@@ -1,4 +1,5 @@
-// Fetch API core for this private Site; scripts/build.mjs creates the Worker entrypoint.
+// Dormant Fetch API core for this private Site. The current release is static-only.
+// Deployment requires a separate trusted server entrypoint and secure key setup.
 // Node IncomingMessage/ServerResponse and Vercel handlers require separate adapters.
 // Identity headers are trusted ONLY behind Sites' authenticated dispatcher.
 // Never expose this handler directly on a public server that accepts spoofed identity headers.
