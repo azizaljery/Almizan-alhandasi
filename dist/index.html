@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الميزان الهندسي | منزلي بفكري وإحساسي</title>
   <meta name="description" content="الميزان الهندسي — منصة تصميم ذكية لكل مشروع يبدأ من أرض وفكرة.">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305080f'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23e0b25e' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23C6A15B' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://unpkg.com/konva@9/konva.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
@@ -116,17 +117,17 @@
             <div class="cb">
               <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin-bottom:11px">الأولوية في المخطط</label>
               <div class="vis" id="styleGrid">
-                <div class="vs on" data-key="privacy"><svg viewBox="0 0 100 40"><path d="M10 32h30V9h22v23h28" fill="none" stroke="#e0b25e" stroke-width="5"/><path d="M41 21h20" stroke="#4fd8d0" stroke-width="3"/></svg><b>خصوصية متدرجة</b><small>مداخل واضحة</small></div>
-                <div class="vs" data-key="courtyard"><svg viewBox="0 0 100 40"><path d="M14 7h72v27H14z" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><rect x="38" y="14" width="24" height="14" fill="#0d1520" stroke="#4fd8d0"/></svg><b>فناء عائلي</b><small>ضوء وارتباط</small></div>
-                <div class="vs" data-key="separate"><svg viewBox="0 0 100 40"><rect x="10" y="9" width="34" height="23" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><rect x="56" y="9" width="34" height="23" fill="rgba(79,216,208,.12)" stroke="#4fd8d0"/><path d="M45 20h10" stroke="#8494ac" stroke-dasharray="3 2"/></svg><b>ضيافة مستقلة</b><small>عزل أقوى</small></div>
-                <div class="vs" data-key="flexible"><svg viewBox="0 0 100 40"><rect x="11" y="8" width="78" height="25" fill="rgba(224,178,94,.12)" stroke="#e0b25e"/><path d="M37 8v25M63 8v25" stroke="#4fd8d0" stroke-dasharray="4 3"/></svg><b>مرن ومفتوح</b><small>قابل للتوسع</small></div>
+                <div class="vs on" data-key="privacy"><svg viewBox="0 0 100 40"><path d="M10 32h30V9h22v23h28" fill="none" stroke="#C6A15B" stroke-width="5"/><path d="M41 21h20" stroke="#4fd8d0" stroke-width="3"/></svg><b>خصوصية متدرجة</b><small>مداخل واضحة</small></div>
+                <div class="vs" data-key="courtyard"><svg viewBox="0 0 100 40"><path d="M14 7h72v27H14z" fill="rgba(198,161,91,.14)" stroke="#C6A15B"/><rect x="38" y="14" width="24" height="14" fill="#0d1520" stroke="#4fd8d0"/></svg><b>فناء عائلي</b><small>ضوء وارتباط</small></div>
+                <div class="vs" data-key="separate"><svg viewBox="0 0 100 40"><rect x="10" y="9" width="34" height="23" fill="rgba(198,161,91,.18)" stroke="#C6A15B"/><rect x="56" y="9" width="34" height="23" fill="rgba(79,216,208,.12)" stroke="#4fd8d0"/><path d="M45 20h10" stroke="#8494ac" stroke-dasharray="3 2"/></svg><b>ضيافة مستقلة</b><small>عزل أقوى</small></div>
+                <div class="vs" data-key="flexible"><svg viewBox="0 0 100 40"><rect x="11" y="8" width="78" height="25" fill="rgba(198,161,91,.12)" stroke="#C6A15B"/><path d="M37 8v25M63 8v25" stroke="#4fd8d0" stroke-dasharray="4 3"/></svg><b>مرن ومفتوح</b><small>قابل للتوسع</small></div>
               </div>
               <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin:20px 0 11px">اللغة المعمارية</label>
               <div class="vis" id="structGrid">
-                <div class="vs on" data-key="resort"><svg viewBox="0 0 100 40"><rect x="10" y="20" width="80" height="16" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><path d="M6 20l44-13 44 13" fill="none" stroke="#e0b25e"/></svg><b>هادئ وفخم</b><small>ألوان دافئة</small></div>
-                <div class="vs" data-key="modern"><svg viewBox="0 0 100 40"><rect x="12" y="12" width="30" height="24" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><rect x="46" y="6" width="42" height="30" fill="rgba(224,178,94,.1)" stroke="#e0b25e"/></svg><b>مودرن</b><small>كتل نظيفة</small></div>
-                <div class="vs" data-key="neoclassic"><svg viewBox="0 0 100 40"><rect x="14" y="18" width="72" height="18" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><path d="M10 18l40-13 40 13z" fill="rgba(224,178,94,.22)" stroke="#e0b25e"/></svg><b>نيو كلاسيك</b><small>واجهة مهيبة</small></div>
-                <div class="vs" data-key="hijazi"><svg viewBox="0 0 100 40"><rect x="12" y="10" width="76" height="26" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><path d="M22 20h10v8H22zM44 20h10v8H44zM66 20h10v8H66z" fill="none" stroke="#4fd8d0"/></svg><b>حجازي</b><small>تفاصيل أصيلة</small></div>
+                <div class="vs on" data-key="resort"><svg viewBox="0 0 100 40"><rect x="10" y="20" width="80" height="16" fill="rgba(198,161,91,.18)" stroke="#C6A15B"/><path d="M6 20l44-13 44 13" fill="none" stroke="#C6A15B"/></svg><b>هادئ وفخم</b><small>ألوان دافئة</small></div>
+                <div class="vs" data-key="modern"><svg viewBox="0 0 100 40"><rect x="12" y="12" width="30" height="24" fill="rgba(198,161,91,.18)" stroke="#C6A15B"/><rect x="46" y="6" width="42" height="30" fill="rgba(198,161,91,.1)" stroke="#C6A15B"/></svg><b>مودرن</b><small>كتل نظيفة</small></div>
+                <div class="vs" data-key="neoclassic"><svg viewBox="0 0 100 40"><rect x="14" y="18" width="72" height="18" fill="rgba(198,161,91,.14)" stroke="#C6A15B"/><path d="M10 18l40-13 40 13z" fill="rgba(198,161,91,.22)" stroke="#C6A15B"/></svg><b>نيو كلاسيك</b><small>واجهة مهيبة</small></div>
+                <div class="vs" data-key="hijazi"><svg viewBox="0 0 100 40"><rect x="12" y="10" width="76" height="26" fill="rgba(198,161,91,.14)" stroke="#C6A15B"/><path d="M22 20h10v8H22zM44 20h10v8H44zM66 20h10v8H66z" fill="none" stroke="#4fd8d0"/></svg><b>حجازي</b><small>تفاصيل أصيلة</small></div>
               </div>
             </div>
           </div>
@@ -269,7 +270,7 @@
             <div class="an-body">
               <div class="movement-map" id="movementMap"></div>
               <div class="mv-legend">
-                <span><i style="background:#e0b25e"></i> رجال / ضيافة</span>
+                <span><i style="background:#C6A15B"></i> رجال / ضيافة</span>
                 <span><i style="background:#a078ff"></i> نساء</span>
                 <span><i style="background:#4fd8d0"></i> عائلة</span>
                 <span><i style="background:#5ee6a8"></i> خدمة</span>

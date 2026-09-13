@@ -121,7 +121,7 @@ function updateRating(){
   document.getElementById('ratingTitle').textContent=gradeTitle(r.grade)+' — '+r.total+'/100';
   document.getElementById('ratingDesc').textContent='تقييم آلي حسب نسبة الاستغلال، الارتدادات، الإضاءة، الخصوصية، والمرونة.';
   document.getElementById('ratingBars').innerHTML=r.bars.map(function(b){
-    return '<div class="rating-bar-row"><span>'+b.name+'</span><div class="rating-bar"><div class="rating-bar-fill" style="width:'+b.val+'%;background:linear-gradient(90deg,#e0b25e,#4fd8d0)"></div></div><span>'+b.val+'</span></div>';
+    return '<div class="rating-bar-row"><span>'+b.name+'</span><div class="rating-bar"><div class="rating-bar-fill" style="width:'+b.val+'%;background:linear-gradient(90deg,#C6A15B,#4fd8d0)"></div></div><span>'+b.val+'</span></div>';
   }).join('');
 }
 function renderCounters(){
@@ -227,7 +227,7 @@ function resizeStage(){
 function drawAll(){if(!stage)return;resizeStage();drawBound();drawGrid();drawZones();drawWalls();drawBlocks();drawOpenings();updateStats();}
 function drawBound(){
   L_bg.destroyChildren();const W=APP.plot.width,L=APP.plot.length,x1=m2px(0),y1=m2py(0),x2=m2px(W),y2=m2py(L);
-  L_bg.add(new Konva.Rect({x:x1,y:y2,width:x2-x1,height:y1-y2,fill:'rgba(224,178,94,.04)',stroke:'rgba(224,178,94,.55)',strokeWidth:2,dash:[8,5]}));
+  L_bg.add(new Konva.Rect({x:x1,y:y2,width:x2-x1,height:y1-y2,fill:'rgba(198,161,91,.04)',stroke:'rgba(198,161,91,.55)',strokeWidth:2,dash:[8,5]}));
   const fp=computeFootprint();if(fp.w>0&&fp.h>0)L_bg.add(new Konva.Rect({x:m2px(fp.x),y:m2py(fp.y+fp.h),width:m2l(fp.w),height:m2l(fp.h),fill:'rgba(79,216,208,.05)',stroke:'rgba(79,216,208,.4)',strokeWidth:1,dash:[5,4]}));
   L_bg.draw();
 }
@@ -240,15 +240,15 @@ function drawGrid(){
 }
 function drawZones(){
   if(!L_z)return;L_z.destroyChildren();
-  const palette={guest:'#e0b25e',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'};
+  const palette={guest:'#C6A15B',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'};
   APP.model.zones.forEach(function(z){
     const color=palette[z.kind]||'#a078ff',x=m2px(z.x),y=m2py(z.y+z.h),w=m2l(z.w),h=m2l(z.h);
     if(w<3||h<3)return;
     L_z.add(new Konva.Rect({x:x,y:y,width:w,height:h,fill:z.kind==='outdoor'?'rgba(140,180,119,.12)':color.replace('#','')?hexToRgba(color,.10):'rgba(160,120,255,.10)',cornerRadius:3}));
     if(w>58&&h>36){
       const area=Math.max(0,z.w*z.h).toFixed(1),font=Math.max(10,Math.min(15,Math.min(w/10,h/5)));
-      L_z.add(new Konva.Text({x:x+5,y:y+h/2-font-2,width:w-10,text:z.name,align:'center',fontSize:font,fontFamily:'Tajawal',fontStyle:'800',fill:color,listening:false}));
-      if(w>72&&h>58)L_z.add(new Konva.Text({x:x+5,y:y+h/2+3,width:w-10,text:area+' م²',align:'center',fontSize:Math.max(9,font-2),fontFamily:'Tajawal',fontStyle:'600',fill:'rgba(233,239,248,.62)',listening:false}));
+      L_z.add(new Konva.Text({x:x+5,y:y+h/2-font-2,width:w-10,text:z.name,align:'center',fontSize:font,fontFamily:'IBM Plex Sans Arabic',fontStyle:'800',fill:color,listening:false}));
+      if(w>72&&h>58)L_z.add(new Konva.Text({x:x+5,y:y+h/2+3,width:w-10,text:area+' م²',align:'center',fontSize:Math.max(9,font-2),fontFamily:'IBM Plex Sans Arabic',fontStyle:'600',fill:'rgba(233,239,248,.62)',listening:false}));
     }
   });
   L_z.draw();
@@ -259,15 +259,15 @@ function hexToRgba(hex,alpha){
 }
 function drawWalls(){
   L_w.destroyChildren();APP.model.walls.forEach(function(w){
-    const col=w.type==='ext'?'#e0b25e':'#4fd8d0',x1=m2px(w.x1),y1=m2py(w.y1),x2=m2px(w.x2),y2=m2py(w.y2);
+    const col=w.type==='ext'?'#C6A15B':'#4fd8d0',x1=m2px(w.x1),y1=m2py(w.y1),x2=m2px(w.x2),y2=m2py(w.y2);
     const line=new Konva.Line({points:[x1,y1,x2,y2],stroke:col,strokeWidth:Math.max(3,m2l(w.t)),lineCap:'round',lineJoin:'round',shadowColor:col,shadowBlur:APP.ui.selected===w.id?20:5,shadowOpacity:APP.ui.selected===w.id?.95:.3,hitStrokeWidth:16});
     line.on('click',function(e){e.cancelBubble=true;if(APP.ui.tool==='erase')return deleteWall(w.id);if(APP.ui.tool==='door')return addOpening(w.id,'door');if(APP.ui.tool==='window')return addOpening(w.id,'window');selectItem('wall',w.id);});
     L_w.add(line);
-    if(APP.ui.tool==='select'){addHandle(w,'start',x1,y1);addHandle(w,'end',x2,y2);L_w.add(new Konva.Text({x:(x1+x2)/2-22,y:(y1+y2)/2-22,text:Math.hypot(w.x2-w.x1,w.y2-w.y1).toFixed(1)+' م',fill:col,fontSize:11,fontFamily:'Tajawal',fontStyle:'800',listening:false}));}
+    if(APP.ui.tool==='select'){addHandle(w,'start',x1,y1);addHandle(w,'end',x2,y2);L_w.add(new Konva.Text({x:(x1+x2)/2-22,y:(y1+y2)/2-22,text:Math.hypot(w.x2-w.x1,w.y2-w.y1).toFixed(1)+' م',fill:col,fontSize:11,fontFamily:'IBM Plex Sans Arabic',fontStyle:'800',listening:false}));}
   });L_w.draw();
 }
 function addHandle(w,which,x,y){
-  const circle=new Konva.Circle({x:x,y:y,radius:7,fill:'#060a11',stroke:w.type==='ext'?'#e0b25e':'#4fd8d0',strokeWidth:2.5,draggable:true,hitStrokeWidth:20});
+  const circle=new Konva.Circle({x:x,y:y,radius:7,fill:'#060a11',stroke:w.type==='ext'?'#C6A15B':'#4fd8d0',strokeWidth:2.5,draggable:true,hitStrokeWidth:20});
   circle.on('dragmove',function(){const nx=Math.round(px2m(circle.x())/APP.ui.snap)*APP.ui.snap,ny=Math.round(px2my(circle.y())/APP.ui.snap)*APP.ui.snap;circle.position({x:m2px(nx),y:m2py(ny)});if(which==='start'){w.x1=nx;w.y1=ny;}else{w.x2=nx;w.y2=ny;}});
   circle.on('dragend',function(){pushHist();drawAll();});L_w.add(circle);
 }
@@ -275,7 +275,7 @@ function drawBlocks(){
   L_bk.destroyChildren();APP.model.blocks.forEach(function(b){
     const d=findDef(b.type);if(!d)return;const w=m2l(b.w),h=m2l(b.h),g=new Konva.Group({x:m2px(b.x),y:m2py(b.y),draggable:APP.ui.tool==='select'});
     g.add(new Konva.Rect({x:-w/2,y:-h/2,width:w,height:h,fill:'rgba(160,120,255,.12)',stroke:APP.ui.selected===b.id?'#a078ff':'rgba(160,120,255,.6)',strokeWidth:APP.ui.selected===b.id?2.5:1.4}));
-    g.add(new Konva.Text({x:-w/2,y:-6,text:d.n,fill:'#a078ff',fontSize:10,fontFamily:'Tajawal',fontStyle:'700',width:w,align:'center'}));
+    g.add(new Konva.Text({x:-w/2,y:-6,text:d.n,fill:'#a078ff',fontSize:10,fontFamily:'IBM Plex Sans Arabic',fontStyle:'700',width:w,align:'center'}));
     g.on('click',function(e){e.cancelBubble=true;if(APP.ui.tool==='erase')return deleteBlock(b.id);selectItem('block',b.id);});
     g.on('dragend',function(){b.x=Math.round(px2m(g.x())/APP.ui.snap)*APP.ui.snap;b.y=Math.round(px2my(g.y())/APP.ui.snap)*APP.ui.snap;pushHist();drawAll();});
     L_bk.add(g);
@@ -510,7 +510,7 @@ function build3D(){
   APP.model.openings.forEach(function(op){const w=APP.model.walls.find(function(x){return x.id===op.wallId;});if(!w)return;const cx=w.x1+(w.x2-w.x1)*op.pos,cy=w.y1+(w.y2-w.y1)*op.pos,ang=-Math.atan2(w.y2-w.y1,w.x2-w.x1),depth=Math.max(.03,w.t-.03);let m;if(op.type==='door'){m=new THREE.Mesh(new THREE.BoxGeometry(op.w,op.h,depth),doorMat);m.position.set(cx,op.h/2,cy);m.castShadow=true;}else{m=new THREE.Mesh(new THREE.BoxGeometry(op.w,op.h,depth),glass);m.position.set(cx,1.1+op.h/2,cy);}m.rotation.y=ang;gOps.add(m);});
   const ext=APP.model.walls.filter(function(w){return w.type==='ext';});if(ext.length>=3){const pts=[];ext.forEach(function(w){pts.push([w.x1,w.y1],[w.x2,w.y2]);});const hull=convexHull(pts);if(hull.length>=3){const shape=new THREE.Shape();shape.moveTo(hull[0][0],hull[0][1]);for(let i=1;i<hull.length;i++)shape.lineTo(hull[i][0],hull[i][1]);shape.lineTo(hull[0][0],hull[0][1]);const roof=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:.3,bevelEnabled:false}),new THREE.MeshStandardMaterial({color:0xb5a689,roughness:.92}));roof.rotation.x=Math.PI/2;roof.position.y=3.5;roof.castShadow=roof.receiveShadow=true;gWalls.add(roof);const slab=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:.12,bevelEnabled:false}),new THREE.MeshStandardMaterial({color:0x2a3550,roughness:.9}));slab.rotation.x=Math.PI/2;slab.position.y=.12;slab.receiveShadow=true;gWalls.add(slab);}}
   const blkMat=new THREE.MeshStandardMaterial({color:0x9b7bd4,roughness:.7});APP.model.blocks.forEach(function(b){const m=new THREE.Mesh(new THREE.BoxGeometry(b.w,.75,b.h),blkMat);m.position.set(b.x,.38,b.y);m.castShadow=true;gBlk.add(m);});
-  const W=APP.plot.width,L=APP.plot.length,line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,.02,0),new THREE.Vector3(W,.02,0),new THREE.Vector3(W,.02,L),new THREE.Vector3(0,.02,L),new THREE.Vector3(0,.02,0)]),new THREE.LineDashedMaterial({color:0xe0b25e,dashSize:.6,gapSize:.4}));line.computeLineDistances();gBlk.add(line);
+  const W=APP.plot.width,L=APP.plot.length,line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,.02,0),new THREE.Vector3(W,.02,0),new THREE.Vector3(W,.02,L),new THREE.Vector3(0,.02,L),new THREE.Vector3(0,.02,0)]),new THREE.LineDashedMaterial({color:0xC6A15B,dashSize:.6,gapSize:.4}));line.computeLineDistances();gBlk.add(line);
 }
 function updSun(hour){if(!sun3)return;const t=Math.max(0,Math.min(1,(hour-6)/12)),elev=Math.sin(t*Math.PI)*65+5,a=135*Math.PI/180,e=elev*Math.PI/180,cx=APP.plot.width/2,cz=APP.plot.length/2,d=80;sun3.position.set(cx+Math.cos(a)*Math.cos(e)*d,Math.sin(e)*d+5,cz+Math.sin(a)*Math.cos(e)*d);sun3.target.position.set(cx,0,cz);const warmth=Math.max(0,1-Math.abs(hour-12)/6);sun3.color.setHSL(.11,.55,.5+warmth*.2);sun3.intensity=.6+warmth*1.9;amb3.intensity=.25+warmth*.4;}
 function setView(v){if(!ctrl3)return;const s=Math.max(APP.plot.width,APP.plot.length);ctrl3.target.set(APP.plot.width/2,1.5,APP.plot.length/2);if(v==='top'){ctrl3.phi=.15;ctrl3.radius=s*1.5;}else if(v==='front'){ctrl3.phi=Math.PI/2.2;ctrl3.radius=s*1.4;}else{ctrl3.phi=Math.PI/3;ctrl3.radius=s*1.6;}ctrl3.update();}
@@ -576,25 +576,25 @@ function drawMovementMap(){
   const prep=get(['تحضير وتخزين','تحضير','منطقة خدمة مرنة'],{x:fp.x+fp.w*.08,y:fp.y+fp.h*.54}),kitchen=get(['مطبخ'],{x:fp.x+fp.w*.28,y:fp.y+fp.h*.6}),mother=get(['جناح الوالدة','غرفة متعددة الاستخدام'],{x:fp.x+fp.w*.14,y:fp.y+fp.h*.86});
   const menEntry={x:men.x,y:fp.y},womenEntry={x:womenFoyer.x,y:fp.y},serviceEntry={x:fp.x,y:prep.y},familyEntry={x:hall.x,y:fp.y+fp.h*.48};
   const line=function(points,c){return '<polyline points="'+points.map(function(q){return p.x(q.x)+','+p.y(q.y);}).join(' ')+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity=".82" marker-end="url(#arrow-'+c.slice(1)+')"/>';};
-  const dot=function(q,c,l){return '<circle cx="'+p.x(q.x)+'" cy="'+p.y(q.y)+'" r="7" fill="'+c+'" stroke="#05080f" stroke-width="2"/><text x="'+p.x(q.x)+'" y="'+(p.y(q.y)-13)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="Tajawal">'+l+'</text>';};
-  const rooms=zones.map(function(z){const color={guest:'#e0b25e',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'}[z.kind]||'#a078ff';return '<rect x="'+p.x(z.x)+'" y="'+p.y(z.y+z.h)+'" width="'+(z.w*p.sc)+'" height="'+(z.h*p.sc)+'" fill="'+color+'" fill-opacity=".08" stroke="'+color+'" stroke-opacity=".23" stroke-width="1"/>';}).join('');
-  const defs='<defs><marker id="arrow-e0b25e" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#e0b25e"/></marker><marker id="arrow-a078ff" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#a078ff"/></marker><marker id="arrow-4fd8d0" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4fd8d0"/></marker><marker id="arrow-5ee6a8" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#5ee6a8"/></marker></defs>';
-  box.innerHTML='<svg viewBox="0 0 '+p.svgW+' '+p.svgH+'" preserveAspectRatio="xMidYMid meet">'+defs+'<rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(224,178,94,.04)" stroke="rgba(224,178,94,.4)" stroke-width="2" stroke-dasharray="6 4"/>'+rooms+line([menEntry,menFoyer,men,dining],'#e0b25e')+line([womenEntry,womenFoyer,women],'#a078ff')+line([familyEntry,hall,mother],'#4fd8d0')+line([serviceEntry,prep,kitchen,dining],'#5ee6a8')+dot(menEntry,'#e0b25e','رجال')+dot(womenEntry,'#a078ff','نساء')+dot(familyEntry,'#4fd8d0','عائلة')+dot(serviceEntry,'#5ee6a8','خدمة')+'</svg>';
+  const dot=function(q,c,l){return '<circle cx="'+p.x(q.x)+'" cy="'+p.y(q.y)+'" r="7" fill="'+c+'" stroke="#05080f" stroke-width="2"/><text x="'+p.x(q.x)+'" y="'+(p.y(q.y)-13)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="IBM Plex Sans Arabic">'+l+'</text>';};
+  const rooms=zones.map(function(z){const color={guest:'#C6A15B',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'}[z.kind]||'#a078ff';return '<rect x="'+p.x(z.x)+'" y="'+p.y(z.y+z.h)+'" width="'+(z.w*p.sc)+'" height="'+(z.h*p.sc)+'" fill="'+color+'" fill-opacity=".08" stroke="'+color+'" stroke-opacity=".23" stroke-width="1"/>';}).join('');
+  const defs='<defs><marker id="arrow-C6A15B" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#C6A15B"/></marker><marker id="arrow-a078ff" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#a078ff"/></marker><marker id="arrow-4fd8d0" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4fd8d0"/></marker><marker id="arrow-5ee6a8" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#5ee6a8"/></marker></defs>';
+  box.innerHTML='<svg viewBox="0 0 '+p.svgW+' '+p.svgH+'" preserveAspectRatio="xMidYMid meet">'+defs+'<rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(198,161,91,.04)" stroke="rgba(198,161,91,.4)" stroke-width="2" stroke-dasharray="6 4"/>'+rooms+line([menEntry,menFoyer,men,dining],'#C6A15B')+line([womenEntry,womenFoyer,women],'#a078ff')+line([familyEntry,hall,mother],'#4fd8d0')+line([serviceEntry,prep,kitchen,dining],'#5ee6a8')+dot(menEntry,'#C6A15B','رجال')+dot(womenEntry,'#a078ff','نساء')+dot(familyEntry,'#4fd8d0','عائلة')+dot(serviceEntry,'#5ee6a8','خدمة')+'</svg>';
 }
 function computeSpaceBudget(){
-  const bar=document.getElementById('budgetBar'),items=document.getElementById('budgetItems');if(!bar||!items)return;const area=plotArea(),build=computeFootprint().usable,parking=Math.min(40,area*.07),garden=Math.max(0,area-build-parking-area*.05),waste=area*.03,internal=Math.max(0,area-build-parking-garden-waste),parts=[{n:'المبنى',v:build,c:'#e0b25e'},{n:'الحديقة',v:garden,c:'#5ee6a8'},{n:'المواقف',v:parking,c:'#4fd8d0'},{n:'ممرات',v:internal,c:'#a078ff'},{n:'مهدر',v:waste,c:'#ff6b6b'}],total=parts.reduce(function(s,p){return s+p.v;},0);
+  const bar=document.getElementById('budgetBar'),items=document.getElementById('budgetItems');if(!bar||!items)return;const area=plotArea(),build=computeFootprint().usable,parking=Math.min(40,area*.07),garden=Math.max(0,area-build-parking-area*.05),waste=area*.03,internal=Math.max(0,area-build-parking-garden-waste),parts=[{n:'المبنى',v:build,c:'#C6A15B'},{n:'الحديقة',v:garden,c:'#5ee6a8'},{n:'المواقف',v:parking,c:'#4fd8d0'},{n:'ممرات',v:internal,c:'#a078ff'},{n:'مهدر',v:waste,c:'#ff6b6b'}],total=parts.reduce(function(s,p){return s+p.v;},0);
   bar.innerHTML=parts.map(function(p){const pc=p.v/total*100;return '<div style="width:'+pc+'%;background:'+p.c+'">'+(pc>8?pc.toFixed(0)+'٪':'')+'</div>';}).join('');
   items.innerHTML=parts.map(function(p){return '<div class="budget-item"><span class="bl">'+p.n+'</span><div class="bv" style="color:'+p.c+'">'+Math.round(p.v)+' م²</div><span class="bp">'+(p.v/total*100).toFixed(0)+'٪ من الأرض</span></div>';}).join('');
 }
 function drawBeforeAfter(view){
-  const box=document.getElementById('baView');if(!box)return;const p=plotSvgBase(),fp=computeFootprint(),zones=APP.model.zones||[];let content='<rect x="0" y="0" width="'+p.svgW+'" height="'+p.svgH+'" fill="#05080f"/><rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(224,178,94,.05)" stroke="rgba(224,178,94,.6)" stroke-width="2" stroke-dasharray="6 4"/>';
+  const box=document.getElementById('baView');if(!box)return;const p=plotSvgBase(),fp=computeFootprint(),zones=APP.model.zones||[];let content='<rect x="0" y="0" width="'+p.svgW+'" height="'+p.svgH+'" fill="#05080f"/><rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(198,161,91,.05)" stroke="rgba(198,161,91,.6)" stroke-width="2" stroke-dasharray="6 4"/>';
   if(view==='after'){
     content+='<rect x="'+p.x(fp.x)+'" y="'+p.y(fp.y+fp.h)+'" width="'+(fp.w*p.sc)+'" height="'+(fp.h*p.sc)+'" fill="rgba(79,216,208,.12)" stroke="rgba(79,216,208,.7)" stroke-width="2"/>';
     if(zones.length){
-      const colors={guest:'#e0b25e',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'};
-      content+=zones.map(function(z){const c=colors[z.kind]||'#a078ff',x=p.x(z.x),y=p.y(z.y+z.h),w=z.w*p.sc,h=z.h*p.sc,show=w>58&&h>35;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'" fill-opacity=".11" stroke="'+c+'" stroke-opacity=".6" stroke-width="1"/>'+(show?'<text x="'+(x+w/2)+'" y="'+(y+h/2)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="Tajawal">'+z.name+'</text>':'');}).join('');
-    }else content+='<text x="'+(p.svgW/2)+'" y="'+(p.svgH/2)+'" fill="rgba(79,216,208,.7)" font-size="18" font-weight="700" text-anchor="middle" font-family="Tajawal">منطقة بناء مبدئية</text>';
-  }else content+='<text x="'+p.svgW/2+'" y="'+p.svgH/2+'" fill="rgba(224,178,94,.5)" font-size="20" font-weight="700" text-anchor="middle" font-family="Tajawal">أرض فاضية — '+Math.round(p.W*p.L)+' م²</text>';
+      const colors={guest:'#C6A15B',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'};
+      content+=zones.map(function(z){const c=colors[z.kind]||'#a078ff',x=p.x(z.x),y=p.y(z.y+z.h),w=z.w*p.sc,h=z.h*p.sc,show=w>58&&h>35;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'" fill-opacity=".11" stroke="'+c+'" stroke-opacity=".6" stroke-width="1"/>'+(show?'<text x="'+(x+w/2)+'" y="'+(y+h/2)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="IBM Plex Sans Arabic">'+z.name+'</text>':'');}).join('');
+    }else content+='<text x="'+(p.svgW/2)+'" y="'+(p.svgH/2)+'" fill="rgba(79,216,208,.7)" font-size="18" font-weight="700" text-anchor="middle" font-family="IBM Plex Sans Arabic">منطقة بناء مبدئية</text>';
+  }else content+='<text x="'+p.svgW/2+'" y="'+p.svgH/2+'" fill="rgba(198,161,91,.5)" font-size="20" font-weight="700" text-anchor="middle" font-family="IBM Plex Sans Arabic">أرض فاضية — '+Math.round(p.W*p.L)+' م²</text>';
   box.innerHTML='<svg viewBox="0 0 '+p.svgW+' '+p.svgH+'" preserveAspectRatio="xMidYMid meet">'+content+'</svg>';
 }
 function initAnalysis(){
