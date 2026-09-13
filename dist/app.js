@@ -6,19 +6,19 @@ const APP = {
   plot: {
     length: 30, width: 20,
     streets: { n:null, s:{w:15,name:'الشارع الرئيسي'}, e:null, w:null },
-    style: 'resort', structure: 'L',
-    rooms: { bedrooms:4, halls:2, majlis:2, baths:4, floors:2 },
+    direction: 'n', style: 'resort', layout: 'privacy',
+    rooms: { bedrooms:2, menMajlis:1, womenMajlis:1, familyHall:1, dining:1, kitchen:1, baths:5, motherSuite:1, stairs:1, floors:2 },
     extras: { maid:false, driver:false, storage:false, accessible:false }
   },
-  model: { walls:[], openings:[], blocks:[] },
-  ui: { tool:'select', snap:.5, showGrid:true, selected:null, zoom:1, offset:{x:0,y:0}, sunHour:10, sunMonth:6, cat:'furniture' },
+  model: { walls:[], openings:[], blocks:[], zones:[] },
+  ui: { tool:'select', snap:.5, showGrid:true, selected:null, zoom:1, offset:{x:0,y:0}, sunHour:10, sunMonth:6, cat:'furniture', planVariant:0 },
   history: [], historyIdx: -1,
   prices: { block:2.5, cement:14, sand:350, rebar:3.5, paint:12, door:800, window:1200, masonLabor:25, plasterLabor:18, paintLabor:10 },
   waste: .07, vat: .15
 };
 
 const LIB = {
-  furniture: { sofa:{n:'كنبة',w:2.2,h:.9}, table:{n:'طاولة',w:1.6,h:.9}, tv:{n:'تلفاز',w:1.4,h:.15}, rug:{n:'سجادة',w:2.4,h:1.2} },
+  furniture: { sofa:{n:'كنبة',w:2.2,h:.9}, table:{n:'طاولة',w:1.6,h:.9}, tv:{n:'تلفاز',w:1.4,h:.15}, rug:{n:'سجادة',w:2.4,h:1.2}, stairs:{n:'درج',w:2.6,h:3.2} },
   kitchen: { sink:{n:'حوض',w:.8,h:.5}, stove:{n:'موقد',w:.6,h:.55}, fridge:{n:'ثلاجة',w:.7,h:.7} },
   bath: { toilet:{n:'مرحاض',w:.55,h:.7}, basin:{n:'مغسلة',w:.6,h:.45}, shower:{n:'دش',w:1.2,h:1} },
   bed: { single:{n:'سرير فردي',w:1,h:2}, double:{n:'سرير مزدوج',w:1.6,h:2}, wardrobe:{n:'خزانة',w:2,h:.6} },
@@ -79,13 +79,26 @@ function getSun(hour,month){
 }
 
 /* نماذج الأرض */
-const CTR=[{k:'bedrooms',n:'غرف النوم',min:1},{k:'halls',n:'الصالات',min:0},{k:'majlis',n:'المجالس',min:0},{k:'baths',n:'دورات المياه',min:0},{k:'floors',n:'عدد الأدوار',min:1}];
+const CTR=[
+  {k:'bedrooms',n:'غرف نوم الأبناء',s:'تُوزّع في جناح هادئ',min:0,max:6},
+  {k:'motherSuite',n:'جناح الوالدة',s:'غرفة وجلسة قريبة من العائلة',min:0,max:1},
+  {k:'menMajlis',n:'مجلس الرجال',s:'مدخل وبهو مستقلان',min:0,max:2},
+  {k:'womenMajlis',n:'مجلس النساء',s:'مدخل وبهو خاصان',min:0,max:2},
+  {k:'familyHall',n:'الصالة العائلية',s:'القلب الرابط للمنزل',min:0,max:2},
+  {k:'dining',n:'صالة الطعام',s:'بين الضيافة والمطبخ',min:0,max:2},
+  {k:'kitchen',n:'المطابخ',s:'تُربط بالخدمة والطعام',min:0,max:2},
+  {k:'baths',n:'دورات المياه',s:'للضيافة والجناح الخاص',min:0,max:8},
+  {k:'stairs',n:'السلالم',s:'عند تعدد الأدوار',min:0,max:2}
+];
 const EXT=[{k:'maid',n:'غرفة خادمة',s:'مع حمام'},{k:'driver',n:'غرفة سائق',s:'مدخل منفصل'},{k:'storage',n:'مستودع',s:'قريب من المطبخ'},{k:'accessible',n:'الوصول الشامل',s:'ممرات أوسع'}];
 
 function renderForm(){
   const len=document.getElementById('inLen'),wid=document.getElementById('inWid');
   if(len) len.value=APP.plot.length;
   if(wid) wid.value=APP.plot.width;
+  const dir=document.getElementById('inDirection'),floors=document.getElementById('inFloors');
+  if(dir) dir.value=APP.plot.direction;
+  if(floors) floors.value=APP.plot.rooms.floors;
   updateArea(); renderStreets(); renderCounters(); renderExtras(); updateRating();
 }
 function updateArea(){
@@ -114,15 +127,41 @@ function updateRating(){
 function renderCounters(){
   const box=document.getElementById('counters'); if(!box) return;
   box.innerHTML=CTR.map(function(c){
-    return '<div class="counter"><div class="lbl">'+c.n+'</div><div class="stepper"><button data-k="'+c.k+'" data-a="dec">−</button><span class="v" id="v_'+c.k+'">'+APP.plot.rooms[c.k]+'</span><button data-k="'+c.k+'" data-a="inc">+</button></div></div>';
+    return '<div class="counter"><div class="lbl">'+c.n+'<small>'+c.s+'</small></div><div class="stepper"><button aria-label="إنقاص '+c.n+'" data-k="'+c.k+'" data-a="dec">−</button><span class="v" id="v_'+c.k+'">'+APP.plot.rooms[c.k]+'</span><button aria-label="زيادة '+c.n+'" data-k="'+c.k+'" data-a="inc">+</button></div></div>';
   }).join('');
   box.querySelectorAll('button').forEach(function(b){
     b.addEventListener('click',function(){
-      const k=b.dataset.k,min=CTR.find(function(c){return c.k===k;}).min;
-      APP.plot.rooms[k]=b.dataset.a==='inc'?Math.min(20,APP.plot.rooms[k]+1):Math.max(min,APP.plot.rooms[k]-1);
+      const k=b.dataset.k,def=CTR.find(function(c){return c.k===k;}),min=def.min,max=def.max||20;
+      APP.plot.rooms[k]=b.dataset.a==='inc'?Math.min(max,APP.plot.rooms[k]+1):Math.max(min,APP.plot.rooms[k]-1);
       document.getElementById('v_'+k).textContent=APP.plot.rooms[k];
     });
   });
+}
+
+function readIdea(){
+  const input=document.getElementById('ideaInput');
+  const text=(input&&input.value||'').trim();
+  if(!text){warn('اكتب فكرة المنزل أولاً');return;}
+  const has=function(pattern){return pattern.test(text);};
+  const r=APP.plot.rooms;
+  if(has(/رجال|مجلس\s*رجال/)) r.menMajlis=Math.max(1,r.menMajlis);
+  if(has(/نساء|حريم|مجلس\s*نساء/)) r.womenMajlis=Math.max(1,r.womenMajlis);
+  if(has(/صالة|معيشة|عائل/)) r.familyHall=Math.max(1,r.familyHall);
+  if(has(/طعام|مقلط|سفرة/)) r.dining=Math.max(1,r.dining);
+  if(has(/مطبخ/)) r.kitchen=Math.max(1,r.kitchen);
+  if(has(/والد[ةه]|أم|امي|والدتي/)) r.motherSuite=Math.max(1,r.motherSuite);
+  if(has(/درج|مصعد|دورين|دورين/)) r.stairs=Math.max(1,r.stairs);
+  if(has(/مستودع|تخزين/)) APP.plot.extras.storage=true;
+  if(has(/خادمة|عاملة/)) APP.plot.extras.maid=true;
+  if(has(/مدخلين|مدخلين|مداخل مستقلة|مدخل مستقل|خصوص/)) APP.plot.layout='privacy';
+  if(has(/فناء|حديقة وسط/)) APP.plot.layout='courtyard';
+  if(has(/ضيافة مستقلة|فصل الضيوف/)) APP.plot.layout='separate';
+  const arabicDigits={'٠':0,'١':1,'٢':2,'٣':3,'٤':4,'٥':5,'٦':6,'٧':7,'٨':8,'٩':9};
+  const normalized=text.replace(/[٠-٩]/g,function(d){return arabicDigits[d];});
+  const roomMatch=normalized.match(/(\d+)\s*(?:غرف|غرفة)/);
+  if(roomMatch) r.bedrooms=Math.max(0,Math.min(6,Number(roomMatch[1])));
+  document.querySelectorAll('#styleGrid .vs').forEach(function(v){v.classList.toggle('on',v.dataset.key===APP.plot.layout);});
+  renderCounters();renderExtras();toast('تم فهم عناصر الفكرة وتعبئة البرنامج');
 }
 function renderExtras(){
   const box=document.getElementById('extras');if(!box)return;
@@ -141,7 +180,7 @@ function renderLib(){
 
 /* محرر 2D */
 const PX=30;
-let stage,L_bg,L_gr,L_w,L_bk,L_op;
+let stage,L_bg,L_gr,L_z,L_w,L_bk,L_op;
 const m2px=function(x){return x*PX*APP.ui.zoom+APP.ui.offset.x;};
 const m2py=function(y){return stage.height()-(y*PX*APP.ui.zoom+APP.ui.offset.y);};
 const px2m=function(x){return (x-APP.ui.offset.x)/(PX*APP.ui.zoom);};
@@ -151,8 +190,8 @@ const m2l=function(l){return l*PX*APP.ui.zoom;};
 function initStage(){
   if(stage||!window.Konva) return;
   stage=new Konva.Stage({container:'stage',width:800,height:600});
-  L_bg=new Konva.Layer({listening:false});L_gr=new Konva.Layer({listening:false});L_w=new Konva.Layer();L_bk=new Konva.Layer();L_op=new Konva.Layer();
-  stage.add(L_bg,L_gr,L_w,L_bk,L_op);
+  L_bg=new Konva.Layer({listening:false});L_gr=new Konva.Layer({listening:false});L_z=new Konva.Layer({listening:false});L_w=new Konva.Layer();L_bk=new Konva.Layer();L_op=new Konva.Layer();
+  stage.add(L_bg,L_gr,L_z,L_w,L_bk,L_op);
   stage.on('wheel',function(e){
     e.evt.preventDefault();const p=stage.getPointerPosition();if(!p)return;
     const mp={x:px2m(p.x),y:px2my(p.y)},dir=e.evt.deltaY>0?-1:1;
@@ -185,7 +224,7 @@ function resizeStage(){
   if(!stage)return;const zone=document.querySelector('.czone');if(!zone)return;const r=zone.getBoundingClientRect();
   if(r.width>0&&r.height>0){stage.width(r.width);stage.height(r.height);}
 }
-function drawAll(){if(!stage)return;resizeStage();drawBound();drawGrid();drawWalls();drawBlocks();drawOpenings();updateStats();}
+function drawAll(){if(!stage)return;resizeStage();drawBound();drawGrid();drawZones();drawWalls();drawBlocks();drawOpenings();updateStats();}
 function drawBound(){
   L_bg.destroyChildren();const W=APP.plot.width,L=APP.plot.length,x1=m2px(0),y1=m2py(0),x2=m2px(W),y2=m2py(L);
   L_bg.add(new Konva.Rect({x:x1,y:y2,width:x2-x1,height:y1-y2,fill:'rgba(224,178,94,.04)',stroke:'rgba(224,178,94,.55)',strokeWidth:2,dash:[8,5]}));
@@ -198,6 +237,25 @@ function drawGrid(){
   for(let x=0;x<=maxX+1;x++){const px=m2px(x);if(px<-10||px>stage.width()+10)continue;L_gr.add(new Konva.Line({points:[px,0,px,stage.height()],stroke:x%5===0?'rgba(120,145,190,.22)':'rgba(120,145,190,.08)',strokeWidth:x%5===0?1:.5}));}
   for(let y=0;y<=maxY+1;y++){const py=m2py(y);if(py<-10||py>stage.height()+10)continue;L_gr.add(new Konva.Line({points:[0,py,stage.width(),py],stroke:y%5===0?'rgba(120,145,190,.22)':'rgba(120,145,190,.08)',strokeWidth:y%5===0?1:.5}));}
   L_gr.draw();
+}
+function drawZones(){
+  if(!L_z)return;L_z.destroyChildren();
+  const palette={guest:'#e0b25e',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'};
+  APP.model.zones.forEach(function(z){
+    const color=palette[z.kind]||'#a078ff',x=m2px(z.x),y=m2py(z.y+z.h),w=m2l(z.w),h=m2l(z.h);
+    if(w<3||h<3)return;
+    L_z.add(new Konva.Rect({x:x,y:y,width:w,height:h,fill:z.kind==='outdoor'?'rgba(140,180,119,.12)':color.replace('#','')?hexToRgba(color,.10):'rgba(160,120,255,.10)',cornerRadius:3}));
+    if(w>58&&h>36){
+      const area=Math.max(0,z.w*z.h).toFixed(1),font=Math.max(10,Math.min(15,Math.min(w/10,h/5)));
+      L_z.add(new Konva.Text({x:x+5,y:y+h/2-font-2,width:w-10,text:z.name,align:'center',fontSize:font,fontFamily:'Tajawal',fontStyle:'800',fill:color,listening:false}));
+      if(w>72&&h>58)L_z.add(new Konva.Text({x:x+5,y:y+h/2+3,width:w-10,text:area+' م²',align:'center',fontSize:Math.max(9,font-2),fontFamily:'Tajawal',fontStyle:'600',fill:'rgba(233,239,248,.62)',listening:false}));
+    }
+  });
+  L_z.draw();
+}
+function hexToRgba(hex,alpha){
+  const h=String(hex||'#a078ff').replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
 }
 function drawWalls(){
   L_w.destroyChildren();APP.model.walls.forEach(function(w){
@@ -234,7 +292,7 @@ function drawOpenings(){
   });L_op.draw();
 }
 function updateStats(){
-  const vals={stW:APP.model.walls.length,stD:APP.model.openings.filter(function(o){return o.type==='door';}).length,stN:APP.model.openings.filter(function(o){return o.type==='window';}).length,stB:APP.model.blocks.length};
+  const vals={stR:APP.model.zones.filter(function(z){return z.kind!=='outdoor';}).length,stW:APP.model.walls.length,stD:APP.model.openings.filter(function(o){return o.type==='door';}).length,stN:APP.model.openings.filter(function(o){return o.type==='window';}).length,stB:APP.model.blocks.length};
   Object.entries(vals).forEach(function(e){const el=document.getElementById(e[0]);if(el)el.textContent=e[1];});
 }
 function mkWall(x1,y1,x2,y2,t,type){return {id:nid(),x1:x1,y1:y1,x2:x2,y2:y2,t:t,type:type,h:3.2};}
@@ -269,27 +327,157 @@ function addBlock(type){
   const d=findDef(type);if(!d||!stage)return;APP.model.blocks.push({id:nid(),type:type,x:px2m(stage.width()/2),y:px2my(stage.height()/2),w:d.w,h:d.h,rot:0});pushHist();drawAll();toast('تمت إضافة '+d.n);
 }
 function setTool(t){APP.ui.tool=t;document.querySelectorAll('.tool[data-tool]').forEach(function(b){b.classList.toggle('on',b.dataset.tool===t);});drawAll();}
-function pushHist(){const s=JSON.stringify({w:APP.model.walls,o:APP.model.openings,b:APP.model.blocks});APP.history=APP.history.slice(0,APP.historyIdx+1);APP.history.push(s);APP.historyIdx=APP.history.length-1;if(APP.history.length>50){APP.history.shift();APP.historyIdx--;}}
-function undo(){if(APP.historyIdx<=0){warn('لا يوجد ما يمكن التراجع عنه');return;}APP.historyIdx--;const s=JSON.parse(APP.history[APP.historyIdx]);APP.model.walls=s.w;APP.model.openings=s.o;APP.model.blocks=s.b||[];APP.ui.selected=null;drawAll();toast('تم التراجع');}
+function pushHist(){const s=JSON.stringify({w:APP.model.walls,o:APP.model.openings,b:APP.model.blocks,z:APP.model.zones});APP.history=APP.history.slice(0,APP.historyIdx+1);APP.history.push(s);APP.historyIdx=APP.history.length-1;if(APP.history.length>50){APP.history.shift();APP.historyIdx--;}}
+function undo(){if(APP.historyIdx<=0){warn('لا يوجد ما يمكن التراجع عنه');return;}APP.historyIdx--;const s=JSON.parse(APP.history[APP.historyIdx]);APP.model.walls=s.w;APP.model.openings=s.o;APP.model.blocks=s.b||[];APP.model.zones=s.z||[];APP.ui.selected=null;drawAll();renderPlanSpecs();toast('تم التراجع');}
 function fitView(){if(!stage)return;const margin=80,aw=stage.width()-margin*2,ah=stage.height()-margin*2;APP.ui.zoom=Math.max(.2,Math.min(aw/(APP.plot.width*PX),ah/(APP.plot.length*PX)));APP.ui.offset.x=(stage.width()-APP.plot.width*PX*APP.ui.zoom)/2;APP.ui.offset.y=(stage.height()-APP.plot.length*PX*APP.ui.zoom)/2;drawAll();}
 
-function autoGen(){
-  const fp=computeFootprint();if(fp.w<2||fp.h<2){warn('المساحة صغيرة جداً');return;}
-  const walls=[],ops=[],s=APP.plot.structure;let outer=[];
-  if(s==='L'){
-    const cw=fp.w*.42,ch=fp.h*.42;outer=[[fp.x,fp.y],[fp.x+fp.w,fp.y],[fp.x+fp.w,fp.y+fp.h-ch],[fp.x+fp.w-cw,fp.y+fp.h-ch],[fp.x+fp.w-cw,fp.y+fp.h],[fp.x,fp.y+fp.h]];
-  }else if(s==='U'){
-    const c=Math.min(fp.w*.35,fp.h*.5);outer=[[fp.x,fp.y],[fp.x+fp.w,fp.y],[fp.x+fp.w,fp.y+fp.h],[fp.x+fp.w-c,fp.y+fp.h],[fp.x+fp.w-c,fp.y+fp.h-c],[fp.x+c,fp.y+fp.h-c],[fp.x+c,fp.y+fp.h],[fp.x,fp.y+fp.h]];
-  }else if(s==='split'){
-    const gap=fp.w*.06,w1=fp.w*.6,w2=fp.w-w1-gap,x2=fp.x+w1+gap;outer=[[fp.x,fp.y],[fp.x+w1,fp.y],[fp.x+w1,fp.y+fp.h],[fp.x,fp.y+fp.h]];
-    walls.push(mkWall(x2,fp.y,x2,fp.y+fp.h,.25,'ext'),mkWall(x2,fp.y,x2+w2,fp.y,.25,'ext'),mkWall(x2+w2,fp.y,x2+w2,fp.y+fp.h,.25,'ext'),mkWall(x2+w2,fp.y+fp.h,x2,fp.y+fp.h,.25,'ext'));
-  }else outer=[[fp.x,fp.y],[fp.x+fp.w,fp.y],[fp.x+fp.w,fp.y+fp.h],[fp.x,fp.y+fp.h]];
-  for(let i=0;i<outer.length;i++){const a=outer[i],b=outer[(i+1)%outer.length];walls.push(mkWall(a[0],a[1],b[0],b[1],.25,'ext'));}
-  const sy=fp.y+fp.h*.55;if(fp.w>=4)walls.push(mkWall(fp.x,sy,fp.x+fp.w,sy,.12,'int'));
-  const entry=walls.find(function(w){return Math.abs(w.y1-fp.y)<.01&&Math.abs(w.y2-fp.y)<.01&&Math.abs(w.x2-w.x1)>2;});if(entry)ops.push({id:nid(),wallId:entry.id,pos:.5,w:1.1,h:2.2,type:'door'});
-  walls.filter(function(w){return w.type==='int';}).forEach(function(w,i){if(Math.hypot(w.x2-w.x1,w.y2-w.y1)>3)ops.push({id:nid(),wallId:w.id,pos:.3+(i%3)*.2,w:.9,h:2.1,type:'door'});});
-  walls.filter(function(w){return w.type==='ext';}).forEach(function(w){const len=Math.hypot(w.x2-w.x1,w.y2-w.y1);if(len>4&&w!==entry){const c=Math.max(1,Math.floor(len/4));for(let k=1;k<=c;k++)ops.push({id:nid(),wallId:w.id,pos:k/(c+1),w:1.2,h:1.4,type:'window'});}});
-  APP.model.walls=walls;APP.model.openings=ops;APP.model.blocks=[];APP.ui.selected=null;pushHist();drawAll();fitView();
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function planVariantName(v){return ['خصوصية متدرجة','ضيافة معكوسة','فناء عائلي'][v]||'خصوصية متدرجة';}
+
+function buildSmartZones(fp,variant){
+  const r=APP.plot.rooms,zones=[],mirror=variant===1;
+  function add(name,kind,rx,ry,rw,rh,role){
+    if(rw<=0||rh<=0)return;
+    const x=mirror?fp.x+(1-rx-rw)*fp.w:fp.x+rx*fp.w;
+    zones.push({id:nid(),name:name,kind:kind,role:role||kind,x:x,y:fp.y+ry*fp.h,w:rw*fp.w,h:rh*fp.h});
+  }
+  const has=function(key){return (r[key]||0)>0;};
+
+  add(has('menMajlis')?'مجلس الرجال':'جلسة ضيافة مرنة','guest',0,.00,.42,.24,'guest');
+  add('بهو الرجال','circulation',.42,.00,.13,.12,'guest');
+  add(r.baths>0?'حمام الرجال':'مغاسل الرجال','wet',.55,.00,.13,.12,'guest');
+  add(has('womenMajlis')?'مجلس النساء':'جلسة عائلية هادئة','guest',.68,.12,.32,.36,'guest');
+  add('بهو النساء','circulation',.82,.00,.18,.12,'guest');
+  add(r.baths>1?'حمام النساء':'مغاسل النساء','wet',.68,.00,.14,.12,'guest');
+
+  add(has('dining')?'صالة الطعام':'سفرة مرنة','guest',.00,.24,.42,.24,'guest');
+  if(has('stairs')){
+    add('درج محفوظ','circulation',.42,.24,.13,.24,'family');
+    if(variant===2){
+      add('فناء عائلي','outdoor',.55,.29,.13,.15,'family');
+      add('رواق داخلي','circulation',.55,.24,.13,.05,'family');
+      add('بهو العائلة','circulation',.55,.44,.13,.04,'family');
+    }else add('بهو العائلة','circulation',.55,.24,.13,.24,'family');
+  }else if(variant===2){
+    add('فناء عائلي','outdoor',.42,.29,.26,.15,'family');
+    add('رواق داخلي','circulation',.42,.24,.26,.05,'family');
+    add('بهو العائلة','circulation',.42,.44,.26,.04,'family');
+  }else add('بهو العائلة','circulation',.42,.24,.26,.24,'family');
+
+  if(has('kitchen')){
+    add(APP.plot.extras.storage?'تحضير وتخزين':'تحضير','service',.00,.48,.14,.12,'service');
+    add('مطبخ','service',.14,.48,.28,.24,'service');
+  }else add('منطقة خدمة مرنة','service',.00,.48,.42,.24,'service');
+  add(has('familyHall')?'صالة عائلية':'معيشة مرنة','family',.42,.48,.58,.24,'family');
+
+  add(has('motherSuite')?'جناح الوالدة':'غرفة متعددة الاستخدام','private',.00,.72,.28,.28,'private');
+  const bedroomCount=clamp(r.bedrooms||0,0,6),bathStrip=r.baths>2?.12:0,bedStart=.28,bedEnd=1-bathStrip;
+  if(bedroomCount){
+    const roomW=(bedEnd-bedStart)/bedroomCount;
+    for(let i=0;i<bedroomCount;i++)add('غرفة نوم '+(i+1),'private',bedStart+i*roomW,.72,roomW,.28,'private');
+  }else add('جناح عائلي مرن','private',bedStart,.72,bedEnd-bedStart,.28,'private');
+  if(bathStrip){
+    const privateBaths=clamp(r.baths-2,1,2),bathH=.28/privateBaths;
+    for(let i=0;i<privateBaths;i++)add('حمام خاص '+(i+1),'wet',1-bathStrip,.72+i*bathH,bathStrip,bathH,'private');
+  }
+  return zones;
+}
+
+function buildPlanWalls(fp,zones){
+  const segs=[],eps=.015;
+  function outer(x1,y1,x2,y2){
+    return (Math.abs(y1-y2)<eps&&(Math.abs(y1-fp.y)<eps||Math.abs(y1-(fp.y+fp.h))<eps)) || (Math.abs(x1-x2)<eps&&(Math.abs(x1-fp.x)<eps||Math.abs(x1-(fp.x+fp.w))<eps));
+  }
+  function addSeg(x1,y1,x2,y2,type){
+    const h=Math.abs(y1-y2)<eps,v=Math.abs(x1-x2)<eps;if(!h&&!v)return;
+    if(type==='int'&&outer(x1,y1,x2,y2))return;
+    const axis=h?'h':'v',coord=+(h?y1:x1).toFixed(3),a=+(h?Math.min(x1,x2):Math.min(y1,y2)).toFixed(3),b=+(h?Math.max(x1,x2):Math.max(y1,y2)).toFixed(3);
+    let from=a,to=b;
+    for(let i=segs.length-1;i>=0;i--){
+      const s=segs[i];if(s.axis===axis&&s.type===type&&Math.abs(s.coord-coord)<eps&&from<=s.to+eps&&to>=s.from-eps){from=Math.min(from,s.from);to=Math.max(to,s.to);segs.splice(i,1);}
+    }
+    segs.push({axis:axis,coord:coord,from:from,to:to,type:type});
+  }
+  addSeg(fp.x,fp.y,fp.x+fp.w,fp.y,'ext');addSeg(fp.x+fp.w,fp.y,fp.x+fp.w,fp.y+fp.h,'ext');addSeg(fp.x+fp.w,fp.y+fp.h,fp.x,fp.y+fp.h,'ext');addSeg(fp.x,fp.y+fp.h,fp.x,fp.y,'ext');
+  zones.forEach(function(z){
+    addSeg(z.x,z.y,z.x+z.w,z.y,'int');addSeg(z.x+z.w,z.y,z.x+z.w,z.y+z.h,'int');addSeg(z.x+z.w,z.y+z.h,z.x,z.y+z.h,'int');addSeg(z.x,z.y+z.h,z.x,z.y,'int');
+  });
+  return segs.map(function(s){return s.axis==='h'?mkWall(s.from,s.coord,s.to,s.coord,s.type==='ext'?.25:.12,s.type):mkWall(s.coord,s.from,s.coord,s.to,s.type==='ext'?.25:.12,s.type);});
+}
+
+function addPlannedOpening(openings,walls,x,y,type,kind){
+  const desired=type==='door'?1.1:1.35;
+  const candidates=walls.filter(function(w){return !kind||w.type===kind;}).map(function(w){
+    const dx=w.x2-w.x1,dy=w.y2-w.y1,len=Math.hypot(dx,dy);if(len<1.1)return null;
+    const t=clamp(((x-w.x1)*dx+(y-w.y1)*dy)/(len*len),.13,.87),px=w.x1+dx*t,py=w.y1+dy*t;
+    return {w:w,len:len,t:t,d:Math.hypot(x-px,y-py)};
+  }).filter(Boolean).sort(function(a,b){return a.d-b.d;});
+  for(let i=0;i<candidates.length;i++){
+    const c=candidates[i],width=Math.min(desired,c.len*.32),gap=(width/c.len)*.85;
+    if(openings.some(function(o){return o.wallId===c.w.id&&Math.abs(o.pos-c.t)<gap;}))continue;
+    openings.push({id:nid(),wallId:c.w.id,pos:c.t,w:width,h:type==='door'?2.2:1.35,type:type});return true;
+  }
+  return false;
+}
+
+function buildPlanOpenings(fp,zones,walls){
+  const openings=[];
+  function named(name){return zones.find(function(z){return z.name===name;});}
+  function outerDoor(name,side){
+    const z=named(name);if(!z)return;
+    const x=side==='left'?fp.x:side==='right'?fp.x+fp.w:z.x+z.w/2,y=side==='bottom'?fp.y:side==='top'?fp.y+fp.h:z.y+z.h/2;
+    addPlannedOpening(openings,walls,x,y,'door','ext');
+  }
+  outerDoor('مجلس الرجال','bottom');outerDoor('بهو النساء','bottom');outerDoor('تحضير وتخزين','left');
+  zones.filter(function(z){return !['outdoor','wet','circulation'].includes(z.kind);}).forEach(function(z){addPlannedOpening(openings,walls,z.x+z.w/2,z.y+z.h/2,'door','int');});
+  zones.filter(function(z){return ['guest','family','private','service'].includes(z.kind);}).forEach(function(z){
+    const cx=z.x+z.w/2,cy=z.y+z.h/2,eps=.03;
+    if(Math.abs(z.x-fp.x)<eps)addPlannedOpening(openings,walls,fp.x,cy,'window','ext');
+    else if(Math.abs(z.x+z.w-(fp.x+fp.w))<eps)addPlannedOpening(openings,walls,fp.x+fp.w,cy,'window','ext');
+    else if(Math.abs(z.y+z.h-(fp.y+fp.h))<eps)addPlannedOpening(openings,walls,cx,fp.y+fp.h,'window','ext');
+    else if(Math.abs(z.y-fp.y)<eps)addPlannedOpening(openings,walls,cx,fp.y,'window','ext');
+  });
+  return openings;
+}
+
+function buildPlanBlocks(zones){
+  const blocks=[];
+  function add(z,type,fx,fy,scale){
+    const d=findDef(type);if(!d||!z)return;const w=Math.min(d.w*(scale||1),z.w*.62),h=Math.min(d.h*(scale||1),z.h*.62);
+    if(w<.25||h<.15)return;blocks.push({id:nid(),type:type,x:z.x+z.w*fx,y:z.y+z.h*fy,w:w,h:h,rot:0});
+  }
+  zones.forEach(function(z){
+    if(z.name.indexOf('مجلس')===0||z.name.indexOf('جلسة')===0){add(z,'sofa',.28,.52,1.05);add(z,'sofa',.72,.52,1.05);add(z,'table',.5,.5,.95);}
+    else if(z.name.indexOf('صالة عائلية')===0||z.name.indexOf('معيشة')===0){add(z,'sofa',.27,.5,1.15);add(z,'sofa',.72,.5,1.15);add(z,'tv',.5,.82,1.1);add(z,'rug',.5,.5,.95);}
+    else if(z.name.indexOf('صالة الطعام')===0||z.name.indexOf('سفرة')===0){add(z,'table',.5,.5,1.35);}
+    else if(z.name==='مطبخ'){add(z,'sink',.25,.7,1);add(z,'stove',.55,.7,1);add(z,'fridge',.82,.7,1);}
+    else if(z.name.indexOf('غرفة نوم')===0||z.name.indexOf('جناح الوالدة')===0||z.name.indexOf('غرفة متعددة')===0){add(z,'double',.5,.48,1);add(z,'wardrobe',.78,.78,1);}
+    else if(z.name.indexOf('حمام')===0){add(z,'toilet',.28,.3,1);add(z,'basin',.63,.3,1);add(z,'shower',.54,.72,.85);}
+    else if(z.name.indexOf('درج')===0)add(z,'stairs',.5,.5,1);
+  });
+  return blocks;
+}
+
+function renderPlanSpecs(){
+  const box=document.getElementById('planSpecs');if(!box)return;
+  const z=APP.model.zones||[];
+  if(!z.length){box.innerHTML='<div class="empty">ولّد المخطط لتظهر علاقات الفراغات هنا</div>';return;}
+  const room=function(name){return z.some(function(x){return x.name===name;});};
+  const words=[];
+  if(room('مجلس الرجال'))words.push('<div class="spec-line guest"><i class="spec-dot"></i><span>الرجال: مدخل ← بهو ← مجلس ← طعام</span></div>');
+  if(room('مجلس النساء'))words.push('<div class="spec-line guest"><i class="spec-dot"></i><span>النساء: مدخل خاص ← بهو ← مجلس</span></div>');
+  words.push('<div class="spec-line"><i class="spec-dot"></i><span>العائلة: الصالة هي الرابط المباشر مع جناح النوم.</span></div>');
+  words.push('<div class="spec-line service"><i class="spec-dot"></i><span>الخدمة: تحضير وتخزين ← مطبخ ← طعام.</span></div>');
+  words.push('<div class="spec-line private"><i class="spec-dot"></i><span>الخصوصية: جناح الوالدة وغرف النوم في الخلف.</span></div>');
+  box.innerHTML='<div class="spec-title"><span>'+planVariantName(APP.ui.planVariant)+'</span> · '+z.filter(function(x){return x.kind!=="outdoor";}).length+' فراغًا</div>'+words.join('');
+}
+
+function autoGen(advance){
+  const fp=computeFootprint();if(fp.w<5||fp.h<8){warn('المساحة المتاحة بعد الارتدادات صغيرة لتوزيع آمن');return;}
+  if(advance)APP.ui.planVariant=(APP.ui.planVariant+1)%3;
+  else APP.ui.planVariant={privacy:0,separate:1,courtyard:2,flexible:0}[APP.plot.layout]||0;
+  const zones=buildSmartZones(fp,APP.ui.planVariant),walls=buildPlanWalls(fp,zones),openings=buildPlanOpenings(fp,zones,walls),blocks=buildPlanBlocks(zones);
+  APP.model.walls=walls;APP.model.openings=openings;APP.model.blocks=blocks;APP.model.zones=zones;APP.ui.selected=null;pushHist();drawAll();fitView();renderPlanSpecs();
 }
 
 /* العرض 3D */
@@ -331,7 +519,11 @@ function loop3D(){anim3=requestAnimationFrame(loop3D);if(ctrl3){ctrl3.update();r
 
 /* الكميات */
 function computeBOQ(){
-  let extA=0,intA=0;APP.model.walls.forEach(function(w){const a=Math.hypot(w.x2-w.x1,w.y2-w.y1)*w.h;if(w.type==='ext')extA+=a;else intA+=a;});
+  let extA=0,intA=0;APP.model.walls.forEach(function(w){
+    const gross=Math.hypot(w.x2-w.x1,w.y2-w.y1)*w.h;
+    const voids=APP.model.openings.filter(function(o){return o.wallId===w.id;}).reduce(function(sum,o){return sum+o.w*o.h;},0);
+    const a=Math.max(0,gross-voids);if(w.type==='ext')extA+=a;else intA+=a;
+  });
   const doors=APP.model.openings.filter(function(o){return o.type==='door';}).length,windows=APP.model.openings.filter(function(o){return o.type==='window';}).length,totA=extA+intA,fl=APP.plot.rooms.floors||1,net={blocks:Math.ceil((extA*12.5+intA*25)*fl),cement:Math.ceil(totA*.42*fl),sand:Math.ceil(totA*.035*fl*10)/10,rebar:Math.ceil(totA*3.2*fl),paint:Math.ceil(totA*.7*fl),doors:doors,windows:windows},w=APP.waste;
   return {extA:extA,intA:intA,totA:totA,doors:doors,windows:windows,fl:fl,net:net,waste:{blocks:Math.ceil(net.blocks*(1+w)),cement:Math.ceil(net.cement*(1+w)),sand:Math.ceil(net.sand*(1+w)*10)/10,rebar:Math.ceil(net.rebar*(1+w)),paint:Math.ceil(net.paint*(1+w))}};
 }
@@ -377,9 +569,17 @@ function plotSvgBase(){
   return {W:W,L:L,svgW:svgW,svgH:svgH,sc:sc,x:x,y:y};
 }
 function drawMovementMap(){
-  const box=document.getElementById('movementMap');if(!box)return;const p=plotSvgBase(),fp=computeFootprint(),entry={x:p.W/2,y:0},guests={x:fp.x+fp.w*.85,y:fp.y+fp.h*.2},family={x:fp.x+fp.w*.5,y:fp.y+fp.h*.7},service={x:fp.x+fp.w*.15,y:fp.y+fp.h*.3};
-  const path=function(a,b,c){return '<line x1="'+p.x(a.x)+'" y1="'+p.y(a.y)+'" x2="'+p.x(b.x)+'" y2="'+p.y(b.y)+'" stroke="'+c+'" stroke-width="3" stroke-linecap="round" opacity=".75"/>';},dot=function(q,c,l){return '<circle cx="'+p.x(q.x)+'" cy="'+p.y(q.y)+'" r="8" fill="'+c+'" stroke="#05080f" stroke-width="2"/><text x="'+p.x(q.x)+'" y="'+(p.y(q.y)-14)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="Tajawal">'+l+'</text>';};
-  box.innerHTML='<svg viewBox="0 0 '+p.svgW+' '+p.svgH+'" preserveAspectRatio="xMidYMid meet"><rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(224,178,94,.04)" stroke="rgba(224,178,94,.4)" stroke-width="2" stroke-dasharray="6 4"/><rect x="'+p.x(fp.x)+'" y="'+p.y(fp.y+fp.h)+'" width="'+(fp.w*p.sc)+'" height="'+(fp.h*p.sc)+'" fill="rgba(79,216,208,.08)" stroke="rgba(79,216,208,.5)" stroke-width="1.5"/>'+path(entry,guests,'#e0b25e')+path(entry,family,'#4fd8d0')+path(service,family,'#a078ff')+dot(entry,'#e0b25e','المدخل')+dot(guests,'#e0b25e','الضيوف')+dot(family,'#4fd8d0','العائلة')+dot(service,'#a078ff','الخدمة')+'</svg>';
+  const box=document.getElementById('movementMap');if(!box)return;const p=plotSvgBase(),fp=computeFootprint(),zones=APP.model.zones||[];
+  const get=function(names,fallback){const z=zones.find(function(x){return names.indexOf(x.name)>-1;});return z?{x:z.x+z.w/2,y:z.y+z.h/2}:fallback;};
+  const men=get(['مجلس الرجال','جلسة ضيافة مرنة'],{x:fp.x+fp.w*.2,y:fp.y+fp.h*.12}),menFoyer=get(['بهو الرجال'],{x:fp.x+fp.w*.48,y:fp.y+fp.h*.07}),dining=get(['صالة الطعام','سفرة مرنة'],{x:fp.x+fp.w*.2,y:fp.y+fp.h*.36});
+  const women=get(['مجلس النساء','جلسة عائلية هادئة'],{x:fp.x+fp.w*.84,y:fp.y+fp.h*.3}),womenFoyer=get(['بهو النساء'],{x:fp.x+fp.w*.9,y:fp.y+fp.h*.06}),hall=get(['صالة عائلية','معيشة مرنة'],{x:fp.x+fp.w*.7,y:fp.y+fp.h*.6});
+  const prep=get(['تحضير وتخزين','تحضير','منطقة خدمة مرنة'],{x:fp.x+fp.w*.08,y:fp.y+fp.h*.54}),kitchen=get(['مطبخ'],{x:fp.x+fp.w*.28,y:fp.y+fp.h*.6}),mother=get(['جناح الوالدة','غرفة متعددة الاستخدام'],{x:fp.x+fp.w*.14,y:fp.y+fp.h*.86});
+  const menEntry={x:men.x,y:fp.y},womenEntry={x:womenFoyer.x,y:fp.y},serviceEntry={x:fp.x,y:prep.y},familyEntry={x:hall.x,y:fp.y+fp.h*.48};
+  const line=function(points,c){return '<polyline points="'+points.map(function(q){return p.x(q.x)+','+p.y(q.y);}).join(' ')+'" fill="none" stroke="'+c+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity=".82" marker-end="url(#arrow-'+c.slice(1)+')"/>';};
+  const dot=function(q,c,l){return '<circle cx="'+p.x(q.x)+'" cy="'+p.y(q.y)+'" r="7" fill="'+c+'" stroke="#05080f" stroke-width="2"/><text x="'+p.x(q.x)+'" y="'+(p.y(q.y)-13)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="Tajawal">'+l+'</text>';};
+  const rooms=zones.map(function(z){const color={guest:'#e0b25e',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'}[z.kind]||'#a078ff';return '<rect x="'+p.x(z.x)+'" y="'+p.y(z.y+z.h)+'" width="'+(z.w*p.sc)+'" height="'+(z.h*p.sc)+'" fill="'+color+'" fill-opacity=".08" stroke="'+color+'" stroke-opacity=".23" stroke-width="1"/>';}).join('');
+  const defs='<defs><marker id="arrow-e0b25e" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#e0b25e"/></marker><marker id="arrow-a078ff" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#a078ff"/></marker><marker id="arrow-4fd8d0" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4fd8d0"/></marker><marker id="arrow-5ee6a8" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#5ee6a8"/></marker></defs>';
+  box.innerHTML='<svg viewBox="0 0 '+p.svgW+' '+p.svgH+'" preserveAspectRatio="xMidYMid meet">'+defs+'<rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(224,178,94,.04)" stroke="rgba(224,178,94,.4)" stroke-width="2" stroke-dasharray="6 4"/>'+rooms+line([menEntry,menFoyer,men,dining],'#e0b25e')+line([womenEntry,womenFoyer,women],'#a078ff')+line([familyEntry,hall,mother],'#4fd8d0')+line([serviceEntry,prep,kitchen,dining],'#5ee6a8')+dot(menEntry,'#e0b25e','رجال')+dot(womenEntry,'#a078ff','نساء')+dot(familyEntry,'#4fd8d0','عائلة')+dot(serviceEntry,'#5ee6a8','خدمة')+'</svg>';
 }
 function computeSpaceBudget(){
   const bar=document.getElementById('budgetBar'),items=document.getElementById('budgetItems');if(!bar||!items)return;const area=plotArea(),build=computeFootprint().usable,parking=Math.min(40,area*.07),garden=Math.max(0,area-build-parking-area*.05),waste=area*.03,internal=Math.max(0,area-build-parking-garden-waste),parts=[{n:'المبنى',v:build,c:'#e0b25e'},{n:'الحديقة',v:garden,c:'#5ee6a8'},{n:'المواقف',v:parking,c:'#4fd8d0'},{n:'ممرات',v:internal,c:'#a078ff'},{n:'مهدر',v:waste,c:'#ff6b6b'}],total=parts.reduce(function(s,p){return s+p.v;},0);
@@ -387,8 +587,14 @@ function computeSpaceBudget(){
   items.innerHTML=parts.map(function(p){return '<div class="budget-item"><span class="bl">'+p.n+'</span><div class="bv" style="color:'+p.c+'">'+Math.round(p.v)+' م²</div><span class="bp">'+(p.v/total*100).toFixed(0)+'٪ من الأرض</span></div>';}).join('');
 }
 function drawBeforeAfter(view){
-  const box=document.getElementById('baView');if(!box)return;const p=plotSvgBase(),fp=computeFootprint();let content='<rect x="0" y="0" width="'+p.svgW+'" height="'+p.svgH+'" fill="#05080f"/><rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(224,178,94,.05)" stroke="rgba(224,178,94,.6)" stroke-width="2" stroke-dasharray="6 4"/>';
-  if(view==='after'){content+='<rect x="'+p.x(fp.x)+'" y="'+p.y(fp.y+fp.h)+'" width="'+(fp.w*p.sc)+'" height="'+(fp.h*p.sc)+'" fill="rgba(79,216,208,.15)" stroke="rgba(79,216,208,.7)" stroke-width="2"/>';for(let i=1;i<3;i++){const rx=fp.x+fp.w/3*i;content+='<line x1="'+p.x(rx)+'" y1="'+p.y(fp.y+fp.h)+'" x2="'+p.x(rx)+'" y2="'+p.y(fp.y)+'" stroke="rgba(79,216,208,.4)" stroke-width="1"/>';}const ry=fp.y+fp.h/2;content+='<line x1="'+p.x(fp.x)+'" y1="'+p.y(ry)+'" x2="'+p.x(fp.x+fp.w)+'" y2="'+p.y(ry)+'" stroke="rgba(79,216,208,.4)" stroke-width="1"/>';}else content+='<text x="'+p.svgW/2+'" y="'+p.svgH/2+'" fill="rgba(224,178,94,.5)" font-size="20" font-weight="700" text-anchor="middle" font-family="Tajawal">أرض فاضية — '+Math.round(p.W*p.L)+' م²</text>';
+  const box=document.getElementById('baView');if(!box)return;const p=plotSvgBase(),fp=computeFootprint(),zones=APP.model.zones||[];let content='<rect x="0" y="0" width="'+p.svgW+'" height="'+p.svgH+'" fill="#05080f"/><rect x="'+p.x(0)+'" y="'+p.y(p.L)+'" width="'+(p.W*p.sc)+'" height="'+(p.L*p.sc)+'" fill="rgba(224,178,94,.05)" stroke="rgba(224,178,94,.6)" stroke-width="2" stroke-dasharray="6 4"/>';
+  if(view==='after'){
+    content+='<rect x="'+p.x(fp.x)+'" y="'+p.y(fp.y+fp.h)+'" width="'+(fp.w*p.sc)+'" height="'+(fp.h*p.sc)+'" fill="rgba(79,216,208,.12)" stroke="rgba(79,216,208,.7)" stroke-width="2"/>';
+    if(zones.length){
+      const colors={guest:'#e0b25e',family:'#4fd8d0',private:'#a9bce6',service:'#5ee6a8',circulation:'#d9c49a',wet:'#8fa7c7',outdoor:'#8cb477'};
+      content+=zones.map(function(z){const c=colors[z.kind]||'#a078ff',x=p.x(z.x),y=p.y(z.y+z.h),w=z.w*p.sc,h=z.h*p.sc,show=w>58&&h>35;return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'" fill-opacity=".11" stroke="'+c+'" stroke-opacity=".6" stroke-width="1"/>'+(show?'<text x="'+(x+w/2)+'" y="'+(y+h/2)+'" fill="'+c+'" font-size="11" font-weight="700" text-anchor="middle" font-family="Tajawal">'+z.name+'</text>':'');}).join('');
+    }else content+='<text x="'+(p.svgW/2)+'" y="'+(p.svgH/2)+'" fill="rgba(79,216,208,.7)" font-size="18" font-weight="700" text-anchor="middle" font-family="Tajawal">منطقة بناء مبدئية</text>';
+  }else content+='<text x="'+p.svgW/2+'" y="'+p.svgH/2+'" fill="rgba(224,178,94,.5)" font-size="20" font-weight="700" text-anchor="middle" font-family="Tajawal">أرض فاضية — '+Math.round(p.W*p.L)+' م²</text>';
   box.innerHTML='<svg viewBox="0 0 '+p.svgW+' '+p.svgH+'" preserveAspectRatio="xMidYMid meet">'+content+'</svg>';
 }
 function initAnalysis(){
@@ -428,12 +634,15 @@ function boot(){
   document.getElementById('btnGrid').addEventListener('click',function(){APP.ui.showGrid=!APP.ui.showGrid;this.classList.toggle('on',APP.ui.showGrid);drawGrid();});
   document.getElementById('btnFit').addEventListener('click',fitView);
   document.getElementById('btnLibrary').addEventListener('click',function(){document.querySelector('.ed').classList.toggle('library-open');});
-  document.getElementById('btnAuto').addEventListener('click',function(){autoGen();toast('تم التوليد التلقائي');});
-  document.getElementById('btnGen').addEventListener('click',function(){autoGen();switchTab('editor');toast('⚡ تم توليد المخطط');});
-  document.querySelectorAll('#styleGrid .vs').forEach(function(v){v.addEventListener('click',function(){document.querySelectorAll('#styleGrid .vs').forEach(function(x){x.classList.remove('on');});v.classList.add('on');APP.plot.style=v.dataset.key;});});
-  document.querySelectorAll('#structGrid .vs').forEach(function(v){v.addEventListener('click',function(){document.querySelectorAll('#structGrid .vs').forEach(function(x){x.classList.remove('on');});v.classList.add('on');APP.plot.structure=v.dataset.key;});});
+  document.getElementById('btnAuto').addEventListener('click',function(){autoGen(true);toast('تم توليد '+planVariantName(APP.ui.planVariant));});
+  document.getElementById('btnGen').addEventListener('click',function(){autoGen(false);switchTab('editor');toast('⚡ تم توليد مخطط كامل قابل للتعديل');});
+  document.getElementById('btnReadIdea').addEventListener('click',readIdea);
+  document.querySelectorAll('#styleGrid .vs').forEach(function(v){v.addEventListener('click',function(){document.querySelectorAll('#styleGrid .vs').forEach(function(x){x.classList.remove('on');});v.classList.add('on');APP.plot.layout=v.dataset.key;});});
+  document.querySelectorAll('#structGrid .vs').forEach(function(v){v.addEventListener('click',function(){document.querySelectorAll('#structGrid .vs').forEach(function(x){x.classList.remove('on');});v.classList.add('on');APP.plot.style=v.dataset.key;});});
   document.getElementById('inLen').addEventListener('input',function(e){APP.plot.length=Math.max(5,parseFloat(e.target.value)||5);updateArea();updateRating();});
   document.getElementById('inWid').addEventListener('input',function(e){APP.plot.width=Math.max(5,parseFloat(e.target.value)||5);updateArea();updateRating();});
+  document.getElementById('inDirection').addEventListener('change',function(e){APP.plot.direction=e.target.value;});
+  document.getElementById('inFloors').addEventListener('change',function(e){APP.plot.rooms.floors=Math.max(1,parseInt(e.target.value,10)||1);});
   document.querySelectorAll('.street').forEach(function(card){
     card.addEventListener('click',function(e){if(e.target.tagName==='INPUT')return;const side=card.dataset.side;APP.plot.streets[side]=APP.plot.streets[side]?null:{w:15,name:''};renderStreets();updateRating();});
     card.querySelector('.st-w').addEventListener('input',function(e){const s=card.dataset.side;if(APP.plot.streets[s])APP.plot.streets[s].w=parseFloat(e.target.value)||15;updateRating();});

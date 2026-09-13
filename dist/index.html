@@ -30,34 +30,34 @@
   <main class="journey" id="journey">
     <div class="jhead">
       <span class="eyebrow">AL-MIZAN AL-HANDASI</span>
-      <h1>رحلة التصميم</h1>
-      <p>أربع محطات… من الفكرة إلى الاعتماد.</p>
+      <h1>بيتك يبدأ من فكرتك</h1>
+      <p>اكتب احتياجك مرة واحدة، ثم شاهد المخطط والجدران والكتل والكميات في رحلة واحدة.</p>
       <div class="jline"></div>
     </div>
     <div class="jgrid">
       <div class="jcard" data-go="plot">
-        <div class="jnum">١</div><div class="jico">🏛️</div>
-        <h3>المجلس الملكي</h3>
-        <p>الأرض، الشوارع، الارتدادات، ومحلل التقييم الذكي.</p>
-        <span class="jlink">ابدأ الرحلة ←</span>
+        <div class="jnum">١</div><div class="jico">📝</div>
+        <h3>الأرض والفكرة</h3>
+        <p>الأبعاد والشوارع والاتجاه، ثم برنامج منزلك كما تصفه أنت.</p>
+        <span class="jlink">ابدأ مخططك ←</span>
       </div>
       <div class="jcard" data-go="editor">
-        <div class="jnum">٢</div><div class="jico">✏️</div>
-        <h3>الفجر</h3>
-        <p>المحرر 2D: جدران، أبواب، نوافذ، ومكتبة عناصر.</p>
-        <span class="jlink">ادخل المحرر ←</span>
+        <div class="jnum">٢</div><div class="jico">📐</div>
+        <h3>المخطط الذكي</h3>
+        <p>فراغات مسماة، جدران وأبواب ونوافذ، مع توزيع قابل للتعديل.</p>
+        <span class="jlink">شاهد المخطط ←</span>
       </div>
       <div class="jcard" data-go="threeD">
-        <div class="jnum">٣</div><div class="jico">🏗️</div>
-        <h3>المرمر</h3>
-        <p>العرض 3D: ضوء الشمس، المواد، والزوايا.</p>
-        <span class="jlink">اعرض المبنى ←</span>
+        <div class="jnum">٣</div><div class="jico">🧱</div>
+        <h3>الكتل والرؤية 3D</h3>
+        <p>انتقل من الجدار إلى الكتلة، وعاين الضوء والمواد والزوايا.</p>
+        <span class="jlink">شاهد الكتل ←</span>
       </div>
       <div class="jcard" data-go="boq">
         <div class="jnum">٤</div><div class="jico">📊</div>
-        <h3>السلماني</h3>
-        <p>الكميات، التكاليف، والملخص التنفيذي.</p>
-        <span class="jlink">احسب وصدّر ←</span>
+        <h3>الكميات والمراجعة</h3>
+        <p>كميات مبدئية مبنية على الجدران والفتحات، ثم فحص للحركة والتعارضات.</p>
+        <span class="jlink">احسب وراجع ←</span>
       </div>
     </div>
     <div class="jfoot">✦ الميزان الهندسي — منزلي بفكري وإحساسي ✦</div>
@@ -70,11 +70,11 @@
         <div><b>الميزان الهندسي</b><small>AL-MIZAN AL-HANDASI</small></div>
       </div>
       <div class="tabs">
-        <button class="tab on" data-tab="plot">📍 الأرض</button>
-        <button class="tab" data-tab="editor">✏️ المحرر 2D</button>
-        <button class="tab" data-tab="threeD">🏗️ العرض 3D</button>
+        <button class="tab on" data-tab="plot">📝 الفكرة والأرض</button>
+        <button class="tab" data-tab="editor">📐 المخطط الذكي</button>
+        <button class="tab" data-tab="threeD">🧱 الكتل 3D</button>
         <button class="tab" data-tab="boq">📊 الكميات</button>
-        <button class="tab" data-tab="analysis">🔍 التحليل الذكي</button>
+        <button class="tab" data-tab="analysis">✓ المراجعة</button>
       </div>
       <div class="actions"><button class="btn back" onclick="goHome()">↩ البوابة</button></div>
     </div>
@@ -84,15 +84,19 @@
         <div class="form-page">
           <div class="hd">
             <span class="stage-tag">المحطة الأولى</span>
-            <h1>المجلس <span>الملكي</span></h1>
-            <p>أدخل بيانات أرضك، واحصل على تقييم فوري وارتدادات محسوبة.</p>
+            <h1>ابدأ من <span>فكرتك</span></h1>
+            <p>حدد الأرض واحتياج المنزل؛ سيُنشئ الميزان مخططًا مبدئيًا بجدران وفتحات وفراغات قابلة للتعديل.</p>
           </div>
           <div class="card">
-            <div class="ch"><div class="n">١</div><div><h2>أبعاد الأرض والشوارع</h2><p>الأساس الرياضي لحساب الارتدادات</p></div></div>
+            <div class="ch"><div class="n">١</div><div><h2>الأرض والاتجاه</h2><p>الأبعاد والشوارع هي أساس الارتدادات ومكان المداخل</p></div></div>
             <div class="cb">
               <div class="grid2">
                 <div class="fld"><label for="inLen">الطول (م)</label><input type="number" id="inLen" value="30" min="5" max="200" step="0.5"></div>
                 <div class="fld"><label for="inWid">العرض (م)</label><input type="number" id="inWid" value="20" min="5" max="200" step="0.5"></div>
+              </div>
+              <div class="grid2" style="margin-top:16px">
+                <div class="fld"><label for="inDirection">واجهة الأرض</label><select id="inDirection"><option value="n">شمالية</option><option value="s">جنوبية</option><option value="e">شرقية</option><option value="w">غربية</option></select></div>
+                <div class="fld"><label for="inFloors">عدد الأدوار</label><select id="inFloors"><option value="1">دور واحد</option><option value="2" selected>دوران</option><option value="3">ثلاثة أدوار</option></select></div>
               </div>
               <div class="badge"><span>المساحة الإجمالية</span><b id="outArea">600 م²</b></div>
               <div style="margin-top:18px">
@@ -108,28 +112,36 @@
           </div>
 
           <div class="card">
-            <div class="ch"><div class="n">٢</div><div><h2>الهوية المعمارية</h2><p>الطراز والهيكل</p></div></div>
+            <div class="ch"><div class="n">٢</div><div><h2>فكرة التوزيع</h2><p>اختر العلاقة الأهم بين الضيوف والعائلة والخدمة</p></div></div>
             <div class="cb">
-              <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin-bottom:11px">الطراز المعماري</label>
+              <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin-bottom:11px">الأولوية في المخطط</label>
               <div class="vis" id="styleGrid">
-                <div class="vs on" data-key="resort"><svg viewBox="0 0 100 40"><rect x="10" y="20" width="80" height="16" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><path d="M6 20l44-13 44 13" fill="none" stroke="#e0b25e"/></svg><b>منتجع</b><small>أفنية داخلية</small></div>
-                <div class="vs" data-key="modern"><svg viewBox="0 0 100 40"><rect x="12" y="12" width="30" height="24" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><rect x="46" y="6" width="42" height="30" fill="rgba(224,178,94,.1)" stroke="#e0b25e"/></svg><b>مودرن</b><small>كتل هندسية</small></div>
-                <div class="vs" data-key="neoclassic"><svg viewBox="0 0 100 40"><rect x="14" y="18" width="72" height="18" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><path d="M10 18l40-13 40 13z" fill="rgba(224,178,94,.22)" stroke="#e0b25e"/></svg><b>نيو كلاسيك</b><small>زخارف راقية</small></div>
-                <div class="vs" data-key="hijazi"><svg viewBox="0 0 100 40"><rect x="12" y="10" width="76" height="26" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><path d="M22 20h10v8H22zM44 20h10v8H44zM66 20h10v8H66z" fill="none" stroke="#4fd8d0"/></svg><b>حجازي</b><small>رواشين</small></div>
+                <div class="vs on" data-key="privacy"><svg viewBox="0 0 100 40"><path d="M10 32h30V9h22v23h28" fill="none" stroke="#e0b25e" stroke-width="5"/><path d="M41 21h20" stroke="#4fd8d0" stroke-width="3"/></svg><b>خصوصية متدرجة</b><small>مداخل واضحة</small></div>
+                <div class="vs" data-key="courtyard"><svg viewBox="0 0 100 40"><path d="M14 7h72v27H14z" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><rect x="38" y="14" width="24" height="14" fill="#0d1520" stroke="#4fd8d0"/></svg><b>فناء عائلي</b><small>ضوء وارتباط</small></div>
+                <div class="vs" data-key="separate"><svg viewBox="0 0 100 40"><rect x="10" y="9" width="34" height="23" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><rect x="56" y="9" width="34" height="23" fill="rgba(79,216,208,.12)" stroke="#4fd8d0"/><path d="M45 20h10" stroke="#8494ac" stroke-dasharray="3 2"/></svg><b>ضيافة مستقلة</b><small>عزل أقوى</small></div>
+                <div class="vs" data-key="flexible"><svg viewBox="0 0 100 40"><rect x="11" y="8" width="78" height="25" fill="rgba(224,178,94,.12)" stroke="#e0b25e"/><path d="M37 8v25M63 8v25" stroke="#4fd8d0" stroke-dasharray="4 3"/></svg><b>مرن ومفتوح</b><small>قابل للتوسع</small></div>
               </div>
-              <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin:20px 0 11px">هيكل المبنى</label>
+              <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin:20px 0 11px">اللغة المعمارية</label>
               <div class="vis" id="structGrid">
-                <div class="vs on" data-key="L"><svg viewBox="0 0 100 40"><path d="M18 6h26v14h38v14H18z" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/></svg><b>حرف L</b><small>فناء محمي</small></div>
-                <div class="vs" data-key="U"><svg viewBox="0 0 100 40"><path d="M14 6h22v22h28V6h22v28H14z" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/></svg><b>حرف U</b><small>خصوصية</small></div>
-                <div class="vs" data-key="block"><svg viewBox="0 0 100 40"><rect x="16" y="6" width="68" height="28" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/></svg><b>كتلة</b><small>استغلال أمثل</small></div>
-                <div class="vs" data-key="split"><svg viewBox="0 0 100 40"><rect x="12" y="8" width="30" height="24" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><rect x="56" y="12" width="30" height="20" fill="rgba(224,178,94,.1)" stroke="#e0b25e"/></svg><b>كتلتان</b><small>فصل الضيوف</small></div>
+                <div class="vs on" data-key="resort"><svg viewBox="0 0 100 40"><rect x="10" y="20" width="80" height="16" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><path d="M6 20l44-13 44 13" fill="none" stroke="#e0b25e"/></svg><b>هادئ وفخم</b><small>ألوان دافئة</small></div>
+                <div class="vs" data-key="modern"><svg viewBox="0 0 100 40"><rect x="12" y="12" width="30" height="24" fill="rgba(224,178,94,.18)" stroke="#e0b25e"/><rect x="46" y="6" width="42" height="30" fill="rgba(224,178,94,.1)" stroke="#e0b25e"/></svg><b>مودرن</b><small>كتل نظيفة</small></div>
+                <div class="vs" data-key="neoclassic"><svg viewBox="0 0 100 40"><rect x="14" y="18" width="72" height="18" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><path d="M10 18l40-13 40 13z" fill="rgba(224,178,94,.22)" stroke="#e0b25e"/></svg><b>نيو كلاسيك</b><small>واجهة مهيبة</small></div>
+                <div class="vs" data-key="hijazi"><svg viewBox="0 0 100 40"><rect x="12" y="10" width="76" height="26" fill="rgba(224,178,94,.14)" stroke="#e0b25e"/><path d="M22 20h10v8H22zM44 20h10v8H44zM66 20h10v8H66z" fill="none" stroke="#4fd8d0"/></svg><b>حجازي</b><small>تفاصيل أصيلة</small></div>
               </div>
             </div>
           </div>
 
           <div class="card">
-            <div class="ch"><div class="n">٣</div><div><h2>الفراغات والمرافق</h2><p>سيتم توزيعها تلقائياً</p></div></div>
-            <div class="cb"><div id="counters"></div><label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin:16px 0 10px">مرافق إضافية</label><div id="extras"></div></div>
+            <div class="ch"><div class="n">٣</div><div><h2>برنامج المنزل</h2><p>اختر الفراغات التي تريد توزيعها فعليًا داخل المخطط</p></div></div>
+            <div class="cb">
+              <div class="idea-box">
+                <label for="ideaInput">اكتب فكرتك كما تريدها</label>
+                <textarea id="ideaInput" rows="3" placeholder="مثال: مجلس الرجال في الأمام بمدخل مستقل، مجلس النساء بمدخل خاص، صالة عائلية كبيرة، مطبخ قريب من الطعام، وجناح للوالدة بجوار الحديقة."></textarea>
+                <button class="idea-read" id="btnReadIdea" type="button">فهم الفكرة وتعبئة الفراغات</button>
+              </div>
+              <div id="counters"></div>
+              <label style="font-size:.75rem;color:var(--muted);font-weight:700;display:block;margin:16px 0 10px">مرافق إضافية</label><div id="extras"></div>
+            </div>
           </div>
 
           <div class="card">
@@ -141,7 +153,8 @@
               </div>
             </div>
           </div>
-          <button class="cta" id="btnGen">⚡ توليد المخطط والانتقال للمحرر</button>
+          <button class="cta" id="btnGen">⚡ ولّد المخطط كاملاً — جدران وأبواب وفراغات</button>
+          <p class="generator-note">المخطط مبدئي للاستكشاف والتعديل، ويحتاج مراجعة مهندس مرخّص قبل التنفيذ.</p>
         </div>
       </section>
 
@@ -158,13 +171,17 @@
             <button class="tool" id="btnGrid" data-tip="الشبكة">▦</button>
             <button class="tool" id="btnFit" data-tip="ملاءمة">⛶</button>
             <button class="tool" id="btnLibrary" data-tip="المكتبة">☰</button>
-            <button class="tool" id="btnAuto" data-tip="توليد تلقائي">⚡</button>
+            <button class="tool" id="btnAuto" data-tip="فكرة توزيع أخرى">⚡</button>
           </div>
           <div class="czone">
             <div id="stage"></div>
-            <div class="status"><span>الجدران: <b id="stW">0</b></span><span>الأبواب: <b id="stD">0</b></span><span>النوافذ: <b id="stN">0</b></span><span>العناصر: <b id="stB">0</b></span></div>
+            <div class="status"><span>الفراغات: <b id="stR">0</b></span><span>الجدران: <b id="stW">0</b></span><span>الأبواب: <b id="stD">0</b></span><span>النوافذ: <b id="stN">0</b></span><span>العناصر: <b id="stB">0</b></span></div>
           </div>
           <aside class="side">
+            <div>
+              <h3>✦ ملخص المخطط</h3>
+              <div class="plan-specs" id="planSpecs"><div class="empty">ولّد المخطط لتظهر علاقات الفراغات هنا</div></div>
+            </div>
             <div>
               <h3>🪑 مكتبة العناصر</h3>
               <div class="cats" id="cats">
@@ -252,10 +269,10 @@
             <div class="an-body">
               <div class="movement-map" id="movementMap"></div>
               <div class="mv-legend">
-                <span><i style="background:#e0b25e"></i> ضيوف</span>
+                <span><i style="background:#e0b25e"></i> رجال / ضيافة</span>
+                <span><i style="background:#a078ff"></i> نساء</span>
                 <span><i style="background:#4fd8d0"></i> عائلة</span>
-                <span><i style="background:#a078ff"></i> خدمة</span>
-                <span><i style="background:#ff6b6b"></i> تعارض</span>
+                <span><i style="background:#5ee6a8"></i> خدمة</span>
               </div>
             </div>
           </div>
