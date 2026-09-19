@@ -1,8 +1,5 @@
-// Dormant Fetch API core for this private Site. The current release is static-only.
-// Deployment requires a separate trusted server entrypoint and secure key setup.
-// Node IncomingMessage/ServerResponse and Vercel handlers require separate adapters.
-// Identity headers are trusted ONLY behind Sites' authenticated dispatcher.
-// Never expose this handler directly on a public server that accepts spoofed identity headers.
+// Cloudflare Worker API for the private «الميزان الهندسي» Site.
+// OPENAI_API_KEY and MIZAN_ACCESS_CODE stay in Worker secrets.
 const ROOM_TYPES = ['bedroom', 'majlis', 'living', 'dining', 'kitchen', 'bath', 'storage', 'service', 'corridor'];
 const POSITIONS = ['front', 'middle', 'back'];
 const SIDES = ['any', 'left', 'right'];
@@ -12,6 +9,7 @@ const WINDOW_MS = 60000;
 const MAX_REQUESTS = 5;
 const MAX_BUCKETS = 2000;
 const DEFAULT_MODEL = 'gpt-4.1-mini';
+const DEFAULT_ALLOWED_ORIGIN = 'https://al-mizan-al-handasi.aljeryabod.chatgpt.site';
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const textList = { type: 'array', items: { type: 'string' } };
 export const BRIEF_SCHEMA = {
@@ -82,6 +80,26 @@ const INSTRUCTIONS = `أنت مساعد برمجة مساحات سكنية لم�
 12. الناتج بالعربية ويتبع JSON Schema المحدد، ولا يحتوي كوداً تنفيذياً.`;
 const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200, extraHeaders = {}) => new Response(JSON.stringify(body), { status, headers: { ...headers, ...extraHeaders } });
+const allowedOrigin = env => typeof env.ALLOWED_ORIGIN === 'string' && env.ALLOWED_ORIGIN.trim() ? env.ALLOWED_ORIGIN.trim().replace(/\/$/, '') : DEFAULT_ALLOWED_ORIGIN;
+const corsHeaders = origin => ({
+  'Access-Control-Allow-Origin': origin,
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Mizan-Access-Code',
+  'Access-Control-Max-Age': '600',
+  Vary: 'Origin',
+});
+async function secureEqual(left, right) {
+  if (typeof left !== 'string' || typeof right !== 'string' || !left || !right) return false;
+  const encoder = new TextEncoder();
+  const [a, b] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(left)),
+    crypto.subtle.digest('SHA-256', encoder.encode(right)),
+  ]);
+  const x = new Uint8Array(a), y = new Uint8Array(b);
+  let different = x.length ^ y.length;
+  for (let i = 0; i < Math.min(x.length, y.length); i++) different |= x[i] ^ y[i];
+  return different === 0;
+}
 async function readLimited(request) {
   if (!request.body) throw new Error('invalid_input');
   const reader = request.body.getReader();
@@ -101,31 +119,39 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
   const buckets = new Map();
   return { async fetch(request, env = {}) {
     const url = new URL(request.url), isApi = url.pathname.startsWith('/api/');
-    if (isApi && !request.headers.get('oai-authenticated-user-id')) return json({ error: 'سجّل الدخول إلى موقعك أولاً.' }, 401);
-    if (url.pathname === '/api/assistant/status' && request.method === 'GET') return json({
-      configured: typeof env.OPENAI_API_KEY === 'string' && !!env.OPENAI_API_KEY.trim(), verified: false,
-      scope: 'requirements_only',
-      message: typeof env.OPENAI_API_KEY === 'string' && env.OPENAI_API_KEY.trim() ? 'مفتاح الخدمة مهيأ؛ هذه الحالة لا تختبر الاتصال. يلزم تحليل ناجح للتحقق منه.' : 'الذكاء الاصطناعي غير مفعّل بعد. يلزم إعداد مفتاح الخدمة الآمن.',
-    });
-    // Same-origin requests only. Do not open this paid endpoint with wildcard CORS.
+    if (url.pathname === '/api/assistant/status' && request.method === 'GET') {
+      const origin = request.headers.get('Origin');
+      if (origin && origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      return json({
+        configured: typeof env.OPENAI_API_KEY === 'string' && !!env.OPENAI_API_KEY.trim(), verified: false,
+        accessConfigured: typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim(),
+        scope: 'requirements_only',
+        message: typeof env.OPENAI_API_KEY === 'string' && env.OPENAI_API_KEY.trim() ? 'مفتاح الخدمة مهيأ؛ هذه الحالة لا تختبر الاتصال. يلزم تحليل ناجح للتحقق منه.' : 'الذكاء الاصطناعي غير مفعّل بعد. يلزم إعداد مفتاح الخدمة الآمن.',
+      }, 200, origin ? corsHeaders(origin) : {});
+    }
     if (url.pathname === '/api/assistant' && request.method === 'OPTIONS') {
-      if (request.headers.get('Origin') !== url.origin) return json({ error: 'طلب غير مسموح.' }, 403);
-      return new Response(null, { status: 204, headers: { Allow: 'POST, OPTIONS', 'Cache-Control': 'no-store' } });
+      const origin = request.headers.get('Origin');
+      if (origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      return new Response(null, { status: 204, headers: { ...corsHeaders(origin), 'Cache-Control': 'no-store' } });
     }
     if (url.pathname === '/api/assistant' && request.method === 'POST') {
-      if (request.headers.get('Origin') !== url.origin) return json({ error: 'طلب غير مسموح.' }, 403);
-      if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return json({ error: 'نوع البيانات غير مدعوم؛ استخدم JSON.' }, 415);
+      const origin = request.headers.get('Origin');
+      if (origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      const cors = corsHeaders(origin);
+      if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return json({ error: 'نوع البيانات غير مدعوم؛ استخدم JSON.' }, 415, cors);
+      if (typeof env.MIZAN_ACCESS_CODE !== 'string' || !env.MIZAN_ACCESS_CODE.trim()) return json({ error: 'حماية خدمة الذكاء غير مهيأة بعد.', code: 'ACCESS_NOT_CONFIGURED' }, 503, cors);
+      if (!await secureEqual(request.headers.get('X-Mizan-Access-Code') || '', env.MIZAN_ACCESS_CODE.trim())) return json({ error: 'رمز دخول الذكاء غير صحيح.' }, 401, cors);
       let input;
       try { input = validateInput(await readLimited(request)); }
       catch (error) {
-        if (error.message === 'too_large') return json({ error: 'حجم الطلب أكبر من 24000 بايت. اختصر الوصف أو المتطلبات السابقة.', code: 'REQUEST_TOO_LARGE' }, 413);
-        return json({ error: 'تحقق من الوصف (8–4000 حرف)، والأبعاد (8–100م)، والأدوار (1–3)، وبيانات الشوارع والغرف.' }, 400);
+        if (error.message === 'too_large') return json({ error: 'حجم الطلب أكبر من 24000 بايت. اختصر الوصف أو المتطلبات السابقة.', code: 'REQUEST_TOO_LARGE' }, 413, cors);
+        return json({ error: 'تحقق من الوصف (8–4000 حرف)، والأبعاد (8–100م)، والأدوار (1–3)، وبيانات الشوارع والغرف.' }, 400, cors);
       }
-      if (typeof env.OPENAI_API_KEY !== 'string' || !env.OPENAI_API_KEY.trim()) return json({ error: 'مفتاح خدمة الذكاء لم يُفعّل بعد. لم يُرسل وصفك إلى مزود الذكاء.', code: 'AI_NOT_CONFIGURED' }, 503);
-      const uid = request.headers.get('oai-authenticated-user-id'), timestamp = now();
+      if (typeof env.OPENAI_API_KEY !== 'string' || !env.OPENAI_API_KEY.trim()) return json({ error: 'مفتاح خدمة الذكاء لم يُفعّل بعد. لم يُرسل وصفك إلى مزود الذكاء.', code: 'AI_NOT_CONFIGURED' }, 503, cors);
+      const uid = request.headers.get('CF-Connecting-IP') || 'authorized-client', timestamp = now();
       for (const [key, bucket] of buckets) if (timestamp - bucket.start >= WINDOW_MS) buckets.delete(key);
       const bucket = buckets.get(uid) || { start: timestamp, count: 0 };
-      if (bucket.count >= MAX_REQUESTS || (!buckets.has(uid) && buckets.size >= MAX_BUCKETS)) return json({ error: 'طلبات متقاربة؛ انتظر دقيقة ثم حاول مجدداً.' }, 429, { 'Retry-After': String(Math.max(1, Math.ceil((WINDOW_MS - timestamp + bucket.start) / 1000))) });
+      if (bucket.count >= MAX_REQUESTS || (!buckets.has(uid) && buckets.size >= MAX_BUCKETS)) return json({ error: 'طلبات متقاربة؛ انتظر دقيقة ثم حاول مجدداً.' }, 429, { ...cors, 'Retry-After': String(Math.max(1, Math.ceil((WINDOW_MS - timestamp + bucket.start) / 1000))) });
       bucket.count++; buckets.set(uid, bucket);
       try {
         const response = await providerFetch('https://api.openai.com/v1/responses', {
@@ -138,18 +164,18 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
         });
         if (!response.ok) {
           const error = response.status === 429 ? 'خدمة الذكاء وصلت حد الاستخدام أو الرصيد. لم يتغيّر مخططك.' : response.status === 401 || response.status === 403 ? 'تعذر توثيق مفتاح الخدمة؛ يلزم مراجعة إعداد الربط.' : 'خدمة الذكاء غير متاحة الآن. حاول لاحقاً.';
-          return json({ error }, 502);
+          return json({ error }, 502, cors);
         }
         const data = await response.json();
-        if (data.status !== 'completed') return json({ error: 'لم يكتمل التحليل. اختصر الوصف أو حاول مجدداً.' }, 502);
+        if (data.status !== 'completed') return json({ error: 'لم يكتمل التحليل. اختصر الوصف أو حاول مجدداً.' }, 502, cors);
         const content = (data.output || []).filter(x => x.type === 'message').flatMap(x => x.content || []);
-        if (content.some(x => x.type === 'refusal')) return json({ error: 'تعذر معالجة هذا الوصف. أعد صياغته حول احتياجات المسكن.' }, 422);
+        if (content.some(x => x.type === 'refusal')) return json({ error: 'تعذر معالجة هذا الوصف. أعد صياغته حول احتياجات المسكن.' }, 422, cors);
         const output = content.filter(x => x.type === 'output_text').map(x => x.text).join('');
         const brief = validateBrief(JSON.parse(output));
         // Keep every unhandled requirement; do not evict one to insert our scope warning.
         const limitations = input.plot.floors > 1 ? ['هذا التحليل للدور الأرضي فقط؛ توزيع الأدوار الأخرى والسلالم غير منفذ.'] : [];
-        return json({ brief, source: 'openai', scope: 'requirements_only', requiresReview: true, limitations, model: data.model || env.OPENAI_MODEL || DEFAULT_MODEL, generatedAt: new Date().toISOString() });
-      } catch { return json({ error: 'تعذر استلام اقتراح صالح خلال الوقت المحدد. بقي مخططك كما هو؛ حاول لاحقاً.' }, 502); }
+        return json({ brief, source: 'openai', scope: 'requirements_only', requiresReview: true, limitations, model: data.model || env.OPENAI_MODEL || DEFAULT_MODEL, generatedAt: new Date().toISOString() }, 200, cors);
+      } catch { return json({ error: 'تعذر استلام اقتراح صالح خلال الوقت المحدد. بقي مخططك كما هو؛ حاول لاحقاً.' }, 502, cors); }
     }
     if (isApi) return json({ error: 'مسار غير متاح.' }, 404);
     if (!['GET', 'HEAD'].includes(request.method)) return new Response('Method not allowed', { status: 405 });
@@ -164,3 +190,11 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
 // Keep one instance so the short-window limiter survives requests in the same isolate.
 const apiWorker = createWorker();
 export const handleRequest = (request, env) => apiWorker.fetch(request, env);
+
+// Cloudflare Workers API entrypoint. The Sites frontend remains a separate,
+// private deployment and calls only the /api/* routes here.
+export default {
+  async fetch(request, env = {}) {
+    return apiWorker.fetch(request, env);
+  },
+};

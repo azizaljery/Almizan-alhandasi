@@ -1,8 +1,11 @@
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, validatePlot, footprint, defaultRooms, normalizeRooms, generateModel, quantities } from './planner.mjs';
 import { escapeXML as esc, PlanViewport } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
-import { AI_ENABLED, requestBrief } from './assistant.mjs';
+import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
+import { reviewPlan } from './audit.mjs';
+import { requestLocalBrief } from './local-nlp.mjs';
+import { applySunOrientation, describeSunOrientation } from './sun-orientation.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -98,7 +101,16 @@ function showResults() {
   viewport = new PlanViewport($('plan'), m, selectRoom);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); void show3D();
+  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); void show3D();
+}
+function renderPlanReview() {
+  const review = reviewPlan(state.model);
+  $('reviewScore').textContent = `${fmt(review.score, 0)} / ١٠٠`;
+  $('reviewAreas').innerHTML = review.areas.map(([name, area]) => `<div><span>${name}</span><b>${fmt(area)} م²</b></div>`).join('');
+  const group = (label, routes) => routes.length ? `<li><b>${label}:</b> ${routes.map(route => `${esc(route.room)} (${fmt(route.metres)}م)`).join('، ')}</li>` : '';
+  $('reviewRoutes').innerHTML = group('الضيافة', review.routes.guests) + group('العائلة', review.routes.family) + group('الخدمة', review.routes.service) || '<li>لا توجد غرف كافية لحساب مسارات الفئات.</li>';
+  $('reviewIssues').innerHTML = review.issues.map(issue => `<li class="${issue.level}">${esc(issue.text)}</li>`).join('');
+  $('reviewLimit').textContent = review.note;
 }
 function solveLayout(plot, rooms) {
   if (typeof Worker === 'undefined') return Promise.resolve().then(() => generateModel(plot, rooms));
@@ -159,16 +171,61 @@ function switchTab(tab) {
 }
 function goHome() { $('app').classList.remove('show'); $('journey').style.display = 'grid'; viewer?.setVisible(false); window.scrollTo({ top: 0, behavior: 'auto' }); }
 async function askAI() {
+  if ($('askAI').disabled) return;
   message('aiFeedback', '');
   if (AI_ENABLED && ($('idea').value.trim().length < 8 || $('idea').value.length > 4000)) { message('aiFeedback', 'اكتب وصفًا بين 8 و4000 حرف.'); return; }
+  state.proposal = null; $('aiReview').hidden = true;
+  $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ تحليل الوصف…';
   try {
-    const result = await requestBrief({ prompt: $('idea').value, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { signal: AbortSignal.timeout(45000) });
-    state.proposal = result.brief; $('aiSummary').textContent = result.brief.summary;
-    const notes = [...result.brief.assumptions.map(s => 'افتراض: ' + s), ...result.brief.questions.map(s => 'سؤال: ' + s), ...result.brief.unhandled.map(s => 'غير منفّذ: ' + s), ...result.limitations];
-    $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-    $('aiReview').hidden = false; $('acceptAI').disabled = !result.brief.rooms.length;
+    const result = await requestBrief({ prompt: $('idea').value, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
+    showBrief(result.brief, result.limitations);
+    $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
+    $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'وصل اقتراح من خدمة الذكاء. لم يتغيّر المخطط؛ راجعه قبل نقل الغرف إلى الجدول.');
   } catch (error) { message('aiFeedback', error.message); }
+  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = 'حلّل عبر الخدمة'; }
+}
+
+function showBrief(brief, limitations = []) {
+  state.proposal = brief; $('aiSummary').textContent = brief.summary;
+  const notes = [...brief.assumptions.map(s => 'افتراض: ' + s), ...brief.questions.map(s => 'سؤال: ' + s), ...brief.unhandled.map(s => 'غير منفّذ: ' + s), ...limitations];
+  $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  $('aiReview').hidden = false; $('acceptAI').disabled = !brief.rooms.length;
+}
+async function askLocal() {
+  message('aiFeedback', '');
+  try {
+    const brief = await requestLocalBrief({ prompt: $('idea').value, previous: { rooms: publicRooms(state.program) } });
+    showBrief(brief, ['فهم محلي محدود للأعداد والنفي وأسماء الغرف؛ لا يتصل بخادم ولا يولّد رسمًا أو يغيّر الجدول حتى توافق.']);
+    message('aiFeedback', 'تم اقتراح برنامج محليًا. راجعه ثم اختر نقله إلى الجدول.');
+  } catch (error) { message('aiFeedback', error.message); }
+}
+function applySunToProgram() {
+  try {
+    const plot = validatePlot(rawPlot());
+    if (!window.confirm('سيُعاد ضبط موقع وجانب الغرف بترجيح اتجاهي مبدئي، وقد يستبدل تعديلاتك اليدوية في هذين الحقلين. المتابعة؟')) return;
+    state.program = publicRooms(applySunOrientation(normalizeRooms(state.program), plot.entry)); state.manualEdits = true; renderRows();
+    toast(describeSunOrientation(plot.entry));
+  } catch (error) { message('generationError', error.message); }
+}
+
+async function refreshAssistantStatus() {
+  if (!AI_ENABLED) return;
+  try {
+    const status = await getAssistantStatus({ signal: AbortSignal.timeout(8000) });
+    const ready = status.configured && status.accessConfigured;
+    if ($('aiBadge').textContent === 'متصل') return;
+    $('aiStatus').textContent = ready
+      ? 'إعدادات الخدمة موجودة. أدخل رمز الموقع ثم اطلب التحليل للتحقق من الاتصال.'
+      : 'خدمة فهم المتطلبات غير مكتملة الإعداد حاليًا؛ الفهم المحلي والتصميم اليدوي متاحان.';
+    $('aiBadge').textContent = ready ? 'مهيّأ' : 'غير مكتمل';
+    $('aiBadge').classList.toggle('warn', !ready);
+  } catch {
+    if ($('aiBadge').textContent === 'متصل') return;
+    $('aiStatus').textContent = 'تعذر التحقق من اتصال خدمة الذكاء الآن؛ يمكنك استخدام الفهم المحلي أو تجربة التحليل برمز الموقع.';
+    $('aiBadge').textContent = 'الاتصال غير مؤكد';
+    $('aiBadge').classList.add('warn');
+  }
 }
 
 function boot() {
@@ -221,8 +278,9 @@ function boot() {
   $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); });
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
   $('askAI').addEventListener('click', askAI);
+  $('askLocal').addEventListener('click', askLocal); $('applySun').addEventListener('click', applySunToProgram);
   $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; if (!window.confirm('نقل اقتراح الذكاء إلى جدول المراجعة بدل القائمة الحالية؟ لن يتغيّر الرسم حتى تضغط «ولّد».')) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
-  renderStreets(); rating(); renderRows(); renderBOQ();
+  renderStreets(); rating(); renderRows(); renderBOQ(); void refreshAssistantStatus();
 }
 boot();

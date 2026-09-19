@@ -14,6 +14,9 @@ for (const file of files.filter(name => /\.(mjs|js)$/.test(name))) {
   for (const [, name] of source.matchAll(/(?:from\s*|new URL\()'\.\/([^']+)'/g)) assert.ok(existsSync('dist/' + name), file + ' -> ' + name);
   assert.ok(!/sk-(?:proj-)?[a-zA-Z0-9_-]{20,}/.test(source), 'Secret-like value in public asset');
 }
-assert.match(readFileSync('dist/assistant.mjs', 'utf8'), /export const AI_ENABLED = false/);
+const assistant = readFileSync('dist/assistant.mjs', 'utf8');
+assert.match(assistant, /export const AI_ENABLED = true/);
+assert.match(assistant, /X-Mizan-Access-Code/);
+assert.ok(!assistant.includes('OPENAI_API_KEY'), 'Provider key must never be referenced by the browser client');
 assert.ok(!existsSync('dist/server'), 'Do not package an obsolete backend in this static release');
-console.log('Static Arabic entrypoint, local imports, worker asset and JavaScript syntax verified. AI remains disabled.');
+console.log('Static Arabic entrypoint, local imports, protected Worker client and JavaScript syntax verified.');

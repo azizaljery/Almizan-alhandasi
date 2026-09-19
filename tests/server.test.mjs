@@ -4,7 +4,7 @@ import { BRIEF_SCHEMA, createWorker, handleRequest, validateBrief, validateInput
 
 // All provider responses are simulated. These tests never call OpenAI or use a real key.
 const ORIGIN = 'https://mizan.example';
-const TEST_ENV = { OPENAI_API_KEY: 'unit-test-only-do-not-use' };
+const TEST_ENV = { OPENAI_API_KEY: 'unit-test-only-do-not-use', MIZAN_ACCESS_CODE: 'private-test-code', ALLOWED_ORIGIN: ORIGIN };
 const input = () => ({
   prompt: 'أبي مجلس للضيوف وثلاث غرف نوم وحمامين',
   plot: { width: 20, length: 30, floors: 1, streets: { s: true, n: false } },
@@ -21,10 +21,10 @@ const completed = value => ({
 function request(body = input(), options = {}) {
   const headers = new Headers({
     'Content-Type': 'application/json; charset=utf-8',
-    Origin: ORIGIN, 'oai-authenticated-user-id': 'test-owner',
+    Origin: ORIGIN, 'X-Mizan-Access-Code': 'private-test-code', 'CF-Connecting-IP': '192.0.2.10',
     ...options.headers,
   });
-  if (options.anonymous) headers.delete('oai-authenticated-user-id');
+  if (options.anonymous) headers.delete('X-Mizan-Access-Code');
   const method = options.method || 'POST';
   return new Request(ORIGIN + (options.path || '/api/assistant'), {
     method, headers,
@@ -91,12 +91,11 @@ test('room validation supports corridor and bounded areas; clarification does no
   assert.deepEqual(validateBrief(clarification), clarification);
 });
 
-test('anonymous requests and foreign origins cannot use the paid endpoint', async () => {
+test('missing access code and foreign origins cannot use the paid endpoint', async () => {
   const { worker, calls } = fixture();
-  for (const path of ['/api/assistant', '/api/assistant/status']) {
-    const res = await worker.fetch(request(input(), { anonymous: true, path, method: path.endsWith('status') ? 'GET' : 'POST' }), TEST_ENV);
-    assert.equal(res.status, 401);
-  }
+  assert.equal((await worker.fetch(request(input(), { anonymous: true }), TEST_ENV)).status, 401);
+  assert.equal((await worker.fetch(request(input(), { headers: { 'X-Mizan-Access-Code': 'wrong' } }), TEST_ENV)).status, 401);
+  assert.equal((await worker.fetch(request(null, { anonymous: true, path: '/api/assistant/status', method: 'GET' }), TEST_ENV)).status, 200);
   for (const method of ['POST', 'OPTIONS']) {
     const res = await worker.fetch(request(input(), { method, headers: { Origin: 'https://foreign.example' } }), TEST_ENV);
     assert.equal(res.status, 403);
@@ -104,22 +103,24 @@ test('anonymous requests and foreign origins cannot use the paid endpoint', asyn
   }
   const preflight = await worker.fetch(request(input(), { method: 'OPTIONS' }), TEST_ENV);
   assert.equal(preflight.status, 204);
-  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'), null);
+  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'), ORIGIN);
+  assert.match(preflight.headers.get('Access-Control-Allow-Headers'), /X-Mizan-Access-Code/);
   assert.equal(calls.length, 0);
 });
 
 test('configuration status never claims live verification or a working manual engine', async () => {
   const { worker, calls } = fixture();
-  for (const [env, configured] of [[{}, false], [{ OPENAI_API_KEY: '   ' }, false], [TEST_ENV, true]]) {
+  for (const [env, configured] of [[{ ALLOWED_ORIGIN: ORIGIN }, false], [{ OPENAI_API_KEY: '   ', ALLOWED_ORIGIN: ORIGIN }, false], [TEST_ENV, true]]) {
     const res = await worker.fetch(request(null, { method: 'GET', path: '/api/assistant/status' }), env);
     const data = await res.json();
     assert.equal(data.configured, configured);
+    assert.equal(data.accessConfigured, typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim());
     assert.equal(data.verified, false);
     assert.equal(data.scope, 'requirements_only');
     assert.equal(JSON.stringify(data).includes(TEST_ENV.OPENAI_API_KEY), false);
     assert.equal(res.headers.get('Cache-Control'), 'no-store');
   }
-  const missing = await worker.fetch(request(), {});
+  const missing = await worker.fetch(request(), { MIZAN_ACCESS_CODE: 'private-test-code', ALLOWED_ORIGIN: ORIGIN });
   assert.equal(missing.status, 503);
   assert.equal((await missing.json()).code, 'AI_NOT_CONFIGURED');
   assert.equal(calls.length, 0);
@@ -169,7 +170,7 @@ test('multi-floor limitations never delete an unhandled user requirement', async
   assert.match(data.limitations[0], /الأرضي فقط/);
 });
 
-test('limits per verified user across requests and expires at the minute boundary', async () => {
+test('limits per client address across requests and expires at the minute boundary', async () => {
   let timestamp = 0;
   const { worker, calls } = fixture({ now: () => timestamp });
   const frozenEnv = Object.freeze({ ...TEST_ENV });
@@ -178,10 +179,10 @@ test('limits per verified user across requests and expires at the minute boundar
   assert.equal(res.status, 429);
   assert.equal(res.headers.get('Retry-After'), '60');
   assert.equal(calls.length, 5);
-  assert.equal((await worker.fetch(request(input(), { headers: { 'oai-authenticated-user-id': 'second-trusted-user' } }), frozenEnv)).status, 200);
+  assert.equal((await worker.fetch(request(input(), { headers: { 'CF-Connecting-IP': '192.0.2.11' } }), frozenEnv)).status, 200);
   timestamp = 60000;
   assert.equal((await worker.fetch(request(), frozenEnv)).status, 200);
-  assert.deepEqual(Object.keys(frozenEnv), ['OPENAI_API_KEY']);
+  assert.deepEqual(Object.keys(frozenEnv), ['OPENAI_API_KEY', 'MIZAN_ACCESS_CODE', 'ALLOWED_ORIGIN']);
 });
 
 test('provider failures, refusals and invalid outputs fail closed without leaking provider bodies', async () => {
@@ -218,6 +219,6 @@ test('preserves embedded Site assets and exports a Fetch-standard API handler', 
   assert.equal((await worker.fetch(request(null, { method: 'GET', path: '/constructor' }))).status, 404);
   assert.equal((await worker.fetch(request(null, { method: 'GET', path: '/missing' }))).status, 404);
   assert.equal((await worker.fetch(request(null, { path: '/' }))).status, 405);
-  assert.equal((await handleRequest(request(null, { anonymous: true, method: 'GET', path: '/api/assistant/status' }))).status, 401);
+  assert.equal((await handleRequest(request(null, { anonymous: true, method: 'GET', path: '/api/assistant/status' }), { ALLOWED_ORIGIN: ORIGIN })).status, 200);
   assert.equal(calls.length, 0);
 });
