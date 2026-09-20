@@ -24,6 +24,7 @@
         <label>ارتداد جهة الشارع (م)<input id="streetSetback" type="number" min="0" max="15" step=".1" value="3"></label>
         <label>ارتداد جهة الجار (م)<input id="neighborSetback" type="number" min="0" max="15" step=".1" value="1.5"></label>
         <label>سقف نسبة البناء المفترض (%)<input id="coverage" type="number" min="10" max="90" step="1" value="75"></label>
+        <label>سقف مساحة البناء الأرضي (م²)<input id="maxBuiltArea" type="number" min="20" max="10000" step="1" placeholder="اختياري — مثال: 550"></label>
       </div><p class="help">تحقّق من اشتراطات موقع أرضك مع المختص. هذه الأداة لا تمنح اعتمادًا أو ضمانًا للسلامة الإنشائية.</p></div>
     </article>
     <article class="card"><header class="ch"><b class="num">٣</b><div><h2>مؤشر تخطيطي أولي</h2><p>يساعد على المقارنة، ولا يقيّم قيمة الأرض أو صلاحيتها للبناء.</p></div></header>
@@ -38,13 +39,14 @@
   <div class="wrap">
     <header class="head"><span class="ey">الخطوة الثانية</span><h1>كل غرفة… على فكرتك</h1><p>راجع المساحات والمواقع، ثم شاهدها في مخطط واحد وعرض داخلي.</p></header>
     <div class="scope-note">هذه النسخة تصمّم <strong>دورًا أرضيًا بكتلة مستطيلة ومدخل واحد</strong>. الأدوار الأخرى، L وU والأفنية والمداخل المستقلة ليست منفّذة.</div>
+    <section class="project-tools" aria-label="حفظ المشروع واستعادته"><div><h2>ملف مشروعك</h2><p>احتفظ بالمدخلات والبدائل والأسعار وآخر 5 نسخ في ملف تستعيده لاحقًا. لا يوجد حفظ تلقائي أو سحابي.</p></div><div class="inline-actions"><button id="saveProject" class="small-button">تنزيل ملف المشروع</button><button id="loadProject" class="small-button">استيراد مشروع محفوظ</button><input id="projectFile" type="file" accept=".json,application/json" aria-label="ملف مشروع ميزان" hidden></div><p id="projectStatus" role="status" class="help" hidden></p></section>
 
     <article class="card"><header class="ch"><b class="num">✦</b><div><h2>صف فكرة منزلك</h2><p id="aiStatus">جارٍ التحقق من خدمة فهم المتطلبات…</p></div><span class="pill" id="aiBadge">جارٍ التحقق</span></header>
       <div class="cb">
         <label for="idea">وصفك بالعربية<textarea id="idea" rows="3" maxlength="4000" placeholder="مثال: مجلس أمامي يمين بمساحة 32 م²، وصالة وسط المنزل، وثلاث غرف نوم في الخلف…"></textarea></label>
         <label for="aiAccessCode">رمز دخول الذكاء<input id="aiAccessCode" type="password" autocomplete="current-password" maxlength="128" placeholder="الرمز الخاص بالميزان الهندسي"></label>
         <div class="inline-actions"><button class="secondary" id="askAI">حلّل عبر الخدمة</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
-        <p class="help">الخدمة تحوّل الوصف إلى متطلبات قابلة للمراجعة وتتطلب رمز الموقع. الفهم المحلي لا يرسل شيئًا للخارج، ويقتصر على الأعداد والنفي وأسماء الغرف.</p>
+        <p class="help">الخدمة تتطلب رمز الموقع. الفهم المحلي يدعم الأعداد العربية والإنجليزية والمساحات والنفي، ولا يرسل الوصف للخارج. الأبعاد النصية تُحوّل لمساحة فقط؛ المداخل والخصوصية والأجنحة لا تتحقق تلقائيًا.</p>
         <div id="aiFeedback" class="message" role="status" hidden></div>
         <div id="aiReview" hidden><h3>اقتراح للمراجعة</h3><p id="aiSummary"></p><ul id="aiNotes"></ul><button class="secondary" id="acceptAI">نقل الاقتراح إلى جدول المراجعة</button></div>
       </div>
@@ -82,7 +84,7 @@
         <div class="table-scroll" tabindex="0" aria-label="جدول الغرف؛ يمكن تمريره أفقياً"><table class="program-table"><caption>الفراغات المطلوبة للدور الأرضي</caption><thead><tr><th scope="col">الاسم</th><th scope="col">النوع</th><th scope="col">المساحة الصافية م²</th><th scope="col">الموقع</th><th scope="col">الجانب من المدخل</th><th scope="col">تعديل</th></tr></thead><tbody id="roomRows"></tbody></table></div>
         <div class="inline-actions"><label>فراغ إضافي<select id="addType"></select></label><button id="addRoom" class="small-button">＋ أضف إلى الجدول</button><button id="applySun" class="small-button">☀ ترجيح اتجاهي</button><button id="undo" class="small-button" disabled>↶ استرجع التوليد السابق</button></div>
         <p class="help">المساحة المطلوبة محفوظة، لكن طول الغرفة وعرضها يحددهما المحرك. المواقع أمام / وسط / خلف بالنسبة للمدخل. بعض الغرف الداخلية قد تحتاج حل تهوية يراجعه المختص.</p>
-        <button class="primary" id="gen">ولّد مخطط منزلي ✦</button>
+        <button class="primary" id="gen">ولّد وقارن البدائل ✦</button>
         <p id="generationError" class="message error" role="alert" hidden></p>
       </div>
     </article>
@@ -90,12 +92,14 @@
     <div class="out" id="out">
       <div class="result-head"><div><span class="ey">تصور قابل للمراجعة</span><h2>من فكرتك… إلى مساحة تراها</h2></div><span class="pill" id="resultState">محدّث</span></div>
       <p class="message warning stale-message" hidden>تغيّرت المتطلبات. هذا هو آخر مخطط ناجح؛ اضغط «ولّد» لتحديثه والكميات.</p>
+      <section class="card" aria-label="مقارنة بدائل المخطط"><header class="ch"><div><h2>قارن قبل أن تختار</h2><p>كل اختيار يحدّث الرسم والعرض الثلاثي والكميات معًا.</p></div></header><div class="cb"><div id="alternativeCards" class="alternative-grid"></div><p class="help" id="alternativeNote"></p></div></section>
       <article class="card"><header class="ch"><b class="num">2D</b><div><h2>المخطط الأرضي</h2><p>اسحب للتحريك، وكبّر بإصبعين أو العجلة. اختر الغرفة لعرض تفاصيلها.</p></div></header>
         <div class="cb">
-          <div class="viewer-tools" role="group" aria-label="أدوات المخطط"><button class="small-button" id="zoomIn" aria-label="تكبير المخطط">＋</button><button class="small-button" id="zoomOut" aria-label="تصغير المخطط">−</button><button class="small-button" id="fitPlan">ملاءمة المبنى</button><button class="small-button" id="fitPlot">حدود الأرض</button></div>
+          <div class="viewer-tools" role="group" aria-label="أدوات المخطط"><button class="small-button" id="zoomIn" aria-label="تكبير المخطط">＋</button><button class="small-button" id="zoomOut" aria-label="تصغير المخطط">−</button><button class="small-button" id="fitPlan">ملاءمة المبنى</button><button class="small-button" id="fitPlot">حدود الأرض</button><button class="small-button" id="exportPlan">تنزيل الرسم SVG</button><label class="check"><input id="showRoute" type="checkbox" checked> مسار الوصول</label></div>
           <div class="plan" id="plan"></div>
           <div class="plan-key"><span><i style="background:#f3e6c8"></i>استقبال</span><span><i style="background:#dceee7"></i>معيشة</span><span><i style="background:#e4e7f2"></i>نوم</span><span><i style="background:#dcebf2"></i>خدمات</span><span><i style="background:#faf7e9"></i>ممرات</span><span><i style="background:#e2e2df"></i>غير موزّع</span></div>
           <div class="room-inspector" id="roomInspector" role="status"><p>اختر غرفة من المخطط أو من القائمة أدناه.</p></div>
+          <p class="help" id="routeInfo" role="status"></p>
           <div class="inline-actions"><label>انتقل مباشرة إلى غرفة<select id="roomSelect"></select></label><button class="small-button" id="focusRoom">ركّز عليها في 2D</button><button class="small-button" id="enterRoom">ادخل الغرفة في 3D</button></div>
           <p class="help">الأثاث رموز توضيحية فقط، وليس توزيع تأثيث معتمدًا أو بندًا في الكميات.</p>
         </div>
@@ -108,7 +112,7 @@
           <div id="walkControls" hidden><p class="help">داخل الغرفة: اسحب للنظر حولك، واستخدم الأسهم / WASD أو الأزرار. تمنع الحركة عبور الجدران؛ الأبواب معروضة مفتوحة.</p><div class="walk-buttons" role="group" aria-label="الحركة داخل الغرفة"><button class="small-button" data-move="forward">للأمام ↑</button><button class="small-button" data-move="left">يسار ←</button><button class="small-button" data-move="right">يمين →</button><button class="small-button" data-move="back">للخلف ↓</button><button class="small-button" data-view="persp">اخرج للمنظور</button></div></div>
         </div>
       </article>
-      <article class="card"><header class="ch"><b class="num">فحص</b><div><h2>مراجعة التخطيط المبدئية</h2><p>ميزانية مساحة، مسارات تقريبية، وكشف تعارضات أولي من نفس المخطط.</p></div><span class="pill" id="reviewScore">—</span></header><div class="cb"><div class="review-areas" id="reviewAreas"></div><h3 class="subhead">مسارات الحركة التقريبية</h3><ul class="review-list" id="reviewRoutes"></ul><h3 class="subhead">تنبيهات تحتاج مراجعة</h3><ul class="review-list" id="reviewIssues"></ul><p class="help" id="reviewLimit"></p></div></article>
+      <article class="card"><header class="ch"><b class="num">فحص</b><div><h2>مراجعة التخطيط المبدئية</h2><p>ميزانية مساحة، حركة عبر الممرات، وتنبيهات من نفس المخطط.</p></div><span class="pill" id="reviewScore">—</span></header><div class="cb"><div class="review-areas" id="reviewAreas"></div><h3 class="subhead">مسارات الحركة</h3><ul class="review-list" id="reviewRoutes"></ul><h3 class="subhead">ترابط الغرف</h3><ul class="review-list" id="reviewRelationships"></ul><h3 class="subhead">تنبيهات تحتاج مراجعة</h3><ul class="review-list" id="reviewIssues"></ul><p class="help" id="reviewLimit"></p></div></article>
       <details class="review-notes" open><summary>ملاحظات الحل وما يحتاج مراجعة</summary><ul id="modelWarnings"></ul></details>
     </div>
   </div>
@@ -126,6 +130,7 @@
       <div class="g2 separate"><label>احتياط حسابي على البنود المسعّرة (%)<input id="costReserve" type="number" min="0" max="50" step=".5" value="7"></label><label>نسبة الضريبة المفترضة (%)<input id="vat" type="number" min="0" max="30" step=".5" value="15"></label></div>
       <p class="help">الاحتياط يضاف إلى التكلفة ولا يغيّر الكميات. الضريبة افتراض قابل للتعديل، لا فتوى ضريبية. مساحة التشطيبات لوجهي الجدران؛ حصر تقريبي دون خصم تقاطعاتها أو حساب أكتاف الفتحات.</p>
       <table id="tot"><caption>ملخص البنود المسعّرة فقط</caption></table>
+      <button class="secondary" id="exportBOQ">تنزيل الكميات والأسعار CSV</button>
     </div>
     <button class="secondary" data-next="rating">↩ عدّل الأرض والافتراضات</button><button class="secondary" data-next="design">↩ عدّل برنامج الغرف</button>
   </div>

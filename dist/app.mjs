@@ -1,20 +1,22 @@
-import { TYPES, POSITIONS, SIDES, DIRECTIONS, validatePlot, footprint, defaultRooms, normalizeRooms, generateModel, quantities } from './planner.mjs';
-import { escapeXML as esc, PlanViewport } from './plan-view.mjs';
+import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities } from './planner.mjs';
+import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
 import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
 import { reviewPlan } from './audit.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
 import { applySunOrientation, describeSunOrientation } from './sun-orientation.mjs';
+import { circulationNetwork } from './circulation.mjs';
+import { encodeProject, decodeProject, MAX_PROJECT_BYTES, quantitiesCSV } from './project.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null };
-let viewport, viewer, toastTimer, loading3D;
-const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100 });
-const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null };
+let viewport, viewer, toastTimer, loading3D, circulation;
+const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
+const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
 const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
 function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
@@ -23,6 +25,9 @@ function markDirty() {
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
   $('resultState').textContent = state.dirty ? 'آخر مخطط ناجح — يحتاج تحديثًا' : 'المخطط مطابق للجدول';
   $('resultState').classList.toggle('warn', state.dirty);
+  $('exportPlan').disabled = !state.model || state.dirty;
+  $('exportBOQ').disabled = !state.model || state.dirty;
+  all('[data-alternative]').forEach(button => { button.disabled = state.dirty || $('gen').disabled; });
 }
 function renderStreets() {
   const selected = $('entry').value || 's';
@@ -44,7 +49,7 @@ function rating() {
     ];
     const score = Math.round(metrics.reduce((s, r) => s + r.value, 0) / metrics.length), grade = score >= 88 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 45 ? 'D' : 'F';
     $('grade').textContent = grade; $('grade').dataset.g = grade; $('rt').textContent = `مؤشر تخطيطي ${fmt(score, 0)} / ١٠٠`;
-    $('ratingHelp').textContent = `المتاح داخل الافتراضات: ${fmt(f.area)} م². المؤشر متوسط أربعة عوامل مبسطة، وليس تقييمًا للشمس أو الخصوصية أو سعر الأرض.`;
+    $('ratingHelp').textContent = `سقف المساحة المتاح: ${fmt(Math.min(f.area, p.maxBuiltArea ?? Infinity))} م². المؤشر متوسط أربعة عوامل مبسطة، وليس تقييمًا للشمس أو الخصوصية أو سعر الأرض.`;
     $('bars').innerHTML = metrics.map(r => `<div class="bar"><span>${r.name}</span><div class="track"><div class="fill" style="width:${r.value}%"></div></div><b>${fmt(r.value, 0)}</b></div>`).join('');
     message('plotError', '');
   } catch (error) {
@@ -63,6 +68,12 @@ function selectRoom(id) {
   const r = state.model?.rooms.find(r => r.id === id); if (!r) return;
   state.selected = id; $('roomSelect').value = id; viewport?.select(id);
   $('roomInspector').innerHTML = `<div><b>${esc(r.name)}</b><p>${POSITIONS[r.position]} · ${SIDES[r.resolvedSide]}</p></div><div class="numbers"><span>${fmt(r.area)} م² صافي</span><span>${fmt(r.w, 2)} × ${fmt(r.h, 2)} م</span></div>`;
+  drawRoute();
+}
+function drawRoute() {
+  const path = circulation?.toRoom(state.selected);
+  viewport?.showRoute($('showRoute').checked ? path?.points || [] : []);
+  $('routeInfo').textContent = path ? `من المدخل إلى باب الغرفة عبر محاور الممرات: ${fmt(path.metres)} م. المسار لا يثبت استقلال الحركة أو صلاحية الإخلاء.` : 'لا يوجد مسار ممر موثق لهذه الغرفة.';
 }
 function on3DMode(mode, detail) {
   $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside';
@@ -98,29 +109,40 @@ async function show3D(retry = false) {
 }
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
+  circulation = circulationNetwork(m);
   viewport = new PlanViewport($('plan'), m, selectRoom);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); void show3D();
+  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderAlternatives(); void show3D();
+}
+function renderAlternatives() {
+  $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
+    const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
+    return `<article class="alternative-card${selected ? ' selected' : ''}"><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div></dl><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض' : 'اعرض هذا البديل'}</button></article>`;
+  }).join('');
+  const failed = state.failures.map(f => `${STRATEGIES[f.strategy]}: ${f.reason}`).join(' ');
+  $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تُستبعد النسخ المتطابقة والحلول غير الصالحة. المقارنة ضمن الكتلة المستطيلة وليست ثلاثة أنماط معمارية كاملة. ${failed}`;
+  markDirty();
 }
 function renderPlanReview() {
   const review = reviewPlan(state.model);
-  $('reviewScore').textContent = `${fmt(review.score, 0)} / ١٠٠`;
+  $('reviewScore').textContent = `${fmt(review.issues.filter(i => i.level === 'warn').length, 0)} تنبيهات`;
   $('reviewAreas').innerHTML = review.areas.map(([name, area]) => `<div><span>${name}</span><b>${fmt(area)} م²</b></div>`).join('');
-  const group = (label, routes) => routes.length ? `<li><b>${label}:</b> ${routes.map(route => `${esc(route.room)} (${fmt(route.metres)}م)`).join('، ')}</li>` : '';
+  const group = (label, routes) => routes.length ? `<li><b>${label}:</b> ${routes.map(route => `${esc(route.room)} (${route.metres === null ? 'غير متصل' : fmt(route.metres) + 'م'})`).join('، ')}</li>` : '';
   $('reviewRoutes').innerHTML = group('الضيافة', review.routes.guests) + group('العائلة', review.routes.family) + group('الخدمة', review.routes.service) || '<li>لا توجد غرف كافية لحساب مسارات الفئات.</li>';
   $('reviewIssues').innerHTML = review.issues.map(issue => `<li class="${issue.level}">${esc(issue.text)}</li>`).join('');
   $('reviewLimit').textContent = review.note;
+  $('reviewRelationships').innerHTML = review.relationships.map(r => `<li>${esc(r.from)} ← ${esc(r.to)}: ${fmt(r.metres)} م عبر الممرات</li>`).join('') || '<li>أضف غرفًا مترابطة لعرض المقارنة.</li>';
 }
-function solveLayout(plot, rooms) {
-  if (typeof Worker === 'undefined') return Promise.resolve().then(() => generateModel(plot, rooms));
+function runPlanner(request) {
+  if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms));
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./layout-worker.mjs', import.meta.url), { type: 'module' });
-    const finish = (error, model) => { clearTimeout(timer); worker.terminate(); error ? reject(Error(error)) : resolve(model); };
-    const timer = setTimeout(() => finish('استغرق البحث وقتًا أطول من المتاح؛ جرّب برنامجًا أقل أو حدّد جوانب الغرف لتقليل احتمالات التوزيع.'), 12000);
-    worker.onmessage = event => finish(event.data.error, event.data.model);
+    const finish = (error, result) => { clearTimeout(timer); worker.terminate(); error ? reject(Error(error)) : resolve(result); };
+    const timer = setTimeout(() => finish('استغرق البحث وقتًا أطول من المتاح؛ جرّب برنامجًا أقل أو حدّد جوانب الغرف لتقليل احتمالات التوزيع.'), 25000);
+    worker.onmessage = event => finish(event.data.error, event.data);
     worker.onerror = () => finish('تعذّر تشغيل محرك التوزيع في المتصفح. أعد تحميل الصفحة ثم حاول مجددًا.');
-    worker.postMessage({ plot, rooms });
+    worker.postMessage(request);
   });
 }
 async function generate() {
@@ -129,14 +151,15 @@ async function generate() {
   $('gen').disabled = true; $('undo').disabled = true; $('gen').textContent = 'جارٍ توزيع الغرف والتحقّق من الوصول…';
   try {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
-    const candidate = await solveLayout(plot, rooms);
-    if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-15);
-    state.model = candidate; state.signature = signature(plot, rooms);
+    const result = await runPlanner({ plot, rooms, alternatives: true });
+    if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
+    state.alternatives = result.models; state.failures = result.failures;
+    state.model = result.models[0]; state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّد المخطط محليًا. راجع الغرف وملاحظات الحل.');
   } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح محفوظ أدناه دون تغيير.' : '')); markDirty(); }
-  finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد مخطط منزلي ✦'; }
+  finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن البدائل ✦'; markDirty(); }
 }
 function renderBOQ() {
   const m = state.model; $('boqEmpty').hidden = !!m; $('boqOutput').hidden = !m; if (!m) return;
@@ -228,6 +251,53 @@ async function refreshAssistantStatus() {
   }
 }
 
+function restorePlot(p) {
+  state.streets = { ...p.streets }; renderStreets(); $('entry').value = p.entry;
+  for (const [id, value] of Object.entries({ len: p.length, wid: p.width, floors: p.floors, streetSetback: p.streetSetback, neighborSetback: p.neighborSetback, coverage: p.coverage * 100, maxBuiltArea: p.maxBuiltArea ?? '' })) $(id).value = value;
+}
+function syncPalette() {
+  all('#styles [data-v]').forEach(button => { const on = button.dataset.v === state.palette; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
+}
+function download(content, mime, name) {
+  const url = URL.createObjectURL(new Blob([content], { type: mime })), anchor = document.createElement('a');
+  anchor.href = url; anchor.download = name; document.body.append(anchor); anchor.click(); anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+function saveProject() {
+  if ($('gen').disabled) return toast('انتظر اكتمال العملية الجارية قبل الحفظ.');
+  try {
+    const text = encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, model: state.model, alternatives: state.alternatives, history: state.history });
+    download(text, 'application/json;charset=utf-8', 'mizan-handasi-project.json');
+    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. احتفظ بالملف؛ لا يوجد حفظ سحابي أو تلقائي.');
+  } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
+}
+async function importProject(file) {
+  if (!file || $('gen').disabled) return;
+  if (file.size > MAX_PROJECT_BYTES) return message('projectStatus', 'حجم الملف يتجاوز 2 ميغابايت. بقي العمل كما هو.');
+  if (!window.confirm('سيستبدل الملف مدخلات الجلسة الحالية ومخططها وأسعارها. نزّل مشروعك الحالي أولًا إن احتجته. المتابعة؟')) return;
+  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value]);
+  $('gen').disabled = true; $('undo').disabled = true; markDirty();
+  message('projectStatus', 'جارٍ فحص ملف المشروع وإعادة بناء نسخه قبل الاستيراد…');
+  try {
+    const { project } = await runPlanner({ projectText: await file.text() });
+    if (JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
+    state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.proposal = null;
+    state.signature = project.model ? signature(project.model.plot, project.model.program) : '';
+    restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
+    $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
+    if (state.model) showResults(); else { $('out').style.display = 'none'; viewer?.setVisible(false); }
+    message('projectStatus', 'تم استيراد المشروع والتحقق من مخططاته. لم يُستورد أو يُحفظ أي رمز دخول.');
+  } catch (error) { message('projectStatus', error.message); }
+  finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; markDirty(); }
+}
+function exportResult(kind) {
+  if (!state.model || state.dirty || $('gen').disabled) return toast('حدّث المخطط قبل تصدير الرسم أو الكميات.');
+  try {
+    if (kind === 'svg') download(buildPlanSVG(state.model), 'image/svg+xml;charset=utf-8', 'mizan-handasi-plan.svg');
+    else download(quantitiesCSV(state.model, state.rates, number('costReserve'), number('vat')), 'text/csv;charset=utf-8', 'mizan-handasi-quantities.csv');
+  } catch (error) { toast(error.message); }
+}
+
 function boot() {
   $('journey').inert = true; $('app').inert = true;
   $('enter').addEventListener('click', () => { $('intro').classList.add('off'); $('intro').inert = true; $('journey').inert = false; $('app').inert = false; document.querySelector('[data-go="rating"]').focus({ preventScroll: true }); });
@@ -236,7 +306,7 @@ function boot() {
   all('[data-next]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.next)));
   $('home').addEventListener('click', goHome); $('back').addEventListener('click', goHome);
   $('streets').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (!b) return; state.streets[b.dataset.side] = !state.streets[b.dataset.side]; renderStreets(); rating(); markDirty(); });
-  ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'entry', 'floors'].forEach(id => $(id).addEventListener('input', () => { rating(); markDirty(); }));
+  ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'maxBuiltArea', 'entry', 'floors'].forEach(id => $(id).addEventListener('input', () => { rating(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     state.program[Number(row.dataset.row)][field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
@@ -258,18 +328,29 @@ function boot() {
     if (state.model) void show3D();
   });
   $('gen').addEventListener('click', generate);
+  $('alternativeCards').addEventListener('click', event => {
+    const button = event.target.closest('[data-alternative]');
+    if (!button || state.dirty || $('gen').disabled) return;
+    const model = state.alternatives[Number(button.dataset.alternative)];
+    if (!model || model === state.model) return;
+    state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
+    state.model = model; showResults(); toast('تغيّر المخطط و3D والكميات إلى البديل المختار.');
+  });
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
     const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
-    state.streets = { ...p.streets }; renderStreets(); $('entry').value = p.entry;
-    for (const [id, value] of Object.entries({ len: p.length, wid: p.width, floors: p.floors, streetSetback: p.streetSetback, neighborSetback: p.neighborSetback, coverage: p.coverage * 100 })) $(id).value = value;
-    all('#styles [data-v]').forEach(button => { const on = button.dataset.v === state.palette; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
+    restorePlot(p); syncPalette(); state.alternatives = [state.model]; state.failures = [];
     state.signature = signature(p, state.program); state.manualEdits = false; renderRows(); rating(); message('generationError', ''); showResults(); toast('تم استرجاع التوليد السابق ومتطلباته.');
   });
   $('zoomIn').addEventListener('click', () => viewport?.zoom(.8)); $('zoomOut').addEventListener('click', () => viewport?.zoom(1.25));
   $('fitPlan').addEventListener('click', () => viewport?.fit()); $('fitPlot').addEventListener('click', () => viewport?.fit(true));
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
+  $('showRoute').addEventListener('change', drawRoute);
+  $('saveProject').addEventListener('click', saveProject);
+  $('loadProject').addEventListener('click', () => { if (!$('gen').disabled) $('projectFile').click(); });
+  $('projectFile').addEventListener('change', async () => { const file = $('projectFile').files[0]; $('projectFile').value = ''; await importProject(file); });
+  $('exportPlan').addEventListener('click', () => exportResult('svg')); $('exportBOQ').addEventListener('click', () => exportResult('csv'));
   $('focusRoom').addEventListener('click', () => { viewport?.focus(state.selected); $('plan').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   $('enterRoom').addEventListener('click', async () => { if (!viewer && !await show3D()) return; viewer.enter(state.selected); $('view').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));

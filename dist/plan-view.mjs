@@ -101,5 +101,14 @@ export class PlanViewport {
   }
   fit(plot = false) { this.view = plot ? plotViewBox(this.model) : buildingViewBox(this.model); this.apply(); }
   focus(id) { const r = this.model.rooms.find(r => r.id === id); if (r) { this.view = roomViewBox(r); this.apply(); this.select(id); } }
+  showRoute(points = []) {
+    this.svg.querySelector('[data-circulation-route]')?.remove();
+    if (points.length < 2) return;
+    const route = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    route.setAttribute('data-circulation-route', 'true');
+    route.setAttribute('points', points.map(p => `${p.x},${-p.y}`).join(' '));
+    for (const [key, value] of Object.entries({ fill: 'none', stroke: '#b04d24', 'stroke-width': '.09', 'stroke-dasharray': '.2 .12', 'stroke-linecap': 'round', 'pointer-events': 'none' })) route.setAttribute(key, value);
+    this.svg.append(route);
+  }
   select(id) { this.svg.querySelectorAll('[data-room-id]').forEach(g => { const on = g.dataset.roomId === id; g.classList.toggle('selected', on); g.setAttribute('aria-pressed', String(on)); }); }
 }

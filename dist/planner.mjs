@@ -14,6 +14,8 @@ export const POSITIONS = { front: 'أمام', middle: 'وسط', back: 'خلف' }
 export const SIDES = { any: 'تلقائي', left: 'يسار المدخل', right: 'يمين المدخل' };
 export const DIRECTIONS = { s: 'جنوب', n: 'شمال', e: 'شرق', w: 'غرب' };
 export const GEOMETRY = { exterior: .25, partition: .15, corridor: 1.6, branch: 1.2, height: 3.2 };
+export const ENGINE_VERSION = 'rectangular-2';
+export const STRATEGIES = { compact: 'اقتصاد المساحة', balanced: 'توازن أبعاد الغرف', frontage: 'تقليل الغرف الداخلية' };
 const E = 1e-5, T = GEOMETRY.partition, X = GEOMETRY.exterior;
 const sum = (list, fn) => list.reduce((a, v) => a + fn(v), 0);
 const near = (a, b) => Math.abs(a - b) < E;
@@ -28,7 +30,9 @@ export function validatePlot(raw) {
   if (!Object.hasOwn(DIRECTIONS, raw.entry) || !streets[raw.entry]) throw Error('اختر جهة مدخل مطلة على أحد الشوارع المفعّلة.');
   const streetSetback = raw.streetSetback ?? 3, neighborSetback = raw.neighborSetback ?? 1.5, coverage = raw.coverage ?? .75;
   if (![streetSetback, neighborSetback].every(n => Number.isFinite(n) && n >= 0 && n <= 15) || !Number.isFinite(coverage) || coverage < .1 || coverage > .9) throw Error('راجع افتراضات الارتدادات ونسبة البناء.');
-  return { width: raw.width, length: raw.length, floors: raw.floors, streets, entry: raw.entry, streetSetback, neighborSetback, coverage };
+  const maxBuiltArea = raw.maxBuiltArea ?? null;
+  if (maxBuiltArea !== null && (!Number.isFinite(maxBuiltArea) || maxBuiltArea < 20 || maxBuiltArea > raw.width * raw.length)) throw Error('سقف البناء يجب أن يكون بين 20 م² ومساحة الأرض، أو اتركه فارغًا.');
+  return { width: raw.width, length: raw.length, floors: raw.floors, streets, entry: raw.entry, streetSetback, neighborSetback, coverage, maxBuiltArea };
 }
 export function footprint(raw) {
   const p = validatePlot(raw);
@@ -59,7 +63,7 @@ export function defaultRooms({ bedrooms = 4, majlis = 2, baths = 3, kitchens = 1
 
 // Partition a wing into full-width rows. Small rooms share a row with a cross passage.
 // A bounded search can reject a program it cannot fit; this is not a proof of impossibility.
-function packWing(rooms, width) {
+function packWing(rooms, width, strategy) {
   if (!rooms.length) return { rows: [], height: 0 };
   const memo = new Map(); let visits = 0;
   function solve(list) {
@@ -78,15 +82,16 @@ function packWing(rooms, width) {
       if (!rest) continue;
       const branch = group.length > 1 ? GEOMETRY.branch + T : 0;
       const height = depth + branch + (rest.rows.length ? T : 0) + rest.height;
-      const aspectPenalty = sum(group, r => Math.abs(Math.log((r.area / depth) / depth))) * .035;
-      const score = height + rest.score - rest.height + aspectPenalty;
+      const aspectPenalty = sum(group, r => Math.abs(Math.log((r.area / depth) / depth))) * (strategy === 'balanced' ? 1.5 : .035);
+      const interiorPenalty = strategy === 'frontage' ? Math.max(0, group.length - 1) * 5 : 0;
+      const score = height + rest.score - rest.height + aspectPenalty + interiorPenalty;
       if (!best || score < best.score) best = { rows: [{ rooms: group, depth, branch }, ...rest.rows], height, score };
     }
     memo.set(key, best); return best;
   }
   return solve(rooms);
 }
-function packZone(rooms, width) {
+function packZone(rooms, width, strategy) {
   let states = [{ left: rooms.filter(r => r.side === 'left'), right: rooms.filter(r => r.side === 'right') }];
   for (const r of rooms.filter(r => r.side === 'any').sort((a, b) => b.area - a.area)) {
     states = states.flatMap(s => [{ left: [...s.left, r], right: s.right }, { left: s.left, right: [...s.right, r] }]);
@@ -94,13 +99,13 @@ function packZone(rooms, width) {
     states = states.slice(0, 48);
   }
   const cache = new Map();
-  const pack = list => { const key = list.map(r => r.id).sort().join(','); if (!cache.has(key)) cache.set(key, packWing(list, width)); return cache.get(key); };
+  const pack = list => { const key = list.map(r => r.id).sort().join(','); if (!cache.has(key)) cache.set(key, packWing(list, width, strategy)); return cache.get(key); };
   let best = null;
   for (const s of states) {
     const left = pack(s.left), right = pack(s.right);
     if (!left || !right) continue;
     const height = Math.max(left.height, right.height);
-    const score = height + Math.abs(left.height - right.height) * .02;
+    const score = height + Math.abs(left.height - right.height) * .02 + (strategy === 'compact' ? 0 : ((left.score || 0) - left.height + (right.score || 0) - right.height));
     if (!best || score < best.score) best = { left, right, height, score };
   }
   return best;
@@ -132,20 +137,22 @@ function mergeWalls(raw) {
   return walls;
 }
 
-export function generateModel(rawPlot, rawRooms) {
+export function generateModel(rawPlot, rawRooms, { strategy = 'compact' } = {}) {
+  if (!Object.hasOwn(STRATEGIES, strategy)) throw Error('استراتيجية توزيع غير معروفة.');
   const plot = validatePlot(rawPlot), f = footprint(plot), program = normalizeRooms(rawRooms);
   const sideways = ['e', 'w'].includes(plot.entry), maxWidth = Math.min(20, sideways ? f.h : f.w), maxDepth = sideways ? f.w : f.h;
   const required = sum(program, r => r.area);
-  if (required > f.area) throw Error('مجموع مساحات الغرف أكبر من المساحة المتاحة قبل إضافة الجدران والممرات. لم تتغيّر مساحاتك.');
+  const areaBudget = Math.min(f.area, plot.maxBuiltArea ?? Infinity);
+  if (required > areaBudget) throw Error('مجموع مساحات الغرف أكبر من سقف البناء المتاح قبل إضافة الجدران والممرات. لم تتغيّر مساحاتك.');
   let solution = null;
   for (let width = maxWidth; width >= Math.max(7, maxWidth - 5); width -= .5) {
     const wing = (width - X * 2 - T * 2 - GEOMETRY.corridor) / 2;
     if (wing < 1.5) continue;
-    const zones = Object.keys(POSITIONS).map(position => ({ position, ...packZone(program.filter(r => r.position === position), wing) }));
+    const zones = Object.keys(POSITIONS).map(position => ({ position, ...packZone(program.filter(r => r.position === position), wing, strategy) }));
     if (zones.some(z => !Number.isFinite(z.height))) continue;
     const depth = X * 2 + sum(zones, z => z.height) + T * (zones.filter(z => z.height).length - 1);
-    if (depth > maxDepth + E) continue;
-    const score = width * depth + Math.abs(width - depth) * .2;
+    if (depth > maxDepth + E || width * depth > areaBudget + E) continue;
+    const score = width * depth + Math.abs(width - depth) * .2 + (strategy === 'compact' ? 0 : sum(zones, z => z.score - z.height) * 15);
     if (!solution || score < solution.score) solution = { width, wing, depth, zones, score };
   }
   if (!solution) throw Error('لم يجد محرك الكتلة المستطيلة توزيعاً يحافظ على المساحات والمواقع المطلوبة وممرات الوصول. جرّب تعديل المواقع أو المساحات أو أبعاد الأرض؛ لم تُحذف أو تُصغّر أي غرفة.');
@@ -211,7 +218,7 @@ export function generateModel(rawPlot, rawRooms) {
     return { ...rest, id: 'opening-' + i, wallId: w.id, pos };
   });
   const walls = localWalls.map(w => { const a = transform.point(w.x1, w.y1), b = transform.point(w.x2, w.y2); return { ...w, x1: a.x, y1: a.y, x2: b.x, y2: b.y }; });
-  const model = { version: 1, plot, footprint: f, building: transform.rect(buildingLocal), program, rooms: rooms.map(transform.rect), corridors: corridors.map(transform.rect), reserves: reserves.map(transform.rect), links, walls, openings, drawnFloors: 1, warnings: [] };
+  const model = { version: 1, engineVersion: ENGINE_VERSION, strategy, plot, footprint: f, building: transform.rect(buildingLocal), program, rooms: rooms.map(transform.rect), corridors: corridors.map(transform.rect), reserves: reserves.map(transform.rect), links, walls, openings, drawnFloors: 1, warnings: [] };
   const errors = validateModel(model);
   if (errors.length) throw Error(errors[0]);
   if (plot.floors > 1) model.warnings.push('المعروض والكميات للدور الأرضي فقط؛ الأدوار الأخرى والسلالم لم تُصمّم.');
@@ -220,6 +227,20 @@ export function generateModel(rawPlot, rawRooms) {
   if (reserves.length) model.warnings.push('المساحات الرمادية غير موزعة وليست غرفاً مطلوبة؛ تظهر مساحتها مستقلة.');
   model.warnings.push('المساحات صافية بين أوجه الجدران. شكل مستطيل ومدخل واحد؛ لا ضمان للفصل التام بين الضيوف والعائلة أو مطابقة كود البناء.');
   return model;
+}
+
+// Alternatives reuse the same geometry and validation, never change the submitted program.
+export function generateAlternatives(plot, rooms) {
+  const models = [], fingerprints = new Set(), failures = [];
+  for (const strategy of Object.keys(STRATEGIES)) {
+    try {
+      const model = generateModel(plot, rooms, { strategy });
+      const key = JSON.stringify(model.rooms.map(r => [r.id, r.x, r.y, r.w, r.h].map(v => typeof v === 'number' ? +v.toFixed(5) : v)).sort((a, b) => a[0].localeCompare(b[0])));
+      if (!fingerprints.has(key)) { fingerprints.add(key); models.push(model); }
+    } catch (error) { failures.push({ strategy, reason: error.message }); }
+  }
+  if (!models.length) throw Error(failures[0]?.reason || 'لم يُعثر على حل صالح.');
+  return { models, failures };
 }
 
 export function openingPoint(model, o) {
@@ -232,6 +253,7 @@ export function validateModel(m) {
   const nodes = new Map([...m.rooms, ...m.corridors].map(r => [r.id, r]));
   if (nodes.size !== m.rooms.length + m.corridors.length || new Set(m.walls.map(w => w.id)).size !== m.walls.length || new Set(m.openings.map(o => o.id)).size !== m.openings.length) fail('معرّفات هندسية مكررة.');
   if (!inside(m.building, m.footprint)) fail('كتلة المبنى تتجاوز المساحة المتاحة.');
+  if (m.plot.maxBuiltArea !== null && m.plot.maxBuiltArea !== undefined && m.building.w * m.building.h > m.plot.maxBuiltArea + E) fail('كتلة المبنى تتجاوز سقف البناء المطلوب.');
   if (m.rooms.length !== m.program.length) fail('عدد الغرف لا يطابق البرنامج.');
   m.corridors.forEach(c => { if (![c.x, c.y, c.w, c.h].every(Number.isFinite) || c.w <= 0 || c.h <= 0 || !inside(c, m.building)) fail('ممر غير صالح.'); });
   m.openings.forEach(o => {
