@@ -9,6 +9,7 @@ import { applySunOrientation, describeSunOrientation } from './sun-orientation.m
 import { circulationNetwork } from './circulation.mjs';
 import { encodeProject, decodeProject, MAX_PROJECT_BYTES, quantitiesCSV } from './project.mjs';
 import { designInsights } from './design-insights.mjs';
+import { monthName, solarPreview } from './solar-path.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -73,10 +74,25 @@ function rating() {
     $('grade').textContent = grade; $('grade').dataset.g = grade; $('rt').textContent = `مؤشر تخطيطي ${fmt(score, 0)} / ١٠٠`;
     $('ratingHelp').textContent = `سقف المساحة المتاح: ${fmt(Math.min(f.area, p.maxBuiltArea ?? Infinity))} م². المؤشر متوسط أربعة عوامل مبسطة، وليس تقييمًا للشمس أو الخصوصية أو سعر الأرض.`;
     $('bars').innerHTML = metrics.map(r => `<div class="bar"><span>${r.name}</span><div class="track"><div class="fill" style="width:${r.value}%"></div></div><b>${fmt(r.value, 0)}</b></div>`).join('');
+    $('plotInsights').innerHTML = [
+      ['حدود البناء المتاحة', `${fmt(Math.min(f.area, p.maxBuiltArea ?? Infinity))} م²`, 'بعد الارتدادات وسقف المساحة الذي أدخلته.'],
+      ['مساحة الارتدادات', `${fmt(Math.max(0, area - f.area))} م²`, 'فرق مساحة الأرض عن مستطيل البناء المتاح.'],
+      ['الانفتاح على الشوارع', `${fmt(streetCount, 0)} جهة`, streetCount ? 'يُستخدم في القراءة التخطيطية، وليس لقياس الخصوصية.' : 'فعّل جهة شارع واحدة على الأقل.'],
+    ].map(([label, value, detail]) => `<div class="insight"><div><span>${label}</span><b>${value}</b></div><p>${detail}</p></div>`).join('');
     message('plotError', '');
   } catch (error) {
-    $('grade').textContent = '—'; $('grade').removeAttribute('data-g'); $('rt').textContent = 'راجع بيانات الأرض'; $('bars').replaceChildren(); $('ratingHelp').textContent = 'لا يمكن عرض مؤشر صالح بالمدخلات الحالية.'; message('plotError', error.message);
+    $('grade').textContent = '—'; $('grade').removeAttribute('data-g'); $('rt').textContent = 'راجع بيانات الأرض'; $('bars').replaceChildren(); $('plotInsights').replaceChildren(); $('ratingHelp').textContent = 'لا يمكن عرض مؤشر صالح بالمدخلات الحالية.'; message('plotError', error.message);
   }
+}
+function renderSolarPreview() {
+  try {
+    const preview = solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 });
+    $('sunHourVal').textContent = `${String(Math.floor(number('sunHour'))).padStart(2, '0')}:${number('sunHour') % 1 ? '30' : '00'}`;
+    $('sunMonthVal').textContent = monthName(number('sunMonth'));
+    $('sunInfo').innerHTML = preview.visible
+      ? `ارتفاع الشمس: <b>${fmt(preview.altitude)}°</b> · سمتها من الشمال: <b>${fmt(preview.azimuth)}°</b> · ظل جدار ٣٫٢م: <b>${fmt(preview.shadowLength)} م</b>`
+      : 'الشمس تحت الأفق في هذه المعاينة؛ لا يظهر ظل شمسي مباشر.';
+  } catch (error) { $('sunInfo').textContent = error.message; }
 }
 function programTotal() {
   const sum = state.program.reduce((s, r) => s + (Number.isFinite(r.area) ? r.area : 0), 0);
@@ -159,7 +175,7 @@ function showResults() {
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
-  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderAlternatives(); void show3D();
+  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderAlternatives(); renderSolarPreview(); void show3D();
 }
 function renderAlternatives() {
   $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
@@ -358,6 +374,7 @@ function boot() {
   $('home').addEventListener('click', goHome); $('back').addEventListener('click', goHome);
   $('streets').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (!b) return; state.streets[b.dataset.side] = !state.streets[b.dataset.side]; renderStreets(); rating(); markDirty(); });
   ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'maxBuiltArea', 'entry', 'floors'].forEach(id => $(id).addEventListener('input', () => { rating(); markDirty(); }));
+  ['solarLatitude', 'sunMonth', 'sunHour'].forEach(id => $(id).addEventListener('input', renderSolarPreview));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     state.program[Number(row.dataset.row)][field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
