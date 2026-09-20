@@ -39,6 +39,29 @@
   <div class="wrap">
     <header class="head design-head"><span class="ey">استوديو التصميم</span><h1>ابدأ بفكرتك… ثم امشِ داخلها</h1><p>اختر توجهًا، صف ما يهمك، وقارن البدائل قبل أن تستقر على مخطط واحد.</p></header>
     <div class="scope-note">المحرك الحالي يوزّع <strong>الدور الأرضي داخل كتلة مستطيلة</strong>. الأفكار هنا توجه البرنامج والبدائل؛ اعتماد المخطط التنفيذي والاشتراطات يبقى لدى المختص.</div>
+    <article class="card discovery-card" aria-label="اكتشاف أسلوب المنزل"><header class="ch"><b class="num">٠</b><div><h2>اكتشف أسلوب منزلك</h2><p>ابدأ بما تحب وما ترفضه؛ لا تحتاج معرفة المساحات أو المصطلحات الهندسية الآن.</p></div><span class="pill" id="discoveryState">لم يكتمل بعد</span></header>
+      <div class="cb">
+        <h3 class="subhead">أي صورة أقرب لذوقك؟</h3>
+        <div class="taste-deck" id="tasteDeck">
+          <article class="taste-card" data-style="modern" tabindex="0"><img src="./assets/style-modern-villa.png" alt="فيلا سعودية حديثة بفناء داخلي"><div><b>معاصر هادئ</b><small>كتل واضحة، فناء مظلل، وخامات طبيعية</small></div><div class="taste-actions"><button class="taste-no" type="button" data-taste="reject" aria-label="لا يناسبني المعاصر">لا يناسبني</button><button class="taste-yes" type="button" data-taste="like" aria-label="أعجبني المعاصر">أعجبني</button></div></article>
+          <article class="taste-card" data-style="classic" tabindex="0"><img src="./assets/style-classic-villa.png" alt="فيلا سعودية كلاسيكية بواجهة حجرية"><div><b>كلاسيكي متزن</b><small>واجهة حجرية، تناسب، وهيبة بلا مبالغة</small></div><div class="taste-actions"><button class="taste-no" type="button" data-taste="reject" aria-label="لا يناسبني الكلاسيكي">لا يناسبني</button><button class="taste-yes" type="button" data-taste="like" aria-label="أعجبني الكلاسيكي">أعجبني</button></div></article>
+          <article class="taste-card" data-style="resort" tabindex="0"><img src="./assets/style-resort-villa.png" alt="فيلا بطابع منتجعي حول فناء مزروع"><div><b>منتجع عائلي</b><small>أجنحة منخفضة وفناء أخضر مريح</small></div><div class="taste-actions"><button class="taste-no" type="button" data-taste="reject" aria-label="لا يناسبني طابع المنتجع">لا يناسبني</button><button class="taste-yes" type="button" data-taste="like" aria-label="أعجبني طابع المنتجع">أعجبني</button></div></article>
+        </div>
+        <h3 class="subhead">ما الذي تريد أن نتجنبه؟</h3>
+        <div class="avoid-grid" id="avoidChoices" role="group" aria-label="اختيار المرفوضات المعمارية">
+          <button type="button" data-avoid="الممرات الطويلة والمظلمة">ممرات طويلة ومظلمة</button><button type="button" data-avoid="مرور الضيوف عبر خصوصية العائلة">كشف الضيوف للعائلة</button><button type="button" data-avoid="نوافذ كبيرة على شمس العصر الغربية">شمس العصر الغربية</button><button type="button" data-avoid="صدى الصوت في الصالات والمجالس">صدى في المجالس</button><button type="button" data-avoid="مطبخ بعيد عن الطعام والخدمات">مطبخ بعيد عن الطعام</button><button type="button" data-avoid="غرف نوم مكشوفة أو قريبة من الضيافة">نوم قريب من الضيافة</button>
+        </div>
+        <h3 class="subhead">أسلوب حياتكم</h3>
+        <div class="lifestyle-grid" id="lifestyleChoices">
+          <fieldset><legend>العزائم والضيافة</legend><button type="button" data-life="guests" data-value="قليلة">قليلة</button><button type="button" data-life="guests" data-value="متكررة">متكررة</button></fieldset>
+          <fieldset><legend>الأطفال</legend><button type="button" data-life="children" data-value="قريبون من الصالة">قريبون منك</button><button type="button" data-life="children" data-value="جناح هادئ">جناح هادئ</button></fieldset>
+          <fieldset><legend>كبار السن</legend><button type="button" data-life="seniors" data-value="موجودون">نعم</button><button type="button" data-life="seniors" data-value="غير موجودين">لا</button></fieldset>
+          <fieldset><legend>مرونة المستقبل</legend><button type="button" data-life="future" data-value="مهمة">مهمة</button><button type="button" data-life="future" data-value="ليست أولوية">ليست أولوية</button></fieldset>
+        </div>
+        <div class="discovery-summary" id="discoverySummary" aria-live="polite">اختر ما يناسبكم؛ سنحوّله إلى موجز تصميم يمكنك تعديله قبل التحليل.</div>
+        <button class="secondary" type="button" id="applyDiscovery">استخدم هذه الرغبات في الوصف</button>
+      </div>
+    </article>
     <section class="project-tools" aria-label="حفظ المشروع واستعادته"><div><h2>ملف مشروعك</h2><p>احتفظ بالمدخلات والبدائل والأسعار وآخر 5 نسخ في ملف تستعيده لاحقًا. لا يوجد حفظ تلقائي أو سحابي.</p></div><div class="inline-actions"><button id="saveProject" class="small-button">تنزيل ملف المشروع</button><button id="loadProject" class="small-button">استيراد مشروع محفوظ</button><input id="projectFile" type="file" accept=".json,application/json" aria-label="ملف مشروع ميزان" hidden></div><p id="projectStatus" role="status" class="help" hidden></p></section>
 
     <article class="card idea-library"><header class="ch"><b class="num">٠</b><div><h2>اختر نقطة انطلاق</h2><p>هذه أفكار جاهزة تصف العلاقات بين الفراغات؛ عدّل النص بعدها كما تريد.</p></div></header>

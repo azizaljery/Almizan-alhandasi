@@ -14,13 +14,33 @@ const $ = id => document.getElementById(id), all = selector => [...document.quer
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1 };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
 const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
 function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
+function discoveryText() {
+  const d = state.discovery, parts = [];
+  if (d.likes.length) parts.push(`الطابع المفضل: ${d.likes.map(style => ({ modern: 'معاصر هادئ', classic: 'كلاسيكي متزن', resort: 'منتجع عائلي' }[style])).join('، ')}.`);
+  if (d.rejects.length) parts.push(`أنماط غير مفضلة: ${d.rejects.map(style => ({ modern: 'المعاصر', classic: 'الكلاسيكي', resort: 'المنتجعي' }[style])).join('، ')}.`);
+  if (d.avoids.length) parts.push(`تجنّب: ${d.avoids.join('، ')}.`);
+  if (d.life.guests) parts.push(`الضيافة: ${d.life.guests}.`);
+  if (d.life.children) parts.push(`الأطفال: ${d.life.children}.`);
+  if (d.life.seniors) parts.push(`كبار السن: ${d.life.seniors}.`);
+  if (d.life.future) parts.push(`مرونة المستقبل: ${d.life.future}.`);
+  return parts.join(' ');
+}
+function renderDiscovery() {
+  const d = state.discovery;
+  all('#tasteDeck .taste-card').forEach(card => { const style = card.dataset.style; card.classList.toggle('liked', d.likes.includes(style)); card.classList.toggle('rejected', d.rejects.includes(style)); });
+  all('#avoidChoices [data-avoid]').forEach(button => { const on = d.avoids.includes(button.dataset.avoid); button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
+  all('#lifestyleChoices [data-life]').forEach(button => { const on = d.life[button.dataset.life] === button.dataset.value; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
+  const text = discoveryText(); $('discoverySummary').textContent = text || 'اختر ما يناسبكم؛ سنحوّله إلى موجز تصميم يمكنك تعديله قبل التحليل.';
+  const count = d.likes.length + d.avoids.length + Object.keys(d.life).length;
+  $('discoveryState').textContent = count ? `${count} رغبات محددة` : 'لم يكتمل بعد';
+}
 function markDirty() {
   state.dirty = !!state.model && signature(rawPlot(), state.program) !== state.signature;
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
@@ -229,7 +249,8 @@ async function askAI() {
   state.proposal = null; $('aiReview').hidden = true;
   $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ تحليل الوصف…';
   try {
-    const result = await requestBrief({ prompt: $('idea').value, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. ركّز على ترتيب الأولويات: الضيافة، العائلة، الخصوصية، الحركة، والخدمات.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
+    const discovery = discoveryText();
+    const result = await requestBrief({ prompt: [discovery, $('idea').value.trim()].filter(Boolean).join('\n\n'), plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. ركّز على ترتيب الأولويات: الضيافة، العائلة، الخصوصية، الحركة، والخدمات.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
     showBrief(result.brief, result.limitations);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
@@ -356,6 +377,25 @@ function boot() {
     all('#styles [data-v]').forEach(button => { const on = button === b; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
     if (state.model) void show3D();
   });
+  $('tasteDeck').addEventListener('click', event => {
+    const action = event.target.closest('[data-taste]'); if (!action) return;
+    const card = action.closest('.taste-card'), style = card?.dataset.style; if (!style) return;
+    const target = action.dataset.taste === 'like' ? state.discovery.likes : state.discovery.rejects;
+    const other = action.dataset.taste === 'like' ? state.discovery.rejects : state.discovery.likes;
+    const index = target.indexOf(style); index >= 0 ? target.splice(index, 1) : target.push(style);
+    const otherIndex = other.indexOf(style); if (otherIndex >= 0) other.splice(otherIndex, 1);
+    if (action.dataset.taste === 'like') { state.palette = style; syncPalette(); if (state.model) void show3D(); }
+    renderDiscovery();
+  });
+  $('avoidChoices').addEventListener('click', event => {
+    const button = event.target.closest('[data-avoid]'); if (!button) return;
+    const value = button.dataset.avoid, index = state.discovery.avoids.indexOf(value); index >= 0 ? state.discovery.avoids.splice(index, 1) : state.discovery.avoids.push(value); renderDiscovery();
+  });
+  $('lifestyleChoices').addEventListener('click', event => {
+    const button = event.target.closest('[data-life]'); if (!button) return;
+    const key = button.dataset.life; state.discovery.life[key] = state.discovery.life[key] === button.dataset.value ? undefined : button.dataset.value; if (!state.discovery.life[key]) delete state.discovery.life[key]; renderDiscovery();
+  });
+  $('applyDiscovery').addEventListener('click', () => { const text = discoveryText(); if (!text) return toast('اختر رغبة واحدة على الأقل أولًا.'); $('idea').value = [text, $('idea').value.trim()].filter(Boolean).join('\n\n'); $('idea').focus({ preventScroll: true }); toast('أُضيف موجز رغباتكم إلى الوصف؛ راجعه ثم حلّله أو عدّل جدول الغرف.'); });
   $('ideaCards').addEventListener('click', event => {
     const card = event.target.closest('[data-idea]'); if (!card) return;
     $('idea').value = card.dataset.idea;
@@ -401,6 +441,6 @@ function boot() {
   $('askLocal').addEventListener('click', askLocal); $('applySun').addEventListener('click', applySunToProgram);
   $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; if (!window.confirm('نقل اقتراح الذكاء إلى جدول المراجعة بدل القائمة الحالية؟ لن يتغيّر الرسم حتى تضغط «ولّد».')) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
-  renderStreets(); rating(); renderRows(); renderBOQ(); void refreshAssistantStatus();
+  renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); void refreshAssistantStatus();
 }
 boot();
