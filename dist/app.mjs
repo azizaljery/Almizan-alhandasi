@@ -8,6 +8,7 @@ import { requestLocalBrief } from './local-nlp.mjs';
 import { applySunOrientation, describeSunOrientation } from './sun-orientation.mjs';
 import { circulationNetwork } from './circulation.mjs';
 import { encodeProject, decodeProject, MAX_PROJECT_BYTES, quantitiesCSV } from './project.mjs';
+import { designInsights } from './design-insights.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -157,6 +158,10 @@ function renderPlanReview() {
   $('reviewIssues').innerHTML = review.issues.map(issue => `<li class="${issue.level}">${esc(issue.text)}</li>`).join('');
   $('reviewLimit').textContent = review.note;
   $('reviewRelationships').innerHTML = review.relationships.map(r => `<li>${esc(r.from)} ← ${esc(r.to)}: ${fmt(r.metres)} م عبر الممرات</li>`).join('') || '<li>أضف غرفًا مترابطة لعرض المقارنة.</li>';
+  const insights = designInsights(state.model);
+  $('insightScore').textContent = `${fmt(insights.overall, 0)} / ١٠٠`;
+  $('insightCards').innerHTML = insights.cards.map(card => `<div class="insight"><div><span>${esc(card.label)}</span><b>${fmt(card.score, 0)}</b></div><p>${esc(card.detail)}</p></div>`).join('');
+  $('insightLimit').textContent = insights.note;
 }
 function runPlanner(request) {
   if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms));
