@@ -13,7 +13,7 @@ const $ = id => document.getElementById(id), all = selector => [...document.quer
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1 };
 let viewport, viewer, toastTimer, loading3D, circulation;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -77,8 +77,9 @@ function drawRoute() {
 }
 function on3DMode(mode, detail) {
   $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside';
-  if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · مستوى النظر 1.6 م'; }
+  if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · مستوى النظر 1.6 م · اسحب للنظر وتحرك عبر الأبواب'; }
   else $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + ' · تصور غير تنفيذي';
+  $('tourState').textContent = mode === 'inside' ? `داخل ${detail}` : 'منظور عام';
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
 async function loadThree(retry = false) {
@@ -107,12 +108,35 @@ async function show3D(retry = false) {
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
+function prepareTour() {
+  if (!state.model) return [];
+  const priorities = ['majlis', 'living', 'dining', 'kitchen', 'bedroom'];
+  const rooms = state.model.rooms;
+  const external = state.model.openings.find(o => o.type === 'door' && o.connects?.includes('outside'));
+  const first = external?.roomId ? rooms.find(room => room.id === external.roomId) : null;
+  const ordered = [...rooms].sort((a, b) => priorities.indexOf(a.type) - priorities.indexOf(b.type) || a.y - b.y || a.x - b.x);
+  return [...new Map([first, ...ordered].filter(Boolean).map(room => [room.id, room])).values()];
+}
+async function showTourRoom(index, { scroll = false } = {}) {
+  const room = state.tour[index]; if (!room) return;
+  if (!viewer && !await show3D()) return;
+  state.tourIndex = index; state.selected = room.id; $('roomSelect').value = room.id; viewport?.select(room.id);
+  viewer.enter(room.id); $('tourState').textContent = `الجولة ${index + 1} / ${state.tour.length} · ${room.name}`;
+  $('tourPrev').disabled = index <= 0; $('tourNext').disabled = index >= state.tour.length - 1;
+  if (scroll) $('view').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+async function startTour() {
+  state.tour = prepareTour(); state.tourIndex = -1;
+  if (!state.tour.length) return toast('ولّد مخططًا أولًا لبدء الجولة.');
+  await showTourRoom(0, { scroll: true });
+}
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
   circulation = circulationNetwork(m);
   viewport = new PlanViewport($('plan'), m, selectRoom);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
   $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderAlternatives(); void show3D();
 }
 function renderAlternatives() {
@@ -200,7 +224,7 @@ async function askAI() {
   state.proposal = null; $('aiReview').hidden = true;
   $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ تحليل الوصف…';
   try {
-    const result = await requestBrief({ prompt: $('idea').value, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
+    const result = await requestBrief({ prompt: $('idea').value, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. ركّز على ترتيب الأولويات: الضيافة، العائلة، الخصوصية، الحركة، والخدمات.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
     showBrief(result.brief, result.limitations);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
@@ -327,6 +351,13 @@ function boot() {
     all('#styles [data-v]').forEach(button => { const on = button === b; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
     if (state.model) void show3D();
   });
+  $('ideaCards').addEventListener('click', event => {
+    const card = event.target.closest('[data-idea]'); if (!card) return;
+    $('idea').value = card.dataset.idea;
+    all('#ideaCards .idea-card').forEach(item => item.classList.toggle('active', item === card));
+    $('idea').focus({ preventScroll: true });
+    toast('تم وضع الفكرة في الوصف. أضف متطلباتك الخاصة ثم حلّلها أو عدّل الجدول.');
+  });
   $('gen').addEventListener('click', generate);
   $('alternativeCards').addEventListener('click', event => {
     const button = event.target.closest('[data-alternative]');
@@ -353,6 +384,9 @@ function boot() {
   $('exportPlan').addEventListener('click', () => exportResult('svg')); $('exportBOQ').addEventListener('click', () => exportResult('csv'));
   $('focusRoom').addEventListener('click', () => { viewport?.focus(state.selected); $('plan').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
   $('enterRoom').addEventListener('click', async () => { if (!viewer && !await show3D()) return; viewer.enter(state.selected); $('view').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+  $('startTour').addEventListener('click', startTour);
+  $('tourPrev').addEventListener('click', () => { if (state.tourIndex > 0) void showTourRoom(state.tourIndex - 1); });
+  $('tourNext').addEventListener('click', () => { if (state.tourIndex < state.tour.length - 1) void showTourRoom(state.tourIndex + 1); });
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));
   all('[data-move]').forEach(b => b.addEventListener('click', () => viewer?.move(b.dataset.move)));
   $('roof').addEventListener('change', () => viewer?.setRoof($('roof').checked)); $('retry3D').addEventListener('click', () => { void show3D(true); });

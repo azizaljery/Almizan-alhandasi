@@ -70,8 +70,17 @@ export class RoomViewer {
       if (r.type === 'bedroom' && r.w >= 2.5 && r.h >= 2.5) {
         this.mesh(r.x + 1.1, .28, -r.y - r.h + 1.3, 1.5, .42, 2, '#d6d9e6');
         this.mesh(r.x + 1.1, .53, -r.y - r.h + .55, 1.3, .12, .4, '#f7f4ed');
+      } else if (r.type === 'majlis' || r.type === 'living') {
+        const sofa = r.type === 'majlis' ? '#c0a278' : '#91aeb6';
+        this.mesh(r.x + r.w / 2, .32, -r.y - .55, Math.max(1.2, r.w - .75), .58, .6, sofa);
+        this.mesh(r.x + .55, .32, -r.y - r.h / 2, .6, .58, Math.max(1.2, r.h - 1.1), sofa);
+        this.mesh(r.x + r.w / 2, .28, -r.y - r.h / 2, Math.min(1.35, r.w * .32), .42, Math.min(1.35, r.h * .28), '#70533b');
+      } else if (r.type === 'dining') {
+        this.mesh(r.x + r.w / 2, .4, -r.y - r.h / 2, Math.min(2.4, r.w * .46), .12, Math.min(1.25, r.h * .35), '#7e6043');
+        for (const [dx, dz] of [[-1, -.75], [1, -.75], [-1, .75], [1, .75]]) this.mesh(r.x + r.w / 2 + dx, .27, -r.y - r.h / 2 + dz, .45, .5, .45, '#b6a88c');
       } else if (r.type === 'kitchen') this.mesh(r.x + r.w / 2, .45, -r.y - r.h + .35, r.w - .4, .9, .55, '#b4c2a4');
       else if (r.type === 'bath') this.mesh(r.x + .55, .27, -r.y - r.h + .65, .55, .5, .7, '#f4f8fa');
+      else if (r.type === 'storage' || r.type === 'service') this.mesh(r.x + r.w / 2, .75, -r.y - .35, r.w - .4, 1.5, .35, '#a59e8b');
     });
     this.pieces.forEach(p => this.mesh(p.x, p.bottom + p.height / 2, -p.y, p.length, p.height, p.thickness, p.type === 'ext' ? color : '#f5f1e9', p.angle));
     model.openings.filter(o => o.type === 'window').forEach(o => {
