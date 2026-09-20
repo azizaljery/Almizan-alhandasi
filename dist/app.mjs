@@ -23,8 +23,9 @@ function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
 function discoveryText() {
   const d = state.discovery, parts = [];
-  if (d.likes.length) parts.push(`الطابع المفضل: ${d.likes.map(style => ({ modern: 'معاصر هادئ', classic: 'كلاسيكي متزن', resort: 'منتجع عائلي' }[style])).join('، ')}.`);
-  if (d.rejects.length) parts.push(`أنماط غير مفضلة: ${d.rejects.map(style => ({ modern: 'المعاصر', classic: 'الكلاسيكي', resort: 'المنتجعي' }[style])).join('، ')}.`);
+  const examples = { courtyard_privacy: 'خصوصية ضيافة وفناء', family_layout: 'بيت عائلي واضح', concept_comparison: 'مقارنة التصورات قبل القرار', classic_living: 'إحساس داخلي كلاسيكي دافئ' };
+  if (d.likes.length) parts.push(`أفكار مفضلة: ${d.likes.map(style => examples[style] || style).join('، ')}.`);
+  if (d.rejects.length) parts.push(`أفكار غير مفضلة: ${d.rejects.map(style => examples[style] || style).join('، ')}.`);
   if (d.avoids.length) parts.push(`تجنّب: ${d.avoids.join('، ')}.`);
   if (d.life.guests) parts.push(`الضيافة: ${d.life.guests}.`);
   if (d.life.children) parts.push(`الأطفال: ${d.life.children}.`);
@@ -384,7 +385,10 @@ function boot() {
     const other = action.dataset.taste === 'like' ? state.discovery.rejects : state.discovery.likes;
     const index = target.indexOf(style); index >= 0 ? target.splice(index, 1) : target.push(style);
     const otherIndex = other.indexOf(style); if (otherIndex >= 0) other.splice(otherIndex, 1);
-    if (action.dataset.taste === 'like') { state.palette = style; syncPalette(); if (state.model) void show3D(); }
+    if (action.dataset.taste === 'like') {
+      const palette = { courtyard_privacy: 'resort', family_layout: 'modern', concept_comparison: 'classic', classic_living: 'classic' }[style];
+      if (palette) { state.palette = palette; syncPalette(); if (state.model) void show3D(); }
+    }
     renderDiscovery();
   });
   $('avoidChoices').addEventListener('click', event => {
@@ -396,13 +400,6 @@ function boot() {
     const key = button.dataset.life; state.discovery.life[key] = state.discovery.life[key] === button.dataset.value ? undefined : button.dataset.value; if (!state.discovery.life[key]) delete state.discovery.life[key]; renderDiscovery();
   });
   $('applyDiscovery').addEventListener('click', () => { const text = discoveryText(); if (!text) return toast('اختر رغبة واحدة على الأقل أولًا.'); $('idea').value = [text, $('idea').value.trim()].filter(Boolean).join('\n\n'); $('idea').focus({ preventScroll: true }); toast('أُضيف موجز رغباتكم إلى الوصف؛ راجعه ثم حلّله أو عدّل جدول الغرف.'); });
-  $('ideaCards').addEventListener('click', event => {
-    const card = event.target.closest('[data-idea]'); if (!card) return;
-    $('idea').value = card.dataset.idea;
-    all('#ideaCards .idea-card').forEach(item => item.classList.toggle('active', item === card));
-    $('idea').focus({ preventScroll: true });
-    toast('تم وضع الفكرة في الوصف. أضف متطلباتك الخاصة ثم حلّلها أو عدّل الجدول.');
-  });
   $('gen').addEventListener('click', generate);
   $('alternativeCards').addEventListener('click', event => {
     const button = event.target.closest('[data-alternative]');
