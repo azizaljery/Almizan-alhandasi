@@ -2,6 +2,10 @@
 
 هذه طبقة خادم Cloudflare Worker لخدمة فهم متطلبات «الميزان الهندسي».
 
+الخدمة المحددة لهذا المشروع هي `gentle-sun-5ef5` على حساب `aljeryabod.workers.dev`، وهو الاسم نفسه في `wrangler.toml` وعنوان العميل في `dist/assistant.mjs`. لا تنشر هذا الخادم إلى `al-mizan-api` المرتبط بمشروع الأسهم.
+
+فحص الإعداد: `GET https://gentle-sun-5ef5.aljeryabod.workers.dev/api/assistant/status`. عند استخدام اختبار HTTP داخل Cloudflare، اضبط الترويسة `Origin` على `https://al-mizan-al-handasi.aljeryabod.chatgpt.site`. الرابط الأساسي `/` يعيد 404 لأنه ليس صفحة للموقع. يلزم طلب تحليل ناجح من الواجهة برمز الموقع لإثبات الاتصال الحي.
+
 ## ما ينفذه هذا الملف
 
 - يحوّل وصفاً عربياً إلى متطلبات مساحية عبر Responses API مع Structured Outputs، عند إعداد المفتاح.

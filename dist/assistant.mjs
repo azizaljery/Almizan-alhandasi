@@ -2,7 +2,7 @@ import { normalizeRooms } from './planner.mjs';
 
 export const AI_ENABLED = true;
 // Enabling the client does not verify that the separately deployed Worker is ready.
-export const AI_ENDPOINT = 'https://al-mizan-handasa.aljeryabod.workers.dev/api/assistant';
+export const AI_ENDPOINT = 'https://gentle-sun-5ef5.aljeryabod.workers.dev/api/assistant';
 export const AI_STATUS_ENDPOINT = AI_ENDPOINT + '/status';
 
 async function fetchJSON(endpoint, options, fetcher, invalidResponseMessage) {
