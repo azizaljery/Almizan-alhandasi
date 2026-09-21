@@ -13,6 +13,7 @@ import { designInsights } from './design-insights.mjs';
 import { monthName, solarPreview } from './solar-path.mjs';
 import { compareHomeModels, buildEngineeringPromptContext } from './home-design-engine.mjs';
 import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
+import { initVisualizer } from './render-visualizer.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -590,6 +591,6 @@ function boot() {
   $('drawAI').addEventListener('click', drawFromAIProposal);
   $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; toast('حُفظ برنامج الذكاء في الجدول دون توليد الرسم بعد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
-  renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); void refreshAssistantStatus();
+  renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); initVisualizer(() => state.model); void refreshAssistantStatus();
 }
 boot();
