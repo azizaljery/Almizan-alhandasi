@@ -88,7 +88,10 @@ export class RoomViewer {
     if (p.streets.n) addBox(p.width / 2, -.12, -p.length - 1.15, p.width + 3, .12, 2.1, road);
     if (p.streets.w) addBox(-1.15, -.12, -p.length / 2, 2.1, .12, p.length + 3, road);
     if (p.streets.e) addBox(p.width + 1.15, -.12, -p.length / 2, 2.1, .12, p.length + 3, road);
-    addBox(b.x + b.w / 2, -.005, -b.y - b.h / 2, b.w + .3, .16, b.h + .3, '#d4c7b6', 0, 1, { receiveShadow: true });
+    if (model.massingParts?.length) {
+      model.massingParts.forEach(part => addBox(part.x + part.w / 2, -.005, -part.y - part.h / 2, part.w + .3, .16, part.h + .3, '#d4c7b6', 0, 1, { receiveShadow: true }));
+      model.courtyards?.forEach(court => addBox(court.x + court.w / 2, .005, -court.y - court.h / 2, court.w, .03, court.h, '#b9c99a', 0, 1, { receiveShadow: true }));
+    } else addBox(b.x + b.w / 2, -.005, -b.y - b.h / 2, b.w + .3, .16, b.h + .3, '#d4c7b6', 0, 1, { receiveShadow: true });
 
     const externalDoor = model.openings.find(o => o.type === 'door' && o.connects?.includes('outside'));
     if (externalDoor) {
@@ -153,7 +156,10 @@ export class RoomViewer {
     });
     model.corridors.forEach((r, i) => addBox(r.x + r.w / 2, 3.34 + (concept === 'spine' && i === 0 ? .22 : 0), -r.y - r.h / 2, r.w + .14, .18, r.h + .14, concept === 'spine' && i === 0 ? style.accent : style.roof, 0, 1, { parent: this.roof }));
     const parapet = palette === 'modern' ? .34 : .5;
-    for (const [x, z, w, d] of [[b.x + b.w / 2, -b.y, b.w + .35, .16], [b.x + b.w / 2, -b.y - b.h, b.w + .35, .16], [b.x, -b.y - b.h / 2, .16, b.h], [b.x + b.w, -b.y - b.h / 2, .16, b.h]]) addBox(x, 3.5, z, w, parapet, d, style.accent, 0, 1, { parent: this.roof });
+    const parapetRects = model.massingParts?.length ? model.massingParts : [b];
+    parapetRects.forEach(r => {
+      for (const [x, z, w, d] of [[r.x + r.w / 2, -r.y, r.w + .35, .16], [r.x + r.w / 2, -r.y - r.h, r.w + .35, .16], [r.x, -r.y - r.h / 2, .16, r.h], [r.x + r.w, -r.y - r.h / 2, .16, r.h]]) addBox(x, 3.5, z, w, parapet, d, style.accent, 0, 1, { parent: this.roof });
+    });
     this.roof.visible = false;
 
     // Landscape and shade elements distinguish the architectural concepts without external images.
@@ -184,7 +190,7 @@ export class RoomViewer {
     this.phi = name === 'top' ? .02 : name === 'front' ? 1.42 : .65;
     this.theta = name === 'front' ? ({ s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[this.model.plot.entry]) : Math.PI * .23;
     const aspect = Math.max(.35, this.container.clientWidth / Math.max(1, this.container.clientHeight));
-    this.radius = s * (name === 'front' ? 1.8 : Math.max(1.65, 1.3 / aspect));
+    this.radius = s * (name === 'front' ? 1.35 : Math.max(1.18, .96 / aspect));
     this.onMode?.('orbit', name); this.render();
   }
   enter(id) {

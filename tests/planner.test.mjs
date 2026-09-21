@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultRooms, generateModel, validateModel, validatePlot, normalizeRooms, quantities, wallPieces, openingPoint, overlap } from '../dist/planner.mjs';
+import { defaultRooms, generateModel, generateTopologyModel, validateModel, validatePlot, normalizeRooms, quantities, wallPieces, openingPoint, overlap, placeOpening, removeOpening } from '../dist/planner.mjs';
 import { quantityRows, estimate } from '../dist/estimates.mjs';
 
 const plot = { width: 20, length: 30, floors: 2, entry: 's', streets: { s: true } };
@@ -19,6 +19,26 @@ test('default program preserves all 12 requested rooms and exact clear floor are
 test('same requirements produce the same model; generation does not mutate inputs', () => {
   const rooms = defaultRooms(), before = JSON.stringify([plot, rooms]), a = build(plot, rooms), b = build(plot, rooms);
   assert.deepEqual(a, b); assert.equal(JSON.stringify([plot, rooms]), before);
+});
+
+test('topology generator creates real courtyard and U voids without changing the program', () => {
+  const wide = { ...plot, width: 30, length: 40 };
+  for (const topology of ['courtyard', 'u-court']) {
+    const m = generateTopologyModel(wide, defaultRooms(), { topology });
+    assert.equal(m.topology, topology); assert.ok(m.courtyards?.length); assert.ok(m.massingParts?.length >= 3);
+    assert.deepEqual(validateModel(m), []); near(quantities(m).rooms, 228); assert.equal(m.rooms.length, defaultRooms().length);
+    const court = m.courtyards[0];
+    [...m.rooms, ...m.corridors].forEach(cell => assert.equal(overlap(court, cell), false));
+    assert.ok(m.builtArea < m.building.w * m.building.h, 'courtyard must be a real unbuilt void, not a label');
+  }
+});
+
+test('direct editor opening operations preserve the geometry contract', () => {
+  const m = build();
+  const wall = m.walls.find(w => w.type === 'ext' && Math.hypot(w.x2 - w.x1, w.y2 - w.y1) > 2.5 && !m.openings.some(o => o.wallId === w.id));
+  const point = { x: (wall.x1 + wall.x2) / 2, y: (wall.y1 + wall.y2) / 2 };
+  const edited = placeOpening(m, { type: 'window', point }); assert.equal(edited.openings.length, m.openings.length + 1); assert.deepEqual(validateModel(edited), []);
+  const restored = removeOpening(edited, point); assert.equal(restored.openings.length, m.openings.length); assert.deepEqual(validateModel(restored), []);
 });
 
 test('front/back and fixed left/right rotate consistently for all four entry directions', () => {

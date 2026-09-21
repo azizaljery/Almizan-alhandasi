@@ -23,7 +23,10 @@ export function buildPlanSVG(model) {
   const fp = box(model.footprint);
   s += `<rect x="${fp.x}" y="${fp.y}" width="${fp.w}" height="${fp.h}" fill="none" stroke="#5b9981" stroke-width=".03" stroke-dasharray=".16 .18"/>`;
   const b = box(model.building);
-  s += `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#eceae3"/>`;
+  if (model.massingParts?.length) {
+    for (const part of model.massingParts) { const v = box(part); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#eceae3"/>`; }
+    for (const court of model.courtyards || []) { const v = box(court); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" rx=".12" fill="#dce8d2" stroke="#77946c" stroke-width=".06" stroke-dasharray=".22 .14"/><text x="${v.x + v.w / 2}" y="${v.y + v.h / 2}" fill="#4f704f" font-size=".34" font-weight="700" text-anchor="middle">فناء مفتوح</text>`; }
+  } else s += `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#eceae3"/>`;
   for (const r of model.corridors) { const v = box(r); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#faf7e9"/>`; }
   for (const r of model.reserves) {
     const v = box(r);
@@ -64,15 +67,27 @@ export class PlanViewport {
   constructor(container, model, onSelect) {
     this.container = container; this.model = model; this.onSelect = onSelect;
     container.innerHTML = buildPlanSVG(model); this.svg = container.querySelector('svg');
-    this.pointers = new Map(); this.view = buildingViewBox(model); this.start = null;
+    this.pointers = new Map(); this.view = buildingViewBox(model); this.start = null; this.editor = null; this.editorMove = null;
     const svg = this.svg;
     svg.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
+      const room = e.target.closest('[data-room-id]')?.dataset.roomId, point = this.point(e.clientX, e.clientY);
+      if (this.editor?.active && this.editor.tool !== 'select') {
+        if (this.editor.tool === 'move' && room) {
+          svg.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); this.editorMove = { room, origin: point }; return;
+        }
+        this.editor.onAction?.({ tool: this.editor.tool, point, room }); return;
+      }
       svg.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      this.start = { x: e.clientX, y: e.clientY, room: e.target.closest('[data-room-id]')?.dataset.roomId, moved: false };
+      this.start = { x: e.clientX, y: e.clientY, room, moved: false };
     });
     svg.addEventListener('pointermove', e => {
       if (!this.pointers.has(e.pointerId)) return;
+      if (this.editorMove) {
+        const point = this.point(e.clientX, e.clientY), dx = point.x - this.editorMove.origin.x, dy = -point.y - this.editorMove.origin.y;
+        const group = this.svg.querySelector(`[data-room-id="${this.editorMove.room}"]`); if (group) group.setAttribute('transform', `translate(${dx} ${-dy})`);
+        return;
+      }
       const before = [...this.pointers.values()]; this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); const after = [...this.pointers.values()];
       if (this.start && (after.length > 1 || Math.hypot(e.clientX - this.start.x, e.clientY - this.start.y) > 5)) this.start.moved = true;
       const midpoint = list => ({ x: list.reduce((s, p) => s + p.x, 0) / list.length, y: list.reduce((s, p) => s + p.y, 0) / list.length });
@@ -84,6 +99,10 @@ export class PlanViewport {
       }
     });
     const finish = e => {
+      if (this.editorMove) {
+        const point = this.point(e.clientX, e.clientY), dx = point.x - this.editorMove.origin.x, dy = -point.y - this.editorMove.origin.y;
+        this.editor.onAction?.({ tool: 'move', room: this.editorMove.room, dx, dy }); this.editorMove = null; this.pointers.delete(e.pointerId); return;
+      }
       if (e.type === 'pointerup' && this.start && !this.start.moved && this.start.room && this.pointers.size === 1) onSelect(this.start.room);
       this.pointers.delete(e.pointerId); this.start = null;
     };
@@ -91,6 +110,7 @@ export class PlanViewport {
     svg.addEventListener('wheel', e => { e.preventDefault(); this.zoom(Math.exp(Math.max(-200, Math.min(200, e.deltaY)) * .003), { x: e.clientX, y: e.clientY }); }, { passive: false });
     svg.addEventListener('keydown', e => { const room = e.target.closest('[data-room-id]'); if (room && ['Enter', ' '].includes(e.key)) { e.preventDefault(); onSelect(room.dataset.roomId); } });
   }
+  setEditor(editor) { this.editor = editor; this.svg.classList?.toggle('editing', !!editor?.active); }
   point(x, y) { const p = this.svg.createSVGPoint(); p.x = x; p.y = y; return p.matrixTransform(this.svg.getScreenCTM().inverse()); }
   apply() { this.svg.setAttribute('viewBox', `${this.view.x} ${this.view.y} ${this.view.w} ${this.view.h}`); }
   zoom(factor, client) {

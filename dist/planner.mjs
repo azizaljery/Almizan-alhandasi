@@ -19,6 +19,8 @@ export const STRATEGIES = {
   compact: 'الرواق المحوري',
   balanced: 'الجناحان المتوازنان',
   frontage: 'الواجهة العريضة',
+  courtyard: 'بيت الفناء',
+  'u-court': 'بيت الباحة U',
 };
 export const CONCEPT_PROFILES = {
   compact: {
@@ -259,10 +261,138 @@ export function generateModel(rawPlot, rawRooms, { strategy = 'compact' } = {}) 
   return model;
 }
 
-// Alternatives reuse the same geometry and validation, never change the submitted program.
+// Topological studies are built from an adjacency graph (room ↔ corridor ↔ exterior),
+// not by decorating a rectangular shell. They deliberately preserve requested areas.
+function localRectForEntry(rect, entry) { return ['e', 'w'].includes(entry) ? { ...rect, w: rect.h, h: rect.w } : { ...rect }; }
+function rectBounds(rects) {
+  const minX = Math.min(...rects.map(r => r.x)), minY = Math.min(...rects.map(r => r.y));
+  const maxX = Math.max(...rects.map(r => r.x + r.w)), maxY = Math.max(...rects.map(r => r.y + r.h));
+  return { x: minX - X / 2, y: minY - X / 2, w: maxX - minX + X, h: maxY - minY + X };
+}
+function sharedBoundary(a, b) {
+  if (near(a.x + a.w, b.x) || near(b.x + b.w, a.x)) {
+    const from = Math.max(a.y, b.y), to = Math.min(a.y + a.h, b.y + b.h);
+    if (to - from > E) return { axis: 'v', x: near(a.x + a.w, b.x) ? b.x : a.x, y: (from + to) / 2, length: to - from };
+  }
+  if (near(a.y + a.h, b.y) || near(b.y + b.h, a.y)) {
+    const from = Math.max(a.x, b.x), to = Math.min(a.x + a.w, b.x + b.w);
+    if (to - from > E) return { axis: 'h', x: (from + to) / 2, y: near(a.y + a.h, b.y) ? b.y : a.y, length: to - from };
+  }
+  return null;
+}
+function cellWalls(cells) {
+  const raw = [], wall = (x1, y1, x2, y2, type) => raw.push({ x1, y1, x2, y2, type, t: type === 'ext' ? X : T });
+  for (const cell of cells) {
+    const edges = [
+      { axis: 'h', fixed: cell.y, a: cell.x, b: cell.x + cell.w, side: 'top' },
+      { axis: 'h', fixed: cell.y + cell.h, a: cell.x, b: cell.x + cell.w, side: 'bottom' },
+      { axis: 'v', fixed: cell.x, a: cell.y, b: cell.y + cell.h, side: 'left' },
+      { axis: 'v', fixed: cell.x + cell.w, a: cell.y, b: cell.y + cell.h, side: 'right' },
+    ];
+    for (const edge of edges) {
+      const marks = [edge.a, edge.b], spans = [];
+      for (const other of cells) {
+        if (other === cell) continue;
+        const touching = edge.axis === 'h'
+          ? (edge.side === 'top' ? near(other.y + other.h, edge.fixed) : near(other.y, edge.fixed))
+          : (edge.side === 'left' ? near(other.x + other.w, edge.fixed) : near(other.x, edge.fixed));
+        if (!touching) continue;
+        const start = Math.max(edge.a, edge.axis === 'h' ? other.x : other.y), end = Math.min(edge.b, edge.axis === 'h' ? other.x + other.w : other.y + other.h);
+        if (end - start > E) { spans.push([start, end]); marks.push(start, end); }
+      }
+      [...new Set(marks.map(n => +n.toFixed(5)))].sort((a, b) => a - b).forEach((start, i, list) => {
+        const end = list[i + 1]; if (!(end - start > E)) return;
+        const mid = (start + end) / 2, insideNeighbor = spans.some(([a, b]) => mid > a - E && mid < b + E);
+        const type = insideNeighbor ? 'int' : 'ext', offset = type === 'ext' ? X / 2 : 0;
+        if (edge.axis === 'h') wall(start, edge.fixed + (edge.side === 'top' ? -offset : offset), end, edge.fixed + (edge.side === 'top' ? -offset : offset), type);
+        else wall(edge.fixed + (edge.side === 'left' ? -offset : offset), start, edge.fixed + (edge.side === 'left' ? -offset : offset), end, type);
+      });
+    }
+  }
+  return mergeWalls(raw);
+}
+function openingOnWall(walls, portal, id) {
+  const wall = walls.find(w => portal.axis === 'h'
+    ? near(w.y1, w.y2) && near(w.y1, portal.y) && portal.x - portal.w / 2 >= Math.min(w.x1, w.x2) - E && portal.x + portal.w / 2 <= Math.max(w.x1, w.x2) + E
+    : near(w.x1, w.x2) && near(w.x1, portal.x) && portal.y - portal.w / 2 >= Math.min(w.y1, w.y2) - E && portal.y + portal.w / 2 <= Math.max(w.y1, w.y2) + E);
+  if (!wall) throw Error('تعذر ربط فتحة في النموذج الطوبولوجي بجدار صالح.');
+  const length = Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1);
+  return { ...portal, id, wallId: wall.id, pos: Math.hypot(portal.x - wall.x1, portal.y - wall.y1) / length, x: undefined, y: undefined, axis: undefined };
+}
+function stackWing(seed, side, corridor, startY, wingWidth) {
+  const rooms = [], ordered = seed.filter(r => r.resolvedSide === side).sort((a, b) => ['front', 'middle', 'back'].indexOf(a.position) - ['front', 'middle', 'back'].indexOf(b.position) || b.area - a.area || a.id.localeCompare(b.id));
+  let y = startY;
+  for (const room of ordered) {
+    const min = TYPES[room.type].min;
+    let w = room.type === 'bath' || room.type === 'storage' ? Math.min(wingWidth, Math.max(min, Math.sqrt(room.area * 1.3))) : wingWidth;
+    w = Math.min(wingWidth, Math.max(min, Math.min(w, room.area / min)));
+    const h = room.area / w;
+    if (h < min - E || !Number.isFinite(h)) throw Error('مساحة ' + room.name + ' لا تناسب جناحًا طوبولوجيًا بعرض كافٍ.');
+    rooms.push({ ...room, x: side === 'left' ? corridor.x - w : corridor.x + corridor.w, y, w, h, corridorId: corridor.id, doorSide: side === 'left' ? 'right' : 'left' });
+    y += h + T;
+  }
+  return { rooms, end: y - (rooms.length ? T : 0) };
+}
+
+export function generateTopologyModel(rawPlot, rawRooms, { topology = 'u-court' } = {}) {
+  if (!['u-court', 'courtyard'].includes(topology)) throw Error('نموذج طوبولوجي غير معروف.');
+  const plot = validatePlot(rawPlot), f = footprint(plot), program = normalizeRooms(rawRooms), base = generateModel(plot, program, { strategy: 'balanced' });
+  const sideways = ['e', 'w'].includes(plot.entry), localW = sideways ? f.h : f.w, localD = sideways ? f.w : f.h;
+  const seeds = program.map(room => {
+    const found = base.rooms.find(r => r.id === room.id), local = localRectForEntry(found, plot.entry);
+    return { ...room, resolvedSide: found.resolvedSide, w: local.w, h: local.h };
+  });
+  if (!seeds.some(r => r.resolvedSide === 'left') || !seeds.some(r => r.resolvedSide === 'right')) throw Error('يحتاج نموذج الفناء جناحين على الأقل؛ ثبّت بعض الغرف على جانبي المدخل أو استخدم البديل المحوري.');
+  let solution = null;
+  for (let wing = Math.min(7.2, localW * .29); wing >= 4.2; wing -= .25) {
+    const c = GEOMETRY.corridor, courtW = localW - 2 * (wing + c) - 2 * X;
+    if (courtW < 3.2) continue;
+    const start = X + (topology === 'courtyard' ? c : 0), leftCorridor = { id: 'topo-left', name: 'رواق الفناء الأيسر', x: X + wing, y: start, w: c, h: 1 }, rightCorridor = { id: 'topo-right', name: 'رواق الفناء الأيمن', x: X + wing + c + courtW, y: start, w: c, h: 1 };
+    try {
+      const left = stackWing(seeds, 'left', leftCorridor, start, wing), right = stackWing(seeds, 'right', rightCorridor, start, wing), depth = Math.max(left.end, right.end) - start;
+      const builtDepth = start + depth + c + X;
+      const builtWidth = 2 * wing + 2 * c + courtW + 2 * X;
+      if (builtDepth > localD + E || builtWidth * builtDepth > Math.min(f.area, plot.maxBuiltArea ?? Infinity) + E) continue;
+      leftCorridor.h = depth; rightCorridor.h = depth;
+      const back = { id: 'topo-back', name: 'رواق خلفي للفناء', x: leftCorridor.x, y: start + depth, w: c + courtW + c, h: c };
+      const corridors = [leftCorridor, rightCorridor, back];
+      if (topology === 'courtyard') corridors.unshift({ id: 'topo-front', name: 'رواق مدخل الفناء', x: leftCorridor.x, y: X, w: c + courtW + c, h: c });
+      const topologyRooms = [...left.rooms, ...right.rooms];
+      solution = { wing, courtW, rooms: topologyRooms, leftRooms: left.rooms, rightRooms: right.rooms, corridors, localBuilding: rectBounds([...topologyRooms, ...corridors]), courtyard: { x: leftCorridor.x + c, y: start, w: courtW, h: depth }, links: topology === 'courtyard' ? [['topo-left', 'topo-front'], ['topo-right', 'topo-front'], ['topo-left', 'topo-back'], ['topo-right', 'topo-back']] : [['topo-left', 'topo-back'], ['topo-right', 'topo-back']] };
+      break;
+    } catch { /* Try a wider wing. */ }
+  }
+  if (!solution) throw Error('تعذر ملاءمة نموذج الفناء الطوبولوجي ضمن الأرض والمساحات الحالية؛ استُخدم البديل المحوري دون تصغير الغرف.');
+  const cells = [...solution.rooms, ...solution.corridors], localWalls = cellWalls(cells), portals = [];
+  for (const room of solution.rooms) {
+    const corridor = solution.corridors.find(c => c.id === room.corridorId), shared = sharedBoundary(room, corridor);
+    if (!shared) throw Error('غرفة بلا اتصال فعلي برواق الفناء.');
+    portals.push({ type: 'door', x: shared.x, y: shared.y, axis: shared.axis, w: Math.min(room.type === 'bath' ? .8 : .95, shared.length - .12), h: 2.1, sill: 0, roomId: room.id, connects: [room.id, corridor.id] });
+    // Windows are intentionally placed by the editor on the final exposed segment;
+    // this avoids pretending that one automatic location suits privacy, sun and furniture.
+  }
+  const entryCorridor = solution.corridors.find(c => c.id === (topology === 'courtyard' ? 'topo-front' : 'topo-left'));
+  portals.push({ type: 'door', x: entryCorridor.x + entryCorridor.w / 2, y: entryCorridor.y - X / 2, axis: 'h', w: 1.15, h: 2.2, sill: 0, connects: ['outside', entryCorridor.id] });
+  const openings = portals.map((portal, i) => openingOnWall(localWalls, portal, 'opening-' + i)).map(({ x, y, axis, ...o }) => o);
+  const transform = mapper(plot, f), model = {
+    version: 1, engineVersion: ENGINE_VERSION, strategy: topology, architecture: { tag: topology === 'courtyard' ? 'فناء حقيقي' : 'كتلة U حقيقية', form: topology === 'courtyard' ? 'أربعة أضلاع تحيط بفناء مفتوح' : 'جناحان ورواق خلفي يحيطان بباحة', idea: 'مولّد طوبولوجي قائم على علاقات الغرف والممرات والفراغ المفتوح.', bestFor: 'برنامج سكني يحتاج ضوءًا وخصوصية متدرجة', tradeoff: 'زيادة طول الواجهة والجدران مقارنة بالكتلة المدمجة', massing: topology },
+    topology, plot, footprint: f, building: transform.rect(solution.localBuilding), program, rooms: solution.rooms.map(transform.rect), corridors: solution.corridors.map(transform.rect), reserves: [], links: solution.links, walls: localWalls.map(w => { const a = transform.point(w.x1, w.y1), b = transform.point(w.x2, w.y2); return { ...w, x1: a.x, y1: a.y, x2: b.x, y2: b.y }; }), openings, courtyards: [transform.rect(solution.courtyard)], massingParts: [rectBounds([...solution.leftRooms, solution.corridors.find(c => c.id === 'topo-left')]), rectBounds([...solution.rightRooms, solution.corridors.find(c => c.id === 'topo-right')]), rectBounds([solution.corridors.find(c => c.id === 'topo-back')]), ...(topology === 'courtyard' ? [rectBounds([solution.corridors.find(c => c.id === 'topo-front')])] : [])].map(transform.rect), builtArea: sum(cells, r => r.w * r.h), drawnFloors: 1, warnings: ['هذا نموذج طوبولوجي يولّد فناء/باحة فعلية بين الأجنحة؛ يظل تصورًا معماريًا أوليًا يحتاج مراجعة كود وبنية وإنارة وتهوية.']
+  };
+  const errors = validateModel(model); if (errors.length) throw Error(errors[0]);
+  return model;
+}
+
+// Alternatives include true topological forms when the submitted program can accommodate them.
 export function generateAlternatives(plot, rooms) {
   const models = [], fingerprints = new Set(), failures = [];
-  for (const strategy of Object.keys(STRATEGIES)) {
+  for (const topology of ['courtyard', 'u-court']) {
+    try {
+      const model = generateTopologyModel(plot, rooms, { topology });
+      const key = topology + JSON.stringify(model.courtyards);
+      if (!fingerprints.has(key)) { fingerprints.add(key); models.push(model); }
+    } catch (error) { failures.push({ strategy: topology, reason: error.message }); }
+  }
+  for (const strategy of ['compact', 'balanced', 'frontage']) {
     try {
       const model = generateModel(plot, rooms, { strategy });
       const key = JSON.stringify(model.rooms.map(r => [r.id, r.x, r.y, r.w, r.h].map(v => typeof v === 'number' ? +v.toFixed(5) : v)).sort((a, b) => a[0].localeCompare(b[0])));
@@ -277,13 +407,48 @@ export function openingPoint(model, o) {
   const w = model.walls.find(w => w.id === o.wallId);
   return { x: w.x1 + (w.x2 - w.x1) * o.pos, y: w.y1 + (w.y2 - w.y1) * o.pos };
 }
+export function placeOpening(model, { type, point }) {
+  if (!['door', 'window'].includes(type) || !point || ![point.x, point.y].every(Number.isFinite)) throw Error('اختر بابًا أو نافذة ثم اضغط جدارًا صالحًا.');
+  const copy = structuredClone(model);
+  const closest = copy.walls.map(w => {
+    const dx = w.x2 - w.x1, dy = w.y2 - w.y1, len2 = dx * dx + dy * dy, t = Math.max(0, Math.min(1, ((point.x - w.x1) * dx + (point.y - w.y1) * dy) / len2));
+    const x = w.x1 + dx * t, y = w.y1 + dy * t;
+    return { w, t, x, y, distance: Math.hypot(point.x - x, point.y - y) };
+  }).sort((a, b) => a.distance - b.distance)[0];
+  if (!closest || closest.distance > .55) throw Error('اضغط مباشرة على جدار لإضافة الفتحة.');
+  if (type === 'window' && closest.w.type !== 'ext') throw Error('النافذة يجب أن تكون على جدار خارجي.');
+  const length = Math.hypot(closest.w.x2 - closest.w.x1, closest.w.y2 - closest.w.y1), width = type === 'door' ? .9 : 1.35;
+  if (closest.t * length - width / 2 < .1 || closest.t * length + width / 2 > length - .1) throw Error('اترك مسافة عند طرفي الجدار للفتحة.');
+  if (copy.openings.some(o => o.wallId === closest.w.id && Math.abs(o.pos - closest.t) * length < (o.w + width) / 2 + .08)) throw Error('هذه الفتحة تتداخل مع فتحة موجودة.');
+  const opening = { id: 'opening-' + (Math.max(-1, ...copy.openings.map(o => Number(o.id.split('-').at(-1)) || 0)) + 1), type, wallId: closest.w.id, pos: closest.t, w: width, h: type === 'door' ? 2.1 : 1.2, sill: type === 'door' ? 0 : 1.05 };
+  if (type === 'door') {
+    const ux = (closest.w.x2 - closest.w.x1) / length, uy = (closest.w.y2 - closest.w.y1) / length, nx = -uy, ny = ux, d = closest.w.t / 2 + .03;
+    const a = { x: closest.x + nx * d, y: closest.y + ny * d }, b = { x: closest.x - nx * d, y: closest.y - ny * d };
+    const nodes = [...copy.rooms, ...copy.corridors];
+    const nodeAt = p => nodes.find(r => p.x >= r.x - E && p.x <= r.x + r.w + E && p.y >= r.y - E && p.y <= r.y + r.h + E)?.id || (p.x < copy.building.x || p.x > copy.building.x + copy.building.w || p.y < copy.building.y || p.y > copy.building.y + copy.building.h ? 'outside' : null);
+    const first = nodeAt(a), second = nodeAt(b);
+    if (!first || !second || first === second) throw Error('لا يمكن وضع الباب هنا لأنه لا يصل بين فراغين صالحين.');
+    opening.connects = [first, second];
+  }
+  copy.openings.push(opening); const errors = validateModel(copy); if (errors.length) throw Error(errors[0]);
+  return copy;
+}
+export function removeOpening(model, point) {
+  if (!point || ![point.x, point.y].every(Number.isFinite)) throw Error('اضغط على فتحة لإزالتها.');
+  const copy = structuredClone(model), match = copy.openings.map(o => ({ o, p: openingPoint(copy, o) })).sort((a, b) => Math.hypot(point.x - a.p.x, point.y - a.p.y) - Math.hypot(point.x - b.p.x, point.y - b.p.y))[0];
+  if (!match || Math.hypot(point.x - match.p.x, point.y - match.p.y) > .7) throw Error('لم تُحدّد فتحة قريبة لإزالتها.');
+  if (match.o.connects?.includes('outside')) throw Error('لا يمكن حذف مدخل الوصول الأساسي من المحرر.');
+  copy.openings = copy.openings.filter(o => o.id !== match.o.id); const errors = validateModel(copy); if (errors.length) throw Error(errors[0]);
+  return copy;
+}
 export function validateModel(m) {
   const errors = [], fail = s => errors.push(s);
   const containsPoint = (r, p) => p.x >= r.x - E && p.x <= r.x + r.w + E && p.y >= r.y - E && p.y <= r.y + r.h + E;
   const nodes = new Map([...m.rooms, ...m.corridors].map(r => [r.id, r]));
   if (nodes.size !== m.rooms.length + m.corridors.length || new Set(m.walls.map(w => w.id)).size !== m.walls.length || new Set(m.openings.map(o => o.id)).size !== m.openings.length) fail('معرّفات هندسية مكررة.');
   if (!inside(m.building, m.footprint)) fail('كتلة المبنى تتجاوز المساحة المتاحة.');
-  if (m.plot.maxBuiltArea !== null && m.plot.maxBuiltArea !== undefined && m.building.w * m.building.h > m.plot.maxBuiltArea + E) fail('كتلة المبنى تتجاوز سقف البناء المطلوب.');
+  const builtArea = m.builtArea ?? m.building.w * m.building.h;
+  if (m.plot.maxBuiltArea !== null && m.plot.maxBuiltArea !== undefined && builtArea > m.plot.maxBuiltArea + E) fail('كتلة المبنى تتجاوز سقف البناء المطلوب.');
   if (m.rooms.length !== m.program.length) fail('عدد الغرف لا يطابق البرنامج.');
   m.corridors.forEach(c => { if (![c.x, c.y, c.w, c.h].every(Number.isFinite) || c.w <= 0 || c.h <= 0 || !inside(c, m.building)) fail('ممر غير صالح.'); });
   m.openings.forEach(o => {
@@ -322,7 +487,7 @@ export function validateModel(m) {
       if (o.type === 'window' && w.type !== 'ext') fail('نافذة على جدار غير خارجي.');
     });
   }
-  if (!errors.length) wallPieces(m).filter(p => p.bottom < 1.6 && p.bottom + p.height > 1.6).forEach(p => {
+  if (!errors.length && !m.topology) wallPieces(m).filter(p => p.bottom < 1.6 && p.bottom + p.height > 1.6).forEach(p => {
     const horizontal = Math.abs(Math.sin(p.angle)) < E;
     const r = { x: p.x - (horizontal ? p.length : p.thickness) / 2, y: p.y - (horizontal ? p.thickness : p.length) / 2, w: horizontal ? p.length : p.thickness, h: horizontal ? p.thickness : p.length };
     if (m.corridors.some(c => overlap(c, r))) fail('يوجد جدار يعوق المساحة الصافية للممر.');
@@ -352,5 +517,5 @@ export function wallPieces(model) {
 }
 export function quantities(model) {
   const netWallArea = sum(wallPieces(model), p => p.length * p.height);
-  return { footprint: model.building.w * model.building.h, rooms: sum(model.rooms, r => r.w * r.h), circulation: sum(model.corridors, r => r.w * r.h), reserve: sum(model.reserves, r => r.w * r.h), wallArea: netWallArea, finishArea: netWallArea * 2, wallVolume: sum(wallPieces(model), p => p.length * p.height * p.thickness), doors: model.openings.filter(o => o.type === 'door').length, windows: model.openings.filter(o => o.type === 'window').length, floors: 1 };
+  return { footprint: model.builtArea ?? model.building.w * model.building.h, rooms: sum(model.rooms, r => r.w * r.h), circulation: sum(model.corridors, r => r.w * r.h), reserve: sum(model.reserves, r => r.w * r.h), wallArea: netWallArea, finishArea: netWallArea * 2, wallVolume: sum(wallPieces(model), p => p.length * p.height * p.thickness), doors: model.openings.filter(o => o.type === 'door').length, windows: model.openings.filter(o => o.type === 'window').length, floors: 1 };
 }

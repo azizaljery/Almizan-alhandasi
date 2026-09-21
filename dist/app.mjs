@@ -1,5 +1,5 @@
 import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
-import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities } from './planner.mjs';
+import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
 import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
 import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
@@ -18,7 +18,7 @@ const $ = id => document.getElementById(id), all = selector => [...document.quer
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -193,11 +193,34 @@ async function startTour() {
   if (!state.tour.length) return toast('ولّد مخططًا أولًا لبدء الجولة.');
   await showTourRoom(0, { scroll: true });
 }
+function syncPlanEditor() {
+  const open = !!state.editor.open;
+  $('planEditor').hidden = !open; $('togglePlanEditor').setAttribute('aria-expanded', String(open));
+  $('togglePlanEditor').textContent = open ? '× أخفِ التحرير' : '✎ حرّر المخطط';
+  all('[data-plan-tool]').forEach(button => button.classList.toggle('on', button.dataset.planTool === state.editor.tool));
+  const instructions = { select: 'اختر غرفة لقراءة تفاصيلها. اختر بابًا أو نافذة أو حذفًا لتعديل الرسم.', door: 'اضغط على جدار فاصل أو خارجي لإضافة باب صالح.', window: 'اضغط على جدار خارجي لإضافة نافذة.', erase: 'اضغط قرب باب أو نافذة لحذفها. المدخل الأساسي محمي.' };
+  $('planEditorStatus').textContent = instructions[state.editor.tool] || instructions.select;
+  viewport?.setEditor({ active: open, tool: state.editor.tool, onAction: editPlanAtPoint });
+}
+function editPlanAtPoint(action) {
+  if (!state.model) return;
+  if (action.tool === 'select') { if (action.room) selectRoom(action.room); return; }
+  try {
+    const before = state.model;
+    const next = action.tool === 'erase' ? removeOpening(before, action.point) : placeOpening(before, { type: action.tool, point: action.point });
+    state.history = [...state.history, { model: before, palette: state.palette }].slice(-5);
+    state.model = next;
+    const index = state.alternatives.indexOf(before); if (index >= 0) state.alternatives[index] = next;
+    state.signature = signature(rawPlot(), state.program); state.engineeringSignature = engineeringSignature();
+    showResults();
+    toast(action.tool === 'erase' ? 'حُذفت الفتحة المحددة.' : action.tool === 'door' ? 'أُضيف الباب إلى المخطط.' : 'أُضيفت النافذة إلى المخطط.');
+  } catch (error) { toast(error.message); }
+}
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
   refreshEngineering();
   circulation = circulationNetwork(m);
-  viewport = new PlanViewport($('plan'), m, selectRoom);
+  viewport = new PlanViewport($('plan'), m, selectRoom); syncPlanEditor();
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
@@ -518,6 +541,13 @@ function boot() {
   });
   $('zoomIn').addEventListener('click', () => viewport?.zoom(.8)); $('zoomOut').addEventListener('click', () => viewport?.zoom(1.25));
   $('fitPlan').addEventListener('click', () => viewport?.fit()); $('fitPlot').addEventListener('click', () => viewport?.fit(true));
+  $('togglePlanEditor').addEventListener('click', () => { state.editor.open = !state.editor.open; syncPlanEditor(); });
+  $('closePlanEditor').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); });
+  $('planEditor').addEventListener('click', event => {
+    const tool = event.target.closest('[data-plan-tool]'); if (!tool) return;
+    state.editor.tool = tool.dataset.planTool; syncPlanEditor();
+  });
+  $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
   $('showRoute').addEventListener('change', drawRoute);
   $('saveProject').addEventListener('click', saveProject);
