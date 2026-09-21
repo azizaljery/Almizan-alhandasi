@@ -15,7 +15,37 @@ export const SIDES = { any: 'تلقائي', left: 'يسار المدخل', right
 export const DIRECTIONS = { s: 'جنوب', n: 'شمال', e: 'شرق', w: 'غرب' };
 export const GEOMETRY = { exterior: .25, partition: .15, corridor: 1.6, branch: 1.2, height: 3.2 };
 export const ENGINE_VERSION = 'rectangular-2';
-export const STRATEGIES = { compact: 'اقتصاد المساحة', balanced: 'توازن أبعاد الغرف', frontage: 'تقليل الغرف الداخلية' };
+export const STRATEGIES = {
+  compact: 'الرواق المحوري',
+  balanced: 'الجناحان المتوازنان',
+  frontage: 'الواجهة العريضة',
+};
+export const CONCEPT_PROFILES = {
+  compact: {
+    tag: 'محور واضح',
+    form: 'كتلة طولية بإيقاع منتظم ومدخل مقروء',
+    idea: 'يربط المدخل بالفراغات عبر رواق رئيسي واضح، ويضغط مساحة الحركة قدر الإمكان.',
+    bestFor: 'الأراضي العميقة والبرنامج الكبير',
+    tradeoff: 'المحور أطول وقد يحتاج معالجة ضوء في المنتصف',
+    massing: 'spine',
+  },
+  balanced: {
+    tag: 'خصوصية متدرجة',
+    form: 'جناح ضيافة وجناح عائلي حول قلب مشترك',
+    idea: 'يوازن بين أبعاد الغرف، ويجعل وسط المنزل نقطة انتقال بين العام والخاص.',
+    bestFor: 'العائلة والضيافة المتكررة',
+    tradeoff: 'مساحة حركة أكبر مقابل فصل أوضح',
+    massing: 'twin-wings',
+  },
+  frontage: {
+    tag: 'اتصال بالحديقة',
+    form: 'كتلة أقصر وأعرض مع حضور قوي للواجهة',
+    idea: 'يوسّع الواجهة المعمارية ويزيد فرص الفتحات الخارجية والاتصال بالفراغ المفتوح.',
+    bestFor: 'الأراضي العريضة والواجهات المهمة',
+    tradeoff: 'يحتاج عرض أرض أكبر وقد يرفع طول الجدار الخارجي',
+    massing: 'garden-front',
+  },
+};
 const E = 1e-5, T = GEOMETRY.partition, X = GEOMETRY.exterior;
 const sum = (list, fn) => list.reduce((a, v) => a + fn(v), 0);
 const near = (a, b) => Math.abs(a - b) < E;
@@ -218,14 +248,14 @@ export function generateModel(rawPlot, rawRooms, { strategy = 'compact' } = {}) 
     return { ...rest, id: 'opening-' + i, wallId: w.id, pos };
   });
   const walls = localWalls.map(w => { const a = transform.point(w.x1, w.y1), b = transform.point(w.x2, w.y2); return { ...w, x1: a.x, y1: a.y, x2: b.x, y2: b.y }; });
-  const model = { version: 1, engineVersion: ENGINE_VERSION, strategy, plot, footprint: f, building: transform.rect(buildingLocal), program, rooms: rooms.map(transform.rect), corridors: corridors.map(transform.rect), reserves: reserves.map(transform.rect), links, walls, openings, drawnFloors: 1, warnings: [] };
+  const model = { version: 1, engineVersion: ENGINE_VERSION, strategy, architecture: { ...CONCEPT_PROFILES[strategy] }, plot, footprint: f, building: transform.rect(buildingLocal), program, rooms: rooms.map(transform.rect), corridors: corridors.map(transform.rect), reserves: reserves.map(transform.rect), links, walls, openings, drawnFloors: 1, warnings: [] };
   const errors = validateModel(model);
   if (errors.length) throw Error(errors[0]);
   if (plot.floors > 1) model.warnings.push('المعروض والكميات للدور الأرضي فقط؛ الأدوار الأخرى والسلالم لم تُصمّم.');
   const noWindows = model.rooms.filter(r => !openings.some(o => o.roomId === r.id && o.type === 'window'));
   if (noWindows.length) model.warnings.push('فراغات دون نافذة خارجية في هذا الحل: ' + noWindows.map(r => r.name).join('، ') + '. تحتاج مراجعة الإضاءة والتهوية.');
   if (reserves.length) model.warnings.push('المساحات الرمادية غير موزعة وليست غرفاً مطلوبة؛ تظهر مساحتها مستقلة.');
-  model.warnings.push('المساحات صافية بين أوجه الجدران. شكل مستطيل ومدخل واحد؛ لا ضمان للفصل التام بين الضيوف والعائلة أو مطابقة كود البناء.');
+  model.warnings.push('المساحات صافية بين أوجه الجدران. هذا بديل تخطيطي بكتلة أرضية منتظمة ومدخل واحد؛ لغة الكتلة الخارجية لا تثبت مطابقة الكود أو الفصل التام بين الضيوف والعائلة.');
   return model;
 }
 

@@ -1,5 +1,5 @@
 import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
-import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities } from './planner.mjs';
+import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities } from './planner.mjs';
 import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
 import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
@@ -27,7 +27,7 @@ function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
 function discoveryText() {
   const d = state.discovery, parts = [];
-  const examples = { courtyard_privacy: 'خصوصية ضيافة وفناء', family_layout: 'بيت عائلي واضح', concept_comparison: 'مقارنة التصورات قبل القرار', classic_living: 'إحساس داخلي كلاسيكي دافئ' };
+  const examples = { courtyard_privacy: 'بيت الفناء الخاص', family_layout: 'جناحان على شكل L', concept_comparison: 'بيت الباحة U', classic_living: 'أجنحة مرتبطة برواق' };
   if (d.likes.length) parts.push(`أفكار مفضلة: ${d.likes.map(style => examples[style] || style).join('، ')}.`);
   if (d.rejects.length) parts.push(`أفكار غير مفضلة: ${d.rejects.map(style => examples[style] || style).join('، ')}.`);
   if (d.avoids.length) parts.push(`تجنّب: ${d.avoids.join('، ')}.`);
@@ -216,6 +216,14 @@ function refreshEngineering() {
 function currentEngineeringEvaluation() {
   return state.engineering?.rows?.find(row => row.design.sourceModel === state.model)?.evaluation || null;
 }
+function conceptThumbnail(model) {
+  const b = model.building, pad = .7, colors = { majlis: '#d9b777', living: '#8fb5a6', dining: '#d9c69c', kitchen: '#a8bd8d', bedroom: '#9da8c9', bath: '#8fb9c8', storage: '#b7aea1', service: '#cfa59f' };
+  const rect = (r, fill, radius = .08) => `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${radius}" fill="${fill}"/>`;
+  const rooms = model.rooms.map(r => rect(r, colors[r.type] || '#b8b2aa')).join('');
+  const corridors = model.corridors.map(r => rect(r, '#f3ead8', .03)).join('');
+  const walls = model.walls.map(w => `<line x1="${w.x1}" y1="${w.y1}" x2="${w.x2}" y2="${w.y2}" stroke="${w.type === 'ext' ? '#2e4a3d' : '#708078'}" stroke-width="${w.t}"/>`).join('');
+  return `<svg class="concept-thumb" viewBox="${b.x - pad} ${b.y - pad} ${b.w + pad * 2} ${b.h + pad * 2}" preserveAspectRatio="xMidYMid meet" aria-label="معاينة هندسية فعلية لهذا البديل" role="img"><rect x="${b.x - pad}" y="${b.y - pad}" width="${b.w + pad * 2}" height="${b.h + pad * 2}" fill="#f8f5ef"/>${corridors}${rooms}${walls}</svg>`;
+}
 function renderEngineeringReview() {
   const current = currentEngineeringEvaluation();
   if (!current) {
@@ -235,12 +243,13 @@ function renderEngineeringReview() {
 function renderAlternatives() {
   $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
     const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
+    const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
     const evaluation = state.engineering?.rows?.[index]?.evaluation;
     const engineering = evaluation ? `<div><dt>قرار الميزان</dt><dd>${fmt(evaluation.score, 0)} / ١٠٠</dd></div><div><dt>عوائق</dt><dd>${fmt(evaluation.blockers.length, 0)}</dd></div>` : '';
-    return `<article class="alternative-card${selected ? ' selected' : ''}"><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض' : 'اعرض هذا البديل'}</button></article>`;
+    return `<article class="alternative-card${selected ? ' selected' : ''}">${conceptThumbnail(model)}<span class="concept-tag">${esc(concept.tag)}</span><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><p class="concept-form">${esc(concept.form)}. ${esc(concept.idea)}</p><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><p class="concept-fit"><b>أنسب لـ:</b> ${esc(concept.bestFor)}<br><b>المقايضة:</b> ${esc(concept.tradeoff)}</p><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض في 2D و3D' : 'اعرض هذا النموذج'}</button></article>`;
   }).join('');
   const failed = state.failures.map(f => `${STRATEGIES[f.strategy]}: ${f.reason}`).join(' ');
-  $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تُستبعد النسخ المتطابقة والحلول غير الصالحة. المقارنة ضمن الكتلة المستطيلة وليست ثلاثة أنماط معمارية كاملة. ${failed}`;
+  $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
   markDirty();
 }
 function renderPlanReview() {

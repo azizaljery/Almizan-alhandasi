@@ -12,11 +12,17 @@ export class RoomViewer {
     catch { throw Error('عرض 3D يحتاج WebGL، وهو غير متاح في هذا المتصفح. يمكنك متابعة المخطط 2D.'); }
     this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 2));
     this.renderer.outputColorSpace = T.SRGBColorSpace;
+    if (T.ACESFilmicToneMapping) this.renderer.toneMapping = T.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.05;
+    if (this.renderer.shadowMap) { this.renderer.shadowMap.enabled = true; if (T.PCFSoftShadowMap) this.renderer.shadowMap.type = T.PCFSoftShadowMap; }
     const canvas = this.renderer.domElement;
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
-    this.scene.add(new T.HemisphereLight(0xffffff, 0x88877b, 2));
-    const light = new T.DirectionalLight(0xfff0d5, 2.2); light.position.set(30, 60, -10); this.scene.add(light);
+    this.scene.add(new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8));
+    const light = new T.DirectionalLight(0xffe4b6, 3.1); light.position.set(-28, 48, 18); light.castShadow = true;
+    if (light.shadow?.mapSize) { light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048; light.shadow.camera.near = 1; light.shadow.camera.far = 120; }
+    this.scene.add(light);
+    const fill = new T.DirectionalLight(0xbcd8ff, .75); fill.position.set(24, 18, -35); this.scene.add(fill);
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
     const on = (event, handler, options = {}) => canvas.addEventListener(event, handler, { ...options, signal: this.abort.signal });
@@ -54,41 +60,119 @@ export class RoomViewer {
     this.group.traverse(o => { if (o.geometry) geometries.add(o.geometry); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => materials.add(m)); });
     this.group.clear(); geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose());
   }
-  mesh(x, y, z, w, h, d, color, rotation = 0, opacity = 1) {
-    const T = this.T, material = new T.MeshStandardMaterial({ color, roughness: .85, transparent: opacity < 1, opacity });
-    const m = new T.Mesh(new T.BoxGeometry(w, h, d), material); m.position.set(x, y, z); m.rotation.y = rotation; this.group.add(m); return m;
+  mesh(x, y, z, w, h, d, color, rotation = 0, opacity = 1, options = {}) {
+    const T = this.T;
+    const Material = options.glass && T.MeshPhysicalMaterial ? T.MeshPhysicalMaterial : T.MeshStandardMaterial;
+    const material = new Material({ color, roughness: options.roughness ?? (options.glass ? .12 : .78), metalness: options.metalness ?? 0, transparent: opacity < 1 || options.glass, opacity, depthWrite: !(options.glass || opacity < .55), ...(options.glass ? { transmission: .55, thickness: .05 } : {}) });
+    const m = new T.Mesh(new T.BoxGeometry(Math.max(.01, w), Math.max(.01, h), Math.max(.01, d)), material);
+    m.position.set(x, y, z); m.rotation.y = rotation; m.castShadow = options.castShadow ?? !options.glass; m.receiveShadow = options.receiveShadow ?? !options.glass;
+    (options.parent || this.group).add(m); return m;
   }
   setModel(model, palette = 'resort') {
     this.clear(); this.model = model; this.pieces = wallPieces(model);
-    const b = model.building, p = model.plot, T = this.T;
-    const color = { resort: '#ead9bc', modern: '#f3f1ec', classic: '#e0ceae', hijazi: '#cdb390' }[palette] || '#ead9bc';
-    this.mesh(p.width / 2, -.12, -p.length / 2, p.width, .18, p.length, '#c8d3c1');
-    this.mesh(b.x + b.w / 2, -.01, -b.y - b.h / 2, b.w, .12, b.h, '#e6e1d5');
+    const b = model.building, p = model.plot, T = this.T, concept = model.architecture?.massing || 'spine';
+    const materials = {
+      resort: { facade: '#ead9bc', accent: '#8e6948', roof: '#d2bea0', floor: '#eee5d5', metal: '#604d3b' },
+      modern: { facade: '#f4f2ed', accent: '#5a6666', roof: '#d8d6cf', floor: '#e8e4dc', metal: '#303839' },
+      classic: { facade: '#e5d3b6', accent: '#a77d49', roof: '#c5ad88', floor: '#eee2ce', metal: '#5c4936' },
+      hijazi: { facade: '#d7bea0', accent: '#7c4f3c', roof: '#b89b77', floor: '#eadbc8', metal: '#483a31' },
+    };
+    const style = materials[palette] || materials.resort;
+    const floorColors = { bedroom: '#dfe3ee', majlis: '#ead9bb', living: '#d7e8df', dining: '#eee3cf', kitchen: '#dce8d3', bath: '#dcecf1', storage: '#e6e1da', service: '#ead9d5', corridor: '#eee9df' };
+    const addBox = (...args) => this.mesh(...args);
+
+    // Site, streets, entry walk and a raised architectural plinth.
+    addBox(p.width / 2, -.18, -p.length / 2, p.width + 3, .28, p.length + 3, '#aebd9d', 0, 1, { roughness: 1, receiveShadow: true });
+    const road = '#777b7c';
+    if (p.streets.s) addBox(p.width / 2, -.12, 1.15, p.width + 3, .12, 2.1, road);
+    if (p.streets.n) addBox(p.width / 2, -.12, -p.length - 1.15, p.width + 3, .12, 2.1, road);
+    if (p.streets.w) addBox(-1.15, -.12, -p.length / 2, 2.1, .12, p.length + 3, road);
+    if (p.streets.e) addBox(p.width + 1.15, -.12, -p.length / 2, 2.1, .12, p.length + 3, road);
+    addBox(b.x + b.w / 2, -.005, -b.y - b.h / 2, b.w + .3, .16, b.h + .3, '#d4c7b6', 0, 1, { receiveShadow: true });
+
+    const externalDoor = model.openings.find(o => o.type === 'door' && o.connects?.includes('outside'));
+    if (externalDoor) {
+      const ep = openingPoint(model, externalDoor), entry = model.plot.entry;
+      if (entry === 's') addBox(ep.x, .02, -ep.y / 2, 1.45, .08, Math.max(.2, ep.y), '#c9b18d');
+      if (entry === 'n') addBox(ep.x, .02, -(ep.y + p.length) / 2, 1.45, .08, Math.max(.2, p.length - ep.y), '#c9b18d');
+      if (entry === 'w') addBox(ep.x / 2, .02, -ep.y, Math.max(.2, ep.x), .08, 1.45, '#c9b18d');
+      if (entry === 'e') addBox((ep.x + p.width) / 2, .02, -ep.y, Math.max(.2, p.width - ep.x), .08, 1.45, '#c9b18d');
+      addBox(ep.x, 2.65, -ep.y, externalDoor.w + 1.35, .18, 1.25, style.accent, entry === 'e' || entry === 'w' ? Math.PI / 2 : 0, 1, { metalness: .05 });
+      for (const side of [-1, 1]) {
+        const sideways = entry === 'e' || entry === 'w';
+        addBox(ep.x + (sideways ? 0 : side * (externalDoor.w + 1) / 2), 1.3, -ep.y + (sideways ? side * (externalDoor.w + 1) / 2 : 0), .12, 2.6, .12, style.metal);
+      }
+    }
+
+    // Floor finishes and furniture groups remain explicitly schematic, but read at architectural scale.
+    model.corridors.forEach(r => addBox(r.x + r.w / 2, .085, -r.y - r.h / 2, r.w, .035, r.h, '#eee8da', 0, 1, { roughness: .62 }));
     model.rooms.forEach(r => {
-      this.mesh(r.x + r.w / 2, .058, -r.y - r.h / 2, r.w, .015, r.h, TYPES[r.type].color);
-      // Schematic furniture only; not included in the quantity schedule.
+      addBox(r.x + r.w / 2, .09, -r.y - r.h / 2, r.w, .04, r.h, floorColors[r.type] || TYPES[r.type].color, 0, 1, { roughness: .58 });
       if (r.type === 'bedroom' && r.w >= 2.5 && r.h >= 2.5) {
-        this.mesh(r.x + 1.1, .28, -r.y - r.h + 1.3, 1.5, .42, 2, '#d6d9e6');
-        this.mesh(r.x + 1.1, .53, -r.y - r.h + .55, 1.3, .12, .4, '#f7f4ed');
+        addBox(r.x + 1.05, .24, -r.y - r.h + 1.25, 1.55, .32, 2.05, '#b9b4aa');
+        addBox(r.x + 1.05, .47, -r.y - r.h + 1.25, 1.48, .16, 1.96, '#e9e5dc');
+        addBox(r.x + 1.05, .59, -r.y - r.h + .52, 1.3, .12, .38, '#f7f4ed');
+        addBox(r.x + r.w - .38, .95, -r.y - r.h / 2, .48, 1.78, Math.min(2.2, r.h - .5), '#887966');
       } else if (r.type === 'majlis' || r.type === 'living') {
-        const sofa = r.type === 'majlis' ? '#c0a278' : '#91aeb6';
-        this.mesh(r.x + r.w / 2, .32, -r.y - .55, Math.max(1.2, r.w - .75), .58, .6, sofa);
-        this.mesh(r.x + .55, .32, -r.y - r.h / 2, .6, .58, Math.max(1.2, r.h - 1.1), sofa);
-        this.mesh(r.x + r.w / 2, .28, -r.y - r.h / 2, Math.min(1.35, r.w * .32), .42, Math.min(1.35, r.h * .28), '#70533b');
+        const sofa = r.type === 'majlis' ? '#b9986f' : '#779da0';
+        addBox(r.x + r.w / 2, .3, -r.y - .48, Math.max(1.1, r.w - .7), .5, .58, sofa);
+        addBox(r.x + .48, .3, -r.y - r.h / 2, .58, .5, Math.max(1.1, r.h - 1), sofa);
+        addBox(r.x + r.w / 2, .25, -r.y - r.h / 2, Math.min(1.45, r.w * .32), .36, Math.min(1.2, r.h * .28), '#76563c');
       } else if (r.type === 'dining') {
-        this.mesh(r.x + r.w / 2, .4, -r.y - r.h / 2, Math.min(2.4, r.w * .46), .12, Math.min(1.25, r.h * .35), '#7e6043');
-        for (const [dx, dz] of [[-1, -.75], [1, -.75], [-1, .75], [1, .75]]) this.mesh(r.x + r.w / 2 + dx, .27, -r.y - r.h / 2 + dz, .45, .5, .45, '#b6a88c');
-      } else if (r.type === 'kitchen') this.mesh(r.x + r.w / 2, .45, -r.y - r.h + .35, r.w - .4, .9, .55, '#b4c2a4');
-      else if (r.type === 'bath') this.mesh(r.x + .55, .27, -r.y - r.h + .65, .55, .5, .7, '#f4f8fa');
-      else if (r.type === 'storage' || r.type === 'service') this.mesh(r.x + r.w / 2, .75, -r.y - .35, r.w - .4, 1.5, .35, '#a59e8b');
+        addBox(r.x + r.w / 2, .42, -r.y - r.h / 2, Math.min(2.5, r.w * .52), .14, Math.min(1.3, r.h * .38), '#75543a');
+        for (const [dx, dz] of [[-.9, -.72], [.9, -.72], [-.9, .72], [.9, .72]]) addBox(r.x + r.w / 2 + dx, .28, -r.y - r.h / 2 + dz, .42, .52, .42, '#ad9d84');
+      } else if (r.type === 'kitchen') {
+        addBox(r.x + r.w / 2, .46, -r.y - r.h + .34, Math.max(.6, r.w - .35), .88, .58, '#9fab91');
+        if (r.w > 3.2 && r.h > 3) addBox(r.x + r.w / 2, .48, -r.y - r.h / 2, Math.min(1.8, r.w - 1.2), .9, .72, '#c4b69d');
+      } else if (r.type === 'bath') {
+        addBox(r.x + .5, .27, -r.y - r.h + .6, .5, .5, .7, '#edf3f2');
+        addBox(r.x + r.w - .4, .48, -r.y - .42, .55, .9, .5, '#d5e3e2', 0, .5, { glass: true });
+      } else if (r.type === 'storage' || r.type === 'service') addBox(r.x + r.w / 2, .78, -r.y - .32, Math.max(.4, r.w - .35), 1.5, .34, '#9f9584');
     });
-    this.pieces.forEach(p => this.mesh(p.x, p.bottom + p.height / 2, -p.y, p.length, p.height, p.thickness, p.type === 'ext' ? color : '#f5f1e9', p.angle));
-    model.openings.filter(o => o.type === 'window').forEach(o => {
-      const w = model.walls.find(w => w.id === o.wallId), point = openingPoint(model, o);
-      this.mesh(point.x, o.sill + o.h / 2, -point.y, o.w, o.h, .025, '#80b8c7', Math.atan2(w.y2 - w.y1, w.x2 - w.x1), .28);
+
+    // Exact wall pieces keep door/window voids physically open; exterior receives the selected material system.
+    this.pieces.forEach(piece => addBox(piece.x, piece.bottom + piece.height / 2, -piece.y, piece.length, piece.height, piece.thickness, piece.type === 'ext' ? style.facade : '#f2eee6', piece.angle, 1, { roughness: piece.type === 'ext' ? .72 : .9 }));
+    model.openings.forEach(o => {
+      const wall = model.walls.find(w => w.id === o.wallId), point = openingPoint(model, o), angle = Math.atan2(wall.y2 - wall.y1, wall.x2 - wall.x1);
+      if (o.type === 'window') {
+        addBox(point.x, o.sill + o.h / 2, -point.y, o.w, o.h, .045, '#78aeba', angle, .34, { glass: true, metalness: .12 });
+        const ux = Math.cos(angle), uz = -Math.sin(angle), half = Math.max(0, o.w / 2 - .035);
+        for (const sign of [-1, 1]) addBox(point.x + ux * half * sign, o.sill + o.h / 2, -point.y + uz * half * sign, .055, o.h + .12, .09, style.metal, angle, 1, { metalness: .35 });
+        for (const y of [o.sill, o.sill + o.h, o.sill + o.h / 2]) addBox(point.x, y, -point.y, o.w + .1, .055, .09, style.metal, angle, 1, { metalness: .35 });
+      } else {
+        addBox(point.x, o.h / 2, -point.y, o.w, o.h, .055, o.roomId ? '#8c633d' : style.accent, angle + .28, 1, { roughness: .5 });
+        addBox(point.x, o.h + .045, -point.y, o.w + .16, .09, .12, style.metal, angle);
+      }
     });
-    // Doors intentionally shown open so the actual wall openings remain visible.
-    this.roof = this.mesh(b.x + b.w / 2, 3.32, -b.y - b.h / 2, b.w, .22, b.h, '#b9a88a'); this.roof.visible = false;
+
+    // Roof is split by room and circulation zone, making every planning strategy legible as massing.
+    this.roof = new T.Group(); this.group.add(this.roof);
+    model.rooms.forEach(r => {
+      const lift = concept === 'twin-wings' ? (r.resolvedSide === 'left' ? .12 : 0) : concept === 'garden-front' && r.position === 'front' ? .16 : 0;
+      addBox(r.x + r.w / 2, 3.29 + lift, -r.y - r.h / 2, r.w + .08, .2, r.h + .08, style.roof, 0, 1, { parent: this.roof, roughness: .82 });
+    });
+    model.corridors.forEach((r, i) => addBox(r.x + r.w / 2, 3.34 + (concept === 'spine' && i === 0 ? .22 : 0), -r.y - r.h / 2, r.w + .14, .18, r.h + .14, concept === 'spine' && i === 0 ? style.accent : style.roof, 0, 1, { parent: this.roof }));
+    const parapet = palette === 'modern' ? .34 : .5;
+    for (const [x, z, w, d] of [[b.x + b.w / 2, -b.y, b.w + .35, .16], [b.x + b.w / 2, -b.y - b.h, b.w + .35, .16], [b.x, -b.y - b.h / 2, .16, b.h], [b.x + b.w, -b.y - b.h / 2, .16, b.h]]) addBox(x, 3.5, z, w, parapet, d, style.accent, 0, 1, { parent: this.roof });
+    this.roof.visible = false;
+
+    // Landscape and shade elements distinguish the architectural concepts without external images.
+    const outside = (x, y) => x < b.x - .7 || x > b.x + b.w + .7 || y < b.y - .7 || y > b.y + b.h + .7;
+    [[1, 1], [p.width - 1, 1], [1, p.length - 1], [p.width - 1, p.length - 1]].filter(([x, y]) => outside(x, y)).forEach(([x, y], i) => {
+      addBox(x, .65, -y, .22, 1.3, .22, '#70543a');
+      addBox(x, 1.55, -y, 1.05, .72, 1.05, i % 2 ? '#507455' : '#60835d');
+      addBox(x, 2.05, -y, .72, .55, .72, '#6f9265');
+    });
+    if (concept === 'garden-front' || palette === 'resort') {
+      const gy = model.plot.entry === 'n' ? b.y - .9 : b.y + b.h + .9;
+      for (let i = -2; i <= 2; i++) addBox(b.x + b.w / 2 + i * 1.05, 2.35, -gy, .09, .16, 2.1, style.accent);
+      for (const i of [-2.1, 2.1]) addBox(b.x + b.w / 2 + i, 1.15, -gy, .12, 2.3, .12, style.metal);
+    }
+    if (palette === 'hijazi') {
+      const frontY = model.plot.entry === 'n' ? b.y + b.h : b.y;
+      for (let x = b.x + .8; x < b.x + b.w - .4; x += 1.15) addBox(x, 2.35, -frontY, .16, 1.3, .18, '#6f4434');
+    }
+
     const points = [[0, 0], [p.width, 0], [p.width, p.length], [0, p.length], [0, 0]].map(([x, y]) => new T.Vector3(x, .07, -y));
     const line = new T.Line(new T.BufferGeometry().setFromPoints(points), new T.LineDashedMaterial({ color: 0x93753f, dashSize: .4, gapSize: .3 })); line.computeLineDistances(); this.group.add(line);
     this.view('persp'); this.resize();
