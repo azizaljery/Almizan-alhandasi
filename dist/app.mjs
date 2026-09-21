@@ -11,12 +11,13 @@ import { circulationNetwork } from './circulation.mjs';
 import { encodeProject, decodeProject, MAX_PROJECT_BYTES, quantitiesCSV } from './project.mjs';
 import { designInsights } from './design-insights.mjs';
 import { monthName, solarPreview } from './solar-path.mjs';
+import { compareHomeModels, buildEngineeringPromptContext } from './home-design-engine.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -44,6 +45,7 @@ function renderDiscovery() {
   const count = d.likes.length + d.rejects.length + d.avoids.length + Object.keys(d.life).length;
   $('discoveryState').textContent = count ? `${count} رغبات محددة` : 'لم يكتمل بعد';
   renderClientBrief();
+  if (state.model) markDirty();
 }
 function renderClientBrief() {
   clientBrief = buildClientBrief(state.discovery, state.program);
@@ -65,7 +67,7 @@ function applyClientBrief() {
   } catch (error) { toast(error.message); renderClientBrief(); }
 }
 function markDirty() {
-  state.dirty = !!state.model && signature(rawPlot(), state.program) !== state.signature;
+  state.dirty = !!state.model && (signature(rawPlot(), state.program) !== state.signature || state.engineeringSignature !== engineeringSignature());
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
   $('resultState').textContent = state.dirty ? 'آخر مخطط ناجح — يحتاج تحديثًا' : 'المخطط مطابق للجدول';
   $('resultState').classList.toggle('warn', state.dirty);
@@ -73,6 +75,7 @@ function markDirty() {
   $('exportBOQ').disabled = !state.model || state.dirty;
   all('[data-alternative]').forEach(button => { button.disabled = state.dirty || $('gen').disabled; });
 }
+function engineeringSignature() { return JSON.stringify([state.discovery, $('idea')?.value || '']); }
 function renderStreets() {
   const selected = $('entry').value || 's';
   $('streets').innerHTML = Object.entries(DIRECTIONS).map(([side, name]) => `<button class="street ${state.streets[side] ? 'on' : ''}" data-side="${side}" aria-pressed="${state.streets[side]}"><i class="dot"></i><b>${name}</b><small>${state.streets[side] ? 'شارع مفعّل' : 'جهة جار'}</small></button>`).join('');
@@ -191,6 +194,7 @@ async function startTour() {
 }
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
+  refreshEngineering();
   circulation = circulationNetwork(m);
   viewport = new PlanViewport($('plan'), m, selectRoom);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
@@ -198,10 +202,41 @@ function showResults() {
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
   $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderAlternatives(); renderSolarPreview(); void show3D();
 }
+function refreshEngineering() {
+  if (!state.model || !state.alternatives.length) { state.engineering = null; state.engineeringSignature = ''; return; }
+  try {
+    state.engineering = compareHomeModels({ plot: state.model.plot, rooms: state.program, discovery: state.discovery, idea: $('idea').value, models: state.alternatives });
+    state.engineeringSignature = engineeringSignature();
+  } catch (error) {
+    state.engineering = { error: error.message, rows: [], comparison: { rows: [] } };
+    state.engineeringSignature = '';
+  }
+}
+function currentEngineeringEvaluation() {
+  return state.engineering?.rows?.find(row => row.design.sourceModel === state.model)?.evaluation || null;
+}
+function renderEngineeringReview() {
+  const current = currentEngineeringEvaluation();
+  if (!current) {
+    $('engineeringScore').textContent = 'غير متاح';
+    $('engineeringCards').replaceChildren();
+    $('engineeringNotes').innerHTML = `<li>${esc(state.engineering?.error || 'ولّد مخططًا صالحًا أولًا لإجراء فحص محرك القرار.')}</li>`;
+    $('engineeringLimit').textContent = 'الفحص المرفق لا يستبدل المراجعة الهندسية والكود وتقرير التربة والمخططات التنفيذية.';
+    return;
+  }
+  $('engineeringScore').textContent = `${fmt(current.score, 0)} / ١٠٠`;
+  const labels = { privacy: 'الخصوصية', spaceEfficiency: 'كفاءة المساحة', functionalAdjacency: 'العلاقات الوظيفية', circulation: 'الحركة', wasteControl: 'التحكم بالهدر', futureExpansion: 'المرونة المستقبلية' };
+  $('engineeringCards').innerHTML = Object.entries(labels).map(([key, label]) => `<div class="insight"><div><span>${label}</span><b>${fmt(current.metrics[key] ?? 0, 0)}</b></div><p>مؤشر مبدئي من ١٠٠، مرتبط بالبرنامج والرغبات الحالية.</p></div>`).join('');
+  const notes = [...current.explanations, ...current.blockers.map(blocker => `عائق: ${blocker.message}`)];
+  $('engineeringNotes').innerHTML = notes.length ? notes.map(note => `<li>${esc(note)}</li>`).join('') : '<li>لم يرصد المحرك ملاحظة إضافية في البيانات الحالية.</li>';
+  $('engineeringLimit').textContent = 'هذه قراءة قرارية مبدئية من محرك الميزان؛ لا تُعد تصميمًا إنشائيًا أو اعتمادًا نظاميًا.';
+}
 function renderAlternatives() {
   $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
     const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
-    return `<article class="alternative-card${selected ? ' selected' : ''}"><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div></dl><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض' : 'اعرض هذا البديل'}</button></article>`;
+    const evaluation = state.engineering?.rows?.[index]?.evaluation;
+    const engineering = evaluation ? `<div><dt>قرار الميزان</dt><dd>${fmt(evaluation.score, 0)} / ١٠٠</dd></div><div><dt>عوائق</dt><dd>${fmt(evaluation.blockers.length, 0)}</dd></div>` : '';
+    return `<article class="alternative-card${selected ? ' selected' : ''}"><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض' : 'اعرض هذا البديل'}</button></article>`;
   }).join('');
   const failed = state.failures.map(f => `${STRATEGIES[f.strategy]}: ${f.reason}`).join(' ');
   $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تُستبعد النسخ المتطابقة والحلول غير الصالحة. المقارنة ضمن الكتلة المستطيلة وليست ثلاثة أنماط معمارية كاملة. ${failed}`;
@@ -220,6 +255,7 @@ function renderPlanReview() {
   $('insightScore').textContent = `${fmt(insights.overall, 0)} / ١٠٠`;
   $('insightCards').innerHTML = insights.cards.map(card => `<div class="insight"><div><span>${esc(card.label)}</span><b>${fmt(card.score, 0)}</b></div><p>${esc(card.detail)}</p></div>`).join('');
   $('insightLimit').textContent = insights.note;
+  renderEngineeringReview();
 }
 function runPlanner(request) {
   if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms));
@@ -289,7 +325,9 @@ async function askAI() {
   try {
     const discovery = discoveryText();
     const clientContext = clientBrief ? [`مبادئ التخطيط المستخلصة: ${clientBrief.principles.join('، ') || 'لم تحدد بعد.'}`, `أسئلة تحتاج إجابة: ${clientBrief.questions.join('، ') || 'لا توجد.'}`, `حدود يجب التصريح بها: ${clientBrief.limits.join('، ') || 'لا توجد.'}`].join('\n') : '';
-    const result = await requestBrief({ prompt: [clientContext, discovery, $('idea').value.trim()].filter(Boolean).join('\n\n'), plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
+    const engineeringContext = buildEngineeringPromptContext({ plot: rawPlot(), rooms: state.program, discovery: state.discovery, idea: $('idea').value, model: state.model });
+    const engineText = `سياق محرك القرار الهندسي المنظم (مرجع تحليلي، لا تتجاهل عدم اليقين): ${JSON.stringify(engineeringContext)}`;
+    const result = await requestBrief({ prompt: [clientContext, discovery, engineText, $('idea').value.trim()].filter(Boolean).join('\n\n'), plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
     showBrief(result.brief, result.limitations);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
@@ -404,6 +442,7 @@ function boot() {
     state.program[Number(row.dataset.row)][field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
     state.manualEdits = true; programTotal(); markDirty(); renderClientBrief();
   });
+  $('idea').addEventListener('input', markDirty);
   $('roomRows').addEventListener('click', e => { const b = e.target.closest('[data-remove]'); if (!b) return; state.program.splice(Number(b.dataset.remove), 1); state.manualEdits = true; renderRows(); });
   $('addType').innerHTML = options(TYPES, 'bedroom');
   $('addRoom').addEventListener('click', () => { if (state.program.length >= 30) return toast('الحد الأقصى 30 فراغًا.'); const type = $('addType').value; state.program.push({ name: TYPES[type].name, type, area: TYPES[type].area, position: type === 'majlis' ? 'front' : type === 'bedroom' ? 'back' : 'middle', side: 'any' }); state.manualEdits = true; renderRows(); });
