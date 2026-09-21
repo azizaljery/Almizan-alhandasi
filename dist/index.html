@@ -80,8 +80,8 @@
       <div class="cb">
         <label for="idea">صف أسلوب حياتك واحتياجاتك<textarea id="idea" rows="5" maxlength="4000" placeholder="مثال: أريد مدخل ضيوف واضحًا، مجلسًا أماميًا، صالة عائلية في الوسط، جناح الوالدة قرب الصالة، وغرف النوم في الخلف…"></textarea></label>
         <label for="aiAccessCode">رمز دخول الذكاء<input id="aiAccessCode" type="password" autocomplete="current-password" maxlength="128" placeholder="الرمز الخاص بالميزان الهندسي"></label>
-        <div class="inline-actions"><button class="secondary" id="askAI">حلّل عبر الخدمة</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
-        <p class="help">الخدمة تحول فكرتك إلى برنامج غرف قابل للمراجعة وتوضح الافتراضات والأسئلة. لا تعدل مخططك تلقائيًا؛ أنت توافق أولًا ثم تولّد البدائل. الفهم المحلي يعمل بلا اتصال للأعداد والأسماء والتعديلات البسيطة.</p>
+        <div class="inline-actions"><button class="secondary" id="askAI">✦ حلّل وارسم بالذكاء</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
+        <p class="help">الذكاء يفهم العميل، يحدد برنامج الغرف والمواقع والأولويات، ثم يرسلها إلى محرك الرسم الهندسي. بعد موافقتك يرسم بدائل 2D و3D وكميات من النموذج نفسه؛ لا يعتمد أي رسم لا يجتاز التحقق الهندسي.</p>
         <div id="aiFeedback" class="message" role="status" hidden></div>
         <div id="aiReview" hidden>
           <h3>اقتراح للمراجعة</h3>
@@ -93,7 +93,7 @@
             <section><span>التعارضات التي تحتاج قرارًا</span><p id="aiConflicts">—</p></section>
           </div>
           <ul id="aiNotes"></ul>
-          <button class="secondary" id="acceptAI">نقل الاقتراح إلى جدول المراجعة</button>
+          <div class="inline-actions"><button class="primary" id="drawAI">اعتمد وارسم المخططات</button><button class="small-button" id="acceptAI">نقل إلى الجدول فقط</button></div>
         </div>
       </div>
     </article>

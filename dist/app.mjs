@@ -18,7 +18,7 @@ const $ = id => document.getElementById(id), all = selector => [...document.quer
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -363,7 +363,7 @@ async function askAI() {
   message('aiFeedback', '');
   if (AI_ENABLED && ($('idea').value.trim().length < 8 || $('idea').value.length > 4000)) { message('aiFeedback', 'اكتب وصفًا بين 8 و4000 حرف.'); return; }
   state.proposal = null; $('aiReview').hidden = true;
-  $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ تحليل الوصف…';
+  $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ فهم المتطلبات وتجهيز الرسم…';
   try {
     const discovery = discoveryText();
     const clientContext = clientBrief ? [`مبادئ التخطيط المستخلصة: ${clientBrief.principles.join('، ') || 'لم تحدد بعد.'}`, `أسئلة تحتاج إجابة: ${clientBrief.questions.join('، ') || 'لا توجد.'}`, `حدود يجب التصريح بها: ${clientBrief.limits.join('، ') || 'لا توجد.'}`].join('\n') : '';
@@ -375,14 +375,14 @@ async function askAI() {
     showBrief(result.brief, result.limitations, context);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
-    message('aiFeedback', 'وصل اقتراح من خدمة الذكاء. لم يتغيّر المخطط؛ راجعه قبل نقل الغرف إلى الجدول.');
+    message('aiFeedback', 'جهّز الذكاء برنامج التصميم. راجع الافتراضات ثم اختر «اعتمد وارسم المخططات».');
   } catch (error) { message('aiFeedback', error.message); }
-  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = 'حلّل عبر الخدمة'; }
+  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = '✦ حلّل وارسم بالذكاء'; }
 }
 
 function showBrief(brief, limitations = [], context = null) {
   const resolved = context || buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt: $('idea').value });
-  state.proposal = brief; state.briefContext = deriveRequirements({ prompt: resolved.prompt, context: resolved, brief }); $('aiSummary').textContent = brief.summary;
+  state.proposal = brief; state.aiDesign = { summary: brief.summary, source: 'ai' }; state.briefContext = deriveRequirements({ prompt: resolved.prompt, context: resolved, brief }); $('aiSummary').textContent = brief.summary;
   const profile = state.briefContext;
   if ($('aiReadiness')) $('aiReadiness').textContent = `${profile.readiness}%`;
   if ($('aiPriorities')) $('aiPriorities').textContent = profile.topPriorities.join(' · ') || 'لم تحدد بعد';
@@ -390,7 +390,13 @@ function showBrief(brief, limitations = [], context = null) {
   if ($('aiConflicts')) $('aiConflicts').textContent = profile.conflicts.join(' · ') || 'لا تعارض ظاهر في هذه القراءة';
   const notes = [...brief.assumptions.map(s => 'افتراض: ' + s), ...brief.questions.map(s => 'سؤال: ' + s), ...brief.unhandled.map(s => 'غير منفّذ: ' + s), ...limitations];
   $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-  $('aiReview').hidden = false; $('acceptAI').disabled = !brief.rooms.length;
+  $('aiReview').hidden = false; $('acceptAI').disabled = !brief.rooms.length; $('drawAI').disabled = !brief.rooms.length;
+}
+async function drawFromAIProposal() {
+  if (!state.proposal?.rooms.length) return;
+  state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true;
+  toast('اعتمد برنامج الذكاء؛ جارٍ الآن رسم البدائل والتحقق منها هندسيًا.');
+  await generate();
 }
 async function askLocal() {
   message('aiFeedback', '');
@@ -581,7 +587,8 @@ function boot() {
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
   $('askAI').addEventListener('click', askAI);
   $('askLocal').addEventListener('click', askLocal); $('applySun').addEventListener('click', applySunToProgram);
-  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; if (!window.confirm('نقل اقتراح الذكاء إلى جدول المراجعة بدل القائمة الحالية؟ لن يتغيّر الرسم حتى تضغط «ولّد».')) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; });
+  $('drawAI').addEventListener('click', drawFromAIProposal);
+  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; toast('حُفظ برنامج الذكاء في الجدول دون توليد الرسم بعد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); void refreshAssistantStatus();
 }
