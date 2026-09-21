@@ -2,6 +2,8 @@
  * الواجهة لا تحمل مفتاح OpenAI. الطلب يمر عبر Worker مستقل محمي.
  */
 
+import { buildPlanSVG } from './plan-view.mjs';
+
 const IMAGE_WORKER_URL = globalThis.MIZAN_IMAGE_WORKER_URL || 'https://mizan-images.aljeryabod.workers.dev';
 const MAX_GALLERY_ITEMS = 20;
 const GALLERY_STORAGE_KEY = 'mizan_gallery_v1';
@@ -30,23 +32,71 @@ export function buildDallePrompt(model, options = {}) {
   const building = model?.building;
   const plotText = plot?.width && plot?.length ? `on a ${Math.round(plot.width)} by ${Math.round(plot.length)} metre plot` : 'on a Saudi residential plot';
   const footprintText = building?.w && building?.h ? `The generated building footprint is approximately ${Math.round(building.w * building.h)} square metres.` : '';
-  const rooms = Array.isArray(model?.program) ? model.program.slice(0, 20).map(room => room.name).filter(Boolean) : [];
-  const roomText = rooms.length ? `The brief includes ${rooms.join(', ')}; express privacy and clear guest, family and service circulation without adding text.` : '';
+  const rooms = Array.isArray(model?.program) ? model.program.slice(0, 30).map(room => room.name).filter(Boolean) : [];
+  const roomText = rooms.length ? `The brief includes exactly these spaces: ${rooms.join(', ')}; express privacy and clear guest, family and service circulation without adding text.` : '';
+  const geometryRooms = Array.isArray(model?.rooms)
+    ? model.rooms.slice(0, 30).map((room, index) => {
+      const name = String(room.name || `room-${index + 1}`).replace(/[<>]/g, '');
+      const x = Number(room.x || 0).toFixed(1);
+      const y = Number(room.y || 0).toFixed(1);
+      const w = Number(room.w || 0).toFixed(1);
+      const h = Number(room.h || 0).toFixed(1);
+      return `${name}[x=${x},y=${y},w=${w},h=${h}]`;
+    }).join('; ')
+    : '';
+  const geometryText = geometryRooms
+    ? `AUTHORITATIVE PLAN GEOMETRY (metres): ${geometryRooms}. Preserve this relative arrangement and proportions exactly. Do not add, remove, merge, rotate, mirror, or relocate rooms.`
+    : '';
   return [
-    `Professional architectural visualization of ${style[0]} ${plotText}.`,
-    `${structure}.`, `Materials and features: ${style[1]}.`, footprintText, roomText,
+    `Professional architectural visualization of the EXISTING Mizan engineering plan, not a new design, of ${style[0]} ${plotText}.`,
+    `${structure}.`, `Materials and features: ${style[1]}.`, footprintText, roomText, geometryText,
+    'The supplied plan image is authoritative. Keep the same footprint, room count, room adjacency, entrance side, openings, and circulation. This is a visual interpretation of the supplied plan, not a new floor plan; never substitute a generic villa or random facade.',
     `Mood: ${style[2]}. Lighting: ${lighting}. Camera: ${view}, 35mm lens, f/8, ultra detailed.`,
     'Saudi Arabian arid climate, native planting, realistic proportions, photorealistic architectural photography, no people, no text, no logos, no watermark.'
   ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 }
 
+async function planReferenceImage(model) {
+  if (!model) return null;
+  const svg = buildPlanSVG(model);
+  const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(Error('تعذّر تجهيز صورة المخطط المرجعية.'));
+      element.src = objectUrl;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = 1536;
+    canvas.height = 1024;
+    const context = canvas.getContext('2d');
+    if (!context) throw Error('تعذّر تجهيز لوحة صورة المخطط.');
+    context.fillStyle = '#f8f7f1';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    const scale = Math.min((canvas.width - 96) / image.width, (canvas.height - 96) / image.height);
+    const width = image.width * scale;
+    const height = image.height * scale;
+    context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+    return canvas.toDataURL('image/png');
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 async function requestImage(prompt, accessCode, options = {}) {
   if (IMAGE_WORKER_URL.includes('YOUR-SUBDOMAIN')) throw Error('خدمة الصور لم تُربط بعد. أضف رابط Worker الصور في إعدادات المشروع.');
   if (!accessCode || accessCode.length < 4) throw Error('أدخل رمز دخول الصور أولاً.');
+  const allowedSizes = ['1024x1024', '1024x1536', '1536x1024', 'auto'];
+  const requestedSize = allowedSizes.includes(options.size) ? options.size : '1536x1024';
+  const requestedQuality = options.quality === 'standard' ? 'standard' : 'hd';
+  const body = { prompt, quality: requestedQuality, size: requestedSize, style: options.apiStyle || 'natural' };
+  if (options.referenceImage) body.reference_image = options.referenceImage;
   const response = await fetch(IMAGE_WORKER_URL, {
     method: 'POST', credentials: 'omit', cache: 'no-store',
     headers: { 'Content-Type': 'application/json', 'X-Mizan-Access-Code': accessCode },
-    body: JSON.stringify({ prompt, quality: options.quality || 'hd', size: options.size || '1792x1024', style: options.apiStyle || 'natural' }),
+    body: JSON.stringify(body),
     signal: AbortSignal.timeout(90000),
   });
   let data = null; try { data = await response.json(); } catch { /* handled below */ }
@@ -74,13 +124,13 @@ function openViewer(url) {
 async function downloadImage(url) { try { const response = await fetch(url); const blob = await response.blob(); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `mizan-render-${Date.now()}.png`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000); } catch { window.open(url, '_blank', 'noopener'); } }
 function handleGalleryAction(event) { const button = event.currentTarget; if (button.dataset.action === 'view') openViewer(button.dataset.url); if (button.dataset.action === 'download') void downloadImage(button.dataset.url); if (button.dataset.action === 'delete') { vizState.gallery = vizState.gallery.filter(item => item.id !== button.dataset.id); writeGallery(vizState.gallery); renderGallery(); } }
 
-export const vizState = { gallery: readGallery(), generating: false, options: { style: 'resort', structure: 'block', timeLighting: 'golden', viewAngle: 'hero', quality: 'hd', size: '1792x1024', apiStyle: 'natural' } };
+export const vizState = { gallery: readGallery(), generating: false, options: { style: 'resort', structure: 'block', timeLighting: 'golden', viewAngle: 'hero', quality: 'hd', size: '1536x1024', apiStyle: 'natural' } };
 
 function ensureVisualizerMarkup() {
   if (document.getElementById('generateVisual')) return;
   const anchor = document.querySelector('.immersive-card');
   if (!anchor) return;
-  anchor.insertAdjacentHTML('afterend', `<article class="card visualizer-card" aria-label="العرض البصري المعماري"><header class="ch"><b class="num">✨</b><div><h2>العرض البصري المعماري</h2><p>حوّل المخطط الحالي إلى تصور معماري واقعي مع الحفاظ على فكرته ومساراته.</p></div><span class="pill" id="visualBadge">DALL·E 3</span></header><div class="cb"><div class="visual-controls"><div class="visual-group"><label class="visual-label">الطراز البصري</label><div class="visual-options" role="group" aria-label="الطراز البصري"><button type="button" class="visual-opt" data-visual-style="resort">🏝️ <b>منتجع</b><small>حجر وفناء أخضر</small></button><button type="button" class="visual-opt" data-visual-style="modern">▢ <b>مودرن</b><small>كتل بيضاء وزجاج</small></button><button type="button" class="visual-opt" data-visual-style="classic">🏛️ <b>كلاسيكي</b><small>هيبة وتناسق</small></button><button type="button" class="visual-opt" data-visual-style="hijazi">🕌 <b>حجازي</b><small>حجر ورواشين</small></button></div></div><div class="visual-group"><label class="visual-label">الإضاءة</label><div class="visual-options" role="group" aria-label="إضاءة الصورة"><button type="button" class="visual-opt" data-visual-light="golden">🌅 <b>ذهبية</b></button><button type="button" class="visual-opt" data-visual-light="morning">🌤️ <b>صباح</b></button><button type="button" class="visual-opt" data-visual-light="midday">☀️ <b>ظهيرة</b></button><button type="button" class="visual-opt" data-visual-light="dusk">🌇 <b>غروب</b></button><button type="button" class="visual-opt" data-visual-light="night">🌙 <b>ليل</b></button></div></div><div class="visual-group"><label class="visual-label">زاوية الكاميرا</label><div class="visual-options" role="group" aria-label="زاوية الكاميرا"><button type="button" class="visual-opt" data-visual-view="hero">📐 <b>درامية</b></button><button type="button" class="visual-opt" data-visual-view="aerial">🚁 <b>جوية</b></button><button type="button" class="visual-opt" data-visual-view="entry">🚪 <b>الواجهة</b></button><button type="button" class="visual-opt" data-visual-view="courtyard">🌿 <b>الفناء</b></button><button type="button" class="visual-opt" data-visual-view="corner">◪ <b>ركنية</b></button></div></div></div><button class="primary visual-generate" id="generateVisual" type="button">✨ توليد صورة معمارية واقعية</button><div class="visual-status" id="visualStatus" hidden><span class="visual-spinner" aria-hidden="true"></span> جارٍ توليد الصورة…</div><div class="visual-gallery-header"><h3 class="subhead">معرض التصورات</h3><button class="small-button" id="clearGallery" type="button">حذف الكل</button></div><div class="render-gallery" id="renderGallery"></div><p class="help">يُرسل وصف المخطط فقط إلى Worker الصور. مفتاح OpenAI لا يصل إلى المتصفح، والصور تحفظ محليًا في هذا الجهاز. نزّل الصورة التي تريد الاحتفاظ بها.</p></div></article>`);
+  anchor.insertAdjacentHTML('afterend', `<article class="card visualizer-card" aria-label="العرض البصري المعماري"><header class="ch"><b class="num">✨</b><div><h2>العرض البصري المعماري</h2><p>تصوير للمخطط الموجود مع الالتزام بكتلته وعلاقاته، وليس اقتراح مخطط جديد.</p></div><span class="pill" id="visualBadge">GPT Image</span></header><div class="cb"><div class="visual-controls"><div class="visual-group"><label class="visual-label">الطراز البصري</label><div class="visual-options" role="group" aria-label="الطراز البصري"><button type="button" class="visual-opt" data-visual-style="resort">🏝️ <b>منتجع</b><small>حجر وفناء أخضر</small></button><button type="button" class="visual-opt" data-visual-style="modern">▢ <b>مودرن</b><small>كتل بيضاء وزجاج</small></button><button type="button" class="visual-opt" data-visual-style="classic">🏛️ <b>كلاسيكي</b><small>هيبة وتناسق</small></button><button type="button" class="visual-opt" data-visual-style="hijazi">🕌 <b>حجازي</b><small>حجر ورواشين</small></button></div></div><div class="visual-group"><label class="visual-label">الإضاءة</label><div class="visual-options" role="group" aria-label="إضاءة الصورة"><button type="button" class="visual-opt" data-visual-light="golden">🌅 <b>ذهبية</b></button><button type="button" class="visual-opt" data-visual-light="morning">🌤️ <b>صباح</b></button><button type="button" class="visual-opt" data-visual-light="midday">☀️ <b>ظهيرة</b></button><button type="button" class="visual-opt" data-visual-light="dusk">🌇 <b>غروب</b></button><button type="button" class="visual-opt" data-visual-light="night">🌙 <b>ليل</b></button></div></div><div class="visual-group"><label class="visual-label">زاوية الكاميرا</label><div class="visual-options" role="group" aria-label="زاوية الكاميرا"><button type="button" class="visual-opt" data-visual-view="hero">📐 <b>درامية</b></button><button type="button" class="visual-opt" data-visual-view="aerial">🚁 <b>جوية</b></button><button type="button" class="visual-opt" data-visual-view="entry">🚪 <b>الواجهة</b></button><button type="button" class="visual-opt" data-visual-view="courtyard">🌿 <b>الفناء</b></button><button type="button" class="visual-opt" data-visual-view="corner">◪ <b>ركنية</b></button></div></div></div><button class="primary visual-generate" id="generateVisual" type="button">✨ توليد تصور مستند إلى المخطط</button><div class="visual-status" id="visualStatus" hidden><span class="visual-spinner" aria-hidden="true"></span> جارٍ توليد الصورة…</div><div class="visual-gallery-header"><h3 class="subhead">معرض التصورات</h3><button class="small-button" id="clearGallery" type="button">حذف الكل</button></div><div class="render-gallery" id="renderGallery"></div><p class="help">تُرسل صورة المخطط ومواصفاته إلى Worker الصور لتوجيه التصور البصري. الاعتماد الدقيق للمساحات والمداخل يبقى من مخطط 2D/3D، ومفتاح OpenAI لا يصل إلى المتصفح.</p></div></article>`);
 }
 
 export async function generateVisual(model, overrides = {}) {
@@ -90,14 +140,15 @@ export async function generateVisual(model, overrides = {}) {
   const options = { ...vizState.options, ...overrides }; const prompt = buildDallePrompt(model, options);
   try {
     const accessCode = localStorage.getItem(ACCESS_CODE_KEY) || '';
-    const data = await requestImage(prompt, accessCode, options);
+    const referenceImage = await planReferenceImage(model);
+    const data = await requestImage(prompt, accessCode, { ...options, referenceImage });
     const item = { id: `render_${Date.now()}`, url: data.url, revised_prompt: data.revised_prompt || null, prompt, generated_at: data.generated_at || new Date().toISOString(), styleLabel: styleLabel(options), size: data.size, quality: data.quality };
     vizState.gallery = [...vizState.gallery, item].slice(-MAX_GALLERY_ITEMS); writeGallery(vizState.gallery); renderGallery(); return item;
   } finally { vizState.generating = false; updateVisualizerUI(); }
 }
 
 function updateVisualizerUI() {
-  const button = document.getElementById('generateVisual'); if (button) { button.disabled = vizState.generating; button.textContent = vizState.generating ? 'جارٍ توليد الصورة…' : '✨ توليد صورة معمارية واقعية'; }
+  const button = document.getElementById('generateVisual'); if (button) { button.disabled = vizState.generating; button.textContent = vizState.generating ? 'جارٍ توليد الصورة…' : '✨ توليد تصور مستند إلى المخطط'; }
   const status = document.getElementById('visualStatus'); if (status) status.hidden = !vizState.generating;
   document.querySelectorAll('[data-visual-style]').forEach(el => el.classList.toggle('on', el.dataset.visualStyle === vizState.options.style));
   document.querySelectorAll('[data-visual-light]').forEach(el => el.classList.toggle('on', el.dataset.visualLight === vizState.options.timeLighting));
