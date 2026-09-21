@@ -61,10 +61,29 @@ export function validateInput(body) {
     if (!record(c) || !Number.isInteger(c.bedrooms) || c.bedrooms < 1 || c.bedrooms > 8 || !Number.isInteger(c.majlis) || c.majlis < 0 || c.majlis > 3) throw new Error('invalid_input');
     plot.counts = { bedrooms: c.bedrooms, majlis: c.majlis };
   }
-  return { prompt: body.prompt.trim(), plot, previous: body.previous == null ? null : validateBrief(body.previous) };
+  let context = null;
+  if (body.context !== undefined) {
+    const c = body.context;
+    if (!record(c) || typeof c.prompt !== 'string' || c.prompt.length > 4000 || !record(c.discovery) || !Array.isArray(c.rooms) || c.rooms.length > 30) throw new Error('invalid_input');
+    const d = c.discovery;
+    if (!Array.isArray(d.likes) || !Array.isArray(d.rejects) || !Array.isArray(d.avoids) || !record(d.life) ||
+      [...d.likes, ...d.rejects, ...d.avoids].some(value => typeof value !== 'string' || value.length > 240) ||
+      Object.values(d.life).some(value => typeof value !== 'string' || value.length > 240)) throw new Error('invalid_input');
+    context = {
+      language: typeof c.language === 'string' ? c.language.slice(0, 12) : 'ar',
+      plot: record(c.plot) ? { width: c.plot.width, length: c.plot.length, floors: c.plot.floors, entry: typeof c.plot.entry === 'string' ? c.plot.entry.slice(0, 8) : '', streets: record(c.plot.streets) ? c.plot.streets : {} } : null,
+      discovery: { likes: [...d.likes], rejects: [...d.rejects], avoids: [...d.avoids], life: { ...d.life } },
+      rooms: c.rooms.map(room => {
+        if (!record(room) || typeof room.name !== 'string' || room.name.length > 70 || !ROOM_TYPES.includes(room.type) || !Number.isFinite(room.area) || room.area < 4 || room.area > 120) throw new Error('invalid_input');
+        return { name: room.name.slice(0, 70), type: room.type, area: room.area, position: room.position, side: room.side };
+      }),
+      prompt: c.prompt.trim(),
+    };
+  }
+  return { prompt: body.prompt.trim(), plot, context, previous: body.previous == null ? null : validateBrief(body.previous) };
 }
 const INSTRUCTIONS = `أنت مساعد برمجة مساحات سكنية لمنصة «الميزان الهندسي».
-حوّل وصف المستخدم العربي، بما فيه اللهجة السعودية والأرقام العربية والإنجليزية، إلى متطلبات مساحية للدور الأرضي للمراجعة. ابدأ بفهم نمط الحياة وترتيب الأولويات: الضيافة، العائلة، الخصوصية، سهولة الحركة، والخدمات. لخّص الفكرة المعمارية بجملة عملية، ثم حوّل فقط ما يمكن تمثيله إلى برنامج غرف. هذه الخدمة تحلل المتطلبات فقط؛ لا تنفذ توزيعاً هندسياً ولا تولّد جدراناً أو ممرات أو رسماً 2D أو 3D. لا تدّع أن المحرك نفّذ المخطط أو أثبت الخصوصية أو الوصول أو الملاءمة داخل الأرض.
+حوّل وصف المستخدم العربي، بما فيه اللهجة السعودية والأرقام العربية والإنجليزية، إلى متطلبات مساحية للدور الأرضي للمراجعة. ابدأ بفهم نمط الحياة وترتيب الأولويات: الضيافة، العائلة، الخصوصية، سهولة الحركة، والخدمات. إذا وُجد context منظّم من الواجهة فاستفد منه للتحقق من اللغة والتفضيلات والبرنامج الحالي، لكن اعتبر الوصف الأخير هو المصدر الأعلى عند التعارض. لخّص الفكرة المعمارية بجملة عملية، ثم حوّل فقط ما يمكن تمثيله إلى برنامج غرف. هذه الخدمة تحلل المتطلبات فقط؛ لا تنفذ توزيعاً هندسياً ولا تولّد جدراناً أو ممرات أو رسماً 2D أو 3D. لا تدّع أن المحرك نفّذ المخطط أو أثبت الخصوصية أو الوصول أو الملاءمة داخل الأرض.
 القواعد:
 1. الوصف الأخير أولوية، وعند التعديل حافظ على المتطلبات السابقة التي لم يطلب تغييرها. counts إن وجدت قيم افتراضية فقط؛ النص الصريح أولى.
 2. كل عنصر في rooms غرفة واحدة. أقصى 30 غرفة، وarea مساحة هدف بين 4 و120 م². لا تحذف متطلباً أو تصغّر مساحة صريحة لمجرد الملاءمة؛ سجّل ما لا تستطيع تمثيله في unhandled واسأل في questions.
