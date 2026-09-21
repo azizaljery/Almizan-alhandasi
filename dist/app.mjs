@@ -288,7 +288,8 @@ async function askAI() {
   $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ تحليل الوصف…';
   try {
     const discovery = discoveryText();
-    const result = await requestBrief({ prompt: [discovery, $('idea').value.trim()].filter(Boolean).join('\n\n'), plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. ركّز على ترتيب الأولويات: الضيافة، العائلة، الخصوصية، الحركة، والخدمات.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
+    const clientContext = clientBrief ? [`مبادئ التخطيط المستخلصة: ${clientBrief.principles.join('، ') || 'لم تحدد بعد.'}`, `أسئلة تحتاج إجابة: ${clientBrief.questions.join('، ') || 'لا توجد.'}`, `حدود يجب التصريح بها: ${clientBrief.limits.join('، ') || 'لا توجد.'}`].join('\n') : '';
+    const result = await requestBrief({ prompt: [clientContext, discovery, $('idea').value.trim()].filter(Boolean).join('\n\n'), plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
     showBrief(result.brief, result.limitations);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');

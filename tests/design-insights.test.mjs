@@ -8,7 +8,7 @@ const model = generateModel({ width: 20, length: 30, floors: 1, entry: 's', stre
 test('design insight scores are bounded and derived without external data', () => {
   const result = designInsights(model);
   assert.ok(result.overall >= 0 && result.overall <= 100);
-  assert.equal(result.cards.length, 6);
+  assert.equal(result.cards.length, 8);
   assert.ok(result.cards.every(card => card.score >= 0 && card.score <= 100));
   assert.match(result.note, /لا تصلح للاعتماد التنفيذي/);
 });

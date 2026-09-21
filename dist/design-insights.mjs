@@ -1,6 +1,7 @@
 // Preliminary, model-derived design indicators. These are comparison aids, not
 // building-code, acoustic, daylight, energy, valuation, or security approvals.
 import { quantities } from './planner.mjs';
+import { rectangleArea, coverageRatio, occupancyDensity, slabAspectRatio, drainageSlope, weightedScore } from './engineering.mjs';
 import { reviewPlan } from './audit.mjs';
 
 const clamp = value => Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
@@ -71,6 +72,10 @@ function uniquePositions(rooms) {
 export function designInsights(model) {
   const review = reviewPlan(model);
   const q = quantities(model);
+  const plotArea = rectangleArea(model.plot.width, model.plot.length);
+  const builtCoverage = coverageRatio(q.footprint, plotArea);
+  const compactness = 100 / Math.max(1, slabAspectRatio(model.plot.width, model.plot.length));
+  const routeSlopeProxy = drainageSlope(Math.max(0, model.plot.length - model.building.h), Math.max(model.plot.length, 1));
   const rooms = model.rooms;
   const occupied = rooms.filter(room => occupiedTypes.has(room.type));
   const routes = [...review.routes.guests, ...review.routes.family, ...review.routes.service].filter(route => route.metres !== null);
@@ -112,7 +117,7 @@ export function designInsights(model) {
     movement,
     hasGuestFamilyConflict ? 35 : 75,
   );
-  const overall = HolisticLivingExperience.calculateScore(ergonomic, biophilic, social, privacy, average([ergonomic, acoustic]), 0, circulationEfficiency);
+  const overall = weightedScore([{weight: .15, value: ergonomic}, {weight: .15, value: biophilic}, {weight: .15, value: social}, {weight: .15, value: privacy}, {weight: .15, value: average([ergonomic, acoustic])}, {weight: .15, value: compactness}, {weight: .10, value: circulationEfficiency}]);
 
   const cards = [
     { key: 'privacy', label: 'الخصوصية والحركة', score: privacy, detail: hasGuestFamilyConflict ? 'هناك اشتراك مرصود لمسار الضيوف والعائلة.' : 'فصل الحركة يُقاس من مسارات الممرات المتاحة.' },
@@ -121,6 +126,8 @@ export function designInsights(model) {
     { key: 'acoustic', label: 'الهدوء النسبي', score: acoustic, detail: 'يقيس فصل مواقع الضيافة والنوم فقط؛ لا يحسب عزل الجدران.' },
     { key: 'light', label: 'الانفتاح الخارجي', score: biophilic, detail: `${Math.round(exteriorRatio * 100)}٪ من الفراغات المأهولة لها نافذة مرسومة.` },
     { key: 'storage', label: 'التخزين', score: storageIndex, detail: storage.length ? `${storage.length} فراغ تخزين مخصص في المخطط.` : 'لا يوجد فراغ تخزين مخصص في البرنامج.' },
+    { key: 'coverage', label: 'استغلال الأرض', score: Math.min(100, builtCoverage * 100 / Math.max(model.plot.coverage || .75, .1)), detail: `بصمة البناء ${Math.round(builtCoverage * 100)}٪ من الأرض؛ هذه نسبة هندسية للحساب وليست اعتمادًا تنظيميًا.` },
+    { key: 'topography', label: 'فرق العمق', score: Math.max(0, 100 - routeSlopeProxy * 100), detail: `فرق تقريبي بين عمق الأرض والكتلة ${routeSlopeProxy.toFixed(2)}؛ لا يمثل مناسيب الموقع.` },
   ];
   return {
     overall,
