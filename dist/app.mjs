@@ -12,12 +12,13 @@ import { encodeProject, decodeProject, MAX_PROJECT_BYTES, quantitiesCSV } from '
 import { designInsights } from './design-insights.mjs';
 import { monthName, solarPreview } from './solar-path.mjs';
 import { compareHomeModels, buildEngineeringPromptContext } from './home-design-engine.mjs';
+import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -327,8 +328,10 @@ async function askAI() {
     const clientContext = clientBrief ? [`مبادئ التخطيط المستخلصة: ${clientBrief.principles.join('، ') || 'لم تحدد بعد.'}`, `أسئلة تحتاج إجابة: ${clientBrief.questions.join('، ') || 'لا توجد.'}`, `حدود يجب التصريح بها: ${clientBrief.limits.join('، ') || 'لا توجد.'}`].join('\n') : '';
     const engineeringContext = buildEngineeringPromptContext({ plot: rawPlot(), rooms: state.program, discovery: state.discovery, idea: $('idea').value, model: state.model });
     const engineText = `سياق محرك القرار الهندسي المنظم (مرجع تحليلي، لا تتجاهل عدم اليقين): ${JSON.stringify(engineeringContext)}`;
-    const result = await requestBrief({ prompt: [clientContext, discovery, engineText, $('idea').value.trim()].filter(Boolean).join('\n\n'), plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
-    showBrief(result.brief, result.limitations);
+    const prompt = [clientContext, discovery, engineText, $('idea').value.trim()].filter(Boolean).join('\n\n');
+    const context = buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt });
+    const result = await requestBrief({ prompt, context, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
+    showBrief(result.brief, result.limitations, context);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'وصل اقتراح من خدمة الذكاء. لم يتغيّر المخطط؛ راجعه قبل نقل الغرف إلى الجدول.');
@@ -336,8 +339,14 @@ async function askAI() {
   finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = 'حلّل عبر الخدمة'; }
 }
 
-function showBrief(brief, limitations = []) {
-  state.proposal = brief; $('aiSummary').textContent = brief.summary;
+function showBrief(brief, limitations = [], context = null) {
+  const resolved = context || buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt: $('idea').value });
+  state.proposal = brief; state.briefContext = deriveRequirements({ prompt: resolved.prompt, context: resolved, brief }); $('aiSummary').textContent = brief.summary;
+  const profile = state.briefContext;
+  if ($('aiReadiness')) $('aiReadiness').textContent = `${profile.readiness}%`;
+  if ($('aiPriorities')) $('aiPriorities').textContent = profile.topPriorities.join(' · ') || 'لم تحدد بعد';
+  if ($('aiRelationships')) $('aiRelationships').textContent = profile.relationships.map(r => `${r.from} ← ${r.to}`).join(' · ') || 'لا توجد علاقة كافية للحساب';
+  if ($('aiConflicts')) $('aiConflicts').textContent = profile.conflicts.join(' · ') || 'لا تعارض ظاهر في هذه القراءة';
   const notes = [...brief.assumptions.map(s => 'افتراض: ' + s), ...brief.questions.map(s => 'سؤال: ' + s), ...brief.unhandled.map(s => 'غير منفّذ: ' + s), ...limitations];
   $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   $('aiReview').hidden = false; $('acceptAI').disabled = !brief.rooms.length;
@@ -345,8 +354,10 @@ function showBrief(brief, limitations = []) {
 async function askLocal() {
   message('aiFeedback', '');
   try {
-    const brief = await requestLocalBrief({ prompt: $('idea').value, previous: { rooms: publicRooms(state.program) } });
-    showBrief(brief, ['فهم محلي محدود للأعداد والنفي وأسماء الغرف؛ لا يتصل بخادم ولا يولّد رسمًا أو يغيّر الجدول حتى توافق.']);
+    const prompt = $('idea').value;
+    const context = buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt });
+    const brief = await requestLocalBrief({ prompt, previous: { rooms: publicRooms(state.program) } });
+    showBrief(brief, ['فهم محلي محدود للأعداد والنفي وأسماء الغرف؛ لا يتصل بخادم ولا يولّد رسمًا أو يغيّر الجدول حتى توافق.'], context);
     message('aiFeedback', 'تم اقتراح برنامج محليًا. راجعه ثم اختر نقله إلى الجدول.');
   } catch (error) { message('aiFeedback', error.message); }
 }

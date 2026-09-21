@@ -83,7 +83,18 @@
         <div class="inline-actions"><button class="secondary" id="askAI">حلّل عبر الخدمة</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
         <p class="help">الخدمة تحول فكرتك إلى برنامج غرف قابل للمراجعة وتوضح الافتراضات والأسئلة. لا تعدل مخططك تلقائيًا؛ أنت توافق أولًا ثم تولّد البدائل. الفهم المحلي يعمل بلا اتصال للأعداد والأسماء والتعديلات البسيطة.</p>
         <div id="aiFeedback" class="message" role="status" hidden></div>
-        <div id="aiReview" hidden><h3>اقتراح للمراجعة</h3><p id="aiSummary"></p><ul id="aiNotes"></ul><button class="secondary" id="acceptAI">نقل الاقتراح إلى جدول المراجعة</button></div>
+        <div id="aiReview" hidden>
+          <h3>اقتراح للمراجعة</h3>
+          <p id="aiSummary"></p>
+          <div class="ai-brief-grid" aria-label="ملخص فهم العميل">
+            <section><span>جاهزية المتطلبات</span><b id="aiReadiness">—</b></section>
+            <section><span>أعلى الأولويات</span><p id="aiPriorities">—</p></section>
+            <section><span>العلاقات المقترحة</span><p id="aiRelationships">—</p></section>
+            <section><span>التعارضات التي تحتاج قرارًا</span><p id="aiConflicts">—</p></section>
+          </div>
+          <ul id="aiNotes"></ul>
+          <button class="secondary" id="acceptAI">نقل الاقتراح إلى جدول المراجعة</button>
+        </div>
       </div>
     </article>
 

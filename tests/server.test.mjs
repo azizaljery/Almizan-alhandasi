@@ -75,6 +75,21 @@ test('validates plot, prompt, previous brief and typed street fields', () => {
   assert.deepEqual(validateInput(body).previous, brief());
 });
 
+test('accepts a bounded client requirements context and rejects malformed context', () => {
+  const body = input();
+  body.context = {
+    language: 'ar-en', prompt: body.prompt,
+    plot: body.plot,
+    discovery: { likes: ['classic'], rejects: [], avoids: ['كشف الضيوف'], life: { seniors: 'موجودون' } },
+    rooms: [{ name: 'مجلس', type: 'majlis', area: 30, position: 'front', side: 'any' }],
+  };
+  const accepted = validateInput(body);
+  assert.equal(accepted.context.discovery.life.seniors, 'موجودون');
+  assert.equal(accepted.context.rooms[0].type, 'majlis');
+  const malformed = { ...body, context: { ...body.context, rooms: [{ name: 'bad', type: 'unknown', area: 30, position: 'front', side: 'any' }] } };
+  assert.throws(() => validateInput(malformed));
+});
+
 test('room validation supports corridor and bounded areas; clarification does not invent rooms', () => {
   const value = brief();
   value.rooms[0] = { name: ' ممر ', type: 'corridor', area: 8, position: 'middle', side: 'any' };
