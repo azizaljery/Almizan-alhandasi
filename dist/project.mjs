@@ -1,3 +1,4 @@
+import { normalizeDiscovery } from './client-brief.mjs';
 import { ENGINE_VERSION, STRATEGIES, validatePlot, normalizeRooms, generateModel } from './planner.mjs';
 import { estimate, quantityRows } from './estimates.mjs';
 
@@ -26,7 +27,7 @@ function validateProject(raw) {
   const project = {
     schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION,
     savedAt: typeof raw.savedAt === 'string' && Number.isFinite(Date.parse(raw.savedAt)) ? raw.savedAt : new Date().toISOString(),
-    draft: { plot: validatePlot(draft.plot), rooms: publicRooms(draft.rooms), palette: palette(draft.palette), rates, costReserve: draft.costReserve, vat: draft.vat, idea: draft.idea },
+    draft: { plot: validatePlot(draft.plot), rooms: publicRooms(draft.rooms), palette: palette(draft.palette), rates, costReserve: draft.costReserve, vat: draft.vat, idea: draft.idea, discovery: normalizeDiscovery(draft.discovery) },
     design: raw.design === null ? null : recipe(raw.design),
     alternatives: raw.alternatives.map(recipe),
     history: raw.history.map(entry => ({ design: recipe(entry.design), palette: palette(entry.palette) })),
@@ -35,10 +36,10 @@ function validateProject(raw) {
   if (project.design && project.alternatives.some(r => JSON.stringify([r.plot, r.rooms]) !== JSON.stringify([project.design.plot, project.design.rooms]))) throw Error('البدائل المحفوظة ليست من متطلبات المخطط نفسه.');
   return project;
 }
-export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, model, alternatives = [], history = [] }) {
+export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [] }) {
   // Only explicitly allowlisted data is saved. Access codes and provider keys are never read.
   const raw = { schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION, savedAt: new Date().toISOString(),
-    draft: { plot, rooms, palette, rates, costReserve, vat, idea }, design: modelRecipe(model),
+    draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery }, design: modelRecipe(model),
     alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette })) };
   return JSON.stringify(validateProject(raw), null, 2);
 }

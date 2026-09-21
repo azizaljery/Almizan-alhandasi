@@ -1,3 +1,4 @@
+import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities } from './planner.mjs';
 import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
@@ -16,7 +17,7 @@ const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
 const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, tour: [], tourIndex: -1, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
-let viewport, viewer, toastTimer, loading3D, circulation;
+let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
 const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
@@ -40,8 +41,28 @@ function renderDiscovery() {
   all('#avoidChoices [data-avoid]').forEach(button => { const on = d.avoids.includes(button.dataset.avoid); button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
   all('#lifestyleChoices [data-life]').forEach(button => { const on = d.life[button.dataset.life] === button.dataset.value; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
   const text = discoveryText(); $('discoverySummary').textContent = text || 'اختر ما يناسبكم؛ سنحوّله إلى موجز تصميم يمكنك تعديله قبل التحليل.';
-  const count = d.likes.length + d.avoids.length + Object.keys(d.life).length;
+  const count = d.likes.length + d.rejects.length + d.avoids.length + Object.keys(d.life).length;
   $('discoveryState').textContent = count ? `${count} رغبات محددة` : 'لم يكتمل بعد';
+  renderClientBrief();
+}
+function renderClientBrief() {
+  clientBrief = buildClientBrief(state.discovery, state.program);
+  const list = (id, items, empty) => { $(id).replaceChildren(...(items.length ? items : [empty]).map(text => { const li = document.createElement('li'); li.textContent = text; return li; })); };
+  list('clientPrinciples', clientBrief.principles, 'حدّد أولويات الضيافة والخصوصية والخدمات من الاختيارات أعلاه.');
+  list('clientQuestions', clientBrief.questions, 'أضف أي احتياج خاص في وصف المنزل قبل التحليل.');
+  list('clientLimits', clientBrief.limits, 'تبقى المساحات والجوانب كما أدخلتها؛ التعديلات المعروضة تخص الموقع النسبي فقط.');
+  $('clientChanges').innerHTML = clientBrief.changes.map(c => `<label class="client-change"><input type="checkbox" data-brief-room="${c.index}"><span><b>${esc(c.name)}: ${esc(POSITIONS[c.from])} ← ${esc(POSITIONS[c.to])}</b><small>${esc(c.reason)}</small></span></label>`).join('');
+  $('clientNoChanges').hidden = !!clientBrief.changes.length;
+  $('applyClientBrief').disabled = true;
+}
+function applyClientBrief() {
+  try {
+    const selected = all('#clientChanges [data-brief-room]:checked').map(el => Number(el.dataset.briefRoom));
+    if (!selected.length) return;
+    state.program = applyBriefChoices(state.discovery, state.program, clientBrief, selected);
+    state.manualEdits = true; renderRows();
+    toast('طُبّقت المواقع التي اخترتها على الجدول. اضغط «ولّد» لتحديث المخطط ومقارنة البدائل.');
+  } catch (error) { toast(error.message); renderClientBrief(); }
 }
 function markDirty() {
   state.dirty = !!state.model && signature(rawPlot(), state.program) !== state.signature;
@@ -100,7 +121,7 @@ function programTotal() {
 }
 function renderRows() {
   $('roomRows').innerHTML = state.program.map((r, i) => `<tr data-row="${i}"><td><input data-field="name" aria-label="اسم الفراغ ${i + 1}" maxlength="70" value="${esc(r.name)}"></td><td><select data-field="type" aria-label="نوع الفراغ ${i + 1}">${options(TYPES, r.type)}</select></td><td><input data-field="area" aria-label="مساحة الفراغ ${i + 1}" type="number" min="4" max="120" step=".5" value="${Number.isFinite(r.area) ? r.area : ''}"></td><td><select data-field="position" aria-label="موقع الفراغ ${i + 1}">${options(POSITIONS, r.position)}</select></td><td><select data-field="side" aria-label="جانب الفراغ ${i + 1}">${options(SIDES, r.side)}</select></td><td><button class="remove-room" data-remove="${i}" aria-label="حذف ${esc(r.name)}">حذف</button></td></tr>`).join('');
-  programTotal(); markDirty();
+  programTotal(); markDirty(); renderClientBrief();
 }
 function selectRoom(id) {
   const r = state.model?.rooms.find(r => r.id === id); if (!r) return;
@@ -333,22 +354,22 @@ function download(content, mime, name) {
 function saveProject() {
   if ($('gen').disabled) return toast('انتظر اكتمال العملية الجارية قبل الحفظ.');
   try {
-    const text = encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, model: state.model, alternatives: state.alternatives, history: state.history });
+    const text = encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history });
     download(text, 'application/json;charset=utf-8', 'mizan-handasi-project.json');
-    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. احتفظ بالملف؛ لا يوجد حفظ سحابي أو تلقائي.');
+    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات ورغبات المنزل وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. احتفظ بالملف؛ لا يوجد حفظ سحابي أو تلقائي.');
   } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
 }
 async function importProject(file) {
   if (!file || $('gen').disabled) return;
   if (file.size > MAX_PROJECT_BYTES) return message('projectStatus', 'حجم الملف يتجاوز 2 ميغابايت. بقي العمل كما هو.');
   if (!window.confirm('سيستبدل الملف مدخلات الجلسة الحالية ومخططها وأسعارها. نزّل مشروعك الحالي أولًا إن احتجته. المتابعة؟')) return;
-  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value]);
+  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery]);
   $('gen').disabled = true; $('undo').disabled = true; markDirty();
   message('projectStatus', 'جارٍ فحص ملف المشروع وإعادة بناء نسخه قبل الاستيراد…');
   try {
     const { project } = await runPlanner({ projectText: await file.text() });
-    if (JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
-    state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.proposal = null;
+    if (JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
+    state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.proposal = null;
     state.signature = project.model ? signature(project.model.plot, project.model.program) : '';
     restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
     $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
@@ -371,6 +392,8 @@ function boot() {
   all('[data-go]').forEach(button => button.addEventListener('click', () => { $('journey').style.display = 'none'; $('app').classList.add('show'); switchTab(button.dataset.go); }));
   all('[data-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
   all('[data-next]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.next)));
+  $('clientChanges').addEventListener('change', () => { $('applyClientBrief').disabled = !all('#clientChanges [data-brief-room]:checked').length; });
+  $('applyClientBrief').addEventListener('click', applyClientBrief);
   $('home').addEventListener('click', goHome); $('back').addEventListener('click', goHome);
   $('streets').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (!b) return; state.streets[b.dataset.side] = !state.streets[b.dataset.side]; renderStreets(); rating(); markDirty(); });
   ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'maxBuiltArea', 'entry', 'floors'].forEach(id => $(id).addEventListener('input', () => { rating(); markDirty(); }));
@@ -378,7 +401,7 @@ function boot() {
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     state.program[Number(row.dataset.row)][field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
-    state.manualEdits = true; programTotal(); markDirty();
+    state.manualEdits = true; programTotal(); markDirty(); renderClientBrief();
   });
   $('roomRows').addEventListener('click', e => { const b = e.target.closest('[data-remove]'); if (!b) return; state.program.splice(Number(b.dataset.remove), 1); state.manualEdits = true; renderRows(); });
   $('addType').innerHTML = options(TYPES, 'bedroom');

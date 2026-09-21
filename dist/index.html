@@ -62,6 +62,16 @@
         </div>
         <div class="discovery-summary" id="discoverySummary" aria-live="polite">اختر ما يناسبكم؛ سنحوّله إلى موجز تصميم يمكنك تعديله قبل التحليل.</div>
         <button class="secondary" type="button" id="applyDiscovery">استخدم هذه الرغبات في الوصف</button>
+        <section class="client-brief" aria-labelledby="clientBriefTitle">
+          <h3 id="clientBriefTitle">فكرة التخطيط قبل البدائل</h3>
+          <p>راجع أثر رغباتك على جدول الغرف. اختر التغييرات المناسبة، ثم ولّد المخطط من الجدول المعدّل.</p>
+          <ul id="clientPrinciples"></ul>
+          <div id="clientChanges"></div>
+          <p id="clientNoChanges">لا توجد تغييرات إضافية في المواقع النسبية؛ قد يكون الجدول متوافقًا معها بالفعل أو تحتاج رغباتك تفصيلًا.</p>
+          <button class="secondary" type="button" id="applyClientBrief" disabled>طبّق التغييرات المحددة على الجدول</button>
+          <h4>نحتاج تحديده في وصفك</h4><ul id="clientQuestions"></ul>
+          <details><summary>ما يحتاج مراجعة إضافية</summary><ul id="clientLimits"></ul></details>
+        </section>
       </div>
     </article>
     <section class="project-tools" aria-label="حفظ المشروع واستعادته"><div><h2>ملف مشروعك</h2><p>احتفظ بالمدخلات والبدائل والأسعار وآخر 5 نسخ في ملف تستعيده لاحقًا. لا يوجد حفظ تلقائي أو سحابي.</p></div><div class="inline-actions"><button id="saveProject" class="small-button">تنزيل ملف المشروع</button><button id="loadProject" class="small-button">استيراد مشروع محفوظ</button><input id="projectFile" type="file" accept=".json,application/json" aria-label="ملف مشروع ميزان" hidden></div><p id="projectStatus" role="status" class="help" hidden></p></section>
