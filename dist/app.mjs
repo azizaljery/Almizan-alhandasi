@@ -117,6 +117,7 @@ function renderSolarPreview() {
     $('sunInfo').innerHTML = preview.visible
       ? `ارتفاع الشمس: <b>${fmt(preview.altitude)}°</b> · سمتها من الشمال: <b>${fmt(preview.azimuth)}°</b> · ظل جدار ٣٫٢م: <b>${fmt(preview.shadowLength)} م</b>`
       : 'الشمس تحت الأفق في هذه المعاينة؛ لا يظهر ظل شمسي مباشر.';
+    viewport?.showSolar(preview, $('showShadow')?.checked); viewer?.setSun?.(preview);
   } catch (error) { $('sunInfo').textContent = error.message; }
 }
 function programTotal() {
@@ -131,7 +132,13 @@ function selectRoom(id) {
   const r = state.model?.rooms.find(r => r.id === id); if (!r) return;
   state.selected = id; $('roomSelect').value = id; viewport?.select(id);
   $('roomInspector').innerHTML = `<div><b>${esc(r.name)}</b><p>${POSITIONS[r.position]} · ${SIDES[r.resolvedSide]}</p></div><div class="numbers"><span>${fmt(r.area)} م² صافي</span><span>${fmt(r.w, 2)} × ${fmt(r.h, 2)} م</span></div>`;
+  syncRoomEditor(r);
   drawRoute();
+}
+function syncRoomEditor(room = state.model?.rooms.find(r => r.id === state.selected)) {
+  const form = $('roomEditForm'); if (!form || !room) return;
+  const index = state.program.findIndex(r => r.id === room.id); if (index < 0) return;
+  const program = state.program[index]; form.hidden = !state.editor.open; $('roomEditTitle').textContent = `الغرفة: ${program.name}`; $('roomEditName').value = program.name; $('roomEditArea').value = program.area; $('roomEditPosition').innerHTML = options(POSITIONS, program.position); $('roomEditSide').innerHTML = options(SIDES, program.side); form.dataset.roomIndex = index;
 }
 function drawRoute() {
   const path = circulation?.toRoom(state.selected);
@@ -167,7 +174,7 @@ async function show3D(retry = false) {
     message('threeError', ''); $('retry3D').hidden = true;
     await loadThree(retry);
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
-    viewer.setVisible(state.tab === 'design'); viewer.setModel(state.model, state.palette); $('roof').checked = false;
+    viewer.setVisible(state.tab === 'design'); viewer.setModel(state.model, state.palette); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 })); $('roof').checked = false;
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
@@ -200,6 +207,7 @@ function syncPlanEditor() {
   all('[data-plan-tool]').forEach(button => button.classList.toggle('on', button.dataset.planTool === state.editor.tool));
   const instructions = { select: 'اختر غرفة لقراءة تفاصيلها. اختر بابًا أو نافذة أو حذفًا لتعديل الرسم.', door: 'اضغط على جدار فاصل أو خارجي لإضافة باب صالح.', window: 'اضغط على جدار خارجي لإضافة نافذة.', erase: 'اضغط قرب باب أو نافذة لحذفها. المدخل الأساسي محمي.' };
   $('planEditorStatus').textContent = instructions[state.editor.tool] || instructions.select;
+  syncRoomEditor();
   viewport?.setEditor({ active: open, tool: state.editor.tool, onAction: editPlanAtPoint });
 }
 function editPlanAtPoint(action) {
@@ -309,7 +317,8 @@ async function generate() {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
     const result = await runPlanner({ plot, rooms, alternatives: true });
     if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
-    state.alternatives = result.models; state.failures = result.failures;
+    const preferred = state.discovery.likes.includes('courtyard_privacy') ? ['courtyard', 'u-court', 'balanced', 'compact', 'frontage'] : state.discovery.likes.includes('family_layout') ? ['balanced', 'u-court', 'courtyard', 'compact', 'frontage'] : ['courtyard', 'u-court', 'balanced', 'compact', 'frontage'];
+    state.alternatives = result.models.sort((a, b) => preferred.indexOf(a.strategy) - preferred.indexOf(b.strategy)); state.failures = result.failures;
     state.model = result.models[0]; state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
@@ -547,9 +556,15 @@ function boot() {
     const tool = event.target.closest('[data-plan-tool]'); if (!tool) return;
     state.editor.tool = tool.dataset.planTool; syncPlanEditor();
   });
+  $('roomEditForm').addEventListener('submit', event => {
+    event.preventDefault(); const index = Number(event.currentTarget.dataset.roomIndex); if (!Number.isInteger(index) || !state.program[index]) return;
+    try {
+      state.program[index] = { ...state.program[index], name: $('roomEditName').value.trim(), area: $('roomEditArea').valueAsNumber, position: $('roomEditPosition').value, side: $('roomEditSide').value }; normalizeRooms(state.program); state.manualEdits = true; renderRows(); markDirty(); toast('حُفظ تعديل الغرفة في البرنامج. اضغط «ولّد» لإعادة توزيعها هندسيًا دون تغيير المساحة.');
+    } catch (error) { toast(error.message); syncRoomEditor(); }
+  });
   $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
-  $('showRoute').addEventListener('change', drawRoute);
+  $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview);
   $('saveProject').addEventListener('click', saveProject);
   $('loadProject').addEventListener('click', () => { if (!$('gen').disabled) $('projectFile').click(); });
   $('projectFile').addEventListener('change', async () => { const file = $('projectFile').files[0]; $('projectFile').value = ''; await importProject(file); });

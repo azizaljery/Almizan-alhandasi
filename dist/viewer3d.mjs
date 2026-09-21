@@ -19,7 +19,7 @@ export class RoomViewer {
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
     this.scene.add(new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8));
-    const light = new T.DirectionalLight(0xffe4b6, 3.1); light.position.set(-28, 48, 18); light.castShadow = true;
+    const light = new T.DirectionalLight(0xffe4b6, 3.1); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
     if (light.shadow?.mapSize) { light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048; light.shadow.camera.near = 1; light.shadow.camera.far = 120; }
     this.scene.add(light);
     const fill = new T.DirectionalLight(0xbcd8ff, .75); fill.position.set(24, 18, -35); this.scene.add(fill);
@@ -216,6 +216,12 @@ export class RoomViewer {
     this.render();
   }
   setRoof(show) { if (this.roof) { this.roof.visible = show && this.mode !== 'inside'; this.render(); } }
+  setSun(preview) {
+    if (!this.sunLight || !preview?.visible) return;
+    const rad = preview.azimuth * Math.PI / 180, altitude = Math.max(.12, preview.altitude * Math.PI / 180), distance = 52;
+    this.sunLight.position.set(Math.sin(rad) * Math.cos(altitude) * distance, Math.sin(altitude) * distance, -Math.cos(rad) * Math.cos(altitude) * distance);
+    this.sunLight.intensity = Math.max(1.3, Math.min(3.5, 1.2 + preview.altitude / 28)); this.render();
+  }
   resize() {
     const w = this.container.clientWidth, h = this.container.clientHeight;
     if (!w || !h) return;

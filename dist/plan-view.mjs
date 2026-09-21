@@ -130,5 +130,19 @@ export class PlanViewport {
     for (const [key, value] of Object.entries({ fill: 'none', stroke: '#b04d24', 'stroke-width': '.09', 'stroke-dasharray': '.2 .12', 'stroke-linecap': 'round', 'pointer-events': 'none' })) route.setAttribute(key, value);
     this.svg.append(route);
   }
+  showSolar(preview, show = true) {
+    this.svg.querySelector('[data-solar-shadow]')?.remove(); this.svg.querySelector('[data-solar-direction]')?.remove();
+    if (!show || !preview?.visible) return;
+    const rad = (preview.azimuth + 180) * Math.PI / 180, length = Math.min(preview.shadowLength || 0, Math.max(this.model.plot.width, this.model.plot.length) * .9);
+    const dx = Math.sin(rad) * length, dy = -Math.cos(rad) * length, shapes = this.model.massingParts?.length ? this.model.massingParts : [this.model.building];
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g'); group.setAttribute('data-solar-shadow', 'true'); group.setAttribute('pointer-events', 'none');
+    shapes.forEach(r => {
+      const corners = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]];
+      const points = [...corners, ...corners.slice().reverse().map(([x, y]) => [x + dx, y + dy])];
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); polygon.setAttribute('points', points.map(([x, y]) => `${x},${-y}`).join(' ')); polygon.setAttribute('fill', '#5d6470'); polygon.setAttribute('fill-opacity', '.22'); group.append(polygon);
+    });
+    this.svg.insertBefore(group, this.svg.firstChild);
+    const sun = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sun.setAttribute('data-solar-direction', 'true'); sun.setAttribute('x', String(this.model.building.x)); sun.setAttribute('y', String(-this.model.building.y + .7)); sun.setAttribute('fill', '#bd7b16'); sun.setAttribute('font-size', '.35'); sun.setAttribute('font-weight', '700'); sun.textContent = `☀ شمس ${preview.azimuth}° · ظل ${preview.shadowLength}م`; this.svg.append(sun);
+  }
   select(id) { this.svg.querySelectorAll('[data-room-id]').forEach(g => { const on = g.dataset.roomId === id; g.classList.toggle('selected', on); g.setAttribute('aria-pressed', String(on)); }); }
 }
