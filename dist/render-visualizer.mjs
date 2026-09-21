@@ -2,7 +2,7 @@
  * الواجهة لا تحمل مفتاح OpenAI. الطلب يمر عبر Worker مستقل محمي.
  */
 
-const IMAGE_WORKER_URL = globalThis.MIZAN_IMAGE_WORKER_URL || 'https://mizan-images.YOUR-SUBDOMAIN.workers.dev';
+const IMAGE_WORKER_URL = globalThis.MIZAN_IMAGE_WORKER_URL || 'https://mizan-images.aljeryabod.workers.dev';
 const MAX_GALLERY_ITEMS = 20;
 const GALLERY_STORAGE_KEY = 'mizan_gallery_v1';
 const ACCESS_CODE_KEY = 'mizan_image_access_code';
