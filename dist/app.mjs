@@ -14,6 +14,7 @@ import { monthName, solarPreview } from './solar-path.mjs';
 import { compareHomeModels, buildEngineeringPromptContext } from './home-design-engine.mjs';
 import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
 import { initVisualizer } from './render-visualizer.mjs';
+import { calculateMizanScore } from './mizan-score.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -297,7 +298,19 @@ function renderPlanReview() {
   $('insightScore').textContent = `${fmt(insights.overall, 0)} / ١٠٠`;
   $('insightCards').innerHTML = insights.cards.map(card => `<div class="insight"><div><span>${esc(card.label)}</span><b>${fmt(card.score, 0)}</b></div><p>${esc(card.detail)}</p></div>`).join('');
   $('insightLimit').textContent = insights.note;
+  renderMizanScore();
   renderEngineeringReview();
+}
+function renderMizanScore() {
+  const output = $('mizanScoreOutput');
+  if (!output) return;
+  const result = calculateMizanScore(state.model);
+  if (!result) { output.innerHTML = '<p class="help">ولّد مخططًا صالحًا لعرض Mizan Score.</p>'; return; }
+  $('mizanScoreValue').textContent = `${fmt(result.score, 0)} / ١٠٠٠`;
+  $('mizanScoreGrade').textContent = `${result.grade} · ثقة الحساب ${result.confidence}%`;
+  $('mizanScoreAxes').innerHTML = result.axes.map(axis => `<div class="insight"><div><span>${esc(axis.label)} <small>(${axis.weight}٪)</small></span><b>${fmt(axis.score, 0)}</b></div><p>${esc(axis.detail)}</p></div>`).join('');
+  $('mizanScoreNotes').innerHTML = `<li>نقاط القوة: ${esc(result.strengths.join('، ') || 'لا توجد نقاط مرتفعة كافية بعد.')}</li><li>نقاط التحسين: ${esc(result.improvements.join('، ') || 'لا توجد محاور منخفضة في هذا الفحص.')}</li><li>عقوبة التنبيهات: ${fmt(result.penalties, 0)} نقطة.</li>`;
+  $('mizanScoreLimit').textContent = result.note;
 }
 function runPlanner(request) {
   if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms));
