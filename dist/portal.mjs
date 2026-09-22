@@ -141,4 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
   mountPortal();
 });
 
+// بوابة الإدارة المستقلة
+import('./mizan-portal.mjs').then(({ initMizanPortal }) => {
+  initMizanPortal();
+}).catch(error => console.warn('Mizan portal unavailable:', error));
+
 export { mountPortal };
