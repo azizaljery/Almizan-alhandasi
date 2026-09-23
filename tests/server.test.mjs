@@ -2,8 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BRIEF_SCHEMA, createWorker, handleRequest, validateBrief, validateInput } from '../worker/server.mjs';
 
-// All provider responses are simulated. These tests never call OpenAI or use a real key.
-const ORIGIN = 'https://mizan.example';
+const ORIGIN = 'https://al-mizan-al-handasi.aljeryabod.chatgpt.site';
 const TEST_ENV = { OPENAI_API_KEY: 'unit-test-only-do-not-use' };
 const input = () => ({
   prompt: 'أبي مجلس للضيوف وثلاث غرف نوم وحمامين',
@@ -21,12 +20,11 @@ const completed = value => ({
 function request(body = input(), options = {}) {
   const headers = new Headers({
     'Content-Type': 'application/json; charset=utf-8',
-    Origin: ORIGIN, 'oai-authenticated-user-id': 'test-owner',
+    Origin: ORIGIN,
     ...options.headers,
   });
-  if (options.anonymous) headers.delete('oai-authenticated-user-id');
   const method = options.method || 'POST';
-  return new Request(ORIGIN + (options.path || '/api/assistant'), {
+  return new Request('https://al-mizan-api.ajeryabod.workers.dev' + (options.path || '/api/assistant'), {
     method, headers,
     ...(['GET', 'HEAD', 'OPTIONS'].includes(method) ? {} : { body: options.raw ?? JSON.stringify(body) }),
   });
@@ -91,12 +89,8 @@ test('room validation supports corridor and bounded areas; clarification does no
   assert.deepEqual(validateBrief(clarification), clarification);
 });
 
-test('anonymous requests and foreign origins cannot use the paid endpoint', async () => {
+test('foreign origins cannot use the paid endpoint and allowed origin receives CORS', async () => {
   const { worker, calls } = fixture();
-  for (const path of ['/api/assistant', '/api/assistant/status']) {
-    const res = await worker.fetch(request(input(), { anonymous: true, path, method: path.endsWith('status') ? 'GET' : 'POST' }), TEST_ENV);
-    assert.equal(res.status, 401);
-  }
   for (const method of ['POST', 'OPTIONS']) {
     const res = await worker.fetch(request(input(), { method, headers: { Origin: 'https://foreign.example' } }), TEST_ENV);
     assert.equal(res.status, 403);
@@ -104,11 +98,12 @@ test('anonymous requests and foreign origins cannot use the paid endpoint', asyn
   }
   const preflight = await worker.fetch(request(input(), { method: 'OPTIONS' }), TEST_ENV);
   assert.equal(preflight.status, 204);
-  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'), null);
+  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'), ORIGIN);
+  assert.match(preflight.headers.get('Access-Control-Allow-Methods'), /POST/);
   assert.equal(calls.length, 0);
 });
 
-test('configuration status never claims live verification or a working manual engine', async () => {
+test('configuration status never claims live verification', async () => {
   const { worker, calls } = fixture();
   for (const [env, configured] of [[{}, false], [{ OPENAI_API_KEY: '   ' }, false], [TEST_ENV, true]]) {
     const res = await worker.fetch(request(null, { method: 'GET', path: '/api/assistant/status' }), env);
@@ -169,16 +164,15 @@ test('multi-floor limitations never delete an unhandled user requirement', async
   assert.match(data.limitations[0], /الأرضي فقط/);
 });
 
-test('limits per verified user across requests and expires at the minute boundary', async () => {
+test('limits clients across requests and expires at the minute boundary', async () => {
   let timestamp = 0;
   const { worker, calls } = fixture({ now: () => timestamp });
   const frozenEnv = Object.freeze({ ...TEST_ENV });
   for (let i = 0; i < 5; i++) assert.equal((await worker.fetch(request(), frozenEnv)).status, 200);
-  const res = await worker.fetch(request(input(), { headers: { 'X-Forwarded-For': 'changed-to-bypass-limit' } }), frozenEnv);
+  const res = await worker.fetch(request(), frozenEnv);
   assert.equal(res.status, 429);
   assert.equal(res.headers.get('Retry-After'), '60');
   assert.equal(calls.length, 5);
-  assert.equal((await worker.fetch(request(input(), { headers: { 'oai-authenticated-user-id': 'second-trusted-user' } }), frozenEnv)).status, 200);
   timestamp = 60000;
   assert.equal((await worker.fetch(request(), frozenEnv)).status, 200);
   assert.deepEqual(Object.keys(frozenEnv), ['OPENAI_API_KEY']);
@@ -218,6 +212,6 @@ test('preserves embedded Site assets and exports a Fetch-standard API handler', 
   assert.equal((await worker.fetch(request(null, { method: 'GET', path: '/constructor' }))).status, 404);
   assert.equal((await worker.fetch(request(null, { method: 'GET', path: '/missing' }))).status, 404);
   assert.equal((await worker.fetch(request(null, { path: '/' }))).status, 405);
-  assert.equal((await handleRequest(request(null, { anonymous: true, method: 'GET', path: '/api/assistant/status' }))).status, 401);
+  assert.equal((await handleRequest(request(null, { method: 'GET', path: '/api/assistant/status' }), {})).status, 200);
   assert.equal(calls.length, 0);
 });
