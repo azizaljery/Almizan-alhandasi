@@ -4,14 +4,13 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { generateModel, defaultRooms } from '../dist/planner.mjs';
 import { buildPlanSVG, PlanViewport } from '../dist/plan-view.mjs';
-import { AI_ENABLED, validateSuggestion, requestBrief } from '../dist/assistant.mjs';
+import { AI_ENABLED, WORKER_URL, validateSuggestion, requestBrief } from '../dist/assistant.mjs';
 
 const m = generateModel({ width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }, defaultRooms());
 test('generated SVG is valid XML with complete viewBox and escaped user-controlled room names', () => {
   const copy = structuredClone(m); copy.rooms[0].name = '<script>alert("x")</script>&';
   const svg = buildPlanSVG(copy); assert.ok(svg.includes('&lt;script&gt;')); assert.equal(svg.includes('<script>'), false);
   assert.equal((svg.match(/data-room-id=/g) || []).length, 12); assert.equal(/NaN|Infinity/.test(svg), false);
-  // XML parser is diagnostic only; no browser, network, or screenshot is used.
   const result = spawnSync('python', ['-c', 'import sys; from xml.etree import ElementTree as E; r=E.fromstring(sys.stdin.buffer.read()); assert len(r.attrib["viewBox"].split()) == 4; assert r.attrib["preserveAspectRatio"] == "xMidYMid meet"'], { input: svg });
   assert.equal(result.status, 0, result.stderr.toString());
 });
@@ -48,16 +47,18 @@ test('two-pointer pinch zooms without one-finger state errors after cancellation
   assert.ok(p.view.w < before); pointer(svg, 'pointercancel', { pointerId: 2 }); pointer(svg, 'pointerup', { pointerId: 1 }); assert.equal(p.pointers.size, 0);
 });
 
-test('static release never calls an AI provider or backend and remains explicitly disabled', async () => {
-  let calls = 0; assert.equal(AI_ENABLED, false);
-  await assert.rejects(requestBrief({}, { fetcher: async () => { calls++; } }), /غير مفعّل/); assert.equal(calls, 0);
-  const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8'); assert.match(html, /الذكاء الاصطناعي غير مفعّل/); assert.equal(html.includes('OPENAI_API_KEY='), false);
+test('AI client is enabled through the external Worker without exposing a browser secret', () => {
+  assert.equal(AI_ENABLED, true);
+  assert.equal(WORKER_URL, 'https://al-mizan-api.ajeryabod.workers.dev');
+  const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+  assert.match(html, /الذكاء الاصطناعي مفعّل/);
+  assert.equal(html.includes('OPENAI_API_KEY='), false);
 });
 
-test('future assistant path accepts only validated suggestions and never changes the model itself', async () => {
+test('assistant path accepts only validated suggestions and never changes the model itself', async () => {
   const brief = { summary: 'اقتراح', questions: [], assumptions: ['المساحة افتراض'], unhandled: [], rooms: defaultRooms() }, previous = JSON.stringify(m);
   const result = await requestBrief({ prompt: 'أريد منزلاً', plot: m.plot }, { enabled: true, fetcher: async (url, opts) => {
-    assert.equal(url, '/api/assistant'); assert.equal(opts.credentials, 'same-origin'); assert.equal(opts.headers.Authorization, undefined);
+    assert.equal(url, WORKER_URL + '/api/assistant'); assert.equal(opts.credentials, undefined); assert.equal(opts.headers.Authorization, undefined);
     return Response.json({ source: 'openai', brief });
   } });
   assert.equal(result.brief.rooms.length, 12); assert.equal(JSON.stringify(m), previous);
