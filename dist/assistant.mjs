@@ -1,8 +1,9 @@
 import { normalizeRooms } from './planner.mjs';
 
-// Static release: no API route, no browser key, and no provider request.
-// Enable only together with a securely configured backend and a verified integration test.
-export const AI_ENABLED = false;
+// AI is enabled through the external Cloudflare Worker.
+// No API key or provider secret is exposed in the browser.
+export const AI_ENABLED = true;
+export const WORKER_URL = 'https://al-mizan-api.ajeryabod.workers.dev';
 export function validateSuggestion(raw) {
   if (!raw || typeof raw.summary !== 'string' || !raw.summary.trim() || raw.summary.length > 1000) throw Error('اقتراح غير صالح.');
   const result = { summary: raw.summary };
@@ -16,7 +17,7 @@ export function validateSuggestion(raw) {
 }
 export async function requestBrief(input, { enabled = AI_ENABLED, fetcher = globalThis.fetch, signal } = {}) {
   if (!enabled) throw Error('الذكاء الاصطناعي غير مفعّل في هذه النسخة. لم يُرسل الوصف. يمكنك تعديل الغرف في الجدول والتوليد محليًا الآن.');
-  const response = await fetcher('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(input), signal });
+  const response = await fetcher(WORKER_URL + '/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input), signal });
   if (!response.headers.get('content-type')?.includes('application/json')) throw Error('خدمة التحليل غير متصلة بهذا الإصدار. بقي مخططك كما هو.');
   const data = await response.json();
   if (!response.ok) throw Error(typeof data.error === 'string' ? data.error : 'تعذّر التحليل؛ بقي مخططك كما هو.');
