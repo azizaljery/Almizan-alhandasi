@@ -23,7 +23,7 @@
 
 ## حالة الذكاء
 
-`AI_ENABLED = false` في `dist/assistant.mjs`. زر التحليل يوضح عدم التفعيل ولا يرسل الوصف. مسودة الخادم منفصلة في `worker/server.mjs` وغير منشورة بهذا الإصدار. تفعيلها يحتاج ربطًا آمنًا واختبار طلب حي، وليس مجرد تغيير الزر أو وضع مفتاح في المتصفح.
+`AI_ENABLED = true` في `dist/assistant.mjs`. التحليل يرسل الطلب إلى Cloudflare Worker على `https://al-mizan-api.ajeryabod.workers.dev/api/assistant`، بينما يبقى مفتاح OpenAI في بيئة الـWorker فقط ولا يوضع في المتصفح.
 
 ## ملفات الموقع
 
