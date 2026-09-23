@@ -39,11 +39,11 @@
     <header class="head"><span class="ey">الخطوة الثانية</span><h1>كل غرفة… على فكرتك</h1><p>راجع المساحات والمواقع، ثم شاهدها في مخطط واحد وعرض داخلي.</p></header>
     <div class="scope-note">هذه النسخة تصمّم <strong>دورًا أرضيًا بكتلة مستطيلة ومدخل واحد</strong>. الأدوار الأخرى، L وU والأفنية والمداخل المستقلة ليست منفّذة.</div>
 
-    <article class="card"><header class="ch"><b class="num">✦</b><div><h2>صف فكرة منزلك</h2><p id="aiStatus">الذكاء الاصطناعي غير مفعّل؛ التوزيع المحلي يعمل دون اتصال بخدمة ذكاء.</p></div><span class="pill">محلي</span></header>
+    <article class="card"><header class="ch"><b class="num">✦</b><div><h2>صف فكرة منزلك</h2><p id="aiStatus">الذكاء الاصطناعي مفعّل لتحليل المتطلبات؛ التوليد الهندسي يبقى محليًا بعد مراجعتك.</p></div><span class="pill">AI + محلي</span></header>
       <div class="cb">
         <label for="idea">وصفك بالعربية<textarea id="idea" rows="3" maxlength="4000" placeholder="مثال: مجلس أمامي يمين بمساحة 32 م²، وصالة وسط المنزل، وثلاث غرف نوم في الخلف…"></textarea></label>
-        <button class="secondary" id="askAI" aria-disabled="true">حلّل فكرتي — بانتظار تفعيل الربط</button>
-        <p class="help">حاليًا لا يُرسل وصفك ولا يُحوّل تلقائيًا إلى غرف. أدخل المتطلبات في الجدول أدناه. لا تضع مفتاح API هنا.</p>
+        <button class="secondary" id="askAI" aria-disabled="false">حلّل فكرتي بالذكاء الاصطناعي</button>
+        <p class="help">يُرسل وصفك إلى خدمة الذكاء الآمنة لاستخراج متطلبات قابلة للمراجعة. لا يتغيّر المخطط حتى توافق على الاقتراح ثم تضغط «ولّد». لا تضع مفتاح API هنا.</p>
         <div id="aiFeedback" class="message" role="status" hidden></div>
         <div id="aiReview" hidden><h3>اقتراح للمراجعة</h3><p id="aiSummary"></p><ul id="aiNotes"></ul><button class="secondary" id="acceptAI">نقل الاقتراح إلى جدول المراجعة</button></div>
       </div>
