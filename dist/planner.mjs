@@ -833,3 +833,100 @@ export function validateModel(m) {
     if (!p || typeof p.id !== 'string' || !p.id || !Number.isFinite(p.area) || !Number.isFinite(p.targetArea) || p.area <= 0 || p.targetArea <= 0 || Math.abs(p.area - p.targetArea) > E) fail('برنامج غرف غير صالح.');
   });
   m.corridors.forEach(c => { if (![c.x, c.y, c.w, c.h].every(Number.isFinite) || c.w <= 0 || c.h <= 0 || !rectInPolygon(c, m.buildingFootprint)) fail('ممر غير صالح.'); });
+  // Explicit courtyard-void proof (Priority 2): a courtyard is a hole, not a room, a
+  // corridor, built area, an interior slab, or a future roof surface — no room and no
+  // corridor may overlap ANY courtyard's rectangle, checked directly against
+  // model.courtyards rather than only inferred from buildingFootprint's notch shape.
+  const courtyards = Array.isArray(m.courtyards) ? m.courtyards : [];
+  if (m.shape === 'u' && courtyards.length !== 1) fail('شكل U يتطلب فناءً واحداً مطابقاً لفتحة الكتلة.');
+  if (m.shape !== 'u' && courtyards.length) fail('الفناء غير متوقع لهذا الشكل.');
+  courtyards.forEach(c => {
+    if (![c.x, c.y, c.w, c.h].every(Number.isFinite) || c.w <= 0 || c.h <= 0 || !containsPoint(m.footprint, { x: c.x, y: c.y }) || !containsPoint(m.footprint, { x: c.x + c.w, y: c.y + c.h })) fail('أبعاد أو موقع الفناء غير صالح: ' + (c.name || 'فناء') + '.');
+    if (m.shape === 'u') {
+      const corners = [{ x: c.x, y: c.y }, { x: c.x + c.w, y: c.y }, { x: c.x + c.w, y: c.y + c.h }, { x: c.x, y: c.y + c.h }];
+      /** @param {Point} p */
+      /** @param {Point} p */
+      const matchesVertex = p => m.buildingFootprint.some(v => near(v.x, p.x) && near(v.y, p.y));
+      if (!corners.every(matchesVertex)) fail('الفناء لا يطابق فتحة شكل U.');
+    }
+    if (m.rooms.some(r => overlap(r, c))) fail('غرفة تقع داخل الفناء: ' + c.name + '.');
+    if (m.corridors.some(cor => overlap(cor, c))) fail('ممر يعبر الفناء: ' + c.name + '.');
+    if (!ROOF_POLICIES.includes(c.roofPolicy) || c.roofable !== (c.roofPolicy !== 'OPEN_TO_SKY')) fail('حالة تسقيف الفناء غير صالحة أو غير متسقة: ' + c.name + '.');
+  });
+  m.openings.forEach(o => {
+    const wall = m.walls.find(w => w.id === o.wallId);
+    if (!wall || ![o.pos, o.w, o.h, o.sill].every(Number.isFinite) || o.w <= 0 || o.h <= 0 || o.sill < 0 || !['door', 'window'].includes(o.type)) { fail('فتحة غير صالحة.'); return; }
+    if (o.type !== 'door') return;
+    if (o.sill !== 0 || o.connects?.length !== 2) { fail('اتصال باب غير صالح.'); return; }
+    const length = Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1), dx = (wall.x2 - wall.x1) / length, dy = (wall.y2 - wall.y1) / length, p = openingPoint(m, o);
+    /** @param {string} id @param {Point} point */
+    const onNode = (id, point) => id === 'outside' ? !pointInPolygon(m.buildingFootprint, point) : nodes.has(id) && containsPoint(/** @type {Rect} */ (nodes.get(id)), point);
+    for (const along of [-o.w / 2 + .02, 0, o.w / 2 - .02]) {
+      const a = { x: p.x + dx * along - dy * (wall.t / 2 + .02), y: p.y + dy * along + dx * (wall.t / 2 + .02) };
+      const b = { x: p.x + dx * along + dy * (wall.t / 2 + .02), y: p.y + dy * along - dx * (wall.t / 2 + .02) };
+      if (!(onNode(o.connects[0], a) && onNode(o.connects[1], b) || onNode(o.connects[1], a) && onNode(o.connects[0], b))) fail('الباب لا يفتح فعلياً بين الفراغين المرتبطين به.');
+    }
+  });
+  m.links.forEach(([aId, bId]) => {
+    const a = m.corridors.find(c => c.id === aId), b = m.corridors.find(c => c.id === bId);
+    if (!a || !b) { fail('اتصال ممر مفقود.'); return; }
+    const sharedX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), sharedY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+    if (!(sharedX >= -.001 && sharedY >= GEOMETRY.branch - E || sharedY >= -.001 && sharedX >= GEOMETRY.branch - E)) fail('الممر الفرعي غير متصل هندسياً بالممر الرئيسي.');
+  });
+  for (const r of m.rooms) {
+    if (![r.x, r.y, r.w, r.h, r.targetArea].every(Number.isFinite) || r.w <= 0 || r.h <= 0 || r.targetArea <= 0 || !rectInPolygon(r, m.buildingFootprint)) fail('أبعاد غير صالحة للفراغ: ' + r.name);
+    const requested = programById.get(r.id);
+    if (!requested || !Number.isFinite(requested.targetArea) || Math.abs(r.targetArea - requested.targetArea) > E || Math.abs(r.w * r.h - requested.targetArea) > E) fail('المساحة غير مطابقة لطلبك: ' + r.name);
+    if (r.side !== 'any' && r.resolvedSide !== r.side) fail('الجانب المطلوب لم يتحقق: ' + r.name);
+    if (m.corridors.some(c => overlap(r, c))) fail('غرفة تتداخل مع ممر: ' + r.name);
+  }
+  m.rooms.forEach((a, i) => m.rooms.slice(i + 1).forEach(b => { if (overlap(a, b)) fail('غرف متداخلة: ' + a.name + ' و' + b.name); }));
+  for (const w of m.walls) {
+    if (![w.x1, w.y1, w.x2, w.y2, w.t, w.h].every(Number.isFinite) || w.t <= 0 || w.h <= 0 || Math.hypot(w.x2 - w.x1, w.y2 - w.y1) < E || !(near(w.x1, w.x2) || near(w.y1, w.y2))) { fail('جدار غير صالح.'); continue; }
+    if (m.rooms.some(r => near(w.x1, w.x2) ? w.x1 > r.x + E && w.x1 < r.x + r.w - E && Math.min(w.y1, w.y2) < r.y + r.h - E && Math.max(w.y1, w.y2) > r.y + E : w.y1 > r.y + E && w.y1 < r.y + r.h - E && Math.min(w.x1, w.x2) < r.x + r.w - E && Math.max(w.x1, w.x2) > r.x + E)) fail('يوجد جدار يقطع داخل غرفة.');
+    const len = Math.hypot(w.x2 - w.x1, w.y2 - w.y1), ops = m.openings.filter(o => o.wallId === w.id).sort((a, b) => a.pos - b.pos);
+    ops.forEach((o, i) => {
+      if (o.pos * len - o.w / 2 < -E || o.pos * len + o.w / 2 > len + E || o.sill + o.h > w.h + E) fail('فتحة خارج حدود الجدار.');
+      if (i && (o.pos - ops[i - 1].pos) * len < (o.w + ops[i - 1].w) / 2 - E) fail('فتحات متداخلة.');
+      if (o.type === 'window' && w.type !== 'ext') fail('نافذة على جدار غير خارجي.');
+    });
+  }
+  if (!errors.length) wallPieces(m).filter(p => p.bottom < 1.6 && p.bottom + p.height > 1.6).forEach(p => {
+    const horizontal = Math.abs(Math.sin(p.angle)) < E;
+    const r = { x: p.x - (horizontal ? p.length : p.thickness) / 2, y: p.y - (horizontal ? p.thickness : p.length) / 2, w: horizontal ? p.length : p.thickness, h: horizontal ? p.thickness : p.length };
+    if (m.corridors.some(c => overlap(c, r))) fail('يوجد جدار يعوق المساحة الصافية للممر.');
+  });
+  const graph = /** @type {Map<string, Set<string>>} */ (new Map()), connect = (/** @type {string} */ a, /** @type {string} */ b) => { if (!graph.has(a)) graph.set(a, new Set()); /** @type {Set<string>} */ (graph.get(a)).add(b); };
+  [...m.links, ...m.openings.filter(o => o.type === 'door').map(o => o.connects)].forEach(pair => { if (pair?.length === 2) { connect(...pair); connect(pair[1], pair[0]); } });
+  const reached = new Set(['outside']), queue = ['outside'];
+  while (queue.length) for (const b of graph.get(/** @type {string} */ (queue.shift())) || []) if (!reached.has(b)) { reached.add(b); queue.push(b); }
+  m.rooms.forEach(r => { if (!reached.has(r.id)) fail('لا يوجد مسار باب متصل بالمدخل للفراغ: ' + r.name); });
+  return [...new Set(errors)];
+}
+
+// Exact wall pieces, with openings removed; consumed by both 3D and quantity take-off.
+/** @param {ValidatedDesignGeometry} model @returns {WallPiece[]} */
+export function wallPieces(model) {
+  /** @type {WallPiece[]} */
+  const pieces = [];
+  model.walls.forEach(w => {
+    const length = Math.hypot(w.x2 - w.x1, w.y2 - w.y1), ux = (w.x2 - w.x1) / length, uy = (w.y2 - w.y1) / length;
+    /** @param {number} start @param {number} end @param {number} bottom @param {number} height */
+    const add = (start, end, bottom, height) => { if (end - start > E && height > E) pieces.push({ wallId: w.id, x: w.x1 + ux * (start + end) / 2, y: w.y1 + uy * (start + end) / 2, length: end - start, thickness: w.t, height, bottom, angle: Math.atan2(uy, ux), type: w.type }); };
+    let cursor = 0;
+    model.openings.filter(o => o.wallId === w.id).sort((a, b) => a.pos - b.pos).forEach(o => {
+      const start = o.pos * length - o.w / 2, end = o.pos * length + o.w / 2;
+      add(cursor, start, 0, w.h); add(start, end, 0, o.sill); add(start, end, o.sill + o.h, w.h - o.sill - o.h); cursor = end;
+    });
+    add(cursor, length, 0, w.h);
+  });
+  return pieces;
+}
+/** @param {ValidatedDesignGeometry} model @returns {Quantities} */
+export function quantities(model) {
+  const netWallArea = sum(wallPieces(model), p => p.length * p.height);
+  return { footprint: polygonArea(model.buildingFootprint), courtyard: sum(model.courtyards || [], c => c.w * c.h), rooms: sum(model.rooms, r => r.w * r.h), circulation: sum(model.corridors, r => r.w * r.h), reserve: sum(model.reserves, r => r.w * r.h), wallArea: netWallArea, finishArea: netWallArea * 2, wallVolume: sum(wallPieces(model), p => p.length * p.height * p.thickness), doors: model.openings.filter(o => o.type === 'door').length, windows: model.openings.filter(o => o.type === 'window').length, floors: 1 };
+}
+
+// Alias for backward compat and convenience
+export const plan = generateModel;
