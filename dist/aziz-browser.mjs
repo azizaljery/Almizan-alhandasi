@@ -638,3 +638,323 @@ function evaluateHardConstraints(candidate, constraints, config) {
         }
     }
     const axisScore = violations.length === 0 ? 100 : 0;
+    return { violations, satisfiedIds, axisScore, evidence };
+}
+function codeFor(c) {
+    switch (c.kind) {
+        case 'room_count_exact':
+        case 'room_count_min':
+        case 'room_count_max':
+        case 'room_type_required':
+        case 'room_type_forbidden':
+            return 'HARD_REQUIREMENT_MISSING';
+        case 'explicit_area':
+            return 'AREA_TOLERANCE_EXCEEDED';
+        case 'entry_side_required':
+        case 'access_required':
+            return 'INVALID_ACCESS';
+        case 'privacy_required':
+            return 'PRIVACY_CONFLICT';
+        case 'custom':
+            return 'INVALID_SCHEMA';
+        default:
+            return 'HARD_REQUIREMENT_MISSING';
+    }
+}
+function evaluateSingle(candidate, c, config) {
+    switch (c.kind) {
+        case 'room_count_exact': {
+            const n = c.value?.count;
+            return typeof n === 'number' && candidate.rooms.length === n;
+        }
+        case 'room_count_min': {
+            const n = c.value?.count;
+            return typeof n === 'number' && candidate.rooms.length >= n;
+        }
+        case 'room_count_max': {
+            const n = c.value?.count;
+            return typeof n === 'number' && candidate.rooms.length <= n;
+        }
+        case 'room_type_required': {
+            const t = c.value?.type;
+            return typeof t === 'string' && candidate.rooms.some((r) => r.type === t);
+        }
+        case 'room_type_forbidden': {
+            const t = c.value?.type;
+            return typeof t === 'string' && !candidate.rooms.some((r) => r.type === t);
+        }
+        case 'explicit_area': {
+            const v = c.value;
+            if (!Number.isFinite(v?.area) || v.area <= 0)
+                return false;
+            const tol = Number.isFinite(v?.tolerance) && v.tolerance >= 0
+                ? v.tolerance
+                : config.areaTolerancePercent / 100;
+            const matched = v.roomId
+                ? candidate.rooms.filter((r) => r.roomId === v.roomId)
+                : v.type
+                    ? candidate.rooms.filter((r) => r.type === v.type)
+                    : [];
+            if (matched.length === 0)
+                return false;
+            return matched.every((r) => Math.abs(r.clearArea - v.area) / v.area <= tol);
+        }
+        case 'entry_side_required': {
+            const side = c.value?.side;
+            return typeof side === 'string' && candidate.entryPoints.some((e) => e.side === side);
+        }
+        case 'privacy_required': {
+            const v = c.value;
+            if (typeof v?.fromType !== 'string' || typeof v?.toType !== 'string' || !Number.isFinite(v?.minDistance))
+                return false;
+            const a = candidate.rooms.find((r) => r.type === v.fromType);
+            const b = candidate.rooms.find((r) => r.type === v.toType);
+            if (!a || !b)
+                return false;
+            const ca = (0, geometry_js_1.centroidOf)(a.boundary);
+            const cb = (0, geometry_js_1.centroidOf)(b.boundary);
+            if (!Number.isFinite(ca.x) || !Number.isFinite(cb.x))
+                return false;
+            return Math.hypot(ca.x - cb.x, ca.y - cb.y) >= v.minDistance;
+        }
+        case 'access_required': {
+            const v = c.value;
+            if (typeof v?.roomId !== 'string')
+                return false;
+            const room = candidate.rooms.find((r) => r.roomId === v.roomId);
+            if (!room)
+                return false;
+            if (typeof v.fromRoomId === 'string') {
+                return candidate.adjacency.some((adj) => (adj.a === room.roomId && adj.b === v.fromRoomId) ||
+                    (adj.b === room.roomId && adj.a === v.fromRoomId));
+            }
+            if (typeof v.fromEntryId === 'string') {
+                const entry = candidate.entryPoints.find((e) => e.id === v.fromEntryId);
+                if (!entry)
+                    return false;
+                return candidate.adjacency.some((adj) => (adj.a === room.roomId && adj.b === entry.roomId) ||
+                    (adj.b === room.roomId && adj.a === entry.roomId));
+            }
+            return candidate.adjacency.some((a) => a.a === room.roomId || a.b === room.roomId);
+        }
+        case 'custom':
+            return false;
+        default:
+            return false;
+    }
+}
+};
+__mods["./conflict-engine.js"]=function(module,exports,require){"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.detectConflicts = detectConflicts;
+const util_js_1 = require("./util.js");
+const geometry_js_1 = require("./geometry.js");
+function detectConflicts(candidates, outputs) {
+    const conflicts = [];
+    const byType = new Map();
+    for (const c of candidates) {
+        if (!(0, geometry_js_1.isValidPolygon)(c.footprint))
+            continue;
+        const bb = (0, geometry_js_1.bboxOf)(c.footprint);
+        for (const room of c.rooms) {
+            if (!(0, geometry_js_1.isValidPolygon)(room.boundary))
+                continue;
+            const cen = (0, geometry_js_1.centroidOf)(room.boundary);
+            if (!Number.isFinite(cen.x))
+                continue;
+            const side = sideOf(cen, bb);
+            if (!byType.has(room.type))
+                byType.set(room.type, new Map());
+            const m = byType.get(room.type);
+            if (!m.has(c.producedBy))
+                m.set(c.producedBy, []);
+            m.get(c.producedBy).push({ candidateId: c.candidateId, side, confidence: c.engineConfidence });
+        }
+    }
+    for (const [type, perEngine] of byType) {
+        if (perEngine.size < 2)
+            continue;
+        const engineSide = new Map();
+        for (const [engineId, placements] of perEngine) {
+            const tally = new Map();
+            for (const p of placements)
+                tally.set(p.side, (tally.get(p.side) ?? 0) + 1);
+            let best = '';
+            let bestCount = -1;
+            for (const [s, cnt] of tally) {
+                if (cnt > bestCount || (cnt === bestCount && s < best)) {
+                    best = s;
+                    bestCount = cnt;
+                }
+            }
+            engineSide.set(engineId, best);
+        }
+        const sides = new Set(engineSide.values());
+        if (sides.size < 2)
+            continue;
+        const participants = [];
+        for (const [engineId, placements] of perEngine) {
+            const side = engineSide.get(engineId);
+            const rep = placements.slice().sort((a, b) => b.confidence - a.confidence || a.candidateId.localeCompare(b.candidateId))[0];
+            participants.push({ engineId, candidateId: rep.candidateId, position: side, confidence: rep.confidence });
+        }
+        conflicts.push({
+            conflictId: (0, util_js_1.deterministicId)('conflict', ['placement', type, ...participants.map((p) => p.engineId).sort()]),
+            severity: 'major',
+            subject: `room-type:${type}`,
+            participants,
+            description: `Engines disagree on ${type} placement (${[...sides].sort().join(' vs ')})`,
+            evidence: participants.map((p) => `${p.engineId}:${p.position}`),
+        });
+    }
+    const constraintEvalMap = new Map();
+    for (const o of outputs) {
+        for (const ce of o.constraintsEvaluated) {
+            if (!constraintEvalMap.has(ce.constraintId))
+                constraintEvalMap.set(ce.constraintId, new Map());
+            constraintEvalMap.get(ce.constraintId).set(o.engineId, ce.satisfied);
+        }
+    }
+    for (const [cid, byEngine] of constraintEvalMap) {
+        if (new Set(byEngine.values()).size < 2)
+            continue;
+        conflicts.push({
+            conflictId: (0, util_js_1.deterministicId)('conflict', ['constraint-eval', cid, ...[...byEngine.keys()].sort()]),
+            severity: 'major',
+            subject: `constraint-eval:${cid}`,
+            participants: [...byEngine.entries()].sort(([a], [b]) => a.localeCompare(b)).flatMap(([engineId, satisfied]) => {
+                const out = outputs.find((o) => o.engineId === engineId);
+                const candidateIds = out?.candidates.map((c) => c.candidateId) ?? [];
+                if (candidateIds.length === 0) {
+                    return [{ engineId, candidateId: 'n/a', position: satisfied ? 'satisfied' : 'violated', confidence: 1 }];
+                }
+                return candidateIds.map((candidateId) => ({
+                    engineId,
+                    candidateId,
+                    position: satisfied ? 'satisfied' : 'violated',
+                    confidence: 1,
+                }));
+            }),
+            description: `Engines disagree on constraint ${cid}`,
+            evidence: [...byEngine.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([e, s]) => `${e}:${s}`),
+        });
+    }
+    for (const o of outputs) {
+        for (const warn of o.warnings) {
+            if (warn.severity !== 'critical')
+                continue;
+            const candidateIds = o.candidates.map((c) => c.candidateId);
+            conflicts.push({
+                conflictId: (0, util_js_1.deterministicId)('conflict', ['warning', o.engineId, warn.id]),
+                severity: 'critical',
+                subject: `warning:${warn.code}`,
+                participants: candidateIds.length > 0
+                    ? candidateIds.map((candidateId) => ({
+                        engineId: o.engineId,
+                        candidateId,
+                        position: 'critical-warning',
+                        confidence: o.confidence,
+                    }))
+                    : [{ engineId: o.engineId, candidateId: 'n/a', position: 'critical-warning', confidence: o.confidence }],
+                description: `Critical warning from ${o.engineId}: ${warn.message}`,
+                evidence: [warn.code],
+            });
+        }
+    }
+    return conflicts;
+}
+function sideOf(p, bb) {
+    const cx = bb.x + bb.w / 2, cy = bb.y + bb.h / 2;
+    const dx = p.x - cx, dy = p.y - cy;
+    if (Math.abs(dx) > Math.abs(dy))
+        return dx > 0 ? 'east' : 'west';
+    return dy > 0 ? 'north' : 'south';
+}
+};
+__mods["./scoring-engine.js"]=function(module,exports,require){"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.scoreCandidate = scoreCandidate;
+const geometry_js_1 = require("./geometry.js");
+const hard_constraints_js_1 = require("./hard-constraints.js");
+function clamp(v) {
+    return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 0;
+}
+function scoreCandidate(candidate, hardConstraints, softPreferences, conflicts, weights, config) {
+    const axes = [];
+    const mk = (axis, value, evidence) => ({
+        axis, value: clamp(value), weight: weights[axis] ?? 0, evidence,
+    });
+    axes.push(mk('requirementCoverage', requirementCoverage(candidate, softPreferences), [`softPrefs=${softPreferences.length}`]));
+    const hc = (0, hard_constraints_js_1.evaluateHardConstraints)(candidate, hardConstraints, config);
+    axes.push(mk('hardConstraintCompliance', hc.violations.length === 0 ? 100 : 0, [`violations=${hc.violations.length}`]));
+    axes.push(mk('geometryValidity', geometryValidity(candidate), ['checked']));
+    axes.push(mk('areaAccuracy', areaAccuracy(candidate, hardConstraints, config), ['checked']));
+    axes.push(mk('adjacency', adjacencyScore(candidate, softPreferences), ['checked']));
+    axes.push(mk('circulation', circulationScore(candidate), ['checked']));
+    axes.push(mk('privacy', privacyScore(candidate), ['checked']));
+    axes.push(mk('guestFamilySeparation', guestFamilySeparation(candidate), ['checked']));
+    axes.push(mk('serviceFlow', serviceFlow(candidate), ['checked']));
+    axes.push(mk('accessibility', accessibility(candidate), ['checked']));
+    axes.push(mk('daylightPotential', daylightPotential(candidate), ['checked']));
+    axes.push(mk('ventilationPotential', daylightPotential(candidate), ['checked']));
+    axes.push(mk('designEfficiency', designEfficiency(candidate), ['checked']));
+    axes.push(mk('referenceCompatibility', referenceCompatibility(candidate, conflicts), ['checked']));
+    const relevant = conflicts.filter((c) => c.participants.some((p) => p.candidateId === candidate.candidateId));
+    const critical = relevant.filter((c) => c.severity === 'critical').length;
+    const major = relevant.filter((c) => c.severity === 'major').length;
+    const penalty = Math.min(100, critical * 25 + major * 5);
+    axes.push(mk('unresolvedPenalty', 100 - penalty, [`critical=${critical}`, `major=${major}`]));
+    let weightedSum = 0, weightSum = 0;
+    for (const a of axes) {
+        weightedSum += a.value * a.weight;
+        weightSum += a.weight;
+    }
+    const rawTotal = weightSum > 0 ? weightedSum / weightSum : 0;
+    const conf = Math.max(0, Math.min(1, candidate.engineConfidence));
+    const confidenceFactor = 0.5 + 0.5 * conf;
+    return {
+        candidateId: candidate.candidateId,
+        axes,
+        rawTotal,
+        confidenceAdjustedTotal: rawTotal * confidenceFactor,
+    };
+}
+function requirementCoverage(c, prefs) {
+    if (prefs.length === 0)
+        return 100;
+    let covered = 0, total = 0;
+    for (const p of prefs) {
+        const w = Number.isFinite(p.weight) ? Math.max(0, p.weight) : 1;
+        total += w;
+        const r = prefResult(c, p);
+        if (r === 'unsupported') {
+            total -= w;
+            continue;
+        }
+        if (r === true)
+            covered += w;
+    }
+    return total > 0 ? (covered / total) * 100 : 100;
+}
+function prefResult(c, p) {
+    switch (p.kind) {
+        case 'prefer_zone_placement': {
+            const v = p.value;
+            if (!v?.type || !v?.zone)
+                return 'unsupported';
+            const room = c.rooms.find((r) => r.type === v.type);
+            return room ? room.zone === v.zone : false;
+        }
+        case 'prefer_adjacency': {
+            const v = p.value;
+            if (!v?.a || !v?.b)
+                return 'unsupported';
+            return c.adjacency.some((adj) => (adj.a === v.a && adj.b === v.b) || (adj.a === v.b && adj.b === v.a));
+        }
+        case 'prefer_orientation': {
+            const v = p.value;
+            if (!v?.type || !v?.side)
+                return 'unsupported';
+            const room = c.rooms.find((r) => r.type === v.type);
+            if (!room)
+                return false;
