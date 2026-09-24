@@ -293,3 +293,81 @@ function buildWingGeometry(zone, wingBox) {
           corridors.push({ id: corridorId, name: 'ممر فرعي', x: side === 'left' ? x : x - T, y, w: wing + T, h: GEOMETRY.branch });
           links.push([spineId, corridorId]);
           y += row.branch;
+        }
+        const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
+        if (side === 'right') order.reverse();
+        let rx = x;
+        order.forEach(r => { const w = r.area / row.depth; rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
+        y += row.depth + (rowIndex < packed.rows.length - 1 ? T : 0);
+      });
+      const leftover = zoneEntry.height - packed.height - (packed.rows.length ? T : 0);
+      if (leftover > .1) reserves.push({ name: 'غير موزّع', x, y: cursor + packed.height + (packed.rows.length ? T : 0), w: wing, h: leftover });
+    }
+    cursor += zoneEntry.height + (zoneIndex < active.length - 1 ? T : 0);
+  });
+  return { rooms, corridors, reserves, links, wing };
+}
+
+// ── Single-sided variant for a secondary arm that sits beside the main arm horizontally
+// (shared vertical boundary). All rooms in one row along the OUTER edge; the access
+// corridor is a vertical strip along the INNER edge (shared with the main arm), so it is
+// always flush against the shared boundary — never centred, never blocked by a room.
+// corridorSide: 'left' (corridor at box's left edge, rooms to its right) when this arm
+// sits to the RIGHT of main; 'right' (corridor at box's right edge, rooms to its left)
+// when this arm sits to the LEFT of main.
+/** @param {SingleWingSolution} solved @param {WingBox} wingBox @param {'left'|'right'} corridorSide @returns {WingGeometry} */
+function buildSingleSidedWingGeometry(solved, wingBox, corridorSide) {
+  const { x: ox, y: oy, w: boxW, h: boxH } = wingBox;
+  const rooms = /** @type {Room[]} */ ([]), reserves = /** @type {Reserve[]} */ ([]), links = /** @type {Link[]} */ ([]);
+  const corridorId = 'spine-' + wingBox.id;
+  const corridorX = corridorSide === 'left' ? ox : ox + boxW - GEOMETRY.corridor;
+  const corridorEndX = corridorX + GEOMETRY.corridor;
+  /** @type {Corridor[]} */
+  const corridors = [{ id: corridorId, name: 'ممر رئيسي', x: corridorX, y: oy + X, w: GEOMETRY.corridor, h: boxH - 2 * X }];
+  const rowsX = corridorSide === 'left' ? corridorEndX + T : ox + X;
+  const rowsWidth = singleSidedRoomsWidth(boxW);
+  const resolved = corridorSide === 'left' ? 'right' : 'left';
+  let y = oy + X;
+  solved.packed.rows.forEach((row, rowIndex) => {
+    let rCorridorId = corridorId;
+    if (row.branch) {
+      rCorridorId = 'branch-' + wingBox.id + '-' + rowIndex;
+      const branchX = corridorSide === 'left' ? corridorEndX : rowsX;
+      const branchW = corridorSide === 'left' ? (rowsX + rowsWidth) - corridorEndX : corridorX - rowsX;
+      corridors.push({ id: rCorridorId, name: 'ممر فرعي', x: branchX, y, w: branchW, h: GEOMETRY.branch });
+      links.push([corridorId, rCorridorId]);
+      y += row.branch;
+    }
+    const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
+    let rx = rowsX;
+    order.forEach(r => {
+      const w = r.area / row.depth;
+      rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'front' : (corridorSide === 'left' ? 'left' : 'right') });
+      rx += w + T;
+    });
+    y += row.depth + (rowIndex < solved.packed.rows.length - 1 ? T : 0);
+  });
+  const leftover = solved.depth - X * 2 - solved.packed.height;
+  if (leftover > .1) reserves.push({ name: 'غير موزّع', x: rowsX, y: oy + X + solved.packed.height + T, w: rowsWidth, h: leftover });
+  return { rooms, corridors, reserves, links };
+}
+
+function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
+  const { x: ox, y: oy, w: boxW, h: boxH } = wingBox;
+  const rooms = /** @type {Room[]} */ ([]), reserves = /** @type {Reserve[]} */ ([]), links = /** @type {Link[]} */ ([]);
+  const corridorId = 'spine-' + wingBox.id;
+  const corridorY = corridorSide === 'top' ? oy : oy + boxH - GEOMETRY.corridor;
+  const corridorEndY = corridorY + GEOMETRY.corridor;
+  /** @type {Corridor[]} */
+  const corridors = [{ id: corridorId, name: 'ممر رئيسي', x: ox + X, y: corridorY, w: boxW - 2 * X, h: GEOMETRY.corridor }];
+  const rowsY = corridorSide === 'top' ? corridorEndY + T : oy + X;
+  const rowsHeight = singleSidedRoomsWidth(boxH);
+  const resolved = corridorSide === 'top' ? 'right' : 'left';
+  let x = ox + X;
+  solved.packed.rows.forEach((row, rowIndex) => {
+    let rCorridorId = corridorId;
+    const rowTotalHeight = sum(row.rooms, r => r.area / row.depth) + T * (row.rooms.length - 1);
+    if (row.branch) {
+      rCorridorId = 'branch-' + wingBox.id + '-' + rowIndex;
+      const branchY = corridorSide === 'top' ? corridorEndY : rowsY;
+      corridors.push({ id: rCorridorId, name: 'ممر فرعي', x, y: branchY, w: GEOMETRY.branch, h: rowTotalHeight });
