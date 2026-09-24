@@ -4,15 +4,16 @@ import { RoomViewer } from './viewer3d.mjs';
 import { AI_ENABLED, requestBrief } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
 import { analyzeEngineeringLayer } from './engineering-layer.mjs';
+import { runMultiEngineDesign } from './multi-engine.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, engineering: null };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, designIntent: null, engineering: null, decision: null };
 let viewport, viewer, toastTimer, loading3D;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100 });
-const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
+const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, $('shapeMode')?.value || 'auto', state.designIntent, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
 const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
 function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
@@ -141,12 +142,26 @@ function renderEngineeringReview() {
   highlights.replaceChildren(...lines.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   limitations.textContent = review.limitations.join(' ');
 }
+function renderDecisionReview() {
+  const section = $('decisionReview'); if (!section) return;
+  const d = state.decision; section.hidden = !d; if (!d) return;
+  const label = { rect: 'مستطيل', l: 'حرف L', u: 'حرف U' };
+  $('decisionSummary').textContent = `اختار AZIZ بديل ${label[d.selectedShape] || d.selectedShape} بعد مقارنة ${d.alternatives.length} بدائل صالحة.`;
+  const rows = [...d.alternatives].sort((a,b)=>(b.score ?? -1)-(a.score ?? -1)).map(a => {
+    const score = Number.isFinite(a.score) ? fmt(a.score, 1) : 'مرفوض';
+    const patterns = a.patterns?.length ? ` · Gemini: ${a.patterns.slice(0,2).join('، ')}` : '';
+    const rejected = a.rejections?.length ? ` · ${a.rejections.map(r=>r.code).join('، ')}` : '';
+    return `${a.selected ? '✓ ' : ''}${label[a.shape] || a.shape}: ${score} · ثقة ${fmt(a.confidence*100,0)}٪ · ${a.engineeringStatus}${patterns}${rejected}`;
+  });
+  $('decisionAlternatives').replaceChildren(...rows.map(text => { const li=document.createElement('li'); li.textContent=text; return li; }));
+  $('decisionExplanation').textContent = d.explanation || '';
+}
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
   viewport = new PlanViewport($('plan'), m, selectRoom);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...[...m.warnings, ...engineeringWarningLines()].map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-  renderEngineeringReview();
+  renderEngineeringReview(); renderDecisionReview();
   $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); void show3D();
 }
 function solveLayout(plot, rooms) {
@@ -163,17 +178,17 @@ function solveLayout(plot, rooms) {
 async function generate() {
   if ($('gen').disabled) return;
   const startSignature = signature(rawPlot(), state.program);
-  $('gen').disabled = true; $('undo').disabled = true; $('gen').textContent = 'جارٍ توزيع الغرف والتحقّق من الوصول…';
+  $('gen').disabled = true; $('undo').disabled = true; $('gen').textContent = 'جارٍ تشغيل Claude وGemini وAZIZ ومقارنة البدائل…';
   try {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
-    const candidate = await solveLayout(plot, rooms);
-    if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette, engineering: state.engineering }].slice(-15);
-    state.model = candidate; state.engineering = runEngineeringReview(candidate); state.signature = signature(plot, rooms);
+    const result = await runMultiEngineDesign({ plot, rooms, designIntent: state.designIntent, shapeMode: $('shapeMode')?.value || 'auto', cityCode: 'SA', locale: 'ar-SA' });
+    if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette, engineering: state.engineering, decision: state.decision, designIntent: state.designIntent }].slice(-15);
+    state.model = result.model; state.engineering = { review: result.engineering, error: null }; state.decision = result; state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
-    $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّد المخطط محليًا. راجع الغرف وملاحظات الحل.');
+    $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('اكتملت مقارنة المحركات واختار AZIZ أفضل بديل صالح.');
   } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح محفوظ أدناه دون تغيير.' : '')); markDirty(); }
-  finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد مخطط منزلي ✦'; }
+  finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن البدائل ✦'; }
 }
 function renderBOQ() {
   const m = state.model; $('boqEmpty').hidden = !!m; $('boqOutput').hidden = !m; if (!m) return;
@@ -213,9 +228,16 @@ async function askAI() {
   try {
     const result = await requestBrief({ prompt: $('idea').value, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { signal: AbortSignal.timeout(45000) });
     state.proposal = result.brief; $('aiSummary').textContent = result.brief.summary;
-    const notes = [...result.brief.assumptions.map(s => 'افتراض: ' + s), ...result.brief.questions.map(s => 'سؤال: ' + s), ...result.brief.unhandled.map(s => 'غير منفّذ: ' + s), ...result.limitations];
+    const intent = result.brief.designIntent || { priorities: [], preferredShapes: [], conceptDirections: [] };
+    const priorityLabels = { privacy:'الخصوصية', guestFamilySeparation:'فصل الضيوف والعائلة', daylight:'الإضاءة الطبيعية', circulation:'الحركة', accessibility:'سهولة الوصول', serviceFlow:'مسار الخدمة', efficiency:'كفاءة المساحة', futureFlexibility:'المرونة المستقبلية' };
+    const notes = [
+      ...intent.priorities.map(p => 'أولوية فهمها الذكاء: ' + (priorityLabels[p] || p)),
+      ...intent.preferredShapes.map(s => 'شكل يستحق الاستكشاف: ' + s.toUpperCase()),
+      ...intent.conceptDirections.map(d => `اتجاه ${d.label}: ${d.rationale}${d.tradeoffs.length ? ' — المقايضات: ' + d.tradeoffs.join('، ') : ''}`),
+      ...result.brief.assumptions.map(s => 'افتراض: ' + s), ...result.brief.questions.map(s => 'سؤال: ' + s), ...result.brief.unhandled.map(s => 'غير منفّذ: ' + s), ...result.limitations
+    ];
     $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
-    $('aiReview').hidden = false; $('acceptAI').disabled = !result.brief.rooms.length;
+    $('aiReview').hidden = false; $('acceptAI').disabled = !result.brief.rooms.length && !intent.priorities.length && !intent.conceptDirections.length;
     message('aiFeedback', 'وصل اقتراح من خدمة الذكاء. لم يتغيّر المخطط؛ راجعه قبل نقل الغرف إلى الجدول.');
   } catch (error) { message('aiFeedback', error.message); }
 }
@@ -228,7 +250,7 @@ function boot() {
   all('[data-next]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.next)));
   $('home').addEventListener('click', goHome); $('back').addEventListener('click', goHome);
   $('streets').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (!b) return; state.streets[b.dataset.side] = !state.streets[b.dataset.side]; renderStreets(); rating(); markDirty(); });
-  ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'entry', 'floors'].forEach(id => $(id).addEventListener('input', () => { rating(); markDirty(); }));
+  ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'entry', 'floors', 'shapeMode'].forEach(id => $(id).addEventListener('input', () => { rating(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     state.program[Number(row.dataset.row)][field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
@@ -253,7 +275,7 @@ function boot() {
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
-    const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.engineering = previous.engineering || null; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
+    const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.engineering = previous.engineering || null; state.decision = previous.decision || null; state.designIntent = previous.designIntent || null; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
     state.streets = { ...p.streets }; renderStreets(); $('entry').value = p.entry;
     for (const [id, value] of Object.entries({ len: p.length, wid: p.width, floors: p.floors, streetSetback: p.streetSetback, neighborSetback: p.neighborSetback, coverage: p.coverage * 100 })) $(id).value = value;
     all('#styles [data-v]').forEach(button => { const on = button.dataset.v === state.palette; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
@@ -270,7 +292,7 @@ function boot() {
   $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); });
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
   $('askAI').addEventListener('click', askAI);
-  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; if (!window.confirm('نقل اقتراح الذكاء إلى جدول المراجعة بدل القائمة الحالية؟ لن يتغيّر الرسم حتى تضغط «ولّد».')) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; });
+  $('acceptAI').addEventListener('click', () => { if (!state.proposal) return; if (!window.confirm('اعتماد تحليل الذكاء وأولوياته؟ إذا اقترح غرفًا فستنقل إلى الجدول، ولن يتغيّر الرسم حتى تضغط «ولّد وقارن البدائل».')) return; if (state.proposal.rooms?.length) state.program = publicRooms(state.proposal.rooms); state.designIntent = state.proposal.designIntent || null; state.manualEdits = true; renderRows(); markDirty(); $('aiReview').hidden = true; toast('تم اعتماد تحليل الفكرة ليستخدمه Claude وGemini وAZIZ في المقارنة التالية.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ();
 }
