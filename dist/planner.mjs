@@ -371,3 +371,65 @@ function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
       rCorridorId = 'branch-' + wingBox.id + '-' + rowIndex;
       const branchY = corridorSide === 'top' ? corridorEndY : rowsY;
       corridors.push({ id: rCorridorId, name: 'ممر فرعي', x, y: branchY, w: GEOMETRY.branch, h: rowTotalHeight });
+      links.push([corridorId, rCorridorId]);
+      x += row.branch;
+    }
+    const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
+    let ry = rowsY;
+    order.forEach(r => {
+      const h = r.area / row.depth;
+      rooms.push({ ...r, x, y: ry, w: row.depth, h, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'left' : (corridorSide === 'top' ? 'front' : 'back') });
+      ry += h + T;
+    });
+    x += row.depth + (rowIndex < solved.packed.rows.length - 1 ? T : 0);
+  });
+  const leftover = solved.depth - X * 2 - solved.packed.height;
+  if (leftover > .1) reserves.push({ name: 'غير موزّع', x: ox + X + solved.packed.height + T, y: rowsY, w: leftover, h: rowsHeight });
+  return { rooms, corridors, reserves, links };
+}
+
+function solveWing(program, maxWidth, maxDepth) {
+  const required = sum(program, r => r.area);
+  let solution = null;
+  for (let width = Math.min(20, maxWidth); width >= Math.max(7, Math.min(20, maxWidth) - 5); width -= .5) {
+    const wing = (width - X * 2 - T * 2 - GEOMETRY.corridor) / 2;
+    if (wing < 1.5) continue;
+    const zones = /** @type {SolvedZone[]} */ (/** @type {Position[]} */ (Object.keys(POSITIONS)).map(position => ({ position, ...packZone(program.filter(r => r.position === position), wing) })));
+    if (zones.some(z => !Number.isFinite(z.height))) continue;
+    const depth = X * 2 + sum(zones, z => z.height) + T * (zones.filter(z => z.height).length - 1);
+    if (depth > maxDepth + E) continue;
+    const score = width * depth + Math.abs(width - depth) * .2;
+    if (!solution || score < solution.score) solution = { width, depth, zones: { zones }, score, requiredArea: required, singleSided: false };
+  }
+  return solution;
+}
+
+function singleSidedRoomsWidth(boxWidth) {
+  return boxWidth - GEOMETRY.corridor - T - X;
+}
+
+function solveSingleSidedWing(rawProgram, maxWidth, maxDepth) {
+  const program = rawProgram.map(r => r.side === 'any' ? r : { ...r, side: 'any' });
+  const required = sum(program, r => r.area);
+  let solution = null;
+  for (let width = Math.min(20, maxWidth); width >= Math.max(7, Math.min(20, maxWidth) - 5); width -= .5) {
+    const wing = singleSidedRoomsWidth(width);
+    if (wing < 1.5) continue;
+    const packed = packWing(program, wing);
+    if (!packed || !Number.isFinite(packed.height)) continue;
+    const depth = X * 2 + packed.height;
+    if (depth > maxDepth + E) continue;
+    const score = width * depth + Math.abs(width - depth) * .2;
+    if (!solution || score < solution.score) solution = { width, depth, packed, score, requiredArea: required, singleSided: true };
+  }
+  return solution;
+}
+
+function planRectangle(f, program, sideways) {
+  const maxWidth = Math.min(20, sideways ? f.h : f.w), maxDepth = sideways ? f.w : f.h;
+  const solved = solveWing(program, maxWidth, maxDepth);
+  if (!solved) return null;
+  const w = solved.width, h = solved.depth;
+  const footprintPolygon = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
+  return { arms: [{ id: 'a', box: { id: 'a', x: 0, y: 0, w, h }, zone: solved.zones, program }], overallW: w, overallH: h, footprintPolygon };
+}
