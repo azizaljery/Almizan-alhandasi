@@ -22,6 +22,17 @@ globalThis.ResizeObserver = class { observe() {} disconnect() { this.disconnecte
 const plot = { width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }, model = generateModel(plot, defaultRooms());
 const container = () => ({ clientWidth: 950, clientHeight: 500, canvases: [], prepend(c) { this.canvases.push(c); } });
 
+test('Claude model renders through the existing 3D geometry controller', () => {
+  const claude = generateModel(plot, defaultRooms(), { strategy: 'claude-rect' });
+  const viewer = new RoomViewer(container());
+  viewer.setModel(claude);
+  assert.ok(viewer.group.children.length > claude.rooms.length);
+  for (const object of viewer.group.children) {
+    if (object.position) assert.ok([object.position.x, object.position.y, object.position.z].every(Number.isFinite));
+  }
+  viewer.destroy();
+});
+
 test('3D reuses one renderer, builds wall pieces with real openings, and disposes prior geometry', () => {
   const box = container(), v = new RoomViewer(box); v.setModel(model);
   const render = v.renderer, previous = [...v.group.children], pieces = wallPieces(model);

@@ -1,4 +1,5 @@
 // Local, deterministic concept planner. Metres; x east, y north. Not a code-compliance engine.
+import { generateModel as claudeGenerate, validateModel as claudeValidate, quantities as claudeQuantities } from './claude/planner.mjs';
 export const TYPES = {
   bedroom: { name: 'غرفة نوم', area: 20, min: 2.6, color: '#e4e7f2' },
   majlis: { name: 'مجلس', area: 32, min: 3, color: '#f3e6c8' },
@@ -16,6 +17,7 @@ export const DIRECTIONS = { s: 'جنوب', n: 'شمال', e: 'شرق', w: 'غر�
 export const GEOMETRY = { exterior: .25, partition: .15, corridor: 1.6, branch: 1.2, height: 3.2 };
 export const ENGINE_VERSION = 'rectangular-2';
 export const STRATEGIES = {
+  'claude-rect': 'Claude 2.2.1 — مخطط مستطيل',
   compact: 'الرواق المحوري',
   balanced: 'الجناحان المتوازنان',
   frontage: 'الواجهة العريضة',
@@ -171,6 +173,13 @@ function mergeWalls(raw) {
 
 export function generateModel(rawPlot, rawRooms, { strategy = 'compact' } = {}) {
   if (!Object.hasOwn(STRATEGIES, strategy)) throw Error('استراتيجية توزيع غير معروفة.');
+  if (strategy === 'claude-rect') {
+    const plot = validatePlot(rawPlot);
+    const model = claudeGenerate({ ...plot, shape: 'rect' }, rawRooms);
+    if (plot.maxBuiltArea !== null && claudeQuantities(model).footprint > plot.maxBuiltArea + E) throw Error('حل Claude يتجاوز سقف البناء المحدد؛ لم تُصغّر الغرف.');
+    return { ...model, plot: { ...model.plot, maxBuiltArea: plot.maxBuiltArea }, engineVersion: 'claude-2.2.1', strategy,
+      architecture: { ...CONCEPT_PROFILES.compact, tag: 'Claude 2.2.1', idea: 'توزيع حتمي يحافظ على المساحات المطلوبة ويتحقق من اتصال الغرف.' } };
+  }
   const plot = validatePlot(rawPlot), f = footprint(plot), program = normalizeRooms(rawRooms);
   const sideways = ['e', 'w'].includes(plot.entry), maxWidth = Math.min(20, sideways ? f.h : f.w), maxDepth = sideways ? f.w : f.h;
   const required = sum(program, r => r.area);
@@ -383,8 +392,12 @@ export function generateTopologyModel(rawPlot, rawRooms, { topology = 'u-court' 
 }
 
 // Alternatives include true topological forms when the submitted program can accommodate them.
-export function generateAlternatives(plot, rooms) {
+export function generateAlternatives(plot, rooms, { includeClaude = false } = {}) {
   const models = [], fingerprints = new Set(), failures = [];
+  if (includeClaude) {
+    try { models.push(generateModel(plot, rooms, { strategy: 'claude-rect' })); }
+    catch (error) { failures.push({ strategy: 'claude-rect', reason: error.message }); }
+  }
   for (const topology of ['courtyard', 'u-court']) {
     try {
       const model = generateTopologyModel(plot, rooms, { topology });
@@ -442,6 +455,11 @@ export function removeOpening(model, point) {
   return copy;
 }
 export function validateModel(m) {
+  if (m?.version === 2) {
+    const errors = claudeValidate(m);
+    if (!errors.length && m.plot.maxBuiltArea != null && claudeQuantities(m).footprint > m.plot.maxBuiltArea + E) errors.push('الكتلة تتجاوز سقف البناء المحدد.');
+    return errors;
+  }
   const errors = [], fail = s => errors.push(s);
   const containsPoint = (r, p) => p.x >= r.x - E && p.x <= r.x + r.w + E && p.y >= r.y - E && p.y <= r.y + r.h + E;
   const nodes = new Map([...m.rooms, ...m.corridors].map(r => [r.id, r]));
@@ -516,6 +534,7 @@ export function wallPieces(model) {
   return pieces;
 }
 export function quantities(model) {
+  if (model.version === 2) return claudeQuantities(model);
   const netWallArea = sum(wallPieces(model), p => p.length * p.height);
   return { footprint: model.builtArea ?? model.building.w * model.building.h, rooms: sum(model.rooms, r => r.w * r.h), circulation: sum(model.corridors, r => r.w * r.h), reserve: sum(model.reserves, r => r.w * r.h), wallArea: netWallArea, finishArea: netWallArea * 2, wallVolume: sum(wallPieces(model), p => p.length * p.height * p.thickness), doors: model.openings.filter(o => o.type === 'door').length, windows: model.openings.filter(o => o.type === 'window').length, floors: 1 };
 }

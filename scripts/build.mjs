@@ -8,6 +8,10 @@ const html = readFileSync('dist/index.html', 'utf8');
 assert.ok(html.includes('<html lang="ar" dir="rtl">'));
 for (const [, name] of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) assert.ok(existsSync('dist/' + name), name);
 const files = readdirSync('dist');
+for (const file of readdirSync('vendor/claude-planner/src')) {
+  assert.deepEqual(readFileSync('dist/claude/' + file), readFileSync('vendor/claude-planner/src/' + file), 'Claude source drift: ' + file);
+  execFileSync(process.execPath, ['--check', 'dist/claude/' + file]);
+}
 for (const file of files.filter(name => /\.(mjs|js)$/.test(name))) {
   execFileSync(process.execPath, ['--check', 'dist/' + file]);
   const source = readFileSync('dist/' + file, 'utf8');

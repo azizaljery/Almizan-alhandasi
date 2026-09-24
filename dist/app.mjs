@@ -365,7 +365,7 @@ function renderMizanScore() {
   $('mizanScoreLimit').textContent = result.note;
 }
 function runPlanner(request) {
-  if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms));
+  if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms, { includeClaude: true }));
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./layout-worker.mjs', import.meta.url), { type: 'module' });
     const finish = (error, result) => { clearTimeout(timer); worker.terminate(); error ? reject(Error(error)) : resolve(result); };
@@ -383,7 +383,7 @@ async function generate() {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
     const result = await runPlanner({ plot, rooms, alternatives: true });
     if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
-    const preferred = state.discovery.likes.includes('courtyard_privacy') ? ['courtyard', 'u-court', 'balanced', 'compact', 'frontage'] : state.discovery.likes.includes('family_layout') ? ['balanced', 'u-court', 'courtyard', 'compact', 'frontage'] : ['courtyard', 'u-court', 'balanced', 'compact', 'frontage'];
+    const preferred = state.discovery.likes.includes('courtyard_privacy') ? ['courtyard', 'u-court', 'claude-rect', 'balanced', 'compact', 'frontage'] : state.discovery.likes.includes('family_layout') ? ['balanced', 'claude-rect', 'u-court', 'courtyard', 'compact', 'frontage'] : ['claude-rect', 'courtyard', 'u-court', 'balanced', 'compact', 'frontage'];
     state.alternatives = result.models.sort((a, b) => preferred.indexOf(a.strategy) - preferred.indexOf(b.strategy)); state.failures = result.failures;
     state.model = result.models[0]; state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }

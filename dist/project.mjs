@@ -23,7 +23,7 @@ function validateProject(raw) {
     rates[key] = value;
   }
   estimate([], {}, draft.costReserve, draft.vat);
-  if (!Array.isArray(raw.alternatives) || raw.alternatives.length > 3 || !Array.isArray(raw.history) || raw.history.length > 5) throw Error('عدد النسخ المحفوظة يتجاوز الحد المسموح.');
+  if (!Array.isArray(raw.alternatives) || raw.alternatives.length > Object.keys(STRATEGIES).length || !Array.isArray(raw.history) || raw.history.length > 5) throw Error('عدد النسخ المحفوظة يتجاوز الحد المسموح.');
   const project = {
     schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION,
     savedAt: typeof raw.savedAt === 'string' && Number.isFinite(Date.parse(raw.savedAt)) ? raw.savedAt : new Date().toISOString(),
