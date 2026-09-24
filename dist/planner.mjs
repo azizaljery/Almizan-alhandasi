@@ -733,3 +733,103 @@ function generateModelCore(rawPlot, rawRooms) {
           bridgeCorridors.push(bridge);
           allLinks.push([prevSpine.id, bridge.id], [bridge.id, currSpine.id]);
         }
+      }
+    }
+  }
+  allCorridors.push(...bridgeCorridors);
+  // Shape-specific extras (e.g. the U-shape's gallery), given in local coordinates.
+  if (plan.extra) {
+    plan.extra.corridors.forEach(c => allCorridors.push({ ...c, x: c.x + offsetX, y: c.y + offsetY }));
+    plan.extra.walls.forEach(w => rawWalls.push({ x1: w.x1 + offsetX, y1: w.y1 + offsetY, x2: w.x2 + offsetX, y2: w.y2 + offsetY, type: w.type, t: w.type === 'ext' ? X : T }));
+    plan.extra.doors.forEach(d => portals.push({ ...d, x: d.x + offsetX, y: d.y + offsetY }));
+  }
+  /** @type {Courtyard[]} */
+  const courtyardsLocal = (plan.extra?.courtyards || []).map(c => ({ ...c, x: c.x + offsetX, y: c.y + offsetY, roofPolicy: 'OPEN_TO_SKY', roofable: false }));
+  const entrySpine = entryArm.geo.corridors[0];
+  portals.push({ type: 'door', x: entrySpine.x + entrySpine.w / 2, y: entryArm.box.y + X / 2, axis: 'h', w: 1.1, h: 2.2, sill: 0, connects: ['outside', entrySpine.id] });
+
+  const localWalls = mergeWalls(rawWalls);
+  const openings = portals.map((o, i) => {
+    const w = localWalls.find(w => o.axis === 'h' ? near(w.y1, w.y2) && near(w.y1, o.y) && o.x - o.w / 2 >= w.x1 - E && o.x + o.w / 2 <= w.x2 + E : near(w.x1, w.x2) && near(w.x1, o.x) && o.y - o.w / 2 >= w.y1 - E && o.y + o.w / 2 <= w.y2 + E);
+    if (!w) throw Error('تعذر ربط إحدى الفتحات بجدار صالح.');
+    const length = Math.hypot(w.x2 - w.x1, w.y2 - w.y1);
+    const pos = Math.hypot(o.x - w.x1, o.y - w.y1) / length;
+    const { x, y, axis, ...rest } = o;
+    return { ...rest, id: 'opening-' + i, wallId: w.id, pos };
+  });
+  const walls = localWalls.map(w => { const a = transform.point(w.x1, w.y1), b = transform.point(w.x2, w.y2); return { ...w, x1: a.x, y1: a.y, x2: b.x, y2: b.y }; });
+  const buildingLocal = { x: offsetX, y: offsetY, w: plan.overallW, h: plan.overallH };
+  // buildingFootprint: the true outer polygon, in world coordinates (offset applied,
+  // then rotated/mirrored for entry direction). Every shape planner returns its own
+  // footprintPolygon in the same local frame as its arm boxes; rect's is just its four
+  // corners, so this path is uniform across all three shapes — no shape-specific case
+  // needed here. boundingBox is derived FROM this polygon, never built independently,
+  // so it can never silently drift from the true outline (Priority 1's requirement).
+  const buildingFootprint = plan.footprintPolygon.map(pt => transform.point(pt.x + offsetX, pt.y + offsetY));
+  const boundingBox = polygonBoundingBox(buildingFootprint);
+  /** @type {ValidatedDesignGeometry} */
+  const model = {
+    version: 2, plot, footprint: f, building: transform.rect(buildingLocal), buildingFootprint, boundingBox, program,
+    shape: usedShape, shapeFallback,
+    rooms: allRooms.map(transform.rect), corridors: allCorridors.map(transform.rect), reserves: allReserves.map(transform.rect),
+    courtyards: courtyardsLocal.map(transform.rect), links: allLinks, walls, openings, drawnFloors: 1, warnings: [],
+  };
+  const errors = validateModel(model);
+  if (errors.length) throw Error(errors[0]);
+  if (plot.floors > 1) model.warnings.push('المعروض والكميات للدور الأرضي فقط؛ الأدوار الأخرى والسلالم لم تُصمّم.');
+  if (shapeFallback) model.warnings.push('تعذّر ملاءمة شكل «' + SHAPES[plot.shape] + '» ضمن الأرض والمساحات الحالية؛ استُخدم المستطيل المصمت بدلاً منه.');
+  /** @type {Opening[]} */
+  const typedOpenings = openings;
+  const noWindows = model.rooms.filter(r => !typedOpenings.some(o => o.roomId === r.id && o.type === 'window'));
+  if (noWindows.length) model.warnings.push('فراغات دون نافذة خارجية في هذا الحل: ' + noWindows.map(r => r.name).join('، ') + '. تحتاج مراجعة الإضاءة والتهوية.');
+  if (model.courtyards.length) model.warnings.push('الفناء الأوسط مساحة مفتوحة غير مسقوفة، ومستثناة من مساحة الكتلة المبنية؛ الرواق الخلفي يربط الجناحين الأماميين بالجناح الخلفي.');
+  if (allReserves.length) model.warnings.push('المساحات الرمادية غير موزعة وليست غرفاً مطلوبة؛ تظهر مساحتها مستقلة.');
+  model.warnings.push('المساحات صافية بين أوجه الجدران. مدخل واحد؛ لا ضمان للفصل التام بين الضيوف والعائلة أو مطابقة كود البناء.');
+  return model;
+}
+
+// Public entry point. If a non-rectangular shape solves geometrically but its model is
+// rejected by validateModel, fall back to the proven rectangle rather than failing — the
+// user's rooms are never shrunk or dropped either way.
+/** @param {PlotInput} rawPlot @param {RoomRequest[]} rawRooms @returns {ValidatedDesignGeometry} @throws {Error} Arabic message if no valid layout exists */
+export function generateModel(rawPlot, rawRooms) {
+  const requestedShape = normalizeShapeKey(rawPlot?.shape);
+  const normalizedPlot = rawPlot && typeof rawPlot === 'object' ? { ...rawPlot, shape: requestedShape } : rawPlot;
+  try { return generateModelCore(normalizedPlot, rawRooms); }
+  catch (error) {
+    if (!normalizedPlot || requestedShape === 'rect') throw error;
+    const model = generateModelCore({ ...normalizedPlot, shape: 'rect' }, rawRooms);
+    model.shapeFallback = true;
+    model.warnings.unshift('تعذّر إخراج شكل «' + SHAPES[requestedShape] + '» سليماً لهذه الأرض والمساحات؛ عُرض المستطيل المصمت بدلاً منه.');
+    return model;
+  }
+}
+
+/**
+ * Precondition: o.wallId names a wall of model (true for every opening of a model returned by
+ * generateModel). Otherwise this throws a TypeError -- it does not validate.
+ * @param {ValidatedDesignGeometry} model @param {Opening} o @returns {Point}
+ */
+export function openingPoint(model, o) {
+  const w = /** @type {Wall} */ (model.walls.find(w => w.id === o.wallId));
+  return { x: w.x1 + (w.x2 - w.x1) * o.pos, y: w.y1 + (w.y2 - w.y1) * o.pos };
+}
+/** @param {ValidatedDesignGeometry} m @returns {string[]} unique Arabic error messages; empty = valid */
+export function validateModel(m) {
+  const errors = /** @type {string[]} */ ([]), fail = (/** @type {string} */ s) => errors.push(s);
+  /** @param {Rect} r @param {Point} p */
+  const containsPoint = (r, p) => p.x >= r.x - E && p.x <= r.x + r.w + E && p.y >= r.y - E && p.y <= r.y + r.h + E;
+  const nodes = new Map([...m.rooms, ...m.corridors].map(r => /** @type {[string, Rect]} */ ([r.id, r])));
+  if (nodes.size !== m.rooms.length + m.corridors.length || new Set(m.walls.map(w => w.id)).size !== m.walls.length || new Set(m.openings.map(o => o.id)).size !== m.openings.length) fail('معرّفات هندسية مكررة.');
+  // Uses the true polygon, not just its bounding box: a notched shape (L/U) can have a
+  // bounding box that pokes outside the plot even when the actual built area does not,
+  // or vice versa for an oddly-shaped plot — checking every polygon vertex is precise
+  // either way, since this engine only ever produces axis-aligned rectangular plots.
+  if (!m.buildingFootprint.every(pt => containsPoint(m.footprint, pt))) fail('كتلة المبنى تتجاوز المساحة المتاحة.');
+  if (m.rooms.length !== m.program.length) fail('عدد الغرف لا يطابق البرنامج.');
+  const programById = new Map(m.program.map(p => [p.id, p]));
+  if (programById.size !== m.program.length) fail('معرّفات البرنامج مكررة.');
+  m.program.forEach(p => {
+    if (!p || typeof p.id !== 'string' || !p.id || !Number.isFinite(p.area) || !Number.isFinite(p.targetArea) || p.area <= 0 || p.targetArea <= 0 || Math.abs(p.area - p.targetArea) > E) fail('برنامج غرف غير صالح.');
+  });
+  m.corridors.forEach(c => { if (![c.x, c.y, c.w, c.h].every(Number.isFinite) || c.w <= 0 || c.h <= 0 || !rectInPolygon(c, m.buildingFootprint)) fail('ممر غير صالح.'); });
