@@ -1,0 +1,23 @@
+{
+  "name": "@mizan/engineering-math",
+  "version": "1.0.0",
+  "description": "Deterministic Architectural Mathematics, Structural Sizing, MEP Physics, and Quantity Takeoff Engine for Mizan Platform",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test tests/geometric-equations.test.js tests/analytical-algorithms.test.js tests/customer-benefits.test.js tests/boundary-and-invalid-inputs.test.js",
+    "typecheck": "node scripts/typecheck.js",
+    "build": "node scripts/build.js"
+  },
+  "keywords": [
+    "mizan",
+    "architecture",
+    "engineering-math",
+    "geometric-equations",
+    "boq",
+    "thermal-physics",
+    "acoustic-comfort"
+  ],
+  "author": "Mizan Core Engineering Team",
+  "license": "UNLICENSED"
+}
