@@ -3,12 +3,13 @@ import { escapeXML as esc, PlanViewport } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
 import { AI_ENABLED, requestBrief } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
+import { analyzeEngineeringLayer } from './engineering-layer.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, palette: 'resort', history: [], signature: '', selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, engineering: null };
 let viewport, viewer, toastTimer, loading3D;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100 });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -93,11 +94,59 @@ async function show3D(retry = false) {
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
+function runEngineeringReview(model) {
+  try { return { review: analyzeEngineeringLayer(model), error: null }; }
+  catch (error) { return { review: null, error: error instanceof Error ? error.message : 'تعذّرت المراجعة الهندسية المبدئية.' }; }
+}
+function engineeringWarningLines() {
+  const result = state.engineering;
+  if (!result) return [];
+  if (result.error) return ['تعذّرت مراجعة Gemini الهندسية لهذا المخطط: ' + result.error];
+  const review = result.review, metrics = review.coordination.summaryMetrics;
+  const lines = [`مراجعة Gemini الهندسية المبدئية: ${metrics.totalFindingsCount} ملاحظة و${metrics.totalClashesCount} تعارض هندسي مكتشف.`];
+  const patterns = review.intelligence.candidateStrategies.slice(0, 3).map(candidate => candidate.name);
+  if (patterns.length) lines.push('أنماط معمارية مرشحة للمراجعة: ' + patterns.join('، ') + '.');
+  lines.push(`مؤشر الاستفادة من مساحة الكتلة: ${fmt(review.math.areaUtilizationRatio * 100, 0)}٪.`);
+  return lines;
+}
+function renderEngineeringReview() {
+  const section = $('engineeringReview'), result = state.engineering;
+  section.hidden = !result;
+  if (!result) return;
+  const summary = $('engineeringSummary'), highlights = $('engineeringHighlights'), limitations = $('engineeringLimitations');
+  if (result.error) {
+    summary.textContent = 'لم تكتمل المراجعة الهندسية لهذا المخطط.';
+    highlights.replaceChildren(...engineeringWarningLines().map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+    limitations.textContent = 'بقي المخطط الأصلي محفوظاً دون تعديل.';
+    return;
+  }
+  const review = result.review, metrics = review.coordination.summaryMetrics;
+  const statusLabel = {
+    COORDINATION_PASSED: 'لا توجد مخالفات ضمن البيانات الهندسية المتاحة.',
+    PASSED_WITH_ADVISORIES: 'اجتاز الفحص مع ملاحظات استرشادية.',
+    CHANGES_REQUIRED: 'يحتاج مراجعة قبل اعتماد هذا التصور.',
+    CRITICAL_BLOCKERS_FOUND: 'توجد تعارضات أو عوائق تستلزم معالجة قبل الاستمرار.',
+  }[review.coordination.status] || 'اكتملت المراجعة الأولية.';
+  summary.textContent = `حالة التنسيق: ${statusLabel} ${metrics.totalFindingsCount} ملاحظة، ${metrics.totalClashesCount} تعارض.`;
+  const candidates = review.intelligence.candidateStrategies.slice(0, 3).map(candidate => candidate.name).join('، ') || 'لا يوجد نمط ملائم ضمن القيود الحالية.';
+  const coverage = Object.entries(review.coverage)
+    .filter(([, status]) => status !== 'EVALUATED')
+    .map(([name]) => name)
+    .join('، ');
+  const lines = [
+    `أنماط Gemini المرشحة: ${candidates}.`,
+    `مساحة الكتلة ${fmt(review.math.footprintM2)} م²، وصافي البرنامج ${fmt(review.math.programmedAreaM2)} م².`,
+    coverage ? `لم تُقيّم بعد لغياب بيانات المصدر: ${coverage}.` : 'اكتملت التغطية المتاحة من نموذج المصدر.',
+  ];
+  highlights.replaceChildren(...lines.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  limitations.textContent = review.limitations.join(' ');
+}
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
   viewport = new PlanViewport($('plan'), m, selectRoom);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
-  $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  $('modelWarnings').replaceChildren(...[...m.warnings, ...engineeringWarningLines()].map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  renderEngineeringReview();
   $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); void show3D();
 }
 function solveLayout(plot, rooms) {
@@ -118,8 +167,8 @@ async function generate() {
   try {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
     const candidate = await solveLayout(plot, rooms);
-    if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-15);
-    state.model = candidate; state.signature = signature(plot, rooms);
+    if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette, engineering: state.engineering }].slice(-15);
+    state.model = candidate; state.engineering = runEngineeringReview(candidate); state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّد المخطط محليًا. راجع الغرف وملاحظات الحل.');
@@ -204,7 +253,7 @@ function boot() {
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
-    const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
+    const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.engineering = previous.engineering || null; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
     state.streets = { ...p.streets }; renderStreets(); $('entry').value = p.entry;
     for (const [id, value] of Object.entries({ len: p.length, wid: p.width, floors: p.floors, streetSetback: p.streetSetback, neighborSetback: p.neighborSetback, coverage: p.coverage * 100 })) $(id).value = value;
     all('#styles [data-v]').forEach(button => { const on = button.dataset.v === state.palette; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });

@@ -1,0 +1,15 @@
+{
+  "name": "@mizan/engineering-core",
+  "version": "1.0.0",
+  "description": "MIZAN Engineering Intelligence & Cross-Discipline Coordination Core",
+  "type": "module",
+  "main": "core/coordination-orchestrator.js",
+  "scripts": {
+    "test": "node --test tests/clash-detection.test.js tests/discipline-coordinators.test.js tests/end-to-end-coordination.test.js tests/geometry-immutability.test.js tests/rules-current-edition.test.js tests/rules-provenance.test.js tests/boundary-and-invalid-inputs.test.js",
+    "typecheck": "node scripts/typecheck.js",
+    "build": "node scripts/build.js"
+  },
+  "keywords": ["mizan", "engineering", "coordination", "clash-detection", "bim", "sbc-2024"],
+  "author": "Developer 3 - MIZAN Engineering Core",
+  "license": "UNLICENSED"
+}

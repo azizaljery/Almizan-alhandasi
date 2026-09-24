@@ -1,0 +1,22 @@
+{
+  "name": "@mizan/design-intelligence",
+  "version": "1.1.0-dev",
+  "description": "Architectural design knowledge, reference patterns, and spatial compatibility engine for Mizan Platform",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/conflict-evaluator.test.js tests/diversity-evaluator.test.js tests/graph-matching.test.js tests/next-features.test.js tests/pattern-schema.test.js tests/quality-evaluator.test.js tests/test-matrix-20-scenarios.test.js tests/end-to-end-pipeline.test.js tests/boundary-and-invalid-inputs.test.js",
+    "typecheck": "node scripts/typecheck.js",
+    "build": "node scripts/build.js"
+  },
+  "keywords": [
+    "architecture",
+    "saudi-residential",
+    "patterns",
+    "spatial-graph",
+    "design-intelligence",
+    "mizan"
+  ],
+  "author": "Mizan Core Architecture Team",
+  "license": "UNLICENSED"
+}
