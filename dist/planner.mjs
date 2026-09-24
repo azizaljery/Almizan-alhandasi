@@ -633,3 +633,103 @@ function buildArmWalls(armRooms, armBox, openEdges = []) {
   if (!openEdges.includes('right')) wall(bx + bw - X / 2, by + X / 2, bx + bw - X / 2, by + bh - X / 2, 'ext');
   armRooms.forEach(r => {
     const leftExt = near(r.x, bx + X), rightExt = near(r.x + r.w, bx + bw - X), frontExt = near(r.y, by + X), backExt = near(r.y + r.h, by + bh - X);
+    if (!leftExt) wall(r.x - T / 2, r.y - T / 2, r.x - T / 2, r.y + r.h + T / 2, 'int');
+    if (!rightExt) wall(r.x + r.w + T / 2, r.y - T / 2, r.x + r.w + T / 2, r.y + r.h + T / 2, 'int');
+    if (!frontExt) wall(r.x - T / 2, r.y - T / 2, r.x + r.w + T / 2, r.y - T / 2, 'int');
+    if (!backExt) wall(r.x - T / 2, r.y + r.h + T / 2, r.x + r.w + T / 2, r.y + r.h + T / 2, 'int');
+    const frontDoor = r.doorSide === 'front', backDoor = r.doorSide === 'back';
+    const doorX = (frontDoor || backDoor) ? r.x + r.w / 2 : r.doorSide === 'right' ? r.x + r.w + T / 2 : r.x - T / 2;
+    portals.push({ type: 'door', x: doorX, y: frontDoor ? r.y - T / 2 : backDoor ? r.y + r.h + T / 2 : r.y + r.h / 2, axis: (frontDoor || backDoor) ? 'h' : 'v', w: r.type === 'bath' ? .8 : .9, h: 2.1, sill: 0, roomId: r.id, connects: [r.id, r.corridorId] });
+    const extEdge = leftExt ? 'left' : rightExt ? 'right' : backExt ? 'back' : frontExt ? 'front' : null;
+    if (extEdge) {
+      const horizontal = ['front', 'back'].includes(extEdge);
+      portals.push({ type: 'window', x: horizontal ? r.x + r.w / 2 : extEdge === 'left' ? bx + X / 2 : bx + bw - X / 2, y: horizontal ? extEdge === 'front' ? by + X / 2 : by + bh - X / 2 : r.y + r.h / 2, axis: horizontal ? 'h' : 'v', w: Math.min(r.type === 'bath' ? .7 : 1.4, (horizontal ? r.w : r.h) - .5), h: r.type === 'bath' ? .6 : 1.2, sill: r.type === 'bath' ? 1.7 : 1.1, roomId: r.id });
+    }
+  });
+  return { rawWalls, portals };
+}
+
+/** @param {PlotInput} rawPlot @param {RoomRequest[]} rawRooms @returns {ValidatedDesignGeometry} */
+function generateModelCore(rawPlot, rawRooms) {
+  const plot = validatePlot(rawPlot), f = footprint(plot), program = normalizeRooms(rawRooms);
+  const sideways = ['e', 'w'].includes(plot.entry);
+  const required = sum(program, r => r.area);
+  if (required > f.area) throw Error('مجموع مساحات الغرف أكبر من المساحة المتاحة قبل إضافة الجدران والممرات. لم تتغيّر مساحاتك.');
+
+  /** @type {ShapeKey[]} */
+  const planners = plot.shape === 'rect' ? ['rect'] : [plot.shape, 'rect'];
+  let plan = /** @type {ShapePlan | null} */ (null), usedShape = plot.shape, shapeFallback = false;
+  for (const shapeKey of planners) {
+    plan = SHAPE_PLANNERS[shapeKey](f, program, sideways);
+    if (plan) { usedShape = shapeKey; shapeFallback = shapeKey !== plot.shape; break; }
+  }
+  if (!plan) throw Error('لم يجد محرك التخطيط توزيعاً يحافظ على المساحات والمواقع المطلوبة وممرات الوصول لهذا الشكل والأرض. جرّب تعديل المواقع أو المساحات أو أبعاد الأرض، أو اختر شكلاً آخر؛ لم تُحذف أو تُصغّر أي غرفة.');
+
+  const localWidth = sideways ? f.h : f.w, localDepth = sideways ? f.w : f.h;
+  const offsetX = (localWidth - plan.overallW) / 2, offsetY = (localDepth - plan.overallH) / 2;
+  const transform = mapper(plot, f);
+
+  const allRooms = /** @type {Room[]} */ ([]), allCorridors = /** @type {Corridor[]} */ ([]), allReserves = /** @type {Reserve[]} */ ([]), allLinks = /** @type {Link[]} */ ([]);
+  const armGeoms = plan.arms.map(arm => {
+    const shiftedBox = { ...arm.box, x: arm.box.x + offsetX, y: arm.box.y + offsetY };
+    const geo = !arm.single ? buildWingGeometry(arm.zone, shiftedBox) : arm.vertical ? buildSingleSidedWingGeometryVertical(arm.zone, shiftedBox, arm.corridorSide) : buildSingleSidedWingGeometry(arm.zone, shiftedBox, arm.corridorSide);
+    return { ...arm, box: shiftedBox, geo };
+  });
+  armGeoms.forEach(({ geo }) => { allRooms.push(...geo.rooms); allCorridors.push(...geo.corridors); allReserves.push(...geo.reserves); allLinks.push(...geo.links); });
+
+  // Cross-arm connectivity is proven only through real physical doorways added below
+  // (validateModel's reachability graph walks both `links`, meant for geometrically
+  // touching same-arm spine/branch corridor pairs, and door `connects` pairs together).
+  // No placeholder cross-arm link is added here, so nothing needs superseding later.
+  const entryArm = armGeoms[0];
+
+  const rawWalls = /** @type {RawWall[]} */ ([]), portals = /** @type {Portal[]} */ ([]);
+  armGeoms.forEach(({ box, geo, openEdges }) => {
+    const { rawWalls: w, portals: p } = buildArmWalls(geo.rooms, box, openEdges || []);
+    rawWalls.push(...w); portals.push(...p);
+  });
+  // Where two arms sit side by side with a gap between them (the T*2 partition gap left
+  // by the shape planners), fill that gap with an actual bridge corridor that spans
+  // EXACTLY from one arm's own spine to the other's — not just the raw gap — because
+  // packZone always centers each arm's spine mid-wing, which is generally not flush
+  // with the shared boundary between arms. The bridge's own span (its y-range for
+  // side-by-side arms, x-range for stacked arms) is the INTERSECTION of both spines'
+  // own ranges, guaranteeing every point of the bridge sits directly against open
+  // corridor on both ends — never against a room, since a spine's full length is by
+  // construction corridor, not room, space. (rect shape has one arm: loop is a no-op.)
+  /** @type {Corridor[]} */
+  const bridgeCorridors = [];
+  for (let i = 0; i < armGeoms.length; i++) {
+    for (let j = i + 1; j < armGeoms.length; j++) {
+      const prev = armGeoms[i], curr = armGeoms[j];
+      const prevSpine = prev.geo.corridors[0], currSpine = curr.geo.corridors[0];
+      const prevBox = prev.box, currBox = curr.box;
+      // "Adjacent" means one arm's box starts roughly where the other's ends, within the
+      // small partition gap the shape planners leave (T*2) — not merely "somewhere to
+      // the right", which would also match arms on opposite sides of a shared spine (e.g.
+      // U's left and right arms, which never touch each other directly).
+      const maxGap = T * 2 + X + E;
+      const gapX = currBox.x >= prevBox.x + prevBox.w - E ? currBox.x - (prevBox.x + prevBox.w) : prevBox.x - (currBox.x + currBox.w);
+      const sideBySide = Math.abs(gapX) <= maxGap && (currBox.x >= prevBox.x + prevBox.w - E || prevBox.x >= currBox.x + currBox.w - E);
+      if (sideBySide) {
+        const spineOverlapStart = Math.max(prevSpine.y, currSpine.y), spineOverlapEnd = Math.min(prevSpine.y + prevSpine.h, currSpine.y + currSpine.h);
+        const bridgeX = Math.min(prevSpine.x + prevSpine.w, currSpine.x), bridgeEnd = Math.max(prevSpine.x, currSpine.x + currSpine.w);
+        const bridgeW = bridgeEnd - bridgeX;
+        if (bridgeW > E && spineOverlapEnd - spineOverlapStart > E) {
+          const bridge = { id: 'bridge-' + i + '-' + j, name: 'ممر رابط', x: bridgeX, y: spineOverlapStart, w: bridgeW, h: spineOverlapEnd - spineOverlapStart };
+          bridgeCorridors.push(bridge);
+          allLinks.push([prevSpine.id, bridge.id], [bridge.id, currSpine.id]);
+          continue;
+        }
+      }
+      const gapY = currBox.y >= prevBox.y + prevBox.h - E ? currBox.y - (prevBox.y + prevBox.h) : prevBox.y - (currBox.y + currBox.h);
+      const stacked = Math.abs(gapY) <= maxGap && (currBox.y >= prevBox.y + prevBox.h - E || prevBox.y >= currBox.y + currBox.h - E);
+      if (stacked) {
+        const spineOverlapStart = Math.max(prevSpine.x, currSpine.x), spineOverlapEnd = Math.min(prevSpine.x + prevSpine.w, currSpine.x + currSpine.w);
+        const bridgeY = Math.min(prevSpine.y + prevSpine.h, currSpine.y), bridgeEnd = Math.max(prevSpine.y, currSpine.y + currSpine.h);
+        const bridgeH = bridgeEnd - bridgeY;
+        if (bridgeH > E && spineOverlapEnd - spineOverlapStart > E) {
+          const bridge = { id: 'bridge-' + i + '-' + j, name: 'ممر رابط', x: spineOverlapStart, y: bridgeY, w: spineOverlapEnd - spineOverlapStart, h: bridgeH };
+          bridgeCorridors.push(bridge);
+          allLinks.push([prevSpine.id, bridge.id], [bridge.id, currSpine.id]);
+        }
