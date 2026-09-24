@@ -533,3 +533,103 @@ function planU(f, program, sideways) {
   }
   if (!best) return null;
   const { back, overallW, overallH, Fh } = best;
+  const left = { ...best.left, depth: Fh }, right = { ...best.right, depth: Fh };
+  const leftBox = { id: 'left', x: 0, y: 0, w: left.width, h: Fh };
+  const rightBox = { id: 'right', x: overallW - right.width, y: 0, w: right.width, h: Fh };
+  const backBox = { id: 'back', x: (overallW - back.width) / 2, y: Fh + G, w: back.width, h: back.depth };
+  const gy = Fh, gallery = { id: 'gallery', name: 'رواق', x: X, y: gy, w: overallW - 2 * X, h: G };
+  /** @type {WallSeg[]} */
+  const walls = [
+    // courtyard-facing wall between the flanks, collinear with their back walls (merged).
+    { x1: X / 2, y1: gy - X / 2, x2: overallW - X / 2, y2: gy - X / 2, type: 'ext' },
+    // gallery rear wall, collinear with the back wing's front wall.
+    { x1: X / 2, y1: gy + G + X / 2, x2: overallW - X / 2, y2: gy + G + X / 2, type: 'ext' },
+    // courtyard-facing walls of each flank, just outside the flank box so the flank's
+    // corridor (flush with its box edge) stays clear.
+    { x1: leftBox.x + leftBox.w + X / 2, y1: X / 2, x2: leftBox.x + leftBox.w + X / 2, y2: gy - X / 2, type: 'ext' },
+    { x1: rightBox.x - X / 2, y1: X / 2, x2: rightBox.x - X / 2, y2: gy - X / 2, type: 'ext' },
+    // gallery end walls.
+    { x1: X / 2, y1: gy - X / 2, x2: X / 2, y2: gy + G + X / 2, type: 'ext' },
+    { x1: overallW - X / 2, y1: gy - X / 2, x2: overallW - X / 2, y2: gy + G + X / 2, type: 'ext' },
+  ];
+  // Corridor x-centres of each arm (single-sided flanks: corridor on the courtyard side).
+  const leftCx = leftBox.x + leftBox.w - G / 2, rightCx = rightBox.x + G / 2;
+  const backWing = (backBox.w - X * 2 - T * 2 - G) / 2, backCx = backBox.x + X + backWing + T + G / 2;
+  /** @type {Portal[]} */
+  const doors = [
+    { type: 'door', x: leftCx, y: gy - X / 2, axis: 'h', w: 1.1, h: 2.2, sill: 0, connects: ['spine-left', 'gallery'] },
+    { type: 'door', x: rightCx, y: gy - X / 2, axis: 'h', w: 1.1, h: 2.2, sill: 0, connects: ['spine-right', 'gallery'] },
+    { type: 'door', x: backCx, y: gy + G + X / 2, axis: 'h', w: 1.1, h: 2.2, sill: 0, connects: ['gallery', 'spine-back'] },
+  ];
+  const courtyard = { name: 'فناء', x: leftBox.w + X, y: 0, w: rightBox.x - X - (leftBox.w + X), h: gy - X };
+  // footprintPolygon: a true U, eight points, consistent winding with the other shapes,
+  // with the courtyard
+  // cut as an inward notch on the front edge (y=0..gy-X) between the two flanks. Built
+  // directly from courtyard's own x/w and gy so the polygon can never disagree with the
+  // hole validateModel checks rooms/corridors against.
+  const cLeft = courtyard.x, cRight = courtyard.x + courtyard.w, cBack = courtyard.y + courtyard.h;
+  const footprintPolygon = [
+    { x: 0, y: 0 }, { x: cLeft, y: 0 }, { x: cLeft, y: cBack }, { x: cRight, y: cBack },
+    { x: cRight, y: 0 }, { x: overallW, y: 0 }, { x: overallW, y: overallH }, { x: 0, y: overallH },
+  ];
+  return {
+    arms: [
+      { id: 'left', box: leftBox, zone: left, program: leftProgram, single: true, corridorSide: 'right', openEdges: ['right'] },
+      { id: 'right', box: rightBox, zone: right, program: rightProgram, single: true, corridorSide: 'left', openEdges: ['left'] },
+      { id: 'back', box: backBox, zone: back.zones, program: backProgram, single: false },
+    ],
+    extra: { corridors: [gallery], walls, doors, courtyards: [courtyard] },
+    overallW, overallH, footprintPolygon,
+  };
+}
+const SHAPE_PLANNERS = { rect: planRectangle, l: planL, u: planU };
+
+/** Local planning frame -> plot frame. @param {Plot} p @param {Rect} f */
+function mapper(p, f) {
+  /** @param {number} x @param {number} y @returns {Point} */
+  const point = (x, y) => p.entry === 's' ? { x: f.x + x, y: f.y + y } : p.entry === 'n' ? { x: f.x + f.w - x, y: f.y + f.h - y } : p.entry === 'e' ? { x: f.x + f.w - y, y: f.y + x } : { x: f.x + y, y: f.y + f.h - x };
+  /** @template {Rect} R @param {R} r @returns {R} */
+  const rect = r => { const a = point(r.x, r.y), b = point(r.x + r.w, r.y + r.h); return { ...r, x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) }; };
+  return { point, rect };
+}
+/** @param {RawWall[]} raw @returns {Wall[]} */
+function mergeWalls(raw) {
+  /** @type {Map<string, WallBin>} */
+  const bins = new Map();
+  raw.forEach(w => {
+    const vertical = near(w.x1, w.x2), fixed = vertical ? w.x1 : w.y1;
+    const a = Math.min(vertical ? w.y1 : w.x1, vertical ? w.y2 : w.x2), b = Math.max(vertical ? w.y1 : w.x1, vertical ? w.y2 : w.x2);
+    const key = (vertical ? 'v' : 'h') + fixed.toFixed(5) + w.type;
+    if (!bins.has(key)) bins.set(key, { vertical, fixed, type: w.type, t: w.t, ranges: [] });
+    /** @type {WallBin} */ (bins.get(key)).ranges.push([a, b]);
+  });
+  /** @type {Wall[]} */
+  const walls = [];
+  for (const bin of bins.values()) {
+    /** @type {[number, number][]} */
+    const ranges = [];
+    bin.ranges.sort((a, b) => a[0] - b[0]).forEach(r => {
+      const last = ranges.at(-1);
+      if (last && r[0] <= last[1] + E) last[1] = Math.max(last[1], r[1]); else ranges.push([...r]);
+    });
+    ranges.forEach(([a, b]) => walls.push({ id: 'wall-' + walls.length, x1: bin.vertical ? bin.fixed : a, y1: bin.vertical ? a : bin.fixed, x2: bin.vertical ? bin.fixed : b, y2: bin.vertical ? b : bin.fixed, type: bin.type, t: bin.t, h: GEOMETRY.height }));
+  }
+  return walls;
+}
+
+// ── Generate full wall/opening geometry for one rectangular arm's rooms, in LOCAL
+// (pre-transform) coordinates, given the arm's own bounding box for exterior-edge detection.
+/** @param {Room[]} armRooms @param {Rect} armBox @param {Edge[]} [openEdges] @returns {{ rawWalls: RawWall[], portals: Portal[] }} */
+function buildArmWalls(armRooms, armBox, openEdges = []) {
+  const rawWalls = /** @type {RawWall[]} */ ([]), portals = /** @type {Portal[]} */ ([]);
+  /** @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2 @param {'ext'|'int'} type */
+  const wall = (x1, y1, x2, y2, type) => rawWalls.push({ x1, y1, x2, y2, type, t: type === 'ext' ? X : T });
+  const { x: bx, y: by, w: bw, h: bh } = armBox;
+  // An edge in openEdges is where this arm physically joins another arm (via a bridge
+  // corridor) — no exterior wall is built there, so the bridge can actually connect.
+  if (!openEdges.includes('front')) wall(bx + X / 2, by + X / 2, bx + bw - X / 2, by + X / 2, 'ext');
+  if (!openEdges.includes('back')) wall(bx + X / 2, by + bh - X / 2, bx + bw - X / 2, by + bh - X / 2, 'ext');
+  if (!openEdges.includes('left')) wall(bx + X / 2, by + X / 2, bx + X / 2, by + bh - X / 2, 'ext');
+  if (!openEdges.includes('right')) wall(bx + bw - X / 2, by + X / 2, bx + bw - X / 2, by + bh - X / 2, 'ext');
+  armRooms.forEach(r => {
+    const leftExt = near(r.x, bx + X), rightExt = near(r.x + r.w, bx + bw - X), frontExt = near(r.y, by + X), backExt = near(r.y + r.h, by + bh - X);
