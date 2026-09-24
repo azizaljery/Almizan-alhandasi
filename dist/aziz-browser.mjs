@@ -1278,3 +1278,323 @@ function buildRefinementRequest(input, rejections, attempt, clock, deadlineMs) {
         const key = `${r.candidateId}|${r.engineId}|${r.code}`;
         if (!failedCandidatesMap.has(key)) {
             failedCandidatesMap.set(key, { candidateId: r.candidateId, engineId: r.engineId, reason: r.code });
+        }
+        if (r.violatedConstraintId) {
+            const arr = failedConstraints.get(r.violatedConstraintId) ?? [];
+            arr.push(r.description);
+            failedConstraints.set(r.violatedConstraintId, arr);
+        }
+    }
+    const explicitAreas = [];
+    const requiredRooms = [];
+    for (const c of input.hardConstraints) {
+        if (c.kind === 'explicit_area') {
+            const v = c.value;
+            explicitAreas.push({ roomId: v.roomId ?? v.type ?? 'unknown', area: v.area ?? 0 });
+        }
+        if (c.kind === 'room_type_required') {
+            const v = c.value;
+            if (v.type)
+                requiredRooms.push(v.type);
+        }
+    }
+    return {
+        requestId: (0, util_js_1.deterministicId)('refine', [input.requestId, attempt]),
+        createdAt: clock.nowIso(),
+        attempt,
+        reason: `All candidates rejected in attempt ${attempt}`,
+        failedConstraints: [...failedConstraints.entries()]
+            .map(([constraintId, evidence]) => ({ constraintId, evidence }))
+            .sort((a, b) => a.constraintId.localeCompare(b.constraintId)),
+        failedCandidates: [...failedCandidatesMap.values()].sort((a, b) => a.candidateId.localeCompare(b.candidateId)),
+        engineHints: [...enginesInvolved].sort().map((engineId) => ({ engineId, hint: hintFor(engineId, rejections) })),
+        mustPreserve: {
+            hardConstraintIds: input.hardConstraints.map((c) => c.id),
+            explicitAreas,
+            requiredRooms,
+        },
+        mayChange: ['room positions within footprint', 'room areas within tolerance', 'candidate geometry'],
+        mayNotChange: ['hard constraint set', 'explicit areas', 'entry side requirements'],
+        deadlineMs,
+    };
+}
+function hintFor(engineId, rejections) {
+    const own = rejections.filter((r) => r.engineId === engineId);
+    const codes = new Set(own.map((r) => r.code));
+    const parts = [];
+    if (codes.has('ROOM_OVERLAP'))
+        parts.push('avoid overlapping room boundaries');
+    if (codes.has('OUTSIDE_BUILDING_BOUNDARY'))
+        parts.push('keep rooms inside footprint');
+    if (codes.has('HARD_REQUIREMENT_MISSING'))
+        parts.push('honor hard constraints');
+    if (codes.has('AREA_TOLERANCE_EXCEEDED'))
+        parts.push('meet explicit areas');
+    if (codes.has('INVALID_ACCESS'))
+        parts.push('ensure valid adjacency/access');
+    if (codes.has('LOW_CONFIDENCE'))
+        parts.push('increase confidence');
+    if (codes.has('UNRESOLVED_ENGINE_CONFLICT'))
+        parts.push('resolve cross-engine conflicts');
+    if (parts.length === 0)
+        parts.push('re-evaluate against hard constraints');
+    return parts.join('; ');
+}
+};
+__mods["./decision-trace.js"]=function(module,exports,require){"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildDecisionTrace = buildDecisionTrace;
+const util_js_1 = require("./util.js");
+function buildDecisionTrace(winner, winnerScore, allScores, conflicts, provenance, weights) {
+    const steps = [];
+    let order = 0;
+    const runnerUp = allScores
+        .filter((s) => s.candidateId !== winner.candidateId)
+        .sort((a, b) => b.confidenceAdjustedTotal - a.confidenceAdjustedTotal)[0];
+    steps.push({
+        stepId: (0, util_js_1.deterministicId)('trace', [winner.candidateId, 'selection']),
+        order: order++,
+        subject: 'candidate-selection',
+        summary: runnerUp
+            ? `Selected ${winner.candidateId} (${winnerScore.confidenceAdjustedTotal.toFixed(1)}) over ${runnerUp.candidateId} (${runnerUp.confidenceAdjustedTotal.toFixed(1)})`
+            : `Selected ${winner.candidateId} (only surviving candidate) with score ${winnerScore.confidenceAdjustedTotal.toFixed(1)}`,
+        drivingEvidence: winnerScore.axes.filter((a) => a.value >= 70).map((a) => `${a.axis}=${a.value.toFixed(0)}`),
+        participatingEngines: [winner.producedBy],
+        weights: winnerScore.axes.map((a) => ({ axis: a.axis, weight: weights[a.axis] ?? 0, source: 'config' })),
+    });
+    const topAxes = [...winnerScore.axes].sort((a, b) => b.value * b.weight - a.value * a.weight).slice(0, 5);
+    for (const axis of topAxes) {
+        steps.push({
+            stepId: (0, util_js_1.deterministicId)('trace', [winner.candidateId, 'axis', axis.axis]),
+            order: order++,
+            subject: `axis:${axis.axis}`,
+            summary: `${axis.axis} scored ${axis.value.toFixed(0)} (weight ${axis.weight})`,
+            drivingEvidence: axis.evidence,
+            participatingEngines: [winner.producedBy],
+            weights: [{ axis: axis.axis, weight: weights[axis.axis] ?? 0, source: 'config' }],
+        });
+    }
+    for (const c of conflicts.filter((x) => x.participants.some((p) => p.candidateId === winner.candidateId))) {
+        steps.push({
+            stepId: (0, util_js_1.deterministicId)('trace', [winner.candidateId, 'conflict', c.conflictId]),
+            order: order++,
+            subject: `conflict:${c.subject}`,
+            summary: `${c.severity} conflict: ${c.description}`,
+            drivingEvidence: c.evidence,
+            participatingEngines: c.participants.map((p) => p.engineId),
+            weights: [],
+        });
+    }
+    for (const p of provenance.filter((x) => x.action === 'objected' && x.subject !== winner.candidateId)) {
+        steps.push({
+            stepId: (0, util_js_1.deterministicId)('trace', [winner.candidateId, 'objection', p.entryId]),
+            order: order++,
+            subject: p.subject,
+            summary: `Objection noted: ${p.statement}`,
+            drivingEvidence: p.evidence,
+            participatingEngines: [p.actor],
+            weights: [],
+        });
+    }
+    return {
+        traceId: (0, util_js_1.deterministicId)('trace', [winner.candidateId, 'full']),
+        candidateId: winner.candidateId,
+        steps,
+        narrative: buildNarrative(winner, winnerScore, conflicts, provenance, runnerUp),
+    };
+}
+function buildNarrative(winner, score, conflicts, provenance, runnerUp) {
+    const parts = [];
+    parts.push(`Selected ${winner.candidateId} from ${winner.producedBy} (v${winner.producedByVersion}).`);
+    parts.push(`Weighted total: ${score.confidenceAdjustedTotal.toFixed(1)}.`);
+    if (runnerUp)
+        parts.push(`Margin over runner-up: ${(score.confidenceAdjustedTotal - runnerUp.confidenceAdjustedTotal).toFixed(1)}.`);
+    const strong = score.axes.filter((a) => a.value >= 80).map((a) => a.axis);
+    if (strong.length)
+        parts.push(`Strong axes: ${strong.join(', ')}.`);
+    const weak = score.axes.filter((a) => a.value < 50).map((a) => a.axis);
+    if (weak.length)
+        parts.push(`Weak axes: ${weak.join(', ')}.`);
+    if (conflicts.length)
+        parts.push(`Recorded conflicts: ${conflicts.length}.`);
+    const objections = provenance.filter((p) => p.action === 'objected');
+    if (objections.length)
+        parts.push(`Objections: ${objections.map((o) => o.statement).slice(0, 3).join(' / ')}.`);
+    return parts.join(' ');
+}
+};
+__mods["./aziz.js"]=function(module,exports,require){"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createAziz = createAziz;
+const util_js_1 = require("./util.js");
+const output_validation_js_1 = require("./output-validation.js");
+const hard_constraints_js_1 = require("./hard-constraints.js");
+const conflict_engine_js_1 = require("./conflict-engine.js");
+const scoring_engine_js_1 = require("./scoring-engine.js");
+const consensus_engine_js_1 = require("./consensus-engine.js");
+const refinement_engine_js_1 = require("./refinement-engine.js");
+const decision_trace_js_1 = require("./decision-trace.js");
+const HARD_CONSTRAINT_KINDS = new Set([
+    'room_count_exact', 'room_count_min', 'room_count_max',
+    'room_type_required', 'room_type_forbidden', 'explicit_area',
+    'entry_side_required', 'privacy_required', 'access_required', 'custom',
+]);
+const HARD_CONSTRAINT_SOURCES = new Set(['user', 'municipality', 'engineer', 'system']);
+const SOFT_PREFERENCE_KINDS = new Set([
+    'prefer_area_near', 'prefer_zone_placement', 'prefer_adjacency',
+    'prefer_orientation', 'prefer_aesthetic', 'custom',
+]);
+const SOFT_PREFERENCE_SOURCES = new Set(['user', 'engineer', 'system']);
+function validHardConstraint(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+        return false;
+    const c = value;
+    return (typeof c.id === 'string' && c.id.length > 0 &&
+        typeof c.kind === 'string' && HARD_CONSTRAINT_KINDS.has(c.kind) &&
+        typeof c.description === 'string' &&
+        (c.appliesTo === undefined || typeof c.appliesTo === 'string') &&
+        typeof c.source === 'string' && HARD_CONSTRAINT_SOURCES.has(c.source) &&
+        c.priority === 'must');
+}
+function validSoftPreference(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+        return false;
+    const p = value;
+    return (typeof p.id === 'string' && p.id.length > 0 &&
+        typeof p.kind === 'string' && SOFT_PREFERENCE_KINDS.has(p.kind) &&
+        typeof p.description === 'string' &&
+        typeof p.weight === 'number' && Number.isFinite(p.weight) &&
+        (p.appliesTo === undefined || typeof p.appliesTo === 'string') &&
+        typeof p.source === 'string' && SOFT_PREFERENCE_SOURCES.has(p.source));
+}
+function inputShapeError(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+        return 'INPUT_NOT_OBJECT';
+    const input = value;
+    if (typeof input.requestId !== 'string' || input.requestId.length === 0)
+        return 'REQUEST_ID_INVALID';
+    if (!input.context || typeof input.context !== 'object' || Array.isArray(input.context))
+        return 'CONTEXT_INVALID';
+    const context = input.context;
+    if (typeof context.plotArea !== 'number' || !Number.isFinite(context.plotArea) || context.plotArea < 0)
+        return 'PLOT_AREA_INVALID';
+    if (typeof context.cityCode !== 'string' || context.cityCode.length === 0)
+        return 'CITY_CODE_INVALID';
+    if (typeof context.locale !== 'string' || context.locale.length === 0)
+        return 'LOCALE_INVALID';
+    if (!Array.isArray(input.engineOutputs))
+        return 'ENGINE_OUTPUTS_NOT_ARRAY';
+    if (!Array.isArray(input.hardConstraints))
+        return 'HARD_CONSTRAINTS_NOT_ARRAY';
+    if (!input.hardConstraints.every(validHardConstraint))
+        return 'HARD_CONSTRAINT_INVALID';
+    if (!Array.isArray(input.softPreferences))
+        return 'SOFT_PREFERENCES_NOT_ARRAY';
+    if (!input.softPreferences.every(validSoftPreference))
+        return 'SOFT_PREFERENCE_INVALID';
+    if (input.previousRefinement !== undefined && input.previousRefinement !== null) {
+        if (typeof input.previousRefinement !== 'object' || Array.isArray(input.previousRefinement))
+            return 'PREVIOUS_REFINEMENT_INVALID';
+        const attempt = input.previousRefinement.attempt;
+        if (typeof attempt !== 'number' || !Number.isInteger(attempt) || attempt < 0)
+            return 'PREVIOUS_REFINEMENT_ATTEMPT_INVALID';
+    }
+    return null;
+}
+function safeInputForInvalidState(value) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const v = value;
+        return {
+            requestId: typeof v.requestId === 'string' && v.requestId.length > 0 ? v.requestId : 'invalid-request',
+            context: { plotArea: 0, cityCode: 'invalid', locale: 'und' },
+            hardConstraints: [],
+            softPreferences: [],
+            engineOutputs: [],
+        };
+    }
+    return {
+        requestId: 'invalid-request',
+        context: { plotArea: 0, cityCode: 'invalid', locale: 'und' },
+        hardConstraints: [],
+        softPreferences: [],
+        engineOutputs: [],
+    };
+}
+function canonicalDesignKey(candidate) {
+    return (0, util_js_1.stableStringify)({
+        footprint: candidate.footprint,
+        rooms: candidate.rooms,
+        adjacency: candidate.adjacency,
+        entryPoints: candidate.entryPoints,
+        metrics: candidate.metrics,
+    });
+}
+function duplicateRepresentativeOrder(a, b) {
+    return (b.engineConfidence - a.engineConfidence ||
+        a.candidateId.localeCompare(b.candidateId) ||
+        a.producedBy.localeCompare(b.producedBy) ||
+        a.producedByVersion.localeCompare(b.producedByVersion));
+}
+function createAziz(configInput = {}, clock = util_js_1.systemClock) {
+    const config = (0, consensus_engine_js_1.normalizeConfig)(configInput);
+    async function process(input) {
+        const t0 = clock.monotonicMs();
+        const provenance = [];
+        const rejections = [];
+        const allCandidates = [];
+        const acceptedOutputs = [];
+        const inputValidationError = inputShapeError(input);
+        if (inputValidationError) {
+            const safeInput = safeInputForInvalidState(input);
+            return emptyState('no-candidates', safeInput, config, [], rejections, [{
+                    entryId: (0, util_js_1.deterministicId)('prov', [safeInput.requestId, 'input', inputValidationError]),
+                    at: clock.nowIso(),
+                    actor: 'aziz',
+                    action: 'objected',
+                    subject: 'input-validation',
+                    statement: `Invalid AZIZ input: ${inputValidationError}`,
+                    evidence: [inputValidationError],
+                    confidence: 1,
+                }], null, clock, t0);
+        }
+        let inputFingerprint;
+        try {
+            inputFingerprint = (0, util_js_1.fnv1aHash)((0, util_js_1.stableStringify)({
+                requestId: input.requestId,
+                hardConstraints: input.hardConstraints,
+                softPreferences: input.softPreferences,
+                context: input.context,
+                ...(input.previousRefinement ? { previousFeedback: input.previousRefinement } : {}),
+            }));
+        }
+        catch (e) {
+            return emptyState('no-candidates', input, config, [], rejections, [{
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, 'input', 'invalid']),
+                    at: clock.nowIso(),
+                    actor: 'aziz',
+                    action: 'objected',
+                    subject: 'input',
+                    statement: e instanceof util_js_1.NonJsonInputError ? `Input is not JSON-compatible: ${e.message}` : 'Input fingerprint failed',
+                    evidence: [],
+                    confidence: 0,
+                }], null, clock, t0);
+        }
+        const engineOutputsIndex = [];
+        let receivedCount = 0;
+        for (const rawOutput of input.engineOutputs) {
+            const engineId = rawOutput?.engineId ?? '';
+            const engineVersion = rawOutput?.engineVersion ?? '';
+            const validation = (0, output_validation_js_1.validateEngineOutput)(rawOutput, { engineId, engineVersion }, inputFingerprint);
+            if (!validation.ok) {
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, engineId, 'invalid-output', validation.reason ?? 'unknown']),
+                    at: clock.nowIso(),
+                    actor: engineId || 'unknown',
+                    action: 'objected',
+                    subject: 'output-validation',
+                    statement: `Invalid engine output: ${validation.reason ?? 'unknown'}`,
+                    evidence: [],
+                    confidence: 0,
+                });
+                continue;
+            }
