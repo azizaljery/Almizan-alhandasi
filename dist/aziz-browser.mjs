@@ -1598,3 +1598,242 @@ function createAziz(configInput = {}, clock = util_js_1.systemClock) {
                 });
                 continue;
             }
+            const rawValidatedOutput = rawOutput;
+            const output = {
+                ...rawValidatedOutput,
+                candidates: validation.validCandidates ?? [],
+            };
+            if (validation.invalidCandidateIds?.length) {
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, output.engineId, 'invalid-candidates', ...validation.invalidCandidateIds]),
+                    at: clock.nowIso(), actor: output.engineId, action: 'objected',
+                    subject: 'candidate-validation',
+                    statement: `Rejected invalid candidates: ${validation.invalidCandidateIds.join(', ')}`,
+                    evidence: validation.invalidCandidateIds,
+                    confidence: 0,
+                });
+            }
+            engineOutputsIndex.push({
+                engineId: output.engineId,
+                engineVersion: output.engineVersion,
+                invocationId: output.invocationId,
+                candidateCount: output.candidates.length,
+                confidence: output.confidence,
+                warnings: output.warnings.length,
+                status: output.execution.status,
+            });
+            if (output.execution.status === 'failed') {
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, output.engineId, 'failed']),
+                    at: clock.nowIso(),
+                    actor: output.engineId,
+                    action: 'objected',
+                    subject: 'execution',
+                    statement: `Engine ${output.engineId} failed: ${output.execution.errorMessage ?? 'unknown'}`,
+                    evidence: [],
+                    confidence: 0,
+                });
+                continue;
+            }
+            acceptedOutputs.push(output);
+            for (const cand of output.candidates) {
+                if (cand.schemaVersion !== '1.0.0') {
+                    rejections.push({
+                        candidateId: cand.candidateId, engineId: output.engineId, code: 'VERSION_MISMATCH',
+                        description: `Schema version ${cand.schemaVersion} not supported`, evidence: [], severity: 'critical',
+                    });
+                    continue;
+                }
+                receivedCount++;
+                allCandidates.push(cand);
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, cand.candidateId, 'proposed']),
+                    at: clock.nowIso(), actor: output.engineId, action: 'proposed',
+                    subject: cand.candidateId,
+                    statement: `Proposed candidate with confidence ${cand.engineConfidence}`,
+                    evidence: [`rooms=${cand.rooms.length}`, `footprintArea=${cand.metrics.grossArea.toFixed(1)}`],
+                    confidence: cand.engineConfidence,
+                });
+            }
+            for (const warn of output.warnings) {
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, output.engineId, 'warn', warn.id]),
+                    at: clock.nowIso(), actor: output.engineId,
+                    action: warn.severity === 'critical' ? 'objected' : 'supported',
+                    subject: `warning:${warn.code}`, statement: warn.message,
+                    evidence: [warn.code], confidence: output.confidence,
+                });
+            }
+        }
+        const confidenceEligible = [];
+        for (const c of allCandidates) {
+            if (c.engineConfidence < config.confidenceFloor) {
+                rejections.push({
+                    candidateId: c.candidateId, engineId: c.producedBy, code: 'LOW_CONFIDENCE',
+                    description: `Candidate confidence ${c.engineConfidence} below floor ${config.confidenceFloor}`,
+                    evidence: [], severity: 'critical',
+                });
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, c.candidateId, 'low-confidence']),
+                    at: clock.nowIso(), actor: 'aziz', action: 'rejected', subject: c.candidateId,
+                    statement: `Low confidence (${c.engineConfidence} < ${config.confidenceFloor})`,
+                    evidence: [], confidence: 1,
+                });
+                continue;
+            }
+            confidenceEligible.push(c);
+        }
+        const idCounts = new Map();
+        for (const c of confidenceEligible)
+            idCounts.set(c.candidateId, (idCounts.get(c.candidateId) ?? 0) + 1);
+        const idUniqueCandidates = [];
+        for (const c of confidenceEligible) {
+            if ((idCounts.get(c.candidateId) ?? 0) > 1) {
+                const rejection = {
+                    candidateId: c.candidateId, engineId: c.producedBy, code: 'DUPLICATE_CANDIDATE',
+                    description: `Candidate ID ${c.candidateId} is not globally unique`,
+                    evidence: [`candidateId=${c.candidateId}`], severity: 'major',
+                };
+                rejections.push(rejection);
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, c.producedBy, c.candidateId, 'duplicate-id']),
+                    at: clock.nowIso(), actor: 'aziz', action: 'rejected', subject: c.candidateId,
+                    statement: rejection.description, evidence: rejection.evidence, confidence: 1,
+                });
+                continue;
+            }
+            idUniqueCandidates.push(c);
+        }
+        const designGroups = new Map();
+        for (const c of idUniqueCandidates) {
+            const key = canonicalDesignKey(c);
+            const group = designGroups.get(key) ?? [];
+            group.push(c);
+            designGroups.set(key, group);
+        }
+        const uniqueCandidates = [];
+        for (const group of designGroups.values()) {
+            const ordered = [...group].sort(duplicateRepresentativeOrder);
+            const keep = ordered[0];
+            uniqueCandidates.push(keep);
+            for (const c of ordered.slice(1)) {
+                const rejection = {
+                    candidateId: c.candidateId, engineId: c.producedBy, code: 'DUPLICATE_CANDIDATE',
+                    description: `Duplicate design of candidate ${keep.candidateId}`,
+                    evidence: [`kept=${keep.candidateId}`, `reportedGeometryHash=${c.geometryHash}`], severity: 'minor',
+                };
+                rejections.push(rejection);
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, c.candidateId, 'duplicate-design', keep.candidateId]),
+                    at: clock.nowIso(), actor: 'aziz', action: 'rejected', subject: c.candidateId,
+                    statement: rejection.description, evidence: rejection.evidence, confidence: 1,
+                });
+            }
+        }
+        if (uniqueCandidates.length === 0) {
+            const attempt = (input.previousRefinement?.attempt ?? 0) + 1;
+            const refinement = rejections.length > 0 && attempt <= config.maxRefinementAttempts
+                ? (0, refinement_engine_js_1.buildRefinementRequest)(input, rejections, attempt, clock, config.engineTimeoutMs)
+                : null;
+            return {
+                ...emptyState(rejections.length > 0 ? 'all-rejected' : 'no-candidates', input, config, engineOutputsIndex, rejections, provenance, refinement, clock, t0),
+                candidatesReceived: receivedCount,
+            };
+        }
+        const survivorsAfterHard = [];
+        for (const c of uniqueCandidates) {
+            const hc = (0, hard_constraints_js_1.evaluateHardConstraints)(c, input.hardConstraints, config);
+            if (hc.violations.length > 0) {
+                rejections.push(...hc.violations);
+                for (const v of hc.violations) {
+                    provenance.push({
+                        entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, c.candidateId, v.code, v.description]),
+                        at: clock.nowIso(), actor: 'aziz', action: 'rejected',
+                        subject: c.candidateId, statement: v.description, evidence: v.evidence, confidence: 1,
+                    });
+                }
+            }
+            else {
+                survivorsAfterHard.push(c);
+            }
+        }
+        if (survivorsAfterHard.length === 0) {
+            const attempt = (input.previousRefinement?.attempt ?? 0) + 1;
+            const refinement = attempt <= config.maxRefinementAttempts
+                ? (0, refinement_engine_js_1.buildRefinementRequest)(input, rejections, attempt, clock, config.engineTimeoutMs)
+                : null;
+            return {
+                ...emptyState('all-rejected', input, config, engineOutputsIndex, rejections, provenance, refinement, clock, t0),
+                candidatesReceived: receivedCount,
+            };
+        }
+        const conflicts = (0, conflict_engine_js_1.detectConflicts)(survivorsAfterHard, acceptedOutputs);
+        for (const cf of conflicts) {
+            provenance.push({
+                entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, 'conflict', cf.conflictId]),
+                at: clock.nowIso(), actor: 'aziz', action: 'objected',
+                subject: cf.subject, statement: cf.description, evidence: cf.evidence, confidence: 1,
+            });
+        }
+        const criticalConflictCandidateIds = new Set();
+        for (const cf of conflicts) {
+            if (cf.severity !== 'critical')
+                continue;
+            for (const p of cf.participants) {
+                if (p.candidateId && p.candidateId !== 'n/a')
+                    criticalConflictCandidateIds.add(p.candidateId);
+            }
+        }
+        const survivors = [];
+        for (const c of survivorsAfterHard) {
+            if (criticalConflictCandidateIds.has(c.candidateId)) {
+                rejections.push({
+                    candidateId: c.candidateId, engineId: c.producedBy, code: 'UNRESOLVED_ENGINE_CONFLICT',
+                    description: 'Candidate involved in a critical cross-engine conflict',
+                    evidence: conflicts.filter((cf) => cf.severity === 'critical' && cf.participants.some((p) => p.candidateId === c.candidateId)).map((cf) => cf.conflictId),
+                    severity: 'critical',
+                });
+                provenance.push({
+                    entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, c.candidateId, 'critical-conflict']),
+                    at: clock.nowIso(), actor: 'aziz', action: 'rejected', subject: c.candidateId,
+                    statement: 'Rejected due to critical cross-engine conflict', evidence: [], confidence: 1,
+                });
+            }
+            else survivors.push(c);
+        }
+        if (survivors.length === 0) {
+            const attempt = (input.previousRefinement?.attempt ?? 0) + 1;
+            const refinement = attempt <= config.maxRefinementAttempts ? (0, refinement_engine_js_1.buildRefinementRequest)(input, rejections, attempt, clock, config.engineTimeoutMs) : null;
+            return { ...emptyState('all-rejected', input, config, engineOutputsIndex, rejections, provenance, refinement, clock, t0), candidatesReceived: receivedCount };
+        }
+        const weights = (0, consensus_engine_js_1.resolveWeights)(config, input.context);
+        const scores = survivors.map((c) => (0, scoring_engine_js_1.scoreCandidate)(c, input.hardConstraints, input.softPreferences, conflicts, weights, config));
+        const byId = new Map(survivors.map((c) => [c.candidateId, c]));
+        const ranked = [...scores].sort((a, b) => b.confidenceAdjustedTotal - a.confidenceAdjustedTotal || a.candidateId.localeCompare(b.candidateId));
+        const topScore = ranked[0].confidenceAdjustedTotal;
+        const tieGroup = ranked.filter((s) => topScore - s.confidenceAdjustedTotal < config.tieThreshold).sort((a, b) => {
+            const aConf = byId.get(a.candidateId).engineConfidence;
+            const bConf = byId.get(b.candidateId).engineConfidence;
+            return bConf - aConf || a.candidateId.localeCompare(b.candidateId);
+        });
+        const winnerScore = tieGroup[0];
+        const sortedScores = [winnerScore, ...ranked.filter((s) => s !== winnerScore)];
+        const winner = byId.get(winnerScore.candidateId);
+        const trace = (0, decision_trace_js_1.buildDecisionTrace)(winner, winnerScore, sortedScores, conflicts, provenance, weights);
+        for (const step of trace.steps) {
+            provenance.push({ entryId: (0, util_js_1.deterministicId)('prov', [input.requestId, 'trace', step.stepId]), at: clock.nowIso(), actor: 'aziz', action: 'accepted', subject: step.subject, statement: step.summary, evidence: step.drivingEvidence, confidence: 1 });
+        }
+        return {
+            requestId: input.requestId, builtAt: clock.nowIso(), config, inputs: input, candidatesReceived: receivedCount,
+            candidatesRejected: rejections, candidatesSurvived: survivors.map((s) => s.candidateId), scores: sortedScores,
+            conflicts, selectedCandidateId: winner.candidateId, selectionReason: `Highest weighted total (${winnerScore.confidenceAdjustedTotal.toFixed(2)})`,
+            decisionTrace: trace, provenance, refinementRequest: null, engineOutputsIndex, status: 'selected', durationMs: clock.monotonicMs() - t0,
+        };
+    }
+    return { process, config: () => ({ ...config, weights: { ...config.weights }, weightProfiles: Object.fromEntries(Object.entries(config.weightProfiles).map(([k, v]) => [k, { ...v }])) }) };
+}
+function emptyState(status, input, config, engineOutputsIndex, rejections, provenance, refinement, clock, t0) {
+    return { requestId: input.requestId, builtAt: clock.nowIso(), config, inputs: input, candidatesReceived: 0, candidatesRejected: rejections, candidatesSurvived: [], scores: [], conflicts: [], selectedCandidateId: null, selectionReason: null, decisionTrace: null, provenance, refinementRequest: refinement, engineOutputsIndex, status, durationMs: clock.monotonicMs() - t0 };
+}
+};
+const __cache=Object.create(null);function __require(id){const k=id.startsWith('./')?id:'./'+id;if(__cache[k])return __cache[k].exports;const f=__mods[k];if(!f)throw Error('AZIZ bundle missing '+k);const m={exports:{}};__cache[k]=m;f(m,m.exports,__require);return m.exports;}const __aziz=__require('./aziz.js'),__util=__require('./util.js');export const createAziz=__aziz.createAziz;export const deterministicId=__util.deterministicId;export const fnv1aHash=__util.fnv1aHash;export const stableStringify=__util.stableStringify;export const AZIZ_BROWSER_BUNDLE_VERSION='candidate4R3';
