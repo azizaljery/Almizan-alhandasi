@@ -1,5 +1,20 @@
 import { normalizeRooms } from './planner.mjs';
 
+const DESIGN_PRIORITIES = new Set(['privacy','guestFamilySeparation','daylight','circulation','accessibility','serviceFlow','efficiency','futureFlexibility']);
+const DESIGN_SHAPES = new Set(['rect','l','u']);
+function validateDesignIntent(raw) {
+  const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const priorities = Array.isArray(source.priorities) ? [...new Set(source.priorities.filter(x => DESIGN_PRIORITIES.has(x)))].slice(0, 6) : [];
+  const preferredShapes = Array.isArray(source.preferredShapes) ? [...new Set(source.preferredShapes.filter(x => DESIGN_SHAPES.has(x)))].slice(0, 3) : [];
+  const conceptDirections = Array.isArray(source.conceptDirections) ? source.conceptDirections.slice(0, 3).map((x, i) => {
+    if (!x || typeof x !== 'object' || Array.isArray(x)) throw Error('اقتراح غير صالح.');
+    const shapeHint = ['auto','rect','l','u'].includes(x.shapeHint) ? x.shapeHint : 'auto';
+    if (typeof x.label !== 'string' || !x.label.trim() || x.label.length > 120 || typeof x.rationale !== 'string' || x.rationale.length > 800 || !Array.isArray(x.tradeoffs) || x.tradeoffs.length > 6 || x.tradeoffs.some(t => typeof t !== 'string' || t.length > 300)) throw Error('اقتراح غير صالح.');
+    return { id: typeof x.id === 'string' && x.id ? x.id.slice(0, 80) : `concept-${i+1}`, label: x.label.trim(), shapeHint, rationale: x.rationale.trim(), tradeoffs: [...x.tradeoffs] };
+  }) : [];
+  return { priorities, preferredShapes, conceptDirections };
+}
+
 // AI is enabled through the external Cloudflare Worker.
 // No API key or provider secret is exposed in the browser.
 export const AI_ENABLED = true;
@@ -13,6 +28,7 @@ export function validateSuggestion(raw) {
   }
   if (!Array.isArray(raw.rooms) || raw.rooms.length > 30 || (!raw.rooms.length && ![...result.questions, ...result.unhandled].some(s => s.trim()))) throw Error('اقتراح غير صالح.');
   result.rooms = raw.rooms.length ? normalizeRooms(raw.rooms).map(({ name, type, area, position, side }) => ({ name, type, area, position, side })) : [];
+  result.designIntent = validateDesignIntent(raw.designIntent);
   return result;
 }
 export async function requestBrief(input, { enabled = AI_ENABLED, fetcher = globalThis.fetch, signal } = {}) {
