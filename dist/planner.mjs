@@ -433,3 +433,103 @@ function planRectangle(f, program, sideways) {
   const footprintPolygon = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
   return { arms: [{ id: 'a', box: { id: 'a', x: 0, y: 0, w, h }, zone: solved.zones, program }], overallW: w, overallH: h, footprintPolygon };
 }
+// packWing/packZone logic; only their layout in the footprint differs from the single rectangle.
+/** @param {Rect} f @param {ProgramRoom[]} program @param {boolean} sideways @returns {ShapePlan | null} */
+function planL(f, program, sideways) {
+  const localWidth = sideways ? f.h : f.w, localDepth = sideways ? f.w : f.h;
+  const mainProgram = program.filter(r => r.position !== 'back');
+  /** @type {ProgramRoom[]} */
+  const backProgram = program.filter(r => r.position === 'back').map(r => ({ ...r, position: 'middle' }));
+  if (!mainProgram.length || !backProgram.length) return null; // need both arms populated to form an L
+  // Split available width by each arm's share of total room area, reserving at least 7m
+  // per arm, so neither arm starves the other by greedily claiming up to 20m.
+  const mainShare = sum(mainProgram, r => r.area) / sum(program, r => r.area);
+  const usableWidth = localWidth - T * 2;
+  const mainMaxWidth = Math.min(20, Math.max(7, usableWidth * mainShare));
+  const mainMaxDepth = localDepth * .62;
+  const main = solveSingleSidedWing(mainProgram, mainMaxWidth, mainMaxDepth);
+  if (!main) return null;
+  const armMaxWidth = Math.min(20, localWidth - main.width - T * 2);
+  if (armMaxWidth < 7) return null;
+  const armMaxDepth = localDepth - main.depth;
+  // The secondary arm is single-sided: its corridor sits flush against the boundary
+  // shared with the main arm (its own LEFT edge, since the arm is placed to main's
+  // right), guaranteeing a bridge corridor across the small gap never crosses a room.
+  const arm = solveSingleSidedWing(backProgram, armMaxWidth, armMaxDepth);
+  if (!arm) return null;
+  const mainBox = { id: 'main', x: 0, y: 0, w: main.width, h: main.depth };
+  const armBox = { id: 'arm', x: main.width + T * 2, y: 0, w: arm.width, h: arm.depth };
+  const overallW = main.width + T * 2 + arm.width, overallH = Math.max(main.depth, arm.depth);
+  // footprintPolygon: a true L, six points, one interior (reflex) corner where the
+  // shorter arm's far edge meets the taller arm's side — NOT the bounding rectangle.
+  // Walked starting at the front-left corner, consistent winding with planRectangle's.
+  // Handles either arm being
+  // the taller one (main.depth vs arm.depth) so the notch always sits on the shorter side.
+  const mainRight = main.width + T; // midpoint of the partition gap: true shared boundary
+  const footprintPolygon = main.depth >= arm.depth
+    ? [{ x: 0, y: 0 }, { x: overallW, y: 0 }, { x: overallW, y: arm.depth }, { x: mainRight, y: arm.depth }, { x: mainRight, y: overallH }, { x: 0, y: overallH }]
+    : [{ x: 0, y: 0 }, { x: mainRight, y: 0 }, { x: mainRight, y: main.depth }, { x: overallW, y: main.depth }, { x: overallW, y: overallH }, { x: 0, y: overallH }];
+  return {
+    arms: [
+      // main's corridor sits on its RIGHT edge (flush against the shared boundary with arm).
+      { id: 'main', box: mainBox, zone: main, program: mainProgram, single: true, corridorSide: 'right', openEdges: ['right'] },
+      { id: 'arm', box: armBox, zone: arm, program: backProgram, single: true, corridorSide: 'left', openEdges: ['left'] },
+    ],
+    overallW, overallH, footprintPolygon,
+  };
+}
+// U-shape: a spine arm across the back plus two side arms flanking a central open courtyard
+// facing the entry. Front/middle rooms split left/right by their requested side (or by area
+// balance if unspecified) into the two flanking arms; back rooms form the connecting spine.
+// U-shape, rebuilt to avoid the vertical single-sided wing entirely: instead of a spine
+// arm stacked above/below two flanking arms (which needed packWing's row axis reversed —
+// the source of an unresolved bug, see KNOWN-ISSUE-U-SHAPE.md), all three arms sit SIDE
+// BY SIDE horizontally, each one a normal vertical rectangle built by the same
+// buildSingleSidedWingGeometry() already proven correct for planL's two arms. Order left
+// to right: left arm | spine (middle, widest) | right arm. Each arm's corridor runs along
+// whichever inner edge faces its neighbour, so a bridge corridor connects flush to open
+// corridor space on both sides exactly as in planL — no new geometry class needed.
+// U-shape (true courtyard house): two single-sided front flanks with an open courtyard
+// between them, a cross gallery corridor behind them, and a standard double-sided back
+// wing behind the gallery. Every arm reuses geometry proven in planL / planRectangle; the
+// only new element is the gallery, returned as `extra` (corridor + walls + doors) in local
+// coordinates. Doors pass through exactly one exterior wall each (flank back wall or back
+// wing front wall), so validateModel's physical door check holds.
+/** @param {Rect} f @param {ProgramRoom[]} program @param {boolean} sideways @returns {ShapePlan | null} */
+function planU(f, program, sideways) {
+  const localWidth = sideways ? f.h : f.w, localDepth = sideways ? f.w : f.h;
+  const G = GEOMETRY.corridor, COURT = 3;
+  const frontMid = program.filter(r => r.position !== 'back');
+  // Small rooms cannot fill a full row of a single-sided flank, so they go to the back wing.
+  const SMALL = 12;
+  /** @type {ProgramRoom[]} */
+  const backProgram = [
+    ...program.filter(r => r.position === 'back'),
+    ...frontMid.filter(r => r.side === 'any' && r.area < SMALL),
+  ].map(r => ({ ...r, position: 'middle' }));
+  const flankRooms = frontMid.filter(r => !(r.side === 'any' && r.area < SMALL));
+  if (!backProgram.length || flankRooms.length < 2) return null;
+  const leftProgram = flankRooms.filter(r => r.side === 'left');
+  const rightProgram = flankRooms.filter(r => r.side === 'right');
+  flankRooms.filter(r => r.side === 'any').sort((a, b) => b.area - a.area)
+    .forEach(r => (sum(leftProgram, x => x.area) <= sum(rightProgram, x => x.area) ? leftProgram : rightProgram).push(r));
+  if (!leftProgram.length || !rightProgram.length) return null;
+  /** @type {{ left: SingleWingSolution, right: SingleWingSolution, back: WingSolution, overallW: number, overallH: number, Fh: number, score: number } | null} */
+  let best = null;
+  for (let flankW = Math.min(20, (localWidth - COURT) / 2); flankW >= 7; flankW -= .5) {
+    const back = solveWing(backProgram, Math.min(20, localWidth), localDepth - 8);
+    if (!back) return null;
+    const flankMaxDepth = localDepth - back.depth - G;
+    const left = solveSingleSidedWing(leftProgram, flankW, flankMaxDepth);
+    if (!left) continue;
+    const right = solveSingleSidedWing(rightProgram, flankW, flankMaxDepth);
+    if (!right) continue;
+    const overallW = Math.max(left.width + COURT + right.width, back.width);
+    if (overallW > localWidth + E) continue;
+    const Fh = Math.max(left.depth, right.depth);
+    const overallH = Fh + G + back.depth;
+    const score = overallW * overallH;
+    if (!best || score < best.score) best = { left, right, back, overallW, overallH, Fh, score };
+  }
+  if (!best) return null;
+  const { back, overallW, overallH, Fh } = best;
