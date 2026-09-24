@@ -150,6 +150,17 @@
           <p class="help">الأثاث رموز توضيحية فقط، وليس توزيع تأثيث معتمدًا أو بندًا في الكميات.</p>
         </div>
       </article>
+      <article class="card gemini-engineering-card" id="geminiLens" hidden aria-label="مراجعة Gemini الهندسية للمخطط">
+        <header class="ch gemini-head"><b class="num">✦</b><div><span class="ey">GEMINI ENGINEERING</span><h2>عين هندسية على المخطط</h2><p>قراءة مبدئية متصلة مباشرة بالمسقط المعروض، لا حكم تنفيذي أو ترخيص بناء.</p></div><span class="pill" id="geminiState">جارٍ التحليل</span></header>
+        <div class="cb gemini-body">
+          <div class="gemini-overview"><div><span class="gemini-kicker">حالة التصميم الحالي</span><strong id="geminiSummary">—</strong></div><label class="gemini-toggle"><input id="showGemini" type="checkbox" checked> أظهر علامات Gemini على 2D</label></div>
+          <div class="gemini-metrics" id="geminiMetrics"></div>
+          <section class="gemini-patterns"><span>أنماط معمارية مرشحة للمراجعة</span><b id="geminiPatterns">—</b></section>
+          <h3 class="subhead">ما يحتاج قرارًا أو مراجعة</h3>
+          <ul class="gemini-findings" id="geminiFindings"></ul>
+          <p class="gemini-coverage" id="geminiCoverage"></p>
+        </div>
+      </article>
       <article class="card immersive-card"><header class="ch"><b class="num">3D</b><div><h2>جولة داخل التصميم</h2><p>ادخل من المدخل، تحرك بين الفراغات، وانظر حولك كما لو كنت داخل البيت.</p></div><span class="pill" id="tourState">منظور عام</span></header>
         <div class="cb">
           <div class="tour-strip"><div><b>ابدأ التجربة</b><small>تبدأ الجولة من أقرب فراغ للمدخل ثم تنتقل بين الغرف.</small></div><div class="inline-actions"><button class="small-button tour-primary" id="startTour">ابدأ من المدخل</button><button class="small-button" id="tourPrev" disabled>الغرفة السابقة</button><button class="small-button" id="tourNext" disabled>الغرفة التالية</button></div></div>
@@ -190,5 +201,5 @@
 <footer class="app-footer">الميزان الهندسي · تصور تصميمي غير تنفيذي · محرك محلي للدور الأرضي</footer>
 </main>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="./app.mjs"></script><script type="module" src="./portal.mjs"></script>
+<link rel="stylesheet" href="./gemini-ui.css"><script type="module" src="./app.mjs"></script><script type="module" src="./portal.mjs"></script>
 </body></html>

@@ -144,5 +144,26 @@ export class PlanViewport {
     this.svg.insertBefore(group, this.svg.firstChild);
     const sun = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sun.setAttribute('data-solar-direction', 'true'); sun.setAttribute('x', String(this.model.building.x)); sun.setAttribute('y', String(-this.model.building.y + .7)); sun.setAttribute('fill', '#bd7b16'); sun.setAttribute('font-size', '.35'); sun.setAttribute('font-weight', '700'); sun.textContent = `☀ شمس ${preview.azimuth}° · ظل ${preview.shadowLength}م`; this.svg.append(sun);
   }
+  showEngineeringMarkers(markers = [], show = true) {
+    this.svg.querySelector('[data-gemini-markers]')?.remove();
+    if (!show || !markers.length) return;
+    const spaces = [...this.model.rooms, ...this.model.corridors];
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    group.setAttribute('data-gemini-markers', 'true'); group.setAttribute('pointer-events', 'none');
+    for (const marker of markers) {
+      const room = spaces.find(space => space.id === marker.id);
+      if (!room) continue;
+      const x = room.x + room.w - .18, y = -room.y - .22;
+      const color = marker.severity === 'critical' ? '#cf3b3b' : marker.severity === 'major' ? '#c77918' : '#1c7784';
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', String(x)); circle.setAttribute('cy', String(y)); circle.setAttribute('r', '.19');
+      circle.setAttribute('fill', color); circle.setAttribute('stroke', '#fff8e9'); circle.setAttribute('stroke-width', '.045');
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', String(x)); label.setAttribute('y', String(y + .075)); label.setAttribute('fill', '#fff');
+      label.setAttribute('font-size', '.23'); label.setAttribute('font-weight', '800'); label.setAttribute('text-anchor', 'middle'); label.textContent = marker.count > 9 ? '9+' : String(marker.count);
+      group.append(circle, label);
+    }
+    this.svg.append(group);
+  }
   select(id) { this.svg.querySelectorAll('[data-room-id]').forEach(g => { const on = g.dataset.roomId === id; g.classList.toggle('selected', on); g.setAttribute('aria-pressed', String(on)); }); }
 }

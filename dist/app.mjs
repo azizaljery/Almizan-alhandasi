@@ -15,12 +15,13 @@ import { compareHomeModels, buildEngineeringPromptContext } from './home-design-
 import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
 import { initVisualizer } from './render-visualizer.mjs';
 import { calculateMizanScore } from './mizan-score.mjs';
+import { analyzeGeminiEngineering } from './gemini-engineering-layer.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -133,7 +134,9 @@ function renderRows() {
 function selectRoom(id) {
   const r = state.model?.rooms.find(r => r.id === id); if (!r) return;
   state.selected = id; $('roomSelect').value = id; viewport?.select(id);
-  $('roomInspector').innerHTML = `<div><b>${esc(r.name)}</b><p>${POSITIONS[r.position]} · ${SIDES[r.resolvedSide]}</p></div><div class="numbers"><span>${fmt(r.area)} م² صافي</span><span>${fmt(r.w, 2)} × ${fmt(r.h, 2)} م</span></div>`;
+  const marker = state.gemini?.review?.markers?.find(item => item.id === id);
+  const geminiNote = marker ? `<p class="gemini-room-note"><b>Gemini:</b> ${marker.count} ملاحظة ${marker.severity === 'critical' ? 'حرجة' : marker.severity === 'major' ? 'مهمة' : 'استرشادية'} مرتبطة بهذا الفراغ.</p>` : '';
+  $('roomInspector').innerHTML = `<div><b>${esc(r.name)}</b><p>${POSITIONS[r.position]} · ${SIDES[r.resolvedSide]}</p></div><div class="numbers"><span>${fmt(r.area)} م² صافي</span><span>${fmt(r.w, 2)} × ${fmt(r.h, 2)} م</span></div>${geminiNote}`;
   syncRoomEditor(r);
   drawRoute();
 }
@@ -229,12 +232,61 @@ function editPlanAtPoint(action) {
 function showResults() {
   const m = state.model; $('out').style.display = 'block';
   refreshEngineering();
+  refreshGemini();
   circulation = circulationNetwork(m);
   viewport = new PlanViewport($('plan'), m, selectRoom); syncPlanEditor();
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
-  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderAlternatives(); renderSolarPreview(); void show3D();
+  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderGeminiReview(); renderAlternatives(); renderSolarPreview(); void show3D();
+}
+function refreshGemini() {
+  if (!state.model) { state.gemini = null; return; }
+  try { state.gemini = { review: analyzeGeminiEngineering(state.model), error: null }; }
+  catch (error) { state.gemini = { review: null, error: error instanceof Error ? error.message : 'تعذّرت مراجعة Gemini.' }; }
+}
+function renderGeminiMarkers() {
+  viewport?.showEngineeringMarkers(state.gemini?.review?.markers || [], $('showGemini')?.checked !== false);
+}
+function renderGeminiReview() {
+  const lens = $('geminiLens'), result = state.gemini;
+  if (!lens) return;
+  lens.hidden = !result;
+  if (!result?.review) {
+    $('geminiState').textContent = 'تعذّر التشغيل';
+    $('geminiSummary').textContent = result?.error || 'ولّد مخططًا صالحًا لبدء قراءة Gemini.';
+    $('geminiMetrics').replaceChildren(); $('geminiPatterns').textContent = '—';
+    $('geminiFindings').innerHTML = '<li>لا تتوفر نتائج قابلة للعرض.</li>';
+    $('geminiCoverage').textContent = 'لم تبدأ المراجعة.';
+    renderGeminiMarkers();
+    return;
+  }
+  const review = result.review, metrics = review.coordination.summaryMetrics;
+  const stateLabel = {
+    COORDINATION_PASSED: 'قراءة أولية نظيفة',
+    PASSED_WITH_ADVISORIES: 'ملاحظات استرشادية',
+    CHANGES_REQUIRED: 'تعديلات مقترحة',
+    CRITICAL_BLOCKERS_FOUND: 'عوائق تحتاج مراجعة'
+  }[review.coordination.status] || 'مراجعة أولية';
+  $('geminiState').textContent = stateLabel;
+  $('geminiState').dataset.state = review.coordination.status;
+  $('geminiSummary').textContent = `${metrics.totalFindingsCount} ملاحظة · ${metrics.totalClashesCount} تعارض · ${fmt(review.math.areaUtilizationRatio * 100, 0)}٪ استفادة صافية من الكتلة.`;
+  const metricCards = [
+    ['فحص الفراغات', review.coordination.architecturalReview.evaluatedChecksCount, 'فحص هندسي معماري'],
+    ['التعارضات', metrics.totalClashesCount, 'تقاطعات بين التخصصات المتاحة'],
+    ['حمل كهربائي', `${fmt(review.coordination.electricalCoordination.estimatedTotalConnectedKVA, 1)} kVA`, 'مؤشر أولي لاختيار الأحمال'],
+    ['تكييف مبدئي', `${fmt(review.coordination.hvacCoordination.totalEstimatedTonsRefrigeration, 1)} TR`, 'تقدير مساحة مكيّفة فقط']
+  ];
+  $('geminiMetrics').innerHTML = metricCards.map(([label, value, note]) => `<div class="gemini-metric"><span>${esc(label)}</span><b>${esc(value)}</b><small>${esc(note)}</small></div>`).join('');
+  const patterns = review.intelligence.candidateStrategies.slice(0, 3).map(pattern => pattern.name).filter(Boolean);
+  $('geminiPatterns').textContent = patterns.length ? patterns.join(' · ') : 'لا يوجد نمط مرشح ضمن المدخلات الحالية.';
+  const findings = review.findings.slice(0, 5);
+  $('geminiFindings').innerHTML = findings.length
+    ? findings.map(item => `<li class="gemini-${String(item.severity).toLowerCase()}"><b>${esc(item.title)}</b><span>${esc(item.description)}</span>${item.suggestion ? `<small>المقترح: ${esc(item.suggestion)}</small>` : ''}</li>`).join('')
+    : '<li class="gemini-clean"><b>لا توجد ملاحظات مرتبطة بالبيانات المتاحة.</b><span>تبقى الأنظمة الإنشائية والكهربائية والسباكة الفعلية خارج نطاق هذا المخطط.</span></li>';
+  const unavailable = Object.entries(review.coverage).filter(([, value]) => value !== 'EVALUATED').map(([key]) => key);
+  $('geminiCoverage').textContent = unavailable.length ? `المتاح في الرسم تم تقييمه. غير متاح بعد: ${unavailable.join('، ')}.` : 'اكتملت التغطية المتاحة من المخطط.';
+  renderGeminiMarkers();
 }
 function refreshEngineering() {
   if (!state.model || !state.alternatives.length) { state.engineering = null; state.engineeringSignature = ''; return; }
@@ -584,7 +636,7 @@ function boot() {
   });
   $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
-  $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview);
+  $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview); $('showGemini').addEventListener('change', renderGeminiMarkers);
   $('saveProject').addEventListener('click', saveProject);
   $('loadProject').addEventListener('click', () => { if (!$('gen').disabled) $('projectFile').click(); });
   $('projectFile').addEventListener('change', async () => { const file = $('projectFile').files[0]; $('projectFile').value = ''; await importProject(file); });
