@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+dist/server/
+dist/.openai/
+.sites-runtime/
+node_modules/

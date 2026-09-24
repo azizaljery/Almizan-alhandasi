@@ -1,0 +1,137 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الميزان الهندسي</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23C6A15B' stroke-width='4'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>:root{--b:#0a0a0a;--n:#0b132b;--g:#c6a15b;--i:#f6f1e7;--m:#9aa8bd;--c:#4fd8d0;--br:rgba(198,161,91,.22);--ok:#5ee6a8;--d:#ff6b6b}*{box-sizing:border-box;margin:0}body{font-family:'IBM Plex Sans Arabic',sans-serif;color:var(--i);background:var(--b);line-height:1.65}button,input,select{font:inherit;color:inherit}button{cursor:pointer} .serif,h1,h2{font-family:'Aref Ruqaa',serif}.intro{position:fixed;inset:0;z-index:9;display:grid;place-items:center;text-align:center;overflow:hidden;background:#0a0a0a;transition:1s}.intro.off{opacity:0;visibility:hidden}.glow{position:absolute;width:80vw;height:80vw;right:-30%;top:-30%;filter:blur(80px);background:radial-gradient(circle,rgba(198,161,91,.4),rgba(198,161,91,.07) 45%,transparent 70%)}.intro>*:not(.glow){position:relative}.mark,.logo{display:grid;place-items:center;background:linear-gradient(145deg,var(--g),#8a6423);box-shadow:0 0 70px rgba(198,161,91,.5)}.mark{width:80px;height:80px;border-radius:22px;margin:auto auto 25px;font-size:40px}.intro h1{font-size:clamp(2.6rem,8vw,5.4rem);text-shadow:0 0 45px rgba(198,161,91,.4)}.line{height:1px;width:240px;margin:28px auto;background:linear-gradient(90deg,transparent,var(--g),transparent)}.intro p{font-size:clamp(1rem,2vw,1.4rem);font-weight:300}.intro button{margin-top:45px;padding:14px 48px;background:none;border:1px solid var(--g);border-radius:5px;color:var(--g)}.foot{position:absolute;bottom:28px;letter-spacing:5px;font-size:.7rem;color:#888}.journey{min-height:100vh;display:grid;place-items:center;padding:70px 24px;background:radial-gradient(circle at 80% 15%,rgba(198,161,91,.13),transparent 55%),radial-gradient(circle at 15% 85%,rgba(79,216,208,.08),transparent 55%)}.journey>div,.wrap{width:min(1120px,100%);margin:auto}.head{text-align:center;margin-bottom:45px}.ey{font-size:.72rem;letter-spacing:7px;color:var(--g);font-weight:800}.head h1{font-size:clamp(2.3rem,6vw,4rem);margin:8px 0;background:linear-gradient(105deg,var(--g),#f4dfa8,#4fd8d0);-webkit-background-clip:text;color:transparent}.head p{color:var(--m)}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.journey button{min-height:260px;padding:34px 26px;text-align:right;border-radius:21px;border:1px solid var(--br);background:linear-gradient(160deg,#162038,#0b111c);color:var(--i);transition:.25s}.journey button:hover{transform:translateY(-7px);border-color:var(--g)}.icon{display:grid;place-items:center;width:62px;height:62px;border:1px solid var(--br);border-radius:16px;background:rgba(198,161,91,.14);font-size:30px;margin-bottom:16px}.journey h2{font-size:1.5rem}.journey p{color:var(--m);margin-top:8px}.link{display:block;margin-top:18px;color:var(--g);font-weight:700}.app{display:none;min-height:100vh;background:var(--n)}.app.show{display:block}.top{position:sticky;top:0;z-index:2;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 22px;background:rgba(5,8,15,.96);border-bottom:1px solid var(--br)}.brand{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:right}.logo{width:40px;height:40px;border-radius:12px;font-size:20px}.brand h2{font-size:1.15rem}.brand small{display:block;color:var(--m);font-size:.55rem;letter-spacing:3px}.tabs{display:flex;gap:4px;padding:4px;border:1px solid var(--br);border-radius:13px}.tab,.back{border:0;border-radius:9px;padding:9px 15px;background:none;color:var(--m);font-weight:700}.tab.on{background:linear-gradient(145deg,var(--g),#a8823e);color:#101010}.back{border:1px solid var(--br)}.panel{display:none}.panel.on{display:block}.wrap{padding:42px 22px 80px}.card{overflow:hidden;border:1px solid var(--br);border-radius:19px;background:linear-gradient(160deg,rgba(22,31,48,.8),rgba(14,20,33,.65));margin:20px 0}.ch{display:flex;gap:13px;align-items:center;padding:18px 24px;border-bottom:1px solid var(--br);background:linear-gradient(90deg,rgba(198,161,91,.07),transparent)}.num{display:grid;place-items:center;flex:0 0 33px;height:33px;border-radius:10px;background:var(--g);color:#111;font-weight:900}.ch h2{font-family:inherit;font-size:1.05rem}.ch p{font-size:.75rem;color:var(--m)}.cb{padding:24px}.g2,.g3,.g4,.choices{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4,.choices{grid-template-columns:repeat(4,1fr)}label{display:grid;gap:7px;color:var(--m);font-size:.8rem;font-weight:700}input,select{padding:13px 14px;border:1px solid var(--br);border-radius:11px;background:#09101d;color:var(--i)}.area{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding:16px 19px;border:1px solid var(--br);border-radius:13px;background:rgba(198,161,91,.08);color:var(--m)}.area b{font-size:1.8rem;color:var(--g)}.street,.choice{padding:15px;border:1px solid var(--br);border-radius:14px;background:rgba(255,255,255,.02);color:var(--i);text-align:right}.street.on{border-color:var(--c);background:rgba(79,216,208,.08)}.dot{display:inline-block;width:9px;height:9px;margin-left:8px;border-radius:50%;background:#657}.street.on .dot{background:var(--c);box-shadow:0 0 10px var(--c)}.street small,.choice small{display:block;color:var(--m);font-size:.7rem}.choice{text-align:center;cursor:pointer}.choice.on{border-color:var(--g);background:rgba(198,161,91,.1)}.choice svg{width:100%;height:42px}.rating{display:flex;gap:28px;align-items:center;flex-wrap:wrap}.grade{display:grid;place-items:center;width:125px;height:125px;border-radius:26px;background:linear-gradient(145deg,var(--g),#8a6423);color:#111;font-size:4.8rem}.grade[data-g=A]{background:linear-gradient(145deg,#5ee6a8,#2b8a5c)}.grade[data-g=B]{background:linear-gradient(145deg,#7ed957,#4a8020)}.grade[data-g=D]{background:linear-gradient(145deg,#ffb84d,#a87418)}.grade[data-g=F]{background:linear-gradient(145deg,#ff6b6b,#8a2020);color:#fff}.ri{flex:1;min-width:240px}.ri h2{color:var(--g);font-size:1.5rem}.ri p{color:var(--m);font-size:.85rem}.bar{display:grid;grid-template-columns:100px 1fr 35px;gap:10px;align-items:center;margin-top:9px;color:var(--m);font-size:.77rem}.track{height:7px;border-radius:6px;background:#ffffff12}.fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--g),var(--c))}.bar b{color:var(--g);text-align:left}.primary,.secondary{width:100%;padding:18px;border-radius:15px;margin-top:20px;font-weight:800}.primary{border:0;color:#111;background:linear-gradient(100deg,var(--g),#f4dfa8,var(--c))}.secondary{border:1px solid var(--br);background:#ffffff08}.out{display:none}.plan{padding:16px;border:1px solid var(--br);border-radius:15px;background:#08101e}.plan svg{display:block;width:100%}.view{position:relative;height:500px;border:1px solid var(--br);border-radius:15px;overflow:hidden;background:#0a0f18}.note{position:absolute;top:13px;left:13px;padding:6px 10px;border-radius:8px;background:#ffb84d22;color:#ffb84d;font-size:.7rem}.ctrl{position:absolute;bottom:13px;left:50%;transform:translateX(-50%);padding:5px;border:1px solid var(--br);border-radius:10px;background:#09101dee}.ctrl button{border:0;background:none;color:var(--m);padding:7px 11px}.ctrl button.on{border-radius:7px;background:var(--g);color:#111}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.kpi{padding:17px;border:1px solid var(--br);border-radius:15px;background:#101a30}.kpi span{display:block;color:var(--m);font-size:.7rem}.kpi b{font-size:1.45rem;color:var(--g)}.kpi.c b{color:var(--c)}.kpi.o b{color:var(--ok)}.kpi.d b{color:var(--d)}table{width:100%;border-collapse:collapse;margin-top:20px;overflow:hidden;border:1px solid var(--br);border-radius:15px;background:#101a30}th,td{padding:13px 15px;border-bottom:1px solid #ffffff10;text-align:right}th{font-size:.75rem;color:var(--g);background:#c6a15b14}.n{text-align:left}.final td{background:#5ee6a818;color:var(--ok);font-weight:900}@media(max-width:800px){.cards{grid-template-columns:1fr}.top{flex-wrap:wrap}.tabs{order:3;width:100%;overflow:auto}.tab{white-space:nowrap}.g3,.g4,.choices{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.view{height:380px}.wrap{padding:28px 14px 60px}}@media(max-width:460px){.g2{grid-template-columns:1fr}.brand small{display:none}.back{padding:7px}}</style><link rel="stylesheet" href="./planner.css"><meta name="description" content="الميزان الهندسي: من متطلبات منزلك إلى مخطط تصوري قابل للمراجعة، وعرض داخلي ثلاثي الأبعاد وكميات أولية."></head>
+<body><section class="intro" id="intro"><i class="glow"></i><div><div class="mark">⚖️</div><h1>الميزان الهندسي</h1><div class="line"></div><p>منزلي بفكري وإحساسي.</p><button id="enter">اكتشف</button></div><small class="foot">AL-MIZAN AL-HANDASI · 2026</small></section>
+<main class="journey" id="journey"><div><header class="head"><span class="ey">AL-MIZAN AL-HANDASI</span><h1>رحلة التصميم</h1><p>ثلاث خطوات… من الفكرة إلى تصور قابل للمراجعة.</p></header><div class="cards"><button data-go="rating"><span class="icon">📐</span><h2>تقييم الأرض</h2><p>أدخل أبعاد أرضك وشوارعها لتعرف استغلالها المبدئي.</p><span class="link">ابدأ التقييم ←</span></button><button data-go="design"><span class="icon">🏛️</span><h2>التصميم الذكي</h2><p>حدّد غرفك ومساحاتها، ثم استكشف مخطط 2D والغرف في 3D.</p><span class="link">ولّد التصميم ←</span></button><button data-go="boq"><span class="icon">📊</span><h2>الكميات والتكاليف</h2><p>كميات مرتبطة بالمخطط، وأسعار تدخلها أنت لحساب تقدير أولي.</p><span class="link">احسب الكميات ←</span></button></div></div></main>
+<main class="app" id="app"><nav class="top"><button class="brand" id="home"><i class="logo">⚖️</i><span><h2>الميزان الهندسي</h2><small>AL-MIZAN AL-HANDASI</small></span></button><div class="tabs"><button class="tab" data-tab="rating">📐 التقييم</button><button class="tab" data-tab="design">🏛️ التصميم</button><button class="tab" data-tab="boq">📊 الكميات</button></div><button class="back" id="back">↩ البوابة</button></nav>
+
+<section class="panel" id="panel-rating" aria-label="تقييم الأرض">
+  <div class="wrap">
+    <header class="head"><span class="ey">الخطوة الأولى</span><h1>الأرض… بداية الحكاية</h1><p>أبعاد واضحة ومدخل معروف، لتبدأ من أساس مفهوم.</p></header>
+    <article class="card"><header class="ch"><b class="num">١</b><div><h2>أرضك واتجاه الدخول</h2><p>الشمال أعلى الرسم؛ اليسار واليمين كما تراهما وأنت تدخل المنزل.</p></div></header>
+      <div class="cb">
+        <div class="g3">
+          <label>الطول — شمال / جنوب (م)<input id="len" type="number" value="30" min="8" max="100" step=".5" required></label>
+          <label>العرض — شرق / غرب (م)<input id="wid" type="number" value="20" min="8" max="100" step=".5" required></label>
+          <label>جهة المدخل الرئيسي<select id="entry"></select></label>
+        </div>
+        <div class="area"><span>المساحة الإجمالية للأرض</span><b id="area">600 م²</b></div>
+        <h3 class="subhead">الشوارع المحيطة</h3><div class="g4" id="streets"></div>
+        <p class="help">فعّل جهة الشارع، ثم اختر منها المدخل. عرض الشارع غير محسوب في هذه النسخة.</p>
+      </div>
+    </article>
+    <article class="card"><header class="ch"><b class="num">٢</b><div><h2>افتراضات التخطيط</h2><p>قيم قابلة للتعديل، وليست اشتراطات بلدية معتمدة.</p></div></header>
+      <div class="cb"><div class="g3">
+        <label>ارتداد جهة الشارع (م)<input id="streetSetback" type="number" min="0" max="15" step=".1" value="3"></label>
+        <label>ارتداد جهة الجار (م)<input id="neighborSetback" type="number" min="0" max="15" step=".1" value="1.5"></label>
+        <label>سقف نسبة البناء المفترض (%)<input id="coverage" type="number" min="10" max="90" step="1" value="75"></label>
+      </div><p class="help">تحقّق من اشتراطات موقع أرضك مع المختص. هذه الأداة لا تمنح اعتمادًا أو ضمانًا للسلامة الإنشائية.</p></div>
+    </article>
+    <article class="card"><header class="ch"><b class="num">٣</b><div><h2>مؤشر تخطيطي أولي</h2><p>يساعد على المقارنة، ولا يقيّم قيمة الأرض أو صلاحيتها للبناء.</p></div></header>
+      <div class="cb"><div class="rating"><div class="grade" id="grade">—</div><div class="ri"><h2 id="rt">— / 100</h2><p id="ratingHelp">مؤشر حسابي مبسّط؛ ليس دراسة فعلية للشمس أو الخصوصية.</p><div id="bars"></div></div></div></div>
+    </article>
+    <p id="plotError" class="message error" role="alert" hidden></p>
+    <button class="primary" data-next="design">التالي: حدّد غرف منزلك ←</button>
+  </div>
+</section>
+
+<section class="panel" id="panel-design" aria-label="تصميم المنزل">
+  <div class="wrap">
+    <header class="head"><span class="ey">الخطوة الثانية</span><h1>كل غرفة… على فكرتك</h1><p>راجع المساحات والمواقع، ثم شاهدها في مخطط واحد وعرض داخلي.</p></header>
+    <div class="scope-note">هذه النسخة تصمّم <strong>دورًا أرضيًا بكتلة مستطيلة ومدخل واحد</strong>. الأدوار الأخرى، L وU والأفنية والمداخل المستقلة ليست منفّذة.</div>
+
+    <article class="card"><header class="ch"><b class="num">✦</b><div><h2>صف فكرة منزلك</h2><p id="aiStatus">الذكاء الاصطناعي مفعّل لتحليل المتطلبات؛ التوليد الهندسي يبقى محليًا بعد مراجعتك.</p></div><span class="pill">AI + محلي</span></header>
+      <div class="cb">
+        <label for="idea">وصفك بالعربية<textarea id="idea" rows="3" maxlength="4000" placeholder="مثال: مجلس أمامي يمين بمساحة 32 م²، وصالة وسط المنزل، وثلاث غرف نوم في الخلف…"></textarea></label>
+        <button class="secondary" id="askAI" aria-disabled="false">حلّل فكرتي بالذكاء الاصطناعي</button>
+        <p class="help">يُرسل وصفك إلى خدمة الذكاء الآمنة لاستخراج متطلبات قابلة للمراجعة. لا يتغيّر المخطط حتى توافق على الاقتراح ثم تضغط «ولّد». لا تضع مفتاح API هنا.</p>
+        <div id="aiFeedback" class="message" role="status" hidden></div>
+        <div id="aiReview" hidden><h3>اقتراح للمراجعة</h3><p id="aiSummary"></p><ul id="aiNotes"></ul><button class="secondary" id="acceptAI">نقل الاقتراح إلى جدول المراجعة</button></div>
+      </div>
+    </article>
+
+    <article class="card"><header class="ch"><b class="num">١</b><div><h2>ابدأ ببرنامج مساحات</h2><p>الأعداد تُنشئ قائمة أولية؛ الجدول بعدها هو المرجع الفعلي للتوليد.</p></div></header>
+      <div class="cb">
+        <div class="g3">
+          <label>غرف النوم<input id="beds" type="number" value="4" min="0" max="10"></label>
+          <label>المجالس<input id="majlis" type="number" value="2" min="0" max="10"></label>
+          <label>دورات المياه<input id="baths" type="number" value="3" min="0" max="10"></label>
+          <label>المطابخ<input id="kitchens" type="number" value="1" min="0" max="10"></label>
+          <label>الصالات العائلية<input id="halls" type="number" value="1" min="0" max="10"></label>
+          <label>غرف الطعام<input id="dining" type="number" value="1" min="0" max="10"></label>
+        </div>
+        <button id="applyCounts" class="secondary">تحديث الجدول من الأعداد</button>
+        <div class="g2 separate">
+          <label>عدد الأدوار الذي تفكّر فيه<select id="floors"><option value="1">دور واحد</option><option value="2" selected>دوران — الأرضي فقط معروض</option><option value="3">ثلاثة أدوار — الأرضي فقط معروض</option></select></label>
+          <p class="help">اختيار أكثر من دور لا يكرر الغرف أو الكميات. الممر الرئيسي 1.6 م، والفرعي 1.2 م؛ افتراضات تخطيطية لا تعني تحقق الوصول الشامل.</p>
+        </div>
+        <h3 class="subhead">طابع ألوان الخامات</h3>
+        <div class="choices" id="styles">
+          <button class="choice on" data-v="resort" aria-pressed="true"><i class="swatch resort"></i><b>منتجع</b><small>درجات رملية</small></button>
+          <button class="choice" data-v="modern" aria-pressed="false"><i class="swatch modern"></i><b>مودرن</b><small>أبيض هادئ</small></button>
+          <button class="choice" data-v="classic" aria-pressed="false"><i class="swatch classic"></i><b>كلاسيكي</b><small>عاجي دافئ</small></button>
+          <button class="choice" data-v="hijazi" aria-pressed="false"><i class="swatch hijazi"></i><b>حجازي</b><small>لون ترابي</small></button>
+        </div>
+        <p class="help">الطابع هنا يغيّر الألوان فقط، ولا ينشئ زخارف أو رواشين أو أفنية.</p>
+      </div>
+    </article>
+
+    <article class="card"><header class="ch"><b class="num">٢</b><div><h2>راجع غرفك قبل التوليد</h2><p>كل سطر غرفة واحدة؛ لن تُحذف غرفة أو تُصغّر مساحتها لتناسب الأرض.</p></div></header>
+      <div class="cb">
+        <p class="program-total" id="programTotal" role="status"></p>
+        <div class="table-scroll" tabindex="0" aria-label="جدول الغرف؛ يمكن تمريره أفقياً"><table class="program-table"><caption>الفراغات المطلوبة للدور الأرضي</caption><thead><tr><th scope="col">الاسم</th><th scope="col">النوع</th><th scope="col">المساحة الصافية م²</th><th scope="col">الموقع</th><th scope="col">الجانب من المدخل</th><th scope="col">تعديل</th></tr></thead><tbody id="roomRows"></tbody></table></div>
+        <div class="inline-actions"><label>فراغ إضافي<select id="addType"></select></label><button id="addRoom" class="small-button">＋ أضف إلى الجدول</button><button id="undo" class="small-button" disabled>↶ استرجع التوليد السابق</button></div>
+        <p class="help">المساحة المطلوبة محفوظة، لكن طول الغرفة وعرضها يحددهما المحرك. المواقع أمام / وسط / خلف بالنسبة للمدخل. بعض الغرف الداخلية قد تحتاج حل تهوية يراجعه المختص.</p>
+        <button class="primary" id="gen">ولّد مخطط منزلي ✦</button>
+        <p id="generationError" class="message error" role="alert" hidden></p>
+      </div>
+    </article>
+
+    <div class="out" id="out">
+      <div class="result-head"><div><span class="ey">تصور قابل للمراجعة</span><h2>من فكرتك… إلى مساحة تراها</h2></div><span class="pill" id="resultState">محدّث</span></div>
+      <p class="message warning stale-message" hidden>تغيّرت المتطلبات. هذا هو آخر مخطط ناجح؛ اضغط «ولّد» لتحديثه والكميات.</p>
+      <article class="card"><header class="ch"><b class="num">2D</b><div><h2>المخطط الأرضي</h2><p>اسحب للتحريك، وكبّر بإصبعين أو العجلة. اختر الغرفة لعرض تفاصيلها.</p></div></header>
+        <div class="cb">
+          <div class="viewer-tools" role="group" aria-label="أدوات المخطط"><button class="small-button" id="zoomIn" aria-label="تكبير المخطط">＋</button><button class="small-button" id="zoomOut" aria-label="تصغير المخطط">−</button><button class="small-button" id="fitPlan">ملاءمة المبنى</button><button class="small-button" id="fitPlot">حدود الأرض</button></div>
+          <div class="plan" id="plan"></div>
+          <div class="plan-key"><span><i style="background:#f3e6c8"></i>استقبال</span><span><i style="background:#dceee7"></i>معيشة</span><span><i style="background:#e4e7f2"></i>نوم</span><span><i style="background:#dcebf2"></i>خدمات</span><span><i style="background:#faf7e9"></i>ممرات</span><span><i style="background:#e2e2df"></i>غير موزّع</span></div>
+          <div class="room-inspector" id="roomInspector" role="status"><p>اختر غرفة من المخطط أو من القائمة أدناه.</p></div>
+          <div class="inline-actions"><label>انتقل مباشرة إلى غرفة<select id="roomSelect"></select></label><button class="small-button" id="focusRoom">ركّز عليها في 2D</button><button class="small-button" id="enterRoom">ادخل الغرفة في 3D</button></div>
+          <p class="help">الأثاث رموز توضيحية فقط، وليس توزيع تأثيث معتمدًا أو بندًا في الكميات.</p>
+        </div>
+      </article>
+      <article class="card"><header class="ch"><b class="num">3D</b><div><h2>استكشف من الداخل</h2><p>الجدران والفتحات نفسها في مخطط 2D، وليست صناديق غرف مصمتة.</p></div></header>
+        <div class="cb">
+          <div class="viewer-tools"><button class="small-button" data-view="persp">منظور</button><button class="small-button" data-view="top">علوي</button><button class="small-button" data-view="front">أمامي</button><label class="check"><input id="roof" type="checkbox"> إظهار السقف</label></div>
+          <div class="view" id="view"><div class="view-label" id="viewMode">منظور خارجي — السقف مخفي لرؤية الغرف</div></div>
+          <div class="message error" id="threeError" role="status" hidden></div><button class="small-button" id="retry3D" hidden>أعد محاولة تحميل العرض</button>
+          <div id="walkControls" hidden><p class="help">داخل الغرفة: اسحب للنظر حولك، واستخدم الأسهم / WASD أو الأزرار. تمنع الحركة عبور الجدران؛ الأبواب معروضة مفتوحة.</p><div class="walk-buttons" role="group" aria-label="الحركة داخل الغرفة"><button class="small-button" data-move="forward">للأمام ↑</button><button class="small-button" data-move="left">يسار ←</button><button class="small-button" data-move="right">يمين →</button><button class="small-button" data-move="back">للخلف ↓</button><button class="small-button" data-view="persp">اخرج للمنظور</button></div></div>
+        </div>
+      </article>
+      <details class="review-notes engineering-review" id="engineeringReview" open hidden><summary>المراجعة الهندسية المبدئية — Gemini</summary><p id="engineeringSummary" class="engineering-summary"></p><ul id="engineeringHighlights"></ul><p id="engineeringLimitations" class="engineering-limitations"></p></details>
+      <details class="review-notes" open><summary>ملاحظات الحل وما يحتاج مراجعة</summary><ul id="modelWarnings"></ul></details>
+      <button class="primary" data-next="boq">التالي: كميات هذا المخطط ←</button>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="panel-boq" aria-label="الكميات">
+  <div class="wrap">
+    <header class="head"><span class="ey">الخطوة الثالثة</span><h1>كميات من مخططك</h1><p>حصر تصوري للدور الأرضي فقط. أدخل أسعارك لتكوين تقدير جزئي.</p></header>
+    <div id="boqEmpty" class="scope-note">ولّد مخططًا أولًا، ثم تظهر كمياته هنا. لا توجد كميات لمبنى لم يُرسم.<button class="secondary" data-next="design">انتقل إلى التصميم</button></div>
+    <div id="boqOutput" hidden>
+      <p class="message warning stale-message" hidden>تغيّرت المتطلبات. الكميات أدناه تخص آخر مخطط ناجح، وليست التعديلات الجديدة.</p>
+      <div class="kpis" id="kpis"></div>
+      <div class="scope-note">هذا ليس عرض سعر أو جدول كميات تنفيذيًا. لا يشمل الأساسات والتسليح والأسقف الإنشائية والكهرباء والسباكة والتكييف أو الأثاث. لا نحسب الحديد من مساحة الجدران.</div>
+      <div class="table-scroll" tabindex="0" aria-label="جدول الكميات والأسعار"><table id="mat"><caption>كميات أولية — أسعار الوحدة تُدخل يدويًا بالريال</caption></table></div>
+      <div class="g2 separate"><label>احتياط حسابي على البنود المسعّرة (%)<input id="costReserve" type="number" min="0" max="50" step=".5" value="7"></label><label>نسبة الضريبة المفترضة (%)<input id="vat" type="number" min="0" max="30" step=".5" value="15"></label></div>
+      <p class="help">الاحتياط يضاف إلى التكلفة ولا يغيّر الكميات. الضريبة افتراض قابل للتعديل، لا فتوى ضريبية. مساحة التشطيبات لوجهي الجدران؛ حصر تقريبي دون خصم تقاطعاتها أو حساب أكتاف الفتحات.</p>
+      <table id="tot"><caption>ملخص البنود المسعّرة فقط</caption></table>
+    </div>
+    <button class="secondary" data-next="rating">↩ عدّل الأرض والافتراضات</button><button class="secondary" data-next="design">↩ عدّل برنامج الغرف</button>
+  </div>
+</section>
+<footer class="app-footer">الميزان الهندسي · تصور تصميمي غير تنفيذي · محرك محلي للدور الأرضي</footer>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="./app.mjs"></script>
+</body></html>
