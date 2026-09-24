@@ -193,3 +193,103 @@ export function normalizeRooms(raw) {
   if (!Array.isArray(raw) || !raw.length || raw.length > 30) throw Error('البرنامج يحتاج من 1 إلى 30 فراغاً.');
   return raw.map((r, i) => {
     if (!r || typeof r.name !== 'string' || !r.name.trim() || r.name.length > 70 || !Object.hasOwn(TYPES, r.type) || !Number.isFinite(r.area) || r.area < 4 || r.area > 120 || !Object.hasOwn(POSITIONS, r.position) || !Object.hasOwn(SIDES, r.side)) throw Error('راجع اسم ونوع ومساحة وموقع الفراغ رقم ' + (i + 1) + '؛ المساحة بين 4 و120 م².');
+    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side };
+  });
+}
+/** @param {{ bedrooms?: number, majlis?: number, baths?: number, kitchens?: number, halls?: number, dining?: number }} [counts] @returns {RoomRequest[]} */
+export function defaultRooms({ bedrooms = 4, majlis = 2, baths = 3, kitchens = 1, halls = 1, dining = 1 } = {}) {
+  /** @type {RoomRequest[]} */
+  const result = [];
+  /** @param {RoomType} type @param {number} count @param {Position} position */
+  const add = (type, count, position) => {
+    if (!Number.isInteger(count) || count < 0 || count > 10) throw Error('أعداد الفراغات يجب أن تكون أعداداً صحيحة بين 0 و10.');
+    for (let i = 0; i < count; i++) result.push({ name: TYPES[type].name + (count > 1 ? ' ' + (i + 1) : ''), type, area: TYPES[type].area, position, side: type === 'majlis' && count === 2 ? (i ? 'right' : 'left') : 'any' });
+  };
+  add('majlis', majlis, 'front'); add('living', halls, 'middle'); add('dining', dining, 'middle'); add('kitchen', kitchens, 'middle'); add('bedroom', bedrooms, 'back');
+  add('bath', baths, 'back');
+  if (baths) result[result.length - baths].position = 'middle';
+  return result;
+}
+
+// ── packWing: partition a set of rooms into full-width rows within ONE rectangular wing.
+// Unchanged core algorithm — this is the proven part. Small rooms share a row with a cross passage.
+// A bounded search can reject a program it cannot fit; this is not a proof of impossibility.
+/** @param {ProgramRoom[]} rooms @param {number} width @returns {Packed | null} */
+function packWing(rooms, width) {
+  if (!rooms.length) return { rows: [], height: 0 };
+  /** @type {Map<string, ScoredPacked | null>} */
+  const memo = new Map(); let visits = 0;
+  /** @param {ProgramRoom[]} list @returns {ScoredPacked | null} */
+  function solve(list) {
+    if (!list.length) return { rows: [], height: 0, score: 0 };
+    const key = list.map(r => r.id).sort().join(',');
+    if (memo.has(key)) return /** @type {ScoredPacked | null} */ (memo.get(key));
+    if (++visits > 1800) return null;
+    const first = [...list].sort((a, b) => a.area - b.area)[0], other = list.filter(r => r !== first);
+    const groups = [[first]];
+    other.forEach((r, i) => { groups.push([first, r]); other.slice(i + 1).forEach(s => groups.push([first, r, s])); });
+    /** @type {ScoredPacked | null} */
+    let best = null;
+    for (const group of groups) {
+      const depth = sum(group, r => r.area) / (width - T * (group.length - 1));
+      if (group.some(r => depth < TYPES[r.type].min - E || r.area / depth < TYPES[r.type].min - E || Math.max(depth * depth / r.area, r.area / (depth * depth)) > 5)) continue;
+      const rest = solve(list.filter(r => !group.includes(r)));
+      if (!rest) continue;
+      const branch = group.length > 1 ? GEOMETRY.branch + T : 0;
+      const height = depth + branch + (rest.rows.length ? T : 0) + rest.height;
+      const aspectPenalty = sum(group, r => Math.abs(Math.log((r.area / depth) / depth))) * .035;
+      const score = height + rest.score - rest.height + aspectPenalty;
+      if (!best || score < best.score) best = { rows: [{ rooms: group, depth, branch }, ...rest.rows], height, score };
+    }
+    memo.set(key, best); return best;
+  }
+  return solve(rooms);
+}
+/** @param {ProgramRoom[]} rooms @param {number} width @returns {ZonePair | null} */
+function packZone(rooms, width) {
+  let states = [{ left: rooms.filter(r => r.side === 'left'), right: rooms.filter(r => r.side === 'right') }];
+  for (const r of rooms.filter(r => r.side === 'any').sort((a, b) => b.area - a.area)) {
+    states = states.flatMap(s => [{ left: [...s.left, r], right: s.right }, { left: s.left, right: [...s.right, r] }]);
+    states.sort((a, b) => Math.abs(sum(a.left, r => r.area) - sum(a.right, r => r.area)) - Math.abs(sum(b.left, r => r.area) - sum(b.right, r => r.area)));
+    states = states.slice(0, 48);
+  }
+  /** @type {Map<string, Packed | null>} */
+  const cache = new Map();
+  /** @param {ProgramRoom[]} list */
+  const pack = list => { const key = list.map(r => r.id).sort().join(','); if (!cache.has(key)) cache.set(key, packWing(list, width)); return cache.get(key); };
+  /** @type {ZonePair | null} */
+  let best = null;
+  for (const s of states) {
+    const left = pack(s.left), right = pack(s.right);
+    if (!left || !right) continue;
+    const height = Math.max(left.height, right.height);
+    const score = height + Math.abs(left.height - right.height) * .02;
+    if (!best || score < best.score) best = { left, right, height, score };
+  }
+  return best;
+}
+
+// ── Build ONE rectangular wing's full geometry (rooms, corridors, reserves) inside a local
+// axis-aligned box, given a two-sided packZone result. Reusable for rect / each arm of L / each arm of U.
+/** @param {ZoneSet} zone @param {WingBox} wingBox @returns {WingGeometry} */
+function buildWingGeometry(zone, wingBox) {
+  const { x: ox, y: oy, w: width } = wingBox;
+  const wing = (width - X * 2 - T * 2 - GEOMETRY.corridor) / 2;
+  // The single rectangle arm ('a') keeps the original v1 ids ('spine', 'branch-<pos>-<side>-<row>')
+  // so existing UI/tests that reference them keep working; multi-arm shapes prefix the arm id.
+  const spineId = wingBox.id === 'a' ? 'spine' : 'spine-' + wingBox.id, branchPrefix = wingBox.id === 'a' ? 'branch-' : 'branch-' + wingBox.id + '-';
+  const rooms = /** @type {Room[]} */ ([]), corridors = /** @type {Corridor[]} */ ([{ id: spineId, name: 'ممر رئيسي', x: ox + X + wing + T, y: oy + X, w: GEOMETRY.corridor, h: wingBox.h - 2 * X }]), reserves = /** @type {Reserve[]} */ ([]), links = /** @type {Link[]} */ ([]);
+  let cursor = oy + X;
+  const active = zone.zones.filter(z => z.height);
+  active.forEach((zoneEntry, zoneIndex) => {
+    for (const side of /** @type {ResolvedSide[]} */ (['left', 'right'])) {
+      const x = side === 'left' ? ox + X : ox + X + wing + 2 * T + GEOMETRY.corridor;
+      let y = cursor;
+      const packed = zoneEntry[side];
+      packed.rows.forEach((row, rowIndex) => {
+        let corridorId = spineId;
+        if (row.branch) {
+          corridorId = branchPrefix + zoneEntry.position + '-' + side + '-' + rowIndex;
+          corridors.push({ id: corridorId, name: 'ممر فرعي', x: side === 'left' ? x : x - T, y, w: wing + T, h: GEOMETRY.branch });
+          links.push([spineId, corridorId]);
+          y += row.branch;
