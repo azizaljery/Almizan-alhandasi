@@ -1,0 +1,402 @@
+$ node --test tests/*.test.mjs
+TAP version 13
+# Subtest: C01 generateAlternatives builds a real U/courtyard model for a plot the old engine could not
+ok 1 - C01 generateAlternatives builds a real U/courtyard model for a plot the old engine could not
+  ---
+  duration_ms: 809.857685
+  type: 'test'
+  ...
+# Subtest: C02 app.mjs field contract: model.architecture.{tag,form,idea,bestFor,tradeoff}, model.strategy, STRATEGIES[strategy]
+ok 2 - C02 app.mjs field contract: model.architecture.{tag,form,idea,bestFor,tradeoff}, model.strategy, STRATEGIES[strategy]
+  ---
+  duration_ms: 130.219249
+  type: 'test'
+  ...
+# Subtest: C03 app.mjs quantities contract: q.footprint/q.rooms/q.circulation/q.reserve/q.doors/q.windows all finite
+ok 3 - C03 app.mjs quantities contract: q.footprint/q.rooms/q.circulation/q.reserve/q.doors/q.windows all finite
+  ---
+  duration_ms: 147.334908
+  type: 'test'
+  ...
+# Subtest: C04 U model exposes massingParts covering every room and corridor, building stays as fallback shape
+ok 4 - C04 U model exposes massingParts covering every room and corridor, building stays as fallback shape
+  ---
+  duration_ms: 117.532207
+  type: 'test'
+  ...
+# Subtest: C05 rect model has no massingParts (matches the live site: plain rect never set it)
+ok 5 - C05 rect model has no massingParts (matches the live site: plain rect never set it)
+  ---
+  duration_ms: 121.883213
+  type: 'test'
+  ...
+# Subtest: C06 U courtyard box is drawable exactly as plan-view.mjs draws it (x,y,w,h, positive, inside building)
+ok 6 - C06 U courtyard box is drawable exactly as plan-view.mjs draws it (x,y,w,h, positive, inside building)
+  ---
+  duration_ms: 615.662647
+  type: 'test'
+  ...
+# Subtest: C07 a plot too tight for U still returns a working rect alternative and named failures, never throws
+ok 7 - C07 a plot too tight for U still returns a working rect alternative and named failures, never throws
+  ---
+  duration_ms: 26.414347
+  type: 'test'
+  ...
+# Subtest: C08 a plot too tight even for a rect throws a single Arabic Error (matches old `if (!models.length) throw`)
+ok 8 - C08 a plot too tight even for a rect throws a single Arabic Error (matches old `if (!models.length) throw`)
+  ---
+  duration_ms: 0.786768
+  type: 'test'
+  ...
+# Subtest: C09 generateAlternatives never mutates its plot or rooms arguments
+ok 9 - C09 generateAlternatives never mutates its plot or rooms arguments
+  ---
+  duration_ms: 129.004868
+  type: 'test'
+  ...
+# Subtest: C10 generateAlternatives is deterministic: same plot+rooms -> identical model list across calls
+ok 10 - C10 generateAlternatives is deterministic: same plot+rooms -> identical model list across calls
+  ---
+  duration_ms: 247.842184
+  type: 'test'
+  ...
+# Subtest: C11 generateModelLegacy: "compact"/"balanced"/"frontage" -> rect; "courtyard"/"u-court" -> u
+ok 11 - C11 generateModelLegacy: "compact"/"balanced"/"frontage" -> rect; "courtyard"/"u-court" -> u
+  ---
+  duration_ms: 117.082751
+  type: 'test'
+  ...
+# Subtest: C12 engineVersion is a NEW string distinct from the legacy "rectangular-2", so old cached/stored models are never confused with new ones
+ok 12 - C12 engineVersion is a NEW string distinct from the legacy "rectangular-2", so old cached/stored models are never confused with new ones
+  ---
+  duration_ms: 110.807516
+  type: 'test'
+  ...
+# Subtest: C13 every produced model still passes v2.2.1 validateModel (bridge only adds fields, never removes/breaks geometry)
+ok 13 - C13 every produced model still passes v2.2.1 validateModel (bridge only adds fields, never removes/breaks geometry)
+  ---
+  duration_ms: 136.940996
+  type: 'test'
+  ...
+# Subtest: H01 courtyard dimensions must be finite and positive
+ok 14 - H01 courtyard dimensions must be finite and positive
+  ---
+  duration_ms: 385.49377
+  type: 'test'
+  ...
+# Subtest: H02 courtyard must match the polygon notch exactly and lie inside the buildable area
+ok 15 - H02 courtyard must match the polygon notch exactly and lie inside the buildable area
+  ---
+  duration_ms: 1239.800285
+  type: 'test'
+  ...
+# Subtest: H03 courtyard count must match the shape: U exactly one, rect and L none
+ok 16 - H03 courtyard count must match the shape: U exactly one, rect and L none
+  ---
+  duration_ms: 482.119872
+  type: 'test'
+  ...
+# Subtest: H04 a room area is checked against the program by id; NaN never passes
+ok 17 - H04 a room area is checked against the program by id; NaN never passes
+  ---
+  duration_ms: 99.189465
+  type: 'test'
+  ...
+# Subtest: H05 the program itself must be well-formed
+ok 18 - H05 the program itself must be well-formed
+  ---
+  duration_ms: 31.903265
+  type: 'test'
+  ...
+# Subtest: H06 footprintDiagnostics reports setbacks, coverage and frontage/depth per entry
+ok 19 - H06 footprintDiagnostics reports setbacks, coverage and frontage/depth per entry
+  ---
+  duration_ms: 0.477147
+  type: 'test'
+  ...
+# Subtest: H07 failures explain entry, setbacks, coverage and frontage/depth; the 8 m plot limit is not raised
+ok 20 - H07 failures explain entry, setbacks, coverage and frontage/depth; the 8 m plot limit is not raised
+  ---
+  duration_ms: 8.678512
+  type: 'test'
+  ...
+# Subtest: H08 importModel upgrades a v2.1.x U model without touching anything else, and never mutates input
+ok 21 - H08 importModel upgrades a v2.1.x U model without touching anything else, and never mutates input
+  ---
+  duration_ms: 718.166701
+  type: 'test'
+  ...
+# Subtest: H09 migration refuses to guess, and importModel still rejects invalid geometry
+ok 22 - H09 migration refuses to guess, and importModel still rejects invalid geometry
+  ---
+  duration_ms: 173.826686
+  type: 'test'
+  ...
+# Subtest: H10 reserved roof states are schema-valid but not computed: quantities and pricing refuse them
+ok 23 - H10 reserved roof states are schema-valid but not computed: quantities and pricing refuse them
+  ---
+  duration_ms: 442.716623
+  type: 'test'
+  ...
+# Subtest: default program preserves all 12 requested rooms and exact clear floor areas
+ok 24 - default program preserves all 12 requested rooms and exact clear floor areas
+  ---
+  duration_ms: 37.689048
+  type: 'test'
+  ...
+# Subtest: same requirements produce the same model; generation does not mutate inputs
+ok 25 - same requirements produce the same model; generation does not mutate inputs
+  ---
+  duration_ms: 28.905434
+  type: 'test'
+  ...
+# Subtest: front/back and fixed left/right rotate consistently for all four entry directions
+ok 26 - front/back and fixed left/right rotate consistently for all four entry directions
+  ---
+  duration_ms: 48.560407
+  type: 'test'
+  ...
+# Subtest: rejects invalid dimensions, streets, counts, floor counts and unbounded programs
+ok 27 - rejects invalid dimensions, streets, counts, floor counts and unbounded programs
+  ---
+  duration_ms: 0.808271
+  type: 'test'
+  ...
+# Subtest: an infeasible small plot fails without shrinking or removing requested rooms
+ok 28 - an infeasible small plot fails without shrinking or removing requested rooms
+  ---
+  duration_ms: 2.245114
+  type: 'test'
+  ...
+# Subtest: supports all 30 bounded rooms and a small explicit program
+ok 29 - supports all 30 bounded rooms and a small explicit program
+  ---
+  duration_ms: 430.325672
+  type: 'test'
+  ...
+# Subtest: door reachability is physical, not merely a graph label
+ok 30 - door reachability is physical, not merely a graph label
+  ---
+  duration_ms: 21.87113
+  type: 'test'
+  ...
+# Subtest: detects walls crossing rooms or corridors, invalid openings and overlaps
+ok 31 - detects walls crossing rooms or corridors, invalid openings and overlaps
+  ---
+  duration_ms: 36.113525
+  type: 'test'
+  ...
+# Subtest: shared collinear walls are deduplicated and window openings are exterior
+ok 32 - shared collinear walls are deduplicated and window openings are exterior
+  ---
+  duration_ms: 8.359407
+  type: 'test'
+  ...
+# Subtest: 3D wall pieces and quantities subtract the same openings and do not multiply undrawn floors
+ok 33 - 3D wall pieces and quantities subtract the same openings and do not multiply undrawn floors
+  ---
+  duration_ms: 16.705581
+  type: 'test'
+  ...
+# Subtest: estimates distinguish unpriced from zero rates and compute a partial total transparently
+ok 34 - estimates distinguish unpriced from zero rates and compute a partial total transparently
+  ---
+  duration_ms: 7.825665
+  type: 'test'
+  ...
+# Subtest: varied bounded programs either validate or return an explicit fit failure
+ok 35 - varied bounded programs either validate or return an explicit fit failure
+  ---
+  duration_ms: 154.235406
+  type: 'test'
+  ...
+# Subtest: R01 validatePlot accepts every exact limit and rejects just beyond it
+ok 36 - R01 validatePlot accepts every exact limit and rejects just beyond it
+  ---
+  duration_ms: 1.894693
+  type: 'test'
+  ...
+# Subtest: R02 a street flag counts only when exactly true, and the entry must face a street
+ok 37 - R02 a street flag counts only when exactly true, and the entry must face a street
+  ---
+  duration_ms: 0.403994
+  type: 'test'
+  ...
+# Subtest: R03 room program limits: area 4..120, name <= 70 chars, 1..30 rooms
+ok 38 - R03 room program limits: area 4..120, name <= 70 chars, 1..30 rooms
+  ---
+  duration_ms: 0.518859
+  type: 'test'
+  ...
+# Subtest: R04 minimum buildable width is 7.0 m: below it every program fails cleanly, at it a model is produced
+ok 39 - R04 minimum buildable width is 7.0 m: below it every program fails cleanly, at it a model is produced
+  ---
+  duration_ms: 6.537123
+  type: 'test'
+  ...
+# Subtest: R05 shape keys: case/space-normalised, unsupported rejected explicitly, prototype-safe, fallback after normalisation
+ok 40 - R05 shape keys: case/space-normalised, unsupported rejected explicitly, prototype-safe, fallback after normalisation
+  ---
+  duration_ms: 315.921974
+  type: 'test'
+  ...
+# Subtest: R06 L and U fall back to a valid rect, flagged, with exactly one fallback warning
+ok 41 - R06 L and U fall back to a valid rect, flagged, with exactly one fallback warning
+  ---
+  duration_ms: 3.31262
+  type: 'test'
+  ...
+# Subtest: R07 when the shape and the rect fallback both fail: a clean Error, inputs untouched
+ok 42 - R07 when the shape and the rect fallback both fail: a clean Error, inputs untouched
+  ---
+  duration_ms: 14.207137
+  type: 'test'
+  ...
+# Subtest: R08 a rect request never reports a fallback
+ok 43 - R08 a rect request never reports a fallback
+  ---
+  duration_ms: 45.291197
+  type: 'test'
+  ...
+# Subtest: R09 U courtyard is the polygon notch: its 4 corners are footprint vertices, open on the entry side
+ok 44 - R09 U courtyard is the polygon notch: its 4 corners are footprint vertices, open on the entry side
+  ---
+  duration_ms: 1135.480525
+  type: 'test'
+  ...
+# Subtest: R10 every U courtyard is emitted OPEN_TO_SKY with roofable false
+ok 45 - R10 every U courtyard is emitted OPEN_TO_SKY with roofable false
+  ---
+  duration_ms: 322.646535
+  type: 'test'
+  ...
+# Subtest: R11 validateModel rejects a room or corridor moved into the courtyard
+ok 46 - R11 validateModel rejects a room or corridor moved into the courtyard
+  ---
+  duration_ms: 123.294689
+  type: 'test'
+  ...
+# Subtest: R12 validateModel rejects a building outline that leaves the buildable footprint
+ok 47 - R12 validateModel rejects a building outline that leaves the buildable footprint
+  ---
+  duration_ms: 70.59312
+  type: 'test'
+  ...
+# Subtest: R13 roofPolicy: inconsistent or unknown states are rejected; reserved states are schema-valid
+ok 48 - R13 roofPolicy: inconsistent or unknown states are rejected; reserved states are schema-valid
+  ---
+  duration_ms: 259.774436
+  type: 'test'
+  ...
+# Subtest: R14 v1 surface preserved: building == boundingBox, version 2, plan alias, stable ids
+ok 49 - R14 v1 surface preserved: building == boundingBox, version 2, plan alias, stable ids
+  ---
+  duration_ms: 345.776511
+  type: 'test'
+  ...
+# Subtest: R15 schema lock: model and courtyard carry exactly the contract fields
+ok 50 - R15 schema lock: model and courtyard carry exactly the contract fields
+  ---
+  duration_ms: 65.545334
+  type: 'test'
+  ...
+# Subtest: R16 deterministic across shapes, entries and interleaved calls (no hidden state)
+ok 51 - R16 deterministic across shapes, entries and interleaved calls (no hidden state)
+  ---
+  duration_ms: 570.368952
+  type: 'test'
+  ...
+# Subtest: R17 seeded fuzz (150 cases): clean failure or fully valid model, never anything in between
+ok 52 - R17 seeded fuzz (150 cases): clean failure or fully valid model, never anything in between
+  ---
+  duration_ms: 297.023058
+  type: 'test'
+  ...
+# Subtest: R18 estimate: reserve 0..50 and VAT 0..30 inclusive; negative rate rejected; blank rate is unpriced, not zero
+ok 53 - R18 estimate: reserve 0..50 and VAT 0..30 inclusive; negative rate rejected; blank rate is unpriced, not zero
+  ---
+  duration_ms: 5.042524
+  type: 'test'
+  ...
+# Subtest: rect: buildingFootprint is a simple axis-aligned rectangle with 4 points
+ok 54 - rect: buildingFootprint is a simple axis-aligned rectangle with 4 points
+  ---
+  duration_ms: 42.421554
+  type: 'test'
+  ...
+# Subtest: l: buildingFootprint is a true L with 6 points and one interior reflex corner
+ok 55 - l: buildingFootprint is a true L with 6 points and one interior reflex corner
+  ---
+  duration_ms: 7.848622
+  type: 'test'
+  ...
+# Subtest: u: buildingFootprint is a true U with 8 points and a central front notch
+ok 56 - u: buildingFootprint is a true U with 8 points and a central front notch
+  ---
+  duration_ms: 126.88107
+  type: 'test'
+  ...
+# Subtest: L courtyard test: L shape has no courtyard
+ok 57 - L courtyard test: L shape has no courtyard
+  ---
+  duration_ms: 5.722063
+  type: 'test'
+  ...
+# Subtest: rect courtyard test: rect shape has no courtyard
+ok 58 - rect courtyard test: rect shape has no courtyard
+  ---
+  duration_ms: 5.935511
+  type: 'test'
+  ...
+# Subtest: courtyard.roofable is always false
+ok 59 - courtyard.roofable is always false
+  ---
+  duration_ms: 78.043928
+  type: 'test'
+  ...
+# Subtest: buildingFootprint polygon area must be positive
+ok 60 - buildingFootprint polygon area must be positive
+  ---
+  duration_ms: 267.543312
+  type: 'test'
+  ...
+# Subtest: three distinct shapes are offered and produce genuinely different footprints
+ok 61 - three distinct shapes are offered and produce genuinely different footprints
+  ---
+  duration_ms: 140.190975
+  type: 'test'
+  ...
+# Subtest: U has an open courtyard that no room or corridor enters, excluded from built footprint
+ok 62 - U has an open courtyard that no room or corridor enters, excluded from built footprint
+  ---
+  duration_ms: 342.340585
+  type: 'test'
+  ...
+# Subtest: every room keeps its exact requested area in L and U, across entries
+ok 63 - every room keeps its exact requested area in L and U, across entries
+  ---
+  duration_ms: 287.817578
+  type: 'test'
+  ...
+# Subtest: L and U are deterministic and never mutate inputs
+ok 64 - L and U are deterministic and never mutate inputs
+  ---
+  duration_ms: 93.078572
+  type: 'test'
+  ...
+# Subtest: varied programs: every L/U result validates or falls back safely, never a broken model
+ok 65 - varied programs: every L/U result validates or falls back safely, never a broken model
+  ---
+  duration_ms: 3275.89018
+  type: 'test'
+  ...
+1..65
+# tests 65
+# suites 0
+# pass 65
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15795.461742
+EXIT=0

@@ -1,0 +1,156 @@
+{
+  "projectId": "PRJ-VILLA-COMPLIANT-001",
+  "schemaVersion": "claude-design-schema-v1.2",
+  "units": "METRIC_MM",
+  "defaultHVACSystem": "CONCEALED_DUCT_SPLIT",
+  "levels": [
+    {
+      "levelId": "LVL-GF",
+      "name": "Ground Floor",
+      "elevationZ": 0,
+      "floorToCeilingHeight": 3500,
+      "slabThickness": 250
+    },
+    {
+      "levelId": "LVL-FF",
+      "name": "First Floor",
+      "elevationZ": 3500,
+      "floorToCeilingHeight": 3500,
+      "slabThickness": 250
+    }
+  ],
+  "spaces": [
+    {
+      "spaceId": "SP-GF-LIVING",
+      "levelId": "LVL-GF",
+      "name": "Ground Floor Majlis",
+      "functionalType": "LIVING",
+      "polygon2D": [[0, 0], [6000, 0], [6000, 5000], [0, 5000]],
+      "netAreaSqM": 30.0,
+      "requiredHeadroomMm": 2800,
+      "hvacSystemType": "CONCEALED_DUCT_SPLIT"
+    },
+    {
+      "spaceId": "SP-GF-CORR",
+      "levelId": "LVL-GF",
+      "name": "Main Hallway",
+      "functionalType": "CORRIDOR",
+      "nominalWidthMm": 1200,
+      "polygon2D": [[6000, 0], [7200, 0], [7200, 5000], [6000, 5000]],
+      "netAreaSqM": 6.0,
+      "requiredHeadroomMm": 2600,
+      "hvacSystemType": "CONCEALED_DUCT_SPLIT"
+    },
+    {
+      "spaceId": "SP-GF-BATH",
+      "levelId": "LVL-GF",
+      "name": "Guest Bathroom",
+      "functionalType": "BATHROOM",
+      "polygon2D": [[7200, 0], [9200, 0], [9200, 2500], [7200, 2500]],
+      "netAreaSqM": 5.0,
+      "requiredHeadroomMm": 2400,
+      "hvacSystemType": "MINI_SPLIT"
+    },
+    {
+      "spaceId": "SP-GF-ELEC",
+      "levelId": "LVL-GF",
+      "name": "Main Electrical Niche",
+      "functionalType": "ELECTRICAL_ROOM",
+      "polygon2D": [[7200, 2500], [9200, 2500], [9200, 5000], [7200, 5000]],
+      "netAreaSqM": 5.0,
+      "requiredHeadroomMm": 2600,
+      "hvacSystemType": "MINI_SPLIT"
+    },
+    {
+      "spaceId": "SP-FF-BED",
+      "levelId": "LVL-FF",
+      "name": "Master Bedroom",
+      "functionalType": "BEDROOM",
+      "polygon2D": [[0, 0], [6000, 0], [6000, 5000], [0, 5000]],
+      "netAreaSqM": 30.0,
+      "requiredHeadroomMm": 2800,
+      "hvacSystemType": "CONCEALED_DUCT_SPLIT"
+    },
+    {
+      "spaceId": "SP-FF-CORR",
+      "levelId": "LVL-FF",
+      "name": "Upper Hallway",
+      "functionalType": "CORRIDOR",
+      "nominalWidthMm": 1200,
+      "polygon2D": [[6000, 0], [7200, 0], [7200, 5000], [6000, 5000]],
+      "netAreaSqM": 6.0,
+      "requiredHeadroomMm": 2600,
+      "hvacSystemType": "CONCEALED_DUCT_SPLIT"
+    },
+    {
+      "spaceId": "SP-FF-BATH",
+      "levelId": "LVL-FF",
+      "name": "Master En-Suite Bathroom",
+      "functionalType": "BATHROOM",
+      "polygon2D": [[7200, 0], [9200, 0], [9200, 2500], [7200, 2500]],
+      "netAreaSqM": 5.0,
+      "requiredHeadroomMm": 2400,
+      "hvacSystemType": "MINI_SPLIT"
+    }
+  ],
+  "structuralElements": [
+    {
+      "elementId": "COL-GF-01",
+      "levelId": "LVL-GF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[0, 0], [300, 0], [300, 600], [0, 600]]
+    },
+    {
+      "elementId": "COL-GF-02",
+      "levelId": "LVL-GF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[5000, 0], [5300, 0], [5300, 600], [5000, 600]]
+    },
+    {
+      "elementId": "COL-FF-01",
+      "levelId": "LVL-FF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[0, 0], [300, 0], [300, 600], [0, 600]]
+    },
+    {
+      "elementId": "COL-FF-02",
+      "levelId": "LVL-FF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[5000, 0], [5300, 0], [5300, 600], [5000, 600]]
+    }
+  ],
+  "enclosureElements": [
+    {
+      "elementId": "WALL-GF-EXT-01",
+      "levelId": "LVL-GF",
+      "type": "EXTERIOR_WALL",
+      "startPoint": [0, 0],
+      "endPoint": [9200, 0],
+      "thicknessMm": 250
+    }
+  ],
+  "openings": [
+    {
+      "openingId": "DR-GF-01",
+      "parentElementId": "WALL-GF-EXT-01",
+      "levelId": "LVL-GF",
+      "type": "DOOR",
+      "position": [6600, 0],
+      "widthMm": 900,
+      "heightMm": 2200,
+      "adjacentCorridorSpaceId": "SP-GF-CORR",
+      "swingDirection": "INWARD_RIGHT"
+    }
+  ],
+  "electricalEquipment": [
+    {
+      "elementId": "MDB-GF-01",
+      "levelId": "LVL-GF",
+      "spaceId": "SP-GF-ELEC",
+      "type": "MDB",
+      "position": [8200, 4800],
+      "frontFacingDirection": "SOUTH"
+    }
+  ],
+  "mepServiceZones": []
+}

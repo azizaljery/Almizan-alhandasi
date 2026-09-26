@@ -1,0 +1,5 @@
+
+> build
+> node scripts/build.mjs
+
+Static Arabic entrypoint, local imports, protected Worker client and JavaScript syntax verified.

@@ -1,0 +1,126 @@
+{
+  "projectId": "PRJ-VILLA-CONFLICTED-002",
+  "schemaVersion": "claude-design-schema-v1.2",
+  "units": "METRIC_MM",
+  "defaultHVACSystem": "CONCEALED_DUCT_SPLIT",
+  "levels": [
+    {
+      "levelId": "LVL-GF",
+      "name": "Ground Floor",
+      "elevationZ": 0,
+      "floorToCeilingHeight": 3400,
+      "slabThickness": 250
+    },
+    {
+      "levelId": "LVL-FF",
+      "name": "First Floor",
+      "elevationZ": 3400,
+      "floorToCeilingHeight": 3400,
+      "slabThickness": 250
+    }
+  ],
+  "spaces": [
+    {
+      "spaceId": "SP-GF-CORR-SUBCODE",
+      "levelId": "LVL-GF",
+      "name": "Narrow Corridor",
+      "functionalType": "CORRIDOR",
+      "nominalWidthMm": 750,
+      "polygon2D": [[0, 0], [750, 0], [750, 6000], [0, 6000]],
+      "netAreaSqM": 4.5,
+      "requiredHeadroomMm": 2400
+    },
+    {
+      "spaceId": "SP-GF-ELEC-ROOM",
+      "levelId": "LVL-GF",
+      "name": "Ground Floor Electrical Switchgear",
+      "functionalType": "ELECTRICAL_ROOM",
+      "polygon2D": [[2000, 2000], [4500, 2000], [4500, 4500], [2000, 4500]],
+      "netAreaSqM": 6.25,
+      "requiredHeadroomMm": 2600
+    },
+    {
+      "spaceId": "SP-FF-BATH-OVER-ELEC",
+      "levelId": "LVL-FF",
+      "name": "Upper Floor Bathroom Directly Over Electrical",
+      "functionalType": "BATHROOM",
+      "polygon2D": [[2200, 2200], [4200, 2200], [4200, 4200], [2200, 4200]],
+      "netAreaSqM": 4.0,
+      "requiredHeadroomMm": 2400
+    },
+    {
+      "spaceId": "SP-FF-LIVING-PLENUM-DEFICIT",
+      "levelId": "LVL-FF",
+      "name": "Upper Living Room With High Ceiling",
+      "functionalType": "LIVING",
+      "polygon2D": [[5000, 0], [14000, 0], [14000, 6000], [5000, 6000]],
+      "netAreaSqM": 54.0,
+      "requiredHeadroomMm": 3050,
+      "hvacSystemType": "CONCEALED_DUCT_SPLIT"
+    }
+  ],
+  "structuralElements": [
+    {
+      "elementId": "COL-GF-A",
+      "levelId": "LVL-GF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[5000, 0], [5300, 0], [5300, 600], [5000, 600]]
+    },
+    {
+      "elementId": "COL-GF-B",
+      "levelId": "LVL-GF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[14000, 0], [14300, 0], [14300, 600], [14000, 600]]
+    },
+    {
+      "elementId": "COL-FF-FLOATING",
+      "levelId": "LVL-FF",
+      "type": "COLUMN",
+      "boundaryPolygon": [[9000, 3000], [9300, 3000], [9300, 3600], [9000, 3600]]
+    }
+  ],
+  "enclosureElements": [
+    {
+      "elementId": "WALL-GF-ELEC-ENCLOSURE",
+      "levelId": "LVL-GF",
+      "type": "INTERIOR_PARTITION",
+      "startPoint": [2000, 2000],
+      "endPoint": [4500, 2000],
+      "thicknessMm": 150
+    }
+  ],
+  "openings": [
+    {
+      "openingId": "DR-ELEC-INTRUDER",
+      "parentElementId": "WALL-GF-ELEC-ENCLOSURE",
+      "levelId": "LVL-GF",
+      "type": "DOOR",
+      "position": [2500, 2000],
+      "widthMm": 900,
+      "heightMm": 2100,
+      "adjacentCorridorSpaceId": "SP-GF-CORR-SUBCODE",
+      "swingDirection": "OUTWARD_LEFT"
+    }
+  ],
+  "electricalEquipment": [
+    {
+      "elementId": "DB-GF-CONFLICTED",
+      "levelId": "LVL-GF",
+      "spaceId": "SP-GF-ELEC-ROOM",
+      "type": "DISTRIBUTION_BOARD",
+      "position": [2500, 2400],
+      "frontFacingDirection": "SOUTH"
+    }
+  ],
+  "mepServiceZones": [
+    {
+      "zoneId": "ZONE-HVAC-TRUNK-01",
+      "levelId": "LVL-GF",
+      "discipline": "HVAC",
+      "boundaryPolygon": [[4800, 100], [5500, 100], [5500, 500], [4800, 500]],
+      "bottomElevationZ": 2800,
+      "topElevationZ": 3200,
+      "reservedFor": "MAIN_SUPPLY_DUCT"
+    }
+  ]
+}

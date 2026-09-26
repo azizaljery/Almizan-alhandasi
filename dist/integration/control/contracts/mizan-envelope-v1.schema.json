@@ -1,0 +1,1435 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mizan:integration-envelope:1.0.0",
+  "title": "MIZAN-IR/1.0.0 (control-room target, not current engine schemas)",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/candidate"
+    },
+    {
+      "$ref": "#/$defs/review"
+    },
+    {
+      "$ref": "#/$defs/decision"
+    }
+  ],
+  "$defs": {
+    "hash": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "SHA-256"
+        },
+        "profile": {
+          "const": "mizan-json-sorted-keys-v1"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "algorithm",
+        "profile",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "units": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "const": "m"
+        },
+        "area": {
+          "const": "m2"
+        },
+        "volume": {
+          "const": "m3"
+        }
+      },
+      "required": [
+        "length",
+        "area",
+        "volume"
+      ],
+      "additionalProperties": false
+    },
+    "point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false
+    },
+    "rect": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "additionalProperties": true
+    },
+    "programRoom": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "type": {
+          "enum": [
+            "bedroom",
+            "majlis",
+            "living",
+            "dining",
+            "kitchen",
+            "bath",
+            "storage",
+            "service",
+            "corridor"
+          ]
+        },
+        "areaM2": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "position": {
+          "enum": [
+            "front",
+            "middle",
+            "back"
+          ]
+        },
+        "side": {
+          "enum": [
+            "left",
+            "right",
+            "any"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "areaM2",
+        "position",
+        "side"
+      ],
+      "additionalProperties": false
+    },
+    "constraint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "value": {},
+        "source": {
+          "enum": [
+            "user",
+            "municipality",
+            "engineer",
+            "system"
+          ]
+        },
+        "priority": {
+          "const": "must"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "description",
+        "value",
+        "source",
+        "priority"
+      ],
+      "additionalProperties": false
+    },
+    "preference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "value": {},
+        "source": {
+          "enum": [
+            "user",
+            "engineer",
+            "system"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "description",
+        "weight",
+        "value",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "kind": {
+          "const": "DesignRequest"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "plot": {
+          "type": "object",
+          "properties": {
+            "widthM": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "lengthM": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "entry": {
+              "enum": [
+                "s",
+                "n",
+                "e",
+                "w"
+              ]
+            },
+            "streets": {
+              "type": "object",
+              "properties": {
+                "s": {
+                  "type": "boolean"
+                },
+                "n": {
+                  "type": "boolean"
+                },
+                "e": {
+                  "type": "boolean"
+                },
+                "w": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "s",
+                "n",
+                "e",
+                "w"
+              ],
+              "additionalProperties": false
+            },
+            "maxBuiltAreaM2": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "floorsRequested": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "coverageRatio": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 0.9
+            }
+          },
+          "required": [
+            "widthM",
+            "lengthM",
+            "entry",
+            "streets",
+            "maxBuiltAreaM2",
+            "floorsRequested",
+            "coverageRatio"
+          ],
+          "additionalProperties": false
+        },
+        "drawnFloorsSupported": {
+          "const": 1
+        },
+        "program": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/programRoom"
+          },
+          "minItems": 1,
+          "maxItems": 30
+        },
+        "hardConstraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/constraint"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "softPreferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/preference"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "interpretation": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "enum": [
+                "confirmed",
+                "needs_confirmation"
+              ]
+            },
+            "originalText": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "unresolved": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "minItems": 0,
+              "maxItems": 100
+            },
+            "priorities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "minItems": 0,
+              "maxItems": 20
+            }
+          },
+          "required": [
+            "status",
+            "originalText",
+            "unresolved",
+            "priorities"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "projectId",
+        "requestId",
+        "plot",
+        "drawnFloorsSupported",
+        "program",
+        "hardConstraints",
+        "softPreferences",
+        "interpretation"
+      ],
+      "additionalProperties": false
+    },
+    "room": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "area": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "targetArea": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "corridorId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "x",
+        "y",
+        "w",
+        "h",
+        "area",
+        "targetArea",
+        "corridorId"
+      ],
+      "additionalProperties": true
+    },
+    "corridor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "additionalProperties": true
+    },
+    "courtyard": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "roofPolicy": {
+          "const": "OPEN_TO_SKY"
+        },
+        "roofable": {
+          "const": false
+        }
+      },
+      "required": [
+        "name",
+        "x",
+        "y",
+        "w",
+        "h",
+        "roofPolicy",
+        "roofable"
+      ],
+      "additionalProperties": true
+    },
+    "wall": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "x1": {
+          "type": "number"
+        },
+        "y1": {
+          "type": "number"
+        },
+        "x2": {
+          "type": "number"
+        },
+        "y2": {
+          "type": "number"
+        },
+        "t": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "type": {
+          "enum": [
+            "ext",
+            "int"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "t",
+        "h",
+        "type"
+      ],
+      "additionalProperties": true
+    },
+    "opening": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "type": {
+          "enum": [
+            "door",
+            "window"
+          ]
+        },
+        "wallId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "pos": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "sill": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roomId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "connects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "wallId",
+        "pos",
+        "w",
+        "h",
+        "sill"
+      ],
+      "additionalProperties": true
+    },
+    "geometry": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": 2
+        },
+        "plot": {
+          "type": "object"
+        },
+        "shape": {
+          "enum": [
+            "rect",
+            "l",
+            "u"
+          ]
+        },
+        "shapeFallback": {
+          "type": "boolean"
+        },
+        "buildingFootprint": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/point"
+          },
+          "minItems": 4,
+          "maxItems": 5000
+        },
+        "building": {
+          "$ref": "#/$defs/rect"
+        },
+        "boundingBox": {
+          "$ref": "#/$defs/rect"
+        },
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/room"
+          },
+          "minItems": 1,
+          "maxItems": 30
+        },
+        "corridors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/corridor"
+          },
+          "minItems": 0,
+          "maxItems": 500
+        },
+        "courtyards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/courtyard"
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "walls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/wall"
+          },
+          "minItems": 0,
+          "maxItems": 5000
+        },
+        "openings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opening"
+          },
+          "minItems": 0,
+          "maxItems": 5000
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 0,
+          "maxItems": 5000
+        },
+        "drawnFloors": {
+          "const": 1
+        },
+        "reserves": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rect"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        }
+      },
+      "required": [
+        "version",
+        "plot",
+        "shape",
+        "shapeFallback",
+        "buildingFootprint",
+        "building",
+        "boundingBox",
+        "rooms",
+        "corridors",
+        "courtyards",
+        "walls",
+        "openings",
+        "links",
+        "drawnFloors",
+        "reserves",
+        "warnings"
+      ],
+      "additionalProperties": true
+    },
+    "producer": {
+      "type": "object",
+      "properties": {
+        "engineId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "packageName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "packageVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "sourceSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "adapterVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "engineId",
+        "packageName",
+        "packageVersion",
+        "sourceSha256",
+        "adapterVersion"
+      ],
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "kind": {
+          "const": "CandidateEnvelope"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "candidateId": {
+          "type": "string",
+          "pattern": "^cand:[a-f0-9]{64}$"
+        },
+        "inputHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "geometryHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "producer": {
+          "$ref": "#/$defs/producer"
+        },
+        "alternativeKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "requestedShape": {
+          "enum": [
+            "rect",
+            "l",
+            "u"
+          ]
+        },
+        "actualShape": {
+          "enum": [
+            "rect",
+            "l",
+            "u"
+          ]
+        },
+        "units": {
+          "$ref": "#/$defs/units"
+        },
+        "frame": {
+          "const": "PLOT_SW_X_EAST_Y_NORTH"
+        },
+        "fallback": {
+          "type": "object",
+          "properties": {
+            "used": {
+              "type": "boolean"
+            },
+            "allowedByUser": {
+              "type": "boolean"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "used",
+            "allowedByUser",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "geometry": {
+          "$ref": "#/$defs/geometry"
+        },
+        "presentation": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "massingParts": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/rect"
+                  },
+                  "minItems": 1,
+                  "maxItems": 500
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "label",
+            "massingParts"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "projectId",
+        "requestId",
+        "candidateId",
+        "inputHash",
+        "geometryHash",
+        "producer",
+        "alternativeKey",
+        "requestedShape",
+        "actualShape",
+        "units",
+        "frame",
+        "fallback",
+        "geometry",
+        "presentation"
+      ],
+      "additionalProperties": false
+    },
+    "check": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "discipline": {
+          "enum": [
+            "architectural",
+            "structural",
+            "electrical",
+            "plumbing",
+            "hvac",
+            "pattern"
+          ]
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_EVALUATED",
+            "ESTIMATE",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "minItems": 0,
+          "maxItems": 100
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "id",
+        "discipline",
+        "status",
+        "evidenceIds",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pass": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fail": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notEvaluated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "estimate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "notApplicable": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evaluatedRatio": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "total",
+        "pass",
+        "fail",
+        "notEvaluated",
+        "estimate",
+        "notApplicable",
+        "evaluatedRatio"
+      ],
+      "additionalProperties": false
+    },
+    "confidence": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "HEURISTIC",
+            "CALIBRATED",
+            "UNAVAILABLE"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "calibrated": {
+          "type": "boolean"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "calibrated",
+        "method"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "UNAVAILABLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "null"
+              },
+              "calibrated": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "HEURISTIC"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "calibrated": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "CALIBRATED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "calibrated": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "kind": {
+          "const": "ReviewEnvelope"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "candidateId": {
+          "type": "string",
+          "pattern": "^cand:[a-f0-9]{64}$"
+        },
+        "inputHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "geometryHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "reviewId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "engineId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "checkRegistryVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "preliminaryOnly": {
+          "const": true
+        },
+        "overall": {
+          "enum": [
+            "PRELIMINARY_INCOMPLETE",
+            "BLOCKED",
+            "PASS_WITHIN_SCOPE"
+          ]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/check"
+          },
+          "minItems": 0,
+          "maxItems": 500
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "telemetry": {
+          "type": "object",
+          "properties": {
+            "generatedAt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [
+            "generatedAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "projectId",
+        "requestId",
+        "candidateId",
+        "inputHash",
+        "geometryHash",
+        "reviewId",
+        "engineId",
+        "checkRegistryVersion",
+        "preliminaryOnly",
+        "overall",
+        "checks",
+        "coverage",
+        "confidence",
+        "findings",
+        "assumptions",
+        "references",
+        "telemetry"
+      ],
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0.0"
+        },
+        "kind": {
+          "const": "DecisionEnvelope"
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "inputHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "decisionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "status": {
+          "enum": [
+            "SELECTED_PRELIMINARY",
+            "NO_SELECTION",
+            "NEEDS_CLARIFICATION"
+          ]
+        },
+        "selectedCandidateId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^cand:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "geometryHash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "minItems": 0,
+          "maxItems": 10000
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "acceptanceProfile": {
+          "const": "ARCHITECTURAL_PRELIMINARY_V1"
+        },
+        "constructionApproved": {
+          "const": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "projectId",
+        "requestId",
+        "inputHash",
+        "decisionId",
+        "status",
+        "selectedCandidateId",
+        "geometryHash",
+        "reviewIds",
+        "reasons",
+        "acceptanceProfile",
+        "constructionApproved"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "SELECTED_PRELIMINARY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "selectedCandidateId": {
+                "type": "string"
+              },
+              "geometryHash": {
+                "$ref": "#/$defs/hash"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "selectedCandidateId": {
+                "type": "null"
+              },
+              "geometryHash": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

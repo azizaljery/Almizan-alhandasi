@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: integrated Claude -> Gemini -> AZIZ works for s
+ok 1 - integrated Claude -> Gemini -> AZIZ works for s
+  ---
+  duration_ms: 298.020514
+  type: 'test'
+  ...
+# Subtest: integrated Claude -> Gemini -> AZIZ works for n
+ok 2 - integrated Claude -> Gemini -> AZIZ works for n
+  ---
+  duration_ms: 172.265572
+  type: 'test'
+  ...
+# Subtest: integrated Claude -> Gemini -> AZIZ works for e
+ok 3 - integrated Claude -> Gemini -> AZIZ works for e
+  ---
+  duration_ms: 205.69209
+  type: 'test'
+  ...
+# Subtest: integrated Claude -> Gemini -> AZIZ works for w
+ok 4 - integrated Claude -> Gemini -> AZIZ works for w
+  ---
+  duration_ms: 182.075113
+  type: 'test'
+  ...
+# Subtest: integrated generation honors current setback controls
+ok 5 - integrated generation honors current setback controls
+  ---
+  duration_ms: 263.358445
+  type: 'test'
+  ...
+# Subtest: integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies
+ok 6 - integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies
+  ---
+  duration_ms: 164.90255
+  type: 'test'
+  ...
+# Subtest: integrated U model remains editable with existing opening tools
+ok 7 - integrated U model remains editable with existing opening tools
+  ---
+  duration_ms: 145.99468
+  type: 'test'
+  ...
+# Subtest: integrated path fails clearly when the explicit built-area cap makes all three shapes infeasible
+ok 8 - integrated path fails clearly when the explicit built-area cap makes all three shapes infeasible
+  ---
+  duration_ms: 66.319528
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1602.115646
