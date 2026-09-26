@@ -20,16 +20,15 @@ jobs:
           ref: integration/mizan-release
           fetch-depth: 0
 
-      - name: Reconstruct and verify release archive
+      - name: Verify release archive
         shell: bash
         run: |
           set -euo pipefail
-          cat release-upload/part-* > /tmp/mizan-release.b64
-          base64 -d /tmp/mizan-release.b64 > /tmp/mizan-release.zip
-          echo "af53e5ff2a9e3e07755bfb52ee59c29acfd74169a60297925e8a650d908919c7  /tmp/mizan-release.zip" | sha256sum -c -
+          test -f release-upload/MIZAN-v33-P1-RELEASE-NO-LEGACY-ASSETS.zip
+          echo "af53e5ff2a9e3e07755bfb52ee59c29acfd74169a60297925e8a650d908919c7  release-upload/MIZAN-v33-P1-RELEASE-NO-LEGACY-ASSETS.zip" | sha256sum -c -
           rm -rf /tmp/mizan-unpack
           mkdir -p /tmp/mizan-unpack
-          unzip -q /tmp/mizan-release.zip -d /tmp/mizan-unpack
+          unzip -q release-upload/MIZAN-v33-P1-RELEASE-NO-LEGACY-ASSETS.zip -d /tmp/mizan-unpack
           test -d /tmp/mizan-unpack/site-src
 
       - name: Replace branch content with verified source
