@@ -1,3 +1,4 @@
+import { checkBrowserImports } from './check-browser-imports.mjs';
 // Buildless static release: validate the authored output; do not emit or deploy a server.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -24,3 +25,5 @@ assert.match(assistant, /X-Mizan-Access-Code/);
 assert.ok(!assistant.includes('OPENAI_API_KEY'), 'Provider key must never be referenced by the browser client');
 assert.ok(!existsSync('dist/server'), 'Do not package an obsolete backend in this static release');
 console.log('Static Arabic entrypoint, local imports, protected Worker client and JavaScript syntax verified.');
+
+console.log(`Browser import graph verified: ${checkBrowserImports()} modules.`);

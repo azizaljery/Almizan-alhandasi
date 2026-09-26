@@ -4,7 +4,7 @@
  * and diversity evaluation to produce top-K architectural reference concepts.
  */
 
-import crypto from 'node:crypto';
+import crypto from '../../../../browser-crypto.mjs';
 import { DeterministicFilter } from './deterministic-filter.js';
 import { ScoringEngine } from './scoring-engine.js';
 import { ConceptDiversityEvaluator } from '../evaluators/diversity-evaluator.js';

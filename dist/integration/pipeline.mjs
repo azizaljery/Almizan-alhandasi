@@ -3,7 +3,7 @@
  * Only measured geometry/area/program axes participate. Other AZIZ axes are diagnostics,
  * NOT evidence of privacy, ventilation, statutory compliance or engineering approval.
  */
-import schema from './control/contracts/mizan-envelope-v1.schema.json' with {type:'json'};
+import schema from './control/contracts/mizan-envelope-v1.schema.mjs';
 import {generateModelLegacy,quantities} from '../claude/compat-layer.mjs';
 import {validateModel} from '../claude/planner.mjs';
 import {reviewCandidate,verifyBoundReview} from './gemini/packages/design-intelligence/adapters/mizan-review-v1.js';

@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from '../../../../browser-crypto.mjs';
 import { canonicalJSON } from '../../../reference/identity.mjs';
 
 export function computeGeometryHash(geometry) {

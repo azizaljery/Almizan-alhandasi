@@ -1,5 +1,5 @@
 /** Explicit MIZAN-IR/1.0.0 boundary. This is not the legacy coordinate API. */
-import schema from '../../../contracts/mizan-envelope-v1.schema.json' with { type: 'json' };
+import schema from '../../../contracts/mizan-envelope-v1.schema.mjs';
 import { canonicalJSON, assertUnitsAndFrame, verifyCandidateBinding, ContractError } from '../../../reference/identity.mjs';
 import { deepFreeze } from '../core/geometry-hasher.js';
 
