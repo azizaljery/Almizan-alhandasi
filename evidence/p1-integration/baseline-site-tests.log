@@ -1,0 +1,482 @@
+
+> test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: deployed Claude sources match the acceptance-tested vendor sources byte for byte
+ok 1 - deployed Claude sources match the acceptance-tested vendor sources byte for byte
+  ---
+  duration_ms: 3.085918
+  type: 'test'
+  ...
+# Subtest: live generation path includes Claude without losing legacy alternatives or room areas
+ok 2 - live generation path includes Claude without losing legacy alternatives or room areas
+  ---
+  duration_ms: 203.887091
+  type: 'test'
+  ...
+# Subtest: Claude enforces site built-area cap in generation and validation
+ok 3 - Claude enforces site built-area cap in generation and validation
+  ---
+  duration_ms: 23.910346
+  type: 'test'
+  ...
+# Subtest: Claude projects round-trip with their strategy, geometry and quantity totals
+ok 4 - Claude projects round-trip with their strategy, geometry and quantity totals
+  ---
+  duration_ms: 11.92427
+  type: 'test'
+  ...
+# Subtest: Claude output reaches 2D, Gemini and the existing home decision engine
+ok 5 - Claude output reaches 2D, Gemini and the existing home decision engine
+  ---
+  duration_ms: 13.537485
+  type: 'test'
+  ...
+# Subtest: reviewed preferences affect the actual planner input without changing areas or sides
+ok 6 - reviewed preferences affect the actual planner input without changing areas or sides
+  ---
+  duration_ms: 57.613501
+  type: 'test'
+  ...
+# Subtest: only selected changes apply and stale reviews reject
+ok 7 - only selected changes apply and stale reviews reject
+  ---
+  duration_ms: 1.423529
+  type: 'test'
+  ...
+# Subtest: discovery round-trips and legacy projects still load with empty preferences
+ok 8 - discovery round-trips and legacy projects still load with empty preferences
+  ---
+  duration_ms: 3.244732
+  type: 'test'
+  ...
+# Subtest: invalid and contradictory saved choices reject; courtyard is explicitly unsupported
+ok 9 - invalid and contradictory saved choices reject; courtyard is explicitly unsupported
+  ---
+  duration_ms: 0.373582
+  type: 'test'
+  ...
+# Subtest: design insight scores are bounded and derived without external data
+ok 10 - design insight scores are bounded and derived without external data
+  ---
+  duration_ms: 6.189973
+  type: 'test'
+  ...
+# Subtest: adapted algorithms reject invalid acoustic transmission and bound scores
+ok 11 - adapted algorithms reject invalid acoustic transmission and bound scores
+  ---
+  duration_ms: 0.264249
+  type: 'test'
+  ...
+# Subtest: generated SVG is valid XML with complete viewBox and escaped user-controlled room names
+ok 12 - generated SVG is valid XML with complete viewBox and escaped user-controlled room names
+  ---
+  duration_ms: 1414.34704
+  type: 'test'
+  ...
+# Subtest: pan and anchor zoom remain correct with letterboxing, and room focus stays bounded
+ok 13 - pan and anchor zoom remain correct with letterboxing, and room focus stays bounded
+  ---
+  duration_ms: 1.998477
+  type: 'test'
+  ...
+# Subtest: two-pointer pinch zooms without one-finger state errors after cancellation
+ok 14 - two-pointer pinch zooms without one-finger state errors after cancellation
+  ---
+  duration_ms: 1.312716
+  type: 'test'
+  ...
+# Subtest: AI release requires the private site access code and never exposes the provider key
+ok 15 - AI release requires the private site access code and never exposes the provider key
+  ---
+  duration_ms: 4.29923
+  type: 'test'
+  ...
+# Subtest: assistant status is validated before the interface calls it ready
+ok 16 - assistant status is validated before the interface calls it ready
+  ---
+  duration_ms: 28.189871
+  type: 'test'
+  ...
+# Subtest: assistant connection failures provide recoverable messages and never return a proposal
+ok 17 - assistant connection failures provide recoverable messages and never return a proposal
+  ---
+  duration_ms: 3.626513
+  type: 'test'
+  ...
+# Subtest: planning review produces bounded area, route and conflict outputs from the generated model
+ok 18 - planning review produces bounded area, route and conflict outputs from the generated model
+  ---
+  duration_ms: 8.111586
+  type: 'test'
+  ...
+# Subtest: local Arabic understanding proposes changes for counts and negation without network access
+ok 19 - local Arabic understanding proposes changes for counts and negation without network access
+  ---
+  duration_ms: 7.238138
+  type: 'test'
+  ...
+# Subtest: directional preference changes only placement fields and respects the actual entry side
+ok 20 - directional preference changes only placement fields and respects the actual entry side
+  ---
+  duration_ms: 1.269804
+  type: 'test'
+  ...
+# Subtest: future assistant path accepts only validated suggestions and never changes the model itself
+ok 21 - future assistant path accepts only validated suggestions and never changes the model itself
+  ---
+  duration_ms: 2.106767
+  type: 'test'
+  ...
+# Subtest: entrypoint has unique IDs, all fixed UI references exist, and imports are static local assets
+ok 22 - entrypoint has unique IDs, all fixed UI references exist, and imports are static local assets
+  ---
+  duration_ms: 2.6009
+  type: 'test'
+  ...
+# Subtest: attached home-design engine builds a structured customer and site context
+ok 23 - attached home-design engine builds a structured customer and site context
+  ---
+  duration_ms: 2.668613
+  type: 'test'
+  ...
+# Subtest: planner models are evaluated by the attached decision engine
+ok 24 - planner models are evaluated by the attached decision engine
+  ---
+  duration_ms: 28.422705
+  type: 'test'
+  ...
+# Subtest: alternative comparison and AI context use the same deterministic customer inputs
+ok 25 - alternative comparison and AI context use the same deterministic customer inputs
+  ---
+  duration_ms: 25.145203
+  type: 'test'
+  ...
+# Subtest: default program preserves all 12 requested rooms and exact clear floor areas
+ok 26 - default program preserves all 12 requested rooms and exact clear floor areas
+  ---
+  duration_ms: 40.317141
+  type: 'test'
+  ...
+# Subtest: same requirements produce the same model; generation does not mutate inputs
+ok 27 - same requirements produce the same model; generation does not mutate inputs
+  ---
+  duration_ms: 28.74554
+  type: 'test'
+  ...
+# Subtest: topology generator creates real courtyard and U voids without changing the program
+ok 28 - topology generator creates real courtyard and U voids without changing the program
+  ---
+  duration_ms: 37.074196
+  type: 'test'
+  ...
+# Subtest: direct editor opening operations preserve the geometry contract
+ok 29 - direct editor opening operations preserve the geometry contract
+  ---
+  duration_ms: 9.143308
+  type: 'test'
+  ...
+# Subtest: front/back and fixed left/right rotate consistently for all four entry directions
+ok 30 - front/back and fixed left/right rotate consistently for all four entry directions
+  ---
+  duration_ms: 31.533524
+  type: 'test'
+  ...
+# Subtest: rejects invalid dimensions, streets, counts, floor counts and unbounded programs
+ok 31 - rejects invalid dimensions, streets, counts, floor counts and unbounded programs
+  ---
+  duration_ms: 1.291945
+  type: 'test'
+  ...
+# Subtest: an infeasible small plot fails without shrinking or removing requested rooms
+ok 32 - an infeasible small plot fails without shrinking or removing requested rooms
+  ---
+  duration_ms: 1.021791
+  type: 'test'
+  ...
+# Subtest: supports all 30 bounded rooms and a small explicit program
+ok 33 - supports all 30 bounded rooms and a small explicit program
+  ---
+  duration_ms: 610.563011
+  type: 'test'
+  ...
+# Subtest: door reachability is physical, not merely a graph label
+ok 34 - door reachability is physical, not merely a graph label
+  ---
+  duration_ms: 22.79276
+  type: 'test'
+  ...
+# Subtest: detects walls crossing rooms or corridors, invalid openings and overlaps
+ok 35 - detects walls crossing rooms or corridors, invalid openings and overlaps
+  ---
+  duration_ms: 73.030549
+  type: 'test'
+  ...
+# Subtest: shared collinear walls are deduplicated and window openings are exterior
+ok 36 - shared collinear walls are deduplicated and window openings are exterior
+  ---
+  duration_ms: 39.055855
+  type: 'test'
+  ...
+# Subtest: 3D wall pieces and quantities subtract the same openings and do not multiply undrawn floors
+ok 37 - 3D wall pieces and quantities subtract the same openings and do not multiply undrawn floors
+  ---
+  duration_ms: 15.868536
+  type: 'test'
+  ...
+# Subtest: estimates distinguish unpriced from zero rates and compute a partial total transparently
+ok 38 - estimates distinguish unpriced from zero rates and compute a partial total transparently
+  ---
+  duration_ms: 8.578275
+  type: 'test'
+  ...
+# Subtest: varied bounded programs either validate or return an explicit fit failure
+ok 39 - varied bounded programs either validate or return an explicit fit failure
+  ---
+  duration_ms: 179.925564
+  type: 'test'
+  ...
+# Subtest: builds a bounded bilingual client context without secrets
+ok 40 - builds a bounded bilingual client context without secrets
+  ---
+  duration_ms: 2.788679
+  type: 'test'
+  ...
+# Subtest: derives priorities, relationships, conflicts and clarifying questions
+ok 41 - derives priorities, relationships, conflicts and clarifying questions
+  ---
+  duration_ms: 1.232965
+  type: 'test'
+  ...
+# Subtest: accepts the new streets contract and sanitizes the optional legacy counts
+ok 42 - accepts the new streets contract and sanitizes the optional legacy counts
+  ---
+  duration_ms: 3.982836
+  type: 'test'
+  ...
+# Subtest: validates plot, prompt, previous brief and typed street fields
+ok 43 - validates plot, prompt, previous brief and typed street fields
+  ---
+  duration_ms: 1.860511
+  type: 'test'
+  ...
+# Subtest: accepts a bounded client requirements context and rejects malformed context
+ok 44 - accepts a bounded client requirements context and rejects malformed context
+  ---
+  duration_ms: 0.732411
+  type: 'test'
+  ...
+# Subtest: room validation supports corridor and bounded areas; clarification does not invent rooms
+ok 45 - room validation supports corridor and bounded areas; clarification does not invent rooms
+  ---
+  duration_ms: 1.403301
+  type: 'test'
+  ...
+# Subtest: missing access code and foreign origins cannot use the paid endpoint
+ok 46 - missing access code and foreign origins cannot use the paid endpoint
+  ---
+  duration_ms: 89.159331
+  type: 'test'
+  ...
+# Subtest: configuration status never claims live verification or a working manual engine
+ok 47 - configuration status never claims live verification or a working manual engine
+  ---
+  duration_ms: 12.319974
+  type: 'test'
+  ...
+# Subtest: rejects unsupported media, broken JSON and oversized UTF-8 bodies before calling a provider
+ok 48 - rejects unsupported media, broken JSON and oversized UTF-8 bodies before calling a provider
+  ---
+  duration_ms: 7.814148
+  type: 'test'
+  ...
+# Subtest: constructs a structured Responses request and returns only a validated reviewable brief
+ok 49 - constructs a structured Responses request and returns only a validated reviewable brief
+  ---
+  duration_ms: 10.447895
+  type: 'test'
+  ...
+# Subtest: multi-floor limitations never delete an unhandled user requirement
+ok 50 - multi-floor limitations never delete an unhandled user requirement
+  ---
+  duration_ms: 5.866009
+  type: 'test'
+  ...
+# Subtest: limits per client address across requests and expires at the minute boundary
+ok 51 - limits per client address across requests and expires at the minute boundary
+  ---
+  duration_ms: 17.542267
+  type: 'test'
+  ...
+# Subtest: provider failures, refusals and invalid outputs fail closed without leaking provider bodies
+ok 52 - provider failures, refusals and invalid outputs fail closed without leaking provider bodies
+  ---
+  duration_ms: 22.084335
+  type: 'test'
+  ...
+# Subtest: preserves embedded Site assets and exports a Fetch-standard API handler
+ok 53 - preserves embedded Site assets and exports a Fetch-standard API handler
+  ---
+  duration_ms: 2.414839
+  type: 'test'
+  ...
+# Subtest: solar preview gives a finite daytime position and wall shadow
+ok 54 - solar preview gives a finite daytime position and wall shadow
+  ---
+  duration_ms: 1.278076
+  type: 'test'
+  ...
+# Subtest: solar preview reports the sun below the horizon instead of inventing a shadow
+ok 55 - solar preview reports the sun below the horizon instead of inventing a shadow
+  ---
+  duration_ms: 0.744013
+  type: 'test'
+  ...
+# Subtest: Claude model renders through the existing 3D geometry controller
+ok 56 - Claude model renders through the existing 3D geometry controller
+  ---
+  duration_ms: 46.267321
+  type: 'test'
+  ...
+# Subtest: 3D reuses one renderer, builds wall pieces with real openings, and disposes prior geometry
+ok 57 - 3D reuses one renderer, builds wall pieces with real openings, and disposes prior geometry
+  ---
+  duration_ms: 16.85015
+  type: 'test'
+  ...
+# Subtest: room entry uses eye-level camera, roof is hidden, and wall collision permits a door passage
+ok 58 - room entry uses eye-level camera, roof is hidden, and wall collision permits a door passage
+  ---
+  duration_ms: 1.785918
+  type: 'test'
+  ...
+# Subtest: hidden 3D does not render and resize reuses the same canvas
+ok 59 - hidden 3D does not render and resize reuses the same canvas
+  ---
+  duration_ms: 26.745921
+  type: 'test'
+  ...
+# Subtest: missing Three and unavailable WebGL fail with actionable messages
+ok 60 - missing Three and unavailable WebGL fail with actionable messages
+  ---
+  duration_ms: 0.916181
+  type: 'test'
+  ...
+# Subtest: visual prompt is derived from the generated plan without secrets
+ok 61 - visual prompt is derived from the generated plan without secrets
+  ---
+  duration_ms: 1.401926
+  type: 'test'
+  ...
+# Subtest: visual prompt includes the generated room geometry
+ok 62 - visual prompt includes the generated room geometry
+  ---
+  duration_ms: 0.661443
+  type: 'test'
+  ...
+# Subtest: visual prompt falls back to safe defaults for unknown options
+ok 63 - visual prompt falls back to safe defaults for unknown options
+  ---
+  duration_ms: 0.284604
+  type: 'test'
+  ...
+# Subtest: image worker fails closed before calling OpenAI
+ok 64 - image worker fails closed before calling OpenAI
+  ---
+  duration_ms: 28.079902
+  type: 'test'
+  ...
+# Subtest: image worker accepts only bounded image parameters
+ok 65 - image worker accepts only bounded image parameters
+  ---
+  duration_ms: 6.840173
+  type: 'test'
+  ...
+# Subtest: image worker sends a plan reference through the image edit endpoint
+ok 66 - image worker sends a plan reference through the image edit endpoint
+  ---
+  duration_ms: 6.470264
+  type: 'test'
+  ...
+# Subtest: image worker rejects malformed plan references before OpenAI
+ok 67 - image worker rejects malformed plan references before OpenAI
+  ---
+  duration_ms: 2.179016
+  type: 'test'
+  ...
+# Subtest: alternatives differ geometrically, preserve inputs and pass the existing geometry contract
+ok 68 - alternatives differ geometrically, preserve inputs and pass the existing geometry contract
+  ---
+  duration_ms: 52.090551
+  type: 'test'
+  ...
+# Subtest: gross built-area cap includes walls and circulation and never shrinks the room schedule
+ok 69 - gross built-area cap includes walls and circulation and never shrinks the room schedule
+  ---
+  duration_ms: 50.141927
+  type: 'test'
+  ...
+# Subtest: corridor routes rotate correctly, are not straight-line shortcuts and never cross solid walls
+ok 70 - corridor routes rotate correctly, are not straight-line shortcuts and never cross solid walls
+  ---
+  duration_ms: 120.686449
+  type: 'test'
+  ...
+# Subtest: a disconnected corridor is reported as unreachable, not as zero distance
+ok 71 - a disconnected corridor is reported as unreachable, not as zero distance
+  ---
+  duration_ms: 3.99834
+  type: 'test'
+  ...
+# Subtest: review discloses shared guest/family circulation and measures inter-room connections
+ok 72 - review discloses shared guest/family circulation and measures inter-room connections
+  ---
+  duration_ms: 2.278541
+  type: 'test'
+  ...
+# Subtest: project file round-trips selected alternative, dirty draft, history and explicit zero prices without secrets
+ok 73 - project file round-trips selected alternative, dirty draft, history and explicit zero prices without secrets
+  ---
+  duration_ms: 23.210834
+  type: 'test'
+  ...
+# Subtest: project import rejects corrupt, mismatched, huge and infeasible files before accepting state
+ok 74 - project import rejects corrupt, mismatched, huge and infeasible files before accepting state
+  ---
+  duration_ms: 5.930454
+  type: 'test'
+  ...
+# Subtest: CSV distinguishes unpriced values from zero and carries a UTF-8 BOM and partial-scope warning
+ok 75 - CSV distinguishes unpriced values from zero and carries a UTF-8 BOM and partial-scope warning
+  ---
+  duration_ms: 0.834438
+  type: 'test'
+  ...
+# Subtest: local understanding isolates negation, supports Arabic digits and retains room attributes
+ok 76 - local understanding isolates negation, supports Arabic digits and retains room attributes
+  ---
+  duration_ms: 9.069869
+  type: 'test'
+  ...
+# Subtest: local understanding separates dining from living and reports unsupported dimensions and privacy
+ok 77 - local understanding separates dining from living and reports unsupported dimensions and privacy
+  ---
+  duration_ms: 1.970091
+  type: 'test'
+  ...
+# Subtest: local understanding handles English, additions and requests clarification for ambiguous resizing
+ok 78 - local understanding handles English, additions and requests clarification for ambiguous resizing
+  ---
+  duration_ms: 1.100326
+  type: 'test'
+  ...
+1..78
+# tests 78
+# suites 0
+# pass 78
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1869.596825

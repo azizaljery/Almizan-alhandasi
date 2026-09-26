@@ -1,0 +1,2 @@
+$ npm run planner:typecheck
+EXIT=0

@@ -1,0 +1,13 @@
+{
+  "name": "planner-pkg",
+  "version": "2.3.1-p1-cla-01",
+  "node": "v24.19.0",
+  "files": {
+    "planner.mjs": "8cf6b34251a9920b3da1912951b5ba2f425ae5b4f5f8946b12dfddafa0692560",
+    "estimates.mjs": "59ea7f70e877160024944e9f54665db3f49866d27bdbb6d390f80d0576eb19cf",
+    "PlannerOutputContract.mjs": "e36c24dd6351802bf7b4d18300ce81e46439b0f6bb9cc845794864a8662775a4",
+    "migrations.mjs": "b22b9545ccaade59a825424cf546b5c4e6d62c84ed0eefd7bd1622b0e1c40fb9",
+    "compat-layer.mjs": "924cb48c97f2ad111ce05a42c2acbf3eebd618ce451d9ec56a866b6033973f1c",
+    "index.mjs": "3ed97cfb7d21b79140a68b89004f70a408ccdb02dd4d94cae325c6b0479f937b"
+  }
+}

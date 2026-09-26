@@ -1,0 +1,26 @@
+{
+  "name": "planner-pkg",
+  "version": "2.3.1-p1-cla-01",
+  "type": "module",
+  "private": true,
+  "description": "Mizan Handasi - Deterministic architectural planner",
+  "main": "./dist/index.mjs",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./planner": "./src/planner.mjs",
+    "./contract": "./src/PlannerOutputContract.mjs",
+    "./estimates": "./src/estimates.mjs",
+    "./compat-layer": "./src/compat-layer.mjs"
+  },
+  "scripts": {
+    "planner:typecheck": "tsc -p tsconfig.json",
+    "planner:test": "node --test tests/*.test.mjs",
+    "planner:build": "node build.mjs",
+    "test": "npm run planner:test",
+    "planner:ast-equal": "node tools/ast-equal.mjs",
+    "planner:mutants": "node tools/mutants.mjs"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}

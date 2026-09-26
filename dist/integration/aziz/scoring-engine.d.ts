@@ -1,0 +1,3 @@
+import type { DesignCandidate, HardConstraint, SoftPreference, Conflict, CandidateScore, ScoreAxis, AzizConfig } from './types.js';
+export declare function scoreCandidate(candidate: DesignCandidate, hardConstraints: HardConstraint[], softPreferences: SoftPreference[], conflicts: Conflict[], weights: Record<ScoreAxis, number>, config: AzizConfig): CandidateScore;
+//# sourceMappingURL=scoring-engine.d.ts.map

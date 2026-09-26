@@ -1,0 +1,22 @@
+Files /mnt/data/mizan-integration-work/site-src-v33-original/dist/app.mjs and /mnt/data/mizan-integration-work/site-src/dist/app.mjs differ
+Only in /mnt/data/mizan-integration-work/site-src/dist/claude: compat-layer.mjs
+Only in /mnt/data/mizan-integration-work/site-src/dist: integration
+Only in /mnt/data/mizan-integration-work/site-src/dist: multi-engine.mjs
+Files /mnt/data/mizan-integration-work/site-src-v33-original/dist/project.mjs and /mnt/data/mizan-integration-work/site-src/dist/project.mjs differ
+Only in /mnt/data/mizan-integration-work/site-src/tests: multi-engine.test.mjs
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner: .gitignore
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner: BATCH-MANIFEST.md
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/build.mjs and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/build.mjs differ
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/dist/MANIFEST.json and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/dist/MANIFEST.json differ
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/dist: compat-layer.mjs
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/dist/index.mjs and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/dist/index.mjs differ
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner: docs
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner: evidence
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/package-lock.json and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/package-lock.json differ
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/package.json and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/package.json differ
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/src: compat-layer.mjs
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/tests: compat-layer.test.mjs
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/tests: p1-geometry.test.mjs
+Only in /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/tests: p1-mutants.test.mjs
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/tools/mutants.mjs and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/tools/mutants.mjs differ
+Files /mnt/data/mizan-integration-work/site-src-v33-original/vendor/claude-planner/tsconfig.json and /mnt/data/mizan-integration-work/site-src/vendor/claude-planner/tsconfig.json differ

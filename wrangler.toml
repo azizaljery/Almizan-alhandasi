@@ -1,0 +1,13 @@
+name = "gentle-sun-5ef5"
+main = "worker/server.mjs"
+compatibility_date = "2026-09-19"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# Secrets are configured remotely, never committed here:
+# OPENAI_API_KEY
+# OPENAI_MODEL
+# MIZAN_ACCESS_CODE
+# Optional: ALLOWED_ORIGIN
