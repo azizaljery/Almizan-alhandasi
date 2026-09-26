@@ -16,12 +16,13 @@ import { buildClientContext, deriveRequirements } from './requirements-engine.mj
 import { initVisualizer } from './render-visualizer.mjs';
 import { calculateMizanScore } from './mizan-score.mjs';
 import { analyzeGeminiEngineering } from './gemini-engineering-layer.mjs';
+import { runMultiEngineDesign } from './multi-engine.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -381,14 +382,13 @@ async function generate() {
   $('gen').disabled = true; $('undo').disabled = true; $('gen').textContent = 'جارٍ توزيع الغرف والتحقّق من الوصول…';
   try {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
-    const result = await runPlanner({ plot, rooms, alternatives: true });
+    const result = await runMultiEngineDesign({ plot, rooms, idea: $('idea')?.value || '', discovery: state.discovery, briefContext: state.briefContext });
     if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
-    const preferred = state.discovery.likes.includes('courtyard_privacy') ? ['courtyard', 'u-court', 'claude-rect', 'balanced', 'compact', 'frontage'] : state.discovery.likes.includes('family_layout') ? ['balanced', 'claude-rect', 'u-court', 'courtyard', 'compact', 'frontage'] : ['claude-rect', 'courtyard', 'u-court', 'balanced', 'compact', 'frontage'];
-    state.alternatives = result.models.sort((a, b) => preferred.indexOf(a.strategy) - preferred.indexOf(b.strategy)); state.failures = result.failures;
-    state.model = result.models[0]; state.signature = signature(plot, rooms);
+    state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, requestId: result.request.requestId };
+    state.model = result.selectedModel; state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
-    $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّد المخطط محليًا. راجع الغرف وملاحظات الحل.');
+    $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّدت البدائل عبر Claude، وراجعتها Gemini، واختار AZIZ البديل التخطيطي الأولي.');
   } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح محفوظ أدناه دون تغيير.' : '')); markDirty(); }
   finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن البدائل ✦'; markDirty(); }
 }

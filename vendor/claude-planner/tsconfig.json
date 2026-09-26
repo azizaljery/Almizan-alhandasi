@@ -17,6 +17,7 @@
     "src/planner.mjs",
     "src/estimates.mjs",
     "src/PlannerOutputContract.mjs",
-    "src/migrations.mjs"
+    "src/migrations.mjs",
+    "src/compat-layer.mjs"
   ]
 }

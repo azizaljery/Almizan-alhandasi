@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
@@ -43,46 +43,84 @@ const MUTANTS = [
   ['M20 reserved roof states priced', 'planner', 'if (unsupported) throw Error(', 'if (false) throw Error(', 'H10'],
 ];
 
-// Optional subset: --only=M01,M15  (for re-running one mutant, or chunking a long run)
-const onlyArg = process.argv.find((a) => a.startsWith('--only='));
-const only = onlyArg ? new Set(onlyArg.slice(7).split(',')) : null;
-const selected = only ? MUTANTS.filter(([name]) => only.has(name.split(' ')[0])) : MUTANTS;
-if (only && selected.length !== only.size) { console.error('SETUP-ERROR unknown mutant id in --only'); process.exit(2); }
-
-const before = srcHash();
-const sandbox = mkdtempSync(join(tmpdir(), 'planner-mutants-'));
-let killed = 0, setupError = false;
-try {
-  cpSync(join(ROOT, 'tests'), join(sandbox, 'tests'), { recursive: true });
-  const tests = readdirSync(join(sandbox, 'tests')).filter((f) => f.endsWith('.test.mjs')).map((f) => join('tests', f));
-  for (const [name, file, from, to, target] of selected) {
-    rmSync(join(sandbox, 'src'), { recursive: true, force: true });
-    cpSync(SRC, join(sandbox, 'src'), { recursive: true });
-    // ZIP-extracted src/ may be read-only (mode 0444, e.g. some archivers, or a checked-out
-    // release tree); make the sandbox copy writable before mutating it. Never touches SRC itself.
-    for (const f of readdirSync(join(sandbox, 'src'))) chmodSync(join(sandbox, 'src', f), 0o644);
-    const path = join(sandbox, 'src', file + '.mjs');
-    const original = readFileSync(path, 'utf8');
-    if (original.split(from).length !== 2) { console.error(`SETUP-ERROR ${name}: anchor not found exactly once in src/${file}.mjs`); setupError = true; continue; }
-    writeFileSync(path, original.replace(from, to));
-    // Pin the reporter and isolation so individual test names remain observable.
-    // Reject runner failures separately from genuine mutation survivors.
-    const run = spawnSync(process.execPath, ['--test', '--test-isolation=none', '--test-reporter=tap', ...tests], { cwd: sandbox, encoding: 'utf8', timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
-    const out = run.stdout || '';
-    if (run.error || run.signal || !/^# tests \d+$/m.test(out) || !new RegExp('^# Subtest: ' + target + '\\b', 'm').test(out)) {
-      console.error(`SETUP-ERROR ${name}: runner failed or target not observed (${run.error?.message || run.signal || run.stderr || 'missing TAP target'})`);
-      setupError = true;
-      continue;
-    }
-    const failing = [...out.matchAll(/^not ok \d+ - (.{0,48})/gm)].map((x) => x[1]);
-    const ok = run.status === 1 && failing.some((t) => t.startsWith(target));
-    if (ok) killed++;
-    console.log(`${ok ? 'KILLED  ' : 'SURVIVED'} ${name} | target ${target} | failing: ${failing.map((t) => t.split(' ')[0]).join(', ') || '-'}`);
+/**
+ * Node's structured event stream avoids human reporter formats and file-level summaries.
+ * Errors retain code/failureType; a loader error or timeout cannot count as an assertion kill.
+ */
+export default async function* reporter(events) {
+  for await (const e of events) {
+    if (e.type !== 'test:pass' && e.type !== 'test:fail') continue;
+    const d=e.data, error=d.details?.error;
+    yield JSON.stringify({type:e.type,name:d.name,skip:d.skip,todo:d.todo,
+      code:error?.code,causeCode:error?.cause?.code,
+      causeName:error?.cause?.name,causeStack:error?.cause?.stack,
+      failureType:error?.failureType})+'\n';
   }
-} finally {
-  rmSync(sandbox, { recursive: true, force: true });
 }
-const after = srcHash();
-if (before !== after) { console.error('FATAL: package src/ changed during the run'); process.exit(2); }
-console.log(`killed ${killed}/${selected.length}${only ? ' (subset)' : ''}; package src/ untouched (sha256 ${after.slice(0, 16)}...)`);
-process.exit(setupError ? 2 : killed === selected.length ? 0 : 1);
+
+export function classifyRun(result, target, mutatedFile) {
+  if (result.error || result.signal || result.status === null) return 'INCONCLUSIVE';
+  let events;
+  try { events=result.stdout.trim().split('\n').filter(Boolean).map(s=>JSON.parse(s)); }
+  catch { return 'INCONCLUSIVE'; }
+  const relevant=events.filter(e=>e.name === target || e.name.startsWith(target+' '));
+  const failures=events.filter(e=>e.type==='test:fail');
+  const assertion=e=>e.code==='ERR_ASSERTION' || e.causeCode==='ERR_ASSERTION';
+  // A passing target can also be killed by a newly thrown domain Error originating
+  // in the mutated source itself (M16). Loader/TypeError/tool failures stay inconclusive.
+  const domainFailure=e=>mutatedFile && e.failureType==='testCodeFailure' &&
+    e.causeName==='Error' && !e.causeCode &&
+    e.causeStack?.split('\n')[1]?.includes(pathToFileURL(mutatedFile).href+':');
+  const killedFailure=e=>assertion(e) || domainFailure(e);
+  if (failures.some(e=>!killedFailure(e))) return 'INCONCLUSIVE';
+  if (result.status !== 0 && relevant.some(e=>e.type==='test:fail' && killedFailure(e))) return 'KILLED';
+  if (result.status === 0 && relevant.some(e=>e.type==='test:pass' && !e.skip && !e.todo)) return 'SURVIVED';
+  return 'INCONCLUSIVE';
+}
+
+export function main() {
+  const onlyArg=process.argv.find(a=>a.startsWith('--only='));
+  const only=onlyArg ? new Set(onlyArg.slice(7).split(',')) : null;
+  const selected=only ? MUTANTS.filter(([name])=>only.has(name.split(' ')[0])) : MUTANTS;
+  if (only && selected.length!==only.size) {console.error('INCONCLUSIVE unknown mutant');return 2;}
+  const before=srcHash(), sandbox=mkdtempSync(join(tmpdir(),'planner-mutants-'));
+  let killed=0, inconclusive=0;
+  const env={...process.env}; delete env.NODE_TEST_CONTEXT;
+  const reportPath=pathToFileURL(fileURLToPath(import.meta.url)).href;
+  const run=(tests,pattern)=>spawnSync(process.execPath,[
+    '--test','--test-reporter='+reportPath,...(pattern ? ['--test-name-pattern=^'+pattern+'(?: |$)'] : []),...tests
+  ],{env,cwd:sandbox,encoding:'utf8',timeout:120000,maxBuffer:16*1024*1024});
+  try {
+    for (const dir of ['src','tests','tools']) cpSync(join(ROOT,dir),join(sandbox,dir),{recursive:true});
+    const tests=readdirSync(join(sandbox,'tests')).filter(f=>f.endsWith('.test.mjs')).map(f=>join('tests',f));
+    const baseline=run(tests);
+    console.log('BASELINE exit='+baseline.status+' signal='+baseline.signal);
+    if (baseline.status!==0 || baseline.error || baseline.signal ||
+        selected.some(([, , , , target])=>classifyRun(baseline,target)!=='SURVIVED')) {
+      console.error('INCONCLUSIVE baseline failed\n'+baseline.stdout+'\n'+baseline.stderr);return 2;
+    }
+    for (const [name,file,from,to,target] of selected) {
+      rmSync(join(sandbox,'src'),{recursive:true,force:true});
+      cpSync(SRC,join(sandbox,'src'),{recursive:true});
+      for (const f of readdirSync(join(sandbox,'src'))) chmodSync(join(sandbox,'src',f),0o644);
+      const path=join(sandbox,'src',file+'.mjs'), original=readFileSync(path,'utf8');
+      if (original.split(from).length!==2) {console.log('INCONCLUSIVE '+name+' anchor mismatch');inconclusive++;continue;}
+      writeFileSync(path,original.replace(from,to));
+      const result=run(tests,target), status=classifyRun(result,target,path);
+      if (status==='KILLED') killed++;
+      if (status==='INCONCLUSIVE') inconclusive++;
+      console.log(status+' '+name+' | target='+target+' exit='+result.status+' signal='+result.signal);
+      console.log(result.stdout);
+      if (result.stderr) console.log(result.stderr);
+    }
+  } finally {
+    rmSync(sandbox,{recursive:true,force:true});
+    if (before!==srcHash()) throw Error('FATAL package src changed');
+    console.log('SOURCE_SHA256 before='+before+' after='+srcHash());
+  }
+  console.log('killed '+killed+'/'+selected.length+'; inconclusive '+inconclusive);
+  return inconclusive ? 2 : killed===selected.length ? 0 : 1;
+}
+if (process.argv[1] && fileURLToPath(import.meta.url) === fileURLToPath(pathToFileURL(process.argv[1]))) {
+  process.exitCode=main();
+}

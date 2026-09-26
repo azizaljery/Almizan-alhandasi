@@ -1,15 +1,23 @@
 import { normalizeDiscovery } from './client-brief.mjs';
-import { ENGINE_VERSION, STRATEGIES, validatePlot, normalizeRooms, generateModel } from './planner.mjs';
+import { ENGINE_VERSION, STRATEGIES, validatePlot, normalizeRooms, generateModel, validateModel } from './planner.mjs';
 import { estimate, quantityRows } from './estimates.mjs';
 
 export const MAX_PROJECT_BYTES = 2_000_000;
 const palettes = ['resort', 'modern', 'classic', 'hijazi'];
 const publicRooms = rooms => normalizeRooms(rooms).map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
 const palette = value => { if (!palettes.includes(value)) throw Error('طابع محفوظ غير معروف.'); return value; };
-export const modelRecipe = model => model ? { plot: validatePlot(model.plot), rooms: publicRooms(model.program), strategy: model.strategy || 'compact' } : null;
+export const modelRecipe = model => model ? { plot: validatePlot(model.plot), rooms: publicRooms(model.program), strategy: model.strategy || 'compact', ...(model.engineVersion === 'mizan-p1-integrated' ? { embedded: structuredClone(model) } : {}) } : null;
 function recipe(raw) {
   if (!raw || !Object.hasOwn(STRATEGIES, raw.strategy)) throw Error('وصف توزيع محفوظ غير صالح.');
-  return { plot: validatePlot(raw.plot), rooms: publicRooms(raw.rooms), strategy: raw.strategy };
+  const out = { plot: validatePlot(raw.plot), rooms: publicRooms(raw.rooms), strategy: raw.strategy };
+  if (raw.embedded !== undefined) {
+    if (!raw.embedded || typeof raw.embedded !== 'object' || raw.embedded.engineVersion !== 'mizan-p1-integrated') throw Error('المخطط المدمج المحفوظ غير صالح.');
+    const embedded = structuredClone(raw.embedded), errors = validateModel(embedded);
+    if (errors.length) throw Error('المخطط المدمج المحفوظ غير صالح: ' + errors[0]);
+    if (embedded.strategy !== raw.strategy || JSON.stringify(validatePlot(embedded.plot)) !== JSON.stringify(out.plot) || JSON.stringify(publicRooms(embedded.program)) !== JSON.stringify(out.rooms)) throw Error('بيانات المخطط المدمج لا تطابق وصف الحفظ.');
+    out.embedded = embedded;
+  }
+  return out;
 }
 function validateProject(raw) {
   if (!raw || raw.schema !== 'mizan-handasi-project' || raw.version !== 1 || raw.engineVersion !== ENGINE_VERSION) throw Error('الملف ليس مشروع ميزان متوافقًا مع هذا الإصدار. لم يتغير عملك.');
@@ -51,7 +59,7 @@ export function decodeProject(text) {
   const rebuild = recipe => {
     if (!recipe) return null;
     const key = JSON.stringify(recipe);
-    if (!cache.has(key)) cache.set(key, generateModel(recipe.plot, recipe.rooms, { strategy: recipe.strategy }));
+    if (!cache.has(key)) cache.set(key, recipe.embedded ? structuredClone(recipe.embedded) : generateModel(recipe.plot, recipe.rooms, { strategy: recipe.strategy }));
     return cache.get(key);
   };
   // Rebuild and validate every design before allowing the UI to replace its state.
