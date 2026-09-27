@@ -120,3 +120,12 @@ test('entrypoint has unique IDs, all fixed UI references exist, and imports are 
   assert.equal(/<script[^>]*three\.min\.js/.test(html), false, '3D CDN loading must not block the initial interface or 2D');
   for (const [, path] of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) assert.ok(readFileSync(new URL('../dist/' + path, import.meta.url)).length);
 });
+
+test('assistant health check button is wired to getAssistantStatus without changing AI or security logic', () => {
+  const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../dist/app.mjs', import.meta.url), 'utf8');
+  assert.match(html, /id="aiHealthBtn"/); assert.match(html, /id="aiHealthOut"/);
+  assert.match(app, /checkAssistantHealth/); assert.match(app, /aiHealthBtn'\)\.addEventListener\('click', checkAssistantHealth\)/);
+  const body = app.slice(app.indexOf('async function checkAssistantHealth'), app.indexOf('function restorePlot'));
+  assert.match(body, /getAssistantStatus\(/); assert.equal(/OPENAI_API_KEY|X-Mizan-Access-Code|fetch\(/.test(body), false);
+});

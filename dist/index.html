@@ -85,7 +85,8 @@
       <div class="cb">
         <label for="idea">صف أسلوب حياتك واحتياجاتك<textarea id="idea" rows="5" maxlength="4000" placeholder="مثال: أريد مدخل ضيوف واضحًا، مجلسًا أماميًا، صالة عائلية في الوسط، جناح الوالدة قرب الصالة، وغرف النوم في الخلف…"></textarea></label>
         <label for="aiAccessCode">رمز دخول الذكاء<input id="aiAccessCode" type="password" autocomplete="current-password" maxlength="128" placeholder="الرمز الخاص بالميزان الهندسي"></label>
-        <div class="inline-actions"><button class="secondary" id="askAI">✦ حلّل وارسم بالذكاء</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
+        <div class="inline-actions"><button class="secondary" id="askAI">✦ حلّل وارسم بالذكاء</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button><button class="small-button" id="aiHealthBtn" type="button">فحص اتصال الذكاء</button></div>
+        <p id="aiHealthOut" class="help" role="status" hidden></p>
         <p class="help">الذكاء يفهم العميل، يحدد برنامج الغرف والمواقع والأولويات، ثم يرسلها إلى محرك الرسم الهندسي. بعد موافقتك يرسم بدائل 2D و3D وكميات من النموذج نفسه؛ لا يعتمد أي رسم لا يجتاز التحقق الهندسي.</p>
         <div id="aiFeedback" class="message" role="status" hidden></div>
         <div id="aiReview" hidden>
