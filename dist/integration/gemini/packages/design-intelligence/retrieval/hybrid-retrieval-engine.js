@@ -4,11 +4,32 @@
  * and diversity evaluation to produce top-K architectural reference concepts.
  */
 
-import crypto from 'node:crypto';
 import { DeterministicFilter } from './deterministic-filter.js';
 import { ScoringEngine } from './scoring-engine.js';
 import { ConceptDiversityEvaluator } from '../evaluators/diversity-evaluator.js';
 import { DesignIntelligenceResult } from '../contracts/aziz-integration.contract.js';
+
+// This module is imported transitively by the browser bundle (app.mjs -> multi-engine.mjs ->
+// integration/pipeline.mjs -> mizan-review-v1.js -> DesignIntelligenceEngine), and
+// HybridRetrievalEngine.retrieve() runs live in the browser during design generation. A static
+// `import crypto from 'node:crypto'` fails to resolve in the browser and aborts the entire ES
+// module graph before any click handlers are bound. Use Node's SHA-256 when available and fall
+// back to a deterministic, non-cryptographic fingerprint (audit tracking only, never a security
+// hash) so the browser bundle keeps working without a Node-only builtin.
+const nodeCrypto = (typeof process !== 'undefined' && process.versions?.node)
+  ? await import('node:crypto')
+  : null;
+function fnv1a(text, seed) {
+  let hash = seed >>> 0;
+  for (let index = 0; index < text.length; index++) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash >>> 0;
+}
+function fallbackFingerprint(text) {
+  return [0x811c9dc5, 0x9e3779b9].map(seed => fnv1a(text, seed).toString(16).padStart(8, '0')).join('');
+}
 
 export class HybridRetrievalEngine {
   /**
@@ -26,7 +47,9 @@ export class HybridRetrievalEngine {
 
     // Deterministic context hash for audit tracking
     const canonicalContext = JSON.stringify(context);
-    const deterministicHash = crypto.createHash('sha256').update(canonicalContext).digest('hex').substring(0, 16);
+    const deterministicHash = (nodeCrypto
+      ? nodeCrypto.createHash('sha256').update(canonicalContext).digest('hex')
+      : fallbackFingerprint(canonicalContext)).substring(0, 16);
 
     // 1. Deterministic Hard Filtering
     const { filteredPatterns, excludedRecords } = DeterministicFilter.filter(patternLibrary, context);
