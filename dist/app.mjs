@@ -502,6 +502,21 @@ async function refreshAssistantStatus() {
   }
 }
 
+async function checkAssistantHealth() {
+  const button = $('aiHealthBtn'), out = $('aiHealthOut');
+  if (!AI_ENABLED) { out.hidden = false; out.textContent = 'خدمة الذكاء غير مفعّلة في هذه النسخة؛ استخدم الفهم المحلي.'; return; }
+  button.disabled = true; out.hidden = false; out.textContent = 'جارٍ فحص اتصال خدمة الذكاء…';
+  try {
+    const status = await getAssistantStatus({ signal: AbortSignal.timeout(8000) });
+    const ready = status.configured && status.accessConfigured;
+    out.textContent = ready
+      ? 'الخدمة مهيّأة ورمز الوصول مطلوب من المتصفح؛ أدخل الرمز ثم اطلب التحليل لتأكيد الاتصال الكامل.'
+      : 'الخدمة غير مكتملة الإعداد حاليًا (configured=' + Boolean(status.configured) + '، accessConfigured=' + Boolean(status.accessConfigured) + '). استخدم الفهم المحلي.';
+  } catch {
+    out.textContent = 'تعذّر الوصول إلى خدمة الذكاء الآن؛ تحقق من الاتصال أو استخدم الفهم المحلي.';
+  } finally { button.disabled = false; }
+}
+
 function restorePlot(p) {
   state.streets = { ...p.streets }; renderStreets(); $('entry').value = p.entry;
   for (const [id, value] of Object.entries({ len: p.length, wid: p.width, floors: p.floors, streetSetback: p.streetSetback, neighborSetback: p.neighborSetback, coverage: p.coverage * 100, maxBuiltArea: p.maxBuiltArea ?? '' })) $(id).value = value;
@@ -653,6 +668,7 @@ function boot() {
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
   $('askAI').addEventListener('click', askAI);
   $('askLocal').addEventListener('click', askLocal); $('applySun').addEventListener('click', applySunToProgram);
+  $('aiHealthBtn').addEventListener('click', checkAssistantHealth);
   $('drawAI').addEventListener('click', drawFromAIProposal);
   $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; toast('حُفظ برنامج الذكاء في الجدول دون توليد الرسم بعد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
