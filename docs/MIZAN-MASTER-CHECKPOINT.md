@@ -189,3 +189,47 @@ Status:
 ```
 
 No new package or agent scope is accepted without this card.
+
+
+## Code quality directive — adopted
+
+Code cleanliness outranks preserving an old internal package name.
+
+Rules:
+- Prefer small, single-purpose modules.
+- Keep the deterministic core minimal; move adapters, integrations, and provider-specific code outward.
+- Avoid duplicate schemas and mirrored domain models.
+- Prefer explicit data contracts over implicit object shapes.
+- No hidden mutation of design state.
+- No convenience abstraction unless it removes real duplication or clarifies ownership.
+- Prefer functions/classes that are easy to test in isolation.
+- Keep files short by default; split when responsibilities diverge rather than letting a core file become a grab-bag.
+- Generated/compiled mirrors must never be mistaken for canonical source.
+- Backward compatibility is allowed through adapters, not by polluting the canonical model.
+
+### Design Core decision
+
+Do **not** expand or preserve `design-core` merely because it already exists.
+
+Current direction:
+1. Freeze the current Design Core concept until its authoritative source is independently verified.
+2. Evaluate whether its responsibilities can be reduced into a cleaner **MIZAN Canonical Design Model**.
+3. Target IFC 4.3 alignment at the semantic boundary, not by forcing full IFC complexity into every candidate.
+4. Keep MIZAN-specific concepts native and compact:
+   - requirements
+   - hard/soft constraints
+   - candidates
+   - provenance
+   - decision traces
+   - validated geometry references
+5. Use adapters for IFC/Speckle/Autodesk interoperability.
+6. If the verified Design Core is cleaner than a replacement, retain and trim it.
+7. If it is redundant, bloated, or duplicates the decision/engineering layers, retire it behind an adapter and replace it with the canonical model.
+
+No replacement is authorized until:
+- responsibility overlap is mapped,
+- migration impact is known,
+- adapters are specified,
+- and independent tests prove no loss of required behavior.
+
+Principle: **protect the architecture, not the package name.**
