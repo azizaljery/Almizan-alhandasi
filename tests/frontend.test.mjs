@@ -120,3 +120,25 @@ test('entrypoint has unique IDs, all fixed UI references exist, and imports are 
   assert.equal(/<script[^>]*three\.min\.js/.test(html), false, '3D CDN loading must not block the initial interface or 2D');
   for (const [, path] of html.matchAll(/(?:src|href)="\.\/([^"#]+)"/g)) assert.ok(readFileSync(new URL('../dist/' + path, import.meta.url)).length);
 });
+
+test('no static "node:*" builtin import is reachable from the browser entrypoints, so the ⁨اكتشف⁩ button and app always bind', () => {
+  // A static `import x from 'node:...'` anywhere in the graph reachable from app.mjs/portal.mjs
+  // fails to resolve in a browser and aborts the whole ES module graph before any click listener
+  // (including the intro "اكتشف" button) gets bound. Dynamic, guarded `await import('node:...')`
+  // remains fine since it never appears in a `from '...'` clause and only runs under Node.
+  const distDir = new URL('../dist/', import.meta.url), visited = new Set(), offenders = [];
+  const stripComments = src => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+  function walk(relPath) {
+    const fileUrl = new URL(relPath, distDir);
+    if (visited.has(fileUrl.href)) return;
+    visited.add(fileUrl.href);
+    const source = stripComments(readFileSync(fileUrl, 'utf8'));
+    for (const [, spec] of source.matchAll(/from\s*['"](node:[a-zA-Z0-9_/-]+)['"]/g)) offenders.push(`${relPath} -> ${spec}`);
+    for (const [, spec] of source.matchAll(/(?:import|export)\s+(?:[^'"()]*?from\s+)?['"](\.[^'"]+)['"]/g)) {
+      walk(new URL(spec, fileUrl).pathname.replace(new RegExp('^' + distDir.pathname), ''));
+    }
+  }
+  walk('app.mjs'); walk('portal.mjs');
+  assert.ok(visited.size > 100, `expected the module graph walk to reach many files, only found ${visited.size}`);
+  assert.deepEqual(offenders, []);
+});
