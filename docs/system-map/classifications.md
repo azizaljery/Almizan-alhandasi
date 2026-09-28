@@ -1,0 +1,35 @@
+# Classifications
+
+## Types
+- SOURCE
+- BUILD
+- ADAPTER
+- CONTRACT
+- TEST
+- EVIDENCE
+- GENERATED
+- VENDORED
+- LEGACY
+- DUPLICATE
+- EXPERIMENTAL
+- UNKNOWN
+
+## States
+- ACTIVE
+- SHADOW
+- DEPRECATED
+- ORPHANED
+- UNVERIFIED
+- CANDIDATE_FOR_ARCHIVE
+
+## Verification
+- VERIFIED_RUNTIME
+- VERIFIED_TEST
+- VERIFIED_HASH
+- DOCUMENTED
+- INFERRED
+- CONTRADICTED
+- UNKNOWN
+- PROPOSED
+
+DUPLICATE requires hash equality or explicit content comparison; name similarity is insufficient.
