@@ -125,3 +125,21 @@ On closure:
 - current_stage = LINEAGE_AUDIT
 - baseline.status = NOT_FROZEN
 - development = BLOCKED_UNTIL_BASELINE
+
+
+## Closure principle
+
+Do not close this stage because:
+- the search has taken long enough
+- the contradiction count is small
+- a report exists
+- the team feels ready to move on
+
+Close only when the Closure Checklist is complete and the Definition of Done is satisfied by evidence.
+
+Required closure conditions include:
+- Human Review Completed
+- Contradictions Registry Integrity = PASS
+- Contradictions Report Generated
+- All known contradictions are Identified, Classified, Documented, and Traceable
+- No Resolution Attempted
