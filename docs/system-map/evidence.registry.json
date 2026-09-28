@@ -287,6 +287,36 @@
       "limitations": [
         "Static code inspection only."
       ]
+    },
+    {
+      "evidenceId": "EVD-CODE-0010",
+      "type": "INFERRED",
+      "sourcePath": "dist/home-design-engine.mjs",
+      "symbolOrTest": "compareHomeModels uses plan-local IDs for bestId and retains sourceModel",
+      "claimIds": [],
+      "result": "OBSERVED_IN_CODE",
+      "scope": "Static identity inspection of comparison path",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Does not prove bestId is canonical or persisted."
+      ]
+    },
+    {
+      "evidenceId": "EVD-CODE-0011",
+      "type": "INFERRED",
+      "sourcePath": "dist/gemini-engineering-layer.mjs",
+      "symbolOrTest": "UI Gemini review derives local fingerprints instead of exposing candidateId and geometryHash binding",
+      "claimIds": [],
+      "result": "OBSERVED_IN_CODE",
+      "scope": "Static identity inspection of UI Gemini review path",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Potential traceability gap only; not a LINEAGE_BREAK."
+      ]
     }
   ]
 }
