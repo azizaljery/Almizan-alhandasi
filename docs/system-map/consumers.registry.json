@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "consumers": [
     {
       "consumerId": "aziz-engine",
@@ -30,82 +30,94 @@
     {
       "consumerId": "mizan-score",
       "reads": [
-        "candidate",
-        "evidence",
-        "scoringContext"
+        "model",
+        "auditReview",
+        "quantities"
       ],
       "writes": [
-        "scoreVector",
-        "penalties",
+        "score",
+        "normalized",
+        "grade",
         "confidence",
-        "coverage"
+        "axes",
+        "strengths",
+        "improvements",
+        "penalties",
+        "note"
       ],
       "mustNotWrite": [
         "selectedCandidateId",
         "winner",
-        "refinementInstruction",
         "candidateNativeGeometry"
       ],
-      "fallbackPolicy": "NO_SCORE",
-      "verification": "PROPOSED",
+      "fallbackPolicy": "RETURN_NULL_WHEN_NO_MODEL",
+      "verification": "INFERRED",
       "evidenceIds": []
     },
     {
       "consumerId": "renderer-2d",
       "reads": [
-        "canonicalGeometry",
-        "labels",
-        "openings",
-        "selectedState"
+        "model.plot",
+        "model.building",
+        "model.footprint",
+        "model.rooms",
+        "model.corridors",
+        "model.reserves",
+        "model.walls",
+        "model.openings"
       ],
       "writes": [
-        "2dOutput"
+        "svgOutput"
       ],
       "mustNotWrite": [
         "canonicalGeometry"
       ],
-      "fallbackPolicy": "DISPLAY_ERROR",
-      "verification": "PARTIALLY_VERIFIED",
+      "fallbackPolicy": "UNKNOWN",
+      "verification": "VERIFIED_TEST",
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ]
     },
     {
       "consumerId": "renderer-3d",
       "reads": [
-        "canonicalGeometry",
-        "openings",
-        "materials",
-        "displayState"
+        "model.plot",
+        "model.building",
+        "model.rooms",
+        "model.corridors",
+        "model.walls",
+        "model.openings"
       ],
       "writes": [
-        "3dOutput"
+        "threeScene"
       ],
       "mustNotWrite": [
         "canonicalGeometry"
       ],
-      "fallbackPolicy": "DISPLAY_ERROR",
-      "verification": "PARTIALLY_VERIFIED",
+      "fallbackPolicy": "DISPLAY_ERROR_WHEN_WEBGL_UNAVAILABLE",
+      "verification": "VERIFIED_TEST",
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ]
     },
     {
       "consumerId": "boq-engine",
       "reads": [
-        "canonicalGeometry"
+        "model",
+        "planner.quantities(model)",
+        "model.openings"
       ],
       "writes": [
-        "quantities",
-        "costRows"
+        "quantityRows",
+        "estimateTotals"
       ],
       "mustNotWrite": [
         "canonicalGeometry"
       ],
-      "fallbackPolicy": "FAIL_CLOSED",
-      "verification": "PARTIALLY_VERIFIED",
+      "fallbackPolicy": "FAIL_ON_INVALID_COST_INPUTS",
+      "verification": "VERIFIED_TEST",
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ]
     }
   ]
