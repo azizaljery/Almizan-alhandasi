@@ -13,24 +13,28 @@ It does not resolve, merge, refactor, or enforce architecture.
 - Classification: SOURCE_OF_TRUTH
 - Verification: CONTRADICTED
 - Evidence: EVD-DOC-0001, EVD-TEST-0002
+- Scope: tested integration path; not all browser/production paths
 - Resolution: NOT_ATTEMPTED
 
 ### CONTR-0002 — Persistence documentation vs exact integrated restore
 - Classification: SOURCE_OF_TRUTH
 - Verification: CONTRADICTED
 - Evidence: EVD-DOC-0002, EVD-TEST-0003
+- Scope: integrated-model round-trip; historical paths not fully covered
 - Resolution: NOT_ATTEMPTED
 
 ### CONTR-0003 — Mizan Score vs home-design evaluation.score
 - Classification: OWNERSHIP
 - Verification: INFERRED
 - Evidence: EVD-CODE-0001, EVD-CODE-0003
+- Note: overlapping scoring responsibility, not a proven runtime result conflict
 - Resolution: NOT_ATTEMPTED
 
 ### CONTR-0004 — AZIZ selectedModel vs home-design bestId
 - Classification: FLOW
 - Verification: INFERRED
 - Evidence: EVD-CODE-0001, EVD-CODE-0002, EVD-TEST-0001
+- Note: decision-boundary overlap; no evidence bestId replaces selectedModel
 - Resolution: NOT_ATTEMPTED
 
 ### CONTR-0005 — AZIZ scoring implementation vs declared score-definition boundary
@@ -43,12 +47,14 @@ It does not resolve, merge, refactor, or enforce architecture.
 - Classification: FLOW
 - Verification: INFERRED
 - Evidence: EVD-CODE-0006
+- Human-review caveat: map/boundary ambiguity only; not a proven runtime execution conflict
 - Resolution: NOT_ATTEMPTED
 
 ### CONTR-0007 — Engineering Core source-of-truth split across non-identical copies
 - Classification: SOURCE_OF_TRUTH
 - Verification: CONTRADICTED
 - Evidence: EVD-HASH-0002, EVD-CODE-0006
+- Human-review caveat: CONTRADICTED applies to byte identity of the inspected copies; canonicality is not resolved
 - Resolution: NOT_ATTEMPTED
 
 ## Potential Lineage Candidates
@@ -71,13 +77,15 @@ It does not resolve, merge, refactor, or enforce architecture.
 - Evidence: EVD-CODE-0011, EVD-CODE-0006
 - Disposition: DEFER_TO_LINEAGE_AUDIT
 
-## Registry State
+## Current Audit State
 
 - Contradictions: 7
 - Potential lineage candidates: 3
-- Evidence records: 18
-- Claims: 17
 - Registry Integrity: PASS
+- CD-011 Resolution Guard: COMPLETED / PASS
+- CD-012 Human Review: COMPLETED / PASS
+- No known contradiction missing within the current registered and reviewed scope
+- Global System Discovery / System Map completeness is NOT claimed
 
 ## Resolution Guard
 
@@ -88,10 +96,7 @@ It does not resolve, merge, refactor, or enforce architecture.
 
 ## Stage State
 
-CONTRADICTION_DETECTION remains IN_PROGRESS until:
-- CD-011 Resolution Guard
-- CD-012 Human Review
-- CD-013 Closure Review
+CONTRADICTION_DETECTION is ready for CD-013 Closure Review.
 
 Baseline remains NOT_FROZEN.
 Development remains BLOCKED_UNTIL_BASELINE.
