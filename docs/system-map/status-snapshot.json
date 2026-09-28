@@ -76,19 +76,21 @@
     "binding": false
   },
   "developmentStatus": {
-    "aziz": "UNCHANGED",
-    "planner": "UNCHANGED",
-    "mizanScore": "UNCHANGED",
-    "designCore": "UNCHANGED",
-    "engineeringCore": "UNCHANGED",
-    "geometry2d": "UNCHANGED",
-    "geometry3d": "UNCHANGED",
-    "boq": "UNCHANGED",
-    "contracts": "UNCHANGED"
+    "aziz": "BLOCKED_UNTIL_BASELINE",
+    "planner": "BLOCKED_UNTIL_BASELINE",
+    "mizanScore": "BLOCKED_UNTIL_BASELINE",
+    "designCore": "BLOCKED_UNTIL_BASELINE",
+    "engineeringCore": "BLOCKED_UNTIL_BASELINE",
+    "geometry2d": "BLOCKED_UNTIL_BASELINE",
+    "geometry3d": "BLOCKED_UNTIL_BASELINE",
+    "boq": "BLOCKED_UNTIL_BASELINE",
+    "contracts": "BLOCKED_UNTIL_BASELINE"
   },
   "nextStep": "Complete contradiction detection, then lineage audit.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
-    "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline."
+    "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
+    "System Discovery and System Map remain IN_PROGRESS until their own Definitions of Done are evidenced; Registry Integrity PASS does not imply map completeness.",
+    "Development is governance-blocked until the System Map Baseline is frozen."
   ]
 }
