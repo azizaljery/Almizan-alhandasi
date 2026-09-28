@@ -1,0 +1,35 @@
+{
+  "id": "CD-003",
+  "name": "Flows Review",
+  "source_artifacts": [
+    "data-flows.registry.json",
+    "consumers.registry.json",
+    "components.registry.json",
+    "claims.registry.json",
+    "evidence.registry.json",
+    "contradictions.registry.json"
+  ],
+  "reviewed_flows": [
+    "selected-candidate-to-2d",
+    "selected-candidate-to-3d",
+    "selected-candidate-to-boq",
+    "candidate-to-score-current"
+  ],
+  "findings": [
+    "The three selected-candidate downstream flows are test-backed but still have UNKNOWN contract/failure details.",
+    "candidate-to-score-current has UNKNOWN producer and no evidenceIds.",
+    "The integrated reviewCandidate-before-AZIZ path is not represented as a distinct registered data flow.",
+    "The UI analyzeGeminiEngineering(selected model) path is also not represented as a distinct registered data flow.",
+    "CONTR-0006 records the observed dual Engineering Review flow overlap."
+  ],
+  "new_contradiction_ids": [
+    "CONTR-0006"
+  ],
+  "coverage": {
+    "status": "PARTIAL",
+    "notes": "Every currently registered flow was reviewed; unregistered observed flow paths were documented without altering runtime."
+  },
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS"
+}
