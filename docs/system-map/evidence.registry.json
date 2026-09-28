@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "evidence": [
+    {
+      "evidenceId": "test-selected-model-consistency",
+      "evidenceType": "AUTOMATED_TEST",
+      "artifactPath": "RELEASE-TEST-87.log",
+      "claim": "Selected model is consumed by 2D, 3D and BOQ",
+      "result": "PASS",
+      "scope": "TEST_ENVIRONMENT",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Does not prove browser rendering.",
+        "Does not prove production deployment.",
+        "Does not establish engineering approval."
+      ]
+    },
+    {
+      "evidenceId": "release-build-pass",
+      "evidenceType": "BUILD_LOG",
+      "artifactPath": "RELEASE-BUILD.log",
+      "claim": "Release build completed successfully.",
+      "result": "PASS",
+      "scope": "TEST_ENVIRONMENT",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Does not prove production deployment or browser acceptance."
+      ]
+    }
+  ]
+}
