@@ -70,9 +70,10 @@
         "CD-001",
         "CD-002",
         "CD-003",
-        "CD-004"
+        "CD-004",
+        "CD-005"
       ],
-      "nextCheck": "CD-005"
+      "nextCheck": "CD-006"
     },
     "lineageAudit": {
       "status": "NOT_STARTED",
@@ -103,7 +104,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-005 Ownership Contradictions, then CD-006, CD-007, and CD-008. Keep all resolutions NOT_ATTEMPTED.",
+  "nextStep": "Execute CD-006 Flow Contradictions Review. Keep all contradiction resolutions NOT_ATTEMPTED.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
