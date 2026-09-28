@@ -45,8 +45,12 @@
         "components": 7,
         "dataFlows": 4,
         "consumers": 5,
-        "evidenceRecords": 4,
-        "claims": 5
+        "evidenceRecords": 9,
+        "claims": 9,
+        "contradictions": 4,
+        "lineageCandidates": 1,
+        "decisions": 2,
+        "decisionIntegrityRules": 17
       }
     },
     "evidenceAudit": {
@@ -91,6 +95,23 @@
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
     "System Discovery and System Map remain IN_PROGRESS until their own Definitions of Done are evidenced; Registry Integrity PASS does not imply map completeness.",
-    "Development is governance-blocked until the System Map Baseline is frozen."
-  ]
+    "Development is governance-blocked until the System Map Baseline is frozen.",
+    "Decision Integrity is now a machine-readable governance check for ADR-AUDIT records."
+  ],
+  "governanceChecks": {
+    "decisionIntegrity": {
+      "status": "COMPLETED",
+      "result": "PASS",
+      "decisionsEvaluated": 2,
+      "rulesPerDecision": 17,
+      "approvedDecisions": 1,
+      "proposedDecisions": 1,
+      "blockedDecisions": 0,
+      "failedDecisions": 0,
+      "notes": [
+        "ADR-AUDIT-0001 revalidated: PASS and remains APPROVED.",
+        "ADR-AUDIT-0002 automated validation: PASS, status remains PROPOSED pending explicit human review."
+      ]
+    }
+  }
 }
