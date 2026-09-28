@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.5.0",
+  "schemaVersion": "1.6.0",
   "claims": [
     {
       "claimId": "CLM-FLOW-0007",
@@ -210,6 +210,44 @@
       "scope": "Static comparison of the two Gemini review paths",
       "limitations": [
         "Potential lineage issue only; no LINEAGE_BREAK classification is made."
+      ]
+    },
+    {
+      "claimId": "CLM-LIN-0001",
+      "statement": "After a manual opening edit on an integrated model, the geometry changes while the copied integration.geometryHash and integration.candidateId are not recomputed before the edited model becomes state.model.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0012"
+      ],
+      "scope": "Manual opening edit path in dist/planner.mjs and dist/app.mjs",
+      "limitations": [
+        "Static code evidence; no new executable identity assertion was run in this audit turn."
+      ]
+    },
+    {
+      "claimId": "CLM-LIN-0002",
+      "statement": "bestId is a local comparison identifier and is not referenced by the inspected app.mjs as a replacement for state.model or canonical candidateId.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0010",
+        "EVD-CODE-0002"
+      ],
+      "scope": "Static inspection of home-design-engine.mjs and app.mjs",
+      "limitations": [
+        "Absence of use is limited to the inspected current app path."
+      ]
+    },
+    {
+      "claimId": "CLM-LIN-0003",
+      "statement": "The UI Gemini review is recomputed from the current state.model on each inspected displayed model replacement path, but the review result still lacks direct canonical candidateId/geometryHash binding.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0011",
+        "EVD-CODE-0013"
+      ],
+      "scope": "Static inspection of current UI review flow",
+      "limitations": [
+        "This supports continuity of displayed review freshness, not canonical provenance."
       ]
     }
   ]
