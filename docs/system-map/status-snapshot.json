@@ -45,10 +45,10 @@
         "components": 7,
         "dataFlows": 4,
         "consumers": 5,
-        "evidenceRecords": 15,
-        "claims": 14,
+        "evidenceRecords": 18,
+        "claims": 17,
         "contradictions": 7,
-        "lineageCandidates": 1,
+        "lineageCandidates": 3,
         "decisions": 2,
         "decisionIntegrityRules": 17
       }
@@ -73,13 +73,19 @@
         "CD-004",
         "CD-005",
         "CD-006",
-        "CD-007"
+        "CD-007",
+        "CD-008"
       ],
-      "nextCheck": "CD-008",
+      "nextCheck": "CD-009",
       "activeCheck": null,
       "cd006Subchecks": {
         "total": 14,
         "completed": 14,
+        "result": "PASS"
+      },
+      "cd008Subchecks": {
+        "total": 15,
+        "completed": 15,
         "result": "PASS"
       }
     },
@@ -112,7 +118,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-008 Identity / Lineage Candidates review without declaring LINEAGE_BREAK.",
+  "nextStep": "Execute CD-009 Registry Validation after CD-008 lineage registry updates.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
