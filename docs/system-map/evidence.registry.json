@@ -1,34 +1,67 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "evidence": [
     {
-      "evidenceId": "test-selected-model-consistency",
-      "evidenceType": "AUTOMATED_TEST",
-      "artifactPath": "RELEASE-TEST-87.log",
-      "claim": "Selected model is consumed by 2D, 3D and BOQ",
+      "evidenceId": "EVD-TEST-0001",
+      "type": "VERIFIED_TEST",
+      "sourcePath": "tests/release-consistency.test.mjs",
+      "symbolOrTest": "AZIZ-selected model is the exact source consumed by 2D, 3D geometry and BOQ",
+      "claimIds": ["CLM-FLOW-0007"],
       "result": "PASS",
-      "scope": "TEST_ENVIRONMENT",
+      "scope": "Tested integration candidate: selected candidate propagation to 2D, 3D wall geometry and BOQ",
       "commit": null,
       "sourceHash": null,
       "executedAt": null,
       "limitations": [
-        "Does not prove browser rendering.",
-        "Does not prove production deployment.",
+        "Does not prove browser rendering correctness.",
+        "Does not prove production deployment identity.",
         "Does not establish engineering approval."
       ]
     },
     {
-      "evidenceId": "release-build-pass",
-      "evidenceType": "BUILD_LOG",
-      "artifactPath": "RELEASE-BUILD.log",
-      "claim": "Release build completed successfully.",
+      "evidenceId": "EVD-TEST-0002",
+      "type": "VERIFIED_TEST",
+      "sourcePath": "tests/multi-engine.test.mjs",
+      "symbolOrTest": "integrated Claude -> Gemini -> AZIZ works for s/n/e/w",
+      "claimIds": ["CLM-FLOW-0008"],
       "result": "PASS",
-      "scope": "TEST_ENVIRONMENT",
+      "scope": "Tested integration candidate across four entry directions",
       "commit": null,
       "sourceHash": null,
       "executedAt": null,
       "limitations": [
-        "Does not prove production deployment or browser acceptance."
+        "Proves test-path behavior only.",
+        "Does not prove production runtime or browser UX."
+      ]
+    },
+    {
+      "evidenceId": "EVD-TEST-0003",
+      "type": "VERIFIED_TEST",
+      "sourcePath": "tests/multi-engine.test.mjs",
+      "symbolOrTest": "integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies",
+      "claimIds": ["CLM-PERSIST-0001"],
+      "result": "PASS",
+      "scope": "Project persistence round-trip for integrated models",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Does not prove every historical project shape or production storage path."
+      ]
+    },
+    {
+      "evidenceId": "EVD-HASH-0001",
+      "type": "VERIFIED_TEST",
+      "sourcePath": "tests/claude-integration.test.mjs",
+      "symbolOrTest": "deployed Claude sources match the acceptance-tested vendor sources byte for byte",
+      "claimIds": ["CLM-MIRROR-0001"],
+      "result": "PASS",
+      "scope": "Claude dist/ source mirror against vendor/claude-planner/src/",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "The test proves byte-for-byte equality at test time; explicit SHA values are not recorded in this registry yet."
       ]
     }
   ]
