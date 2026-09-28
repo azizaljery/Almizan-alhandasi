@@ -223,11 +223,13 @@
       "name": "Resolution Guard",
       "description": "Verify all contradiction entries remain NOT_ATTEMPTED and no refactor/runtime change occurred.",
       "expectedOutput": "No resolution attempted.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
+        "docs/system-map/CD-011-resolution-guard.json",
         "docs/system-map/contradictions.registry.json"
-      ]
+      ],
+      "health": "PASS"
     },
     {
       "id": "CD-012",
@@ -264,7 +266,7 @@
     "contradictionsRegistryIntegrityPass": true,
     "contradictionsReportGenerated": true,
     "humanReviewCompleted": false,
-    "resolutionNotAttemptedForAllEntries": false,
+    "resolutionNotAttemptedForAllEntries": true,
     "eligibleForClosure": false
   },
   "exitCondition": {
