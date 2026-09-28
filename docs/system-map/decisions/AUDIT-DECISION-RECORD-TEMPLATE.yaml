@@ -1,0 +1,67 @@
+decision_id: ADR-AUDIT-XXXX
+title: ""
+date: ""
+author: ""
+
+audit_phase:
+  - SYSTEM_DISCOVERY
+  - SYSTEM_MAP
+  - REGISTRY_INTEGRITY
+  - EVIDENCE_AUDIT
+  - CONTRADICTION_DETECTION
+  - LINEAGE_AUDIT
+  - HUMAN_REVIEW
+  - SYSTEM_MAP_BASELINE
+
+status: PROPOSED
+
+decision_type: PROCESS_RULE
+
+description: ""
+
+rationale: ""
+
+evidence: []
+
+affected_artifacts: []
+
+repository_scope:
+  allowed:
+    - docs/system-map/*.json
+    - docs/system-map/*.md
+    - docs/system-map/generated/*
+    - docs/system-map/decisions/*
+  forbidden:
+    - AZIZ
+    - Planner
+    - Mizan Score Runtime
+    - Engineering Core
+    - Design Core
+    - 2D
+    - 3D
+    - BOQ
+    - Contracts Runtime
+
+baseline_dependency:
+  baseline_status: NOT_FROZEN
+  implementation_allowed: false
+
+implementation_rule: |
+  During ARCHITECTURE TRUTH AUDIT
+  this decision may update only
+  audit artifacts.
+
+human_review_required: true
+human_review_completed: false
+
+decision_dod:
+  decision_id_assigned: false
+  description_documented: false
+  rationale_documented: false
+  audit_phase_identified: false
+  affected_artifacts_listed: false
+  repository_files_updated: false
+  commit_created: false
+  human_review_completed: false
+
+notes: []
