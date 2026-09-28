@@ -122,6 +122,30 @@
       "impact": "Score ownership is not aligned between the intended system-map boundary and current implementation.",
       "notes": "No resolution attempted during contradiction detection.",
       "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "CONTR-0006",
+      "title": "Two Gemini engineering review paths coexist without a mapped boundary distinction",
+      "category": "FLOW",
+      "status": "IDENTIFIED",
+      "verificationState": "INFERRED",
+      "description": "The integrated pipeline uses reviewCandidate() before AZIZ selection, while the UI separately runs analyzeGeminiEngineering(state.model) after a model is selected. The current system map does not distinguish these two flows.",
+      "artifacts": [
+        "dist/integration/pipeline.mjs",
+        "dist/integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js",
+        "dist/app.mjs",
+        "dist/gemini-engineering-layer.mjs",
+        "docs/system-map/data-flows.registry.json"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0006"
+      ],
+      "conflictingClaimIds": [
+        "CLM-FLOW-0009"
+      ],
+      "impact": "Engineering-review flow purpose and ownership are ambiguous in the current map; no harmful runtime conflict is proven.",
+      "notes": "No merge, refactor, or runtime change attempted.",
+      "resolution": "NOT_ATTEMPTED"
     }
   ],
   "lineageCandidates": [
