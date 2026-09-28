@@ -13,8 +13,8 @@
   },
   "snapshotDate": "2026-09-28",
   "currentStage": {
-    "name": "CONTRADICTION_DETECTION",
-    "status": "IN_PROGRESS",
+    "name": "LINEAGE_AUDIT",
+    "status": "NOT_STARTED",
     "result": null
   },
   "baseline": {
@@ -58,11 +58,11 @@
       "result": null
     },
     "contradictionDetection": {
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
       "closureChecklist": "docs/system-map/CONTRADICTION-DETECTION-CLOSURE-CHECKLIST.md",
-      "exitCriteriaMet": false,
+      "exitCriteriaMet": true,
       "executionTracker": "docs/system-map/contradiction-detection.execution.json",
       "executionView": "docs/system-map/generated/contradiction-detection-execution.md",
       "executionTrackerHuman": "docs/system-map/CONTRADICTION-DETECTION-EXECUTION-TRACKER.md",
@@ -77,10 +77,12 @@
         "CD-008",
         "CD-009",
         "CD-010",
-        "CD-011"
+        "CD-011",
+        "CD-012",
+        "CD-013"
       ],
-      "nextCheck": "CD-012",
-      "activeCheck": "CD-012",
+      "nextCheck": null,
+      "activeCheck": null,
       "cd006Subchecks": {
         "total": 14,
         "completed": 14,
@@ -121,7 +123,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Complete CD-012 human review before CD-013 closure review.",
+  "nextStep": "Begin LINEAGE_AUDIT using PLC-0001, PLC-0002, and PLC-0003 as deferred candidates. Do not classify LINEAGE_BREAK without lineage evidence.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
