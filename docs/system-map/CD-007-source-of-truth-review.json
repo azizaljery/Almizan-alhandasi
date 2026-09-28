@@ -1,0 +1,53 @@
+{
+  "id": "CD-007",
+  "name": "Source-of-Truth Contradictions Review",
+  "scope": [
+    "Canonical model ownership",
+    "Source vs Runtime vs Mirror",
+    "Planner source/mirror evidence",
+    "Engineering Review source/mirror evidence",
+    "README vs tested behavior"
+  ],
+  "reviewedFindings": [
+    {
+      "contradictionId": "CONTR-0001",
+      "classification": "SOURCE_OF_TRUTH",
+      "status": "DOCUMENTED_TRACEABLE",
+      "subject": "README shape limitations vs tested RECT/L/U support"
+    },
+    {
+      "contradictionId": "CONTR-0002",
+      "classification": "SOURCE_OF_TRUTH",
+      "status": "DOCUMENTED_TRACEABLE",
+      "subject": "README persistence description vs exact integrated restore"
+    },
+    {
+      "contradictionId": "CONTR-0007",
+      "classification": "SOURCE_OF_TRUTH",
+      "status": "DOCUMENTED_TRACEABLE",
+      "subject": "Engineering Core split across non-identical runtime copies"
+    }
+  ],
+  "sourceMirrorAssessment": {
+    "claudePlanner": "Test evidence says inspected dist/claude files matched vendor/claude-planner/src byte-for-byte at test time; explicit per-file SHA values are still not normalized in the registry.",
+    "engineeringCore": "Two observed runtime copies are not byte-identical; canonical source remains unresolved.",
+    "canonicalModel": "No new contradiction proven beyond currently registered source/runtime/mirror issues."
+  },
+  "newContradictionIds": [
+    "CONTR-0007"
+  ],
+  "coverage": {
+    "status": "PROVEN_FOR_CURRENT_SCOPE",
+    "notes": "Current source-of-truth questions were reviewed against README, component registry, mirror test evidence, runtime paths, and direct blob comparison."
+  },
+  "guards": {
+    "sourceChosen": false,
+    "mirrorMerged": false,
+    "runtimeModified": false,
+    "refactorPerformed": false,
+    "resolution": "NOT_ATTEMPTED"
+  },
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS"
+}
