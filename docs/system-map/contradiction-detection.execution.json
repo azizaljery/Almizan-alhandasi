@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "1.0.0",
+  "stage": "CONTRADICTION_DETECTION",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "PASS",
+  "resolutionPolicy": "NOT_ATTEMPTED",
+  "developmentStatus": "BLOCKED_UNTIL_BASELINE",
+  "baselineStatus": "NOT_FROZEN",
+  "items": [
+    {
+      "id": "CD-001",
+      "name": "Coverage Review",
+      "description": "Review all approved contradiction axes.",
+      "expectedOutput": "Confirm current coverage completeness.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/contradictions.registry.json"
+      ]
+    },
+    {
+      "id": "CD-002",
+      "name": "Components Review",
+      "description": "Review all Components for unregistered contradictions.",
+      "expectedOutput": "New items or explicit confirmation of no additional items.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/components.registry.json"
+      ]
+    },
+    {
+      "id": "CD-003",
+      "name": "Flows Review",
+      "description": "Review all Data Flows for additional contradictions.",
+      "expectedOutput": "Additional flow contradictions identified or none found.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/data-flows.registry.json"
+      ]
+    },
+    {
+      "id": "CD-004",
+      "name": "Claims Review",
+      "description": "Review all Claims for conflict or inconsistency.",
+      "expectedOutput": "Conflicting/inconsistent claims identified or none found.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/claims.registry.json"
+      ]
+    },
+    {
+      "id": "CD-005",
+      "name": "Ownership Contradictions",
+      "description": "Review Score ownership, AZIZ boundaries, and Engineering Review boundaries.",
+      "expectedOutput": "All known ownership contradictions documented.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/contradictions.registry.json"
+      ]
+    },
+    {
+      "id": "CD-006",
+      "name": "Flow Contradictions",
+      "description": "Review Mizan Score path and compareHomeModels() overlap.",
+      "expectedOutput": "All known flow contradictions documented.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/contradictions.registry.json"
+      ]
+    },
+    {
+      "id": "CD-007",
+      "name": "Source-of-Truth Contradictions",
+      "description": "Review canonical model ownership and Source/Runtime/Mirror conflicts.",
+      "expectedOutput": "All known source-of-truth contradictions documented.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/contradictions.registry.json"
+      ]
+    },
+    {
+      "id": "CD-008",
+      "name": "Identity / Lineage Candidates",
+      "description": "Review candidateId, geometryHash, and model identity propagation.",
+      "expectedOutput": "Potential Lineage Issues recorded only; no LINEAGE_BREAK classification yet.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/contradictions.registry.json"
+      ]
+    },
+    {
+      "id": "CD-009",
+      "name": "Registry Validation",
+      "description": "Re-run registry integrity after contradiction updates.",
+      "expectedOutput": "Registry Integrity = PASS.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/status-snapshot.json"
+      ]
+    },
+    {
+      "id": "CD-010",
+      "name": "Report Generation",
+      "description": "Update contradictions report.",
+      "expectedOutput": "Current complete contradiction report.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/generated/contradictions-report.md"
+      ]
+    },
+    {
+      "id": "CD-011",
+      "name": "Resolution Guard",
+      "description": "Verify all contradiction entries remain NOT_ATTEMPTED and no refactor/runtime change occurred.",
+      "expectedOutput": "No resolution attempted.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/contradictions.registry.json"
+      ]
+    },
+    {
+      "id": "CD-012",
+      "name": "Human Review",
+      "description": "Human review of classification, documentation, and traceability.",
+      "expectedOutput": "Human Review Completed.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/HUMAN-REVIEW-GATE.md"
+      ]
+    },
+    {
+      "id": "CD-013",
+      "name": "Closure Review",
+      "description": "Final Definition of Done review.",
+      "expectedOutput": "Formal close/no-close decision.",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidenceArtifacts": [
+        "docs/system-map/status-snapshot.json"
+      ]
+    }
+  ],
+  "closureGate": {
+    "allKnownContradictionsIdentified": false,
+    "allKnownContradictionsClassified": false,
+    "allKnownContradictionsDocumented": false,
+    "allKnownContradictionsTraceable": false,
+    "ownershipReviewComplete": false,
+    "flowReviewComplete": false,
+    "sourceOfTruthReviewComplete": false,
+    "identityLineageCandidatesDocumented": false,
+    "contradictionsRegistryIntegrityPass": false,
+    "contradictionsReportGenerated": false,
+    "humanReviewCompleted": false,
+    "resolutionNotAttemptedForAllEntries": false,
+    "eligibleForClosure": false
+  },
+  "exitCondition": {
+    "onPassNextStage": "LINEAGE_AUDIT",
+    "baselineStatus": "NOT_FROZEN",
+    "developmentStatus": "BLOCKED_UNTIL_BASELINE"
+  }
+}
