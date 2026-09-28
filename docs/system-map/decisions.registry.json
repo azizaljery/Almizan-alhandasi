@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "decisions": [
     {
       "decisionId": "ADR-AUDIT-0001",
@@ -11,20 +11,321 @@
       "decisionType": "PROCESS_RULE",
       "description": "Any approved audit decision must be recorded promptly in docs/system-map while the audit is active.",
       "rationale": "Prevent loss of governance decisions between discussion and repository state while keeping runtime code frozen until baseline.",
-      "evidence": [],
+      "evidence": [
+        "ARTIFACT:docs/system-map/WORKING-UPDATE-RULE.md",
+        "COMMIT:73e86ebf5bb87366069085cc0f6d524b11db930f"
+      ],
       "affectedArtifacts": [
         "docs/system-map/*.json",
         "docs/system-map/*.md",
         "docs/system-map/generated/*"
       ],
+      "repositoryScope": {
+        "allowed": [
+          "docs/system-map/*.json",
+          "docs/system-map/*.md",
+          "docs/system-map/generated/*"
+        ],
+        "forbidden": [
+          "AZIZ",
+          "Planner",
+          "Mizan Score Runtime",
+          "Engineering Core",
+          "Design Core",
+          "2D",
+          "3D",
+          "BOQ",
+          "Contracts Runtime",
+          "production/deployment code"
+        ]
+      },
       "baselineDependency": {
         "baselineStatus": "NOT_FROZEN",
         "implementationAllowed": false
       },
+      "implementationRule": "During ARCHITECTURE TRUTH AUDIT this decision may update only audit artifacts.",
       "productionCodeChange": false,
       "humanReviewRequired": true,
       "humanReviewCompleted": true,
-      "notes": []
+      "traceability": {
+        "discussionReference": "PROJECT-CONVERSATION-2026-09-28-WORKING-UPDATE-RULE",
+        "evidenceIds": [
+          "ARTIFACT:docs/system-map/WORKING-UPDATE-RULE.md",
+          "COMMIT:73e86ebf5bb87366069085cc0f6d524b11db930f"
+        ],
+        "registryIds": [
+          "ADR-AUDIT-0001"
+        ],
+        "proposalCommitHash": "1b3e52b804b55019aa31a2b7bac2f3c598b205ce",
+        "approvalCommitHash": "e217e44a8deea0927a39c9d6829322bc58b42d36"
+      },
+      "automatedValidation": {
+        "decisionIdPresent": {
+          "status": "PASS",
+          "message": "decisionId is present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "titlePresent": {
+          "status": "PASS",
+          "message": "title is present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "decisionTypeValid": {
+          "status": "PASS",
+          "message": "PROCESS_RULE is an allowed decision type.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "auditPhaseValid": {
+          "status": "PASS",
+          "message": "SYSTEM_MAP is an allowed audit phase.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "rationalePresent": {
+          "status": "PASS",
+          "message": "rationale is documented.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "evidenceReferenced": {
+          "status": "PASS",
+          "message": "Decision references the working update rule and governance commits/artifacts.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "affectedArtifactsPresent": {
+          "status": "PASS",
+          "message": "Affected audit artifacts are listed.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "repositoryScopeDefined": {
+          "status": "PASS",
+          "message": "Allowed and forbidden repository scopes are defined.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "implementationRulePresent": {
+          "status": "PASS",
+          "message": "Audit-artifacts-only implementation rule is present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "baselineDependencyDefined": {
+          "status": "PASS",
+          "message": "Baseline dependency is defined as NOT_FROZEN / implementationAllowed=false.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "forbiddenRuntimeChanges": {
+          "status": "PASS",
+          "message": "Runtime components are explicitly forbidden before baseline freeze.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "humanReviewRequired": {
+          "status": "PASS",
+          "message": "humanReviewRequired=true.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "runtimeChangeCheck": {
+          "status": "PASS",
+          "message": "productionCodeChange=false and scope is audit artifacts only.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "evidenceChainCheck": {
+          "status": "PASS",
+          "message": "Governance evidence references and repository artifacts are linked.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "baselineConsistencyCheck": {
+          "status": "PASS",
+          "message": "No frozen baseline exists; this is audit-governance-only and does not alter runtime architecture.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "adrDependencyCheck": {
+          "status": "PASS",
+          "message": "Decision is non-production-binding while baseline is NOT_FROZEN.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "traceabilityCheck": {
+          "status": "PASS",
+          "message": "Discussion reference, evidence/artifact references, registry ID and proposal/approval commits are recorded.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        }
+      },
+      "decisionHealth": {
+        "status": "PASS",
+        "checksTotal": 17,
+        "checksPassed": 17,
+        "checksFailed": 0,
+        "checksBlocked": 0
+      },
+      "approvalGate": {
+        "eligibleForApproval": true,
+        "blockingChecks": [],
+        "reason": "All automated validation checks passed and human review is complete."
+      },
+      "notes": [
+        "Revalidated under Decision Integrity rules after initial approval."
+      ]
+    },
+    {
+      "decisionId": "ADR-AUDIT-0002",
+      "title": "Decision Integrity Gate for Audit Decisions",
+      "date": "2026-09-28",
+      "author": "MAIN_CONTROL",
+      "auditPhase": "SYSTEM_MAP",
+      "status": "PROPOSED",
+      "decisionType": "PROCESS_RULE",
+      "description": "Every ADR-AUDIT decision must pass a machine-readable Decision Integrity Check before it is eligible for APPROVED status.",
+      "rationale": "Make the decision itself auditable and prevent incomplete, untraceable, scope-breaking, or runtime-changing audit decisions from being approved.",
+      "evidence": [
+        "DISCUSSION:PROJECT-CONVERSATION-2026-09-28-DECISION-INTEGRITY",
+        "ARTIFACT:docs/system-map/decisions/ADR-AUDIT-TEMPLATE.md",
+        "ARTIFACT:docs/system-map/decision-integrity.rules.json"
+      ],
+      "affectedArtifacts": [
+        "docs/system-map/decisions/ADR-AUDIT-TEMPLATE.md",
+        "docs/system-map/decision-integrity.rules.json",
+        "docs/system-map/decisions.registry.json",
+        "docs/system-map/decisions/*.md"
+      ],
+      "repositoryScope": {
+        "allowed": [
+          "docs/system-map/*.json",
+          "docs/system-map/*.md",
+          "docs/system-map/generated/*"
+        ],
+        "forbidden": [
+          "AZIZ",
+          "Planner",
+          "Mizan Score Runtime",
+          "Engineering Core",
+          "Design Core",
+          "2D",
+          "3D",
+          "BOQ",
+          "Contracts Runtime",
+          "production/deployment code"
+        ]
+      },
+      "baselineDependency": {
+        "baselineStatus": "NOT_FROZEN",
+        "implementationAllowed": false
+      },
+      "implementationRule": "This decision affects audit-governance artifacts only while ARCHITECTURE TRUTH AUDIT is active.",
+      "productionCodeChange": false,
+      "humanReviewRequired": true,
+      "humanReviewCompleted": false,
+      "traceability": {
+        "discussionReference": "PROJECT-CONVERSATION-2026-09-28-DECISION-INTEGRITY",
+        "evidenceIds": [
+          "ARTIFACT:docs/system-map/decisions/ADR-AUDIT-TEMPLATE.md",
+          "ARTIFACT:docs/system-map/decision-integrity.rules.json"
+        ],
+        "registryIds": [
+          "ADR-AUDIT-0002"
+        ],
+        "proposalCommitHash": "9c1c08d5324d108bef39215b9b9cb36ff8da1a2b",
+        "approvalCommitHash": null
+      },
+      "automatedValidation": {
+        "decisionIdPresent": {
+          "status": "PASS",
+          "message": "decisionId is present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "titlePresent": {
+          "status": "PASS",
+          "message": "title is present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "decisionTypeValid": {
+          "status": "PASS",
+          "message": "PROCESS_RULE is an allowed decision type.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "auditPhaseValid": {
+          "status": "PASS",
+          "message": "SYSTEM_MAP is an allowed audit phase.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "rationalePresent": {
+          "status": "PASS",
+          "message": "rationale is documented.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "evidenceReferenced": {
+          "status": "PASS",
+          "message": "Template, validation rules and discussion reference are linked.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "affectedArtifactsPresent": {
+          "status": "PASS",
+          "message": "Affected audit artifacts are listed.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "repositoryScopeDefined": {
+          "status": "PASS",
+          "message": "Allowed and forbidden repository scopes are defined.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "implementationRulePresent": {
+          "status": "PASS",
+          "message": "Audit-governance-only implementation rule is present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "baselineDependencyDefined": {
+          "status": "PASS",
+          "message": "Baseline dependency is defined as NOT_FROZEN / implementationAllowed=false.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "forbiddenRuntimeChanges": {
+          "status": "PASS",
+          "message": "Runtime components are explicitly forbidden.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "humanReviewRequired": {
+          "status": "PASS",
+          "message": "humanReviewRequired=true.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "runtimeChangeCheck": {
+          "status": "PASS",
+          "message": "productionCodeChange=false and runtime implementation remains blocked.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "evidenceChainCheck": {
+          "status": "PASS",
+          "message": "Governance artifact references are present.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "baselineConsistencyCheck": {
+          "status": "PASS",
+          "message": "No frozen baseline exists; rule affects audit governance only.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "adrDependencyCheck": {
+          "status": "PASS",
+          "message": "Decision does not become production-binding before baseline freeze.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        },
+        "traceabilityCheck": {
+          "status": "PASS",
+          "message": "Discussion reference, artifact references, registry ID and proposal commit are recorded.",
+          "checkedAt": "2026-09-28T19:44:00Z"
+        }
+      },
+      "decisionHealth": {
+        "status": "PASS",
+        "checksTotal": 17,
+        "checksPassed": 17,
+        "checksFailed": 0,
+        "checksBlocked": 0
+      },
+      "approvalGate": {
+        "eligibleForApproval": false,
+        "blockingChecks": [
+          "human_review_completed"
+        ],
+        "reason": "Automated validation passed, but explicit human review/approval has not yet been recorded."
+      },
+      "notes": [
+        "Proposal commit exists. Awaiting explicit human review before APPROVED."
+      ]
     }
   ]
 }
