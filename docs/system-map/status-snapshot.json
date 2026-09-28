@@ -14,7 +14,7 @@
   "snapshotDate": "2026-09-28",
   "currentStage": {
     "name": "LINEAGE_AUDIT",
-    "status": "NOT_STARTED",
+    "status": "IN_PROGRESS",
     "result": null
   },
   "baseline": {
@@ -45,8 +45,8 @@
         "components": 7,
         "dataFlows": 4,
         "consumers": 5,
-        "evidenceRecords": 18,
-        "claims": 17,
+        "evidenceRecords": 21,
+        "claims": 21,
         "contradictions": 7,
         "lineageCandidates": 3,
         "decisions": 2,
@@ -95,8 +95,28 @@
       }
     },
     "lineageAudit": {
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "IN_PROGRESS",
+      "result": null,
+      "health": "PASS",
+      "executionTracker": "docs/system-map/lineage-audit.execution.json",
+      "humanTracker": "docs/system-map/LINEAGE-AUDIT-EXECUTION-TRACKER.md",
+      "findingsRegistry": "docs/system-map/lineage-findings.registry.json",
+      "completedChecks": [
+        "LA-001",
+        "LA-002",
+        "LA-003",
+        "LA-004",
+        "LA-005",
+        "LA-006",
+        "LA-007"
+      ],
+      "activeCheck": "LA-008",
+      "nextCheck": "LA-008",
+      "findings": {
+        "lineageBreaks": 1,
+        "identityTranslationGaps": 1,
+        "traceabilityGaps": 1
+      }
     },
     "humanReview": {
       "status": "NOT_STARTED",
@@ -123,7 +143,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Begin LINEAGE_AUDIT using PLC-0001, PLC-0002, and PLC-0003 as deferred candidates. Do not classify LINEAGE_BREAK without lineage evidence.",
+  "nextStep": "Complete LA-008 Human Review of LBR-0001, LGAP-0002, and LGAP-0003 before lineage closure.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
