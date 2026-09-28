@@ -45,9 +45,9 @@
         "components": 7,
         "dataFlows": 4,
         "consumers": 5,
-        "evidenceRecords": 9,
-        "claims": 9,
-        "contradictions": 4,
+        "evidenceRecords": 14,
+        "claims": 13,
+        "contradictions": 6,
         "lineageCandidates": 1,
         "decisions": 2,
         "decisionIntegrityRules": 17
@@ -73,7 +73,12 @@
         "CD-004",
         "CD-005"
       ],
-      "nextCheck": "CD-006"
+      "nextCheck": "CD-006",
+      "activeCheck": "CD-006",
+      "cd006Subchecks": {
+        "total": 14,
+        "completed": 0
+      }
     },
     "lineageAudit": {
       "status": "NOT_STARTED",
@@ -104,7 +109,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-006 Flow Contradictions Review. Keep all contradiction resolutions NOT_ATTEMPTED.",
+  "nextStep": "Execute CD-006 subchecks sequentially; register any additional flow contradiction only when evidenced. Keep resolution NOT_ATTEMPTED.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
