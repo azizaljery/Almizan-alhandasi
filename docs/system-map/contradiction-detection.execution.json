@@ -124,8 +124,8 @@
       "name": "Flow Contradictions",
       "description": "Review Mizan Score path and compareHomeModels() overlap.",
       "expectedOutput": "All known flow contradictions documented.",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
         "docs/system-map/CD-006-FLOW-CONTRADICTIONS-CHECKLIST.md",
         "docs/system-map/CD-006-flow-contradictions.execution.json",
@@ -137,7 +137,11 @@
       ],
       "health": "PASS",
       "subchecksTotal": 14,
-      "subchecksCompleted": 0
+      "subchecksCompleted": 14,
+      "coverageAssessment": {
+        "status": "PROVEN_FOR_CURRENT_SCOPE",
+        "notes": "All current Mizan Score, compareHomeModels/bestId, selectedModel downstream, and Gemini review paths in CD-006 scope were reviewed and traceability validated."
+      }
     },
     {
       "id": "CD-007",
@@ -223,7 +227,7 @@
     "allKnownContradictionsDocumented": true,
     "allKnownContradictionsTraceable": true,
     "ownershipReviewComplete": true,
-    "flowReviewComplete": false,
+    "flowReviewComplete": true,
     "sourceOfTruthReviewComplete": false,
     "identityLineageCandidatesDocumented": false,
     "contradictionsRegistryIntegrityPass": false,
