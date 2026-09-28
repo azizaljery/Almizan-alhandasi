@@ -96,7 +96,9 @@ It does not resolve, merge, refactor, or enforce architecture.
 
 ## Stage State
 
-CONTRADICTION_DETECTION is ready for CD-013 Closure Review.
+CONTRADICTION_DETECTION is CLOSED: COMPLETED / PASS / Health PASS.
+
+Next stage: LINEAGE_AUDIT.
 
 Baseline remains NOT_FROZEN.
 Development remains BLOCKED_UNTIL_BASELINE.
