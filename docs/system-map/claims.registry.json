@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.4.0",
+  "schemaVersion": "1.5.0",
   "claims": [
     {
       "claimId": "CLM-FLOW-0007",
@@ -171,6 +171,45 @@
       "limitations": [
         "This proves divergence of the inspected copies only.",
         "It does not establish which copy is canonical or newer."
+      ]
+    },
+    {
+      "claimId": "CLM-ID-0001",
+      "statement": "Candidate identity is derived from request/input/geometry/producer data, geometryHash is derived from canonical geometry, and selectedModel carries candidateId and geometryHash from the selected candidate.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0009",
+        "EVD-TEST-0001",
+        "EVD-TEST-0003"
+      ],
+      "scope": "Identity creation, selected-model mapping, and exact persistence test scope",
+      "limitations": [
+        "Downstream 2D/3D/BOQ outputs do not themselves carry independently verified output hashes."
+      ]
+    },
+    {
+      "claimId": "CLM-ID-0002",
+      "statement": "home-design comparison uses a plan-local bestId rather than the canonical candidateId, while retaining the original model in sourceModel.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0010"
+      ],
+      "scope": "Static inspection of compareHomeModels()",
+      "limitations": [
+        "Does not prove a lineage break or canonical identity replacement."
+      ]
+    },
+    {
+      "claimId": "CLM-ID-0003",
+      "statement": "The UI Gemini engineering review path uses locally derived deterministic fingerprints and does not expose the selected model candidateId/geometryHash binding that exists in the integrated review path.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0011",
+        "EVD-CODE-0006"
+      ],
+      "scope": "Static comparison of the two Gemini review paths",
+      "limitations": [
+        "Potential lineage issue only; no LINEAGE_BREAK classification is made."
       ]
     }
   ]
