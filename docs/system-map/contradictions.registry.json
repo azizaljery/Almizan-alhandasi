@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.5.0",
+  "schemaVersion": "1.6.0",
   "contradictions": [
     {
       "id": "CONTR-0001",
@@ -193,7 +193,17 @@
         "EVD-TEST-0001"
       ],
       "impact": "Potential traceability gap only. Do not classify as LINEAGE_BREAK until LINEAGE_AUDIT.",
-      "disposition": "DEFER_TO_LINEAGE_AUDIT"
+      "disposition": "LINEAGE_BREAK_CONFIRMED",
+      "lineageAudit": {
+        "status": "REVIEWED",
+        "result": "LINEAGE_BREAK",
+        "findingId": "LBR-0001",
+        "evidenceIds": [
+          "EVD-CODE-0012",
+          "EVD-TEST-0001"
+        ],
+        "rationale": "Manual opening edits change canonical geometry content while the integrated candidateId/geometryHash metadata are retained unchanged and the edited model continues downstream."
+      }
     },
     {
       "id": "PLC-0002",
@@ -213,7 +223,17 @@
         "CLM-ID-0002"
       ],
       "impact": "Potential identity translation gap if bestId is later treated as canonical design identity.",
-      "disposition": "DEFER_TO_LINEAGE_AUDIT"
+      "disposition": "RETAIN_AS_IDENTITY_TRANSLATION_GAP",
+      "lineageAudit": {
+        "status": "REVIEWED",
+        "result": "NO_BREAK_EVIDENCED",
+        "findingId": "LGAP-0002",
+        "evidenceIds": [
+          "EVD-CODE-0010",
+          "EVD-CODE-0002"
+        ],
+        "rationale": "bestId is local to comparison output; the current app does not use it to replace canonical selectedModel identity."
+      }
     },
     {
       "id": "PLC-0003",
@@ -235,7 +255,17 @@
         "CLM-ID-0003"
       ],
       "impact": "Potential traceability gap between the selected canonical model and displayed UI engineering-review findings.",
-      "disposition": "DEFER_TO_LINEAGE_AUDIT"
+      "disposition": "RETAIN_AS_TRACEABILITY_GAP",
+      "lineageAudit": {
+        "status": "REVIEWED",
+        "result": "NO_BREAK_EVIDENCED",
+        "findingId": "LGAP-0003",
+        "evidenceIds": [
+          "EVD-CODE-0011",
+          "EVD-CODE-0013"
+        ],
+        "rationale": "UI Gemini review is recomputed from the current model before display, but lacks canonical candidateId/geometryHash binding for durable provenance."
+      }
     }
   ]
 }
