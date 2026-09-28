@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "baselineId": null,
+  "status": "NOT_FROZEN",
+  "commit": null,
+  "registryVersions": {
+    "components": null,
+    "dataFlows": null,
+    "consumers": null,
+    "evidence": null,
+    "claims": null
+  },
+  "reviewDate": null,
+  "reviewedBy": [
+    "MAIN_CONTROL"
+  ],
+  "knownUnknowns": [],
+  "unresolvedContradictions": [],
+  "lineageBreaks": [],
+  "notes": "Populate only after human review gate passes."
+}
