@@ -2,10 +2,10 @@
   "schemaVersion": "1.0.0",
   "id": "CD-006",
   "name": "Flow Contradictions Review",
-  "status": "IN_PROGRESS",
-  "result": null,
+  "status": "COMPLETED",
+  "result": "PASS",
   "health": "PASS",
-  "eligibleForCompletion": false,
+  "eligibleForCompletion": true,
   "knownFlowContradictions": [
     "CONTR-0004",
     "CONTR-0006"
@@ -14,114 +14,176 @@
     {
       "id": "CD-006-01",
       "name": "Current Mizan Score call path",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "dist/app.mjs",
+        "EVD-CODE-0002",
+        "EVD-CODE-0003"
+      ],
+      "note": "Mizan Score is evaluated from state.model; state.model is assigned from result.selectedModel in the inspected UI path."
     },
     {
       "id": "CD-006-02",
       "name": "candidate-to-score-current registry mapping",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "docs/system-map/data-flows.registry.json",
+        "dist/app.mjs"
+      ],
+      "note": "Registry producer remains UNKNOWN. This is a documented mapping gap, not a conflicting flow claim."
     },
     {
       "id": "CD-006-03",
       "name": "compareHomeModels() / evaluation.score path",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "dist/home-design-engine.mjs",
+        "EVD-CODE-0001",
+        "EVD-CODE-0002"
+      ],
+      "note": "compareHomeModels() computes evaluation.score and bestId independently from the selected-model assignment path."
     },
     {
       "id": "CD-006-04",
       "name": "AZIZ selectedCandidateId to selectedModel path",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "dist/multi-engine.mjs",
+        "EVD-TEST-0001"
+      ],
+      "note": "selectedModel is derived by matching candidateId to decision.selectedCandidateId."
     },
     {
       "id": "CD-006-05",
       "name": "selectedModel to 2D",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "tests/release-consistency.test.mjs",
+        "EVD-TEST-0001"
+      ],
+      "note": "Test evidence covers selected model consumption by 2D."
     },
     {
       "id": "CD-006-06",
       "name": "selectedModel to 3D",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "tests/release-consistency.test.mjs",
+        "EVD-TEST-0001"
+      ],
+      "note": "Test evidence covers selected model consumption by 3D wall geometry."
     },
     {
       "id": "CD-006-07",
       "name": "selectedModel to BOQ",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "tests/release-consistency.test.mjs",
+        "EVD-TEST-0001"
+      ],
+      "note": "Test evidence covers selected model consumption by BOQ."
     },
     {
       "id": "CD-006-08",
       "name": "selectedModel versus bestId overlap",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "CONTR-0004",
+        "EVD-CODE-0001",
+        "EVD-CODE-0002",
+        "EVD-TEST-0001"
+      ],
+      "note": "selectedModel versus bestId overlap remains documented as FLOW; no runtime conflict or resolution asserted."
     },
     {
       "id": "CD-006-09",
       "name": "Integrated Gemini reviewCandidate() path",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "dist/integration/pipeline.mjs",
+        "EVD-CODE-0006"
+      ],
+      "note": "Integrated reviewCandidate() executes before decideReviewed/AZIZ selection."
     },
     {
       "id": "CD-006-10",
       "name": "UI analyzeGeminiEngineering() path",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "dist/app.mjs",
+        "dist/gemini-engineering-layer.mjs",
+        "EVD-CODE-0006"
+      ],
+      "note": "UI analyzeGeminiEngineering(state.model) is a separate post-selection preliminary review path."
     },
     {
       "id": "CD-006-11",
       "name": "Dual Gemini review overlap",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "CONTR-0006",
+        "EVD-CODE-0006"
+      ],
+      "note": "Dual Gemini review paths remain registered as a FLOW overlap with no merge or fix."
     },
     {
       "id": "CD-006-12",
       "name": "Flow to Claim to Evidence traceability",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/evidence.registry.json",
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "note": "Cross-reference validation found no dangling claim/evidence references for current contradiction records."
     },
     {
       "id": "CD-006-13",
       "name": "Potential lineage candidates",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "PLC-0001",
+        "EVD-TEST-0001"
+      ],
+      "note": "Potential lineage issue remains deferred to LINEAGE_AUDIT; no LINEAGE_BREAK declared."
     },
     {
       "id": "CD-006-14",
       "name": "Resolution Guard and Registry Integrity revalidation",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
-      "evidence": []
+      "evidence": [
+        "docs/system-map/contradictions.registry.json",
+        "registry-integrity-revalidation"
+      ],
+      "note": "Registry integrity PASS; all 6 contradiction resolutions remain NOT_ATTEMPTED; no runtime/refactor/path merge performed."
     }
   ],
   "guards": {
@@ -132,5 +194,27 @@
     "architectureEnforcement": false
   },
   "baseline": "NOT_FROZEN",
-  "development": "BLOCKED_UNTIL_BASELINE"
+  "development": "BLOCKED_UNTIL_BASELINE",
+  "additionalFlowContradictions": [],
+  "mappingGaps": [
+    {
+      "id": "FLOW-GAP-0001",
+      "subject": "candidate-to-score-current producer",
+      "status": "DOCUMENTED",
+      "note": "Producer is UNKNOWN in data-flows.registry.json while inspected UI code evaluates the selected state.model. Recorded as an incomplete mapping, not a contradiction."
+    }
+  ],
+  "registryIntegrityRevalidation": {
+    "result": "PASS",
+    "issues": [],
+    "counts": {
+      "components": 7,
+      "flows": 4,
+      "consumers": 5,
+      "evidence": 14,
+      "claims": 13,
+      "contradictions": 6,
+      "lineageCandidates": 1
+    }
+  }
 }
