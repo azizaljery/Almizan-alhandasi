@@ -236,8 +236,8 @@
       "name": "Human Review",
       "description": "Human review of classification, documentation, and traceability.",
       "expectedOutput": "Human Review Completed.",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
         "docs/system-map/human-review-notes.md",
         "docs/system-map/generated/contradictions-report.md",
@@ -250,11 +250,12 @@
       "name": "Closure Review",
       "description": "Final Definition of Done review.",
       "expectedOutput": "Formal close/no-close decision.",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
       "evidenceArtifacts": [
         "docs/system-map/status-snapshot.json"
-      ]
+      ],
+      "health": "PASS"
     }
   ],
   "closureGate": {
@@ -268,7 +269,7 @@
     "identityLineageCandidatesDocumented": true,
     "contradictionsRegistryIntegrityPass": true,
     "contradictionsReportGenerated": true,
-    "humanReviewCompleted": false,
+    "humanReviewCompleted": true,
     "resolutionNotAttemptedForAllEntries": true,
     "eligibleForClosure": false
   },
