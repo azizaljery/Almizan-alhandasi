@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.2.0",
+  "schemaVersion": "1.4.0",
   "claims": [
     {
       "claimId": "CLM-FLOW-0007",
@@ -158,6 +158,19 @@
       "scope": "Current system-map component coverage",
       "limitations": [
         "Canonical planner ownership boundary remains unresolved."
+      ]
+    },
+    {
+      "claimId": "CLM-MIRROR-0002",
+      "statement": "The inspected Engineering Core copy used by the UI Gemini bridge is not byte-identical to the Engineering Core copy used by the integrated review pipeline.",
+      "status": "VERIFIED_HASH",
+      "evidenceIds": [
+        "EVD-HASH-0002"
+      ],
+      "scope": "coordination-orchestrator.js comparison on control/mizan-master-checkpoint",
+      "limitations": [
+        "This proves divergence of the inspected copies only.",
+        "It does not establish which copy is canonical or newer."
       ]
     }
   ]
