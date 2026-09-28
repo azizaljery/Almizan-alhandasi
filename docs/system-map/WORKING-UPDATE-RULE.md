@@ -45,3 +45,37 @@ For every adopted change:
 
 Principle:
 Discussion becomes governed repository state promptly, but production behavior changes only after the audit baseline and post-baseline decisions.
+
+
+## Default interpretation of future suggestions
+
+While ARCHITECTURE TRUTH AUDIT is active and SYSTEM MAP BASELINE is not FROZEN:
+
+- New suggestions are treated by default as `Audit Governance Change`.
+- They update audit artifacts, policies, registries, reports, status snapshots, or review gates only.
+- They do NOT imply a runtime/source implementation change.
+
+A suggestion becomes eligible for runtime implementation only after:
+1. SYSTEM MAP BASELINE = FROZEN
+2. Relevant PRE-BASELINE ADRs are reviewed
+3. The resulting architectural decision is ACCEPTED
+4. A separate implementation change is authorized/reviewed
+
+If the user explicitly requests a runtime change before those gates, record the request as a post-baseline implementation candidate unless the governance freeze is explicitly lifted.
+
+Traceability chain:
+
+```text
+Discussion
+→ Decision
+→ Audit Artifact Update
+→ Commit
+```
+
+Never:
+
+```text
+Discussion
+→ Memory
+→ Maybe Later
+```
