@@ -19,8 +19,7 @@
       "health": "PASS",
       "evidence": [
         "dist/app.mjs",
-        "EVD-CODE-0002",
-        "EVD-CODE-0003"
+        "dist/mizan-score.mjs"
       ],
       "note": "Mizan Score is evaluated from state.model; state.model is assigned from result.selectedModel in the inspected UI path."
     },
@@ -32,7 +31,7 @@
       "health": "PASS",
       "evidence": [
         "docs/system-map/data-flows.registry.json",
-        "dist/app.mjs"
+        "docs/system-map/CD-006-flow-review.json"
       ],
       "note": "Registry producer remains UNKNOWN. This is a documented mapping gap, not a conflicting flow claim."
     },
@@ -44,8 +43,7 @@
       "health": "PASS",
       "evidence": [
         "dist/home-design-engine.mjs",
-        "EVD-CODE-0001",
-        "EVD-CODE-0002"
+        "EVD-CODE-0001"
       ],
       "note": "compareHomeModels() computes evaluation.score and bestId independently from the selected-model assignment path."
     },
@@ -181,7 +179,8 @@
       "health": "PASS",
       "evidence": [
         "docs/system-map/contradictions.registry.json",
-        "registry-integrity-revalidation"
+        "registry-integrity-validation",
+        "git-compare:a9770d7...e010df8"
       ],
       "note": "Registry integrity PASS; all 6 contradiction resolutions remain NOT_ATTEMPTED; no runtime/refactor/path merge performed."
     }
@@ -216,5 +215,15 @@
       "contradictions": 6,
       "lineageCandidates": 1
     }
+  },
+  "findings": {
+    "newFlowContradictions": [],
+    "scoreFlowMapping": "MAPPING_GAP_DOCUMENTED_NOT_NEW_CONTRADICTION",
+    "lineageCandidates": [
+      "PLC-0001"
+    ],
+    "registryIntegrity": "PASS",
+    "runtimeChangesDetected": false,
+    "refactorDetected": false
   }
 }
