@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.4.0",
+  "schemaVersion": "1.5.0",
   "contradictions": [
     {
       "id": "CONTR-0001",
@@ -144,7 +144,7 @@
         "CLM-FLOW-0009"
       ],
       "impact": "Engineering-review flow purpose and ownership are ambiguous in the current map; no harmful runtime conflict is proven.",
-      "notes": "No merge, refactor, or runtime change attempted.",
+      "notes": "Human review accepts FLOW/INFERRED as a mapped-boundary ambiguity only; this is not a proven runtime execution conflict. No resolution attempted.",
       "resolution": "NOT_ATTEMPTED"
     },
     {
@@ -170,7 +170,7 @@
         "CLM-FLOW-0009"
       ],
       "impact": "The current map cannot claim one unambiguous Engineering Review source-of-truth across both observed runtime paths.",
-      "notes": "Do not choose, merge, or replace either copy during contradiction detection.",
+      "notes": "Human review constrains CONTRADICTED to the byte-identity/mirror claim: the inspected copies differ. It does not determine which copy is canonical or prove they were required to be mirrors. No resolution attempted.",
       "resolution": "NOT_ATTEMPTED"
     }
   ],
