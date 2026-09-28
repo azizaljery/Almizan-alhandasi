@@ -236,11 +236,14 @@
       "name": "Human Review",
       "description": "Human review of classification, documentation, and traceability.",
       "expectedOutput": "Human Review Completed.",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
       "evidenceArtifacts": [
-        "docs/system-map/HUMAN-REVIEW-GATE.md"
-      ]
+        "docs/system-map/human-review-notes.md",
+        "docs/system-map/generated/contradictions-report.md",
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "health": "PASS"
     },
     {
       "id": "CD-013",
