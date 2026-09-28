@@ -1,0 +1,466 @@
+{
+  "id": "CD-008",
+  "name": "Identity / Lineage Candidates Review",
+  "stage": "CONTRADICTION_DETECTION",
+  "objective": "Review identity propagation and potential lineage issues within the current audited scope without classifying any item as LINEAGE_BREAK before LINEAGE_AUDIT.",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "eligible_for_completion": true,
+  "baseline_status": "NOT_FROZEN",
+  "development_status": "BLOCKED_UNTIL_BASELINE",
+  "prerequisites": {
+    "CD_001_through_CD_007": "COMPLETED_PASS",
+    "registry_integrity": "PASS"
+  },
+  "scope": [
+    "candidateId",
+    "geometryHash",
+    "model identity propagation",
+    "selectedModel identity continuity",
+    "downstream identity preservation in 2D, 3D, and BOQ",
+    "selectedModel versus bestId identity relationship",
+    "Gemini Engineering Review path identity continuity"
+  ],
+  "known_lineage_candidates": [
+    "PLC-0001",
+    "PLC-0002",
+    "PLC-0003"
+  ],
+  "current_counts": {
+    "contradictions": 7,
+    "lineage_candidates": 3
+  },
+  "classification_rule": {
+    "allowed_during_CD_008": "POTENTIAL_LINEAGE_ISSUE",
+    "forbidden_before_LINEAGE_AUDIT": "LINEAGE_BREAK",
+    "disposition": "DEFER_TO_LINEAGE_AUDIT"
+  },
+  "checks": [
+    {
+      "id": "CD-008-01",
+      "name": "Review candidateId creation and propagation",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "planner-output-contract",
+        "aziz-engine"
+      ],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0001"
+      ],
+      "evidence_ids": [
+        "EVD-CODE-0009"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [],
+      "notes": [
+        "candidateId is derived from request/input/geometry/producer/alternativeKey and verified before use."
+      ]
+    },
+    {
+      "id": "CD-008-02",
+      "name": "Review geometryHash creation and propagation",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "planner-output-contract",
+        "aziz-engine"
+      ],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0001"
+      ],
+      "evidence_ids": [
+        "EVD-CODE-0009"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [],
+      "notes": [
+        "geometryHash is SHA-256 over canonical units/frame/geometry and is reverified by verifyCandidateBinding()."
+      ]
+    },
+    {
+      "id": "CD-008-03",
+      "name": "Review model identity propagation across registered flows",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "aziz-engine",
+        "renderer-2d",
+        "renderer-3d",
+        "boq-engine"
+      ],
+      "flow_ids": [
+        "selected-candidate-to-2d",
+        "selected-candidate-to-3d",
+        "selected-candidate-to-boq"
+      ],
+      "claim_ids": [
+        "CLM-FLOW-0007",
+        "CLM-ID-0001"
+      ],
+      "evidence_ids": [
+        "EVD-TEST-0001",
+        "EVD-CODE-0009"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0001"
+      ],
+      "notes": [
+        "Selected model carries integration.candidateId and integration.geometryHash; downstream output hashes are not independently recorded."
+      ]
+    },
+    {
+      "id": "CD-008-04",
+      "name": "Review selectedModel identity continuity",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "aziz-engine"
+      ],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0001",
+        "CLM-FLOW-0007"
+      ],
+      "evidence_ids": [
+        "EVD-TEST-0001",
+        "EVD-TEST-0003"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [],
+      "notes": [
+        "selectedModel is mapped by decision.selectedCandidateId and exact integrated save/restore preserves the model."
+      ]
+    },
+    {
+      "id": "CD-008-05",
+      "name": "Review downstream identity preservation in 2D",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "renderer-2d"
+      ],
+      "flow_ids": [
+        "selected-candidate-to-2d"
+      ],
+      "claim_ids": [
+        "CLM-FLOW-0007"
+      ],
+      "evidence_ids": [
+        "EVD-TEST-0001"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0001"
+      ],
+      "notes": [
+        "Same selected model is test-proven to feed 2D; output does not carry an independently verified output hash."
+      ]
+    },
+    {
+      "id": "CD-008-06",
+      "name": "Review downstream identity preservation in 3D",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "renderer-3d"
+      ],
+      "flow_ids": [
+        "selected-candidate-to-3d"
+      ],
+      "claim_ids": [
+        "CLM-FLOW-0007"
+      ],
+      "evidence_ids": [
+        "EVD-TEST-0001"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0001"
+      ],
+      "notes": [
+        "Same selected model is test-proven to feed 3D wall geometry; output identity is not independently hashed."
+      ]
+    },
+    {
+      "id": "CD-008-07",
+      "name": "Review downstream identity preservation in BOQ",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "boq-engine"
+      ],
+      "flow_ids": [
+        "selected-candidate-to-boq"
+      ],
+      "claim_ids": [
+        "CLM-FLOW-0007"
+      ],
+      "evidence_ids": [
+        "EVD-TEST-0001"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0001"
+      ],
+      "notes": [
+        "Same selected model is test-proven to feed BOQ; derived output identity is not independently hashed."
+      ]
+    },
+    {
+      "id": "CD-008-08",
+      "name": "Review identity relationship between selectedModel and bestId",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "aziz-engine"
+      ],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0002",
+        "CLM-DECISION-0001"
+      ],
+      "evidence_ids": [
+        "EVD-CODE-0010",
+        "EVD-CODE-0002"
+      ],
+      "contradiction_ids": [
+        "CONTR-0004"
+      ],
+      "lineage_candidate_ids": [
+        "PLC-0002"
+      ],
+      "notes": [
+        "bestId is a plan-local design ID; sourceModel retains the model, but bestId is not directly bound to canonical candidateId."
+      ]
+    },
+    {
+      "id": "CD-008-09",
+      "name": "Review identity continuity across Gemini Engineering Review paths",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [
+        "engineering-review"
+      ],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0003",
+        "CLM-FLOW-0009"
+      ],
+      "evidence_ids": [
+        "EVD-CODE-0011",
+        "EVD-CODE-0006"
+      ],
+      "contradiction_ids": [
+        "CONTR-0006"
+      ],
+      "lineage_candidate_ids": [
+        "PLC-0003"
+      ],
+      "notes": [
+        "Integrated review path binds candidateId/geometryHash; UI review path uses separate deterministic fingerprints without direct canonical binding."
+      ]
+    },
+    {
+      "id": "CD-008-10",
+      "name": "Link each finding to available Flow, Claim, Evidence, and Component IDs",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0001",
+        "CLM-ID-0002",
+        "CLM-ID-0003"
+      ],
+      "evidence_ids": [
+        "EVD-CODE-0009",
+        "EVD-CODE-0010",
+        "EVD-CODE-0011"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0001",
+        "PLC-0002",
+        "PLC-0003"
+      ],
+      "notes": [
+        "Identity findings are cross-linked to current audit registries."
+      ]
+    },
+    {
+      "id": "CD-008-11",
+      "name": "Record newly observed identity or lineage candidates as PLC entries only",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [],
+      "flow_ids": [],
+      "claim_ids": [
+        "CLM-ID-0002",
+        "CLM-ID-0003"
+      ],
+      "evidence_ids": [
+        "EVD-CODE-0010",
+        "EVD-CODE-0011"
+      ],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0002",
+        "PLC-0003"
+      ],
+      "notes": [
+        "Two new potential lineage issues were registered; neither is classified as a LINEAGE_BREAK."
+      ]
+    },
+    {
+      "id": "CD-008-12",
+      "name": "Verify no candidate is classified as LINEAGE_BREAK before LINEAGE_AUDIT",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [],
+      "flow_ids": [],
+      "claim_ids": [],
+      "evidence_ids": [],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [
+        "PLC-0001",
+        "PLC-0002",
+        "PLC-0003"
+      ],
+      "notes": [
+        "All PLC entries remain deferred to LINEAGE_AUDIT."
+      ]
+    },
+    {
+      "id": "CD-008-13",
+      "name": "Verify all contradiction resolutions remain NOT_ATTEMPTED",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [],
+      "flow_ids": [],
+      "claim_ids": [],
+      "evidence_ids": [],
+      "contradiction_ids": [
+        "CONTR-0001",
+        "CONTR-0002",
+        "CONTR-0003",
+        "CONTR-0004",
+        "CONTR-0005",
+        "CONTR-0006",
+        "CONTR-0007"
+      ],
+      "lineage_candidate_ids": [],
+      "notes": [
+        "All seven contradictions retain resolution=NOT_ATTEMPTED."
+      ]
+    },
+    {
+      "id": "CD-008-14",
+      "name": "Verify no Runtime change or Refactor occurred",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [],
+      "flow_ids": [],
+      "claim_ids": [],
+      "evidence_ids": [],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [],
+      "notes": [
+        "Git comparison from CD-008 start shows only docs/system-map registry updates; no runtime files changed."
+      ]
+    },
+    {
+      "id": "CD-008-15",
+      "name": "Re-run Registry Integrity after any registry change",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "component_ids": [],
+      "flow_ids": [],
+      "claim_ids": [],
+      "evidence_ids": [],
+      "contradiction_ids": [],
+      "lineage_candidate_ids": [],
+      "notes": [
+        "Registry integrity revalidation PASS with no dangling references or duplicate IDs."
+      ]
+    }
+  ],
+  "findings": {
+    "new_contradiction_ids": [],
+    "new_lineage_candidate_ids": [
+      "PLC-0002",
+      "PLC-0003"
+    ],
+    "confirmed_existing_lineage_candidate_ids": [
+      "PLC-0001"
+    ],
+    "notes": [
+      "PLC-0001: downstream 2D/3D/BOQ outputs lack independently recorded output identity hashes.",
+      "PLC-0002: home-design bestId is plan-local rather than directly candidateId-bound.",
+      "PLC-0003: UI Gemini review uses local deterministic fingerprints without direct canonical candidateId/geometryHash binding."
+    ]
+  },
+  "guards": {
+    "lineage_break_classification_allowed": false,
+    "resolution": "NOT_ATTEMPTED",
+    "runtime_changes": false,
+    "refactor_performed": false,
+    "canonical_identity_selected": false
+  },
+  "completion_gate": {
+    "candidateId_reviewed": true,
+    "geometryHash_reviewed": true,
+    "model_identity_propagation_reviewed": true,
+    "selectedModel_identity_continuity_reviewed": true,
+    "downstream_identity_preservation_reviewed": true,
+    "all_findings_classified": true,
+    "all_findings_documented": true,
+    "all_findings_traceable": true,
+    "all_lineage_candidates_deferred_to_LINEAGE_AUDIT": true,
+    "registry_integrity_revalidated": true,
+    "no_LINEAGE_BREAK_declared": true,
+    "no_resolution_attempted": true,
+    "no_runtime_change": true,
+    "no_refactor": true
+  },
+  "validation": {
+    "subchecks_total": 15,
+    "subchecks_passed": 15,
+    "registry_integrity": "PASS",
+    "registry_counts": {
+      "components": 7,
+      "flows": 4,
+      "consumers": 5,
+      "evidence": 18,
+      "claims": 17,
+      "contradictions": 7,
+      "lineage_candidates": 3
+    },
+    "production_diff_guard": "PASS",
+    "production_diff_note": "From CD-008 start through lineage registry updates, changed files were limited to docs/system-map/*."
+  },
+  "next_check_on_pass": "CD-009",
+  "notes": [
+    "PASS confirms completion within the current scope; it does not prove full System Discovery or System Map coverage.",
+    "No fresh Node test-suite execution was used for this audit check; validation used direct source inspection, existing VERIFIED_TEST evidence, direct registry checks, and Git diff guard."
+  ]
+}
