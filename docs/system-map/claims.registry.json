@@ -1,11 +1,13 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "claims": [
     {
       "claimId": "CLM-FLOW-0007",
       "statement": "The AZIZ-selected model is the model consumed by 2D, 3D wall geometry and BOQ in the tested integration candidate.",
       "status": "VERIFIED_TEST",
-      "evidenceIds": ["EVD-TEST-0001"],
+      "evidenceIds": [
+        "EVD-TEST-0001"
+      ],
       "scope": "Tested integration candidate",
       "limitations": [
         "Production runtime not independently verified.",
@@ -16,7 +18,9 @@
       "claimId": "CLM-FLOW-0008",
       "statement": "The integrated Claude -> Gemini -> AZIZ path returns three validated RECT/L/U models and a SELECTED_PRELIMINARY decision for south, north, east and west entry tests.",
       "status": "VERIFIED_TEST",
-      "evidenceIds": ["EVD-TEST-0002"],
+      "evidenceIds": [
+        "EVD-TEST-0002"
+      ],
       "scope": "tests/multi-engine.test.mjs",
       "limitations": [
         "This is test-path evidence, not production-runtime evidence."
@@ -26,7 +30,9 @@
       "claimId": "CLM-PERSIST-0001",
       "statement": "Integrated project save/restore preserves the selected model and RECT/L/U alternatives exactly in the tested round-trip.",
       "status": "VERIFIED_TEST",
-      "evidenceIds": ["EVD-TEST-0003"],
+      "evidenceIds": [
+        "EVD-TEST-0003"
+      ],
       "scope": "Integrated project persistence test",
       "limitations": [
         "Historical and production persistence paths are not fully covered by this claim."
@@ -36,7 +42,9 @@
       "claimId": "CLM-MIRROR-0001",
       "statement": "The tested dist/claude source files match vendor/claude-planner/src/ byte for byte.",
       "status": "VERIFIED_TEST",
-      "evidenceIds": ["EVD-HASH-0001"],
+      "evidenceIds": [
+        "EVD-HASH-0001"
+      ],
       "scope": "Claude source mirror test",
       "limitations": [
         "Explicit per-file SHA values are not yet recorded in the registry."
@@ -46,11 +54,61 @@
       "claimId": "CLM-SCORE-0001",
       "statement": "A runtime Mizan Score implementation exists at dist/mizan-score.mjs and is invoked from dist/app.mjs.",
       "status": "INFERRED",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "EVD-CODE-0003"
+      ],
       "scope": "Static code inspection",
       "limitations": [
         "No runtime trace has yet proven execution in a browser session.",
         "Current implementation is a heuristic and does not yet satisfy the planned V1 specification."
+      ]
+    },
+    {
+      "claimId": "CLM-DOC-0001",
+      "statement": "README states that the current product supports only a rectangular mass and does not support L/U forms or courtyards.",
+      "status": "DOCUMENTED",
+      "evidenceIds": [
+        "EVD-DOC-0001"
+      ],
+      "scope": "README stated limitations",
+      "limitations": [
+        "Conflicts with newer automated-test evidence for the integrated candidate."
+      ]
+    },
+    {
+      "claimId": "CLM-DOC-0002",
+      "statement": "README states that saved designs are regenerated from their inputs and strategies during import.",
+      "status": "DOCUMENTED",
+      "evidenceIds": [
+        "EVD-DOC-0002"
+      ],
+      "scope": "README persistence description",
+      "limitations": [
+        "Does not distinguish the later integrated embedded-model path."
+      ]
+    },
+    {
+      "claimId": "CLM-SCORE-0002",
+      "statement": "home-design-engine exposes a separate evaluation.score and compareHomeModels() computes a bestId from the highest evaluation score.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0001"
+      ],
+      "scope": "Static code inspection",
+      "limitations": [
+        "No evidence yet that bestId replaces the AZIZ-selected model in live execution."
+      ]
+    },
+    {
+      "claimId": "CLM-DECISION-0001",
+      "statement": "In the inspected app orchestration path, state.model is assigned from runMultiEngineDesign().selectedModel, while compareHomeModels() is computed separately for engineering evaluation display.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0002"
+      ],
+      "scope": "Static code inspection",
+      "limitations": [
+        "No browser runtime trace."
       ]
     }
   ]
