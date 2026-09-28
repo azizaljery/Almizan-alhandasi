@@ -52,7 +52,6 @@
       "result": "PASS",
       "evidenceArtifacts": [
         "docs/system-map/components.registry.json",
-        "docs/system-map/CD-002-COMPONENTS-REVIEW.md",
         "docs/system-map/CD-002-components-review.json",
         "docs/system-map/contradictions.registry.json"
       ],
