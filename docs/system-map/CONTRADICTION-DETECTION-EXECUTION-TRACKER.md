@@ -30,7 +30,7 @@ Architecture Enforcement
 
 | ID | Check | Description | Expected Output | Status | Result | Evidence / Artifact |
 |----|--------|-------------|----------------|--------|--------|---------------------|
-| CD-001 | Coverage Review | مراجعة جميع محاور التناقضات المعتمدة | تأكيد اكتمال الحصر الحالي | NOT_STARTED | null | contradictions.registry.json |
+| CD-001 | Coverage Review | مراجعة جميع محاور التناقضات المعتمدة | تأكيد اكتمال الحصر الحالي | IN_PROGRESS | null | contradictions.registry.json + components/data-flows/claims registries |
 | CD-002 | Components Review | مراجعة جميع Components بحثًا عن تناقضات غير مسجلة | عناصر جديدة أو تأكيد عدم وجود عناصر إضافية | NOT_STARTED | null | components.registry.json |
 | CD-003 | Flows Review | مراجعة جميع Data Flows | كشف أي تناقضات تدفق إضافية | NOT_STARTED | null | data-flows.registry.json |
 | CD-004 | Claims Review | مراجعة جميع Claims | كشف Claims متعارضة أو غير متسقة | NOT_STARTED | null | claims.registry.json |
@@ -201,3 +201,11 @@ CONTRADICTION_DETECTION
 ```text
 LINEAGE_AUDIT
 ```
+
+
+## CD-001 Progress
+
+- المحاور المعتمدة تمت مراجعتها مبدئيًا: OWNERSHIP / FLOW / SOURCE_OF_TRUTH / IDENTITY_LINEAGE.
+- التغطية **لم تثبت مكتملة بعد**.
+- CD-001 يعتمد على إتمام CD-002 وCD-003 وCD-004 قبل الحكم النهائي.
+- الحالة الحالية: IN_PROGRESS / result: null / health: PASS.
