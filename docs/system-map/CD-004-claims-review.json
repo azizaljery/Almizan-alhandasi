@@ -1,0 +1,32 @@
+{
+  "id": "CD-004",
+  "name": "Claims Review",
+  "source_artifacts": [
+    "claims.registry.json",
+    "evidence.registry.json",
+    "components.registry.json",
+    "data-flows.registry.json",
+    "contradictions.registry.json"
+  ],
+  "reviewed_claim_count": 13,
+  "findings": [
+    "Existing README shape and persistence conflicts remain registered as CONTR-0001 and CONTR-0002.",
+    "Mizan Score versus home-design evaluation overlap remains registered as CONTR-0003.",
+    "AZIZ-selected model versus home-design bestId overlap remains registered as CONTR-0004.",
+    "New AZIZ score-definition ownership conflict is registered as CONTR-0005.",
+    "New dual Engineering Review flow overlap is registered as CONTR-0006."
+  ],
+  "new_claim_ids": [
+    "CLM-OWN-0001",
+    "CLM-AZIZ-0001",
+    "CLM-FLOW-0009",
+    "CLM-COMP-0001"
+  ],
+  "coverage": {
+    "status": "PARTIAL",
+    "notes": "All claims currently present in the registry were reviewed; global discovery completeness is not asserted."
+  },
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS"
+}
