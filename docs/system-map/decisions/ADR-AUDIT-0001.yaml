@@ -1,0 +1,77 @@
+decision_id: ADR-AUDIT-0001
+title: Audit Artifacts Only During Architecture Truth Audit
+date: "2026-09-28"
+author: MAIN_CONTROL
+
+audit_phase:
+  - CONTRADICTION_DETECTION
+
+status: APPROVED
+
+decision_type: PROCESS_RULE
+
+description: >
+  Any approved audit governance decision must be recorded promptly
+  in docs/system-map audit artifacts and committed to the audit branch.
+  During ARCHITECTURE TRUTH AUDIT, approved governance decisions do not
+  imply changes to production/runtime source code.
+
+rationale: >
+  Preserve traceability between discussion, decision, repository state,
+  and commit history, while preventing audit discoveries from silently
+  becoming runtime refactors before the System Map Baseline is frozen
+  and post-baseline ADR review is complete.
+
+evidence:
+  - docs/system-map/WORKING-UPDATE-RULE.md
+  - docs/system-map/AUDIT-EXECUTION-CHECKLIST.md
+  - docs/system-map/status-snapshot.json
+
+affected_artifacts:
+  - docs/system-map/*.json
+  - docs/system-map/*.md
+  - docs/system-map/generated/*
+  - docs/system-map/decisions/*
+
+repository_scope:
+  allowed:
+    - docs/system-map/*.json
+    - docs/system-map/*.md
+    - docs/system-map/generated/*
+    - docs/system-map/decisions/*
+  forbidden:
+    - AZIZ
+    - Planner
+    - Mizan Score Runtime
+    - Engineering Core
+    - Design Core
+    - 2D
+    - 3D
+    - BOQ
+    - Contracts Runtime
+
+baseline_dependency:
+  baseline_status: NOT_FROZEN
+  implementation_allowed: false
+
+implementation_rule: >
+  Audit artifacts may be updated during ARCHITECTURE TRUTH AUDIT.
+  Production/runtime code remains BLOCKED_UNTIL_BASELINE.
+
+human_review_required: true
+human_review_completed: true
+
+decision_dod:
+  decision_id_assigned: true
+  description_documented: true
+  rationale_documented: true
+  audit_phase_identified: true
+  affected_artifacts_listed: true
+  repository_files_updated: true
+  commit_created: true
+  human_review_completed: true
+
+production_code_change: false
+
+notes:
+  - Discussion -> Decision Record -> Repository Update -> Commit -> Traceable Audit History
