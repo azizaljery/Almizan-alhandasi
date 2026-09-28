@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
   "stage": "CONTRADICTION_DETECTION",
-  "status": "IN_PROGRESS",
-  "result": null,
+  "status": "COMPLETED",
+  "result": "PASS",
   "health": "PASS",
   "resolutionPolicy": "NOT_ATTEMPTED",
   "developmentStatus": "BLOCKED_UNTIL_BASELINE",
@@ -250,10 +250,13 @@
       "name": "Closure Review",
       "description": "Final Definition of Done review.",
       "expectedOutput": "Formal close/no-close decision.",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/status-snapshot.json"
+        "docs/system-map/CD-013-closure-review.json",
+        "docs/system-map/status-snapshot.json",
+        "docs/system-map/human-review-notes.md",
+        "docs/system-map/generated/contradictions-report.md"
       ],
       "health": "PASS"
     }
@@ -271,7 +274,7 @@
     "contradictionsReportGenerated": true,
     "humanReviewCompleted": true,
     "resolutionNotAttemptedForAllEntries": true,
-    "eligibleForClosure": false
+    "eligibleForClosure": true
   },
   "exitCondition": {
     "onPassNextStage": "LINEAGE_AUDIT",
