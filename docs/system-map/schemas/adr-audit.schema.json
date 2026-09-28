@@ -1,0 +1,472 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mizan.local/schema/adr-audit.schema.json",
+  "title": "MIZAN ADR-AUDIT Decision Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decisionId",
+    "title",
+    "date",
+    "author",
+    "auditPhase",
+    "status",
+    "decisionType",
+    "description",
+    "rationale",
+    "evidence",
+    "affectedArtifacts",
+    "repositoryScope",
+    "baselineDependency",
+    "implementationRule",
+    "productionCodeChange",
+    "humanReviewRequired",
+    "humanReviewCompleted",
+    "traceability",
+    "automatedValidation",
+    "decisionHealth",
+    "approvalGate",
+    "notes"
+  ],
+  "properties": {
+    "decisionId": {
+      "type": "string",
+      "pattern": "^ADR-AUDIT-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auditPhase": {
+      "type": "string",
+      "enum": [
+        "SYSTEM_DISCOVERY",
+        "SYSTEM_MAP",
+        "REGISTRY_INTEGRITY",
+        "EVIDENCE_AUDIT",
+        "CONTRADICTION_DETECTION",
+        "LINEAGE_AUDIT",
+        "HUMAN_REVIEW",
+        "SYSTEM_MAP_BASELINE"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PROPOSED",
+        "APPROVED",
+        "REJECTED",
+        "SUPERSEDED"
+      ]
+    },
+    "decisionType": {
+      "type": "string",
+      "enum": [
+        "PROCESS_RULE",
+        "EVIDENCE_RULE",
+        "STATUS_MODEL",
+        "DOD_CHANGE",
+        "CONTRADICTION_CLASSIFICATION",
+        "LINEAGE_CONVENTION",
+        "BASELINE_REQUIREMENT",
+        "OWNERSHIP_DEFINITION",
+        "OTHER"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 10
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "affectedArtifacts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "repositoryScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed",
+        "forbidden"
+      ],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "forbidden": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "baselineDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baselineStatus",
+        "implementationAllowed"
+      ],
+      "properties": {
+        "baselineStatus": {
+          "type": "string",
+          "enum": [
+            "NOT_FROZEN",
+            "FROZEN"
+          ]
+        },
+        "implementationAllowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "implementationRule": {
+      "type": "string",
+      "minLength": 10
+    },
+    "productionCodeChange": {
+      "type": "boolean"
+    },
+    "humanReviewRequired": {
+      "const": true
+    },
+    "humanReviewCompleted": {
+      "type": "boolean"
+    },
+    "traceability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "discussionReference",
+        "evidenceIds",
+        "registryIds",
+        "proposalCommitHash",
+        "approvalCommitHash"
+      ],
+      "properties": {
+        "discussionReference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "registryIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "proposalCommitHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "approvalCommitHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{40}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "automatedValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionIdPresent",
+        "titlePresent",
+        "decisionTypeValid",
+        "auditPhaseValid",
+        "rationalePresent",
+        "evidenceReferenced",
+        "affectedArtifactsPresent",
+        "repositoryScopeDefined",
+        "implementationRulePresent",
+        "baselineDependencyDefined",
+        "forbiddenRuntimeChanges",
+        "humanReviewRequired",
+        "runtimeChangeCheck",
+        "evidenceChainCheck",
+        "baselineConsistencyCheck",
+        "adrDependencyCheck",
+        "traceabilityCheck"
+      ],
+      "properties": {
+        "decisionIdPresent": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "titlePresent": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "decisionTypeValid": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "auditPhaseValid": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "rationalePresent": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "evidenceReferenced": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "affectedArtifactsPresent": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "repositoryScopeDefined": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "implementationRulePresent": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "baselineDependencyDefined": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "forbiddenRuntimeChanges": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "humanReviewRequired": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "runtimeChangeCheck": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "evidenceChainCheck": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "baselineConsistencyCheck": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "adrDependencyCheck": {
+          "$ref": "#/$defs/validationRule"
+        },
+        "traceabilityCheck": {
+          "$ref": "#/$defs/validationRule"
+        }
+      }
+    },
+    "decisionHealth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "checksTotal",
+        "checksPassed",
+        "checksFailed",
+        "checksBlocked"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/checkResult"
+        },
+        "checksTotal": {
+          "type": "integer",
+          "const": 17
+        },
+        "checksPassed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 17
+        },
+        "checksFailed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 17
+        },
+        "checksBlocked": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 17
+        }
+      }
+    },
+    "approvalGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligibleForApproval",
+        "blockingChecks",
+        "reason"
+      ],
+      "properties": {
+        "eligibleForApproval": {
+          "type": "boolean"
+        },
+        "blockingChecks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "checkResult": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED"
+      ]
+    },
+    "validationRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "message",
+        "checkedAt"
+      ],
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/checkResult"
+        },
+        "message": {
+          "type": "string"
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "APPROVED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "humanReviewCompleted": {
+            "const": true
+          },
+          "approvalGate": {
+            "properties": {
+              "eligibleForApproval": {
+                "const": true
+              }
+            },
+            "required": [
+              "eligibleForApproval"
+            ]
+          },
+          "traceability": {
+            "properties": {
+              "approvalCommitHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{40}$"
+              }
+            },
+            "required": [
+              "approvalCommitHash"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "baselineDependency": {
+            "properties": {
+              "baselineStatus": {
+                "const": "NOT_FROZEN"
+              }
+            },
+            "required": [
+              "baselineStatus"
+            ]
+          }
+        },
+        "required": [
+          "baselineDependency"
+        ]
+      },
+      "then": {
+        "properties": {
+          "baselineDependency": {
+            "properties": {
+              "implementationAllowed": {
+                "const": false
+              }
+            },
+            "required": [
+              "implementationAllowed"
+            ]
+          },
+          "productionCodeChange": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}
