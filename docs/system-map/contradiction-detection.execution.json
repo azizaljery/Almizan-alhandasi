@@ -124,11 +124,20 @@
       "name": "Flow Contradictions",
       "description": "Review Mizan Score path and compareHomeModels() overlap.",
       "expectedOutput": "All known flow contradictions documented.",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
       "evidenceArtifacts": [
-        "docs/system-map/contradictions.registry.json"
-      ]
+        "docs/system-map/CD-006-FLOW-CONTRADICTIONS-CHECKLIST.md",
+        "docs/system-map/CD-006-flow-contradictions.execution.json",
+        "docs/system-map/CD-006-flow-review.json",
+        "docs/system-map/data-flows.registry.json",
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/evidence.registry.json"
+      ],
+      "health": "PASS",
+      "subchecksTotal": 14,
+      "subchecksCompleted": 0
     },
     {
       "id": "CD-007",
