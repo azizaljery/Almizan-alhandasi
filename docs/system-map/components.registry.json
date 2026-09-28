@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "components": [
     {
       "componentId": "planner-output-contract",
@@ -123,7 +123,7 @@
         "geometry-repair"
       ],
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ]
     },
     {
@@ -145,7 +145,7 @@
         "structural-inference"
       ],
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ]
     },
     {
@@ -168,7 +168,7 @@
         "geometry-repair"
       ],
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ]
     }
   ]
