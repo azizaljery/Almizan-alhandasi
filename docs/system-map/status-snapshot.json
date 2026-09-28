@@ -71,13 +71,15 @@
         "CD-002",
         "CD-003",
         "CD-004",
-        "CD-005"
+        "CD-005",
+        "CD-006"
       ],
-      "nextCheck": "CD-006",
-      "activeCheck": "CD-006",
+      "nextCheck": "CD-007",
+      "activeCheck": null,
       "cd006Subchecks": {
         "total": 14,
-        "completed": 0
+        "completed": 14,
+        "result": "PASS"
       }
     },
     "lineageAudit": {
@@ -109,7 +111,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-006 subchecks sequentially; register any additional flow contradiction only when evidenced. Keep resolution NOT_ATTEMPTED.",
+  "nextStep": "Execute CD-007 Source-of-Truth Contradictions Review. Keep all contradiction resolutions NOT_ATTEMPTED.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
