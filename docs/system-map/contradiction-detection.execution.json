@@ -168,11 +168,25 @@
       "name": "Identity / Lineage Candidates",
       "description": "Review candidateId, geometryHash, and model identity propagation.",
       "expectedOutput": "Potential Lineage Issues recorded only; no LINEAGE_BREAK classification yet.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/contradictions.registry.json"
-      ]
+        "docs/system-map/CD-008-identity-lineage-candidates.execution.json",
+        "docs/system-map/CD-008-identity-lineage-review.json",
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/evidence.registry.json",
+        "dist/integration/control/reference/identity.mjs",
+        "tests/release-consistency.test.mjs",
+        "tests/multi-engine.test.mjs"
+      ],
+      "health": "PASS",
+      "subchecksTotal": 15,
+      "subchecksCompleted": 15,
+      "coverageAssessment": {
+        "status": "PROVEN_FOR_CURRENT_SCOPE",
+        "notes": "candidateId, geometryHash, selectedModel continuity, downstream identity, bestId relationship, and Gemini review identity were reviewed."
+      }
     },
     {
       "id": "CD-009",
@@ -238,7 +252,7 @@
     "ownershipReviewComplete": true,
     "flowReviewComplete": true,
     "sourceOfTruthReviewComplete": true,
-    "identityLineageCandidatesDocumented": false,
+    "identityLineageCandidatesDocumented": true,
     "contradictionsRegistryIntegrityPass": false,
     "contradictionsReportGenerated": false,
     "humanReviewCompleted": false,
