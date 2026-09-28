@@ -1,0 +1,18 @@
+{
+  "id": "CD-008",
+  "name": "Identity / Lineage Candidates Review",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "findings": [
+    "PLC-0001 confirmed and deferred to LINEAGE_AUDIT",
+    "PLC-0002 added: bestId is not directly candidateId-bound",
+    "PLC-0003 added: UI Gemini review lacks direct canonical candidateId/geometryHash binding"
+  ],
+  "guards": {
+    "lineangeBreakDeclared": false,
+    "resolution": "NOT_ATTEMPTED",
+    "runtimeChanges": false,
+    "refactor": false
+  }
+}
