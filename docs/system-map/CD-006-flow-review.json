@@ -1,0 +1,47 @@
+{
+  "id": "CD-006",
+  "name": "Flow Contradictions Review",
+  "scope": [
+    "Current Mizan Score Path",
+    "compareHomeModels() overlap",
+    "selectedModel path",
+    "bestId path",
+    "Gemini Engineering Review paths",
+    "additional flow contradictions in current scope"
+  ],
+  "findings": [
+    {
+      "subject": "selectedModel versus bestId",
+      "contradictionId": "CONTR-0004",
+      "classification": "FLOW",
+      "status": "DOCUMENTED_TRACEABLE",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "subject": "Dual Gemini Engineering Review paths",
+      "contradictionId": "CONTR-0006",
+      "classification": "FLOW",
+      "status": "DOCUMENTED_TRACEABLE",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "subject": "Current Mizan Score flow mapping",
+      "classification": "FLOW_MAPPING_GAP",
+      "status": "DOCUMENTED",
+      "note": "The registry names candidate-to-score-current with an UNKNOWN producer, while inspected app code scores state.model after it is assigned from result.selectedModel. This is recorded as a flow-mapping discrepancy for contradiction review; no runtime change is made."
+    }
+  ],
+  "coverage": {
+    "status": "PROVEN_FOR_CURRENT_SCOPE",
+    "notes": "All flow questions listed for CD-006 were reviewed against current registries and inspected code."
+  },
+  "constraints": {
+    "contradictionResolutionPerformed": false,
+    "pathsMerged": false,
+    "runtimeModified": false,
+    "refactorPerformed": false
+  },
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "PASS"
+}
