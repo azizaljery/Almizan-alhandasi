@@ -74,10 +74,13 @@
         "CD-005",
         "CD-006",
         "CD-007",
-        "CD-008"
+        "CD-008",
+        "CD-009",
+        "CD-010",
+        "CD-011"
       ],
-      "nextCheck": "CD-009",
-      "activeCheck": null,
+      "nextCheck": "CD-012",
+      "activeCheck": "CD-012",
       "cd006Subchecks": {
         "total": 14,
         "completed": 14,
@@ -118,7 +121,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-009 Registry Validation after CD-008 lineage registry updates.",
+  "nextStep": "Complete CD-012 human review before CD-013 closure review.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
