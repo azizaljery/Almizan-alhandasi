@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.6.0",
+  "schemaVersion": "1.7.0",
   "claims": [
     {
       "claimId": "CLM-FLOW-0007",
@@ -248,6 +248,19 @@
       "scope": "Static inspection of current UI review flow",
       "limitations": [
         "This supports continuity of displayed review freshness, not canonical provenance."
+      ]
+    },
+    {
+      "claimId": "CLM-LIN-0004",
+      "statement": "Integrated project persistence preserves embedded model identity metadata exactly; therefore stale candidateId/geometryHash metadata introduced by a manual edit would persist across save/restore.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0012",
+        "EVD-CODE-0014"
+      ],
+      "scope": "Manual edit plus integrated project persistence path",
+      "limitations": [
+        "Static composition of two observed code paths; no new end-to-end runtime test was executed."
       ]
     }
   ]
