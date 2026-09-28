@@ -45,9 +45,9 @@
         "components": 7,
         "dataFlows": 4,
         "consumers": 5,
-        "evidenceRecords": 14,
-        "claims": 13,
-        "contradictions": 6,
+        "evidenceRecords": 15,
+        "claims": 14,
+        "contradictions": 7,
         "lineageCandidates": 1,
         "decisions": 2,
         "decisionIntegrityRules": 17
@@ -72,9 +72,10 @@
         "CD-003",
         "CD-004",
         "CD-005",
-        "CD-006"
+        "CD-006",
+        "CD-007"
       ],
-      "nextCheck": "CD-007",
+      "nextCheck": "CD-008",
       "activeCheck": null,
       "cd006Subchecks": {
         "total": 14,
@@ -111,7 +112,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-007 Source-of-Truth Contradictions Review. Keep all contradiction resolutions NOT_ATTEMPTED.",
+  "nextStep": "Execute CD-008 Identity / Lineage Candidates review without declaring LINEAGE_BREAK.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
