@@ -387,29 +387,115 @@
         "registryIds": [
           "ADR-AUDIT-0003"
         ],
-        "proposalCommitHash": null,
+        "proposalCommitHash": "b6c6b6c37ab6c9db4a4c44e6c8a8e9d88b938521",
         "approvalCommitHash": null
       },
-      "automatedValidation": {},
+      "automatedValidation": {
+        "decisionIdPresent": {
+          "status": "PASS",
+          "message": "decisionId is present.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "titlePresent": {
+          "status": "PASS",
+          "message": "title is present.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "decisionTypeValid": {
+          "status": "PASS",
+          "message": "PROCESS_RULE is allowed.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "auditPhaseValid": {
+          "status": "PASS",
+          "message": "SYSTEM_MAP is allowed.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "rationalePresent": {
+          "status": "PASS",
+          "message": "rationale is documented.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "evidenceReferenced": {
+          "status": "PASS",
+          "message": "Discussion and proposed validation artifacts are referenced.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "affectedArtifactsPresent": {
+          "status": "PASS",
+          "message": "Affected audit artifacts are listed.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "repositoryScopeDefined": {
+          "status": "PASS",
+          "message": "Allowed and forbidden scopes are defined.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "implementationRulePresent": {
+          "status": "PASS",
+          "message": "Audit-artifacts-only implementation rule is present.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "baselineDependencyDefined": {
+          "status": "PASS",
+          "message": "Baseline dependency is NOT_FROZEN with implementationAllowed=false.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "forbiddenRuntimeChanges": {
+          "status": "PASS",
+          "message": "Runtime components remain forbidden.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "humanReviewRequired": {
+          "status": "PASS",
+          "message": "humanReviewRequired=true.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "runtimeChangeCheck": {
+          "status": "PASS",
+          "message": "productionCodeChange=false.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "evidenceChainCheck": {
+          "status": "PASS",
+          "message": "Discussion and artifact references are linked.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "baselineConsistencyCheck": {
+          "status": "PASS",
+          "message": "Proposal does not change production/runtime architecture before baseline.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "adrDependencyCheck": {
+          "status": "PASS",
+          "message": "Proposal remains non-production-binding while baseline is NOT_FROZEN.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        },
+        "traceabilityCheck": {
+          "status": "PASS",
+          "message": "Discussion reference, registry ID and proposal commit are recorded.",
+          "checkedAt": "2026-09-28T20:02:00Z"
+        }
+      },
       "decisionHealth": {
-        "status": "BLOCKED",
+        "status": "PASS",
         "checksTotal": 17,
-        "checksPassed": 0,
+        "checksPassed": 17,
         "checksFailed": 0,
-        "checksBlocked": 17
+        "checksBlocked": 0
       },
       "approvalGate": {
         "eligibleForApproval": false,
         "blockingChecks": [
-          "proposal_commit_hash",
-          "automated_validation",
           "human_review_completed"
         ],
-        "reason": "Decision proposal must be committed, validated, and human-reviewed before approval."
+        "reason": "Decision Integrity checks passed, but explicit human review has not yet been recorded."
       },
       "notes": [
         "JSON Schema is aligned to the current camelCase machine-readable decisions registry.",
-        "A standalone executable Layer-2 validator is not implemented in this phase."
+        "Layer 1 schema artifact exists; no standalone Draft 2020-12 validator has been executed in-repository yet.",
+        "Layer 2 rule model exists; a standalone executable repository-aware validator is not implemented in this phase.",
+        "Layer 3 human review is still pending."
       ]
     }
   ]
