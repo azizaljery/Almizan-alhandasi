@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "contradictions": [
     {
       "id": "CONTR-0001",
@@ -96,6 +96,31 @@
       ],
       "impact": "There are two decision-like concepts: AZIZ selectedCandidateId and home-design bestId. Their intended ownership is not yet formally established.",
       "notes": "Requires later architecture decision after baseline; no runtime conflict claimed.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "CONTR-0005",
+      "title": "AZIZ scoring implementation overlaps declared score-definition boundary",
+      "category": "OWNERSHIP",
+      "status": "IDENTIFIED",
+      "verificationState": "INFERRED",
+      "description": "The system map says AZIZ must not own score-definition, while inspected AZIZ source contains score axes, weighted totals, ranking, and candidate selection logic.",
+      "artifacts": [
+        "docs/system-map/components.registry.json",
+        "dist/integration/aziz/scoring-engine.js",
+        "dist/integration/aziz/aziz.js"
+      ],
+      "evidenceIds": [
+        "EVD-DOC-0003",
+        "EVD-CODE-0004",
+        "EVD-CODE-0005"
+      ],
+      "conflictingClaimIds": [
+        "CLM-OWN-0001",
+        "CLM-AZIZ-0001"
+      ],
+      "impact": "Score ownership is not aligned between the intended system-map boundary and current implementation.",
+      "notes": "No resolution attempted during contradiction detection.",
       "resolution": "NOT_ATTEMPTED"
     }
   ],
