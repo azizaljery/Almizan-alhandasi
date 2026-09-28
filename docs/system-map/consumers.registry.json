@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "1.0.0",
+  "consumers": [
+    {
+      "consumerId": "aziz-engine",
+      "reads": [
+        "candidate.identity",
+        "candidate.geometryHash",
+        "hardConstraintResults",
+        "scoreVector",
+        "scoreConfidence",
+        "evidenceCoverage"
+      ],
+      "writes": [
+        "decisionId",
+        "decisionStatus",
+        "selectedCandidateIds",
+        "decisionTrace",
+        "refinementRequests"
+      ],
+      "mustNotWrite": [
+        "scoreAxisDefinitions",
+        "candidateNativeGeometry",
+        "evidenceRecords"
+      ],
+      "fallbackPolicy": "NO_SELECTION",
+      "verification": "UNKNOWN",
+      "evidenceIds": []
+    },
+    {
+      "consumerId": "mizan-score",
+      "reads": [
+        "candidate",
+        "evidence",
+        "scoringContext"
+      ],
+      "writes": [
+        "scoreVector",
+        "penalties",
+        "confidence",
+        "coverage"
+      ],
+      "mustNotWrite": [
+        "selectedCandidateId",
+        "winner",
+        "refinementInstruction",
+        "candidateNativeGeometry"
+      ],
+      "fallbackPolicy": "NO_SCORE",
+      "verification": "PROPOSED",
+      "evidenceIds": []
+    },
+    {
+      "consumerId": "renderer-2d",
+      "reads": [
+        "canonicalGeometry",
+        "labels",
+        "openings",
+        "selectedState"
+      ],
+      "writes": [
+        "2dOutput"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry"
+      ],
+      "fallbackPolicy": "DISPLAY_ERROR",
+      "verification": "PARTIALLY_VERIFIED",
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ]
+    },
+    {
+      "consumerId": "renderer-3d",
+      "reads": [
+        "canonicalGeometry",
+        "openings",
+        "materials",
+        "displayState"
+      ],
+      "writes": [
+        "3dOutput"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry"
+      ],
+      "fallbackPolicy": "DISPLAY_ERROR",
+      "verification": "PARTIALLY_VERIFIED",
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ]
+    },
+    {
+      "consumerId": "boq-engine",
+      "reads": [
+        "canonicalGeometry"
+      ],
+      "writes": [
+        "quantities",
+        "costRows"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry"
+      ],
+      "fallbackPolicy": "FAIL_CLOSED",
+      "verification": "PARTIALLY_VERIFIED",
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ]
+    }
+  ]
+}
