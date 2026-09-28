@@ -1,0 +1,17 @@
+{
+  "id": "CD-009",
+  "name": "Registry Validation",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "counts": {
+    "components": 7,
+    "flows": 4,
+    "consumers": 5,
+    "evidence": 18,
+    "claims": 17,
+    "contradictions": 7,
+    "lineageCandidates": 3
+  },
+  "issues": []
+}
