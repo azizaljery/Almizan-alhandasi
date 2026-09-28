@@ -1,12 +1,14 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "evidence": [
     {
       "evidenceId": "EVD-TEST-0001",
       "type": "VERIFIED_TEST",
       "sourcePath": "tests/release-consistency.test.mjs",
       "symbolOrTest": "AZIZ-selected model is the exact source consumed by 2D, 3D geometry and BOQ",
-      "claimIds": ["CLM-FLOW-0007"],
+      "claimIds": [
+        "CLM-FLOW-0007"
+      ],
       "result": "PASS",
       "scope": "Tested integration candidate: selected candidate propagation to 2D, 3D wall geometry and BOQ",
       "commit": null,
@@ -23,7 +25,9 @@
       "type": "VERIFIED_TEST",
       "sourcePath": "tests/multi-engine.test.mjs",
       "symbolOrTest": "integrated Claude -> Gemini -> AZIZ works for s/n/e/w",
-      "claimIds": ["CLM-FLOW-0008"],
+      "claimIds": [
+        "CLM-FLOW-0008"
+      ],
       "result": "PASS",
       "scope": "Tested integration candidate across four entry directions",
       "commit": null,
@@ -39,7 +43,9 @@
       "type": "VERIFIED_TEST",
       "sourcePath": "tests/multi-engine.test.mjs",
       "symbolOrTest": "integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies",
-      "claimIds": ["CLM-PERSIST-0001"],
+      "claimIds": [
+        "CLM-PERSIST-0001"
+      ],
       "result": "PASS",
       "scope": "Project persistence round-trip for integrated models",
       "commit": null,
@@ -54,7 +60,9 @@
       "type": "VERIFIED_TEST",
       "sourcePath": "tests/claude-integration.test.mjs",
       "symbolOrTest": "deployed Claude sources match the acceptance-tested vendor sources byte for byte",
-      "claimIds": ["CLM-MIRROR-0001"],
+      "claimIds": [
+        "CLM-MIRROR-0001"
+      ],
       "result": "PASS",
       "scope": "Claude dist/ source mirror against vendor/claude-planner/src/",
       "commit": null,
@@ -62,6 +70,92 @@
       "executedAt": null,
       "limitations": [
         "The test proves byte-for-byte equality at test time; explicit SHA values are not recorded in this registry yet."
+      ]
+    },
+    {
+      "evidenceId": "EVD-DOC-0001",
+      "type": "DOCUMENTED",
+      "sourcePath": "README.md",
+      "symbolOrTest": "حدود معلنة: كتلة مستطيلة ودور أرضي ومدخل واحد. لا L/U أو أفنية...",
+      "claimIds": [
+        "CLM-DOC-0001"
+      ],
+      "result": "DOCUMENTED",
+      "scope": "README stated product limitations",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Documentation only; does not establish current tested implementation."
+      ]
+    },
+    {
+      "evidenceId": "EVD-DOC-0002",
+      "type": "DOCUMENTED",
+      "sourcePath": "README.md",
+      "symbolOrTest": "الحفظ والمقارنة: تُعاد هندسة النسخ من مدخلاتها واستراتيجياتها بمحرك الإصدار نفسه",
+      "claimIds": [
+        "CLM-DOC-0002"
+      ],
+      "result": "DOCUMENTED",
+      "scope": "README persistence description",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Documentation only; does not establish the integrated-model persistence path."
+      ]
+    },
+    {
+      "evidenceId": "EVD-CODE-0001",
+      "type": "INFERRED",
+      "sourcePath": "dist/home-design-engine.mjs",
+      "symbolOrTest": "compareHomeModels() computes bestId from highest evaluation.score",
+      "claimIds": [
+        "CLM-SCORE-0002"
+      ],
+      "result": "OBSERVED_IN_CODE",
+      "scope": "Static code inspection",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Static code inspection only; does not prove bestId controls the live selected model."
+      ]
+    },
+    {
+      "evidenceId": "EVD-CODE-0002",
+      "type": "INFERRED",
+      "sourcePath": "dist/app.mjs",
+      "symbolOrTest": "generate() assigns state.model = result.selectedModel; refreshEngineering() computes compareHomeModels separately",
+      "claimIds": [
+        "CLM-DECISION-0001"
+      ],
+      "result": "OBSERVED_IN_CODE",
+      "scope": "Static code inspection of UI orchestration",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Static code inspection only; no browser runtime trace."
+      ]
+    },
+    {
+      "evidenceId": "EVD-CODE-0003",
+      "type": "INFERRED",
+      "sourcePath": "dist/mizan-score.mjs",
+      "symbolOrTest": "calculateMizanScore() computes weighted axes and penalties",
+      "claimIds": [
+        "CLM-SCORE-0001"
+      ],
+      "result": "OBSERVED_IN_CODE",
+      "scope": "Static code inspection of current score implementation",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "No runtime trace yet proves invocation in a browser session.",
+        "Current heuristic is not the future MIZAN_SCORE_V1_SPEC."
       ]
     }
   ]
