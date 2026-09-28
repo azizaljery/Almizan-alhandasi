@@ -1,0 +1,9 @@
+{
+  "id": "CD-011",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "contradictionCount": 7,
+  "allResolutions": "NOT_ATTEMPTED",
+  "auditOnlyChanges": true
+}
