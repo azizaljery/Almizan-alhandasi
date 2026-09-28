@@ -89,29 +89,43 @@
     {
       "id": "LA-006",
       "name": "Downstream Impact Review",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidence": [
+        "dist/app.mjs",
         "EVD-TEST-0001",
-        "dist/app.mjs"
+        "EVD-CODE-0012"
       ],
       "notes": [
-        "Reviewing 2D/3D/BOQ behavior after edited geometry carries stale canonical identity."
+        "2D/3D/BOQ continue consuming the edited state.model; the geometry is current, but retained canonical identity metadata can be stale after manual edits."
+      ],
+      "findingIds": [
+        "LBR-0001"
       ]
     },
     {
       "id": "LA-007",
       "name": "Registry Integrity Revalidation",
-      "status": "NOT_STARTED",
-      "result": null,
-      "evidence": []
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "docs/system-map/evidence.registry.json",
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/lineage-findings.registry.json"
+      ],
+      "notes": [
+        "Registry integrity revalidation PASS; no dangling lineage evidence/claim/PLC references found."
+      ]
     },
     {
       "id": "LA-008",
       "name": "Human Review",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
-      "evidence": []
+      "evidence": [
+        "docs/system-map/lineage-findings.registry.json"
+      ]
     },
     {
       "id": "LA-009",
@@ -136,6 +150,11 @@
     "runtimeChanges": false,
     "refactorPerformed": false,
     "lineageRepairAttempted": false,
-    "architectureEnforcement": false
+    "architectureEnforcement": false,
+    "auditOnlyChanges": true
+  },
+  "registryIntegrity": {
+    "result": "PASS",
+    "issues": []
   }
 }
