@@ -211,11 +211,12 @@
       "name": "Report Generation",
       "description": "Update contradictions report.",
       "expectedOutput": "Current complete contradiction report.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
         "docs/system-map/generated/contradictions-report.md"
-      ]
+      ],
+      "health": "PASS"
     },
     {
       "id": "CD-011",
@@ -261,7 +262,7 @@
     "sourceOfTruthReviewComplete": true,
     "identityLineageCandidatesDocumented": true,
     "contradictionsRegistryIntegrityPass": true,
-    "contradictionsReportGenerated": false,
+    "contradictionsReportGenerated": true,
     "humanReviewCompleted": false,
     "resolutionNotAttemptedForAllEntries": false,
     "eligibleForClosure": false
