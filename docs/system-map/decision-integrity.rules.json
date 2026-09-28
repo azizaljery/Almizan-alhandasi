@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1.0.0",
+  "allowedAuditPhases": [
+    "SYSTEM_DISCOVERY",
+    "SYSTEM_MAP",
+    "REGISTRY_INTEGRITY",
+    "EVIDENCE_AUDIT",
+    "CONTRADICTION_DETECTION",
+    "LINEAGE_AUDIT",
+    "HUMAN_REVIEW",
+    "SYSTEM_MAP_BASELINE"
+  ],
+  "allowedDecisionTypes": [
+    "PROCESS_RULE",
+    "EVIDENCE_RULE",
+    "STATUS_MODEL",
+    "DOD_CHANGE",
+    "CONTRADICTION_CLASSIFICATION",
+    "LINEAGE_CONVENTION",
+    "BASELINE_REQUIREMENT",
+    "OWNERSHIP_DEFINITION",
+    "OTHER"
+  ],
+  "allowedRuleStatuses": [
+    "PASS",
+    "FAIL",
+    "BLOCKED"
+  ],
+  "validationRules": [
+    {
+      "ruleId": "decision_id_present",
+      "required": true
+    },
+    {
+      "ruleId": "title_present",
+      "required": true
+    },
+    {
+      "ruleId": "decision_type_valid",
+      "required": true
+    },
+    {
+      "ruleId": "audit_phase_valid",
+      "required": true
+    },
+    {
+      "ruleId": "rationale_present",
+      "required": true
+    },
+    {
+      "ruleId": "evidence_referenced",
+      "required": true
+    },
+    {
+      "ruleId": "affected_artifacts_present",
+      "required": true
+    },
+    {
+      "ruleId": "repository_scope_defined",
+      "required": true
+    },
+    {
+      "ruleId": "implementation_rule_present",
+      "required": true
+    },
+    {
+      "ruleId": "baseline_dependency_defined",
+      "required": true
+    },
+    {
+      "ruleId": "forbidden_runtime_changes",
+      "required": true
+    },
+    {
+      "ruleId": "human_review_required",
+      "required": true
+    },
+    {
+      "ruleId": "runtime_change_check",
+      "required": true
+    },
+    {
+      "ruleId": "evidence_chain_check",
+      "required": true
+    },
+    {
+      "ruleId": "baseline_consistency_check",
+      "required": true
+    },
+    {
+      "ruleId": "adr_dependency_check",
+      "required": true
+    },
+    {
+      "ruleId": "traceability_check",
+      "required": true
+    }
+  ],
+  "approvalGate": {
+    "allRequiredValidationChecksMustPass": true,
+    "humanReviewCompletedRequired": true,
+    "proposalCommitRequired": true,
+    "productionImplementationBeforeFrozenBaseline": false
+  },
+  "runtimeForbiddenWhileBaselineNotFrozen": [
+    "AZIZ",
+    "Planner",
+    "Mizan Score Runtime",
+    "Engineering Core",
+    "Design Core",
+    "2D",
+    "3D",
+    "BOQ",
+    "Contracts Runtime"
+  ],
+  "notes": [
+    "Multiple DOCUMENTED or INFERRED evidence items do not automatically upgrade a decision or claim to VERIFIED.",
+    "Audit-governance decisions may be approved before baseline freeze only within docs/system-map; production architecture remains non-binding."
+  ]
+}
