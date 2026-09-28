@@ -65,7 +65,14 @@
       "exitCriteriaMet": false,
       "executionTracker": "docs/system-map/contradiction-detection.execution.json",
       "executionView": "docs/system-map/generated/contradiction-detection-execution.md",
-      "executionTrackerHuman": "docs/system-map/CONTRADICTION-DETECTION-EXECUTION-TRACKER.md"
+      "executionTrackerHuman": "docs/system-map/CONTRADICTION-DETECTION-EXECUTION-TRACKER.md",
+      "completedChecks": [
+        "CD-001",
+        "CD-002",
+        "CD-003",
+        "CD-004"
+      ],
+      "nextCheck": "CD-005"
     },
     "lineageAudit": {
       "status": "NOT_STARTED",
@@ -96,7 +103,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute CD-001 through CD-013 in order; keep resolution NOT_ATTEMPTED and production development BLOCKED_UNTIL_BASELINE.",
+  "nextStep": "Execute CD-005 Ownership Contradictions, then CD-006, CD-007, and CD-008. Keep all resolutions NOT_ATTEMPTED.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
