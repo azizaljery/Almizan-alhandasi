@@ -148,11 +148,20 @@
       "name": "Source-of-Truth Contradictions",
       "description": "Review canonical model ownership and Source/Runtime/Mirror conflicts.",
       "expectedOutput": "All known source-of-truth contradictions documented.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/contradictions.registry.json"
-      ]
+        "docs/system-map/CD-007-source-of-truth-review.json",
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/evidence.registry.json",
+        "tests/claude-integration.test.mjs"
+      ],
+      "health": "PASS",
+      "coverageAssessment": {
+        "status": "PROVEN_FOR_CURRENT_SCOPE",
+        "notes": "README/test conflicts, canonical model/source boundaries, and runtime mirror divergence were reviewed. CONTR-0007 was added."
+      }
     },
     {
       "id": "CD-008",
@@ -228,7 +237,7 @@
     "allKnownContradictionsTraceable": true,
     "ownershipReviewComplete": true,
     "flowReviewComplete": true,
-    "sourceOfTruthReviewComplete": false,
+    "sourceOfTruthReviewComplete": true,
     "identityLineageCandidatesDocumented": false,
     "contradictionsRegistryIntegrityPass": false,
     "contradictionsReportGenerated": false,
