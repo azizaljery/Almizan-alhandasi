@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.3.0",
   "contradictions": [
     {
       "id": "CONTR-0001",
@@ -145,6 +145,32 @@
       ],
       "impact": "Engineering-review flow purpose and ownership are ambiguous in the current map; no harmful runtime conflict is proven.",
       "notes": "No merge, refactor, or runtime change attempted.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "CONTR-0007",
+      "title": "Engineering Core source-of-truth is split across non-identical runtime copies",
+      "category": "SOURCE_OF_TRUTH",
+      "status": "IDENTIFIED",
+      "verificationState": "CONTRADICTED",
+      "description": "The UI Gemini engineering bridge depends on dist/gemini/engineering-core, while the integrated review pipeline depends on dist/integration/gemini/packages/engineering-core. The inspected coordination-orchestrator.js files are not byte-identical.",
+      "artifacts": [
+        "dist/gemini/engineering-core/core/coordination-orchestrator.js",
+        "dist/integration/gemini/packages/engineering-core/core/coordination-orchestrator.js",
+        "dist/gemini-engineering-layer.mjs",
+        "dist/integration/pipeline.mjs",
+        "docs/system-map/components.registry.json"
+      ],
+      "evidenceIds": [
+        "EVD-HASH-0002",
+        "EVD-CODE-0006"
+      ],
+      "conflictingClaimIds": [
+        "CLM-MIRROR-0002",
+        "CLM-FLOW-0009"
+      ],
+      "impact": "The current map cannot claim one unambiguous Engineering Review source-of-truth across both observed runtime paths.",
+      "notes": "Do not choose, merge, or replace either copy during contradiction detection.",
       "resolution": "NOT_ATTEMPTED"
     }
   ],
