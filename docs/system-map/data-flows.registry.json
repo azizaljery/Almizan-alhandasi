@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "flows": [
     {
       "flowId": "selected-candidate-to-2d",
@@ -13,7 +13,7 @@
       "mutationPolicy": "READ_ONLY",
       "failurePolicy": "UNKNOWN",
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ],
       "openQuestions": [
         "Exact contract boundary and runtime hash propagation require verification."
@@ -31,7 +31,7 @@
       "mutationPolicy": "READ_ONLY",
       "failurePolicy": "UNKNOWN",
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ],
       "openQuestions": [
         "Exact contract boundary and runtime hash propagation require verification."
@@ -49,27 +49,28 @@
       "mutationPolicy": "READ_ONLY",
       "failurePolicy": "UNKNOWN",
       "evidenceIds": [
-        "test-selected-model-consistency"
+        "EVD-TEST-0001"
       ],
       "openQuestions": [
         "Need proof BOQ derives only from canonical geometry in all runtime paths."
       ]
     },
     {
-      "flowId": "candidate-to-score-v1",
-      "producer": "candidate-pool",
+      "flowId": "candidate-to-score-current",
+      "producer": "UNKNOWN",
       "consumer": "mizan-score",
-      "contractId": "mizan-score-input-v1",
-      "inputHashField": "geometryHash",
-      "outputHashField": "scoreEvidenceHash",
+      "contractId": "UNKNOWN",
+      "inputHashField": "UNKNOWN",
+      "outputHashField": null,
       "transport": "IN_PROCESS",
-      "verification": "PROPOSED",
+      "verification": "INFERRED",
       "mutationPolicy": "READ_ONLY",
-      "failurePolicy": "FAIL_CLOSED",
+      "failurePolicy": "UNKNOWN",
       "evidenceIds": [],
       "openQuestions": [
-        "Canonical candidate contract not frozen.",
-        "Score normalization not specified."
+        "Static code shows calculateMizanScore(model) is called from app.mjs.",
+        "Runtime execution has not yet been traced.",
+        "Future MIZAN_SCORE_V1 contract is not yet defined."
       ]
     }
   ]
