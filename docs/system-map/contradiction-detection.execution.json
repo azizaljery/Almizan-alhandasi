@@ -13,11 +13,34 @@
       "name": "Coverage Review",
       "description": "Review all approved contradiction axes.",
       "expectedOutput": "Confirm current coverage completeness.",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
       "evidenceArtifacts": [
-        "docs/system-map/contradictions.registry.json"
-      ]
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/components.registry.json",
+        "docs/system-map/data-flows.registry.json",
+        "docs/system-map/claims.registry.json"
+      ],
+      "health": "PASS",
+      "dependencies": [
+        "CD-002",
+        "CD-003",
+        "CD-004"
+      ],
+      "progress": {
+        "approvedAxesReviewed": [
+          "OWNERSHIP",
+          "FLOW",
+          "SOURCE_OF_TRUTH",
+          "IDENTITY_LINEAGE"
+        ],
+        "currentRegistryEntriesObserved": {
+          "contradictions": 4,
+          "lineageCandidates": 1
+        },
+        "coverageConclusion": "NOT_YET_PROVEN_COMPLETE",
+        "reason": "Coverage cannot be closed until Components, Flows, and Claims reviews finish."
+      }
     },
     {
       "id": "CD-002",
