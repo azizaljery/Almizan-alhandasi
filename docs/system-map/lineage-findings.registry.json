@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "stage": "LINEAGE_AUDIT",
+  "findings": [
+    {
+      "id": "LBR-0001",
+      "type": "LINEAGE_BREAK",
+      "sourceCandidateId": "PLC-0001",
+      "title": "Manual opening edits change canonical geometry without refreshing candidate identity",
+      "verificationState": "INFERRED",
+      "status": "CONFIRMED",
+      "evidenceIds": [
+        "EVD-CODE-0012",
+        "EVD-CODE-0014",
+        "EVD-TEST-0001"
+      ],
+      "claimIds": [
+        "CLM-LIN-0001",
+        "CLM-LIN-0004"
+      ],
+      "description": "Integrated models carry integration.candidateId and integration.geometryHash. placeOpening()/removeOpening() structuredClone the model, mutate openings (which are part of canonical geometry), and return the clone without recomputing either identity value. The app then adopts the edited model and continues downstream. Integrated persistence embeds and restores the edited model exactly, preserving any stale identity metadata.",
+      "impact": "The displayed/edited geometry can no longer be proven to be the geometry identified by the retained candidateId/geometryHash.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "LGAP-0002",
+      "type": "IDENTITY_TRANSLATION_GAP",
+      "sourceCandidateId": "PLC-0002",
+      "title": "bestId is local to comparison output",
+      "verificationState": "INFERRED",
+      "status": "NO_BREAK_EVIDENCED",
+      "evidenceIds": [
+        "EVD-CODE-0010",
+        "EVD-CODE-0002"
+      ],
+      "claimIds": [
+        "CLM-LIN-0002"
+      ],
+      "description": "bestId is derived from local plan IDs and sourceModel is retained. No inspected app path uses bestId to replace state.model or canonical candidateId.",
+      "impact": "Potential future translation risk if bestId is promoted to canonical identity.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "LGAP-0003",
+      "type": "TRACEABILITY_GAP",
+      "sourceCandidateId": "PLC-0003",
+      "title": "UI Gemini review lacks durable canonical identity binding",
+      "verificationState": "INFERRED",
+      "status": "NO_BREAK_EVIDENCED",
+      "evidenceIds": [
+        "EVD-CODE-0011",
+        "EVD-CODE-0013"
+      ],
+      "claimIds": [
+        "CLM-LIN-0003"
+      ],
+      "description": "The UI Gemini review is recomputed from the current state.model before display on inspected model-replacement paths, reducing stale-display risk, but the review object does not expose canonical candidateId/geometryHash binding.",
+      "impact": "Review findings have weaker durable provenance than the integrated review path.",
+      "resolution": "NOT_ATTEMPTED"
+    }
+  ]
+}
