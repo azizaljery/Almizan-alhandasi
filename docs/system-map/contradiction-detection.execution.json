@@ -13,8 +13,8 @@
       "name": "Coverage Review",
       "description": "Review all approved contradiction axes.",
       "expectedOutput": "Confirm current coverage completeness.",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
         "docs/system-map/contradictions.registry.json",
         "docs/system-map/components.registry.json",
@@ -35,11 +35,12 @@
           "IDENTITY_LINEAGE"
         ],
         "currentRegistryEntriesObserved": {
-          "contradictions": 4,
+          "contradictions": 6,
           "lineageCandidates": 1
         },
-        "coverageConclusion": "NOT_YET_PROVEN_COMPLETE",
-        "reason": "Coverage cannot be closed until Components, Flows, and Claims reviews finish."
+        "coverageConclusion": "CURRENT_KNOWN_SCOPE_COMPLETE",
+        "scope": "Current registered audit artifacts only; global System Discovery completeness is not asserted.",
+        "reason": "CD-002, CD-003, and CD-004 were completed; newly discovered contradictions were registered and linked."
       }
     },
     {
@@ -47,17 +48,18 @@
       "name": "Components Review",
       "description": "Review all Components for unregistered contradictions.",
       "expectedOutput": "New items or explicit confirmation of no additional items.",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
         "docs/system-map/components.registry.json",
         "docs/system-map/CD-002-COMPONENTS-REVIEW.md",
+        "docs/system-map/CD-002-components-review.json",
         "docs/system-map/contradictions.registry.json"
       ],
       "health": "PASS",
       "coverageAssessment": {
-        "status": "NOT_PROVEN",
-        "notes": "Component review started; completeness has not yet been established."
+        "status": "PARTIAL",
+        "notes": "All currently registered components reviewed; broader System Map completeness remains unproven."
       }
     },
     {
@@ -65,22 +67,38 @@
       "name": "Flows Review",
       "description": "Review all Data Flows for additional contradictions.",
       "expectedOutput": "Additional flow contradictions identified or none found.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/data-flows.registry.json"
-      ]
+        "docs/system-map/data-flows.registry.json",
+        "docs/system-map/consumers.registry.json",
+        "docs/system-map/CD-003-flows-review.json",
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "health": "PASS",
+      "coverageAssessment": {
+        "status": "PARTIAL",
+        "notes": "All currently registered flows reviewed; unregistered observed review paths were documented."
+      }
     },
     {
       "id": "CD-004",
       "name": "Claims Review",
       "description": "Review all Claims for conflict or inconsistency.",
       "expectedOutput": "Conflicting/inconsistent claims identified or none found.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/claims.registry.json"
-      ]
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/evidence.registry.json",
+        "docs/system-map/CD-004-claims-review.json",
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "health": "PASS",
+      "coverageAssessment": {
+        "status": "PARTIAL",
+        "notes": "All current claims reviewed; global discovery completeness is not asserted."
+      }
     },
     {
       "id": "CD-005",
@@ -183,10 +201,10 @@
     }
   ],
   "closureGate": {
-    "allKnownContradictionsIdentified": false,
-    "allKnownContradictionsClassified": false,
-    "allKnownContradictionsDocumented": false,
-    "allKnownContradictionsTraceable": false,
+    "allKnownContradictionsIdentified": true,
+    "allKnownContradictionsClassified": true,
+    "allKnownContradictionsDocumented": true,
+    "allKnownContradictionsTraceable": true,
     "ownershipReviewComplete": false,
     "flowReviewComplete": false,
     "sourceOfTruthReviewComplete": false,
