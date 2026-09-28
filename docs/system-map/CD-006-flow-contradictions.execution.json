@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "CD-006",
+  "name": "Flow Contradictions Review",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "PASS",
+  "eligibleForCompletion": false,
+  "knownFlowContradictions": [
+    "CONTR-0004",
+    "CONTR-0006"
+  ],
+  "checks": [
+    {
+      "id": "CD-006-01",
+      "name": "Current Mizan Score call path",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-02",
+      "name": "candidate-to-score-current registry mapping",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-03",
+      "name": "compareHomeModels() / evaluation.score path",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-04",
+      "name": "AZIZ selectedCandidateId to selectedModel path",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-05",
+      "name": "selectedModel to 2D",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-06",
+      "name": "selectedModel to 3D",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-07",
+      "name": "selectedModel to BOQ",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-08",
+      "name": "selectedModel versus bestId overlap",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-09",
+      "name": "Integrated Gemini reviewCandidate() path",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-10",
+      "name": "UI analyzeGeminiEngineering() path",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-11",
+      "name": "Dual Gemini review overlap",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-12",
+      "name": "Flow to Claim to Evidence traceability",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-13",
+      "name": "Potential lineage candidates",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    },
+    {
+      "id": "CD-006-14",
+      "name": "Resolution Guard and Registry Integrity revalidation",
+      "status": "NOT_STARTED",
+      "result": null,
+      "health": "PASS",
+      "evidence": []
+    }
+  ],
+  "guards": {
+    "resolution": "NOT_ATTEMPTED",
+    "runtimeChanges": false,
+    "refactorPerformed": false,
+    "pathsMerged": false,
+    "architectureEnforcement": false
+  },
+  "baseline": "NOT_FROZEN",
+  "development": "BLOCKED_UNTIL_BASELINE"
+}
