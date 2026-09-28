@@ -1,0 +1,38 @@
+{
+  "id": "CD-002",
+  "name": "Components Review",
+  "source_artifacts": [
+    "components.registry.json",
+    "contradictions.registry.json",
+    "evidence.registry.json",
+    "claims.registry.json"
+  ],
+  "scope_note": "Review completed against the current registered component scope; this does not prove global System Map completeness.",
+  "reviewed_components": [
+    "planner-output-contract",
+    "aziz-engine",
+    "mizan-score",
+    "engineering-review",
+    "renderer-2d",
+    "renderer-3d",
+    "boq-engine"
+  ],
+  "findings": {
+    "new_contradiction_ids": [
+      "CONTR-0005",
+      "CONTR-0006"
+    ],
+    "potential_lineage_candidate_ids": [],
+    "coverage_gaps": [
+      "Planner runtime boundary is not represented as a standalone canonical component; only PlannerOutputContract is registered.",
+      "Engineering Review has at least two observed code paths whose boundary distinction is not represented in the current map."
+    ]
+  },
+  "coverage": {
+    "status": "PARTIAL",
+    "notes": "All currently registered components were reviewed; broader System Map completeness remains unproven."
+  },
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS"
+}
