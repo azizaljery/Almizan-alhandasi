@@ -1,0 +1,45 @@
+{
+  "id": "CD-013",
+  "name": "Closure Review",
+  "stage": "CONTRADICTION_DETECTION",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "scope": "Current registered and reviewed audit scope only",
+  "definitionOfDone": {
+    "allKnownContradictionsIdentified": true,
+    "allKnownContradictionsClassified": true,
+    "allKnownContradictionsDocumented": true,
+    "allKnownContradictionsTraceable": true,
+    "ownershipReviewComplete": true,
+    "flowReviewComplete": true,
+    "sourceOfTruthReviewComplete": true,
+    "identityLineageCandidatesDocumented": true,
+    "contradictionsRegistryIntegrityPass": true,
+    "contradictionsReportGenerated": true,
+    "humanReviewCompleted": true,
+    "resolutionNotAttemptedForAllEntries": true
+  },
+  "counts": {
+    "contradictions": 7,
+    "lineageCandidates": 3,
+    "evidence": 18,
+    "claims": 17
+  },
+  "humanReview": {
+    "result": "PASS",
+    "caveat": "PASS is limited to the current registered and reviewed scope; it does not prove global System Discovery or System Map completeness."
+  },
+  "guards": {
+    "runtimeChanges": false,
+    "refactorPerformed": false,
+    "ownershipResolution": false,
+    "architectureEnforcement": false,
+    "lineageBreakDeclared": false
+  },
+  "exit": {
+    "nextStage": "LINEAGE_AUDIT",
+    "baseline": "NOT_FROZEN",
+    "development": "BLOCKED_UNTIL_BASELINE"
+  }
+}
