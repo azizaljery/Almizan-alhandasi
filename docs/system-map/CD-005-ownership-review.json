@@ -1,0 +1,73 @@
+{
+  "id": "CD-005",
+  "name": "Ownership Contradictions Review",
+  "scope": [
+    "Score Ownership",
+    "AZIZ Boundaries",
+    "Engineering Review Boundaries",
+    "Scoring Ownership Inside AZIZ",
+    "Canonical Decision Ownership",
+    "Additional ownership overlaps discovered in current scope"
+  ],
+  "reviewedOwnershipFindings": [
+    {
+      "subject": "Mizan Score vs home-design evaluation.score",
+      "classification": "OWNERSHIP",
+      "contradictionId": "CONTR-0003",
+      "status": "DOCUMENTED_TRACEABLE",
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0003"
+      ],
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "subject": "AZIZ score-definition boundary vs AZIZ scoring implementation",
+      "classification": "OWNERSHIP",
+      "contradictionId": "CONTR-0005",
+      "status": "DOCUMENTED_TRACEABLE",
+      "evidenceIds": [
+        "EVD-DOC-0003",
+        "EVD-CODE-0004",
+        "EVD-CODE-0005"
+      ],
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "subject": "Canonical decision ownership",
+      "classification": "BOUNDARY_OVERLAP_RETAINED_AS_FLOW",
+      "contradictionId": "CONTR-0004",
+      "status": "DOCUMENTED_TRACEABLE",
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0002",
+        "EVD-TEST-0001"
+      ],
+      "note": "AZIZ-selected model remains the tested downstream source; compareHomeModels bestId is separate in inspected app code. No ownership resolution is made here."
+    },
+    {
+      "subject": "Engineering Review boundaries",
+      "classification": "BOUNDARY_OVERLAP_RETAINED_AS_FLOW",
+      "contradictionId": "CONTR-0006",
+      "status": "DOCUMENTED_TRACEABLE",
+      "evidenceIds": [
+        "EVD-CODE-0006"
+      ],
+      "note": "Two preliminary Gemini review paths are observed. Neither is promoted to an ownership contradiction in this stage."
+    }
+  ],
+  "newOwnershipContradictions": [],
+  "coverage": {
+    "status": "PROVEN_FOR_CURRENT_SCOPE",
+    "notes": "All ownership questions listed for CD-005 were reviewed against current registries and inspected code evidence. This does not prove global System Map completeness."
+  },
+  "constraints": {
+    "ownershipResolutionPerformed": false,
+    "architectureEnforcementPerformed": false,
+    "runtimeModified": false,
+    "refactorPerformed": false
+  },
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS"
+}
