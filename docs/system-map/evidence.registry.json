@@ -278,7 +278,9 @@
       "type": "INFERRED",
       "sourcePath": "dist/integration/control/reference/identity.mjs",
       "symbolOrTest": "candidateId and geometryHash identity functions",
-      "claimIds": [],
+      "claimIds": [
+        "CLM-ID-0001"
+      ],
       "result": "OBSERVED_IN_CODE",
       "scope": "Static identity creation inspection",
       "commit": null,
@@ -293,7 +295,9 @@
       "type": "INFERRED",
       "sourcePath": "dist/home-design-engine.mjs",
       "symbolOrTest": "compareHomeModels uses plan-local IDs for bestId and retains sourceModel",
-      "claimIds": [],
+      "claimIds": [
+        "CLM-ID-0002"
+      ],
       "result": "OBSERVED_IN_CODE",
       "scope": "Static identity inspection of comparison path",
       "commit": null,
@@ -308,7 +312,9 @@
       "type": "INFERRED",
       "sourcePath": "dist/gemini-engineering-layer.mjs",
       "symbolOrTest": "UI Gemini review derives local fingerprints instead of exposing candidateId and geometryHash binding",
-      "claimIds": [],
+      "claimIds": [
+        "CLM-ID-0003"
+      ],
       "result": "OBSERVED_IN_CODE",
       "scope": "Static identity inspection of UI Gemini review path",
       "commit": null,
