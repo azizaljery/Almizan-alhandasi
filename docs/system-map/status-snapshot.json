@@ -59,7 +59,10 @@
     },
     "contradictionDetection": {
       "status": "IN_PROGRESS",
-      "result": null
+      "result": null,
+      "health": "PASS",
+      "closureChecklist": "docs/system-map/CONTRADICTION-DETECTION-CLOSURE-CHECKLIST.md",
+      "exitCriteriaMet": false
     },
     "lineageAudit": {
       "status": "NOT_STARTED",
@@ -90,7 +93,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Complete contradiction detection, then lineage audit.",
+  "nextStep": "Execute the contradiction detection closure checklist; do not resolve contradictions. Then begin LINEAGE_AUDIT.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
