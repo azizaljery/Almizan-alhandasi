@@ -27,8 +27,8 @@
     {
       "subject": "Current Mizan Score flow mapping",
       "classification": "FLOW_MAPPING_GAP",
-      "status": "DOCUMENTED",
-      "note": "The registry names candidate-to-score-current with an UNKNOWN producer, while inspected app code scores state.model after it is assigned from result.selectedModel. This is recorded as a flow-mapping discrepancy for contradiction review; no runtime change is made."
+      "status": "DOCUMENTED_TRACEABLE",
+      "note": "The registry flow remains imprecise: producer is UNKNOWN, while inspected UI code scores state.model after selectedModel assignment. This is a mapping gap, not a separately proven contradiction."
     }
   ],
   "coverage": {
@@ -41,7 +41,15 @@
     "runtimeModified": false,
     "refactorPerformed": false
   },
-  "status": "IN_PROGRESS",
-  "result": null,
-  "health": "PASS"
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "validation": {
+    "subchecksPassed": 14,
+    "subchecksFailed": 0,
+    "registryIntegrity": "PASS",
+    "resolutionGuard": "PASS",
+    "productionDiffGuard": "PASS",
+    "productionDiffEvidence": "From CD-006 start through guard verification, changed files were limited to docs/system-map/*."
+  }
 }
