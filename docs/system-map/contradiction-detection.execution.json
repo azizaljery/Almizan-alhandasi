@@ -47,11 +47,18 @@
       "name": "Components Review",
       "description": "Review all Components for unregistered contradictions.",
       "expectedOutput": "New items or explicit confirmation of no additional items.",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
       "evidenceArtifacts": [
-        "docs/system-map/components.registry.json"
-      ]
+        "docs/system-map/components.registry.json",
+        "docs/system-map/CD-002-COMPONENTS-REVIEW.md",
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "health": "PASS",
+      "coverageAssessment": {
+        "status": "NOT_PROVEN",
+        "notes": "Component review started; completeness has not yet been established."
+      }
     },
     {
       "id": "CD-003",
