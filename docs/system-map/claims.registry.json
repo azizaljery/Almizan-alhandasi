@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "claims": [
     {
       "claimId": "CLM-FLOW-0007",
@@ -109,6 +109,55 @@
       "scope": "Static code inspection",
       "limitations": [
         "No browser runtime trace."
+      ]
+    },
+    {
+      "claimId": "CLM-OWN-0001",
+      "statement": "The current system-map boundary for aziz-engine declares that AZIZ must not own score-definition.",
+      "status": "DOCUMENTED",
+      "evidenceIds": [
+        "EVD-DOC-0003"
+      ],
+      "scope": "components.registry.json ownership boundary",
+      "limitations": [
+        "Governance/system-map declaration only."
+      ]
+    },
+    {
+      "claimId": "CLM-AZIZ-0001",
+      "statement": "The inspected AZIZ implementation contains a scoring engine that defines weighted axes, computes confidenceAdjustedTotal, ranks candidates, and uses that ranking to select selectedCandidateId.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0004",
+        "EVD-CODE-0005"
+      ],
+      "scope": "Static code inspection of dist/integration/aziz",
+      "limitations": [
+        "No independent production runtime trace."
+      ]
+    },
+    {
+      "claimId": "CLM-FLOW-0009",
+      "statement": "Two distinct Gemini review paths are present in inspected code: an integrated bound reviewCandidate() gate before AZIZ selection and a UI analyzeGeminiEngineering(state.model) review path.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0006"
+      ],
+      "scope": "Static code inspection",
+      "limitations": [
+        "Coexistence does not by itself prove an execution conflict."
+      ]
+    },
+    {
+      "claimId": "CLM-COMP-0001",
+      "statement": "Planner runtime code is present and used, but the current components registry contains PlannerOutputContract rather than a standalone canonical Planner engine component.",
+      "status": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0007"
+      ],
+      "scope": "Current system-map component coverage",
+      "limitations": [
+        "Canonical planner ownership boundary remains unresolved."
       ]
     }
   ]
