@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0.0",
+  "flows": [
+    {
+      "flowId": "selected-candidate-to-2d",
+      "producer": "aziz-engine",
+      "consumer": "renderer-2d",
+      "contractId": "UNKNOWN",
+      "inputHashField": "geometryHash",
+      "outputHashField": null,
+      "transport": "IN_PROCESS",
+      "verification": "VERIFIED_TEST",
+      "mutationPolicy": "READ_ONLY",
+      "failurePolicy": "UNKNOWN",
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ],
+      "openQuestions": [
+        "Exact contract boundary and runtime hash propagation require verification."
+      ]
+    },
+    {
+      "flowId": "selected-candidate-to-3d",
+      "producer": "aziz-engine",
+      "consumer": "renderer-3d",
+      "contractId": "UNKNOWN",
+      "inputHashField": "geometryHash",
+      "outputHashField": null,
+      "transport": "IN_PROCESS",
+      "verification": "VERIFIED_TEST",
+      "mutationPolicy": "READ_ONLY",
+      "failurePolicy": "UNKNOWN",
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ],
+      "openQuestions": [
+        "Exact contract boundary and runtime hash propagation require verification."
+      ]
+    },
+    {
+      "flowId": "selected-candidate-to-boq",
+      "producer": "aziz-engine",
+      "consumer": "boq-engine",
+      "contractId": "UNKNOWN",
+      "inputHashField": "geometryHash",
+      "outputHashField": null,
+      "transport": "IN_PROCESS",
+      "verification": "VERIFIED_TEST",
+      "mutationPolicy": "READ_ONLY",
+      "failurePolicy": "UNKNOWN",
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ],
+      "openQuestions": [
+        "Need proof BOQ derives only from canonical geometry in all runtime paths."
+      ]
+    },
+    {
+      "flowId": "candidate-to-score-v1",
+      "producer": "candidate-pool",
+      "consumer": "mizan-score",
+      "contractId": "mizan-score-input-v1",
+      "inputHashField": "geometryHash",
+      "outputHashField": "scoreEvidenceHash",
+      "transport": "IN_PROCESS",
+      "verification": "PROPOSED",
+      "mutationPolicy": "READ_ONLY",
+      "failurePolicy": "FAIL_CLOSED",
+      "evidenceIds": [],
+      "openQuestions": [
+        "Canonical candidate contract not frozen.",
+        "Score normalization not specified."
+      ]
+    }
+  ]
+}
