@@ -104,11 +104,20 @@
       "name": "Ownership Contradictions",
       "description": "Review Score ownership, AZIZ boundaries, and Engineering Review boundaries.",
       "expectedOutput": "All known ownership contradictions documented.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/contradictions.registry.json"
-      ]
+        "docs/system-map/CD-005-ownership-review.json",
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/evidence.registry.json",
+        "docs/system-map/components.registry.json"
+      ],
+      "health": "PASS",
+      "coverageAssessment": {
+        "status": "PROVEN_FOR_CURRENT_SCOPE",
+        "notes": "Score ownership, AZIZ boundaries, Engineering Review boundaries, and canonical decision ownership were reviewed without resolving ownership."
+      }
     },
     {
       "id": "CD-006",
@@ -204,7 +213,7 @@
     "allKnownContradictionsClassified": true,
     "allKnownContradictionsDocumented": true,
     "allKnownContradictionsTraceable": true,
-    "ownershipReviewComplete": false,
+    "ownershipReviewComplete": true,
     "flowReviewComplete": false,
     "sourceOfTruthReviewComplete": false,
     "identityLineageCandidatesDocumented": false,
