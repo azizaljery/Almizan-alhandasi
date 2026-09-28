@@ -31,7 +31,7 @@ Architecture Enforcement
 | ID | Check | Description | Expected Output | Status | Result | Evidence / Artifact |
 |----|--------|-------------|----------------|--------|--------|---------------------|
 | CD-001 | Coverage Review | مراجعة جميع محاور التناقضات المعتمدة | تأكيد اكتمال الحصر الحالي | IN_PROGRESS | null | contradictions.registry.json + components/data-flows/claims registries |
-| CD-002 | Components Review | مراجعة جميع Components بحثًا عن تناقضات غير مسجلة | عناصر جديدة أو تأكيد عدم وجود عناصر إضافية | NOT_STARTED | null | components.registry.json |
+| CD-002 | Components Review | مراجعة جميع Components بحثًا عن تناقضات غير مسجلة | عناصر جديدة أو تأكيد عدم وجود عناصر إضافية | IN_PROGRESS | null | components.registry.json + CD-002-COMPONENTS-REVIEW.md |
 | CD-003 | Flows Review | مراجعة جميع Data Flows | كشف أي تناقضات تدفق إضافية | NOT_STARTED | null | data-flows.registry.json |
 | CD-004 | Claims Review | مراجعة جميع Claims | كشف Claims متعارضة أو غير متسقة | NOT_STARTED | null | claims.registry.json |
 | CD-005 | Ownership Contradictions | مراجعة ملكية Score وAZIZ وEngineering Review | جميع تناقضات الملكية موثقة | NOT_STARTED | null | contradictions.registry.json |
@@ -209,3 +209,11 @@ LINEAGE_AUDIT
 - التغطية **لم تثبت مكتملة بعد**.
 - CD-001 يعتمد على إتمام CD-002 وCD-003 وCD-004 قبل الحكم النهائي.
 - الحالة الحالية: IN_PROGRESS / result: null / health: PASS.
+
+
+## CD-002 Progress
+
+- المراجعة بدأت فعليًا.
+- الحالة الحالية: IN_PROGRESS / result: null / health: PASS.
+- Coverage: NOT_PROVEN.
+- لا يجوز رفع CD-002 إلى PASS قبل مراجعة جميع المكونات المسجلة وتوثيق أي missing/overlap/boundary issue.
