@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "1.0.0",
+  "contradictions": [
+    {
+      "id": "CONTR-0001",
+      "title": "README shape limitations conflict with integrated RECT/L/U support",
+      "category": "SOURCE_OF_TRUTH",
+      "status": "IDENTIFIED",
+      "verificationState": "CONTRADICTED",
+      "description": "README states that L/U forms and courtyards are unsupported, while automated integration tests verify RECT/L/U generation including a U courtyard in the tested candidate.",
+      "artifacts": [
+        "README.md",
+        "tests/multi-engine.test.mjs"
+      ],
+      "evidenceIds": [
+        "EVD-DOC-0001",
+        "EVD-TEST-0002"
+      ],
+      "conflictingClaimIds": [
+        "CLM-DOC-0001",
+        "CLM-FLOW-0008"
+      ],
+      "impact": "Documentation can understate current tested capabilities and mislead architecture discovery.",
+      "notes": "No documentation correction attempted during this audit stage.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "CONTR-0002",
+      "title": "README persistence description conflicts with integrated exact-geometry restore path",
+      "category": "SOURCE_OF_TRUTH",
+      "status": "IDENTIFIED",
+      "verificationState": "CONTRADICTED",
+      "description": "README describes saved designs as regenerated from inputs and strategies, while the integrated persistence test verifies that integrated RECT/L/U models are embedded and restored exactly in the tested round-trip.",
+      "artifacts": [
+        "README.md",
+        "dist/project.mjs",
+        "tests/multi-engine.test.mjs"
+      ],
+      "evidenceIds": [
+        "EVD-DOC-0002",
+        "EVD-TEST-0003"
+      ],
+      "conflictingClaimIds": [
+        "CLM-DOC-0002",
+        "CLM-PERSIST-0001"
+      ],
+      "impact": "The documented source-of-truth behavior for persistence differs between legacy and integrated paths.",
+      "notes": "Likely version/path drift; exact historical boundary remains to be mapped.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "CONTR-0003",
+      "title": "Scoring ownership overlap between Mizan Score and home-design engine evaluation",
+      "category": "OWNERSHIP",
+      "status": "IDENTIFIED",
+      "verificationState": "INFERRED",
+      "description": "The codebase contains calculateMizanScore() with weighted quality axes and a separate home-design evaluation.score used by compareHomeModels(). This establishes overlapping scoring responsibilities, but not yet a proven runtime contradiction.",
+      "artifacts": [
+        "dist/mizan-score.mjs",
+        "dist/home-design-engine.mjs",
+        "dist/app.mjs"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0003"
+      ],
+      "conflictingClaimIds": [
+        "CLM-SCORE-0001",
+        "CLM-SCORE-0002"
+      ],
+      "impact": "Score authority is ambiguous and could lead to duplicate or conflicting quality definitions if not resolved after baseline.",
+      "notes": "Do not consolidate during contradiction detection.",
+      "resolution": "NOT_ATTEMPTED"
+    },
+    {
+      "id": "CONTR-0004",
+      "title": "Decision-like bestId exists outside the AZIZ-selected-model path",
+      "category": "FLOW",
+      "status": "IDENTIFIED",
+      "verificationState": "INFERRED",
+      "description": "The inspected UI path assigns state.model from runMultiEngineDesign().selectedModel, while compareHomeModels() independently computes bestId from evaluation.score. Static inspection does not show bestId replacing the selected model, so this is a decision-boundary overlap rather than a proven execution conflict.",
+      "artifacts": [
+        "dist/app.mjs",
+        "dist/home-design-engine.mjs",
+        "dist/multi-engine.mjs"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0002",
+        "EVD-TEST-0001"
+      ],
+      "conflictingClaimIds": [
+        "CLM-DECISION-0001",
+        "CLM-SCORE-0002",
+        "CLM-FLOW-0007"
+      ],
+      "impact": "There are two decision-like concepts: AZIZ selectedCandidateId and home-design bestId. Their intended ownership is not yet formally established.",
+      "notes": "Requires later architecture decision after baseline; no runtime conflict claimed.",
+      "resolution": "NOT_ATTEMPTED"
+    }
+  ],
+  "lineageCandidates": [
+    {
+      "id": "PLC-0001",
+      "title": "geometryHash propagation beyond selected model requires lineage audit",
+      "category": "IDENTITY_LINEAGE",
+      "status": "IDENTIFIED",
+      "verificationState": "INFERRED",
+      "description": "The selected integrated model carries integration.geometryHash, and tests prove that the same selected model feeds 2D/3D/BOQ. The inspected downstream outputs do not yet have independently recorded output hashes or verified hash checks.",
+      "artifacts": [
+        "dist/multi-engine.mjs",
+        "tests/release-consistency.test.mjs",
+        "dist/plan-view.mjs",
+        "dist/viewer3d.mjs",
+        "dist/estimates.mjs"
+      ],
+      "evidenceIds": [
+        "EVD-TEST-0001"
+      ],
+      "impact": "Potential traceability gap only. Do not classify as LINEAGE_BREAK until LINEAGE_AUDIT.",
+      "disposition": "DEFER_TO_LINEAGE_AUDIT"
+    }
+  ]
+}
