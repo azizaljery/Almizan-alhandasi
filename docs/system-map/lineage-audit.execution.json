@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "1.0.0",
+  "stage": "LINEAGE_AUDIT",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "PASS",
+  "baselineStatus": "NOT_FROZEN",
+  "developmentStatus": "BLOCKED_UNTIL_BASELINE",
+  "checks": [
+    {
+      "id": "LA-001",
+      "name": "Identity Baseline",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "dist/integration/control/reference/identity.mjs",
+        "EVD-CODE-0009"
+      ],
+      "notes": [
+        "candidateId/geometryHash creation and verification rules reviewed."
+      ]
+    },
+    {
+      "id": "LA-002",
+      "name": "PLC-0001 Canonical Identity Continuity",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "PLC-0001",
+        "EVD-CODE-0012"
+      ],
+      "findingIds": [
+        "LBR-0001"
+      ],
+      "notes": [
+        "LINEAGE_BREAK confirmed on manual opening edit path."
+      ]
+    },
+    {
+      "id": "LA-003",
+      "name": "PLC-0001 Persistence Impact",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "EVD-CODE-0014",
+        "CLM-LIN-0004"
+      ],
+      "findingIds": [
+        "LBR-0001"
+      ],
+      "notes": [
+        "Stale identity metadata would persist through exact embedded save/restore."
+      ]
+    },
+    {
+      "id": "LA-004",
+      "name": "PLC-0002 bestId Identity Translation",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "PLC-0002",
+        "EVD-CODE-0010",
+        "EVD-CODE-0002"
+      ],
+      "findingIds": [
+        "LGAP-0002"
+      ],
+      "notes": [
+        "No current canonical identity replacement observed."
+      ]
+    },
+    {
+      "id": "LA-005",
+      "name": "PLC-0003 Gemini UI Binding",
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "PLC-0003",
+        "EVD-CODE-0011",
+        "EVD-CODE-0013"
+      ],
+      "findingIds": [
+        "LGAP-0003"
+      ],
+      "notes": [
+        "No stale-display break observed; durable canonical binding remains absent."
+      ]
+    },
+    {
+      "id": "LA-006",
+      "name": "Downstream Impact Review",
+      "status": "IN_PROGRESS",
+      "result": null,
+      "evidence": [
+        "EVD-TEST-0001",
+        "dist/app.mjs"
+      ],
+      "notes": [
+        "Reviewing 2D/3D/BOQ behavior after edited geometry carries stale canonical identity."
+      ]
+    },
+    {
+      "id": "LA-007",
+      "name": "Registry Integrity Revalidation",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidence": []
+    },
+    {
+      "id": "LA-008",
+      "name": "Human Review",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidence": []
+    },
+    {
+      "id": "LA-009",
+      "name": "Closure Review",
+      "status": "NOT_STARTED",
+      "result": null,
+      "evidence": []
+    }
+  ],
+  "findingsSummary": {
+    "lineageBreaks": [
+      "LBR-0001"
+    ],
+    "identityTranslationGaps": [
+      "LGAP-0002"
+    ],
+    "traceabilityGaps": [
+      "LGAP-0003"
+    ]
+  },
+  "guards": {
+    "runtimeChanges": false,
+    "refactorPerformed": false,
+    "lineageRepairAttempted": false,
+    "architectureEnforcement": false
+  }
+}
