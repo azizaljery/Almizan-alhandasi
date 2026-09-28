@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisions": [
+    {
+      "decisionId": "ADR-AUDIT-0001",
+      "title": "Audit Artifacts Only During Architecture Truth Audit",
+      "date": "2026-09-28",
+      "author": "MAIN_CONTROL",
+      "auditPhase": "SYSTEM_MAP",
+      "status": "APPROVED",
+      "decisionType": "PROCESS_RULE",
+      "description": "Any approved audit decision must be recorded promptly in docs/system-map while the audit is active.",
+      "rationale": "Prevent loss of governance decisions between discussion and repository state while keeping runtime code frozen until baseline.",
+      "evidence": [],
+      "affectedArtifacts": [
+        "docs/system-map/*.json",
+        "docs/system-map/*.md",
+        "docs/system-map/generated/*"
+      ],
+      "baselineDependency": {
+        "baselineStatus": "NOT_FROZEN",
+        "implementationAllowed": false
+      },
+      "productionCodeChange": false,
+      "humanReviewRequired": true,
+      "humanReviewCompleted": true,
+      "notes": []
+    }
+  ]
+}
