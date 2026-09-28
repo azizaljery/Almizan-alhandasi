@@ -193,11 +193,18 @@
       "name": "Registry Validation",
       "description": "Re-run registry integrity after contradiction updates.",
       "expectedOutput": "Registry Integrity = PASS.",
-      "status": "NOT_STARTED",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidenceArtifacts": [
-        "docs/system-map/status-snapshot.json"
-      ]
+        "docs/system-map/CD-009-registry-validation.json",
+        "docs/system-map/components.registry.json",
+        "docs/system-map/data-flows.registry.json",
+        "docs/system-map/consumers.registry.json",
+        "docs/system-map/evidence.registry.json",
+        "docs/system-map/claims.registry.json",
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "health": "PASS"
     },
     {
       "id": "CD-010",
@@ -253,7 +260,7 @@
     "flowReviewComplete": true,
     "sourceOfTruthReviewComplete": true,
     "identityLineageCandidatesDocumented": true,
-    "contradictionsRegistryIntegrityPass": false,
+    "contradictionsRegistryIntegrityPass": true,
     "contradictionsReportGenerated": false,
     "humanReviewCompleted": false,
     "resolutionNotAttemptedForAllEntries": false,
