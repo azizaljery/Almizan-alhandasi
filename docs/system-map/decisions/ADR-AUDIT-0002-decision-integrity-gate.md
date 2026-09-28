@@ -22,9 +22,24 @@ The decision record itself must be auditable. This prevents incomplete, untracea
 
 ## Evidence
 
-- Discussion reference: PROJECT-CONVERSATION-2026-09-28-DECISION-INTEGRITY
-- Template: docs/system-map/decisions/ADR-AUDIT-TEMPLATE.md
-- Validation rules: docs/system-map/decision-integrity.rules.json
+- DISCUSSION: `PROJECT-CONVERSATION-2026-09-28-DECISION-INTEGRITY`
+- ARTIFACT: `docs/system-map/decisions/ADR-AUDIT-TEMPLATE.md`
+- ARTIFACT: `docs/system-map/decision-integrity.rules.json`
+
+## Decision Integrity
+
+Automated validation: PASS (17/17)
+Decision health: PASS
+Human review completed: false
+Approval gate: NOT ELIGIBLE
+Blocking check: `human_review_completed`
+
+## Traceability
+
+- discussion: `PROJECT-CONVERSATION-2026-09-28-DECISION-INTEGRITY`
+- registry id: `ADR-AUDIT-0002`
+- proposal commit: `9c1c08d5324d108bef39215b9b9cb36ff8da1a2b`
+- approval commit: null
 
 ## Affected artifacts
 
@@ -75,21 +90,4 @@ Discussion
 → Approval Commit
 ```
 
-## Traceability
-
-```yaml
-discussion_reference: PROJECT-CONVERSATION-2026-09-28-DECISION-INTEGRITY
-evidence_ids:
-  - docs/system-map/decisions/ADR-AUDIT-TEMPLATE.md
-  - docs/system-map/decision-integrity.rules.json
-registry_ids:
-  - ADR-AUDIT-0002
-proposal_commit_hash: null
-approval_commit_hash: null
-```
-
-## Current approval state
-
-Automated validation will be recorded after the proposal commit exists.
-
-Human review is still required before this record may become APPROVED.
+This record deliberately remains PROPOSED until explicit human review/approval is recorded.
