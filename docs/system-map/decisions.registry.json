@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "decisions": [
     {
       "decisionId": "ADR-AUDIT-0001",
@@ -325,6 +325,91 @@
       },
       "notes": [
         "Proposal commit exists. Awaiting explicit human review before APPROVED."
+      ]
+    },
+    {
+      "decisionId": "ADR-AUDIT-0003",
+      "title": "Three-Layer Validation for ADR-AUDIT Decisions",
+      "date": "2026-09-28",
+      "author": "MAIN_CONTROL",
+      "auditPhase": "SYSTEM_MAP",
+      "status": "PROPOSED",
+      "decisionType": "PROCESS_RULE",
+      "description": "Validate ADR-AUDIT decisions through JSON Schema, executable audit-rule validation, and human review before approval.",
+      "rationale": "Structural validity, repository-aware semantic checks, and human judgment solve different classes of failure and should not be conflated.",
+      "evidence": [
+        "DISCUSSION:PROJECT-CONVERSATION-2026-09-28-ADR-AUDIT-JSON-SCHEMA",
+        "ARTIFACT:docs/system-map/schemas/adr-audit.schema.json",
+        "ARTIFACT:docs/system-map/ADR-AUDIT-VALIDATION-ARCHITECTURE.md",
+        "ARTIFACT:docs/system-map/decision-integrity.rules.json"
+      ],
+      "affectedArtifacts": [
+        "docs/system-map/schemas/adr-audit.schema.json",
+        "docs/system-map/ADR-AUDIT-VALIDATION-ARCHITECTURE.md",
+        "docs/system-map/decision-integrity.rules.json",
+        "docs/system-map/decisions.registry.json"
+      ],
+      "repositoryScope": {
+        "allowed": [
+          "docs/system-map/*.json",
+          "docs/system-map/*.md",
+          "docs/system-map/generated/*",
+          "docs/system-map/schemas/*.json"
+        ],
+        "forbidden": [
+          "AZIZ",
+          "Planner",
+          "Mizan Score Runtime",
+          "Engineering Core",
+          "Design Core",
+          "2D",
+          "3D",
+          "BOQ",
+          "Contracts Runtime",
+          "production/deployment code"
+        ]
+      },
+      "baselineDependency": {
+        "baselineStatus": "NOT_FROZEN",
+        "implementationAllowed": false
+      },
+      "implementationRule": "During ARCHITECTURE TRUTH AUDIT this decision may add or update audit-validation artifacts only. A standalone executable validator requires a separately approved audit-tooling scope.",
+      "productionCodeChange": false,
+      "humanReviewRequired": true,
+      "humanReviewCompleted": false,
+      "traceability": {
+        "discussionReference": "PROJECT-CONVERSATION-2026-09-28-ADR-AUDIT-JSON-SCHEMA",
+        "evidenceIds": [
+          "ARTIFACT:docs/system-map/schemas/adr-audit.schema.json",
+          "ARTIFACT:docs/system-map/ADR-AUDIT-VALIDATION-ARCHITECTURE.md",
+          "ARTIFACT:docs/system-map/decision-integrity.rules.json"
+        ],
+        "registryIds": [
+          "ADR-AUDIT-0003"
+        ],
+        "proposalCommitHash": null,
+        "approvalCommitHash": null
+      },
+      "automatedValidation": {},
+      "decisionHealth": {
+        "status": "BLOCKED",
+        "checksTotal": 17,
+        "checksPassed": 0,
+        "checksFailed": 0,
+        "checksBlocked": 17
+      },
+      "approvalGate": {
+        "eligibleForApproval": false,
+        "blockingChecks": [
+          "proposal_commit_hash",
+          "automated_validation",
+          "human_review_completed"
+        ],
+        "reason": "Decision proposal must be committed, validated, and human-reviewed before approval."
+      },
+      "notes": [
+        "JSON Schema is aligned to the current camelCase machine-readable decisions registry.",
+        "A standalone executable Layer-2 validator is not implemented in this phase."
       ]
     }
   ]
