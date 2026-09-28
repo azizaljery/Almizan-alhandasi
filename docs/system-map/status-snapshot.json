@@ -64,7 +64,8 @@
       "closureChecklist": "docs/system-map/CONTRADICTION-DETECTION-CLOSURE-CHECKLIST.md",
       "exitCriteriaMet": false,
       "executionTracker": "docs/system-map/contradiction-detection.execution.json",
-      "executionView": "docs/system-map/generated/contradiction-detection-execution.md"
+      "executionView": "docs/system-map/generated/contradiction-detection-execution.md",
+      "executionTrackerHuman": "docs/system-map/CONTRADICTION-DETECTION-EXECUTION-TRACKER.md"
     },
     "lineageAudit": {
       "status": "NOT_STARTED",
@@ -95,7 +96,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute the contradiction detection closure checklist; do not resolve contradictions. Then begin LINEAGE_AUDIT.",
+  "nextStep": "Execute CD-001 through CD-013 in order; keep resolution NOT_ATTEMPTED and production development BLOCKED_UNTIL_BASELINE.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
