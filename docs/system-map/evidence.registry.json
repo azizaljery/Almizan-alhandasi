@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.5.0",
+  "schemaVersion": "1.6.0",
   "evidence": [
     {
       "evidenceId": "EVD-TEST-0001",
@@ -271,6 +271,21 @@
       "limitations": [
         "Proves the inspected files are not byte-identical.",
         "Does not determine which copy is canonical."
+      ]
+    },
+    {
+      "evidenceId": "EVD-CODE-0009",
+      "type": "INFERRED",
+      "sourcePath": "dist/integration/control/reference/identity.mjs",
+      "symbolOrTest": "candidateId and geometryHash identity functions",
+      "claimIds": [],
+      "result": "OBSERVED_IN_CODE",
+      "scope": "Static identity creation inspection",
+      "commit": null,
+      "sourceHash": null,
+      "executedAt": null,
+      "limitations": [
+        "Static code inspection only."
       ]
     }
   ]
