@@ -62,7 +62,9 @@
       "result": null,
       "health": "PASS",
       "closureChecklist": "docs/system-map/CONTRADICTION-DETECTION-CLOSURE-CHECKLIST.md",
-      "exitCriteriaMet": false
+      "exitCriteriaMet": false,
+      "executionTracker": "docs/system-map/contradiction-detection.execution.json",
+      "executionView": "docs/system-map/generated/contradiction-detection-execution.md"
     },
     "lineageAudit": {
       "status": "NOT_STARTED",
