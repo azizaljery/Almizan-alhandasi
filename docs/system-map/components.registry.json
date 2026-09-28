@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "1.0.0",
+  "components": [
+    {
+      "componentId": "planner-output-contract",
+      "displayName": "PlannerOutputContract",
+      "classification": "CONTRACT",
+      "status": "ACTIVE",
+      "owner": "PLANNER_GEOMETRY",
+      "sourcePath": "dist/claude/PlannerOutputContract.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "planning-io-contract",
+        "canonical-geometry-shape"
+      ],
+      "mustNotOwn": [
+        "candidate-ranking",
+        "score-definition",
+        "engineering-approval",
+        "visualization-state"
+      ],
+      "evidenceIds": [],
+      "notes": "Exact canonical upstream and version still require verification."
+    },
+    {
+      "componentId": "aziz-engine",
+      "displayName": "AZIZ Engine",
+      "classification": "BUILD",
+      "status": "UNVERIFIED",
+      "owner": "MAIN_CONTROL",
+      "sourcePath": null,
+      "buildPaths": [
+        "dist/integration/aziz/"
+      ],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "candidate-orchestration",
+        "hard-constraint-gating",
+        "decision-tracing",
+        "selection-policy"
+      ],
+      "mustNotOwn": [
+        "score-definition",
+        "silent-geometry-mutation",
+        "engineering-approval"
+      ],
+      "evidenceIds": [],
+      "notes": "Integrated runtime exists; canonical source package still requires verification."
+    },
+    {
+      "componentId": "mizan-score",
+      "displayName": "Mizan Score",
+      "classification": "SOURCE",
+      "status": "UNVERIFIED",
+      "owner": "MIZAN_SCORE",
+      "sourcePath": "dist/mizan-score.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "UNKNOWN",
+      "responsibilities": [
+        "quality-measurement",
+        "score-vector",
+        "penalties",
+        "confidence"
+      ],
+      "mustNotOwn": [
+        "winner-selection",
+        "geometry-mutation",
+        "refinement-policy"
+      ],
+      "evidenceIds": [],
+      "notes": "Existence/path must be verified from repository tree and code."
+    },
+    {
+      "componentId": "engineering-review",
+      "displayName": "Engineering Review",
+      "classification": "BUILD",
+      "status": "UNVERIFIED",
+      "owner": "ENGINEERING_REVIEW",
+      "sourcePath": null,
+      "buildPaths": [
+        "dist/integration/gemini/packages/engineering-core/"
+      ],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "engineering-findings",
+        "clash-detection",
+        "review-status",
+        "refinement-requests"
+      ],
+      "mustNotOwn": [
+        "silent-geometry-mutation",
+        "winner-selection",
+        "score-definition"
+      ],
+      "evidenceIds": [],
+      "notes": "Integrated source mirror exists; canonical package location requires verification."
+    },
+    {
+      "componentId": "renderer-2d",
+      "displayName": "2D Renderer",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "VISUALIZATION_2D",
+      "sourcePath": "dist/plan-view.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "2d-rendering"
+      ],
+      "mustNotOwn": [
+        "canonical-wall-generation",
+        "geometry-repair"
+      ],
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ]
+    },
+    {
+      "componentId": "renderer-3d",
+      "displayName": "3D Renderer",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "VISUALIZATION_3D",
+      "sourcePath": "dist/viewer3d.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "3d-visualization"
+      ],
+      "mustNotOwn": [
+        "canonical-wall-generation",
+        "structural-inference"
+      ],
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ]
+    },
+    {
+      "componentId": "boq-engine",
+      "displayName": "BOQ / Estimates",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "BOQ_ENGINE",
+      "sourcePath": "dist/estimates.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "quantity-derivation",
+        "cost-estimation"
+      ],
+      "mustNotOwn": [
+        "visual-mesh-as-geometry-truth",
+        "geometry-repair"
+      ],
+      "evidenceIds": [
+        "test-selected-model-consistency"
+      ]
+    }
+  ]
+}
