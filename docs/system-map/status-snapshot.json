@@ -185,12 +185,24 @@
       "health": "PASS",
       "conditions": {
         "pass": 0,
-        "fail": 2,
-        "blocked": 6,
-        "formallyAccepted": 0
+        "formallyAccepted": 3,
+        "blocked": 3,
+        "fail": 2
       },
-      "gateArtifact": "docs/system-map/development-unblock-gate.json",
-      "trackerArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-GATE.md"
+      "currentWork": [
+        "DEV-GATE-004",
+        "DEV-GATE-005",
+        "DEV-GATE-006",
+        "DEV-GATE-007",
+        "DEV-GATE-008"
+      ],
+      "notes": [
+        "DEV-GATE-004 provenance is PARTIALLY_PROVEN but production equivalence is not proven.",
+        "DEV-GATE-005 browser visual verification is not proven.",
+        "DEV-GATE-006 production deployment identity is not proven.",
+        "DEV-GATE-007 post-baseline contradiction disposition review started.",
+        "DEV-GATE-008 post-baseline lineage/evidence disposition review started."
+      ]
     }
   },
   "preBaselineAdrs": {
@@ -208,7 +220,7 @@
     "geometry3d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
     "boq": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE"
   },
-  "nextStep": "Resolve or formally accept DEVELOPMENT_UNBLOCK_GATE conditions. Runtime remains blocked.",
+  "nextStep": "Close evidence-blocked 004/005/006 when external/live evidence is available; continue documented disposition of 007/008 without runtime changes.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
