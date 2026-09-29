@@ -1,6 +1,6 @@
 {
   "stage": "EVIDENCE_AUDIT",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETED",
   "completed": [
     "EA-001",
     "EA-002",
@@ -12,13 +12,19 @@
     "EA-008",
     "EA-009",
     "EA-010",
-    "EA-011"
+    "EA-011",
+    "EA-012",
+    "EA-013"
   ],
-  "next": "EA-012",
+  "next": null,
   "registryIntegrity": "PASS",
   "findings": [
     "EAGAP-0001",
     "EAGAP-0002",
     "EAGAP-0003"
-  ]
+  ],
+  "result": "PASS",
+  "health": "PASS",
+  "reviewOutcome": "docs/system-map/EA-012-review-outcome.json",
+  "closureArtifact": "docs/system-map/EA-013-closure-review.json"
 }
