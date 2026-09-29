@@ -24,5 +24,9 @@
     "runtimeChanges": false,
     "refactor": false
   },
-  "completionEligible": false
+  "completionEligible": false,
+  "repositoryEvidence": [
+    "RELEASE-MANIFEST.md: automated local Chromium attempt produced no screenshot and is NOT a visual pass.",
+    "INTEGRATION-P1-REPORT.md: browser visual/cross-device acceptance has not been executed on this candidate."
+  ]
 }
