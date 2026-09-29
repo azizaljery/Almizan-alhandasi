@@ -2,8 +2,8 @@
   "schemaVersion": "1.0.0",
   "audit": {
     "name": "ARCHITECTURE_TRUTH_AUDIT",
-    "status": "IN_PROGRESS",
-    "result": null,
+    "status": "COMPLETED",
+    "result": "PASS",
     "health": "PASS"
   },
   "project": {
@@ -11,16 +11,19 @@
     "repository": "azizaljery/Almizan-alhandasi",
     "branch": "control/mizan-master-checkpoint"
   },
-  "snapshotDate": "2026-09-28",
+  "snapshotDate": "2026-09-29",
   "currentStage": {
-    "name": "SYSTEM_MAP_BASELINE_FREEZE_GATE",
-    "status": "READY_FOR_DECISION",
-    "result": null
+    "name": "SYSTEM_MAP_BASELINE",
+    "status": "COMPLETED",
+    "result": "FROZEN"
   },
   "baseline": {
-    "status": "NOT_FROZEN",
-    "baselineHash": null,
-    "frozenAt": null
+    "status": "FROZEN",
+    "baselineId": "SMB-20260929-001",
+    "baselineHash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5",
+    "frozenAt": "2026-09-29T16:56:00+03:00",
+    "frozenBy": "PROJECT_OWNER",
+    "artifact": "docs/system-map/system-map-baseline.json"
   },
   "stages": {
     "systemDiscovery": {
@@ -159,20 +162,22 @@
       "reviewDate": "2026-09-29"
     },
     "systemMapBaseline": {
-      "status": "DRAFT_HASHED",
-      "result": null,
-      "binding": false,
-      "frozen": false,
+      "status": "COMPLETED",
+      "result": "FROZEN",
+      "binding": true,
+      "frozen": true,
       "draftArtifact": "docs/system-map/system-map-baseline.draft.json",
       "checklistArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-DRAFT-CHECKLIST.md",
-      "freezeApproval": "PENDING",
-      "hashesGenerated": false,
+      "freezeApproval": "APPROVED",
+      "hashesGenerated": true,
       "baselineHash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5",
       "baselineInputCommit": "dd795b2a92c81dfcb8af49449afb587fe62b363d",
       "registryHashesGenerated": true,
       "hashAlgorithm": "SHA-256",
-      "freezeGate": "READY_FOR_DECISION",
-      "freezeGateArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-FREEZE-GATE.md"
+      "freezeGate": "PASS",
+      "freezeGateArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-FREEZE-GATE.md",
+      "frozenArtifact": "docs/system-map/system-map-baseline.json",
+      "freezeDecisionArtifact": "docs/system-map/BASELINE-FREEZE-DECISION.json"
     }
   },
   "preBaselineAdrs": {
@@ -181,17 +186,17 @@
     "binding": false
   },
   "developmentStatus": {
-    "aziz": "BLOCKED_UNTIL_BASELINE",
-    "planner": "BLOCKED_UNTIL_BASELINE",
-    "mizanScore": "BLOCKED_UNTIL_BASELINE",
-    "designCore": "BLOCKED_UNTIL_BASELINE",
-    "engineeringCore": "BLOCKED_UNTIL_BASELINE",
-    "geometry2d": "BLOCKED_UNTIL_BASELINE",
-    "geometry3d": "BLOCKED_UNTIL_BASELINE",
-    "boq": "BLOCKED_UNTIL_BASELINE",
-    "contracts": "BLOCKED_UNTIL_BASELINE"
+    "aziz": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "planner": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "mizanScore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "designCore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "engineeringCore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "geometry2d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "geometry3d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "boq": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
+    "contracts": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE"
   },
-  "nextStep": "Await explicit separate Freeze Gate decision: APPROVE FREEZE or DO NOT FREEZE. Development remains blocked.",
+  "nextStep": "Begin separate Development Unblock Gate review. Baseline is frozen; development remains blocked until its independent conditions are resolved or formally accepted.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
@@ -200,7 +205,9 @@
     "PASS means stage completion against its Definition of Done, not absence of findings or technical approval.",
     "Global Human Review is accepted for Baseline Draft only.",
     "Architecture correctness, production readiness, and development unblocking remain NOT_APPROVED.",
-    "Development-unblock conditions are tracked separately from truthful-baseline creation."
+    "Development-unblock conditions are tracked separately from truthful-baseline creation.",
+    "SYSTEM MAP BASELINE SMB-20260929-001 is FROZEN by explicit Project Owner approval.",
+    "Baseline freeze does not approve architecture correctness, production readiness, or development unblocking."
   ],
   "governanceChecks": {
     "decisionIntegrity": {
