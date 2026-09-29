@@ -420,6 +420,24 @@ export function openingPoint(model, o) {
   const w = model.walls.find(w => w.id === o.wallId);
   return { x: w.x1 + (w.x2 - w.x1) * o.pos, y: w.y1 + (w.y2 - w.y1) * o.pos };
 }
+function invalidateIntegratedIdentityAfterGeometryEdit(model, reason) {
+  if (!model?.integration) return model;
+  const current = model.integration;
+  model.integration = {
+    ...current,
+    parentCandidateId: current.parentCandidateId ?? current.candidateId ?? null,
+    parentGeometryHash: current.parentGeometryHash ?? structuredClone(current.geometryHash ?? null),
+    parentReviewId: current.parentReviewId ?? current.reviewId ?? null,
+    candidateId: null,
+    geometryHash: null,
+    reviewId: null,
+    reviewOverall: null,
+    reviewCoverage: null,
+    lineageStatus: 'EDITED_UNBOUND',
+    lineageReason: reason,
+  };
+  return model;
+}
 export function placeOpening(model, { type, point }) {
   if (!['door', 'window'].includes(type) || !point || ![point.x, point.y].every(Number.isFinite)) throw Error('اختر بابًا أو نافذة ثم اضغط جدارًا صالحًا.');
   const copy = structuredClone(model);
@@ -444,7 +462,7 @@ export function placeOpening(model, { type, point }) {
     opening.connects = [first, second];
   }
   copy.openings.push(opening); const errors = validateModel(copy); if (errors.length) throw Error(errors[0]);
-  return copy;
+  return invalidateIntegratedIdentityAfterGeometryEdit(copy, 'OPENING_ADDED');
 }
 export function removeOpening(model, point) {
   if (!point || ![point.x, point.y].every(Number.isFinite)) throw Error('اضغط على فتحة لإزالتها.');
@@ -452,7 +470,7 @@ export function removeOpening(model, point) {
   if (!match || Math.hypot(point.x - match.p.x, point.y - match.p.y) > .7) throw Error('لم تُحدّد فتحة قريبة لإزالتها.');
   if (match.o.connects?.includes('outside')) throw Error('لا يمكن حذف مدخل الوصول الأساسي من المحرر.');
   copy.openings = copy.openings.filter(o => o.id !== match.o.id); const errors = validateModel(copy); if (errors.length) throw Error(errors[0]);
-  return copy;
+  return invalidateIntegratedIdentityAfterGeometryEdit(copy, 'OPENING_REMOVED');
 }
 export function validateModel(m) {
   if (m?.version === 2) {
