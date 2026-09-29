@@ -71,11 +71,13 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 
 | Field | Value |
 |---|---|
-| Status | `BLOCKED` |
-| Browser visual report | `UNRESOLVED` |
-| Gate evidence | `docs/system-map/development-unblock-gate.json` |
-| Current finding | Repository tests do not establish browser visual verification. |
-| Closure requirement | Produce traceable browser visual verification evidence for the intended deployment/scope. |
+| Status | `IN_PROGRESS` |
+| Health | `BLOCKED` |
+| Verification target | `https://al-mizan-al-handasi.aljeryabod.chatgpt.site` |
+| Current result | `NOT_VERIFIED` |
+| Required evidence | screenshots, critical user-flow trace, acceptance checklist, bounded browser/device scope, known UI limitations |
+| Execution record | `docs/system-map/DEV-GATE-005-browser-visual-verification.execution.json` |
+| Runtime changed | `NO` |
 
 ## DEV-GATE-006 — Production Deployment Identity
 
