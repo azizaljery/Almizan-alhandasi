@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "DEV-GATE-001-DESIGN-CORE-OWNERSHIP",
+  "gateId": "DEV-GATE-001",
+  "status": "PROPOSED",
+  "result": "BLOCKED",
+  "baselineId": "SMB-20260929-001",
+  "objective": "Establish whether Design Core is a single canonical source or a formally composite ownership boundary.",
+  "observedLayers": [
+    {
+      "role": "CANONICAL_CONTRACT_CANDIDATE",
+      "path": "dist/claude/PlannerOutputContract.mjs",
+      "mirrorOrUpstream": "vendor/claude-planner/src/PlannerOutputContract.mjs",
+      "evidence": {
+        "gitBlobSha": "720d53fb4dd848b5ca422d12e0cacdf0e71c189c",
+        "identicalBlob": true
+      },
+      "proven": "Contract/data-shape authority is documented in docs/MIZAN_SYSTEM_MAP.md.",
+      "notProven": "Ownership of the complete Design Core implementation."
+    },
+    {
+      "role": "CLAUDE_PLANNER_UPSTREAM_CANDIDATE",
+      "path": "vendor/claude-planner/src/",
+      "runtimeMirror": "dist/claude/",
+      "evidence": {
+        "buildRule": "scripts/build.mjs compares every vendor/claude-planner/src file byte-for-byte with dist/claude.",
+        "plannerBlobSha": "c4dc583289f11c55222196b7277dd3cec8af56a8",
+        "plannerOutputContractBlobSha": "720d53fb4dd848b5ca422d12e0cacdf0e71c189c"
+      },
+      "proven": "Vendor source and dist/claude runtime mirror are byte-identical for inspected planner and contract files; build script enforces full-directory equality.",
+      "notProven": "That Claude Planner alone constitutes the complete Design Core."
+    },
+    {
+      "role": "RUNTIME_DESIGN_BOUNDARY",
+      "path": "dist/planner.mjs",
+      "evidence": {
+        "gitBlobSha": "f51f017b63509ce47aeb9dc272eb9ee5d7438379",
+        "imports": "./claude/planner.mjs"
+      },
+      "proven": "Current broader runtime planning boundary integrates Claude planner and local deterministic planning/editing/validation behavior.",
+      "notProven": "That a dist runtime file is canonical authored source."
+    }
+  ],
+  "candidateDecision": {
+    "optionA": {
+      "name": "FORMALLY_COMPOSITE_DESIGN_CORE",
+      "status": "CANDIDATE",
+      "structure": {
+        "contractAuthority": "PlannerOutputContract",
+        "claudePlannerUpstream": "vendor/claude-planner/src/",
+        "runtimeIntegrationBoundary": "dist/planner.mjs"
+      },
+      "requirement": "Project Owner must formally approve the composite ownership model and its change-control/build rules."
+    },
+    "optionB": {
+      "name": "SINGLE_CANONICAL_SOURCE",
+      "status": "NOT_ESTABLISHED",
+      "requirement": "Identify one source with canonicalPath, canonicalVersion, canonicalOwner, build/mirror mapping, runtime consumers, hash evidence, and exclusion rationale for other candidates."
+    }
+  },
+  "decisionRule": "Do not close DEV-GATE-001 until one option is supported by evidence and formally approved where ownership policy is required.",
+  "runtimeChanges": false,
+  "refactorPerformed": false
+}
