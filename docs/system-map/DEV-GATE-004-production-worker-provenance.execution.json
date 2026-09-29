@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "DEV-GATE-004",
+  "name": "Production Worker Provenance",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "BLOCKED",
+  "baselineId": "SMB-20260929-001",
+  "provenance_chain": {
+    "chain_status": "NOT_PROVEN",
+    "required": [
+      "Source Commit",
+      "Build Run",
+      "Artifact Digest",
+      "Deployment ID",
+      "Production Worker",
+      "Live Version Evidence"
+    ]
+  },
+  "proven": {
+    "runtime_changes": 0,
+    "repository_artifact": "worker/server.mjs",
+    "repository_sha256": "6f74364086632bf048f52b8b57176478335b684595615776f4249e18731c3c53",
+    "configured_worker_name": "gentle-sun-5ef5",
+    "configured_main": "worker/server.mjs"
+  },
+  "missing_evidence": [
+    "Production Worker Identifier / immutable deployment identifier",
+    "Deployment Version",
+    "Build Run ID",
+    "Deployed Artifact Hash",
+    "Deployment Log",
+    "Worker Bindings evidence",
+    "Live Runtime Version Evidence"
+  ],
+  "guards": {
+    "runtime_changes": false,
+    "refactor": false
+  },
+  "completion_eligible": false
+}
