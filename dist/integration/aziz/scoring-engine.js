@@ -1,5 +1,6 @@
 import { polygonContains, polygonsOverlap, centroidOf, isValidPolygon } from './geometry.js';
 import { evaluateHardConstraints } from './hard-constraints.js';
+// Candidate4R3 selection utility: internal to AZIZ ranking; this is not Mizan Score.
 function clamp(v) {
     return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 0;
 }
