@@ -67,18 +67,19 @@
     {
       "id": "DEV-GATE-004",
       "condition": "Establish Production Worker byte provenance",
-      "status": "COMPLETED",
-      "result": "BLOCKED",
+      "status": "IN_PROGRESS",
+      "result": null,
       "evidence": [
+        "docs/system-map/DEV-GATE-004-production-worker-provenance.execution.json",
         "docs/system-map/DEV-GATE-004-WORKER-PROVENANCE.json",
         "worker/server.mjs",
         "wrangler.toml",
         "FILE-SHA256SUMS.txt",
-        "FILE-SHA256SUMS-RELEASE.txt",
-        "README.md"
+        "FILE-SHA256SUMS-RELEASE.txt"
       ],
-      "reason": "Repository Worker identity is established (SHA-256 6f743640...c3c53) and wrangler targets gentle-sun-5ef5, but deployed Worker byte/version provenance is not available to prove equality.",
-      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
+      "reason": "Production Worker provenance chain is not proven. Repository artifact/hash and configured Worker target are known, but build/deployment/live-version evidence is incomplete.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
+      "health": "BLOCKED"
     },
     {
       "id": "DEV-GATE-005",
@@ -140,7 +141,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "DEV-GATE-004 remains BLOCKED pending deployed Worker provenance. Continue evidence review for DEV-GATE-005 Browser Visual Verification without runtime changes.",
+  "nextAction": "Complete DEV-GATE-004 provenance evidence chain; DEV-GATE-005/006 remain blocked and may be investigated without runtime changes.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
