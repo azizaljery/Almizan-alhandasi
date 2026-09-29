@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "SCORE-OWNERSHIP-20260929-001",
+  "baselineId": "SMB-20260929-001",
+  "status": "APPROVED",
+  "scope": "POST_BASELINE_CONTROLLED_DEVELOPMENT",
+  "resolves": [
+    "CONTR-0003",
+    "CONTR-0005"
+  ],
+  "ownership": {
+    "mizanScore": {
+      "role": "PRODUCT_QUALITY_MEASUREMENT",
+      "authority": "MIZAN_SCORE",
+      "may": [
+        "measure planner-model quality",
+        "publish axes/penalties/confidence",
+        "support comparison"
+      ],
+      "mustNot": [
+        "select canonical winner",
+        "mutate geometry"
+      ]
+    },
+    "azizCandidate4R3": {
+      "role": "INTERNAL_SELECTION_UTILITY",
+      "authority": "AZIZ_SELECTION",
+      "may": [
+        "compute internal candidate selection utility",
+        "rank surviving candidates",
+        "select candidate",
+        "trace selection"
+      ],
+      "mustNot": [
+        "claim its utility is Mizan Score",
+        "define future Mizan Score V1"
+      ]
+    },
+    "homeDesignEvaluator": {
+      "role": "ADVISORY_DIAGNOSTIC_EVALUATION",
+      "authority": "HOME_DESIGN_EVALUATION",
+      "may": [
+        "evaluate alternatives",
+        "produce local comparison bestId for advisory UI/context"
+      ],
+      "mustNot": [
+        "replace AZIZ selectedCandidateId",
+        "be treated as canonical candidate identity",
+        "claim to be Mizan Score"
+      ]
+    }
+  },
+  "semanticRule": "Three numeric evaluations may coexist only because they answer different questions. Mizan Score measures product quality; AZIZ utility selects among integrated candidates; Home Design evaluation is advisory. Only AZIZ owns canonical candidate selection in the current integrated flow.",
+  "futureRule": "Before Mizan Score V1 implementation, define an explicit adapter if AZIZ is to consume Mizan Score. Do not silently equate existing AZIZ utility axes with Mizan Score V1.",
+  "runtimeBehaviorChangeRequired": false,
+  "historicalBaselineMutation": false
+}
