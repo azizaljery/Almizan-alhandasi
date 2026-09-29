@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "gateId": "DEV-GATE-007",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "FAIL",
+  "baselineId": "SMB-20260929-001",
+  "rule": "Frozen contradiction registry remains immutable; dispositions are post-baseline gate records.",
+  "dispositions": [
+    {
+      "id": "CONTR-0001",
+      "postBaselineStatus": "OPEN",
+      "recommendedDisposition": "REQUIRES_DOCUMENTATION_CORRECTION_OR_FORMAL_ACCEPTANCE",
+      "reason": "README limitation text conflicts with tested RECT/L/U support."
+    },
+    {
+      "id": "CONTR-0002",
+      "postBaselineStatus": "OPEN",
+      "recommendedDisposition": "REQUIRES_DOCUMENTATION_CORRECTION_OR_FORMAL_ACCEPTANCE",
+      "reason": "README persistence description conflicts with tested exact integrated restore."
+    },
+    {
+      "id": "CONTR-0003",
+      "postBaselineStatus": "OPEN",
+      "recommendedDisposition": "REQUIRES_OWNERSHIP_DECISION",
+      "reason": "Mizan Score and home-design evaluation have overlapping scoring roles."
+    },
+    {
+      "id": "CONTR-0004",
+      "postBaselineStatus": "OPEN",
+      "recommendedDisposition": "REQUIRES_DECISION_BOUNDARY_ACCEPTANCE",
+      "reason": "bestId remains decision-like but is not proven to replace AZIZ selectedModel."
+    },
+    {
+      "id": "CONTR-0005",
+      "postBaselineStatus": "OPEN",
+      "recommendedDisposition": "REQUIRES_SCORE_OWNERSHIP_DECISION",
+      "reason": "Current AZIZ Candidate4R3 implements scoring despite declared score-definition boundary."
+    },
+    {
+      "id": "CONTR-0006",
+      "postBaselineStatus": "CANDIDATE_RESOLVED_BY_DECISION",
+      "recommendedDisposition": "VERIFY_THEN_CLOSE",
+      "reason": "DEV-GATE-003 formally distinguished integrated acceptance review from UI preliminary review."
+    },
+    {
+      "id": "CONTR-0007",
+      "postBaselineStatus": "CANDIDATE_RESOLVED_BY_DECISION",
+      "recommendedDisposition": "VERIFY_THEN_CLOSE",
+      "reason": "DEV-GATE-003 formally accepted the non-identical Engineering Core split with distinct roles."
+    }
+  ],
+  "runtimeChanges": false,
+  "refactor": false
+}
