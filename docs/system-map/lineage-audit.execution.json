@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
   "stage": "LINEAGE_AUDIT",
-  "status": "IN_PROGRESS",
-  "result": null,
+  "status": "COMPLETED",
+  "result": "PASS",
   "health": "PASS",
   "baselineStatus": "NOT_FROZEN",
   "developmentStatus": "BLOCKED_UNTIL_BASELINE",
@@ -134,9 +134,11 @@
     {
       "id": "LA-009",
       "name": "Closure Review",
-      "status": "IN_PROGRESS",
-      "result": null,
-      "evidence": []
+      "status": "COMPLETED",
+      "result": "PASS",
+      "evidence": [
+        "docs/system-map/LA-009-closure-review.json"
+      ]
     }
   ],
   "findingsSummary": {
@@ -165,5 +167,9 @@
     "status": "COMPLETED",
     "result": "PASS",
     "artifact": "docs/system-map/LA-008-review-outcome.json"
+  },
+  "closure": {
+    "eligible": true,
+    "artifact": "docs/system-map/LA-009-closure-review.json"
   }
 }
