@@ -110,6 +110,14 @@ test('future assistant path accepts only validated suggestions and never changes
   assert.equal(validateSuggestion({ ...brief, questions: ['ما المطلوب؟'], rooms: [] }).rooms.length, 0);
 });
 
+test('default floor selection matches the currently supported integrated single-floor generation path', () => {
+  const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+  assert.match(html, /<select id="floors"><option value="1" selected>دور واحد — مدعوم الآن<\/option>/);
+  assert.equal(/<option value="2" selected>/.test(html), false);
+  assert.equal(/<option value="3" selected>/.test(html), false);
+  assert.match(html, /المولد المتكامل الحالي يرسم الدور الأرضي فقط/);
+});
+
 test('entrypoint has unique IDs, all fixed UI references exist, and imports are static local assets', () => {
   const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8'), app = readFileSync(new URL('../dist/app.mjs', import.meta.url), 'utf8');
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]); assert.equal(ids.length, new Set(ids).size);
