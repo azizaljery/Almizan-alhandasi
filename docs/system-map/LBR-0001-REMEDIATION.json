@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "remediationId": "LBR-0001-REM-001",
+  "findingId": "LBR-0001",
+  "baselineId": "SMB-20260929-001",
+  "status": "IMPLEMENTED_TEST_EXECUTION_PENDING",
+  "implementation": {
+    "plannerCommit": "c7f5b9b44463598eec77bc1d3808b2c171c6f409",
+    "testCommit": "e86519a7e2e3a879a96c157e3ebeda448cf280e7",
+    "files": [
+      "dist/planner.mjs",
+      "tests/multi-engine.test.mjs"
+    ],
+    "behavior": [
+      "After placeOpening/removeOpening on an integrated model, stale candidateId and geometryHash are cleared.",
+      "Stale integrated review binding is cleared.",
+      "Original candidate/review identity is retained only as parent provenance.",
+      "Edited model is marked lineageStatus=EDITED_UNBOUND with an explicit reason."
+    ]
+  },
+  "targetedRegression": {
+    "file": "tests/multi-engine.test.mjs",
+    "test": "integrated U model remains editable with existing opening tools and invalidates stale canonical identity",
+    "assertions": [
+      "candidateId becomes null after geometry edit",
+      "geometryHash becomes null after geometry edit",
+      "review binding becomes null after geometry edit",
+      "parentCandidateId/parentGeometryHash preserve provenance",
+      "removeOpening keeps identity unbound",
+      "validateModel remains clean"
+    ],
+    "executionStatus": "PENDING_RUNNER",
+    "reason": "No executable repository runner is available in the current connected session; a GitHub Actions workflow was added for repository-side execution."
+  },
+  "ci": {
+    "workflow": ".github/workflows/controlled-development-tests.yml",
+    "workflowCommit": "0a83520a179c2b026126e5c5a5611ce29524fa41",
+    "observedRun": "NONE_YET"
+  },
+  "frozenBaselineMutation": false,
+  "productionReleaseAuthorized": false
+}
