@@ -15,7 +15,7 @@
   "currentStage": {
     "name": "HUMAN_REVIEW",
     "status": "IN_PROGRESS",
-    "result": null
+    "result": "BLOCKED"
   },
   "baseline": {
     "status": "NOT_FROZEN",
@@ -145,7 +145,12 @@
     },
     "humanReview": {
       "status": "IN_PROGRESS",
-      "result": null
+      "result": "BLOCKED",
+      "reason": "System Discovery and System Map coverage are not yet proven complete.",
+      "blockingArtifacts": [
+        "docs/system-map/system-discovery-inventory.json",
+        "docs/system-map/system-map-coverage-gaps.json"
+      ]
     },
     "systemMapBaseline": {
       "status": "NOT_STARTED",
@@ -168,7 +173,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Run global HUMAN_REVIEW across System Discovery, System Map, contradictions, lineage, evidence, known unknowns, and audit limitations before Baseline.",
+  "nextStep": "Classify direct runtime modules and close System Discovery/System Map coverage before global Human Review.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
