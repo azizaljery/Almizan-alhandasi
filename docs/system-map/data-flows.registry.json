@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "flows": [
     {
       "flowId": "selected-candidate-to-2d",
@@ -57,20 +57,82 @@
     },
     {
       "flowId": "candidate-to-score-current",
-      "producer": "UNKNOWN",
+      "producer": "aziz-engine",
       "consumer": "mizan-score",
       "contractId": "UNKNOWN",
-      "inputHashField": "UNKNOWN",
+      "inputHashField": "integration.geometryHash",
       "outputHashField": null,
       "transport": "IN_PROCESS",
       "verification": "INFERRED",
       "mutationPolicy": "READ_ONLY",
       "failurePolicy": "UNKNOWN",
-      "evidenceIds": [],
+      "evidenceIds": [
+        "EVD-CODE-0002",
+        "EVD-CODE-0003",
+        "EVD-CODE-0015"
+      ],
       "openQuestions": [
-        "Static code shows calculateMizanScore(model) is called from app.mjs.",
-        "Runtime execution has not yet been traced.",
+        "Static code maps runMultiEngineDesign().selectedModel into state.model before calculateMizanScore(state.model).",
+        "No dedicated runtime trace is recorded for this UI scoring call.",
         "Future MIZAN_SCORE_V1 contract is not yet defined."
+      ]
+    },
+    {
+      "flowId": "selected-candidate-to-home-design-evaluator",
+      "producer": "aziz-engine",
+      "consumer": "home-design-evaluator",
+      "contractId": "UNKNOWN",
+      "inputHashField": "integration.geometryHash",
+      "outputHashField": null,
+      "transport": "IN_PROCESS",
+      "verification": "INFERRED",
+      "mutationPolicy": "READ_ONLY",
+      "failurePolicy": "UNKNOWN",
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0002"
+      ],
+      "openQuestions": [
+        "bestId remains a local comparison identity; canonical decision ownership is unresolved."
+      ]
+    },
+    {
+      "flowId": "selected-candidate-to-ui-engineering-review",
+      "producer": "aziz-engine",
+      "consumer": "engineering-review",
+      "contractId": "UNKNOWN",
+      "inputHashField": "integration.geometryHash",
+      "outputHashField": null,
+      "transport": "IN_PROCESS",
+      "verification": "INFERRED",
+      "mutationPolicy": "READ_ONLY",
+      "failurePolicy": "PRELIMINARY_REVIEW",
+      "evidenceIds": [
+        "EVD-CODE-0006",
+        "EVD-CODE-0011",
+        "EVD-CODE-0013"
+      ],
+      "openQuestions": [
+        "UI review lacks durable candidateId/geometryHash binding."
+      ]
+    },
+    {
+      "flowId": "selected-candidate-to-project-store",
+      "producer": "aziz-engine",
+      "consumer": "project-store",
+      "contractId": "PROJECT_V3",
+      "inputHashField": "integration.geometryHash",
+      "outputHashField": null,
+      "transport": "SERIALIZED_PROJECT",
+      "verification": "VERIFIED_TEST",
+      "mutationPolicy": "COPY_PRESERVE",
+      "failurePolicy": "REJECT_INVALID_PROJECT",
+      "evidenceIds": [
+        "EVD-TEST-0003",
+        "EVD-CODE-0014"
+      ],
+      "openQuestions": [
+        "Manual edits can preserve stale identity metadata; see LBR-0001."
       ]
     }
   ]
