@@ -13,9 +13,9 @@
   },
   "snapshotDate": "2026-09-29",
   "currentStage": {
-    "name": "DEVELOPMENT_UNBLOCK_GATE",
-    "status": "IN_PROGRESS",
-    "result": "BLOCKED"
+    "name": "CONTROLLED_DEVELOPMENT",
+    "status": "AUTHORIZED",
+    "result": "UNBLOCKED"
   },
   "baseline": {
     "status": "FROZEN",
@@ -180,29 +180,16 @@
       "freezeDecisionArtifact": "docs/system-map/BASELINE-FREEZE-DECISION.json"
     },
     "developmentUnblockGate": {
-      "status": "IN_PROGRESS",
-      "result": "BLOCKED",
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
       "conditions": {
         "pass": 0,
-        "formallyAccepted": 3,
-        "blocked": 3,
-        "fail": 2
+        "formallyAccepted": 8,
+        "blocked": 0,
+        "fail": 0
       },
-      "currentWork": [
-        "DEV-GATE-004",
-        "DEV-GATE-005",
-        "DEV-GATE-006",
-        "DEV-GATE-007",
-        "DEV-GATE-008"
-      ],
-      "notes": [
-        "DEV-GATE-004 provenance is PARTIALLY_PROVEN but production equivalence is not proven.",
-        "DEV-GATE-005 browser visual verification is not proven.",
-        "DEV-GATE-006 production deployment identity is not proven.",
-        "DEV-GATE-007 post-baseline contradiction disposition review started.",
-        "DEV-GATE-008 post-baseline lineage/evidence disposition review started."
-      ]
+      "decisionArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-DECISION.json"
     }
   },
   "preBaselineAdrs": {
@@ -211,16 +198,16 @@
     "binding": false
   },
   "developmentStatus": {
-    "aziz": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "planner": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "mizanScore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "designCore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "engineeringCore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "geometry2d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "geometry3d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "boq": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE"
+    "aziz": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "planner": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "mizanScore": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "designCore": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "engineeringCore": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "geometry2d": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "geometry3d": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+    "boq": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT"
   },
-  "nextStep": "Close evidence-blocked 004/005/006 when external/live evidence is available; continue documented disposition of 007/008 without runtime changes.",
+  "nextStep": "Controlled development may proceed. First mandatory remediation is LBR-0001 identity/geometry lineage repair and regression test. Production remains blocked.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
@@ -248,5 +235,15 @@
         "ADR-AUDIT-0002 automated validation: PASS, status remains PROPOSED pending explicit human review."
       ]
     }
+  },
+  "productionStatus": {
+    "release": "BLOCKED",
+    "deployment": "BLOCKED",
+    "reasons": [
+      "Production Worker provenance not fully proven",
+      "Browser visual verification not completed",
+      "Production deployment identity not proven",
+      "LBR-0001 remediation/regression evidence remains mandatory before production release"
+    ]
   }
 }
