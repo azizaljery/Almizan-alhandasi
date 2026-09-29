@@ -7,7 +7,7 @@
   "health": "BLOCKED",
   "baselineId": "SMB-20260929-001",
   "provenance_chain": {
-    "chain_status": "NOT_PROVEN",
+    "chain_status": "PARTIALLY_PROVEN",
     "required": [
       "Source Commit",
       "Build Run",
@@ -15,6 +15,18 @@
       "Deployment ID",
       "Production Worker",
       "Live Version Evidence"
+    ],
+    "proven_segment": [
+      "Repository artifact",
+      "Repository SHA-256",
+      "Configured Worker target"
+    ],
+    "unproven_segment": [
+      "Build Run",
+      "Deployment ID",
+      "Deployed Artifact Digest",
+      "Live Version Evidence",
+      "Byte-for-Byte Production Equivalence"
     ]
   },
   "proven": {
