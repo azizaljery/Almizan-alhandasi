@@ -1,0 +1,64 @@
+{
+  "project": "AL-MIZAN AL-HANDASI",
+  "phase": "CONTROLLED_DEVELOPMENT",
+  "baselineReference": {
+    "id": "SMB-20260929-001",
+    "status": "FROZEN",
+    "mutable": false
+  },
+  "productionStatus": "BLOCKED",
+  "allowedResults": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "FORMALLY_ACCEPTED"
+  ],
+  "guards": {
+    "runtimeChangesAllowedDuringEvidenceReview": false,
+    "baselineMutationAllowed": false,
+    "productionDeploymentAllowed": false
+  },
+  "id": "DEV-GATE-004",
+  "name": "Production Worker Provenance",
+  "status": "COMPLETED",
+  "result": "BLOCKED",
+  "health": "PASS",
+  "objective": "Prove that the currently deployed Production Worker bytes are the same artifact represented by the repository evidence.",
+  "evidenceReviewed": [
+    {
+      "item": "Repository worker entrypoint",
+      "value": "worker/server.mjs",
+      "verification": "VERIFIED_REPOSITORY"
+    },
+    {
+      "item": "Repository artifact SHA-256",
+      "value": "6f74364086632bf048f52b8b57176478335b684595615776f4249e18731c3c53",
+      "verification": "VERIFIED_REPOSITORY_RELEASE_HASH"
+    },
+    {
+      "item": "Wrangler target",
+      "value": "gentle-sun-5ef5",
+      "verification": "VERIFIED_REPOSITORY_CONFIG"
+    }
+  ],
+  "provenanceChain": {
+    "repositoryEntrypoint": "PROVEN",
+    "repositoryDigest": "PROVEN",
+    "configuredWorkerTarget": "PROVEN",
+    "deploymentArtifactDigest": "NOT_PROVIDED",
+    "liveProductionBytesDigest": "NOT_PROVIDED",
+    "repositoryToProductionByteEquivalence": "NOT_PROVEN"
+  },
+  "analysis": {
+    "conclusion": "Repository-side Worker identity and configured target are proven, but the live production artifact cannot be matched byte-for-byte to the repository artifact.",
+    "classificationReason": "Missing immutable deployment/live-byte evidence blocks proof; no contradictory evidence establishes FAIL.",
+    "missingEvidence": [
+      "Immutable deployment ID or Worker version ID",
+      "Digest of artifact actually deployed",
+      "Platform deployment record linking artifact digest to gentle-sun-5ef5",
+      "Live/platform evidence sufficient to compare deployed bytes with repository worker/server.mjs"
+    ]
+  },
+  "runtimeChanges": 0,
+  "nextAction": "Acquire immutable deployment/platform provenance evidence; do not redeploy merely to manufacture evidence unless separately authorized."
+}
