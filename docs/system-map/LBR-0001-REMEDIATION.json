@@ -3,7 +3,7 @@
   "remediationId": "LBR-0001-REM-001",
   "findingId": "LBR-0001",
   "baselineId": "SMB-20260929-001",
-  "status": "IMPLEMENTED_TEST_EXECUTION_PENDING",
+  "status": "VERIFIED",
   "implementation": {
     "plannerCommit": "c7f5b9b44463598eec77bc1d3808b2c171c6f409",
     "testCommit": "e86519a7e2e3a879a96c157e3ebeda448cf280e7",
@@ -29,14 +29,55 @@
       "removeOpening keeps identity unbound",
       "validateModel remains clean"
     ],
-    "executionStatus": "PENDING_RUNNER",
-    "reason": "No executable repository runner is available in the current connected session; a GitHub Actions workflow was added for repository-side execution."
+    "executionStatus": "PASS",
+    "reason": "No executable repository runner is available in the current connected session; a GitHub Actions workflow was added for repository-side execution.",
+    "runId": 36597864516,
+    "jobId": 109507328013,
+    "headSha": "2d9d6f1936566a6cbe571fb4267c1d9f2917a1c7",
+    "testNumber": 33,
+    "totalTests": 88,
+    "passed": 88,
+    "failed": 0
   },
   "ci": {
     "workflow": ".github/workflows/controlled-development-tests.yml",
     "workflowCommit": "0a83520a179c2b026126e5c5a5611ce29524fa41",
-    "observedRun": "NONE_YET"
+    "observedRun": 36597864516,
+    "conclusion": "success",
+    "jobId": 109507328013,
+    "testSummary": "88 PASS / 0 FAIL"
   },
   "frozenBaselineMutation": false,
-  "productionReleaseAuthorized": false
+  "productionReleaseAuthorized": false,
+  "verification": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "relatedVerification": [
+    {
+      "area": "LBR-0001 targeted regression",
+      "test": 33,
+      "result": "PASS"
+    },
+    {
+      "area": "2D / 3D / BOQ selected-model consistency",
+      "test": 49,
+      "result": "PASS"
+    },
+    {
+      "area": "integrated save/restore exact geometry",
+      "test": 32,
+      "result": "PASS"
+    },
+    {
+      "area": "3D opening geometry",
+      "test": 67,
+      "result": "PASS"
+    },
+    {
+      "area": "project round-trip persistence",
+      "test": 83,
+      "result": "PASS"
+    }
+  ],
+  "postBaselineDisposition": "LBR-0001 repaired and verified post-baseline. Historical finding remains unchanged in SMB-20260929-001."
 }
