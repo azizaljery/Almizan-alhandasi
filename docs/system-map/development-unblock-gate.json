@@ -27,7 +27,8 @@
         "Repository search: design-core / @mizan/design-core / packages/design-core returned no source result",
         "docs/system-map/discrepancies.md"
       ],
-      "reason": "No canonical Design Core source is established in the reviewed repository."
+      "reason": "No canonical Design Core source is established in the reviewed repository.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
       "id": "DEV-GATE-002",
@@ -38,7 +39,8 @@
         "dist/integration/gemini/packages/design-intelligence/docs/AZIZ_MAPPING.md",
         "docs/system-map/discrepancies.md"
       ],
-      "reason": "Integrated AZIZ runtime/mapping exists, but the canonical AZIZ source package/version remains unresolved."
+      "reason": "Integrated AZIZ runtime/mapping exists, but the canonical AZIZ source package/version remains unresolved.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
       "id": "DEV-GATE-003",
@@ -50,7 +52,8 @@
         "EVD-HASH-0002",
         "docs/system-map/discrepancies.md"
       ],
-      "reason": "UI and integrated Engineering Core copies are non-identical and no canonical copy or formal split acceptance is recorded."
+      "reason": "UI and integrated Engineering Core copies are non-identical and no canonical copy or formal split acceptance is recorded.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
       "id": "DEV-GATE-004",
@@ -61,7 +64,8 @@
         "worker/server.mjs",
         "docs/system-map/discrepancies.md"
       ],
-      "reason": "Repository Worker source exists, but byte-for-byte provenance to the deployed Production Worker is not established."
+      "reason": "Repository Worker source exists, but byte-for-byte provenance to the deployed Production Worker is not established.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
       "id": "DEV-GATE-005",
@@ -72,7 +76,8 @@
         "docs/system-map/discrepancies.md",
         "SMB-20260929-001 audit limitations"
       ],
-      "reason": "Repository tests do not establish browser visual verification."
+      "reason": "Repository tests do not establish browser visual verification.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
       "id": "DEV-GATE-006",
@@ -83,7 +88,8 @@
         "SMB-20260929-001 knownUnknowns",
         "docs/system-map/discrepancies.md"
       ],
-      "reason": "Frozen baseline is repository-runtime scoped and does not establish deployed production identity."
+      "reason": "Frozen baseline is repository-runtime scoped and does not establish deployed production identity.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
       "id": "DEV-GATE-007",
@@ -93,7 +99,8 @@
       "evidence": [
         "docs/system-map/contradictions.registry.json"
       ],
-      "reason": "CONTR-0001 through CONTR-0007 remain resolution=NOT_ATTEMPTED; no post-baseline formal acceptance is recorded."
+      "reason": "CONTR-0001 through CONTR-0007 remain resolution=NOT_ATTEMPTED; no post-baseline formal acceptance is recorded.",
+      "trackerArtifact": "docs/system-map/CONTR-RESOLUTION-TRACKER.md"
     },
     {
       "id": "DEV-GATE-008",
@@ -104,7 +111,8 @@
         "docs/system-map/lineage-findings.registry.json",
         "docs/system-map/evidence-audit-findings.registry.json"
       ],
-      "reason": "LBR-0001, LGAP-0002, LGAP-0003 and EAGAP-0001..0003 remain unresolved; no development-scope formal acceptance is recorded."
+      "reason": "LBR-0001, LGAP-0002, LGAP-0003 and EAGAP-0001..0003 remain unresolved; no development-scope formal acceptance is recorded.",
+      "trackerArtifact": "docs/system-map/LINEAGE-EVIDENCE-RESOLUTION.md"
     }
   ],
   "summary": {
@@ -119,5 +127,10 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Resolve or formally accept gate conditions with evidence. Do not modify runtime while gate remains blocked."
+  "nextAction": "Use the three populated trackers to close conditions with evidence or Project Owner formal acceptance. Current gate result remains BLOCKED.",
+  "trackingArtifacts": {
+    "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
+    "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
+    "lineageEvidenceResolution": "docs/system-map/LINEAGE-EVIDENCE-RESOLUTION.md"
+  }
 }
