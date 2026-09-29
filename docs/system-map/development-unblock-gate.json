@@ -97,14 +97,17 @@
     {
       "id": "DEV-GATE-006",
       "condition": "Establish production deployment identity",
-      "status": "COMPLETED",
-      "result": "BLOCKED",
+      "status": "IN_PROGRESS",
+      "result": null,
       "evidence": [
-        "SMB-20260929-001 knownUnknowns",
-        "docs/system-map/discrepancies.md"
+        "docs/system-map/DEV-GATE-006-production-deployment-identity.execution.json",
+        ".openai/hosting.json",
+        "RELEASE-MANIFEST.md",
+        "INTEGRATION-P1-REPORT.md"
       ],
-      "reason": "Frozen baseline is repository-runtime scoped and does not establish deployed production identity.",
-      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
+      "reason": "Repository hosting project ID and production targets are known, but no immutable deployment identity binds current production bytes to the reviewed repository/build.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
+      "health": "BLOCKED"
     },
     {
       "id": "DEV-GATE-007",
@@ -142,7 +145,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Collect browser visual evidence for DEV-GATE-005 and deployed provenance for DEV-GATE-004; no runtime changes.",
+  "nextAction": "DEV-GATE-004/005/006 remain evidence-blocked. Next review DEV-GATE-007 contradiction disposition without runtime changes.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
