@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "1.0.0",
+  "resolutionId": "SCORE-OWNERSHIP-RESOLUTION-0001",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "baselineId": "SMB-20260929-001",
+  "baselineMutation": "FORBIDDEN",
+  "contradictions": [
+    "CONTR-0003",
+    "CONTR-0005"
+  ],
+  "production": "BLOCKED",
+  "mizanScoreV1": "BLOCKED_UNTIL_OWNERSHIP_RESOLUTION",
+  "governingQuestion": [
+    "Who owns score definition?",
+    "Who owns candidate selection decision?"
+  ],
+  "inventory": {
+    "dist/mizan-score.mjs::calculateMizanScore": {
+      "role": "MEASUREMENT_HEURISTIC",
+      "produces": [
+        "score",
+        "normalized",
+        "axes",
+        "penalties",
+        "confidence"
+      ],
+      "selectsWinner": false
+    },
+    "dist/mizan-home-design-engine.mjs::evaluateDesign": {
+      "role": "LEGACY_HOME_DESIGN_MEASUREMENT",
+      "produces": [
+        "evaluation.score",
+        "metrics",
+        "blockers"
+      ],
+      "selectsWinner": false
+    },
+    "dist/home-design-engine.mjs::compareHomeModels": {
+      "role": "LEGACY_COMPARISON_DECISION",
+      "consumes": "evaluation.score",
+      "produces": [
+        "bestId"
+      ],
+      "selectsWinner": true
+    },
+    "dist/integration/aziz/scoring-engine.js::scoreCandidate": {
+      "role": "AZIZ_INTERNAL_MEASUREMENT",
+      "produces": [
+        "axes",
+        "rawTotal",
+        "confidenceAdjustedTotal"
+      ],
+      "selectsWinner": false
+    },
+    "dist/integration/aziz/consensus-engine.js": {
+      "role": "AZIZ_WEIGHT_DEFINITION",
+      "produces": [
+        "DEFAULT_WEIGHTS",
+        "weight profiles",
+        "resolved weights"
+      ],
+      "selectsWinner": false
+    },
+    "dist/integration/aziz/aziz.js": {
+      "role": "AZIZ_ORCHESTRATION_AND_SELECTION",
+      "consumes": [
+        "scoreCandidate",
+        "resolveWeights"
+      ],
+      "selectsWinner": true
+    }
+  },
+  "preliminaryFinding": "At least three score-definition paths and two decision-like selection paths exist. Ownership is not yet resolved; no runtime patch has been applied.",
+  "checks": {
+    "SOR-001": {
+      "status": "COMPLETED",
+      "result": "PASS",
+      "note": "Inventory of score-producing functions and weights completed."
+    },
+    "SOR-002": {
+      "status": "IN_PROGRESS",
+      "result": null,
+      "note": "Trace calculateMizanScore ownership and consumers."
+    }
+  },
+  "guards": {
+    "runtimeChanges": false,
+    "refactor": false,
+    "productionChanges": false
+  }
+}
