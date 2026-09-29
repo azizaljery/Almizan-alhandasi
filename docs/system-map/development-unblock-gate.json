@@ -22,12 +22,15 @@
       "id": "DEV-GATE-001",
       "condition": "Establish canonical Design Core source",
       "status": "COMPLETED",
-      "result": "BLOCKED",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
-        "Repository search: design-core / @mizan/design-core / packages/design-core returned no source result",
-        "docs/system-map/discrepancies.md"
+        "docs/system-map/DEV-GATE-001-DESIGN-CORE-OWNERSHIP.json",
+        "scripts/build.mjs",
+        "vendor/claude-planner/src/",
+        "dist/claude/",
+        "dist/planner.mjs"
       ],
-      "reason": "No canonical Design Core source is established in the reviewed repository.",
+      "reason": "Project Owner formally accepted the composite Design Core ownership model; canonical authored Claude Planner/contract source is vendor/claude-planner/src, dist/claude is its build-validated runtime mirror, and dist/planner.mjs is the runtime integration boundary.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
@@ -118,8 +121,8 @@
   "summary": {
     "pass": 0,
     "fail": 2,
-    "blocked": 6,
-    "formallyAccepted": 0
+    "blocked": 5,
+    "formallyAccepted": 1
   },
   "decision": "DEVELOPMENT_REMAINS_BLOCKED",
   "guards": {
@@ -127,7 +130,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Use the three populated trackers to close conditions with evidence or Project Owner formal acceptance. Current gate result remains BLOCKED.",
+  "nextAction": "Proceed to DEV-GATE-002 canonical AZIZ source/version. Runtime remains blocked.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
