@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "DEV-GATE-006",
+  "name": "Production Deployment Identity",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "BLOCKED",
+  "reviewedAt": "2026-09-29",
+  "baselineId": "SMB-20260929-001",
+  "repositoryHostingIdentity": {
+    "projectId": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+    "staticDirectory": "dist",
+    "evidence": ".openai/hosting.json"
+  },
+  "productionTarget": {
+    "site": "https://al-mizan-al-handasi.aljeryabod.chatgpt.site",
+    "worker": "gentle-sun-5ef5",
+    "workerEndpoint": "https://gentle-sun-5ef5.aljeryabod.workers.dev/api/assistant"
+  },
+  "proven": [
+    "Repository hosting project_id and static directory are recorded.",
+    "Repository Worker target/name and client endpoint are documented."
+  ],
+  "blockingEvidence": [
+    "RELEASE-MANIFEST.md says the reviewed package was not deployed.",
+    "INTEGRATION-P1-REPORT.md says the package is not yet a production deployment.",
+    "No deployment ID/build ID/live artifact digest binds current production bytes to this repository baseline."
+  ],
+  "requiredForClosure": [
+    "Production deployment ID/version",
+    "Deployed frontend artifact digest or equivalent immutable identity",
+    "Binding from deployment identity to repository/build commit",
+    "Live verification evidence"
+  ],
+  "guards": {
+    "runtimeChanges": false,
+    "refactor": false
+  },
+  "completionEligible": false
+}
