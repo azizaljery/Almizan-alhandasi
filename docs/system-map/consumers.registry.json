@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.2.0",
+  "schemaVersion": "1.3.0",
   "consumers": [
     {
       "consumerId": "aziz-engine",
@@ -193,6 +193,85 @@
       "evidenceIds": [
         "EVD-TEST-0003",
         "EVD-CODE-0014"
+      ]
+    },
+    {
+      "consumerId": "planning-audit",
+      "reads": [
+        "model",
+        "circulationNetwork"
+      ],
+      "writes": [
+        "planningReview"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry",
+        "selectedCandidateId"
+      ],
+      "fallbackPolicy": "RETURN_REVIEW",
+      "verification": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "consumerId": "circulation-analysis",
+      "reads": [
+        "model.rooms",
+        "model.corridors",
+        "model.openings"
+      ],
+      "writes": [
+        "circulationNetwork"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry"
+      ],
+      "fallbackPolicy": "RETURN_NETWORK_OR_UNREACHABLE",
+      "verification": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "consumerId": "design-insights",
+      "reads": [
+        "model",
+        "engineeringAnalysis",
+        "planningReview"
+      ],
+      "writes": [
+        "designInsightScores"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry",
+        "selectedCandidateId"
+      ],
+      "fallbackPolicy": "BOUNDED_DERIVED_INSIGHTS",
+      "verification": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "consumerId": "visualization-adapter",
+      "reads": [
+        "model",
+        "planReference",
+        "visualOptions"
+      ],
+      "writes": [
+        "visualPrompt",
+        "visualizationRequest"
+      ],
+      "mustNotWrite": [
+        "canonicalGeometry",
+        "selectedCandidateId"
+      ],
+      "fallbackPolicy": "SAFE_DEFAULTS_OR_DISPLAY_ERROR",
+      "verification": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0015"
       ]
     }
   ]
