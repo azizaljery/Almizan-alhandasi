@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordedAt": "2026-09-29",
+  "baselineId": "SMB-20260929-001",
+  "development": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
+  "production": "BLOCKED",
+  "productionEvidenceRun": {
+    "workflowRunId": 36614114499,
+    "headSha": "d782669dc846a8d0e1a402f8efa1a8c9c0ddd9a5",
+    "artifactId": 11054562754,
+    "artifactDigest": "sha256:4eda79625af72d9ce97f23525806493173d1861d519c40ff6c5d2b5b0b9ccfd9"
+  },
+  "devGate004": {
+    "result": "BLOCKED",
+    "actualProductionEvidence": {
+      "workerStatusHttp": 200,
+      "configured": true,
+      "accessConfigured": true,
+      "verified": false,
+      "cfRay": "a42d22ae7d5fbdc4-MAN"
+    },
+    "blocker": "Deployment version/digest and byte-for-byte equivalence to repository worker/server.mjs remain unproven."
+  },
+  "devGate005": {
+    "result": "FAIL",
+    "actualProductionEvidence": {
+      "siteHttp": 200,
+      "browserMatrix": [
+        "Chromium 1440x1000",
+        "Chromium 390x844"
+      ],
+      "screenshots": 10,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "startup": true,
+      "journey": true,
+      "design": true,
+      "boq": true,
+      "generation": false,
+      "observedError": "ADDITIONAL_FLOORS_NOT_IMPLEMENTED"
+    },
+    "controlledDevelopmentFix": {
+      "fixCommit": "bb0a44dce7d8e8de657404fd32085434b7494657",
+      "regressionTestCommit": "651eec152fbd2c52a0bf62621f4f97022d8b2830",
+      "verificationRunId": 36614673915,
+      "verification": "90 PASS / 0 FAIL",
+      "deployed": false
+    }
+  },
+  "nextProductionStep": "Deploy an approved controlled-development build, then rerun production evidence. Do not mark production PASS before generation, 2D, 3D, BOQ and save/restore are observed live."
+}
