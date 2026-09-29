@@ -20,9 +20,9 @@
   },
   "id": "DEV-GATE-005",
   "name": "Browser Visual Verification",
-  "status": "IN_PROGRESS",
-  "result": null,
-  "health": "BLOCKED",
+  "status": "COMPLETED",
+  "result": "FAIL",
+  "health": "PASS",
   "objective": "Verify required browser-visible behavior and visual state against an approved acceptance scope without changing Runtime.",
   "evidenceReviewed": [
     {
@@ -49,66 +49,66 @@
     {
       "id": "DEV-GATE-005-01",
       "name": "Fix target build/version",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS"
     },
     {
       "id": "DEV-GATE-005-02",
       "name": "Approve browser/device matrix",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS_WITH_LIMITED_MATRIX"
     },
     {
       "id": "DEV-GATE-005-03",
       "name": "Verify startup and primary screen",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS_WITHIN_CAPTURED_SCOPE"
     },
     {
       "id": "DEV-GATE-005-04",
       "name": "Verify plan editing and openings visually",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "BLOCKED_BY_GENERATION_FAILURE"
     },
     {
       "id": "DEV-GATE-005-05",
       "name": "Verify 2D state",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS_WITHIN_CAPTURED_SCOPE"
     },
     {
       "id": "DEV-GATE-005-06",
       "name": "Verify 3D state",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "BLOCKED_BY_GENERATION_FAILURE"
     },
     {
       "id": "DEV-GATE-005-07",
       "name": "Verify BOQ presentation",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS_WITHIN_CAPTURED_SCOPE"
     },
     {
       "id": "DEV-GATE-005-08",
       "name": "Verify save/restore browser flow",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "NOT_REACHED"
     },
     {
       "id": "DEV-GATE-005-09",
       "name": "Capture console and network evidence",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS_WITHIN_CAPTURED_SCOPE"
     },
     {
       "id": "DEV-GATE-005-10",
       "name": "Record deviations and human review",
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "COMPLETED",
+      "result": "FAIL"
     }
   ],
   "analysis": {
-    "conclusion": "Existing repository evidence explicitly does not establish browser visual acceptance, so no PASS/FAIL conclusion can be made.",
+    "conclusion": "Actual production browser evidence is now available. Startup, journey, design and BOQ views render in desktop/mobile Chromium with no console/page/request failures, but the primary generation flow does not produce a result on the current production default state. Therefore production visual verification FAILS rather than remaining evidence-blocked.",
     "classificationReason": "Required screenshots/recordings, fixed deployment identity, browser matrix, console/network capture, and human visual review are missing.",
     "missingEvidence": [
       "Visual evidence package",
@@ -120,5 +120,68 @@
     ]
   },
   "runtimeChanges": 0,
-  "nextAction": "Collect visual evidence against a fixed build, then execute checks DEV-GATE-005-01 through DEV-GATE-005-10."
+  "nextAction": "Deploy an approved production build containing the single-floor default fix, then rerun the same production evidence workflow. Do not mark PASS until generation, 2D, 3D, BOQ and save/restore are observed on production.",
+  "actualProductionEvidence": {
+    "workflowRunId": 36614114499,
+    "workflowHeadSha": "d782669dc846a8d0e1a402f8efa1a8c9c0ddd9a5",
+    "artifactId": 11054562754,
+    "artifactName": "production-evidence-36614114499",
+    "artifactDigest": "sha256:4eda79625af72d9ce97f23525806493173d1861d519c40ff6c5d2b5b0b9ccfd9",
+    "capturedAtUtc": "2026-09-29T18:43:44Z",
+    "site": {
+      "projectId": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+      "slug": "al-mizan-al-handasi",
+      "liveUrl": "https://al-mizan-al-handasi.aljeryabod.chatgpt.site",
+      "status": "active",
+      "accessMode": "custom",
+      "sourceVersionNumber": 14,
+      "projectionRevision": 28
+    },
+    "browserMatrix": [
+      {
+        "browser": "Chromium",
+        "viewport": "1440x1000",
+        "httpStatus": 200
+      },
+      {
+        "browser": "Chromium",
+        "viewport": "390x844",
+        "httpStatus": 200
+      }
+    ],
+    "screenshots": [
+      "desktop-chromium-01-startup.png",
+      "desktop-chromium-02-journey.png",
+      "desktop-chromium-03-design.png",
+      "desktop-chromium-04-after-generate.png",
+      "desktop-chromium-05-boq.png",
+      "mobile-chromium-01-startup.png",
+      "mobile-chromium-02-journey.png",
+      "mobile-chromium-03-design.png",
+      "mobile-chromium-04-after-generate.png",
+      "mobile-chromium-05-boq.png"
+    ],
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "generationResult": {
+      "desktopOutVisible": false,
+      "mobileOutVisible": false,
+      "observedError": "ADDITIONAL_FLOORS_NOT_IMPLEMENTED"
+    },
+    "liveAssetComparisonAtRunHead": {
+      "app.mjs": "MATCH",
+      "planner.css": "MATCH",
+      "planner.mjs": "MISMATCH",
+      "index.html": "MISMATCH"
+    }
+  },
+  "controlledDevelopmentRemediation": {
+    "finding": "Default UI selected two floors while integrated generation supports one floor only.",
+    "fixCommit": "bb0a44dce7d8e8de657404fd32085434b7494657",
+    "regressionTestCommit": "651eec152fbd2c52a0bf62621f4f97022d8b2830",
+    "verificationRunId": 36614673915,
+    "verification": "90 PASS / 0 FAIL",
+    "productionDeploymentStatus": "NOT_DEPLOYED"
+  }
 }
