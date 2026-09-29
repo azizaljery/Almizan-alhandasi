@@ -121,16 +121,20 @@
     {
       "id": "LA-008",
       "name": "Human Review",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "evidence": [
+        "docs/system-map/LA-008-review-outcome.json",
         "docs/system-map/lineage-findings.registry.json"
+      ],
+      "notes": [
+        "User-provided review accepted LBR-0001, LGAP-0002, and LGAP-0003 with wording clarifications."
       ]
     },
     {
       "id": "LA-009",
       "name": "Closure Review",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null,
       "evidence": []
     }
@@ -156,5 +160,10 @@
   "registryIntegrity": {
     "result": "PASS",
     "issues": []
+  },
+  "humanReview": {
+    "status": "COMPLETED",
+    "result": "PASS",
+    "artifact": "docs/system-map/LA-008-review-outcome.json"
   }
 }
