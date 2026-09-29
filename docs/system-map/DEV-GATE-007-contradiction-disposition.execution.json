@@ -21,11 +21,13 @@
     },
     {
       "id": "CONTR-0003",
-      "postBaselineStatus": "RESOLUTION_IMPLEMENTED_VERIFICATION_PENDING",
-      "recommendedDisposition": "CLOSE_ON_TARGETED_TEST_PASS",
+      "postBaselineStatus": "RESOLVED_POST_BASELINE",
+      "recommendedDisposition": "CLOSED",
       "reason": "SCORE-OWNERSHIP-20260929-001 formally separates Mizan product-quality measurement, Home Design advisory evaluation, and AZIZ canonical selection.",
       "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
-      "testArtifact": "tests/score-ownership.test.mjs"
+      "testArtifact": "tests/score-ownership.test.mjs",
+      "verification": "PASS",
+      "resolutionArtifact": "docs/system-map/SCORE-OWNERSHIP-RESOLUTION.json"
     },
     {
       "id": "CONTR-0004",
@@ -35,11 +37,13 @@
     },
     {
       "id": "CONTR-0005",
-      "postBaselineStatus": "RESOLUTION_IMPLEMENTED_VERIFICATION_PENDING",
-      "recommendedDisposition": "CLOSE_ON_TARGETED_TEST_PASS",
+      "postBaselineStatus": "RESOLVED_POST_BASELINE",
+      "recommendedDisposition": "CLOSED",
       "reason": "SCORE-OWNERSHIP-20260929-001 defines AZIZ Candidate4R3 scoring as internal selection utility, not Mizan Score or future Mizan Score V1.",
       "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
-      "testArtifact": "tests/score-ownership.test.mjs"
+      "testArtifact": "tests/score-ownership.test.mjs",
+      "verification": "PASS",
+      "resolutionArtifact": "docs/system-map/SCORE-OWNERSHIP-RESOLUTION.json"
     },
     {
       "id": "CONTR-0006",
@@ -57,9 +61,12 @@
   "runtimeChanges": false,
   "refactor": false,
   "scoreOwnershipResolution": {
-    "status": "IMPLEMENTED",
-    "verification": "PENDING_CI",
+    "status": "VERIFIED",
+    "result": "PASS",
+    "verification": "89_PASS_0_FAIL",
+    "workflowRunId": 36606652467,
     "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
+    "resolutionArtifact": "docs/system-map/SCORE-OWNERSHIP-RESOLUTION.json",
     "testArtifact": "tests/score-ownership.test.mjs"
   }
 }
