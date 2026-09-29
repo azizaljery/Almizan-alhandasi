@@ -1,0 +1,15 @@
+{
+  "decisionId": "GLOBAL-HUMAN-REVIEW-2026-09-29",
+  "decision": "ACCEPTED_WITH_CONDITIONS",
+  "authorization": "BASELINE_DRAFT_ONLY",
+  "auditCommit": "f4827ad9ecd65ad0d8ea836d9e5bb6a4e0f9547b",
+  "auditDate": "2026-09-29",
+  "repository": "azizaljery/Almizan-alhandasi",
+  "scope": "REPOSITORY_RUNTIME_SCOPE",
+  "architectureCorrectness": "NOT_APPROVED",
+  "productionReadiness": "NOT_APPROVED",
+  "developmentUnblocking": "NOT_APPROVED",
+  "freezeApproval": "NOT_GRANTED",
+  "conditionsSource": "docs/system-map/SYSTEM-MAP-BASELINE-DRAFT-CHECKLIST.md",
+  "statement": "Accepted as a truthful current-state audit for Baseline Draft creation only. Findings remain visible and unresolved unless separately resolved or formally accepted."
+}
