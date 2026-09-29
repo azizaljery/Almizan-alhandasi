@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.9.0",
+  "schemaVersion": "2.0.0",
   "evidence": [
     {
       "evidenceId": "EVD-TEST-0001",
@@ -18,7 +18,11 @@
         "Does not prove browser rendering correctness.",
         "Does not prove production deployment identity.",
         "Does not establish engineering approval."
-      ]
+      ],
+      "executionArtifact": "RELEASE-TEST-87.log",
+      "executionArtifactTest": "Subtest 48 — AZIZ-selected model is the exact source consumed by 2D, 3D geometry and BOQ",
+      "executionArtifactResult": "PASS",
+      "reproducibilityNote": "The release log proves the named test passed, but the evidence record is not bound to an exact execution timestamp or tested commit SHA."
     },
     {
       "evidenceId": "EVD-TEST-0002",
@@ -36,7 +40,11 @@
       "limitations": [
         "Proves test-path behavior only.",
         "Does not prove production runtime or browser UX."
-      ]
+      ],
+      "executionArtifact": "RELEASE-TEST-87.log",
+      "executionArtifactTest": "Subtests 26–29 plus 36 — integrated Claude -> Gemini -> AZIZ for four entry directions; topology generator creates real courtyard and U voids",
+      "executionArtifactResult": "PASS",
+      "reproducibilityNote": "The release log proves the named tests passed, but the evidence record is not bound to an exact execution timestamp or tested commit SHA."
     },
     {
       "evidenceId": "EVD-TEST-0003",
@@ -53,7 +61,11 @@
       "executedAt": null,
       "limitations": [
         "Does not prove every historical project shape or production storage path."
-      ]
+      ],
+      "executionArtifact": "RELEASE-TEST-87.log",
+      "executionArtifactTest": "Subtest 31 — integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies",
+      "executionArtifactResult": "PASS",
+      "reproducibilityNote": "The release log proves the named test passed, but the evidence record is not bound to an exact execution timestamp or tested commit SHA."
     },
     {
       "evidenceId": "EVD-HASH-0001",
@@ -70,7 +82,11 @@
       "executedAt": null,
       "limitations": [
         "The test proves byte-for-byte equality at test time; explicit SHA values are not recorded in this registry yet."
-      ]
+      ],
+      "executionArtifact": "RELEASE-TEST-87.log",
+      "executionArtifactTest": "Subtest 1 — deployed Claude sources match the acceptance-tested vendor sources byte for byte",
+      "executionArtifactResult": "PASS",
+      "reproducibilityNote": "This is VERIFIED_TEST evidence of byte equality at test time. Explicit compared SHA values are not recorded, so it is not upgraded to VERIFIED_HASH."
     },
     {
       "evidenceId": "EVD-DOC-0001",
