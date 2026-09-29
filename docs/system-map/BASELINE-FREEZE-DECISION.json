@@ -1,0 +1,17 @@
+{
+  "decisionId": "BASELINE-FREEZE-20260929-001",
+  "baselineId": "SMB-20260929-001",
+  "decision": "APPROVE_FREEZE",
+  "status": "APPROVED",
+  "approvedBy": "PROJECT_OWNER",
+  "approvedAt": "2026-09-29T16:56:00+03:00",
+  "baselineInputCommit": "dd795b2a92c81dfcb8af49449afb587fe62b363d",
+  "baselineHash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5",
+  "frozenArtifact": "docs/system-map/system-map-baseline.json",
+  "boundaries": {
+    "architectureCorrectness": "NOT_APPROVED",
+    "productionReadiness": "NOT_APPROVED",
+    "developmentUnblocking": "NOT_APPROVED"
+  },
+  "nextGovernanceGate": "DEVELOPMENT_UNBLOCK_GATE"
+}
