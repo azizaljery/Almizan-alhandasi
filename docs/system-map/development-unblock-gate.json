@@ -70,10 +70,14 @@
       "status": "COMPLETED",
       "result": "BLOCKED",
       "evidence": [
+        "docs/system-map/DEV-GATE-004-WORKER-PROVENANCE.json",
         "worker/server.mjs",
-        "docs/system-map/discrepancies.md"
+        "wrangler.toml",
+        "FILE-SHA256SUMS.txt",
+        "FILE-SHA256SUMS-RELEASE.txt",
+        "README.md"
       ],
-      "reason": "Repository Worker source exists, but byte-for-byte provenance to the deployed Production Worker is not established.",
+      "reason": "Repository Worker identity is established (SHA-256 6f743640...c3c53) and wrangler targets gentle-sun-5ef5, but deployed Worker byte/version provenance is not available to prove equality.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
@@ -136,7 +140,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Proceed to DEV-GATE-004 Production Worker byte provenance. Runtime remains blocked.",
+  "nextAction": "DEV-GATE-004 remains BLOCKED pending deployed Worker provenance. Continue evidence review for DEV-GATE-005 Browser Visual Verification without runtime changes.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
