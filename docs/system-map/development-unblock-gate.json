@@ -75,12 +75,14 @@
         "worker/server.mjs",
         "wrangler.toml",
         "FILE-SHA256SUMS.txt",
-        "FILE-SHA256SUMS-RELEASE.txt"
+        "FILE-SHA256SUMS-RELEASE.txt",
+        "docs/system-map/DEV-GATE-004-production-worker-provenance.review.json"
       ],
       "reason": "Production Worker provenance chain is not proven. Repository artifact/hash and configured Worker target are known, but build/deployment/live-version evidence is incomplete.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
       "health": "PASS",
-      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json",
+      "reviewFinding": "Production provenance review completed BLOCKED: live byte equivalence is NOT_PROVEN. Development-only risk remains formally accepted; production remains blocked."
     },
     {
       "id": "DEV-GATE-005",
@@ -89,12 +91,14 @@
       "result": "FORMALLY_ACCEPTED",
       "evidence": [
         "docs/system-map/DEV-GATE-005-browser-visual-verification.execution.json",
-        "docs/system-map/discrepancies.md"
+        "docs/system-map/discrepancies.md",
+        "docs/system-map/DEV-GATE-005-browser-visual-verification.review.json"
       ],
       "reason": "Browser visual state is not yet verified with reviewable screenshots/user-flow evidence and a bounded browser scope.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
       "health": "PASS",
-      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json",
+      "reviewFinding": "Browser visual review is evidence-BLOCKED. Development-only risk remains formally accepted; production remains blocked."
     },
     {
       "id": "DEV-GATE-006",
@@ -155,7 +159,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Begin controlled implementation. First priority: repair LBR-0001 and add regression evidence. Do not deploy to production until production provenance, browser verification, and deployment identity gates are separately cleared.",
+  "nextAction": "Controlled development continues. Production release remains blocked pending Worker provenance proof, browser visual verification, and production deployment identity.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
