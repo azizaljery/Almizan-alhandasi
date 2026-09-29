@@ -84,14 +84,15 @@
     {
       "id": "DEV-GATE-005",
       "condition": "Complete browser visual verification",
-      "status": "COMPLETED",
-      "result": "BLOCKED",
+      "status": "IN_PROGRESS",
+      "result": null,
       "evidence": [
-        "docs/system-map/discrepancies.md",
-        "SMB-20260929-001 audit limitations"
+        "docs/system-map/DEV-GATE-005-browser-visual-verification.execution.json",
+        "docs/system-map/discrepancies.md"
       ],
-      "reason": "Repository tests do not establish browser visual verification.",
-      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
+      "reason": "Browser visual state is not yet verified with reviewable screenshots/user-flow evidence and a bounded browser scope.",
+      "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
+      "health": "BLOCKED"
     },
     {
       "id": "DEV-GATE-006",
@@ -141,7 +142,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Complete DEV-GATE-004 provenance evidence chain; DEV-GATE-005/006 remain blocked and may be investigated without runtime changes.",
+  "nextAction": "Collect browser visual evidence for DEV-GATE-005 and deployed provenance for DEV-GATE-004; no runtime changes.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
