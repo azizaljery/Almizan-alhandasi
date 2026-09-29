@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "resolutionId": "SCORE-OWNERSHIP-RESOLUTION-20260929-001",
+  "baselineId": "SMB-20260929-001",
+  "findings": [
+    "CONTR-0003",
+    "CONTR-0005"
+  ],
+  "status": "VERIFIED",
+  "result": "PASS",
+  "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
+  "implementation": [
+    "Runtime ownership comments added to Mizan Score, Home Design evaluator, and AZIZ Candidate4R3 scoring engine without changing scoring behavior.",
+    "Mizan Score is product-quality measurement and does not select canonical candidates.",
+    "Home Design bestId is advisory/local and does not replace AZIZ canonical selection.",
+    "AZIZ Candidate4R3 scoring is explicitly internal selection utility, not Mizan Score or future Mizan Score V1."
+  ],
+  "verification": {
+    "workflowRunId": 36606652467,
+    "jobId": 109537280322,
+    "headSha": "67e46ce89b7e7c98dc46e8aba3b33162a593879d",
+    "targetedTest": "score ownership boundaries keep Mizan measurement, Home Design advisory comparison and AZIZ selection distinct",
+    "targetedTestNumber": 52,
+    "targetedResult": "PASS",
+    "suite": "89 PASS / 0 FAIL"
+  },
+  "postBaselineDisposition": {
+    "CONTR-0003": "RESOLVED_POST_BASELINE",
+    "CONTR-0005": "RESOLVED_POST_BASELINE"
+  },
+  "frozenBaselineMutation": false,
+  "productionReleaseAuthorized": false
+}
