@@ -37,12 +37,16 @@
       "id": "DEV-GATE-002",
       "condition": "Establish accepted/canonical AZIZ source/version",
       "status": "COMPLETED",
-      "result": "BLOCKED",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
-        "dist/integration/gemini/packages/design-intelligence/docs/AZIZ_MAPPING.md",
-        "docs/system-map/discrepancies.md"
+        "docs/system-map/DEV-GATE-002-AZIZ-CANONICAL.json",
+        "INTEGRATION-P1-REPORT.md",
+        "dist/integration/aziz/index.js",
+        "dist/integration/aziz/index.js.map",
+        "FILE-SHA256SUMS.txt",
+        "RELEASE-TEST-87.log"
       ],
-      "reason": "Integrated AZIZ runtime/mapping exists, but the canonical AZIZ source package/version remains unresolved.",
+      "reason": "Project Owner formally accepted dist/integration/aziz as the canonical delivered AZIZ Candidate4R3 runtime artifact for this gate. The original TypeScript authoring source is not present and is not falsely claimed as recovered.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
@@ -121,8 +125,8 @@
   "summary": {
     "pass": 0,
     "fail": 2,
-    "blocked": 5,
-    "formallyAccepted": 1
+    "blocked": 4,
+    "formallyAccepted": 2
   },
   "decision": "DEVELOPMENT_REMAINS_BLOCKED",
   "guards": {
@@ -130,7 +134,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Proceed to DEV-GATE-002 canonical AZIZ source/version. Runtime remains blocked.",
+  "nextAction": "Proceed to DEV-GATE-003 Engineering Core canonical source/split decision. Runtime remains blocked.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
