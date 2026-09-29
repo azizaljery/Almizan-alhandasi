@@ -58,11 +58,14 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 | Field | Value |
 |---|---|
 | Status | `BLOCKED` |
-| Repository source | `worker/server.mjs` |
-| Production byte provenance | `UNRESOLVED` |
-| Gate evidence | `docs/system-map/development-unblock-gate.json` |
-| Current finding | Repository Worker source exists; no byte-for-byte proof binds it to the deployed Production Worker. |
-| Closure requirement | Record deployed artifact identity/hash and compare it with the intended repository artifact. |
+| Repository artifact | `worker/server.mjs` |
+| Repository SHA-256 | `6f74364086632bf048f52b8b57176478335b684595615776f4249e18731c3c53` |
+| Configured Worker | `gentle-sun-5ef5` |
+| Wrangler main | `worker/server.mjs` |
+| Repository hash evidence | `FILE-SHA256SUMS.txt`, `FILE-SHA256SUMS-RELEASE.txt` |
+| Missing proof | Deployed Worker byte/version/hash identity |
+| Decision record | `docs/system-map/DEV-GATE-004-WORKER-PROVENANCE.json` |
+| Runtime changed | `NO` |
 
 ## DEV-GATE-005 — Browser Visual Verification
 
