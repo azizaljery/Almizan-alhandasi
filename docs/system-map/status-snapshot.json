@@ -13,9 +13,9 @@
   },
   "snapshotDate": "2026-09-29",
   "currentStage": {
-    "name": "SYSTEM_MAP_BASELINE",
-    "status": "COMPLETED",
-    "result": "FROZEN"
+    "name": "DEVELOPMENT_UNBLOCK_GATE",
+    "status": "IN_PROGRESS",
+    "result": "BLOCKED"
   },
   "baseline": {
     "status": "FROZEN",
@@ -178,6 +178,19 @@
       "freezeGateArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-FREEZE-GATE.md",
       "frozenArtifact": "docs/system-map/system-map-baseline.json",
       "freezeDecisionArtifact": "docs/system-map/BASELINE-FREEZE-DECISION.json"
+    },
+    "developmentUnblockGate": {
+      "status": "IN_PROGRESS",
+      "result": "BLOCKED",
+      "health": "PASS",
+      "conditions": {
+        "pass": 0,
+        "fail": 2,
+        "blocked": 6,
+        "formallyAccepted": 0
+      },
+      "gateArtifact": "docs/system-map/development-unblock-gate.json",
+      "trackerArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-GATE.md"
     }
   },
   "preBaselineAdrs": {
@@ -193,10 +206,9 @@
     "engineeringCore": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
     "geometry2d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
     "geometry3d": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "boq": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE",
-    "contracts": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE"
+    "boq": "BLOCKED_UNTIL_DEVELOPMENT_UNBLOCK_GATE"
   },
-  "nextStep": "Begin separate Development Unblock Gate review. Baseline is frozen; development remains blocked until its independent conditions are resolved or formally accepted.",
+  "nextStep": "Resolve or formally accept DEVELOPMENT_UNBLOCK_GATE conditions. Runtime remains blocked.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
