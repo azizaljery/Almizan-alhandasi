@@ -207,7 +207,7 @@
     "geometry3d": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT",
     "boq": "UNBLOCKED_FOR_CONTROLLED_DEVELOPMENT"
   },
-  "nextStep": "Controlled development may proceed. First mandatory remediation is LBR-0001 identity/geometry lineage repair and regression test. Production remains blocked.",
+  "nextStep": "Continue controlled development. Production remains blocked. After an approved deployment containing the DEV-GATE-005 fix, rerun Production Evidence and require live generation/2D/3D/BOQ/save-restore evidence.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
@@ -239,11 +239,24 @@
   "productionStatus": {
     "release": "BLOCKED",
     "deployment": "BLOCKED",
-    "reasons": [
-      "Production Worker provenance not fully proven",
-      "Browser visual verification not completed",
-      "Production deployment identity not proven",
-      "LBR-0001 remediation/regression evidence remains mandatory before production release"
-    ]
+    "evidenceRunId": 36614114499,
+    "gates": {
+      "DEV-GATE-004": {
+        "result": "BLOCKED",
+        "reason": "Live Worker is reachable/configured, but deployment version/digest and byte-for-byte equivalence are unproven."
+      },
+      "DEV-GATE-005": {
+        "result": "FAIL",
+        "reason": "Actual desktop/mobile production screenshots show the primary generation flow does not produce a result; observed error ADDITIONAL_FLOORS_NOT_IMPLEMENTED."
+      }
+    },
+    "remediation": {
+      "devGate005": {
+        "fixCommit": "bb0a44dce7d8e8de657404fd32085434b7494657",
+        "testCommit": "651eec152fbd2c52a0bf62621f4f97022d8b2830",
+        "testResult": "90 PASS / 0 FAIL",
+        "deployed": false
+      }
+    }
   }
 }
