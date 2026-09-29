@@ -1,0 +1,29 @@
+{
+  "algorithm": "SHA-256",
+  "canonicalization": "UTF-8 JSON.stringify of object with key order: commit, reviewDate, registryVersions, registryHashes; registry keys in the order recorded below.",
+  "commit": "dd795b2a92c81dfcb8af49449afb587fe62b363d",
+  "reviewDate": "2026-09-29",
+  "registryVersions": {
+    "components": "1.2.0",
+    "dataFlows": "1.2.0",
+    "consumers": "1.3.0",
+    "evidence": "2.1.0",
+    "claims": "1.7.0",
+    "contradictions": "1.6.0",
+    "lineageFindings": "1.0.0",
+    "evidenceAuditFindings": "1.0.0"
+  },
+  "registryHashes": {
+    "components": "54a679449df4d213b8d4a0004014dfc9dd89b6c1cc2f6301028cad09acb1a39f",
+    "dataFlows": "88092fc94b366e6326beb7beed783b3da91afa1c10f9005c8132fb3d929d3a47",
+    "consumers": "c199ae860455aad08d467869e646fb433215d2259321f2cda31b590cc4df047a",
+    "evidence": "4b31878e688ebf1e14d5fb0e1779856d9169ef35865bcbf797fd9660ccef9a37",
+    "claims": "5872f272d0c83f682c8daf5a1aea102b52628948107e3e2170d5d677a64a256c",
+    "contradictions": "270348b2f076c7c6217d0d7a0250708ce7ee00ea36ae3c044321c883aa14c11c",
+    "lineageFindings": "5a666633b6b879d0c8accdf9dfc074bb0d285c4e784928f88f33cc588582e010",
+    "evidenceAuditFindings": "51d89b67053495aa004577ec10a1ed70c2a7e4e715ca9860c140e49c0be4606c"
+  },
+  "baselineHash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5",
+  "freezeStatus": "NOT_FROZEN",
+  "note": "Hash inputs are captured for Freeze Gate review. This does not itself freeze the baseline or unblock development."
+}
