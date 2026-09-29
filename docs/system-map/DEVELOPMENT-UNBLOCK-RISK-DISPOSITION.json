@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "DEV-UNBLOCK-RISK-DISPOSITION-20260929",
+  "status": "APPROVED",
+  "authority": "PROJECT_OWNER_DIRECTION",
+  "scope": "DEVELOPMENT_ONLY",
+  "approvedAt": "2026-09-29",
+  "rationale": "Unblock controlled development without misrepresenting production verification. Production/deployment remains separately blocked.",
+  "dispositions": {
+    "DEV-GATE-004": {
+      "result": "FORMALLY_ACCEPTED",
+      "limitation": "Worker provenance is PARTIALLY_PROVEN; production deploy/redeploy remains prohibited until provenance is proven."
+    },
+    "DEV-GATE-005": {
+      "result": "FORMALLY_ACCEPTED",
+      "limitation": "Browser visual verification is not proven; production release remains prohibited until visual verification is completed."
+    },
+    "DEV-GATE-006": {
+      "result": "FORMALLY_ACCEPTED",
+      "limitation": "Production deployment identity is not proven; production release remains prohibited until identity is proven."
+    },
+    "DEV-GATE-007": {
+      "result": "FORMALLY_ACCEPTED",
+      "limitation": "Frozen contradictions remain historical. Post-baseline ownership/flow decisions govern new development; unresolved documentation/ownership items must not be represented as fixed in SMB-20260929-001."
+    },
+    "DEV-GATE-008": {
+      "result": "FORMALLY_ACCEPTED",
+      "limitation": "LBR-0001 and evidence gaps are accepted only as development remediation debt. First implementation priority is identity re-binding after geometry edits; production release remains blocked until the lineage break is repaired and verified."
+    }
+  },
+  "productionReleaseAuthorized": false,
+  "runtimeChangeAuthorizedAfterGate": true,
+  "requiredFirstRemediation": [
+    "Repair LBR-0001 by re-binding/recomputing candidate identity after geometry/opening edits.",
+    "Add a dedicated regression test proving identity changes with edited geometry.",
+    "Preserve frozen baseline SMB-20260929-001 unchanged."
+  ]
+}
