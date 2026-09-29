@@ -15,7 +15,7 @@
   "currentStage": {
     "name": "HUMAN_REVIEW",
     "status": "IN_PROGRESS",
-    "result": "BLOCKED"
+    "result": null
   },
   "baseline": {
     "status": "NOT_FROZEN",
@@ -24,12 +24,16 @@
   },
   "stages": {
     "systemDiscovery": {
-      "status": "IN_PROGRESS",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS",
+      "scope": "REPOSITORY_RUNTIME_SCOPE",
+      "closureArtifact": "docs/system-map/system-discovery-map-closure.json"
     },
     "systemMap": {
-      "status": "IN_PROGRESS",
-      "result": null
+      "status": "COMPLETED",
+      "result": "PASS",
+      "scope": "REPOSITORY_RUNTIME_SCOPE",
+      "closureArtifact": "docs/system-map/system-discovery-map-closure.json"
     },
     "registryIntegrity": {
       "status": "COMPLETED",
@@ -42,10 +46,10 @@
         "verificationStates": "PASS"
       },
       "observedCounts": {
-        "components": 7,
-        "dataFlows": 4,
-        "consumers": 5,
-        "evidenceRecords": 21,
+        "components": 13,
+        "dataFlows": 7,
+        "consumers": 12,
+        "evidenceRecords": 22,
         "claims": 21,
         "contradictions": 7,
         "lineageCandidates": 3,
@@ -145,12 +149,7 @@
     },
     "humanReview": {
       "status": "IN_PROGRESS",
-      "result": "BLOCKED",
-      "reason": "System Discovery and System Map coverage are not yet proven complete.",
-      "blockingArtifacts": [
-        "docs/system-map/system-discovery-inventory.json",
-        "docs/system-map/system-map-coverage-gaps.json"
-      ]
+      "result": null
     },
     "systemMapBaseline": {
       "status": "NOT_STARTED",
@@ -173,7 +172,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Classify direct runtime modules and close System Discovery/System Map coverage before global Human Review.",
+  "nextStep": "Perform global HUMAN_REVIEW over the now-closed repository-scope discovery/map, contradictions, lineage, evidence gaps, known unknowns, and audit limitations.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
