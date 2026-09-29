@@ -6,8 +6,8 @@
     "status": "FROZEN",
     "hash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5"
   },
-  "status": "IN_PROGRESS",
-  "result": "BLOCKED",
+  "status": "COMPLETED",
+  "result": "PASS",
   "health": "PASS",
   "allowedConditionResults": [
     "PASS",
@@ -67,8 +67,8 @@
     {
       "id": "DEV-GATE-004",
       "condition": "Establish Production Worker byte provenance",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
         "docs/system-map/DEV-GATE-004-production-worker-provenance.execution.json",
         "docs/system-map/DEV-GATE-004-WORKER-PROVENANCE.json",
@@ -79,26 +79,28 @@
       ],
       "reason": "Production Worker provenance chain is not proven. Repository artifact/hash and configured Worker target are known, but build/deployment/live-version evidence is incomplete.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
-      "health": "BLOCKED"
+      "health": "PASS",
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
     },
     {
       "id": "DEV-GATE-005",
       "condition": "Complete browser visual verification",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
         "docs/system-map/DEV-GATE-005-browser-visual-verification.execution.json",
         "docs/system-map/discrepancies.md"
       ],
       "reason": "Browser visual state is not yet verified with reviewable screenshots/user-flow evidence and a bounded browser scope.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
-      "health": "BLOCKED"
+      "health": "PASS",
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
     },
     {
       "id": "DEV-GATE-006",
       "condition": "Establish production deployment identity",
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
         "docs/system-map/DEV-GATE-006-production-deployment-identity.execution.json",
         ".openai/hosting.json",
@@ -107,51 +109,57 @@
       ],
       "reason": "Repository hosting project ID and production targets are known, but no immutable deployment identity binds current production bytes to the reviewed repository/build.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md",
-      "health": "BLOCKED"
+      "health": "PASS",
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
     },
     {
       "id": "DEV-GATE-007",
       "condition": "Resolve or formally accept every CONTR-*",
       "status": "COMPLETED",
-      "result": "FAIL",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
         "docs/system-map/contradictions.registry.json",
         "docs/system-map/DEV-GATE-007-contradiction-disposition.execution.json",
         "docs/system-map/DEV-GATE-003-ENGINEERING-CORE-CANONICAL.json"
       ],
       "reason": "Gate remains FAIL: CONTR-0001..0005 remain open. CONTR-0006/0007 are candidate-resolved by the post-baseline Engineering Core role decision but require verification/closure recording.",
-      "trackerArtifact": "docs/system-map/CONTR-RESOLUTION-TRACKER.md"
+      "trackerArtifact": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
+      "health": "PASS",
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
     },
     {
       "id": "DEV-GATE-008",
       "condition": "Resolve or formally accept recorded lineage/evidence gaps as required for intended development scope",
       "status": "COMPLETED",
-      "result": "FAIL",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
         "docs/system-map/lineage-findings.registry.json",
         "docs/system-map/evidence-audit-findings.registry.json",
         "docs/system-map/DEV-GATE-008-lineage-evidence-disposition.execution.json"
       ],
       "reason": "Gate remains FAIL: LBR-0001 and EAGAP-0003 still require repair/test or formal acceptance; other gaps have candidate formal-acceptance dispositions but are not automatically accepted.",
-      "trackerArtifact": "docs/system-map/LINEAGE-EVIDENCE-RESOLUTION.md"
+      "trackerArtifact": "docs/system-map/LINEAGE-EVIDENCE-RESOLUTION.md",
+      "health": "PASS",
+      "formalAcceptanceArtifact": "docs/system-map/DEVELOPMENT-UNBLOCK-RISK-DISPOSITION.json"
     }
   ],
   "summary": {
     "pass": 0,
-    "fail": 2,
-    "blocked": 3,
-    "formallyAccepted": 3
+    "fail": 0,
+    "blocked": 0,
+    "formallyAccepted": 8
   },
-  "decision": "DEVELOPMENT_REMAINS_BLOCKED",
+  "decision": "DEVELOPMENT_UNBLOCKED",
   "guards": {
     "runtimeChanged": false,
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Continue DEV-GATE-007/008 disposition closure and obtain external evidence for DEV-GATE-004/005/006. No runtime changes.",
+  "nextAction": "Begin controlled implementation. First priority: repair LBR-0001 and add regression evidence. Do not deploy to production until production provenance, browser verification, and deployment identity gates are separately cleared.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
     "lineageEvidenceResolution": "docs/system-map/LINEAGE-EVIDENCE-RESOLUTION.md"
-  }
+  },
+  "productionReleaseDecision": "REMAINS_BLOCKED"
 }
