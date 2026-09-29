@@ -115,9 +115,11 @@
       "status": "COMPLETED",
       "result": "FAIL",
       "evidence": [
-        "docs/system-map/contradictions.registry.json"
+        "docs/system-map/contradictions.registry.json",
+        "docs/system-map/DEV-GATE-007-contradiction-disposition.execution.json",
+        "docs/system-map/DEV-GATE-003-ENGINEERING-CORE-CANONICAL.json"
       ],
-      "reason": "CONTR-0001 through CONTR-0007 remain resolution=NOT_ATTEMPTED; no post-baseline formal acceptance is recorded.",
+      "reason": "Gate remains FAIL: CONTR-0001..0005 remain open. CONTR-0006/0007 are candidate-resolved by the post-baseline Engineering Core role decision but require verification/closure recording.",
       "trackerArtifact": "docs/system-map/CONTR-RESOLUTION-TRACKER.md"
     },
     {
@@ -127,9 +129,10 @@
       "result": "FAIL",
       "evidence": [
         "docs/system-map/lineage-findings.registry.json",
-        "docs/system-map/evidence-audit-findings.registry.json"
+        "docs/system-map/evidence-audit-findings.registry.json",
+        "docs/system-map/DEV-GATE-008-lineage-evidence-disposition.execution.json"
       ],
-      "reason": "LBR-0001, LGAP-0002, LGAP-0003 and EAGAP-0001..0003 remain unresolved; no development-scope formal acceptance is recorded.",
+      "reason": "Gate remains FAIL: LBR-0001 and EAGAP-0003 still require repair/test or formal acceptance; other gaps have candidate formal-acceptance dispositions but are not automatically accepted.",
       "trackerArtifact": "docs/system-map/LINEAGE-EVIDENCE-RESOLUTION.md"
     }
   ],
@@ -145,7 +148,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "DEV-GATE-004/005/006 remain evidence-blocked. Next review DEV-GATE-007 contradiction disposition without runtime changes.",
+  "nextAction": "Continue DEV-GATE-007/008 disposition closure and obtain external evidence for DEV-GATE-004/005/006. No runtime changes.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
