@@ -83,12 +83,14 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 
 | Field | Value |
 |---|---|
-| Status | `BLOCKED` |
-| Deployment identity | `UNRESOLVED` |
-| Gate evidence | `docs/system-map/development-unblock-gate.json` |
-| Current finding | Frozen baseline is repository-runtime scoped and does not establish deployed production identity. |
-| Closure requirement | Bind the deployed production artifact/version to a traceable repository/build identity. |
+| Status | `IN_PROGRESS` |
+| Health | `BLOCKED` |
+| Repository hosting project ID | `appgprj_6aa6d211421c8191ae8cb918a8cea058` |
+| Static directory | `dist` |
+| Site target | `https://al-mizan-al-handasi.aljeryabod.chatgpt.site` |
+| Worker target | `gentle-sun-5ef5` |
+| Current identity result | `NOT_PROVEN` |
+| Missing proof | deployment ID/version + deployed artifact identity + commit/build binding + live verification |
+| Execution record | `docs/system-map/DEV-GATE-006-production-deployment-identity.execution.json` |
+| Runtime changed | `NO` |
 
-## Rule
-
-This registry records current evidence only. It does not resolve canonical ownership by assertion.
