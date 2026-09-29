@@ -11,7 +11,14 @@
     "EA-007",
     "EA-008",
     "EA-009",
-    "EA-010"
+    "EA-010",
+    "EA-011"
   ],
-  "next": "EA-011"
+  "next": "EA-012",
+  "registryIntegrity": "PASS",
+  "findings": [
+    "EAGAP-0001",
+    "EAGAP-0002",
+    "EAGAP-0003"
+  ]
 }
