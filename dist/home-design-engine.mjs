@@ -1,6 +1,7 @@
 // Adapter between the attached home-design decision engine and Mizan's
 // rectangular planner. The attached engine remains the source of the
 // decision rules; this file only translates the planner's model shape.
+// Ownership: advisory home-design evaluation only; compareHomeModels().bestId is not canonical selection.
 import {
   createMizanProject,
   updateProjectProfile,
