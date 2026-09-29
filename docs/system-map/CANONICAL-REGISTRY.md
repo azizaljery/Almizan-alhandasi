@@ -26,12 +26,17 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 
 | Field | Value |
 |---|---|
-| Status | `BLOCKED` |
-| Canonical source / version | `UNRESOLVED` |
-| Gate evidence | `docs/system-map/development-unblock-gate.json` |
-| Supporting evidence | `dist/integration/gemini/packages/design-intelligence/docs/AZIZ_MAPPING.md` |
-| Current finding | Integrated AZIZ runtime/mapping exists; canonical AZIZ source package/version is not established. |
-| Closure requirement | Establish accepted canonical AZIZ source/version with traceable evidence, or formal acceptance by Project Owner. |
+| Status | `FORMALLY_ACCEPTED` |
+| Canonical delivered artifact | `dist/integration/aziz/` |
+| Release identity | `AZIZ Candidate4R3` |
+| Entry point | `dist/integration/aziz/index.js` |
+| Integration consumer | `dist/integration/pipeline.mjs` |
+| Authoring source | `NOT PRESENT IN REVIEWED REPOSITORY` |
+| Source-map provenance | `index.js.map → ../src/index.ts` |
+| Hash evidence | `FILE-SHA256SUMS.txt`, `FILE-SHA256SUMS-RELEASE.txt` |
+| Release evidence | `INTEGRATION-P1-REPORT.md`, `RELEASE-TEST-87.log` |
+| Decision | `docs/system-map/DEV-GATE-002-AZIZ-CANONICAL.json` |
+| Runtime changed | `NO` |
 
 ## DEV-GATE-003 — Canonical Engineering Core
 
