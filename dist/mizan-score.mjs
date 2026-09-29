@@ -5,6 +5,7 @@ const clamp = value => Math.max(0, Math.min(100, Number.isFinite(value) ? value 
 const mean = values => values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
 
 // Mizan Score is a transparent comparative heuristic, not a code approval.
+// Ownership: product-quality measurement only. It does not select the canonical candidate.
 export function calculateMizanScore(model, { confidence = 0.72 } = {}) {
   if (!model) return null;
   const review = reviewPlan(model);
