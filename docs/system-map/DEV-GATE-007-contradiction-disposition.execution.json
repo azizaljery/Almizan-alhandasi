@@ -21,9 +21,11 @@
     },
     {
       "id": "CONTR-0003",
-      "postBaselineStatus": "OPEN",
-      "recommendedDisposition": "REQUIRES_OWNERSHIP_DECISION",
-      "reason": "Mizan Score and home-design evaluation have overlapping scoring roles."
+      "postBaselineStatus": "RESOLUTION_IMPLEMENTED_VERIFICATION_PENDING",
+      "recommendedDisposition": "CLOSE_ON_TARGETED_TEST_PASS",
+      "reason": "SCORE-OWNERSHIP-20260929-001 formally separates Mizan product-quality measurement, Home Design advisory evaluation, and AZIZ canonical selection.",
+      "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
+      "testArtifact": "tests/score-ownership.test.mjs"
     },
     {
       "id": "CONTR-0004",
@@ -33,9 +35,11 @@
     },
     {
       "id": "CONTR-0005",
-      "postBaselineStatus": "OPEN",
-      "recommendedDisposition": "REQUIRES_SCORE_OWNERSHIP_DECISION",
-      "reason": "Current AZIZ Candidate4R3 implements scoring despite declared score-definition boundary."
+      "postBaselineStatus": "RESOLUTION_IMPLEMENTED_VERIFICATION_PENDING",
+      "recommendedDisposition": "CLOSE_ON_TARGETED_TEST_PASS",
+      "reason": "SCORE-OWNERSHIP-20260929-001 defines AZIZ Candidate4R3 scoring as internal selection utility, not Mizan Score or future Mizan Score V1.",
+      "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
+      "testArtifact": "tests/score-ownership.test.mjs"
     },
     {
       "id": "CONTR-0006",
@@ -51,5 +55,11 @@
     }
   ],
   "runtimeChanges": false,
-  "refactor": false
+  "refactor": false,
+  "scoreOwnershipResolution": {
+    "status": "IMPLEMENTED",
+    "verification": "PENDING_CI",
+    "decisionArtifact": "docs/system-map/SCORE-OWNERSHIP-DECISION.json",
+    "testArtifact": "tests/score-ownership.test.mjs"
+  }
 }
