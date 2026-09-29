@@ -1,0 +1,32 @@
+{
+  "id": "LA-008",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "reviewSource": "USER_PROVIDED",
+  "decisions": [
+    {
+      "findingId": "LBR-0001",
+      "accepted": true,
+      "classification": "LINEAGE_BREAK"
+    },
+    {
+      "findingId": "LGAP-0002",
+      "accepted": true,
+      "classification": "IDENTITY_TRANSLATION_GAP",
+      "breakEvidenced": false
+    },
+    {
+      "findingId": "LGAP-0003",
+      "accepted": true,
+      "classification": "TRACEABILITY_GAP",
+      "breakEvidenced": false
+    }
+  ],
+  "clarifications": [
+    "LBR-0001 identity metadata was derived for pre-edit geometry and is retained after opening edits without recomputation.",
+    "LGAP-0002 bestId remains local to the inspected comparison path and does not replace canonical identity there.",
+    "LGAP-0003 review freshness at render time is distinct from durable candidate identity binding."
+  ],
+  "scope": "CURRENT_REGISTERED_AND_REVIEWED_SCOPE"
+}
