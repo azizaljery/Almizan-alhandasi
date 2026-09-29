@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "DEV-GATE-004-WORKER-PROVENANCE",
+  "gateId": "DEV-GATE-004",
+  "status": "COMPLETED",
+  "result": "BLOCKED",
+  "reviewedAt": "2026-09-29",
+  "repositoryArtifact": {
+    "path": "worker/server.mjs",
+    "sha256": "6f74364086632bf048f52b8b57176478335b684595615776f4249e18731c3c53",
+    "hashSources": [
+      "FILE-SHA256SUMS.txt",
+      "FILE-SHA256SUMS-RELEASE.txt"
+    ]
+  },
+  "deploymentTarget": {
+    "workerName": "gentle-sun-5ef5",
+    "configuredBy": "wrangler.toml",
+    "main": "worker/server.mjs",
+    "endpoint": "https://gentle-sun-5ef5.aljeryabod.workers.dev/api/assistant"
+  },
+  "proven": [
+    "Repository release hash for worker/server.mjs is recorded.",
+    "wrangler.toml targets gentle-sun-5ef5 and worker/server.mjs.",
+    "README identifies gentle-sun-5ef5 as the engineering Worker target."
+  ],
+  "missingProof": [
+    "No deployed Worker byte hash/version artifact is available in the reviewed repository.",
+    "No evidence binds the currently deployed Worker bytes to repository SHA-256 6f743640...c3c53."
+  ],
+  "closureRequirement": "Obtain deployed Worker artifact/version/hash provenance and compare it with the repository release artifact.",
+  "runtimeChanges": false,
+  "refactorPerformed": false
+}
