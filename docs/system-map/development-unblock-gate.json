@@ -53,13 +53,15 @@
       "id": "DEV-GATE-003",
       "condition": "Establish canonical Engineering Core copy or formally accept the split",
       "status": "COMPLETED",
-      "result": "BLOCKED",
+      "result": "FORMALLY_ACCEPTED",
       "evidence": [
-        "CONTR-0007",
-        "EVD-HASH-0002",
-        "docs/system-map/discrepancies.md"
+        "docs/system-map/DEV-GATE-003-ENGINEERING-CORE-CANONICAL.json",
+        "dist/integration/gemini/packages/engineering-core/package.json",
+        "dist/integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js",
+        "dist/gemini-engineering-layer.mjs",
+        "EVD-HASH-0002"
       ],
-      "reason": "UI and integrated Engineering Core copies are non-identical and no canonical copy or formal split acceptance is recorded.",
+      "reason": "Project Owner formally accepted the existing split: integrated Engineering Core/MIZAN-IR path is authoritative for integrated candidate acceptance; dist/gemini Engineering Core is a legacy UI preliminary-review copy only.",
       "trackerArtifact": "docs/system-map/CANONICAL-REGISTRY.md"
     },
     {
@@ -125,8 +127,8 @@
   "summary": {
     "pass": 0,
     "fail": 2,
-    "blocked": 4,
-    "formallyAccepted": 2
+    "blocked": 3,
+    "formallyAccepted": 3
   },
   "decision": "DEVELOPMENT_REMAINS_BLOCKED",
   "guards": {
@@ -134,7 +136,7 @@
     "refactorPerformed": false,
     "architectureEnforced": false
   },
-  "nextAction": "Proceed to DEV-GATE-003 Engineering Core canonical source/split decision. Runtime remains blocked.",
+  "nextAction": "Proceed to DEV-GATE-004 Production Worker byte provenance. Runtime remains blocked.",
   "trackingArtifacts": {
     "canonicalRegistry": "docs/system-map/CANONICAL-REGISTRY.md",
     "contradictionResolution": "docs/system-map/CONTR-RESOLUTION-TRACKER.md",
