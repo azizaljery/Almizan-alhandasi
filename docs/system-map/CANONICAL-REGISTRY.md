@@ -13,10 +13,14 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 |---|---|
 | Status | `BLOCKED` |
 | Canonical path / URI | `UNRESOLVED` |
-| Gate evidence | `docs/system-map/development-unblock-gate.json` |
-| Supporting evidence | `docs/system-map/discrepancies.md` |
-| Current finding | Repository search performed during gate evaluation did not establish a canonical Design Core source. |
-| Closure requirement | Establish canonical source with evidence, or Project Owner formally accepts an explicit alternative/scope. |
+| Decision record | `docs/system-map/DEV-GATE-001-DESIGN-CORE-OWNERSHIP.json` |
+| Contract authority candidate | `dist/claude/PlannerOutputContract.mjs` |
+| Claude Planner upstream candidate | `vendor/claude-planner/src/` |
+| Runtime integration boundary | `dist/planner.mjs` |
+| Build evidence | `scripts/build.mjs` enforces byte equality between `vendor/claude-planner/src/` and `dist/claude/` |
+| Git blob evidence | planner: `c4dc583289f11c55222196b7277dd3cec8af56a8`; contract: `720d53fb4dd848b5ca422d12e0cacdf0e71c189c` |
+| Current finding | Three distinct roles are evidenced, but no approved rule establishes them as one composite Design Core or selects one single canonical source. |
+| Closure requirement | Approve the composite ownership model with change-control rules, or establish one canonical source with owner/version/mirror/runtime/hash evidence. |
 
 ## DEV-GATE-002 — Canonical AZIZ Source / Version
 
