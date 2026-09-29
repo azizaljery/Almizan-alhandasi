@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "gateId": "DEV-GATE-008",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "FAIL",
+  "baselineId": "SMB-20260929-001",
+  "rule": "Frozen lineage/evidence findings remain historical. This record evaluates post-baseline development disposition only.",
+  "findings": [
+    {
+      "id": "LBR-0001",
+      "currentType": "LINEAGE_BREAK",
+      "developmentDisposition": "OPEN_REQUIRES_REPAIR_OR_FORMAL_ACCEPTANCE",
+      "reason": "Manual opening edits can change geometry while retaining pre-edit candidateId/geometryHash."
+    },
+    {
+      "id": "LGAP-0002",
+      "currentType": "IDENTITY_TRANSLATION_GAP",
+      "developmentDisposition": "CANDIDATE_FORMAL_ACCEPTANCE",
+      "reason": "No break is evidenced; bestId remains local in the inspected comparison path."
+    },
+    {
+      "id": "LGAP-0003",
+      "currentType": "TRACEABILITY_GAP",
+      "developmentDisposition": "CANDIDATE_FORMAL_ACCEPTANCE_WITH_LIMITATION",
+      "reason": "UI review is current at render time but lacks durable candidate identity binding."
+    },
+    {
+      "id": "EAGAP-0001",
+      "currentType": "REPRODUCIBILITY_GAP",
+      "developmentDisposition": "CANDIDATE_FORMAL_ACCEPTANCE_WITH_LIMITATION",
+      "reason": "Release test results exist but exact tested commit/timestamp metadata is incomplete."
+    },
+    {
+      "id": "EAGAP-0002",
+      "currentType": "HASH_PROVENANCE_GAP",
+      "developmentDisposition": "CANDIDATE_FORMAL_ACCEPTANCE_WITH_LIMITATION",
+      "reason": "Byte equality is test-proven but explicit compared hash values are not recorded."
+    },
+    {
+      "id": "EAGAP-0003",
+      "currentType": "EVIDENCE_STRENGTH_LIMIT",
+      "developmentDisposition": "OPEN_REQUIRES_TEST_OR_FORMAL_ACCEPTANCE",
+      "reason": "LBR-0001 remains INFERRED without a dedicated stale-identity test."
+    }
+  ],
+  "runtimeChanges": false,
+  "refactor": false,
+  "decision": "NO_AUTOMATIC_ACCEPTANCE"
+}
