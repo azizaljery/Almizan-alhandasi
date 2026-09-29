@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "1.0.0",
+  "gate": "DEVELOPMENT_UNBLOCK_GATE",
+  "baseline": {
+    "id": "SMB-20260929-001",
+    "status": "FROZEN",
+    "hash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5"
+  },
+  "status": "IN_PROGRESS",
+  "result": "BLOCKED",
+  "health": "PASS",
+  "allowedConditionResults": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "FORMALLY_ACCEPTED"
+  ],
+  "formalAcceptanceAuthority": "PROJECT_OWNER",
+  "runtimeChangesAllowed": false,
+  "conditions": [
+    {
+      "id": "DEV-GATE-001",
+      "condition": "Establish canonical Design Core source",
+      "status": "COMPLETED",
+      "result": "BLOCKED",
+      "evidence": [
+        "Repository search: design-core / @mizan/design-core / packages/design-core returned no source result",
+        "docs/system-map/discrepancies.md"
+      ],
+      "reason": "No canonical Design Core source is established in the reviewed repository."
+    },
+    {
+      "id": "DEV-GATE-002",
+      "condition": "Establish accepted/canonical AZIZ source/version",
+      "status": "COMPLETED",
+      "result": "BLOCKED",
+      "evidence": [
+        "dist/integration/gemini/packages/design-intelligence/docs/AZIZ_MAPPING.md",
+        "docs/system-map/discrepancies.md"
+      ],
+      "reason": "Integrated AZIZ runtime/mapping exists, but the canonical AZIZ source package/version remains unresolved."
+    },
+    {
+      "id": "DEV-GATE-003",
+      "condition": "Establish canonical Engineering Core copy or formally accept the split",
+      "status": "COMPLETED",
+      "result": "BLOCKED",
+      "evidence": [
+        "CONTR-0007",
+        "EVD-HASH-0002",
+        "docs/system-map/discrepancies.md"
+      ],
+      "reason": "UI and integrated Engineering Core copies are non-identical and no canonical copy or formal split acceptance is recorded."
+    },
+    {
+      "id": "DEV-GATE-004",
+      "condition": "Establish Production Worker byte provenance",
+      "status": "COMPLETED",
+      "result": "BLOCKED",
+      "evidence": [
+        "worker/server.mjs",
+        "docs/system-map/discrepancies.md"
+      ],
+      "reason": "Repository Worker source exists, but byte-for-byte provenance to the deployed Production Worker is not established."
+    },
+    {
+      "id": "DEV-GATE-005",
+      "condition": "Complete browser visual verification",
+      "status": "COMPLETED",
+      "result": "BLOCKED",
+      "evidence": [
+        "docs/system-map/discrepancies.md",
+        "SMB-20260929-001 audit limitations"
+      ],
+      "reason": "Repository tests do not establish browser visual verification."
+    },
+    {
+      "id": "DEV-GATE-006",
+      "condition": "Establish production deployment identity",
+      "status": "COMPLETED",
+      "result": "BLOCKED",
+      "evidence": [
+        "SMB-20260929-001 knownUnknowns",
+        "docs/system-map/discrepancies.md"
+      ],
+      "reason": "Frozen baseline is repository-runtime scoped and does not establish deployed production identity."
+    },
+    {
+      "id": "DEV-GATE-007",
+      "condition": "Resolve or formally accept every CONTR-*",
+      "status": "COMPLETED",
+      "result": "FAIL",
+      "evidence": [
+        "docs/system-map/contradictions.registry.json"
+      ],
+      "reason": "CONTR-0001 through CONTR-0007 remain resolution=NOT_ATTEMPTED; no post-baseline formal acceptance is recorded."
+    },
+    {
+      "id": "DEV-GATE-008",
+      "condition": "Resolve or formally accept recorded lineage/evidence gaps as required for intended development scope",
+      "status": "COMPLETED",
+      "result": "FAIL",
+      "evidence": [
+        "docs/system-map/lineage-findings.registry.json",
+        "docs/system-map/evidence-audit-findings.registry.json"
+      ],
+      "reason": "LBR-0001, LGAP-0002, LGAP-0003 and EAGAP-0001..0003 remain unresolved; no development-scope formal acceptance is recorded."
+    }
+  ],
+  "summary": {
+    "pass": 0,
+    "fail": 2,
+    "blocked": 6,
+    "formallyAccepted": 0
+  },
+  "decision": "DEVELOPMENT_REMAINS_BLOCKED",
+  "guards": {
+    "runtimeChanged": false,
+    "refactorPerformed": false,
+    "architectureEnforced": false
+  },
+  "nextAction": "Resolve or formally accept gate conditions with evidence. Do not modify runtime while gate remains blocked."
+}
