@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "DEV-GATE-003-ENGINEERING-CORE-CANONICAL",
+  "gateId": "DEV-GATE-003",
+  "status": "APPROVED",
+  "result": "FORMALLY_ACCEPTED",
+  "approvedBy": "PROJECT_OWNER",
+  "approvedAt": "2026-09-29",
+  "decision": "FORMALLY_ACCEPT_SPLIT_WITH_DISTINCT_ROLES",
+  "canonicalDesignation": {
+    "engineeringAcceptanceCore": "dist/integration/gemini/packages/engineering-core/",
+    "packageIdentity": "@mizan/engineering-core@1.0.0",
+    "acceptanceAdapter": "dist/integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js",
+    "uiPreliminaryCopy": "dist/gemini/engineering-core/",
+    "uiBridge": "dist/gemini-engineering-layer.mjs"
+  },
+  "evidence": [
+    "The two coordination-orchestrator.js files have different Git blob SHAs.",
+    "The integrated copy adds preliminaryOnly, legacyStatusOnly, assumptions and statusScope safeguards.",
+    "The integrated package declares @mizan/engineering-core@1.0.0 and includes p1-ir.test.js in its test command.",
+    "mizan-review-v1.js binds review results to candidateId/geometryHash and explicitly marks unsupported engineering disciplines NOT_EVALUATED.",
+    "dist/gemini-engineering-layer.mjs consumes the separate UI copy for preliminary display review."
+  ],
+  "policy": [
+    "The integrated Engineering Core + MIZAN-IR review adapter is authoritative for candidate acceptance/rejection in the integrated pipeline.",
+    "The dist/gemini Engineering Core remains a legacy UI preliminary-review copy only; it is not authoritative for integrated candidate acceptance.",
+    "This formal split does not assert byte identity between the copies.",
+    "Any future consolidation requires a post-baseline change with tests and provenance evidence."
+  ],
+  "runtimeChanges": false,
+  "refactorPerformed": false,
+  "baselineMutation": false
+}
