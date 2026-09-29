@@ -1,0 +1,32 @@
+{
+  "id": "SD-SM-CLOSURE-001",
+  "scope": "REPOSITORY_RUNTIME_SCOPE",
+  "headCommit": "aa03b0263b7ae3013b0484a527d31dca4729c652",
+  "systemDiscovery": {
+    "status": "COMPLETED",
+    "result": "PASS",
+    "basis": [
+      "Repository tree inventory completed",
+      "All 19 direct app runtime imports classified",
+      "Major nested runtime/vendor/build trees classified",
+      "Missing critical direct runtime components registered",
+      "Known unresolved canonical-source questions remain explicitly recorded"
+    ]
+  },
+  "systemMap": {
+    "status": "COMPLETED",
+    "result": "PASS",
+    "basis": [
+      "Components registry updated to 13 components",
+      "Critical data flows updated to 7 flows",
+      "Consumer registry updated to 12 consumers",
+      "Registry integrity revalidated PASS",
+      "Coverage gaps and unresolved provenance remain visible rather than silently resolved"
+    ]
+  },
+  "caveats": [
+    "PASS is limited to the repository runtime scope at the reviewed branch head.",
+    "It does not establish production deployment identity.",
+    "Canonical source provenance for Design Core, AZIZ, Engineering Core, and deployed Worker remains unresolved where recorded."
+  ]
+}
