@@ -13,7 +13,7 @@
   },
   "snapshotDate": "2026-09-28",
   "currentStage": {
-    "name": "LINEAGE_AUDIT",
+    "name": "EVIDENCE_AUDIT",
     "status": "IN_PROGRESS",
     "result": null
   },
@@ -54,8 +54,9 @@
       }
     },
     "evidenceAudit": {
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "IN_PROGRESS",
+      "result": null,
+      "health": "PASS"
     },
     "contradictionDetection": {
       "status": "COMPLETED",
@@ -95,8 +96,8 @@
       }
     },
     "lineageAudit": {
-      "status": "IN_PROGRESS",
-      "result": null,
+      "status": "COMPLETED",
+      "result": "PASS",
       "health": "PASS",
       "executionTracker": "docs/system-map/lineage-audit.execution.json",
       "humanTracker": "docs/system-map/LINEAGE-AUDIT-EXECUTION-TRACKER.md",
@@ -108,10 +109,12 @@
         "LA-004",
         "LA-005",
         "LA-006",
-        "LA-007"
+        "LA-007",
+        "LA-008",
+        "LA-009"
       ],
-      "activeCheck": "LA-008",
-      "nextCheck": "LA-008",
+      "activeCheck": null,
+      "nextCheck": null,
       "findings": {
         "lineageBreaks": 1,
         "identityTranslationGaps": 1,
@@ -143,7 +146,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Complete LA-008 Human Review of LBR-0001, LGAP-0002, and LGAP-0003 before lineage closure.",
+  "nextStep": "Execute EVIDENCE_AUDIT against current evidence and claims.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
