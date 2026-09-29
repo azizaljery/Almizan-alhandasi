@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "1.0.0",
+  "baselineId": "SMB-20260929-001",
+  "status": "FROZEN",
+  "binding": true,
+  "frozen": true,
+  "scope": "REPOSITORY_RUNTIME_SCOPE",
+  "commit": "dd795b2a92c81dfcb8af49449afb587fe62b363d",
+  "snapshot": {
+    "runtimeModulesReviewed": 19,
+    "components": 13,
+    "criticalDataFlows": 7,
+    "consumers": 12,
+    "evidenceRecords": 22,
+    "claims": 21
+  },
+  "auditStages": {
+    "SYSTEM_DISCOVERY": "PASS",
+    "SYSTEM_MAP": "PASS",
+    "REGISTRY_INTEGRITY": "PASS",
+    "CONTRADICTION_DETECTION": "PASS",
+    "LINEAGE_AUDIT": "PASS",
+    "EVIDENCE_AUDIT": "PASS",
+    "GLOBAL_HUMAN_REVIEW": "ACCEPTED_WITH_CONDITIONS"
+  },
+  "humanReview": {
+    "status": "COMPLETED",
+    "result": "ACCEPTED_WITH_CONDITIONS",
+    "reviewDate": "2026-09-29",
+    "reviewedBy": [
+      "PROJECT_OWNER"
+    ],
+    "decision": "ACCEPTED_FOR_BASELINE_DRAFT_ONLY",
+    "architectureCorrectness": "NOT_APPROVED",
+    "productionReadiness": "NOT_APPROVED",
+    "developmentUnblocking": "NOT_APPROVED"
+  },
+  "unresolvedContradictions": [
+    "CONTR-0001",
+    "CONTR-0002",
+    "CONTR-0003",
+    "CONTR-0004",
+    "CONTR-0005",
+    "CONTR-0006",
+    "CONTR-0007"
+  ],
+  "lineage": {
+    "breaks": [
+      "LBR-0001"
+    ],
+    "identityGaps": [
+      "LGAP-0002"
+    ],
+    "traceabilityGaps": [
+      "LGAP-0003"
+    ]
+  },
+  "evidenceGaps": [
+    "EAGAP-0001",
+    "EAGAP-0002",
+    "EAGAP-0003"
+  ],
+  "knownUnknowns": [
+    "Canonical Design Core source is not established.",
+    "Canonical AZIZ source package is not established.",
+    "Canonical Engineering Core source across the UI and integration copies is unresolved.",
+    "Production Worker byte provenance is unresolved.",
+    "Browser visual verification is distinct and not established by repository test/build evidence.",
+    "Production deployment identity is not established by this repository-runtime baseline."
+  ],
+  "auditLimitations": [
+    "Scope is repository runtime scope, not production deployment identity.",
+    "Several VERIFIED_TEST records lack exact tested commit SHA and execution timestamp.",
+    "EVD-HASH-0001 lacks explicit compared hash values and remains VERIFIED_TEST.",
+    "LBR-0001 remains INFERRED because no dedicated runtime assertion verifies stale identity metadata after manual opening edits."
+  ],
+  "registryVersions": {
+    "components": "1.2.0",
+    "dataFlows": "1.2.0",
+    "consumers": "1.3.0",
+    "evidence": "2.1.0",
+    "claims": "1.7.0",
+    "contradictions": "1.6.0",
+    "lineageFindings": "1.0.0",
+    "evidenceAuditFindings": "1.0.0"
+  },
+  "registryHashes": {
+    "components": "54a679449df4d213b8d4a0004014dfc9dd89b6c1cc2f6301028cad09acb1a39f",
+    "dataFlows": "88092fc94b366e6326beb7beed783b3da91afa1c10f9005c8132fb3d929d3a47",
+    "consumers": "c199ae860455aad08d467869e646fb433215d2259321f2cda31b590cc4df047a",
+    "evidence": "4b31878e688ebf1e14d5fb0e1779856d9169ef35865bcbf797fd9660ccef9a37",
+    "claims": "5872f272d0c83f682c8daf5a1aea102b52628948107e3e2170d5d677a64a256c",
+    "contradictions": "270348b2f076c7c6217d0d7a0250708ce7ee00ea36ae3c044321c883aa14c11c",
+    "lineageFindings": "5a666633b6b879d0c8accdf9dfc074bb0d285c4e784928f88f33cc588582e010",
+    "evidenceAuditFindings": "51d89b67053495aa004577ec10a1ed70c2a7e4e715ca9860c140e49c0be4606c"
+  },
+  "reviewDate": "2026-09-29",
+  "baselineHash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5",
+  "frozenAt": "2026-09-29T16:56:00+03:00",
+  "frozenBy": "PROJECT_OWNER",
+  "freezeGate": {
+    "globalHumanReviewPass": true,
+    "registryHashesGenerated": true,
+    "baselineHashGenerated": true,
+    "knownUnknownsVisible": true,
+    "contradictionsVisible": true,
+    "lineageFindingsVisible": true,
+    "evidenceGapsVisible": true,
+    "auditLimitationsVisible": true,
+    "eligibleForFreeze": true
+  },
+  "notes": [
+    "This baseline draft records current audited reality; it does not certify architectural correctness.",
+    "No unresolved contradiction, lineage finding, evidence gap, known unknown, or audit limitation may be hidden to obtain freeze eligibility.",
+    "Frozen by explicit Project Owner approval on 2026-09-29.",
+    "Freeze establishes a binding historical truth baseline only; it does not approve architecture correctness, production readiness, or development unblocking."
+  ],
+  "auditReference": {
+    "auditCommit": "f4827ad9ecd65ad0d8ea836d9e5bb6a4e0f9547b",
+    "auditDate": "2026-09-29",
+    "repository": "azizaljery/Almizan-alhandasi",
+    "branch": "control/mizan-master-checkpoint",
+    "scope": "REPOSITORY_RUNTIME_SCOPE"
+  },
+  "passSemantics": "PASS means the audit stage completed its Definition of Done; it does not mean the system has no findings, the architecture is correct, or production/development readiness is approved.",
+  "countSources": {
+    "runtimeModulesReviewed": "docs/system-map/runtime-module-classification.json",
+    "components": "docs/system-map/components.registry.json",
+    "criticalDataFlows": "docs/system-map/data-flows.registry.json",
+    "consumers": "docs/system-map/consumers.registry.json",
+    "evidenceRecords": "docs/system-map/evidence.registry.json",
+    "claims": "docs/system-map/claims.registry.json",
+    "contradictions": "docs/system-map/contradictions.registry.json",
+    "lineageFindings": "docs/system-map/lineage-findings.registry.json",
+    "evidenceAuditGaps": "docs/system-map/evidence-audit-findings.registry.json"
+  },
+  "developmentUnblockConditions": [
+    {
+      "id": "DEV-GATE-001",
+      "condition": "Establish canonical Design Core source",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-002",
+      "condition": "Establish accepted/canonical AZIZ source/version",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-003",
+      "condition": "Establish canonical Engineering Core copy or formally accept the split",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-004",
+      "condition": "Establish Production Worker byte provenance",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-005",
+      "condition": "Complete browser visual verification",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-006",
+      "condition": "Establish production deployment identity",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-007",
+      "condition": "Resolve or formally accept every CONTR-*",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-008",
+      "condition": "Resolve or formally accept recorded lineage/evidence gaps as required for intended development scope",
+      "status": "OPEN"
+    }
+  ],
+  "hashAlgorithm": "SHA-256",
+  "hashInputArtifact": "docs/system-map/baseline-hash-input.json",
+  "freezeDecision": {
+    "decision": "APPROVE_FREEZE",
+    "approvedBy": "PROJECT_OWNER",
+    "approvedAt": "2026-09-29T16:56:00+03:00",
+    "architectureCorrectness": "NOT_APPROVED",
+    "productionReadiness": "NOT_APPROVED",
+    "developmentUnblocking": "NOT_APPROVED"
+  }
+}
