@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0.0",
+  "baselineId": null,
+  "status": "DRAFT",
+  "binding": false,
+  "frozen": false,
+  "scope": "REPOSITORY_RUNTIME_SCOPE",
+  "commit": null,
+  "snapshot": {
+    "runtimeModulesReviewed": 19,
+    "components": 13,
+    "criticalDataFlows": 7,
+    "consumers": 12,
+    "evidenceRecords": 22,
+    "claims": 21
+  },
+  "auditStages": {
+    "SYSTEM_DISCOVERY": "PASS",
+    "SYSTEM_MAP": "PASS",
+    "REGISTRY_INTEGRITY": "PASS",
+    "CONTRADICTION_DETECTION": "PASS",
+    "LINEAGE_AUDIT": "PASS",
+    "EVIDENCE_AUDIT": "PASS",
+    "GLOBAL_HUMAN_REVIEW": "READY"
+  },
+  "humanReview": {
+    "status": "READY",
+    "result": null,
+    "reviewDate": null,
+    "reviewedBy": []
+  },
+  "unresolvedContradictions": [
+    "CONTR-0001",
+    "CONTR-0002",
+    "CONTR-0003",
+    "CONTR-0004",
+    "CONTR-0005",
+    "CONTR-0006",
+    "CONTR-0007"
+  ],
+  "lineage": {
+    "breaks": [
+      "LBR-0001"
+    ],
+    "identityGaps": [
+      "LGAP-0002"
+    ],
+    "traceabilityGaps": [
+      "LGAP-0003"
+    ]
+  },
+  "evidenceGaps": [
+    "EAGAP-0001",
+    "EAGAP-0002",
+    "EAGAP-0003"
+  ],
+  "knownUnknowns": [
+    "Canonical Design Core source is not established.",
+    "Canonical AZIZ source package is not established.",
+    "Canonical Engineering Core source across the UI and integration copies is unresolved.",
+    "Production Worker byte provenance is unresolved.",
+    "Browser visual verification is distinct and not established by repository test/build evidence.",
+    "Production deployment identity is not established by this repository-runtime baseline."
+  ],
+  "auditLimitations": [
+    "Scope is repository runtime scope, not production deployment identity.",
+    "Several VERIFIED_TEST records lack exact tested commit SHA and execution timestamp.",
+    "EVD-HASH-0001 lacks explicit compared hash values and remains VERIFIED_TEST.",
+    "LBR-0001 remains INFERRED because no dedicated runtime assertion verifies stale identity metadata after manual opening edits."
+  ],
+  "registryVersions": {
+    "components": null,
+    "dataFlows": null,
+    "consumers": null,
+    "evidence": null,
+    "claims": null,
+    "contradictions": null,
+    "lineageFindings": null,
+    "evidenceAuditFindings": null
+  },
+  "registryHashes": {
+    "components": null,
+    "dataFlows": null,
+    "consumers": null,
+    "evidence": null,
+    "claims": null,
+    "contradictions": null,
+    "lineageFindings": null,
+    "evidenceAuditFindings": null
+  },
+  "reviewDate": null,
+  "baselineHash": null,
+  "frozenAt": null,
+  "frozenBy": null,
+  "freezeGate": {
+    "globalHumanReviewPass": false,
+    "registryHashesGenerated": false,
+    "baselineHashGenerated": false,
+    "knownUnknownsVisible": true,
+    "contradictionsVisible": true,
+    "lineageFindingsVisible": true,
+    "evidenceGapsVisible": true,
+    "auditLimitationsVisible": true,
+    "eligibleForFreeze": false
+  },
+  "notes": [
+    "This baseline draft records current audited reality; it does not certify architectural correctness.",
+    "No unresolved contradiction, lineage finding, evidence gap, known unknown, or audit limitation may be hidden to obtain freeze eligibility."
+  ]
+}
