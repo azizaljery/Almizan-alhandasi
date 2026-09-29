@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "DEV-GATE-002-AZIZ-CANONICAL",
+  "gateId": "DEV-GATE-002",
+  "status": "APPROVED",
+  "result": "FORMALLY_ACCEPTED",
+  "approvedBy": "PROJECT_OWNER",
+  "approvedAt": "2026-09-29",
+  "canonicalDesignation": {
+    "artifact": "dist/integration/aziz/",
+    "releaseIdentity": "AZIZ Candidate4R3",
+    "artifactClass": "CANONICAL_DELIVERED_RUNTIME_ARTIFACT",
+    "sourcePackageStatus": "SOURCE_TS_NOT_PRESENT_IN_REVIEWED_REPOSITORY",
+    "entryPoint": "dist/integration/aziz/index.js",
+    "integrationConsumer": "dist/integration/pipeline.mjs"
+  },
+  "evidence": [
+    "INTEGRATION-P1-REPORT.md identifies the integrated decision engine as AZIZ Candidate4R3.",
+    "dist/integration/pipeline.mjs imports createAziz/defaultConfig/fnv1aHash/stableStringify/fixedClock from ./aziz/index.js.",
+    "dist/integration/aziz/index.js exports the AZIZ runtime modules.",
+    "dist/integration/aziz/index.js.map points to ../src/index.ts, but that TypeScript source tree is not present in the reviewed repository.",
+    "FILE-SHA256SUMS.txt and FILE-SHA256SUMS-RELEASE.txt record hashes for compiled dist/integration/aziz artifacts.",
+    "RELEASE-TEST-87.log exercises the integrated Claude -> Gemini -> AZIZ path."
+  ],
+  "limitation": "This decision canonizes the delivered AZIZ Candidate4R3 runtime artifact for the current repository/development gate. It does not claim that the absent TypeScript authoring source has been recovered.",
+  "changeControlRules": [
+    "Do not silently replace dist/integration/aziz with a different AZIZ package/version.",
+    "Any recovered or new authored AZIZ source must be linked to this runtime artifact by reproducible build/hash evidence before becoming canonical source.",
+    "SMB-20260929-001 remains immutable."
+  ],
+  "runtimeChanges": false,
+  "refactorPerformed": false
+}
