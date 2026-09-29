@@ -148,12 +148,17 @@
       }
     },
     "humanReview": {
-      "status": "IN_PROGRESS",
-      "result": null
+      "status": "READY",
+      "result": null,
+      "reviewArtifact": "docs/system-map/GLOBAL-HUMAN-REVIEW.md"
     },
     "systemMapBaseline": {
-      "status": "NOT_STARTED",
-      "result": null
+      "status": "DRAFT_PREPARED",
+      "result": null,
+      "binding": false,
+      "frozen": false,
+      "draftArtifact": "docs/system-map/system-map-baseline.draft.json",
+      "checklistArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-DRAFT-CHECKLIST.md"
     }
   },
   "preBaselineAdrs": {
@@ -172,7 +177,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Perform global HUMAN_REVIEW over the now-closed repository-scope discovery/map, contradictions, lineage, evidence gaps, known unknowns, and audit limitations.",
+  "nextStep": "Complete GLOBAL_HUMAN_REVIEW. Only after PASS: capture baseline commit and registry versions/hashes, compute baseline hash, then evaluate Freeze Gate.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
