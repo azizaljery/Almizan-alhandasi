@@ -13,7 +13,7 @@
   },
   "snapshotDate": "2026-09-28",
   "currentStage": {
-    "name": "EVIDENCE_AUDIT",
+    "name": "HUMAN_REVIEW",
     "status": "IN_PROGRESS",
     "result": null
   },
@@ -54,9 +54,31 @@
       }
     },
     "evidenceAudit": {
-      "status": "IN_PROGRESS",
-      "result": null,
-      "health": "PASS"
+      "status": "COMPLETED",
+      "result": "PASS",
+      "health": "PASS",
+      "completedChecks": [
+        "EA-001",
+        "EA-002",
+        "EA-003",
+        "EA-004",
+        "EA-005",
+        "EA-006",
+        "EA-007",
+        "EA-008",
+        "EA-009",
+        "EA-010",
+        "EA-011",
+        "EA-012",
+        "EA-013"
+      ],
+      "findings": {
+        "evidenceMetadataGaps": 1,
+        "hashProvenanceGaps": 1,
+        "evidenceStrengthLimits": 1
+      },
+      "registryIntegrity": "PASS",
+      "closureArtifact": "docs/system-map/EA-013-closure-review.json"
     },
     "contradictionDetection": {
       "status": "COMPLETED",
@@ -122,7 +144,7 @@
       }
     },
     "humanReview": {
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "result": null
     },
     "systemMapBaseline": {
@@ -146,7 +168,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Execute EVIDENCE_AUDIT against current evidence and claims.",
+  "nextStep": "Run global HUMAN_REVIEW across System Discovery, System Map, contradictions, lineage, evidence, known unknowns, and audit limitations before Baseline.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
