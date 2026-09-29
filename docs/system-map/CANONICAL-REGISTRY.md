@@ -42,12 +42,16 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 
 | Field | Value |
 |---|---|
-| Status | `BLOCKED` |
-| Canonical copy | `UNRESOLVED` |
-| Gate evidence | `docs/system-map/development-unblock-gate.json` |
-| Supporting evidence | `CONTR-0007`, `EVD-HASH-0002` |
-| Current finding | UI and integrated Engineering Core copies are proven non-identical; evidence does not determine which is canonical. |
-| Closure requirement | Establish canonical copy or formally accept the split. |
+| Status | `FORMALLY_ACCEPTED` |
+| Decision | `FORMALLY_ACCEPT_SPLIT_WITH_DISTINCT_ROLES` |
+| Integrated acceptance core | `dist/integration/gemini/packages/engineering-core/` |
+| Package identity | `@mizan/engineering-core@1.0.0` |
+| Acceptance adapter | `dist/integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js` |
+| UI preliminary copy | `dist/gemini/engineering-core/` |
+| UI bridge | `dist/gemini-engineering-layer.mjs` |
+| Evidence | Copies are non-identical; integrated copy has P1 safeguards and MIZAN-IR bound review path |
+| Decision record | `docs/system-map/DEV-GATE-003-ENGINEERING-CORE-CANONICAL.json` |
+| Runtime changed | `NO` |
 
 ## DEV-GATE-004 — Production Worker Byte Provenance
 
