@@ -2,8 +2,8 @@
   "schemaVersion": "1.0.0",
   "decisionId": "DEV-GATE-001-DESIGN-CORE-OWNERSHIP",
   "gateId": "DEV-GATE-001",
-  "status": "PROPOSED",
-  "result": "BLOCKED",
+  "status": "APPROVED",
+  "result": "FORMALLY_ACCEPTED",
   "baselineId": "SMB-20260929-001",
   "objective": "Establish whether Design Core is a single canonical source or a formally composite ownership boundary.",
   "observedLayers": [
@@ -60,5 +60,21 @@
   },
   "decisionRule": "Do not close DEV-GATE-001 until one option is supported by evidence and formally approved where ownership policy is required.",
   "runtimeChanges": false,
-  "refactorPerformed": false
+  "refactorPerformed": false,
+  "approvedBy": "PROJECT_OWNER",
+  "approvedAt": "2026-09-29",
+  "approvedOption": "FORMALLY_COMPOSITE_DESIGN_CORE",
+  "canonicalOwnership": {
+    "contractAuthority": "vendor/claude-planner/src/PlannerOutputContract.mjs",
+    "runtimeContractMirror": "dist/claude/PlannerOutputContract.mjs",
+    "planningUpstream": "vendor/claude-planner/src/",
+    "planningRuntimeMirror": "dist/claude/",
+    "runtimeIntegrationBoundary": "dist/planner.mjs"
+  },
+  "changeControlRules": [
+    "Author Claude Planner and PlannerOutputContract changes in vendor/claude-planner/src/.",
+    "dist/claude/ is a byte-identical runtime mirror validated by scripts/build.mjs.",
+    "dist/planner.mjs is the runtime integration boundary and is not the canonical upstream for Claude Planner source.",
+    "Changes that alter the composite ownership model require a new post-baseline decision; SMB-20260929-001 remains immutable."
+  ]
 }
