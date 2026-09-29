@@ -1,0 +1,34 @@
+{
+  "id": "EA-012",
+  "status": "COMPLETED",
+  "result": "PASS",
+  "health": "PASS",
+  "reviewSource": "USER_PROVIDED",
+  "acceptedFindings": [
+    {
+      "id": "EAGAP-0001",
+      "classification": "EVIDENCE_METADATA_GAP",
+      "accepted": true
+    },
+    {
+      "id": "EAGAP-0002",
+      "classification": "HASH_PROVENANCE_GAP",
+      "accepted": true
+    },
+    {
+      "id": "EAGAP-0003",
+      "classification": "EVIDENCE_STRENGTH_LIMIT",
+      "accepted": true
+    }
+  ],
+  "reviewChecks": {
+    "evidenceGapsRecorded": true,
+    "evidenceStrengthLevelsDocumented": true,
+    "claimsLinkedToEvidence": true,
+    "noUnclassifiedEvidenceFound": true,
+    "noKnownUnrecordedGapInCurrentScope": true,
+    "summaryAndRegistryConsistent": true,
+    "noEvidenceUpgradeWithoutProof": true
+  },
+  "caveat": "PASS applies to the current registered and reviewed scope; it does not prove global discovery completeness."
+}
