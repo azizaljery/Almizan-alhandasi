@@ -1,0 +1,124 @@
+{
+  "project": "AL-MIZAN AL-HANDASI",
+  "phase": "CONTROLLED_DEVELOPMENT",
+  "baselineReference": {
+    "id": "SMB-20260929-001",
+    "status": "FROZEN",
+    "mutable": false
+  },
+  "productionStatus": "BLOCKED",
+  "allowedResults": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "FORMALLY_ACCEPTED"
+  ],
+  "guards": {
+    "runtimeChangesAllowedDuringEvidenceReview": false,
+    "baselineMutationAllowed": false,
+    "productionDeploymentAllowed": false
+  },
+  "id": "DEV-GATE-005",
+  "name": "Browser Visual Verification",
+  "status": "IN_PROGRESS",
+  "result": null,
+  "health": "BLOCKED",
+  "objective": "Verify required browser-visible behavior and visual state against an approved acceptance scope without changing Runtime.",
+  "evidenceReviewed": [
+    {
+      "item": "Release visual status",
+      "value": "RELEASE-MANIFEST.md records no screenshot/visual pass",
+      "verification": "VERIFIED_REPOSITORY"
+    },
+    {
+      "item": "Integration visual status",
+      "value": "INTEGRATION-P1-REPORT.md states browser visual/cross-device acceptance was not executed",
+      "verification": "VERIFIED_REPOSITORY"
+    }
+  ],
+  "requiredEvidence": [
+    "Approved visual acceptance scope and expected screens/states",
+    "Target URL/build/version and browser/device matrix",
+    "Timestamped screenshots or video for each required flow",
+    "Recorded browser console errors and network failures",
+    "Acceptance checklist results for critical user flows",
+    "Reviewer identity and review timestamp",
+    "Known visual deviations with severity and disposition"
+  ],
+  "checks": [
+    {
+      "id": "DEV-GATE-005-01",
+      "name": "Fix target build/version",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-02",
+      "name": "Approve browser/device matrix",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-03",
+      "name": "Verify startup and primary screen",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-04",
+      "name": "Verify plan editing and openings visually",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-05",
+      "name": "Verify 2D state",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-06",
+      "name": "Verify 3D state",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-07",
+      "name": "Verify BOQ presentation",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-08",
+      "name": "Verify save/restore browser flow",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-09",
+      "name": "Capture console and network evidence",
+      "status": "NOT_STARTED",
+      "result": null
+    },
+    {
+      "id": "DEV-GATE-005-10",
+      "name": "Record deviations and human review",
+      "status": "NOT_STARTED",
+      "result": null
+    }
+  ],
+  "analysis": {
+    "conclusion": "Existing repository evidence explicitly does not establish browser visual acceptance, so no PASS/FAIL conclusion can be made.",
+    "classificationReason": "Required screenshots/recordings, fixed deployment identity, browser matrix, console/network capture, and human visual review are missing.",
+    "missingEvidence": [
+      "Visual evidence package",
+      "Target build/version identity",
+      "Browser/device matrix",
+      "Acceptance results",
+      "Console/network capture",
+      "Human visual review record"
+    ]
+  },
+  "runtimeChanges": 0,
+  "nextAction": "Collect visual evidence against a fixed build, then execute checks DEV-GATE-005-01 through DEV-GATE-005-10."
+}
