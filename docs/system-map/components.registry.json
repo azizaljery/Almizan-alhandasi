@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "components": [
     {
       "componentId": "planner-output-contract",
@@ -56,13 +56,13 @@
       "componentId": "mizan-score",
       "displayName": "Mizan Score",
       "classification": "SOURCE",
-      "status": "UNVERIFIED",
+      "status": "ACTIVE",
       "owner": "MIZAN_SCORE",
       "sourcePath": "dist/mizan-score.mjs",
       "buildPaths": [],
       "version": null,
       "sourceHash": null,
-      "runtime": "UNKNOWN",
+      "runtime": "PRESENT",
       "responsibilities": [
         "quality-measurement",
         "score-vector",
@@ -74,8 +74,11 @@
         "geometry-mutation",
         "refinement-policy"
       ],
-      "evidenceIds": [],
-      "notes": "Existence/path must be verified from repository tree and code."
+      "evidenceIds": [
+        "EVD-CODE-0003",
+        "EVD-CODE-0015"
+      ],
+      "notes": "Current runtime implementation is present; future Mizan Score V1 remains separate and not implemented."
     },
     {
       "componentId": "engineering-review",
@@ -169,6 +172,168 @@
       ],
       "evidenceIds": [
         "EVD-TEST-0001"
+      ]
+    },
+    {
+      "componentId": "planner-engine",
+      "displayName": "Planner Runtime",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "PLANNER_GEOMETRY",
+      "sourcePath": "dist/planner.mjs",
+      "buildPaths": [
+        "dist/claude/planner.mjs"
+      ],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "plan-generation",
+        "opening-editing",
+        "geometry-validation",
+        "geometry-derived-quantities"
+      ],
+      "mustNotOwn": [
+        "candidate-selection",
+        "engineering-approval"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0007",
+        "EVD-CODE-0015"
+      ],
+      "notes": "Runtime planner boundary is now registered; canonical upstream remains unresolved."
+    },
+    {
+      "componentId": "assistant-adapter",
+      "displayName": "Assistant Adapter",
+      "classification": "ADAPTER",
+      "status": "ACTIVE",
+      "owner": "ASSISTANT_INTEGRATION",
+      "sourcePath": "dist/assistant.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "assistant-status",
+        "validated-brief-request"
+      ],
+      "mustNotOwn": [
+        "geometry-mutation",
+        "candidate-selection"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "componentId": "project-store",
+      "displayName": "Project Store",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "PROJECT_PERSISTENCE",
+      "sourcePath": "dist/project.mjs",
+      "buildPaths": [],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "project-encode",
+        "project-decode",
+        "integrated-model-persistence",
+        "csv-export"
+      ],
+      "mustNotOwn": [
+        "geometry-generation",
+        "candidate-selection"
+      ],
+      "evidenceIds": [
+        "EVD-TEST-0003",
+        "EVD-CODE-0014",
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "componentId": "home-design-evaluator",
+      "displayName": "Home Design Evaluator",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "HOME_DESIGN_EVALUATION",
+      "sourcePath": "dist/home-design-engine.mjs",
+      "buildPaths": [
+        "dist/mizan-home-design-engine.mjs"
+      ],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "home-model-evaluation",
+        "alternative-comparison",
+        "engineering-prompt-context"
+      ],
+      "mustNotOwn": [
+        "canonical-candidate-identity",
+        "aziz-selection"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0010",
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "componentId": "requirements-engine",
+      "displayName": "Requirements Engine",
+      "classification": "SOURCE",
+      "status": "ACTIVE",
+      "owner": "CLIENT_REQUIREMENTS",
+      "sourcePath": "dist/requirements-engine.mjs",
+      "buildPaths": [
+        "dist/client-brief.mjs",
+        "dist/local-nlp.mjs"
+      ],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "client-context",
+        "requirements-derivation",
+        "brief-normalization"
+      ],
+      "mustNotOwn": [
+        "geometry-generation",
+        "candidate-selection"
+      ],
+      "evidenceIds": [
+        "EVD-CODE-0015"
+      ]
+    },
+    {
+      "componentId": "multi-engine-orchestrator",
+      "displayName": "Multi-Engine Orchestrator",
+      "classification": "ADAPTER",
+      "status": "ACTIVE",
+      "owner": "INTEGRATION_ORCHESTRATION",
+      "sourcePath": "dist/multi-engine.mjs",
+      "buildPaths": [
+        "dist/integration/pipeline.mjs"
+      ],
+      "version": null,
+      "sourceHash": null,
+      "runtime": "PRESENT",
+      "responsibilities": [
+        "design-request-construction",
+        "integrated-pipeline-invocation",
+        "selected-model-mapping"
+      ],
+      "mustNotOwn": [
+        "score-definition",
+        "geometry-repair"
+      ],
+      "evidenceIds": [
+        "EVD-TEST-0001",
+        "EVD-CODE-0009",
+        "EVD-CODE-0015"
       ]
     }
   ]
