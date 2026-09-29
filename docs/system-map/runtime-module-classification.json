@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "1.0.0",
+  "sourceEntryPoint": "dist/app.mjs",
+  "directImportsReviewed": 19,
+  "classifications": [
+    {
+      "path": "dist/client-brief.mjs",
+      "classification": "ADAPTER",
+      "mappedTo": "requirements-engine",
+      "reason": "Client brief normalization and preference application",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/planner.mjs",
+      "classification": "COMPONENT",
+      "mappedTo": "planner-engine",
+      "reason": "Runtime planning, editing and geometry validation",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/plan-view.mjs",
+      "classification": "COMPONENT_MEMBER",
+      "mappedTo": "renderer-2d",
+      "reason": "2D rendering",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/viewer3d.mjs",
+      "classification": "COMPONENT_MEMBER",
+      "mappedTo": "renderer-3d",
+      "reason": "3D rendering",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/assistant.mjs",
+      "classification": "COMPONENT",
+      "mappedTo": "assistant-adapter",
+      "reason": "External assistant/status adapter",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/estimates.mjs",
+      "classification": "COMPONENT_MEMBER",
+      "mappedTo": "boq-engine",
+      "reason": "Quantity/cost derivation",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/audit.mjs",
+      "classification": "ANALYZER",
+      "mappedTo": "planning-audit",
+      "reason": "Plan review analyzer",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/local-nlp.mjs",
+      "classification": "ADAPTER",
+      "mappedTo": "requirements-engine",
+      "reason": "Local brief extraction",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/sun-orientation.mjs",
+      "classification": "UTILITY",
+      "mappedTo": "solar-analysis",
+      "reason": "Sun orientation helper",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/circulation.mjs",
+      "classification": "ANALYZER",
+      "mappedTo": "circulation-analysis",
+      "reason": "Circulation network analysis",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/project.mjs",
+      "classification": "COMPONENT",
+      "mappedTo": "project-store",
+      "reason": "Project encode/decode and persistence",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/design-insights.mjs",
+      "classification": "ANALYZER",
+      "mappedTo": "design-insights",
+      "reason": "Derived design-quality analysis",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/solar-path.mjs",
+      "classification": "UTILITY",
+      "mappedTo": "solar-analysis",
+      "reason": "Solar preview calculations",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/home-design-engine.mjs",
+      "classification": "COMPONENT",
+      "mappedTo": "home-design-evaluator",
+      "reason": "Independent home-design evaluation/comparison",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/requirements-engine.mjs",
+      "classification": "COMPONENT",
+      "mappedTo": "requirements-engine",
+      "reason": "Client context and requirements derivation",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/render-visualizer.mjs",
+      "classification": "ADAPTER",
+      "mappedTo": "visualization-adapter",
+      "reason": "Visual prompt/image visualization adapter",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/mizan-score.mjs",
+      "classification": "COMPONENT_MEMBER",
+      "mappedTo": "mizan-score",
+      "reason": "Current Mizan Score implementation",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/gemini-engineering-layer.mjs",
+      "classification": "ADAPTER",
+      "mappedTo": "engineering-review",
+      "reason": "UI Gemini engineering-review bridge",
+      "status": "REVIEWED"
+    },
+    {
+      "path": "dist/multi-engine.mjs",
+      "classification": "COMPONENT",
+      "mappedTo": "multi-engine-orchestrator",
+      "reason": "Design request construction and integrated orchestration",
+      "status": "REVIEWED"
+    }
+  ],
+  "missingCriticalComponentsToRegister": [
+    "planner-engine",
+    "assistant-adapter",
+    "project-store",
+    "home-design-evaluator",
+    "requirements-engine",
+    "multi-engine-orchestrator"
+  ],
+  "nonComponentDomainsToRepresentElsewhere": [
+    "planning-audit",
+    "circulation-analysis",
+    "design-insights",
+    "solar-analysis",
+    "visualization-adapter"
+  ],
+  "result": "PARTIAL",
+  "note": "All direct app runtime imports are now classified. Nested integration/vendor/build trees still require coverage reconciliation before System Discovery/System Map can be marked complete."
+}
