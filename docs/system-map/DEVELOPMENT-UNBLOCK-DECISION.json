@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "decisionId": "DEVELOPMENT-UNBLOCK-20260929-001",
+  "baselineId": "SMB-20260929-001",
+  "status": "APPROVED",
+  "decision": "DEVELOPMENT_UNBLOCKED",
+  "approvedAt": "2026-09-29",
+  "authority": "PROJECT_OWNER_DIRECTION",
+  "conditions": {
+    "formallyAccepted": [
+      "DEV-GATE-001",
+      "DEV-GATE-002",
+      "DEV-GATE-003",
+      "DEV-GATE-004",
+      "DEV-GATE-005",
+      "DEV-GATE-006",
+      "DEV-GATE-007",
+      "DEV-GATE-008"
+    ],
+    "pass": [],
+    "blocked": [],
+    "fail": []
+  },
+  "boundaries": {
+    "developmentAuthorized": true,
+    "productionReleaseAuthorized": false,
+    "productionDeploymentAuthorized": false,
+    "frozenBaselineMutable": false
+  },
+  "mandatoryRemediationOrder": [
+    "LBR-0001 identity/geometry lineage repair plus regression test",
+    "Re-evaluate scoring ownership contradictions CONTR-0003/0005 before Mizan Score V1 implementation",
+    "Complete Worker provenance, browser visual verification, and production deployment identity before any production release"
+  ],
+  "note": "Formal acceptance unblocks controlled development; it does not erase historical findings or certify production readiness."
+}
