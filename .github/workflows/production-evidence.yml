@@ -1,0 +1,197 @@
+name: Production Evidence
+
+on:
+  push:
+    branches:
+      - control/mizan-master-checkpoint
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SITE_URL: https://al-mizan-al-handasi.aljeryabod.chatgpt.site
+      WORKER_URL: https://gentle-sun-5ef5.aljeryabod.workers.dev
+      WORKER_NAME: gentle-sun-5ef5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Prepare evidence directory
+        run: mkdir -p evidence/production/screenshots
+
+      - name: Capture live site and Worker HTTP evidence
+        shell: bash
+        run: |
+          set -u
+          {
+            echo "captured_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "repository=$GITHUB_REPOSITORY"
+            echo "head_sha=$GITHUB_SHA"
+            echo "site_url=$SITE_URL"
+            echo "worker_url=$WORKER_URL"
+          } > evidence/production/context.txt
+
+          curl -sS -D evidence/production/site.headers.txt -o evidence/production/site.index.html "$SITE_URL/" || true
+          curl -sS -D evidence/production/worker-status.headers.txt -H "Origin: $SITE_URL" -o evidence/production/worker-status.json "$WORKER_URL/api/assistant/status" || true
+
+          for asset in app.mjs planner.mjs planner.css index.html; do
+            curl -sS -L -o "evidence/production/live-$asset" "$SITE_URL/$asset" || true
+          done
+
+          {
+            echo "# Live HTTP status"
+            echo -n "site_status="; curl -sS -o /dev/null -w '%{http_code}' "$SITE_URL/" || true; echo
+            echo -n "worker_status="; curl -sS -o /dev/null -w '%{http_code}' -H "Origin: $SITE_URL" "$WORKER_URL/api/assistant/status" || true; echo
+          } > evidence/production/http-status.txt
+
+          {
+            echo "# SHA-256 comparison"
+            for pair in "dist/app.mjs live-app.mjs" "dist/planner.mjs live-planner.mjs" "dist/planner.css live-planner.css" "dist/index.html live-index.html"; do
+              set -- $pair
+              repo_file="$1"
+              live_file="evidence/production/$2"
+              echo "## $repo_file"
+              if [ -f "$repo_file" ]; then sha256sum "$repo_file"; else echo "repo_missing"; fi
+              if [ -s "$live_file" ]; then sha256sum "$live_file"; else echo "live_missing"; fi
+            done
+          } > evidence/production/site-sha256.txt
+
+      - name: Capture Cloudflare deployment provenance when credentials are available
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set +e
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "cloudflare_credentials=NOT_AVAILABLE" > evidence/production/cloudflare-provenance.txt
+            exit 0
+          fi
+
+          echo "cloudflare_credentials=AVAILABLE" > evidence/production/cloudflare-provenance.txt
+          npx -y wrangler@4 deployments list --name "$WORKER_NAME" --json > evidence/production/cloudflare-deployments.json 2> evidence/production/cloudflare-deployments.stderr.txt
+
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -D evidence/production/cloudflare-worker-content.headers.txt -o evidence/production/cloudflare-worker-content.bin "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$WORKER_NAME/content"
+
+          if [ -s evidence/production/cloudflare-worker-content.bin ]; then
+            sha256sum evidence/production/cloudflare-worker-content.bin > evidence/production/cloudflare-worker-content.sha256.txt
+          fi
+          sha256sum worker/server.mjs > evidence/production/repository-worker.sha256.txt
+
+      - name: Install Playwright Chromium
+        run: |
+          npm --silent --no-save install playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run production browser evidence capture
+        shell: bash
+        run: |
+          cat > evidence/production/capture-live.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+
+          const site = process.env.SITE_URL;
+          const out = 'evidence/production';
+          const evidence = {
+            capturedAt: new Date().toISOString(),
+            site,
+            scenarios: [],
+            console: [],
+            pageErrors: [],
+            requestFailures: []
+          };
+
+          const browser = await chromium.launch({headless:true});
+          const matrices = [
+            {name:'desktop-chromium', viewport:{width:1440,height:1000}},
+            {name:'mobile-chromium', viewport:{width:390,height:844}}
+          ];
+
+          for (const matrix of matrices) {
+            const context = await browser.newContext({viewport:matrix.viewport});
+            const page = await context.newPage();
+            const prefix = matrix.name;
+            const record = {matrix, steps:[]};
+
+            page.on('console', msg => evidence.console.push({matrix:prefix,type:msg.type(),text:msg.text()}));
+            page.on('pageerror', err => evidence.pageErrors.push({matrix:prefix,message:err.message}));
+            page.on('requestfailed', req => evidence.requestFailures.push({matrix:prefix,url:req.url(),failure:req.failure()}));
+
+            try {
+              const response = await page.goto(site, {waitUntil:'networkidle', timeout:30000});
+              record.steps.push({step:'startup',httpStatus:response?.status() ?? null,url:page.url(),title:await page.title()});
+              await page.screenshot({path:`${out}/screenshots/${prefix}-01-startup.png`,fullPage:true});
+
+              const enter = page.locator('#enter');
+              if (await enter.count()) {
+                await enter.click();
+                await page.waitForTimeout(500);
+                record.steps.push({step:'enter',visible:true});
+                await page.screenshot({path:`${out}/screenshots/${prefix}-02-journey.png`,fullPage:true});
+              }
+
+              const design = page.locator('[data-go="design"]');
+              if (await design.count()) {
+                await design.click();
+                await page.waitForTimeout(500);
+                record.steps.push({step:'design-tab',visible:true});
+                await page.screenshot({path:`${out}/screenshots/${prefix}-03-design.png`,fullPage:true});
+              }
+
+              const gen = page.locator('#gen');
+              if (await gen.count() && await gen.isEnabled()) {
+                await gen.click();
+                await page.waitForTimeout(5000);
+                record.steps.push({step:'generate-attempt',outVisible:await page.locator('#out').isVisible().catch(()=>false)});
+                await page.screenshot({path:`${out}/screenshots/${prefix}-04-after-generate.png`,fullPage:true});
+              }
+
+              const boqTab = page.locator('[data-tab="boq"]');
+              if (await boqTab.count()) {
+                await boqTab.click();
+                await page.waitForTimeout(400);
+                record.steps.push({step:'boq-tab',visible:true});
+                await page.screenshot({path:`${out}/screenshots/${prefix}-05-boq.png`,fullPage:true});
+              }
+            } catch (error) {
+              record.error = String(error?.stack || error);
+            }
+            evidence.scenarios.push(record);
+            await context.close();
+          }
+
+          await browser.close();
+          fs.writeFileSync(`${out}/browser-evidence.json`, JSON.stringify(evidence,null,2));
+          NODE
+          node evidence/production/capture-live.mjs
+
+      - name: Create evidence manifest
+        shell: bash
+        run: |
+          {
+            echo "# Production Evidence Manifest"
+            echo
+            echo "Captured: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "Repository: $GITHUB_REPOSITORY"
+            echo "Commit: $GITHUB_SHA"
+            echo "Site: $SITE_URL"
+            echo "Worker: $WORKER_URL"
+            echo
+            echo "## Files"
+            find evidence/production -maxdepth 2 -type f -printf '%P\n' | sort
+          } > evidence/production/MANIFEST.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-evidence-${{ github.run_id }}
+          path: evidence/production
+          if-no-files-found: error
+          retention-days: 30
