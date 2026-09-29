@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "1.0.0",
+  "headCommit": "2b1bf470ca24d0b2a75e37f2196f247ae8b87b7e",
+  "reviewedTrees": [
+    {
+      "path": "dist/claude/",
+      "files": 5,
+      "classification": "RUNTIME_BUILD_OR_MIRROR",
+      "mappedTo": "planner-engine",
+      "evidenceIds": [
+        "EVD-HASH-0001"
+      ],
+      "openQuestion": "Canonical upstream/version not fully established."
+    },
+    {
+      "path": "vendor/claude-planner/",
+      "files": 38,
+      "classification": "VENDORED_SOURCE_CANDIDATE",
+      "mappedTo": "planner-engine",
+      "evidenceIds": [
+        "EVD-HASH-0001"
+      ],
+      "openQuestion": "External canonical provenance beyond repository vendor copy remains unresolved."
+    },
+    {
+      "path": "dist/integration/aziz/",
+      "files": null,
+      "classification": "RUNTIME_BUILD",
+      "mappedTo": "aziz-engine",
+      "evidenceIds": [
+        "EVD-CODE-0004",
+        "EVD-CODE-0005"
+      ],
+      "openQuestion": "Canonical AZIZ source package remains unresolved."
+    },
+    {
+      "path": "dist/integration/control/",
+      "files": null,
+      "classification": "CONTRACT_REFERENCE_SUPPORT",
+      "mappedTo": "multi-engine-orchestrator",
+      "evidenceIds": [
+        "EVD-CODE-0009"
+      ],
+      "openQuestion": "Contract ownership/version baseline not yet frozen."
+    },
+    {
+      "path": "dist/integration/gemini/",
+      "files": null,
+      "classification": "INTEGRATION_BUILD",
+      "mappedTo": "engineering-review",
+      "evidenceIds": [
+        "EVD-CODE-0006",
+        "EVD-HASH-0002"
+      ],
+      "openQuestion": "Differs from UI Gemini engineering-core copy."
+    },
+    {
+      "path": "dist/gemini/",
+      "files": 46,
+      "classification": "UI_RUNTIME_BUILD",
+      "mappedTo": "engineering-review",
+      "evidenceIds": [
+        "EVD-CODE-0006",
+        "EVD-HASH-0002"
+      ],
+      "openQuestion": "Canonical source across UI and integrated copies remains unresolved."
+    },
+    {
+      "path": "worker/",
+      "files": 3,
+      "classification": "EXTERNAL_SERVICE_RUNTIME",
+      "mappedTo": "assistant-adapter",
+      "evidenceIds": [],
+      "openQuestion": "Production deployed Worker byte provenance remains unresolved."
+    },
+    {
+      "path": "scripts/",
+      "files": 1,
+      "classification": "BUILD_TOOLING",
+      "mappedTo": null,
+      "evidenceIds": [],
+      "openQuestion": null
+    }
+  ],
+  "counts": {
+    "distClaude": 5,
+    "distGemini": 46,
+    "distIntegration": 150,
+    "vendorClaudePlanner": 38,
+    "worker": 3,
+    "scripts": 1
+  },
+  "assessment": "MAJOR_RUNTIME_TREES_CLASSIFIED",
+  "remainingCoverageQuestions": [
+    "Canonical Design Core source location remains unresolved.",
+    "Canonical AZIZ source package remains unresolved.",
+    "Engineering Core canonical source across two runtime copies remains unresolved.",
+    "Production Worker byte provenance remains unresolved."
+  ]
+}
