@@ -13,8 +13,8 @@
   },
   "snapshotDate": "2026-09-28",
   "currentStage": {
-    "name": "HUMAN_REVIEW",
-    "status": "IN_PROGRESS",
+    "name": "SYSTEM_MAP_BASELINE",
+    "status": "DRAFT_PREPARED",
     "result": null
   },
   "baseline": {
@@ -148,9 +148,15 @@
       }
     },
     "humanReview": {
-      "status": "READY",
-      "result": null,
-      "reviewArtifact": "docs/system-map/GLOBAL-HUMAN-REVIEW.md"
+      "status": "COMPLETED",
+      "result": "ACCEPTED_WITH_CONDITIONS",
+      "decision": "ACCEPTED_FOR_BASELINE_DRAFT_ONLY",
+      "architectureCorrectness": "NOT_APPROVED",
+      "productionReadiness": "NOT_APPROVED",
+      "developmentUnblocking": "NOT_APPROVED",
+      "reviewArtifact": "docs/system-map/GLOBAL-HUMAN-REVIEW.md",
+      "auditCommit": "f4827ad9ecd65ad0d8ea836d9e5bb6a4e0f9547b",
+      "reviewDate": "2026-09-29"
     },
     "systemMapBaseline": {
       "status": "DRAFT_PREPARED",
@@ -158,7 +164,10 @@
       "binding": false,
       "frozen": false,
       "draftArtifact": "docs/system-map/system-map-baseline.draft.json",
-      "checklistArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-DRAFT-CHECKLIST.md"
+      "checklistArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-DRAFT-CHECKLIST.md",
+      "freezeApproval": "NOT_GRANTED",
+      "hashesGenerated": false,
+      "baselineHash": null
     }
   },
   "preBaselineAdrs": {
@@ -177,13 +186,16 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Complete GLOBAL_HUMAN_REVIEW. Only after PASS: capture baseline commit and registry versions/hashes, compute baseline hash, then evaluate Freeze Gate.",
+  "nextStep": "Baseline Draft is authorized. Do not freeze or unblock development. Next baseline action requires separate Freeze Gate approval after commit/registry hash collection.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
-    "System Discovery and System Map remain IN_PROGRESS until their own Definitions of Done are evidenced; Registry Integrity PASS does not imply map completeness.",
     "Development is governance-blocked until the System Map Baseline is frozen.",
-    "Decision Integrity is now a machine-readable governance check for ADR-AUDIT records."
+    "Decision Integrity is now a machine-readable governance check for ADR-AUDIT records.",
+    "PASS means stage completion against its Definition of Done, not absence of findings or technical approval.",
+    "Global Human Review is accepted for Baseline Draft only.",
+    "Architecture correctness, production readiness, and development unblocking remain NOT_APPROVED.",
+    "Development-unblock conditions are tracked separately from truthful-baseline creation."
   ],
   "governanceChecks": {
     "decisionIntegrity": {
