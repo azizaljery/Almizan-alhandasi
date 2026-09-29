@@ -20,7 +20,7 @@ Baseline Hash: null
 - [x] 13 components recorded.
 - [x] 7 critical flows recorded.
 - [x] 12 consumers recorded.
-- [ ] Final baseline commit captured.
+- [x] Final baseline input commit captured: `dd795b2a92c81dfcb8af49449afb587fe62b363d`.
 
 ## 2. Audit Gates
 - [x] SYSTEM_DISCOVERY — PASS
@@ -73,14 +73,14 @@ Baseline Hash: null
 - [x] No known duplicate IDs in current reviewed registries.
 
 ## 9. Hash Inputs
-- [ ] Baseline commit captured.
-- [ ] Registry versions captured.
-- [ ] Registry hashes generated.
+- [x] Baseline commit captured.
+- [x] Registry versions captured.
+- [x] Registry hashes generated with SHA-256.
 
 ## 10. Baseline Hash
-- [ ] Baseline hash input set frozen.
-- [ ] Baseline hash generated.
-- [ ] Baseline hash recorded.
+- [x] Baseline hash input set captured.
+- [x] Baseline hash generated.
+- [x] Baseline hash recorded: `ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5`.
 
 ## 11. Freeze Gate
 - [x] Global Human Review decision recorded.
