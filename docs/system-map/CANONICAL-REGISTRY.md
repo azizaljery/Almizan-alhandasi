@@ -11,16 +11,16 @@ Evidence root: `docs/system-map/` on branch `control/mizan-master-checkpoint`.
 
 | Field | Value |
 |---|---|
-| Status | `BLOCKED` |
-| Canonical path / URI | `UNRESOLVED` |
-| Decision record | `docs/system-map/DEV-GATE-001-DESIGN-CORE-OWNERSHIP.json` |
-| Contract authority candidate | `dist/claude/PlannerOutputContract.mjs` |
-| Claude Planner upstream candidate | `vendor/claude-planner/src/` |
+| Status | `FORMALLY_ACCEPTED` |
+| Ownership model | `FORMALLY_COMPOSITE_DESIGN_CORE` |
+| Canonical contract source | `vendor/claude-planner/src/PlannerOutputContract.mjs` |
+| Contract runtime mirror | `dist/claude/PlannerOutputContract.mjs` |
+| Canonical Claude Planner upstream | `vendor/claude-planner/src/` |
+| Planner runtime mirror | `dist/claude/` |
 | Runtime integration boundary | `dist/planner.mjs` |
-| Build evidence | `scripts/build.mjs` enforces byte equality between `vendor/claude-planner/src/` and `dist/claude/` |
-| Git blob evidence | planner: `c4dc583289f11c55222196b7277dd3cec8af56a8`; contract: `720d53fb4dd848b5ca422d12e0cacdf0e71c189c` |
-| Current finding | Three distinct roles are evidenced, but no approved rule establishes them as one composite Design Core or selects one single canonical source. |
-| Closure requirement | Approve the composite ownership model with change-control rules, or establish one canonical source with owner/version/mirror/runtime/hash evidence. |
+| Build guard | `scripts/build.mjs` enforces byte equality for vendor → dist/claude |
+| Decision | `docs/system-map/DEV-GATE-001-DESIGN-CORE-OWNERSHIP.json` |
+| Runtime changed | `NO` |
 
 ## DEV-GATE-002 — Canonical AZIZ Source / Version
 
