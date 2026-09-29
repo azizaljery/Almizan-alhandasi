@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "consumers": [
     {
       "consumerId": "aziz-engine",
@@ -118,6 +118,81 @@
       "verification": "VERIFIED_TEST",
       "evidenceIds": [
         "EVD-TEST-0001"
+      ]
+    },
+    {
+      "consumerId": "home-design-evaluator",
+      "reads": [
+        "selectedModel",
+        "plot",
+        "rooms",
+        "clientContext"
+      ],
+      "writes": [
+        "evaluation.score",
+        "evaluation.metrics",
+        "comparison.bestId",
+        "comparison.designs"
+      ],
+      "mustNotWrite": [
+        "canonicalCandidateId",
+        "selectedCandidateId",
+        "candidateNativeGeometry"
+      ],
+      "fallbackPolicy": "RETURN_STRUCTURED_EVALUATION",
+      "verification": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0001",
+        "EVD-CODE-0010"
+      ]
+    },
+    {
+      "consumerId": "engineering-review",
+      "reads": [
+        "candidate.geometry",
+        "candidate.identity",
+        "selectedModel"
+      ],
+      "writes": [
+        "engineeringFindings",
+        "reviewStatus",
+        "preliminaryReview"
+      ],
+      "mustNotWrite": [
+        "candidateNativeGeometry",
+        "selectedCandidateId",
+        "scoreAxisDefinitions"
+      ],
+      "fallbackPolicy": "PRELIMINARY_OR_BLOCKED_BY_PATH",
+      "verification": "INFERRED",
+      "evidenceIds": [
+        "EVD-CODE-0006",
+        "EVD-CODE-0011"
+      ]
+    },
+    {
+      "consumerId": "project-store",
+      "reads": [
+        "project.model",
+        "alternatives",
+        "selectedAlternative",
+        "history",
+        "prices"
+      ],
+      "writes": [
+        "serializedProject",
+        "restoredProject",
+        "csvOutput"
+      ],
+      "mustNotWrite": [
+        "candidateSelection",
+        "geometryGeneration"
+      ],
+      "fallbackPolicy": "REJECT_CORRUPT_OR_MISMATCHED_PROJECT",
+      "verification": "VERIFIED_TEST",
+      "evidenceIds": [
+        "EVD-TEST-0003",
+        "EVD-CODE-0014"
       ]
     }
   ]
