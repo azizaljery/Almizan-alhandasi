@@ -21,13 +21,19 @@
     "CONTRADICTION_DETECTION": "PASS",
     "LINEAGE_AUDIT": "PASS",
     "EVIDENCE_AUDIT": "PASS",
-    "GLOBAL_HUMAN_REVIEW": "READY"
+    "GLOBAL_HUMAN_REVIEW": "ACCEPTED_WITH_CONDITIONS"
   },
   "humanReview": {
-    "status": "READY",
-    "result": null,
-    "reviewDate": null,
-    "reviewedBy": []
+    "status": "COMPLETED",
+    "result": "ACCEPTED_WITH_CONDITIONS",
+    "reviewDate": "2026-09-29",
+    "reviewedBy": [
+      "PROJECT_OWNER"
+    ],
+    "decision": "ACCEPTED_FOR_BASELINE_DRAFT_ONLY",
+    "architectureCorrectness": "NOT_APPROVED",
+    "productionReadiness": "NOT_APPROVED",
+    "developmentUnblocking": "NOT_APPROVED"
   },
   "unresolvedContradictions": [
     "CONTR-0001",
@@ -88,12 +94,12 @@
     "lineageFindings": null,
     "evidenceAuditFindings": null
   },
-  "reviewDate": null,
+  "reviewDate": "2026-09-29",
   "baselineHash": null,
   "frozenAt": null,
   "frozenBy": null,
   "freezeGate": {
-    "globalHumanReviewPass": false,
+    "globalHumanReviewPass": true,
     "registryHashesGenerated": false,
     "baselineHashGenerated": false,
     "knownUnknownsVisible": true,
@@ -106,5 +112,66 @@
   "notes": [
     "This baseline draft records current audited reality; it does not certify architectural correctness.",
     "No unresolved contradiction, lineage finding, evidence gap, known unknown, or audit limitation may be hidden to obtain freeze eligibility."
+  ],
+  "auditReference": {
+    "auditCommit": "f4827ad9ecd65ad0d8ea836d9e5bb6a4e0f9547b",
+    "auditDate": "2026-09-29",
+    "repository": "azizaljery/Almizan-alhandasi",
+    "branch": "control/mizan-master-checkpoint",
+    "scope": "REPOSITORY_RUNTIME_SCOPE"
+  },
+  "passSemantics": "PASS means the audit stage completed its Definition of Done; it does not mean the system has no findings, the architecture is correct, or production/development readiness is approved.",
+  "countSources": {
+    "runtimeModulesReviewed": "docs/system-map/runtime-module-classification.json",
+    "components": "docs/system-map/components.registry.json",
+    "criticalDataFlows": "docs/system-map/data-flows.registry.json",
+    "consumers": "docs/system-map/consumers.registry.json",
+    "evidenceRecords": "docs/system-map/evidence.registry.json",
+    "claims": "docs/system-map/claims.registry.json",
+    "contradictions": "docs/system-map/contradictions.registry.json",
+    "lineageFindings": "docs/system-map/lineage-findings.registry.json",
+    "evidenceAuditGaps": "docs/system-map/evidence-audit-findings.registry.json"
+  },
+  "developmentUnblockConditions": [
+    {
+      "id": "DEV-GATE-001",
+      "condition": "Establish canonical Design Core source",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-002",
+      "condition": "Establish accepted/canonical AZIZ source/version",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-003",
+      "condition": "Establish canonical Engineering Core copy or formally accept the split",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-004",
+      "condition": "Establish Production Worker byte provenance",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-005",
+      "condition": "Complete browser visual verification",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-006",
+      "condition": "Establish production deployment identity",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-007",
+      "condition": "Resolve or formally accept every CONTR-*",
+      "status": "OPEN"
+    },
+    {
+      "id": "DEV-GATE-008",
+      "condition": "Resolve or formally accept recorded lineage/evidence gaps as required for intended development scope",
+      "status": "OPEN"
+    }
   ]
 }
