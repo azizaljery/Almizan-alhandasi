@@ -2,8 +2,8 @@
   "schemaVersion": "1.0.0",
   "decisionId": "DEV-GATE-004-WORKER-PROVENANCE",
   "gateId": "DEV-GATE-004",
-  "status": "COMPLETED",
-  "result": "BLOCKED",
+  "status": "IN_PROGRESS",
+  "result": null,
   "reviewedAt": "2026-09-29",
   "repositoryArtifact": {
     "path": "worker/server.mjs",
@@ -28,7 +28,10 @@
     "No deployed Worker byte hash/version artifact is available in the reviewed repository.",
     "No evidence binds the currently deployed Worker bytes to repository SHA-256 6f743640...c3c53."
   ],
-  "closureRequirement": "Obtain deployed Worker artifact/version/hash provenance and compare it with the repository release artifact.",
+  "closureRequirement": "Complete Source Commit → Build Run → Artifact Digest → Deployment ID → Production Worker → Live Version Evidence.",
   "runtimeChanges": false,
-  "refactorPerformed": false
+  "refactorPerformed": false,
+  "health": "BLOCKED",
+  "provenanceChainStatus": "NOT_PROVEN",
+  "executionRecord": "docs/system-map/DEV-GATE-004-production-worker-provenance.execution.json"
 }
