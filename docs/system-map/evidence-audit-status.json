@@ -1,0 +1,17 @@
+{
+  "stage": "EVIDENCE_AUDIT",
+  "status": "IN_PROGRESS",
+  "completed": [
+    "EA-001",
+    "EA-002",
+    "EA-003",
+    "EA-004",
+    "EA-005",
+    "EA-006",
+    "EA-007",
+    "EA-008",
+    "EA-009",
+    "EA-010"
+  ],
+  "next": "EA-011"
+}
