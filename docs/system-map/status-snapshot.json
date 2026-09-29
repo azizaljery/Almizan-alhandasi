@@ -13,8 +13,8 @@
   },
   "snapshotDate": "2026-09-28",
   "currentStage": {
-    "name": "SYSTEM_MAP_BASELINE",
-    "status": "DRAFT_PREPARED",
+    "name": "SYSTEM_MAP_BASELINE_FREEZE_GATE",
+    "status": "READY_FOR_DECISION",
     "result": null
   },
   "baseline": {
@@ -159,15 +159,20 @@
       "reviewDate": "2026-09-29"
     },
     "systemMapBaseline": {
-      "status": "DRAFT_PREPARED",
+      "status": "DRAFT_HASHED",
       "result": null,
       "binding": false,
       "frozen": false,
       "draftArtifact": "docs/system-map/system-map-baseline.draft.json",
       "checklistArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-DRAFT-CHECKLIST.md",
-      "freezeApproval": "NOT_GRANTED",
+      "freezeApproval": "PENDING",
       "hashesGenerated": false,
-      "baselineHash": null
+      "baselineHash": "ee4401adc67699803f367c813631286603452ffd13d7b242f7ed10fb02f29ed5",
+      "baselineInputCommit": "dd795b2a92c81dfcb8af49449afb587fe62b363d",
+      "registryHashesGenerated": true,
+      "hashAlgorithm": "SHA-256",
+      "freezeGate": "READY_FOR_DECISION",
+      "freezeGateArtifact": "docs/system-map/SYSTEM-MAP-BASELINE-FREEZE-GATE.md"
     }
   },
   "preBaselineAdrs": {
@@ -186,7 +191,7 @@
     "boq": "BLOCKED_UNTIL_BASELINE",
     "contracts": "BLOCKED_UNTIL_BASELINE"
   },
-  "nextStep": "Baseline Draft is authorized. Do not freeze or unblock development. Next baseline action requires separate Freeze Gate approval after commit/registry hash collection.",
+  "nextStep": "Await explicit separate Freeze Gate decision: APPROVE FREEZE or DO NOT FREEZE. Development remains blocked.",
   "notes": [
     "Baseline records reality; it does not certify architectural correctness.",
     "Known unknowns, unresolved contradictions and lineage breaks may remain in a frozen baseline.",
