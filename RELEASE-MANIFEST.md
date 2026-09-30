@@ -1,21 +1,11 @@
-# MIZAN Engineering — v33 P1 Release Candidate
+# MIZAN Engineering — Site v37 navigation follow-up
 
-Baseline: Sites v33 source export at commit dbc41c0ec424e389f81f0f14f13d288682e6744d.
-Integrated path: Claude P1 -> Gemini P1 -> AZIZ -> selected model -> existing 2D/3D/BOQ.
+Production baseline: Sites v37, source commit `d65fae7ad33949747340344eb318734d9f130e51`.
 
-Verification in clean extraction:
-- npm test: 87/87 PASS
-- npm run build: PASS
-- Added release consistency test proves the AZIZ-selected model is the same model consumed by 2D SVG, 3D wall geometry, and BOQ quantity rows.
-- Existing integration tests cover RECT/L/U, four entry directions, setbacks, save/restore, opening editor and explicit built-area-cap failure.
+Change: the portal’s “فهم العميل” action now opens the existing design workspace before scrolling to and focusing the client-idea field. The design-card route and reviewed-change gating remain unchanged.
 
-Browser visual gate:
-- Automated local Chromium attempt did not complete in the container and produced no screenshot. This is NOT recorded as a visual pass.
+Validation in the Site source checkout:
+- `node scripts/build.mjs` — PASS
+- `node --test tests/*.test.mjs` — 94/94 PASS, including two portal navigation regression checks
 
-Deployment:
-- This static package does not deploy the separately managed Worker.
-- Keep current v33 source as rollback baseline.
-
-Release integrity:
-- Hash changes in `FILE-SHA256SUMS.txt` and `FILE-SHA256SUMS-RELEASE.txt` are generated metadata for the associated `worker/server.mjs`, `tests/server.test.mjs`, and `wrangler.toml` contract changes, not separate product changes.
-- Regenerate the tracked-file hashes and the release manifest's hash of `FILE-SHA256SUMS.txt` whenever those files change.
+This is a frontend-only release candidate. No Worker, AI, security, access-policy, or room-program behavior was changed. The candidate has not yet been saved or deployed; Site v37 remains the rollback baseline. Automated checks do not replace a fresh live-browser check of the portal route.
