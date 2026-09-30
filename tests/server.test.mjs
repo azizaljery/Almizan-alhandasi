@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BRIEF_SCHEMA, createWorker, handleRequest, validateBrief, validateInput } from '../worker/server.mjs';
+import { BRIEF_SCHEMA, UNSUPPORTED_FLOORS, createWorker, handleRequest, validateBrief, validateInput } from '../worker/server.mjs';
 
 // All provider responses are simulated. These tests never call OpenAI or use a real key.
 const ORIGIN = 'https://mizan.example';
@@ -176,13 +176,59 @@ test('constructs a structured Responses request and returns only a validated rev
   assert.equal(JSON.stringify(data).includes(TEST_ENV.OPENAI_API_KEY), false);
 });
 
-test('multi-floor limitations never delete an unhandled user requirement', async () => {
-  const value = brief(); value.unhandled = Array.from({ length: 12 }, (_, i) => 'متطلب غير ممثل ' + i);
-  const { worker } = fixture({ provider: () => Response.json(completed(value)) });
-  const body = input(); body.plot.floors = 3;
-  const data = await (await worker.fetch(request(body), TEST_ENV)).json();
-  assert.deepEqual(data.brief.unhandled, value.unhandled);
-  assert.match(data.limitations[0], /الأرضي فقط/);
+test('single-floor requests are accepted and unsupported floor counts are rejected explicitly with 422', async () => {
+  assert.equal(validateInput(input()).plot.floors, 1);
+  const accepted = fixture();
+  const ok = await accepted.worker.fetch(request(), TEST_ENV);
+  assert.equal(ok.status, 200);
+  const okData = await ok.json();
+  assert.equal(okData.source, 'openai');
+  assert.deepEqual(okData.limitations, []);
+  assert.equal(accepted.calls.length, 1);
+  assert.deepEqual(UNSUPPORTED_FLOORS, { status: 422, code: 'ADDITIONAL_FLOORS_NOT_IMPLEMENTED', error: 'Additional floors are not implemented yet. Please use one floor.' });
+  for (const floors of [2, 3, 4]) {
+    const body = input(); body.plot.floors = floors;
+    assert.throws(() => validateInput(body), /unsupported_floors/);
+    const { worker, calls } = fixture();
+    const res = await worker.fetch(request(body), TEST_ENV);
+    assert.equal(res.status, 422);
+    assert.equal(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
+    const data = await res.json();
+    assert.deepEqual(data, { error: 'Additional floors are not implemented yet. Please use one floor.', code: 'ADDITIONAL_FLOORS_NOT_IMPLEMENTED' });
+    assert.equal('brief' in data, false);
+    assert.equal('source' in data, false);
+    assert.equal(calls.length, 0);
+  }
+  const contextBody = input();
+  contextBody.context = { prompt: contextBody.prompt, plot: { ...contextBody.plot, floors: 2 }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, rooms: [] };
+  const { worker, calls } = fixture();
+  const res = await worker.fetch(request(contextBody), TEST_ENV);
+  assert.equal(res.status, 422);
+  assert.equal((await res.json()).code, 'ADDITIONAL_FLOORS_NOT_IMPLEMENTED');
+  assert.equal(calls.length, 0);
+  for (const floors of [0, 1.5, '2']) {
+    const body = input(); body.plot.floors = floors;
+    assert.equal((await fixture().worker.fetch(request(body), TEST_ENV)).status, 400);
+  }
+});
+
+test('version endpoint exposes only a well-formed build commit SHA', async () => {
+  const { worker, calls } = fixture();
+  const sha = '0123456789abcdef0123456789abcdef01234567';
+  const res = await worker.fetch(request(null, { anonymous: true, method: 'GET', path: '/api/version' }), { ...TEST_ENV, BUILD_SHA: sha });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('Cache-Control'), 'no-store');
+  assert.equal(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
+  const data = await res.json();
+  assert.deepEqual(data, { service: 'al-mizan-al-handasi-api', commit: sha, supportedFloors: [1] });
+  assert.equal(JSON.stringify(data).includes(TEST_ENV.OPENAI_API_KEY), false);
+  assert.equal(JSON.stringify(data).includes(TEST_ENV.MIZAN_ACCESS_CODE), false);
+  for (const BUILD_SHA of [undefined, '', 'not-a-sha', sha.slice(0, 7), sha + '0']) {
+    const unknown = await (await worker.fetch(request(null, { method: 'GET', path: '/api/version' }), { ...TEST_ENV, BUILD_SHA })).json();
+    assert.equal(unknown.commit, null);
+  }
+  assert.equal((await worker.fetch(request(null, { method: 'GET', path: '/api/version', headers: { Origin: 'https://foreign.example' } }), TEST_ENV)).status, 403);
+  assert.equal(calls.length, 0);
 });
 
 test('limits per client address across requests and expires at the minute boundary', async () => {

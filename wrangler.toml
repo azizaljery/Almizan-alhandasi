@@ -11,3 +11,6 @@ enabled = true
 # OPENAI_MODEL
 # MIZAN_ACCESS_CODE
 # Optional: ALLOWED_ORIGIN
+
+# The manual production deployment workflow injects BUILD_SHA from its checked-out commit.
+# For local deployments, pass --var BUILD_SHA:$(git rev-parse HEAD).

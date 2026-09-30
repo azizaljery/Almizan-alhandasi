@@ -1,6 +1,7 @@
 name: Release 005 Verification
 
 on:
+  pull_request:
   push:
     branches:
       - main
@@ -17,7 +18,7 @@ jobs:
           node-version: 22
       - name: Build validation
         run: node scripts/build.mjs
-      - name: Targeted floor-default regression
-        run: node --test tests/frontend.test.mjs --test-name-pattern="default floor selection matches"
+      - name: Targeted DEV-GATE-005 regressions
+        run: node --test --test-name-pattern="unsupported floor|version endpoint|legacy multi-floor" tests/server.test.mjs tests/frontend.test.mjs
       - name: Full suite
         run: npm test

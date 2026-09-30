@@ -10,6 +10,8 @@ const MAX_REQUESTS = 5;
 const MAX_BUCKETS = 2000;
 const DEFAULT_MODEL = 'gpt-4.1-mini';
 const DEFAULT_ALLOWED_ORIGIN = 'https://al-mizan-al-handasi.aljeryabod.chatgpt.site';
+const SUPPORTED_FLOORS = 1;
+export const UNSUPPORTED_FLOORS = Object.freeze({ status: 422, code: 'ADDITIONAL_FLOORS_NOT_IMPLEMENTED', error: 'Additional floors are not implemented yet. Please use one floor.' });
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const textList = { type: 'array', items: { type: 'string' } };
 export const BRIEF_SCHEMA = {
@@ -45,7 +47,9 @@ export function validateBrief(raw) {
 export function validateInput(body) {
   if (!record(body) || typeof body.prompt !== 'string' || body.prompt.trim().length < 8 || body.prompt.length > 4000) throw new Error('invalid_input');
   const p = body.plot;
-  if (!record(p) || !Number.isFinite(p.width) || !Number.isFinite(p.length) || p.width < 8 || p.width > 100 || p.length < 8 || p.length > 100 || !Number.isInteger(p.floors) || p.floors < 1 || p.floors > 3) throw new Error('invalid_input');
+  if (!record(p) || !Number.isFinite(p.width) || !Number.isFinite(p.length) || p.width < 8 || p.width > 100 || p.length < 8 || p.length > 100 || !Number.isInteger(p.floors) || p.floors < 1) throw new Error('invalid_input');
+  // Only the single-floor generation path is implemented; never degrade to a partial success.
+  if (p.floors > SUPPORTED_FLOORS) throw new Error('unsupported_floors');
   const streets = {};
   if (p.streets !== undefined) {
     if (!record(p.streets) || Object.keys(p.streets).some(key => !STREET_SIDES.includes(key))) throw new Error('invalid_input');
@@ -65,6 +69,7 @@ export function validateInput(body) {
   if (body.context !== undefined) {
     const c = body.context;
     if (!record(c) || typeof c.prompt !== 'string' || c.prompt.length > 4000 || !record(c.discovery) || !Array.isArray(c.rooms) || c.rooms.length > 30) throw new Error('invalid_input');
+    if (record(c.plot) && Number(c.plot.floors) > SUPPORTED_FLOORS) throw new Error('unsupported_floors');
     const d = c.discovery;
     if (!Array.isArray(d.likes) || !Array.isArray(d.rejects) || !Array.isArray(d.avoids) || !record(d.life) ||
       [...d.likes, ...d.rejects, ...d.avoids].some(value => typeof value !== 'string' || value.length > 240) ||
@@ -148,6 +153,13 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
         message: typeof env.OPENAI_API_KEY === 'string' && env.OPENAI_API_KEY.trim() ? 'مفتاح الخدمة مهيأ؛ هذه الحالة لا تختبر الاتصال. يلزم تحليل ناجح للتحقق منه.' : 'الذكاء الاصطناعي غير مفعّل بعد. يلزم إعداد مفتاح الخدمة الآمن.',
       }, 200, origin ? corsHeaders(origin) : {});
     }
+    if (url.pathname === '/api/version' && request.method === 'GET') {
+      const origin = request.headers.get('Origin');
+      if (origin && origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      // BUILD_SHA is a non-secret deploy-time var; only a full 40-hex commit SHA is ever echoed.
+      const sha = typeof env.BUILD_SHA === 'string' && /^[0-9a-f]{40}$/.test(env.BUILD_SHA.trim().toLowerCase()) ? env.BUILD_SHA.trim().toLowerCase() : null;
+      return json({ service: 'al-mizan-al-handasi-api', commit: sha, supportedFloors: [SUPPORTED_FLOORS] }, 200, origin ? corsHeaders(origin) : {});
+    }
     if (url.pathname === '/api/assistant' && request.method === 'OPTIONS') {
       const origin = request.headers.get('Origin');
       if (origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
@@ -163,8 +175,9 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
       let input;
       try { input = validateInput(await readLimited(request)); }
       catch (error) {
+        if (error.message === 'unsupported_floors') return json({ error: UNSUPPORTED_FLOORS.error, code: UNSUPPORTED_FLOORS.code }, UNSUPPORTED_FLOORS.status, cors);
         if (error.message === 'too_large') return json({ error: 'حجم الطلب أكبر من 24000 بايت. اختصر الوصف أو المتطلبات السابقة.', code: 'REQUEST_TOO_LARGE' }, 413, cors);
-        return json({ error: 'تحقق من الوصف (8–4000 حرف)، والأبعاد (8–100م)، والأدوار (1–3)، وبيانات الشوارع والغرف.' }, 400, cors);
+        return json({ error: 'تحقق من الوصف (8–4000 حرف)، والأبعاد (8–100م)، والأدوار (دور واحد)، وبيانات الشوارع والغرف.' }, 400, cors);
       }
       if (typeof env.OPENAI_API_KEY !== 'string' || !env.OPENAI_API_KEY.trim()) return json({ error: 'مفتاح خدمة الذكاء لم يُفعّل بعد. لم يُرسل وصفك إلى مزود الذكاء.', code: 'AI_NOT_CONFIGURED' }, 503, cors);
       const uid = request.headers.get('CF-Connecting-IP') || 'authorized-client', timestamp = now();
@@ -191,9 +204,7 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
         if (content.some(x => x.type === 'refusal')) return json({ error: 'تعذر معالجة هذا الوصف. أعد صياغته حول احتياجات المسكن.' }, 422, cors);
         const output = content.filter(x => x.type === 'output_text').map(x => x.text).join('');
         const brief = validateBrief(JSON.parse(output));
-        // Keep every unhandled requirement; do not evict one to insert our scope warning.
-        const limitations = input.plot.floors > 1 ? ['هذا التحليل للدور الأرضي فقط؛ توزيع الأدوار الأخرى والسلالم غير منفذ.'] : [];
-        return json({ brief, source: 'openai', scope: 'requirements_only', requiresReview: true, limitations, model: data.model || env.OPENAI_MODEL || DEFAULT_MODEL, generatedAt: new Date().toISOString() }, 200, cors);
+        return json({ brief, source: 'openai', scope: 'requirements_only', requiresReview: true, limitations: [], model: data.model || env.OPENAI_MODEL || DEFAULT_MODEL, generatedAt: new Date().toISOString() }, 200, cors);
       } catch { return json({ error: 'تعذر استلام اقتراح صالح خلال الوقت المحدد. بقي مخططك كما هو؛ حاول لاحقاً.' }, 502, cors); }
     }
     if (isApi) return json({ error: 'مسار غير متاح.' }, 404);
