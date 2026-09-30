@@ -23,9 +23,20 @@ function cardAction(selector) {
   if (element) element.click();
 }
 
+function openDesignPanel() {
+  cardAction('#journey > div > .cards > button:nth-child(2)');
+}
+
 function scrollToElement(id) {
   const element = document.getElementById(id);
   if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function focusClientIdea() {
+  const idea = document.getElementById('idea');
+  if (!idea) return;
+  scrollToElement('idea');
+  idea.focus({ preventScroll: true });
 }
 
 function mountPortal() {
@@ -98,9 +109,9 @@ function mountPortal() {
   portal.querySelectorAll('[data-portal-action]').forEach(button => {
     button.addEventListener('click', () => {
       const action = button.dataset.portalAction;
-      if (action === 'brief') { scrollToElement('idea'); return; }
+      if (action === 'brief') { openDesignPanel(); focusClientIdea(); return; }
       if (action === 'land') { cardAction('#journey > div > .cards > button:nth-child(1)'); return; }
-      if (action === 'design') { cardAction('#journey > div > .cards > button:nth-child(2)'); return; }
+      if (action === 'design') { openDesignPanel(); return; }
       if (action === 'boq') { cardAction('#journey > div > .cards > button:nth-child(3)'); return; }
     });
   });

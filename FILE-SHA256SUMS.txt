@@ -158,7 +158,7 @@ e5ab8217f207bb969f260edd3dd4e1b38cb573b25455c64286d995f7bfd1c631  ./dist/integra
 7830d98e079eee691303df050b80b8e459513970a6545c45de4bba3dde27920a  ./dist/integration/gemini/packages/design-intelligence/library/reference-cases.js
 26bff0c3d2ea036ea36de4f5a452ad1f6c32767d1dc6c3b50b0d29125b198bff  ./dist/integration/gemini/packages/design-intelligence/package.json
 f89d7a66c17644f3d85916f36da4f954efcf515d65ab8415250e4931a991d797  ./dist/integration/gemini/packages/design-intelligence/retrieval/deterministic-filter.js
-f46e5bc22236bdd8d2aa6fb8a4688552cfd0fe38dd2f8d06cbd189291bcb406f  ./dist/integration/gemini/packages/design-intelligence/retrieval/hybrid-retrieval-engine.js
+c4ddd063b6c6bb423c87e48621fdde327e9cf94400b19e5c2d52775c6b2586fe  ./dist/integration/gemini/packages/design-intelligence/retrieval/hybrid-retrieval-engine.js
 4aac6e85e80896250005fe6ad408b5663eb1571c06602fa97b4632a2fddf4e3b  ./dist/integration/gemini/packages/design-intelligence/retrieval/scoring-engine.js
 c19275ba70806e2ee6a1b550860a728059f474fad2c8169ccaac07cd67b92358  ./dist/integration/gemini/packages/design-intelligence/scripts/build.js
 e4c12dc2bb96bf433f1977d96bdd66bc8b5c6548a4abe3edf61d85a2b2fa75f3  ./dist/integration/gemini/packages/design-intelligence/scripts/p1-acceptance.mjs
@@ -179,7 +179,7 @@ f457195d6f62a9b3ec30ca77f04f33524e40617f805cb67a87ff7b7be5640063  ./dist/integra
 c365d2474f500f3d2a4abdaf32cf916bbdfc2f7ec438bc191eea8ed042cfb2e4  ./dist/integration/gemini/packages/engineering-core/contracts/claude-geometry-adapter.js
 00d852c66494845503ca9477c89e4d3d5bdfd0a519e99fb0ceab40acd118476a  ./dist/integration/gemini/packages/engineering-core/contracts/claude-geometry.contract.js
 09453e29455089114feff406dfa6f29256d051b82403edeb5c279ba29a016acb  ./dist/integration/gemini/packages/engineering-core/contracts/coordination-package.contract.js
-6e687e736a40df7bc0c5d1861ff9c3184e8d7e512699a0fb55fad3614b74c593  ./dist/integration/gemini/packages/engineering-core/contracts/mizan-ir-v1.adapter.js
+48c87a5b593c493c1cb24533b1a7a96785aa2d54bec8dd8980da76504f7348de  ./dist/integration/gemini/packages/engineering-core/contracts/mizan-ir-v1.adapter.js
 bb05bc9bb477dc2db92d0929d537fe52e0eb6dd78ac878b2142497d58c268de6  ./dist/integration/gemini/packages/engineering-core/contracts/rules.contract.js
 2ce23db3ab4a11fc4a8b750cfc83d38a4dc77985a9464c2646192943749de050  ./dist/integration/gemini/packages/engineering-core/contracts/solver-interfaces.contract.js
 0d476b9b443afd2818e34ef240d41358d26d21d5a1d2ef2a6fd6b720e3139dab  ./dist/integration/gemini/packages/engineering-core/coordinators/architectural-reviewer.js
@@ -188,7 +188,7 @@ c3b9815d7a5cba5ba2211908296b8967be2d3b5d15c2707c5a689bec37ad4d36  ./dist/integra
 b695cc46e6efe9215b2b913b066520cbe3519108849a039a548c840203b5738b  ./dist/integration/gemini/packages/engineering-core/coordinators/plumbing-coordinator.js
 d15a397d4cde577b48f933577bc5ffc5fd0aaa8ad04232bee35620f1b77a6501  ./dist/integration/gemini/packages/engineering-core/coordinators/structural-coordinator.js
 6301ac76d1079cc7988c988ec34c18211b51483de61277c5cbc2708361c1eb9a  ./dist/integration/gemini/packages/engineering-core/core/coordination-orchestrator.js
-d5c1deb5e32cf92d18c1d9ab762a607a4851097886989e25fa6afb7800abc241  ./dist/integration/gemini/packages/engineering-core/core/geometry-hasher.js
+56289c34cd90a4b3821d7524b4b1280b6de0289e8f3e23a40f7dc66648f7f943  ./dist/integration/gemini/packages/engineering-core/core/geometry-hasher.js
 db571725dda962db3d4db36616e55d2e50a359d340c2d8326f02cd1b19524b7e  ./dist/integration/gemini/packages/engineering-core/core/report-generator.js
 d4e88f1ad731441be05889bc22d1a2ed85245d90fa18a1b5554455455b7bc744  ./dist/integration/gemini/packages/engineering-core/fixtures/compliant-villa.fixture.json
 3ced678003a3386faa4d6fc7204a4207a843ba28575a32f354fb046bfcbc753d  ./dist/integration/gemini/packages/engineering-core/fixtures/conflicted-villa.fixture.json
@@ -218,7 +218,7 @@ eebbca078aee8b9b570877c030b9287c93fce7a93f19cf2b87fa04e6c4c07bd7  ./dist/integra
 60e4b0c8191248df09a40c43a380c495f76194ef4d788a28f6bb48a3333652b3  ./dist/integration/gemini/packages/engineering-math/tests/p1-estimates.test.js
 373233beeb1a10acea977506b839ca4b62b2e5c32ea58bb3d7af83dbce344b15  ./dist/integration/gemini/reference/identity.mjs
 0d390fa3edeafd9d96ca1e11e1c380afe4d6fd3fa899492ec6bf3a0cc76202ba  ./dist/integration/gemini/reference/orthogonal-audit.mjs
-dab549bf103b5e72a396f6e26e17118b034c2698c8d9b7629bee8fd37c7e62b6  ./dist/integration/pipeline.mjs
+0d07a6eb467776fc6521825274d88fa12d199bb1d675bd32e883537f9ce62009  ./dist/integration/pipeline.mjs
 ed3feefc012ccc453082b80c83e07103c078a3a7dadebed59e44ca8db8f92329  ./dist/layout-worker.mjs
 e5126741594c428ff21908be274ac8d0e5028e1582b347ceaed9c3e8dff1132f  ./dist/local-nlp.mjs
 6f870217a27ed93cf09b1f99759682ca24234b5260248f19d0c017928179b4da  ./dist/mizan-home-design-engine.mjs
@@ -229,7 +229,7 @@ f7e5a5ceba1872760bb378a3d807fa76d11c08adaf530aba0da9645afdca47c7  ./dist/mizan-p
 cc709c32cd8c20251a0549ac8b91e9b417598c7abc194bb289d556ba04775212  ./dist/plan-view.mjs
 3618d01c580d5629367d8cccbb5988d8ced532177541fdda647a75b9cb6ee762  ./dist/planner.css
 56052ed6a5e386dab6489daa9fd766d16ee5bab384c4f477259d98e7c2237c2a  ./dist/planner.mjs
-6ceece4963f768eb9f4b0b4fa6a1f52451ac7a8d993b4f2a116d4d1d6fe475c3  ./dist/portal.mjs
+4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d  ./dist/portal.mjs
 113d11c9ff62b16aecc088e2ab51820e1eafcf8667e056220260407ba4a77e11  ./dist/project.mjs
 6c2cc8e2e542f7552645219f760a81face4cd71077e895a821486b15d09e1e4f  ./dist/render-visualizer.mjs
 49a91602ea68be5a96ecf54a4f6461703e306d752ceef0f8c9907cc1e049b579  ./dist/requirements-engine.mjs
@@ -243,7 +243,7 @@ d483f97c632f7090cc39b22d8a1b917f52da6d62b2088d8d7be89da65c637f39  ./evidence/p1-
 e073411a959459c469f2d60a5208a5003f2d1f66de5bd5356b9e6d64e0b74dc9  ./evidence/p1-integration/final-site-tests.log
 510e5200d0bed810bc40820d2ed29f07a35a148905491088ae8bff09d6e7fbf9  ./evidence/p1-integration/multi-engine-tests.log
 54a7d862190b2ceff4cbc878da122d4df99d951e9b6cf9a102618956d1c23344  ./package.json
-abaaf7e92b119cf2d1774d551f7820f4fabd3e50bb8e631fdc9682ba541cbe20  ./scripts/build.mjs
+3f6a41b8153dd0104634cc2f0ea80ed49492f59b355b7e04b0fd53f4eed66bbe  ./scripts/build.mjs
 724a38bf53f5e13ff46401e124b78c84c3d83fd16b3e5c04da7d317f8478d0eb  ./tests/claude-integration.test.mjs
 a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client-brief.test.mjs
 49b8f497fd5556c1735c968b181a39e14295a23ed6707118b6534db7aabf1617  ./tests/design-insights.test.mjs
@@ -251,6 +251,7 @@ a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client
 bc528d9aee28849310a6db8f67621487379c7841874a93aa11ffeae368707b0f  ./tests/home-design-engine.test.mjs
 dd8d2d4fd6f76548432d793ed2ee94f9c85b54784d41172de15cd448b747932b  ./tests/multi-engine.test.mjs
 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
+92ba70786a48b0388b1d68805e0e8b9c0a19ad4b51d2e7eaeaa975c66e945824  ./tests/portal-navigation.test.mjs
 4c929dc7e4f76c72fd937d562356e42327781a6396b77e87f2d80e78fdc053bf  ./tests/requirements-engine.test.mjs
 36cc62657ccc7eeed30c98de12327f213b1321ecfa8f683173ef1259c8efe99e  ./tests/server.test.mjs
 70dda3e233d59fcfb15e04728868792f0aaadf0bd258cd8226df8f9cfb2ec837  ./tests/solar-path.test.mjs
