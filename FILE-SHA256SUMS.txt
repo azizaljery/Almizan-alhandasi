@@ -1,3 +1,5 @@
+95cd03045bb8d5ece2c63c5a7befc307f07d4ad4722893a059be42908914a3e7  ./.github/workflows/deploy-worker.yml
+ebb9a03ab7f9df6e25502bf10fa642495bd4ef9de02b45968623afd157190b84  ./.github/workflows/release-005-verification.yml
 0072dfabe80f38dd8dbb54b4a44440edf21e447d3ecadfccc6a520861e1bd381  ./.gitignore
 b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
