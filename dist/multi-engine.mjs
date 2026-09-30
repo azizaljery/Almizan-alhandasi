@@ -71,7 +71,11 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   if (canonicalJSON({ plot, rooms }) !== before) throw Error('INTEGRATION_MUTATED_CALLER_INPUT');
   if (result.decision.status !== 'SELECTED_PRELIMINARY' || !result.finalDesignState) {
     const details = [...(result.decision?.reasons || []), ...(result.failures || []).map(x => `${x.shape}: ${x.reason}`)].join(' | ');
-    throw Error(details || 'لم يتمكن محرك القرار من اعتماد بديل تخطيطي أولي.');
+    const userFacingDetails = details.replaceAll(
+      'ADDITIONAL_FLOORS_NOT_IMPLEMENTED',
+      'طلبتَ أكثر من دور، لكن محرك التصميم الحالي يرسم الدور الأرضي فقط. اختر «دور واحد» ثم أعد التوليد.'
+    );
+    throw Error(userFacingDetails || 'لم يتمكن محرك القرار من اعتماد بديل تخطيطي أولي.');
   }
   const pairs = result.pairs;
   const models = pairs.map(modelFor);

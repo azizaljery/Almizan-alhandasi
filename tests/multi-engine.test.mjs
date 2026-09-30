@@ -36,6 +36,19 @@ for (const entry of ['s','n','e','w']) test(`integrated Claude -> Gemini -> AZIZ
   assert.equal(u.courtyards.length, 1); assert.ok(u.massingParts?.length >= 3);
 });
 
+test('integrated generation explains the unsupported multi-floor boundary in Arabic', async () => {
+  const plot = plotFor('s', { floors: 2 });
+  await assert.rejects(
+    runMultiEngineDesign({ plot, rooms: structuredClone(baseRooms), discovery }),
+    error => {
+      assert.match(error.message, /محرك التصميم الحالي يرسم الدور الأرضي فقط/);
+      assert.match(error.message, /اختر «دور واحد» ثم أعد التوليد/);
+      assert.doesNotMatch(error.message, /ADDITIONAL_FLOORS_NOT_IMPLEMENTED/);
+      return true;
+    },
+  );
+});
+
 test('integrated generation honors current setback controls', async () => {
   const defaultOut = await runMultiEngineDesign({ plot: plotFor('s'), rooms: structuredClone(baseRooms), discovery });
   const wideOut = await runMultiEngineDesign({ plot: plotFor('s', { streetSetback: 6, neighborSetback: 3 }), rooms: structuredClone(baseRooms), discovery });
