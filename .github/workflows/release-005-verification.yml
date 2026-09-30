@@ -1,0 +1,23 @@
+name: Release 005 Verification
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build validation
+        run: node scripts/build.mjs
+      - name: Targeted floor-default regression
+        run: node --test tests/frontend.test.mjs --test-name-pattern="default floor selection matches"
+      - name: Full suite
+        run: npm test
