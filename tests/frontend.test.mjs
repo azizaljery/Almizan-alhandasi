@@ -8,6 +8,7 @@ import { AI_ENABLED, validateSuggestion, requestBrief, getAssistantStatus } from
 import { reviewPlan } from '../dist/audit.mjs';
 import { requestLocalBrief } from '../dist/local-nlp.mjs';
 import { applySunOrientation } from '../dist/sun-orientation.mjs';
+import { encodeProject, decodeProject } from '../dist/project.mjs';
 
 const m = generateModel({ width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }, defaultRooms());
 test('generated SVG is valid XML with complete viewBox and escaped user-controlled room names', () => {
@@ -73,6 +74,20 @@ test('assistant connection failures provide recoverable messages and never retur
   await assert.rejects(requestBrief({}, { ...options, fetcher: async () => new Response('{broken', { headers: { 'Content-Type': 'application/json' } }) }), /غير متصلة/);
   await assert.rejects(requestBrief({}, { ...options, fetcher: async () => Response.json(null) }), /مصدر الاقتراح/);
   await assert.rejects(requestBrief({}, { ...options, fetcher: async () => Response.json({ error: 'رمز دخول الذكاء غير صحيح.' }, { status: 401 }) }), /رمز دخول الذكاء غير صحيح/);
+});
+
+test('legacy multi-floor project receives a corrective message instead of a false assistant success', async () => {
+  const saved = JSON.parse(encodeProject({ plot: m.plot, rooms: defaultRooms(), palette: 'resort', rates: {}, costReserve: 0, vat: 0, idea: 'مشروع محفوظ', model: null }));
+  saved.draft.plot.floors = 2;
+  const restored = decodeProject(JSON.stringify(saved));
+  assert.equal(restored.plot.floors, 2);
+  await assert.rejects(requestBrief({ prompt: restored.idea, plot: restored.plot, context: { plot: restored.plot } }, {
+    enabled: true, accessCode: 'private-code',
+    fetcher: async (_url, options) => {
+      assert.equal(JSON.parse(options.body).context.plot.floors, 2);
+      return Response.json({ error: 'Additional floors are not implemented yet. Please use one floor.', code: 'ADDITIONAL_FLOORS_NOT_IMPLEMENTED' }, { status: 422 });
+    },
+  }), /غيّر عدد الأدوار إلى 1 ثم أعد التحليل/);
 });
 
 test('planning review produces bounded area, route and conflict outputs from the generated model', () => {

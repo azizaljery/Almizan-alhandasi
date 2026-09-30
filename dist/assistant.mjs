@@ -16,7 +16,10 @@ async function fetchJSON(endpoint, options, fetcher, invalidResponseMessage) {
   if (!response.headers.get('content-type')?.toLowerCase().includes('application/json')) throw Error(invalidResponseMessage);
   let data;
   try { data = await response.json(); } catch { throw Error(invalidResponseMessage); }
-  if (!response.ok) throw Error(typeof data?.error === 'string' && data.error.trim() ? data.error : invalidResponseMessage);
+  if (!response.ok) {
+    if (data?.code === 'ADDITIONAL_FLOORS_NOT_IMPLEMENTED') throw Error('المشروع المحفوظ يطلب أكثر من دور، وهذه النسخة تدعم دورًا واحدًا فقط. غيّر عدد الأدوار إلى 1 ثم أعد التحليل.');
+    throw Error(typeof data?.error === 'string' && data.error.trim() ? data.error : invalidResponseMessage);
+  }
   return data;
 }
 

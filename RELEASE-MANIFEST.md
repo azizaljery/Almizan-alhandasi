@@ -13,5 +13,9 @@ Browser visual gate:
 - Automated local Chromium attempt did not complete in the container and produced no screenshot. This is NOT recorded as a visual pass.
 
 Deployment:
-- Not deployed by this package.
+- This static package does not deploy the separately managed Worker.
 - Keep current v33 source as rollback baseline.
+
+Release integrity:
+- Hash changes in `FILE-SHA256SUMS.txt` and `FILE-SHA256SUMS-RELEASE.txt` are generated metadata for the associated `worker/server.mjs`, `tests/server.test.mjs`, and `wrangler.toml` contract changes, not separate product changes.
+- Regenerate the tracked-file hashes and the release manifest's hash of `FILE-SHA256SUMS.txt` whenever those files change.

@@ -1,0 +1,35 @@
+name: Deploy Worker
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build validation
+        run: node scripts/build.mjs
+      - name: Full test suite
+        run: npm test
+      - name: Install pinned Wrangler
+        run: npm install --global wrangler@4.144.0
+      - name: Verify commit identity
+        run: test "${#BUILD_SHA}" -eq 40 && [[ "$BUILD_SHA" =~ ^[0-9a-f]{40}$ ]]
+        env:
+          BUILD_SHA: ${{ github.sha }}
+      - name: Deploy with commit identity
+        run: wrangler deploy --var "BUILD_SHA:${BUILD_SHA}"
+        env:
+          BUILD_SHA: ${{ github.sha }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

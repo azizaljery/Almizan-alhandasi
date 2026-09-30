@@ -12,5 +12,5 @@ enabled = true
 # MIZAN_ACCESS_CODE
 # Optional: ALLOWED_ORIGIN
 
-# Non-secret build identity for GET /api/version (40-hex commit SHA only):
-#   wrangler deploy --var BUILD_SHA:$(git rev-parse HEAD)
+# The manual production deployment workflow injects BUILD_SHA from its checked-out commit.
+# For local deployments, pass --var BUILD_SHA:$(git rev-parse HEAD).
