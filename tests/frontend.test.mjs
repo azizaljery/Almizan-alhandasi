@@ -90,6 +90,14 @@ test('local Arabic understanding proposes changes for counts and negation withou
   assert.match(brief.summary, /محليًا/);
 });
 
+test('design defaults to the currently supported integrated single-floor path', () => {
+  const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+  assert.match(html, /<select id="floors"><option value="1" selected>دور واحد — مدعوم الآن<\/option>/);
+  assert.equal(/<option value="2" selected>/.test(html), false);
+  assert.equal(/<option value="3" selected>/.test(html), false);
+  assert.match(html, /المولد المتكامل الحالي يرسم الدور الأرضي فقط/);
+});
+
 test('directional preference changes only placement fields and respects the actual entry side', () => {
   const rooms = defaultRooms({ bedrooms: 1, majlis: 1, baths: 0, kitchens: 0, halls: 1, dining: 0 });
   const oriented = applySunOrientation(rooms, 'w');
