@@ -11,3 +11,6 @@ enabled = true
 # OPENAI_MODEL
 # MIZAN_ACCESS_CODE
 # Optional: ALLOWED_ORIGIN
+
+# Non-secret build identity for GET /api/version (40-hex commit SHA only):
+#   wrangler deploy --var BUILD_SHA:$(git rev-parse HEAD)
