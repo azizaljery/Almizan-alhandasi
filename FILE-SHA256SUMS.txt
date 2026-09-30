@@ -231,7 +231,7 @@ f7e5a5ceba1872760bb378a3d807fa76d11c08adaf530aba0da9645afdca47c7  ./dist/mizan-p
 cc709c32cd8c20251a0549ac8b91e9b417598c7abc194bb289d556ba04775212  ./dist/plan-view.mjs
 3618d01c580d5629367d8cccbb5988d8ced532177541fdda647a75b9cb6ee762  ./dist/planner.css
 56052ed6a5e386dab6489daa9fd766d16ee5bab384c4f477259d98e7c2237c2a  ./dist/planner.mjs
-6ceece4963f768eb9f4b0b4fa6a1f52451ac7a8d993b4f2a116d4d1d6fe475c3  ./dist/portal.mjs
+4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d  ./dist/portal.mjs
 113d11c9ff62b16aecc088e2ab51820e1eafcf8667e056220260407ba4a77e11  ./dist/project.mjs
 6c2cc8e2e542f7552645219f760a81face4cd71077e895a821486b15d09e1e4f  ./dist/render-visualizer.mjs
 49a91602ea68be5a96ecf54a4f6461703e306d752ceef0f8c9907cc1e049b579  ./dist/requirements-engine.mjs
@@ -253,6 +253,7 @@ a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client
 bc528d9aee28849310a6db8f67621487379c7841874a93aa11ffeae368707b0f  ./tests/home-design-engine.test.mjs
 dd8d2d4fd6f76548432d793ed2ee94f9c85b54784d41172de15cd448b747932b  ./tests/multi-engine.test.mjs
 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
+92ba70786a48b0388b1d68805e0e8b9c0a19ad4b51d2e7eaeaa975c66e945824  ./tests/portal-navigation.test.mjs
 4c929dc7e4f76c72fd937d562356e42327781a6396b77e87f2d80e78fdc053bf  ./tests/requirements-engine.test.mjs
 142d80d416c31af17225717ced18aff46777745f119b46f16e64cb17ae06d75a  ./tests/server.test.mjs
 70dda3e233d59fcfb15e04728868792f0aaadf0bd258cd8226df8f9cfb2ec837  ./tests/solar-path.test.mjs
