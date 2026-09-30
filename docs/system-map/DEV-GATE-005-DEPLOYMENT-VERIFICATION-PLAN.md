@@ -13,14 +13,14 @@
 نشر إصلاح جعل عدد الأدوار الافتراضي دورًا واحدًا، ثم إثبات نجاحه على Production دون رفع 005 إلى PASS قبل اكتمال الأدلة الحية.
 
 ## 1. ما قبل النشر
-- [ ] تثبيت Commit المرشح وتسجيل SHA الكامل.
-- [ ] مراجعة Diff وحصره في إصلاح 005 واختباره وتوثيقه، أو توثيق أي تغيير إضافي.
-- [ ] إعادة Targeted Regression الخاص بعدد الأدوار.
-- [ ] إعادة كامل الاختبارات: 90/90 PASS أو أحدث نتيجة بلا فشل.
-- [ ] نجاح Production Build نظيف.
-- [ ] التأكد أن الواجهة تبدأ افتراضيًا على دور واحد.
-- [ ] تحديد الإصدار السابق ومعرفه كهدف Rollback.
-- [ ] تسجيل نافذة النشر والمنفذ.
+- [x] تثبيت Commit المرشح وتسجيل SHA الكامل: `99b8f8b6ef51308e65c1aceff0349ec2fc6f0938` (Production code fix is in parent chain; `dist/index.html` fix commit `11f64ec42f04eac682bbfb76fded3fe55ea853f7`).
+- [x] مراجعة Diff: إصلاح `dist/index.html` + Regression Test + CI verification workflow. لا تغييرات Worker/DB/Cron.
+- [x] Targeted Regression PASS — workflow run `36705103180`.
+- [x] Full Suite على مرشح `main`: `89/89 PASS — 0 FAIL` (أحدث Suite للمرشح بلا فشل؛ فرع التحكم سبق أن وصل 90/90 بعد اختبارات إضافية).
+- [x] Production Build validation PASS — `node scripts/build.mjs` ضمن run `36705103180`.
+- [x] الواجهة تبدأ افتراضيًا على دور واحد؛ مثبت بالاختبار المخصص.
+- [x] Rollback Git target: `f3d23f937911443ec88a0c1645d9e129f08665ec`. Rollback Site target المرصود: source version `14`, projection revision `28`.
+- [x] نافذة النشر: 2026-09-30. المنفذ المخطط: Production Site project `appgprj_6aa6d211421c8191ae8cb918a8cea058` / slug `al-mizan-al-handasi`.
 
 ### Go / No-Go
 النشر مسموح فقط عند نجاح الاختبار المخصص، الحزمة الكاملة، البناء، ومعرفة هدف Rollback وعدم وجود تغييرات غير مراجعة.
@@ -95,3 +95,30 @@ DEV-GATE-004: BLOCKED
 DEV-GATE-005: FAIL_PENDING_DEPLOY_AND_RETEST
 Baseline: SMB-20260929-001_FROZEN
 ```
+
+
+## سجل التنفيذ الحالي — 2026-09-30
+
+### Pre-Deploy Gate
+```yaml
+candidate_commit: 99b8f8b6ef51308e65c1aceff0349ec2fc6f0938
+targeted_regression: PASS
+full_suite: 89/89_PASS
+build: PASS
+rollback_git: f3d23f937911443ec88a0c1645d9e129f08665ec
+rollback_site_source_version: 14
+rollback_site_projection_revision: 28
+go_no_go: GO_FOR_SITE_DEPLOYMENT
+```
+
+### Deployment execution
+```yaml
+status: BLOCKED_BY_MISSING_SITE_PUBLISH_ACTION_IN_CURRENT_TOOLING
+production_state_changed: false
+worker_changed: false
+secrets_changed: false
+db_changed: false
+cron_changed: false
+```
+
+تم استكمال جميع عناصر ما قبل النشر المتاحة آليًا. النشر الفعلي إلى مشروع Sites الحالي لم يُنفذ لأن الأدوات المتصلة في هذه الجلسة لا تعرض إجراء نشر/تحديث مباشر لمشروع Sites المحدد. لا يتم تمثيل النشر كمنفذ قبل وجود دليل Deployment فعلي.
