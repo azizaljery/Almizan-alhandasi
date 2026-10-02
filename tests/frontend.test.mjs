@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { generateModel, defaultRooms } from '../dist/planner.mjs';
+import { generateModel, defaultRooms, placeOpening, removeOpening, validateModel } from '../dist/planner.mjs';
 import { buildPlanSVG, PlanViewport } from '../dist/plan-view.mjs';
 import { AI_ENABLED, validateSuggestion, requestBrief, getAssistantStatus } from '../dist/assistant.mjs';
 import { reviewPlan } from '../dist/audit.mjs';
@@ -21,7 +21,7 @@ test('generated SVG is valid XML with complete viewBox and escaped user-controll
 });
 
 class FakeSVG extends EventTarget {
-  constructor() { super(); this.v = { x: 0, y: 0, w: 20, h: 30 }; }
+  constructor() { super(); this.v = { x: 0, y: 0, w: 20, h: 30 }; this.roomGroup = { attributes: {}, setAttribute(k, v) { this.attributes[k] = v; }, getAttribute(k) { return this.attributes[k] ?? null; }, removeAttribute(k) { delete this.attributes[k]; } }; }
   setAttribute(key, value) { if (key === 'viewBox') { const [x, y, w, h] = value.split(' ').map(Number); this.v = { x, y, w, h }; } }
   getBoundingClientRect() { return { x: 40, y: 60, width: 1000, height: 500 }; }
   createSVGPoint() { return { x: 0, y: 0, matrixTransform(m) { return { x: this.x * m.a + m.e, y: this.y * m.d + m.f }; } }; }
@@ -31,10 +31,16 @@ class FakeSVG extends EventTarget {
     return { inverse: () => ({ a: 1 / scale, d: 1 / scale, e: -e / scale, f: -f / scale }) };
   }
   querySelectorAll() { return []; }
-  closest() { return null; }
+  querySelector() { return this.roomGroup; }
+  closest() { return this.roomTarget ? { dataset: { roomId: this.roomTarget } } : null; }
   setPointerCapture() {}
 }
 const pointer = (svg, type, properties) => { const e = new Event(type); Object.assign(e, { button: 0, ...properties }); svg.dispatchEvent(e); };
+const screenForSVGPoint = (viewport, point) => {
+  const rect = viewport.svg.getBoundingClientRect(), v = viewport.view, scale = Math.min(rect.width / v.w, rect.height / v.h);
+  const e = rect.x + (rect.width - v.w * scale) / 2 - v.x * scale, f = rect.y + (rect.height - v.h * scale) / 2 - v.y * scale;
+  return { x: e + point.x * scale, y: f + point.y * scale };
+};
 test('pan and anchor zoom remain correct with letterboxing, and room focus stays bounded', () => {
   const svg = new FakeSVG(), viewport = new PlanViewport({ set innerHTML(x) {}, querySelector: () => svg }, m, () => {}); viewport.apply();
   const client = { x: 310, y: 250 }, before = viewport.point(client.x, client.y); viewport.zoom(.5, client); const after = viewport.point(client.x, client.y);
@@ -50,6 +56,53 @@ test('two-pointer pinch zooms without one-finger state errors after cancellation
   const svg = new FakeSVG(), p = new PlanViewport({ set innerHTML(x) {}, querySelector: () => svg }, m, () => {}); p.apply(); const before = p.view.w;
   pointer(svg, 'pointerdown', { pointerId: 1, clientX: 400, clientY: 200 }); pointer(svg, 'pointerdown', { pointerId: 2, clientX: 600, clientY: 200 }); pointer(svg, 'pointermove', { pointerId: 2, clientX: 700, clientY: 200 });
   assert.ok(p.view.w < before); pointer(svg, 'pointercancel', { pointerId: 2 }); pointer(svg, 'pointerup', { pointerId: 1 }); assert.equal(p.pointers.size, 0);
+});
+
+test('zoomed opening edits convert SVG Y to model Y while room-move deltas keep their orientation', () => {
+  const svg = new FakeSVG(), viewport = new PlanViewport({ set innerHTML(x) {}, querySelector: () => svg }, m, () => {}); viewport.apply();
+  viewport.zoom(.8, { x: 500, y: 250 });
+  const wall = m.walls.find(w => w.type === 'ext' && Math.hypot(w.x2 - w.x1, w.y2 - w.y1) > 2.5 && !m.openings.some(o => o.wallId === w.id));
+  assert.ok(wall, 'fixture has an unoccupied exterior wall');
+  const modelPoint = { x: (wall.x1 + wall.x2) / 2, y: (wall.y1 + wall.y2) / 2 };
+  const client = screenForSVGPoint(viewport, { x: modelPoint.x, y: -modelPoint.y });
+  let action;
+  viewport.setEditor({ active: true, tool: 'window', onAction: value => { action = value; } });
+  pointer(svg, 'pointerdown', { pointerId: 3, clientX: client.x, clientY: client.y });
+  assert.equal(action.tool, 'window'); assert.ok(Math.abs(action.point.x - modelPoint.x) < 1e-8); assert.ok(Math.abs(action.point.y - modelPoint.y) < 1e-8);
+  const edited = placeOpening(m, { type: 'window', point: action.point });
+  assert.equal(edited.openings.length, m.openings.length + 1); assert.deepEqual(validateModel(edited), []);
+  viewport.setEditor({ active: true, tool: 'erase', onAction: value => { action = value; } });
+  pointer(svg, 'pointerdown', { pointerId: 4, clientX: client.x, clientY: client.y });
+  const restored = removeOpening(edited, action.point);
+  assert.equal(restored.openings.length, m.openings.length); assert.deepEqual(validateModel(restored), []);
+
+  svg.roomTarget = m.rooms[0].id;
+  const move = (fromClient, toClient, finish = 'pointerup', id = 5) => {
+    let moveAction;
+    viewport.setEditor({ active: true, tool: 'move', onAction: value => { moveAction = value; } });
+    const from = viewport.point(...fromClient), to = viewport.point(...toClient);
+    pointer(svg, 'pointerdown', { pointerId: id, clientX: fromClient[0], clientY: fromClient[1] });
+    pointer(svg, 'pointermove', { pointerId: id, clientX: toClient[0], clientY: toClient[1] });
+    const preview = svg.roomGroup.getAttribute('transform');
+    pointer(svg, finish, { pointerId: id, clientX: toClient[0], clientY: toClient[1] });
+    return { moveAction, from, to, preview };
+  };
+  const still = move([500, 250], [500, 250]);
+  assert.equal(still.moveAction.dx, 0); assert.equal(still.moveAction.dy, 0, 'a stationary pointer must not move a room');
+  const horizontal = move([500, 250], [550, 250], 'pointerup', 6);
+  assert.ok(Math.abs(horizontal.moveAction.dx - (horizontal.to.x - horizontal.from.x)) < 1e-8); assert.equal(horizontal.moveAction.dy, 0);
+  const vertical = move([500, 250], [500, 300], 'pointerup', 7);
+  assert.equal(vertical.moveAction.dx, 0); assert.ok(Math.abs(vertical.moveAction.dy - (vertical.from.y - vertical.to.y)) < 1e-8);
+  const [previewX, previewY] = vertical.preview.match(/[+-]?(?:\d+\.?\d*|\.\d+)/g).map(Number);
+  assert.ok(Math.abs(previewX - (vertical.to.x - vertical.from.x)) < 1e-8); assert.ok(Math.abs(previewY - (vertical.to.y - vertical.from.y)) < 1e-8);
+  let cancelledAction;
+  viewport.setEditor({ active: true, tool: 'move', onAction: value => { cancelledAction = value; } });
+  pointer(svg, 'pointerdown', { pointerId: 8, clientX: 500, clientY: 250 });
+  pointer(svg, 'pointermove', { pointerId: 8, clientX: 520, clientY: 270 });
+  assert.ok(svg.roomGroup.getAttribute('transform'));
+  pointer(svg, 'pointercancel', { pointerId: 8, clientX: 520, clientY: 270 });
+  assert.equal(cancelledAction, undefined, 'cancelling a drag must not commit room movement');
+  assert.equal(svg.roomGroup.getAttribute('transform'), null, 'cancelled preview must be restored');
 });
 
 test('AI release requires the private site access code and never exposes the provider key', async () => {
