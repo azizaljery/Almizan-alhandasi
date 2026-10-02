@@ -1,18 +1,17 @@
+f2ae71be6266e09ee31f5c2da55e2537ac8369224475208a9c360b159c3faedc  ./.github/agents/almizan.agent.md
 95cd03045bb8d5ece2c63c5a7befc307f07d4ad4722893a059be42908914a3e7  ./.github/workflows/deploy-worker.yml
+32a0b43a9c6b026c6abfda3a8d4177027988985dbd41c04a2ec50047a6bc9a2d  ./.github/workflows/production-candidate-validation.yml
 ebb9a03ab7f9df6e25502bf10fa642495bd4ef9de02b45968623afd157190b84  ./.github/workflows/release-005-verification.yml
 0072dfabe80f38dd8dbb54b4a44440edf21e447d3ecadfccc6a520861e1bd381  ./.gitignore
 b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
-7f28a8fbe80c855bd1a7e69369793fc86d1d1f0f34e82f41cdaf9ce7d2ba31ce  ./FILE-SHA256SUMS.txt
+8c5b1e00f635dbbfffd28297392f05398dd56357f11d88404e6e9fac3cf19cb4  ./FILE-SHA256SUMS.txt
 ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
 d4509f408a7fd8ba4aa0af99a30dbe9a0a6a5b04557f1d80e68b55d589b9b5ce  ./README.md
 d483f97c632f7090cc39b22d8a1b917f52da6d62b2088d8d7be89da65c637f39  ./RELEASE-BUILD.log
-eec67a42a790d639a75181705162e5d785c360b3519608cd7e970bcd430592df  ./RELEASE-MANIFEST.md
+83d8785f7b3f598ceaab7388a06b7f087a95a824ba5ef3ba081b5d6e37f29c58  ./RELEASE-MANIFEST.md
 2ff00c69617e0d0c94410eb2c5efd93553ad15323f33fd1e8ad510c3e3d0c2db  ./RELEASE-TEST-87.log
 c869e731cdd5f4c4948ca868908935ed7ba1b89129f0f214a73c6cef37802028  ./dist/app.mjs
-553f2e353f14c882771a5f681415a739061a28ef5d2aea907752ac83888fae0f  ./dist/assets/style-classic-villa.png
-92052de58061462948f24194143c7e479e2b0c5c3b990821860d3791a9f07a5f  ./dist/assets/style-modern-villa.png
-cc754587c431a37da8082e22d4f4133d9cdddea8e36b4a243035870909912bbe  ./dist/assets/style-resort-villa.png
 f3aa2e9fdf717bf8fb5af7100f3beb53215a13b915eba9a10b947f50495ccf83  ./dist/assistant.mjs
 85ffde8b956ae7fcdfca1f684b635c8b2806c4ca0cb68a64f49b1cf3c8f2d640  ./dist/audit.mjs
 4fea9f45878a01c1f9c4de014f5273b870ec23b86ae6ac1233b1cc16a686f993  ./dist/circulation.mjs
@@ -74,7 +73,7 @@ d06f35857fe1aa54d630dbb606e9becb17f65faa920d3287c17a0763095a005c  ./dist/gemini/
 c69f2471249a93bd0a2337a3424c4cd71209a2a3185758f6cf5f2852f2bb8695  ./dist/gemini/engineering-math/src/index.js
 56063c1c8468bb0117eecf4381ea64ef1cadce4fb39f965757abc3d13a2ff93f  ./dist/gemini/shared/deterministic-hash.js
 780685f096045b51909e0ad16cc52913440c805a6c160933c6ea8437b42df1e6  ./dist/home-design-engine.mjs
-f14964bd26a5b4ce8c96331bb30117b80468894cb24a2884e2cf56d9c3da0dc4  ./dist/index.html
+aa18a71f5400b53406cb3d0e1adbdc2325e49cd1cf02e39d69f6c233a93e21a8  ./dist/index.html
 d82006c25b00fb4b984fcc3fb3ad2c3c9107454582790b9f58ea8ac6528655cc  ./dist/integration/aziz/aziz.d.ts
 47c7a891e9447e7252f3d94e48b0f7efb0b9d02238aec4ec472590203ef55107  ./dist/integration/aziz/aziz.d.ts.map
 34a0bc0be7239acdbadef88d14a2adf5347bdda39bb7466c446444b50dec9901  ./dist/integration/aziz/aziz.js
@@ -164,7 +163,7 @@ e5ab8217f207bb969f260edd3dd4e1b38cb573b25455c64286d995f7bfd1c631  ./dist/integra
 7830d98e079eee691303df050b80b8e459513970a6545c45de4bba3dde27920a  ./dist/integration/gemini/packages/design-intelligence/library/reference-cases.js
 26bff0c3d2ea036ea36de4f5a452ad1f6c32767d1dc6c3b50b0d29125b198bff  ./dist/integration/gemini/packages/design-intelligence/package.json
 f89d7a66c17644f3d85916f36da4f954efcf515d65ab8415250e4931a991d797  ./dist/integration/gemini/packages/design-intelligence/retrieval/deterministic-filter.js
-f46e5bc22236bdd8d2aa6fb8a4688552cfd0fe38dd2f8d06cbd189291bcb406f  ./dist/integration/gemini/packages/design-intelligence/retrieval/hybrid-retrieval-engine.js
+36b7851c1dc4690f0a5382e1637c132d621278eab0dffa634c56953518967726  ./dist/integration/gemini/packages/design-intelligence/retrieval/hybrid-retrieval-engine.js
 4aac6e85e80896250005fe6ad408b5663eb1571c06602fa97b4632a2fddf4e3b  ./dist/integration/gemini/packages/design-intelligence/retrieval/scoring-engine.js
 c19275ba70806e2ee6a1b550860a728059f474fad2c8169ccaac07cd67b92358  ./dist/integration/gemini/packages/design-intelligence/scripts/build.js
 e4c12dc2bb96bf433f1977d96bdd66bc8b5c6548a4abe3edf61d85a2b2fa75f3  ./dist/integration/gemini/packages/design-intelligence/scripts/p1-acceptance.mjs
@@ -194,7 +193,7 @@ c3b9815d7a5cba5ba2211908296b8967be2d3b5d15c2707c5a689bec37ad4d36  ./dist/integra
 b695cc46e6efe9215b2b913b066520cbe3519108849a039a548c840203b5738b  ./dist/integration/gemini/packages/engineering-core/coordinators/plumbing-coordinator.js
 d15a397d4cde577b48f933577bc5ffc5fd0aaa8ad04232bee35620f1b77a6501  ./dist/integration/gemini/packages/engineering-core/coordinators/structural-coordinator.js
 6301ac76d1079cc7988c988ec34c18211b51483de61277c5cbc2708361c1eb9a  ./dist/integration/gemini/packages/engineering-core/core/coordination-orchestrator.js
-d5c1deb5e32cf92d18c1d9ab762a607a4851097886989e25fa6afb7800abc241  ./dist/integration/gemini/packages/engineering-core/core/geometry-hasher.js
+96dc82d2323533041cb27f90e6b7f90a78669ac64ef342d37fadb887ec4feb45  ./dist/integration/gemini/packages/engineering-core/core/geometry-hasher.js
 db571725dda962db3d4db36616e55d2e50a359d340c2d8326f02cd1b19524b7e  ./dist/integration/gemini/packages/engineering-core/core/report-generator.js
 d4e88f1ad731441be05889bc22d1a2ed85245d90fa18a1b5554455455b7bc744  ./dist/integration/gemini/packages/engineering-core/fixtures/compliant-villa.fixture.json
 3ced678003a3386faa4d6fc7204a4207a843ba28575a32f354fb046bfcbc753d  ./dist/integration/gemini/packages/engineering-core/fixtures/conflicted-villa.fixture.json
@@ -232,7 +231,7 @@ e5126741594c428ff21908be274ac8d0e5028e1582b347ceaed9c3e8dff1132f  ./dist/local-n
 f7e5a5ceba1872760bb378a3d807fa76d11c08adaf530aba0da9645afdca47c7  ./dist/mizan-portal.mjs
 5c6f4ad49077599b5870c06fdfb9a81cc720443def14f153cef5fb938b9d464e  ./dist/mizan-score.mjs
 18ac4d1938ff20fb5db3c423df0c4b54fb3c90bdccb32c5c847c10602103ccbf  ./dist/multi-engine.mjs
-cc709c32cd8c20251a0549ac8b91e9b417598c7abc194bb289d556ba04775212  ./dist/plan-view.mjs
+4aeb7a866a25defc60bf7bba37aa9cbeeabec71e9fa8d39c900f08b82af34168  ./dist/plan-view.mjs
 3618d01c580d5629367d8cccbb5988d8ced532177541fdda647a75b9cb6ee762  ./dist/planner.css
 56052ed6a5e386dab6489daa9fd766d16ee5bab384c4f477259d98e7c2237c2a  ./dist/planner.mjs
 4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d  ./dist/portal.mjs
@@ -253,7 +252,7 @@ abaaf7e92b119cf2d1774d551f7820f4fabd3e50bb8e631fdc9682ba541cbe20  ./scripts/buil
 724a38bf53f5e13ff46401e124b78c84c3d83fd16b3e5c04da7d317f8478d0eb  ./tests/claude-integration.test.mjs
 a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client-brief.test.mjs
 49b8f497fd5556c1735c968b181a39e14295a23ed6707118b6534db7aabf1617  ./tests/design-insights.test.mjs
-8f1e6a461669c259d603946901280c7a4253d5e0e4363636ed04ef210fc1653c  ./tests/frontend.test.mjs
+6785a193f0bc54313e8e16831597209f96e82458ae51855b6fab00a945053df6  ./tests/frontend.test.mjs
 bc528d9aee28849310a6db8f67621487379c7841874a93aa11ffeae368707b0f  ./tests/home-design-engine.test.mjs
 dd8d2d4fd6f76548432d793ed2ee94f9c85b54784d41172de15cd448b747932b  ./tests/multi-engine.test.mjs
 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
@@ -265,6 +264,7 @@ e183f73580e8ee47f1cb6c25db7d76f3fa10bfe30a22ef3da1d37ae4094d6127  ./tests/releas
 c705f2b2c991d33dc0904533360eb58ee317629c3d2b7a0c9adf1c95bc6338cd  ./tests/viewer3d.test.mjs
 acf038543874dcc0df7ae4ed36a7bf834c67e7101be415d6c8404d300c504e33  ./tests/visualizer.test.mjs
 a0f085024d97e157d629af90bba62d92007848269d99ef1db0860b0dbe6af05e  ./tests/workflow.test.mjs
+46298b42c0f505c6b59be4296d6eec260422312c43006a05c44e08ceb44dff65  ./vendor.gitkeep
 4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97  ./vendor/claude-planner/.gitignore
 72839d5ce0cce784c9747c120e3b2b09dff73164c30c288652e3e89258d1511f  ./vendor/claude-planner/BATCH-MANIFEST.md
 f9c8139015db5963ba5d634c9e656437f3060764e6621a2bbbf13d4551c7a7cc  ./vendor/claude-planner/build.mjs
@@ -303,7 +303,7 @@ a3f5096d31f91eee2b19ef2c72f5e9a49a3bf1f89ca334b1a35f15c950a6201c  ./vendor/claud
 1e67313da887dff7a6531e0f0afc99ae8bcb6a9593ef79323f194f9edceb6e5a  ./vendor/claude-planner/tools/ast-equal.mjs
 436e5ba4254e8d5eac3f58c84f7ff7e5b4b0faf621daafec224d38be3e32a2e3  ./vendor/claude-planner/tools/mutants.mjs
 8b8e78046908633d13e9805f30c45d26263f48b3c29857be6d0dfa0fc3740de7  ./vendor/claude-planner/tsconfig.json
-2e318cca7ba122cbab2e13ea49a61fab85281a13f5163b0b3bd77d7112f80201  ./worker/README.md
+76da769d579140697fedb729db8213e35a0c2a884c74ff4217a3af971ff45315  ./worker/README.md
 9d0bc99d6346b6bd12ac125beff35a74a0137fcb19149ac116ce68c3a2e44252  ./worker/mizan-images-worker.mjs
 713b9b9c73da20bfdf4f00f6a7238697f8cd2272fe1b8ceb8ddb1ceec631202f  ./worker/server.mjs
 489def563b2f1d6ee942d2ca5667d551e13c2512d1087f35c4e1c7fc3de8a246  ./wrangler.toml
