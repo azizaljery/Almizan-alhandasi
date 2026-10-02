@@ -76,7 +76,8 @@ export class PlanViewport {
         if (this.editor.tool === 'move' && room) {
           svg.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); this.editorMove = { room, origin: point }; return;
         }
-        this.editor.onAction?.({ tool: this.editor.tool, point, room }); return;
+        // The plan is drawn in SVG space with Y inverted, while planner geometry uses positive Y.
+        this.editor.onAction?.({ tool: this.editor.tool, point: { x: point.x, y: -point.y }, room }); return;
       }
       svg.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       this.start = { x: e.clientX, y: e.clientY, room, moved: false };
@@ -84,8 +85,8 @@ export class PlanViewport {
     svg.addEventListener('pointermove', e => {
       if (!this.pointers.has(e.pointerId)) return;
       if (this.editorMove) {
-        const point = this.point(e.clientX, e.clientY), dx = point.x - this.editorMove.origin.x, dy = -point.y - this.editorMove.origin.y;
-        const group = this.svg.querySelector(`[data-room-id="${this.editorMove.room}"]`); if (group) group.setAttribute('transform', `translate(${dx} ${-dy})`);
+        const point = this.point(e.clientX, e.clientY), dx = point.x - this.editorMove.origin.x, dy = point.y - this.editorMove.origin.y;
+        const group = this.svg.querySelector(`[data-room-id="${this.editorMove.room}"]`); if (group) group.setAttribute('transform', `translate(${dx} ${dy})`);
         return;
       }
       const before = [...this.pointers.values()]; this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); const after = [...this.pointers.values()];
@@ -100,8 +101,13 @@ export class PlanViewport {
     });
     const finish = e => {
       if (this.editorMove) {
-        const point = this.point(e.clientX, e.clientY), dx = point.x - this.editorMove.origin.x, dy = -point.y - this.editorMove.origin.y;
-        this.editor.onAction?.({ tool: 'move', room: this.editorMove.room, dx, dy }); this.editorMove = null; this.pointers.delete(e.pointerId); return;
+        const move = this.editorMove, group = this.svg.querySelector(`[data-room-id="${move.room}"]`);
+        group?.removeAttribute('transform');
+        if (e.type === 'pointerup') {
+          const point = this.point(e.clientX, e.clientY), dx = point.x - move.origin.x, dy = move.origin.y - point.y;
+          this.editor.onAction?.({ tool: 'move', room: move.room, dx, dy });
+        }
+        this.editorMove = null; this.pointers.delete(e.pointerId); return;
       }
       if (e.type === 'pointerup' && this.start && !this.start.moved && this.start.room && this.pointers.size === 1) onSelect(this.start.room);
       this.pointers.delete(e.pointerId); this.start = null;

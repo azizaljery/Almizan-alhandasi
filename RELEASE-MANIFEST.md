@@ -1,11 +1,19 @@
-# MIZAN Engineering — Site v37 navigation follow-up
+# MIZAN Engineering — Site v39 candidate: 2D editor coordinates
 
-Production baseline: Sites v37, source commit `d65fae7ad33949747340344eb318734d9f130e51`.
+Production rollback baseline: Sites v38 source snapshot `465cc257ff53bf9f363f7d0e85c20768a5722417`.
+Independent GitHub regression baseline: `main` at `b3d416a107ae2d7d5d7263051a1460391830ab62`.
 
-Change: the portal’s “فهم العميل” action now opens the existing design workspace before scrolling to and focusing the client-idea field. The design-card route and reviewed-change gating remain unchanged.
+Pre-existing source drift: the GitHub main tree and the Site v38 source snapshot are not identical. Each baseline was patched and verified independently. This Site release will be packaged from the existing v38 source snapshot so unrelated Worker/AI and other source differences are not synchronized into the Site.
 
-Validation in the Site source checkout:
+Change: convert non-move 2D editor pointer Y back from inverted SVG coordinates to positive model coordinates before window/door placement and opening removal. Correct room-move preview and model deltas, cancel without committing, and restore the temporary preview.
+
+Regression coverage uses actual viewport transforms after zoom. It checks window placement/removal and model validity, zero/horizontal/vertical room movement, preview translation, and cancellation. The opening-coordinate regression fails with the original callback behavior.
+
+Verification in the independent GitHub-main and Site-v38 worktrees:
 - `node scripts/build.mjs` — PASS
-- `node --test tests/*.test.mjs` — 94/94 PASS, including two portal navigation regression checks
+- `node --test tests/*.test.mjs` — 95/95 PASS on each baseline
+- Regenerated source and release checksum manifests on each baseline
 
-This is a frontend-only release candidate. No Worker, AI, security, access-policy, or room-program behavior was changed. The candidate has not yet been saved or deployed; Site v37 remains the rollback baseline. Automated checks do not replace a fresh live-browser check of the portal route.
+Live v38 UI reached the 2D editor and reproduced rejected wall clicks; no project was saved. The corrected interaction still needs live confirmation after deployment. Live 3D remains unverified in cloud Chromium because WebGL is unavailable there.
+
+Frontend-only candidate. No Worker, AI, security, access-policy, or room-program behavior changed. This candidate has not been saved or deployed; v38 remains the rollback baseline.
