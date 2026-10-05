@@ -1,0 +1,258 @@
+{
+  "schema": "engineering-coordination/1",
+  "created_at": "2026-10-05T16:47:28.513060+00:00",
+  "project": "Almizan-alhandasi",
+  "repository": "https://github.com/azizaljery/Almizan-alhandasi",
+  "authorized_scope": [
+    "مراجعة إصلاح تصادم AZIZ وسجلاته وتثبيت النسخة المصححة محليًا.",
+    "تصحيح عقد Design Intelligence والخصوصية والحركة والوصول من بيانات المخطط الفعلية.",
+    "تقييم المحاور الهندسية والمرجع بالبيانات المتاحة؛ الناقص غير مُقيّم.",
+    "اختبار المسار والتحقق التفاعلي وأرشفة الأدلة قبل قرار نشر."
+  ],
+  "constraints": {
+    "stocks_project_excluded": true,
+    "scope_expansion_authorized": false,
+    "merge_authorized": false,
+    "deployment_authorized": false
+  },
+  "original": {
+    "commit": "d32121e8b6acecec7bfe20ec90c55c127e8206dc",
+    "archive": "/workspace/engineering-coordination-20261005/almizan-original-d32121e8.zip",
+    "git_blob_verification": "PASS",
+    "tracked_files": 310,
+    "working_directory_preserved": "/workspace/Almizan-alhandasi"
+  },
+  "isolated_candidate": {
+    "directory": "/workspace/engineering-isolated/almizan-repair-20261005",
+    "base_commit": "d32121e8b6acecec7bfe20ec90c55c127e8206dc",
+    "source": "Existing broader 105-test archive; not AZIZ-COLLISION-REVIEW.zip",
+    "file_identity_verification": "PASS",
+    "files": 342,
+    "checksum_manifests": {
+      "FILE-SHA256SUMS.txt": {
+        "status": "PASS",
+        "files": 337
+      },
+      "FILE-SHA256SUMS-RELEASE.txt": {
+        "status": "PASS",
+        "files": 341
+      }
+    }
+  },
+  "previous_archived_verification": {
+    "reexecuted_this_turn": false,
+    "site": {
+      "status": "PASS",
+      "passed": 105,
+      "failed": 0,
+      "log": "evidence/engineering-repair/site-tests.log"
+    },
+    "build": {
+      "status": "PASS",
+      "log": "evidence/engineering-repair/build.log"
+    },
+    "browser": {
+      "status": "PASS",
+      "passed_flows": 8,
+      "page_errors": [],
+      "report": "evidence/engineering-repair/browser-report.json"
+    },
+    "original_p1_packages": {
+      "passed": 74,
+      "failed_execution_due_missing_files": 41,
+      "assessment": "BLOCKED_MISSING_FIXTURES",
+      "detail": "engineering-math 18/18; engineering-core 12/31; design-intelligence 44/66"
+    },
+    "not_verified": [
+      "AZIZ-COLLISION-REVIEW.zip and its claimed 130-test result",
+      "Remote AI service",
+      "Physical iPad",
+      "Outstanding review comments on the broader package"
+    ]
+  },
+  "coordination_with_abdullah": {
+    "status": "BLOCKED",
+    "communicated": false,
+    "delivery_acknowledged": false,
+    "connected_agents": [
+      "/root"
+    ],
+    "reason": "No connected Abdullah session; no available tool for messaging an external Codex task. No direct contact endpoint has been identified.",
+    "payload_ready": true,
+    "messages_relayed_by_user": false
+  },
+  "existing_remote_archive": {
+    "branch": "artifact/engineering-repair-20261005",
+    "commit": "8f621a6efc6c8f79dc7d720c0192ebe83b84d310",
+    "path": "artifacts/Almizan-alhandasi-engineering-repair-2026-10-05.zip"
+  },
+  "this_turn": {
+    "source_repairs_performed": false,
+    "remote_writes_performed": false,
+    "merge_performed": false,
+    "deployment_performed": false,
+    "repair_completion_claimed": false
+  },
+  "deliverable_files": [
+    {
+      "path": "/workspace/engineering-coordination-20261005/almizan-original-d32121e8.zip",
+      "bytes": 740103,
+      "sha256": "a05249ecec86f204515b24337eb239f029c4c4b7cd088e085f417b7e4f4916a8"
+    },
+    {
+      "path": "/workspace/Almizan-alhandasi-engineering-repair-2026-10-05.zip",
+      "bytes": 13506029,
+      "sha256": "cd6ad75fbebbbc2711960c50bfadaf1d94f104a0b9dcf6a2a2802e9bdc488e90"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/FILE-SHA256SUMS.txt",
+      "bytes": 40409,
+      "sha256": "2c779233019aceec0ba6110f96a7ffbef123191d319300bfefea2f4caaafe614"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/FILE-SHA256SUMS-RELEASE.txt",
+      "bytes": 40759,
+      "sha256": "8baac4c11a2c43a44d1f7ff31d7a1e588b2515feadb2e08faa2a46c1e1cc83c3"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/aziz-before-after.log",
+      "bytes": 160,
+      "sha256": "cbd5d561d240cc9e336ecc2c56d2702e3c879ab4192754f7a8d61f5bf36e9f43"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/baseline-tests.log",
+      "bytes": 9131,
+      "sha256": "16e1c1cac0316b1b05b1b27c2f722d1634f771ef4be80355881ca33fe8b6a1d2"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-3d-overview.png",
+      "bytes": 236384,
+      "sha256": "0e554e1833a4dcd06ad8367b79499701fc0056d19b11738b3d157dbd7786f373"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-3d.png",
+      "bytes": 122041,
+      "sha256": "701d0160a75e7cdfe8f7a97dfa13f4dbf3e17ef9a23f124e136274492f653357"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-alternative-0.json",
+      "bytes": 121705,
+      "sha256": "1bd537ab77e53aee352c6be737d9fcfa78b898aeff4ed77d97b6f9f96004456b"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-alternative-1.json",
+      "bytes": 154358,
+      "sha256": "1eed4dd330b6432cc2b96e6b548876daf2a40acdc25fe24586abc63b8b0478e2"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-alternative-2.json",
+      "bytes": 189755,
+      "sha256": "c6b8d385986b9cfb7b61151f281fabfcc885997db731e6fc4ab91c51198b6f48"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-boq.csv",
+      "bytes": 1200,
+      "sha256": "680e27b7c737dcdb499cd16d45b759a66dd58ffd38c25c6744fb1b0bc9e50df6"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-direction-e.json",
+      "bytes": 251836,
+      "sha256": "ec8d19304cb548f8404359a702eed0655a972bd1ec9b7c3a9c9e23ea2fdc83d2"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-direction-n.json",
+      "bytes": 221269,
+      "sha256": "881fc651bbd24ea03a39549a8bc0281cc272bdddfe7ddb458f1808708f3f68d8"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-direction-w.json",
+      "bytes": 281735,
+      "sha256": "79410674949d67e07dfdca34978eccfcac8e82c1d0c26dcf49119239ae966ccc"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-edited.json",
+      "bytes": 225212,
+      "sha256": "84348f188bcdb43a3f815ae685628719fa3e02c77099ed84a4f17ba13b506276"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-engineering.png",
+      "bytes": 175628,
+      "sha256": "d7f0da939ae8cbe81449392aadadb54eb76bdd1bbfdcf07ece987b168ec89865"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-removed.json",
+      "bytes": 260408,
+      "sha256": "e3b40813c00b0f69d0f51e1b8cd711fb9a8ff9e2dabb6c5f5d485c1e42cd5484"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-report.json",
+      "bytes": 1407,
+      "sha256": "f701f9cd5ccc9801f93bd1190687422d59e89d15370af267c40526b3229dcdee"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-restored.json",
+      "bytes": 189755,
+      "sha256": "522f15ca7b8e0f7a587694550310dfef0df0bc843c674aa89abd9d792b0d1195"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-run.log",
+      "bytes": 563,
+      "sha256": "05a31af21fccea83b9d1a5fb6218bb0f968f956039de75d5413888eb3b4ae709"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-tablet.png",
+      "bytes": 170966,
+      "sha256": "71d7300de4e9265e7f15404aefb2fed61b772466f0d2abdd9522f90d589790ba"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/browser-trace.zip",
+      "bytes": 11980552,
+      "sha256": "da531c60987c884238afe00d7fc8618db9142d96185d5c96434fe22920e2e4fc"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/build.log",
+      "bytes": 97,
+      "sha256": "fd100172c5064012ffa13430bd1f7320456a1910b4566b7bdb8108dd58af8d69"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/design-intelligence-tests.log",
+      "bytes": 33523,
+      "sha256": "c2d63b5dc6f39d79e8e0bbc7e24563de677416efd77118f20bc56017a7d2ce0a"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/engineering-core-tests.log",
+      "bytes": 26542,
+      "sha256": "caed3b8fdb50345235b503eac292d898bdd9fba3f3d5b6970bc895271ab6c07b"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/engineering-math-tests.log",
+      "bytes": 2184,
+      "sha256": "855f406968c20e6f88b1ec306ae1dfa55fad0e5a11988c463e99c0e1464d313c"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/full-tests.log",
+      "bytes": 10073,
+      "sha256": "b0f54411426981be672c63c624abb0ccace1d80bcb95dac70645f6c5095f3ad6"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/regression-tests.log",
+      "bytes": 1045,
+      "sha256": "aa98e7dd9248afe4310750ac435c13b99284c270b366c15ab1ab65ef241456a2"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/site-tests.log",
+      "bytes": 10052,
+      "sha256": "86b23c72e690f8ecdf47e3eea3e3b16a5e807a07019f65e1261601189e6d2f3b"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/source-discovery.json",
+      "bytes": 1084,
+      "sha256": "81abaf92cb60a8172278b38cb92413d9a1fee60f7bbaf1eb5413b36ed93d16b3"
+    },
+    {
+      "path": "/workspace/engineering-isolated/almizan-repair-20261005/evidence/engineering-repair/source.patch",
+      "bytes": 155417,
+      "sha256": "4759160e2f321c4ccff741305f58fa33045c402a4e664c12a161f236fd1d1a8b"
+    }
+  ]
+}
