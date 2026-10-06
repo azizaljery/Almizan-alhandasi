@@ -24,6 +24,7 @@ const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
 const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'modern', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
+const exploration = { signature: '', previous: [], seed: Date.now() >>> 0 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
 const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
@@ -332,10 +333,9 @@ function renderAlternatives() {
     const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
     const evaluation = state.engineering?.rows?.[index]?.evaluation;
     const engineering = evaluation ? `<div><dt>قرار الميزان</dt><dd>${fmt(evaluation.score, 0)} / ١٠٠</dd></div><div><dt>عوائق</dt><dd>${fmt(evaluation.blockers.length, 0)}</dd></div>` : '';
-    return `<article class="alternative-card${selected ? ' selected' : ''}">${conceptThumbnail(model)}<span class="concept-tag">${esc(concept.tag)}</span><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><p class="concept-form">${esc(concept.form)}. ${esc(concept.idea)}</p><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><p class="concept-fit"><b>أنسب لـ:</b> ${esc(concept.bestFor)}<br><b>المقايضة:</b> ${esc(concept.tradeoff)}</p><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض في 2D و3D' : 'اعرض هذا النموذج'}</button></article>`;
+    return `<article class="alternative-card${selected ? ' selected' : ''}">${conceptThumbnail(model)}<span class="concept-tag">${esc(concept.tag)}</span><h3>فكرة ${fmt(index + 1, 0)} · ${esc(concept.form)}</h3><p class="concept-form">${esc(concept.idea)}</p><dl><div><dt>أبعاد الكتلة</dt><dd>${fmt(model.building.w)} × ${fmt(model.building.h)} م</dd></div><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><p class="concept-fit"><b>أنسب لـ:</b> ${esc(concept.bestFor)}<br><b>المقايضة:</b> ${esc(concept.tradeoff)}</p><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض في 2D و3D' : 'اعرض هذا النموذج'}</button></article>`;
   }).join('');
-  const failed = state.failures.map(f => `${STRATEGIES[f.strategy]}: ${f.reason}`).join(' ');
-  $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
+  $('alternativeNote').textContent = `${fmt(state.alternatives.length, 0)} أفكار اجتازت فحص اختلاف توزيع الغرف ونسبها والكتلة والممرات. لا يُحسب تغيير الاسم أو اللون أو عكس المخطط فكرة جديدة. عدد الأفكار يعتمد على المساحة والقيود؛ اضغط «أفكار جديدة» لمواصلة البحث مع حفظ اختيارك ضمن التراجع.`;
   markDirty();
 }
 function renderPlanReview() {
@@ -366,7 +366,7 @@ function renderMizanScore() {
   $('mizanScoreLimit').textContent = result.note;
 }
 function runPlanner(request) {
-  if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms, { includeClaude: true }));
+  if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.integrated ? runMultiEngineDesign(request) : request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms, { includeClaude: true }));
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./layout-worker.mjs', import.meta.url), { type: 'module' });
     const finish = (error, result) => { clearTimeout(timer); worker.terminate(); error ? reject(Error(error)) : resolve(result); };
@@ -379,18 +379,23 @@ function runPlanner(request) {
 async function generate() {
   if ($('gen').disabled) return;
   const startSignature = signature(rawPlot(), state.program);
-  $('gen').disabled = true; $('undo').disabled = true; $('gen').textContent = 'جارٍ توزيع الغرف والتحقّق من الوصول…';
+  $('gen').disabled = true; $('freshIdeas').disabled = true; $('freshIdeas').textContent = 'جارٍ البحث…'; $('undo').disabled = true; $('gen').textContent = 'جارٍ البحث عن توزيعات مختلفة…';
   try {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
-    const result = await runMultiEngineDesign({ plot, rooms, idea: $('idea')?.value || '', discovery: state.discovery, briefContext: state.briefContext });
+    const currentSignature = signature(plot, rooms);
+    if (exploration.signature !== currentSignature) { exploration.signature = currentSignature; exploration.previous = []; }
+    const sameProgram = model => model && signature(model.plot, model.program) === currentSignature;
+    const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(h => h.model).filter(sameProgram)];
+    const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea')?.value || '', discovery: state.discovery, briefContext: state.briefContext, seed: ++exploration.seed, previous });
+    exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, requestId: result.request.requestId };
     state.model = result.selectedModel; state.signature = signature(plot, rooms);
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
-    $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّدت البدائل عبر Claude، وراجعتها Gemini، واختار AZIZ البديل التخطيطي الأولي.');
-  } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح محفوظ أدناه دون تغيير.' : '')); markDirty(); }
-  finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن البدائل ✦'; markDirty(); }
+    $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} أفكار مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
+  } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح محفوظ أدناه دون تغيير.' : '')); if (state.model) toast(error.message); markDirty(); }
+  finally { $('gen').disabled = false; $('freshIdeas').disabled = false; $('freshIdeas').textContent = 'أفكار جديدة ✦'; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن البدائل ✦'; markDirty(); }
 }
 function renderBOQ() {
   const m = state.model; $('boqEmpty').hidden = !!m; $('boqOutput').hidden = !m; if (!m) return;
@@ -617,6 +622,7 @@ function boot() {
   });
   $('applyDiscovery').addEventListener('click', () => { const text = discoveryText(); if (!text) return toast('اختر رغبة واحدة على الأقل أولًا.'); $('idea').value = [text, $('idea').value.trim()].filter(Boolean).join('\n\n'); $('idea').focus({ preventScroll: true }); toast('أُضيف موجز رغباتكم إلى الوصف؛ راجعه ثم حلّله أو عدّل جدول الغرف.'); });
   $('gen').addEventListener('click', generate);
+  $('freshIdeas').addEventListener('click', generate);
   $('alternativeCards').addEventListener('click', event => {
     const button = event.target.closest('[data-alternative]');
     if (!button || state.dirty || $('gen').disabled) return;

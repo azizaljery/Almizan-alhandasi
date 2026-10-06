@@ -11,6 +11,7 @@ import {validateEnvelope} from './gemini/packages/engineering-core/contracts/miz
 import {contentHash,geometryHash,candidateId,verifyCandidateBinding,canonicalJSON,FRAME,UNITS} from './control/reference/identity.mjs';
 import {auditMassing} from './control/reference/orthogonal-audit.mjs';
 import {createAziz,defaultConfig,fnv1aHash,stableStringify,fixedClock} from './aziz/index.js';
+import {exploreGeometry,conceptFor} from '../design-exploration.mjs';
 
 const CLAUDE_ID='@mizan/claude-planner';
 const CLAUDE_VERSION='2.3.1-p1-cla-01';
@@ -36,14 +37,14 @@ function supportedRequest(r) {
  }
  return reasons;
 }
-export async function generateCandidate(request,shape,generationOverrides={}) {
+export async function generateCandidate(request,shape,generationOverrides={},exploration=null) {
  const r=snapshot(request);
  if(!Object.hasOwn(STRATEGIES,shape)) throw Error('UNSUPPORTED_SHAPE');
  const inputReasons=supportedRequest(r); if(inputReasons.length) throw Error(inputReasons.join(';'));
  const plot={width:r.plot.widthM,length:r.plot.lengthM,entry:r.plot.entry,streets:r.plot.streets,
   floors:r.plot.floorsRequested,coverage:r.plot.coverageRatio,maxBuiltAreaM2:r.plot.maxBuiltAreaM2,...generationOverrides};
  const rooms=r.program.map(p=>({name:p.name,type:p.type,area:p.areaM2,position:p.position,side:p.side}));
- const m=generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
+ const m=exploration ? exploreGeometry(plot,rooms,shape,exploration,STRATEGIES[shape]) : generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
  const errors=validateModel(m); if(errors.length) throw Error('NATIVE_VALIDATION_FAILED:'+errors.join(';'));
  const geometry=Object.fromEntries(GEOMETRY_KEYS.filter(k=>m[k]!==undefined).map(k=>[k,structuredClone(m[k])]));
  canonicalJSON(geometry); // Never turn NaN/Infinity into JSON null.
@@ -51,9 +52,9 @@ export async function generateCandidate(request,shape,generationOverrides={}) {
  if(!massing.pass) throw Error('MASSING_NOT_EQUIVALENT');
  const c={schemaVersion:'1.0.0',kind:'CandidateEnvelope',projectId:r.projectId,requestId:r.requestId,
   inputHash:await contentHash(r),producer:{engineId:CLAUDE_ID,packageName:'planner-pkg',packageVersion:CLAUDE_VERSION,
-  sourceSha256:SOURCE,adapterVersion:ADAPTER_VERSION},alternativeKey:`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
+  sourceSha256:SOURCE,adapterVersion:exploration?'architectural-exploration/1.0.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
   units:{...UNITS},frame:FRAME,fallback:{used:m.shapeFallback,allowedByUser:false,reason:null},geometry,
-  presentation:{label:m.architecture.tag,massingParts:structuredClone(m.massingParts??null)}};
+  presentation:{label:exploration?conceptFor(exploration,m.shape).tag:m.architecture.tag,massingParts:structuredClone(m.massingParts??null)}};
  c.geometryHash=await geometryHash(c); c.candidateId=await candidateId(c);
  validateEnvelope(c,'candidate'); await verifyCandidateBinding(c,r);
  return {candidate:c,massing,nativeValidation:{engineId:CLAUDE_ID,sourceSha256:SOURCE,errors}};

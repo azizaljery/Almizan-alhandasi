@@ -20,8 +20,9 @@ for (const entry of ['s','n','e','w']) test(`integrated Claude -> Gemini -> AZIZ
   assert.equal(JSON.stringify({ plot, rooms }), before);
   assert.equal(out.decision.status, 'SELECTED_PRELIMINARY');
   assert.equal(out.aziz.status, 'selected');
-  assert.equal(out.models.length, 3);
-  assert.deepEqual(out.models.map(m => m.shape), ['rect','l','u']);
+  assert.ok(out.models.length >= 3 && out.models.length <= 6);
+  assert.ok(out.models.some(m => m.shape === 'rect'));
+  assert.ok(out.models.some(m => m.shape === 'u'));
   assert.ok(out.models.includes(out.selectedModel));
   for (const model of out.models) {
     assert.deepEqual(validateModel(model), []);
@@ -58,14 +59,14 @@ test('integrated generation honors current setback controls', async () => {
   assert.equal(wideOut.selectedModel.plot.neighborSetback, 3);
 });
 
-test('integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies', async () => {
+test('integrated project save restores exact explored geometry instead of regenerating old strategies', async () => {
   const plot = plotFor('s'), rooms = structuredClone(baseRooms);
   const out = await runMultiEngineDesign({ plot, rooms, discovery });
   const text = encodeProject({ plot, rooms, palette: 'resort', rates: {}, costReserve: 0, vat: 0, idea: '', discovery, model: out.selectedModel, alternatives: out.models, history: [] });
   const restored = decodeProject(text);
   assert.deepEqual(restored.model, out.selectedModel);
   assert.deepEqual(restored.alternatives, out.models);
-  assert.deepEqual(restored.alternatives.map(m => m.shape), ['rect','l','u']);
+  assert.deepEqual(restored.alternatives.map(m => m.shape), out.models.map(m => m.shape));
 });
 
 test('integrated U model remains editable with existing opening tools', async () => {
@@ -83,7 +84,7 @@ test('integrated U model remains editable with existing opening tools', async ()
   assert.equal(restored.openings.length, model.openings.length);
 });
 
-test('integrated path fails clearly when the explicit built-area cap makes all three shapes infeasible', async () => {
+test('integrated path fails clearly when the explicit built-area cap makes every explored layout infeasible', async () => {
   const plot = plotFor('s', { maxBuiltArea: 250 });
   await assert.rejects(() => runMultiEngineDesign({ plot, rooms: structuredClone(baseRooms), discovery }), /MAX_BUILT_AREA_EXCEEDED|No candidate|لم يتمكن/);
 });

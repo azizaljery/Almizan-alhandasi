@@ -1,4 +1,6 @@
-import { runPipeline } from './integration/pipeline.mjs';
+import { runPipeline, generateCandidate, decideReviewed } from './integration/pipeline.mjs';
+import { reviewCandidate } from './integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js';
+import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court' });
@@ -52,7 +54,8 @@ function modelFor(pair) {
   return {
     ...structuredClone(pair.candidate.geometry),
     strategy: SHAPE_STRATEGY[shape] || 'claude-rect',
-    architecture: CONCEPT[shape] || CONCEPT.rect,
+    architecture: pair.concept || CONCEPT[shape] || CONCEPT.rect,
+    exploration: { descriptor: layoutDescriptor(pair.candidate.geometry) },
     massingParts: structuredClone(pair.candidate.presentation.massingParts || null),
     engineVersion: 'mizan-p1-integrated',
     integration: {
@@ -64,10 +67,26 @@ function modelFor(pair) {
     },
   };
 }
-export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null }) {
+export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null, seed = 1, previous = [] }) {
   const request = await buildDesignRequest({ plot, rooms, idea, discovery, briefContext });
   const before = canonicalJSON({ plot, rooms });
-  const result = await runPipeline(request, { generationOverrides: { streetSetback: plot.streetSetback, neighborSetback: plot.neighborSetback } });
+  const overrides = { streetSetback: plot.streetSetback, neighborSetback: plot.neighborSetback };
+  let result;
+  if (plot.floors !== 1) result = await runPipeline(request, { generationOverrides: overrides });
+  else {
+    const candidates = [], failures = [];
+    for (const spec of explorationSpecs(seed)) {
+      try {
+        const generated = await generateCandidate(request, spec.shape, overrides, spec);
+        candidates.push({ ...generated, concept: conceptFor(spec, spec.shape) });
+      } catch (error) { if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
+    }
+    const diverse = selectDiverse(candidates, previous);
+    if (!diverse.length && candidates.length && previous.length) throw Error('لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.');
+    const pairs = [];
+    for (const generated of diverse) pairs.push({ ...generated, review: await reviewCandidate(generated.candidate, request) });
+    result = { pairs, failures, ...await decideReviewed(request, pairs) };
+  }
   if (canonicalJSON({ plot, rooms }) !== before) throw Error('INTEGRATION_MUTATED_CALLER_INPUT');
   if (result.decision.status !== 'SELECTED_PRELIMINARY' || !result.finalDesignState) {
     const details = [...(result.decision?.reasons || []), ...(result.failures || []).map(x => `${x.shape}: ${x.reason}`)].join(' | ');
