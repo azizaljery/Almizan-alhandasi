@@ -22,7 +22,7 @@ const $ = id => document.getElementById(id), all = selector => [...document.quer
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'modern', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -154,7 +154,7 @@ function drawRoute() {
 function on3DMode(mode, detail) {
   $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside';
   if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · مستوى النظر 1.6 م · اسحب للنظر وتحرك عبر الأبواب'; }
-  else $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + ' · تصور غير تنفيذي';
+  else { $('roof').checked = viewer?.roof?.visible || false; $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + ' · تصور غير تنفيذي'; }
   $('tourState').textContent = mode === 'inside' ? `داخل ${detail}` : 'منظور عام';
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
@@ -551,7 +551,19 @@ function exportResult(kind) {
 
 function boot() {
   $('journey').inert = true; $('app').inert = true;
-  $('enter').addEventListener('click', () => { $('intro').classList.add('off'); $('intro').inert = true; $('journey').inert = false; $('app').inert = false; document.querySelector('[data-go="rating"]').focus({ preventScroll: true }); });
+  document.body.classList.add('intro-active');
+  let introTimer;
+  const enterStudio = () => {
+    clearTimeout(introTimer);
+    if ($('intro').inert) return;
+    $('intro').classList.add('off'); $('intro').inert = true;
+    $('journey').inert = false; $('journey').style.display = 'none'; $('app').inert = false;
+    $('app').classList.add('show', 'studio-ready'); document.body.classList.remove('intro-active');
+    switchTab('rating');
+    document.querySelector('[data-tab="rating"]').focus({ preventScroll: true });
+    setTimeout(() => { $('intro').hidden = true; }, 750);
+  };
+  $('enter').addEventListener('click', enterStudio);
   all('[data-go]').forEach(button => button.addEventListener('click', () => { $('journey').style.display = 'none'; $('app').classList.add('show'); switchTab(button.dataset.go); }));
   all('[data-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
   all('[data-next]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.next)));
@@ -657,5 +669,6 @@ function boot() {
   $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length) return; state.program = publicRooms(state.proposal.rooms); state.manualEdits = true; renderRows(); $('aiReview').hidden = true; toast('حُفظ برنامج الذكاء في الجدول دون توليد الرسم بعد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); initVisualizer(() => state.model); void refreshAssistantStatus();
+  introTimer = setTimeout(enterStudio, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1200 : 4600);
 }
 boot();

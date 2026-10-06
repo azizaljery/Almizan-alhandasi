@@ -1,4 +1,6 @@
-import { TYPES, center, openingPoint, wallPieces } from './planner.mjs';
+import { center, openingPoint, wallPieces } from './planner.mjs';
+import { architecturalTextures, beveledBox } from './architectural-materials.mjs';
+import { furnishRoom } from './furniture3d.mjs';
 
 export class RoomViewer {
   constructor(container, onMode) {
@@ -6,22 +8,28 @@ export class RoomViewer {
     if (!T) throw Error('تعذّر تحميل مكتبة 3D. مخطط 2D يعمل؛ تحقّق من الاتصال ثم أعد المحاولة.');
     this.T = T; this.container = container; this.onMode = onMode; this.visible = true; this.mode = 'orbit';
     this.abort = new AbortController(); this.pointers = new Map(); this.scene = new T.Scene();
-    this.scene.background = new T.Color('#e8eceb');
-    this.camera = new T.PerspectiveCamera(48, 1, .05, 700);
+    this.scene.background = new T.Color('#e3e8de');
+    this.camera = new T.PerspectiveCamera(42, 1, .05, 700);
     try { this.renderer = new T.WebGLRenderer({ antialias: true, alpha: false }); }
     catch { throw Error('عرض 3D يحتاج WebGL، وهو غير متاح في هذا المتصفح. يمكنك متابعة المخطط 2D.'); }
     this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 2));
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     if (T.ACESFilmicToneMapping) this.renderer.toneMapping = T.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.05;
+    this.renderer.toneMappingExposure = .95;
+    this.textures = architecturalTextures(T);
     if (this.renderer.shadowMap) { this.renderer.shadowMap.enabled = true; if (T.PCFSoftShadowMap) this.renderer.shadowMap.type = T.PCFSoftShadowMap; }
     const canvas = this.renderer.domElement;
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
-    this.scene.add(new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8));
-    const light = new T.DirectionalLight(0xffe4b6, 3.1); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
-    if (light.shadow?.mapSize) { light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048; light.shadow.camera.near = 1; light.shadow.camera.far = 120; }
+    this.scene.add(new T.HemisphereLight(0xfffcf2, 0x7b927b, 2.1));
+    const light = new T.DirectionalLight(0xffefd3, 2.7); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
+    if (light.shadow?.mapSize) {
+      light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048;
+      light.shadow.camera.near = 1; light.shadow.camera.far = 180;
+      light.shadow.bias = -.00015; light.shadow.normalBias = .025;
+    }
     this.scene.add(light);
+    if (light.target) this.scene.add(light.target);
     const fill = new T.DirectionalLight(0xbcd8ff, .75); fill.position.set(24, 18, -35); this.scene.add(fill);
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
@@ -63,12 +71,22 @@ export class RoomViewer {
   mesh(x, y, z, w, h, d, color, rotation = 0, opacity = 1, options = {}) {
     const T = this.T;
     const Material = options.glass && T.MeshPhysicalMaterial ? T.MeshPhysicalMaterial : T.MeshStandardMaterial;
-    const material = new Material({ color, roughness: options.roughness ?? (options.glass ? .12 : .78), metalness: options.metalness ?? 0, transparent: opacity < 1 || options.glass, opacity, depthWrite: !(options.glass || opacity < .55), ...(options.glass ? { transmission: .55, thickness: .05 } : {}) });
-    const m = new T.Mesh(new T.BoxGeometry(Math.max(.01, w), Math.max(.01, h), Math.max(.01, d)), material);
+    const texture = this.textures[options.texture];
+    const material = new Material({ color, roughness: options.roughness ?? (options.glass ? .12 : .78), metalness: options.metalness ?? 0, transparent: opacity < 1 || options.glass, opacity, depthWrite: !(options.glass || opacity < .55), ...(texture ? { map: texture, bumpMap: texture, bumpScale: options.texture === 'stone' ? .018 : .006 } : {}), ...(options.glass ? { transmission: .35, thickness: .05, ior: 1.45 } : {}) });
+    const sizes = [w, h, d].map(v => Math.max(.01, v));
+    const geometry = options.rounded ? beveledBox(T, ...sizes) : new T.BoxGeometry(...sizes);
+    const m = new T.Mesh(geometry, material);
     m.position.set(x, y, z); m.rotation.y = rotation; m.castShadow = options.castShadow ?? !options.glass; m.receiveShadow = options.receiveShadow ?? !options.glass;
     (options.parent || this.group).add(m); return m;
   }
-  setModel(model, palette = 'resort') {
+  sphere(x, y, z, radius, color, options = {}) {
+    const T = this.T, scale = options.scale || [1, 1, 1];
+    if (!T.SphereGeometry) return this.mesh(x, y, z, radius * 2 * scale[0], radius * 2 * scale[1], radius * 2 * scale[2], color);
+    const m = new T.Mesh(new T.SphereGeometry(radius, 12, 8), new T.MeshStandardMaterial({ color, roughness: options.roughness ?? .75, metalness: options.metalness ?? 0 }));
+    m.position.set(x, y, z); m.scale.set(...scale); m.castShadow = true; m.receiveShadow = true;
+    this.group.add(m); return m;
+  }
+  setModel(model, palette = 'modern') {
     this.clear(); this.model = model; this.pieces = wallPieces(model);
     const b = model.building, p = model.plot, T = this.T, concept = model.architecture?.massing || 'spine';
     const materials = {
@@ -78,7 +96,6 @@ export class RoomViewer {
       hijazi: { facade: '#d7bea0', accent: '#7c4f3c', roof: '#b89b77', floor: '#eadbc8', metal: '#483a31' },
     };
     const style = materials[palette] || materials.resort;
-    const floorColors = { bedroom: '#dfe3ee', majlis: '#ead9bb', living: '#d7e8df', dining: '#eee3cf', kitchen: '#dce8d3', bath: '#dcecf1', storage: '#e6e1da', service: '#ead9d5', corridor: '#eee9df' };
     const addBox = (...args) => this.mesh(...args);
 
     // Site, streets, entry walk and a raised architectural plinth.
@@ -105,36 +122,30 @@ export class RoomViewer {
         const sideways = entry === 'e' || entry === 'w';
         addBox(ep.x + (sideways ? 0 : side * (externalDoor.w + 1) / 2), 1.3, -ep.y + (sideways ? side * (externalDoor.w + 1) / 2 : 0), .12, 2.6, .12, style.metal);
       }
+      // Entry cladding is decorative and stays outside the actual doorway.
+      if (palette === 'modern' || palette === 'resort') {
+        const wall = model.walls.find(w => w.id === externalDoor.wallId);
+        const dx = wall.x2 - wall.x1, dy = wall.y2 - wall.y1, length = Math.hypot(dx, dy);
+        const ux = dx / length, uy = dy / length;
+        const outward = { s: [0, .14], n: [0, -.14], e: [.14, 0], w: [-.14, 0] }[entry];
+        for (const sign of [-1, 1]) for (let i = 0; i < 7; i++) {
+          const along = sign * (externalDoor.w / 2 + .23 + i * .12);
+          addBox(ep.x + ux * along + outward[0], 1.5, -ep.y - uy * along + outward[1], .055, 2.7, .055, '#9b795a', 0, 1, { texture: 'wood' });
+        }
+      }
     }
 
-    // Floor finishes and furniture groups remain explicitly schematic, but read at architectural scale.
-    model.corridors.forEach(r => addBox(r.x + r.w / 2, .085, -r.y - r.h / 2, r.w, .035, r.h, '#eee8da', 0, 1, { roughness: .62 }));
+    // Physical surface maps and detailed furniture share the exact room footprint.
+    model.corridors.forEach(r => addBox(r.x + r.w / 2, .085, -r.y - r.h / 2, r.w, .035, r.h, '#e3ddce', 0, 1, { texture: 'stone', roughness: .72 }));
     model.rooms.forEach(r => {
-      addBox(r.x + r.w / 2, .09, -r.y - r.h / 2, r.w, .04, r.h, floorColors[r.type] || TYPES[r.type].color, 0, 1, { roughness: .58 });
-      if (r.type === 'bedroom' && r.w >= 2.5 && r.h >= 2.5) {
-        addBox(r.x + 1.05, .24, -r.y - r.h + 1.25, 1.55, .32, 2.05, '#b9b4aa');
-        addBox(r.x + 1.05, .47, -r.y - r.h + 1.25, 1.48, .16, 1.96, '#e9e5dc');
-        addBox(r.x + 1.05, .59, -r.y - r.h + .52, 1.3, .12, .38, '#f7f4ed');
-        addBox(r.x + r.w - .38, .95, -r.y - r.h / 2, .48, 1.78, Math.min(2.2, r.h - .5), '#887966');
-      } else if (r.type === 'majlis' || r.type === 'living') {
-        const sofa = r.type === 'majlis' ? '#b9986f' : '#779da0';
-        addBox(r.x + r.w / 2, .3, -r.y - .48, Math.max(1.1, r.w - .7), .5, .58, sofa);
-        addBox(r.x + .48, .3, -r.y - r.h / 2, .58, .5, Math.max(1.1, r.h - 1), sofa);
-        addBox(r.x + r.w / 2, .25, -r.y - r.h / 2, Math.min(1.45, r.w * .32), .36, Math.min(1.2, r.h * .28), '#76563c');
-      } else if (r.type === 'dining') {
-        addBox(r.x + r.w / 2, .42, -r.y - r.h / 2, Math.min(2.5, r.w * .52), .14, Math.min(1.3, r.h * .38), '#75543a');
-        for (const [dx, dz] of [[-.9, -.72], [.9, -.72], [-.9, .72], [.9, .72]]) addBox(r.x + r.w / 2 + dx, .28, -r.y - r.h / 2 + dz, .42, .52, .42, '#ad9d84');
-      } else if (r.type === 'kitchen') {
-        addBox(r.x + r.w / 2, .46, -r.y - r.h + .34, Math.max(.6, r.w - .35), .88, .58, '#9fab91');
-        if (r.w > 3.2 && r.h > 3) addBox(r.x + r.w / 2, .48, -r.y - r.h / 2, Math.min(1.8, r.w - 1.2), .9, .72, '#c4b69d');
-      } else if (r.type === 'bath') {
-        addBox(r.x + .5, .27, -r.y - r.h + .6, .5, .5, .7, '#edf3f2');
-        addBox(r.x + r.w - .4, .48, -r.y - .42, .55, .9, .5, '#d5e3e2', 0, .5, { glass: true });
-      } else if (r.type === 'storage' || r.type === 'service') addBox(r.x + r.w / 2, .78, -r.y - .32, Math.max(.4, r.w - .35), 1.5, .34, '#9f9584');
+      const texture = r.type === 'bedroom' || r.type === 'living' || r.type === 'majlis' ? 'wood' : r.type === 'bath' || r.type === 'kitchen' ? 'tile' : 'stone';
+      const color = texture === 'wood' ? '#cbb794' : texture === 'tile' ? '#e7e6db' : '#e7dfca';
+      addBox(r.x + r.w / 2, .09, -r.y - r.h / 2, r.w, .04, r.h, color, 0, 1, { texture, roughness: texture === 'tile' ? .38 : .68 });
+      furnishRoom(this, r, palette);
     });
 
     // Exact wall pieces keep door/window voids physically open; exterior receives the selected material system.
-    this.pieces.forEach(piece => addBox(piece.x, piece.bottom + piece.height / 2, -piece.y, piece.length, piece.height, piece.thickness, piece.type === 'ext' ? style.facade : '#f2eee6', piece.angle, 1, { roughness: piece.type === 'ext' ? .72 : .9 }));
+    this.pieces.forEach(piece => addBox(piece.x, piece.bottom + piece.height / 2, -piece.y, piece.length, piece.height, piece.thickness, piece.type === 'ext' ? style.facade : '#f2eee6', piece.angle, 1, { roughness: piece.type === 'ext' ? .72 : .9, texture: piece.type === 'ext' ? 'stone' : undefined }));
     model.openings.forEach(o => {
       const wall = model.walls.find(w => w.id === o.wallId), point = openingPoint(model, o), angle = Math.atan2(wall.y2 - wall.y1, wall.x2 - wall.x1);
       if (o.type === 'window') {
@@ -166,8 +177,8 @@ export class RoomViewer {
     const outside = (x, y) => x < b.x - .7 || x > b.x + b.w + .7 || y < b.y - .7 || y > b.y + b.h + .7;
     [[1, 1], [p.width - 1, 1], [1, p.length - 1], [p.width - 1, p.length - 1]].filter(([x, y]) => outside(x, y)).forEach(([x, y], i) => {
       addBox(x, .65, -y, .22, 1.3, .22, '#70543a');
-      addBox(x, 1.55, -y, 1.05, .72, 1.05, i % 2 ? '#507455' : '#60835d');
-      addBox(x, 2.05, -y, .72, .55, .72, '#6f9265');
+      this.sphere(x, 1.8, -y, .68, i % 2 ? '#567653' : '#719165', { scale: [1, 1.2, 1] });
+      this.sphere(x + .3, 1.66, -y + .15, .4, '#829c70');
     });
     if (concept === 'garden-front' || palette === 'resort') {
       const gy = model.plot.entry === 'n' ? b.y - .9 : b.y + b.h + .9;
@@ -181,16 +192,25 @@ export class RoomViewer {
 
     const points = [[0, 0], [p.width, 0], [p.width, p.length], [0, p.length], [0, 0]].map(([x, y]) => new T.Vector3(x, .07, -y));
     const line = new T.Line(new T.BufferGeometry().setFromPoints(points), new T.LineDashedMaterial({ color: 0x93753f, dashSize: .4, gapSize: .3 })); line.computeLineDistances(); this.group.add(line);
+    if (this.sunLight.target) this.sunLight.target.position.set(b.x + b.w / 2, 0, -b.y - b.h / 2);
+    if (this.sunLight.shadow?.camera) {
+      const extent = Math.max(p.width, p.length) * .8;
+      Object.assign(this.sunLight.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, far: Math.max(180, extent * 5) });
+      this.sunLight.shadow.camera.updateProjectionMatrix();
+    }
     this.view('persp'); this.resize();
   }
   view(name) {
     if (!this.model) return;
-    this.mode = 'orbit'; const b = this.model.building, s = Math.max(b.w, b.h);
+    this.mode = 'orbit'; const b = this.model.building;
     this.target.set(b.x + b.w / 2, .8, -b.y - b.h / 2);
-    this.phi = name === 'top' ? .02 : name === 'front' ? 1.42 : .65;
-    this.theta = name === 'front' ? ({ s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[this.model.plot.entry]) : Math.PI * .23;
+    this.phi = name === 'top' ? .02 : name === 'front' ? 1.3 : .78;
+    const entryAngle = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[this.model.plot.entry] || 0;
+    this.theta = entryAngle + (name === 'front' ? .08 : Math.PI * .22);
+    this.roof.visible = name === 'front';
     const aspect = Math.max(.35, this.container.clientWidth / Math.max(1, this.container.clientHeight));
-    this.radius = s * (name === 'front' ? 1.35 : Math.max(1.18, .96 / aspect));
+    const halfFov = Math.atan(Math.tan(21 * Math.PI / 180) * Math.min(1, aspect));
+    this.radius = Math.hypot(b.w, b.h) / (2 * Math.sin(halfFov)) * 1.06;
     this.onMode?.('orbit', name); this.render();
   }
   enter(id) {
@@ -219,7 +239,8 @@ export class RoomViewer {
   setSun(preview) {
     if (!this.sunLight || !preview?.visible) return;
     const rad = preview.azimuth * Math.PI / 180, altitude = Math.max(.12, preview.altitude * Math.PI / 180), distance = 52;
-    this.sunLight.position.set(Math.sin(rad) * Math.cos(altitude) * distance, Math.sin(altitude) * distance, -Math.cos(rad) * Math.cos(altitude) * distance);
+    const b = this.model.building;
+    this.sunLight.position.set(b.x + b.w / 2 + Math.sin(rad) * Math.cos(altitude) * distance, Math.sin(altitude) * distance, -b.y - b.h / 2 - Math.cos(rad) * Math.cos(altitude) * distance);
     this.sunLight.intensity = Math.max(1.3, Math.min(3.5, 1.2 + preview.altitude / 28)); this.render();
   }
   resize() {
@@ -239,5 +260,5 @@ export class RoomViewer {
     }
     this.renderer.render(this.scene, this.camera);
   }
-  destroy() { this.abort.abort(); this.resizeObserver.disconnect(); this.clear(); this.renderer.dispose(); this.renderer.domElement.remove(); }
+  destroy() { this.abort.abort(); this.resizeObserver.disconnect(); this.clear(); Object.values(this.textures).forEach(texture => texture.dispose()); this.renderer.dispose(); this.renderer.domElement.remove(); }
 }
