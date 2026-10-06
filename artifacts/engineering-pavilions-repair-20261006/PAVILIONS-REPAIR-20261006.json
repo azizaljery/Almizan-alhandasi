@@ -1,0 +1,73 @@
+{
+  "trigger": "User screenshot showed that linked pavilions were still unsupported; the prior change did not generate the requested concept.",
+  "scope": "Actual linked-pavilion generation and single active concept selection, in the isolated experimental Site only.",
+  "baseline_source_commit": "74d0a4b402432f2bb5b2ab3bb7acddc083228729",
+  "baseline_archive": "trial-v2-original.zip",
+  "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+  "implementation": [
+    "Preserves the frozen native Claude source files. A separate composer spaces the actual front/middle/back room bands into two or three pavilions linked by a roofed corridor.",
+    "Rebuilds the real footprint, exterior walls, opening references and exact non-overlapping massing parts; preserves all requested room IDs, areas, names, positions and sides.",
+    "Candidate provenance identifies @mizan/pavilion-composer and hashes its actual source file. Both shared contracts accept the explicit pavilions shape.",
+    "Independent cross-section verification rejects a rectangle relabelled as pavilions. Native validation, access checks, Gemini bound review and AZIZ eligibility remain required.",
+    "The latest card selected replaces the previous liked card in the UI. Its selection, 2D, actual RoomViewer model, saved project and quantities match."
+  ],
+  "default_case": {
+    "plot": "20x30 m, south entrance, original setbacks and 75% coverage",
+    "rooms": 12,
+    "requested_net_area_m2": 228,
+    "pavilions": 3,
+    "real_exterior_gap_depths_m": [
+      1.65,
+      1.65
+    ],
+    "gross_built_area_m2": 350.5173599003737,
+    "result": "PASS"
+  },
+  "verification": {
+    "site_tests": {
+      "passed": 124,
+      "failed": 0,
+      "log": "evidence/engineering-repair/pavilions-tests-20261006.log"
+    },
+    "focused_regressions": {
+      "passed": 19,
+      "failed": 0,
+      "log": "evidence/engineering-repair/pavilions-regression-20261006.log"
+    },
+    "build": {
+      "status": "PASS",
+      "log": "evidence/engineering-repair/pavilions-build-20261006.log"
+    },
+    "browser": {
+      "status": "PASS",
+      "flows": 13,
+      "report": "evidence/engineering-repair/browser-report.json",
+      "log": "evidence/engineering-repair/pavilions-browser-20261006.log",
+      "screenshots": [
+        "evidence/engineering-repair/browser-pavilions-3d.png",
+        "evidence/engineering-repair/browser-pavilions-phone.png"
+      ],
+      "saved_geometry": "evidence/engineering-repair/browser-pavilions-default.json",
+      "exported_svg": "evidence/engineering-repair/browser-pavilions-plan.svg"
+    }
+  },
+  "limitations": [
+    "Closed four-sided courtyard remains unsupported.",
+    "Pavilion generation needs at least two occupied front/middle/back bands; geometric or built-area failures preserve the last successful model.",
+    "The rectangular native base could not fit the default 20x30 room program for east/west entrances; 35x45 works in all four entrance directions. This is a generator limit, not proof that architecture is impossible.",
+    "The shared corridor does not certify privacy or independent guest/family routes.",
+    "No structural, MEP, soil, statutory or verified-reference assessment is invented.",
+    "Live remote AI and physical iPhone/iPad were not tested; real browser rendering used emulated device viewports.",
+    "The original AZIZ-COLLISION-REVIEW.zip / claimed 130 tests remains unavailable; 41 earlier P1 checks still require missing fixtures.",
+    "Earlier review comments beyond the requested generation fix remain unresolved."
+  ],
+  "abdullah_direct_communication": "BLOCKED: no connected Abdullah session or external task-messaging tool; no coordination or delivery acknowledgement claimed.",
+  "original_site_id": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+  "original_version_observed_before_this_update": 41,
+  "original_version_updated_at": "2026-10-06T20:59:40.853834+00:00",
+  "original_site_update_by_this_task": false,
+  "original_site_observation": "Original Site latest-version number changed from the previous session 40 to 41 outside this task; this task preserves the current observed state and only deploys the separate trial Site.",
+  "github_main_observed": "d32121e8b6acecec7bfe20ec90c55c127e8206dc",
+  "merge_performed": false,
+  "created_at": "2026-10-06T23:17:10.659791+00:00"
+}
