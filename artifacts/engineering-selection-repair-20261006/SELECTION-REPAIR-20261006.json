@@ -1,0 +1,104 @@
+{
+  "issue": "A selected house shape was retained as an unevaluated soft preference while automatic generation selected RECT.",
+  "scope": "Engineering only; isolated experimental Site update; original source and live Site preserved.",
+  "baseline_source_commit": "617b9bf0c89e091de235aa18aab442f51b31459d",
+  "baseline_archive": "trial-v1-original.zip (packaged alongside updated source)",
+  "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+  "changes": [
+    "Selected L/U shapes become an explicit hash-bound must constraint.",
+    "Native generation, Gemini review and the decision gate enforce allowed shapes.",
+    "Rejected supported shapes are excluded.",
+    "Closed courtyard and separate pavilions fail explicitly, without substitution.",
+    "A selected alternative persists across regeneration and project restoration.",
+    "Changes made during asynchronous generation reject stale results and preserve the last successful plan."
+  ],
+  "before": [
+    {
+      "choice": "family_layout",
+      "generated": "rect",
+      "alternatives": [
+        "rect",
+        "l",
+        "u"
+      ],
+      "decision": "Soft preferences retained in request but NOT_EVALUATED by this first integration preview."
+    },
+    {
+      "choice": "concept_comparison",
+      "generated": "rect",
+      "alternatives": [
+        "rect",
+        "l",
+        "u"
+      ],
+      "decision": "Soft preferences retained in request but NOT_EVALUATED by this first integration preview."
+    },
+    {
+      "choice": "courtyard_privacy",
+      "generated": "rect",
+      "alternatives": [
+        "rect",
+        "l",
+        "u"
+      ],
+      "decision": "Soft preferences retained in request but NOT_EVALUATED by this first integration preview."
+    },
+    {
+      "choice": "classic_living",
+      "generated": "rect",
+      "alternatives": [
+        "rect",
+        "l",
+        "u"
+      ],
+      "decision": "Soft preferences retained in request but NOT_EVALUATED by this first integration preview."
+    }
+  ],
+  "verification": {
+    "project_tests": {
+      "passed": 115,
+      "failed": 0,
+      "log": "evidence/engineering-repair/selection-tests-20261006.log"
+    },
+    "new_regressions": {
+      "passed": 10,
+      "failed": 0,
+      "log": "evidence/engineering-repair/selection-regression-after-20261006.log"
+    },
+    "build": {
+      "status": "PASS",
+      "log": "evidence/engineering-repair/selection-build-20261006.log"
+    },
+    "browser": {
+      "status": "PASS",
+      "flows": 12,
+      "report": "evidence/engineering-repair/browser-report.json",
+      "log": "evidence/engineering-repair/selection-browser-20261006.log"
+    }
+  },
+  "failed_attempts": [
+    {
+      "kind": "Bug reproduction before implementation",
+      "status": "9 initially authored assertions failed as expected on the baseline; later tests were refined and one gate regression added.",
+      "log": "evidence/engineering-repair/selection-regression-before-20261006.log"
+    },
+    {
+      "kind": "Browser harness attempt 1",
+      "reason": "Test tried to fill the built-area field while its land-input tab was hidden. The test navigation was corrected.",
+      "archive": "evidence/engineering-repair/selection-browser-attempt-1"
+    }
+  ],
+  "not_verified": [
+    "Original AZIZ-COLLISION-REVIEW.zip / claimed 130 tests remain unavailable.",
+    "41 original P1 checks still need missing fixtures.",
+    "Live remote AI service.",
+    "Physical iPad.",
+    "Previously outstanding review comments beyond this shape-selection repair."
+  ],
+  "abdullah_coordination": "BLOCKED: no connected Abdullah session or external task-messaging tool; no direct coordination or delivery acknowledgement claimed.",
+  "original_repository_merge_performed": false,
+  "original_site_deployment_performed": false,
+  "original_site_id": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+  "original_live_version": 40,
+  "created_at": "2026-10-06T13:22:15.956884+00:00"
+}

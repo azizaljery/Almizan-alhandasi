@@ -1,0 +1,31 @@
+{
+  "source": {
+    "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+    "checkout_path": "/workspace/engineering-preview-20261006",
+    "commit_sha": "74d0a4b402432f2bb5b2ab3bb7acddc083228729",
+    "archive": "/workspace/engineering-selection-repair-20261006/engineering-selection-trial-v2.tar.gz",
+    "archive_sha256": "b70b8ef2cd97af0bdab7ef48e1634749cf8f95d9b6746daa913767a29bb01e88",
+    "archive_files": 290,
+    "source_push_verified": true
+  },
+  "deployment": {
+    "id": "appgdep_6ac4f66b2f5c819190bb6a78138fafae",
+    "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+    "title": "الميزان الهندسي — تجربة الإصلاحات",
+    "version_id": "appgprj_6ac4eded93108191b87fe517f9f83b29~appgver_ea6afe478c788191ac8d2a353106c2aa",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://almizan-engineering-trial-20261006.aljeryabod.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6ac4eded93108191b87fe517f9f83b29",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-06T13:24:19.155678+00:00"
+  },
+  "trialVersion": 2,
+  "originalSiteUnchanged": true,
+  "originalMain": "d32121e8b6acecec7bfe20ec90c55c127e8206dc",
+  "testsPassed": 115,
+  "browserFlowsPassed": 12
+}
