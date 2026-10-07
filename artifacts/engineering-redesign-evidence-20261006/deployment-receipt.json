@@ -1,0 +1,52 @@
+{
+  "created_at_utc": "2026-10-07T00:00:52.775Z",
+  "source": {
+    "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+    "checkout_path": "/workspace/engineering-redesign-20261006",
+    "commit_sha": "875708041e75eb0ae2ab03cdd58b968c7c42182a",
+    "archive": "/workspace/engineering-redesign-evidence-20261006/engineering-workspace-trial-v4.tar.gz",
+    "archive_sha256": "ed85228d6a63e7f04d0a14f5d8123801d1a0e6cda3a93689f95e01f4de9de67c",
+    "archive_files": 295,
+    "source_push_verified": true
+  },
+  "deployment": {
+    "id": "appgdep_6ac58b783a3481919982ccefca64405d",
+    "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+    "title": "الميزان الهندسي — تجربة الإصلاحات",
+    "version_id": "appgprj_6ac4eded93108191b87fe517f9f83b29~appgver_5230d8af56e881918d625159ddd7395a",
+    "type": "publish",
+    "status": "succeeded",
+    "url": "https://almizan-engineering-trial-20261006.aljeryabod.chatgpt.site",
+    "has_mcp": false,
+    "screenshot_asset_pointer": null,
+    "provider_deployment_id": "site---6ac4eded93108191b87fe517f9f83b29",
+    "failure_message": null,
+    "env_set_revision": 0,
+    "updated_at": "2026-10-07T00:00:20.219549+00:00"
+  },
+  "experimental_site": {
+    "id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+    "version": 4,
+    "url": "https://almizan-engineering-trial-20261006.aljeryabod.chatgpt.site",
+    "access_mode": "custom",
+    "allowed_users_count": 1
+  },
+  "original_site": {
+    "id": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+    "version_before": 41,
+    "version_after": 41,
+    "unchanged": true
+  },
+  "original_source": {
+    "sha": "d32121e8b6acecec7bfe20ec90c55c127e8206dc",
+    "unchanged": true
+  },
+  "validation": {
+    "tests_passed": 134,
+    "tests_failed": 0,
+    "browser_flows_passed": 17,
+    "responsive_checks_passed": 3
+  },
+  "coordination_with_abdullah": "BLOCKED_NO_CONNECTED_DIRECT_CHANNEL",
+  "no_merge_or_original_publication": true
+}

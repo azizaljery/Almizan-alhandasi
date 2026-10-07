@@ -1,0 +1,122 @@
+{
+  "status": "VERIFIED_EXPERIMENTAL_RELEASE",
+  "created_at_utc": "2026-10-06T23:55:32.746086+00:00",
+  "scope": "Engineering site UI redesign and reviewable client request flow; original site and GitHub main remain outside the authorized publishing scope.",
+  "user_direction": {
+    "keep": "Right-hand step sequence",
+    "final_visual": "Neutral white and grey with restrained blue, inspired by large-company product interfaces.",
+    "superseded_direction": "Earlier dark direction was replaced after the user specified the palette."
+  },
+  "source_parent_sha": "73032f8d7fa17316a8c391194211c0ecbb456c6b",
+  "original_preservation": {
+    "frozen_archive": "original-trial-v3.zip",
+    "archive_sha256": "053c25e812f53d2d420c32dbffaeea5f596e076f1bd087106f906b247bdc9b5d",
+    "all_original_tracked_files_verified": 381,
+    "original_experimental_checkout_clean": true,
+    "main_sha": "d32121e8b6acecec7bfe20ec90c55c127e8206dc",
+    "original_site_version_observed_before": 41
+  },
+  "implementation": [
+    "Six-step responsive working surface opening directly on client request, preserving navigation sequence at the right.",
+    "Reviewable local extraction of counts, room areas, positions, plot dimensions, entrance, supported shape and material palette; separate replace/modify modes.",
+    "Questions for ambiguous/contradictory requests, visible assumptions and unsupported demands.",
+    "Stale proposal rejection and prevention of generation from unapplied text.",
+    "Actual room/area/position and shape comparison, with pending demands explicitly marked not evaluated.",
+    "Existing SVG, WebGL, editing, tours, save/import and BOQ flows preserved.",
+    "Pure visualization-prompt builder derives topology and area from actual model rather than a default rectangle.",
+    "Illustrative PNG captured from the actual native WebGL model, labeled as an example."
+  ],
+  "validation": {
+    "tests": {
+      "passed": 134,
+      "failed": 0,
+      "skipped": 0,
+      "log": "evidence/workspace-redesign/tests-release.log"
+    },
+    "build": {
+      "status": "PASS",
+      "log": "evidence/workspace-redesign/build-release.log"
+    },
+    "interactive_browser": {
+      "status": "PASS",
+      "workflow_flows": 17,
+      "responsive_checks": 3,
+      "page_errors": 0,
+      "min_assessment_contrast": 7.211336368695733,
+      "report": "evidence/workspace-redesign/browser-report.json",
+      "mobile_report": "evidence/workspace-redesign/mobile-report.json",
+      "viewports": [
+        "1440x1000",
+        "820x1180",
+        "390x844"
+      ],
+      "text_zoom": "200%",
+      "native_3d_geometry_compared_to_exported_2d_project": true
+    }
+  },
+  "failed_then_corrected": [
+    {
+      "finding": "Two initial regression failures: order-sensitive room comparison and obsolete portal navigation expectation.",
+      "resolution": "Compare actual room attributes independently of output order; verify new direct-entry navigation."
+    },
+    {
+      "finding": "Initial dark assessment contrast failure.",
+      "resolution": "Explicit readable labels; final palette contrast passed."
+    },
+    {
+      "finding": "Mobile flex direction inherited a column, pushing the primary action below the viewport.",
+      "resolution": "Explicit responsive horizontal step sequence; first-screen action verified."
+    },
+    {
+      "finding": "Browser selectors matched hidden or duplicate buttons during redesign.",
+      "resolution": "Scoped selectors; full release flows passed."
+    },
+    {
+      "finding": "First experimental source push rejected the 61,689,274-byte Playwright trace as artifacts_git_receive_pack_object_too_large.",
+      "resolution": "Keep the exact trace in the full review ZIP and commit its SHA256 pointer in the Site source repository."
+    }
+  ],
+  "not_tested": [
+    "Live external AI and image services: original protected services retained, no authorized code/key available for a real provider request.",
+    "Physical iPhone/iPad testing; browser emulation used.",
+    "Independent architectural/code/structural/MEP/soil/accessibility approval.",
+    "Delivery to or acknowledgment from Abdullah: no connected direct channel or Abdullah task session."
+  ],
+  "limitations": [
+    "Local request extraction uses bounded rules and is not a general language model.",
+    "Closed four-sided courtyard, additional floors and independent guest/family entrances remain unimplemented.",
+    "Unrecognized/special requirements require clarification and remain visible for review.",
+    "Prior missing 130-test AZIZ-COLLISION-REVIEW.zip is not reconstructed or claimed by this package; prior fixture blockers remain documented."
+  ],
+  "coordination": {
+    "abdullah": "BLOCKED_NO_CONNECTED_DIRECT_CHANNEL",
+    "shared_material_prepared": [
+      "Full source",
+      "Code diff",
+      "Test logs",
+      "SHA256 manifests",
+      "Browser traces",
+      "Screenshots",
+      "Restorable projects",
+      "Original archive"
+    ]
+  },
+  "publication_target": {
+    "project_id": "appgprj_6ac4eded93108191b87fe517f9f83b29",
+    "experimental_only": true,
+    "preserve_private_audience": true,
+    "original_site_project_id": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+    "github_artifact_branch": "artifact/engineering-repair-20261005",
+    "merge_authorized": false,
+    "original_site_publication_authorized": false
+  },
+  "archived_large_evidence": [
+    {
+      "filename": "browser-trace.zip",
+      "bytes": 61689274,
+      "sha256": "8083a7af10d37c92b7a3f64acdcce0b1301e8771d1cc81345ab92fdc1b6e76fa",
+      "package_path": "updated/evidence/workspace-redesign/browser-trace.zip",
+      "reason": "Sites source repository rejected the large trace blob. The original bytes are retained in the full review ZIP."
+    }
+  ]
+}
