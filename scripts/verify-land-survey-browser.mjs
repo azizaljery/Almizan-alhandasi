@@ -2,7 +2,8 @@ import http from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import assert from 'node:assert/strict';
-const { chromium } = await import(process.env.MIZAN_PLAYWRIGHT_PATH || 'playwright');
+const playwright = await import(process.env.MIZAN_PLAYWRIGHT_PATH || 'playwright');
+const { chromium } = playwright.default || playwright;
 
 const evidence = resolve('evidence/land-survey'); await mkdir(evidence, { recursive: true });
 const root = resolve('dist'), types = { '.html': 'text/html', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
