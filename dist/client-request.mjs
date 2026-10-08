@@ -25,8 +25,9 @@ const wingCountWords = {
 const wingNumberToken = `(?:\\d+(?:\\.\\d+)?|${Object.keys(wingCountWords).sort((a, b) => b.length - a.length).join('|')})`;
 const wingMarker = new RegExp(`(?:^|[\\s،,؛]|(?<=و))(?:(?<explicit>${wingNumberToken})\\s+)?(?<noun>جناح(?:ين|ان)?|اجنحة|اجنحه|wings?)(?=$|[\\s،,؛.!؟])`, 'giu');
 const wingCorrectionCue = /لكن|بل|قصدي|اقصد|التصحيح|تصحيح|صحح(?:ها|ه)?|اعني|بدل(?:ا)?(?: من)?|خلها|خليها|بالعكس|actually|instead|correction|i mean/i;
+const implicitWingCorrection = new RegExp(`(?:لكن|بل|قصدي|اقصد|التصحيح|تصحيح|صحح(?:ها|ه)?|اعني|بدل(?:ا)?(?: من)?|خلها|خليها|بالعكس|actually|instead|correction|i mean)\\s*(?:(?:ابي|ابغى|ابغا|اريد|ودي|ارغب|i\\s+want|i(?:'|’)d\\s+like)\\s*)?(?<count>${wingNumberToken})(?![\\p{L}\\p{N}])(?!(?:\\s*(?:غرفة|غرف|نوم|مجلس|صالة|مطبخ|حمام|مكتب|bedrooms?|rooms?)))(?!\\s*(?:اجنحة|اجنحه|جناح))`, 'giu');
 function extractWingCount(text) {
-  const markers = [...text.matchAll(wingMarker)].map(match => {
+  const explicitMarkers = [...text.matchAll(wingMarker)].map(match => {
     const explicit = match.groups.explicit;
     const noun = match.groups.noun.toLowerCase();
     const count = explicit !== undefined
@@ -36,6 +37,21 @@ function extractWingCount(text) {
           : null;
     return { index: match.index, end: match.index + match[0].length, count };
   }).filter(marker => marker.count !== null);
+  const implicitMarkers = [];
+  for (let index = 0; index < explicitMarkers.length; index++) {
+    const previous = explicitMarkers[index];
+    const next = explicitMarkers[index + 1];
+    const clause = text.slice(previous.end, next?.index ?? text.length);
+    for (const match of clause.matchAll(implicitWingCorrection)) {
+      const explicit = match.groups.count;
+      const value = wingCountWords[explicit.toLowerCase()] ?? Number(explicit);
+      if (Number.isFinite(value)) {
+        const countStart = previous.end + match.index + match[0].length - explicit.length;
+        implicitMarkers.push({ index: countStart, end: countStart + explicit.length, count: value });
+      }
+    }
+  }
+  const markers = [...explicitMarkers, ...implicitMarkers].sort((a, b) => a.index - b.index);
   if (!markers.length) return { count: null, conflict: false, counts: [] };
   let count = markers[0].count, conflict = false;
   for (let index = 1; index < markers.length; index++) {

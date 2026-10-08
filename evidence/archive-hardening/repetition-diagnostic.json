@@ -1,0 +1,28 @@
+{
+  "sameCandidateGeometrySet": true,
+  "candidateCount": [
+    4,
+    4
+  ],
+  "selectedSameGeometry": true,
+  "differentSeedSelectedSameGeometry": true,
+  "selectedShapes": [
+    "rect",
+    "rect"
+  ],
+  "firstPreferenceSet": [
+    "like:classic_living",
+    "priority:1"
+  ],
+  "secondPreferenceSet": [
+    "like:family_layout",
+    "priority:1"
+  ],
+  "azizNotes": [
+    "AZIZ selected from native-validated candidates after the bound Gemini review gate.",
+    "Only geometry validity, explicit area compliance and area efficiency are weighted; privacy, access graph, reference and MEP axes have weight 0.",
+    "Gemini incomplete discipline coverage is retained; this is not construction approval.",
+    "Soft preferences retained in request but NOT_EVALUATED by this first integration preview."
+  ],
+  "repeatability": "same plot, room program, seed, and candidate-generation path; only narrative/preferences differ"
+}

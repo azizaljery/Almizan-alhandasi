@@ -1,0 +1,21 @@
+.account-archive{position:relative}
+.account-archive>summary{list-style:none;cursor:pointer}
+.account-archive>summary::-webkit-details-marker{display:none}
+.archive-panel-body{position:absolute;z-index:80;inset-inline-end:0;top:calc(100% + 9px);width:min(370px,calc(100vw - 24px));display:grid;gap:12px;padding:18px;background:#fff;border:1px solid #d8d7d2;border-radius:16px;box-shadow:0 18px 50px #10100f25;color:#191917;text-align:right}
+.archive-panel-body h2{margin:0;font-size:1.08rem}
+.archive-status{margin:0;min-height:1.5em;font-size:.9rem;color:#5e5c55;line-height:1.6}
+.archive-status[data-state="ready"]{color:#176c4f}
+.archive-status[data-state="error"]{color:#9e3042}
+.archive-panel-body label{display:grid;gap:6px;font-size:.88rem;font-weight:600}
+.archive-panel-body input,.archive-panel-body select{width:100%;min-height:42px;padding:8px 10px;border:1px solid #cbc9c1;border-radius:9px;background:#fff;color:#191917;font:inherit}
+.archive-actions,.archive-picker{display:flex;align-items:center;gap:8px}
+.archive-actions>*{flex:1}
+.archive-picker label{flex:1}
+.archive-more{width:100%}
+.archive-panel-body button:disabled{opacity:.52;cursor:not-allowed}
+.archive-panel-body .archive-delete{color:#9e3042;border-color:#e7c4ca}
+.archive-note{color:#625f57;font-size:.82rem;line-height:1.55}
+.account-archive[open] .archive-panel-body{animation:archive-open .12s ease-out}
+@keyframes archive-open{from{opacity:.65;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:680px){.archive-panel-body{position:fixed;top:66px;inset-inline:12px;width:auto;max-height:calc(100dvh - 82px);overflow:auto}.archive-actions{gap:6px}.archive-panel-body .small-button{min-height:40px;padding:7px 8px;font-size:.82rem}}
+@media(prefers-reduced-motion:reduce){.account-archive[open] .archive-panel-body{animation:none}}

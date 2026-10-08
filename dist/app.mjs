@@ -1,6 +1,6 @@
 import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
-import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
-import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
+import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, validateModel, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
+import { escapeXML as esc, PlanViewport } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
 import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
@@ -8,7 +8,7 @@ import { reviewPlan } from './audit.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
 import { applySunOrientation, describeSunOrientation } from './sun-orientation.mjs';
 import { circulationNetwork } from './circulation.mjs';
-import { encodeProject, decodeProject, MAX_PROJECT_BYTES, quantitiesCSV } from './project.mjs';
+import { encodeProject, decodeProject, MAX_PROJECT_BYTES } from './project.mjs';
 import { designInsights } from './design-insights.mjs';
 import { monthName, solarPreview } from './solar-path.mjs';
 import { compareHomeModels, buildEngineeringPromptContext } from './home-design-engine.mjs';
@@ -21,13 +21,14 @@ import { analyzeClientRequest, auditClientRequest, extractClientDesires, request
 import { DESIGN_CHOICES } from './design-selection.mjs';
 import { analyzeSurveyGeometry, deriveRectangularGeneratorPlot, surveyFingerprint, validateLandSurvey } from './land-survey.mjs';
 import { initLandSurveyEditor } from './land-map.mjs';
+import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const exploration = { signature: '', previous: [], seed: 1 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
@@ -90,9 +91,11 @@ function markDirty() {
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
   $('resultState').textContent = state.dirty ? 'آخر مخطط ناجح — يحتاج تحديثًا' : 'المخطط مطابق للجدول';
   $('resultState').classList.toggle('warn', state.dirty);
-  $('exportPlan').disabled = !state.model || state.dirty;
-  $('exportBOQ').disabled = !state.model || state.dirty;
+  const archived = archiveIsCurrent();
+  $('exportPlan').disabled = !state.model || state.dirty || !archived;
+  $('exportBOQ').disabled = !state.model || state.dirty || !archived;
   all('[data-alternative]').forEach(button => { button.disabled = state.dirty || $('gen').disabled; });
+  renderArchiveControls();
   syncWorkspace();
 }
 function syncWorkspace() {
@@ -682,13 +685,206 @@ function download(content, mime, name) {
   anchor.href = url; anchor.download = name; document.body.append(anchor); anchor.click(); anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
+function projectText() {
+  return encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history, landSurvey: state.landSurvey, modelLandSurvey: state.modelLandSurvey });
+}
+function archiveProjectSignature() {
+  try {
+    const project = JSON.parse(projectText());
+    project.savedAt = '';
+    return JSON.stringify(project);
+  } catch { return ''; }
+}
+function archiveIsCurrent() {
+  const archive = state.archive;
+  return !!(archive.storageReady && archive.authenticated && archive.designId && archive.selectedDesignId === archive.designId && archive.receiptId && archive.loadedVersion && archive.loadedVersion === archive.currentVersion && archive.savedSignature && !state.dirty && archive.savedSignature === archiveProjectSignature());
+}
+function renderArchiveControls() {
+  if (!$('archiveStatus')) return;
+  const archive = state.archive, current = archiveIsCurrent();
+  const status = $('archiveStatus');
+  let text, kind = 'info';
+  if (!archive.storageReady) { text = archive.notice || 'الأرشيف غير متاح الآن. تبقى التعديلات في هذه الصفحة ويمكنك تنزيل ملف المشروع.'; kind = archive.notice ? 'error' : 'info'; }
+  else if (!archive.authenticated) { text = 'سجّل الدخول إلى ChatGPT لعرض تصاميم حسابك وحفظها.'; }
+  else if (!state.model) { text = 'ولّد مخططًا أولًا، ثم احفظ نسخة الحساب قبل تنزيل الرسم أو الكميات.'; }
+  else if (state.dirty) { text = 'حدّث المخطط بعد تعديل المدخلات، ثم احفظ النسخة الجديدة في الأرشيف.'; }
+  else if (current) { text = archive.notice || `المخطط الحالي محفوظ في الحساب${archive.loadedVersion ? ` · النسخة ${archive.loadedVersion}` : ''}.`; kind = 'ready'; }
+  else { text = archive.notice || 'هذه النسخة غير محفوظة في الحساب بعد. احفظها قبل تنزيل الرسم أو الكميات.'; kind = archive.notice ? 'error' : 'info'; }
+  status.textContent = text; status.dataset.state = kind;
+  $('archiveSignIn').hidden = !archive.storageReady || archive.authenticated;
+  $('archiveMore').hidden = !archive.hasMore;
+  $('archiveMore').disabled = archive.loading;
+  $('archiveDesigns').disabled = !archive.storageReady || !archive.authenticated || archive.loading || !archive.designs.length;
+  $('archiveVersions').disabled = !archive.storageReady || !archive.authenticated || archive.loading || !archive.selectedDesignId;
+  $('archiveSave').disabled = !archive.storageReady || !archive.authenticated || archive.loading || !state.model || state.dirty || !archive.designId || archive.selectedDesignId !== archive.designId;
+  $('archiveSaveNew').disabled = !archive.storageReady || !archive.authenticated || archive.loading || !state.model || state.dirty;
+  $('archiveLoad').disabled = !archive.storageReady || !archive.authenticated || archive.loading || !archive.selectedDesignId || !$('archiveVersions').value;
+  $('archiveDelete').disabled = !archive.storageReady || !archive.authenticated || archive.loading || !archive.selectedDesignId;
+}
+async function archiveApi(path, options = {}) {
+  const result = await fetch(path, { credentials: 'same-origin', cache: 'no-store', ...options });
+  let data = {};
+  try { data = await result.json(); } catch { /* handled by status below */ }
+  if (!result.ok) throw Object.assign(new Error(data.message || 'تعذر الاتصال بأرشيف الحساب.'), { status: result.status, code: data.error || 'request_failed' });
+  return data;
+}
+async function archiveDownload(path, payload) {
+  const result = await fetch(path, { method: 'POST', credentials: 'same-origin', cache: 'no-store', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+  if (!result.ok) {
+    let data = {};
+    try { data = await result.json(); } catch { /* status below */ }
+    throw Object.assign(new Error(data.message || 'تعذر التحقق من إيصال التصدير.'), { status: result.status, code: data.error || 'request_failed' });
+  }
+  if (result.headers.get('x-mizan-archive-receipt') !== payload.receiptId || result.headers.get('x-mizan-archive-version') !== String(payload.expectedVersion)) throw Error('لم يطابق إيصال النسخة استجابة التصدير؛ أُلغي التنزيل.');
+  return { blob: await result.blob(), mime: result.headers.get('content-type') || 'application/octet-stream' };
+}
+function setArchiveNotice(text, isError = false) {
+  state.archive.notice = text;
+  if ($('archiveStatus')) { $('archiveStatus').textContent = text; $('archiveStatus').dataset.state = isError ? 'error' : 'ready'; }
+}
+async function refreshArchive({ keepNotice = false } = {}) {
+  const archive = state.archive;
+  if (!archive.storageReady || !archive.authenticated) { renderArchiveControls(); return; }
+  archive.loading = true; renderArchiveControls();
+  try {
+    const result = await archiveApi('/api/archive/designs');
+    archive.designs = Array.isArray(result.designs) ? result.designs : [];
+    archive.nextCursor = result.nextCursor || null; archive.hasMore = result.hasMore === true;
+    const preferred = archive.designs.some(item => item.id === archive.selectedDesignId) ? archive.selectedDesignId
+      : archive.designs.some(item => item.id === archive.designId) ? archive.designId
+        : archive.designs[0]?.id || '';
+    archive.selectedDesignId = preferred;
+    const select = $('archiveDesigns');
+    select.replaceChildren(...(archive.designs.length ? archive.designs.map(item => {
+      const option = document.createElement('option'); option.value = item.id; option.textContent = `${item.title} · النسخة ${item.current_version}`; return option;
+    }) : [new Option('لا توجد تصاميم محفوظة', '')]));
+    select.value = preferred;
+    if (preferred) await refreshArchiveVersions(preferred, { keepNotice: true });
+    else { $('archiveVersions').replaceChildren(new Option('—', '')); $('archiveVersions').value = ''; }
+    if (!keepNotice) archive.notice = '';
+  } catch (error) {
+    archive.notice = error.message || 'تعذر تحديث الأرشيف.';
+    if (error.status === 503) archive.storageReady = false;
+  } finally { archive.loading = false; renderArchiveControls(); }
+}
+async function loadMoreArchive() {
+  const archive = state.archive;
+  if (!archive.storageReady || !archive.authenticated || !archive.hasMore || !archive.nextCursor || archive.loading) return;
+  archive.loading = true; renderArchiveControls();
+  try {
+    const result = await archiveApi(`/api/archive/designs?cursor=${encodeURIComponent(archive.nextCursor)}`);
+    const current = new Set(archive.designs.map(item => item.id));
+    archive.designs.push(...(result.designs || []).filter(item => !current.has(item.id)));
+    archive.nextCursor = result.nextCursor || null; archive.hasMore = result.hasMore === true;
+    const select = $('archiveDesigns'), selected = archive.selectedDesignId;
+    select.replaceChildren(...archive.designs.map(item => { const option = document.createElement('option'); option.value = item.id; option.textContent = `${item.title} · النسخة ${item.current_version}`; return option; }));
+    select.value = selected;
+  } catch (error) { archive.notice = error.message || 'تعذر تحميل تصاميم أقدم.'; }
+  finally { archive.loading = false; renderArchiveControls(); }
+}
+async function refreshArchiveVersions(id, { keepNotice = true } = {}) {
+  if (!id) return;
+  const result = await archiveApi(`/api/archive/designs/${encodeURIComponent(id)}/versions`);
+  const rows = Array.isArray(result.versions) ? result.versions : [];
+  $('archiveVersions').replaceChildren(...(rows.length ? rows.map(item => {
+    const option = document.createElement('option'); option.value = String(item.version_number); option.textContent = `النسخة ${item.version_number} · ${new Date(item.created_at).toLocaleDateString('ar-SA')}`; return option;
+  }) : [new Option('لا توجد نسخ', '')]));
+  const design = state.archive.designs.find(item => item.id === id);
+  $('archiveVersions').value = rows.some(item => item.version_number === design?.current_version) ? String(design.current_version) : String(rows[0]?.version_number || '');
+  if (!keepNotice) state.archive.notice = '';
+}
+async function initArchive() {
+  try {
+    const result = await archiveApi('/api/archive/session');
+    state.archive.storageReady = result.storageReady === true;
+    state.archive.authenticated = result.authenticated === true;
+    if (state.archive.storageReady && state.archive.authenticated) await refreshArchive();
+  } catch (error) {
+    state.archive.storageReady = false;
+    state.archive.authenticated = error.code === 'sign_in_required';
+    state.archive.notice = error.message || 'تعذر الاتصال بأرشيف الحساب؛ بقيت التعديلات المحلية كما هي.';
+  }
+  renderArchiveControls();
+}
+async function saveArchive({ asNew = false } = {}) {
+  const archive = state.archive;
+  if (!archive.storageReady || !archive.authenticated) return setArchiveNotice('سجّل الدخول وتأكد من توفر الأرشيف قبل الحفظ.', true);
+  if (!state.model || state.dirty) return setArchiveNotice('حدّث المخطط أولًا حتى تُحفظ المدخلات والهندسة معًا.', true);
+  const project = projectText(), projectSignature = archiveProjectSignature(), title = $('archiveTitle').value;
+  const useUpdate = !asNew && archive.designId && archive.designId === archive.selectedDesignId;
+  const url = useUpdate ? `/api/archive/designs/${encodeURIComponent(archive.designId)}` : '/api/archive/designs';
+  const method = useUpdate ? 'PUT' : 'POST';
+  const expectedVersion = useUpdate ? archive.currentVersion : null;
+  const requestSignature = archiveRequestSignature({ url, method, targetDesignId: useUpdate ? archive.designId : '', expectedVersion, title, project: projectSignature });
+  const pending = pendingArchiveKey({ key: archive.pendingKey, signature: archive.pendingSignature }, requestSignature, () => crypto.randomUUID());
+  archive.pendingKey = pending.key; archive.pendingSignature = pending.signature;
+  const payload = { title, project, idempotencyKey: archive.pendingKey };
+  if (useUpdate) payload.expectedVersion = expectedVersion;
+  archive.loading = true; archive.notice = ''; renderArchiveControls();
+  try {
+    const result = await archiveApi(url, {
+      method, headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload),
+    });
+    if (!result.receiptId) throw Error('لم يصدر إيصال هندسي للنسخة المحفوظة؛ لم يُفعّل التصدير.');
+    archive.designId = result.designId; archive.currentVersion = result.currentVersion || result.version; archive.loadedVersion = result.version; archive.receiptId = result.receiptId;
+    archive.selectedDesignId = result.designId; archive.savedSignature = projectSignature; archive.pendingKey = ''; archive.pendingSignature = '';
+    $('archiveTitle').value = result.title || payload.title;
+    await refreshArchive({ keepNotice: true });
+    markDirty();
+    setArchiveNotice(`حُفظ التصميم في حسابك · النسخة ${result.version}${result.duplicate ? ' · بصمة المقارنة مطابقة لنسخة محفوظة' : ''}.`);
+  } catch (error) {
+    if (error.status === 503) archive.storageReady = false;
+    setArchiveNotice(error.status ? error.message : 'تعذر الاتصال بالأرشيف؛ بقيت المدخلات على الشاشة. أعد المحاولة.', true);
+  } finally { archive.loading = false; renderArchiveControls(); }
+}
+async function loadArchiveVersion() {
+  const archive = state.archive, id = $('archiveDesigns').value, version = $('archiveVersions').value;
+  if (!id || !version || archive.loading) return;
+  archive.loading = true; archive.notice = ''; renderArchiveControls();
+  try {
+    const saved = await archiveApi(`/api/archive/designs/${encodeURIComponent(id)}/versions/${encodeURIComponent(version)}`);
+    const project = decodeProject(saved.project);
+    if (!saved.model || validateModel(saved.model).length) throw Error('تعذّر التحقق من هندسة النسخة؛ بقي المشروع الحالي كما هو.');
+    project.model = saved.model;
+    applyProjectState(project, 'تم فتح نسخة الحساب والتحقق من المدخلات والهندسة المحفوظة.');
+    archive.designId = saved.designId; archive.currentVersion = saved.currentVersion; archive.loadedVersion = saved.version; archive.receiptId = saved.receiptId || '';
+    archive.selectedDesignId = saved.designId; archive.savedSignature = archiveProjectSignature();
+    $('archiveTitle').value = saved.title;
+    markDirty();
+    setArchiveNotice(`فُتحت النسخة ${saved.version} من الأرشيف.`);
+  } catch (error) { setArchiveNotice(error.message || 'تعذر فتح النسخة؛ بقيت المدخلات الحالية كما هي.', true); }
+  finally { archive.loading = false; renderArchiveControls(); }
+}
+async function deleteArchiveDesign() {
+  const archive = state.archive, id = $('archiveDesigns').value;
+  const design = archive.designs.find(item => item.id === id);
+  if (!design || archive.loading) return;
+  if (!window.confirm(`سيُحذف «${design.title}» مع نسخه المحفوظة. لا يمكن التراجع عن الحذف. هل تريد المتابعة؟`)) return;
+  archive.loading = true; renderArchiveControls();
+  try {
+    await archiveApi(`/api/archive/designs/${encodeURIComponent(id)}`, { method: 'DELETE', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ expectedVersion: design.current_version }) });
+    if (archive.designId === id) { archive.designId = ''; archive.currentVersion = null; archive.loadedVersion = null; archive.receiptId = ''; archive.savedSignature = ''; }
+    markDirty();
+    archive.selectedDesignId = ''; await refreshArchive(); setArchiveNotice('حُذف التصميم ونسخه من الأرشيف.');
+  } catch (error) { setArchiveNotice(error.message || 'تعذر حذف التصميم.', true); }
+  finally { archive.loading = false; renderArchiveControls(); }
+}
 function saveProject() {
   if ($('gen').disabled) return toast('انتظر اكتمال العملية الجارية قبل الحفظ.');
   try {
-    const text = encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history, landSurvey: state.landSurvey, modelLandSurvey: state.modelLandSurvey });
+    const text = projectText();
     download(text, 'application/json;charset=utf-8', 'mizan-handasi-project.json');
     message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات ورغبات المنزل وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. احتفظ بالملف؛ لا يوجد حفظ سحابي أو تلقائي.');
   } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
+}
+function applyProjectState(project, statusText) {
+  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
+  state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
+  restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
+  state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
+  $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
+  if (state.model) showResults(); else { $('out').style.display = 'none'; viewer?.setVisible(false); }
+  message('projectStatus', statusText);
 }
 async function importProject(file) {
   if (!file || $('gen').disabled) return;
@@ -700,22 +896,19 @@ async function importProject(file) {
   try {
     const { project } = await runPlanner({ projectText: await file.text() });
     if (JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
-    state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null;
-    state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
-    restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
-    state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
-    $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
-    if (state.model) showResults(); else { $('out').style.display = 'none'; viewer?.setVisible(false); }
-    message('projectStatus', 'تم استيراد المشروع والتحقق من مخططاته وحدود المسح المحفوظة. لم يُستورد أو يُحفظ أي رمز دخول.');
+    applyProjectState(project, 'تم استيراد المشروع والتحقق من مخططاته وحدود المسح المحفوظة. لم يُستورد أو يُحفظ أي رمز دخول.');
   } catch (error) { message('projectStatus', error.message); }
   finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; markDirty(); }
 }
-function exportResult(kind) {
+async function exportResult(kind) {
   if (!state.model || state.dirty || $('gen').disabled) return toast('حدّث المخطط قبل تصدير الرسم أو الكميات.');
+  if (!archiveIsCurrent()) return toast('احفظ النسخة المطابقة في أرشيف الحساب قبل تصدير الرسم أو الكميات.');
   try {
-    if (kind === 'svg') download(buildPlanSVG(state.model), 'image/svg+xml;charset=utf-8', 'mizan-handasi-plan.svg');
-    else download(quantitiesCSV(state.model, state.rates, number('costReserve'), number('vat')), 'text/csv;charset=utf-8', 'mizan-handasi-quantities.csv');
-  } catch (error) { toast(error.message); }
+    const archive = state.archive, version = archive.loadedVersion;
+    const { blob, mime } = await archiveDownload(`/api/archive/designs/${encodeURIComponent(archive.designId)}/exports/${kind}`, { receiptId: archive.receiptId, expectedVersion: version });
+    if (!archiveIsCurrent() || archive.loadedVersion !== version) return toast('تغيّرت النسخة أثناء تجهيز التصدير؛ أُلغِي التنزيل.');
+    download(blob, mime, kind === 'svg' ? 'mizan-handasi-plan.svg' : 'mizan-handasi-quantities.csv');
+  } catch (error) { toast(error.message || 'تعذر تصدير النسخة المحفوظة.'); }
 }
 
 function boot() {
@@ -853,6 +1046,20 @@ function boot() {
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
   $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview); $('showGemini').addEventListener('change', renderGeminiMarkers);
   $('saveProject').addEventListener('click', saveProject);
+  $('archiveSave').addEventListener('click', () => { void saveArchive(); });
+  $('archiveSaveNew').addEventListener('click', () => { void saveArchive({ asNew: true }); });
+  $('archiveRefresh').addEventListener('click', () => { void refreshArchive(); });
+  $('archiveMore').addEventListener('click', () => { void loadMoreArchive(); });
+  $('archiveDesigns').addEventListener('change', async () => {
+    const archive = state.archive; archive.selectedDesignId = $('archiveDesigns').value; archive.loading = true; renderArchiveControls();
+    try { await refreshArchiveVersions(archive.selectedDesignId, { keepNotice: false }); }
+    catch (error) { archive.notice = error.message || 'تعذر تحميل نسخ هذا التصميم.'; }
+    finally { archive.loading = false; renderArchiveControls(); }
+  });
+  $('archiveVersions').addEventListener('change', renderArchiveControls);
+  $('archiveTitle').addEventListener('input', renderArchiveControls);
+  $('archiveLoad').addEventListener('click', () => { void loadArchiveVersion(); });
+  $('archiveDelete').addEventListener('click', () => { void deleteArchiveDesign(); });
   $('loadProject').addEventListener('click', () => { if (!$('gen').disabled) $('projectFile').click(); });
   $('projectFile').addEventListener('change', async () => { const file = $('projectFile').files[0]; $('projectFile').value = ''; await importProject(file); });
   $('exportPlan').addEventListener('click', () => exportResult('svg')); $('exportBOQ').addEventListener('click', () => exportResult('csv'));
@@ -864,13 +1071,13 @@ function boot() {
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));
   all('[data-move]').forEach(b => b.addEventListener('click', () => viewer?.move(b.dataset.move)));
   $('roof').addEventListener('change', () => viewer?.setRoof($('roof').checked)); $('retry3D').addEventListener('click', () => { void show3D(true); });
-  $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); });
-  ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
+  $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); markDirty(); });
+  ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', () => { updateCosts(); markDirty(); }));
   $('askAI').addEventListener('click', askAI);
   $('askLocal').addEventListener('click', understandRequest); $('applySun').addEventListener('click', applySunToProgram);
   $('drawAI').addEventListener('click', drawFromAIProposal);
   $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length || state.proposal.questions.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم أو يحتاج إجابة؛ أعد التحليل قبل الاعتماد.'); state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true; switchTab('design'); toast('حُفظ البرنامج في الجدول؛ راجعه قبل التوليد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'result' && $('app').classList.contains('show')));
-  renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); renderLandSurveySummary(); initVisualizer(() => state.model); switchTab('rating'); void refreshAssistantStatus();
+  renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); renderLandSurveySummary(); initVisualizer(() => state.model); switchTab('rating'); void refreshAssistantStatus(); void initArchive();
 }
 boot();

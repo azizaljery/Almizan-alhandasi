@@ -1,0 +1,507 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "76258b7b-82c0-4468-9443-eb36214aa1ad",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "archive_design_versions": {
+      "name": "archive_design_versions",
+      "columns": {
+        "design_id": {
+          "name": "design_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_user_id": {
+          "name": "owner_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version_number": {
+          "name": "version_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "project_snapshot_json": {
+          "name": "project_snapshot_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exact_model_json": {
+          "name": "exact_model_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "novelty_geometry_json": {
+          "name": "novelty_geometry_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exact_geometry_hash": {
+          "name": "exact_geometry_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "topology_json": {
+          "name": "topology_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "decision_trace_json": {
+          "name": "decision_trace_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "novelty_hash": {
+          "name": "novelty_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "geometry_policy_version": {
+          "name": "geometry_policy_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "engine_version": {
+          "name": "engine_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_archive_versions_design_owner": {
+          "name": "fk_archive_versions_design_owner",
+          "tableFrom": "archive_design_versions",
+          "tableTo": "archive_designs",
+          "columnsFrom": [
+            "design_id",
+            "owner_user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "owner_user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pk_archive_design_versions": {
+          "columns": [
+            "design_id",
+            "version_number"
+          ],
+          "name": "pk_archive_design_versions"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_archive_versions_version_number": {
+          "name": "ck_archive_versions_version_number",
+          "value": "\"archive_design_versions\".\"version_number\" >= 1"
+        }
+      }
+    },
+    "archive_designs": {
+      "name": "archive_designs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_user_id": {
+          "name": "owner_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "current_version": {
+          "name": "current_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_archive_designs_id_owner": {
+          "name": "uq_archive_designs_id_owner",
+          "columns": [
+            "id",
+            "owner_user_id"
+          ],
+          "isUnique": true
+        },
+        "idx_archive_designs_owner_updated": {
+          "name": "idx_archive_designs_owner_updated",
+          "columns": [
+            "owner_user_id",
+            "updated_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_archive_designs_current_version": {
+          "name": "ck_archive_designs_current_version",
+          "value": "\"archive_designs\".\"current_version\" >= 1"
+        },
+        "ck_archive_designs_title_length": {
+          "name": "ck_archive_designs_title_length",
+          "value": "length(\"archive_designs\".\"title\") BETWEEN 1 AND 120"
+        }
+      }
+    },
+    "archive_geometry_claims": {
+      "name": "archive_geometry_claims",
+      "columns": {
+        "novelty_hash": {
+          "name": "novelty_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_user_id": {
+          "name": "owner_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "design_id": {
+          "name": "design_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tombstoned_at": {
+          "name": "tombstoned_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_archive_claims_owner_design": {
+          "name": "idx_archive_claims_owner_design",
+          "columns": [
+            "owner_user_id",
+            "design_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_archive_claim_tombstone_state": {
+          "name": "ck_archive_claim_tombstone_state",
+          "value": "(\"archive_geometry_claims\".\"owner_user_id\" IS NOT NULL AND \"archive_geometry_claims\".\"design_id\" IS NOT NULL AND \"archive_geometry_claims\".\"tombstoned_at\" IS NULL) OR (\"archive_geometry_claims\".\"owner_user_id\" IS NULL AND \"archive_geometry_claims\".\"design_id\" IS NULL AND \"archive_geometry_claims\".\"tombstoned_at\" IS NOT NULL)"
+        }
+      }
+    },
+    "archive_idempotency": {
+      "name": "archive_idempotency",
+      "columns": {
+        "owner_user_id": {
+          "name": "owner_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "operation": {
+          "name": "operation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_design_id": {
+          "name": "target_design_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expected_version": {
+          "name": "expected_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "request_hash": {
+          "name": "request_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "design_id": {
+          "name": "design_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version_number": {
+          "name": "version_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_archive_idempotency_owner_design": {
+          "name": "idx_archive_idempotency_owner_design",
+          "columns": [
+            "owner_user_id",
+            "design_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "fk_archive_idempotency_version_owner": {
+          "name": "fk_archive_idempotency_version_owner",
+          "tableFrom": "archive_idempotency",
+          "tableTo": "archive_design_versions",
+          "columnsFrom": [
+            "design_id",
+            "version_number"
+          ],
+          "columnsTo": [
+            "design_id",
+            "version_number"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "pk_archive_idempotency": {
+          "columns": [
+            "owner_user_id",
+            "idempotency_key"
+          ],
+          "name": "pk_archive_idempotency"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "ck_archive_idempotency_key_length": {
+          "name": "ck_archive_idempotency_key_length",
+          "value": "length(\"archive_idempotency\".\"idempotency_key\") BETWEEN 16 AND 100"
+        },
+        "ck_archive_idempotency_operation": {
+          "name": "ck_archive_idempotency_operation",
+          "value": "\"archive_idempotency\".\"operation\" IN ('create', 'update')"
+        }
+      }
+    },
+    "archive_receipts": {
+      "name": "archive_receipts",
+      "columns": {
+        "receipt_id": {
+          "name": "receipt_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_user_id": {
+          "name": "owner_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "design_id": {
+          "name": "design_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version_number": {
+          "name": "version_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "novelty_hash": {
+          "name": "novelty_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "exact_geometry_hash": {
+          "name": "exact_geometry_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "geometry_policy_version": {
+          "name": "geometry_policy_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_archive_receipts_owner_version": {
+          "name": "idx_archive_receipts_owner_version",
+          "columns": [
+            "owner_user_id",
+            "design_id",
+            "version_number"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "fk_archive_receipt_version": {
+          "name": "fk_archive_receipt_version",
+          "tableFrom": "archive_receipts",
+          "tableTo": "archive_design_versions",
+          "columnsFrom": [
+            "design_id",
+            "version_number"
+          ],
+          "columnsTo": [
+            "design_id",
+            "version_number"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_archive_receipt_design_owner": {
+          "name": "fk_archive_receipt_design_owner",
+          "tableFrom": "archive_receipts",
+          "tableTo": "archive_designs",
+          "columnsFrom": [
+            "design_id",
+            "owner_user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "owner_user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

@@ -2,6 +2,7 @@
 .env.*
 !.env.example
 dist/server/
+dist/client/
 dist/.openai/
 .sites-runtime/
 node_modules/

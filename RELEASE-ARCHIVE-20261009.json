@@ -1,0 +1,16 @@
+{
+  "release": "2026.10.09-archive-1",
+  "source_handoff": "3b899ecfdee04b5b03f524a5dfc2d4baef4e0448",
+  "rollback": "0a323bf65c63e947e3da18cbde19173717e06678",
+  "tests": {
+    "passed": 169,
+    "failed": 0
+  },
+  "archive_policy": "exact canonical geometry with normalized rotation/reflection; not general structural uniqueness",
+  "local_validation": "SQLite D1-compatible shim; production D1 validation pending",
+  "deployment_adaptations": [
+    "Worker and public assets separated into dist/server and dist/client",
+    "Fresh schema-only Drizzle migration: no prior live D1 binding or migrations",
+    "Repaired incomplete optional dependency lock entries"
+  ]
+}

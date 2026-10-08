@@ -1,0 +1,48 @@
+{
+  "site": "local static build; archive API mocked",
+  "tests": 9,
+  "results": [
+    {
+      "name": "export requires a matching saved receipt and version",
+      "pass": true
+    },
+    {
+      "name": "generate then archive enables current SVG export",
+      "pass": true
+    },
+    {
+      "name": "dirty snapshot locks exports until next archive version",
+      "pass": true
+    },
+    {
+      "name": "load an exact archived version and restore state",
+      "pass": true
+    },
+    {
+      "name": "old saved version stays blocked from current export",
+      "pass": true
+    },
+    {
+      "name": "lost response retries the identical idempotent write without duplicating a version",
+      "pass": true
+    },
+    {
+      "name": "service failure preserves edits and blocks export",
+      "pass": true
+    },
+    {
+      "name": "archive layout at 390px",
+      "pass": true,
+      "viewport": 390,
+      "scroll": 390,
+      "panel": 366
+    },
+    {
+      "name": "archive layout at 820px",
+      "pass": true,
+      "viewport": 820,
+      "scroll": 820,
+      "panel": 370
+    }
+  ]
+}

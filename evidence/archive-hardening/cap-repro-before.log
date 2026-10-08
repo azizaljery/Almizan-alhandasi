@@ -1,0 +1,5 @@
+Baseline: commit 5e3e550c57d43dfffe8fe2a8f8b31ec5334ee56e, before local fix.
+Test: same-geometry PUT at a full 500-version archive cap.
+Observed response: HTTP 409; expected HTTP 507 archive_storage_limit.
+Observed database state after rejection: current_version=501, title changed to "يجب ألا يتغير هذا العنوان", archived version rows remained 500.
+The request therefore mutated the design row without inserting version 501.

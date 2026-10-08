@@ -1,0 +1,11 @@
+✔ archive rejects new versions at its bounded local storage ceiling (102.278031ms)
+✔ a same-geometry PUT at the 500-version cap refuses without mutating the design (117.503725ms)
+✔ a competing archive write that reaches the 500-version cap blocks an in-flight same-geometry PUT atomically (75.763149ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 403.020573

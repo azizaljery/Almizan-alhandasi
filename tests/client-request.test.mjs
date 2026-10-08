@@ -28,6 +28,7 @@ test('staggered wings require an explicit supported count of exactly two',async(
 test('wing-count corrections follow text order and unresolved count conflicts block generation',async()=>{
  const twoThenThree='أبي جناحين متدرجين مرتبطين، لكن أبي ٣ أجنحة متدرجة، غرفتين نوم ومطبخ';
  const rejected=await analyzeClientRequest(input(twoThenThree));assert.equal(rejected.wingCount,3);assert.ok(rejected.questions.some(q=>/يدعم جناحين فقط/.test(q)));await assert.rejects(buildDesignRequest({plot,rooms:rejected.rooms,idea:twoThenThree}),/يدعم جناحين فقط/);
+ const shorthand='أبي جناحين متدرجين، لكن أبي٣';const shorthandResult=await analyzeClientRequest(input(shorthand));assert.equal(shorthandResult.wingCount,3);assert.ok(shorthandResult.questions.some(q=>/يدعم جناحين فقط/.test(q)));await assert.rejects(buildDesignRequest({plot,rooms:shorthandResult.rooms,idea:shorthand}),/يدعم جناحين فقط/);
  const threeThenCorrectedTwo='أبي ٣ أجنحة متدرجة مرتبطة، لكن تصحيح صريح: أبي جناحين متدرجين مرتبطين، غرفتين نوم ومطبخ';
  const corrected=await analyzeClientRequest(input(threeThenCorrectedTwo));assert.equal(corrected.wingCount,2);assert.equal(corrected.questions.length,0);const request=await buildDesignRequest({plot,rooms:corrected.rooms,idea:threeThenCorrectedTwo});assert.deepEqual(request.hardConstraints.find(c=>c.kind==='wing_count_exact').value,{count:2});
  const unresolved='أبي جناحين متدرجين مرتبطين و٣ أجنحة متدرجة، غرفتين نوم ومطبخ';
