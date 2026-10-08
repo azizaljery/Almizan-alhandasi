@@ -122,7 +122,8 @@ async function runAdversarial() {
     await page.locator('#requestReview:not([hidden])').waitFor();
     const questions = (await page.locator('#requestQuestions').allTextContents()).map(item => item.trim()).filter(Boolean);
     const proposed = await page.locator('#requestRooms').innerText();
-    return { questions, proposed, applyEnabled: !(await page.locator('#applyRequest').isDisabled()) };
+    const facts = await page.locator('#requestFacts').innerText();
+    return { questions, proposed, facts, applyEnabled: !(await page.locator('#applyRequest').isDisabled()) };
   };
   try {
     await page.goto(`http://127.0.0.1:${server.address().port}`, { waitUntil: 'networkidle' });
@@ -153,12 +154,18 @@ async function runAdversarial() {
       ['unsupported north facade', 'غرفة نوم ٤×٦ بواجهة شمالية', /لا يثبت أي جدار خارجي.*لم نطبق الطلب/],
       ['generic staggered wing count', 'أبي أجنحة متدرجة مرتبطة، غرفتين نوم ومطبخ', /حدّد عدد الأجنحة/],
       ['unsupported three-wing count', 'أبي ٣ أجنحة متدرجة مرتبطة، غرفتين نوم ومطبخ', /يدعم جناحين فقط/],
+      ['two then corrected three-wing count', 'جناحين متدرجين مرتبطين، لكن أبي ٣ أجنحة متدرجة، غرفتين نوم ومطبخ', /طلبت 3 أجنحة.*يدعم جناحين فقط/],
+      ['conflicting two and three counts without correction', 'جناحين متدرجين مرتبطين و٣ أجنحة متدرجة، غرفتين نوم ومطبخ', /أعداد مختلفة.*بلا عبارة تصحيح/],
     ]) {
       const result = await review(prompt);
       assert.equal(result.applyEnabled, false, `${label} must block application`);
       assert.match(result.questions.join(' '), expected);
       blockedCases.push({ label, questions: result.questions, applyEnabled: result.applyEnabled });
     }
+    const correctedCount = await review('٣ أجنحة متدرجة مرتبطة، لكن تصحيح صريح: أبي جناحين متدرجين مرتبطين، غرفتين نوم ومطبخ');
+    assert.equal(correctedCount.applyEnabled, true);
+    assert.match(correctedCount.facts, /عدد الأجنحة\s*جناحان.*يطابق التكوين المدعوم/s);
+    steps.push({ case: 'explicit correction from three wings to two resolves in text order and remains applicable', status: 'PASS' });
     assert.deepEqual(errors, []);
     const report = { status: 'PASS', steps, blockedCases, pageErrors: errors, notes: ['All cases used the visible local request UI. The explicit 4×4 versus 20 m² conflict and north-facing facade remain unapplied. No live AI was called.'] };
     await writeFile(resolve(evidence, 'adversarial-ui-report.json'), JSON.stringify(report, null, 2) + '\n');

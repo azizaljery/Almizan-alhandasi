@@ -8,18 +8,47 @@ export const requestShapeLabels = labels;
 const shapePatterns = [
   ['closed', /فناء\s*(?:خاص\s*)?(?:مغلق|من اربع|اربعة جوانب)/i],
   ['pavilions', /اجنحة\s*(?:منفصلة|مرتبطة|يربطها|مع رواق)|(?:اجنحة|كتل).*?رواق|linked pavilions/i],
-  ['staggered', /(?:اجنحة|جناح(?:ين|ان))\s*متدرج(?:ة|ين|ون|ان)?|(?:شكل|تكوين|كتل)\s*متدرج|staggered wings/i],
+  ['staggered', /(?:اجنحة|جناح(?:ين|ان)?)\s*متدرج(?:ة|ين|ون|ان)?|(?:شكل|تكوين|كتل)\s*متدرج|staggered wings/i],
   ['l', /(?:شكل|حرف|بيت|جناحين|جناحان)\s*(?:حرف\s*)?l\b/i],
   ['u', /(?:شكل|حرف|بيت|باحة)\s*(?:حرف\s*)?u\b/i],
   ['rect', /(?:بيت|شكل|مخطط|كتلة)\s*مستطيل|rectangular/i],
 ];
 const unique = list => [...new Set(list)];
 const hasNegation = prefix => /(?:ما\s*(?:ابي|ابغى|اريد)|لا\s*(?:ابي|اريد)?|بدون|استبعد|غير|مو)\s*$/.test(prefix.trim());
-const wingCountWords = { one: 1, two: 2, three: 3, four: 4, five: 5, واحد: 1, واحدة: 1, اثنين: 2, اثنتين: 2, ثنتين: 2, ثلاث: 3, ثلاثة: 3, اربع: 4, اربعة: 4, خمس: 5, خمسة: 5 };
+const wingCountWords = {
+  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  واحد: 1, واحدة: 1, اثنان: 2, اثنتان: 2, اثنين: 2, اثنتين: 2, اثنا: 2, اثنتا: 2, ثنين: 2, ثنتين: 2,
+  ثلاث: 3, ثلاثة: 3, ثلاثه: 3, اربع: 4, اربعة: 4, اربعه: 4, خمس: 5, خمسة: 5, خمسه: 5,
+  ست: 6, ستة: 6, سته: 6, سبع: 7, سبعة: 7, سبعه: 7, ثمان: 8, ثمانية: 8, ثمانيه: 8,
+  تسع: 9, تسعة: 9, تسعه: 9, عشر: 10, عشرة: 10, عشره: 10,
+};
+const wingNumberToken = `(?:\\d+(?:\\.\\d+)?|${Object.keys(wingCountWords).sort((a, b) => b.length - a.length).join('|')})`;
+const wingMarker = new RegExp(`(?:^|[\\s،,؛]|(?<=و))(?:(?<explicit>${wingNumberToken})\\s+)?(?<noun>جناح(?:ين|ان)?|اجنحة|اجنحه|wings?)(?=$|[\\s،,؛.!؟])`, 'giu');
+const wingCorrectionCue = /لكن|بل|قصدي|اقصد|التصحيح|تصحيح|صحح(?:ها|ه)?|اعني|بدل(?:ا)?(?: من)?|خلها|خليها|بالعكس|actually|instead|correction|i mean/i;
 function extractWingCount(text) {
-  if (/جناحين|جناحان/i.test(text)) return 2;
-  const match = text.match(/(?:^|[\s،,])([0-9]+|one|two|three|four|five|واحد|واحدة|اثنين|اثنتين|ثنتين|ثلاث|ثلاثة|اربع|اربعة|خمس|خمسة)\s+(?:اجنحة|اجنحه|جناح)(?=$|[\s،,])/i);
-  return match ? (wingCountWords[match[1].toLowerCase()] ?? Number(match[1])) : null;
+  const markers = [...text.matchAll(wingMarker)].map(match => {
+    const explicit = match.groups.explicit;
+    const noun = match.groups.noun.toLowerCase();
+    const count = explicit !== undefined
+      ? (wingCountWords[explicit.toLowerCase()] ?? Number(explicit))
+      : /جناحين|جناحان/i.test(noun) ? 2
+        : /جناح$/i.test(noun) || /^wing$/i.test(noun) ? 1
+          : null;
+    return { index: match.index, end: match.index + match[0].length, count };
+  }).filter(marker => marker.count !== null);
+  if (!markers.length) return { count: null, conflict: false, counts: [] };
+  let count = markers[0].count, conflict = false;
+  for (let index = 1; index < markers.length; index++) {
+    const current = markers[index], previous = markers[index - 1];
+    const correction = wingCorrectionCue.test(text.slice(previous.end, current.index));
+    if (current.count === count) {
+      if (correction) conflict = false;
+      continue;
+    }
+    count = current.count;
+    conflict = correction ? false : true;
+  }
+  return { count: conflict ? null : count, conflict, counts: markers.map(marker => marker.count) };
 }
 
 const special = [
@@ -46,8 +75,10 @@ export function extractShapeIntent(prompt) {
   let shape = positiveShapes.length === 1 ? positiveShapes[0] : null;
   if (positiveShapes.length > 1) { questions.push(`طلبت أكثر من شكل (${positiveShapes.map(s => labels[s]).join('، ')}). اختر شكلًا واحدًا قبل تطبيق الطلب.`); shape = null; }
   if (positiveShapes.some(s => negativeShapes.includes(s))) { questions.push('الشكل نفسه مطلوب ومستبعد في الوصف؛ وضّح الاختيار الذي تريد تطبيقه.'); shape = null; }
-  const wingCount = shape === 'staggered' ? extractWingCount(text) : null;
-  if (shape === 'staggered' && wingCount === null) questions.push('حدّد عدد الأجنحة المتدرجة. المولد الحالي يدعم جناحين متدرجين مرتبطين فقط؛ لا نفترض العدد من وصف عام.');
+  const wingIntent = shape === 'staggered' ? extractWingCount(text) : { count: null, conflict: false, counts: [] };
+  const wingCount = wingIntent.count;
+  if (shape === 'staggered' && wingIntent.conflict) questions.push(`وردت أعداد مختلفة للأجنحة (${unique(wingIntent.counts).join('، ')}) بلا عبارة تصحيح صريحة. حدّد العدد؛ لم نعتمد أيًّا منها.`);
+  else if (shape === 'staggered' && wingCount === null) questions.push('حدّد عدد الأجنحة المتدرجة. المولد الحالي يدعم جناحين متدرجين مرتبطين فقط؛ لا نفترض العدد من وصف عام.');
   else if (shape === 'staggered' && wingCount !== 2) questions.push(`طلبت ${wingCount} أجنحة متدرجة، بينما المولد الحالي يدعم جناحين فقط؛ لم نستبدل العدد المطلوب.`);
   return { shape, wingCount, rejectedShapes: negativeShapes, questions };
 }

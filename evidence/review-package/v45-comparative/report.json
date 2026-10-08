@@ -38,5 +38,6 @@
     }
   },
   "adversarialUI": "natural-ui/adversarial-ui-report.json",
+  "wingCountCorrectionChecks": "natural-ui/adversarial-ui-report.json",
   "exactRawOutputs": "natural-ui/"
 }

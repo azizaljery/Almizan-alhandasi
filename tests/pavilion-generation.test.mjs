@@ -87,6 +87,16 @@ test('simulated AI response normalization preserves separate exact rooms and bin
     assert.ok(Math.abs(actual.w - requested.dimensions.width) < 1e-5 && Math.abs(actual.h - requested.dimensions.length) < 1e-5
       || Math.abs(actual.w - requested.dimensions.length) < 1e-5 && Math.abs(actual.h - requested.dimensions.width) < 1e-5);
   }
+  const normalizedAiRooms = normalizeRooms(brief.rooms);
+  const twoThenThree = 'جناحين متدرجين مرتبطين، لكن أبي ٣ أجنحة متدرجة';
+  await assert.rejects(buildDesignRequest({ plot: plotFor(), rooms: normalizedAiRooms, idea: twoThenThree }), /يدعم جناحين فقط/);
+  const threeThenCorrectedTwo = '٣ أجنحة متدرجة مرتبطة، لكن تصحيح صريح: أبي جناحين متدرجين مرتبطين';
+  const correctedRequest = await buildDesignRequest({ plot: plotFor(), rooms: normalizedAiRooms, idea: threeThenCorrectedTwo });
+  assert.deepEqual(correctedRequest.hardConstraints.find(c => c.kind === 'wing_count_exact').value, { count: 2 });
+  const correctedCandidate = await generateCandidate(correctedRequest, 'staggered');
+  assert.equal(correctedCandidate.candidate.presentation.massingParts.filter(part => part.component === 'wing').length, 2);
+  const unresolvedCount = 'جناحين متدرجين مرتبطين و٣ أجنحة متدرجة';
+  await assert.rejects(buildDesignRequest({ plot: plotFor(), rooms: normalizedAiRooms, idea: unresolvedCount }), /أعداد مختلفة.*بلا عبارة تصحيح/);
 });
 test('a rebound rectangle labelled pavilions fails geometry review and the decision gate', async () => {
   const request = await buildDesignRequest({ plot: plotFor(), rooms, discovery });

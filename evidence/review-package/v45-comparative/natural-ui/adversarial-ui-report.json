@@ -8,6 +8,10 @@
     {
       "case": "بدون مجلس removes the requested rooms and preserves all four bedrooms",
       "status": "PASS"
+    },
+    {
+      "case": "explicit correction from three wings to two resolves in text order and remains applicable",
+      "status": "PASS"
     }
   ],
   "blockedCases": [
@@ -36,6 +40,20 @@
       "label": "unsupported three-wing count",
       "questions": [
         "طلبت 3 أجنحة متدرجة، بينما المولد الحالي يدعم جناحين فقط؛ لم نستبدل العدد المطلوب."
+      ],
+      "applyEnabled": false
+    },
+    {
+      "label": "two then corrected three-wing count",
+      "questions": [
+        "طلبت 3 أجنحة متدرجة، بينما المولد الحالي يدعم جناحين فقط؛ لم نستبدل العدد المطلوب."
+      ],
+      "applyEnabled": false
+    },
+    {
+      "label": "conflicting two and three counts without correction",
+      "questions": [
+        "وردت أعداد مختلفة للأجنحة (2، 3) بلا عبارة تصحيح صريحة. حدّد العدد؛ لم نعتمد أيًّا منها."
       ],
       "applyEnabled": false
     }
