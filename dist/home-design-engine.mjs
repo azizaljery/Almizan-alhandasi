@@ -66,7 +66,7 @@ function addDiscoveryPreferences(project, discovery = {}) {
 function addDiscoveryRelationships(project, discovery = {}) {
   const avoids = Array.isArray(discovery.avoids) ? discovery.avoids : [];
   if (avoids.includes('مرور الضيوف عبر خصوصية العائلة')) {
-    addRelationship(project, { from: 'men_majlis', to: 'family_hall', type: 'forbidden', priority: 'very_important', reason: 'منع عبور الضيوف في نطاق العائلة' });
+    addRelationship(project, { from: 'men_majlis', to: 'family_hall', type: 'forbidden', scope: 'entry_routes', priority: 'very_important', reason: 'منع عبور الضيوف في نطاق العائلة' });
   }
   if (avoids.includes('مطبخ بعيد عن الطعام والخدمات')) {
     addRelationship(project, { from: 'kitchen', to: 'dining', type: 'direct', priority: 'important', reason: 'تقريب المطبخ والطعام' });
@@ -147,12 +147,7 @@ export function modelToEngineeringDesign(model, id = `plan-${model?.strategy || 
       externalPaving: 0
     },
     counts: { doors: q.doors, windows: q.windows },
-    metrics: {
-      daylight: q.windows >= model.rooms.length ? 0.8 : 0.55,
-      ventilation: q.windows >= model.rooms.length ? 0.8 : 0.55,
-      constructability: 0.75,
-      futureExpansion: 0.5
-    },
+    metrics: {},
     sourceModel: model
   };
 }
@@ -196,4 +191,3 @@ export function buildEngineeringPromptContext({ plot, rooms, discovery = {}, ide
     } : null
   };
 }
-

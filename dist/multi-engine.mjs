@@ -1,10 +1,13 @@
+import { extractShapeIntent } from './client-request.mjs';
+import { resolveDesignShapes } from './design-selection.mjs';
 import { runPipeline, generateCandidate, decideReviewed } from './integration/pipeline.mjs';
 import { reviewCandidate } from './integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js';
 import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 
-const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court' });
+const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions' });
 const CONCEPT = Object.freeze({
+  pavilions: { tag: 'أجنحة مرتبطة برواق', form: 'أجنحة تفصلها فراغات خارجية', idea: 'كتل حقيقية تربطها حركة مغطاة وتحفظ البرنامج.', bestFor: 'البرنامج المقسم إلى مناطق', tradeoff: 'يتطلب عمقًا أكبر ولا يضمن مداخل مستقلة', massing: 'pavilions' },
   rect: { tag: 'مستطيل منضبط', form: 'كتلة مستطيلة صريحة', idea: 'حل مباشر يختبر البرنامج ضمن كتلة واحدة واضحة.', bestFor: 'الأراضي والبرامج التي تفضّل البساطة', tradeoff: 'تنوع كتلي أقل مقابل وضوح أعلى', massing: 'rect' },
   l: { tag: 'كتلة L حقيقية', form: 'جناحان متعامدان', idea: 'يفتح جانبًا من الأرض ويكوّن فصلًا أوضح بين جناحين.', bestFor: 'الخصوصية والحديقة الجانبية', tradeoff: 'واجهة وجدران خارجية أطول', massing: 'l' },
   u: { tag: 'كتلة U حقيقية', form: 'ثلاثة أجنحة حول فناء مفتوح', idea: 'يحتضن فناءً داخليًا مفتوحًا مع اتصال بصري بين الأجنحة.', bestFor: 'الخصوصية والفناء المركزي', tradeoff: 'كتلة أكثر تعقيدًا وتحتاج مساحة مناسبة', massing: 'u' },
@@ -27,7 +30,22 @@ function preferenceList(discovery = {}, briefContext = null) {
   for (const value of briefContext?.topPriorities || []) rows.push({ id: `priority:${rows.length}`, kind: 'prefer_priority', description: String(value), weight: 1, value: { text: String(value) }, source: 'user' });
   return rows;
 }
-export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {}, briefContext = null }) {
+
+export function requestedDesignShapes({ idea = '', discovery = {}, selectedShape = null }) {
+  const intent = extractShapeIntent(idea);
+  if (intent.questions.length) throw Error(intent.questions.join(' '));
+  if (intent.shape === 'closed') throw Error('الفناء المغلق من أربع جهات غير متاح للتوليد؛ لم نستبدله بشكل آخر.');
+  const allowed = resolveDesignShapes(discovery, selectedShape).filter(shape => !intent.rejectedShapes.includes(shape));
+  if (intent.shape && !allowed.includes(intent.shape)) throw Error('الشكل المطلوب في الوصف يتعارض مع اختيار الشكل الحالي؛ وحّد اختيارك قبل التوليد.');
+  const resolved = intent.shape ? [intent.shape] : allowed;
+  if (!resolved.length) throw Error('استبعدت جميع الأشكال المدعومة؛ اختر شكلًا متاحًا قبل التوليد.');
+  return resolved;
+}
+
+export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null }) {
+  const shapes = requestedDesignShapes({ idea, discovery, selectedShape });
+  const textIntent = extractShapeIntent(idea);
+  const shapeConstraint = selectedShape !== null || discovery.likes?.length || discovery.rejects?.length || textIntent.shape || textIntent.rejectedShapes.length ? [{ id: 'HC-USER-SHAPES', kind: 'shape_allowed', description: 'Preserve explicit allowed shapes without fallback.', value: { shapes }, source: 'user', priority: 'must' }] : [];
   const program = rooms.map(publicRoom);
   const seed = {
     projectId: 'MIZAN-SITE-V33-P1',
@@ -37,7 +55,7 @@ export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {
     },
     drawnFloorsSupported: 1,
     program,
-    hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }],
+    hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }, ...shapeConstraint],
     softPreferences: preferenceList(discovery, briefContext),
     interpretation: {
       status: 'confirmed',
@@ -67,18 +85,21 @@ function modelFor(pair) {
     },
   };
 }
-export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null, seed = 1, previous = [] }) {
-  const request = await buildDesignRequest({ plot, rooms, idea, discovery, briefContext });
+export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null, seed = 1, previous = [] }) {
+  const request = await buildDesignRequest({ plot, rooms, idea, discovery, briefContext, selectedShape });
+  const allowedShapes = requestedDesignShapes({ idea, discovery, selectedShape });
   const before = canonicalJSON({ plot, rooms });
   const overrides = { streetSetback: plot.streetSetback, neighborSetback: plot.neighborSetback };
   let result;
   if (plot.floors !== 1) result = await runPipeline(request, { generationOverrides: overrides });
   else {
     const candidates = [], failures = [];
-    for (const spec of explorationSpecs(seed)) {
+    const specs = explorationSpecs(seed).filter(spec => allowedShapes.includes(spec.shape));
+    if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
+    for (const spec of specs) {
       try {
-        const generated = await generateCandidate(request, spec.shape, overrides, spec);
-        candidates.push({ ...generated, concept: conceptFor(spec, spec.shape) });
+        const generated = await generateCandidate(request, spec.shape, overrides, spec.shape === 'pavilions' ? null : spec);
+        candidates.push({ ...generated, concept: spec.shape === 'pavilions' ? CONCEPT.pavilions : conceptFor(spec, spec.shape) });
       } catch (error) { if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
     }
     const diverse = selectDiverse(candidates, previous);
@@ -94,7 +115,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
       'ADDITIONAL_FLOORS_NOT_IMPLEMENTED',
       'طلبتَ أكثر من دور، لكن محرك التصميم الحالي يرسم الدور الأرضي فقط. اختر «دور واحد» ثم أعد التوليد.'
     );
-    throw Error(userFacingDetails || 'لم يتمكن محرك القرار من اعتماد بديل تخطيطي أولي.');
+    throw Error((request.hardConstraints.some(c=>c.kind==='shape_allowed') ? 'تعذّر تنفيذ الشكل المختار ضمن المدخلات الحالية؛ لم نولّد شكلًا آخر بدلًا منه. ' : '') + (userFacingDetails || 'لم يتمكن محرك القرار من اعتماد بديل تخطيطي أولي.'));
   }
   const pairs = result.pairs;
   const models = pairs.map(modelFor);

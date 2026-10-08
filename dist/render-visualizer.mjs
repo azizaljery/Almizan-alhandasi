@@ -3,6 +3,7 @@
  */
 
 import { buildPlanSVG } from './plan-view.mjs';
+import { pavilionTopology } from './pavilion-planner.mjs';
 
 const IMAGE_WORKER_URL = globalThis.MIZAN_IMAGE_WORKER_URL || 'https://mizan-images.aljeryabod.workers.dev';
 const MAX_GALLERY_ITEMS = 20;
@@ -25,13 +26,21 @@ const writeGallery = value => { try { localStorage.setItem(GALLERY_STORAGE_KEY, 
 
 export function buildDallePrompt(model, options = {}) {
   const style = STYLE_DESCRIPTORS[options.style || 'resort'] || STYLE_DESCRIPTORS.resort;
-  const structure = STRUCTURES[options.structure || 'block'] || STRUCTURES.block;
+  const actualShape = model?.shape;
+  const structure = actualShape === 'pavilions'
+    ? `${pavilionTopology(model).pavilionCount || 'Multiple'} pavilion bodies connected by narrow roofed corridor ribbons, separated by real outdoor gaps, exactly as in the supplied plan`
+    : STRUCTURES[({ l: 'L', u: 'U', rect: 'block' }[actualShape]) || options.structure || 'block'] || STRUCTURES.block;
   const lighting = LIGHTS[options.timeLighting || 'golden'] || LIGHTS.golden;
   const view = VIEWS[options.viewAngle || 'hero'] || VIEWS.hero;
   const plot = model?.plot;
   const building = model?.building;
   const plotText = plot?.width && plot?.length ? `on a ${Math.round(plot.width)} by ${Math.round(plot.length)} metre plot` : 'on a Saudi residential plot';
-  const footprintText = building?.w && building?.h ? `The generated building footprint is approximately ${Math.round(building.w * building.h)} square metres.` : '';
+  const polygon = model?.buildingFootprint;
+  const footprintArea = Array.isArray(polygon) && polygon.length >= 3
+    ? Math.abs(polygon.reduce((sum, p, i) => { const q = polygon[(i + 1) % polygon.length]; return sum + p.x * q.y - q.x * p.y; }, 0)) / 2
+    : building?.w && building?.h ? building.w * building.h : null;
+  const footprintText = footprintArea ? `The generated building footprint is approximately ${Math.round(footprintArea)} square metres.` : '';
+  const entryText = plot?.entry ? `AUTHORITATIVE ENTRANCE SIDE: ${{ n: 'north', s: 'south', e: 'east', w: 'west' }[plot.entry] || plot.entry}. North is positive Y; east is positive X. Preserve the entrance side and orientation.` : '';
   const rooms = Array.isArray(model?.program) ? model.program.slice(0, 30).map(room => room.name).filter(Boolean) : [];
   const roomText = rooms.length ? `The brief includes exactly these spaces: ${rooms.join(', ')}; express privacy and clear guest, family and service circulation without adding text.` : '';
   const geometryRooms = Array.isArray(model?.rooms)
@@ -49,7 +58,7 @@ export function buildDallePrompt(model, options = {}) {
     : '';
   return [
     `Professional architectural visualization of the EXISTING Mizan engineering plan, not a new design, of ${style[0]} ${plotText}.`,
-    `${structure}.`, `Materials and features: ${style[1]}.`, footprintText, roomText, geometryText,
+    `${structure}.`, `Materials and features: ${style[1]}.`, footprintText, entryText, roomText, geometryText,
     'The supplied plan image is authoritative. Keep the same footprint, room count, room adjacency, entrance side, openings, and circulation. This is a visual interpretation of the supplied plan, not a new floor plan; never substitute a generic villa or random facade.',
     `Mood: ${style[2]}. Lighting: ${lighting}. Camera: ${view}, 35mm lens, f/8, ultra detailed.`,
     'Saudi Arabian arid climate, native planting, realistic proportions, photorealistic architectural photography, no people, no text, no logos, no watermark.'
@@ -130,7 +139,7 @@ function ensureVisualizerMarkup() {
   if (document.getElementById('generateVisual')) return;
   const anchor = document.querySelector('.immersive-card');
   if (!anchor) return;
-  anchor.insertAdjacentHTML('afterend', `<article class="card visualizer-card" aria-label="العرض البصري المعماري"><header class="ch"><b class="num">✨</b><div><h2>العرض البصري المعماري</h2><p>تصوير للمخطط الموجود مع الالتزام بكتلته وعلاقاته، وليس اقتراح مخطط جديد.</p></div><span class="pill" id="visualBadge">GPT Image</span></header><div class="cb"><div class="visual-controls"><div class="visual-group"><label class="visual-label">الطراز البصري</label><div class="visual-options" role="group" aria-label="الطراز البصري"><button type="button" class="visual-opt" data-visual-style="resort">🏝️ <b>منتجع</b><small>حجر وفناء أخضر</small></button><button type="button" class="visual-opt" data-visual-style="modern">▢ <b>مودرن</b><small>كتل بيضاء وزجاج</small></button><button type="button" class="visual-opt" data-visual-style="classic">🏛️ <b>كلاسيكي</b><small>هيبة وتناسق</small></button><button type="button" class="visual-opt" data-visual-style="hijazi">🕌 <b>حجازي</b><small>حجر ورواشين</small></button></div></div><div class="visual-group"><label class="visual-label">الإضاءة</label><div class="visual-options" role="group" aria-label="إضاءة الصورة"><button type="button" class="visual-opt" data-visual-light="golden">🌅 <b>ذهبية</b></button><button type="button" class="visual-opt" data-visual-light="morning">🌤️ <b>صباح</b></button><button type="button" class="visual-opt" data-visual-light="midday">☀️ <b>ظهيرة</b></button><button type="button" class="visual-opt" data-visual-light="dusk">🌇 <b>غروب</b></button><button type="button" class="visual-opt" data-visual-light="night">🌙 <b>ليل</b></button></div></div><div class="visual-group"><label class="visual-label">زاوية الكاميرا</label><div class="visual-options" role="group" aria-label="زاوية الكاميرا"><button type="button" class="visual-opt" data-visual-view="hero">📐 <b>درامية</b></button><button type="button" class="visual-opt" data-visual-view="aerial">🚁 <b>جوية</b></button><button type="button" class="visual-opt" data-visual-view="entry">🚪 <b>الواجهة</b></button><button type="button" class="visual-opt" data-visual-view="courtyard">🌿 <b>الفناء</b></button><button type="button" class="visual-opt" data-visual-view="corner">◪ <b>ركنية</b></button></div></div></div><button class="primary visual-generate" id="generateVisual" type="button">✨ توليد تصور مستند إلى المخطط</button><div class="visual-status" id="visualStatus" hidden><span class="visual-spinner" aria-hidden="true"></span> جارٍ توليد الصورة…</div><div class="visual-gallery-header"><h3 class="subhead">معرض التصورات</h3><button class="small-button" id="clearGallery" type="button">حذف الكل</button></div><div class="render-gallery" id="renderGallery"></div><p class="help">تُرسل صورة المخطط ومواصفاته إلى Worker الصور لتوجيه التصور البصري. الاعتماد الدقيق للمساحات والمداخل يبقى من مخطط 2D/3D، ومفتاح OpenAI لا يصل إلى المتصفح.</p></div></article>`);
+  anchor.insertAdjacentHTML('afterend', `<article class="card visualizer-card" aria-label="العرض البصري المعماري"><header class="ch"><b class="num">✨</b><div><h2>التصور البصري للمراجعة</h2><p>تصور بصري موجّه بالمخطط؛ راجع مطابقة الصورة قبل استخدامها.</p></div><span class="pill" id="visualBadge">GPT Image</span></header><div class="cb"><div class="visual-controls"><div class="visual-group"><label class="visual-label">الطراز البصري</label><div class="visual-options" role="group" aria-label="الطراز البصري"><button type="button" class="visual-opt" data-visual-style="resort">🏝️ <b>منتجع</b><small>حجر وفناء أخضر</small></button><button type="button" class="visual-opt" data-visual-style="modern">▢ <b>مودرن</b><small>كتل بيضاء وزجاج</small></button><button type="button" class="visual-opt" data-visual-style="classic">🏛️ <b>كلاسيكي</b><small>هيبة وتناسق</small></button><button type="button" class="visual-opt" data-visual-style="hijazi">🕌 <b>حجازي</b><small>حجر ورواشين</small></button></div></div><div class="visual-group"><label class="visual-label">الإضاءة</label><div class="visual-options" role="group" aria-label="إضاءة الصورة"><button type="button" class="visual-opt" data-visual-light="golden">🌅 <b>ذهبية</b></button><button type="button" class="visual-opt" data-visual-light="morning">🌤️ <b>صباح</b></button><button type="button" class="visual-opt" data-visual-light="midday">☀️ <b>ظهيرة</b></button><button type="button" class="visual-opt" data-visual-light="dusk">🌇 <b>غروب</b></button><button type="button" class="visual-opt" data-visual-light="night">🌙 <b>ليل</b></button></div></div><div class="visual-group"><label class="visual-label">زاوية الكاميرا</label><div class="visual-options" role="group" aria-label="زاوية الكاميرا"><button type="button" class="visual-opt" data-visual-view="hero">📐 <b>درامية</b></button><button type="button" class="visual-opt" data-visual-view="aerial">🚁 <b>جوية</b></button><button type="button" class="visual-opt" data-visual-view="entry">🚪 <b>الواجهة</b></button><button type="button" class="visual-opt" data-visual-view="courtyard">🌿 <b>الفناء</b></button><button type="button" class="visual-opt" data-visual-view="corner">◪ <b>ركنية</b></button></div></div></div><button class="primary visual-generate" id="generateVisual" type="button">✨ توليد تصور مستند إلى المخطط</button><div class="visual-status" id="visualStatus" hidden><span class="visual-spinner" aria-hidden="true"></span> جارٍ توليد الصورة…</div><div class="visual-gallery-header"><h3 class="subhead">معرض التصورات</h3><button class="small-button" id="clearGallery" type="button">حذف الكل</button></div><div class="render-gallery" id="renderGallery"></div><p class="help">تُرسل صورة المخطط ومواصفاته إلى Worker الصور لتوجيه التصور البصري. الاعتماد الدقيق للمساحات والمداخل يبقى من مخطط 2D/3D، ومفتاح OpenAI لا يصل إلى المتصفح.</p></div></article>`);
 }
 
 export async function generateVisual(model, overrides = {}) {

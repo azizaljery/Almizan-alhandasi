@@ -1,3 +1,4 @@
+import { DESIGN_CHOICES } from './design-selection.mjs';
 // Local, deterministic planning preferences; no AI transport or credentials.
 const TASTES = ['courtyard_privacy', 'family_layout', 'concept_comparison', 'classic_living'];
 const AVOIDS = ['الممرات الطويلة والمظلمة', 'مرور الضيوف عبر خصوصية العائلة', 'نوافذ كبيرة على شمس العصر الغربية', 'صدى الصوت في الصالات والمجالس', 'مطبخ بعيد عن الطعام والخدمات', 'غرف نوم مكشوفة أو قريبة من الضيافة'];
@@ -40,8 +41,13 @@ export function buildClientBrief(discovery, rooms) {
   if(d.avoids.includes(AVOIDS[0]))limits.push('تقليل طول الممرات يحتاج مقارنة أطوال المسارات، ولا تثبت الإضاءة من طول الممر وحده.');
   if(d.avoids.includes(AVOIDS[2]))limits.push('طلب تجنب شمس الغرب محفوظ؛ مواقع الفتحات والتظليل تحتاج مراجعة منفصلة.');
   if(d.avoids.includes(AVOIDS[3]))limits.push('معالجة الصدى تحتاج مواد وأبعادًا وحسابًا صوتيًا غير منفّذ هنا.');
-  if(d.likes.includes('courtyard_privacy'))limits.push('الفناء رغبة محفوظة؛ محرك الكتلة المستطيلة الحالي لا ينشئ فناءً.');
-  if(d.likes.length||d.rejects.length)limits.push('تفضيلات الصور توجّه النقاش؛ لا تثبت تنفيذ طراز معماري أو استبعاده في هندسة المخطط.');
+  for (const key of d.likes) {
+    const choice = DESIGN_CHOICES[key];
+    if (choice.shape) principles.push(`التوليد يقتصر على الشكل المختار: ${choice.label}.`);
+    else limits.push(`${choice.label} غير متاح للتوليد حاليًا؛ المحرك لا ينشئ فناءً مغلقًا من أربع جهات. لن يُولَّد شكل آخر بدلًا منه.`);
+  }
+  if(d.rejects.some(key=>DESIGN_CHOICES[key].shape))principles.push('الأشكال المرفوضة تُستبعد من بدائل التوليد.');
+  if(d.likes.length||d.rejects.length)limits.push('مطابقة شكل الكتلة لا تثبت تنفيذ الخصوصية أو أسلوب حياة معين؛ تُقيَّم هذه المحاور من بيانات المخطط المتاحة.');
   return { fingerprint:briefFingerprint(d,rooms), changes, questions, limits, principles };
 }
 export function applyBriefChoices(discovery, rooms, brief, indices) {

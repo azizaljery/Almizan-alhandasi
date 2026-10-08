@@ -59,10 +59,10 @@ export function circulationNetwork(model) {
     return { metres: distances.get(to), points, spaces: [...new Set(spaces)] };
   }
   const entries = doors.filter(o => o.connects?.includes('outside'));
-  const roomDoor = id => doors.find(o => o.roomId === id);
-  const bestPath = (from, to) => from.map(entry => path(entry.id, to.id)).filter(Boolean).sort((a, b) => a.metres - b.metres)[0] || null;
+  const roomDoors = id => doors.filter(o => o.connects?.includes(id));
+  const bestPath = (from, to) => from.flatMap(a => to.map(b => path(a.id, b.id))).filter(Boolean).sort((a, b) => a.metres - b.metres)[0] || null;
   return {
-    toRoom(id) { const door = roomDoor(id); return door ? bestPath(entries, door) : null; },
-    betweenRooms(a, b) { const from = roomDoor(a), to = roomDoor(b); return from && to ? path(from.id, to.id) : null; },
+    toRoom(id) { return bestPath(entries, roomDoors(id)); },
+    betweenRooms(a, b) { return bestPath(roomDoors(a), roomDoors(b)); },
   };
 }

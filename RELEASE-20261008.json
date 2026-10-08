@@ -1,0 +1,63 @@
+{
+  "release": "2026.10.08",
+  "official_project": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
+  "baseline": "07cac66ac02e24f045cd1d91a58a1f86e3b989f2",
+  "ui_source": "875708041e75eb0ae2ab03cdd58b968c7c42182a",
+  "rollback_library_id": "libfile_b41014360fd08191a7a75d4bd442816f",
+  "tests": {
+    "passed": 124,
+    "failed": 0,
+    "skipped": 0
+  },
+  "build": "PASS",
+  "browser_before_publish": "BLOCKED_BY_RUNTIME_IPC_AND_LOCAL_PREVIEW_ACCESS",
+  "independent_review": "Two defects found and corrected; 13 targeted tests passed independently",
+  "preserved": [
+    "native Claude planner",
+    "AZIZ selection weights",
+    "identity collision checks",
+    "official 3D materials and furniture",
+    "diversity search"
+  ],
+  "limitations": [
+    "No live external AI provider request executed",
+    "No calibrated architectural correctness claim",
+    "Pavilion-only yields one distinct candidate",
+    "Closed four-sided courtyard and multiple floors unsupported"
+  ],
+  "changed_file_sha256": {
+    "README.md": "4423d89d9eb55ff63c77f025e241ee0b4213022b4b40acedb16b0fa89a317b8f",
+    "dist/app.mjs": "7b292c2d8d2ab6a2fa084c28759c4d11107203ca8f08ccbce707a7d43296e0b8",
+    "dist/assets/pavilion-example.png": "2916e75fadf52ebbf0cd72b9eaefb98a794a7fbab31bd01ea611d1f180e8d8bb",
+    "dist/candidate-intelligence.mjs": "13b0add1b132a0dd97f43d1aa6a9e671588adf46980ce00d7b1f1ebb1afb7c66",
+    "dist/circulation.mjs": "500d8a8e55af4c965ca5837dae21a8544fd04c1be2a28b4da3bee1ee312aa758",
+    "dist/client-brief.mjs": "c630646bc530761fa565dd8ebaaebc1e6bddd430bcf6a10e9f0047759dc5400e",
+    "dist/client-request.mjs": "89856ef00b653a1931e8369a2d3a40794025278386a232d4ebd6fee264d9b582",
+    "dist/design-insights.mjs": "703c74d4906e6fbcf97e7c5ef79ac6b4f9218796dd9b8e56effc1f759c3b48b9",
+    "dist/design-selection.mjs": "8630f8def636b9b6c6228e3339c97750e6a2586875fed9b1febdeeea763f088c",
+    "dist/home-design-engine.mjs": "f3956d4d6a2a2e572db603a263f16686e9fdd8c7bd51d256fc505826a2319633",
+    "dist/index.html": "ad4b5e968b37ff4fea780fa83562703cb1bbda00225d4b71e5091fbd660ccf33",
+    "dist/integration/control/contracts/mizan-envelope-v1.schema.json": "19beef5be179575ab345cadae7719b26a582dbf39f6fe8dc63fcbbfc71aabcb2",
+    "dist/integration/control/contracts/mizan-envelope-v1.schema.mjs": "9d0930bd742001fcfe21af1077f2eb065f17696ec9717a412530e3cc0107af6e",
+    "dist/integration/gemini/contracts/mizan-envelope-v1.schema.json": "19beef5be179575ab345cadae7719b26a582dbf39f6fe8dc63fcbbfc71aabcb2",
+    "dist/integration/gemini/contracts/mizan-envelope-v1.schema.mjs": "9d0930bd742001fcfe21af1077f2eb065f17696ec9717a412530e3cc0107af6e",
+    "dist/integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js": "aa4c2731259ae6cbc19b0e11fc3423c47f41b6ef0a99036a32ace7967f795dd6",
+    "dist/integration/pipeline.mjs": "34a9695dbc5a7cc79090ea93bb2978d5c96ce4d9cb0022ed676169393e37fa07",
+    "dist/mizan-home-design-engine.mjs": "f0a3f5a3ed332418aa365c6e2aabe44b3eb0bd2a7781469033c096ef7dd4fc82",
+    "dist/mizan-score.mjs": "a5040fdc7c30900c7b83c1f9e117baaf1d5724ea6a79fef6c44ca8f66130738c",
+    "dist/multi-engine.mjs": "a08e8cdea1805d815c104768d7af7a4f1b444a12334fd1a57f4ce9f46ccb4bf5",
+    "dist/pavilion-planner.mjs": "1ce9f064dd41f822582ce13f70d86a3cdc8c418808c9cad5df3c653c810972a9",
+    "dist/plan-evidence.mjs": "e9b9a1802d2136339515247afdd14772b66c074ecea88c54ff30d40d56f932e1",
+    "dist/planner.css": "fe400b1591a9dda9a55583ef0db30bdbc7118254eae1c25c1c355472cafafe44",
+    "dist/planner.mjs": "7ded57e735c0bc4fc7b0ec523bac81da91b4996a453178a9cecc17ba05d6a247",
+    "dist/render-visualizer.mjs": "09d22a28f337468b4f701ac08339204f49aa875729d69219f9862b14e68a6227",
+    "dist/workspace.css": "87c50c794f485b5adc7c263fb3f2b54e1fe73eb672f7f9154231feda8cb974cf",
+    "scripts/verify-workspace-browser.mjs": "f0e72a085e9a204492f60bd41228533ba577dc3ef8e8d8a41d4e5881b5a6047a",
+    "scripts/verify-workspace-mobile.mjs": "cfc34f5170adfadf8f1d1564cc115ae39437e895a07ff5eac737c001b8d3e294",
+    "tests/client-request.test.mjs": "35ab510dba38463d34408ba8b8a64074295bf9ed931a34bc477149d431b04415",
+    "tests/frontend.test.mjs": "b35a5d34f47ba3d4e058aaba0d64af02b0f1ccb4d28ce1a4820c1410753fc798",
+    "tests/pavilion-generation.test.mjs": "506a49ea6a92bad7efb86e92fad31e4abe2cc0b109caa82afe044e8f4d174837",
+    "tests/portal-navigation.test.mjs": "eba5bda39c26be345d3d7df6dfb0c96a98e540088588344619e54200c0dfd204",
+    "tests/unified-workspace-contract.test.mjs": "22767883af87d5d2e1cfc9fd993c74825ad804ca1c30cc60a5d90ccc31e44b10"
+  }
+}

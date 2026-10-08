@@ -1,3 +1,9 @@
+## Unified official workspace — 2026-10-08
+
+This release integrates the approved six-step light workspace from trial source `875708041e75eb0ae2ab03cdd58b968c7c42182a` into official source `07cac66ac02e24f045cd1d91a58a1f86e3b989f2`. It preserves the official six-alternative geometric search, native planner, AZIZ selection weights and detailed 3D viewer. Explicit shape requests are enforced at the engine boundary; unsupported requests fail without substitution. The pavilion-only generator currently returns one distinct valid pavilion layout, not six padded copies.
+
+The previous v41 source is preserved as `engineering-v41-rollback-20261008.zip` in the owner Library. Older release/checksum documents below are historical; see `RELEASE-20261008.json` for the current scope and verification limits. Live external AI provider behavior and physical-device testing must not be inferred from local tests.
+
 # الميزان الهندسي — محرك المخطط المحلي
 
 ## الواجهة والعرض ثلاثي الأبعاد — 6 أكتوبر 2026

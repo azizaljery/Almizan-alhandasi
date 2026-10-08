@@ -1,3 +1,4 @@
+import { validateModel as validateNativeModel } from '../../../../../planner.mjs';
 /** Gemini preliminary review. No geometry generation, editing, or production acceptance. */
 import { adaptCandidateEnvelope, validateEnvelope, ADAPTER_VERSION } from '../../engineering-core/contracts/mizan-ir-v1.adapter.js';
 import { EngineeringRulesRegistry } from '../../engineering-core/rules-registry/rules-registry.js';
@@ -5,7 +6,7 @@ import { DesignIntelligenceEngine } from '../engine.js';
 import { CustomerBenefits } from '../../engineering-math/src/customer-benefits.js';
 import { contentHash, summarizeChecks, verifyReviewBinding, ContractError } from '../../../reference/identity.mjs';
 
-export const CHECK_REGISTRY_VERSION='gemini-ir-preliminary/1.0.0';
+export const CHECK_REGISTRY_VERSION='gemini-ir-preliminary/1.0.1-shape';
 export const CHECK_REGISTRY=Object.freeze([
   ['identity','architectural'],['polygon-area','architectural'],['plot-bounds','architectural'],
   ['space-containment','architectural'],['courtyard-void','architectural'],['opening-references','architectural'],
@@ -67,7 +68,8 @@ export async function reviewCandidate(candidate,request) {
     {courtyards:structuredClone(g.courtyards),footprintOverlapM2:audit.courtyardOverlapM2,spaceOverlapM2:audit.spaceVoidOverlapM2});
   add('opening-references','PASS','Wall/room/connects references and finite schema dimensions checked; no swing or access-compliance inference.',
     {openingIds:g.openings.map(o=>o.id),wallIds:g.walls.map(w=>w.id),scope:'reference-integrity-only'});
-  add('native-validation','NOT_EVALUATED','Claude validateModel is not shipped in this Gemini task; schema and limited geometry checks do not replace that upstream gate.');
+  const nativeErrors = validateNativeModel(g);
+  add('native-validation',nativeErrors.length?'FAIL':'PASS','Native geometry and pavilion topology validation for this exact bound model.',{ errors:nativeErrors });
   add('max-built-area',r.plot.maxBuiltAreaM2===null?'NOT_APPLICABLE':withinCap(a.areaM2,r.plot.maxBuiltAreaM2)?'PASS':'FAIL',
     r.plot.maxBuiltAreaM2===null?'No explicit cap in this request.':'Compare polygon area with explicit cap using contract tolerance.',{areaM2:a.areaM2,capM2:r.plot.maxBuiltAreaM2});
   const coverageCap=r.plot.widthM*r.plot.lengthM*r.plot.coverageRatio;
@@ -82,6 +84,7 @@ export async function reviewCandidate(candidate,request) {
     {directMapping,mismatches,requested:r.program.length,actual:g.rooms.length});
   const constraintResults=r.hardConstraints.map(h=>{
     if(h.kind==='room_count_exact'&&Number.isInteger(h.value?.count)) return {id:h.id,status:h.value.count===g.rooms.length?'PASS':'FAIL',expected:h.value.count,actual:g.rooms.length};
+    if(h.kind==='shape_allowed'&&Array.isArray(h.value?.shapes)) return {id:h.id,status:h.value.shapes.includes(c.actualShape)&&g.shape===c.actualShape&&c.requestedShape===c.actualShape&&!c.fallback.used?'PASS':'FAIL',expected:h.value.shapes,actual:c.actualShape};
     return {id:h.id,status:'NOT_EVALUATED',reason:'Unsupported must constraint; requires control-room handling.'};
   });
   add('hard-constraints',!constraintResults.length?'NOT_APPLICABLE':constraintResults.some(x=>x.status==='FAIL')?'FAIL':constraintResults.some(x=>x.status==='NOT_EVALUATED')?'NOT_EVALUATED':'PASS',

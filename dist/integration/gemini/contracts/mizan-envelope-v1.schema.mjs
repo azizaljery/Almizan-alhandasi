@@ -678,7 +678,8 @@ export default {
           "enum": [
             "rect",
             "l",
-            "u"
+            "u",
+            "pavilions"
           ]
         },
         "shapeFallback": {
@@ -871,14 +872,16 @@ export default {
           "enum": [
             "rect",
             "l",
-            "u"
+            "u",
+            "pavilions"
           ]
         },
         "actualShape": {
           "enum": [
             "rect",
             "l",
-            "u"
+            "u",
+            "pavilions"
           ]
         },
         "units": {

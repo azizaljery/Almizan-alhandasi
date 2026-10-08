@@ -33,7 +33,9 @@
 // Constants
 // -----------------------------------------------------------------------------
 
-export const MIZAN_VERSION = '1.0.0';
+import { assessPlan, aggregateAxes } from './plan-evidence.mjs';
+import { circulationNetwork } from './circulation.mjs';
+export const MIZAN_VERSION = '1.1.0';
 
 export const JOURNEY_STAGES = Object.freeze([
   'welcome',
@@ -437,6 +439,7 @@ export function addRelationship(project, input) {
     from: input.from,
     to: input.to,
     type: input.type || RELATION_TYPES.NEUTRAL,
+    scope: input.scope || 'direct_doors',
     priority: normalizePriority(input.priority),
     reason: input.reason || null
   };
@@ -517,19 +520,18 @@ export function evaluateDesign(project, design, options = {}) {
   const weights = normalizeWeights(options.weights || project.metricWeights || DEFAULT_METRIC_WEIGHTS);
   const raw = calculateRawMetrics(project, design);
 
-  let weighted = 0;
-  for (const metric of DESIGN_METRICS) {
-    weighted += (raw[metric] || 0) * (weights[metric] || 0);
-  }
+  const coverage = aggregateAxes(DESIGN_METRICS.map(key => ({ score: raw[key] === null ? null : raw[key] * 100, weight: weights[key] || 0 })));
 
   const blockers = detectBlockers(project, design);
   const blockerPenalty = Math.min(35, blockers.length * 7);
-  const score = clamp(weighted * 100 - blockerPenalty, 0, 100);
+  const score = coverage.score === null ? null : clamp(coverage.score - blockerPenalty, 0, 100);
 
   const result = {
     designId: design.id,
-    score: round(score, 1),
-    metrics: mapObject(raw, v => round(v * 100, 1)),
+    score: score === null ? null : round(score, 1),
+    metrics: mapObject(raw, v => v === null ? null : round(v * 100, 1)),
+    coverage,
+    metricStatus: mapObject(raw, v => v === null ? 'NOT_EVALUATED' : 'ESTIMATE'),
     blockers,
     explanations: explainEvaluation(project, design, raw, blockers),
     spaceStats: calculateSpaceStats(design),
@@ -542,6 +544,7 @@ export function evaluateDesign(project, design, options = {}) {
 }
 
 function calculateRawMetrics(project, design) {
+  const evidence = design.sourceModel ? assessPlan(design.sourceModel) : null;
   const space = calculateSpaceStats(design);
   const relations = scoreRelationships(project, design);
   const privacy = analyzePrivacy(project, design);
@@ -553,13 +556,13 @@ function calculateRawMetrics(project, design) {
     spaceEfficiency: clamp(space.efficiency, 0, 1),
     functionalAdjacency: relations.score,
     circulation: circulation.score,
-    daylight: normalizedMetric(design.metrics?.daylight, 0.65),
-    ventilation: normalizedMetric(design.metrics?.ventilation, 0.65),
-    solarOrientation: normalizedMetric(design.metrics?.solarOrientation, 0.6),
-    acousticSeparation: normalizedMetric(design.metrics?.acousticSeparation, 0.65),
-    futureExpansion: normalizedMetric(design.metrics?.futureExpansion, project.designDNA.futureExpansion || 0.5),
-    costEfficiency: normalizedMetric(design.metrics?.costEfficiency, 0.65),
-    constructability: normalizedMetric(design.metrics?.constructability, 0.7),
+    daylight: !evidence || evidence.daylight.score === null ? null : evidence.daylight.score / 100,
+    ventilation: null,
+    solarOrientation: null,
+    acousticSeparation: null,
+    futureExpansion: null,
+    costEfficiency: null,
+    constructability: null,
     wasteControl: 1 - waste.ratio
   };
 }
@@ -567,10 +570,8 @@ function calculateRawMetrics(project, design) {
 function detectBlockers(project, design) {
   const blockers = [];
 
-  for (const rel of project.relationships || []) {
-    if (rel.type !== RELATION_TYPES.FORBIDDEN) continue;
-    const distance = getSpaceDistance(design, rel.from, rel.to);
-    if (distance !== null && distance < 1.5) {
+  for (const rel of scoreRelationships(project, design).details) {
+    if (rel.type === RELATION_TYPES.FORBIDDEN && rel.score !== null && rel.score === 0) {
       blockers.push({
         type: 'forbidden_relationship',
         severity: 'high',
@@ -628,17 +629,28 @@ export function compareDesigns(project, designs = [], options = {}) {
 
 function scoreRelationships(project, design) {
   const rels = project.relationships || [];
-  if (!rels.length) return { score: 0.75, details: [] };
+  if (!rels.length || !design.sourceModel) return { score: null, details: [] };
+  const model = design.sourceModel, network = circulationNetwork(model);
 
   let weightedScore = 0;
   let weightSum = 0;
   const details = [];
 
   for (const rel of rels) {
-    const distance = getSpaceDistance(design, rel.from, rel.to);
-    if (distance === null) continue;
-
-    const score = relationshipDistanceScore(rel.type, distance);
+    const from = design.spaces.filter(s => s.type === rel.from || s.id === rel.from);
+    const to = design.spaces.filter(s => s.type === rel.to || s.id === rel.to);
+    const pairs = from.flatMap(a => to.filter(b => b.id !== a.id).map(b => ({ a: a.id, b: b.id, path: network.betweenRooms(a.id, b.id),
+      direct: model.openings.some(o => o.type === 'door' && o.connects?.includes(a.id) && o.connects.includes(b.id)) })));
+    if (!pairs.length || pairs.some(p => !p.path)) { details.push({ ...rel, status: 'NOT_EVALUATED', score: null }); continue; }
+    const distance = Math.max(...pairs.map(p => p.path.metres));
+    const independent = pairs.every(p => {
+      const a = network.toRoom(p.a), b = network.toRoom(p.b);
+      return a && b && !a.spaces.some(s => b.spaces.includes(s));
+    });
+    const score = rel.scope === 'entry_routes' ? independent ? 1 : 0
+      : rel.type === RELATION_TYPES.DIRECT ? pairs.every(p => p.direct) ? 1 : 0
+      : rel.type === RELATION_TYPES.FORBIDDEN ? pairs.every(p => !p.direct) ? 1 : 0
+      : pairs.reduce((s, p) => s + relationshipDistanceScore(rel.type, p.path.metres), 0) / pairs.length;
     const weight = rel.priority || 0.5;
 
     weightedScore += score * weight;
@@ -652,7 +664,7 @@ function scoreRelationships(project, design) {
   }
 
   return {
-    score: weightSum ? weightedScore / weightSum : 0.75,
+    score: details.some(d => d.status === 'NOT_EVALUATED') ? null : weightSum ? weightedScore / weightSum : null,
     details
   };
 }
@@ -677,29 +689,9 @@ function relationshipDistanceScore(type, distance) {
 // -----------------------------------------------------------------------------
 
 export function analyzePrivacy(project, design) {
-  const publicSpaces = new Set(['men_majlis', 'women_majlis', 'foyer', 'guest_wc', 'dining']);
-  const privateSpaces = new Set(['master_bedroom', 'bedroom', 'parent_suite', 'family_hall']);
-
-  let conflicts = 0;
-  let checks = 0;
-
-  for (const pub of publicSpaces) {
-    for (const priv of privateSpaces) {
-      const d = getSpaceDistance(design, pub, priv);
-      if (d === null) continue;
-      checks++;
-      if (d < 4) conflicts += 1;
-    }
-  }
-
-  const base = checks ? 1 - conflicts / checks : 0.8;
-  const privacyWeight = project.designDNA?.privacy ?? 0.8;
-
-  return {
-    score: clamp((base * 0.75) + (privacyWeight * 0.25), 0, 1),
-    conflicts,
-    checks
-  };
+  const evidence = design.sourceModel ? assessPlan(design.sourceModel).privacy : null;
+  return { score: !evidence || evidence.score === null ? null : evidence.score / 100, status: evidence?.status || 'NOT_EVALUATED',
+    conflicts: evidence?.data?.pairs.filter(p => p.sharedCorridors.length).length || 0, checks: evidence?.data?.pairs.length || 0 };
 }
 
 // -----------------------------------------------------------------------------
@@ -707,23 +699,11 @@ export function analyzePrivacy(project, design) {
 // -----------------------------------------------------------------------------
 
 export function analyzeCirculation(design) {
+  const evidence = design.sourceModel ? assessPlan(design.sourceModel).circulation : null;
   const circulationArea = Number(design.areas?.circulation || 0);
   const total = Number(design.areas?.totalBuiltArea || sumSpaceAreas(design));
-
-  if (!total) return { score: 0.7, ratio: 0 };
-
-  const ratio = circulationArea / total;
-
-  let score = 1;
-  if (ratio > 0.22) score = 0.45;
-  else if (ratio > 0.18) score = 0.65;
-  else if (ratio > 0.15) score = 0.8;
-
-  return {
-    score,
-    ratio: clamp(ratio, 0, 1),
-    circulationArea
-  };
+  return { score: !evidence || evidence.score === null ? null : evidence.score / 100, status: evidence?.status || 'NOT_EVALUATED',
+    ratio: total ? circulationArea / total : null, circulationArea };
 }
 
 // -----------------------------------------------------------------------------
@@ -1079,9 +1059,9 @@ function explainEvaluation(project, design, raw, blockers) {
   const notes = [];
 
   if (raw.privacy >= 0.8) {
-    notes.push('الفصل بين الضيافة والعائلة جيد ويحقق خصوصية مرتفعة.');
-  } else if (raw.privacy < 0.6) {
-    notes.push('يوجد تقارب زائد بين مناطق الضيافة والمناطق الخاصة.');
+    notes.push('اشتراك مسارات الضيافة والعائلة في الممرات منخفض؛ الخصوصية البصرية والصوتية غير مُقيّمة.');
+  } else if (raw.privacy !== null && raw.privacy < 0.6) {
+    notes.push('يوجد اشتراك مرصود بين مسارات الضيافة والعائلة في الممرات.');
   }
 
   if (raw.spaceEfficiency >= 0.82) {
@@ -1090,7 +1070,7 @@ function explainEvaluation(project, design, raw, blockers) {
     notes.push('يوجد هدر أو حركة زائدة يمكن استعادتها لصالح الفراغات الأساسية.');
   }
 
-  if (raw.functionalAdjacency < 0.65) {
+  if (raw.functionalAdjacency !== null && raw.functionalAdjacency < 0.65) {
     notes.push('بعض العلاقات الوظيفية لا تتوافق مع تفضيلات العميل المسجلة.');
   }
 
@@ -1098,6 +1078,8 @@ function explainEvaluation(project, design, raw, blockers) {
     notes.push(`يوجد ${blockers.length} عائق يجب حله قبل اعتماد التصميم.`);
   }
 
+  const labels = { privacy: 'فصل حركة الضيافة والعائلة', functionalAdjacency: 'العلاقات الوظيفية', circulation: 'الحركة', daylight: 'الإضاءة الفعلية', ventilation: 'التهوية', solarOrientation: 'التوجيه الشمسي', acousticSeparation: 'العزل الصوتي', futureExpansion: 'التوسع المستقبلي', costEfficiency: 'الاقتصاد', constructability: 'قابلية التنفيذ' };
+  for (const [key, value] of Object.entries(raw)) if (value === null) notes.push(`${labels[key] || 'المحور'}: غير مُقيّم لغياب البيانات اللازمة.`);
   if (!notes.length) {
     notes.push('التصميم متوازن مبدئيًا وفق البيانات الحالية.');
   }
@@ -1108,24 +1090,6 @@ function explainEvaluation(project, design, raw, blockers) {
 // -----------------------------------------------------------------------------
 // Geometry Helpers
 // -----------------------------------------------------------------------------
-
-function getSpaceDistance(design, aType, bType) {
-  const a = findSpace(design, aType);
-  const b = findSpace(design, bType);
-
-  if (!a || !b || !a.center || !b.center) return null;
-
-  const dx = Number(a.center.x || 0) - Number(b.center.x || 0);
-  const dy = Number(a.center.y || 0) - Number(b.center.y || 0);
-
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function findSpace(design, type) {
-  return (design.spaces || []).find(s =>
-    s.type === type || s.id === type || s.name === type
-  );
-}
 
 // -----------------------------------------------------------------------------
 // Utility
@@ -1163,13 +1127,6 @@ function normalizeWeights(weights) {
   }
 
   return out;
-}
-
-function normalizedMetric(value, fallback = 0.6) {
-  if (value === undefined || value === null) return clamp(fallback, 0, 1);
-  const num = Number(value);
-  if (num > 1) return clamp(num / 100, 0, 1);
-  return clamp(num, 0, 1);
 }
 
 function structuredCloneSafe(value) {

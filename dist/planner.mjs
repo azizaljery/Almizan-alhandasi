@@ -1,5 +1,6 @@
 // Local, deterministic concept planner. Metres; x east, y north. Not a code-compliance engine.
 import { generateModel as claudeGenerate, validateModel as claudeValidate, quantities as claudeQuantities } from './claude/planner.mjs';
+import { pavilionTopology } from './pavilion-planner.mjs';
 export const TYPES = {
   bedroom: { name: 'غرفة نوم', area: 20, min: 2.6, color: '#e4e7f2' },
   majlis: { name: 'مجلس', area: 32, min: 3, color: '#f3e6c8' },
@@ -23,6 +24,7 @@ export const STRATEGIES = {
   frontage: 'الواجهة العريضة',
   courtyard: 'بيت الفناء',
   'u-court': 'بيت الباحة U',
+  pavilions: 'أجنحة مرتبطة برواق',
 };
 export const CONCEPT_PROFILES = {
   compact: {
@@ -420,6 +422,10 @@ export function openingPoint(model, o) {
   const w = model.walls.find(w => w.id === o.wallId);
   return { x: w.x1 + (w.x2 - w.x1) * o.pos, y: w.y1 + (w.y2 - w.y1) * o.pos };
 }
+function invalidateBoundReview(model) {
+  if (model.integration) model.integration = { previousCandidateId: model.integration.candidateId || model.integration.previousCandidateId || null,
+    candidateId: null, geometryHash: null, reviewId: null, reviewOverall: 'NOT_EVALUATED', reviewCoverage: null, requiresReview: true };
+}
 export function placeOpening(model, { type, point }) {
   if (!['door', 'window'].includes(type) || !point || ![point.x, point.y].every(Number.isFinite)) throw Error('اختر بابًا أو نافذة ثم اضغط جدارًا صالحًا.');
   const copy = structuredClone(model);
@@ -443,7 +449,16 @@ export function placeOpening(model, { type, point }) {
     if (!first || !second || first === second) throw Error('لا يمكن وضع الباب هنا لأنه لا يصل بين فراغين صالحين.');
     opening.connects = [first, second];
   }
+  if (type === 'window') {
+    const nx = -(closest.w.y2 - closest.w.y1) / length, ny = (closest.w.x2 - closest.w.x1) / length, d = closest.w.t / 2 + .03;
+    const room = copy.rooms.find(r => [1, -1].some(sign => {
+      const x = closest.x + sign * nx * d, y = closest.y + sign * ny * d;
+      return x >= r.x - E && x <= r.x + r.w + E && y >= r.y - E && y <= r.y + r.h + E;
+    }));
+    if (room) opening.roomId = room.id;
+  }
   copy.openings.push(opening); const errors = validateModel(copy); if (errors.length) throw Error(errors[0]);
+  invalidateBoundReview(copy);
   return copy;
 }
 export function removeOpening(model, point) {
@@ -452,11 +467,12 @@ export function removeOpening(model, point) {
   if (!match || Math.hypot(point.x - match.p.x, point.y - match.p.y) > .7) throw Error('لم تُحدّد فتحة قريبة لإزالتها.');
   if (match.o.connects?.includes('outside')) throw Error('لا يمكن حذف مدخل الوصول الأساسي من المحرر.');
   copy.openings = copy.openings.filter(o => o.id !== match.o.id); const errors = validateModel(copy); if (errors.length) throw Error(errors[0]);
+  invalidateBoundReview(copy);
   return copy;
 }
 export function validateModel(m) {
   if (m?.version === 2) {
-    const errors = claudeValidate(m);
+    const errors = [...claudeValidate(m), ...(m.shape === 'pavilions' ? pavilionTopology(m).errors : [])];
     if (!errors.length && m.plot.maxBuiltArea != null && claudeQuantities(m).footprint > m.plot.maxBuiltArea + E) errors.push('الكتلة تتجاوز سقف البناء المحدد.');
     return errors;
   }

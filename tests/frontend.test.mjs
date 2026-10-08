@@ -175,7 +175,7 @@ test('entrypoint has unique IDs, all fixed UI references exist, and imports are 
   const html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8'), app = readFileSync(new URL('../dist/app.mjs', import.meta.url), 'utf8');
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]); assert.equal(ids.length, new Set(ids).size);
   for (const [, id] of app.matchAll(/\$\('([^']+)'\)/g)) if (!id.startsWith('amount-')) assert.ok(ids.includes(id), id);
-  assert.equal((html.match(/data-tab=/g) || []).length, 3); assert.equal((html.match(/id="panel-/g) || []).length, 3);
+  assert.equal((html.match(/data-tab=/g) || []).length, 6); assert.equal((html.match(/id="panel-/g) || []).length, 6);
   assert.equal(/data-go="boq" hidden/.test(html), false); assert.equal(/data-tab="boq" hidden/.test(html), false);
   assert.match(html, /<script type="module" src="\.\/app.mjs"><\/script>/); assert.equal(html.includes('<script>const A='), false);
   assert.equal(/<script[^>]*three\.min\.js/.test(html), false, '3D CDN loading must not block the initial interface or 2D');
