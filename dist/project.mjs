@@ -1,6 +1,7 @@
 import { normalizeDiscovery } from './client-brief.mjs';
 import { ENGINE_VERSION, STRATEGIES, validatePlot, normalizeRooms, generateModel, validateModel } from './planner.mjs';
 import { estimate, quantityRows } from './estimates.mjs';
+import { validateLandSurvey } from './land-survey.mjs';
 
 export const MAX_PROJECT_BYTES = 2_000_000;
 const palettes = ['resort', 'modern', 'classic', 'hijazi'];
@@ -35,20 +36,26 @@ function validateProject(raw) {
   const project = {
     schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION,
     savedAt: typeof raw.savedAt === 'string' && Number.isFinite(Date.parse(raw.savedAt)) ? raw.savedAt : new Date().toISOString(),
-    draft: { plot: validatePlot(draft.plot), rooms: publicRooms(draft.rooms), palette: palette(draft.palette), rates, costReserve: draft.costReserve, vat: draft.vat, idea: draft.idea, discovery: normalizeDiscovery(draft.discovery) },
+    draft: { plot: validatePlot(draft.plot), rooms: publicRooms(draft.rooms), palette: palette(draft.palette), rates, costReserve: draft.costReserve, vat: draft.vat, idea: draft.idea, discovery: normalizeDiscovery(draft.discovery), landSurvey: validateLandSurvey(draft.landSurvey ?? null) },
+    modelLandSurvey: validateLandSurvey(Object.hasOwn(raw, 'modelLandSurvey') ? raw.modelLandSurvey : (draft.landSurvey ?? null)),
     design: raw.design === null ? null : recipe(raw.design),
     alternatives: raw.alternatives.map(recipe),
-    history: raw.history.map(entry => ({ design: recipe(entry.design), palette: palette(entry.palette) })),
+    history: raw.history.map(entry => ({ design: recipe(entry.design), palette: palette(entry.palette), ...(entry.landSurvey ? { landSurvey: validateLandSurvey(entry.landSurvey) } : {}) })),
   };
+  const matchesSurveyBinding = (plot, survey) => !survey || survey.engineLink !== 'survey-rectangle' ||
+    (Math.abs(plot.width - survey.binding.width) <= 1e-8 && Math.abs(plot.length - survey.binding.length) <= 1e-8);
+  if (!matchesSurveyBinding(project.draft.plot, project.draft.landSurvey)) throw Error('أبعاد الأرض المحفوظة لا تطابق الربط الصريح للمسح بالمولد.');
+  if (project.design && !matchesSurveyBinding(project.design.plot, project.modelLandSurvey)) throw Error('المخطط الأساسي لا يطابق أبعاد ربط مسح نسخته.');
+  for (const entry of project.history) if (!matchesSurveyBinding(entry.design.plot, entry.landSurvey)) throw Error('إحدى النسخ السابقة لا تطابق أبعاد ربط مسحها بالمولد.');
   if (!project.design && project.alternatives.length) throw Error('بدائل محفوظة بلا مخطط أساسي.');
   if (project.design && project.alternatives.some(r => JSON.stringify([r.plot, r.rooms]) !== JSON.stringify([project.design.plot, project.design.rooms]))) throw Error('البدائل المحفوظة ليست من متطلبات المخطط نفسه.');
   return project;
 }
-export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [] }) {
+export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [], landSurvey = null, modelLandSurvey = landSurvey }) {
   // Only explicitly allowlisted data is saved. Access codes and provider keys are never read.
   const raw = { schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION, savedAt: new Date().toISOString(),
-    draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery }, design: modelRecipe(model),
-    alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette })) };
+    draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery, landSurvey }, modelLandSurvey, design: modelRecipe(model),
+    alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
   return JSON.stringify(validateProject(raw), null, 2);
 }
 export function decodeProject(text) {
@@ -63,7 +70,7 @@ export function decodeProject(text) {
     return cache.get(key);
   };
   // Rebuild and validate every design before allowing the UI to replace its state.
-  return { ...project.draft, savedAt: project.savedAt, model: rebuild(project.design), alternatives: project.alternatives.map(rebuild), history: project.history.map(h => ({ model: rebuild(h.design), palette: h.palette })) };
+  return { ...project.draft, modelLandSurvey: project.modelLandSurvey, savedAt: project.savedAt, model: rebuild(project.design), alternatives: project.alternatives.map(rebuild), history: project.history.map(h => ({ model: rebuild(h.design), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
 }
 export function quantitiesCSV(model, rates, reserve, vat) {
   const rows = quantityRows(model), totals = estimate(rows, rates, reserve, vat);

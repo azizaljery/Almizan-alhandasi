@@ -5,6 +5,7 @@ import { circulationNetwork } from '../dist/circulation.mjs';
 import { reviewPlan } from '../dist/audit.mjs';
 import { encodeProject, decodeProject, quantitiesCSV, MAX_PROJECT_BYTES } from '../dist/project.mjs';
 import { requestLocalBrief } from '../dist/local-nlp.mjs';
+import { geoJSONFromVertices, validateLandSurvey } from '../dist/land-survey.mjs';
 
 const plot = { width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } };
 const rooms = defaultRooms();
@@ -111,6 +112,22 @@ test('project import rejects corrupt, mismatched, huge and infeasible files befo
   assert.equal(encodeProject(snapshot).includes('corrupted'), false);
 });
 
+test('land boundary and engine-link choice round-trip with the project while legacy files default to none', () => {
+  const landSurvey = validateLandSurvey({ version: 1,
+    geometry: geoJSONFromVertices([[46.6753, 24.7136], [46.6755, 24.7136], [46.6755, 24.7139], [46.6753, 24.7139]]),
+    references: [20.1, 33.3, 20.1, 33.3], engineLink: 'survey-rectangle',
+    binding: { width: 20.1, length: 33.3, source: 'confirmed-edge-references' }, mapView: { center: [24.7136, 46.6753], zoom: 16, provider: 'local' },
+  });
+  const priorSurvey = validateLandSurvey({ ...landSurvey, engineLink: 'separate-rectangle', binding: null });
+  const project = encodeProject({ ...snapshot, plot: { ...plot, width: 20.1, length: 33.3 }, landSurvey, modelLandSurvey: null, history: [{ model: models[0], palette: 'modern', landSurvey: priorSurvey }] });
+  const restored = decodeProject(project);
+  assert.deepEqual(restored.landSurvey, landSurvey);
+  assert.deepEqual(restored.history[0].landSurvey, priorSurvey);
+  const legacy = decodeProject(encodeProject(snapshot));
+  assert.equal(legacy.landSurvey, null);
+  assert.equal(Object.hasOwn(legacy.history[0], 'landSurvey'), false);
+});
+
 test('CSV distinguishes unpriced values from zero and carries a UTF-8 BOM and partial-scope warning', () => {
   const csv = quantitiesCSV(models[0], { doors: 0 }, 0, 0);
   assert.ok(csv.startsWith('\uFEFF'));
@@ -150,4 +167,11 @@ test('local understanding handles English, additions and requests clarification 
   const ambiguous = await requestLocalBrief({ prompt: 'مجلس بمساحة ٤٨ م²', previous: { rooms } });
   assert.ok(ambiguous.questions.length); assert.deepEqual(ambiguous.rooms.filter(r => r.type === 'majlis').map(r => r.area), [32, 32]);
   await assert.rejects(requestLocalBrief({ prompt: '١١ غرف نوم', previous: { rooms } }), /لم أختصر/);
+});
+
+test('centimeter room dimensions convert to square meters and stay advisory', async () => {
+  const brief = await requestLocalBrief({ prompt: 'غرفة نوم ٤٠٠×٤٠٠ سم', previous: { rooms: [] } });
+  assert.equal(brief.rooms[0].area, 16);
+  assert.ok(brief.unhandled.some(note => /استُخدمت 4 × 4 م لمساحة غرفة نوم فقط/.test(note)));
+  assert.ok(brief.unhandled.some(note => /لا يثبّت المحرك الطول والعرض/.test(note)));
 });

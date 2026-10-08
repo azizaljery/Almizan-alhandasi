@@ -1,0 +1,61 @@
+.studio-view-toggle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:10px;border:1px solid #d6d6dc;border-radius:12px;background:#fff}
+.studio-view-toggle .on{background:#0b6ed0;border-color:#0b6ed0;color:#fff}
+.studio-view-toggle span{margin-inline-start:auto;color:#657080;font-size:.8rem}
+.studio-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,320px);gap:16px;align-items:start}
+.studio-main{display:grid;gap:14px;min-width:0}
+.studio-main>.card{margin:0;min-width:0}
+.studio-inspector{position:sticky;top:148px;display:grid;gap:12px;align-content:start;min-width:0;max-height:calc(100vh - 166px);overflow:auto;padding:2px}
+.studio-inspector>.card{margin:0;min-width:0}
+.studio-model-summary{padding:16px;border:1px solid #d7dbe2;border-radius:12px;background:#fff;box-shadow:0 6px 20px #17233a08}
+.studio-model-summary>span{display:block;margin-bottom:6px;color:#697384;font-size:.78rem}
+.studio-model-summary>div{font-size:.88rem;line-height:1.8;color:#25344a}
+.studio-inspector .match-row{grid-template-columns:1fr;gap:6px;padding:12px 0}
+.studio-inspector .match-state{justify-self:start;grid-column:auto;grid-row:auto}
+.studio-inspector .room-inspector{display:block;margin:0;padding:14px;border-radius:12px;background:#fff}
+.studio-inspector .room-inspector .numbers{flex-wrap:wrap;margin-top:8px}
+.studio-inspector .inline-actions{margin:0;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+.studio-inspector .inline-actions label{grid-column:1/-1;min-width:0}
+.studio-inspector .inline-actions button{min-width:0;padding:8px;font-size:.8rem}
+.studio-inspector .help{margin:0 2px;font-size:.78rem;line-height:1.65}
+.studio-inspector .plan-key{display:flex;flex-wrap:wrap;gap:7px 10px;padding:12px;border:1px solid #d7dbe2;border-radius:10px;background:#fff}
+.studio-inspector .match-card{border-radius:12px}
+.studio-inspector .match-card .ch{padding:14px}
+.studio-inspector .match-card .cb{padding:14px}
+.studio-main .plan{min-height:560px}
+.studio-main .plan svg{min-height:540px}
+.studio-main .view{height:min(72vh,720px);min-height:480px}
+.studio-3d[hidden],.studio-2d[hidden]{display:none!important}
+.studio-layout+.card[aria-label="مقارنة بدائل المخطط"]{margin-top:14px}
+.studio-layout+.card[aria-label="مقارنة بدائل المخطط"] .alternative-grid{display:flex;gap:12px;overflow-x:auto;overscroll-behavior-inline:contain;padding:4px 2px 12px;scroll-snap-type:x mandatory}
+.studio-layout+.card[aria-label="مقارنة بدائل المخطط"] .alternative-card{flex:0 0 min(31%,320px);scroll-snap-align:start}
+#panel-result>.wrap{width:min(1600px,100%);padding:28px clamp(18px,2.4vw,38px) 50px}
+#panel-result>.wrap>.head{margin-bottom:18px}
+@media(max-width:1120px){
+  .studio-layout{grid-template-columns:minmax(0,1fr) minmax(245px,280px);gap:12px}
+  .studio-main .plan{min-height:490px}
+  .studio-main .plan svg{min-height:470px}
+  .studio-layout+.card[aria-label="مقارنة بدائل المخطط"] .alternative-card{flex-basis:40%}
+}
+@media(max-width:900px){
+  .studio-layout{grid-template-columns:minmax(0,1fr)}
+  .studio-inspector{position:static;max-height:none;overflow:visible;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .studio-inspector .match-card{grid-column:1/-1}
+  .studio-inspector .match-row{grid-template-columns:1fr auto}
+  .studio-inspector .match-state{grid-column:2;grid-row:1}
+  .studio-inspector .room-inspector,.studio-inspector .plan-key,.studio-inspector .studio-model-summary{grid-column:1/-1}
+  .studio-layout+.card[aria-label="مقارنة بدائل المخطط"] .alternative-card{flex-basis:45%}
+}
+@media(max-width:560px){
+  #panel-result>.wrap{padding:18px 12px 38px}
+  .studio-view-toggle{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:7px}
+  .studio-view-toggle .small-button{min-width:0;padding:8px 5px;font-size:.78rem}
+  .studio-view-toggle span{grid-column:1/-1;margin:0;text-align:center}
+  .studio-main .ch{padding:14px}
+  .studio-main .cb{padding:12px}
+  .studio-main .plan{min-height:360px}
+  .studio-main .plan svg{min-height:390px}
+  .studio-main .view{height:62vh;min-height:360px}
+  .studio-inspector{grid-template-columns:minmax(0,1fr)}
+  .studio-inspector>.match-card{grid-column:auto}
+  .studio-layout+.card[aria-label="مقارنة بدائل المخطط"] .alternative-card{flex-basis:78%}
+}
