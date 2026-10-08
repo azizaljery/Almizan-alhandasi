@@ -464,7 +464,9 @@ async function generate() {
     const plot = validatePlot(rawPlot()), rooms = normalizeRooms(state.program);
     const currentSignature = JSON.stringify([signature(plot, rooms), startEngineeringSignature]);
     if (exploration.signature !== currentSignature) { exploration.signature = currentSignature; exploration.previous = []; }
-    const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous: exploration.previous });
+    const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
+    const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
+    const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
     if (signature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ بقي المخطط السابق محفوظًا. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);

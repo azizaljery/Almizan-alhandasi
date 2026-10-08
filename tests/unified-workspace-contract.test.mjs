@@ -27,3 +27,9 @@ test('new brief context invalidates the generation snapshot and AI proposals bin
  assert.match(app,/sourceFingerprint !== requestFingerprint\(requestInput\(\)\)/);
  assert.match(app,/proposalFingerprint !== requestFingerprint\(requestInput\(\)\)/);
 });
+
+test('new-ideas exclusion includes displayed alternatives even after selected shape changes',()=>{
+ const app=readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
+ assert.match(app,/state\.alternatives\.filter\(sameProgram\)/);
+ assert.match(app,/state\.history\.map\(entry => entry\.model\)\.filter\(sameProgram\)/);
+});

@@ -1,11 +1,11 @@
 {
-  "release": "2026.10.08",
+  "release": "2026.10.08-r2",
   "official_project": "appgprj_6aa6d211421c8191ae8cb918a8cea058",
   "baseline": "07cac66ac02e24f045cd1d91a58a1f86e3b989f2",
   "ui_source": "875708041e75eb0ae2ab03cdd58b968c7c42182a",
   "rollback_library_id": "libfile_b41014360fd08191a7a75d4bd442816f",
   "tests": {
-    "passed": 124,
+    "passed": 125,
     "failed": 0,
     "skipped": 0
   },
@@ -27,7 +27,7 @@
   ],
   "changed_file_sha256": {
     "README.md": "4423d89d9eb55ff63c77f025e241ee0b4213022b4b40acedb16b0fa89a317b8f",
-    "dist/app.mjs": "7b292c2d8d2ab6a2fa084c28759c4d11107203ca8f08ccbce707a7d43296e0b8",
+    "dist/app.mjs": "5aac6350d51b6a07065126f120d5a4aa7a8cf2b7094958d4de1ff639b4822a57",
     "dist/assets/pavilion-example.png": "2916e75fadf52ebbf0cd72b9eaefb98a794a7fbab31bd01ea611d1f180e8d8bb",
     "dist/candidate-intelligence.mjs": "13b0add1b132a0dd97f43d1aa6a9e671588adf46980ce00d7b1f1ebb1afb7c66",
     "dist/circulation.mjs": "500d8a8e55af4c965ca5837dae21a8544fd04c1be2a28b4da3bee1ee312aa758",
@@ -36,7 +36,7 @@
     "dist/design-insights.mjs": "703c74d4906e6fbcf97e7c5ef79ac6b4f9218796dd9b8e56effc1f759c3b48b9",
     "dist/design-selection.mjs": "8630f8def636b9b6c6228e3339c97750e6a2586875fed9b1febdeeea763f088c",
     "dist/home-design-engine.mjs": "f3956d4d6a2a2e572db603a263f16686e9fdd8c7bd51d256fc505826a2319633",
-    "dist/index.html": "ad4b5e968b37ff4fea780fa83562703cb1bbda00225d4b71e5091fbd660ccf33",
+    "dist/index.html": "29b421a47e93f386c0d5ee3238a3eac741784bb73fb7da38174458983b79d17e",
     "dist/integration/control/contracts/mizan-envelope-v1.schema.json": "19beef5be179575ab345cadae7719b26a582dbf39f6fe8dc63fcbbfc71aabcb2",
     "dist/integration/control/contracts/mizan-envelope-v1.schema.mjs": "9d0930bd742001fcfe21af1077f2eb065f17696ec9717a412530e3cc0107af6e",
     "dist/integration/gemini/contracts/mizan-envelope-v1.schema.json": "19beef5be179575ab345cadae7719b26a582dbf39f6fe8dc63fcbbfc71aabcb2",
@@ -58,6 +58,15 @@
     "tests/frontend.test.mjs": "b35a5d34f47ba3d4e058aaba0d64af02b0f1ccb4d28ce1a4820c1410753fc798",
     "tests/pavilion-generation.test.mjs": "506a49ea6a92bad7efb86e92fad31e4abe2cc0b109caa82afe044e8f4d174837",
     "tests/portal-navigation.test.mjs": "eba5bda39c26be345d3d7df6dfb0c96a98e540088588344619e54200c0dfd204",
-    "tests/unified-workspace-contract.test.mjs": "22767883af87d5d2e1cfc9fd993c74825ad804ca1c30cc60a5d90ccc31e44b10"
+    "tests/unified-workspace-contract.test.mjs": "a2f63e5c0aad485e3360d452291073e0912551e96c042ea46555d7c976fe5ce2"
+  },
+  "public_v42_browser_evidence": {
+    "source": "4c32dece9939277367d0359b67f5a5697526c0c6",
+    "six_alternatives_generated": true,
+    "all_six_selected_with_12_rooms": true,
+    "BOQ_selected_geometry_visible": true,
+    "SVG_and_project_downloaded": true,
+    "WebGL": "UNAVAILABLE_IN_CLOUD_BROWSER",
+    "followup": "Preserve displayed/history geometry exclusions across selection changes; final r2 browser confirmation pending"
   }
 }
