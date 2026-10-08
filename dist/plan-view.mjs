@@ -36,11 +36,11 @@ export function buildPlanSVG(model) {
     const v = box(r), cx = v.x + v.w / 2, cy = v.y + v.h / 2;
     const words = r.name.split(/\s+/), lines = [''];
     words.forEach(word => { if ((lines.at(-1) + word).length > 16 && lines.length < 2) lines.push(word); else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word; });
-    const font = Math.min(.38, v.w / (Math.max(...lines.map(l => l.length)) * .56 + 2));
+    const font = Math.min(.52, v.w / (Math.max(...lines.map(l => l.length)) * .43 + 1.3));
     const label = `${r.name}، ${r.area} متر مربع، ${r.w.toFixed(2)} في ${r.h.toFixed(2)} متر`;
     s += `<g data-room-id="${r.id}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${TYPES[r.type].color}"/>${furniture(r)}<g pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
     lines.forEach((line, i) => { s += `<text x="${cx}" y="${cy - .25 + i * .43}" font-size="${font}" font-weight="700" paint-order="stroke" stroke="${TYPES[r.type].color}" stroke-width=".09">${escapeXML(line)}</text>`; });
-    s += `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .23}" font-size=".29" font-weight="500">${r.area} م²</text><text x="${cx}" y="${cy + (lines.length - 1) * .43 + .6}" font-size=".24" fill="#536973">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text></g></g>`;
+    s += `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .23}" font-size=".4" font-weight="600">${r.area} م²</text><text x="${cx}" y="${cy + (lines.length - 1) * .43 + .62}" font-size=".35" font-weight="500" fill="#536973">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text></g></g>`;
   }
   model.walls.forEach(w => { s += `<line x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${w.type === 'ext' ? '#394a4b' : '#657574'}" stroke-width="${w.t}" stroke-linecap="square" pointer-events="none"/>`; });
   model.openings.forEach(o => {

@@ -246,6 +246,7 @@ function renderRows() {
 function selectRoom(id) {
   const r = state.model?.rooms.find(r => r.id === id); if (!r) return;
   state.selected = id; $('roomSelect').value = id; viewport?.select(id);
+  if (state.tab === 'result' && $('studioInspector')) $('studioInspector').open = true;
   const marker = state.gemini?.review?.markers?.find(item => item.id === id);
   const geminiNote = marker ? `<p class="gemini-room-note"><b>المراجعة المحلية:</b> ${marker.count} ملاحظة ${marker.severity === 'critical' ? 'حرجة' : marker.severity === 'major' ? 'مهمة' : 'استرشادية'} مرتبطة بهذا الفراغ.</p>` : '';
   $('roomInspector').innerHTML = `<div><b>${esc(r.name)}</b><p>${POSITIONS[r.position]} · ${SIDES[r.resolvedSide]}</p></div><div class="numbers"><span>${fmt(r.area)} م² صافي</span><span>${fmt(r.w, 2)} × ${fmt(r.h, 2)} م</span></div>${geminiNote}`;
@@ -334,12 +335,20 @@ function syncPlanEditor() {
 function renderStudioModelSummary() {
   const output = $('studioModelSummary'), model = state.model;
   if (!output) return;
-  if (!model) { output.textContent = 'ولّد مخططًا لعرض أبعاده وبرنامجه.'; return; }
+  if (!model) {
+    output.textContent = 'المسقط والخصائص من النموذج نفسه.';
+    if ($('studioModelTechnical')) $('studioModelTechnical').textContent = 'لا توجد بيانات نموذج بعد.';
+    if ($('studioModelKey')) $('studioModelKey').textContent = '—';
+    return;
+  }
   const plot = model.plot, built = quantities(model).footprint;
+  const shapeLabel = ({ rect: 'كتلة مستطيلة', l: 'كتلة على شكل L', u: 'كتلة على شكل U', pavilions: 'أجنحة متصلة برواق' })[model.shape] || 'غير محددة';
   const boundary = state.modelLandSurvey?.engineLink === 'survey-rectangle'
-    ? `مرتبط بمستطيل من المسح (${state.modelLandSurvey.binding.source === 'confirmed-edge-references' ? 'أطوال مرجعية أدخلها المستخدم' : 'تقدير خريطة'}).`
-    : state.modelLandSurvey ? 'المسح محفوظ بصورة منفصلة ولا يحدد شكل هذا المولد.' : 'مستطيل إدخال للمولد دون حد مسح.';
-  output.textContent = `${fmt(plot.width)} × ${fmt(plot.length)} م · ${model.rooms.length} فراغًا · بصمة المولد ${fmt(built)} م² · ${model.shape || 'شكل مولد'}. ${boundary}`;
+    ? `مرتبط بحدود المسح (${state.modelLandSurvey.binding.source === 'confirmed-edge-references' ? 'أطوال مرجعية أدخلها المستخدم' : 'تقدير خريطة'}).`
+    : state.modelLandSurvey ? 'حدود المسح محفوظة بصورة منفصلة.' : 'أبعاد الأرض من مدخلات المشروع.';
+  output.textContent = `${fmt(plot.width)} × ${fmt(plot.length)} م أرض · ${model.rooms.length} فراغًا · مساحة البناء ${fmt(built)} م². ${boundary}`;
+  if ($('studioModelTechnical')) $('studioModelTechnical').textContent = `المساحة المبنية المحسوبة ${fmt(built)} م² · هيئة الكتلة ${shapeLabel}.`;
+  if ($('studioModelKey')) $('studioModelKey').textContent = shapeLabel;
 }
 function setStudioMode(mode) {
   if (mode === 'quantities') { switchTab('boq'); return; }
@@ -471,11 +480,14 @@ function renderAlternatives() {
   $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
     const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
     const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
+    const title = model.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[model.strategy || 'compact'];
+    const tag = concept.tag === 'Claude 2.2.1' ? 'مسقط مستطيل' : concept.tag;
     const evaluation = state.engineering?.rows?.[index]?.evaluation;
-    const engineering = evaluation ? `<div><dt>قرار الميزان</dt><dd>${assessedText(evaluation.score)} / ١٠٠ · جزئي</dd></div><div><dt>عوائق</dt><dd>${fmt(evaluation.blockers.length, 0)}</dd></div>` : '';
-    return `<article class="alternative-card${selected ? ' selected' : ''}">${conceptThumbnail(model)}<span class="concept-tag">${esc(concept.tag)}</span><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><p class="concept-form">${esc(concept.form)}. ${esc(concept.idea)}</p><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><p class="concept-fit"><b>أنسب لـ:</b> ${esc(concept.bestFor)}<br><b>المقايضة:</b> ${esc(concept.tradeoff)}</p><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض في 2D و3D' : 'اعرض هذا النموذج'}</button></article>`;
+    const engineering = evaluation ? `قرار الميزان ${assessedText(evaluation.score)} من ١٠٠ جزئي · ${fmt(evaluation.blockers.length, 0)} عوائق.` : '';
+    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>${esc(title)}</strong><small>${esc(tag)}</small></span></button><details class="alternative-details"><summary aria-label="تفاصيل البديل">تفاصيل</summary><div><p>${esc(title)} · ${esc(concept.form)}. ${esc(concept.idea)}</p><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p><p><b>يناسب:</b> ${esc(concept.bestFor)} · <b>المقايضة:</b> ${esc(concept.tradeoff)}</p></div></details></article>`;
   }).join('');
-  const failed = state.failures.map(f => `${STRATEGIES[f.strategy]}: ${f.reason}`).join(' ');
+  $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} بدائل هندسية · التحديد يحدّث المسقط و3D والكميات`;
+  const failed = state.failures.map(f => `${f.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[f.strategy] || 'أحد البدائل'}: ${f.reason}`).join(' ');
   $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
   markDirty();
 }
@@ -566,6 +578,7 @@ function updateCosts() {
 function switchTab(tab) {
   if (!['brief', 'rating', 'design', 'result', 'review', 'boq'].includes(tab)) return;
   state.tab = tab;
+  $('app').classList.toggle('studio-active', tab === 'result');
   all('.tab').forEach(button => { const on = button.dataset.tab === tab; button.classList.toggle('on', on); if (on) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current'); });
   all('.panel').forEach(panel => panel.classList.toggle('on', panel.id === 'panel-' + tab));
   if (tab === 'rating') rating(); if (tab === 'boq') renderBOQ();
