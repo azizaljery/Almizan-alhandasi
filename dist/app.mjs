@@ -25,7 +25,7 @@ import { initLandSurveyEditor } from './land-map.mjs';
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
-const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
+const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
 const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
@@ -39,7 +39,7 @@ function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
 function discoveryText() {
   const d = state.discovery, parts = [];
-  const examples = { courtyard_privacy: 'بيت الفناء الخاص', family_layout: 'جناحان على شكل L', concept_comparison: 'بيت الباحة U', classic_living: 'أجنحة مرتبطة برواق' };
+  const examples = { courtyard_privacy: 'بيت الفناء الخاص', family_layout: 'جناحان على شكل L', concept_comparison: 'بيت الباحة U', classic_living: 'أجنحة مرتبطة برواق', staggered_wings: 'جناحان متدرجان مرتبطان' };
   if (d.likes.length) parts.push(`أفكار مفضلة: ${d.likes.map(style => examples[style] || style).join('، ')}.`);
   if (d.rejects.length) parts.push(`أفكار غير مفضلة: ${d.rejects.map(style => examples[style] || style).join('، ')}.`);
   if (d.avoids.length) parts.push(`تجنّب: ${d.avoids.join('، ')}.`);
@@ -55,7 +55,7 @@ function renderDiscovery() {
     const style = card.dataset.style, liked = d.likes.includes(style);
     card.classList.toggle('liked', liked); card.classList.toggle('rejected', d.rejects.includes(style));
     const button = card.querySelector('[data-taste="like"]');
-    button.textContent = liked ? 'شكل التوليد المختار' : 'اختر هذا الشكل';
+    button.textContent = liked ? 'تفضيل هذا الشكل' : 'أفضّل هذا الشكل';
     button.setAttribute('aria-pressed', String(liked));
   });
   all('#avoidChoices [data-avoid]').forEach(button => { const on = d.avoids.includes(button.dataset.avoid); button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on)); });
@@ -159,7 +159,7 @@ async function understandRequest() {
     state.requestProposal = result;
     $('requestSummary').textContent = result.summary;
     $('requestFacts').innerHTML = result.understood.map(f => `<div class="request-fact ${f.state}"><span>${esc(f.label)}</span><b>${esc(f.value)}</b></div>`).join('');
-    $('requestRooms').innerHTML = result.rooms.map(r => `<div class="request-room"><span>${esc(r.name)}<small> · ${esc(POSITIONS[r.position])} / ${esc(SIDES[r.side])}</small></span><b>${fmt(r.area)} م²</b></div>`).join('') || '<p class="help">لم يحدد الوصف غرفًا. أضف عدد الغرف أو اختر تعديل الجدول الحالي.</p>';
+    $('requestRooms').innerHTML = result.rooms.map(r => `<div class="request-room"><span>${esc(r.name)}<small> · ${esc(POSITIONS[r.position])} / ${esc(SIDES[r.side])}</small></span><b>${r.dimensions ? `${fmt(r.dimensions.width, 2)} × ${fmt(r.dimensions.length, 2)} م · ` : ''}${fmt(r.area)} م²</b></div>`).join('') || '<p class="help">لم يحدد الوصف غرفًا. أضف عدد الغرف أو اختر تعديل الجدول الحالي.</p>';
     const list = (id, items, empty) => { $(id).replaceChildren(...(items.length ? items : empty ? [empty] : []).map(text => { const li = document.createElement('li'); li.textContent = text; return li; })); };
     list('requestDesires', result.desires.map(r => `${r.label}: ${r.detail}`), 'لا توجد أولويات إضافية محددة في هذه القراءة.');
     list('requestQuestions', result.questions); $('requestQuestionsBox').hidden = !result.questions.length;
@@ -240,7 +240,7 @@ function programTotal() {
   $('programTotal').textContent = `${fmt(state.program.length, 0)} فراغًا · ${fmt(sum)} م² صافي الغرف، قبل إضافة الجدران والممرات. التوليد من هذا الجدول فقط.`;
 }
 function renderRows() {
-  $('roomRows').innerHTML = state.program.map((r, i) => `<tr data-row="${i}"><td><input data-field="name" aria-label="اسم الفراغ ${i + 1}" maxlength="70" value="${esc(r.name)}"></td><td><select data-field="type" aria-label="نوع الفراغ ${i + 1}">${options(TYPES, r.type)}</select></td><td><input data-field="area" aria-label="مساحة الفراغ ${i + 1}" type="number" min="4" max="120" step=".5" value="${Number.isFinite(r.area) ? r.area : ''}"></td><td><select data-field="position" aria-label="موقع الفراغ ${i + 1}">${options(POSITIONS, r.position)}</select></td><td><select data-field="side" aria-label="جانب الفراغ ${i + 1}">${options(SIDES, r.side)}</select></td><td><button class="remove-room" data-remove="${i}" aria-label="حذف ${esc(r.name)}">حذف</button></td></tr>`).join('');
+  $('roomRows').innerHTML = state.program.map((r, i) => `<tr data-row="${i}"><td><input data-field="name" aria-label="اسم الفراغ ${i + 1}" maxlength="70" value="${esc(r.name)}"></td><td><select data-field="type" aria-label="نوع الفراغ ${i + 1}">${options(TYPES, r.type)}</select></td><td><input data-field="area" aria-label="مساحة الفراغ ${i + 1}" type="number" min="4" max="120" step=".01" value="${Number.isFinite(r.area) ? r.area : ''}"${r.dimensions ? ' disabled aria-describedby="dimensionHelp"' : ''}></td><td><div class="dimension-inputs"><input data-field="dim-width" aria-label="عرض ${esc(r.name)} بالمتر" type="number" min="1" max="60" step=".1" placeholder="عرض" value="${r.dimensions?.width ?? ''}"><span>×</span><input data-field="dim-length" aria-label="طول ${esc(r.name)} بالمتر" type="number" min="1" max="60" step=".1" placeholder="طول" value="${r.dimensions?.length ?? ''}"></div></td><td><select data-field="position" aria-label="موقع الفراغ ${i + 1}">${options(POSITIONS, r.position)}</select></td><td><select data-field="side" aria-label="جانب الفراغ ${i + 1}">${options(SIDES, r.side)}</select></td><td><button class="remove-room" data-remove="${i}" aria-label="حذف ${esc(r.name)}">حذف</button></td></tr>`).join('');
   programTotal(); markDirty(); renderClientBrief();
 }
 function selectRoom(id) {
@@ -256,7 +256,7 @@ function selectRoom(id) {
 function syncRoomEditor(room = state.model?.rooms.find(r => r.id === state.selected)) {
   const form = $('roomEditForm'); if (!form || !room) return;
   const index = state.program.findIndex(r => r.id === room.id); if (index < 0) return;
-  const program = state.program[index]; form.hidden = !state.editor.open; $('roomEditTitle').textContent = `الغرفة: ${program.name}`; $('roomEditName').value = program.name; $('roomEditArea').value = program.area; $('roomEditPosition').innerHTML = options(POSITIONS, program.position); $('roomEditSide').innerHTML = options(SIDES, program.side); form.dataset.roomIndex = index;
+  const program = state.program[index]; form.hidden = !state.editor.open; $('roomEditTitle').textContent = `الغرفة: ${program.name}`; $('roomEditName').value = program.name; $('roomEditArea').value = program.area; $('roomEditArea').disabled = !!program.dimensions; $('roomEditWidth').value = program.dimensions?.width ?? ''; $('roomEditLength').value = program.dimensions?.length ?? ''; $('roomEditPosition').innerHTML = options(POSITIONS, program.position); $('roomEditSide').innerHTML = options(SIDES, program.side); form.dataset.roomIndex = index;
 }
 function drawRoute() {
   const path = circulation?.toRoom(state.selected);
@@ -342,7 +342,7 @@ function renderStudioModelSummary() {
     return;
   }
   const plot = model.plot, built = quantities(model).footprint;
-  const shapeLabel = ({ rect: 'كتلة مستطيلة', l: 'كتلة على شكل L', u: 'كتلة على شكل U', pavilions: 'أجنحة متصلة برواق' })[model.shape] || 'غير محددة';
+  const shapeLabel = ({ rect: 'كتلة مستطيلة', l: 'كتلة على شكل L', u: 'كتلة على شكل U', pavilions: 'أجنحة متصلة برواق', staggered: 'جناحان متدرجان مرتبطان' })[model.shape] || 'غير محددة';
   const boundary = state.modelLandSurvey?.engineLink === 'survey-rectangle'
     ? `مرتبط بحدود المسح (${state.modelLandSurvey.binding.source === 'confirmed-edge-references' ? 'أطوال مرجعية أدخلها المستخدم' : 'تقدير خريطة'}).`
     : state.modelLandSurvey ? 'حدود المسح محفوظة بصورة منفصلة.' : 'أبعاد الأرض من مدخلات المشروع.';
@@ -453,7 +453,7 @@ function currentEngineeringEvaluation() {
   return state.engineering?.rows?.find(row => row.design.sourceModel === state.model)?.evaluation || null;
 }
 function conceptThumbnail(model) {
-  const b = model.building, pad = .7, colors = { majlis: '#d9b777', living: '#8fb5a6', dining: '#d9c69c', kitchen: '#a8bd8d', bedroom: '#9da8c9', bath: '#8fb9c8', storage: '#b7aea1', service: '#cfa59f' };
+  const b = model.building, pad = .7, colors = { majlis: '#d9b777', living: '#8fb5a6', dining: '#d9c69c', kitchen: '#a8bd8d', bedroom: '#9da8c9', bath: '#8fb9c8', storage: '#b7aea1', office: '#b4a3ce', service: '#cfa59f' };
   const rect = (r, fill, radius = .08) => `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${radius}" fill="${fill}"/>`;
   const rooms = model.rooms.map(r => rect(r, colors[r.type] || '#b8b2aa')).join('');
   const corridors = model.corridors.map(r => rect(r, '#f3ead8', .03)).join('');
@@ -542,7 +542,7 @@ async function generate() {
     if (exploration.signature !== currentSignature) { exploration.signature = currentSignature; exploration.previous = []; }
     const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
     const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
-    const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
+  const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
     if (workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ بقي المخطط السابق محفوظًا. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
@@ -595,6 +595,9 @@ async function askAI() {
   const sourceFingerprint = requestFingerprint(requestInput());
   $('askAI').disabled = true; $('askLocal').disabled = true; $('askAI').textContent = 'جارٍ فهم المتطلبات وتجهيز الرسم…';
   try {
+    const request = requestInput();
+    const localConstraints = await requestLocalBrief({ prompt: request.prompt, previous: { rooms: request.mode === 'modify' ? request.rooms : [] } });
+    if (request.rooms.some(r => r.type === 'office' || r.dimensions) || localConstraints.rooms.some(r => r.type === 'office' || r.dimensions)) throw Error('الخدمة المتصلة الحالية لا تحفظ الأبعاد الملزمة أو نوع المكتب. استخدم «افهم طلبي محليًا»؛ لن نعتمد اقتراحًا لا يثبت هذه القيود.');
     const discovery = discoveryText();
     const clientContext = clientBrief ? [`مبادئ التخطيط المستخلصة: ${clientBrief.principles.join('، ') || 'لم تحدد بعد.'}`, `أسئلة تحتاج إجابة: ${clientBrief.questions.join('، ') || 'لا توجد.'}`, `حدود يجب التصريح بها: ${clientBrief.limits.join('، ') || 'لا توجد.'}`].join('\n') : '';
     const engineeringContext = buildEngineeringPromptContext({ plot: rawPlot(), rooms: state.program, discovery: state.discovery, idea: $('idea').value, model: state.model });
@@ -758,7 +761,13 @@ function boot() {
   ['solarLatitude', 'sunMonth', 'sunHour'].forEach(id => $(id).addEventListener('input', renderSolarPreview));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
-    state.program[Number(row.dataset.row)][field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
+    const program = state.program[Number(row.dataset.row)];
+    if (field === 'dim-width' || field === 'dim-length') {
+      const widthInput = row.querySelector('[data-field="dim-width"]'), lengthInput = row.querySelector('[data-field="dim-length"]');
+      const width = widthInput.value === '' ? NaN : widthInput.valueAsNumber, length = lengthInput.value === '' ? NaN : lengthInput.valueAsNumber;
+      if (Number.isFinite(width) && Number.isFinite(length)) { program.dimensions = { width, length }; program.area = width * length; row.querySelector('[data-field="area"]').value = program.area; row.querySelector('[data-field="area"]').disabled = true; }
+      else { delete program.dimensions; row.querySelector('[data-field="area"]').disabled = false; }
+    } else program[field] = field === 'area' ? e.target.valueAsNumber : e.target.value;
     state.manualEdits = true; programTotal(); markDirty(); renderClientBrief();
   });
   $('idea').addEventListener('input', markDirty);
@@ -789,7 +798,7 @@ function boot() {
     else target.push(style);
     const otherIndex = other.indexOf(style); if (otherIndex >= 0) other.splice(otherIndex, 1);
     if (action.dataset.taste === 'like') {
-      const palette = { courtyard_privacy: 'resort', family_layout: 'modern', concept_comparison: 'classic', classic_living: 'classic' }[style];
+      const palette = { courtyard_privacy: 'resort', family_layout: 'modern', concept_comparison: 'classic', classic_living: 'classic', staggered_wings: 'classic' }[style];
       if (palette) { state.palette = palette; syncPalette(); if (state.model) void show3D(); }
     }
     renderDiscovery();
@@ -830,10 +839,14 @@ function boot() {
     const tool = event.target.closest('[data-plan-tool]'); if (!tool) return;
     state.editor.tool = tool.dataset.planTool; syncPlanEditor();
   });
+  $('roomEditWidth').addEventListener('input', () => { const w = $('roomEditWidth').valueAsNumber, l = $('roomEditLength').valueAsNumber; if ($('roomEditWidth').value !== '' && $('roomEditLength').value !== '' && Number.isFinite(w*l)) { $('roomEditArea').value = w*l; $('roomEditArea').disabled = true; } else $('roomEditArea').disabled = false; });
+  $('roomEditLength').addEventListener('input', () => { const w = $('roomEditWidth').valueAsNumber, l = $('roomEditLength').valueAsNumber; if ($('roomEditWidth').value !== '' && $('roomEditLength').value !== '' && Number.isFinite(w*l)) { $('roomEditArea').value = w*l; $('roomEditArea').disabled = true; } else $('roomEditArea').disabled = false; });
   $('roomEditForm').addEventListener('submit', event => {
     event.preventDefault(); const index = Number(event.currentTarget.dataset.roomIndex); if (!Number.isInteger(index) || !state.program[index]) return;
     try {
-      state.program[index] = { ...state.program[index], name: $('roomEditName').value.trim(), area: $('roomEditArea').valueAsNumber, position: $('roomEditPosition').value, side: $('roomEditSide').value }; normalizeRooms(state.program); state.manualEdits = true; renderRows(); markDirty(); toast('حُفظ تعديل الغرفة في البرنامج. اضغط «ولّد» لإعادة توزيعها هندسيًا دون تغيير المساحة.');
+      const width = $('roomEditWidth').value === '' ? NaN : $('roomEditWidth').valueAsNumber, length = $('roomEditLength').value === '' ? NaN : $('roomEditLength').valueAsNumber;
+      const dimensions = Number.isFinite(width) && Number.isFinite(length) ? { width, length } : null;
+      state.program[index] = { ...state.program[index], name: $('roomEditName').value.trim(), area: dimensions ? width * length : $('roomEditArea').valueAsNumber, dimensions, position: $('roomEditPosition').value, side: $('roomEditSide').value }; normalizeRooms(state.program); state.manualEdits = true; renderRows(); markDirty(); toast('حُفظ تعديل الغرفة في البرنامج. اضغط «ولّد» لإعادة توزيعها هندسيًا.');
     } catch (error) { toast(error.message); syncRoomEditor(); }
   });
   $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });

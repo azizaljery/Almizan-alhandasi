@@ -10,6 +10,7 @@ const terms = [
   ['مطابخ|مطبخين|مطبخ|kitchens?', 'kitchen'],
   ['دورات مياه|دورة مياه|حمامات|حمامين|حمام|bathrooms?', 'bath'],
   ['مستودعات|مستودع|مخزن|تخزين|storerooms?|storage', 'storage'],
+  ['مكاتب|مكتب|offices?|study rooms?', 'office'],
 ];
 const entity = new RegExp(terms.map(([term], i) => `(?<t${i}>${term})`).join('|'), 'giu');
 const countWord = Object.keys(numbers).sort((a, b) => b.length - a.length).join('|');
@@ -22,7 +23,7 @@ const dimensionMetres = match => {
   const unit1 = match[2] || match[4] || 'm', unit2 = match[4] || match[2] || 'm';
   return [Number(match[1]) / (/^(?:cm|سم|سنتيمتر)$/i.test(unit1) ? 100 : 1), Number(match[3]) / (/^(?:cm|سم|سنتيمتر)$/i.test(unit2) ? 100 : 1)];
 };
-const clean = rooms => rooms.length ? normalizeRooms(rooms).map(({ name, type, area, position, side }) => ({ name, type, area, position, side })) : [];
+const clean = rooms => rooms.length ? normalizeRooms(rooms).map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions } : {}) })) : [];
 const defaults = type => ({ type, name: TYPES[type].name, area: TYPES[type].area, position: type === 'majlis' ? 'front' : type === 'bedroom' ? 'back' : 'middle', side: 'any' });
 
 export async function requestLocalBrief({ prompt, previous }) {
@@ -42,26 +43,37 @@ export async function requestLocalBrief({ prompt, previous }) {
     const token = (leading || trailing)?.[1]?.toLowerCase();
     const explicit = token !== undefined ? (numbers[token] ?? Number(token)) : /غرفتين|مجلسين|مجلسان|صالتين|حمامين|مطبخين/.test(match[0]) ? 2 : null;
     if (explicit !== null && (!Number.isInteger(explicit) || explicit < 0 || explicit > 10)) throw Error('عدد كل نوع من الفراغات يجب أن يكون بين 0 و10؛ لم أختصر طلبك تلقائيًا.');
-    const remove = negation.test(prefix.trim()), named = /نساء|رجال/.test(match[0]) ? match[0] : null;
+    const remove = negation.test(prefix.trim()), addDenied = /(?:و?لا)\s+(?:تضف|تضيف|اضف|اضيف)\s*$/i.test(prefix.trim()), named = /نساء|رجال/.test(match[0]) ? match[0] : null;
     const current = rooms.filter(r => r.type === type && (!named || normalizeText(r.name) === named));
     const dimensionValues = dimensions ? dimensionMetres(dimensions) : null;
     const requestedArea = dimensionValues ? dimensionValues[0] * dimensionValues[1] : area ? Number(area[1]) : null;
+    const explicitArea = area ? Number(area[1]) : null;
+    if (dimensionValues && explicitArea !== null && Math.abs(requestedArea - explicitArea) > 1e-4) {
+      questions.push(`أبعاد ${match[0]} تعطي مساحة ${requestedArea} م²، بينما كتبت مساحة ${explicitArea} م²؛ وضّح أي القيدين تريد قبل تطبيق الطلب.`);
+    }
     const add = /(?:اضف|زد|add)\s*(?:\d+|[\p{L}]+)?\s*$/iu.test(prefix);
-    const item = { type, named, remove, count: remove ? 0 : explicit ?? (named || add ? 1 : current.length || 1), explicit, area: requestedArea,
+    const item = { type, named, remove, addDenied, count: remove || addDenied ? 0 : explicit ?? (named || add ? 1 : current.length || 1), explicit, area: requestedArea, dimensions: dimensionValues ? { width: dimensionValues[0], length: dimensionValues[1] } : null,
       position: /خلف|back/i.test(clause) ? 'back' : /امام|front/i.test(clause) ? 'front' : /وسط|middle/i.test(clause) ? 'middle' : null,
       side: /يمين|right/i.test(clause) ? 'right' : /يسار|left/i.test(clause) ? 'left' : /تلقائي|auto/i.test(clause) ? 'any' : null,
       add };
     if (requestedArea !== null && (!Number.isFinite(requestedArea) || requestedArea < 4 || requestedArea > 120 || (dimensionValues && Math.min(...dimensionValues) < 1))) throw Error('راجع مساحة ' + match[0] + '؛ المساحة المقبولة بين 4 و120 م².');
-    if (dimensionValues && !remove) unhandled.push(`استُخدمت ${dimensionValues[0]} × ${dimensionValues[1]} م لمساحة ${match[0]} فقط. لا يثبّت المحرك الطول والعرض؛ راجع أبعاد الناتج ولا تعتبر الطلب محققًا.`);
     if (!groups.has(type)) groups.set(type, []);
     groups.get(type).push(item);
   }
   for (const [type, items] of groups) {
+    if (items.every(item => item.addDenied)) {
+      assumptions.push(`لم نضف ${TYPES[type].name} بناءً على طلبك؛ بقيت الغرف الحالية من هذا النوع كما هي.`);
+      continue;
+    }
     const existing = rooms.filter(r => r.type === type);
     let replacement = [...existing];
     if (items.every(i => i.named && !i.remove) && !items.some(i => i.add)) replacement = existing.filter(r => /نساء|رجال/.test(r.name) && !items.some(i => normalizeText(r.name) === i.named));
     for (const item of items) {
       const scope = replacement.filter(r => !item.named || normalizeText(r.name) === item.named);
+      if (item.addDenied) {
+        assumptions.push(`لم نضف ${TYPES[type].name} بناءً على طلبك؛ بقيت الغرف الحالية من هذا النوع كما هي.`);
+        continue;
+      }
       if (!item.named && items.length === 1 && item.explicit === null && !item.remove && !item.add && scope.length > 1 && (item.area !== null || item.position || item.side)) {
         questions.push(`يوجد ${scope.length} من نوع ${TYPES[type].name}. حدّد العدد أو اسم الفراغ لتطبيق تعديل المساحة أو الموقع؛ أبقيتها دون تغيير.`); continue;
       }
@@ -69,18 +81,16 @@ export async function requestLocalBrief({ prompt, previous }) {
       for (let n = 0; n < item.count; n++) {
         const old = scope[n] || (item.named ? existing.find(r => normalizeText(r.name) === item.named) : existing[n]) || defaults(type);
         replacement.push({ ...old, name: item.named || old.name || TYPES[type].name, type,
-          area: item.area ?? old.area, position: item.position ?? old.position, side: item.side ?? old.side });
+          area: item.area ?? old.area, dimensions: item.dimensions ?? (item.area !== null ? undefined : old.dimensions), position: item.position ?? old.position, side: item.side ?? old.side });
       }
       if (!item.named && replacement.length > 1) replacement = replacement.map((r, n) => ({ ...r, name: existing[n]?.name || `${TYPES[type].name} ${n + 1}` }));
       assumptions.push(`راجع ${item.named || TYPES[type].name}: ${replacement.length} فراغًا بعد التعديل؛ حُفظت خصائص الغرف السابقة ما لم تطلب تغييرها.`);
     }
     rooms = [...rooms.filter(r => r.type !== type), ...replacement];
   }
-  if (/خصوصي|خصوصية|مستقل|ابواب|باب|جناح|ملحق|درج|مسبح|حديقة|privacy|entrance|suite|stairs/i.test(text)) unhandled.push('اشتراطات الخصوصية والمداخل المستقلة والأجنحة والأبواب والملحقات والحدائق تحتاج تخطيطًا إضافيًا؛ لم تُنفّذ بهذا الفهم المحلي.');
-  if (/مكتب|office/i.test(text)) {
-    const officeIndex = text.search(/مكتب|office/i), officeDimensions = text.slice(officeIndex).match(dimensionPattern);
-    const size = officeDimensions ? dimensionMetres(officeDimensions) : null;
-    unhandled.push(`طلبت مكتبًا، لكنه ليس نوع غرفة في هذا المحرك؛ لم يُضف إلى جدول التوليد.${size ? ` أبعاد المكتب المرجعية ${size[0]} × ${size[1]} م (مساحة ${size[0] * size[1]} م²) محفوظة كتوضيح للطلب فقط.` : ''}`);
+  if (/خصوصي|خصوصية|مستقل|ابواب|باب|ملحق|مسبح|حديقة|privacy|entrance|(?:^|[\s،,؛])(?:درج|سلم)(?=$|[\s،,؛])|stairs/i.test(text)) unhandled.push('اشتراطات الخصوصية والمداخل المستقلة والأبواب والملحقات والحدائق تحتاج تخطيطًا إضافيًا؛ لم تُنفّذ بهذا الفهم المحلي.');
+  if (/(?:واجهة(?:\s+الغرفة)?|واجهتها|واجهته|facade|frontage).{0,18}(?:شمال(?:ية)?|جنوب(?:ية)?|شرق(?:ية)?|غرب(?:ية)?|north|south|east|west)/i.test(text)) {
+    questions.push('طلبت جهة واجهة محددة لغرفة؛ المولد لا يثبت أي جدار خارجي لهذه الغرفة على جهة بوصلة بعينها. لم نطبق الطلب، ولا نفترض أن تدوير الغرفة يحقق الواجهة.');
   }
   if (!matches.length) questions.push('لم أفهم تعديلًا محددًا للغرف؛ بقي برنامجك كما هو.');
   if (rooms.length > 30) throw Error('النص ينتج أكثر من 30 فراغًا؛ لم يُحذف أي طلب لإخفاء التجاوز.');

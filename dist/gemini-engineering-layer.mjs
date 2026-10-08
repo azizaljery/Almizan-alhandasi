@@ -8,7 +8,7 @@ const GROUND_LEVEL = 'LVL-GF';
 const ROOM_TYPE_TO_FUNCTION = {
   bedroom: 'BEDROOM', majlis: 'LIVING', living: 'LIVING', dining: 'LIVING',
   kitchen: 'KITCHEN', bath: 'BATHROOM', storage: 'STORAGE', service: 'STORAGE',
-  corridor: 'CORRIDOR'
+  corridor: 'CORRIDOR', office: 'LIVING'
 };
 
 const pointMm = (x, y) => [Math.round(x * MM), Math.round(y * MM)];

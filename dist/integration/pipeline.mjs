@@ -12,6 +12,7 @@ import {contentHash,geometryHash,candidateId,verifyCandidateBinding,canonicalJSO
 import {auditMassing} from './control/reference/orthogonal-audit.mjs';
 import {createAziz,defaultConfig,fnv1aHash,stableStringify,fixedClock} from './aziz/index.js';
 import {generatePavilionModel,pavilionTopology,PAVILION_COMPOSER_VERSION} from '../pavilion-planner.mjs';
+import {generateStaggeredModel,staggeredTopology,STAGGERED_COMPOSER_VERSION} from '../staggered-planner.mjs';
 import {exploreGeometry,conceptFor} from '../design-exploration.mjs';
 
 const CLAUDE_ID='@mizan/claude-planner';
@@ -19,7 +20,8 @@ const CLAUDE_VERSION='2.3.1-p1-cla-01';
 const SOURCE='549b8bcead0f9f2412bf1ea84c83ddb7524137d22166649a1adfcf87e8474c3d';
 const ADAPTER_VERSION='control-local-preview/1.1.0';
 const PAVILION_SOURCE='1ce9f064dd41f822582ce13f70d86a3cdc8c418808c9cad5df3c653c810972a9';
-const STRATEGIES={rect:'compact',l:'l',u:'u-court',pavilions:'pavilions'};
+const STAGGERED_SOURCE='0300ebb2460433dcee8c44ce28be7b1bc1db403ef9721a2d922292f190abcf16';
+const STRATEGIES={rect:'compact',l:'l',u:'u-court',pavilions:'pavilions',staggered:'staggered'};
 const GEOMETRY_KEYS=[...Object.keys(schema.$defs.geometry.properties),'footprint','program'];
 const CAPABILITIES={disciplines:['architectural'],supportsGeometry:true,supportsRequirements:true,supportsScoring:false,deterministic:true};
 const CONFIDENCE=.5; // Uniform legacy numeric field, explicit neutral heuristic, NOT calibrated confidence.
@@ -36,8 +38,11 @@ function supportedRequest(r) {
  // Fail closed rather than pretending the legacy distance/adjacency heuristics prove a must.
  for(const c of r.hardConstraints) {
   const count=c.kind==='room_count_exact'&&Number.isInteger(c.value?.count)&&c.value.count>=0;
+  const exactRoom=r.program.find(p=>p.id===c.value?.roomId), exact= c.kind==='room_dimensions_exact' && exactRoom?.exactDimensionsM && c.value?.rotationAllowed===true && Number.isFinite(c.value?.widthM) && Number.isFinite(c.value?.lengthM) && Number.isFinite(c.value?.toleranceM) && c.value.toleranceM>=0 && Math.abs(c.value.widthM-exactRoom.exactDimensionsM.widthM)<=1e-8 && Math.abs(c.value.lengthM-exactRoom.exactDimensionsM.lengthM)<=1e-8;
   const shape=c.kind==='shape_allowed'&&Array.isArray(c.value?.shapes)&&c.value.shapes.length>0&&c.value.shapes.every(s=>Object.hasOwn(STRATEGIES,s));
-  if(!count&&!shape) reasons.push(`MUST_REQUIRES_REVIEW:${c.id}`);
+  const wing=c.kind==='wing_count_exact'&&c.value?.count===2&&r.hardConstraints.some(x=>x.kind==='shape_allowed'&&x.value?.shapes?.includes('staggered'));
+  if(c.kind==='wing_count_exact'&&!wing) reasons.push(c.value?.count===2?'WING_COUNT_REQUIRES_STAGGERED':'UNSUPPORTED_WING_COUNT');
+  else if(!count&&!exact&&!shape&&!wing) reasons.push(`MUST_REQUIRES_REVIEW:${c.id}`);
  }
  return reasons;
 }
@@ -46,19 +51,22 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
  if(!Object.hasOwn(STRATEGIES,shape)) throw Error('UNSUPPORTED_SHAPE');
  const inputReasons=supportedRequest(r); if(inputReasons.length) throw Error(inputReasons.join(';'));
  if(r.hardConstraints.some(c=>c.kind==='shape_allowed'&&!c.value.shapes.includes(shape))) throw Error('SHAPE_NOT_ALLOWED');
- const composed=shape==='pavilions';
+ const composed=shape==='pavilions'||shape==='staggered';
  const plot={width:r.plot.widthM,length:r.plot.lengthM,entry:r.plot.entry,streets:r.plot.streets,
   floors:r.plot.floorsRequested,coverage:r.plot.coverageRatio,maxBuiltAreaM2:r.plot.maxBuiltAreaM2,...generationOverrides};
- const rooms=r.program.map(p=>({name:p.name,type:p.type,area:p.areaM2,position:p.position,side:p.side}));
- const m=composed ? generatePavilionModel(plot,rooms) : exploration ? exploreGeometry(plot,rooms,shape,exploration,STRATEGIES[shape]) : generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
- const errors=[...validateModel(m),...(composed?pavilionTopology(m).errors:[])]; if(errors.length) throw Error('NATIVE_VALIDATION_FAILED:'+errors.join(';'));
+ const rooms=r.program.map(p=>({name:p.name,type:p.type,area:p.areaM2,...(p.exactDimensionsM?{dimensions:{width:p.exactDimensionsM.widthM,length:p.exactDimensionsM.lengthM}}:{}),position:p.position,side:p.side}));
+ const m=shape==='staggered' ? generateStaggeredModel(plot,rooms) : shape==='pavilions' ? generatePavilionModel(plot,rooms) : exploration ? exploreGeometry(plot,rooms,shape,exploration,STRATEGIES[shape]) : generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
+ const topology=shape==='staggered'?staggeredTopology(m):shape==='pavilions'?pavilionTopology(m):{errors:[]};
+ const requiredWings=r.hardConstraints.find(c=>c.kind==='wing_count_exact')?.value?.count;
+ if(requiredWings!==undefined&&(shape!=='staggered'||topology.wingCount!==requiredWings)) throw Error('REQUESTED_WING_COUNT_MISMATCH');
+ const errors=[...validateModel(m),...topology.errors]; if(errors.length) throw Error('NATIVE_VALIDATION_FAILED:'+errors.join(';'));
  const geometry=Object.fromEntries(GEOMETRY_KEYS.filter(k=>m[k]!==undefined).map(k=>[k,structuredClone(m[k])]));
  canonicalJSON(geometry); // Never turn NaN/Infinity into JSON null.
  const massing=auditMassing(geometry.buildingFootprint,m.massingParts??[m.building],geometry.courtyards);
  if(!massing.pass) throw Error('MASSING_NOT_EQUIVALENT');
  const c={schemaVersion:'1.0.0',kind:'CandidateEnvelope',projectId:r.projectId,requestId:r.requestId,
-  inputHash:await contentHash(r),producer:{engineId:composed?'@mizan/pavilion-composer':CLAUDE_ID,packageName:composed?'pavilion-composer':'planner-pkg',packageVersion:composed?PAVILION_COMPOSER_VERSION:CLAUDE_VERSION,
-  sourceSha256:composed?PAVILION_SOURCE:SOURCE,adapterVersion:exploration?'architectural-exploration/1.0.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
+  inputHash:await contentHash(r),producer:{engineId:shape==='pavilions'?'@mizan/pavilion-composer':shape==='staggered'?'@mizan/staggered-composer':CLAUDE_ID,packageName:composed?`${shape==='pavilions'?'pavilion':shape}-composer`:'planner-pkg',packageVersion:shape==='staggered'?STAGGERED_COMPOSER_VERSION:composed?PAVILION_COMPOSER_VERSION:CLAUDE_VERSION,
+  sourceSha256:shape==='staggered'?STAGGERED_SOURCE:composed?PAVILION_SOURCE:SOURCE,adapterVersion:exploration?'architectural-exploration/1.0.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
   units:{...UNITS},frame:FRAME,fallback:{used:m.shapeFallback,allowedByUser:false,reason:null},geometry,
   presentation:{label:exploration?conceptFor(exploration,m.shape).tag:m.architecture.tag,massingParts:structuredClone(m.massingParts??null)}};
  c.geometryHash=await geometryHash(c); c.candidateId=await candidateId(c);
@@ -97,7 +105,9 @@ export async function decideReviewed(request,pairs) {
   const {candidate:c,review}=p;
   if(!c||!review) throw Error('CANDIDATE_OR_REVIEW_MISSING');
   await verifyBoundReview(review,c,r); // source schema, identity, actual content hash, registry and coverage.
-  const nativeErrors=[...validateModel(c.geometry),...(c.actualShape==='pavilions'?pavilionTopology(c.geometry).errors:[])];
+  const topologyModel={...c.geometry,massingParts:c.presentation.massingParts};
+  const topology=c.actualShape==='staggered'?staggeredTopology(topologyModel):c.actualShape==='pavilions'?pavilionTopology(topologyModel):{errors:[]};
+  const nativeErrors=[...validateModel(c.geometry),...topology.errors];
   if(nativeErrors.length) throw Error('NATIVE_VALIDATION_FAILED:'+nativeErrors.join(';'));
   const audit=auditMassing(c.geometry.buildingFootprint,c.presentation.massingParts??[c.geometry.building],c.geometry.courtyards);
   if(!audit.pass) throw Error('MASSING_NOT_EQUIVALENT');
@@ -111,7 +121,7 @@ export async function decideReviewed(request,pairs) {
  }
  if(!eligible.length) return {decision:await decision(r,'NO_SELECTION',null,validReviews,['No candidate passed native validation and all required architectural checks.']),aziz:null,rejected};
  const at=new Date().toISOString(),invocationId='inv:'+(await contentHash({request:r,adapterVersion:ADAPTER_VERSION})).value;
- const hard=[...r.hardConstraints.filter(c=>c.kind!=='shape_allowed'),...r.program.map(p=>({id:`area:${p.id}`,kind:'explicit_area',description:'Preserve requested clear room area',
+ const hard=[...r.hardConstraints.filter(c=>c.kind!=='shape_allowed'),...r.program.filter(p=>p.exactDimensionsM).map(p=>({id:`dimensions:${p.id}`,kind:'room_dimensions_exact',description:'Preserve the exact requested room dimensions, allowing 90-degree rotation.',value:{roomId:p.id,widthM:p.exactDimensionsM.widthM,lengthM:p.exactDimensionsM.lengthM,rotationAllowed:true,toleranceM:1e-5},source:'user',priority:'must'})),...r.program.map(p=>({id:`area:${p.id}`,kind:'explicit_area',description:'Preserve requested clear room area',
   value:{roomId:p.id,area:p.areaM2,tolerance:1e-8},source:'user',priority:'must'}))];
  const input={requestId:r.requestId,context:{plotArea:r.plot.widthM*r.plot.lengthM,cityCode:'unspecified',locale:'ar'},hardConstraints:hard,softPreferences:[]};
  const legacyHash=fnv1aHash(stableStringify(input));

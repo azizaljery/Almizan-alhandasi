@@ -133,7 +133,7 @@ export interface EngineAdapter {
         reason?: string;
     }>;
 }
-export type HardConstraintKind = 'room_count_exact' | 'room_count_min' | 'room_count_max' | 'room_type_required' | 'room_type_forbidden' | 'explicit_area' | 'entry_side_required' | 'privacy_required' | 'access_required' | 'custom';
+export type HardConstraintKind = 'room_count_exact' | 'room_count_min' | 'room_count_max' | 'room_type_required' | 'room_type_forbidden' | 'explicit_area' | 'room_dimensions_exact' | 'wing_count_exact' | 'entry_side_required' | 'privacy_required' | 'access_required' | 'custom';
 export interface HardConstraint {
     id: string;
     kind: HardConstraintKind;

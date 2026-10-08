@@ -65,6 +65,7 @@ export const TYPES = {
   kitchen: { name: 'مطبخ', area: 18, min: 2.2, color: '#e3edda' },
   bath: { name: 'دورة مياه', area: 6, min: 1.5, color: '#dcebf2' },
   storage: { name: 'مستودع', area: 8, min: 1.3, color: '#e9e5df' },
+  office: { name: 'مكتب', area: 12, min: 2.2, color: '#e6e0f2' },
   service: { name: 'غرفة خدمة', area: 12, min: 2.2, color: '#f0e0dd' },
   corridor: { name: 'ممر إضافي', area: 8, min: 1.2, color: '#f4f1e8' },
 };
@@ -259,7 +260,9 @@ export function normalizeRooms(raw) {
   if (!Array.isArray(raw) || !raw.length || raw.length > 30) throw Error('البرنامج يحتاج من 1 إلى 30 فراغاً.');
   return raw.map((r, i) => {
     if (!r || typeof r.name !== 'string' || !r.name.trim() || r.name.length > 70 || !Object.hasOwn(TYPES, r.type) || !Number.isFinite(r.area) || r.area < 4 || r.area > 120 || !Object.hasOwn(POSITIONS, r.position) || !Object.hasOwn(SIDES, r.side)) throw Error('راجع اسم ونوع ومساحة وموقع الفراغ رقم ' + (i + 1) + '؛ المساحة بين 4 و120 م².');
-    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side };
+    const dimensions = r.dimensions ?? r.exactDimensionsM ?? null;
+    if (dimensions !== null && (!dimensions || !Number.isFinite(dimensions.width) || !Number.isFinite(dimensions.length) || dimensions.width < 1 || dimensions.length < 1 || dimensions.width > 60 || dimensions.length > 60 || Math.abs(dimensions.width * dimensions.length - r.area) > 1e-4)) throw Error('أبعاد الفراغ رقم ' + (i + 1) + ' غير صالحة أو لا تطابق مساحته. تُعامل الأبعاد الصريحة كقيد هندسي، والمساحة ناتجة من حاصل ضربها.');
+    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side, ...(dimensions ? { dimensions: { width: dimensions.width, length: dimensions.length } } : {}) };
   });
 }
 /** @param {{ bedrooms?: number, majlis?: number, baths?: number, kitchens?: number, halls?: number, dining?: number }} [counts] @returns {RoomRequest[]} */
@@ -297,15 +300,38 @@ function packWing(rooms, width) {
     /** @type {ScoredPacked | null} */
     let best = null;
     for (const group of groups) {
-      const depth = sum(group, r => r.area) / (width - T * (group.length - 1));
-      if (group.some(r => depth < TYPES[r.type].min - E || r.area / depth < TYPES[r.type].min - E || Math.max(depth * depth / r.area, r.area / (depth * depth)) > 5)) continue;
+      const lockedDepths = [...new Set(group.flatMap(r => r.dimensions ? [r.dimensions.width, r.dimensions.length] : []))];
+      const depths = lockedDepths.length ? lockedDepths : [sum(group, r => r.area) / (width - T * (group.length - 1))];
+      const options = [];
+      for (const depth of depths) {
+        if (!Number.isFinite(depth) || depth <= 0) continue;
+        const choices = group.map(r => {
+          const candidates = r.dimensions
+            ? [{ w: r.dimensions.width, h: r.dimensions.length }, { w: r.dimensions.length, h: r.dimensions.width }].filter(d => Math.abs(d.h - depth) <= E)
+            : [{ w: r.area / depth, h: depth }];
+          return candidates.filter(d => d.w >= TYPES[r.type].min - E && d.h >= TYPES[r.type].min - E && (r.dimensions || Math.max(d.w / d.h, d.h / d.w) <= 5));
+        });
+        if (choices.some(items => !items.length)) continue;
+        const visit = (index, selected) => {
+          if (index === group.length) {
+            const usedWidth = sum(selected, d => d.w) + T * (selected.length - 1);
+            if (usedWidth <= width + E) options.push({ depth, placements: Object.fromEntries(group.map((r, i) => [r.id, selected[i]])), usedWidth });
+            return;
+          }
+          for (const choice of choices[index]) visit(index + 1, [...selected, choice]);
+        };
+        visit(0, []);
+      }
+      if (!options.length) continue;
       const rest = solve(list.filter(r => !group.includes(r)));
       if (!rest) continue;
-      const branch = group.length > 1 ? GEOMETRY.branch + T : 0;
-      const height = depth + branch + (rest.rows.length ? T : 0) + rest.height;
-      const aspectPenalty = sum(group, r => Math.abs(Math.log((r.area / depth) / depth))) * .035;
-      const score = height + rest.score - rest.height + aspectPenalty;
-      if (!best || score < best.score) best = { rows: [{ rooms: group, depth, branch }, ...rest.rows], height, score };
+      for (const option of options) {
+        const branch = group.length > 1 || option.usedWidth < width - .02 ? GEOMETRY.branch + T : 0;
+        const height = option.depth + branch + (rest.rows.length ? T : 0) + rest.height;
+        const aspectPenalty = sum(group, r => Math.abs(Math.log(option.placements[r.id].w / option.placements[r.id].h))) * .035;
+        const score = height + rest.score - rest.height + aspectPenalty + Math.max(0, width - option.usedWidth) * .15;
+        if (!best || score < best.score) best = { rows: [{ rooms: group, depth: option.depth, placements: option.placements, branch }, ...rest.rows], height, score };
+      }
     }
     memo.set(key, best); return best;
   }
@@ -363,7 +389,7 @@ function buildWingGeometry(zone, wingBox) {
         const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
         if (side === 'right') order.reverse();
         let rx = x;
-        order.forEach(r => { const w = r.area / row.depth; rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
+        order.forEach(r => { const d = row.placements[r.id]; const w = d.w; rooms.push({ ...r, x: rx, y, w, h: d.h, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
         y += row.depth + (rowIndex < packed.rows.length - 1 ? T : 0);
       });
       const leftover = zoneEntry.height - packed.height - (packed.rows.length ? T : 0);
@@ -414,11 +440,11 @@ function buildSingleSidedWingGeometry(solved, wingBox, corridorSide) {
     const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
     let rx = rowsX;
     order.forEach(r => {
-      const w = r.area / row.depth;
+      const d = row.placements[r.id], w = d.w;
       // Honour an explicit side request when it matches this wing's fixed layout; a room
       // asking for the corridor's own side cannot be satisfied here (single-sided wing),
       // which validateModel will correctly flag rather than silently ignore.
-      rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'front' : (corridorSide === 'left' ? 'left' : 'right') });
+      rooms.push({ ...r, x: rx, y, w, h: d.h, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'front' : (corridorSide === 'left' ? 'left' : 'right') });
       rx += w + T;
     });
     y += row.depth + (rowIndex < solved.packed.rows.length - 1 ? T : 0);
@@ -454,7 +480,7 @@ function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
     // The row's own total height along y (sum of each room's height plus the T gaps
     // between them) — the branch must span exactly this, not the whole available depth,
     // or it silently falls short of covering the row's later rooms (the earlier bug).
-    const rowTotalHeight = sum(row.rooms, r => r.area / row.depth) + T * (row.rooms.length - 1);
+    const rowTotalHeight = sum(row.rooms, r => row.placements[r.id].w) + T * (row.rooms.length - 1);
     if (row.branch) {
       rCorridorId = 'branch-' + wingBox.id + '-' + rowIndex;
       const branchY = corridorSide === 'top' ? corridorEndY : rowsY;
@@ -465,7 +491,7 @@ function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
     const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
     let ry = rowsY;
     order.forEach(r => {
-      const h = r.area / row.depth;
+      const d = row.placements[r.id], h = d.w;
       rooms.push({ ...r, x, y: ry, w: row.depth, h, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'left' : (corridorSide === 'top' ? 'front' : 'back') });
       ry += h + T;
     });
@@ -1006,6 +1032,7 @@ export function validateModel(m) {
     placedIds.add(r.id);
     // `!(... <= E)` is NaN-safe: NaN comparisons are false, so NaN fails here instead of passing.
     if (!(Math.abs(r.w * r.h - (requested ? requested.area : NaN)) <= E)) fail('المساحة غير مطابقة لطلبك: ' + r.name);
+    if (requested?.dimensions && !(Math.abs(r.w - requested.dimensions.width) <= E && Math.abs(r.h - requested.dimensions.length) <= E || Math.abs(r.w - requested.dimensions.length) <= E && Math.abs(r.h - requested.dimensions.width) <= E)) fail('الأبعاد الصريحة لا تطابق هندسة الفراغ: ' + r.name);
     if (r.side !== 'any' && r.resolvedSide !== r.side) fail('الجانب المطلوب لم يتحقق: ' + r.name);
     if (m.corridors.some(c => overlap(r, c))) fail('غرفة تتداخل مع ممر: ' + r.name);
   }

@@ -28,7 +28,7 @@ export function validateSuggestion(raw) {
     result[k] = [...raw[k]];
   }
   if (!Array.isArray(raw.rooms) || raw.rooms.length > 30 || (!raw.rooms.length && ![...result.questions, ...result.unhandled].some(s => s.trim()))) throw Error('اقتراح غير صالح.');
-  result.rooms = raw.rooms.length ? normalizeRooms(raw.rooms).map(({ name, type, area, position, side }) => ({ name, type, area, position, side })) : [];
+  result.rooms = raw.rooms.length ? normalizeRooms(raw.rooms).map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) })) : [];
   return result;
 }
 export async function requestBrief(input, { enabled = AI_ENABLED, endpoint = AI_ENDPOINT, accessCode = '', fetcher = globalThis.fetch, signal } = {}) {

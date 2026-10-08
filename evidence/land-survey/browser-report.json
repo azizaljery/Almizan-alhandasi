@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "steps": [
+    {
+      "name": "Land-first six-stage workflow does not request device location",
+      "status": "PASS"
+    },
+    {
+      "name": "OSM remains idle until the explicit consent is set, and a tile outage leaves local editing available",
+      "status": "PASS"
+    },
+    {
+      "name": "Draw, edit and measure a real four-corner WGS84 polygon with true-north bearings",
+      "status": "PASS"
+    },
+    {
+      "name": "Save/import/reopen restores the exact editable polygon, confirmed measurements, view and binding",
+      "status": "PASS"
+    },
+    {
+      "name": "Clear confirmation removes only the saved survey and preserves generator dimensions",
+      "status": "PASS"
+    },
+    {
+      "name": "Phone and iPad-sized viewports reach the map editor without horizontal overflow",
+      "status": "PASS"
+    }
+  ],
+  "pageErrors": [],
+  "tileRequests": [
+    "https://tile.openstreetmap.org/16/41263/28121.png",
+    "https://tile.openstreetmap.org/16/41264/28121.png",
+    "https://tile.openstreetmap.org/16/41265/28121.png",
+    "https://tile.openstreetmap.org/16/41266/28121.png",
+    "https://tile.openstreetmap.org/16/41263/28122.png",
+    "https://tile.openstreetmap.org/16/41264/28122.png",
+    "https://tile.openstreetmap.org/16/41265/28122.png",
+    "https://tile.openstreetmap.org/16/41266/28122.png",
+    "https://tile.openstreetmap.org/16/41263/28123.png",
+    "https://tile.openstreetmap.org/16/41264/28123.png",
+    "https://tile.openstreetmap.org/16/41265/28123.png",
+    "https://tile.openstreetmap.org/16/41266/28123.png"
+  ],
+  "limitations": [
+    "OSM requests intentionally returned HTTP 503 to verify offline fallback",
+    "Viewport simulations used Chromium; no physical iPad tested",
+    "No official parcel data source is configured"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "label": "baseline-v45",
+  "prompt": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+  "reviewQuestions": [],
+  "reviewFacts": "غرفة نوم\n2 · 32 م²\nصالة عائلية\n1 · 30 م²\nمطبخ\n1 · 12 م²",
+  "proposedRoomRows": "غرفة نوم 1 · خلف / تلقائي\n١٦ م²\nغرفة نوم 2 · خلف / تلقائي\n١٦ م²\nصالة عائلية · وسط / تلقائي\n٣٠ م²\nمطبخ · وسط / تلقائي\n١٢ م²",
+  "applyEnabled": true,
+  "roomCount": 4,
+  "shape": "l",
+  "explicitWingCountInPrompt": 2,
+  "interpretedWingCount": null,
+  "representedStaggeredWingCount": null,
+  "roomGeometry": [
+    {
+      "name": "مطبخ",
+      "type": "kitchen",
+      "width": 5.32054054054054,
+      "length": 2.2554099359951234,
+      "area": 11.999999999999998
+    },
+    {
+      "name": "صالة عائلية",
+      "type": "living",
+      "width": 5.32054054054054,
+      "length": 5.638524839987809,
+      "area": 30
+    },
+    {
+      "name": "غرفة نوم 1",
+      "type": "bedroom",
+      "width": 5.33945945945946,
+      "length": 2.9965580076938636,
+      "area": 15.999999999999995
+    },
+    {
+      "name": "غرفة نوم 2",
+      "type": "bedroom",
+      "width": 5.33945945945946,
+      "length": 2.9965580076938654,
+      "area": 16.000000000000004
+    }
+  ],
+  "files": {
+    "project": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/baseline-v45-project.json",
+    "svg": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/baseline-v45-plan.svg",
+    "csv": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/baseline-v45-quantities.csv"
+  },
+  "svgBytes": 11546,
+  "csvBytes": 1196,
+  "viewportChecks": [
+    {
+      "width": 390,
+      "height": 844,
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "width": 820,
+      "height": 1180,
+      "viewport": 820,
+      "document": 820
+    }
+  ],
+  "pageErrors": []
+}

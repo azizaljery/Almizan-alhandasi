@@ -1,6 +1,6 @@
 import { DESIGN_CHOICES } from './design-selection.mjs';
 // Local, deterministic planning preferences; no AI transport or credentials.
-const TASTES = ['courtyard_privacy', 'family_layout', 'concept_comparison', 'classic_living'];
+const TASTES = ['courtyard_privacy', 'family_layout', 'concept_comparison', 'classic_living', 'staggered_wings'];
 const AVOIDS = ['الممرات الطويلة والمظلمة', 'مرور الضيوف عبر خصوصية العائلة', 'نوافذ كبيرة على شمس العصر الغربية', 'صدى الصوت في الصالات والمجالس', 'مطبخ بعيد عن الطعام والخدمات', 'غرف نوم مكشوفة أو قريبة من الضيافة'];
 const LIFE = { guests: ['قليلة', 'متكررة'], children: ['قريبون من الصالة', 'جناح هادئ'], seniors: ['موجودون', 'غير موجودين'], future: ['مهمة', 'ليست أولوية'] };
 export function normalizeDiscovery(raw) {
@@ -43,7 +43,7 @@ export function buildClientBrief(discovery, rooms) {
   if(d.avoids.includes(AVOIDS[3]))limits.push('معالجة الصدى تحتاج مواد وأبعادًا وحسابًا صوتيًا غير منفّذ هنا.');
   for (const key of d.likes) {
     const choice = DESIGN_CHOICES[key];
-    if (choice.shape) principles.push(`التوليد يقتصر على الشكل المختار: ${choice.label}.`);
+    if (choice.shape) principles.push(`الشكل المفضل للمقارنة: ${choice.label}. يظل تفضيلًا؛ الوصف الصريح للشكل وحده يقيد التوليد إذا كان مدعومًا.`);
     else limits.push(`${choice.label} غير متاح للتوليد حاليًا؛ المحرك لا ينشئ فناءً مغلقًا من أربع جهات. لن يُولَّد شكل آخر بدلًا منه.`);
   }
   if(d.rejects.some(key=>DESIGN_CHOICES[key].shape))principles.push('الأشكال المرفوضة تُستبعد من بدائل التوليد.');

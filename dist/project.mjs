@@ -5,7 +5,7 @@ import { validateLandSurvey } from './land-survey.mjs';
 
 export const MAX_PROJECT_BYTES = 2_000_000;
 const palettes = ['resort', 'modern', 'classic', 'hijazi'];
-const publicRooms = rooms => normalizeRooms(rooms).map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
+const publicRooms = rooms => normalizeRooms(rooms).map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const palette = value => { if (!palettes.includes(value)) throw Error('طابع محفوظ غير معروف.'); return value; };
 export const modelRecipe = model => model ? { plot: validatePlot(model.plot), rooms: publicRooms(model.program), strategy: model.strategy || 'compact', ...(model.engineVersion === 'mizan-p1-integrated' ? { embedded: structuredClone(model) } : {}) } : null;
 function recipe(raw) {

@@ -122,6 +122,7 @@ export default {
             "kitchen",
             "bath",
             "storage",
+            "office",
             "service",
             "corridor"
           ]
@@ -129,6 +130,15 @@ export default {
         "areaM2": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "exactDimensionsM": {
+          "type": "object",
+          "properties": {
+            "widthM": { "type": "number", "minimum": 1, "maximum": 60 },
+            "lengthM": { "type": "number", "minimum": 1, "maximum": 60 }
+          },
+          "required": ["widthM", "lengthM"],
+          "additionalProperties": false
         },
         "position": {
           "enum": [
@@ -679,7 +689,8 @@ export default {
             "rect",
             "l",
             "u",
-            "pavilions"
+            "pavilions",
+            "staggered"
           ]
         },
         "shapeFallback": {
@@ -873,7 +884,8 @@ export default {
             "rect",
             "l",
             "u",
-            "pavilions"
+            "pavilions",
+            "staggered"
           ]
         },
         "actualShape": {
@@ -881,7 +893,8 @@ export default {
             "rect",
             "l",
             "u",
-            "pavilions"
+            "pavilions",
+            "staggered"
           ]
         },
         "units": {

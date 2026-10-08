@@ -1,0 +1,14 @@
+{
+  "fixtureKind": "SIMULATED_TEST_FIXTURE",
+  "liveAI": false,
+  "summary": "ملخص اختباري مصطنع لمسار تطبيع الاقتراح فقط.",
+  "questions": [],
+  "assumptions": [],
+  "unhandled": [],
+  "rooms": [
+    { "name": "غرفة نوم 1", "type": "bedroom", "area": 16, "dimensions": { "width": 4, "length": 4 }, "position": "back", "side": "any" },
+    { "name": "غرفة نوم 2", "type": "bedroom", "area": 16, "dimensions": { "width": 4, "length": 4 }, "position": "back", "side": "any" },
+    { "name": "صالة عائلية", "type": "living", "area": 30, "dimensions": { "width": 6, "length": 5 }, "position": "middle", "side": "any" },
+    { "name": "مطبخ", "type": "kitchen", "area": 12, "dimensions": { "width": 3, "length": 4 }, "position": "middle", "side": "any" }
+  ]
+}

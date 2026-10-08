@@ -4,6 +4,7 @@
 
 import { buildPlanSVG } from './plan-view.mjs';
 import { pavilionTopology } from './pavilion-planner.mjs';
+import { staggeredTopology } from './staggered-planner.mjs';
 
 const IMAGE_WORKER_URL = globalThis.MIZAN_IMAGE_WORKER_URL || 'https://mizan-images.aljeryabod.workers.dev';
 const MAX_GALLERY_ITEMS = 20;
@@ -29,6 +30,8 @@ export function buildDallePrompt(model, options = {}) {
   const actualShape = model?.shape;
   const structure = actualShape === 'pavilions'
     ? `${pavilionTopology(model).pavilionCount || 'Multiple'} pavilion bodies connected by narrow roofed corridor ribbons, separated by real outdoor gaps, exactly as in the supplied plan`
+    : actualShape === 'staggered'
+    ? `${staggeredTopology(model).wingCount || 'Multiple'} staggered pavilion wings alternating sideways and joined by transverse covered links across real outdoor gaps, exactly as in the supplied plan`
     : STRUCTURES[({ l: 'L', u: 'U', rect: 'block' }[actualShape]) || options.structure || 'block'] || STRUCTURES.block;
   const lighting = LIGHTS[options.timeLighting || 'golden'] || LIGHTS.golden;
   const view = VIEWS[options.viewAngle || 'hero'] || VIEWS.hero;

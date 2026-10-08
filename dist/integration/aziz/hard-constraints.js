@@ -66,6 +66,10 @@ function codeFor(c) {
             return 'HARD_REQUIREMENT_MISSING';
         case 'explicit_area':
             return 'AREA_TOLERANCE_EXCEEDED';
+        case 'room_dimensions_exact':
+            return 'ROOM_DIMENSIONS_EXCEEDED';
+        case 'wing_count_exact':
+            return 'HARD_REQUIREMENT_MISSING';
         case 'entry_side_required':
         case 'access_required':
             return 'INVALID_ACCESS';
@@ -114,6 +118,23 @@ function evaluateSingle(candidate, c, config) {
             if (matched.length === 0)
                 return false;
             return matched.every((r) => Math.abs(r.clearArea - v.area) / v.area <= tol);
+        }
+        case 'room_dimensions_exact': {
+            const v = c.value, tol = Number.isFinite(v?.toleranceM) && v.toleranceM >= 0 ? v.toleranceM : 1e-5;
+            if (typeof v?.roomId !== 'string' || !Number.isFinite(v.widthM) || !Number.isFinite(v.lengthM) || v.widthM <= 0 || v.lengthM <= 0) return false;
+            const matched = candidate.rooms.filter(r => r.roomId === v.roomId);
+            if (matched.length !== 1) return false;
+            return matched.every(r => {
+                const xs = r.boundary.points.map(p => p.x), ys = r.boundary.points.map(p => p.y);
+                const width = Math.max(...xs) - Math.min(...xs), length = Math.max(...ys) - Math.min(...ys);
+                return Math.abs(width-v.widthM)<=tol && Math.abs(length-v.lengthM)<=tol || v.rotationAllowed===true && Math.abs(width-v.lengthM)<=tol && Math.abs(length-v.widthM)<=tol;
+            });
+        }
+        case 'wing_count_exact': {
+            const expected = c.value?.count;
+            const parts = candidate.raw?.candidateEnvelope?.presentation?.massingParts;
+            const actual = Array.isArray(parts) ? parts.filter((part) => part.component === 'wing').length : null;
+            return expected === 2 && candidate.raw?.candidateEnvelope?.actualShape === 'staggered' && actual === expected;
         }
         case 'entry_side_required': {
             const side = c.value?.side;

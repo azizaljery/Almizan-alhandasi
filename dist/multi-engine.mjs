@@ -5,8 +5,9 @@ import { reviewCandidate } from './integration/gemini/packages/design-intelligen
 import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 
-const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions' });
+const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions', staggered: 'staggered' });
 const CONCEPT = Object.freeze({
+  staggered: { tag: 'جناحان متدرجان مرتبطان', form: 'جناحان متبادلان جانبيًا تصل بينهما وصلة عرضية', idea: 'جناحان منفصلان بفجوة خارجية ورواق رابط مغطى قابل للفحص.', bestFor: 'مقارنة توزيع المناطق على أرض أوسع', tradeoff: 'يحتاج عمقًا وعرضًا إضافيين؛ لا يثبت الخصوصية أو صلاحية التنفيذ', massing: 'staggered' },
   pavilions: { tag: 'أجنحة مرتبطة برواق', form: 'أجنحة تفصلها فراغات خارجية', idea: 'كتل حقيقية تربطها حركة مغطاة وتحفظ البرنامج.', bestFor: 'البرنامج المقسم إلى مناطق', tradeoff: 'يتطلب عمقًا أكبر ولا يضمن مداخل مستقلة', massing: 'pavilions' },
   rect: { tag: 'مستطيل منضبط', form: 'كتلة مستطيلة صريحة', idea: 'حل مباشر يختبر البرنامج ضمن كتلة واحدة واضحة.', bestFor: 'الأراضي والبرامج التي تفضّل البساطة', tradeoff: 'تنوع كتلي أقل مقابل وضوح أعلى', massing: 'rect' },
   l: { tag: 'كتلة L حقيقية', form: 'جناحان متعامدان', idea: 'يفتح جانبًا من الأرض ويكوّن فصلًا أوضح بين جناحين.', bestFor: 'الخصوصية والحديقة الجانبية', tradeoff: 'واجهة وجدران خارجية أطول', massing: 'l' },
@@ -19,6 +20,7 @@ function publicRoom(room, index) {
     name: String(room.name),
     type: room.type,
     areaM2: Number(room.area),
+    ...(room.dimensions ? { exactDimensionsM: { widthM: room.dimensions.width, lengthM: room.dimensions.length } } : {}),
     position: room.position,
     side: room.side,
   };
@@ -45,8 +47,14 @@ export function requestedDesignShapes({ idea = '', discovery = {}, selectedShape
 export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null }) {
   const shapes = requestedDesignShapes({ idea, discovery, selectedShape });
   const textIntent = extractShapeIntent(idea);
-  const shapeConstraint = selectedShape !== null || discovery.likes?.length || discovery.rejects?.length || textIntent.shape || textIntent.rejectedShapes.length ? [{ id: 'HC-USER-SHAPES', kind: 'shape_allowed', description: 'Preserve explicit allowed shapes without fallback.', value: { shapes }, source: 'user', priority: 'must' }] : [];
+  const shapeConstraint = selectedShape !== null || discovery.rejects?.length || textIntent.shape || textIntent.rejectedShapes.length ? [{ id: 'HC-USER-SHAPES', kind: 'shape_allowed', description: 'Preserve explicit allowed shapes without fallback.', value: { shapes }, source: 'user', priority: 'must' }] : [];
+  const wingCount = textIntent.shape === 'staggered' ? textIntent.wingCount : selectedShape === 'staggered' ? 2 : null;
+  const wingCountConstraint = wingCount === null ? [] : [{ id: 'HC-WING-COUNT', kind: 'wing_count_exact', description: 'Preserve the exact requested number of staggered wings.', value: { count: wingCount }, source: 'user', priority: 'must' }];
   const program = rooms.map(publicRoom);
+  const dimensionConstraints = program.filter(p => p.exactDimensionsM).map(p => ({
+    id: `dimensions:${p.id}`, kind: 'room_dimensions_exact', description: `Preserve the exact clear dimensions of ${p.name}, allowing a 90-degree rotation.`,
+    value: { roomId: p.id, widthM: p.exactDimensionsM.widthM, lengthM: p.exactDimensionsM.lengthM, rotationAllowed: true, toleranceM: 1e-5 }, source: 'user', priority: 'must',
+  }));
   const seed = {
     projectId: 'MIZAN-SITE-V33-P1',
     plot: {
@@ -55,7 +63,7 @@ export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {
     },
     drawnFloorsSupported: 1,
     program,
-    hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }, ...shapeConstraint],
+    hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }, ...dimensionConstraints, ...shapeConstraint, ...wingCountConstraint],
     softPreferences: preferenceList(discovery, briefContext),
     interpretation: {
       status: 'confirmed',
@@ -96,16 +104,21 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
     const candidates = [], failures = [];
     const specs = explorationSpecs(seed).filter(spec => allowedShapes.includes(spec.shape));
     if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
+    if (allowedShapes.includes('staggered')) specs.push({ shape: 'staggered', key: 'staggered-baseline', mode: -1, seed });
     for (const spec of specs) {
       try {
-        const generated = await generateCandidate(request, spec.shape, overrides, spec.shape === 'pavilions' ? null : spec);
-        candidates.push({ ...generated, concept: spec.shape === 'pavilions' ? CONCEPT.pavilions : conceptFor(spec, spec.shape) });
+        const composed = ['pavilions','staggered'].includes(spec.shape);
+        const generated = await generateCandidate(request, spec.shape, overrides, composed ? null : spec);
+        candidates.push({ ...generated, concept: composed ? CONCEPT[spec.shape] : conceptFor(spec, spec.shape) });
       } catch (error) { if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
     }
     const diverse = selectDiverse(candidates, previous);
     if (!diverse.length && candidates.length && previous.length) throw Error('لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.');
     const pairs = [];
-    for (const generated of diverse) pairs.push({ ...generated, review: await reviewCandidate(generated.candidate, request) });
+    for (const generated of diverse) {
+      try { pairs.push({ ...generated, review: await reviewCandidate(generated.candidate, request) }); }
+      catch (error) { failures.push({ shape: generated.candidate.actualShape, reason: `REVIEW_REJECTED:${error.message}` }); }
+    }
     result = { pairs, failures, ...await decideReviewed(request, pairs) };
   }
   if (canonicalJSON({ plot, rooms }) !== before) throw Error('INTEGRATION_MUTATED_CALLER_INPUT');

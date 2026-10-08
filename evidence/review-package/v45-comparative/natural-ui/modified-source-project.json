@@ -1,0 +1,1714 @@
+{
+  "schema": "mizan-handasi-project",
+  "version": 1,
+  "engineVersion": "rectangular-2",
+  "savedAt": "2026-10-08T15:34:19.501Z",
+  "draft": {
+    "plot": {
+      "width": 20,
+      "length": 30,
+      "floors": 1,
+      "streets": {
+        "s": true,
+        "n": false,
+        "e": false,
+        "w": false
+      },
+      "entry": "s",
+      "streetSetback": 3,
+      "neighborSetback": 1.5,
+      "coverage": 0.75,
+      "maxBuiltArea": null
+    },
+    "rooms": [
+      {
+        "name": "غرفة نوم 1",
+        "type": "bedroom",
+        "area": 16,
+        "position": "back",
+        "side": "any",
+        "dimensions": {
+          "width": 4,
+          "length": 4
+        }
+      },
+      {
+        "name": "غرفة نوم 2",
+        "type": "bedroom",
+        "area": 16,
+        "position": "back",
+        "side": "any",
+        "dimensions": {
+          "width": 4,
+          "length": 4
+        }
+      },
+      {
+        "name": "صالة عائلية",
+        "type": "living",
+        "area": 30,
+        "position": "middle",
+        "side": "any",
+        "dimensions": {
+          "width": 6,
+          "length": 5
+        }
+      },
+      {
+        "name": "مطبخ",
+        "type": "kitchen",
+        "area": 12,
+        "position": "middle",
+        "side": "any",
+        "dimensions": {
+          "width": 3,
+          "length": 4
+        }
+      }
+    ],
+    "palette": "resort",
+    "rates": {},
+    "costReserve": 7,
+    "vat": 15,
+    "idea": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+    "discovery": {
+      "likes": [
+        "staggered_wings"
+      ],
+      "rejects": [],
+      "avoids": [],
+      "life": {}
+    },
+    "landSurvey": null
+  },
+  "modelLandSurvey": null,
+  "design": {
+    "plot": {
+      "width": 20,
+      "length": 30,
+      "floors": 1,
+      "streets": {
+        "s": true,
+        "n": false,
+        "e": false,
+        "w": false
+      },
+      "entry": "s",
+      "streetSetback": 3,
+      "neighborSetback": 1.5,
+      "coverage": 0.75,
+      "maxBuiltArea": null
+    },
+    "rooms": [
+      {
+        "name": "غرفة نوم 1",
+        "type": "bedroom",
+        "area": 16,
+        "position": "back",
+        "side": "any",
+        "dimensions": {
+          "width": 4,
+          "length": 4
+        }
+      },
+      {
+        "name": "غرفة نوم 2",
+        "type": "bedroom",
+        "area": 16,
+        "position": "back",
+        "side": "any",
+        "dimensions": {
+          "width": 4,
+          "length": 4
+        }
+      },
+      {
+        "name": "صالة عائلية",
+        "type": "living",
+        "area": 30,
+        "position": "middle",
+        "side": "any",
+        "dimensions": {
+          "width": 6,
+          "length": 5
+        }
+      },
+      {
+        "name": "مطبخ",
+        "type": "kitchen",
+        "area": 12,
+        "position": "middle",
+        "side": "any",
+        "dimensions": {
+          "width": 3,
+          "length": 4
+        }
+      }
+    ],
+    "strategy": "staggered",
+    "embedded": {
+      "version": 2,
+      "plot": {
+        "width": 20,
+        "length": 30,
+        "floors": 1,
+        "streets": {
+          "s": true,
+          "n": false,
+          "e": false,
+          "w": false
+        },
+        "entry": "s",
+        "streetSetback": 3,
+        "neighborSetback": 1.5,
+        "coverage": 0.75,
+        "shape": "staggered",
+        "maxBuiltArea": null
+      },
+      "shape": "staggered",
+      "shapeFallback": false,
+      "buildingFootprint": [
+        {
+          "x": 3.3,
+          "y": 7.85
+        },
+        {
+          "x": 15.8,
+          "y": 7.85
+        },
+        {
+          "x": 15.8,
+          "y": 15.7
+        },
+        {
+          "x": 11.5,
+          "y": 15.7
+        },
+        {
+          "x": 11.5,
+          "y": 17.799999999999997
+        },
+        {
+          "x": 16.7,
+          "y": 17.799999999999997
+        },
+        {
+          "x": 16.7,
+          "y": 23.65
+        },
+        {
+          "x": 4.199999999999999,
+          "y": 23.65
+        },
+        {
+          "x": 4.199999999999999,
+          "y": 17.799999999999997
+        },
+        {
+          "x": 8.5,
+          "y": 17.799999999999997
+        },
+        {
+          "x": 8.5,
+          "y": 15.7
+        },
+        {
+          "x": 3.3,
+          "y": 15.7
+        }
+      ],
+      "building": {
+        "x": 3.3,
+        "y": 7.85,
+        "w": 13.399999999999999,
+        "h": 15.799999999999999
+      },
+      "boundingBox": {
+        "x": 3.3,
+        "y": 7.85,
+        "w": 13.399999999999999,
+        "h": 15.799999999999999
+      },
+      "rooms": [
+        {
+          "id": "room-2",
+          "name": "صالة عائلية",
+          "type": "living",
+          "area": 30,
+          "targetArea": 30,
+          "position": "middle",
+          "side": "any",
+          "dimensions": {
+            "width": 6,
+            "length": 5
+          },
+          "x": 3.55,
+          "y": 9.450000000000001,
+          "w": 5.000000000000001,
+          "h": 6,
+          "resolvedSide": "left",
+          "corridorId": "branch-middle-left-0",
+          "doorSide": "front"
+        },
+        {
+          "id": "room-3",
+          "name": "مطبخ",
+          "type": "kitchen",
+          "area": 12,
+          "targetArea": 12,
+          "position": "middle",
+          "side": "any",
+          "dimensions": {
+            "width": 3,
+            "length": 4
+          },
+          "x": 10.5,
+          "y": 9.450000000000001,
+          "w": 4,
+          "h": 3,
+          "resolvedSide": "right",
+          "corridorId": "branch-middle-right-0",
+          "doorSide": "front"
+        },
+        {
+          "id": "room-0",
+          "name": "غرفة نوم 1",
+          "type": "bedroom",
+          "area": 16,
+          "targetArea": 16,
+          "position": "back",
+          "side": "any",
+          "dimensions": {
+            "width": 4,
+            "length": 4
+          },
+          "x": 4.449999999999999,
+          "y": 19.4,
+          "w": 4,
+          "h": 4,
+          "resolvedSide": "left",
+          "corridorId": "branch-back-left-0",
+          "doorSide": "front"
+        },
+        {
+          "id": "room-1",
+          "name": "غرفة نوم 2",
+          "type": "bedroom",
+          "area": 16,
+          "targetArea": 16,
+          "position": "back",
+          "side": "any",
+          "dimensions": {
+            "width": 4,
+            "length": 4
+          },
+          "x": 11.399999999999999,
+          "y": 19.4,
+          "w": 4,
+          "h": 4,
+          "resolvedSide": "right",
+          "corridorId": "branch-back-right-0",
+          "doorSide": "front"
+        }
+      ],
+      "corridors": [
+        {
+          "id": "staggered-spine-1",
+          "name": "ممر طولي للجناح",
+          "x": 8.75,
+          "y": 8.1,
+          "w": 1.6000000000000014,
+          "h": 8.000000000000002
+        },
+        {
+          "id": "staggered-spine-2",
+          "name": "ممر طولي للجناح",
+          "x": 9.649999999999999,
+          "y": 17.4,
+          "w": 1.6000000000000014,
+          "h": 6
+        },
+        {
+          "id": "branch-middle-left-0",
+          "name": "ممر فرعي",
+          "x": 3.55,
+          "y": 8.1,
+          "w": 5.2,
+          "h": 1.200000000000001
+        },
+        {
+          "id": "branch-middle-right-0",
+          "name": "ممر فرعي",
+          "x": 10.349999999999998,
+          "y": 8.1,
+          "w": 5.200000000000003,
+          "h": 1.200000000000001
+        },
+        {
+          "id": "branch-back-left-0",
+          "name": "ممر فرعي",
+          "x": 4.449999999999999,
+          "y": 18.049999999999997,
+          "w": 5.199999999999999,
+          "h": 1.2000000000000028
+        },
+        {
+          "id": "branch-back-right-0",
+          "name": "ممر فرعي",
+          "x": 11.25,
+          "y": 18.049999999999997,
+          "w": 5.199999999999999,
+          "h": 1.2000000000000028
+        },
+        {
+          "id": "staggered-link-1",
+          "name": "ممر رابط عرضي",
+          "x": 8.75,
+          "y": 15.949999999999998,
+          "w": 2.5,
+          "h": 1.5999999999999996
+        }
+      ],
+      "courtyards": [],
+      "walls": [
+        {
+          "id": "staggered-exterior-0",
+          "x1": 3.425,
+          "y1": 7.975,
+          "x2": 15.675,
+          "y2": 7.975,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-1",
+          "x1": 15.675,
+          "y1": 7.975,
+          "x2": 15.675,
+          "y2": 15.575,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-2",
+          "x1": 15.675,
+          "y1": 15.575,
+          "x2": 11.375,
+          "y2": 15.575,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-3",
+          "x1": 11.375,
+          "y1": 15.575,
+          "x2": 11.375,
+          "y2": 17.924999999999997,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-4",
+          "x1": 11.375,
+          "y1": 17.924999999999997,
+          "x2": 16.575,
+          "y2": 17.924999999999997,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-5",
+          "x1": 16.575,
+          "y1": 17.924999999999997,
+          "x2": 16.575,
+          "y2": 23.525,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-6",
+          "x1": 16.575,
+          "y1": 23.525,
+          "x2": 4.324999999999999,
+          "y2": 23.525,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-7",
+          "x1": 4.324999999999999,
+          "y1": 23.525,
+          "x2": 4.324999999999999,
+          "y2": 17.924999999999997,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-8",
+          "x1": 4.324999999999999,
+          "y1": 17.924999999999997,
+          "x2": 8.625,
+          "y2": 17.924999999999997,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-9",
+          "x1": 8.625,
+          "y1": 17.924999999999997,
+          "x2": 8.625,
+          "y2": 15.575,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-10",
+          "x1": 8.625,
+          "y1": 15.575,
+          "x2": 3.425,
+          "y2": 15.575,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "staggered-exterior-11",
+          "x1": 3.425,
+          "y1": 15.575,
+          "x2": 3.425,
+          "y2": 7.975,
+          "type": "ext",
+          "t": 0.25,
+          "h": 3.2
+        },
+        {
+          "id": "wall-4-pavilion-0",
+          "x1": 8.625,
+          "y1": 9.375,
+          "x2": 8.625,
+          "y2": 15.525,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-5-pavilion-0",
+          "x1": 3.4749999999999996,
+          "y1": 9.375,
+          "x2": 8.625,
+          "y2": 9.375,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-6-pavilion-0",
+          "x1": 10.425,
+          "y1": 9.375,
+          "x2": 14.575,
+          "y2": 9.375,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-8-pavilion-0",
+          "x1": 10.425,
+          "y1": 9.375,
+          "x2": 10.425,
+          "y2": 12.525,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-9-pavilion-0",
+          "x1": 11.325,
+          "y1": 19.325000000000003,
+          "x2": 11.325,
+          "y2": 23.474999999999994,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-10-pavilion-0",
+          "x1": 14.575,
+          "y1": 9.375,
+          "x2": 14.575,
+          "y2": 12.525,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-11-pavilion-0",
+          "x1": 15.474999999999998,
+          "y1": 19.325000000000003,
+          "x2": 15.474999999999998,
+          "y2": 23.474999999999994,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-12-pavilion-0",
+          "x1": 10.425,
+          "y1": 12.525,
+          "x2": 14.575,
+          "y2": 12.525,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-13-pavilion-0",
+          "x1": 8.524999999999999,
+          "y1": 19.325000000000003,
+          "x2": 8.524999999999999,
+          "y2": 23.474999999999994,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-14-pavilion-0",
+          "x1": 4.375,
+          "y1": 19.325000000000003,
+          "x2": 8.524999999999999,
+          "y2": 19.325000000000003,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        },
+        {
+          "id": "wall-15-pavilion-0",
+          "x1": 11.325,
+          "y1": 19.325000000000003,
+          "x2": 15.474999999999998,
+          "y2": 19.325000000000003,
+          "type": "int",
+          "t": 0.15,
+          "h": 3.2
+        }
+      ],
+      "openings": [
+        {
+          "type": "door",
+          "w": 0.9,
+          "h": 2.1,
+          "sill": 0,
+          "roomId": "room-2",
+          "connects": [
+            "room-2",
+            "branch-middle-left-0"
+          ],
+          "id": "opening-0",
+          "wallId": "wall-5-pavilion-0",
+          "pos": 0.5000000000000001
+        },
+        {
+          "type": "window",
+          "w": 1.4,
+          "h": 1.2,
+          "sill": 1.1,
+          "roomId": "room-2",
+          "id": "opening-1",
+          "wallId": "staggered-exterior-11",
+          "pos": 0.4111842105263156
+        },
+        {
+          "type": "door",
+          "w": 0.9,
+          "h": 2.1,
+          "sill": 0,
+          "roomId": "room-3",
+          "connects": [
+            "room-3",
+            "branch-middle-right-0"
+          ],
+          "id": "opening-2",
+          "wallId": "wall-6-pavilion-0",
+          "pos": 0.5
+        },
+        {
+          "type": "door",
+          "w": 0.9,
+          "h": 2.1,
+          "sill": 0,
+          "roomId": "room-0",
+          "connects": [
+            "room-0",
+            "branch-back-left-0"
+          ],
+          "id": "opening-3",
+          "wallId": "wall-14-pavilion-0",
+          "pos": 0.5000000000000001
+        },
+        {
+          "type": "window",
+          "w": 1.4,
+          "h": 1.2,
+          "sill": 1.1,
+          "roomId": "room-0",
+          "id": "opening-4",
+          "wallId": "staggered-exterior-7",
+          "pos": 0.37946428571428575
+        },
+        {
+          "type": "door",
+          "w": 0.9,
+          "h": 2.1,
+          "sill": 0,
+          "roomId": "room-1",
+          "connects": [
+            "room-1",
+            "branch-back-right-0"
+          ],
+          "id": "opening-5",
+          "wallId": "wall-15-pavilion-0",
+          "pos": 0.5
+        },
+        {
+          "type": "window",
+          "w": 1.4,
+          "h": 1.2,
+          "sill": 1.1,
+          "roomId": "room-1",
+          "id": "opening-6",
+          "wallId": "staggered-exterior-6",
+          "pos": 0.2591836734693878
+        },
+        {
+          "type": "door",
+          "w": 1.1,
+          "h": 2.2,
+          "sill": 0,
+          "connects": [
+            "outside",
+            "staggered-spine-1"
+          ],
+          "id": "opening-7",
+          "wallId": "staggered-exterior-0",
+          "pos": 0.5000000000000001
+        }
+      ],
+      "links": [
+        [
+          "staggered-spine-1",
+          "branch-middle-left-0"
+        ],
+        [
+          "staggered-spine-1",
+          "branch-middle-right-0"
+        ],
+        [
+          "staggered-spine-2",
+          "branch-back-left-0"
+        ],
+        [
+          "staggered-spine-2",
+          "branch-back-right-0"
+        ],
+        [
+          "staggered-spine-1",
+          "staggered-link-1"
+        ],
+        [
+          "staggered-link-1",
+          "staggered-spine-2"
+        ]
+      ],
+      "drawnFloors": 1,
+      "reserves": [
+        {
+          "name": "غير موزّع",
+          "x": 10.5,
+          "y": 12.600000000000001,
+          "w": 5.050000000000001,
+          "h": 2.8499999999999996
+        }
+      ],
+      "warnings": [
+        "فراغات دون نافذة خارجية في هذا الحل: مطبخ. تحتاج مراجعة الإضاءة والتهوية.",
+        "المساحات الرمادية غير موزعة وليست غرفاً مطلوبة؛ تظهر مساحتها مستقلة.",
+        "المساحات صافية بين أوجه الجدران. مدخل واحد؛ لا ضمان للفصل التام بين الضيوف والعائلة أو مطابقة كود البناء.",
+        "2 أجنحة فعلية من مناطق الجدول، تفصلها فراغات خارجية ويربطها رواق مسقوف. الرواق مشترك؛ لا يثبت فصل الضيوف عن العائلة.",
+        "كتل الأجنحة متبادلة جانبيًا، تفصلها فجوات خارجية ويصل بينها رواق عرضي مسقوف. هذا توزيع تخطيطي أولي."
+      ],
+      "footprint": {
+        "x": 1.5,
+        "y": 3,
+        "w": 17,
+        "h": 25.5,
+        "sb": {
+          "s": 3,
+          "n": 1.5,
+          "e": 1.5,
+          "w": 1.5
+        },
+        "area": 433.5
+      },
+      "program": [
+        {
+          "id": "room-0",
+          "name": "غرفة نوم 1",
+          "type": "bedroom",
+          "area": 16,
+          "targetArea": 16,
+          "position": "back",
+          "side": "any",
+          "dimensions": {
+            "width": 4,
+            "length": 4
+          }
+        },
+        {
+          "id": "room-1",
+          "name": "غرفة نوم 2",
+          "type": "bedroom",
+          "area": 16,
+          "targetArea": 16,
+          "position": "back",
+          "side": "any",
+          "dimensions": {
+            "width": 4,
+            "length": 4
+          }
+        },
+        {
+          "id": "room-2",
+          "name": "صالة عائلية",
+          "type": "living",
+          "area": 30,
+          "targetArea": 30,
+          "position": "middle",
+          "side": "any",
+          "dimensions": {
+            "width": 6,
+            "length": 5
+          }
+        },
+        {
+          "id": "room-3",
+          "name": "مطبخ",
+          "type": "kitchen",
+          "area": 12,
+          "targetArea": 12,
+          "position": "middle",
+          "side": "any",
+          "dimensions": {
+            "width": 3,
+            "length": 4
+          }
+        }
+      ],
+      "strategy": "staggered",
+      "architecture": {
+        "tag": "جناحان متدرجان مرتبطان",
+        "form": "جناحان متبادلان جانبيًا تصل بينهما وصلة عرضية",
+        "idea": "جناحان منفصلان بفجوة خارجية ورواق رابط مغطى قابل للفحص.",
+        "bestFor": "مقارنة توزيع المناطق على أرض أوسع",
+        "tradeoff": "يحتاج عمقًا وعرضًا إضافيين؛ لا يثبت الخصوصية أو صلاحية التنفيذ",
+        "massing": "staggered"
+      },
+      "exploration": {
+        "descriptor": {
+          "shape": "staggered",
+          "pairs": [
+            0.521584247006048,
+            0.7871557617047709,
+            0.906203781874309,
+            0.6723509194915577,
+            0.8691495890620402,
+            0.4969776295687248
+          ],
+          "aspects": [
+            0,
+            0,
+            0.28768207245178085,
+            0.18232155679395445
+          ],
+          "mass": [
+            0.16475523307605547,
+            0,
+            0.694054054054055,
+            0.19449324324324324
+          ]
+        }
+      },
+      "massingParts": [
+        {
+          "x": 3.3,
+          "y": 7.85,
+          "w": 12.5,
+          "h": 7.85,
+          "name": "جناح متدرج 1",
+          "component": "wing"
+        },
+        {
+          "x": 4.199999999999999,
+          "y": 17.799999999999997,
+          "w": 12.5,
+          "h": 5.850000000000001,
+          "name": "جناح متدرج 2",
+          "component": "wing"
+        },
+        {
+          "x": 8.5,
+          "y": 15.7,
+          "w": 3,
+          "h": 2.099999999999998,
+          "component": "link",
+          "name": "رواق رابط متدرج"
+        }
+      ],
+      "engineVersion": "mizan-p1-integrated",
+      "integration": {
+        "candidateId": "cand:1c5f5a41e696a945827fbd13101e05770c241fadcf60611c8470bfb4f490aaa7",
+        "geometryHash": {
+          "algorithm": "SHA-256",
+          "profile": "mizan-json-sorted-keys-v1",
+          "value": "c8ae4abc28489e71bfc8ef69d495c35073bf619b8fa7600d2fd7ef778ca06e88"
+        },
+        "reviewId": "review:6993a561264c0a56119afe87d48c9fb276fccd6b36e80424a4ce80bddca288b0",
+        "reviewOverall": "PRELIMINARY_INCOMPLETE",
+        "reviewCoverage": {
+          "total": 28,
+          "pass": 11,
+          "fail": 0,
+          "notEvaluated": 11,
+          "estimate": 4,
+          "notApplicable": 2,
+          "evaluatedRatio": 0.4230769230769231
+        }
+      }
+    }
+  },
+  "alternatives": [
+    {
+      "plot": {
+        "width": 20,
+        "length": 30,
+        "floors": 1,
+        "streets": {
+          "s": true,
+          "n": false,
+          "e": false,
+          "w": false
+        },
+        "entry": "s",
+        "streetSetback": 3,
+        "neighborSetback": 1.5,
+        "coverage": 0.75,
+        "maxBuiltArea": null
+      },
+      "rooms": [
+        {
+          "name": "غرفة نوم 1",
+          "type": "bedroom",
+          "area": 16,
+          "position": "back",
+          "side": "any",
+          "dimensions": {
+            "width": 4,
+            "length": 4
+          }
+        },
+        {
+          "name": "غرفة نوم 2",
+          "type": "bedroom",
+          "area": 16,
+          "position": "back",
+          "side": "any",
+          "dimensions": {
+            "width": 4,
+            "length": 4
+          }
+        },
+        {
+          "name": "صالة عائلية",
+          "type": "living",
+          "area": 30,
+          "position": "middle",
+          "side": "any",
+          "dimensions": {
+            "width": 6,
+            "length": 5
+          }
+        },
+        {
+          "name": "مطبخ",
+          "type": "kitchen",
+          "area": 12,
+          "position": "middle",
+          "side": "any",
+          "dimensions": {
+            "width": 3,
+            "length": 4
+          }
+        }
+      ],
+      "strategy": "staggered",
+      "embedded": {
+        "version": 2,
+        "plot": {
+          "width": 20,
+          "length": 30,
+          "floors": 1,
+          "streets": {
+            "s": true,
+            "n": false,
+            "e": false,
+            "w": false
+          },
+          "entry": "s",
+          "streetSetback": 3,
+          "neighborSetback": 1.5,
+          "coverage": 0.75,
+          "shape": "staggered",
+          "maxBuiltArea": null
+        },
+        "shape": "staggered",
+        "shapeFallback": false,
+        "buildingFootprint": [
+          {
+            "x": 3.3,
+            "y": 7.85
+          },
+          {
+            "x": 15.8,
+            "y": 7.85
+          },
+          {
+            "x": 15.8,
+            "y": 15.7
+          },
+          {
+            "x": 11.5,
+            "y": 15.7
+          },
+          {
+            "x": 11.5,
+            "y": 17.799999999999997
+          },
+          {
+            "x": 16.7,
+            "y": 17.799999999999997
+          },
+          {
+            "x": 16.7,
+            "y": 23.65
+          },
+          {
+            "x": 4.199999999999999,
+            "y": 23.65
+          },
+          {
+            "x": 4.199999999999999,
+            "y": 17.799999999999997
+          },
+          {
+            "x": 8.5,
+            "y": 17.799999999999997
+          },
+          {
+            "x": 8.5,
+            "y": 15.7
+          },
+          {
+            "x": 3.3,
+            "y": 15.7
+          }
+        ],
+        "building": {
+          "x": 3.3,
+          "y": 7.85,
+          "w": 13.399999999999999,
+          "h": 15.799999999999999
+        },
+        "boundingBox": {
+          "x": 3.3,
+          "y": 7.85,
+          "w": 13.399999999999999,
+          "h": 15.799999999999999
+        },
+        "rooms": [
+          {
+            "id": "room-2",
+            "name": "صالة عائلية",
+            "type": "living",
+            "area": 30,
+            "targetArea": 30,
+            "position": "middle",
+            "side": "any",
+            "dimensions": {
+              "width": 6,
+              "length": 5
+            },
+            "x": 3.55,
+            "y": 9.450000000000001,
+            "w": 5.000000000000001,
+            "h": 6,
+            "resolvedSide": "left",
+            "corridorId": "branch-middle-left-0",
+            "doorSide": "front"
+          },
+          {
+            "id": "room-3",
+            "name": "مطبخ",
+            "type": "kitchen",
+            "area": 12,
+            "targetArea": 12,
+            "position": "middle",
+            "side": "any",
+            "dimensions": {
+              "width": 3,
+              "length": 4
+            },
+            "x": 10.5,
+            "y": 9.450000000000001,
+            "w": 4,
+            "h": 3,
+            "resolvedSide": "right",
+            "corridorId": "branch-middle-right-0",
+            "doorSide": "front"
+          },
+          {
+            "id": "room-0",
+            "name": "غرفة نوم 1",
+            "type": "bedroom",
+            "area": 16,
+            "targetArea": 16,
+            "position": "back",
+            "side": "any",
+            "dimensions": {
+              "width": 4,
+              "length": 4
+            },
+            "x": 4.449999999999999,
+            "y": 19.4,
+            "w": 4,
+            "h": 4,
+            "resolvedSide": "left",
+            "corridorId": "branch-back-left-0",
+            "doorSide": "front"
+          },
+          {
+            "id": "room-1",
+            "name": "غرفة نوم 2",
+            "type": "bedroom",
+            "area": 16,
+            "targetArea": 16,
+            "position": "back",
+            "side": "any",
+            "dimensions": {
+              "width": 4,
+              "length": 4
+            },
+            "x": 11.399999999999999,
+            "y": 19.4,
+            "w": 4,
+            "h": 4,
+            "resolvedSide": "right",
+            "corridorId": "branch-back-right-0",
+            "doorSide": "front"
+          }
+        ],
+        "corridors": [
+          {
+            "id": "staggered-spine-1",
+            "name": "ممر طولي للجناح",
+            "x": 8.75,
+            "y": 8.1,
+            "w": 1.6000000000000014,
+            "h": 8.000000000000002
+          },
+          {
+            "id": "staggered-spine-2",
+            "name": "ممر طولي للجناح",
+            "x": 9.649999999999999,
+            "y": 17.4,
+            "w": 1.6000000000000014,
+            "h": 6
+          },
+          {
+            "id": "branch-middle-left-0",
+            "name": "ممر فرعي",
+            "x": 3.55,
+            "y": 8.1,
+            "w": 5.2,
+            "h": 1.200000000000001
+          },
+          {
+            "id": "branch-middle-right-0",
+            "name": "ممر فرعي",
+            "x": 10.349999999999998,
+            "y": 8.1,
+            "w": 5.200000000000003,
+            "h": 1.200000000000001
+          },
+          {
+            "id": "branch-back-left-0",
+            "name": "ممر فرعي",
+            "x": 4.449999999999999,
+            "y": 18.049999999999997,
+            "w": 5.199999999999999,
+            "h": 1.2000000000000028
+          },
+          {
+            "id": "branch-back-right-0",
+            "name": "ممر فرعي",
+            "x": 11.25,
+            "y": 18.049999999999997,
+            "w": 5.199999999999999,
+            "h": 1.2000000000000028
+          },
+          {
+            "id": "staggered-link-1",
+            "name": "ممر رابط عرضي",
+            "x": 8.75,
+            "y": 15.949999999999998,
+            "w": 2.5,
+            "h": 1.5999999999999996
+          }
+        ],
+        "courtyards": [],
+        "walls": [
+          {
+            "id": "staggered-exterior-0",
+            "x1": 3.425,
+            "y1": 7.975,
+            "x2": 15.675,
+            "y2": 7.975,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-1",
+            "x1": 15.675,
+            "y1": 7.975,
+            "x2": 15.675,
+            "y2": 15.575,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-2",
+            "x1": 15.675,
+            "y1": 15.575,
+            "x2": 11.375,
+            "y2": 15.575,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-3",
+            "x1": 11.375,
+            "y1": 15.575,
+            "x2": 11.375,
+            "y2": 17.924999999999997,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-4",
+            "x1": 11.375,
+            "y1": 17.924999999999997,
+            "x2": 16.575,
+            "y2": 17.924999999999997,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-5",
+            "x1": 16.575,
+            "y1": 17.924999999999997,
+            "x2": 16.575,
+            "y2": 23.525,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-6",
+            "x1": 16.575,
+            "y1": 23.525,
+            "x2": 4.324999999999999,
+            "y2": 23.525,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-7",
+            "x1": 4.324999999999999,
+            "y1": 23.525,
+            "x2": 4.324999999999999,
+            "y2": 17.924999999999997,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-8",
+            "x1": 4.324999999999999,
+            "y1": 17.924999999999997,
+            "x2": 8.625,
+            "y2": 17.924999999999997,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-9",
+            "x1": 8.625,
+            "y1": 17.924999999999997,
+            "x2": 8.625,
+            "y2": 15.575,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-10",
+            "x1": 8.625,
+            "y1": 15.575,
+            "x2": 3.425,
+            "y2": 15.575,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "staggered-exterior-11",
+            "x1": 3.425,
+            "y1": 15.575,
+            "x2": 3.425,
+            "y2": 7.975,
+            "type": "ext",
+            "t": 0.25,
+            "h": 3.2
+          },
+          {
+            "id": "wall-4-pavilion-0",
+            "x1": 8.625,
+            "y1": 9.375,
+            "x2": 8.625,
+            "y2": 15.525,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-5-pavilion-0",
+            "x1": 3.4749999999999996,
+            "y1": 9.375,
+            "x2": 8.625,
+            "y2": 9.375,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-6-pavilion-0",
+            "x1": 10.425,
+            "y1": 9.375,
+            "x2": 14.575,
+            "y2": 9.375,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-8-pavilion-0",
+            "x1": 10.425,
+            "y1": 9.375,
+            "x2": 10.425,
+            "y2": 12.525,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-9-pavilion-0",
+            "x1": 11.325,
+            "y1": 19.325000000000003,
+            "x2": 11.325,
+            "y2": 23.474999999999994,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-10-pavilion-0",
+            "x1": 14.575,
+            "y1": 9.375,
+            "x2": 14.575,
+            "y2": 12.525,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-11-pavilion-0",
+            "x1": 15.474999999999998,
+            "y1": 19.325000000000003,
+            "x2": 15.474999999999998,
+            "y2": 23.474999999999994,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-12-pavilion-0",
+            "x1": 10.425,
+            "y1": 12.525,
+            "x2": 14.575,
+            "y2": 12.525,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-13-pavilion-0",
+            "x1": 8.524999999999999,
+            "y1": 19.325000000000003,
+            "x2": 8.524999999999999,
+            "y2": 23.474999999999994,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-14-pavilion-0",
+            "x1": 4.375,
+            "y1": 19.325000000000003,
+            "x2": 8.524999999999999,
+            "y2": 19.325000000000003,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          },
+          {
+            "id": "wall-15-pavilion-0",
+            "x1": 11.325,
+            "y1": 19.325000000000003,
+            "x2": 15.474999999999998,
+            "y2": 19.325000000000003,
+            "type": "int",
+            "t": 0.15,
+            "h": 3.2
+          }
+        ],
+        "openings": [
+          {
+            "type": "door",
+            "w": 0.9,
+            "h": 2.1,
+            "sill": 0,
+            "roomId": "room-2",
+            "connects": [
+              "room-2",
+              "branch-middle-left-0"
+            ],
+            "id": "opening-0",
+            "wallId": "wall-5-pavilion-0",
+            "pos": 0.5000000000000001
+          },
+          {
+            "type": "window",
+            "w": 1.4,
+            "h": 1.2,
+            "sill": 1.1,
+            "roomId": "room-2",
+            "id": "opening-1",
+            "wallId": "staggered-exterior-11",
+            "pos": 0.4111842105263156
+          },
+          {
+            "type": "door",
+            "w": 0.9,
+            "h": 2.1,
+            "sill": 0,
+            "roomId": "room-3",
+            "connects": [
+              "room-3",
+              "branch-middle-right-0"
+            ],
+            "id": "opening-2",
+            "wallId": "wall-6-pavilion-0",
+            "pos": 0.5
+          },
+          {
+            "type": "door",
+            "w": 0.9,
+            "h": 2.1,
+            "sill": 0,
+            "roomId": "room-0",
+            "connects": [
+              "room-0",
+              "branch-back-left-0"
+            ],
+            "id": "opening-3",
+            "wallId": "wall-14-pavilion-0",
+            "pos": 0.5000000000000001
+          },
+          {
+            "type": "window",
+            "w": 1.4,
+            "h": 1.2,
+            "sill": 1.1,
+            "roomId": "room-0",
+            "id": "opening-4",
+            "wallId": "staggered-exterior-7",
+            "pos": 0.37946428571428575
+          },
+          {
+            "type": "door",
+            "w": 0.9,
+            "h": 2.1,
+            "sill": 0,
+            "roomId": "room-1",
+            "connects": [
+              "room-1",
+              "branch-back-right-0"
+            ],
+            "id": "opening-5",
+            "wallId": "wall-15-pavilion-0",
+            "pos": 0.5
+          },
+          {
+            "type": "window",
+            "w": 1.4,
+            "h": 1.2,
+            "sill": 1.1,
+            "roomId": "room-1",
+            "id": "opening-6",
+            "wallId": "staggered-exterior-6",
+            "pos": 0.2591836734693878
+          },
+          {
+            "type": "door",
+            "w": 1.1,
+            "h": 2.2,
+            "sill": 0,
+            "connects": [
+              "outside",
+              "staggered-spine-1"
+            ],
+            "id": "opening-7",
+            "wallId": "staggered-exterior-0",
+            "pos": 0.5000000000000001
+          }
+        ],
+        "links": [
+          [
+            "staggered-spine-1",
+            "branch-middle-left-0"
+          ],
+          [
+            "staggered-spine-1",
+            "branch-middle-right-0"
+          ],
+          [
+            "staggered-spine-2",
+            "branch-back-left-0"
+          ],
+          [
+            "staggered-spine-2",
+            "branch-back-right-0"
+          ],
+          [
+            "staggered-spine-1",
+            "staggered-link-1"
+          ],
+          [
+            "staggered-link-1",
+            "staggered-spine-2"
+          ]
+        ],
+        "drawnFloors": 1,
+        "reserves": [
+          {
+            "name": "غير موزّع",
+            "x": 10.5,
+            "y": 12.600000000000001,
+            "w": 5.050000000000001,
+            "h": 2.8499999999999996
+          }
+        ],
+        "warnings": [
+          "فراغات دون نافذة خارجية في هذا الحل: مطبخ. تحتاج مراجعة الإضاءة والتهوية.",
+          "المساحات الرمادية غير موزعة وليست غرفاً مطلوبة؛ تظهر مساحتها مستقلة.",
+          "المساحات صافية بين أوجه الجدران. مدخل واحد؛ لا ضمان للفصل التام بين الضيوف والعائلة أو مطابقة كود البناء.",
+          "2 أجنحة فعلية من مناطق الجدول، تفصلها فراغات خارجية ويربطها رواق مسقوف. الرواق مشترك؛ لا يثبت فصل الضيوف عن العائلة.",
+          "كتل الأجنحة متبادلة جانبيًا، تفصلها فجوات خارجية ويصل بينها رواق عرضي مسقوف. هذا توزيع تخطيطي أولي."
+        ],
+        "footprint": {
+          "x": 1.5,
+          "y": 3,
+          "w": 17,
+          "h": 25.5,
+          "sb": {
+            "s": 3,
+            "n": 1.5,
+            "e": 1.5,
+            "w": 1.5
+          },
+          "area": 433.5
+        },
+        "program": [
+          {
+            "id": "room-0",
+            "name": "غرفة نوم 1",
+            "type": "bedroom",
+            "area": 16,
+            "targetArea": 16,
+            "position": "back",
+            "side": "any",
+            "dimensions": {
+              "width": 4,
+              "length": 4
+            }
+          },
+          {
+            "id": "room-1",
+            "name": "غرفة نوم 2",
+            "type": "bedroom",
+            "area": 16,
+            "targetArea": 16,
+            "position": "back",
+            "side": "any",
+            "dimensions": {
+              "width": 4,
+              "length": 4
+            }
+          },
+          {
+            "id": "room-2",
+            "name": "صالة عائلية",
+            "type": "living",
+            "area": 30,
+            "targetArea": 30,
+            "position": "middle",
+            "side": "any",
+            "dimensions": {
+              "width": 6,
+              "length": 5
+            }
+          },
+          {
+            "id": "room-3",
+            "name": "مطبخ",
+            "type": "kitchen",
+            "area": 12,
+            "targetArea": 12,
+            "position": "middle",
+            "side": "any",
+            "dimensions": {
+              "width": 3,
+              "length": 4
+            }
+          }
+        ],
+        "strategy": "staggered",
+        "architecture": {
+          "tag": "جناحان متدرجان مرتبطان",
+          "form": "جناحان متبادلان جانبيًا تصل بينهما وصلة عرضية",
+          "idea": "جناحان منفصلان بفجوة خارجية ورواق رابط مغطى قابل للفحص.",
+          "bestFor": "مقارنة توزيع المناطق على أرض أوسع",
+          "tradeoff": "يحتاج عمقًا وعرضًا إضافيين؛ لا يثبت الخصوصية أو صلاحية التنفيذ",
+          "massing": "staggered"
+        },
+        "exploration": {
+          "descriptor": {
+            "shape": "staggered",
+            "pairs": [
+              0.521584247006048,
+              0.7871557617047709,
+              0.906203781874309,
+              0.6723509194915577,
+              0.8691495890620402,
+              0.4969776295687248
+            ],
+            "aspects": [
+              0,
+              0,
+              0.28768207245178085,
+              0.18232155679395445
+            ],
+            "mass": [
+              0.16475523307605547,
+              0,
+              0.694054054054055,
+              0.19449324324324324
+            ]
+          }
+        },
+        "massingParts": [
+          {
+            "x": 3.3,
+            "y": 7.85,
+            "w": 12.5,
+            "h": 7.85,
+            "name": "جناح متدرج 1",
+            "component": "wing"
+          },
+          {
+            "x": 4.199999999999999,
+            "y": 17.799999999999997,
+            "w": 12.5,
+            "h": 5.850000000000001,
+            "name": "جناح متدرج 2",
+            "component": "wing"
+          },
+          {
+            "x": 8.5,
+            "y": 15.7,
+            "w": 3,
+            "h": 2.099999999999998,
+            "component": "link",
+            "name": "رواق رابط متدرج"
+          }
+        ],
+        "engineVersion": "mizan-p1-integrated",
+        "integration": {
+          "candidateId": "cand:1c5f5a41e696a945827fbd13101e05770c241fadcf60611c8470bfb4f490aaa7",
+          "geometryHash": {
+            "algorithm": "SHA-256",
+            "profile": "mizan-json-sorted-keys-v1",
+            "value": "c8ae4abc28489e71bfc8ef69d495c35073bf619b8fa7600d2fd7ef778ca06e88"
+          },
+          "reviewId": "review:6993a561264c0a56119afe87d48c9fb276fccd6b36e80424a4ce80bddca288b0",
+          "reviewOverall": "PRELIMINARY_INCOMPLETE",
+          "reviewCoverage": {
+            "total": 28,
+            "pass": 11,
+            "fail": 0,
+            "notEvaluated": 11,
+            "estimate": 4,
+            "notApplicable": 2,
+            "evaluatedRatio": 0.4230769230769231
+          }
+        }
+      }
+    }
+  ],
+  "history": []
+}

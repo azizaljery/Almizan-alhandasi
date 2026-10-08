@@ -148,12 +148,12 @@ test('local understanding isolates negation, supports Arabic digits and retains 
   assert.equal(removed.rooms.filter(r => r.type === 'bedroom').length, 4);
 });
 
-test('local understanding separates dining from living and reports unsupported dimensions and privacy', async () => {
+test('local understanding separates dining from living and preserves exact dimensions plus privacy limits', async () => {
   const brief = await requestLocalBrief({ prompt: 'مجلس رجال ٩×٧ ومجلس نساء٨×٦ وصالة طعام ٢٠ م² وصالة عائلية ٣٠ م² بمدخل مستقل', previous: { rooms: rooms } });
   assert.deepEqual(brief.rooms.filter(r => r.type === 'majlis').map(r => [r.name, r.area]), [['مجلس رجال', 63], ['مجلس نساء', 48]]);
   assert.equal(brief.rooms.find(r => r.type === 'dining').area, 20);
   assert.equal(brief.rooms.find(r => r.type === 'living').area, 30);
-  assert.ok(brief.unhandled.some(s => /لا يثبّت/.test(s)));
+  assert.deepEqual(brief.rooms.filter(r => r.type === 'majlis').map(r => r.dimensions), [{ width: 9, length: 7 }, { width: 8, length: 6 }]);
   assert.ok(brief.unhandled.some(s => /المداخل/.test(s)));
 });
 
@@ -169,9 +169,9 @@ test('local understanding handles English, additions and requests clarification 
   await assert.rejects(requestLocalBrief({ prompt: '١١ غرف نوم', previous: { rooms } }), /لم أختصر/);
 });
 
-test('centimeter room dimensions convert to square meters and stay advisory', async () => {
+test('centimeter dimensions become exact metric room constraints', async () => {
   const brief = await requestLocalBrief({ prompt: 'غرفة نوم ٤٠٠×٤٠٠ سم', previous: { rooms: [] } });
   assert.equal(brief.rooms[0].area, 16);
-  assert.ok(brief.unhandled.some(note => /استُخدمت 4 × 4 م لمساحة غرفة نوم فقط/.test(note)));
-  assert.ok(brief.unhandled.some(note => /لا يثبّت المحرك الطول والعرض/.test(note)));
+  assert.deepEqual(brief.rooms[0].dimensions, { width: 4, length: 4 });
+  assert.equal(brief.unhandled.some(note => /لا يثبّت المحرك الطول والعرض/.test(note)), false);
 });

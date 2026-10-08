@@ -8,7 +8,7 @@ import { buildRefinementRequest } from './refinement-engine.js';
 import { buildDecisionTrace } from './decision-trace.js';
 const HARD_CONSTRAINT_KINDS = new Set([
     'room_count_exact', 'room_count_min', 'room_count_max',
-    'room_type_required', 'room_type_forbidden', 'explicit_area',
+    'room_type_required', 'room_type_forbidden', 'explicit_area', 'room_dimensions_exact', 'wing_count_exact',
     'entry_side_required', 'privacy_required', 'access_required', 'custom',
 ]);
 const HARD_CONSTRAINT_SOURCES = new Set(['user', 'municipality', 'engineer', 'system']);

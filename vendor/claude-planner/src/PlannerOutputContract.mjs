@@ -12,7 +12,7 @@
 /** @typedef {Point[]} Polygon  Closed implicitly (last point joins first). Winding not load-bearing (even-odd rule). */
 /** @typedef {'s'|'n'|'e'|'w'} Direction */
 /** @typedef {'rect'|'l'|'u'} ShapeKey */
-/** @typedef {'bedroom'|'majlis'|'living'|'dining'|'kitchen'|'bath'|'storage'|'service'|'corridor'} RoomType */
+/** @typedef {'bedroom'|'majlis'|'living'|'dining'|'kitchen'|'bath'|'storage'|'office'|'service'|'corridor'} RoomType */
 /** @typedef {'front'|'middle'|'back'} Position */
 /** @typedef {'left'|'right'|'any'} Side */
 /** @typedef {'left'|'right'} ResolvedSide */
@@ -43,6 +43,7 @@
  * @property {string} name  non-empty after trim, <= 70 chars
  * @property {RoomType} type
  * @property {number} area  net m², 4..120; placed rooms keep it exactly (±1e-5)
+ * @property {{ width: number, length: number }} [dimensions] exact clear room dimensions in metres; geometry may rotate them 90°
  * @property {Position} position
  * @property {Side} side
  */
@@ -72,6 +73,7 @@
  * @property {RoomType} type
  * @property {number} area
  * @property {number} targetArea  copy of area; validateModel checks w*h against it
+ * @property {{ width: number, length: number }} [dimensions] explicit dimensions that geometry must preserve, allowing axis swap
  * @property {Position} position  may be rewritten to 'middle' inside L/U arms
  * @property {Side} side          may be rewritten to 'any' inside single-sided arms
  */

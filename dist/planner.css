@@ -44,3 +44,6 @@ body{font-size:17px}.help,.scope-note,.message{font-size:1rem;line-height:1.85}.
 #engineeringCards .insight span,#mizanScoreAxes .insight span,#insightCards .insight span{color:#46524c}
 #engineeringCards .insight p,#mizanScoreAxes .insight p,#insightCards .insight p{color:#5f625b}
 #engineeringCards .insight b,#mizanScoreAxes .insight b,#insightCards .insight b{color:#2e4a3d}
+
+.dimension-inputs{display:flex;align-items:center;gap:4px}.dimension-inputs input{max-width:68px;text-align:center}.dimension-inputs span{color:var(--m);flex:none}
+.concept-diagram.staggered i:nth-child(1){left:25px;right:75px;top:28px;height:46px}.concept-diagram.staggered i:nth-child(2){left:75px;right:25px;top:78px;height:46px}.concept-diagram.staggered i:nth-child(3){left:25px;right:75px;bottom:20px;height:40px}.concept-diagram.staggered b{left:71px;right:71px;top:72px;bottom:61px;background:var(--gold);border-width:2px}.concept-diagram.staggered em{left:50%;top:76px;transform:translateX(-50%);width:58px;height:28px}

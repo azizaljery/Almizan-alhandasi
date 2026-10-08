@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "baseVersion": 45,
+  "baseCommit": "ffaffa9457bf7df61e475899aab6be848252833c",
+  "comparison": "Same natural prompt entered through visible UI on baseline and modified source.",
+  "prompt": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+  "plotDefaultsNotInPrompt": {
+    "widthM": 20,
+    "lengthM": 30,
+    "floors": 1,
+    "entry": "south",
+    "streetSetbackM": 3,
+    "neighborSetbackM": 1.5,
+    "coverage": 0.75
+  },
+  "before": {
+    "path": "natural UI, no clarification",
+    "roomCount": 4,
+    "shape": "l",
+    "staggeredWingCountInterpreted": null,
+    "rooms": [
+      { "name": "غرفة نوم 1", "type": "bedroom", "areaM2": 16, "requestedDimensionsM": [4, 4], "actualDimensionsM": [5.339459, 2.996558], "dimensionsPreserved": false },
+      { "name": "غرفة نوم 2", "type": "bedroom", "areaM2": 16, "requestedDimensionsM": [4, 4], "actualDimensionsM": [5.339459, 2.996558], "dimensionsPreserved": false },
+      { "name": "صالة عائلية", "type": "living", "areaM2": 30, "requestedDimensionsM": [6, 5], "actualDimensionsM": [5.320541, 5.638525], "dimensionsPreserved": false },
+      { "name": "مطبخ", "type": "kitchen", "areaM2": 12, "requestedDimensionsM": [3, 4], "actualDimensionsM": [5.320541, 2.25541], "dimensionsPreserved": false }
+    ],
+    "svg": "natural-ui/baseline-v45-plan.svg",
+    "csv": "natural-ui/baseline-v45-quantities.csv",
+    "project": "natural-ui/baseline-v45-project.json"
+  },
+  "after": {
+    "path": "natural UI, no clarification",
+    "roomCount": 4,
+    "shape": "staggered",
+    "requestedWingCount": 2,
+    "interpretedWingCount": 2,
+    "actualStaggeredWingCount": 2,
+    "coveredLinkCount": 1,
+    "rooms": [
+      { "name": "غرفة نوم 1", "type": "bedroom", "areaM2": 16, "requestedDimensionsM": [4, 4], "actualDimensionsM": [4, 4], "dimensionsPreserved": true },
+      { "name": "غرفة نوم 2", "type": "bedroom", "areaM2": 16, "requestedDimensionsM": [4, 4], "actualDimensionsM": [4, 4], "dimensionsPreserved": true },
+      { "name": "صالة عائلية", "type": "living", "areaM2": 30, "requestedDimensionsM": [6, 5], "actualDimensionsM": [5, 6], "dimensionsPreserved": true, "rotated90Degrees": true },
+      { "name": "مطبخ", "type": "kitchen", "areaM2": 12, "requestedDimensionsM": [3, 4], "actualDimensionsM": [4, 3], "dimensionsPreserved": true, "rotated90Degrees": true }
+    ],
+    "svg": "natural-ui/modified-source-plan.svg",
+    "csv": "natural-ui/modified-source-quantities.csv",
+    "project": "natural-ui/modified-source-project.json"
+  },
+  "responsiveViewports": ["390x844", "820x1180"],
+  "pageErrors": [],
+  "unsupportedClaims": [
+    "The baseline did not interpret the requested staggered shape or bind a wing-count constraint; its L output does not prove that two staggered wings were delivered.",
+    "Generic staggered wording and requested counts other than two block application; more than two wings are unsupported.",
+    "A specific north-facing room facade is unsupported and blocks application; 90-degree room rotation is not a substitute.",
+    "The generated plan is conceptual only and is not certified, permit-ready, or survey-grade."
+  ]
+}

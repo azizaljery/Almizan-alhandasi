@@ -1,0 +1,42 @@
+{
+  "baseVersion": 45,
+  "baseCommit": "ffaffa9457bf7df61e475899aab6be848252833c",
+  "viewports": {
+    "desktop": { "width": 1440, "height": 1000 },
+    "phone": { "width": 390, "height": 844 },
+    "tablet": { "width": 820, "height": 1180 }
+  },
+  "pages": {
+    "before": {
+      "stages": 6,
+      "activeStage": "brief",
+      "styleCards": 4,
+      "explicitWingCountParsed": false,
+      "desktopOverflow": false,
+      "pageErrors": []
+    },
+    "after": {
+      "stages": 6,
+      "activeStage": "result",
+      "styleCards": 5,
+      "staggeredCard": true,
+      "desktopOverflow": false,
+      "generated": {
+        "shape": "staggered",
+        "roomCount": 4,
+        "requestedWingCount": 2,
+        "actualWingCount": 2,
+        "coveredLinkCount": 1,
+        "roomDimensionsPreserved": true,
+        "questions": [],
+        "limitations": [],
+        "downloads": ["mizan-handasi-plan.svg", "mizan-handasi-quantities.csv"]
+      },
+      "phone": { "viewport": 390, "document": 390, "noHorizontalOverflow": true },
+      "tablet": { "viewport": 820, "document": 820, "noHorizontalOverflow": true },
+      "pageErrors": []
+    }
+  },
+  "adversarialUI": "natural-ui/adversarial-ui-report.json",
+  "exactRawOutputs": "natural-ui/"
+}

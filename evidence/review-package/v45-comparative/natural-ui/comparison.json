@@ -1,0 +1,183 @@
+{
+  "status": "PASS",
+  "prompt": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+  "results": [
+    {
+      "label": "baseline-v45",
+      "prompt": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+      "reviewQuestions": [],
+      "reviewFacts": "غرفة نوم\n2 · 32 م²\nصالة عائلية\n1 · 30 م²\nمطبخ\n1 · 12 م²",
+      "proposedRoomRows": "غرفة نوم 1 · خلف / تلقائي\n١٦ م²\nغرفة نوم 2 · خلف / تلقائي\n١٦ م²\nصالة عائلية · وسط / تلقائي\n٣٠ م²\nمطبخ · وسط / تلقائي\n١٢ م²",
+      "applyEnabled": true,
+      "roomCount": 4,
+      "shape": "l",
+      "explicitWingCountInPrompt": 2,
+      "interpretedWingCount": null,
+      "representedStaggeredWingCount": null,
+      "roomGeometry": [
+        {
+          "name": "مطبخ",
+          "type": "kitchen",
+          "width": 5.32054054054054,
+          "length": 2.2554099359951234,
+          "area": 11.999999999999998
+        },
+        {
+          "name": "صالة عائلية",
+          "type": "living",
+          "width": 5.32054054054054,
+          "length": 5.638524839987809,
+          "area": 30
+        },
+        {
+          "name": "غرفة نوم 1",
+          "type": "bedroom",
+          "width": 5.33945945945946,
+          "length": 2.9965580076938636,
+          "area": 15.999999999999995
+        },
+        {
+          "name": "غرفة نوم 2",
+          "type": "bedroom",
+          "width": 5.33945945945946,
+          "length": 2.9965580076938654,
+          "area": 16.000000000000004
+        }
+      ],
+      "files": {
+        "project": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/baseline-v45-project.json",
+        "svg": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/baseline-v45-plan.svg",
+        "csv": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/baseline-v45-quantities.csv"
+      },
+      "svgBytes": 11546,
+      "csvBytes": 1196,
+      "viewportChecks": [
+        {
+          "width": 390,
+          "height": 844,
+          "viewport": 390,
+          "document": 390
+        },
+        {
+          "width": 820,
+          "height": 1180,
+          "viewport": 820,
+          "document": 820
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "label": "modified-source",
+      "prompt": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+      "reviewQuestions": [],
+      "reviewFacts": "الشكل المطلوب\nجناحان متدرجان مرتبطان\nعدد الأجنحة\nجناحان · يطابق التكوين المدعوم\nغرفة نوم\n2 · 4×4 م (16 م²)، 4×4 م (16 م²)\nصالة عائلية\n1 · 6×5 م (30 م²)\nمطبخ\n1 · 3×4 م (12 م²)",
+      "proposedRoomRows": "غرفة نوم 1 · خلف / تلقائي\n٤ × ٤ م · ١٦ م²\nغرفة نوم 2 · خلف / تلقائي\n٤ × ٤ م · ١٦ م²\nصالة عائلية · وسط / تلقائي\n٦ × ٥ م · ٣٠ م²\nمطبخ · وسط / تلقائي\n٣ × ٤ م · ١٢ م²",
+      "applyEnabled": true,
+      "roomCount": 4,
+      "shape": "staggered",
+      "explicitWingCountInPrompt": 2,
+      "interpretedWingCount": 2,
+      "representedStaggeredWingCount": 2,
+      "roomGeometry": [
+        {
+          "name": "صالة عائلية",
+          "type": "living",
+          "width": 5.000000000000001,
+          "length": 6,
+          "area": 30.000000000000007
+        },
+        {
+          "name": "مطبخ",
+          "type": "kitchen",
+          "width": 4,
+          "length": 3,
+          "area": 12
+        },
+        {
+          "name": "غرفة نوم 1",
+          "type": "bedroom",
+          "width": 4,
+          "length": 4,
+          "area": 16
+        },
+        {
+          "name": "غرفة نوم 2",
+          "type": "bedroom",
+          "width": 4,
+          "length": 4,
+          "area": 16
+        }
+      ],
+      "files": {
+        "project": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/modified-source-project.json",
+        "svg": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/modified-source-plan.svg",
+        "csv": "/workspace/Almizan-official/evidence/review-package/v45-comparative/natural-ui/modified-source-quantities.csv"
+      },
+      "svgBytes": 12414,
+      "csvBytes": 1190,
+      "viewportChecks": [
+        {
+          "width": 390,
+          "height": 844,
+          "viewport": 390,
+          "document": 390
+        },
+        {
+          "width": 820,
+          "height": 1180,
+          "viewport": 820,
+          "document": 820
+        }
+      ],
+      "pageErrors": []
+    }
+  ],
+  "adversarial": {
+    "status": "PASS",
+    "steps": [
+      {
+        "case": "لا تضف غرفة نوم preserves all four existing bedrooms and two majlis rooms",
+        "status": "PASS"
+      },
+      {
+        "case": "بدون مجلس removes the requested rooms and preserves all four bedrooms",
+        "status": "PASS"
+      }
+    ],
+    "blockedCases": [
+      {
+        "label": "area conflict",
+        "questions": [
+          "أبعاد غرفة نوم تعطي مساحة 16 م²، بينما كتبت مساحة 20 م²؛ وضّح أي القيدين تريد قبل تطبيق الطلب."
+        ],
+        "applyEnabled": false
+      },
+      {
+        "label": "unsupported north facade",
+        "questions": [
+          "طلبت جهة واجهة محددة لغرفة؛ المولد لا يثبت أي جدار خارجي لهذه الغرفة على جهة بوصلة بعينها. لم نطبق الطلب، ولا نفترض أن تدوير الغرفة يحقق الواجهة."
+        ],
+        "applyEnabled": false
+      },
+      {
+        "label": "generic staggered wing count",
+        "questions": [
+          "حدّد عدد الأجنحة المتدرجة. المولد الحالي يدعم جناحين متدرجين مرتبطين فقط؛ لا نفترض العدد من وصف عام."
+        ],
+        "applyEnabled": false
+      },
+      {
+        "label": "unsupported three-wing count",
+        "questions": [
+          "طلبت 3 أجنحة متدرجة، بينما المولد الحالي يدعم جناحين فقط؛ لم نستبدل العدد المطلوب."
+        ],
+        "applyEnabled": false
+      }
+    ],
+    "pageErrors": [],
+    "notes": [
+      "All cases used the visible local request UI. The explicit 4×4 versus 20 m² conflict and north-facing facade remain unapplied. No live AI was called."
+    ]
+  }
+}

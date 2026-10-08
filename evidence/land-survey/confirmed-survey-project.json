@@ -1,0 +1,175 @@
+{
+  "schema": "mizan-handasi-project",
+  "version": 1,
+  "engineVersion": "rectangular-2",
+  "savedAt": "2026-10-08T15:37:16.467Z",
+  "draft": {
+    "plot": {
+      "width": 20.1,
+      "length": 33.3,
+      "floors": 1,
+      "streets": {
+        "s": true,
+        "n": false,
+        "e": false,
+        "w": false
+      },
+      "entry": "s",
+      "streetSetback": 3,
+      "neighborSetback": 1.5,
+      "coverage": 0.75,
+      "maxBuiltArea": null
+    },
+    "rooms": [
+      {
+        "name": "مجلس 1",
+        "type": "majlis",
+        "area": 32,
+        "position": "front",
+        "side": "left"
+      },
+      {
+        "name": "مجلس 2",
+        "type": "majlis",
+        "area": 32,
+        "position": "front",
+        "side": "right"
+      },
+      {
+        "name": "صالة عائلية",
+        "type": "living",
+        "area": 28,
+        "position": "middle",
+        "side": "any"
+      },
+      {
+        "name": "صالة طعام",
+        "type": "dining",
+        "area": 20,
+        "position": "middle",
+        "side": "any"
+      },
+      {
+        "name": "مطبخ",
+        "type": "kitchen",
+        "area": 18,
+        "position": "middle",
+        "side": "any"
+      },
+      {
+        "name": "غرفة نوم 1",
+        "type": "bedroom",
+        "area": 20,
+        "position": "back",
+        "side": "any"
+      },
+      {
+        "name": "غرفة نوم 2",
+        "type": "bedroom",
+        "area": 20,
+        "position": "back",
+        "side": "any"
+      },
+      {
+        "name": "غرفة نوم 3",
+        "type": "bedroom",
+        "area": 20,
+        "position": "back",
+        "side": "any"
+      },
+      {
+        "name": "غرفة نوم 4",
+        "type": "bedroom",
+        "area": 20,
+        "position": "back",
+        "side": "any"
+      },
+      {
+        "name": "دورة مياه 1",
+        "type": "bath",
+        "area": 6,
+        "position": "middle",
+        "side": "any"
+      },
+      {
+        "name": "دورة مياه 2",
+        "type": "bath",
+        "area": 6,
+        "position": "back",
+        "side": "any"
+      },
+      {
+        "name": "دورة مياه 3",
+        "type": "bath",
+        "area": 6,
+        "position": "back",
+        "side": "any"
+      }
+    ],
+    "palette": "resort",
+    "rates": {},
+    "costReserve": 7,
+    "vat": 15,
+    "idea": "",
+    "discovery": {
+      "likes": [],
+      "rejects": [],
+      "avoids": [],
+      "life": {}
+    },
+    "landSurvey": {
+      "version": 1,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              46.6753,
+              24.7136
+            ],
+            [
+              46.6755,
+              24.7136
+            ],
+            [
+              46.6755,
+              24.7139
+            ],
+            [
+              46.6753,
+              24.7139
+            ],
+            [
+              46.6753,
+              24.7136
+            ]
+          ]
+        ]
+      },
+      "references": [
+        20.1,
+        33.3,
+        20.1,
+        33.3
+      ],
+      "engineLink": "survey-rectangle",
+      "binding": {
+        "width": 20.1,
+        "length": 33.3,
+        "source": "confirmed-edge-references"
+      },
+      "mapView": {
+        "center": [
+          24.7136,
+          46.6753
+        ],
+        "zoom": 16,
+        "provider": "local"
+      }
+    }
+  },
+  "modelLandSurvey": null,
+  "design": null,
+  "alternatives": [],
+  "history": []
+}

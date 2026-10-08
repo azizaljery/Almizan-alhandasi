@@ -68,7 +68,7 @@ export async function reviewCandidate(candidate,request) {
     {courtyards:structuredClone(g.courtyards),footprintOverlapM2:audit.courtyardOverlapM2,spaceOverlapM2:audit.spaceVoidOverlapM2});
   add('opening-references','PASS','Wall/room/connects references and finite schema dimensions checked; no swing or access-compliance inference.',
     {openingIds:g.openings.map(o=>o.id),wallIds:g.walls.map(w=>w.id),scope:'reference-integrity-only'});
-  const nativeErrors = validateNativeModel(g);
+  const nativeErrors = validateNativeModel({ ...g, massingParts: c.presentation?.massingParts });
   add('native-validation',nativeErrors.length?'FAIL':'PASS','Native geometry and pavilion topology validation for this exact bound model.',{ errors:nativeErrors });
   add('max-built-area',r.plot.maxBuiltAreaM2===null?'NOT_APPLICABLE':withinCap(a.areaM2,r.plot.maxBuiltAreaM2)?'PASS':'FAIL',
     r.plot.maxBuiltAreaM2===null?'No explicit cap in this request.':'Compare polygon area with explicit cap using contract tolerance.',{areaM2:a.areaM2,capM2:r.plot.maxBuiltAreaM2});
@@ -84,6 +84,16 @@ export async function reviewCandidate(candidate,request) {
     {directMapping,mismatches,requested:r.program.length,actual:g.rooms.length});
   const constraintResults=r.hardConstraints.map(h=>{
     if(h.kind==='room_count_exact'&&Number.isInteger(h.value?.count)) return {id:h.id,status:h.value.count===g.rooms.length?'PASS':'FAIL',expected:h.value.count,actual:g.rooms.length};
+    if(h.kind==='room_dimensions_exact') {
+      const room=g.rooms.find(x=>x.id===h.value?.roomId), tol=Number.isFinite(h.value?.toleranceM)?h.value.toleranceM:1e-5;
+      if(!room) return {id:h.id,status:'FAIL',expected:h.value,actual:null};
+      const matches=Math.abs(room.w-h.value.widthM)<=tol&&Math.abs(room.h-h.value.lengthM)<=tol || h.value.rotationAllowed===true&&Math.abs(room.w-h.value.lengthM)<=tol&&Math.abs(room.h-h.value.widthM)<=tol;
+      return {id:h.id,status:matches?'PASS':'FAIL',expected:{widthM:h.value.widthM,lengthM:h.value.lengthM,rotationAllowed:h.value.rotationAllowed},actual:{widthM:room.w,lengthM:room.h}};
+    }
+    if(h.kind==='wing_count_exact') {
+      const actual=c.presentation?.massingParts?.filter(p=>p.component==='wing').length??null;
+      return {id:h.id,status:c.actualShape==='staggered'&&actual===h.value?.count?'PASS':'FAIL',expected:{shape:'staggered',count:h.value?.count},actual:{shape:c.actualShape,count:actual}};
+    }
     if(h.kind==='shape_allowed'&&Array.isArray(h.value?.shapes)) return {id:h.id,status:h.value.shapes.includes(c.actualShape)&&g.shape===c.actualShape&&c.requestedShape===c.actualShape&&!c.fallback.used?'PASS':'FAIL',expected:h.value.shapes,actual:c.actualShape};
     return {id:h.id,status:'NOT_EVALUATED',reason:'Unsupported must constraint; requires control-room handling.'};
   });

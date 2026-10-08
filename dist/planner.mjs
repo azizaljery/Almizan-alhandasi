@@ -1,6 +1,7 @@
 // Local, deterministic concept planner. Metres; x east, y north. Not a code-compliance engine.
 import { generateModel as claudeGenerate, validateModel as claudeValidate, quantities as claudeQuantities } from './claude/planner.mjs';
 import { pavilionTopology } from './pavilion-planner.mjs';
+import { staggeredTopology } from './staggered-planner.mjs';
 export const TYPES = {
   bedroom: { name: 'غرفة نوم', area: 20, min: 2.6, color: '#e4e7f2' },
   majlis: { name: 'مجلس', area: 32, min: 3, color: '#f3e6c8' },
@@ -9,6 +10,7 @@ export const TYPES = {
   kitchen: { name: 'مطبخ', area: 18, min: 2.2, color: '#e3edda' },
   bath: { name: 'دورة مياه', area: 6, min: 1.5, color: '#dcebf2' },
   storage: { name: 'مستودع', area: 8, min: 1.3, color: '#e9e5df' },
+  office: { name: 'مكتب', area: 12, min: 2.2, color: '#e6e0f2' },
   service: { name: 'غرفة خدمة', area: 12, min: 2.2, color: '#f0e0dd' },
   corridor: { name: 'ممر إضافي', area: 8, min: 1.2, color: '#f4f1e8' },
 };
@@ -25,6 +27,7 @@ export const STRATEGIES = {
   courtyard: 'بيت الفناء',
   'u-court': 'بيت الباحة U',
   pavilions: 'أجنحة مرتبطة برواق',
+  staggered: 'جناحان متدرجان مرتبطان',
 };
 export const CONCEPT_PROFILES = {
   compact: {
@@ -82,7 +85,9 @@ export function normalizeRooms(raw) {
   if (!Array.isArray(raw) || !raw.length || raw.length > 30) throw Error('البرنامج يحتاج من 1 إلى 30 فراغاً.');
   return raw.map((r, i) => {
     if (!r || typeof r.name !== 'string' || !r.name.trim() || r.name.length > 70 || !Object.hasOwn(TYPES, r.type) || !Number.isFinite(r.area) || r.area < 4 || r.area > 120 || !Object.hasOwn(POSITIONS, r.position) || !Object.hasOwn(SIDES, r.side)) throw Error('راجع اسم ونوع ومساحة وموقع الفراغ رقم ' + (i + 1) + '؛ المساحة بين 4 و120 م².');
-    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side };
+    const dimensions = r.dimensions ?? r.exactDimensionsM ?? null;
+    if (dimensions !== null && (!dimensions || !Number.isFinite(dimensions.width) || !Number.isFinite(dimensions.length) || dimensions.width < 1 || dimensions.length < 1 || dimensions.width > 60 || dimensions.length > 60 || Math.abs(dimensions.width * dimensions.length - r.area) > 1e-4)) throw Error('أبعاد الفراغ رقم ' + (i + 1) + ' غير صالحة أو لا تطابق مساحته. تُعامل الأبعاد الصريحة كقيد هندسي، والمساحة ناتجة من حاصل ضربها.');
+    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side, ...(dimensions ? { dimensions: { width: dimensions.width, length: dimensions.length } } : {}) };
   });
 }
 export function defaultRooms({ bedrooms = 4, majlis = 2, baths = 3, kitchens = 1, halls = 1, dining = 1 } = {}) {
@@ -112,16 +117,39 @@ function packWing(rooms, width, strategy) {
     other.forEach((r, i) => { groups.push([first, r]); other.slice(i + 1).forEach(s => groups.push([first, r, s])); });
     let best = null;
     for (const group of groups) {
-      const depth = sum(group, r => r.area) / (width - T * (group.length - 1));
-      if (group.some(r => depth < TYPES[r.type].min - E || r.area / depth < TYPES[r.type].min - E || Math.max(depth * depth / r.area, r.area / (depth * depth)) > 5)) continue;
+      const lockedDepths = [...new Set(group.flatMap(r => r.dimensions ? [r.dimensions.width, r.dimensions.length] : []))];
+      const depths = lockedDepths.length ? lockedDepths : [sum(group, r => r.area) / (width - T * (group.length - 1))];
+      const options = [];
+      for (const depth of depths) {
+        if (!Number.isFinite(depth) || depth <= 0) continue;
+        const choices = group.map(r => {
+          const candidates = r.dimensions
+            ? [{ w: r.dimensions.width, h: r.dimensions.length }, { w: r.dimensions.length, h: r.dimensions.width }].filter(d => Math.abs(d.h - depth) <= E)
+            : [{ w: r.area / depth, h: depth }];
+          return candidates.filter(d => d.w >= TYPES[r.type].min - E && d.h >= TYPES[r.type].min - E && (r.dimensions || Math.max(d.w / d.h, d.h / d.w) <= 5));
+        });
+        if (choices.some(items => !items.length)) continue;
+        const visit = (index, selected) => {
+          if (index === group.length) {
+            const usedWidth = sum(selected, d => d.w) + T * (selected.length - 1);
+            if (usedWidth <= width + E) options.push({ depth, placements: Object.fromEntries(group.map((r, i) => [r.id, selected[i]])), usedWidth });
+            return;
+          }
+          for (const choice of choices[index]) visit(index + 1, [...selected, choice]);
+        };
+        visit(0, []);
+      }
+      if (!options.length) continue;
       const rest = solve(list.filter(r => !group.includes(r)));
       if (!rest) continue;
-      const branch = group.length > 1 ? GEOMETRY.branch + T : 0;
-      const height = depth + branch + (rest.rows.length ? T : 0) + rest.height;
-      const aspectPenalty = sum(group, r => Math.abs(Math.log((r.area / depth) / depth))) * (strategy === 'balanced' ? 1.5 : .035);
-      const interiorPenalty = strategy === 'frontage' ? Math.max(0, group.length - 1) * 5 : 0;
-      const score = height + rest.score - rest.height + aspectPenalty + interiorPenalty;
-      if (!best || score < best.score) best = { rows: [{ rooms: group, depth, branch }, ...rest.rows], height, score };
+      for (const option of options) {
+        const branch = group.length > 1 || option.usedWidth < width - .02 ? GEOMETRY.branch + T : 0;
+        const height = option.depth + branch + (rest.rows.length ? T : 0) + rest.height;
+        const aspectPenalty = sum(group, r => Math.abs(Math.log(option.placements[r.id].w / option.placements[r.id].h))) * (strategy === 'balanced' ? 1.5 : .035);
+        const interiorPenalty = strategy === 'frontage' ? Math.max(0, group.length - 1) * 5 : 0;
+        const score = height + rest.score - rest.height + aspectPenalty + interiorPenalty + Math.max(0, width - option.usedWidth) * .15;
+        if (!best || score < best.score) best = { rows: [{ rooms: group, depth: option.depth, placements: option.placements, branch }, ...rest.rows], height, score };
+      }
     }
     memo.set(key, best); return best;
   }
@@ -221,7 +249,7 @@ export function generateModel(rawPlot, rawRooms, { strategy = 'compact' } = {}) 
         const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
         if (side === 'right') order.reverse();
         let rx = x;
-        order.forEach(r => { const w = r.area / row.depth; rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
+        order.forEach(r => { const d = row.placements[r.id]; const w = d.w; rooms.push({ ...r, x: rx, y, w, h: d.h, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
         y += row.depth + (rowIndex < packed.rows.length - 1 ? T : 0);
       });
       const leftover = zone.height - packed.height - (packed.rows.length ? T : 0);
@@ -472,7 +500,7 @@ export function removeOpening(model, point) {
 }
 export function validateModel(m) {
   if (m?.version === 2) {
-    const errors = [...claudeValidate(m), ...(m.shape === 'pavilions' ? pavilionTopology(m).errors : [])];
+    const errors = [...claudeValidate(m), ...(m.shape === 'pavilions' ? pavilionTopology(m).errors : m.shape === 'staggered' ? staggeredTopology(m).errors : [])];
     if (!errors.length && m.plot.maxBuiltArea != null && claudeQuantities(m).footprint > m.plot.maxBuiltArea + E) errors.push('الكتلة تتجاوز سقف البناء المحدد.');
     return errors;
   }
@@ -507,6 +535,8 @@ export function validateModel(m) {
   for (const r of m.rooms) {
     if (![r.x, r.y, r.w, r.h].every(Number.isFinite) || r.w <= 0 || r.h <= 0 || !inside(r, m.building)) fail('أبعاد غير صالحة للفراغ: ' + r.name);
     if (Math.abs(r.w * r.h - r.targetArea) > E) fail('المساحة غير مطابقة لطلبك: ' + r.name);
+    const requested = m.program.find(p => p.id === r.id);
+    if (requested?.dimensions && !(Math.abs(r.w - requested.dimensions.width) <= E && Math.abs(r.h - requested.dimensions.length) <= E || Math.abs(r.w - requested.dimensions.length) <= E && Math.abs(r.h - requested.dimensions.width) <= E)) fail('الأبعاد الصريحة لا تطابق هندسة الفراغ: ' + r.name);
     if (r.side !== 'any' && r.resolvedSide !== r.side) fail('الجانب المطلوب لم يتحقق: ' + r.name);
     if (m.corridors.some(c => overlap(r, c))) fail('غرفة تتداخل مع ممر: ' + r.name);
   }

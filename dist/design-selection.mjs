@@ -3,18 +3,18 @@ export const DESIGN_CHOICES = Object.freeze({
   family_layout: { label: 'جناحان على شكل L', shape: 'l' },
   concept_comparison: { label: 'بيت الباحة U', shape: 'u' },
   classic_living: { label: 'أجنحة مرتبطة برواق', shape: 'pavilions' },
+  staggered_wings: { label: 'جناحان متدرجان مرتبطان', shape: 'staggered' },
 });
-export const DESIGN_SHAPES = Object.freeze(['rect', 'l', 'u', 'pavilions']);
-const DEFAULT_SHAPES = ['rect', 'l', 'u'];
+export const DESIGN_SHAPES = Object.freeze(['rect', 'l', 'u', 'pavilions', 'staggered']);
+const DEFAULT_SHAPES = [...DESIGN_SHAPES];
 
 export function resolveDesignShapes(discovery = {}, selectedShape = null) {
   const likes = discovery.likes || [], rejects = discovery.rejects || [];
   if (![likes, rejects].every(values => Array.isArray(values) && values.every(v => Object.hasOwn(DESIGN_CHOICES, v)))) throw Error('اختيار شكل البيت غير معروف.');
   if (likes.some(v => rejects.includes(v))) throw Error('الشكل نفسه مختار ومرفوض؛ راجع اختياراتك.');
-  const unsupported = likes.filter(v => !DESIGN_CHOICES[v].shape);
-  if (unsupported.length) throw Error(`${unsupported.map(v => DESIGN_CHOICES[v].label).join('، ')} غير متاح للتوليد حاليًا. اختر L أو U؛ لم يتم استبدال اختيارك بشكل آخر.`);
-  const allowed = new Set(likes.length ? likes.map(v => DESIGN_CHOICES[v].shape) : DEFAULT_SHAPES);
-  if (!likes.length && selectedShape === 'pavilions') allowed.add(selectedShape);
+  // UI likes are preferences, not a demand to lock the client into one massing template.
+  // Only an explicit prompt shape or a chosen existing result narrows generation.
+  const allowed = new Set(DEFAULT_SHAPES);
   for (const v of rejects) allowed.delete(DESIGN_CHOICES[v].shape);
   if (selectedShape !== null) {
     if (!DESIGN_SHAPES.includes(selectedShape) || !allowed.has(selectedShape)) throw Error('البديل المحدد لا يطابق اختيارات شكل البيت الحالية.');

@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "method": "Same ordinary Arabic request was entered through the visible application UI on baseline v45 and modified source; no alternate fixture was used.",
+  "prompt": "غرفتين نوم ٤×٤ لكل غرفة، صالة ٦×٥، مطبخ ٣×٤. أبي جناحين متدرجين مرتبطين.",
+  "baseline": {
+    "clarificationQuestions": [],
+    "applyEnabled": true,
+    "shape": "l",
+    "roomCount": 4,
+    "requestedWingCountInText": 2,
+    "wingCountConstraint": null,
+    "dimensionsPreserved": false,
+    "exports": ["natural-ui/baseline-v45-plan.svg", "natural-ui/baseline-v45-quantities.csv"]
+  },
+  "modified": {
+    "clarificationQuestions": [],
+    "applyEnabled": true,
+    "shape": "staggered",
+    "roomCount": 4,
+    "wingCountConstraint": 2,
+    "actualWings": 2,
+    "coveredLinks": 1,
+    "dimensionsPreserved": true,
+    "exports": ["natural-ui/modified-source-plan.svg", "natural-ui/modified-source-quantities.csv"]
+  },
+  "mobileAndTablet": [
+    { "width": 390, "height": 844, "noHorizontalOverflow": true },
+    { "width": 820, "height": 1180, "noHorizontalOverflow": true }
+  ],
+  "pageErrors": [],
+  "limitations": ["Screens used Chromium viewport simulation; no physical iPad was tested.", "No live AI call was made."]
+}

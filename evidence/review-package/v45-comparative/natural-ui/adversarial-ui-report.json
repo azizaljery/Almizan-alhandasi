@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "steps": [
+    {
+      "case": "لا تضف غرفة نوم preserves all four existing bedrooms and two majlis rooms",
+      "status": "PASS"
+    },
+    {
+      "case": "بدون مجلس removes the requested rooms and preserves all four bedrooms",
+      "status": "PASS"
+    }
+  ],
+  "blockedCases": [
+    {
+      "label": "area conflict",
+      "questions": [
+        "أبعاد غرفة نوم تعطي مساحة 16 م²، بينما كتبت مساحة 20 م²؛ وضّح أي القيدين تريد قبل تطبيق الطلب."
+      ],
+      "applyEnabled": false
+    },
+    {
+      "label": "unsupported north facade",
+      "questions": [
+        "طلبت جهة واجهة محددة لغرفة؛ المولد لا يثبت أي جدار خارجي لهذه الغرفة على جهة بوصلة بعينها. لم نطبق الطلب، ولا نفترض أن تدوير الغرفة يحقق الواجهة."
+      ],
+      "applyEnabled": false
+    },
+    {
+      "label": "generic staggered wing count",
+      "questions": [
+        "حدّد عدد الأجنحة المتدرجة. المولد الحالي يدعم جناحين متدرجين مرتبطين فقط؛ لا نفترض العدد من وصف عام."
+      ],
+      "applyEnabled": false
+    },
+    {
+      "label": "unsupported three-wing count",
+      "questions": [
+        "طلبت 3 أجنحة متدرجة، بينما المولد الحالي يدعم جناحين فقط؛ لم نستبدل العدد المطلوب."
+      ],
+      "applyEnabled": false
+    }
+  ],
+  "pageErrors": [],
+  "notes": [
+    "All cases used the visible local request UI. The explicit 4×4 versus 20 m² conflict and north-facing facade remain unapplied. No live AI was called."
+  ]
+}

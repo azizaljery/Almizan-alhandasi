@@ -16,10 +16,19 @@ test('negated textual shape never reappears in allowed shapes',async()=>{
  const r=await buildDesignRequest({plot,rooms,idea:'ما أبي بيت على شكل U'});
  assert.equal(r.hardConstraints.find(c=>c.kind==='shape_allowed').value.shapes.includes('u'),false);
 });
-test('conflicting explicit text and UI shape fail closed',async()=>{
- await assert.rejects(buildDesignRequest({plot,rooms,idea:'أبي بيت على شكل L',discovery:{likes:['concept_comparison'],rejects:[]}}),/يتعارض/);
+test('an explicit text shape remains binding while a style card stays a soft preference',async()=>{
+ const r=await buildDesignRequest({plot,rooms,idea:'أبي بيت على شكل L',discovery:{likes:['concept_comparison'],rejects:[]}});
+ assert.deepEqual(r.hardConstraints.find(c=>c.kind==='shape_allowed').value.shapes,['l']);
+ await assert.rejects(buildDesignRequest({plot,rooms,idea:'أبي بيت على شكل L',selectedShape:'u'}),/يتعارض/);
  await assert.rejects(buildDesignRequest({plot,rooms,idea:'أبي على شكل L وعلى شكل U'}),/أكثر من شكل/);
  assert.equal(extractShapeIntent('أبي بيت فناء مغلق').shape,'closed');
+});
+test('a liked template does not narrow generation to a forced L or U',async()=>{
+ const r=await buildDesignRequest({plot,rooms,discovery:{likes:['concept_comparison'],rejects:[]}});
+ assert.equal(r.hardConstraints.some(c=>c.kind==='shape_allowed'),false);
+ const out=await runMultiEngineDesign({plot,rooms,discovery:{likes:['concept_comparison'],rejects:[]}});
+ assert.ok(out.models.some(m=>m.shape==='rect'));
+ assert.ok(out.models.some(m=>m.shape==='pavilions'));
 });
 test('new brief context invalidates the generation snapshot and AI proposals bind inputs',()=>{
  const app=readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
