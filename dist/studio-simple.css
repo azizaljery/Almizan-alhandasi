@@ -87,3 +87,18 @@
 .studio-sun-presets button{min-height:42px;padding:8px 15px;border-radius:9px;border:1px solid #c7d6c8;background:#f0f5ee;color:#2c553c;font:inherit;font-size:.83rem;font-weight:800}
 .studio-sun-presets button:hover,.studio-sun-presets button:focus-visible{background:#dcebdd;outline-color:#3f7552}
 #app.studio-simple-mode #autoOrbit3D{border-color:#7ba88a;color:#28603f;font-weight:800}
+
+/* Mobile prioritizes the conversation, not the technical plot form. */
+body:has(#app.studio-simple-mode:not(.studio-advanced-open)) #mzpFab{display:none!important}
+#app.studio-simple-mode:not(.studio-advanced-open) .top .back{display:none}
+.studio-plot-hint{margin:0;padding:11px 24px;border-top:1px solid #e6ebe2;background:#f5f8f2;color:#46634d;font-size:.8rem;line-height:1.7}
+@media(max-width:690px){
+  .studio-conversation{order:0}
+  .studio-project-setup{order:1}
+  .studio-simple-hero{margin-bottom:17px}
+  .studio-simple-hero p{display:none}
+  .studio-phase{margin-top:9px}
+  .studio-transcript{min-height:100px;max-height:180px}
+  .studio-request-form textarea{min-height:120px}
+  .studio-plot-hint{padding:10px 17px}
+}
