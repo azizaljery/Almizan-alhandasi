@@ -15,6 +15,7 @@ import { compareHomeModels, buildEngineeringPromptContext } from './home-design-
 import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
 import { initVisualizer } from './render-visualizer.mjs';
 import { calculateMizanScore } from './mizan-score.mjs';
+import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
 import { analyzeGeminiEngineering } from './gemini-engineering-layer.mjs';
 import { runMultiEngineDesign } from './multi-engine.mjs';
 
@@ -22,7 +23,7 @@ const $ = id => document.getElementById(id), all = selector => [...document.quer
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', history: [], signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'rating', rates: {}, proposal: null, briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -74,6 +75,7 @@ function applyClientBrief() {
 function markDirty() {
   state.dirty = !!state.model && (signature(rawPlot(), state.program) !== state.signature || state.engineeringSignature !== engineeringSignature());
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
+  if ($('requirementStale')) $('requirementStale').hidden = !state.dirty;
   $('resultState').textContent = state.dirty ? 'آخر مخطط ناجح — يحتاج تحديثًا' : 'المخطط مطابق للجدول';
   $('resultState').classList.toggle('warn', state.dirty);
   $('exportPlan').disabled = !state.model || state.dirty;
@@ -239,7 +241,7 @@ function showResults() {
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
-  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderGeminiReview(); renderAlternatives(); renderSolarPreview(); void show3D();
+  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderGeminiReview(); renderAlternatives(); renderRequirementEvidence(); renderSolarPreview(); void show3D();
 }
 function refreshGemini() {
   if (!state.model) { state.gemini = null; return; }
@@ -338,6 +340,33 @@ function renderAlternatives() {
   $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
   markDirty();
 }
+function renderRequirementEvidence() {
+  if (!state.model) return;
+  const context = state.traceContext || { idea: '', discovery: {}, briefContext: null };
+  try {
+    const evidence = evaluateRequirementEvidence({
+      model: state.model, program: state.model.program,
+      idea: context.idea, discovery: context.discovery, briefContext: context.briefContext,
+    });
+    const labels = [
+      ['ENFORCED', 'مطابق في الرسم'],
+      ['MEASURED', 'مقاس دون حكم'],
+      ['NOT_MET', 'غير مستوفى'],
+      ['UNVERIFIED', 'غير مثبت'],
+      ['UNSUPPORTED', 'غير مدعوم'],
+    ];
+    $('requirementSummary').innerHTML = labels.map(([key, label]) =>
+      '<div data-summary-status="' + key + '"><strong>' + fmt(evidence.counts[key], 0) +
+      '</strong><span>' + label + '</span></div>').join('');
+    $('requirementRows').innerHTML = renderRequirementEvidenceHTML(evidence);
+    $('requirementNote').textContent = evidence.note + ' مرجع النموذج: ' + evidence.modelIdentity + '.' +
+      (state.traceContext ? '' : ' لا يتوفر موجز النص الأصلي لهذه النسخة المستعادة؛ عُرضت قياسات النموذج فقط.');
+  } catch (error) {
+    $('requirementSummary').textContent = 'تعذّر فحص متطلبات هذا المخطط.';
+    $('requirementRows').replaceChildren();
+    $('requirementNote').textContent = error.message;
+  }
+}
 function renderPlanReview() {
   const review = reviewPlan(state.model);
   $('reviewScore').textContent = `${fmt(review.issues.filter(i => i.level === 'warn').length, 0)} تنبيهات`;
@@ -386,6 +415,7 @@ async function generate() {
     if (state.model) state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, requestId: result.request.requestId };
     state.model = result.selectedModel; state.signature = signature(plot, rooms);
+    state.traceContext = { idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null };
     if (signature(rawPlot(), state.program) === startSignature) { state.program = publicRooms(rooms); state.manualEdits = false; renderRows(); }
     message('generationError', ''); showResults();
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('تولّدت البدائل عبر Claude، وراجعتها Gemini، واختار AZIZ البديل التخطيطي الأولي.');
@@ -534,6 +564,7 @@ async function importProject(file) {
     if (JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
     state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.proposal = null;
     state.signature = project.model ? signature(project.model.plot, project.model.program) : '';
+    state.traceContext = { idea: project.idea, discovery: structuredClone(project.discovery), briefContext: null };
     restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
     $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
     if (state.model) showResults(); else { $('out').style.display = 'none'; viewer?.setVisible(false); }
@@ -616,7 +647,7 @@ function boot() {
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
-    const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
+    const previous = state.history.pop(); state.model = previous.model; state.palette = previous.palette; state.traceContext = null; state.program = publicRooms(previous.model.program); const p = previous.model.plot;
     restorePlot(p); syncPalette(); state.alternatives = [state.model]; state.failures = [];
     state.signature = signature(p, state.program); state.manualEdits = false; renderRows(); rating(); message('generationError', ''); showResults(); toast('تم استرجاع التوليد السابق ومتطلباته.');
   });
