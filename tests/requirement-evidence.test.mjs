@@ -85,6 +85,19 @@ test('explicit no-courtyard request is checked against geometry, not decorative 
   assert.equal(find(evaluateRequirementEvidence({ model: altered, program: rooms, idea: 'لا فناء' }), 'no-court').status, REQUIREMENT_STATUS.NOT_MET);
 });
 
+test('unhandled free-text requirements stay UNVERIFIED and are never counted as enforced', () => {
+  const result = evaluateRequirementEvidence({
+    model, program: rooms,
+    idea: 'أريد غرفة هادئة بعيدًا عن الشارع',
+    briefContext: { constraints: ['غرفة هادئة بلا ضجيج', 'عزل صوتي خاص'] },
+  });
+  const row = find(result, 'free-text');
+  assert.ok(row);
+  assert.equal(row.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.match(row.evidence, /عزل صوتي خاص/);
+  assert.ok(result.counts.UNVERIFIED >= 1);
+});
+
 test('HTML evidence escapes user-supplied room names and displays the state', () => {
   const altered = structuredClone(model);
   altered.rooms[0].name = '<img src=x onerror=alert(1)>';
