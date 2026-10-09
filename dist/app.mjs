@@ -452,7 +452,7 @@ async function askAI() {
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'جهّز الذكاء برنامج التصميم. راجع الافتراضات ثم اختر «اعتمد وارسم المخططات».');
   } catch (error) { message('aiFeedback', error.message); }
-  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = '✦ حلّل وارسم بالذكاء'; }
+  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = '✦ افهم وصف المنزل واقترح برنامجًا للرسم'; }
 }
 
 function showBrief(brief, limitations = [], context = null) {
