@@ -1,6 +1,7 @@
 // Client journey V2. Reuses the existing AI Worker, room program, Claude/Gemini/AZIZ
 // generation, plan viewer and 3D scene. Never simulates a successful revision.
 import { diffRoomPrograms, geometryFingerprint, composeDesignConversation } from './design-dialog.mjs';
+import { verifyProposedProgram } from './brief-contract.mjs';
 
 const $ = id => document.getElementById(id);
 const create = (tag, className, text) => {
@@ -125,6 +126,8 @@ export function initSimpleStudio() {
       const prompt = composeDesignConversation(conversation.initial, conversation.turns, latest);
       const proposal = await api.propose(prompt, { accessCode: $('studioAccessCode').value, local });
       const diff = diffRoomPrograms(current.program, proposal.brief.rooms, latest, { requireChange: current.hasModel, initial: !current.hasModel });
+      const contract = verifyProposedProgram(prompt, proposal.brief.rooms);
+      diff.blockers.push(...contract.violations);
       conversation.latest = latest;
       conversation.diff = diff;
       conversation.approved = false;
