@@ -2,6 +2,7 @@ import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
 import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
+import { loadThreeRuntime } from './three-runtime.mjs';
 import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
 import { reviewPlan } from './audit.mjs';
@@ -168,19 +169,9 @@ function on3DMode(mode, detail) {
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
 async function loadThree(retry = false) {
-  if (globalThis.THREE) return;
+  if (globalThis.THREE?.WebGLRenderer) return;
   if (loading3D) return loading3D;
-  const existing = document.querySelector('script[src*="three.min.js"]');
-  const create = retry || !existing;
-  loading3D = new Promise((resolve, reject) => {
-    const script = create ? document.createElement('script') : existing;
-    const cleanup = () => { clearTimeout(timer); script.removeEventListener('load', success); script.removeEventListener('error', failure); };
-    const success = () => { cleanup(); globalThis.THREE ? resolve() : reject(Error('تعذّر تهيئة مكتبة 3D.')); };
-    const failure = () => { cleanup(); reject(Error('تعذّر تحميل مكتبة 3D. تحقّق من الاتصال ثم أعد المحاولة. مخطط 2D متاح.')); };
-    const timer = setTimeout(failure, 8000);
-    script.addEventListener('load', success, { once: true }); script.addEventListener('error', failure, { once: true });
-    if (create) { script.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js'; script.async = true; document.head.append(script); }
-  });
+  loading3D = loadThreeRuntime({ retry });
   try { await loading3D; } finally { loading3D = null; }
 }
 async function show3D(retry = false) {
