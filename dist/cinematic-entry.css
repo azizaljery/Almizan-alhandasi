@@ -26,3 +26,6 @@
 
 /* Override the legacy .intro > * selector without changing the old route. */
 #intro.cinematic .cinematic-world,#intro.cinematic .cinematic-sun,#intro.cinematic .cinematic-corner,#intro.cinematic .cinematic-eyebrow,#intro.cinematic .cinematic-logo,#intro.cinematic .cinematic-bottom,#intro.cinematic .cinematic-skip{position:absolute}
+
+/* The establishing shot occupies the full screen without scrolling the underlying app. */
+body:has(#intro.cinematic:not(.off)){overflow:hidden}
