@@ -6,6 +6,7 @@ import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
 import { reviewPlan } from './audit.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
+import { bindRequestedDimensions, verifyProposedProgram } from './brief-contract.mjs';
 import { applySunOrientation, describeSunOrientation } from './sun-orientation.mjs';
 import { circulationNetwork } from './circulation.mjs';
 import { encodeProject, decodeProject, MAX_PROJECT_BYTES } from './project.mjs';
@@ -616,7 +617,11 @@ async function askAI() {
   try {
     const request = requestInput();
     const localConstraints = await requestLocalBrief({ prompt: request.prompt, previous: { rooms: request.mode === 'modify' ? request.rooms : [] } });
-    if (request.rooms.some(r => r.type === 'office' || r.dimensions) || localConstraints.rooms.some(r => r.type === 'office' || r.dimensions)) throw Error('الخدمة المتصلة الحالية لا تحفظ الأبعاد الملزمة أو نوع المكتب. استخدم «افهم طلبي محليًا»؛ لن نعتمد اقتراحًا لا يثبت هذه القيود.');
+    if (request.rooms.some(r => r.type === 'office') || localConstraints.rooms.some(r => r.type === 'office')) throw Error('عقد الخدمة المتصلة الحالي لا يدعم نوع «مكتب»؛ لن نعتمد اقتراحًا قد يسقطه. يلزم تحديث عقد الخدمة قبل تحليل هذا النوع بالذكاء المتصل.');
+    const dimensionConflict = localConstraints.questions.find(question => /أبعاد .*تعطي مساحة .* بينما كتبت مساحة/.test(question));
+    if (dimensionConflict) throw Error(dimensionConflict);
+    const ambiguousRoomEdit = localConstraints.questions.find(question => /حدّد العدد أو اسم الفراغ لتطبيق تعديل المساحة أو الموقع/.test(question));
+    if (ambiguousRoomEdit) throw Error(ambiguousRoomEdit);
     const discovery = discoveryText();
     const clientContext = clientBrief ? [`مبادئ التخطيط المستخلصة: ${clientBrief.principles.join('، ') || 'لم تحدد بعد.'}`, `أسئلة تحتاج إجابة: ${clientBrief.questions.join('، ') || 'لا توجد.'}`, `حدود يجب التصريح بها: ${clientBrief.limits.join('، ') || 'لا توجد.'}`].join('\n') : '';
     const engineeringContext = buildEngineeringPromptContext({ plot: rawPlot(), rooms: state.program, discovery: state.discovery, idea: $('idea').value, model: state.model });
@@ -625,7 +630,14 @@ async function askAI() {
     const context = buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt });
     const result = await requestBrief({ prompt, context, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
     if (sourceFingerprint !== requestFingerprint(requestInput())) throw Error('تغيّرت المدخلات أثناء التحليل؛ لم يُطبق الرد القديم. أعد التحليل لطلبك الحالي.');
-    showBrief(result.brief, result.limitations, context);
+    const rooms = bindRequestedDimensions(result.brief.rooms, localConstraints.rooms);
+    const contract = verifyProposedProgram(request.prompt, rooms);
+    if (!contract.pass) throw Error('لم أعتمد اقتراح الذكاء لأن متطلبًا صريحًا لم يطابقه: ' + contract.violations.join(' '));
+    const dimensionRooms = localConstraints.rooms.filter(room => room.dimensions);
+    const dimensionNote = dimensionRooms.length
+      ? `الأبعاد الملزمة لـ${dimensionRooms.length} غرفة حُفظت من طلبك أو جدول الغرف السابق بعد مطابقة النوع والهوية والعدد والمساحة؛ لم يستنتجها الذكاء الاصطناعي، وما زالت بحاجة إلى مراجعتك قبل الرسم.`
+      : null;
+    showBrief({ ...result.brief, rooms }, dimensionNote ? [...result.limitations, dimensionNote] : result.limitations, context);
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'جهّز الذكاء برنامج التصميم. راجع الافتراضات ثم اختر «اعتمد وارسم المخططات».');

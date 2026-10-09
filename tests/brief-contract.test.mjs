@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeBriefText, extractPlotDimensions, extractExplicitProgramRequirements, verifyProposedProgram } from '../dist/brief-contract.mjs';
+import { readFileSync } from 'node:fs';
+import { normalizeBriefText, extractPlotDimensions, extractExplicitProgramRequirements, bindRequestedDimensions, verifyProposedProgram } from '../dist/brief-contract.mjs';
+import { requestLocalBrief } from '../dist/local-nlp.mjs';
 
 const rooms = [
   { name: 'مجلس الرجال', type: 'majlis', area: 63, dimensions: { width: 9, length: 7 } },
@@ -53,6 +55,92 @@ test('exact dimensions allow a quarter-turn and cannot be replaced by area alone
   const areaOnly = structuredClone(rooms);
   delete areaOnly[2].dimensions;
   assert.equal(verifyProposedProgram('kitchen 8×6', areaOnly).pass, false);
+});
+
+test('connected suggestions regain only user-requested exact dimensions when a whole same-type group agrees', () => {
+  const requested = [
+    { name: 'غرفة نوم 1', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 } },
+    { name: 'غرفة نوم 2', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 } },
+  ];
+  const unrelated = { name: 'مطبخ', type: 'kitchen', area: 12 };
+  const proposed = [{ name: 'نوم أ', type: 'bedroom', area: 16 }, { name: 'نوم ب', type: 'bedroom', area: 16 }, unrelated];
+  const bound = bindRequestedDimensions(proposed, requested);
+  assert.deepEqual(bound.slice(0, 2).map(room => room.dimensions), [{ width: 4, length: 4 }, { width: 4, length: 4 }]);
+  assert.deepEqual(bound[2], unrelated);
+  assert.equal(proposed[0].dimensions, undefined, 'binding must not mutate the AI response');
+});
+
+test('different same-type dimensions bind only through a unique room identity and matching area', () => {
+  const requested = [
+    { name: 'المطبخ الرئيسي', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 } },
+    { name: 'مطبخ الخدمة', type: 'kitchen', area: 20, dimensions: { width: 5, length: 4 } },
+  ];
+  const proposed = [
+    { name: 'مطبخ الخدمة', type: 'kitchen', area: 20 },
+    { name: 'مطبخ رئيسي', type: 'kitchen', area: 48 },
+  ];
+  const bound = bindRequestedDimensions(proposed, requested);
+  assert.deepEqual(bound.map(room => room.dimensions), [{ width: 5, length: 4 }, { width: 8, length: 6 }]);
+  assert.throws(() => bindRequestedDimensions([
+    { name: 'مطبخ', type: 'kitchen', area: 48 }, { name: 'مطبخ', type: 'kitchen', area: 20 },
+  ], requested), /لم أُخمّن الربط/);
+});
+
+test('an iterative modify retains prior exact dimensions and changes only the explicitly revised room', async () => {
+  const previous = [
+    { name: 'مجلس الرجال', type: 'majlis', area: 63, dimensions: { width: 9, length: 7 }, position: 'front', side: 'any' },
+    { name: 'مجلس النساء', type: 'majlis', area: 48, dimensions: { width: 8, length: 6 }, position: 'front', side: 'any' },
+    { name: 'المطبخ', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 }, position: 'middle', side: 'any' },
+    { name: 'غرفة نوم 1', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 }, position: 'back', side: 'any' },
+  ];
+  const revised = await requestLocalBrief({ prompt: 'غيّر المطبخ إلى 9×6', previous: { rooms: previous } });
+  const aiRoomsWithoutDimensions = revised.rooms.map(({ name, type, area, position, side }) => ({ name, type, area, position, side }));
+  const result = bindRequestedDimensions(aiRoomsWithoutDimensions, revised.rooms);
+  assert.deepEqual(Object.fromEntries(result.map(room => [room.name, room.dimensions])), {
+    'مجلس الرجال': { width: 9, length: 7 }, 'مجلس النساء': { width: 8, length: 6 },
+    'غرفة نوم 1': { width: 4, length: 4 }, 'المطبخ': { width: 9, length: 6 },
+  });
+});
+
+test('local modify parser flags a dimension edit when multiple same-type rooms make identity ambiguous', async () => {
+  const prior = [
+    { name: 'مطبخ رئيسي', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 }, position: 'middle', side: 'any' },
+    { name: 'مطبخ خدمة', type: 'kitchen', area: 20, dimensions: { width: 5, length: 4 }, position: 'middle', side: 'any' },
+  ];
+  const local = await requestLocalBrief({ prompt: 'عدّل المطبخ إلى 7×6', previous: { rooms: prior } });
+  assert.ok(local.questions.some(question => /حدّد العدد أو اسم الفراغ/.test(question)));
+  // Although the previous dimensions would otherwise match the AI response,
+  // the app must show this parser question and keep the approval gate closed.
+  assert.ok(local.rooms.every(room => room.dimensions));
+  const app = readFileSync(new URL('../dist/app.mjs', import.meta.url), 'utf8');
+  assert.match(app, /if \(ambiguousRoomEdit\) throw Error\(ambiguousRoomEdit\)/);
+  assert.match(app, /bindRequestedDimensions\(result\.brief\.rooms, localConstraints\.rooms\)/);
+  assert.match(app, /request\.rooms\.some\(r => r\.type === 'office'\)/, 'office remains fail-closed under the unchanged Worker schema');
+  assert.doesNotMatch(app, /r\.type === 'office' \|\| r\.dimensions/, 'dimensions no longer bypass the connected-AI review path');
+});
+
+test('exact-dimension binding fails closed on missing rooms, wrong area, and contradictory AI rectangles', () => {
+  const requested = [
+    { name: 'مطبخ رئيسي', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 } },
+    { name: 'مطبخ خدمة', type: 'kitchen', area: 20, dimensions: { width: 5, length: 4 } },
+  ];
+  assert.throws(() => bindRequestedDimensions([{ name: 'مطبخ رئيسي', type: 'kitchen', area: 48 }], requested), /يتضمن 1/);
+  assert.throws(() => bindRequestedDimensions([
+    { name: 'مطبخ رئيسي', type: 'kitchen', area: 47 }, { name: 'مطبخ خدمة', type: 'kitchen', area: 20 },
+  ], requested), /لم يطابق/);
+  const square = [{ name: 'مكتب دراسة', type: 'office', area: 16, dimensions: { width: 2, length: 8 } }];
+  assert.throws(() => bindRequestedDimensions(square, [
+    { name: 'مكتب دراسة', type: 'office', area: 16, dimensions: { width: 4, length: 4 } },
+  ]), /أبعادًا متعارضة/);
+});
+
+test('single hard dimension among indistinguishable same-type rooms requires clarification, never greedy mapping', () => {
+  const requested = [
+    { name: 'مطبخ', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 } },
+    { name: 'مطبخ', type: 'kitchen', area: 20 },
+  ];
+  const proposed = [{ name: 'مطبخ', type: 'kitchen', area: 48 }, { name: 'مطبخ', type: 'kitchen', area: 20 }];
+  assert.throws(() => bindRequestedDimensions(proposed, requested), /لم أُخمّن الربط/);
 });
 
 test('Arabic numerals and English bedroom count are recognized', () => {

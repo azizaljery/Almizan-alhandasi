@@ -138,6 +138,79 @@ const sameDimensions = (actual, expected) => !!actual && (
   Math.abs(actual.width - expected.length) <= .01 && Math.abs(actual.length - expected.width) <= .01
 );
 
+const areaMatches = (left, right) => Number.isFinite(Number(left)) && Number.isFinite(Number(right)) && Math.abs(Number(left) - Number(right)) <= .01;
+const roomIdentity = room => {
+  const name = normalizeBriefText(room?.name).toLowerCase().split(/\s+/u).map(word => word.replace(/^ال/u, '')).join(' ').replace(/[^\p{L}\p{N}]+/gu, '');
+  return name ? `${room?.type}|${name}` : '';
+};
+
+// The connected Worker schema intentionally carries room areas but not exact
+// rectangles. Restore dimensions from the client-parsed request only after
+// proving that the AI's room identity, count, and area agree. Never overwrite
+// a conflicting AI dimension or guess between same-type rooms.
+export function bindRequestedDimensions(proposedRooms, requestedRooms) {
+  if (!Array.isArray(proposedRooms) || !Array.isArray(requestedRooms)) throw Error('لا يمكن التحقق من أبعاد الغرف في الاقتراح.');
+  const required = requestedRooms.filter(room => dimensionsOf(room));
+  if (!required.length) return structuredClone(proposedRooms);
+  const result = structuredClone(proposedRooms);
+  const updates = new Map();
+  for (const type of new Set(required.map(room => room.type))) {
+    const requestedGroup = requestedRooms.filter(room => room.type === type);
+    const proposedGroup = result.map((room, index) => ({ room, index })).filter(item => item.room.type === type);
+    if (proposedGroup.length !== requestedGroup.length) {
+      throw Error(`طلبك يتضمن ${requestedGroup.length} من نوع ${type}، لكن اقتراح الذكاء يتضمن ${proposedGroup.length}. لم أطبّق الاقتراح؛ وضّح العدد أو أعد التحليل.`);
+    }
+    for (const requested of requestedGroup.filter(room => dimensionsOf(room))) {
+      const dimensions = dimensionsOf(requested);
+      const requestedArea = Number(requested.area ?? requested.areaM2);
+      const dimensionArea = dimensions.width * dimensions.length;
+      if (!(dimensions.width > 0 && dimensions.length > 0) || !areaMatches(requestedArea, dimensionArea)) {
+        throw Error(`أبعاد ${requested.name || type} ومساحتها المسجلة غير متطابقة؛ صحّح الجدول قبل اعتماد اقتراح الذكاء.`);
+      }
+    }
+    const fullyConstrained = requestedGroup.length > 0 && requestedGroup.every(room => dimensionsOf(room));
+    const sharedDimensions = fullyConstrained && requestedGroup.every(room => sameDimensions(dimensionsOf(room), dimensionsOf(requestedGroup[0])));
+    if (sharedDimensions) {
+      const requiredDimensions = dimensionsOf(requestedGroup[0]);
+      const area = requiredDimensions.width * requiredDimensions.length;
+      if (requestedGroup.some(room => !areaMatches(room.area ?? room.areaM2, area)) ||
+          proposedGroup.some(({ room }) => !areaMatches(room.area ?? room.areaM2, area))) {
+        throw Error(`لم يطابق اقتراح الذكاء مساحة كل غرفة ${type} لأبعادك الدقيقة؛ وضّح البرنامج قبل اعتماده.`);
+      }
+      for (const { room, index } of proposedGroup) {
+        const current = dimensionsOf(room);
+        if (current && !sameDimensions(current, requiredDimensions)) {
+          throw Error(`اقتراح الذكاء أعطى ${room.name} أبعادًا متعارضة مع طلبك. لم أستبدلها بصمت.`);
+        }
+        updates.set(index, { ...requiredDimensions });
+      }
+      continue;
+    }
+    for (const requested of requestedGroup.filter(room => dimensionsOf(room))) {
+      const identity = roomIdentity(requested);
+      const requestedMatches = requestedGroup.filter(room => roomIdentity(room) === identity);
+      const proposedMatches = proposedGroup.filter(({ room }) => roomIdentity(room) === identity);
+      if (!identity || requestedMatches.length !== 1 || proposedMatches.length !== 1) {
+        throw Error(`تعذّر ربط أبعاد ${requested.name || type} بغرفة واحدة واضحة في اقتراح الذكاء. سمِّ الغرفة أو حدّد عدد كل نوع؛ لم أُخمّن الربط.`);
+      }
+      const { room, index } = proposedMatches[0];
+      const dimensions = dimensionsOf(requested);
+      const area = dimensions.width * dimensions.length;
+      if (!areaMatches(requested.area ?? requested.areaM2, area) ||
+          !areaMatches(room.area ?? room.areaM2, requested.area ?? requested.areaM2) ||
+          !areaMatches(room.area ?? room.areaM2, area)) {
+        throw Error(`لم يطابق ${room.name} هوية الغرفة ومساحتها المطلوبة؛ لم أُطبّق أبعادًا على غرفة أخرى.`);
+      }
+      const current = dimensionsOf(room);
+      if (current && !sameDimensions(current, dimensions)) {
+        throw Error(`اقتراح الذكاء أعطى ${room.name} أبعادًا متعارضة مع طلبك. لم أستبدلها بصمت.`);
+      }
+      updates.set(index, { ...dimensions });
+    }
+  }
+  return result.map((room, index) => updates.has(index) ? { ...room, dimensions: updates.get(index) } : room);
+}
+
 export function verifyProposedProgram(text, rooms) {
   if (!Array.isArray(rooms)) throw Error('قائمة الغرف المقترحة غير صالحة.');
   const requirements = extractExplicitProgramRequirements(text);
