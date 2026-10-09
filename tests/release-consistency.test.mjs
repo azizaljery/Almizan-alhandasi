@@ -13,11 +13,15 @@ const plot = validatePlot({
 });
 const rooms = normalizeRooms(defaultRooms());
 
-test('AZIZ-selected model is the exact source consumed by 2D, 3D geometry and BOQ', async () => {
+test('decision-selected model is the exact reviewed source consumed by 2D, 3D geometry and BOQ', async () => {
   const result = await runMultiEngineDesign({ plot, rooms: structuredClone(rooms), idea: 'release consistency check', discovery });
   const model = result.selectedModel;
   assert.ok(model);
   assert.equal(model.integration.candidateId, result.decision.selectedCandidateId);
+  assert.equal(model.integration.reviewId, result.preferenceRanking.selectedReviewId);
+  assert.ok(result.decision.reviewIds.includes(model.integration.reviewId));
+  assert.equal(model.integration.geometryHash.value, result.decision.geometryHash.value);
+  assert.equal(result.preferenceRanking.selectionMethod, 'aziz_geometry_fallback');
 
   const svg = buildPlanSVG(model);
   for (const room of model.rooms) assert.match(svg, new RegExp(`data-room-id="${room.id}"`));

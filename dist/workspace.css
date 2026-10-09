@@ -30,3 +30,4 @@
 @media(max-width:480px){.head h1{font-size:1.65rem}.request-card{border-radius:14px}.request-card textarea{height:200px;min-height:200px}.generation-dock{border-radius:12px}}
 
 @media(max-width:800px){.tabs{display:flex;flex-direction:row;overflow-x:auto;gap:0}.tab{flex:1 0 auto;min-width:58px;width:auto;padding:9px 8px;border-radius:0}.tab.on{border-radius:0}}
+.match-state.estimate{background:#f5f0df;color:#745b12}.match-state.unsupported{background:#f1f1f2;color:#5f6268}

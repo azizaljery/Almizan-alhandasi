@@ -1,5 +1,6 @@
 import { requestLocalBrief } from './local-nlp.mjs';
 import { TYPES, POSITIONS, DIRECTIONS, validatePlot } from './planner.mjs';
+import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
 
 export const requestText = value => String(value || '').replace(/[٠-٩۰-۹]/g, d => String('٠١٢٣٤٥٦٧٨٩'.includes(d) ? '٠١٢٣٤٥٦٧٨٩'.indexOf(d) : '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[أإآ]/g, 'ا').replace(/[\u064B-\u065F\u0670]/g, '').replace(/٫/g, '.');
 export const requestFingerprint = ({ prompt, rooms, plot, discovery, mode }) => JSON.stringify([prompt, rooms, plot, discovery, mode]);
@@ -68,7 +69,8 @@ function extractWingCount(text) {
 }
 
 const special = [
-    [/مدخل.*?مستقل|مداخل.*?مستقل|فصل.*?ضيوف|الضيوف.*?العائلة|guest.*?separat/i, 'استقلال مسار الضيوف عن العائلة', 'تحتاج تخطيطًا لمسارات ومداخل منفصلة؛ المخطط الحالي لا يضمن استقلالها.'],
+    [/مدخل.*?(?:مستقل|منفصل)|مداخل.*?(?:مستقل|منفصل)|(?:independent|separate)\s+(?:guest\s+)?entrances?/i, 'استقلال مداخل الضيافة', 'المولد لا يدعم مداخل مستقلة موثقة؛ يلزم توضيح ومراجعة قبل اعتمادها.', 'require_separate_guest_entry'],
+    [/فصل.*?ضيوف|الضيوف.*?العائلة|guest.*?(?:separat|private)\s+(?:route|path)|(?:separat|private)\s+guest.*?(?:route|path)/i, 'فصل مسارات الضيافة والعائلة', 'يمكن مقارنة تداخل مقاطع الممر؛ لا يثبت المداخل المستقلة أو الخصوصية البصرية.', 'avoid_shared_guest_family_corridors'],
     [/خصوصي|privacy/i, 'خصوصية العائلة وغرف النوم', 'تُراجع من الأبواب ومسارات المخطط؛ لا يكفي اختيار الشكل لإثباتها.'],
     [/والد(?:ة|تي)|كبار السن|كرسي متحرك|ذوي الاعاقة|wheelchair/i, 'سهولة وصول كبار السن', 'قرب الغرف قابل للفحص؛ المناسيب والدوران وتجهيزات الوصول غير مُقيّمة.'],
     [/مسبح|pool/i, 'مسبح', 'المسبح غير مدعوم في محرك توزيع الغرف الحالي.'],
@@ -78,7 +80,25 @@ const special = [
     [/غرفة غسيل|رياضة|كراج|garage|laundry|gym/i, 'فراغ إضافي يحتاج تعريفًا', 'هذا الاستخدام غير ممثل بنوع غرفة مستقل؛ حدّد اسمه ومساحته واستخدامه مع المختص.'],
   ];
 
-export function extractClientDesires(prompt) { const text = requestText(prompt); return special.filter(([pattern]) => pattern.test(text)).map(([,label,detail]) => ({label,detail})); }
+export function extractClientDesires(prompt) {
+  const text = requestText(prompt), desires = special.filter(([pattern]) => pattern.test(text)).map(([,label,detail,kind]) => ({label,detail,...(kind?{kind}:{})}));
+  for (const pref of buildPreferenceRequests({ idea: text })) {
+    const kind = pref.value?.mizanKind;
+    const label = kind === 'prefer_dining_access_all_majlis' ? 'وصول السفرة إلى المجالس'
+      : kind === 'prefer_dining_far_from_majlis' ? 'إبعاد السفرة عن المجالس'
+        : kind === 'unresolved_dining_majlis_relation' ? 'علاقة السفرة بالمجالس'
+      : kind === 'avoid_shared_guest_family_corridors' ? 'فصل مسارات الضيافة والعائلة'
+        : kind === 'require_separate_guest_entry' ? 'مداخل الضيافة المستقلة'
+        : kind === 'avoid_bedroom_kitchen_sightline' ? 'عدم مواجهة غرف النوم للمطبخ'
+          : kind === 'prefer_bedroom_kitchen_sightline' ? 'مواجهة غرف النوم للمطبخ'
+            : kind === 'unresolved_bedroom_kitchen_facing' ? 'اتجاه غرف النوم بالنسبة للمطبخ'
+          : kind === 'avoid_long_corridors' ? 'تقليل طول الممرات'
+            : kind === 'unresolved_long_corridor_intent' ? 'تفضيل طول الممرات'
+              : kind === 'prefer_long_corridors' ? 'تفضيل الممرات الأطول' : null;
+    if (label && !desires.some(item => item.kind === kind)) desires.push({ label, detail: pref.description, kind, preferenceId: pref.id });
+  }
+  return desires;
+}
 
 export function extractShapeIntent(prompt) {
   const text = requestText(prompt), shapes = [], rejectedShapes = [], questions = [];
@@ -139,6 +159,9 @@ export async function analyzeClientRequest({ prompt, rooms = [], plot, discovery
     if (entry) understood.push({ label: 'المدخل', value: entry[1], state: 'understood' });
   }
   desires.push(...extractClientDesires(text));
+  for (const pref of buildPreferenceRequests({ idea: text, discovery })) if (pref.value?.mustRequirement) {
+    questions.push(`طلبت شرطًا إلزاميًا (${pref.value.mizanKind})، لكن المولد/المراجع لا يثبت هذا الشرط. لن نخفضه إلى رغبة عادية؛ احذف صيغة الإلزام أو وضّح أنك تريد مراجعة أولية فقط.`);
+  }
   if (/كبير|واسع|صغير|مساحات مناسبة/.test(text) && !/(?:مساح|م²|م2|متر مربع|\d\s*[×x*])/.test(text)) questions.push('وصفت مساحة بأنها كبيرة أو صغيرة؛ حدّد المساحة المطلوبة بالمتر المربع حتى لا نختارها عنك.');
   if (/غرف نوم|مجالس|حمامات|مطابخ|صالات/.test(text) && !/\d|واحد|اثنين|ثنتين|ثلاث|اربع|خمس|ست|سبع|ثمان|تسع|عشر/.test(text)) questions.push('ذكرت غرفًا بصيغة الجمع دون عدد واضح؛ حدّد عدد كل نوع قبل تطبيق البرنامج.');
   if (/غرف(?:ة)?(?:\s+نوم)?\s+(?:ل|حق)\s*(?:الاطفال|العيال|الوالدة)/.test(text)) questions.push('حدّد عدد غرف النوم ومساحة كل غرفة، ثم سمّها في الجدول حسب من يستخدمها.');
@@ -155,7 +178,7 @@ export async function analyzeClientRequest({ prompt, rooms = [], plot, discovery
   };
 }
 
-export function auditClientRequest({ model, rooms, discovery = {}, desired = [] }) {
+export function auditClientRequest({ model, rooms, discovery = {}, desired = [], idea = '' }) {
   if (!model) return [];
   const rows = [];
   const available = [...model.rooms];
@@ -167,6 +190,15 @@ export function auditClientRequest({ model, rooms, discovery = {}, desired = [] 
   rows.push({ label: 'الغرف والمساحات والأبعاد والمواقع', state: exact ? 'met' : 'unmet', detail: exact ? `${rooms.length} فراغًا مطابقًا للبرنامج؛ الأبعاد الملزمة طوبقت على المستطيلات الفعلية في المخطط، مع السماح بتدوير الغرفة 90°.` : 'توجد فروق بين الجدول والمخطط؛ حدّث التوليد قبل اعتماد النتيجة.' });
   const choice = { family_layout: 'l', concept_comparison: 'u', classic_living: 'pavilions', staggered_wings: 'staggered', courtyard_privacy: 'closed' }[discovery.likes?.[0]];
   rows.push({ label: choice ? 'الشكل المفضل' : 'شكل البيت الناتج', state: 'information', detail: choice ? `تفضيلك: ${labels[choice]} · الناتج: ${labels[model.shape] || model.shape}. التفضيل لا يقيّد البدائل؛ الشكل المكتوب صراحةً يقيدها إذا كان مدعومًا.` : `لم يُحدد شكل إلزامي؛ الناتج الحالي ${labels[model.shape] || model.shape}.` });
-  for (const item of desired) rows.push({ label: item.label, state: 'pending', detail: item.detail });
+  const preferences = buildPreferenceRequests({ idea, discovery });
+  const evaluations = evaluatePlanPreferences(model, preferences);
+  const measuredKinds = new Set(evaluations.map(item => item.kind));
+  const stateFor = status => status === 'PASS' ? 'met' : status === 'FAIL' ? 'unmet'
+    : status === 'ESTIMATE' ? 'estimate' : 'unsupported';
+  for (const item of evaluations) rows.push({ label: item.label, state: stateFor(item.status), detail: item.detail });
+  for (const item of desired) {
+    if (item.kind && measuredKinds.has(item.kind)) continue;
+    rows.push({ label: item.label, state: 'unsupported', detail: item.detail || 'لم يُقيّم الطلب لغياب هندسة أو معيار موثوق.' });
+  }
   return rows;
 }

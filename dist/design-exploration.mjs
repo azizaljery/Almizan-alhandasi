@@ -17,18 +17,26 @@ function random(seed) {
   let n = seed >>> 0;
   return () => { n += 0x6D2B79F5; let t = n; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-export function explorationSpecs(seed = 1) {
+export function explorationSpecs(seed = 1, { routeFocused = false } = {}) {
   const specs = ['rect', 'l', 'u'].map(shape => ({ shape, key: `${shape}-baseline`, mode: -1, widthRatio: 1, seed }));
   const rng = random(seed);
   for (let i = 0; i < 12; i++) {
     const widthRatio = [.48, .6, .74, .88, 1][i % 5];
     for (const shape of ['rect', 'l', 'u']) specs.push({ shape, key: `${shape}-explore-${seed}-${i}`, mode: i % 3, widthRatio, seed: Math.floor(rng() * 0xFFFFFFFF) });
   }
+  // Deterministic functional zoning variants keep room identities/dimensions fixed,
+  // but test additional side assignments when circulation is an explicit goal.
+  if (routeFocused) {
+    for (const mode of [3, 4, 5]) for (const shape of ['rect', 'l', 'u']) {
+      specs.push({ shape, key: `${shape}-route-mode-${mode}-${seed}`, mode, widthRatio: 1,
+        seed: (seed + mode * 131 + shape.charCodeAt(0) * 17) >>> 0 });
+    }
+  }
   return specs;
 }
 export function conceptFor(spec, shape) {
   const form = { rect: 'كتلة واحدة ورواق مركزي', l: 'جناحان حول حديقة جانبية', u: 'أجنحة تحيط بباحة مفتوحة' }[shape];
-  const base = concepts[Math.max(0, spec.mode)];
+  const base = concepts[spec.mode >= 3 ? (spec.mode - 3) % concepts.length : Math.max(0, spec.mode)];
   return { ...base, tag: spec.mode < 0 ? 'التوزيع المرجعي' : base.tag,
     form, massing: shape, idea: spec.mode < 0 ? 'توزيع للمقارنة مع الأفكار الجديدة تحت المتطلبات نفسها.' : base.idea + (spec.widthRatio < .8 ? ' ويختبر كتلة أضيق وأكثر عمقًا ضمن الأرض.' : '') };
 }
@@ -37,7 +45,9 @@ export function exploreGeometry(plot, rooms, shape, spec, strategy) {
   const assigned = original.map(r => {
     if (spec.mode < 0 || r.side !== 'any' || (shape === 'u' && r.position !== 'back' && r.area < 12)) return r;
     const role = roles[r.type] ?? 1;
-    const left = spec.mode === 0 ? role !== 1 : spec.mode === 1 ? role === 2 : rng() < .5;
+    const left = spec.mode === 0 ? role !== 1 : spec.mode === 1 ? role === 2
+      : spec.mode === 3 ? role === 0 : spec.mode === 4 ? role === 1
+        : spec.mode === 5 ? role === 2 : rng() < .5;
     return { ...r, side: left ? 'left' : 'right' };
   });
   let m;
@@ -84,8 +94,13 @@ const rms = (a, b) => a.length && a.length === b.length ? Math.sqrt(a.reduce((s,
 export function layoutDistance(a, b) {
   return Math.max(a.shape === b.shape ? 0 : .4, rms(a.pairs, b.pairs) * 2, rms(a.aspects, b.aspects) * .5, rms(a.mass, b.mass) * .5);
 }
-export function selectDiverse(candidates, previous = [], limit = MAX_ALTERNATIVES) {
-  const chosen = [], history = previous.map(m => layoutDescriptor(m)), remaining = candidates.map(c => ({ ...c, descriptor: layoutDescriptor(c.candidate.geometry) }));
+export function selectDiverse(candidates, previous = [], limit = MAX_ALTERNATIVES, prioritizedCandidateIds = []) {
+  const history = previous.map(m => layoutDescriptor(m));
+  const remaining = candidates.map(c => ({ ...c, descriptor: layoutDescriptor(c.candidate.geometry) }));
+  const byCandidateId = new Map(remaining.map(c => [c.candidate.candidateId, c]));
+  const chosen = [...new Set(prioritizedCandidateIds)].map(id => byCandidateId.get(id)).filter(Boolean).slice(0, limit);
+  const chosenIds = new Set(chosen.map(c => c.candidate.candidateId));
+  for (let i = remaining.length - 1; i >= 0; i--) if (chosenIds.has(remaining[i].candidate.candidateId)) remaining.splice(i, 1);
   while (chosen.length < limit && remaining.length) {
     let best = -1, score = -1;
     remaining.forEach((c, i) => {

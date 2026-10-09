@@ -149,9 +149,29 @@ function unlinkSurveyRectangle() {
 const requestInput = () => ({ prompt: $('idea').value, rooms: publicRooms(state.program), plot: rawPlot(), discovery: structuredClone(state.discovery), mode: document.querySelector('[name="requestMode"]:checked').value });
 function renderRequestMatch() {
   const desires = extractClientDesires($('idea').value);
-  for (const label of state.discovery.avoids) desires.push({label,detail:'رغبة محفوظة؛ تحتاج معيارًا واضحًا ومراجعة من المخطط قبل اعتبارها متحققة.'});
-  const rows = auditClientRequest({ model: state.model, rooms: state.program, discovery: state.discovery, desired: desires });
-  $('requestMatch').innerHTML = rows.map(row => `<div class="match-row"><b>${esc(row.label)}</b><p>${esc(row.detail)}</p><span class="pill match-state ${row.state}">${{ met: 'تحقق في المخطط', unmet: 'لم يتحقق', pending: 'غير مُقيّم', information: 'للمراجعة' }[row.state]}</span></div>`).join('');
+  const rows = auditClientRequest({ model: state.model, rooms: state.program, discovery: state.discovery, desired: desires, idea: $('idea').value });
+  const ranking = state.multiEngine?.preferenceRanking;
+  const selectedCandidate = ranking?.ranked?.find(row => row.candidateId === state.model?.integration?.candidateId);
+  if (selectedCandidate?.preferenceScore !== null && selectedCandidate?.preferenceScore !== undefined) rows.push({
+    label: 'ترتيب التفضيلات المقاسة بين البدائل', state: 'estimate',
+    detail: `${fmt(selectedCandidate.preferenceScore, 0)} / ١٠٠ مقارنة نسبية على ${ranking.activePreferenceCount} محور قابل للقياس؛ ليست درجة رضا مطلقة ولا إثبات خصوصية أو مطابقة نظامية.`
+  });
+  if (ranking?.bestPreferenceCandidateId && ranking.bestPreferenceCandidateId !== ranking.selectedCandidateId) {
+    const preferred = ranking.ranked?.find(row => row.candidateId === ranking.bestPreferenceCandidateId);
+    const selected = ranking.ranked?.find(row => row.candidateId === ranking.selectedCandidateId);
+    const corridor = row => row?.evaluations?.find(item => item.kind === 'avoid_long_corridors')?.data;
+    const preferredCorridor = corridor(preferred), selectedCorridor = corridor(selected);
+    const m = value => Number.isFinite(value) ? `${fmt(value, 1)}م` : 'غير متاح';
+    const metricText = data => data ? `أطول مقطع ${m(data.longestCorridorAxisM)}، مجموع المحاور ${m(data.totalModeledCorridorAxisM)}، مساحة الممرات ${Number.isFinite(data.totalModeledCorridorAreaM2) ? `${fmt(data.totalModeledCorridorAreaM2, 1)}م²` : 'غير متاحة'}، أطول مسار دخول ${m(data.longestEntryRouteM)}` : null;
+    const preferredName = state.alternatives?.find(model => model.integration?.candidateId === ranking.bestPreferenceCandidateId)?.architecture?.tag || ranking.bestPreferenceCandidateId;
+    const selectedName = state.alternatives?.find(model => model.integration?.candidateId === ranking.selectedCandidateId)?.architecture?.tag || ranking.selectedCandidateId;
+    rows.push({ label: 'مقايضة تخطيطية · لم يُبدّل الاختيار تلقائيًا', state: 'estimate',
+      detail: preferredCorridor && selectedCorridor
+        ? `المخطط المرشح ${preferredName}: ${metricText(preferredCorridor)}. المختار ${selectedName}: ${metricText(selectedCorridor)}. المرشح بقي بديلًا لأن المقاييس تتعارض؛ قارن المخططين قبل الاختيار.`
+        : `ترتيب التفضيلات يميل إلى ${preferredName}، بينما أبقى القرار ${selectedName} لعدم وجود تحسن مهيمن على كل المحاور المقاسة. كلاهما اجتاز فحوص ما قبلية؛ المقارنة ليست إثبات اعتماد.` });
+  }
+  const status = { met: 'تحقق في المخطط', unmet: 'لم يتحقق', pending: 'بانتظار المخطط', information: 'للمراجعة', estimate: 'مؤشر مقارن', unsupported: 'غير مُقيّم' };
+  $('requestMatch').innerHTML = rows.map(row => `<div class="match-row"><b>${esc(row.label)}</b><p>${esc(row.detail)}</p><span class="pill match-state ${row.state}">${status[row.state] || status.unsupported}</span></div>`).join('');
 }
 async function understandRequest() {
   if ($('askLocal').disabled) return;
@@ -549,7 +569,7 @@ async function generate() {
     if (workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ بقي المخطط السابق محفوظًا. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
-    state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, requestId: result.request.requestId };
+    state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
     state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults(); switchTab('result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);

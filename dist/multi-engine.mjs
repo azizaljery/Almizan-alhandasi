@@ -4,6 +4,7 @@ import { runPipeline, generateCandidate, decideReviewed } from './integration/pi
 import { reviewCandidate } from './integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js';
 import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
+import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
 
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions', staggered: 'staggered' });
 const CONCEPT = Object.freeze({
@@ -25,14 +26,6 @@ function publicRoom(room, index) {
     side: room.side,
   };
 }
-function preferenceList(discovery = {}, briefContext = null) {
-  const rows = [];
-  for (const value of discovery.likes || []) rows.push({ id: `like:${value}`, kind: 'prefer_aesthetic', description: `User selected concept preference: ${value}`, weight: 1, value: { key: value }, source: 'user' });
-  for (const value of discovery.rejects || []) rows.push({ id: `reject:${value}`, kind: 'avoid_aesthetic', description: `User rejected concept: ${value}`, weight: 1, value: { key: value }, source: 'user' });
-  for (const value of briefContext?.topPriorities || []) rows.push({ id: `priority:${rows.length}`, kind: 'prefer_priority', description: String(value), weight: 1, value: { text: String(value) }, source: 'user' });
-  return rows;
-}
-
 export function requestedDesignShapes({ idea = '', discovery = {}, selectedShape = null }) {
   const intent = extractShapeIntent(idea);
   if (intent.questions.length) throw Error(intent.questions.join(' '));
@@ -51,6 +44,9 @@ export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {
   const wingCount = textIntent.shape === 'staggered' ? textIntent.wingCount : selectedShape === 'staggered' ? 2 : null;
   const wingCountConstraint = wingCount === null ? [] : [{ id: 'HC-WING-COUNT', kind: 'wing_count_exact', description: 'Preserve the exact requested number of staggered wings.', value: { count: wingCount }, source: 'user', priority: 'must' }];
   const program = rooms.map(publicRoom);
+  const softPreferences = buildPreferenceRequests({ idea, discovery, briefContext });
+  const unresolvedRequired = softPreferences.filter(pref => pref.value?.mustRequirement).map(pref =>
+    `Unverified mandatory request (${pref.value.mizanKind}): ${pref.description}. It is not enforced by the generator/reviewer; clarify or remove the must-language before selecting/exporting a plan.`);
   const dimensionConstraints = program.filter(p => p.exactDimensionsM).map(p => ({
     id: `dimensions:${p.id}`, kind: 'room_dimensions_exact', description: `Preserve the exact clear dimensions of ${p.name}, allowing a 90-degree rotation.`,
     value: { roomId: p.id, widthM: p.exactDimensionsM.widthM, lengthM: p.exactDimensionsM.lengthM, rotationAllowed: true, toleranceM: 1e-5 }, source: 'user', priority: 'must',
@@ -64,11 +60,11 @@ export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {
     drawnFloorsSupported: 1,
     program,
     hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }, ...dimensionConstraints, ...shapeConstraint, ...wingCountConstraint],
-    softPreferences: preferenceList(discovery, briefContext),
+    softPreferences,
     interpretation: {
       status: 'confirmed',
       originalText: [idea || 'Manual design request.', `streetSetback=${plot.streetSetback};neighborSetback=${plot.neighborSetback}`].filter(Boolean).join('\n'),
-      unresolved: [],
+      unresolved: unresolvedRequired,
       priorities: (briefContext?.topPriorities || []).map(String),
     },
   };
@@ -86,6 +82,7 @@ function modelFor(pair) {
     engineVersion: 'mizan-p1-integrated',
     integration: {
       candidateId: pair.candidate.candidateId,
+      alternativeKey: pair.candidate.alternativeKey,
       geometryHash: structuredClone(pair.candidate.geometryHash),
       reviewId: pair.review.reviewId,
       reviewOverall: pair.review.overall,
@@ -102,7 +99,9 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   if (plot.floors !== 1) result = await runPipeline(request, { generationOverrides: overrides });
   else {
     const candidates = [], failures = [];
-    const specs = explorationSpecs(seed).filter(spec => allowedShapes.includes(spec.shape));
+    const routeFocused = request.softPreferences.some(pref => ['avoid_long_corridors','prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_kitchen_dining_route',
+      'avoid_shared_guest_family_corridors','avoid_bedroom_guest_proximity'].includes(pref.value?.mizanKind || pref.kind));
+    const specs = explorationSpecs(seed, { routeFocused }).filter(spec => allowedShapes.includes(spec.shape));
     if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
     if (allowedShapes.includes('staggered')) specs.push({ shape: 'staggered', key: 'staggered-baseline', mode: -1, seed });
     for (const spec of specs) {
@@ -112,7 +111,37 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
         candidates.push({ ...generated, concept: composed ? CONCEPT[spec.shape] : conceptFor(spec, spec.shape) });
       } catch (error) { if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
     }
-    const diverse = selectDiverse(candidates, previous);
+    const priorityIds = [];
+    if (routeFocused) {
+      const baselineIds = candidates.filter(g => /-baseline$/.test(g.candidate.alternativeKey)).map(g => g.candidate.candidateId);
+      const metricRows = new Map();
+      for (const generated of candidates) for (const row of evaluatePlanPreferences(generated.candidate.geometry, request.softPreferences)) {
+        const metrics = row.data?.preferenceMetrics || (Number.isFinite(row.objective) && row.direction
+          ? [{ name: `${row.id}:objective`, value: row.objective, direction: row.direction }] : []);
+        for (const metric of metrics) {
+          if (!Number.isFinite(metric.value)) continue;
+          const prior = metricRows.get(metric.name) || { direction: metric.direction, rows: [] };
+          prior.rows.push({ candidateId: generated.candidate.candidateId, value: metric.value,
+            routeFocused: /-route-mode-/.test(generated.candidate.alternativeKey) }); metricRows.set(metric.name, prior);
+        }
+      }
+      const priority = ['longest_entry_route_m','mean_entry_route_m','modeled_corridor_area_m2','total_corridor_axis_m','longest_corridor_axis_m'];
+      const names = [...metricRows.keys()].sort((a, b) => {
+        const ai = priority.findIndex(name => a.includes(name)), bi = priority.findIndex(name => b.includes(name));
+        return (ai < 0 ? priority.length : ai) - (bi < 0 ? priority.length : bi) || a.localeCompare(b);
+      });
+      const metricWinnerIds = [];
+      for (const name of names) {
+        const metric = metricRows.get(name); const direction = metric.direction;
+        const routeCandidates = metric.rows.filter(row => row.routeFocused);
+        const pool = routeCandidates.length ? routeCandidates : metric.rows;
+        const winner = [...pool].sort((a, b) => (direction === 'maximize' ? b.value - a.value : a.value - b.value)
+          || a.candidateId.localeCompare(b.candidateId))[0];
+        if (winner && !metricWinnerIds.includes(winner.candidateId)) metricWinnerIds.push(winner.candidateId);
+      }
+      priorityIds.push(...baselineIds, ...metricWinnerIds);
+    }
+    const diverse = selectDiverse(candidates, previous, undefined, priorityIds);
     if (!diverse.length && candidates.length && previous.length) throw Error('لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.');
     const pairs = [];
     for (const generated of diverse) {
@@ -142,6 +171,8 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
     failures: (result.failures || []).map(f => ({ strategy: SHAPE_STRATEGY[f.shape] || f.shape, reason: f.reason })),
     decision: result.decision,
     aziz: result.aziz,
+    preferenceRanking: result.preferenceRanking ?? null,
+    preferenceEvaluations: result.preferenceEvaluations ?? [],
     reviews: pairs.map(p => p.review),
     request,
   };

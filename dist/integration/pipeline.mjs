@@ -14,6 +14,7 @@ import {createAziz,defaultConfig,fnv1aHash,stableStringify,fixedClock} from './a
 import {generatePavilionModel,pavilionTopology,PAVILION_COMPOSER_VERSION} from '../pavilion-planner.mjs';
 import {generateStaggeredModel,staggeredTopology,STAGGERED_COMPOSER_VERSION} from '../staggered-planner.mjs';
 import {exploreGeometry,conceptFor} from '../design-exploration.mjs';
+import {evaluatePlanPreferences,rankAzizSurvivingPreferences} from '../preference-evidence.mjs';
 
 const CLAUDE_ID='@mizan/claude-planner';
 const CLAUDE_VERSION='2.3.1-p1-cla-01';
@@ -32,7 +33,10 @@ function snapshot(request) {
 }
 function supportedRequest(r) {
  const reasons=[];
- if(r.interpretation.status!=='confirmed'||r.interpretation.unresolved.length) reasons.push('REQUEST_REQUIRES_CONFIRMATION');
+ if(r.interpretation.status!=='confirmed'||r.interpretation.unresolved.length) {
+  if(r.interpretation.unresolved.length) reasons.push(...r.interpretation.unresolved.map(reason=>`REQUEST_REQUIRES_CONFIRMATION:${reason}`));
+  else reasons.push('REQUEST_REQUIRES_CONFIRMATION');
+ }
  if(r.plot.floorsRequested!==1) reasons.push('ADDITIONAL_FLOORS_NOT_IMPLEMENTED');
  if(!r.program.every((p,i)=>p.id===`room-${i}`)) reasons.push('EXPLICIT_PROGRAM_ID_MAPPING_NOT_IMPLEMENTED_IN_PREVIEW');
  // Fail closed rather than pretending the legacy distance/adjacency heuristics prove a must.
@@ -123,7 +127,12 @@ export async function decideReviewed(request,pairs) {
  const at=new Date().toISOString(),invocationId='inv:'+(await contentHash({request:r,adapterVersion:ADAPTER_VERSION})).value;
  const hard=[...r.hardConstraints.filter(c=>c.kind!=='shape_allowed'),...r.program.filter(p=>p.exactDimensionsM).map(p=>({id:`dimensions:${p.id}`,kind:'room_dimensions_exact',description:'Preserve the exact requested room dimensions, allowing 90-degree rotation.',value:{roomId:p.id,widthM:p.exactDimensionsM.widthM,lengthM:p.exactDimensionsM.lengthM,rotationAllowed:true,toleranceM:1e-5},source:'user',priority:'must'})),...r.program.map(p=>({id:`area:${p.id}`,kind:'explicit_area',description:'Preserve requested clear room area',
   value:{roomId:p.id,area:p.areaM2,tolerance:1e-8},source:'user',priority:'must'}))];
- const input={requestId:r.requestId,context:{plotArea:r.plot.widthM*r.plot.lengthM,cityCode:'unspecified',locale:'ar'},hardConstraints:hard,softPreferences:[]};
+ // The frozen AZIZ v1 adapter accepts only its documented preference kinds.
+ // Keep every user preference in the request while adapting unknown kinds to
+ // `custom`; preference evidence below is computed from the native geometry.
+ const azizPreferenceKinds=new Set(['prefer_area_near','prefer_zone_placement','prefer_adjacency','prefer_orientation','prefer_aesthetic','custom']);
+ const azizPreferences=r.softPreferences.map(p=>azizPreferenceKinds.has(p.kind)?p:{...p,kind:'custom',value:{...(p.value&&typeof p.value==='object'?p.value:{}),mizanKind:p.kind}});
+ const input={requestId:r.requestId,context:{plotArea:r.plot.widthM*r.plot.lengthM,cityCode:'unspecified',locale:'ar'},hardConstraints:hard,softPreferences:azizPreferences};
  const legacyHash=fnv1aHash(stableStringify(input));
  const mapped=eligible.map(c=>asAziz(c,invocationId,at));
  const producers=[...new Map(eligible.map(c=>[c.producer.engineId,c.producer])).values()];
@@ -132,12 +141,36 @@ export async function decideReviewed(request,pairs) {
  const weights=Object.fromEntries(Object.keys(defaultConfig().weights).map(k=>[k,0]));
  Object.assign(weights,{geometryValidity:3,hardConstraintCompliance:3,areaAccuracy:1,designEfficiency:1});
  const aziz=await createAziz({weights,activeProfile:'balanced',tieThreshold:Number.EPSILON},fixedClock(at)).process({...input,engineOutputs});
- const selected=eligible.find(c=>c.candidateId===aziz.selectedCandidateId)??null;
- const reasons=[selected?'AZIZ selected from native-validated candidates after the bound Gemini review gate.':'AZIZ rejected all architectural candidates.',
-  'Only geometry validity, explicit area compliance and area efficiency are weighted; privacy, access graph, reference and MEP axes have weight 0.',
+ const preferenceEntries=eligible.map(c=>({candidateId:c.candidateId,weight:1,evaluations:evaluatePlanPreferences(c.geometry,r.softPreferences)}));
+ const preferenceRankingResult=rankAzizSurvivingPreferences(preferenceEntries,aziz);
+ const azizBaselineCandidateId=preferenceRankingResult.fallbackCandidateId;
+ const selected=preferenceRankingResult.selectedCandidateId
+  ? eligible.find(c=>c.candidateId===preferenceRankingResult.selectedCandidateId)??null : null;
+ const selectedPair=pairs.find(p=>p.candidate.candidateId===selected?.candidateId)??null;
+ const hasMeasuredPreference=preferenceRankingResult.ranked.some(entry=>entry.candidateId===selected?.candidateId&&entry.preferenceScore!==null);
+ const preferenceRanking={...preferenceRankingResult,
+  reportedAzizCandidateId:aziz.selectedCandidateId,
+  selectedCandidateId:selected?.candidateId??null,
+  selectedReviewId:selectedPair?.review?.reviewId??null,
+  selectionMethod:!azizBaselineCandidateId?'aziz_no_surviving_candidate':
+   selected?.candidateId!==azizBaselineCandidateId?'native_geometry_preference_dominance':
+   preferenceRankingResult.bestPreferenceCandidateId!==azizBaselineCandidateId?'aziz_pareto_fallback':
+    hasMeasuredPreference?'aziz_preference_tie':'aziz_geometry_fallback',
+  selectionOverride:Boolean(azizBaselineCandidateId&&hasMeasuredPreference&&selected?.candidateId!==azizBaselineCandidateId)};
+ const preferenceEvaluations=preferenceRanking.ranked.map(entry=>({candidateId:entry.candidateId,preferenceScore:entry.preferenceScore,evaluations:entry.evaluations}));
+ const measuredPreferenceCount=preferenceRanking.activePreferenceCount;
+ const reasons=[selected?(selected.candidateId!==azizBaselineCandidateId
+  ? `Selection provenance: native preference candidate ${selected.candidateId} strictly Pareto-dominated AZIZ geometry-only fallback ${azizBaselineCandidateId} across measured user-requested axes after hard/native checks and bound review; selected review ${selectedPair.review.reviewId}.`
+  : preferenceRankingResult.bestPreferenceCandidateId!==azizBaselineCandidateId
+    ? `Selection provenance: AZIZ geometry-only fallback ${selected.candidateId} retained because preference-ranked alternative ${preferenceRankingResult.bestPreferenceCandidateId} traded off measured corridor/route axes; see candidate evidence. Selected review ${selectedPair.review.reviewId}.`
+  : hasMeasuredPreference
+  ? `Selection provenance: AZIZ geometry-only fallback ${selected.candidateId} was also the leading native preference candidate after hard/native checks and bound review; selected review ${selectedPair.review.reviewId}.`
+  : `AZIZ geometry-only selection ${selected.candidateId} passed native validation and the bound review gate; no user preference had measurable evidence.`):'AZIZ did not return a selected candidate present in its accepted-survivor list; no preference override was made.',
+  'Only geometry validity, explicit area compliance and area efficiency are weighted inside legacy AZIZ; access graph, privacy, reference and MEP axes have weight 0 there.',
+  r.softPreferences.length?`${r.softPreferences.length} typed user preferences were retained in the request; ${measuredPreferenceCount} axes had measurable evidence and were compared across AZIZ-accepted survivors. Unsupported goals remain explicitly unscored.`:'No user soft preferences were supplied.',
   'Gemini incomplete discipline coverage is retained; this is not construction approval.',
-  r.softPreferences.length?'Soft preferences retained in request but NOT_EVALUATED by this first integration preview.':'No soft preferences were supplied.'];
- return {decision:await decision(r,selected?'SELECTED_PRELIMINARY':'NO_SELECTION',selected,validReviews,reasons),aziz,rejected,
+  preferenceRanking.comparisons.length?`Measured preference axes compared across ${preferenceRanking.survivingCandidateIds.length} AZIZ-accepted alternatives; relative rankings do not establish an absolute code threshold.`:'No measurable soft preference could rank these candidates.' ];
+ return {decision:await decision(r,selected?'SELECTED_PRELIMINARY':'NO_SELECTION',selected,validReviews,reasons),aziz,rejected,preferenceRanking,preferenceEvaluations,
  finalDesignState:selected?{candidateId:selected.candidateId,geometryHash:selected.geometryHash,model:structuredClone(selected.geometry),
   presentation:structuredClone(selected.presentation),constructionApproved:false}:null};
 }
