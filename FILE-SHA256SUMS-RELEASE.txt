@@ -6,7 +6,7 @@ ebb9a03ab7f9df6e25502bf10fa642495bd4ef9de02b45968623afd157190b84  ./.github/work
 0072dfabe80f38dd8dbb54b4a44440edf21e447d3ecadfccc6a520861e1bd381  ./.gitignore
 b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
-20a6f6582ff8ee806745d2c738f25846a36004dc94e0d18eb24d67b95ed98d42  ./FILE-SHA256SUMS.txt
+d0ebc7182a15f6e7d3298aab4c6e0f2b9d3a247a28d9cc9374f2a91116b6e2fa  ./FILE-SHA256SUMS.txt
 ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
 d4509f408a7fd8ba4aa0af99a30dbe9a0a6a5b04557f1d80e68b55d589b9b5ce  ./README.md
 d483f97c632f7090cc39b22d8a1b917f52da6d62b2088d8d7be89da65c637f39  ./RELEASE-BUILD.log
@@ -246,7 +246,7 @@ a0f6e2dbfe4143b7518e8bfda11ce55a689b69bdf55c0e02eed99754dd7b05f3  ./dist/render-
 49a91602ea68be5a96ecf54a4f6461703e306d752ceef0f8c9907cc1e049b579  ./dist/requirements-engine.mjs
 d3c66dc1f49214d93e49bb1cb3936e5b893c94a55109abbc7de47cecafc6c449  ./dist/solar-path.mjs
 3f533d7f9bbf9960fb032549e0cbdb4955d579e53db180456ebaa64e5daddbbf  ./dist/studio-preview.mjs
-a2cd277df05efd080035d3c741d662fddd027c68f023b27fa5e218e9d2426d40  ./dist/studio-simple.css
+143e94661155884141168d4183d49205d2e99f9b3f8bd3e71233f1eb38f49dc6  ./dist/studio-simple.css
 60ac9c95ac40a061c841adeff6c4e0a168044824e71585bd1dbfe38dc04f6ed5  ./dist/studio-simple.mjs
 4fd9f1036003d4cb275189062cb9f7f401c54dbcf926ff703380e7d5415afe6b  ./dist/sun-orientation.mjs
 63764157e8cde092ac90b919b776c081182c045295cab29cc46ca1c1827f6e0d  ./dist/three-runtime.mjs
@@ -259,7 +259,7 @@ e073411a959459c469f2d60a5208a5003f2d1f66de5bd5356b9e6d64e0b74dc9  ./evidence/p1-
 510e5200d0bed810bc40820d2ed29f07a35a148905491088ae8bff09d6e7fbf9  ./evidence/p1-integration/multi-engine-tests.log
 54a7d862190b2ceff4cbc878da122d4df99d951e9b6cf9a102618956d1c23344  ./package.json
 abaaf7e92b119cf2d1774d551f7820f4fabd3e50bb8e631fdc9682ba541cbe20  ./scripts/build.mjs
-0c7311603d599ebd9afb886e5dd7c6969a24c5b37d5c1afbdd2c88389d13e59b  ./scripts/studio-browser-e2e.mjs
+a101d019dd1c57dbf85f86c5767210e1c170037073f064b190ab4967e9f4fa7b  ./scripts/studio-browser-e2e.mjs
 9f95c82665885cd8dfe3acdd181a4d90d15c42f7248c71dfa7372d3b98731036  ./scripts/studio-browser-smoke.mjs
 5e2cf95cd4f7eeca8fe61ccf899a6c114a30320eb69fd29398e1047a738b4ba2  ./tests/brief-contract.test.mjs
 f5c072b68804f1287efe9d5e91d2e7331c77cb2904ba52938170ab05a3ecafb1  ./tests/cinematic-studio.test.mjs
