@@ -66,9 +66,10 @@ try {
   assert.ok(await waitFor('document.getElementById("app").classList.contains("show") && document.getElementById("panel-design").classList.contains("on")'), 'Cinematic skip did not enter the design page.');
   const initial = await evaluate('({simple:document.getElementById("app").classList.contains("studio-simple-mode"),legacy:!!document.getElementById("roomRows"),hasAI:!!window.mizanStudioAPI})');
   assert.ok(initial.simple && initial.legacy && initial.hasAI, 'Simple and legacy interfaces did not coexist.');
-  await evaluate('document.getElementById("gen").click(); true');
+  await evaluate('window.mizanStudioAPI.setPlot({width:35,length:45,entry:"s",maxBuiltArea:null}); document.getElementById("gen").click(); true');
   assert.ok(await waitFor('!!document.querySelector("#plan svg") && !document.getElementById("gen").disabled', 22000), 'The existing real 2D generator did not produce a plan.');
   const plan = await evaluate('({rooms:document.querySelectorAll("#plan [data-room-id]").length,alternatives:document.querySelectorAll(".studio-alternative").length,errors:document.getElementById("generationError").textContent})');
+  console.log('Browser plan metrics:', JSON.stringify(plan));
   assert.ok(plan.rooms >= 3, '2D plan lacks rooms.');
   assert.ok(plan.alternatives >= 2, 'The candidate comparison has fewer than two real plans.');
   assert.ok(!plan.errors, 'The planner reported a generation error: ' + plan.errors);
