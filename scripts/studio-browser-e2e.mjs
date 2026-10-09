@@ -82,9 +82,13 @@ try {
   const has3D = await waitFor('!!document.querySelector("#view canvas")', 16000);
   const threeStatus = await evaluate('({hasCanvas:!!document.querySelector("#view canvas"),error:document.getElementById("threeError").textContent})');
   if (!has3D) throw Error('3D canvas did not initialize: ' + threeStatus.error);
-  await evaluate('document.getElementById("plan").scrollIntoView({behavior:"auto",block:"center"}); true');
-  await pause(850);
-  const screenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  const planRect = await evaluate('(() => { const el=document.getElementById("plan"); const r=el.getBoundingClientRect(); return {x:r.left+scrollX,y:r.top+scrollY,width:r.width,height:r.height,display:getComputedStyle(el).display,outDisplay:getComputedStyle(document.getElementById("out")).display}; })()');
+  console.log('Plan viewport metrics:', JSON.stringify(planRect));
+  assert.ok(planRect.width > 100 && planRect.height > 100, '2D plan exists but is not visibly laid out.');
+  const screenshot = await send('Page.captureScreenshot', {
+    format: 'png', captureBeyondViewport: true,
+    clip: { x: planRect.x, y: planRect.y, width: planRect.width, height: planRect.height, scale: 1 },
+  });
   writeFileSync('/tmp/mizan-generated-plan.png', Buffer.from(screenshot.data, 'base64'));
   console.log('E2E PASS: real planner produced ' + plan.rooms + ' room shapes, ' + plan.alternatives + ' distinct candidates, and a WebGL 3D canvas.');
 } finally {
