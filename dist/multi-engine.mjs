@@ -1,5 +1,6 @@
 import { runPipeline } from './integration/pipeline.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
+import { extractExplicitGeometryConstraints, filterShapesByExplicitConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
 
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court' });
 const CONCEPT = Object.freeze({
@@ -67,7 +68,9 @@ function modelFor(pair) {
 export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null }) {
   const request = await buildDesignRequest({ plot, rooms, idea, discovery, briefContext });
   const before = canonicalJSON({ plot, rooms });
-  const result = await runPipeline(request, { generationOverrides: { streetSetback: plot.streetSetback, neighborSetback: plot.neighborSetback } });
+  const explicitConstraints = extractExplicitGeometryConstraints({ idea });
+  const shapeGate = filterShapesByExplicitConstraints(['rect', 'l', 'u'], explicitConstraints);
+  const result = await runPipeline(request, { shapes: shapeGate.allowed, generationOverrides: { streetSetback: plot.streetSetback, neighborSetback: plot.neighborSetback } });
   if (canonicalJSON({ plot, rooms }) !== before) throw Error('INTEGRATION_MUTATED_CALLER_INPUT');
   if (result.decision.status !== 'SELECTED_PRELIMINARY' || !result.finalDesignState) {
     const details = [...(result.decision?.reasons || []), ...(result.failures || []).map(x => `${x.shape}: ${x.reason}`)].join(' | ');
@@ -79,6 +82,8 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   }
   const pairs = result.pairs;
   const models = pairs.map(modelFor);
+  const compliance = verifyGeometryAgainstExplicitConstraints(models, explicitConstraints);
+  if (!compliance.pass) throw Error('EXPLICIT_GEOMETRY_CONSTRAINT_VIOLATED: ' + compliance.violations.map(item => item.code).join(', '));
   const selectedIndex = pairs.findIndex(p => p.candidate.candidateId === result.decision.selectedCandidateId);
   if (selectedIndex < 0) throw Error('AZIZ_SELECTION_NOT_FOUND');
   const selectedModel = models[selectedIndex];
@@ -86,7 +91,11 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
     models,
     selectedModel,
     selectedIndex,
-    failures: (result.failures || []).map(f => ({ strategy: SHAPE_STRATEGY[f.shape] || f.shape, reason: f.reason })),
+    failures: [
+      ...(result.failures || []).map(f => ({ strategy: SHAPE_STRATEGY[f.shape] || f.shape, reason: f.reason })),
+      ...shapeGate.excluded.map(item => ({ strategy: SHAPE_STRATEGY[item.shape], reason: item.reason, code: item.code })),
+    ],
+    explicitConstraints,
     decision: result.decision,
     aziz: result.aziz,
     reviews: pairs.map(p => p.review),

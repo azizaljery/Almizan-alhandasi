@@ -1,0 +1,112 @@
+/* Mizan Studio V2: conversation first, measured architecture second. The old UI remains intact. */
+#app.studio-simple-mode{background:#f7f5ef;color:#203d2f}
+#app.studio-simple-mode .top{background:#f7f5ef;border-bottom:1px solid #d9dfd4;box-shadow:0 8px 24px #172c2110}
+#app.studio-simple-mode .top .brand h2{color:#234a36}
+#app.studio-simple-mode .top .brand small{color:#6a796b}
+#app.studio-simple-mode:not(.studio-advanced-open) .top .tabs{display:none}
+#app.studio-simple-mode #panel-design{background:#f7f5ef;color:#233c2e}
+#app.studio-simple-mode #panel-design>.wrap{max-width:1450px;width:min(95%,1450px);padding-top:28px}
+#app.studio-simple-mode:not(.studio-advanced-open) #panel-design .wrap > :not(#studioSimple):not(#out){display:none!important}
+#app.studio-simple-mode:not(.studio-advanced-open) #out .studio-technical{display:none!important}
+#app.studio-simple-mode #panel-design .card{background:#fff;border-color:#dce3d9;color:#2a4133}
+#app.studio-simple-mode #panel-design .card .ch h2{color:#244f38}
+#app.studio-simple-mode #panel-design .card .ch p,#app.studio-simple-mode #panel-design .help{color:#596e5d}
+#app.studio-simple-mode #panel-design .card .cb{color:#2a4034}
+#app.studio-simple-mode #panel-design .result-head h2{color:#214632}
+#app.studio-simple-mode #panel-design .result-head .ey{color:#8c7750}
+#app.studio-simple-mode #panel-design .view{height:clamp(450px,68vh,760px);background:#e7ece6}
+#app.studio-simple-mode #panel-design .plan{height:clamp(480px,70vh,780px)}
+.studio-simple{position:relative;isolation:isolate;padding:clamp(12px,2vw,25px) 0 34px;color:#203d2f}
+.studio-simple::before{content:"";position:absolute;z-index:-1;top:-20px;left:-8vw;width:min(48vw,620px);height:340px;border-radius:50%;background:radial-gradient(ellipse,#d9e6d81e,transparent 72%);pointer-events:none}
+.studio-simple-hero{max-width:950px;margin:0 0 27px}
+.studio-kicker{display:block;margin-bottom:10px;color:#977445;letter-spacing:.11em;font-size:.77rem;font-weight:900}
+.studio-simple-hero h1{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:800;line-height:1.55;font-size:clamp(1.65rem,3.15vw,2.8rem);letter-spacing:-.025em;color:#173d2c}
+.studio-simple-hero p{font-size:clamp(.95rem,1.4vw,1.1rem);line-height:2;color:#5d7163;max-width:850px;margin-top:9px}
+.studio-phase{display:inline-block;margin-top:17px;padding:7px 14px;border-radius:99px;border:1px solid #cfdbcd;background:#e9f1e7;color:#295e41;font-size:.79rem;font-weight:800}
+.studio-simple-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.82fr);gap:22px;align-items:start}
+.studio-conversation,.studio-project-setup{border:1px solid #dce3d8;border-radius:22px;background:#fff;box-shadow:0 18px 38px -34px #173d2c59}
+.studio-conversation{overflow:hidden}
+.studio-transcript{min-height:172px;max-height:330px;overflow:auto;padding:25px;display:flex;flex-direction:column;gap:15px;background:linear-gradient(155deg,#fcfdf9,#f6f8f2)}
+.studio-message{max-width:90%;border-radius:17px;padding:15px 19px;border:1px solid #e0e8df;background:#fff;box-shadow:0 7px 20px -17px #163e2966}
+.studio-message.user{margin-inline-start:auto;background:#e8f0e8;border-color:#ccddce}
+.studio-message.assistant{margin-inline-end:auto}
+.studio-speaker{display:block;font-size:.71rem;font-weight:900;letter-spacing:.03em;color:#886e48;margin-bottom:5px}
+.studio-message p{margin:0;font-size:.92rem;line-height:1.95;color:#2b4836;overflow-wrap:anywhere;white-space:pre-wrap}
+.studio-request-form{padding:23px 25px 18px;border-top:1px solid #e2e9e0}
+.studio-request-form>label{display:block;margin-bottom:9px;color:#254936;font-weight:900;font-size:.91rem}
+.studio-request-form textarea{display:block;width:100%;min-height:150px;max-height:330px;resize:vertical;padding:17px 18px;border:1.5px solid #d1ddd0;border-radius:15px;background:#fffefb;color:#1c3b2b;font-family:inherit;font-size:1.03rem;line-height:1.95;outline:none;box-shadow:inset 0 1px 4px #122c1507}
+.studio-request-form textarea:focus{border-color:#417e5d;box-shadow:0 0 0 4px #3b806018}
+.studio-request-form textarea::placeholder{color:#839386}
+.studio-request-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:15px}
+.studio-primary,.studio-secondary,.studio-advanced-button{font:inherit;min-height:48px;padding:10px 18px;border-radius:11px;font-weight:800;font-size:.9rem;cursor:pointer;transition:background .15s,transform .15s,border-color .15s}
+.studio-primary{border:1px solid #28563d;background:#28563d;color:#fff;box-shadow:0 9px 22px -15px #17402c}
+.studio-primary:hover:not(:disabled){background:#37724f;transform:translateY(-1px)}
+.studio-primary:disabled{opacity:.48;cursor:not-allowed}
+.studio-secondary{border:1px solid #cfdacc;background:#f9faf7;color:#2c563c}
+.studio-secondary:hover{background:#edf4ec}
+.studio-feedback{padding:0 25px 15px;color:#49644f;font-size:.85rem;line-height:1.9}
+.studio-feedback:empty{display:none}
+.studio-feedback.error{color:#9a3e31}
+.studio-feedback.warning{color:#8d6630}
+.studio-proposal{margin:0 25px 25px;padding:20px;border:1px solid #d5e3d5;border-radius:14px;background:#f7faf5}
+.studio-proposal[hidden]{display:none}
+.studio-proposal h2{font-family:inherit;font-size:1.1rem;color:#234b35}
+.studio-proposal>p{margin:8px 0 15px;color:#3d5743;line-height:1.85;font-size:.92rem}
+.studio-proposal-diff{display:grid;gap:8px}
+.studio-diff-row{padding:9px 12px;background:#fff;border:1px solid #e0e9dc;border-radius:9px;color:#2e4a35;font-size:.86rem}
+.studio-proposal-warnings{display:grid;gap:8px;margin-top:11px}
+.studio-proposal-warnings p{margin:0;padding:10px 12px;border-radius:8px;border:1px solid #eacaba;background:#fff5f0;color:#8c4434;font-size:.84rem;line-height:1.8}
+.studio-project-setup{padding:25px}
+.studio-side-eyebrow{display:block;color:#a47b47;font-size:.76rem;font-weight:900;letter-spacing:.1em}
+.studio-project-setup h2{font-family:inherit;color:#244e36;font-size:1.38rem;font-weight:900;margin:4px 0 5px}
+.studio-project-setup>p{font-size:.87rem;color:#607164;line-height:1.9;margin-bottom:18px}
+.studio-plot-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.studio-plot-fields label,.studio-access label{font-size:.81rem;color:#435c49;font-weight:800}
+.studio-plot-fields input,.studio-plot-fields select,.studio-access input{display:block;width:100%;min-height:46px;margin-top:7px;border:1px solid #d3dfd3;border-radius:10px;background:#fdfdfb;color:#244632;padding:9px 11px;font:inherit;font-size:.94rem}
+.studio-plot-fields input:focus,.studio-plot-fields select:focus,.studio-access input:focus{outline:2px solid #4e8563;outline-offset:2px}
+.studio-access{margin-top:18px;padding:13px;border-radius:11px;border:1px solid #dce5d9;background:#fafbf8}
+.studio-access summary{cursor:pointer;font-size:.86rem;color:#365740;font-weight:900}
+.studio-access summary span{font-size:.71rem;color:#718575;font-weight:500;margin-inline-start:7px}
+.studio-access label{display:block;margin-top:13px}
+.studio-access small{display:block;margin-top:9px;font-size:.72rem;color:#697b6c;line-height:1.7}
+.studio-trust{margin-top:17px;padding:16px;border-radius:12px;background:#eff4eb;border-inline-start:3px solid #608a66}
+.studio-trust strong{font-size:.87rem;color:#2e5b3d}
+.studio-trust p{font-size:.8rem;color:#536d58;line-height:1.9;margin:5px 0 0}
+.studio-advanced-button{width:100%;margin-top:17px;border:1px solid #cbd8c9;background:transparent;color:#365a41}
+.studio-advanced-button:hover{background:#e9f1e8}
+#app.studio-simple-mode.studio-advanced-open .studio-advanced-button{background:#dcebdc}
+#app.studio-simple-mode #out{margin-top:35px}
+#app.studio-simple-mode #out .alternative-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))}
+#app.studio-simple-mode #out .studio-alternative{box-shadow:0 14px 32px -23px #122f2266}
+@media(max-width:1020px){.studio-simple-grid{grid-template-columns:1fr}.studio-project-setup{order:-1}.studio-plot-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.studio-transcript{max-height:260px}}
+@media(max-width:690px){#app.studio-simple-mode #panel-design>.wrap{width:94%;padding-top:16px}.studio-simple-hero h1{font-size:1.6rem}.studio-project-setup{padding:18px}.studio-plot-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-request-form{padding:17px}.studio-transcript{padding:17px}.studio-message{max-width:100%}.studio-request-actions{flex-direction:column}.studio-primary,.studio-secondary{width:100%}.studio-proposal{margin:0 15px 17px;padding:15px}.studio-feedback{padding:0 17px 12px}#app.studio-simple-mode #panel-design .view{height:480px}}
+@media(prefers-reduced-motion:reduce){.studio-primary,.studio-secondary,.studio-advanced-button{transition:none!important}}
+
+/* Solar controls remain usable even when the advanced settings are collapsed. */
+.studio-sun-presets{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.studio-sun-presets button{min-height:42px;padding:8px 15px;border-radius:9px;border:1px solid #c7d6c8;background:#f0f5ee;color:#2c553c;font:inherit;font-size:.83rem;font-weight:800}
+.studio-sun-presets button:hover,.studio-sun-presets button:focus-visible{background:#dcebdd;outline-color:#3f7552}
+#app.studio-simple-mode #autoOrbit3D{border-color:#7ba88a;color:#28603f;font-weight:800}
+
+/* Mobile prioritizes the conversation, not the technical plot form. */
+body:has(#app.studio-simple-mode:not(.studio-advanced-open)) #mzpFab{display:none!important}
+#app.studio-simple-mode:not(.studio-advanced-open) .top .back{display:none}
+.studio-plot-hint{margin:0;padding:11px 24px;border-top:1px solid #e6ebe2;background:#f5f8f2;color:#46634d;font-size:.8rem;line-height:1.7}
+@media(max-width:690px){
+  .studio-conversation{order:0}
+  .studio-project-setup{order:1}
+  .studio-simple-hero{margin-bottom:17px}
+  .studio-simple-hero p{display:none}
+  .studio-phase{margin-top:9px}
+  .studio-transcript{min-height:100px;max-height:180px}
+  .studio-request-form textarea{min-height:120px}
+  .studio-plot-hint{padding:10px 17px}
+}
+
+/* Mobile chat follows the page scroll; never nest a narrow internal scrollbar. */
+@media(max-width:690px){.studio-transcript{max-height:none;overflow:visible}}
+
+/* Prevent horizontal page scrolling caused by legacy technical panels on narrow phones. */
+body:has(#app.studio-simple-mode){overflow-x:clip}
+#app.studio-simple-mode,#app.studio-simple-mode #panel-design,#app.studio-simple-mode .studio-simple{max-width:100%;min-width:0;overflow-x:clip}
+#app.studio-simple-mode .studio-conversation,#app.studio-simple-mode .studio-project-setup{min-width:0}

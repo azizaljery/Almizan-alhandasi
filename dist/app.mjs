@@ -2,6 +2,7 @@ import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
 import { escapeXML as esc, PlanViewport, buildPlanSVG } from './plan-view.mjs';
 import { RoomViewer } from './viewer3d.mjs';
+import { loadThreeRuntime } from './three-runtime.mjs';
 import { AI_ENABLED, requestBrief, getAssistantStatus } from './assistant.mjs';
 import { quantityRows, estimate } from './estimates.mjs';
 import { reviewPlan } from './audit.mjs';
@@ -168,19 +169,9 @@ function on3DMode(mode, detail) {
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
 async function loadThree(retry = false) {
-  if (globalThis.THREE) return;
+  if (globalThis.THREE?.WebGLRenderer) return;
   if (loading3D) return loading3D;
-  const existing = document.querySelector('script[src*="three.min.js"]');
-  const create = retry || !existing;
-  loading3D = new Promise((resolve, reject) => {
-    const script = create ? document.createElement('script') : existing;
-    const cleanup = () => { clearTimeout(timer); script.removeEventListener('load', success); script.removeEventListener('error', failure); };
-    const success = () => { cleanup(); globalThis.THREE ? resolve() : reject(Error('تعذّر تهيئة مكتبة 3D.')); };
-    const failure = () => { cleanup(); reject(Error('تعذّر تحميل مكتبة 3D. تحقّق من الاتصال ثم أعد المحاولة. مخطط 2D متاح.')); };
-    const timer = setTimeout(failure, 8000);
-    script.addEventListener('load', success, { once: true }); script.addEventListener('error', failure, { once: true });
-    if (create) { script.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js'; script.async = true; document.head.append(script); }
-  });
+  loading3D = loadThreeRuntime({ retry });
   try { await loading3D; } finally { loading3D = null; }
 }
 async function show3D(retry = false) {
@@ -189,7 +180,7 @@ async function show3D(retry = false) {
     message('threeError', ''); $('retry3D').hidden = true;
     await loadThree(retry);
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
-    viewer.setVisible(state.tab === 'design'); viewer.setModel(state.model, state.palette); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 })); $('roof').checked = false;
+    viewer.setVisible(state.tab === 'design'); viewer.setModel(state.model, state.palette); viewer.setRoof(true); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 })); $('roof').checked = true;
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
@@ -661,6 +652,22 @@ function boot() {
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));
   all('[data-move]').forEach(b => b.addEventListener('click', () => viewer?.move(b.dataset.move)));
   $('roof').addEventListener('change', () => viewer?.setRoof($('roof').checked)); $('retry3D').addEventListener('click', () => { void show3D(true); });
+  const orbitButton = $('autoOrbit3D');
+  const orbitLabel = () => {
+    const active = !!viewer?.autoOrbit;
+    orbitButton.setAttribute('aria-pressed', String(active));
+    orbitButton.textContent = active ? 'إيقاف الدوران الهادئ' : '↻ دوران هادئ حول المبنى';
+  };
+  orbitButton.addEventListener('click', () => {
+    if (!viewer) return toast('ولّد مخططًا أولًا ليعمل العرض الثلاثي.');
+    if (viewer.autoOrbit) viewer.stopOrbit(); else viewer.startOrbit();
+    orbitLabel();
+  });
+  $('view').addEventListener('pointerdown', () => { if (viewer?.autoOrbit) { viewer.stopOrbit(); orbitLabel(); } }, { capture: true });
+  all('[data-sun-preset]').forEach(button => button.addEventListener('click', () => {
+    $('sunHour').value = button.dataset.sunPreset;
+    renderSolarPreview();
+  }));
   $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); });
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
   $('askAI').addEventListener('click', askAI);
@@ -670,4 +677,49 @@ function boot() {
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); initVisualizer(() => state.model); void refreshAssistantStatus();
 }
+// The simplified studio uses the SAME state, AI service, generator and 2D/3D/BOQ.
+// This bridge exposes no credentials and does not create a parallel planning engine.
+const mizanStudioAPI = Object.freeze({
+  getState() {
+    return {
+      hasModel: !!state.model,
+      model: state.model ? structuredClone(state.model) : null,
+      program: publicRooms(state.program),
+      proposal: state.proposal ? structuredClone(state.proposal) : null,
+      plot: rawPlot(),
+      dirty: state.dirty,
+      failures: structuredClone(state.failures),
+    };
+  },
+  setPlot({ width, length, entry, maxBuiltArea }) {
+    if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
+    if (!Number.isFinite(Number(width)) || !Number.isFinite(Number(length))) throw Error('أدخل أبعاد الأرض بالأمتار.');
+    $('wid').value = String(width);
+    $('len').value = String(length);
+    $('entry').value = entry;
+    if (maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '') $('maxBuiltArea').value = '';
+    else $('maxBuiltArea').value = String(maxBuiltArea);
+    state.streets[entry] = true;
+    renderStreets();
+    rating(); markDirty();
+    return validatePlot(rawPlot());
+  },
+  async propose(prompt, { accessCode = '', local = false } = {}) {
+    $('idea').value = String(prompt || '');
+    $('aiAccessCode').value = String(accessCode || '');
+    state.proposal = null;
+    if (local) await askLocal(); else await askAI();
+    if (!state.proposal) throw Error($('aiFeedback').textContent || 'لم ينتج تحليل صالح؛ بقي المخطط السابق كما هو.');
+    return { brief: structuredClone(state.proposal), context: structuredClone(state.briefContext) };
+  },
+  async drawProposal() {
+    if (!state.proposal?.rooms?.length) throw Error('لا يوجد برنامج غرف صالح للاعتماد.');
+    const previous = state.model;
+    await drawFromAIProposal();
+    if (!state.model || state.model === previous) throw Error($('generationError').textContent || 'لم ينجح التوليد؛ بقي المخطط السابق محفوظًا.');
+    return { model: structuredClone(state.model), alternatives: state.alternatives.map(model => structuredClone(model)), failures: structuredClone(state.failures) };
+  },
+  showAdvanced() { return !!state.model; },
+});
+Object.defineProperty(window, 'mizanStudioAPI', { value: mizanStudioAPI, configurable: false, writable: false });
 boot();

@@ -5,28 +5,29 @@ export class RoomViewer {
     const T = globalThis.THREE;
     if (!T) throw Error('تعذّر تحميل مكتبة 3D. مخطط 2D يعمل؛ تحقّق من الاتصال ثم أعد المحاولة.');
     this.T = T; this.container = container; this.onMode = onMode; this.visible = true; this.mode = 'orbit';
-    this.abort = new AbortController(); this.pointers = new Map(); this.scene = new T.Scene();
+    this.abort = new AbortController(); this.pointers = new Map(); this.scene = new T.Scene(); this.autoOrbit = false; this.orbitFrame = 0; this.orbitLast = 0;
     this.scene.background = new T.Color('#e8eceb');
     this.camera = new T.PerspectiveCamera(48, 1, .05, 700);
     try { this.renderer = new T.WebGLRenderer({ antialias: true, alpha: false }); }
     catch { throw Error('عرض 3D يحتاج WebGL، وهو غير متاح في هذا المتصفح. يمكنك متابعة المخطط 2D.'); }
-    this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1.6));
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     if (T.ACESFilmicToneMapping) this.renderer.toneMapping = T.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
     if (this.renderer.shadowMap) { this.renderer.shadowMap.enabled = true; if (T.PCFSoftShadowMap) this.renderer.shadowMap.type = T.PCFSoftShadowMap; }
     const canvas = this.renderer.domElement;
+    if (canvas.style) canvas.style.touchAction = 'none';
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
-    this.scene.add(new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8));
+    this.ambientLight = new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8); this.scene.add(this.ambientLight);
     const light = new T.DirectionalLight(0xffe4b6, 3.1); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
-    if (light.shadow?.mapSize) { light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048; light.shadow.camera.near = 1; light.shadow.camera.far = 120; }
+    if (light.shadow?.mapSize) { const size = Math.min(globalThis.innerWidth || 1200, globalThis.innerHeight || 900) < 700 ? 1024 : 2048; light.shadow.mapSize.width = size; light.shadow.mapSize.height = size; light.shadow.camera.near = 1; light.shadow.camera.far = 200; light.shadow.bias = -.00022; }
     this.scene.add(light);
-    const fill = new T.DirectionalLight(0xbcd8ff, .75); fill.position.set(24, 18, -35); this.scene.add(fill);
+    const fill = new T.DirectionalLight(0xbcd8ff, .75); this.fillLight = fill; fill.position.set(24, 18, -35); this.scene.add(fill);
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
     const on = (event, handler, options = {}) => canvas.addEventListener(event, handler, { ...options, signal: this.abort.signal });
-    on('pointerdown', e => { if (e.button !== 0) return; canvas.focus({ preventScroll: true }); canvas.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
+    on('pointerdown', e => { if (e.button !== 0) return; this.stopOrbit(); canvas.focus({ preventScroll: true }); canvas.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
     on('pointermove', e => {
       if (!this.pointers.has(e.pointerId)) return;
       const old = this.pointers.get(e.pointerId), before = [...this.pointers.values()];
@@ -36,6 +37,20 @@ export class RoomViewer {
         const after = [...this.pointers.values()], distance = points => Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
         if (distance(after) > 1) this.radius *= distance(before) / distance(after);
         this.radius = Math.max(4, Math.min(240, this.radius));
+        // Two-finger pan uses the actual touch-centroid shift, not a page scroll.
+        const midpoint = points => ({
+          x: (points[0].x + points[1].x) / 2,
+          y: (points[0].y + points[1].y) / 2,
+        });
+        const previous = midpoint(before), current = midpoint(after);
+        const scale = this.radius * .0014;
+        const shiftX = (current.x - previous.x) * scale;
+        const shiftY = (current.y - previous.y) * scale;
+        const p = this.model?.plot;
+        if (p) {
+          this.target.x = Math.max(-5, Math.min(p.width + 5, this.target.x - shiftX * Math.cos(this.theta) + shiftY * Math.sin(this.theta)));
+          this.target.z = Math.max(-p.length - 5, Math.min(5, this.target.z + shiftX * Math.sin(this.theta) + shiftY * Math.cos(this.theta)));
+        }
       } else if (this.pointers.size === 1) {
         if (this.mode === 'inside') { this.yaw -= dx * .005; this.pitch = Math.max(-.85, Math.min(.85, this.pitch - dy * .004)); }
         else { this.theta -= dx * .007; this.phi = Math.max(.02, Math.min(1.45, this.phi - dy * .005)); }
@@ -44,7 +59,7 @@ export class RoomViewer {
     });
     on('pointerup', e => this.pointers.delete(e.pointerId)); on('pointercancel', e => this.pointers.delete(e.pointerId));
     on('wheel', e => {
-      e.preventDefault();
+      e.preventDefault(); this.stopOrbit();
       if (this.mode === 'inside') this.move(e.deltaY > 0 ? 'back' : 'forward', .3);
       else { this.radius = Math.max(4, Math.min(240, this.radius * Math.exp(Math.max(-200, Math.min(200, e.deltaY)) * .002))); this.render(); }
     }, { passive: false });
@@ -71,6 +86,16 @@ export class RoomViewer {
   setModel(model, palette = 'resort') {
     this.clear(); this.model = model; this.pieces = wallPieces(model);
     const b = model.building, p = model.plot, T = this.T, concept = model.architecture?.massing || 'spine';
+    // Shadow frustum follows the actual plot, not Three.js' tiny default ±5m area.
+    const camera = this.sunLight.shadow?.camera;
+    if (camera) {
+      const span = Math.max(p.width, p.length) + 12;
+      camera.left = -span; camera.right = span; camera.top = span; camera.bottom = -span;
+      camera.near = 1; camera.far = Math.max(160, span * 4);
+      camera.updateProjectionMatrix?.();
+    }
+    this.sunLight.target?.position?.set(p.width / 2, 0, -p.length / 2);
+    this.sunLight.target?.updateMatrixWorld?.();
     const materials = {
       resort: { facade: '#ead9bc', accent: '#8e6948', roof: '#d2bea0', floor: '#eee5d5', metal: '#604d3b' },
       modern: { facade: '#f4f2ed', accent: '#5a6666', roof: '#d8d6cf', floor: '#e8e4dc', metal: '#303839' },
@@ -185,6 +210,7 @@ export class RoomViewer {
   }
   view(name) {
     if (!this.model) return;
+    this.stopOrbit();
     this.mode = 'orbit'; const b = this.model.building, s = Math.max(b.w, b.h);
     this.target.set(b.x + b.w / 2, .8, -b.y - b.h / 2);
     this.phi = name === 'top' ? .02 : name === 'front' ? 1.42 : .65;
@@ -194,6 +220,7 @@ export class RoomViewer {
     this.onMode?.('orbit', name); this.render();
   }
   enter(id) {
+    this.stopOrbit();
     const r = this.model?.rooms.find(r => r.id === id); if (!r) return;
     const c = center(r), door = this.model.openings.find(o => o.type === 'door' && o.roomId === id), p = openingPoint(this.model, door);
     this.mode = 'inside'; this.eye = { x: c.x, y: c.y }; this.yaw = Math.atan2(p.x - c.x, p.y - c.y); this.pitch = -.06;
@@ -217,17 +244,54 @@ export class RoomViewer {
   }
   setRoof(show) { if (this.roof) { this.roof.visible = show && this.mode !== 'inside'; this.render(); } }
   setSun(preview) {
-    if (!this.sunLight || !preview?.visible) return;
-    const rad = preview.azimuth * Math.PI / 180, altitude = Math.max(.12, preview.altitude * Math.PI / 180), distance = 52;
-    this.sunLight.position.set(Math.sin(rad) * Math.cos(altitude) * distance, Math.sin(altitude) * distance, -Math.cos(rad) * Math.cos(altitude) * distance);
-    this.sunLight.intensity = Math.max(1.3, Math.min(3.5, 1.2 + preview.altitude / 28)); this.render();
+    if (!this.sunLight) return;
+    if (!preview?.visible || !Number.isFinite(preview.altitude) || preview.altitude <= 0) {
+      this.sunLight.visible = false;
+      if (this.ambientLight) this.ambientLight.intensity = .5;
+      if (this.fillLight) this.fillLight.intensity = .22;
+      this.render(); return;
+    }
+    this.sunLight.visible = true;
+    if (this.ambientLight) this.ambientLight.intensity = Math.max(.75, Math.min(1.8, .75 + preview.altitude / 55));
+    if (this.fillLight) this.fillLight.intensity = .55;
+    const rad = preview.azimuth * Math.PI / 180;
+    const altitude = Math.max(.035, preview.altitude * Math.PI / 180);
+    const distance = Math.max(55, (this.model?.plot?.length || 0) * 1.6, (this.model?.plot?.width || 0) * 1.6);
+    const origin = this.sunLight.target?.position || { x: 0, y: 0, z: 0 };
+    this.sunLight.position.set(
+      origin.x + Math.sin(rad) * Math.cos(altitude) * distance,
+      origin.y + Math.sin(altitude) * distance,
+      origin.z - Math.cos(rad) * Math.cos(altitude) * distance
+    );
+    this.sunLight.intensity = Math.max(.45, Math.min(3.1, .5 + preview.altitude / 25));
+    this.render();
+  }
+  startOrbit() {
+    if (!this.model || typeof requestAnimationFrame !== 'function') return false;
+    if (this.mode !== 'orbit') this.view('persp');
+    if (this.autoOrbit) return true;
+    this.autoOrbit = true; this.orbitLast = 0;
+    const tick = now => {
+      if (!this.autoOrbit) return;
+      const elapsed = this.orbitLast ? Math.min(64, now - this.orbitLast) : 16;
+      this.orbitLast = now;
+      if (this.visible) { this.theta += elapsed * .00013; this.render(); }
+      this.orbitFrame = requestAnimationFrame(tick);
+    };
+    this.orbitFrame = requestAnimationFrame(tick);
+    return true;
+  }
+  stopOrbit() {
+    this.autoOrbit = false; this.orbitLast = 0;
+    if (this.orbitFrame && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this.orbitFrame);
+    this.orbitFrame = 0;
   }
   resize() {
     const w = this.container.clientWidth, h = this.container.clientHeight;
     if (!w || !h) return;
     this.camera.aspect = w / h; this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h, false); this.render();
   }
-  setVisible(show) { this.visible = show; if (show) this.resize(); }
+  setVisible(show) { this.visible = show; if (!show) this.stopOrbit(); if (show) this.resize(); }
   render() {
     if (!this.visible || !this.model || !this.container.clientWidth) return;
     if (this.mode === 'inside') {
@@ -239,5 +303,5 @@ export class RoomViewer {
     }
     this.renderer.render(this.scene, this.camera);
   }
-  destroy() { this.abort.abort(); this.resizeObserver.disconnect(); this.clear(); this.renderer.dispose(); this.renderer.domElement.remove(); }
+  destroy() { this.stopOrbit(); this.abort.abort(); this.resizeObserver.disconnect(); this.clear(); this.renderer.dispose(); this.renderer.domElement.remove(); }
 }
