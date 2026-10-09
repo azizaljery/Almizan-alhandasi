@@ -174,6 +174,17 @@ export function evaluateRequirementEvidence({ model, program, idea = '', discove
       'طلب صريح من العميل', 'شكل المبنى');
   }
 
+  const unproven = Array.isArray(briefContext?.constraints) ? briefContext.constraints : [];
+  if (unproven.length || String(idea || '').trim()) {
+    const sample = unproven.slice(0, 3).join('؛ ');
+    add('free-text', 'مطابقة الوصف الحر والتفضيلات', 'UNVERIFIED',
+      (unproven.length
+        ? 'توجد ' + fmt(unproven.length, 0) + ' رغبات أو قيود تحتاج إثباتًا منفصلًا. ' + sample +
+          (unproven.length > 3 ? '؛ وغيرها.' : '.')
+        : 'الوصف النصي موجود، لكن لا تتوفر أدلة هندسية لكل عبارة فيه.') +
+      ' المقاييس أعلاه تثبت فقط ما ورد فيها صراحة؛ لا يعني نجاح التوليد تنفيذ بقية النص.',
+      'وصف العميل والموجز', 'متطلبات غير مثبتة');
+  }
   const counts = Object.fromEntries(Object.keys(REQUIREMENT_STATUS).map(key => [key, rows.filter(row => row.status === key).length]));
   return {
     version: '1.0.0',
