@@ -46,6 +46,28 @@
       <div class="gemini-entry-copy"><span class="ey">GEMINI ENGINEERING · مفعّلة</span><h2>المراجعة الهندسية تدخل معك من أول بديل</h2><p>بعد توليد المخطط، يقرأ Gemini المسقط المعروض، يقترح الأنماط المناسبة، ويضع التنبيهات المرتبطة بالغرف مباشرة على مخطط 2D.</p></div>
       <ul class="gemini-entry-steps" aria-label="ما الذي يظهر بعد التوليد"><li>قراءة المسقط</li><li>أنماط مرشّحة</li><li>تنبيهات مبدئية</li></ul>
     </section>
+    <article class="card"><header class="ch"><b class="num">✦</b><div><h2>المساعد المعماري</h2><p id="aiStatus">جارٍ التحقق من خدمة فهم المتطلبات…</p></div><span class="pill" id="aiBadge">جارٍ التحقق</span></header>
+      <div class="cb">
+        <label for="idea">صف أسلوب حياتك واحتياجاتك<textarea id="idea" rows="5" maxlength="4000" placeholder="مثال: أريد مدخل ضيوف واضحًا، مجلسًا أماميًا، صالة عائلية في الوسط، جناح الوالدة قرب الصالة، وغرف النوم في الخلف…"></textarea></label>
+        <label for="aiAccessCode">رمز دخول الذكاء<input id="aiAccessCode" type="password" autocomplete="current-password" maxlength="128" placeholder="الرمز الخاص بالميزان الهندسي"></label>
+        <div class="inline-actions"><button class="secondary" id="askAI">✦ افهم وصف المنزل واقترح برنامجًا للرسم</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
+        <p class="help">الذكاء يفهم العميل، يحدد برنامج الغرف والمواقع والأولويات، ثم يرسلها إلى محرك الرسم الهندسي. بعد موافقتك يرسم بدائل 2D و3D وكميات من النموذج نفسه؛ لا يعتمد أي رسم لا يجتاز التحقق الهندسي.</p>
+        <div id="aiFeedback" class="message" role="status" hidden></div>
+        <div id="aiReview" hidden>
+          <h3>اقتراح للمراجعة</h3>
+          <p id="aiSummary"></p>
+          <div class="ai-brief-grid" aria-label="ملخص فهم العميل">
+            <section><span>جاهزية المتطلبات</span><b id="aiReadiness">—</b></section>
+            <section><span>أعلى الأولويات</span><p id="aiPriorities">—</p></section>
+            <section><span>العلاقات المقترحة</span><p id="aiRelationships">—</p></section>
+            <section><span>التعارضات التي تحتاج قرارًا</span><p id="aiConflicts">—</p></section>
+          </div>
+          <ul id="aiNotes"></ul>
+          <div class="inline-actions"><button class="primary" id="drawAI">اعتمد وارسم المخططات</button><button class="small-button" id="acceptAI">نقل إلى الجدول فقط</button></div>
+        </div>
+      </div>
+    </article>
+
     <article class="card discovery-card" aria-label="اكتشاف أسلوب المنزل"><header class="ch"><b class="num">٠</b><div><h2>تخيّل بيتكم قبل رسمه</h2><p>اختر ما يشبه طريقة عيشكم؛ من هذه الأمثلة نفهم الخصوصية والحركة والفناء قبل الدخول في المساحات.</p></div><span class="pill" id="discoveryState">لم يكتمل بعد</span></header>
       <div class="cb">
         <h3 class="subhead">ما الأفكار التي تحبها؟ (هذه تفضيلات، وليست مخططات)</h3>
@@ -81,28 +103,6 @@
       </div>
     </article>
     <section class="project-tools" aria-label="حفظ المشروع واستعادته"><div><h2>ملف مشروعك</h2><p>احتفظ بالمدخلات والبدائل والأسعار وآخر 5 نسخ في ملف تستعيده لاحقًا. لا يوجد حفظ تلقائي أو سحابي.</p></div><div class="inline-actions"><button id="saveProject" class="small-button">تنزيل ملف المشروع</button><button id="loadProject" class="small-button">استيراد مشروع محفوظ</button><input id="projectFile" type="file" accept=".json,application/json" aria-label="ملف مشروع ميزان" hidden></div><p id="projectStatus" role="status" class="help" hidden></p></section>
-
-    <article class="card"><header class="ch"><b class="num">✦</b><div><h2>المساعد المعماري</h2><p id="aiStatus">جارٍ التحقق من خدمة فهم المتطلبات…</p></div><span class="pill" id="aiBadge">جارٍ التحقق</span></header>
-      <div class="cb">
-        <label for="idea">صف أسلوب حياتك واحتياجاتك<textarea id="idea" rows="5" maxlength="4000" placeholder="مثال: أريد مدخل ضيوف واضحًا، مجلسًا أماميًا، صالة عائلية في الوسط، جناح الوالدة قرب الصالة، وغرف النوم في الخلف…"></textarea></label>
-        <label for="aiAccessCode">رمز دخول الذكاء<input id="aiAccessCode" type="password" autocomplete="current-password" maxlength="128" placeholder="الرمز الخاص بالميزان الهندسي"></label>
-        <div class="inline-actions"><button class="secondary" id="askAI">✦ حلّل وارسم بالذكاء</button><button class="small-button" id="askLocal">فهم محلي بلا مفتاح</button></div>
-        <p class="help">الذكاء يفهم العميل، يحدد برنامج الغرف والمواقع والأولويات، ثم يرسلها إلى محرك الرسم الهندسي. بعد موافقتك يرسم بدائل 2D و3D وكميات من النموذج نفسه؛ لا يعتمد أي رسم لا يجتاز التحقق الهندسي.</p>
-        <div id="aiFeedback" class="message" role="status" hidden></div>
-        <div id="aiReview" hidden>
-          <h3>اقتراح للمراجعة</h3>
-          <p id="aiSummary"></p>
-          <div class="ai-brief-grid" aria-label="ملخص فهم العميل">
-            <section><span>جاهزية المتطلبات</span><b id="aiReadiness">—</b></section>
-            <section><span>أعلى الأولويات</span><p id="aiPriorities">—</p></section>
-            <section><span>العلاقات المقترحة</span><p id="aiRelationships">—</p></section>
-            <section><span>التعارضات التي تحتاج قرارًا</span><p id="aiConflicts">—</p></section>
-          </div>
-          <ul id="aiNotes"></ul>
-          <div class="inline-actions"><button class="primary" id="drawAI">اعتمد وارسم المخططات</button><button class="small-button" id="acceptAI">نقل إلى الجدول فقط</button></div>
-        </div>
-      </div>
-    </article>
 
     <article class="card"><header class="ch"><b class="num">١</b><div><h2>ابدأ ببرنامج مساحات</h2><p>الأعداد تُنشئ قائمة أولية؛ الجدول بعدها هو المرجع الفعلي للتوليد.</p></div></header>
       <div class="cb">
