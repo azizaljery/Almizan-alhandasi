@@ -23,3 +23,6 @@
 #intro.cinematic #enter{display:none}
 @media(max-width:650px){.cinematic-world .cinematic-static{width:145vw;max-width:none}.cinematic-logo{bottom:19%}.cinematic-monogram{width:64px;height:64px;font-size:2.9rem}.cinematic-logo h1{font-size:2.7rem}.cinematic-bottom{font-size:.57rem}.cinematic-eyebrow{font-size:.63rem;letter-spacing:.14em}.cinematic-corner{inset:12px}}
 @media(prefers-reduced-motion:reduce){#intro.cinematic *{animation:none!important;transition:none!important}.cinematic-logo{opacity:1;transform:none}}
+
+/* Override the legacy .intro > * selector without changing the old route. */
+#intro.cinematic .cinematic-world,#intro.cinematic .cinematic-sun,#intro.cinematic .cinematic-corner,#intro.cinematic .cinematic-eyebrow,#intro.cinematic .cinematic-logo,#intro.cinematic .cinematic-bottom,#intro.cinematic .cinematic-skip{position:absolute}
