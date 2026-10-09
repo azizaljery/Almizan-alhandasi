@@ -24,7 +24,7 @@ test('cinematic entry routes into the conversation-first studio while retaining 
   assert.match(html, /id="landSurveyEditor"/);
   assert.match(html, /id="studioAdvancedToggle"/);
   assert.match(html, /id="roof" type="checkbox" checked/);
-  assert.match(html, /2026\.10\.10-studio-1/);
+  assert.match(html, /2026\.10\.10-studio-2/);
 });
 
 test('every workspace section has a navigation destination connected to the actual application', () => {

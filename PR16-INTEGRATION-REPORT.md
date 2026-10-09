@@ -23,7 +23,17 @@ Source reference: PR16 head `bf7c2d28804e4ac73d4d41614255b2cec4f7e0f3`, based on
 ## Verification
 
 - Baseline before edits: `npm test` 181/181; `npm run build` passed.
-- Final source: `npm test` 215/215; `npm run build` passed, including the archive Worker bundle and 131-module browser import graph.
+- Final source: `npm test` 235/235; `npm run build` passed, including the archive Worker bundle and 133-module browser import graph.
 - Regression tests cover unrelated bedroom deletion after a living-room edit, rename-only deletion, same-type sibling area scope, negative intent, distance/adjacency wording, exact proposal snapshot approval, no-op generation blocking, exact/minimum/excluded bedroom counts, dual-count wording, same-area wrong room dimensions, no-courtyard filtering, day/night lighting, roof persistence, conversation revision ordering, and return-to-composer without model changes.
 - Archive Worker, D1 schema/migrations, Sites auth wiring, site hosting settings, and release rollback files were not edited.
 - Local Chromium/Playwright screenshots were not captured because this executor denies Chromium's Unix process-singleton socket. The v49 live flow exposed the missing conversation return path; this follow-up patch is not yet deployed and needs a live recheck. No live AI request or deployment was run from this worktree.
+
+## Final combined follow-up
+
+- Composer relation parsing is clause-scoped and whole-token; unrelated no-courtyard wording cannot create a bedroom/kitchen sightline constraint. An explicit prior mandatory privacy request is retained and remains unverified when unsupported.
+- Connected AI dimension handoff now carries user-originated exact dimensions only after unambiguous identity, count, area and rectangle checks. Ambiguous or contradictory replies fail closed; office remains unsupported by the unchanged Worker schema. Provider execution was not tested with credentials.
+- Session-only storage is described honestly; project download/account archive do not persist the transcript.
+- PR15 geometry-backed requirement evidence is selectively integrated: generation-time program and plot snapshots, candidate binding, dimensions, measured paths, unsupported requirements and XSS-safe rendering. Missing original context stays UNVERIFIED.
+- Combined validation: 235 tests passed, zero failures/skips; build verified 133 browser modules. Both manifests refreshed after final edits.
+- Live v50 test: 3 bedrooms4x4 + living6x5 + kitchen8x6 -> return conversation -> kitchen7x6 preserved the other rooms. Map and account archive UI remained accessible; local project download succeeded.
+- Final studio-2 deployment and interactive evidence are recorded separately in the release evidence package. Cloud Chrome cannot create WebGL (GL_VENDOR/GL_RENDERER disabled), so integrated live 3D, physical Safari/iPad, authenticated archive writes and actual AI provider remain unverified.
