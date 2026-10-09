@@ -62,6 +62,9 @@ try {
   await send('Runtime.enable');
   await send('Page.navigate', { url: 'http://127.0.0.1:8765/index.html' });
   assert.ok(await waitFor('!!window.mizanStudioAPI && !!document.getElementById("cinematicSkip")'), 'Mizan Studio module did not boot.');
+  await pause(350);
+  const introScreenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  writeFileSync('/tmp/mizan-cinematic-live.png', Buffer.from(introScreenshot.data, 'base64'));
   await evaluate('document.getElementById("cinematicSkip").click(); true');
   assert.ok(await waitFor('document.getElementById("app").classList.contains("show") && document.getElementById("panel-design").classList.contains("on")'), 'Cinematic skip did not enter the design page.');
   const initial = await evaluate('({simple:document.getElementById("app").classList.contains("studio-simple-mode"),legacy:!!document.getElementById("roomRows"),hasAI:!!window.mizanStudioAPI})');
