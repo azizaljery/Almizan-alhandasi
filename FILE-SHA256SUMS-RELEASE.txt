@@ -5,7 +5,7 @@ ebb9a03ab7f9df6e25502bf10fa642495bd4ef9de02b45968623afd157190b84  ./.github/work
 0072dfabe80f38dd8dbb54b4a44440edf21e447d3ecadfccc6a520861e1bd381  ./.gitignore
 b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
-6b350be40359d1768c46d536bd3e7a2f3ec5acf57d1618170a677e6f1efcb5e7  ./FILE-SHA256SUMS.txt
+4ce94a2bba60d94f84f22a564cb95a1c44d0ed7213b3b77d95ee6acea69b0d8e  ./FILE-SHA256SUMS.txt
 ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
 d4509f408a7fd8ba4aa0af99a30dbe9a0a6a5b04557f1d80e68b55d589b9b5ce  ./README.md
 d483f97c632f7090cc39b22d8a1b917f52da6d62b2088d8d7be89da65c637f39  ./RELEASE-BUILD.log
@@ -260,7 +260,7 @@ dd8d2d4fd6f76548432d793ed2ee94f9c85b54784d41172de15cd448b747932b  ./tests/multi-
 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
 92ba70786a48b0388b1d68805e0e8b9c0a19ad4b51d2e7eaeaa975c66e945824  ./tests/portal-navigation.test.mjs
 e183f73580e8ee47f1cb6c25db7d76f3fa10bfe30a22ef3da1d37ae4094d6127  ./tests/release-consistency.test.mjs
-0e9bd6fa18a04bd3da790612050e0fa0f321685670a09f648b44b9f0b176143a  ./tests/requirement-evidence.test.mjs
+ab3e1f014931f2a56deb711d8c81c1f4f1d79922b27d04590645f7900ef5fe29  ./tests/requirement-evidence.test.mjs
 4c929dc7e4f76c72fd937d562356e42327781a6396b77e87f2d80e78fdc053bf  ./tests/requirements-engine.test.mjs
 142d80d416c31af17225717ced18aff46777745f119b46f16e64cb17ae06d75a  ./tests/server.test.mjs
 70dda3e233d59fcfb15e04728868792f0aaadf0bd258cd8226df8f9cfb2ec837  ./tests/solar-path.test.mjs
