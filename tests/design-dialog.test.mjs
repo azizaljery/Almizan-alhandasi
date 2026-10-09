@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { diffRoomPrograms, composeDesignConversation } from '../dist/design-dialog.mjs';
-import { proposalInputsMatch } from '../dist/studio-simple.mjs';
+import { proposalInputsMatch, returnToConversation } from '../dist/studio-simple.mjs';
 
 const program = [
   { name: 'غرفة نوم 1', type: 'bedroom', area: 16, position: 'back', side: 'any' },
@@ -96,4 +96,28 @@ test('pending proposal approval is bound to the visible text and plot values', (
   assert.equal(proposalInputsMatch(snapshot.brief, { ...snapshot.plot, width: 30 }, snapshot), false);
   assert.equal(proposalInputsMatch(snapshot.brief, { ...snapshot.plot, entry: 'n' }, snapshot), false);
   assert.equal(proposalInputsMatch(snapshot.brief, { ...snapshot.plot, maxBuiltArea: '600' }, snapshot), false);
+});
+
+test('returning from results only reopens the composer and preserves draft, transcript, and model', () => {
+  const effects = [];
+  const draft = { value: 'قرّب المطبخ من الطعام', focus(options) { effects.push(['focus', options]); } };
+  const transcript = ['الطلب الأول', 'تم توليد المخطط'];
+  const model = { id: 'accepted-model' };
+  const doc = {
+    querySelector(selector) {
+      assert.equal(selector, '[data-tab="design"]');
+      return { click() { effects.push(['navigate', 'design']); } };
+    },
+    getElementById(id) {
+      if (id === 'studioBrief') return draft;
+      if (id === 'studioSimple') return { scrollIntoView(options) { effects.push(['scroll', options]); } };
+      return null;
+    },
+  };
+  assert.equal(returnToConversation(doc), true);
+  assert.deepEqual(effects.map(effect => effect[0]), ['navigate', 'scroll', 'focus']);
+  assert.equal(draft.value, 'قرّب المطبخ من الطعام');
+  assert.deepEqual(transcript, ['الطلب الأول', 'تم توليد المخطط']);
+  assert.equal(model.id, 'accepted-model');
+  assert.equal(returnToConversation({ querySelector() { return null; } }), false);
 });

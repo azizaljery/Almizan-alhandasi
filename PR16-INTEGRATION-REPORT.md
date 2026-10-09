@@ -1,4 +1,4 @@
-# PR16 selective integration on Sites v48
+# PR16 selective integration on Sites v48, with live-flow follow-up
 
 Base: production Sites v48 source `f4f5489445b8f18eb4cf4ed4b1fda02c1773571b`
 
@@ -17,11 +17,13 @@ Source reference: PR16 head `bf7c2d28804e4ac73d4d41614255b2cec4f7e0f3`, based on
 - Bound approval to the exact visible request and plot snapshot. The request/plot controls lock while a proposal is pending; any changed snapshot is rejected for re-analysis before drawing.
 - Added a deterministic pre-generation contract: explicit bedroom counts are exact unless the user says “at least”; explicit room dimensions are checked as dimensions (allowing rotation), never by area alone.
 - Plot edits now refuse to break a saved survey-to-generator rectangle link and leave the current program unchanged when the proposed plot would conflict.
+- The results panel has an explicit return-to-conversation action that restores the existing composer and focuses it without regenerating or discarding the accepted model, transcript, or draft.
+- The local project-download notice now distinguishes downloading a local file from saving a version to the account archive.
 
 ## Verification
 
 - Baseline before edits: `npm test` 181/181; `npm run build` passed.
-- Final source: `npm test` 210/210; `npm run build` passed, including the archive Worker bundle and 131-module browser import graph.
-- Regression tests cover unrelated bedroom deletion after a living-room edit, rename-only deletion, same-type sibling area scope, negative intent, distance/adjacency wording, exact proposal snapshot approval, exact/minimum/excluded bedroom counts, dual-count wording, same-area wrong room dimensions, no-courtyard filtering, day/night lighting, roof persistence, and conversation revision ordering.
+- Final source: `npm test` 213/213; `npm run build` passed, including the archive Worker bundle and 131-module browser import graph.
+- Regression tests cover unrelated bedroom deletion after a living-room edit, rename-only deletion, same-type sibling area scope, negative intent, distance/adjacency wording, exact proposal snapshot approval, exact/minimum/excluded bedroom counts, dual-count wording, same-area wrong room dimensions, no-courtyard filtering, day/night lighting, roof persistence, conversation revision ordering, and return-to-composer without model changes.
 - Archive Worker, D1 schema/migrations, Sites auth wiring, site hosting settings, and release rollback files were not edited.
-- Desktop/tablet/mobile screenshots were not captured: local Chromium and Playwright launch fail in this executor because the runtime denies Chromium's Unix process-singleton socket, including with `--no-sandbox`. A post-publication browser check remains necessary. No live AI request or deployment was run here.
+- Local Chromium/Playwright screenshots were not captured because this executor denies Chromium's Unix process-singleton socket. The v49 live flow exposed the missing conversation return path; this follow-up patch is not yet deployed and needs a live recheck. No live AI request or deployment was run from this worktree.

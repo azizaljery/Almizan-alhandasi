@@ -83,6 +83,11 @@
 #app.studio-active .step-number{width:auto;height:auto;min-width:auto;flex:0 0 auto;border:0;background:none;color:#777c74;font-size:.69rem;font-weight:600}
 #app.studio-active .workspace-main{background:#f2f1ed}
 #app.studio-active #panel-result>.wrap{width:min(1920px,100%);padding:12px clamp(10px,2vw,30px) 30px}
+#app.studio-active .studio-conversation-return{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 10px;padding:12px 16px;border:1px solid #b8c9b8;border-radius:12px;background:linear-gradient(100deg,#edf4e8,#f8f7f0);color:#293d30}
+#app.studio-active .studio-conversation-return b{display:block;font-size:.95rem}
+#app.studio-active .studio-conversation-return p{margin:3px 0 0;color:#5e705f;font-size:.82rem;line-height:1.5}
+#app.studio-active .studio-conversation-return .primary{flex:0 0 auto;min-height:42px;padding:9px 18px;background:#2f6747;border-color:#2f6747;color:#fff;font-size:.86rem}
+#app.studio-active .studio-conversation-return .primary:hover{background:#244f36}
 #app.studio-active .studio-workspace-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:61px;padding:2px 1px 8px;border-bottom:1px solid #d9d8d1}
 #app.studio-active .studio-heading{min-width:0}
 #app.studio-active .studio-heading>.ey{font-size:.69rem;color:#74776f;letter-spacing:.025em}
@@ -179,6 +184,8 @@
   #app.studio-active .studio-inspector{inset-block-start:75px;width:min(320px,calc(100% - 20px))}
 }
 @media(max-width:560px){
+  #app.studio-active .studio-conversation-return{align-items:stretch;flex-direction:column;gap:9px;margin-bottom:8px;padding:12px}
+  #app.studio-active .studio-conversation-return .primary{width:100%}
   #app.studio-active .top{min-height:50px;padding:4px 9px;gap:7px}
   #app.studio-active .brand{gap:5px}
   #app.studio-active .brand .logo{width:29px;height:29px;font-size:1rem}

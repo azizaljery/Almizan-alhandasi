@@ -890,7 +890,7 @@ function saveProject() {
   try {
     const text = projectText();
     download(text, 'application/json;charset=utf-8', 'mizan-handasi-project.json');
-    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات ورغبات المنزل وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. احتفظ بالملف؛ لا يوجد حفظ سحابي أو تلقائي.');
+    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات ورغبات المنزل وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. هذا تنزيل محلي؛ حفظ الحساب يتم من أرشيف الحساب.');
   } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
 }
 function applyProjectState(project, statusText) {

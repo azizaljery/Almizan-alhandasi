@@ -21,6 +21,15 @@ export function proposalInputsMatch(brief, plot, expected) {
     trim(plot.maxBuiltArea) === trim(expected.plot.maxBuiltArea);
 }
 
+export function returnToConversation(doc) {
+  const designTab = doc?.querySelector?.('[data-tab="design"]');
+  if (!designTab) return false;
+  designTab.click();
+  doc.getElementById('studioSimple')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  doc.getElementById('studioBrief')?.focus?.({ preventScroll: true });
+  return true;
+}
+
 function appendMessage(role, message) {
   const root = $('studioTranscript');
   const bubble = create('div', 'studio-message ' + role);
@@ -228,6 +237,9 @@ export function initSimpleStudio() {
     setInputsLocked(false);
     status('اكتب توضيحك، وسنراجع الاقتراح من جديد قبل الرسم.');
     $('studioBrief').focus();
+  });
+  $('studioContinueConversation').addEventListener('click', () => {
+    returnToConversation(document);
   });
   $('studioAdvancedToggle').addEventListener('click', () => {
     const open = app.classList.toggle('studio-advanced-open');
