@@ -16,7 +16,7 @@ class Mesh extends Group { constructor(g, m) { super(); this.geometry = g; this.
 class Camera extends Group { constructor() { super(); } updateProjectionMatrix() {} lookAt(...args) { this.look = args; } }
 class Canvas extends EventTarget { setAttribute() {} setPointerCapture() {} focus() {} remove() { this.removed = true; } }
 class Renderer { constructor() { this.domElement = new Canvas(); this.renders = 0; } setPixelRatio() {} setSize(w, h) { this.size = [w, h]; } render() { this.renders++; } dispose() { this.disposed = true; } }
-const fakeThree = { Scene: Group, Color: class { constructor(value) { this.value = value; } }, PerspectiveCamera: Camera, WebGLRenderer: Renderer, HemisphereLight: Group, DirectionalLight: Group, Group, Vector3, Mesh, BoxGeometry: Geometry, MeshStandardMaterial: Material, BufferGeometry: Geometry, Line: Mesh, LineDashedMaterial: Material, SRGBColorSpace: 'srgb' };
+const fakeThree = { Scene: Group, Color: class { constructor(value) { this.value = value; } }, PerspectiveCamera: Camera, WebGLRenderer: Renderer, HemisphereLight: Group, DirectionalLight: class extends Group { constructor() { super(); this.shadow = { mapSize: { width: 0, height: 0 }, camera: { updateProjectionMatrix() {} } }; this.target = new Group(); } }, Group, Vector3, Mesh, BoxGeometry: Geometry, MeshStandardMaterial: Material, BufferGeometry: Geometry, Line: Mesh, LineDashedMaterial: Material, SRGBColorSpace: 'srgb' };
 globalThis.THREE = fakeThree;
 globalThis.ResizeObserver = class { observe() {} disconnect() { this.disconnected = true; } };
 const plot = { width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }, model = generateModel(plot, defaultRooms());
@@ -71,4 +71,48 @@ test('missing Three and unavailable WebGL fail with actionable messages', () => 
   delete globalThis.THREE; assert.throws(() => new RoomViewer(container()), /تعذّر تحميل/);
   globalThis.THREE = { ...fakeThree, WebGLRenderer: class { constructor() { throw Error('unavailable'); } } };
   assert.throws(() => new RoomViewer(container()), /WebGL/); globalThis.THREE = fakeThree;
+});
+
+
+test('3D shadow camera covers the entire plot instead of the default tiny shadow region', () => {
+  const v = new RoomViewer(container());
+  v.setModel(model);
+  const camera = v.sunLight.shadow.camera;
+  assert.ok(camera.left <= -(plot.length + 10));
+  assert.ok(camera.right >= plot.length + 10);
+  assert.equal(v.sunLight.target.position.x, plot.width / 2);
+  assert.equal(v.sunLight.target.position.z, -plot.length / 2);
+  v.destroy();
+});
+
+test('sunlight disappears below the horizon and returns at valid solar angles', () => {
+  const v = new RoomViewer(container()); v.setModel(model);
+  v.setSun({ visible: false, altitude: -2, azimuth: 280 });
+  assert.equal(v.sunLight.visible, false);
+  v.setSun({ visible: true, altitude: 35, azimuth: 280 });
+  assert.equal(v.sunLight.visible, true);
+  assert.ok(Number.isFinite(v.sunLight.position.x));
+  assert.ok(Number.isFinite(v.sunLight.position.y));
+  assert.ok(Number.isFinite(v.sunLight.position.z));
+  v.destroy();
+});
+
+test('gentle orbit can start and is stopped by a manual view change', () => {
+  const oldRAF = globalThis.requestAnimationFrame, oldCancel = globalThis.cancelAnimationFrame;
+  globalThis.requestAnimationFrame = () => 10;
+  globalThis.cancelAnimationFrame = () => {};
+  try {
+    const v = new RoomViewer(container()); v.setModel(model);
+    assert.equal(v.startOrbit(), true);
+    assert.equal(v.autoOrbit, true);
+    v.view('top');
+    assert.equal(v.autoOrbit, false);
+    assert.equal(v.phi, .02);
+    v.destroy();
+  } finally {
+    if (oldRAF === undefined) delete globalThis.requestAnimationFrame;
+    else globalThis.requestAnimationFrame = oldRAF;
+    if (oldCancel === undefined) delete globalThis.cancelAnimationFrame;
+    else globalThis.cancelAnimationFrame = oldCancel;
+  }
 });
