@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { defaultRooms, normalizeRooms, validatePlot, quantities, validateModel } from '../dist/planner.mjs';
 import { buildDesignRequest, runMultiEngineDesign } from '../dist/multi-engine.mjs';
 import { buildPreferenceRequests, evaluatePlanPreferences, rankPreferenceCandidates, rankAzizSurvivingPreferences } from '../dist/preference-evidence.mjs';
-import { auditClientRequest, extractClientDesires } from '../dist/client-request.mjs';
+import { analyzeClientRequest, auditClientRequest, extractClientDesires } from '../dist/client-request.mjs';
+import { composeDesignConversation } from '../dist/design-dialog.mjs';
 
 const plot = validatePlot({ width: 35, length: 45, floors: 1, entry: 's', streets: { s: true, n: false, e: false, w: false }, streetSetback: 3, neighborSetback: 1.5, coverage: .75, maxBuiltArea: null });
 const noDiscovery = { likes: [], rejects: [], avoids: [], life: {} };
@@ -198,7 +199,49 @@ test('Arabic preference polarity, corrections, neutral statements and clause sco
   assert.ok(mixed.includes('avoid_long_corridors'));
   assert.ok(mixed.includes('prefer_bedroom_kitchen_sightline'));
   assert.ok(!mixed.includes('avoid_bedroom_kitchen_sightline'), 'corridor negation must not leak into the bedroom clause');
+  assert.ok(kinds('أريد غرف النوم وتطل على المطبخ').includes('prefer_bedroom_kitchen_sightline'), 'Arabic attached conjunction stays supported');
   assert.ok(kinds('أبي مسارات منفصلة للضيوف والعائلة').includes('avoid_shared_guest_family_corridors'));
+});
+
+test('composed revision headings cannot invent mandatory sightline intent or discard an earlier explicit privacy request', async () => {
+  const initial = 'أريد 3 غرف نوم كل غرفة 4×4، وصالة 6×5 ومطبخ 8×6. لا أريد فناء.';
+  const latest = 'عدّل المطبخ إلى 7×6 مع الحفاظ على غرف النوم والصالة وبدون فناء';
+  const composed = composeDesignConversation(initial, [initial], latest);
+  const rows = buildPreferenceRequests({ idea: composed });
+  assert.ok(!rows.some(row => row.value.mizanKind === 'avoid_bedroom_kitchen_sightline'),
+    'the headings "المتطلبات الأصلية" and "التعديل المطلوب" must not look like facing or mandatory intent');
+  assert.ok(!rows.some(row => row.value.mizanKind === 'prefer_bedroom_kitchen_sightline'));
+
+  const rooms = normalizeRooms([
+    ...[1, 2, 3].map(index => ({ name: `غرفة نوم ${index}`, type: 'bedroom', area: 16,
+      dimensions: { width: 4, length: 4 }, position: 'back', side: 'any' })),
+    { name: 'صالة عائلية', type: 'living', area: 30, dimensions: { width: 6, length: 5 }, position: 'middle', side: 'any' },
+    { name: 'مطبخ', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 }, position: 'middle', side: 'any' },
+  ]);
+  const discovery = { ...noDiscovery };
+  const userVisible = await analyzeClientRequest({ prompt: composed, rooms, plot, discovery, mode: 'modify' });
+  assert.deepEqual(userVisible.questions, [], 'the actual local approval gate must not ask about an invented unsupported requirement');
+  assert.deepEqual(userVisible.rooms.find(room => room.type === 'kitchen').dimensions, { width: 7, length: 6 });
+  assert.equal(userVisible.rooms.filter(room => room.type === 'bedroom').length, 3);
+  assert.ok(!userVisible.desires.some(item => item.kind === 'avoid_bedroom_kitchen_sightline'));
+
+  for (const request of ['يجب ألا تواجه غرف النوم المطبخ', 'Bedrooms must not face the kitchen']) {
+    const explicit = buildPreferenceRequests({ idea: request }).find(row => row.value.mizanKind === 'avoid_bedroom_kitchen_sightline');
+    assert.ok(explicit, request);
+    assert.equal(explicit.value.mustRequirement, true, request);
+  }
+  const ordinary = buildPreferenceRequests({ idea: 'غرفة النوم لا تواجه المطبخ' })
+    .find(row => row.value.mizanKind === 'avoid_bedroom_kitchen_sightline');
+  assert.ok(ordinary, 'an explicit Arabic sightline preference is still recognized');
+  assert.equal(ordinary.value.mustRequirement, undefined, 'a preference alone is not made mandatory');
+
+  const priorPrivacy = `${initial.slice(0, -1)}، ويجب ألا تواجه غرف النوم المطبخ.`;
+  const privacyConversation = composeDesignConversation(priorPrivacy, [priorPrivacy], latest);
+  const retained = await analyzeClientRequest({ prompt: privacyConversation, rooms, plot, discovery, mode: 'modify' });
+  assert.ok(retained.desires.some(item => item.kind === 'avoid_bedroom_kitchen_sightline'),
+    'an explicitly stated prior-conversation privacy constraint remains visible after an unrelated revision');
+  assert.ok(retained.questions.some(question => /شرطًا إلزاميًا/.test(question)),
+    'unsupported explicit privacy requirements remain pending for review instead of being silently dropped');
 });
 
 test('discovery chip splits bedroom proximity from visual exposure and darkness from corridor length', () => {

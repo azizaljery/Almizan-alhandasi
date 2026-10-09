@@ -27,14 +27,24 @@ function discoveryAvoidKind(label) {
 }
 
 const correctionCue = /لكن|بل|تصحيح(?:ا| صريح)?|التصحيح|قصدي|اقصد|اعني|بالعكس|actually|instead|however|but|correction|i mean/gi;
+function intentClauses(section) {
+  return section.split(/[،,؛.!؟:\n]+|\b(?:and|but|however)\b|(?:\s+و(?=\s*(?:ابي|ابغى|ابغا|اريد|احب|ارغب|ودي|i\s+want)))/i)
+    .map(clause => clause.trim()).filter(Boolean);
+}
 function correctedTopic(text, topic) {
   const sections = text.split(correctionCue);
-  const clauses = section => section.split(/[،,؛.!؟\n]+|\b(?:and|but|however)\b|(?:\s+و(?=\s*(?:ابي|ابغى|ابغا|اريد|احب|ارغب|ودي|i\s+want)))/i).filter(Boolean);
   for (const section of [...sections].reverse()) {
-    const match = clauses(section).reverse().find(clause => topic.test(clause));
+    const match = intentClauses(section).reverse().find(clause => topic.test(clause));
     if (match) return match;
   }
   return text;
+}
+function correctedRelationClause(text, topics, relation) {
+  for (const section of [...text.split(correctionCue)].reverse()) {
+    const match = intentClauses(section).reverse().find(clause => topics.every(topic => topic.test(clause)) && relation.test(clause));
+    if (match) return match;
+  }
+  return null;
 }
 const avoidanceIntent = /(?:ما\s*(?:ابي|ابغى|ابغا|اريد|احب|اكره|تواجه|تطل)|لا\s*(?:ابي|ابغى|اريد|احب|اكره|تواجه|تطل|تفتح|تقابل)|اكره|لا\s*ينبغي(?:\s*ان)?|يجب\s*(?:الا|ان\s*لا)|لا\s*بد\s*(?:ان\s*)?لا|بدون|تجنب|اتجنب|avoid|don't\s*want|do\s*not\s*want|should\s*not|shouldn't|must\s*not|mustn't|not\s+face)/;
 const positiveIntent = /(?:ابي|ابغى|ابغا|اريد|احب|ارغب|want|prefer|like)/;
@@ -84,9 +94,10 @@ function promptKinds(idea) {
 
   const bedroomTopic = /غرف(?: ال)?نوم|غرفه(?: ال)?نوم|غرفه|bedrooms?/;
   const kitchenTopic = /مطبخ|kitchen/;
-  const facing = /تواجه|مواجهه|مقابل|تطل(?:\s*على)?|تفتح(?:\s*على)?|face|facing|overlook/;
-  if (bedroomTopic.test(text) && kitchenTopic.test(text) && facing.test(text)) {
-    const section = correctedTopic(text, bedroomTopic);
+  const facing = /(?:^|[^\p{L}\p{N}])(?:و?(?:تواجه|مواجهه|مقابل|تطل(?:\s*على)?|تفتح(?:\s*على)?)|facing|face|overlook)(?=$|[^\p{L}\p{N}])/iu;
+  const bedroomKitchenSection = correctedRelationClause(text, [bedroomTopic, kitchenTopic], facing);
+  if (bedroomKitchenSection) {
+    const section = bedroomKitchenSection;
     const avoid = avoidanceIntent.test(section) && !noConcern.test(section);
     const prefer = positiveIntent.test(section) && !avoidanceIntent.test(section);
     const kind = avoid ? 'avoid_bedroom_kitchen_sightline'
@@ -119,7 +130,8 @@ function promptKinds(idea) {
         : kind?.includes('corridor') ? /ممر(?:ات|ين|ه|corridors?)/
           : kind?.includes('guest') || kind?.includes('shared') ? /ضيوف|ضيافه|مجلس|عائله|اسره|guest|family/
             : /مجلس|majlis/;
-    const section = correctedTopic(text, topic);
+    const section = kind?.includes('bedroom') && bedroomKitchenSection
+      ? bedroomKitchenSection : correctedTopic(text, topic);
     const must = /(?:must|mandatory|required|require|لازم|يجب|لا\s*بد|ضروري|شرط|مطلوب)/.test(section);
     return must ? { ...row, value: { ...row.value, mustRequirement: true } } : row;
   });
