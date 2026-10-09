@@ -180,7 +180,7 @@ async function show3D(retry = false) {
     message('threeError', ''); $('retry3D').hidden = true;
     await loadThree(retry);
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
-    viewer.setVisible(state.tab === 'design'); viewer.setModel(state.model, state.palette); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 })); $('roof').checked = false;
+    viewer.setVisible(state.tab === 'design'); viewer.setModel(state.model, state.palette); viewer.setRoof(true); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 })); $('roof').checked = true;
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
@@ -652,6 +652,22 @@ function boot() {
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));
   all('[data-move]').forEach(b => b.addEventListener('click', () => viewer?.move(b.dataset.move)));
   $('roof').addEventListener('change', () => viewer?.setRoof($('roof').checked)); $('retry3D').addEventListener('click', () => { void show3D(true); });
+  const orbitButton = $('autoOrbit3D');
+  const orbitLabel = () => {
+    const active = !!viewer?.autoOrbit;
+    orbitButton.setAttribute('aria-pressed', String(active));
+    orbitButton.textContent = active ? 'إيقاف الدوران الهادئ' : '↻ دوران هادئ حول المبنى';
+  };
+  orbitButton.addEventListener('click', () => {
+    if (!viewer) return toast('ولّد مخططًا أولًا ليعمل العرض الثلاثي.');
+    if (viewer.autoOrbit) viewer.stopOrbit(); else viewer.startOrbit();
+    orbitLabel();
+  });
+  $('view').addEventListener('pointerdown', () => { if (viewer?.autoOrbit) { viewer.stopOrbit(); orbitLabel(); } }, { capture: true });
+  all('[data-sun-preset]').forEach(button => button.addEventListener('click', () => {
+    $('sunHour').value = button.dataset.sunPreset;
+    renderSolarPreview();
+  }));
   $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); });
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', updateCosts));
   $('askAI').addEventListener('click', askAI);
