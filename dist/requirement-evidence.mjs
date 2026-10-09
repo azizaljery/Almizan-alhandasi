@@ -11,7 +11,7 @@ export const REQUIREMENT_STATUS = Object.freeze({
   UNVERIFIED: 'UNVERIFIED',
   UNSUPPORTED: 'UNSUPPORTED',
 });
-const number = value => Number.isFinite(Number(value)) ? Number(value) : null;
+const number = value => value === null || value === undefined || value === '' ? null : (Number.isFinite(Number(value)) ? Number(value) : null);
 const fmt = (value, decimals = 1) => Number(value).toLocaleString('ar-SA', { maximumFractionDigits: decimals });
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -161,14 +161,14 @@ export function evaluateRequirementEvidence({ model, program, idea = '', discove
       'المخطط الأرضي لا يثبت قدرة الأساسات أو الأنظمة أو الهيكل على تحمل التوسع المستقبلي.',
       'رغبة العميل', 'المستقبل');
   }
-  if (/(?:بدون|دون|لا أريد|لا نريد)\s+(?:فناء|باحة)/.test(briefText)) {
+  if (/(?:بدون|دون|لا أريد|لا نريد|لا)\s+(?:فناء|باحة)/.test(briefText)) {
     const courtCount = (model.courtyards || []).length;
     add('no-court', 'عدم إنشاء فناء',
       courtCount ? 'NOT_MET' : 'MEASURED',
       courtCount ? 'يوجد ' + fmt(courtCount, 0) + ' فناء مرسوم رغم طلب استبعاده.' : 'لا توجد مساحة فناء معرفة في هندسة هذا البديل.',
       'طلب صريح من العميل', 'شكل المبنى');
   }
-  if (/(?:بدون|دون|لا أريد|لا نريد)\s+مسبح/.test(briefText)) {
+  if (/(?:بدون|دون|لا أريد|لا نريد|لا)\s+مسبح/.test(briefText)) {
     add('no-pool', 'عدم إنشاء مسبح', 'UNVERIFIED',
       'المسبح الخارجي غير ممثل في مخطط الدور الأرضي الحالي؛ غيابه عن الرسم لا يثبت عدم وجوده في تصميم الموقع.',
       'طلب صريح من العميل', 'شكل المبنى');
