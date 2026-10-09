@@ -34,6 +34,14 @@ jobs:
           if [ -z "$CHROME" ]; then echo "::error::Chromium not installed on runner"; exit 1; fi
           "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=7300 --dump-dom http://127.0.0.1:8765/index.html > /tmp/mizan-dom.html 2> /tmp/mizan-chrome.log
           node scripts/studio-browser-smoke.mjs /tmp/mizan-dom.html
+      - name: Verify mobile viewport and capture visual evidence
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --window-size=390,844 --virtual-time-budget=7300 --dump-dom http://127.0.0.1:8765/index.html > /tmp/mizan-mobile-dom.html 2> /tmp/mizan-mobile-chrome.log
+          node scripts/studio-browser-smoke.mjs /tmp/mizan-mobile-dom.html
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --window-size=1366,900 --virtual-time-budget=2200 --screenshot=/tmp/mizan-intro.png http://127.0.0.1:8765/index.html > /dev/null 2>&1
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --window-size=1366,900 --virtual-time-budget=7300 --screenshot=/tmp/mizan-desktop.png http://127.0.0.1:8765/index.html > /dev/null 2>&1
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --window-size=390,844 --virtual-time-budget=7300 --screenshot=/tmp/mizan-mobile.png http://127.0.0.1:8765/index.html > /dev/null 2>&1
       - name: Save smoke evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -41,6 +49,11 @@ jobs:
           name: mizan-studio-browser-smoke
           path: |
             /tmp/mizan-dom.html
+            /tmp/mizan-mobile-dom.html
+            /tmp/mizan-intro.png
+            /tmp/mizan-desktop.png
+            /tmp/mizan-mobile.png
+            /tmp/mizan-mobile-chrome.log
             /tmp/mizan-chrome.log
             /tmp/mizan-server.log
           retention-days: 7
