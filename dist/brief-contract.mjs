@@ -12,6 +12,15 @@ export function normalizeBriefText(value) {
     .replace(/ة/g, 'ه')
     .replace(/\s+/g, ' ');
 }
+export function extractPlotDimensions(text) {
+  const source = normalizeBriefText(text);
+  const match = source.match(/(?:^|[\s،؛])(?:ال)?ارض(?:ي|نا)?\s*(?:(?:ب)?ابعاد|مقاس|:)?\s*(\d+(?:\.\d+)?)\s*[×xX*]\s*(\d+(?:\.\d+)?)/iu);
+  if (!match) return null;
+  const width = Number(match[1]), length = Number(match[2]);
+  if (!(width >= 8 && width <= 100 && length >= 8 && length <= 100)) return null;
+  return { width, length };
+}
+
 const count = value => /^\d+$/.test(value) ? Number(value) : words[value] ?? null;
 const roomType = label => /مستودع|مخزن|storage/i.test(label) ? 'storage'
   : /مطبخ|kitchen/i.test(label) ? 'kitchen'
