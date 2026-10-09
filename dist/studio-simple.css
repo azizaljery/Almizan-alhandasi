@@ -105,3 +105,8 @@ body:has(#app.studio-simple-mode:not(.studio-advanced-open)) #mzpFab{display:non
 
 /* Mobile chat follows the page scroll; never nest a narrow internal scrollbar. */
 @media(max-width:690px){.studio-transcript{max-height:none;overflow:visible}}
+
+/* Prevent horizontal page scrolling caused by legacy technical panels on narrow phones. */
+body:has(#app.studio-simple-mode){overflow-x:clip}
+#app.studio-simple-mode,#app.studio-simple-mode #panel-design,#app.studio-simple-mode .studio-simple{max-width:100%;min-width:0;overflow-x:clip}
+#app.studio-simple-mode .studio-conversation,#app.studio-simple-mode .studio-project-setup{min-width:0}
