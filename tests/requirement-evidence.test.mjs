@@ -88,7 +88,10 @@ test('explicit no-courtyard request is checked against geometry, not decorative 
 test('HTML evidence escapes user-supplied room names and displays the state', () => {
   const altered = structuredClone(model);
   altered.rooms[0].name = '<img src=x onerror=alert(1)>';
-  const evidence = evaluateRequirementEvidence({ model: altered, program: rooms });
+  altered.rooms[0].w /= 2;
+  const maliciousProgram = structuredClone(rooms);
+  maliciousProgram[0].name = '<img src=x onerror=alert(1)>';
+  const evidence = evaluateRequirementEvidence({ model: altered, program: maliciousProgram });
   const html = renderRequirementEvidenceHTML(evidence);
   assert.ok(!html.includes('<img'));
   assert.ok(html.includes('data-evidence-status="NOT_MET"'));
