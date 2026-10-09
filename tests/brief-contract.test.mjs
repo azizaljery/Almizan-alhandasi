@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeBriefText, extractExplicitProgramRequirements, verifyProposedProgram } from '../dist/brief-contract.mjs';
+import { normalizeBriefText, extractPlotDimensions, extractExplicitProgramRequirements, verifyProposedProgram } from '../dist/brief-contract.mjs';
 
 const rooms = [
   { name: 'مجلس الرجال', type: 'majlis', area: 63 },
@@ -59,4 +59,12 @@ test('latest room dimension revision overrides the original dimension', () => {
   updated[2].area = 54;
   assert.equal(verifyProposedProgram(prompt, updated).pass, true);
   assert.equal(verifyProposedProgram(prompt, rooms).pass, false);
+});
+
+
+test('explicit land dimensions are read from the client brief without confusing room sizes', () => {
+  assert.deepEqual(extractPlotDimensions('أرضي ٥٠×٢٥ م، وأريد مطبخ 8×6'), { width: 50, length: 25 });
+  assert.deepEqual(extractPlotDimensions('الأرض 30x40'), { width: 30, length: 40 });
+  assert.equal(extractPlotDimensions('المطبخ 8×6'), null);
+  assert.equal(extractPlotDimensions('الأرض 500×300'), null);
 });
