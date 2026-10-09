@@ -144,6 +144,15 @@
       <div class="result-head"><div><span class="ey">تصور قابل للمراجعة</span><h2>من فكرتك… إلى مساحة تراها</h2></div><span class="pill" id="resultState">محدّث</span></div>
       <p class="message warning stale-message" hidden>تغيّرت المتطلبات. هذا هو آخر مخطط ناجح؛ اضغط «ولّد» لتحديثه والكميات.</p>
       <section class="card" aria-label="مقارنة بدائل المخطط"><header class="ch"><div><h2>قارن قبل أن تختار</h2><p>كل اختيار يحدّث الرسم والعرض الثلاثي والكميات معًا.</p></div></header><div class="cb"><div id="alternativeCards" class="alternative-grid"></div><p class="help" id="alternativeNote"></p></div></section>
+      <section class="card requirement-evidence" id="requirementEvidence" aria-labelledby="requirementEvidenceTitle">
+        <header class="ch"><b class="num">✓</b><div><h2 id="requirementEvidenceTitle">ما الذي نفّذه التصميم من طلبك؟</h2><p>سجل أدلة من المخطط نفسه: ما ثبت، وما قيس فقط، وما لم يُثبت أو لم يُنفذ. لا نعتبر المظهر دليلًا على تحقق الطلب.</p></div></header>
+        <div class="cb">
+          <div id="requirementSummary" class="requirement-summary" role="status"></div>
+          <p id="requirementStale" class="message warning" hidden>غيّرت المتطلبات بعد آخر توليد. الأدلة أدناه تخص المخطط السابق؛ أعد التوليد لمقارنتها مع طلبك الجديد.</p>
+          <div id="requirementRows" class="requirement-rows"></div>
+          <p id="requirementNote" class="help"></p>
+        </div>
+      </section>
       <article class="card"><header class="ch"><b class="num">2D</b><div><h2>المخطط الأرضي</h2><p>اسحب للتحريك، وكبّر بإصبعين أو العجلة. اختر الغرفة لعرض تفاصيلها.</p></div></header>
         <div class="cb">
           <div class="viewer-tools" role="group" aria-label="أدوات المخطط"><button class="small-button" id="zoomIn" aria-label="تكبير المخطط">＋</button><button class="small-button" id="zoomOut" aria-label="تصغير المخطط">−</button><button class="small-button" id="fitPlan">ملاءمة المبنى</button><button class="small-button" id="fitPlot">حدود الأرض</button><button class="small-button" id="togglePlanEditor" aria-expanded="false">✎ حرّر المخطط</button><button class="small-button" id="exportPlan">تنزيل الرسم SVG</button><label class="check"><input id="showRoute" type="checkbox" checked> مسار الوصول</label></div>
