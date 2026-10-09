@@ -81,3 +81,9 @@
 @media(max-width:1020px){.studio-simple-grid{grid-template-columns:1fr}.studio-project-setup{order:-1}.studio-plot-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.studio-transcript{max-height:260px}}
 @media(max-width:690px){#app.studio-simple-mode #panel-design>.wrap{width:94%;padding-top:16px}.studio-simple-hero h1{font-size:1.6rem}.studio-project-setup{padding:18px}.studio-plot-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-request-form{padding:17px}.studio-transcript{padding:17px}.studio-message{max-width:100%}.studio-request-actions{flex-direction:column}.studio-primary,.studio-secondary{width:100%}.studio-proposal{margin:0 15px 17px;padding:15px}.studio-feedback{padding:0 17px 12px}#app.studio-simple-mode #panel-design .view{height:480px}}
 @media(prefers-reduced-motion:reduce){.studio-primary,.studio-secondary,.studio-advanced-button{transition:none!important}}
+
+/* Solar controls remain usable even when the advanced settings are collapsed. */
+.studio-sun-presets{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.studio-sun-presets button{min-height:42px;padding:8px 15px;border-radius:9px;border:1px solid #c7d6c8;background:#f0f5ee;color:#2c553c;font:inherit;font-size:.83rem;font-weight:800}
+.studio-sun-presets button:hover,.studio-sun-presets button:focus-visible{background:#dcebdd;outline-color:#3f7552}
+#app.studio-simple-mode #autoOrbit3D{border-color:#7ba88a;color:#28603f;font-weight:800}
