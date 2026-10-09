@@ -359,7 +359,7 @@ function renderRequirementEvidence() {
       '<div data-summary-status="' + key + '"><strong>' + fmt(evidence.counts[key], 0) +
       '</strong><span>' + label + '</span></div>').join('');
     $('requirementRows').innerHTML = renderRequirementEvidenceHTML(evidence);
-    $('requirementNote').textContent = evidence.note +
+    $('requirementNote').textContent = evidence.note + ' مرجع النموذج: ' + evidence.modelIdentity + '.' +
       (state.traceContext ? '' : ' لا يتوفر موجز النص الأصلي لهذه النسخة المستعادة؛ عُرضت قياسات النموذج فقط.');
   } catch (error) {
     $('requirementSummary').textContent = 'تعذّر فحص متطلبات هذا المخطط.';
