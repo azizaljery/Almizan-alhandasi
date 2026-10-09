@@ -90,6 +90,14 @@ try {
     clip: { x: planRect.x, y: planRect.y, width: planRect.width, height: planRect.height, scale: 1 },
   });
   writeFileSync('/tmp/mizan-generated-plan.png', Buffer.from(screenshot.data, 'base64'));
+  await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await pause(300);
+  const mobile = await evaluate('({viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth})');
+  await evaluate('window.scrollTo({left:1000,top:0,behavior:"instant"}); true');
+  await pause(100);
+  const horizontalScroll = await evaluate('window.scrollX');
+  console.log('Mobile viewport metrics:', JSON.stringify({ ...mobile, horizontalScroll }));
+  assert.ok(Math.abs(horizontalScroll) <= 1, 'Mobile page allows horizontal scrolling beyond the viewport.');
   console.log('E2E PASS: real planner produced ' + plan.rooms + ' room shapes, ' + plan.alternatives + ' distinct candidates, and a WebGL 3D canvas.');
 } finally {
   try { socket?.close(); } catch {}
