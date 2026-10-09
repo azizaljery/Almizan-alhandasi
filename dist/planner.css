@@ -103,3 +103,13 @@ body{font-size:17px}.help,.scope-note,.message{font-size:1rem;line-height:1.85}.
 .studio-preview-note{padding:0 20px 18px;color:#5e6b60;font-size:.85rem}
 @media(max-width:1000px){.studio-site-overview{grid-template-columns:1fr}.studio-site-diagram svg{max-height:220px}.studio-preview-layout{grid-template-columns:1fr}.studio-preview-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.alternative-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}}
 @media(max-width:650px){.studio-site-card{padding:15px}.studio-site-head{align-items:flex-start;flex-direction:column}.studio-site-overview{gap:14px}.studio-site-facts{grid-template-columns:1fr 1fr}.studio-site-facts b{font-size:.93rem}.taste-deck{grid-template-columns:1fr}.taste-card{grid-template-columns:96px minmax(0,1fr)}.taste-card>.taste-brief-icon{padding:10px!important}.alternative-grid{grid-template-columns:1fr}.studio-plan-preview img{height:270px}.studio-preview-layout{padding:10px}.studio-preview-layout img{height:52vh}.studio-preview-meta{grid-template-columns:1fr 1fr;gap:6px}.studio-preview-head{padding:10px 12px}}
+
+/* Image quota failures must not obscure or replace the engineering output. */
+.visual-notice{margin:16px 0;padding:17px;border:1px solid #d5c3a5;border-radius:13px;background:#fff7e9;color:#5e4828;line-height:1.8}
+.visual-notice>strong{display:block;font-size:.93rem;color:#67472c}
+.visual-fallback{display:grid;grid-template-columns:minmax(230px,1fr) minmax(200px,1fr);gap:18px;align-items:center;margin-top:14px;padding:12px;border:1px solid #e2ddcd;border-radius:12px;background:#fff}
+.visual-fallback img{display:block;width:100%;max-height:280px;object-fit:contain;background:#f8f7f1;border-radius:9px}
+.visual-fallback b{color:#244d37;font-size:1rem}
+.visual-fallback p{margin:8px 0 14px;font-size:.86rem;color:#5e6b5e}
+.visual-fallback button{min-height:46px;background:#244d37;color:#fff;border-color:#244d37}
+@media(max-width:650px){.visual-fallback{grid-template-columns:1fr}}
