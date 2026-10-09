@@ -16,13 +16,14 @@ export class RoomViewer {
     this.renderer.toneMappingExposure = 1.05;
     if (this.renderer.shadowMap) { this.renderer.shadowMap.enabled = true; if (T.PCFSoftShadowMap) this.renderer.shadowMap.type = T.PCFSoftShadowMap; }
     const canvas = this.renderer.domElement;
+    if (canvas.style) canvas.style.touchAction = 'none';
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
-    this.scene.add(new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8));
+    this.ambientLight = new T.HemisphereLight(0xfffbef, 0x6f7c70, 1.8); this.scene.add(this.ambientLight);
     const light = new T.DirectionalLight(0xffe4b6, 3.1); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
     if (light.shadow?.mapSize) { const size = Math.min(globalThis.innerWidth || 1200, globalThis.innerHeight || 900) < 700 ? 1024 : 2048; light.shadow.mapSize.width = size; light.shadow.mapSize.height = size; light.shadow.camera.near = 1; light.shadow.camera.far = 200; light.shadow.bias = -.00022; }
     this.scene.add(light);
-    const fill = new T.DirectionalLight(0xbcd8ff, .75); fill.position.set(24, 18, -35); this.scene.add(fill);
+    const fill = new T.DirectionalLight(0xbcd8ff, .75); this.fillLight = fill; fill.position.set(24, 18, -35); this.scene.add(fill);
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
     const on = (event, handler, options = {}) => canvas.addEventListener(event, handler, { ...options, signal: this.abort.signal });
@@ -36,6 +37,20 @@ export class RoomViewer {
         const after = [...this.pointers.values()], distance = points => Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
         if (distance(after) > 1) this.radius *= distance(before) / distance(after);
         this.radius = Math.max(4, Math.min(240, this.radius));
+        // Two-finger pan uses the actual touch-centroid shift, not a page scroll.
+        const midpoint = points => ({
+          x: (points[0].x + points[1].x) / 2,
+          y: (points[0].y + points[1].y) / 2,
+        });
+        const previous = midpoint(before), current = midpoint(after);
+        const scale = this.radius * .0014;
+        const shiftX = (current.x - previous.x) * scale;
+        const shiftY = (current.y - previous.y) * scale;
+        const p = this.model?.plot;
+        if (p) {
+          this.target.x = Math.max(-5, Math.min(p.width + 5, this.target.x - shiftX * Math.cos(this.theta) + shiftY * Math.sin(this.theta)));
+          this.target.z = Math.max(-p.length - 5, Math.min(5, this.target.z + shiftX * Math.sin(this.theta) + shiftY * Math.cos(this.theta)));
+        }
       } else if (this.pointers.size === 1) {
         if (this.mode === 'inside') { this.yaw -= dx * .005; this.pitch = Math.max(-.85, Math.min(.85, this.pitch - dy * .004)); }
         else { this.theta -= dx * .007; this.phi = Math.max(.02, Math.min(1.45, this.phi - dy * .005)); }
@@ -231,9 +246,14 @@ export class RoomViewer {
   setSun(preview) {
     if (!this.sunLight) return;
     if (!preview?.visible || !Number.isFinite(preview.altitude) || preview.altitude <= 0) {
-      this.sunLight.visible = false; this.render(); return;
+      this.sunLight.visible = false;
+      if (this.ambientLight) this.ambientLight.intensity = .5;
+      if (this.fillLight) this.fillLight.intensity = .22;
+      this.render(); return;
     }
     this.sunLight.visible = true;
+    if (this.ambientLight) this.ambientLight.intensity = Math.max(.75, Math.min(1.8, .75 + preview.altitude / 55));
+    if (this.fillLight) this.fillLight.intensity = .55;
     const rad = preview.azimuth * Math.PI / 180;
     const altitude = Math.max(.035, preview.altitude * Math.PI / 180);
     const distance = Math.max(55, (this.model?.plot?.length || 0) * 1.6, (this.model?.plot?.width || 0) * 1.6);
