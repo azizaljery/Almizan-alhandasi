@@ -1,5 +1,5 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الميزان الهندسي</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23C6A15B' stroke-width='4'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
-<meta name="description" content="صف طلب منزلك، راجع ما فهمناه، ثم اختبر المخطط والغرف والميزانية من مشروع واحد."><link rel="stylesheet" href="./workspace.css"><link rel="stylesheet" href="./land-survey.css"><link rel="stylesheet" href="./studio-workspace.css"><link rel="stylesheet" href="./archive.css"><link rel="stylesheet" href="./cinematic-entry.css"><link rel="stylesheet" href="./studio-simple.css"></head><body><section class="intro cinematic" id="intro" aria-label="مقدمة الميزان الهندسي">
+<meta name="description" content="صف طلب منزلك، راجع ما فهمناه، ثم اختبر المخطط والغرف والميزانية من مشروع واحد."><link rel="stylesheet" href="./workspace.css"><link rel="stylesheet" href="./land-survey.css"><link rel="stylesheet" href="./studio-workspace.css"><link rel="stylesheet" href="./archive.css"><link rel="stylesheet" href="./cinematic-entry.css"><link rel="stylesheet" href="./studio-simple.css"><link rel="stylesheet" href="./requirement-evidence.css"></head><body><section class="intro cinematic" id="intro" aria-label="مقدمة الميزان الهندسي">
   <div class="cinematic-sun" aria-hidden="true"></div>
   <div class="cinematic-world" id="cinematicCanvas" aria-hidden="true">
     <svg class="cinematic-static" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -295,6 +295,15 @@
       <section class="studio-alternatives" aria-label="مقارنة بدائل المخطط">
         <header class="studio-alternatives-head"><div><span class="ey">اختيارات التخطيط</span><h2>بدائل من برنامجك</h2></div><small id="alternativesCount">اختر نموذجًا لعرض تفاصيله</small></header>
         <div id="alternativeCards" class="alternative-grid" role="list" aria-label="بدائل تخطيط فعلية"></div>
+      </section>
+      <section class="card requirement-evidence" id="requirementEvidence" aria-labelledby="requirementEvidenceTitle">
+        <header class="ch"><b class="num" aria-hidden="true">✓</b><div><h2 id="requirementEvidenceTitle">سجل أدلة المتطلبات من المخطط المحدد</h2><p>قياسات هندسية من البديل المعروض. القياس ليس اعتمادًا إنشائيًا أو نظاميًا، وما لا يدعمه النموذج سيظهر بوضوح.</p></div></header>
+        <div class="cb">
+          <div id="requirementSummary" class="requirement-summary" role="status" aria-live="polite"></div>
+          <p id="requirementStale" class="message warning" hidden>هذه الأدلة تخص آخر بديل ناجح وبرنامج الغرف المحفوظ وقت توليده؛ تغيّرت المدخلات الحالية ولم تُفحص بعد. أعد التوليد لعرض سجل جديد.</p>
+          <div id="requirementRows" class="requirement-rows"></div>
+          <p id="requirementNote" class="help"></p>
+        </div>
       </section>
       <div class="studio-layout"><div class="studio-main"><article id="studioPlanCard" class="card studio-2d"><header class="ch studio-canvas-head"><div><span class="ey">مسقط مرسوم من بيانات المشروع</span><h2>المخطط الأرضي</h2></div><span class="studio-canvas-help">اختر غرفة لعرض مساحتها وأبعادها</span></header>
         <div class="cb">

@@ -24,13 +24,14 @@ import { analyzeSurveyGeometry, deriveRectangularGeneratorPlot, surveyFingerprin
 import { initLandSurveyEditor } from './land-map.mjs';
 import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
+import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
+const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
 const exploration = { signature: '', previous: [], seed: 1 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
@@ -91,6 +92,7 @@ function applyClientBrief() {
 function markDirty() {
   state.dirty = !!state.model && (workspaceSignature(rawPlot(), state.program) !== state.signature || state.engineeringSignature !== engineeringSignature());
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
+  if ($('requirementStale')) $('requirementStale').hidden = !state.dirty;
   $('resultState').textContent = state.dirty ? 'آخر مخطط ناجح — يحتاج تحديثًا' : 'المخطط مطابق للجدول';
   $('resultState').classList.toggle('warn', state.dirty);
   const archived = archiveIsCurrent();
@@ -406,7 +408,7 @@ function showResults() {
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
-  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderGeminiReview(); renderAlternatives(); renderSolarPreview(); void show3D();
+  $('undo').disabled = !state.history.length; markDirty(); renderBOQ(); renderPlanReview(); renderGeminiReview(); renderAlternatives(); renderRequirementEvidence(); renderSolarPreview(); void show3D();
   renderRequestMatch();
 }
 function refreshGemini() {
@@ -511,6 +513,38 @@ function renderAlternatives() {
   $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
   markDirty();
 }
+function renderRequirementEvidence() {
+  const summary = $('requirementSummary'), rows = $('requirementRows'), note = $('requirementNote');
+  if (!state.model || !summary || !rows || !note) return;
+  const context = state.traceContext;
+  try {
+    const evidence = evaluateRequirementEvidence({
+      model: state.model,
+      program: Array.isArray(context?.program) ? context.program : undefined,
+      plot: context?.plot || null,
+      idea: context?.idea || '', discovery: context?.discovery || {}, briefContext: context?.briefContext || null,
+    });
+    const labels = [
+      ['ENFORCED', 'مطابق في الرسم'], ['MEASURED', 'مقاس دون حكم'], ['NOT_MET', 'غير مستوفى'],
+      ['UNVERIFIED', 'غير مثبت'], ['UNSUPPORTED', 'غير مدعوم'],
+    ];
+    summary.replaceChildren(...labels.map(([key, label]) => {
+      const item = document.createElement('div'); item.dataset.summaryStatus = key;
+      const value = document.createElement('strong'); value.textContent = fmt(evidence.counts[key], 0);
+      const title = document.createElement('span'); title.textContent = label;
+      item.append(value, title); return item;
+    }));
+    rows.innerHTML = renderRequirementEvidenceHTML(evidence);
+    note.textContent = evidence.note + ' هوية البديل المحدد: ' + evidence.modelIdentity + '.' +
+      (context?.program ? ' تمت المقارنة مع برنامج الغرف المحفوظ لحظة هذا التوليد.' :
+        ' لا تتوفر نسخة برنامج الغرف الأصلية لهذا البديل؛ لم نستخدم جدول التحرير الحالي لإثبات المطابقة.');
+    $('requirementStale').hidden = !state.dirty;
+  } catch (error) {
+    summary.textContent = 'تعذّر فحص هذا النموذج.';
+    rows.replaceChildren();
+    note.textContent = error instanceof Error ? error.message : 'تعذّر إنشاء سجل الأدلة.';
+  }
+}
 function renderPlanReview() {
   const review = reviewPlan(state.model);
   $('reviewScore').textContent = `${fmt(review.issues.filter(i => i.level === 'warn').length, 0)} تنبيهات`;
@@ -567,7 +601,7 @@ async function generate() {
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
-    state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
+    state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults(); switchTab('result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
   } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح لم يتغير في هذه الجلسة.' : '')); markDirty(); }
@@ -906,7 +940,7 @@ function saveProject() {
   } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
 }
 function applyProjectState(project, statusText) {
-  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
+  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
   state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
   restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
   state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
@@ -1048,7 +1082,7 @@ function boot() {
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
-    const previous = state.history.pop(); state.model = previous.model; state.selectedShape = previous.model.shape || null; state.palette = previous.palette; state.program = publicRooms(previous.model.program); state.landSurvey = previous.landSurvey ? validateLandSurvey(previous.landSurvey) : null; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; const p = previous.model.plot;
+    const previous = state.history.pop(); state.model = previous.model; state.traceContext = null; state.selectedShape = previous.model.shape || null; state.palette = previous.palette; state.program = publicRooms(previous.model.program); state.landSurvey = previous.landSurvey ? validateLandSurvey(previous.landSurvey) : null; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; const p = previous.model.plot;
     restorePlot(p); syncPalette(); state.alternatives = [state.model]; state.failures = [];
     state.signature = workspaceSignature(p, state.program); state.manualEdits = false; renderRows(); renderLandSurveySummary(); rating(); message('generationError', ''); showResults(); toast('تم استرجاع التوليد السابق ومتطلباته وحدود مسحه.');
   });
