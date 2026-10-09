@@ -661,4 +661,49 @@ function boot() {
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'design' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); initVisualizer(() => state.model); void refreshAssistantStatus();
 }
+// The simplified studio uses the SAME state, AI service, generator and 2D/3D/BOQ.
+// This bridge exposes no credentials and does not create a parallel planning engine.
+const mizanStudioAPI = Object.freeze({
+  getState() {
+    return {
+      hasModel: !!state.model,
+      model: state.model ? structuredClone(state.model) : null,
+      program: publicRooms(state.program),
+      proposal: state.proposal ? structuredClone(state.proposal) : null,
+      plot: rawPlot(),
+      dirty: state.dirty,
+      failures: structuredClone(state.failures),
+    };
+  },
+  setPlot({ width, length, entry, maxBuiltArea }) {
+    if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
+    if (!Number.isFinite(Number(width)) || !Number.isFinite(Number(length))) throw Error('أدخل أبعاد الأرض بالأمتار.');
+    $('wid').value = String(width);
+    $('len').value = String(length);
+    $('entry').value = entry;
+    if (maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '') $('maxBuiltArea').value = '';
+    else $('maxBuiltArea').value = String(maxBuiltArea);
+    state.streets[entry] = true;
+    renderStreets();
+    rating(); markDirty();
+    return validatePlot(rawPlot());
+  },
+  async propose(prompt, { accessCode = '', local = false } = {}) {
+    $('idea').value = String(prompt || '');
+    $('aiAccessCode').value = String(accessCode || '');
+    state.proposal = null;
+    if (local) await askLocal(); else await askAI();
+    if (!state.proposal) throw Error($('aiFeedback').textContent || 'لم ينتج تحليل صالح؛ بقي المخطط السابق كما هو.');
+    return { brief: structuredClone(state.proposal), context: structuredClone(state.briefContext) };
+  },
+  async drawProposal() {
+    if (!state.proposal?.rooms?.length) throw Error('لا يوجد برنامج غرف صالح للاعتماد.');
+    const previous = state.model;
+    await drawFromAIProposal();
+    if (!state.model || state.model === previous) throw Error($('generationError').textContent || 'لم ينجح التوليد؛ بقي المخطط السابق محفوظًا.');
+    return { model: structuredClone(state.model), alternatives: state.alternatives.map(model => structuredClone(model)), failures: structuredClone(state.failures) };
+  },
+  showAdvanced() { return !!state.model; },
+});
+Object.defineProperty(window, 'mizanStudioAPI', { value: mizanStudioAPI, configurable: false, writable: false });
 boot();
