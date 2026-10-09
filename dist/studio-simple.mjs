@@ -67,7 +67,8 @@ function showDiff(diff, brief) {
   $('studioApprove').disabled = diff.blockers.length > 0 || !brief.rooms?.length;
 }
 function setBusy(busy) {
-  for (const id of ['studioSubmit', 'studioLocal', 'studioApprove']) $(id).disabled = busy;
+  for (const id of ['studioSubmit', 'studioLocal']) $(id).disabled = busy;
+  if (busy) $('studioApprove').disabled = true;
   $('studioRequestForm').setAttribute('aria-busy', String(busy));
 }
 function markTechnical() {
