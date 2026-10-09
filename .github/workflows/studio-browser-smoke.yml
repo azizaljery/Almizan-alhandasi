@@ -1,0 +1,46 @@
+name: Mizan Studio Browser Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'dist/**'
+      - 'scripts/studio-browser-smoke.mjs'
+      - '.github/workflows/studio-browser-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build validation
+        run: npm run build
+      - name: Start static preview server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory dist > /tmp/mizan-server.log 2>&1 &
+          echo $! > /tmp/mizan-server.pid
+          sleep 2
+          curl --fail --silent --show-error http://127.0.0.1:8765/index.html > /dev/null
+      - name: Verify the real browser initializes the studio
+        run: |
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then echo "::error::Chromium not installed on runner"; exit 1; fi
+          "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu --virtual-time-budget=7300 --dump-dom http://127.0.0.1:8765/index.html > /tmp/mizan-dom.html 2> /tmp/mizan-chrome.log
+          node scripts/studio-browser-smoke.mjs /tmp/mizan-dom.html
+      - name: Save smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mizan-studio-browser-smoke
+          path: |
+            /tmp/mizan-dom.html
+            /tmp/mizan-chrome.log
+            /tmp/mizan-server.log
+          retention-days: 7
