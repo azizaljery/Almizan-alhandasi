@@ -5,13 +5,13 @@ ebb9a03ab7f9df6e25502bf10fa642495bd4ef9de02b45968623afd157190b84  ./.github/work
 0072dfabe80f38dd8dbb54b4a44440edf21e447d3ecadfccc6a520861e1bd381  ./.gitignore
 b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
-8c5b1e00f635dbbfffd28297392f05398dd56357f11d88404e6e9fac3cf19cb4  ./FILE-SHA256SUMS.txt
+6b350be40359d1768c46d536bd3e7a2f3ec5acf57d1618170a677e6f1efcb5e7  ./FILE-SHA256SUMS.txt
 ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
 d4509f408a7fd8ba4aa0af99a30dbe9a0a6a5b04557f1d80e68b55d589b9b5ce  ./README.md
 d483f97c632f7090cc39b22d8a1b917f52da6d62b2088d8d7be89da65c637f39  ./RELEASE-BUILD.log
 83d8785f7b3f598ceaab7388a06b7f087a95a824ba5ef3ba081b5d6e37f29c58  ./RELEASE-MANIFEST.md
 2ff00c69617e0d0c94410eb2c5efd93553ad15323f33fd1e8ad510c3e3d0c2db  ./RELEASE-TEST-87.log
-c869e731cdd5f4c4948ca868908935ed7ba1b89129f0f214a73c6cef37802028  ./dist/app.mjs
+9cc38bb4036fb3b763e148ca2648f51b231c58cd963e24db98811c642f11072d  ./dist/app.mjs
 f3aa2e9fdf717bf8fb5af7100f3beb53215a13b915eba9a10b947f50495ccf83  ./dist/assistant.mjs
 85ffde8b956ae7fcdfca1f684b635c8b2806c4ca0cb68a64f49b1cf3c8f2d640  ./dist/audit.mjs
 4fea9f45878a01c1f9c4de014f5273b870ec23b86ae6ac1233b1cc16a686f993  ./dist/circulation.mjs
@@ -73,7 +73,7 @@ d06f35857fe1aa54d630dbb606e9becb17f65faa920d3287c17a0763095a005c  ./dist/gemini/
 c69f2471249a93bd0a2337a3424c4cd71209a2a3185758f6cf5f2852f2bb8695  ./dist/gemini/engineering-math/src/index.js
 56063c1c8468bb0117eecf4381ea64ef1cadce4fb39f965757abc3d13a2ff93f  ./dist/gemini/shared/deterministic-hash.js
 780685f096045b51909e0ad16cc52913440c805a6c160933c6ea8437b42df1e6  ./dist/home-design-engine.mjs
-aa18a71f5400b53406cb3d0e1adbdc2325e49cd1cf02e39d69f6c233a93e21a8  ./dist/index.html
+46355ce389b6385066e37db508d9af31a861920b0f25dcebb8d2ea8c5498f177  ./dist/index.html
 d82006c25b00fb4b984fcc3fb3ad2c3c9107454582790b9f58ea8ac6528655cc  ./dist/integration/aziz/aziz.d.ts
 47c7a891e9447e7252f3d94e48b0f7efb0b9d02238aec4ec472590203ef55107  ./dist/integration/aziz/aziz.d.ts.map
 34a0bc0be7239acdbadef88d14a2adf5347bdda39bb7466c446444b50dec9901  ./dist/integration/aziz/aziz.js
@@ -237,6 +237,8 @@ f7e5a5ceba1872760bb378a3d807fa76d11c08adaf530aba0da9645afdca47c7  ./dist/mizan-p
 4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d  ./dist/portal.mjs
 113d11c9ff62b16aecc088e2ab51820e1eafcf8667e056220260407ba4a77e11  ./dist/project.mjs
 6c2cc8e2e542f7552645219f760a81face4cd71077e895a821486b15d09e1e4f  ./dist/render-visualizer.mjs
+96c8660a1d929abf99ca325d42d77a6c0211d9136a3e2c1ab210601cc0725dd7  ./dist/requirement-evidence.css
+22f6371252c4bfaaf25b80031fb0a037ca1100d898ea48765df56d7cf39177a2  ./dist/requirement-evidence.mjs
 49a91602ea68be5a96ecf54a4f6461703e306d752ceef0f8c9907cc1e049b579  ./dist/requirements-engine.mjs
 d3c66dc1f49214d93e49bb1cb3936e5b893c94a55109abbc7de47cecafc6c449  ./dist/solar-path.mjs
 4fd9f1036003d4cb275189062cb9f7f401c54dbcf926ff703380e7d5415afe6b  ./dist/sun-orientation.mjs
@@ -258,6 +260,7 @@ dd8d2d4fd6f76548432d793ed2ee94f9c85b54784d41172de15cd448b747932b  ./tests/multi-
 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
 92ba70786a48b0388b1d68805e0e8b9c0a19ad4b51d2e7eaeaa975c66e945824  ./tests/portal-navigation.test.mjs
 e183f73580e8ee47f1cb6c25db7d76f3fa10bfe30a22ef3da1d37ae4094d6127  ./tests/release-consistency.test.mjs
+0e9bd6fa18a04bd3da790612050e0fa0f321685670a09f648b44b9f0b176143a  ./tests/requirement-evidence.test.mjs
 4c929dc7e4f76c72fd937d562356e42327781a6396b77e87f2d80e78fdc053bf  ./tests/requirements-engine.test.mjs
 142d80d416c31af17225717ced18aff46777745f119b46f16e64cb17ae06d75a  ./tests/server.test.mjs
 70dda3e233d59fcfb15e04728868792f0aaadf0bd258cd8226df8f9cfb2ec837  ./tests/solar-path.test.mjs
