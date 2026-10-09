@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { diffRoomPrograms, composeDesignConversation } from '../dist/design-dialog.mjs';
 import { proposalInputsMatch, returnToConversation } from '../dist/studio-simple.mjs';
 
@@ -96,6 +97,16 @@ test('pending proposal approval is bound to the visible text and plot values', (
   assert.equal(proposalInputsMatch(snapshot.brief, { ...snapshot.plot, width: 30 }, snapshot), false);
   assert.equal(proposalInputsMatch(snapshot.brief, { ...snapshot.plot, entry: 'n' }, snapshot), false);
   assert.equal(proposalInputsMatch(snapshot.brief, { ...snapshot.plot, maxBuiltArea: '600' }, snapshot), false);
+});
+
+test('an unchanged or read-only room program is blocked before the redraw call', () => {
+  const result = diffRoomPrograms(program, structuredClone(program), 'أبقِ المخطط كما هو', { initial: false });
+  assert.equal(result.noChange, true);
+  assert.ok(result.blockers.some(text => /لم يغيّر برنامج الغرف/.test(text)));
+  const studioSource = readFileSync(new URL('../dist/studio-simple.mjs', import.meta.url), 'utf8');
+  const approval = studioSource.slice(studioSource.indexOf("$('studioApprove')"), studioSource.indexOf("$('studioEdit')"));
+  assert.match(approval, /if \(!conversation\.diff \|\| conversation\.diff\.blockers\.length\) return;/);
+  assert.ok(approval.indexOf('api.drawProposal()') > approval.indexOf('conversation.diff.blockers.length'));
 });
 
 test('returning from results only reopens the composer and preserves draft, transcript, and model', () => {

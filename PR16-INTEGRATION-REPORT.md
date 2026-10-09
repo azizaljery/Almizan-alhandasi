@@ -23,7 +23,7 @@ Source reference: PR16 head `bf7c2d28804e4ac73d4d41614255b2cec4f7e0f3`, based on
 ## Verification
 
 - Baseline before edits: `npm test` 181/181; `npm run build` passed.
-- Final source: `npm test` 213/213; `npm run build` passed, including the archive Worker bundle and 131-module browser import graph.
-- Regression tests cover unrelated bedroom deletion after a living-room edit, rename-only deletion, same-type sibling area scope, negative intent, distance/adjacency wording, exact proposal snapshot approval, exact/minimum/excluded bedroom counts, dual-count wording, same-area wrong room dimensions, no-courtyard filtering, day/night lighting, roof persistence, conversation revision ordering, and return-to-composer without model changes.
+- Final source: `npm test` 214/214; `npm run build` passed, including the archive Worker bundle and 131-module browser import graph.
+- Regression tests cover unrelated bedroom deletion after a living-room edit, rename-only deletion, same-type sibling area scope, negative intent, distance/adjacency wording, exact proposal snapshot approval, no-op generation blocking, exact/minimum/excluded bedroom counts, dual-count wording, same-area wrong room dimensions, no-courtyard filtering, day/night lighting, roof persistence, conversation revision ordering, and return-to-composer without model changes.
 - Archive Worker, D1 schema/migrations, Sites auth wiring, site hosting settings, and release rollback files were not edited.
 - Local Chromium/Playwright screenshots were not captured because this executor denies Chromium's Unix process-singleton socket. The v49 live flow exposed the missing conversation return path; this follow-up patch is not yet deployed and needs a live recheck. No live AI request or deployment was run from this worktree.

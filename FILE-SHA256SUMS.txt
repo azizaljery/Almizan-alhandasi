@@ -2,7 +2,7 @@ ad9f11f271d75dfc5dbd9c0999ade3c282357ca7f891b52ee8db4b879e9c41df  ./.gitignore
 c174c15f8ed4267589d9e038398cdb71479ae003556c8a404c98c2e72c107302  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
 ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
-a770035c71964ae273cd2e1e825513111c65edc77bfc06caff63a89fbb776678  ./PR16-INTEGRATION-REPORT.md
+3d3406e3c956822f04946022c5cb2c9d2c43a6057b67e6841d78d3c0c1102ca1  ./PR16-INTEGRATION-REPORT.md
 e4e0476f3ec59bcda72d21b5162699bcf91310730320d20fb521dbd20c36408b  ./README.md
 61bfdff280a76b2a2ccf9306e44ca5db9dfca6efc98f7778efa694d71480563c  ./dist/app.mjs
 553f2e353f14c882771a5f681415a739061a28ef5d2aea907752ac83888fae0f  ./dist/assets/style-classic-villa.png
@@ -263,7 +263,7 @@ de11e48520f8cd683a287852d48e8305af257e06234dcaf1e7f91daa37c3056d  ./scripts/chec
 724a38bf53f5e13ff46401e124b78c84c3d83fd16b3e5c04da7d317f8478d0eb  ./tests/claude-integration.test.mjs
 a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client-brief.test.mjs
 9db9909d27876caa131a6c259252dfebf8f033f5b613f6f7ee1cef2887076435  ./tests/design-constraints.test.mjs
-68a881f75d52d2e22727c1c5fddb02e91240cd6c7e1f98b921d21c3dcaac5a2a  ./tests/design-dialog.test.mjs
+93917bd1aca2cee424396b70f9e0a99330fce7df8d103bfd415415ca1e68a2fa  ./tests/design-dialog.test.mjs
 49b8f497fd5556c1735c968b181a39e14295a23ed6707118b6534db7aabf1617  ./tests/design-insights.test.mjs
 b35a5d34f47ba3d4e058aaba0d64af02b0f1ccb4d28ce1a4820c1410753fc798  ./tests/frontend.test.mjs
 bc528d9aee28849310a6db8f67621487379c7841874a93aa11ffeae368707b0f  ./tests/home-design-engine.test.mjs
