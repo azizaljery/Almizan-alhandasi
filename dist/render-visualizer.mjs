@@ -155,6 +155,56 @@ function updateVisualizerUI() {
   document.querySelectorAll('[data-visual-view]').forEach(el => el.classList.toggle('on', el.dataset.visualView === vizState.options.viewAngle));
 }
 
+export function visualFailureMessage(error) {
+  const detail = String(error?.message || error || '');
+  if (/رصيد|الحد المسموح|quota|billing|insufficient|credit|429|402/i.test(detail))
+    return 'خدمة الصور الخارجية غير متاحة الآن بسبب الرصيد أو حد الاستخدام. الرسم الهندسي 2D والعرض 3D والكميات لا تتأثر.';
+  if (/رمز|401|403|unauthorized|forbidden/i.test(detail))
+    return 'تعذر التحقق من صلاحية خدمة الصور. راجع رمز الدخول؛ يمكنك متابعة المخطط الهندسي دون توليد صورة.';
+  if (/timeout|انتهت المهلة|network|fetch|الاتصال/i.test(detail))
+    return 'تعذر الاتصال بخدمة الصور في الوقت الحالي. يمكنك متابعة المخطط الهندسي وعرض 3D دون انتظار الصورة.';
+  return 'لم تكتمل الصورة المعمارية. الرسم الهندسي متاح كما هو، ولا تتغير الغرف أو الكميات عند فشل الصورة.';
+}
+
+function showVisualNotice(error, model) {
+  const status = document.getElementById('visualStatus');
+  if (!status) return;
+  let notice = document.getElementById('visualNotice');
+  if (!notice) {
+    notice = document.createElement('section');
+    notice.id = 'visualNotice';
+    notice.className = 'visual-notice';
+    notice.setAttribute('role', 'status');
+    notice.setAttribute('aria-live', 'polite');
+    status.insertAdjacentElement('afterend', notice);
+  }
+  notice.replaceChildren();
+  const title = document.createElement('strong');
+  title.textContent = visualFailureMessage(error);
+  notice.append(title);
+  if (model) {
+    const panel = document.createElement('div');
+    panel.className = 'visual-fallback';
+    const img = document.createElement('img');
+    img.alt = 'المسقط الهندسي الحقيقي من نموذج الميزان، بديل عن الصورة الخارجية غير المتاحة';
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(buildPlanSVG(model));
+    const copy = document.createElement('div');
+    const heading = document.createElement('b');
+    heading.textContent = 'مسقطك الهندسي متاح دون تكلفة توليد الصور';
+    const desc = document.createElement('p');
+    desc.textContent = 'هذا رسم 2D من بيانات الغرف والجدران والفتحات، وليس صورة فوتوغرافية ولا تصميمًا بديلًا.';
+    const go = document.createElement('button');
+    go.type = 'button';
+    go.className = 'small-button';
+    go.textContent = 'افتح المخطط الكامل 2D';
+    go.addEventListener('click', () => document.getElementById('plan')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    copy.append(heading, desc, go);
+    panel.append(img, copy);
+    notice.append(panel);
+  }
+  notice.hidden = false;
+}
+
 export function initVisualizer(getModel) {
   ensureVisualizerMarkup();
   document.querySelectorAll('[data-visual-style]').forEach(el => el.addEventListener('click', () => { vizState.options.style = el.dataset.visualStyle; updateVisualizerUI(); }));
@@ -162,10 +212,14 @@ export function initVisualizer(getModel) {
   document.querySelectorAll('[data-visual-view]').forEach(el => el.addEventListener('click', () => { vizState.options.viewAngle = el.dataset.visualView; updateVisualizerUI(); }));
   const button = document.getElementById('generateVisual');
   button?.addEventListener('click', async () => {
-    const model = getModel?.(); if (!model) { alert('ولّد المخطط أولاً ثم اطلب الصورة المعمارية.'); return; }
+    const model = getModel?.();
+    if (!model) { showVisualNotice('ولّد المخطط أولاً قبل طلب الصورة.', null); return; }
     let code = localStorage.getItem(ACCESS_CODE_KEY) || '';
-    if (!code) { code = window.prompt('أدخل رمز دخول الصور الذي أعددته في Worker:')?.trim() || ''; if (!code) return; localStorage.setItem(ACCESS_CODE_KEY, code); }
-    try { await generateVisual(model); } catch (error) { alert(`فشل التوليد: ${error.message}`); }
+    if (!code) { code = window.prompt('أدخل رمز دخول الصور الذي أعددته في Worker:')?.trim() || ''; if (!code) { showVisualNotice('رمز الدخول مطلوب.', model); return; } localStorage.setItem(ACCESS_CODE_KEY, code); }
+    try {
+      await generateVisual(model);
+      const notice = document.getElementById('visualNotice'); if (notice) notice.hidden = true;
+    } catch (error) { showVisualNotice(error, model); }
   });
   document.getElementById('clearGallery')?.addEventListener('click', () => { if (vizState.gallery.length && confirm('حذف كل الصور المحفوظة من هذا الجهاز؟')) { vizState.gallery = []; writeGallery([]); renderGallery(); } });
   renderGallery(); updateVisualizerUI();

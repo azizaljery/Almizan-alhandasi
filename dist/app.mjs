@@ -15,6 +15,7 @@ import { compareHomeModels, buildEngineeringPromptContext } from './home-design-
 import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
 import { initVisualizer } from './render-visualizer.mjs';
 import { calculateMizanScore } from './mizan-score.mjs';
+import { siteOverviewHTML, studioCardsHTML, planPreviewURL, studioMetrics } from './studio-preview.mjs';
 import { analyzeGeminiEngineering } from './gemini-engineering-layer.mjs';
 import { runMultiEngineDesign } from './multi-engine.mjs';
 
@@ -87,6 +88,12 @@ function renderStreets() {
   const enabled = Object.fromEntries(Object.entries(DIRECTIONS).filter(([s]) => state.streets[s]));
   $('entry').innerHTML = Object.keys(enabled).length ? options(enabled, selected) : '<option value="">فعّل جهة شارع أولًا</option>';
 }
+function renderSiteOverview() {
+  const target = $('studioSiteOverview');
+  if (!target) return;
+  try { target.innerHTML = siteOverviewHTML(rawPlot(), state.program); }
+  catch (error) { target.textContent = 'أكمل أبعاد الأرض واتجاه المدخل لتظهر حدود البناء الحقيقية. ' + error.message; }
+}
 function rating() {
   const p = rawPlot(); $('area').textContent = Number.isFinite(p.width * p.length) ? fmt(p.width * p.length) + ' م²' : '—';
   try {
@@ -112,6 +119,7 @@ function rating() {
   } catch (error) {
     $('grade').textContent = '—'; $('grade').removeAttribute('data-g'); $('rt').textContent = 'راجع بيانات الأرض'; $('bars').replaceChildren(); $('plotInsights').replaceChildren(); $('ratingHelp').textContent = 'لا يمكن عرض مؤشر صالح بالمدخلات الحالية.'; message('plotError', error.message);
   }
+  renderSiteOverview();
 }
 function renderSolarPreview() {
   try {
@@ -127,6 +135,7 @@ function renderSolarPreview() {
 function programTotal() {
   const sum = state.program.reduce((s, r) => s + (Number.isFinite(r.area) ? r.area : 0), 0);
   $('programTotal').textContent = `${fmt(state.program.length, 0)} فراغًا · ${fmt(sum)} م² صافي الغرف، قبل إضافة الجدران والممرات. التوليد من هذا الجدول فقط.`;
+  renderSiteOverview();
 }
 function renderRows() {
   $('roomRows').innerHTML = state.program.map((r, i) => `<tr data-row="${i}"><td><input data-field="name" aria-label="اسم الفراغ ${i + 1}" maxlength="70" value="${esc(r.name)}"></td><td><select data-field="type" aria-label="نوع الفراغ ${i + 1}">${options(TYPES, r.type)}</select></td><td><input data-field="area" aria-label="مساحة الفراغ ${i + 1}" type="number" min="4" max="120" step=".5" value="${Number.isFinite(r.area) ? r.area : ''}"></td><td><select data-field="position" aria-label="موقع الفراغ ${i + 1}">${options(POSITIONS, r.position)}</select></td><td><select data-field="side" aria-label="جانب الفراغ ${i + 1}">${options(SIDES, r.side)}</select></td><td><button class="remove-room" data-remove="${i}" aria-label="حذف ${esc(r.name)}">حذف</button></td></tr>`).join('');
@@ -302,14 +311,6 @@ function refreshEngineering() {
 function currentEngineeringEvaluation() {
   return state.engineering?.rows?.find(row => row.design.sourceModel === state.model)?.evaluation || null;
 }
-function conceptThumbnail(model) {
-  const b = model.building, pad = .7, colors = { majlis: '#d9b777', living: '#8fb5a6', dining: '#d9c69c', kitchen: '#a8bd8d', bedroom: '#9da8c9', bath: '#8fb9c8', storage: '#b7aea1', service: '#cfa59f' };
-  const rect = (r, fill, radius = .08) => `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${radius}" fill="${fill}"/>`;
-  const rooms = model.rooms.map(r => rect(r, colors[r.type] || '#b8b2aa')).join('');
-  const corridors = model.corridors.map(r => rect(r, '#f3ead8', .03)).join('');
-  const walls = model.walls.map(w => `<line x1="${w.x1}" y1="${w.y1}" x2="${w.x2}" y2="${w.y2}" stroke="${w.type === 'ext' ? '#2e4a3d' : '#708078'}" stroke-width="${w.t}"/>`).join('');
-  return `<svg class="concept-thumb" viewBox="${b.x - pad} ${b.y - pad} ${b.w + pad * 2} ${b.h + pad * 2}" preserveAspectRatio="xMidYMid meet" aria-label="معاينة هندسية فعلية لهذا البديل" role="img"><rect x="${b.x - pad}" y="${b.y - pad}" width="${b.w + pad * 2}" height="${b.h + pad * 2}" fill="#f8f5ef"/>${corridors}${rooms}${walls}</svg>`;
-}
 function renderEngineeringReview() {
   const current = currentEngineeringEvaluation();
   if (!current) {
@@ -327,16 +328,24 @@ function renderEngineeringReview() {
   $('engineeringLimit').textContent = 'هذه قراءة قرارية مبدئية من محرك الميزان؛ لا تُعد تصميمًا إنشائيًا أو اعتمادًا نظاميًا.';
 }
 function renderAlternatives() {
-  $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
-    const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
-    const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
-    const evaluation = state.engineering?.rows?.[index]?.evaluation;
-    const engineering = evaluation ? `<div><dt>قرار الميزان</dt><dd>${fmt(evaluation.score, 0)} / ١٠٠</dd></div><div><dt>عوائق</dt><dd>${fmt(evaluation.blockers.length, 0)}</dd></div>` : '';
-    return `<article class="alternative-card${selected ? ' selected' : ''}">${conceptThumbnail(model)}<span class="concept-tag">${esc(concept.tag)}</span><h3>${esc(STRATEGIES[model.strategy || 'compact'])}</h3><p class="concept-form">${esc(concept.form)}. ${esc(concept.idea)}</p><dl><div><dt>الكتلة المبنية</dt><dd>${fmt(q.footprint)} م²</dd></div><div><dt>الممرات</dt><dd>${fmt(q.circulation)} م²</dd></div><div><dt>غير موزع</dt><dd>${fmt(q.reserve)} م²</dd></div><div><dt>مأهول بلا نافذة خارجية</dt><dd>${fmt(review.occupiedWithoutWindows, 0)} فراغ</dd></div>${engineering}</dl><p class="concept-fit"><b>أنسب لـ:</b> ${esc(concept.bestFor)}<br><b>المقايضة:</b> ${esc(concept.tradeoff)}</p><button class="small-button" data-alternative="${index}" aria-pressed="${selected}">${selected ? 'المخطط المعروض في 2D و3D' : 'اعرض هذا النموذج'}</button></article>`;
-  }).join('');
-  const failed = state.failures.map(f => `${STRATEGIES[f.strategy]}: ${f.reason}`).join(' ');
-  $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
+  const evaluations = state.engineering?.rows?.map(row => row.evaluation) || [];
+  $('alternativeCards').innerHTML = studioCardsHTML(state.alternatives, state.model, STRATEGIES, evaluations);
+  const failed = state.failures.map(f => (STRATEGIES[f.strategy] || f.strategy) + ': ' + f.reason).join(' ');
+  $('alternativeNote').textContent = state.alternatives.length + ' مساقط من النموذج الهندسي نفسه. اختيار AZIZ مستقل عن أعلى نتيجة حسابية في Mizan Score؛ راجع الحركة والخصوصية والتنبيهات قبل الاعتماد. ' + failed;
   markDirty();
+}
+function openStudioPreview(index) {
+  const model = state.alternatives[index];
+  if (!model) return;
+  const metrics = studioMetrics(model);
+  $('studioPreviewTitle').textContent = (STRATEGIES[model.strategy] || model.architecture?.tag || 'بديل معماري') + (state.dirty ? ' — من آخر توليد ناجح' : '');
+  $('studioPreviewImage').src = planPreviewURL(model);
+  $('studioPreviewMeta').innerHTML = '<div><span>Mizan Score</span><strong>' + fmt(metrics.score, 0) + ' / 1000</strong></div>' +
+    '<div><span>صافي الغرف</span><strong>' + fmt(metrics.rooms) + ' م²</strong></div>' +
+    '<div><span>الممرات</span><strong>' + fmt(metrics.circulation) + ' م²</strong></div>' +
+    '<div><span>الغرف دون نافذة خارجية</span><strong>' + fmt(metrics.windowless, 0) + '</strong></div>' +
+    '<div><span>التنبيهات</span><strong>' + fmt(metrics.warnings, 0) + '</strong></div>';
+  $('studioPreviewDialog').showModal();
 }
 function renderPlanReview() {
   const review = reviewPlan(state.model);
@@ -443,7 +452,7 @@ async function askAI() {
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'جهّز الذكاء برنامج التصميم. راجع الافتراضات ثم اختر «اعتمد وارسم المخططات».');
   } catch (error) { message('aiFeedback', error.message); }
-  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = '✦ حلّل وارسم بالذكاء'; }
+  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = '✦ افهم وصف المنزل واقترح برنامجًا للرسم'; }
 }
 
 function showBrief(brief, limitations = [], context = null) {
@@ -606,6 +615,8 @@ function boot() {
   $('applyDiscovery').addEventListener('click', () => { const text = discoveryText(); if (!text) return toast('اختر رغبة واحدة على الأقل أولًا.'); $('idea').value = [text, $('idea').value.trim()].filter(Boolean).join('\n\n'); $('idea').focus({ preventScroll: true }); toast('أُضيف موجز رغباتكم إلى الوصف؛ راجعه ثم حلّله أو عدّل جدول الغرف.'); });
   $('gen').addEventListener('click', generate);
   $('alternativeCards').addEventListener('click', event => {
+    const preview = event.target.closest('[data-preview]');
+    if (preview) { openStudioPreview(Number(preview.dataset.preview)); return; }
     const button = event.target.closest('[data-alternative]');
     if (!button || state.dirty || $('gen').disabled) return;
     const model = state.alternatives[Number(button.dataset.alternative)];
@@ -613,6 +624,7 @@ function boot() {
     state.history = [...state.history, { model: state.model, palette: state.palette }].slice(-5);
     state.model = model; showResults(); toast('تغيّر المخطط و3D والكميات إلى البديل المختار.');
   });
+  $('studioPreviewClose').addEventListener('click', () => $('studioPreviewDialog').close());
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
