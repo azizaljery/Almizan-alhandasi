@@ -102,3 +102,6 @@ body:has(#app.studio-simple-mode:not(.studio-advanced-open)) #mzpFab{display:non
   .studio-request-form textarea{min-height:120px}
   .studio-plot-hint{padding:10px 17px}
 }
+
+/* Mobile chat follows the page scroll; never nest a narrow internal scrollbar. */
+@media(max-width:690px){.studio-transcript{max-height:none;overflow:visible}}
