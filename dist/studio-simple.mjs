@@ -226,8 +226,8 @@ export function initSimpleStudio() {
       }
       $('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      status(error.message || 'فشل التوليد. آخر مخطط ناجح محفوظ.', 'error');
-      appendMessage('assistant', 'تعذّر إنتاج مخطط صالح لهذه التعديلات؛ بقي آخر تصميم ناجح محفوظًا.');
+      status(error.message || 'فشل التوليد. بقي آخر مخطط ناجح معروضًا في هذه الجلسة.', 'error');
+      appendMessage('assistant', 'تعذّر إنتاج مخطط صالح لهذه التعديلات؛ لم يتغير آخر مخطط ناجح في هذه الجلسة.');
     } finally { setBusy(false); }
   });
   $('studioEdit').addEventListener('click', () => {

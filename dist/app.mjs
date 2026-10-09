@@ -562,14 +562,14 @@ async function generate() {
     const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
     const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
   const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
-    if (workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ بقي المخطط السابق محفوظًا. أعد التوليد من المدخلات الحالية.');
+    if (workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
     state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults(); switchTab('result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
-  } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح محفوظ دون تغيير.' : '')); markDirty(); }
+  } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح لم يتغير في هذه الجلسة.' : '')); markDirty(); }
   finally { $('gen').disabled = false; $('freshIdeas').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن حتى ستة بدائل'; markDirty(); }
 }
 function renderBOQ() {
@@ -1163,7 +1163,7 @@ const mizanStudioAPI = Object.freeze({
       if (state.requestProposal === pending) throw Error($('requestFeedback').textContent || 'لم يُطبق الاقتراح؛ لم يتغير المخطط السابق.');
       await generate();
     } else await drawFromAIProposal();
-    if (!state.model || state.model === previous) throw Error($('generationError').textContent || 'لم ينجح التوليد؛ بقي المخطط السابق محفوظًا.');
+    if (!state.model || state.model === previous) throw Error($('generationError').textContent || 'لم ينجح التوليد؛ بقي المخطط السابق ظاهرًا في هذه الجلسة.');
     studioProposalSource = null;
     return { model: structuredClone(state.model), alternatives: state.alternatives.map(model => structuredClone(model)), failures: structuredClone(state.failures) };
   },
