@@ -40,7 +40,7 @@ export function extractExplicitProgramRequirements(text) {
     ['men-majlis', /مجلس\s+(?:ال)?رجال/, 'مجلس الرجال'],
     ['women-majlis', /مجلس\s+(?:ال)?نساء/, 'مجلس النساء'],
   ]) if (expression.test(source)) result.set(id, { id, kind: 'required-room', label });
-  const dimensionPattern = /(?:^|[\s،؛])((?:ال)?مطبخ|(?:ال)?مستودع|(?:ال)?مخزن|مجلس\s+(?:ال)?رجال|مجلس\s+(?:ال)?نساء)\s*(?:(?:ب)?مساحه|مقاس|ابعاد|:)?\s*(\d+(?:\.\d+)?)\s*[×xX*]\s*(\d+(?:\.\d+)?)/giu;
+  const dimensionPattern = /(?:^|[\s،؛])((?:ال)?مطبخ|(?:ال)?مستودع|(?:ال)?مخزن|مجلس\s+(?:ال)?رجال|مجلس\s+(?:ال)?نساء)\s*(?:(?:ب)?مساحه|مقاس|ابعاد|الى|ليكون|:)?\s*(\d+(?:\.\d+)?)\s*[×xX*]\s*(\d+(?:\.\d+)?)/giu;
   for (const match of source.matchAll(dimensionPattern)) {
     const label = match[1], w = Number(match[2]), h = Number(match[3]);
     if (!(w >= 1 && w <= 50 && h >= 1 && h <= 50)) continue;
