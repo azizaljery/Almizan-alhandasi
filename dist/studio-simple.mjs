@@ -97,12 +97,6 @@ export function initSimpleStudio() {
     const latest = trim($('studioBrief').value);
     if (!latest) return status('اكتب وصف المنزل أو التعديل المطلوب أولًا.', 'warning');
     const current = api.getState();
-    if (!local && !trim($('studioAccessCode').value)) {
-      const details = $('studioAccessCode').closest('details');
-      details.open = true;
-      $('studioAccessCode').focus();
-      return status('أدخل رمز خدمة الذكاء للمتابعة، أو اختر «فهم محلي محدود». لن نُظهر تحليلًا وهميًا.', 'warning');
-    }
     const style = current.hasModel && styleOnlyCommand(latest);
     if (style) {
       const button = document.querySelector('#styles [data-v="' + style + '"]');
@@ -114,6 +108,12 @@ export function initSimpleStudio() {
         $('studioBrief').value = '';
         return;
       }
+    }
+    if (!local && !trim($('studioAccessCode').value)) {
+      const details = $('studioAccessCode').closest('details');
+      details.open = true;
+      $('studioAccessCode').focus();
+      return status('أدخل رمز خدمة الذكاء للمتابعة، أو اختر «فهم محلي محدود». لن نُظهر تحليلًا وهميًا.', 'warning');
     }
     setBusy(true);
     $('studioProposalPanel').hidden = true;
