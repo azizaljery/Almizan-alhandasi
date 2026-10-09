@@ -41,28 +41,72 @@ export function createArchitecturalScene(T, host) {
   mesh(170, .1, 170, 0, -.22, 0, grass, false);
   mesh(18, .35, 14, 0, 0, 0, darkStone, false);
   // A contemporary Najdi-inspired villa: two masses, central portal and deep openings.
-  mesh(6.7, 4.4, 7.2, -4.7, 2.25, -.6, sandstone);
-  mesh(6.7, 4.4, 7.2, 4.7, 2.25, -.6, sandstone);
-  mesh(3.5, 3.5, 4.3, 0, 1.8, -2.2, ivory);
-  mesh(17.8, .35, 8.4, 0, 4.6, -.7, roof);
-  mesh(3.1, 3.8, .35, 0, 2.2, 3.45, darkStone);
-  mesh(2.1, 3.15, .42, 0, 1.75, 3.72, glass);
-  mesh(2.45, .14, .45, 0, 3.55, 3.76, metal);
+  // Distinct massing and recesses, not a single flat rectangular block.
+  mesh(7.1, 4.5, 7.7, -5.1, 2.35, -.7, sandstone);
+  mesh(7.1, 4.2, 7.7, 5.1, 2.2, -.7, ivory);
+  mesh(4.1, 3.6, 5.8, 0, 1.9, -.3, sandstone);
+  mesh(7.75, .36, 8.3, -5.1, 4.8, -.7, roof);
+  mesh(7.75, .36, 8.3, 5.1, 4.5, -.7, roof);
+  mesh(4.6, .28, 6.3, 0, 3.8, -.3, ivory);
+  // Najdi-inspired roof parapets, stone bands and deep openings.
   for (const sign of [-1, 1]) {
-    mesh(.26, 4.15, .48, sign * 1.58, 2.1, 3.7, ivory);
-    mesh(1.5, 1.55, .16, sign * 5.3, 2.15, 3.1, glass);
-    mesh(1.65, .15, .43, sign * 5.3, 3.05, 3.2, metal);
-    mesh(.18, 1.75, .38, sign * 4.46, 2.2, 3.15, ivory);
-    mesh(.18, 1.75, .38, sign * 6.14, 2.2, 3.15, ivory);
-    mesh(6.8, .28, .55, sign * 4.7, 4.35, 3.15, ivory);
-    mesh(.4, 1.25, .4, sign * 8.5, 4.7, 3.2, sandstone);
+    const x = sign * 5.1, front = 3.25;
+    mesh(7.7, .5, .27, x, 5.05 - (sign > 0 ? .3 : 0), front, ivory);
+    mesh(.26, .65, 8.0, x + sign * 3.8, 4.95 - (sign > 0 ? .3 : 0), -.7, sandstone);
+    mesh(7.8, .14, .6, x, 4.38 - (sign > 0 ? .3 : 0), front + .05, metal);
+    mesh(2.05, 1.9, .19, x, 2.38, front + .09, glass);
+    mesh(2.25, .17, .58, x, 3.42, front + .2, metal);
+    mesh(.16, 2.1, .45, x - 1.13, 2.4, front + .19, ivory);
+    mesh(.16, 2.1, .45, x + 1.13, 2.4, front + .19, ivory);
+    mesh(.13, 1.9, .35, x, 2.38, front + .21, ivory);
+    for (let k = 0; k < 4; k++) {
+      const rib = x + sign * (2.1 + k * .35);
+      mesh(.12, 2.45, .42, rib, 2.5, front + .1, ivory);
+    }
   }
-  // Recessed terrace, landscaping and a long afternoon shadow.
-  mesh(5.8, .16, 4.4, 0, .22, 5.15, ivory, false);
-  for (const sign of [-1, 1]) {
-    mesh(.28, 2.3, .28, sign * 9.8, 1.1, 4.3, darkStone);
-    mesh(1.7, .75, 1.7, sign * 9.8, 2.5, 4.3, grass);
+  // Recessed central portal and sculpted arch framing the entrance.
+  mesh(3.25, 3.55, .28, 0, 1.9, 2.74, darkStone);
+  mesh(2.35, 2.95, .31, 0, 1.55, 2.95, glass);
+  mesh(.15, 2.9, .38, 0, 1.55, 3.16, metal);
+  mesh(3.9, .25, 1.25, 0, 3.7, 3.02, roof);
+  for (const sign of [-1, 1]) mesh(.28, 3.5, .58, sign * 1.78, 1.85, 3.08, ivory);
+  const arch = new T.Shape();
+  arch.moveTo(-1.72, .2);
+  arch.lineTo(-1.72, 2.4);
+  arch.quadraticCurveTo(-1.72, 3.55, 0, 3.75);
+  arch.quadraticCurveTo(1.72, 3.55, 1.72, 2.4);
+  arch.lineTo(1.72, .2);
+  arch.closePath();
+  const opening = new T.Path();
+  opening.moveTo(-1.38, .2);
+  opening.lineTo(-1.38, 2.38);
+  opening.quadraticCurveTo(-1.3, 3.16, 0, 3.38);
+  opening.quadraticCurveTo(1.3, 3.16, 1.38, 2.38);
+  opening.lineTo(1.38, .2);
+  opening.closePath();
+  arch.holes.push(opening);
+  const archGeometry = new T.ExtrudeGeometry(arch, { depth: .18, bevelEnabled: false, curveSegments: 16 });
+  geometries.add(archGeometry);
+  const archMesh = new T.Mesh(archGeometry, ivory);
+  archMesh.position.set(0, .2, 3.16);
+  archMesh.castShadow = true; archMesh.receiveShadow = true; scene.add(archMesh);
+  // Warm entrance paving, landscaping and readable cast shadows.
+  mesh(6.1, .14, 5.4, 0, .21, 5.8, ivory, false);
+  for (let i = 0; i < 6; i++) {
+    mesh(5.2, .025, .08, 0, .31, 3.7 + i * .75, darkStone, false);
   }
+  const leaves = material('#315a45'), trunkMat = material('#967751');
+  const tree = (x, z) => {
+    const trunkGeometry = new T.CylinderGeometry(.13, .2, 2.3, 7); geometries.add(trunkGeometry);
+    const trunk = new T.Mesh(trunkGeometry, trunkMat); trunk.position.set(x, 1.2, z);
+    trunk.castShadow = true; scene.add(trunk);
+    const crownGeometry = new T.SphereGeometry(1.35, 10, 7); geometries.add(crownGeometry);
+    const crown = new T.Mesh(crownGeometry, leaves);
+    crown.scale.set(1, .55, .92); crown.position.set(x, 2.7, z);
+    crown.castShadow = true; crown.receiveShadow = true; scene.add(crown);
+  };
+  tree(-11.4, 4.6); tree(11.6, 5.1);
+  tree(-13.6, -2.8); tree(13.5, -3.7);
   const hemi = new T.HemisphereLight(0xf7ead4, 0x345349, 2.1); scene.add(hemi);
   const sun = new T.DirectionalLight(0xffe0a4, 3.6);
   sun.position.set(-23, 33, 18); sun.target.position.set(0, 0, 0);
@@ -74,7 +118,7 @@ export function createArchitecturalScene(T, host) {
   scene.add(sun, sun.target);
   const fill = new T.DirectionalLight(0xb2d4c5, .7); fill.position.set(17, 13, -15); scene.add(fill);
   const target = new T.Vector3(0, 1.7, .2);
-  const far = new T.Vector3(30, 20, 38), near = new T.Vector3(10.5, 7.4, 14.8);
+  const far = new T.Vector3(58, 34, 67), near = new T.Vector3(12.5, 8.4, 17.2);
   let width = 0, height = 0;
   const resize = () => {
     const w = Math.max(1, host.clientWidth), h = Math.max(1, host.clientHeight);
