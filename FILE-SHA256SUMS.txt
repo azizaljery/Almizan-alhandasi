@@ -7,7 +7,7 @@ b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/host
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
 ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
 d4509f408a7fd8ba4aa0af99a30dbe9a0a6a5b04557f1d80e68b55d589b9b5ce  ./README.md
-d7af72474cebbbb1f8dca909fb526c118440f553bb1bbc99d9d9d02c4ac50443  ./dist/app.mjs
+69e1d3e1a789a7e3666bd1892530f15b0d523b2a8bc017de3ed8113b952902f6  ./dist/app.mjs
 f3aa2e9fdf717bf8fb5af7100f3beb53215a13b915eba9a10b947f50495ccf83  ./dist/assistant.mjs
 85ffde8b956ae7fcdfca1f684b635c8b2806c4ca0cb68a64f49b1cf3c8f2d640  ./dist/audit.mjs
 4fea9f45878a01c1f9c4de014f5273b870ec23b86ae6ac1233b1cc16a686f993  ./dist/circulation.mjs
@@ -69,7 +69,7 @@ d06f35857fe1aa54d630dbb606e9becb17f65faa920d3287c17a0763095a005c  ./dist/gemini/
 c69f2471249a93bd0a2337a3424c4cd71209a2a3185758f6cf5f2852f2bb8695  ./dist/gemini/engineering-math/src/index.js
 56063c1c8468bb0117eecf4381ea64ef1cadce4fb39f965757abc3d13a2ff93f  ./dist/gemini/shared/deterministic-hash.js
 780685f096045b51909e0ad16cc52913440c805a6c160933c6ea8437b42df1e6  ./dist/home-design-engine.mjs
-bb776119253a25bf01e528578a78561435e8d45e57994f7bcd3529836e530bf3  ./dist/index.html
+3fff3e56bc6675f7967612ff616c3c7d74a0996b73ce0874fee1e83defbf78c3  ./dist/index.html
 d82006c25b00fb4b984fcc3fb3ad2c3c9107454582790b9f58ea8ac6528655cc  ./dist/integration/aziz/aziz.d.ts
 47c7a891e9447e7252f3d94e48b0f7efb0b9d02238aec4ec472590203ef55107  ./dist/integration/aziz/aziz.d.ts.map
 34a0bc0be7239acdbadef88d14a2adf5347bdda39bb7466c446444b50dec9901  ./dist/integration/aziz/aziz.js
@@ -258,7 +258,7 @@ e183f73580e8ee47f1cb6c25db7d76f3fa10bfe30a22ef3da1d37ae4094d6127  ./tests/releas
 4c929dc7e4f76c72fd937d562356e42327781a6396b77e87f2d80e78fdc053bf  ./tests/requirements-engine.test.mjs
 142d80d416c31af17225717ced18aff46777745f119b46f16e64cb17ae06d75a  ./tests/server.test.mjs
 70dda3e233d59fcfb15e04728868792f0aaadf0bd258cd8226df8f9cfb2ec837  ./tests/solar-path.test.mjs
-4dd3d879fcedaab1cfbe2b4d527f587af2b21bd1e6df5fe07897ec2e6e92f5ae  ./tests/studio-preview.test.mjs
+aa202028c9890e2480f9fa9941098f9cc20f832915f824268fac639ae7afedb9  ./tests/studio-preview.test.mjs
 c705f2b2c991d33dc0904533360eb58ee317629c3d2b7a0c9adf1c95bc6338cd  ./tests/viewer3d.test.mjs
 acf038543874dcc0df7ae4ed36a7bf834c67e7101be415d6c8404d300c504e33  ./tests/visualizer.test.mjs
 a0f085024d97e157d629af90bba62d92007848269d99ef1db0860b0dbe6af05e  ./tests/workflow.test.mjs
