@@ -6,7 +6,7 @@ const removePattern = /احذف|حذف|الغ|شيل|أزل|ازل|استبعد|
 const areaPattern = /كبر|كبّر|وسع|وسّع|صغر|صغّر|قلل|زد|زيادة|مساح|متر|×|resize|larger|smaller|increase|reduce/i;
 const renamePattern = /اسم|بدل|غيّر|غير|استبدل|rename|replace/i;
 
-export function diffRoomPrograms(previous, next, request = '', { requireChange = true } = {}) {
+export function diffRoomPrograms(previous, next, request = '', { requireChange = true, initial = false } = {}) {
   if (!Array.isArray(previous) || !Array.isArray(next)) throw Error('برنامج الغرف غير صالح.');
   const group = rooms => {
     const result = new Map();
@@ -33,10 +33,10 @@ export function diffRoomPrograms(previous, next, request = '', { requireChange =
     added.push(...b.slice(common));
   }
   const blockers = [];
-  if (removed.length && !removePattern.test(request) && !renamePattern.test(request)) {
+  if (!initial && removed.length && !removePattern.test(request) && !renamePattern.test(request)) {
     blockers.push('الاقتراح يحذف غرفًا لم تطلب حذفها؛ راجعه قبل إعادة الرسم.');
   }
-  if (changed.some(x => x.fields.some(f => f.name === 'area')) && !areaPattern.test(request)) {
+  if (!initial && changed.some(x => x.fields.some(f => f.name === 'area')) && !areaPattern.test(request)) {
     blockers.push('الاقتراح غيّر مساحات غرف دون طلب واضح بذلك.');
   }
   const noChange = added.length + removed.length + changed.length === 0;
