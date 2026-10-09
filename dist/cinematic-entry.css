@@ -29,3 +29,9 @@
 
 /* The establishing shot occupies the full screen without scrolling the underlying app. */
 body:has(#intro.cinematic:not(.off)){overflow:hidden}
+
+/* Reveal identity with legible contrast against the sunlit stone facade. */
+#intro.cinematic .cinematic-logo{width:min(570px,88vw);left:50%;right:auto;bottom:10%;padding:14px 25px 18px;translate:-50% 0;background:radial-gradient(ellipse at center,#0a2b22df 0%,#0a2b22b0 52%,#0a2b2200 79%);text-shadow:0 3px 5px #071b15,0 9px 24px #05120dcc}
+#intro.cinematic .cinematic-logo h1{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:900;letter-spacing:-.015em;color:#fff7e6;font-size:clamp(2rem,5vw,4.3rem)}
+#intro.cinematic .cinematic-logo p{color:#fff0d5}
+@media(max-width:650px){#intro.cinematic .cinematic-logo{bottom:17%;width:94vw;padding:14px 10px}#intro.cinematic .cinematic-logo h1{font-size:2.35rem}}
