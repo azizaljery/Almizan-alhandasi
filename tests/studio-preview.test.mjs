@@ -56,5 +56,6 @@ test('design entry removes static shape diagrams and includes the full-size plan
   assert.ok(html.includes('id="studioSiteOverview"'));
   assert.ok(html.includes('id="studioPreviewDialog"'));
   assert.ok(html.includes('id="alternativeCards"'));
+  assert.ok(html.indexOf('id="askAI"') < html.indexOf('id="tasteDeck"'), 'the AI brief must precede optional concept preferences');
   assert.ok(!html.includes('class="concept-diagram'), 'generic massing blocks should not masquerade as plans');
 });
