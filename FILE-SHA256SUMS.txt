@@ -2,6 +2,7 @@ f2ae71be6266e09ee31f5c2da55e2537ac8369224475208a9c360b159c3faedc  ./.github/agen
 95cd03045bb8d5ece2c63c5a7befc307f07d4ad4722893a059be42908914a3e7  ./.github/workflows/deploy-worker.yml
 32a0b43a9c6b026c6abfda3a8d4177027988985dbd41c04a2ec50047a6bc9a2d  ./.github/workflows/production-candidate-validation.yml
 ebb9a03ab7f9df6e25502bf10fa642495bd4ef9de02b45968623afd157190b84  ./.github/workflows/release-005-verification.yml
+14c0a693a840a9b7c26148d814d87acfc8a78b4b2311c87dc4a3927f4510b5ba  ./.github/workflows/studio-browser-smoke.yml
 0072dfabe80f38dd8dbb54b4a44440edf21e447d3ecadfccc6a520861e1bd381  ./.gitignore
 b1e1a20bc84e71a393c477f8768eb707dc995775d18e74d0d294e76cc0d0deb8  ./.openai/hosting.json
 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
@@ -12,7 +13,7 @@ f3aa2e9fdf717bf8fb5af7100f3beb53215a13b915eba9a10b947f50495ccf83  ./dist/assista
 85ffde8b956ae7fcdfca1f684b635c8b2806c4ca0cb68a64f49b1cf3c8f2d640  ./dist/audit.mjs
 205a19c7c2f28c515a8a039f79bd75cfc7ccb87c75e550fb6950b378a14f5859  ./dist/brief-contract.mjs
 8d360bcf29c70595f35d35ea30ddca95b489998721555afa1ace5d6b2a9872a9  ./dist/cinematic-entry.css
-1796bf0e184c3c7e9bb5ae4c73301485739d14c7f45487b1082ad409efee0245  ./dist/cinematic-entry.mjs
+e4497298a9bbe88041ab2537c3191d32b2d323e3098bff1ef9b67a8291cf490a  ./dist/cinematic-entry.mjs
 4fea9f45878a01c1f9c4de014f5273b870ec23b86ae6ac1233b1cc16a686f993  ./dist/circulation.mjs
 e36c24dd6351802bf7b4d18300ce81e46439b0f6bb9cc845794864a8662775a4  ./dist/claude/PlannerOutputContract.mjs
 924cb48c97f2ad111ce05a42c2acbf3eebd618ce451d9ec56a866b6033973f1c  ./dist/claude/compat-layer.mjs
@@ -254,6 +255,8 @@ e073411a959459c469f2d60a5208a5003f2d1f66de5bd5356b9e6d64e0b74dc9  ./evidence/p1-
 510e5200d0bed810bc40820d2ed29f07a35a148905491088ae8bff09d6e7fbf9  ./evidence/p1-integration/multi-engine-tests.log
 54a7d862190b2ceff4cbc878da122d4df99d951e9b6cf9a102618956d1c23344  ./package.json
 abaaf7e92b119cf2d1774d551f7820f4fabd3e50bb8e631fdc9682ba541cbe20  ./scripts/build.mjs
+8e0aa484834fff79ebfd453dbb4aa8d4a21151d2868f9d0fc24edac8d0d0c9e9  ./scripts/studio-browser-e2e.mjs
+9f95c82665885cd8dfe3acdd181a4d90d15c42f7248c71dfa7372d3b98731036  ./scripts/studio-browser-smoke.mjs
 96d939e4b20b35ec28bde6e1d50b5f8e260dbc94ed30dad37b1c228cef8da1de  ./tests/brief-contract.test.mjs
 f5c072b68804f1287efe9d5e91d2e7331c77cb2904ba52938170ab05a3ecafb1  ./tests/cinematic-studio.test.mjs
 724a38bf53f5e13ff46401e124b78c84c3d83fd16b3e5c04da7d317f8478d0eb  ./tests/claude-integration.test.mjs
