@@ -65,7 +65,7 @@ try {
   await pause(350);
   const introScreenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
   writeFileSync('/tmp/mizan-cinematic-live.png', Buffer.from(introScreenshot.data, 'base64'));
-  await pause(3750);
+  await waitFor('!document.getElementById("intro").classList.contains("off") && Number(getComputedStyle(document.getElementById("intro")).getPropertyValue("--cinematic-reveal")) > .35', 4600);
   const revealScreenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
   writeFileSync('/tmp/mizan-cinematic-reveal.png', Buffer.from(revealScreenshot.data, 'base64'));
   await evaluate('document.getElementById("cinematicSkip").click(); true');
