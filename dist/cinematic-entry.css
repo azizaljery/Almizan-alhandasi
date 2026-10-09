@@ -1,0 +1,25 @@
+/* Mizan cinematic: architectural Saudi calm, warm afternoon sun and precise geometry. */
+#intro.cinematic{--cinematic-reveal:0;z-index:200;display:block;position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 70% 24%,#395146 0%,#172f27 40%,#0b1c18 90%);color:#f7f0df;text-align:center;transition:opacity .7s ease,visibility .7s ease}
+#intro.cinematic.off{opacity:0;visibility:hidden;pointer-events:none}
+#intro.cinematic::before{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:linear-gradient(0deg,#0c201bc9,transparent 36%,#0c201b48 80%),repeating-linear-gradient(90deg,transparent 0 119px,#f2dbab0a 120px),repeating-linear-gradient(0deg,transparent 0 119px,#f2dbab09 120px)}
+#intro.cinematic::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;box-shadow:inset 0 0 180px 55px #07151099}
+.cinematic-world{position:absolute;inset:0;overflow:hidden;display:grid;place-items:center}
+.cinematic-world canvas{display:block;width:100%;height:100%;position:absolute;inset:0;opacity:0;animation:cinematicFadeIn .7s ease forwards}
+@keyframes cinematicFadeIn{to{opacity:1}}
+.cinematic-world .cinematic-static{width:min(1050px,112vw);height:auto;max-height:93vh;filter:drop-shadow(0 50px 48px #020d0c91);transform-origin:50% 56%;animation:cinematicArchitecturalZoom 4.8s ease-in-out both}
+#intro.cinematic.cinematic-webgl .cinematic-static{opacity:0}
+@keyframes cinematicArchitecturalZoom{0%,54%{transform:scale(.77) translateY(1.5%)}86%,100%{transform:scale(1.25) translateY(1%)}}
+.cinematic-sun{position:absolute;z-index:1;width:min(55vw,580px);height:min(55vw,580px);top:-15%;left:6%;border-radius:50%;background:radial-gradient(circle,#ffdb9c5c, #e0b87c26 31%,transparent 69%);filter:blur(13px);pointer-events:none}
+.cinematic-eyebrow{position:absolute;z-index:7;top:clamp(18px,5vh,55px);right:clamp(22px,6vw,90px);font-size:.76rem;letter-spacing:.23em;color:#ead8b3b0;font-weight:800}
+.cinematic-logo{position:absolute;z-index:7;inset:auto 0 12%;display:flex;flex-direction:column;align-items:center;gap:7px;opacity:var(--cinematic-reveal);transform:translateY(calc((1 - var(--cinematic-reveal)) * 24px));transition:opacity .16s linear;pointer-events:none;text-shadow:0 6px 30px #07130de6}
+.cinematic-monogram{display:grid;place-items:center;width:80px;height:80px;margin-bottom:8px;border:1.5px solid #d9ba79b0;border-radius:20px;background:#123629dd;color:#edce89;font-family:'Aref Ruqaa',serif;font-size:3.7rem;box-shadow:0 16px 45px #06140b8a,0 0 0 6px #d9ba7918}
+.cinematic-logo h1{font-family:'Aref Ruqaa',serif;font-size:clamp(2.5rem,6.2vw,5.3rem);font-weight:700;line-height:1.35;color:#fff6df}
+.cinematic-logo p{font-size:clamp(.92rem,1.7vw,1.25rem);color:#eddec1;letter-spacing:.02em}
+.cinematic-line{width:130px;height:1px;margin:9px 0;background:linear-gradient(90deg,transparent,#e3c486,transparent)}
+.cinematic-bottom{position:absolute;z-index:7;bottom:clamp(16px,3vh,30px);right:clamp(20px,5vw,65px);font-size:.7rem;letter-spacing:.14em;color:#e3d0acb5}
+.cinematic-skip{position:absolute;z-index:8;bottom:clamp(16px,3vh,30px);left:clamp(18px,4vw,60px);border:1px solid #ebd4a86b;border-radius:99px;background:#142e27a8;padding:10px 20px;color:#f5e7cc;font:inherit;font-size:.84rem;min-height:44px;backdrop-filter:blur(10px)}
+.cinematic-skip:hover,.cinematic-skip:focus-visible{background:#e3c58b;color:#163327;outline:2px solid #fff6df;outline-offset:3px}
+.cinematic-corner{position:absolute;z-index:5;inset:20px;border:1px solid #c8ad7650;pointer-events:none;clip-path:polygon(0 0,8% 0,8% 2px,2px 2px,2px 8%,0 8%,0 0,100% 0,100% 8%,calc(100% - 2px) 8%,calc(100% - 2px) 2px,92% 2px,92% 0,100% 0,100% 100%,92% 100%,92% calc(100% - 2px),calc(100% - 2px) calc(100% - 2px),calc(100% - 2px) 92%,100% 92%,100% 100%,0 100%,0 92%,2px 92%,2px calc(100% - 2px),8% calc(100% - 2px),8% 100%,0 100%)}
+#intro.cinematic #enter{display:none}
+@media(max-width:650px){.cinematic-world .cinematic-static{width:145vw;max-width:none}.cinematic-logo{bottom:19%}.cinematic-monogram{width:64px;height:64px;font-size:2.9rem}.cinematic-logo h1{font-size:2.7rem}.cinematic-bottom{font-size:.57rem}.cinematic-eyebrow{font-size:.63rem;letter-spacing:.14em}.cinematic-corner{inset:12px}}
+@media(prefers-reduced-motion:reduce){#intro.cinematic *{animation:none!important;transition:none!important}.cinematic-logo{opacity:1;transform:none}}
