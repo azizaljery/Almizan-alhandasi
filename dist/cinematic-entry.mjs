@@ -106,13 +106,14 @@ export function startCinematic({ doc = document, win = window } = {}) {
   const skip = doc.getElementById('cinematicSkip');
   const host = doc.getElementById('cinematicCanvas');
   if (!intro || !enter || !skip || !host) return null;
-  let finished = false, scene = null, frame = 0;
+  let finished = false, scene = null, frame = 0, fallbackTimer = 0;
   const reduced = !!win.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   const begin = win.performance.now();
   const finish = () => {
     if (finished) return;
     finished = true;
     win.cancelAnimationFrame(frame);
+    if (fallbackTimer) win.clearTimeout(fallbackTimer);
     scene?.dispose();
     intro.classList.add('cinematic-finished');
     enter.click(); // Existing boot code keeps the old route and saved-project logic intact.
@@ -134,6 +135,7 @@ export function startCinematic({ doc = document, win = window } = {}) {
     frame = win.requestAnimationFrame(tick);
   };
   frame = win.requestAnimationFrame(tick);
+  fallbackTimer = win.setTimeout(finish, CINEMATIC_TIMING.totalMs + 850);
   loadThreeRuntime().then(T => {
     if (finished) return;
     try {
