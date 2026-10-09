@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { defaultRooms, generateModel, validateModel } from '../dist/planner.mjs';
+import { defaultRooms, generateModel, validateModel, validatePlot, normalizeRooms } from '../dist/planner.mjs';
+import { runMultiEngineDesign } from '../dist/multi-engine.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML, REQUIREMENT_STATUS } from '../dist/requirement-evidence.mjs';
 
 const plot = {
@@ -12,6 +13,22 @@ const plot = {
 const rooms = defaultRooms();
 const model = generateModel(plot, rooms, { strategy: 'balanced' });
 const find = (result, id) => result.rows.find(row => row.id === id);
+
+test('evidence binds to all integrated RECT/L/U candidates and preserves AZIZ identities', async () => {
+  const actualPlot = validatePlot(plot);
+  const program = normalizeRooms(rooms);
+  const result = await runMultiEngineDesign({
+    plot: actualPlot, rooms: structuredClone(program), discovery: { likes: [], rejects: [], avoids: [], life: {} },
+  });
+  assert.equal(result.decision.status, 'SELECTED_PRELIMINARY');
+  assert.deepEqual(result.models.map(item => item.shape), ['rect', 'l', 'u']);
+  for (const candidate of result.models) {
+    const evidence = evaluateRequirementEvidence({ model: candidate, program });
+    assert.equal(find(evidence, 'program').status, REQUIREMENT_STATUS.ENFORCED);
+    assert.equal(evidence.modelIdentity, candidate.integration.candidateId);
+    assert.ok(evidence.rows.some(row => row.id === 'corridors'));
+  }
+});
 
 test('evidence uses real geometry, preserves caller model, and checks exact room program', () => {
   assert.deepEqual(validateModel(model), []);
