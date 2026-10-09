@@ -59,6 +59,7 @@ jobs:
             /tmp/mizan-mobile.png
             /tmp/mizan-generated-plan.png
             /tmp/mizan-cinematic-live.png
+            /tmp/mizan-cinematic-reveal.png
             /tmp/mizan-mobile-chrome.log
             /tmp/mizan-chrome.log
             /tmp/mizan-server.log
