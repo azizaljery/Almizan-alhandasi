@@ -1,7 +1,7 @@
 // Client journey V2. Reuses the existing AI Worker, room program, Claude/Gemini/AZIZ
 // generation, plan viewer and 3D scene. Never simulates a successful revision.
 import { diffRoomPrograms, geometryFingerprint, composeDesignConversation } from './design-dialog.mjs';
-import { verifyProposedProgram } from './brief-contract.mjs';
+import { verifyProposedProgram, extractPlotDimensions } from './brief-contract.mjs';
 
 const $ = id => document.getElementById(id);
 const create = (tag, className, text) => {
@@ -43,6 +43,12 @@ function plotValues() {
     entry: $('studioEntry').value,
     maxBuiltArea: $('studioMaxArea').value.trim() || null,
   };
+}
+function updatePlotHint() {
+  const labels = { s: 'جنوب', n: 'شمال', e: 'شرق', w: 'غرب' };
+  const values = plotValues();
+  $('studioPlotHint').textContent = 'أبعاد الأرض الحالية ' + values.width + ' × ' + values.length +
+    ' م · المدخل ' + (labels[values.entry] || 'غير محدد') + '. عدّلها من بطاقة الأرض أدناه إذا لزم.';
 }
 function showDiff(diff, brief) {
   const root = $('studioProposalDiff');
@@ -89,6 +95,8 @@ export function initSimpleStudio() {
   $('studioLength').value = initial.length;
   $('studioEntry').value = initial.entry;
   $('studioMaxArea').value = initial.maxBuiltArea ?? '';
+  updatePlotHint();
+  for (const id of ['studioWidth', 'studioLength', 'studioEntry', 'studioMaxArea']) $(id).addEventListener('change', updatePlotHint);
   const conversation = { initial: '', turns: [], latest: '', diff: null, approved: false };
   const setPhase = (text, button) => {
     $('studioPhase').textContent = text;
@@ -121,6 +129,12 @@ export function initSimpleStudio() {
     status('جارٍ تحليل الطلب ومراجعته مع برنامج الغرف الحالي…');
     appendMessage('user', latest);
     try {
+      const explicitPlot = extractPlotDimensions(latest);
+      if (explicitPlot) {
+        $('studioWidth').value = explicitPlot.width;
+        $('studioLength').value = explicitPlot.length;
+        updatePlotHint();
+      }
       api.setPlot(plotValues());
       if (!conversation.initial) conversation.initial = latest;
       const prompt = composeDesignConversation(conversation.initial, conversation.turns, latest);
