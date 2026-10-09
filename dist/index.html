@@ -1,6 +1,46 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الميزان الهندسي</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23C6A15B' stroke-width='4'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
-<meta name="description" content="صف طلب منزلك، راجع ما فهمناه، ثم اختبر المخطط والغرف والميزانية من مشروع واحد."><link rel="stylesheet" href="./workspace.css"><link rel="stylesheet" href="./land-survey.css"><link rel="stylesheet" href="./studio-workspace.css"><link rel="stylesheet" href="./archive.css"></head><body><a class="skip-link" href="#workspaceMain">انتقل إلى مساحة العمل</a>
-<main class="app show" id="app"><header class="top"><button class="brand" id="home" aria-label="العودة إلى الأرض"><span class="logo">م</span><span><b>الميزان الهندسي</b><small>مساحة تصميم منزلك</small></span></button><div class="workspace-actions"><span class="trial-label">إصدار 2026.10.09-preferences-1</span><button class="small-button" id="loadProject">فتح مشروع</button><button class="small-button" id="saveProject">تنزيل المشروع</button><details class="account-archive" id="archivePanel"><summary><span class="small-button">أرشيف الحساب</span></summary><section class="archive-panel-body" aria-label="أرشيف تصاميم الحساب"><h2>تصاميم حسابك</h2><p id="archiveStatus" class="archive-status" role="status" aria-live="polite">جارٍ التحقق من الأرشيف…</p><a id="archiveSignIn" href="/signin-with-chatgpt?return_to=%2F" target="_top" hidden>سجّل الدخول إلى ChatGPT</a><label class="archive-title-label" for="archiveTitle">اسم التصميم<input id="archiveTitle" maxlength="120" value="تصميم منزلي" autocomplete="off"></label><div class="archive-actions"><button type="button" id="archiveSave" class="small-button" disabled>حفظ نسخة</button><button type="button" id="archiveSaveNew" class="small-button" disabled>أرشفة تصميم جديد</button></div><div class="archive-picker"><label for="archiveDesigns">التصميم<select id="archiveDesigns" disabled><option value="">لا توجد تصاميم محملة</option></select></label><button type="button" id="archiveRefresh" class="small-button">تحديث</button></div><button type="button" id="archiveMore" class="small-button archive-more" hidden>تحميل تصاميم أقدم</button><label for="archiveVersions">النسخة<select id="archiveVersions" disabled><option value="">—</option></select></label><div class="archive-actions"><button type="button" id="archiveLoad" class="small-button" disabled>فتح النسخة</button><button type="button" id="archiveDelete" class="small-button archive-delete" disabled>حذف التصميم</button></div><small class="archive-note">التصدير الهندسي متاح بعد حفظ النسخة المطابقة في الحساب. ملف المشروع المحلي يبقى خيارًا مستقلًا.</small></section></details><input id="projectFile" type="file" accept=".json,application/json" aria-label="ملف مشروع ميزان" hidden></div></header>
+<meta name="description" content="صف طلب منزلك، راجع ما فهمناه، ثم اختبر المخطط والغرف والميزانية من مشروع واحد."><link rel="stylesheet" href="./workspace.css"><link rel="stylesheet" href="./land-survey.css"><link rel="stylesheet" href="./studio-workspace.css"><link rel="stylesheet" href="./archive.css"><link rel="stylesheet" href="./cinematic-entry.css"><link rel="stylesheet" href="./studio-simple.css"></head><body><section class="intro cinematic" id="intro" aria-label="مقدمة الميزان الهندسي">
+  <div class="cinematic-sun" aria-hidden="true"></div>
+  <div class="cinematic-world" id="cinematicCanvas" aria-hidden="true">
+    <svg class="cinematic-static" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="mizanFront" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#e9d8b5"/><stop offset="1" stop-color="#a88b65"/></linearGradient>
+        <linearGradient id="mizanRoof" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4e4c3"/><stop offset="1" stop-color="#c2a176"/></linearGradient>
+        <linearGradient id="mizanGlass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9fc1b8"/><stop offset="1" stop-color="#345e59"/></linearGradient>
+        <filter id="mizanBlur"><feGaussianBlur stdDeviation="20"/></filter>
+      </defs>
+      <ellipse cx="555" cy="487" rx="375" ry="66" fill="#030e0c" opacity=".65" filter="url(#mizanBlur)"/>
+      <path d="M180 395L533 246L850 386L510 546Z" fill="#415c4b" stroke="#d4ba86" stroke-width="2"/>
+      <path d="M259 275L428 203L428 407L259 479Z" fill="#967a59"/>
+      <path d="M428 203L562 263L562 467L428 407Z" fill="url(#mizanFront)"/>
+      <path d="M259 275L428 203L562 263L393 336Z" fill="url(#mizanRoof)"/>
+      <path d="M545 261L710 188L838 246L674 318Z" fill="url(#mizanRoof)"/>
+      <path d="M545 261L674 318L674 486L545 428Z" fill="url(#mizanFront)"/>
+      <path d="M674 318L838 246L838 414L674 486Z" fill="#987c5a"/>
+      <path d="M396 333L544 267L674 325L525 390Z" fill="#b59a72"/>
+      <path d="M396 333L525 390L525 500L396 441Z" fill="#f0e1c4"/>
+      <path d="M525 390L674 325L674 437L525 500Z" fill="#bda27a"/>
+      <path d="M440 371L491 394L491 469L440 445Z" fill="url(#mizanGlass)" stroke="#d4b97e" stroke-width="4"/>
+      <path d="M551 385L627 351L627 423L551 458Z" fill="url(#mizanGlass)" stroke="#d4b97e" stroke-width="4"/>
+      <path d="M310 335L362 313L362 389L310 412Z" fill="url(#mizanGlass)" stroke="#dfc69b" stroke-width="5"/>
+      <path d="M724 319L785 293L785 375L724 401Z" fill="url(#mizanGlass)" stroke="#dfc69b" stroke-width="5"/>
+      <path d="M410 453L523 503L676 435L726 456L521 549L353 474Z" fill="#d6c39e" opacity=".75"/>
+      <path d="M195 449L325 392M790 456L870 421" stroke="#c2ad7e" stroke-width="3" stroke-dasharray="9 11"/>
+    </svg>
+  </div>
+  <div class="cinematic-corner" aria-hidden="true"></div>
+  <span class="cinematic-eyebrow">AL MIZAN / ARCHITECTURE</span>
+  <div class="cinematic-logo" aria-live="off">
+    <span class="cinematic-monogram" aria-hidden="true">م</span>
+    <h1>الميزان الهندسي</h1>
+    <span class="cinematic-line" aria-hidden="true"></span>
+    <p>من الفكرة إلى عمارة تفهمك</p>
+  </div>
+  <span class="cinematic-bottom">SAUDI ARCHITECTURAL INTELLIGENCE</span>
+  <button type="button" id="cinematicSkip" class="cinematic-skip">تجاوز المقدمة</button>
+</section>
+<a class="skip-link" href="#workspaceMain">انتقل إلى مساحة العمل</a>
+<main class="app show" id="app"><header class="top"><button class="brand" id="home" aria-label="العودة إلى الأرض"><span class="logo">م</span><span><b>الميزان الهندسي</b><small>مساحة تصميم منزلك</small></span></button><div class="workspace-actions"><span class="trial-label">إصدار 2026.10.10-studio-1</span><button class="small-button" id="loadProject">فتح مشروع</button><button class="small-button" id="saveProject">تنزيل المشروع</button><details class="account-archive" id="archivePanel"><summary><span class="small-button">أرشيف الحساب</span></summary><section class="archive-panel-body" aria-label="أرشيف تصاميم الحساب"><h2>تصاميم حسابك</h2><p id="archiveStatus" class="archive-status" role="status" aria-live="polite">جارٍ التحقق من الأرشيف…</p><a id="archiveSignIn" href="/signin-with-chatgpt?return_to=%2F" target="_top" hidden>سجّل الدخول إلى ChatGPT</a><label class="archive-title-label" for="archiveTitle">اسم التصميم<input id="archiveTitle" maxlength="120" value="تصميم منزلي" autocomplete="off"></label><div class="archive-actions"><button type="button" id="archiveSave" class="small-button" disabled>حفظ نسخة</button><button type="button" id="archiveSaveNew" class="small-button" disabled>أرشفة تصميم جديد</button></div><div class="archive-picker"><label for="archiveDesigns">التصميم<select id="archiveDesigns" disabled><option value="">لا توجد تصاميم محملة</option></select></label><button type="button" id="archiveRefresh" class="small-button">تحديث</button></div><button type="button" id="archiveMore" class="small-button archive-more" hidden>تحميل تصاميم أقدم</button><label for="archiveVersions">النسخة<select id="archiveVersions" disabled><option value="">—</option></select></label><div class="archive-actions"><button type="button" id="archiveLoad" class="small-button" disabled>فتح النسخة</button><button type="button" id="archiveDelete" class="small-button archive-delete" disabled>حذف التصميم</button></div><small class="archive-note">التصدير الهندسي متاح بعد حفظ النسخة المطابقة في الحساب. ملف المشروع المحلي يبقى خيارًا مستقلًا.</small></section></details><input id="projectFile" type="file" accept=".json,application/json" aria-label="ملف مشروع ميزان" hidden></div></header>
 <div class="workspace-layout"><aside class="workspace-sidebar"><div class="sidebar-label">مشروع منزلك</div><nav class="tabs" aria-label="خطوات المشروع"><button class="tab" data-tab="rating"><span class="step-number">01</span><span><b>الأرض</b><small>الأبعاد والمدخل</small></span></button><button class="tab" data-tab="brief"><span class="step-number">02</span><span><b>طلبك</b><small>اكتب ما تحتاجه</small></span></button><button class="tab" data-tab="design"><span class="step-number">03</span><span><b class="tab-label-wide">الغرف والشكل</b><b class="tab-label-short">الغرف</b><small>راجع برنامجك</small></span></button><button class="tab" data-tab="result"><span class="step-number">04</span><span><b>المخطط</b><small>2D وجولة 3D</small></span></button><button class="tab" data-tab="review"><span class="step-number">05</span><span><b>المراجعة</b><small>ما تحقق وما بقي</small></span></button><button class="tab" data-tab="boq"><span class="step-number">06</span><span><b>الكميات</b><small>تقدير من المخطط</small></span></button></nav><section class="project-snapshot"><h2>ملخص المشروع</h2><dl><div><dt>الأرض</dt><dd id="snapshotPlot">20 × 30 م</dd></div><div><dt>البرنامج</dt><dd id="snapshotRooms">12 فراغًا</dd></div><div><dt>الشكل</dt><dd id="snapshotShape">لم يُحدد</dd></div><div><dt>المخطط</dt><dd id="snapshotStatus">لم يُولد بعد</dd></div></dl><p>يحفظ زر التنزيل ملف مشروعك على جهازك.</p></section><button class="settings-button" id="openSettings">إعدادات الموقع</button></aside><div class="workspace-main" id="workspaceMain" tabindex="-1"><p id="projectStatus" role="status" class="message project-status" hidden></p><section class="panel" id="panel-brief" aria-label="طلب العميل"><div class="wrap">
 <header class="head"><span class="ey">02 / فهم طلبك</span><h1>كيف تبي يكون بيتك؟</h1><p>ابدأ بكلامك. راجع ما فهمناه قبل أن نرسمه.</p></header>
 <div class="intake-layout"><article class="card request-card"><div class="cb">
@@ -105,7 +145,60 @@
   </div>
 </section>
 
-<section class="panel" id="panel-design" aria-label="الغرف وشكل البيت"><div class="wrap"><header class="head"><span class="ey">03 / برنامج التصميم</span><h1>غرفك. شكل بيتك. أولوياتك.</h1><p>الجدول هو المرجع الذي يرسم منه الموقع؛ راجعه قبل التوليد.</p></header><article class="card"><header class="ch"><b class="num">٢</b><div><h2>راجع غرفك قبل التوليد</h2><p>كل سطر غرفة واحدة؛ لن تُحذف غرفة أو تُصغّر مساحتها لتناسب الأرض.</p></div></header>
+<section class="panel" id="panel-design" aria-label="الغرف وشكل البيت"><div class="wrap"><section class="studio-simple" id="studioSimple" aria-labelledby="studioSimpleTitle">
+  <header class="studio-simple-hero">
+    <span class="studio-kicker">MIZAN DESIGN STUDIO · مساحة تصميم تفاعلية</span>
+    <h1 id="studioSimpleTitle">صف بيتك بطريقتك. سنحوّل الوصف إلى مخطط قابل للتعديل.</h1>
+    <p>لا تحتاج أن تبدأ بعدّ الغرف في جدول. تحدث عن بيتك، ثم راجع ما فهمه النظام قبل الرسم. وبعد كل مخطط يمكنك طلب تعديل جديد.</p>
+    <span class="studio-phase" id="studioPhase">01 / نفهم طلبك</span>
+  </header>
+  <div class="studio-simple-grid">
+    <section class="studio-conversation" aria-label="محادثة تصميم المنزل">
+      <div class="studio-transcript" id="studioTranscript" role="log" aria-live="polite" aria-relevant="additions">
+        <div class="studio-message assistant"><span class="studio-speaker">الميزان الهندسي</span><p>أخبرني عن المنزل الذي تريده: الغرف، من يسكنه، الضيافة، الخصوصية، وما لا ترغب فيه. سأعرض ما فهمته قبل أن أرسم، ولن أغيّر غرفة أو مساحة دون أن أوضح ذلك.</p></div>
+      </div>
+      <p class="studio-plot-hint" id="studioPlotHint">أبعاد الأرض الحالية 20 × 30 م · المدخل جنوب. عدّلها من بطاقة الأرض أدناه إذا لزم.</p>
+      <form id="studioRequestForm" class="studio-request-form">
+        <label for="studioBrief">وصف المنزل أو التعديل المطلوب</label>
+        <textarea id="studioBrief" rows="5" maxlength="2600" placeholder="مثال: دور أرضي، 3 غرف نوم، جناح للوالدة، مجلس رجال بمدخل مستقل، مجلس نساء، صالة عائلية، طعام قريب من المجلسين، ولا أريد فناءً أو ممرات طويلة." required></textarea>
+        <div class="studio-request-actions">
+          <button type="submit" id="studioSubmit" class="studio-primary">افهم طلبي واقترح المخطط <span aria-hidden="true">←</span></button>
+          <button type="button" id="studioLocal" class="studio-secondary">فهم محلي محدود</button>
+        </div>
+      </form>
+      <div id="studioStatus" class="studio-feedback" role="status" aria-live="polite"></div>
+      <section id="studioProposalPanel" class="studio-proposal" hidden aria-labelledby="studioProposalTitle">
+        <h2 id="studioProposalTitle">هذا ما فهمته قبل الرسم</h2>
+        <p id="studioProposalSummary"></p>
+        <div id="studioProposalDiff" class="studio-proposal-diff"></div>
+        <div id="studioProposalWarnings" class="studio-proposal-warnings"></div>
+        <div class="studio-request-actions">
+          <button type="button" id="studioApprove" class="studio-primary">اعتمد الفهم وارسم المخطط</button>
+          <button type="button" id="studioEdit" class="studio-secondary">سأوضح طلبي أكثر</button>
+        </div>
+      </section>
+    </section>
+    <aside class="studio-project-setup" aria-label="معلومات الأرض الأساسية">
+      <span class="studio-side-eyebrow">معلومات المشروع</span>
+      <h2>أرض منزلك</h2>
+      <p>نحتاج أبعاد الأرض وجهة المدخل فقط للبدء. يمكنك مراجعة التفاصيل الهندسية لاحقًا.</p>
+      <div class="studio-plot-fields">
+        <label>العرض (م)<input id="studioWidth" type="number" min="8" max="100" step=".5" value="20"></label>
+        <label>الطول (م)<input id="studioLength" type="number" min="8" max="100" step=".5" value="30"></label>
+        <label>جهة المدخل<select id="studioEntry"><option value="s">جنوب</option><option value="n">شمال</option><option value="w">غرب</option><option value="e">شرق</option></select></label>
+        <label>سقف البناء (م²) — اختياري<input id="studioMaxArea" type="number" min="20" max="10000" step="1" placeholder="مثل 550"></label>
+      </div>
+      <details class="studio-access">
+        <summary>ربط خدمة الذكاء الاصطناعي <span>اختياري للعرض</span></summary>
+        <label for="studioAccessCode">رمز دخول خدمة الذكاء<input id="studioAccessCode" type="password" autocomplete="off" placeholder="رمز الدخول الخاص بموقعك"></label>
+        <small>يُرسل الرمز إلى Worker الحالي عند التحليل فقط، ولا يُحفظ في المحادثة الجديدة.</small>
+      </details>
+      <div class="studio-trust"><strong>لن نعرض شكلًا رمزيًا على أنه مخطط.</strong><p>البدائل ستُرسم من هندسة الغرف والجدران الفعلية، وسيظهر بوضوح أي مطلب لم يتحقق.</p></div>
+      <button type="button" id="studioAdvancedToggle" class="studio-advanced-button" aria-expanded="false">إظهار الأدوات الأصلية المتقدمة</button>
+    </aside>
+  </div>
+</section>
+<header class="head"><span class="ey">03 / برنامج التصميم</span><h1>غرفك. شكل بيتك. أولوياتك.</h1><p>الجدول هو المرجع الذي يرسم منه الموقع؛ راجعه قبل التوليد.</p></header><article class="card"><header class="ch"><b class="num">٢</b><div><h2>راجع غرفك قبل التوليد</h2><p>كل سطر غرفة واحدة؛ لن تُحذف غرفة أو تُصغّر مساحتها لتناسب الأرض.</p></div></header>
       <div class="cb">
         <p class="program-total" id="programTotal" role="status"></p>
         <div class="table-scroll" tabindex="0" aria-label="جدول الغرف؛ يمكن تمريره أفقياً"><table class="program-table"><caption>الفراغات المطلوبة للدور الأرضي</caption><thead><tr><th scope="col">الاسم</th><th scope="col">النوع</th><th scope="col">المساحة الصافية م²</th><th scope="col">أبعاد ملزمة م (عرض × طول)</th><th scope="col">الموقع</th><th scope="col">الجانب من المدخل</th><th scope="col">تعديل</th></tr></thead><tbody id="roomRows"></tbody></table></div>
@@ -209,7 +302,7 @@
       </article><article id="studio3dCard" class="card immersive-card studio-3d" hidden><header class="ch"><b class="num">3D</b><div><h2>جولة 3D من مخططك</h2><p>ادخل من المدخل، تحرك بين الفراغات، وانظر حولك كما لو كنت داخل البيت.</p></div><span class="pill" id="tourState">منظور عام</span></header>
         <div class="cb">
           <div class="tour-strip"><div><b>ابدأ التجربة</b><small>تبدأ الجولة من أقرب فراغ للمدخل ثم تنتقل بين الغرف.</small></div><div class="inline-actions"><button class="small-button tour-primary" id="startTour">ابدأ من المدخل</button><button class="small-button" id="tourPrev" disabled>الغرفة السابقة</button><button class="small-button" id="tourNext" disabled>الغرفة التالية</button></div></div>
-          <div class="viewer-tools"><button class="small-button" data-view="persp">منظور خارجي</button><button class="small-button" data-view="top">علوي</button><button class="small-button" data-view="front">واجهة المدخل</button><label class="check"><input id="roof" type="checkbox"> إظهار السقف</label></div>
+          <div class="viewer-tools"><button class="small-button" data-view="persp">منظور خارجي</button><button class="small-button" data-view="top">علوي</button><button class="small-button" data-view="front">واجهة المدخل</button><label class="check"><input id="roof" type="checkbox" checked> إظهار السقف</label></div>
           <div class="view" id="view"><div class="view-label" id="viewMode">منظور خارجي — السقف مخفي لرؤية الغرف</div></div>
           <div class="message error" id="threeError" role="status" hidden></div><button class="small-button" id="retry3D" hidden>أعد محاولة تحميل العرض</button>
           <div id="walkControls" hidden><p class="help">اسحب للنظر حولك، واستخدم الأسهم أو WASD أو الأزرار. الأبواب الفعلية فقط تسمح بالمرور؛ الأثاث تمثيل بصري لفهم الفراغ ولا يدخل في الكميات.</p><div class="walk-buttons" role="group" aria-label="الحركة داخل الغرفة"><button class="small-button" data-move="forward">للأمام ↑</button><button class="small-button" data-move="left">يسار ←</button><button class="small-button" data-move="right">يمين →</button><button class="small-button" data-move="back">للخلف ↓</button><button class="small-button" data-view="persp">العودة للمنظور</button></div></div>
@@ -259,4 +352,4 @@
     <button class="secondary" data-next="rating">عدّل الأرض والافتراضات</button><button class="secondary" data-next="design">عدّل برنامج الغرف</button>
   </div>
 </section>
-<footer class="app-footer">الميزان الهندسي · مخطط تصوري للدور الأرضي قابل للمراجعة <button class="footer-settings" data-open-settings>إعدادات الموقع</button></footer></div></div></main><div class="toast" id="toast" role="status" hidden></div><script type="module" src="./app.mjs"></script><footer class="release-stamp" style="padding:12px;text-align:center;color:#475569;font-size:14px">الميزان الهندسي · واجهة العمل الموحدة · إصدار 2026.10.09-preferences-1</footer></body></html>
+<footer class="app-footer">الميزان الهندسي · مخطط تصوري للدور الأرضي قابل للمراجعة <button class="footer-settings" data-open-settings>إعدادات الموقع</button></footer></div></div></main><div class="toast" id="toast" role="status" hidden></div><script type="module" src="./app.mjs"></script><script id="studio-simple-module" type="module" src="./studio-simple.mjs"></script><script type="module" src="./cinematic-entry.mjs"></script><footer class="release-stamp" style="padding:12px;text-align:center;color:#475569;font-size:14px">الميزان الهندسي · واجهة العمل الموحدة · إصدار 2026.10.10-studio-1</footer></body></html>

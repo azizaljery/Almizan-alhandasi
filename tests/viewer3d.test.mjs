@@ -60,6 +60,23 @@ test('room entry uses eye-level camera, roof is hidden, and wall collision permi
   v.view('top'); assert.equal(v.mode, 'orbit'); assert.equal(v.phi, .02); v.destroy();
 });
 
+test('roof choice survives camera presets and sun lighting updates for day and night', () => {
+  const v = new RoomViewer(container()); v.setModel(model);
+  v.setRoof(true);
+  v.view('top'); assert.equal(v.roof.visible, true);
+  v.view('front'); assert.equal(v.roof.visible, true);
+  v.view('persp'); assert.equal(v.roof.visible, true);
+  v.setSun({ visible: true, azimuth: 140, altitude: 32 });
+  assert.equal(v.sunLight.visible, true);
+  assert.equal(v.ambientLight.intensity, 1.2);
+  assert.ok(v.sunLight.position.y > 0);
+  v.setSun({ visible: false, azimuth: 140, altitude: -8 });
+  assert.equal(v.sunLight.visible, false);
+  assert.equal(v.ambientLight.intensity, .55);
+  assert.equal(v.fillLight.intensity, .22);
+  v.destroy();
+});
+
 test('hidden 3D does not render and resize reuses the same canvas', () => {
   const box = container(), v = new RoomViewer(box); v.setModel(model); v.setVisible(false); const before = v.renderer.renders;
   v.render(); v.resize(); assert.equal(v.renderer.renders, before);

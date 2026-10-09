@@ -5,6 +5,7 @@ import { reviewCandidate } from './integration/gemini/packages/design-intelligen
 import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
+import { extractExplicitGeometryConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
 
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions', staggered: 'staggered' });
 const CONCEPT = Object.freeze({
@@ -30,7 +31,10 @@ export function requestedDesignShapes({ idea = '', discovery = {}, selectedShape
   const intent = extractShapeIntent(idea);
   if (intent.questions.length) throw Error(intent.questions.join(' '));
   if (intent.shape === 'closed') throw Error('الفناء المغلق من أربع جهات غير متاح للتوليد؛ لم نستبدله بشكل آخر.');
-  const allowed = resolveDesignShapes(discovery, selectedShape).filter(shape => !intent.rejectedShapes.includes(shape));
+  const explicitGeometry = extractExplicitGeometryConstraints({ idea });
+  if (explicitGeometry.noCourtyard && intent.shape === 'u') throw Error('طلبت شكل U مع فناء ثم طلبت عدم وجود فناء؛ وضّح أيهما تريد قبل التوليد.');
+  const allowed = resolveDesignShapes(discovery, selectedShape).filter(shape =>
+    !intent.rejectedShapes.includes(shape) && !(explicitGeometry.noCourtyard && shape === 'u'));
   if (intent.shape && !allowed.includes(intent.shape)) throw Error('الشكل المطلوب في الوصف يتعارض مع اختيار الشكل الحالي؛ وحّد اختيارك قبل التوليد.');
   const resolved = intent.shape ? [intent.shape] : allowed;
   if (!resolved.length) throw Error('استبعدت جميع الأشكال المدعومة؛ اختر شكلًا متاحًا قبل التوليد.');
@@ -161,6 +165,9 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   }
   const pairs = result.pairs;
   const models = pairs.map(modelFor);
+  const geometryConstraints = extractExplicitGeometryConstraints({ idea });
+  const geometryCheck = verifyGeometryAgainstExplicitConstraints(models, geometryConstraints);
+  if (!geometryCheck.pass) throw Error('لم يتمكن المحرك من إثبات استيفاء شرط عدم وجود فناء داخلي؛ لم نعتمد أي مخطط.');
   const selectedIndex = pairs.findIndex(p => p.candidate.candidateId === result.decision.selectedCandidateId);
   if (selectedIndex < 0) throw Error('AZIZ_SELECTION_NOT_FOUND');
   const selectedModel = models[selectedIndex];

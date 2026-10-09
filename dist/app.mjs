@@ -22,6 +22,7 @@ import { DESIGN_CHOICES } from './design-selection.mjs';
 import { analyzeSurveyGeometry, deriveRectangularGeneratorPlot, surveyFingerprint, validateLandSurvey } from './land-survey.mjs';
 import { initLandSurveyEditor } from './land-map.mjs';
 import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
+import { loadThreeRuntime } from './three-runtime.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -29,7 +30,7 @@ const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
 const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
-let viewport, viewer, toastTimer, loading3D, circulation, clientBrief;
+let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
 const exploration = { signature: '', previous: [], seed: 1 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -198,6 +199,10 @@ function applyRequest() {
   if (result.questions.length || !result.rooms.length) return;
   try {
     const plot = validatePlot({ ...rawPlot(), ...result.plotPatch }); normalizeRooms(result.rooms);
+    const binding = state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null;
+    if (binding && (Math.abs(plot.width - binding.width) > 1e-8 || Math.abs(plot.length - binding.length) > 1e-8)) {
+      throw Error('أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ؛ أعد الربط أو اختر مستطيلًا منفصلًا صراحةً قبل تغييرها. لم يتغير البرنامج.');
+    }
     state.program = publicRooms(result.rooms); state.clientDesires = result.desires; state.requestAppliedPrompt = $('idea').value; state.manualEdits = true;
     if (result.palette) { state.palette = result.palette; syncPalette(); }
     if (result.shape) {
@@ -294,19 +299,9 @@ function on3DMode(mode, detail) {
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
 async function loadThree(retry = false) {
-  if (globalThis.THREE) return;
+  if (globalThis.THREE?.WebGLRenderer && globalThis.THREE?.Scene) return;
   if (loading3D) return loading3D;
-  const existing = document.querySelector('script[src*="three.min.js"]');
-  const create = retry || !existing;
-  loading3D = new Promise((resolve, reject) => {
-    const script = create ? document.createElement('script') : existing;
-    const cleanup = () => { clearTimeout(timer); script.removeEventListener('load', success); script.removeEventListener('error', failure); };
-    const success = () => { cleanup(); globalThis.THREE ? resolve() : reject(Error('تعذّر تهيئة مكتبة 3D.')); };
-    const failure = () => { cleanup(); reject(Error('تعذّر تحميل مكتبة 3D. تحقّق من الاتصال ثم أعد المحاولة. مخطط 2D متاح.')); };
-    const timer = setTimeout(failure, 8000);
-    script.addEventListener('load', success, { once: true }); script.addEventListener('error', failure, { once: true });
-    if (create) { script.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js'; script.async = true; document.head.append(script); }
-  });
+  loading3D = loadThreeRuntime({ retry });
   try { await loading3D; } finally { loading3D = null; }
 }
 async function show3D(retry = false) {
@@ -315,7 +310,8 @@ async function show3D(retry = false) {
     message('threeError', ''); $('retry3D').hidden = true;
     await loadThree(retry);
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
-    viewer.setVisible(state.tab === 'result' && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 })); $('roof').checked = false;
+    const showRoof = $('roof').checked;
+    viewer.setVisible(state.tab === 'result' && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 }));
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
@@ -1100,4 +1096,79 @@ function boot() {
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'result' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); renderLandSurveySummary(); initVisualizer(() => state.model); switchTab('rating'); void refreshAssistantStatus(); void initArchive();
 }
+
+// The conversation-first UI is an adapter over v48's confirmed request, exact
+// geometry, archive signature, land-survey and project state. It owns no planner.
+const mizanStudioAPI = Object.freeze({
+  getState() {
+    return {
+      hasModel: !!state.model,
+      model: state.model ? structuredClone(state.model) : null,
+      program: publicRooms(state.program),
+      plot: rawPlot(),
+      dirty: state.dirty,
+      failures: structuredClone(state.failures),
+    };
+  },
+  setPlot({ width, length, entry, maxBuiltArea }) {
+    if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
+    const requested = {
+      ...rawPlot(), width: Number(width), length: Number(length), entry,
+      maxBuiltArea: maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '' ? null : Number(maxBuiltArea),
+    };
+    const candidate = validatePlot(requested);
+    const binding = state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null;
+    if (binding && (Math.abs(candidate.width - binding.width) > 1e-8 || Math.abs(candidate.length - binding.length) > 1e-8)) {
+      throw Error('أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ؛ أعد الربط أو اختر مستطيلًا منفصلًا صراحةً قبل تغييرها.');
+    }
+    $('wid').value = String(candidate.width);
+    $('len').value = String(candidate.length);
+    $('entry').value = candidate.entry;
+    $('maxBuiltArea').value = candidate.maxBuiltArea ?? '';
+    // A chosen entrance must be on a street in this planner; make that side explicit.
+    state.streets[entry] = true;
+    renderStreets(); rating(); markDirty();
+    return validatePlot(rawPlot());
+  },
+  async propose(prompt, { accessCode = '', local = false } = {}) {
+    $('idea').value = String(prompt || '');
+    const mode = state.model ? 'modify' : 'replace';
+    const modeInput = document.querySelector(`[name="requestMode"][value="${mode}"]`);
+    if (modeInput) modeInput.checked = true;
+    state.proposal = null; state.proposalFingerprint = null; state.requestProposal = null; studioProposalSource = null;
+    if (local) {
+      await understandRequest();
+      if (!state.requestProposal) throw Error($('requestFeedback').textContent || 'لم ينتج فهم محلي صالح؛ بقي المخطط السابق كما هو.');
+      studioProposalSource = 'local';
+      return { brief: { ...structuredClone(state.requestProposal), unhandled: structuredClone(state.requestProposal.limitations || []) }, context: null };
+    }
+    $('aiAccessCode').value = String(accessCode || '');
+    await askAI();
+    if (!state.proposal) throw Error($('aiFeedback').textContent || 'لم ينتج تحليل صالح؛ بقي المخطط السابق كما هو.');
+    studioProposalSource = 'ai';
+    return { brief: structuredClone(state.proposal), context: structuredClone(state.briefContext) };
+  },
+  async drawProposal() {
+    if (studioProposalSource === 'local') {
+      if (!state.requestProposal?.rooms?.length || state.requestProposal.questions?.length || state.requestProposal.fingerprint !== requestFingerprint(requestInput())) {
+        throw Error('الفهم المحلي قديم أو يحتاج توضيحًا؛ أعد التحليل قبل الاعتماد.');
+      }
+    } else if (!state.proposal?.rooms?.length || state.proposal.questions?.length || state.proposalFingerprint !== requestFingerprint(requestInput())) {
+      throw Error('لا يوجد اقتراح متصل صالح للاعتماد؛ أعد التحليل قبل الاعتماد.');
+    }
+    const previous = state.model;
+    if (studioProposalSource === 'local') {
+      const pending = state.requestProposal;
+      applyRequest();
+      if (state.requestProposal === pending) throw Error($('requestFeedback').textContent || 'لم يُطبق الاقتراح؛ لم يتغير المخطط السابق.');
+      await generate();
+    } else await drawFromAIProposal();
+    if (!state.model || state.model === previous) throw Error($('generationError').textContent || 'لم ينجح التوليد؛ بقي المخطط السابق محفوظًا.');
+    studioProposalSource = null;
+    return { model: structuredClone(state.model), alternatives: state.alternatives.map(model => structuredClone(model)), failures: structuredClone(state.failures) };
+  },
+  showAdvanced() { return !!state.model; },
+});
+Object.defineProperty(window, 'mizanStudioAPI', { value: mizanStudioAPI, configurable: false, writable: false });
+
 boot();

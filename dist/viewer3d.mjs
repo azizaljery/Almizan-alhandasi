@@ -21,7 +21,7 @@ export class RoomViewer {
     const canvas = this.renderer.domElement;
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
-    this.scene.add(new T.HemisphereLight(0xfffcf2, 0x7b927b, 2.1));
+    this.ambientLight = new T.HemisphereLight(0xfffcf2, 0x7b927b, 2.1); this.scene.add(this.ambientLight);
     const light = new T.DirectionalLight(0xffefd3, 2.7); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
     if (light.shadow?.mapSize) {
       light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048;
@@ -30,7 +30,7 @@ export class RoomViewer {
     }
     this.scene.add(light);
     if (light.target) this.scene.add(light.target);
-    const fill = new T.DirectionalLight(0xbcd8ff, .75); fill.position.set(24, 18, -35); this.scene.add(fill);
+    const fill = new T.DirectionalLight(0xbcd8ff, .75); this.fillLight = fill; fill.position.set(24, 18, -35); this.scene.add(fill);
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
     const on = (event, handler, options = {}) => canvas.addEventListener(event, handler, { ...options, signal: this.abort.signal });
@@ -207,7 +207,7 @@ export class RoomViewer {
     this.phi = name === 'top' ? .02 : name === 'front' ? 1.3 : .78;
     const entryAngle = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[this.model.plot.entry] || 0;
     this.theta = entryAngle + (name === 'front' ? .08 : Math.PI * .22);
-    this.roof.visible = name === 'front';
+    // Roof visibility is an explicit user choice; camera presets must not silently change it.
     const aspect = Math.max(.35, this.container.clientWidth / Math.max(1, this.container.clientHeight));
     const halfFov = Math.atan(Math.tan(21 * Math.PI / 180) * Math.min(1, aspect));
     this.radius = Math.hypot(b.w, b.h) / (2 * Math.sin(halfFov)) * 1.06;
@@ -237,9 +237,20 @@ export class RoomViewer {
   }
   setRoof(show) { if (this.roof) { this.roof.visible = show && this.mode !== 'inside'; this.render(); } }
   setSun(preview) {
-    if (!this.sunLight || !preview?.visible) return;
-    const rad = preview.azimuth * Math.PI / 180, altitude = Math.max(.12, preview.altitude * Math.PI / 180), distance = 52;
+    if (!this.sunLight) return;
+    if (!preview?.visible) {
+      this.sunLight.visible = false;
+      if (this.ambientLight) this.ambientLight.intensity = .55;
+      if (this.fillLight) this.fillLight.intensity = .22;
+      this.render();
+      return;
+    }
+    this.sunLight.visible = true;
+    if (this.ambientLight) this.ambientLight.intensity = 1.2;
+    if (this.fillLight) this.fillLight.intensity = .65;
+    const rad = preview.azimuth * Math.PI / 180, altitude = Math.max(.08, preview.altitude * Math.PI / 180);
     const b = this.model.building;
+    const distance = Math.max(52, Math.max(this.model.plot.width, this.model.plot.length) * 1.8);
     this.sunLight.position.set(b.x + b.w / 2 + Math.sin(rad) * Math.cos(altitude) * distance, Math.sin(altitude) * distance, -b.y - b.h / 2 - Math.cos(rad) * Math.cos(altitude) * distance);
     this.sunLight.intensity = Math.max(1.3, Math.min(3.5, 1.2 + preview.altitude / 28)); this.render();
   }
