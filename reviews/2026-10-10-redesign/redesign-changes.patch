@@ -1,0 +1,1842 @@
+diff --git a/FILE-SHA256SUMS-RELEASE.txt b/FILE-SHA256SUMS-RELEASE.txt
+index 7ee0c2a..98e2c40 100644
+--- a/FILE-SHA256SUMS-RELEASE.txt
++++ b/FILE-SHA256SUMS-RELEASE.txt
+@@ -1,20 +1,21 @@
+ ad9f11f271d75dfc5dbd9c0999ade3c282357ca7f891b52ee8db4b879e9c41df  ./.gitignore
+ c174c15f8ed4267589d9e038398cdb71479ae003556c8a404c98c2e72c107302  ./.openai/hosting.json
+ 1fcaa88b62e8cffa515013ae4447b02528b4a5719e515afc83d8b483794786b2  ./CLAUDE-INTEGRATION.md
+-ade20568149edc2458077d864f51ca442bd733b131e6fd741df5788f71453662  ./FILE-SHA256SUMS.txt
++407326e0d41fd1d504c5da68050a8cccea73a095fac3cd72ab508a943cf5cd2d  ./FILE-SHA256SUMS.txt
+ ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
+ 56798be876f4151f2f0525fbb002f4e2a5843bedd96be4ef2dc0ccb9f9634c96  ./PR16-INTEGRATION-REPORT.md
+ e4e0476f3ec59bcda72d21b5162699bcf91310730320d20fb521dbd20c36408b  ./README.md
+ d483f97c632f7090cc39b22d8a1b917f52da6d62b2088d8d7be89da65c637f39  ./RELEASE-BUILD.log
+ 83d8785f7b3f598ceaab7388a06b7f087a95a824ba5ef3ba081b5d6e37f29c58  ./RELEASE-MANIFEST.md
+ 2ff00c69617e0d0c94410eb2c5efd93553ad15323f33fd1e8ad510c3e3d0c2db  ./RELEASE-TEST-87.log
+-c020d2df95e1d873ce04b393582b160d74e8f2c341b1cb0e88d520e15d494485  ./dist/app.mjs
++ff8978f79ec2ddf41e75e1c33043aeb46366504743287dde83eee9b14686b454  ./dist/app.mjs
+ 553f2e353f14c882771a5f681415a739061a28ef5d2aea907752ac83888fae0f  ./dist/assets/style-classic-villa.png
+ 92052de58061462948f24194143c7e479e2b0c5c3b990821860d3791a9f07a5f  ./dist/assets/style-modern-villa.png
+ cc754587c431a37da8082e22d4f4133d9cdddea8e36b4a243035870909912bbe  ./dist/assets/style-resort-villa.png
+ 4151a4d70838294649388d16c247ac3469ae10260da61a8e933a9f83e1b86357  ./dist/assistant.mjs
+ 85ffde8b956ae7fcdfca1f684b635c8b2806c4ca0cb68a64f49b1cf3c8f2d640  ./dist/audit.mjs
+ c9e359631f56c5f2c2779860eb4b8aced7f61f8306a320075a0d3721bb2a2e99  ./dist/brief-contract.mjs
++b24738a93dd1bcee56a59f5b56cb7db78219a2f326c168a000a6f237d068f523  ./dist/brief-topology-planner.mjs
+ 7715990abb21a2458fd365538b4de64b41e79f3910924c024f110fcb86dd5c68  ./dist/cinematic-entry.css
+ 20d1d2affc8901ce9753205b33e7ebd1cab8e4ce9097d34f5abe3d6b2a2a3a20  ./dist/cinematic-entry.mjs
+ 500d8a8e55af4c965ca5837dae21a8544fd04c1be2a28b4da3bee1ee312aa758  ./dist/circulation.mjs
+@@ -78,7 +79,7 @@ d06f35857fe1aa54d630dbb606e9becb17f65faa920d3287c17a0763095a005c  ./dist/gemini/
+ c69f2471249a93bd0a2337a3424c4cd71209a2a3185758f6cf5f2852f2bb8695  ./dist/gemini/engineering-math/src/index.js
+ 56063c1c8468bb0117eecf4381ea64ef1cadce4fb39f965757abc3d13a2ff93f  ./dist/gemini/shared/deterministic-hash.js
+ f3956d4d6a2a2e572db603a263f16686e9fdd8c7bd51d256fc505826a2319633  ./dist/home-design-engine.mjs
+-804a87415806f72513a3d02602ddb3ffc30d892af730028c7ccf4e3f47bf46ba  ./dist/index.html
++3bf8dde0fa538f2f3e9a5695e0d60704ef31bc9febf902504e644daec058aa0e  ./dist/index.html
+ d82006c25b00fb4b984fcc3fb3ad2c3c9107454582790b9f58ea8ac6528655cc  ./dist/integration/aziz/aziz.d.ts
+ 47c7a891e9447e7252f3d94e48b0f7efb0b9d02238aec4ec472590203ef55107  ./dist/integration/aziz/aziz.d.ts.map
+ d33ea580f59c00d457159f8cb617790541d06f1dac6fc8aafb5b2002a85fe270  ./dist/integration/aziz/aziz.js
+@@ -231,27 +232,28 @@ eebbca078aee8b9b570877c030b9287c93fce7a93f19cf2b87fa04e6c4c07bd7  ./dist/integra
+ 60e4b0c8191248df09a40c43a380c495f76194ef4d788a28f6bb48a3333652b3  ./dist/integration/gemini/packages/engineering-math/tests/p1-estimates.test.js
+ 373233beeb1a10acea977506b839ca4b62b2e5c32ea58bb3d7af83dbce344b15  ./dist/integration/gemini/reference/identity.mjs
+ 0d390fa3edeafd9d96ca1e11e1c380afe4d6fd3fa899492ec6bf3a0cc76202ba  ./dist/integration/gemini/reference/orthogonal-audit.mjs
+-441806561b7a5ef44710b890651ddf38e600dcd75e958f679f8c683e97ec1bba  ./dist/integration/pipeline.mjs
++19a6e6fe9580bafe9fd55e6602ddc61328a0e73f31a79f1e97ca725100f03244  ./dist/integration/pipeline.mjs
+ 2d3d7a08c0ba7909f10229c3bc02297d8b2f5078bb6e95a304dc56979696ba8d  ./dist/layout-worker.mjs
+ 38bd155ac8aba3f51ad9d9c4fea00cf9ab7e3f3acea7856e7bbb972355114a9c  ./dist/local-nlp.mjs
+ f0a3f5a3ed332418aa365c6e2aabe44b3eb0bd2a7781469033c096ef7dd4fc82  ./dist/mizan-home-design-engine.mjs
+ 20161218593ae8768596014d4f22e7c252d086ca337fd909bfcb1da56d9bd84b  ./dist/mizan-portal.css
+ f7e5a5ceba1872760bb378a3d807fa76d11c08adaf530aba0da9645afdca47c7  ./dist/mizan-portal.mjs
+ a5040fdc7c30900c7b83c1f9e117baaf1d5724ea6a79fef6c44ca8f66130738c  ./dist/mizan-score.mjs
+-7f982207a217a03d5b9ae365e405546a8bb728966cdb992c55f140fea9f1396e  ./dist/multi-engine.mjs
+-193a508b8dda3bce13fe2635c40b940c271a938ce46936b40b9fe64cc2aa635f  ./dist/plan-view.mjs
++daf92bc5eda2e1ba940b19cd0d9fafb03032fa16dd51fe44ea43f81b22a7cc66  ./dist/multi-engine.mjs
++d7ebfa5adc47e7c2a00d5e890cb9bea3fc06fb4d9a08b0a0822a5b90c22223db  ./dist/plan-view.mjs
+ 573a8b104cad7e82d93e2f47efeaf0aaa0a6466c785969a68e684a2f19e17c7c  ./dist/planner.css
+ 14f84d162122ee3163cccc5b98070746a035acb713f9f35594efa8b63fc17fcd  ./dist/planner.mjs
++54a818d2b980bf5bac5544469765bdadd9fd2a8d36a6a340a516f0ce4860368c  ./dist/plot-entry.mjs
+ 4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d  ./dist/portal.mjs
+ 1e551d0ea4829d52330de5477d6d7fcee4111fabbcc3e19c83bbfa50688984ab  ./dist/project.mjs
+-e0e0a0434a74c75d5c31a0f243001c5c31fccea51205b0dc2c61d3ab007b697b  ./dist/render-visualizer.mjs
++b25fa0a199a8cadb591ad7388085242397ae00a7db650661f704de2a41ecb7d4  ./dist/render-visualizer.mjs
+ 96c8660a1d929abf99ca325d42d77a6c0211d9136a3e2c1ab210601cc0725dd7  ./dist/requirement-evidence.css
+ 48141e9f16ff0121a9aaabbaf22076833fc19f08cd162345b2f034c43b8441f1  ./dist/requirement-evidence.mjs
+ 49a91602ea68be5a96ecf54a4f6461703e306d752ceef0f8c9907cc1e049b579  ./dist/requirements-engine.mjs
+ d3c66dc1f49214d93e49bb1cb3936e5b893c94a55109abbc7de47cecafc6c449  ./dist/solar-path.mjs
+ 28fb3db74558f3239783d2a5db57c5dbc22cd8d0f8f127795ca08017fdb60b6d  ./dist/studio-simple.css
+ b592e79d1d84a797b69eec1e2a5fbbd31e5505af1bc755e28959f8c70aefb9f1  ./dist/studio-simple.mjs
+-668acad6ea2b584de3ebd1258a280805fbc4a547aeaeb09332452d1f23500efc  ./dist/studio-workspace.css
++fa813ff280d6573f68af48c374cba63141a86bca37a8317e00067ed51cb24bc5  ./dist/studio-workspace.css
+ 4fd9f1036003d4cb275189062cb9f7f401c54dbcf926ff703380e7d5415afe6b  ./dist/sun-orientation.mjs
+ 63764157e8cde092ac90b919b776c081182c045295cab29cc46ca1c1827f6e0d  ./dist/three-runtime.mjs
+ 3058a652afef2b043cf3f4e53f071f647fc30d4aeabb6b6cc76594f74a097c45  ./dist/viewer3d.mjs
+@@ -265,6 +267,7 @@ e073411a959459c469f2d60a5208a5003f2d1f66de5bd5356b9e6d64e0b74dc9  ./evidence/p1-
+ c9ace67194d4722ea205630b0c8cab789123accd407e9af79335c6a8c81ddba4  ./scripts/build.mjs
+ de11e48520f8cd683a287852d48e8305af257e06234dcaf1e7f91daa37c3056d  ./scripts/check-browser-imports.mjs
+ abba32c21ac490a8190815444fa5db8cb303178b62f5bddbdd00a42ca2605df0  ./tests/brief-contract.test.mjs
++d32924ae8d82d7ef6c24059bef7485dbb6f860d596a21d7923245bab6ea90eae  ./tests/brief-topology-generation.test.mjs
+ 94b2179171a033fb095d1e31d46cb3b1336dfb84058c86f3309da5cead67b9c3  ./tests/browser-compat.test.mjs
+ 724a38bf53f5e13ff46401e124b78c84c3d83fd16b3e5c04da7d317f8478d0eb  ./tests/claude-integration.test.mjs
+ a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client-brief.test.mjs
+@@ -274,7 +277,9 @@ a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client
+ b35a5d34f47ba3d4e058aaba0d64af02b0f1ccb4d28ce1a4820c1410753fc798  ./tests/frontend.test.mjs
+ bc528d9aee28849310a6db8f67621487379c7841874a93aa11ffeae368707b0f  ./tests/home-design-engine.test.mjs
+ bc377d24df0b13cd31dbf1a57dd837fea37a641a62611b8a9ec0570ec90ac723  ./tests/multi-engine.test.mjs
++87f163b427eb9441c4b656d6cd68000c3afaaa86f5459df578c1d330be6c1aec  ./tests/plan-presentation.test.mjs
+ 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
++09e2db925ea07c912cbc364a7768bbd6bbf3c3e140c72811289f81a02dfd913c  ./tests/plot-entry.test.mjs
+ 02ee4501ac8dff60cd5b3827d3c41eaff26c8c7f6b06294cc5496e063edb0043  ./tests/portal-navigation.test.mjs
+ 187b207685bc55c61c43758fcdbbe411a40fbd0a1af299abfcfe3227b7022b75  ./tests/release-consistency.test.mjs
+ b046e822eb040c4818401ab1623253610d26adbc3612297b238348867d9e7b4f  ./tests/requirement-evidence.test.mjs
+diff --git a/FILE-SHA256SUMS.txt b/FILE-SHA256SUMS.txt
+index f5757d6..dbe1443 100644
+--- a/FILE-SHA256SUMS.txt
++++ b/FILE-SHA256SUMS.txt
+@@ -4,13 +4,14 @@ c174c15f8ed4267589d9e038398cdb71479ae003556c8a404c98c2e72c107302  ./.openai/host
+ ab7ae6362b0baa2d94502310fa8c8d34c3d38e806085e58fb581c1f6c64b3cc3  ./INTEGRATION-P1-REPORT.md
+ 56798be876f4151f2f0525fbb002f4e2a5843bedd96be4ef2dc0ccb9f9634c96  ./PR16-INTEGRATION-REPORT.md
+ e4e0476f3ec59bcda72d21b5162699bcf91310730320d20fb521dbd20c36408b  ./README.md
+-c020d2df95e1d873ce04b393582b160d74e8f2c341b1cb0e88d520e15d494485  ./dist/app.mjs
++ff8978f79ec2ddf41e75e1c33043aeb46366504743287dde83eee9b14686b454  ./dist/app.mjs
+ 553f2e353f14c882771a5f681415a739061a28ef5d2aea907752ac83888fae0f  ./dist/assets/style-classic-villa.png
+ 92052de58061462948f24194143c7e479e2b0c5c3b990821860d3791a9f07a5f  ./dist/assets/style-modern-villa.png
+ cc754587c431a37da8082e22d4f4133d9cdddea8e36b4a243035870909912bbe  ./dist/assets/style-resort-villa.png
+ 4151a4d70838294649388d16c247ac3469ae10260da61a8e933a9f83e1b86357  ./dist/assistant.mjs
+ 85ffde8b956ae7fcdfca1f684b635c8b2806c4ca0cb68a64f49b1cf3c8f2d640  ./dist/audit.mjs
+ c9e359631f56c5f2c2779860eb4b8aced7f61f8306a320075a0d3721bb2a2e99  ./dist/brief-contract.mjs
++b24738a93dd1bcee56a59f5b56cb7db78219a2f326c168a000a6f237d068f523  ./dist/brief-topology-planner.mjs
+ 7715990abb21a2458fd365538b4de64b41e79f3910924c024f110fcb86dd5c68  ./dist/cinematic-entry.css
+ 20d1d2affc8901ce9753205b33e7ebd1cab8e4ce9097d34f5abe3d6b2a2a3a20  ./dist/cinematic-entry.mjs
+ 500d8a8e55af4c965ca5837dae21a8544fd04c1be2a28b4da3bee1ee312aa758  ./dist/circulation.mjs
+@@ -74,7 +75,7 @@ d06f35857fe1aa54d630dbb606e9becb17f65faa920d3287c17a0763095a005c  ./dist/gemini/
+ c69f2471249a93bd0a2337a3424c4cd71209a2a3185758f6cf5f2852f2bb8695  ./dist/gemini/engineering-math/src/index.js
+ 56063c1c8468bb0117eecf4381ea64ef1cadce4fb39f965757abc3d13a2ff93f  ./dist/gemini/shared/deterministic-hash.js
+ f3956d4d6a2a2e572db603a263f16686e9fdd8c7bd51d256fc505826a2319633  ./dist/home-design-engine.mjs
+-804a87415806f72513a3d02602ddb3ffc30d892af730028c7ccf4e3f47bf46ba  ./dist/index.html
++3bf8dde0fa538f2f3e9a5695e0d60704ef31bc9febf902504e644daec058aa0e  ./dist/index.html
+ d82006c25b00fb4b984fcc3fb3ad2c3c9107454582790b9f58ea8ac6528655cc  ./dist/integration/aziz/aziz.d.ts
+ 47c7a891e9447e7252f3d94e48b0f7efb0b9d02238aec4ec472590203ef55107  ./dist/integration/aziz/aziz.d.ts.map
+ d33ea580f59c00d457159f8cb617790541d06f1dac6fc8aafb5b2002a85fe270  ./dist/integration/aziz/aziz.js
+@@ -227,27 +228,28 @@ eebbca078aee8b9b570877c030b9287c93fce7a93f19cf2b87fa04e6c4c07bd7  ./dist/integra
+ 60e4b0c8191248df09a40c43a380c495f76194ef4d788a28f6bb48a3333652b3  ./dist/integration/gemini/packages/engineering-math/tests/p1-estimates.test.js
+ 373233beeb1a10acea977506b839ca4b62b2e5c32ea58bb3d7af83dbce344b15  ./dist/integration/gemini/reference/identity.mjs
+ 0d390fa3edeafd9d96ca1e11e1c380afe4d6fd3fa899492ec6bf3a0cc76202ba  ./dist/integration/gemini/reference/orthogonal-audit.mjs
+-441806561b7a5ef44710b890651ddf38e600dcd75e958f679f8c683e97ec1bba  ./dist/integration/pipeline.mjs
++19a6e6fe9580bafe9fd55e6602ddc61328a0e73f31a79f1e97ca725100f03244  ./dist/integration/pipeline.mjs
+ 2d3d7a08c0ba7909f10229c3bc02297d8b2f5078bb6e95a304dc56979696ba8d  ./dist/layout-worker.mjs
+ 38bd155ac8aba3f51ad9d9c4fea00cf9ab7e3f3acea7856e7bbb972355114a9c  ./dist/local-nlp.mjs
+ f0a3f5a3ed332418aa365c6e2aabe44b3eb0bd2a7781469033c096ef7dd4fc82  ./dist/mizan-home-design-engine.mjs
+ 20161218593ae8768596014d4f22e7c252d086ca337fd909bfcb1da56d9bd84b  ./dist/mizan-portal.css
+ f7e5a5ceba1872760bb378a3d807fa76d11c08adaf530aba0da9645afdca47c7  ./dist/mizan-portal.mjs
+ a5040fdc7c30900c7b83c1f9e117baaf1d5724ea6a79fef6c44ca8f66130738c  ./dist/mizan-score.mjs
+-7f982207a217a03d5b9ae365e405546a8bb728966cdb992c55f140fea9f1396e  ./dist/multi-engine.mjs
+-193a508b8dda3bce13fe2635c40b940c271a938ce46936b40b9fe64cc2aa635f  ./dist/plan-view.mjs
++daf92bc5eda2e1ba940b19cd0d9fafb03032fa16dd51fe44ea43f81b22a7cc66  ./dist/multi-engine.mjs
++d7ebfa5adc47e7c2a00d5e890cb9bea3fc06fb4d9a08b0a0822a5b90c22223db  ./dist/plan-view.mjs
+ 573a8b104cad7e82d93e2f47efeaf0aaa0a6466c785969a68e684a2f19e17c7c  ./dist/planner.css
+ 14f84d162122ee3163cccc5b98070746a035acb713f9f35594efa8b63fc17fcd  ./dist/planner.mjs
++54a818d2b980bf5bac5544469765bdadd9fd2a8d36a6a340a516f0ce4860368c  ./dist/plot-entry.mjs
+ 4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d  ./dist/portal.mjs
+ 1e551d0ea4829d52330de5477d6d7fcee4111fabbcc3e19c83bbfa50688984ab  ./dist/project.mjs
+-e0e0a0434a74c75d5c31a0f243001c5c31fccea51205b0dc2c61d3ab007b697b  ./dist/render-visualizer.mjs
++b25fa0a199a8cadb591ad7388085242397ae00a7db650661f704de2a41ecb7d4  ./dist/render-visualizer.mjs
+ 96c8660a1d929abf99ca325d42d77a6c0211d9136a3e2c1ab210601cc0725dd7  ./dist/requirement-evidence.css
+ 48141e9f16ff0121a9aaabbaf22076833fc19f08cd162345b2f034c43b8441f1  ./dist/requirement-evidence.mjs
+ 49a91602ea68be5a96ecf54a4f6461703e306d752ceef0f8c9907cc1e049b579  ./dist/requirements-engine.mjs
+ d3c66dc1f49214d93e49bb1cb3936e5b893c94a55109abbc7de47cecafc6c449  ./dist/solar-path.mjs
+ 28fb3db74558f3239783d2a5db57c5dbc22cd8d0f8f127795ca08017fdb60b6d  ./dist/studio-simple.css
+ b592e79d1d84a797b69eec1e2a5fbbd31e5505af1bc755e28959f8c70aefb9f1  ./dist/studio-simple.mjs
+-668acad6ea2b584de3ebd1258a280805fbc4a547aeaeb09332452d1f23500efc  ./dist/studio-workspace.css
++fa813ff280d6573f68af48c374cba63141a86bca37a8317e00067ed51cb24bc5  ./dist/studio-workspace.css
+ 4fd9f1036003d4cb275189062cb9f7f401c54dbcf926ff703380e7d5415afe6b  ./dist/sun-orientation.mjs
+ 63764157e8cde092ac90b919b776c081182c045295cab29cc46ca1c1827f6e0d  ./dist/three-runtime.mjs
+ 3058a652afef2b043cf3f4e53f071f647fc30d4aeabb6b6cc76594f74a097c45  ./dist/viewer3d.mjs
+@@ -261,6 +263,7 @@ e073411a959459c469f2d60a5208a5003f2d1f66de5bd5356b9e6d64e0b74dc9  ./evidence/p1-
+ c9ace67194d4722ea205630b0c8cab789123accd407e9af79335c6a8c81ddba4  ./scripts/build.mjs
+ de11e48520f8cd683a287852d48e8305af257e06234dcaf1e7f91daa37c3056d  ./scripts/check-browser-imports.mjs
+ abba32c21ac490a8190815444fa5db8cb303178b62f5bddbdd00a42ca2605df0  ./tests/brief-contract.test.mjs
++d32924ae8d82d7ef6c24059bef7485dbb6f860d596a21d7923245bab6ea90eae  ./tests/brief-topology-generation.test.mjs
+ 94b2179171a033fb095d1e31d46cb3b1336dfb84058c86f3309da5cead67b9c3  ./tests/browser-compat.test.mjs
+ 724a38bf53f5e13ff46401e124b78c84c3d83fd16b3e5c04da7d317f8478d0eb  ./tests/claude-integration.test.mjs
+ a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client-brief.test.mjs
+@@ -270,7 +273,9 @@ a64dee87f4ef88f15a88e41f73fd83f1047895f2a5bba36f060e95e8a726b385  ./tests/client
+ b35a5d34f47ba3d4e058aaba0d64af02b0f1ccb4d28ce1a4820c1410753fc798  ./tests/frontend.test.mjs
+ bc528d9aee28849310a6db8f67621487379c7841874a93aa11ffeae368707b0f  ./tests/home-design-engine.test.mjs
+ bc377d24df0b13cd31dbf1a57dd837fea37a641a62611b8a9ec0570ec90ac723  ./tests/multi-engine.test.mjs
++87f163b427eb9441c4b656d6cd68000c3afaaa86f5459df578c1d330be6c1aec  ./tests/plan-presentation.test.mjs
+ 9426b2e85ff1a09211b6938da4305011bac45b8de219f7e872d409a5f88fc66a  ./tests/planner.test.mjs
++09e2db925ea07c912cbc364a7768bbd6bbf3c3e140c72811289f81a02dfd913c  ./tests/plot-entry.test.mjs
+ 02ee4501ac8dff60cd5b3827d3c41eaff26c8c7f6b06294cc5496e063edb0043  ./tests/portal-navigation.test.mjs
+ 187b207685bc55c61c43758fcdbbe411a40fbd0a1af299abfcfe3227b7022b75  ./tests/release-consistency.test.mjs
+ b046e822eb040c4818401ab1623253610d26adbc3612297b238348867d9e7b4f  ./tests/requirement-evidence.test.mjs
+diff --git a/dist/app.mjs b/dist/app.mjs
+index ce8918b..82d0a98 100644
+--- a/dist/app.mjs
++++ b/dist/app.mjs
+@@ -25,19 +25,20 @@ import { initLandSurveyEditor } from './land-map.mjs';
+ import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
+ import { loadThreeRuntime } from './three-runtime.mjs';
+ import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
++import { setPlotFromSimpleInput, validateEntryPlot } from './plot-entry.mjs';
+ 
+ const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
+ const number = id => $(id).valueAsNumber;
+ const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
+ const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
+ const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
+-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
++const state = { streets: { n: false, s: true, e: false, w: false }, streetSelectionExplicit: false, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
+ let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
+ const exploration = { signature: '', previous: [], seed: 1 };
+ const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
+ const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
+ const workspaceSignature = (p, rooms, survey = state.landSurvey) => JSON.stringify([signature(p, rooms), surveyFingerprint(survey)]);
+-const historyEntry = (model, palette) => ({ model, palette, ...(state.modelLandSurvey ? { landSurvey: structuredClone(state.modelLandSurvey) } : {}) });
++const historyEntry = (model, palette) => ({ model, palette, streetSelectionExplicit: state.streetSelectionExplicit, ...(state.modelLandSurvey ? { landSurvey: structuredClone(state.modelLandSurvey) } : {}) });
+ const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
+ function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
+ function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
+@@ -201,7 +202,11 @@ function applyRequest() {
+   if (result.fingerprint !== requestFingerprint(requestInput())) return message('requestFeedback', 'تغيّرت المدخلات بعد القراءة؛ اضغط «افهم طلبي» مرة أخرى.');
+   if (result.questions.length || !result.rooms.length) return;
+   try {
+-    const plot = validatePlot({ ...rawPlot(), ...result.plotPatch }); normalizeRooms(result.rooms);
++    const requestedPlot = { ...rawPlot(), ...result.plotPatch };
++    const plot = Object.hasOwn(result.plotPatch, 'entry')
++      ? validateEntryPlot(requestedPlot, requestedPlot.entry, { currentStreets: state.streets, streetSelectionExplicit: state.streetSelectionExplicit })
++      : validatePlot(requestedPlot);
++    normalizeRooms(result.rooms);
+     const binding = state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null;
+     if (binding && (Math.abs(plot.width - binding.width) > 1e-8 || Math.abs(plot.length - binding.length) > 1e-8)) {
+       throw Error('أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ؛ أعد الربط أو اختر مستطيلًا منفصلًا صراحةً قبل تغييرها. لم يتغير البرنامج.');
+@@ -501,12 +506,15 @@ function renderEngineeringReview() {
+ function renderAlternatives() {
+   $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
+     const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
++    const routes = circulationNetwork(model);
++    const routeLengths = model.rooms.map(room => routes.toRoom(room.id)?.metres);
++    const longestRoute = routeLengths.length && routeLengths.every(Number.isFinite) ? Math.max(...routeLengths) : null;
+     const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
+     const title = model.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[model.strategy || 'compact'];
+     const tag = concept.tag === 'Claude 2.2.1' ? 'مسقط مستطيل' : concept.tag;
+     const evaluation = state.engineering?.rows?.[index]?.evaluation;
+     const engineering = evaluation ? `قرار الميزان ${assessedText(evaluation.score)} من ١٠٠ جزئي · ${fmt(evaluation.blockers.length, 0)} عوائق.` : '';
+-    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>${esc(title)}</strong><small>${esc(tag)}</small></span></button><details class="alternative-details"><summary aria-label="تفاصيل البديل">تفاصيل</summary><div><p>${esc(title)} · ${esc(concept.form)}. ${esc(concept.idea)}</p><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p><p><b>يناسب:</b> ${esc(concept.bestFor)} · <b>المقايضة:</b> ${esc(concept.tradeoff)}</p></div></details></article>`;
++    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} البديل ${fmt(index + 1, 0)} · ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>البديل ${fmt(index + 1, 0)}</strong><small><span>بناء ${fmt(q.footprint, 0)} م²</span><span>ممرات ${fmt(q.circulation, 0)} م²</span></small></span></button><details class="alternative-details"><summary aria-label="تفاصيل البديل">تفاصيل</summary><div><p>${esc(title)} · ${esc(tag)} · ${esc(concept.form)}. ${esc(concept.idea)}</p><p>المساحة المبنية ${fmt(q.footprint)} م² · أطول مسار من المدخل إلى باب غرفة ${longestRoute === null ? 'غير متصل أو غير متاح' : `${fmt(longestRoute)} م`}. قد تقل مساحة الممرات بينما يطول مسار الوصول؛ قارن المقياسين. هذه قياسات للنموذج وليست اعتمادًا للسلامة أو سهولة الوصول.</p><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p><p><b>يناسب:</b> ${esc(concept.bestFor)} · <b>المقايضة:</b> ${esc(concept.tradeoff)}</p></div></details></article>`;
+   }).join('');
+   $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} بدائل هندسية · التحديد يحدّث المسقط و3D والكميات`;
+   const failed = state.failures.map(f => `${f.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[f.strategy] || 'أحد البدائل'}: ${f.reason}`).join(' ');
+@@ -735,8 +743,9 @@ async function refreshAssistantStatus() {
+   }
+ }
+ 
+-function restorePlot(p) {
+-  state.streets = { ...p.streets }; renderStreets(); $('entry').value = p.entry;
++function restorePlot(p, { streetSelectionExplicit = state.streetSelectionExplicit } = {}) {
++  state.streets = { ...p.streets }; state.streetSelectionExplicit = streetSelectionExplicit; renderStreets(); $('entry').value = p.entry;
++  if ($('studioEntry')) $('studioEntry').value = p.entry;
+   for (const [id, value] of Object.entries({ len: p.length, wid: p.width, floors: p.floors, streetSetback: p.streetSetback, neighborSetback: p.neighborSetback, coverage: p.coverage * 100, maxBuiltArea: p.maxBuiltArea ?? '' })) $(id).value = value;
+ }
+ function syncPalette() {
+@@ -942,7 +951,7 @@ function saveProject() {
+ function applyProjectState(project, statusText) {
+   state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
+   state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
+-  restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
++  restorePlot(project.plot, { streetSelectionExplicit: true }); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
+   state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
+   $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
+   if (state.model) showResults(); else { $('out').style.display = 'none'; viewer?.setVisible(false); }
+@@ -1007,7 +1016,7 @@ function boot() {
+     modify: 'غيّر المطبخ إلى مساحة 24 م² بالوسط، بدون مستودع.',
+   };
+   all('[data-request-example]').forEach(button => button.addEventListener('click', () => { $('idea').value = examples[button.dataset.requestExample]; document.querySelector(`[name="requestMode"][value="${button.dataset.requestExample === 'modify' ? 'modify' : 'replace'}"]`).checked = true; markDirty(); $('idea').focus({ preventScroll: true }); }));
+-  $('streets').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (!b) return; state.streets[b.dataset.side] = !state.streets[b.dataset.side]; renderStreets(); rating(); markDirty(); });
++  $('streets').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (!b) return; state.streetSelectionExplicit = true; state.streets[b.dataset.side] = !state.streets[b.dataset.side]; renderStreets(); rating(); markDirty(); });
+   ['len', 'wid', 'streetSetback', 'neighborSetback', 'coverage', 'maxBuiltArea', 'entry', 'floors'].forEach(id => $(id).addEventListener('input', () => {
+     if (['len', 'wid'].includes(id) && state.landSurvey?.engineLink === 'survey-rectangle' &&
+       (Math.abs(number('wid') - state.landSurvey.binding.width) > 1e-8 || Math.abs(number('len') - state.landSurvey.binding.length) > 1e-8)) unlinkSurveyRectangle();
+@@ -1083,7 +1092,7 @@ function boot() {
+     if (!state.history.length) return;
+     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
+     const previous = state.history.pop(); state.model = previous.model; state.traceContext = null; state.selectedShape = previous.model.shape || null; state.palette = previous.palette; state.program = publicRooms(previous.model.program); state.landSurvey = previous.landSurvey ? validateLandSurvey(previous.landSurvey) : null; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; const p = previous.model.plot;
+-    restorePlot(p); syncPalette(); state.alternatives = [state.model]; state.failures = [];
++    restorePlot(p, { streetSelectionExplicit: previous.streetSelectionExplicit ?? true }); syncPalette(); state.alternatives = [state.model]; state.failures = [];
+     state.signature = workspaceSignature(p, state.program); state.manualEdits = false; renderRows(); renderLandSurveySummary(); rating(); message('generationError', ''); showResults(); toast('تم استرجاع التوليد السابق ومتطلباته وحدود مسحه.');
+   });
+   $('zoomIn').addEventListener('click', () => viewport?.zoom(.8)); $('zoomOut').addEventListener('click', () => viewport?.zoom(1.25));
+@@ -1157,24 +1166,21 @@ const mizanStudioAPI = Object.freeze({
+     };
+   },
+   setPlot({ width, length, entry, maxBuiltArea }) {
+-    if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
+-    const requested = {
+-      ...rawPlot(), width: Number(width), length: Number(length), entry,
+-      maxBuiltArea: maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '' ? null : Number(maxBuiltArea),
+-    };
+-    const candidate = validatePlot(requested);
+-    const binding = state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null;
+-    if (binding && (Math.abs(candidate.width - binding.width) > 1e-8 || Math.abs(candidate.length - binding.length) > 1e-8)) {
+-      throw Error('أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ؛ أعد الربط أو اختر مستطيلًا منفصلًا صراحةً قبل تغييرها.');
+-    }
+-    $('wid').value = String(candidate.width);
+-    $('len').value = String(candidate.length);
+-    $('entry').value = candidate.entry;
+-    $('maxBuiltArea').value = candidate.maxBuiltArea ?? '';
+-    // A chosen entrance must be on a street in this planner; make that side explicit.
+-    state.streets[entry] = true;
+-    renderStreets(); rating(); markDirty();
+-    return validatePlot(rawPlot());
++    return setPlotFromSimpleInput({
++      state,
++      input: { width, length, entry, maxBuiltArea },
++      getRawPlot: rawPlot,
++      getSurveyBinding: () => state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null,
++      commitFields: candidate => {
++        $('wid').value = String(candidate.width);
++        $('len').value = String(candidate.length);
++        $('entry').value = candidate.entry;
++        $('maxBuiltArea').value = candidate.maxBuiltArea ?? '';
++      },
++      renderStreets,
++      rating,
++      markDirty,
++    });
+   },
+   async propose(prompt, { accessCode = '', local = false } = {}) {
+     $('idea').value = String(prompt || '');
+diff --git a/dist/brief-topology-planner.mjs b/dist/brief-topology-planner.mjs
+new file mode 100644
+index 0000000..8e7b48e
+--- /dev/null
++++ b/dist/brief-topology-planner.mjs
+@@ -0,0 +1,199 @@
++// A brief-led compact corridor composition. Rooms remain metric rectangles and are
++// placed on either side of one connected spine; no fixed outer-shape template is
++// inferred from labels. This is a preliminary layout, not an accessibility design.
++import { footprint, normalizeRooms, validatePlot, validateModel, quantities, GEOMETRY, TYPES } from './claude/planner.mjs';
++
++const E = 1e-5, X = GEOMETRY.exterior, T = GEOMETRY.partition, C = GEOMETRY.corridor, B = GEOMETRY.branch;
++const positions = ['front', 'middle', 'back'];
++const near = (a, b) => Math.abs(a - b) < E;
++const uniqueDims = r => {
++  const minimum = TYPES[r.type]?.min ?? 1;
++  const raw = r.dimensions ? [{ w: r.dimensions.width, h: r.dimensions.length }, { w: r.dimensions.length, h: r.dimensions.width }]
++    : [{ w: Math.sqrt(r.area), h: Math.sqrt(r.area) }];
++  return raw.filter((d, i) => d.w >= minimum - E && d.h >= minimum - E
++    && (i === 0 || !near(d.w, raw[0].w) || !near(d.h, raw[0].h)));
++};
++const stateKey = s => ['left', 'right'].flatMap(side => s[side].map(r => `${r.id}:${r.w}x${r.h}`)).join('|');
++
++function zoneOptions(roomList) {
++  let beam = [{ left: [], right: [] }];
++  for (const room of roomList) {
++    const sides = room.side === 'any' ? ['left', 'right'] : [room.side];
++    const expanded = [];
++    for (const s of beam) for (const side of sides) for (const d of uniqueDims(room)) {
++      const next = { left: [...s.left], right: [...s.right] };
++      next[side].push({ ...room, w: d.w, h: d.h, resolvedSide: side }); expanded.push(next);
++    }
++    const score = s => {
++      const sw = side => Math.max(0, ...s[side].map(r => r.w));
++      const sh = side => s[side].reduce((n, r) => n + r.h + T, 0);
++      const depth = Math.max(sh('left'), sh('right'));
++      const width = sw('left') + sw('right') + C + 2 * T + 2 * X;
++      const reserve = sw('left') * Math.max(0, depth - sh('left')) + sw('right') * Math.max(0, depth - sh('right'));
++      return width * (depth + 2 * X) + reserve * .55 + C * depth * .25;
++    };
++    const dedupe = new Map();
++    for (const s of expanded.sort((a, b) => score(a) - score(b) || stateKey(a).localeCompare(stateKey(b)))) {
++      const k = stateKey(s); if (!dedupe.has(k)) dedupe.set(k, s);
++    }
++    beam = [...dedupe.values()].slice(0, 72);
++  }
++  return beam.map(s => ({ left: s.left, right: s.right,
++    leftDepth: s.left.reduce((n, r) => n + r.h + T, 0) - (s.left.length ? T : 0),
++    rightDepth: s.right.reduce((n, r) => n + r.h + T, 0) - (s.right.length ? T : 0),
++  }));
++}
++
++function mapper(plot, f) {
++  const point = (x, y) => plot.entry === 's' ? { x: f.x + x, y: f.y + y }
++    : plot.entry === 'n' ? { x: f.x + f.w - x, y: f.y + f.h - y }
++      : plot.entry === 'e' ? { x: f.x + f.w - y, y: f.y + x }
++        : { x: f.x + y, y: f.y + f.h - x };
++  const rect = r => { const a = point(r.x, r.y), b = point(r.x + r.w, r.y + r.h); return { ...r,
++    x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(b.x - a.x), h: Math.abs(b.y - a.y) }; };
++  return { point, rect };
++}
++function mergeWalls(raw) {
++  const bins = new Map();
++  for (const w of raw) {
++    const vertical = near(w.x1, w.x2), fixed = vertical ? w.x1 : w.y1;
++    const a = Math.min(vertical ? w.y1 : w.x1, vertical ? w.y2 : w.x2), b = Math.max(vertical ? w.y1 : w.x1, vertical ? w.y2 : w.x2);
++    const k = `${vertical ? 'v' : 'h'}:${fixed.toFixed(5)}:${w.type}`;
++    if (!bins.has(k)) bins.set(k, { vertical, fixed, type: w.type, t: w.t, ranges: [] }); bins.get(k).ranges.push([a, b]);
++  }
++  const out = [];
++  for (const bin of bins.values()) {
++    const ranges = [];
++    bin.ranges.sort((a, b) => a[0] - b[0]).forEach(r => { const p = ranges.at(-1); if (p && r[0] <= p[1] + E) p[1] = Math.max(p[1], r[1]); else ranges.push([...r]); });
++    for (const [a, b] of ranges) out.push({ id: `wall-${out.length}`, x1: bin.vertical ? bin.fixed : a,
++      y1: bin.vertical ? a : bin.fixed, x2: bin.vertical ? bin.fixed : b, y2: bin.vertical ? b : bin.fixed,
++      type: bin.type, t: bin.t, h: GEOMETRY.height });
++  }
++  return out;
++}
++function wallAt(walls, p) {
++  return walls.find(w => p.axis === 'h' ? near(w.y1, w.y2) && near(w.y1, p.y) && p.x - p.w / 2 >= Math.min(w.x1, w.x2) - E && p.x + p.w / 2 <= Math.max(w.x1, w.x2) + E
++    : near(w.x1, w.x2) && near(w.x1, p.x) && p.y - p.w / 2 >= Math.min(w.y1, w.y2) - E && p.y + p.w / 2 <= Math.max(w.y1, w.y2) + E);
++}
++
++export function generateBriefTopologyModel(rawPlot, rawRooms, { variant = 0 } = {}) {
++  const capM2 = rawPlot?.maxBuiltAreaM2, capAlias = rawPlot?.maxBuiltArea;
++  if (capM2 != null && capAlias != null && capM2 !== capAlias) throw Error('CONFLICTING_AREA_CAP');
++  const requestedCap = capM2 ?? capAlias ?? null;
++  // validatePlot accepts the legacy maxBuiltArea name and enforces its legal range;
++  // normalize the DesignRequest maxBuiltAreaM2 alias before that validation.
++  const normalizedPlot = validatePlot({ ...rawPlot, maxBuiltArea: requestedCap, shape: 'rect' });
++  if (requestedCap !== null && (!Number.isFinite(requestedCap) || requestedCap < 20 || requestedCap > rawPlot.width * rawPlot.length)) {
++    throw Error('سقف البناء يجب أن يكون بين 20 م² ومساحة الأرض، أو اتركه فارغًا.');
++  }
++  const plot = { ...normalizedPlot, maxBuiltArea: requestedCap };
++  const f = footprint(plot), program = normalizeRooms(rawRooms);
++  if (program.some(room => !uniqueDims(room).length)) throw Error('BRIEF_TOPOLOGY_ROOM_MIN_DIMENSION_UNSATISFIED');
++  const sideways = ['e', 'w'].includes(plot.entry), availW = sideways ? f.h : f.w, availD = sideways ? f.w : f.h;
++  const zones = positions.map(position => ({ position, options: zoneOptions(program.filter(r => r.position === position)) })).filter(z => z.options.length && z.options.some(s => s.left.length || s.right.length));
++  let beam = [{ zones: [], leftW: 0, rightW: 0, depth: 0 }];
++  for (const zone of zones) {
++    const next = [];
++    for (const state of beam) for (const option of zone.options) {
++      const leftW = Math.max(state.leftW, ...option.left.map(r => r.w), 0), rightW = Math.max(state.rightW, ...option.right.map(r => r.w), 0);
++      const zoneD = Math.max(option.leftDepth, option.rightDepth), depth = state.depth + zoneD + (state.zones.length ? T : 0);
++      next.push({ zones: [...state.zones, { ...zone, ...option, startY: state.depth + (state.zones.length ? T : 0), depth: zoneD }], leftW, rightW, depth });
++    }
++    const score = s => {
++      const width = 2 * X + s.leftW + T + C + T + s.rightW;
++      const reserve = s.zones.reduce((n, z) => n + s.leftW * Math.max(0, z.depth - z.leftDepth) + s.rightW * Math.max(0, z.depth - z.rightDepth), 0);
++      const branch = s.zones.reduce((n, z) => n + [...z.left, ...z.right].reduce((v, r) => v + Math.max(0, (r.resolvedSide === 'left' ? s.leftW : s.rightW) - r.w) * B, 0), 0);
++      const gross = width * (s.depth + 2 * X), circulation = C * s.depth + branch;
++      return [gross + reserve * (variant === 1 ? 1.5 : .7) + circulation * (variant === 2 ? .65 : .2), gross, reserve, stateKey({ left: s.zones.flatMap(z => z.left), right: s.zones.flatMap(z => z.right) })];
++    };
++    next.sort((a, b) => { const x = score(a), y = score(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2] || x[3].localeCompare(y[3]); });
++    beam = next.slice(0, 160);
++  }
++  if (!beam.length) throw Error('BRIEF_TOPOLOGY_NO_ASSIGNMENT');
++  const ranked = beam.map(state => {
++    const width = 2 * X + state.leftW + T + C + T + state.rightW;
++    const reserve = state.zones.reduce((n, z) => n + state.leftW * Math.max(0, z.depth - z.leftDepth) + state.rightW * Math.max(0, z.depth - z.rightDepth), 0);
++    const branchArea = state.zones.reduce((n, z) => n + [...z.left, ...z.right].reduce((v, r) => v + Math.max(0, (r.resolvedSide === 'left' ? state.leftW : state.rightW) - r.w) * B, 0), 0);
++    const gross = width * (state.depth + 2 * X), circulation = C * state.depth + branchArea;
++    const score = gross + reserve * (variant === 1 ? 1.5 : .7) + circulation * (variant === 2 ? .65 : .2);
++    return { state, width, reserve, branchArea, gross, circulation, score };
++  }).sort((a, b) => a.score - b.score || a.gross - b.gross || a.reserve - b.reserve || stateKey({ left: a.state.zones.flatMap(z => z.left), right: a.state.zones.flatMap(z => z.right) }).localeCompare(stateKey({ left: b.state.zones.flatMap(z => z.left), right: b.state.zones.flatMap(z => z.right) })));
++  const best = ranked[Math.min(variant, ranked.length - 1)], state = best.state;
++  const totalDepth = state.depth, buildingLocal = { x: 0, y: 0, w: best.width, h: totalDepth + 2 * X };
++  if (best.width > availW + E || buildingLocal.h > availD + E) throw Error('BRIEF_TOPOLOGY_OUTSIDE_BUILDABLE_FOOTPRINT');
++  const offsetX = (availW - best.width) / 2, offsetY = (availD - buildingLocal.h) / 2;
++  const leftCorridorX = X + state.leftW + T, corridor = { id: 'spine', name: 'ممر متصل', x: leftCorridorX, y: X, w: C, h: totalDepth };
++  const rooms = [], corridors = [corridor], reserves = [], links = [], rawWalls = [], portals = [];
++  const worldLocal = r => ({ ...r, x: r.x + offsetX, y: r.y + offsetY });
++  for (const z of state.zones) {
++    for (const side of ['left', 'right']) {
++      let y = X + z.startY;
++      for (const placed of z[side]) {
++        const isLeft = side === 'left', sideW = isLeft ? state.leftW : state.rightW;
++        const x = isLeft ? X : best.width - X - placed.w;
++        const r = { ...placed, x, y, corridorId: 'spine', doorSide: isLeft ? 'right' : 'left' };
++        rooms.push(r);
++        const gap = Math.max(0, sideW - r.w);
++        let doorCorridor = 'spine';
++        if (gap > E) {
++          const branchId = `branch-${r.id}`, start = isLeft ? r.x + r.w + T : corridor.x + corridor.w;
++          const branch = { id: branchId, name: 'وصلة ممر قصيرة', x: start, y: r.y + r.h / 2 - B / 2, w: gap, h: B };
++          corridors.push(branch); links.push(['spine', branchId]); doorCorridor = branchId;
++          const a = isLeft ? r.x + r.w + T : corridor.x + corridor.w, b = isLeft ? corridor.x : r.x - T;
++          const top = branch.y, bottom = branch.y + B;
++          if (top > r.y + E) reserves.push({ name: 'فراغ غير موزع', x: a, y: r.y, w: gap, h: top - r.y });
++          if (r.y + r.h > bottom + E) reserves.push({ name: 'فراغ غير موزع', x: a, y: bottom, w: gap, h: r.y + r.h - bottom });
++          if (!(b - a > E)) throw Error('BRIEF_TOPOLOGY_BRANCH_COLLAPSED');
++        }
++        r.corridorId = doorCorridor;
++        const doorX = isLeft ? r.x + r.w + T / 2 : r.x - T / 2;
++        portals.push({ type: 'door', x: doorX, y: r.y + r.h / 2, axis: 'v', w: r.type === 'bath' ? .8 : .9, h: 2.1, sill: 0, roomId: r.id, connects: [r.id, doorCorridor] });
++        const windowX = isLeft ? X / 2 : best.width - X / 2;
++        portals.push({ type: 'window', x: windowX, y: r.y + r.h / 2, axis: 'v', w: Math.min(r.type === 'bath' ? .7 : 1.4, r.h - .5), h: r.type === 'bath' ? .6 : 1.2, sill: r.type === 'bath' ? 1.7 : 1.1, roomId: r.id });
++        if (isLeft) rawWalls.push({ x1: r.x + r.w + T / 2, y1: r.y - T / 2, x2: r.x + r.w + T / 2, y2: r.y + r.h + T / 2, type: 'int', t: T });
++        else rawWalls.push({ x1: r.x - T / 2, y1: r.y - T / 2, x2: r.x - T / 2, y2: r.y + r.h + T / 2, type: 'int', t: T });
++        if (r.y > X + E) rawWalls.push({ x1: r.x - T / 2, y1: r.y - T / 2, x2: r.x + r.w + T / 2, y2: r.y - T / 2, type: 'int', t: T });
++        if (r.y + r.h < buildingLocal.h - X - E) rawWalls.push({ x1: r.x - T / 2, y1: r.y + r.h + T / 2, x2: r.x + r.w + T / 2, y2: r.y + r.h + T / 2, type: 'int', t: T });
++        y += r.h + T;
++      }
++    }
++  }
++  // The short unused tail on either side is explicit, not quietly counted as room area.
++  for (const z of state.zones) for (const side of ['left', 'right']) {
++    const d = z[`${side}Depth`], sw = side === 'left' ? state.leftW : state.rightW;
++    if (sw > E && z.depth > d + E) reserves.push({ name: 'فراغ غير موزع', x: side === 'left' ? X : best.width - X - sw,
++      y: X + z.startY + d, w: sw, h: z.depth - d });
++  }
++  const H = buildingLocal.h, W = buildingLocal.w;
++  rawWalls.push(
++    { x1: X / 2, y1: X / 2, x2: W - X / 2, y2: X / 2, type: 'ext', t: X },
++    { x1: X / 2, y1: H - X / 2, x2: W - X / 2, y2: H - X / 2, type: 'ext', t: X },
++    { x1: X / 2, y1: X / 2, x2: X / 2, y2: H - X / 2, type: 'ext', t: X },
++    { x1: W - X / 2, y1: X / 2, x2: W - X / 2, y2: H - X / 2, type: 'ext', t: X },
++  );
++  portals.push({ type: 'door', x: corridor.x + C / 2, y: X / 2, axis: 'h', w: 1.1, h: 2.2, sill: 0, connects: ['outside', 'spine'] });
++  const wallsLocal = mergeWalls(rawWalls), openingsLocal = portals.map((p, i) => {
++    const wall = wallAt(wallsLocal, p); if (!wall) throw Error(`BRIEF_TOPOLOGY_OPENING_WALL_MISSING:${i}`);
++    const length = Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1), pos = Math.hypot(p.x - wall.x1, p.y - wall.y1) / length;
++    const { x, y, axis, ...rest } = p; return { ...rest, id: `opening-${i}`, wallId: wall.id, pos };
++  });
++  const transform = mapper(plot, f), origin = { x: f.x + offsetX, y: f.y + offsetY };
++  const point = p => transform.point(p.x + offsetX, p.y + offsetY), rect = r => transform.rect(worldLocal(r));
++  const walls = wallsLocal.map(w => { const a = point({ x: w.x1, y: w.y1 }), b = point({ x: w.x2, y: w.y2 }); return { ...w, x1: a.x, y1: a.y, x2: b.x, y2: b.y }; });
++  const localFootprint = [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }];
++  const model = { version: 2, engineVersion: 'brief-topology/1.0.0', strategy: 'brief-topology-spine', architecture: {
++    tag: 'ترتيب موجّه بالبرنامج', form: 'غرف على جانبي رواق متصل مع وصلات قصيرة عند الحاجة',
++    idea: 'توزيع يحافظ على المساحات والأبعاد الصريحة ويرتب المناطق حسب مواضعها في الطلب. الفتحات والمسارات تخطيطية فقط.',
++    bestFor: 'البرامج ذات الأبعاد أو ترتيب المناطق المحدد', tradeoff: 'قد تظهر مساحات غير موزعة وتحتاج مراجعة مختص.', massing: 'rect',
++  }, plot: { ...plot, maxBuiltArea: plot.maxBuiltAreaM2 ?? plot.maxBuiltArea ?? null }, footprint: f,
++    building: transform.rect({ ...buildingLocal, x: origin.x - f.x, y: origin.y - f.y }),
++    buildingFootprint: localFootprint.map(p => transform.point(p.x + offsetX, p.y + offsetY)),
++    boundingBox: transform.rect({ x: offsetX, y: offsetY, w: W, h: H }), program,
++    shape: 'rect', shapeFallback: false,
++    rooms: rooms.map(rect), corridors: corridors.map(rect), reserves: reserves.map(rect), courtyards: [], links, walls,
++    openings: openingsLocal, drawnFloors: 1, warnings: ['المخطط يحافظ على القيود الهندسية الممثلة؛ عرض الممرات والأبواب لا يثبت الوصول الشامل أو الكود.', ...(reserves.length ? ['توجد مساحات غير موزعة ظاهرة مستقلًا.'] : [])] };
++  const errors = validateModel(model); if (errors.length) throw Error('BRIEF_TOPOLOGY_VALIDATION_FAILED:' + errors.join(';'));
++  const cap = plot.maxBuiltArea;
++  if (cap != null && quantities(model).footprint > cap + Math.max(1e-6, Math.abs(cap) * 1e-8)) throw Error('BRIEF_TOPOLOGY_MAX_BUILT_AREA_EXCEEDED');
++  return model;
++}
+diff --git a/dist/design-exploration.mjs b/dist/design-exploration.mjs
+index 11729a9..bad3db5 100644
+--- a/dist/design-exploration.mjs
++++ b/dist/design-exploration.mjs
+@@ -4,6 +4,8 @@
+  */
+ import { generateModelLegacy } from './claude/compat-layer.mjs';
+ import { footprint, normalizeRooms, validatePlot, polygonArea } from './claude/planner.mjs';
++import { generateBriefTopologyModel } from './brief-topology-planner.mjs';
++import { circulationNetwork } from './circulation.mjs';
+ 
+ export const DIVERSITY_THRESHOLD = .12;
+ export const MAX_ALTERNATIVES = 6;
+@@ -35,6 +37,11 @@ export function explorationSpecs(seed = 1, { routeFocused = false } = {}) {
+   return specs;
+ }
+ export function conceptFor(spec, shape) {
++  if (spec.topology === 'brief-spine') return { tag: 'توزيع موجّه بالبرنامج',
++    form: 'غرف على جانبي رواق متصل مع وصلات قصيرة عند الحاجة',
++    idea: 'يعيد ترتيب الغرف حسب مواقعها وأبعادها الصريحة ضمن شبكة حركة متصلة.',
++    bestFor: 'البرامج التي تحدد الأبعاد أو ترتيب المناطق',
++    tradeoff: 'قد يترك مساحات غير موزعة وقد يطيل بعض مسارات الوصول رغم تقليل مساحة الممرات؛ راجع القياسات', massing: 'rect' };
+   const form = { rect: 'كتلة واحدة ورواق مركزي', l: 'جناحان حول حديقة جانبية', u: 'أجنحة تحيط بباحة مفتوحة' }[shape];
+   const base = concepts[spec.mode >= 3 ? (spec.mode - 3) % concepts.length : Math.max(0, spec.mode)];
+   return { ...base, tag: spec.mode < 0 ? 'التوزيع المرجعي' : base.tag,
+@@ -42,6 +49,13 @@ export function conceptFor(spec, shape) {
+ }
+ export function exploreGeometry(plot, rooms, shape, spec, strategy) {
+   const original = normalizeRooms(rooms), rng = random(spec.seed);
++  if (spec.topology === 'brief-spine') {
++    const model = generateBriefTopologyModel(plot, original, { variant: spec.variant || 0 });
++    model.program = original;
++    model.rooms = model.rooms.map(room => ({ ...room, side: original.find(r => r.id === room.id).side,
++      position: original.find(r => r.id === room.id).position }));
++    return model;
++  }
+   const assigned = original.map(r => {
+     if (spec.mode < 0 || r.side !== 'any' || (shape === 'u' && r.position !== 'back' && r.area < 12)) return r;
+     const role = roles[r.type] ?? 1;
+@@ -94,11 +108,38 @@ const rms = (a, b) => a.length && a.length === b.length ? Math.sqrt(a.reduce((s,
+ export function layoutDistance(a, b) {
+   return Math.max(a.shape === b.shape ? 0 : .4, rms(a.pairs, b.pairs) * 2, rms(a.aspects, b.aspects) * .5, rms(a.mass, b.mass) * .5);
+ }
++export function qualityMetrics(model) {
++  const sum = rows => (rows || []).reduce((n, row) => n + row.w * row.h, 0);
++  const footprintArea = model.buildingFootprint ? polygonArea(model.buildingFootprint) : model.builtArea ?? model.building.w * model.building.h;
++  const network = circulationNetwork(model);
++  const routes = model.rooms.map(room => network.toRoom(room.id)?.metres ?? Infinity);
++  return { footprintArea, corridorArea: sum(model.corridors), reserveArea: sum(model.reserves),
++    longestEntryRoute: routes.length ? Math.max(...routes) : 0, totalEntryRoute: routes.reduce((n, value) => n + value, 0) };
++}
++// Remove only geometry that is worse on every measured space-use axis; retain the
++// Pareto trade-offs, then let diversity select among those plausible options.
++export function qualityFrontier(candidates) {
++  const rows = candidates.map(item => ({ item, metrics: qualityMetrics(item.candidate?.geometry || item) }));
++  const axes = ['footprintArea', 'corridorArea', 'reserveArea', 'longestEntryRoute'];
++  const dominates = (a, b) => axes.every(key => a[key] <= b[key] + 1e-7) && axes.some(key => a[key] < b[key] - 1e-7);
++  // Geometry classes are alternatives the user may explicitly ask to compare, so
++  // only prune dominated candidates within the same actual footprint class.
++  const key = row => row.item.candidate?.actualShape || (row.item.candidate?.geometry || row.item).shape || 'unknown';
++  return rows.filter((row, i) => !rows.some((other, j) => i !== j && key(row) === key(other) && dominates(other.metrics, row.metrics)))
++    .map(row => row.item);
++}
+ export function selectDiverse(candidates, previous = [], limit = MAX_ALTERNATIVES, prioritizedCandidateIds = []) {
+   const history = previous.map(m => layoutDescriptor(m));
+   const remaining = candidates.map(c => ({ ...c, descriptor: layoutDescriptor(c.candidate.geometry) }));
+   const byCandidateId = new Map(remaining.map(c => [c.candidate.candidateId, c]));
+-  const chosen = [...new Set(prioritizedCandidateIds)].map(id => byCandidateId.get(id)).filter(Boolean).slice(0, limit);
++  const chosen = [];
++  for (const id of [...new Set(prioritizedCandidateIds)]) {
++    const item = byCandidateId.get(id); if (!item || chosen.length >= limit) continue;
++    const isBriefTopology = item.candidate.alternativeKey?.startsWith('brief-spine-');
++    const references = [...history, ...chosen.map(row => row.descriptor)];
++    if (isBriefTopology && references.some(ref => layoutDistance(item.descriptor, ref) + 1e-9 < DIVERSITY_THRESHOLD)) continue;
++    chosen.push(item);
++  }
+   const chosenIds = new Set(chosen.map(c => c.candidate.candidateId));
+   for (let i = remaining.length - 1; i >= 0; i--) if (chosenIds.has(remaining[i].candidate.candidateId)) remaining.splice(i, 1);
+   while (chosen.length < limit && remaining.length) {
+@@ -106,7 +147,7 @@ export function selectDiverse(candidates, previous = [], limit = MAX_ALTERNATIVE
+     remaining.forEach((c, i) => {
+       const reference = [...history, ...chosen.map(x => x.descriptor)];
+       const distance = reference.length ? Math.min(...reference.map(d => layoutDistance(c.descriptor, d))) : 1;
+-      if (distance + 1e-9 >= DIVERSITY_THRESHOLD && distance > score) { best = i; score = distance; }
++      if (distance + 1e-9 >= DIVERSITY_THRESHOLD && distance > score + 1e-9) { best = i; score = distance; }
+     });
+     if (best < 0) break;
+     chosen.push(remaining.splice(best, 1)[0]);
+diff --git a/dist/index.html b/dist/index.html
+index fad4020..4595789 100644
+--- a/dist/index.html
++++ b/dist/index.html
+@@ -273,7 +273,7 @@
+     <section class="generation-dock"><div><b>ارسم من اختياراتك الحالية</b><p>كل غرفة ومساحتها والشكل المختار محفوظة في البرنامج.</p></div><button class="primary" id="gen">ولّد وقارن حتى ستة بدائل</button>
+         <p id="generationError" class="message error" role="alert" hidden></p></section></div></section><section class="panel" id="panel-result" aria-label="المخطط والعرض الثلاثي"><div class="wrap"><div class="empty-state" id="resultEmpty"><span>2D / 3D</span><h2>المخطط يبدأ من غرفك.</h2><p>راجع البرنامج والشكل، ثم ولّد المخطط.</p><button class="primary" data-next="design">الغرف وشكل البيت</button></div><div class="out" id="out">
+ <div class="studio-conversation-return" role="region" aria-label="متابعة تعديل التصميم">
+-  <div><b>تريد تعديل المخطط؟</b><p>المخطط ظاهر خلال هذه الجلسة فقط، وسجل المحادثة لا يُستعاد بعد تحديث الصفحة. لتنزيل مدخلات التصميم والمخطط اختر «تنزيل المشروع»، أو افتح «أرشيف الحساب» واختر «حفظ نسخة»؛ كلاهما لا يحفظ سجل المحادثة نفسه.</p></div>
++  <div><b>تريد تعديل التصميم؟</b><p>المخطط ظاهر خلال هذه الجلسة فقط؛ المحادثة لا تُستعاد بعد التحديث. احفظ التصميم عبر «تنزيل المشروع» أو «حفظ نسخة» في «أرشيف الحساب»، ثم ارجع للحوار.</p></div>
+   <button class="primary" type="button" id="studioContinueConversation">متابعة الحوار وتعديل التصميم</button>
+ </div>
+ <div class="studio-workspace-bar">
+@@ -296,15 +296,6 @@
+         <header class="studio-alternatives-head"><div><span class="ey">اختيارات التخطيط</span><h2>بدائل من برنامجك</h2></div><small id="alternativesCount">اختر نموذجًا لعرض تفاصيله</small></header>
+         <div id="alternativeCards" class="alternative-grid" role="list" aria-label="بدائل تخطيط فعلية"></div>
+       </section>
+-      <section class="card requirement-evidence" id="requirementEvidence" aria-labelledby="requirementEvidenceTitle">
+-        <header class="ch"><b class="num" aria-hidden="true">✓</b><div><h2 id="requirementEvidenceTitle">سجل أدلة المتطلبات من المخطط المحدد</h2><p>قياسات هندسية من البديل المعروض. القياس ليس اعتمادًا إنشائيًا أو نظاميًا، وما لا يدعمه النموذج سيظهر بوضوح.</p></div></header>
+-        <div class="cb">
+-          <div id="requirementSummary" class="requirement-summary" role="status" aria-live="polite"></div>
+-          <p id="requirementStale" class="message warning" hidden>هذه الأدلة تخص آخر بديل ناجح وبرنامج الغرف المحفوظ وقت توليده؛ تغيّرت المدخلات الحالية ولم تُفحص بعد. أعد التوليد لعرض سجل جديد.</p>
+-          <div id="requirementRows" class="requirement-rows"></div>
+-          <p id="requirementNote" class="help"></p>
+-        </div>
+-      </section>
+       <div class="studio-layout"><div class="studio-main"><article id="studioPlanCard" class="card studio-2d"><header class="ch studio-canvas-head"><div><span class="ey">مسقط مرسوم من بيانات المشروع</span><h2>المخطط الأرضي</h2></div><span class="studio-canvas-help">اختر غرفة لعرض مساحتها وأبعادها</span></header>
+         <div class="cb">
+           <div class="viewer-tools" role="group" aria-label="أدوات المخطط"><button class="small-button" id="zoomIn" aria-label="تكبير المخطط">＋</button><button class="small-button" id="zoomOut" aria-label="تصغير المخطط">−</button><button class="small-button" id="fitPlan">ملاءمة المبنى</button><button class="small-button" id="fitPlot">حدود الأرض</button><button class="small-button" id="togglePlanEditor" aria-expanded="false">✎ حرّر المخطط</button><button class="small-button" id="exportPlan">تنزيل الرسم SVG</button><label class="check"><input id="showRoute" type="checkbox" checked> مسار الوصول</label></div>
+@@ -331,6 +322,18 @@
+           <article class="card match-card"><header class="ch"><div><h2>مطابقة الطلب</h2><p>ما يمكن قياسه من المخطط وما يحتاج متابعة.</p></div></header><div class="cb" id="requestMatch"></div></article>
+         </div>
+       </details></div>
++      <details class="studio-evidence-disclosure">
++        <summary aria-controls="requirementEvidence"><span><b>أدلة المتطلبات</b><small>قياسات قابلة للتتبع من المخطط المحدد</small></span><span class="studio-disclosure-hint">عرض السجل</span></summary>
++        <section class="card requirement-evidence" id="requirementEvidence" aria-labelledby="requirementEvidenceTitle">
++          <header class="ch"><b class="num" aria-hidden="true">✓</b><div><h2 id="requirementEvidenceTitle">سجل أدلة المتطلبات من المخطط المحدد</h2><p>قياسات من البديل المعروض. هذه ليست مصادقة إنشائية أو نظامية؛ وما لا يدعمه النموذج سيظهر بوضوح.</p></div></header>
++          <div class="cb">
++            <div id="requirementSummary" class="requirement-summary" role="status" aria-live="polite"></div>
++            <p id="requirementStale" class="message warning" hidden>هذه الأدلة تخص آخر بديل ناجح وبرنامج الغرف المحفوظ وقت توليده؛ تغيّرت المدخلات الحالية ولم تُفحص بعد. أعد التوليد لعرض سجل جديد.</p>
++            <div id="requirementRows" class="requirement-rows"></div>
++            <p id="requirementNote" class="help"></p>
++          </div>
++        </section>
++      </details>
+       <div class="section-next"><span>راجع الحركة والخصوصية والمحاور الهندسية.</span><button class="small-button" data-next="review">افتح المراجعة</button></div></div></div></section><section class="panel" id="panel-review" aria-label="مراجعة الطلب والمخطط"><div class="wrap"><header class="head"><span class="ey">05 / المراجعة</span><h1>وش تحقق؟ ووش يحتاج قرار؟</h1><p>المراجعة مرتبطة بالمخطط الحالي. نقص البيانات يبقى معلنًا.</p></header><div class="empty-state" id="reviewEmpty"><h2>نحتاج مخططًا لبدء المراجعة.</h2><button class="small-button" data-next="design">راجع برنامج الغرف</button></div><div id="reviewContent" hidden><article class="card gemini-engineering-card" id="geminiLens" hidden aria-label="مراجعة المراجعة المحلية الهندسية للمخطط">
+         <header class="ch gemini-head"><b class="num">✦</b><div><span class="ey">المراجعة المعمارية</span><h2>قراءة الأبواب والغرف والمسارات</h2><p>قراءة مبدئية متصلة مباشرة بالمسقط المعروض، لا حكم تنفيذي أو ترخيص بناء.</p></div><span class="pill" id="geminiState">جارٍ التحليل</span></header>
+         <div class="cb gemini-body">
+diff --git a/dist/integration/pipeline.mjs b/dist/integration/pipeline.mjs
+index 8dac486..d11d54e 100644
+--- a/dist/integration/pipeline.mjs
++++ b/dist/integration/pipeline.mjs
+@@ -22,6 +22,7 @@ const SOURCE='549b8bcead0f9f2412bf1ea84c83ddb7524137d22166649a1adfcf87e8474c3d';
+ const ADAPTER_VERSION='control-local-preview/1.1.0';
+ const PAVILION_SOURCE='1ce9f064dd41f822582ce13f70d86a3cdc8c418808c9cad5df3c653c810972a9';
+ const STAGGERED_SOURCE='0300ebb2460433dcee8c44ce28be7b1bc1db403ef9721a2d922292f190abcf16';
++const BRIEF_TOPOLOGY_SOURCE='b24738a93dd1bcee56a59f5b56cb7db78219a2f326c168a000a6f237d068f523';
+ const STRATEGIES={rect:'compact',l:'l',u:'u-court',pavilions:'pavilions',staggered:'staggered'};
+ const GEOMETRY_KEYS=[...Object.keys(schema.$defs.geometry.properties),'footprint','program'];
+ const CAPABILITIES={disciplines:['architectural'],supportsGeometry:true,supportsRequirements:true,supportsScoring:false,deterministic:true};
+@@ -56,6 +57,7 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
+  const inputReasons=supportedRequest(r); if(inputReasons.length) throw Error(inputReasons.join(';'));
+  if(r.hardConstraints.some(c=>c.kind==='shape_allowed'&&!c.value.shapes.includes(shape))) throw Error('SHAPE_NOT_ALLOWED');
+  const composed=shape==='pavilions'||shape==='staggered';
++ const briefTopology=exploration?.topology==='brief-spine';
+  const plot={width:r.plot.widthM,length:r.plot.lengthM,entry:r.plot.entry,streets:r.plot.streets,
+   floors:r.plot.floorsRequested,coverage:r.plot.coverageRatio,maxBuiltAreaM2:r.plot.maxBuiltAreaM2,...generationOverrides};
+  const rooms=r.program.map(p=>({name:p.name,type:p.type,area:p.areaM2,...(p.exactDimensionsM?{dimensions:{width:p.exactDimensionsM.widthM,length:p.exactDimensionsM.lengthM}}:{}),position:p.position,side:p.side}));
+@@ -69,8 +71,8 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
+  const massing=auditMassing(geometry.buildingFootprint,m.massingParts??[m.building],geometry.courtyards);
+  if(!massing.pass) throw Error('MASSING_NOT_EQUIVALENT');
+  const c={schemaVersion:'1.0.0',kind:'CandidateEnvelope',projectId:r.projectId,requestId:r.requestId,
+-  inputHash:await contentHash(r),producer:{engineId:shape==='pavilions'?'@mizan/pavilion-composer':shape==='staggered'?'@mizan/staggered-composer':CLAUDE_ID,packageName:composed?`${shape==='pavilions'?'pavilion':shape}-composer`:'planner-pkg',packageVersion:shape==='staggered'?STAGGERED_COMPOSER_VERSION:composed?PAVILION_COMPOSER_VERSION:CLAUDE_VERSION,
+-  sourceSha256:shape==='staggered'?STAGGERED_SOURCE:composed?PAVILION_SOURCE:SOURCE,adapterVersion:exploration?'architectural-exploration/1.0.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
++  inputHash:await contentHash(r),producer:{engineId:briefTopology?'@mizan/brief-topology-composer':shape==='pavilions'?'@mizan/pavilion-composer':shape==='staggered'?'@mizan/staggered-composer':CLAUDE_ID,packageName:briefTopology?'brief-topology-composer':composed?`${shape==='pavilions'?'pavilion':shape}-composer`:'planner-pkg',packageVersion:briefTopology?'1.0.0':shape==='staggered'?STAGGERED_COMPOSER_VERSION:composed?PAVILION_COMPOSER_VERSION:CLAUDE_VERSION,
++  sourceSha256:briefTopology?BRIEF_TOPOLOGY_SOURCE:shape==='staggered'?STAGGERED_SOURCE:composed?PAVILION_SOURCE:SOURCE,adapterVersion:exploration?'architectural-exploration/1.0.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
+   units:{...UNITS},frame:FRAME,fallback:{used:m.shapeFallback,allowedByUser:false,reason:null},geometry,
+   presentation:{label:exploration?conceptFor(exploration,m.shape).tag:m.architecture.tag,massingParts:structuredClone(m.massingParts??null)}};
+  c.geometryHash=await geometryHash(c); c.candidateId=await candidateId(c);
+diff --git a/dist/multi-engine.mjs b/dist/multi-engine.mjs
+index 94fc1b3..03a1329 100644
+--- a/dist/multi-engine.mjs
++++ b/dist/multi-engine.mjs
+@@ -2,7 +2,7 @@ import { extractShapeIntent } from './client-request.mjs';
+ import { resolveDesignShapes } from './design-selection.mjs';
+ import { runPipeline, generateCandidate, decideReviewed } from './integration/pipeline.mjs';
+ import { reviewCandidate } from './integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js';
+-import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
++import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor, qualityFrontier, qualityMetrics } from './design-exploration.mjs';
+ import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
+ import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
+ import { extractExplicitGeometryConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
+@@ -106,6 +106,13 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
+     const routeFocused = request.softPreferences.some(pref => ['avoid_long_corridors','prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_kitchen_dining_route',
+       'avoid_shared_guest_family_corridors','avoid_bedroom_guest_proximity'].includes(pref.value?.mizanKind || pref.kind));
+     const specs = explorationSpecs(seed, { routeFocused }).filter(spec => allowedShapes.includes(spec.shape));
++    // Room locations and (when supplied) exact dimensions are brief constraints
++    // that fixed-footprint enumeration misses. Area-only rooms use an explicit
++    // square starting dimension; do not override an explicit non-rectangular-only request.
++    if (allowedShapes.includes('rect') && request.program.length) {
++      for (const variant of [0, 1, 2]) specs.push({ shape: 'rect', key: `brief-spine-${variant}-${seed}`,
++        mode: -1, widthRatio: 1, seed, topology: 'brief-spine', variant });
++    }
+     if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
+     if (allowedShapes.includes('staggered')) specs.push({ shape: 'staggered', key: 'staggered-baseline', mode: -1, seed });
+     for (const spec of specs) {
+@@ -145,7 +152,13 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
+       }
+       priorityIds.push(...baselineIds, ...metricWinnerIds);
+     }
+-    const diverse = selectDiverse(candidates, previous, undefined, priorityIds);
++    const briefCandidates = qualityFrontier(candidates.filter(item => item.candidate.alternativeKey.startsWith('brief-spine-')));
++    const suitable = [...candidates.filter(item => !item.candidate.alternativeKey.startsWith('brief-spine-')), ...briefCandidates];
++    if (routeFocused) for (const id of priorityIds) { const item = candidates.find(row => row.candidate.candidateId === id); if (item && !suitable.includes(item)) suitable.push(item); }
++    const bestBrief = suitable.filter(item => item.candidate.alternativeKey.startsWith('brief-spine-'))
++      .sort((a, b) => { const q = item => qualityMetrics(item.candidate.geometry); const score = item => { const x=q(item); return x.footprintArea + .35*x.corridorArea + .8*x.reserveArea + .05*x.totalEntryRoute; }; return score(a)-score(b) || a.candidate.candidateId.localeCompare(b.candidate.candidateId); })[0]?.candidate.candidateId;
++    if (bestBrief && !routeFocused) priorityIds.unshift(bestBrief);
++    const diverse = selectDiverse(suitable, previous, undefined, priorityIds);
+     if (!diverse.length && candidates.length && previous.length) throw Error('لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.');
+     const pairs = [];
+     for (const generated of diverse) {
+diff --git a/dist/plan-view.mjs b/dist/plan-view.mjs
+index 54a3b64..e63743e 100644
+--- a/dist/plan-view.mjs
++++ b/dist/plan-view.mjs
+@@ -4,21 +4,51 @@ export const escapeXML = value => String(value).replace(/[&<>"']/g, c => ({ '&':
+ const f = n => Number(n.toFixed(5));
+ const box = (r, pad = 0) => ({ x: r.x - pad, y: -r.y - r.h - pad, w: r.w + pad * 2, h: r.h + pad * 2 });
+ export const plotViewBox = m => box({ x: 0, y: 0, w: m.plot.width, h: m.plot.length }, 2.3);
+-export const buildingViewBox = m => box(m.building, 1.4);
++export const buildingViewBox = m => box(m.building, 2.05);
+ export const roomViewBox = r => box(r, .8);
+ 
+-function furniture(r) {
+-  const x = r.x + .3, y = -r.y - r.h + .3;
+-  if (r.type === 'bedroom' && r.w > 2.5 && r.h > 2.5) return `<g fill="#ffffff70" stroke="#74809a" stroke-width=".035" opacity=".5"><rect x="${x}" y="${y}" width="1.5" height="2" rx=".06"/><path d="M${x},${y + .5}h1.5"/><rect x="${x + .1}" y="${y + .1}" width=".55" height=".3" rx=".04"/><rect x="${x + .85}" y="${y + .1}" width=".55" height=".3" rx=".04"/></g>`;
+-  if (r.type === 'kitchen') return `<path d="M${x},${y + Math.min(2.5, r.h - .6)}V${y}H${x + r.w - .6}" fill="none" stroke="#a6b69b" stroke-width=".5" opacity=".55"/>`;
+-  if (r.type === 'bath') return `<g fill="#fff" stroke="#70909d" stroke-width=".035" opacity=".5"><rect x="${x}" y="${y}" width=".55" height=".28" rx=".03"/><ellipse cx="${x + .275}" cy="${y + .5}" rx=".23" ry=".3"/></g>`;
+-  if (['majlis', 'living'].includes(r.type)) return `<rect x="${x}" y="${y}" width="${Math.min(2.8, r.w - .6)}" height=".7" rx=".1" fill="#ffffff55" stroke="#9a917a" stroke-width=".055" opacity=".55"/>`;
+-  return '';
++// Dimension strings describe the outer faces of the actual exterior walls, not room targets
++// or the containing rectangle. The rectangle fallback keeps older/minimal models renderable.
++export function planOutlineMetrics(model) {
++  const exterior = (model.walls || []).filter(w => w.type === 'ext'
++    && [w.x1, w.y1, w.x2, w.y2].every(Number.isFinite));
++  const points = exterior.length
++    ? exterior.flatMap(w => {
++      const half = (Number.isFinite(w.t) ? w.t : 0) / 2;
++      return [{ x: w.x1 - half, y: w.y1 - half }, { x: w.x1 + half, y: w.y1 + half },
++        { x: w.x2 - half, y: w.y2 - half }, { x: w.x2 + half, y: w.y2 + half }];
++    })
++    : [{ x: model.building.x, y: model.building.y },
++      { x: model.building.x + model.building.w, y: model.building.y + model.building.h }];
++  const minX = Math.min(...points.map(p => p.x)), maxX = Math.max(...points.map(p => p.x));
++  const minY = Math.min(...points.map(p => p.y)), maxY = Math.max(...points.map(p => p.y));
++  return { minX, maxX, minY, maxY, width: maxX - minX, length: maxY - minY };
++}
++
++function textLines(name, maxChars) {
++  const words = String(name).trim().split(/\s+/), lines = [''];
++  for (const word of words) {
++    const current = lines.at(-1);
++    if (current && current.length + word.length + 1 > maxChars && lines.length < 2) lines.push(word);
++    else lines[lines.length - 1] += (current ? ' ' : '') + word;
++  }
++  return lines;
++}
++
++function roomLabelLayout(r, rect) {
++  const maxChars = Math.max(5, Math.floor((rect.w - .28) / .27));
++  const lines = textLines(r.name, maxChars);
++  const nameSize = Math.min(.62, (rect.w - .28) / (Math.max(...lines.map(line => line.length)) * .52),
++    (rect.h - .22) / (lines.length * 1.12 + .8));
++  const dimensionSize = Math.min(.28, nameSize * .58), areaSize = Math.min(.34, nameSize * .7);
++  const showDimensions = rect.h >= (lines.length * nameSize * 1.12) + 1.22 && nameSize >= .34;
++  const showArea = rect.h >= (lines.length * nameSize * 1.12) + .90 && nameSize >= .28;
++  return { lines, nameSize: Math.max(.22, nameSize), areaSize, dimensionSize, showDimensions, showArea };
+ }
+ 
+ export function buildPlanSVG(model) {
+-  const v = buildingViewBox(model), W = model.plot.width, L = model.plot.length;
+-  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v.x} ${v.y} ${v.w} ${v.h}" preserveAspectRatio="xMidYMid meet" role="group" aria-label="مخطط الدور الأرضي؛ اختر غرفة لعرض تفاصيلها" style="font-family:'IBM Plex Sans Arabic',sans-serif"><defs><pattern id="paper-grid" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#d7ddd8" stroke-width=".018"/></pattern></defs>`;
++  const v = buildingViewBox(model), outline = planOutlineMetrics(model), W = model.plot.width, L = model.plot.length;
++  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v.x} ${v.y} ${v.w} ${v.h}" preserveAspectRatio="xMidYMid meet" role="group" aria-label="مخطط الدور الأرضي؛ اختر غرفة لعرض تفاصيلها" style="font-family:'IBM Plex Sans Arabic',sans-serif"><defs><pattern id="paper-grid" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#d7ddd8" stroke-width=".018"/></pattern><marker id="entry-arrow" markerWidth=".28" markerHeight=".28" refX=".25" refY=".14" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L.28 .14L0 .28Z" fill="#9b682c"/></marker></defs>`;
+   s += `<rect x="-200" y="-200" width="400" height="400" fill="#f8f7f1"/><rect x="0" y="${-L}" width="${W}" height="${L}" fill="url(#paper-grid)" stroke="#a88b51" stroke-width=".065" stroke-dasharray=".3 .2"/>`;
+   const fp = box(model.footprint);
+   s += `<rect x="${fp.x}" y="${fp.y}" width="${fp.w}" height="${fp.h}" fill="none" stroke="#5b9981" stroke-width=".03" stroke-dasharray=".16 .18"/>`;
+@@ -34,15 +64,26 @@ export function buildPlanSVG(model) {
+   }
+   for (const r of model.rooms) {
+     const v = box(r), cx = v.x + v.w / 2, cy = v.y + v.h / 2;
+-    const words = r.name.split(/\s+/), lines = [''];
+-    words.forEach(word => { if ((lines.at(-1) + word).length > 16 && lines.length < 2) lines.push(word); else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word; });
+-    const font = Math.min(.52, v.w / (Math.max(...lines.map(l => l.length)) * .43 + 1.3));
++    const labels = roomLabelLayout(r, v), areaSize = labels.areaSize, dimensionSize = labels.dimensionSize;
+     const label = `${r.name}، ${r.area} متر مربع، ${r.w.toFixed(2)} في ${r.h.toFixed(2)} متر`;
+-    s += `<g data-room-id="${r.id}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${TYPES[r.type].color}"/>${furniture(r)}<g pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
+-    lines.forEach((line, i) => { s += `<text x="${cx}" y="${cy - .25 + i * .43}" font-size="${font}" font-weight="700" paint-order="stroke" stroke="${TYPES[r.type].color}" stroke-width=".09">${escapeXML(line)}</text>`; });
+-    s += `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .23}" font-size=".4" font-weight="600">${r.area} م²</text><text x="${cx}" y="${cy + (lines.length - 1) * .43 + .62}" font-size=".35" font-weight="500" fill="#536973">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text></g></g>`;
++    const lastNameOffset = (labels.lines.length - 1) * labels.nameSize * 1.12;
++    const areaOffset = lastNameOffset + .58, dimensionOffset = areaOffset + .40;
++    const topEdge = -.82 * labels.nameSize;
++    const lastOffset = labels.showDimensions ? dimensionOffset : labels.showArea ? areaOffset : lastNameOffset;
++    const lastFont = labels.showDimensions ? dimensionSize : labels.showArea ? areaSize : labels.nameSize;
++    const bottomEdge = lastOffset + .78 * lastFont;
++    const firstBaseline = cy - (topEdge + bottomEdge) / 2;
++    s += `<g data-room-id="${r.id}" data-label-detail="${labels.showDimensions ? 'full' : labels.showArea ? 'area' : 'name'}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${TYPES[r.type].color}"/><g pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
++    labels.lines.forEach((line, i) => { s += `<text x="${cx}" y="${firstBaseline + i * labels.nameSize * 1.12}" font-size="${labels.nameSize}" font-weight="700" paint-order="stroke" stroke="${TYPES[r.type].color}" stroke-width=".09">${escapeXML(line)}</text>`; });
++    if (labels.showArea) s += `<text x="${cx}" y="${firstBaseline + areaOffset}" font-size="${areaSize}" font-weight="650">${r.area} م²</text>`;
++    if (labels.showDimensions) s += `<text x="${cx}" y="${firstBaseline + dimensionOffset}" font-size="${dimensionSize}" font-weight="500" fill="#536973">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text>`;
++    s += `</g></g>`;
+   }
+-  model.walls.forEach(w => { s += `<line x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${w.type === 'ext' ? '#394a4b' : '#657574'}" stroke-width="${w.t}" stroke-linecap="square" pointer-events="none"/>`; });
++  model.walls.forEach(w => {
++    const edge = w.type === 'ext' ? '#273a3d' : '#465756', face = w.type === 'ext' ? '#4b5d5b' : '#89928d';
++    s += `<line data-wall="${w.type}" x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${edge}" stroke-width="${w.t + .055}" stroke-linecap="square" pointer-events="none"/>`;
++    s += `<line x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${face}" stroke-width="${w.t}" stroke-linecap="square" pointer-events="none"/>`;
++  });
+   model.openings.forEach(o => {
+     const wall = model.walls.find(w => w.id === o.wallId), p = openingPoint(model, o), angle = Math.atan2(-(wall.y2 - wall.y1), wall.x2 - wall.x1);
+     const dx = Math.cos(angle), dy = Math.sin(angle), a = { x: p.x - dx * o.w / 2, y: -p.y - dy * o.w / 2 }, z = { x: p.x + dx * o.w / 2, y: -p.y + dy * o.w / 2 };
+@@ -56,9 +97,27 @@ export function buildPlanSVG(model) {
+       s += `<path d="M${a.x} ${a.y}L${leaf.x} ${leaf.y} M${z.x} ${z.y}A${o.w} ${o.w} 0 0 ${sign > 0 ? 1 : 0} ${leaf.x} ${leaf.y}" fill="none" stroke="#ad8244" stroke-width=".04" pointer-events="none"/>`;
+     }
+   });
+-  const entry = openingPoint(model, model.openings.find(o => o.type === 'door' && o.connects.includes('outside')));
+-  s += `<circle cx="${entry.x}" cy="${-entry.y}" r=".12" fill="#ac7634"/><text x="${b.x + b.w / 2}" y="${b.y + b.h + .75}" font-size=".35" fill="#7e6032" text-anchor="middle">المدخل ${DIRECTIONS[model.plot.entry]} · الأرض ${W} × ${L} م</text>`;
+-  s += `<g transform="translate(${b.x + b.w + .55},${b.y + 1.5})" fill="#3e5c59"><path d="M0 -1L-.2 -.25H.2Z"/><path d="M0 -.3V.65" stroke="#3e5c59" stroke-width=".05"/><text y="-1.2" font-size=".32" text-anchor="middle">N</text></g></svg>`;
++  const horizontalDimY = -outline.maxY - .72, verticalDimX = outline.maxX + .78, bottom = -outline.minY;
++  const tick = .13, dimColor = '#3e5455';
++  const horizontalLabel = `${outline.width.toFixed(2)} م`, verticalLabel = `${outline.length.toFixed(2)} م`;
++  s += `<g data-outline-dimensions="true" aria-label="الأبعاد الخارجية بالمتر؛ الأفقي شرق–غرب والرأسي شمال–جنوب" fill="${dimColor}" stroke="${dimColor}" stroke-width=".028" pointer-events="none">`;
++  s += `<path d="M${outline.minX} ${horizontalDimY + .07}V${-outline.maxY - .06} M${outline.maxX} ${horizontalDimY + .07}V${-outline.maxY - .06} M${outline.minX} ${horizontalDimY}H${outline.maxX} M${outline.minX - tick} ${horizontalDimY + tick}L${outline.minX + tick} ${horizontalDimY - tick} M${outline.maxX - tick} ${horizontalDimY + tick}L${outline.maxX + tick} ${horizontalDimY - tick}" fill="none"/>`;
++  s += `<text data-axis="east-west" x="${(outline.minX + outline.maxX) / 2}" y="${horizontalDimY - .12}" font-size=".30" font-weight="650" text-anchor="middle" stroke="#f8f7f1" stroke-width=".18" paint-order="stroke" direction="rtl">${horizontalLabel}</text>`;
++  s += `<path d="M${verticalDimX - .07} ${-outline.maxY}H${outline.maxX + .06} M${verticalDimX - .07} ${-outline.minY}H${outline.maxX + .06} M${verticalDimX} ${-outline.maxY}V${-outline.minY} M${verticalDimX - tick} ${-outline.maxY + tick}L${verticalDimX + tick} ${-outline.maxY - tick} M${verticalDimX - tick} ${-outline.minY + tick}L${verticalDimX + tick} ${-outline.minY - tick}" fill="none"/>`;
++  const verticalLabelX = verticalDimX + .24, verticalLabelY = (-outline.maxY - outline.minY) / 2;
++  s += `<text data-axis="north-south" x="${verticalLabelX}" y="${verticalLabelY}" transform="rotate(-90 ${verticalLabelX} ${verticalLabelY})" font-size=".30" font-weight="650" text-anchor="middle" stroke="#f8f7f1" stroke-width=".18" paint-order="stroke" direction="rtl">${verticalLabel}</text></g>`;
++
++  const entryOpening = model.openings.find(o => o.type === 'door' && o.connects.includes('outside'));
++  const entry = entryOpening && openingPoint(model, entryOpening);
++  if (entry) {
++    const outward = { s: { x: 0, y: 1 }, n: { x: 0, y: -1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } }[model.plot.entry];
++    const end = { x: entry.x + outward.x * .58, y: -entry.y + outward.y * .58 };
++    s += `<g data-entry-indicator="${model.plot.entry}" aria-label="المدخل جهة ${DIRECTIONS[model.plot.entry]}" pointer-events="none"><line x1="${entry.x}" y1="${-entry.y}" x2="${end.x}" y2="${end.y}" stroke="#9b682c" stroke-width=".045" marker-end="url(#entry-arrow)"/><circle cx="${entry.x}" cy="${-entry.y}" r=".10" fill="#ac7634" stroke="#fff8e9" stroke-width=".035"/></g>`;
++  }
++  const scaleX = b.x + .22, scaleY = bottom + .62, captionY = bottom + 1.48;
++  s += `<g data-scale-bar="true" data-segment-length-m="1" aria-label="مقياس رسومي؛ كل مقطع يساوي متراً" fill="#334a4c" stroke="#334a4c" pointer-events="none"><path d="M${scaleX} ${scaleY}H${scaleX + 2} M${scaleX} ${scaleY - .12}V${scaleY + .12} M${scaleX + 1} ${scaleY - .12}V${scaleY + .12} M${scaleX + 2} ${scaleY - .12}V${scaleY + .12}" fill="none" stroke-width=".045"/><text x="${scaleX}" y="${scaleY + .40}" font-size=".24" text-anchor="start" stroke="none" direction="ltr">0</text><text x="${scaleX + 1}" y="${scaleY + .40}" font-size=".24" text-anchor="middle" stroke="none" direction="ltr">1</text><text x="${scaleX + 2}" y="${scaleY + .40}" font-size=".24" text-anchor="end" stroke="none" direction="ltr">2</text><text x="${scaleX + 2.45}" y="${scaleY + .40}" font-size=".23" text-anchor="start" stroke="none" direction="rtl">متر</text><text x="${b.x + b.w / 2}" y="${captionY}" font-size=".34" text-anchor="middle" stroke="none" direction="rtl">الدور الأرضي · الأرض ${W.toFixed(2)} × ${L.toFixed(2)} م</text></g>`;
++  const northX = outline.maxX + 1.52, northY = -outline.maxY + 1.20;
++  s += `<g data-north-arrow="true" data-axis="project-north" transform="translate(${northX},${northY})" fill="#3e5c59" pointer-events="none"><path d="M0 -.76L-.22 0H.22Z"/><path d="M0 -.04V.42" stroke="#3e5c59" stroke-width=".05"/><text y="-1.00" font-size=".32" font-weight="700" text-anchor="middle">N</text></g></svg>`;
+   return s;
+ }
+ 
+diff --git a/dist/plot-entry.mjs b/dist/plot-entry.mjs
+new file mode 100644
+index 0000000..9f3e1c1
+--- /dev/null
++++ b/dist/plot-entry.mjs
+@@ -0,0 +1,67 @@
++import { DIRECTIONS, validatePlot } from './planner.mjs';
++
++export function streetsForEntry(currentStreets, entry, streetSelectionExplicit = false) {
++  const current = Object.fromEntries(Object.keys(DIRECTIONS).map(side => [side, currentStreets?.[side] === true]));
++  if (!streetSelectionExplicit) {
++    return Object.fromEntries(Object.keys(DIRECTIONS).map(side => [side, side === entry]));
++  }
++  if (Object.hasOwn(current, entry)) current[entry] = true;
++  return current;
++}
++
++// Build and validate an entry-side change without mutating the caller's plot.
++// Fresh UI frontage is a default that follows the selected entry. Once the user
++// explicitly edits advanced frontage, retain those sides and add the entrance.
++export function validateEntryPlot(raw, entry, {
++  currentStreets = raw?.streets,
++  streetSelectionExplicit = false,
++  surveyBinding = null,
++} = {}) {
++  const candidate = validatePlot({
++    ...raw,
++    entry,
++    streets: streetsForEntry(currentStreets, entry, streetSelectionExplicit),
++  });
++  if (surveyBinding && (
++    Math.abs(candidate.width - surveyBinding.width) > 1e-8 ||
++    Math.abs(candidate.length - surveyBinding.length) > 1e-8
++  )) {
++    throw Error('أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ؛ أعد الربط أو اختر مستطيلًا منفصلًا صراحةً قبل تغييرها.');
++  }
++  return candidate;
++}
++
++// The app injects its DOM callbacks, while tests supply small state/field stubs.
++// All validation (including the explicit survey binding) finishes before any
++// callback or state write, so rejected input leaves the UI and street vector intact.
++export function setPlotFromSimpleInput({
++  state,
++  input,
++  getRawPlot,
++  getSurveyBinding = () => null,
++  commitFields,
++  renderStreets = () => {},
++  rating = () => {},
++  markDirty = () => {},
++}) {
++  const { width, length, entry, maxBuiltArea } = input || {};
++  if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
++  const requested = {
++    ...getRawPlot(),
++    width: Number(width),
++    length: Number(length),
++    entry,
++    maxBuiltArea: maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '' ? null : Number(maxBuiltArea),
++  };
++  const candidate = validateEntryPlot(requested, entry, {
++    currentStreets: state.streets,
++    streetSelectionExplicit: state.streetSelectionExplicit,
++    surveyBinding: getSurveyBinding(),
++  });
++  commitFields(candidate);
++  state.streets = { ...candidate.streets };
++  renderStreets();
++  rating();
++  markDirty();
++  return candidate;
++}
+diff --git a/dist/render-visualizer.mjs b/dist/render-visualizer.mjs
+index 3b6cda4..e14c815 100644
+--- a/dist/render-visualizer.mjs
++++ b/dist/render-visualizer.mjs
+@@ -142,7 +142,7 @@ function ensureVisualizerMarkup() {
+   if (document.getElementById('generateVisual')) return;
+   const anchor = document.querySelector('.immersive-card');
+   if (!anchor) return;
+-  anchor.insertAdjacentHTML('afterend', `<article class="card visualizer-card" aria-label="العرض البصري المعماري"><header class="ch"><b class="num">✨</b><div><h2>التصور البصري للمراجعة</h2><p>تصور بصري موجّه بالمخطط؛ راجع مطابقة الصورة قبل استخدامها.</p></div><span class="pill" id="visualBadge">GPT Image</span></header><div class="cb"><div class="visual-controls"><div class="visual-group"><label class="visual-label">الطراز البصري</label><div class="visual-options" role="group" aria-label="الطراز البصري"><button type="button" class="visual-opt" data-visual-style="resort">🏝️ <b>منتجع</b><small>حجر وفناء أخضر</small></button><button type="button" class="visual-opt" data-visual-style="modern">▢ <b>مودرن</b><small>كتل بيضاء وزجاج</small></button><button type="button" class="visual-opt" data-visual-style="classic">🏛️ <b>كلاسيكي</b><small>هيبة وتناسق</small></button><button type="button" class="visual-opt" data-visual-style="hijazi">🕌 <b>حجازي</b><small>حجر ورواشين</small></button></div></div><div class="visual-group"><label class="visual-label">الإضاءة</label><div class="visual-options" role="group" aria-label="إضاءة الصورة"><button type="button" class="visual-opt" data-visual-light="golden">🌅 <b>ذهبية</b></button><button type="button" class="visual-opt" data-visual-light="morning">🌤️ <b>صباح</b></button><button type="button" class="visual-opt" data-visual-light="midday">☀️ <b>ظهيرة</b></button><button type="button" class="visual-opt" data-visual-light="dusk">🌇 <b>غروب</b></button><button type="button" class="visual-opt" data-visual-light="night">🌙 <b>ليل</b></button></div></div><div class="visual-group"><label class="visual-label">زاوية الكاميرا</label><div class="visual-options" role="group" aria-label="زاوية الكاميرا"><button type="button" class="visual-opt" data-visual-view="hero">📐 <b>درامية</b></button><button type="button" class="visual-opt" data-visual-view="aerial">🚁 <b>جوية</b></button><button type="button" class="visual-opt" data-visual-view="entry">🚪 <b>الواجهة</b></button><button type="button" class="visual-opt" data-visual-view="courtyard">🌿 <b>الفناء</b></button><button type="button" class="visual-opt" data-visual-view="corner">◪ <b>ركنية</b></button></div></div></div><button class="primary visual-generate" id="generateVisual" type="button">✨ توليد تصور مستند إلى المخطط</button><div class="visual-status" id="visualStatus" hidden><span class="visual-spinner" aria-hidden="true"></span> جارٍ توليد الصورة…</div><div class="visual-gallery-header"><h3 class="subhead">معرض التصورات</h3><button class="small-button" id="clearGallery" type="button">حذف الكل</button></div><div class="render-gallery" id="renderGallery"></div><p class="help">تُرسل صورة المخطط ومواصفاته إلى Worker الصور لتوجيه التصور البصري. الاعتماد الدقيق للمساحات والمداخل يبقى من مخطط 2D/3D، ومفتاح OpenAI لا يصل إلى المتصفح.</p></div></article>`);
++  anchor.insertAdjacentHTML('afterend', `<details class="studio-visualization-disclosure"><summary><span><b>التصور البصري الاختياري</b><small>لقطة استلهامية؛ مخطط 2D هو المرجع الهندسي</small></span><span class="studio-disclosure-hint">فتح خيارات التصور</span></summary><article class="card visualizer-card" aria-label="العرض البصري المعماري"><header class="ch"><b class="num">✨</b><div><h2>التصور البصري للمراجعة</h2><p>تصور بصري موجّه بالمخطط؛ راجع مطابقة الصورة قبل استخدامها.</p></div><span class="pill" id="visualBadge">GPT Image</span></header><div class="cb"><div class="visual-controls"><div class="visual-group"><label class="visual-label">الطراز البصري</label><div class="visual-options" role="group" aria-label="الطراز البصري"><button type="button" class="visual-opt" data-visual-style="resort">🏝️ <b>منتجع</b><small>حجر وفناء أخضر</small></button><button type="button" class="visual-opt" data-visual-style="modern">▢ <b>مودرن</b><small>كتل بيضاء وزجاج</small></button><button type="button" class="visual-opt" data-visual-style="classic">🏛️ <b>كلاسيكي</b><small>هيبة وتناسق</small></button><button type="button" class="visual-opt" data-visual-style="hijazi">🕌 <b>حجازي</b><small>حجر ورواشين</small></button></div></div><div class="visual-group"><label class="visual-label">الإضاءة</label><div class="visual-options" role="group" aria-label="إضاءة الصورة"><button type="button" class="visual-opt" data-visual-light="golden">🌅 <b>ذهبية</b></button><button type="button" class="visual-opt" data-visual-light="morning">🌤️ <b>صباح</b></button><button type="button" class="visual-opt" data-visual-light="midday">☀️ <b>ظهيرة</b></button><button type="button" class="visual-opt" data-visual-light="dusk">🌇 <b>غروب</b></button><button type="button" class="visual-opt" data-visual-light="night">🌙 <b>ليل</b></button></div></div><div class="visual-group"><label class="visual-label">زاوية الكاميرا</label><div class="visual-options" role="group" aria-label="زاوية الكاميرا"><button type="button" class="visual-opt" data-visual-view="hero">📐 <b>درامية</b></button><button type="button" class="visual-opt" data-visual-view="aerial">🚁 <b>جوية</b></button><button type="button" class="visual-opt" data-visual-view="entry">🚪 <b>الواجهة</b></button><button type="button" class="visual-opt" data-visual-view="courtyard">🌿 <b>الفناء</b></button><button type="button" class="visual-opt" data-visual-view="corner">◪ <b>ركنية</b></button></div></div></div><button class="primary visual-generate" id="generateVisual" type="button">✨ توليد تصور مستند إلى المخطط</button><div class="visual-status" id="visualStatus" hidden><span class="visual-spinner" aria-hidden="true"></span> جارٍ توليد الصورة…</div><div class="visual-gallery-header"><h3 class="subhead">معرض التصورات</h3><button class="small-button" id="clearGallery" type="button">حذف الكل</button></div><div class="render-gallery" id="renderGallery"></div><p class="help">تُرسل صورة المخطط ومواصفاته إلى Worker الصور لتوجيه التصور البصري. الاعتماد الدقيق للمساحات والمداخل يبقى من مخطط 2D/3D، ومفتاح OpenAI لا يصل إلى المتصفح.</p></div></article></details>`);
+ }
+ 
+ export async function generateVisual(model, overrides = {}) {
+diff --git a/dist/studio-workspace.css b/dist/studio-workspace.css
+index 9ae70e1..8db770a 100644
+--- a/dist/studio-workspace.css
++++ b/dist/studio-workspace.css
+@@ -60,241 +60,224 @@
+   .studio-layout+.card[aria-label="مقارنة بدائل المخطط"] .alternative-card{flex-basis:78%}
+ }
+ 
+-/* Focused architectural workbench: the drawing is the page, controls stay quiet. */
++/* Room data fields remain legible in the program editor at every stage. */
++#panel-design .program-table{min-width:900px}
++#panel-design .program-table th{padding:12px 10px;font-size:.84rem;white-space:nowrap}
++#panel-design .program-table td{padding:8px 9px;vertical-align:middle}
++#panel-design .program-table input,#panel-design .program-table select{min-height:46px;padding:8px 10px;font-size:.94rem;line-height:1.35}
++#panel-design .program-table td:first-child{min-width:190px}
++#panel-design .program-table td:nth-child(3){width:168px}
++#panel-design .program-table input[data-field="area"]{font-variant-numeric:tabular-nums;font-size:1rem;font-weight:600}
++/* Plan-first studio: the measured plan stays primary, with compact, readable controls. */
+ #app.studio-active .top{min-height:56px;padding:5px 20px;gap:14px}
+-#app.studio-active .brand{gap:8px}
++#app.studio-active .brand{gap:8px;min-height:44px}
+ #app.studio-active .brand .logo{width:34px;height:34px;border-radius:8px;background:#27372f;color:#f5f1e8;font-size:1.25rem}
+ #app.studio-active .brand b{font-size:.98rem;font-weight:600}
+ #app.studio-active .brand small{display:none}
+ #app.studio-active .workspace-actions{gap:6px}
+-#app.studio-active .workspace-actions .small-button{min-height:34px;padding:5px 10px;font-size:.78rem}
++#app.studio-active .workspace-actions>.small-button,#app.studio-active .account-archive>summary .small-button{display:inline-flex;align-items:center;min-height:44px;padding:6px 10px;font-size:.875rem}
+ #app.studio-active .trial-label{display:none}
+ #app.studio-active .workspace-layout{display:block;min-height:calc(100vh - 56px)}
+ #app.studio-active .workspace-sidebar{position:sticky;z-index:18;top:56px;display:block;height:auto;overflow:visible;padding:4px clamp(10px,2vw,28px);border:0;border-bottom:1px solid #d7d8d2;background:rgba(249,248,244,.96);backdrop-filter:blur(14px)}
+ #app.studio-active .sidebar-label,#app.studio-active .project-snapshot,#app.studio-active .settings-button{display:none}
+ #app.studio-active .tabs{display:flex;flex-direction:row;justify-content:stretch;gap:4px;overflow:visible}
+-#app.studio-active .tab{flex:1 1 0;min-width:0;min-height:40px;width:auto;justify-content:center;gap:7px;padding:5px 8px;border:0;border-radius:7px;text-align:center;background:transparent}
+-#app.studio-active .tab b{font-size:.82rem;font-weight:500;white-space:nowrap}
++#app.studio-active .tab{flex:1 1 0;min-width:0;min-height:44px;width:auto;justify-content:center;gap:7px;padding:5px 8px;border:0;border-radius:7px;text-align:center;background:transparent}
++#app.studio-active .tab b{font-size:.875rem;font-weight:500;white-space:nowrap}
+ #app.studio-active .tab small{display:none}
+ #app.studio-active .tab.on{background:#27372f;color:#fff;box-shadow:none}
+ #app.studio-active .tab.on b,#app.studio-active .tab.on .step-number{color:#f3ead8}
+ #app.studio-active .tab.on .step-number{background:transparent}
+ #app.studio-active .tab.on:after{display:none}
+-#app.studio-active .step-number{width:auto;height:auto;min-width:auto;flex:0 0 auto;border:0;background:none;color:#777c74;font-size:.69rem;font-weight:600}
++#app.studio-active .step-number{width:auto;height:auto;min-width:auto;flex:0 0 auto;border:0;background:none;color:#777c74;font-size:.75rem;font-weight:600}
+ #app.studio-active .workspace-main{background:#f2f1ed}
+-#app.studio-active #panel-result>.wrap{width:min(1920px,100%);padding:12px clamp(10px,2vw,30px) 30px}
+-#app.studio-active .studio-conversation-return{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 10px;padding:12px 16px;border:1px solid #b8c9b8;border-radius:12px;background:linear-gradient(100deg,#edf4e8,#f8f7f0);color:#293d30}
+-#app.studio-active .studio-conversation-return b{display:block;font-size:.95rem}
+-#app.studio-active .studio-conversation-return p{margin:3px 0 0;color:#5e705f;font-size:.82rem;line-height:1.5}
+-#app.studio-active .studio-conversation-return .primary{flex:0 0 auto;min-height:42px;padding:9px 18px;background:#2f6747;border-color:#2f6747;color:#fff;font-size:.86rem}
++#app.studio-active #panel-result>.wrap{width:min(1920px,100%);padding:10px clamp(10px,2vw,30px) 28px}
++#app.studio-active .studio-conversation-return{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:12px;margin:0 0 6px;padding:7px 12px;border:1px solid #c9d4c8;border-radius:8px;background:#f0f3ec;color:#293d30}
++#app.studio-active .studio-conversation-return>div{min-width:0}
++#app.studio-active .studio-conversation-return b{display:block;font-size:.875rem;line-height:1.35}
++#app.studio-active .studio-conversation-return p{margin:2px 0 0;color:#59665b;font-size:.75rem;line-height:1.4}
++#app.studio-active .studio-conversation-return .primary{width:auto!important;max-width:min(100%,290px);min-height:44px;flex:0 0 auto;white-space:normal;margin:0;padding:7px 13px;border-radius:7px;background:#315b43;border-color:#315b43;color:#fff;font-size:.875rem;line-height:1.3}
+ #app.studio-active .studio-conversation-return .primary:hover{background:#244f36}
+-#app.studio-active .studio-workspace-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:61px;padding:2px 1px 8px;border-bottom:1px solid #d9d8d1}
++#app.studio-active .studio-workspace-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:52px;padding:1px 1px 4px;border-bottom:1px solid #d9d8d1}
+ #app.studio-active .studio-heading{min-width:0}
+-#app.studio-active .studio-heading>.ey{font-size:.69rem;color:#74776f;letter-spacing:.025em}
+-#app.studio-active .studio-heading h1{margin:0;font-size:1.25rem;font-weight:600;line-height:1.3;color:#242925}
+-#app.studio-active #studioModelSummary{max-width:850px;margin-top:2px;color:#656a63;font-size:.78rem;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++#app.studio-active .studio-heading>.ey{font-size:.75rem;color:#646b63;letter-spacing:.025em}
++#app.studio-active .studio-heading h1{margin:0;font-size:1.125rem;font-weight:600;line-height:1.3;color:#242925}
++#app.studio-active #studioModelSummary{max-width:850px;margin-top:2px;color:#596158;font-size:.75rem;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++#app.studio-active .studio-title-line{display:flex;align-items:center;gap:9px}
++#app.studio-active .studio-result-state{max-width:220px;padding:3px 7px;font-size:.75rem;line-height:1.4}
+ #app.studio-active .studio-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+ #app.studio-active .studio-view-toggle{display:flex;align-items:center;gap:3px;margin:0;padding:3px;border:1px solid #d1d2cb;border-radius:8px;background:#eeede8}
+-#app.studio-active .studio-view-toggle .small-button{min-height:34px;padding:4px 13px;border:0;border-radius:6px;background:transparent;color:#555c55;font-size:.78rem}
++#app.studio-active .studio-view-toggle .small-button{min-width:44px;min-height:44px;padding:5px 12px;border:0;border-radius:6px;background:transparent;color:#404940;font-size:.875rem}
+ #app.studio-active .studio-view-toggle .small-button.on{background:#fff;color:#25372e;box-shadow:0 1px 3px #00000014}
+-#app.studio-active .studio-regenerate{min-height:38px;border-color:#35483d;background:#35483d;color:#fff;font-size:.78rem}
++#app.studio-active .studio-regenerate{min-height:44px;padding:6px 12px;border-color:#35483d;background:#35483d;color:#fff;font-size:.875rem}
+ #app.studio-active .studio-regenerate:hover:not(:disabled){background:#26372e}
+-#app.studio-active .stale-message{margin:5px 0;padding:7px 12px;font-size:.8rem}
+-#app.studio-active .studio-alternatives{margin:8px 0 10px;padding:0;background:transparent;border:0;box-shadow:none}
+-#app.studio-active .studio-alternatives-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 6px}
++#app.studio-active .project-status{max-height:34px;overflow:hidden;margin:3px 8px 0;padding:4px 9px;border-radius:5px;font-size:.75rem;line-height:1.35;white-space:nowrap;text-overflow:ellipsis}
++#app.studio-active .stale-message{margin:5px 0;padding:7px 12px;font-size:.875rem}
++#app.studio-active .studio-alternatives{margin:4px 0 6px;padding:0;background:transparent;border:0;box-shadow:none}
++#app.studio-active .studio-alternatives-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 3px}
+ #app.studio-active .studio-alternatives-head .ey{display:none}
+-#app.studio-active .studio-alternatives-head h2{font-size:.87rem;font-weight:600;color:#303730}
+-#app.studio-active .studio-alternatives-head small{color:#777c74;font-size:.72rem}
+-#app.studio-active .studio-alternatives .alternative-grid{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 1px 7px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+-#app.studio-active .studio-alternatives .alternative-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;flex:0 0 230px;min-width:0;min-height:78px;margin:0;padding:5px 7px;background:#faf9f6;border:1px solid #d9d8d1;border-radius:8px;box-shadow:none;scroll-snap-align:start}
++#app.studio-active .studio-alternatives-head h2{font-size:.875rem;font-weight:600;color:#303730}
++#app.studio-active .studio-alternatives-head small{max-width:58%;overflow:hidden;color:#596158;font-size:.75rem;text-overflow:ellipsis;white-space:nowrap}
++#app.studio-active .studio-alternatives .alternative-grid{display:flex;gap:6px;overflow-x:auto;overscroll-behavior-inline:contain;padding:1px 1px 5px;scroll-snap-type:x mandatory;scrollbar-width:thin}
++#app.studio-active .studio-alternatives .alternative-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;flex:0 0 240px;height:70px;min-width:0;min-height:70px;max-height:70px;margin:0;padding:3px 5px;overflow:visible;background:#faf9f6;border:1px solid #d9d8d1;border-radius:8px;box-shadow:none;scroll-snap-align:start}
+ #app.studio-active .studio-alternatives .alternative-card.selected{background:#fff;border-color:#536c5b;box-shadow:inset 0 0 0 1px #536c5b}
+-#app.studio-active .alternative-pick{display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:9px;width:100%;min-width:0;padding:2px;border:0;background:transparent;text-align:right}
+-#app.studio-active .alternative-preview{display:block;width:78px;height:58px;overflow:hidden;border:1px solid #e0ddd4;border-radius:5px;background:#f3f1e9}
++#app.studio-active .alternative-pick{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:7px;width:100%;min-width:0;min-height:60px;padding:2px;border:0;background:transparent;text-align:right}
++#app.studio-active .alternative-preview{display:block;width:62px;height:48px;overflow:hidden;border:1px solid #e0ddd4;border-radius:5px;background:#f3f1e9}
+ #app.studio-active .alternative-preview .concept-thumb{display:block;width:100%;height:100%;margin:0;border:0;aspect-ratio:auto;background:#f3f1e9}
+-#app.studio-active .alternative-copy{display:grid;gap:2px;min-width:0}
+-#app.studio-active .alternative-copy strong{overflow:hidden;color:#28332b;font-size:.78rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+-#app.studio-active .alternative-copy small{overflow:hidden;color:#777b74;font-size:.66rem;line-height:1.4;text-overflow:ellipsis;white-space:nowrap}
+-#app.studio-active .alternative-details{align-self:center;font-size:.65rem;color:#777b74}
+-#app.studio-active .alternative-details summary{padding:5px;cursor:pointer;list-style:none}
++#app.studio-active .alternative-copy{display:grid;gap:2px;min-width:0;max-height:58px;overflow:hidden}
++#app.studio-active .alternative-copy strong{display:-webkit-box;overflow:hidden;color:#28332b;font-size:.875rem;font-weight:600;line-height:1.25;text-overflow:ellipsis;-webkit-box-orient:vertical;-webkit-line-clamp:2}
++#app.studio-active .alternative-copy small{display:grid;gap:0;color:#5f665e;font-size:.75rem;line-height:1.3;white-space:normal;overflow-wrap:anywhere}
++#app.studio-active .alternative-details{align-self:center;font-size:.75rem;color:#4f5d51}
++#app.studio-active .alternative-details summary{display:grid;width:44px;height:44px;place-items:center;padding:0;cursor:pointer;list-style:none;font-size:.75rem;white-space:nowrap}
+ #app.studio-active .alternative-details summary::-webkit-details-marker{display:none}
+-#app.studio-active .alternative-details summary::after{content:'···';font-size:1rem;letter-spacing:.06em}
+-#app.studio-active .alternative-details[open]{position:absolute;z-index:25;width:min(320px,calc(100vw - 24px));margin-top:2px;padding:10px;background:#fff;border:1px solid #d7d8d2;border-radius:8px;box-shadow:0 12px 32px #1c251d20;line-height:1.7}
++#app.studio-active .alternative-details[open]{position:absolute;z-index:25;inset-block-start:calc(100% - 2px);inset-inline-start:3px;width:min(320px,calc(100vw - 24px));margin-top:2px;padding:10px;background:#fff;border:1px solid #d7d8d2;border-radius:8px;box-shadow:0 12px 32px #1c251d20;font-size:.75rem;line-height:1.7}
+ #app.studio-active .alternative-details[open] summary{display:flex;justify-content:flex-end}
+ #app.studio-active .alternative-details div{padding:0 8px 8px}
+ #app.studio-active .alternative-details p+p{margin-top:5px}
+-#app.studio-active .studio-alternative-notes{margin:0 2px;color:#74776f;font-size:.7rem}
+-#app.studio-active .studio-alternative-notes summary{cursor:pointer}
+-#app.studio-active .studio-alternative-notes .help{margin:5px 0 0;font-size:.72rem;line-height:1.55}
+-#app.studio-active .studio-layout{position:relative;display:block;margin:0}
++#app.studio-active .studio-alternative-notes{margin:0 2px;color:#5d655c;font-size:.75rem}
++#app.studio-active .studio-alternative-notes summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
++#app.studio-active .studio-alternative-notes .help{margin:5px 0 0;font-size:.75rem;line-height:1.5}
++#app.studio-active .studio-layout{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,310px);gap:14px;align-items:start;margin:0 0 10px}
+ #app.studio-active .studio-main{display:block;width:100%;min-width:0}
+-#app.studio-active .studio-main>.card{margin:0;border:0;border-radius:8px;background:transparent;box-shadow:none;overflow:visible}
+-#app.studio-active .studio-canvas-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;padding:2px 4px;border:0}
+-#app.studio-active .studio-canvas-head .ey{display:block;color:#777b74;font-size:.66rem}
+-#app.studio-active .studio-canvas-head h2{font-size:.92rem;font-weight:600;color:#303730}
+-#app.studio-active .studio-canvas-help{color:#777b74;font-size:.72rem}
++#app.studio-active .studio-main>.card{min-width:0;margin:0;border:0;border-radius:8px;background:transparent;box-shadow:none;overflow:visible}
++#app.studio-active .studio-canvas-head{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:34px;padding:2px 4px;border:0}
++#app.studio-active .studio-canvas-head .ey{display:block;color:#5d655c;font-size:.75rem}
++#app.studio-active .studio-canvas-head h2{font-size:.875rem;font-weight:600;color:#303730}
++#app.studio-active .studio-canvas-help{color:#596158;font-size:.75rem}
+ #app.studio-active .studio-main .cb{padding:0}
+ #app.studio-active .viewer-tools{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow-x:auto;margin:0 0 6px;padding:3px 0;scrollbar-width:thin}
+-#app.studio-active .viewer-tools .small-button{flex:0 0 auto;min-height:33px;padding:4px 9px;border-color:transparent;background:transparent;color:#4d574e;font-size:.72rem}
++#app.studio-active .viewer-tools .small-button{flex:0 0 auto;min-width:44px;min-height:44px;padding:5px 10px;border-color:transparent;background:transparent;color:#3f4b41;font-size:.75rem}
+ #app.studio-active .viewer-tools .small-button:hover:not(:disabled){background:#e7e8e1}
+-#app.studio-active .viewer-tools .check{display:flex;align-items:center;gap:5px;flex:0 0 auto;margin-inline-start:auto;color:#596158;font-size:.72rem;white-space:nowrap}
+-#app.studio-active .plan{height:min(72vh,780px);min-height:520px;border:1px solid #c6c8bf;border-radius:8px;background:#fbfaf6;box-shadow:0 2px 10px #18221a0a}
+-#app.studio-active .plan svg{height:100%;min-height:100%}
+-#app.studio-active .studio-main .view{height:min(74vh,800px);min-height:520px;border-radius:8px}
++#app.studio-active .viewer-tools .check{display:flex;align-items:center;gap:6px;flex:0 0 auto;min-height:44px;margin-inline-start:auto;padding:0 6px;color:#465248;font-size:.75rem;white-space:nowrap}
++#app.studio-active .plan{height:min(68vh,760px);min-height:480px;border:1px solid #c6c8bf;border-radius:8px;background:#fbfaf6;box-shadow:0 2px 10px #18221a0a}
++#app.studio-active .plan svg{width:100%;height:100%;min-height:100%}
++#app.studio-active .studio-main .view{height:min(68vh,760px);min-height:480px;border-radius:8px}
++#app.studio-active .studio-3d[hidden],#app.studio-active .studio-2d[hidden]{display:none!important}
+ #app.studio-active .studio-3d .cb{padding:0}
+-#app.studio-active .studio-inspector{position:absolute;z-index:12;inset-block-start:80px;inset-inline-start:10px;display:block;width:min(340px,calc(100% - 20px));max-height:calc(100% - 95px);overflow:auto;padding:0;border:1px solid #c9cbc2;border-radius:8px;background:rgba(250,249,245,.96);box-shadow:0 7px 24px #20282017;backdrop-filter:blur(12px)}
+-#app.studio-active .studio-inspector-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;padding:7px 10px;cursor:pointer;list-style:none;color:#344137;font-size:.75rem;font-weight:600}
++#app.studio-active .studio-3d .small-button,#app.studio-active .walk-buttons .small-button{min-width:44px;min-height:44px;padding:6px 10px;font-size:.875rem}
++#app.studio-active #retry3D{min-height:44px;font-size:.875rem}
++#app.studio-active .studio-inspector{position:sticky;z-index:2;top:130px;display:block;align-self:start;width:100%;min-width:0;max-height:calc(100vh - 150px);overflow:auto;margin:0;padding:0;border:1px solid #c9cbc2;border-radius:8px;background:rgba(250,249,245,.97);box-shadow:0 3px 12px #2028200d;backdrop-filter:blur(8px)}
++#app.studio-active .studio-inspector-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:8px 10px;cursor:pointer;list-style:none;color:#344137;font-size:.875rem;font-weight:600}
+ #app.studio-active .studio-inspector-summary::-webkit-details-marker{display:none}
+-#app.studio-active .studio-inspector-summary::after{content:'＋';font-size:.9rem;color:#68746b}
++#app.studio-active .studio-inspector-summary::after{content:'＋';font-size:1rem;color:#4d654f}
+ #app.studio-active .studio-inspector[open] .studio-inspector-summary::after{content:'−'}
+-#app.studio-active .studio-inspector-summary small{overflow:hidden;color:#777c74;font-size:.66rem;font-weight:400;text-overflow:ellipsis;white-space:nowrap}
+-#app.studio-active .studio-inspector-body{display:grid;gap:8px;max-height:calc(100vh - 185px);overflow:auto;padding:8px;border-top:1px solid #e1e0d9}
+-#app.studio-active .studio-model-details{display:grid;gap:6px;padding:8px;background:#f2f1eb;border-radius:6px;color:#4e574e;font-size:.73rem}
+-#app.studio-active .studio-model-details .ey{font-size:.63rem;color:#777b74}
+-#app.studio-active .studio-model-details details summary,.studio-legend-details summary{cursor:pointer;color:#38453b;font-size:.72rem}
+-#app.studio-active .studio-model-details code{display:block;direction:ltr;text-align:left;font-size:.72rem;color:#48564b}
++#app.studio-active .studio-inspector-summary small{overflow:hidden;color:#596158;font-size:.75rem;font-weight:400;text-overflow:ellipsis;white-space:nowrap}
++#app.studio-active .studio-inspector-body{display:grid;gap:8px;max-height:calc(100vh - 205px);overflow:auto;padding:8px;border-top:1px solid #e1e0d9}
++#app.studio-active .studio-model-details{display:grid;gap:6px;padding:8px;background:#f2f1eb;border-radius:6px;color:#4e574e;font-size:.75rem}
++#app.studio-active .studio-model-details .ey{font-size:.75rem;color:#596158}
++#app.studio-active .studio-model-details details summary,.studio-legend-details summary{display:flex;align-items:center;min-height:44px;cursor:pointer;color:#38453b;font-size:.875rem}
++#app.studio-active .studio-model-details code{display:block;direction:ltr;text-align:left;font-size:.75rem;color:#48564b}
++#app.studio-active .plan-tool-list button,#app.studio-active .editor-program-link,#app.studio-active .plan-editor .icon-button,#app.studio-active #roomEditForm button{min-width:44px;min-height:44px;font-size:.875rem}
++#app.studio-active #roomEditForm input,#app.studio-active #roomEditForm select{min-height:44px;font-size:.875rem}
+ #app.studio-active .room-inspector{display:block;margin:0;padding:10px;border:1px solid #ddded7;border-radius:6px;background:#fff;color:#4b534c}
+ #app.studio-active .room-inspector>div:first-child>b{display:block;font-size:1rem;color:#26382d}
+-#app.studio-active .room-inspector>div:first-child>p{font-size:.76rem}
++#app.studio-active .room-inspector>div:first-child>p{font-size:.75rem}
+ #app.studio-active .room-inspector .numbers{display:flex;gap:12px;flex-wrap:wrap;margin-top:5px;font-size:.93rem;font-weight:600;color:#344137;direction:rtl}
+ #app.studio-active .room-inspector .numbers span{padding:4px 8px;border-radius:5px;background:#f0f1eb;font-variant-numeric:tabular-nums;white-space:nowrap}
+ #app.studio-active .studio-room-navigation{display:grid;gap:6px;padding:8px;background:#fff;border:1px solid #ddded7;border-radius:6px}
+-#app.studio-active .studio-room-navigation .help{margin:0;font-size:.72rem;line-height:1.5}
++#app.studio-active .studio-room-navigation .help{margin:0;font-size:.75rem;line-height:1.5}
+ #app.studio-active .studio-room-navigation .inline-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0}
+-#app.studio-active .studio-room-navigation label{grid-column:1/-1;font-size:.76rem}
+-#app.studio-active .studio-room-navigation select,#app.studio-active .studio-room-navigation button{min-height:42px;padding:6px 8px;font-size:.76rem}
++#app.studio-active .studio-room-navigation label{grid-column:1/-1;font-size:.875rem}
++#app.studio-active .studio-room-navigation select,#app.studio-active .studio-room-navigation button{min-height:44px;padding:6px 8px;font-size:.875rem}
+ #app.studio-active .studio-legend-details{padding:8px;border:1px solid #ddded7;border-radius:6px;background:#fff}
+-#app.studio-active .studio-legend-details .plan-key{gap:7px;margin:8px 0 0;font-size:.68rem}
+-#app.studio-active .studio-legend-details .help{font-size:.7rem;line-height:1.55}
++#app.studio-active .studio-legend-details .plan-key{gap:7px;margin:8px 0 0;font-size:.75rem}
++#app.studio-active .studio-legend-details .help{font-size:.75rem;line-height:1.5}
+ #app.studio-active .studio-inspector .match-card{margin:0;border:1px solid #ddded7;border-radius:6px;box-shadow:none}
+ #app.studio-active .studio-inspector .match-card .ch{padding:8px 10px}
+ #app.studio-active .studio-inspector .match-card .cb{padding:8px 10px}
+-#app.studio-active .studio-inspector .match-card h2{font-size:.82rem}
+-#app.studio-active .studio-inspector .match-card p{font-size:.7rem}
+-#app.studio-active .studio-inspector .match-row{grid-template-columns:1fr auto;gap:5px;padding:7px 0;font-size:.73rem}
+-#app.studio-active .studio-inspector .match-state{grid-column:auto;grid-row:auto;justify-self:start}
+-#app.studio-active .studio-inspector .match-card .help{font-size:.68rem}
++#app.studio-active .studio-inspector .match-card h2{font-size:.875rem}
++#app.studio-active .studio-inspector .match-card p{font-size:.75rem}
++#app.studio-active .studio-inspector .match-row{grid-template-columns:1fr auto;gap:5px;padding:7px 0;font-size:.75rem}
++#app.studio-active .studio-inspector .match-state{grid-column:auto;grid-row:auto;justify-self:start;min-height:28px;font-size:.75rem}
++#app.studio-active .studio-inspector .match-card .help{font-size:.75rem}
+ #app.studio-active .studio-inspector details+article{margin-top:0}
+-#app.studio-active .section-next{margin-top:18px}
++#app.studio-active .studio-evidence-disclosure,#app.studio-active .studio-visualization-disclosure{margin:8px 0 12px;border:1px solid #d4d7ce;border-radius:8px;background:#faf9f5;color:#344137}
++#app.studio-active .studio-evidence-disclosure>summary,#app.studio-active .studio-visualization-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;padding:8px 13px;cursor:pointer;list-style:none}
++#app.studio-active .studio-evidence-disclosure>summary::-webkit-details-marker,#app.studio-active .studio-visualization-disclosure>summary::-webkit-details-marker{display:none}
++#app.studio-active .studio-evidence-disclosure>summary>span:first-child,#app.studio-active .studio-visualization-disclosure>summary>span:first-child{display:grid;gap:2px;min-width:0}
++#app.studio-active .studio-evidence-disclosure>summary b,#app.studio-active .studio-visualization-disclosure>summary b{font-size:.875rem;font-weight:650}
++#app.studio-active .studio-evidence-disclosure>summary small,#app.studio-active .studio-visualization-disclosure>summary small{color:#596158;font-size:.75rem}
++#app.studio-active .studio-disclosure-hint{flex:0 0 auto;color:#365b40;font-size:.75rem}
++#app.studio-active .studio-evidence-disclosure>summary:focus-visible,#app.studio-active .studio-visualization-disclosure>summary:focus-visible,#app.studio-active .studio-inspector-summary:focus-visible{outline:3px solid #315b43;outline-offset:2px}
++#app.studio-active .studio-evidence-disclosure[open],#app.studio-active .studio-visualization-disclosure[open]{padding:0 10px 10px}
++#app.studio-active .studio-evidence-disclosure .requirement-evidence,#app.studio-active .studio-visualization-disclosure .visualizer-card{margin:0;border:0;box-shadow:none}
++#app.studio-active .studio-evidence-disclosure .requirement-evidence .ch h2{font-size:1rem}
++#app.studio-active .studio-evidence-disclosure .requirement-evidence .ch p{font-size:.875rem}
++#app.studio-active .studio-evidence-disclosure #requirementStale{font-size:.875rem}
++#app.studio-active .studio-evidence-disclosure .requirement-summary{gap:6px;margin-bottom:10px}
++#app.studio-active .studio-evidence-disclosure .requirement-summary>div{padding:8px 6px}
++#app.studio-active .studio-evidence-disclosure .requirement-summary strong{font-size:1.25rem}
++#app.studio-active .studio-evidence-disclosure .requirement-summary span{font-size:.75rem}
++#app.studio-active .studio-evidence-disclosure .requirement-category,#app.studio-active .studio-evidence-disclosure .requirement-status{font-size:.75rem}
++#app.studio-active .studio-evidence-disclosure .requirement-row h3{font-size:.875rem}
++#app.studio-active .studio-evidence-disclosure .requirement-rows{gap:8px}
++#app.studio-active .studio-evidence-disclosure .requirement-row{padding:12px}
++#app.studio-active .studio-evidence-disclosure .requirement-row p{font-size:.875rem}
++#app.studio-active .studio-evidence-disclosure .requirement-row small{font-size:.75rem}
++#app.studio-active .studio-evidence-disclosure .help{font-size:.875rem}
++#app.studio-active .studio-visualization-disclosure .visual-controls{gap:12px;margin-bottom:12px}
++#app.studio-active .studio-visualization-disclosure .visual-options{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px}
++#app.studio-active .studio-visualization-disclosure .visual-label{font-size:.875rem}
++#app.studio-active .studio-visualization-disclosure .visual-opt{min-height:44px;padding:7px 8px;font-size:.875rem}
++#app.studio-active .studio-visualization-disclosure .visual-opt b{font-size:.875rem}
++#app.studio-active .studio-visualization-disclosure .visual-opt small{font-size:.75rem}
++#app.studio-active .studio-visualization-disclosure .visual-generate,#app.studio-active .studio-visualization-disclosure #clearGallery{min-height:44px;font-size:.875rem}
++#app.studio-active .studio-visualization-disclosure .visualizer-card .help{font-size:.75rem}
++#app.studio-active .studio-visualization-disclosure .render-action{min-height:44px;font-size:.75rem}
++#app.studio-active .section-next{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-size:.875rem}
++#app.studio-active .section-next .small-button{min-height:44px;font-size:.875rem}
+ #app.studio-active #panel-result .empty-state{margin:30px auto;max-width:620px}
+-#app.studio-active .section-next{display:flex;align-items:center;justify-content:space-between;gap:12px}
+ @media(max-width:900px){
+-  #app.studio-active .studio-workspace-bar{align-items:flex-start}
+-  #app.studio-active .studio-main .plan{height:min(64vh,650px);min-height:450px}
+-  #app.studio-active .studio-main .view{height:min(64vh,650px);min-height:450px}
+-  #app.studio-active .studio-inspector{inset-block-start:75px;width:min(320px,calc(100% - 20px))}
+-}
+-@media(max-width:560px){
+-  #app.studio-active .studio-conversation-return{align-items:stretch;flex-direction:column;gap:9px;margin-bottom:8px;padding:12px}
+-  #app.studio-active .studio-conversation-return .primary{width:100%}
+-  #app.studio-active .top{min-height:50px;padding:4px 9px;gap:7px}
+-  #app.studio-active .brand{gap:5px}
+-  #app.studio-active .brand .logo{width:29px;height:29px;font-size:1rem}
+-  #app.studio-active .brand b{font-size:.8rem}
+-  #app.studio-active .workspace-actions{gap:3px}
+-  #app.studio-active .workspace-actions .small-button{min-height:31px;padding:4px 7px;font-size:.67rem}
+-  #app.studio-active .workspace-sidebar{top:50px;padding:3px 5px}
+-  #app.studio-active .tabs{gap:2px}
+-  #app.studio-active .tab{min-height:39px;gap:3px;padding:4px 2px}
+-  #app.studio-active .tab b{font-size:.68rem}
+-  #app.studio-active .step-number{font-size:.61rem}
+-  #app.studio-active #panel-result>.wrap{padding:7px 8px 22px}
+-  #app.studio-active .studio-workspace-bar{display:grid;grid-template-columns:1fr;gap:5px;padding:0 1px 7px}
+-  #app.studio-active .studio-heading>.ey{font-size:.61rem}
+-  #app.studio-active .studio-heading h1{font-size:1.02rem}
+-  #app.studio-active #studioModelSummary{max-width:100%;font-size:.67rem;white-space:nowrap}
+-  #app.studio-active .studio-actions{width:100%;justify-content:space-between}
+-  #app.studio-active .studio-view-toggle{flex:1 1 auto}
+-  #app.studio-active .studio-view-toggle .small-button{flex:1 1 0;min-width:0;min-height:31px;padding:3px 6px;font-size:.7rem}
+-  #app.studio-active .studio-regenerate{min-height:33px;padding:3px 8px;font-size:.68rem}
+-  #app.studio-active .studio-alternatives{margin:6px 0 7px}
+-  #app.studio-active .studio-alternatives-head{margin-bottom:4px}
+-  #app.studio-active .studio-alternatives-head h2{font-size:.78rem}
+-  #app.studio-active .studio-alternatives-head small{max-width:58%;font-size:.62rem;text-align:left}
+-  #app.studio-active .studio-alternatives .alternative-grid{gap:5px;padding-bottom:5px}
+-  #app.studio-active .studio-alternatives .alternative-card{flex-basis:195px;min-height:67px;padding:4px 5px}
+-  #app.studio-active .alternative-pick{grid-template-columns:66px minmax(0,1fr);gap:6px}
+-  #app.studio-active .alternative-preview{width:66px;height:50px}
+-  #app.studio-active .alternative-copy strong{font-size:.7rem}
+-  #app.studio-active .alternative-copy small{font-size:.6rem}
+-  #app.studio-active .alternative-details summary{padding:3px}
+-  #app.studio-active .studio-alternative-notes{font-size:.64rem}
+-  #app.studio-active .studio-canvas-head{min-height:32px;padding:0 2px}
+-  #app.studio-active .studio-canvas-head h2{font-size:.8rem}
+-  #app.studio-active .studio-canvas-help{font-size:.63rem}
+-  #app.studio-active .viewer-tools{gap:1px;margin-bottom:4px}
+-  #app.studio-active .viewer-tools .small-button{min-height:31px;padding:3px 7px;font-size:.66rem}
+-  #app.studio-active .viewer-tools .check{font-size:.64rem}
+-  #app.studio-active .studio-main .plan{height:min(58vh,570px);min-height:390px;border-radius:6px}
+-  #app.studio-active .studio-main .view{height:min(58vh,570px);min-height:390px}
+-  #app.studio-active .studio-inspector{inset-block-start:67px;inset-inline-start:5px;width:min(300px,calc(100% - 10px));max-height:calc(100% - 72px)}
+-  #app.studio-active .studio-inspector-summary{min-height:35px;padding:5px 8px;font-size:.69rem}
+-  #app.studio-active .studio-inspector-summary small{font-size:.6rem}
+-  #app.studio-active .studio-inspector-body{max-height:62vh;padding:6px}
+-  #app.studio-active .room-inspector .numbers{font-size:.88rem}
+-  #app.studio-active .studio-room-navigation .inline-actions{grid-template-columns:1fr 1fr}
+-  #app.studio-active .studio-room-navigation select,#app.studio-active .studio-room-navigation button{font-size:.7rem}
+-  #app.studio-active .studio-inspector .match-row{grid-template-columns:1fr auto}
+-  #app.studio-active .studio-inspector .match-state{grid-column:auto;grid-row:auto}
+-  #app.studio-active .section-next{align-items:flex-start;flex-direction:column;font-size:.76rem}
+-}
+-
+-/* Room data fields remain legible in the program editor at every stage. */
+-#panel-design .program-table{min-width:900px}
+-#panel-design .program-table th{padding:12px 10px;font-size:.84rem;white-space:nowrap}
+-#panel-design .program-table td{padding:8px 9px;vertical-align:middle}
+-#panel-design .program-table input,#panel-design .program-table select{min-height:46px;padding:8px 10px;font-size:.94rem;line-height:1.35}
+-#panel-design .program-table td:first-child{min-width:190px}
+-#panel-design .program-table td:nth-child(3){width:168px}
+-#panel-design .program-table input[data-field="area"]{font-variant-numeric:tabular-nums;font-size:1rem;font-weight:600}
+-#app.studio-active .studio-title-line{display:flex;align-items:center;gap:9px}
+-#app.studio-active .studio-result-state{max-width:220px;padding:3px 7px;font-size:.65rem;line-height:1.4}
+-@media(max-width:560px){#app.studio-active .studio-result-state{max-width:170px;font-size:.59rem}}
+-#app.studio-active .project-status{max-height:28px;overflow:hidden;margin:3px 12px 0;padding:4px 9px;border-radius:5px;font-size:.68rem;line-height:1.4;white-space:nowrap;text-overflow:ellipsis}
+-#app.studio-active .studio-workspace-bar{min-height:54px;padding:0 0 4px}
+-#app.studio-active .studio-alternatives{margin:5px 0 6px}
+-#app.studio-active .studio-alternatives-head{margin-bottom:4px}
+-#app.studio-active .studio-alternatives .alternative-card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 28px;align-items:center;flex:0 0 216px;height:64px;min-height:64px;max-height:64px;padding:3px 4px;overflow:visible}
+-#app.studio-active .alternative-pick{height:56px;grid-template-columns:62px minmax(0,1fr);gap:7px;align-content:center}
+-#app.studio-active .alternative-preview{width:62px;height:48px}
+-#app.studio-active .alternative-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;height:100%;overflow:hidden;transform:translateY(-3px);line-height:1.2}
+-#app.studio-active .alternative-copy strong{display:block;max-width:100%;margin:0;font-size:.76rem;line-height:1.2}
+-#app.studio-active .alternative-copy small{display:block;max-width:100%;margin:0;font-size:.64rem;line-height:1.2}
+-#app.studio-active .alternative-details{position:static;align-self:center;justify-self:center;z-index:2;font-size:.62rem}
+-#app.studio-active .alternative-details summary{display:grid;width:27px;height:30px;place-items:center;padding:0;font-size:0;line-height:1.3}
+-#app.studio-active .studio-alternative-notes{margin:0;padding:8px;background:#fff;border:1px solid #ddded7;border-radius:6px;font-size:.74rem}
+-#app.studio-active .studio-alternative-notes .help{margin-top:5px;font-size:.72rem}
+-#app.studio-active .alternative-details[open]{inset-block-start:calc(100% - 2px);inset-inline-start:3px}
+-#app.studio-active .studio-canvas-head{min-height:32px;height:32px}
+-#app.studio-active .viewer-tools{max-height:35px;margin-bottom:3px;padding:1px 0;overflow-y:hidden}
+-#app.studio-active .viewer-tools .small-button{min-height:30px}
+-@media(max-width:560px){
+- #app.studio-active .project-status{max-height:22px;margin:2px 8px 0;padding:2px 7px;font-size:.61rem}
+- #app.studio-active .studio-workspace-bar{min-height:0;padding-bottom:5px;gap:3px}
+- #app.studio-active .studio-alternatives{margin:3px 0 4px}
+- #app.studio-active .studio-alternatives-head{margin-bottom:3px}
+- #app.studio-active .studio-alternatives-head h2{font-size:.71rem}
+- #app.studio-active .studio-alternatives-head small{font-size:.58rem}
+- #app.studio-active .studio-alternatives .alternative-card{flex-basis:190px;height:57px;min-height:57px;max-height:57px;padding:2px 3px}
+- #app.studio-active .alternative-pick{height:51px;grid-template-columns:58px minmax(0,1fr);gap:5px}
+- #app.studio-active .alternative-preview{width:58px;height:44px}
+- #app.studio-active .alternative-copy{gap:2px;line-height:1.15}
+- #app.studio-active .alternative-copy strong{font-size:.67rem;line-height:1.15}
+- #app.studio-active .alternative-copy small{font-size:.58rem;line-height:1.15}
+- #app.studio-active .alternative-details summary{width:24px;height:28px}
+- #app.studio-active .studio-canvas-head{min-height:28px;height:28px}
+- #app.studio-active .viewer-tools{max-height:32px}
+- #app.studio-active .viewer-tools .small-button{min-height:28px}
++ #app.studio-active .studio-layout{grid-template-columns:minmax(0,1fr);gap:8px}
++ #app.studio-active .studio-inspector{position:static;max-height:none;overflow:visible;width:100%}
++ #app.studio-active .studio-inspector-body{max-height:none}
++ #app.studio-active .studio-main .plan,#app.studio-active .studio-main .view{height:min(68vh,720px);min-height:450px}
+ }
+ @media(max-width:560px){
+- #app.studio-active .studio-workspace-bar{display:grid;grid-template-columns:1fr;gap:2px;min-height:0;padding-bottom:4px}
+- #app.studio-active .studio-heading{display:flex;align-items:baseline;gap:7px;min-height:22px}
++ #app.studio-active .top{min-height:50px;padding:4px 9px;gap:7px}
++ #app.studio-active .brand{gap:5px}
++ #app.studio-active .brand .logo{width:29px;height:29px;font-size:1rem}
++ #app.studio-active .brand>span:not(.logo){display:none}
++ #app.studio-active .workspace-actions{gap:3px;flex-wrap:nowrap;min-width:0}
++ #app.studio-active .workspace-actions>.small-button,#app.studio-active .account-archive>summary .small-button{min-height:44px;padding:4px 7px;font-size:.75rem}
++ #app.studio-active .workspace-sidebar{top:50px;padding:3px 5px}
++ #app.studio-active .tabs{gap:2px}
++ #app.studio-active .tab{min-height:44px;gap:3px;padding:4px 2px}
++ #app.studio-active .tab b{font-size:.875rem}
++ #app.studio-active .step-number{font-size:.75rem}
++ #app.studio-active #panel-result>.wrap{padding:7px 8px 22px}
++ #app.studio-active .studio-workspace-bar{display:grid;grid-template-columns:1fr;gap:3px;min-height:0;padding:0 1px 4px}
++ #app.studio-active .studio-heading{display:flex;align-items:baseline;gap:7px;min-height:24px}
+  #app.studio-active .studio-heading>.ey{display:none}
+  #app.studio-active .studio-title-line{flex:0 0 auto;gap:0}
+- #app.studio-active .studio-title-line h1{font-size:.88rem;white-space:nowrap}
++ #app.studio-active .studio-title-line h1{font-size:.875rem;white-space:nowrap}
+  #app.studio-active .studio-result-state{display:none}
+- #app.studio-active #studioModelSummary{flex:1 1 auto;max-width:none;margin:0;font-size:.57rem;line-height:1.3;white-space:nowrap}
+- #app.studio-active .studio-actions{min-height:30px}
+- #app.studio-active .studio-canvas-head{min-height:24px;height:24px}
++ #app.studio-active #studioModelSummary{flex:1 1 auto;min-width:0;max-width:none;margin:0;font-size:.75rem;line-height:1.3;white-space:normal;overflow:visible;overflow-wrap:anywhere;text-overflow:clip}
++ #app.studio-active .studio-actions{width:100%;min-height:44px;justify-content:space-between;gap:6px}
++ #app.studio-active .studio-view-toggle{flex:1 1 auto;min-height:44px}
++ #app.studio-active .studio-view-toggle .small-button{flex:1 1 0;min-width:44px;min-height:44px;padding:4px 5px;font-size:.875rem}
++ #app.studio-active .studio-regenerate{min-height:44px;padding:5px 8px;font-size:.875rem}
++ #app.studio-active .studio-alternatives{margin:2px 0 4px}
++ #app.studio-active .studio-alternatives-head{margin-bottom:2px}
++ #app.studio-active .studio-alternatives-head h2{font-size:.875rem}
++ #app.studio-active .studio-alternatives-head small{max-width:60%;font-size:.75rem}
++ #app.studio-active .studio-alternatives .alternative-card{flex-basis:238px;height:68px;min-height:68px;max-height:68px;padding:2px 4px}
++ #app.studio-active .alternative-pick{height:60px;min-height:60px;grid-template-columns:56px minmax(0,1fr);gap:5px}
++ #app.studio-active .alternative-preview{width:56px;height:44px}
++ #app.studio-active .alternative-copy strong{font-size:.875rem}
++ #app.studio-active .alternative-copy small{font-size:.75rem}
++ #app.studio-active .studio-main .plan,#app.studio-active .studio-main .view{height:min(64vh,640px);min-height:400px}
++ #app.studio-active .studio-canvas-head{min-height:32px;height:32px;padding:0 2px}
+  #app.studio-active .studio-canvas-head .ey,#app.studio-active .studio-canvas-help{display:none}
+- #app.studio-active .viewer-tools{max-height:28px}
++ #app.studio-active .studio-canvas-head h2{font-size:.875rem}
++ #app.studio-active .viewer-tools{min-height:46px;max-height:50px;gap:2px;margin:0 0 4px;overflow-x:auto;overflow-y:hidden}
++ #app.studio-active .viewer-tools .small-button{min-height:44px;padding:5px 8px;font-size:.75rem}
++ #app.studio-active .viewer-tools .check{min-height:44px;font-size:.75rem}
++ #app.studio-active .studio-inspector{position:static;max-height:none;overflow:visible}
++ #app.studio-active .studio-inspector-summary{min-height:46px;padding:8px;font-size:.875rem}
++ #app.studio-active .studio-inspector-summary small{font-size:.75rem}
++ #app.studio-active .studio-inspector-body{max-height:none;padding:7px}
++ #app.studio-active .studio-inspector .match-row{grid-template-columns:1fr auto}
++ #app.studio-active .studio-inspector .match-state{grid-column:auto;grid-row:auto}
++ #app.studio-active .studio-evidence-disclosure>summary,#app.studio-active .studio-visualization-disclosure>summary{min-height:50px;padding:8px 10px}
++ #app.studio-active .section-next{align-items:flex-start;flex-direction:column}
+ }
+diff --git a/tests/brief-topology-generation.test.mjs b/tests/brief-topology-generation.test.mjs
+new file mode 100644
+index 0000000..e3ec49e
+--- /dev/null
++++ b/tests/brief-topology-generation.test.mjs
+@@ -0,0 +1,174 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { createHash } from 'node:crypto';
++import { readFileSync } from 'node:fs';
++import { generateBriefTopologyModel } from '../dist/brief-topology-planner.mjs';
++import { runMultiEngineDesign } from '../dist/multi-engine.mjs';
++import { generateModelLegacy } from '../dist/claude/compat-layer.mjs';
++import { validateModel, validatePlot, quantities } from '../dist/planner.mjs';
++import { circulationNetwork } from '../dist/circulation.mjs';
++import { TYPES } from '../dist/claude/planner.mjs';
++
++const plot = validatePlot({ width: 20, length: 30, floors: 1, entry: 's', streets: { s: true },
++  streetSetback: 3, neighborSetback: 1.5, coverage: .75 });
++const exactBrief = [
++  { name: 'غرفة نوم 1', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 }, position: 'back', side: 'any' },
++  { name: 'غرفة نوم 2', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 }, position: 'back', side: 'any' },
++  { name: 'غرفة نوم 3', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 }, position: 'back', side: 'any' },
++  { name: 'صالة عائلية', type: 'living', area: 30, dimensions: { width: 6, length: 5 }, position: 'middle', side: 'any' },
++  { name: 'مطبخ', type: 'kitchen', area: 48, dimensions: { width: 8, length: 6 }, position: 'middle', side: 'any' },
++];
++const occupied = m => m.rooms.filter(r => ['bedroom', 'living', 'majlis', 'dining'].includes(r.type));
++const measures = m => {
++  const q = quantities(m), route = circulationNetwork(m);
++  return { gross: q.footprint, corridors: q.circulation, reserve: q.reserve,
++    longest: Math.max(...m.rooms.map(r => route.toRoom(r.id)?.metres ?? Infinity)),
++    windowedOccupied: occupied(m).filter(r => m.openings.some(o => o.roomId === r.id && o.type === 'window')).length,
++    occupied: occupied(m).length };
++};
++
++test('compact brief topology is an ordinary reviewed candidate and beats exact-brief baseline axes', async () => {
++  const baseline = generateModelLegacy(plot, exactBrief, { strategy: 'compact', allowFallback: false });
++  const model = generateBriefTopologyModel(plot, exactBrief, { variant: 2 });
++  assert.deepEqual(validateModel(model), []);
++  assert.equal(model.rooms.length, exactBrief.length);
++  assert.equal(model.shape, 'rect'); // true rectangular perimeter; novelty is the actual room/corridor topology
++  for (const requested of exactBrief) {
++    const actual = model.rooms.find(r => r.name === requested.name);
++    assert.ok(actual); assert.ok(Math.abs(actual.w * actual.h - requested.area) < 1e-8);
++    assert.ok(Math.abs(actual.w - requested.dimensions.width) < 1e-5 && Math.abs(actual.h - requested.dimensions.length) < 1e-5
++      || Math.abs(actual.w - requested.dimensions.length) < 1e-5 && Math.abs(actual.h - requested.dimensions.width) < 1e-5);
++    assert.ok(circulationNetwork(model).toRoom(actual.id));
++  }
++  const old = measures(baseline), next = measures(model);
++  assert.ok(next.gross < old.gross - 1);
++  assert.ok(next.corridors < old.corridors - 1);
++  assert.ok(next.longest < old.longest - 1);
++  assert.equal(next.windowedOccupied, next.occupied);
++
++  const result = await runMultiEngineDesign({ plot, rooms: exactBrief, idea: 'توزيع مدمج بلا فناء داخلي', seed: 17 });
++  const generated = result.models.filter(m => m.integration.alternativeKey.startsWith('brief-spine-'));
++  assert.ok(generated.length > 0, 'candidate participates in ordinary unspecified-shape review/selection');
++  assert.ok(generated.every(m => validateModel(m).length === 0));
++  assert.ok(generated.some(m => m.integration.candidateId === result.selectedModel.integration.candidateId));
++  assert.ok(result.reviews.every(r => r.checks.find(c => c.id === 'program-areas')?.status === 'PASS'));
++  const source = createHash('sha256').update(readFileSync('dist/brief-topology-planner.mjs')).digest('hex');
++  assert.ok(generated.every(m => m.integration.candidateId));
++  const request = await (await import('../dist/multi-engine.mjs')).buildDesignRequest({ plot, rooms: exactBrief, idea: 'توزيع مدمج بلا فناء داخلي' });
++  const { candidate } = await (await import('../dist/integration/pipeline.mjs')).generateCandidate(request, 'rect', {},
++    { shape: 'rect', key: 'brief-spine-provenance', seed: 17, topology: 'brief-spine', variant: 2 });
++  assert.equal(candidate.producer.engineId, '@mizan/brief-topology-composer');
++  assert.equal(candidate.producer.sourceSha256, source);
++});
++
++test('brief topology preserves either built-area cap alias and fails closed on low, invalid, or conflicting caps', async () => {
++  for (const capField of ['maxBuiltAreaM2', 'maxBuiltArea']) {
++    const accepted = generateBriefTopologyModel({ ...plot, [capField]: 250 }, exactBrief, { variant: 2 });
++    assert.equal(accepted.plot.maxBuiltArea, 250);
++    assert.throws(() => generateBriefTopologyModel({ ...plot, [capField]: 200 }, exactBrief, { variant: 2 }),
++      /BRIEF_TOPOLOGY_MAX_BUILT_AREA_EXCEEDED/);
++  }
++  for (const invalid of [0, -1, Infinity, NaN, plot.width * plot.length + 1]) {
++    assert.throws(() => generateBriefTopologyModel({ ...plot, maxBuiltAreaM2: invalid }, exactBrief),
++      /سقف البناء/);
++  }
++  assert.throws(() => generateBriefTopologyModel({ ...plot, maxBuiltArea: 230, maxBuiltAreaM2: 220 }, exactBrief),
++    /CONFLICTING_AREA_CAP/);
++  const cappedPlot = validatePlot({ ...plot, maxBuiltArea: 200 });
++  await assert.rejects(runMultiEngineDesign({ plot: cappedPlot, rooms: exactBrief, idea: 'توزيع مدمج بلا فناء داخلي', seed: 17 }),
++    /MAX_BUILT_AREA_EXCEEDED|BRIEF_TOPOLOGY_MAX_BUILT_AREA_EXCEEDED|No candidate|لم يتمكن/);
++});
++
++test('room-type minimum dimensions are enforced for six types and area-only rooms', async () => {
++  for (const type of ['bedroom', 'majlis', 'living', 'dining', 'kitchen', 'bath']) {
++    const minimum = TYPES[type].min;
++    const width = minimum, length = Math.max(minimum, 4 / minimum);
++    const atBoundary = { name: `Boundary ${type}`, type, area: width * length,
++      dimensions: { width, length }, position: 'middle', side: 'any' };
++    const accepted = generateBriefTopologyModel(plot, [atBoundary]);
++    assert.deepEqual(validateModel(accepted), [], type);
++    const below = { ...atBoundary, name: `Below ${type}`, dimensions: { width: minimum - .01, length: Math.max(minimum + .5, 4 / (minimum - .01)) } };
++    below.area = below.dimensions.width * below.dimensions.length;
++    assert.throws(() => generateBriefTopologyModel(plot, [below]), /BRIEF_TOPOLOGY_ROOM_MIN_DIMENSION_UNSATISFIED/, type);
++  }
++  const tooSmallSquareBedroom = { name: 'Tiny bedroom', type: 'bedroom', area: 2.59 ** 2,
++    position: 'middle', side: 'any' };
++  assert.throws(() => generateBriefTopologyModel(plot, [tooSmallSquareBedroom]), /BRIEF_TOPOLOGY_ROOM_MIN_DIMENSION_UNSATISFIED/);
++  const invalidExactBedroom = { name: 'Short bedroom', type: 'bedroom', area: 6,
++    dimensions: { width: 2, length: 3 }, position: 'middle', side: 'any' };
++  assert.throws(() => generateBriefTopologyModel(plot, [invalidExactBedroom]), /BRIEF_TOPOLOGY_ROOM_MIN_DIMENSION_UNSATISFIED/);
++  await assert.rejects(runMultiEngineDesign({ plot, rooms: [invalidExactBedroom], seed: 1 }),
++    /ROOM_MIN_DIMENSION|SHAPE_FIT_FAILED|No candidate|لم يتمكن/);
++});
++
++test('area-only everyday briefs receive a reviewed brief-topology alternative in ordinary generation', async () => {
++  const program = [
++    { name: 'Family living', type: 'living', area: 30, position: 'middle', side: 'any' },
++    { name: 'Kitchen', type: 'kitchen', area: 16, position: 'middle', side: 'any' },
++    { name: 'Bedroom', type: 'bedroom', area: 16, position: 'back', side: 'any' },
++    { name: 'Office', type: 'office', area: 12, position: 'front', side: 'left' },
++  ];
++  const result = await runMultiEngineDesign({ plot, rooms: program, seed: 13 });
++  const generated = result.models.filter(model => model.integration.alternativeKey.startsWith('brief-spine-'));
++  assert.ok(generated.length > 0);
++  for (const model of generated) {
++    assert.deepEqual(validateModel(model), []);
++    assert.equal(model.rooms.length, program.length);
++    assert.deepEqual(model.rooms.map(room => room.targetArea).sort((a, b) => a - b), program.map(room => room.area).sort((a, b) => a - b));
++    assert.ok(model.rooms.every(room => circulationNetwork(model).toRoom(room.id)));
++  }
++});
++
++test('room placement responds to brief zones, fixed sides, and all entry orientations', () => {
++  const changed = exactBrief.map(r => r.name === 'صالة عائلية' ? { ...r, position: 'front' } : r);
++  const south = generateBriefTopologyModel(plot, changed);
++  assert.deepEqual(validateModel(south), []);
++  assert.ok(south.rooms.find(r => r.name === 'صالة عائلية').y < south.rooms.find(r => r.name === 'مطبخ').y);
++  for (const entry of ['s', 'n', 'e', 'w']) {
++    const oriented = validatePlot({ ...plot, entry, streets: { [entry]: true } });
++    const fixed = exactBrief.map((r, i) => i === 0 ? { ...r, side: 'left' } : r);
++    const model = generateBriefTopologyModel(oriented, fixed);
++    assert.deepEqual(validateModel(model), [], entry);
++    assert.equal(model.rooms.find(r => r.id === 'room-0').resolvedSide, 'left', entry);
++    assert.ok(model.rooms.every(r => circulationNetwork(model).toRoom(r.id)), entry);
++  }
++});
++
++test('a second asymmetric brief drives front/middle/back zones independent of request order', () => {
++  const program = [
++    { name: 'Reception', type: 'living', area: 30, dimensions: { width: 6, length: 5 }, position: 'front', side: 'left' },
++    { name: 'Office', type: 'office', area: 12, dimensions: { width: 3, length: 4 }, position: 'middle', side: 'right' },
++    { name: 'Kitchen', type: 'kitchen', area: 16, dimensions: { width: 4, length: 4 }, position: 'middle', side: 'left' },
++    { name: 'Bedroom', type: 'bedroom', area: 16, dimensions: { width: 4, length: 4 }, position: 'back', side: 'right' },
++  ];
++  const signature = model => model.rooms.map(room => [room.name, room.x, room.y, room.w, room.h, room.resolvedSide]
++    .map(value => typeof value === 'number' ? value.toFixed(5) : value).join('|')).sort();
++  const first = generateBriefTopologyModel(plot, program);
++  const reversed = generateBriefTopologyModel(plot, [...program].reverse());
++  assert.deepEqual(validateModel(first), []);
++  assert.deepEqual(validateModel(reversed), []);
++  assert.deepEqual(signature(first), signature(reversed));
++  for (const requested of program) {
++    const room = first.rooms.find(item => item.name === requested.name);
++    assert.equal(room.resolvedSide, requested.side);
++    assert.ok(circulationNetwork(first).toRoom(room.id));
++  }
++  const front = first.rooms.find(room => room.name === 'Reception');
++  const middle = first.rooms.find(room => room.name === 'Office');
++  const back = first.rooms.find(room => room.name === 'Bedroom');
++  assert.ok(front.y + front.h <= middle.y + 1e-5);
++  assert.ok(middle.y + middle.h <= back.y + 1e-5);
++  const variants = [0, 1, 2].map(variant => generateBriefTopologyModel(plot, exactBrief, { variant }));
++  assert.ok(variants.every(model => validateModel(model).length === 0));
++  const signatures = new Set(variants.map(model => model.rooms.map(room => [room.name, room.x, room.y, room.w, room.h, room.resolvedSide]
++    .map(value => typeof value === 'number' ? value.toFixed(4) : value).join('|')).sort().join('::')));
++  assert.ok(signatures.size > 1, 'the bounded topology search produces distinct room arrangements');
++});
++
++test('candidate ordering and geometry are deterministic for the same seed and brief', async () => {
++  const args = { plot, rooms: exactBrief, idea: 'توزيع مدمج بلا فناء داخلي', seed: 27 };
++  const [a, b] = await Promise.all([runMultiEngineDesign(args), runMultiEngineDesign(args)]);
++  assert.deepEqual(a.models.map(m => m.integration.alternativeKey), b.models.map(m => m.integration.alternativeKey));
++  assert.deepEqual(a.models.map(m => m.integration.geometryHash.value), b.models.map(m => m.integration.geometryHash.value));
++  assert.equal(a.selectedModel.integration.candidateId, b.selectedModel.integration.candidateId);
++});
+diff --git a/tests/plan-presentation.test.mjs b/tests/plan-presentation.test.mjs
+new file mode 100644
+index 0000000..8419cfe
+--- /dev/null
++++ b/tests/plan-presentation.test.mjs
+@@ -0,0 +1,70 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { defaultRooms, generateModel, validatePlot } from '../dist/planner.mjs';
++import { buildPlanSVG, planOutlineMetrics } from '../dist/plan-view.mjs';
++
++const entries = ['s', 'n', 'e', 'w'];
++const plotFor = entry => validatePlot({
++  width: 25, length: 35, floors: 1, entry,
++  streets: Object.fromEntries(entries.map(side => [side, side === entry])),
++  streetSetback: 3, neighborSetback: 1.5, coverage: .75, maxBuiltArea: null,
++});
++const designFor = entry => generateModel(plotFor(entry), defaultRooms({ bedrooms: 2, majlis: 0, baths: 1, kitchens: 1, halls: 1, dining: 0 }));
++const axisValue = (svg, axis) => svg.match(new RegExp(`<text data-axis="${axis}"[^>]*>([^<]*)</text>`))?.[1];
++
++test('outside dimensions come from exterior-wall faces and scale bar uses metre geometry', () => {
++  const model = designFor('s'), before = JSON.stringify(model), dimensions = planOutlineMetrics(model), svg = buildPlanSVG(model);
++  assert.equal(JSON.stringify(model), before, 'drawing must not mutate the measured plan');
++  assert.equal(axisValue(svg, 'east-west'), `${dimensions.width.toFixed(2)} م`);
++  assert.equal(axisValue(svg, 'north-south'), `${dimensions.length.toFixed(2)} م`);
++  assert.match(svg, /data-outline-dimensions="true" aria-label="الأبعاد الخارجية بالمتر/);
++  assert.match(svg, /data-scale-bar="true" data-segment-length-m="1"/);
++  const scalePath = svg.match(/<g data-scale-bar="true"[^>]*><path d="([^"]+)"/)?.[1];
++  assert.ok(scalePath);
++  const scaleNumbers = scalePath.match(/[+-]?(?:\d+(?:\.\d*)?|\.\d+)/g).map(Number);
++  assert.ok(Math.abs(scaleNumbers[2] - scaleNumbers[0] - 2) < 1e-6, 'the graphic scale spans two model metres');
++  assert.ok(Math.abs(scaleNumbers[6] - scaleNumbers[3] - 1) < 1e-6, 'adjacent scale ticks are one metre apart');
++  assert.match(svg, /text x="[^\"]+" y="[^\"]+" font-size="\.34"[^>]*>الدور الأرضي/);
++});
++
++test('north remains project north while the entry arrow follows each of the four actual entry sides', () => {
++  const vectors = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
++  for (const entry of entries) {
++    const model = designFor(entry), svg = buildPlanSVG(model);
++    assert.match(svg, new RegExp(`data-entry-indicator="${entry}" aria-label="المدخل جهة ${entry === 's' ? 'جنوب' : entry === 'n' ? 'شمال' : entry === 'e' ? 'شرق' : 'غرب'}"`));
++    assert.match(svg, /<g data-north-arrow="true" data-axis="project-north"/);
++    assert.match(svg, /<path d="M0 -\.76L-\.22 0H\.22Z"\/><path d="M0 -\.04V\.42"/);
++    const attrs = svg.match(new RegExp(`<g data-entry-indicator="${entry}"[^>]*><line ([^>]+)`))?.[1];
++    assert.ok(attrs, `${entry}: entry-direction line is present`);
++    const numbers = Object.fromEntries([...attrs.matchAll(/(x1|y1|x2|y2)="([+-]?[\d.]+)"/g)].map(([, key, value]) => [key, Number(value)]));
++    const [dx, dy] = vectors[entry];
++    assert.ok(Math.abs((numbers.x2 - numbers.x1) * dx + (numbers.y2 - numbers.y1) * dy) > .5, `${entry}: arrow points outward`);
++    assert.ok(Math.abs((numbers.x2 - numbers.x1) * dy - (numbers.y2 - numbers.y1) * dx) < 1e-6, `${entry}: arrow is normal to the facade`);
++    const bounds = planOutlineMetrics(model);
++    assert.equal(axisValue(svg, 'east-west'), `${bounds.width.toFixed(2)} م`);
++    assert.equal(axisValue(svg, 'north-south'), `${bounds.length.toFixed(2)} م`);
++  }
++});
++
++test('wall hierarchy, openings, door swings, and room selection labels remain in the SVG', () => {
++  const model = designFor('e'), svg = buildPlanSVG(model);
++  assert.equal((svg.match(/data-wall="ext"/g) || []).length, model.walls.filter(w => w.type === 'ext').length);
++  assert.equal((svg.match(/data-wall="int"/g) || []).length, model.walls.filter(w => w.type === 'int').length);
++  assert.ok(model.openings.some(o => o.type === 'window'));
++  assert.ok(model.openings.some(o => o.type === 'door'));
++  assert.ok((svg.match(/A[\d.]+ [\d.]+ 0 0 [01]/g) || []).length >= model.openings.filter(o => o.type === 'door').length);
++  assert.equal((svg.match(/data-room-id="room-/g) || []).length, model.rooms.length);
++  assert.ok((svg.match(/data-label-detail="full"/g) || []).length > 0);
++  assert.match(svg, /aria-label="[^"]+ متر مربع/);
++});
++
++test('outline dimension helper includes wall thickness and has a safe rectangle fallback', () => {
++  const model = { building: { x: 0, y: 0, w: 4, h: 5 }, walls: [
++    { type: 'ext', t: .2, x1: .1, y1: .1, x2: 3.9, y2: .1 },
++    { type: 'ext', t: .2, x1: .1, y1: 4.9, x2: 3.9, y2: 4.9 },
++    { type: 'ext', t: .2, x1: .1, y1: .1, x2: .1, y2: 4.9 },
++    { type: 'ext', t: .2, x1: 3.9, y1: .1, x2: 3.9, y2: 4.9 },
++  ] };
++  assert.deepEqual(planOutlineMetrics(model), { minX: 0, maxX: 4, minY: 0, maxY: 5, width: 4, length: 5 });
++  assert.deepEqual(planOutlineMetrics({ building: model.building, walls: [] }), { minX: 0, maxX: 4, minY: 0, maxY: 5, width: 4, length: 5 });
++});
+diff --git a/tests/plot-entry.test.mjs b/tests/plot-entry.test.mjs
+new file mode 100644
+index 0000000..e78a807
+--- /dev/null
++++ b/tests/plot-entry.test.mjs
+@@ -0,0 +1,175 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++import { setPlotFromSimpleInput, validateEntryPlot } from '../dist/plot-entry.mjs';
++import { analyzeClientRequest } from '../dist/client-request.mjs';
++import { defaultRooms, generateModel, validatePlot } from '../dist/planner.mjs';
++
++const fresh = () => ({
++  width: 20, length: 30, floors: 1,
++  streets: { n: false, s: true, e: false, w: false }, entry: 's',
++  streetSetback: 3, neighborSetback: 1.5, coverage: .75, maxBuiltArea: null,
++});
++const streetSet = entry => Object.fromEntries(['n', 's', 'e', 'w'].map(side => [side, side === entry]));
++
++function setPlotHarness({ binding = null, explicit = false } = {}) {
++  const state = { streets: { ...fresh().streets }, streetSelectionExplicit: explicit };
++  const fields = { width: 20, length: 30, entry: 's', maxBuiltArea: '' };
++  const events = [];
++  const getRawPlot = () => ({
++    ...fresh(), ...fields, maxBuiltArea: fields.maxBuiltArea === '' ? null : Number(fields.maxBuiltArea),
++    streets: { ...state.streets },
++  });
++  const run = input => setPlotFromSimpleInput({
++    state, input, getRawPlot, getSurveyBinding: () => binding,
++    commitFields(candidate) {
++      events.push('commit');
++      fields.width = candidate.width; fields.length = candidate.length;
++      fields.entry = candidate.entry; fields.maxBuiltArea = candidate.maxBuiltArea ?? '';
++    },
++    renderStreets() { events.push('render'); },
++    rating() { events.push('rating'); },
++    markDirty() { events.push('dirty'); },
++  });
++  return { state, fields, events, getRawPlot, run };
++}
++
++test('the app setPlot API delegates to the tested transactional setter', () => {
++  const source = readFileSync(new URL('../dist/app.mjs', import.meta.url), 'utf8');
++  const methodStart = source.indexOf('  setPlot({ width, length, entry, maxBuiltArea }) {');
++  const methodEnd = source.indexOf('  async propose(', methodStart);
++  assert.notEqual(methodStart, -1);
++  assert.notEqual(methodEnd, -1);
++  assert.match(source.slice(methodStart, methodEnd), /return setPlotFromSimpleInput\(/);
++});
++
++test('advanced street edits and restored project/undo vectors are marked explicit', () => {
++  const source = readFileSync(new URL('../dist/app.mjs', import.meta.url), 'utf8');
++  assert.match(source, /state\.streetSelectionExplicit = true; state\.streets\[b\.dataset\.side\]/);
++  assert.match(source, /restorePlot\(project\.plot, \{ streetSelectionExplicit: true \}\)/);
++  assert.match(source, /restorePlot\(p, \{ streetSelectionExplicit: previous\.streetSelectionExplicit \?\? true \}\)/);
++});
++
++test('the integrated setPlot transaction commits fields and state from the same candidate', () => {
++  const harness = setPlotHarness();
++  const candidate = harness.run({ width: 21, length: 31, entry: 'n', maxBuiltArea: 500 });
++  assert.deepEqual(candidate.streets, streetSet('n'));
++  assert.deepEqual(harness.state.streets, candidate.streets);
++  assert.deepEqual(validatePlot(harness.getRawPlot()), candidate);
++  assert.deepEqual(harness.fields, { width: 21, length: 31, entry: 'n', maxBuiltArea: 500 });
++  assert.deepEqual(harness.events, ['commit', 'render', 'rating', 'dirty']);
++});
++
++test('invalid entry, dimensions, and survey-bound changes leave setPlot state and fields untouched', () => {
++  for (const { input, binding, error } of [
++    { input: { width: 21, length: 30, entry: 'x' }, error: /جهة المدخل غير صالحة/ },
++    { input: { width: 7, length: 30, entry: 'n' }, error: /8 و100/ },
++    {
++      input: { width: 21, length: 30, entry: 'n' },
++      binding: { width: 20, length: 30, source: 'map-estimate' },
++      error: /أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ/,
++    },
++  ]) {
++    const harness = setPlotHarness({ binding });
++    const beforeState = structuredClone(harness.state), beforeFields = structuredClone(harness.fields);
++    assert.throws(() => harness.run(input), error);
++    assert.deepEqual(harness.state, beforeState);
++    assert.deepEqual(harness.fields, beforeFields);
++    assert.deepEqual(harness.events, []);
++  }
++});
++
++test('a changed simple entry replaces only the inferred fresh south frontage', () => {
++  for (const entry of ['n', 'e', 'w']) {
++    const source = { ...fresh(), width: 30, length: 30 }, before = structuredClone({ ...source, streets: { ...source.streets } });
++    const candidate = validateEntryPlot(source, entry, { streetSelectionExplicit: false });
++    assert.equal(candidate.entry, entry);
++    assert.deepEqual(candidate.streets, streetSet(entry));
++    const generated = generateModel(candidate, defaultRooms());
++    assert.equal(generated.plot.entry, entry);
++    assert.deepEqual(generated.plot.streets, streetSet(entry));
++    assert.deepEqual(source, before);
++  }
++  const south = validateEntryPlot(fresh(), 's', { streetSelectionExplicit: false });
++  assert.deepEqual(south.streets, streetSet('s'));
++});
++
++test('advanced explicit multi-street selections survive simple entry changes', () => {
++  const source = { ...fresh(), streets: { n: false, s: true, e: true, w: false } };
++  const candidate = validateEntryPlot(source, 'n', {
++    currentStreets: source.streets,
++    streetSelectionExplicit: true,
++  });
++  assert.deepEqual(candidate.streets, { n: true, s: true, e: true, w: false });
++  assert.equal(candidate.entry, 'n');
++  assert.deepEqual(source.streets, { n: false, s: true, e: true, w: false });
++});
++
++test('advanced explicit single and restored street vectors remain intentional', () => {
++  const current = { n: true, s: false, e: false, w: false };
++  const explicit = validateEntryPlot({ ...fresh(), streets: current }, 'e', {
++    currentStreets: current,
++    streetSelectionExplicit: true,
++  });
++  assert.deepEqual(explicit.streets, { n: true, s: false, e: true, w: false });
++
++  const restored = { n: false, s: true, e: true, w: false };
++  const fromProject = validateEntryPlot({ ...fresh(), streets: restored }, 'e', {
++    currentStreets: restored,
++    streetSelectionExplicit: true,
++  });
++  assert.deepEqual(fromProject.streets, restored);
++});
++
++test('natural-language entry patch reconciles the implicit default before validation', async () => {
++  const sourcePlot = fresh();
++  const proposal = await analyzeClientRequest({
++    prompt: 'أبي ٤ غرف نوم ومجلس وصالة ومطبخ، المدخل شمال',
++    rooms: defaultRooms(), plot: sourcePlot,
++    discovery: { likes: [], rejects: [], avoids: [], life: {} }, mode: 'replace',
++  });
++  assert.equal(proposal.plotPatch.entry, 'n');
++  const merged = { ...sourcePlot, ...proposal.plotPatch };
++  const candidate = validateEntryPlot(merged, merged.entry, {
++    currentStreets: sourcePlot.streets,
++    streetSelectionExplicit: false,
++  });
++  assert.deepEqual(candidate.streets, streetSet('n'));
++
++  const explicitPlot = { ...fresh(), streets: { n: false, s: true, e: true, w: false } };
++  const explicitProposal = await analyzeClientRequest({
++    prompt: 'أبي ٤ غرف نوم ومجلس وصالة ومطبخ، المدخل شمال',
++    rooms: defaultRooms(), plot: explicitPlot,
++    discovery: { likes: [], rejects: [], avoids: [], life: {} }, mode: 'replace',
++  });
++  const explicitMerged = { ...explicitPlot, ...explicitProposal.plotPatch };
++  const explicitCandidate = validateEntryPlot(explicitMerged, explicitMerged.entry, {
++    currentStreets: explicitPlot.streets,
++    streetSelectionExplicit: true,
++  });
++  assert.deepEqual(explicitCandidate.streets, { n: true, s: true, e: true, w: false });
++});
++
++test('invalid plots and survey-bound dimension changes fail without mutating source state', () => {
++  const source = fresh(), before = structuredClone(source);
++  assert.throws(() => validateEntryPlot({ ...source, width: 7 }, 'n'), /8 و100/);
++  assert.deepEqual(source, before);
++
++  assert.throws(() => validateEntryPlot({ ...source, width: 21 }, 'n', {
++    surveyBinding: { width: 20, length: 30, source: 'map-estimate' },
++  }), /أبعاد مستطيل المولد مرتبطة بالمسح المحفوظ/);
++  assert.deepEqual(source, before);
++  const sameBinding = validateEntryPlot(source, 'n', {
++    surveyBinding: { width: 20, length: 30, source: 'map-estimate' },
++  });
++  assert.deepEqual(sameBinding.streets, streetSet('n'));
++  assert.deepEqual(source, before);
++
++  const surveyedFrontage = { ...fresh(), streets: { n: false, s: true, e: true, w: false } };
++  const boundCandidate = validateEntryPlot(surveyedFrontage, 'n', {
++    currentStreets: surveyedFrontage.streets,
++    streetSelectionExplicit: true,
++    surveyBinding: { width: 20, length: 30, source: 'confirmed-edge-references' },
++  });
++  assert.deepEqual(boundCandidate.streets, { n: true, s: true, e: true, w: false });
++});
+diff --git a/tests/unified-workspace-contract.test.mjs b/tests/unified-workspace-contract.test.mjs
+index a17c43d..c9768c1 100644
+--- a/tests/unified-workspace-contract.test.mjs
++++ b/tests/unified-workspace-contract.test.mjs
+@@ -48,10 +48,9 @@ test('studio distinguishes a session-visible plan from a downloaded or archived
+  const studio=readFileSync(new URL('../dist/studio-simple.mjs',import.meta.url),'utf8');
+  const app=readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
+  assert.match(html,/المخطط ظاهر خلال هذه الجلسة فقط/);
+- assert.match(html,/سجل المحادثة لا يُستعاد بعد تحديث الصفحة/);
++ assert.match(html,/المحادثة لا تُستعاد بعد التحديث/);
+  assert.match(html,/«تنزيل المشروع»/);
+  assert.match(html,/«أرشيف الحساب»/);
+- assert.match(html,/كلاهما لا يحفظ سجل المحادثة نفسه/);
+  assert.doesNotMatch(html,/سيبقى هذا المخطط محفوظًا للمراجعة/);
+  assert.match(studio,/آخر مخطط ناجح معروضًا في هذه الجلسة/);
+  assert.match(studio,/لم يتغير آخر مخطط ناجح في هذه الجلسة/);
+@@ -59,3 +58,40 @@ test('studio distinguishes a session-visible plan from a downloaded or archived
+  assert.match(app,/آخر مخطط ناجح لم يتغير في هذه الجلسة/);
+  assert.doesNotMatch(app,/آخر مخطط ناجح محفوظ|المخطط السابق محفوظًا/);
+ });
++
++test('generated plan is the primary result; evidence and illustrative renders are secondary disclosures',()=>{
++ const html=readFileSync(new URL('../dist/index.html',import.meta.url),'utf8');
++ const app=readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
++ const visualizer=readFileSync(new URL('../dist/render-visualizer.mjs',import.meta.url),'utf8');
++ const css=readFileSync(new URL('../dist/studio-workspace.css',import.meta.url),'utf8');
++ const result=html.slice(html.indexOf('id="panel-result"'),html.indexOf('id="panel-review"'));
++ assert.ok(result.indexOf('id="studioPlanCard"') < result.indexOf('class="studio-evidence-disclosure"'));
++ assert.match(result,/<details class="studio-evidence-disclosure">\s*<summary[^>]*aria-controls="requirementEvidence"/);
++ assert.match(result,/class="studio-layout"[\s\S]*?id="studioPlanCard"[\s\S]*?id="studioInspector"/);
++ assert.match(visualizer,/studio-visualization-disclosure[\s\S]*?visualizer-card/);
++ assert.match(visualizer,/لقطة استلهامية؛ مخطط 2D هو المرجع الهندسي/);
++ assert.match(css,/studio-conversation-return \.primary\{width:auto!important/);
++ assert.match(css,/#app\.studio-active \.studio-layout\{position:relative;display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(260px,310px\)/);
++ assert.match(css,/#app\.studio-active \.plan\{height:min\(68vh,760px\)/);
++ assert.match(css,/viewer-tools \.small-button\{[^}]*min-height:44px/);
++ assert.match(css,/studio-view-toggle \.small-button\{min-width:44px;min-height:44px/);
++ assert.match(css,/studio-regenerate\{min-height:44px/);
++ assert.match(css,/studio-conversation-return \.primary\{[^}]*min-height:44px/);
++ assert.match(css,/studio-inspector-summary\{min-height:46px/);
++ assert.match(css,/#app\.studio-active #studioModelSummary\{flex:1 1 auto;min-width:0;max-width:none;[^}]*white-space:normal;overflow:visible;overflow-wrap:anywhere/);
++ const activeStyles=css.slice(css.indexOf('/* Plan-first studio:'));
++ const resultFontSizes=[...activeStyles.matchAll(/font-size:\s*([\d.]+)rem/g)].map(([,size])=>Number(size));
++ assert.ok(resultFontSizes.length>0&&resultFontSizes.every(size=>size>=.75),`studio text falls below 12px: ${resultFontSizes}`);
++ assert.match(css,/plan-tool-list button[^}]*min-height:44px/);
++ assert.match(app,/renderRequirementEvidence\(\)/);
++});
++
++
++test('alternative comparison exposes actual area and route tradeoffs instead of repeated shape titles',()=>{
++ const app=readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
++ assert.match(app,/routes\.toRoom\(room\.id\)\?\.metres/);
++ assert.match(app,/routeLengths\.every\(Number\.isFinite\)/);
++ assert.match(app,/Math\.max\(\.\.\.routeLengths\)/);
++ assert.match(app,/قد تقل مساحة الممرات بينما يطول مسار الوصول/);
++ assert.match(app,/بناء \$\{fmt\(q\.footprint, 0\)\}/);
++});

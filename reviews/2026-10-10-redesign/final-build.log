@@ -1,0 +1,7 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> build
+> node scripts/build.mjs
+
+Arabic app, browser imports, D1 migration and separately bundled archive Worker verified.
+Browser import graph verified: 135 modules.

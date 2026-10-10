@@ -1,0 +1,18 @@
+{
+  "status": "LOCAL_REVIEW_ONLY_NOT_PUBLISHED",
+  "site_url": "https://al-mizan-al-handasi.aljeryabod.chatgpt.site",
+  "production_observed_label": "2026.10.10-studio-2",
+  "reconstructed_baseline_commit": "d043ab2ec19b7b5b74dc6de1946f0eea43e95d75",
+  "review_commit": "2733bc115a2f79764e1d8b8a4b0709133f363c38",
+  "tests": {
+    "pass": 257,
+    "fail": 0,
+    "skip": 0
+  },
+  "build_browser_modules": 135,
+  "new_ui_interactive_browser": "NOT_PERFORMED",
+  "publication": "BLOCKED_SITES_UPDATE_TOOL_UNAVAILABLE",
+  "generator_scope": "bounded rectangular central-spine composition; not freeform architecture",
+  "previous_review_commit": "85b92cc35c603c7a1f8dce21535ca067867e840c",
+  "entrance_frontage_repair": "Node reproduction and actual setter harness; 9 targeted tests PASS; not live-browser verified"
+}
