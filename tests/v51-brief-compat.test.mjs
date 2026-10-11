@@ -70,3 +70,10 @@ test('conflicting supplied rectangle is rejected without mutating either program
   assert.throws(() => contract.bindRequestedDimensions(proposed, requested), /متعارض/);
   assert.deepEqual({ proposed, requested }, before);
 });
+for (const text of ['kitchen 8x6 m, no rotation', 'مطبخ 8×6 م، بدون تدوير', 'kitchen 8x6 metres; without rotation', 'مطبخ 8×6 متر بدون دوران']) {
+  test(`dimension units preserve rotation prohibition: ${text}`, () => {
+    assert.equal(contract.verifyProposedProgram(text, [{ ...kitchen, dimensions: { width: 6, length: 8 } }]).pass, false);
+    assert.equal(contract.verifyProgramGeometry(text, [{ ...kitchen, w: 6, h: 8 }]).pass, false);
+    assert.equal(contract.verifyProgramGeometry(text, [{ ...kitchen, w: 8, h: 6 }]).pass, true);
+  });
+}

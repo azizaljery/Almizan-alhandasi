@@ -39,8 +39,8 @@ function roomIsNamed(room, request) {
 
 // A deletion target belongs to its own command, never to another action in
 // the same request. Keep the production area guards separate and unchanged.
-const deletionTokens = value => norm(value).split(/[^\p{L}\p{N}'-]+/u).filter(Boolean).map(word => word.replace(/^ال/, ''));
-const deletionCommands = new Set(['احذف', 'ازل', 'شيل', 'استبعد', 'الغ', 'delete', 'remove']);
+const deletionTokens = value => norm(value).split(/[^\p{L}\p{N}'-]+/u).filter(Boolean).map(word => word === 'الغ' || word === 'والغ' ? word : word.replace(/^ال/, ''));
+const deletionCommands = new Set(['احذف', 'حذف', 'ازل', 'شيل', 'استبعد', 'استغن', 'الغ', 'delete', 'remove']);
 const editCommands = new Set(['غير', 'بدل', 'استبدل', 'انقل', 'حرك', 'كبر', 'صغر', 'وسع', 'change', 'move', 'rename', 'replace', ...deletionCommands]);
 const negativeDeletionWords = new Set(['لا', 'لم', 'لن', 'ليس', 'عدم', 'بدون', 'دون', 'without', "don't", 'not', 'no', 'never']);
 const allWords = new Set(['كل', 'جميع', 'كافه', 'all', 'every']);
@@ -61,12 +61,22 @@ function removalAuthorized(previous, removed, request) {
         if (editCommands.has(words[j]) || editCommands.has(words[j].replace(/^و/, ''))) break;
         target.push(words[j]);
       }
+      if (words[i].replace(/^و/, '') === 'استغن' && target[0] === 'عن') target.shift();
       if (target[0] === 'the') target.shift();
       if (['and', 'و'].includes(target.at(-1))) target.pop();
       const all = allWords.has(target[0]);
       if (all) target.shift();
       if (target[0] === 'the') target.shift();
-      if (target.length) targets.push({ text: target.join(' '), all });
+      const groups = [[]];
+      for (const word of target) {
+        if (word === 'and' || word === 'و') groups.push([]);
+        else if (/^وال/.test(word)) groups.push([word.slice(3)]);
+        else groups.at(-1).push(word);
+      }
+      for (const group of groups) {
+        if (group[0] === 'the') group.shift();
+        if (group.length) targets.push({ text: group.join(' '), all });
+      }
     }
   }
   return removed.every(room => targets.some(target => {

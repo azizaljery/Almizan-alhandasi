@@ -83,3 +83,17 @@ test('production room-scoped area permission and negation remain intact', () => 
 test('all-of-type still requires a specific type rather than generic rooms', () => {
   rejected(diffRoomPrograms(rooms, without('bed-1', 'bed-2'), 'احذف كل الغرف'));
 });
+
+for(const request of ['الغ المطبخ','أريد حذف المطبخ','استغن عن المطبخ']) {
+ test('preserve explicit legacy command: '+request,()=>{
+  const before=[{name:'المطبخ',type:'kitchen',area:18},{name:'الصالة',type:'living',area:24}];
+  assert.equal(diffRoomPrograms(before,before.slice(1),request).blockers.length,0);
+ });
+}
+for(const [request,names] of [['احذف المطبخ والصالة',['المطبخ','الصالة']],['delete kitchen and living room',['kitchen','living room']]]) {
+ test('preserve explicitly coordinated targets: '+request,()=>{
+  const before=[{name:names[0],type:'kitchen',area:18},{name:names[1],type:'living',area:24},{name:'bedroom',type:'bedroom',area:20}];
+  assert.equal(diffRoomPrograms(before,before.slice(2),request).blockers.length,0);
+  assert.ok(diffRoomPrograms(before,[],request).blockers.length>0);
+ });
+}

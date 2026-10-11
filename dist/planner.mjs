@@ -87,7 +87,7 @@ export function normalizeRooms(raw) {
     if (!r || typeof r.name !== 'string' || !r.name.trim() || r.name.length > 70 || !Object.hasOwn(TYPES, r.type) || !Number.isFinite(r.area) || r.area < 4 || r.area > 120 || !Object.hasOwn(POSITIONS, r.position) || !Object.hasOwn(SIDES, r.side)) throw Error('راجع اسم ونوع ومساحة وموقع الفراغ رقم ' + (i + 1) + '؛ المساحة بين 4 و120 م².');
     const dimensions = r.dimensions ?? r.exactDimensionsM ?? null;
     if (dimensions !== null && (!dimensions || !Number.isFinite(dimensions.width) || !Number.isFinite(dimensions.length) || dimensions.width < 1 || dimensions.length < 1 || dimensions.width > 60 || dimensions.length > 60 || Math.abs(dimensions.width * dimensions.length - r.area) > 1e-4)) throw Error('أبعاد الفراغ رقم ' + (i + 1) + ' غير صالحة أو لا تطابق مساحته. تُعامل الأبعاد الصريحة كقيد هندسي، والمساحة ناتجة من حاصل ضربها.');
-    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side, ...(dimensions ? { dimensions: { width: dimensions.width, length: dimensions.length } } : {}) };
+    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side, ...(dimensions ? { dimensions: { width: dimensions.width, length: dimensions.length, ...(dimensions.allowRotation === false ? { allowRotation: false } : {}) } } : {}) };
   });
 }
 export function defaultRooms({ bedrooms = 4, majlis = 2, baths = 3, kitchens = 1, halls = 1, dining = 1 } = {}) {

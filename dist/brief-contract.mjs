@@ -120,7 +120,7 @@ export function extractExplicitProgramRequirements(text) {
     const sex = /رجال/.test(label) ? ':men' : /نساء/.test(label) ? ':women' : '';
     const id = `dimensions:${type}${sex}`;
     const suffix = source.slice(match.index + match[0].length);
-    const allowRotation = !/^\s*[,،;؛]?\s*(?:بدون\s+(?:تدوير|دوران)|دون\s+(?:تدوير|دوران)|no\s+rotation|without\s+rotation)(?=$|[\s،؛,.;])/iu.test(suffix);
+    const allowRotation = !/^\s*(?:(?:m|metres?|meters?|م|متر|امتار)(?=$|[\s،؛,.;])\s*)?[,،;؛]?\s*(?:بدون\s+(?:تدوير|دوران)|دون\s+(?:تدوير|دوران)|no\s+rotation|without\s+rotation)(?=$|[\s،؛,.;])/iu.test(suffix);
     addRule(id, { id, kind: isNegatedAt(source, match.index) ? 'excluded-room-dimensions' : 'room-dimensions', label, expected: width * length, width, length, ...(allowRotation ? {} : { allowRotation: false }) });
   }
   return [...result.values()].flat();
