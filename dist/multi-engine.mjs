@@ -2,6 +2,8 @@ import { runPipeline } from './integration/pipeline.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 import { extractExplicitGeometryConstraints, filterShapesByExplicitConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
 
+import { attachExplicitProgramConstraints, verifyProposedProgram } from './brief-contract.mjs';
+
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court' });
 const CONCEPT = Object.freeze({
   rect: { tag: 'مستطيل منضبط', form: 'كتلة مستطيلة صريحة', idea: 'حل مباشر يختبر البرنامج ضمن كتلة واحدة واضحة.', bestFor: 'الأراضي والبرامج التي تفضّل البساطة', tradeoff: 'تنوع كتلي أقل مقابل وضوح أعلى', massing: 'rect' },
@@ -27,7 +29,15 @@ function preferenceList(discovery = {}, briefContext = null) {
   return rows;
 }
 export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {}, briefContext = null }) {
-  const program = rooms.map(publicRoom);
+  const compliance = verifyProposedProgram(idea, rooms);
+  if (!compliance.pass) throw Error('EXPLICIT_PROGRAM_CONSTRAINT_VIOLATED: ' + compliance.violations.join(' | '));
+  const constrainedRooms = attachExplicitProgramConstraints(idea, rooms);
+  const program = constrainedRooms.map(publicRoom);
+  const dimensions = constrainedRooms.flatMap((room, index) => room.dimensions ? [{
+    id: `HC-DIMENSIONS-${index}`, kind: 'explicit_dimensions', description: 'Preserve requested width and length independently of area.',
+    value: { roomId: `room-${index}`, width: room.dimensions.width, length: room.dimensions.length, allowRotation: room.dimensions.allowRotation !== false },
+    source: 'user', priority: 'must',
+  }] : []);
   const seed = {
     projectId: 'MIZAN-SITE-V33-P1',
     plot: {
@@ -36,7 +46,7 @@ export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {
     },
     drawnFloorsSupported: 1,
     program,
-    hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }],
+    hardConstraints: [{ id: 'HC-ROOM-COUNT', kind: 'room_count_exact', description: 'Preserve the exact room program supplied by the user.', value: { count: program.length }, source: 'user', priority: 'must' }, ...dimensions],
     softPreferences: preferenceList(discovery, briefContext),
     interpretation: {
       status: 'confirmed',

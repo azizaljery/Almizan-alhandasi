@@ -1,0 +1,44 @@
+✔ exact count: 3 bedrooms (21.630899ms)
+✔ exact count: ٣ غرف نوم (18.969672ms)
+✔ exact count: ۳ غرف نوم (3.94955ms)
+✔ exact count: ثلاث غرف نوم (0.700855ms)
+✔ exact count: ثلاثة غرف نوم (0.613311ms)
+✔ exact count: three bedrooms (0.540926ms)
+✔ exact count: غرفتين نوم (0.772589ms)
+✔ exact count: غرفتا نوم (0.687896ms)
+✔ exact count: غرف نوم عدد 3 (0.884409ms)
+✔ minimum is explicit: at least three bedrooms (0.751467ms)
+✔ minimum is explicit: ٣ غرف نوم على الأقل (0.652793ms)
+✔ minimum is explicit: على الأقل ثلاث غرف نوم (0.616879ms)
+✔ minimum qualifier stays scoped to the adjacent count (0.621393ms)
+✔ equal area cannot substitute different explicit dimensions (0.830641ms)
+✔ program constraints attach without mutating old projects or claiming geometry (1.734617ms)
+✔ actual geometry independently checks sides and permits real rotation (1.997353ms)
+✔ explicit rotation prohibition prevents swapped geometry (0.424763ms)
+✔ minimum wording: 3 غرف نوم على الأقل (0.479852ms)
+✔ minimum wording: بحد أدنى 3 غرف نوم (0.508382ms)
+✔ minimum wording: 3 bedrooms minimum (0.425845ms)
+✔ capitalized number words and zero remain exact (0.40854ms)
+✔ compound Arabic number: إحدى عشرة غرف نوم (0.460658ms)
+✔ compound Arabic number: اثنتا عشرة غرف نوم (0.373611ms)
+✔ compound Arabic number: ثلاث عشرة غرف نوم (0.586589ms)
+✔ compound Arabic number: عشرون غرف نوم (0.530836ms)
+✔ geometry binding cannot accept another same-type room (0.301474ms)
+✔ ambiguous dimension target is rejected without mutating the program (1.004131ms)
+✔ dimension contracts cover English kitchen and Arabic living room (0.901959ms)
+✔ large explicit counts are not silently discarded or partially parsed (1.604286ms)
+✔ explicit Arabic bedroom count and dimension requirements are extracted (40.75359ms)
+✔ valid explicit villa requirements pass without inventing additional rooms (7.807436ms)
+✔ AI dropping a bedroom or changing kitchen dimensions is blocked (1.137484ms)
+✔ AI merging women and men majlis into one generic room is blocked (1.80678ms)
+✔ Arabic numerals and English bedroom count are recognized (5.233719ms)
+✔ latest room dimension revision overrides the original dimension (0.593661ms)
+✔ explicit land dimensions are read from the client brief without confusing room sizes (1.636701ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 202.993329

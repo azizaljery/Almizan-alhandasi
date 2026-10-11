@@ -1,0 +1,154 @@
+{
+  "browser": "Chromium",
+  "checks": {
+    "rejected": true,
+    "unchanged": true,
+    "cases": [
+      {
+        "streets": {
+          "s": true,
+          "n": false,
+          "e": false,
+          "w": false
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": false,
+          "e": false,
+          "w": false
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      },
+      {
+        "streets": {
+          "s": true,
+          "n": false,
+          "e": true,
+          "w": false
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": false,
+          "e": true,
+          "w": false
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      },
+      {
+        "streets": {
+          "s": true,
+          "n": false,
+          "e": true,
+          "w": false
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": false,
+          "e": true,
+          "w": false
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      },
+      {
+        "streets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      },
+      {
+        "streets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      },
+      {
+        "streets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      },
+      {
+        "streets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "expectedStreets": {
+          "s": true,
+          "n": true,
+          "e": true,
+          "w": true
+        },
+        "sameEnvelope": true,
+        "setbacks": true,
+        "valid": true,
+        "inside": true,
+        "cap": true
+      }
+    ],
+    "noAccessRejected": true,
+    "noAccessUnchanged": true
+  },
+  "invalidFormPreservedLand": true,
+  "browserRuntimeGuards": {
+    "deletionBlocked": true,
+    "snapshots": true,
+    "exact": true,
+    "minimum": true,
+    "wrongShape": true,
+    "rotation": true,
+    "dimensionsRejected": true
+  }
+}

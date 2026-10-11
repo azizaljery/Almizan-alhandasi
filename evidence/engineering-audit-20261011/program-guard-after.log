@@ -1,0 +1,37 @@
+✔ cinematic holds the architectural view before approaching the Mizan identity (2.296974ms)
+✔ silent removal of a room is blocked during a revision (3.447465ms)
+✔ explicit removal and area changes are reviewed, not silently blocked (1.175434ms)
+✔ identical room program is not counted as a successful revision (0.383044ms)
+✔ geometry fingerprint changes with actual room position, not marketing labels (0.52868ms)
+✔ conversation prompt preserves original brief and latest request within bounds (0.692912ms)
+✔ old detailed editor and project functions remain in the source but are hidden in simple mode (1.323479ms)
+✔ 3D runtime is ESM, cinematic can be skipped, and reduced-motion is supported (2.262024ms)
+✔ cinematic and studio scripts preserve existing AI Worker and single-model generation (0.841637ms)
+✔ removal needs specific affirmative authorization: غيّر موقع الصالة (5.368355ms)
+✔ removal needs specific affirmative authorization: غير موقع الصالة (0.49729ms)
+✔ removal needs specific affirmative authorization: استبدل مكان الصالة (0.309177ms)
+✔ removal needs specific affirmative authorization: احذف الغرف (0.277055ms)
+✔ removal needs specific affirmative authorization: لا تحذف غرفة النوم (0.290342ms)
+✔ removal needs specific affirmative authorization: احذف المطبخ وغير موقع غرفة النوم (0.282542ms)
+✔ removal needs specific affirmative authorization: غير موقع غرفة النوم واحذف المطبخ (0.383876ms)
+✔ removal needs specific affirmative authorization: لا أريد حذف غرفة النوم (10.120331ms)
+✔ removal needs specific affirmative authorization: احذف غرفة النوم الثانية (0.319257ms)
+✔ removal needs specific affirmative authorization: لا تحذف المطبخ بل غير موقع غرفة النوم (0.402285ms)
+✔ specific room deletion remains compatible with Arabic articles and English (2.563374ms)
+✔ authorizing one room never permits deleting another (7.749647ms)
+✔ duplicate rooms cannot be deleted by an ambiguous name (0.463549ms)
+✔ reordering duplicates is not a modification (0.237286ms)
+✔ audit snapshots and difference are detached from caller state (0.801445ms)
+✔ a unique short room name is accepted without a generic room wildcard (14.409611ms)
+✔ legacy rooms without IDs preserve unchanged duplicates during deletion (0.247576ms)
+✔ geometry-relevant fields remain visible in the difference (0.224947ms)
+✔ Arabic compound command authorizes deleting the living room only (0.155564ms)
+✔ English compound command authorizes deleting the living room only (0.346871ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 169.071208

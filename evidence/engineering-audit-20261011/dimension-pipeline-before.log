@@ -1,0 +1,165 @@
+✖ request preserves room dimensions separately from area without mutating program (6.14946ms)
+✖ real pipeline refuses equal-area wrong dimensions before ranking (252.83077ms)
+✖ real pipeline preserves legacy requests and accepts actual dimensions including rotation (51.173559ms)
+✖ review gate cannot rank a same-area candidate with wrong requested geometry (45.451653ms)
+✖ rotation is forbidden when constraint explicitly disallows it (26.38948ms)
+✖ central request rejects extra bedrooms regardless of caller validation (2.027511ms)
+✖ direct pipeline validates explicit text dimensions even if caller omits hard constraint (43.61803ms)
+✖ direct pipeline refuses a text count mismatch before generating or ranking (42.382494ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 0
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 640.780267
+
+✖ failing tests:
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:10:1
+✖ request preserves room dimensions separately from area without mutating program (6.14946ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + undefined
+  - {
+  -   allowRotation: true,
+  -   length: 4,
+  -   roomId: 'room-0',
+  -   width: 8
+  - }
+
+      at TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:13:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { roomId: 'room-0', width: 8, length: 4, allowRotation: true },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:15:1
+✖ real pipeline refuses equal-area wrong dimensions before ranking (252.83077ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:17:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /EXPLICIT_DIMENSIONS_VIOLATED/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:19:1
+✖ real pipeline preserves legacy requests and accepts actual dimensions including rotation (51.173559ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'NEEDS_CLARIFICATION'
+  - 'SELECTED_PRELIMINARY'
+
+      at TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:23:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'NEEDS_CLARIFICATION',
+    expected: 'SELECTED_PRELIMINARY',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:27:1
+✖ review gate cannot rank a same-area candidate with wrong requested geometry (45.451653ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'NEEDS_CLARIFICATION'
+  - 'NO_SELECTION'
+
+      at TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:34:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'NEEDS_CLARIFICATION',
+    expected: 'NO_SELECTION',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:36:1
+✖ rotation is forbidden when constraint explicitly disallows it (26.38948ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'NEEDS_CLARIFICATION'
+  - 'NO_SELECTION'
+
+      at TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:39:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'NEEDS_CLARIFICATION',
+    expected: 'NO_SELECTION',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:41:1
+✖ central request rejects extra bedrooms regardless of caller validation (2.027511ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:43:2)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /EXPLICIT_PROGRAM_CONSTRAINT_VIOLATED/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:45:1
+✖ direct pipeline validates explicit text dimensions even if caller omits hard constraint (43.61803ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'SELECTED_PRELIMINARY'
+  - 'NO_SELECTION'
+
+      at TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:49:9)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'SELECTED_PRELIMINARY',
+    expected: 'NO_SELECTION',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:51:1
+✖ direct pipeline refuses a text count mismatch before generating or ranking (42.382494ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'SELECTED_PRELIMINARY'
+  - 'NEEDS_CLARIFICATION'
+
+      at TestContext.<anonymous> (file:///tmp/mizan-dimension-before-mp2qI7/tests/dimension-pipeline.test.mjs:53:67)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'SELECTED_PRELIMINARY',
+    expected: 'NEEDS_CLARIFICATION',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

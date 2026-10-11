@@ -116,13 +116,19 @@
     <aside class="studio-project-setup" aria-label="معلومات الأرض الأساسية">
       <span class="studio-side-eyebrow">معلومات المشروع</span>
       <h2>أرض منزلك</h2>
-      <p>نحتاج أبعاد الأرض وجهة المدخل فقط للبدء. يمكنك مراجعة التفاصيل الهندسية لاحقًا.</p>
+      <p>حدّد أبعاد الأرض والشوارع الفعلية ثم جهة المدخل. تغيير المدخل لا يضيف شارعًا.</p>
       <div class="studio-plot-fields">
         <label>العرض (م)<input id="studioWidth" type="number" min="8" max="100" step=".5" value="20"></label>
         <label>الطول (م)<input id="studioLength" type="number" min="8" max="100" step=".5" value="30"></label>
         <label>جهة المدخل<select id="studioEntry"><option value="s">جنوب</option><option value="n">شمال</option><option value="w">غرب</option><option value="e">شرق</option></select></label>
         <label>سقف البناء (م²) — اختياري<input id="studioMaxArea" type="number" min="20" max="10000" step="1" placeholder="مثل 550"></label>
       </div>
+      <fieldset id="studioStreets"><legend>جهات الشوارع الفعلية — مستقلة عن المدخل</legend>
+        <label><input type="checkbox" data-studio-street="s">جنوب</label>
+        <label><input type="checkbox" data-studio-street="n">شمال</label>
+        <label><input type="checkbox" data-studio-street="e">شرق</label>
+        <label><input type="checkbox" data-studio-street="w">غرب</label>
+      </fieldset>
       <details class="studio-access">
         <summary>ربط خدمة الذكاء الاصطناعي <span>اختياري للعرض</span></summary>
         <label for="studioAccessCode">رمز دخول خدمة الذكاء<input id="studioAccessCode" type="password" autocomplete="off" placeholder="رمز الدخول الخاص بموقعك"></label>

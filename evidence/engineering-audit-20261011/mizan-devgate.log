@@ -1,0 +1,11 @@
+✔ legacy multi-floor project receives a corrective message instead of a false assistant success (31.13365ms)
+✔ single-floor requests are accepted and unsupported floor counts are rejected explicitly with 422 (76.286751ms)
+✔ version endpoint exposes only a well-formed build commit SHA (3.302654ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 263.355872

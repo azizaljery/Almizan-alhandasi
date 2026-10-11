@@ -3,6 +3,7 @@
  * Only measured geometry/area/program axes participate. Other AZIZ axes are diagnostics,
  * NOT evidence of privacy, ventilation, statutory compliance or engineering approval.
  */
+import { attachExplicitProgramConstraints, verifyProposedProgram } from '../brief-contract.mjs';
 import schema from './control/contracts/mizan-envelope-v1.schema.json' with {type:'json'};
 import {generateModelLegacy,quantities} from '../claude/compat-layer.mjs';
 import {validateModel} from '../claude/planner.mjs';
@@ -25,14 +26,33 @@ function snapshot(request) {
  validateEnvelope(request,'request');
  return JSON.parse(canonicalJSON(request));
 }
+function validDimensions(c, r) {
+ const v=c.value;
+ return c.kind==='explicit_dimensions' && r.program.some(p=>p.id===v?.roomId)
+  && Number.isFinite(v.width) && v.width>0 && Number.isFinite(v.length) && v.length>0
+  && typeof v.allowRotation==='boolean';
+}
+function dimensionViolations(r, geometry) {
+ const inferred=attachExplicitProgramConstraints(r.interpretation.originalText,r.program).flatMap(p=>p.dimensions ? [{kind:'explicit_dimensions',value:{roomId:p.id,...p.dimensions}}] : []);
+ return [...r.hardConstraints.filter(c=>c.kind==='explicit_dimensions'),...inferred].filter(c=>{
+  const v=c.value, matches=geometry.rooms.filter(room=>room.id===v.roomId);
+  if(matches.length!==1) return true;
+  const room=matches[0], equal=(a,b)=>Number.isFinite(a)&&Math.abs(a-b)<=1e-7;
+  return !(equal(room.w,v.width)&&equal(room.h,v.length))
+   && !(v.allowRotation&&equal(room.w,v.length)&&equal(room.h,v.width));
+ });
+}
 function supportedRequest(r) {
  const reasons=[];
+ const programCompliance=verifyProposedProgram(r.interpretation.originalText,r.program);
+ if(!programCompliance.pass) reasons.push('EXPLICIT_PROGRAM_CONSTRAINT_VIOLATED:'+programCompliance.violations.join('|'));
+ try { attachExplicitProgramConstraints(r.interpretation.originalText,r.program); } catch(e) { reasons.push('EXPLICIT_DIMENSIONS_REQUIRE_CLARIFICATION:'+e.message); }
  if(r.interpretation.status!=='confirmed'||r.interpretation.unresolved.length) reasons.push('REQUEST_REQUIRES_CONFIRMATION');
  if(r.plot.floorsRequested!==1) reasons.push('ADDITIONAL_FLOORS_NOT_IMPLEMENTED');
  if(!r.program.every((p,i)=>p.id===`room-${i}`)) reasons.push('EXPLICIT_PROGRAM_ID_MAPPING_NOT_IMPLEMENTED_IN_PREVIEW');
  // Fail closed rather than pretending the legacy distance/adjacency heuristics prove a must.
  for(const c of r.hardConstraints) {
-  if(c.kind!=='room_count_exact'||!Number.isInteger(c.value?.count)||c.value.count<0) reasons.push(`MUST_REQUIRES_REVIEW:${c.id}`);
+  if(!validDimensions(c,r)&&(c.kind!=='room_count_exact'||!Number.isInteger(c.value?.count)||c.value.count<0)) reasons.push(`MUST_REQUIRES_REVIEW:${c.id}`);
  }
  return reasons;
 }
@@ -46,6 +66,7 @@ export async function generateCandidate(request,shape,generationOverrides={}) {
  const m=generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
  const errors=validateModel(m); if(errors.length) throw Error('NATIVE_VALIDATION_FAILED:'+errors.join(';'));
  const geometry=Object.fromEntries(GEOMETRY_KEYS.filter(k=>m[k]!==undefined).map(k=>[k,structuredClone(m[k])]));
+ if(dimensionViolations(r,geometry).length) throw Error('EXPLICIT_DIMENSIONS_VIOLATED:'+dimensionViolations(r,geometry).map(c=>c.value.roomId).join(','));
  canonicalJSON(geometry); // Never turn NaN/Infinity into JSON null.
  const massing=auditMassing(geometry.buildingFootprint,m.massingParts??[m.building],geometry.courtyards);
  if(!massing.pass) throw Error('MASSING_NOT_EQUIVALENT');
@@ -96,6 +117,7 @@ export async function decideReviewed(request,pairs) {
   if(!audit.pass) throw Error('MASSING_NOT_EQUIVALENT');
   if(seen.has(c.candidateId)) throw Error('DUPLICATE_CANDIDATE_ID'); seen.add(c.candidateId);
   validReviews.push(review);
+  if(dimensionViolations(r,c.geometry).length) { rejected.push({candidateId:c.candidateId,failedChecks:['explicit-dimensions'],unprovenChecks:[]}); continue; }
   const failed=review.checks.filter(x=>x.status==='FAIL');
   const essential=['identity','polygon-area','plot-bounds','space-containment','opening-references','plot-coverage','program-areas','requested-floors','interpretation'];
   const missing=essential.filter(id=>review.checks.find(x=>x.id===id)?.status!=='PASS');
@@ -104,7 +126,8 @@ export async function decideReviewed(request,pairs) {
  }
  if(!eligible.length) return {decision:await decision(r,'NO_SELECTION',null,validReviews,['No candidate passed native validation and all required architectural checks.']),aziz:null,rejected};
  const at=new Date().toISOString(),invocationId='inv:'+(await contentHash({request:r,adapterVersion:ADAPTER_VERSION})).value;
- const hard=[...r.hardConstraints,...r.program.map(p=>({id:`area:${p.id}`,kind:'explicit_area',description:'Preserve requested clear room area',
+ // Dimensions are proven above on actual rectangles; legacy AZIZ cannot evaluate this kind.
+ const hard=[...r.hardConstraints.filter(c=>c.kind!=='explicit_dimensions'),...r.program.map(p=>({id:`area:${p.id}`,kind:'explicit_area',description:'Preserve requested clear room area',
   value:{roomId:p.id,area:p.areaM2,tolerance:1e-8},source:'user',priority:'must'}))];
  const input={requestId:r.requestId,context:{plotArea:r.plot.widthM*r.plot.lengthM,cityCode:'unspecified',locale:'ar'},hardConstraints:hard,softPreferences:[]};
  const legacyHash=fnv1aHash(stableStringify(input));
