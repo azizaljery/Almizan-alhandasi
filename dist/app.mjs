@@ -86,8 +86,8 @@ function engineeringSignature() { return JSON.stringify([state.discovery, $('ide
 function renderStreets() {
   const selected = $('entry').value || 's';
   $('streets').innerHTML = Object.entries(DIRECTIONS).map(([side, name]) => `<button class="street ${state.streets[side] ? 'on' : ''}" data-side="${side}" aria-pressed="${state.streets[side]}"><i class="dot"></i><b>${name}</b><small>${state.streets[side] ? 'شارع مفعّل' : 'جهة جار'}</small></button>`).join('');
-  const enabled = Object.fromEntries(Object.entries(DIRECTIONS).filter(([s]) => state.streets[s]));
-  $('entry').innerHTML = Object.keys(enabled).length ? options(enabled, selected) : '<option value="">فعّل جهة شارع أولًا</option>';
+  // Keep the entrance independent; validation reports conflicts without selecting another side.
+  $('entry').innerHTML = options(DIRECTIONS, selected);
 }
 function renderSiteOverview() {
   const target = $('studioSiteOverview');
@@ -691,18 +691,19 @@ const mizanStudioAPI = Object.freeze({
       failures: structuredClone(state.failures),
     };
   },
-  setPlot({ width, length, entry, maxBuiltArea }) {
-    if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
-    if (!Number.isFinite(Number(width)) || !Number.isFinite(Number(length))) throw Error('أدخل أبعاد الأرض بالأمتار.');
-    $('wid').value = String(width);
-    $('len').value = String(length);
-    $('entry').value = entry;
-    if (maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '') $('maxBuiltArea').value = '';
-    else $('maxBuiltArea').value = String(maxBuiltArea);
-    state.streets[entry] = true;
+  setPlot({ width, length, entry, maxBuiltArea, streets }) {
+    // Validate the complete candidate before writing any DOM or state values.
+    const candidate = validatePlot({ ...rawPlot(), width: Number(width), length: Number(length), entry,
+      streets: streets === undefined ? { ...state.streets } : { ...streets },
+      maxBuiltArea: maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '' ? null : Number(maxBuiltArea) });
+    $('wid').value = String(candidate.width);
+    $('len').value = String(candidate.length);
+    state.streets = { ...candidate.streets };
     renderStreets();
+    $('entry').value = candidate.entry;
+    $('maxBuiltArea').value = candidate.maxBuiltArea ?? '';
     rating(); markDirty();
-    return validatePlot(rawPlot());
+    return candidate;
   },
   async propose(prompt, { accessCode = '', local = false } = {}) {
     $('idea').value = String(prompt || '');

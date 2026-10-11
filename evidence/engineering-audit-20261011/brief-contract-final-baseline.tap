@@ -1,0 +1,491 @@
+✖ exact count: 3 bedrooms (2.527581ms)
+✖ exact count: ٣ غرف نوم (1.101372ms)
+✖ exact count: ۳ غرف نوم (0.243737ms)
+✖ exact count: ثلاث غرف نوم (0.185703ms)
+✖ exact count: ثلاثة غرف نوم (0.215525ms)
+✖ exact count: three bedrooms (0.281446ms)
+✖ exact count: غرفتين نوم (0.168316ms)
+✖ exact count: غرفتا نوم (0.206536ms)
+✖ exact count: غرف نوم عدد 3 (0.281671ms)
+✖ minimum is explicit: at least three bedrooms (0.297924ms)
+✔ minimum is explicit: ٣ غرف نوم على الأقل (0.221559ms)
+✔ minimum is explicit: على الأقل ثلاث غرف نوم (2.527386ms)
+✖ minimum qualifier stays scoped to the adjacent count (0.339182ms)
+✖ equal area cannot substitute different explicit dimensions (0.527241ms)
+✖ program constraints attach without mutating old projects or claiming geometry (0.236544ms)
+✖ actual geometry independently checks sides and permits real rotation (0.11628ms)
+✖ explicit rotation prohibition prevents swapped geometry (0.071051ms)
+✔ minimum wording: 3 غرف نوم على الأقل (0.138552ms)
+✔ minimum wording: بحد أدنى 3 غرف نوم (3.294948ms)
+✔ minimum wording: 3 bedrooms minimum (0.113563ms)
+✖ capitalized number words and zero remain exact (0.182779ms)
+✖ compound Arabic number: إحدى عشرة غرف نوم (0.21177ms)
+✖ compound Arabic number: اثنتا عشرة غرف نوم (0.155686ms)
+✖ compound Arabic number: ثلاث عشرة غرف نوم (0.085097ms)
+✖ compound Arabic number: عشرون غرف نوم (0.104774ms)
+✖ geometry binding cannot accept another same-type room (0.103921ms)
+✖ ambiguous dimension target is rejected without mutating the program (0.489008ms)
+✖ dimension contracts cover English kitchen and Arabic living room (0.123841ms)
+✖ large explicit counts are not silently discarded or partially parsed (0.164619ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 5
+ℹ fail 24
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111.43549
+
+✖ failing tests:
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: 3 bedrooms (2.527581ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:10:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: ٣ غرف نوم (1.101372ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:10:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: ۳ غرف نوم (0.243737ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:10:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: ثلاث غرف نوم (0.185703ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:10:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: ثلاثة غرف نوم (0.215525ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:10:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: three bedrooms (0.281446ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:9:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: غرفتين نوم (0.168316ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:9:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: غرفتا نوم (0.206536ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:9:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:7:3
+✖ exact count: غرف نوم عدد 3 (0.281671ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:9:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:14:3
+✖ minimum is explicit: at least three bedrooms (0.297924ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:16:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:19:1
+✖ minimum qualifier stays scoped to the adjacent count (0.339182ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:20:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:23:1
+✖ equal area cannot substitute different explicit dimensions (0.527241ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:24:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:26:1
+✖ program constraints attach without mutating old projects or claiming geometry (0.236544ms)
+  TypeError: contract.attachExplicitProgramConstraints is not a function
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:29:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:34:1
+✖ actual geometry independently checks sides and permits real rotation (0.11628ms)
+  TypeError: contract.verifyProgramGeometry is not a function
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:36:25)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:43:1
+✖ explicit rotation prohibition prevents swapped geometry (0.071051ms)
+  TypeError: contract.verifyProgramGeometry is not a function
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:44:25)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:52:1
+✖ capitalized number words and zero remain exact (0.182779ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:53:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:57:3
+✖ compound Arabic number: إحدى عشرة غرف نوم (0.21177ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:59:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:57:3
+✖ compound Arabic number: اثنتا عشرة غرف نوم (0.155686ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:59:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:57:3
+✖ compound Arabic number: ثلاث عشرة غرف نوم (0.085097ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:59:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:57:3
+✖ compound Arabic number: عشرون غرف نوم (0.104774ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:59:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:62:1
+✖ geometry binding cannot accept another same-type room (0.103921ms)
+  TypeError: contract.verifyAttachedProgramGeometry is not a function
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:64:25)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:66:1
+✖ ambiguous dimension target is rejected without mutating the program (0.489008ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /حدد غرفة/. Input:
+
+  'TypeError: contract.attachExplicitProgramConstraints is not a function'
+
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:69:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: contract.attachExplicitProgramConstraints is not a function
+        at file:///tmp/brief-contract-exact-baseline.test.mjs:69:32
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:69:10)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1382:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+        at Test.postRun (node:internal/test_runner/test:1522:19)
+        at Test.run (node:internal/test_runner/test:1447:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:960:7),
+    expected: /حدد غرفة/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:72:1
+✖ dimension contracts cover English kitchen and Arabic living room (0.123841ms)
+  TypeError: contract.verifyProgramGeometry is not a function
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:73:25)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at ../../tmp/brief-contract-exact-baseline.test.mjs:76:1
+✖ large explicit counts are not silently discarded or partially parsed (0.164619ms)
+  TypeError: Cannot read properties of undefined (reading 'expected')
+      at TestContext.<anonymous> (file:///tmp/brief-contract-exact-baseline.test.mjs:79:60)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)

@@ -1,0 +1,25 @@
+✔ request preserves room dimensions separately from area without mutating program (18.562704ms)
+✔ real pipeline refuses equal-area wrong dimensions before ranking (456.615378ms)
+✔ real pipeline preserves legacy requests and accepts actual dimensions including rotation (745.598756ms)
+✔ review gate cannot rank a same-area candidate with wrong requested geometry (146.235866ms)
+✔ rotation is forbidden when constraint explicitly disallows it (266.969748ms)
+✔ central request rejects extra bedrooms regardless of caller validation (1.343814ms)
+✔ direct pipeline validates explicit text dimensions even if caller omits hard constraint (127.653312ms)
+✔ direct pipeline refuses a text count mismatch before generating or ranking (25.156191ms)
+✔ integrated Claude -> Gemini -> AZIZ works for s (926.974994ms)
+✔ integrated Claude -> Gemini -> AZIZ works for n (666.244502ms)
+✔ integrated Claude -> Gemini -> AZIZ works for e (504.795694ms)
+✔ integrated Claude -> Gemini -> AZIZ works for w (524.862321ms)
+✔ integrated generation explains the unsupported multi-floor boundary in Arabic (8.490677ms)
+✔ integrated generation honors current setback controls (393.709263ms)
+✔ integrated project save restores exact RECT/L/U geometry instead of regenerating old strategies (438.210253ms)
+✔ integrated U model remains editable with existing opening tools (309.141781ms)
+✔ integrated path fails clearly when the explicit built-area cap makes all three shapes infeasible (85.090147ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4258.46822

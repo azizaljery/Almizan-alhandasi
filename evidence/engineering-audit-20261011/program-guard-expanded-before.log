@@ -1,0 +1,463 @@
+✖ removal needs specific affirmative authorization: غيّر موقع الصالة (6.17479ms)
+✖ removal needs specific affirmative authorization: غير موقع الصالة (0.640657ms)
+✖ removal needs specific affirmative authorization: استبدل مكان الصالة (1.167421ms)
+✖ removal needs specific affirmative authorization: احذف الغرف (0.343196ms)
+✖ removal needs specific affirmative authorization: لا تحذف غرفة النوم (0.245772ms)
+✖ removal needs specific affirmative authorization: احذف المطبخ وغير موقع غرفة النوم (0.254978ms)
+✖ removal needs specific affirmative authorization: غير موقع غرفة النوم واحذف المطبخ (0.193089ms)
+✖ removal needs specific affirmative authorization: لا أريد حذف غرفة النوم (0.192994ms)
+✖ removal needs specific affirmative authorization: احذف غرفة النوم الثانية (0.385058ms)
+✖ removal needs specific affirmative authorization: لا تحذف المطبخ بل غير موقع غرفة النوم (0.326871ms)
+✔ specific room deletion remains compatible with Arabic articles and English (0.84523ms)
+✖ authorizing one room never permits deleting another (0.538431ms)
+✖ duplicate rooms cannot be deleted by an ambiguous name (0.99572ms)
+✖ reordering duplicates is not a modification (0.373928ms)
+✖ audit snapshots and difference are detached from caller state (0.723412ms)
+✖ a unique short room name is accepted without a generic room wildcard (0.346392ms)
+✖ legacy rooms without IDs preserve unchanged duplicates during deletion (0.477843ms)
+✖ geometry-relevant fields remain visible in the difference (0.209038ms)
+✖ Arabic compound command authorizes deleting the living room only (0.178746ms)
+✖ English compound command authorizes deleting the living room only (0.267541ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 1
+ℹ fail 19
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 114.382595
+
+✖ failing tests:
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: غيّر موقع الصالة (6.17479ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: غير موقع الصالة (0.640657ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: استبدل مكان الصالة (1.167421ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: احذف الغرف (0.343196ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: لا تحذف غرفة النوم (0.245772ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: احذف المطبخ وغير موقع غرفة النوم (0.254978ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: غير موقع غرفة النوم واحذف المطبخ (0.193089ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: لا أريد حذف غرفة النوم (0.192994ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: احذف غرفة النوم الثانية (0.385058ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:11:3
+✖ removal needs specific affirmative authorization: لا تحذف المطبخ بل غير موقع غرفة النوم (0.326871ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('bed-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:12:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:20:1
+✖ authorizing one room never permits deleting another (0.538431ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, [rooms[0]], 'احذف المطبخ').blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:21:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:23:1
+✖ duplicate rooms cannot be deleted by an ambiguous name (0.99572ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    [
+  +   'bed-2'
+  -   'bed-1'
+    ]
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:28:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'bed-2' ],
+    expected: [ 'bed-1' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:31:1
+✖ reordering duplicates is not a modification (0.373928ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:33:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:35:1
+✖ audit snapshots and difference are detached from caller state (0.723412ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + undefined
+  - [
+  -   {
+  -     area: 40,
+  -     id: 'living-1',
+  -     name: 'صالة عائلية',
+  -     position: 'middle',
+  -     type: 'living'
+  -   },
+  -   {
+  -     area: 24,
+  -     id: 'bed-1',
+  -     name: 'غرفة نوم',
+  -     position: 'back',
+  -     type: 'bedroom'
+  -   },
+  -   {
+  -     area: 20,
+  -     id: 'kitchen-1',
+  -     name: 'مطبخ',
+  -     position: 'front',
+  -     type: 'kitchen'
+  -   }
+  - ]
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:38:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [ { id: 'living-1', name: 'صالة عائلية', type: 'living', area: 40, position: 'middle' }, { id: 'bed-1', name: 'غرفة نوم', type: 'bedroom', area: 24, position: 'back' }, { id: 'kitchen-1', name: 'مطبخ', type: 'kitchen', area: 20, position: 'front' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:47:1
+✖ a unique short room name is accepted without a generic room wildcard (0.346392ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('kitchen-1'), 'احذف المطبخ الخارجي').blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:49:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:51:1
+✖ legacy rooms without IDs preserve unchanged duplicates during deletion (0.477843ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    [
+      {
+  +     area: 30,
+  -     area: 24,
+        name: 'غرفة نوم',
+        type: 'bedroom'
+      }
+    ]
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:55:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { name: 'غرفة نوم', type: 'bedroom', area: 30 } ],
+    expected: [ { name: 'غرفة نوم', type: 'bedroom', area: 24 } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:59:1
+✖ geometry-relevant fields remain visible in the difference (0.209038ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:63:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:67:1
+✖ Arabic compound command authorizes deleting the living room only (0.178746ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(rooms, without('kitchen-1'), request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:69:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../tmp/program-guard-baseline.test.mjs:72:1
+✖ English compound command authorizes deleting the living room only (0.267541ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(diffRoomPrograms(before, [before[0]], request).blockers.length)
+
+      at TestContext.<anonymous> (file:///tmp/program-guard-baseline.test.mjs:78:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
