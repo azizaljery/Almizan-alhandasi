@@ -219,6 +219,7 @@ async function checkedEncodedProject(decoded) {
       vat: decoded.vat,
       idea: decoded.idea,
       discovery: decoded.discovery,
+      studioSession: decoded.studioSession,
       model: exactModel,
       alternatives: (decoded.alternatives || []).map(clean),
       history: (decoded.history || []).map(item => ({ model: clean(item.model), palette: item.palette, ...(item.landSurvey ? { landSurvey: item.landSurvey } : {}) })),

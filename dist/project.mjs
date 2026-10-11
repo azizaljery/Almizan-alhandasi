@@ -2,6 +2,7 @@ import { normalizeDiscovery } from './client-brief.mjs';
 import { ENGINE_VERSION, STRATEGIES, validatePlot, normalizeRooms, generateModel, validateModel } from './planner.mjs';
 import { estimate, quantityRows } from './estimates.mjs';
 import { validateLandSurvey } from './land-survey.mjs';
+import { normalizeStudioSession } from './studio-session.mjs';
 
 export const MAX_PROJECT_BYTES = 2_000_000;
 const palettes = ['resort', 'modern', 'classic', 'hijazi'];
@@ -61,12 +62,16 @@ function validateProject(raw) {
   if (project.design && project.alternatives.some(r => JSON.stringify([r.plot, r.rooms]) !== JSON.stringify([project.design.plot, project.design.rooms]))) throw Error('البدائل المحفوظة ليست من متطلبات المخطط نفسه.');
   return project;
 }
-export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [], landSurvey = null, modelLandSurvey = landSurvey }) {
+export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [], landSurvey = null, modelLandSurvey = landSurvey, studioSession }) {
   // Only explicitly allowlisted data is saved. Access codes and provider keys are never read.
   const raw = { schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION, savedAt: new Date().toISOString(),
     draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery, landSurvey }, modelLandSurvey, design: modelRecipe(model),
     alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
-  const text = JSON.stringify(validateProject(raw), null, 2);
+  const project = validateProject(raw);
+  // The session contains transcript and revision references only. Its approval
+  // is checked against this one authoritative saved design, never a second model.
+  project.studioSession = normalizeStudioSession(studioSession, { model: project.design?.embedded ?? null, legacy: studioSession === undefined });
+  const text = JSON.stringify(project, null, 2);
   if (new TextEncoder().encode(text).length > MAX_PROJECT_BYTES) throw Error('ملف المشروع أكبر من 2 ميغابايت؛ قلّل عدد البدائل أو النسخ المحفوظة.');
   return text;
 }
@@ -82,7 +87,9 @@ export function decodeProject(text) {
     return cache.get(key);
   };
   // Rebuild and validate every design before allowing the UI to replace its state.
-  return { ...project.draft, modelLandSurvey: project.modelLandSurvey, savedAt: project.savedAt, model: rebuild(project.design), alternatives: project.alternatives.map(rebuild), history: project.history.map(h => ({ model: rebuild(h.design), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
+  const model = rebuild(project.design);
+  const studioSession = normalizeStudioSession(raw.studioSession, { model, legacy: !Object.hasOwn(raw, 'studioSession') });
+  return { ...project.draft, modelLandSurvey: project.modelLandSurvey, savedAt: project.savedAt, model, studioSession, alternatives: project.alternatives.map(rebuild), history: project.history.map(h => ({ model: rebuild(h.design), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
 }
 export function quantitiesCSV(model, rates, reserve, vat) {
   const rows = quantityRows(model), totals = estimate(rows, rates, reserve, vat);
