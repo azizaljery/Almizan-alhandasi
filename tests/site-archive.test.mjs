@@ -428,3 +428,12 @@ test('archive retains atomic editor revision and exact committed partition geome
   assert.equal(decodeProject(opened.project).model.geometryRevision,1);
  } finally { isolated.close(); }
 });
+
+test('archive retains site solar metadata and legacy-unverified association through exact project roundtrip',async()=>{
+ const isolated=new LocalD1();try{
+  const original=decodeProject(project());const context={version:1,source:'explicit-user',latitude:24.7,longitude:46.7,instant:'2026-06-21T12:00:00+03:00',northAngleDeg:35,northConfirmed:true};
+  original.siteSolar=context;original.modelSurveyAssociated=false;original.history=[{model:original.model,palette:original.palette,siteSolar:context,modelSurveyAssociated:false}];
+  const response=await call(isolated,'/api/archive/designs',{method:'POST',body:{project:encodeProject(original),title:'solar context',idempotencyKey:'site-solar-roundtrip-001'}});const receipt=await response.json();assert.equal(response.status,201,JSON.stringify(receipt));
+  const opened=await(await call(isolated,`/api/archive/designs/${receipt.designId}`)).json(),restored=decodeProject(opened.project);assert.deepEqual(restored.siteSolar,context);assert.equal(restored.modelSurveyAssociated,false);assert.deepEqual(restored.history[0].siteSolar,context);assert.equal(restored.history[0].modelSurveyAssociated,false);
+ }finally{isolated.close();}
+});

@@ -69,7 +69,7 @@ export function buildPlanSVG(model) {
   });
   const entry = openingPoint(model, model.openings.find(o => o.type === 'door' && o.connects.includes('outside')));
   s += `<circle cx="${entry.x}" cy="${-entry.y}" r=".12" fill="#ac7634"/><text x="${b.x + b.w / 2}" y="${b.y + b.h + .75}" font-size=".35" fill="#7e6032" text-anchor="middle">المدخل ${DIRECTIONS[model.plot.entry]} · الأرض ${W} × ${L} م</text>`;
-  s += `<g transform="translate(${b.x + b.w + .55},${b.y + 1.5})" fill="#3e5c59"><path d="M0 -1L-.2 -.25H.2Z"/><path d="M0 -.3V.65" stroke="#3e5c59" stroke-width=".05"/><text y="-1.2" font-size=".32" text-anchor="middle">N</text></g></svg>`;
+  s += `<g transform="translate(${b.x + b.w + .55},${b.y + 1.5})" fill="#3e5c59"><g data-plan-north-arrow="true"><path d="M0 -1L-.2 -.25H.2Z"/><path d="M0 -.3V.65" stroke="#3e5c59" stroke-width=".05"/></g><text data-plan-north-label="true" y="-1.2" font-size=".32" text-anchor="middle">+Y</text></g></svg>`;
   return s;
 }
 
@@ -157,6 +157,9 @@ export class PlanViewport {
     label.textContent = this.solarLabel + (clipped ? ' · الظل ممتد خارج إطار العرض' : '');
   }
   showSolar(preview, show = true) {
+    const siteNorth=preview?.status==='approximate-site'&&Number.isFinite(preview.provenance?.northAngleDeg);
+    this.svg.querySelector('[data-plan-north-arrow]')?.setAttribute('transform',`rotate(${siteNorth?preview.provenance.northAngleDeg:0})`);
+    const northLabel=this.svg.querySelector('[data-plan-north-label]');if(northLabel)northLabel.textContent=siteNorth?'N':' +Y';
     this.svg.querySelector('[data-solar-shadow]')?.remove(); this.svg.querySelector('[data-solar-direction]')?.remove();
     this.solarBounds = null;
     if (!show || !preview?.visible) return;
@@ -178,7 +181,7 @@ export class PlanViewport {
     this.svg.querySelector('[data-solar-layer]').append(group);
     this.solarBounds = { x: Math.min(...all.map(p => p[0])), y: Math.min(...all.map(p => p[1])), right: Math.max(...all.map(p => p[0])), bottom: Math.max(...all.map(p => p[1])) };
     const sun = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sun.setAttribute('data-solar-direction', 'true'); sun.setAttribute('fill', '#bd7b16'); sun.setAttribute('font-size', '.35'); sun.setAttribute('font-weight', '700'); sun.setAttribute('pointer-events', 'none');
-    this.solarLabel = `☀ شمس ${f(preview.azimuth)}° · ظل ${f(length)}م`;
+    this.solarLabel = `☀ ${preview.azimuth == null ? 'شمس رأسية؛ السمت غير معرّف' : 'سمت حقيقي ' + f(preview.azimuth) + '°'} · ظل ${f(length)}م`;
     this.svg.append(sun); this.updateSolarLabel();
   }
   showEngineeringMarkers(markers = [], show = true) {

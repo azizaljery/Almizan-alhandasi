@@ -40,6 +40,11 @@ export const monthName = month => ['يناير', 'فبراير', 'مارس', 'أ
  */
 export function solarVectors(preview, { northOffsetDeg = 0 } = {}) {
   if (!Number.isFinite(northOffsetDeg)) throw Error('زاوية الشمال غير صالحة.');
+  if (preview?.status === 'approximate-site') {
+    const {world,plan,enu}=preview;
+    if(!world||!plan||!enu||![world.x,world.y,world.z,plan.x,plan.y,plan.up].every(Number.isFinite))throw Error('متجه شمس الموقع غير صالح.');
+    return {visible:preview.visible===true,towardSun:enu,world:{...world},shadowPerMeter:preview.shadowPerMeter?{east:preview.shadowPerMeter.x,north:preview.shadowPerMeter.y}:null};
+  }
   if (!preview || preview.status === 'not-calculated' || preview.altitude == null || preview.azimuth == null) return { visible: false, towardSun: null, world: null, shadowPerMeter: null };
   if (!Number.isFinite(preview.altitude) || Math.abs(preview.altitude) > 90 || !Number.isFinite(preview.azimuth)) throw Error('اتجاه الشمس غير صالح.');
   const alt = radians(preview.altitude), az = radians(preview.azimuth + northOffsetDeg);

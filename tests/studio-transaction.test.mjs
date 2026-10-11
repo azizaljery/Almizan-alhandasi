@@ -1,3 +1,4 @@
+import { rebindSolarContext } from '../dist/solar-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -59,6 +60,7 @@ function harness() {
     syncPalette() {}, renderDiscovery() {}, rating() {}, toast() {},
     renderRows: () => context.markDirty(), switchTab: () => context.markDirty(),
     message: (id,text) => { $(id).textContent = text; context.messages.push({ id,text }); },
+    rebindSolarContext, restoreSolarSettings() {},
     runPlanner: input => { context.workerCalls.push(input); return worker.promise; },
     applyProjectState: (project,detail) => { context.imports.push({ project,detail }); state.model = project.model; },
   };

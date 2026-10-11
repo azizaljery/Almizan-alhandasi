@@ -16,7 +16,7 @@ import { applySunOrientation, describeSunOrientation } from './sun-orientation.m
 import { circulationNetwork } from './circulation.mjs';
 import { encodeProject, decodeProject, MAX_PROJECT_BYTES } from './project.mjs';
 import { designInsights } from './design-insights.mjs';
-import { monthName, solarPreview } from './solar-path.mjs';
+import { siteSolarPreview, rebindSolarContext } from './solar-context.mjs';
 import { compareHomeModels, buildEngineeringPromptContext } from './home-design-engine.mjs';
 import { buildClientContext, deriveRequirements } from './requirements-engine.mjs';
 import { initVisualizer } from './render-visualizer.mjs';
@@ -36,7 +36,7 @@ const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
-const state = { studioSession: createStudioSession(), streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
+const state = { studioSession: createStudioSession(), streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, modelSurveyAssociated: false, siteSolar: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
 let geometrySession, geometryUI, geometrySource, geometryPending, geometryCommandId = 0, modelEpoch = 0, renderedModel, geometryAlternativePool = [];
 let studioPending = null, studioOperationContext = null, studioAbort = null, generationSequence = 0, studioRestoring = false;
@@ -79,7 +79,7 @@ const exploration = { signature: '', previous: [], seed: 1 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
 const workspaceSignature = (p, rooms, survey = state.landSurvey) => JSON.stringify([signature(p, rooms), surveyFingerprint(survey)]);
-const historyEntry = (model, palette) => ({ model, palette, ...(state.modelLandSurvey ? { landSurvey: structuredClone(state.modelLandSurvey) } : {}) });
+const historyEntry = (model, palette) => ({ model, palette, siteSolar: structuredClone(state.siteSolar), modelSurveyAssociated: state.modelSurveyAssociated, ...(state.modelLandSurvey ? { landSurvey: structuredClone(state.modelLandSurvey) } : {}) });
 const options = (dict, selected) => Object.entries(dict).map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${esc(typeof label === 'string' ? label : label.name)}</option>`).join('');
 function message(id, text) { $(id).textContent = text; $(id).hidden = !text; }
 function toast(text) { message('toast', text); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
@@ -300,22 +300,29 @@ function rating() {
     $('grade').textContent = '—'; $('grade').removeAttribute('data-g'); $('rt').textContent = 'راجع بيانات الأرض'; $('bars').replaceChildren(); $('plotInsights').replaceChildren(); $('ratingHelp').textContent = 'لا يمكن عرض مؤشر صالح بالمدخلات الحالية.'; message('plotError', error.message);
   }
 }
+function readSolarSettings() {
+  const numeric=id=>$(id).value.trim()===''?null:Number($(id).value);
+  return {version:1,source:$('solarSource').value,latitude:$('solarSource').value==='explicit-user'?numeric('solarLatitude'):null,longitude:$('solarSource').value==='explicit-user'?numeric('solarLongitude'):null,instant:$('solarInstant').value.trim(),northAngleDeg:numeric('solarNorth'),northConfirmed:$('solarNorthConfirmed').checked,...($('solarSource').value==='model-survey-first-vertex'&&$('solarNorthConfirmed').checked?{confirmedSurveyFingerprint:surveyFingerprint(state.modelLandSurvey)||''}:{})};
+}
+function restoreSolarSettings() {
+  const context=state.siteSolar;
+  $('solarSource').value=context?.source||'explicit-user';
+  for(const [id,key] of [['solarLatitude','latitude'],['solarLongitude','longitude'],['solarInstant','instant'],['solarNorth','northAngleDeg']])$(id).value=context?.[key]??'';
+  $('solarNorthConfirmed').checked=context?.northConfirmed===true;
+}
 function currentSolarPreview() {
-  const latitude = $('solarLatitude').value.trim();
-  return solarPreview({ mode: 'example', latitude: latitude === '' ? null : Number(latitude), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 });
+  return siteSolarPreview(state.siteSolar,{model:state.model,modelLandSurvey:state.modelLandSurvey,modelSurveyAssociated:state.modelSurveyAssociated});
 }
 function renderSolarPreview() {
   try {
-    const preview = currentSolarPreview();
-    $('sunHourVal').textContent = `${String(Math.floor(number('sunHour'))).padStart(2, '0')}:${number('sunHour') % 1 ? '30' : '00'}`;
-    $('sunMonthVal').textContent = monthName(number('sunMonth'));
-    $('sunInfo').innerHTML = preview.status === 'not-calculated'
-      ? 'غير محسوب. أدخل خط عرض لمثال تقريبي فقط؛ موقع الأرض والشمال الحقيقي والتاريخ والوقت والمنطقة الزمنية غير موثقة هنا.'
-      : preview.visible
-        ? `مثال تقريبي · ارتفاع الشمس: <b>${fmt(preview.altitude)}°</b> · سمتها من شمال الرسم الافتراضي: <b>${fmt(preview.azimuth)}°</b> · ظل كتلة ٣٫٢م: <b>${fmt(preview.shadowLength)} م</b>. قد يمتد الظل خارج إطار العرض.`
-        : 'الشمس تحت الأفق في المثال التقريبي؛ لا يوجد ضوء أو ظل شمسي مباشر. إنارة العرض المساعدة ليست ضوء نهار مقاسًا.';
-    viewport?.showSolar(preview, $('showShadow')?.checked); viewer?.setSun?.(preview);
-  } catch (error) { $('sunInfo').textContent = error.message; viewport?.showSolar(null, false); viewer?.setSun?.({ visible: false, status: 'not-calculated' }); }
+  const preview=currentSolarPreview();
+  $('solarLatitude').disabled=$('solarLongitude').disabled=state.siteSolar?.source==='model-survey-first-vertex';
+  if(state.siteSolar?.source==='model-survey-first-vertex'){$('solarLatitude').value='';$('solarLongitude').value='';}
+  $('sunInfo').textContent=preview.status==='not-calculated'?'غير محسوب · '+preview.reason:
+    `حساب شمسي هندسي تقريبي · المصدر: ${state.siteSolar.source==='explicit-user'?'إحداثيات أدخلها المستخدم':'أول نقطة من حدود مسح المخطط المرتبط'} · ${preview.provenance.latitude}، ${preview.provenance.longitude} · الوقت ${state.siteSolar.instant} · زاوية الشمال ${state.siteSolar.northAngleDeg}°. `+
+    (preview.visible?`ارتفاع الشمس ${fmt(preview.altitude)}° · ${preview.azimuth==null?'الشمس رأسية؛ السمت غير معرّف':`السمت الحقيقي ${fmt(preview.azimuth)}°`} · ظل كتلة ٣٫٢م ${fmt(preview.shadowLength)}م. قد يمتد خارج العرض.`:'الشمس تحت الأفق؛ لا ضوء أو ظل شمسي مباشر.');
+  viewport?.showSolar(preview,$('showShadow')?.checked);viewer?.setSun?.(preview);
+  } catch (error) { $('sunInfo').textContent=error.message;viewport?.showSolar(null,false);viewer?.setSun?.({visible:false,status:'not-calculated'}); }
 }
 function programTotal() {
   const sum = state.program.reduce((s, r) => s + (Number.isFinite(r.area) ? r.area : 0), 0);
@@ -724,7 +731,8 @@ async function generate(options = {}) {
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { searchEvidence: result.searchEvidence, decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
-    state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
+    state.siteSolar = rebindSolarContext(state.siteSolar,state.modelLandSurvey,state.landSurvey); restoreSolarSettings();
+    state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.modelSurveyAssociated = true; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults('generated'); switchTab($('app').classList.contains('studio-simple-mode') && !$('app').classList.contains('studio-advanced-open') ? 'design' : 'result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
     return { model: structuredClone(state.model), alternatives: structuredClone(state.alternatives), failures: structuredClone(state.failures), operationId: operation?.id || null };
@@ -877,7 +885,7 @@ function download(content, mime, name) {
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 function projectText() {
-  return encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history, landSurvey: state.landSurvey, modelLandSurvey: state.modelLandSurvey, studioSession: state.studioSession });
+  return encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history, landSurvey: state.landSurvey, modelLandSurvey: state.modelLandSurvey, modelSurveyAssociated: state.modelSurveyAssociated, siteSolar: state.siteSolar, studioSession: state.studioSession });
 }
 function archiveProjectSignature() {
   try {
@@ -1031,11 +1039,11 @@ async function saveArchive({ asNew = false } = {}) {
 async function loadArchiveVersion() {
   const archive = state.archive, id = $('archiveDesigns').value, version = $('archiveVersions').value;
   if (!id || !version || archive.loading) return;
-  const startEpoch = modelEpoch, startDraft = JSON.stringify([rawPlot(), state.program, $('idea').value, state.studioSession.draftText, state.studioSession.epoch, state.studioSession.messageSequence]);
+  const startEpoch = modelEpoch, startDraft = JSON.stringify([rawPlot(), state.program, $('idea').value, state.studioSession.draftText, state.studioSession.epoch, state.studioSession.messageSequence, state.siteSolar]);
   archive.loading = true; archive.notice = ''; renderArchiveControls();
   try {
     const saved = await archiveApi(`/api/archive/designs/${encodeURIComponent(id)}/versions/${encodeURIComponent(version)}`);
-    if (modelEpoch !== startEpoch || startDraft !== JSON.stringify([rawPlot(), state.program, $('idea').value, state.studioSession.draftText, state.studioSession.epoch, state.studioSession.messageSequence])) throw Error('تغيّرت الهندسة أثناء التحميل؛ أُلغي استبدال المخطط.');
+    if (modelEpoch !== startEpoch || startDraft !== JSON.stringify([rawPlot(), state.program, $('idea').value, state.studioSession.draftText, state.studioSession.epoch, state.studioSession.messageSequence, state.siteSolar])) throw Error('تغيّرت الهندسة أثناء التحميل؛ أُلغي استبدال المخطط.');
     const project = decodeProject(saved.project);
     if (!saved.model || validateModel(saved.model).length) throw Error('تعذّر التحقق من هندسة النسخة؛ بقي المشروع الحالي كما هو.');
     project.model = saved.model;
@@ -1075,7 +1083,7 @@ function applyProjectState(project, statusText) {
   try {
   cancelStudioWork('load', false);
   state.studioSession = normalizeStudioSession(project.studioSession, { model: project.model, legacy: !project.studioSession });
-  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives.length ? project.alternatives : project.model ? [project.model] : []; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
+  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives.length ? project.alternatives : project.model ? [project.model] : []; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.modelSurveyAssociated = project.modelSurveyAssociated === true; state.siteSolar = project.siteSolar ?? null; restoreSolarSettings(); state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
   state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
   restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
   state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
@@ -1090,12 +1098,12 @@ async function importProject(file) {
   if (file.size > MAX_PROJECT_BYTES) return message('projectStatus', 'حجم الملف يتجاوز 2 ميغابايت. بقي العمل كما هو.');
   if (!window.confirm('سيستبدل الملف مدخلات الجلسة الحالية ومخططها وأسعارها. نزّل مشروعك الحالي أولًا إن احتجته. المتابعة؟')) return;
   const startEpoch = modelEpoch;
-  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey, state.studioSession.epoch, state.studioSession.revision, state.studioSession.draftText, state.studioSession.messageSequence]);
+  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey, state.studioSession.epoch, state.studioSession.revision, state.studioSession.draftText, state.studioSession.messageSequence, state.siteSolar]);
   $('gen').disabled = true; $('undo').disabled = true; markDirty();
   message('projectStatus', 'جارٍ فحص ملف المشروع وإعادة بناء نسخه قبل الاستيراد…');
   try {
     const { project } = await runPlanner({ projectText: await file.text() });
-    if (modelEpoch !== startEpoch || JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey, state.studioSession.epoch, state.studioSession.revision, state.studioSession.draftText, state.studioSession.messageSequence]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
+    if (modelEpoch !== startEpoch || JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey, state.studioSession.epoch, state.studioSession.revision, state.studioSession.draftText, state.studioSession.messageSequence, state.siteSolar]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
     applyProjectState(project, 'تم استيراد المشروع والتحقق من مخططاته وحدود المسح المحفوظة. لم يُستورد أو يُحفظ أي رمز دخول.');
   } catch (error) { message('projectStatus', error.message); }
   finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; markDirty(); }
@@ -1151,7 +1159,7 @@ function boot() {
       (Math.abs(number('wid') - state.landSurvey.binding.width) > 1e-8 || Math.abs(number('len') - state.landSurvey.binding.length) > 1e-8)) unlinkSurveyRectangle();
     rating(); markDirty();
   }));
-  ['solarLatitude', 'sunMonth', 'sunHour'].forEach(id => $(id).addEventListener('input', renderSolarPreview));
+  ['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     const program = state.program[Number(row.dataset.row)];
@@ -1216,12 +1224,12 @@ function boot() {
     state.selectedShape = model.shape;
     if (model === state.model) { state.engineeringSignature = engineeringSignature(); return; }
     state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
-    state.model = model; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey); showResults(); toast('تغيّر المخطط و3D والكميات إلى البديل المختار.');
+    state.model = model; state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey); showResults(); toast('تغيّر المخطط و3D والكميات إلى البديل المختار.');
   });
   $('undo').addEventListener('click', () => {
     if (!state.history.length) return;
     if (state.dirty && !window.confirm('سيتم استرجاع بيانات آخر توليد سابق بدل تعديلات الجدول الحالية. المتابعة؟')) return;
-    const previous = state.history.pop(); state.model = previous.model; state.traceContext = null; state.selectedShape = previous.model.shape || null; state.palette = previous.palette; state.program = publicRooms(previous.model.program); state.landSurvey = previous.landSurvey ? validateLandSurvey(previous.landSurvey) : null; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; const p = previous.model.plot;
+    const previous = state.history.pop(); state.model = previous.model; state.traceContext = null; state.selectedShape = previous.model.shape || null; state.palette = previous.palette; state.program = publicRooms(previous.model.program); state.landSurvey = previous.landSurvey ? validateLandSurvey(previous.landSurvey) : null; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.modelSurveyAssociated = previous.modelSurveyAssociated === true; state.siteSolar = previous.siteSolar ?? null; restoreSolarSettings(); const p = previous.model.plot;
     restorePlot(p); syncPalette(); state.alternatives = [state.model]; state.failures = [];
     state.signature = workspaceSignature(p, state.program); state.manualEdits = false; renderRows(); renderLandSurveySummary(); rating(); message('generationError', ''); showResults(); toast('تم استرجاع التوليد السابق ومتطلباته وحدود مسحه.');
   });
@@ -1289,6 +1297,7 @@ const mizanStudioAPI = Object.freeze({
     return {
       studioSession: structuredClone(state.studioSession),
       requirementsAudit: studioAudit(),
+      siteSolar: structuredClone(state.siteSolar), solarPreview: currentSolarPreview(), modelSurveyAssociated: state.modelSurveyAssociated,
       alternatives: structuredClone(state.alternatives),
       hasModel: !!state.model,
       model: state.model ? structuredClone(state.model) : null,

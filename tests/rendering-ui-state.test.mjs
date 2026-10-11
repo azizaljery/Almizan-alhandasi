@@ -5,9 +5,9 @@ import vm from 'node:vm';
 const source=fs.readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
 function body(name,next){return source.slice(source.indexOf('function '+name+'('),source.indexOf('function '+next+'(')).replace(/async\s*$/, '');}
 test('solar UI does not coerce a missing latitude into a real site',()=>{
- const fields={solarLatitude:{value:''},sunMonth:{value:'6'},sunHour:{value:'12'}};
- const get=vm.runInNewContext(body('currentSolarPreview','renderSolarPreview')+'\ncurrentSolarPreview',{$:id=>fields[id],number:id=>Number(fields[id].value),solarPreview:input=>input});
- assert.equal(get().latitude,null);assert.equal(get().mode,'example');fields.solarLatitude.value='0';assert.equal(get().latitude,0);
+ const state={siteSolar:null,model:null,modelLandSurvey:null,modelSurveyAssociated:false};
+ const get=vm.runInNewContext(body('currentSolarPreview','renderSolarPreview')+'\ncurrentSolarPreview',{state,siteSolarPreview:(input,context)=>({input,context})});
+ assert.equal(get().input,null);assert.equal(get().context.modelSurveyAssociated,false);state.siteSolar={latitude:0,longitude:0};assert.equal(get().input.latitude,0);
 });
 test('invalid solar input clears old 2D shadow and 3D sunlight instead of retaining stale time',()=>{
  const fields={sunInfo:{textContent:''}},calls=[];

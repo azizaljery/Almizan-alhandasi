@@ -222,9 +222,11 @@ async function checkedEncodedProject(decoded) {
       studioSession: decoded.studioSession,
       model: exactModel,
       alternatives: (decoded.alternatives || []).map(clean),
-      history: (decoded.history || []).map(item => ({ model: clean(item.model), palette: item.palette, ...(item.landSurvey ? { landSurvey: item.landSurvey } : {}) })),
+      history: (decoded.history || []).map(item => ({ model: clean(item.model), palette: item.palette, siteSolar: item.siteSolar ?? null, modelSurveyAssociated: item.modelSurveyAssociated === true, ...(item.landSurvey ? { landSurvey: item.landSurvey } : {}) })),
       landSurvey: decoded.landSurvey,
       modelLandSurvey: decoded.modelLandSurvey,
+      modelSurveyAssociated: decoded.modelSurveyAssociated,
+      siteSolar: decoded.siteSolar,
     });
     restored = decodeProject(snapshot);
   } catch {

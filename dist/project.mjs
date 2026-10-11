@@ -2,6 +2,7 @@ import { normalizeDiscovery } from './client-brief.mjs';
 import { ENGINE_VERSION, STRATEGIES, validatePlot, normalizeRooms, generateModel, validateModel } from './planner.mjs';
 import { estimate, quantityRows } from './estimates.mjs';
 import { validateLandSurvey } from './land-survey.mjs';
+import { normalizeSiteSolar } from './solar-context.mjs';
 import { normalizeStudioSession } from './studio-session.mjs';
 
 export const MAX_PROJECT_BYTES = 2_000_000;
@@ -49,9 +50,11 @@ function validateProject(raw) {
     savedAt: typeof raw.savedAt === 'string' && Number.isFinite(Date.parse(raw.savedAt)) ? raw.savedAt : new Date().toISOString(),
     draft: { plot: validatePlot(draft.plot), rooms: publicRooms(draft.rooms), palette: palette(draft.palette), rates, costReserve: draft.costReserve, vat: draft.vat, idea: draft.idea, discovery: normalizeDiscovery(draft.discovery), landSurvey: validateLandSurvey(draft.landSurvey ?? null) },
     modelLandSurvey: validateLandSurvey(Object.hasOwn(raw, 'modelLandSurvey') ? raw.modelLandSurvey : (draft.landSurvey ?? null)),
+    siteSolar: normalizeSiteSolar(raw.siteSolar),
+    modelSurveyAssociated: Object.hasOwn(raw, 'modelLandSurvey') && (!Object.hasOwn(raw,'modelSurveyAssociated') || raw.modelSurveyAssociated === true),
     design: raw.design === null ? null : recipe(raw.design),
     alternatives: raw.alternatives.map(recipe),
-    history: raw.history.map(entry => ({ design: recipe(entry.design), palette: palette(entry.palette), ...(entry.landSurvey ? { landSurvey: validateLandSurvey(entry.landSurvey) } : {}) })),
+    history: raw.history.map(entry => ({ design: recipe(entry.design), palette: palette(entry.palette), ...(entry.siteSolar ? {siteSolar: normalizeSiteSolar(entry.siteSolar)} : {}), ...(Object.hasOwn(entry,'modelSurveyAssociated') ? {modelSurveyAssociated: entry.modelSurveyAssociated === true} : {}), ...(entry.landSurvey ? { landSurvey: validateLandSurvey(entry.landSurvey) } : {}) })),
   };
   const matchesSurveyBinding = (plot, survey) => !survey || survey.engineLink !== 'survey-rectangle' ||
     (Math.abs(plot.width - survey.binding.width) <= 1e-8 && Math.abs(plot.length - survey.binding.length) <= 1e-8);
@@ -62,11 +65,11 @@ function validateProject(raw) {
   if (project.design && project.alternatives.some(r => JSON.stringify([r.plot, r.rooms]) !== JSON.stringify([project.design.plot, project.design.rooms]))) throw Error('البدائل المحفوظة ليست من متطلبات المخطط نفسه.');
   return project;
 }
-export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [], landSurvey = null, modelLandSurvey = landSurvey, studioSession }) {
+export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, idea, discovery, model, alternatives = [], history = [], landSurvey = null, modelLandSurvey = landSurvey, modelSurveyAssociated = true, siteSolar = null, studioSession }) {
   // Only explicitly allowlisted data is saved. Access codes and provider keys are never read.
   const raw = { schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION, savedAt: new Date().toISOString(),
-    draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery, landSurvey }, modelLandSurvey, design: modelRecipe(model),
-    alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
+    draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery, landSurvey }, modelLandSurvey, modelSurveyAssociated, siteSolar, design: modelRecipe(model),
+    alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette, ...(h.siteSolar ? {siteSolar: h.siteSolar} : {}), ...(Object.hasOwn(h,'modelSurveyAssociated') ? {modelSurveyAssociated: h.modelSurveyAssociated === true} : {}), ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
   const project = validateProject(raw);
   // The session contains transcript and revision references only. Its approval
   // is checked against this one authoritative saved design, never a second model.
@@ -89,7 +92,7 @@ export function decodeProject(text) {
   // Rebuild and validate every design before allowing the UI to replace its state.
   const model = rebuild(project.design);
   const studioSession = normalizeStudioSession(raw.studioSession, { model, legacy: !Object.hasOwn(raw, 'studioSession') });
-  return { ...project.draft, modelLandSurvey: project.modelLandSurvey, savedAt: project.savedAt, model, studioSession, alternatives: project.alternatives.map(rebuild), history: project.history.map(h => ({ model: rebuild(h.design), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
+  return { ...project.draft, modelLandSurvey: project.modelLandSurvey, modelSurveyAssociated: project.modelSurveyAssociated, siteSolar: project.siteSolar, savedAt: project.savedAt, model, studioSession, alternatives: project.alternatives.map(rebuild), history: project.history.map(h => ({ model: rebuild(h.design), palette: h.palette, ...(h.siteSolar ? {siteSolar: h.siteSolar} : {}), ...(Object.hasOwn(h,'modelSurveyAssociated') ? {modelSurveyAssociated: h.modelSurveyAssociated === true} : {}), ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
 }
 export function quantitiesCSV(model, rates, reserve, vat) {
   const rows = quantityRows(model), totals = estimate(rows, rates, reserve, vat);

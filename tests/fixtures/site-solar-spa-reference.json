@@ -1,0 +1,186 @@
+{
+  "reference": "pvlib 0.16.1 spa.solar_position (NREL SPA implementation), actual return index3 e0 from source, NOT refracted index2 e",
+  "source": "https://pvlib-python.readthedocs.io/en/v0.16.1/reference/generated/pvlib.solarposition.spa_python.html",
+  "threshold_deg": 0.05,
+  "cases": [
+    {
+      "name": "spa-published",
+      "input": {
+        "latitude": 39.742476,
+        "longitude": -105.1786,
+        "instant": "2003-10-17T12:30:30-07:00",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 39.872045903839926,
+      "reference_azimuth": 194.34024051024002,
+      "actual_altitude": 39.87207442406391,
+      "actual_azimuth": 194.34258286147943,
+      "angular_difference_deg": 0.001797928932771225,
+      "delta_t": "67 seconds",
+      "reference_elevation_m": 1830.14
+    },
+    {
+      "name": "equator-equinox",
+      "input": {
+        "latitude": 0,
+        "longitude": 0,
+        "instant": "2024-03-20T12:00:00Z",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 88.16682281016554,
+      "reference_azimuth": 85.41391597096583,
+      "actual_altitude": 88.17140621616876,
+      "actual_azimuth": 85.38734163850256,
+      "angular_difference_deg": 0.0046613811846205255,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "equator-night",
+      "input": {
+        "latitude": 0,
+        "longitude": 0,
+        "instant": "2024-03-20T00:00:00Z",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": -88.13504804966128,
+      "reference_azimuth": 268.43200065582573,
+      "actual_altitude": -88.13956518854083,
+      "actual_azimuth": 268.44174693919996,
+      "angular_difference_deg": 0.0045282340868186485,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "synthetic-north-summer",
+      "input": {
+        "latitude": 60,
+        "longitude": 25,
+        "instant": "2024-06-21T12:00:00+03:00",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 50.73356444736053,
+      "reference_azimuth": 149.53195415228163,
+      "actual_altitude": 50.735288161648505,
+      "actual_azimuth": 149.53087688658212,
+      "angular_difference_deg": 0.0018536632328579167,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "synthetic-south-summer",
+      "input": {
+        "latitude": -33,
+        "longitude": 151,
+        "instant": "2024-12-21T10:00:00+11:00",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 50.77951320890669,
+      "reference_azimuth": 87.38425947963924,
+      "actual_altitude": 50.7747051854266,
+      "actual_azimuth": 87.38918513465501,
+      "angular_difference_deg": 0.005728729384420935,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "synthetic-north-polar",
+      "input": {
+        "latitude": 89.999,
+        "longitude": 0,
+        "instant": "2024-06-21T12:00:00Z",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 23.435647469235906,
+      "reference_azimuth": 179.5194753947767,
+      "actual_altitude": 23.438237921768938,
+      "actual_azimuth": 179.5187814857427,
+      "angular_difference_deg": 0.002667542088924086,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "synthetic-south-polar",
+      "input": {
+        "latitude": -89.999,
+        "longitude": 0,
+        "instant": "2024-06-21T12:00:00Z",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": -23.438043630968256,
+      "reference_azimuth": 0.4805173340235456,
+      "actual_altitude": -23.436237992308097,
+      "actual_azimuth": 0.48121123242094654,
+      "angular_difference_deg": 0.0019145897210613358,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "western-offset",
+      "input": {
+        "latitude": 24,
+        "longitude": -120,
+        "instant": "2024-09-22T07:00:00-08:00",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 15.364394437946206,
+      "reference_azimuth": 97.07026127146258,
+      "actual_altitude": 15.356615845082803,
+      "actual_azimuth": 97.06747567077059,
+      "angular_difference_deg": 0.008229313969985495,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "east-date-line",
+      "input": {
+        "latitude": 10,
+        "longitude": 179,
+        "instant": "2024-02-29T09:10:11+12:00",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 40.28017781911939,
+      "reference_azimuth": 109.42333029557807,
+      "actual_altitude": 40.277565295575,
+      "actual_azimuth": 109.41881449168392,
+      "angular_difference_deg": 0.004323684920168002,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "range-start",
+      "input": {
+        "latitude": 40,
+        "longitude": 0,
+        "instant": "1901-01-01T12:00:00Z",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 26.950749678078992,
+      "reference_azimuth": 179.07946005717622,
+      "actual_altitude": 26.952589789527416,
+      "actual_azimuth": 179.08511095826327,
+      "angular_difference_deg": 0.0053627334481817154,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    },
+    {
+      "name": "range-end",
+      "input": {
+        "latitude": -40,
+        "longitude": 0,
+        "instant": "2099-12-31T12:00:00Z",
+        "northAngleDeg": 0
+      },
+      "reference_geometric_altitude": 73.03250256613089,
+      "reference_azimuth": 2.3219166507263935,
+      "actual_altitude": 73.03348087491376,
+      "actual_azimuth": 2.3212599164215817,
+      "angular_difference_deg": 0.0009969038877309896,
+      "delta_t": "pvlib estimated from year/month",
+      "reference_elevation_m": 0
+    }
+  ],
+  "max_angular_difference_deg": 0.008229313969985495,
+  "status": "PASS",
+  "limitations": "Numerical cross-implementation benchmark on 11 synthetic cases; not field measurement, independent published multi-site observations, nor global accuracy guarantee. pvlib is review-only, not shipped or required at runtime."
+}

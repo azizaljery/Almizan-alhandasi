@@ -1,3 +1,4 @@
+import { rebindSolarContext } from '../dist/solar-context.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -15,7 +16,7 @@ function harness(name){
     state:{studioSession:{},program:[],model:null,alternatives:[],history:[],discovery:{},briefContext:null,landSurvey:null,requestAppliedPrompt:''},exploration:{signature:'',previous:[],seed:0},
     assertStudioOperation:t=>{if(t&&t!==active)throw Error('STALE OPERATION');},isCurrentStudioOperation:(_,t)=>t===active,
     rawPlot:()=>({}),requestInput:()=>({prompt:'',rooms:[],mode:'modify'}),requestFingerprint:()=> 'same',workspaceSignature:()=> 'same',engineeringSignature:()=> 'same',signature:()=> 'same',validatePlot:x=>x,normalizeRooms:x=>x,publicRooms:x=>x,
-    runPlanner:pending,analyzeClientRequest:pending,requestBrief:pending,requestLocalBrief:async()=>({rooms:[],questions:[]}),discoveryText:()=>'',buildEngineeringPromptContext:()=>({}),buildClientContext:()=>({}),bindRequestedDimensions:x=>x,verifyProposedProgram:()=>({pass:true}),
+    rebindSolarContext,restoreSolarSettings(){},runPlanner:pending,analyzeClientRequest:pending,requestBrief:pending,requestLocalBrief:async()=>({rooms:[],questions:[]}),discoveryText:()=>'',buildEngineeringPromptContext:()=>({}),buildClientContext:()=>({}),bindRequestedDimensions:x=>x,verifyProposedProgram:()=>({pass:true}),
     message:(id,text)=>{messages[id]=text;},markDirty(){},renderRows(){},showResults(){},switchTab(){},toast(){},syncWorkspace(){},fmt:String,esc:String,POSITIONS:{},SIDES:{},historyEntry:model=>({model}),showBrief:brief=>{c.state.proposal=brief;}
   };
   vm.createContext(c);vm.runInContext(functions[name],c);

@@ -74,3 +74,10 @@ test('Arabic solar label anchors inside the right viewport edge and follows pann
  const label=v.svg.querySelector('[data-solar-direction]');assert.equal(label.attrs.direction,'rtl');assert.equal(label.attrs['text-anchor'],'start');near(Number(label.attrs.x),29.6);
  v.view={x:10,y:-20,w:20,h:20};v.apply();near(Number(label.attrs.x),29.6);near(Number(label.attrs.y),-19.4);
 });
+
+test('compass indicates plan +Y until confirmed site north, and rotates independently of shadow visibility or night',()=>{
+ const v=fixture(),arrow=new Node('g'),label=new Node('text');arrow.setAttribute('data-plan-north-arrow','');label.setAttribute('data-plan-north-label','');v.svg.append(arrow,label);
+ v.showSolar({status:'not-calculated',visible:false});assert.equal(arrow.attrs.transform,'rotate(0)');assert.equal(label.textContent.trim(),'+Y');
+ v.showSolar({status:'approximate-site',visible:false,provenance:{northAngleDeg:90}},false);assert.equal(arrow.attrs.transform,'rotate(90)');assert.equal(label.textContent,'N');
+ v.showSolar(null,false);assert.equal(label.textContent.trim(),'+Y');assert.equal(arrow.attrs.transform,'rotate(0)');
+});
