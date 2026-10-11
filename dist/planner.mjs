@@ -2,6 +2,7 @@
 import { generateModel as claudeGenerate, validateModel as claudeValidate, quantities as claudeQuantities } from './claude/planner.mjs';
 import { pavilionTopology } from './pavilion-planner.mjs';
 import { staggeredTopology } from './staggered-planner.mjs';
+import { circulationNetwork } from './circulation.mjs';
 export const TYPES = {
   bedroom: { name: 'غرفة نوم', area: 20, min: 2.6, color: '#e4e7f2' },
   majlis: { name: 'مجلس', area: 32, min: 3, color: '#f3e6c8' },
@@ -498,10 +499,17 @@ export function removeOpening(model, point) {
   invalidateBoundReview(copy);
   return copy;
 }
+function unreachableRooms(model) {
+  try {
+    const network = circulationNetwork(model);
+    return model.rooms.filter(room => !network.toRoom(room.id)).map(room => 'لا يوجد مسار حركة فعلي متصل بالمدخل للفراغ: ' + room.name);
+  } catch { return ['تعذر التحقق من ترابط مسارات الأبواب.']; }
+}
 export function validateModel(m) {
   if (m?.version === 2) {
     const errors = [...claudeValidate(m), ...(m.shape === 'pavilions' ? pavilionTopology(m).errors : m.shape === 'staggered' ? staggeredTopology(m).errors : [])];
     if (!errors.length && m.plot.maxBuiltArea != null && claudeQuantities(m).footprint > m.plot.maxBuiltArea + E) errors.push('الكتلة تتجاوز سقف البناء المحدد.');
+    if (!errors.length) errors.push(...unreachableRooms(m));
     return errors;
   }
   const errors = [], fail = s => errors.push(s);
@@ -561,6 +569,7 @@ export function validateModel(m) {
   const reached = new Set(['outside']), queue = ['outside'];
   while (queue.length) for (const b of graph.get(queue.shift()) || []) if (!reached.has(b)) { reached.add(b); queue.push(b); }
   m.rooms.forEach(r => { if (!reached.has(r.id)) fail('لا يوجد مسار باب متصل بالمدخل للفراغ: ' + r.name); });
+  if (!errors.length) errors.push(...unreachableRooms(m));
   return [...new Set(errors)];
 }
 

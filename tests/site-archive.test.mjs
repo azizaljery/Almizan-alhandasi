@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import archiveWorker from '../worker/site-archive.mjs';
-import { defaultRooms, generateModel, validateModel } from '../dist/planner.mjs';
+import { defaultRooms, generateModel, generateTopologyModel, validateModel, removeOpening, openingPoint } from '../dist/planner.mjs';
 import { encodeProject, decodeProject, quantitiesCSV } from '../dist/project.mjs';
 import { quantityRows, estimate } from '../dist/estimates.mjs';
 import { buildPlanSVG } from '../dist/plan-view.mjs';
@@ -373,4 +373,40 @@ test('archive session does not report ready before all migration tables exist', 
     assert.equal(response.status, 503);
     assert.equal((await response.json()).error, 'archive_unavailable');
   } finally { database.close(); }
+});
+
+
+test('edited non-integrated geometry survives archive save/open with 22 to 21 openings', async () => {
+ const isolated = new LocalD1();
+ try {
+  const program = defaultRooms(), model = generateModel(plot, program);
+  assert.equal(model.openings.length,22);
+  const win = model.openings.find(o=>o.type==='window');
+  const edited = removeOpening(model,openingPoint(model,win));
+  assert.equal(edited.openings.length,21);
+  const response=await call(isolated,'/api/archive/designs',{method:'POST',body:{project:project({model:edited,rooms:program}),title:'edited synthetic geometry',idempotencyKey:'edited-window-roundtrip-001'}});
+  const receipt=await response.json();assert.equal(response.status,201,JSON.stringify(receipt));
+  const opened=await(await call(isolated,`/api/archive/designs/${receipt.designId}`)).json();
+  assert.equal(opened.model.openings.length,21);
+  const restored=decodeProject(opened.project);
+  assert.deepEqual(restored.model.openings,edited.openings);
+  assert.deepEqual(opened.model.openings,edited.openings);
+  assert.equal(restored.model.openings.some(o=>o.id===win.id),false);
+  assert.ok(opened.exactGeometryHash);
+ } finally { isolated.close(); }
+});
+
+test('archive sanitizer retains topology and explicit built area for both courtyard families', async () => {
+ for(const topology of ['courtyard','u-court']) {
+  const isolated=new LocalD1();
+  try {
+   const p={...plot,width:30,length:40},program=defaultRooms(),model=generateTopologyModel(p,program,{topology});
+   const response=await call(isolated,'/api/archive/designs',{method:'POST',body:{project:project({model,plot:p,rooms:program}),title:topology,idempotencyKey:'edited-topology-roundtrip-001'}});
+   const receipt=await response.json();assert.equal(response.status,201,JSON.stringify(receipt));
+   const opened=await(await call(isolated,`/api/archive/designs/${receipt.designId}`)).json();
+   assert.equal(opened.model.topology,model.topology);
+   assert.equal(opened.model.builtArea,model.builtArea);
+   assert.deepEqual(decodeProject(opened.project).model.openings,model.openings);
+  } finally {isolated.close();}
+ }
 });

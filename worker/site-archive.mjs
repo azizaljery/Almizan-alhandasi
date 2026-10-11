@@ -170,6 +170,8 @@ function sanitizeModel(input) {
     engineVersion: String(input.engineVersion || '').slice(0, 80),
     strategy: String(input.strategy || '').slice(0, 80),
     ...(typeof input.shape === 'string' ? { shape: input.shape.slice(0, 60) } : {}),
+    ...(typeof input.topology === 'string' ? { topology: input.topology.slice(0, 60) } : {}),
+    ...(input.builtArea !== undefined ? { builtArea: input.builtArea } : {}),
     ...(input.shapeFallback !== undefined ? { shapeFallback: safeTree(input.shapeFallback) } : {}),
     architecture: boxFields(input.architecture || {}, ['tag', 'form', 'idea', 'bestFor', 'tradeoff', 'massing']),
     plot: {

@@ -3,7 +3,7 @@ import { openingPoint } from './planner.mjs';
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
-// Walk along the centre lines of connected clear corridors, not through rooms or walls.
+// Walk along clear corridor axes and room interiors through their physical doors.
 // This is an illustrative route, not an egress or accessibility certification.
 export function circulationNetwork(model) {
   const nodes = new Map(), edges = new Map(), lines = new Map();
@@ -23,10 +23,32 @@ export function circulationNetwork(model) {
     if (!lines.has(corridor.id)) lines.set(corridor.id, []);
     lines.get(corridor.id).push(projectedId);
   };
-  const doors = model.openings.filter(o => o.type === 'door');
+  const rooms = new Map((model.rooms || []).map(r => [r.id, r]));
+  const walls = new Map((model.walls || []).map(w => [w.id, w]));
+  const physicalRoomDoors = new Map();
+  const attachRoom = (room, door, point) => {
+    const wall = walls.get(door.wallId), tolerance = wall.t / 2 + 1e-5;
+    const horizontal = Math.abs(wall.y2 - wall.y1) < 1e-8;
+    const vertical = Math.abs(wall.x2 - wall.x1) < 1e-8;
+    // A claimed connection alone cannot create a shortcut through a solid wall.
+    const adjacent = horizontal
+      ? point.x >= room.x && point.x <= room.x + room.w && Math.min(Math.abs(point.y - room.y), Math.abs(point.y - room.y - room.h)) <= tolerance
+      : vertical && point.y >= room.y && point.y <= room.y + room.h && Math.min(Math.abs(point.x - room.x), Math.abs(point.x - room.x - room.w)) <= tolerance;
+    if (!adjacent) return;
+    const centre = { x: room.x + room.w / 2, y: room.y + room.h / 2 };
+    const turn = horizontal ? { x: point.x, y: centre.y } : { x: centre.x, y: point.y };
+    const turnId = add(`${door.id}@room:${room.id}`, turn), centreId = add(`centre:${room.id}`, centre);
+    connect(door.id, turnId, room.id); connect(turnId, centreId, room.id);
+    if (!physicalRoomDoors.has(room.id)) physicalRoomDoors.set(room.id, new Set());
+    physicalRoomDoors.get(room.id).add(door.id);
+  };
+  const doors = model.openings.filter(o => o.type === 'door' && walls.has(o.wallId) && Number.isFinite(o.pos));
   for (const door of doors) {
     const point = openingPoint(model, door); add(door.id, point);
-    for (const space of door.connects || []) if (corridors.has(space)) attach(corridors.get(space), point, door.id);
+    for (const space of door.connects || []) {
+      if (corridors.has(space)) attach(corridors.get(space), point, door.id);
+      else if (rooms.has(space)) attachRoom(rooms.get(space), door, point);
+    }
   }
   for (const [index, [aId, bId]] of model.links.entries()) {
     const a = corridors.get(aId), b = corridors.get(bId);
@@ -59,7 +81,7 @@ export function circulationNetwork(model) {
     return { metres: distances.get(to), points, spaces: [...new Set(spaces)] };
   }
   const entries = doors.filter(o => o.connects?.includes('outside'));
-  const roomDoors = id => doors.filter(o => o.connects?.includes(id));
+  const roomDoors = id => doors.filter(o => physicalRoomDoors.get(id)?.has(o.id));
   const bestPath = (from, to) => from.flatMap(a => to.map(b => path(a.id, b.id))).filter(Boolean).sort((a, b) => a.metres - b.metres)[0] || null;
   return {
     toRoom(id) { return bestPath(entries, roomDoors(id)); },

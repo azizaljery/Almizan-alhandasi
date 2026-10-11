@@ -1,3 +1,4 @@
+import { circulationNetwork } from './circulation.mjs';
 import { center, openingPoint, wallPieces } from './planner.mjs';
 import { architecturalTextures, beveledBox } from './architectural-materials.mjs';
 import { furnishRoom } from './furniture3d.mjs';
@@ -214,10 +215,15 @@ export class RoomViewer {
     this.onMode?.('orbit', name); this.render();
   }
   enter(id) {
-    const r = this.model?.rooms.find(r => r.id === id); if (!r) return;
-    const c = center(r), door = this.model.openings.find(o => o.type === 'door' && o.roomId === id), p = openingPoint(this.model, door);
+    const r = this.model?.rooms.find(r => r.id === id); if (!r) return false;
+    let route;
+    try { route = circulationNetwork(this.model).toRoom(id); } catch { return false; }
+    const p = route?.points.at(-1);
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return false;
+    const c = center(r);
     this.mode = 'inside'; this.eye = { x: c.x, y: c.y }; this.yaw = Math.atan2(p.x - c.x, p.y - c.y); this.pitch = -.06;
     this.roof.visible = false; this.onMode?.('inside', r.name); this.render(); this.renderer.domElement.focus({ preventScroll: true });
+    return true;
   }
   blocked(x, y) {
     const p = this.model.plot, radius = .18;

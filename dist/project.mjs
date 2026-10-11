@@ -7,15 +7,25 @@ export const MAX_PROJECT_BYTES = 2_000_000;
 const palettes = ['resort', 'modern', 'classic', 'hijazi'];
 const publicRooms = rooms => normalizeRooms(rooms).map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const palette = value => { if (!palettes.includes(value)) throw Error('طابع محفوظ غير معروف.'); return value; };
-export const modelRecipe = model => model ? { plot: validatePlot(model.plot), rooms: publicRooms(model.program), strategy: model.strategy || 'compact', ...(model.engineVersion === 'mizan-p1-integrated' ? { embedded: structuredClone(model) } : {}) } : null;
+export const modelRecipe = model => model ? { plot: validatePlot(model.plot), rooms: publicRooms(model.program), strategy: model.strategy || 'compact', geometryVersion: 1, embedded: structuredClone(model) } : null;
 function recipe(raw) {
   if (!raw || !Object.hasOwn(STRATEGIES, raw.strategy)) throw Error('وصف توزيع محفوظ غير صالح.');
   const out = { plot: validatePlot(raw.plot), rooms: publicRooms(raw.rooms), strategy: raw.strategy };
+  // Geometry storage is versioned independently of the project envelope. Old
+  // recipe-only projects and unmarked integrated snapshots remain readable.
+  // A marked snapshot may never fall back to regeneration when geometry is lost.
+  if (Object.hasOwn(raw, 'geometryVersion') && (raw.geometryVersion !== 1 || raw.embedded === undefined)) throw Error('إصدار حفظ هندسة المخطط غير صالح أو هندسته مفقودة.');
   if (raw.embedded !== undefined) {
-    if (!raw.embedded || typeof raw.embedded !== 'object' || raw.embedded.engineVersion !== 'mizan-p1-integrated') throw Error('المخطط المدمج المحفوظ غير صالح.');
-    const embedded = structuredClone(raw.embedded), errors = validateModel(embedded);
+    if (!raw.embedded || typeof raw.embedded !== 'object' || Array.isArray(raw.embedded) ||
+      ![1, 2].includes(raw.embedded.version) ||
+      (raw.geometryVersion !== 1 && raw.embedded.engineVersion !== 'mizan-p1-integrated')) throw Error('المخطط المدمج المحفوظ غير صالح.');
+    const embedded = structuredClone(raw.embedded);
+    let errors;
+    try { errors = validateModel(embedded); }
+    catch { throw Error('هندسة المخطط المحفوظ غير مكتملة أو غير صالحة.'); }
     if (errors.length) throw Error('المخطط المدمج المحفوظ غير صالح: ' + errors[0]);
     if (embedded.strategy !== raw.strategy || JSON.stringify(validatePlot(embedded.plot)) !== JSON.stringify(out.plot) || JSON.stringify(publicRooms(embedded.program)) !== JSON.stringify(out.rooms)) throw Error('بيانات المخطط المدمج لا تطابق وصف الحفظ.');
+    if (raw.geometryVersion === 1) out.geometryVersion = 1;
     out.embedded = embedded;
   }
   return out;
@@ -56,7 +66,9 @@ export function encodeProject({ plot, rooms, palette, rates, costReserve, vat, i
   const raw = { schema: 'mizan-handasi-project', version: 1, engineVersion: ENGINE_VERSION, savedAt: new Date().toISOString(),
     draft: { plot, rooms, palette, rates, costReserve, vat, idea, discovery, landSurvey }, modelLandSurvey, design: modelRecipe(model),
     alternatives: alternatives.map(modelRecipe), history: history.slice(-5).map(h => ({ design: modelRecipe(h.model), palette: h.palette, ...(h.landSurvey ? { landSurvey: h.landSurvey } : {}) })) };
-  return JSON.stringify(validateProject(raw), null, 2);
+  const text = JSON.stringify(validateProject(raw), null, 2);
+  if (new TextEncoder().encode(text).length > MAX_PROJECT_BYTES) throw Error('ملف المشروع أكبر من 2 ميغابايت؛ قلّل عدد البدائل أو النسخ المحفوظة.');
+  return text;
 }
 export function decodeProject(text) {
   if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_PROJECT_BYTES) throw Error('ملف المشروع أكبر من 2 ميغابايت أو غير صالح.');
