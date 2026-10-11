@@ -239,7 +239,7 @@ async function understandRequest(operation = null) {
     list('requestAssumptions', result.assumptions); list('requestLimits', result.limitations);
     $('requestReview').hidden = false; syncWorkspace();
     $('requestReview').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } catch (error) { message('requestFeedback', error.message); }
+  } catch (error) { if (startEpoch === modelEpoch && (!operation?.sessionId || isCurrentStudioOperation(state.studioSession, operation))) message('requestFeedback', error.message); }
   finally { if (!operation?.sessionId || isCurrentStudioOperation(state.studioSession, operation)) { $('askLocal').disabled = false; $('askLocal').textContent = 'افهم طلبي'; } }
 }
 function applyRequest() {
@@ -709,7 +709,7 @@ async function generate(options = {}) {
     message('generationError', ''); showResults('generated'); switchTab($('app').classList.contains('studio-simple-mode') && !$('app').classList.contains('studio-advanced-open') ? 'design' : 'result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
     return { model: structuredClone(state.model), alternatives: structuredClone(state.alternatives), failures: structuredClone(state.failures), operationId: operation?.id || null };
-  } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح لم يتغير في هذه الجلسة.' : '')); markDirty(); }
+  } catch (error) { if (runId === generationSequence && startEpoch === modelEpoch && (!operation || isCurrentStudioOperation(state.studioSession, operation))) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح لم يتغير في هذه الجلسة.' : '')); markDirty(); } }
   finally { if (runId === generationSequence) { $('gen').disabled = false; $('freshIdeas').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن حتى ستة بدائل'; markDirty(); } }
 }
 function renderBOQ() {
@@ -783,7 +783,7 @@ async function askAI(operation = null) {
     $('aiStatus').textContent = 'نجح الاتصال والتحليل. راجع الاقتراح قبل نقله إلى الجدول.';
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'جهّز الذكاء برنامج التصميم. راجع الافتراضات ثم اختر «اعتمد وارسم المخططات».');
-  } catch (error) { message('aiFeedback', error.message); }
+  } catch (error) { if (startEpoch === modelEpoch && (!operation?.sessionId || isCurrentStudioOperation(state.studioSession, operation))) message('aiFeedback', error.message); }
   finally { if (!operation?.sessionId || isCurrentStudioOperation(state.studioSession, operation)) { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = 'حلّل طلبي بالخدمة المتصلة'; } }
 }
 
