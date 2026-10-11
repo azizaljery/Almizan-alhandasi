@@ -6,7 +6,7 @@ import { verifyProposedProgram, verifyProgramGeometry } from '../brief-contract.
  */
 import schema from './control/contracts/mizan-envelope-v1.schema.mjs';
 import {generateModelLegacy,quantities} from '../claude/compat-layer.mjs';
-import {validateModel} from '../claude/planner.mjs';
+import {validateModel,RECT_SEARCH_VERSION} from '../claude/planner.mjs';
 import {reviewCandidate,verifyBoundReview} from './gemini/packages/design-intelligence/adapters/mizan-review-v1.js';
 import {validateEnvelope} from './gemini/packages/engineering-core/contracts/mizan-ir-v1.adapter.js';
 import {contentHash,geometryHash,candidateId,verifyCandidateBinding,canonicalJSON,FRAME,UNITS} from './control/reference/identity.mjs';
@@ -18,8 +18,8 @@ import {exploreGeometry,conceptFor} from '../design-exploration.mjs';
 import {evaluatePlanPreferences,rankAzizSurvivingPreferences} from '../preference-evidence.mjs';
 
 const CLAUDE_ID='@mizan/claude-planner';
-const CLAUDE_VERSION='2.3.1-p1-cla-01';
-const SOURCE='549b8bcead0f9f2412bf1ea84c83ddb7524137d22166649a1adfcf87e8474c3d';
+const CLAUDE_VERSION=RECT_SEARCH_VERSION;
+const SOURCE='cf6de1ed1339c2cdc11faeaf7cae787c6423a32f9826a18ad3eaab6ca4bff23f';
 const ADAPTER_VERSION='control-local-preview/1.1.0';
 const PAVILION_SOURCE='1ce9f064dd41f822582ce13f70d86a3cdc8c418808c9cad5df3c653c810972a9';
 const STAGGERED_SOURCE='0300ebb2460433dcee8c44ce28be7b1bc1db403ef9721a2d922292f190abcf16';
@@ -64,6 +64,18 @@ function supportedRequest(r) {
  }
  return reasons;
 }
+// Only already-recognized directional route preferences enter the bounded solver.
+// Other asks remain in the existing explicit preference/unsupported evidence.
+function searchRelationships(request) {
+ const relationships=[];
+ for(const preference of request.softPreferences) {
+  const kind=preference.value?.mizanKind;
+  if(!['prefer_dining_access_all_majlis','prefer_dining_far_from_majlis'].includes(kind)) continue;
+  const relation=kind==='prefer_dining_far_from_majlis'?'far':'near';
+  for(const a of request.program.filter(r=>r.type==='dining')) for(const b of request.program.filter(r=>r.type==='majlis')) relationships.push({roomIds:[a.id,b.id],relation,weight:1});
+ }
+ return relationships;
+}
 export async function generateCandidate(request,shape,generationOverrides={},exploration=null) {
  const r=snapshot(request);
  if(!Object.hasOwn(STRATEGIES,shape)) throw Error('UNSUPPORTED_SHAPE');
@@ -72,8 +84,10 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
  const composed=shape==='pavilions'||shape==='staggered';
  const plot={width:r.plot.widthM,length:r.plot.lengthM,entry:r.plot.entry,streets:r.plot.streets,
   floors:r.plot.floorsRequested,coverage:r.plot.coverageRatio,maxBuiltAreaM2:r.plot.maxBuiltAreaM2,...generationOverrides};
- const rooms=r.program.map(p=>({name:p.name,type:p.type,area:p.areaM2,...(p.exactDimensionsM?{dimensions:{width:p.exactDimensionsM.widthM,length:p.exactDimensionsM.lengthM}}:{}),position:p.position,side:p.side}));
- const m=shape==='staggered' ? generateStaggeredModel(plot,rooms) : shape==='pavilions' ? generatePavilionModel(plot,rooms) : exploration ? exploreGeometry(plot,rooms,shape,exploration,STRATEGIES[shape]) : generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
+ const rooms=r.program.map(p=>({name:p.name,type:p.type,area:p.areaM2,...(p.exactDimensionsM?{dimensions:{width:p.exactDimensionsM.widthM,length:p.exactDimensionsM.lengthM,...(r.hardConstraints.some(c=>c.kind==='room_dimensions_exact'&&c.value.roomId===p.id&&c.value.rotationAllowed===false)?{allowRotation:false}:{})}}:{}),position:p.position,side:p.side}));
+ const search=exploration?.search ? {...exploration.search,relationships:searchRelationships(r)} : null;
+ const resolvedExploration=search?{...exploration,search}:exploration;
+ const m=shape==='staggered' ? generateStaggeredModel(plot,rooms) : shape==='pavilions' ? generatePavilionModel(plot,rooms) : exploration ? exploreGeometry(plot,rooms,shape,resolvedExploration,STRATEGIES[shape]) : generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
  const topology=shape==='staggered'?staggeredTopology(m):shape==='pavilions'?pavilionTopology(m):{errors:[]};
  const requiredWings=r.hardConstraints.find(c=>c.kind==='wing_count_exact')?.value?.count;
  if(requiredWings!==undefined&&(shape!=='staggered'||topology.wingCount!==requiredWings)) throw Error('REQUESTED_WING_COUNT_MISMATCH');
@@ -86,7 +100,7 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
  if(!massing.pass) throw Error('MASSING_NOT_EQUIVALENT');
  const c={schemaVersion:'1.0.0',kind:'CandidateEnvelope',projectId:r.projectId,requestId:r.requestId,
   inputHash:await contentHash(r),producer:{engineId:shape==='pavilions'?'@mizan/pavilion-composer':shape==='staggered'?'@mizan/staggered-composer':CLAUDE_ID,packageName:composed?`${shape==='pavilions'?'pavilion':shape}-composer`:'planner-pkg',packageVersion:shape==='staggered'?STAGGERED_COMPOSER_VERSION:composed?PAVILION_COMPOSER_VERSION:CLAUDE_VERSION,
-  sourceSha256:shape==='staggered'?STAGGERED_SOURCE:composed?PAVILION_SOURCE:SOURCE,adapterVersion:exploration?'architectural-exploration/1.0.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
+  sourceSha256:shape==='staggered'?STAGGERED_SOURCE:composed?PAVILION_SOURCE:SOURCE,adapterVersion:exploration?'architectural-exploration/1.1.0':ADAPTER_VERSION},alternativeKey:exploration?.key??`${shape}-${r.plot.entry}`,requestedShape:shape,actualShape:m.shape,
   units:{...UNITS},frame:FRAME,fallback:{used:m.shapeFallback,allowedByUser:false,reason:null},geometry,
   presentation:{label:exploration?conceptFor(exploration,m.shape).tag:m.architecture.tag,massingParts:structuredClone(m.massingParts??null)}};
  c.geometryHash=await geometryHash(c); c.candidateId=await candidateId(c);

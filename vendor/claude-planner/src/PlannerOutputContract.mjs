@@ -43,7 +43,8 @@
  * @property {string} name  non-empty after trim, <= 70 chars
  * @property {RoomType} type
  * @property {number} area  net m², 4..120; placed rooms keep it exactly (±1e-5)
- * @property {{ width: number, length: number }} [dimensions] exact clear room dimensions in metres; geometry may rotate them 90°
+ * @property {{ width: number, length: number, allowRotation?: boolean }} [dimensions] exact clear room dimensions in metres; geometry may rotate them 90° unless allowRotation is false
+ * @property {{ width: number, length: number, allowRotation?: boolean }} [exactDimensionsM] legacy native dimensions alias
  * @property {Position} position
  * @property {Side} side
  */
@@ -73,7 +74,7 @@
  * @property {RoomType} type
  * @property {number} area
  * @property {number} targetArea  copy of area; validateModel checks w*h against it
- * @property {{ width: number, length: number }} [dimensions] explicit dimensions that geometry must preserve, allowing axis swap
+ * @property {{ width: number, length: number, allowRotation?: boolean }} [dimensions] explicit dimensions that geometry must preserve, allowing axis swap unless allowRotation is false
  * @property {Position} position  may be rewritten to 'middle' inside L/U arms
  * @property {Side} side          may be rewritten to 'any' inside single-sided arms
  */

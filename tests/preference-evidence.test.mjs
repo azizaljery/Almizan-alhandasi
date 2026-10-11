@@ -90,8 +90,8 @@ test('corridor preference exposes a tradeoff but preserves the AZIZ winner unles
   const preferenceAlternative = after.models.find(model => model.integration.candidateId === after.preferenceRanking.bestPreferenceCandidateId);
   assert.ok(preferenceAlternative, 'the route-ranked alternative reaches the UI alternatives');
   assert.notEqual(preferenceAlternative.integration.geometryHash.value, after.selectedModel.integration.geometryHash.value);
-  assert.match(preferenceAlternative.integration.alternativeKey, /route-mode|explore/,
-    'the route-focused geometry search contributes a distinct candidate');
+  assert.notDeepEqual(preferenceAlternative.corridors, after.selectedModel.corridors,
+    'the measured tradeoff comes from different corridor geometry, regardless of generator key');
   const residual = winningEvidence.evaluations.find(row => row.kind === 'avoid_long_corridors');
   const fallbackEvidence = after.preferenceEvaluations.find(row => row.candidateId === after.aziz.selectedCandidateId)
     .evaluations.find(row => row.kind === 'avoid_long_corridors');

@@ -31,11 +31,18 @@ test('displayed ideas differ structurally and a new batch excludes previous idea
 
 test('labels, translation, reflection, rotation and equal-room swaps cannot earn novelty', async () => {
   const {models:[m]} = await runMultiEngineDesign({plot,rooms,seed:1});
-  const renamed = structuredClone(m); renamed.architecture.tag='اسم مختلف'; renamed.rooms.reverse();
-  for(const r of renamed.rooms){r.x+=100;r.y-=70;r.name='تسمية أخرى';r.id='different-'+r.id;}
-  const mirrored = structuredClone(m); mirrored.rooms=mirrored.rooms.map(r=>({...r,x:100-r.x-r.w}));
-  const rotated = structuredClone(m); rotated.rooms=rotated.rooms.map(r=>({...r,x:-r.y-r.h,y:r.x,w:r.h,h:r.w}));
-  rotated.building={...rotated.building,w:m.building.h,h:m.building.w};
+  const transform = (source, point, rename = false) => {
+    const out=structuredClone(source), rect=r=>{const a=point(r.x,r.y),b=point(r.x+r.w,r.y+r.h);return {...r,x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(b.x-a.x),h:Math.abs(b.y-a.y)}};
+    for(const key of ['rooms','corridors','reserves','courtyards','massingParts']) if(out[key])out[key]=out[key].map(rect);
+    for(const key of ['building','boundingBox','footprint'])if(out[key])out[key]=rect(out[key]);
+    if(out.buildingFootprint)out.buildingFootprint=out.buildingFootprint.map(p=>point(p.x,p.y));
+    out.walls=out.walls.map(w=>{const a=point(w.x1,w.y1),b=point(w.x2,w.y2);return {...w,x1:a.x,y1:a.y,x2:b.x,y2:b.y}});
+    if(rename){const id=value=>value==='outside'?value:'renamed-'+value;for(const key of ['rooms','corridors','walls','openings','program'])out[key]=out[key].map(v=>({...v,id:id(v.id),...(v.wallId?{wallId:id(v.wallId)}:{}),...(v.roomId?{roomId:id(v.roomId)}:{}),...(v.connects?{connects:v.connects.map(id)}:{})}));out.links=out.links.map(pair=>pair.map(id));out.rooms.reverse();out.rooms.forEach(r=>r.name='تسمية أخرى');}
+    return out;
+  };
+  const renamed=transform(m,(x,y)=>({x:x+100,y:y-70}),true);renamed.architecture.tag='اسم مختلف';
+  const mirrored=transform(m,(x,y)=>({x:100-x,y}));
+  const rotated=transform(m,(x,y)=>({x:-y,y:x}));
   for(const clone of [renamed,mirrored,rotated]) assert.ok(layoutDistance(descriptor(m),descriptor(clone))<1e-12);
   assert.equal(selectDiverse([m,renamed,mirrored,rotated].map(geometry=>({candidate:{geometry}}))).length,1);
 });

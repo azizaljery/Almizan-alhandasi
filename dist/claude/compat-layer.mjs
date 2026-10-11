@@ -1,6 +1,6 @@
 // P1-CLA-01 — local geometry/legacy projection only; MIZAN-IR/1.0.0 semantics.
 // Not a complete replacement for the site's editor, persistence or integration adapter.
-// The four native engine files are preserved byte-for-byte.
+// Local relational-search extension; native source and browser projection are kept byte-for-byte in sync.
 import { generateModel, quantities as quantitiesV2, TYPES, SHAPES, GEOMETRY, validateModel } from './planner.mjs';
 
 /**
@@ -127,11 +127,11 @@ export function generateAlternatives(plot, rooms) {
  * Legacy strategy aliases are retained for restore, but duplicate geometry is offered once.
  * Native fallback is accepted only with explicit permission, always reported.
  * @param {PlotInput} plot @param {RoomRequest[]} rooms
- * @param {{strategy?:string, allowFallback?:boolean}} [opts]
+ * @param {{strategy?:string, allowFallback?:boolean, search?:import('./planner.mjs').RectSearchInput}} [opts]
  */
-export function generateModelLegacy(plot, rooms, {strategy='compact', allowFallback=false}={}) {
+export function generateModelLegacy(plot, rooms, {strategy='compact', allowFallback=false, search}={}) {
   const cap=areaCap(plot), requestedShape=shapeFor(strategy);
-  const m=generateModel({...plot,shape:requestedShape},rooms);
+  const m=generateModel({...plot,shape:requestedShape},rooms,{search});
   const errors=validateModel(m);
   if (errors.length) throw Error('NATIVE_VALIDATION_FAILED: '+errors.join('; '));
   const applied=m.shape !== requestedShape;

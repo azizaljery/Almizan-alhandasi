@@ -565,7 +565,7 @@ function renderAlternatives() {
   $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} بدائل هندسية · التحديد يحدّث المسقط و3D والكميات`;
   const failed = state.failures.map(f => `${f.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[f.strategy] || 'أحد البدائل'}: ${f.reason}`).join(' ');
   const search = state.multiEngine?.searchEvidence;
-  const explanation = search ? `جُرّبت ${search.attempted} محاولة؛ تعذرت هندسة ${search.generationRejected}، واستُبعد ${search.excludedHistory} للتشابه مع التاريخ و${search.excludedBatch} للتشابه داخل الدفعة و${search.reviewRejected} عند المراجعة. الحد الأقصى ستة وليس عددًا مضمونًا.` : '';
+  const explanation = search ? `جُرّبت ${search.attempted} محاولة؛ تعذرت هندسة ${search.generationRejected}، واستُبعد ${search.excludedHistory} للتشابه مع التاريخ و${search.excludedBatch} للتشابه داخل الدفعة و${search.reviewRejected} عند المراجعة. الحد الأقصى ستة وليس عددًا مضمونًا. البحث محدود ولا يثبت استحالة حلول أخرى.` : '';
   $('alternativeNote').textContent = `${state.alternatives.length} بدائل معروضة من البرنامج نفسه. الاختلاف مقاس بالهندسة، ولا يثبت وحده اختلاف التنظيم أو جودة التصميم. ${explanation} ${failed}`;
   markDirty();
 }

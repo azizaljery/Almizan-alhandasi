@@ -118,9 +118,10 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
         candidates.push({ ...generated, concept: composed ? CONCEPT[spec.shape] : conceptFor(spec, spec.shape) });
       } catch (error) { generationRejections.push({ key: spec.key, shape: spec.shape, reason: error.message }); if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
     }
-    const priorityIds = [];
+    const preferredShapes = request.softPreferences.filter(p => (p.value?.mizanKind || p.kind) === 'prefer_aesthetic').map(p => p.value?.shape).filter(Boolean);
+    const baselineIds = candidates.filter(g => (/-baseline$/.test(g.candidate.alternativeKey) || ['pavilions','staggered'].includes(g.candidate.actualShape))).map(g => g.candidate.candidateId);
+    const priorityIds = [...baselineIds, ...candidates.filter(g => preferredShapes.includes(g.candidate.actualShape)).map(g => g.candidate.candidateId)];
     if (routeFocused) {
-      const baselineIds = candidates.filter(g => /-baseline$/.test(g.candidate.alternativeKey)).map(g => g.candidate.candidateId);
       const metricRows = new Map();
       for (const generated of candidates) for (const row of evaluatePlanPreferences(generated.candidate.geometry, request.softPreferences)) {
         const metrics = row.data?.preferenceMetrics || (Number.isFinite(row.objective) && row.direction
@@ -129,7 +130,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
           if (!Number.isFinite(metric.value)) continue;
           const prior = metricRows.get(metric.name) || { direction: metric.direction, rows: [] };
           prior.rows.push({ candidateId: generated.candidate.candidateId, value: metric.value,
-            routeFocused: /-route-mode-/.test(generated.candidate.alternativeKey) }); metricRows.set(metric.name, prior);
+            routeFocused: /-(?:route-mode|organization)-/.test(generated.candidate.alternativeKey) }); metricRows.set(metric.name, prior);
         }
       }
       const priority = ['longest_entry_route_m','mean_entry_route_m','modeled_corridor_area_m2','total_corridor_axis_m','longest_corridor_axis_m'];
@@ -146,8 +147,9 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
           || a.candidateId.localeCompare(b.candidateId))[0];
         if (winner && !metricWinnerIds.includes(winner.candidateId)) metricWinnerIds.push(winner.candidateId);
       }
-      priorityIds.push(...baselineIds, ...metricWinnerIds);
+      priorityIds.push(...metricWinnerIds);
     }
+    priorityIds.push(...candidates.filter(g => /-organization-/.test(g.candidate.alternativeKey)).map(g => g.candidate.candidateId));
     const selection = selectDiverseWithEvidence(candidates, previous, undefined, priorityIds), diverse = selection.selected;
     searchEvidence = { ...selection.summary, attempted: specs.length, generationRejected: generationRejections.length, generationRejections, rejections: selection.rejections };
     if (!diverse.length && candidates.length && previous.length) throw Error(`لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. تأهل 0 من ${candidates.length} مرشحًا هندسيًا؛ استُبعد ${selection.summary.excludedHistory} للتشابه مع التاريخ. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.`);

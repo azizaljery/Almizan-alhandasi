@@ -1,7 +1,8 @@
-/** Architectural search around the frozen geometry solver. No room areas are relaxed.
+/** Architectural search around the versioned geometry solver. No room areas are relaxed.
  * Search envelopes are subsets of the user's buildable area; only translation is
  * applied to the solver output. Walls, openings and circulation stay metric-exact.
  */
+import { spatialRelationDescriptor, spatialRelationDistance } from './spatial-relations.mjs';
 import { generateModelLegacy } from './claude/compat-layer.mjs';
 import { footprint, normalizeRooms, validatePlot, polygonArea } from './claude/planner.mjs';
 
@@ -32,13 +33,14 @@ export function explorationSpecs(seed = 1, { routeFocused = false } = {}) {
         seed: (seed + mode * 131 + shape.charCodeAt(0) * 17) >>> 0 });
     }
   }
+  for (const variant of [0,1,2]) specs.push({ shape: 'rect', key: `rect-organization-${seed}-${variant}`, mode: -1, widthRatio: 1, seed, search: { variant } });
   return specs;
 }
 export function conceptFor(spec, shape) {
   const form = { rect: 'كتلة واحدة ورواق مركزي', l: 'جناحان حول حديقة جانبية', u: 'أجنحة تحيط بباحة مفتوحة' }[shape];
   const base = concepts[spec.mode >= 3 ? (spec.mode - 3) % concepts.length : Math.max(0, spec.mode)];
-  return { ...base, tag: spec.mode < 0 ? 'التوزيع المرجعي' : base.tag,
-    form, massing: shape, idea: spec.mode < 0 ? 'توزيع للمقارنة مع الأفكار الجديدة تحت المتطلبات نفسها.' : base.idea + (spec.widthRatio < .8 ? ' ويختبر كتلة أضيق وأكثر عمقًا ضمن الأرض.' : '') };
+  return { ...base, tag: spec.search ? 'تنظيم صفوف وفروع وصول' : spec.mode < 0 ? 'التوزيع المرجعي' : base.tag,
+    form, massing: shape, idea: spec.search ? 'بحث محدود داخل المولد في صفوف الغرف وفروع الوصول مع إبقاء المتطلبات الملزمة؛ العلاقة المطلوبة تؤثر في البحث قبل التقييم النهائي.' : spec.mode < 0 ? 'توزيع للمقارنة مع الأفكار الجديدة تحت المتطلبات نفسها.' : base.idea + (spec.widthRatio < .8 ? ' ويختبر كتلة أضيق وأكثر عمقًا ضمن الأرض.' : '') };
 }
 export function exploreGeometry(plot, rooms, shape, spec, strategy) {
   const original = normalizeRooms(rooms), rng = random(spec.seed);
@@ -51,7 +53,7 @@ export function exploreGeometry(plot, rooms, shape, spec, strategy) {
     return { ...r, side: left ? 'left' : 'right' };
   });
   let m;
-  if (spec.mode < 0) m = generateModelLegacy(plot, assigned, { strategy, allowFallback: false });
+  if (spec.mode < 0) m = generateModelLegacy(plot, assigned, { strategy, allowFallback: false, search: spec.search });
   else {
     const f = footprint(plot), sideways = ['e', 'w'].includes(plot.entry);
     const w = f.w * (sideways ? 1 : spec.widthRatio), h = f.h * (sideways ? spec.widthRatio : 1);
@@ -88,11 +90,13 @@ export function layoutDescriptor(m) {
   for (const r of m.rooms) add(aspectGroups, key(r), Math.abs(Math.log(r.w / r.h)));
   m.rooms.forEach((a, i) => m.rooms.slice(i + 1).forEach(b => add(groups, [key(a), key(b)].sort().join('|'), Math.hypot(a.x + a.w / 2 - b.x - b.w / 2, a.y + a.h / 2 - b.y - b.h / 2) / scale)));
   const flatten = map => [...map.entries()].sort(([a], [b]) => a.localeCompare(b)).flatMap(([, values]) => values.sort((a, b) => a - b));
-  return { shape: m.shape || (courtyard ? 'u' : 'rect'), pairs: flatten(groups), aspects: flatten(aspectGroups), mass: [Math.abs(Math.log(m.building.w / m.building.h)), q.courtyard / q.footprint, q.circulation / q.rooms, q.reserve / q.rooms] };
+  const physical = spatialRelationDescriptor(m);
+  const relations = { valid: physical.valid, sharedWalls: physical.sharedWalls, access: physical.access };
+  return { relations, shape: m.shape || (courtyard ? 'u' : 'rect'), pairs: flatten(groups), aspects: flatten(aspectGroups), mass: [Math.abs(Math.log(m.building.w / m.building.h)), q.courtyard / q.footprint, q.circulation / q.rooms, q.reserve / q.rooms] };
 }
 const rms = (a, b) => a.length && a.length === b.length ? Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0) / a.length) : a.length === b.length ? 0 : 1;
 export function layoutDistance(a, b) {
-  return Math.max(a.shape === b.shape ? 0 : .4, rms(a.pairs, b.pairs) * 2, rms(a.aspects, b.aspects) * .5, rms(a.mass, b.mass) * .5);
+  return Math.max(spatialRelationDistance(a.relations, b.relations) * .5, a.shape === b.shape ? 0 : .4, rms(a.pairs, b.pairs) * 2, rms(a.aspects, b.aspects) * .5, rms(a.mass, b.mass) * .5);
 }
 export function selectDiverseWithEvidence(candidates, previous = [], limit = MAX_ALTERNATIVES, prioritizedCandidateIds = []) {
   const history = previous.map(m => layoutDescriptor(m));
