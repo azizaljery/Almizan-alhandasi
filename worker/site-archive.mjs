@@ -168,6 +168,7 @@ function sanitizeModel(input) {
   const model = {
     version: input.version,
     engineVersion: String(input.engineVersion || '').slice(0, 80),
+    ...(Number.isSafeInteger(input.geometryRevision) && input.geometryRevision >= 0 ? { geometryRevision: input.geometryRevision } : {}),
     strategy: String(input.strategy || '').slice(0, 80),
     ...(typeof input.shape === 'string' ? { shape: input.shape.slice(0, 60) } : {}),
     ...(typeof input.topology === 'string' ? { topology: input.topology.slice(0, 60) } : {}),

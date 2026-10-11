@@ -410,3 +410,21 @@ test('archive sanitizer retains topology and explicit built area for both courty
   } finally {isolated.close();}
  }
 });
+
+
+test('archive retains atomic editor revision and exact committed partition geometry', async () => {
+ const { createGeometrySession } = await import('../dist/geometry-session.mjs');
+ const isolated = new LocalD1();
+ try {
+  const model = generateModel(plot, defaultRooms());
+  const session = createGeometrySession(model);
+  const preview = session.preview({id:'archive-partition-command',type:'move-partition',baseRevision:0,wallId:'wall-6',deltaM:.2});
+  const edited = session.commit({previewId:preview.previewId,confirmProgramChange:true}).model;
+  const response = await call(isolated,'/api/archive/designs',{method:'POST',body:{project:project({model:edited,rooms:edited.program}),title:'partition geometry',idempotencyKey:'partition-revision-roundtrip-001'}});
+  const receipt = await response.json(); assert.equal(response.status,201,JSON.stringify(receipt));
+  const opened = await(await call(isolated,`/api/archive/designs/${receipt.designId}`)).json();
+  assert.equal(opened.model.geometryRevision,1);
+  for (const field of ['rooms','walls','openings','program']) assert.deepEqual(opened.model[field],edited[field]);
+  assert.equal(decodeProject(opened.project).model.geometryRevision,1);
+ } finally { isolated.close(); }
+});

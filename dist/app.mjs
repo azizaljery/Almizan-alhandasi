@@ -1,3 +1,6 @@
+import { createGeometrySession } from './geometry-session.mjs';
+import { eligiblePartitions } from './geometry-editor.mjs';
+import { initGeometryEditor } from './geometry-editor-ui.mjs';
 import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, validateModel, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
 import { escapeXML as esc, PlanViewport } from './plan-view.mjs';
@@ -33,6 +36,7 @@ const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dime
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
 const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
+let geometrySession, geometryUI, geometrySource, geometryPending, geometryCommandId = 0, modelEpoch = 0, renderedModel, geometryAlternativePool = [];
 const exploration = { signature: '', previous: [], seed: 1 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -308,12 +312,15 @@ async function loadThree(retry = false) {
 }
 async function show3D(retry = false) {
   if (!state.model) return false;
+  const requestedModel = state.model, requestedEpoch = modelEpoch;
+  if (viewer && viewer.model !== requestedModel) viewer.setVisible(false);
   try {
     message('threeError', ''); $('retry3D').hidden = true;
     await loadThree(retry);
+    if (requestedModel !== state.model || requestedEpoch !== modelEpoch) return false;
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
     const showRoof = $('roof').checked;
-    viewer.setVisible(state.tab === 'result' && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 }));
+    viewer.setVisible(state.tab === 'result' && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 }));
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
@@ -345,6 +352,7 @@ async function startTour() {
 }
 function syncPlanEditor() {
   const open = !!state.editor.open;
+  geometryUI?.setEnabled(open && state.editor.tool === 'select');
   $('planEditor').hidden = !open; $('togglePlanEditor').setAttribute('aria-expanded', String(open));
   $('togglePlanEditor').textContent = open ? '× أخفِ التحرير' : '✎ حرّر المخطط';
   all('[data-plan-tool]').forEach(button => button.classList.toggle('on', button.dataset.planTool === state.editor.tool));
@@ -397,13 +405,60 @@ function editPlanAtPoint(action) {
     toast(action.tool === 'erase' ? 'حُذفت الفتحة المحددة.' : action.tool === 'door' ? 'أُضيف الباب إلى المخطط.' : 'أُضيفت النافذة إلى المخطط.');
   } catch (error) { toast(error.message); }
 }
+function syncGeometryEditor() {
+  if (!geometryUI) geometryUI = initGeometryEditor({
+    host: $('geometryEditorHost'), getSvg: () => viewport?.svg, getModel: () => state.model,
+    getHistory: () => geometrySession.getState(),
+    getPartitions: () => eligiblePartitions(state.model, { landSurvey: state.modelLandSurvey }),
+    onPreview: operation => {
+      if (state.dirty) throw Error('راجع اختلاف المدخلات عن المخطط قبل التحرير الهندسي.');
+      geometryPending = geometrySession.preview({ ...operation, id: `geometry-command-${++geometryCommandId}`, baseRevision: geometrySession.getState().revision });
+      if (geometryPending.impact.requiresConfirmation && state.alternatives.length > 1) geometryPending.impact.alternativesNote = 'تغيّر المساحات برنامج المقارنة؛ سيحفظ المشروع المخطط المعدل وحده. تبقى البدائل السابقة قابلة للاستعادة بالتراجع داخل هذه الجلسة.';
+      return geometryPending;
+    },
+    onCommit: () => {
+      if (!geometryPending) throw Error('لا توجد معاينة لاعتمادها.');
+      if (state.dirty) { geometrySession.cancel(); geometryPending = null; throw Error('تغيّرت المتطلبات أثناء المعاينة؛ أُلغي الاعتماد لحماية تعديلاتك.'); }
+      applyGeometryState(geometrySession.commit({ previewId: geometryPending.previewId, confirmProgramChange: true }));
+    },
+    onCancel: () => { geometrySession?.cancel(); geometryPending = null; },
+    onUndo: () => { if (state.dirty) throw Error('راجع تعديلات المتطلبات قبل التراجع الهندسي.'); applyGeometryState(geometrySession.undo()); },
+    onRedo: () => { if (state.dirty) throw Error('راجع تعديلات المتطلبات قبل الإعادة الهندسية.'); applyGeometryState(geometrySession.redo()); },
+  });
+  geometryUI.setEnabled(state.editor.open && state.editor.tool === 'select');
+  geometryUI.refresh();
+}
+function applyGeometryState(result) {
+  state.model = result.model; geometrySource = state.model; geometryPending = null;
+  state.program = structuredClone(state.model.program);
+  // Retain the initial comparison cohort in memory for undo; only designs with
+  // the currently confirmed program may enter the active comparison or save.
+  const key = signature(state.model.plot, state.model.program);
+  state.alternatives = [state.model, ...geometryAlternativePool.filter(model => signature(model.plot, model.program) === key)];
+  state.traceContext = null; state.multiEngine = null; state.manualEdits = true;
+  state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey);
+  state.engineeringSignature = engineeringSignature();
+  renderRows(); showResults();
+}
 function showResults() {
+  if (renderedModel !== state.model) { modelEpoch++; renderedModel = state.model; }
+  // Synchronize command revision before both renderers consume the authoritative model.
+  if (geometrySource !== state.model) {
+    geometryUI?.cancel();
+    if (geometrySession) geometrySession.replaceModel(state.model, { landSurvey: state.modelLandSurvey });
+    else geometrySession = createGeometrySession(state.model, { landSurvey: state.modelLandSurvey });
+    const before = state.model;
+    geometryAlternativePool = state.alternatives.filter(model => model !== before);
+    state.model = geometrySession.getState().model; geometrySource = state.model; geometryPending = null; renderedModel = state.model;
+    state.alternatives = state.alternatives.map(model => model === before ? state.model : model);
+  }
   const m = state.model; $('out').style.display = 'block';
   renderStudioModelSummary();
   refreshEngineering();
   refreshGemini();
   circulation = circulationNetwork(m);
-  viewport = new PlanViewport($('plan'), m, selectRoom); syncPlanEditor();
+  viewport = new PlanViewport($('plan'), m, selectRoom); syncPlanEditor(); syncGeometryEditor();
+  viewport.svg.dataset.geometryRevision = String(m.geometryRevision || 0);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   state.tour = prepareTour(); state.tourIndex = -1; $('tourPrev').disabled = true; $('tourNext').disabled = state.tour.length < 2; $('tourState').textContent = 'منظور عام';
@@ -584,6 +639,7 @@ function runPlanner(request) {
 }
 async function generate() {
   if ($('gen').disabled) return;
+  const startEpoch = modelEpoch;
   const startSignature = workspaceSignature(rawPlot(), state.program), startEngineeringSignature = engineeringSignature();
   $('gen').disabled = true; $('freshIdeas').disabled = true; $('undo').disabled = true; $('gen').textContent = 'جارٍ البحث عن بدائل مختلفة…';
   try {
@@ -596,7 +652,7 @@ async function generate() {
     const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
     const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
   const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
-    if (workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
+    if (modelEpoch !== startEpoch || workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
@@ -608,6 +664,7 @@ async function generate() {
 }
 function renderBOQ() {
   const m = state.model; $('boqEmpty').hidden = !!m; $('boqOutput').hidden = !m; if (!m) return;
+  $('boqOutput').dataset.geometryRevision = String(m.geometryRevision || 0);
   const q = quantities(m);
   $('kpis').innerHTML = [
     ['مساحة الكتلة الأرضية', q.footprint, 'م²'], ['صافي الغرف', q.rooms, 'م²'], ['الممرات الصافية', q.circulation, 'م²'], ['الأبواب / النوافذ', `${q.doors} / ${q.windows}`, 'فتحة'],
@@ -901,9 +958,11 @@ async function saveArchive({ asNew = false } = {}) {
 async function loadArchiveVersion() {
   const archive = state.archive, id = $('archiveDesigns').value, version = $('archiveVersions').value;
   if (!id || !version || archive.loading) return;
+  const startEpoch = modelEpoch;
   archive.loading = true; archive.notice = ''; renderArchiveControls();
   try {
     const saved = await archiveApi(`/api/archive/designs/${encodeURIComponent(id)}/versions/${encodeURIComponent(version)}`);
+    if (modelEpoch !== startEpoch) throw Error('تغيّرت الهندسة أثناء التحميل؛ أُلغي استبدال المخطط.');
     const project = decodeProject(saved.project);
     if (!saved.model || validateModel(saved.model).length) throw Error('تعذّر التحقق من هندسة النسخة؛ بقي المشروع الحالي كما هو.');
     project.model = saved.model;
@@ -939,24 +998,25 @@ function saveProject() {
   } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
 }
 function applyProjectState(project, statusText) {
-  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
+  state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives.length ? project.alternatives : project.model ? [project.model] : []; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
   state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
   restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
   state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
   $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
-  if (state.model) showResults(); else { $('out').style.display = 'none'; viewer?.setVisible(false); }
+  if (state.model) showResults(); else { modelEpoch++; geometryUI?.cancel(); geometryUI?.setEnabled(false); geometrySession = null; geometrySource = null; geometryPending = null; geometryAlternativePool = []; renderedModel = null; $('out').style.display = 'none'; viewer?.setVisible(false); }
   message('projectStatus', statusText);
 }
 async function importProject(file) {
   if (!file || $('gen').disabled) return;
   if (file.size > MAX_PROJECT_BYTES) return message('projectStatus', 'حجم الملف يتجاوز 2 ميغابايت. بقي العمل كما هو.');
   if (!window.confirm('سيستبدل الملف مدخلات الجلسة الحالية ومخططها وأسعارها. نزّل مشروعك الحالي أولًا إن احتجته. المتابعة؟')) return;
+  const startEpoch = modelEpoch;
   const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey]);
   $('gen').disabled = true; $('undo').disabled = true; markDirty();
   message('projectStatus', 'جارٍ فحص ملف المشروع وإعادة بناء نسخه قبل الاستيراد…');
   try {
     const { project } = await runPlanner({ projectText: await file.text() });
-    if (JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
+    if (modelEpoch !== startEpoch || JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
     applyProjectState(project, 'تم استيراد المشروع والتحقق من مخططاته وحدود المسح المحفوظة. لم يُستورد أو يُحفظ أي رمز دخول.');
   } catch (error) { message('projectStatus', error.message); }
   finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; markDirty(); }
@@ -1153,6 +1213,9 @@ const mizanStudioAPI = Object.freeze({
       plot: rawPlot(),
       dirty: state.dirty,
       failures: structuredClone(state.failures),
+      alternativeCount: state.alternatives.length,
+      geometry: geometrySession ? { revision: geometrySession.getState().revision, undoDepth: geometrySession.getState().undoDepth, redoDepth: geometrySession.getState().redoDepth } : null,
+      renderedRevisions: { plan: viewport?.model?.geometryRevision ?? 0, three: viewer?.model?.geometryRevision ?? null, quantities: Number($('boqOutput').dataset.geometryRevision || 0) },
     };
   },
   setPlot({ width, length, entry, maxBuiltArea, streets }) {
