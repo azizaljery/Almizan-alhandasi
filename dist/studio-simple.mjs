@@ -201,9 +201,14 @@ export function initSimpleStudio() {
     const latest = trim($('studioBrief').value);
     if (!latest) return status('اكتب وصف المنزل أو التعديل المطلوب أولًا.', 'warning');
     const current = api.getState(), style = current.hasModel && styleOnlyCommand(latest);
+    if ((current.studioSession?.messages?.length || 0) > 252) return status('بلغ الحوار حد الرسائل؛ احفظ مشروعك قبل بدء جلسة أخرى. لم يتغير المخطط.', 'warning');
     if (style) {
       const button = document.querySelector('#styles [data-v="' + style + '"]');
-      if (button) { button.click(); persistMessage('user', latest); persistMessage('assistant', 'تغيّر طابع الخامات في العرض الثلاثي فقط. توزيع الغرف والجدران لم يتغير.'); api.setStudioDraft(''); $('studioBrief').value = ''; return; }
+      if (button) {
+        try { button.click(); persistMessage('user', latest); persistMessage('assistant', 'تغيّر طابع الخامات في العرض الثلاثي فقط. توزيع الغرف والجدران لم يتغير.'); api.setStudioDraft(''); $('studioBrief').value = ''; }
+        catch (error) { status(error.message || 'تعذر إكمال طلب الطابع.', 'error'); }
+        return;
+      }
     }
     if (!local && !trim($('studioAccessCode').value)) {
       $('studioAccessCode').closest('details').open = true; $('studioAccessCode').focus();
@@ -215,7 +220,6 @@ export function initSimpleStudio() {
       if (explicitPlot) { $('studioWidth').value = explicitPlot.width; $('studioLength').value = explicitPlot.length; }
       api.setPlot(plotValues()); updatePlotHint();
     } catch (error) { return status(error.message, 'error'); }
-    if ((api.getState().studioSession?.messages?.length || 0) > 252) return status('بلغ الحوار حد الرسائل؛ احفظ مشروعك قبل بدء جلسة أخرى. لم يتغير المخطط.', 'warning');
     const serial = ++requestSerial;
     busy = true; setBusy(true); setInputsLocked(true);
     status('جارٍ فهم الطلب ومقارنته ببرنامج الغرف الحالي…');
