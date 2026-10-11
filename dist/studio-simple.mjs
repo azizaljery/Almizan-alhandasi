@@ -42,6 +42,47 @@ export function createPlanSurfaceMount(doc) {
     showAdvanced() { if (out.parentNode !== anchor.parentNode) anchor.parentNode.insertBefore(out, anchor.nextSibling); },
   };
 }
+// Secondary tools retain their live nodes and delegated listeners.
+export function initCompactStudio(doc) {
+  const dialog = doc.getElementById('studioCompareDialog'), trigger = doc.getElementById('studioCompareOpen');
+  const alternatives = doc.querySelector('.studio-alternatives');
+  const alternativeAnchor = doc.createComment('original-alternatives');
+  if (alternatives) { alternatives.parentNode.insertBefore(alternativeAnchor, alternatives); doc.getElementById('studioCompareContent').append(alternatives); }
+  let advanced = false; const aestheticAnchors = new Map();
+  trigger.addEventListener('click', () => dialog.showModal());
+  doc.getElementById('studioCompareClose').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => trigger.focus({ preventScroll: true }));
+  doc.getElementById('studioCompareContent').addEventListener('click', event => {
+    const choice = event.target.closest('[data-alternative]');
+    if (choice && !choice.disabled) dialog.close();
+  });
+  doc.getElementById('studioLandOpen').addEventListener('click', () => {
+    const land = doc.getElementById('studioLandDetails'); land.open = !land.open;
+    if (land.open) land.querySelector('summary').focus({ preventScroll: true });
+  });
+  const relocateAestheticTools = () => {
+    const target = doc.getElementById('studioAestheticTools');
+    for (const card of doc.querySelectorAll('.visualizer-card')) {
+      if (!aestheticAnchors.has(card)) { const anchor = doc.createComment('original-aesthetic-tool'); card.parentNode.insertBefore(anchor, card); aestheticAnchors.set(card, anchor); }
+      if (!advanced && !target.contains(card)) target.append(card);
+    }
+  };
+  relocateAestheticTools();
+  const observer = new MutationObserver(relocateAestheticTools);
+  observer.observe(doc.getElementById('app'), { childList: true, subtree: true });
+  return {
+    showAdvanced() {
+      advanced = true; if (dialog.open) dialog.close();
+      if (alternatives) alternativeAnchor.parentNode.insertBefore(alternatives, alternativeAnchor.nextSibling);
+      for (const [card, anchor] of aestheticAnchors) anchor.parentNode.insertBefore(card, anchor.nextSibling);
+    },
+    showConversation() {
+      advanced = false; if (alternatives) doc.getElementById('studioCompareContent').append(alternatives);
+      relocateAestheticTools();
+    },
+    disconnect() { observer.disconnect(); }
+  };
+}
 export function studioRequirementRows(state) {
   const measured = state.requirementsAudit || state.requirementAudit;
   if (Array.isArray(measured) && measured.length) return measured.map(row => ({
@@ -68,7 +109,19 @@ function renderSession(state) {
     bubble.append(create('p', '', message.text ?? message.content ?? ''));
     root.append(bubble);
   }
+  $('studioAcceptedSummary').textContent = session.understanding?.summary || (state.hasModel ? 'المخطط الحالي — اكتب التعديل الذي تريده أسفله.' : 'صف المنزل الذي تريده، ثم راجع الفهم قبل الرسم.');
+  $('studioCompareOpen').hidden = !state.hasModel; $('studioEditJump').hidden = !state.hasModel;
   const requirements = studioRequirementRows(state), rows = $('studioRequirementsRows');
+  const mandatory = $('studioMandatoryIssues'); mandatory.replaceChildren();
+  const failed = requirements.filter(row => ['unmet', 'NOT_MET'].includes(row.state));
+  for (const item of failed) mandatory.append(create('p', 'studio-mandatory-failure', item.label + ': ' + item.detail));
+  const uncertain = requirements.filter(row => ['unsupported', 'unverified', 'UNSUPPORTED', 'UNVERIFIED', 'NOT_EVALUATED'].includes(row.state));
+  if (uncertain.length) {
+    const review = create('button', 'studio-secondary', `${fmt(uncertain.length)} متطلبات أو حدود غير مدعومة أو غير متحقق منها — راجع التفاصيل`); review.type = 'button';
+    review.addEventListener('click', () => { $('studioReviewDetails').open = true; $('studioReviewDetails').querySelector('summary').focus(); }); mandatory.append(review);
+  }
+  mandatory.hidden = !failed.length && !uncertain.length;
+  $('studioReviewCount').textContent = requirements.length ? `(${fmt(requirements.length)})` : '';
   rows.replaceChildren(); $('studioRequirementsEmpty').hidden = requirements.length > 0;
   for (const item of requirements) {
     const row = create('article', 'studio-requirement-row'); row.dataset.state = item.state;
@@ -164,10 +217,11 @@ export function composeStudioPrompt(session = {}, latest = '') {
 export function initSimpleStudio() {
   const api = window.mizanStudioAPI;
   if (!api) throw Error('تعذّر ربط الاستوديو بمحرك الميزان الأصلي.');
-  const app = $('app'), surface = createPlanSurfaceMount(document);
-  app.classList.add('studio-simple-mode'); surface.showConversation(); markTechnical();
+  const app = $('app'), surface = createPlanSurfaceMount(document), compact = initCompactStudio(document);
+  app.classList.add('studio-simple-mode'); surface.showConversation(); compact.showConversation(); markTechnical();
   // Only the currently executable proposal is ephemeral. Conversation, draft,
   // accepted understanding and customer approval belong to the application session.
+  $('studioEditJump').addEventListener('click', () => { api.showConversation(); const target = $('plan').getClientRects().length ? $('plan') : $('view'); target.scrollIntoView({behavior:'smooth',block:'start'}); $('studioBrief').focus({preventScroll:true}); });
   const conversation = { latest: '', diff: null, snapshot: null };
   let requestSerial = 0, busy = false, drawing = false;
   let sessionIdentity = null;
@@ -211,7 +265,7 @@ export function initSimpleStudio() {
       }
     }
     if (!local && !trim($('studioAccessCode').value)) {
-      $('studioAccessCode').closest('details').open = true; $('studioAccessCode').focus();
+      for (let section = $('studioAccessCode').closest('details'); section; section = section.parentElement?.closest('details')) section.open = true; $('studioAccessCode').focus();
       return status('أدخل رمز خدمة الذكاء، أو اختر «فهم محلي محدود».', 'warning');
     }
     clearPending();
@@ -259,7 +313,7 @@ export function initSimpleStudio() {
       clearPending(); api.setStudioDraft(''); $('studioBrief').value = '';
       try { persistMessage('assistant', changed ? 'ظهر مخطط أولي من ' + fmt(output.model.rooms.length) + ' فراغًا. راجع الرسم والمتطلبات، ثم اكتب التعديل التالي أسفله.' : 'الهندسة مطابقة للمخطط السابق؛ لم أعتبر الطلب تعديلًا ناجحًا.'); } catch { /* Committed geometry remains successful even when transcript storage is full. */ }
       status(changed ? 'المخطط داخل المحادثة. تسجيل موافقتك عليه خطوة مستقلة بعد المراجعة.' : 'لم تتغير الهندسة؛ راجع البدائل أو وضّح المطلوب.', changed ? '' : 'warning');
-      if (!app.classList.contains('studio-advanced-open')) { surface.showConversation(); api.showConversation(); }
+      if (!app.classList.contains('studio-advanced-open')) { surface.showConversation(); compact.showConversation(); api.showConversation(); }
       $('studioPlanSlot').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
       if (serial !== requestSerial) return;
@@ -271,15 +325,15 @@ export function initSimpleStudio() {
   $('studioCancel').addEventListener('click', () => { ++requestSerial; api.cancelStudioOperation(); clearPending(); busy = false; drawing = false; setBusy(false); status('أُلغيت العملية. بقي المخطط السابق كما هو.'); });
   $('studioApprovePlan').addEventListener('click', () => { try { api.approveStudioPlan(); sync(); status('سُجل اختيارك لهذا المخطط الأولي. هذا ليس اعتمادًا هندسيًا أو نظاميًا.'); } catch (error) { status(error.message, 'warning'); } });
   $('studioContinueConversation').addEventListener('click', () => {
-    app.classList.remove('studio-advanced-open'); surface.showConversation(); api.showConversation(); returnToConversation(document);
+    app.classList.remove('studio-advanced-open'); surface.showConversation(); compact.showConversation(); api.showConversation(); returnToConversation(document);
     $('studioAdvancedToggle').setAttribute('aria-expanded', 'false'); $('studioAdvancedToggle').textContent = 'الأدوات والتفاصيل الهندسية';
   });
   $('studioAdvancedToggle').addEventListener('click', () => {
     const open = app.classList.toggle('studio-advanced-open');
     $('studioAdvancedToggle').setAttribute('aria-expanded', String(open));
     $('studioAdvancedToggle').textContent = open ? 'العودة إلى المحادثة والمخطط' : 'الأدوات والتفاصيل الهندسية';
-    if (open) { surface.showAdvanced(); document.querySelector('[data-tab="result"]')?.click(); }
-    else { surface.showConversation(); api.showConversation(); syncPlot(api.getState().plot); }
+    if (open) { surface.showAdvanced(); compact.showAdvanced(); document.querySelector('[data-tab="result"]')?.click(); }
+    else { surface.showConversation(); compact.showConversation(); api.showConversation(); syncPlot(api.getState().plot); }
   });
   window.addEventListener('mizan:studio-state', sync);
   sync();

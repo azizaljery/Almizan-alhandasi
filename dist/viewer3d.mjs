@@ -1,6 +1,6 @@
 import { circulationNetwork } from './circulation.mjs';
 import { center, openingPoint, wallPieces } from './planner.mjs';
-import { architecturalTextures, beveledBox } from './architectural-materials.mjs';
+import { architecturalTextures, beveledBox, applyMeterTextureScale } from './architectural-materials.mjs';
 import { solarVectors } from './solar-path.mjs';
 import { furnishRoom } from './furniture3d.mjs';
 
@@ -15,7 +15,7 @@ export class RoomViewer {
     this.reducedMotion = options.reducedMotion ?? this.motionQuery?.matches ?? false;
     this.T = T; this.container = container; this.onMode = onMode; this.visible = true; this.mode = 'orbit';
     this.abort = new AbortController(); this.pointers = new Map(); this.scene = new T.Scene();
-    this.scene.background = new T.Color('#e3e8de');
+    this.scene.background = new T.Color('#edf0f2');
     this.camera = new T.PerspectiveCamera(42, 1, .05, 700);
     try { this.renderer = new T.WebGLRenderer({ antialias: true, alpha: false }); }
     catch { throw Error('عرض 3D يحتاج WebGL، وهو غير متاح في هذا المتصفح. يمكنك متابعة المخطط 2D.'); }
@@ -29,7 +29,7 @@ export class RoomViewer {
     for (const texture of Object.values(this.textures)) texture.anisotropy = Math.min(4, this.renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
-    this.ambientLight = new T.HemisphereLight(0xfffcf2, 0x7b927b, 2.1); this.scene.add(this.ambientLight);
+    this.ambientLight = new T.HemisphereLight(0xffffff, 0xb9bec6, 1.5); this.scene.add(this.ambientLight);
     const light = new T.DirectionalLight(0xffefd3, 2.7); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true; light.visible = false;
     if (light.shadow?.mapSize) {
       light.shadow.mapSize.width = 1024; light.shadow.mapSize.height = 1024;
@@ -38,7 +38,12 @@ export class RoomViewer {
     }
     this.scene.add(light);
     if (light.target) this.scene.add(light.target);
-    const fill = new T.DirectionalLight(0xbcd8ff, .75); this.fillLight = fill; fill.position.set(24, 18, -35); this.scene.add(fill);
+    const fill = new T.DirectionalLight(0xf3f6ff, .55); this.fillLight = fill; fill.intensity = .55; fill.castShadow = false; fill.position.set(24, 18, -35); this.scene.add(fill);
+    // Neutral studio illumination keeps unknown-location/night previews readable.
+    // It is not a physical sun or an illuminance simulation and casts no solar shadows.
+    this.ambientLight.intensity = 1.5;
+    this.studioLight = new T.DirectionalLight(0xfffaf3, 1.8); this.studioLight.intensity = 1.8; this.studioLight.castShadow = false;
+    this.studioLight.position.set(-18, 30, 24); this.scene.add(this.studioLight); this.lightingMode = 'studio-preview';
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
     const on = (event, handler, options = {}) => canvas.addEventListener(event, handler, { ...options, signal: this.abort.signal });
@@ -88,9 +93,10 @@ export class RoomViewer {
     const T = this.T;
     const Material = options.glass && T.MeshPhysicalMaterial ? T.MeshPhysicalMaterial : T.MeshStandardMaterial;
     const texture = this.textures[options.texture];
-    const material = new Material({ color, roughness: options.roughness ?? (options.glass ? .12 : .78), metalness: options.metalness ?? 0, transparent: opacity < 1 || options.glass, opacity, depthWrite: !(options.glass || opacity < .55), ...(texture ? { map: texture, bumpMap: texture, bumpScale: options.texture === 'stone' ? .018 : .006 } : {}), ...(options.glass ? { transmission: .35, thickness: .05, ior: 1.45 } : {}) });
+    const material = new Material({ color, roughness: options.roughness ?? (options.glass ? .12 : .78), metalness: options.metalness ?? 0, transparent: opacity < 1 || options.glass, opacity, depthWrite: !(options.glass || opacity < .55), ...(texture ? { map: texture, bumpMap: texture, bumpScale: options.texture === 'stone' ? .002 : .001 } : {}), ...(options.glass ? { transmission: .35, thickness: .05, ior: 1.45 } : {}) });
     const sizes = [w, h, d].map(v => Math.max(.01, v));
     const geometry = options.rounded ? beveledBox(T, ...sizes) : new T.BoxGeometry(...sizes);
+    if (texture) applyMeterTextureScale(geometry, options.texture === 'wood' ? 1.8 : 2.4);
     const m = new T.Mesh(geometry, material);
     m.position.set(x, y, z); m.rotation.y = rotation; m.castShadow = options.castShadow ?? !options.glass; m.receiveShadow = options.receiveShadow ?? !options.glass;
     (options.parent || this.group).add(m); return m;
@@ -115,7 +121,7 @@ export class RoomViewer {
     const addBox = (...args) => this.mesh(...args);
 
     // Site, streets, entry walk and a raised architectural plinth.
-    addBox(p.width / 2, -.18, -p.length / 2, p.width + 3, .28, p.length + 3, '#aebd9d', 0, 1, { roughness: 1, receiveShadow: true });
+    addBox(p.width / 2, -.18, -p.length / 2, p.width + 3, .28, p.length + 3, '#b8c0b0', 0, 1, { roughness: 1, receiveShadow: true });
     const road = '#777b7c';
     if (p.streets.s) addBox(p.width / 2, -.12, 1.15, p.width + 3, .12, 2.1, road);
     if (p.streets.n) addBox(p.width / 2, -.12, -p.length - 1.15, p.width + 3, .12, 2.1, road);
@@ -127,11 +133,11 @@ export class RoomViewer {
     } else addBox(b.x + b.w / 2, -.005, -b.y - b.h / 2, b.w, .16, b.h, '#d4c7b6', 0, 1, { receiveShadow: true });
 
     // Physical surface maps and detailed furniture share the exact room footprint.
-    model.corridors.forEach(r => addBox(r.x + r.w / 2, .085, -r.y - r.h / 2, r.w, .035, r.h, '#e3ddce', 0, 1, { texture: 'stone', roughness: .72 }));
+    model.corridors.forEach(r => addBox(r.x + r.w / 2, .085, -r.y - r.h / 2, r.w, .035, r.h, '#cec7b8', 0, 1, { texture: 'stone', roughness: .72 }));
     model.rooms.forEach(r => {
       const texture = r.type === 'bedroom' || r.type === 'living' || r.type === 'majlis' ? 'wood' : r.type === 'bath' || r.type === 'kitchen' ? 'tile' : 'stone';
-      const color = texture === 'wood' ? '#cbb794' : texture === 'tile' ? '#e7e6db' : '#e7dfca';
-      addBox(r.x + r.w / 2, .09, -r.y - r.h / 2, r.w, .04, r.h, color, 0, 1, { texture, roughness: texture === 'tile' ? .38 : .68 });
+      const color = texture === 'wood' ? '#bfae95' : texture === 'tile' ? '#cbd1cf' : '#c9c4b8';
+      addBox(r.x + r.w / 2, .09, -r.y - r.h / 2, r.w, .04, r.h, color, 0, 1, { texture, roughness: texture === 'tile' ? .58 : .76 });
       if (this.illustrativeFurniture) furnishRoom(this, r, palette);
     });
 
@@ -140,7 +146,7 @@ export class RoomViewer {
     model.openings.forEach(o => {
       const wall = model.walls.find(w => w.id === o.wallId), point = openingPoint(model, o), angle = Math.atan2(wall.y2 - wall.y1, wall.x2 - wall.x1);
       if (o.type === 'window') {
-        addBox(point.x, o.sill + o.h / 2, -point.y, o.w, o.h, .045, '#78aeba', angle, .34, { glass: true, metalness: .12 });
+        addBox(point.x, o.sill + o.h / 2, -point.y, o.w, o.h, .045, '#9db7bd', angle, .34, { glass: true, metalness: .12 });
 
       }
     });
@@ -214,14 +220,10 @@ export class RoomViewer {
     const direction = solarVectors(preview);
     if (!direction.visible || !direction.world || !this.model) {
       this.sunLight.visible = false;
-      if (this.ambientLight) this.ambientLight.intensity = .55;
-      if (this.fillLight) this.fillLight.intensity = .22;
       this.render();
       return;
     }
     this.sunLight.visible = true;
-    if (this.ambientLight) this.ambientLight.intensity = 1.2;
-    if (this.fillLight) this.fillLight.intensity = .65;
     const b = this.model.building;
     const distance = Math.max(52, Math.max(this.model.plot.width, this.model.plot.length) * 1.8);
     this.sunLight.position.set(b.x + b.w / 2 + direction.world.x * distance, direction.world.y * distance, -b.y - b.h / 2 + direction.world.z * distance);
@@ -285,7 +287,7 @@ export class RoomViewer {
   }
   getPerformanceStats() {
     const info = this.renderer.info;
-    return { ...this.quality, measurement: 'CPU render submission time, not GPU frame time', geometries: info?.memory?.geometries ?? null, textures: info?.memory?.textures ?? null, drawCalls: info?.render?.calls ?? null, triangles: info?.render?.triangles ?? null, animating: !!this.transition };
+    return { ...this.quality, lightingMode: this.lightingMode, measurement: 'CPU render submission time, not GPU frame time', geometries: info?.memory?.geometries ?? null, textures: info?.memory?.textures ?? null, drawCalls: info?.render?.calls ?? null, triangles: info?.render?.triangles ?? null, animating: !!this.transition };
   }
   destroy() {
     if (this.destroyed) return;

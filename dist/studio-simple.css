@@ -153,3 +153,58 @@ body:has(#app.studio-simple-mode){overflow-x:clip}
 @media(max-width:1100px){.studio-simple-grid{grid-template-columns:minmax(0,1fr)}.studio-project-setup{order:1}.studio-plot-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.studio-transcript{max-height:none}}
 @media(max-width:690px){.studio-simple-grid{gap:14px}.studio-requirements,.studio-plan-approval{padding:16px}.studio-restore-notice{margin:12px 16px}.studio-requirement-row{grid-template-columns:minmax(0,1fr)}.studio-requirement-state{justify-self:start}.studio-plot-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#app.studio-simple-mode #studioPlanSlot .plan,#app.studio-simple-mode #studioPlanSlot .view{height:460px}.studio-request-actions{gap:10px}#app.studio-simple-mode #studioPlanSlot .alternative-grid{grid-template-columns:minmax(0,1fr)}}
 #app.studio-simple-mode #studioPlanSlot button{min-height:44px}
+/* Compact conversation: one live plan, adjacent composer, secondary disclosures. */
+#app.studio-simple-mode:not(.studio-advanced-open) #panel-design>.wrap{padding-top:12px;max-width:1120px}
+.studio-simple-hero{padding:8px 0 12px!important;margin-bottom:8px!important}
+.studio-simple-hero h1{font-size:clamp(1.25rem,2.3vw,1.75rem)!important;margin:4px 0!important}
+.studio-simple-hero>p,.studio-simple-hero .studio-kicker{display:none}
+.studio-simple-grid{display:flex;flex-direction:column;gap:8px}
+.studio-conversation{width:100%;border-radius:12px;box-shadow:none}
+.studio-project-setup{order:-1!important;width:100%;padding:0!important;border-radius:10px;box-sizing:border-box}
+.studio-project-setup>summary,.studio-secondary-details>summary{min-height:44px;display:list-item;cursor:pointer;padding:10px 16px;box-sizing:border-box;font-size:.85rem;color:#405a48}
+.studio-project-setup[open]{padding:0 16px 16px!important}
+.studio-project-setup>summary{outline-offset:2px}
+.studio-compact-toolbar{display:flex;gap:8px;padding:8px 12px;flex-wrap:wrap}
+.studio-compact-toolbar button{width:auto!important;min-height:44px;padding:8px 14px}
+.studio-accepted-summary{margin:0;padding:8px 16px;font-size:.9rem;line-height:1.7;border-bottom:1px solid #e2e7df}
+.studio-secondary-details{border-top:1px solid #e2e7df;background:#fafbf8}
+.studio-transcript{min-height:0;max-height:320px!important;overflow:auto!important;padding:12px}
+.studio-request-form{padding:12px 16px!important;border-top:1px solid #dce3d8}
+.studio-request-form textarea{min-height:76px!important;max-height:180px;resize:vertical}
+.studio-request-actions{display:flex;flex-direction:row!important;flex-wrap:wrap;gap:8px}
+.studio-request-actions button{width:auto!important;flex:1 1 150px;padding:9px 12px;min-height:44px}
+.studio-plan-approval{padding:10px 16px}
+.studio-plan-approval p{font-size:.78rem;line-height:1.6;margin-bottom:6px}
+.studio-plot-hint{font-size:.76rem;padding:6px 16px!important;margin:0!important}
+#studioMandatoryIssues{padding:6px 16px;background:#fff9ef;border-bottom:1px solid #eedcc2}
+.studio-mandatory-failure{color:#873e31;font-size:.85rem;margin:4px 0;overflow-wrap:anywhere}
+#studioMandatoryIssues button{padding:6px 10px;min-height:44px;font-size:.8rem}
+#studioCompareDialog{width:min(920px,94vw);max-height:72dvh;box-sizing:border-box;border:1px solid #cbd7c9;border-radius:14px;padding:0;color:#244032;background:#fff;overflow:hidden}
+#studioCompareDialog::backdrop{background:#162b2666}
+#studioCompareDialog>header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #dce3d8}
+#studioCompareDialog h2{font-size:1.1rem;margin:0}
+#studioCompareContent{max-height:calc(72dvh - 85px);overflow:auto;padding:12px;overscroll-behavior:contain}
+#studioCompareDialog .alternative-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+#studioCompareDialog button{min-height:44px}
+#studioAestheticTools{margin-top:12px;border:1px solid #dce3d8;border-radius:10px}
+#studioAestheticTools>.help{padding:0 16px}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #out{padding:8px!important}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-workspace-bar{padding:0 4px 8px;margin:0;gap:8px}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-workspace-bar .ey,
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #studioModelSummary,
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-canvas-head{display:none}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-title-line h1{font-size:1.1rem}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .plan,
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .view{height:clamp(250px,42dvh,440px)!important;min-height:250px}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .plan svg{height:100%;min-height:0}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-layout .card{margin-bottom:0}
+@media(max-width:690px){.studio-simple-hero .studio-phase{font-size:.7rem}.studio-request-actions button{font-size:.8rem;flex-basis:125px}.studio-project-setup .studio-plot-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#studioCompareDialog{width:96vw}#studioCompareDialog .alternative-grid{grid-template-columns:1fr}}
+.studio-lighting-note{font-size:.74rem;line-height:1.5;color:#54675b;margin:4px 8px}
+.studio-plan-tools>summary{min-height:44px;padding:10px 8px;box-sizing:border-box;cursor:pointer;font-size:.82rem;color:#405a48}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .section-next{display:none}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #plan,
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #view{scroll-margin-top:135px}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-actions{display:flex;flex-direction:row;flex-wrap:wrap;gap:6px}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-view-toggle button{width:auto;min-width:64px;padding:6px 10px}
+@media(min-width:691px){#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #plan,#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #view{scroll-margin-top:100px}}
+@media(min-width:691px) and (max-width:1000px){#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #plan,#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #view{scroll-margin-top:150px}}

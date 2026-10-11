@@ -10,10 +10,10 @@ export function architecturalTextures(T) {
     ctx.fillStyle = '#eeeeee'; ctx.fillRect(0, 0, 256, 256);
     const pixels = ctx.getImageData(0, 0, 256, 256);
     for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-      let value = 230 + random() * 18;
-      if (kind === 'wood') value = 211 + 18 * Math.sin(y * .17 + Math.sin(x * .035) * .7) + random() * 12;
-      if (kind === 'fabric') value = 220 + (x % 3 === 0 || y % 3 === 0 ? -14 : 8) + random() * 14;
-      if (kind === 'tile') value = x % 64 < 2 || y % 64 < 2 ? 178 : 239 + random() * 10;
+      let value = 245 + random() * 4;
+      if (kind === 'wood') value = 246 + 2 * Math.sin(y * .32 + Math.sin(x * .025) * .45) + random() * 2;
+      if (kind === 'fabric') value = 243 + (x % 3 === 0 || y % 3 === 0 ? -3 : 2) + random() * 2;
+      if (kind === 'tile') value = x % 64 < 1 || y % 64 < 1 ? 235 : 247 + random() * 3;
       const i = (y * 256 + x) * 4;
       pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value; pixels.data[i + 3] = 255;
     }
@@ -21,8 +21,7 @@ export function architecturalTextures(T) {
     const texture = new T.CanvasTexture(canvas);
     texture.wrapS = texture.wrapT = T.RepeatWrapping;
     texture.colorSpace = T.SRGBColorSpace;
-    if (kind === 'wood') texture.repeat.set(2, 3);
-    if (kind === 'fabric') texture.repeat.set(3, 3);
+    texture.repeat.set(1, 1);
     texture.anisotropy = 4;
     textures[kind] = texture;
   }
@@ -37,4 +36,18 @@ export function beveledBox(T, w, h, d, radius = .035) {
   const geometry = new T.ExtrudeGeometry(shape, { depth: d - 2 * r, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: r, bevelThickness: r });
   geometry.translate(-w / 2, -h / 2, -d / 2 + r);
   return geometry;
+}
+
+// Box UVs use metres instead of stretching the same grain across every room.
+// One 2.4m tile texture contains four 0.6m tiles per axis; this is a finish preview.
+export function applyMeterTextureScale(geometry, metresPerRepeat = 2.4) {
+  const { position, normal, uv } = geometry.attributes || {};
+  if (!position || !normal || !uv || !(metresPerRepeat > 0)) return geometry;
+  for (let i = 0; i < position.count; i++) {
+    const x = position.getX(i), y = position.getY(i), z = position.getZ(i);
+    const nx = Math.abs(normal.getX(i)), ny = Math.abs(normal.getY(i)), nz = Math.abs(normal.getZ(i));
+    const pair = ny >= nx && ny >= nz ? [x, z] : nx >= nz ? [z, y] : [x, y];
+    uv.setXY(i, pair[0] / metresPerRepeat, pair[1] / metresPerRepeat);
+  }
+  uv.needsUpdate = true; return geometry;
 }

@@ -84,7 +84,7 @@ try{
  await page.evaluate(()=>{window.__rendering.viewer.destroy();window.__rendering.root.remove();});
  // Actual customer conversation UI, same loaded candidate at all three widths.
  for(const width of [390,820,1440]){
-  await page.setViewportSize({width,height:1100});await page.locator('[data-studio-mode="2d"]').click();await page.locator('#studioTranscript').scrollIntoViewIfNeeded();await shot(`conversation-${width}`,true);
+  await page.setViewportSize({width,height:width===390?844:width===1440?1000:1100});await page.locator('[data-studio-mode="2d"]').click();await page.evaluate(()=>scrollTo(0,0));await shot(`conversation-${width}`);
   for(const mode of ['2d','3d']){
    await page.locator(`[data-studio-mode="${mode}"]`).click();await page.locator(mode==='2d'?'#plan':'#view').scrollIntoViewIfNeeded();
    if(mode==='3d'){await page.waitForFunction(()=>document.querySelector('#view canvas')&&window.mizanStudioAPI.getState().renderedRevisions.three!==null);await page.locator('#roof').uncheck();}

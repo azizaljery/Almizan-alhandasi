@@ -68,12 +68,12 @@ test('roof choice survives camera presets and sun lighting updates for day and n
   v.view('persp'); assert.equal(v.roof.visible, true);
   v.setSun({ visible: true, azimuth: 140, altitude: 32 });
   assert.equal(v.sunLight.visible, true);
-  assert.equal(v.ambientLight.intensity, 1.2);
+  assert.equal(v.ambientLight.intensity, 1.5);
   assert.ok(v.sunLight.position.y > 0);
   v.setSun({ visible: false, azimuth: 140, altitude: -8 });
   assert.equal(v.sunLight.visible, false);
-  assert.equal(v.ambientLight.intensity, .55);
-  assert.equal(v.fillLight.intensity, .22);
+  assert.equal(v.ambientLight.intensity, 1.5);
+  assert.equal(v.fillLight.intensity, .55);
   v.destroy();
 });
 
@@ -150,3 +150,5 @@ test('openings contribute only glazing at exact window bounds, without invented 
  v.setModel({...model,openings:[]});const sealedNonWallCount=v.group.children.filter(mesh=>mesh.geometry).length-v.pieces.length;
  assert.equal(nonWallCount-sealedNonWallCount,windows.length,'only one glazing surface per modeled window; doors add no unmodeled hardware');v.destroy();
 });
+
+test('neutral preview lighting remains legible for missing latitude and night without inventing sun',()=>{const v=new RoomViewer(container());v.setModel(model);v.setSun({status:'not-calculated',visible:false});assert.equal(v.sunLight.visible,false);assert.ok(v.ambientLight.intensity>=1.5);assert.ok(v.studioLight.intensity>=1);assert.equal(v.studioLight.castShadow,false);const before=[v.ambientLight.intensity,v.studioLight.intensity,v.fillLight.intensity];v.setSun({visible:true,azimuth:140,altitude:32});assert.deepEqual([v.ambientLight.intensity,v.studioLight.intensity,v.fillLight.intensity],before);v.setSun({visible:false,azimuth:140,altitude:-8});assert.deepEqual([v.ambientLight.intensity,v.studioLight.intensity,v.fillLight.intensity],before);assert.equal(v.sunLight.visible,false);v.destroy();});

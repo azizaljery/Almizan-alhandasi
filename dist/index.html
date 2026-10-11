@@ -148,36 +148,43 @@
 <section class="panel" id="panel-design" aria-label="الغرف وشكل البيت"><div class="wrap"><section class="studio-simple" id="studioSimple" aria-labelledby="studioSimpleTitle">
   <header class="studio-simple-hero">
     <span class="studio-kicker">الميزان الهندسي · مساحة بيتك</span>
-    <h1 id="studioSimpleTitle">من فكرتك إلى مخطط نتناقش فيه.</h1>
+    <h1 id="studioSimpleTitle">مخطط بيتك، خطوة بخطوة.</h1>
     <p>لا تحتاج أن تبدأ بعدّ الغرف في جدول. تحدث عن بيتك، ثم راجع ما فهمه النظام قبل الرسم. وبعد كل مخطط يمكنك طلب تعديل جديد.</p>
     <span class="studio-phase" id="studioPhase">01 / نفهم طلبك</span>
   </header>
   <div class="studio-simple-grid">
     <section class="studio-conversation" aria-label="محادثة تصميم المنزل">
-      <div class="studio-transcript" id="studioTranscript" role="log" aria-live="polite" aria-relevant="additions">
-        <div class="studio-message assistant"><span class="studio-speaker">الميزان الهندسي</span><p>أخبرني عن المنزل الذي تريده: الغرف، من يسكنه، الضيافة، الخصوصية، وما لا ترغب فيه. سأعرض ما فهمته قبل أن أرسم، ولن أغيّر غرفة أو مساحة دون أن أوضح ذلك.</p></div>
-      </div>
-      <p class="studio-plot-hint" id="studioPlotHint">أبعاد الأرض الحالية 20 × 30 م · المدخل جنوب. عدّلها من بطاقة الأرض أدناه إذا لزم.</p>
-      <p id="studioRestoreNotice" class="studio-restore-notice" role="status" hidden></p>
-      <section id="studioRequirements" class="studio-requirements" aria-labelledby="studioRequirementsTitle">
-        <h2 id="studioRequirementsTitle">طلبك وما تحقق منه</h2>
-        <p id="studioRequirementsEmpty">ستظهر متطلباتك هنا بعد فهم الطلب، ثم نقارنها بالمخطط الفعلي.</p>
-        <div id="studioRequirementsRows"></div>
-      </section>
+      <div class="studio-compact-toolbar"><button type="button" id="studioEditJump" class="studio-secondary" hidden>المخطط والتعديل</button><button type="button" id="studioCompareOpen" class="studio-secondary" hidden>قارن البدائل</button><button type="button" id="studioLandOpen" class="studio-secondary">بيانات الأرض</button></div>
+      <p id="studioAcceptedSummary" class="studio-accepted-summary">صف المنزل الذي تريده، ثم راجع الفهم قبل الرسم.</p>
+      <div id="studioMandatoryIssues" role="status" hidden></div>
       <section id="studioPlanSlot" class="studio-plan-slot" aria-label="مخطط المحادثة الحالي"></section>
-      <section id="studioPlanApproval" class="studio-plan-approval" hidden>
-        <p id="studioPlanApprovalStatus" role="status">راجع المخطط قبل تسجيل اختيارك. الموافقة هنا تعني اختيارك للتصميم الأولي؛ ليست اعتمادًا هندسيًا أو نظاميًا.</p>
-        <button type="button" id="studioApprovePlan" class="studio-secondary">أوافق على هذا المخطط الأولي</button>
-      </section>
       <form id="studioRequestForm" class="studio-request-form">
         <label for="studioBrief">وصف المنزل أو التعديل المطلوب</label>
-        <textarea id="studioBrief" rows="5" maxlength="2600" placeholder="مثال: دور أرضي، 3 غرف نوم، جناح للوالدة، مجلس رجال بمدخل مستقل، مجلس نساء، صالة عائلية، طعام قريب من المجلسين، ولا أريد فناءً أو ممرات طويلة." required></textarea>
+        <textarea id="studioBrief" rows="2" maxlength="2600" placeholder="مثال: دور أرضي، 3 غرف نوم، جناح للوالدة، مجلس رجال بمدخل مستقل، مجلس نساء، صالة عائلية، طعام قريب من المجلسين، ولا أريد فناءً أو ممرات طويلة." required></textarea>
         <div class="studio-request-actions">
           <button type="submit" id="studioSubmit" class="studio-primary">افهم طلبي واقترح المخطط <span aria-hidden="true">←</span></button>
           <button type="button" id="studioLocal" class="studio-secondary">فهم محلي محدود</button>
           <button type="button" id="studioCancel" class="studio-secondary" hidden>إلغاء العملية</button>
         </div>
       </form>
+      <section id="studioPlanApproval" class="studio-plan-approval" hidden>
+        <p id="studioPlanApprovalStatus" role="status">راجع المخطط قبل تسجيل اختيارك. الموافقة هنا تعني اختيارك للتصميم الأولي؛ ليست اعتمادًا هندسيًا أو نظاميًا.</p>
+        <button type="button" id="studioApprovePlan" class="studio-secondary">أوافق على هذا المخطط الأولي</button>
+      </section>
+      <details id="studioReviewDetails" class="studio-secondary-details"><summary>الفهم والمتطلبات وحدود التحقق <span id="studioReviewCount"></span></summary>
+      <section id="studioRequirements" class="studio-requirements" aria-labelledby="studioRequirementsTitle">
+        <h2 id="studioRequirementsTitle">طلبك وما تحقق منه</h2>
+        <p id="studioRequirementsEmpty">ستظهر متطلباتك هنا بعد فهم الطلب، ثم نقارنها بالمخطط الفعلي.</p>
+        <div id="studioRequirementsRows"></div>
+      </section>
+      </details>
+      <details id="studioHistoryDetails" class="studio-secondary-details"><summary>سجل المحادثة</summary>
+      <div class="studio-transcript" id="studioTranscript" role="log" aria-live="polite" aria-relevant="additions">
+        <div class="studio-message assistant"><span class="studio-speaker">الميزان الهندسي</span><p>أخبرني عن المنزل الذي تريده: الغرف، من يسكنه، الضيافة، الخصوصية، وما لا ترغب فيه. سأعرض ما فهمته قبل أن أرسم، ولن أغيّر غرفة أو مساحة دون أن أوضح ذلك.</p></div>
+      </div>
+      </details>
+      <p class="studio-plot-hint" id="studioPlotHint">أبعاد الأرض الحالية 20 × 30 م · المدخل جنوب. عدّلها من «بيانات الأرض» عند الحاجة.</p>
+      <p id="studioRestoreNotice" class="studio-restore-notice" role="status" hidden></p>
       <div id="studioStatus" class="studio-feedback" role="status" aria-live="polite"></div>
       <section id="studioProposalPanel" class="studio-proposal" hidden aria-labelledby="studioProposalTitle">
         <h2 id="studioProposalTitle">هذا ما فهمته قبل الرسم</h2>
@@ -190,7 +197,7 @@
         </div>
       </section>
     </section>
-    <aside class="studio-project-setup" aria-label="معلومات الأرض الأساسية">
+    <details id="studioLandDetails" class="studio-project-setup"><summary>بيانات الأرض والإعدادات</summary>
       <span class="studio-side-eyebrow">معلومات المشروع</span>
       <h2>أرض منزلك</h2>
       <p>حدّد أبعاد الأرض والشوارع الفعلية ثم جهة المدخل. تغيير المدخل لا يضيف شارعًا.</p>
@@ -213,8 +220,10 @@
       </details>
       <div class="studio-trust"><strong>لن نعرض شكلًا رمزيًا على أنه مخطط.</strong><p>البدائل ستُرسم من هندسة الغرف والجدران الفعلية، وسيظهر بوضوح أي مطلب لم يتحقق.</p></div>
       <button type="button" id="studioAdvancedToggle" class="studio-advanced-button" aria-expanded="false">إظهار الأدوات الأصلية المتقدمة</button>
-    </aside>
+    </details>
   </div>
+  <details id="studioAestheticTools" class="studio-secondary-details"><summary>تصور جمالي اختياري — ليس مخططًا هندسيًا</summary><p class="help">هذه صور مولّدة للمظهر فقط؛ المرجع الهندسي هو المخطط والمجسم الحالي.</p></details>
+  <dialog id="studioCompareDialog" aria-labelledby="studioCompareTitle"><header><h2 id="studioCompareTitle">مقارنة البدائل</h2><button type="button" id="studioCompareClose" class="studio-secondary">إغلاق المقارنة</button></header><div id="studioCompareContent"></div></dialog>
 </section>
 <header class="head"><span class="ey">03 / برنامج التصميم</span><h1>غرفك. شكل بيتك. أولوياتك.</h1><p>الجدول هو المرجع الذي يرسم منه الموقع؛ راجعه قبل التوليد.</p></header><article class="card"><header class="ch"><b class="num">٢</b><div><h2>راجع غرفك قبل التوليد</h2><p>كل سطر غرفة واحدة؛ لن تُحذف غرفة أو تُصغّر مساحتها لتناسب الأرض.</p></div></header>
       <div class="cb">
@@ -325,7 +334,9 @@
       </section>
       <div class="studio-layout"><div class="studio-main"><article id="studioPlanCard" class="card studio-2d"><header class="ch studio-canvas-head"><div><span class="ey">مسقط مرسوم من بيانات المشروع</span><h2>المخطط الأرضي</h2></div><span class="studio-canvas-help">اختر غرفة لعرض مساحتها وأبعادها</span></header>
         <div class="cb">
+          <details id="studioPlanTools" class="studio-plan-tools"><summary>أدوات المسقط والتحرير</summary>
           <div class="viewer-tools" role="group" aria-label="أدوات المخطط"><button class="small-button" id="zoomIn" aria-label="تكبير المخطط">＋</button><button class="small-button" id="zoomOut" aria-label="تصغير المخطط">−</button><button class="small-button" id="fitPlan">ملاءمة المبنى</button><button class="small-button" id="fitPlot">حدود الأرض</button><button class="small-button" id="togglePlanEditor" aria-expanded="false">✎ حرّر المخطط</button><button class="small-button" id="exportPlan">تنزيل الرسم SVG</button><label class="check"><input id="showRoute" type="checkbox" checked> مسار الوصول</label></div>
+          </details>
           <div class="plan-editor-wrap"><aside class="plan-editor" id="planEditor" hidden aria-label="أدوات تحرير المخطط"><div class="plan-editor-head"><b>لوحة التحرير</b><button class="icon-button" id="closePlanEditor" aria-label="إخفاء أدوات التحرير">×</button></div><p id="planEditorStatus">اختر أداة ثم اضغط على الجدار في الرسم.</p><div class="plan-tool-list" role="group" aria-label="أدوات الرسم"><button data-plan-tool="select" class="on">⌖ تحديد</button><button data-plan-tool="door">▱ باب</button><button data-plan-tool="window">▭ نافذة</button><button data-plan-tool="erase">⌫ حذف فتحة</button></div><section id="geometryEditorHost" aria-label="تحرير هندسي مباشر"></section><form id="roomEditForm" class="room-edit-form" hidden><b id="roomEditTitle">الغرفة المحددة</b><label>الاسم<input id="roomEditName" maxlength="70"></label><label>المساحة الصافية م²<input id="roomEditArea" type="number" min="4" max="120" step=".5"></label><label>العرض الملزم م<input id="roomEditWidth" type="number" min="1" max="60" step=".1"></label><label>الطول الملزم م<input id="roomEditLength" type="number" min="1" max="60" step=".1"></label><label>الموقع<select id="roomEditPosition"></select></label><label>الجانب<select id="roomEditSide"></select></label><button class="small-button" type="submit">حفظ للجيل القادم</button></form><button class="editor-program-link" id="editorRoomProgram">▦ عدّل كل الغرف والمساحات</button><small>شبكة الرسم 1م؛ التقاط التحرير الهندسي 0.05م. القاطع المؤهل وفتحاته يُعدّلان مباشرة بعد المعاينة والتأكيد. حقول الغرفة أعلاه تخص برنامج التوليد القادم.</small></aside><div class="plan" id="plan"></div></div>
 
 
@@ -334,7 +345,7 @@
         <div class="cb">
           <div class="tour-strip"><div><b>ابدأ التجربة</b><small>تبدأ الجولة من أقرب فراغ للمدخل ثم تنتقل بين الغرف.</small></div><div class="inline-actions"><button class="small-button tour-primary" id="startTour">ابدأ من المدخل</button><button class="small-button" id="tourPrev" disabled>الغرفة السابقة</button><button class="small-button" id="tourNext" disabled>الغرفة التالية</button></div></div>
           <div class="viewer-tools"><button class="small-button" data-view="persp">منظور خارجي</button><button class="small-button" data-view="top">علوي</button><button class="small-button" data-view="front">واجهة المدخل</button><label class="check"><input id="roof" type="checkbox" checked> إظهار السقف</label></div>
-          <div class="view" id="view"><div class="view-label" id="viewMode">منظور خارجي — السقف مخفي لرؤية الغرف</div></div>
+          <p class="studio-lighting-note">إضاءة استوديو للمعاينة، وليست محاكاة إنارة أو شمس. الأرضيات خامات توضيحية؛ اتجاه الشمس يظهر عند توفر بيانات المثال.</p><div class="view" id="view"><div class="view-label" id="viewMode">منظور خارجي — السقف مخفي لرؤية الغرف</div></div>
           <div class="message error" id="threeError" role="status" hidden></div><button class="small-button" id="retry3D" hidden>أعد محاولة تحميل العرض</button>
           <div id="walkControls" hidden><p class="help">اسحب للنظر حولك، واستخدم الأسهم أو WASD أو الأزرار. الأبواب الفعلية فقط تسمح بالمرور؛ الأثاث تمثيل بصري لفهم الفراغ ولا يدخل في الكميات.</p><div class="walk-buttons" role="group" aria-label="الحركة داخل الغرفة"><button class="small-button" data-move="forward">للأمام ↑</button><button class="small-button" data-move="left">يسار ←</button><button class="small-button" data-move="right">يمين →</button><button class="small-button" data-move="back">للخلف ↓</button><button class="small-button" data-view="persp">العودة للمنظور</button></div></div>
         </div>
