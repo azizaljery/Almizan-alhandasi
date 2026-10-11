@@ -94,22 +94,55 @@ const rms = (a, b) => a.length && a.length === b.length ? Math.sqrt(a.reduce((s,
 export function layoutDistance(a, b) {
   return Math.max(a.shape === b.shape ? 0 : .4, rms(a.pairs, b.pairs) * 2, rms(a.aspects, b.aspects) * .5, rms(a.mass, b.mass) * .5);
 }
-export function selectDiverse(candidates, previous = [], limit = MAX_ALTERNATIVES, prioritizedCandidateIds = []) {
+export function selectDiverseWithEvidence(candidates, previous = [], limit = MAX_ALTERNATIVES, prioritizedCandidateIds = []) {
   const history = previous.map(m => layoutDescriptor(m));
   const remaining = candidates.map(c => ({ ...c, descriptor: layoutDescriptor(c.candidate.geometry) }));
-  const byCandidateId = new Map(remaining.map(c => [c.candidate.candidateId, c]));
-  const chosen = [...new Set(prioritizedCandidateIds)].map(id => byCandidateId.get(id)).filter(Boolean).slice(0, limit);
-  const chosenIds = new Set(chosen.map(c => c.candidate.candidateId));
-  for (let i = remaining.length - 1; i >= 0; i--) if (chosenIds.has(remaining[i].candidate.candidateId)) remaining.splice(i, 1);
+  const chosen = [], rejections = [];
+  const assess = candidate => {
+    const historyDistance = history.length ? Math.min(...history.map(d => layoutDistance(candidate.descriptor, d))) : Infinity;
+    const batchDistance = chosen.length ? Math.min(...chosen.map(c => layoutDistance(candidate.descriptor, c.descriptor))) : Infinity;
+    const reason = historyDistance + 1e-9 < DIVERSITY_THRESHOLD ? 'HISTORY_SIMILARITY'
+      : batchDistance + 1e-9 < DIVERSITY_THRESHOLD ? 'BATCH_SIMILARITY' : null;
+    return { reason, distance: Math.min(historyDistance, batchDistance), historyDistance, batchDistance };
+  };
+  const record = (candidate, check, reason = check.reason) => rejections.push({
+    candidateId: candidate.candidate.candidateId ?? null, reason,
+    distance: Number.isFinite(check.distance) ? check.distance : null,
+    historyDistance: Number.isFinite(check.historyDistance) ? check.historyDistance : null,
+    batchDistance: Number.isFinite(check.batchDistance) ? check.batchDistance : null,
+    threshold: DIVERSITY_THRESHOLD,
+  });
+  // Priority changes order only. Every candidate must clear exactly the same
+  // historical and within-batch distance gate before it can be selected.
+  for (const id of new Set(prioritizedCandidateIds)) {
+    if (chosen.length >= limit) break;
+    const index = remaining.findIndex(c => c.candidate.candidateId === id);
+    if (index < 0) continue;
+    const candidate = remaining.splice(index, 1)[0], check = assess(candidate);
+    if (check.reason) record(candidate, check);
+    else chosen.push(candidate);
+  }
   while (chosen.length < limit && remaining.length) {
     let best = -1, score = -1;
-    remaining.forEach((c, i) => {
-      const reference = [...history, ...chosen.map(x => x.descriptor)];
-      const distance = reference.length ? Math.min(...reference.map(d => layoutDistance(c.descriptor, d))) : 1;
-      if (distance + 1e-9 >= DIVERSITY_THRESHOLD && distance > score) { best = i; score = distance; }
+    remaining.forEach((candidate, i) => {
+      const check = assess(candidate);
+      const distance = check.distance === Infinity ? 1 : check.distance;
+      if (!check.reason && distance > score) { best = i; score = distance; }
     });
     if (best < 0) break;
     chosen.push(remaining.splice(best, 1)[0]);
   }
-  return chosen;
+  for (const candidate of remaining) {
+    const check = assess(candidate);
+    record(candidate, check, check.reason || 'LIMIT_REACHED');
+  }
+  const count = reason => rejections.filter(row => row.reason === reason).length;
+  return { selected: chosen, rejections, summary: {
+    generated: candidates.length, selected: chosen.length,
+    excludedHistory: count('HISTORY_SIMILARITY'), excludedBatch: count('BATCH_SIMILARITY'),
+    limitDeferred: count('LIMIT_REACHED'), threshold: DIVERSITY_THRESHOLD,
+  } };
+}
+export function selectDiverse(candidates, previous = [], limit = MAX_ALTERNATIVES, prioritizedCandidateIds = []) {
+  return selectDiverseWithEvidence(candidates, previous, limit, prioritizedCandidateIds).selected;
 }

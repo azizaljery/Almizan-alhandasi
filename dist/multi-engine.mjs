@@ -3,7 +3,7 @@ import { extractShapeIntent } from './client-request.mjs';
 import { resolveDesignShapes } from './design-selection.mjs';
 import { runPipeline, generateCandidate, decideReviewed } from './integration/pipeline.mjs';
 import { reviewCandidate } from './integration/gemini/packages/design-intelligence/adapters/mizan-review-v1.js';
-import { explorationSpecs, selectDiverse, conceptFor, layoutDescriptor } from './design-exploration.mjs';
+import { explorationSpecs, selectDiverseWithEvidence, conceptFor, layoutDescriptor } from './design-exploration.mjs';
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
 import { extractExplicitGeometryConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
@@ -102,10 +102,10 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   const allowedShapes = requestedDesignShapes({ idea, discovery, selectedShape });
   const before = canonicalJSON({ plot, rooms });
   const overrides = { streetSetback: plot.streetSetback, neighborSetback: plot.neighborSetback };
-  let result;
+  let result, searchEvidence = null;
   if (plot.floors !== 1) result = await runPipeline(request, { generationOverrides: overrides });
   else {
-    const candidates = [], failures = [];
+    const candidates = [], failures = [], generationRejections = [];
     const routeFocused = request.softPreferences.some(pref => ['avoid_long_corridors','prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_kitchen_dining_route',
       'avoid_shared_guest_family_corridors','avoid_bedroom_guest_proximity'].includes(pref.value?.mizanKind || pref.kind));
     const specs = explorationSpecs(seed, { routeFocused }).filter(spec => allowedShapes.includes(spec.shape));
@@ -116,7 +116,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
         const composed = ['pavilions','staggered'].includes(spec.shape);
         const generated = await generateCandidate(request, spec.shape, overrides, composed ? null : spec);
         candidates.push({ ...generated, concept: composed ? CONCEPT[spec.shape] : conceptFor(spec, spec.shape) });
-      } catch (error) { if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
+      } catch (error) { generationRejections.push({ key: spec.key, shape: spec.shape, reason: error.message }); if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
     }
     const priorityIds = [];
     if (routeFocused) {
@@ -148,13 +148,16 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
       }
       priorityIds.push(...baselineIds, ...metricWinnerIds);
     }
-    const diverse = selectDiverse(candidates, previous, undefined, priorityIds);
-    if (!diverse.length && candidates.length && previous.length) throw Error('لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.');
+    const selection = selectDiverseWithEvidence(candidates, previous, undefined, priorityIds), diverse = selection.selected;
+    searchEvidence = { ...selection.summary, attempted: specs.length, generationRejected: generationRejections.length, generationRejections, rejections: selection.rejections };
+    if (!diverse.length && candidates.length && previous.length) throw Error(`لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. تأهل 0 من ${candidates.length} مرشحًا هندسيًا؛ استُبعد ${selection.summary.excludedHistory} للتشابه مع التاريخ. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.`);
     const pairs = [];
     for (const generated of diverse) {
       try { pairs.push({ ...generated, review: await reviewCandidate(generated.candidate, request) }); }
       catch (error) { failures.push({ shape: generated.candidate.actualShape, reason: `REVIEW_REJECTED:${error.message}` }); }
     }
+    searchEvidence.reviewRejected = diverse.length - pairs.length;
+    searchEvidence.reviewed = pairs.length;
     result = { pairs, failures, ...await decideReviewed(request, pairs) };
   }
   if (canonicalJSON({ plot, rooms }) !== before) throw Error('INTEGRATION_MUTATED_CALLER_INPUT');
@@ -178,6 +181,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
     models,
     selectedModel,
     selectedIndex,
+    searchEvidence,
     failures: (result.failures || []).map(f => ({ strategy: SHAPE_STRATEGY[f.shape] || f.shape, reason: f.reason })),
     decision: result.decision,
     aziz: result.aziz,

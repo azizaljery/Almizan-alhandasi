@@ -564,7 +564,9 @@ function renderAlternatives() {
   }).join('');
   $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} بدائل هندسية · التحديد يحدّث المسقط و3D والكميات`;
   const failed = state.failures.map(f => `${f.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[f.strategy] || 'أحد البدائل'}: ${f.reason}`).join(' ');
-  $('alternativeNote').textContent = `${state.alternatives.length} بدائل مختلفة هندسيًا من البرنامج نفسه؛ تختلف نسب الكتلة، توزيع الغرف، الحركة، ومعالجة الكتلة في 3D. تُستبعد النسخ المتطابقة والحلول غير الصالحة. ${failed}`;
+  const search = state.multiEngine?.searchEvidence;
+  const explanation = search ? `جُرّبت ${search.attempted} محاولة؛ تعذرت هندسة ${search.generationRejected}، واستُبعد ${search.excludedHistory} للتشابه مع التاريخ و${search.excludedBatch} للتشابه داخل الدفعة و${search.reviewRejected} عند المراجعة. الحد الأقصى ستة وليس عددًا مضمونًا.` : '';
+  $('alternativeNote').textContent = `${state.alternatives.length} بدائل معروضة من البرنامج نفسه. الاختلاف مقاس بالهندسة، ولا يثبت وحده اختلاف التنظيم أو جودة التصميم. ${explanation} ${failed}`;
   markDirty();
 }
 function renderRequirementEvidence() {
@@ -655,7 +657,7 @@ async function generate() {
     if (modelEpoch !== startEpoch || workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
-    state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
+    state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { searchEvidence: result.searchEvidence, decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
     state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults(); switchTab('result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);

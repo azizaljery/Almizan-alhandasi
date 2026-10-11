@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { runMultiEngineDesign } from '../dist/multi-engine.mjs';
-import { layoutDescriptor, layoutDistance, DIVERSITY_THRESHOLD, selectDiverse } from '../dist/design-exploration.mjs';
+import { layoutDescriptor, layoutDistance, DIVERSITY_THRESHOLD, selectDiverse, selectDiverseWithEvidence } from '../dist/design-exploration.mjs';
 import { defaultRooms, normalizeRooms, validatePlot, validateModel, generateModel } from '../dist/planner.mjs';
 const plot = validatePlot({width:35,length:45,floors:1,entry:'s',streets:{s:true},streetSetback:3,neighborSetback:1.5,coverage:.75});
 const rooms = normalizeRooms(defaultRooms());
@@ -74,4 +74,37 @@ test('new-idea search accepts previous designs from legacy project imports', asy
   const result=await runMultiEngineDesign({plot,rooms,seed:1,previous:[legacy]});
   assert.ok(result.models.length>0);
   for(const model of result.models) assert.ok(layoutDistance(descriptor(model),descriptor(legacy))>=DIVERSITY_THRESHOLD-1e-9);
+});
+
+test('priority orders eligible layouts without bypassing pairwise or history diversity',()=>{
+ const base=generateModel(plot,rooms,{strategy:'compact'}),duplicate=structuredClone(base),other=structuredClone(base);
+ duplicate.rooms=duplicate.rooms.map(r=>({...r,x:r.x+15,y:r.y-8}));other.shape='u';
+ const candidate=(candidateId,geometry)=>({candidate:{candidateId,geometry}});
+ const candidates=[candidate('first',base),candidate('duplicate',duplicate),candidate('other',other)];
+ const before=structuredClone(candidates);
+ const batch=selectDiverse(candidates,[],6,['first','duplicate','other']);
+ assert.deepEqual(batch.map(x=>x.candidate.candidateId),['first','other']);
+ const next=selectDiverse(candidates,[base],6,['first','duplicate','other']);
+ assert.deepEqual(next.map(x=>x.candidate.candidateId),['other']);assert.deepEqual(candidates,before);
+});
+
+test('route-priority real generation applies one diversity gate across seed batches',async()=>{
+ const idea='avoid long corridors';
+ const first=await runMultiEngineDesign({plot,rooms,idea,seed:1});
+ const second=await runMultiEngineDesign({plot,rooms,idea,seed:2,previous:first.models});
+ assert.ok(first.models.length>0);assert.ok(second.models.length>0);
+ for(const batch of [first.models,second.models])for(let i=0;i<batch.length;i++)for(let j=i+1;j<batch.length;j++)assert.ok(layoutDistance(descriptor(batch[i]),descriptor(batch[j]))>=DIVERSITY_THRESHOLD-1e-9,`priority pair ${i}/${j} repeats geometry`);
+ for(const a of second.models)for(const b of first.models)assert.ok(layoutDistance(descriptor(a),descriptor(b))>=DIVERSITY_THRESHOLD-1e-9,'priority repeated prior layout');
+});
+
+
+test('diversity evidence accounts for actual pool, history, batch rejection and display limit',()=>{
+ const base=generateModel(plot,rooms,{strategy:'compact'});
+ const variant=shape=>({...structuredClone(base),shape});
+ const candidates=[['old',base],['new',variant('u')],['same-new',variant('u')],['deferred',variant('l')]].map(([candidateId,geometry])=>({candidate:{candidateId,geometry}}));
+ const out=selectDiverseWithEvidence(candidates,[base],1,['old','new']);
+ assert.deepEqual(out.summary,{generated:4,selected:1,excludedHistory:1,excludedBatch:1,limitDeferred:1,threshold:DIVERSITY_THRESHOLD});
+ assert.deepEqual(out.rejections.map(r=>[r.candidateId,r.reason]),[['old','HISTORY_SIMILARITY'],['same-new','BATCH_SIMILARITY'],['deferred','LIMIT_REACHED']]);
+ assert.equal(out.rejections[0].historyDistance,0);assert.equal(out.rejections[1].batchDistance,0);
+ assert.deepEqual(selectDiverse(candidates,[base],1,['old','new']),out.selected);
 });
