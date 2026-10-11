@@ -1,3 +1,4 @@
+import { solarVectors } from './solar-path.mjs';
 import { TYPES, DIRECTIONS, center, openingPoint } from './planner.mjs';
 
 export const escapeXML = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
@@ -6,6 +7,15 @@ const box = (r, pad = 0) => ({ x: r.x - pad, y: -r.y - r.h - pad, w: r.w + pad *
 export const plotViewBox = m => box({ x: 0, y: 0, w: m.plot.width, h: m.plot.length }, 2.3);
 export const buildingViewBox = m => box(m.building, 1.4);
 export const roomViewBox = r => box(r, .8);
+
+// The ground projection of a rectangular vertical prism is the convex hull of
+// its base and its translated roof. Keep separate massing parts separate.
+function prismHull(points) {
+  const sorted = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (a, b, c) => (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+  const half = list => { const out = []; for (const p of list) { while (out.length > 1 && cross(out.at(-2), out.at(-1), p) <= 0) out.pop(); out.push(p); } return out; };
+  return [...half(sorted).slice(0, -1), ...half(sorted.slice().reverse()).slice(0, -1)];
+}
 
 function furniture(r) {
   const x = r.x + .3, y = -r.y - r.h + .3;
@@ -22,6 +32,7 @@ export function buildPlanSVG(model) {
   s += `<rect x="-200" y="-200" width="400" height="400" fill="#f8f7f1"/><rect x="0" y="${-L}" width="${W}" height="${L}" fill="url(#paper-grid)" stroke="#a88b51" stroke-width=".065" stroke-dasharray=".3 .2"/>`;
   const fp = box(model.footprint);
   s += `<rect x="${fp.x}" y="${fp.y}" width="${fp.w}" height="${fp.h}" fill="none" stroke="#5b9981" stroke-width=".03" stroke-dasharray=".16 .18"/>`;
+  s += `<g data-solar-layer="true" pointer-events="none"></g>`;
   const b = box(model.building);
   if (model.massingParts?.length) {
     for (const part of model.massingParts) { const v = box(part); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#eceae3"/>`; }
@@ -118,7 +129,7 @@ export class PlanViewport {
   }
   setEditor(editor) { this.editor = editor; this.svg.classList?.toggle('editing', !!editor?.active); }
   point(x, y) { const p = this.svg.createSVGPoint(); p.x = x; p.y = y; return p.matrixTransform(this.svg.getScreenCTM().inverse()); }
-  apply() { this.svg.setAttribute('viewBox', `${this.view.x} ${this.view.y} ${this.view.w} ${this.view.h}`); }
+  apply() { this.svg.setAttribute('viewBox', `${this.view.x} ${this.view.y} ${this.view.w} ${this.view.h}`); this.updateSolarLabel(); }
   zoom(factor, client) {
     const rect = this.svg.getBoundingClientRect(), at = client || { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
     const p = this.point(at.x, at.y), width = Math.max(2.5, Math.min(this.model.plot.width * 2.5, this.view.w * factor));
@@ -136,19 +147,39 @@ export class PlanViewport {
     for (const [key, value] of Object.entries({ fill: 'none', stroke: '#b04d24', 'stroke-width': '.09', 'stroke-dasharray': '.2 .12', 'stroke-linecap': 'round', 'pointer-events': 'none' })) route.setAttribute(key, value);
     this.svg.append(route);
   }
+  updateSolarLabel() {
+    const label = this.svg.querySelector('[data-solar-direction]');
+    if (!label || !this.solarBounds) return;
+    const b = this.solarBounds, v = this.view;
+    const clipped = b.x < v.x || b.y < v.y || b.right > v.x + v.w || b.bottom > v.y + v.h;
+    label.setAttribute('x', String(v.x + v.w - .4)); label.setAttribute('y', String(v.y + .6));
+    label.setAttribute('direction', 'rtl'); label.setAttribute('text-anchor', 'start');
+    label.textContent = this.solarLabel + (clipped ? ' · الظل ممتد خارج إطار العرض' : '');
+  }
   showSolar(preview, show = true) {
     this.svg.querySelector('[data-solar-shadow]')?.remove(); this.svg.querySelector('[data-solar-direction]')?.remove();
+    this.solarBounds = null;
     if (!show || !preview?.visible) return;
-    const rad = (preview.azimuth + 180) * Math.PI / 180, length = Math.min(preview.shadowLength || 0, Math.max(this.model.plot.width, this.model.plot.length) * .9);
-    const dx = Math.sin(rad) * length, dy = -Math.cos(rad) * length, shapes = this.model.massingParts?.length ? this.model.massingParts : [this.model.building];
+    const vectors = solarVectors(preview), direction = vectors.shadowPerMeter, length = preview.shadowLength;
+    if (!direction || !Number.isFinite(length) || length < 0) return;
+    const norm = Math.hypot(direction.east, direction.north);
+    const dx = norm ? direction.east / norm * length : 0, dy = norm ? direction.north / norm * length : 0;
+    const shapes = this.model.massingParts?.length ? this.model.massingParts : [this.model.building];
     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g'); group.setAttribute('data-solar-shadow', 'true'); group.setAttribute('pointer-events', 'none');
+    // Group opacity applies once across overlapping prism projections.
+    group.setAttribute('fill', '#5d6470'); group.setAttribute('opacity', '.22');
+    const all = [];
     shapes.forEach(r => {
       const corners = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]];
-      const points = [...corners, ...corners.slice().reverse().map(([x, y]) => [x + dx, y + dy])];
-      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); polygon.setAttribute('points', points.map(([x, y]) => `${x},${-y}`).join(' ')); polygon.setAttribute('fill', '#5d6470'); polygon.setAttribute('fill-opacity', '.22'); group.append(polygon);
+      const points = prismHull([...corners, ...corners.map(([x, y]) => [x + dx, y + dy])]).map(([x, y]) => [x, -y]);
+      all.push(...points);
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon'); polygon.setAttribute('points', points.map(([x, y]) => `${x},${y}`).join(' ')); group.append(polygon);
     });
-    this.svg.insertBefore(group, this.svg.firstChild);
-    const sun = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sun.setAttribute('data-solar-direction', 'true'); sun.setAttribute('x', String(this.model.building.x)); sun.setAttribute('y', String(-this.model.building.y + .7)); sun.setAttribute('fill', '#bd7b16'); sun.setAttribute('font-size', '.35'); sun.setAttribute('font-weight', '700'); sun.textContent = `☀ شمس ${preview.azimuth}° · ظل ${preview.shadowLength}م`; this.svg.append(sun);
+    this.svg.querySelector('[data-solar-layer]').append(group);
+    this.solarBounds = { x: Math.min(...all.map(p => p[0])), y: Math.min(...all.map(p => p[1])), right: Math.max(...all.map(p => p[0])), bottom: Math.max(...all.map(p => p[1])) };
+    const sun = document.createElementNS('http://www.w3.org/2000/svg', 'text'); sun.setAttribute('data-solar-direction', 'true'); sun.setAttribute('fill', '#bd7b16'); sun.setAttribute('font-size', '.35'); sun.setAttribute('font-weight', '700'); sun.setAttribute('pointer-events', 'none');
+    this.solarLabel = `☀ شمس ${f(preview.azimuth)}° · ظل ${f(length)}م`;
+    this.svg.append(sun); this.updateSolarLabel();
   }
   showEngineeringMarkers(markers = [], show = true) {
     this.svg.querySelector('[data-gemini-markers]')?.remove();

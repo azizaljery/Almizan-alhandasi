@@ -300,16 +300,22 @@ function rating() {
     $('grade').textContent = '—'; $('grade').removeAttribute('data-g'); $('rt').textContent = 'راجع بيانات الأرض'; $('bars').replaceChildren(); $('plotInsights').replaceChildren(); $('ratingHelp').textContent = 'لا يمكن عرض مؤشر صالح بالمدخلات الحالية.'; message('plotError', error.message);
   }
 }
+function currentSolarPreview() {
+  const latitude = $('solarLatitude').value.trim();
+  return solarPreview({ mode: 'example', latitude: latitude === '' ? null : Number(latitude), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 });
+}
 function renderSolarPreview() {
   try {
-    const preview = solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 });
+    const preview = currentSolarPreview();
     $('sunHourVal').textContent = `${String(Math.floor(number('sunHour'))).padStart(2, '0')}:${number('sunHour') % 1 ? '30' : '00'}`;
     $('sunMonthVal').textContent = monthName(number('sunMonth'));
-    $('sunInfo').innerHTML = preview.visible
-      ? `ارتفاع الشمس: <b>${fmt(preview.altitude)}°</b> · سمتها من الشمال: <b>${fmt(preview.azimuth)}°</b> · ظل جدار ٣٫٢م: <b>${fmt(preview.shadowLength)} م</b>`
-      : 'الشمس تحت الأفق في هذه المعاينة؛ لا يظهر ظل شمسي مباشر.';
+    $('sunInfo').innerHTML = preview.status === 'not-calculated'
+      ? 'غير محسوب. أدخل خط عرض لمثال تقريبي فقط؛ موقع الأرض والشمال الحقيقي والتاريخ والوقت والمنطقة الزمنية غير موثقة هنا.'
+      : preview.visible
+        ? `مثال تقريبي · ارتفاع الشمس: <b>${fmt(preview.altitude)}°</b> · سمتها من شمال الرسم الافتراضي: <b>${fmt(preview.azimuth)}°</b> · ظل كتلة ٣٫٢م: <b>${fmt(preview.shadowLength)} م</b>. قد يمتد الظل خارج إطار العرض.`
+        : 'الشمس تحت الأفق في المثال التقريبي؛ لا يوجد ضوء أو ظل شمسي مباشر. إنارة العرض المساعدة ليست ضوء نهار مقاسًا.';
     viewport?.showSolar(preview, $('showShadow')?.checked); viewer?.setSun?.(preview);
-  } catch (error) { $('sunInfo').textContent = error.message; }
+  } catch (error) { $('sunInfo').textContent = error.message; viewport?.showSolar(null, false); viewer?.setSun?.({ visible: false, status: 'not-calculated' }); }
 }
 function programTotal() {
   const sum = state.program.reduce((s, r) => s + (Number.isFinite(r.area) ? r.area : 0), 0);
@@ -341,10 +347,21 @@ function drawRoute() {
 }
 function on3DMode(mode, detail) {
   $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside';
-  if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · مستوى النظر 1.6 م · اسحب للنظر وتحرك عبر الأبواب'; }
+  if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · السقف مخفي للمشاهدة · مستوى النظر 1.6 م · ليست محاكاة إضاءة تحت سقف مغلق'; }
   else { $('roof').checked = viewer?.roof?.visible || false; $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + ' · تصور غير تنفيذي'; }
   $('tourState').textContent = mode === 'inside' ? `داخل ${detail}` : 'منظور عام';
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
+}
+function on3DState(detail) {
+  $('view').dataset.renderStatus = detail.status;
+  if (['context-lost', 'restoring', 'unavailable'].includes(detail.status)) {
+    message('threeError', detail.message || 'تعذر عرض 3D؛ مخطط 2D محفوظ ومتاح.');
+    $('viewMode').textContent = '3D غير متاح حاليًا · مخطط 2D محفوظ';
+    $('retry3D').hidden = detail.status === 'restoring';
+  } else if (detail.status === 'ready') {
+    message('threeError', ''); $('retry3D').hidden = true;
+    if (viewer?.model) on3DMode(viewer.mode, viewer.mode === 'inside' ? state.model?.rooms.find(r => r.id === state.selected)?.name || '' : viewer.currentViewName || 'persp');
+  }
 }
 async function loadThree(retry = false) {
   if (globalThis.THREE?.WebGLRenderer && globalThis.THREE?.Scene) return;
@@ -360,11 +377,13 @@ async function show3D(retry = false) {
     message('threeError', ''); $('retry3D').hidden = true;
     await loadThree(retry);
     if (requestedModel !== state.model || requestedEpoch !== modelEpoch) return false;
-    if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
-    const showRoof = $('roof').checked;
-    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 }));
-    return true;
-  } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
+    const showRoof = viewer?.mode === 'inside' ? viewer.roofChoice : $('roof').checked;
+    if (retry && viewer?.contextLost) { viewer.destroy(); viewer = null; }
+    if (!viewer) viewer = new RoomViewer($('view'), on3DMode, { onState: on3DState });
+    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); renderSolarPreview();
+    if (viewer.contextLost) { on3DState({ status: 'context-lost', message: 'توقف عرض 3D مؤقتًا؛ المخطط الحالي محفوظ ويمكن متابعة 2D أو إعادة المحاولة.' }); return false; }
+    on3DState({ status: 'ready' }); return true;
+  } catch (error) { if (requestedModel !== state.model || requestedEpoch !== modelEpoch) return false; message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
 function prepareTour() {
   if (!state.model) return [];

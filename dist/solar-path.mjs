@@ -1,13 +1,16 @@
-// A small, location-aware solar preview. It is deliberately separate from the
+// An illustrative solar-hour preview, not a verified site/time calculation. It is deliberately separate from the
 // layout engine: it describes sky position only and does not claim to model
 // neighbouring buildings, terrain, glazing, or actual shading.
 const radians = degrees => degrees * Math.PI / 180;
 const degrees = radians => radians * 180 / Math.PI;
-const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+const unavailable = reason => ({ status: 'not-calculated', reason, visible: false, altitude: null, azimuth: null, shadowLength: null, declination: null, wallHeight: null, provenance: { locationKnown: false, northKnown: false, timeBasis: null }, disclaimer: 'لم تُحسب شمس الموقع؛ يلزم موقع وشمال وتاريخ ووقت ومنطقة زمنية موثقة ومحرك حساب يدعمها.' });
 
-export function solarPreview({ latitude = 24.7136, month = 6, hour = 12, wallHeight = 3.2 } = {}) {
+export function solarPreview({ latitude, month = 6, hour = 12, wallHeight = 3.2, mode = 'example' } = {}) {
+  if (mode === 'site') return unavailable('SITE_CALCULATION_NOT_IMPLEMENTED');
+  if (mode !== 'example') throw Error('وضع الشمس غير مدعوم.');
+  if (latitude === undefined || latitude === null || latitude === '') return unavailable('MISSING_EXAMPLE_LATITUDE');
   if (!Number.isFinite(latitude) || latitude < -66 || latitude > 66) throw Error('أدخل خط عرض بين ‎-66° و66° لعرض المعاينة.');
-  if (!Number.isFinite(month) || month < 1 || month > 12) throw Error('الشهر يجب أن يكون بين 1 و12.');
+  if (!Number.isInteger(month) || month < 1 || month > 12) throw Error('الشهر يجب أن يكون بين 1 و12.');
   if (!Number.isFinite(hour) || hour < 0 || hour > 24) throw Error('الساعة يجب أن تكون بين 0 و24.');
   if (!Number.isFinite(wallHeight) || wallHeight <= 0) throw Error('ارتفاع الجدار يجب أن يكون أكبر من صفر.');
 
@@ -22,12 +25,25 @@ export function solarPreview({ latitude = 24.7136, month = 6, hour = 12, wallHei
   const visible = altitude > 0;
   const shadowLength = visible ? wallHeight / Math.tan(radians(altitude)) : null;
   return {
-    visible,
-    altitude: +altitude.toFixed(1),
-    azimuth: +azimuth.toFixed(1),
-    shadowLength: shadowLength === null ? null : +clamp(shadowLength, 0, 999).toFixed(1),
-    declination: +declination.toFixed(1),
+    status: 'approximate-example', reason: null, visible, altitude, azimuth, shadowLength, declination, wallHeight,
+    provenance: { locationKnown: false, northKnown: false, timeBasis: 'solar-hour', latitude, month, hour, representativeDay: day, method: 'representative-day-declination', exclusions: ['longitude-clock-time-timezone', 'surveyed-north', 'terrain-neighbours', 'atmospheric-refraction'] },
+    disclaimer: 'مثال تقريبي بخط العرض ويوم ممثل للشهر وساعة شمسية؛ ليس حسابًا موثقًا لشمس الموقع أو التوقيت المدني. الشمال في الرسم افتراضي.'
   };
 }
 
 export const monthName = month => ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'][Math.round(month) - 1] || '—';
+
+/** Unit direction toward sun and flat-ground displacement per metre of vertical
+ * height. Model north maps to scene -Z; scene +Y is elevation. A surveyed north
+ * offset, if independently supplied, rotates clockwise from model +north.
+ * No display clipping, low-angle clamp, terrain, or occlusion is applied here.
+ */
+export function solarVectors(preview, { northOffsetDeg = 0 } = {}) {
+  if (!Number.isFinite(northOffsetDeg)) throw Error('زاوية الشمال غير صالحة.');
+  if (!preview || preview.status === 'not-calculated' || preview.altitude == null || preview.azimuth == null) return { visible: false, towardSun: null, world: null, shadowPerMeter: null };
+  if (!Number.isFinite(preview.altitude) || Math.abs(preview.altitude) > 90 || !Number.isFinite(preview.azimuth)) throw Error('اتجاه الشمس غير صالح.');
+  const alt = radians(preview.altitude), az = radians(preview.azimuth + northOffsetDeg);
+  const towardSun = { east: Math.sin(az) * Math.cos(alt), north: Math.cos(az) * Math.cos(alt), up: Math.sin(alt) };
+  const visible = preview.altitude > 0 && preview.visible !== false;
+  return { visible, towardSun, world: { x: towardSun.east, y: towardSun.up, z: -towardSun.north }, shadowPerMeter: visible ? { east: -towardSun.east / towardSun.up, north: -towardSun.north / towardSun.up } : null };
+}

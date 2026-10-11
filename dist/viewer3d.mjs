@@ -1,31 +1,38 @@
 import { circulationNetwork } from './circulation.mjs';
 import { center, openingPoint, wallPieces } from './planner.mjs';
 import { architecturalTextures, beveledBox } from './architectural-materials.mjs';
+import { solarVectors } from './solar-path.mjs';
 import { furnishRoom } from './furniture3d.mjs';
 
 export class RoomViewer {
-  constructor(container, onMode) {
+  constructor(container, onMode, options = {}) {
     const T = globalThis.THREE;
     if (!T) throw Error('تعذّر تحميل مكتبة 3D. مخطط 2D يعمل؛ تحقّق من الاتصال ثم أعد المحاولة.');
+    this.quality = { tier: 'balanced', reason: 'initial conservative limits', frames: 0, slowFrames: 0, complexFrames: 0, lastRenderMs: 0, pixelRatioCap: 1.5, shadowMapSize: 1024 };
+    this.now = options.now || (() => globalThis.performance?.now?.() ?? Date.now());
+    this.options = options; this.onState = options.onState; this.transitionMs = options.transitionMs ?? 320; this.frameId = null; this.transition = null; this.contextLost = false; this.destroyed = false; this.roofChoice = false; this.illustrativeFurniture = options.illustrativeFurniture === true;
+    this.motionQuery = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+    this.reducedMotion = options.reducedMotion ?? this.motionQuery?.matches ?? false;
     this.T = T; this.container = container; this.onMode = onMode; this.visible = true; this.mode = 'orbit';
     this.abort = new AbortController(); this.pointers = new Map(); this.scene = new T.Scene();
     this.scene.background = new T.Color('#e3e8de');
     this.camera = new T.PerspectiveCamera(42, 1, .05, 700);
     try { this.renderer = new T.WebGLRenderer({ antialias: true, alpha: false }); }
     catch { throw Error('عرض 3D يحتاج WebGL، وهو غير متاح في هذا المتصفح. يمكنك متابعة المخطط 2D.'); }
-    this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1.5));
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     if (T.ACESFilmicToneMapping) this.renderer.toneMapping = T.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = .95;
     this.textures = architecturalTextures(T);
     if (this.renderer.shadowMap) { this.renderer.shadowMap.enabled = true; if (T.PCFSoftShadowMap) this.renderer.shadowMap.type = T.PCFSoftShadowMap; }
     const canvas = this.renderer.domElement;
+    for (const texture of Object.values(this.textures)) texture.anisotropy = Math.min(4, this.renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
     this.ambientLight = new T.HemisphereLight(0xfffcf2, 0x7b927b, 2.1); this.scene.add(this.ambientLight);
-    const light = new T.DirectionalLight(0xffefd3, 2.7); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true;
+    const light = new T.DirectionalLight(0xffefd3, 2.7); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true; light.visible = false;
     if (light.shadow?.mapSize) {
-      light.shadow.mapSize.width = 2048; light.shadow.mapSize.height = 2048;
+      light.shadow.mapSize.width = 1024; light.shadow.mapSize.height = 1024;
       light.shadow.camera.near = 1; light.shadow.camera.far = 180;
       light.shadow.bias = -.00015; light.shadow.normalBias = .025;
     }
@@ -35,7 +42,7 @@ export class RoomViewer {
     this.group = new T.Group(); this.scene.add(this.group);
     this.target = new T.Vector3(); this.theta = Math.PI * .23; this.phi = .65; this.radius = 35; this.yaw = 0; this.pitch = 0;
     const on = (event, handler, options = {}) => canvas.addEventListener(event, handler, { ...options, signal: this.abort.signal });
-    on('pointerdown', e => { if (e.button !== 0) return; canvas.focus({ preventScroll: true }); canvas.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
+    on('pointerdown', e => { if (e.button !== 0) return; this.cancelTransition(); canvas.focus({ preventScroll: true }); canvas.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
     on('pointermove', e => {
       if (!this.pointers.has(e.pointerId)) return;
       const old = this.pointers.get(e.pointerId), before = [...this.pointers.values()];
@@ -53,7 +60,7 @@ export class RoomViewer {
     });
     on('pointerup', e => this.pointers.delete(e.pointerId)); on('pointercancel', e => this.pointers.delete(e.pointerId));
     on('wheel', e => {
-      e.preventDefault();
+      e.preventDefault(); this.cancelTransition();
       if (this.mode === 'inside') this.move(e.deltaY > 0 ? 'back' : 'forward', .3);
       else { this.radius = Math.max(4, Math.min(240, this.radius * Math.exp(Math.max(-200, Math.min(200, e.deltaY)) * .002))); this.render(); }
     }, { passive: false });
@@ -62,8 +69,16 @@ export class RoomViewer {
       if (this.mode === 'inside' && keys[e.key]) { e.preventDefault(); this.move(keys[e.key], .28); }
       if (e.key === 'Escape') this.view('persp');
     });
+    on('webglcontextlost', e => { e.preventDefault(); this.contextLost = true; this.cancelTransition(); this.pointers.clear(); this.emitState('context-lost', 'توقف عرض 3D مؤقتًا؛ مخططك محفوظ ويمكن متابعة 2D.'); });
+    on('webglcontextrestored', () => {
+      this.emitState('restoring', 'جارٍ استعادة عرض 3D…');
+      try { this.contextLost = false; Object.values(this.textures).forEach(texture => { texture.needsUpdate = true; }); this.resize(); this.emitState('ready', 'عاد عرض 3D دون تغيير المخطط.'); }
+      catch { this.contextLost = true; this.emitState('unavailable', 'تعذرت استعادة 3D؛ مخطط 2D محفوظ ومتاح.'); }
+    });
+    this.motionQuery?.addEventListener?.('change', e => { if (this.options.reducedMotion !== undefined) return; this.reducedMotion = e.matches; if (e.matches) this.cancelTransition(true); }, { signal: this.abort.signal });
     this.resizeObserver = new ResizeObserver(() => this.resize()); this.resizeObserver.observe(container);
   }
+  emitState(status, message) { this.onState?.({ status, message, mode: this.mode, view: this.currentViewName || 'persp' }); }
   clear() {
     const geometries = new Set(), materials = new Set();
     this.group.traverse(o => { if (o.geometry) geometries.add(o.geometry); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => materials.add(m)); });
@@ -88,8 +103,8 @@ export class RoomViewer {
     this.group.add(m); return m;
   }
   setModel(model, palette = 'modern') {
-    this.clear(); this.model = model; this.pieces = wallPieces(model);
-    const b = model.building, p = model.plot, T = this.T, concept = model.architecture?.massing || 'spine';
+    this.cancelTransition(); this.pointers.clear(); this.clear(); this.model = model; this.pieces = wallPieces(model);
+    const b = model.building, p = model.plot, T = this.T;
     const materials = {
       resort: { facade: '#ead9bc', accent: '#8e6948', roof: '#d2bea0', floor: '#eee5d5', metal: '#604d3b' },
       modern: { facade: '#f4f2ed', accent: '#5a6666', roof: '#d8d6cf', floor: '#e8e4dc', metal: '#303839' },
@@ -107,34 +122,9 @@ export class RoomViewer {
     if (p.streets.w) addBox(-1.15, -.12, -p.length / 2, 2.1, .12, p.length + 3, road);
     if (p.streets.e) addBox(p.width + 1.15, -.12, -p.length / 2, 2.1, .12, p.length + 3, road);
     if (model.massingParts?.length) {
-      model.massingParts.forEach(part => addBox(part.x + part.w / 2, -.005, -part.y - part.h / 2, part.w + .3, .16, part.h + .3, '#d4c7b6', 0, 1, { receiveShadow: true }));
+      model.massingParts.forEach(part => addBox(part.x + part.w / 2, -.005, -part.y - part.h / 2, part.w, .16, part.h, '#d4c7b6', 0, 1, { receiveShadow: true }));
       model.courtyards?.forEach(court => addBox(court.x + court.w / 2, .005, -court.y - court.h / 2, court.w, .03, court.h, '#b9c99a', 0, 1, { receiveShadow: true }));
-    } else addBox(b.x + b.w / 2, -.005, -b.y - b.h / 2, b.w + .3, .16, b.h + .3, '#d4c7b6', 0, 1, { receiveShadow: true });
-
-    const externalDoor = model.openings.find(o => o.type === 'door' && o.connects?.includes('outside'));
-    if (externalDoor) {
-      const ep = openingPoint(model, externalDoor), entry = model.plot.entry;
-      if (entry === 's') addBox(ep.x, .02, -ep.y / 2, 1.45, .08, Math.max(.2, ep.y), '#c9b18d');
-      if (entry === 'n') addBox(ep.x, .02, -(ep.y + p.length) / 2, 1.45, .08, Math.max(.2, p.length - ep.y), '#c9b18d');
-      if (entry === 'w') addBox(ep.x / 2, .02, -ep.y, Math.max(.2, ep.x), .08, 1.45, '#c9b18d');
-      if (entry === 'e') addBox((ep.x + p.width) / 2, .02, -ep.y, Math.max(.2, p.width - ep.x), .08, 1.45, '#c9b18d');
-      addBox(ep.x, 2.65, -ep.y, externalDoor.w + 1.35, .18, 1.25, style.accent, entry === 'e' || entry === 'w' ? Math.PI / 2 : 0, 1, { metalness: .05 });
-      for (const side of [-1, 1]) {
-        const sideways = entry === 'e' || entry === 'w';
-        addBox(ep.x + (sideways ? 0 : side * (externalDoor.w + 1) / 2), 1.3, -ep.y + (sideways ? side * (externalDoor.w + 1) / 2 : 0), .12, 2.6, .12, style.metal);
-      }
-      // Entry cladding is decorative and stays outside the actual doorway.
-      if (palette === 'modern' || palette === 'resort') {
-        const wall = model.walls.find(w => w.id === externalDoor.wallId);
-        const dx = wall.x2 - wall.x1, dy = wall.y2 - wall.y1, length = Math.hypot(dx, dy);
-        const ux = dx / length, uy = dy / length;
-        const outward = { s: [0, .14], n: [0, -.14], e: [.14, 0], w: [-.14, 0] }[entry];
-        for (const sign of [-1, 1]) for (let i = 0; i < 7; i++) {
-          const along = sign * (externalDoor.w / 2 + .23 + i * .12);
-          addBox(ep.x + ux * along + outward[0], 1.5, -ep.y - uy * along + outward[1], .055, 2.7, .055, '#9b795a', 0, 1, { texture: 'wood' });
-        }
-      }
-    }
+    } else addBox(b.x + b.w / 2, -.005, -b.y - b.h / 2, b.w, .16, b.h, '#d4c7b6', 0, 1, { receiveShadow: true });
 
     // Physical surface maps and detailed furniture share the exact room footprint.
     model.corridors.forEach(r => addBox(r.x + r.w / 2, .085, -r.y - r.h / 2, r.w, .035, r.h, '#e3ddce', 0, 1, { texture: 'stone', roughness: .72 }));
@@ -142,7 +132,7 @@ export class RoomViewer {
       const texture = r.type === 'bedroom' || r.type === 'living' || r.type === 'majlis' ? 'wood' : r.type === 'bath' || r.type === 'kitchen' ? 'tile' : 'stone';
       const color = texture === 'wood' ? '#cbb794' : texture === 'tile' ? '#e7e6db' : '#e7dfca';
       addBox(r.x + r.w / 2, .09, -r.y - r.h / 2, r.w, .04, r.h, color, 0, 1, { texture, roughness: texture === 'tile' ? .38 : .68 });
-      furnishRoom(this, r, palette);
+      if (this.illustrativeFurniture) furnishRoom(this, r, palette);
     });
 
     // Exact wall pieces keep door/window voids physically open; exterior receives the selected material system.
@@ -151,45 +141,17 @@ export class RoomViewer {
       const wall = model.walls.find(w => w.id === o.wallId), point = openingPoint(model, o), angle = Math.atan2(wall.y2 - wall.y1, wall.x2 - wall.x1);
       if (o.type === 'window') {
         addBox(point.x, o.sill + o.h / 2, -point.y, o.w, o.h, .045, '#78aeba', angle, .34, { glass: true, metalness: .12 });
-        const ux = Math.cos(angle), uz = -Math.sin(angle), half = Math.max(0, o.w / 2 - .035);
-        for (const sign of [-1, 1]) addBox(point.x + ux * half * sign, o.sill + o.h / 2, -point.y + uz * half * sign, .055, o.h + .12, .09, style.metal, angle, 1, { metalness: .35 });
-        for (const y of [o.sill, o.sill + o.h, o.sill + o.h / 2]) addBox(point.x, y, -point.y, o.w + .1, .055, .09, style.metal, angle, 1, { metalness: .35 });
-      } else {
-        addBox(point.x, o.h / 2, -point.y, o.w, o.h, .055, o.roomId ? '#8c633d' : style.accent, angle + .28, 1, { roughness: .5 });
-        addBox(point.x, o.h + .045, -point.y, o.w + .16, .09, .12, style.metal, angle);
+
       }
     });
 
     // Roof is split by room and circulation zone, making every planning strategy legible as massing.
     this.roof = new T.Group(); this.group.add(this.roof);
-    model.rooms.forEach(r => {
-      const lift = concept === 'twin-wings' ? (r.resolvedSide === 'left' ? .12 : 0) : concept === 'garden-front' && r.position === 'front' ? .16 : 0;
-      addBox(r.x + r.w / 2, 3.29 + lift, -r.y - r.h / 2, r.w + .08, .2, r.h + .08, style.roof, 0, 1, { parent: this.roof, roughness: .82 });
-    });
-    model.corridors.forEach((r, i) => addBox(r.x + r.w / 2, 3.34 + (concept === 'spine' && i === 0 ? .22 : 0), -r.y - r.h / 2, r.w + .14, .18, r.h + .14, concept === 'spine' && i === 0 ? style.accent : style.roof, 0, 1, { parent: this.roof }));
-    const parapet = palette === 'modern' ? .34 : .5;
-    const parapetRects = model.massingParts?.length ? model.massingParts : [b];
-    parapetRects.forEach(r => {
-      for (const [x, z, w, d] of [[r.x + r.w / 2, -r.y, r.w + .35, .16], [r.x + r.w / 2, -r.y - r.h, r.w + .35, .16], [r.x, -r.y - r.h / 2, .16, r.h], [r.x + r.w, -r.y - r.h / 2, .16, r.h]]) addBox(x, 3.5, z, w, parapet, d, style.accent, 0, 1, { parent: this.roof });
-    });
-    this.roof.visible = false;
-
-    // Landscape and shade elements distinguish the architectural concepts without external images.
-    const outside = (x, y) => x < b.x - .7 || x > b.x + b.w + .7 || y < b.y - .7 || y > b.y + b.h + .7;
-    [[1, 1], [p.width - 1, 1], [1, p.length - 1], [p.width - 1, p.length - 1]].filter(([x, y]) => outside(x, y)).forEach(([x, y], i) => {
-      addBox(x, .65, -y, .22, 1.3, .22, '#70543a');
-      this.sphere(x, 1.8, -y, .68, i % 2 ? '#567653' : '#719165', { scale: [1, 1.2, 1] });
-      this.sphere(x + .3, 1.66, -y + .15, .4, '#829c70');
-    });
-    if (concept === 'garden-front' || palette === 'resort') {
-      const gy = model.plot.entry === 'n' ? b.y - .9 : b.y + b.h + .9;
-      for (let i = -2; i <= 2; i++) addBox(b.x + b.w / 2 + i * 1.05, 2.35, -gy, .09, .16, 2.1, style.accent);
-      for (const i of [-2.1, 2.1]) addBox(b.x + b.w / 2 + i, 1.15, -gy, .12, 2.3, .12, style.metal);
-    }
-    if (palette === 'hijazi') {
-      const frontY = model.plot.entry === 'n' ? b.y + b.h : b.y;
-      for (let x = b.x + .8; x < b.x + b.w - .4; x += 1.15) addBox(x, 2.35, -frontY, .16, 1.3, .18, '#6f4434');
-    }
+    // A removable illustrative ceiling follows modeled zones at the modeled wall height.
+    // It is not a structural roof specification; no parapets, overhangs or invented level changes.
+    const wallTop = Math.max(...this.pieces.map(piece => piece.bottom + piece.height));
+    [...model.rooms, ...model.corridors].forEach(r => addBox(r.x + r.w / 2, wallTop + .05, -r.y - r.h / 2, r.w, .1, r.h, style.roof, 0, 1, { parent: this.roof, roughness: .9 }));
+    this.roof.visible = this.roofChoice;
 
     const points = [[0, 0], [p.width, 0], [p.width, p.length], [0, p.length], [0, 0]].map(([x, y]) => new T.Vector3(x, .07, -y));
     const line = new T.Line(new T.BufferGeometry().setFromPoints(points), new T.LineDashedMaterial({ color: 0x93753f, dashSize: .4, gapSize: .3 })); line.computeLineDistances(); this.group.add(line);
@@ -199,11 +161,12 @@ export class RoomViewer {
       Object.assign(this.sunLight.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, far: Math.max(180, extent * 5) });
       this.sunLight.shadow.camera.updateProjectionMatrix();
     }
-    this.view('persp'); this.resize();
+    this.view('persp', { immediate: true }); this.resize();
   }
-  view(name) {
+  view(name, { immediate = false } = {}) {
     if (!this.model) return;
-    this.mode = 'orbit'; const b = this.model.building;
+    this.cancelTransition(); const start = this.orbitPose(), wasInside = this.mode === 'inside';
+    this.currentViewName = name; this.mode = 'orbit'; const b = this.model.building;
     this.target.set(b.x + b.w / 2, .8, -b.y - b.h / 2);
     this.phi = name === 'top' ? .02 : name === 'front' ? 1.3 : .78;
     const entryAngle = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[this.model.plot.entry] || 0;
@@ -212,7 +175,10 @@ export class RoomViewer {
     const aspect = Math.max(.35, this.container.clientWidth / Math.max(1, this.container.clientHeight));
     const halfFov = Math.atan(Math.tan(21 * Math.PI / 180) * Math.min(1, aspect));
     this.radius = Math.hypot(b.w, b.h) / (2 * Math.sin(halfFov)) * 1.06;
-    this.onMode?.('orbit', name); this.render();
+    if (this.roof) this.roof.visible = this.roofChoice;
+    this.onMode?.('orbit', name);
+    if (!immediate && !wasInside && !this.reducedMotion && this.visible && !this.contextLost && globalThis.requestAnimationFrame) this.animateOrbit(start, this.orbitPose());
+    else this.render();
   }
   enter(id) {
     const r = this.model?.rooms.find(r => r.id === id); if (!r) return false;
@@ -221,7 +187,7 @@ export class RoomViewer {
     const p = route?.points.at(-1);
     if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return false;
     const c = center(r);
-    this.mode = 'inside'; this.eye = { x: c.x, y: c.y }; this.yaw = Math.atan2(p.x - c.x, p.y - c.y); this.pitch = -.06;
+    this.cancelTransition?.(); this.mode = 'inside'; this.eye = { x: c.x, y: c.y }; this.yaw = Math.atan2(p.x - c.x, p.y - c.y); this.pitch = -.06;
     this.roof.visible = false; this.onMode?.('inside', r.name); this.render(); this.renderer.domElement.focus({ preventScroll: true });
     return true;
   }
@@ -236,15 +202,17 @@ export class RoomViewer {
   }
   move(direction, amount = .45) {
     if (this.mode !== 'inside') return;
+    this.cancelTransition();
     const yaw = this.yaw + (direction === 'left' ? -Math.PI / 2 : direction === 'right' ? Math.PI / 2 : direction === 'back' ? Math.PI : 0);
     const steps = Math.ceil(amount / .07), dx = Math.sin(yaw) * amount / steps, dy = Math.cos(yaw) * amount / steps;
     for (let i = 0; i < steps; i++) { const x = this.eye.x + dx, y = this.eye.y + dy; if (this.blocked(x, y)) break; this.eye = { x, y }; }
     this.render();
   }
-  setRoof(show) { if (this.roof) { this.roof.visible = show && this.mode !== 'inside'; this.render(); } }
+  setRoof(show) { this.roofChoice = !!show; if (this.roof) { this.roof.visible = show && this.mode !== 'inside'; this.render(); } }
   setSun(preview) {
     if (!this.sunLight) return;
-    if (!preview?.visible) {
+    const direction = solarVectors(preview);
+    if (!direction.visible || !direction.world || !this.model) {
       this.sunLight.visible = false;
       if (this.ambientLight) this.ambientLight.intensity = .55;
       if (this.fillLight) this.fillLight.intensity = .22;
@@ -254,10 +222,9 @@ export class RoomViewer {
     this.sunLight.visible = true;
     if (this.ambientLight) this.ambientLight.intensity = 1.2;
     if (this.fillLight) this.fillLight.intensity = .65;
-    const rad = preview.azimuth * Math.PI / 180, altitude = Math.max(.08, preview.altitude * Math.PI / 180);
     const b = this.model.building;
     const distance = Math.max(52, Math.max(this.model.plot.width, this.model.plot.length) * 1.8);
-    this.sunLight.position.set(b.x + b.w / 2 + Math.sin(rad) * Math.cos(altitude) * distance, Math.sin(altitude) * distance, -b.y - b.h / 2 - Math.cos(rad) * Math.cos(altitude) * distance);
+    this.sunLight.position.set(b.x + b.w / 2 + direction.world.x * distance, direction.world.y * distance, -b.y - b.h / 2 + direction.world.z * distance);
     this.sunLight.intensity = Math.max(1.3, Math.min(3.5, 1.2 + preview.altitude / 28)); this.render();
   }
   resize() {
@@ -265,9 +232,9 @@ export class RoomViewer {
     if (!w || !h) return;
     this.camera.aspect = w / h; this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h, false); this.render();
   }
-  setVisible(show) { this.visible = show; if (show) this.resize(); }
+  setVisible(show) { this.visible = show; if (!show) this.cancelTransition(); if (show) this.resize(); }
   render() {
-    if (!this.visible || !this.model || !this.container.clientWidth) return;
+    if (this.destroyed || this.contextLost || !this.visible || !this.model || !this.container.clientWidth) return;
     if (this.mode === 'inside') {
       this.camera.position.set(this.eye.x, 1.6, -this.eye.y);
       this.camera.lookAt(this.eye.x + Math.sin(this.yaw) * Math.cos(this.pitch), 1.6 + Math.sin(this.pitch), -this.eye.y - Math.cos(this.yaw) * Math.cos(this.pitch));
@@ -275,7 +242,55 @@ export class RoomViewer {
       this.camera.position.set(this.target.x + this.radius * Math.sin(this.phi) * Math.sin(this.theta), this.target.y + this.radius * Math.cos(this.phi), this.target.z + this.radius * Math.sin(this.phi) * Math.cos(this.theta));
       this.camera.lookAt(this.target);
     }
-    this.renderer.render(this.scene, this.camera);
+    const started = this.now(); this.renderer.render(this.scene, this.camera); this.measureQuality(Math.max(0, this.now() - started));
   }
-  destroy() { this.abort.abort(); this.resizeObserver.disconnect(); this.clear(); Object.values(this.textures).forEach(texture => texture.dispose()); this.renderer.dispose(); this.renderer.domElement.remove(); }
+  orbitPose() { return { theta: this.theta, phi: this.phi, radius: this.radius, x: this.target.x, y: this.target.y, z: this.target.z }; }
+  applyOrbit(pose) { this.theta = pose.theta; this.phi = pose.phi; this.radius = pose.radius; this.target.set(pose.x, pose.y, pose.z); }
+  cancelTransition(finish = false) {
+    if (this.frameId !== null) globalThis.cancelAnimationFrame?.(this.frameId);
+    if (finish && this.transition) this.applyOrbit(this.transition.end);
+    this.frameId = null; this.transition = null;
+    if (finish) this.render();
+  }
+  animateOrbit(start, end) {
+    if (!(this.transitionMs > 0)) { this.applyOrbit(end); this.render(); return; }
+    end.theta = start.theta + Math.atan2(Math.sin(end.theta - start.theta), Math.cos(end.theta - start.theta));
+    const transition = { start, end, time: null }; this.transition = transition; this.applyOrbit(start); this.render();
+    const tick = now => {
+      if (this.transition !== transition || this.destroyed || this.contextLost) return;
+      this.frameId = null;
+      if (transition.time === null) transition.time = now;
+      const progress = Math.min(1, Math.max(0, (now - transition.time) / this.transitionMs)), t = progress * progress * (3 - 2 * progress), pose = {};
+      for (const key of Object.keys(start)) pose[key] = start[key] + (end[key] - start[key]) * t;
+      this.applyOrbit(pose); this.render();
+      if (progress < 1) this.frameId = globalThis.requestAnimationFrame(tick); else this.transition = null;
+    };
+    this.frameId = globalThis.requestAnimationFrame(tick);
+  }
+  measureQuality(renderMs) {
+    const q = this.quality, info = this.renderer.info?.render;
+    q.frames++; q.lastRenderMs = renderMs;
+    q.slowFrames = renderMs > 22 ? q.slowFrames + 1 : 0;
+    q.complexFrames = (info?.calls > 1000 || info?.triangles > 200000) ? q.complexFrames + 1 : 0;
+    if (q.tier === 'balanced' && (q.slowFrames >= 12 || q.complexFrames >= 3)) {
+      q.tier = 'low'; q.reason = q.slowFrames >= 12 ? '12 consecutive CPU render submissions above 22ms' : '3 consecutive frames above 1000 draw calls or 200000 triangles';
+      q.pixelRatioCap = 1; q.shadowMapSize = 512; this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1));
+      if (this.sunLight.shadow?.mapSize) {
+        this.sunLight.shadow.mapSize.width = this.sunLight.shadow.mapSize.height = 512;
+        this.sunLight.shadow.map?.dispose(); this.sunLight.shadow.map = null;
+        this.sunLight.shadow.mapPass?.dispose(); this.sunLight.shadow.mapPass = null;
+        this.sunLight.shadow.needsUpdate = true;
+      }
+    }
+  }
+  getPerformanceStats() {
+    const info = this.renderer.info;
+    return { ...this.quality, measurement: 'CPU render submission time, not GPU frame time', geometries: info?.memory?.geometries ?? null, textures: info?.memory?.textures ?? null, drawCalls: info?.render?.calls ?? null, triangles: info?.render?.triangles ?? null, animating: !!this.transition };
+  }
+  destroy() {
+    if (this.destroyed) return;
+    this.destroyed = true; this.cancelTransition(); this.pointers.clear(); this.abort.abort(); this.resizeObserver.disconnect(); this.clear();
+    new Set(Object.values(this.textures)).forEach(texture => texture.dispose()); this.textures = {};
+    this.sunLight.shadow?.map?.dispose(); this.sunLight.shadow?.mapPass?.dispose(); this.renderer.renderLists?.dispose(); this.renderer.dispose(); this.renderer.domElement.remove();
+  }
 }
