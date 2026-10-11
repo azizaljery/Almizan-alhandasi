@@ -208,3 +208,32 @@ body:has(#app.studio-simple-mode){overflow-x:clip}
 #app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-view-toggle button{width:auto;min-width:64px;padding:6px 10px}
 @media(min-width:691px){#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #plan,#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #view{scroll-margin-top:100px}}
 @media(min-width:691px) and (max-width:1000px){#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #plan,#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #view{scroll-margin-top:150px}}
+/* Selected projects start at the drawing, not repeated onboarding chrome. */
+#app.studio-simple-mode .top{min-height:58px;padding:6px 14px;display:flex;flex-wrap:nowrap;gap:8px}
+#app.studio-simple-mode .top .brand{min-width:0;gap:7px}
+#app.studio-simple-mode .top .brand b{white-space:nowrap;font-size:.9rem}
+#app.studio-simple-mode .top .brand small{display:none}
+#app.studio-simple-mode .top .workspace-actions{display:flex;gap:0;flex-wrap:nowrap;min-width:0}
+#studioProjectMenu{position:relative}
+#studioProjectMenu>summary{min-height:44px;box-sizing:border-box;padding:10px 14px;border:1px solid #cdd8cb;border-radius:8px;cursor:pointer;font-size:.85rem;list-style:inside}
+.studio-project-menu-actions{position:absolute;inset-inline-end:0;top:100%;z-index:500;min-width:220px;padding:10px;display:flex;flex-direction:column;gap:8px;background:#fff;border:1px solid #cdd8cb;border-radius:8px;box-shadow:0 8px 24px #162b2633}
+.studio-project-menu-actions>button{width:100%;min-height:44px}
+#studioProjectMenu:not([open])>.studio-project-menu-actions{display:none}
+#studioProjectNotice{margin:4px 14px;font-size:.76rem;color:#54675b}
+#studioProjectNotice>summary{cursor:pointer;min-height:28px;line-height:28px}
+#studioProjectNotice #projectStatus{margin:4px 0;padding:8px;font-size:.8rem}
+#app.studio-has-model:not(.studio-advanced-open) .studio-simple-hero{display:none}
+#app.studio-has-model:not(.studio-advanced-open) .studio-compact-toolbar{display:none}
+#app.studio-has-model:not(.studio-advanced-open) .studio-project-setup>summary{min-height:36px;padding:7px 12px}
+#app.studio-has-model:not(.studio-advanced-open) #studioAcceptedSummary{padding:5px 12px;font-size:.8rem;line-height:1.5}
+#app.studio-has-model:not(.studio-advanced-open) #studioMandatoryIssues{padding:3px 8px}
+#app.studio-has-model:not(.studio-advanced-open) #studioMandatoryIssues button{font-size:.72rem;min-height:36px;padding:4px 8px;line-height:1.4}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot .studio-workspace-bar{display:block;padding:0;margin:0}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot #resultState{display:none}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot .studio-regenerate{display:none}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot .studio-actions{display:block;margin:0}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot .studio-view-toggle{display:flex;width:100%;gap:4px;padding:3px;flex-wrap:wrap;box-sizing:border-box}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot .studio-view-toggle button{flex:1 1 60px;min-width:0;padding:4px;font-size:.72rem;min-height:44px}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot .studio-view-toggle #studioEditJump{font-size:.68rem}
+#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot #plan,#app.studio-has-model:not(.studio-advanced-open) #studioPlanSlot #view{scroll-margin-top:72px}
+#app.studio-advanced-open #studioCompareOpen,#app.studio-advanced-open #studioEditJump{display:none}

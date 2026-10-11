@@ -44,8 +44,42 @@ export function createPlanSurfaceMount(doc) {
 }
 // Secondary tools retain their live nodes and delegated listeners.
 export function initCompactStudio(doc) {
+  // Keep project actions available in one compact native menu; move, never clone.
+  const actions = doc.querySelector('.workspace-actions');
+  const projectMenu = doc.createElement('details'); projectMenu.id = 'studioProjectMenu';
+  const projectSummary = doc.createElement('summary'); projectSummary.textContent = 'المشروع';
+  const projectActions = doc.createElement('div'); projectActions.className = 'studio-project-menu-actions';
+  projectMenu.append(projectSummary, projectActions); actions.append(projectMenu);
+  for (const id of ['loadProject','saveProject','archivePanel']) projectActions.append(doc.getElementById(id));
+  for (const id of ['loadProject','saveProject']) doc.getElementById(id).addEventListener('click', () => { projectMenu.open = false; });
+  const archive = doc.getElementById('archivePanel'), archiveClose = doc.createElement('button');
+  archiveClose.id = 'studioArchiveClose'; archiveClose.type = 'button'; archiveClose.className = 'small-button'; archiveClose.textContent = 'إغلاق الأرشيف';
+  archive.querySelector('.archive-panel-body').prepend(archiveClose);
+  archiveClose.addEventListener('click', () => { archive.open = false; archive.querySelector('summary').focus(); });
+  projectMenu.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault(); event.stopPropagation();
+    if (archive.open) { archive.open = false; archive.querySelector('summary').focus(); }
+    else { projectMenu.open = false; projectSummary.focus(); }
+  });
+  const status = doc.getElementById('projectStatus'), notice = doc.createElement('details'), noticeSummary = doc.createElement('summary');
+  notice.id = 'studioProjectNotice'; noticeSummary.textContent = 'حالة المشروع';
+  status.parentNode.insertBefore(notice, status); notice.append(noticeSummary, status);
+  let previousStatus = '';
+  const updateNotice = () => {
+    notice.hidden = status.hidden || !status.textContent;
+    if (status.textContent !== previousStatus) {
+      previousStatus = status.textContent;
+      const success = /^تم (?:استيراد|تحميل|فتح|تجهيز)/.test(previousStatus);
+      notice.open = !success; noticeSummary.textContent = success ? 'تم فتح أو تجهيز المشروع — التفاصيل' : 'حالة المشروع';
+    }
+  };
+  new MutationObserver(updateNotice).observe(status, {childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['hidden']}); updateNotice();
   const dialog = doc.getElementById('studioCompareDialog'), trigger = doc.getElementById('studioCompareOpen');
+  const modeTools = doc.querySelector('#out .studio-view-toggle');
+  modeTools.append(trigger, doc.getElementById('studioEditJump'));
   const alternatives = doc.querySelector('.studio-alternatives');
+  alternatives?.querySelector('.studio-alternatives-head')?.append(doc.getElementById('freshIdeas'));
   const alternativeAnchor = doc.createComment('original-alternatives');
   if (alternatives) { alternatives.parentNode.insertBefore(alternativeAnchor, alternatives); doc.getElementById('studioCompareContent').append(alternatives); }
   let advanced = false; const aestheticAnchors = new Map();
@@ -100,6 +134,7 @@ function appendMessage(role, message) {
 }
 function renderSession(state) {
   const session = state.studioSession || {}, root = $('studioTranscript');
+  $('app').classList.toggle('studio-has-model', !!state.hasModel);
   root.replaceChildren();
   const messages = session.messages?.length ? session.messages : [{ role: 'assistant', text: 'صف البيت الذي تريده. سأعرض فهمي أولًا، ثم نراجع المخطط ونتابع التعديل هنا.' }];
   for (const message of messages) {
