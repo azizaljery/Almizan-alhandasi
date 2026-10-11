@@ -144,7 +144,7 @@ export function createArchitecturalScene(T, host) {
   return { update, dispose };
 }
 
-export function startCinematic({ doc = document, win = window } = {}) {
+export function startCinematic({ doc = document, win = window, playIntro = false } = {}) {
   const intro = doc.getElementById('intro');
   const skip = doc.getElementById('cinematicSkip');
   const host = doc.getElementById('cinematicCanvas');
@@ -169,6 +169,8 @@ export function startCinematic({ doc = document, win = window } = {}) {
     win.setTimeout(() => { intro.inert = true; }, 700);
   };
   skip.addEventListener('click', finish, { once: true });
+  // The project surface is available immediately; the introduction is opt-in.
+  if (!playIntro) { finish(); return { finish }; }
   if (reduced) {
     intro.classList.add('cinematic-reduced');
     frame = win.requestAnimationFrame(finish);

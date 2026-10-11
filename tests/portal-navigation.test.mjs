@@ -41,7 +41,7 @@ test('results keep an obvious route back to the existing conversation without st
   const returnHandler = simpleStudio.slice(simpleStudio.indexOf("$('studioContinueConversation')"), simpleStudio.indexOf("$('studioAdvancedToggle')"));
   assert.match(returnHandler, /returnToConversation\(document\)/);
   assert.doesNotMatch(returnHandler, /request\(|drawProposal|generate\(/);
-  const showResults = app.slice(app.indexOf('function showResults()'), app.indexOf('function refreshGemini()'));
+  const showResults = app.slice(app.indexOf('function showResults('), app.indexOf('function refreshGemini()'));
   assert.match(showResults, /\$\('out'\)\.style\.display = 'block'/);
 });
 

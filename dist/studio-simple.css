@@ -114,3 +114,42 @@ body:has(#app.studio-simple-mode:not(.studio-advanced-open)) #mzpFab{display:non
 body:has(#app.studio-simple-mode){overflow-x:clip}
 #app.studio-simple-mode,#app.studio-simple-mode #panel-design,#app.studio-simple-mode .studio-simple{max-width:100%;min-width:0;overflow-x:clip}
 #app.studio-simple-mode .studio-conversation,#app.studio-simple-mode .studio-project-setup{min-width:0}
+
+/* One live drawing surface, carried into the conversation without cloning it. */
+.studio-simple-grid{grid-template-columns:minmax(0,1fr) 280px;gap:20px}
+.studio-simple-hero{margin-bottom:18px}
+.studio-simple-hero h1{font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:700}
+.studio-simple-hero p{max-width:760px;font-size:.95rem}
+.studio-transcript{max-height:none;overflow:visible;min-height:100px;background:#fafbf8;box-shadow:none}
+.studio-message{box-shadow:none;border-radius:12px}
+.studio-requirements{padding:20px 24px;border-top:1px solid #dce3d8;background:#fff}
+.studio-requirements h2{font:700 1rem 'IBM Plex Sans Arabic',sans-serif;color:#234b35;margin:0 0 12px}
+.studio-requirements>p{font-size:.86rem;line-height:1.9;color:#607164}
+#studioRequirementsRows{display:grid;gap:10px}
+.studio-requirement-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px;border:1px solid #dce3d8;border-radius:10px;font-size:.86rem}
+.studio-requirement-row p{grid-column:1/-1;margin:0;line-height:1.9;color:#536757;overflow-wrap:anywhere}
+.studio-requirement-state{font-size:.76rem;padding:3px 8px;align-self:start;border-radius:6px;background:#eef2e9;color:#355840}
+.studio-requirement-row[data-state="unmet"],.studio-requirement-row[data-state="NOT_MET"]{border-color:#d1a49b}
+.studio-requirement-row[data-state="unsupported"],.studio-requirement-row[data-state="UNSUPPORTED"]{border-style:dashed}
+.studio-plan-slot{min-width:0;scroll-margin-top:90px}
+.studio-plan-slot:empty{display:none}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot #out{margin:0;padding:18px 14px;border-top:1px solid #dce3d8;background:#f7f8f3}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-conversation-return{display:none}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-technical,
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot [data-studio-mode="quantities"]{display:none!important}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-layout{grid-template-columns:minmax(0,1fr)}
+#app.studio-simple-mode:not(.studio-advanced-open) #studioPlanSlot .studio-workspace-bar{gap:12px;flex-wrap:wrap}
+#app.studio-simple-mode #studioPlanSlot .alternative-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.studio-plan-approval{padding:16px 24px;border-top:1px solid #dce3d8;background:#f3f6ef}
+.studio-plan-approval p{font-size:.86rem;line-height:1.9;margin:0 0 12px;color:#405a48}
+.studio-restore-notice{margin:14px 24px;padding:12px;border:1px solid #d5c19f;border-radius:9px;background:#fbf6eb;color:#715c36;font-size:.86rem;line-height:1.9}
+.studio-simple button,.studio-simple select,.studio-simple input:not([type="checkbox"]),.studio-access summary{min-height:44px}
+.studio-simple button:focus-visible,.studio-simple summary:focus-visible{outline:3px solid #588367;outline-offset:3px}
+#studioStreets{margin:16px 0 0;padding:10px;border:1px solid #dce3d8;border-radius:9px}
+#studioStreets legend{font-size:.78rem;line-height:1.7;padding:0 5px}
+#studioStreets label{display:inline-flex;gap:7px;align-items:center;min-height:44px;padding:0 8px;font-size:.86rem}
+#studioCancel{border-color:#b4916f;color:#725337}
+.studio-request-actions [hidden],.studio-plan-approval[hidden],.studio-restore-notice[hidden]{display:none!important}
+@media(max-width:1100px){.studio-simple-grid{grid-template-columns:minmax(0,1fr)}.studio-project-setup{order:1}.studio-plot-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.studio-transcript{max-height:none}}
+@media(max-width:690px){.studio-simple-grid{gap:14px}.studio-requirements,.studio-plan-approval{padding:16px}.studio-restore-notice{margin:12px 16px}.studio-requirement-row{grid-template-columns:minmax(0,1fr)}.studio-requirement-state{justify-self:start}.studio-plot-fields{grid-template-columns:repeat(2,minmax(0,1fr))}#app.studio-simple-mode #studioPlanSlot .plan,#app.studio-simple-mode #studioPlanSlot .view{height:460px}.studio-request-actions{gap:10px}#app.studio-simple-mode #studioPlanSlot .alternative-grid{grid-template-columns:minmax(0,1fr)}}
+#app.studio-simple-mode #studioPlanSlot button{min-height:44px}

@@ -43,19 +43,14 @@ test('new-ideas exclusion includes displayed alternatives even after selected sh
  assert.match(app,/state\.history\.map\(entry => entry\.model\)\.filter\(sameProgram\)/);
 });
 
-test('studio distinguishes a session-visible plan from a downloaded or archived save',()=>{
+test('studio distinguishes current work from an explicitly downloaded or archived conversation',()=>{
  const html=readFileSync(new URL('../dist/index.html',import.meta.url),'utf8');
- const studio=readFileSync(new URL('../dist/studio-simple.mjs',import.meta.url),'utf8');
  const app=readFileSync(new URL('../dist/app.mjs',import.meta.url),'utf8');
- assert.match(html,/المخطط ظاهر خلال هذه الجلسة فقط/);
- assert.match(html,/سجل المحادثة لا يُستعاد بعد تحديث الصفحة/);
+ assert.match(html,/حفظ المخطط والمحادثة/);
+ assert.match(html,/تحديث الصفحة وحده لا يحفظ عملك/);
  assert.match(html,/«تنزيل المشروع»/);
  assert.match(html,/«أرشيف الحساب»/);
- assert.match(html,/كلاهما لا يحفظ سجل المحادثة نفسه/);
- assert.doesNotMatch(html,/سيبقى هذا المخطط محفوظًا للمراجعة/);
- assert.match(studio,/آخر مخطط ناجح معروضًا في هذه الجلسة/);
- assert.match(studio,/لم يتغير آخر مخطط ناجح في هذه الجلسة/);
- assert.doesNotMatch(studio,/آخر مخطط ناجح محفوظ|آخر تصميم ناجح محفوظ/);
+ assert.doesNotMatch(html,/سجل المحادثة لا يُستعاد|كلاهما لا يحفظ سجل المحادثة نفسه/);
  assert.match(app,/آخر مخطط ناجح لم يتغير في هذه الجلسة/);
  assert.doesNotMatch(app,/آخر مخطط ناجح محفوظ|المخطط السابق محفوظًا/);
 });

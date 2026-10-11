@@ -1,3 +1,5 @@
+import { createStudioSession, normalizeStudioSession, beginStudioOperation, isCurrentStudioOperation, cancelStudioOperation, bindStudioRevision, appendStudioMessage, acceptStudioUnderstanding, approveStudioRevision, invalidateStudioApproval, setStudioDraft } from './studio-session.mjs';
+import { diffRoomPrograms } from './design-dialog.mjs';
 import { createGeometrySession } from './geometry-session.mjs';
 import { eligiblePartitions } from './geometry-editor.mjs';
 import { initGeometryEditor } from './geometry-editor-ui.mjs';
@@ -34,9 +36,45 @@ const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
-const state = { streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
+const state = { studioSession: createStudioSession(), streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
 let geometrySession, geometryUI, geometrySource, geometryPending, geometryCommandId = 0, modelEpoch = 0, renderedModel, geometryAlternativePool = [];
+let studioPending = null, studioOperationContext = null, studioAbort = null, generationSequence = 0, studioRestoring = false;
+const emitStudioState = reason => window.dispatchEvent(new CustomEvent('mizan:studio-state', { detail: { reason } }));
+const studioInputStamp = () => JSON.stringify([requestFingerprint(requestInput()), state.palette]);
+const studioSceneVisible = () => state.tab === 'result' || (state.tab === 'design' && $('app').classList.contains('studio-simple-mode'));
+function assertStudioOperation(token) {
+  if (token && !isCurrentStudioOperation(state.studioSession, token)) throw Error('أُلغيت العملية أو تغيّرت نسخة المخطط؛ لم يُطبق الرد المتأخر.');
+}
+function cancelStudioWork(reason = 'cancel', restore = true) {
+  cancelStudioOperation(state.studioSession); modelEpoch++; generationSequence++;
+  studioAbort?.abort(); studioAbort = null;
+  const context = studioOperationContext; studioOperationContext = null;
+  if (restore && context && context.model === state.model && (!context.stamp || context.stamp === studioInputStamp())) {
+    state.program = structuredClone(context.program); $('idea').value = context.idea;
+    state.requestAppliedPrompt = context.applied; state.briefContext = context.briefContext;
+    state.discovery = context.discovery; state.selectedShape = context.selectedShape;
+    state.palette = context.palette; state.clientDesires = context.clientDesires; state.manualEdits = context.manualEdits; syncPalette();
+    restorePlot(context.plot); renderDiscovery(); renderRows();
+  }
+  studioPending = null; studioOperationContext = null; studioProposalSource = null;
+  state.proposal = null; state.proposalFingerprint = null; state.requestProposal = null;
+  $('gen').disabled = false; $('freshIdeas').disabled = false; $('askAI').disabled = false; $('askLocal').disabled = false;
+  $('gen').textContent = 'ولّد وقارن حتى ستة بدائل'; $('askAI').textContent = 'حلّل طلبي بالخدمة المتصلة'; $('askLocal').textContent = 'افهم طلبي';
+  emitStudioState(reason); markDirty();
+}
+function studioAudit() {
+  if (!state.model) return [];
+  const rows = auditClientRequest({ model: state.model, rooms: state.program, discovery: state.discovery, desired: extractClientDesires(state.requestAppliedPrompt), idea: state.requestAppliedPrompt });
+  const understandings = state.studioSession.understandingHistory || [];
+  for (const item of understandings) {
+    for (const constraint of item.constraints || []) rows.push({ label: 'مصدر المتطلبات المعتمدة للفهم', state: 'information', detail: constraint.text });
+    for (const assumption of item.assumptions || []) rows.push({ label: 'افتراض يحتاج مراجعتك', state: 'unsupported', detail: assumption });
+  }
+  rows.push({ label: 'حدود التحقق من هذه النسخة', state: 'unsupported', detail: state.model.integration?.requiresReview ? 'تعدّلت الهندسة؛ مراجعة النسخة السابقة لا تعتمد هذا التعديل. يلزم فحص جديد.' : 'الفحوص المتاحة أولية وغير مكتملة؛ الاشتراطات المحلية والإنشاء والخدمات غير معتمدة بهذا المخطط.' });
+  return rows;
+}
+
 const exploration = { signature: '', previous: [], seed: 1 };
 const rawPlot = () => ({ width: number('wid'), length: number('len'), floors: Number($('floors').value), streets: { ...state.streets }, entry: $('entry').value, streetSetback: number('streetSetback'), neighborSetback: number('neighborSetback'), coverage: number('coverage') / 100, maxBuiltArea: $('maxBuiltArea').value === '' ? null : number('maxBuiltArea') });
 const signature = (p, rooms) => JSON.stringify([p.width, p.length, p.floors, p.entry, p.streetSetback, p.neighborSetback, p.coverage, p.maxBuiltArea ?? null, ...Object.keys(DIRECTIONS).map(k => p.streets[k]), publicRooms(rooms)]);
@@ -94,6 +132,7 @@ function applyClientBrief() {
   } catch (error) { toast(error.message); renderClientBrief(); }
 }
 function markDirty() {
+  if (studioOperationContext?.fingerprint && !studioOperationContext.applying && state.studioSession.activeOperation && studioOperationContext.stamp !== studioInputStamp()) cancelStudioWork('cancel', false);
   state.dirty = !!state.model && (workspaceSignature(rawPlot(), state.program) !== state.signature || state.engineeringSignature !== engineeringSignature());
   all('.stale-message').forEach(el => { el.hidden = !state.dirty; });
   if ($('requirementStale')) $('requirementStale').hidden = !state.dirty;
@@ -102,7 +141,8 @@ function markDirty() {
   const archived = archiveIsCurrent();
   $('exportPlan').disabled = !state.model || state.dirty || !archived;
   $('exportBOQ').disabled = !state.model || state.dirty || !archived;
-  all('[data-alternative]').forEach(button => { button.disabled = state.dirty || $('gen').disabled; });
+  all('[data-alternative]').forEach(button => { button.disabled = (state.dirty || $('gen').disabled) && !state.studioSession.activeOperation; });
+  if (!studioRestoring && state.dirty && state.studioSession.currentApproval && !state.studioSession.activeOperation) invalidateStudioApproval(state.studioSession, 'تغيّرت المتطلبات الحالية');
   renderArchiveControls();
   syncWorkspace();
 }
@@ -181,12 +221,14 @@ function renderRequestMatch() {
   const status = { met: 'تحقق في المخطط', unmet: 'لم يتحقق', pending: 'بانتظار المخطط', information: 'للمراجعة', estimate: 'مؤشر مقارن', unsupported: 'غير مُقيّم' };
   $('requestMatch').innerHTML = rows.map(row => `<div class="match-row"><b>${esc(row.label)}</b><p>${esc(row.detail)}</p><span class="pill match-state ${row.state}">${status[row.state] || status.unsupported}</span></div>`).join('');
 }
-async function understandRequest() {
+async function understandRequest(operation = null) {
+  const startEpoch = modelEpoch;
   if ($('askLocal').disabled) return;
   $('askLocal').disabled = true; $('askLocal').textContent = 'جارٍ قراءة طلبك…'; message('requestFeedback', '');
   try {
     const input = requestInput(), result = await analyzeClientRequest(input);
-    if (result.fingerprint !== requestFingerprint(requestInput())) throw Error('تغيّر الطلب أثناء القراءة؛ أعد التحليل من وصفك الحالي.');
+    assertStudioOperation(operation?.sessionId ? operation : null);
+    if (startEpoch !== modelEpoch || result.fingerprint !== requestFingerprint(requestInput())) throw Error('تغيّر الطلب أثناء القراءة؛ أعد التحليل من وصفك الحالي.');
     state.requestProposal = result;
     $('requestSummary').textContent = result.summary;
     $('requestFacts').innerHTML = result.understood.map(f => `<div class="request-fact ${f.state}"><span>${esc(f.label)}</span><b>${esc(f.value)}</b></div>`).join('');
@@ -198,7 +240,7 @@ async function understandRequest() {
     $('requestReview').hidden = false; syncWorkspace();
     $('requestReview').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) { message('requestFeedback', error.message); }
-  finally { $('askLocal').disabled = false; $('askLocal').textContent = 'افهم طلبي'; }
+  finally { if (!operation?.sessionId || isCurrentStudioOperation(state.studioSession, operation)) { $('askLocal').disabled = false; $('askLocal').textContent = 'افهم طلبي'; } }
 }
 function applyRequest() {
   const result = state.requestProposal; if (!result) return;
@@ -320,7 +362,7 @@ async function show3D(retry = false) {
     if (requestedModel !== state.model || requestedEpoch !== modelEpoch) return false;
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode);
     const showRoof = $('roof').checked;
-    viewer.setVisible(state.tab === 'result' && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 }));
+    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); viewer.setSun(solarPreview({ latitude: number('solarLatitude'), month: number('sunMonth'), hour: number('sunHour'), wallHeight: 3.2 }));
     return true;
   } catch (error) { message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
 }
@@ -401,7 +443,7 @@ function editPlanAtPoint(action) {
     state.model = next;
     const index = state.alternatives.indexOf(before); if (index >= 0) state.alternatives[index] = next;
     state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey); state.engineeringSignature = engineeringSignature();
-    showResults();
+    showResults('geometry-edit');
     toast(action.tool === 'erase' ? 'حُذفت الفتحة المحددة.' : action.tool === 'door' ? 'أُضيف الباب إلى المخطط.' : 'أُضيفت النافذة إلى المخطط.');
   } catch (error) { toast(error.message); }
 }
@@ -438,9 +480,9 @@ function applyGeometryState(result) {
   state.traceContext = null; state.multiEngine = null; state.manualEdits = true;
   state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey);
   state.engineeringSignature = engineeringSignature();
-  renderRows(); showResults();
+  renderRows(); showResults('geometry-edit');
 }
-function showResults() {
+function showResults(reason = 'selection') {
   if (renderedModel !== state.model) { modelEpoch++; renderedModel = state.model; }
   // Synchronize command revision before both renderers consume the authoritative model.
   if (geometrySource !== state.model) {
@@ -452,7 +494,8 @@ function showResults() {
     state.model = geometrySession.getState().model; geometrySource = state.model; geometryPending = null; renderedModel = state.model;
     state.alternatives = state.alternatives.map(model => model === before ? state.model : model);
   }
-  const m = state.model; $('out').style.display = 'block';
+  const m = state.model; if (reason === 'generated') studioOperationContext = null; bindStudioRevision(state.studioSession, m, reason === 'load' ? 'sync' : reason); studioPending = null;
+  emitStudioState(reason); $('out').style.display = 'block';
   renderStudioModelSummary();
   refreshEngineering();
   refreshGemini();
@@ -639,7 +682,10 @@ function runPlanner(request) {
     worker.postMessage(request);
   });
 }
-async function generate() {
+async function generate(options = {}) {
+  const operation = options.operation || null, runId = ++generationSequence;
+  assertStudioOperation(operation);
+  if (operation && studioOperationContext) { studioOperationContext.fingerprint = requestFingerprint(requestInput()); studioOperationContext.stamp = studioInputStamp(); studioOperationContext.applying = false; }
   if ($('gen').disabled) return;
   const startEpoch = modelEpoch;
   const startSignature = workspaceSignature(rawPlot(), state.program), startEngineeringSignature = engineeringSignature();
@@ -654,15 +700,17 @@ async function generate() {
     const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
     const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
   const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
+    assertStudioOperation(operation);
     if (modelEpoch !== startEpoch || workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { searchEvidence: result.searchEvidence, decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
     state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
-    message('generationError', ''); showResults(); switchTab('result');
+    message('generationError', ''); showResults('generated'); switchTab($('app').classList.contains('studio-simple-mode') && !$('app').classList.contains('studio-advanced-open') ? 'design' : 'result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
+    return { model: structuredClone(state.model), alternatives: structuredClone(state.alternatives), failures: structuredClone(state.failures), operationId: operation?.id || null };
   } catch (error) { message('generationError', error.message + (state.model ? ' آخر مخطط ناجح لم يتغير في هذه الجلسة.' : '')); markDirty(); }
-  finally { $('gen').disabled = false; $('freshIdeas').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن حتى ستة بدائل'; markDirty(); }
+  finally { if (runId === generationSequence) { $('gen').disabled = false; $('freshIdeas').disabled = false; $('undo').disabled = !state.history.length; $('gen').textContent = 'ولّد وقارن حتى ستة بدائل'; markDirty(); } }
 }
 function renderBOQ() {
   const m = state.model; $('boqEmpty').hidden = !!m; $('boqOutput').hidden = !m; if (!m) return;
@@ -694,12 +742,13 @@ function switchTab(tab) {
   all('.tab').forEach(button => { const on = button.dataset.tab === tab; button.classList.toggle('on', on); if (on) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current'); });
   all('.panel').forEach(panel => panel.classList.toggle('on', panel.id === 'panel-' + tab));
   if (tab === 'rating') rating(); if (tab === 'boq') renderBOQ();
-  viewer?.setVisible(tab === 'result' && state.studioMode === '3d' && !!state.model); markDirty();
-  if (tab === 'result') { requestAnimationFrame(() => { viewport?.fit(); viewer?.resize?.(); }); }
+  viewer?.setVisible(studioSceneVisible() && state.studioMode === '3d' && !!state.model); markDirty();
+  if (studioSceneVisible()) { requestAnimationFrame(() => { viewport?.fit(); viewer?.resize?.(); }); }
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 function goHome() { switchTab('rating'); }
-async function askAI() {
+async function askAI(operation = null) {
+  const startEpoch = modelEpoch;
   if ($('askAI').disabled) return;
   message('aiFeedback', '');
   if (AI_ENABLED && ($('idea').value.trim().length < 8 || $('idea').value.length > 4000)) { message('aiFeedback', 'اكتب وصفًا بين 8 و4000 حرف.'); return; }
@@ -720,8 +769,9 @@ async function askAI() {
     const engineText = `سياق محرك القرار الهندسي المنظم (مرجع تحليلي، لا تتجاهل عدم اليقين): ${JSON.stringify(engineeringContext)}`;
     const prompt = [clientContext, discovery, engineText, $('idea').value.trim()].filter(Boolean).join('\n\n');
     const context = buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt });
-    const result = await requestBrief({ prompt, context, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: AbortSignal.timeout(45000) });
-    if (sourceFingerprint !== requestFingerprint(requestInput())) throw Error('تغيّرت المدخلات أثناء التحليل؛ لم يُطبق الرد القديم. أعد التحليل لطلبك الحالي.');
+    const result = await requestBrief({ prompt, context, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: studioAbort ? AbortSignal.any([studioAbort.signal, AbortSignal.timeout(45000)]) : AbortSignal.timeout(45000) });
+    assertStudioOperation(operation?.sessionId ? operation : null);
+    if (startEpoch !== modelEpoch || sourceFingerprint !== requestFingerprint(requestInput())) throw Error('تغيّرت المدخلات أثناء التحليل؛ لم يُطبق الرد القديم. أعد التحليل لطلبك الحالي.');
     const rooms = bindRequestedDimensions(result.brief.rooms, localConstraints.rooms);
     const contract = verifyProposedProgram(request.prompt, rooms);
     if (!contract.pass) throw Error('لم أعتمد اقتراح الذكاء لأن متطلبًا صريحًا لم يطابقه: ' + contract.violations.join(' '));
@@ -734,7 +784,7 @@ async function askAI() {
     $('aiBadge').textContent = 'متصل'; $('aiBadge').classList.remove('warn');
     message('aiFeedback', 'جهّز الذكاء برنامج التصميم. راجع الافتراضات ثم اختر «اعتمد وارسم المخططات».');
   } catch (error) { message('aiFeedback', error.message); }
-  finally { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = 'حلّل طلبي بالخدمة المتصلة'; }
+  finally { if (!operation?.sessionId || isCurrentStudioOperation(state.studioSession, operation)) { $('askAI').disabled = false; $('askLocal').disabled = false; $('askAI').textContent = 'حلّل طلبي بالخدمة المتصلة'; } }
 }
 
 function showBrief(brief, limitations = [], context = null) {
@@ -749,18 +799,20 @@ function showBrief(brief, limitations = [], context = null) {
   $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   $('aiReview').hidden = false; syncWorkspace();
 }
-async function drawFromAIProposal() {
+async function drawFromAIProposal(options = {}) {
   if (!state.proposal?.rooms.length || state.proposal.questions.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم أو يحتاج إجابة؛ أعد التحليل قبل الاعتماد.');
   state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true;
   toast('اعتمد برنامج الذكاء؛ جارٍ الآن رسم البدائل والتحقق منها هندسيًا.');
-  await generate();
+  return generate(options);
 }
 async function askLocal() {
+  const startEpoch = modelEpoch, fingerprint = requestFingerprint(requestInput());
   message('aiFeedback', '');
   try {
     const prompt = $('idea').value;
     const context = buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt });
     const brief = await requestLocalBrief({ prompt, previous: { rooms: publicRooms(state.program) } });
+    if (startEpoch !== modelEpoch || fingerprint !== requestFingerprint(requestInput())) throw Error('تغيّرت النسخة أثناء القراءة؛ لم يطبق الرد القديم.');
     showBrief(brief, ['فهم محلي محدود للأعداد والنفي وأسماء الغرف؛ لا يتصل بخادم ولا يولّد رسمًا أو يغيّر الجدول حتى توافق.'], context);
     message('aiFeedback', 'تم اقتراح برنامج محليًا. راجعه ثم اختر نقله إلى الجدول.');
   } catch (error) { message('aiFeedback', error.message); }
@@ -806,7 +858,7 @@ function download(content, mime, name) {
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 function projectText() {
-  return encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history, landSurvey: state.landSurvey, modelLandSurvey: state.modelLandSurvey });
+  return encodeProject({ plot: rawPlot(), rooms: state.program, palette: state.palette, rates: state.rates, costReserve: number('costReserve'), vat: number('vat'), idea: $('idea').value, discovery: state.discovery, model: state.model, alternatives: state.alternatives, history: state.history, landSurvey: state.landSurvey, modelLandSurvey: state.modelLandSurvey, studioSession: state.studioSession });
 }
 function archiveProjectSignature() {
   try {
@@ -960,11 +1012,11 @@ async function saveArchive({ asNew = false } = {}) {
 async function loadArchiveVersion() {
   const archive = state.archive, id = $('archiveDesigns').value, version = $('archiveVersions').value;
   if (!id || !version || archive.loading) return;
-  const startEpoch = modelEpoch;
+  const startEpoch = modelEpoch, startDraft = JSON.stringify([rawPlot(), state.program, $('idea').value, state.studioSession.draftText, state.studioSession.epoch, state.studioSession.messageSequence]);
   archive.loading = true; archive.notice = ''; renderArchiveControls();
   try {
     const saved = await archiveApi(`/api/archive/designs/${encodeURIComponent(id)}/versions/${encodeURIComponent(version)}`);
-    if (modelEpoch !== startEpoch) throw Error('تغيّرت الهندسة أثناء التحميل؛ أُلغي استبدال المخطط.');
+    if (modelEpoch !== startEpoch || startDraft !== JSON.stringify([rawPlot(), state.program, $('idea').value, state.studioSession.draftText, state.studioSession.epoch, state.studioSession.messageSequence])) throw Error('تغيّرت الهندسة أثناء التحميل؛ أُلغي استبدال المخطط.');
     const project = decodeProject(saved.project);
     if (!saved.model || validateModel(saved.model).length) throw Error('تعذّر التحقق من هندسة النسخة؛ بقي المشروع الحالي كما هو.');
     project.model = saved.model;
@@ -996,29 +1048,35 @@ function saveProject() {
   try {
     const text = projectText();
     download(text, 'application/json;charset=utf-8', 'mizan-handasi-project.json');
-    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: المدخلات ورغبات المنزل وآخر مخطط والبدائل وآخر 5 نسخ والأسعار. هذا تنزيل محلي؛ حفظ الحساب يتم من أرشيف الحساب.');
-  } catch (error) { message('projectStatus', error.message + ' صحّح المدخلات قبل الحفظ.'); }
+    message('projectStatus', 'تم تجهيز ملف المشروع للتنزيل: الحوار والفهم المعتمد وقرار اختيار النسخة والمدخلات والمخطط والبدائل وآخر 5 نسخ والأسعار. هذا تنزيل محلي؛ حفظ الحساب يتم من أرشيف الحساب.');
+  } catch (error) { const detail = error.message + ' لم يُجهز ملف الحفظ؛ صحّح المدخلات ثم أعد المحاولة.'; message('projectStatus', detail); toast(detail); if ($('studioStatus')) { $('studioStatus').textContent = detail; $('studioStatus').className = 'studio-feedback error'; } }
 }
 function applyProjectState(project, statusText) {
+  studioRestoring = true;
+  try {
+  cancelStudioWork('load', false);
+  state.studioSession = normalizeStudioSession(project.studioSession, { model: project.model, legacy: !project.studioSession });
   state.discovery = project.discovery; renderDiscovery(); state.program = project.rooms; state.palette = project.palette; state.rates = project.rates; state.model = project.model; state.selectedShape = project.model?.shape || null; state.alternatives = project.alternatives.length ? project.alternatives : project.model ? [project.model] : []; state.failures = []; state.history = project.history; state.landSurvey = project.landSurvey; state.modelLandSurvey = project.modelLandSurvey; state.proposal = null; state.traceContext = null; state.briefContext = null; state.aiDesign = null; state.multiEngine = null; state.engineering = null; state.engineeringSignature = '';
   state.signature = project.model ? workspaceSignature(project.model.plot, project.model.program, state.modelLandSurvey) : '';
   restorePlot(project.plot); syncPalette(); $('idea').value = project.idea; $('costReserve').value = project.costReserve; $('vat').value = project.vat;
   state.requestProposal = null; state.requestAppliedPrompt = project.idea; state.clientDesires = [];
   $('aiReview').hidden = true; message('generationError', ''); renderRows(); rating(); renderBOQ();
-  if (state.model) showResults(); else { modelEpoch++; geometryUI?.cancel(); geometryUI?.setEnabled(false); geometrySession = null; geometrySource = null; geometryPending = null; geometryAlternativePool = []; renderedModel = null; $('out').style.display = 'none'; viewer?.setVisible(false); }
-  message('projectStatus', statusText);
+  if (state.model) showResults('load'); else { modelEpoch++; geometryUI?.cancel(); geometryUI?.setEnabled(false); geometrySession = null; geometrySource = null; geometryPending = null; geometryAlternativePool = []; renderedModel = null; $('out').style.display = 'none'; viewer?.setVisible(false); }
+  message('projectStatus', statusText); emitStudioState('load');
+  if ($('app').classList.contains('studio-simple-mode')) switchTab('design');
+  } finally { studioRestoring = false; }
 }
 async function importProject(file) {
   if (!file || $('gen').disabled) return;
   if (file.size > MAX_PROJECT_BYTES) return message('projectStatus', 'حجم الملف يتجاوز 2 ميغابايت. بقي العمل كما هو.');
   if (!window.confirm('سيستبدل الملف مدخلات الجلسة الحالية ومخططها وأسعارها. نزّل مشروعك الحالي أولًا إن احتجته. المتابعة؟')) return;
   const startEpoch = modelEpoch;
-  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey]);
+  const before = JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey, state.studioSession.epoch, state.studioSession.revision, state.studioSession.draftText, state.studioSession.messageSequence]);
   $('gen').disabled = true; $('undo').disabled = true; markDirty();
   message('projectStatus', 'جارٍ فحص ملف المشروع وإعادة بناء نسخه قبل الاستيراد…');
   try {
     const { project } = await runPlanner({ projectText: await file.text() });
-    if (modelEpoch !== startEpoch || JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
+    if (modelEpoch !== startEpoch || JSON.stringify([rawPlot(), state.program, state.palette, state.rates, $('costReserve').value, $('vat').value, $('idea').value, state.discovery, state.landSurvey, state.studioSession.epoch, state.studioSession.revision, state.studioSession.draftText, state.studioSession.messageSequence]) !== before) throw Error('تغيّرت المدخلات أثناء القراءة؛ أُلغي الاستيراد لحماية تعديلاتك.');
     applyProjectState(project, 'تم استيراد المشروع والتحقق من مخططاته وحدود المسح المحفوظة. لم يُستورد أو يُحفظ أي رمز دخول.');
   } catch (error) { message('projectStatus', error.message); }
   finally { $('gen').disabled = false; $('undo').disabled = !state.history.length; markDirty(); }
@@ -1132,7 +1190,8 @@ function boot() {
   $('freshIdeas').addEventListener('click', generate);
   $('alternativeCards').addEventListener('click', event => {
     const button = event.target.closest('[data-alternative]');
-    if (!button || state.dirty || $('gen').disabled) return;
+    if (!button || ((state.dirty || $('gen').disabled) && !state.studioSession.activeOperation)) return;
+    if (state.studioSession.activeOperation) { cancelStudioWork('selection'); if (state.dirty) return; }
     const model = state.alternatives[Number(button.dataset.alternative)];
     if (!model) return;
     state.selectedShape = model.shape;
@@ -1209,6 +1268,9 @@ function boot() {
 const mizanStudioAPI = Object.freeze({
   getState() {
     return {
+      studioSession: structuredClone(state.studioSession),
+      requirementsAudit: studioAudit(),
+      alternatives: structuredClone(state.alternatives),
       hasModel: !!state.model,
       model: state.model ? structuredClone(state.model) : null,
       program: publicRooms(state.program),
@@ -1240,42 +1302,76 @@ const mizanStudioAPI = Object.freeze({
     renderStreets(); rating(); markDirty();
     return validatePlot(rawPlot());
   },
-  async propose(prompt, { accessCode = '', local = false } = {}) {
+  appendStudioMessage(role, text) { appendStudioMessage(state.studioSession, { role, text, source: role === 'user' ? 'customer' : 'system' }); emitStudioState('session'); },
+  setStudioDraft(text) { setStudioDraft(state.studioSession, text); },
+  cancelStudioOperation() { cancelStudioWork(); },
+  rejectStudioProposal() {
+    const proposalMessage = [...state.studioSession.messages].reverse().find(m => m.role === 'assistant');
+    if (studioPending && proposalMessage) proposalMessage.status = 'rejected';
+    cancelStudioWork();
+  },
+  approveStudioPlan() {
+    if (!state.model || state.dirty) throw Error('راجع اختلاف المتطلبات عن المخطط قبل اعتماد النسخة.');
+    const rows = studioAudit();
+    if (rows.some(row => row.state === 'unmet')) throw Error('يوجد متطلب غير محقق؛ راجعه قبل اعتماد هذه النسخة.');
+    approveStudioRevision(state.studioSession, { confirmed: true }); emitStudioState('session'); markDirty();
+    return structuredClone(state.studioSession.currentApproval);
+  },
+  showConversation() { switchTab('design'); requestAnimationFrame(() => { viewport?.fit(); viewer?.resize?.(); }); },
+  async propose(prompt, { accessCode = '', local = false, latest = '' } = {}) {
+    cancelStudioWork('operation-start');
+    studioOperationContext = { model: state.model, program: structuredClone(state.program), idea: $('idea').value, applied: state.requestAppliedPrompt, briefContext: structuredClone(state.briefContext), discovery: structuredClone(state.discovery), selectedShape: state.selectedShape, plot: rawPlot(), palette: state.palette, clientDesires: structuredClone(state.clientDesires), manualEdits: state.manualEdits };
     $('idea').value = String(prompt || '');
     const mode = state.model ? 'modify' : 'replace';
     const modeInput = document.querySelector(`[name="requestMode"][value="${mode}"]`);
     if (modeInput) modeInput.checked = true;
+    const operation = beginStudioOperation(state.studioSession, 'understand');
+    studioOperationContext.fingerprint = requestFingerprint(requestInput()); studioOperationContext.stamp = studioInputStamp(); studioAbort = new AbortController();
     state.proposal = null; state.proposalFingerprint = null; state.requestProposal = null; studioProposalSource = null;
-    if (local) {
-      await understandRequest();
-      if (!state.requestProposal) throw Error($('requestFeedback').textContent || 'لم ينتج فهم محلي صالح؛ بقي المخطط السابق كما هو.');
-      studioProposalSource = 'local';
-      return { brief: { ...structuredClone(state.requestProposal), unhandled: structuredClone(state.requestProposal.limitations || []) }, context: null };
+    markDirty();
+    try {
+      if (local) await understandRequest(operation);
+      else { $('aiAccessCode').value = String(accessCode || ''); await askAI(operation); }
+      assertStudioOperation(operation);
+      const brief = local ? state.requestProposal : state.proposal;
+      if (!brief) throw Error($(local ? 'requestFeedback' : 'aiFeedback').textContent || 'لم ينتج فهم صالح؛ بقي المخطط السابق كما هو.');
+      const originalText = latest || state.studioSession.draftText || prompt;
+      const diff = diffRoomPrograms(studioOperationContext.program, brief.rooms, originalText, { requireChange: !!state.model, initial: !state.model });
+      const contract = verifyProposedProgram(prompt, brief.rooms);
+      if (diff.blockers.length || !contract.pass) throw Error([...diff.blockers, ...contract.violations].join(' '));
+      studioProposalSource = local ? 'local' : 'ai';
+      studioPending = { operation, latest: originalText, prompt, brief: structuredClone(brief), fingerprint: requestFingerprint(requestInput()) };
+      return { brief: { ...structuredClone(brief), unhandled: structuredClone(brief.unhandled || brief.limitations || []) }, context: structuredClone(state.briefContext), operationId: operation.id };
+    } catch (error) {
+      if (isCurrentStudioOperation(state.studioSession, operation)) cancelStudioWork('operation-failed');
+      throw error;
     }
-    $('aiAccessCode').value = String(accessCode || '');
-    await askAI();
-    if (!state.proposal) throw Error($('aiFeedback').textContent || 'لم ينتج تحليل صالح؛ بقي المخطط السابق كما هو.');
-    studioProposalSource = 'ai';
-    return { brief: structuredClone(state.proposal), context: structuredClone(state.briefContext) };
   },
   async drawProposal() {
-    if (studioProposalSource === 'local') {
-      if (!state.requestProposal?.rooms?.length || state.requestProposal.questions?.length || state.requestProposal.fingerprint !== requestFingerprint(requestInput())) {
-        throw Error('الفهم المحلي قديم أو يحتاج توضيحًا؛ أعد التحليل قبل الاعتماد.');
-      }
-    } else if (!state.proposal?.rooms?.length || state.proposal.questions?.length || state.proposalFingerprint !== requestFingerprint(requestInput())) {
-      throw Error('لا يوجد اقتراح متصل صالح للاعتماد؛ أعد التحليل قبل الاعتماد.');
+    const pending = studioPending;
+    if (!pending) throw Error('لا يوجد فهم جارٍ لاعتماده؛ أعد مراجعة الطلب.');
+    assertStudioOperation(pending.operation);
+    if (pending.fingerprint !== requestFingerprint(requestInput()) || pending.brief.questions?.length) throw Error('تغيّر الطلب أو يحتاج توضيحًا؛ أعد التحليل قبل الرسم.');
+    const userMessage = [...state.studioSession.messages].reverse().find(m => m.role === 'user');
+    acceptStudioUnderstanding(state.studioSession, { summary: pending.brief.summary, sourceMessageIds: userMessage ? [userMessage.id] : [], constraints: userMessage ? [{ text: pending.latest, sourceMessageId: userMessage.id }] : [], assumptions: pending.brief.assumptions || [], operationToken: pending.operation });
+    const operation = beginStudioOperation(state.studioSession, 'draw');
+    const context = studioOperationContext;
+    // Program application is part of this transaction, not a concurrent edit.
+    if (studioOperationContext) studioOperationContext.applying = true;
+    let output;
+    try {
+      if (studioProposalSource === 'local') {
+        const proposal = state.requestProposal; applyRequest();
+        if (state.requestProposal === proposal) throw Error($('requestFeedback').textContent || 'لم يطبق الفهم.');
+        output = await generate({ operation });
+      } else output = await drawFromAIProposal({ operation });
+      if (!output || output.operationId !== operation.id) throw Error($('generationError').textContent || 'لم تثبت هذه العملية مخططًا؛ بقيت النسخة الحالية كما هي.');
+      studioPending = null; studioProposalSource = null; studioAbort = null;
+      return output;
+    } catch (error) {
+      if (isCurrentStudioOperation(state.studioSession, operation)) { studioOperationContext = context; cancelStudioWork('operation-failed'); }
+      throw error;
     }
-    const previous = state.model;
-    if (studioProposalSource === 'local') {
-      const pending = state.requestProposal;
-      applyRequest();
-      if (state.requestProposal === pending) throw Error($('requestFeedback').textContent || 'لم يُطبق الاقتراح؛ لم يتغير المخطط السابق.');
-      await generate();
-    } else await drawFromAIProposal();
-    if (!state.model || state.model === previous) throw Error($('generationError').textContent || 'لم ينجح التوليد؛ بقي المخطط السابق ظاهرًا في هذه الجلسة.');
-    studioProposalSource = null;
-    return { model: structuredClone(state.model), alternatives: state.alternatives.map(model => structuredClone(model)), failures: structuredClone(state.failures) };
   },
   showAdvanced() { return !!state.model; },
 });

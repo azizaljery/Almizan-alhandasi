@@ -101,6 +101,32 @@ function areaAuthorized(request, room, previous) {
   return previous.filter(item => norm(item.type) === type).length === 1 && !!typeTerms[type]?.test(norm(request));
 }
 
+function namedOrUniqueType(room, request, previous) {
+  return roomIsNamed(room, request) ||
+    (previous.filter(item => norm(item.type) === norm(room.type)).length <= 1 && !!typeTerms[norm(room.type)]?.test(norm(request)));
+}
+function protectedRoom(room, request, previous) {
+  const clauses = norm(request).split(/[،,؛;.!?\n]/);
+  return clauses.some(clause => {
+    const negative = /(?:^|\s)(?:لا|لم|لن|بدون|دون|عدم|without|not|never|don't|do not)\s/.exec(clause);
+    return negative && namedOrUniqueType(room, clause.slice(negative.index), previous);
+  });
+}
+function additionAuthorized(room, request) {
+  const source = norm(request);
+  // Ambiguous negated additions are refused; a room mention alone is insufficient.
+  if (/(?:^|\s)(?:لا|لم|لن|بدون|دون|عدم|without|not|never|don't)\s/.test(source)) return false;
+  const action = /(?:اضف|اضافه|زد|زياده|\badd\b|\binclude\b|\bincrease\b|اجعل\s+عدد|اريد\s+عدد|عدد)/i;
+  return source.split(/[،,؛;.!?\n]/).some(clause => {
+    const match = action.exec(clause); if (!match) return false;
+    const target = clause.slice(match.index + match[0].length);
+    const type = norm(room.type), term = typeTerms[type];
+    const namesRoom = roomIsNamed(room, target) || !!term?.test(target);
+    const countAction = /عدد/.test(match[0]);
+    return namesRoom && (!countAction || /[0-9]|واحد|اثن|اثنت|ثلاث|اربع|خمس|ست|سبع|ثمان|تسع|عشر/.test(target));
+  });
+}
+
 export function diffRoomPrograms(previous, next, request = '', { requireChange = true, initial = false } = {}) {
   if (!Array.isArray(previous) || !Array.isArray(next)) throw Error('برنامج الغرف غير صالح.');
   const beforeSnapshot = structuredClone(previous), afterSnapshot = structuredClone(next);
@@ -154,6 +180,18 @@ export function diffRoomPrograms(previous, next, request = '', { requireChange =
   if (!initial && unauthorizedAreas.length) {
     blockers.push('الاقتراح غيّر مساحة غرفة لم تحددها صراحةً؛ سمِّ الغرفة ومساحتها المطلوبة قبل المتابعة.');
   }
+  // A named edit must not silently change another room's placement or dimensions.
+  // Type-only references are unambiguous only when that type occurs once.
+  const unauthorizedFields = changed.filter(row =>
+    row.fields.some(field => ['position', 'side', 'dimensions'].includes(field.name)) &&
+    (protectedRoom({name:row.room,type:row.type}, request, previous) ||
+      !namedOrUniqueType({name:row.room,type:row.type}, request, previous)));
+  if (!initial && unauthorizedFields.length) {
+    blockers.push('الاقتراح غيّر موقع أو جهة أو أبعاد غرفة غير مستهدفة؛ سمِّ الغرفة المطلوب تعديلها صراحةً.');
+  }
+  if (!initial && added.some(room => !additionAuthorized(room, request))) {
+    blockers.push('الاقتراح أضاف غرفة لم تطلب إضافتها صراحةً؛ حدّد اسم أو نوع الغرفة المطلوبة.');
+  }
   const noChange = added.length + removed.length + changed.length === 0;
   if (requireChange && noChange) blockers.push('الاقتراح لم يغيّر برنامج الغرف؛ لن نعتبر إعادة الرسم نفسها تنفيذًا لتعديلك.');
   return { added, removed, changed, noChange, blockers, before: beforeSnapshot, after: afterSnapshot };
@@ -174,14 +212,14 @@ export function geometryFingerprint(model) {
 export function composeDesignConversation(initial, history, latest, limit = 3900) {
   const first = String(initial || '').trim(), next = String(latest || '').trim();
   if (!next) throw Error('اكتب طلبك أو التعديل الذي تريده.');
-  const intro = first && first !== next ? 'المتطلبات الأصلية المعتمدة:\n' + first + '\n\n' : '';
+  const intro = first && first !== next ? 'المتطلبات الأصلية المعتمدة:\n' + first + '.\n\n' : '';
   const final = 'التعديل المطلوب الآن:\n' + next;
   if (intro.length + final.length > limit) throw Error('وصف المشروع طويل جدًا. اختصر النص الأصلي دون حذف المتطلبات المهمة.');
-  const turns = (Array.isArray(history) ? history : []).slice(-8);
+  const turns = Array.isArray(history) ? history : [];
   let text = intro + final;
   for (const turn of turns.slice().reverse()) {
-    const segment = '\n\nملاحظة سابقة من العميل: ' + String(turn).slice(0, 450);
-    if (text.length + segment.length > limit) break;
+    const segment = '\n\nملاحظة سابقة من العميل: ' + String(turn) + '.';
+    if (text.length + segment.length + 2 > limit) throw Error('وصف المشروع طويل جدًا. اختصر النص دون حذف المتطلبات المعتمدة قبل المتابعة.');
     text = intro + segment + '\n\n' + text.slice(intro.length).trimStart();
   }
   return text;

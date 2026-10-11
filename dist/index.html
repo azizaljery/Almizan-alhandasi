@@ -147,8 +147,8 @@
 
 <section class="panel" id="panel-design" aria-label="الغرف وشكل البيت"><div class="wrap"><section class="studio-simple" id="studioSimple" aria-labelledby="studioSimpleTitle">
   <header class="studio-simple-hero">
-    <span class="studio-kicker">MIZAN DESIGN STUDIO · مساحة تصميم تفاعلية</span>
-    <h1 id="studioSimpleTitle">صف بيتك بطريقتك. سنحوّل الوصف إلى مخطط قابل للتعديل.</h1>
+    <span class="studio-kicker">الميزان الهندسي · مساحة بيتك</span>
+    <h1 id="studioSimpleTitle">من فكرتك إلى مخطط نتناقش فيه.</h1>
     <p>لا تحتاج أن تبدأ بعدّ الغرف في جدول. تحدث عن بيتك، ثم راجع ما فهمه النظام قبل الرسم. وبعد كل مخطط يمكنك طلب تعديل جديد.</p>
     <span class="studio-phase" id="studioPhase">01 / نفهم طلبك</span>
   </header>
@@ -158,12 +158,24 @@
         <div class="studio-message assistant"><span class="studio-speaker">الميزان الهندسي</span><p>أخبرني عن المنزل الذي تريده: الغرف، من يسكنه، الضيافة، الخصوصية، وما لا ترغب فيه. سأعرض ما فهمته قبل أن أرسم، ولن أغيّر غرفة أو مساحة دون أن أوضح ذلك.</p></div>
       </div>
       <p class="studio-plot-hint" id="studioPlotHint">أبعاد الأرض الحالية 20 × 30 م · المدخل جنوب. عدّلها من بطاقة الأرض أدناه إذا لزم.</p>
+      <p id="studioRestoreNotice" class="studio-restore-notice" role="status" hidden></p>
+      <section id="studioRequirements" class="studio-requirements" aria-labelledby="studioRequirementsTitle">
+        <h2 id="studioRequirementsTitle">طلبك وما تحقق منه</h2>
+        <p id="studioRequirementsEmpty">ستظهر متطلباتك هنا بعد فهم الطلب، ثم نقارنها بالمخطط الفعلي.</p>
+        <div id="studioRequirementsRows"></div>
+      </section>
+      <section id="studioPlanSlot" class="studio-plan-slot" aria-label="مخطط المحادثة الحالي"></section>
+      <section id="studioPlanApproval" class="studio-plan-approval" hidden>
+        <p id="studioPlanApprovalStatus" role="status">راجع المخطط قبل تسجيل اختيارك. الموافقة هنا تعني اختيارك للتصميم الأولي؛ ليست اعتمادًا هندسيًا أو نظاميًا.</p>
+        <button type="button" id="studioApprovePlan" class="studio-secondary">أوافق على هذا المخطط الأولي</button>
+      </section>
       <form id="studioRequestForm" class="studio-request-form">
         <label for="studioBrief">وصف المنزل أو التعديل المطلوب</label>
         <textarea id="studioBrief" rows="5" maxlength="2600" placeholder="مثال: دور أرضي، 3 غرف نوم، جناح للوالدة، مجلس رجال بمدخل مستقل، مجلس نساء، صالة عائلية، طعام قريب من المجلسين، ولا أريد فناءً أو ممرات طويلة." required></textarea>
         <div class="studio-request-actions">
           <button type="submit" id="studioSubmit" class="studio-primary">افهم طلبي واقترح المخطط <span aria-hidden="true">←</span></button>
           <button type="button" id="studioLocal" class="studio-secondary">فهم محلي محدود</button>
+          <button type="button" id="studioCancel" class="studio-secondary" hidden>إلغاء العملية</button>
         </div>
       </form>
       <div id="studioStatus" class="studio-feedback" role="status" aria-live="polite"></div>
@@ -279,7 +291,7 @@
     <section class="generation-dock"><div><b>ارسم من اختياراتك الحالية</b><p>كل غرفة ومساحتها والشكل المختار محفوظة في البرنامج.</p></div><button class="primary" id="gen">ولّد وقارن حتى ستة بدائل</button>
         <p id="generationError" class="message error" role="alert" hidden></p></section></div></section><section class="panel" id="panel-result" aria-label="المخطط والعرض الثلاثي"><div class="wrap"><div class="empty-state" id="resultEmpty"><span>2D / 3D</span><h2>المخطط يبدأ من غرفك.</h2><p>راجع البرنامج والشكل، ثم ولّد المخطط.</p><button class="primary" data-next="design">الغرف وشكل البيت</button></div><div class="out" id="out">
 <div class="studio-conversation-return" role="region" aria-label="متابعة تعديل التصميم">
-  <div><b>تريد تعديل المخطط؟</b><p>المخطط ظاهر خلال هذه الجلسة فقط، وسجل المحادثة لا يُستعاد بعد تحديث الصفحة. لتنزيل مدخلات التصميم والمخطط اختر «تنزيل المشروع»، أو افتح «أرشيف الحساب» واختر «حفظ نسخة»؛ كلاهما لا يحفظ سجل المحادثة نفسه.</p></div>
+  <div><b>تريد تعديل المخطط؟</b><p>اختر «تنزيل المشروع» لحفظ المخطط والمحادثة في ملف، أو «أرشيف الحساب» لحفظ نسخة في حسابك. حدّث النسخة المحفوظة بعد التعديلات؛ تحديث الصفحة وحده لا يحفظ عملك.</p></div>
   <button class="primary" type="button" id="studioContinueConversation">متابعة الحوار وتعديل التصميم</button>
 </div>
 <div class="studio-workspace-bar">
