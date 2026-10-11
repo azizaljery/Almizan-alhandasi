@@ -1,3 +1,4 @@
+import { verifyProposedProgram } from './brief-contract.mjs';
 import { extractShapeIntent } from './client-request.mjs';
 import { resolveDesignShapes } from './design-selection.mjs';
 import { runPipeline, generateCandidate, decideReviewed } from './integration/pipeline.mjs';
@@ -42,6 +43,8 @@ export function requestedDesignShapes({ idea = '', discovery = {}, selectedShape
 }
 
 export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null }) {
+  const programCompliance = verifyProposedProgram(idea, rooms);
+  if (!programCompliance.pass) throw Error('EXPLICIT_PROGRAM_CONSTRAINT_VIOLATED: ' + programCompliance.violations.join(' | '));
   const shapes = requestedDesignShapes({ idea, discovery, selectedShape });
   const textIntent = extractShapeIntent(idea);
   const shapeConstraint = selectedShape !== null || discovery.rejects?.length || textIntent.shape || textIntent.rejectedShapes.length ? [{ id: 'HC-USER-SHAPES', kind: 'shape_allowed', description: 'Preserve explicit allowed shapes without fallback.', value: { shapes }, source: 'user', priority: 'must' }] : [];
@@ -52,8 +55,8 @@ export async function buildDesignRequest({ plot, rooms, idea = '', discovery = {
   const unresolvedRequired = softPreferences.filter(pref => pref.value?.mustRequirement).map(pref =>
     `Unverified mandatory request (${pref.value.mizanKind}): ${pref.description}. It is not enforced by the generator/reviewer; clarify or remove the must-language before selecting/exporting a plan.`);
   const dimensionConstraints = program.filter(p => p.exactDimensionsM).map(p => ({
-    id: `dimensions:${p.id}`, kind: 'room_dimensions_exact', description: `Preserve the exact clear dimensions of ${p.name}, allowing a 90-degree rotation.`,
-    value: { roomId: p.id, widthM: p.exactDimensionsM.widthM, lengthM: p.exactDimensionsM.lengthM, rotationAllowed: true, toleranceM: 1e-5 }, source: 'user', priority: 'must',
+    id: `dimensions:${p.id}`, kind: 'room_dimensions_exact', description: `Preserve the exact clear dimensions of ${p.name} with the requested rotation policy.`,
+    value: { roomId: p.id, widthM: p.exactDimensionsM.widthM, lengthM: p.exactDimensionsM.lengthM, rotationAllowed: rooms[program.indexOf(p)].dimensions?.allowRotation !== false, toleranceM: 1e-5 }, source: 'user', priority: 'must',
   }));
   const seed = {
     projectId: 'MIZAN-SITE-V33-P1',

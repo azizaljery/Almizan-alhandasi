@@ -145,8 +145,8 @@ export async function analyzeClientRequest({ prompt, rooms = [], plot, discovery
   const entry = text.match(/(?:المدخل|مدخل رئيسي|الدخول)\s*(?:من|في|جهة|على)?\s*(?:ال)?(شمال|جنوب|شرق|غرب)/);
   if (entry) {
     plotPatch.entry = Object.keys(DIRECTIONS).find(k => DIRECTIONS[k] === entry[1]);
-    plotPatch.streets = { ...plot?.streets, [plotPatch.entry]: true };
-    assumptions.push('فُعّلت جهة المدخل كشارع؛ راجع الشوارع المحيطة بالأرض.');
+    // Entrance intent cannot change surveyed or explicitly selected street sides.
+    // validatePlot below records any conflict as a question before acceptance.
   }
   if (/دور(?:ان|ين)|طابق(?:ان|ين)|دورين|two floors/i.test(text)) plotPatch.floors = 2;
   else if (/ثلاث(?:ة)? (?:ادوار|طوابق)|3 (?:ادوار|طوابق)/.test(text)) plotPatch.floors = 3;

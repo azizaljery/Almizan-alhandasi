@@ -37,29 +37,51 @@ function roomIsNamed(room, request) {
   return name.length >= 4 && norm(request).includes(name);
 }
 
+// A deletion target belongs to its own command, never to another action in
+// the same request. Keep the production area guards separate and unchanged.
+const deletionTokens = value => norm(value).split(/[^\p{L}\p{N}'-]+/u).filter(Boolean).map(word => word.replace(/^ال/, ''));
+const deletionCommands = new Set(['احذف', 'ازل', 'شيل', 'استبعد', 'الغ', 'delete', 'remove']);
+const editCommands = new Set(['غير', 'بدل', 'استبدل', 'انقل', 'حرك', 'كبر', 'صغر', 'وسع', 'change', 'move', 'rename', 'replace', ...deletionCommands]);
+const negativeDeletionWords = new Set(['لا', 'لم', 'لن', 'ليس', 'عدم', 'بدون', 'دون', 'without', "don't", 'not', 'no', 'never']);
+const allWords = new Set(['كل', 'جميع', 'كافه', 'all', 'every']);
+const genericRoomWords = new Set(['غرف', 'غرفه', 'room', 'rooms']);
+const targetName = value => deletionTokens(value).filter(word => word !== 'the').join(' ');
 function removalAuthorized(previous, removed, request) {
-  if (!removePattern.test(request) || !removed.length || actionIsNegated(request, removePattern)) return false;
-  const text = norm(request);
-  const byType = new Map();
-  for (const room of removed) {
+  if (!removed.length || actionIsNegated(request, removePattern)) return false;
+  // Conservatively reject negated requests even when an ellipsis or a long
+  // qualifier separates the negation from the deletion verb.
+  if (deletionTokens(request).some(word => negativeDeletionWords.has(word) || negativeDeletionWords.has(word.replace(/^و/, '')))) return false;
+  const targets = [];
+  for (const clause of String(request).split(/[،,؛;.!?\n]/)) {
+    const words = deletionTokens(clause);
+    for (let i = 0; i < words.length; i++) {
+      if (!deletionCommands.has(words[i].replace(/^و/, ''))) continue;
+      const target = [];
+      for (let j = i + 1; j < words.length; j++) {
+        if (editCommands.has(words[j]) || editCommands.has(words[j].replace(/^و/, ''))) break;
+        target.push(words[j]);
+      }
+      if (target[0] === 'the') target.shift();
+      if (['and', 'و'].includes(target.at(-1))) target.pop();
+      const all = allWords.has(target[0]);
+      if (all) target.shift();
+      if (target[0] === 'the') target.shift();
+      if (target.length) targets.push({ text: target.join(' '), all });
+    }
+  }
+  return removed.every(room => targets.some(target => {
     const type = norm(room.type);
-    if (!byType.has(type)) byType.set(type, []);
-    byType.get(type).push(room);
-  }
-  for (const [type, rows] of byType) {
-    const named = rows.filter(room => roomIsNamed(room, text));
-    if (named.length === rows.length) continue;
-    // Generic type deletion is supported only when it is unambiguous. Multiple
-    // same-type rooms require naming each one, or an explicit all-of-type request.
+    const sameType = previous.filter(item => norm(item.type) === type);
     const term = typeTerms[type];
-    if (!term?.test(text)) return false;
-    const previousCount = previous.filter(room => norm(room.type) === type).length;
-    const allOfType = /(?:كل|جميع|كافه|all|every)/i.test(text);
-    if (allOfType && rows.length === previousCount) continue;
-    if (previousCount === 1 && rows.length === 1) continue;
-    return false;
-  }
-  return true;
+    const exactType = term && new RegExp('^(?:' + term.source + ')$', term.flags).test(target.text);
+    // Preserve explicit all-of-type deletion, but its quantifier and type must
+    // be in this deletion clause and all rooms of that type must be removed.
+    if (genericRoomWords.has(target.text)) return false;
+    if (target.all) return !!exactType && removed.filter(item => norm(item.type) === type).length === sameType.length;
+    const name = targetName(room.name);
+    if (target.text === name) return previous.filter(item => targetName(item.name) === name).length === 1;
+    return !!exactType && sameType.length === 1;
+  }));
 }
 
 function areaAuthorized(request, room, previous) {
@@ -71,6 +93,7 @@ function areaAuthorized(request, room, previous) {
 
 export function diffRoomPrograms(previous, next, request = '', { requireChange = true, initial = false } = {}) {
   if (!Array.isArray(previous) || !Array.isArray(next)) throw Error('برنامج الغرف غير صالح.');
+  const beforeSnapshot = structuredClone(previous), afterSnapshot = structuredClone(next);
   const group = rooms => {
     const result = new Map();
     for (const room of rooms) {
@@ -80,20 +103,38 @@ export function diffRoomPrograms(previous, next, request = '', { requireChange =
     }
     return result;
   };
-  const before = group(previous), after = group(next);
+  const before = group(beforeSnapshot), after = group(afterSnapshot);
   const added = [], removed = [], changed = [];
   for (const k of new Set([...before.keys(), ...after.keys()])) {
-    const a = before.get(k) || [], b = after.get(k) || [];
-    const common = Math.min(a.length, b.length);
-    for (let i = 0; i < common; i++) {
-      const fields = [];
-      if (Math.abs(area(a[i]) - area(b[i])) > .01) fields.push({ name: 'area', from: area(a[i]), to: area(b[i]) });
-      if (norm(a[i].position) !== norm(b[i].position)) fields.push({ name: 'position', from: a[i].position, to: b[i].position });
-      if (norm(a[i].side) !== norm(b[i].side)) fields.push({ name: 'side', from: a[i].side, to: b[i].side });
-      if (fields.length) changed.push({ room: b[i].name, type: b[i].type, fields });
+    const a = [...(before.get(k) || [])], b = [...(after.get(k) || [])];
+    const pairs = [];
+    // Match stable identities, then unchanged duplicate records, before pairing
+    // remaining legacy records. Reordering must not produce a fictitious edit.
+    for (let i = a.length - 1; i >= 0; i--) {
+      const j = a[i].id != null ? b.findIndex(room => room.id === a[i].id) : -1;
+      if (j >= 0) pairs.push([a.splice(i, 1)[0], b.splice(j, 1)[0]]);
     }
-    removed.push(...a.slice(common));
-    added.push(...b.slice(common));
+    for (let i = a.length - 1; i >= 0; i--) {
+      const j = b.findIndex(room => JSON.stringify(room) === JSON.stringify(a[i]));
+      if (j >= 0) pairs.push([a.splice(i, 1)[0], b.splice(j, 1)[0]]);
+    }
+    while (a.length && b.length) {
+      const i = a.findIndex(left => b.some(right => left.id == null || right.id == null));
+      if (i < 0) break;
+      const j = b.findIndex(right => a[i].id == null || right.id == null);
+      pairs.push([a.splice(i, 1)[0], b.splice(j, 1)[0]]);
+    }
+    for (const [left, right] of pairs) {
+      const fields = [];
+      if (Math.abs(area(left) - area(right)) > .01) fields.push({ name: 'area', from: area(left), to: area(right) });
+      for (const field of new Set([...Object.keys(left), ...Object.keys(right)])) {
+        if (['area', 'areaM2', 'name', 'type', 'id'].includes(field)) continue;
+        if (JSON.stringify(left[field]) !== JSON.stringify(right[field])) fields.push({ name: field, from: left[field], to: right[field] });
+      }
+      if (fields.length) changed.push({ room: right.name, type: right.type, fields });
+    }
+    removed.push(...a);
+    added.push(...b);
   }
   const blockers = [];
   if (!initial && removed.length && !removalAuthorized(previous, removed, request)) {
@@ -105,7 +146,7 @@ export function diffRoomPrograms(previous, next, request = '', { requireChange =
   }
   const noChange = added.length + removed.length + changed.length === 0;
   if (requireChange && noChange) blockers.push('الاقتراح لم يغيّر برنامج الغرف؛ لن نعتبر إعادة الرسم نفسها تنفيذًا لتعديلك.');
-  return { added, removed, changed, noChange, blockers };
+  return { added, removed, changed, noChange, blockers, before: beforeSnapshot, after: afterSnapshot };
 }
 
 export function geometryFingerprint(model) {

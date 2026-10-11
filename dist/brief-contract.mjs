@@ -27,7 +27,7 @@ export function normalizeBriefText(value) {
 }
 
 const negativePrefix = /(?:^|[\s،؛])(?:لا|لم|لن|ليس|عدم|بدون|دون|without|don't|do\s+not|not|no)(?:\s+\S+){0,3}\s*$/iu;
-const isNegatedAt = (source, index) => negativePrefix.test(source.slice(Math.max(0, index - 60), index));
+const isNegatedAt = (source, index) => negativePrefix.test(source.slice(Math.max(0, index - 60), index).split(/[،؛,;.!?]/u).at(-1));
 
 export function extractPlotDimensions(text) {
   const source = normalizeBriefText(text);
@@ -38,7 +38,7 @@ export function extractPlotDimensions(text) {
   return { width, length };
 }
 
-const countValue = value => /^\d+$/.test(value) ? Number(value) : numberWords[value] ?? null;
+const countValue = value => /^\d+$/.test(value) ? Number(value) : numberWords[value.toLowerCase()] ?? null;
 const roomType = label => /مستودع|مخزن|storage/i.test(label) ? 'storage'
   : /مطبخ|kitchen/i.test(label) ? 'kitchen'
   : /مجلس|majlis/i.test(label) ? 'majlis'
@@ -83,9 +83,11 @@ export function extractExplicitProgramRequirements(text) {
   const englishCountPattern = new RegExp(`(?:^|[\\s،؛])(${`\\d+|${wordPattern}`})\\s+bedrooms?`, 'giu');
   const recordCount = (match, offset) => {
     const n = countValue(match[1]);
-    if (n === null || n < 1 || n > 20) return;
+    if (!Number.isSafeInteger(n) || n < 0) return;
     const prefix = source.slice(Math.max(0, offset - 36), offset);
-    const minimum = /(?:على\s+الاقل|بحد\s+ادني|كحد\s+ادني|at\s+least|minimum|min\.?\s*)$/iu.test(prefix);
+    const suffix = source.slice(offset + match[0].length);
+    const minimum = /(?:على\s+الاقل|بحد\s+ادن[ىي]|كحد\s+ادن[ىي]|at\s+least|minimum(?: of)?|min\.?)\s*$/iu.test(prefix) ||
+      /^\s*(?:على\s+الاقل|بحد\s+ادن[ىي]|كحد\s+ادن[ىي]|at\s+least|minimum)(?=$|[\s،؛,.;])/iu.test(suffix);
     const negated = isNegatedAt(source, offset);
     addRule('bedrooms', { id: 'bedrooms', kind: negated ? 'excluded-count' : minimum ? 'minimum-count' : 'exact-count', label: 'غرف النوم', expected: n });
   };
@@ -94,7 +96,7 @@ export function extractExplicitProgramRequirements(text) {
   for (const match of source.matchAll(englishCountPattern)) countMatches.push({ match, offset: match.index });
   // Common Arabic dual forms state an exact count without a leading numeral.
   const dualCountPattern = /(?:^|[\s،؛])(?:غرفتين|غرفتا|غرفتان|غرفتي)\s+(?:نوم|النوم)(?=$|[\s،؛])/giu;
-  for (const match of source.matchAll(dualCountPattern)) countMatches.push({ match: ['', '2'], offset: match.index });
+  for (const match of source.matchAll(dualCountPattern)) countMatches.push({ match: [match[0], '2'], offset: match.index });
   countMatches.sort((a, b) => a.offset - b.offset);
   const seenCountMatches = new Set();
   for (const item of countMatches) {
@@ -117,25 +119,27 @@ export function extractExplicitProgramRequirements(text) {
     const type = roomType(label) || 'other';
     const sex = /رجال/.test(label) ? ':men' : /نساء/.test(label) ? ':women' : '';
     const id = `dimensions:${type}${sex}`;
-    addRule(id, { id, kind: isNegatedAt(source, match.index) ? 'excluded-room-dimensions' : 'room-dimensions', label, expected: width * length, width, length });
+    const suffix = source.slice(match.index + match[0].length);
+    const allowRotation = !/^\s*[,،;؛]?\s*(?:بدون\s+(?:تدوير|دوران)|دون\s+(?:تدوير|دوران)|no\s+rotation|without\s+rotation)(?=$|[\s،؛,.;])/iu.test(suffix);
+    addRule(id, { id, kind: isNegatedAt(source, match.index) ? 'excluded-room-dimensions' : 'room-dimensions', label, expected: width * length, width, length, ...(allowRotation ? {} : { allowRotation: false }) });
   }
   return [...result.values()].flat();
 }
 
 function dimensionsOf(room) {
   if (room?.dimensions && Number.isFinite(Number(room.dimensions.width)) && Number.isFinite(Number(room.dimensions.length))) {
-    return { width: Number(room.dimensions.width), length: Number(room.dimensions.length) };
+    return { width: Number(room.dimensions.width), length: Number(room.dimensions.length), ...(room.dimensions.allowRotation === false ? { allowRotation: false } : {}) };
   }
   const exact = room?.exactDimensionsM || room?.exactDimensions;
   if (exact && Number.isFinite(Number(exact.widthM ?? exact.width)) && Number.isFinite(Number(exact.lengthM ?? exact.length))) {
-    return { width: Number(exact.widthM ?? exact.width), length: Number(exact.lengthM ?? exact.length) };
+    return { width: Number(exact.widthM ?? exact.width), length: Number(exact.lengthM ?? exact.length), ...(exact.allowRotation === false || exact.rotationAllowed === false ? { allowRotation: false } : {}) };
   }
   if (Number.isFinite(Number(room?.width)) && Number.isFinite(Number(room?.length))) return { width: Number(room.width), length: Number(room.length) };
   return null;
 }
-const sameDimensions = (actual, expected) => !!actual && (
-  Math.abs(actual.width - expected.width) <= .01 && Math.abs(actual.length - expected.length) <= .01 ||
-  Math.abs(actual.width - expected.length) <= .01 && Math.abs(actual.length - expected.width) <= .01
+const sameDimensions = (actual, expected, tolerance = .01) => !!actual && (
+  Math.abs(actual.width - expected.width) <= tolerance && Math.abs(actual.length - expected.length) <= tolerance ||
+  expected.allowRotation !== false && Math.abs(actual.width - expected.length) <= tolerance && Math.abs(actual.length - expected.width) <= tolerance
 );
 
 const areaMatches = (left, right) => Number.isFinite(Number(left)) && Number.isFinite(Number(right)) && Math.abs(Number(left) - Number(right)) <= .01;
@@ -169,7 +173,7 @@ export function bindRequestedDimensions(proposedRooms, requestedRooms) {
       }
     }
     const fullyConstrained = requestedGroup.length > 0 && requestedGroup.every(room => dimensionsOf(room));
-    const sharedDimensions = fullyConstrained && requestedGroup.every(room => sameDimensions(dimensionsOf(room), dimensionsOf(requestedGroup[0])));
+    const sharedDimensions = fullyConstrained && requestedGroup.every(room => dimensionsOf(room).allowRotation === dimensionsOf(requestedGroup[0]).allowRotation && sameDimensions(dimensionsOf(room), dimensionsOf(requestedGroup[0])));
     if (sharedDimensions) {
       const requiredDimensions = dimensionsOf(requestedGroup[0]);
       const area = requiredDimensions.width * requiredDimensions.length;
@@ -211,7 +215,7 @@ export function bindRequestedDimensions(proposedRooms, requestedRooms) {
   return result.map((room, index) => updates.has(index) ? { ...room, dimensions: updates.get(index) } : room);
 }
 
-export function verifyProposedProgram(text, rooms) {
+export function verifyProposedProgram(text, rooms, { dimensionTolerance = .01 } = {}) {
   if (!Array.isArray(rooms)) throw Error('قائمة الغرف المقترحة غير صالحة.');
   const requirements = extractExplicitProgramRequirements(text);
   const violations = [];
@@ -233,17 +237,31 @@ export function verifyProposedProgram(text, rooms) {
       const found = matches.some(room => {
         const actual = dimensionsOf(room);
         const area = Number(room.area ?? room.areaM2);
-        return sameDimensions(actual, rule) && Math.abs(area - rule.expected) <= .25;
+        return sameDimensions(actual, rule, dimensionTolerance) && Math.abs(area - rule.expected) <= .25;
       });
-      if (!found) violations.push(`طلبت أبعاد ${rule.label} ${rule.width}×${rule.length} م بالضبط، مع السماح بالتدوير 90°؛ المساحة وحدها لا تثبت الأبعاد.`);
+      if (!found) violations.push(`طلبت أبعاد ${rule.label} ${rule.width}×${rule.length} م بالضبط، ${rule.allowRotation === false ? 'دون تدوير' : 'مع السماح بالتدوير 90°'}؛ المساحة وحدها لا تثبت الأبعاد.`);
     } else if (rule.kind === 'excluded-room-dimensions') {
       const matches = rooms.filter(room => roomNameMatches(room, rule.label));
       const dimensions = matches.map(dimensionsOf);
-      const found = dimensions.some(actual => sameDimensions(actual, rule));
+      const found = dimensions.some(actual => sameDimensions(actual, rule, dimensionTolerance));
       const unknown = matches.length > 0 && dimensions.some(actual => !actual);
       if (found) violations.push(`ذكرت أنك لا تريد أبعاد ${rule.label} ${rule.width}×${rule.length} م؛ الاقتراح يتضمنها.`);
       else if (unknown) violations.push(`لا يمكن التحقق من أن ${rule.label} لا يستخدم أبعاد ${rule.width}×${rule.length} م؛ نحتاج أبعادًا صريحة قبل الاعتماد.`);
     }
   }
   return { requirements, violations, pass: violations.length === 0 };
+}
+
+
+// Generated rectangles are verified independently of requested dimension metadata.
+// Preserve exclusions and count semantics by reusing the current V51 contract.
+export function verifyProgramGeometry(text, rooms) {
+  if (!Array.isArray(rooms)) throw Error('قائمة الغرف الهندسية غير صالحة.');
+  return verifyProposedProgram(text, rooms.map(room => {
+    const { dimensions, exactDimensionsM, exactDimensions, width, length, ...rest } = room;
+    const actualWidth = room.w ?? width, actualLength = room.h ?? length;
+    const valid = Number.isFinite(actualWidth) && Number.isFinite(actualLength) && actualWidth > 0 && actualLength > 0;
+    return { ...rest, area: valid ? actualWidth * actualLength : NaN,
+      ...(valid ? { dimensions: { width: actualWidth, length: actualLength } } : {}) };
+  }), { dimensionTolerance: 1e-5 });
 }

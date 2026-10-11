@@ -1,3 +1,4 @@
+import { verifyProposedProgram, verifyProgramGeometry } from '../brief-contract.mjs';
 /** Local integration preview over frozen handoffs. No provider call, UI change or deployment.
  * Keeps native module/package names. SHA-256 binding is kept separate from legacy AZIZ FNV.
  * Only measured geometry/area/program axes participate. Other AZIZ axes are diagnostics,
@@ -31,8 +32,21 @@ function snapshot(request) {
  validateEnvelope(request,'request');
  return JSON.parse(canonicalJSON(request));
 }
+function verifyRequestedGeometry(r,rooms) {
+ const check=verifyProgramGeometry(r.interpretation.originalText,rooms);
+ for(const c of r.hardConstraints.filter(c=>c.kind==='room_dimensions_exact')) {
+  const matching=rooms.filter(room=>room.id===c.value.roomId), v=c.value;
+  const same=(a,b)=>Number.isFinite(a)&&Math.abs(a-b)<=Math.min(v.toleranceM,1e-5);
+  const room=matching[0];
+  if(matching.length!==1 || !((same(room.w,v.widthM)&&same(room.h,v.lengthM)) ||
+   (v.rotationAllowed&&same(room.w,v.lengthM)&&same(room.h,v.widthM)))) check.violations.push('EXPLICIT_DIMENSIONS_VIOLATED:'+v.roomId);
+ }
+ return {...check,pass:check.violations.length===0};
+}
 function supportedRequest(r) {
  const reasons=[];
+ const programCompliance=verifyProposedProgram(r.interpretation.originalText,r.program);
+ if(!programCompliance.pass) reasons.push('EXPLICIT_PROGRAM_CONSTRAINT_VIOLATED:'+programCompliance.violations.join('|'));
  if(r.interpretation.status!=='confirmed'||r.interpretation.unresolved.length) {
   if(r.interpretation.unresolved.length) reasons.push(...r.interpretation.unresolved.map(reason=>`REQUEST_REQUIRES_CONFIRMATION:${reason}`));
   else reasons.push('REQUEST_REQUIRES_CONFIRMATION');
@@ -42,7 +56,7 @@ function supportedRequest(r) {
  // Fail closed rather than pretending the legacy distance/adjacency heuristics prove a must.
  for(const c of r.hardConstraints) {
   const count=c.kind==='room_count_exact'&&Number.isInteger(c.value?.count)&&c.value.count>=0;
-  const exactRoom=r.program.find(p=>p.id===c.value?.roomId), exact= c.kind==='room_dimensions_exact' && exactRoom?.exactDimensionsM && c.value?.rotationAllowed===true && Number.isFinite(c.value?.widthM) && Number.isFinite(c.value?.lengthM) && Number.isFinite(c.value?.toleranceM) && c.value.toleranceM>=0 && Math.abs(c.value.widthM-exactRoom.exactDimensionsM.widthM)<=1e-8 && Math.abs(c.value.lengthM-exactRoom.exactDimensionsM.lengthM)<=1e-8;
+  const exactRoom=r.program.find(p=>p.id===c.value?.roomId), exact= c.kind==='room_dimensions_exact' && exactRoom?.exactDimensionsM && typeof c.value?.rotationAllowed==='boolean' && Number.isFinite(c.value?.widthM) && Number.isFinite(c.value?.lengthM) && Number.isFinite(c.value?.toleranceM) && c.value.toleranceM>=0 && Math.abs(c.value.widthM-exactRoom.exactDimensionsM.widthM)<=1e-8 && Math.abs(c.value.lengthM-exactRoom.exactDimensionsM.lengthM)<=1e-8;
   const shape=c.kind==='shape_allowed'&&Array.isArray(c.value?.shapes)&&c.value.shapes.length>0&&c.value.shapes.every(s=>Object.hasOwn(STRATEGIES,s));
   const wing=c.kind==='wing_count_exact'&&c.value?.count===2&&r.hardConstraints.some(x=>x.kind==='shape_allowed'&&x.value?.shapes?.includes('staggered'));
   if(c.kind==='wing_count_exact'&&!wing) reasons.push(c.value?.count===2?'WING_COUNT_REQUIRES_STAGGERED':'UNSUPPORTED_WING_COUNT');
@@ -65,6 +79,8 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
  if(requiredWings!==undefined&&(shape!=='staggered'||topology.wingCount!==requiredWings)) throw Error('REQUESTED_WING_COUNT_MISMATCH');
  const errors=[...validateModel(m),...topology.errors]; if(errors.length) throw Error('NATIVE_VALIDATION_FAILED:'+errors.join(';'));
  const geometry=Object.fromEntries(GEOMETRY_KEYS.filter(k=>m[k]!==undefined).map(k=>[k,structuredClone(m[k])]));
+ const geometryCompliance=verifyRequestedGeometry(r,geometry.rooms);
+ if(!geometryCompliance.pass) throw Error('EXPLICIT_GEOMETRY_CONSTRAINT_VIOLATED:'+geometryCompliance.violations.join('|'));
  canonicalJSON(geometry); // Never turn NaN/Infinity into JSON null.
  const massing=auditMassing(geometry.buildingFootprint,m.massingParts??[m.building],geometry.courtyards);
  if(!massing.pass) throw Error('MASSING_NOT_EQUIVALENT');
@@ -117,6 +133,8 @@ export async function decideReviewed(request,pairs) {
   if(!audit.pass) throw Error('MASSING_NOT_EQUIVALENT');
   if(seen.has(c.candidateId)) throw Error('DUPLICATE_CANDIDATE_ID'); seen.add(c.candidateId);
   validReviews.push(review);
+  const geometryCompliance=verifyRequestedGeometry(r,c.geometry.rooms);
+  if(!geometryCompliance.pass) { rejected.push({candidateId:c.candidateId,failedChecks:['explicit-program-geometry'],unprovenChecks:[],reasons:geometryCompliance.violations}); continue; }
   const failed=review.checks.filter(x=>x.status==='FAIL');
   const essential=['identity','polygon-area','plot-bounds','space-containment','opening-references','plot-coverage','program-areas','hard-constraints','requested-floors','interpretation'];
   const missing=essential.filter(id=>review.checks.find(x=>x.id===id)?.status!=='PASS');

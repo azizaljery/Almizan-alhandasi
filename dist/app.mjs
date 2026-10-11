@@ -226,8 +226,7 @@ function engineeringSignature() { return JSON.stringify([state.discovery, $('ide
 function renderStreets() {
   const selected = $('entry').value || 's';
   $('streets').innerHTML = Object.entries(DIRECTIONS).map(([side, name]) => `<button class="street ${state.streets[side] ? 'on' : ''}" data-side="${side}" aria-pressed="${state.streets[side]}"><i class="dot"></i><b>${name}</b><small>${state.streets[side] ? 'شارع مفعّل' : 'جهة جار'}</small></button>`).join('');
-  const enabled = Object.fromEntries(Object.entries(DIRECTIONS).filter(([s]) => state.streets[s]));
-  $('entry').innerHTML = Object.keys(enabled).length ? options(enabled, selected) : '<option value="">فعّل جهة شارع أولًا</option>';
+  $('entry').innerHTML = options(DIRECTIONS, selected);
 }
 function rating() {
   const p = rawPlot(); $('area').textContent = Number.isFinite(p.width * p.length) ? fmt(p.width * p.length) + ' م²' : '—';
@@ -1156,10 +1155,11 @@ const mizanStudioAPI = Object.freeze({
       failures: structuredClone(state.failures),
     };
   },
-  setPlot({ width, length, entry, maxBuiltArea }) {
+  setPlot({ width, length, entry, maxBuiltArea, streets }) {
     if (!['s', 'n', 'e', 'w'].includes(entry)) throw Error('جهة المدخل غير صالحة.');
     const requested = {
       ...rawPlot(), width: Number(width), length: Number(length), entry,
+      streets: streets === undefined ? { ...state.streets } : { ...streets },
       maxBuiltArea: maxBuiltArea === null || maxBuiltArea === undefined || maxBuiltArea === '' ? null : Number(maxBuiltArea),
     };
     const candidate = validatePlot(requested);
@@ -1171,8 +1171,7 @@ const mizanStudioAPI = Object.freeze({
     $('len').value = String(candidate.length);
     $('entry').value = candidate.entry;
     $('maxBuiltArea').value = candidate.maxBuiltArea ?? '';
-    // A chosen entrance must be on a street in this planner; make that side explicit.
-    state.streets[entry] = true;
+    state.streets = { ...candidate.streets };
     renderStreets(); rating(); markDirty();
     return validatePlot(rawPlot());
   },

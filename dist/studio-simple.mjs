@@ -18,7 +18,8 @@ export function proposalInputsMatch(brief, plot, expected) {
   return Number(plot.width) === Number(expected.plot.width) &&
     Number(plot.length) === Number(expected.plot.length) &&
     String(plot.entry) === String(expected.plot.entry) &&
-    trim(plot.maxBuiltArea) === trim(expected.plot.maxBuiltArea);
+    trim(plot.maxBuiltArea) === trim(expected.plot.maxBuiltArea) &&
+    ['n', 's', 'e', 'w'].every(side => !!plot.streets?.[side] === !!expected.plot.streets?.[side]);
 }
 
 export function returnToConversation(doc) {
@@ -58,6 +59,7 @@ function plotValues() {
     width: Number($('studioWidth').value),
     length: Number($('studioLength').value),
     entry: $('studioEntry').value,
+    streets: Object.fromEntries([...document.querySelectorAll('[data-studio-street]')].map(el => [el.dataset.studioStreet, el.checked])),
     maxBuiltArea: $('studioMaxArea').value.trim() || null,
   };
 }
@@ -65,6 +67,7 @@ const plotInputIds = ['studioWidth', 'studioLength', 'studioEntry', 'studioMaxAr
 function setInputsLocked(locked) {
   $('studioBrief').readOnly = locked;
   for (const id of plotInputIds) $(id).disabled = locked;
+  for (const el of document.querySelectorAll('[data-studio-street]')) el.disabled = locked;
 }
 function updatePlotHint() {
   const labels = { s: 'جنوب', n: 'شمال', e: 'شرق', w: 'غرب' };
@@ -81,7 +84,9 @@ function showDiff(diff, brief) {
   for (const row of diff.changed.slice(0, 9)) {
     const fields = row.fields.map(f => f.name === 'area'
       ? 'المساحة ' + fmt(f.from) + ' ← ' + fmt(f.to) + ' م²'
-      : f.name === 'position' ? 'الموقع ' + f.from + ' ← ' + f.to : 'الجهة ' + f.from + ' ← ' + f.to);
+      : f.name === 'position' ? 'الموقع ' + f.from + ' ← ' + f.to
+      : f.name === 'side' ? 'الجهة ' + f.from + ' ← ' + f.to
+      : f.name + ': ' + JSON.stringify(f.from) + ' ← ' + JSON.stringify(f.to));
     add(row.room + ': ' + fields.join(' · '));
   }
   if (diff.changed.length > 9) add('وتوجد ' + fmt(diff.changed.length - 9) + ' تعديلات أخرى في البرنامج.');
@@ -116,6 +121,7 @@ export function initSimpleStudio() {
   $('studioWidth').value = initial.width;
   $('studioLength').value = initial.length;
   $('studioEntry').value = initial.entry;
+  for (const el of document.querySelectorAll('[data-studio-street]')) el.checked = !!initial.streets[el.dataset.studioStreet];
   $('studioMaxArea').value = initial.maxBuiltArea ?? '';
   updatePlotHint();
   for (const id of ['studioWidth', 'studioLength', 'studioEntry', 'studioMaxArea']) $(id).addEventListener('change', updatePlotHint);
@@ -250,6 +256,7 @@ export function initSimpleStudio() {
       $('studioWidth').value = current.width;
       $('studioLength').value = current.length;
       $('studioEntry').value = current.entry;
+      for (const el of document.querySelectorAll('[data-studio-street]')) el.checked = !!current.streets[el.dataset.studioStreet];
       $('studioMaxArea').value = current.maxBuiltArea ?? '';
     }
   });
