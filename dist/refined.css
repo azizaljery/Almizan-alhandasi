@@ -1,0 +1,133 @@
+/* الميزان الهندسي — الطبقة البصرية الراقية (تُحمَّل أخيرًا وتعلو على ما قبلها).
+   هدوء، مساحات بيضاء واسعة، أخضر عميق بلمسة نحاسية، خط ناعم للعناوين. */
+:root{
+  --b:#f6f2ea;--n:#f6f2ea;--surface:#fffdf8;--ink:#17332a;--i:#17332a;--muted:#6b7a6f;--m:#6b7a6f;
+  --accent:#1f4a38;--g:#1f4a38;--c:#1f4a38;--mizan-accent:#1f4a38;--br:#e6dfd0;--ok:#2c6a4c;--d:#9a3e31;
+  --mz-ivory:#f6f2ea;--mz-paper:#fffdf8;--mz-line:#e6dfd0;--mz-line-strong:#d6ccb6;
+  --mz-green:#1f4a38;--mz-green-deep:#143428;--mz-green-soft:#e8efe8;
+  --mz-brass:#a8814a;--mz-brass-soft:#f1e7d3;--mz-text:#17332a;--mz-sub:#5c6e62;
+  --mz-shadow:0 1px 2px rgba(23,51,42,.04),0 14px 34px -22px rgba(23,51,42,.28);
+  --mz-serif:'Amiri','Noto Naskh Arabic','IBM Plex Sans Arabic',serif;
+  color-scheme:light;
+}
+html{background:var(--mz-ivory)}
+body{background:var(--mz-ivory);color:var(--mz-text);font-family:'IBM Plex Sans Arabic',Tahoma,Arial,sans-serif;font-weight:400;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:#d9c7a1;color:#13281f}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--mz-brass);outline-offset:3px}
+
+/* ——— الشريط العلوي ——— */
+#app .top{min-height:68px;padding:10px clamp(16px,3vw,40px);background:rgba(255,253,248,.88);
+  backdrop-filter:saturate(1.2) blur(14px);-webkit-backdrop-filter:saturate(1.2) blur(14px);
+  border-bottom:1px solid var(--mz-line);box-shadow:none}
+#app .brand{gap:13px}
+#app .brand .logo{width:42px;height:42px;border-radius:50%;background:var(--mz-green-deep);color:#e9d6a8;
+  font-family:var(--mz-serif);font-size:1.7rem;font-weight:700;line-height:1;box-shadow:inset 0 0 0 1.5px #c9a867}
+#app .brand b{font-family:var(--mz-serif);font-size:1.35rem;font-weight:700;color:var(--mz-green-deep);letter-spacing:0}
+#app .brand small{color:var(--mz-sub);font-size:.78rem}
+#app .trial-label{display:none}
+#app .workspace-actions .small-button,#app .small-button{min-height:40px;padding:7px 15px;border-radius:999px;border:1px solid var(--mz-line-strong);
+  background:transparent;color:var(--mz-green);font-weight:500;font-size:.85rem;box-shadow:none}
+#app .small-button:hover:not(:disabled){background:var(--mz-green-soft);border-color:#b9c9bb}
+
+/* ——— الصفحة ——— */
+#app.studio-simple-mode,#app.studio-simple-mode #panel-design{background:var(--mz-ivory);color:var(--mz-text)}
+#app.studio-simple-mode #panel-design>.wrap{max-width:1180px;width:min(94%,1180px);padding-top:clamp(28px,5vw,64px)}
+.studio-simple{padding:0 0 56px;color:var(--mz-text)}
+.studio-simple::before{display:none}
+
+/* الترحيب */
+.studio-simple-hero{max-width:760px;margin:0 0 clamp(28px,4vw,44px);position:relative;padding-top:22px}
+.studio-simple-hero::before{content:"";position:absolute;top:0;inset-inline-start:0;width:54px;height:2px;background:var(--mz-brass)}
+.studio-kicker{color:var(--mz-brass);font-size:.8rem;font-weight:500;letter-spacing:.06em;margin-bottom:12px}
+.studio-simple-hero h1{font-family:var(--mz-serif);font-weight:700;font-size:clamp(2.1rem,4.6vw,3.3rem)!important;line-height:1.5;letter-spacing:0;color:var(--mz-green-deep);margin:0!important}
+.studio-simple-hero p{font-size:clamp(1rem,1.5vw,1.14rem);line-height:2.05;color:var(--mz-sub);max-width:640px;margin-top:12px}
+.studio-phase{margin-top:22px;padding:6px 16px;border:1px solid var(--mz-line-strong);border-radius:999px;background:transparent;color:var(--mz-green);font-size:.8rem;font-weight:500}
+
+/* البطاقات والمحادثة */
+.studio-conversation,.studio-project-setup,#app .card{background:var(--mz-paper);border:1px solid var(--mz-line);border-radius:22px;box-shadow:var(--mz-shadow);color:var(--mz-text)}
+#app.studio-simple-mode #panel-design .card{background:var(--mz-paper);border-color:var(--mz-line);color:var(--mz-text)}
+#app.studio-simple-mode #panel-design .card .ch h2,#app .card .ch h2{color:var(--mz-green-deep);font-family:var(--mz-serif);font-size:1.3rem;font-weight:700}
+#app.studio-simple-mode #panel-design .card .ch p,#app.studio-simple-mode #panel-design .help{color:var(--mz-sub)}
+.studio-simple-grid{gap:clamp(16px,2.4vw,28px)}
+.studio-transcript{background:transparent;padding:26px 28px}
+.studio-message{border-radius:18px;border:1px solid var(--mz-line);background:#fff;box-shadow:none}
+.studio-message.user{background:var(--mz-green-soft);border-color:#d3e0d4}
+.studio-speaker{color:var(--mz-brass);font-weight:500}
+.studio-message p{color:var(--mz-text);line-height:2}
+.studio-request-form{padding:26px 28px 20px;border-top:1px solid var(--mz-line)}
+.studio-request-form>label{font-family:var(--mz-serif);font-size:1.25rem;font-weight:700;color:var(--mz-green-deep);margin-bottom:12px}
+.studio-request-form textarea{min-height:170px;padding:20px 22px;border:1px solid var(--mz-line-strong);border-radius:18px;background:#fff;
+  color:var(--mz-text);font-size:1.02rem;line-height:2.05;box-shadow:inset 0 1px 2px rgba(23,51,42,.04)}
+.studio-request-form textarea:focus{border-color:var(--mz-green);box-shadow:0 0 0 4px rgba(31,74,56,.1)}
+.studio-request-form textarea::placeholder{color:#97a399}
+.studio-request-actions{gap:12px;margin-top:18px}
+
+/* الأزرار */
+.studio-primary,.studio-secondary,.studio-advanced-button{min-height:50px;padding:11px 24px;border-radius:999px;font-weight:500;font-size:.95rem;letter-spacing:0}
+.studio-primary{background:var(--mz-green-deep);border:1px solid var(--mz-green-deep);color:#f7efdc;box-shadow:0 10px 24px -14px rgba(20,52,40,.7)}
+.studio-primary:hover:not(:disabled){background:var(--mz-green);transform:translateY(-1px)}
+.studio-secondary{background:transparent;border:1px solid var(--mz-line-strong);color:var(--mz-green)}
+.studio-secondary:hover{background:var(--mz-green-soft)}
+#app .small-button.on,#app .studio-view-toggle .small-button[aria-pressed="true"]{background:var(--mz-green-deep);border-color:var(--mz-green-deep);color:#f7efdc}
+
+/* ما فهمه المهندس */
+.studio-proposal{margin:0 28px 28px;padding:26px;border:1px solid #e1d6bd;border-radius:20px;background:linear-gradient(180deg,#fbf6ea,#fffdf8)}
+.studio-proposal h2{font-family:var(--mz-serif);font-size:1.5rem;font-weight:700;color:var(--mz-green-deep)}
+.studio-proposal>p{color:var(--mz-text);line-height:2.05;font-size:1rem}
+.studio-diff-row{border-radius:12px;border:1px solid var(--mz-line);background:#fff;color:var(--mz-text);font-size:.92rem;line-height:1.9;padding:11px 15px}
+.studio-proposal-warnings p{border-radius:12px;border:1px solid #e6d3b4;background:#fbf3e3;color:#7a5a2c;line-height:1.95}
+.studio-feedback{color:var(--mz-sub)}
+.studio-feedback.error{color:var(--d)}
+
+/* الطيّات */
+details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-tools{border-radius:18px}
+.studio-secondary-details{border:1px solid var(--mz-line);background:transparent;margin-top:12px;border-radius:18px}
+.studio-secondary-details>summary,.studio-project-setup>summary,#app details>summary{color:var(--mz-green);font-weight:500;cursor:pointer;list-style-position:inside}
+.studio-project-setup{padding:26px}
+.studio-side-eyebrow{color:var(--mz-brass);font-weight:500;letter-spacing:.06em}
+.studio-trust{background:var(--mz-brass-soft);border:1px solid #e6d7b6;border-radius:16px;color:#6a4e24}
+.studio-plot-hint{color:var(--mz-sub);background:transparent;border-top:1px solid var(--mz-line);padding:12px 28px}
+
+/* المدخلات */
+#app input,#app select,#app textarea{border:1px solid var(--mz-line-strong);border-radius:12px;background:#fff;color:var(--mz-text)}
+#app input:focus,#app select:focus{border-color:var(--mz-green);box-shadow:0 0 0 4px rgba(31,74,56,.1);outline:none}
+#app label{color:var(--mz-text);font-weight:500}
+#app input[type=checkbox],#app input[type=radio]{accent-color:var(--mz-green)}
+
+/* شارات */
+#app .pill,.studio-result-state{background:var(--mz-green-soft);color:var(--mz-green);border:1px solid #d3e0d4;border-radius:999px;font-weight:500}
+#app .preview-tag,#app .ey{color:var(--mz-brass);font-weight:500;letter-spacing:.05em}
+
+/* النتيجة */
+#app .studio-title-line h1,#app .studio-heading h1{font-family:var(--mz-serif);font-size:clamp(1.8rem,3.6vw,2.6rem);color:var(--mz-green-deep)}
+#app .studio-view-toggle{background:#fff;border:1px solid var(--mz-line);border-radius:999px;padding:5px;gap:4px}
+#app .studio-view-toggle .small-button{border:0;background:transparent}
+#app.studio-simple-mode #panel-design .view{background:#efeadc;border-radius:16px}
+#app .plan,#app .studio-plan-slot{border-radius:18px;overflow:hidden}
+
+/* التذييل */
+#app .app-footer{color:var(--mz-sub);font-size:.85rem;padding:36px 16px 12px}
+#app .footer-settings{color:var(--mz-green);background:none;border:0;text-decoration:underline;text-underline-offset:4px}
+.release-stamp{color:#9aa59c!important;font-size:.72rem!important;padding:4px 12px 28px!important;letter-spacing:.04em}
+
+@media (max-width:760px){
+  #app .top{padding:8px 14px;min-height:60px}
+  #app .brand small{display:none}
+  .studio-transcript{padding:18px}
+  .studio-request-form{padding:20px 18px 16px}
+  .studio-proposal{margin:0 14px 18px;padding:18px}
+  .studio-primary,.studio-secondary{width:100%}
+  .studio-simple-hero h1{font-size:2rem!important}
+  .studio-simple-hero p{display:block!important;font-size:.98rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* قبل أول مخطط: لا مساحة رسم فارغة؛ يبدأ العميل بالحديث فقط */
+#app.studio-simple-mode:not(.studio-has-model) #studioPlanSlot{display:none}
+#app textarea:focus-visible{outline:none}
+.studio-simple-hero p{display:block}
+#app .app-footer,.app-footer{background:transparent!important;border-top:1px solid var(--mz-line);margin-top:24px}
+.release-stamp{background:transparent!important}
+.studio-plot-hint{background:transparent!important}
+.studio-requirements{background:transparent!important;border-top:1px solid var(--mz-line)}
