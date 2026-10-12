@@ -11,7 +11,7 @@ const MAX_BUCKETS = 2000;
 const DEFAULT_MODEL = 'claude-sonnet-5-5';
 const BRIEF_TOOL = 'submit_home_brief';
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const DEFAULT_ALLOWED_ORIGIN = 'https://al-mizan-al-handasi.aljeryabod.chatgpt.site';
+const DEFAULT_ALLOWED_ORIGINS = ['https://almizan-handasi.aljeryabod.workers.dev', 'https://al-mizan-al-handasi.aljeryabod.chatgpt.site'];
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const textList = { type: 'array', items: { type: 'string' } };
 export const BRIEF_SCHEMA = {
@@ -103,7 +103,11 @@ const INSTRUCTIONS = `أنت مساعد برمجة مساحات سكنية لم�
 14. سلّم الجواب دائماً باستدعاء الأداة submit_home_brief مرة واحدة فقط، دون أي نص خارجها.`;
 const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200, extraHeaders = {}) => new Response(JSON.stringify(body), { status, headers: { ...headers, ...extraHeaders } });
-const allowedOrigin = env => typeof env.ALLOWED_ORIGIN === 'string' && env.ALLOWED_ORIGIN.trim() ? env.ALLOWED_ORIGIN.trim().replace(/\/$/, '') : DEFAULT_ALLOWED_ORIGIN;
+// ALLOWED_ORIGIN قائمة مفصولة بفواصل؛ الافتراضي موقع كلودفلير الجديد والموقع القديم أثناء الانتقال.
+const originAllowed = (origin, env) => {
+  const list = typeof env.ALLOWED_ORIGIN === 'string' && env.ALLOWED_ORIGIN.trim() ? env.ALLOWED_ORIGIN.split(',').map(x => x.trim().replace(/\/$/, '')).filter(Boolean) : DEFAULT_ALLOWED_ORIGINS;
+  return typeof origin === 'string' && list.includes(origin);
+};
 const corsHeaders = origin => ({
   'Access-Control-Allow-Origin': origin,
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -144,7 +148,7 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
     const url = new URL(request.url), isApi = url.pathname.startsWith('/api/');
     if (url.pathname === '/api/assistant/status' && request.method === 'GET') {
       const origin = request.headers.get('Origin');
-      if (origin && origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      if (origin && !originAllowed(origin, env)) return json({ error: 'طلب غير مسموح.' }, 403);
       return json({
         configured: typeof env.ANTHROPIC_API_KEY === 'string' && !!env.ANTHROPIC_API_KEY.trim(), verified: false,
         accessConfigured: typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim(),
@@ -154,12 +158,12 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
     }
     if (url.pathname === '/api/assistant' && request.method === 'OPTIONS') {
       const origin = request.headers.get('Origin');
-      if (origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      if (!originAllowed(origin, env)) return json({ error: 'طلب غير مسموح.' }, 403);
       return new Response(null, { status: 204, headers: { ...corsHeaders(origin), 'Cache-Control': 'no-store' } });
     }
     if (url.pathname === '/api/assistant' && request.method === 'POST') {
       const origin = request.headers.get('Origin');
-      if (origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
+      if (!originAllowed(origin, env)) return json({ error: 'طلب غير مسموح.' }, 403);
       const cors = corsHeaders(origin);
       if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return json({ error: 'نوع البيانات غير مدعوم؛ استخدم JSON.' }, 415, cors);
       if (typeof env.MIZAN_ACCESS_CODE !== 'string' || !env.MIZAN_ACCESS_CODE.trim()) return json({ error: 'حماية خدمة الذكاء غير مهيأة بعد.', code: 'ACCESS_NOT_CONFIGURED' }, 503, cors);

@@ -910,7 +910,7 @@ function renderArchiveControls() {
   const status = $('archiveStatus');
   let text, kind = 'info';
   if (!archive.storageReady) { text = archive.notice || 'الأرشيف غير متاح الآن. تبقى التعديلات في هذه الصفحة ويمكنك تنزيل ملف المشروع.'; kind = archive.notice ? 'error' : 'info'; }
-  else if (!archive.authenticated) { text = 'سجّل الدخول إلى ChatGPT لعرض تصاميم حسابك وحفظها.'; }
+  else if (!archive.authenticated) { text = 'سجّل الدخول لعرض تصاميم حسابك وحفظها.'; }
   else if (!state.model) { text = 'ولّد مخططًا أولًا، ثم احفظ نسخة الحساب قبل تنزيل الرسم أو الكميات.'; }
   else if (state.dirty) { text = 'حدّث المخطط بعد تعديل المدخلات، ثم احفظ النسخة الجديدة في الأرشيف.'; }
   else if (current) { text = archive.notice || `المخطط الحالي محفوظ في الحساب${archive.loadedVersion ? ` · النسخة ${archive.loadedVersion}` : ''}.`; kind = 'ready'; }

@@ -1,13 +1,26 @@
+# الميزان الهندسي على Cloudflare: الموقع + وكيل Claude + أرشيف الحسابات من وركر واحد.
 name = "almizan-handasi"
-main = "worker/server.mjs"
+main = "worker/index.mjs"
 compatibility_date = "2026-09-19"
 workers_dev = true
+
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
+# المسارات التالية يعالجها الوركر أولًا؛ البقية ملفات ثابتة مباشرة.
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "almizan-archive"
+database_id = "993f60e1-c187-42ca-bf4c-f0a5a4b9c44f"
 
 [observability]
 enabled = true
 
-# Secrets are configured remotely, never committed here:
-# ANTHROPIC_API_KEY
-# ANTHROPIC_MODEL (optional, default claude-sonnet-5-5)
-# MIZAN_ACCESS_CODE
-# Optional: ALLOWED_ORIGIN
+# الأسرار تُضبط في Cloudflare ولا تُكتب هنا أبدًا:
+#   ANTHROPIC_API_KEY, MIZAN_ACCESS_CODE
+# اختياري:
+#   ANTHROPIC_MODEL  (الافتراضي claude-sonnet-5-5)
+#   ALLOWED_ORIGIN   (قائمة أصول مفصولة بفواصل)
+#   ACCESS_TEAM_DOMAIN, ACCESS_AUD  (لتسجيل الدخول للأرشيف عبر Cloudflare Access)
