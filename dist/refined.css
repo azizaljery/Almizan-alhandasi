@@ -131,3 +131,21 @@ details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-
 .release-stamp{background:transparent!important}
 .studio-plot-hint{background:transparent!important}
 .studio-requirements{background:transparent!important;border-top:1px solid var(--mz-line)}
+
+/* لوحة العرض */
+.board-dialog{border:0;padding:0;width:min(1120px,96vw);max-height:94vh;border-radius:22px;background:var(--mz-ivory);color:var(--mz-text);box-shadow:0 30px 80px -20px rgba(10,30,22,.55);overflow:auto}
+.board-dialog::backdrop{background:rgba(14,30,24,.55);backdrop-filter:blur(3px)}
+.board-bar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--mz-line);position:sticky;top:0;background:var(--mz-ivory);z-index:2}
+.board-title-field{display:grid;gap:6px;min-width:220px;flex:1 1 240px;max-width:380px}
+.board-actions{display:flex;gap:10px;flex-wrap:wrap}
+.board-stage{padding:18px}
+.board-stage svg{display:block;width:100%;height:auto;border-radius:14px;box-shadow:var(--mz-shadow)}
+.board-note{margin:0;padding:0 22px 20px;color:var(--mz-sub);font-size:.85rem;line-height:1.9}
+@media print{
+  body.printing-board>*:not(#mizanBoardDialog){display:none!important}
+  body.printing-board #mizanBoardDialog{position:static;width:100%;max-height:none;box-shadow:none;border-radius:0;overflow:visible}
+  body.printing-board .board-bar,body.printing-board .board-note{display:none}
+  body.printing-board .board-stage{padding:0}
+  body.printing-board .board-stage svg{box-shadow:none;border-radius:0}
+  @page{margin:8mm}
+}

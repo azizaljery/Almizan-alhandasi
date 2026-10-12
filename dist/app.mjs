@@ -41,6 +41,8 @@ let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioPro
 let geometrySession, geometryUI, geometrySource, geometryPending, geometryCommandId = 0, modelEpoch = 0, renderedModel, geometryAlternativePool = [];
 let studioPending = null, studioOperationContext = null, studioAbort = null, generationSequence = 0, studioRestoring = false;
 const emitStudioState = reason => window.dispatchEvent(new CustomEvent('mizan:studio-state', { detail: { reason } }));
+// قراءة فقط لطبقة لوحة العرض: النموذج الحالي إن كان مطابقًا للمدخلات، وإلا null.
+window.mizanPresentation = Object.freeze({ currentModel: () => (state.model && !state.dirty ? state.model : null) });
 const studioInputStamp = () => JSON.stringify([requestFingerprint(requestInput()), state.palette]);
 const studioSceneVisible = () => state.tab === 'result' || (state.tab === 'design' && $('app').classList.contains('studio-simple-mode'));
 function assertStudioOperation(token) {
