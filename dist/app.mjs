@@ -625,20 +625,32 @@ function renderEngineeringReview() {
   $('engineeringLimit').textContent = 'هذه قراءة قرارية مبدئية من محرك الميزان؛ لا تُعد تصميمًا إنشائيًا أو اعتمادًا نظاميًا.';
 }
 function renderAlternatives() {
-  $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
-    const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
-    const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
-    const title = model.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[model.strategy || 'compact'];
-    const tag = concept.tag === 'Claude 2.2.1' ? 'مسقط مستطيل' : concept.tag;
+  // عرض يخدم حاجة العميل: ترتيب البدائل بقياسات حقيقية من المحرك، وتسميتها بميزتها لا بشكلها الهندسي.
+  const rows = state.alternatives.map((model, index) => {
     const evaluation = state.engineering?.rows?.[index]?.evaluation;
+    return { model, index, q: quantities(model), review: reviewPlan(model), evaluation,
+      score: Number.isFinite(evaluation?.score) ? evaluation.score : null, blockers: evaluation?.blockers?.length ?? 0 };
+  });
+  const order = [...rows].sort((x, y) => x.blockers - y.blockers || (y.score ?? -1) - (x.score ?? -1) || x.q.circulation - y.q.circulation);
+  const minCirc = Math.min(...rows.map(r => r.q.circulation)), minDark = Math.min(...rows.map(r => r.review.occupiedWithoutWindows));
+  const used = new Set();
+  const nameOf = (row, rank) => {
+    const options = rank === 0 ? ['الأنسب لطلبك'] : [];
+    if (row.q.circulation === minCirc) options.push('أقل ممرات');
+    if (row.review.occupiedWithoutWindows === minDark) options.push('إضاءة طبيعية أفضل');
+    options.push(`خيار آخر ${rank + 1}`);
+    const label = options.find(o => !used.has(o)) || `خيار ${rank + 1}`; used.add(label); return label;
+  };
+  const labels = new Map(order.map((row, rank) => [row.index, nameOf(row, rank)]));
+  const card = (row, rank) => {
+    const { model, index, q, review, evaluation } = row, selected = model === state.model, title = labels.get(index);
     const engineering = evaluation ? `قرار الميزان ${assessedText(evaluation.score)} من ١٠٠ جزئي · ${fmt(evaluation.blockers.length, 0)} عوائق.` : '';
-    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>${esc(title)}</strong><small>${esc(tag)}</small></span></button><details class="alternative-details"><summary aria-label="تفاصيل البديل">تفاصيل</summary><div><p>${esc(title)} · ${esc(concept.form)}. ${esc(concept.idea)}</p><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p><p><b>يناسب:</b> ${esc(concept.bestFor)} · <b>المقايضة:</b> ${esc(concept.tradeoff)}</p></div></details></article>`;
-  }).join('');
-  $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} بدائل هندسية · التحديد يحدّث المسقط و3D والكميات`;
-  const failed = state.failures.map(f => `${f.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[f.strategy] || 'أحد البدائل'}: ${f.reason}`).join(' ');
-  const search = state.multiEngine?.searchEvidence;
-  const explanation = search ? `جُرّبت ${search.attempted} محاولة؛ تعذرت هندسة ${search.generationRejected}، واستُبعد ${search.excludedHistory} للتشابه مع التاريخ و${search.excludedBatch} للتشابه داخل الدفعة و${search.reviewRejected} عند المراجعة. الحد الأقصى ستة وليس عددًا مضمونًا. البحث محدود ولا يثبت استحالة حلول أخرى.` : '';
-  $('alternativeNote').textContent = `${state.alternatives.length} بدائل معروضة من البرنامج نفسه. الاختلاف مقاس بالهندسة، ولا يثبت وحده اختلاف التنظيم أو جودة التصميم. ${explanation} ${failed}`;
+    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}${rank === 0 ? ' best' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>${esc(title)}</strong></span></button><details class="alternative-details"><summary aria-label="تفاصيل الخيار">تفاصيل</summary><div><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p></div></details></article>`;
+  };
+  $('alternativeCards').innerHTML = order.slice(0, 3).map(card).join('') + (order.length > 3
+    ? `<details class="more-alternatives"><summary>عرض خيارات أخرى (${fmt(order.length - 3, 0)})</summary><div class="more-alternatives-grid">${order.slice(3).map((row, i) => card(row, i + 3)).join('')}</div></details>` : '');
+  $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} خيارات مرتبة حسب ملاءمتها لطلبك · اختيار أي منها يحدّث المسقط و3D والكميات`;
+  $('alternativeNote').textContent = 'الخيارات من برنامجك نفسه، والترتيب بقياسات حسابية مبدئية؛ لا يغني عن المراجعة الهندسية.';
   markDirty();
 }
 function renderRequirementEvidence() {

@@ -154,3 +154,11 @@ details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-
 #app .workspace-main,#app .project-snapshot,#app .workspace-layout,#app section.panel{background:var(--mz-ivory)}
 #app .area,#app .insight,#app .request-fact,#app .concept-diagram,#app .taste-card.liked{background:#f3eedf;border-color:var(--mz-line);border-radius:14px}
 #app .trial-label{background:transparent}
+
+/* بساطة العرض: بديل واحد بارز والبقية مطوية، وتفاصيل التغييرات مطوية */
+#alternativeCards .more-alternatives{grid-column:1/-1;margin-top:.5rem}
+#alternativeCards .more-alternatives>summary{cursor:pointer;padding:.7rem 1rem;border:1px solid var(--mz-line,#d9cfbb);border-radius:14px;background:var(--mz-paper,#fffdf8);color:var(--mz-green,#1d3a2f);font-weight:600}
+#alternativeCards .more-alternatives-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem;margin-top:.8rem}
+.alternative-card.best{outline:2px solid var(--mz-brass,#b08d57);outline-offset:2px}
+.studio-proposal-more{margin:.6rem 0}
+.studio-proposal-more>summary{cursor:pointer;color:var(--mz-green,#1d3a2f);font-weight:600;padding:.4rem 0}
