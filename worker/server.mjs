@@ -186,7 +186,8 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
         });
         if (!response.ok) {
           const error = response.status === 429 || response.status === 402 ? 'خدمة الذكاء وصلت حد الاستخدام أو الرصيد. لم يتغيّر مخططك.' : response.status === 401 || response.status === 403 ? 'تعذر توثيق مفتاح الخدمة؛ يلزم مراجعة إعداد الربط.' : 'خدمة الذكاء غير متاحة الآن. حاول لاحقاً.';
-          return json({ error }, 502, cors);
+          let detail = ''; try { const e = await response.json(); detail = ` [${response.status}] ${String(e?.error?.type || '').slice(0, 60)}: ${String(e?.error?.message || '').slice(0, 300)}`; } catch { detail = ` [${response.status}]`; }
+          return json({ error: error + detail }, 502, cors);
         }
         const data = await response.json();
         if (data.stop_reason === 'refusal') return json({ error: 'تعذر معالجة هذا الوصف. أعد صياغته حول احتياجات المسكن.' }, 422, cors);
