@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultRooms, validatePlot, normalizeRooms } from '../dist/planner.mjs';
+import { defaultRooms, validatePlot, normalizeRooms, validateModel, generateModel } from '../dist/planner.mjs';
 import { buildDesignRequest, runMultiEngineDesign } from '../dist/multi-engine.mjs';
 import { buildPreferenceRequests } from '../dist/preference-evidence.mjs';
-import { buildProgramRelationshipContract } from '../dist/program-relationship-contract.mjs';
+import { buildProgramRelationshipContract, validateProgramRelationshipContract } from '../dist/program-relationship-contract.mjs';
 import { buildClientContext, deriveRequirements } from '../dist/requirements-engine.mjs';
 import { circulationNetwork } from '../dist/circulation.mjs';
+import { eligiblePartitions, previewGeometryCommand } from '../dist/geometry-editor.mjs';
+import { buildPlanSVG } from '../dist/plan-view.mjs';
+import { quantities } from '../dist/claude/planner.mjs';
+import { evaluatePlanPreferences } from '../dist/preference-evidence.mjs';
 
 const prompt = 'غرفتين نوم بالضبط، صالة عائلية مفتوحة على المطبخ، مجلس رجال متصل بمنطقة الطعام، حمام ضيوف مرتبط بالطعام، خصوصية بين الضيوف والعائلة، وغرفة ضيوف خارجية.';
 const plot = validatePlot({ width: 35, length: 45, floors: 1, entry: 's', streets: { s: true }, streetSetback: 3, neighborSetback: 1.5, coverage: .75 });
@@ -22,6 +26,8 @@ const rooms = normalizeRooms([
 
 test('explicit sample request becomes a reviewable relationship contract in the understanding step', () => {
   const contract = buildProgramRelationshipContract({ prompt, program: rooms });
+  assert.equal(buildProgramRelationshipContract({ prompt: 'لا أريد صالة عائلية مفتوحة على المطبخ', program: rooms }), null,
+    'a negated open-plan phrase is not upgraded to a mandatory requirement');
   assert.ok(contract);
   assert.equal(contract.requiredProgram.find(row => row.id === 'bedrooms-exact').count, 2);
   assert.deepEqual(contract.relationships.map(row => row.id), [
@@ -30,7 +36,7 @@ test('explicit sample request becomes a reviewable relationship contract in the 
   const context = buildClientContext({ plot, rooms, prompt });
   const derived = deriveRequirements({ prompt, context, brief: { summary: prompt, questions: [], assumptions: [], unhandled: [], rooms } });
   assert.ok(derived.spatialRelationshipContract);
-  assert.ok(derived.questions.some(question => /صالة مفتوحة/.test(question)));
+  assert.ok(!derived.questions.some(question => /صالة مفتوحة/.test(question)), 'the supported open-plan relationship no longer needs clarification');
   assert.ok(derived.spatialRelationshipContract.unsupported.some(row => row.id === 'external-guest-room-location'));
 });
 
@@ -54,7 +60,7 @@ test('guest-bath to dining preference improves the best measured route in the bo
   assert.deepEqual(program, before);
 });
 
-test('legacy valid geometry is rejected when the explicit spatial contract is not satisfied', async () => {
+test('open-plan is met while unsupported privacy and external guest requirements still reject the full brief', async () => {
   const before = structuredClone(rooms);
   await assert.rejects(runMultiEngineDesign({ plot, rooms, idea: prompt, selectedShape: 'rect', seed: 1 }), error => {
     assert.equal(error.code, 'PROGRAM_RELATIONSHIP_REQUIREMENTS_UNSATISFIED');
@@ -62,10 +68,42 @@ test('legacy valid geometry is rejected when the explicit spatial contract is no
     const selected = error.relationshipEvidence.find(row => row.candidateId === error.relationshipEvidence[0].candidateId) || error.relationshipEvidence[0];
     assert.equal(selected.programEvidence.find(row => row.id === 'bedrooms-exact').status, 'PASS');
     assert.equal(selected.programEvidence.find(row => row.id === 'external-guest-room').status, 'PASS');
-    assert.equal(selected.relations.find(row => row.id === 'open-living-kitchen').status, 'FAIL');
+    assert.equal(selected.relations.find(row => row.id === 'open-living-kitchen').status, 'PASS');
     assert.equal(selected.relations.find(row => row.id === 'guest-family-privacy').status, 'FAIL');
     assert.equal(selected.relations.find(row => row.id === 'external-guest-room-location').status, 'FAIL');
     return true;
   });
   assert.deepEqual(rooms, before, 'a rejected interpretation must not mutate the caller program');
+});
+
+test('open living-kitchen request creates a measured no-leaf portal and survives an unrelated edit', async () => {
+  const requestText = 'صالة عائلية مفتوحة على المطبخ';
+  const requestPlot = validatePlot({ width: 35, length: 45, floors: 1, entry: 's', streets: { s: true }, streetSetback: 3, neighborSetback: 1.5, coverage: .75 });
+  const result = await runMultiEngineDesign({ plot: requestPlot, rooms: defaultRooms(), idea: requestText, selectedShape: 'rect', seed: 1 });
+  const model = result.selectedModel, opening = model.openings.find(item => item.openPlan === true);
+  assert.ok(opening, 'selected model must carry an explicit open-plan portal');
+  assert.deepEqual(validateModel(model), []);
+  assert.equal(model.rooms.length, defaultRooms().length);
+  const contract = buildProgramRelationshipContract({ prompt: requestText, program: result.request.program });
+  const unmodified = generateModel({ width: 35, length: 45, floors: 1, entry: 's', streets: { s: true }, streetSetback: 3, neighborSetback: 1.5, coverage: .75 }, defaultRooms());
+  const beforeEvidence = validateProgramRelationshipContract(contract, unmodified, result.request.program);
+  assert.equal(beforeEvidence.relations.find(item => item.id === 'open-living-kitchen').status, 'FAIL', 'the prior closed-partition geometry must fail acceptance');
+  const evidence = validateProgramRelationshipContract(contract, model, result.request.program);
+  assert.equal(evidence.eligible, true);
+  const relationship = evidence.relations.find(item => item.id === 'open-living-kitchen');
+  assert.equal(relationship.status, 'PASS');
+  assert.ok(relationship.evidence.clearRatio >= .8);
+  assert.equal(evaluatePlanPreferences(model, result.request.softPreferences)[0].status, 'MEASURED');
+  const plan = buildPlanSVG(model, { mode: 'cad' });
+  assert.match(plan, new RegExp(`data-opening-id="${opening.id}"`));
+  assert.doesNotMatch(plan, new RegExp(`data-opening-id="${opening.id}"[^]*?data-cad-only="true"[^]*?cad-door`));
+  assert.equal(quantities(model).doors, model.openings.filter(item => item.type === 'door' && !item.openPlan).length);
+  const otherWall = eligiblePartitions(model).find(item => item.eligible && item.wallId !== opening.wallId);
+  assert.ok(otherWall, 'fixture needs an unrelated movable partition');
+  const edited = previewGeometryCommand(model, { id: 'open-plan-preserving-edit', type: 'move-partition', baseRevision: 0, wallId: otherWall.wallId, deltaM: .05 }).model;
+  assert.deepEqual(validateModel(edited), []);
+  assert.equal(edited.rooms.length, model.rooms.length);
+  assert.deepEqual(edited.rooms.map(room => room.id).sort(), model.rooms.map(room => room.id).sort());
+  assert.deepEqual(edited.openings.find(item => item.openPlan), opening);
+  assert.equal(validateProgramRelationshipContract(contract, edited, result.request.program).relations.find(item => item.id === 'open-living-kitchen').status, 'PASS');
 });

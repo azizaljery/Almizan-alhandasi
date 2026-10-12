@@ -87,7 +87,7 @@ export const ROOF_POLICY_SUPPORT = Object.freeze({
   COVERED_ATRIUM: Object.freeze({ status: 'reserved', emitted: false, quantities: false, rendering: false }),
 });
 export const GEOMETRY = { exterior: .25, partition: .15, corridor: 1.6, branch: 1.2, height: 3.2 };
-export const RECT_SEARCH_VERSION = '2.4.0-clustered-1';
+export const RECT_SEARCH_VERSION = '2.5.0-open-plan-1';
 const E = 1e-5, T = GEOMETRY.partition, X = GEOMETRY.exterior;
 /** @template T @param {T[]} list @param {(v: T) => number} fn @returns {number} */
 const sum = (list, fn) => list.reduce((a, v) => a + fn(v), 0);
@@ -281,9 +281,9 @@ export function defaultRooms({ bedrooms = 4, majlis = 2, baths = 3, kitchens = 1
   return result;
 }
 
-/** @typedef {{roomIds: string[], relation: 'near'|'far', weight?: number}} RectRelationshipInput */
+/** @typedef {{roomIds: string[], relation: 'near'|'far'|'open-plan', weight?: number}} RectRelationshipInput */
 /** @typedef {{variant?: number, topology?: 'spine'|'clustered', relationships?: RectRelationshipInput[]}} RectSearchInput */
-/** @typedef {{roomIds: string[], relation: 'near'|'far', weight: number}} RectRelationship */
+/** @typedef {{roomIds: string[], relation: 'near'|'far'|'open-plan', weight: number}} RectRelationship */
 /** @typedef {{variant: number, topology: 'spine'|'clustered', relationships: RectRelationship[]}} RectSearch */
 /** @typedef {{search?: RectSearchInput}} GenerateOptions */
 // Opt-in bounded rectangular search. These are soft relationships; room count,
@@ -297,7 +297,9 @@ function normalizeSearch(raw, program, shape) {
   const relationships = raw.relationships ?? [];
   if (!Array.isArray(relationships) || relationships.length > 8) throw Error('INVALID_RELATIONSHIPS: يسمح بثماني علاقات مكانية كحد أقصى.');
   return { variant: raw.variant ?? 0, topology: raw.topology ?? 'spine', relationships: relationships.map(relation => {
-    if (!relation || !Array.isArray(relation.roomIds) || relation.roomIds.length !== 2 || relation.roomIds[0] === relation.roomIds[1] || !relation.roomIds.every(id => program.some(room => room.id === id)) || !['near', 'far'].includes(relation.relation) || !Number.isFinite(relation.weight ?? 1) || (relation.weight ?? 1) <= 0 || (relation.weight ?? 1) > 10) throw Error('INVALID_RELATIONSHIP: العلاقة تحتاج غرفتين موجودتين وقربًا أو بعدًا ووزنًا موجبًا لا يتجاوز 10.');
+    const linked = relation?.roomIds?.map(id => program.find(room => room.id === id));
+    const openPair = relation?.relation === 'open-plan' && linked?.length === 2 && new Set(linked.map(room => room?.type)).size === 2 && linked.some(room => room?.type === 'living') && linked.some(room => room?.type === 'kitchen');
+    if (!relation || !Array.isArray(relation.roomIds) || relation.roomIds.length !== 2 || relation.roomIds[0] === relation.roomIds[1] || !relation.roomIds.every(id => program.some(room => room.id === id)) || !['near', 'far', 'open-plan'].includes(relation.relation) || (relation.relation === 'open-plan' && !openPair) || !Number.isFinite(relation.weight ?? 1) || (relation.weight ?? 1) <= 0 || (relation.weight ?? 1) > 10) throw Error('INVALID_RELATIONSHIP: العلاقة تحتاج غرفتين صالحتين وقربًا أو بعدًا أو مخططًا مفتوحًا ووزنًا موجبًا لا يتجاوز 10.');
     return { roomIds: [...relation.roomIds], relation: relation.relation, weight: relation.weight ?? 1 };
   }) };
 }
@@ -341,7 +343,7 @@ export function routeObjective(geometry, relationships) {
     const [a,b]=rooms.map(room=>roomAccess(/** @type {Room} */(room))), ca=center(a.corridor), cb=center(b.corridor);
     const distance=a.corridor.id===b.corridor.id?manhattan(a.point,b.point):manhattan(a.point,ca)+(distancesFrom(a.corridor.id).get(b.corridor.id)??Infinity)+manhattan(cb,b.point);
     if (!Number.isFinite(distance)) return score + 1e6 * relation.weight;
-    return score + distance * relation.weight * (relation.relation === 'near' ? 1 : -1);
+    return score + distance * relation.weight * (relation.relation === 'far' ? -1 : 1);
   }, 0);
 }
 
@@ -399,7 +401,7 @@ function packWing(rooms, width, search = null) {
         const accessPenalty = search?.variant === 1 ? (group.length - 1) * 3 : search?.variant === 2 ? (group.length === 1 ? 2 : 0) : 0;
         const pairPenalty = (search?.relationships || []).reduce((total, relation) => {
           const together = relation.roomIds.every(id => group.some(room => room.id === id));
-          return total + (together ? (relation.relation === 'near' ? -2 : 2) * relation.weight : 0);
+          return total + (together ? (relation.relation === 'near' || relation.relation === 'open-plan' ? -200 : 2) * relation.weight : 0);
         }, 0);
         const score = height + rest.score - rest.height + aspectPenalty + Math.max(0, width - option.usedWidth) * .15 + accessPenalty + pairPenalty;
         if (!best || score < best.score) best = { rows: [{ rooms: group, depth: option.depth, placements: option.placements, branch }, ...rest.rows], height, score };
@@ -414,7 +416,13 @@ function packZone(rooms, width, search = null) {
   let states = [{ left: rooms.filter(r => r.side === 'left'), right: rooms.filter(r => r.side === 'right') }];
   for (const r of rooms.filter(r => r.side === 'any').sort((a, b) => b.area - a.area)) {
     states = states.flatMap(s => [{ left: [...s.left, r], right: s.right }, { left: s.left, right: [...s.right, r] }]);
-    states.sort((a, b) => Math.abs(sum(a.left, r => r.area) - sum(a.right, r => r.area)) - Math.abs(sum(b.left, r => r.area) - sum(b.right, r => r.area)));
+    const score = state => Math.abs(sum(state.left, r => r.area) - sum(state.right, r => r.area)) + (search?.relationships || []).reduce((penalty, relation) => {
+      if (relation.relation !== 'open-plan') return penalty;
+      const left = relation.roomIds.every(id => state.left.some(room => room.id === id)), right = relation.roomIds.every(id => state.right.some(room => room.id === id));
+      const assigned = relation.roomIds.some(id => state.left.some(room => room.id === id) || state.right.some(room => room.id === id));
+      return penalty + (assigned && !left && !right ? 10000 * relation.weight : 0);
+    }, 0);
+    states.sort((a, b) => score(a) - score(b));
     states = states.slice(0, 48);
   }
   /** @type {Map<string, Packed | null>} */
@@ -430,7 +438,13 @@ function packZone(rooms, width, search = null) {
     const projected = { zones: [{ position: rooms[0]?.position || 'middle', left, right, height, score: 0 }] };
     const relationshipPenalty = search?.relationships.length ? routeObjective(buildWingGeometry(projected, { id: 'a', x: 0, y: 0, w: width * 2 + X * 2 + T * 2 + GEOMETRY.corridor, h: height + X * 2 }), search.relationships) : 0;
     const accessPenalty = search?.variant === 1 ? [...left.rows, ...right.rows].filter(row => row.branch).length * .5 : search?.variant === 2 ? [...left.rows, ...right.rows].filter(row => row.rooms.length === 1).length : 0;
-    const score = height + Math.abs(left.height - right.height) * .02 + relationshipPenalty + accessPenalty;
+    const separatedOpenPair = (search?.relationships || []).reduce((penalty, relation) => {
+      if (relation.relation !== 'open-plan') return penalty;
+      const left = relation.roomIds.every(id => s.left.some(room => room.id === id)), right = relation.roomIds.every(id => s.right.some(room => room.id === id));
+      const assigned = relation.roomIds.every(id => s.left.some(room => room.id === id) || s.right.some(room => room.id === id));
+      return penalty + (assigned && !left && !right ? 10000 * relation.weight : 0);
+    }, 0);
+    const score = height + Math.abs(left.height - right.height) * .02 + relationshipPenalty + accessPenalty + separatedOpenPair;
     if (!best || score < best.score) best = { left, right, height, score };
   }
   return best;
@@ -1142,7 +1156,17 @@ export function validateModel(m) {
     const wall = m.walls.find(w => w.id === o.wallId);
     if (!wall || ![o.pos, o.w, o.h, o.sill].every(Number.isFinite) || o.w <= 0 || o.h <= 0 || o.sill < 0 || !['door', 'window'].includes(o.type)) { fail('فتحة غير صالحة.'); return; }
     if (o.type !== 'door') return;
-    if (o.sill !== 0 || o.connects?.length !== 2) { fail('اتصال باب غير صالح.'); return; }
+    if (o.sill !== 0 || o.connects?.length !== 2 || (o.openPlan === true && o.connects.some(id => !m.rooms.some(room => room.id === id)))) { fail('اتصال باب غير صالح.'); return; }
+    if (o.openPlan === true) {
+      const pair = o.connects.map(id => m.rooms.find(room => room.id === id));
+      const living = pair.find(room => room?.type === 'living'), kitchen = pair.find(room => room?.type === 'kitchen');
+      if (!living || !kitchen || wall.type !== 'int') { fail('فتحة المخطط المفتوح تحتاج جداراً داخلياً وصالة ومطبخاً.'); return; }
+      const verticalShared = Math.abs(living.x + living.w - kitchen.x) <= T * 2 || Math.abs(kitchen.x + kitchen.w - living.x) <= T * 2;
+      const horizontalShared = Math.abs(living.y + living.h - kitchen.y) <= T * 2 || Math.abs(kitchen.y + kitchen.h - living.y) <= T * 2;
+      const shared = verticalShared ? Math.min(living.y + living.h, kitchen.y + kitchen.h) - Math.max(living.y, kitchen.y)
+        : horizontalShared ? Math.min(living.x + living.w, kitchen.x + kitchen.w) - Math.max(living.x, kitchen.x) : 0;
+      if (shared <= 0 || o.w < 1.8 || o.w > shared + .01 || o.w / shared < .8) { fail('فتحة المخطط المفتوح غير متجاورة أو لا تحقق عرضاً صافياً قدره 80٪ من الحد المشترك.'); return; }
+    }
     const length = Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1), dx = (wall.x2 - wall.x1) / length, dy = (wall.y2 - wall.y1) / length, p = openingPoint(m, o);
     /** @param {string} id @param {Point} point */
     const onNode = (id, point) => id === 'outside' ? !pointInPolygon(m.buildingFootprint, point) : nodes.has(id) && containsPoint(/** @type {Rect} */ (nodes.get(id)), point);
@@ -1221,7 +1245,7 @@ export function quantities(model) {
   const unsupported = (model.courtyards || []).find(c => !ROOF_POLICY_SUPPORT[c.roofPolicy]?.quantities);
   if (unsupported) throw Error('حساب الكميات غير منفذ لفناء بحالة التسقيف «' + String(unsupported.roofPolicy) + '»؛ هذه القيمة محجوزة في العقد أو ناقصة (نموذج قديم يحتاج ترحيلاً).');
   const netWallArea = sum(wallPieces(model), p => p.length * p.height);
-  return { footprint: polygonArea(model.buildingFootprint), courtyard: sum(model.courtyards || [], c => c.w * c.h), rooms: sum(model.rooms, r => r.w * r.h), circulation: sum(model.corridors, r => r.w * r.h), reserve: sum(model.reserves, r => r.w * r.h), wallArea: netWallArea, finishArea: netWallArea * 2, wallVolume: sum(wallPieces(model), p => p.length * p.height * p.thickness), doors: model.openings.filter(o => o.type === 'door').length, windows: model.openings.filter(o => o.type === 'window').length, floors: 1 };
+  return { footprint: polygonArea(model.buildingFootprint), courtyard: sum(model.courtyards || [], c => c.w * c.h), rooms: sum(model.rooms, r => r.w * r.h), circulation: sum(model.corridors, r => r.w * r.h), reserve: sum(model.reserves, r => r.w * r.h), wallArea: netWallArea, finishArea: netWallArea * 2, wallVolume: sum(wallPieces(model), p => p.length * p.height * p.thickness), doors: model.openings.filter(o => o.type === 'door' && !o.openPlan).length, windows: model.openings.filter(o => o.type === 'window').length, floors: 1 };
 }
 
 // Alias for backward compat and convenience

@@ -87,7 +87,7 @@ export const ROOF_POLICY_SUPPORT = Object.freeze({
   COVERED_ATRIUM: Object.freeze({ status: 'reserved', emitted: false, quantities: false, rendering: false }),
 });
 export const GEOMETRY = { exterior: .25, partition: .15, corridor: 1.6, branch: 1.2, height: 3.2 };
-export const RECT_SEARCH_VERSION = '2.4.0-clustered-1';
+export const RECT_SEARCH_VERSION = '2.5.0-open-plan-1';
 const E = 1e-5, T = GEOMETRY.partition, X = GEOMETRY.exterior;
 /** @template T @param {T[]} list @param {(v: T) => number} fn @returns {number} */
 const sum = (list, fn) => list.reduce((a, v) => a + fn(v), 0);

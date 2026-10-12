@@ -67,17 +67,23 @@ test('both-majlis routes, movement separation, corridors and bedroom sightlines 
   assert.ok(rows.some(row => row.state === 'estimate' && /أطول محور.*ممر/.test(row.detail)));
 });
 
-test('corridor preference exposes a tradeoff but preserves the AZIZ winner unless a candidate Pareto-dominates it', async () => {
+test('corridor preference exposes tradeoffs and displaces AZIZ only after strict measured Pareto improvement', async () => {
   const rooms = normalizeRooms(defaultRooms());
   const before = await runMultiEngineDesign({ plot, rooms, discovery: noDiscovery, seed: 1 });
   const after = await runMultiEngineDesign({ plot, rooms, discovery: { ...noDiscovery, avoids: ['الممرات الطويلة والمظلمة'] }, seed: 1 });
   assert.equal(before.selectedModel.shape, 'rect');
-  assert.equal(after.selectedModel.integration.candidateId, after.aziz.selectedCandidateId,
-    'a single improved corridor-segment proxy must not displace AZIZ when the route/corridor area worsen');
+  const selectedMetrics = after.preferenceRanking.ranked.find(row => row.candidateId === after.preferenceRanking.selectedCandidateId).evaluations[0].data.preferenceMetrics;
+  const fallbackMetrics = after.preferenceRanking.ranked.find(row => row.candidateId === after.preferenceRanking.fallbackCandidateId).evaluations[0].data.preferenceMetrics;
+  const fallbackByName = new Map(fallbackMetrics.map(metric => [metric.name, metric]));
+  assert.ok(selectedMetrics.every(metric => metric.direction === 'maximize'
+    ? metric.value >= fallbackByName.get(metric.name).value - 1e-9
+    : metric.value <= fallbackByName.get(metric.name).value + 1e-9), 'preference may displace the AZIZ winner only when no corridor or route metric worsens');
+  assert.ok(selectedMetrics.some(metric => Math.abs(metric.value - fallbackByName.get(metric.name).value) > 1e-9), 'the selected candidate must strictly improve at least one measured metric');
+  assert.equal(after.selectedModel.integration.candidateId, after.preferenceRanking.selectedCandidateId);
   assert.notEqual(after.preferenceRanking.bestPreferenceCandidateId, after.preferenceRanking.fallbackCandidateId,
     'the measured segment-length leader remains visible as an alternative');
-  assert.equal(after.preferenceRanking.selectionMethod, 'aziz_pareto_fallback');
-  assert.equal(after.preferenceRanking.selectionOverride, false);
+  assert.equal(after.preferenceRanking.selectionMethod, 'native_geometry_preference_dominance');
+  assert.equal(after.preferenceRanking.selectionOverride, true);
   assert.equal(after.preferenceRanking.fallbackCandidateId, after.aziz.selectedCandidateId);
   assert.equal(after.preferenceRanking.selectedCandidateId, after.decision.selectedCandidateId);
   assert.equal(after.selectedModel.integration.candidateId, after.decision.selectedCandidateId);
@@ -85,7 +91,7 @@ test('corridor preference exposes a tradeoff but preserves the AZIZ winner unles
   assert.ok(after.decision.reviewIds.includes(after.selectedModel.integration.reviewId));
   assert.equal(after.decision.geometryHash.value, after.selectedModel.integration.geometryHash.value);
   assert.ok(after.models.includes(after.selectedModel), 'the selected model is one of the alternatives consumed by the UI');
-  assert.match(after.decision.reasons[0], /retained because preference-ranked alternative.*traded off measured corridor\/route axes/);
+  assert.match(after.decision.reasons[0], /strictly Pareto-dominated AZIZ geometry-only fallback.*measured user-requested axes/);
   const winningEvidence = after.preferenceEvaluations.find(row => row.candidateId === after.preferenceRanking.bestPreferenceCandidateId);
   const preferenceAlternative = after.models.find(model => model.integration.candidateId === after.preferenceRanking.bestPreferenceCandidateId);
   assert.ok(preferenceAlternative, 'the route-ranked alternative reaches the UI alternatives');
@@ -201,6 +207,8 @@ test('Arabic preference polarity, corrections, neutral statements and clause sco
   assert.ok(!mixed.includes('avoid_bedroom_kitchen_sightline'), 'corridor negation must not leak into the bedroom clause');
   assert.ok(kinds('أريد غرف النوم وتطل على المطبخ').includes('prefer_bedroom_kitchen_sightline'), 'Arabic attached conjunction stays supported');
   assert.ok(kinds('أبي مسارات منفصلة للضيوف والعائلة').includes('avoid_shared_guest_family_corridors'));
+  assert.ok(kinds('أريد صالة عائلية مفتوحة على المطبخ').includes('require_open_living_kitchen'));
+  assert.ok(!kinds('لا أريد صالة عائلية مفتوحة على المطبخ').includes('require_open_living_kitchen'));
 });
 
 test('composed revision headings cannot invent mandatory sightline intent or discard an earlier explicit privacy request', async () => {

@@ -65,7 +65,7 @@ export function buildPlanSVG(model, {mode = 'color'} = {}) {
     s += `<g data-cad-only="true" stroke="#20282e" stroke-width=".025" pointer-events="none">${[a,z].map(q=>`<line x1="${q.x-dy*wall.t/2}" y1="${q.y+dx*wall.t/2}" x2="${q.x+dy*wall.t/2}" y2="${q.y-dx*wall.t/2}"/>`).join('')}</g>`;
     if (o.type === 'window') {
       for (const k of [-.035, .035]) s += `<line class="cad-window" x1="${a.x - dy * k}" y1="${a.y + dx * k}" x2="${z.x - dy * k}" y2="${z.y + dx * k}" stroke="#248da6" stroke-width=".035" pointer-events="none"/>`;
-    } else {
+    } else if (!o.openPlan) {
       const target = o.roomId ? center(model.rooms.find(r => r.id === o.roomId)) : center(model.corridors[0]);
       const sign = (-dy * (target.x - p.x) + dx * (-target.y + p.y)) >= 0 ? 1 : -1;
       const leaf = { x: a.x - dy * sign * o.w, y: a.y + dx * sign * o.w };

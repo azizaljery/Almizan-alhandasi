@@ -1,6 +1,6 @@
 {
   "name": "planner-pkg",
-  "version": "2.4.0-clustered-1",
+  "version": "2.5.0-open-plan-1",
   "type": "module",
   "private": true,
   "description": "Mizan Handasi - Deterministic architectural planner",

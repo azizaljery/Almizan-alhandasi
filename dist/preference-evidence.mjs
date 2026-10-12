@@ -52,6 +52,10 @@ const noConcern = /(?:ما\s*عندي\s*(?:اي\s*)?(?:مشكله|مانع)|عا
 
 function promptKinds(idea) {
   const text = normalizeText(idea), found = [];
+  const livingKitchenAsk = /(?:صاله(?:\s+عائليه)?\s+مفتوحه\s+(?:على|مع)\s+(?:ال)?مطبخ|(?:ال)?مطبخ\s+مفتوح\s+(?:على|مع)\s+(?:ال)?صاله|open\s+(?:living\s+)?kitchen\s+(?:to|with)\s+(?:the\s+)?living)/;
+  const livingKitchen = livingKitchenAsk.test(text) && !/(?:لا\s*(?:ابي|ابغى|اريد|ارغب)|ما\s*(?:ابي|ابغى|اريد)|بدون|not|don't|do\s+not)\s+.{0,35}(?:صاله|مطبخ|living|kitchen)|(?:صاله|مطبخ|living|kitchen).{0,35}(?:لا\s*(?:تكون|تصير)|غير\s+مفتوحه|not\s+open)/.test(text);
+  if (livingKitchen) found.push(preference('prompt:open-living-kitchen', 'require_open_living_kitchen',
+    'تكوين فتحة مباشرة واسعة بين الصالة والمطبخ، ويثبتها فحص هندسة الفتحة.', { sourceText: idea, clearRatio: .8 }, 3));
   const diningTopic = /سفره|طعام|dining|meal/;
   const majlisTopic = /مجلس|مجالس|majlis/;
   const dining = diningTopic.test(text), majlis = majlisTopic.test(text);
@@ -131,6 +135,7 @@ function promptKinds(idea) {
   return found.map(row => {
     const kind = row.value?.mizanKind;
     const topic = kind === 'require_separate_guest_entry' ? /مدخل|مداخل|entrance/
+      : kind === 'require_open_living_kitchen' ? /صاله|مطبخ|living|kitchen/
       : kind?.includes('bedroom') ? /غرف(?: ال)?نوم|غرفه(?: ال)?نوم|غرفه|bedrooms?/
       : kind?.includes('dining') ? /سفره|طعام|dining|meal/
         : kind?.includes('corridor') ? /ممر(?:ات|ين|ه|corridors?)/
@@ -194,6 +199,17 @@ const notEvaluated = (pref, reason) => ({ id: pref.id, kind: pref.value?.mizanKi
 function pathPreference(model, pref, network) {
   const kind = pref.value?.mizanKind;
   const rooms = model.rooms || [];
+  if (kind === 'require_open_living_kitchen') {
+    const living=rooms.filter(room=>room.type==='living'), kitchen=rooms.filter(room=>room.type==='kitchen');
+    const opening=(model.openings||[]).find(item=>item.openPlan===true&&item.type==='door'&&living[0]?.id&&kitchen[0]?.id&&item.connects?.includes(living[0].id)&&item.connects?.includes(kitchen[0].id));
+    const wall=(model.walls||[]).find(item=>item.id===opening?.wallId);
+    if(!opening||!wall||living.length!==1||kitchen.length!==1) return notEvaluated(pref,'لا توجد فتحة مفتوحة مرتبطة بهندسة الصالة والمطبخ.');
+    const shared=Math.abs(living[0].x+living[0].w-kitchen[0].x)<.02||Math.abs(kitchen[0].x+kitchen[0].w-living[0].x)<.02
+      ? Math.min(living[0].y+living[0].h,kitchen[0].y+kitchen[0].h)-Math.max(living[0].y,kitchen[0].y)
+      : Math.min(living[0].x+living[0].w,kitchen[0].x+kitchen[0].w)-Math.max(living[0].x,kitchen[0].x);
+    const ratio=opening.w/shared;
+    return { id: pref.id,kind,label:pref.description,status:ratio>=.8?'MEASURED':'NOT_MET',score:ratio>=.8?100:Math.max(0,Math.round(ratio*100)),objective:'clear-opening/shared-boundary',direction:'larger',detail:{openingId:opening.id,wallId:wall.id,clearWidthM:opening.w,sharedLengthM:shared,clearRatio:ratio,openPlan:true} };
+  }
   if (kind === 'prefer_dining_access_all_majlis' || kind === 'prefer_dining_far_from_majlis') {
     const dining = rooms.filter(r => r.type === 'dining'), majlis = rooms.filter(r => r.type === 'majlis');
     const required = Math.max(1, pref.value.minMajlis || 1);
@@ -319,7 +335,7 @@ function evaluateOne(model, pref) {
   }
   if (kind === 'avoid_shared_guest_family_corridors' || kind === 'avoid_bedroom_guest_shared_corridors') return sharedCorridorPreference(model, pref, circulationNetwork(model));
   if (kind === 'avoid_bedroom_guest_proximity') return bedroomGuestProximity(model, pref);
-  if (kind === 'prefer_dining_access_all_majlis' || kind === 'prefer_dining_far_from_majlis' || kind === 'prefer_kitchen_dining_route' || kind === 'prefer_guest_bath_dining_route') return pathPreference(model, pref, circulationNetwork(model));
+  if (kind === 'require_open_living_kitchen' || kind === 'prefer_dining_access_all_majlis' || kind === 'prefer_dining_far_from_majlis' || kind === 'prefer_kitchen_dining_route' || kind === 'prefer_guest_bath_dining_route') return pathPreference(model, pref, circulationNetwork(model));
   if (kind === 'avoid_bedroom_kitchen_sightline' || kind === 'prefer_bedroom_kitchen_sightline' || kind === 'unresolved_bedroom_kitchen_facing') return notEvaluated(pref,
     'غير مُقيّم: لا توجد هندسة خطّ رؤية بين فتحات الغرف. لن نحوّل «عدم المواجهة» إلى «عدم المجاورة» ولا نزعم تحقق الخصوصية.');
   if (kind === 'avoid_exposed_bedrooms') return notEvaluated(pref, 'غير مُقيّم: لا توجد هندسة خطوط رؤية من الخارج/المدخل إلى أبواب ونوافذ غرف النوم؛ القرب من المجالس مؤشر منفصل ولا يثبت الانكشاف.');

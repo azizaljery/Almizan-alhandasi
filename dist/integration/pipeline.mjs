@@ -19,7 +19,7 @@ import {evaluatePlanPreferences,rankAzizSurvivingPreferences} from '../preferenc
 
 const CLAUDE_ID='@mizan/claude-planner';
 const CLAUDE_VERSION=RECT_SEARCH_VERSION;
-const SOURCE='408f51b84bb52c3f67ddeb9f0e81f52adbe7c8c45751d999ed58d99521788d36';
+const SOURCE='afc330310db62df6ff370951ba6a7fb9745bfa610aa31a216535410ccd20aa13';
 const ADAPTER_VERSION='control-local-preview/1.1.0';
 const PAVILION_SOURCE='1ce9f064dd41f822582ce13f70d86a3cdc8c418808c9cad5df3c653c810972a9';
 const STAGGERED_SOURCE='0300ebb2460433dcee8c44ce28be7b1bc1db403ef9721a2d922292f190abcf16';
@@ -70,6 +70,11 @@ function searchRelationships(request) {
  const relationships=[];
  for(const preference of request.softPreferences) {
   const kind=preference.value?.mizanKind;
+  if(kind==='require_open_living_kitchen') {
+   const living=request.program.filter(r=>r.type==='living'), kitchen=request.program.filter(r=>r.type==='kitchen');
+   if(living.length===1&&kitchen.length===1) relationships.push({roomIds:[living[0].id,kitchen[0].id],relation:'open-plan',weight:1});
+   continue;
+  }
   if(!['prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_guest_bath_dining_route'].includes(kind)) continue;
   if(kind==='prefer_guest_bath_dining_route') {
    for(const a of request.program.filter(r=>r.type==='bath')) for(const b of request.program.filter(r=>r.type==='dining')) relationships.push({roomIds:[a.id,b.id],relation:'near',weight:1});
@@ -79,6 +84,26 @@ function searchRelationships(request) {
   for(const a of request.program.filter(r=>r.type==='dining')) for(const b of request.program.filter(r=>r.type==='majlis')) relationships.push({roomIds:[a.id,b.id],relation,weight:1});
  }
  return relationships;
+}
+function applyOpenLivingKitchen(model) {
+ const living=model.rooms.filter(room=>room.type==='living'), kitchens=model.rooms.filter(room=>room.type==='kitchen');
+ if(living.length!==1||kitchens.length!==1) throw Error('OPEN_PLAN_REQUIRES_ONE_LIVING_AND_ONE_KITCHEN');
+ const [a,b]=[living[0],kitchens[0]], eps=1e-4, boundaries=[];
+ if(Math.abs(a.x+a.w-b.x)<=.3||Math.abs(b.x+b.w-a.x)<=.3) boundaries.push({horizontal:false,fixed:Math.abs(a.x+a.w-b.x)<=.3?(a.x+a.w+b.x)/2:(b.x+b.w+a.x)/2,start:Math.max(a.y,b.y),end:Math.min(a.y+a.h,b.y+b.h)});
+ if(Math.abs(a.y+a.h-b.y)<=.3||Math.abs(b.y+b.h-a.y)<=.3) boundaries.push({horizontal:true,fixed:Math.abs(a.y+a.h-b.y)<=.3?(a.y+a.h+b.y)/2:(b.y+b.h+a.y)/2,start:Math.max(a.x,b.x),end:Math.min(a.x+a.w,b.x+b.w)});
+ const boundary=boundaries.filter(edge=>edge.end-edge.start>.2).sort((x,y)=>(y.end-y.start)-(x.end-x.start))[0];
+ if(!boundary) throw Error('OPEN_PLAN_REQUIRES_ADJACENT_LIVING_AND_KITCHEN');
+ const wall=model.walls.filter(item=>item.type==='int'&&(boundary.horizontal?Math.abs(item.y1-item.y2)<=eps&&Math.abs(item.y1-boundary.fixed)<=.2:Math.abs(item.x1-item.x2)<=eps&&Math.abs(item.x1-boundary.fixed)<=.2))
+  .map(item=>({item,start:boundary.horizontal?Math.min(item.x1,item.x2):Math.min(item.y1,item.y2),end:boundary.horizontal?Math.max(item.x1,item.x2):Math.max(item.y1,item.y2)}))
+  .filter(row=>row.end-row.start>=boundary.end-boundary.start-.3).sort((x,y)=>(y.end-y.start)-(x.end-x.start))[0];
+ if(!wall) throw Error('OPEN_PLAN_SHARED_PARTITION_NOT_FOUND');
+ const sharedStart=Math.max(boundary.start,wall.start),sharedEnd=Math.min(boundary.end,wall.end), sharedLength=sharedEnd-sharedStart,clearWidth=sharedLength*.85;
+ if(clearWidth<1.8||clearWidth>=sharedLength) throw Error('OPEN_PLAN_CLEAR_WIDTH_NOT_FEASIBLE');
+ const center=(sharedStart+sharedEnd)/2, length=wall.end-wall.start;
+ model.openings=model.openings.filter(opening=>!(opening.wallId===wall.item.id&&opening.type==='door'&&opening.connects?.includes(a.id)&&opening.connects?.includes(b.id)));
+ model.openings.push({id:`opening-openplan-${a.id}-${b.id}`,type:'door',openPlan:true,roomId:a.id,connects:[a.id,b.id],wallId:wall.item.id,
+  pos:((center-(boundary.horizontal?wall.item.x1:wall.item.y1))/(boundary.horizontal?wall.item.x2-wall.item.x1:wall.item.y2-wall.item.y1)),w:clearWidth,h:Math.min(2.6,model.walls.find(item=>item.id===wall.item.id).h-.05),sill:0});
+ const errors=validateModel(model); if(errors.length) throw Error('OPEN_PLAN_GEOMETRY_INVALID:'+errors.join(';'));
 }
 export async function generateCandidate(request,shape,generationOverrides={},exploration=null) {
  const r=snapshot(request);
@@ -92,6 +117,7 @@ export async function generateCandidate(request,shape,generationOverrides={},exp
  const search=exploration?.search ? {...exploration.search,relationships:searchRelationships(r)} : null;
  const resolvedExploration=search?{...exploration,search}:exploration;
  const m=shape==='staggered' ? generateStaggeredModel(plot,rooms) : shape==='pavilions' ? generatePavilionModel(plot,rooms) : exploration ? exploreGeometry(plot,rooms,shape,resolvedExploration,STRATEGIES[shape]) : generateModelLegacy(plot,rooms,{strategy:STRATEGIES[shape],allowFallback:false});
+ if(r.softPreferences.some(pref=>pref.value?.mizanKind==='require_open_living_kitchen')) applyOpenLivingKitchen(m);
  const topology=shape==='staggered'?staggeredTopology(m):shape==='pavilions'?pavilionTopology(m):{errors:[]};
  const requiredWings=r.hardConstraints.find(c=>c.kind==='wing_count_exact')?.value?.count;
  if(requiredWings!==undefined&&(shape!=='staggered'||topology.wingCount!==requiredWings)) throw Error('REQUESTED_WING_COUNT_MISMATCH');

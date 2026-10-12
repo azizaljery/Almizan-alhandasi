@@ -129,6 +129,7 @@
  * @property {number} sill  0 for doors
  * @property {string} [roomId]  room doors and room windows; absent on the entry door and U gallery doors
  * @property {[string, string]} [connects]  doors only: two node ids (room, corridor, or 'outside')
+ * @property {boolean} [openPlan]  open living/kitchen portal; no door leaf or swing, with clear width >=80% of shared boundary
  */
 
 /** @typedef {[string, string]} Link  Two corridor ids that share an edge >= branch width (same-arm spine/branch, or a bridge). */

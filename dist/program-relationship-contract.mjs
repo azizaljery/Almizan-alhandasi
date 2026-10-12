@@ -21,15 +21,19 @@ export function buildProgramRelationshipContract({ prompt = '', program = [] } =
   const text = normalizeBriefText(prompt).toLowerCase();
   const types = roomTypes(program);
   const bedrooms = exactBedroomCount(prompt);
-  const asksOpenLivingKitchen = has(text, /صاله(?:\s+عائليه)?\s+(?:مفتوحه|مفتوح)\s+(?:على|مع)\s+(?:ال)?مطبخ/iu);
+  const asksOpenLivingKitchen = text.split(/[،,؛.!؟\n]+/u).some(clause =>
+    has(clause, /صاله(?:\s+عائليه)?\s+(?:مفتوحه|مفتوح)\s+(?:على|مع)\s+(?:ال)?مطبخ/iu)
+      && !has(clause, /(?:لا|ما)\s*(?:ابي|ابغى|ابغا|اريد|ارغب)|(?:لا\s+تكون|غير\s+مفتوحه|غير\s+مفتوح)/iu));
   const asksGuestDiningBath = has(text, /مجلس\s+(?:ال)?رجال/iu) && has(text, /حمام|دوره\s+مياه/iu) && has(text, /طعام|سفره/iu);
   const asksGuestPrivacy = has(text, /مجلس|ضيوف|ضيافه/iu) && has(text, /عائله|اسره|صاله|نوم/iu) && has(text, /خصوصيه|خصوص|عزل|منفصل/iu);
   const asksExternalGuest = has(text, /غرفه\s+(?:ال)?ضيوف?\s+(?:خارجيه|منفصله)|غرفه\s+خارجيه\s+(?:لل)?ضيوف|external\s+guest\s+room/iu);
-  if (bedrooms !== 2 || !asksOpenLivingKitchen || !asksGuestDiningBath || !asksGuestPrivacy || !asksExternalGuest) return null;
+  if (!(bedrooms === 2 && asksOpenLivingKitchen && asksGuestDiningBath && asksGuestPrivacy && asksExternalGuest)
+      && !(asksOpenLivingKitchen && roomTypes(program).has('living') && roomTypes(program).has('kitchen'))) return null;
+  const focusedOpenPlan = !(bedrooms === 2 && asksOpenLivingKitchen && asksGuestDiningBath && asksGuestPrivacy && asksExternalGuest);
 
   const guestRooms = ['majlis', 'dining', 'bath'];
   const familyRooms = ['living', 'bedroom'];
-  const requiredProgram = [
+  const requiredProgram = focusedOpenPlan ? [] : [
     { id: 'bedrooms-exact', type: 'bedroom', count: 2, mode: 'exact', label: 'غرفتا نوم بالضبط' },
     { id: 'living-single', type: 'living', count: 1, mode: 'exact', label: 'صالة عائلية واحدة' },
     { id: 'kitchen-single', type: 'kitchen', count: 1, mode: 'exact', label: 'مطبخ واحد' },
@@ -38,7 +42,7 @@ export function buildProgramRelationshipContract({ prompt = '', program = [] } =
     { id: 'guest-bath-single', type: 'bath', count: 1, mode: 'exact', label: 'حمام ضيوف واحد' },
     { id: 'external-guest-room', type: 'external_guest', count: 1, mode: 'exact', label: 'غرفة ضيوف خارج الكتلة الرئيسية' },
   ];
-  const relationships = [
+  const relationships = (focusedOpenPlan ? [] : [
     { id: 'open-living-kitchen', kind: 'open-plan', from: 'living', to: 'kitchen', required: true,
       proof: 'تجاور فعلي وفتحة مباشرة واسعة بلا حاجز جداري مغلق.' },
     { id: 'guest-dining-access', kind: 'walkable-access', from: 'majlis', to: 'dining', required: true,
@@ -49,14 +53,13 @@ export function buildProgramRelationshipContract({ prompt = '', program = [] } =
       proof: 'عدم وجود باب مباشر أو ممر مشترك، مع فحص خط رؤية مستقل.' },
     { id: 'external-guest-room-location', kind: 'outside-primary-footprint', from: 'external_guest', to: 'outside', required: true,
       proof: 'كتلة ضيوف مستقلة داخل حدود الأرض مع وصول خارجي مادي.' },
-  ];
-  const unsupported = [
-    { id: 'open-living-kitchen', reason: 'المولد الحالي يبني جدرانًا داخلية بين الغرف ولا يملك تمثيل منطقة مفتوحة بلا فاصل.' },
+  ]).concat(focusedOpenPlan ? [{ id: 'open-living-kitchen', kind: 'open-plan', from: 'living', to: 'kitchen', required: true,
+    proof: 'تجاور فعلي وفتحة مباشرة واسعة بلا حاجز جداري مغلق.' }] : []);
+  const unsupported = focusedOpenPlan ? [] : [
     { id: 'guest-family-privacy', reason: 'المولد الحالي له مدخل واحد ولا يفحص خطوط الرؤية؛ غياب التجاور وحده لا يثبت الخصوصية.' },
     { id: 'external-guest-room-location', reason: 'عقد المخطط الحالي يحصر جميع الغرف داخل مضلع مبنى رئيسي واحد ولا يمثل كتلة ضيوف خارجية.' },
   ];
-  const clarifications = [
-    'هل تعني «صالة مفتوحة على المطبخ» إزالة الجدار الفاصل، لا بابًا بين الغرفتين؟',
+  const clarifications = focusedOpenPlan ? [] : [
     'هل المقصود بحمام مرتبط بالطعام اتصال أبواب مباشر أم مسار قصير عبر ممر؟',
     'هل غرفة الضيوف الخارجية مبنى مستقل داخل الأرض ويحتاج مدخلًا خارجيًا مستقلًا؟',
   ];
@@ -83,11 +86,11 @@ function lengthOf(intervals) { return mergeIntervals(intervals).reduce((sum, [a,
 function openBoundary(model, a, b) {
   const eps = 1e-5;
   let horizontal, fixed, start, end;
-  if (Math.abs(a.x + a.w - b.x) <= eps || Math.abs(b.x + b.w - a.x) <= eps) {
-    horizontal = false; fixed = Math.abs(a.x + a.w - b.x) <= eps ? a.x + a.w : b.x + b.w;
+  if (Math.abs(a.x + a.w - b.x) <= .3 || Math.abs(b.x + b.w - a.x) <= .3) {
+    horizontal = false; fixed = Math.abs(a.x + a.w - b.x) <= .3 ? (a.x + a.w + b.x) / 2 : (b.x + b.w + a.x) / 2;
     start = Math.max(a.y, b.y); end = Math.min(a.y + a.h, b.y + b.h);
-  } else if (Math.abs(a.y + a.h - b.y) <= eps || Math.abs(b.y + b.h - a.y) <= eps) {
-    horizontal = true; fixed = Math.abs(a.y + a.h - b.y) <= eps ? a.y + a.h : b.y + b.h;
+  } else if (Math.abs(a.y + a.h - b.y) <= .3 || Math.abs(b.y + b.h - a.y) <= .3) {
+    horizontal = true; fixed = Math.abs(a.y + a.h - b.y) <= .3 ? (a.y + a.h + b.y) / 2 : (b.y + b.h + a.y) / 2;
     start = Math.max(a.x, b.x); end = Math.min(a.x + a.w, b.x + b.w);
   } else return { adjacent: false, sharedLengthM: 0, clearWidthM: 0, clearRatio: 0 };
   if (end - start <= eps) return { adjacent: false, sharedLengthM: 0, clearWidthM: 0, clearRatio: 0 };
@@ -99,7 +102,7 @@ function openBoundary(model, a, b) {
     const alongEnd = horizontal ? Math.max(wall.x1, wall.x2) : Math.max(wall.y1, wall.y2);
     const clipStart = Math.max(start, alongStart), clipEnd = Math.min(end, alongEnd);
     if (clipEnd <= clipStart) continue;
-    const doorSpans = (model.openings || []).filter(opening => opening.type === 'door' && opening.wallId === wall.id &&
+    const doorSpans = (model.openings || []).filter(opening => opening.type === 'door' && opening.openPlan === true && opening.wallId === wall.id &&
       opening.connects?.includes(a.id) && opening.connects?.includes(b.id)).map(opening => {
       const wallLength = Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1);
       const center = (horizontal ? wall.x1 : wall.y1) + (horizontal ? wall.x2 - wall.x1 : wall.y2 - wall.y1) * opening.pos;
@@ -164,11 +167,11 @@ export function validateProgramRelationshipContract(contract, model, program = [
       reason: 'عقد الهندسة الحالي يشترط أن تكون كل الغرف داخل مضلع مبنى واحد؛ لا يمثّل ملحقًا مستقلًا.' }
     : { status: 'FAIL', count: external.length, reason: 'غرفة الضيوف الخارجية غير ممثلة كنوع منفصل قابل للتحقق.' };
   const relations = [
-    { id: 'open-living-kitchen', status: openPlan.clearRatio >= .8 ? 'PASS' : 'FAIL', evidence: { ...openPlan, requiredClearRatio: .8 } },
-    { id: 'guest-dining-access', ...guestDining },
-    { id: 'guest-bath-dining-access', ...guestBathDining },
-    { id: 'guest-family-privacy', ...privacy },
-    { id: 'external-guest-room-location', ...externalLocation },
+    ...(contract.relationships.some(row => row.id === 'open-living-kitchen') ? [{ id: 'open-living-kitchen', status: openPlan.adjacent && openPlan.clearRatio >= .8 ? 'PASS' : 'FAIL', evidence: { ...openPlan, requiredClearRatio: .8 } }] : []),
+    ...(contract.relationships.some(row => row.id === 'guest-dining-access') ? [{ id: 'guest-dining-access', ...guestDining }] : []),
+    ...(contract.relationships.some(row => row.id === 'guest-bath-dining-access') ? [{ id: 'guest-bath-dining-access', ...guestBathDining }] : []),
+    ...(contract.relationships.some(row => row.id === 'guest-family-privacy') ? [{ id: 'guest-family-privacy', ...privacy }] : []),
+    ...(contract.relationships.some(row => row.id === 'external-guest-room-location') ? [{ id: 'external-guest-room-location', ...externalLocation }] : []),
   ];
   const satisfied = programEvidence.every(item => item.status === 'PASS') && relations.every(item => item.status === 'PASS');
   return { schemaVersion: contract.schemaVersion, status: satisfied ? 'SATISFIED' : 'NOT_SATISFIED', eligible: satisfied,
