@@ -171,7 +171,7 @@ test('constructs a structured Messages request and returns only a validated revi
   assert.equal(calls[0][1].headers.Authorization, undefined);
   const sent = JSON.parse(calls[0][1].body);
   assert.equal(sent.model, 'claude-sonnet-5-5');
-  assert.deepEqual(sent.tool_choice, { type: 'tool', name: 'submit_home_brief' });
+  assert.deepEqual(sent.tool_choice, { type: 'auto' });
   assert.deepEqual(sent.tools[0].input_schema, BRIEF_SCHEMA);
   assert.deepEqual(JSON.parse(sent.messages[0].content).previous, brief());
   assert.match(sent.system, /تحلل المتطلبات فقط/);
