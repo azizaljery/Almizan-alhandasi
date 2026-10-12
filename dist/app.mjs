@@ -158,8 +158,8 @@ function syncWorkspace() {
   $('snapshotStatus').textContent = !state.model ? 'لم يُولد بعد' : state.dirty ? 'يحتاج تحديثًا' : 'مطابق للجدول';
   $('resultEmpty').hidden = !!state.model; $('reviewEmpty').hidden = !!state.model; $('reviewContent').hidden = !state.model;
   $('requestCharacters').textContent = `${$('idea').value.length} / 4000`;
-  if (state.requestProposal) $('applyRequest').disabled = state.requestProposal.fingerprint !== requestFingerprint(requestInput()) || !state.requestProposal.rooms.length || !!state.requestProposal.questions.length;
-  const proposalCurrent = !!state.proposal?.rooms.length && state.proposalFingerprint === requestFingerprint(requestInput()) && !state.proposal.questions.length;
+  if (state.requestProposal) $('applyRequest').disabled = state.requestProposal.fingerprint !== requestFingerprint(requestInput()) || !state.requestProposal.rooms.length;
+  const proposalCurrent = !!state.proposal?.rooms.length && state.proposalFingerprint === requestFingerprint(requestInput());
   $('acceptAI').disabled = !proposalCurrent; $('drawAI').disabled = !proposalCurrent;
   if (state.model) renderRequestMatch();
   renderLandSurveySummary();
@@ -248,7 +248,7 @@ async function understandRequest(operation = null) {
 function applyRequest() {
   const result = state.requestProposal; if (!result) return;
   if (result.fingerprint !== requestFingerprint(requestInput())) return message('requestFeedback', 'تغيّرت المدخلات بعد القراءة؛ اضغط «افهم طلبي» مرة أخرى.');
-  if (result.questions.length || !result.rooms.length) return;
+  if (!result.rooms.length) return;
   try {
     const plot = validatePlot({ ...rawPlot(), ...result.plotPatch }); normalizeRooms(result.rooms);
     const binding = state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null;
@@ -848,7 +848,7 @@ function showBrief(brief, limitations = [], context = null) {
   $('aiReview').hidden = false; syncWorkspace();
 }
 async function drawFromAIProposal(options = {}) {
-  if (!state.proposal?.rooms.length || state.proposal.questions.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم أو يحتاج إجابة؛ أعد التحليل قبل الاعتماد.');
+  if (!state.proposal?.rooms.length || state.proposalFingerprint !== requestFingerprint(requestInput())) { const text = 'الاقتراح قديم؛ أعد التحليل قبل الاعتماد.'; message('aiFeedback', text); message('generationError', text); return; }
   state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true;
   toast('اعتمد برنامج الذكاء؛ جارٍ الآن رسم البدائل والتحقق منها هندسيًا.');
   return generate(options);
@@ -1306,7 +1306,7 @@ function boot() {
   $('askAI').addEventListener('click', askAI);
   $('askLocal').addEventListener('click', understandRequest); $('applySun').addEventListener('click', applySunToProgram);
   $('drawAI').addEventListener('click', drawFromAIProposal);
-  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length || state.proposal.questions.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم أو يحتاج إجابة؛ أعد التحليل قبل الاعتماد.'); state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true; switchTab('design'); toast('حُفظ البرنامج في الجدول؛ راجعه قبل التوليد.'); });
+  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم؛ أعد التحليل قبل الاعتماد.'); state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true; switchTab('design'); toast('حُفظ البرنامج في الجدول؛ راجعه قبل التوليد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'result' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); renderLandSurveySummary(); initVisualizer(() => state.model); switchTab('rating'); void refreshAssistantStatus(); void initArchive();
 }
@@ -1414,7 +1414,7 @@ const mizanStudioAPI = Object.freeze({
         if (state.requestProposal === proposal) throw Error($('requestFeedback').textContent || 'لم يطبق الفهم.');
         output = await generate({ operation });
       } else output = await drawFromAIProposal({ operation });
-      if (!output || output.operationId !== operation.id) throw Error($('generationError').textContent || 'لم تثبت هذه العملية مخططًا؛ بقيت النسخة الحالية كما هي.');
+      if (!output || output.operationId !== operation.id) throw Error($('generationError').textContent || ($('gen').disabled ? 'ما زالت عملية رسم سابقة قيد التنفيذ؛ انتظر قليلًا ثم اعتمد مجددًا.' : '') || $('aiFeedback').textContent || 'لم تثبت هذه العملية مخططًا؛ بقيت النسخة الحالية كما هي.');
       studioPending = null; studioProposalSource = null; studioAbort = null;
       return output;
     } catch (error) {
