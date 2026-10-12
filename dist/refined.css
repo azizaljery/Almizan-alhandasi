@@ -162,3 +162,6 @@ details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-
 .alternative-card.best{outline:2px solid var(--mz-brass,#b08d57);outline-offset:2px}
 .studio-proposal-more{margin:.6rem 0}
 .studio-proposal-more>summary{cursor:pointer;color:var(--mz-green,#1d3a2f);font-weight:600;padding:.4rem 0}
+
+/* واجهة العميل: بلا أدوات تحرير */
+#togglePlanEditor,#planEditor,#geometryEditorHost{display:none!important}

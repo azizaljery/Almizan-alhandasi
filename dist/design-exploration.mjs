@@ -5,6 +5,7 @@
 import { spatialRelationDescriptor, spatialRelationDistance } from './spatial-relations.mjs';
 import { generateModelLegacy } from './claude/compat-layer.mjs';
 import { footprint, normalizeRooms, validatePlot, polygonArea } from './claude/planner.mjs';
+import { ensuitePairs, ensuiteRelationships, applyEnsuiteDoors } from './ensuite.mjs';
 
 export const DIVERSITY_THRESHOLD = .12;
 export const MAX_ALTERNATIVES = 6;
@@ -18,7 +19,7 @@ function random(seed) {
   let n = seed >>> 0;
   return () => { n += 0x6D2B79F5; let t = n; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-export function explorationSpecs(seed = 1, { routeFocused = false } = {}) {
+export function explorationSpecs(seed = 1, { routeFocused = false, ensuite = false } = {}) {
   const specs = ['rect', 'l', 'u'].map(shape => ({ shape, key: `${shape}-baseline`, mode: -1, widthRatio: 1, seed }));
   const rng = random(seed);
   for (let i = 0; i < 12; i++) {
@@ -35,7 +36,7 @@ export function explorationSpecs(seed = 1, { routeFocused = false } = {}) {
   }
   for (const variant of [0,1,2]) specs.push({ shape: 'rect', key: `rect-organization-${seed}-${variant}`, mode: -1, widthRatio: 1, seed, search: { variant } });
   for (const variant of [0,1,2]) specs.push({ shape: 'rect', key: `rect-clustered-${seed}-${variant}`, mode: -1, widthRatio: 1, seed, search: { topology: 'clustered', variant } });
-  return specs;
+  return ensuite ? specs.map(spec => ({ ...spec, ensuite: true })) : specs;
 }
 export function conceptFor(spec, shape) {
   if (spec.search?.topology === 'clustered') return { tag: 'مجموعات وردهات مترابطة', form: 'ردهات قصيرة متزاحة وروابط عرضية', massing: shape, idea: 'بحث محدود في مجموعات أمامية ووسطية وخلفية، لكل منها ردهة وصول قصيرة؛ تربطها ردهات عرضية مع حفظ البرنامج والأبعاد.', bestFor: 'مقارنة تنظيم الحركة بين مجموعات الغرف', tradeoff: 'قد تزيد المساحة غير الموزعة ومسافة بعض المسارات؛ ليس تخطيطًا حرًا أو إثباتًا لفصل الخصوصية' };
@@ -55,7 +56,23 @@ export function exploreGeometry(plot, rooms, shape, spec, strategy) {
     return { ...r, side: left ? 'left' : 'right' };
   });
   let m;
-  if (spec.mode < 0) m = generateModelLegacy(plot, assigned, { strategy, allowFallback: false, search: spec.search });
+  const pairs = ensuitePairs(original);
+  let ensuiteApplied = false;
+  if (spec.mode < 0) {
+    // حمام ملحق: علاقة «قرب» بين كل غرفة نوم وحمامها في المحرك المستطيل. العلاقات التي طلبها العميل صراحةً لها الأولوية،
+    // وإن لم يجد المحرك توزيعًا بها يعود إلى البحث الأصلي دون تغيير.
+    const explicit = spec.search?.relationships?.length > 0;
+    const ensuiteSearch = spec.ensuite === true && shape === 'rect' && pairs.length && !explicit ? { variant: 0, ...(spec.search || {}), relationships: ensuiteRelationships(original) } : null;
+    if (ensuiteSearch) {
+      // الحمام الملحق يُوضع في منطقة غرفته؛ يُستعاد موضعه الأصلي في برنامج العميل بعد التوليد كباقي الغرف.
+      const zoned = assigned.map(r => {
+        const pair = pairs.find(p => p.bathId === r.id), bed = pair && assigned.find(x => x.id === pair.bedroomId);
+        return bed ? { ...r, position: bed.position, side: bed.side } : r;
+      });
+      try { m = generateModelLegacy(plot, zoned, { strategy, allowFallback: false, search: ensuiteSearch }); ensuiteApplied = true; } catch { m = null; }
+    }
+    if (!m) m = generateModelLegacy(plot, assigned, { strategy, allowFallback: false, search: spec.search });
+  }
   else {
     const f = footprint(plot), sideways = ['e', 'w'].includes(plot.entry);
     const w = f.w * (sideways ? 1 : spec.widthRatio), h = f.h * (sideways ? spec.widthRatio : 1);
@@ -70,6 +87,7 @@ export function exploreGeometry(plot, rooms, shape, spec, strategy) {
     m.plot = { ...validatePlot({ ...plot, shape }), maxBuiltArea: plot.maxBuiltAreaM2 ?? plot.maxBuiltArea ?? null };
     m.footprint = f;
   }
+  if (ensuiteApplied) applyEnsuiteDoors(m, pairs);
   // The untouched client program is authoritative, including explicit sides. Native
   // L wings may discard side requests; restoring them makes the validation gate reject it.
   m.program = original;

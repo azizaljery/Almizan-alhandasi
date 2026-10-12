@@ -1,3 +1,4 @@
+import { presentationPenalty, ensuiteCoverage } from './ensuite.mjs';
 import { createStudioSession, normalizeStudioSession, beginStudioOperation, isCurrentStudioOperation, cancelStudioOperation, bindStudioRevision, appendStudioMessage, acceptStudioUnderstanding, approveStudioRevision, invalidateStudioApproval, setStudioDraft } from './studio-session.mjs';
 import { diffRoomPrograms } from './design-dialog.mjs';
 import { createGeometrySession } from './geometry-session.mjs';
@@ -631,11 +632,13 @@ function renderAlternatives() {
     return { model, index, q: quantities(model), review: reviewPlan(model), evaluation,
       score: Number.isFinite(evaluation?.score) ? evaluation.score : null, blockers: evaluation?.blockers?.length ?? 0 };
   });
-  const order = [...rows].sort((x, y) => x.blockers - y.blockers || (y.score ?? -1) - (x.score ?? -1) || x.q.circulation - y.q.circulation);
+  rows.forEach(row => { row.penalty = presentationPenalty(row.model); row.suites = ensuiteCoverage(row.model); });
+  const order = [...rows].sort((x, y) => x.blockers - y.blockers || x.penalty - y.penalty || (y.score ?? -1) - (x.score ?? -1) || x.q.circulation - y.q.circulation);
   const minCirc = Math.min(...rows.map(r => r.q.circulation)), minDark = Math.min(...rows.map(r => r.review.occupiedWithoutWindows));
   const used = new Set();
   const nameOf = (row, rank) => {
     const options = rank === 0 ? ['الأنسب لطلبك'] : [];
+    if (row.suites.wanted && row.suites.linked === row.suites.wanted) options.push('حمام داخل كل غرفة نوم');
     if (row.q.circulation === minCirc) options.push('أقل ممرات');
     if (row.review.occupiedWithoutWindows === minDark) options.push('إضاءة طبيعية أفضل');
     options.push(`خيار آخر ${rank + 1}`);
@@ -740,14 +743,14 @@ async function generate(options = {}) {
     if (exploration.signature !== currentSignature) { exploration.signature = currentSignature; exploration.previous = []; }
     const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
     const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
-  const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
+  const result = await runPlanner({ integrated: true, ensuite: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
     assertStudioOperation(operation);
     if (modelEpoch !== startEpoch || workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { searchEvidence: result.searchEvidence, decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
     state.siteSolar = rebindSolarContext(state.siteSolar,state.modelLandSurvey,state.landSurvey); restoreSolarSettings();
-    state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.modelSurveyAssociated = true; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
+    state.model = [...result.models].sort((a, b) => presentationPenalty(a) - presentationPenalty(b))[0] || result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.modelSurveyAssociated = true; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults('generated'); switchTab($('app').classList.contains('studio-simple-mode') && !$('app').classList.contains('studio-advanced-open') ? 'design' : 'result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
     return { model: structuredClone(state.model), alternatives: structuredClone(state.alternatives), failures: structuredClone(state.failures), operationId: operation?.id || null };

@@ -1,5 +1,6 @@
 import {cadStyles,cadDimensionLayer,cadViewBox,architecturalRoomFill,colorPlanLegend} from './cad-plan.mjs';
 import { solarVectors } from './solar-path.mjs';
+import { planFurniture } from './plan-furniture.mjs';
 import { TYPES, DIRECTIONS, center, openingPoint } from './planner.mjs';
 
 export const escapeXML = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
@@ -43,17 +44,17 @@ export function buildPlanSVG(model, {mode = 'color'} = {}) {
   for (const r of model.corridors) { const v = box(r); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" class="cad-corridor" fill="#faf7e9"/>`; }
   for (const r of model.reserves) {
     const v = box(r);
-    s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#e2e2df"/><text x="${v.x + v.w / 2}" y="${v.y + v.h / 2}" fill="#69716e" font-size=".24" text-anchor="middle">غير موزّع</text>`;
+    s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#ecebe6" stroke="#cfcdc4" stroke-width=".03" stroke-dasharray=".18 .12"/><text x="${v.x + v.w / 2}" y="${v.y + v.h / 2}" fill="#69716e" font-size=".24" text-anchor="middle">غير موزّع</text>`;
   }
   for (const r of model.rooms) {
     const v = box(r), cx = v.x + v.w / 2, cy = v.y + v.h / 2;
     const words = r.name.split(/\s+/), lines = [''];
     words.forEach(word => { if ((lines.at(-1) + word).length > 16 && lines.length < 2) lines.push(word); else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word; });
-    const font = Math.min(.52, v.w / (Math.max(...lines.map(l => l.length)) * .43 + 1.3));
+    const font = Math.min(.52, v.w / (Math.max(...lines.map(l => l.length)) * .43 + 1.3), v.h / (lines.length * .9 + 2.1));
     const label = `${r.name}، ${f(r.area)} متر مربع، ${r.w.toFixed(2)} في ${r.h.toFixed(2)} متر`;
-    s += `<g data-room-id="${r.id}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${architecturalRoomFill(r.type)}"/><g data-plan-furniture="true">${furniture(r)}</g><g class="cad-room-label" pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
+    s += `<g data-room-id="${r.id}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${architecturalRoomFill(r.type)}"/><g data-plan-furniture="true">${planFurniture(model, r)}</g><g class="cad-room-label" pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
     lines.forEach((line, i) => { s += `<text x="${cx}" y="${cy - .25 + i * .43}" font-size="${font}" font-weight="700" paint-order="stroke" stroke="${architecturalRoomFill(r.type)}" stroke-width=".09">${escapeXML(line)}</text>`; });
-    s += `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .23}" font-size=".4" font-weight="600">${f(r.area)} م²</text><text x="${cx}" y="${cy + (lines.length - 1) * .43 + .62}" font-size=".35" font-weight="500" fill="#536973">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text></g></g>`;
+    s += `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .23}" font-size=".4" font-weight="600" paint-order="stroke" stroke="#ffffff" stroke-width=".1">${f(r.area)} م²</text>${Math.min(r.w, r.h) >= 2.2 ? `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .62}" font-size=".35" font-weight="500" fill="#536973" paint-order="stroke" stroke="#ffffff" stroke-width=".1">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text>` : ''}</g></g>`;
   }
   model.walls.forEach(w => { s += `<line class="cad-wall" data-wall-id="${escapeXML(w.id)}" x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${w.type === 'ext' ? '#394a4b' : '#657574'}" stroke-width="${Number.isFinite(w.t) && w.t > 0 ? w.t : .015}" data-wall-thickness-known="${Number.isFinite(w.t) && w.t > 0}" stroke-linecap="square" pointer-events="none"/>`; });
   model.openings.forEach(o => {
