@@ -1,6 +1,6 @@
 import { checkBrowserImports } from './check-browser-imports.mjs';
 // Compile the separate Sites archive Worker and verify the authored public assets.
-import { readFileSync, readdirSync, existsSync, mkdirSync, rmSync, cpSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdirSync, rmSync, cpSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
@@ -34,6 +34,10 @@ for (const entry of readdirSync('dist', { withFileTypes: true })) {
   if (['client', 'server', '.openai'].includes(entry.name) || entry.name.startsWith('.')) continue;
   cpSync(`dist/${entry.name}`, `dist/client/${entry.name}`, { recursive: true });
 }
+// رقم الإصدار المنشور: يسمح بالتحقق من أن ما يعمل على الموقع هو نفس هذا الالتزام فعلًا.
+let commit = 'unknown';
+try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch {}
+writeFileSync('dist/client/version.json', JSON.stringify({ commit, builtAt: new Date().toISOString() }, null, 2));
 if (existsSync('dist/server')) rmSync('dist/server', { recursive: true, force: true });
 mkdirSync('dist/server', { recursive: true });
 await build({

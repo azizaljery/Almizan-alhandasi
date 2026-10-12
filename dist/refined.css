@@ -163,8 +163,32 @@ details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-
 .studio-proposal-more{margin:.6rem 0}
 .studio-proposal-more>summary{cursor:pointer;color:var(--mz-green,#1d3a2f);font-weight:600;padding:.4rem 0}
 
-/* واجهة العميل: بلا أدوات تحرير */
-#togglePlanEditor,#planEditor,#geometryEditorHost{display:none!important}
+/* التحرير اليدوي الحقيقي للمخطط: تحريك جدار، إضافة/حذف باب أو نافذة، تعديل غرفة محددة.
+   أولوية أساسية؛ منسجم بصريًا مع طبقة العرض الراقية بدل الألوان القديمة. */
+/* planner.css (مستورد مبكرًا عبر workspace.css) يضع اللوحة position:absolute فوق الرسم؛
+   نلغي ذلك هنا صراحةً كي تُكدَّس اللوحة فوق المخطط بدل تغطيته. */
+#planEditor.plan-editor{position:static;inset:auto;z-index:auto;width:100%;max-width:none;background:var(--mz-paper);border:1px solid var(--mz-line);border-radius:14px;color:var(--mz-text);box-shadow:var(--mz-shadow);backdrop-filter:none;margin-bottom:16px}
+.plan-editor-wrap{display:block}
+.plan-editor-head{align-items:center;padding-bottom:8px;border-bottom:1px solid var(--mz-line);margin-bottom:10px}
+.plan-editor-head b{font-family:var(--mz-serif);color:var(--mz-green-deep);font-size:1.05rem}
+.plan-tool-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.plan-tool-list button{min-height:40px;padding:6px 12px;border:1px solid var(--mz-line-strong);border-radius:999px;background:transparent;color:var(--mz-green);font:inherit;font-size:.82rem;cursor:pointer}
+.plan-tool-list button.on{background:var(--mz-green-deep);border-color:var(--mz-green-deep);color:#f3ead2}
+#planEditorStatus{font-size:.85rem;color:var(--mz-sub);line-height:1.8;margin:0 0 8px}
+.geometry-editor{background:var(--mz-ivory);border:1px solid var(--mz-line);border-radius:12px;color:var(--mz-text)}
+.geometry-editor-heading{flex-direction:column;align-items:flex-start!important;gap:6px!important}
+.geometry-editor-heading label{white-space:nowrap}
+.geometry-editor-heading strong{font-family:var(--mz-serif);color:var(--mz-green-deep)}
+.geometry-editor input,.geometry-editor select{border-color:var(--mz-line-strong);color:var(--mz-text);background:#fff}
+.geometry-editor button{border-color:var(--mz-line-strong);color:var(--mz-green);background:#fff}
+.geometry-editor button[data-ge=confirm]{background:var(--mz-green-deep);border-color:var(--mz-green-deep);color:#f3ead2}
+.geometry-editor button:disabled{opacity:.4}
+.geometry-editor-impact{background:var(--mz-green-soft);color:var(--mz-text)}
+.geometry-editor-impact.error{background:#fbe9e7;color:#8a3b30}
+.room-edit-form{border-top:1px solid var(--mz-line);padding-top:12px;margin-top:12px}
+.room-edit-form label{font-size:.82rem;color:var(--mz-sub)}
+.room-edit-form input,.room-edit-form select{border:1px solid var(--mz-line-strong);border-radius:8px;padding:8px;font:inherit;color:var(--mz-text);background:#fff}
+.editor-program-link{background:var(--mz-brass-soft);color:var(--mz-green-deep);border-radius:10px;font-weight:600}
 
 /* بطاقات البدائل: صورة مصغّرة كاملة العرض فوق العنوان، دون إزاحة */
 .alternative-card{display:flex;flex-direction:column;gap:6px;padding:10px;min-width:0}

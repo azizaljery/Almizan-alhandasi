@@ -347,7 +347,10 @@ function selectRoom(id) {
 }
 function syncRoomEditor(room = state.model?.rooms.find(r => r.id === state.selected)) {
   const form = $('roomEditForm'); if (!form || !room) return;
-  const index = state.program.findIndex(r => r.id === room.id); if (index < 0) return;
+  // أرقام المعرّفات تُشتق من ترتيب البرنامج نفسه عند التوليد (room-0, room-1, …)؛
+  // لا يحمل state.program معرّفات (ليبقى متوافقًا مع صيغة حفظ المشروع)، فنشتق الفهرس من المعرّف مباشرة.
+  const index = /^room-\d+$/.test(room.id || '') ? Number(room.id.slice(5)) : -1;
+  if (index < 0 || index >= state.program.length) return;
   const program = state.program[index]; form.hidden = !state.editor.open; $('roomEditTitle').textContent = `الغرفة: ${program.name}`; $('roomEditName').value = program.name; $('roomEditArea').value = program.area; $('roomEditArea').disabled = !!program.dimensions; $('roomEditWidth').value = program.dimensions?.width ?? ''; $('roomEditLength').value = program.dimensions?.length ?? ''; $('roomEditPosition').innerHTML = options(POSITIONS, program.position); $('roomEditSide').innerHTML = options(SIDES, program.side); form.dataset.roomIndex = index;
 }
 function drawRoute() {
