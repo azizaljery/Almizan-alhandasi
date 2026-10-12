@@ -36,7 +36,7 @@ const number = id => $(id).valueAsNumber;
 const fmt = (v, digits = 1) => v.toLocaleString('ar-SA', { maximumFractionDigits: digits });
 const publicRooms = rooms => rooms.map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const assessedText = (value, digits = 0) => value === null || value === undefined ? 'غير مُقيّم' : fmt(value, digits);
-const state = { studioSession: createStudioSession(), streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, modelSurveyAssociated: false, siteSolar: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: '2d', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
+const state = { studioSession: createStudioSession(), streets: { n: false, s: true, e: false, w: false }, program: defaultRooms(), model: null, alternatives: [], failures: [], palette: 'resort', selectedShape: null, history: [], landSurvey: null, modelLandSurvey: null, modelSurveyAssociated: false, siteSolar: null, signature: '', engineeringSignature: '', engineering: null, gemini: null, multiEngine: null, selected: null, traceContext: null, manualEdits: false, dirty: false, tab: 'brief', studioMode: 'cad', rates: {}, proposal: null, proposalFingerprint: null, requestProposal: null, requestAppliedPrompt: '', clientDesires: [], briefContext: null, aiDesign: null, tour: [], tourIndex: -1, editor: { open: false, tool: 'select' }, discovery: { likes: [], rejects: [], avoids: [], life: {} }, archive: { storageReady: false, authenticated: false, designs: [], selectedDesignId: '', designId: '', currentVersion: null, loadedVersion: null, receiptId: '', savedSignature: '', loading: false, pendingKey: '', pendingSignature: '', notice: '', nextCursor: null, hasMore: false } };
 let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioProposalSource = null;
 let geometrySession, geometryUI, geometrySource, geometryPending, geometryCommandId = 0, modelEpoch = 0, renderedModel, geometryAlternativePool = [];
 let studioPending = null, studioOperationContext = null, studioAbort = null, generationSequence = 0, studioRestoring = false;
@@ -449,15 +449,16 @@ function renderStudioModelSummary() {
 }
 function setStudioMode(mode) {
   if (mode === 'quantities') { switchTab('boq'); return; }
-  if (!['2d', '3d'].includes(mode)) return;
+  if (!['cad', '2d', '3d'].includes(mode)) return;
   state.studioMode = mode;
-  $('studioPlanCard').hidden = mode !== '2d'; $('studio3dCard').hidden = mode !== '3d';
+  $('studioPlanCard').hidden = mode === '3d'; $('studio3dCard').hidden = mode !== '3d';
   all('[data-studio-mode]').forEach(button => {
     const on = button.dataset.studioMode === mode; button.classList.toggle('on', on); button.setAttribute('aria-pressed', String(on));
   });
+  if (mode !== '3d') viewport?.setMode(mode === 'cad' ? 'cad' : 'color');
   if (mode === '3d' && state.model) void show3D();
   else viewer?.setVisible(false);
-  requestAnimationFrame(() => { if (mode === '2d') viewport?.fit(); else viewer?.resize?.(); });
+  requestAnimationFrame(() => { if (mode !== '3d') viewport?.fit(); else viewer?.resize?.(); });
 }
 function editPlanAtPoint(action) {
   if (!state.model) return;
@@ -526,7 +527,7 @@ function showResults(reason = 'selection') {
   refreshEngineering();
   refreshGemini();
   circulation = circulationNetwork(m);
-  viewport = new PlanViewport($('plan'), m, selectRoom); syncPlanEditor(); syncGeometryEditor();
+  viewport = new PlanViewport($('plan'), m, selectRoom, { mode: state.studioMode === '2d' ? 'color' : 'cad' }); syncPlanEditor(); syncGeometryEditor();
   viewport.svg.dataset.geometryRevision = String(m.geometryRevision || 0);
   $('roomSelect').innerHTML = m.rooms.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join(''); selectRoom(m.rooms[0].id);
   $('modelWarnings').replaceChildren(...m.warnings.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));

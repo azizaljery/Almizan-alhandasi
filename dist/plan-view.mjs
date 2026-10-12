@@ -1,3 +1,4 @@
+import {cadStyles,cadDimensionLayer,cadViewBox,architecturalRoomFill,colorPlanLegend} from './cad-plan.mjs';
 import { solarVectors } from './solar-path.mjs';
 import { TYPES, DIRECTIONS, center, openingPoint } from './planner.mjs';
 
@@ -26,19 +27,20 @@ function furniture(r) {
   return '';
 }
 
-export function buildPlanSVG(model) {
-  const v = buildingViewBox(model), W = model.plot.width, L = model.plot.length;
-  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${v.x} ${v.y} ${v.w} ${v.h}" preserveAspectRatio="xMidYMid meet" role="group" aria-label="مخطط الدور الأرضي؛ اختر غرفة لعرض تفاصيلها" style="font-family:'IBM Plex Sans Arabic',sans-serif"><defs><pattern id="paper-grid" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#d7ddd8" stroke-width=".018"/></pattern></defs>`;
-  s += `<rect x="-200" y="-200" width="400" height="400" fill="#f8f7f1"/><rect x="0" y="${-L}" width="${W}" height="${L}" fill="url(#paper-grid)" stroke="#a88b51" stroke-width=".065" stroke-dasharray=".3 .2"/>`;
+export function buildPlanSVG(model, {mode = 'color'} = {}) {
+  if (!['cad','color'].includes(mode)) throw Error('وضع المسقط غير صالح.');
+  const v = mode === 'cad' ? cadViewBox(model) : buildingViewBox(model), W = model.plot.width, L = model.plot.length;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" data-plan-mode="${mode}" viewBox="${v.x} ${v.y} ${v.w} ${v.h}" preserveAspectRatio="xMidYMid meet" role="group" aria-label="مخطط الدور الأرضي؛ اختر غرفة لعرض تفاصيلها" style="font-family:'IBM Plex Sans Arabic',sans-serif"><style>${cadStyles}</style><defs><pattern id="paper-grid" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#d7ddd8" stroke-width=".018"/></pattern></defs>`;
+  s += `<rect class="cad-paper" x="-200" y="-200" width="400" height="400" fill="#f8f7f1"/><rect class="cad-plot-boundary" x="0" y="${-L}" width="${W}" height="${L}" fill="url(#paper-grid)" stroke="#a88b51" stroke-width=".065" stroke-dasharray=".3 .2"/>`;
   const fp = box(model.footprint);
-  s += `<rect x="${fp.x}" y="${fp.y}" width="${fp.w}" height="${fp.h}" fill="none" stroke="#5b9981" stroke-width=".03" stroke-dasharray=".16 .18"/>`;
+  s += `<rect class="cad-buildable" x="${fp.x}" y="${fp.y}" width="${fp.w}" height="${fp.h}" fill="none" stroke="#5b9981" stroke-width=".03" stroke-dasharray=".16 .18"/>`;
   s += `<g data-solar-layer="true" pointer-events="none"></g>`;
   const b = box(model.building);
   if (model.massingParts?.length) {
-    for (const part of model.massingParts) { const v = box(part); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#eceae3"/>`; }
-    for (const court of model.courtyards || []) { const v = box(court); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" rx=".12" fill="#dce8d2" stroke="#77946c" stroke-width=".06" stroke-dasharray=".22 .14"/><text x="${v.x + v.w / 2}" y="${v.y + v.h / 2}" fill="#4f704f" font-size=".34" font-weight="700" text-anchor="middle">فناء مفتوح</text>`; }
-  } else s += `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="#eceae3"/>`;
-  for (const r of model.corridors) { const v = box(r); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#faf7e9"/>`; }
+    for (const part of model.massingParts) { const v = box(part); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" class="cad-mass" fill="#eceae3"/>`; }
+    for (const court of model.courtyards || []) { const v = box(court); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" class="cad-courtyard" rx=".12" fill="#dce8d2" stroke="#77946c" stroke-width=".06" stroke-dasharray=".22 .14"/><text x="${v.x + v.w / 2}" y="${v.y + v.h / 2}" fill="#4f704f" font-size=".34" font-weight="700" text-anchor="middle">فناء مفتوح</text>`; }
+  } else s += `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" class="cad-mass" fill="#eceae3"/>`;
+  for (const r of model.corridors) { const v = box(r); s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" class="cad-corridor" fill="#faf7e9"/>`; }
   for (const r of model.reserves) {
     const v = box(r);
     s += `<rect x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="#e2e2df"/><text x="${v.x + v.w / 2}" y="${v.y + v.h / 2}" fill="#69716e" font-size=".24" text-anchor="middle">غير موزّع</text>`;
@@ -49,36 +51,39 @@ export function buildPlanSVG(model) {
     words.forEach(word => { if ((lines.at(-1) + word).length > 16 && lines.length < 2) lines.push(word); else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word; });
     const font = Math.min(.52, v.w / (Math.max(...lines.map(l => l.length)) * .43 + 1.3));
     const label = `${r.name}، ${f(r.area)} متر مربع، ${r.w.toFixed(2)} في ${r.h.toFixed(2)} متر`;
-    s += `<g data-room-id="${r.id}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${TYPES[r.type].color}"/>${furniture(r)}<g pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
-    lines.forEach((line, i) => { s += `<text x="${cx}" y="${cy - .25 + i * .43}" font-size="${font}" font-weight="700" paint-order="stroke" stroke="${TYPES[r.type].color}" stroke-width=".09">${escapeXML(line)}</text>`; });
+    s += `<g data-room-id="${r.id}" class="plan-room" tabindex="0" role="button" aria-label="${escapeXML(label)}"><title>${escapeXML(label)}</title><rect class="room-fill" x="${v.x}" y="${v.y}" width="${v.w}" height="${v.h}" fill="${architecturalRoomFill(r.type)}"/><g data-plan-furniture="true">${furniture(r)}</g><g class="cad-room-label" pointer-events="none" text-anchor="middle" fill="#263d4a" direction="rtl">`;
+    lines.forEach((line, i) => { s += `<text x="${cx}" y="${cy - .25 + i * .43}" font-size="${font}" font-weight="700" paint-order="stroke" stroke="${architecturalRoomFill(r.type)}" stroke-width=".09">${escapeXML(line)}</text>`; });
     s += `<text x="${cx}" y="${cy + (lines.length - 1) * .43 + .23}" font-size=".4" font-weight="600">${f(r.area)} م²</text><text x="${cx}" y="${cy + (lines.length - 1) * .43 + .62}" font-size=".35" font-weight="500" fill="#536973">${r.w.toFixed(2)} × ${r.h.toFixed(2)} م</text></g></g>`;
   }
-  model.walls.forEach(w => { s += `<line x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${w.type === 'ext' ? '#394a4b' : '#657574'}" stroke-width="${w.t}" stroke-linecap="square" pointer-events="none"/>`; });
+  model.walls.forEach(w => { s += `<line class="cad-wall" data-wall-id="${escapeXML(w.id)}" x1="${f(w.x1)}" y1="${f(-w.y1)}" x2="${f(w.x2)}" y2="${f(-w.y2)}" stroke="${w.type === 'ext' ? '#394a4b' : '#657574'}" stroke-width="${Number.isFinite(w.t) && w.t > 0 ? w.t : .015}" data-wall-thickness-known="${Number.isFinite(w.t) && w.t > 0}" stroke-linecap="square" pointer-events="none"/>`; });
   model.openings.forEach(o => {
+    const host = model.walls.find(w => w.id === o.wallId);
+    if (!host || !Number.isFinite(host.t) || host.t <= 0) return;
     const wall = model.walls.find(w => w.id === o.wallId), p = openingPoint(model, o), angle = Math.atan2(-(wall.y2 - wall.y1), wall.x2 - wall.x1);
     const dx = Math.cos(angle), dy = Math.sin(angle), a = { x: p.x - dx * o.w / 2, y: -p.y - dy * o.w / 2 }, z = { x: p.x + dx * o.w / 2, y: -p.y + dy * o.w / 2 };
-    s += `<line x1="${a.x}" y1="${a.y}" x2="${z.x}" y2="${z.y}" stroke="#faf7e9" stroke-width="${wall.t + .04}" pointer-events="none"/>`;
+    s += `<line class="cad-opening-cut" data-opening-id="${escapeXML(o.id)}" x1="${a.x}" y1="${a.y}" x2="${z.x}" y2="${z.y}" stroke="#faf7e9" stroke-width="${wall.t + .04}" pointer-events="none"/>`;
+    s += `<g data-cad-only="true" stroke="#20282e" stroke-width=".025" pointer-events="none">${[a,z].map(q=>`<line x1="${q.x-dy*wall.t/2}" y1="${q.y+dx*wall.t/2}" x2="${q.x+dy*wall.t/2}" y2="${q.y-dx*wall.t/2}"/>`).join('')}</g>`;
     if (o.type === 'window') {
-      for (const k of [-.035, .035]) s += `<line x1="${a.x - dy * k}" y1="${a.y + dx * k}" x2="${z.x - dy * k}" y2="${z.y + dx * k}" stroke="#248da6" stroke-width=".035" pointer-events="none"/>`;
+      for (const k of [-.035, .035]) s += `<line class="cad-window" x1="${a.x - dy * k}" y1="${a.y + dx * k}" x2="${z.x - dy * k}" y2="${z.y + dx * k}" stroke="#248da6" stroke-width=".035" pointer-events="none"/>`;
     } else {
       const target = o.roomId ? center(model.rooms.find(r => r.id === o.roomId)) : center(model.corridors[0]);
       const sign = (-dy * (target.x - p.x) + dx * (-target.y + p.y)) >= 0 ? 1 : -1;
       const leaf = { x: a.x - dy * sign * o.w, y: a.y + dx * sign * o.w };
-      s += `<path d="M${a.x} ${a.y}L${leaf.x} ${leaf.y} M${z.x} ${z.y}A${o.w} ${o.w} 0 0 ${sign > 0 ? 1 : 0} ${leaf.x} ${leaf.y}" fill="none" stroke="#ad8244" stroke-width=".04" pointer-events="none"/>`;
+      s += `<path class="cad-door" d="M${a.x} ${a.y}L${leaf.x} ${leaf.y} M${z.x} ${z.y}A${o.w} ${o.w} 0 0 ${sign > 0 ? 1 : 0} ${leaf.x} ${leaf.y}" fill="none" stroke="#ad8244" stroke-width=".04" pointer-events="none"/>`;
     }
   });
   const entry = openingPoint(model, model.openings.find(o => o.type === 'door' && o.connects.includes('outside')));
-  s += `<circle cx="${entry.x}" cy="${-entry.y}" r=".12" fill="#ac7634"/><text x="${b.x + b.w / 2}" y="${b.y + b.h + .75}" font-size=".35" fill="#7e6032" text-anchor="middle">المدخل ${DIRECTIONS[model.plot.entry]} · الأرض ${W} × ${L} م</text>`;
+  s += `<circle class="cad-entry" cx="${entry.x}" cy="${-entry.y}" r=".12" fill="#ac7634"/><text class="cad-entry" x="${b.x + b.w / 2}" y="${b.y + b.h + .75}" font-size=".35" fill="#7e6032" text-anchor="middle">المدخل ${DIRECTIONS[model.plot.entry]} · الأرض ${W} × ${L} م</text>`;
   s += `<g transform="translate(${b.x + b.w + .55},${b.y + 1.5})" fill="#3e5c59"><g data-plan-north-arrow="true"><path d="M0 -1L-.2 -.25H.2Z"/><path d="M0 -.3V.65" stroke="#3e5c59" stroke-width=".05"/></g><text data-plan-north-label="true" y="-1.2" font-size=".32" text-anchor="middle">+Y</text></g></svg>`;
-  return s;
+  return s.replace('</svg>', cadDimensionLayer(model) + colorPlanLegend(model) + '</svg>');
 }
 
 // Pointer coordinates are transformed through the actual SVG CTM, including letterboxing.
 export class PlanViewport {
-  constructor(container, model, onSelect) {
+  constructor(container, model, onSelect, {mode = 'color'} = {}) {
     this.container = container; this.model = model; this.onSelect = onSelect;
-    container.innerHTML = buildPlanSVG(model); this.svg = container.querySelector('svg');
-    this.pointers = new Map(); this.view = buildingViewBox(model); this.start = null; this.editor = null; this.editorMove = null;
+    this.mode = mode; container.innerHTML = buildPlanSVG(model, {mode}); this.svg = container.querySelector('svg');
+    this.pointers = new Map(); this.view = mode === 'cad' ? cadViewBox(model) : buildingViewBox(model); this.start = null; this.editor = null; this.editorMove = null;
     const svg = this.svg;
     svg.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
@@ -127,6 +132,8 @@ export class PlanViewport {
     svg.addEventListener('wheel', e => { e.preventDefault(); this.zoom(Math.exp(Math.max(-200, Math.min(200, e.deltaY)) * .003), { x: e.clientX, y: e.clientY }); }, { passive: false });
     svg.addEventListener('keydown', e => { const room = e.target.closest('[data-room-id]'); if (room && ['Enter', ' '].includes(e.key)) { e.preventDefault(); onSelect(room.dataset.roomId); } });
   }
+  setMode(mode) { if (!['cad','color'].includes(mode)) throw Error('وضع المسقط غير صالح.'); this.mode = mode; this.svg.setAttribute('data-plan-mode', mode); }
+  getMode() { return this.mode || 'color'; }
   setEditor(editor) { this.editor = editor; this.svg.classList?.toggle('editing', !!editor?.active); }
   point(x, y) { const p = this.svg.createSVGPoint(); p.x = x; p.y = y; return p.matrixTransform(this.svg.getScreenCTM().inverse()); }
   apply() { this.svg.setAttribute('viewBox', `${this.view.x} ${this.view.y} ${this.view.w} ${this.view.h}`); this.updateSolarLabel(); }
@@ -136,7 +143,7 @@ export class PlanViewport {
     factor = width / this.view.w;
     this.view = { x: p.x - (p.x - this.view.x) * factor, y: p.y - (p.y - this.view.y) * factor, w: width, h: this.view.h * factor }; this.apply();
   }
-  fit(plot = false) { this.view = plot ? plotViewBox(this.model) : buildingViewBox(this.model); this.apply(); }
+  fit(plot = false) { this.view = plot ? plotViewBox(this.model) : this.mode === 'cad' ? cadViewBox(this.model) : buildingViewBox(this.model); this.apply(); }
   focus(id) { const r = this.model.rooms.find(r => r.id === id); if (r) { this.view = roomViewBox(r); this.apply(); this.select(id); } }
   showRoute(points = []) {
     this.svg.querySelector('[data-circulation-route]')?.remove();
