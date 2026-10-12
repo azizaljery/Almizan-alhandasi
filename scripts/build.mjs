@@ -25,7 +25,7 @@ for (const file of files.filter(name => /\.(mjs|js)$/.test(name))) {
 const assistant = readFileSync('dist/assistant.mjs', 'utf8');
 assert.match(assistant, /export const AI_ENABLED = true/);
 assert.match(assistant, /X-Mizan-Access-Code/);
-assert.ok(!assistant.includes('OPENAI_API_KEY'), 'Provider key must never be referenced by the browser client');
+assert.ok(!assistant.includes('OPENAI_API_KEY') && !assistant.includes('ANTHROPIC_API_KEY'), 'Provider key must never be referenced by the browser client');
 // Keep authored assets in dist/ while packaging only public files in dist/client.
 // Server code and deployment metadata must never be served as browser assets.
 if (existsSync('dist/client')) rmSync('dist/client', { recursive: true, force: true });

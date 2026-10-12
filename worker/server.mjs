@@ -1,5 +1,5 @@
 // Cloudflare Worker API for the private «الميزان الهندسي» Site.
-// OPENAI_API_KEY and MIZAN_ACCESS_CODE stay in Worker secrets.
+// ANTHROPIC_API_KEY and MIZAN_ACCESS_CODE stay in Worker secrets.
 const ROOM_TYPES = ['bedroom', 'majlis', 'living', 'dining', 'kitchen', 'bath', 'storage', 'service', 'corridor'];
 const POSITIONS = ['front', 'middle', 'back'];
 const SIDES = ['any', 'left', 'right'];
@@ -8,7 +8,9 @@ const MAX_BODY_BYTES = 24000;
 const WINDOW_MS = 60000;
 const MAX_REQUESTS = 5;
 const MAX_BUCKETS = 2000;
-const DEFAULT_MODEL = 'gpt-4.1-mini';
+const DEFAULT_MODEL = 'claude-sonnet-5-5';
+const BRIEF_TOOL = 'submit_home_brief';
+const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const DEFAULT_ALLOWED_ORIGIN = 'https://al-mizan-al-handasi.aljeryabod.chatgpt.site';
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const textList = { type: 'array', items: { type: 'string' } };
@@ -142,10 +144,10 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
       const origin = request.headers.get('Origin');
       if (origin && origin !== allowedOrigin(env)) return json({ error: 'طلب غير مسموح.' }, 403);
       return json({
-        configured: typeof env.OPENAI_API_KEY === 'string' && !!env.OPENAI_API_KEY.trim(), verified: false,
+        configured: typeof env.ANTHROPIC_API_KEY === 'string' && !!env.ANTHROPIC_API_KEY.trim(), verified: false,
         accessConfigured: typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim(),
         scope: 'requirements_only',
-        message: typeof env.OPENAI_API_KEY === 'string' && env.OPENAI_API_KEY.trim() ? 'مفتاح الخدمة مهيأ؛ هذه الحالة لا تختبر الاتصال. يلزم تحليل ناجح للتحقق منه.' : 'الذكاء الاصطناعي غير مفعّل بعد. يلزم إعداد مفتاح الخدمة الآمن.',
+        message: typeof env.ANTHROPIC_API_KEY === 'string' && env.ANTHROPIC_API_KEY.trim() ? 'مفتاح الخدمة مهيأ؛ هذه الحالة لا تختبر الاتصال. يلزم تحليل ناجح للتحقق منه.' : 'الذكاء الاصطناعي غير مفعّل بعد. يلزم إعداد مفتاح الخدمة الآمن.',
       }, 200, origin ? corsHeaders(origin) : {});
     }
     if (url.pathname === '/api/assistant' && request.method === 'OPTIONS') {
@@ -166,34 +168,34 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
         if (error.message === 'too_large') return json({ error: 'حجم الطلب أكبر من 24000 بايت. اختصر الوصف أو المتطلبات السابقة.', code: 'REQUEST_TOO_LARGE' }, 413, cors);
         return json({ error: 'تحقق من الوصف (8–4000 حرف)، والأبعاد (8–100م)، والأدوار (1–3)، وبيانات الشوارع والغرف.' }, 400, cors);
       }
-      if (typeof env.OPENAI_API_KEY !== 'string' || !env.OPENAI_API_KEY.trim()) return json({ error: 'مفتاح خدمة الذكاء لم يُفعّل بعد. لم يُرسل وصفك إلى مزود الذكاء.', code: 'AI_NOT_CONFIGURED' }, 503, cors);
+      if (typeof env.ANTHROPIC_API_KEY !== 'string' || !env.ANTHROPIC_API_KEY.trim()) return json({ error: 'مفتاح خدمة الذكاء لم يُفعّل بعد. لم يُرسل وصفك إلى مزود الذكاء.', code: 'AI_NOT_CONFIGURED' }, 503, cors);
       const uid = request.headers.get('CF-Connecting-IP') || 'authorized-client', timestamp = now();
       for (const [key, bucket] of buckets) if (timestamp - bucket.start >= WINDOW_MS) buckets.delete(key);
       const bucket = buckets.get(uid) || { start: timestamp, count: 0 };
       if (bucket.count >= MAX_REQUESTS || (!buckets.has(uid) && buckets.size >= MAX_BUCKETS)) return json({ error: 'طلبات متقاربة؛ انتظر دقيقة ثم حاول مجدداً.' }, 429, { ...cors, 'Retry-After': String(Math.max(1, Math.ceil((WINDOW_MS - timestamp + bucket.start) / 1000))) });
       bucket.count++; buckets.set(uid, bucket);
       try {
-        const response = await providerFetch('https://api.openai.com/v1/responses', {
+        const response = await providerFetch(ANTHROPIC_URL, {
           method: 'POST', signal: AbortSignal.timeout(40000),
-          headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: env.OPENAI_MODEL || DEFAULT_MODEL, store: false,
-            instructions: INSTRUCTIONS, input: JSON.stringify(input), max_output_tokens: 4500,
-            text: { format: { type: 'json_schema', name: 'home_brief', strict: true, schema: BRIEF_SCHEMA } },
+          headers: { 'x-api-key': env.ANTHROPIC_API_KEY.trim(), 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: env.ANTHROPIC_MODEL || DEFAULT_MODEL, max_tokens: 4500,
+            system: INSTRUCTIONS, messages: [{ role: 'user', content: JSON.stringify(input) }],
+            tools: [{ name: BRIEF_TOOL, description: 'سلّم برنامج المتطلبات السكنية المنظّم للمراجعة.', input_schema: BRIEF_SCHEMA }],
+            tool_choice: { type: 'tool', name: BRIEF_TOOL },
           }),
         });
         if (!response.ok) {
-          const error = response.status === 429 ? 'خدمة الذكاء وصلت حد الاستخدام أو الرصيد. لم يتغيّر مخططك.' : response.status === 401 || response.status === 403 ? 'تعذر توثيق مفتاح الخدمة؛ يلزم مراجعة إعداد الربط.' : 'خدمة الذكاء غير متاحة الآن. حاول لاحقاً.';
+          const error = response.status === 429 || response.status === 402 ? 'خدمة الذكاء وصلت حد الاستخدام أو الرصيد. لم يتغيّر مخططك.' : response.status === 401 || response.status === 403 ? 'تعذر توثيق مفتاح الخدمة؛ يلزم مراجعة إعداد الربط.' : 'خدمة الذكاء غير متاحة الآن. حاول لاحقاً.';
           return json({ error }, 502, cors);
         }
         const data = await response.json();
-        if (data.status !== 'completed') return json({ error: 'لم يكتمل التحليل. اختصر الوصف أو حاول مجدداً.' }, 502, cors);
-        const content = (data.output || []).filter(x => x.type === 'message').flatMap(x => x.content || []);
-        if (content.some(x => x.type === 'refusal')) return json({ error: 'تعذر معالجة هذا الوصف. أعد صياغته حول احتياجات المسكن.' }, 422, cors);
-        const output = content.filter(x => x.type === 'output_text').map(x => x.text).join('');
-        const brief = validateBrief(JSON.parse(output));
+        if (data.stop_reason === 'refusal') return json({ error: 'تعذر معالجة هذا الوصف. أعد صياغته حول احتياجات المسكن.' }, 422, cors);
+        if (data.stop_reason !== 'tool_use') return json({ error: 'لم يكتمل التحليل. اختصر الوصف أو حاول مجدداً.' }, 502, cors);
+        const block = (data.content || []).find(x => x.type === 'tool_use' && x.name === BRIEF_TOOL);
+        const brief = validateBrief(block?.input);
         // Keep every unhandled requirement; do not evict one to insert our scope warning.
         const limitations = input.plot.floors > 1 ? ['هذا التحليل للدور الأرضي فقط؛ توزيع الأدوار الأخرى والسلالم غير منفذ.'] : [];
-        return json({ brief, source: 'openai', scope: 'requirements_only', requiresReview: true, limitations, model: data.model || env.OPENAI_MODEL || DEFAULT_MODEL, generatedAt: new Date().toISOString() }, 200, cors);
+        return json({ brief, source: 'claude', scope: 'requirements_only', requiresReview: true, limitations, model: data.model || env.ANTHROPIC_MODEL || DEFAULT_MODEL, generatedAt: new Date().toISOString() }, 200, cors);
       } catch { return json({ error: 'تعذر استلام اقتراح صالح خلال الوقت المحدد. بقي مخططك كما هو؛ حاول لاحقاً.' }, 502, cors); }
     }
     if (isApi) return json({ error: 'مسار غير متاح.' }, 404);
