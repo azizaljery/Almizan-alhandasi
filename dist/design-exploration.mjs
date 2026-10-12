@@ -34,9 +34,11 @@ export function explorationSpecs(seed = 1, { routeFocused = false } = {}) {
     }
   }
   for (const variant of [0,1,2]) specs.push({ shape: 'rect', key: `rect-organization-${seed}-${variant}`, mode: -1, widthRatio: 1, seed, search: { variant } });
+  for (const variant of [0,1,2]) specs.push({ shape: 'rect', key: `rect-clustered-${seed}-${variant}`, mode: -1, widthRatio: 1, seed, search: { topology: 'clustered', variant } });
   return specs;
 }
 export function conceptFor(spec, shape) {
+  if (spec.search?.topology === 'clustered') return { tag: 'مجموعات وردهات مترابطة', form: 'ردهات قصيرة متزاحة وروابط عرضية', massing: shape, idea: 'بحث محدود في مجموعات أمامية ووسطية وخلفية، لكل منها ردهة وصول قصيرة؛ تربطها ردهات عرضية مع حفظ البرنامج والأبعاد.', bestFor: 'مقارنة تنظيم الحركة بين مجموعات الغرف', tradeoff: 'قد تزيد المساحة غير الموزعة ومسافة بعض المسارات؛ ليس تخطيطًا حرًا أو إثباتًا لفصل الخصوصية' };
   const form = { rect: 'كتلة واحدة ورواق مركزي', l: 'جناحان حول حديقة جانبية', u: 'أجنحة تحيط بباحة مفتوحة' }[shape];
   const base = concepts[spec.mode >= 3 ? (spec.mode - 3) % concepts.length : Math.max(0, spec.mode)];
   return { ...base, tag: spec.search ? 'تنظيم صفوف وفروع وصول' : spec.mode < 0 ? 'التوزيع المرجعي' : base.tag,

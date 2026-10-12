@@ -33,7 +33,7 @@
  */
 /**
  * Internal (non-contract) planning types.
- * @typedef {{ rooms: ProgramRoom[], depth: number, branch: number }} PackRow
+ * @typedef {{ rooms: ProgramRoom[], depth: number, branch: number, placements: Record<string, {w: number, h: number}> }} PackRow
  * @typedef {{ rows: PackRow[], height: number }} Packed
  * @typedef {Packed & { score: number }} ScoredPacked
  * @typedef {{ left: Packed, right: Packed, height: number, score: number }} ZonePair
@@ -42,7 +42,7 @@
  * @typedef {{ width: number, depth: number, zones: ZoneSet, score: number, requiredArea: number, singleSided: false }} WingSolution
  * @typedef {{ width: number, depth: number, packed: Packed, score: number, requiredArea: number, singleSided: true }} SingleWingSolution
  * @typedef {Rect & { id: string }} WingBox
- * @typedef {{ id: string, box: WingBox, program: ProgramRoom[], openEdges?: Edge[] }} ArmBase
+ * @typedef {{ id: string, box: WingBox, program: ProgramRoom[], openEdges?: Edge[], clustered?: boolean }} ArmBase
  * @typedef {ArmBase & { single?: false, zone: ZoneSet }} DoubleArm
  * @typedef {ArmBase & { single: true, zone: SingleWingSolution, corridorSide: 'left'|'right', vertical?: false }} SingleArm
  * @typedef {ArmBase & { single: true, zone: SingleWingSolution, corridorSide: 'top'|'bottom', vertical: true }} VerticalArm
@@ -65,6 +65,7 @@ export const TYPES = {
   kitchen: { name: 'مطبخ', area: 18, min: 2.2, color: '#e3edda' },
   bath: { name: 'دورة مياه', area: 6, min: 1.5, color: '#dcebf2' },
   storage: { name: 'مستودع', area: 8, min: 1.3, color: '#e9e5df' },
+  office: { name: 'مكتب', area: 12, min: 2.2, color: '#e6e0f2' },
   service: { name: 'غرفة خدمة', area: 12, min: 2.2, color: '#f0e0dd' },
   corridor: { name: 'ممر إضافي', area: 8, min: 1.2, color: '#f4f1e8' },
 };
@@ -86,6 +87,7 @@ export const ROOF_POLICY_SUPPORT = Object.freeze({
   COVERED_ATRIUM: Object.freeze({ status: 'reserved', emitted: false, quantities: false, rendering: false }),
 });
 export const GEOMETRY = { exterior: .25, partition: .15, corridor: 1.6, branch: 1.2, height: 3.2 };
+export const RECT_SEARCH_VERSION = '2.4.0-clustered-1';
 const E = 1e-5, T = GEOMETRY.partition, X = GEOMETRY.exterior;
 /** @template T @param {T[]} list @param {(v: T) => number} fn @returns {number} */
 const sum = (list, fn) => list.reduce((a, v) => a + fn(v), 0);
@@ -259,7 +261,9 @@ export function normalizeRooms(raw) {
   if (!Array.isArray(raw) || !raw.length || raw.length > 30) throw Error('البرنامج يحتاج من 1 إلى 30 فراغاً.');
   return raw.map((r, i) => {
     if (!r || typeof r.name !== 'string' || !r.name.trim() || r.name.length > 70 || !Object.hasOwn(TYPES, r.type) || !Number.isFinite(r.area) || r.area < 4 || r.area > 120 || !Object.hasOwn(POSITIONS, r.position) || !Object.hasOwn(SIDES, r.side)) throw Error('راجع اسم ونوع ومساحة وموقع الفراغ رقم ' + (i + 1) + '؛ المساحة بين 4 و120 م².');
-    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side };
+    const dimensions = r.dimensions ?? r.exactDimensionsM ?? null;
+    if (dimensions !== null && (!dimensions || !Number.isFinite(dimensions.width) || !Number.isFinite(dimensions.length) || dimensions.width < 1 || dimensions.length < 1 || dimensions.width > 60 || dimensions.length > 60 || Math.abs(dimensions.width * dimensions.length - r.area) > 1e-4)) throw Error('أبعاد الفراغ رقم ' + (i + 1) + ' غير صالحة أو لا تطابق مساحته. تُعامل الأبعاد الصريحة كقيد هندسي، والمساحة ناتجة من حاصل ضربها.');
+    return { id: 'room-' + i, name: r.name.trim(), type: r.type, area: r.area, targetArea: r.area, position: r.position, side: r.side, ...(dimensions ? { dimensions: { width: dimensions.width, length: dimensions.length, ...(dimensions.allowRotation === false ? { allowRotation: false } : {}) } } : {}) };
   });
 }
 /** @param {{ bedrooms?: number, majlis?: number, baths?: number, kitchens?: number, halls?: number, dining?: number }} [counts] @returns {RoomRequest[]} */
@@ -277,11 +281,75 @@ export function defaultRooms({ bedrooms = 4, majlis = 2, baths = 3, kitchens = 1
   return result;
 }
 
+/** @typedef {{roomIds: string[], relation: 'near'|'far', weight?: number}} RectRelationshipInput */
+/** @typedef {{variant?: number, topology?: 'spine'|'clustered', relationships?: RectRelationshipInput[]}} RectSearchInput */
+/** @typedef {{roomIds: string[], relation: 'near'|'far', weight: number}} RectRelationship */
+/** @typedef {{variant: number, topology: 'spine'|'clustered', relationships: RectRelationship[]}} RectSearch */
+/** @typedef {{search?: RectSearchInput}} GenerateOptions */
+// Opt-in bounded rectangular search. These are soft relationships; room count,
+// side, position, area and locked dimensions remain feasibility constraints.
+/** @param {RectSearchInput | undefined} raw @param {ProgramRoom[]} program @param {ShapeKey} shape @returns {RectSearch | null} */
+function normalizeSearch(raw, program, shape) {
+  if (raw === undefined) return null;
+  if (shape !== 'rect') throw Error('SEARCH_RECTANGLE_ONLY: البحث العلاقي متاح للمستطيل فقط.');
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !Number.isInteger(raw.variant ?? 0) || (raw.variant ?? 0) < 0 || (raw.variant ?? 0) > 2) throw Error('INVALID_RECT_SEARCH: نمط البحث يجب أن يكون 0 أو 1 أو 2.');
+  if (raw.topology !== undefined && !['spine','clustered'].includes(raw.topology)) throw Error('INVALID_SEARCH_TOPOLOGY');
+  const relationships = raw.relationships ?? [];
+  if (!Array.isArray(relationships) || relationships.length > 8) throw Error('INVALID_RELATIONSHIPS: يسمح بثماني علاقات مكانية كحد أقصى.');
+  return { variant: raw.variant ?? 0, topology: raw.topology ?? 'spine', relationships: relationships.map(relation => {
+    if (!relation || !Array.isArray(relation.roomIds) || relation.roomIds.length !== 2 || relation.roomIds[0] === relation.roomIds[1] || !relation.roomIds.every(id => program.some(room => room.id === id)) || !['near', 'far'].includes(relation.relation) || !Number.isFinite(relation.weight ?? 1) || (relation.weight ?? 1) <= 0 || (relation.weight ?? 1) > 10) throw Error('INVALID_RELATIONSHIP: العلاقة تحتاج غرفتين موجودتين وقربًا أو بعدًا ووزنًا موجبًا لا يتجاوز 10.');
+    return { roomIds: [...relation.roomIds], relation: relation.relation, weight: relation.weight ?? 1 };
+  }) };
+}
+
+// Rectilinear route proxy on the connected circulation graph. It deliberately
+// uses corridor IDs and physical rectangle joins rather than assuming corridors[0]
+// is a spine. This is a search objective, not a clearance/code-compliance proof.
+/** @param {WingGeometry} geometry @param {RectRelationship[]} relationships @returns {number} */
+export function routeObjective(geometry, relationships) {
+  const byId = new Map(geometry.corridors.map(c => [c.id, c]));
+  const center = c => ({ x:c.x+c.w/2, y:c.y+c.h/2 });
+  const manhattan = (a,b) => Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+  const joins = (a,b) => {
+    const x0=Math.max(a.x,b.x), x1=Math.min(a.x+a.w,b.x+b.w), y0=Math.max(a.y,b.y), y1=Math.min(a.y+a.h,b.y+b.h);
+    if (x1 >= x0-E && y1 >= y0-E) return {x:(x0+x1)/2,y:(y0+y1)/2};
+    if (x1 >= x0-E && (Math.abs(a.y+a.h-b.y)<E || Math.abs(b.y+b.h-a.y)<E)) return {x:(x0+x1)/2,y:Math.abs(a.y+a.h-b.y)<E?(a.y+a.h+b.y)/2:(b.y+b.h+a.y)/2};
+    if (y1 >= y0-E && (Math.abs(a.x+a.w-b.x)<E || Math.abs(b.x+b.w-a.x)<E)) return {x:Math.abs(a.x+a.w-b.x)<E?(a.x+a.w+b.x)/2:(b.x+b.w+a.x)/2,y:(y0+y1)/2};
+    return null;
+  };
+  const graph = new Map([...byId.keys()].map(id=>[id,[]]));
+  for (const [aId,bId] of geometry.links) {
+    if (!byId.has(aId)||!byId.has(bId)) continue;
+    const a=byId.get(aId), b=byId.get(bId), portal=joins(a,b);
+    if (!portal) continue; // Ignore a claimed link with no physical corridor join.
+    const cost=manhattan(center(a),portal)+manhattan(portal,center(b));
+    graph.get(aId).push([bId,cost]); graph.get(bId).push([aId,cost]);
+  }
+  const distancesFrom = source => {
+    const distance=new Map([[source,0]]), pending=new Set(graph.keys());
+    while(pending.size){let current=null,best=Infinity;for(const id of pending)if((distance.get(id)??Infinity)<best){current=id;best=distance.get(id);}if(current===null)break;pending.delete(current);for(const [next,cost] of graph.get(current)){const candidate=best+cost;if(candidate<(distance.get(next)??Infinity))distance.set(next,candidate);}}
+    return distance;
+  };
+  const roomAccess = room => {
+    const corridor=byId.get(room.corridorId); if(!corridor) throw Error('MISSING_PACKED_ACCESS');
+    const point=room.doorSide==='front'?{x:room.x+room.w/2,y:room.y-T/2}:room.doorSide==='right'?{x:room.x+room.w+T/2,y:room.y+room.h/2}:{x:room.x-T/2,y:room.y+room.h/2};
+    return {corridor,point};
+  };
+  return relationships.reduce((score, relation) => {
+    const rooms = relation.roomIds.map(id => geometry.rooms.find(room => room.id === id));
+    if (rooms.some(room => !room)) return score; // another position zone is scored at solveWing
+    const [a,b]=rooms.map(room=>roomAccess(/** @type {Room} */(room))), ca=center(a.corridor), cb=center(b.corridor);
+    const distance=a.corridor.id===b.corridor.id?manhattan(a.point,b.point):manhattan(a.point,ca)+(distancesFrom(a.corridor.id).get(b.corridor.id)??Infinity)+manhattan(cb,b.point);
+    if (!Number.isFinite(distance)) return score + 1e6 * relation.weight;
+    return score + distance * relation.weight * (relation.relation === 'near' ? 1 : -1);
+  }, 0);
+}
+
 // ── packWing: partition a set of rooms into full-width rows within ONE rectangular wing.
 // Unchanged core algorithm — this is the proven part. Small rooms share a row with a cross passage.
 // A bounded search can reject a program it cannot fit; this is not a proof of impossibility.
-/** @param {ProgramRoom[]} rooms @param {number} width @returns {Packed | null} */
-function packWing(rooms, width) {
+/** @param {ProgramRoom[]} rooms @param {number} width @param {RectSearch | null} [search] @returns {Packed | null} */
+function packWing(rooms, width, search = null) {
   if (!rooms.length) return { rows: [], height: 0 };
   /** @type {Map<string, ScoredPacked | null>} */
   const memo = new Map(); let visits = 0;
@@ -291,28 +359,58 @@ function packWing(rooms, width) {
     const key = list.map(r => r.id).sort().join(',');
     if (memo.has(key)) return /** @type {ScoredPacked | null} */ (memo.get(key));
     if (++visits > 1800) return null;
-    const first = [...list].sort((a, b) => a.area - b.area)[0], other = list.filter(r => r !== first);
+    const first = [...list].sort((a, b) => search?.variant === 1 ? b.area - a.area : a.area - b.area)[0], other = list.filter(r => r !== first);
     const groups = [[first]];
     other.forEach((r, i) => { groups.push([first, r]); other.slice(i + 1).forEach(s => groups.push([first, r, s])); });
     /** @type {ScoredPacked | null} */
     let best = null;
     for (const group of groups) {
-      const depth = sum(group, r => r.area) / (width - T * (group.length - 1));
-      if (group.some(r => depth < TYPES[r.type].min - E || r.area / depth < TYPES[r.type].min - E || Math.max(depth * depth / r.area, r.area / (depth * depth)) > 5)) continue;
+      const lockedDepths = [...new Set(group.flatMap(r => r.dimensions ? [r.dimensions.width, r.dimensions.length] : []))];
+      const depths = lockedDepths.length ? lockedDepths : [sum(group, r => r.area) / (width - T * (group.length - 1))];
+      /** @type {{depth: number, placements: Record<string, {w: number, h: number}>, usedWidth: number}[]} */
+      const options = [];
+      for (const depth of depths) {
+        if (!Number.isFinite(depth) || depth <= 0) continue;
+        const choices = group.map(r => {
+          const candidates = r.dimensions
+            ? [{ w: r.dimensions.width, h: r.dimensions.length }, ...(r.dimensions.allowRotation === false ? [] : [{ w: r.dimensions.length, h: r.dimensions.width }])].filter(d => Math.abs(d.h - depth) <= E)
+            : [{ w: r.area / depth, h: depth }];
+          return candidates.filter(d => d.w >= TYPES[r.type].min - E && d.h >= TYPES[r.type].min - E && (r.dimensions || Math.max(d.w / d.h, d.h / d.w) <= 5));
+        });
+        if (choices.some(items => !items.length)) continue;
+        /** @param {number} index @param {{w: number, h: number}[]} selected */
+        const visit = (index, selected) => {
+          if (index === group.length) {
+            const usedWidth = sum(selected, d => d.w) + T * (selected.length - 1);
+            if (usedWidth <= width + E) options.push({ depth, placements: Object.fromEntries(group.map((r, i) => [r.id, selected[i]])), usedWidth });
+            return;
+          }
+          for (const choice of choices[index]) visit(index + 1, [...selected, choice]);
+        };
+        visit(0, []);
+      }
+      if (!options.length) continue;
       const rest = solve(list.filter(r => !group.includes(r)));
       if (!rest) continue;
-      const branch = group.length > 1 ? GEOMETRY.branch + T : 0;
-      const height = depth + branch + (rest.rows.length ? T : 0) + rest.height;
-      const aspectPenalty = sum(group, r => Math.abs(Math.log((r.area / depth) / depth))) * .035;
-      const score = height + rest.score - rest.height + aspectPenalty;
-      if (!best || score < best.score) best = { rows: [{ rooms: group, depth, branch }, ...rest.rows], height, score };
+      for (const option of options) {
+        const branch = group.length > 1 || option.usedWidth < width - .02 ? GEOMETRY.branch + T : 0;
+        const height = option.depth + branch + (rest.rows.length ? T : 0) + rest.height;
+        const aspectPenalty = sum(group, r => Math.abs(Math.log(option.placements[r.id].w / option.placements[r.id].h))) * .035;
+        const accessPenalty = search?.variant === 1 ? (group.length - 1) * 3 : search?.variant === 2 ? (group.length === 1 ? 2 : 0) : 0;
+        const pairPenalty = (search?.relationships || []).reduce((total, relation) => {
+          const together = relation.roomIds.every(id => group.some(room => room.id === id));
+          return total + (together ? (relation.relation === 'near' ? -2 : 2) * relation.weight : 0);
+        }, 0);
+        const score = height + rest.score - rest.height + aspectPenalty + Math.max(0, width - option.usedWidth) * .15 + accessPenalty + pairPenalty;
+        if (!best || score < best.score) best = { rows: [{ rooms: group, depth: option.depth, placements: option.placements, branch }, ...rest.rows], height, score };
+      }
     }
     memo.set(key, best); return best;
   }
   return solve(rooms);
 }
-/** @param {ProgramRoom[]} rooms @param {number} width @returns {ZonePair | null} */
-function packZone(rooms, width) {
+/** @param {ProgramRoom[]} rooms @param {number} width @param {RectSearch | null} [search] @returns {ZonePair | null} */
+function packZone(rooms, width, search = null) {
   let states = [{ left: rooms.filter(r => r.side === 'left'), right: rooms.filter(r => r.side === 'right') }];
   for (const r of rooms.filter(r => r.side === 'any').sort((a, b) => b.area - a.area)) {
     states = states.flatMap(s => [{ left: [...s.left, r], right: s.right }, { left: s.left, right: [...s.right, r] }]);
@@ -322,14 +420,17 @@ function packZone(rooms, width) {
   /** @type {Map<string, Packed | null>} */
   const cache = new Map();
   /** @param {ProgramRoom[]} list */
-  const pack = list => { const key = list.map(r => r.id).sort().join(','); if (!cache.has(key)) cache.set(key, packWing(list, width)); return cache.get(key); };
+  const pack = list => { const key = list.map(r => r.id).sort().join(','); if (!cache.has(key)) cache.set(key, packWing(list, width, search)); return cache.get(key); };
   /** @type {ZonePair | null} */
   let best = null;
   for (const s of states) {
     const left = pack(s.left), right = pack(s.right);
     if (!left || !right) continue;
     const height = Math.max(left.height, right.height);
-    const score = height + Math.abs(left.height - right.height) * .02;
+    const projected = { zones: [{ position: rooms[0]?.position || 'middle', left, right, height, score: 0 }] };
+    const relationshipPenalty = search?.relationships.length ? routeObjective(buildWingGeometry(projected, { id: 'a', x: 0, y: 0, w: width * 2 + X * 2 + T * 2 + GEOMETRY.corridor, h: height + X * 2 }), search.relationships) : 0;
+    const accessPenalty = search?.variant === 1 ? [...left.rows, ...right.rows].filter(row => row.branch).length * .5 : search?.variant === 2 ? [...left.rows, ...right.rows].filter(row => row.rooms.length === 1).length : 0;
+    const score = height + Math.abs(left.height - right.height) * .02 + relationshipPenalty + accessPenalty;
     if (!best || score < best.score) best = { left, right, height, score };
   }
   return best;
@@ -363,7 +464,7 @@ function buildWingGeometry(zone, wingBox) {
         const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
         if (side === 'right') order.reverse();
         let rx = x;
-        order.forEach(r => { const w = r.area / row.depth; rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
+        order.forEach(r => { const d = row.placements[r.id]; const w = d.w; rooms.push({ ...r, x: rx, y, w, h: d.h, resolvedSide: side, corridorId, doorSide: row.branch ? 'front' : side === 'left' ? 'right' : 'left' }); rx += w + T; });
         y += row.depth + (rowIndex < packed.rows.length - 1 ? T : 0);
       });
       const leftover = zoneEntry.height - packed.height - (packed.rows.length ? T : 0);
@@ -372,6 +473,58 @@ function buildWingGeometry(zone, wingBox) {
     cursor += zoneEntry.height + (zoneIndex < active.length - 1 ? T : 0);
   });
   return { rooms, corridors, reserves, links, wing };
+}
+
+// Bounded offset-cluster family. Each position cohort owns a short hall; clear
+// transverse vestibules join those halls. No full-depth spine is inserted. Width
+// and room packing remain solved before geometry, never warped after validation.
+const CLUSTER_OFFSET = 3, CLUSTER_JOIN = GEOMETRY.corridor + 2 * T;
+/** @param {ZoneSet} zone @param {WingBox} box @param {number} variant @returns {WingGeometry} */
+function buildClusterGeometry(zone, box, variant) {
+  const active = zone.zones.filter(z => z.height);
+  const width = box.w - CLUSTER_OFFSET;
+  const rooms = /** @type {Room[]} */ ([]), corridors = /** @type {Corridor[]} */ ([]), links = /** @type {Link[]} */ ([]), reserves = /** @type {Reserve[]} */ ([]);
+  let y = box.y + X;
+  active.forEach((z, i) => {
+    // The entrance cohort stays central. Subsequent clusters alternate or fan
+    // toward opposite offsets; variants also choose different feasible row packs.
+    const offset = i === 0 ? CLUSTER_OFFSET / 2 : variant === 1 ? (i === 1 ? CLUSTER_OFFSET : 0) : (i === 1 ? 0 : CLUSTER_OFFSET);
+    const x = box.x + offset;
+    const geo = buildWingGeometry({ zones: [z] }, { id: 'cluster-' + i, x, y: y - X, w: width, h: z.height + 2 * X });
+    const originalHall = geo.corridors[0].id, hallId = 'hall-' + z.position;
+    geo.rooms.forEach(r => { if (r.corridorId === originalHall) r.corridorId = hallId; });
+    geo.corridors[0].id = hallId;
+    geo.links = geo.links.map(([a,b]) => [a === originalHall ? hallId : a,b === originalHall ? hallId : b]);
+    const hall = geo.corridors[0];
+    if (i) { hall.y -= T; hall.h += T; }
+    if (i < active.length - 1) hall.h += T;
+    if (i) {
+      const prev = corridors.find(c => c.id === 'hall-' + active[i-1].position);
+      if (!prev) throw Error('MISSING_CLUSTER_HALL');
+      const join = { id: 'vestibule-' + i, name: 'ردهة ربط', x: Math.min(prev.x, hall.x), y: prev.y + prev.h, w: Math.abs(prev.x - hall.x) + GEOMETRY.corridor, h: GEOMETRY.corridor };
+      corridors.push(join); links.push([prev.id,join.id],[join.id,hall.id]);
+    }
+    rooms.push(...geo.rooms); corridors.push(...geo.corridors); links.push(...geo.links); reserves.push(...geo.reserves);
+    if (offset > E) reserves.push({name:'غير موزّع بجوار المجموعة',x:box.x+X,y,w:offset,h:z.height});
+    if (CLUSTER_OFFSET-offset > E) reserves.push({name:'غير موزّع بجوار المجموعة',x:x+width-X,y,w:CLUSTER_OFFSET-offset,h:z.height});
+    y += z.height + CLUSTER_JOIN;
+  });
+  return { rooms, corridors, links, reserves, wing: (width - 2*X - 2*T - GEOMETRY.corridor)/2 };
+}
+/** @param {Rect} f @param {ProgramRoom[]} program @param {boolean} sideways @param {RectSearch} search @returns {ShapePlan | null} */
+function planClusters(f, program, sideways, search) {
+  const count = new Set(program.map(r => r.position)).size;
+  if (count < 2) return null;
+  const maxWidth = Math.min(23, sideways ? f.h : f.w);
+  const maxDepth = sideways ? f.w : f.h;
+  const solved = solveWing(program, maxWidth - CLUSTER_OFFSET, maxDepth - (count-1)*(CLUSTER_JOIN-T), search);
+  if (!solved) return null;
+  const w = solved.width + CLUSTER_OFFSET, h = solved.depth + (count-1)*(CLUSTER_JOIN-T);
+  const box = { id:'a', x:0, y:0, w, h };
+  const geometry = buildClusterGeometry(solved.zones, box, search.variant);
+  // Side constraints refer to the whole building, not an offset cluster's label.
+  if (geometry.rooms.some(r => r.side === 'left' && r.x+r.w > w/2+E || r.side === 'right' && r.x < w/2-E)) return null;
+  return { arms:[{id:'a',box,zone:solved.zones,program,clustered:true}], overallW:w, overallH:h, footprintPolygon:[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}] };
 }
 
 // ── Single-sided variant for a secondary arm that sits beside the main arm horizontally
@@ -414,11 +567,11 @@ function buildSingleSidedWingGeometry(solved, wingBox, corridorSide) {
     const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
     let rx = rowsX;
     order.forEach(r => {
-      const w = r.area / row.depth;
+      const d = row.placements[r.id], w = d.w;
       // Honour an explicit side request when it matches this wing's fixed layout; a room
       // asking for the corridor's own side cannot be satisfied here (single-sided wing),
       // which validateModel will correctly flag rather than silently ignore.
-      rooms.push({ ...r, x: rx, y, w, h: row.depth, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'front' : (corridorSide === 'left' ? 'left' : 'right') });
+      rooms.push({ ...r, x: rx, y, w, h: d.h, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'front' : (corridorSide === 'left' ? 'left' : 'right') });
       rx += w + T;
     });
     y += row.depth + (rowIndex < solved.packed.rows.length - 1 ? T : 0);
@@ -454,7 +607,7 @@ function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
     // The row's own total height along y (sum of each room's height plus the T gaps
     // between them) — the branch must span exactly this, not the whole available depth,
     // or it silently falls short of covering the row's later rooms (the earlier bug).
-    const rowTotalHeight = sum(row.rooms, r => r.area / row.depth) + T * (row.rooms.length - 1);
+    const rowTotalHeight = sum(row.rooms, r => row.placements[r.id].w) + T * (row.rooms.length - 1);
     if (row.branch) {
       rCorridorId = 'branch-' + wingBox.id + '-' + rowIndex;
       const branchY = corridorSide === 'top' ? corridorEndY : rowsY;
@@ -465,7 +618,7 @@ function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
     const order = [...row.rooms].sort((a, b) => TYPES[b.type].min - TYPES[a.type].min || b.area - a.area);
     let ry = rowsY;
     order.forEach(r => {
-      const h = r.area / row.depth;
+      const d = row.placements[r.id], h = d.w;
       rooms.push({ ...r, x, y: ry, w: row.depth, h, resolvedSide: resolved, corridorId: rCorridorId, doorSide: row.branch ? 'left' : (corridorSide === 'top' ? 'front' : 'back') });
       ry += h + T;
     });
@@ -477,8 +630,8 @@ function buildSingleSidedWingGeometryVertical(solved, wingBox, corridorSide) {
 }
 
 // ── Solve a single rectangular wing: try widths, run packZone, return best solution or null.
-/** @param {ProgramRoom[]} program @param {number} maxWidth @param {number} maxDepth @returns {WingSolution | null} */
-function solveWing(program, maxWidth, maxDepth) {
+/** @param {ProgramRoom[]} program @param {number} maxWidth @param {number} maxDepth @param {RectSearch | null} [search] @returns {WingSolution | null} */
+function solveWing(program, maxWidth, maxDepth, search = null) {
   const required = sum(program, r => r.area);
   /** @type {WingSolution | null} */
   let solution = null;
@@ -488,11 +641,12 @@ function solveWing(program, maxWidth, maxDepth) {
     // packZone() may return null, leaving an entry with only `position` (height undefined).
     // The isFinite guard on the next line rejects the whole width before any entry is used,
     // so past it every entry is a SolvedZone.
-    const zones = /** @type {SolvedZone[]} */ (/** @type {Position[]} */ (Object.keys(POSITIONS)).map(position => ({ position, ...packZone(program.filter(r => r.position === position), wing) })));
+    const zones = /** @type {SolvedZone[]} */ (/** @type {Position[]} */ (Object.keys(POSITIONS)).map(position => ({ position, ...packZone(program.filter(r => r.position === position), wing, search) })));
     if (zones.some(z => !Number.isFinite(z.height))) continue;
     const depth = X * 2 + sum(zones, z => z.height) + T * (zones.filter(z => z.height).length - 1);
     if (depth > maxDepth + E) continue;
-    const score = width * depth + Math.abs(width - depth) * .2;
+    const relationshipPenalty = search?.relationships.length ? routeObjective(buildWingGeometry({ zones }, { id: 'a', x: 0, y: 0, w: width, h: depth }), search.relationships) * 5 : 0;
+    const score = width * depth + Math.abs(width - depth) * .2 + relationshipPenalty;
     if (!solution || score < solution.score) solution = { width, depth, zones: { zones }, score, requiredArea: required, singleSided: false };
   }
   return solution;
@@ -541,10 +695,11 @@ function solveSingleSidedWing(rawProgram, maxWidth, maxDepth) {
 }
 
 // ── Shape strategies: each returns { arms: [{id, box, zone, program}], overallW, overallH } or null.
-/** @param {Rect} f @param {ProgramRoom[]} program @param {boolean} sideways @returns {ShapePlan | null} */
-function planRectangle(f, program, sideways) {
+/** @param {Rect} f @param {ProgramRoom[]} program @param {boolean} sideways @param {RectSearch | null} [search] @returns {ShapePlan | null} */
+function planRectangle(f, program, sideways, search = null) {
+  if (search?.topology === 'clustered') return planClusters(f, program, sideways, search);
   const maxWidth = Math.min(20, sideways ? f.h : f.w), maxDepth = sideways ? f.w : f.h;
-  const solved = solveWing(program, maxWidth, maxDepth);
+  const solved = solveWing(program, maxWidth, maxDepth, search);
   if (!solved) return null;
   const w = solved.width, h = solved.depth;
   // footprintPolygon: the building's true outer boundary in local coordinates (x east,
@@ -775,10 +930,14 @@ function buildArmWalls(armRooms, armBox, openEdges = []) {
   return { rawWalls, portals };
 }
 
-/** @param {PlotInput} rawPlot @param {RoomRequest[]} rawRooms @returns {ValidatedDesignGeometry} */
-function generateModelCore(rawPlot, rawRooms) {
+/** @param {PlotInput} rawPlot @param {RoomRequest[]} rawRooms @param {GenerateOptions} [options] @returns {ValidatedDesignGeometry} */
+function generateModelCore(rawPlot, rawRooms, options = {}) {
   const plot = validatePlot(rawPlot), f = footprint(plot), program = normalizeRooms(rawRooms);
   const sideways = ['e', 'w'].includes(plot.entry);
+  const search = normalizeSearch(options.search, program, plot.shape);
+  // Locked dimensions are expressed in the final plot frame. The packing frame
+  // turns 90 degrees for east/west entries; never treat that as permission to rotate.
+  const packingProgram = sideways ? program.map(room => room.dimensions?.allowRotation === false ? { ...room, dimensions: { ...room.dimensions, width: room.dimensions.length, length: room.dimensions.width } } : room) : program;
   const required = sum(program, r => r.area);
   const diagnostics = footprintDiagnostics(plot);
   if (required > f.area) throw Error('مجموع مساحات الغرف (' + Math.round(required * 100) / 100 + ' م²) أكبر من المساحة المتاحة قبل إضافة الجدران والممرات. لم تتغيّر مساحاتك. ' + describeFootprint(diagnostics));
@@ -788,7 +947,7 @@ function generateModelCore(rawPlot, rawRooms) {
   const planners = plot.shape === 'rect' ? ['rect'] : [plot.shape, 'rect'];
   let plan = /** @type {ShapePlan | null} */ (null), usedShape = plot.shape, shapeFallback = false;
   for (const shapeKey of planners) {
-    plan = SHAPE_PLANNERS[shapeKey](f, program, sideways);
+    plan = SHAPE_PLANNERS[shapeKey](f, packingProgram, sideways, search);
     if (plan) { usedShape = shapeKey; shapeFallback = shapeKey !== plot.shape; break; }
   }
   if (!plan) throw Error('لم يجد محرك التخطيط توزيعاً يحافظ على المساحات والمواقع المطلوبة وممرات الوصول لهذا الشكل والأرض. جرّب تعديل المواقع أو المساحات أو أبعاد الأرض، أو اختر شكلاً آخر؛ لم تُحذف أو تُصغّر أي غرفة. ' + describeFootprint(diagnostics) + ' مساحات الغرف وحدها ' + Math.round(required * 100) / 100 + ' م² قبل الجدران والممرات.');
@@ -800,7 +959,7 @@ function generateModelCore(rawPlot, rawRooms) {
   const allRooms = /** @type {Room[]} */ ([]), allCorridors = /** @type {Corridor[]} */ ([]), allReserves = /** @type {Reserve[]} */ ([]), allLinks = /** @type {Link[]} */ ([]);
   const armGeoms = plan.arms.map(arm => {
     const shiftedBox = { ...arm.box, x: arm.box.x + offsetX, y: arm.box.y + offsetY };
-    const geo = !arm.single ? buildWingGeometry(arm.zone, shiftedBox) : arm.vertical ? buildSingleSidedWingGeometryVertical(arm.zone, shiftedBox, arm.corridorSide) : buildSingleSidedWingGeometry(arm.zone, shiftedBox, arm.corridorSide);
+    const geo = arm.clustered ? buildClusterGeometry(/** @type {ZoneSet} */ (arm.zone), shiftedBox, search?.variant ?? 0) : !arm.single ? buildWingGeometry(arm.zone, shiftedBox) : arm.vertical ? buildSingleSidedWingGeometryVertical(arm.zone, shiftedBox, arm.corridorSide) : buildSingleSidedWingGeometry(arm.zone, shiftedBox, arm.corridorSide);
     return { ...arm, box: shiftedBox, geo };
   });
   armGeoms.forEach(({ geo }) => { allRooms.push(...geo.rooms); allCorridors.push(...geo.corridors); allReserves.push(...geo.reserves); allLinks.push(...geo.links); });
@@ -899,7 +1058,7 @@ function generateModelCore(rawPlot, rawRooms) {
   const model = {
     version: 2, plot, footprint: f, building: transform.rect(buildingLocal), buildingFootprint, boundingBox, program,
     shape: usedShape, shapeFallback,
-    rooms: allRooms.map(transform.rect), corridors: allCorridors.map(transform.rect), reserves: allReserves.map(transform.rect),
+    rooms: allRooms.map(room => { const requested = program.find(item => item.id === room.id); return { ...transform.rect(room), ...(requested?.dimensions ? { dimensions: { ...requested.dimensions } } : {}) }; }), corridors: allCorridors.map(transform.rect), reserves: allReserves.map(transform.rect),
     courtyards: courtyardsLocal.map(transform.rect), links: allLinks, walls, openings, drawnFloors: 1, warnings: [],
   };
   const errors = validateModel(model);
@@ -919,10 +1078,11 @@ function generateModelCore(rawPlot, rawRooms) {
 // Public entry point. If a non-rectangular shape solves geometrically but its model is
 // rejected by validateModel, fall back to the proven rectangle rather than failing — the
 // user's rooms are never shrunk or dropped either way.
-/** @param {PlotInput} rawPlot @param {RoomRequest[]} rawRooms @returns {ValidatedDesignGeometry} @throws {Error} Arabic message if no valid layout exists */
-export function generateModel(rawPlot, rawRooms) {
-  try { return generateModelCore(rawPlot, rawRooms); }
+/** @param {PlotInput} rawPlot @param {RoomRequest[]} rawRooms @param {GenerateOptions} [options] @returns {ValidatedDesignGeometry} @throws {Error} Arabic message if no valid layout exists */
+export function generateModel(rawPlot, rawRooms, options = {}) {
+  try { return generateModelCore(rawPlot, rawRooms, options); }
   catch (error) {
+    if (options.search !== undefined) throw error;
     /** @type {ShapeKey} */
     let requested;
     try { requested = normalizeShapeKey(rawPlot?.shape); } catch { throw error; } // unsupported key: report the original error
@@ -1006,6 +1166,7 @@ export function validateModel(m) {
     placedIds.add(r.id);
     // `!(... <= E)` is NaN-safe: NaN comparisons are false, so NaN fails here instead of passing.
     if (!(Math.abs(r.w * r.h - (requested ? requested.area : NaN)) <= E)) fail('المساحة غير مطابقة لطلبك: ' + r.name);
+    if (requested?.dimensions && !(Math.abs(r.w - requested.dimensions.width) <= E && Math.abs(r.h - requested.dimensions.length) <= E || requested.dimensions.allowRotation !== false && Math.abs(r.w - requested.dimensions.length) <= E && Math.abs(r.h - requested.dimensions.width) <= E)) fail('الأبعاد الصريحة لا تطابق هندسة الفراغ: ' + r.name);
     if (r.side !== 'any' && r.resolvedSide !== r.side) fail('الجانب المطلوب لم يتحقق: ' + r.name);
     if (m.corridors.some(c => overlap(r, c))) fail('غرفة تتداخل مع ممر: ' + r.name);
   }

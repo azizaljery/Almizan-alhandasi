@@ -19,7 +19,7 @@ import {evaluatePlanPreferences,rankAzizSurvivingPreferences} from '../preferenc
 
 const CLAUDE_ID='@mizan/claude-planner';
 const CLAUDE_VERSION=RECT_SEARCH_VERSION;
-const SOURCE='cf6de1ed1339c2cdc11faeaf7cae787c6423a32f9826a18ad3eaab6ca4bff23f';
+const SOURCE='408f51b84bb52c3f67ddeb9f0e81f52adbe7c8c45751d999ed58d99521788d36';
 const ADAPTER_VERSION='control-local-preview/1.1.0';
 const PAVILION_SOURCE='1ce9f064dd41f822582ce13f70d86a3cdc8c418808c9cad5df3c653c810972a9';
 const STAGGERED_SOURCE='0300ebb2460433dcee8c44ce28be7b1bc1db403ef9721a2d922292f190abcf16';

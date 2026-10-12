@@ -7,6 +7,7 @@ import { explorationSpecs, selectDiverseWithEvidence, conceptFor, layoutDescript
 import { contentHash, canonicalJSON } from './integration/control/reference/identity.mjs';
 import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
 import { extractExplicitGeometryConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
+import { spatialRelationDescriptor } from './spatial-relations.mjs';
 
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions', staggered: 'staggered' });
 const CONCEPT = Object.freeze({
@@ -111,16 +112,30 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
     const specs = explorationSpecs(seed, { routeFocused }).filter(spec => allowedShapes.includes(spec.shape));
     if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
     if (allowedShapes.includes('staggered')) specs.push({ shape: 'staggered', key: 'staggered-baseline', mode: -1, seed });
+    const clusteredGraphSignatures = new Set();
     for (const spec of specs) {
       try {
         const composed = ['pavilions','staggered'].includes(spec.shape);
         const generated = await generateCandidate(request, spec.shape, overrides, composed ? null : spec);
+        if (spec.search?.topology === 'clustered') {
+          const graph = spatialRelationDescriptor(generated.candidate.geometry);
+          const signature = graph.valid ? JSON.stringify([graph.sharedWalls, graph.access]) : null;
+          if (!signature || clusteredGraphSignatures.has(signature)) {
+            generationRejections.push({ key: spec.key, shape: spec.shape, reason: signature ? 'SAME_CLUSTER_ACCESS_GRAPH' : 'INVALID_CLUSTER_ACCESS_GRAPH' });
+            continue;
+          }
+          clusteredGraphSignatures.add(signature);
+        }
         candidates.push({ ...generated, concept: composed ? CONCEPT[spec.shape] : conceptFor(spec, spec.shape) });
       } catch (error) { generationRejections.push({ key: spec.key, shape: spec.shape, reason: error.message }); if (spec.mode < 0) failures.push({ shape: spec.shape, reason: error.message }); }
     }
     const preferredShapes = request.softPreferences.filter(p => (p.value?.mizanKind || p.kind) === 'prefer_aesthetic').map(p => p.value?.shape).filter(Boolean);
     const baselineIds = candidates.filter(g => (/-baseline$/.test(g.candidate.alternativeKey) || ['pavilions','staggered'].includes(g.candidate.actualShape))).map(g => g.candidate.candidateId);
-    const priorityIds = [...baselineIds, ...candidates.filter(g => preferredShapes.includes(g.candidate.actualShape)).map(g => g.candidate.candidateId)];
+    // Reserve review slots for native short-hall circulation candidates after the
+    // ordinary baselines. They still pass the same history, pairwise diversity,
+    // geometry-review and AZIZ eligibility gates; priority changes ordering only.
+    const clusteredIds = candidates.filter(g => /^rect-clustered-/.test(g.candidate.alternativeKey)).map(g => g.candidate.candidateId);
+    const priorityIds = [...baselineIds, ...(routeFocused ? [] : clusteredIds), ...candidates.filter(g => preferredShapes.includes(g.candidate.actualShape)).map(g => g.candidate.candidateId)];
     if (routeFocused) {
       const metricRows = new Map();
       for (const generated of candidates) for (const row of evaluatePlanPreferences(generated.candidate.geometry, request.softPreferences)) {
@@ -150,6 +165,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
       priorityIds.push(...metricWinnerIds);
     }
     priorityIds.push(...candidates.filter(g => /-organization-/.test(g.candidate.alternativeKey)).map(g => g.candidate.candidateId));
+    if (routeFocused) priorityIds.push(...clusteredIds);
     const selection = selectDiverseWithEvidence(candidates, previous, undefined, priorityIds), diverse = selection.selected;
     searchEvidence = { ...selection.summary, attempted: specs.length, generationRejected: generationRejections.length, generationRejections, rejections: selection.rejections };
     if (!diverse.length && candidates.length && previous.length) throw Error(`لم يجد البحث الحالي أفكارًا أخرى تختلف بما يكفي ضمن هذه القيود. تأهل 0 من ${candidates.length} مرشحًا هندسيًا؛ استُبعد ${selection.summary.excludedHistory} للتشابه مع التاريخ. بقيت البدائل السابقة محفوظة؛ جرّب البحث مجددًا أو وسّع حرية توزيع الغرف.`);
