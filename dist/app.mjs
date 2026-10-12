@@ -717,7 +717,7 @@ function runPlanner(request) {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./layout-worker.mjs', import.meta.url), { type: 'module' });
     const finish = (error, result) => { clearTimeout(timer); worker.terminate(); error ? reject(Error(error)) : resolve(result); };
-    const timer = setTimeout(() => finish('استغرق البحث وقتًا أطول من المتاح؛ جرّب برنامجًا أقل أو حدّد جوانب الغرف لتقليل احتمالات التوزيع.'), 25000);
+    const timer = setTimeout(() => finish('استغرق البحث أكثر من دقيقتين؛ أعد تحميل الصفحة وحاول مجددًا، وإن تكرر جرّب برنامجًا أقل أو حدّد جوانب الغرف لتقليل احتمالات التوزيع.'), 120000);
     worker.onmessage = event => finish(event.data.error, event.data);
     worker.onerror = () => finish('تعذّر تشغيل محرك التوزيع في المتصفح. أعد تحميل الصفحة ثم حاول مجددًا.');
     worker.postMessage(request);
