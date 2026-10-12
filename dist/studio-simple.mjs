@@ -225,9 +225,9 @@ function showDiff(diff, brief) {
   for (const message of [
     ...diff.blockers,
     ...(brief.unhandled || []).map(x => 'غير منفذ أو غير محسوم: ' + x),
-    ...(brief.questions || []).map(x => 'سؤال قبل الاعتماد: ' + x),
+    ...(brief.questions || []).map(x => 'للعلم (اختياري، يمكنك الرسم الآن وتعديله لاحقًا): ' + x),
   ]) warnings.append(create('p', '', message));
-  $('studioApprove').disabled = diff.blockers.length > 0 || !brief.rooms?.length || !!brief.questions?.length;
+  $('studioApprove').disabled = diff.blockers.length > 0 || !brief.rooms?.length;
 }
 function setBusy(busy) {
   for (const id of ['studioSubmit', 'studioLocal']) $(id).disabled = busy;

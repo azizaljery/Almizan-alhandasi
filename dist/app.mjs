@@ -1397,7 +1397,7 @@ const mizanStudioAPI = Object.freeze({
     const pending = studioPending;
     if (!pending) throw Error('لا يوجد فهم جارٍ لاعتماده؛ أعد مراجعة الطلب.');
     assertStudioOperation(pending.operation);
-    if (pending.fingerprint !== requestFingerprint(requestInput()) || pending.brief.questions?.length) throw Error('تغيّر الطلب أو يحتاج توضيحًا؛ أعد التحليل قبل الرسم.');
+    if (pending.fingerprint !== requestFingerprint(requestInput())) throw Error('تغيّر الطلب؛ أعد التحليل قبل الرسم.');
     const userMessage = [...state.studioSession.messages].reverse().find(m => m.role === 'user');
     acceptStudioUnderstanding(state.studioSession, { summary: pending.brief.summary, sourceMessageIds: userMessage ? [userMessage.id] : [], constraints: userMessage ? [{ text: pending.latest, sourceMessageId: userMessage.id }] : [], assumptions: pending.brief.assumptions || [], operationToken: pending.operation });
     const operation = beginStudioOperation(state.studioSession, 'draw');
