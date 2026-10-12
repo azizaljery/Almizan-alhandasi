@@ -12,6 +12,7 @@ try {
   page.on('dialog', dialog => dialog.accept());
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   const consoleErrors = []; page.on('console', message => { if (message.type() === 'error' && !/ERR_TUNNEL_CONNECTION_FAILED|404 \(File not found\)/.test(message.text())) consoleErrors.push(message.text()); });
+  const httpFailures = []; page.on('response', response => { if (response.status() >= 400) httpFailures.push({ status: response.status(), url: response.url() }); });
   await page.goto(process.env.MIZAN_URL || 'http://127.0.0.1:8766', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !!window.mizanStudioAPI);
   const fixture = await page.evaluate(async () => {
@@ -200,7 +201,8 @@ try {
   assert.deepEqual((await state()).model.openings, saved.model.openings);
   evidence.push('captured project Blob decodes and file reimport preserves committed geometry');
   await page.screenshot({ path: '/tmp/geometry-editor-browser.png', fullPage: false });
-  console.log(JSON.stringify({ browser: 'Chromium (Safari not run)', evidence, viewportEvidence, controlSizes, revisions: (await state()).renderedRevisions, errors, consoleErrors }, null, 2));
+  console.log(JSON.stringify({ browser: 'Chromium (Safari not run)', evidence, viewportEvidence, controlSizes, revisions: (await state()).renderedRevisions, errors, consoleErrors, httpFailures }, null, 2));
   assert.deepEqual(errors, []);
   assert.deepEqual(consoleErrors, []);
+  assert.ok(httpFailures.every(item => item.url.endsWith('/api/archive/session')), JSON.stringify(httpFailures));
 } finally { await browser.close(); }
