@@ -1,4 +1,4 @@
-name = "gentle-sun-5ef5"
+name = "almizan-handasi"
 main = "worker/server.mjs"
 compatibility_date = "2026-09-19"
 workers_dev = true
@@ -7,8 +7,8 @@ workers_dev = true
 enabled = true
 
 # Secrets are configured remotely, never committed here:
-# OPENAI_API_KEY
-# OPENAI_MODEL
+# ANTHROPIC_API_KEY
+# ANTHROPIC_MODEL (optional, default claude-sonnet-5-5)
 # MIZAN_ACCESS_CODE
 # Optional: ALLOWED_ORIGIN
 

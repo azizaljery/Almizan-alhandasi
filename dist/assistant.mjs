@@ -2,7 +2,7 @@ import { normalizeRooms } from './planner.mjs';
 
 export const AI_ENABLED = true;
 // Enabling the client does not verify that the separately deployed Worker is ready.
-export const AI_ENDPOINT = 'https://gentle-sun-5ef5.aljeryabod.workers.dev/api/assistant';
+export const AI_ENDPOINT = 'https://almizan-handasi.aljeryabod.workers.dev/api/assistant';
 export const AI_STATUS_ENDPOINT = AI_ENDPOINT + '/status';
 
 async function fetchJSON(endpoint, options, fetcher, invalidResponseMessage) {
@@ -38,7 +38,7 @@ export async function requestBrief(input, { enabled = AI_ENABLED, endpoint = AI_
   if (!enabled) throw Error('الذكاء الاصطناعي غير مفعّل في هذه النسخة. لم يُرسل الوصف. يمكنك تعديل الغرف في الجدول والتوليد محليًا الآن.');
   if (typeof accessCode !== 'string' || !accessCode.trim()) throw Error('أدخل رمز دخول الذكاء الخاص بالموقع أولًا.');
   const data = await fetchJSON(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Mizan-Access-Code': accessCode.trim() }, body: JSON.stringify(input), signal }, fetcher, 'خدمة التحليل غير متصلة بهذا الإصدار. بقي مخططك كما هو.');
-  if (data?.source !== 'openai') throw Error('لم يتم التحقق من مصدر الاقتراح.');
+  if (data?.source !== 'claude') throw Error('لم يتم التحقق من مصدر الاقتراح.');
   return { brief: validateSuggestion(data.brief), model: data.model, limitations: Array.isArray(data.limitations) ? data.limitations.filter(s => typeof s === 'string').slice(0, 12) : [] };
 }
 

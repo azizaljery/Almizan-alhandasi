@@ -169,7 +169,7 @@ test('future assistant path accepts only validated suggestions and never changes
   const brief = { summary: 'اقتراح', questions: [], assumptions: ['المساحة افتراض'], unhandled: [], rooms: defaultRooms() }, previous = JSON.stringify(m);
   const result = await requestBrief({ prompt: 'أريد منزلاً', plot: m.plot }, { enabled: true, accessCode: 'private-code', fetcher: async (url, opts) => {
     assert.match(url, /workers\.dev\/api\/assistant$/); assert.equal(opts.credentials, 'omit'); assert.equal(opts.headers.Authorization, undefined); assert.equal(opts.headers['X-Mizan-Access-Code'], 'private-code');
-    return Response.json({ source: 'openai', brief });
+    return Response.json({ source: 'claude', brief });
   } });
   assert.equal(result.brief.rooms.length, 12); assert.equal(JSON.stringify(m), previous);
   await assert.rejects(requestBrief({}, { enabled: true, accessCode: 'x', fetcher: async () => new Response('<html>') }), /غير متصلة/);
