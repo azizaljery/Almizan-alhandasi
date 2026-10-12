@@ -62,6 +62,11 @@ export function deriveRequirements({ prompt = '', context = {}, brief = {} } = {
     ...(!context.plot?.entry ? ['ما جهة المدخل الرئيسي بالنسبة للشوارع؟'] : []),
     ...(hasGuests && hasFamily && !hasAny(source, ['مدخل مستقل', 'فصل']) ? ['هل تريد مسار ضيوف مستقلًا عن الصالة العائلية؟'] : []),
   ]).slice(0, 8);
+  const spatialRelationshipContract = buildProgramRelationshipContract({ prompt: source, program: rooms });
+  if (spatialRelationshipContract) {
+    relationships.push(...spatialRelationshipContract.relationships.map(item => ({ from: item.from, to: item.to, reason: item.proof, weight: 'شرط صريح' })));
+    questions.unshift(...spatialRelationshipContract.clarifications);
+  }
   const sorted = [...priorities].sort((a, b) => b.score - a.score);
   return {
     version: 1,
@@ -70,6 +75,7 @@ export function deriveRequirements({ prompt = '', context = {}, brief = {} } = {
     topPriorities: sorted.slice(0, 3).map(item => item.label),
     constraints,
     relationships,
+    spatialRelationshipContract,
     conflicts,
     questions,
     assumptions: unique(brief.assumptions),
@@ -79,3 +85,4 @@ export function deriveRequirements({ prompt = '', context = {}, brief = {} } = {
 }
 
 export default { buildClientContext, deriveRequirements };
+import { buildProgramRelationshipContract } from './program-relationship-contract.mjs';

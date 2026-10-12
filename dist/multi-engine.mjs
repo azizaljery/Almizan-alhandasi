@@ -8,6 +8,7 @@ import { contentHash, canonicalJSON } from './integration/control/reference/iden
 import { buildPreferenceRequests, evaluatePlanPreferences } from './preference-evidence.mjs';
 import { extractExplicitGeometryConstraints, verifyGeometryAgainstExplicitConstraints } from './design-constraints.mjs';
 import { spatialRelationDescriptor } from './spatial-relations.mjs';
+import { buildProgramRelationshipContract, validateProgramRelationshipContract, relationshipContractBlockers } from './program-relationship-contract.mjs';
 
 const SHAPE_STRATEGY = Object.freeze({ rect: 'claude-rect', l: 'balanced', u: 'u-court', pavilions: 'pavilions', staggered: 'staggered' });
 const CONCEPT = Object.freeze({
@@ -107,7 +108,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   if (plot.floors !== 1) result = await runPipeline(request, { generationOverrides: overrides });
   else {
     const candidates = [], failures = [], generationRejections = [];
-    const routeFocused = request.softPreferences.some(pref => ['avoid_long_corridors','prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_kitchen_dining_route',
+    const routeFocused = request.softPreferences.some(pref => ['avoid_long_corridors','prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_kitchen_dining_route','prefer_guest_bath_dining_route',
       'avoid_shared_guest_family_corridors','avoid_bedroom_guest_proximity'].includes(pref.value?.mizanKind || pref.kind));
     const specs = explorationSpecs(seed, { routeFocused }).filter(spec => allowedShapes.includes(spec.shape));
     if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
@@ -189,6 +190,19 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
   }
   const pairs = result.pairs;
   const models = pairs.map(modelFor);
+  const relationshipContract = buildProgramRelationshipContract({ prompt: idea, program: request.program });
+  let relationshipEvidence = null;
+  if (relationshipContract) {
+    const evidence = models.map(model => ({ model, evidence: validateProgramRelationshipContract(relationshipContract, model, request.program) }));
+    relationshipEvidence = evidence.map(({model,evidence}) => ({candidateId:model.integration?.candidateId, alternativeKey:model.integration?.alternativeKey, ...evidence}));
+    const selectedEvidence = evidence.find(row => row.model.integration?.candidateId === result.decision.selectedCandidateId);
+    if (!selectedEvidence?.evidence.eligible) {
+      const blockers = relationshipContractBlockers(selectedEvidence?.evidence);
+      const error = Error(`PROGRAM_RELATIONSHIP_REQUIREMENTS_UNSATISFIED: لم يثبت المخطط العلاقات المطلوبة (${blockers.map(row=>`${row.id}:${row.status}`).join(', ')}).`);
+      error.code = 'PROGRAM_RELATIONSHIP_REQUIREMENTS_UNSATISFIED'; error.relationshipContract = relationshipContract; error.relationshipEvidence = relationshipEvidence;
+      throw error;
+    }
+  }
   const geometryConstraints = extractExplicitGeometryConstraints({ idea });
   const geometryCheck = verifyGeometryAgainstExplicitConstraints(models, geometryConstraints);
   if (!geometryCheck.pass) throw Error('لم يتمكن المحرك من إثبات استيفاء شرط عدم وجود فناء داخلي؛ لم نعتمد أي مخطط.');

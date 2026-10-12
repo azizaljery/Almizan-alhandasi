@@ -823,7 +823,10 @@ function showBrief(brief, limitations = [], context = null) {
   if ($('aiPriorities')) $('aiPriorities').textContent = profile.topPriorities.join(' · ') || 'لم تحدد بعد';
   if ($('aiRelationships')) $('aiRelationships').textContent = profile.relationships.map(r => `${r.from} ← ${r.to}`).join(' · ') || 'لا توجد علاقة كافية للحساب';
   if ($('aiConflicts')) $('aiConflicts').textContent = profile.conflicts.join(' · ') || 'لا تعارض ظاهر في هذه القراءة';
-  const notes = [...brief.assumptions.map(s => 'افتراض: ' + s), ...brief.questions.map(s => 'سؤال: ' + s), ...brief.unhandled.map(s => 'غير منفّذ: ' + s), ...limitations];
+  const contractNotes = profile.spatialRelationshipContract
+    ? [...profile.spatialRelationshipContract.clarifications.map(s => 'سؤال هندسي: ' + s), ...profile.spatialRelationshipContract.unsupported.map(item => `حد المولد (${item.id}): ${item.reason}`)]
+    : [];
+  const notes = [...brief.assumptions.map(s => 'افتراض: ' + s), ...brief.questions.map(s => 'سؤال: ' + s), ...brief.unhandled.map(s => 'غير منفّذ: ' + s), ...contractNotes, ...limitations];
   $('aiNotes').replaceChildren(...notes.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
   $('aiReview').hidden = false; syncWorkspace();
 }

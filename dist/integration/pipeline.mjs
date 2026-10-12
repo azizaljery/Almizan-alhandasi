@@ -70,7 +70,11 @@ function searchRelationships(request) {
  const relationships=[];
  for(const preference of request.softPreferences) {
   const kind=preference.value?.mizanKind;
-  if(!['prefer_dining_access_all_majlis','prefer_dining_far_from_majlis'].includes(kind)) continue;
+  if(!['prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_guest_bath_dining_route'].includes(kind)) continue;
+  if(kind==='prefer_guest_bath_dining_route') {
+   for(const a of request.program.filter(r=>r.type==='bath')) for(const b of request.program.filter(r=>r.type==='dining')) relationships.push({roomIds:[a.id,b.id],relation:'near',weight:1});
+   continue;
+  }
   const relation=kind==='prefer_dining_far_from_majlis'?'far':'near';
   for(const a of request.program.filter(r=>r.type==='dining')) for(const b of request.program.filter(r=>r.type==='majlis')) relationships.push({roomIds:[a.id,b.id],relation,weight:1});
  }

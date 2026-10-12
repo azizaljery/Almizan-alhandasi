@@ -55,6 +55,12 @@ function promptKinds(idea) {
   const diningTopic = /سفره|طعام|dining|meal/;
   const majlisTopic = /مجلس|مجالس|majlis/;
   const dining = diningTopic.test(text), majlis = majlisTopic.test(text);
+  const bathTopic = /حمام|دوره\s+مياه|bathroom|washroom|wc/;
+  const bathDiningSection = correctedTopic(text, /حمام|دوره\s+مياه|bathroom|washroom|wc/);
+  if (bathTopic.test(text) && diningTopic.test(text) && /مرتبط|متصل|قريب|قرب|مسار|طريق|access|connect|near|route/.test(bathDiningSection)) {
+    found.push(preference('prompt:guest-bath-dining-route', 'prefer_guest_bath_dining_route',
+      'تقليل مسار الأبواب المقاس بين حمام الضيوف ومنطقة الطعام؛ لا يثبت التجاور المباشر.', { sourceText: idea }, 2));
+  }
   const diningSection = dining && majlis ? correctedTopic(text, /سفره|طعام|dining|meal/) : text;
   const routeRelation = /قريب|قرب|بعيد|مساف|اتصال|مسار|طريق|near|close|far|connect|route/.test(diningSection);
   if (dining && majlis && routeRelation) {
@@ -212,6 +218,16 @@ function pathPreference(model, pref, network) {
     return { id: pref.id, kind, label: pref.description, status: 'ESTIMATE', score: null, objective: mean, direction: 'minimize',
       detail: `متوسط مسار المطبخ إلى السفرة ${mean.toFixed(1)}م عبر الممرات المرسومة؛ ترتيب مقارن بين البدائل، دون عتبة «قريب» مفترضة.` };
   }
+  if (kind === 'prefer_guest_bath_dining_route') {
+    const baths = rooms.filter(r => r.type === 'bath'), dining = rooms.filter(r => r.type === 'dining');
+    if (!baths.length || !dining.length) return notEvaluated(pref, 'لا توجد غرفة حمام وسفرة معًا؛ لم يغيّر التقييم البرنامج.');
+    const pairs = baths.flatMap(b => dining.map(d => ({ bath: b.name, dining: d.name, path: network.betweenRooms(b.id, d.id) })));
+    if (pairs.some(p => !p.path)) return { ...notEvaluated(pref, 'تعذّر إثبات مسار أبواب متصل بين حمام الضيوف والطعام.'), status: 'FAIL', score: 0 };
+    const mean = pairs.reduce((sum, p) => sum + p.path.metres, 0) / pairs.length;
+    return { id: pref.id, kind, label: pref.description, status: 'ESTIMATE', score: null, objective: mean, direction: 'minimize',
+      data: { pairs: pairs.map(p => ({ bath: p.bath, dining: p.dining, metres: p.path.metres, corridors: p.path.spaces })) },
+      detail: `متوسط مسار الحمام إلى الطعام ${mean.toFixed(1)}م؛ قياس مقارن للمسار، ولا يعني تجاورًا مباشرًا.` };
+  }
   return null;
 }
 
@@ -303,7 +319,7 @@ function evaluateOne(model, pref) {
   }
   if (kind === 'avoid_shared_guest_family_corridors' || kind === 'avoid_bedroom_guest_shared_corridors') return sharedCorridorPreference(model, pref, circulationNetwork(model));
   if (kind === 'avoid_bedroom_guest_proximity') return bedroomGuestProximity(model, pref);
-  if (kind === 'prefer_dining_access_all_majlis' || kind === 'prefer_dining_far_from_majlis' || kind === 'prefer_kitchen_dining_route') return pathPreference(model, pref, circulationNetwork(model));
+  if (kind === 'prefer_dining_access_all_majlis' || kind === 'prefer_dining_far_from_majlis' || kind === 'prefer_kitchen_dining_route' || kind === 'prefer_guest_bath_dining_route') return pathPreference(model, pref, circulationNetwork(model));
   if (kind === 'avoid_bedroom_kitchen_sightline' || kind === 'prefer_bedroom_kitchen_sightline' || kind === 'unresolved_bedroom_kitchen_facing') return notEvaluated(pref,
     'غير مُقيّم: لا توجد هندسة خطّ رؤية بين فتحات الغرف. لن نحوّل «عدم المواجهة» إلى «عدم المجاورة» ولا نزعم تحقق الخصوصية.');
   if (kind === 'avoid_exposed_bedrooms') return notEvaluated(pref, 'غير مُقيّم: لا توجد هندسة خطوط رؤية من الخارج/المدخل إلى أبواب ونوافذ غرف النوم؛ القرب من المجالس مؤشر منفصل ولا يثبت الانكشاف.');
