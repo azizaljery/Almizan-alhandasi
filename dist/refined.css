@@ -149,3 +149,8 @@ details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-
   body.printing-board .board-stage svg{box-shadow:none;border-radius:0}
   @page{margin:8mm}
 }
+
+/* خلفيات قديمة صلبة بلون رمادي مزرق تُوحَّد مع لوحة الألوان الجديدة */
+#app .workspace-main,#app .project-snapshot,#app .workspace-layout,#app section.panel{background:var(--mz-ivory)}
+#app .area,#app .insight,#app .request-fact,#app .concept-diagram,#app .taste-card.liked{background:#f3eedf;border-color:var(--mz-line);border-radius:14px}
+#app .trial-label{background:transparent}

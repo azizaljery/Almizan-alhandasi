@@ -4,6 +4,7 @@ import { diffRoomPrograms, geometryFingerprint, composeDesignConversation } from
 import { verifyProposedProgram, extractPlotDimensions } from './brief-contract.mjs';
 
 const $ = id => document.getElementById(id);
+const POSITION_AR = { front: 'أمامي', middle: 'وسط', back: 'خلفي' }, SIDE_AR = { any: 'غير محدد', left: 'يسار', right: 'يمين' };
 const create = (tag, className, text) => {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -213,8 +214,8 @@ function showDiff(diff, brief) {
   for (const row of diff.changed) {
     const fields = row.fields.map(f => f.name === 'area'
       ? 'المساحة ' + fmt(f.from) + ' ← ' + fmt(f.to) + ' م²'
-      : f.name === 'position' ? 'الموقع ' + f.from + ' ← ' + f.to
-      : f.name === 'side' ? 'الجهة ' + f.from + ' ← ' + f.to
+      : f.name === 'position' ? 'الموقع ' + (POSITION_AR[f.from] || f.from) + ' ← ' + (POSITION_AR[f.to] || f.to)
+      : f.name === 'side' ? 'الجهة ' + (SIDE_AR[f.from] || f.from) + ' ← ' + (SIDE_AR[f.to] || f.to)
       : f.name + ': ' + JSON.stringify(f.from) + ' ← ' + JSON.stringify(f.to));
     add(row.room + ': ' + fields.join(' · '));
   }
