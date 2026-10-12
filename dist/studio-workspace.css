@@ -11,7 +11,7 @@
 .studio-model-summary>div{font-size:.88rem;line-height:1.8;color:#25344a}
 .studio-inspector .match-row{grid-template-columns:1fr;gap:6px;padding:12px 0}
 .studio-inspector .match-state{justify-self:start;grid-column:auto;grid-row:auto}
-.studio-inspector .room-inspector{display:block;margin:0;padding:14px;border-radius:12px;background:#fff}
+.studio-inspector .room-inspector{display:block;margin:0;padding:14px;border-radius:12px;background:#fff;pointer-events:none}
 .studio-inspector .room-inspector .numbers{flex-wrap:wrap;margin-top:8px}
 .studio-inspector .inline-actions{margin:0;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
 .studio-inspector .inline-actions label{grid-column:1/-1;min-width:0}
@@ -142,6 +142,14 @@
 #app.studio-active .studio-main .view{height:min(74vh,800px);min-height:520px;border-radius:8px}
 #app.studio-active .studio-3d .cb{padding:0}
 #app.studio-active .studio-inspector{position:absolute;z-index:12;inset-block-start:80px;inset-inline-start:10px;display:block;width:min(340px,calc(100% - 20px));max-height:calc(100% - 95px);overflow:auto;padding:0;border:1px solid #c9cbc2;border-radius:8px;background:rgba(250,249,245,.96);box-shadow:0 7px 24px #20282017;backdrop-filter:blur(12px)}
+#app.studio-active .studio-inspector{pointer-events:none}
+#app.studio-active .studio-inspector-body{pointer-events:none}
+#app.studio-active .studio-inspector-summary,
+#app.studio-active .studio-inspector-body button,
+#app.studio-active .studio-inspector-body input,
+#app.studio-active .studio-inspector-body select,
+#app.studio-active .studio-inspector-body a,
+#app.studio-active .studio-inspector-body summary{pointer-events:auto}
 #app.studio-active .studio-inspector-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;padding:7px 10px;cursor:pointer;list-style:none;color:#344137;font-size:.75rem;font-weight:600}
 #app.studio-active .studio-inspector-summary::-webkit-details-marker{display:none}
 #app.studio-active .studio-inspector-summary::after{content:'＋';font-size:.9rem;color:#68746b}
@@ -298,3 +306,9 @@
  #app.studio-active .studio-canvas-head .ey,#app.studio-active .studio-canvas-help{display:none}
  #app.studio-active .viewer-tools{max-height:28px}
 }
+#app.studio-active .plan-editor{pointer-events:none}
+#app.studio-active .plan-editor button,
+#app.studio-active .plan-editor input,
+#app.studio-active .plan-editor select,
+#app.studio-active .plan-editor textarea,
+#app.studio-active .plan-editor summary{pointer-events:auto}

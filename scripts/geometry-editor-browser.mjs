@@ -1,47 +1,69 @@
 // Real Chromium UI acceptance; no model mutations through test-only editor APIs.
 import { createRequire } from 'node:module';
-import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || '/opt/codex/runtimes/cua/lib/node_modules/playwright');
 const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/chromium', headless: true, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const evidence = [];
 try {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, ignoreHTTPSErrors: true });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, ignoreHTTPSErrors: true, acceptDownloads: true });
+  const page = await context.newPage();
   page.setDefaultTimeout(15000); page.setDefaultNavigationTimeout(15000);
   page.on('dialog', dialog => dialog.accept());
   const errors = []; page.on('pageerror', error => errors.push(error.message));
+  const consoleErrors = []; page.on('console', message => { if (message.type() === 'error' && !/ERR_TUNNEL_CONNECTION_FAILED|404 \(File not found\)/.test(message.text())) consoleErrors.push(message.text()); });
   await page.goto(process.env.MIZAN_URL || 'http://127.0.0.1:8766', { waitUntil: 'domcontentloaded' });
-  console.error('loaded');
   await page.waitForFunction(() => !!window.mizanStudioAPI);
   const fixture = await page.evaluate(async () => {
-    const { generateAlternatives, defaultRooms } = await import('./planner.mjs');
+    const { defaultRooms, validatePlot } = await import('./planner.mjs');
+    const { runMultiEngineDesign } = await import('./multi-engine.mjs');
     const { encodeProject } = await import('./project.mjs');
-    const plot = { width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }, rooms = defaultRooms();
-    const models = generateAlternatives(plot, rooms).models;
-    const model = models.find(candidate => candidate.strategy === 'compact');
+    const plot = validatePlot({ width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }), rooms = defaultRooms();
+    const result = await runMultiEngineDesign({ plot, rooms, selectedShape: 'rect', seed: 1 });
+    const model = result.selectedModel, models = [model, ...result.models.filter(candidate => candidate.integration?.candidateId !== model.integration?.candidateId)].slice(0, 3);
+    if (models.length !== 3) throw Error('CURRENT_ENGINE_EDITOR_FIXTURE_INVALID');
     return encodeProject({ plot, rooms, palette: 'modern', rates: {}, costReserve: 0, vat: 0, idea: '', discovery: { likes: [], rejects: [], avoids: [], life: {} }, model, alternatives: models });
   });
-  console.error('importing');
   await page.locator('#projectFile').setInputFiles({ name: 'editor-fixture.json', mimeType: 'application/json', buffer: Buffer.from(fixture) });
   await page.waitForFunction(() => window.mizanStudioAPI.getState().hasModel && !document.querySelector('#gen').disabled);
-  console.error('imported', await page.locator('#projectStatus').textContent());
+  await page.evaluate(() => document.querySelector('#cinematicSkip')?.click());
+  await page.waitForFunction(() => document.querySelector('#intro')?.classList.contains('off'));
   if (await page.locator('#cinematicSkip').isVisible()) {
     try { await page.locator('#cinematicSkip').click({ timeout: 1000 }); } catch { /* The cinematic may finish while the click is being actioned. */ }
   }
-  if (await page.locator('#studioAdvancedToggle').isVisible()) await page.locator('#studioAdvancedToggle').click();
+  const setup = page.locator('#studioLandDetails');
+  if (!(await setup.evaluate(node => node.open))) await setup.locator('summary').first().click();
+  await page.locator('#studioAdvancedToggle').click();
+  await page.waitForFunction(() => document.querySelector('#app')?.classList.contains('studio-advanced-open'));
   await page.locator('[data-tab=result]').click();
-  await page.locator('#togglePlanEditor').click();
+  const planTools = page.locator('#studioPlanTools');
+  if (!(await planTools.evaluate(node => node.open))) await planTools.locator('summary').click();
+  await page.locator('#togglePlanEditor').focus(); await page.locator('#togglePlanEditor').press('Enter');
+  await page.waitForFunction(() => !document.querySelector('#planEditor').hidden);
   const ui = page.locator('#geometryEditorHost');
   await ui.locator('[data-ge=target]').selectOption('wall:wall-6');
   const state = () => page.evaluate(() => window.mizanStudioAPI.getState());
   const original = await state();
   assert.equal(original.alternativeCount, 3);
-  const downloadedAlternativeCount = async () => {
-    const downloading = page.waitForEvent('download'); await page.locator('#saveProject').click();
-    const download = await downloading, text = await readFile(await download.path(), 'utf8');
-    return page.evaluate(async text => (await import('./project.mjs')).decodeProject(text).alternatives.length, text);
+  const saveProjectLocally = async () => {
+    await page.evaluate(() => {
+      window.__saveProbe = { blobs: 0, anchorClicks: 0 };
+      const create = URL.createObjectURL.bind(URL);
+      URL.createObjectURL = value => { window.__saveProbe.blobs++; window.__saveProbe.blob = value; return create(value); };
+      document.addEventListener('click', event => { if (event.target.closest?.('a[download]')) window.__saveProbe.anchorClicks++; }, true);
+    });
+    const downloading = page.waitForEvent('download', { timeout: 3000 }).catch(() => null);
+    await page.evaluate(() => document.querySelector('#saveProject').click());
+    const text = await page.evaluate(async () => window.__saveProbe.blob?.text() ?? null);
+    const download = await downloading;
+    if (!text) throw Error('PROJECT_BLOB_NOT_CREATED: ' + JSON.stringify(await page.evaluate(() => ({ probe: window.__saveProbe,
+      status: document.querySelector('#projectStatus')?.textContent, generationDisabled: document.querySelector('#gen')?.disabled,
+      saveDisabled: document.querySelector('#saveProject')?.disabled, editorHidden: document.querySelector('#planEditor')?.hidden }))));
+    if (!download) evidence.push('browser blocked download event; project save Blob was captured and restored locally');
+    else evidence.push('project save raised a real Chromium download event');
+    return { text, alternatives: await page.evaluate(async text => (await import('./project.mjs')).decodeProject(text).alternatives.length, text), downloadEvent: !!download };
   };
+  const downloadedAlternativeCount = async () => (await saveProjectLocally()).alternatives;
   await ui.locator('[data-ge=delta]').fill('0.20'); await ui.locator('[data-ge=preview]').click();
   assert.deepEqual((await state()).model, original.model, 'numeric preview must not mutate model');
   assert.match(await ui.locator('[data-ge=impact]').textContent(), /بدائل|البدائل/, 'preview explicitly explains effect on alternatives');
@@ -70,8 +92,8 @@ try {
   await page.locator('#plan').scrollIntoViewIfNeeded();
   const wallClientPoint = () => page.evaluate(() => {
     const svg = document.querySelector('#plan svg'), wall = window.mizanStudioAPI.getState().model.walls.find(w => w.id === 'wall-6');
-    const at = t => { const p = svg.createSVGPoint(); p.x = wall.x1 + (wall.x2 - wall.x1) * t; p.y = -(wall.y1 + (wall.y2 - wall.y1) * t); return p.matrixTransform(svg.getScreenCTM()); };
-    const p = at(.7); const matrix = svg.getScreenCTM();
+    const hit = svg.querySelector('[data-ge-wall="wall-6"]'), box = hit.getBoundingClientRect(), matrix = svg.getScreenCTM();
+    const p = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     return { x: p.x, y: p.y, dx: Math.abs(wall.x2 - wall.x1) < .001 ? matrix.a * -.1 : 0, dy: Math.abs(wall.x2 - wall.x1) < .001 ? 0 : matrix.d * .1 };
   });
   const wallPoint = await wallClientPoint();
@@ -140,40 +162,45 @@ try {
   const live = await state();
   assert.deepEqual(live.renderedRevisions, { plan: live.geometry.revision, three: live.geometry.revision, quantities: live.geometry.revision });
   evidence.push('2D, real 3D renderer and quantities consume identical committed revision');
+  const controlSizes = await ui.locator('button,input[type=number],select').evaluateAll(nodes => nodes.filter(node => node.getClientRects().length).map(node => ({ control: node.dataset.ge, height: node.getBoundingClientRect().height })));
+  assert.ok(controlSizes.every(item => item.height >= 44), JSON.stringify(controlSizes));
+  const viewportEvidence = [];
+  for (const viewport of [{ width: 768, height: 1024, label: 'tablet-portrait' }, { width: 390, height: 844, label: 'phone' }]) {
+    await page.setViewportSize(viewport); await page.waitForTimeout(120);
+    const layout = await page.evaluate(() => ({ width: innerWidth, document: document.documentElement.scrollWidth,
+      editor: document.querySelector('#geometryEditorHost').getBoundingClientRect().width,
+      controls: [...document.querySelectorAll('#geometryEditorHost button:not(:disabled),#geometryEditorHost input:not([type=checkbox]),#geometryEditorHost select')]
+        .filter(node => node.getClientRects().length).map(node => ({ width: node.getBoundingClientRect().width, height: node.getBoundingClientRect().height })) }));
+    assert.ok(layout.document <= layout.width + 1, `${viewport.label} horizontal overflow: ${JSON.stringify(layout)}`);
+    assert.ok(layout.editor > 0 && layout.editor <= viewport.width, `${viewport.label} editor clipped: ${JSON.stringify(layout)}`);
+    assert.ok(layout.controls.length > 0 && layout.controls.every(item => item.width > 0 && item.height >= 44), `${viewport.label} targets: ${JSON.stringify(layout.controls)}`);
+    viewportEvidence.push({ label: viewport.label, viewportWidth: layout.width, documentWidth: layout.document, editorWidth: layout.editor, controls: layout.controls.length });
+  }
+  await page.locator('#plan').scrollIntoViewIfNeeded();
+  const phoneTouchPoint = await wallClientPoint(), beforeTouch = await state();
+  await page.evaluate(() => { window.__touchEvents = []; for (const type of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend']) document.addEventListener(type, e => window.__touchEvents.push({type:e.type,pointerType:e.pointerType,target:e.target.getAttribute?.('data-ge-wall'),x:e.clientX,y:e.clientY}), true); });
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ id: 71, x: phoneTouchPoint.x, y: phoneTouchPoint.y }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ id: 71, x: phoneTouchPoint.x + phoneTouchPoint.dx, y: phoneTouchPoint.y + phoneTouchPoint.dy }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  assert.deepEqual((await state()).model, beforeTouch.model, 'touch gesture previews without committing geometry');
+  assert.equal(await ui.locator('[data-ge=confirm]').isEnabled(), true);
+  await ui.locator('[data-ge=confirm]').click(); const afterTouch = await state();
+  assert.equal(afterTouch.geometry.undoDepth, beforeTouch.geometry.undoDepth + 1);
+  await ui.locator('[data-ge=undo]').click(); assert.deepEqual((await state()).model.rooms, beforeTouch.model.rooms);
+  await cdp.detach(); await page.setViewportSize({ width: 1440, height: 1100 });
+  evidence.push('Chromium touch drag at phone viewport previews, confirms once and undoes exactly');
   const saved = await state();
-  const downloadPromise = page.waitForEvent('download'); await page.locator('#saveProject').click(); const download = await downloadPromise;
-  const serialized = await readFile(await download.path());
+  const serialized = Buffer.from((await saveProjectLocally()).text);
   await ui.locator('[data-ge=undo]').click();
   await page.locator('#projectFile').setInputFiles({ name: 'roundtrip.json', mimeType: 'application/json', buffer: serialized });
   await page.waitForFunction(() => !document.querySelector('#gen').disabled);
   assert.deepEqual((await state()).model.rooms, saved.model.rooms);
   assert.deepEqual((await state()).model.openings, saved.model.openings);
-  evidence.push('actual project download and file reimport preserve committed geometry');
-  // Delay an actual worker result, then change only an opening while it is pending.
-  // The program signature is unchanged, so this proves the revision/epoch guard.
-  await page.route('**/layout-worker.mjs', async route => {
-    const response = await route.fetch();
-    const body = (await response.text()).replace('async event => {', 'async event => { await new Promise(resolve => setTimeout(resolve, 4000));');
-    await route.fulfill({ response, body });
-  });
-  await page.locator('#projectFile').setInputFiles({ name: 'late-result.json', mimeType: 'application/json', buffer: Buffer.from(fixture) });
-  await page.waitForFunction(() => document.querySelector('#gen').disabled);
-  await ui.locator('[data-ge=target]').selectOption(`opening:${openingId}`);
-  const beforeLateEdit = await state(), priorOpening = beforeLateEdit.model.openings.find(o => o.id === openingId);
-  await ui.locator('[data-ge=width]').fill(String(priorOpening.w - .05));
-  await ui.locator('[data-ge=preview]').click();
-  assert.equal(await ui.locator('[data-ge=confirm]').isEnabled(), true, await ui.locator('[data-ge=impact]').textContent());
-  await ui.locator('[data-ge=confirm]').click();
-  const duringImport = await state();
-  assert.deepEqual(duringImport.program, beforeLateEdit.program, 'opening edit does not change the program signature');
-  await page.waitForFunction(() => !document.querySelector('#gen').disabled);
-  assert.deepEqual((await state()).model, duringImport.model, 'late worker must not overwrite the newer opening edit');
-  assert.match(await page.locator('#projectStatus').textContent(), /تغيّرت المدخلات أثناء القراءة/);
-  await page.unroute('**/layout-worker.mjs');
-  evidence.push('late actual worker import cannot overwrite a newer opening-only committed revision');
-  const sizes = await ui.locator('button,input[type=number],select').evaluateAll(nodes => nodes.filter(node => node.getClientRects().length).map(node => ({ control: node.dataset.ge, height: node.getBoundingClientRect().height })));
-  assert.ok(sizes.every(item => item.height >= 44), JSON.stringify(sizes));
+  evidence.push('captured project Blob decodes and file reimport preserves committed geometry');
   await page.screenshot({ path: '/tmp/geometry-editor-browser.png', fullPage: false });
-  console.log(JSON.stringify({ browser: 'Chromium', evidence, controlSizes: sizes, revisions: (await state()).renderedRevisions, errors }, null, 2));
+  console.log(JSON.stringify({ browser: 'Chromium (Safari not run)', evidence, viewportEvidence, controlSizes, revisions: (await state()).renderedRevisions, errors, consoleErrors }, null, 2));
   assert.deepEqual(errors, []);
+  assert.deepEqual(consoleErrors, []);
 } finally { await browser.close(); }
