@@ -7,7 +7,9 @@ const fail = (code, detail) => { const error = Error(`${code}: ${detail}`); erro
 const hasDimensions = room => !!(room?.dimensions || room?.exactDimensionsM || room?.exactDimensions);
 function unsupported(model, landSurvey) {
   if (landSurvey != null || model?.landSurvey != null || model?.modelLandSurvey != null) return 'SURVEY_CONTEXT_UNSUPPORTED: تعديل الهندسة المرتبطة بمسح أرض غير مدعوم في هذه الدفعة.';
-  if (model?.version !== 1 || model.topology) return 'MODEL_UNSUPPORTED: التعديل متاح حاليًا للنموذج المستطيلي القديم فقط؛ لا نعيد توليد الأشكال الأخرى.';
+  const supportedVersion = model?.version === 1 || model?.version === 2;
+  const shape = model?.actualShape ?? model?.shape ?? (model?.topology ? 'topology' : 'rect');
+  if (!supportedVersion || shape !== 'rect' || model?.shapeFallback) return 'MODEL_UNSUPPORTED: التعديل الحالي يدعم الهندسة المستطيلة المحققة فقط، ولا يعيد توليد الأشكال الأخرى.';
   return null;
 }
 function describe(model, wall, reason) {

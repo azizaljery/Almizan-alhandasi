@@ -59,9 +59,18 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
   }
   function operation() {
     if (!selected) throw Error('اختر عنصرًا قابلًا للتعديل أولًا.');
-    return selected.kind === 'wall'
-      ? { type: 'move-partition', wallId: selected.id, deltaM: numeric('delta') }
-      : { type: 'edit-opening', openingId: selected.id, positionM: numeric('position'), widthM: numeric('width'), heightM: numeric('height') };
+    if (selected.kind === 'wall') return { type: 'move-partition', wallId: selected.id, deltaM: numeric('delta') };
+    const model=getModel(), opening=currentTarget(), wall=model.walls.find(w=>w.id===opening.wallId);
+    if(!opening||!wall)throw Error('تعذّر ربط الفتحة المحددة بجدارها.');
+    const command={type:'edit-opening',openingId:selected.id};
+    const original={positionM:opening.pos*lineLength(wall),widthM:opening.w,heightM:opening.h};
+    for(const [field,key]of [['position','positionM'],['width','widthM'],['height','heightM']]){
+      const value=numeric(field);
+      // Initial form values are rounded for display. Keep untouched geometry exact;
+      // submit only fields the user actually changed by at least one supported step.
+      if(Math.abs(value-original[key])>=.025)command[key]=value;
+    }
+    return command;
   }
   function preview(command) {
     if (!enabled) return;
