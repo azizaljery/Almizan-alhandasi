@@ -165,3 +165,13 @@ details.studio-secondary-details,.studio-project-setup,#app details.studio-plan-
 
 /* واجهة العميل: بلا أدوات تحرير */
 #togglePlanEditor,#planEditor,#geometryEditorHost{display:none!important}
+
+/* بطاقات البدائل: صورة مصغّرة كاملة العرض فوق العنوان، دون إزاحة */
+.alternative-card{display:flex;flex-direction:column;gap:6px;padding:10px;min-width:0}
+.alternative-card .alternative-pick{display:flex;flex-direction:column;align-items:stretch;gap:10px;width:100%;margin:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:right;cursor:pointer}
+.alternative-card .alternative-preview{display:block;width:100%;aspect-ratio:4/3;overflow:hidden;border:1px solid #e0ddd4;border-radius:10px;background:#f3f1e9}
+.alternative-card .alternative-preview .concept-thumb{display:block;width:100%;height:100%;margin:0;border:0;aspect-ratio:auto;background:#f3f1e9}
+.alternative-card .alternative-copy{display:block;min-width:0}
+.alternative-card .alternative-copy strong{display:block;font-size:1rem;font-weight:700;line-height:1.5;white-space:normal;overflow:visible;text-overflow:clip}
+.alternative-card .alternative-details{margin:0}
+.alternative-card .alternative-details summary{cursor:pointer;font-size:.9rem}
