@@ -1,4 +1,5 @@
-import { presentationPenalty, ensuiteCoverage } from './ensuite.mjs';
+import { presentationPenalty, ensuiteCoverage, explainPresentationPenalty, PRESENTATION_PENALTY_VERSION } from './ensuite.mjs';
+import { renderTransparencyPanel } from './transparency.mjs';
 import { createStudioSession, normalizeStudioSession, beginStudioOperation, isCurrentStudioOperation, cancelStudioOperation, bindStudioRevision, appendStudioMessage, acceptStudioUnderstanding, approveStudioRevision, invalidateStudioApproval, setStudioDraft } from './studio-session.mjs';
 import { diffRoomPrograms } from './design-dialog.mjs';
 import { createGeometrySession } from './geometry-session.mjs';
@@ -639,7 +640,7 @@ function renderAlternatives() {
     return { model, index, q: quantities(model), review: reviewPlan(model), evaluation,
       score: Number.isFinite(evaluation?.score) ? evaluation.score : null, blockers: evaluation?.blockers?.length ?? 0 };
   });
-  rows.forEach(row => { row.penalty = presentationPenalty(row.model); row.suites = ensuiteCoverage(row.model); });
+  rows.forEach(row => { row.penaltyDetail = explainPresentationPenalty(row.model); row.penalty = row.penaltyDetail.penalty; row.suites = ensuiteCoverage(row.model); });
   const order = [...rows].sort((x, y) => x.blockers - y.blockers || x.penalty - y.penalty || (y.score ?? -1) - (x.score ?? -1) || x.q.circulation - y.q.circulation);
   const minCirc = Math.min(...rows.map(r => r.q.circulation)), minDark = Math.min(...rows.map(r => r.review.occupiedWithoutWindows));
   const used = new Set();
@@ -661,6 +662,25 @@ function renderAlternatives() {
     ? `<details class="more-alternatives"><summary>عرض خيارات أخرى (${fmt(order.length - 3, 0)})</summary><div class="more-alternatives-grid">${order.slice(3).map((row, i) => card(row, i + 3)).join('')}</div></details>` : '');
   $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} خيارات مرتبة حسب ملاءمتها لطلبك · اختيار أي منها يحدّث المسقط و3D والكميات`;
   $('alternativeNote').textContent = 'الخيارات من برنامجك نفسه، والترتيب بقياسات حسابية مبدئية؛ لا يغني عن المراجعة الهندسية.';
+  const selectionTransparency = $('selectionTransparency');
+  if (selectionTransparency && order.length) {
+    const best = order[0];
+    selectionTransparency.innerHTML = renderTransparencyPanel({
+      name: 'ترتيب البدائل واختيار «الأنسب لطلبك»',
+      inputs: order.map((row, rank) => ({
+        label: `الترتيب ${rank + 1} — ${labels.get(row.index)}`,
+        value: `عوائق ${row.blockers}، عقوبة عرض ${fmt(row.penalty, 1)} (حمامات غير متصلة ${fmt(row.penaltyDetail.ensuitePenalty, 0)} + تناسب الغرف ${fmt(row.penaltyDetail.proportionPenalty, 1)})، قرار الميزان ${assessedText(row.score)}، ممرات ${fmt(row.q.circulation, 1)} م²`,
+      })),
+      formula: 'ترتيب تصاعدي حسب: (١) عدد عوائق محرك القرار الهندسي، ثم (٢) «عقوبة العرض» = (عدد حمامات غرف النوم غير المتصلة بغرفتها × ١٠) + حدّ أعلى(٠، أسوأ نسبة طول إلى عرض لغرفة رئيسية − ١.٦)، ثم (٣) قرار الميزان تنازليًا، ثم (٤) أقل مساحة ممرات. أول بديل في هذا الترتيب هو «الأنسب لطلبك».',
+      formulaVersion: PRESENTATION_PENALTY_VERSION,
+      result: `«الأنسب لطلبك»: ${labels.get(best.index)} — عقوبة عرض ${fmt(best.penalty, 1)}، ${best.blockers} عوائق.`,
+      effect: 'هذا الترتيب يحدد أي بديل يصبح المخطط الافتراضي المعروض في المسقط والعرض الثلاثي والكميات مباشرة بعد التوليد، وأي بديل يحمل تسمية «الأنسب لطلبك». كل البدائل الأخرى تبقى متاحة للاختيار اليدوي من البطاقات أعلاه.',
+      assumptions: ['«عقوبة العرض» تفترض أن حمامًا متصلًا مباشرة بغرفة نومه وغرفًا رئيسية أقرب إلى المربع أفضل تجربة للعميل من أي معيار آخر غير محسوب هنا (كاتجاه الغرفة أو الخصوصية الفعلية).'],
+      missingData: ['لا تُقاس تفضيلات العميل النصية الحرة في هذا الترتيب؛ انظر لوحة «مطابقة طلبك» لمقارنة التفضيلات المقاسة بدلًا من ذلك.'],
+      limits: ['عقوبة العرض مقياس هندسي بسيط (اتصال حمام وتناسب أبعاد)؛ لا تقيس الإضاءة أو الخصوصية أو كفاءة التوزيع ولا تحل محل قرار الميزان أو مطابقة الطلب.', 'عند تساوي عدد العوائق وعقوبة العرض، يُفضَّل قرار الميزان الأعلى ثم أقل مساحة ممرات؛ هذا ترتيب حسابي مبدئي وليس توصية هندسية معتمدة.'],
+      testedCases: ['مُغطّى باختبارات تلقائية في tests/ensuite.test.mjs: حمامات متصلة بالكامل، حمامات غير متصلة جزئيًا، وغرف بنسب طول/عرض متفاوتة.'],
+    });
+  } else if (selectionTransparency) selectionTransparency.innerHTML = '';
   markDirty();
 }
 function renderRequirementEvidence() {
@@ -721,6 +741,26 @@ function renderMizanScore() {
   $('mizanScoreAxes').innerHTML = result.axes.map(axis => `<div class="insight"><div><span>${esc(axis.label)} <small>(وزن ${axis.weight})</small></span><b>${assessedText(axis.score)}</b></div><p>${esc(axis.detail)}</p></div>`).join('');
   $('mizanScoreNotes').innerHTML = `<li>نقاط القوة: ${esc(result.strengths.join('، ') || 'لا توجد نقاط مرتفعة كافية بعد.')}</li><li>نقاط التحسين: ${esc(result.improvements.join('، ') || 'لا توجد محاور منخفضة في هذا الفحص.')}</li><li>عقوبة التنبيهات: ${fmt(result.penalties, 0)} نقطة.</li>`;
   $('mizanScoreLimit').textContent = result.note;
+  const transparency = $('mizanScoreTransparency');
+  if (transparency) {
+    const evaluated = result.axes.filter(axis => axis.score !== null);
+    const missing = result.axes.filter(axis => axis.score === null);
+    transparency.innerHTML = renderTransparencyPanel({
+      name: 'Mizan Score — المقارنة الجزئية',
+      inputs: result.axes.map(axis => ({ label: `${axis.label} (وزن ${axis.weight})`, value: assessedText(axis.score) })),
+      formula: result.formula,
+      formulaVersion: result.formulaVersion,
+      result: `${assessedText(result.score)} / ١٠٠٠`,
+      effect: result.effect,
+      assumptions: evaluated.map(axis => axis.detail),
+      missingData: missing.map(axis => `${axis.label}: ${axis.detail}`),
+      limits: [
+        result.note,
+        'إعادة توزيع الأوزان على المحاور المُقيَّمة فقط تعني أن مخططًا بمحاور قليلة مُقيَّمة قد تختلف درجته الكلية عن مخطط آخر بنفس الأداء الفعلي لكن بمحاور أكثر تقييمًا؛ العدد في «جزئي من ١٢» أعلاه ضروري لقراءة الدرجة بصورة صحيحة.',
+      ],
+      testedCases: ['مُغطّى باختبارات تلقائية في tests/plan-evidence.test.mjs و tests/mizan-score.test.mjs: نموذج متصل بالكامل، ونموذج بمسارات غير مكتملة تُسقط محاور الخصوصية والحركة إلى «غير مُقيّم».'],
+    });
+  }
 }
 function runPlanner(request) {
   if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.integrated ? runMultiEngineDesign(request) : request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms, { includeClaude: true }));
