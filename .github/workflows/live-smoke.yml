@@ -1,0 +1,32 @@
+name: Live Smoke (published site)
+
+# فحص المتصفح على الموقع المنشور فعليًا. يعمل يدويًا، وبعد نجاح نشر الموقع.
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy Site (Cloudflare)"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright (not saved to package.json)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Wait for the deployment to be served
+        run: sleep 20
+      - name: Smoke test the live site
+        run: node scripts/live-smoke.mjs
