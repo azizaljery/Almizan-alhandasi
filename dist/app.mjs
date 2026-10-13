@@ -32,6 +32,7 @@ import { initLandSurveyEditor } from './land-map.mjs';
 import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { initSunDayUI } from './sun-day-ui.mjs';
+import { initCompare3D } from './compare3d.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
@@ -317,6 +318,16 @@ function restoreSolarSettings() {
 }
 function currentSolarPreview() {
   return siteSolarPreview(state.siteSolar,{model:state.model,modelLandSurvey:state.modelLandSurvey,modelSurveyAssociated:state.modelSurveyAssociated});
+}
+let compare3D = null;
+function compare3DControls() {
+  if (compare3D || !$('compare3d')) return;
+  compare3D = initCompare3D({ root: $('compare3d'), ViewerClass: RoomViewer, getAlternatives: () => state.alternatives, getCurrent: () => state.model, getPalette: () => state.palette,
+    ensureThree: () => loadThree(), describe: (model, index) => {
+      const q = quantities(model), tag = model.architecture?.tag;
+      return { title: 'البديل ' + (index + 1) + (tag ? ' · ' + tag : '') + (model === state.model ? ' (المعروض)' : ''),
+        summary: `ممرات ${fmt(q.circulation, 1)} م² · نوافذ ${fmt(q.windows, 0)} · أبواب ${fmt(q.doors, 0)}` };
+    }, onNotice: text => message('threeError', text) });
 }
 let sunDayUI = null;
 function sunDayControls() {
@@ -681,6 +692,7 @@ function renderAlternatives() {
     ? `<details class="more-alternatives"><summary>عرض خيارات أخرى (${fmt(order.length - 3, 0)})</summary><div class="more-alternatives-grid">${order.slice(3).map((row, i) => card(row, i + 3)).join('')}</div></details>` : '');
   $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} خيارات مرتبة حسب ملاءمتها لطلبك · اختيار أي منها يحدّث المسقط و3D والكميات`;
   $('alternativeNote').textContent = 'الخيارات من برنامجك نفسه، والترتيب بقياسات حسابية مبدئية؛ لا يغني عن المراجعة الهندسية.';
+  if (typeof compare3D !== 'undefined') compare3D?.refresh();
   const selectionTransparency = $('selectionTransparency');
   if (selectionTransparency && order.length) {
     const best = order[0];
@@ -1252,7 +1264,7 @@ function boot() {
       (Math.abs(number('wid') - state.landSurvey.binding.width) > 1e-8 || Math.abs(number('len') - state.landSurvey.binding.length) > 1e-8)) unlinkSurveyRectangle();
     rating(); markDirty();
   }));
-  sunDayControls();
+  sunDayControls();compare3DControls();
 ['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
