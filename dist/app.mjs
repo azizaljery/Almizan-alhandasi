@@ -704,6 +704,7 @@ function renderRequirementEvidence() {
       program: Array.isArray(context?.program) ? context.program : undefined,
       plot: context?.plot || null,
       idea: context?.idea || '', discovery: context?.discovery || {}, briefContext: context?.briefContext || null,
+      jurisdiction: $('jurisdictionRiyadh')?.checked ? 'riyadh-momah-1446h' : null,
     });
     const labels = [
       ['ENFORCED', 'مطابق في الرسم'], ['MEASURED', 'مقاس دون حكم'], ['NOT_MET', 'غير مستوفى'],
@@ -1333,6 +1334,7 @@ function boot() {
   $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
   $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview); $('showGemini').addEventListener('change', renderGeminiMarkers);
+  $('jurisdictionRiyadh')?.addEventListener('change', renderRequirementEvidence);
   $('saveProject').addEventListener('click', saveProject);
   $('archiveSave').addEventListener('click', () => { void saveArchive(); });
   $('archiveSaveNew').addEventListener('click', () => { void saveArchive({ asNew: true }); });

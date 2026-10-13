@@ -178,6 +178,49 @@ test('regulatory setback checks report an unmeasurable fact as "—", not a fabr
   assert.match(find(result, 'reg-neighbor-setback').evidence, /الارتداد المستخدم في هذا المخطط: —/);
 });
 
+test('declaring the Riyadh jurisdiction attaches a real sourced verdict to neighbor setback and coverage, but street setback stays honestly unverified', () => {
+  const result = evaluateRequirementEvidence({ model, program: rooms, plot, jurisdiction: 'riyadh-momah-1446h' });
+  const regulatoryCategory = 'الاشتراطات النظامية (الكود/البلدية)';
+
+  const jurisdiction = find(result, 'reg-jurisdiction');
+  assert.equal(jurisdiction.status, REQUIREMENT_STATUS.ENFORCED);
+  assert.equal(jurisdiction.category, regulatoryCategory);
+  assert.match(jurisdiction.source, /وزير الشؤون البلدية/);
+
+  // The test plot's neighborSetback (1.5) and coverage (.75 -> footprint/land <= 75%)
+  // exactly meet the real cited minimums, so both become a genuine, sourced pass.
+  const neighbor = find(result, 'reg-neighbor-setback');
+  assert.equal(neighbor.status, REQUIREMENT_STATUS.ENFORCED);
+  assert.match(neighbor.source, /١\.٥م كحد أدنى|1.5/);
+
+  const coverage = find(result, 'reg-coverage');
+  assert.equal(coverage.status, REQUIREMENT_STATUS.ENFORCED);
+  assert.match(coverage.source, /٧٥٪|75/);
+
+  // Street setback depends on the real street's width, which this project never
+  // collects, so even with a jurisdiction declared it must stay unverified rather
+  // than claim a pass it cannot actually confirm for a wide street.
+  const street = find(result, 'reg-street-setback');
+  assert.equal(street.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.match(street.evidence, /خُمس عرض الشارع/);
+});
+
+test('declaring the Riyadh jurisdiction fails a setback or coverage that genuinely violates the cited minimum', () => {
+  const tight = structuredClone(model);
+  tight.plot.neighborSetback = 1; tight.plot.streetSetback = 2;
+  const result = evaluateRequirementEvidence({ model: tight, program: rooms, plot: { ...plot, neighborSetback: 1, streetSetback: 2 }, jurisdiction: 'riyadh-momah-1446h' });
+  assert.equal(find(result, 'reg-neighbor-setback').status, REQUIREMENT_STATUS.NOT_MET);
+  // 2m is below the absolute 3m front-setback floor in every case, regardless of street width.
+  assert.equal(find(result, 'reg-street-setback').status, REQUIREMENT_STATUS.NOT_MET);
+});
+
+test('omitting the jurisdiction keeps every regulatory row exactly as unverified as before, even though the real source now exists in code', () => {
+  const result = evaluateRequirementEvidence({ model, program: rooms, plot });
+  for (const id of ['reg-jurisdiction', 'reg-street-setback', 'reg-neighbor-setback', 'reg-coverage']) {
+    assert.equal(find(result, id).status, REQUIREMENT_STATUS.UNVERIFIED);
+  }
+});
+
 test('HTML evidence escapes user-supplied room names and displays the state', () => {
   const altered = structuredClone(model);
   altered.rooms[0].name = '<img src=x onerror=alert(1)>';

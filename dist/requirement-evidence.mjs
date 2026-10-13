@@ -3,7 +3,23 @@
 // It does not change the Claude/Gemini/AZIZ pipeline or certify code compliance.
 import { quantities } from './planner.mjs';
 import { circulationNetwork } from './circulation.mjs';
-import { unverifiedCheck, toEvidenceRow } from './regulatory-checks.mjs';
+import { unverifiedCheck, createRegulatoryCheck, REGULATORY_STATUS, toEvidenceRow } from './regulatory-checks.mjs';
+
+// Real, dated source for Riyadh residential construction requirements. This is a
+// national ministerial decision (not a Riyadh-only code); Amanat Al-Riyadh applies
+// it to building permits in Riyadh. No separate Riyadh-only building code was found
+// when this was researched. Cross-checked against two independent reputable news
+// reports (ajel.sa, okaz.com.sa) and the ministry's own published PDF; the exact
+// ministerial decision number could not be read with full confidence from OCR, so
+// only the independently-corroborated effective date is cited as the version.
+const RIYADH_MOMAH_SOURCE = Object.freeze({
+  document: 'اشتراطات إنشاء المباني السكنية — قرار وزير الشؤون البلدية والقروية والإسكان (اشتراط وزاري وطني تطبّقه أمانة منطقة الرياض على تصاريح البناء في الرياض؛ لم يُعثر على كود بناء منفصل خاص بالرياض وحدها)',
+  version: 'ساري من ٨ محرم ١٤٤٦هـ الموافق ١٤ يوليو ٢٠٢٤م',
+});
+const RIYADH_JURISDICTION_ID = 'riyadh-momah-1446h';
+// Fixed to the date this source was actually looked up and cross-checked, not
+// today's date — a verification date should not silently roll forward on its own.
+const RIYADH_MOMAH_VERIFIED_DATE = '2026-10-13';
 
 export const REQUIREMENT_STATUS = Object.freeze({
   ENFORCED: 'ENFORCED',
@@ -21,7 +37,8 @@ const round = n => Math.round(n * 10) / 10;
 const make = (id, title, status, evidence, source = 'النموذج الهندسي', category = 'تخطيط') =>
   ({ id, title, status, evidence, source, category });
 
-export function evaluateRequirementEvidence({ model, program, plot: requestedPlot = null, idea = '', discovery = {}, briefContext = null } = {}) {
+export function evaluateRequirementEvidence({ model, program, plot: requestedPlot = null, idea = '', discovery = {}, briefContext = null, jurisdiction = null } = {}) {
+  const riyadh = jurisdiction === RIYADH_JURISDICTION_ID;
   if (!model || !Array.isArray(model.rooms) || !Array.isArray(model.openings) || !Array.isArray(model.corridors)) {
     throw Error('يلزم نموذج هندسي صالح لعرض أدلة المتطلبات.');
   }
@@ -115,40 +132,87 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
   // نسبة التغطية)، ولا تُعرض كمطابقة أو مخالفة لأي اشتراط نظامي حقيقي؛ كل فحص
   // يُعرض صراحة كـ"لم يتم التحقق" حتى يرتبط المشروع بجهة/كود فعلي.
   const regulatoryCategory = 'الاشتراطات النظامية (الكود/البلدية)';
-  rows.push(toEvidenceRow(unverifiedCheck({
-    rule: 'الجهة والكود النظامي المعتمد للمشروع',
-    measuredLabel: 'المدينة/البلدية أو كود البناء المسجل لهذا المشروع',
-    measuredValue: null,
-    verificationNote: 'لا يوجد في بيانات هذا المشروع تحديد لمدينة أو بلدية أو كود بناء معتمد. دون ذلك لا يمكن تحديد الاشتراطات النظامية الفعلية للارتدادات أو نسبة البناء، ولا اعتماد أي فحص في هذا القسم كمطابقة نظامية؛ القيم المقاسة أدناه حقائق هندسية من الرسم فقط.',
-  }), { id: 'reg-jurisdiction', category: regulatoryCategory }));
+  if (riyadh) {
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'الجهة والكود النظامي المعتمد للمشروع',
+      measuredLabel: 'المدينة/البلدية أو كود البناء المسجل لهذا المشروع',
+      measuredValue: null,
+      status: REGULATORY_STATUS.PASS,
+      source: { ...RIYADH_MOMAH_SOURCE, verifiedDate: RIYADH_MOMAH_VERIFIED_DATE },
+      verificationNote: 'حدد مُعِد هذا المشروع أن موقعه مدينة الرياض. هذا اشتراط وزاري وطني لا كود منفصل خاص بالرياض وحدها؛ أمانة منطقة الرياض هي من يطبّقه على تصاريح البناء فيها.',
+    }), { id: 'reg-jurisdiction', category: regulatoryCategory }));
+  } else {
+    rows.push(toEvidenceRow(unverifiedCheck({
+      rule: 'الجهة والكود النظامي المعتمد للمشروع',
+      measuredLabel: 'المدينة/البلدية أو كود البناء المسجل لهذا المشروع',
+      measuredValue: null,
+      verificationNote: 'لا يوجد في بيانات هذا المشروع تحديد لمدينة أو بلدية أو كود بناء معتمد. دون ذلك لا يمكن تحديد الاشتراطات النظامية الفعلية للارتدادات أو نسبة البناء، ولا اعتماد أي فحص في هذا القسم كمطابقة نظامية؛ القيم المقاسة أدناه حقائق هندسية من الرسم فقط.',
+    }), { id: 'reg-jurisdiction', category: regulatoryCategory }));
+  }
 
   const streetSetback = number(model.plot?.streetSetback ?? requestedPlot?.streetSetback);
-  rows.push(toEvidenceRow(unverifiedCheck({
-    rule: 'ارتداد المبنى عن جهة الشارع',
-    measuredLabel: 'الارتداد المستخدم في هذا المخطط',
-    measuredValue: streetSetback, unit: 'م',
-  }), { id: 'reg-street-setback', category: regulatoryCategory }));
+  const streetSetbackNote = 'اشتراط وزارة الشؤون البلدية والقروية والإسكان للفلل: الارتداد الأمامي عن شارع أقل من ٣٠م = خُمس عرض الشارع بحد أدنى ٣م؛ لشارع ٣٠م فأكثر = ٦م كحد أدنى. هذا المشروع لا يسجل عرض الشارع الفعلي لكل جهة، فلا يمكن التأكد آليًا من الحد الكامل المطلوب لشارعك — فقط من كونه لا يقل عن الحد الأدنى المطلق (٣م).';
+  if (riyadh && streetSetback !== null && streetSetback < 3) {
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'ارتداد المبنى عن جهة الشارع',
+      measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+      measuredValue: streetSetback, unit: 'م',
+      status: REGULATORY_STATUS.FAIL,
+      source: { ...RIYADH_MOMAH_SOURCE, verifiedDate: RIYADH_MOMAH_VERIFIED_DATE, section: 'البند ٤-١، الفقرة (٤): الارتداد الأمامي خُمس عرض الشارع بحد أدنى ٣م' },
+      verificationNote: streetSetbackNote + ' القيمة المستخدمة هنا أقل من هذا الحد الأدنى المطلق في كل الحالات.',
+    }), { id: 'reg-street-setback', category: regulatoryCategory }));
+  } else {
+    rows.push(toEvidenceRow(unverifiedCheck({
+      rule: 'ارتداد المبنى عن جهة الشارع',
+      measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+      measuredValue: streetSetback, unit: 'م',
+      verificationNote: riyadh ? streetSetbackNote : undefined,
+    }), { id: 'reg-street-setback', category: regulatoryCategory }));
+  }
 
   const neighborSetback = number(model.plot?.neighborSetback ?? requestedPlot?.neighborSetback);
-  rows.push(toEvidenceRow(unverifiedCheck({
-    rule: 'ارتداد المبنى عن حدود الجيران',
-    measuredLabel: 'الارتداد المستخدم في هذا المخطط',
-    measuredValue: neighborSetback, unit: 'م',
-  }), { id: 'reg-neighbor-setback', category: regulatoryCategory }));
+  if (riyadh && neighborSetback !== null) {
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'ارتداد المبنى عن حدود الجيران',
+      measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+      measuredValue: neighborSetback, unit: 'م',
+      status: neighborSetback >= 1.5 ? REGULATORY_STATUS.PASS : REGULATORY_STATUS.FAIL,
+      source: { ...RIYADH_MOMAH_SOURCE, verifiedDate: RIYADH_MOMAH_VERIFIED_DATE, section: 'البند ٤-١، الفقرة (٤): الارتداد عن الجيران والممرات ١.٥م كحد أدنى' },
+    }), { id: 'reg-neighbor-setback', category: regulatoryCategory }));
+  } else {
+    rows.push(toEvidenceRow(unverifiedCheck({
+      rule: 'ارتداد المبنى عن حدود الجيران',
+      measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+      measuredValue: neighborSetback, unit: 'م',
+    }), { id: 'reg-neighbor-setback', category: regulatoryCategory }));
+  }
 
   const plotWidth = number(model.plot?.width ?? requestedPlot?.width);
   const plotLength = number(model.plot?.length ?? requestedPlot?.length);
   const landArea = plotWidth !== null && plotLength !== null ? plotWidth * plotLength : null;
   const coverageRatio = landArea && landArea > 0 ? round(q.footprint / landArea * 100) : null;
   const assumedCoverageCap = number(model.plot?.coverage ?? requestedPlot?.coverage);
-  rows.push(toEvidenceRow(unverifiedCheck({
-    rule: 'أقصى نسبة بناء (تغطية الأرض)',
-    measuredLabel: 'نسبة مساحة الكتلة المرسومة إلى مساحة الأرض',
-    measuredValue: coverageRatio, unit: '%',
-    verificationNote: (assumedCoverageCap !== null
-      ? 'استخدم التوليد افتراض نسبة بناء داخلي قدره ' + fmt(assumedCoverageCap * 100, 0) + '٪ كحد تصميمي قابل للتعديل، وهو ليس كودًا نظاميًا. '
-      : '') + 'يتطلب تأكيد الحد النظامي الفعلي لنسبة البناء من كود البناء أو البلدية المعتمدة لموقع المشروع، بنسخته الحالية وتاريخ تحقق فعلي، أو مراجعة مهندس/جهة مرخّصة.',
-  }), { id: 'reg-coverage', category: regulatoryCategory }));
+  if (riyadh && coverageRatio !== null) {
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'أقصى نسبة بناء (تغطية الأرض)',
+      measuredLabel: 'نسبة مساحة الكتلة المرسومة إلى مساحة الأرض',
+      measuredValue: coverageRatio, unit: '%',
+      status: coverageRatio <= 75 ? REGULATORY_STATUS.PASS : REGULATORY_STATUS.FAIL,
+      source: { ...RIYADH_MOMAH_SOURCE, verifiedDate: RIYADH_MOMAH_VERIFIED_DATE, section: 'البند ٤-١، الفقرتان (١) و(٢): لا تتجاوز نسبة بناء الدور الأرضي والدور الأول ٧٥٪ من مساحة الأرض' },
+      verificationNote: (assumedCoverageCap !== null
+        ? 'استخدم التوليد افتراض نسبة بناء داخلي قدره ' + fmt(assumedCoverageCap * 100, 0) + '٪ كحد تصميمي قابل للتعديل. '
+        : '') + 'هذا الفحص لدور أرضي واحد فقط، وهو كل ما يولّده هذا المحرك حاليًا؛ لا يغطي ملحق الدور العلوي (٧٠٪ من مسطح الدور الأسفل) لأنه غير مدعوم بعد.',
+    }), { id: 'reg-coverage', category: regulatoryCategory }));
+  } else {
+    rows.push(toEvidenceRow(unverifiedCheck({
+      rule: 'أقصى نسبة بناء (تغطية الأرض)',
+      measuredLabel: 'نسبة مساحة الكتلة المرسومة إلى مساحة الأرض',
+      measuredValue: coverageRatio, unit: '%',
+      verificationNote: (assumedCoverageCap !== null
+        ? 'استخدم التوليد افتراض نسبة بناء داخلي قدره ' + fmt(assumedCoverageCap * 100, 0) + '٪ كحد تصميمي قابل للتعديل، وهو ليس كودًا نظاميًا. '
+        : '') + 'يتطلب تأكيد الحد النظامي الفعلي لنسبة البناء من كود البناء أو البلدية المعتمدة لموقع المشروع، بنسخته الحالية وتاريخ تحقق فعلي، أو مراجعة مهندس/جهة مرخّصة.',
+    }), { id: 'reg-coverage', category: regulatoryCategory }));
+  }
 
   const relationships = [
     ['majlis', 'dining', 'المجلس إلى الطعام'],
