@@ -2,19 +2,23 @@
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const fixed = value => Number(value).toFixed(2);
 const lineLength = wall => Math.hypot(wall.x2 - wall.x1, wall.y2 - wall.y1);
-export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () => [], getRoomMoves = () => [], getHistory = () => ({}), onPreview, onCommit, onCancel, onUndo, onRedo }) {
+const CORNER_SIDES = { tl: { x: 'left', y: 'top' }, tr: { x: 'right', y: 'top' }, bl: { x: 'left', y: 'bottom' }, br: { x: 'right', y: 'bottom' } };
+const CORNER_LABELS = { tl: 'الزاوية العلوية اليسرى', tr: 'الزاوية العلوية اليمنى', bl: 'الزاوية السفلية اليسرى', br: 'الزاوية السفلية اليمنى' };
+export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () => [], getRoomMoves = () => [], getRoomResizes = () => [], getHistory = () => ({}), onPreview, onCommit, onCancel, onUndo, onRedo }) {
   if (!host || typeof getModel !== 'function' || typeof getSvg !== 'function') throw Error('Geometry editor requires a host, model and SVG.');
   host.classList.add('geometry-editor');
   host.dir = 'rtl';
   host.innerHTML = `<div class="geometry-editor-heading"><strong>تعديل الهندسة</strong><label><input data-ge="layer" type="checkbox" checked> إظهار طبقة التعديل</label></div>
-    <p class="geometry-editor-help">اختر جدارًا أو فتحة أو غرفة قابلة للنقل من المخطط. السحب يعرض معاينة فقط؛ لا يتغير المخطط قبل التأكيد.</p>
+    <p class="geometry-editor-help">اختر جدارًا أو فتحة أو غرفة قابلة للنقل من المخطط، أو زاوية غرفة لتغيير أبعادها بالسحب. السحب يعرض معاينة فقط؛ لا يتغير المخطط قبل التأكيد.</p>
     <div class="geometry-editor-fields"><label>العنصر<select data-ge="target" aria-label="عنصر التعديل"></select></label>
       <label data-ge="wall-field">إزاحة الجدار (م)<input data-ge="delta" aria-label="إزاحة الجدار بالمتر" type="number" step="0.05" value="0"></label>
       <label data-ge="opening-field">الموضع من بداية الجدار (م)<input data-ge="position" aria-label="موضع الفتحة بالمتر" type="number" min="0" step="0.05"></label>
       <label data-ge="opening-field">عرض الفتحة (م)<input data-ge="width" aria-label="عرض الفتحة بالمتر" type="number" min="0.05" step="0.05"></label>
       <label data-ge="opening-field">ارتفاع الفتحة (م)<input data-ge="height" aria-label="ارتفاع الفتحة بالمتر" type="number" min="0.05" step="0.05"></label>
       <label data-ge="room-field">إزاحة الغرفة أفقيًا (م)<input data-ge="dx" aria-label="إزاحة الغرفة أفقيًا بالمتر" type="number" step="0.05" value="0"></label>
-      <label data-ge="room-field">إزاحة الغرفة رأسيًا (م)<input data-ge="dy" aria-label="إزاحة الغرفة رأسيًا بالمتر" type="number" step="0.05" value="0"></label></div>
+      <label data-ge="room-field">إزاحة الغرفة رأسيًا (م)<input data-ge="dy" aria-label="إزاحة الغرفة رأسيًا بالمتر" type="number" step="0.05" value="0"></label>
+      <label data-ge="resize-field">تمديد الحافة الأفقية للزاوية (م)<input data-ge="growx" aria-label="تمديد حافة الغرفة الأفقية بالمتر" type="number" step="0.05" value="0"></label>
+      <label data-ge="resize-field">تمديد الحافة الرأسية للزاوية (م)<input data-ge="growy" aria-label="تمديد حافة الغرفة الرأسية بالمتر" type="number" step="0.05" value="0"></label></div>
     <div class="geometry-editor-actions"><button type="button" data-ge="preview">معاينة التعديل</button><button type="button" data-ge="confirm" disabled>تأكيد التعديل والمساحات</button><button type="button" data-ge="cancel" disabled>إلغاء المعاينة</button><button type="button" data-ge="undo">تراجع</button><button type="button" data-ge="redo">إعادة</button></div>
     <div data-ge="impact" class="geometry-editor-impact" aria-live="polite" role="status">لم تُجرَ معاينة بعد.</div>`;
   const el = name => host.querySelector(`[data-ge="${name}"]`);
@@ -39,6 +43,7 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
     const model = getModel();
     if (selected?.kind === 'wall') return model?.walls?.find(w => w.id === selected.id);
     if (selected?.kind === 'room') return model?.rooms?.find(r => r.id === selected.id);
+    if (selected?.kind === 'resize') return model?.rooms?.find(r => r.id === selected.id.split('|')[0]);
     return model?.openings?.find(o => o.id === selected?.id);
   }
   function selectTarget(kind, id) {
@@ -49,8 +54,10 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
     el('wall-field').hidden = kind !== 'wall';
     host.querySelectorAll('[data-ge="opening-field"]').forEach(node => { node.hidden = kind !== 'opening'; });
     host.querySelectorAll('[data-ge="room-field"]').forEach(node => { node.hidden = kind !== 'room'; });
+    host.querySelectorAll('[data-ge="resize-field"]').forEach(node => { node.hidden = kind !== 'resize'; });
     el('delta').value = '0';
     el('dx').value = '0'; el('dy').value = '0';
+    el('growx').value = '0'; el('growy').value = '0';
     if (kind === 'opening' && target) {
       const wall = model.walls.find(w => w.id === target.wallId);
       el('position').value = fixed(target.pos * lineLength(wall));
@@ -60,6 +67,11 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
       const info = (getRoomMoves() || []).find(item => item.roomId === id);
       el('dx').disabled = !info?.axes?.x; el('dy').disabled = !info?.axes?.y;
     } else { el('dx').disabled = false; el('dy').disabled = false; }
+    if (kind === 'resize') {
+      const [roomId, corner] = id.split('|'), sides = CORNER_SIDES[corner];
+      const info = (getRoomResizes() || []).find(item => item.roomId === roomId);
+      el('growx').disabled = !info?.edges?.[sides.x]; el('growy').disabled = !info?.edges?.[sides.y];
+    } else { el('growx').disabled = false; el('growy').disabled = false; }
     actionState(); drawOverlay();
   }
   function numeric(name) {
@@ -71,6 +83,14 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
     if (!selected) throw Error('اختر عنصرًا قابلًا للتعديل أولًا.');
     if (selected.kind === 'wall') return { type: 'move-partition', wallId: selected.id, deltaM: numeric('delta') };
     if (selected.kind === 'room') return { type: 'move-room', roomId: selected.id, dxM: numeric('dx'), dyM: numeric('dy') };
+    if (selected.kind === 'resize') {
+      const [roomId, corner] = selected.id.split('|'), sides = CORNER_SIDES[corner];
+      const command = { type: 'resize-room', roomId };
+      const growx = numeric('growx'), growy = numeric('growy');
+      if (!el('growx').disabled) command[sides.x === 'right' ? 'growRightM' : 'growLeftM'] = growx;
+      if (!el('growy').disabled) command[sides.y === 'top' ? 'growTopM' : 'growBottomM'] = growy;
+      return command;
+    }
     const model=getModel(), opening=currentTarget(), wall=model.walls.find(w=>w.id===opening.wallId);
     if(!opening||!wall)throw Error('تعذّر ربط الفتحة المحددة بجدارها.');
     const command={type:'edit-opening',openingId:selected.id};
@@ -131,6 +151,21 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
       element('title', {}, hit).textContent = `غرفة قابلة للنقل ${room.name || room.id}`;
       element('rect', { x: room.x, y: -room.y - room.h, width: room.w, height: room.h, fill: 'none', stroke: active ? '#c36b25' : '#6a4fab', 'stroke-width': 3, 'stroke-dasharray': active ? '0' : '2 3', 'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none' });
     }
+    for (const info of (getRoomResizes() || []).filter(item => item.eligible)) {
+      const room = model.rooms.find(r => r.id === info.roomId); if (!room) continue;
+      for (const corner of ['tl', 'tr', 'bl', 'br']) {
+        const sides = CORNER_SIDES[corner];
+        if (!info.edges?.[sides.x] && !info.edges?.[sides.y]) continue;
+        const cx = sides.x === 'right' ? room.x + room.w : room.x;
+        const cy = sides.y === 'top' ? room.y + room.h : room.y;
+        const id = `${room.id}|${corner}`;
+        const active = selected?.kind === 'resize' && selected.id === id;
+        const color = active ? '#c36b25' : '#1f7a4d';
+        const hit = element('line', { x1: cx - .001, y1: -cy, x2: cx + .001, y2: -cy, stroke: color, 'stroke-opacity': '.35', 'stroke-width': 40, 'stroke-linecap': 'round', 'vector-effect': 'non-scaling-stroke', 'data-ge-resize': id, tabindex: 0, role: 'button', 'aria-label': `تغيير أبعاد غرفة ${room.name || room.id} من ${CORNER_LABELS[corner]}` });
+        element('title', {}, hit).textContent = `زاوية قابلة للسحب لتغيير أبعاد ${room.name || room.id}`;
+        element('line', { x1: cx - .001, y1: -cy, x2: cx + .001, y2: -cy, stroke: color, 'stroke-width': 12, 'stroke-linecap': 'round', 'vector-effect': 'non-scaling-stroke', 'pointer-events': 'none' });
+      }
+    }
     if (pending?.model) {
       const ghost = element('g', { 'pointer-events': 'none', 'data-ge-preview': '' });
       for (const id of pending.impact?.wallIds || []) {
@@ -159,15 +194,21 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
   const stop = event => { event.preventDefault(); event.stopImmediatePropagation(); };
   function pointerDown(event) {
     if (!enabled || !host.getClientRects().length || event.button !== 0 || !el('layer').checked) return;
-    const hit = event.target.closest('[data-ge-wall],[data-ge-opening],[data-ge-room]'); if (!hit) return;
+    const hit = event.target.closest('[data-ge-wall],[data-ge-opening],[data-ge-room],[data-ge-resize]'); if (!hit) return;
     stop(event);
-    const kind = hit.hasAttribute('data-ge-wall') ? 'wall' : hit.hasAttribute('data-ge-opening') ? 'opening' : 'room';
-    const id = hit.getAttribute(kind === 'wall' ? 'data-ge-wall' : kind === 'opening' ? 'data-ge-opening' : 'data-ge-room');
+    const kind = hit.hasAttribute('data-ge-wall') ? 'wall' : hit.hasAttribute('data-ge-opening') ? 'opening' : hit.hasAttribute('data-ge-resize') ? 'resize' : 'room';
+    const id = hit.getAttribute(kind === 'wall' ? 'data-ge-wall' : kind === 'opening' ? 'data-ge-opening' : kind === 'resize' ? 'data-ge-resize' : 'data-ge-room');
     selectTarget(kind, id);
     const target = currentTarget();
     const wall = kind === 'wall' ? target : kind === 'opening' ? getModel().walls.find(w => w.id === target.wallId) : null;
     const axes = kind === 'room' ? (getRoomMoves() || []).find(info => info.roomId === id)?.axes || { x: false, y: false } : null;
-    drag = { pointerId: event.pointerId, kind, wall, axes, origin: coordinates(event), startPosition: kind === 'opening' ? target.pos * lineLength(wall) : 0, moved: false };
+    let resizeAxes = null, corner = null;
+    if (kind === 'resize') {
+      const [roomId, c] = id.split('|'); corner = c; const sides = CORNER_SIDES[corner];
+      const info = (getRoomResizes() || []).find(item => item.roomId === roomId);
+      resizeAxes = { x: !!info?.edges?.[sides.x], y: !!info?.edges?.[sides.y] };
+    }
+    drag = { pointerId: event.pointerId, kind, wall, axes, corner, resizeAxes, origin: coordinates(event), startPosition: kind === 'opening' ? target.pos * lineLength(wall) : 0, moved: false };
     consumed.add(event.pointerId); svg.setPointerCapture?.(event.pointerId); actionState();
   }
   function pointerMove(event) {
@@ -179,7 +220,11 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
     drag.moved = true;
     if (drag.kind === 'wall') el('delta').value = fixed(Math.abs(drag.wall.x2 - drag.wall.x1) < 1e-5 ? dx : dy);
     else if (drag.kind === 'room') { el('dx').value = fixed(drag.axes?.x ? dx : 0); el('dy').value = fixed(drag.axes?.y ? dy : 0); }
-    else {
+    else if (drag.kind === 'resize') {
+      const sides = CORNER_SIDES[drag.corner];
+      const growx = sides.x === 'right' ? dx : -dx, growy = sides.y === 'top' ? dy : -dy;
+      el('growx').value = fixed(drag.resizeAxes?.x ? growx : 0); el('growy').value = fixed(drag.resizeAxes?.y ? growy : 0);
+    } else {
       const length = lineLength(drag.wall);
       el('position').value = fixed(drag.startPosition + (dx * (drag.wall.x2 - drag.wall.x1) + dy * (drag.wall.y2 - drag.wall.y1)) / length);
     }
@@ -196,7 +241,7 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
   // A second touch cancels the edit before the existing viewport can pan/zoom.
   window.addEventListener('pointerdown', event => {
     if (event.pointerType === 'touch') touches.add(event.pointerId);
-    if ((drag && event.pointerId !== drag.pointerId) || (touches.size > 1 && event.target.closest?.('[data-ge-wall],[data-ge-opening],[data-ge-room]'))) {
+    if ((drag && event.pointerId !== drag.pointerId) || (touches.size > 1 && event.target.closest?.('[data-ge-wall],[data-ge-opening],[data-ge-room],[data-ge-resize]'))) {
       consumed.add(event.pointerId); stop(event); cancel('أُلغيت المعاينة عند اللمس الثاني؛ لم يتغير المخطط.');
     }
   }, { capture: true, signal: lifetime.signal });
@@ -210,11 +255,11 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
     svg.addEventListener('wheel', () => { if (drag || pending) cancel('أُلغيت المعاينة عند تغيير التكبير؛ أعد تحديد القياس.'); }, { capture: true, signal: svgEvents.signal });
     svg.addEventListener('pointerdown', pointerDown, { capture: true, signal: svgEvents.signal });
     svg.addEventListener('keydown', event => {
-      const hit = event.target.closest('[data-ge-wall],[data-ge-opening],[data-ge-room]');
+      const hit = event.target.closest('[data-ge-wall],[data-ge-opening],[data-ge-room],[data-ge-resize]');
       if (hit && ['Enter', ' '].includes(event.key)) {
         stop(event);
-        const kind = hit.hasAttribute('data-ge-wall') ? 'wall' : hit.hasAttribute('data-ge-opening') ? 'opening' : 'room';
-        selectTarget(kind, hit.getAttribute('data-ge-wall') || hit.getAttribute('data-ge-opening') || hit.getAttribute('data-ge-room'));
+        const kind = hit.hasAttribute('data-ge-wall') ? 'wall' : hit.hasAttribute('data-ge-opening') ? 'opening' : hit.hasAttribute('data-ge-resize') ? 'resize' : 'room';
+        selectTarget(kind, hit.getAttribute('data-ge-wall') || hit.getAttribute('data-ge-opening') || hit.getAttribute('data-ge-resize') || hit.getAttribute('data-ge-room'));
       }
     }, { capture: true, signal: svgEvents.signal });
   }
@@ -231,6 +276,20 @@ export function initGeometryEditor({ host, getSvg, getModel, getPartitions = () 
       const option = document.createElement('option'); option.value = `room:${info.roomId}`; option.disabled = !info.eligible;
       const name = model?.rooms?.find(r => r.id === info.roomId)?.name || info.roomId;
       option.textContent = `نقل غرفة ${name}${info.eligible ? '' : ` — ${info.reason || 'غير قابلة للنقل'}`}`; options.append(option);
+    }
+    for (const info of getRoomResizes() || []) {
+      const name = model?.rooms?.find(r => r.id === info.roomId)?.name || info.roomId;
+      if (!info.eligible) {
+        const option = document.createElement('option'); option.value = `resize:${info.roomId}|tl`; option.disabled = true;
+        option.textContent = `تغيير أبعاد غرفة ${name} — ${info.reason || 'غير قابلة لتغيير الأبعاد'}`; options.append(option);
+        continue;
+      }
+      for (const corner of ['tl', 'tr', 'bl', 'br']) {
+        const sides = CORNER_SIDES[corner];
+        if (!info.edges?.[sides.x] && !info.edges?.[sides.y]) continue;
+        const option = document.createElement('option'); option.value = `resize:${info.roomId}|${corner}`;
+        option.textContent = `تغيير أبعاد غرفة ${name} (${CORNER_LABELS[corner]})`; options.append(option);
+      }
     }
     const unsupportedReason = (getPartitions() || []).find(info => /^(?:MODEL_|SURVEY_)/.test(info.reason || ''))?.reason;
     for (const opening of model?.openings || []) {
