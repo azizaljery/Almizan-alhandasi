@@ -62,10 +62,11 @@ const CONDITION_MARKER = /(?:اريد|ابي|ابغي|ابغا|نريد|ودي|�
 // A plain refusal ("لا أريد ...", "ما أبي ..."). It stays an IMPORTANT preference (the
 // client did not use an obligation word) but is flagged `asMandatory` so it is treated
 // as equivalent to a mandatory condition, and the client is told so on the row.
-const REFUSAL_WISH = /(?:^|\s)(?:لا|ما)\s+(?:اريد|ابي|ابغي|ابغا|نريد|ودي|احب|ارغب)(?![ء-ي])/;
+// "بدون" / "تجنّب" are refusals of the same kind ("بيت بدون فناء", "تجنب الممرات الطويلة").
+const REFUSAL_WISH = /(?:^|\s)[وف]?(?:(?:لا|ما)\s+(?:اريد|ابي|ابغي|ابغا|نريد|ودي|احب|ارغب)|(?:بدون|دون|تجنب|اتجنب|نتجنب|تجنبوا))(?![ء-ي])/;
 export const isRefusalWish = normalized => REFUSAL_WISH.test(normalized);
 export const AS_MANDATORY_LABEL = 'بمثابة إلزامي';
-export const AS_MANDATORY_RULE = 'النفي الصريح («لا أريد» و«ما أبي») يبقى «تفضيل مهم» لأنه بلا صيغة إلزام، لكنه يُعامل بمثابة الإلزامي، وتُوسَم صفوفه بـ«بمثابة إلزامي».';
+export const AS_MANDATORY_RULE = 'النفي الصريح («لا أريد» و«ما أبي» و«بدون» و«تجنّب») يبقى «تفضيل مهم» لأنه بلا صيغة إلزام، لكنه يُعامل بمثابة الإلزامي، وتُوسَم صفوفه بـ«بمثابة إلزامي».';
 
 // Split free text into clauses, on punctuation and on a conjunction that starts a
 // new request ("... و أبي ..."). Original wording is kept for display.

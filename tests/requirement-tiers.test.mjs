@@ -380,3 +380,15 @@ test('a conjunction letter glued to the obligation word does not hide it ("وي�
   assert.equal(classifyClause('وأبي مطبخا واسعا').tier, TIER.IMPORTANT);
   assert.equal(classifyClause('ومو لازم فناء').tier, TIER.IMPORTANT);
 });
+
+test('"بدون" and "تجنّب" are refusals treated as equivalent to mandatory, and keep every other rule', () => {
+  for (const text of ['أبي بيت بدون فناء', 'بدون ممرات طويلة', 'نتجنب غرف النوم المكشوفة', 'تجنب مرور الضيوف على العائلة', 'وبدون مسبح']) {
+    const c = classifyClause(text);
+    assert.equal(c.tier, TIER.IMPORTANT, text);
+    assert.equal(c.asMandatory, true, text);
+  }
+  assert.equal(classifyClause('يجب أن يكون بدون فناء').tier, TIER.MANDATORY);
+  assert.equal(classifyClause('بدون لون أزرق').tier, TIER.COSMETIC);
+  assert.equal(classifyClause('أبي ديكور بدون زخرفة').tier, TIER.COSMETIC);
+  for (const text of ['أريد مطبخا مدونا', 'أبي غرفة قريبة من المدخل']) assert.equal(classifyClause(text).asMandatory, undefined, text);
+});

@@ -99,6 +99,56 @@ function validateWindows(model) {
     if (along - opening.w / 2 < start - EPS || along + opening.w / 2 > start + size + EPS || Math.min(Math.abs(normal - normalStart), Math.abs(normal - normalStart - normalSize)) > wall.t / 2 + EPS) fail('INVALID_GEOMETRY', 'التعديل يجعل نافذة خارج حدود غرفتها؛ عدّل موضعها أولًا.');
   }
 }
+// ---- Room-level structural editing (split, delete/merge, corridor delete) ----
+// All of these are built on the same atomic preview model as the partition/room moves:
+// they only produce a proposal that validateModel() must accept, never mutate the input.
+const intThickness = model => model.walls.find(w => w.type === 'int')?.t ?? .15;
+const intHeight = model => model.walls.find(w => w.type === 'int')?.h ?? 3.2;
+const nextId = (prefix, items) => prefix + (Math.max(-1, ...items.map(item => Number(String(item.id).split('-').at(-1)) || 0)) + 1);
+function assertFeasible(room, label = room.name) {
+  const minimum = TYPES[room.type]?.min;
+  if (!(room.w > 0 && room.h > 0)) fail('INVALID_GEOMETRY', 'التعديل يلغي المساحة الصافية لإحدى الغرف.');
+  if (!Number.isFinite(minimum) || room.w < minimum - 1e-5 || room.h < minimum - 1e-5 || Math.max(room.w / room.h, room.h / room.w) > 5)
+    fail('INVALID_GEOMETRY', `PLANNER_ROOM_FEASIBILITY: ${label} يتجاوز حدود المولد الحالية: البعد الأدنى ${minimum} م ونسبة الاستطالة القصوى 5؛ ليست اشتراطات نظامية.`);
+}
+function syncProgramArea(next, room) {
+  room.area = room.w * room.h; room.targetArea = room.area;
+  const requested = next.program.find(r => r.id === room.id);
+  if (!requested) fail('INVALID_GEOMETRY', 'غرفة بلا سجل برنامج مطابق.');
+  requested.area = room.area;
+  if (Object.hasOwn(requested, 'targetArea')) requested.targetArea = room.area;
+}
+function isLocked(model, roomId) { return hasDimensions(model.rooms.find(r => r.id === roomId)) || hasDimensions(model.program.find(r => r.id === roomId)); }
+function spaceName(model, id) { return model.rooms.find(r => r.id === id)?.name || model.corridors.find(c => c.id === id)?.name || id; }
+function newRoomName(model, type) {
+  const base = TYPES[type]?.name || 'غرفة', taken = new Set(model.rooms.map(r => r.name));
+  if (!taken.has(base)) return base;
+  for (let i = 2; i < 100; i++) if (!taken.has(`${base} ${i}`)) return `${base} ${i}`;
+  return `${base} ${model.rooms.length + 1}`;
+}
+// For the UI: what each room can currently do. Previews re-derive and enforce all of this.
+export function eligibleRoomEdits(model, { landSurvey = null } = {}) {
+  const reason = unsupported(model, landSurvey);
+  const partitions = reason ? [] : eligiblePartitions(model, { landSurvey });
+  const t = reason ? 0 : intThickness(model);
+  return (model?.rooms || []).map(room => {
+    const none = { roomId: room.id, split: { x: false, y: false }, mergeWith: [], eligible: false };
+    if (reason) return { ...none, reason };
+    if (isLocked(model, room.id)) return { ...none, reason: 'DIMENSIONS_LOCKED: أبعاد هذه الغرفة مثبتة صراحة؛ لا يعدّلها هذا الإجراء.' };
+    const minimum = TYPES[room.type]?.min ?? 0;
+    const split = { x: room.w >= 2 * minimum + t + 1e-5, y: room.h >= 2 * minimum + t + 1e-5 };
+    const mergeWith = partitions.filter(p => p.eligible && p.roomIds.includes(room.id)).map(p => p.roomIds.find(id => id !== room.id));
+    const eligible = split.x || split.y || mergeWith.length > 0;
+    return { ...none, split, mergeWith, eligible, reason: eligible ? null : 'لا يمكن تعديل هذه الغرفة من هذه الدفعة (محاطة بجدران خارجية أو حدود ممرات).' };
+  });
+}
+export function eligibleCorridors(model, { landSurvey = null } = {}) {
+  const reason = unsupported(model, landSurvey);
+  return (model?.corridors || []).map(corridor => ({ corridorId: corridor.id, eligible: !reason && corridor.id !== 'spine',
+    reason: reason || (corridor.id === 'spine' ? 'الممر الرئيسي هو عمود الحركة؛ لا يُحذف.' : null) }));
+}
+
+
 // Produces an immutable proposal. The caller must explicitly confirm area impact
 // before installing this model into the live design or undo/redo session.
 export function previewGeometryCommand(model, command, { landSurvey = null, revision = model?.geometryRevision ?? 0 } = {}) {
@@ -246,6 +296,96 @@ export function previewGeometryCommand(model, command, { landSurvey = null, revi
     }
     if (!changed) fail('NO_CHANGE', 'لم يتغير موضع الفتحة أو أبعادها.');
     impact.openingIds.push(opening.id);
+  } else if (command.type === 'split-room') {
+    const parent = next.rooms.find(r => r.id === command.roomId), original = model.rooms.find(r => r.id === command.roomId);
+    if (!parent || !original) fail('ROOM_NOT_FOUND', 'الغرفة غير موجودة.');
+    if (!['x', 'y'].includes(command.axis)) fail('INVALID_COMMAND', 'حدّد اتجاه التقسيم: رأسي (x) أو أفقي (y).');
+    if (!Number.isFinite(command.atM)) fail('INVALID_COMMAND', 'موضع التقسيم يجب أن يكون رقمًا بالمتر من بداية الغرفة.');
+    if (isLocked(model, original.id)) fail('DIMENSIONS_LOCKED', 'أبعاد هذه الغرفة مثبتة صراحة؛ لا تُقسَّم.');
+    const newType = command.newType ?? original.type;
+    if (!Object.hasOwn(TYPES, newType)) fail('INVALID_COMMAND', 'نوع الغرفة الجديدة غير معروف.');
+    const t = intThickness(model), vertical = command.axis === 'x', cut = snap(command.atM), size = vertical ? original.w : original.h;
+    if (!(cut > 0 && cut < size)) fail('INVALID_COMMAND', 'موضع التقسيم يجب أن يقع داخل الغرفة.');
+    applied.atM = cut;
+    const origin = vertical ? original.x : original.y, line = origin + cut, secondNew = command.newRoomAt !== 'first';
+    const rects = [{ lo: origin, hi: line - t / 2 }, { lo: line + t / 2, hi: origin + size }];
+    const newId = nextId('room-', [...next.rooms, ...next.program]), wallId = nextId('wall-', next.walls);
+    const setSpan = (room, span) => { if (vertical) { room.x = span.lo; room.w = span.hi - span.lo; } else { room.y = span.lo; room.h = span.hi - span.lo; } };
+    const created = { ...structuredClone(original), id: newId, name: String(command.newName ?? '').trim() || newRoomName(model, newType), type: newType };
+    delete created.corridorId; delete created.doorSide; delete created.dimensions; delete created.exactDimensionsM; delete created.exactDimensions;
+    if (created.name.length > 70) fail('INVALID_COMMAND', 'اسم الغرفة الجديدة أطول من 70 حرفًا.');
+    setSpan(parent, rects[secondNew ? 0 : 1]); setSpan(created, rects[secondNew ? 1 : 0]);
+    assertFeasible(parent); assertFeasible(created);
+    const half = value => value < line - 1e-9 ? 0 : 1, ownerOf = half => (half === (secondNew ? 0 : 1)) ? parent.id : created.id;
+    for (const opening of next.openings) {
+      const touchesParent = opening.roomId === parent.id || opening.connects?.includes(parent.id);
+      if (!touchesParent) continue;
+      const wall = next.walls.find(w => w.id === opening.wallId), point = openingPoint(next, opening), horizontalWall = near(wall.y1, wall.y2);
+      const along = vertical ? point.x : point.y;
+      const runsAcross = vertical ? horizontalWall : !horizontalWall;
+      if (runsAcross && Math.abs(along - line) < opening.w / 2 + t / 2 + 1e-6) fail('INVALID_GEOMETRY', 'خط التقسيم يمر بفتحة قائمة (باب أو نافذة)؛ حرّك موضع التقسيم أو الفتحة أولًا.');
+      const owner = ownerOf(half(along));
+      if (opening.roomId === parent.id) opening.roomId = owner;
+      if (opening.connects) opening.connects = opening.connects.map(id => id === parent.id ? owner : id);
+    }
+    const wallLength = (vertical ? original.h : original.w) + t, doorW = .9;
+    if (wallLength < doorW + .4) fail('INVALID_GEOMETRY', 'الغرفة أضيق من أن يتسع الجدار الجديد لباب بين القسمين.');
+    next.walls.push({ id: wallId, x1: vertical ? line : original.x - t / 2, y1: vertical ? original.y - t / 2 : line, x2: vertical ? line : original.x + original.w + t / 2, y2: vertical ? original.y + original.h + t / 2 : line, type: 'int', t, h: intHeight(model) });
+    const doorId = nextId('opening-', next.openings);
+    next.openings.push({ type: 'door', w: doorW, h: 2.1, sill: 0, roomId: parent.id, connects: [parent.id, created.id], id: doorId, wallId, pos: .5 });
+    next.rooms.push(created);
+    next.program.push({ id: newId, name: created.name, type: created.type, area: 0, targetArea: 0, position: original.position, side: original.side });
+    syncProgramArea(next, parent); syncProgramArea(next, created);
+    impact.rooms.push({ id: parent.id, beforeArea: original.w * original.h, afterArea: parent.area }, { id: newId, beforeArea: 0, afterArea: created.area });
+    impact.wallIds.push(wallId); impact.openingIds.push(doorId);
+    impact.addedRoomId = newId; impact.requiresConfirmation = true;
+  } else if (command.type === 'delete-room') {
+    const original = model.rooms.find(r => r.id === command.roomId);
+    if (!original) fail('ROOM_NOT_FOUND', 'الغرفة غير موجودة.');
+    if (model.rooms.length <= 1) fail('ROOM_DELETE_BLOCKED', 'لا يمكن حذف آخر غرفة في المخطط.');
+    if (isLocked(model, original.id)) fail('DIMENSIONS_LOCKED', 'أبعاد هذه الغرفة مثبتة صراحة؛ لا تُحذف بهذا الإجراء.');
+    const partitions = eligiblePartitions(model, { landSurvey }).filter(p => p.eligible && p.roomIds.includes(original.id));
+    if (!partitions.length) fail('ROOM_DELETE_BLOCKED', 'لا يوجد قاطع داخلي كامل يفصل هذه الغرفة عن جارة مناسبة لتتسع مكانها؛ لا يمكن حذفها دون هدم جدار خارجي أو حد ممر.');
+    const area = id => { const r = model.rooms.find(x => x.id === id); return r.w * r.h; };
+    const neighbourOf = p => p.roomIds.find(id => id !== original.id);
+    let chosen;
+    if (command.mergeIntoRoomId != null) {
+      chosen = partitions.find(p => neighbourOf(p) === command.mergeIntoRoomId);
+      if (!chosen) fail('ROOM_DELETE_BLOCKED', 'الغرفة المحددة ليست جارة مؤهلة لاستيعاب المساحة.');
+    } else {
+      chosen = [...partitions].sort((a, b) => (model.rooms.find(r => r.id === neighbourOf(b)).type === original.type) - (model.rooms.find(r => r.id === neighbourOf(a)).type === original.type) || area(neighbourOf(b)) - area(neighbourOf(a)))[0];
+    }
+    const survivorId = neighbourOf(chosen);
+    if (isLocked(model, survivorId)) fail('DIMENSIONS_LOCKED', 'أبعاد الغرفة المجاورة مثبتة صراحة؛ لا تتسع.');
+    applied.mergeIntoRoomId = survivorId;
+    const survivor = next.rooms.find(r => r.id === survivorId), removed = next.rooms.find(r => r.id === original.id);
+    const x = Math.min(survivor.x, removed.x), y = Math.min(survivor.y, removed.y);
+    const w = Math.max(survivor.x + survivor.w, removed.x + removed.w) - x, h = Math.max(survivor.y + survivor.h, removed.y + removed.h) - y;
+    Object.assign(survivor, { x, y, w, h });
+    assertFeasible(survivor);
+    next.walls = next.walls.filter(wall => wall.id !== chosen.wallId);
+    next.openings = next.openings.filter(o => o.wallId !== chosen.wallId);
+    for (const opening of next.openings) {
+      if (opening.roomId === removed.id) opening.roomId = survivor.id;
+      if (opening.connects) opening.connects = opening.connects.map(id => id === removed.id ? survivor.id : id);
+    }
+    next.openings = next.openings.filter(o => o.type !== 'door' || !o.connects || o.connects[0] !== o.connects[1]);
+    next.rooms = next.rooms.filter(r => r.id !== removed.id);
+    next.program = next.program.filter(r => r.id !== removed.id);
+    syncProgramArea(next, survivor);
+    impact.rooms.push({ id: survivor.id, beforeArea: model.rooms.find(r => r.id === survivor.id).w * model.rooms.find(r => r.id === survivor.id).h, afterArea: survivor.area });
+    impact.removedRoomId = removed.id; impact.removedRoomArea = original.w * original.h; impact.wallIds.push(chosen.wallId);
+    impact.requiresConfirmation = true;
+  } else if (command.type === 'delete-corridor') {
+    const corridor = next.corridors.find(c => c.id === command.corridorId);
+    if (!corridor) fail('CORRIDOR_NOT_FOUND', 'الممر غير موجود.');
+    if (corridor.id === 'spine') fail('CORRIDOR_NOT_ELIGIBLE', 'الممر الرئيسي هو عمود الحركة؛ لا يُحذف.');
+    const doors = next.openings.filter(o => o.type === 'door' && o.connects?.includes(corridor.id));
+    next.corridors = next.corridors.filter(c => c.id !== corridor.id);
+    next.links = next.links.filter(pair => !pair.includes(corridor.id));
+    next.openings = next.openings.filter(o => !(o.type === 'door' && o.connects?.includes(corridor.id)));
+    impact.corridorId = corridor.id; impact.corridorArea = corridor.w * corridor.h; impact.openingIds.push(...doors.map(d => d.id));
+    impact.requiresConfirmation = true;
   } else fail('UNSUPPORTED_COMMAND', 'نوع أمر التحرير غير مدعوم.');
   try { normalizeRooms(next.program); } catch (error) { fail('INVALID_GEOMETRY', error.message); }
   const errors = validateModel(next); if (errors.length) fail('INVALID_GEOMETRY', errors.join(' | '));
