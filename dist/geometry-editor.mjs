@@ -33,6 +33,39 @@ function describe(model, wall, reason) {
 export function eligiblePartitions(model, { landSurvey = null } = {}) {
   return (model?.walls || []).map(wall => describe(model, wall, unsupported(model, landSurvey)));
 }
+// A partition's "before"/"after" rooms (see describe() above) sit offset from the
+// wall's own centreline by half its thickness, so a room edge can only be matched
+// to its bounding wall through this before/after role — never by comparing raw
+// coordinates, which are not equal (they differ by wall.t / 2).
+function partitionSide(partition, roomId) {
+  const index = partition.roomIds.indexOf(roomId);
+  if (index < 0) return null;
+  if (partition.orientation === 'horizontal') return index === 0 ? 'top' : 'bottom';
+  if (partition.orientation === 'vertical') return index === 0 ? 'right' : 'left';
+  return null;
+}
+// The eligible partition wall bounding `room` on a given side ('left'|'right'|'top'|'bottom'), if any.
+function roomSideWall(partitions, room, side) {
+  return partitions.find(p => p.eligible && partitionSide(p, room.id) === side) || null;
+}
+// Per-room summary of whether a free rigid move is possible on each axis, for the
+// UI to disable/explain before the user attempts a drag. Not the final authority —
+// previewGeometryCommand({type:'move-room'}) re-derives and enforces this itself.
+export function eligibleRoomMoves(model, { landSurvey = null } = {}) {
+  const reason = unsupported(model, landSurvey);
+  const partitions = reason ? [] : eligiblePartitions(model, { landSurvey });
+  return (model?.rooms || []).map(room => {
+    if (reason) return { roomId: room.id, eligible: false, axes: { x: false, y: false }, reason };
+    if (hasDimensions(room) || hasDimensions(model.program.find(r => r.id === room.id)))
+      return { roomId: room.id, eligible: false, axes: { x: false, y: false }, reason: 'DIMENSIONS_LOCKED: أبعاد هذه الغرفة مثبتة صراحة؛ لا ينقلها هذا الإجراء.' };
+    const axes = {
+      x: !!roomSideWall(partitions, room, 'left') && !!roomSideWall(partitions, room, 'right'),
+      y: !!roomSideWall(partitions, room, 'bottom') && !!roomSideWall(partitions, room, 'top'),
+    };
+    const eligible = axes.x || axes.y;
+    return { roomId: room.id, eligible, axes, reason: eligible ? null : 'الغرفة محاطة بجدار خارجي أو حد ممر أو قاطع جزئي أو غرفة ذات أبعاد مثبتة على كل الجهات؛ لا يمكن نقلها حرًا في أي اتجاه.' };
+  });
+}
 function validateWindows(model) {
   for (const opening of model.openings.filter(o => o.type === 'window' && o.roomId)) {
     const room = model.rooms.find(r => r.id === opening.roomId), wall = model.walls.find(w => w.id === opening.wallId);
@@ -78,6 +111,53 @@ export function previewGeometryCommand(model, command, { landSurvey = null, revi
     }
     impact.wallIds.push(wall.id);
     impact.openingIds.push(...next.openings.filter(o => o.wallId === wall.id).map(o => o.id));
+    impact.requiresConfirmation = true;
+  } else if (command.type === 'move-room') {
+    const room = next.rooms.find(r => r.id === command.roomId), originalRoom = model.rooms.find(r => r.id === command.roomId);
+    if (!room || !originalRoom) fail('ROOM_NOT_FOUND', 'الغرفة غير موجودة.');
+    if (!['dxM', 'dyM'].some(key => Object.hasOwn(command, key) && command[key] != null) ) fail('INVALID_COMMAND', 'نقل الغرفة يحتاج إزاحة أفقية أو رأسية بالمتر.');
+    for (const key of ['dxM', 'dyM']) if (Object.hasOwn(command, key) && command[key] != null && !Number.isFinite(command[key])) fail('INVALID_COMMAND', 'إزاحة نقل الغرفة يجب أن تكون رقمًا بالمتر.');
+    const dx = snap(command.dxM || 0), dy = snap(command.dyM || 0);
+    if (!dx && !dy) fail('NO_CHANGE', 'الإزاحة أصغر من شبكة التحرير 0.05 م.');
+    applied.dxM = dx; applied.dyM = dy;
+    if (hasDimensions(originalRoom) || hasDimensions(model.program.find(r => r.id === originalRoom.id))) fail('DIMENSIONS_LOCKED', 'أبعاد هذه الغرفة مثبتة صراحة؛ لا ينقلها هذا الإجراء.');
+    const partitions = eligiblePartitions(model, { landSurvey });
+    const sideLabel = { left: 'اليسار', right: 'اليمين', top: 'الأعلى', bottom: 'الأسفل' };
+    const edges = [];
+    if (dx) { edges.push({ side: 'left', delta: dx }); edges.push({ side: 'right', delta: dx }); }
+    if (dy) { edges.push({ side: 'bottom', delta: dy }); edges.push({ side: 'top', delta: dy }); }
+    const moves = [];
+    for (const edge of edges) {
+      const match = roomSideWall(partitions, originalRoom, edge.side);
+      if (!match) fail('ROOM_MOVE_BLOCKED', `تعذّر نقل الغرفة من جهة ${sideLabel[edge.side]}: لا يوجد قاطع داخلي مؤهل هناك (قد يكون جدارًا خارجيًا، أو حد ممر، أو قاطعًا جزئيًا، أو غرفة مجاورة ذات أبعاد مثبتة). النقل الحر مدعوم فقط حين تحيط بالغرفة قواطع داخلية كاملة على كل جهة تتحرك.`);
+      moves.push({ wallId: match.wallId, delta: edge.delta, orientation: match.orientation });
+    }
+    const touchedRoomIds = new Set([originalRoom.id]);
+    for (const mv of moves) {
+      const wall = next.walls.find(w => w.id === mv.wallId), partition = partitions.find(p => p.wallId === mv.wallId), horizontal = mv.orientation === 'horizontal';
+      if (horizontal) { wall.y1 += mv.delta; wall.y2 += mv.delta; } else { wall.x1 += mv.delta; wall.x2 += mv.delta; }
+      for (const [index, id] of partition.roomIds.entries()) {
+        const r2 = next.rooms.find(r => r.id === id);
+        const sizeKey = horizontal ? 'h' : 'w', originKey = horizontal ? 'y' : 'x';
+        r2[sizeKey] += index === 0 ? mv.delta : -mv.delta;
+        if (index === 1) r2[originKey] += mv.delta;
+        touchedRoomIds.add(id);
+      }
+      impact.wallIds.push(wall.id);
+      impact.openingIds.push(...next.openings.filter(o => o.wallId === wall.id).map(o => o.id));
+    }
+    for (const id of touchedRoomIds) {
+      const r2 = next.rooms.find(r => r.id === id), before2 = model.rooms.find(r => r.id === id);
+      if (r2.w <= 0 || r2.h <= 0) fail('INVALID_GEOMETRY', 'النقل يلغي المساحة الصافية لإحدى الغرف.');
+      const minimum = TYPES[r2.type]?.min;
+      if (!Number.isFinite(minimum) || r2.w < minimum - 1e-5 || r2.h < minimum - 1e-5 || Math.max(r2.w / r2.h, r2.h / r2.w) > 5) fail('INVALID_GEOMETRY', `PLANNER_ROOM_FEASIBILITY: ${r2.name} يتجاوز حدود المولد الحالية: البعد الأدنى ${minimum} م ونسبة الاستطالة القصوى 5؛ ليست اشتراطات نظامية.`);
+      r2.area = r2.w * r2.h; r2.targetArea = r2.area;
+      const requested = next.program.find(r => r.id === id);
+      if (!requested) fail('INVALID_GEOMETRY', 'غرفة بلا سجل برنامج مطابق.');
+      requested.area = r2.area;
+      if (Object.hasOwn(requested, 'targetArea')) requested.targetArea = r2.area;
+      impact.rooms.push({ id, beforeArea: before2.w * before2.h, afterArea: r2.area });
+    }
     impact.requiresConfirmation = true;
   } else if (command.type === 'edit-opening') {
     const opening = next.openings.find(o => o.id === command.openingId);

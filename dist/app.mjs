@@ -3,7 +3,7 @@ import { renderTransparencyPanel } from './transparency.mjs';
 import { createStudioSession, normalizeStudioSession, beginStudioOperation, isCurrentStudioOperation, cancelStudioOperation, bindStudioRevision, appendStudioMessage, acceptStudioUnderstanding, approveStudioRevision, invalidateStudioApproval, setStudioDraft } from './studio-session.mjs';
 import { diffRoomPrograms } from './design-dialog.mjs';
 import { createGeometrySession } from './geometry-session.mjs';
-import { eligiblePartitions } from './geometry-editor.mjs';
+import { eligiblePartitions, eligibleRoomMoves } from './geometry-editor.mjs';
 import { initGeometryEditor } from './geometry-editor-ui.mjs';
 import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, validateModel, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
@@ -490,6 +490,7 @@ function syncGeometryEditor() {
     host: $('geometryEditorHost'), getSvg: () => viewport?.svg, getModel: () => state.model,
     getHistory: () => geometrySession.getState(),
     getPartitions: () => eligiblePartitions(state.model, { landSurvey: state.modelLandSurvey }),
+    getRoomMoves: () => eligibleRoomMoves(state.model, { landSurvey: state.modelLandSurvey }),
     onPreview: operation => {
       if (state.dirty) throw Error('راجع اختلاف المدخلات عن المخطط قبل التحرير الهندسي.');
       geometryPending = geometrySession.preview({ ...operation, id: `geometry-command-${++geometryCommandId}`, baseRevision: geometrySession.getState().revision });
