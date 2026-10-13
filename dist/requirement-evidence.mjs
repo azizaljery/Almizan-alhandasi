@@ -3,6 +3,7 @@
 // It does not change the Claude/Gemini/AZIZ pipeline or certify code compliance.
 import { quantities } from './planner.mjs';
 import { circulationNetwork } from './circulation.mjs';
+import { unverifiedCheck, toEvidenceRow } from './regulatory-checks.mjs';
 
 export const REQUIREMENT_STATUS = Object.freeze({
   ENFORCED: 'ENFORCED',
@@ -108,6 +109,46 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
       'يسجل المرشح سقفًا قدره ' + fmt(recordedCap) + ' م² والكتلة ' + fmt(q.footprint) + ' م²، لكن السقف الأصلي المرتبط بالتوليد غير متاح للمقارنة.',
       'بيانات المرشح فقط', 'متطلبات إلزامية');
   }
+
+  // الاشتراطات النظامية (الكود/البلدية): لا يملك هذا المشروع مرجع كود بناء أو
+  // بلدية محقق بذاته. القيم أدناه حقائق مقاسة من الرسم فقط (الارتداد المستخدم،
+  // نسبة التغطية)، ولا تُعرض كمطابقة أو مخالفة لأي اشتراط نظامي حقيقي؛ كل فحص
+  // يُعرض صراحة كـ"لم يتم التحقق" حتى يرتبط المشروع بجهة/كود فعلي.
+  const regulatoryCategory = 'الاشتراطات النظامية (الكود/البلدية)';
+  rows.push(toEvidenceRow(unverifiedCheck({
+    rule: 'الجهة والكود النظامي المعتمد للمشروع',
+    measuredLabel: 'المدينة/البلدية أو كود البناء المسجل لهذا المشروع',
+    measuredValue: null,
+    verificationNote: 'لا يوجد في بيانات هذا المشروع تحديد لمدينة أو بلدية أو كود بناء معتمد. دون ذلك لا يمكن تحديد الاشتراطات النظامية الفعلية للارتدادات أو نسبة البناء، ولا اعتماد أي فحص في هذا القسم كمطابقة نظامية؛ القيم المقاسة أدناه حقائق هندسية من الرسم فقط.',
+  }), { id: 'reg-jurisdiction', category: regulatoryCategory }));
+
+  const streetSetback = number(model.plot?.streetSetback ?? requestedPlot?.streetSetback);
+  rows.push(toEvidenceRow(unverifiedCheck({
+    rule: 'ارتداد المبنى عن جهة الشارع',
+    measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+    measuredValue: streetSetback, unit: 'م',
+  }), { id: 'reg-street-setback', category: regulatoryCategory }));
+
+  const neighborSetback = number(model.plot?.neighborSetback ?? requestedPlot?.neighborSetback);
+  rows.push(toEvidenceRow(unverifiedCheck({
+    rule: 'ارتداد المبنى عن حدود الجيران',
+    measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+    measuredValue: neighborSetback, unit: 'م',
+  }), { id: 'reg-neighbor-setback', category: regulatoryCategory }));
+
+  const plotWidth = number(model.plot?.width ?? requestedPlot?.width);
+  const plotLength = number(model.plot?.length ?? requestedPlot?.length);
+  const landArea = plotWidth !== null && plotLength !== null ? plotWidth * plotLength : null;
+  const coverageRatio = landArea && landArea > 0 ? round(q.footprint / landArea * 100) : null;
+  const assumedCoverageCap = number(model.plot?.coverage ?? requestedPlot?.coverage);
+  rows.push(toEvidenceRow(unverifiedCheck({
+    rule: 'أقصى نسبة بناء (تغطية الأرض)',
+    measuredLabel: 'نسبة مساحة الكتلة المرسومة إلى مساحة الأرض',
+    measuredValue: coverageRatio, unit: '%',
+    verificationNote: (assumedCoverageCap !== null
+      ? 'استخدم التوليد افتراض نسبة بناء داخلي قدره ' + fmt(assumedCoverageCap * 100, 0) + '٪ كحد تصميمي قابل للتعديل، وهو ليس كودًا نظاميًا. '
+      : '') + 'يتطلب تأكيد الحد النظامي الفعلي لنسبة البناء من كود البناء أو البلدية المعتمدة لموقع المشروع، بنسخته الحالية وتاريخ تحقق فعلي، أو مراجعة مهندس/جهة مرخّصة.',
+  }), { id: 'reg-coverage', category: regulatoryCategory }));
 
   const relationships = [
     ['majlis', 'dining', 'المجلس إلى الطعام'],

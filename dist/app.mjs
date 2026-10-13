@@ -559,6 +559,8 @@ function renderGeminiReview() {
     $('geminiMetrics').replaceChildren(); $('geminiPatterns').textContent = '—';
     $('geminiFindings').innerHTML = '<li>لا تتوفر نتائج قابلة للعرض.</li>';
     $('geminiCoverage').textContent = 'لم تبدأ المراجعة.';
+    $('geminiRegulatory').replaceChildren();
+    $('geminiHeuristics').textContent = '';
     renderGeminiMarkers();
     return;
   }
@@ -589,6 +591,14 @@ function renderGeminiReview() {
   const labels = { referenceComparison: 'المرجع المحقق', structuralSystem: 'الإنشاء', soil: 'التربة', electricalLayout: 'الكهرباء', plumbingRouting: 'السباكة', hvacSystem: 'نظام التكييف', crossDisciplineClashes: 'التعارضات الهندسية', statutoryCompliance: 'المطابقة النظامية' };
   const unavailable = Object.entries(review.coverage).filter(([, value]) => value === 'NOT_EVALUATED').map(([key]) => labels[key] || key);
   $('geminiCoverage').textContent = unavailable.length ? `غير مُقيّم: ${unavailable.join('، ')}. الحركة مقاسة من الرسم، والأنماط والأحمال تقديرات إرشادية.` : 'اكتملت التغطية المتاحة من المخطط.';
+  const regulatoryRows = Array.isArray(review.regulatory) ? review.regulatory : [];
+  $('geminiRegulatory').innerHTML = regulatoryRows.length
+    ? renderRequirementEvidenceHTML({ rows: regulatoryRows })
+    : '<p class="help">لم تُستدعَ أي قاعدة مصنّفة كاستشهاد كود نظامي (SBC) لهذا المخطط.</p>';
+  const heuristicRules = Array.isArray(review.heuristicRules) ? review.heuristicRules : [];
+  $('geminiHeuristics').textContent = heuristicRules.length
+    ? 'قواعد داخلية غير نظامية استُخدمت في هذه القراءة (أدلة ممارسة لا كود): ' + heuristicRules.join(' | ')
+    : 'لا توجد قواعد داخلية غير نظامية مرتبطة بهذا المخطط.';
   renderGeminiMarkers();
 }
 function refreshEngineering() {

@@ -138,6 +138,46 @@ test('unhandled free-text requirements stay UNVERIFIED and are never counted as 
   assert.ok(result.counts.UNVERIFIED >= 1);
 });
 
+test('regulatory checks (jurisdiction, setbacks, coverage) are always disclosed as unverified facts, never a false pass/fail', () => {
+  const result = evaluateRequirementEvidence({ model, program: rooms, plot });
+  const regulatoryCategory = 'الاشتراطات النظامية (الكود/البلدية)';
+  const jurisdiction = find(result, 'reg-jurisdiction');
+  assert.ok(jurisdiction);
+  assert.equal(jurisdiction.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.equal(jurisdiction.category, regulatoryCategory);
+  assert.match(jurisdiction.evidence, /لا يوجد.*مدينة أو بلدية أو كود بناء معتمد/);
+
+  const street = find(result, 'reg-street-setback');
+  assert.equal(street.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.equal(street.category, regulatoryCategory);
+  assert.match(street.evidence, /الارتداد المستخدم في هذا المخطط: 3 م/);
+  assert.match(street.evidence, /لم يتم التحقق/);
+  assert.match(street.source, /لا يوجد مصدر نظامي موثّق/);
+
+  const neighbor = find(result, 'reg-neighbor-setback');
+  assert.equal(neighbor.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.match(neighbor.evidence, /الارتداد المستخدم في هذا المخطط: 1.5 م/);
+
+  const coverage = find(result, 'reg-coverage');
+  assert.equal(coverage.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.match(coverage.evidence, /نسبة مساحة الكتلة المرسومة إلى مساحة الأرض/);
+  assert.match(coverage.evidence, /افتراض نسبة بناء داخلي قدره ٧٥٪/);
+
+  // No regulatory row ever reports ENFORCED/NOT_MET: this module has no real source to verify against.
+  for (const row of [jurisdiction, street, neighbor, coverage]) {
+    assert.notEqual(row.status, REQUIREMENT_STATUS.ENFORCED);
+    assert.notEqual(row.status, REQUIREMENT_STATUS.NOT_MET);
+  }
+});
+
+test('regulatory setback checks report an unmeasurable fact as "—", not a fabricated zero', () => {
+  const noSetbacks = structuredClone(model);
+  delete noSetbacks.plot.streetSetback; delete noSetbacks.plot.neighborSetback;
+  const result = evaluateRequirementEvidence({ model: noSetbacks, program: rooms, plot: { ...plot, streetSetback: undefined, neighborSetback: undefined } });
+  assert.match(find(result, 'reg-street-setback').evidence, /الارتداد المستخدم في هذا المخطط: —/);
+  assert.match(find(result, 'reg-neighbor-setback').evidence, /الارتداد المستخدم في هذا المخطط: —/);
+});
+
 test('HTML evidence escapes user-supplied room names and displays the state', () => {
   const altered = structuredClone(model);
   altered.rooms[0].name = '<img src=x onerror=alert(1)>';
