@@ -131,11 +131,18 @@ test('unhandled free-text requirements stay UNVERIFIED and are never counted as 
     idea: 'أريد غرفة هادئة بعيدًا عن الشارع',
     briefContext: { constraints: ['غرفة هادئة بلا ضجيج', 'عزل صوتي خاص'] },
   });
-  const row = find(result, 'free-text');
-  assert.ok(row);
-  assert.equal(row.status, REQUIREMENT_STATUS.UNVERIFIED);
-  assert.match(row.evidence, /عزل صوتي خاص/);
-  assert.ok(result.counts.UNVERIFIED >= 1);
+  // The old single "free-text" lump is now itemized: every wish and constraint gets
+  // its own classified row, and none can become ENFORCED without a geometric proof.
+  assert.equal(find(result, 'free-text'), undefined);
+  const conditionRows = result.rows.filter(row => row.id.startsWith('cond:'));
+  assert.ok(conditionRows.some(row => row.title.includes('عزل صوتي خاص')));
+  assert.ok(conditionRows.some(row => row.title.includes('غرفة هادئة')));
+  for (const row of conditionRows) {
+    assert.equal(row.status, REQUIREMENT_STATUS.UNVERIFIED);
+    assert.ok(['MANDATORY', 'IMPORTANT', 'COSMETIC'].includes(row.tier));
+    assert.equal(row.outcome, 'UNPROVABLE');
+  }
+  assert.ok(result.counts.UNVERIFIED >= conditionRows.length);
 });
 
 test('regulatory checks (jurisdiction, setbacks, coverage) are always disclosed as unverified facts, never a false pass/fail', () => {
