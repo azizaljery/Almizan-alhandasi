@@ -50,8 +50,8 @@ export function outcomeOfStatus(status) {
 // ---- Signals (applied to normalized text: alef/ya/ta-marbuta unified, no tashkeel) ----
 // "مطلوب" is deliberately absent: it also means "the requested size/amount" and would
 // over-promote ordinary wishes to mandatory.
-const MUST = /(?:^|[^ء-ي])(?:ال)?(?:يجب|يلزم|لازم|لا ?بد|ضروري|الزامي|شرط اساسي|شرط لازم|ممنوع|يمنع|لا يجوز|ابدا|اشترط)(?![ء-ي])|(?:^|[^a-z])(?:must|required|mandatory|never|non-negotiable)(?![a-z])/;
-const NEGATED_MUST = /(?:^|\s)(?:مو|مب|مش|ليس|لا|ما)\s+(?:من\s+)?(?:ال)?(?:لازم|ضروري|يجب|يلزم|شرط)/;
+const MUST = /(?:^|[^ء-ي])[وف]?(?:ال)?(?:يجب|يلزم|لازم|لا ?بد|ضروري|الزامي|شرط اساسي|شرط لازم|ممنوع|يمنع|لا يجوز|ابدا|اشترط)(?![ء-ي])|(?:^|[^a-z])(?:must|required|mandatory|never|non-negotiable)(?![a-z])/;
+const NEGATED_MUST = /(?:^|\s)[وف]?(?:مو|مب|مش|ليس|لا|ما)\s+(?:من\s+)?(?:ال)?(?:لازم|ضروري|يجب|يلزم|شرط)/;
 const COSMETIC_LABEL = /(?:^|[^ء-ي])(?:شكلي|شكليه|جمالي|جماليه|تجميلي)(?![ء-ي])/;
 const COSMETIC_WORDS = /(?:لون|الوان|واجهه|تشطيب|ديكور|طراز|زخرف|مظهر|جمال|فخامه|ستايل|style|facade|colou?r|finish|look)/;
 // A remark that touches function (rooms, routes, openings, sun, privacy...) is never

@@ -372,3 +372,11 @@ test('the refusal flag reaches the evidence rows and the rendered HTML with its 
   const summary = summarizeTiers(result.rows);
   assert.equal(summary.tiers.MANDATORY.total, result.rows.filter(item => item.tier === TIER.MANDATORY).length);
 });
+
+test('a conjunction letter glued to the obligation word does not hide it ("ويجب", "فلازم")', () => {
+  for (const text of ['ويجب أن يكون المطبخ قرب الصالة', 'فلازم يكون المدخل منفصلا', 'ولا بد من مجلس مستقل', 'وممنوع مرور الضيوف']) {
+    assert.equal(classifyClause(text).tier, TIER.MANDATORY, text);
+  }
+  assert.equal(classifyClause('وأبي مطبخا واسعا').tier, TIER.IMPORTANT);
+  assert.equal(classifyClause('ومو لازم فناء').tier, TIER.IMPORTANT);
+});
