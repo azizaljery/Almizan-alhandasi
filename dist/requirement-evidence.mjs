@@ -21,6 +21,25 @@ const RIYADH_JURISDICTION_ID = 'riyadh-momah-1446h';
 // today's date — a verification date should not silently roll forward on its own.
 const RIYADH_MOMAH_VERIFIED_DATE = '2026-10-13';
 
+// Real, dated source for the Wadi Hanifah Urban Code's detached-villa urban
+// section (T4.1). This is NOT a city-wide Riyadh code: it applies only inside the
+// Wadi Hanifah valley corridor and its tributaries, under the Royal Commission for
+// Riyadh City (not the national ministry). Its figures genuinely differ from the
+// national ministerial decision above (e.g. front setback is a 0–2m band for most
+// of the facade, not a khumus-of-street-width minimum; side/rear setback is 2m, not
+// 1.5m) — so the two jurisdictions are kept mutually exclusive in the UI rather
+// than merged. Cross-checked against the applied-guide PDF published by Amanah
+// Al-Riyadh's e-services portal; the exact developer/plot-type breakdown (an
+// apartment vs. a detached villa) is in the same document but only the detached-
+// villa figures are cited here, since that is the only building type this engine
+// generates.
+const WADI_HANIFAH_T41_SOURCE = Object.freeze({
+  document: 'الكود العمراني لمنطقة وادي حنيفة — الدليل التطبيقي، القسم الحضري T4.1 (فلل منفصلة)، صادر عن الهيئة الملكية لمدينة الرياض (ينطبق فقط داخل ممر وادي حنيفة وروافده، لا على مدينة الرياض كاملة)',
+  version: 'الدليل التطبيقي، الإصدار ١.٠ (٢٠٢٠م)',
+});
+const WADI_HANIFAH_JURISDICTION_ID = 'wadi-hanifah-t4-1';
+const WADI_HANIFAH_VERIFIED_DATE = '2026-10-13';
+
 export const REQUIREMENT_STATUS = Object.freeze({
   ENFORCED: 'ENFORCED',
   MEASURED: 'MEASURED',
@@ -39,6 +58,7 @@ const make = (id, title, status, evidence, source = 'النموذج الهندس
 
 export function evaluateRequirementEvidence({ model, program, plot: requestedPlot = null, idea = '', discovery = {}, briefContext = null, jurisdiction = null } = {}) {
   const riyadh = jurisdiction === RIYADH_JURISDICTION_ID;
+  const wadiHanifah = jurisdiction === WADI_HANIFAH_JURISDICTION_ID;
   if (!model || !Array.isArray(model.rooms) || !Array.isArray(model.openings) || !Array.isArray(model.corridors)) {
     throw Error('يلزم نموذج هندسي صالح لعرض أدلة المتطلبات.');
   }
@@ -132,7 +152,16 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
   // نسبة التغطية)، ولا تُعرض كمطابقة أو مخالفة لأي اشتراط نظامي حقيقي؛ كل فحص
   // يُعرض صراحة كـ"لم يتم التحقق" حتى يرتبط المشروع بجهة/كود فعلي.
   const regulatoryCategory = 'الاشتراطات النظامية (الكود/البلدية)';
-  if (riyadh) {
+  if (wadiHanifah) {
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'الجهة والكود النظامي المعتمد للمشروع',
+      measuredLabel: 'المدينة/البلدية أو كود البناء المسجل لهذا المشروع',
+      measuredValue: null,
+      status: REGULATORY_STATUS.PASS,
+      source: { ...WADI_HANIFAH_T41_SOURCE, verifiedDate: WADI_HANIFAH_VERIFIED_DATE },
+      verificationNote: 'حدد مُعِد هذا المشروع أن موقعه داخل ممر وادي حنيفة وروافده، فيُطبَّق القسم الحضري T4.1 من كود وادي حنيفة العمراني (الصادر عن الهيئة الملكية لمدينة الرياض) بدل الاشتراط الوزاري العام — لأن أرقام هذا الكود (الارتدادات ونسبة البناء) تختلف فعليًا عن الاشتراط العام ولا تنطبق إلا داخل هذا الممر الجغرافي الضيق.',
+    }), { id: 'reg-jurisdiction', category: regulatoryCategory }));
+  } else if (riyadh) {
     rows.push(toEvidenceRow(createRegulatoryCheck({
       rule: 'الجهة والكود النظامي المعتمد للمشروع',
       measuredLabel: 'المدينة/البلدية أو كود البناء المسجل لهذا المشروع',
@@ -152,6 +181,13 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
 
   const streetSetback = number(model.plot?.streetSetback ?? requestedPlot?.streetSetback);
   const streetSetbackNote = 'اشتراط وزارة الشؤون البلدية والقروية والإسكان للفلل: الارتداد الأمامي عن شارع أقل من ٣٠م = خُمس عرض الشارع بحد أدنى ٣م؛ لشارع ٣٠م فأكثر = ٦م كحد أدنى. هذا المشروع لا يسجل عرض الشارع الفعلي لكل جهة، فلا يمكن التأكد آليًا من الحد الكامل المطلوب لشارعك — فقط من كونه لا يقل عن الحد الأدنى المطلق (٣م).';
+  // T4.1's front-setback rule is a BAND (the building line must sit within 0–2m of
+  // the street boundary for at least 60% of the main facade width, not a minimum
+  // distance), and this engine only stores one scalar setback value for the whole
+  // facade rather than a per-segment facade breakdown. There is no honest
+  // PASS/FAIL to compute from a single number against a percentage-of-facade rule,
+  // so this stays UNVERIFIED for Wadi Hanifah too — but still cites the real figures.
+  const wadiHanifahStreetSetbackNote = 'اشتراط القسم الحضري T4.1 لكود وادي حنيفة (فلل منفصلة): خط البناء الأمامي يجب أن يقع ضمن نطاق ٠-٢م من حد الشارع لما لا يقل عن ٦٠٪ من عرض الواجهة الرئيسية، والباقي غير مقيّد. هذا شرط على نسبة من عرض الواجهة لا على قيمة ارتداد واحدة، والنموذج الحالي يسجل ارتدادًا واحدًا للواجهة كاملة دون تفصيل نسبي، فلا يمكن الحكم بمطابقة أو مخالفة آليًا من هذه القيمة وحدها.';
   if (riyadh && streetSetback !== null && streetSetback < 3) {
     rows.push(toEvidenceRow(createRegulatoryCheck({
       rule: 'ارتداد المبنى عن جهة الشارع',
@@ -166,12 +202,24 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
       rule: 'ارتداد المبنى عن جهة الشارع',
       measuredLabel: 'الارتداد المستخدم في هذا المخطط',
       measuredValue: streetSetback, unit: 'م',
-      verificationNote: riyadh ? streetSetbackNote : undefined,
+      verificationNote: wadiHanifah ? wadiHanifahStreetSetbackNote : riyadh ? streetSetbackNote : undefined,
     }), { id: 'reg-street-setback', category: regulatoryCategory }));
   }
 
   const neighborSetback = number(model.plot?.neighborSetback ?? requestedPlot?.neighborSetback);
-  if (riyadh && neighborSetback !== null) {
+  if (wadiHanifah && neighborSetback !== null) {
+    // T4.1's side AND rear setbacks for detached villas are both 2m, so this one
+    // model value (which doesn't distinguish side from rear) can be checked
+    // against both without approximation.
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'ارتداد المبنى عن حدود الجيران (الجانبي والخلفي)',
+      measuredLabel: 'الارتداد المستخدم في هذا المخطط',
+      measuredValue: neighborSetback, unit: 'م',
+      status: neighborSetback >= 2 ? REGULATORY_STATUS.PASS : REGULATORY_STATUS.FAIL,
+      source: { ...WADI_HANIFAH_T41_SOURCE, verifiedDate: WADI_HANIFAH_VERIFIED_DATE, section: 'القسم الحضري T4.1، الارتداد الجانبي والخلفي للفلل المنفصلة: ٢م كحد أدنى' },
+      verificationNote: 'النموذج يسجل قيمة ارتداد واحدة للجيران دون تمييز الجانبي عن الخلفي؛ كود T4.1 يضع ٢م كحد أدنى لكليهما، فهذا الفحص صحيح لكلا الجهتين بهذه القيمة.',
+    }), { id: 'reg-neighbor-setback', category: regulatoryCategory }));
+  } else if (riyadh && neighborSetback !== null) {
     rows.push(toEvidenceRow(createRegulatoryCheck({
       rule: 'ارتداد المبنى عن حدود الجيران',
       measuredLabel: 'الارتداد المستخدم في هذا المخطط',
@@ -192,7 +240,18 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
   const landArea = plotWidth !== null && plotLength !== null ? plotWidth * plotLength : null;
   const coverageRatio = landArea && landArea > 0 ? round(q.footprint / landArea * 100) : null;
   const assumedCoverageCap = number(model.plot?.coverage ?? requestedPlot?.coverage);
-  if (riyadh && coverageRatio !== null) {
+  if (wadiHanifah && coverageRatio !== null) {
+    rows.push(toEvidenceRow(createRegulatoryCheck({
+      rule: 'أقصى نسبة بناء (تغطية الأرض)',
+      measuredLabel: 'نسبة مساحة الكتلة المرسومة إلى مساحة الأرض',
+      measuredValue: coverageRatio, unit: '%',
+      status: coverageRatio <= 75 ? REGULATORY_STATUS.PASS : REGULATORY_STATUS.FAIL,
+      source: { ...WADI_HANIFAH_T41_SOURCE, verifiedDate: WADI_HANIFAH_VERIFIED_DATE, section: 'القسم الحضري T4.1، الفلل المنفصلة: نسبة بناء ٧٥٪ كحد أقصى (أو ٧٠٪ إن وُجد فناء/باحة مفتوحة داخل القطعة)' },
+      verificationNote: (assumedCoverageCap !== null
+        ? 'استخدم التوليد افتراض نسبة بناء داخلي قدره ' + fmt(assumedCoverageCap * 100, 0) + '٪ كحد تصميمي قابل للتعديل. '
+        : '') + 'الحد الأقصى هنا ٧٥٪، أو ٧٠٪ إن تضمن المخطط فناءً أو باحة مفتوحة؛ هذا النموذج لا يسجل وجود فناء كشرط منفصل في هذا الفحص، فاعتُمد الحد الأعلى (٧٥٪) فقط.',
+    }), { id: 'reg-coverage', category: regulatoryCategory }));
+  } else if (riyadh && coverageRatio !== null) {
     rows.push(toEvidenceRow(createRegulatoryCheck({
       rule: 'أقصى نسبة بناء (تغطية الأرض)',
       measuredLabel: 'نسبة مساحة الكتلة المرسومة إلى مساحة الأرض',

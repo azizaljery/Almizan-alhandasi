@@ -214,6 +214,53 @@ test('declaring the Riyadh jurisdiction fails a setback or coverage that genuine
   assert.equal(find(result, 'reg-street-setback').status, REQUIREMENT_STATUS.NOT_MET);
 });
 
+test('declaring the Wadi Hanifah T4.1 jurisdiction attaches its own real sourced verdict, distinct from the Riyadh ministerial one, and fails the default plot\'s neighbor setback against T4.1\'s stricter 2m minimum', () => {
+  const result = evaluateRequirementEvidence({ model, program: rooms, plot, jurisdiction: 'wadi-hanifah-t4-1' });
+  const regulatoryCategory = 'الاشتراطات النظامية (الكود/البلدية)';
+
+  const jurisdiction = find(result, 'reg-jurisdiction');
+  assert.equal(jurisdiction.status, REQUIREMENT_STATUS.ENFORCED);
+  assert.equal(jurisdiction.category, regulatoryCategory);
+  assert.match(jurisdiction.source, /وادي حنيفة/);
+  assert.match(jurisdiction.source, /الهيئة الملكية لمدينة الرياض/);
+
+  // The test plot's neighborSetback (1.5) meets the Riyadh ministerial minimum
+  // (1.5m) but genuinely violates T4.1's stricter 2m minimum for detached villas.
+  const neighbor = find(result, 'reg-neighbor-setback');
+  assert.equal(neighbor.status, REQUIREMENT_STATUS.NOT_MET);
+  assert.match(neighbor.source, /٢م كحد أدنى|T4\.1/);
+
+  // Coverage (.75 -> footprint/land <= 75%) still meets T4.1's own 75% ceiling.
+  const coverage = find(result, 'reg-coverage');
+  assert.equal(coverage.status, REQUIREMENT_STATUS.ENFORCED);
+  assert.match(coverage.source, /٧٥٪|75/);
+
+  // T4.1's front setback is a percentage-of-facade band, not a single minimum
+  // distance; this engine only stores one scalar setback, so it must stay
+  // honestly unverified even with the jurisdiction declared, unlike the Riyadh
+  // ministerial check (which can at least enforce an absolute floor).
+  const street = find(result, 'reg-street-setback');
+  assert.equal(street.status, REQUIREMENT_STATUS.UNVERIFIED);
+  assert.match(street.evidence, /نسبة من عرض الواجهة|T4\.1/);
+});
+
+test('declaring the Wadi Hanifah T4.1 jurisdiction passes a neighbor setback that actually meets its 2m minimum', () => {
+  const roomy = structuredClone(model);
+  roomy.plot.neighborSetback = 2;
+  const result = evaluateRequirementEvidence({ model: roomy, program: rooms, plot: { ...plot, neighborSetback: 2 }, jurisdiction: 'wadi-hanifah-t4-1' });
+  assert.equal(find(result, 'reg-neighbor-setback').status, REQUIREMENT_STATUS.ENFORCED);
+});
+
+test('Wadi Hanifah and Riyadh jurisdictions are distinct and never both verified from the same declared jurisdiction', () => {
+  const riyadhResult = evaluateRequirementEvidence({ model, program: rooms, plot, jurisdiction: 'riyadh-momah-1446h' });
+  // Under the Riyadh ministerial code, this same plot's 1.5m neighbor setback is a genuine pass...
+  assert.equal(find(riyadhResult, 'reg-neighbor-setback').status, REQUIREMENT_STATUS.ENFORCED);
+  const wadiResult = evaluateRequirementEvidence({ model, program: rooms, plot, jurisdiction: 'wadi-hanifah-t4-1' });
+  // ...but a genuine fail under Wadi Hanifah's T4.1 — proving the two sources are
+  // kept fully independent rather than merged into one set of numbers.
+  assert.equal(find(wadiResult, 'reg-neighbor-setback').status, REQUIREMENT_STATUS.NOT_MET);
+});
+
 test('omitting the jurisdiction keeps every regulatory row exactly as unverified as before, even though the real source now exists in code', () => {
   const result = evaluateRequirementEvidence({ model, program: rooms, plot });
   for (const id of ['reg-jurisdiction', 'reg-street-setback', 'reg-neighbor-setback', 'reg-coverage']) {

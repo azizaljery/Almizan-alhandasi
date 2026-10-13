@@ -704,7 +704,12 @@ function renderRequirementEvidence() {
       program: Array.isArray(context?.program) ? context.program : undefined,
       plot: context?.plot || null,
       idea: context?.idea || '', discovery: context?.discovery || {}, briefContext: context?.briefContext || null,
-      jurisdiction: $('jurisdictionRiyadh')?.checked ? 'riyadh-momah-1446h' : null,
+      // Wadi Hanifah's T4.1 urban code is more specific (a narrow corridor inside
+      // Riyadh) than the general ministerial decision, so it takes priority if both
+      // are somehow checked at once; the change listeners below also keep the two
+      // mutually exclusive in the UI itself.
+      jurisdiction: $('jurisdictionWadiHanifah')?.checked ? 'wadi-hanifah-t4-1'
+        : $('jurisdictionRiyadh')?.checked ? 'riyadh-momah-1446h' : null,
     });
     const labels = [
       ['ENFORCED', 'مطابق في الرسم'], ['MEASURED', 'مقاس دون حكم'], ['NOT_MET', 'غير مستوفى'],
@@ -1334,7 +1339,14 @@ function boot() {
   $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
   $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview); $('showGemini').addEventListener('change', renderGeminiMarkers);
-  $('jurisdictionRiyadh')?.addEventListener('change', renderRequirementEvidence);
+  $('jurisdictionRiyadh')?.addEventListener('change', () => {
+    if ($('jurisdictionRiyadh')?.checked && $('jurisdictionWadiHanifah')) $('jurisdictionWadiHanifah').checked = false;
+    renderRequirementEvidence();
+  });
+  $('jurisdictionWadiHanifah')?.addEventListener('change', () => {
+    if ($('jurisdictionWadiHanifah')?.checked && $('jurisdictionRiyadh')) $('jurisdictionRiyadh').checked = false;
+    renderRequirementEvidence();
+  });
   $('saveProject').addEventListener('click', saveProject);
   $('archiveSave').addEventListener('click', () => { void saveArchive(); });
   $('archiveSaveNew').addEventListener('click', () => { void saveArchive({ asNew: true }); });
