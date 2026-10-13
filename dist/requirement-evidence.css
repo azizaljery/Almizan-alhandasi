@@ -27,3 +27,39 @@
 .requirement-evidence .help{margin-top:17px;color:#667466;line-height:1.9}
 @media(max-width:920px){.requirement-summary{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:680px){.requirement-rows{grid-template-columns:1fr}.requirement-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.requirement-row{padding:13px}.requirement-row-head{flex-wrap:wrap}.requirement-status{white-space:normal}.requirement-summary strong{font-size:1.4rem}}
+
+/* Three-tier classification of the client's own conditions (إلزامي / تفضيل مهم / خيار شكلي). */
+.requirement-rows>.tier-board,.requirement-rows>.tier-group{grid-column:1/-1;min-width:0}
+.tier-board{display:flex;flex-direction:column;gap:12px;padding:16px 17px;border:1px solid #dbe3db;border-radius:13px;background:#f6f8f4}
+.tier-summary{width:100%;border-collapse:collapse;direction:rtl;text-align:center;font-size:.88rem}
+.tier-summary caption{caption-side:top;text-align:start;padding-bottom:8px;font-weight:900;color:#244634}
+.tier-summary th,.tier-summary td{padding:9px 8px;border-bottom:1px solid #e1e7df;font-variant-numeric:tabular-nums}
+.tier-summary thead th{font-size:.76rem;font-weight:800;color:#4c6154}
+.tier-summary tbody th{text-align:start;font-weight:900;color:#244634}
+.tier-summary tbody tr:last-child th,.tier-summary tbody tr:last-child td{border-bottom:0}
+.tier-summary td[data-outcome=MET]{color:#337455;font-weight:800}
+.tier-summary td[data-outcome=NOT_MET]{color:#a83f30;font-weight:800}
+.tier-summary td[data-outcome=UNPROVABLE]{color:#80612e;font-weight:800}
+.tier-rules{font-size:.84rem;line-height:1.9;color:#4b5b50}
+.tier-rules summary{cursor:pointer;font-weight:800;color:#315b40}
+.tier-rules dt{margin-top:8px;font-weight:900;color:#244634}
+.tier-rules dd{margin:2px 0 0}
+.tier-group{margin-top:8px}
+.tier-group-title{font-family:inherit;font-size:1.02rem;font-weight:900;color:#1f4a36;margin:6px 0 10px;padding-inline-start:10px;border-inline-start:4px solid #337455}
+.tier-group[data-tier=IMPORTANT] .tier-group-title{border-inline-start-color:#bd9b65}
+.tier-group[data-tier=COSMETIC] .tier-group-title{border-inline-start-color:#8ea3b5}
+.tier-group[data-tier=OTHER] .tier-group-title{border-inline-start-color:#c4cbc4;color:#4c6154}
+.tier-group-title small{font-size:.78rem;font-weight:700;color:#6a7c6d}
+.tier-group-note{margin:0 0 10px;font-size:.82rem;color:#667466}
+.tier-group-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.requirement-pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.requirement-outcome{flex:0 0 auto;padding:4px 8px;border-radius:6px;border:1px solid #d8e2d8;background:#edf3ed;color:#315b40;font-size:.72rem;font-weight:900;white-space:nowrap}
+.requirement-row[data-outcome=NOT_MET] .requirement-outcome{background:#fff0e9;color:#9e3e30;border-color:#ebc3b8}
+.requirement-row[data-outcome=UNPROVABLE] .requirement-outcome{background:#fbf5e9;color:#80612e;border-color:#e6d6b5}
+.requirement-row[data-outcome=MET]{border-inline-start:4px solid #337455}
+.requirement-row[data-outcome=NOT_MET]{border-inline-start:4px solid #b65b4a}
+.requirement-row[data-outcome=UNPROVABLE]{border-inline-start:3px solid #bd9b65}
+.requirement-row[data-tier] .requirement-status{background:#f4f6f3;color:#5a6b5f;font-weight:700}
+.requirement-basis{font-size:.8rem!important;color:#5d6e62!important;line-height:1.8!important}
+.requirement-basis b{color:#315b40}
+@media(max-width:680px){.tier-group-rows{grid-template-columns:1fr}.tier-board{padding:12px}.tier-summary th,.tier-summary td{padding:7px 4px;font-size:.78rem}}
