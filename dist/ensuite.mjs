@@ -85,8 +85,27 @@ export function worstProportion(model) {
   return ratios.length ? Math.max(...ratios) : 1;
 }
 
+// Version of the presentationPenalty formula below. Bump it whenever the
+// weighting between ensuite coverage and room proportion changes.
+export const PRESENTATION_PENALTY_VERSION = 'presentation-penalty/1.0.0';
+
 /** درجة جودة العرض للعميل: الأصغر أفضل — حمام داخل كل غرفة أولًا ثم تناسب أبعاد الغرف. */
 export function presentationPenalty(model) {
   const { wanted, linked } = ensuiteCoverage(model);
   return (wanted - linked) * 10 + Math.max(0, worstProportion(model) - 1.6);
+}
+
+/**
+ * تفصيل عقوبة العرض لبديل واحد: كل مكوّن على حدة قبل جمعه. يُستخدم لعرض
+ * سبب ترتيب هذا البديل أو اختياره افتراضيًا، بدلًا من رقم واحد مغلق.
+ */
+export function explainPresentationPenalty(model) {
+  const { wanted, linked } = ensuiteCoverage(model);
+  const proportion = worstProportion(model);
+  const ensuitePenalty = (wanted - linked) * 10;
+  const proportionPenalty = Math.max(0, proportion - 1.6);
+  return {
+    wanted, linked, worstProportion: proportion, ensuitePenalty, proportionPenalty,
+    penalty: ensuitePenalty + proportionPenalty,
+  };
 }
