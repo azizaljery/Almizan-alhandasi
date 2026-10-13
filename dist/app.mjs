@@ -33,6 +33,7 @@ import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mj
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { initSunDayUI } from './sun-day-ui.mjs';
 import { initCompare3D } from './compare3d.mjs';
+import { initAutoTourUI } from './tour-recorder-ui.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
@@ -318,6 +319,12 @@ function restoreSolarSettings() {
 }
 function currentSolarPreview() {
   return siteSolarPreview(state.siteSolar,{model:state.model,modelLandSurvey:state.modelLandSurvey,modelSurveyAssociated:state.modelSurveyAssociated});
+}
+let autoTourUI = null;
+function autoTourControls() {
+  if (autoTourUI || !$('autoTourBox')) return;
+  autoTourUI = initAutoTourUI({ root: $('autoTourBox'), getViewer: () => viewer, getRooms: () => prepareTour(),
+    ensure3D: async () => { if (state.studioMode !== '3d') setStudioMode('3d'); return await show3D(); } });
 }
 let compare3D = null;
 function compare3DControls() {
@@ -1264,7 +1271,7 @@ function boot() {
       (Math.abs(number('wid') - state.landSurvey.binding.width) > 1e-8 || Math.abs(number('len') - state.landSurvey.binding.length) > 1e-8)) unlinkSurveyRectangle();
     rating(); markDirty();
   }));
-  sunDayControls();compare3DControls();
+  sunDayControls();compare3DControls();autoTourControls();
 ['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
