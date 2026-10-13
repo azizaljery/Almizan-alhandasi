@@ -7,13 +7,14 @@ const extract=(start,end)=>{const a=source.indexOf(start),b=source.indexOf(end,a
 const actual=extract('function on3DState(','async function loadThree(')+extract('async function show3D(','function prepareTour(');
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
 function harness({existing=false,lost=false,inside=false,roof=true,wait=null}={}){
-  const fields={view:{dataset:{}},roof:{checked:inside?false:roof},retry3D:{hidden:false},viewMode:{textContent:''}},calls=[];
+  const fields={view:{dataset:{}},roof:{checked:inside?false:roof},analyticsOverlay:{checked:false},retry3D:{hidden:false},viewMode:{textContent:''}},calls=[];
   const model={geometryRevision:7,rooms:[{id:'r',name:'Room'}]},approval={review:'unchanged'};
   class Viewer {
     constructor(){this.mode='orbit';this.contextLost=false;this.roofChoice=false;this.currentViewName='persp';calls.push(['construct']);}
     setVisible(value){this.visible=value;calls.push(['visible',value]);}
     setModel(value,palette){this.model=value;this.mode='orbit';this.currentViewName='persp';calls.push(['model',value,palette]);}
     setRoof(value){this.roofChoice=value;calls.push(['roof',value]);}
+    setAnalytics(value){this.analyticsOn=value;calls.push(['analytics',value]);}
     destroy(){this.destroyed=true;calls.push(['destroy']);}
   }
   const old=existing?Object.assign(new Viewer(),{model,mode:inside?'inside':'orbit',roofChoice:roof,contextLost:lost}):null;

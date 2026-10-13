@@ -359,9 +359,13 @@ function drawRoute() {
   $('routeInfo').textContent = path ? `من المدخل إلى باب الغرفة عبر محاور الممرات: ${fmt(path.metres)} م. المسار لا يثبت استقلال الحركة أو صلاحية الإخلاء.` : 'لا يوجد مسار ممر موثق لهذه الغرفة.';
 }
 function on3DMode(mode, detail) {
-  $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside';
+  $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside'; $('analyticsOverlay').disabled = mode === 'inside';
   if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · السقف مخفي للمشاهدة · مستوى النظر 1.6 م · ليست محاكاة إضاءة تحت سقف مغلق'; }
-  else { $('roof').checked = viewer?.roof?.visible || false; $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + ' · تصور غير تنفيذي'; }
+  else {
+    $('roof').checked = viewer?.roof?.visible || false;
+    const sectional = detail === 'top' && !$('roof').checked;
+    $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + (sectional ? ' — قطاع أفقي؛ السقف مخفي لرؤية الغرف' : '') + ' · تصور غير تنفيذي';
+  }
   $('tourState').textContent = mode === 'inside' ? `داخل ${detail}` : 'منظور عام';
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
@@ -393,7 +397,7 @@ async function show3D(retry = false) {
     const showRoof = viewer?.mode === 'inside' ? viewer.roofChoice : $('roof').checked;
     if (retry && viewer?.contextLost) { viewer.destroy(); viewer = null; }
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode, { onState: on3DState });
-    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); renderSolarPreview();
+    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; viewer.setAnalytics($('analyticsOverlay').checked); $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); renderSolarPreview();
     if (viewer.contextLost) { on3DState({ status: 'context-lost', message: 'توقف عرض 3D مؤقتًا؛ المخطط الحالي محفوظ ويمكن متابعة 2D أو إعادة المحاولة.' }); return false; }
     on3DState({ status: 'ready' }); return true;
   } catch (error) { if (requestedModel !== state.model || requestedEpoch !== modelEpoch) return false; message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
@@ -1303,7 +1307,9 @@ function boot() {
   $('tourNext').addEventListener('click', () => { if (state.tourIndex < state.tour.length - 1) void showTourRoom(state.tourIndex + 1); });
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));
   all('[data-move]').forEach(b => b.addEventListener('click', () => viewer?.move(b.dataset.move)));
-  $('roof').addEventListener('change', () => viewer?.setRoof($('roof').checked)); $('retry3D').addEventListener('click', () => { void show3D(true); });
+  $('roof').addEventListener('change', () => { viewer?.setRoof($('roof').checked); if (viewer) on3DMode(viewer.mode, viewer.mode === 'inside' ? state.model?.rooms.find(r => r.id === state.selected)?.name || '' : viewer.currentViewName || 'persp'); });
+  $('retry3D').addEventListener('click', () => { void show3D(true); });
+  $('analyticsOverlay').addEventListener('change', () => viewer?.setAnalytics($('analyticsOverlay').checked));
   $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); markDirty(); });
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', () => { updateCosts(); markDirty(); }));
   $('askAI').addEventListener('click', askAI);

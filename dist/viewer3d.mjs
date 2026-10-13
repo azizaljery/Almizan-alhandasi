@@ -3,6 +3,7 @@ import { center, openingPoint, wallPieces } from './planner.mjs';
 import { architecturalTextures, beveledBox, applyMeterTextureScale } from './architectural-materials.mjs';
 import { solarVectors } from './solar-path.mjs';
 import { furnishRoom } from './furniture3d.mjs';
+import { projectPoint, ndcToPixels } from './view-projection.mjs';
 
 export class RoomViewer {
   constructor(container, onMode, options = {}) {
@@ -11,6 +12,7 @@ export class RoomViewer {
     this.quality = { tier: 'balanced', reason: 'initial conservative limits', frames: 0, slowFrames: 0, complexFrames: 0, lastRenderMs: 0, pixelRatioCap: 1.5, shadowMapSize: 1024 };
     this.now = options.now || (() => globalThis.performance?.now?.() ?? Date.now());
     this.options = options; this.onState = options.onState; this.transitionMs = options.transitionMs ?? 320; this.frameId = null; this.transition = null; this.contextLost = false; this.destroyed = false; this.roofChoice = false; this.illustrativeFurniture = options.illustrativeFurniture === true;
+    this.analyticsOn = false; this.labelLayer = null; this.labelEls = [];
     this.motionQuery = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
     this.reducedMotion = options.reducedMotion ?? this.motionQuery?.matches ?? false;
     this.T = T; this.container = container; this.onMode = onMode; this.visible = true; this.mode = 'orbit';
@@ -29,6 +31,15 @@ export class RoomViewer {
     for (const texture of Object.values(this.textures)) texture.anisotropy = Math.min(4, this.renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
     canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'عرض ثلاثي الأبعاد. اسحب للتدوير؛ داخل الغرفة استخدم الأسهم أو أزرار الحركة.');
     container.prepend(canvas);
+    // Optional DOM overlay for the analytical layer (room areas/dimensions). Guarded so the
+    // pure geometry/controller logic keeps working against the minimal test container double,
+    // which has no real DOM methods; real pages always provide both document and a live element.
+    if (typeof document !== 'undefined' && typeof container.appendChild === 'function') {
+      this.labelLayer = document.createElement('div');
+      this.labelLayer.className = 'viewer3d-analytics-layer';
+      this.labelLayer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;display:none';
+      container.appendChild(this.labelLayer);
+    }
     this.ambientLight = new T.HemisphereLight(0xffffff, 0xb9bec6, 1.5); this.scene.add(this.ambientLight);
     const light = new T.DirectionalLight(0xffefd3, 2.7); this.sunLight = light; light.position.set(-28, 48, 18); light.castShadow = true; light.visible = false;
     if (light.shadow?.mapSize) {
@@ -156,6 +167,7 @@ export class RoomViewer {
     // A removable illustrative ceiling follows modeled zones at the modeled wall height.
     // It is not a structural roof specification; no parapets, overhangs or invented level changes.
     const wallTop = Math.max(...this.pieces.map(piece => piece.bottom + piece.height));
+    this.wallTop = wallTop;
     [...model.rooms, ...model.corridors].forEach(r => addBox(r.x + r.w / 2, wallTop + .05, -r.y - r.h / 2, r.w, .1, r.h, style.roof, 0, 1, { parent: this.roof, roughness: .9 }));
     this.roof.visible = this.roofChoice;
 
@@ -167,7 +179,51 @@ export class RoomViewer {
       Object.assign(this.sunLight.shadow.camera, { left: -extent, right: extent, top: extent, bottom: -extent, far: Math.max(180, extent * 5) });
       this.sunLight.shadow.camera.updateProjectionMatrix();
     }
+    this.buildLabels();
     this.view('persp', { immediate: true }); this.resize();
+  }
+  // Analytical overlay: floating DOM labels of room name, net area and bound dimensions —
+  // the exact fields already shown on the 2D plan (plan-view.mjs) and nowhere else invented.
+  // No structural or MEP data exists in the model, so none is drawn here.
+  buildLabels() {
+    if (!this.labelLayer) return;
+    this.labelLayer.replaceChildren();
+    const round = n => Number(n.toFixed(1));
+    this.labelEls = this.model.rooms.map(room => {
+      const el = document.createElement('div');
+      el.className = 'viewer3d-room-label';
+      el.style.cssText = 'position:absolute;transform:translate(-50%,-100%);white-space:nowrap;background:#1c2b22d9;color:#eef3ea;border:1px solid #ffffff3d;border-radius:6px;padding:3px 9px;font-size:.72rem;line-height:1.55;direction:rtl;font-family:inherit';
+      el.textContent = `${room.name} · ${round(room.area)} م² · ${room.w.toFixed(2)}×${room.h.toFixed(2)} م`;
+      this.labelLayer.appendChild(el);
+      return { room, el };
+    });
+  }
+  setAnalytics(show) {
+    this.analyticsOn = !!show;
+    this.updateLabelPositions();
+    this.render();
+  }
+  updateLabelPositions() {
+    if (!this.labelLayer) return;
+    const w = this.container.clientWidth, h = this.container.clientHeight;
+    const show = this.analyticsOn && this.mode !== 'inside' && !!this.model && w > 0 && h > 0;
+    this.labelLayer.style.display = show ? '' : 'none';
+    if (!show) return;
+    const target = { x: this.target.x, y: this.target.y, z: this.target.z };
+    const eye = {
+      x: this.target.x + this.radius * Math.sin(this.phi) * Math.sin(this.theta),
+      y: this.target.y + this.radius * Math.cos(this.phi),
+      z: this.target.z + this.radius * Math.sin(this.phi) * Math.cos(this.theta),
+    };
+    const aspect = w / h, fov = this.camera.fov || 42;
+    for (const { room, el } of this.labelEls) {
+      const point = { x: room.x + room.w / 2, y: this.wallTop + .4, z: -(room.y + room.h / 2) };
+      const proj = projectPoint(eye, target, { x: 0, y: 1, z: 0 }, fov, aspect, point);
+      if (!proj.visible) { el.style.display = 'none'; continue; }
+      el.style.display = '';
+      const px = ndcToPixels(proj, w, h);
+      el.style.left = `${px.left}px`; el.style.top = `${px.top}px`;
+    }
   }
   view(name, { immediate = false } = {}) {
     if (!this.model) return;
@@ -234,7 +290,7 @@ export class RoomViewer {
     if (!w || !h) return;
     this.camera.aspect = w / h; this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h, false); this.render();
   }
-  setVisible(show) { this.visible = show; if (!show) this.cancelTransition(); if (show) this.resize(); }
+  setVisible(show) { this.visible = show; if (!show) { this.cancelTransition(); if (this.labelLayer) this.labelLayer.style.display = 'none'; } if (show) this.resize(); }
   render() {
     if (this.destroyed || this.contextLost || !this.visible || !this.model || !this.container.clientWidth) return;
     if (this.mode === 'inside') {
@@ -245,6 +301,7 @@ export class RoomViewer {
       this.camera.lookAt(this.target);
     }
     const started = this.now(); this.renderer.render(this.scene, this.camera); this.measureQuality(Math.max(0, this.now() - started));
+    this.updateLabelPositions();
   }
   orbitPose() { return { theta: this.theta, phi: this.phi, radius: this.radius, x: this.target.x, y: this.target.y, z: this.target.z }; }
   applyOrbit(pose) { this.theta = pose.theta; this.phi = pose.phi; this.radius = pose.radius; this.target.set(pose.x, pose.y, pose.z); }
@@ -292,6 +349,7 @@ export class RoomViewer {
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true; this.cancelTransition(); this.pointers.clear(); this.abort.abort(); this.resizeObserver.disconnect(); this.clear();
+    this.labelLayer?.remove(); this.labelLayer = null; this.labelEls = [];
     new Set(Object.values(this.textures)).forEach(texture => texture.dispose()); this.textures = {};
     this.sunLight.shadow?.map?.dispose(); this.sunLight.shadow?.mapPass?.dispose(); this.renderer.renderLists?.dispose(); this.renderer.dispose(); this.renderer.domElement.remove();
   }
