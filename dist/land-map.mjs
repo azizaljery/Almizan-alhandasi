@@ -19,11 +19,63 @@ const unproject = (x, y, zoom) => {
   return [Math.atan(Math.sinh(Math.PI * (1 - 2 * y / size))) * 180 / Math.PI, wrapLongitude(x / size * 360 - 180)];
 };
 
+// Riyadh-only bounding box (generous, covers the metropolitan area) used to restrict
+// the geocoding search so stray matches elsewhere in Saudi Arabia (or beyond, for a
+// query Nominatim can't place) don't show up as if they were local results.
+const RIYADH_VIEWBOX = '46.0,25.2,47.3,24.2';
+const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
+
 export function initLandSurveyEditor({ root = document, getSurvey, onApply }) {
   const editor = $(root, 'landSurveyEditor'), map = $(root, 'parcelMap'), tiles = $(root, 'surveyTiles'), overlay = $(root, 'surveyOverlay');
+  const searchInput = $(root, 'surveyMapSearch'), searchButton = $(root, 'surveyMapSearchButton'), searchResults = $(root, 'surveyMapSearchResults');
   let active = false, draft = null, original = null, vertices = [], references = [], view = { ...DEFAULT_MAP_VIEW, center: [...DEFAULT_MAP_VIEW.center] };
-  let addMode = false, pointer = null, tileErrors = 0, tileCount = 0, consentNeeded = false;
+  let addMode = false, pointer = null, tileErrors = 0, tileCount = 0, consentNeeded = false, searchAbort = null;
   const status = text => { $(root, 'surveyMapStatus').textContent = text; };
+  const searchNote = text => { $(root, 'surveyMapSearchNote').textContent = text; };
+  const searchEnabled = () => view.provider === 'osm' && $(root, 'surveyOsmConsent').checked;
+  const clearSearchResults = () => { searchResults.replaceChildren(); searchResults.hidden = true; };
+  const syncSearchAvailability = () => {
+    const enabled = searchEnabled();
+    searchInput.disabled = !enabled; searchButton.disabled = !enabled;
+    if (!enabled) { clearSearchResults(); searchNote('فعّل خلفية OpenStreetMap والموافقة أعلاه لتتمكن من البحث.'); }
+    else if (!searchButton.dataset.busy) searchNote('يرسل البحث نص بحثك فقط إلى خدمة Nominatim المجتمعية التابعة لـ OpenStreetMap؛ لا يرسل حدود مشروعك ولا أي بيانات أخرى من المشروع.');
+  };
+  async function runLocationSearch() {
+    const query = searchInput.value.trim();
+    if (!searchEnabled()) { syncSearchAvailability(); return; }
+    if (!query) { searchNote('اكتب اسم الحي أو الشارع أو المعلم الذي تبحث عنه.'); return; }
+    searchAbort?.abort(); searchAbort = new AbortController();
+    searchButton.dataset.busy = '1'; searchButton.disabled = true; searchButton.textContent = 'جارٍ البحث…'; clearSearchResults();
+    try {
+      const url = `${NOMINATIM_SEARCH_URL}?format=jsonv2&q=${encodeURIComponent(query)}&countrycodes=sa&viewbox=${RIYADH_VIEWBOX}&bounded=1&limit=5&accept-language=ar`;
+      const response = await fetch(url, { signal: searchAbort.signal, headers: { Accept: 'application/json' } });
+      if (!response.ok) throw Error(`رمز ${response.status}`);
+      const places = await response.json();
+      if (!Array.isArray(places) || !places.length) { searchNote('لا نتيجة مطابقة داخل نطاق الرياض الكبرى. جرّب اسمًا أدق أو أدخل الإحداثيات يدويًا أدناه.'); return; }
+      for (const place of places) {
+        const lat = Number(place.lat), lon = Number(place.lon); if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+        const li = document.createElement('li'), button = document.createElement('button');
+        button.type = 'button';
+        const title = document.createElement('b'); title.textContent = place.name || String(place.display_name || '').split('،')[0] || 'موقع';
+        const detail = document.createElement('small'); detail.textContent = place.display_name || '';
+        button.append(title, detail);
+        button.addEventListener('click', () => {
+          view.center = [lat, lon]; view.zoom = Math.max(view.zoom, 17);
+          $(root, 'surveyCenterLat').value = lat; $(root, 'surveyCenterLon').value = lon;
+          renderTiles(); clearSearchResults(); searchInput.value = '';
+          searchNote('انتقلت الخريطة إلى نتيجة البحث. راجع الموقع بصريًا قبل رسم الحدود — نتيجة البحث تقديرية من خدمة بحث مجتمعية وليست تحديد ملكية.');
+        });
+        li.append(button); searchResults.append(li);
+      }
+      if (searchResults.childElementCount) { searchResults.hidden = false; searchNote(`${searchResults.childElementCount} نتيجة. اختر أقربها لموقعك.`); }
+      else searchNote('لا نتيجة مطابقة داخل نطاق الرياض الكبرى. جرّب اسمًا أدق أو أدخل الإحداثيات يدويًا أدناه.');
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      searchNote('تعذّر الوصول إلى خدمة البحث حاليًا. يمكنك إدخال الإحداثيات يدويًا أدناه.');
+    } finally {
+      delete searchButton.dataset.busy; searchButton.textContent = 'ابحث'; searchButton.disabled = !searchEnabled();
+    }
+  }
   const analysis = () => {
     try { return vertices.length >= 3 ? analyzeSurveyGeometry(geoJSONFromVertices(vertices), references) : null; }
     catch { return null; }
@@ -122,6 +174,7 @@ export function initLandSurveyEditor({ root = document, getSurvey, onApply }) {
   const close = () => {
     active = false; editor.hidden = true; draft = null; original = null; vertices = []; references = []; addMode = false;
     $(root, 'surveyAddCorner').setAttribute('aria-pressed', 'false'); $(root, 'surveyAddCorner').textContent = '＋ أضف زاوية من الخريطة'; map.dataset.adding = 'false';
+    searchAbort?.abort(); searchInput.value = ''; clearSearchResults(); syncSearchAvailability();
   };
   const open = () => {
     original = validateLandSurvey(getSurvey()); draft = clone(original) || { version: 1, geometry: null, references: [], engineLink: 'unlinked', binding: null, mapView: { ...DEFAULT_MAP_VIEW, center: [...DEFAULT_MAP_VIEW.center] } };
@@ -132,6 +185,7 @@ export function initLandSurveyEditor({ root = document, getSurvey, onApply }) {
     $(root, 'surveyCenterLat').value = view.center[0]; $(root, 'surveyCenterLon').value = view.center[1];
     editor.hidden = false; active = true; addMode = false; $(root, 'surveyAddCorner').setAttribute('aria-pressed', 'false');
     map.dataset.adding = 'false';
+    searchInput.value = ''; clearSearchResults(); syncSearchAvailability();
     renderCorners(); requestAnimationFrame(renderTiles);
   };
   const makeSurvey = () => {
@@ -153,13 +207,16 @@ export function initLandSurveyEditor({ root = document, getSurvey, onApply }) {
     event.currentTarget.textContent = addMode ? 'اضغط على الخريطة لإضافة زاوية' : '＋ أضف زاوية من الخريطة';
   });
   $(root, 'surveyMapProvider').addEventListener('change', event => {
-    if (event.target.value === 'osm' && !$(root, 'surveyOsmConsent').checked) { event.target.value = 'local'; view.provider = 'local'; consentNeeded = true; renderTiles(); return; }
+    if (event.target.value === 'osm' && !$(root, 'surveyOsmConsent').checked) { event.target.value = 'local'; view.provider = 'local'; consentNeeded = true; renderTiles(); syncSearchAvailability(); return; }
     consentNeeded = false;
-    view.provider = event.target.value; renderTiles();
+    view.provider = event.target.value; renderTiles(); syncSearchAvailability();
   });
   $(root, 'surveyOsmConsent').addEventListener('change', () => {
     if (!$(root, 'surveyOsmConsent').checked && $(root, 'surveyMapProvider').value === 'osm') { $(root, 'surveyMapProvider').value = 'local'; view.provider = 'local'; consentNeeded = false; renderTiles(); }
+    syncSearchAvailability();
   });
+  searchButton.addEventListener('click', runLocationSearch);
+  searchInput.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); runLocationSearch(); } });
   $(root, 'surveyMapCenter').addEventListener('click', () => {
     const lat = Number($(root, 'surveyCenterLat').value), lon = Number($(root, 'surveyCenterLon').value);
     if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) return status('أدخل خط عرض بين ‎−90 و90 وخط طول بين ‎−180 و180.');

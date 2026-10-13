@@ -108,6 +108,12 @@
           <label class="check survey-consent"><input id="surveyOsmConsent" type="checkbox"> أوافق على عرض بلاطات OpenStreetMap، التي تتلقى نطاق الخريطة الظاهر فقط.</label>
         </div>
         <p class="help survey-provider-note">خدمة بلاطات OSM مجتمعية وبلا ضمان إتاحة؛ لا تنزيل مسبق ولا استخدام دون اتصال. سيبقى الرسم والإحداثيات متاحين إذا تعطلت البلاطات. النقر على الخريطة يضيف نقطة محلية، ولا تُرسل الزوايا لمزوّد البلاطات.</p>
+        <div class="survey-map-search">
+          <label>ابحث عن موقعك في الرياض (حي، شارع، معلم)<input id="surveyMapSearch" type="text" autocomplete="off" placeholder="مثال: حي النرجس، أو طريق الملك فهد"></label>
+          <button class="small-button" id="surveyMapSearchButton" type="button">ابحث</button>
+        </div>
+        <p class="help" id="surveyMapSearchNote">فعّل خلفية OpenStreetMap والموافقة أعلاه لتتمكن من البحث.</p>
+        <ul id="surveyMapSearchResults" class="survey-search-results" hidden></ul>
         <div class="survey-map-center">
           <label>خط العرض<input id="surveyCenterLat" type="number" min="-90" max="90" step="0.0000001" value="24.7136"></label>
           <label>خط الطول<input id="surveyCenterLon" type="number" min="-180" max="180" step="0.0000001" value="46.6753"></label>
