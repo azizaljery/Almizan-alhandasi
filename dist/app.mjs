@@ -31,6 +31,7 @@ import { analyzeSurveyGeometry, deriveRectangularGeneratorPlot, surveyFingerprin
 import { initLandSurveyEditor } from './land-map.mjs';
 import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
+import { initSunDayUI } from './sun-day-ui.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
@@ -317,6 +318,12 @@ function restoreSolarSettings() {
 function currentSolarPreview() {
   return siteSolarPreview(state.siteSolar,{model:state.model,modelLandSurvey:state.modelLandSurvey,modelSurveyAssociated:state.modelSurveyAssociated});
 }
+let sunDayUI = null;
+function sunDayControls() {
+  if (sunDayUI || !$('sunDay')) return;
+  sunDayUI = initSunDayUI({ root: $('sunDay'), getModel: () => state.model, getInstant: () => $('solarInstant').value.trim(),
+    setInstant: value => { $('solarInstant').value = value; $('solarInstant').dispatchEvent(new Event('input', { bubbles: true })); } });
+}
 function renderSolarPreview() {
   try {
   const preview=currentSolarPreview();
@@ -325,7 +332,7 @@ function renderSolarPreview() {
   $('sunInfo').textContent=preview.status==='not-calculated'?'غير محسوب · '+preview.reason:
     `حساب شمسي هندسي تقريبي · المصدر: ${state.siteSolar.source==='explicit-user'?'إحداثيات أدخلها المستخدم':'أول نقطة من حدود مسح المخطط المرتبط'} · ${preview.provenance.latitude}، ${preview.provenance.longitude} · الوقت ${state.siteSolar.instant} · زاوية الشمال ${state.siteSolar.northAngleDeg}°. `+
     (preview.visible?`ارتفاع الشمس ${fmt(preview.altitude)}° · ${preview.azimuth==null?'الشمس رأسية؛ السمت غير معرّف':`السمت الحقيقي ${fmt(preview.azimuth)}°`} · ظل كتلة ٣٫٢م ${fmt(preview.shadowLength)}م. قد يمتد خارج العرض.`:'الشمس تحت الأفق؛ لا ضوء أو ظل شمسي مباشر.');
-  viewport?.showSolar(preview,$('showShadow')?.checked);viewer?.setSun?.(preview);
+  viewport?.showSolar(preview,$('showShadow')?.checked);viewer?.setSun?.(preview);if(typeof sunDayUI!=='undefined')sunDayUI?.update(preview);
   } catch (error) { $('sunInfo').textContent=error.message;viewport?.showSolar(null,false);viewer?.setSun?.({visible:false,status:'not-calculated'}); }
 }
 function programTotal() {
@@ -1245,7 +1252,8 @@ function boot() {
       (Math.abs(number('wid') - state.landSurvey.binding.width) > 1e-8 || Math.abs(number('len') - state.landSurvey.binding.length) > 1e-8)) unlinkSurveyRectangle();
     rating(); markDirty();
   }));
-  ['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
+  sunDayControls();
+['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     const program = state.program[Number(row.dataset.row)];
