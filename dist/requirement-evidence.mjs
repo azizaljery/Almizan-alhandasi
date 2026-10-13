@@ -7,7 +7,7 @@ import { unverifiedCheck, createRegulatoryCheck, REGULATORY_STATUS, toEvidenceRo
 import { DESIGN_CHOICES } from './design-selection.mjs';
 import {
   TIER, TIER_ORDER, TIER_LABELS, TIER_RULES, OUTCOME_LABELS, OUTCOME_ORDER, OUTCOME_RULES,
-  normalizeArabic, clip, outcomeOfStatus, splitClauses, isConditionClause, classifyClause, tierForTopic, summarizeTiers,
+  normalizeArabic, AS_MANDATORY_LABEL, AS_MANDATORY_RULE, clip, outcomeOfStatus, splitClauses, isConditionClause, classifyClause, tierForTopic, summarizeTiers,
 } from './requirement-tiers.mjs';
 
 // Real, dated source for Riyadh residential construction requirements. This is a
@@ -393,12 +393,13 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
   const LIFE_BASIS = 'اخترته في أسئلة أسلوب الحياة بلا صيغة إلزام.';
   const tag = (id, info) => {
     const row = rows.find(item => item.id === id);
-    if (row && info) { row.tier = info.tier; row.tierBasis = info.basis; }
+    if (row && info) { row.tier = info.tier; row.tierBasis = info.basis; if (info.asMandatory) row.asMandatory = true; }
     return row;
   };
   const addTiered = (info, ...args) => {
     const row = make(...args);
     row.tier = info.tier; row.tierBasis = info.basis;
+    if (info.asMandatory) row.asMandatory = true;
     rows.push(row);
     return row;
   };
@@ -599,7 +600,7 @@ function requirementRowHTML(row) {
   const outcome = Object.hasOwn(OUTCOME_LABELS, row.outcome) ? row.outcome : outcomeOfStatus(status);
   return '<article class="requirement-row" data-evidence-status="' + status + '" data-tier="' + row.tier + '" data-outcome="' + outcome + '">' +
     '<div class="requirement-row-head"><div><span class="requirement-category">' + escapeHTML(row.category) + '</span><h3>' +
-    escapeHTML(row.title) + '</h3></div><div class="requirement-pills"><span class="requirement-outcome">' + escapeHTML(OUTCOME_LABELS[outcome]) +
+    escapeHTML(row.title) + '</h3></div><div class="requirement-pills">' + (row.asMandatory ? '<span class="requirement-as-mandatory">' + escapeHTML(AS_MANDATORY_LABEL) + '</span>' : '') + '<span class="requirement-outcome">' + escapeHTML(OUTCOME_LABELS[outcome]) +
     '</span><span class="requirement-status">' + escapeHTML(STATUS_LABELS[status]) + '</span></div></div>' +
     '<p>' + escapeHTML(row.evidence) + '</p>' +
     (row.tierBasis ? '<p class="requirement-basis"><b>سبب التصنيف «' + escapeHTML(TIER_LABELS[row.tier]) + '»:</b> ' + escapeHTML(row.tierBasis) + '</p>' : '') +
@@ -621,7 +622,7 @@ export function renderRequirementEvidenceHTML(evidence) {
     '</tbody></table>' +
     '<details class="tier-rules"><summary>كيف صُنّفت شروطك؟</summary><dl>' +
     TIER_ORDER.map(tier => '<dt>' + escapeHTML(TIER_LABELS[tier]) + '</dt><dd>' + escapeHTML(TIER_RULES[tier]) + '</dd>').join('') +
-    '<dt>الحالة</dt><dd>' + escapeHTML(OUTCOME_RULES) + '</dd></dl></details></section>';
+    '<dt>' + escapeHTML(AS_MANDATORY_LABEL) + '</dt><dd>' + escapeHTML(AS_MANDATORY_RULE) + '</dd><dt>الحالة</dt><dd>' + escapeHTML(OUTCOME_RULES) + '</dd></dl></details></section>';
   const byOutcome = rows => [...rows].sort((a, b) =>
     (OUTCOME_PRIORITY[a.outcome || outcomeOfStatus(a.status)] ?? 1) - (OUTCOME_PRIORITY[b.outcome || outcomeOfStatus(b.status)] ?? 1));
   const groups = TIER_ORDER.map(tier => {

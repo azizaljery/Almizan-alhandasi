@@ -59,6 +59,14 @@ const COSMETIC_WORDS = /(?:لون|الوان|واجهه|تشطيب|ديكور|ط
 const STRUCTURAL = /(?:غرف|نوم|ممر|مسار|ضيوف|ضيافه|مجلس|مطبخ|نافذ|نوافذ|شباك|شمس|غرب|شرق|شمال|جنوب|شارع|جار|ارتداد|خصوص|عزل|مساحه|ابعاد|دور|مدخل|باب|حمام|تهويه|اضاءه|ضوء|توسع|سلم|مواقف|حركه|مسبح|فناء|باحه)/;
 const CONDITION_MARKER = /(?:اريد|ابي|ابغي|ابغا|نريد|ودي|احب|افضل|ارغب|يهمني|يهمنا|لا اريد|لا ابي|ما ابي|ما ابغي|ما احب|بدون|دون|تجنب|اتجنب|بعيد|قريب|يجب|لازم|لا ?بد|ضروري|ممنوع|يمنع|want|need|must|avoid|without|prefer|don't|dont)/;
 
+// A plain refusal ("لا أريد ...", "ما أبي ..."). It stays an IMPORTANT preference (the
+// client did not use an obligation word) but is flagged `asMandatory` so it is treated
+// as equivalent to a mandatory condition, and the client is told so on the row.
+const REFUSAL_WISH = /(?:^|\s)(?:لا|ما)\s+(?:اريد|ابي|ابغي|ابغا|نريد|ودي|احب|ارغب)(?![ء-ي])/;
+export const isRefusalWish = normalized => REFUSAL_WISH.test(normalized);
+export const AS_MANDATORY_LABEL = 'بمثابة إلزامي';
+export const AS_MANDATORY_RULE = 'النفي الصريح («لا أريد» و«ما أبي») يبقى «تفضيل مهم» لأنه بلا صيغة إلزام، لكنه يُعامل بمثابة الإلزامي، وتُوسَم صفوفه بـ«بمثابة إلزامي».';
+
 // Split free text into clauses, on punctuation and on a conjunction that starts a
 // new request ("... و أبي ..."). Original wording is kept for display.
 export function splitClauses(text) {
@@ -86,6 +94,9 @@ export function classifyClause(clause, { fallbackBasis = null } = {}) {
   if (COSMETIC_LABEL.test(n) || (COSMETIC_WORDS.test(n) && !STRUCTURAL.test(n))) {
     return { tier: TIER.COSMETIC, basis: 'عبارة تخص المظهر أو الذوق فقط بلا أثر وظيفي مذكور، أو وصفتها بأنها شكلية: ' + quote + '.' };
   }
+  if (isRefusalWish(n)) {
+    return { tier: TIER.IMPORTANT, asMandatory: true, basis: 'نفي صريح في نصك: ' + quote + '. لم نصنّفه «إلزامي» لأنه خلا من صيغة إلزام، لكنه يُعامل بمثابة الإلزامي.' };
+  }
   return { tier: TIER.IMPORTANT, basis: fallbackBasis || ('رغبة صريحة في نصك بلا صيغة إلزام: ' + quote + '.') };
 }
 
@@ -100,6 +111,8 @@ export function tierForTopic({ clauses = [], topic, choice = null, fallbackBasis
   const matches = clauses.filter(clause => topic.test(normalizeArabic(clause))).map(clause => classifyClause(clause, { fallbackBasis }));
   const mandatory = matches.find(item => item.tier === TIER.MANDATORY);
   if (mandatory) return mandatory;
+  const refusal = matches.find(item => item.asMandatory);
+  if (refusal) return refusal;
   if (choice) return { tier: TIER.IMPORTANT, basis: choice.basis };
   return matches.find(item => item.tier === TIER.IMPORTANT) || matches[0] || null;
 }
@@ -120,4 +133,4 @@ export function summarizeTiers(rows = []) {
 }
 
 export default { TIER, TIER_ORDER, TIER_LABELS, OUTCOME, OUTCOME_ORDER, OUTCOME_LABELS, TIER_RULES, OUTCOME_RULES,
-  normalizeArabic, clip, outcomeOfStatus, splitClauses, isConditionClause, hasMustSignal, classifyClause, tierForTopic, summarizeTiers };
+  AS_MANDATORY_LABEL, AS_MANDATORY_RULE, isRefusalWish, normalizeArabic, clip, outcomeOfStatus, splitClauses, isConditionClause, hasMustSignal, classifyClause, tierForTopic, summarizeTiers };

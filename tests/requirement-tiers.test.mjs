@@ -6,7 +6,7 @@ import { runMultiEngineDesign } from '../dist/multi-engine.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from '../dist/requirement-evidence.mjs';
 import {
   TIER, TIER_LABELS, OUTCOME_LABELS, TIER_RULES, classifyClause, tierForTopic, splitClauses, isConditionClause,
-  outcomeOfStatus, summarizeTiers, normalizeArabic,
+  outcomeOfStatus, summarizeTiers, normalizeArabic, AS_MANDATORY_LABEL, isRefusalWish,
 } from '../dist/requirement-tiers.mjs';
 
 const plot = {
@@ -38,7 +38,8 @@ test('explicit obligation wording makes a clause mandatory; plain wishes are imp
   assert.equal(classifyClause('ممنوع مرور الضيوف على غرف النوم').tier, TIER.MANDATORY);
   const wish = classifyClause('لا أريد مرور الضيوف على غرف النوم');
   assert.equal(wish.tier, TIER.IMPORTANT);
-  assert.match(wish.basis, /بلا صيغة إلزام/);
+  assert.match(wish.basis, /بمثابة الإلزامي/);
+  assert.match(classifyClause('أريد غرفة هادئة بعيدًا عن الشارع').basis, /بلا صيغة إلزام/);
   assert.equal(classifyClause('أريد غرفة هادئة بعيدًا عن الشارع').tier, TIER.IMPORTANT);
 });
 
@@ -343,4 +344,31 @@ test('the tier layer is wired through the existing module graph without touching
   assert.ok(css.includes('.tier-board') && css.includes('.tier-group'));
   const tiers = readFileSync(new URL('../dist/requirement-tiers.mjs', import.meta.url), 'utf8');
   assert.ok(!/^\s*import\s/m.test(tiers), 'the tier module is pure and import-free');
+});
+
+test('a plain refusal stays an important preference but is flagged and explained as equivalent to mandatory', () => {
+  for (const text of ['لا أريد مرور الضيوف على غرف النوم', 'ما أبي مطبخ مفتوح', 'ما أبغى فناء']) {
+    const c = classifyClause(text);
+    assert.equal(c.tier, TIER.IMPORTANT, text);
+    assert.equal(c.asMandatory, true, text);
+    assert.match(c.basis, /بمثابة الإلزامي/);
+  }
+  assert.equal(classifyClause('يجب ألا يكون هناك فناء').tier, TIER.MANDATORY);
+  assert.equal(classifyClause('لا أريد لون أزرق').tier, TIER.COSMETIC);
+  assert.equal(classifyClause('أفضل مطبخا واسعا').asMandatory, undefined);
+  assert.equal(classifyClause('أريد مجلسا كبيرا').asMandatory, undefined);
+  assert.equal(isRefusalWish(normalizeArabic('لا أريد ضجيجا')), true);
+  assert.equal(isRefusalWish(normalizeArabic('لا اريدك')), false);
+});
+
+test('the refusal flag reaches the evidence rows and the rendered HTML with its label and rule', () => {
+  const result = evaluateRequirementEvidence({ model, program: rooms, plot, idea: 'لا أريد مرور الضيوف على غرف النوم' });
+  const row = result.rows.find(item => item.asMandatory);
+  assert.ok(row, 'a refusal clause yields a flagged row');
+  assert.equal(row.tier, TIER.IMPORTANT);
+  const html = renderRequirementEvidenceHTML(result);
+  assert.ok(html.includes('requirement-as-mandatory') && html.includes(AS_MANDATORY_LABEL));
+  assert.match(html, /تُعامل بمثابة الإلزامي|يُعامل بمثابة الإلزامي/);
+  const summary = summarizeTiers(result.rows);
+  assert.equal(summary.tiers.MANDATORY.total, result.rows.filter(item => item.tier === TIER.MANDATORY).length);
 });

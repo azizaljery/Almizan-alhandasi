@@ -63,3 +63,5 @@
 .requirement-basis{font-size:.8rem!important;color:#5d6e62!important;line-height:1.8!important}
 .requirement-basis b{color:#315b40}
 @media(max-width:680px){.tier-group-rows{grid-template-columns:1fr}.tier-board{padding:12px}.tier-summary th,.tier-summary td{padding:7px 4px;font-size:.78rem}}
+
+.requirement-as-mandatory { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; font-size: .78em; font-weight: 700; }
