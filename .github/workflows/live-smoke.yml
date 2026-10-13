@@ -2,6 +2,8 @@ name: Live Smoke (published site)
 
 # فحص المتصفح على الموقع المنشور فعليًا. يعمل يدويًا، وبعد نجاح نشر الموقع.
 on:
+  push:
+    branches: [agents/live-smoke]
   workflow_dispatch:
   workflow_run:
     workflows: ["Deploy Site (Cloudflare)"]
@@ -12,7 +14,7 @@ permissions:
 
 jobs:
   smoke:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
