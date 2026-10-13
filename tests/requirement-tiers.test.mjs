@@ -99,6 +99,22 @@ test('the brief example: "لا أريد مرور الضيوف على غرف ال
   assert.match(find(strict, 'privacy-routes').tierBasis, /يجب/);
 });
 
+test('a privacy request stated in free text alone (no matching "what I avoid" pick) is still tiered, not dropped into the untiered engine group', () => {
+  // Regression: tagging privacy-routes used to be gated on the legacy asksSeparation
+  // regex, which only matches a narrower phrasing ("فصل مسار... عن العائلة",
+  // "مسار مستقل/منفصل"). A client who writes the exact brief example on its own, with
+  // no corresponding discovery.avoids entry, was previously left untiered and
+  // mislabeled as a generic engine check that "isn't one of your conditions" — even
+  // though this row only exists because it answers that exact sentence.
+  const result = evaluateRequirementEvidence({
+    model, program: rooms, plot, idea: 'لا أريد مرور الضيوف على غرف النوم',
+  });
+  const privacy = find(result, 'privacy-routes');
+  assert.equal(privacy.tier, TIER.IMPORTANT);
+  assert.ok(privacy.tierBasis && privacy.tierBasis.length > 5);
+  assert.notEqual(privacy.outcome, 'MET');
+});
+
 test('a privacy-route check nobody asked for stays an untiered engine check, not a client condition', () => {
   const result = evaluateRequirementEvidence({ model, program: rooms, plot });
   const privacy = find(result, 'privacy-routes');

@@ -429,7 +429,15 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
     kitchen: /مطبخ.{0,30}(?:بعيد|ابعد)|(?:بعيد|ابعد).{0,30}مطبخ/,
     bedrooms: /نوم.{0,30}(?:مكشوف|ضيافه|ضيوف|مجلس)|(?:مكشوف|ضيافه|ضيوف|مجلس).{0,30}نوم/,
   };
-  if (asksSeparation) tag('privacy-routes', topicInfo(TOPICS.privacy, avoids.some(value => /مرور الضيوف|كشف الضيوف/.test(value)) ? { basis: CHOICE_BASIS } : null));
+  // Gate the TIER on an actual privacy mention (a clause matching TOPICS.privacy, or an
+  // avoid-list choice) — not on asksSeparation, which uses its own narrower legacy
+  // pattern (kept separate for the row's pass/fail threshold below) and would otherwise
+  // leave a real client request such as "لا أريد مرور الضيوف على غرف النوم" untagged and
+  // mislabeled as a generic engine check, even though this row only exists at all
+  // because it answers that exact request.
+  const privacyChoice = avoids.some(value => /مرور الضيوف|كشف الضيوف/.test(value)) ? { basis: CHOICE_BASIS } : null;
+  const privacyMatch = tierForTopic({ clauses: clientClauses, topic: TOPICS.privacy, choice: privacyChoice, fallbackBasis: DEFAULT_BASIS });
+  if (privacyMatch) tag('privacy-routes', privacyMatch);
   tag('acoustics', topicInfo(TOPICS.acoustics, avoids.some(value => /صدى الصوت/.test(value)) ? { basis: CHOICE_BASIS } : null));
   tag('west-sun', topicInfo(TOPICS.westSun, avoids.some(value => /شمس العصر/.test(value)) ? { basis: CHOICE_BASIS } : null));
   tag('future', topicInfo(TOPICS.future, discovery?.life?.future === 'مهمة' ? { basis: 'اخترت أن المرونة المستقبلية «مهمة» في أسئلة أسلوب الحياة.' } : null));
