@@ -1,0 +1,5 @@
+pairs: rect,l,u,pavilions | failures: []
+(a) pair-order permutations: 24 -> distinct outcomes: 1
+(b) decisionId identical across two fresh runs: true
+(c) chain {"decision":"cand:dc2cb0d3efda41572da40489a34606910837b39c476a70fbab1a4d23824ecfb5","ranking":"cand:dc2cb0d3efda41572da40489a34606910837b39c476a70fbab1a4d23824ecfb5","finalState":"cand:dc2cb0d3efda41572da40489a34606910837b39c476a70fbab1a4d23824ecfb5","reviewBound":"cand:dc2cb0d3efda41572da40489a34606910837b39c476a70fbab1a4d23824ecfb5","reviewIdsHasIt":true,"azizSurvivorsHas":true,"geometryHashDecision":true}
+    model.integration.candidateId === decision.selectedCandidateId: true | reviewId: true

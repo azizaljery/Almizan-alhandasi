@@ -1,0 +1,4 @@
+rect       wallKeys= id,x1,y1,x2,y2,type,t,h | footprint 331.51 parts 294.51 wallPlan 35.93 gap-after-walls 1.07
+l          wallKeys= id,x1,y1,x2,y2,type,t,h | footprint 367.19 parts 347.84 wallPlan 39.21 gap-after-walls -19.86
+u          wallKeys= id,x1,y1,x2,y2,type,t,h | footprint 413.10 parts 346.80 wallPlan 52.15 gap-after-walls 14.15
+pavilions  wallKeys= id,x1,y1,x2,y2,type,t,h | footprint 350.69 parts 300.91 wallPlan 49.87 gap-after-walls -0.09

@@ -1,0 +1,25 @@
+PASS welcome card shows on an empty canvas
+PASS four walls drawn by clicking  {"walls":4,"openings":0,"fixtures":0,"labels":0,"rooms":1,"area":45.2399973558,"tool":"wall","sel":[],"undo":true}
+PASS closed loop becomes one room of ~ 8x6 minus walls  area=45.24
+PASS typed length wall added (5 walls)  walls=5
+PASS typed wall is exactly 6.00 m  len=6
+PASS partition splits the rectangle into 2 rooms  rooms=2
+PASS door + 2 windows placed on walls  openings=3
+PASS two rooms labelled  labels=2
+PASS furniture placed  fixtures=2
+PASS bed pushed against the north wall and facing away from it  {"id":"f1","level":"L1","kind":"bed-double","x":2,"y":4.84,"rot":3.142,"w":1.8,"d":2.1,"h":0.55}
+PASS click selects the east wall  w2
+PASS inspector changes wall thickness to 30 cm  t=0.3
+PASS dragging a selected wall end moves the shared corner  walls touching x=9: 2
+PASS Ctrl+Z undoes the last edit
+PASS box selection picks several items  selected=5
+PASS assistant answers a plain area question locally  مساحة «غرفة نوم» الصافية 22.04 م².
+جواب محلي من فهم المخطط
+PASS 3D view built live from the drawing
+PASS example villa loads and has rooms  rooms=9
+PASS finish preset stored in the document  stone
+PASS assistant proposal for materials applies to the drawing after confirmation  wood
+PASS + key zooms in
+PASS no console errors
+{"passed":22,"failed":[]}
+exit=0

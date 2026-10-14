@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: historical prototype rejects duplicate ids conservatively
+ok 1 - historical prototype rejects duplicate ids conservatively
+  ---
+  duration_ms: 1.935733
+  type: 'test'
+  ...
+# Subtest: rejects every member when one id maps to different content
+ok 2 - rejects every member when one id maps to different content
+  ---
+  duration_ms: 1.414017
+  type: 'test'
+  ...
+# Subtest: is independent of arrival order
+ok 3 - is independent of arrival order
+  ---
+  duration_ms: 1.340592
+  type: 'test'
+  ...
+# Subtest: allows unrelated unique candidates to continue
+ok 4 - allows unrelated unique candidates to continue
+  ---
+  duration_ms: 0.37775
+  type: 'test'
+  ...
+# Subtest: records a stable reason for all conflicting members
+ok 5 - records a stable reason for all conflicting members
+  ---
+  duration_ms: 0.349701
+  type: 'test'
+  ...
+# Subtest: does not change the identical-duplicate policy inside the gate
+ok 6 - does not change the identical-duplicate policy inside the gate
+  ---
+  duration_ms: 0.230845
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 179.279535

@@ -1,0 +1,13 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Cannot set properties of null (setting 'value')
+    at set (eval at evaluate (:290:30), <anonymous>:2:76)
+    at eval (eval at evaluate (:290:30), <anonymous>:3:28)
+    at UtilityScript.evaluate (<anonymous>:292:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at /home/claude/almizan-alhandasi/scripts/rendering-accuracy-browser.mjs:94:28
+
+Node.js v22.22.0
+exit=1

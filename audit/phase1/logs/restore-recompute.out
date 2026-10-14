@@ -1,0 +1,2 @@
+recompute(restored) === stored geometryHash : true
+recompute(tampered)  === stored geometryHash : false (false = a restore-time check WOULD detect the tamper)

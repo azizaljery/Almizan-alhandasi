@@ -1,0 +1,4 @@
+1. label changed after binding -> verifyCandidateBinding: true
+   decideReviewed accepts relabeled candidate: SELECTED_PRELIMINARY | label before/after: كتلة U حقيقية -> TAMPERED LABEL
+2. massingParts reordered after binding -> verifyCandidateBinding: true
+   decideReviewed: SELECTED_PRELIMINARY | geometryHash 99949b9459

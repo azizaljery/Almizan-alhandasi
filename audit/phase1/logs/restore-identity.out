@@ -1,0 +1,12 @@
+saved integration keys: [
+  'candidateId',
+  'alternativeKey',
+  'geometryHash',
+  'reviewId',
+  'reviewOverall',
+  'reviewCoverage'
+] | top-level candidateId stored outside model? false
+round-trip integration identical: true
+tampered door accepted by decodeProject: true {"restoredHash":"e3b4580b7ed4","candidateId":"cand:2fb5dd5fd","requiresReview":false,"reviewOverall":"PRELIMINARY_INCOMPLETE"}
+tampered wall height accepted: true | quantities changed: {"wallsBefore":597.4449525684626,"wallsAfter":602.6199525684625}
+model-level hash recomputable from saved file (geometry keys only): UNKNOWN -> see report

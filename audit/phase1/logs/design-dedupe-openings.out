@@ -1,0 +1,42 @@
+{
+ "premise": {
+  "sameRooms": true,
+  "sameOpenings": false,
+  "distinctGeometryHash": true,
+  "distinctCandidateId": true,
+  "doorMoved": [
+   0.20352283546791974,
+   0.28352283546791973
+  ]
+ },
+ "c1": "cand:dc2cb0d3e",
+ "c2": "cand:bbcfe5067",
+ "order12": {
+  "status": "SELECTED_PRELIMINARY",
+  "selected": "cand:bbcfe5067ed8192e7255fcefc477b062d83582661af29005c6bcaed0e606fd55",
+  "azizSurvived": [
+   "cand:bbcfe5067ed8192e7255fcefc477b062d83582661af29005c6bcaed0e606fd55"
+  ],
+  "azizRejected": [
+   {
+    "id": "cand:dc2cb0d3e",
+    "code": "DUPLICATE_CANDIDATE",
+    "desc": "Duplicate design of candidate cand:bbcfe5067ed8192e7255fcefc"
+   }
+  ]
+ },
+ "order21": {
+  "status": "SELECTED_PRELIMINARY",
+  "selected": "cand:bbcfe5067ed8192e7255fcefc477b062d83582661af29005c6bcaed0e606fd55",
+  "azizSurvived": [
+   "cand:bbcfe5067ed8192e7255fcefc477b062d83582661af29005c6bcaed0e606fd55"
+  ],
+  "azizRejected": [
+   {
+    "id": "cand:dc2cb0d3e",
+    "code": "DUPLICATE_CANDIDATE",
+    "desc": "Duplicate design of candidate cand:bbcfe5067ed8192e7255fcefc"
+   }
+  ]
+ }
+}

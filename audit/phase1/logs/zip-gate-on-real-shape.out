@@ -1,0 +1,3 @@
+identical DESIGN, different producer/invocation/createdAt
+  fingerprint equal? false
+  zip gate -> survivors 0 rejected 2 (contract C3 expects identical content NOT rejected by the gate)

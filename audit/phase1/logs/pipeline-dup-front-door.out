@@ -1,0 +1,4 @@
+1 identical duplicate [A,A]                                THROWS DUPLICATE_CANDIDATE_ID
+2 forged: U-geometry carrying RECT id [A,F]                THROWS CANDIDATE_ID_MISMATCH: $
+3 forged reversed [F,A]                                    THROWS CANDIDATE_ID_MISMATCH: $
+4 forged alone [F]                                         THROWS CANDIDATE_ID_MISMATCH: $
