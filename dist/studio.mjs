@@ -1,5 +1,5 @@
 // مرسم الميزان: واجهة الاستوديو (أدوات، خصائص، أدوار، عرض ثلاثي الأبعاد حيّ، مراجعة، مساعد).
-import { createDoc, parseDoc, serialize, getById } from './draw/doc.mjs';
+import { createDoc, parseDoc, serialize, getById, SCHEMA } from './draw/doc.mjs';
 import { ROOM_TYPES, OPENING_KINDS, FIXTURES, STAIR_KINDS, WALL_KINDS, PLOT_ENTRIES, roomTypeName } from './draw/catalog.mjs';
 import { sampleVilla } from './draw/samples.mjs';
 import { Editor } from './draw/editor/editor.mjs';
@@ -139,7 +139,7 @@ $('zoomFit').addEventListener('click', () => editor.fit());
 $('undo').addEventListener('click', () => editor.undo()); $('redo').addEventListener('click', () => editor.redo());
 document.addEventListener('keydown', e => { if (e.target === document.body && (e.ctrlKey || e.metaKey) && /^[zy]$/i.test(e.key)) { e.preventDefault(); /^z$/i.test(e.key) && !e.shiftKey ? editor.undo() : editor.redo(); } });
 $('docTitle').addEventListener('change', e => editor.exec({ type: 'set-meta', title: e.target.value.trim() || 'مشروع بلا اسم' }, 'اسم المشروع'));
-document.querySelectorAll('#welcome [data-start]').forEach(b => b.addEventListener('click', () => { const s = b.dataset.start; if (s === 'example') loadExample(); else editor.setTool(s); }));
+document.querySelectorAll('#welcome [data-start]').forEach(b => b.addEventListener('click', () => { const s = b.dataset.start; if (s === 'example') loadExample(); else if (s === 'import') $('fileInput').click(); else editor.setTool(s); }));
 
 // ------------------------------------------------------------------------------------------------ levels
 function renderLevels() {
@@ -369,6 +369,7 @@ async function ensureViewer() {
   return viewerLoading;
 }
 async function rebuild3D() {
+  if (touring) { rebuildAfterTour = true; return; }
   if (!threeVisible()) { built3D = false; return; }
   const v = await ensureViewer(); if (!v) return;
   const msg = $('threeMsg');
@@ -384,6 +385,21 @@ document.querySelectorAll('#styleSeg [data-style]').forEach(b => b.addEventListe
 $('sunAz').addEventListener('input', e => viewer?.setSun({ azimuthDeg: +e.target.value })); $('sunAlt').addEventListener('input', e => viewer?.setSun({ altitudeDeg: +e.target.value }));
 $('secH').addEventListener('input', e => viewer?.setSectionHeight(+e.target.value)); $('isoLevel').addEventListener('change', sync3DLevel);
 $('shot3d').addEventListener('click', async () => { if (!viewer?.built) return toast('لا يوجد مجسم بعد'); try { download((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2)); } catch { toast('تعذّر التقاط الصورة', true); } });
+// automatic walkthrough (orbit, approach, rooms) with optional local WebM recording
+let touring = false, rebuildAfterTour = false;
+async function ensureTourViewer() {
+  if (!editor.doc.walls.length) return null;
+  if (!threeVisible()) { $('app').dataset.view = 'split'; document.querySelectorAll('.seg [data-view]').forEach(x => x.classList.toggle('on', x.dataset.view === 'split')); editor.resize(); }
+  const was = touring; touring = false; // the model must be current before the camera starts moving
+  try { built3D = false; await rebuild3D(); } finally { touring = was; }
+  viewer?.resize();
+  return viewer?.built ? viewer : null;
+}
+import('./draw/tour-ui.mjs').then(({ initDrawTourUI }) => {
+  globalThis.__mizanTour = initDrawTourUI({ root: $('threePane'), ensureViewer: ensureTourViewer, getEntry: () => editor.doc.entry, planOptions: () => globalThis.__mizanTourOptions || {},
+    onBusy: on => { touring = on; $('threePane').classList.toggle('touring', on); },
+    onDone: () => { sync3DLevel(); syncModeSeg(); if (rebuildAfterTour) { rebuildAfterTour = false; rebuild3D(); } } });
+});
 document.querySelectorAll('.seg [data-view]').forEach(b => b.addEventListener('click', () => { $('app').dataset.view = b.dataset.view; document.querySelectorAll('.seg [data-view]').forEach(x => x.classList.toggle('on', x === b)); requestAnimationFrame(() => { editor.resize(); viewer?.resize(); if (threeVisible()) rebuild3D(); }); }));
 window.addEventListener('resize', () => { editor.resize(); viewer?.resize(); });
 
@@ -393,7 +409,35 @@ function loadExample() { loadDoc(sampleVilla(), 'فُتح المثال: عدّل
 $('btnExample').addEventListener('click', loadExample);
 $('btnNew').addEventListener('click', () => { if (editor.doc.walls.length && !confirm('سيُغلق المشروع الحالي. احفظه أولًا إن أردت. هل تبدأ مشروعًا جديدًا؟')) return; loadDoc(createDoc({ title: 'مشروع جديد' })); editor.setTool('wall'); });
 $('btnOpen').addEventListener('click', () => $('fileInput').click());
-$('fileInput').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; try { loadDoc(parseDoc(await f.text()), 'فُتح الملف'); } catch (err) { toast(err.message || 'تعذّر فتح الملف', true); } });
+$('fileInput').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (f) await openFile(f); });
+// A studio project opens as it is; a saved project or model of the previous planner is converted (draw/import-legacy.mjs).
+async function openFile(file) {
+  let raw; try { raw = JSON.parse(await file.text()); } catch { return toast('الملف ليس JSON صالحًا', true); }
+  try { if (raw?.schema === SCHEMA) loadDoc(parseDoc(raw), 'فُتح الملف'); else await importLegacy(raw); } catch (err) { toast(err.message || 'تعذّر فتح الملف', true); }
+}
+function chooseLegacy(candidates) {
+  return new Promise(resolve => {
+    let picked = null;
+    const dlg = el('dialog', { dir: 'rtl' }, el('h3', {}, 'اختر المخطط المراد استيراده'), el('p', { class: 'muted' }, 'يحتوي الملف أكثر من مخطط؛ يُستورد واحد في كل مرة.'),
+      el('div', { class: 'pick' }, candidates.map(c => el('button', { class: 'btn', onclick: () => { picked = c; dlg.close(); } }, c.label, el('small', {}, `${c.summary.rooms} غرفة · ${c.summary.walls} جدار${c.summary.width ? ` · أرض ${c.summary.width}×${c.summary.length} م` : ''}`)))),
+      el('div', { class: 'row' }, el('button', { class: 'btn', onclick: () => dlg.close() }, 'إلغاء')));
+    dlg.addEventListener('close', () => { dlg.remove(); resolve(picked); });
+    document.body.append(dlg); dlg.showModal();
+  });
+}
+async function importLegacy(raw) {
+  const { findLegacyModels, legacyToDoc, LEGACY_PROJECT_SCHEMA } = await import('./draw/import-legacy.mjs');
+  // a saved design that kept only its recipe is regenerated by the previous planner
+  let generate = null;
+  if (raw?.schema === LEGACY_PROJECT_SCHEMA) { const pl = await import('./planner.mjs').catch(() => null); if (pl) generate = r => pl.generateModel(pl.validatePlot(r.plot), pl.normalizeRooms(r.rooms), { strategy: r.strategy }); }
+  const { candidates, skipped } = findLegacyModels(raw, { generate });
+  if (!candidates.length) return toast(skipped[0] || 'الملف ليس مشروع رسم من الميزان ولا مخططًا من النظام القديم.', true);
+  const pick = candidates.length === 1 ? candidates[0] : await chooseLegacy(candidates);
+  if (!pick) return;
+  const { doc, report } = legacyToDoc(pick.model);
+  loadDoc(doc, `استُورد المخطط: ${report.rooms} غرفة · ${report.walls} جدار · ${report.openings} فتحة` + (report.skipped.length + report.unmatched.length ? ` · تعذّر ${report.skipped.length + report.unmatched.length} عنصر` : ''));
+  globalThis.__mizanImportReport = report; // للاختبارات الحية
+}
 const saveJson = () => download((editor.doc.title || 'mizan').replace(/[\\/:*?"<>|]/g, '_') + '.mizan.json', new Blob([serialize(editor.doc)], { type: 'application/json' }));
 $('btnSave').addEventListener('click', () => { saveJson(); toast('حُفظ الملف على جهازك'); });
 $('btnExport').addEventListener('click', e => { e.stopPropagation(); $('exportMenu').hidden = !$('exportMenu').hidden; });

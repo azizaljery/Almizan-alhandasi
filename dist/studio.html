@@ -26,7 +26,7 @@
     <div class="group">
       <button class="btn" id="btnNew">جديد</button>
       <button class="btn" id="btnExample">مثال جاهز</button>
-      <button class="btn" id="btnOpen">فتح</button>
+      <button class="btn" id="btnOpen" title="فتح ملف مشروع من المرسم، أو مخططًا مولّدًا من النظام القديم (ملف المشروع .json)">فتح</button>
       <button class="btn primary" id="btnSave">حفظ</button>
       <div class="menu"><button class="btn" id="btnExport" aria-haspopup="true">تصدير ▾</button>
         <div class="menu-list" id="exportMenu" hidden>
@@ -67,7 +67,7 @@
         <div class="welcome" id="welcome" hidden>
           <h2>ارسم بيتك كما تتخيله</h2>
           <p>ابدأ بجدار، أو اسحب غرفة مستطيلة، أو افتح مثالًا جاهزًا وعدّل عليه. كل ما ترسمه يراه المساعد ويظهر لك ثلاثي الأبعاد فورًا.</p>
-          <div class="row"><button class="btn primary" data-start="wall">ابدأ برسم جدار</button><button class="btn" data-start="rect">غرفة مستطيلة</button><button class="btn" data-start="example">افتح مثالًا</button></div>
+          <div class="row"><button class="btn primary" data-start="wall">ابدأ برسم جدار</button><button class="btn" data-start="rect">غرفة مستطيلة</button><button class="btn" data-start="example">افتح مثالًا</button><button class="btn" data-start="import">استورد مخططًا قديمًا</button></div>
           <small>اكتب طول الجدار بالأرقام أثناء الرسم ثم Enter · Shift لزاوية 45° · Alt لإيقاف الالتقاط</small>
         </div>
         <div class="toast" id="toast" role="status" hidden></div>
@@ -82,7 +82,9 @@
           <label class="rng" id="secWrap" hidden>المقطع<input type="range" id="secH" min="0.3" max="6" step=".05" value="1.2"></label>
           <label class="chk"><input type="checkbox" id="isoLevel"> عزل الدور</label>
           <button class="btn sm" id="shot3d">التقاط صورة</button>
+          <span class="tour" id="tourBox"><button class="btn sm" id="autoTour" title="دورة حول المبنى ثم داخل الغرف">▶ جولة تلقائية</button><button class="btn sm" id="recordTour">⏺ تسجيل الجولة</button><button class="btn sm warn" id="stopAutoTour" hidden>■ إيقاف</button><a class="btn sm" id="tourDownload" hidden>تنزيل الفيديو</a></span>
         </div>
+        <div class="tour-status" id="autoTourStatus" role="status" aria-live="polite" hidden></div>
         <div class="three-msg" id="threeMsg" hidden></div>
       </div>
     </div>

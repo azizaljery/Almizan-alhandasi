@@ -73,3 +73,10 @@ dialog{border:0;border-radius:14px;padding:20px;box-shadow:0 20px 70px #0006;fon
 .preset{display:flex;gap:8px;align-items:center;width:100%;text-align:start;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;margin-bottom:7px}.preset:hover{background:#faf6ec}.preset i{display:flex;gap:3px}.preset i b{width:16px;height:16px;border-radius:5px;border:1px solid #0002}
 .seg3{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.seg3 button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-size:12.5px}.seg3 button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .facades{display:grid;grid-template-columns:1fr 1fr;gap:7px}.facades button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-size:13px}.facades button:hover{background:#f4efe3}
+
+.tour{display:inline-flex;gap:6px;align-items:center;pointer-events:auto}.tour .btn{background:#fff;border:1px solid var(--line);color:var(--ink)}.tour a.btn{text-decoration:none;background:var(--teal);border-color:var(--teal);color:#fff}
+.tour .btn:disabled{opacity:.5;cursor:default}
+.tour-status{position:absolute;inset-inline:10px;bottom:10px;margin:auto;width:max-content;max-width:calc(100% - 20px);background:#15161aeb;color:#fff;border-radius:10px;padding:7px 14px;font-size:12.5px;line-height:1.7;pointer-events:none;z-index:5}.tour-status[hidden]{display:none}
+.three.touring .three-bar>*:not(.tour){pointer-events:none;opacity:.45}
+dialog .pick{display:flex;flex-direction:column;gap:7px;margin:12px 0}dialog .pick .btn,dialog .row .btn{background:#fff;border:1px solid var(--line);color:var(--ink);text-align:start}dialog .pick .btn:hover,dialog .row .btn:hover{background:#f7f3ea}
+dialog .pick small{display:block;color:var(--soft);margin-top:2px}dialog h3{margin:0 0 6px}dialog .row{display:flex;justify-content:flex-end;gap:8px}
