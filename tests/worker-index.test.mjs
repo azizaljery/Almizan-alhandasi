@@ -7,7 +7,7 @@ const env = { ASSETS: { fetch: async req => new Response('asset:' + new URL(req.
 
 test('المدخل الموحد: الملفات الثابتة من ASSETS', async () => {
   const res = await worker.fetch(new Request(ORIGIN + '/'), env);
-  assert.equal(await res.text(), 'asset:/');
+  assert.equal(await res.text(), 'asset:/studio.html');
   assert.equal(await (await worker.fetch(new Request(ORIGIN + '/app.mjs'), env)).text(), 'asset:/app.mjs');
 });
 test('المدخل الموحد: /api/assistant يذهب للوكيل ولا يكشف الأسرار', async () => {
@@ -31,4 +31,14 @@ test('المدخل الموحد: /api/archive بلا قاعدة يعيد خطأ 
 test('المدخل الموحد: مسار api مجهول يعيد 404 JSON', async () => {
   const res = await worker.fetch(new Request(ORIGIN + '/api/nope'), env);
   assert.equal(res.status, 404);
+});
+
+test('الصفحة الرئيسية تفتح المرسم، و?legacy=1 تفتح الصفحة القديمة', async () => {
+  const { default: worker } = await import('../worker/index.mjs');
+  const seen = [];
+  const env = { ASSETS: { fetch: async req => { seen.push(new URL(req.url).pathname); return new Response('ok'); } } };
+  await worker.fetch(new Request('https://x.test/'), env, {});
+  await worker.fetch(new Request('https://x.test/?legacy=1'), env, {});
+  await worker.fetch(new Request('https://x.test/studio.mjs'), env, {});
+  assert.deepEqual(seen, ['/studio.html', '/', '/studio.mjs']);
 });
