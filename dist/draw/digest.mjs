@@ -254,11 +254,29 @@ export function digestDoc(doc, { compact = false, model = null } = {}) {
   return {
     schema: DIGEST_SCHEMA, title: String(doc.title || '').slice(0, 120), north: r2(m.north), ...(compact ? { compact: true } : {}),
     ...(doc.entry ? { plotEntry: doc.entry } : {}),
+    ...(doc.finish && Object.keys(doc.finish).length ? { finish: compactFinish(doc.finish) } : {}),
     levels, totals, counts, drawingState,
   };
 }
 
 const NUM_AR = n => String(r2(n));
+const FLOOR_AR = { marble: 'رخام', tile: 'بلاط', wood: 'باركيه', wet: 'بلاط حمامات', concrete: 'خرسانة' };
+const BASE_AR = { render: 'لياسة', paint: 'دهان أملس', stone: 'حجر' };
+function compactFinish(f) {
+  const out = {}, fa = f.facade || {};
+  if (fa.base) out.base = fa.base; if (fa.color) out.color = fa.color; if (fa.accent) out.accent = fa.accent; if (fa.accentColor) out.accentColor = fa.accentColor; if (fa.plinth === false) out.plinth = false;
+  for (const k of ['aluminium', 'entryDoor', 'fence']) if (f[k]) out[k] = f[k];
+  if (f.floors) out.floors = Object.fromEntries(Object.entries(f.floors).slice(0, 20));
+  return out;
+}
+function describeFinishAr(f) {
+  const bits = [];
+  if (f.base || f.color) bits.push(`الواجهة ${BASE_AR[f.base] || 'لياسة'}${f.color ? ' بلون ' + f.color : ''}`);
+  if (f.accent) bits.push(f.accent === 'none' ? 'بلا كسوة حجر' : f.accent === 'all' ? 'كسوة حجر على كل الواجهات' : 'كسوة حجر على واجهة المدخل');
+  if (f.aluminium) bits.push('ألمنيوم ' + f.aluminium);
+  if (f.floors) bits.push('أرضيات: ' + Object.entries(f.floors).map(([t, v]) => `${ROOM_TYPES[t]?.ar || t} ${FLOOR_AR[v] || v}`).join('، '));
+  return bits.length ? 'المواد المختارة: ' + bits.join('، ') + '.' : '';
+}
 
 /** Short Arabic summary (used offline). Plain sentences, no bullets. */
 export function describeDigestAr(digest) {
@@ -279,6 +297,7 @@ export function describeDigestAr(digest) {
     if (bad.length) parts.push(`غرف لا يصل إليها المسار من المدخل: ${bad.join('، ')}.`);
     parts.push(`عدد الأبواب ${NUM_AR(c.doors || 0)} والنوافذ ${NUM_AR(c.windows || 0)}${c.openArches ? ` والفتحات المفتوحة ${NUM_AR(c.openArches)}` : ''}.`);
   }
+  if (digest.finish) { const fin = describeFinishAr(digest.finish); if (fin) parts.push(fin); }
   const s = digest.drawingState || {};
   const issues = [];
   if (s.gaps?.length) issues.push(`${NUM_AR(s.gaps.length)} ثغرة في الجدران`);

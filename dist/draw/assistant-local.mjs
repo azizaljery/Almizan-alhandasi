@@ -772,9 +772,43 @@ function splitClauses(orig) {
   return parts;
 }
 
+const COLOR_WORDS = [['ابيض', '#f4f4f1', 'أبيض'], ['كريمي', '#f1ead9', 'كريمي'], ['رملي', '#ece0c8', 'رملي'], ['رمل', '#ece0c8', 'رملي'], ['بيج', '#d9c7a4', 'بيج'], ['ترابي', '#b9a58a', 'ترابي'], ['بني', '#8b7d6b', 'بني'], ['رمادي', '#bfc3c6', 'رمادي'], ['اسود', '#2b2c2e', 'أسود'], ['ازرق', '#1f3a4d', 'أزرق داكن'], ['احمر', '#7a2f2a', 'أحمر داكن'], ['طوبي', '#a65f3c', 'طوبي']];
+const FLOOR_WORDS = [['رخام', 'marble', 'رخام'], ['باركيه', 'wood', 'باركيه'], ['خشب', 'wood', 'باركيه'], ['بلاط', 'tile', 'بلاط'], ['سيراميك', 'tile', 'بلاط'], ['خرسانه', 'concrete', 'خرسانة']];
+/** Façade / material requests ("اجعل الواجهة حجر", "لون الألمنيوم أسود", "أرضية المجلس باركيه"). null when the text is not about materials. */
+export function interpretFinish(norm, doc) {
+  const color = COLOR_WORDS.find(([w]) => has(norm, w));
+  const finish = {}; const said = [];
+  const wantsChange = /(?<![ء-ي])(?:اجعل|خل|خلي|غير|بدل|حول|ابي|ابغي|اريد|لون|اضف|حط|سو|سوي)(?![ء-ي])/.test(norm) || /(?<![ء-ي])(?:لون|لونها|لونه)/.test(norm);
+  if (!wantsChange) return null;
+  const floorMat = FLOOR_WORDS.find(([w]) => has(norm, w));
+  if (has(norm, 'ارضيه|ارضيات|ارضية')) {
+    if (!floorMat) return null;
+    const types = Object.entries(ROOM_TYPES).filter(([k, v]) => k !== 'other' && norm.includes(normalizeAr(v.ar).replace(/^غرفه /, ''))).map(([k]) => k);
+    const named = doc.labels.filter(l => norm.includes(normalizeAr(l.name)) || norm.includes(normalizeAr(roomTypeName(l.type)).replace(/^غرفه /, ''))).map(l => l.type);
+    const pick = [...new Set([...types, ...named])];
+    if (!pick.length) return { intent: 'query', answer: 'أي غرف تقصد بالأرضية؟ اذكر اسم الغرفة، مثل «أرضية المجلس باركيه».', commands: [], needsConfirm: false, ambiguities: [], referencedIds: [] };
+    finish.floors = Object.fromEntries(pick.map(t => [t, floorMat[1]])); said.push(`أرضية ${pick.map(roomTypeName).join(' و')} ${floorMat[2]}`);
+  } else if (has(norm, 'الالمنيوم|المنيوم|اطار النوافذ|اطارات')) {
+    if (!color) return null; finish.aluminium = color[1]; said.push(`لون الألمنيوم ${color[2]}`);
+  } else if (has(norm, 'باب المدخل|الباب الرئيسي|باب الدخول')) {
+    if (!color) return null; finish.entryDoor = color[1]; said.push(`لون باب المدخل ${color[2]}`);
+  } else if (has(norm, 'سور|الاسوار')) {
+    if (!color) return null; finish.fence = color[1]; said.push(`لون السور ${color[2]}`);
+  } else if (has(norm, 'واجه|واجهه|واجهات|الجدران الخارجي|الخارجي|الحجر|حجر')) {
+    const facade = {};
+    if (has(norm, 'حجر') && !/لون/.test(norm)) { facade.base = 'stone'; facade.accent = 'all'; said.push('تشطيب الواجهة حجر'); }
+    else if (has(norm, 'لياسه|لياسة')) { facade.base = 'render'; said.push('تشطيب الواجهة لياسة'); }
+    else if (has(norm, 'دهان|بوي|بويه|املس')) { facade.base = 'paint'; said.push('تشطيب الواجهة دهان أملس'); }
+    if (color) { facade.color = color[1]; said.push(`لون الواجهة ${color[2]}`); }
+    if (!Object.keys(facade).length) return null; finish.facade = facade;
+  } else return null;
+  return { intent: 'edit', answer: `سأغيّر المواد: ${said.join('، ')}. اضغط تطبيق لتراه في المجسم.`, commands: [{ type: 'set-meta', finish }], needsConfirm: true, ambiguities: [], referencedIds: [] };
+}
+
 export function interpretAr(text, doc, { selection = null } = {}) {
   const orig = normalizeWithMap(text);
   if (!orig.norm) return { ...unknownResult('اكتب طلبك أولًا.'), referencedIds: [] };
+  { let fin = null; try { fin = interpretFinish(orig.norm, doc); } catch { fin = null; } if (fin) return finalize(fin, doc); }
   if (String(text).length > 800) return unknownResult('الطلب طويل جدًا؛ اختصره في جملة أو جملتين.');
   let ctx;
   try { ctx = buildCtx(doc, selection); } catch { return unknownResult('تعذر تحليل المخطط الحالي.'); }

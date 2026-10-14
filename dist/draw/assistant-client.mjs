@@ -11,7 +11,7 @@ import { validateDrawingAnswer, LIMITS } from './assistant-schema.mjs';
 
 export const DRAWING_ENDPOINT = 'https://almizan-handasi.aljeryabod.workers.dev/api/assistant/drawing';
 
-const TYPE_AR = { 'add-opening': 'إضافة فتحة', 'add-fixture': 'إضافة قطعة', update: 'تعديل عنصر', 'flip-opening': 'عكس اتجاه باب', 'add-label': 'تسمية غرفة', 'add-level': 'إضافة دور', 'close-gap': 'سدّ ثغرة', delete: 'حذف', translate: 'تحريك' };
+const TYPE_AR = { 'set-meta': 'تغيير المواد والواجهة', 'add-opening': 'إضافة فتحة', 'add-fixture': 'إضافة قطعة', update: 'تعديل عنصر', 'flip-opening': 'عكس اتجاه باب', 'add-label': 'تسمية غرفة', 'add-level': 'إضافة دور', 'close-gap': 'سدّ ثغرة', delete: 'حذف', translate: 'تحريك' };
 const r2 = v => Math.round(v * 100) / 100;
 
 function areasOf(doc) {

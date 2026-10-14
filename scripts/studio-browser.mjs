@@ -133,6 +133,10 @@ ok('finish preset stored in the document', fin === 'stone', fin);
 await page.click('.facades button:has-text("الجنوبية")'); await page.waitForTimeout(2500); await shot('10-facade-south-stone');
 await page.click('.preset:has-text("حديث أبيض")'); await page.waitForTimeout(1500);
 await page.click('.facades button:has-text("الشمالية")'); await page.waitForTimeout(2500); await shot('11-facade-north-white');
+await page.click('[data-tab=ai]'); await page.fill('#askText', 'اجعل أرضية المجلس باركيه'); await page.click('#askBtn');
+await page.waitForSelector('.prop button.primary', { timeout: 15000 }); await page.click('.prop button.primary');
+const fl = await page.evaluate(() => __mizanStudio.doc.finish?.floors?.majlis);
+ok('assistant proposal for materials applies to the drawing after confirmation', fl === 'wood', String(fl));
 await page.click('[data-view="split"]');
 // ---- touch: pinch zoom via two pointers is exercised through CDP is skipped; keyboard zoom instead
 const sc0 = await page.evaluate(() => __mizanStudio.view.scale); await page.locator('#planCanvas').focus(); await page.keyboard.press('+');
