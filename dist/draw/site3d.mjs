@@ -13,7 +13,7 @@ export function buildSite(THREE, doc, lib, ctx) {
   const outline = ctx.outline;
   const bb = boundsOf(plot || outline || [{ x: 0, y: 0 }]);
   out.plotBounds = bb;
-  const cx = (bb.x0 + bb.x1) / 2, cy = (bb.y0 + bb.y1) / 2, size = Math.max(bb.w, bb.h) + 90;
+  const cx = (bb.x0 + bb.x1) / 2, cy = (bb.y0 + bb.y1) / 2, size = 2600; // far beyond the fog (ends at 420 m): the ground has no visible edge, it dissolves into the horizon colour
   // terrain
   B.flatPoly('terrain', [{ x: cx - size / 2, y: cy - size / 2 }, { x: cx + size / 2, y: cy - size / 2 }, { x: cx + size / 2, y: cy + size / 2 }, { x: cx - size / 2, y: cy + size / 2 }], [], g0 - .12, 1, p => [p.x / 3, -p.y / 3]);
   const R = seed => { let a = seed >>> 0 || 1; return () => { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; }; };

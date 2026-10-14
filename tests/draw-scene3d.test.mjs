@@ -77,3 +77,11 @@ test('options: no site, no fixtures reduce the geometry', () => {
   assert.ok(bare.stats.triangles < full.stats.triangles);
   assert.equal(bare.site, null);
 });
+
+test('the ground has no visible edge: the terrain reaches far beyond the fog, on every side of the plot', async () => {
+  const { sampleVilla } = await import('../dist/draw/samples.mjs'), built = buildBuildingScene(sampleVilla(), THREE, { textures: false });
+  let terrain = null; built.site.group.traverse(o => { if (o.isMesh && o.material === built.lib.m.terrain) terrain = o; });
+  assert.ok(terrain, 'terrain mesh exists');
+  terrain.geometry.computeBoundingBox(); const bb = terrain.geometry.boundingBox, plot = built.site.plotBounds;
+  for (const reach of [plot.x0 - bb.min.x, bb.max.x - plot.x1, plot.y0 - -bb.max.z, -bb.min.z - plot.y1]) assert.ok(reach > 1000, 'terrain reaches ' + reach + ' m past the plot (fog ends at 420 m)');
+});

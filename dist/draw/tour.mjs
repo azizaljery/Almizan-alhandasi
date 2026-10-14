@@ -55,6 +55,15 @@ export function planDrawTour(rooms, options = {}) {
  * Drive a DrawViewer through the plan. Resolves true when finished, false when aborted (signal, disposed
  * viewer or lost WebGL context). Each frame is drawn synchronously so a recorder can grab it right after.
  */
+const BLEND_MS = 900, BLEND_FIRST_MS = 1400; // glide time between stops
+const wrapPi = a => a - 2 * Math.PI * Math.floor((a + Math.PI) / (2 * Math.PI));
+function makeBlend(from, seg, afterApproach) {
+  // heading and pitch of the camera we glide away from, read off its orientation (so it works from the orbit view too)
+  const q = from.quat, fx = -2 * (q.x * q.z + q.w * q.y), fy = -2 * (q.y * q.z - q.w * q.x), fz = -(1 - 2 * (q.x * q.x + q.y * q.y));
+  const yaw0 = Math.atan2(fx, -fz), pitch0 = Math.asin(Math.max(-1, Math.min(1, fy)));
+  const dYaw = wrapPi(seg.heading0 * DEG - yaw0), turnMs = Math.abs(dYaw) / DEG * 5; // a bigger turn takes longer, so it never whips round
+  return { from, pitch0, dYaw, ms: Math.min((afterApproach ? BLEND_FIRST_MS : BLEND_MS) + turnMs, seg.ms * .6) };
+}
 export function runDrawTour({ viewer, plan, signal, onProgress, raf = globalThis.requestAnimationFrame?.bind(globalThis), now = () => globalThis.performance.now(), afterFrame }) {
   return new Promise(resolve => {
     if (!viewer?.built || !plan?.segments?.length) { resolve(false); return; }
@@ -75,10 +84,15 @@ export function runDrawTour({ viewer, plan, signal, onProgress, raf = globalThis
       viewer.tween = null;
       if (seg.kind === 'orbit') {
         viewer.showLevel('all'); viewer.setMode('orbit', { animate: false }); viewer.frameBuilding();
-        base = { el: 24, dist: viewer.orbit.dist, target: viewer.orbit.target.clone() };
+        base = { el: 24, dist: viewer.orbit.dist * .82, target: viewer.orbit.target.clone() };
       } else if (seg.kind === 'room') {
         seg.skipped = !viewer.built.rooms.has(seg.key);
-        if (!seg.skipped) viewer.walkToRoom(seg.key, seg.heading0);
+        if (!seg.skipped) {
+          // glide from wherever the camera is now (outside at the door, or in the previous room) instead of cutting
+          const from = viewer.currentPose?.() || null, afterApproach = plan.segments[index - 1]?.kind === 'approach';
+          viewer.walkToRoom(seg.key, seg.heading0);
+          seg.blend = from?.pos && from.quat?.x !== undefined ? makeBlend(from, seg, afterApproach) : null;
+        }
       }
     }
     function apply(seg, p) {
@@ -88,8 +102,15 @@ export function runDrawTour({ viewer, plan, signal, onProgress, raf = globalThis
         const e = ease(p);
         viewer.orbitTo({ azimuthDeg: plan.entryAzimuthDeg, elevationDeg: base.el + (9 - base.el) * e, distance: base.dist * (1 - .5 * e), target: [base.target.x, base.target.y + (1.2 - base.target.y) * e, base.target.z] });
       } else if (!seg.skipped) {
-        viewer.walk.yaw = (seg.heading0 + seg.sweepDeg * ease(p)) * DEG; viewer.walk.pitch = -.04;
-        viewer.applyPose(viewer.walkPose());
+        // constant turning speed: no stop-and-go at the start and end of every room (the glide supplies the ease-in)
+        viewer.walk.yaw = (seg.heading0 + seg.sweepDeg * p) * DEG; viewer.walk.pitch = -.04;
+        const b = seg.blend, k = b ? Math.min(1, (p * seg.ms) / b.ms) : 1;
+        if (b && k < 1) {
+          // glide: position, heading (by the short way round), pitch and field of view ease from the previous view to this room's
+          const e = k * k * (3 - 2 * k); viewer.walk.yaw -= b.dYaw * (1 - e); viewer.walk.pitch = b.pitch0 * (1 - e) - .04 * e;
+          const pose = viewer.walkPose(); pose.pos = b.from.pos.clone().lerp(pose.pos, e); pose.fov = b.from.fov + (pose.fov - b.from.fov) * e;
+          viewer.applyPose(pose);
+        } else viewer.applyPose(viewer.walkPose());
       }
     }
     raf(step);

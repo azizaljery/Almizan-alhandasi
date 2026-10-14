@@ -1,9 +1,10 @@
 // Controls for the studio's automatic walkthrough and its optional local recording.
 import { planDrawTour, runDrawTour, recordingSupported, startRecording } from './tour.mjs';
+import { withDuration } from './webm-fix.mjs';
 
 /**
  * root: element that holds #autoTour, #recordTour, #stopAutoTour, #autoTourStatus, #tourDownload.
- * ensureViewer(): resolves the ready DrawViewer (3D pane shown, model built) or null.
+ * ensureViewer({ record }): resolves the ready DrawViewer (3D pane shown, model built) or null; a recording gets the big pane.
  * getEntry(): entry side of the drawing ('s' | 'n' | 'e' | 'w' | null).
  * planOptions(): optional timings / room cap for planDrawTour (see TOUR in tour.mjs).
  */
@@ -26,22 +27,27 @@ export function initDrawTourUI({ root, ensureViewer, getEntry = () => null, plan
     if (url) { URL.revokeObjectURL(url); url = null; }
     let recorder = null, finished = false, viewer = null, locked = null;
     try {
-      viewer = await ensureViewer();
+      viewer = await ensureViewer({ record });
       if (!viewer?.built) { say('ارسم جدرانًا مغلقة أولًا لتبدأ الجولة التلقائية.'); return false; }
       const plan = planDrawTour(viewer.built.rooms.values(), { ...planOptions(), entry: getEntry() });
       if (!plan.rooms) { say('لا توجد غرف مغلقة بعد؛ أغلق الجدران وسمِّ الغرف لتظهر في الجولة.'); return false; }
       if (record) {
         if (!recordingSupported(viewer.canvas)) { say('تعذّر التسجيل في هذا المتصفح؛ تعمل الجولة دون تسجيل.'); record = false; }
-        else recorder = startRecording(viewer.canvas);
       }
       locked = viewer.canvas.style.pointerEvents; viewer.canvas.style.pointerEvents = 'none'; // no dragging while the camera is driven
       abort = new AbortController();
+      const t0 = performance.now();
       finished = await runDrawTour({
-        viewer, plan, signal: abort.signal, afterFrame: () => recorder?.frame(),
+        viewer, plan, signal: abort.signal, afterFrame: () => {
+          // The recorder starts only once the first picture is on the canvas: started earlier, its opening frame is the blank buffer (a black frame at 0:00).
+          if (record && !recorder) { recorder = startRecording(viewer.canvas); recorder.frame(); }
+          recorder?.frame();
+        },
         onProgress: p => { say(`${record ? '⏺ تسجيل · ' : ''}${p.segment.kind === 'orbit' ? 'دورة حول المبنى' : p.segment.kind === 'approach' ? 'الاقتراب من المدخل' : 'داخل ' + p.segment.name} · ${Math.min(100, Math.round(100 * p.elapsedMs / p.totalMs))}٪`); },
       });
       if (recorder) {
-        const blob = await recorder.stop(); recorder = null;
+        const raw = await recorder.stop(); recorder = null;
+        const blob = raw && finished ? await withDuration(raw, performance.now() - t0) : raw; // MediaRecorder leaves the length out; players need it to show and seek
         if (blob && finished) {
           url = URL.createObjectURL(blob); link.href = url; link.download = 'mizan-tour.webm';
           link.textContent = `نزّل الفيديو (${(blob.size / 1048576).toFixed(1)} م.ب · WebM)`; link.hidden = false;
