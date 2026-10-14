@@ -47,19 +47,21 @@ export async function buildExportManifest({ kind, fileName, mime = null, payload
     app: { commit: app?.commit ?? null, builtAt: app?.builtAt ?? null },
   };
 }
-export const manifestFileName = fileName => fileName.replace(/\.[^./\\]+$/, '') + '.manifest.json';
+// يحتفظ بالامتداد الأصلي حتى لا يتصادم بيانا ملفين بالاسم الأساسي نفسه (mizan-board-DATE.svg / .png).
+export const manifestFileName = fileName => fileName + '.manifest.json';
 export const serializeManifest = manifest => JSON.stringify(manifest, null, 2) + '\n';
 
 let cachedApp;
 /** Deployed build identity from /version.json (written by scripts/build.mjs). Never throws; unavailable ⇒ nulls. */
-export async function loadAppVersion(fetchImpl = globalThis.fetch) {
-  if (cachedApp) return cachedApp;
+export async function loadAppVersion(fetchImpl = globalThis.fetch, { fresh = false } = {}) {
+  if (cachedApp && !fresh) return cachedApp;
   try {
     const r = await fetchImpl('/version.json', { cache: 'no-store' });
     const j = r.ok ? await r.json() : null;
-    cachedApp = { commit: typeof j?.commit === 'string' ? j.commit : null, builtAt: typeof j?.builtAt === 'string' ? j.builtAt : null };
-  } catch { cachedApp = { commit: null, builtAt: null }; }
-  return cachedApp;
+    const app = { commit: typeof j?.commit === 'string' ? j.commit : null, builtAt: typeof j?.builtAt === 'string' ? j.builtAt : null };
+    if (app.commit) cachedApp = app; // نخزّن النجاح فقط؛ فشل لمرة واحدة لا يُجمّد البيان على null حتى إعادة التحميل
+    return app;
+  } catch { return { commit: null, builtAt: null }; }
 }
 
 /** Browser helper: build and download the manifest next to an export that was just downloaded. Never blocks or fails the export. */

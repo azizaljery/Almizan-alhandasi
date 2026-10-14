@@ -8,7 +8,7 @@ import { defaultRooms, normalizeRooms, validatePlot } from '../dist/planner.mjs'
 import { runMultiEngineDesign } from '../dist/multi-engine.mjs';
 import { quantitiesCSV } from '../dist/project.mjs';
 import { buildPlanSVG } from '../dist/plan-view.mjs';
-import { buildExportManifest, identityOf, manifestFileName, serializeManifest, loadAppVersion, MANIFEST_SCHEMA } from '../dist/export-manifest.mjs';
+import { buildExportManifest, identityOf, manifestFileName, serializeManifest, loadAppVersion, downloadManifest, MANIFEST_SCHEMA } from '../dist/export-manifest.mjs';
 
 const plot = validatePlot({ width: 35, length: 45, entry: 's', streets: { s: true }, floors: 1, coverage: .75, streetSetback: 3, neighborSetback: 1.5 });
 const out = await runMultiEngineDesign({ plot, rooms: normalizeRooms(defaultRooms()), selectedShape: 'rect', idea: '', seed: 1 });
@@ -73,17 +73,33 @@ test('building a manifest never mutates the model or the payload, and is determi
   assert.equal(serializeManifest(a), serializeManifest(b));
 });
 
-test('file naming: sidecar is <name>.manifest.json; the export content generators are byte-identical to before', () => {
-  assert.equal(manifestFileName('mizan-handasi-plan.svg'), 'mizan-handasi-plan.manifest.json');
-  assert.equal(manifestFileName('a.b.csv'), 'a.b.manifest.json');
-  // the content generators are untouched by EX-01: same bytes on repeated generation
-  assert.equal(buildPlanSVG(model), buildPlanSVG(model));
-  assert.equal(quantitiesCSV(model, {}, 10, 15), quantitiesCSV(model, {}, 10, 15));
+test('file naming: sidecar keeps the full file name, so svg and png of the same base name never collide (review #5)', () => {
+  assert.equal(manifestFileName('mizan-handasi-plan.svg'), 'mizan-handasi-plan.svg.manifest.json');
+  assert.equal(manifestFileName('mizan-board-2026-10-14.svg') === manifestFileName('mizan-board-2026-10-14.png'), false);
+  assert.equal(manifestFileName('a.b.csv'), 'a.b.csv.manifest.json');
 });
 
-test('loadAppVersion reads /version.json and fails soft to nulls (never blocks an export)', async () => {
-  const ok = await loadAppVersion(async () => ({ ok: true, json: async () => APP }));
-  assert.deepEqual(ok, APP);
+test('loadAppVersion: success is cached; a failure is NOT cached (a transient error must not freeze the commit at null)', async () => {
+  const bad = await loadAppVersion(async () => { throw new Error('offline'); }, { fresh: true });
+  assert.deepEqual(bad, { commit: null, builtAt: null });
+  const notOk = await loadAppVersion(async () => ({ ok: false }), { fresh: true });
+  assert.deepEqual(notOk, { commit: null, builtAt: null });
+  let calls = 0;
+  const ok = await loadAppVersion(async () => { calls++; return { ok: true, json: async () => APP }; }, { fresh: true });
+  assert.deepEqual(ok, APP); assert.equal(calls, 1);
+  const again = await loadAppVersion(async () => { throw new Error('must not be called'); });
+  assert.deepEqual(again, APP, 'cached after a success');
+});
+
+test('downloadManifest: hands save() the sidecar name and a JSON blob that hashes the exact payload; never throws or alters the export', async () => {
+  const payload = new Uint8Array([9, 8, 7, 6]), saved = [];
+  const m = await downloadManifest({ kind: 'k', fileName: 'x.png', mime: 'image/png', payload, model, app: APP }, (blob, name) => saved.push({ blob, name }));
+  assert.equal(saved.length, 1); assert.equal(saved[0].name, 'x.png.manifest.json');
+  const body = JSON.parse(await saved[0].blob.text());
+  assert.equal(body.export.sha256, sha(Buffer.from(payload))); assert.deepEqual(body, JSON.parse(JSON.stringify(m)));
+  assert.deepEqual([...payload], [9, 8, 7, 6], 'payload untouched');
+  assert.equal(await downloadManifest({ kind: 'k', fileName: 'x.png', payload, model, app: APP }, () => { throw new Error('browser refused'); }), null, 'a failing save never propagates');
+  assert.equal(await downloadManifest({ kind: '', fileName: '', payload }, () => {}), null, 'bad args never propagate');
 });
 
 test('every export site is wired to the manifest (source-level guard; PDF/print and the project JSON are documented exceptions)', () => {

@@ -3,28 +3,28 @@
   "kind": "dxf",
   "files": [
    "فيلا نموذجية.dxf",
-   "فيلا نموذجية.manifest.json"
+   "فيلا نموذجية.dxf.manifest.json"
   ],
   "hashMatches": true,
   "nameMatches": true,
   "sourceKind": "studio-document",
   "identity": "NONE",
   "docHash": true,
-  "commit": "959d1dd48ce7d5fbea6cdcdf51d194b9cd3c4a8b",
+  "commit": "4fc79eed683c9a6192ab5cdfaf562e0ab950a137",
   "bytes": true
  },
  {
   "kind": "png",
   "files": [
    "فيلا نموذجية-plan.png",
-   "فيلا نموذجية-plan.manifest.json"
+   "فيلا نموذجية-plan.png.manifest.json"
   ],
   "hashMatches": true,
   "nameMatches": true,
   "sourceKind": "studio-document",
   "identity": "NONE",
   "docHash": true,
-  "commit": "959d1dd48ce7d5fbea6cdcdf51d194b9cd3c4a8b",
+  "commit": "4fc79eed683c9a6192ab5cdfaf562e0ab950a137",
   "bytes": true
  }
 ] pageerrors: 0 []

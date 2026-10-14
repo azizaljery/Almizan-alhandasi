@@ -3,13 +3,13 @@
 import { pathToFileURL } from 'node:url';
 export function compareVersion(live, expected) {
   const commit = typeof live?.commit === 'string' ? live.commit : null;
-  if (!commit) return { ok: false, reason: 'no-commit-in-version-json', live: commit, expected };
+  if (!commit || commit === 'unknown') return { ok: false, reason: 'no-commit-in-version-json', live: commit, expected }; // build.mjs writes 'unknown' when git is unavailable: never a match
   if (!expected) return { ok: false, reason: 'no-expected-commit', live: commit, expected };
   const ok = commit === expected || (expected.length >= 7 && commit.startsWith(expected));
   return { ok, reason: ok ? 'match' : 'mismatch', live: commit, expected, builtAt: live.builtAt ?? null };
 }
 export async function readLive(base, fetchImpl = fetch) {
-  const r = await fetchImpl(`${base.replace(/\/$/, '')}/version.json?v=${Date.now()}`, { headers: { 'cache-control': 'no-cache' } });
+  const r = await fetchImpl(`${base.replace(/\/$/, '')}/version.json?v=${Date.now()}`, { headers: { 'cache-control': 'no-cache' }, signal: AbortSignal.timeout(15000) });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return r.json();
 }

@@ -1,6 +1,7 @@
 // T-05 / F-002 — area truth. Footprint area is the area of the REAL polygon (shoelace), never the bounding box.
 // Reference values (plot 35x45, default program) were measured by the audit (audit/phase1/geometry-consistency.audit.mjs)
 // and are pinned here so that any change to the generators or to quantities() is a visible, deliberate decision.
+// KNOWN GAP (review #2): the non-v2 branch of quantities() (model.builtArea ?? building.w*building.h, planner.mjs) is not covered — every generator now emits v2 models.
 // This test observes only; it does not change the generator. If a value differs, STOP and record it — do not retune the numbers.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -57,7 +58,9 @@ test('F-002 U: the courtyard equals the bbox overstatement (bbox − polygon) �
   near(q.courtyard, 34.55, 'courtyard reference');
 });
 
-test('F-002: the pinned legacy compat layer (dist/claude, read-only) agrees with the production quantities()', async () => {
+// NOTE (independent review #1): production quantities() delegates v2 models to the same function the compat layer exposes, so this is a
+// delegation-consistency check, NOT independent evidence. The independent evidence is the shoelace/reference assertions above.
+test('F-002: delegation consistency — the pinned compat layer (dist/claude, read-only) and production quantities() agree for v2 models', async () => {
   for (const shape of ['rect', 'l', 'u']) {
     const g = await geometryFor(shape);
     near(pinnedQuantities(g).footprint, quantities(g).footprint, `${shape} pinned vs production`);

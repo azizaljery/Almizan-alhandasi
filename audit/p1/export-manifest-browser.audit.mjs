@@ -17,7 +17,7 @@ for (const kind of ['dxf', 'png']) {
   const names = await pg.evaluate(() => window.__dl.slice()); files.forEach((f, i) => { f.name = names[i]; });
   const main = files.find((f) => !f.name.endsWith('.manifest.json')), man = files.find((f) => f.name.endsWith('.manifest.json'));
   const m = man ? JSON.parse(man.bytes.toString('utf8')) : null;
-  results.push({ kind, files: files.map((f) => f.name), hashMatches: !!(main && m && m.export.sha256 === crypto.createHash('sha256').update(main.bytes).digest('hex')), nameMatches: !!(main && m && m.export.fileName === main.name && man.name === main.name.replace(/\.[^.]+$/, '') + '.manifest.json'),
+  results.push({ kind, files: files.map((f) => f.name), hashMatches: !!(main && m && m.export.sha256 === crypto.createHash('sha256').update(main.bytes).digest('hex')), nameMatches: !!(main && m && m.export.fileName === main.name && man.name === main.name + '.manifest.json'),
     sourceKind: m?.source.sourceKind, identity: m?.source.identityStatus, docHash: /^[a-f0-9]{64}$/.test(m?.source.documentSha256 || ''), commit: m?.app.commit, bytes: m?.export.bytes === main?.bytes.length });
 }
 console.log(JSON.stringify(results, null, 1), 'pageerrors:', errs.length, errs.slice(0, 2));

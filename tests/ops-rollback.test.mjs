@@ -14,7 +14,7 @@ test('runbook is tied to the real worker/workflow and states the key limits hone
   const name = wrangler.match(/^name\s*=\s*"([^"]+)"/m)[1];
   assert.ok(doc.includes('npx wrangler rollback') && doc.includes(name));
   assert.match(workflow, /wrangler@4 deploy/, 'the documented deploy flow is the real one');
-  for (const must of ['لم يُنفَّذ أي rollback حقيقي', 'D1', '100', 'git revert', 'verify-live-version', 'غير متحقق']) assert.ok(doc.includes(must), must);
+  for (const must of ['لم يُنفَّذ أي rollback حقيقي', 'D1', '100', 'git revert', 'verify-live-version', 'غير متحقق', 'الأسرار: غير متحقق', 'غير مبيَّن في المستودع']) assert.ok(doc.includes(must), must);
   assert.ok(!/CLOUDFLARE_API_TOKEN\s*=\s*\S+/.test(doc), 'no secret values in the runbook');
 });
 
@@ -26,6 +26,7 @@ test('compareVersion: match, prefix match, mismatch, and missing data never pass
   assert.equal(compareVersion({}, 'abc1234').ok, false);
   assert.equal(compareVersion(live, '').ok, false);
   assert.equal(compareVersion(live, 'abc').ok, false, 'a 3-char prefix is not accepted');
+  assert.equal(compareVersion({ commit: 'unknown' }, 'unknown').ok, false, "build.mjs writes 'unknown' without git: never a match");
 });
 
 // async spawn: a sync spawn would block the in-process server and deadlock
