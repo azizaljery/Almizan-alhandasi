@@ -3,6 +3,7 @@ import { normalizeRooms, validateModel, validatePlot } from '../dist/planner.mjs
 import { buildPlanSVG } from '../dist/plan-view.mjs';
 import { estimate, quantityRows } from '../dist/estimates.mjs';
 import { GEOMETRY_POLICY_VERSION, geometryFingerprint, topologyFor } from './archive-canonical.mjs';
+import { resolveOwner } from './identity.mjs';
 
 const API = '/api/archive';
 const MAX_BODY_BYTES = 1_400_000;
@@ -561,8 +562,8 @@ async function deleteDesign(db, owner, id, raw) {
 async function routeApi(request, env) {
   const url = new URL(request.url), path = url.pathname;
   if (!path.startsWith(`${API}/`)) return null;
-  // Sites forwards this stable per-Site user ID for signed-in requests. Email is display-only.
-  const owner = cleanIdentity(request.headers.get('oai-authenticated-user-id'));
+  // الهوية من رمز Cloudflare Access الموقَّع (أو ترويسة Sites عند TRUST_SITES_HEADER=1 فقط).
+  const owner = cleanIdentity(await resolveOwner(request, env));
   if (path === `${API}/session` && request.method === 'GET') {
     try {
       requireDb(env);
@@ -575,7 +576,7 @@ async function routeApi(request, env) {
     }
   }
   try {
-    if (!owner) return errorResponse('sign_in_required', 401, 'سجّل الدخول إلى ChatGPT لفتح أرشيف حسابك.');
+    if (!owner) return errorResponse('sign_in_required', 401, 'سجّل الدخول لفتح أرشيف حسابك.');
     const db = requireDb(env);
     if (request.method === 'GET' && path === `${API}/designs`) return await listDesigns(db, owner, url);
     if (request.method === 'POST' && path === `${API}/designs`) {

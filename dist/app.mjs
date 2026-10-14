@@ -1,7 +1,9 @@
+import { presentationPenalty, ensuiteCoverage, explainPresentationPenalty, PRESENTATION_PENALTY_VERSION } from './ensuite.mjs';
+import { renderTransparencyPanel } from './transparency.mjs';
 import { createStudioSession, normalizeStudioSession, beginStudioOperation, isCurrentStudioOperation, cancelStudioOperation, bindStudioRevision, appendStudioMessage, acceptStudioUnderstanding, approveStudioRevision, invalidateStudioApproval, setStudioDraft } from './studio-session.mjs';
 import { diffRoomPrograms } from './design-dialog.mjs';
 import { createGeometrySession } from './geometry-session.mjs';
-import { eligiblePartitions } from './geometry-editor.mjs';
+import { eligiblePartitions, eligibleRoomMoves, eligibleRoomResizes } from './geometry-editor.mjs';
 import { initGeometryEditor } from './geometry-editor-ui.mjs';
 import { buildClientBrief, applyBriefChoices } from './client-brief.mjs';
 import { TYPES, POSITIONS, SIDES, DIRECTIONS, STRATEGIES, CONCEPT_PROFILES, validatePlot, validateModel, footprint, defaultRooms, normalizeRooms, generateAlternatives, quantities, placeOpening, removeOpening } from './planner.mjs';
@@ -29,6 +31,9 @@ import { analyzeSurveyGeometry, deriveRectangularGeneratorPlot, surveyFingerprin
 import { initLandSurveyEditor } from './land-map.mjs';
 import { archiveRequestSignature, pendingArchiveKey } from './archive-request.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
+import { initSunDayUI } from './sun-day-ui.mjs';
+import { initCompare3D } from './compare3d.mjs';
+import { initAutoTourUI } from './tour-recorder-ui.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
@@ -41,6 +46,8 @@ let viewport, viewer, toastTimer, loading3D, circulation, clientBrief, studioPro
 let geometrySession, geometryUI, geometrySource, geometryPending, geometryCommandId = 0, modelEpoch = 0, renderedModel, geometryAlternativePool = [];
 let studioPending = null, studioOperationContext = null, studioAbort = null, generationSequence = 0, studioRestoring = false;
 const emitStudioState = reason => window.dispatchEvent(new CustomEvent('mizan:studio-state', { detail: { reason } }));
+// قراءة فقط لطبقة لوحة العرض: النموذج الحالي إن كان مطابقًا للمدخلات، وإلا null.
+window.mizanPresentation = Object.freeze({ currentModel: () => (state.model && !state.dirty ? state.model : null) });
 const studioInputStamp = () => JSON.stringify([requestFingerprint(requestInput()), state.palette]);
 const studioSceneVisible = () => state.tab === 'result' || (state.tab === 'design' && $('app').classList.contains('studio-simple-mode'));
 function assertStudioOperation(token) {
@@ -155,8 +162,8 @@ function syncWorkspace() {
   $('snapshotStatus').textContent = !state.model ? 'لم يُولد بعد' : state.dirty ? 'يحتاج تحديثًا' : 'مطابق للجدول';
   $('resultEmpty').hidden = !!state.model; $('reviewEmpty').hidden = !!state.model; $('reviewContent').hidden = !state.model;
   $('requestCharacters').textContent = `${$('idea').value.length} / 4000`;
-  if (state.requestProposal) $('applyRequest').disabled = state.requestProposal.fingerprint !== requestFingerprint(requestInput()) || !state.requestProposal.rooms.length || !!state.requestProposal.questions.length;
-  const proposalCurrent = !!state.proposal?.rooms.length && state.proposalFingerprint === requestFingerprint(requestInput()) && !state.proposal.questions.length;
+  if (state.requestProposal) $('applyRequest').disabled = state.requestProposal.fingerprint !== requestFingerprint(requestInput()) || !state.requestProposal.rooms.length;
+  const proposalCurrent = !!state.proposal?.rooms.length && state.proposalFingerprint === requestFingerprint(requestInput());
   $('acceptAI').disabled = !proposalCurrent; $('drawAI').disabled = !proposalCurrent;
   if (state.model) renderRequestMatch();
   renderLandSurveySummary();
@@ -245,7 +252,7 @@ async function understandRequest(operation = null) {
 function applyRequest() {
   const result = state.requestProposal; if (!result) return;
   if (result.fingerprint !== requestFingerprint(requestInput())) return message('requestFeedback', 'تغيّرت المدخلات بعد القراءة؛ اضغط «افهم طلبي» مرة أخرى.');
-  if (result.questions.length || !result.rooms.length) return;
+  if (!result.rooms.length) return;
   try {
     const plot = validatePlot({ ...rawPlot(), ...result.plotPatch }); normalizeRooms(result.rooms);
     const binding = state.landSurvey?.engineLink === 'survey-rectangle' ? state.landSurvey.binding : null;
@@ -313,6 +320,28 @@ function restoreSolarSettings() {
 function currentSolarPreview() {
   return siteSolarPreview(state.siteSolar,{model:state.model,modelLandSurvey:state.modelLandSurvey,modelSurveyAssociated:state.modelSurveyAssociated});
 }
+let autoTourUI = null;
+function autoTourControls() {
+  if (autoTourUI || !$('autoTourBox')) return;
+  autoTourUI = initAutoTourUI({ root: $('autoTourBox'), getViewer: () => viewer, getRooms: () => prepareTour(),
+    ensure3D: async () => { if (state.studioMode !== '3d') setStudioMode('3d'); return await show3D(); } });
+}
+let compare3D = null;
+function compare3DControls() {
+  if (compare3D || !$('compare3d')) return;
+  compare3D = initCompare3D({ root: $('compare3d'), ViewerClass: RoomViewer, getAlternatives: () => state.alternatives, getCurrent: () => state.model, getPalette: () => state.palette,
+    ensureThree: () => loadThree(), describe: (model, index) => {
+      const q = quantities(model), tag = model.architecture?.tag;
+      return { title: 'البديل ' + (index + 1) + (tag ? ' · ' + tag : '') + (model === state.model ? ' (المعروض)' : ''),
+        summary: `ممرات ${fmt(q.circulation, 1)} م² · نوافذ ${fmt(q.windows, 0)} · أبواب ${fmt(q.doors, 0)}` };
+    }, onNotice: text => message('threeError', text) });
+}
+let sunDayUI = null;
+function sunDayControls() {
+  if (sunDayUI || !$('sunDay')) return;
+  sunDayUI = initSunDayUI({ root: $('sunDay'), getModel: () => state.model, getInstant: () => $('solarInstant').value.trim(),
+    setInstant: value => { $('solarInstant').value = value; $('solarInstant').dispatchEvent(new Event('input', { bubbles: true })); } });
+}
 function renderSolarPreview() {
   try {
   const preview=currentSolarPreview();
@@ -321,7 +350,7 @@ function renderSolarPreview() {
   $('sunInfo').textContent=preview.status==='not-calculated'?'غير محسوب · '+preview.reason:
     `حساب شمسي هندسي تقريبي · المصدر: ${state.siteSolar.source==='explicit-user'?'إحداثيات أدخلها المستخدم':'أول نقطة من حدود مسح المخطط المرتبط'} · ${preview.provenance.latitude}، ${preview.provenance.longitude} · الوقت ${state.siteSolar.instant} · زاوية الشمال ${state.siteSolar.northAngleDeg}°. `+
     (preview.visible?`ارتفاع الشمس ${fmt(preview.altitude)}° · ${preview.azimuth==null?'الشمس رأسية؛ السمت غير معرّف':`السمت الحقيقي ${fmt(preview.azimuth)}°`} · ظل كتلة ٣٫٢م ${fmt(preview.shadowLength)}م. قد يمتد خارج العرض.`:'الشمس تحت الأفق؛ لا ضوء أو ظل شمسي مباشر.');
-  viewport?.showSolar(preview,$('showShadow')?.checked);viewer?.setSun?.(preview);
+  viewport?.showSolar(preview,$('showShadow')?.checked);viewer?.setSun?.(preview);if(typeof sunDayUI!=='undefined')sunDayUI?.update(preview);
   } catch (error) { $('sunInfo').textContent=error.message;viewport?.showSolar(null,false);viewer?.setSun?.({visible:false,status:'not-calculated'}); }
 }
 function programTotal() {
@@ -344,7 +373,10 @@ function selectRoom(id) {
 }
 function syncRoomEditor(room = state.model?.rooms.find(r => r.id === state.selected)) {
   const form = $('roomEditForm'); if (!form || !room) return;
-  const index = state.program.findIndex(r => r.id === room.id); if (index < 0) return;
+  // أرقام المعرّفات تُشتق من ترتيب البرنامج نفسه عند التوليد (room-0, room-1, …)؛
+  // لا يحمل state.program معرّفات (ليبقى متوافقًا مع صيغة حفظ المشروع)، فنشتق الفهرس من المعرّف مباشرة.
+  const index = /^room-\d+$/.test(room.id || '') ? Number(room.id.slice(5)) : -1;
+  if (index < 0 || index >= state.program.length) return;
   const program = state.program[index]; form.hidden = !state.editor.open; $('roomEditTitle').textContent = `الغرفة: ${program.name}`; $('roomEditName').value = program.name; $('roomEditArea').value = program.area; $('roomEditArea').disabled = !!program.dimensions; $('roomEditWidth').value = program.dimensions?.width ?? ''; $('roomEditLength').value = program.dimensions?.length ?? ''; $('roomEditPosition').innerHTML = options(POSITIONS, program.position); $('roomEditSide').innerHTML = options(SIDES, program.side); form.dataset.roomIndex = index;
 }
 function drawRoute() {
@@ -353,9 +385,13 @@ function drawRoute() {
   $('routeInfo').textContent = path ? `من المدخل إلى باب الغرفة عبر محاور الممرات: ${fmt(path.metres)} م. المسار لا يثبت استقلال الحركة أو صلاحية الإخلاء.` : 'لا يوجد مسار ممر موثق لهذه الغرفة.';
 }
 function on3DMode(mode, detail) {
-  $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside';
+  $('walkControls').hidden = mode !== 'inside'; $('roof').disabled = mode === 'inside'; $('analyticsOverlay').disabled = mode === 'inside';
   if (mode === 'inside') { $('roof').checked = false; $('viewMode').textContent = 'داخل ' + detail + ' · السقف مخفي للمشاهدة · مستوى النظر 1.6 م · ليست محاكاة إضاءة تحت سقف مغلق'; }
-  else { $('roof').checked = viewer?.roof?.visible || false; $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + ' · تصور غير تنفيذي'; }
+  else {
+    $('roof').checked = viewer?.roof?.visible || false;
+    const sectional = detail === 'top' && !$('roof').checked;
+    $('viewMode').textContent = 'منظور ' + ({ top: 'علوي', front: 'أمامي', persp: 'خارجي' }[detail] || 'خارجي') + (sectional ? ' — قطاع أفقي؛ السقف مخفي لرؤية الغرف' : '') + ' · تصور غير تنفيذي';
+  }
   $('tourState').textContent = mode === 'inside' ? `داخل ${detail}` : 'منظور عام';
   all('[data-view]').forEach(button => { button.classList.toggle('on', mode === 'orbit' && button.dataset.view === detail); button.setAttribute('aria-pressed', String(mode === 'orbit' && button.dataset.view === detail)); });
 }
@@ -387,7 +423,7 @@ async function show3D(retry = false) {
     const showRoof = viewer?.mode === 'inside' ? viewer.roofChoice : $('roof').checked;
     if (retry && viewer?.contextLost) { viewer.destroy(); viewer = null; }
     if (!viewer) viewer = new RoomViewer($('view'), on3DMode, { onState: on3DState });
-    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); renderSolarPreview();
+    viewer.setVisible(studioSceneVisible() && state.studioMode === '3d'); viewer.setModel(state.model, state.palette); viewer.setRoof(showRoof); $('roof').checked = showRoof && viewer.mode !== 'inside'; viewer.setAnalytics($('analyticsOverlay').checked); $('view').dataset.geometryRevision = String(state.model.geometryRevision || 0); renderSolarPreview();
     if (viewer.contextLost) { on3DState({ status: 'context-lost', message: 'توقف عرض 3D مؤقتًا؛ المخطط الحالي محفوظ ويمكن متابعة 2D أو إعادة المحاولة.' }); return false; }
     on3DState({ status: 'ready' }); return true;
   } catch (error) { if (requestedModel !== state.model || requestedEpoch !== modelEpoch) return false; message('threeError', error.message); $('retry3D').hidden = false; $('viewMode').textContent = '3D غير متاح حاليًا — يمكنك مراجعة 2D'; return false; }
@@ -479,6 +515,8 @@ function syncGeometryEditor() {
     host: $('geometryEditorHost'), getSvg: () => viewport?.svg, getModel: () => state.model,
     getHistory: () => geometrySession.getState(),
     getPartitions: () => eligiblePartitions(state.model, { landSurvey: state.modelLandSurvey }),
+    getRoomMoves: () => eligibleRoomMoves(state.model, { landSurvey: state.modelLandSurvey }),
+    getRoomResizes: () => eligibleRoomResizes(state.model, { landSurvey: state.modelLandSurvey }),
     onPreview: operation => {
       if (state.dirty) throw Error('راجع اختلاف المدخلات عن المخطط قبل التحرير الهندسي.');
       geometryPending = geometrySession.preview({ ...operation, id: `geometry-command-${++geometryCommandId}`, baseRevision: geometrySession.getState().revision });
@@ -553,6 +591,8 @@ function renderGeminiReview() {
     $('geminiMetrics').replaceChildren(); $('geminiPatterns').textContent = '—';
     $('geminiFindings').innerHTML = '<li>لا تتوفر نتائج قابلة للعرض.</li>';
     $('geminiCoverage').textContent = 'لم تبدأ المراجعة.';
+    $('geminiRegulatory').replaceChildren();
+    $('geminiHeuristics').textContent = '';
     renderGeminiMarkers();
     return;
   }
@@ -583,6 +623,14 @@ function renderGeminiReview() {
   const labels = { referenceComparison: 'المرجع المحقق', structuralSystem: 'الإنشاء', soil: 'التربة', electricalLayout: 'الكهرباء', plumbingRouting: 'السباكة', hvacSystem: 'نظام التكييف', crossDisciplineClashes: 'التعارضات الهندسية', statutoryCompliance: 'المطابقة النظامية' };
   const unavailable = Object.entries(review.coverage).filter(([, value]) => value === 'NOT_EVALUATED').map(([key]) => labels[key] || key);
   $('geminiCoverage').textContent = unavailable.length ? `غير مُقيّم: ${unavailable.join('، ')}. الحركة مقاسة من الرسم، والأنماط والأحمال تقديرات إرشادية.` : 'اكتملت التغطية المتاحة من المخطط.';
+  const regulatoryRows = Array.isArray(review.regulatory) ? review.regulatory : [];
+  $('geminiRegulatory').innerHTML = regulatoryRows.length
+    ? renderRequirementEvidenceHTML({ rows: regulatoryRows })
+    : '<p class="help">لم تُستدعَ أي قاعدة مصنّفة كاستشهاد كود نظامي (SBC) لهذا المخطط.</p>';
+  const heuristicRules = Array.isArray(review.heuristicRules) ? review.heuristicRules : [];
+  $('geminiHeuristics').textContent = heuristicRules.length
+    ? 'قواعد داخلية غير نظامية استُخدمت في هذه القراءة (أدلة ممارسة لا كود): ' + heuristicRules.join(' | ')
+    : 'لا توجد قواعد داخلية غير نظامية مرتبطة بهذا المخطط.';
   renderGeminiMarkers();
 }
 function refreshEngineering() {
@@ -623,20 +671,54 @@ function renderEngineeringReview() {
   $('engineeringLimit').textContent = 'هذه قراءة قرارية مبدئية من محرك الميزان؛ لا تُعد تصميمًا إنشائيًا أو اعتمادًا نظاميًا.';
 }
 function renderAlternatives() {
-  $('alternativeCards').innerHTML = state.alternatives.map((model, index) => {
-    const q = quantities(model), review = reviewPlan(model), selected = model === state.model;
-    const concept = model.architecture || CONCEPT_PROFILES[model.strategy || 'compact'];
-    const title = model.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[model.strategy || 'compact'];
-    const tag = concept.tag === 'Claude 2.2.1' ? 'مسقط مستطيل' : concept.tag;
+  // عرض يخدم حاجة العميل: ترتيب البدائل بقياسات حقيقية من المحرك، وتسميتها بميزتها لا بشكلها الهندسي.
+  const rows = state.alternatives.map((model, index) => {
     const evaluation = state.engineering?.rows?.[index]?.evaluation;
+    return { model, index, q: quantities(model), review: reviewPlan(model), evaluation,
+      score: Number.isFinite(evaluation?.score) ? evaluation.score : null, blockers: evaluation?.blockers?.length ?? 0 };
+  });
+  rows.forEach(row => { row.penaltyDetail = explainPresentationPenalty(row.model); row.penalty = row.penaltyDetail.penalty; row.suites = ensuiteCoverage(row.model); });
+  const order = [...rows].sort((x, y) => x.blockers - y.blockers || x.penalty - y.penalty || (y.score ?? -1) - (x.score ?? -1) || x.q.circulation - y.q.circulation);
+  const minCirc = Math.min(...rows.map(r => r.q.circulation)), minDark = Math.min(...rows.map(r => r.review.occupiedWithoutWindows));
+  const used = new Set();
+  const nameOf = (row, rank) => {
+    const options = rank === 0 ? ['الأنسب لطلبك'] : [];
+    if (row.suites.wanted && row.suites.linked === row.suites.wanted) options.push('حمام داخل كل غرفة نوم');
+    if (row.q.circulation === minCirc) options.push('أقل ممرات');
+    if (row.review.occupiedWithoutWindows === minDark) options.push('إضاءة طبيعية أفضل');
+    options.push(`خيار آخر ${rank + 1}`);
+    const label = options.find(o => !used.has(o)) || `خيار ${rank + 1}`; used.add(label); return label;
+  };
+  const labels = new Map(order.map((row, rank) => [row.index, nameOf(row, rank)]));
+  const card = (row, rank) => {
+    const { model, index, q, review, evaluation } = row, selected = model === state.model, title = labels.get(index);
     const engineering = evaluation ? `قرار الميزان ${assessedText(evaluation.score)} من ١٠٠ جزئي · ${fmt(evaluation.blockers.length, 0)} عوائق.` : '';
-    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>${esc(title)}</strong><small>${esc(tag)}</small></span></button><details class="alternative-details"><summary aria-label="تفاصيل البديل">تفاصيل</summary><div><p>${esc(title)} · ${esc(concept.form)}. ${esc(concept.idea)}</p><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p><p><b>يناسب:</b> ${esc(concept.bestFor)} · <b>المقايضة:</b> ${esc(concept.tradeoff)}</p></div></details></article>`;
-  }).join('');
-  $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} بدائل هندسية · التحديد يحدّث المسقط و3D والكميات`;
-  const failed = state.failures.map(f => `${f.strategy === 'claude-rect' ? 'توزيع متوازن' : STRATEGIES[f.strategy] || 'أحد البدائل'}: ${f.reason}`).join(' ');
-  const search = state.multiEngine?.searchEvidence;
-  const explanation = search ? `جُرّبت ${search.attempted} محاولة؛ تعذرت هندسة ${search.generationRejected}، واستُبعد ${search.excludedHistory} للتشابه مع التاريخ و${search.excludedBatch} للتشابه داخل الدفعة و${search.reviewRejected} عند المراجعة. الحد الأقصى ستة وليس عددًا مضمونًا. البحث محدود ولا يثبت استحالة حلول أخرى.` : '';
-  $('alternativeNote').textContent = `${state.alternatives.length} بدائل معروضة من البرنامج نفسه. الاختلاف مقاس بالهندسة، ولا يثبت وحده اختلاف التنظيم أو جودة التصميم. ${explanation} ${failed}`;
+    return `<article role="listitem" class="alternative-card${selected ? ' selected' : ''}${rank === 0 ? ' best' : ''}"><button class="alternative-pick" data-alternative="${index}" aria-pressed="${selected}" aria-label="${selected ? 'التخطيط المعروض' : 'اعرض'} ${esc(title)}"><span class="alternative-preview">${conceptThumbnail(model)}</span><span class="alternative-copy"><strong>${esc(title)}</strong></span></button><details class="alternative-details"><summary aria-label="تفاصيل الخيار">تفاصيل</summary><div><p>الممرات ${fmt(q.circulation)} م² · غير موزّع ${fmt(q.reserve)} م² · فراغات بلا نافذة خارجية ${fmt(review.occupiedWithoutWindows, 0)}.</p><p>${esc(engineering)}</p></div></details></article>`;
+  };
+  $('alternativeCards').innerHTML = order.slice(0, 3).map(card).join('') + (order.length > 3
+    ? `<details class="more-alternatives"><summary>عرض خيارات أخرى (${fmt(order.length - 3, 0)})</summary><div class="more-alternatives-grid">${order.slice(3).map((row, i) => card(row, i + 3)).join('')}</div></details>` : '');
+  $('alternativesCount').textContent = `${fmt(state.alternatives.length, 0)} خيارات مرتبة حسب ملاءمتها لطلبك · اختيار أي منها يحدّث المسقط و3D والكميات`;
+  $('alternativeNote').textContent = 'الخيارات من برنامجك نفسه، والترتيب بقياسات حسابية مبدئية؛ لا يغني عن المراجعة الهندسية.';
+  if (typeof compare3D !== 'undefined') compare3D?.refresh();
+  const selectionTransparency = $('selectionTransparency');
+  if (selectionTransparency && order.length) {
+    const best = order[0];
+    selectionTransparency.innerHTML = renderTransparencyPanel({
+      name: 'ترتيب البدائل واختيار «الأنسب لطلبك»',
+      inputs: order.map((row, rank) => ({
+        label: `الترتيب ${rank + 1} — ${labels.get(row.index)}`,
+        value: `عوائق ${row.blockers}، عقوبة عرض ${fmt(row.penalty, 1)} (حمامات غير متصلة ${fmt(row.penaltyDetail.ensuitePenalty, 0)} + تناسب الغرف ${fmt(row.penaltyDetail.proportionPenalty, 1)})، قرار الميزان ${assessedText(row.score)}، ممرات ${fmt(row.q.circulation, 1)} م²`,
+      })),
+      formula: 'ترتيب تصاعدي حسب: (١) عدد عوائق محرك القرار الهندسي، ثم (٢) «عقوبة العرض» = (عدد حمامات غرف النوم غير المتصلة بغرفتها × ١٠) + حدّ أعلى(٠، أسوأ نسبة طول إلى عرض لغرفة رئيسية − ١.٦)، ثم (٣) قرار الميزان تنازليًا، ثم (٤) أقل مساحة ممرات. أول بديل في هذا الترتيب هو «الأنسب لطلبك».',
+      formulaVersion: PRESENTATION_PENALTY_VERSION,
+      result: `«الأنسب لطلبك»: ${labels.get(best.index)} — عقوبة عرض ${fmt(best.penalty, 1)}، ${best.blockers} عوائق.`,
+      effect: 'هذا الترتيب يحدد أي بديل يصبح المخطط الافتراضي المعروض في المسقط والعرض الثلاثي والكميات مباشرة بعد التوليد، وأي بديل يحمل تسمية «الأنسب لطلبك». كل البدائل الأخرى تبقى متاحة للاختيار اليدوي من البطاقات أعلاه.',
+      assumptions: ['«عقوبة العرض» تفترض أن حمامًا متصلًا مباشرة بغرفة نومه وغرفًا رئيسية أقرب إلى المربع أفضل تجربة للعميل من أي معيار آخر غير محسوب هنا (كاتجاه الغرفة أو الخصوصية الفعلية).'],
+      missingData: ['لا تُقاس تفضيلات العميل النصية الحرة في هذا الترتيب؛ انظر لوحة «مطابقة طلبك» لمقارنة التفضيلات المقاسة بدلًا من ذلك.'],
+      limits: ['عقوبة العرض مقياس هندسي بسيط (اتصال حمام وتناسب أبعاد)؛ لا تقيس الإضاءة أو الخصوصية أو كفاءة التوزيع ولا تحل محل قرار الميزان أو مطابقة الطلب.', 'عند تساوي عدد العوائق وعقوبة العرض، يُفضَّل قرار الميزان الأعلى ثم أقل مساحة ممرات؛ هذا ترتيب حسابي مبدئي وليس توصية هندسية معتمدة.'],
+      testedCases: ['مُغطّى باختبارات تلقائية في tests/ensuite.test.mjs: حمامات متصلة بالكامل، حمامات غير متصلة جزئيًا، وغرف بنسب طول/عرض متفاوتة.'],
+    });
+  } else if (selectionTransparency) selectionTransparency.innerHTML = '';
   markDirty();
 }
 function renderRequirementEvidence() {
@@ -649,6 +731,12 @@ function renderRequirementEvidence() {
       program: Array.isArray(context?.program) ? context.program : undefined,
       plot: context?.plot || null,
       idea: context?.idea || '', discovery: context?.discovery || {}, briefContext: context?.briefContext || null,
+      // Wadi Hanifah's T4.1 urban code is more specific (a narrow corridor inside
+      // Riyadh) than the general ministerial decision, so it takes priority if both
+      // are somehow checked at once; the change listeners below also keep the two
+      // mutually exclusive in the UI itself.
+      jurisdiction: $('jurisdictionWadiHanifah')?.checked ? 'wadi-hanifah-t4-1'
+        : $('jurisdictionRiyadh')?.checked ? 'riyadh-momah-1446h' : null,
     });
     const labels = [
       ['ENFORCED', 'مطابق في الرسم'], ['MEASURED', 'مقاس دون حكم'], ['NOT_MET', 'غير مستوفى'],
@@ -697,13 +785,33 @@ function renderMizanScore() {
   $('mizanScoreAxes').innerHTML = result.axes.map(axis => `<div class="insight"><div><span>${esc(axis.label)} <small>(وزن ${axis.weight})</small></span><b>${assessedText(axis.score)}</b></div><p>${esc(axis.detail)}</p></div>`).join('');
   $('mizanScoreNotes').innerHTML = `<li>نقاط القوة: ${esc(result.strengths.join('، ') || 'لا توجد نقاط مرتفعة كافية بعد.')}</li><li>نقاط التحسين: ${esc(result.improvements.join('، ') || 'لا توجد محاور منخفضة في هذا الفحص.')}</li><li>عقوبة التنبيهات: ${fmt(result.penalties, 0)} نقطة.</li>`;
   $('mizanScoreLimit').textContent = result.note;
+  const transparency = $('mizanScoreTransparency');
+  if (transparency) {
+    const evaluated = result.axes.filter(axis => axis.score !== null);
+    const missing = result.axes.filter(axis => axis.score === null);
+    transparency.innerHTML = renderTransparencyPanel({
+      name: 'Mizan Score — المقارنة الجزئية',
+      inputs: result.axes.map(axis => ({ label: `${axis.label} (وزن ${axis.weight})`, value: assessedText(axis.score) })),
+      formula: result.formula,
+      formulaVersion: result.formulaVersion,
+      result: `${assessedText(result.score)} / ١٠٠٠`,
+      effect: result.effect,
+      assumptions: evaluated.map(axis => axis.detail),
+      missingData: missing.map(axis => `${axis.label}: ${axis.detail}`),
+      limits: [
+        result.note,
+        'إعادة توزيع الأوزان على المحاور المُقيَّمة فقط تعني أن مخططًا بمحاور قليلة مُقيَّمة قد تختلف درجته الكلية عن مخطط آخر بنفس الأداء الفعلي لكن بمحاور أكثر تقييمًا؛ العدد في «جزئي من ١٢» أعلاه ضروري لقراءة الدرجة بصورة صحيحة.',
+      ],
+      testedCases: ['مُغطّى باختبارات تلقائية في tests/plan-evidence.test.mjs و tests/mizan-score.test.mjs: نموذج متصل بالكامل، ونموذج بمسارات غير مكتملة تُسقط محاور الخصوصية والحركة إلى «غير مُقيّم».'],
+    });
+  }
 }
 function runPlanner(request) {
   if (typeof Worker === 'undefined') return Promise.resolve().then(() => request.integrated ? runMultiEngineDesign(request) : request.projectText !== undefined ? { project: decodeProject(request.projectText) } : generateAlternatives(request.plot, request.rooms, { includeClaude: true }));
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./layout-worker.mjs', import.meta.url), { type: 'module' });
     const finish = (error, result) => { clearTimeout(timer); worker.terminate(); error ? reject(Error(error)) : resolve(result); };
-    const timer = setTimeout(() => finish('استغرق البحث وقتًا أطول من المتاح؛ جرّب برنامجًا أقل أو حدّد جوانب الغرف لتقليل احتمالات التوزيع.'), 25000);
+    const timer = setTimeout(() => finish('استغرق البحث أكثر من دقيقتين؛ أعد تحميل الصفحة وحاول مجددًا، وإن تكرر جرّب برنامجًا أقل أو حدّد جوانب الغرف لتقليل احتمالات التوزيع.'), 120000);
     worker.onmessage = event => finish(event.data.error, event.data);
     worker.onerror = () => finish('تعذّر تشغيل محرك التوزيع في المتصفح. أعد تحميل الصفحة ثم حاول مجددًا.');
     worker.postMessage(request);
@@ -726,14 +834,14 @@ async function generate(options = {}) {
     if (exploration.signature !== currentSignature) { exploration.signature = currentSignature; exploration.previous = []; }
     const sameProgram = model => signature(model.plot, model.program) === signature(plot, rooms);
     const previous = [...exploration.previous, ...state.alternatives.filter(sameProgram), ...state.history.map(entry => entry.model).filter(sameProgram)];
-  const result = await runPlanner({ integrated: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
+  const result = await runPlanner({ integrated: true, ensuite: true, plot, rooms, idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: structuredClone(state.briefContext), selectedShape: state.selectedShape, seed: ++exploration.seed, previous });
     assertStudioOperation(operation);
     if (modelEpoch !== startEpoch || workspaceSignature(rawPlot(), state.program) !== startSignature || engineeringSignature() !== startEngineeringSignature) throw Error('تغيّرت اختياراتك أثناء التوليد؛ لم يتغير المخطط السابق في هذه الجلسة. أعد التوليد من المدخلات الحالية.');
     exploration.previous = [...exploration.previous, ...result.models].slice(-60);
     if (state.model) state.history = [...state.history, historyEntry(state.model, state.palette)].slice(-5);
     state.alternatives = result.models; state.failures = result.failures; state.multiEngine = { searchEvidence: result.searchEvidence, decision: result.decision, aziz: result.aziz, reviews: result.reviews, preferenceRanking: result.preferenceRanking, requestId: result.request.requestId };
     state.siteSolar = rebindSolarContext(state.siteSolar,state.modelLandSurvey,state.landSurvey); restoreSolarSettings();
-    state.model = result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.modelSurveyAssociated = true; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
+    state.model = [...result.models].sort((a, b) => presentationPenalty(a) - presentationPenalty(b))[0] || result.selectedModel; state.modelLandSurvey = state.landSurvey ? structuredClone(state.landSurvey) : null; state.modelSurveyAssociated = true; state.signature = workspaceSignature(plot, rooms, state.modelLandSurvey); state.traceContext = { program: structuredClone(rooms), plot: structuredClone(plot), idea: $('idea').value, discovery: structuredClone(state.discovery), briefContext: state.briefContext ? structuredClone(state.briefContext) : null }; state.program = publicRooms(rooms); state.manualEdits = false; renderRows();
     message('generationError', ''); showResults('generated'); switchTab($('app').classList.contains('studio-simple-mode') && !$('app').classList.contains('studio-advanced-open') ? 'design' : 'result');
     $('out').scrollIntoView({ behavior: 'smooth', block: 'start' }); toast(`وجدنا ${fmt(result.models.length, 0)} بدائل مختلفة مع الحفاظ على برنامجك ومساحاتك.`);
     return { model: structuredClone(state.model), alternatives: structuredClone(state.alternatives), failures: structuredClone(state.failures), operationId: operation?.id || null };
@@ -831,7 +939,7 @@ function showBrief(brief, limitations = [], context = null) {
   $('aiReview').hidden = false; syncWorkspace();
 }
 async function drawFromAIProposal(options = {}) {
-  if (!state.proposal?.rooms.length || state.proposal.questions.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم أو يحتاج إجابة؛ أعد التحليل قبل الاعتماد.');
+  if (!state.proposal?.rooms.length || state.proposalFingerprint !== requestFingerprint(requestInput())) { const text = 'الاقتراح قديم؛ أعد التحليل قبل الاعتماد.'; message('aiFeedback', text); message('generationError', text); return; }
   state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true;
   toast('اعتمد برنامج الذكاء؛ جارٍ الآن رسم البدائل والتحقق منها هندسيًا.');
   return generate(options);
@@ -908,7 +1016,7 @@ function renderArchiveControls() {
   const status = $('archiveStatus');
   let text, kind = 'info';
   if (!archive.storageReady) { text = archive.notice || 'الأرشيف غير متاح الآن. تبقى التعديلات في هذه الصفحة ويمكنك تنزيل ملف المشروع.'; kind = archive.notice ? 'error' : 'info'; }
-  else if (!archive.authenticated) { text = 'سجّل الدخول إلى ChatGPT لعرض تصاميم حسابك وحفظها.'; }
+  else if (!archive.authenticated) { text = 'سجّل الدخول لعرض تصاميم حسابك وحفظها.'; }
   else if (!state.model) { text = 'ولّد مخططًا أولًا، ثم احفظ نسخة الحساب قبل تنزيل الرسم أو الكميات.'; }
   else if (state.dirty) { text = 'حدّث المخطط بعد تعديل المدخلات، ثم احفظ النسخة الجديدة في الأرشيف.'; }
   else if (current) { text = archive.notice || `المخطط الحالي محفوظ في الحساب${archive.loadedVersion ? ` · النسخة ${archive.loadedVersion}` : ''}.`; kind = 'ready'; }
@@ -1163,7 +1271,8 @@ function boot() {
       (Math.abs(number('wid') - state.landSurvey.binding.width) > 1e-8 || Math.abs(number('len') - state.landSurvey.binding.length) > 1e-8)) unlinkSurveyRectangle();
     rating(); markDirty();
   }));
-  ['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
+  sunDayControls();compare3DControls();autoTourControls();
+['solarSource','solarLatitude','solarLongitude','solarInstant','solarNorth','solarNorthConfirmed'].forEach(id => $(id).addEventListener('input', () => { if(['solarSource','solarLatitude','solarLongitude','solarNorth'].includes(id))$('solarNorthConfirmed').checked=false; state.siteSolar=readSolarSettings(); renderSolarPreview(); markDirty(); }));
   $('roomRows').addEventListener('input', e => {
     const field = e.target.dataset.field, row = e.target.closest('[data-row]'); if (!field || !row) return;
     const program = state.program[Number(row.dataset.row)];
@@ -1258,6 +1367,14 @@ function boot() {
   $('editorRoomProgram').addEventListener('click', () => { state.editor.open = false; syncPlanEditor(); document.querySelector('.program-table')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast('عدّل الغرف والمساحات من الجدول ثم ولّد نسخة محدثة من المخطط.'); });
   $('roomSelect').addEventListener('change', () => selectRoom($('roomSelect').value));
   $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview); $('showGemini').addEventListener('change', renderGeminiMarkers);
+  $('jurisdictionRiyadh')?.addEventListener('change', () => {
+    if ($('jurisdictionRiyadh')?.checked && $('jurisdictionWadiHanifah')) $('jurisdictionWadiHanifah').checked = false;
+    renderRequirementEvidence();
+  });
+  $('jurisdictionWadiHanifah')?.addEventListener('change', () => {
+    if ($('jurisdictionWadiHanifah')?.checked && $('jurisdictionRiyadh')) $('jurisdictionRiyadh').checked = false;
+    renderRequirementEvidence();
+  });
   $('saveProject').addEventListener('click', saveProject);
   $('archiveSave').addEventListener('click', () => { void saveArchive(); });
   $('archiveSaveNew').addEventListener('click', () => { void saveArchive({ asNew: true }); });
@@ -1283,13 +1400,15 @@ function boot() {
   $('tourNext').addEventListener('click', () => { if (state.tourIndex < state.tour.length - 1) void showTourRoom(state.tourIndex + 1); });
   all('[data-view]').forEach(b => b.addEventListener('click', () => viewer?.view(b.dataset.view)));
   all('[data-move]').forEach(b => b.addEventListener('click', () => viewer?.move(b.dataset.move)));
-  $('roof').addEventListener('change', () => viewer?.setRoof($('roof').checked)); $('retry3D').addEventListener('click', () => { void show3D(true); });
+  $('roof').addEventListener('change', () => { viewer?.setRoof($('roof').checked); if (viewer) on3DMode(viewer.mode, viewer.mode === 'inside' ? state.model?.rooms.find(r => r.id === state.selected)?.name || '' : viewer.currentViewName || 'persp'); });
+  $('retry3D').addEventListener('click', () => { void show3D(true); });
+  $('analyticsOverlay').addEventListener('change', () => viewer?.setAnalytics($('analyticsOverlay').checked));
   $('mat').addEventListener('input', e => { if (!e.target.dataset.rate) return; state.rates[e.target.dataset.rate] = e.target.value === '' ? '' : e.target.valueAsNumber; updateCosts(); markDirty(); });
   ['costReserve', 'vat'].forEach(id => $(id).addEventListener('input', () => { updateCosts(); markDirty(); }));
   $('askAI').addEventListener('click', askAI);
   $('askLocal').addEventListener('click', understandRequest); $('applySun').addEventListener('click', applySunToProgram);
   $('drawAI').addEventListener('click', drawFromAIProposal);
-  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length || state.proposal.questions.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم أو يحتاج إجابة؛ أعد التحليل قبل الاعتماد.'); state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true; switchTab('design'); toast('حُفظ البرنامج في الجدول؛ راجعه قبل التوليد.'); });
+  $('acceptAI').addEventListener('click', () => { if (!state.proposal?.rooms.length || state.proposalFingerprint !== requestFingerprint(requestInput())) return message('aiFeedback', 'الاقتراح قديم؛ أعد التحليل قبل الاعتماد.'); state.program = publicRooms(state.proposal.rooms); state.requestAppliedPrompt = $('idea').value; state.manualEdits = true; renderRows(); $('aiReview').hidden = true; switchTab('design'); toast('حُفظ البرنامج في الجدول؛ راجعه قبل التوليد.'); });
   window.addEventListener('pagehide', () => viewer?.setVisible(false)); window.addEventListener('pageshow', () => viewer?.setVisible(state.tab === 'result' && $('app').classList.contains('show')));
   renderStreets(); rating(); renderRows(); renderBOQ(); renderDiscovery(); renderLandSurveySummary(); initVisualizer(() => state.model); switchTab('rating'); void refreshAssistantStatus(); void initArchive();
 }
@@ -1383,7 +1502,7 @@ const mizanStudioAPI = Object.freeze({
     const pending = studioPending;
     if (!pending) throw Error('لا يوجد فهم جارٍ لاعتماده؛ أعد مراجعة الطلب.');
     assertStudioOperation(pending.operation);
-    if (pending.fingerprint !== requestFingerprint(requestInput()) || pending.brief.questions?.length) throw Error('تغيّر الطلب أو يحتاج توضيحًا؛ أعد التحليل قبل الرسم.');
+    if (pending.fingerprint !== requestFingerprint(requestInput())) throw Error('تغيّر الطلب؛ أعد التحليل قبل الرسم.');
     const userMessage = [...state.studioSession.messages].reverse().find(m => m.role === 'user');
     acceptStudioUnderstanding(state.studioSession, { summary: pending.brief.summary, sourceMessageIds: userMessage ? [userMessage.id] : [], constraints: userMessage ? [{ text: pending.latest, sourceMessageId: userMessage.id }] : [], assumptions: pending.brief.assumptions || [], operationToken: pending.operation });
     const operation = beginStudioOperation(state.studioSession, 'draw');
@@ -1397,7 +1516,7 @@ const mizanStudioAPI = Object.freeze({
         if (state.requestProposal === proposal) throw Error($('requestFeedback').textContent || 'لم يطبق الفهم.');
         output = await generate({ operation });
       } else output = await drawFromAIProposal({ operation });
-      if (!output || output.operationId !== operation.id) throw Error($('generationError').textContent || 'لم تثبت هذه العملية مخططًا؛ بقيت النسخة الحالية كما هي.');
+      if (!output || output.operationId !== operation.id) throw Error($('generationError').textContent || ($('gen').disabled ? 'ما زالت عملية رسم سابقة قيد التنفيذ؛ انتظر قليلًا ثم اعتمد مجددًا.' : '') || $('aiFeedback').textContent || 'لم تثبت هذه العملية مخططًا؛ بقيت النسخة الحالية كما هي.');
       studioPending = null; studioProposalSource = null; studioAbort = null;
       return output;
     } catch (error) {

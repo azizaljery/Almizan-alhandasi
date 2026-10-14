@@ -34,7 +34,7 @@ export function colorPlanLegend(model) {
 export const cadStyles=`
 [data-cad-only],[data-color-only]{display:none}
 svg[data-plan-mode="color"] [data-color-only]{display:inline}
-svg[data-plan-mode="color"] [data-plan-furniture]{display:none}
+svg[data-plan-mode="color"] [data-plan-furniture]{display:inline}
 svg[data-plan-mode="color"] .cad-paper{fill:#fff}
 svg[data-plan-mode="color"] .cad-mass{fill:#f1f2ef}
 svg[data-plan-mode="color"] .cad-corridor{fill:#fafaf7}
@@ -53,7 +53,7 @@ svg[data-plan-mode="cad"] [data-plan-north-arrow]{fill:#222}
 svg[data-plan-mode="cad"] [data-plan-north-arrow] path{stroke:#222}
 svg[data-plan-mode="cad"] [data-plan-north-label]{fill:#222}
 svg[data-plan-mode="cad"] [data-cad-only]{display:inline}
-svg[data-plan-mode="cad"] [data-plan-furniture]{display:none}
+svg[data-plan-mode="cad"] [data-plan-furniture]{display:inline}
 svg[data-plan-mode="cad"] .cad-paper,svg[data-plan-mode="cad"] .cad-mass,svg[data-plan-mode="cad"] .room-fill,svg[data-plan-mode="cad"] .cad-corridor{fill:#fff}
 svg[data-plan-mode="cad"] .cad-room-label{fill:#20282e}
 svg[data-plan-mode="cad"] .cad-room-label text{stroke:#fff;stroke-width:.06;paint-order:stroke}

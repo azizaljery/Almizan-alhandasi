@@ -2,6 +2,64 @@ import { CoordinationOrchestrator } from './gemini/engineering-core/core/coordin
 import { DesignIntelligenceEngine } from './gemini/design-intelligence/index.js';
 import { GeometricEquations } from './gemini/engineering-math/src/index.js';
 import { DETERMINISTIC_FINGERPRINT_ALGORITHM, deterministicFingerprint } from './gemini/shared/deterministic-hash.js';
+import { unverifiedCheck, toEvidenceRow } from './regulatory-checks.mjs';
+
+// Arabic labels for the fixed, small set of internal rule IDs the Gemini
+// engineering-core rules registry can fire. This is a lookup table for known
+// IDs, not machine translation of the subsystem.
+const ARABIC_RULE_LABELS = {
+  'RULE-SBC-1101-CORRIDOR-WIDTH-01': 'الحد الأدنى لعرض الممر (كود البناء السكني SBC 1101)',
+  'RULE-SBC-1101-CEILING-HEIGHT-02': 'الحد الأدنى لارتفاع السقف (كود البناء السكني SBC 1101)',
+  'RULE-ARCH-HEURISTIC-DOOR-SWING-03': 'مساحة انفتاح الأبواب (قاعدة تخطيطية داخلية، غير نظامية)',
+  'RULE-STRUCT-HEURISTIC-SPAN-01': 'تقدير بحر البلاطة الخرسانية (قاعدة إنشائية تقديرية، غير نظامية)',
+  'RULE-STRUCT-HEURISTIC-STACKING-02': 'استمرارية مسار الأحمال بين الأدوار (قاعدة إنشائية تقديرية، غير نظامية)',
+  'RULE-SBC-401-PANEL-CLEARANCE-01': 'الخلوص الأدنى حول لوحة الكهرباء (كود الكهرباء السعودي SBC 401)',
+  'RULE-SBC-401-DEDICATED-SPACE-03': 'مساحة مخصصة لمعدات الكهرباء (كود الكهرباء السعودي SBC 401)',
+  'RULE-ELEC-HEURISTIC-LOAD-DENSITY-02': 'كثافة الحمل الكهربائي التقديرية (قاعدة تقديرية، غير نظامية)',
+  'RULE-PLUMB-HEURISTIC-WATER-OVER-ELEC-01': 'فصل مسارات المياه عن الكهرباء (قاعدة تنسيقية تقديرية، غير نظامية)',
+  'RULE-PLUMB-HEURISTIC-WET-STACKING-02': 'تراصف فراغات السباكة الرطبة بين الأدوار (قاعدة تقديرية، غير نظامية)',
+  'RULE-HVAC-HEURISTIC-PLENUM-DEPTH-01': 'عمق فراغ تمديدات التكييف (قاعدة تقديرية، غير نظامية)',
+  'RULE-HVAC-HEURISTIC-COOLING-RATE-02': 'معدل التبريد التقديري الإقليمي (قاعدة تقديرية، غير نظامية)',
+};
+const ruleArabicLabel = rule => ARABIC_RULE_LABELS[rule.ruleId] || ('قاعدة داخلية غير مترجمة (معرّفها: ' + rule.ruleId + ')');
+
+/**
+ * Surfaces the rule-source metadata the engineering core already resolves per
+ * fired rule (coordination.engineeringProvenance.appliedRules) to the user,
+ * split into two lists that must never be merged:
+ *  - regulatory: rules the internal registry classifies as citing a real
+ *    statutory code (SBC). This module cannot itself confirm those citations
+ *    against the current official SBC text, so each one is surfaced as an
+ *    honest "لم يتم التحقق" regulatory check that discloses exactly what the
+ *    internal registry claims (document, edition, section, its own recorded
+ *    verification date) without asserting independent verification or a
+ *    pass/fail verdict.
+ *  - heuristicRules: rules the registry itself labels as internal,
+ *    non-statutory heuristics (RuleClassification.PRELIMINARY_HEURISTIC) —
+ *    kept out of the regulatory list so they are never mistaken for a code
+ *    citation.
+ */
+export function describeEngineeringProvenance(coordination) {
+  const applied = coordination?.engineeringProvenance?.appliedRules || [];
+  const regulatory = applied
+    .filter(rule => rule.classification === 'STATUTORY_SBC')
+    .map(rule => toEvidenceRow(unverifiedCheck({
+      rule: ruleArabicLabel(rule),
+      measuredLabel: 'تصنيف القاعدة في سجل محرك Gemini الهندسي الداخلي',
+      measuredValue: null,
+      verificationNote: 'السجل الداخلي يستشهد بـ' + (rule.reference || rule.documentId || 'مصدر غير محدد') +
+        (rule.subsection ? '، ' + rule.subsection : '') +
+        (rule.verifiedAt ? ' (تاريخ تحقق داخلي مسجل: ' + rule.verifiedAt + ')' : '') +
+        '. لم تُراجع هذه الاستشهادات بشكل مستقل مقابل النص الرسمي الحالي لكود البناء السعودي؛ لذلك لا تُعرض كمطابقة أو مخالفة مؤكدة لهذا الكود.',
+    }), {
+      id: 'gemini-rule-' + rule.ruleId,
+      category: 'استشهادات كود مُدرجة داخليًا في محرك Gemini (غير محققة بشكل مستقل)',
+    }));
+  const heuristicRules = applied
+    .filter(rule => rule.classification === 'PRELIMINARY_HEURISTIC')
+    .map(rule => ruleArabicLabel(rule) + ' — قاعدة داخلية غير نظامية' + (rule.reference ? ' (' + rule.reference + ')' : '') + '.');
+  return { regulatory, heuristicRules };
+}
 
 const MM = 1000;
 const GROUND_LEVEL = 'LVL-GF';
@@ -137,6 +195,7 @@ export function analyzeGeminiEngineering(model) {
   const issues = allIssues(coordination);
   const footprintM2 = GeometricEquations.areaRectangle(normal(model.building.w), normal(model.building.h));
   const programmedAreaM2 = model.rooms.reduce((sum, room) => sum + normal(room.w) * normal(room.h), 0);
+  const provenance = describeEngineeringProvenance(coordination);
   return {
     version: 'gemini-engineering-bridge-v2',
     status: 'PRELIMINARY_REVIEW',
@@ -161,12 +220,16 @@ export function analyzeGeminiEngineering(model) {
       structuralSystem: 'NOT_EVALUATED_NO_STRUCTURAL_ELEMENTS',
       electricalLayout: 'NOT_EVALUATED_NO_ELECTRICAL_EQUIPMENT',
       plumbingRouting: 'NOT_EVALUATED_NO_VERTICAL_MEP_MODEL',
-      hvacSystem: 'PRELIMINARY_LOAD_ONLY_NO_SELECTED_SYSTEM'
+      hvacSystem: 'PRELIMINARY_LOAD_ONLY_NO_SELECTED_SYSTEM',
+      statutoryCompliance: 'NOT_EVALUATED'
     },
+    regulatory: provenance.regulatory,
+    heuristicRules: provenance.heuristicRules,
     limitations: [
       'المراجعة مبدئية وليست تصميمًا تنفيذيًا أو اعتمادًا نظاميًا أو رخصة بناء.',
       'لا توجد أعمدة أو قواعد أو أحمال أو تمديدات كهرباء وسباكة أو نظام تكييف فعلي في مخطط المصدر؛ لذلك لا يتم اختلاق فحص لها.',
-      'تظهر العلامات على 2D فقط عندما ترتبط الملاحظة بفراغ معروف في المخطط.'
+      'تظهر العلامات على 2D فقط عندما ترتبط الملاحظة بفراغ معروف في المخطط.',
+      'استشهادات الكود النظامي (SBC) في سجل القواعد الداخلي لم تُراجع بشكل مستقل مقابل النص الرسمي الحالي؛ انظر «الاشتراطات النظامية المستشهد بها داخليًا» أدناه.'
     ],
     traceability: { geometryFingerprintAlgorithm: DETERMINISTIC_FINGERPRINT_ALGORITHM, note: 'Browser fingerprint is deterministic traceability only; it is not SHA-256.' }
   };

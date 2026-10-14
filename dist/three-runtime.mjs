@@ -1,6 +1,7 @@
 // Shared pinned Three.js ESM runtime for the cinematic entrance and the real 3D viewer.
 // r160 does not expose a global THREE via the obsolete build/three.min.js path.
 const THREE_URLS = [
+  new URL('./vendor/three.module.js', import.meta.url).href, // نسخة مستضافة مع الموقع: لا تعتمد على اتصال خارجي
   'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
   'https://unpkg.com/three@0.160.0/build/three.module.js',
 ];

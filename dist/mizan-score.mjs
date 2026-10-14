@@ -1,5 +1,9 @@
-import { assessPlan, aggregateAxes } from './plan-evidence.mjs';
+import { assessPlan, aggregateAxes, PLAN_EVIDENCE_VERSION } from './plan-evidence.mjs';
 const clamp = value => Math.max(0, Math.min(100, Number.isFinite(value) ? value : 0));
+// Mizan Score reuses plan-evidence.mjs's per-axis measurements as-is, only
+// adding the fixed weights below and the missing-axis reweighting in
+// aggregateAxes(); its own formula version tracks that combination.
+export const MIZAN_SCORE_FORMULA_VERSION = 'mizan-score/1.0.0+' + PLAN_EVIDENCE_VERSION;
 
 export function calculateMizanScore(model) {
   if (!model) return null;
@@ -25,6 +29,9 @@ export function calculateMizanScore(model) {
     grade: `مقارنة جزئية · ${coverage.evaluatedAxes} من ${coverage.totalAxes} محاور`, confidence: null, axes, coverage,
     strengths: axes.filter(a => a.score !== null && a.score >= 80).map(a => a.label),
     improvements: axes.filter(a => a.score !== null && a.score < 70).map(a => a.label), penalties: 0,
+    formulaVersion: MIZAN_SCORE_FORMULA_VERSION,
+    formula: 'متوسط موزون لدرجات المحاور المُقيَّمة فقط (من أصل 12 محورًا ذا وزن ثابت)، بعد إعادة توزيع الأوزان على المحاور المُقيَّمة وحدها، مضروبًا في 10 لإعطاء درجة من ١٠٠٠.',
+    effect: 'عرض مقارنة بين مخططات هذا البرنامج فقط؛ لا يُستخدم لاختيار أو استبعاد أي بديل تلقائيًا ولا يغيّر عملية التوليد.',
     note: 'الدرجة جزئية، تُحسب من المحاور ذات البيانات فقط بعد إعادة توزيع أوزانها. الخصوصية مؤشر اشتراك المسارات، والنوافذ لا تثبت الإضاءة الفعلية. المحاور الناقصة غير مُقيّمة والثقة غير معايرة. لا يمثل هذا اعتمادًا هندسيًا.' };
 }
 export { clamp };

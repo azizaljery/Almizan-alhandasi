@@ -10,6 +10,16 @@
 .survey-consent{display:flex;align-items:flex-start;gap:9px;line-height:1.5}
 .survey-consent input{margin-top:5px}
 .survey-provider-note{margin:9px 0 15px}
+.survey-map-search{display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap;margin:4px 0 2px}
+.survey-map-search label{flex:1 1 260px;font-size:.82rem}
+.survey-map-search input{min-height:42px;width:100%}
+.survey-map-search button{min-height:42px}
+#surveyMapSearchNote{margin:7px 0 10px}
+.survey-search-results{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:6px;border:1px solid var(--br);border-radius:10px;overflow:hidden}
+.survey-search-results li{margin:0}
+.survey-search-results button{display:block;width:100%;text-align:right;padding:10px 12px;border:0;background:#fff;cursor:pointer;font:inherit;color:inherit}
+.survey-search-results button:hover,.survey-search-results button:focus-visible{background:#f3f6f4}
+.survey-search-results small{display:block;margin-top:2px;color:var(--muted);overflow-wrap:anywhere}
 .survey-map-center{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:9px;align-items:end;margin-bottom:10px}
 .survey-map-center label{font-size:.82rem}
 .survey-map-center input{min-height:42px}

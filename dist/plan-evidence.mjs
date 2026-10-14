@@ -2,6 +2,11 @@ import { validateModel, quantities } from './planner.mjs';
 import { circulationNetwork } from './circulation.mjs';
 
 export const UNASSESSED = 'غير مُقيّم';
+// Version of the evidence formulas below (how each axis's score/status is
+// derived from the model). Bump it whenever an axis's measurement, status
+// rule or thresholds change, so a displayed score can be traced back to the
+// exact rule that produced it.
+export const PLAN_EVIDENCE_VERSION = 'plan-evidence/1.0.0';
 const measured = (score, detail, data = {}) => ({ status: 'ESTIMATE', score, detail, data });
 export const unavailable = detail => ({ status: 'NOT_EVALUATED', score: null, detail });
 
@@ -28,6 +33,7 @@ export function assessPlan(model) {
     ? measured((pairs.length - shared.length) / pairs.length * 100, 'مقارنة اشتراك مسارات الضيافة والعائلة في الممرات؛ الخصوصية البصرية والصوتية غير مُقيّمة.', { pairs })
     : unavailable('لا توجد مسارات مكتملة وفئات ضيافة وعائلة كافية لمقارنة فصل الحركة.');
   return {
+    version: PLAN_EVIDENCE_VERSION,
     nativeValidation: { status: errors.length ? 'FAIL' : 'PASS', errors },
     access: { status: errors.length ? 'NOT_EVALUATED' : complete ? 'PASS' : 'FAIL', score: errors.length ? null : connected.length / Math.max(1, routes.length) * 100,
       detail: 'اتصال الأبواب عبر الممرات؛ الوصول الشامل والإخلاء غير مُقيّمين.', data: { routes, disconnectedRoomIds: routes.filter(r => !r.path).map(r => r.roomId) } },

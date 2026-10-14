@@ -162,7 +162,7 @@ export async function analyzeClientRequest({ prompt, rooms = [], plot, discovery
   for (const pref of buildPreferenceRequests({ idea: text, discovery })) if (pref.value?.mustRequirement) {
     questions.push(`طلبت شرطًا إلزاميًا (${pref.value.mizanKind})، لكن المولد/المراجع لا يثبت هذا الشرط. لن نخفضه إلى رغبة عادية؛ احذف صيغة الإلزام أو وضّح أنك تريد مراجعة أولية فقط.`);
   }
-  if (/كبير|واسع|صغير|مساحات مناسبة/.test(text) && !/(?:مساح|م²|م2|متر مربع|\d\s*[×x*])/.test(text)) questions.push('وصفت مساحة بأنها كبيرة أو صغيرة؛ حدّد المساحة المطلوبة بالمتر المربع حتى لا نختارها عنك.');
+  if (brief.rooms.length && /كبير|واسع|صغير|مساحات مناسبة/.test(text) && !/(?:مساح|م²|م2|متر مربع|\d\s*[×x*])/.test(text)) questions.push('وصفت مساحة بأنها كبيرة أو صغيرة؛ حدّد المساحة المطلوبة بالمتر المربع حتى لا نختارها عنك.');
   if (/غرف نوم|مجالس|حمامات|مطابخ|صالات/.test(text) && !/\d|واحد|اثنين|ثنتين|ثلاث|اربع|خمس|ست|سبع|ثمان|تسع|عشر/.test(text)) questions.push('ذكرت غرفًا بصيغة الجمع دون عدد واضح؛ حدّد عدد كل نوع قبل تطبيق البرنامج.');
   if (/غرف(?:ة)?(?:\s+نوم)?\s+(?:ل|حق)\s*(?:الاطفال|العيال|الوالدة)/.test(text)) questions.push('حدّد عدد غرف النوم ومساحة كل غرفة، ثم سمّها في الجدول حسب من يستخدمها.');
   for (const type of Object.keys(TYPES)) {

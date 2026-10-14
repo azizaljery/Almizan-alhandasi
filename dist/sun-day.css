@@ -1,0 +1,11 @@
+.sun-day{margin-top:1rem;padding:1rem;border:1px solid var(--br,#d8c9aa);border-radius:14px;background:var(--panel-alt,#f4efe6)}
+.sun-day h3{margin:0 0 .5rem;font-size:1rem}
+.sun-day-controls{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+.sun-day-controls input[type=range]{flex:1 1 220px;min-width:160px;direction:ltr}
+.sun-day-time{min-width:3.5rem;text-align:center;font-variant-numeric:tabular-nums;font-weight:700;direction:ltr}
+.sun-day-table{width:100%;border-collapse:collapse;margin-top:.75rem;font-size:.92rem}
+.sun-day-table th,.sun-day-table td{padding:.4rem .5rem;border-bottom:1px solid var(--br,#e3d8c2);text-align:right;vertical-align:middle}
+.sun-day-table thead th{font-weight:700;color:var(--ink-soft,#4a4744)}
+.sun-bar{display:inline-block;height:.6rem;width:calc(var(--w,0%) * .8);min-width:2px;max-width:80%;background:var(--gold-deep,#a88a5e);border-radius:99px;vertical-align:middle;margin-inline-end:.35rem}
+.sun-day-wrap{overflow-x:auto}
+.sun-day .help{margin:.6rem 0 0}

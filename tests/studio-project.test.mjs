@@ -72,7 +72,7 @@ function localArchive() {
   return {
     close: () => sqlite.close(),
     async request(path, body) {
-      return archiveWorker.fetch(new Request('https://site.test' + path, { method: body ? 'POST' : 'GET', headers: { 'oai-authenticated-user-id': 'studio-test-owner', origin: 'https://site.test', ...(body ? { 'content-type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }), { DB: db });
+      return archiveWorker.fetch(new Request('https://site.test' + path, { method: body ? 'POST' : 'GET', headers: { 'oai-authenticated-user-id': 'studio-test-owner', origin: 'https://site.test', ...(body ? { 'content-type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }), { DB: db, TRUST_SITES_HEADER: '1' });
     },
   };
 }

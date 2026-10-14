@@ -152,3 +152,40 @@ test('openings contribute only glazing at exact window bounds, without invented 
 });
 
 test('neutral preview lighting remains legible for missing latitude and night without inventing sun',()=>{const v=new RoomViewer(container());v.setModel(model);v.setSun({status:'not-calculated',visible:false});assert.equal(v.sunLight.visible,false);assert.ok(v.ambientLight.intensity>=1.5);assert.ok(v.studioLight.intensity>=1);assert.equal(v.studioLight.castShadow,false);const before=[v.ambientLight.intensity,v.studioLight.intensity,v.fillLight.intensity];v.setSun({visible:true,azimuth:140,altitude:32});assert.deepEqual([v.ambientLight.intensity,v.studioLight.intensity,v.fillLight.intensity],before);v.setSun({visible:false,azimuth:140,altitude:-8});assert.deepEqual([v.ambientLight.intensity,v.studioLight.intensity,v.fillLight.intensity],before);assert.equal(v.sunLight.visible,false);v.destroy();});
+
+// Analytical overlay (room areas/dimensions). Without a real document the viewer must stay
+// exactly as tested above (labelLayer stays null, nothing else changes); with one, it must
+// build real text from the model's own area/width/height and hide outside orbit mode.
+test('without a real document, the analytics overlay stays inert and every other test above is unaffected', () => {
+  const v = new RoomViewer(container()); v.setModel(model);
+  assert.equal(v.labelLayer, null); assert.doesNotThrow(() => v.setAnalytics(true)); v.destroy();
+});
+
+test('analytics overlay builds one label per room from model area/width/height, and only shows in orbit mode', () => {
+  const previousDocument = globalThis.document;
+  const makeElement = () => ({
+    style: {}, _children: [], appendChild(c) { this._children.push(c); }, replaceChildren() { this._children = []; }, remove() { this.removed = true; },
+  });
+  globalThis.document = { createElement: makeElement };
+  try {
+    const box = { clientWidth: 950, clientHeight: 500, canvases: [], prepend(c) { this.canvases.push(c); }, appended: [], appendChild(c) { this.appended.push(c); } };
+    const v = new RoomViewer(box); v.setModel(model);
+    assert.ok(v.labelLayer, 'overlay element created once a real document is available');
+    assert.equal(v.labelEls.length, model.rooms.length);
+    const first = v.labelEls[0];
+    assert.equal(first.el.textContent, `${first.room.name} · ${Number(first.room.area.toFixed(1))} م² · ${first.room.w.toFixed(2)}×${first.room.h.toFixed(2)} م`);
+    assert.equal(v.labelLayer.style.display, 'none', 'hidden until explicitly turned on');
+    v.setAnalytics(true);
+    assert.equal(v.labelLayer.style.display, '');
+    v.view('top', { immediate: true });
+    assert.ok(v.labelEls.some(({ el }) => el.style.display !== 'none'), 'at least the central rooms stay in frame from directly above');
+    v.enter(model.rooms[0].id);
+    assert.equal(v.labelLayer.style.display, 'none', 'hidden while walking inside, like the roof');
+    v.view('persp', { immediate: true });
+    assert.equal(v.labelLayer.style.display, '', 'restored on leaving the room, since analytics stayed on');
+    v.setAnalytics(false);
+    assert.equal(v.labelLayer.style.display, 'none');
+    v.destroy();
+    assert.equal(v.labelLayer, null);
+  } finally { if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument; }
+});

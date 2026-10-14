@@ -1,5 +1,5 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الميزان الهندسي</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23C6A15B' stroke-width='4'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&display=swap" rel="stylesheet">
-<meta name="description" content="صف طلب منزلك، راجع ما فهمناه، ثم اختبر المخطط والغرف والميزانية من مشروع واحد."><link rel="stylesheet" href="./workspace.css"><link rel="stylesheet" href="./land-survey.css"><link rel="stylesheet" href="./studio-workspace.css"><link rel="stylesheet" href="./archive.css"><link rel="stylesheet" href="./cinematic-entry.css"><link rel="stylesheet" href="./studio-simple.css"><link rel="stylesheet" href="./requirement-evidence.css"><link rel="stylesheet" href="./geometry-editor.css"></head><body><section class="intro cinematic" id="intro" aria-label="مقدمة الميزان الهندسي">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>الميزان الهندسي</title><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0A0A'/%3E%3Cpath d='M32 10v40M20 50h24M32 14l-12 6 6 14 6-8 6 8 6-14z' fill='none' stroke='%23C6A15B' stroke-width='4'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<meta name="description" content="صف طلب منزلك، راجع ما فهمناه، ثم اختبر المخطط والغرف والميزانية من مشروع واحد."><link rel="stylesheet" href="./workspace.css"><link rel="stylesheet" href="./land-survey.css"><link rel="stylesheet" href="./studio-workspace.css"><link rel="stylesheet" href="./archive.css"><link rel="stylesheet" href="./cinematic-entry.css"><link rel="stylesheet" href="./studio-simple.css"><link rel="stylesheet" href="./requirement-evidence.css"><link rel="stylesheet" href="./sun-day.css"><link rel="stylesheet" href="./compare3d.css"><link rel="stylesheet" href="./geometry-editor.css"><link rel="stylesheet" href="./refined.css"></head><body><section class="intro cinematic" id="intro" aria-label="مقدمة الميزان الهندسي">
   <div class="cinematic-sun" aria-hidden="true"></div>
   <div class="cinematic-world" id="cinematicCanvas" aria-hidden="true">
     <svg class="cinematic-static" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -108,6 +108,12 @@
           <label class="check survey-consent"><input id="surveyOsmConsent" type="checkbox"> أوافق على عرض بلاطات OpenStreetMap، التي تتلقى نطاق الخريطة الظاهر فقط.</label>
         </div>
         <p class="help survey-provider-note">خدمة بلاطات OSM مجتمعية وبلا ضمان إتاحة؛ لا تنزيل مسبق ولا استخدام دون اتصال. سيبقى الرسم والإحداثيات متاحين إذا تعطلت البلاطات. النقر على الخريطة يضيف نقطة محلية، ولا تُرسل الزوايا لمزوّد البلاطات.</p>
+        <div class="survey-map-search">
+          <label>ابحث عن موقعك في الرياض (حي، شارع، معلم)<input id="surveyMapSearch" type="text" autocomplete="off" placeholder="مثال: حي النرجس، أو طريق الملك فهد"></label>
+          <button class="small-button" id="surveyMapSearchButton" type="button">ابحث</button>
+        </div>
+        <p class="help" id="surveyMapSearchNote">فعّل خلفية OpenStreetMap والموافقة أعلاه لتتمكن من البحث.</p>
+        <ul id="surveyMapSearchResults" class="survey-search-results" hidden></ul>
         <div class="survey-map-center">
           <label>خط العرض<input id="surveyCenterLat" type="number" min="-90" max="90" step="0.0000001" value="24.7136"></label>
           <label>خط الطول<input id="surveyCenterLon" type="number" min="-180" max="180" step="0.0000001" value="46.6753"></label>
@@ -149,7 +155,7 @@
   <header class="studio-simple-hero">
     <span class="studio-kicker">الميزان الهندسي · مساحة بيتك</span>
     <h1 id="studioSimpleTitle">مخطط بيتك، خطوة بخطوة.</h1>
-    <p>لا تحتاج أن تبدأ بعدّ الغرف في جدول. تحدث عن بيتك، ثم راجع ما فهمه النظام قبل الرسم. وبعد كل مخطط يمكنك طلب تعديل جديد.</p>
+    <p>أهلًا بك. احكِ لي عن بيتك بكلامك أنت: من يسكنه، وكيف تستقبل ضيوفك، وما تحبه وما لا تريده. سأعيد عليك ما فهمته قبل أن نرسم أي خط، ثم نراجع المخطط معًا.</p>
     <span class="studio-phase" id="studioPhase">01 / نفهم طلبك</span>
   </header>
   <div class="studio-simple-grid">
@@ -189,7 +195,7 @@
       <section id="studioProposalPanel" class="studio-proposal" hidden aria-labelledby="studioProposalTitle">
         <h2 id="studioProposalTitle">هذا ما فهمته قبل الرسم</h2>
         <p id="studioProposalSummary"></p>
-        <div id="studioProposalDiff" class="studio-proposal-diff"></div>
+        <details class="studio-proposal-more"><summary>تفاصيل التغييرات على الغرف</summary><div id="studioProposalDiff" class="studio-proposal-diff"></div></details>
         <div id="studioProposalWarnings" class="studio-proposal-warnings"></div>
         <div class="studio-request-actions">
           <button type="button" id="studioApprove" class="studio-primary">اعتمد الفهم وارسم المخطط</button>
@@ -323,10 +329,13 @@
       <section class="studio-alternatives" aria-label="مقارنة بدائل المخطط">
         <header class="studio-alternatives-head"><div><span class="ey">اختيارات التخطيط</span><h2>بدائل من برنامجك</h2></div><small id="alternativesCount">اختر نموذجًا لعرض تفاصيله</small></header>
         <div id="alternativeCards" class="alternative-grid" role="list" aria-label="بدائل تخطيط فعلية"></div>
+        <div id="selectionTransparency"></div>
       </section>
       <section class="card requirement-evidence" id="requirementEvidence" aria-labelledby="requirementEvidenceTitle">
         <header class="ch"><b class="num" aria-hidden="true">✓</b><div><h2 id="requirementEvidenceTitle">سجل أدلة المتطلبات من المخطط المحدد</h2><p>قياسات هندسية من البديل المعروض. القياس ليس اعتمادًا إنشائيًا أو نظاميًا، وما لا يدعمه النموذج سيظهر بوضوح.</p></div></header>
         <div class="cb">
+          <label class="check jurisdiction-select"><input id="jurisdictionRiyadh" type="checkbox"> المشروع في مدينة الرياض (عام) — طبّق اشتراطات وزارة الشؤون البلدية والقروية والإسكان (الصادرة ١٤٤٦هـ/٢٠٢٤م، المطبّقة عبر أمانة منطقة الرياض) على الارتدادات ونسبة البناء أدناه</label>
+          <label class="check jurisdiction-select"><input id="jurisdictionWadiHanifah" type="checkbox"> المشروع داخل كود وادي حنيفة العمراني — القسم الحضري T4.1 (فلل منفصلة ضمن ممر وادي حنيفة وروافده، الصادر عن الهيئة الملكية لمدينة الرياض) — يُستخدم بدل الاشتراط العام أعلاه إن فُعِّل</label>
           <div id="requirementSummary" class="requirement-summary" role="status" aria-live="polite"></div>
           <p id="requirementStale" class="message warning" hidden>هذه الأدلة تخص آخر بديل ناجح وبرنامج الغرف المحفوظ وقت توليده؛ تغيّرت المدخلات الحالية ولم تُفحص بعد. أعد التوليد لعرض سجل جديد.</p>
           <div id="requirementRows" class="requirement-rows"></div>
@@ -345,10 +354,16 @@
       </article><article id="studio3dCard" class="card immersive-card studio-3d" hidden><header class="ch"><b class="num">3D</b><div><h2>جولة 3D من مخططك</h2><p>الجدران والفتحات من المخطط نفسه. الخامات وسطح السقف تمثيليان، وليسا مواصفات تنفيذية. السقف مخفي عند الدخول للمشاهدة، وليست الإضاءة قياسًا لضوء النهار.</p></div><span class="pill" id="tourState">منظور عام</span></header>
         <div class="cb">
           <div class="tour-strip"><div><b>ابدأ التجربة</b><small>تبدأ الجولة من أقرب فراغ للمدخل ثم تنتقل بين الغرف.</small></div><div class="inline-actions"><button class="small-button tour-primary" id="startTour">ابدأ من المدخل</button><button class="small-button" id="tourPrev" disabled>الغرفة السابقة</button><button class="small-button" id="tourNext" disabled>الغرفة التالية</button></div></div>
-          <div class="viewer-tools"><button class="small-button" data-view="persp">منظور خارجي</button><button class="small-button" data-view="top">علوي</button><button class="small-button" data-view="front">واجهة المدخل</button><label class="check"><input id="roof" type="checkbox" checked> إظهار السقف</label></div>
-          <p class="studio-lighting-note">إضاءة استوديو للمعاينة، وليست محاكاة إنارة أو شمس. الأرضيات خامات توضيحية؛ اتجاه الشمس يُحسب فقط عند اكتمال موقع الأرض والوقت والشمال المؤكد.</p><div class="view" id="view"><div class="view-label" id="viewMode">منظور خارجي — السقف مخفي لرؤية الغرف</div></div>
+          <div class="auto-tour" id="autoTourBox"><div><b>جولة تلقائية</b><small>دورة حول المبنى ثم نظرة داخل كل غرفة، بلا تحكم يدوي.</small></div><div class="inline-actions"><button class="small-button" id="autoTour" type="button">▶ شغّل الجولة</button><button class="small-button" id="recordTour" type="button">⏺ شغّل وسجّل فيديو</button><button class="small-button" id="stopAutoTour" type="button" hidden>■ أوقف</button></div><p class="help" id="autoTourStatus" aria-live="polite"></p><a class="small-button" id="tourDownload" hidden>نزّل الفيديو</a></div>
+          <div class="viewer-tools"><button class="small-button" data-view="persp">منظور خارجي</button><button class="small-button" data-view="top">علوي</button><button class="small-button" data-view="front">واجهة المدخل</button><label class="check"><input id="roof" type="checkbox" checked> إظهار السقف</label><label class="check"><input id="analyticsOverlay" type="checkbox"> المساحات والأبعاد</label></div>
+          <p class="studio-lighting-note">إضاءة استوديو للمعاينة، وليست محاكاة إنارة أو شمس. الأرضيات خامات توضيحية؛ اتجاه الشمس يُحسب فقط عند اكتمال موقع الأرض والوقت والشمال المؤكد. طبقة «المساحات والأبعاد» من بيانات المخطط نفسها؛ ليست طبقة إنشائية أو كهربائية أو صحية.<div class="view" id="view"><div class="view-label" id="viewMode">منظور خارجي — السقف مخفي لرؤية الغرف</div></div>
           <div class="message error" id="threeError" role="status" hidden></div><button class="small-button" id="retry3D" hidden>أعد محاولة تحميل العرض</button>
           <div id="walkControls" hidden><p class="help">اسحب للنظر حولك، واستخدم الأسهم أو WASD أو الأزرار. الأبواب الفعلية فقط تسمح بالمرور؛ الأثاث تمثيل بصري لفهم الفراغ ولا يدخل في الكميات.</p><div class="walk-buttons" role="group" aria-label="الحركة داخل الغرفة"><button class="small-button" data-move="forward">للأمام ↑</button><button class="small-button" data-move="left">يسار ←</button><button class="small-button" data-move="right">يمين →</button><button class="small-button" data-move="back">للخلف ↓</button><button class="small-button" data-view="persp">العودة للمنظور</button></div></div>
+<details class="compare3d" id="compare3d"><summary>قارن بديلين جنبًا إلى جنب في 3D</summary>
+<p class="help" id="compareNote" aria-live="polite"></p>
+<div class="compare3d-grid" id="compareGrid"><div class="compare3d-side"><label>البديل الأول<select id="compareSelectA"></select></label><div class="compare3d-pane" id="comparePaneA" aria-label="العرض الأول"></div><p class="compare3d-caption" id="compareCaptionA"></p></div>
+<div class="compare3d-side"><label>البديل الثاني<select id="compareSelectB"></select></label><div class="compare3d-pane" id="comparePaneB" aria-label="العرض الثاني"></div><p class="compare3d-caption" id="compareCaptionB"></p></div></div>
+<p class="help">الكاميرا واحدة للعرضين: حرّك أحدهما يتبعه الآخر. المقارنة للعرض فقط؛ لا تغيّر البديل المختار ولا الكميات. اختر البديل من «بدائل من برنامجك» ليعتمده المسقط والكميات.</p></details>
         </div>
       </article></div><details class="studio-inspector" id="studioInspector" aria-label="خصائص ومراجعة التصميم">
         <summary class="studio-inspector-summary"><span>الخصائص والمراجعة</span><small>اختر غرفة في المسقط لعرض مساحتها وأبعادها</small></summary>
@@ -370,6 +385,9 @@
           <h3 class="subhead">ما يحتاج قرارًا أو مراجعة</h3>
           <ul class="gemini-findings" id="geminiFindings"></ul>
           <p class="gemini-coverage" id="geminiCoverage"></p>
+          <h3 class="subhead">الاشتراطات النظامية المستشهد بها داخليًا (غير محققة بشكل مستقل)</h3>
+          <div class="requirement-rows" id="geminiRegulatory"></div>
+          <p class="help" id="geminiHeuristics"></p>
         </div>
       </article>
       <article class="card"><header class="ch"><b class="num">☀</b><div><h2>شمس الموقع · حساب هندسي تقريبي</h2><p>لا يُحسب الاتجاه دون موقع ووقت ذي إزاحة زمنية وشمال يؤكده المستخدم.</p></div></header><div class="cb"><div class="sun-panel"><div class="g3">
@@ -379,10 +397,13 @@
 <label>زاوية الشمال الحقيقي من أعلى الرسم · مع عقارب الساعة<input id="solarNorth" type="number" min="0" max="360" step="any" placeholder="غير مؤكد"></label></div>
 <label class="sun-toggle"><input id="solarNorthConfirmed" type="checkbox">أؤكد زاوية الشمال بالنسبة إلى محور +Y للمخطط المعروض؛ لا تُستنتج من المدخل أو الشارع.</label>
 <label class="sun-toggle"><input id="showShadow" type="checkbox" checked> إظهار ظل الكتلة على المخطط</label><p class="sun-info" id="sunInfo" aria-live="polite"></p></div>
+<section class="sun-day" id="sunDay" hidden aria-label="دراسة الشمس خلال اليوم"><h3>دراسة الشمس خلال اليوم</h3>
+<div class="sun-day-controls"><button class="small-button" id="sunDayPlay" type="button" aria-pressed="false" disabled>▶ شغّل اليوم</button><input id="sunDaySlider" type="range" min="0" max="1425" step="15" value="720" disabled aria-label="ساعة اليوم"><b class="sun-day-time" id="sunDayTime">—</b></div>
+<p class="help" id="sunDaySummary" aria-live="polite"></p><div class="sun-day-wrap" id="sunDayRooms"></div><p class="help" id="sunDayLimits"></p></section>
 <p class="help">الإحداثيات WGS84 والوقت المدني بإزاحة رقمية صريحة؛ لا نفترض مدينة أو ساعة أو منطقة زمنية. مصدر المسح يستخدم أول نقطة من حدود المسح المرتبط بالمخطط الحالي، لا مركز الخريطة ولا مسح المسودة. التأكيد يدوي وليس إثباتًا مساحيًا. الحساب الهندسي تقريبي دون انكسار جوي؛ كتلة بارتفاع تمثيلي 3.2م وأرض مستوية، دون تضاريس أو مبانٍ مجاورة. ليس تحليل ضوء نهار أو إنارة أو طاقة. إضاءة الاستوديو مساعدة وغير شمسية.</p></div></article>
       <article class="card"><header class="ch"><b class="num">فحص</b><div><h2>مراجعة التخطيط المبدئية</h2><p>ميزانية مساحة، حركة عبر الممرات، وتنبيهات من نفس المخطط.</p></div><span class="pill" id="reviewScore">—</span></header><div class="cb"><div class="review-areas" id="reviewAreas"></div><h3 class="subhead">مسارات الحركة</h3><ul class="review-list" id="reviewRoutes"></ul><h3 class="subhead">ترابط الغرف</h3><ul class="review-list" id="reviewRelationships"></ul><h3 class="subhead">تنبيهات تحتاج مراجعة</h3><ul class="review-list" id="reviewIssues"></ul><p class="help" id="reviewLimit"></p></div></article>
       <article class="card"><header class="ch"><b class="num">مؤشر</b><div><h2>جودة التجربة التخطيطية</h2><p>مقارنة مبدئية للخصوصية والحركة والضيافة والتخزين من المخطط المعروض.</p></div><span class="pill" id="insightScore">—</span></header><div class="cb"><div class="insight-grid" id="insightCards"></div><p class="help" id="insightLimit"></p></div></article>
-      <article class="card"><header class="ch"><b class="num">ميزان</b><div><h2>Mizan Score — المقارنة الجزئية</h2><p>مؤشر من ١٠٠٠ للمحاور ذات البيانات الفعلية، مع إعلان المحاور الناقصة «غير مُقيّم».</p></div><span class="pill" id="mizanScoreValue">—</span></header><div class="cb" id="mizanScoreOutput"><div class="area"><b id="mizanScoreGrade">ولّد مخططًا لبدء التقييم</b></div><div class="insight-grid" id="mizanScoreAxes"></div><h3 class="subhead">قراءة النتيجة</h3><ul class="review-list" id="mizanScoreNotes"></ul><p class="help" id="mizanScoreLimit"></p></div></article>
+      <article class="card"><header class="ch"><b class="num">ميزان</b><div><h2>Mizan Score — المقارنة الجزئية</h2><p>مؤشر من ١٠٠٠ للمحاور ذات البيانات الفعلية، مع إعلان المحاور الناقصة «غير مُقيّم».</p></div><span class="pill" id="mizanScoreValue">—</span></header><div class="cb" id="mizanScoreOutput"><div class="area"><b id="mizanScoreGrade">ولّد مخططًا لبدء التقييم</b></div><div class="insight-grid" id="mizanScoreAxes"></div><h3 class="subhead">قراءة النتيجة</h3><ul class="review-list" id="mizanScoreNotes"></ul><p class="help" id="mizanScoreLimit"></p><div id="mizanScoreTransparency"></div></div></article>
       <article class="card"><header class="ch"><b class="num">قرار</b><div><h2>محرك القرار الهندسي</h2><p>يقارن رغبات العميل والبرنامج بالمساحة ومسارات الحركة الفعلية، ويبيّن حدود التقييم.</p></div><span class="pill" id="engineeringScore">—</span></header><div class="cb"><div class="insight-grid" id="engineeringCards"></div><h3 class="subhead">تفسير النتيجة</h3><ul class="review-list" id="engineeringNotes"></ul><p class="help" id="engineeringLimit"></p></div></article>
       <details class="review-notes" open><summary>ملاحظات الحل وما يحتاج مراجعة</summary><ul id="modelWarnings"></ul></details></div></div></section><section class="panel" id="panel-boq" aria-label="الكميات">
   <div class="wrap">
@@ -397,9 +418,10 @@
       <p class="help">الاحتياط يضاف إلى التكلفة ولا يغيّر الكميات. الضريبة افتراض قابل للتعديل، لا فتوى ضريبية. مساحة التشطيبات لوجهي الجدران؛ حصر تقريبي دون خصم تقاطعاتها أو حساب أكتاف الفتحات.</p>
       <table id="tot"><caption>ملخص البنود المسعّرة فقط</caption></table>
       <button class="secondary" id="exportBOQ">تنزيل الكميات والأسعار CSV</button>
+      <section class="report-slot" id="reportSlot" aria-labelledby="reportSlotTitle"><h3 id="reportSlotTitle">التقرير التفصيلي <span class="pill">قيد التطوير</span></h3><p class="help">خانة محجوزة لتقرير واحد للعميل. غير متاح الآن، ولا يُولَّد منه أي ملف. المخطط لتطويره لاحقًا أن يضم: المسقط ولقطات 3D، شروطك وحالة كل شرط، الكميات والافتراضات، ودراسة الشمس.</p><button class="secondary" id="reportSoon" type="button" disabled aria-disabled="true">تنزيل التقرير (غير متاح بعد)</button></section>
       <article class="card maintenance-card"><header class="ch"><b class="num">🔧</b><div><h2>دليل تسليم وصيانة مبدئي</h2><p>قائمة يستكملها المقاول والمورد بعد تحديد الأنظمة الفعلية للمشروع.</p></div></header><div class="cb"><div class="maintenance-grid"><section><b>التكييف</b><p>وثّق موديلات الأجهزة والضمانات وتعليمات تنظيف الفلاتر من الشركة المصنعة.</p></section><section><b>السباكة</b><p>سلّم مواقع المحابس الرئيسية وخطوط الصرف والسخانات مع دليل المورد.</p></section><section><b>الكهرباء</b><p>وثّق لوحة التوزيع ودوائرها واختبار القواطع ضمن ملف التسليم.</p></section><section><b>الغلاف الخارجي</b><p>راجع العزل والتصريف والواجهات وفق المادة المنفذة وضمانها.</p></section></div><p class="help">لا يفترض هذا الدليل نوع أجهزة أو دورية صيانة ثابتة؛ المرجع النهائي هو تعليمات المصنع والمخططات التنفيذية.</p></div></article>
     </div>
     <button class="secondary" data-next="rating">عدّل الأرض والافتراضات</button><button class="secondary" data-next="design">عدّل برنامج الغرف</button>
   </div>
 </section>
-<footer class="app-footer">الميزان الهندسي · مخطط تصوري للدور الأرضي قابل للمراجعة <button class="footer-settings" data-open-settings>إعدادات الموقع</button></footer></div></div></main><div class="toast" id="toast" role="status" hidden></div><script type="module" src="./app.mjs"></script><script id="studio-simple-module" type="module" src="./studio-simple.mjs"></script><script type="module" src="./cinematic-entry.mjs"></script><footer class="release-stamp" style="padding:12px;text-align:center;color:#475569;font-size:14px">الميزان الهندسي · واجهة العمل الموحدة · إصدار 2026.10.10-studio-2</footer></body></html>
+<footer class="app-footer">الميزان الهندسي · مخطط تصوري للدور الأرضي قابل للمراجعة <button class="footer-settings" data-open-settings>إعدادات الموقع</button></footer></div></div></main><div class="toast" id="toast" role="status" hidden></div><script type="module" src="./app.mjs"></script><script id="studio-simple-module" type="module" src="./studio-simple.mjs"></script><script type="module" src="./cinematic-entry.mjs"></script><script type="module" src="./presentation-ui.mjs"></script><footer class="release-stamp" style="padding:12px;text-align:center;color:#475569;font-size:14px">الميزان الهندسي · واجهة العمل الموحدة · إصدار 2026.10.10-studio-2</footer></body></html>

@@ -99,7 +99,7 @@ function modelFor(pair) {
     },
   };
 }
-export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null, seed = 1, previous = [] }) {
+export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null, seed = 1, previous = [], ensuite = false }) {
   const request = await buildDesignRequest({ plot, rooms, idea, discovery, briefContext, selectedShape });
   const allowedShapes = requestedDesignShapes({ idea, discovery, selectedShape });
   const before = canonicalJSON({ plot, rooms });
@@ -110,7 +110,7 @@ export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery =
     const candidates = [], failures = [], generationRejections = [];
     const routeFocused = request.softPreferences.some(pref => ['avoid_long_corridors','prefer_dining_access_all_majlis','prefer_dining_far_from_majlis','prefer_kitchen_dining_route','prefer_guest_bath_dining_route',
       'avoid_shared_guest_family_corridors','avoid_bedroom_guest_proximity','require_open_living_kitchen'].includes(pref.value?.mizanKind || pref.kind));
-    const specs = explorationSpecs(seed, { routeFocused }).filter(spec => allowedShapes.includes(spec.shape));
+    const specs = explorationSpecs(seed, { routeFocused, ensuite }).filter(spec => allowedShapes.includes(spec.shape));
     if (allowedShapes.includes('pavilions')) specs.push({ shape: 'pavilions', key: 'pavilions-baseline', mode: -1, seed });
     if (allowedShapes.includes('staggered')) specs.push({ shape: 'staggered', key: 'staggered-baseline', mode: -1, seed });
     const clusteredGraphSignatures = new Set();

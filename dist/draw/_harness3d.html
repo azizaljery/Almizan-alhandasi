@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اختبار المجسم ثلاثي الأبعاد</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1d1f22; color: #eee; font-family: system-ui, sans-serif; }
+  #v { position: fixed; inset: 0; }
+  #hud { position: fixed; top: 8px; right: 8px; font-size: 12px; background: rgba(0,0,0,.45); padding: 4px 8px; border-radius: 6px; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="v"></div>
+<div id="hud">…</div>
+<script type="module">
+import { loadThreeRuntime } from '../three-runtime.mjs';
+import { DrawViewer } from './viewer-draw.mjs';
+import { sampleVilla } from './samples.mjs';
+import { applyCommand } from './doc.mjs';
+
+const THREE = await loadThreeRuntime();
+const hud = document.getElementById('hud');
+
+function twoLevelVilla() {
+  let d = sampleVilla();
+  d = applyCommand(d, { type: 'add-level', name: 'الدور الأول', copyFrom: 'L1' }).doc;
+  const l2 = d.levels[1].id;
+  const lab = (x, y, name, roomType) => { d = applyCommand(d, { type: 'add-label', level: l2, name, roomType, seed: { x, y } }).doc; };
+  lab(3, 2.5, 'غرفة نوم 3', 'bedroom'); lab(9, 2.5, 'صالة علوية', 'living'); lab(3.7, 7.2, 'ممر', 'corridor');
+  lab(9.7, 6.5, 'غرفة نوم 4', 'bedroom'); lab(8.6, 11, 'غرفة نوم 5', 'bedroom'); lab(11, 9.5, 'دورة مياه', 'bath'); lab(11, 12.5, 'دورة مياه 2', 'bath');
+  lab(3.7, 11.7, 'غرفة نوم رئيسية', 'master'); lab(5.8, 11.7, 'غرفة نوم 2', 'bedroom');
+  const F = (kind, x, y, rot = 0) => { d = applyCommand(d, { type: 'add-fixture', level: l2, kind, x, y, rot }).doc; };
+  F('bed-double', 2.0, 12.5); F('wardrobe', 1.2, 10.1); F('nightstand', .7, 12.8); F('bed-single', 5.6, 12.6); F('wardrobe', 5, 10.1);
+  F('sofa-3', 10, 6.1); F('tv-unit', 9.7, 7.6, Math.PI); F('rug', 9.7, 6.8);
+  F('bed-double', 3, 2.5); F('wc', 10.4, 9.0); F('basin', 11.3, 9.4); F('shower', 11.4, 10.4);
+  return d;
+}
+
+let viewer = null;
+const H = {
+  THREE, DrawViewer, sampleVilla, twoLevelVilla, applyCommand,
+  create(opts = {}) {
+    if (viewer) viewer.dispose();
+    viewer = new DrawViewer(document.getElementById('v'), { THREE, preserveDrawingBuffer: true, onState: s => { if (s.type === 'mode') hud.textContent = s.state.mode; }, ...opts });
+    H.viewer = viewer; return viewer;
+  },
+  /** resolves when the viewer is idle: no transition, no pending frame */
+  settle() {
+    return new Promise(resolve => {
+      let calm = 0;
+      const check = () => {
+        const v = viewer;
+        if (!v.tween && !v.needsRender && !v.rafId && !v.walkActive()) { if (++calm >= 3) return resolve(v.stats()); } else calm = 0;
+        requestAnimationFrame(check);
+      };
+      requestAnimationFrame(check);
+    });
+  },
+  viewer: null,
+  ready: true,
+};
+window.H = H;
+</script>
+</body>
+</html>

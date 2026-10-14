@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BRIEF_SCHEMA, createWorker, handleRequest, validateBrief, validateInput } from '../worker/server.mjs';
 
-// All provider responses are simulated. These tests never call OpenAI or use a real key.
+// All provider responses are simulated. These tests never call Anthropic or use a real key.
 const ORIGIN = 'https://mizan.example';
-const TEST_ENV = { OPENAI_API_KEY: 'unit-test-only-do-not-use', MIZAN_ACCESS_CODE: 'private-test-code', ALLOWED_ORIGIN: ORIGIN };
+const TEST_ENV = { ANTHROPIC_API_KEY: 'unit-test-only-do-not-use', MIZAN_ACCESS_CODE: 'private-test-code', ALLOWED_ORIGIN: ORIGIN };
 const input = () => ({
   prompt: 'أبي مجلس للضيوف وثلاث غرف نوم وحمامين',
   plot: { width: 20, length: 30, floors: 1, streets: { s: true, n: false } },
@@ -15,8 +15,8 @@ const brief = () => ({
   rooms: [{ name: 'مجلس الضيوف', type: 'majlis', area: 30, position: 'front', side: 'right' }],
 });
 const completed = value => ({
-  status: 'completed', model: 'gpt-4.1-mini',
-  output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify(value) }] }],
+  stop_reason: 'tool_use', model: 'claude-sonnet-5-5',
+  content: [{ type: 'tool_use', id: 'toolu_test', name: 'submit_home_brief', input: value }],
 });
 function request(body = input(), options = {}) {
   const headers = new Headers({
@@ -125,14 +125,14 @@ test('missing access code and foreign origins cannot use the paid endpoint', asy
 
 test('configuration status never claims live verification or a working manual engine', async () => {
   const { worker, calls } = fixture();
-  for (const [env, configured] of [[{ ALLOWED_ORIGIN: ORIGIN }, false], [{ OPENAI_API_KEY: '   ', ALLOWED_ORIGIN: ORIGIN }, false], [TEST_ENV, true]]) {
+  for (const [env, configured] of [[{ ALLOWED_ORIGIN: ORIGIN }, false], [{ ANTHROPIC_API_KEY: '   ', ALLOWED_ORIGIN: ORIGIN }, false], [TEST_ENV, true]]) {
     const res = await worker.fetch(request(null, { method: 'GET', path: '/api/assistant/status' }), env);
     const data = await res.json();
     assert.equal(data.configured, configured);
     assert.equal(data.accessConfigured, typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim());
     assert.equal(data.verified, false);
     assert.equal(data.scope, 'requirements_only');
-    assert.equal(JSON.stringify(data).includes(TEST_ENV.OPENAI_API_KEY), false);
+    assert.equal(JSON.stringify(data).includes(TEST_ENV.ANTHROPIC_API_KEY), false);
     assert.equal(res.headers.get('Cache-Control'), 'no-store');
   }
   const missing = await worker.fetch(request(), { MIZAN_ACCESS_CODE: 'private-test-code', ALLOWED_ORIGIN: ORIGIN });
@@ -154,7 +154,7 @@ test('rejects unsupported media, broken JSON and oversized UTF-8 bodies before c
   assert.equal(calls.length, 0);
 });
 
-test('constructs a structured Responses request and returns only a validated reviewable brief', async () => {
+test('constructs a structured Messages request and returns only a validated reviewable brief', async () => {
   const { worker, calls } = fixture();
   const body = input(); body.previous = brief();
   const res = await worker.fetch(request(body), TEST_ENV);
@@ -163,17 +163,19 @@ test('constructs a structured Responses request and returns only a validated rev
   assert.deepEqual(data.brief, brief());
   assert.equal(data.requiresReview, true);
   assert.equal(data.scope, 'requirements_only');
-  assert.equal(data.source, 'openai');
+  assert.equal(data.source, 'claude');
   assert.deepEqual(data.limitations, []);
-  assert.equal(calls[0][0], 'https://api.openai.com/v1/responses');
+  assert.equal(calls[0][0], 'https://api.anthropic.com/v1/messages');
+  assert.equal(calls[0][1].headers['x-api-key'], TEST_ENV.ANTHROPIC_API_KEY);
+  assert.equal(calls[0][1].headers['anthropic-version'], '2023-06-01');
+  assert.equal(calls[0][1].headers.Authorization, undefined);
   const sent = JSON.parse(calls[0][1].body);
-  assert.equal(sent.store, false);
-  assert.equal(sent.model, 'gpt-4.1-mini');
-  assert.equal(sent.text.format.strict, true);
-  assert.deepEqual(sent.text.format.schema, BRIEF_SCHEMA);
-  assert.deepEqual(JSON.parse(sent.input).previous, brief());
-  assert.match(sent.instructions, /تحلل المتطلبات فقط/);
-  assert.equal(JSON.stringify(data).includes(TEST_ENV.OPENAI_API_KEY), false);
+  assert.equal(sent.model, 'claude-sonnet-5-5');
+  assert.deepEqual(sent.tool_choice, { type: 'auto' });
+  assert.deepEqual(sent.tools[0].input_schema, BRIEF_SCHEMA);
+  assert.deepEqual(JSON.parse(sent.messages[0].content).previous, brief());
+  assert.match(sent.system, /تحلل المتطلبات فقط/);
+  assert.equal(JSON.stringify(data).includes(TEST_ENV.ANTHROPIC_API_KEY), false);
 });
 
 test('multi-floor limitations never delete an unhandled user requirement', async () => {
@@ -197,17 +199,18 @@ test('limits per client address across requests and expires at the minute bounda
   assert.equal((await worker.fetch(request(input(), { headers: { 'CF-Connecting-IP': '192.0.2.11' } }), frozenEnv)).status, 200);
   timestamp = 60000;
   assert.equal((await worker.fetch(request(), frozenEnv)).status, 200);
-  assert.deepEqual(Object.keys(frozenEnv), ['OPENAI_API_KEY', 'MIZAN_ACCESS_CODE', 'ALLOWED_ORIGIN']);
+  assert.deepEqual(Object.keys(frozenEnv), ['ANTHROPIC_API_KEY', 'MIZAN_ACCESS_CODE', 'ALLOWED_ORIGIN']);
 });
 
 test('provider failures, refusals and invalid outputs fail closed without leaking provider bodies', async () => {
   const scenarios = [
     ...[401, 403, 429, 500].map(status => ({ provider: () => new Response('UPSTREAM-SECRET', { status }), status: 502 })),
     { provider: () => { throw new Error('UPSTREAM-SECRET'); }, status: 502 },
-    { provider: () => Response.json({ status: 'incomplete' }), status: 502 },
-    { provider: () => Response.json({ status: 'completed', output: [{ type: 'message', content: [{ type: 'refusal', refusal: 'UPSTREAM-SECRET' }] }] }), status: 422 },
+    { provider: () => Response.json({ stop_reason: 'max_tokens', content: [] }), status: 502 },
+    { provider: () => Response.json({ stop_reason: 'refusal', content: [{ type: 'text', text: 'UPSTREAM-SECRET' }] }), status: 422 },
     { provider: () => Response.json(completed({ ...brief(), rooms: [{ ...brief().rooms[0], area: 200 }] })), status: 502 },
-    { provider: () => Response.json({ status: 'completed', output: [{ type: 'message', content: [{ type: 'output_text', text: 'broken JSON' }] }] }), status: 502 },
+    { provider: () => Response.json({ stop_reason: 'tool_use', content: [{ type: 'tool_use', name: 'submit_home_brief', input: 'broken' }] }), status: 502 },
+    { provider: () => Response.json({ stop_reason: 'tool_use', content: [{ type: 'text', text: 'UPSTREAM-SECRET' }] }), status: 502 },
   ];
   for (const scenario of scenarios) {
     const { worker } = fixture(scenario);
@@ -217,7 +220,7 @@ test('provider failures, refusals and invalid outputs fail closed without leakin
     assert.equal('brief' in data, false);
     assert.equal('source' in data, false);
     assert.equal(JSON.stringify(data).includes('UPSTREAM-SECRET'), false);
-    assert.equal(JSON.stringify(data).includes(TEST_ENV.OPENAI_API_KEY), false);
+    assert.equal(JSON.stringify(data).includes(TEST_ENV.ANTHROPIC_API_KEY), false);
   }
 });
 

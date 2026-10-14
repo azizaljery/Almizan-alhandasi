@@ -58,7 +58,7 @@ function project({ width = plot.width, palette = 'resort', name = 'منزل ال
 function makeRequest(path, { method = 'GET', user = 'user-a', origin = 'https://site.test', body, headers = {} } = {}) {
   return new Request(`https://site.test${path}`, { method, headers: { ...(user ? { 'oai-authenticated-user-id': user } : {}), ...(origin ? { origin } : {}), ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...headers }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
 }
-async function call(db, path, options = {}) { return archiveWorker.fetch(makeRequest(path, options), { DB: db, ASSETS: { fetch: async () => new Response('asset') } }); }
+async function call(db, path, options = {}) { return archiveWorker.fetch(makeRequest(path, options), { TRUST_SITES_HEADER: '1', DB: db, ASSETS: { fetch: async () => new Response('asset') } }); }
 
 let db;
 before(() => { db = new LocalD1(); });
