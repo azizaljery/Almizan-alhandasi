@@ -1,0 +1,29 @@
+[
+ {
+  "ext": "svg",
+  "names": [
+   "mizan-board-2026-10-14.svg",
+   "mizan-board-2026-10-14.svg.manifest.json"
+  ],
+  "hashMatches": true,
+  "nameMatches": true,
+  "identity": "VERIFIED",
+  "candidate": true,
+  "geometryMatches": true,
+  "kind": "board-svg"
+ },
+ {
+  "ext": "png",
+  "names": [
+   "mizan-board-2026-10-14.png",
+   "mizan-board-2026-10-14.png.manifest.json"
+  ],
+  "hashMatches": true,
+  "nameMatches": true,
+  "identity": "VERIFIED",
+  "candidate": true,
+  "geometryMatches": true,
+  "kind": "board-png"
+ }
+] pageerrors: 0 []
+BROWSER CHECK: PASS
