@@ -67,3 +67,9 @@ dialog{border:0;border-radius:14px;padding:20px;box-shadow:0 20px 70px #0006;fon
   .app[data-view="split"] .panes{flex-direction:column}.app[data-view="split"] .three{border-inline-start:0;border-top:2px solid var(--dark)}
   .floaters{bottom:12px}.three-bar .rng{display:none}.status #stStats,.status #stSnap{display:none}
 }
+
+.sw-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}.swatch{width:30px;height:30px;border-radius:8px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);padding:0}.swatch.on{box-shadow:0 0 0 2px var(--ink)}
+.swatch.custom{position:relative;overflow:hidden;background:conic-gradient(#e44,#ea4,#4c4,#4ce,#74e,#e44)}.swatch.custom input{position:absolute;inset:-6px;opacity:0;width:44px;height:44px;cursor:pointer}
+.preset{display:flex;gap:8px;align-items:center;width:100%;text-align:start;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;margin-bottom:7px}.preset:hover{background:#faf6ec}.preset i{display:flex;gap:3px}.preset i b{width:16px;height:16px;border-radius:5px;border:1px solid #0002}
+.seg3{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.seg3 button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-size:12.5px}.seg3 button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.facades{display:grid;grid-template-columns:1fr 1fr;gap:7px}.facades button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;font-size:13px}.facades button:hover{background:#f4efe3}

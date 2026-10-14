@@ -74,7 +74,7 @@ async function roomDialog(label, room = null) {
 function onDocChanged() {
   $('undo').disabled = !editor.history.canUndo; $('redo').disabled = !editor.history.canRedo;
   if (document.activeElement !== $('docTitle')) $('docTitle').value = editor.doc.title;
-  renderLevels(); renderRooms(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome();
+  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome();
   if (!(document.activeElement && $('side').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName))) renderProps();
 }
 const autosave = debounce(() => store.set(KEY, serialize(editor.doc)), 500);
@@ -249,7 +249,42 @@ function renderRooms() {
 function focusPoint(p) { editor.view.cx = p.x; editor.view.cy = p.y; editor.markDirty(); }
 
 // ------------------------------------------------------------------------------------------------ tabs
-function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); }
+// ------------------------------------------------------------------------------------------------ facades and materials
+const FACADE_COLORS = ['#f1ead9', '#ece0c8', '#d9c7a4', '#c8b28a', '#b9a58a', '#e6e2da', '#bfc3c6', '#8b7d6b', '#a65f3c', '#f4f4f1'];
+const DARK_COLORS = ['#2b2c2e', '#3b3836', '#5b4a3a', '#7a2f2a', '#1f3a4d', '#d8d6d0', '#8a8f94', '#4d3425'];
+const FLOOR_NAMES = { marble: 'رخام', tile: 'بلاط', wood: 'باركيه', wet: 'بلاط حمامات', concrete: 'خرسانة' };
+const PRESETS = [
+  { name: 'خليجي: لياسة رملية وحجر', colors: ['#ece0c8', '#d9c7a4', '#3b3836'], finish: { facade: { base: 'render', color: '#ece0c8', accent: 'entry', accentColor: '#d9c7a4', plinth: true }, aluminium: '#3b3836', entryDoor: '#3a2a22' } },
+  { name: 'حديث أبيض', colors: ['#f4f4f1', '#bfc3c6', '#2b2c2e'], finish: { facade: { base: 'paint', color: '#f4f4f1', accent: 'none', plinth: false }, aluminium: '#2b2c2e', entryDoor: '#2b2c2e' } },
+  { name: 'حجر كامل', colors: ['#c8b28a', '#c8b28a', '#5b4a3a'], finish: { facade: { base: 'stone', color: '#c8b28a', accent: 'all', accentColor: '#c8b28a', plinth: true }, aluminium: '#5b4a3a', entryDoor: '#4d3425' } },
+  { name: 'ترابي دافئ', colors: ['#b9a58a', '#8b7d6b', '#4d3425'], finish: { facade: { base: 'render', color: '#b9a58a', accent: 'entry', accentColor: '#8b7d6b', plinth: true }, aluminium: '#4d3425', entryDoor: '#4d3425' } },
+];
+function swatches(list, cur, onPick) {
+  const row = el('div', { class: 'sw-row' });
+  for (const c of list) row.append(el('button', { class: 'swatch' + (cur && cur.toLowerCase() === c ? ' on' : ''), style: `background:${c}`, title: c, onclick: () => onPick(c) }));
+  row.append(el('span', { class: 'swatch custom', title: 'لون آخر' }, el('input', { type: 'color', value: cur || '#cccccc', onchange: e => onPick(e.target.value) })));
+  return row;
+}
+const setFinish = (patch, label = 'المواد') => editor.exec({ type: 'set-meta', finish: patch }, label, { key: 'finish' });
+function look(az, label) { return el('button', { onclick: async () => { if (!threeVisible()) { $('app').dataset.view = 'split'; document.querySelectorAll('.seg [data-view]').forEach(x => x.classList.toggle('on', x.dataset.view === 'split')); editor.resize(); } await rebuild3D(); if (!viewer?.built) return; viewer.setMode('orbit', { animate: false }); viewer.orbitTo({ azimuthDeg: az, elevationDeg: 9, distance: viewer.radius() * 2.6, animate: true }); } }, label); }
+function renderFinish() {
+  const box = $('tab-finish'); box.replaceChildren();
+  const f = editor.doc.finish || {}, fa = f.facade || {};
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'أنماط جاهزة'), ...PRESETS.map(p => el('button', { class: 'preset', onclick: () => setFinish(p.finish, 'نمط ' + p.name) }, el('i', {}, ...p.colors.map(c => el('b', { style: `background:${c}` }))), p.name))));
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'عرض الواجهات في المجسم'), el('div', { class: 'facades' }, look(0, 'الواجهة الجنوبية'), look(180, 'الواجهة الشمالية'), look(90, 'الواجهة الشرقية'), look(270, 'الواجهة الغربية'))));
+  const seg = (items, cur, fn) => el('div', { class: 'seg3' }, ...items.map(([v, l]) => el('button', { class: cur === v ? 'on' : '', onclick: () => fn(v) }, l)));
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'تشطيب الواجهة'), seg([['render', 'لياسة'], ['paint', 'دهان أملس'], ['stone', 'حجر']], fa.base || 'render', v => setFinish({ facade: { base: v } })), el('h4', {}, 'لون الواجهة'), swatches(FACADE_COLORS, fa.color, c => setFinish({ facade: { color: c } })),
+    el('h4', {}, 'كسوة الحجر'), seg([['entry', 'واجهة المدخل'], ['all', 'كل الواجهات'], ['none', 'بدون']], fa.accent || 'entry', v => setFinish({ facade: { accent: v } })), swatches(FACADE_COLORS.slice(0, 6), fa.accentColor, c => setFinish({ facade: { accentColor: c } })),
+    field('قاعدة حجرية أسفل الجدار', 'check', fa.plinth !== false, v => setFinish({ facade: { plinth: v } }))));
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'النوافذ والأبواب'), el('div', { class: 'muted' }, 'لون الألمنيوم'), swatches(DARK_COLORS, f.aluminium, c => setFinish({ aluminium: c })), el('div', { class: 'muted' }, 'لون باب المدخل'), swatches(DARK_COLORS, f.entryDoor, c => setFinish({ entryDoor: c }))));
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'السور والسطح'), el('div', { class: 'muted' }, 'لون السور'), swatches(FACADE_COLORS, f.fence, c => setFinish({ fence: c })), el('div', { class: 'muted' }, 'لون حافة السطح'), swatches(FACADE_COLORS, fa.copingColor, c => setFinish({ facade: { copingColor: c } }))));
+  const used = [...new Set(editor.doc.labels.map(l => l.type))];
+  const floors = el('div', { class: 'sec' }, el('h4', {}, 'الأرضيات حسب نوع الغرفة'));
+  if (!used.length) floors.append(el('p', { class: 'muted' }, 'سمِّ الغرف أولًا لتختار أرضية كل نوع.'));
+  for (const t of used) floors.append(field(roomTypeName(t), 'select', (f.floors || {})[t] || ROOM_TYPES[t].floor, v => setFinish({ floors: { [t]: v } }), { options: Object.entries(FLOOR_NAMES) }));
+  box.append(floors, el('div', { class: 'acts' }, el('button', { onclick: () => { editor.exec({ type: 'set-meta', finish: { facade: { base: 'render', accent: 'entry', plinth: true, color: null, accentColor: null, plinthColor: null, copingColor: null }, aluminium: null, entryDoor: null, fence: null, roof: null, floors: Object.fromEntries(used.map(t => [t, null])) } }, 'إعادة المواد'); } }, 'إعادة الافتراضي')), el('p', { class: 'muted' }, 'التغيير يظهر فورًا في المجسم ثلاثي الأبعاد ويُحفظ مع المشروع.'));
+}
+function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); }
 document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); if (b.dataset.tab === 'review') runReview(); }));
 
 // ------------------------------------------------------------------------------------------------ review

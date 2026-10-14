@@ -36,10 +36,18 @@ const tintOf = type => { const rgb = hexRgb((ROOM_TYPES[type] || ROOM_TYPES.othe
 const sign = v => v < 0 ? -1 : 1;
 
 export function buildBuildingScene(doc, THREE, options = {}) {
-  const opt = { ...DEFAULTS, ...options };
+  const fin = doc.finish || {}, fac = fin.facade || {};
+  const opt = { ...DEFAULTS, ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...options };
   const ownLib = !opt.materials;
   const lib = opt.materials || createMaterialLibrary(THREE, { textures: opt.textures, maxAnisotropy: opt.maxAnisotropy, quality: opt.quality });
   const group = new THREE.Group(); group.name = 'mizan-building';
+  if (ownLib) { // façade / material choices of the project
+    const m = lib.m, paint = (mat, c) => { if (mat && c) mat.color.set(c); };
+    paint(m.render, fac.color); paint(m.accent, fac.accentColor); paint(m.plinth, fac.plinthColor || fac.accentColor); paint(m.coping, fac.copingColor || fin.roof);
+    paint(m.aluminium, fin.aluminium); paint(m.doorEntry, fin.entryDoor); paint(m.fence, fin.fence);
+    if (fac.base === 'stone') { m.render.map = m.accent.map; m.render.bumpMap = m.accent.bumpMap; m.render.bumpScale = m.accent.bumpScale; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
+    if (fac.base === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
+  }
   const T = opt.slab, PL = opt.plinth;
   const result = { group, rooms: new Map(), levels: [], site: null, stats: {}, lib, options: opt, doc };
   const levelsDoc = doc.levels?.length ? doc.levels : [{ id: 'L1', name: 'الدور الأرضي', elevation: 0, height: 3.2 }];
@@ -112,6 +120,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     // stone accent on the façade that carries the entry door
     const accentSegs = new Set();
     if (opt.stoneAccent === 'entry' && ground) for (const seg of L.solids.segments) if (seg.ext !== 0 && seg.openings.some(o => o.entry)) accentSegs.add(seg.id);
+    if (opt.stoneAccent === 'all' && ground) for (const seg of L.solids.segments) if (seg.ext !== 0) accentSegs.add(seg.id);
 
     const groundExt = ground ? PL + .08 : 0, plinthTop = .9;
     const colRows = (len, jS, jE) => ({ cols: [...(jS ? [.12, .5] : []), ...(jE ? [len - .5, len - .12] : [])] });
@@ -157,7 +166,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
             const accent = accentSegs.has(seg.id) && !fence;
             const colorAt = opt.ao ? (u, z) => { const zz = z + (ground ? PL : 0); const a = zz < .5 ? .84 + .16 * smooth(zz / .5) : 1; return [a, a, a]; } : () => WHITE;
             if (accent) faceGrid('accent', A, Bp, nrm, z0, z1, uOff, colorAt, [], [0, .5, 1, 1.5, 2, 2.5, 3]);
-            else if (z0 < plinthTop && !fence) {
+            else if (z0 < plinthTop && !fence && fac.plinth !== false) {
               faceGrid('plinth', A, Bp, nrm, z0, Math.min(z1, plinthTop), uOff, colorAt, [], [0]);
               if (z1 > plinthTop) faceGrid('render', A, Bp, nrm, plinthTop, z1, uOff, colorAt, [], []);
             } else faceGrid('render', A, Bp, nrm, z0, z1, uOff, colorAt, [], []);
@@ -226,7 +235,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     // ---- rooms: floors, ceilings, roofs, slabs ----------------------------------------------------------------------
     for (const sp of L.spaces) {
       const holes = holesFor(L, sp), net = sp.net, polyHoles = sp.holes;
-      const floorKey = ROOM_TYPES[sp.type]?.floor || 'tile';
+      const floorKey = (doc.finish?.floors || {})[sp.type] || ROOM_TYPES[sp.type]?.floor || 'tile';
       const floorMat = lib.get(floorKey) || lib.get('tile');
       const fb = new MeshBuilder(THREE);
       fb.flatPoly(floorKey, net, [...polyHoles, ...holes.below], E, 1, p => [p.x, -p.y]);

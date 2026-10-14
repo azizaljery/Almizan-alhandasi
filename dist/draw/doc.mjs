@@ -108,6 +108,24 @@ const PATCH_FIELDS = {
 
 function rebuildLevelElevations(doc) { let z = 0; for (const l of doc.levels) { l.elevation = z; z += l.height; } }
 
+const HEX = /^#[0-9a-fA-F]{6}$/;
+export const FINISH_ENUMS = Object.freeze({ base: ['render', 'stone', 'paint'], accent: ['entry', 'all', 'none'], floor: ['marble', 'tile', 'wood', 'wet', 'concrete'] });
+/** Validated merge of the façade / material choices (colours are #rrggbb, everything else from a closed list). */
+export function mergeFinish(cur, patch) {
+  const out = structuredClone(cur || {});
+  const color = (v, name) => { if (!HEX.test(v)) fail('BAD_COLOR', `لون غير صالح: ${name}.`); return v.toLowerCase(); };
+  if (patch.facade) {
+    const f = patch.facade, o = (out.facade = { ...(out.facade || {}) });
+    if (f.base !== undefined) o.base = FINISH_ENUMS.base.includes(f.base) ? f.base : fail('BAD_FINISH', 'نوع الواجهة غير معروف.');
+    if (f.accent !== undefined) o.accent = FINISH_ENUMS.accent.includes(f.accent) ? f.accent : fail('BAD_FINISH', 'نوع الكسوة غير معروف.');
+    if (f.plinth !== undefined) o.plinth = !!f.plinth;
+    for (const k of ['color', 'accentColor', 'plinthColor', 'copingColor']) if (f[k] !== undefined) o[k] = f[k] === null ? undefined : color(f[k], k);
+  }
+  for (const k of ['aluminium', 'entryDoor', 'fence', 'roof']) if (patch[k] !== undefined) out[k] = patch[k] === null ? undefined : color(patch[k], k);
+  if (patch.floors) { out.floors = { ...(out.floors || {}) }; for (const [t, v] of Object.entries(patch.floors)) { if (!isRoomType(t)) fail('BAD_TYPE', 'نوع الغرفة غير معروف.'); if (v === null) delete out.floors[t]; else out.floors[t] = FINISH_ENUMS.floor.includes(v) ? v : fail('BAD_FINISH', 'نوع الأرضية غير معروف.'); } }
+  return JSON.parse(JSON.stringify(out));
+}
+
 const HANDLERS = {
   'add-wall'(doc, c) { const w = newWall(doc, c); return { ids: [w.id] }; },
   'add-walls'(doc, c) {
@@ -325,6 +343,7 @@ const HANDLERS = {
     if (c.title !== undefined) doc.title = String(c.title).slice(0, 120);
     if (c.roof) doc.roof = { ...doc.roof, ...c.roof };
     if (c.settings) doc.settings = { ...doc.settings, ...c.settings };
+    if (c.finish) doc.finish = mergeFinish(doc.finish, c.finish);
     return { ids: [] };
   },
   batch(doc, c) {

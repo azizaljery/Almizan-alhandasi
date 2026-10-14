@@ -124,6 +124,16 @@ await page.click('#btnExample'); await page.waitForTimeout(400);
 s = await st(); ok('example villa loads and has rooms', s.rooms >= 8, 'rooms=' + s.rooms);
 await page.click('[data-view="split"]'); await page.waitForTimeout(2500); await page.evaluate(() => __mizanStudio.fit()); await shot('08-villa-split');
 await page.click('[data-tab=rooms]'); await shot('09-rooms');
+// ---- facades and materials tab
+await page.click('[data-view="3d"]'); await page.waitForTimeout(1200);
+await page.click('[data-tab=finish]');
+await page.click('.preset:has-text("حجر كامل")'); await page.waitForTimeout(1500);
+const fin = await page.evaluate(() => __mizanStudio.doc.finish?.facade?.base);
+ok('finish preset stored in the document', fin === 'stone', fin);
+await page.click('.facades button:has-text("الجنوبية")'); await page.waitForTimeout(2500); await shot('10-facade-south-stone');
+await page.click('.preset:has-text("حديث أبيض")'); await page.waitForTimeout(1500);
+await page.click('.facades button:has-text("الشمالية")'); await page.waitForTimeout(2500); await shot('11-facade-north-white');
+await page.click('[data-view="split"]');
 // ---- touch: pinch zoom via two pointers is exercised through CDP is skipped; keyboard zoom instead
 const sc0 = await page.evaluate(() => __mizanStudio.view.scale); await page.locator('#planCanvas').focus(); await page.keyboard.press('+');
 ok('+ key zooms in', (await page.evaluate(() => __mizanStudio.view.scale)) > sc0);
