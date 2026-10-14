@@ -20,7 +20,8 @@ const click = id => page.evaluate(i => document.getElementById(i)?.dispatchEvent
 const set = (id, v) => page.evaluate(([i, v]) => { const e = document.getElementById(i); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); }, [id, v]);
 const text = id => page.evaluate(i => document.getElementById(i)?.textContent || '', id);
 
-await page.goto(BASE + '/?smoke=' + Date.now(), { waitUntil: 'load' });
+// الصفحة الرئيسية صارت المرسم؛ هذا الفحص يخص واجهة النظام القديم فيفتحها صراحة.
+await page.goto(BASE + '/?legacy=1&smoke=' + Date.now(), { waitUntil: 'load' });
 await page.waitForTimeout(1500);
 const ids = ['sunDay', 'sunDaySlider', 'sunDayPlay', 'compare3d', 'compareSelectA', 'autoTour', 'recordTour', 'stopAutoTour', 'tourDownload', 'reportSlot', 'reportSoon'];
 const missing = await page.evaluate(list => list.filter(i => !document.getElementById(i)), ids);
