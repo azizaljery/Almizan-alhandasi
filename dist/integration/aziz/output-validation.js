@@ -1,3 +1,4 @@
+import { stableStringify } from './util.js';
 const MAX_CANDIDATES_PER_OUTPUT = 200;
 const MAX_ROOMS_PER_CANDIDATE = 500;
 const MAX_POINTS_PER_POLYGON = 5000;
@@ -162,6 +163,16 @@ function validCandidateShape(c) {
     }
     return true;
 }
+// Canonical full-content key; if the candidate cannot be canonicalised it is treated as unique (fail closed).
+let uniqueCounter = 0;
+function contentKey(c) {
+    try {
+        return stableStringify(c);
+    }
+    catch {
+        return `unserialisable#${uniqueCounter++}`;
+    }
+}
 export function validateEngineOutput(raw, adapter, inputHash) {
     if (!raw || typeof raw !== 'object')
         return { ok: false, reason: 'NOT_OBJECT' };
@@ -218,7 +229,7 @@ export function validateEngineOutput(raw, adapter, inputHash) {
         return { ok: false, reason: 'TOO_MANY_CANDIDATES' };
     const validCandidates = [];
     const invalidCandidateIds = [];
-    const seen = new Set();
+    const seen = new Map();
     for (const c of o.candidates) {
         if (!validCandidateShape(c)) {
             const id = c?.candidateId ?? 'unknown';
@@ -237,11 +248,21 @@ export function validateEngineOutput(raw, adapter, inputHash) {
             invalidCandidateIds.push(c.candidateId);
             continue;
         }
-        if (seen.has(c.candidateId)) {
-            invalidCandidateIds.push(c.candidateId);
-            continue;
+        // DEC-001: an identical twin of an already accepted candidate is dropped as before, but a
+        // SAME-ID candidate with different content is kept so AZIZ's collision gate rejects every
+        // member. First-wins here made the geometry behind an id depend on arrival order.
+        const content = contentKey(c);
+        const known = seen.get(c.candidateId);
+        if (known) {
+            if (known.has(content)) {
+                invalidCandidateIds.push(c.candidateId);
+                continue;
+            }
+            known.add(content);
         }
-        seen.add(c.candidateId);
+        else {
+            seen.set(c.candidateId, new Set([content]));
+        }
         validCandidates.push(c);
     }
     return {

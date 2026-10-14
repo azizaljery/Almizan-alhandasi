@@ -1,0 +1,8 @@
+ok 1 - untouched project: identity survives restore unchanged and is not flagged
+not ok 2 - tampered door position: restored identity is invalidated and flagged for review
+not ok 3 - tampered room geometry (program) is detected too
+not ok 4 - forged geometryHash value is detected (hash edited instead of geometry)
+not ok 5 - the file is still readable after a mismatch (no rejection) and the flag survives re-save/re-open
+ok 6 - legacy models without integration are untouched
+# pass 2
+# fail 4

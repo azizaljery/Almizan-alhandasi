@@ -4,8 +4,27 @@ import { estimate, quantityRows } from './estimates.mjs';
 import { validateLandSurvey } from './land-survey.mjs';
 import { normalizeSiteSolar } from './solar-context.mjs';
 import { normalizeStudioSession } from './studio-session.mjs';
+import schema from './integration/control/contracts/mizan-envelope-v1.schema.mjs';
+import { canonicalJSON, FRAME, UNITS } from './integration/control/reference/identity.mjs';
+import { sha256 } from './integration/browser-crypto.mjs';
 
 export const MAX_PROJECT_BYTES = 2_000_000;
+// DEC-002 (ID-01): identity is re-verified on restore. Same key set and same canonical profile as
+// integration/pipeline.mjs (GEOMETRY_KEYS + mizan-json-sorted-keys-v1); the synchronous SHA-256 is byte-identical to WebCrypto.
+const GEOMETRY_KEYS = [...Object.keys(schema.$defs.geometry.properties), 'footprint', 'program'];
+const recomputeGeometryHash = model => sha256(canonicalJSON({ units: UNITS, frame: FRAME, geometry: Object.fromEntries(GEOMETRY_KEYS.filter(k => model[k] !== undefined).map(k => [k, model[k]])) }));
+/** Fail CLOSED: a stored geometryHash that does not match the restored geometry (or cannot be checked) invalidates the
+ *  identity exactly like an edit does (geometry-editor.mjs) and demands a new review. The file is never rejected for this. */
+export function verifyRestoredIdentity(model) {
+  const i = model?.integration;
+  if (!i || i.requiresReview === true || (i.candidateId == null && i.geometryHash == null)) return model; // legacy, or already invalidated
+  let ok = false;
+  try { ok = typeof i.geometryHash?.value === 'string' && i.geometryHash.value === recomputeGeometryHash(model); } catch { ok = false; }
+  if (ok) return model;
+  model.integration = { previousCandidateId: i.candidateId || i.previousCandidateId || null, candidateId: null, geometryHash: null, reviewId: null,
+    reviewOverall: 'NOT_EVALUATED', reviewCoverage: null, requiresReview: true, restoreCheck: 'GEOMETRY_HASH_MISMATCH' };
+  return model;
+}
 const palettes = ['resort', 'modern', 'classic', 'hijazi'];
 const publicRooms = rooms => normalizeRooms(rooms).map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) }));
 const palette = value => { if (!palettes.includes(value)) throw Error('طابع محفوظ غير معروف.'); return value; };
@@ -86,7 +105,7 @@ export function decodeProject(text) {
   const rebuild = recipe => {
     if (!recipe) return null;
     const key = JSON.stringify(recipe);
-    if (!cache.has(key)) cache.set(key, recipe.embedded ? structuredClone(recipe.embedded) : generateModel(recipe.plot, recipe.rooms, { strategy: recipe.strategy }));
+    if (!cache.has(key)) cache.set(key, recipe.embedded ? verifyRestoredIdentity(structuredClone(recipe.embedded)) : generateModel(recipe.plot, recipe.rooms, { strategy: recipe.strategy }));
     return cache.get(key);
   };
   // Rebuild and validate every design before allowing the UI to replace its state.

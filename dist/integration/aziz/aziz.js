@@ -237,33 +237,15 @@ export function createAziz(configInput = {}, clock = systemClock) {
                 });
             }
         }
-        // Reject low-confidence candidates before any duplicate arbitration so a
-        // low-confidence candidate can never suppress a stronger design.
-        const confidenceEligible = [];
-        for (const c of allCandidates) {
-            if (c.engineConfidence < config.confidenceFloor) {
-                rejections.push({
-                    candidateId: c.candidateId, engineId: c.producedBy, code: 'LOW_CONFIDENCE',
-                    description: `Candidate confidence ${c.engineConfidence} below floor ${config.confidenceFloor}`,
-                    evidence: [], severity: 'critical',
-                });
-                provenance.push({
-                    entryId: deterministicId('prov', [input.requestId, c.candidateId, 'low-confidence']),
-                    at: clock.nowIso(), actor: 'aziz', action: 'rejected', subject: c.candidateId,
-                    statement: `Low confidence (${c.engineConfidence} < ${config.confidenceFloor})`,
-                    evidence: [], confidence: 1,
-                });
-                continue;
-            }
-            confidenceEligible.push(c);
-        }
-        // Candidate IDs are global identities. Reject every collision rather than
-        // keeping whichever engine happened to appear first.
+        // Candidate IDs are global identities. An ambiguous identity is detected FIRST (DEC-001):
+        // before the confidence filter and before any ranking. Every member of a colliding id is
+        // rejected, so the outcome never depends on which engine or candidate arrived first and a
+        // weaker-confidence peer cannot let the other member through.
         const idCounts = new Map();
-        for (const c of confidenceEligible)
+        for (const c of allCandidates)
             idCounts.set(c.candidateId, (idCounts.get(c.candidateId) ?? 0) + 1);
         const idUniqueCandidates = [];
-        for (const c of confidenceEligible) {
+        for (const c of allCandidates) {
             if ((idCounts.get(c.candidateId) ?? 0) > 1) {
                 const rejection = {
                     candidateId: c.candidateId, engineId: c.producedBy, code: 'DUPLICATE_CANDIDATE',
@@ -280,11 +262,31 @@ export function createAziz(configInput = {}, clock = systemClock) {
             }
             idUniqueCandidates.push(c);
         }
+        // Reject low-confidence candidates before any design-level duplicate arbitration so a
+        // low-confidence candidate can never suppress a stronger design.
+        const confidenceEligible = [];
+        for (const c of idUniqueCandidates) {
+            if (c.engineConfidence < config.confidenceFloor) {
+                rejections.push({
+                    candidateId: c.candidateId, engineId: c.producedBy, code: 'LOW_CONFIDENCE',
+                    description: `Candidate confidence ${c.engineConfidence} below floor ${config.confidenceFloor}`,
+                    evidence: [], severity: 'critical',
+                });
+                provenance.push({
+                    entryId: deterministicId('prov', [input.requestId, c.candidateId, 'low-confidence']),
+                    at: clock.nowIso(), actor: 'aziz', action: 'rejected', subject: c.candidateId,
+                    statement: `Low confidence (${c.engineConfidence} < ${config.confidenceFloor})`,
+                    evidence: [], confidence: 1,
+                });
+                continue;
+            }
+            confidenceEligible.push(c);
+        }
         // The engine-supplied geometryHash is provenance only; it is not trusted
         // for arbitration. Deduplicate by canonical validated design content and
         // choose the representative deterministically, independent of input order.
         const designGroups = new Map();
-        for (const c of idUniqueCandidates) {
+        for (const c of confidenceEligible) {
             const key = canonicalDesignKey(c);
             const group = designGroups.get(key) ?? [];
             group.push(c);

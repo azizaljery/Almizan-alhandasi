@@ -1,0 +1,66 @@
+
+S1 cross-engine: X=RECT (e1) vs X=L (e2)
+  contract: C1: reject both, order independent
+  permutations=4 distinctOutcomes=1 orderIndependent=true
+  status=["all-rejected"] selected=[null] selectedGeometry=[null]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=1
+
+S2 SAME engine: X=RECT, X=L in one output
+  contract: C1: reject both, order independent
+  permutations=2 distinctOutcomes=1 orderIndependent=true
+  status=["all-rejected"] selected=[null] selectedGeometry=[null]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=2
+
+S2b SAME engine + a unique Y
+  contract: C1 + unique continues
+  permutations=2 distinctOutcomes=1 orderIndependent=true
+  status=["selected"] selected=["Y"] selectedGeometry=["413.1"]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=2
+
+S3 three-way cross-engine X=RECT/L/U
+  contract: C1: reject all three
+  permutations=12 distinctOutcomes=1 orderIndependent=true
+  status=["all-rejected"] selected=[null] selectedGeometry=[null]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=2
+
+S4 collision group + unique Y (cross-engine)
+  contract: C1: only Y passes
+  permutations=4 distinctOutcomes=1 orderIndependent=true
+  status=["selected"] selected=["Y"] selectedGeometry=["413.1"]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=1
+
+S5 identical content, cross-engine (X=RECT in e1 and e2)
+  contract: C3: observe only
+  permutations=4 distinctOutcomes=1 orderIndependent=true
+  status=["all-rejected"] selected=[null] selectedGeometry=[null]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=1
+
+S5b identical content, SAME engine (X=RECT twice)
+  contract: C3: observe only
+  permutations=2 distinctOutcomes=1 orderIndependent=true
+  status=["selected"] selected=["X"] selectedGeometry=["331.5"]
+  rejectionCodes=[] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=0
+
+S6 collision where one member is below confidence floor (X=RECT .9 vs X=L .1)
+  contract: C2: collision detected BEFORE confidence -> both rejected as DUPLICATE
+  permutations=4 distinctOutcomes=1 orderIndependent=true
+  status=["all-rejected"] selected=[null] selectedGeometry=[null]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=1
+
+S7 2 identical + 1 different (X=RECT e1, X=RECT e2, X=L e3)
+  contract: C1: reject all three
+  permutations=12 distinctOutcomes=1 orderIndependent=true
+  status=["all-rejected"] selected=[null] selectedGeometry=[null]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=2
+
+S8 no collision (control): X=RECT, Y=L, Z=U
+  contract: baseline behaviour
+  permutations=12 distinctOutcomes=1 orderIndependent=true
+  status=["selected"] selected=["X"] selectedGeometry=["331.5"]
+  rejectionCodes=[] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=0
+
+S9 different IDs, identical design (A,B same RECT)
+  contract: design dedupe must be order independent
+  permutations=4 distinctOutcomes=1 orderIndependent=true
+  status=["selected"] selected=["A"] selectedGeometry=["331.5"]
+  rejectionCodes=["DUPLICATE_CANDIDATE"] rejectedIdLeakedIntoSurvivors=0 duplicateProvenanceEntryIds=0

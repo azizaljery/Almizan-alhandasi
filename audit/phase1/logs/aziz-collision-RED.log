@@ -1,0 +1,14 @@
+not ok 1 - same id, different content, ONE engine: every member rejected, independent of order
+not ok 2 - same id, different content, ONE engine, plus a unique candidate: only the unique one continues
+not ok 3 - same engine: identical twin + a different member under one id => all rejected (any order)
+ok 4 - different engines, different content: every member rejected, independent of order (regression)
+ok 5 - three engines colliding on one id: all rejected; unique candidate survives alone (regression)
+not ok 6 - collision is detected BEFORE the confidence filter: a low-confidence peer cannot let the other member through
+ok 7 - a low-confidence candidate with a UNIQUE id is still rejected by confidence (behaviour preserved)
+ok 8 - pre-existing policy kept: identical content under one id across engines is rejected as before
+ok 9 - pre-existing policy kept: identical twin inside ONE engine collapses to a single candidate as before
+ok 10 - control: no collision keeps the previous behaviour and is order independent
+ok 11 - different ids with identical design still dedupe order-independently (regression)
+# tests 11
+# pass 7
+# fail 4
