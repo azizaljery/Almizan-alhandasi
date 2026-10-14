@@ -8,6 +8,7 @@ import { reviewDoc } from './draw/review.mjs';
 import { digestDoc, describeDigestAr } from './draw/digest.mjs';
 import { askDrawingAssistant } from './draw/assistant-client.mjs';
 import { wallRect, fixtureRect } from './draw/review.mjs';
+import { downloadManifest } from './export-manifest.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c != null) n.append(c.nodeType ? c : document.createTextNode(String(c))); return n; };
@@ -26,6 +27,8 @@ $('docTitle').value = editor.doc.title;
 let toastTimer = 0;
 function toast(msg, err = false) { const t = $('toast'); t.textContent = msg; t.className = 'toast' + (err ? ' err' : ''); t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, err ? 4200 : 2400); }
 function download(name, blob) { const a = el('a', { href: URL.createObjectURL(blob), download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+// EX-01: كل تصدير (غير ملف المشروع نفسه) يرافقه بيان .manifest.json يربط البايتات بالمستند وبناء التطبيق؛ لا يمسّ محتوى التصدير.
+function exportWithManifest(name, blob, kind) { download(name, blob); void downloadManifest({ kind, fileName: name, mime: blob.type || null, payload: blob, studioDocument: serialize(editor.doc) }, (b, n) => download(n, b)); }
 const debounce = (fn, ms) => { let t = 0; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 const num = (v, d = 2) => (Math.round(v * 10 ** d) / 10 ** d).toString();
 function ask(title, fields) { // small modal: fields [{key,label,type,value,options}]
@@ -384,7 +387,7 @@ document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.addEventListene
 document.querySelectorAll('#styleSeg [data-style]').forEach(b => b.addEventListener('click', () => { viewer?.setStyle(b.dataset.style); document.querySelectorAll('#styleSeg [data-style]').forEach(x => x.classList.toggle('on', x === b)); }));
 $('sunAz').addEventListener('input', e => viewer?.setSun({ azimuthDeg: +e.target.value })); $('sunAlt').addEventListener('input', e => viewer?.setSun({ altitudeDeg: +e.target.value }));
 $('secH').addEventListener('input', e => viewer?.setSectionHeight(+e.target.value)); $('isoLevel').addEventListener('change', sync3DLevel);
-$('shot3d').addEventListener('click', async () => { if (!viewer?.built) return toast('لا يوجد مجسم بعد'); try { download((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2)); } catch { toast('تعذّر التقاط الصورة', true); } });
+$('shot3d').addEventListener('click', async () => { if (!viewer?.built) return toast('لا يوجد مجسم بعد'); try { exportWithManifest((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2), 'studio-3d-png'); } catch { toast('تعذّر التقاط الصورة', true); } });
 // automatic walkthrough (orbit, approach, rooms) with optional local WebM recording
 let touring = false, rebuildAfterTour = false;
 let viewBeforeTour = null;
@@ -449,9 +452,9 @@ document.addEventListener('click', () => { $('exportMenu').hidden = true; });
 $('exportMenu').addEventListener('click', async e => {
   const kind = e.target.dataset.export; if (!kind) return;
   if (kind === 'json') saveJson();
-  else if (kind === 'png') { editor.canvas.toBlob(b => b && download((editor.doc.title || 'mizan') + '-plan.png', b)); }
-  else if (kind === 'png3d') { const v = await ensureViewer(); if (!v?.built) await rebuild3D(); try { download((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2)); } catch { toast('اعرض المجسم أولًا ثم أعد المحاولة', true); } }
-  else if (kind === 'dxf') download((editor.doc.title || 'mizan') + '.dxf', new Blob([toDxf(editor.doc)], { type: 'application/dxf' }));
+  else if (kind === 'png') { editor.canvas.toBlob(b => b && exportWithManifest((editor.doc.title || 'mizan') + '-plan.png', b, 'studio-plan-png')); }
+  else if (kind === 'png3d') { const v = await ensureViewer(); if (!v?.built) await rebuild3D(); try { exportWithManifest((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2), 'studio-3d-png'); } catch { toast('اعرض المجسم أولًا ثم أعد المحاولة', true); } }
+  else if (kind === 'dxf') exportWithManifest((editor.doc.title || 'mizan') + '.dxf', new Blob([toDxf(editor.doc)], { type: 'application/dxf' }), 'studio-dxf');
 });
 function toDxf(doc) {
   const out = ['0', 'SECTION', '2', 'ENTITIES'], mm = v => (v * 1000).toFixed(1);

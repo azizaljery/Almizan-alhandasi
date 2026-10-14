@@ -35,6 +35,7 @@ import { initSunDayUI } from './sun-day-ui.mjs';
 import { initCompare3D } from './compare3d.mjs';
 import { initAutoTourUI } from './tour-recorder-ui.mjs';
 import { evaluateRequirementEvidence, renderRequirementEvidenceHTML } from './requirement-evidence.mjs';
+import { downloadManifest } from './export-manifest.mjs';
 
 const $ = id => document.getElementById(id), all = selector => [...document.querySelectorAll(selector)];
 const number = id => $(id).valueAsNumber;
@@ -1227,7 +1228,10 @@ async function exportResult(kind) {
     const archive = state.archive, version = archive.loadedVersion;
     const { blob, mime } = await archiveDownload(`/api/archive/designs/${encodeURIComponent(archive.designId)}/exports/${kind}`, { receiptId: archive.receiptId, expectedVersion: version });
     if (!archiveIsCurrent() || archive.loadedVersion !== version) return toast('تغيّرت النسخة أثناء تجهيز التصدير؛ أُلغِي التنزيل.');
-    download(blob, mime, kind === 'svg' ? 'mizan-handasi-plan.svg' : 'mizan-handasi-quantities.csv');
+    const fileName = kind === 'svg' ? 'mizan-handasi-plan.svg' : 'mizan-handasi-quantities.csv';
+    download(blob, mime, fileName);
+    // EX-01: بيان مرافق يربط البايتات المنزّلة بالمرشح والبصمة وبناء التطبيق (لا يغيّر محتوى التصدير).
+    void downloadManifest({ kind: 'archive-' + kind, fileName, mime, payload: blob, model: state.model }, (b, n) => download(b, 'application/json;charset=utf-8', n));
   } catch (error) { toast(error.message || 'تعذر تصدير النسخة المحفوظة.'); }
 }
 

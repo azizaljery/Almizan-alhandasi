@@ -12,7 +12,7 @@ export const MAX_PROJECT_BYTES = 2_000_000;
 // DEC-002 (ID-01): identity is re-verified on restore. Same key set and same canonical profile as
 // integration/pipeline.mjs (GEOMETRY_KEYS + mizan-json-sorted-keys-v1); the synchronous SHA-256 is byte-identical to WebCrypto.
 const GEOMETRY_KEYS = [...Object.keys(schema.$defs.geometry.properties), 'footprint', 'program'];
-const recomputeGeometryHash = model => sha256(canonicalJSON({ units: UNITS, frame: FRAME, geometry: Object.fromEntries(GEOMETRY_KEYS.filter(k => model[k] !== undefined).map(k => [k, model[k]])) }));
+export const recomputeGeometryHash = model => sha256(canonicalJSON({ units: UNITS, frame: FRAME, geometry: Object.fromEntries(GEOMETRY_KEYS.filter(k => model[k] !== undefined).map(k => [k, model[k]])) }));
 /** Fail CLOSED: a stored geometryHash that does not match the restored geometry (or cannot be checked) invalidates the
  *  identity exactly like an edit does (geometry-editor.mjs) and demands a new review. The file is never rejected for this. */
 export function verifyRestoredIdentity(model) {

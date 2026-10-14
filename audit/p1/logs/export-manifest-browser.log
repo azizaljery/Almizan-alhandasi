@@ -1,0 +1,31 @@
+[
+ {
+  "kind": "dxf",
+  "files": [
+   "فيلا نموذجية.dxf",
+   "فيلا نموذجية.manifest.json"
+  ],
+  "hashMatches": true,
+  "nameMatches": true,
+  "sourceKind": "studio-document",
+  "identity": "NONE",
+  "docHash": true,
+  "commit": "959d1dd48ce7d5fbea6cdcdf51d194b9cd3c4a8b",
+  "bytes": true
+ },
+ {
+  "kind": "png",
+  "files": [
+   "فيلا نموذجية-plan.png",
+   "فيلا نموذجية-plan.manifest.json"
+  ],
+  "hashMatches": true,
+  "nameMatches": true,
+  "sourceKind": "studio-document",
+  "identity": "NONE",
+  "docHash": true,
+  "commit": "959d1dd48ce7d5fbea6cdcdf51d194b9cd3c4a8b",
+  "bytes": true
+ }
+] pageerrors: 0 []
+BROWSER CHECK: PASS

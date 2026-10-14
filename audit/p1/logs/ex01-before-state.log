@@ -1,0 +1,3 @@
+HEAD:dist/app.mjs:215:    const preferred = ranking.ranked?.find(row => row.candidateId === ranking.bestPreferenceCandidateId);
+HEAD:dist/app.mjs:216:    const selected = ranking.ranked?.find(row => row.candidateId === ranking.selectedCandidateId);
+(before-state: export sites at HEAD — lines above mention identity only if present)

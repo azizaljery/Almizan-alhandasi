@@ -1,0 +1,8 @@
+not ok 4 - F-002 l: footprint equals the polygon area, with the pinned reference value
+not ok 5 - F-002 l: the bounding-box area is NOT what the footprint reports
+not ok 7 - F-002 u: footprint equals the polygon area, with the pinned reference value
+not ok 8 - F-002 u: the bounding-box area is NOT what the footprint reports
+not ok 10 - F-002 U: the courtyard equals the bbox overstatement (bbox − polygon) — the relation that defines the error marker
+not ok 11 - F-002: the pinned legacy compat layer (dist/claude, read-only) agrees with the production quantities()
+# pass 5
+# fail 6

@@ -1,9 +1,12 @@
 // زر «لوحة العرض»: يفتح لوحة الصفحة الواحدة للعميل من النموذج الحالي، مع تنزيل SVG/PNG وطباعة PDF.
 import { buildPresentationBoard } from './presentation-board.mjs';
+import { downloadManifest } from './export-manifest.mjs';
 
 const $ = id => document.getElementById(id);
 const stamp = () => new Date().toLocaleDateString('en-CA');
 let dialog;
+// EX-01: بيان مرافق للتصدير (SVG/PNG)؛ الطباعة/PDF لا تحمل بيانًا (قيد متصفح مسجّل).
+function saveWithManifest(blob, name, kind) { saveBlob(blob, name); void downloadManifest({ kind, fileName: name, mime: blob.type || null, payload: blob, model: window.mizanPresentation?.currentModel() }, saveBlob); }
 
 function toast(text) {
   const t = $('toast'); if (!t) return;
@@ -33,7 +36,7 @@ function ensureDialog() {
   window.addEventListener('afterprint', () => document.body.classList.remove('printing-board'));
   $('boardSvg').addEventListener('click', () => {
     const svg = $('boardStage').querySelector('svg'); if (!svg) return;
-    saveBlob(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' }), `mizan-board-${stamp()}.svg`);
+    saveWithManifest(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' }), `mizan-board-${stamp()}.svg`, 'board-svg');
   });
   $('boardPng').addEventListener('click', () => {
     const svg = $('boardStage').querySelector('svg'); if (!svg) return;
@@ -41,7 +44,7 @@ function ensureDialog() {
     img.onload = () => {
       const c = document.createElement('canvas'); c.width = w * 2; c.height = h * 2;
       const g = c.getContext('2d'); g.scale(2, 2); g.drawImage(img, 0, 0, w, h);
-      c.toBlob(b => b ? saveBlob(b, `mizan-board-${stamp()}.png`) : toast('تعذر إنشاء الصورة؛ استخدم PDF.'), 'image/png');
+      c.toBlob(b => b ? saveWithManifest(b, `mizan-board-${stamp()}.png`, 'board-png') : toast('تعذر إنشاء الصورة؛ استخدم PDF.'), 'image/png');
     };
     img.onerror = () => toast('تعذر إنشاء الصورة؛ استخدم PDF.');
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
