@@ -165,7 +165,7 @@ export class DrawViewer {
     if (doc.north !== undefined) this.sunState = { ...this.sunState, north: doc.north || 0 };
     this.applyStyle();
     this.fitShadow();
-    this.frameBuilding();
+    if (options.keepCamera && this.built.bounds) { if (this.mode !== 'walk') this.applyOrbitCamera(); } else this.frameBuilding();
     this.applyVisibility();
     this.emit('doc');
     this.requestRender();
