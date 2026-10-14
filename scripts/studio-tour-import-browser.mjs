@@ -159,7 +159,12 @@ try {
   probe = JSON.parse(raw);
 } catch (e) { console.log('ffprobe failed: ' + e.message.slice(0, 200)); }
 const stream = probe.streams?.[0] || {}, size = Number(probe.format?.size || 0), frames = Number(stream.nb_read_frames || 0);
-ok('the file is a real WebM video with picture frames', /vp[89]/.test(stream.codec_name || '') && stream.width > 300 && stream.height > 200 && frames >= 5 && size > 10000, JSON.stringify({ codec: stream.codec_name, w: stream.width, h: stream.height, frames, size, duration: probe.format?.duration }));
+ok('the file is a real WebM video with picture frames', /vp[89]/.test(stream.codec_name || '') && stream.width > 300 && stream.height > 200 && frames >= 5 && size > 10000 && Number(probe.format?.duration) > 3, // a duration in the header lets players show the length and seek
+  JSON.stringify({ codec: stream.codec_name, w: stream.width, h: stream.height, frames, size, duration: probe.format?.duration }));
+// no black opening frame: the encoder used to blank the first picture
+let firstMean = -1;
+try { firstMean = execFileSync('ffmpeg', ['-v', 'error', '-i', webm, '-vf', 'select=eq(n\\,0),scale=1:1', '-vsync', '0', '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'gray', '-']).readUInt8(0); } catch (e) { console.log('first-frame check failed: ' + e.message.slice(0, 160)); }
+ok('the video does not open on a black frame', firstMean > 40, 'mean grey of frame 1: ' + firstMean);
 // the video must show the camera moving: frames from the start, the middle and the end must differ
 let moved = false;
 try {

@@ -458,7 +458,7 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     }
     const topX = lean * trunkH * .3;
     ell('trunk', .17, .14, .17, topX, trunkH + .05, 0, 10, 6);
-    const fronds = 13;
+    const fronds = 15;
     for (let i = 0; i < fronds; i++) {
       const a = (i / fronds) * Math.PI * 2 + R() * .3, len = (.9 + R() * .35) * Math.min(w, 2.2) * 1.35, droop = .5 + R() * .5;
       add(frondGeometry(THREE, len, droop), 'frond', topX, trunkH + .06, 0, 0, a, 0);
@@ -483,16 +483,18 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
 
 /** A drooping palm frond: a tapered, curved double sided ribbon with a few leaflet notches. */
 function frondGeometry(THREE, len, droop) {
-  const seg = 8, pos = [], idx = [], nor = [], uv = [];
+  // A broad, feather-shaped blade: widest about a third of the way out, tapering to a point, folded along the midrib (V section)
+  // so it catches light from both sides. The old ribbon was ~6% as wide as it was long and read as a needle at any distance.
+  const seg = 12, pos = [], idx = [], uv = [], maxHalf = len * .085;
   for (let i = 0; i <= seg; i++) {
     const t = i / seg, x = len * t, y = Math.sin(t * Math.PI * .75) * len * .22 - droop * t * t * len * .42;
-    const half = Math.sin(Math.min(1, t * 1.2) * Math.PI) * .09 + .012;
-    pos.push(x, y, -half, x, y + .02, half); nor.push(0, 1, 0, 0, 1, 0); uv.push(t, 0, t, 1);
-    if (i < seg) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+    const half = maxHalf * Math.pow(Math.sin(Math.min(1, t * 1.08 + .04) * Math.PI), .75) * (1 - .25 * t) + .012;
+    const fold = half * .38;
+    pos.push(x, y - fold, -half, x, y, 0, x, y - fold, half); uv.push(t, 0, t, .5, t, 1);
+    if (i < seg) { const a = i * 3; idx.push(a, a + 1, a + 3, a + 1, a + 4, a + 3, a + 1, a + 2, a + 4, a + 2, a + 5, a + 4); }
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
   geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   geo.setIndex(idx);
   geo.computeVertexNormals();

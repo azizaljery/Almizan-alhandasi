@@ -20,8 +20,8 @@ export const STYLES = Object.freeze({
     env: 1.0, exposure: .9, fog: '#dde7ee', sunAltitude: 52, glassGlow: 0, lamp: 0.25,
   },
   dusk: {
-    zenith: '#243257', horizon: '#f2a46b', ground: '#4b3f49', sun: '#ff9d5c', sunIntensity: 2.3, hemiSky: '#7d8cc0', hemiGround: '#4a3f45', hemi: .45,
-    env: .62, exposure: 1.05, fog: '#c98d73', sunAltitude: 7, glassGlow: .55, lamp: 1.2,
+    zenith: '#243257', horizon: '#f2a46b', ground: '#6b5560', sun: '#ff9d5c', sunIntensity: 2.3, hemiSky: '#8d9ad0', hemiGround: '#8a6c62', hemi: .62,
+    env: .75, exposure: 1.12, fog: '#d9966b', sunAltitude: 11, glassGlow: .55, lamp: 1.2,
   },
 });
 
@@ -36,6 +36,7 @@ export class DrawViewer {
     const r = this.renderer;
     r.outputColorSpace = T.SRGBColorSpace; r.toneMapping = T.ACESFilmicToneMapping; r.toneMappingExposure = 1;
     r.shadowMap.enabled = shadows; r.shadowMap.type = T.PCFSoftShadowMap;
+    r.shadowMap.autoUpdate = false; // the sun and the model are static while the camera moves: redraw the shadow map only when something changes (markShadowDirty)
     r.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, maxPixelRatio));
     this.canvas = r.domElement; this.canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none;outline:none';
     this.canvas.tabIndex = 0;
@@ -113,6 +114,7 @@ export class DrawViewer {
       const m = this.built.lib.m;
       for (const mat of Object.values({ ...m, ...this.built.lib.fixtures })) if (mat.isMeshStandardMaterial) { mat.envMapIntensity = (mat.userData.baseEnv ??= mat.envMapIntensity) * S.env; }
       m.glass.emissive.set(S.glassGlow ? '#ffd08a' : '#000000'); m.glass.emissiveIntensity = S.glassGlow;
+      if (m.asphalt?.emissive) m.asphalt.emissive.set(S.glassGlow ? '#3b3034' : '#000000'); // the street would otherwise sink to pure black in the evening light
       const ls = this.built.lib.fixtures.lampShade; if (ls) ls.emissiveIntensity = S.lamp;
     }
   }
@@ -145,7 +147,9 @@ export class DrawViewer {
     const b = this.built?.bounds; if (!b) return;
     const T = this.THREE, c = new T.Vector3((b.x0 + b.x1) / 2, (b.minY + b.maxY) / 2, -(b.y0 + b.y1) / 2);
     const plot = this.built.plotBounds, ex = plot ? Math.max(plot.w, plot.h) * .5 : 0;
-    const R = Math.max(Math.hypot(b.w, b.h) / 2 + 3, Math.min(ex * .8 + 2, 26), 8);
+    // A low sun throws shadows several times the building's height; a frustum that stops short cuts them off with a hard straight edge.
+    const alt = Math.max(this.sunState.altitudeDeg, 5) * Math.PI / 180, reach = Math.min((b.maxY - b.minY + 1) / Math.tan(alt), 40);
+    const R = Math.min(Math.max(Math.hypot(b.w, b.h) / 2 + 3, Math.min(ex * .8 + 2, 26), 8) + reach * .7, 52);
     const dir = this.sunDirection();
     this.sun.position.copy(c).addScaledVector(dir, R * 3); this.sun.target.position.copy(c); this.sun.target.updateMatrixWorld();
     const cam = this.sun.shadow.camera; cam.left = -R; cam.right = R; cam.top = R; cam.bottom = -R; cam.near = R * 1.2; cam.far = R * 5.4; cam.updateProjectionMatrix();
@@ -197,8 +201,10 @@ export class DrawViewer {
     this.visibleLevels = new Set([this.built.levels[i].id]);
     this.applyVisibility(); this.emit('level'); this.requestRender();
   }
+  markShadowDirty() { this.sun.shadow.needsUpdate = true; }
   applyVisibility() {
     if (!this.built) return;
+    this.markShadowDirty();
     const cut = this.mode === 'dollhouse' || this.mode === 'top';
     const topShown = Math.max(...this.built.levels.filter(l => !this.visibleLevels || this.visibleLevels.has(l.id)).map(l => l.index), 0);
     for (const lv of this.built.levels) {
@@ -281,12 +287,14 @@ export class DrawViewer {
     void T;
   }
   rebuildSectionCap() {
+    this.markShadowDirty();
     if (this.sectionCap) { this.scene.remove(this.sectionCap); this.sectionCap.traverse(o => o.geometry?.dispose()); this.sectionCap = null; }
     if (!this.built) return;
     const mat = this.built.lib.m.section;
     this.sectionCap = buildSectionCap(this.THREE, this.built, this.sectionHeight, mat); this.scene.add(this.sectionCap);
   }
   clearSection() {
+    this.markShadowDirty();
     this.renderer.clippingPlanes = [];
     if (this.sectionCap) { this.scene.remove(this.sectionCap); this.sectionCap.traverse(o => o.geometry?.dispose()); this.sectionCap = null; }
   }

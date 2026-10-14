@@ -43,3 +43,16 @@ test('rounded box normals are unit length and bounds match', () => {
   const n = geo.attributes.normal;
   for (let i = 0; i < n.count; i++) assert.ok(Math.abs(Math.hypot(n.getX(i), n.getY(i), n.getZ(i)) - 1) < 1e-4);
 });
+
+test('palm fronds are broad feathered blades, not needles: width is a healthy fraction of length and the blade is folded', () => {
+  const mats = createFixtureMaterials(THREE), g = buildFixture(THREE, 'palm', { w: 2.4, d: 2.4, h: 6, seed: 3 }, mats), blades = [];
+  g.traverse(o => { if (o.isMesh && o.material === mats.frond) blades.push(o); });
+  assert.ok(blades.length >= 12, 'a full crown: ' + blades.length);
+  for (const b of blades) {
+    b.geometry.computeBoundingBox(); const bb = b.geometry.boundingBox, len = bb.max.x - bb.min.x, width = bb.max.z - bb.min.z;
+    assert.ok(width / len > .14, `frond ${width.toFixed(2)} m wide for ${len.toFixed(2)} m long`);
+    assert.ok(width > .3, 'wide enough to read from across the plot: ' + width);
+    // folded along the midrib: the rib stands higher than the edges
+    const pos = b.geometry.attributes.position, mid = Math.floor(pos.count / 3 / 2) * 3; assert.ok(pos.getY(mid + 1) > pos.getY(mid) + .01, 'V section');
+  }
+});

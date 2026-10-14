@@ -387,9 +387,13 @@ $('secH').addEventListener('input', e => viewer?.setSectionHeight(+e.target.valu
 $('shot3d').addEventListener('click', async () => { if (!viewer?.built) return toast('لا يوجد مجسم بعد'); try { download((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2)); } catch { toast('تعذّر التقاط الصورة', true); } });
 // automatic walkthrough (orbit, approach, rooms) with optional local WebM recording
 let touring = false, rebuildAfterTour = false;
-async function ensureTourViewer() {
+let viewBeforeTour = null;
+function setView(view) { $('app').dataset.view = view; document.querySelectorAll('.seg [data-view]').forEach(x => x.classList.toggle('on', x.dataset.view === view)); editor.resize(); viewer?.resize(); }
+async function ensureTourViewer({ record = false } = {}) {
   if (!editor.doc.walls.length) return null;
-  if (!threeVisible()) { $('app').dataset.view = 'split'; document.querySelectorAll('.seg [data-view]').forEach(x => x.classList.toggle('on', x.dataset.view === 'split')); editor.resize(); }
+  // a video takes the shape of the pane: record in the full-width 3D view, not in the narrow half of the split view
+  if (record && $('app').dataset.view !== '3d') { viewBeforeTour = $('app').dataset.view; setView('3d'); await new Promise(r => requestAnimationFrame(r)); }
+  else if (!threeVisible()) setView('split');
   const was = touring; touring = false; // the model must be current before the camera starts moving
   try { built3D = false; await rebuild3D(); } finally { touring = was; }
   viewer?.resize();
@@ -398,7 +402,7 @@ async function ensureTourViewer() {
 import('./draw/tour-ui.mjs').then(({ initDrawTourUI }) => {
   globalThis.__mizanTour = initDrawTourUI({ root: $('threePane'), ensureViewer: ensureTourViewer, getEntry: () => editor.doc.entry, planOptions: () => globalThis.__mizanTourOptions || {},
     onBusy: on => { touring = on; $('threePane').classList.toggle('touring', on); },
-    onDone: () => { sync3DLevel(); syncModeSeg(); if (rebuildAfterTour) { rebuildAfterTour = false; rebuild3D(); } } });
+    onDone: () => { if (viewBeforeTour) { setView(viewBeforeTour); viewBeforeTour = null; } sync3DLevel(); syncModeSeg(); if (rebuildAfterTour) { rebuildAfterTour = false; rebuild3D(); } } });
 });
 document.querySelectorAll('.seg [data-view]').forEach(b => b.addEventListener('click', () => { $('app').dataset.view = b.dataset.view; document.querySelectorAll('.seg [data-view]').forEach(x => x.classList.toggle('on', x === b)); requestAnimationFrame(() => { editor.resize(); viewer?.resize(); if (threeVisible()) rebuild3D(); }); }));
 window.addEventListener('resize', () => { editor.resize(); viewer?.resize(); });

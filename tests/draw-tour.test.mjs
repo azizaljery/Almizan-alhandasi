@@ -109,3 +109,40 @@ test('on the real sample villa the route covers every named room it can and stay
   assert.ok(plan.rooms >= 6 && plan.rooms <= TOUR.maxRooms, 'rooms: ' + plan.rooms);
   for (const seg of plan.segments.slice(2)) { assert.ok(built.rooms.has(seg.key)); assert.ok(Number.isFinite(seg.heading0)); }
 });
+
+// ---------------------------------------------------------------------------------------------- glide between stops (no cuts)
+function walkingViewer(spots) {
+  const T = THREE, cam = { pos: new T.Vector3(2, 3, 14), quat: new T.Quaternion(), fov: 42 };
+  const v = {
+    built: { rooms: new Map(Object.keys(spots).map(k => [k, {}])) }, disposed: false, lost: false, walk: { x: 0, y: 0, yaw: 0, pitch: 0 }, orbit: { dist: 40, target: new T.Vector3() }, cam, shots: [],
+    showLevel() {}, setMode() {}, frameBuilding() {}, orbitTo() {}, renderNow() {},
+    currentPose() { return { pos: cam.pos.clone(), quat: cam.quat.clone(), fov: cam.fov }; },
+    walkToRoom(k, h) { this.walk.x = spots[k][0]; this.walk.y = spots[k][1]; this.walk.yaw = h * Math.PI / 180; },
+    walkPose() { const w = this.walk; return { pos: new T.Vector3(w.x, 1.6, -w.y), quat: new T.Quaternion().setFromEuler(new T.Euler(w.pitch, -w.yaw, 0, 'YXZ')), fov: 72 }; },
+    applyPose(p) { cam.pos.copy(p.pos); cam.quat.copy(p.quat); cam.fov = p.fov; },
+  };
+  return v;
+}
+const forward = q => new THREE.Vector3(0, 0, -1).applyQuaternion(q);
+
+test('between stops the camera glides: no frame jumps far or whips round, and each room is reached before its sweep ends', async () => {
+  const spots = { a: [2, 2], b: [14, 9], c: [3, 12] }, v = walkingViewer(spots), c = clock(), frames = [];
+  const rooms = [room('a', 'entrance', 6, 2, 2, 0, { centroid: { x: 2, y: 6 } }), room('b', 'living', 14, 14, 9, 0, { centroid: { x: 10, y: 9 } }), room('c', 'bedroom', 12, 3, 12, 0, { centroid: { x: 8, y: 12 } })];
+  const plan = planDrawTour(rooms, { orbitMs: 2000, approachMs: 500, roomMs: 3000 });
+  const done = runDrawTour({ viewer: v, plan, raf: c.raf, now: c.now, afterFrame: () => frames.push({ p: v.cam.pos.clone(), f: forward(v.cam.quat), fov: v.cam.fov }) });
+  c.run(1000 / 30); assert.equal(await done, true);
+  let worstMove = 0, worstTurn = 0;
+  for (let i = 1; i < frames.length; i++) { worstMove = Math.max(worstMove, frames[i].p.distanceTo(frames[i - 1].p)); worstTurn = Math.max(worstTurn, Math.acos(Math.min(1, frames[i].f.dot(frames[i - 1].f))) * 180 / Math.PI); }
+  assert.ok(worstMove < 1, 'largest step between frames: ' + worstMove + ' m');
+  assert.ok(worstTurn < 9, 'largest turn between frames: ' + worstTurn + '°');
+  assert.equal(frames.at(-1).fov, 72, 'the field of view has eased to the walking value');
+});
+
+test('a room reached from the opposite heading turns the short way round', async () => {
+  const v = walkingViewer({ a: [5, 5] }), c = clock(), plan = planDrawTour([room('a', 'living', 12, 5, 5, 0, { centroid: { x: 5, y: 9 } })], { orbitMs: 2000, approachMs: 500, roomMs: 3000, sweepDeg: 0 });
+  v.cam.quat.setFromEuler(new THREE.Euler(0, -Math.PI * .99, 0, 'YXZ')); // looking almost exactly backwards
+  const yaws = [], done = runDrawTour({ viewer: v, plan, raf: c.raf, now: c.now, afterFrame: () => { const f = forward(v.cam.quat); yaws.push(Math.atan2(f.x, -f.z) * 180 / Math.PI); } });
+  c.run(1000 / 30); await done;
+  const steps = yaws.slice(1).map((y, i) => Math.abs(((y - yaws[i] + 540) % 360) - 180));
+  assert.ok(steps.every(s => s < 12), 'no wrap-around jumps: ' + Math.max(...steps));
+});

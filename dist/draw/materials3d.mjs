@@ -20,14 +20,14 @@ function noise(ctx, S, H, amp, r, tint = [0, 0, 0]) {
   }
   ctx.putImageData(img, 0, 0);
 }
-function blotches(ctx, S, H, n, r, rMin, rMax, colorFn) {
+function blotches(ctx, S, H, n, r, rMin, rMax, colorFn, alpha = .3) {
   for (let i = 0; i < n; i++) {
     const x = r() * S, y = r() * H, rad = rMin + r() * (rMax - rMin), c = colorFn(r);
     for (const ox of [-S, 0, S]) for (const oy of [-H, 0, H]) {
       const px = x + ox, py = y + oy;
       if (px + rad < 0 || px - rad > S || py + rad < 0 || py - rad > H) continue;
       const g = ctx.createRadialGradient(px, py, 0, px, py, rad);
-      g.addColorStop(0, c.replace('ALPHA', '0.3')); g.addColorStop(1, c.replace('ALPHA', '0'));
+      g.addColorStop(0, c.replace('ALPHA', String(alpha))); g.addColorStop(1, c.replace('ALPHA', '0'));
       ctx.fillStyle = g; ctx.fillRect(px - rad, py - rad, rad * 2, rad * 2);
     }
   }
@@ -38,7 +38,7 @@ const painters = {
   plaster(S = 512) {
     const c = makeCanvas(S), x = c.getContext('2d'), r = rng(11);
     x.fillStyle = '#ffffff'; x.fillRect(0, 0, S, S);
-    blotches(x, S, S, 70, r, 20, 90, () => r() > .5 ? 'rgba(210,196,170,ALPHA)' : 'rgba(255,252,244,ALPHA)');
+    blotches(x, S, S, 70, r, 20, 90, () => r() > .5 ? 'rgba(220,208,186,ALPHA)' : 'rgba(255,252,244,ALPHA)', .13); // soft: strong tan spots read as dirt stains under warm evening light
     noise(x, S, S, 14, r);
     const b = makeCanvas(S), bx = b.getContext('2d'); bx.fillStyle = '#808080'; bx.fillRect(0, 0, S, S); noise(bx, S, S, 90, rng(5));
     return { color: c, bump: b };
