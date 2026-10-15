@@ -8,6 +8,7 @@ import { runMultiEngineDesign } from './multi-engine.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
 import { legacyToDoc } from './draw/import-legacy.mjs';
 import { applyCommand } from './draw/doc.mjs';
+import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H } from './multi-floor.mjs';
 
 export const SHARA_NAME = 'شرعاء';
 export const SHARA_WELCOME = 'أهلاً بك، أنا شرعاء، مساعدك الذكي لفهم احتياجاتك في تصميم منزلك.';
@@ -32,8 +33,12 @@ export function normalizeLand(raw = {}) {
   const streets = list(raw.streets, 'شارعًا'), entries = list(raw.entries, 'مدخلًا');
   const off = entries.filter(s => !streets.includes(s));
   if (off.length) throw Error(`المدخل يجب أن يطل على شارع: ${off.map(s => SIDE_LABELS[s]).join('، ')} ليست من الشوارع المحددة.`);
+  // الأدوار: واحد أو اثنان فقط. plot يبقى بدور واحد لأنه أرض المحرك لكل دور؛ عدد الأدوار في land.floors.
+  const floors = raw.floors === undefined || raw.floors === null || raw.floors === '' ? 1 : Number(raw.floors);
+  if (!Number.isInteger(floors) || floors < 1) throw Error('عدد الأدوار يجب أن يكون 1 أو 2.');
+  if (floors > 2) throw Error('ثلاثة أدوار أو أكثر غير مدعومة بعد؛ المتاح دور أو دوران.');
   const plot = validatePlot({ width, length, floors: 1, streets: Object.fromEntries(streets.map(s => [s, true])), entry: entries[0] });
-  return { plot, land: { length, width, streets, entries } };
+  return { plot, land: { length, width, streets, entries, floors } };
 }
 
 // ------------------------------------------------------------------------------------------------ شرعاء
@@ -177,8 +182,9 @@ export function modelToStudioDoc(model, land, { title = 'تصميم أولي م�
 
 /** يشغّل محرك التوليد الحالي ويعيد التصميم المختار مستندًا للمرسم. أي فشل يُرمى كما هو (لا بديل صامت). */
 export async function generateInitialDesign({ land, rooms, discovery, idea = '', seed = 1, counts = null }) {
-  const { plot } = normalizeLand(land);
+  const { plot, land: normLand } = normalizeLand(land);
   const disc = normalizeDiscovery(discovery);
+  if (normLand.floors >= 2) return generateMultiFloorDesign({ plot, land: normLand, rooms, discovery: disc, idea, seed });
   const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
   const notes = [];
@@ -197,13 +203,26 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
   return { doc, report, notes, dna, alternatives, alternativesCount: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
 }
 
+/** دوران: الأرضي والعلوي بسلم متطابق (انظر multi-floor.mjs). بلا بصمة تصميم ولا بدائل: تُقدَّم لدور واحد فقط. */
+async function generateMultiFloorDesign({ plot, land, rooms, discovery, idea, seed }) {
+  const out = await generateTwoFloors({ plot, land, rooms, discovery, idea, seed, toDoc: modelToStudioDoc });
+  const notes = [...out.notes];
+  if (out.report.areaMismatch.length) notes.push(`${out.report.areaMismatch.length} فراغ تختلف مساحته عن المطلوب بعد التحويل؛ راجعها في المرسم.`);
+  if (out.report.unmatched.length) notes.push(`${out.report.unmatched.length} فراغ لم يُطابَق بعد التحويل.`);
+  if (land.entries.length > 1) notes.push('المحرك يوزّع الغرف بحسب المدخل الأول فقط؛ بقية المداخل مسجّلة في الأرض ولم تؤثر في التوزيع.');
+  notes.push('بصمة التصميم والبدائل غير متاحة في الدورين؛ تظهر لدور واحد فقط.');
+  return { doc: out.doc, report: out.report, notes, dna: null, alternatives: [], alternativesCount: 1, selectedIndex: out.selectedIndex, strategy: out.strategy, floors: 2, multiFloor: out.program };
+}
+
 /**
  * تشخيص فشل التوليد: أرقام محسوبة من محرك الأرض نفسه + تجارب فعلية على المحرك لكل تعديل ممكن.
  * لا يُطبَّق شيء هنا. يعيد حقائق وخيارات، وكل خيار نجح فعلًا أو فشل فعلًا في تجربة؛ والقرار للعميل.
  * المحرك لا يخبرنا أي غرفة بعينها هي المعطِّلة؛ لذلك تظهر النتيجة كتجارب (ينجح/لا ينجح) لا كتفسير مفترض.
  */
 export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow = 4 }) {
-  const { plot } = normalizeLand(land);
+  const { plot, land: normLand } = normalizeLand(land);
+  land = normLand;
+  const floors = land.floors;
   const d = footprintDiagnostics(plot);
   const programArea = c => defaultRooms(c).reduce((a, r) => a + (r.area || 0), 0);
   const required = programArea(counts);
@@ -214,8 +233,17 @@ export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow 
   const facts = {
     plotArea: d.plotWidth * d.plotLength, plotWidth: d.plotWidth, plotLength: d.plotLength, entry: d.entry,
     setbacks: d.setbacks, coverage: d.coverage, afterSetbacks: d.afterSetbacks, coverageCap: d.coverageCap,
-    net: d.net, frontage: d.frontage, depth: d.depth, required, share: d.net.area > 0 ? required / d.net.area : 0, perType, floors: 1,
+    net: d.net, frontage: d.frontage, depth: d.depth, required, share: d.net.area > 0 ? required / (d.net.area * floors) : 0, perType, floors,
   };
+  if (floors >= 2) {
+    // مساحة كل دور مع غرفة السلم، مقابل المساحة المبنية المتاحة للدور الواحد (الأرضي) وكتلته هي سقف العلوي
+    const sp = splitProgram(defaultRooms(counts)), stair = STAIR_W * STAIR_H, sumA = l => l.reduce((a, r) => a + r.area, 0);
+    facts.floorsFacts = [
+      { label: 'الدور الأرضي', rooms: sp.ground.length, required: sumA(sp.ground) + stair, available: d.net.area },
+      { label: 'الدور العلوي', rooms: sp.upper.length, required: sumA(sp.upper) + stair, available: d.net.area },
+    ];
+    facts.stairArea = stair;
+  }
   const works = async (l, c) => { try { await generateInitialDesign({ land: l, rooms: defaultRooms(c), discovery, idea }); return true; } catch { return false; } };
   const floor = { bedrooms: 1, majlis: 0, baths: 1, kitchens: 1, halls: 0, dining: 0 };
   const options = [];
@@ -243,6 +271,7 @@ export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow 
 /** رسالة قصيرة للعميل بدل تفاصيل كل محرك. الخطأ الأصلي يبقى في التفاصيل التقنية. */
 export function friendlyBuildError(err) {
   const raw = String(err?.message || err || '');
+  if (err instanceof MultiFloorError) return raw;
   if (/No candidate passed|لم يجد محرك/.test(raw)) return 'لم أجد توزيعًا يتسع لهذا البرنامج في دور واحد على هذه الأرض، دون حذف أو تصغير أي غرفة.';
   return raw || 'تعذّر توليد التصميم.';
 }

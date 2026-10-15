@@ -47,7 +47,7 @@ for (const key of ['n', 's', 'e', 'w']) {
     + `<label class="tog dis" data-entry-label="${key}"><input type="checkbox" data-kind="entry" value="${key}" disabled> مدخل</label>`;
   grid.append(box);
 }
-function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries] }; }
+function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1 }; }
 function refreshLand() {
   for (const key of ['n', 's', 'e', 'w']) {
     const entry = grid.querySelector(`input[data-kind=entry][value=${key}]`), onStreet = land.streets.has(key);
@@ -195,8 +195,9 @@ function renderReport({ facts: f, options }, err) {
   row(facts, ['الارتدادات (م)', Object.entries(f.setbacks).map(([k, v]) => `${SIDE_LABELS[k]} ${m1(v)}`).join('، ')]);
   row(facts, ['الصافي بعد الارتدادات', `${m1(f.afterSetbacks.width)}×${m1(f.afterSetbacks.depth)} م = ${m1(f.afterSetbacks.area)} م²`]);
   row(facts, ['سقف نسبة البناء', `${m1(f.coverage * 100)}% = ${m1(f.coverageCap)} م²`]);
-  row(facts, ['المساحة المبنية المتاحة', `${m1(f.net.area)} م² (دور واحد)`]);
-  row(facts, ['مساحة الغرف وحدها', `${m1(f.required)} م² = ${m1(f.share * 100)}% من المتاح، قبل الجدران والممرات`]);
+  row(facts, ['المساحة المبنية المتاحة', `${m1(f.net.area)} م² (للدور الواحد)`]);
+  for (const fl of f.floorsFacts || []) row(facts, [fl.label, `${fl.rooms} فراغ + السلم = ${m1(fl.required)} م² من ${m1(fl.available)} م² متاحة للدور، قبل الجدران والممرات`]);
+  row(facts, ['مساحة الغرف وحدها', `${m1(f.required)} م² = ${m1(f.share * 100)}% من المتاح${f.floors > 1 ? ` في ${f.floors} أدوار` : ''}، قبل الجدران والممرات`]);
   box.append(facts);
   const prog = el('table', 'rtable');
   row(prog, ['الفراغ', 'العدد', 'مساحة الواحد', 'المجموع'], true);

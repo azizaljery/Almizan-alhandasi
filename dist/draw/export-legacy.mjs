@@ -98,6 +98,24 @@ function chooseDecomposition(poly, probes) {
 const inRect = (r, p) => p.x >= r.x - 1e-6 && p.x <= r.x + r.w + 1e-6 && p.y >= r.y - 1e-6 && p.y <= r.y + r.h + 1e-6;
 
 /**
+ * الدور العلوي لا مدخل له من الخارج: الوصول إليه من السلم. لذلك تُستبدل أخطاء «لا مسار إلى المدخل» (التي تبدأ من باب خارجي)
+ * بفحص مكافئ يبدأ من غرفة السلم: كل فراغ يُوصل إليه بالأبواب والروابط. إن لم يوجد سلم في الدور بقيت الأخطاء كما هي.
+ * بقية الأخطاء (تداخل، أبواب لا تفتح، ...) تبقى دون تغيير. مسار الحركة الفعلي (circulationNetwork) لا يُفحص هنا.
+ */
+function upperLevelValidation(model, report, labels) {
+  const stairIds = labels.filter(l => l.type === 'stairs').map(l => l.id).filter(id => model.rooms.some(r => r.id === id) || model.corridors.some(c => c.id === id));
+  if (!stairIds.length) return report.validation;
+  const reach = e => e.startsWith('لا يوجد مسار باب متصل بالمدخل') || e.startsWith('لا يوجد مسار حركة فعلي');
+  const rest = report.validation.filter(e => !reach(e));
+  const graph = new Map(), link = (a, b) => { if (!graph.has(a)) graph.set(a, new Set()); graph.get(a).add(b); };
+  for (const [a, b] of [...model.links, ...model.openings.filter(o => o.type === 'door').map(o => o.connects)]) if (a && b) { link(a, b); link(b, a); }
+  const seen = new Set(stairIds), queue = [...stairIds];
+  while (queue.length) for (const n of graph.get(queue.shift()) || []) if (!seen.has(n)) { seen.add(n); queue.push(n); }
+  report.arrival = 'stairs';
+  return [...rest, ...model.rooms.filter(r => !seen.has(r.id)).map(r => 'لا يصل السلم إلى الفراغ: ' + r.name)];
+}
+
+/**
  * @param {object} doc  مستند صالح (mizan-draw/1)
  * @param {{ level?: string }} [opts]  الدور المطلوب تحويله (الأول افتراضيًا)
  * @returns {{ model: object, report: object }}
@@ -211,7 +229,10 @@ export function docToLegacy(doc, { level } = {}) {
     program: rooms.map(r => ({ id: r.id, name: r.name, type: r.type, area: r.area, position: 'middle', side: 'any' })),
     rooms, corridors, reserves: [], courtyards, links, walls: outLegacy, openings, warnings: [], strategy: 'drawing',
   };
-  if (plot && fp && building) { try { report.validation = validateModel(model); } catch (e) { report.validation = ['تعذّر التحقق: ' + e.message]; } }
+  if (plot && fp && building) {
+    try { report.validation = validateModel(model); } catch (e) { report.validation = ['تعذّر التحقق: ' + e.message]; }
+    if (lvl.elevation > 0) report.validation = upperLevelValidation(model, report, labels);
+  }
   else report.validation = ['لم يكتمل بناء النموذج (أرض أو محيط ناقص)؛ لم يُتحقَّق منه.'];
   return { model, report };
 }
