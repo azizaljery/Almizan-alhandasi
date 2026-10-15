@@ -1,0 +1,25 @@
+// فحص حي اختياري لاستوديو التصدير: studio.html ← تصدير ← حزمة ← عرض المحتويات ← تنزيل ZIP.
+import http from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { extname, join, normalize, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml' };
+const server = http.createServer(async (req, res) => { const f = normalize(join(root, decodeURIComponent(new URL(req.url, 'http://x').pathname))); if (!f.startsWith(root) || !existsSync(f)) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[extname(f)] || 'application/octet-stream' }); res.end(await readFile(f)); });
+await new Promise(r => server.listen(0, '127.0.0.1', r));
+const { chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs');
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
+const ctx = await b.newContext({ viewport: { width: 1280, height: 800 }, acceptDownloads: true }), p = await ctx.newPage(), errs = [];
+p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::|404/.test(m.text())) errs.push(m.text()); });
+const res = []; const check = (n, ok, d = '') => { res.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
+await p.goto(`http://127.0.0.1:${server.address().port}/studio.html`); await p.waitForTimeout(800);
+await p.fill('#docTitle', 'villa'); await p.dispatchEvent('#docTitle', 'change'); await p.click('#btnExport'); await p.click('[data-export=bundle]');
+await p.waitForSelector('dialog.export-studio .dna-table');
+const txt = await p.locator('dialog.export-studio').innerText();
+check('المحتويات والبصمة تظهر', txt.includes('manifest.json') && txt.includes('plan.dxf') && txt.includes('quantities.csv') && txt.includes('بصمة الهندسة'));
+const [dl] = await Promise.all([p.waitForEvent('download'), p.click('dialog.export-studio >> text=تنزيل ZIP')]);
+check('اسم ZIP', dl.suggestedFilename().endsWith('-export.zip'), dl.suggestedFilename());
+const path = await dl.path(); check('ZIP غير فارغ', !!path && (await readFile(path)).slice(0, 2).toString() === 'PK');
+check('لا أخطاء', errs.length === 0, errs.join(' | ').slice(0, 200));
+await b.close(); server.close(); process.exit(res.includes(false) ? 1 : 0);

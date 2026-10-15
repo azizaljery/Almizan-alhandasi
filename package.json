@@ -6,7 +6,8 @@
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.mjs",
     "db:generate": "drizzle-kit generate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "release:check": "node scripts/release-fingerprint.mjs"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.11",

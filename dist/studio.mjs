@@ -13,6 +13,8 @@ import { digestDoc, describeDigestAr } from './draw/digest.mjs';
 import { askDrawingAssistant } from './draw/assistant-client.mjs';
 import { wallRect, fixtureRect } from './draw/review.mjs';
 import { downloadManifest } from './export-manifest.mjs';
+import { toDxf } from './draw/dxf.mjs';
+import { openExportStudio } from './draw/export-studio-ui.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c != null) n.append(c.nodeType ? c : document.createTextNode(String(c))); return n; };
@@ -460,20 +462,9 @@ $('exportMenu').addEventListener('click', async e => {
   if (kind === 'json') saveJson();
   else if (kind === 'png') { editor.canvas.toBlob(b => b && exportWithManifest((editor.doc.title || 'mizan') + '-plan.png', b, 'studio-plan-png')); }
   else if (kind === 'png3d') { const v = await ensureViewer(); if (!v?.built) await rebuild3D(); try { exportWithManifest((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2), 'studio-3d-png'); } catch { toast('اعرض المجسم أولًا ثم أعد المحاولة', true); } }
+  else if (kind === 'bundle') openExportStudio({ doc: editor.doc, download });
   else if (kind === 'dxf') exportWithManifest((editor.doc.title || 'mizan') + '.dxf', new Blob([toDxf(editor.doc)], { type: 'application/dxf' }), 'studio-dxf');
 });
-function toDxf(doc) {
-  const out = ['0', 'SECTION', '2', 'ENTITIES'], mm = v => (v * 1000).toFixed(1);
-  const line = (layer, a, b) => out.push('0', 'LINE', '8', layer, '10', mm(a.x), '20', mm(a.y), '30', '0', '11', mm(b.x), '21', mm(b.y), '31', '0');
-  const poly = (layer, p) => p.forEach((q, i) => line(layer, q, p[(i + 1) % p.length]));
-  for (const lv of doc.levels) {
-    const pre = lv.id + '_';
-    for (const w of doc.walls) if (w.level === lv.id) poly(pre + 'WALLS', wallRect(w));
-    for (const f of doc.fixtures) if (f.level === lv.id) poly(pre + 'FURNITURE', fixtureRect(f));
-    for (const o of doc.openings) if (o.level === lv.id) { const w = doc.walls.find(x => x.id === o.wall); if (!w) continue; const L = Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y), u = { x: (w.b.x - w.a.x) / L, y: (w.b.y - w.a.y) / L }; line(pre + (o.kind.startsWith('window') ? 'WINDOWS' : 'DOORS'), { x: w.a.x + u.x * (o.at - o.w / 2), y: w.a.y + u.y * (o.at - o.w / 2) }, { x: w.a.x + u.x * (o.at + o.w / 2), y: w.a.y + u.y * (o.at + o.w / 2) }); }
-  }
-  out.push('0', 'ENDSEC', '0', 'EOF'); return out.join('\n');
-}
 
 // ------------------------------------------------------------------------------------------------ الكميات والتحقق (AR-02)
 let qtyTimer = null;
