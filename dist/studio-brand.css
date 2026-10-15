@@ -1,0 +1,7 @@
+/* هوية الميزان على المرسم: أخضر داكن وذهبي وكريمي بدل الرمادي الداكن، بلا تغيير في سلوك أي أداة. */
+:root{--bg:var(--mz-ivory);--paper:var(--mz-paper);--line:var(--mz-line);--ink:var(--mz-ink);--gold:var(--mz-brass);--teal:var(--mz-green);--dark:var(--mz-green-deep)}
+.top{border-bottom:2px solid var(--mz-brass)}
+.top .btn{background:#1d4637;border-color:#2f6650}.top .btn:hover{background:#245640}
+.top .btn.primary{background:var(--mz-gold);border-color:var(--mz-gold);color:#10261d}
+.title:hover,.title:focus{border-color:#2f6650;background:#1d4637}
+.brand.mz-logo small{margin-top:-2px}

@@ -11,7 +11,7 @@ test('الصفحة الرئيسية: عربية RTL بهوية «الميزان 
 });
 test('الصفحة الرئيسية: كل ملف مرتبط موجود، وروابط المرسم سليمة', () => {
   for (const [, name] of html.matchAll(/(?:src|href)="\.\/([^"#?]+)"/g)) assert.ok(existsSync('dist/' + name), name);
-  assert.ok(existsSync('dist/assets/mizan-mark.svg'));
+  assert.ok(existsSync('dist/assets/mizan-logo.svg'));
 });
 test('الصفحة الرئيسية: الخطوات الأربع موجودة وبلا رموز أسرار', () => {
   for (const id of ['stageWelcome', 'stageLand', 'stageShara', 'stageBuild', 'landForm', 'chat']) assert.ok(html.includes(`id="${id}"`), id);

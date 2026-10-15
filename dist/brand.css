@@ -1,0 +1,12 @@
+/* هوية الميزان الهندسي الموحّدة (مأخوذة من ملف MIZAN: أخضر داكن، ذهبي، كريمي، وعلامة «م» في مربع مستدير).
+   تُحمَّل في home وstudio. الصفحة القديمة تحمل الألوان نفسها في refined.css. */
+:root{
+  --mz-green-deep:#143428; --mz-green:#1f4a38; --mz-green-night:#061b16; --mz-green-mark:#123629;
+  --mz-gold:#d9ba79; --mz-gold-light:#edce89; --mz-brass:#a8814a;
+  --mz-ivory:#f6f2ea; --mz-paper:#fffdf8; --mz-line:#e6dfd0; --mz-ink:#17332a;
+}
+.mz-logo{display:inline-flex;align-items:center;gap:10px;color:inherit;text-decoration:none;white-space:nowrap}
+.mz-logo img{width:34px;height:34px;display:block}
+.mz-logo b{font-weight:700;letter-spacing:0}
+.mz-logo small{display:block;font-size:.62em;font-weight:500;letter-spacing:.16em;color:var(--mz-gold);direction:ltr;text-align:start}
+.mz-eyebrow{font-size:.7rem;letter-spacing:.22em;color:var(--mz-gold);direction:ltr;text-transform:uppercase}
