@@ -1,12 +1,14 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
-import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, suggestFit, friendlyBuildError, ENGINEERING_FIELDS, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
+import { defaultRooms } from './planner.mjs';
 import { requestBrief } from './assistant.mjs';
 
 const $ = id => document.getElementById(id);
 const home = $('home');
+const COUNT_LABELS = ENGINEERING_FIELDS;
 const stages = ['Welcome', 'Land', 'Shara', 'Build'];
 function show(name) {
   for (const s of stages) $('stage' + s).hidden = s !== name;
@@ -174,16 +176,26 @@ async function understandWithAI(text, accessCode) {
 }
 
 // ------------------------------------------------------------------------------------------------ التوليد والتسليم للمرسم
-async function build() {
-  show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
+async function build(counts) {
+  show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildApply').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
+  const useCounts = counts || session.counts;
+  const input = { land: confirmedLand, rooms: defaultRooms(useCounts), discovery: session.discovery(), idea: session.idea };
   try {
-    const out = await generateInitialDesign({ land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea });
+    const out = await generateInitialDesign(input);
     writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' ') });
     $('buildText').textContent = 'جاهز. أفتح لك المرسم…';
     location.href = './studio.html';
   } catch (err) {
     $('buildText').textContent = '';
-    setError($('buildError'), err.message || 'تعذّر توليد التصميم.'); $('buildRetry').hidden = false;
+    setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
+    console.warn('تفاصيل فشل التوليد:', err);
+    $('buildText').textContent = 'أبحث عن أقرب برنامج يتسع…';
+    const fit = await suggestFit({ land: confirmedLand, counts: useCounts, discovery: input.discovery, idea: input.idea }).catch(() => null);
+    if (fit) {
+      const diff = COUNT_LABELS.filter(f => fit[f.id] !== useCounts[f.id]).map(f => `${f.label}: ${useCounts[f.id]} ← ${fit[f.id]}`).join('، ');
+      $('buildText').textContent = `يتسع هذا البرنامج المعدّل: ${diff}.`;
+      $('buildApply').hidden = false; $('buildApply').onclick = () => { session.counts = fit; build(fit); };
+    } else $('buildText').textContent = 'لم أجد تعديلًا بسيطًا يتسع؛ جرّب أرضًا أكبر أو عددًا أقل من الغرف.';
   }
 }
 $('buildRetry').addEventListener('click', () => show('Shara'));

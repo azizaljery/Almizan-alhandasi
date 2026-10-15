@@ -185,6 +185,34 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
   return { doc, report, notes, alternatives: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
 }
 
+/**
+ * اقتراح برنامج يتسع في الأرض عندما يفشل التوليد. لا يُطبَّق تلقائيًا: يعرضه المستدعي ويطلب موافقة العميل.
+ * يجرّب إنقاص فراغ واحد في كل مرة (من الأنواع القابلة للإنقاص) ويختار الأكبر مساحة متبقية ممن ينجح.
+ */
+export async function suggestFit({ land, counts, discovery, idea = '', maxRounds = 4 }) {
+  const floors = { bedrooms: 1, majlis: 0, baths: 1, kitchens: 1, halls: 0, dining: 0 };
+  let current = { ...counts };
+  for (let round = 0; round < maxRounds; round++) {
+    const options = COUNT_FIELDS.filter(f => current[f.id] > floors[f.id])
+      .map(f => ({ id: f.id, counts: { ...current, [f.id]: current[f.id] - 1 } }))
+      .map(o => ({ ...o, area: defaultRooms(o.counts).reduce((a, r) => a + (r.area || 0), 0) }))
+      .sort((a, b) => b.area - a.area);
+    if (!options.length) return null;
+    for (const o of options) {
+      try { await generateInitialDesign({ land, rooms: defaultRooms(o.counts), discovery, idea }); return o.counts; } catch { /* نكمل */ }
+    }
+    current = options[0].counts;
+  }
+  return null;
+}
+
+/** رسالة قصيرة للعميل بدل تفاصيل كل محرك. الخطأ الأصلي يبقى في التفاصيل التقنية. */
+export function friendlyBuildError(err) {
+  const raw = String(err?.message || err || '');
+  if (/No candidate passed|لم يجد محرك/.test(raw)) return 'لم أجد توزيعًا يتسع لهذا البرنامج في دور واحد على هذه الأرض، دون حذف أو تصغير أي غرفة.';
+  return raw || 'تعذّر توليد التصميم.';
+}
+
 // ------------------------------------------------------------------------------------------------ معاينة الأرض
 /** معاينة SVG للأرض: المستطيل بنسبته، والشوارع خطوط خارجه، والمداخل علامات على الضلع. نص آمن (أرقام فقط). */
 export function landPreviewSvg({ length, width, streets = [], entries = [] } = {}) {
