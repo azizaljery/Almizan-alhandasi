@@ -4,6 +4,7 @@ import { ROOM_TYPES, OPENING_KINDS, FIXTURES, STAIR_KINDS, WALL_KINDS, PLOT_ENTR
 import { sampleVilla } from './draw/samples.mjs';
 import { consumeHandoff, loadSavedDNA, STUDIO_KEY } from './draw/handoff.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
+import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
@@ -81,7 +82,7 @@ async function roomDialog(label, room = null) {
 function onDocChanged() {
   $('undo').disabled = !editor.history.canUndo; $('redo').disabled = !editor.history.canRedo;
   if (document.activeElement !== $('docTitle')) $('docTitle').value = editor.doc.title;
-  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna();
+  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna(); if ($('tab-qty').classList.contains('on')) scheduleQty();
   if (!(document.activeElement && $('side').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName))) renderProps();
 }
 const autosave = debounce(() => store.set(KEY, serialize(editor.doc)), 500);
@@ -291,7 +292,7 @@ function renderFinish() {
   for (const t of used) floors.append(field(roomTypeName(t), 'select', (f.floors || {})[t] || ROOM_TYPES[t].floor, v => setFinish({ floors: { [t]: v } }), { options: Object.entries(FLOOR_NAMES) }));
   box.append(floors, el('div', { class: 'acts' }, el('button', { onclick: () => { editor.exec({ type: 'set-meta', finish: { facade: { base: 'render', accent: 'entry', plinth: true, color: null, accentColor: null, plinthColor: null, copingColor: null }, aluminium: null, entryDoor: null, fence: null, roof: null, floors: Object.fromEntries(used.map(t => [t, null])) } }, 'إعادة المواد'); } }, 'إعادة الافتراضي')), el('p', { class: 'muted' }, 'التغيير يظهر فورًا في المجسم ثلاثي الأبعاد ويُحفظ مع المشروع.'));
 }
-function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); }
+function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); if (name === 'qty') renderQty(); }
 document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); if (b.dataset.tab === 'review') runReview(); }));
 
 // ------------------------------------------------------------------------------------------------ review
@@ -471,6 +472,33 @@ function toDxf(doc) {
     for (const o of doc.openings) if (o.level === lv.id) { const w = doc.walls.find(x => x.id === o.wall); if (!w) continue; const L = Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y), u = { x: (w.b.x - w.a.x) / L, y: (w.b.y - w.a.y) / L }; line(pre + (o.kind.startsWith('window') ? 'WINDOWS' : 'DOORS'), { x: w.a.x + u.x * (o.at - o.w / 2), y: w.a.y + u.y * (o.at - o.w / 2) }, { x: w.a.x + u.x * (o.at + o.w / 2), y: w.a.y + u.y * (o.at + o.w / 2) }); }
   }
   out.push('0', 'ENDSEC', '0', 'EOF'); return out.join('\n');
+}
+
+// ------------------------------------------------------------------------------------------------ الكميات والتحقق (AR-02)
+let qtyTimer = null;
+function scheduleQty() { clearTimeout(qtyTimer); qtyTimer = setTimeout(renderQty, 250); }
+function renderQty() {
+  const box = $('tab-qty'); box.replaceChildren();
+  let res; try { res = computeDocQuantities(editor.doc); } catch (e) { box.append(el('div', { class: 'sec' }, el('p', { class: 'fpwarn' }, 'تعذّر حساب الكميات: ' + e.message))); return; }
+  if (!res.levels.some(l => l.q)) { box.append(el('div', { class: 'sec' }, el('h4', {}, 'الكميات'), el('p', { class: 'muted' }, 'ارسم جدرانًا مغلقة وسمِّ الغرف لتظهر الكميات.'), ...res.levels.filter(l => l.error).map(l => el('p', { class: 'fpwarn' }, l.name + ': ' + l.error)))); return; }
+  const t = el('table', { class: 'dna-table' }, el('tr', {}, ...['البند', 'القيمة', 'الدرجة'].map(x => el('th', {}, x))));
+  for (const r of res.rows) t.append(el('tr', {}, el('td', {}, r.label, el('small', { class: 'tag' }, r.basis)), el('td', {}, r.value === null ? '—' : r.value.toLocaleString('ar-SA') + ' ' + r.unit), el('td', {}, el('span', { class: 'grade ' + r.grade }, GRADES[r.grade]))));
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'الكميات من الرسم الحالي'), t, el('p', { class: 'muted' }, 'تُحسب من الجدران والفتحات المرسومة الآن، وتتحدث مع كل تعديل. لا يُذكر رقم بلا مصدر: ما لا يقيسه الرسم يُكتب «غير قابل للحساب».')));
+  const rt = el('table', { class: 'dna-table' }, el('tr', {}, ...['الدور', 'الغرفة', 'الأبعاد', 'المساحة'].map(x => el('th', {}, x))));
+  for (const r of res.perRoom) rt.append(el('tr', {}, el('td', {}, r.level), el('td', {}, r.name), el('td', {}, r.w + '×' + r.h), el('td', {}, r.area + ' م²')));
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'الغرف'), rt));
+  const chk = el('div', { class: 'sec' }, el('h4', {}, 'تحقق المحرك على الرسم'));
+  for (const l of res.levels) {
+    if (l.error) { chk.append(el('p', { class: 'fpwarn' }, l.name + ': ' + l.error)); continue; }
+    if (l.empty) { chk.append(el('p', { class: 'muted' }, l.name + ': لا جدران.')); continue; }
+    const v = l.report.validation;
+    chk.append(el('p', { class: v.length ? 'fpwarn' : 'muted' }, l.name + ': ' + (v.length ? v.length + ' ملاحظة' : 'اجتاز كل فحوص المحرك')));
+    if (v.length) chk.append(el('ul', {}, ...[...new Set(v)].map(x => el('li', {}, x))));
+    for (const w of [...l.report.warnings, ...l.report.skipped]) chk.append(el('p', { class: 'muted' }, '• ' + w));
+    if (l.report.unnamed.length) chk.append(el('p', { class: 'muted' }, '• ' + l.report.unnamed.length + ' فراغ مغلق بلا اسم لم يدخل الحساب.'));
+    if (l.score) chk.append(el('p', { class: 'muted' }, 'درجة الميزان: ' + (l.score.score ?? 'غير مُقيَّمة') + ' — ' + l.score.grade));
+  }
+  box.append(chk);
 }
 
 // ------------------------------------------------------------------------------------------------ بصمة التصميم
