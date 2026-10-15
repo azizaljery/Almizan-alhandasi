@@ -9,7 +9,7 @@ export default {
     if (pathname === '/api/archive' || pathname.startsWith('/api/archive/')) return archive.fetch(request, env, ctx);
     if (pathname.startsWith('/api/')) return assistant.fetch(request, env);
     if (pathname === '/' && !new URL(request.url).searchParams.has('legacy') && env?.ASSETS?.fetch && ['GET', 'HEAD'].includes(request.method)) {
-      const u = new URL(request.url); u.pathname = '/studio.html';
+      const u = new URL(request.url); u.pathname = '/home.html';
       return env.ASSETS.fetch(new Request(u, request));
     }
     if (env?.ASSETS?.fetch) return env.ASSETS.fetch(request);
