@@ -218,10 +218,10 @@ function renderReport({ facts: f, options }, err) {
 
 async function build() {
   show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
-  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea };
+  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts };
   try {
     const out = await generateInitialDesign(input);
-    writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' ') });
+    writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' '), dna: out.dna, alternatives: out.alternatives });
     $('buildText').textContent = 'جاهز. أفتح لك المرسم…';
     location.href = './studio.html';
   } catch (err) {

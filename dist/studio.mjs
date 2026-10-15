@@ -2,7 +2,8 @@
 import { createDoc, parseDoc, serialize, getById, SCHEMA } from './draw/doc.mjs';
 import { ROOM_TYPES, OPENING_KINDS, FIXTURES, STAIR_KINDS, WALL_KINDS, PLOT_ENTRIES, roomTypeName } from './draw/catalog.mjs';
 import { sampleVilla } from './draw/samples.mjs';
-import { consumeHandoff } from './draw/handoff.mjs';
+import { consumeHandoff, loadSavedDNA, STUDIO_KEY } from './draw/handoff.mjs';
+import { geometryFingerprint } from './design-dna.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
@@ -80,7 +81,7 @@ async function roomDialog(label, room = null) {
 function onDocChanged() {
   $('undo').disabled = !editor.history.canUndo; $('redo').disabled = !editor.history.canRedo;
   if (document.activeElement !== $('docTitle')) $('docTitle').value = editor.doc.title;
-  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome();
+  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna();
   if (!(document.activeElement && $('side').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName))) renderProps();
 }
 const autosave = debounce(() => store.set(KEY, serialize(editor.doc)), 500);
@@ -290,7 +291,7 @@ function renderFinish() {
   for (const t of used) floors.append(field(roomTypeName(t), 'select', (f.floors || {})[t] || ROOM_TYPES[t].floor, v => setFinish({ floors: { [t]: v } }), { options: Object.entries(FLOOR_NAMES) }));
   box.append(floors, el('div', { class: 'acts' }, el('button', { onclick: () => { editor.exec({ type: 'set-meta', finish: { facade: { base: 'render', accent: 'entry', plinth: true, color: null, accentColor: null, plinthColor: null, copingColor: null }, aluminium: null, entryDoor: null, fence: null, roof: null, floors: Object.fromEntries(used.map(t => [t, null])) } }, 'إعادة المواد'); } }, 'إعادة الافتراضي')), el('p', { class: 'muted' }, 'التغيير يظهر فورًا في المجسم ثلاثي الأبعاد ويُحفظ مع المشروع.'));
 }
-function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); }
+function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); }
 document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); if (b.dataset.tab === 'review') runReview(); }));
 
 // ------------------------------------------------------------------------------------------------ review
@@ -470,6 +471,42 @@ function toDxf(doc) {
     for (const o of doc.openings) if (o.level === lv.id) { const w = doc.walls.find(x => x.id === o.wall); if (!w) continue; const L = Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y), u = { x: (w.b.x - w.a.x) / L, y: (w.b.y - w.a.y) / L }; line(pre + (o.kind.startsWith('window') ? 'WINDOWS' : 'DOORS'), { x: w.a.x + u.x * (o.at - o.w / 2), y: w.a.y + u.y * (o.at - o.w / 2) }, { x: w.a.x + u.x * (o.at + o.w / 2), y: w.a.y + u.y * (o.at + o.w / 2) }); }
   }
   out.push('0', 'ENDSEC', '0', 'EOF'); return out.join('\n');
+}
+
+// ------------------------------------------------------------------------------------------------ بصمة التصميم
+const STRATEGY_NAMES = { 'claude-rect': 'مخطط مستطيل', compact: 'الرواق المحوري', balanced: 'الجناحان المتوازنان', frontage: 'الواجهة العريضة', courtyard: 'بيت الفناء', 'u-court': 'بيت الباحة U', pavilions: 'أجنحة مرتبطة برواق', staggered: 'جناحان متدرجان' };
+let dnaState = null;
+try { dnaState = homeHandoff?.dna ? { dna: homeHandoff.dna, alternatives: homeHandoff.alternatives || [] } : loadSavedDNA(localStorage); } catch { dnaState = null; }
+function renderDna() {
+  const box = $('tab-dna'); box.replaceChildren();
+  if (!dnaState?.dna) { box.append(el('div', { class: 'sec' }, el('h4', {}, 'بصمة التصميم'), el('p', { class: 'muted' }, 'تظهر البصمة عندما يُولَّد التصميم من الصفحة الرئيسية بعد أسئلة شرعاء. هذا المشروع لا يحمل بصمة.'))); return; }
+  const { dna, alternatives } = dnaState, cur = geometryFingerprint(editor.doc), orig = dna.geometryFingerprint;
+  const same = orig && cur === orig;
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'البصمتان'),
+    el('div', { class: 'fp' }, el('span', { class: 'muted' }, 'بصمة ميزانك'), el('code', {}, dna.fingerprint || '—')),
+    el('div', { class: 'fp' }, el('span', { class: 'muted' }, 'بصمة الهندسة الحالية'), el('code', {}, cur)),
+    el('p', { class: same ? 'muted' : 'fpwarn' }, orig ? (same ? 'الهندسة كما ولّدها المحرك دون تعديل.' : 'عُدّلت الهندسة بعد التوليد (بصمتها الأصلية ' + orig + ').') : 'لا توجد بصمة أصلية للمقارنة.')));
+  const axes = el('div', { class: 'sec' }, el('h4', {}, 'محاور ميزانك'));
+  for (const a of dna.dna.axes) axes.append(el('div', { class: 'axis' }, el('div', { class: 'axis-h' }, el('b', {}, a.label), el('span', {}, Math.round(a.value * 100) + '%')), el('div', { class: 'bar' }, el('i', { style: `width:${Math.round(a.value * 100)}%` })), el('small', { class: 'muted' }, a.sources.join('، ') + (a.measured ? '' : ' — لا يقيسه المحرك بعد، فلا يغيّر الدرجة'))));
+  box.append(axes);
+  const alt = el('div', { class: 'sec' }, el('h4', {}, 'البدائل بميزانك'));
+  const table = el('table', { class: 'dna-table' }, el('tr', {}, ...['البديل', 'بميزانك', 'محايد', ''].map(t => el('th', {}, t))));
+  for (const row of dna.rows) {
+    const doc = alternatives.find(x => x.index === row.index)?.doc, isAziz = row.index === dna.selectedIndex, isBest = row.index === dna.bestIndex;
+    const tags = [isAziz ? 'اختيار AZIZ' : '', isBest ? 'الأنسب لبصمتك' : ''].filter(Boolean).join(' · ');
+    const open = doc && !isAziz ? el('button', { class: 'btn', onclick: () => openAlternative(doc, row) }, 'افتحه') : '';
+    table.append(el('tr', {}, el('td', {}, (STRATEGY_NAMES[row.strategy] || row.strategy) + ' #' + (row.index + 1), tags ? el('small', { class: 'tag' }, tags) : ''), el('td', {}, row.score ?? '—'), el('td', {}, row.neutralScore ?? '—'), el('td', {}, open)));
+  }
+  alt.append(table, el('p', { class: 'muted' }, 'الدرجات تقديرية من مقاييس يقيسها المحرك فعلًا (الخصوصية والحركة والإضاءة والكفاءة والهدر). المعتمد في التوليد هو اختيار AZIZ؛ هذا الترتيب يعرض ما تفضّله بصمتك ولا يغيّر شيئًا إلا إذا فتحت بديلًا بنفسك.'));
+  box.append(alt);
+}
+function openAlternative(doc, row) {
+  if (!confirm('سيُفتح هذا البديل مكان المخطط الحالي. يُحفظ المخطط الحالي نسخةً احتياطية في المتصفح. هل تتابع؟')) return;
+  try { localStorage.setItem('mizan.studio.doc.v1.before-dna', serialize(editor.doc)); } catch { /* التخزين غير متاح */ }
+  if (dnaState?.dna) dnaState.dna.geometryFingerprint = geometryFingerprint(doc);
+  try { localStorage.setItem('mizan.studio.dna.v1', JSON.stringify({ dna: dnaState.dna, alternatives: dnaState.alternatives })); } catch { /* ignore */ }
+  loadDoc(doc, 'فُتح البديل ' + (STRATEGY_NAMES[row.strategy] || row.strategy) + ' ' + (row.index + 1));
+  renderDna();
 }
 
 // ------------------------------------------------------------------------------------------------ boot

@@ -7,11 +7,22 @@ export const HANDOFF_KEY = 'mizan.home.handoff.v1';
 export const STUDIO_KEY = 'mizan.studio.doc.v1';
 export const BACKUP_KEY = 'mizan.studio.doc.v1.before-home';
 export const HANDOFF_SCHEMA = 'mizan-home-handoff/1';
+export const DNA_KEY = 'mizan.studio.dna.v1';
+const MAX_ALT_BYTES = 1_500_000;
 
 /** يكتب التسليم. meta اختياري: مصدر التصميم والأرض (للعرض فقط، لا يغيّر المستند). */
 export function writeHandoff(session, doc, meta = {}) {
   const checked = parseDoc(serialize(doc)); // يرفض المستند غير الصالح قبل الانتقال
-  session.setItem(HANDOFF_KEY, JSON.stringify({ schema: HANDOFF_SCHEMA, at: meta.at ?? null, meta: { source: meta.source || 'home', ...(meta.note ? { note: String(meta.note).slice(0, 200) } : {}) }, doc: checked }));
+  // بصمة التصميم والبدائل اختيارية: تُتحقق وثائق البدائل مثل الأصل، وتُهمل كلها إن كبر حجمها.
+  let dna = null, alternatives = [];
+  if (meta.dna && typeof meta.dna === 'object') {
+    dna = JSON.parse(JSON.stringify(meta.dna));
+    for (const alt of Array.isArray(meta.alternatives) ? meta.alternatives : []) {
+      try { alternatives.push({ index: alt.index, strategy: String(alt.strategy || ''), doc: parseDoc(serialize(alt.doc)) }); } catch { /* بديل غير صالح: يُهمل */ }
+    }
+    if (JSON.stringify(alternatives).length > MAX_ALT_BYTES) alternatives = [];
+  }
+  session.setItem(HANDOFF_KEY, JSON.stringify({ schema: HANDOFF_SCHEMA, at: meta.at ?? null, meta: { source: meta.source || 'home', ...(meta.note ? { note: String(meta.note).slice(0, 200) } : {}) }, ...(dna ? { dna, alternatives } : {}), doc: checked }));
   return checked;
 }
 
@@ -35,5 +46,19 @@ export function consumeHandoff(session, local) {
     }
     local.setItem(STUDIO_KEY, serialize(doc));
   } catch { /* التخزين غير متاح: يبقى المستند محمولًا في الذاكرة */ }
-  return { doc, backedUp, meta: parsed.meta || {} };
+  let dna = null, alternatives = [];
+  if (parsed.dna && typeof parsed.dna === 'object') {
+    dna = parsed.dna;
+    for (const alt of Array.isArray(parsed.alternatives) ? parsed.alternatives : []) { try { alternatives.push({ index: alt.index, strategy: String(alt.strategy || ''), doc: parseDoc(alt.doc) }); } catch { /* يُهمل */ } }
+    try { local.setItem(DNA_KEY, JSON.stringify({ dna, alternatives, docTitle: doc.title })); } catch { /* التخزين غير متاح */ }
+  } else { try { local.removeItem(DNA_KEY); } catch { /* ignore */ } }
+  return { doc, backedUp, meta: parsed.meta || {}, dna, alternatives };
+}
+
+/** يقرأ بصمة التصميم المحفوظة مع المشروع الحالي (إن وُجدت). */
+export function loadSavedDNA(local) {
+  try { const raw = JSON.parse(local.getItem(DNA_KEY) || 'null'); if (!raw?.dna) return null;
+    const alternatives = []; for (const alt of raw.alternatives || []) { try { alternatives.push({ index: alt.index, strategy: String(alt.strategy || ''), doc: parseDoc(alt.doc) }); } catch { /* يُهمل */ } }
+    return { dna: raw.dna, alternatives };
+  } catch { return null; }
 }

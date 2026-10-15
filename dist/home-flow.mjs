@@ -2,6 +2,7 @@
 // وحدة نقية بلا DOM: كل ما فيها قابل للاختبار بـ node. الواجهة في home.mjs.
 import { validatePlot, defaultRooms } from './planner.mjs';
 import { footprintDiagnostics } from './claude/planner.mjs';
+import { rankByDNA, geometryFingerprint } from './design-dna.mjs';
 import { normalizeDiscovery, AVOIDS, LIFE } from './client-brief.mjs';
 import { runMultiEngineDesign } from './multi-engine.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
@@ -175,15 +176,25 @@ export function modelToStudioDoc(model, land, { title = 'تصميم أولي م�
 }
 
 /** يشغّل محرك التوليد الحالي ويعيد التصميم المختار مستندًا للمرسم. أي فشل يُرمى كما هو (لا بديل صامت). */
-export async function generateInitialDesign({ land, rooms, discovery, idea = '', seed = 1 }) {
+export async function generateInitialDesign({ land, rooms, discovery, idea = '', seed = 1, counts = null }) {
   const { plot } = normalizeLand(land);
-  const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: normalizeDiscovery(discovery), seed });
+  const disc = normalizeDiscovery(discovery);
+  const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
   const notes = [];
   if (report.areaMismatch.length) notes.push(`${report.areaMismatch.length} فراغ تختلف مساحته عن المطلوب بعد التحويل؛ راجعها في المرسم.`);
   if (report.unmatched.length) notes.push(`${report.unmatched.length} فراغ لم يُطابَق بعد التحويل.`);
   if (land.entries.length > 1) notes.push('المحرك يوزّع الغرف بحسب المدخل الأول فقط؛ بقية المداخل مسجّلة في الأرض ولم تؤثر في التوزيع.');
-  return { doc, report, notes, alternatives: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
+  // بصمة التصميم: تقييم كل بديل بميزان العميل. اختيار AZIZ يبقى هو المعتمد؛ البدائل تُعرض للقرار.
+  let dna = null, alternatives = [];
+  try {
+    dna = rankByDNA({ plot, rooms, discovery: disc, idea, counts: counts || {}, models: result.models, selectedIndex: result.selectedIndex });
+    for (const row of dna.rows) {
+      try { alternatives.push({ index: row.index, strategy: row.strategy, doc: row.index === result.selectedIndex ? doc : modelToStudioDoc(result.models[row.index], land).doc }); } catch { /* بديل لم يتحوّل: لا يُعرض */ }
+    }
+    dna.geometryFingerprint = geometryFingerprint(doc);
+  } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
+  return { doc, report, notes, dna, alternatives, alternativesCount: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
 }
 
 /**

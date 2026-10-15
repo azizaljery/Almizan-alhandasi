@@ -5,3 +5,12 @@
 .top .btn.primary{background:var(--mz-gold);border-color:var(--mz-gold);color:#10261d}
 .title:hover,.title:focus{border-color:#2f6650;background:#1d4637}
 .brand.mz-logo small{margin-top:-2px}
+
+/* تبويب البصمة */
+#tab-dna .fp{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
+#tab-dna code{direction:ltr;font-size:12px;background:var(--mz-green-soft,#e8efe8);padding:2px 8px;border-radius:6px}
+#tab-dna .fpwarn{color:#8a5a1a;font-size:12.5px;line-height:1.7}
+#tab-dna .axis{margin:10px 0}.axis-h{display:flex;justify-content:space-between}
+#tab-dna .bar{height:7px;background:var(--mz-line);border-radius:99px;margin:5px 0;overflow:hidden}#tab-dna .bar i{display:block;height:100%;background:var(--mz-brass)}
+#tab-dna .dna-table{width:100%;border-collapse:collapse;direction:rtl;font-size:12.5px}#tab-dna .dna-table th,#tab-dna .dna-table td{border:1px solid var(--line);padding:6px;text-align:right;vertical-align:middle}
+#tab-dna .tag{display:block;color:var(--mz-brass);margin-top:2px}

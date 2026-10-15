@@ -107,7 +107,7 @@ test('التوليد: من الأرض والبرنامج إلى مستند، م�
   assert.equal(out.doc.labels.filter(l => l.type === 'bedroom').length, 3);
   assert.ok(out.doc.plot && out.doc.plot.polygon.length === 4);
   assert.ok(out.notes.some(n => n.includes('المدخل الأول فقط')));
-  assert.ok(out.alternatives >= 1);
+  assert.ok(out.alternativesCount >= 1);
 });
 test('التوليد: «بدون فناء» في النص الحر لا ينتج فناءً', async () => {
   const out = await generateInitialDesign({ land: land({ entries: ['s'] }), rooms: defaultRooms({ bedrooms: 3, majlis: 1 }), discovery: normalizeDiscovery(undefined), idea: 'ابي بيت بدون فناء' });
