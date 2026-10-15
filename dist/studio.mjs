@@ -4,6 +4,7 @@ import { ROOM_TYPES, OPENING_KINDS, FIXTURES, STAIR_KINDS, WALL_KINDS, PLOT_ENTR
 import { sampleVilla } from './draw/samples.mjs';
 import { consumeHandoff, loadSavedDNA, STUDIO_KEY } from './draw/handoff.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
+import { AXIS_LABELS as OA_LABELS } from './opening-aware.mjs';
 import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
@@ -527,6 +528,22 @@ function renderDna() {
   }
   alt.append(table, el('p', { class: 'muted' }, 'الدرجات تقديرية من مقاييس يقيسها المحرك فعلًا (الخصوصية والحركة والإضاءة والكفاءة والهدر). المعتمد في التوليد هو اختيار AZIZ؛ هذا الترتيب يعرض ما تفضّله بصمتك ولا يغيّر شيئًا إلا إذا فتحت بديلًا بنفسك.'));
   box.append(alt);
+  renderOpeningAware(box, dna);
+}
+// مقارنة تراعي الفتحات (AZ-06): جدول ثانوي لكل بديل بمحاور مقيسة وحالتها وبراهينها؛ للعرض فقط ولا يغيّر اختيار AZIZ.
+const OA_STATUS = { measured: 'مقيس', estimated: 'تقديري', unavailable: 'غير متاح' };
+function renderOpeningAware(box, dna) {
+  const oa = dna.openingAware; if (!oa?.rows?.length) return;
+  const keys = Object.keys(OA_LABELS), sec = el('div', { class: 'sec' }, el('h4', {}, 'مقارنة تراعي الفتحات (ثانوية)'));
+  const table = el('table', { class: 'dna-table' }, el('tr', {}, el('th', {}, 'البديل'), ...keys.map(k => el('th', {}, OA_LABELS[k])), el('th', {}, 'الجزئية')));
+  for (const row of oa.rows) {
+    const tags = [row.index === oa.selectedIndex ? 'اختيار AZIZ' : '', row.index === oa.bestIndex ? 'الأنسب بالفتحات' : ''].filter(Boolean).join(' · ');
+    table.append(el('tr', {}, el('td', {}, (STRATEGY_NAMES[row.strategy] || row.strategy) + ' #' + (row.index + 1), tags ? el('small', { class: 'tag' }, tags) : ''),
+      ...keys.map(k => { const a = row.axes[k]; return el('td', { title: a ? [a.detail, ...(a.evidence || []).slice(0, 6).map(e => [e.kind, e.openingId, e.roomId].filter(Boolean).join(' · '))].join('\n') : '' }, a ? (a.score === null || a.score === undefined ? '—' : Math.round(a.score)) : '—', el('small', { class: 'tag' }, a ? OA_STATUS[a.status] : '')); }),
+      el('td', {}, row.partialScore ?? '—', el('small', { class: 'tag' }, row.coverage.scored + '/' + row.coverage.total + ' محاور'))));
+  }
+  sec.append(table, el('p', { class: 'muted' }, oa.note + ' مرّر المؤشر فوق خانة لرؤية البراهين (معرّفات الفتحات والغرف).'));
+  box.append(sec);
 }
 function openAlternative(doc, row) {
   if (!confirm('سيُفتح هذا البديل مكان المخطط الحالي. يُحفظ المخطط الحالي نسخةً احتياطية في المتصفح. هل تتابع؟')) return;
