@@ -20,11 +20,13 @@ for (let i=0;i<8;i++){ if(await p.locator('#chat form.counts').count()) break;
   await p.waitForTimeout(250);}
 await p.click('#chat form.counts .cta');
 await p.click('#chat .cta:has-text("توليد التصميم")');
-await p.waitForSelector('#buildApply:not([hidden])',{timeout:60000});
+await p.waitForSelector('#buildReport:not([hidden]) .rtable',{timeout:90000});
 console.log('error:',await p.locator('#buildError').innerText());
-console.log('hint:',await p.locator('#buildText').innerText());
-await p.screenshot({path:'/tmp/claude-0/home-shots/fail-path.png'});
-await Promise.all([p.waitForURL('**/studio.html',{timeout:60000}),p.click('#buildApply')]);
-await p.waitForTimeout(1500);
+const tables=await p.locator('#buildReport .rtable').evaluateAll(ts=>ts.map(t=>[...t.rows].map(r=>[...r.cells].map(c=>c.innerText.trim()).join(' | ')).join('\n')));
+console.log(tables.join('\n----\n'));
+console.log('rtl:',await p.locator('#buildReport .rtable').first().evaluate(t=>getComputedStyle(t).direction));
+await p.screenshot({path:'/tmp/claude-0/home-shots/fail-report.png',fullPage:true});
+const btns=await p.locator('#buildReport button').count(); console.log('apply buttons:',btns);
+await Promise.all([p.waitForURL('**/studio.html',{timeout:60000}),p.locator('#buildReport button').first().click()]);
 console.log('studio opened:',p.url().endsWith('studio.html'));
 await b.close(); server.close();

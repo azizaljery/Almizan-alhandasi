@@ -1,6 +1,7 @@
 // منطق الصفحة الرئيسية: الأرض (طول وعرض وشوارع ومداخل) ← شرعاء ← تصميم أولي داخل المرسم.
 // وحدة نقية بلا DOM: كل ما فيها قابل للاختبار بـ node. الواجهة في home.mjs.
 import { validatePlot, defaultRooms } from './planner.mjs';
+import { footprintDiagnostics } from './claude/planner.mjs';
 import { normalizeDiscovery, AVOIDS, LIFE } from './client-brief.mjs';
 import { runMultiEngineDesign } from './multi-engine.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
@@ -186,24 +187,46 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
 }
 
 /**
- * اقتراح برنامج يتسع في الأرض عندما يفشل التوليد. لا يُطبَّق تلقائيًا: يعرضه المستدعي ويطلب موافقة العميل.
- * يجرّب إنقاص فراغ واحد في كل مرة (من الأنواع القابلة للإنقاص) ويختار الأكبر مساحة متبقية ممن ينجح.
+ * تشخيص فشل التوليد: أرقام محسوبة من محرك الأرض نفسه + تجارب فعلية على المحرك لكل تعديل ممكن.
+ * لا يُطبَّق شيء هنا. يعيد حقائق وخيارات، وكل خيار نجح فعلًا أو فشل فعلًا في تجربة؛ والقرار للعميل.
+ * المحرك لا يخبرنا أي غرفة بعينها هي المعطِّلة؛ لذلك تظهر النتيجة كتجارب (ينجح/لا ينجح) لا كتفسير مفترض.
  */
-export async function suggestFit({ land, counts, discovery, idea = '', maxRounds = 4 }) {
-  const floors = { bedrooms: 1, majlis: 0, baths: 1, kitchens: 1, halls: 0, dining: 0 };
-  let current = { ...counts };
-  for (let round = 0; round < maxRounds; round++) {
-    const options = COUNT_FIELDS.filter(f => current[f.id] > floors[f.id])
-      .map(f => ({ id: f.id, counts: { ...current, [f.id]: current[f.id] - 1 } }))
-      .map(o => ({ ...o, area: defaultRooms(o.counts).reduce((a, r) => a + (r.area || 0), 0) }))
-      .sort((a, b) => b.area - a.area);
-    if (!options.length) return null;
-    for (const o of options) {
-      try { await generateInitialDesign({ land, rooms: defaultRooms(o.counts), discovery, idea }); return o.counts; } catch { /* نكمل */ }
-    }
-    current = options[0].counts;
+export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow = 4 }) {
+  const { plot } = normalizeLand(land);
+  const d = footprintDiagnostics(plot);
+  const programArea = c => defaultRooms(c).reduce((a, r) => a + (r.area || 0), 0);
+  const required = programArea(counts);
+  const perType = COUNT_FIELDS.filter(f => counts[f.id] > 0).map(f => {
+    const unit = defaultRooms({ bedrooms: 0, majlis: 0, baths: 0, kitchens: 0, halls: 0, dining: 0, [f.id]: 1 }).reduce((a, r) => a + r.area, 0);
+    return { id: f.id, label: f.label, count: counts[f.id], unit, total: unit * counts[f.id] };
+  });
+  const facts = {
+    plotArea: d.plotWidth * d.plotLength, plotWidth: d.plotWidth, plotLength: d.plotLength, entry: d.entry,
+    setbacks: d.setbacks, coverage: d.coverage, afterSetbacks: d.afterSetbacks, coverageCap: d.coverageCap,
+    net: d.net, frontage: d.frontage, depth: d.depth, required, share: d.net.area > 0 ? required / d.net.area : 0, perType, floors: 1,
+  };
+  const works = async (l, c) => { try { await generateInitialDesign({ land: l, rooms: defaultRooms(c), discovery, idea }); return true; } catch { return false; } };
+  const floor = { bedrooms: 1, majlis: 0, baths: 1, kitchens: 1, halls: 0, dining: 0 };
+  const options = [];
+  for (const f of COUNT_FIELDS) {
+    if (counts[f.id] <= floor[f.id]) continue;
+    const to = { ...counts, [f.id]: counts[f.id] - 1 };
+    options.push({ kind: 'reduce', field: f.id, label: `${f.label}: ${counts[f.id]} ← ${to[f.id]}`, counts: to, land, ok: await works(land, to), area: programArea(to) });
   }
-  return null;
+  for (const dim of ['width', 'length']) {
+    for (let n = 1; n <= maxGrow; n++) {
+      const grown = { ...land, [dim]: land[dim] + n };
+      if (await works(grown, counts)) { options.push({ kind: 'land', field: dim, label: `${dim === 'width' ? 'عرض' : 'طول'} الأرض: ${land[dim]} ← ${grown[dim]} م`, counts, land: grown, ok: true }); break; }
+      if (n === maxGrow) options.push({ kind: 'land', field: dim, label: `${dim === 'width' ? 'عرض' : 'طول'} الأرض حتى +${maxGrow} م`, counts, land, ok: false });
+    }
+  }
+  if (land.streets.length > 1) {
+    for (const s of land.streets.filter(x => x !== land.entries[0])) {
+      const moved = { ...land, entries: [s, ...land.entries.filter(x => x !== s && x !== land.entries[0])] };
+      options.push({ kind: 'entry', field: s, label: `نقل المدخل الأول إلى جهة ${SIDE_LABELS[s]}`, counts, land: moved, ok: await works(moved, counts) });
+    }
+  }
+  return { facts, options };
 }
 
 /** رسالة قصيرة للعميل بدل تفاصيل كل محرك. الخطأ الأصلي يبقى في التفاصيل التقنية. */

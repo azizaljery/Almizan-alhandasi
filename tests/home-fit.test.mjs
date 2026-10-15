@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateInitialDesign, suggestFit, friendlyBuildError, SharaSession } from '../dist/home-flow.mjs';
+import { generateInitialDesign, diagnoseFit, friendlyBuildError, SharaSession } from '../dist/home-flow.mjs';
 import { defaultRooms } from '../dist/planner.mjs';
 
 const land = { length: 23, width: 22, streets: ['s'], entries: ['s'] };
@@ -11,14 +11,17 @@ test('البرنامج الافتراضي على أرض 22×23 لا يتسع ف�
   await assert.rejects(() => generateInitialDesign({ land, rooms: defaultRooms(defaults), discovery }));
 });
 
-test('suggestFit يقترح برنامجًا أصغر ينجح فعلًا، ولا يعدّل الأصل', async () => {
-  const before = { ...defaults };
-  const fit = await suggestFit({ land, counts: defaults, discovery });
-  assert.ok(fit, 'يجب أن يوجد اقتراح');
-  assert.deepEqual(defaults, before);
-  const diffs = Object.keys(before).filter(k => fit[k] !== before[k]);
-  assert.ok(diffs.length >= 1 && diffs.every(k => fit[k] < before[k]));
-  await generateInitialDesign({ land, rooms: defaultRooms(fit), discovery });
+test('diagnoseFit يعيد حقائق محسوبة وخيارات مجرّبة، ولا يعدّل الأصل ولا يطبّق شيئًا', async () => {
+  const before = { ...defaults }, landBefore = JSON.stringify(land);
+  const { facts, options } = await diagnoseFit({ land, counts: defaults, discovery });
+  assert.deepEqual(defaults, before); assert.equal(JSON.stringify(land), landBefore);
+  assert.equal(facts.plotArea, 506);
+  assert.equal(facts.net.area, 351.5);
+  assert.equal(facts.required, 228);
+  assert.equal(facts.perType.reduce((a, t) => a + t.total, 0), 228);
+  assert.ok(options.some(o => o.kind === 'reduce' && o.ok) && options.some(o => o.kind === 'reduce' && !o.ok), 'خيارات ناجحة وفاشلة معًا');
+  for (const o of options.filter(o => o.ok)) await generateInitialDesign({ land: o.land, rooms: defaultRooms(o.counts), discovery });
+  for (const o of options.filter(o => !o.ok)) await assert.rejects(() => generateInitialDesign({ land: o.land, rooms: defaultRooms(o.counts), discovery }));
 });
 
 test('friendlyBuildError يختصر رسالة المحركات ويُبقي غيرها كما هي', () => {

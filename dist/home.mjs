@@ -1,14 +1,12 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
-import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, suggestFit, friendlyBuildError, ENGINEERING_FIELDS, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
-import { defaultRooms } from './planner.mjs';
 import { requestBrief } from './assistant.mjs';
 
 const $ = id => document.getElementById(id);
 const home = $('home');
-const COUNT_LABELS = ENGINEERING_FIELDS;
 const stages = ['Welcome', 'Land', 'Shara', 'Build'];
 function show(name) {
   for (const s of stages) $('stage' + s).hidden = s !== name;
@@ -176,26 +174,61 @@ async function understandWithAI(text, accessCode) {
 }
 
 // ------------------------------------------------------------------------------------------------ التوليد والتسليم للمرسم
-async function build(counts) {
-  show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildApply').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
-  const useCounts = counts || session.counts;
-  const input = { land: confirmedLand, rooms: defaultRooms(useCounts), discovery: session.discovery(), idea: session.idea };
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+const m1 = v => (Math.round(v * 100) / 100).toString();
+function row(table, cells, head) { const tr = el('tr'); for (const c of cells) { const td = el(head ? 'th' : 'td'); if (c instanceof Node) td.append(c); else td.textContent = c; tr.append(td); } table.append(tr); return tr; }
+
+function applyOption(o) {
+  session.counts = { ...o.counts }; confirmedLand = o.land;
+  $('landLength').value = o.land.length; $('landWidth').value = o.land.width;
+  land.entries = new Set(o.land.entries);
+  grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
+  refreshLand(); build();
+}
+
+function renderReport({ facts: f, options }, err) {
+  const box = $('buildReport'); box.replaceChildren(); box.hidden = false;
+  box.append(el('h3', '', 'لماذا تعذّر التوليد؟'));
+  const facts = el('table', 'rtable');
+  row(facts, ['البند', 'القيمة'], true);
+  row(facts, ['الأرض', `${m1(f.plotWidth)}×${m1(f.plotLength)} م = ${m1(f.plotArea)} م²`]);
+  row(facts, ['الارتدادات (م)', Object.entries(f.setbacks).map(([k, v]) => `${SIDE_LABELS[k]} ${m1(v)}`).join('، ')]);
+  row(facts, ['الصافي بعد الارتدادات', `${m1(f.afterSetbacks.width)}×${m1(f.afterSetbacks.depth)} م = ${m1(f.afterSetbacks.area)} م²`]);
+  row(facts, ['سقف نسبة البناء', `${m1(f.coverage * 100)}% = ${m1(f.coverageCap)} م²`]);
+  row(facts, ['المساحة المبنية المتاحة', `${m1(f.net.area)} م² (دور واحد)`]);
+  row(facts, ['مساحة الغرف وحدها', `${m1(f.required)} م² = ${m1(f.share * 100)}% من المتاح، قبل الجدران والممرات`]);
+  box.append(facts);
+  const prog = el('table', 'rtable');
+  row(prog, ['الفراغ', 'العدد', 'مساحة الواحد', 'المجموع'], true);
+  for (const t of f.perType) row(prog, [t.label, String(t.count), `${m1(t.unit)} م²`, `${m1(t.total)} م²`]);
+  box.append(el('h3', '', 'برنامجك المطلوب'), prog);
+
+  box.append(el('h3', '', 'خيارات جرّبتُها على المحرك فعلًا'));
+  const opts = el('table', 'rtable');
+  row(opts, ['التعديل', 'النتيجة', ''], true);
+  for (const o of options) {
+    const act = el('button', 'cta ghost', 'طبّق هذا الخيار'); act.type = 'button'; act.addEventListener('click', () => applyOption(o));
+    row(opts, [o.label, o.ok ? 'ينجح' : 'لا ينجح وحده', o.ok ? act : '']);
+  }
+  box.append(opts);
+  box.append(el('p', 'hint', 'هذه نتائج تجارب على المحرك وليست تفسيرًا: المحرك لا يحدد غرفة بعينها هي السبب. لم أغيّر شيئًا من برنامجك؛ القرار لك، ولا يُطبَّق أي خيار إلا بضغطك. التوليد الحالي دور واحد فقط.'));
+  if (!options.some(o => o.ok)) box.append(el('p', 'hint', 'لا يكفي أي تعديل بسيط واحد. يمكنك الجمع بين تعديلين بالرجوع إلى شرعاء، أو تكبير الأرض.'));
+  console.warn('تفاصيل فشل التوليد:', err);
+}
+
+async function build() {
+  show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
+  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea };
   try {
     const out = await generateInitialDesign(input);
     writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' ') });
     $('buildText').textContent = 'جاهز. أفتح لك المرسم…';
     location.href = './studio.html';
   } catch (err) {
-    $('buildText').textContent = '';
     setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
-    console.warn('تفاصيل فشل التوليد:', err);
-    $('buildText').textContent = 'أبحث عن أقرب برنامج يتسع…';
-    const fit = await suggestFit({ land: confirmedLand, counts: useCounts, discovery: input.discovery, idea: input.idea }).catch(() => null);
-    if (fit) {
-      const diff = COUNT_LABELS.filter(f => fit[f.id] !== useCounts[f.id]).map(f => `${f.label}: ${useCounts[f.id]} ← ${fit[f.id]}`).join('، ');
-      $('buildText').textContent = `يتسع هذا البرنامج المعدّل: ${diff}.`;
-      $('buildApply').hidden = false; $('buildApply').onclick = () => { session.counts = fit; build(fit); };
-    } else $('buildText').textContent = 'لم أجد تعديلًا بسيطًا يتسع؛ جرّب أرضًا أكبر أو عددًا أقل من الغرف.';
+    $('buildText').textContent = 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…';
+    try { renderReport(await diagnoseFit({ land: confirmedLand, counts: session.counts, discovery: input.discovery, idea: input.idea }), err); $('buildText').textContent = ''; }
+    catch (e2) { $('buildText').textContent = 'تعذّر التحليل التفصيلي.'; console.warn(e2); }
   }
 }
 $('buildRetry').addEventListener('click', () => show('Shara'));
