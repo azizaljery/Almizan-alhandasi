@@ -3,6 +3,7 @@
 import { validatePlot, defaultRooms } from './planner.mjs';
 import { footprintDiagnostics } from './claude/planner.mjs';
 import { rankByDNA, geometryFingerprint } from './design-dna.mjs';
+import { compareOpeningAware } from './opening-aware.mjs';
 import { normalizeDiscovery, AVOIDS, LIFE } from './client-brief.mjs';
 import { runMultiEngineDesign } from './multi-engine.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
@@ -193,6 +194,8 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
       try { alternatives.push({ index: row.index, strategy: row.strategy, doc: row.index === result.selectedIndex ? doc : modelToStudioDoc(result.models[row.index], land).doc }); } catch { /* بديل لم يتحوّل: لا يُعرض */ }
     }
     dna.geometryFingerprint = geometryFingerprint(doc);
+    // مقارنة ثانوية تراعي الفتحات (AZ-06): للعرض فقط، لا تغيّر selectedIndex ولا ترتيب البدائل.
+    try { dna.openingAware = compareOpeningAware({ models: result.models, selectedIndex: result.selectedIndex }); } catch { dna.openingAware = null; }
   } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
   return { doc, report, notes, dna, alternatives, alternativesCount: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
 }
