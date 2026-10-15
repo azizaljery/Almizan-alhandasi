@@ -56,3 +56,5 @@ export function applyBriefChoices(discovery, rooms, brief, indices) {
   if([...selected].some(i=>!Number.isInteger(i)||!fresh.changes.some(c=>c.index===i)))throw Error('اختيار تعديل غير صالح.');
   return rooms.map((r,index)=>{const c=fresh.changes.find(c=>c.index===index);return {...r,...(c&&selected.has(index)?{position:c.to}:{})};});
 }
+
+export { AVOIDS, LIFE, TASTES };

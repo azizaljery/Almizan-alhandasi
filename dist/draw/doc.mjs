@@ -11,6 +11,12 @@ const fail = (code, message, detail) => { throw new DrawError(code, message, det
 const num = (v, name) => { if (typeof v !== 'number' || !Number.isFinite(v)) fail('BAD_NUMBER', `قيمة غير صالحة: ${name}.`); return v; };
 const point = (p, name) => { if (!p || typeof p !== 'object') fail('BAD_POINT', `نقطة غير صالحة: ${name}.`); return { x: num(p.x, name + '.x'), y: num(p.y, name + '.y') }; };
 const clone = v => structuredClone(v);
+/** جهات الأرض: قائمة بلا تكرار من n/s/e/w؛ تُستخدم للشوارع والمداخل المتعددة. */
+const SIDE_KEYS = ['n', 's', 'e', 'w'];
+const sideList = (v, name) => {
+  if (!Array.isArray(v) || v.some(s => !SIDE_KEYS.includes(s))) fail('BAD_SIDES', `قيمة غير صالحة: ${name}؛ المسموح n وs وe وw فقط.`);
+  return [...new Set(v)];
+};
 const COLLECTIONS = ['walls', 'openings', 'labels', 'zones', 'fixtures', 'stairs', 'columns', 'dimensions', 'texts'];
 const PREFIX = { walls: 'w', openings: 'o', labels: 'r', zones: 'z', fixtures: 'f', stairs: 's', columns: 'c', dimensions: 'd', texts: 't', levels: 'L' };
 export const MAX = Object.freeze({ walls: 4000, openings: 4000, fixtures: 3000, labels: 600, coordinate: 2000, wallLength: 400, minWall: .05 });
@@ -336,6 +342,13 @@ const HANDLERS = {
     if (c.polygon !== undefined) { doc.plot = c.polygon ? { polygon: c.polygon.map((p, i) => limit(point(p, 'plot[' + i + ']'))).map(pt), setbacks: c.setbacks || doc.plot?.setbacks || null } : null; }
     else if (doc.plot && c.setbacks) doc.plot.setbacks = c.setbacks;
     if (c.north !== undefined) doc.north = ((num(c.north, 'north') % 360) + 360) % 360;
+    if (c.streets !== undefined) doc.streets = sideList(c.streets, 'streets');
+    if (c.entries !== undefined) {
+      const entries = sideList(c.entries, 'entries');
+      if (doc.streets && entries.some(s => !doc.streets.includes(s))) fail('ENTRY_NOT_ON_STREET', 'كل مدخل يجب أن يطل على أحد الشوارع المحددة.');
+      doc.entries = entries;
+      if (entries.length) doc.entry = entries[0];
+    }
     if (c.entry !== undefined) doc.entry = c.entry;
     return { ids: [] };
   },

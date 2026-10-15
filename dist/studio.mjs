@@ -2,6 +2,7 @@
 import { createDoc, parseDoc, serialize, getById, SCHEMA } from './draw/doc.mjs';
 import { ROOM_TYPES, OPENING_KINDS, FIXTURES, STAIR_KINDS, WALL_KINDS, PLOT_ENTRIES, roomTypeName } from './draw/catalog.mjs';
 import { sampleVilla } from './draw/samples.mjs';
+import { consumeHandoff } from './draw/handoff.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
@@ -16,8 +17,10 @@ const KEY = 'mizan.studio.doc.v1';
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } }, sget(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, sset(k, v) { try { sessionStorage.setItem(k, v); } catch { /* ignore */ } } };
 
 // ------------------------------------------------------------------------------------------------ start
-let initial = null;
-try { const saved = store.get(KEY); if (saved) initial = parseDoc(saved); } catch { initial = null; }
+let initial = null, homeHandoff = null;
+// تسليم من الصفحة الرئيسية: يُستهلك مرة واحدة، والمشروع المحفوظ سابقًا يُنسخ احتياطيًا ولا يضيع.
+try { homeHandoff = consumeHandoff(sessionStorage, localStorage); if (homeHandoff) initial = homeHandoff.doc; } catch { homeHandoff = null; }
+try { if (!initial) { const saved = store.get(KEY); if (saved) initial = parseDoc(saved); } } catch { initial = null; }
 const startedEmpty = !initial;
 const editor = new Editor($('planCanvas'), { doc: initial || createDoc({ title: 'مشروع جديد' }), onEvent: onEditorEvent });
 globalThis.__mizanStudio = editor; // للاختبارات الحية
@@ -475,3 +478,4 @@ editor.on = undefined;
 const _origAfter = editor.afterChange.bind(editor); editor.afterChange = () => { _origAfter(); refreshAiSeesSoon(); };
 if (threeVisible()) rebuild3D();
 if (startedEmpty) $('welcome').hidden = false;
+if (homeHandoff) toast('فُتح تصميمك الأولي من شرعاء. عدّل عليه كما تشاء.' + (homeHandoff.backedUp ? ' نُسخ مشروعك السابق احتياطيًا.' : '') + (homeHandoff.meta?.note ? ' ' + homeHandoff.meta.note : ''));
