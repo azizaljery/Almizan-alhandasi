@@ -398,6 +398,17 @@ document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.addEventListene
 document.querySelectorAll('#styleSeg [data-style]').forEach(b => b.addEventListener('click', () => { viewer?.setStyle(b.dataset.style); document.querySelectorAll('#styleSeg [data-style]').forEach(x => x.classList.toggle('on', x === b)); }));
 $('sunAz').addEventListener('input', e => viewer?.setSun({ azimuthDeg: +e.target.value })); $('sunAlt').addEventListener('input', e => viewer?.setSun({ altitudeDeg: +e.target.value }));
 $('secH').addEventListener('input', e => viewer?.setSectionHeight(+e.target.value)); $('isoLevel').addEventListener('change', sync3DLevel);
+const goFinal = async () => {
+  // يحفظ المشروع ولقطة المجسم (إن أمكن) ثم ينتقل لصفحة المخرجات
+  try { localStorage.setItem(KEY, serialize(editor.doc)); } catch { /* ... */ }
+  try {
+    localStorage.removeItem('mizan.studio.snap3d.v1');
+    const v = await ensureViewer(); if (v && !v.built) await rebuild3D();
+    if (viewer?.built) { const b = await viewer.capturePNG(1); const url = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); }); if (url && url.length < 3e6) localStorage.setItem('mizan.studio.snap3d.v1', url); }
+  } catch { /* اللقطة اختيارية */ }
+  location.href = './final.html';
+};
+$('btnFinal').addEventListener('click', goFinal); $('finalCta').addEventListener('click', goFinal);
 $('shot3d').addEventListener('click', async () => { if (!viewer?.built) return toast('لا يوجد مجسم بعد'); try { exportWithManifest((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2), 'studio-3d-png'); } catch { toast('تعذّر التقاط الصورة', true); } });
 // automatic walkthrough (orbit, approach, rooms) with optional local WebM recording
 let touring = false, rebuildAfterTour = false;

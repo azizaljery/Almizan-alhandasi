@@ -30,6 +30,7 @@
       <button class="btn" id="btnExample">مثال جاهز</button>
       <button class="btn" id="btnOpen" title="فتح ملف مشروع من المرسم، أو مخططًا مولّدًا من النظام القديم (ملف المشروع .json)">فتح</button>
       <button class="btn primary" id="btnSave">حفظ</button>
+      <button class="btn primary" id="btnFinal" title="اعتمد التصميم وافتح مخرجاته: المخطط، الإنشائي، الكميات والتكلفة، كتاب المشروع">اعتمد وأخرج المخرجات ←</button>
       <div class="menu"><button class="btn" id="btnExport" aria-haspopup="true">تصدير ▾</button>
         <div class="menu-list" id="exportMenu" hidden>
           <button data-export="png">صورة المخطط (PNG)</button><button data-export="png3d">صورة المجسم (PNG)</button><button data-export="dxf">ملف CAD (DXF)</button><button data-export="bundle">استوديو التصدير (حزمة)</button><button data-export="json">ملف المشروع (JSON)</button>
@@ -84,6 +85,7 @@
           <label class="rng" id="secWrap" hidden>المقطع<input type="range" id="secH" min="0.3" max="6" step=".05" value="1.2"></label>
           <label class="chk"><input type="checkbox" id="isoLevel"> عزل الدور</label>
           <button class="btn sm" id="shot3d">التقاط صورة</button>
+          <button class="btn sm primary" id="finalCta">اعتمد وأخرج المخرجات ←</button>
           <span class="tour" id="tourBox"><button class="btn sm" id="autoTour" title="دورة حول المبنى ثم داخل الغرف">▶ جولة تلقائية</button><button class="btn sm" id="recordTour">⏺ تسجيل الجولة</button><button class="btn sm warn" id="stopAutoTour" hidden>■ إيقاف</button><a class="btn sm" id="tourDownload" hidden>تنزيل الفيديو</a></span>
         </div>
         <div class="tour-status" id="autoTourStatus" role="status" aria-live="polite" hidden></div>
