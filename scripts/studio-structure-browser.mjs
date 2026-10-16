@@ -37,6 +37,15 @@ check('تنبيه «لا تصميم إنشائي» ظاهر', t0.includes('لا 
 check('جدول أعمدة وجسور', (await p.locator('#tab-str .dna-table').count()) >= 2);
 check('غير القابل للحساب معلن', t0.includes('الأساسات'));
 const before = await p.screenshot({ clip: { x: 360, y: 100, width: 700, height: 650 } });
+check('اللوحة الإنشائية تظهر تلقائيًا في التبويب', (await p.locator('#tab-str .sheetprev svg').count()) === 1 && t0.includes('تُولَّد تلقائيًا'));
+check('شارة عدد الأعمدة على التبويب', await p.locator('#strCount').isVisible());
+await p.click('#tab-str .sheetprev'); await p.waitForSelector('#strModal .strsheet svg');
+await p.screenshot({ path: out + '/sheet-modal.png' });
+check('اللوحة الكاملة تُفتح وفيها جداول', (await p.locator('#strModal').innerText()).includes('جدول الأعمدة'));
+const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#strModal button:has-text("حمّل SVG")')]);
+check('تحميل SVG', /structure-.*\.svg$/.test(dl.suggestedFilename()), dl.suggestedFilename());
+await p.click('#strModal button:has-text("إغلاق")');
+check('الإغلاق يخفي النافذة', !(await p.locator('#strModal').isVisible()));
 await p.check('#tab-str input[type=checkbox]'); await p.waitForTimeout(500);
 const after = await p.screenshot({ clip: { x: 360, y: 100, width: 700, height: 650 } });
 check('تفعيل العرض يرسم فوق المسقط', Buffer.compare(before, after) !== 0);

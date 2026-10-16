@@ -20,8 +20,8 @@ const doc = sampleVilla();
 test('الحزمة: الملفات المتوقعة وmanifest يطابق sha256 مستقلًا وبصمة الهندسة', async () => {
   const { files, manifest } = await buildExportBundle(doc, { now: NOW, app: { commit: 'abc', builtAt: 'x' } });
   const names = files.map(f => f.name);
-  assert.deepEqual(names.filter(n => n.endsWith('.svg')), ['plan-L1.svg']);
-  for (const n of ['plan.dxf', 'quantities.csv', 'manifest.json']) assert.ok(names.includes(n), n);
+  assert.deepEqual(names.filter(n => n.endsWith('.svg')), ['plan-L1.svg', 'structure-L1.svg']);
+  for (const n of ['plan.dxf', 'quantities.csv', 'structure.csv', 'manifest.json']) assert.ok(names.includes(n), n);
   assert.ok(names.some(n => n.endsWith('.mizan.json')));
   assert.equal(manifest.schema, BUNDLE_SCHEMA); assert.equal(manifest.docSchema, doc.schema);
   assert.equal(manifest.createdAt, NOW.toISOString());

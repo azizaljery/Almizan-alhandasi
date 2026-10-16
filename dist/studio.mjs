@@ -7,6 +7,7 @@ import { geometryFingerprint } from './design-dna.mjs';
 import { AXIS_LABELS as OA_LABELS } from './opening-aware.mjs';
 import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
 import { computeStructure, DEFAULT_ASSUMPTIONS } from './draw/structure.mjs';
+import { structureSheetSvg } from './draw/structure-sheet.mjs';
 import { applyCommand } from './draw/doc.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
@@ -87,7 +88,7 @@ async function roomDialog(label, room = null) {
 function onDocChanged() {
   $('undo').disabled = !editor.history.canUndo; $('redo').disabled = !editor.history.canRedo;
   if (document.activeElement !== $('docTitle')) $('docTitle').value = editor.doc.title;
-  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna(); if ($('tab-qty').classList.contains('on')) scheduleQty(); if ($('tab-str').classList.contains('on') || strOverlay) scheduleStr();
+  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna(); if ($('tab-qty').classList.contains('on')) scheduleQty(); scheduleStr();
   if (!(document.activeElement && $('side').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName))) renderProps();
 }
 const autosave = debounce(() => store.set(KEY, serialize(editor.doc)), 500);
@@ -499,7 +500,8 @@ function renderQty() {
 let strTimer = null, strOverlay = false, strAssume = {}, strResult = null;
 try { strAssume = JSON.parse(localStorage.getItem('mizan.studio.structure.v1') || '{}') || {}; } catch { strAssume = {}; }
 function scheduleStr() { clearTimeout(strTimer); strTimer = setTimeout(() => { if ($('tab-str').classList.contains('on')) renderStr(); else refreshStr(); }, 200); }
-function refreshStr() { try { strResult = computeStructure(editor.doc, { assumptions: strAssume }); } catch { strResult = null; } editor.markDirty(); }
+function refreshStr() { try { strResult = computeStructure(editor.doc, { assumptions: strAssume }); } catch { strResult = null; } editor.markDirty(); const cnt = $('strCount'); if (cnt) { const n = strResult?.levels.reduce((a, l) => a + (l.columns?.length || 0), 0) || 0; cnt.hidden = !n; cnt.textContent = n; cnt.title = 'عدد الأعمدة المقترحة في المخطط الإنشائي المبدئي'; }
+  const m = $('strModal'); if (m && !m.hidden && strModalLevel) paintStrModal(); }
 function drawStrOverlay(ctx, { S, k, levelId }) {
   const L = strResult?.levels.find(l => l.id === levelId); if (!L?.columns) return;
   ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#a8814a'; ctx.lineWidth = 2;
@@ -515,6 +517,23 @@ function applyProposedColumns() {
   let d = editor.doc; for (const c of list) d = applyCommand(d, { type: 'add-column', level: editor.levelId, x: c.x, y: c.y, size: c.size }).doc;
   editor.history.commit(d, 'أعمدة مقترحة'); editor.afterChange();
 }
+function sheetSvgFor(levelId) { return structureSheetSvg(editor.doc, strResult, { levelId, fingerprint: geometryFingerprint(editor.doc), date: new Date().toISOString().slice(0, 10), sheetNo: 'S-' + String(editor.doc.levels.findIndex(l => l.id === levelId) + 1).padStart(2, '0') }); }
+let strModalLevel = null;
+function openStrSheet(levelId) {
+  strModalLevel = levelId || editor.levelId; let m = $('strModal');
+  if (!m) { m = el('div', { id: 'strModal', class: 'strmodal', role: 'dialog', 'aria-label': 'المخطط الإنشائي' }); document.body.append(m); }
+  paintStrModal(); m.hidden = false;
+}
+function paintStrModal() {
+  const m = $('strModal'); if (!m || m.hidden && !strModalLevel) return; if (!strResult) refreshStr();
+  const tabs = editor.doc.levels.map(l => el('button', { class: 'btn' + (l.id === strModalLevel ? ' on' : ''), onclick: () => { strModalLevel = l.id; paintStrModal(); } }, l.name));
+  const svg = sheetSvgFor(strModalLevel), body = el('div', { class: 'strsheet' }); body.innerHTML = svg;
+  const name = (String(editor.doc.title || '').replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '')) || 'mizan'; // اسم ملف لاتيني: العناوين العربية تُسقط اسم التنزيل في بعض المتصفحات
+  m.replaceChildren(el('div', { class: 'strbar' }, el('b', {}, 'المخطط الإنشائي المبدئي'), ...tabs,
+    el('button', { class: 'btn', onclick: () => { const a = el('a', { href: URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' })), download: 'structure-' + name + '-' + strModalLevel + '.svg' }); document.body.append(a); a.click(); a.remove(); } }, 'حمّل SVG'),
+    el('button', { class: 'btn', onclick: () => { const w = window.open('', '_blank'); if (!w) return alert('اسمح بالنوافذ المنبثقة للطباعة.'); w.document.write('<!doctype html><meta charset="utf-8"><title>المخطط الإنشائي</title><style>@page{size:A3 landscape;margin:6mm}body{margin:0}svg{width:100%;height:auto}</style>' + svg); w.document.close(); setTimeout(() => w.print(), 400); } }, 'اطبع / PDF'),
+    el('button', { class: 'btn', onclick: () => { m.hidden = true; strModalLevel = null; } }, 'إغلاق')), body);
+}
 const STR_FIELDS = [['fc', 'مقاومة الخرسانة fc′ (MPa)'], ['fy', 'حديد التسليح fy (MPa)'], ['maxSpan', 'أقصى بحر جسر (م)'], ['liveFloor', 'حمل حي للأدوار (kN/م²)'], ['liveRoof', 'حمل حي للسطح (kN/م²)'], ['sdlFloor', 'أحمال ميتة للأدوار (kN/م²)'], ['sdlRoof', 'أحمال ميتة للسطح (kN/م²)'], ['masonry', 'كثافة جدار البلوك (kN/م³)']];
 function renderStr() {
   const box = $('tab-str'); box.replaceChildren();
@@ -523,7 +542,8 @@ function renderStr() {
   const head = el('div', { class: 'sec' }, el('h4', {}, 'الأعمدة والجسور'), note,
     el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: strOverlay, onchange: e => setStrOverlay(e.target.checked) }), ' أظهرها على المسقط (الجسور متقطعة، المقترح بنحاسي، عمودك أخضر)'));
   box.append(head);
-  const res = strResult; if (!res || !res.levels.some(l => l.columns)) { box.append(el('p', { class: 'muted' }, 'ارسم جدرانًا مغلقة (محيط مبنى) لتظهر الأعمدة والجسور.'), ...(res?.levels.flatMap(l => l.warnings || []).map(w => el('p', { class: 'fpwarn' }, w)) || [])); return; }
+  const res = strResult;
+  if (res?.levels.some(l => l.columns)) { const lv = res.levels.find(l => l.id === editor.levelId && l.columns) || res.levels.find(l => l.columns); const prev = el('div', { class: 'sheetprev', title: 'افتح اللوحة كاملة', role: 'button', tabindex: 0, onclick: () => openStrSheet(lv.id), onkeydown: e => { if (e.key === 'Enter') openStrSheet(lv.id); } }); prev.innerHTML = sheetSvgFor(lv.id); box.append(el('div', { class: 'sec' }, el('h4', {}, 'اللوحة الإنشائية (تُولَّد تلقائيًا من رسمك)'), prev, el('button', { class: 'btn', onclick: () => openStrSheet(lv.id) }, 'افتح اللوحة كاملة · حمّل · اطبع'))); } if (!res || !res.levels.some(l => l.columns)) { box.append(el('p', { class: 'muted' }, 'ارسم جدرانًا مغلقة (محيط مبنى) لتظهر الأعمدة والجسور.'), ...(res?.levels.flatMap(l => l.warnings || []).map(w => el('p', { class: 'fpwarn' }, w)) || [])); return; }
   const A = res.assumptions;
   const as = el('div', { class: 'sec' }, el('h4', {}, 'الافتراضات (عدّلها فيُعاد الحساب فورًا)'));
   const grid = el('div', { class: 'strgrid' });
@@ -548,7 +568,7 @@ function renderStr() {
   box.append(el('div', { class: 'sec' }, el('h4', {}, 'حجم الخرسانة التقديري'), el('p', {}, `أعمدة ${t.concrete.columns} م³ · جسور ${t.concrete.beams} م³ · بلاطات ${t.concrete.slabs} م³`)),
     el('div', { class: 'sec' }, el('h4', {}, 'غير قابل للحساب من الرسم'), el('ul', {}, ...res.unavailable.map(x => el('li', {}, x)))));
 }
-editor.overlay = null;
+editor.overlay = null; scheduleStr();
 
 // ------------------------------------------------------------------------------------------------ بصمة التصميم
 const STRATEGY_NAMES = { 'claude-rect': 'مخطط مستطيل', compact: 'الرواق المحوري', balanced: 'الجناحان المتوازنان', frontage: 'الواجهة العريضة', courtyard: 'بيت الفناء', 'u-court': 'بيت الباحة U', pavilions: 'أجنحة مرتبطة برواق', staggered: 'جناحان متدرجان' };

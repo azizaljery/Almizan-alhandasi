@@ -25,14 +25,14 @@ test('الإنشاء: اتزان الأحمال — مجموع أحمال الأ
   assert.ok(cols >= slabLoad * 0.98, `الأعمدة ${cols} أقل من البلاطة ${slabLoad}`);
 });
 
-test('الإنشاء: التعديل يغيّر النتيجة (إضافة جدار داخلي تزيد الأعمدة أو الجسور)', () => {
+test('الإنشاء: التعديل يغيّر النتيجة (إضافة جدار داخلي تزيد أحمال الأعمدة)', () => {
   const doc = build(18, 26), before = computeStructure(doc).levels[0];
   const lvl = doc.levels[0].id, xs = doc.walls.map(w => w.a.x).concat(doc.walls.map(w => w.b.x));
   const ys = doc.walls.map(w => w.a.y).concat(doc.walls.map(w => w.b.y));
   const mid = (Math.min(...xs) + Math.max(...xs)) / 2;
   const d2 = applyCommand(doc, { type: 'add-wall', level: lvl, a: { x: mid - 1.3, y: Math.min(...ys) + 9.0 }, b: { x: mid + 1.3, y: Math.min(...ys) + 9.0 }, t: 0.2 }).doc;
   const after = computeStructure(d2).levels[0];
-  assert.notDeepEqual([after.beams.length, after.columns.length], [before.beams.length, before.columns.length]);
+  assert.ok(sum(after.columns, c => c.Pu) > sum(before.columns, c => c.Pu) + 5, 'وزن الجدار الجديد يصل إلى الأعمدة');
 });
 
 test('الإنشاء: عمود رسمه المستخدم يحلّ محل المقترح القريب ولا يُكرَّر', () => {

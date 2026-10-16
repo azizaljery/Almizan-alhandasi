@@ -8,6 +8,8 @@ import { docBounds } from './editor/render2d.mjs';
 import { toDxf } from './dxf.mjs';
 import { computeDocQuantities, GRADES } from './quantities-doc.mjs';
 import { geometryFingerprint } from '../design-dna.mjs';
+import { computeStructure } from './structure.mjs';
+import { structureSheetSvg, structureCsv } from './structure-sheet.mjs';
 
 export const BUNDLE_SCHEMA = 'mizan-export-bundle/1';
 const enc = new TextEncoder();
@@ -61,6 +63,13 @@ export async function buildExportBundle(doc, { now = new Date(), app = null } = 
   add(`${base}.mizan.json`, 'application/json', serialize(doc), 'document-json');
   let res = null, qtyError = null; try { res = computeDocQuantities(doc); } catch (e) { qtyError = e.message; }
   if (res) add('quantities.csv', 'text/csv;charset=utf-8', quantitiesCsv(res), 'quantities-csv');
+  // المخطط الإنشائي المبدئي لكل دور له جدران، وجدول الأعمدة والجسور؛ يُولَّد من الرسم نفسه فيطابق ما يُعرض في المرسم
+  let structNote = null;
+  try {
+    const st = computeStructure(doc), fp = geometryFingerprint(doc), day = (now instanceof Date ? now : new Date(now)).toISOString().slice(0, 10);
+    doc.levels.forEach((lv, i) => { const L = st.levels.find(x => x.id === lv.id); if (L?.columns) add(`structure-${slug(lv.id)}.svg`, 'image/svg+xml', structureSheetSvg(doc, st, { levelId: lv.id, fingerprint: fp, date: day, sheetNo: 'S-' + String(i + 1).padStart(2, '0') }), 'structure-svg'); });
+    if (st.levels.some(l => l.columns)) add('structure.csv', 'text/csv;charset=utf-8', structureCsv(st), 'structure-csv');
+  } catch (e) { structNote = 'تعذّر المخطط الإنشائي: ' + e.message; }
   const files = [];
   for (const p of parts) files.push({ name: p.name, mime: p.mime, kind: p.kind, bytes: p.bytes, size: p.bytes.length, sha256: await sha256Hex(p.bytes) });
   const manifest = {
@@ -71,7 +80,7 @@ export async function buildExportBundle(doc, { now = new Date(), app = null } = 
     geometryFingerprint: geometryFingerprint(doc),
     app: { commit: app?.commit ?? null, builtAt: app?.builtAt ?? null },
     files: files.map(f => ({ name: f.name, kind: f.kind, mime: f.mime, bytes: f.size, sha256: f.sha256 })),
-    notes: qtyError ? ['تعذّر حساب الكميات: ' + qtyError] : [],
+    notes: [...(qtyError ? ['تعذّر حساب الكميات: ' + qtyError] : []), ...(structNote ? [structNote] : []), 'المخطط الإنشائي تحجيم أولي لا تصميم إنشائي معتمد.'],
   };
   const mbytes = enc.encode(JSON.stringify(manifest, null, 2) + '\n');
   files.push({ name: 'manifest.json', mime: 'application/json', kind: 'manifest', bytes: mbytes, size: mbytes.length, sha256: null });
