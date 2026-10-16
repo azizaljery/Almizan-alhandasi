@@ -39,11 +39,11 @@ await levels.nth(1).click(); await p.waitForTimeout(600);
 check('تبديل الدور يغيّر الدور النشط', (await p.locator('#levels button.on').innerText()) === (await levels.nth(1).innerText()));
 await p.screenshot({ path: join(out, 'floor-upper.png') });
 const rooms = await p.locator('#tab-rooms, #rooms').first().innerText().catch(() => '');
-check('غرف العلوي فيها السلم وغرف النوم', /سلم/.test(rooms) && /غرفة نوم|غرفة 1|نوم/.test(rooms), rooms.replace(/\s+/g, ' ').slice(0, 160));
+check('غرف العلوي: صالة علوية وغرف النوم (السلم يصعد من صالة الأرضي)', /صالة/.test(rooms) && /غرفة نوم|غرفة 1|نوم/.test(rooms), rooms.replace(/\s+/g, ' ').slice(0, 160));
 check('لا أخطاء في المتصفح', errs.length === 0, errs.join(' | ').slice(0, 300));
 // حالة الفشل: أرض صغيرة بدورين تعرض سببًا ولا تنتقل
 await p.goto(base + '/home.html'); await p.click('#start');
-await p.fill('#landLength', '20'); await p.fill('#landWidth', '12'); await p.selectOption('#landFloors', '2');
+await p.fill('#landLength', '12'); await p.fill('#landWidth', '10'); await p.selectOption('#landFloors', '2');
 await p.check('input[data-kind=street][value=s]'); await p.check('input[data-kind=entry][value=s]'); await p.click('#landForm button[type=submit]');
 await p.click('text=اسألني أسئلة محددة');
 for (let i = 0; i < 10; i++) {
@@ -58,7 +58,7 @@ await p.click('#chat form.counts .cta'); await p.click('#chat .cta:has-text("ت�
 await p.waitForSelector('#buildReport:not([hidden])', { timeout: 120000 });
 const rep = await p.locator('#buildReport').innerText();
 check('تقرير الفشل يعرض الدورين والخيارات المجرَّبة', /الدور الأرضي/.test(rep) && /الدور العلوي/.test(rep) && /ينجح|لا ينجح/.test(rep));
-check('رسالة الفشل بأرقام', /12×20/.test(await p.locator('#buildError').innerText()), (await p.locator('#buildError').innerText()).slice(0, 140));
+check('رسالة الفشل بأرقام', /10×12/.test(await p.locator('#buildError').innerText()), (await p.locator('#buildError').innerText()).slice(0, 140));
 await p.screenshot({ path: join(out, 'floors-fail.png') });
 await b.close(); server.close();
 process.exit(results.every(Boolean) ? 0 : 1);

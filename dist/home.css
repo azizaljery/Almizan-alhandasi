@@ -92,3 +92,4 @@ legend{padding:0;font-weight:600;margin-bottom:4px}
 .free details input{margin-top:8px}
 @media(max-width:560px){.two{grid-template-columns:1fr}.pick,.counts,.free{padding-inline-start:0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.scene canvas{opacity:1}}
+.bubble ul.understood{margin:6px 0 0;padding-inline-start:20px;line-height:1.8}.bubble ul.understood li::marker{color:var(--mz-brass,#b08d4f)}

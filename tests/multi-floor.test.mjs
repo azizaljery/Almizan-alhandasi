@@ -8,7 +8,8 @@ import { applyCommand, parseDoc, serialize } from '../dist/draw/doc.mjs';
 
 const discovery = { likes: [], rejects: [], avoids: [], life: {} };
 const base = { bedrooms: 3, majlis: 2, baths: 3, kitchens: 1, halls: 1, dining: 1 };
-const make = (width, length, counts, floors = 2) => generateInitialDesign({ land: { length, width, streets: ['s'], entries: ['s'], floors }, rooms: defaultRooms(counts), discovery, counts });
+// هذه الاختبارات تخص المحرك السابق للدورين (الاحتياطي)؛ المولّد المهني له اختباراته في villa-layout.test.mjs
+const make = (width, length, counts, floors = 2) => generateInitialDesign({ land: { length, width, streets: ['s'], entries: ['s'], floors }, rooms: defaultRooms(counts), discovery, counts, engine: 'legacy' });
 const inRect = (a, b, t = 0.02) => a.x >= b.x - t && a.y >= b.y - t && a.x + a.w <= b.x + b.w + t && a.y + a.h <= b.y + b.h + t;
 
 /** كل ما يجب أن يصح في أي نتيجة دورين ناجحة. */
@@ -66,7 +67,7 @@ for (const [name, w, l, counts] of CASES) {
 
 test('دوران: مدخل شرقي (أرض بشارعين) يُنتج دورين صالحين أيضًا', async () => {
   const counts = { ...base, bedrooms: 4 };
-  const out = await generateInitialDesign({ land: { length: 30, width: 20, streets: ['e', 's'], entries: ['e'], floors: 2 }, rooms: defaultRooms(counts), discovery, counts }).catch(e => e);
+  const out = await generateInitialDesign({ land: { length: 30, width: 20, streets: ['e', 's'], entries: ['e'], floors: 2 }, rooms: defaultRooms(counts), discovery, counts, engine: 'legacy' }).catch(e => e);
   if (out instanceof Error) { assert.ok(out instanceof MultiFloorError, 'الفشل إن وقع فبسبب معلن لا استثناء عابر: ' + out.message); assert.ok(out.code.startsWith('MULTI_')); return; }
   assertTwoFloors(out, counts);
 });

@@ -76,8 +76,9 @@ test('شرعاء الحر: يملأ الأعداد المذكورة صراحة �
   assert.equal(understood.counts.bedrooms, 3); assert.equal(understood.counts.majlis, 1); assert.equal(understood.counts.kitchens, 1);
   assert.equal(understood.counts.baths, undefined, 'لم يُذكر فلا يُخمَّن');
   const next = s.answer('free', understood);
-  assert.equal(next[1].kind, 'counts');
-  const byId = Object.fromEntries(next[1].fields.map(f => [f.id, f.value]));
+  const form = next.find(m => m.kind === 'counts');
+  assert.ok(form, 'نموذج الأعداد يظهر');
+  const byId = Object.fromEntries(form.fields.map(f => [f.id, f.value]));
   assert.deepEqual([byId.bedrooms, byId.majlis, byId.kitchens, byId.baths], [3, 1, 1, '']);
   assert.throws(() => s.answer('counts', { bedrooms: 3, majlis: 1, kitchens: 1 }), /دورات المياه/, 'العدد غير المذكور لا يمرّ بلا إدخال');
   assert.equal(s.idea, 'ابي 3 غرف نوم ومجلس واحد ومطبخ بدون فناء');
@@ -105,9 +106,10 @@ test('التوليد: من الأرض والبرنامج إلى مستند، م�
   const s = new SharaSession(); s.start(); s.answer('mode', 'guided'); s.answer('household', ['guests']); s.answer('avoids', []);
   s.answer('counts', { bedrooms: 3, majlis: 1, baths: 3, kitchens: 1, halls: 1, dining: 1 });
   const out = await generateInitialDesign({ land: land(), rooms: s.rooms(), discovery: s.discovery() });
-  assert.equal(out.doc.labels.filter(l => l.type === 'bedroom').length, 3);
+  assert.equal(out.doc.labels.filter(l => l.type === 'bedroom' || l.type === 'master').length, 3);
   assert.ok(out.doc.plot && out.doc.plot.polygon.length === 4);
-  assert.ok(out.notes.some(n => n.includes('المدخل الأول فقط')));
+  // المدخل الثاني يُنفَّذ بباب على جهته، أو يُذكر صراحة أنه لم يُنفَّذ
+  assert.ok(out.notes.some(n => n.includes('المدخل الثاني')));
   assert.ok(out.alternativesCount >= 1);
 });
 test('التوليد: «بدون فناء» في النص الحر لا ينتج فناءً', async () => {

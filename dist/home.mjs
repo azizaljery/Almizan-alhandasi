@@ -90,7 +90,13 @@ function fail(err) { setError($('chatError'), err.message || String(err)); }
 function render(messages) {
   setError($('chatError'), '');
   for (const m of messages) {
-    bubble(m.text);
+    const row = bubble(m.text);
+    if (m.kind === 'list') {
+      const ul = document.createElement('ul'); ul.className = 'understood';
+      for (const it of m.items || []) { const li = document.createElement('li'); li.textContent = it; ul.append(li); }
+      row.querySelector('.bubble').append(ul);
+      continue;
+    }
     if (m.kind === 'choice') {
       const wrap = document.createElement('div'); wrap.className = 'pick';
       for (const o of m.options) {
@@ -219,7 +225,7 @@ function renderReport({ facts: f, options }, err) {
 
 async function build() {
   show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
-  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts };
+  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements };
   try {
     const out = await generateInitialDesign(input);
     writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' '), dna: out.dna, alternatives: out.alternatives });
