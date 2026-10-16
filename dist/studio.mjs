@@ -6,6 +6,8 @@ import { consumeHandoff, loadSavedDNA, STUDIO_KEY } from './draw/handoff.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
 import { AXIS_LABELS as OA_LABELS } from './opening-aware.mjs';
 import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
+import { computeStructure, DEFAULT_ASSUMPTIONS } from './draw/structure.mjs';
+import { applyCommand } from './draw/doc.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
@@ -85,7 +87,7 @@ async function roomDialog(label, room = null) {
 function onDocChanged() {
   $('undo').disabled = !editor.history.canUndo; $('redo').disabled = !editor.history.canRedo;
   if (document.activeElement !== $('docTitle')) $('docTitle').value = editor.doc.title;
-  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna(); if ($('tab-qty').classList.contains('on')) scheduleQty();
+  renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna(); if ($('tab-qty').classList.contains('on')) scheduleQty(); if ($('tab-str').classList.contains('on') || strOverlay) scheduleStr();
   if (!(document.activeElement && $('side').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName))) renderProps();
 }
 const autosave = debounce(() => store.set(KEY, serialize(editor.doc)), 500);
@@ -295,7 +297,7 @@ function renderFinish() {
   for (const t of used) floors.append(field(roomTypeName(t), 'select', (f.floors || {})[t] || ROOM_TYPES[t].floor, v => setFinish({ floors: { [t]: v } }), { options: Object.entries(FLOOR_NAMES) }));
   box.append(floors, el('div', { class: 'acts' }, el('button', { onclick: () => { editor.exec({ type: 'set-meta', finish: { facade: { base: 'render', accent: 'entry', plinth: true, color: null, accentColor: null, plinthColor: null, copingColor: null }, aluminium: null, entryDoor: null, fence: null, roof: null, floors: Object.fromEntries(used.map(t => [t, null])) } }, 'إعادة المواد'); } }, 'إعادة الافتراضي')), el('p', { class: 'muted' }, 'التغيير يظهر فورًا في المجسم ثلاثي الأبعاد ويُحفظ مع المشروع.'));
 }
-function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); if (name === 'qty') renderQty(); }
+function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); if (name === 'qty') renderQty(); if (name === 'str') renderStr(); }
 document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); if (b.dataset.tab === 'review') runReview(); }));
 
 // ------------------------------------------------------------------------------------------------ review
@@ -492,6 +494,61 @@ function renderQty() {
   }
   box.append(chk);
 }
+
+// ------------------------------------------------------------------------------------------------ الإنشاء: أعمدة وجسور (تحجيم أولي)
+let strTimer = null, strOverlay = false, strAssume = {}, strResult = null;
+try { strAssume = JSON.parse(localStorage.getItem('mizan.studio.structure.v1') || '{}') || {}; } catch { strAssume = {}; }
+function scheduleStr() { clearTimeout(strTimer); strTimer = setTimeout(() => { if ($('tab-str').classList.contains('on')) renderStr(); else refreshStr(); }, 200); }
+function refreshStr() { try { strResult = computeStructure(editor.doc, { assumptions: strAssume }); } catch { strResult = null; } editor.markDirty(); }
+function drawStrOverlay(ctx, { S, k, levelId }) {
+  const L = strResult?.levels.find(l => l.id === levelId); if (!L?.columns) return;
+  ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#a8814a'; ctx.lineWidth = 2;
+  for (const b of L.beams) { const a = S(b.a), c = S(b.b); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(c.x, c.y); ctx.stroke(); }
+  ctx.setLineDash([]);
+  for (const c of L.columns) { const p = S(c), r = Math.max(3, c.size * k / 2); ctx.fillStyle = c.source === 'user' ? '#143428' : 'rgba(168,129,74,.85)'; ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2); ctx.strokeStyle = '#143428'; ctx.lineWidth = 1; ctx.strokeRect(p.x - r, p.y - r, r * 2, r * 2); }
+  ctx.restore();
+}
+function setStrOverlay(on) { strOverlay = on; editor.overlay = on ? drawStrOverlay : null; refreshStr(); }
+function applyProposedColumns() {
+  const L = strResult?.levels.find(l => l.id === editor.levelId); const list = (L?.columns || []).filter(c => c.source === 'proposed'); if (!list.length) return;
+  if (!confirm(`ستُضاف ${list.length} عمودًا مقترحًا إلى هذا الدور كعناصر في الرسم بمقاساتها المحسوبة. يمكنك التراجع بخطوة واحدة. هل تتابع؟`)) return;
+  let d = editor.doc; for (const c of list) d = applyCommand(d, { type: 'add-column', level: editor.levelId, x: c.x, y: c.y, size: c.size }).doc;
+  editor.history.commit(d, 'أعمدة مقترحة'); editor.afterChange();
+}
+const STR_FIELDS = [['fc', 'مقاومة الخرسانة fc′ (MPa)'], ['fy', 'حديد التسليح fy (MPa)'], ['maxSpan', 'أقصى بحر جسر (م)'], ['liveFloor', 'حمل حي للأدوار (kN/م²)'], ['liveRoof', 'حمل حي للسطح (kN/م²)'], ['sdlFloor', 'أحمال ميتة للأدوار (kN/م²)'], ['sdlRoof', 'أحمال ميتة للسطح (kN/م²)'], ['masonry', 'كثافة جدار البلوك (kN/م³)']];
+function renderStr() {
+  const box = $('tab-str'); box.replaceChildren();
+  refreshStr();
+  const note = el('p', { class: 'fpwarn' }, 'تحجيم أولي من الرسم لا تصميم إنشائي ولا اعتماد. يراجعه مهندس إنشائي قبل أي تنفيذ.');
+  const head = el('div', { class: 'sec' }, el('h4', {}, 'الأعمدة والجسور'), note,
+    el('label', { class: 'chk' }, el('input', { type: 'checkbox', checked: strOverlay, onchange: e => setStrOverlay(e.target.checked) }), ' أظهرها على المسقط (الجسور متقطعة، المقترح بنحاسي، عمودك أخضر)'));
+  box.append(head);
+  const res = strResult; if (!res || !res.levels.some(l => l.columns)) { box.append(el('p', { class: 'muted' }, 'ارسم جدرانًا مغلقة (محيط مبنى) لتظهر الأعمدة والجسور.'), ...(res?.levels.flatMap(l => l.warnings || []).map(w => el('p', { class: 'fpwarn' }, w)) || [])); return; }
+  const A = res.assumptions;
+  const as = el('div', { class: 'sec' }, el('h4', {}, 'الافتراضات (عدّلها فيُعاد الحساب فورًا)'));
+  const grid = el('div', { class: 'strgrid' });
+  for (const [key, label] of STR_FIELDS) grid.append(el('label', {}, label, el('input', { type: 'number', step: 'any', value: A[key], onchange: e => { const v = Number(e.target.value); if (Number.isFinite(v) && v > 0) strAssume[key] = v; else delete strAssume[key]; try { localStorage.setItem('mizan.studio.structure.v1', JSON.stringify(strAssume)); } catch { /* ignore */ } setTimeout(renderStr, 0); } })));
+  as.append(grid, el('p', { class: 'muted' }, `ثابتة: φ=${A.phi}، تسليح مفترض ${A.rho * 100}%، عمق الجسر من جداول ACI 318 (L/16 بسيط، L/18.5 طرف مستمر، L/21 طرفان)، الأحمال 1.2D+1.6L. القيم الافتراضية: ${Object.keys(DEFAULT_ASSUMPTIONS).length} معلنة في الشيفرة.`));
+  box.append(as);
+  for (const L of res.levels) {
+    if (!L.columns) { box.append(el('p', { class: 'muted' }, L.name + ': ' + ((L.warnings || [])[0] || 'لا جدران.'))); continue; }
+    const sec = el('div', { class: 'sec' }, el('h4', {}, L.name));
+    sec.append(el('p', { class: 'muted' }, `بلاطة ${L.slab.mode === 'two-way' ? 'باتجاهين' : 'باتجاه واحد'} سماكة ${Math.round(L.slab.thickness * 100)} سم (أسوأ لوح ${L.slab.governingSpan} م) · ${L.columns.length} عمود · ${L.beams.length} بحر جسر`));
+    for (const w of L.warnings || []) sec.append(el('p', { class: 'fpwarn' }, '• ' + w));
+    const ct = el('table', { class: 'dna-table' }, el('tr', {}, ...['العمود', 'مساحة التحميل م²', 'الحمل kN', 'المقاس سم', 'المصدر'].map(x => el('th', {}, x))));
+    for (const c of L.columns) ct.append(el('tr', {}, el('td', {}, c.id), el('td', {}, (Math.round(c.At * 10) / 10).toString()), el('td', {}, c.Pu.toString()), el('td', {}, Math.round(c.size * 100) + '×' + Math.round(c.size * 100)), el('td', {}, c.source === 'user' ? 'رسمته' + (c.drawnSize && c.drawnSize < c.size - 1e-6 ? ' (أصغر من المحسوب: ' + Math.round(c.drawnSize * 100) + ')' : '') : 'مقترح')));
+    sec.append(ct);
+    const bt = el('table', { class: 'dna-table' }, el('tr', {}, ...['الجسر', 'البحر م', 'المقطع سم', 'استمرارية'].map(x => el('th', {}, x))));
+    for (const b of L.beams) bt.append(el('tr', {}, el('td', {}, b.id), el('td', {}, b.length.toString()), el('td', {}, Math.round(b.width * 100) + '×' + Math.round(b.depth * 100)), el('td', {}, b.continuity + ' طرف')));
+    sec.append(bt);
+    if (L.columns.some(c => c.source === 'proposed') && L.id === editor.levelId) sec.append(el('button', { class: 'btn', onclick: applyProposedColumns }, 'اعتمد الأعمدة المقترحة في الرسم'));
+    box.append(sec);
+  }
+  const t = res.totals;
+  box.append(el('div', { class: 'sec' }, el('h4', {}, 'حجم الخرسانة التقديري'), el('p', {}, `أعمدة ${t.concrete.columns} م³ · جسور ${t.concrete.beams} م³ · بلاطات ${t.concrete.slabs} م³`)),
+    el('div', { class: 'sec' }, el('h4', {}, 'غير قابل للحساب من الرسم'), el('ul', {}, ...res.unavailable.map(x => el('li', {}, x)))));
+}
+editor.overlay = null;
 
 // ------------------------------------------------------------------------------------------------ بصمة التصميم
 const STRATEGY_NAMES = { 'claude-rect': 'مخطط مستطيل', compact: 'الرواق المحوري', balanced: 'الجناحان المتوازنان', frontage: 'الواجهة العريضة', courtyard: 'بيت الفناء', 'u-court': 'بيت الباحة U', pavilions: 'أجنحة مرتبطة برواق', staggered: 'جناحان متدرجان' };

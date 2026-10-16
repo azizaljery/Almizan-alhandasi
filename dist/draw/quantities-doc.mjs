@@ -4,6 +4,7 @@
 import { docToLegacy } from './export-legacy.mjs';
 import { quantities } from '../planner.mjs';
 import { calculateMizanScore } from '../mizan-score.mjs';
+import { computeStructure } from './structure.mjs';
 
 export const GRADES = Object.freeze({ measured: 'مقيس', estimated: 'تقدير بافتراض معلن', unavailable: 'غير قابل للحساب' });
 export const ASSUMPTIONS = Object.freeze({ faces: 2, blocksPerM2: 12.5 });
@@ -20,6 +21,7 @@ export function computeDocQuantities(doc) {
       levels.push({ id: lvl.id, name: lvl.name, q, report, score, model });
     } catch (e) { levels.push({ id: lvl.id, name: lvl.name, error: e.message }); }
   }
+  let structure = null; try { structure = computeStructure(doc); } catch { /* غير قابل */ }
   const ok = levels.filter(l => l.q);
   const sum = k => ok.reduce((a, l) => a + (l.q[k] || 0), 0);
   const rows = [
@@ -32,7 +34,12 @@ export function computeDocQuantities(doc) {
     { id: 'windows', label: 'النوافذ', value: sum('windows'), unit: 'عدد', grade: 'measured', basis: 'فتحات النوافذ في الرسم' },
     { id: 'finishArea', label: 'مساحة التشطيب الداخلي', value: r2(sum('wallArea') * ASSUMPTIONS.faces), unit: 'م²', grade: 'estimated', basis: `افتراض: وجهان لكل جدار (×${ASSUMPTIONS.faces}) دون خصم الجدران الخارجية` },
     { id: 'blocks', label: 'عدد البلوك التقريبي', value: Math.round(sum('wallArea') * ASSUMPTIONS.blocksPerM2), unit: 'قطعة', grade: 'estimated', basis: `افتراض: بلوك 20×40 سم = ${ASSUMPTIONS.blocksPerM2} قطعة/م² بلا هدر` },
-    { id: 'concrete', label: 'الخرسانة والتسليح', value: null, unit: '', grade: 'unavailable', basis: 'يحتاج تصميمًا إنشائيًا (أحمال وتربة) غير موجود في الرسم' },
+    ...(structure && structure.totals.columns ? [
+      { id: 'concreteColumns', label: 'خرسانة الأعمدة (تحجيم أولي)', value: structure.totals.concrete.columns, unit: 'م³', grade: 'estimated', basis: `${structure.totals.columns} عمود بمقاسات محسوبة بالأحمال؛ افتراضات معلنة في تبويب «الإنشاء»` },
+      { id: 'concreteBeams', label: 'خرسانة الجسور (تحجيم أولي)', value: structure.totals.concrete.beams, unit: 'م³', grade: 'estimated', basis: `${structure.totals.beams} بحر، عمق من ACI 318 بحسب البحر والاستمرارية` },
+      { id: 'concreteSlabs', label: 'خرسانة البلاطات (تحجيم أولي)', value: structure.totals.concrete.slabs, unit: 'م³', grade: 'estimated', basis: 'سماكة أسوأ لوح × مساحة محيط الدور' },
+    ] : []),
+    { id: 'rebar', label: 'حديد التسليح', value: null, unit: '', grade: 'unavailable', basis: 'يحتاج تصميمًا إنشائيًا تفصيليًا (قص وانحناء وتفاصيل) غير موجود في الرسم' },
     { id: 'mep', label: 'الكهرباء والسباكة والتكييف', value: null, unit: '', grade: 'unavailable', basis: 'لا توجد دوائر ولا نقاط في الرسم' },
     { id: 'cost', label: 'التكلفة', value: null, unit: '', grade: 'unavailable', basis: 'لا توجد أسعار معتمدة في النظام؛ لا يُقدَّر رقم بلا مصدر' },
   ];

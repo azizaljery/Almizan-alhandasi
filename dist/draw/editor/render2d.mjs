@@ -157,6 +157,8 @@ export function renderPlan(ctx, st) {
     ctx.beginPath(); if (c.round) ctx.arc(s.x, s.y, r, 0, 7); else ctx.rect(s.x - r, s.y - r, r * 2, r * 2); ctx.fill(); ctx.stroke();
   }
 
+  if (typeof st.overlay === 'function') st.overlay(ctx, { S, k, levelId, doc });
+
   // ------------------------------------------------------------------ room labels + areas
   if (flags.areas) for (const r of rooms) {
     const c = S(r.label ? r.label.seed : r.centroid);

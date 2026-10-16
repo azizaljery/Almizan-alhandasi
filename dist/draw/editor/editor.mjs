@@ -96,7 +96,7 @@ export class Editor {
     renderPlan(ctx, {
       doc, levelId: this.levelId, analysis: lv ? { rooms: lv.rooms, gaps: lv.analysis.gaps, exteriorWallIds: this.previewDoc ? exteriorWallIds(lv.analysis) : this.extWalls } : null,
       view: this.view, W: this.W, H: this.H, selection: this.selection, hover: this.hover, ghost: this.ghost, snap: this.snap, cursor: this.cursor,
-      selBox: this.selBox, markers: this.markers, flags: { grid: this.opts.grid, dims: this.opts.dims, areas: this.opts.areas, fixtures: this.opts.fixtures },
+      overlay: this.overlay, selBox: this.selBox, markers: this.markers, flags: { grid: this.opts.grid, dims: this.opts.dims, areas: this.opts.areas, fixtures: this.opts.fixtures },
     });
   }
   setMarkers(m) { this.markers = m; this.markDirty(); }

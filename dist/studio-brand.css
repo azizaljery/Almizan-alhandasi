@@ -9,10 +9,12 @@
 /* تبويب البصمة */
 #tab-dna .fp{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}
 #tab-dna code{direction:ltr;font-size:12px;background:var(--mz-green-soft,#e8efe8);padding:2px 8px;border-radius:6px}
-#tab-dna .fpwarn{color:#8a5a1a;font-size:12.5px;line-height:1.7}
+#tab-str .fpwarn,#tab-qty .fpwarn,#tab-dna .fpwarn{color:#8a5a1a;font-size:12.5px;line-height:1.7}
 #tab-dna .axis{margin:10px 0}.axis-h{display:flex;justify-content:space-between}
 #tab-dna .bar{height:7px;background:var(--mz-line);border-radius:99px;margin:5px 0;overflow:hidden}#tab-dna .bar i{display:block;height:100%;background:var(--mz-brass)}
-#tab-qty .dna-table,#tab-dna .dna-table{width:100%;border-collapse:collapse;direction:rtl;font-size:12.5px}#tab-dna .dna-table th,#tab-dna .dna-table td{border:1px solid var(--line);padding:6px;text-align:right;vertical-align:middle}
-#tab-qty .tag,#tab-dna .tag{display:block;color:var(--mz-brass);margin-top:2px}
+#tab-str .dna-table,#tab-qty .dna-table,#tab-dna .dna-table{width:100%;border-collapse:collapse;direction:rtl;font-size:12.5px}#tab-dna .dna-table th,#tab-dna .dna-table td{border:1px solid var(--line);padding:6px;text-align:right;vertical-align:middle}
+#tab-str .tag,#tab-qty .tag,#tab-dna .tag{display:block;color:var(--mz-brass);margin-top:2px}
 
 #tab-qty .grade{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;white-space:nowrap}#tab-qty .grade.measured{background:#dfeee5;color:#143428}#tab-qty .grade.estimated{background:#f3e8cc;color:#6b4f1d}#tab-qty .grade.unavailable{background:#eee;color:#666}#tab-qty ul{margin:4px 18px 4px 0;padding:0;font-size:12.5px}
+
+#tab-str .strgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}#tab-str .strgrid label{display:flex;flex-direction:column;font-size:12px;gap:2px}#tab-str .strgrid input{padding:4px 6px}#tab-str ul{margin:4px 18px 4px 0;padding:0;font-size:12.5px}#tab-str .chk{display:flex;gap:6px;align-items:center;font-size:12.5px}
