@@ -80,7 +80,7 @@ export function renderPlan(ctx, st) {
     const type = ROOM_TYPES[r.type] || ROOM_TYPES.other, hover = st.hover?.roomId === r.id, picked = sel.has(r.id);
     ctx.beginPath();
     for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); }
-    ctx.fillStyle = r.unlabelled ? 'rgba(160,160,160,.12)' : type.color; ctx.fill('evenodd');
+    ctx.fillStyle = r.unlabelled ? 'rgba(160,160,160,.12)' : (typeof st.roomFill === 'function' && st.roomFill(r)) || type.color; ctx.fill('evenodd');
     if (hover || picked) { ctx.fillStyle = picked ? 'rgba(14,127,214,.18)' : 'rgba(14,127,214,.09)'; ctx.fill('evenodd'); }
   }
 
@@ -170,7 +170,12 @@ export function renderPlan(ctx, st) {
     const showName = ctx.measureText(r.name).width <= maxW * 1.05;
     const halo = (text, y, font, color) => { ctx.font = font; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(251,249,244,.92)'; ctx.strokeText(text, c.x, y); ctx.fillStyle = color; ctx.fillText(text, c.x, y); };
     if (showName) halo(r.name, c.y - big * .55, `600 ${big}px ${FONT}`, r.unlabelled ? THEME.inkSoft : THEME.ink);
-    halo(fmtArea(r.area), showName ? c.y + big * .65 : c.y, `400 ${Math.max(9, big * .8)}px ${FONT}`, THEME.inkSoft);
+    if (flags.roomDims && r.rect && r.rect.w > .5 && showName) {
+      // عرض العرض (للمخططات المعروضة على العميل): الأبعاد ثم المساحة، كما في صفحات المخططات المهنية
+      const dims = `${r.rect.l.toFixed(2)} × ${r.rect.w.toFixed(2)}`, fs = Math.max(8.5, big * .72);
+      halo(dims, c.y + big * .6, `500 ${fs}px ${FONT}`, THEME.ink);
+      halo(fmtArea(r.area), c.y + big * .6 + fs * 1.25, `400 ${fs}px ${FONT}`, THEME.inkSoft);
+    } else halo(fmtArea(r.area), showName ? c.y + big * .65 : c.y, `400 ${Math.max(9, big * .8)}px ${FONT}`, THEME.inkSoft);
     if (r.label && sel.has(r.label.id)) { ctx.strokeStyle = THEME.select; ctx.lineWidth = 1.5; const w = Math.min(maxW, ctx.measureText(r.name).width + 16); ctx.strokeRect(c.x - w / 2, c.y - big * 1.3, w, big * 2.6); }
   }
   for (const t of doc.texts) {

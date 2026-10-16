@@ -18,7 +18,7 @@ await p.goto(base + '/final.html'); await p.waitForSelector('.empty');
 check('بلا مشروع: رسالة واضحة', (await p.locator('.empty').innerText()).includes('لا يوجد تصميم'));
 await p.goto(base + '/studio.html'); await p.click('#btnExample'); await p.waitForTimeout(500);
 check('زر اعتمد وأخرج ظاهر', await p.locator('#btnFinal').isVisible());
-await p.click('#btnFinal'); await p.waitForURL('**/final.html'); await p.waitForSelector('#summary');
+await p.click('#btnFinal'); await p.waitForURL('**/view3d.html'); await p.waitForTimeout(2500); await p.click('#toFinal'); await p.waitForURL('**/final.html'); await p.waitForSelector('#summary');
 check('ملخص وأقسام', (await p.locator('.sec').count()) >= 6, String(await p.locator('.sec').count()));
 check('مخطط 2D', await p.locator('#plan0 svg').count() > 0);
 check('إنشائي', await p.locator('#str0 svg').count() > 0);

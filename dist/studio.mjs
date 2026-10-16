@@ -406,7 +406,7 @@ const goFinal = async () => {
     const v = await ensureViewer(); if (v && !v.built) await rebuild3D();
     if (viewer?.built) { const b = await viewer.capturePNG(1); const url = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); }); if (url && url.length < 3e6) localStorage.setItem('mizan.studio.snap3d.v1', url); }
   } catch { /* اللقطة اختيارية */ }
-  location.href = './final.html';
+  location.href = './view3d.html';
 };
 $('btnFinal').addEventListener('click', goFinal); $('finalCta').addEventListener('click', goFinal);
 $('shot3d').addEventListener('click', async () => { if (!viewer?.built) return toast('لا يوجد مجسم بعد'); try { exportWithManifest((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2), 'studio-3d-png'); } catch { toast('تعذّر التقاط الصورة', true); } });

@@ -29,7 +29,7 @@ for (let i = 0; i < 10; i++) {
 await p.fill('#chat form.counts input[name=bedrooms]', '4'); await p.fill('#chat form.counts input[name=majlis]', '2');
 for (const [n, v] of Object.entries({ bedrooms: 3, majlis: 1, baths: 2, kitchens: 1, halls: 1, dining: 1 })) { const i = p.locator(`#chat form.counts input[name=${n}]`); if (!(await i.inputValue())) await i.fill(String(v)); }
 await p.click('#chat form.counts .cta'); await p.click('#chat .cta:has-text("توليد التصميم")');
-await p.waitForURL('**/studio.html', { timeout: 120000 }); await p.waitForTimeout(1500);
+await p.waitForURL('**/design.html', { timeout: 120000 }); await p.waitForSelector('#btnStudio'); await p.click('#btnStudio'); await p.waitForURL('**/studio.html', { timeout: 30000 }); await p.waitForTimeout(1500);
 const levels = p.locator('#levels button:not(.add)');
 check('المرسم يعرض دورين في المحدد', (await levels.count()) === 2, 'levels=' + await levels.count());
 const stored = await p.evaluate(() => JSON.parse(localStorage.getItem('mizan.studio.doc.v1') || 'null'));

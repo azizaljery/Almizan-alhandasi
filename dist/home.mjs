@@ -1,6 +1,7 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
+import { createSession, saveSession } from './design-session.mjs';
 import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
 import { requestBrief } from './assistant.mjs';
@@ -228,9 +229,11 @@ async function build() {
   const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements };
   try {
     const out = await generateInitialDesign(input);
-    writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' '), dna: out.dna, alternatives: out.alternatives });
-    $('buildText').textContent = 'جاهز. أفتح لك المرسم…';
-    location.href = './studio.html';
+    // التصميم الأولي يُعرض على العميل أولًا (اعتماد / تصميم آخر / تعديل في المرسم)
+    const ds = createSession({ land: confirmedLand, counts: session.counts, requirements: session.requirements, discovery: input.discovery, idea: input.idea, result: out });
+    if (!saveSession(localStorage, ds)) { writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' '), dna: out.dna, alternatives: out.alternatives }); location.href = './studio.html'; return; }
+    $('buildText').textContent = 'جاهز. أعرض عليك التصميم…';
+    location.href = './design.html';
   } catch (err) {
     setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
     $('buildText').textContent = 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…';

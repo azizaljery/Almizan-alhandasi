@@ -26,9 +26,17 @@ function assertSound(doc) {
 
 test('البرنامج: لا قيم مسبقة، وحمام ملحق لكل غرفة بقدر عدد الدورات', () => {
   assert.throws(() => buildProgram({}), /غرفة نوم/);
+  // 3 دورات: الرجال، الرئيسية، ودورة مشتركة لغرفتي النوم الأخريين (لا يُفرض حمام لكل غرفة)
   const p = buildProgram(C({ bedrooms: 3, majlis: 1, baths: 3, kitchens: 1 }));
-  assert.equal(p.guestWc, 1); assert.equal(p.attached, 2);
-  assert.ok(p.notes.some(n => n.includes('بلا حمام ملحق')));
+  assert.equal(p.guestWc, 1); assert.equal(p.attached, 1);
+  assert.equal(p.blocks.filter(b => b.bathShared).length, 1);
+  assert.ok(p.notes.some(n => n.includes('تتشارك')));
+  // عدد يكفي لكل غرفة: كل غرفة بحمامها، ومع تفضيل «مشتركة» تبقى مشتركة
+  assert.equal(buildProgram(C({ bedrooms: 3, majlis: 1, baths: 4, kitchens: 1 })).attached, 3);
+  assert.equal(buildProgram(C({ bedrooms: 3, majlis: 1, baths: 4, kitchens: 1 }), { prefs: { sharedBaths: true } }).attached, 1);
+  // مجلسان: دورة للرجال وأخرى للنساء
+  const p2 = buildProgram(C({ bedrooms: 2, majlis: 2, baths: 3, kitchens: 1 }));
+  assert.equal(p2.guestWc, 2); assert.ok(p2.blocks.find(b => b.id === 'majlis1').men && p2.blocks.find(b => b.id === 'majlis2').women);
   assert.equal(p.blocks.filter(b => b.kind === 'suite').length, 3);
   assert.equal(p.blocks.filter(b => b.master).length, 1);
 });
@@ -87,7 +95,7 @@ test('أرض لا تتسع: خطأ برقم المساحة لا برنامج م�
 test('المتطلبات من الكلام: خادمة بحمام، مطبخ مفتوح، مدخل للنساء، مجلس بمقاس', () => {
   const text = 'ابي 4 غرف نوم كل غرفة بحمامها ومجلس رجال 5×6 ومجلس نساء بمدخل مستقل وصالة وطعام ومطبخ مفتوح وغرفة خادمة بحمام';
   const req = extractRequirements(text, { counts: C({ bedrooms: 4, majlis: 2, kitchens: 1, halls: 1, dining: 1 }) });
-  assert.equal(req.counts.baths, 4 + 1 + 1, 'حمام لكل غرفة + الضيوف + الخادمة');
+  assert.equal(req.counts.baths, 4 + 2 + 1, 'حمام لكل غرفة + الرجال والنساء + الخادمة');
   assert.equal(req.areas.majlis, 30);
   assert.ok(req.prefs.openKitchen && req.prefs.familyEntrance && req.extras.maid?.bath);
   const out = generateVillaDesigns({ land: L(20, 30), counts: req.counts, requirements: req });
@@ -102,6 +110,34 @@ test('المتطلبات من الكلام: خادمة بحمام، مطبخ م�
   assert.ok(k && dn);
   assert.ok(out.designs[0].notes.some(n => n.includes('مدخل العائلة')));
   assert.ok(doc.openings.filter(o => o.level === 'L1' && ['door', 'door2'].includes(o.kind)).length > 10);
+});
+
+test('مجلس الرجال مستقل بمدخله عن العائلة والنساء، ومجلس النساء من جهة العائلة', () => {
+  for (const land of [L(20, 30), L(15, 25), L(25, 40, ['e'], ['s', 'e'])]) {
+    const out = generateVillaDesigns({ land, counts: C({ bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 }) });
+    for (const d of out.designs) {
+      const doc = d.doc, an = analyzeWalls(doc.walls.filter(w => w.level === 'L1'));
+      const roomOf = name => { const l = doc.labels.find(x => x.name === name); return l && an.spaces.find(s => s.net && pointInPolygon(l.seed, s.net)); };
+      const men = roomOf('مجلس الرجال'), women = roomOf('مجلس النساء'), fam = roomOf('مدخل العائلة');
+      assert.ok(men && women && fam, 'الفراغات موجودة');
+      // مسار من باب مدخل الرجال لا يصل إلى مدخل العائلة ولا مجلس النساء إلا عبر باب خدمة واحد إلى الطعام/المطبخ
+      const graph = new Map(); const link = (a, b) => { (graph.get(a) || graph.set(a, []).get(a)).push(b); (graph.get(b) || graph.set(b, []).get(b)).push(a); };
+      const spaceAt = p => an.spaces.find(s => s.net && pointInPolygon(p, s.net));
+      for (const o of doc.openings.filter(x => x.level === 'L1' && ['door', 'door2', 'arch'].includes(x.kind))) {
+        const w = doc.walls.find(x => x.id === o.wall), L0 = Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y), ux = (w.b.x - w.a.x) / L0, uy = (w.b.y - w.a.y) / L0;
+        const m = { x: w.a.x + ux * o.at, y: w.a.y + uy * o.at }, a = spaceAt({ x: m.x - uy * .3, y: m.y + ux * .3 }), b = spaceAt({ x: m.x + uy * .3, y: m.y - ux * .3 });
+        if (a && b && a.id !== b.id) link(a.id, b.id);
+      }
+      assert.ok(graph.size >= 8, 'رسم الاتصال مبني فعلًا');
+      const menNames = ['مجلس الرجال', 'مدخل الرجال', 'دورة مياه الرجال', 'مغاسل'];
+      const menIds = new Set(menNames.map(roomOf).filter(Boolean).map(s => s.id));
+      const exits = [...menIds].flatMap(id => (graph.get(id) || []).filter(x => !menIds.has(x)));
+      assert.ok(exits.length <= 1, 'منطقة الرجال لها باب داخلي واحد على الأكثر (خدمة)');
+      for (const x of exits) { const nm = doc.labels.find(l => spaceAt(l.seed)?.id === x)?.name; assert.ok(/الطعام|المطبخ/.test(nm), 'باب الخدمة إلى الطعام أو المطبخ لا إلى العائلة: ' + nm); }
+      assert.ok(!(graph.get(women.id) || []).some(x => menIds.has(x)), 'لا اتصال بين مجلس النساء والرجال');
+      assert.ok(doc.openings.filter(o => o.entry && o.level === 'L1').length >= 2, 'مدخل للرجال ومدخل للعائلة');
+    }
+  }
 });
 
 test('مدخل ثانٍ للأرض يُنفَّذ بباب على جهته', () => {

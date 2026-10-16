@@ -82,8 +82,8 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
 
   // حمام لكل غرفة يرفع عدد دورات المياه إلى ما يكفي
   if (prefs.allEnsuite && c.bedrooms) {
-    const need = c.bedrooms + (c.majlis ? 1 : 0) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
-    if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (حمام لكل غرفة${c.majlis ? ' + دورة مياه الضيوف' : ''}${extras.maid?.bath ? ' + حمام الخادمة' : ''}${extras.driver?.bath ? ' + حمام السائق' : ''})`); }
+    const need = c.bedrooms + Math.min(2, c.majlis || 0) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
+    if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (حمام لكل غرفة${c.majlis ? (c.majlis > 1 ? ' + دورتا مياه الرجال والنساء' : ' + دورة مياه الرجال') : ''}${extras.maid?.bath ? ' + حمام الخادمة' : ''}${extras.driver?.bath ? ' + حمام السائق' : ''})`); }
   }
   return { counts: c, extras, prefs, areas, understood: [...new Set(understood)], unsupported };
 }

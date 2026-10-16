@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>تصميمك — الميزان الهندسي</title>
+<meta name="description" content="التصميم المقترح لمنزلك: المخطط بأبعاده ومساحاته ومناطقه، مع طلب تصميم آخر أو التعديل في المرسم أو الاعتماد والانتقال للعرض ثلاثي الأبعاد.">
+<link rel="icon" href="./assets/mizan-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./brand.css">
+<link rel="stylesheet" href="./present.css">
+</head>
+<body>
+<header class="ph">
+  <a class="mz-logo" href="./home.html"><img src="./assets/mizan-logo.svg" alt="" width="34" height="34"><span><b>الميزان الهندسي</b><small>نحو منزلك</small></span></a>
+  <ol class="steps" aria-label="مراحل التصميم"><li class="done">الأرض</li><li class="done">شرعاء</li><li class="on">التصميم</li><li>العرض ثلاثي الأبعاد</li><li>المخرجات</li></ol>
+</header>
+<main class="wrap" id="main">
+  <p id="loading">جارٍ تجهيز التصميم…</p>
+</main>
+
+<div class="shara" id="shara" hidden>
+  <div class="panel" role="dialog" aria-labelledby="sharaQ">
+    <div class="who"><div class="av" aria-hidden="true">ش</div><div class="bubble" id="sharaQ">ما الذي لم يعجبك في هذا التصميم؟ اختر ما ينطبق، أو اكتب بكلماتك، وسأصمّم لك بديلًا مختلفًا.</div></div>
+    <div class="chips" id="fbChips"></div>
+    <textarea id="fbText" placeholder="مثال: أريد المجلس أكبر، والمطبخ مفتوحًا، وغرفة الماستر بعيدة عن الأطفال"></textarea>
+    <div class="row"><button class="btn gold" id="fbGo">صمّم لي بديلًا</button><button class="btn ghost" id="fbClose">إلغاء</button></div>
+    <div class="status" id="fbStatus" role="status" aria-live="polite"></div>
+  </div>
+</div>
+<script type="module" src="./design.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>العرض ثلاثي الأبعاد — الميزان الهندسي</title>
+<meta name="description" content="منزلك ثلاثي الأبعاد من المخطط المعتمد نفسه: مدار، بيت دمية، تجوّل، جولة تلقائية، والشمس حسب الوقت والتاريخ.">
+<link rel="icon" href="./assets/mizan-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./brand.css">
+<link rel="stylesheet" href="./present.css">
+</head>
+<body>
+<header class="ph">
+  <a class="mz-logo" href="./home.html"><img src="./assets/mizan-logo.svg" alt="" width="34" height="34"><span><b>الميزان الهندسي</b><small>نحو منزلك</small></span></a>
+  <ol class="steps" aria-label="مراحل التصميم"><li class="done">الأرض</li><li class="done">شرعاء</li><li class="done">التصميم</li><li class="on">العرض ثلاثي الأبعاد</li><li>المخرجات</li></ol>
+  <a class="btn ghost" href="./design.html">← العودة إلى التصميم</a>
+  <button class="btn gold" id="toFinal">المخرجات: الإنشائي والكميات وكتاب المشروع ←</button>
+</header>
+<div class="v3">
+  <aside id="threePane">
+    <div><h2>طريقة المشاهدة</h2>
+      <div class="seg" id="modeSeg"><button data-mode="orbit" class="on">مدار</button><button data-mode="dollhouse">بيت دمية</button><button data-mode="top">علوي</button><button data-mode="walk">تجوّل داخل البيت</button></div></div>
+    <div class="tourbox"><button class="btn" id="autoTour">▶ جولة تلقائية</button><button class="btn" id="recordTour">⏺ تسجيل الجولة فيديو</button><button class="btn" id="stopAutoTour" hidden>إيقاف</button><a class="btn" id="tourDownload" hidden download="mizan-tour.webm">تنزيل الفيديو</a></div>
+    <div class="tour-status" id="autoTourStatus" role="status" aria-live="polite" hidden></div>
+    <div><h2>الشمس والظل</h2>
+      <label class="kv">المدينة (خط العرض)<select id="city"></select></label>
+      <label class="kv">التاريخ <span id="dateTxt"></span></label><input type="range" id="day" min="1" max="365" value="172">
+      <label class="kv">الوقت (توقيت شمسي) <span id="timeTxt"></span></label><input type="range" id="hour" min="5.5" max="18.5" step=".25" value="15">
+      <p class="muted" id="sunTxt"></p>
+      <p class="muted">موضع الشمس محسوب بمعادلات فلكية تقريبية لخط عرض المدينة المختارة والشمال في المخطط؛ ليس دراسة إظلال معتمدة.</p></div>
+    <div><h2>الأجواء</h2><div class="seg" id="styleSeg"><button data-style="day" class="on">نهار</button><button data-style="dusk">غروب</button></div></div>
+    <div id="levelBox" hidden><h2>الأدوار</h2><div class="seg" id="levelSeg"></div></div>
+    <button class="btn" id="shot">التقاط صورة</button>
+  </aside>
+  <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div></div>
+</div>
+<script type="module" src="./view3d.mjs"></script>
+</body>
+</html>
