@@ -70,7 +70,7 @@ test('شرعاء: كل مخرجات الاكتشاف تقبلها normalizeDisco
   s.answer('avoids', ['0', '1', '2', '3', '4', '5']);
   assert.doesNotThrow(() => normalizeDiscovery(s.discovery()));
 });
-test('شرعاء الحر: يملأ الأعداد المذكورة صراحة فقط ويحتفظ بالباقي افتراضيًا', async () => {
+test('شرعاء الحر: يملأ الأعداد المذكورة صراحة فقط ويترك الباقي فارغًا بلا افتراض', async () => {
   const s = new SharaSession(); s.start(); s.answer('mode', 'free');
   const understood = await interpretFree('ابي 3 غرف نوم ومجلس واحد ومطبخ بدون فناء');
   assert.equal(understood.counts.bedrooms, 3); assert.equal(understood.counts.majlis, 1); assert.equal(understood.counts.kitchens, 1);
@@ -78,7 +78,8 @@ test('شرعاء الحر: يملأ الأعداد المذكورة صراحة �
   const next = s.answer('free', understood);
   assert.equal(next[1].kind, 'counts');
   const byId = Object.fromEntries(next[1].fields.map(f => [f.id, f.value]));
-  assert.deepEqual([byId.bedrooms, byId.majlis, byId.kitchens, byId.baths], [3, 1, 1, 3]);
+  assert.deepEqual([byId.bedrooms, byId.majlis, byId.kitchens, byId.baths], [3, 1, 1, '']);
+  assert.throws(() => s.answer('counts', { bedrooms: 3, majlis: 1, kitchens: 1 }), /دورات المياه/, 'العدد غير المذكور لا يمرّ بلا إدخال');
   assert.equal(s.idea, 'ابي 3 غرف نوم ومجلس واحد ومطبخ بدون فناء');
   assert.throws(() => s.answer('free', 'ab'), /وصفًا/);
 });

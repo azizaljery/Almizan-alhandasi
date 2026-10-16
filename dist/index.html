@@ -83,8 +83,8 @@
     <article class="card"><header class="ch"><b class="num">١</b><div><h2>أرضك واتجاه الدخول</h2><p>الشمال أعلى الرسم؛ اليسار واليمين كما تراهما وأنت تدخل المنزل.</p></div></header>
       <div class="cb">
         <div class="g3">
-          <label>الطول — شمال / جنوب (م)<input id="len" type="number" value="30" min="8" max="100" step=".5" required></label>
-          <label>العرض — شرق / غرب (م)<input id="wid" type="number" value="20" min="8" max="100" step=".5" required></label>
+          <label>الطول — شمال / جنوب (م)<input id="len" type="number" min="8" max="100" step=".5" required></label>
+          <label>العرض — شرق / غرب (م)<input id="wid" type="number" min="8" max="100" step=".5" required></label>
           <label>جهة المدخل الرئيسي<select id="entry"></select></label>
         </div>
         <div class="area"><span>مساحة المستطيل التحليلي الذي يستخدمه المولد</span><b id="area">600 م²</b></div>
@@ -208,8 +208,8 @@
       <h2>أرض منزلك</h2>
       <p>حدّد أبعاد الأرض والشوارع الفعلية ثم جهة المدخل. تغيير المدخل لا يضيف شارعًا.</p>
       <div class="studio-plot-fields">
-        <label>العرض (م)<input id="studioWidth" type="number" min="8" max="100" step=".5" value="20"></label>
-        <label>الطول (م)<input id="studioLength" type="number" min="8" max="100" step=".5" value="30"></label>
+        <label>العرض (م)<input id="studioWidth" type="number" min="8" max="100" step=".5"></label>
+        <label>الطول (م)<input id="studioLength" type="number" min="8" max="100" step=".5"></label>
         <label>جهة المدخل<select id="studioEntry"><option value="s">جنوب</option><option value="n">شمال</option><option value="w">غرب</option><option value="e">شرق</option></select></label>
         <label>سقف البناء (م²) — اختياري<input id="studioMaxArea" type="number" min="20" max="10000" step="1" placeholder="مثل 550"></label>
       </div>

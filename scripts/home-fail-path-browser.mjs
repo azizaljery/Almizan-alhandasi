@@ -18,6 +18,7 @@ await p.click('text=اسألني أسئلة محددة');
 for (let i=0;i<8;i++){ if(await p.locator('#chat form.counts').count()) break;
   const go=p.locator('#chat .cta:has-text("متابعة")'); if(await go.count()) await go.last().click(); else await p.locator('#chat .pick .chip').first().click();
   await p.waitForTimeout(250);}
+for (const [n, v] of Object.entries({ bedrooms: 3, majlis: 1, baths: 2, kitchens: 1, halls: 1, dining: 1 })) { const i = p.locator(`#chat form.counts input[name=${n}]`); if (!(await i.inputValue())) await i.fill(String(v)); }
 await p.click('#chat form.counts .cta');
 await p.click('#chat .cta:has-text("توليد التصميم")');
 await p.waitForSelector('#buildReport:not([hidden]) .rtable',{timeout:90000});

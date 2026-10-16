@@ -27,6 +27,7 @@ for (let i = 0; i < 10; i++) {
   await p.waitForTimeout(250);
 }
 await p.fill('#chat form.counts input[name=bedrooms]', '4'); await p.fill('#chat form.counts input[name=majlis]', '2');
+for (const [n, v] of Object.entries({ bedrooms: 3, majlis: 1, baths: 2, kitchens: 1, halls: 1, dining: 1 })) { const i = p.locator(`#chat form.counts input[name=${n}]`); if (!(await i.inputValue())) await i.fill(String(v)); }
 await p.click('#chat form.counts .cta'); await p.click('#chat .cta:has-text("توليد التصميم")');
 await p.waitForURL('**/studio.html', { timeout: 120000 }); await p.waitForTimeout(1500);
 const levels = p.locator('#levels button:not(.add)');
@@ -52,6 +53,7 @@ for (let i = 0; i < 10; i++) {
   else { const c = p.locator('#chat .pick .chip'); if (await c.count()) await c.first().click(); }
   await p.waitForTimeout(250);
 }
+for (const [n, v] of Object.entries({ bedrooms: 3, majlis: 1, baths: 2, kitchens: 1, halls: 1, dining: 1 })) { const i = p.locator(`#chat form.counts input[name=${n}]`); if (!(await i.inputValue())) await i.fill(String(v)); }
 await p.click('#chat form.counts .cta'); await p.click('#chat .cta:has-text("توليد التصميم")');
 await p.waitForSelector('#buildReport:not([hidden])', { timeout: 120000 });
 const rep = await p.locator('#buildReport').innerText();

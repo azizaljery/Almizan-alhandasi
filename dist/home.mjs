@@ -116,7 +116,7 @@ function render(messages) {
       const form = document.createElement('form'); form.className = 'counts'; form.noValidate = true;
       for (const f of m.fields) {
         const l = document.createElement('label'); l.textContent = f.label;
-        const i = document.createElement('input'); i.type = 'number'; i.inputMode = 'numeric'; i.min = f.min; i.max = f.max; i.step = 1; i.value = f.value; i.name = f.id;
+        const i = document.createElement('input'); i.type = 'number'; i.inputMode = 'numeric'; i.min = f.min; i.max = f.max; i.step = 1; i.value = f.value ?? ''; i.name = f.id; i.required = true;
         l.append(i); form.append(l);
       }
       const go = document.createElement('button'); go.type = 'submit'; go.className = 'cta'; go.textContent = 'متابعة';

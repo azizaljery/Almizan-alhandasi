@@ -44,12 +44,12 @@ export function normalizeLand(raw = {}) {
 
 // ------------------------------------------------------------------------------------------------ شرعاء
 const COUNT_FIELDS = Object.freeze([
-  { id: 'bedrooms', label: 'غرف النوم', min: 1, max: 10, def: 4 },
-  { id: 'majlis', label: 'المجالس', min: 0, max: 10, def: 2 },
-  { id: 'baths', label: 'دورات المياه', min: 0, max: 10, def: 3 },
-  { id: 'kitchens', label: 'المطابخ', min: 0, max: 10, def: 1 },
-  { id: 'halls', label: 'الصالات', min: 0, max: 10, def: 1 },
-  { id: 'dining', label: 'غرف الطعام', min: 0, max: 10, def: 1 },
+  { id: 'bedrooms', label: 'غرف النوم', min: 1, max: 10 },
+  { id: 'majlis', label: 'المجالس', min: 0, max: 10 },
+  { id: 'baths', label: 'دورات المياه', min: 0, max: 10 },
+  { id: 'kitchens', label: 'المطابخ', min: 0, max: 10 },
+  { id: 'halls', label: 'الصالات', min: 0, max: 10 },
+  { id: 'dining', label: 'غرف الطعام', min: 0, max: 10 },
 ]);
 export const ENGINEERING_FIELDS = COUNT_FIELDS;
 
@@ -70,7 +70,7 @@ const msg = (text, extra = {}) => ({ from: 'shara', text, ...extra });
 export class SharaSession {
   constructor() {
     this.mode = null; this.phase = 'mode';
-    this.life = {}; this.avoids = []; this.counts = Object.fromEntries(COUNT_FIELDS.map(f => [f.id, f.def]));
+    this.life = {}; this.avoids = []; this.counts = {}; // لا قيم مسبقة: كل عدد يُدخله العميل أو يُفهم من كلامه
     this.idea = ''; this.freeRooms = null; this.followups = []; this.log = [];
   }
   start() {
@@ -87,7 +87,7 @@ export class SharaSession {
     return msg('ما الذي تريد تجنبه في بيتك؟ اختر ما يناسبك.', { kind: 'multi', id: 'avoids', options: AVOIDS.map((label, i) => ({ id: String(i), label })) });
   }
   #counts() {
-    return msg('الآن أسئلة هندسية مباشرة: كم تحتاج من كل نوع؟', { kind: 'counts', id: 'counts', fields: COUNT_FIELDS.map(f => ({ ...f, value: this.counts[f.id] })) });
+    return msg('الآن أسئلة هندسية مباشرة: كم تحتاج من كل نوع؟', { kind: 'counts', id: 'counts', fields: COUNT_FIELDS.map(f => ({ ...f, value: this.counts[f.id] ?? '' })) });
   }
   #ready() {
     this.phase = 'ready';
@@ -111,7 +111,7 @@ export class SharaSession {
       const text = String(typeof value === 'string' ? value : value?.text || '').trim();
       if (text.length < 3) throw Error('اكتب وصفًا قصيرًا على الأقل.');
       this.idea = text.slice(0, 4000); this.phase = 'counts';
-      // أعداد مفهومة من النص تحلّ محل الافتراضات؛ ما لم يُفهم يبقى افتراضيًا ويُعرض للمراجعة.
+      // أعداد مفهومة من النص تُعبّأ مسبقًا؛ ما لم يُفهم يبقى فارغًا ويُطلب من العميل.
       const seen = value?.counts && typeof value.counts === 'object' ? value.counts : {};
       for (const f of COUNT_FIELDS) if (Number.isInteger(seen[f.id]) && seen[f.id] >= f.min && seen[f.id] <= f.max) this.counts[f.id] = seen[f.id];
       const notes = [...(value?.assumptions || []), ...(value?.questions || [])].filter(x => typeof x === 'string' && x.trim()).slice(0, 4);
