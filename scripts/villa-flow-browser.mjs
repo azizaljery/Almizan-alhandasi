@@ -14,7 +14,7 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', a
 const results = []; const check = (n, ok, d = '') => { results.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
 const p = await (await b.newContext({ viewport: { width: 1360, height: 900 } })).newPage(); const errs = [];
 p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::/.test(m.text())) errs.push(m.text()); }); p.on('pageerror', e => errs.push(e.message)); p.on('dialog', d => d.accept());
-const TEXT = process.env.VILLA_TEXT || 'أبغى فيلا فيها 4 غرف نوم وحدة منها ماستر بغرفة ملابس، كل غرفة بحمامها، مجلس رجال كبير مع دورة مياه للضيوف، ومجلس نساء بمدخل مستقل، صالة عائلية، مطبخ مفتوح على الطعام، وغرفة خادمة بحمام';
+const TEXT = process.env.VILLA_TEXT || 'أبغى فيلا فيها 4 غرف نوم وحدة منها ماستر بغرفة ملابس، كل غرفة بحمامها، مجلس رجال كبير مع دورة مياه للضيوف، ومجلس نساء بمدخل مستقل، صالة عائلية، مطبخ مفتوح على الطعام، وغرفة خادمة بحمام قريبة من المطبخ، والمطبخ في الخلف';
 await p.goto(base + '/home.html'); await p.click('#start');
 await p.fill('#landLength', process.env.VILLA_L || '30'); await p.fill('#landWidth', process.env.VILLA_W || '20'); await p.check('input[data-kind=street][value=s]'); await p.check('input[data-kind=entry][value=s]');
 if (process.env.VILLA_FLOORS === '2') { const f = p.locator('#landFloors, input[name=floors][value="2"], select#floors'); if (await f.count()) { const tag = await f.first().evaluate(e => e.tagName); if (tag === 'SELECT') await f.first().selectOption('2'); else await f.first().check(); } }
@@ -34,15 +34,20 @@ const tbl = await p.locator('table.rooms').innerText();
 check('جدول الفراغات بالأبعاد والمناطق', /مجلس الرجال/.test(tbl) && /منطقة الرجال/.test(tbl) && /×/.test(tbl), tbl.split('\n').slice(0, 3).join(' | '));
 const d1 = await p.evaluate(() => globalThis.__mizanDesign.doc);
 const names1 = d1.labels.map(l => l.name);
-check('مجلس الرجال بمدخل مستقل ودورة مياه، ومجلس النساء بدورته', names1.includes('مدخل الرجال') && names1.includes('دورة مياه الرجال') && names1.includes('مجلس النساء') && names1.includes('دورة مياه النساء'), names1.join('، '));
+check('مجلس الرجال بمدخل مستقل ودورة مياه، ومجلس النساء بدورته', (names1.includes('مدخل الرجال') || names1.includes('مغاسل')) && names1.includes('دورة مياه الرجال') && names1.includes('مجلس النساء') && names1.includes('دورة مياه النساء'), names1.join('، '));
 check('بابا مدخل على الأقل (العائلة والرجال)', d1.openings.filter(o => o.entry).length >= 2);
+const led1 = await p.locator('#ledger').innerText();
+check('سجل التنفيذ «هل نُفّذ طلبك؟» يعرض بنود الكلام مقيسة', /هل نُفّذ طلبك/.test(led1) && /المطبخ/.test(led1) && /في الخلف/.test(led1) && await p.locator('#ledger li.good, #ledger li.bad').count() >= 3, led1.split('\n').slice(0, 4).join(' | '));
+check('القواعد المكانية منفذة في التصميم الأول', await p.locator('#ledger li.bad').count() === 0, led1.split('\n').slice(0, 3).join(' | '));
 await p.screenshot({ path: out + '/design-1.png', fullPage: false });
 // طلب تصميم آخر
 await p.click('#btnAnother'); await p.waitForSelector('#shara:not([hidden])');
-await p.click('#fbChips .chip[data-id=rooms_small]'); await p.click('#fbChips .chip[data-id=corridors]');
+await p.click('#fbChips .chip[data-id=rooms_small]'); await p.fill('#fbText', 'المجلس في الجهة الشرقية والماستر بعيدة عن المجلس');
 await p.click('#fbGo'); await p.waitForFunction(() => globalThis.__mizanDesign.session.designs.length === 2, null, { timeout: 60000 }); await p.waitForTimeout(500);
 check('«اطلب تصميمًا آخر» يولّد تصميمًا ثانيًا مختلفًا', await p.locator('h1').innerText() === 'التصميم 2' && await p.evaluate(() => { const s = globalThis.__mizanDesign.session; return s.designs[0].pat !== s.designs[1].pat; }));
 check('سجل التصاميم يسمح بالرجوع', await p.locator('.history button').count() === 2);
+const led2 = await p.locator('#ledger').innerText();
+check('ملاحظة شرعاء المكانية نُفّذت في التصميم الثاني', /جهة الشرق/.test(led2) && /بعيدًا عن/.test(led2) && await p.locator('#ledger li.bad').count() === 0, led2.split('\n').slice(0, 5).join(' | '));
 await p.screenshot({ path: out + '/design-2.png', fullPage: false });
 await p.click('#btnApprove'); await p.waitForURL('**/view3d.html'); await p.waitForTimeout(3500);
 check('العرض ثلاثي الأبعاد في صفحة مستقلة بعد الاعتماد', await p.evaluate(() => !!globalThis.__mizanViewer?.built));

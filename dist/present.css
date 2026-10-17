@@ -51,6 +51,13 @@ ul.tick{list-style:none;padding:0;margin:0}
 ul.tick li{padding:4px 22px 4px 0;position:relative;font-size:14px}
 ul.tick li::before{content:"✓";position:absolute;right:0;color:var(--mz-brass);font-weight:700}
 ul.tick li.no::before{content:"–";color:#9a9585}
+ul.tick li.good::before{content:"✓";color:#2f7d4f}
+ul.tick li.bad::before{content:"✗";color:#b3412e}
+ul.tick li .why{display:block;font-size:12.5px;color:#6b6a5f}
+ul.tick li.bad b{font-weight:600;color:#7a2a1d}
+.ledger .score{margin:0 0 8px;padding:6px 12px;border-radius:10px;font-weight:600;font-size:14px}
+.ledger .score.full{background:#e3f0e6;color:#1f5a37}
+.ledger .score.part{background:#f7e6df;color:#7a2a1d}
 ul.notes{margin:0;padding-inline-start:18px;font-size:13.5px;color:#57564c}
 table.rooms{width:100%;border-collapse:collapse;direction:rtl;font-size:14px}
 table.rooms th,table.rooms td{border-bottom:1px solid var(--mz-line);padding:7px 8px;text-align:right}

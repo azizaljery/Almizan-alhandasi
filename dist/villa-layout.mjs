@@ -12,6 +12,7 @@ import { analyzeWalls } from './draw/topology.mjs';
 import { footprint, validatePlot } from './planner.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
 import { reviewDoc, swingSectors, sectorPoints, fixtureRect, penetration } from './draw/review.mjs';
+import { rulePenalty, verifyRequest, blocksFor } from './rules.mjs';
 
 export const VILLA_ENGINE_VERSION = 'villa-zones-2';
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, EPS = 1e-6;
@@ -84,7 +85,8 @@ export function buildProgram(counts = {}, req = {}) {
   // الشريط يُقتطع من المطبخ: نكبّر كتلته بمساحته حتى يبقى المطبخ بمقاسه
   if (kitchenStrip.length) { const k = blocks.find(b => b.id === 'kitchen1'); if (k) k.area += kitchenStrip.length === 2 ? 9 : 5.5; }
   // المقاسات: الصريحة تحل محل الافتراض التصميمي، والوصفية «كبير» تكبّره 30٪
-  const setArea = (pred, a) => { for (const b of blocks.filter(pred)) { const strip = b.kind === 'suite' && b.bath ? b.area - (b.master ? T.master : T.bedroom) : 0; b.area = a + strip; b.fixedArea = true; } };
+  // المقاس الذي يذكره العميل صافٍ داخل الجدران؛ الكتلة تُقاس على محاور الجدران فنضيف نصف سماكة الجدار حولها
+  const setArea = (pred, a) => { for (const b of blocks.filter(pred)) { const strip = b.kind === 'suite' && b.bath ? b.area - (b.master ? T.master : T.bedroom) : 0; b.area = a + .5 * Math.sqrt(a) + strip; b.fixedArea = true; } };
   if (ar.majlis) setArea(b => b.id === 'majlis1', ar.majlis); else if (pr.big_majlis) setArea(b => b.id === 'majlis1', T.majlis * 1.3);
   if (ar.dining) setArea(b => b.kind === 'dining', ar.dining);
   if (ar.kitchen) setArea(b => b.id === 'kitchen1', ar.kitchen); else if (pr.big_kitchen) setArea(b => b.id === 'kitchen1', T.kitchen * 1.3);
@@ -98,7 +100,7 @@ export function buildProgram(counts = {}, req = {}) {
   if (pr.elderlyRoom) { const e = blocks.find(b => b.kind === 'suite' && !b.master) || blocks.find(b => b.master); if (e) { e.rank = 1.95; e.elderly = true; e.name = e.master ? e.name : 'غرفة كبار السن'; } }
   // ممر الضيوف ودورة مياههم يُقتطعان من كتلة المجلس: نضيف مساحتهما حتى يبقى المجلس بمقاسه
   for (const b of blocks) if (b.guestWc) b.area += 7;
-  return { blocks, hall: H > 0, hallArea, extraBaths: extraBathsLeft, guestWc, attached, notes, prefs: pr, kitchenStrip, counts: { bedrooms: N, majlis: M, baths: B, kitchens: K, halls: H, dining: Dn } };
+  return { blocks, rules: Array.isArray(req.rules) ? req.rules : [], entry: req.entry || 's', hall: H > 0, hallArea, hallFixed: !!ar.hall, extraBaths: extraBathsLeft, guestWc, attached, notes, prefs: pr, kitchenStrip, counts: { bedrooms: N, majlis: M, baths: B, kitchens: K, halls: H, dining: Dn } };
 }
 
 /** أعداد من قائمة غرف المحرك القديم (normalizeRooms/defaultRooms). */
@@ -163,6 +165,8 @@ function score(placed, circ, W, D, program = {}) {
       const ms = Math.min(bw, bdp), want = b.kind !== 'suite' ? 9 : b.master ? T.master : T.bedroom;
       if (ms < (b.master ? 3.35 : b.kind === 'suite' ? 2.9 : 2.5)) return no('suite-narrow'); // صافي العرض بعد الجدران يقارب 2.75 م
       if (ms < 3.3) pen += 60 * (3.3 - ms);
+      // غرفة ملابس مطلوبة للرئيسية: تحتاج عمقًا من الباب ≥ 3.9 م ليتسع الحمام والخزانة على الشريط
+      if (b.master && b.bath && program.prefs?.masterDressing && dep < 3.9) pen += 70 + 40 * (3.9 - dep);
       pen += 25 * Math.log(bw * bdp / want) ** 2;
     }
     const asp = Math.max(W_(r), H_(r)) / s;
@@ -205,7 +209,7 @@ function score(placed, circ, W, D, program = {}) {
   const circA = circ.reduce((a, c) => a + A_(c.r), 0), ratio = circA / (W * D);
   if (ratio > .2) pen += 160 * (ratio - .2);
   const hall = circ.find(c => c.id === 'hall');
-  if (hall) { const ha = A_(hall.r), ht = program.hallArea || DESIGN_TARGETS.hall; pen += 1.1 * Math.max(0, ha - ht * 1.3) + 2 * Math.max(0, ht * .5 - ha); const as = Math.max(W_(hall.r), H_(hall.r)) / Math.min(W_(hall.r), H_(hall.r)); if (as > 2.6) pen += 10 * (as - 2.6); }
+  if (hall) { const ha = A_(hall.r), ht = program.hallArea || DESIGN_TARGETS.hall; pen += 1.1 * Math.max(0, ha - ht * 1.3) + 2 * Math.max(0, ht * .5 - ha); if (program.hallFixed) pen += 6 * Math.max(0, Math.abs(ha - ht * 1.12) - ht * .12); const as = Math.max(W_(hall.r), H_(hall.r)) / Math.min(W_(hall.r), H_(hall.r)); if (as > 2.6) pen += 10 * (as - 2.6); }
   return pen;
 }
 
@@ -227,7 +231,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   if (upper) return searchUpper(program, W, D, upper, keep);
   const T = DESIGN_TARGETS, out = [];
   const blocks = program.blocks, suites = blocks.filter(b => b.kind === 'suite').sort(byRank).reverse(); // الرئيسية أولًا
-  const push = (mode, placed, circ, meta) => { const s = score(placed, circ, W, D, program); if (s !== null) out.push({ mode, placed, circ, pen: s, ...meta }); };
+  const push = (mode, placed, circ, meta) => { const s = score(placed, circ, W, D, program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s, rp, pen: s + rp.base + Math.min(...rp.p), ...meta }); };
   const hubWidths = (stair ? [4.8, 5.2] : [3.6, 4.2, 4.8]).filter(h => W - h >= 7.2);
 
   // (1) صالة مركزية بين جناحين، و(2) شكل T: جناحان + ممر عرضي + صف خلفي
@@ -323,13 +327,13 @@ function searchUpper(program, W, D, up, keep) {
   if (up.mode === 'side') {
     const wx0 = up.sideAt === 'L' ? 0 : hb.x1, wx1 = up.sideAt === 'L' ? hb.x0 : W;
     const pl = stack([...blocks].sort(byRank), wx0, wx1, 0, D, up.sideAt === 'L' ? 'x1' : 'x0');
-    const sc = score(pl, [lounge], W, D, program); if (sc !== null) out.push({ mode: 'side', placed: pl, circ: [lounge], pen: sc, stairRect: sr, upper: true });
+    const sc = score(pl, [lounge], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); out.push({ mode: 'side', placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
   } else {
     for (const [L, R] of subsets(blocks)) {
       if (!L.length || !R.length) continue;
       L.sort(byRank); R.sort(byRank);
       const pl = [...stack(L, 0, hb.x0, 0, D, 'x1'), ...stack(R, hb.x1, W, 0, D, 'x0')];
-      const sc = score(pl, [lounge], W, D, program); if (sc !== null) out.push({ mode: up.mode, placed: pl, circ: [lounge], pen: sc, stairRect: sr, upper: true });
+      const sc = score(pl, [lounge], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); out.push({ mode: up.mode, placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
     }
   }
   return out.sort((a, b) => a.pen - b.pen).slice(0, keep);
@@ -497,7 +501,7 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
         const ext = ['x0', 'x1', 'y0'].filter(z => (z === 'x0' && r.x0 < EPS) || (z === 'x1' && r.x1 > W - EPS) || (z === 'y0' && r.y0 < EPS));
         const room = add(b.bath ? cut(r, isX(side) ? 'y1' : (side === 'y0' ? 'x1' : 'x1'), 1.6)[1] : r, { id: b.id, type, name: b.name, kind: 'driver', door: side });
         if (b.bath) { const [strip] = cut(r, isX(side) ? 'y1' : 'x1', 1.6); const bt = add(strip, { id: b.id + '-bath', type: 'bath', name: bathName, kind: 'bath', door: isX(side) ? 'y0' : 'x0' }); const e = shared(bt, room); if (e) doors.push({ a: bt.id, b: room.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .75 }); }
-        if (ext.length) { const e = edgeOf(room, ext[0]); doors.push({ a: room.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .9, service: true }); }
+        if (ext.length) { const e = edgeOf(room, ext[0]); doors.push({ a: room.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .9, service: true, entry: true }); }
         else { circDoor(room.id, room, side, 'door', .9); notes.push('غرفة السائق لم تلامس جدارًا خارجيًا فوُصلت بالداخل؛ يُفضّل نقلها لمدخل خارجي.'); }
         return;
       }
@@ -544,7 +548,8 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
     if (b.kind === 'family') { const d = add(r, { id: b.id, type: 'living', name: b.name, kind: 'family', door: side }); circDoor(d.id, d, side, 'arch', 2.2); return; }
     if (b.kind === 'kitchen') {
       const k = add(r, { id: b.id, type: 'kitchen', name: b.name, kind: 'kitchen', door: side });
-      circDoor(k.id, k, side, 'door', .95);
+      // مطبخ مفتوح على الصالة (طلب صريح): فتحة واسعة بلا باب على جهة الحركة
+      if (program.prefs?.kitchenOpenHall && b.id === 'kitchen1') circDoor(k.id, k, side, 'arch', 2.4); else circDoor(k.id, k, side, 'door', .95);
       // باب خدمة على جدار خارجي ليس الواجهة الأمامية
       const ext = [['x0', r.x0 < EPS], ['x1', r.x1 > W - EPS], ['y1', r.y1 > D - EPS]].filter(([, on]) => on).map(([s]) => s);
       const longest = ext.map(sd => edgeOf(r, sd)).sort((a, b) => (b.to - b.from) - (a.to - a.from))[0];
@@ -881,7 +886,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   const tw = requirements.tweaks || {};
   const program = buildProgram(counts, requirements);
   const plot = validatePlot({ width: Number(land.width), length: Number(land.length), floors: 1, streets: Object.fromEntries((land.streets || []).map(s => [s, true])), entry: land.entries?.[0] || land.entry });
-  const fp = footprint(plot), entry = plot.entry;
+  const fp = footprint(plot), entry = plot.entry; program.entry = entry;
   const W = ['s', 'n'].includes(entry) ? fp.w : fp.h, D = ['s', 'n'].includes(entry) ? fp.h : fp.w;
   const need = program.blocks.reduce((a, b) => a + b.area, 0) + DESIGN_TARGETS.foyer + DESIGN_TARGETS.hall * .6;
   // الغلاف: يُقاس على البرنامج لا على الأرض؛ ما يزيد يبقى ساحات (أمامية/خلفية)
@@ -903,17 +908,20 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   let cands = [];
   for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3 })) cands.push({ ...c, env, pen: c.pen + 6 * Math.max(0, env.w * env.d / target - 1.25) * 10 });
   cands.sort((a, b) => a.pen - b.pen);
-  const seenSig = new Set(), ex = new Set(exclude), avoid = new Set(tw.avoidModes || []);
+  const seenSig = new Set(), ex = new Set(exclude), avoid = new Set([...(tw.avoidModes || []), ...(program.prefs?.noCorridors ? ['tee', 'rows'] : [])]);
   cands = cands.filter(c => { if (seenSig.has(c.sig) || ex.has(c.pat) || avoid.has(c.mode)) return false; seenSig.add(c.sig); return true; });
   if (!cands.length) {
     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م = ${Math.round(W * D)} م²)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
     err.code = 'VILLA_NO_FIT'; err.need = need; err.available = W * D; throw err;
   }
   const designs = [];
+  const hasRules = program.rules.length > 0;
   for (const cand of cands) {
-    if (designs.length >= keep + 2) break;
+    if (designs.length >= keep + (hasRules ? 4 : 2)) break;
+    if (hasRules && designs.filter(d => !d.fails).length >= keep) break;
     try {
-      const mirror = designs.length % 2 === 1; // تنويع الاتجاه بين البدائل
+      // المرآة: تحددها جهات العميل الجانبية (شرق/غرب) إن وُجدت، وإلا تنويع الاتجاه بين البدائل
+      const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : designs.length % 2 === 1;
       const layout = realizeLayout(cand, program, cand.env.w, cand.env.d, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
       const doc = layoutToDoc(layout, { land, plot, fp, entry, mirror, title, ox: cand.env.ox, Wfull: W });
       const built = cand.env.w * cand.env.d;
@@ -923,11 +931,13 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
       const relaxed = relaxFixtures(doc);
       const q = quality(relaxed);
       if (q.reject) continue;
-      designs.push({ doc: relaxed, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms });
+      const ledger = verifyRequest(relaxed, requirements, { entry });
+      designs.push({ doc: relaxed, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, ledger, fails: ledger.filter(x => !x.ok).length });
     } catch { /* بديل لم يُبنَ: يُرفض */ }
   }
   if (!designs.length) { const err = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك لهذا البرنامج والأرض؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : 'تعذّر بناء أي بديل سليم من التوزيعات المرشحة.'); err.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_BUILD_FAILED'; throw err; }
-  designs.sort((a, b) => a.quality - b.quality);
+  // تنفيذ طلب العميل أولًا، ثم الجودة
+  designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality);
   // تنويع الاتجاه: البدائل الزوجية تُعكس (مرآة) بعد الترتيب فلا يتكرر الشكل نفسه
   designs.length = Math.min(designs.length, keep);
   return { designs, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
@@ -940,7 +950,11 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const tw = requirements.tweaks || {}, exSet = new Set(exclude);
   const program = buildProgram(counts, requirements);
   const groundKinds = new Set(['majlis', 'dining', 'kitchen', 'maid', 'office', 'prayer', 'driver']);
-  const gBlocks = program.blocks.filter(b => groundKinds.has(b.kind) || b.elderly);
+  // الدور لكل فراغ: طلب العميل («الماستر في الأرضي»، «المكتب فوق») يتقدم على التوزيع الافتراضي
+  const wantG = new Set(), wantU = new Set();
+  for (const r of program.rules.filter(x => x.kind === 'floor')) for (const b of blocksFor(r.a, program.blocks)) (r.floor === 'ground' ? wantG : wantU).add(b);
+  const upperOk = b => ['suite', 'family', 'office', 'prayer'].includes(b.kind);
+  const gBlocks = program.blocks.filter(b => wantG.has(b) || ((groundKinds.has(b.kind) || b.elderly) && !(wantU.has(b) && upperOk(b))));
   let uBlocks = program.blocks.filter(b => !gBlocks.includes(b));
   if (!uBlocks.some(b => b.kind === 'suite')) { const e = Error('لا توجد غرف نوم للدور العلوي؛ دور واحد يكفي هذا البرنامج.'); e.code = 'VILLA_NO_UPPER'; throw e; }
   if (!gBlocks.length) { const e = Error('لا توجد فراغات ضيافة أو خدمة للدور الأرضي.'); e.code = 'VILLA_NO_GROUND'; throw e; }
@@ -950,7 +964,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const gProg = { ...program, blocks: gBlocks, extraBaths: gExtra };
   const uProg = { ...program, blocks: uBlocks, extraBaths: program.extraBaths - gExtra, upperHallName, hall: true, guestWc: 0, kitchenStrip: [], prefs: {}, hallArea: 24 };
   const plot = validatePlot({ width: Number(land.width), length: Number(land.length), floors: 1, streets: Object.fromEntries((land.streets || []).map(x => [x, true])), entry: land.entries?.[0] || land.entry });
-  const fp = footprint(plot), entry = plot.entry;
+  const fp = footprint(plot), entry = plot.entry; gProg.entry = entry; uProg.entry = entry;
   const W = ['s', 'n'].includes(entry) ? fp.w : fp.h, D = ['s', 'n'].includes(entry) ? fp.h : fp.w;
   const STAIR = { len: 4.0 }, sum = l => l.reduce((a, b) => a + b.area, 0);
   const target = Math.max(sum(gBlocks) + DESIGN_TARGETS.foyer + program.hallArea + 15, sum(uBlocks) + 24 + 15) * 1.15 * (tw.envScale || 1);
@@ -962,15 +976,15 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
     const hall = g.circ.find(c => c.id === 'hall').r;
     const u = searchLayouts(uProg, env.w, env.d, { upper: { mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 } }, keep: 1 })[0];
     const pat = g.pat + '/' + (u && u.placed.map(p => p.block.kind[0] + ((p.r.x0 + p.r.x1) / 2 < env.w / 2 ? 'L' : 'R') + Math.round(p.r.y0 / 3)).sort().join(''));
-    if (u && !exSet.has(pat) && !(tw.avoidModes || []).includes(g.mode)) pairs.push({ g, u, env, pen: g.pen + u.pen, pat });
+    if (u && !exSet.has(pat) && !(tw.avoidModes || []).includes(g.mode)) { const p0 = g.rp.p[0] + u.rp.p[0], p1 = g.rp.p[1] + u.rp.p[1]; pairs.push({ g, u, env, pen: g.raw + u.raw + g.rp.base + u.rp.base + Math.min(p0, p1), mirrorPref: p0 !== p1 ? p1 < p0 : null, pat }); }
   }
   pairs.sort((a, b) => a.pen - b.pen);
   if (!pairs.length) { const e = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : `لم أجد توزيعًا مهنيًا لدورين داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م).`); e.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; throw e; }
   const designs = [];
   for (const pr of pairs) {
-    if (designs.length >= keep + 1) break;
+    if (designs.length >= keep + (program.rules.length ? 3 : 1)) break;
     try {
-      const mirror = designs.length % 2 === 1, { env } = pr;
+      const mirror = pr.mirrorPref ?? designs.length % 2 === 1, { env } = pr;
       const gl = realizeLayout(pr.g, gProg, env.w, env.d, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
       const ul = realizeLayout(pr.u, uProg, env.w, env.d);
       let doc = layoutToDoc(gl, { land, plot, fp, entry, mirror, title, ox: env.ox, Wfull: W });
@@ -982,11 +996,12 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
       const check = checkDoc(doc); if (!check.ok) continue;
       const relaxed = relaxFixtures(doc), q = quality(relaxed); if (q.reject) continue;
       const notes = [...new Set([...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d)} م² (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
-      designs.push({ doc: relaxed, penalty: r2(pr.pen), quality: r2(pr.pen + q.cost), issues: q.issues, mode: pr.g.mode, env, notes, pat: pr.pat, summary: describe(pr.g) + ' (دوران)' });
+      const ledger = verifyRequest(relaxed, requirements, { entry });
+      designs.push({ doc: relaxed, penalty: r2(pr.pen), quality: r2(pr.pen + q.cost), issues: q.issues, mode: pr.g.mode, env, notes, pat: pr.pat, summary: describe(pr.g) + ' (دوران)', ledger, fails: ledger.filter(x => !x.ok).length });
     } catch { /* زوج لم يُبنَ */ }
   }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; throw e; }
-  designs.sort((a, b) => a.quality - b.quality); designs.length = Math.min(designs.length, keep);
+  designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality); designs.length = Math.min(designs.length, keep);
   return { designs, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2 };
 }
 /** سلم U داخل غرفة السلم: يبدأ عند طرفها الأمامي ويصعد نحو الخلف. */

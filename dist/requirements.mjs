@@ -1,8 +1,11 @@
 // متطلبات العميل من كلامه الحر: ما يتجاوز أعداد الغرف (حمام لكل غرفة، مطبخ مفتوح، غرفة خادمة، مدخل مستقل،
 // مقاسات مذكورة، مكتب ومستودع وغسيل...). قواعد نصية حتمية بلا شبكة، ولا تخمين: ما لم يُذكر لا يظهر.
+// والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
 // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
 
-const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10 };
+import { extractRules } from './rules.mjs';
+
+const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
 /** تطبيع عربي: حذف التشكيل والتطويل، توحيد الألف والتاء المربوطة والياء، والأرقام الهندية إلى لاتينية. */
 export function normalizeAr(text) {
   return String(text || '')
@@ -21,7 +24,7 @@ const ROOM_WORDS = [
   ['hall', 'صاله(?: عائليه| المعيشه| معيشه)?|الصاله'],
   ['dining', '(?:صاله|غرفه)? ?(?:ال)?طعام'],
   ['kitchen', '(?:ال)?مطبخ'],
-  ['bedroom', 'غرفه نوم|غرف نوم|غرفه'],
+  ['bedroom', 'غرفه نوم|غرف نوم|غرف (?:لل|ال|ل)?(?:اولاد|اطفال|بنات|عيال|ابناء)|غرفتين|غرفتان|(?:باقي |بقيه )?(?:ال)?غرف|غرفه'],
 ];
 
 /**
@@ -38,17 +41,28 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
   if (has(/(كل|جميع) (ال)?غرف(ه)?( ال)?(نوم)? ?(ب|مع|فيها|لها|عندها|داخلها)? ?(حمام|دوره مياه|دورات مياه)|حمام (خاص )?(لكل|في كل) غرفه|(كل|جميع) (ال)?غرف ماستر|غرف(ه)? ماستر (كلها|جميعها)|حمامات داخليه/)) {
     prefs.allEnsuite = true; understood.push('كل غرفة نوم بحمامها الملحق');
   }
+  else if (has(/حمام(ات)? مشترك|(تتشارك|يتشاركون|تشترك|مشتركه في) (ال)?(حمام|دوره مياه)|حمام (بين|لكل) (كل )?غرفتين|دوره مياه مشتركه|(مو|ما|لا|ليس) (لازم|شرط|ضروري) (كل غرفه|حمام لكل)/)) {
+    prefs.sharedBaths = true; understood.push('غرف النوم (عدا الرئيسية) تتشارك دورات المياه');
+  }
   // الماستر وغرفة الملابس
   if (has(/غرفه (ال)?ملابس|دريسنج|دريسنق|walk ?in/)) { prefs.masterDressing = true; understood.push('غرفة ملابس للغرفة الرئيسية'); }
   const mm = t.match(/(\d+|واحد|اثنين|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه) غرف(ه)? (نوم )?ماستر/);
   if (mm) { const n = num(mm[1]); if (Number.isInteger(n) && n >= 1 && n <= 10) { c.bedrooms = Math.max(c.bedrooms || 0, n); prefs.allEnsuite = true; understood.push(`${n} غرف نوم ماستر (كل غرفة بحمامها)`); } }
+  // «4 غرف» أو «ثلاث غرف نوم»: عدد صريح واحد لغرف النوم يتقدم على العد التقريبي من الكلمات
+  const NUMW = '\\d+|واحد|اثنين|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه|ثمان|ثمانيه|تسع|تسعه|عشر|عشره';
+  const bedRe = new RegExp(`(?<![\\u0600-\\u06FF0-9])و?(${NUMW}) (?:غرف|غرفه)(?: (?:ال)?نوم)?(?! (?:ال)?(?:ملابس|غسيل|خادمه|سائق|طعام|ماستر))(?![\\u0600-\\u06FF])( (?:لل|ل|ال)?(?:عيال|اولاد|اطفال|بنات|ابناء|بزران))?`, 'g');
+  // «الماستر وثلاث غرف للعيال» = أربع غرف نوم
+  const masterSaid = /ماستر|(?:غرفه (?:ال)?نوم |ال)رئيسيه/.test(t);
+  const bedHits = [...t.matchAll(bedRe)].map(m => num(m[1]) + (m[2] && masterSaid ? 1 : 0)).filter(n => Number.isInteger(n) && n >= 1 && n <= 10);
+  if (bedHits.length === 1 && !mm) c.bedrooms = bedHits[0];
   if (has(/ماستر|الرئيسيه/) && !c.bedrooms) c.bedrooms = 1;
   // المطبخ
-  if (has(/مطبخ (مفتوح|امريكي|اميركي|مكشوف)|(open|اوبن) ?(kitchen|كيتشن)/)) { prefs.openKitchen = true; understood.push('مطبخ مفتوح على الطعام'); }
+  if (has(/مطبخ (مفتوح|مكشوف) (ع|على|علي) (ال)?صاله(?! (ال)?طعام)/)) { prefs.kitchenOpenHall = true; understood.push('مطبخ مفتوح على الصالة'); }
+  else if (has(/مطبخ (مفتوح|امريكي|اميركي|مكشوف)|(open|اوبن) ?(kitchen|كيتشن)/)) { prefs.openKitchen = true; understood.push('مطبخ مفتوح على الطعام'); }
   else if (has(/مطبخ (مغلق|مقفل|مستقل)/)) { prefs.openKitchen = false; understood.push('مطبخ مغلق بباب'); }
   if (has(/مطبخ (تحضيري|خارجي|ثاني)|مطبخين/)) { c.kitchens = Math.max(c.kitchens || 0, 2); understood.push('مطبخ ثانٍ (تحضيري)'); }
   // الطعام: «مفتوح على الطعام» أو «غرفة طعام» تعني وجودها
-  if (has(/طعام|سفره|اكل/) && !c.dining) { c.dining = 1; }
+  if (has(/طعام|سفره|اكل/) && !c.dining && !/(بدون|بلا|من غير|ما ابي|ما ابغي|لا اريد|ما احتاج|لا احتاج) (ال)?(غرفه |صاله )?(ال)?(طعام|سفره)/.test(t)) { c.dining = 1; }
   // المداخل
   if (has(/مدخل (مستقل|منفصل|خاص|ثاني) ?(لل)?(نساء|نسوان|عائله|حريم|اهل)|مدخل (لل)?(نساء|العائله|الحريم)|مدخلين|(نساء|النساء|العائله|الحريم)[^،,.]{0,8} ?(ب|مع|له|لها)? ?مدخل (مستقل|منفصل|خاص)/)) { prefs.familyEntrance = true; understood.push('مدخل مستقل للعائلة/النساء'); }
   if (has(/مدخل (مستقل|منفصل|خاص)? ?(لل)?(رجال|ضيوف|مجلس)|مجلس (ب|له|مع) ?مدخل/)) { prefs.guestEntrance = true; understood.push('مدخل مستقل للضيوف إلى المجلس'); }
@@ -62,10 +76,10 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
   if (has(/مستودع|مخزن|بانتري|بنتري/)) { extras.storage = true; understood.push('مخزن'); }
   if (has(/غسيل|غسيل الملابس|لاندري|مغسله ملابس/)) { extras.laundry = true; understood.push('غرفة غسيل'); }
   // كبار السن
-  if (has(/كبار السن|كبير السن|الوالده|الوالد|ابوي|امي|جدتي|جدي|الوالدين/) || discovery?.life?.seniors) { prefs.elderlyRoom = true; understood.push('غرفة نوم قريبة من الصالة لكبار السن'); }
+  if (has(/كبار السن|كبير السن|(ا|ل)لوالد|(?<![\u0600-\u06FF])(و|ل|لل)?(امي|ابوي|جدتي|جدي)(?![\u0600-\u06FF])|(?<![\u0600-\u06FF])(لل|ل)(ام|اب)(?![\u0600-\u06FF])/) || discovery?.life?.seniors) { prefs.elderlyRoom = true; understood.push('غرفة نوم قريبة من الصالة لكبار السن'); }
   // مقاسات صريحة: «مجلس 5×6» أو «مجلس 30 م²»
   for (const [key, words] of ROOM_WORDS) {
-    const GAP = '\\s*(?:(?:ب)?(?:مساحه|مساحتها|مساحته|مقاس|ابعاد|ابعادها|ابعاده)\\s*)?';
+    const GAP = '\\s*(?:(?:كبيره|كبير|واسعه|واسع|صغيره|صغير|فخم|فخمه)\\s*)?(?:(?:كل|لكل) (?:وحده|واحده|غرفه|وحده منها|واحد)\\s*)?(?:(?:ب|و)?(?:مساحه|مساحتها|مساحته|مقاس|مقاسها|مقاسه|ابعاد|ابعادها|ابعاده)\\s*)?';
     const re = new RegExp(`(?:${words})${GAP}(\\d+(?:\\.\\d+)?)\\s*(?:×|في)\\s*(\\d+(?:\\.\\d+)?)`), m = t.match(re);
     if (m) { const a = num(m[1]) * num(m[2]); if (a >= 4 && a <= 150 && !areas[key]) { areas[key] = Math.round(a * 100) / 100; understood.push(`${label(key)} ${m[1]}×${m[2]} م (${areas[key]} م²)`); } continue; }
     const re2 = new RegExp(`(?:${words})${GAP}(\\d+(?:\\.\\d+)?)\\s*(?:م2|م²|متر مربع|مترمربع|متر)`), m2 = t.match(re2);
@@ -75,6 +89,26 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
   for (const [key, re] of [['majlis', /مجلس( رجال| الرجال)? (كبير|واسع|فخم)/], ['hall', /صاله( عائليه)? (كبيره|واسعه)/], ['kitchen', /مطبخ (كبير|واسع)/], ['master', /(ماستر|الرئيسيه) (كبيره|واسعه)/]]) {
     if (!areas[key] && re.test(t)) { prefs['big_' + key] = true; understood.push(`${label(key)} ${['hall', 'master'].includes(key) ? 'واسعة' : 'واسع'}`); }
   }
+  // سعة المجلس: «يتسع لعشرين شخص» ← المساحة بافتراض تصميمي 1.6 م² للشخص في جلسة جدارية (ليس اشتراطًا نظاميًا)
+  const cap = t.match(/مجلس[^،,.]{0,22}?(?:يتسع|يكفي|يستوعب|ياخذ|يشيل|يجلس فيه|ل) ?(?:ل|الي|الى)? ?(\d+|عشرين|ثلاثين|اربعين|خمسين|خمسه عشر|عشر|عشره) ?(?:شخص|اشخاص|نفر|انفار|ضيف|ضيوف|رجال|رجل|واحد)/);
+  if (cap && !areas.majlis) { const n = num(cap[1]); if (n >= 4 && n <= 80) { areas.majlis = Math.round(n * 1.6); understood.push(`مجلس يتسع لـ${n} شخصًا ≈ ${areas.majlis} م² (افتراض تصميمي 1.6 م² للشخص)`); } }
+  // مقارنة بالتصميم المعروض: «المجلس أكبر»، «الصالة أصغر» ← معامل تكبير/تصغير معلن (25٪)
+  const tweaks = {};
+  for (const [re, key, ar] of [[/مجلس (اكبر|اوسع)/, ['majlisScale', 1.25], 'المجلس أكبر'], [/مجلس (اصغر|اضيق)/, ['majlisScale', .8], 'المجلس أصغر'], [/صاله (اكبر|اوسع)/, ['hallScale', 1.25], 'الصالة أكبر'], [/صاله (اصغر|اضيق)/, ['hallScale', .8], 'الصالة أصغر'], [/مطبخ (اكبر|اوسع)/, ['kitchenScale', 1.2], 'المطبخ أكبر'], [/(غرف|غرفه)( ال)?( نوم)? (اكبر|اوسع)|ماستر (اكبر|اوسع)/, ['bedroomScale', 1.2], 'غرف النوم أكبر'], [/(البيت|المبني|المسطح|البناء) (اصغر|اقل)/, ['envScale', .9], 'المبنى أصغر']]) {
+    if (re.test(t)) { tweaks[key[0]] = key[1]; understood.push(ar); }
+  }
+  // القواعد المكانية وعدم الوجود وعدد الأدوار
+  const R = extractRules(t);
+  const rules = R.rules;
+  for (const k of R.absent) {
+    if (k === 'majlis') { c.majlis = 0; understood.push('بدون مجلس'); }
+    else if (k === 'dining') { c.dining = 0; understood.push('بدون غرفة طعام'); }
+    else { delete extras[k]; understood.push('بدون ' + ({ office: 'مكتب', prayer: 'مصلى', maid: 'غرفة خادمة', driver: 'غرفة سائق' }[k] || k)); }
+  }
+  if (R.noCorridors) { prefs.noCorridors = true; understood.push('أقل ما يمكن من الممرات (الحركة عبر الصالة)'); }
+  if (R.floors) { prefs.floors = R.floors; understood.push(R.floors === 2 ? 'دوران (أرضي وأول)' : 'دور واحد'); }
+  for (const r of rules) understood.push(r.text);
+  if (has(/كراج|قراج|جراج|موقف|مواقف|مظله سيار/)) unsupported.push('مواقف السيارات (الكراج): تبقى في الارتداد الأمامي ولا تُرسم في هذا الإصدار.');
   if (has(/فناء|حوش داخلي|كورت ?يارد/)) unsupported.push('الفناء الداخلي: هذا المولّد لا يرسمه بعد؛ ما يزيد عن المبنى يبقى ساحات خارجية.');
   if (has(/مسبح|حمام سباحه/)) unsupported.push('المسبح: خارج المبنى ولا يُرسم في هذا الإصدار.');
   if (has(/مصعد|اسانسير/)) unsupported.push('المصعد: غير مدعوم في هذا الإصدار.');
@@ -85,7 +119,12 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
     const need = c.bedrooms + Math.min(2, c.majlis || 0) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
     if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (حمام لكل غرفة${c.majlis ? (c.majlis > 1 ? ' + دورتا مياه الرجال والنساء' : ' + دورة مياه الرجال') : ''}${extras.maid?.bath ? ' + حمام الخادمة' : ''}${extras.driver?.bath ? ' + حمام السائق' : ''})`); }
   }
-  return { counts: c, extras, prefs, areas, understood: [...new Set(understood)], unsupported };
+  // دورات مياه مشتركة: «تتشارك حمام» ليس عددًا؛ العدد اللازم = الضيوف + الرئيسية + واحدة لكل غرفتين + الخدمة
+  if (prefs.sharedBaths && !prefs.allEnsuite && c.bedrooms) {
+    const need = Math.min(2, c.majlis || 0) + 1 + Math.ceil((c.bedrooms - 1) / 2) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
+    if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة${c.majlis ? '، ودورة مياه للضيوف' : ''})`); }
+  }
+  return { counts: c, extras, prefs, areas, rules, tweaks, understood: [...new Set(understood)], unsupported };
 }
 function label(key) { return { master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[key] || key; }
 

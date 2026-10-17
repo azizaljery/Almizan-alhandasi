@@ -195,7 +195,10 @@ export function modelToStudioDoc(model, land, { title = 'تصميم أولي م�
 
 /** يشغّل محرك التوليد الحالي ويعيد التصميم المختار مستندًا للمرسم. أي فشل يُرمى كما هو (لا بديل صامت). */
 export async function generateInitialDesign({ land, rooms, discovery, idea = '', seed = 1, counts = null, requirements = null, engine = 'auto', exclude = [] }) {
-  const { plot, land: normLand } = normalizeLand(land);
+  const { plot, land: normLand0 } = normalizeLand(land);
+  // عدد الأدوار المذكور في كلام العميل («دورين») يتقدم على الافتراضي في بيانات الأرض
+  const reqFloors = requirements?.prefs?.floors ?? null;
+  const normLand = reqFloors && reqFloors !== normLand0.floors ? { ...normLand0, floors: reqFloors } : normLand0;
   const disc = normalizeDiscovery(discovery);
   if (normLand.floors >= 2 && engine === 'legacy') return generateMultiFloorDesign({ plot, land: normLand, rooms, discovery: disc, idea, seed });
   if (normLand.floors >= 2) {
@@ -242,14 +245,14 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
     dna.geometryFingerprint = geometryFingerprint(best.doc);
     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
   } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, summary: best.summary, pat: best.pat };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, summary: best.summary, pat: best.pat, ledger: best.ledger || [] };
 }
 
 /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
 function villaTwoFloors({ land, counts, requirements, exclude = [] }) {
   const out = generateVillaTwoFloors({ land, counts, requirements, keep: 3, exclude });
   const best = out.designs[0];
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, summary: best.summary, pat: best.pat };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, summary: best.summary, pat: best.pat, ledger: best.ledger || [] };
 }
 
 /** دوران: الأرضي والعلوي بسلم متطابق (انظر multi-floor.mjs). بلا بصمة تصميم ولا بدائل: تُقدَّم لدور واحد فقط. */

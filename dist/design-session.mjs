@@ -2,6 +2,7 @@
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
 import { generateInitialDesign } from './home-flow.mjs';
 import { extractRequirements } from './requirements.mjs';
+import { verifyRequest } from './rules.mjs';
 import { parseDoc, serialize } from './draw/doc.mjs';
 
 export const SESSION_KEY = 'mizan.design.session.v1';
@@ -37,7 +38,7 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
   };
 }
 function entry(result, feedback) {
-  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '' };
+  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null };
 }
 export const currentDoc = s => parseDoc(s.designs[s.current].doc);
 
@@ -52,7 +53,11 @@ export async function redesign(session, { picks = [], text = '' } = {}, { genera
   if (text && text.trim().length >= 3) {
     const more = extractRequirements(text, { counts: {} });
     Object.assign(req.prefs, more.prefs); Object.assign(req.extras, more.extras); Object.assign(req.areas, more.areas);
-    for (const [k, v] of Object.entries(more.counts)) if (Number.isInteger(v) && v > 0) req.counts[k] = v;
+    for (const [k, v] of Object.entries(more.counts)) if (Number.isInteger(v) && (v > 0 || (v === 0 && ['majlis', 'dining'].includes(k)))) req.counts[k] = v;
+    req.rules = mergeRules(req.rules || [], more.rules || []);
+    for (const [k, v] of Object.entries(more.tweaks || {})) req.tweaks[k] = (req.tweaks[k] || 1) * v;
+    if (more.unsupported?.length) req.unsupported = [...new Set([...(req.unsupported || []), ...more.unsupported])];
+    req.understood = [...new Set([...(req.understood || []), ...more.understood])];
     changes.push(...more.understood);
     if (!more.understood.length) changes.push('ملاحظتك المكتوبة لم أستخرج منها تغييرًا محددًا؛ أعرض لك توزيعًا مختلفًا.');
     s.input.idea = [s.input.idea, text].filter(Boolean).join('\n');
@@ -66,6 +71,13 @@ export async function redesign(session, { picks = [], text = '' } = {}, { genera
   return { session: s, changes };
 }
 
+/** القاعدة الجديدة تحل محل القديمة لنفس الفراغ ونوع الطلب (مثل: «المطبخ في الأمام» بعد «المطبخ في الخلف»). */
+export function mergeRules(old = [], add = []) {
+  const key = r => r.kind === 'place' ? `place|${r.a}|${['e', 'w'].includes(r.side) ? 'x' : ['front', 'back', 'n', 's'].includes(r.side) ? 'y' : r.side}` : r.kind === 'floor' ? `floor|${r.a}` : `rel|${r.a}|${r.b}`;
+  const m = new Map(); for (const r of [...old, ...add]) m.set(key(r), r);
+  return [...m.values()].map((r, i) => ({ ...r, id: 'R' + (i + 1) }));
+}
+
 export function approve(session) { const s = clone(session); s.approved = s.current; return s; }
 
 export function saveSession(store, s) { try { store.setItem(SESSION_KEY, JSON.stringify(s)); return true; } catch { return false; } }
@@ -74,7 +86,13 @@ export function loadSession(store) {
   catch { return null; }
 }
 
-export default { SESSION_KEY, FEEDBACK, createSession, redesign, approve, saveSession, loadSession, currentDoc };
+/** سجل التنفيذ للتصميم المعروض: يُقاس من المستند نفسه (ولو عُدّل في المرسم). */
+export function ledgerFor(session, doc = currentDoc(session)) {
+  const req = session.input.requirements || {}, entry = session.input.land?.entries?.[0] || doc.plot?.entry || 's';
+  try { return verifyRequest(doc, req, { entry }); } catch { return session.designs[session.current]?.ledger || []; }
+}
+
+export default { SESSION_KEY, FEEDBACK, createSession, redesign, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules };
 
 // ------------------------------------------------------------------------------------------ العرض
 import { analyzeDoc } from './draw/digest.mjs';
