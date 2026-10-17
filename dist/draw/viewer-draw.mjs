@@ -181,6 +181,7 @@ export class DrawViewer {
   radius() { const b = this.built.bounds, p = this.built.plotBounds; return Math.max(Math.hypot(b.w, b.h) / 2, p ? Math.max(p.w, p.h) * .38 : 0, 5); }
 
   frameBuilding() {
+    this.stopEasing?.();
     if (!this.built) return;
     const R = this.radius(), fov = this.camera.fov * DEG;
     Object.assign(this.orbit, { target: this.center(), dist: clamp(R / Math.sin(fov / 2) * 1.15, 6, 300), minDist: 2, maxDist: R * 14 });
@@ -220,6 +221,7 @@ export class DrawViewer {
 
   // ---------------------------------------------------------------------------------------------------------- modes & camera
   setMode(mode, { animate = true, duration = 700 } = {}) {
+    this.stopEasing?.();
     if (!this.built || !['orbit', 'dollhouse', 'top', 'walk', 'section'].includes(mode)) { this.mode = mode; return; }
     const prev = this.mode, from = this.currentPose();
     if (prev === 'walk') this.leaveWalk();
@@ -254,12 +256,14 @@ export class DrawViewer {
   applyPose(p) { this.camera.position.copy(p.pos); this.camera.quaternion.copy(p.quat); if (p.fov && Math.abs(this.camera.fov - p.fov) > 1e-3) { this.camera.fov = p.fov; this.camera.updateProjectionMatrix(); } this.camera.updateMatrixWorld(); }
   applyOrbitCamera() { this.applyPose(this.orbitPose()); }
   startTween(from, to, duration, done) {
+    this.stopEasing?.();
     this.tween = { from, to, t0: performance.now(), duration, done };
     this.kick();
   }
 
   /** Move the orbit camera: { azimuthDeg, elevationDeg, distance, target:{x,y,z}|[x,y,z] , animate } */
   orbitTo({ azimuthDeg, elevationDeg, distance, target, animate = false, duration = 600 } = {}) {
+    this.stopEasing?.();
     const from = this.currentPose(), o = this.orbit;
     if (azimuthDeg !== undefined) o.az = azimuthDeg * DEG;
     if (elevationDeg !== undefined) o.el = clamp(elevationDeg * DEG, 2 * DEG, 89.9 * DEG);
@@ -271,6 +275,7 @@ export class DrawViewer {
   }
   /** Fly the orbit camera to look at a room. */
   focusRoom(key, { animate = true } = {}) {
+    this.stopEasing?.();
     const r = this.built?.rooms.get(key) || [...(this.built?.rooms.values() || [])].find(x => x.spaceId === key); if (!r) return;
     const size = Math.max(r.bounds.w ?? (r.bounds.x1 - r.bounds.x0), r.bounds.h ?? (r.bounds.y1 - r.bounds.y0));
     this.orbitTo({ target: [r.centroid.x, r.elevation + 1, -r.centroid.y], distance: clamp(size * 1.8 + 3, 4, 40), elevationDeg: 48, animate });
@@ -454,14 +459,22 @@ export class DrawViewer {
     else { this._rs = () => this.resize(); globalThis.addEventListener('resize', this._rs); }
   }
 
+  /** هدف الكاميرا أثناء التفاعل: الإدخال يغيّر الهدف، والحلقة تقرّب الكاميرا منه بنعومة (اعتمادًا على الزمن لا عدد الإطارات). */
+  goalOrbit() {
+    if (!this.goal) { const o = this.orbit; this.goal = { az: o.az, el: o.el, dist: o.dist, target: o.target.clone() }; }
+    return this.goal;
+  }
+  stopEasing() { this.goal = null; this.inertia = null; this.orbit.vAz = this.orbit.vEl = 0; }
   onDown(e) {
     this.canvas.focus({ preventScroll: true });
     this.canvas.setPointerCapture?.(e.pointerId);
-    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, button: e.button, shift: e.shiftKey, t: performance.now() });
-    this.tween = null;
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, button: e.button, shift: e.shiftKey, t: performance.now(), type: e.pointerType });
+    this.tween = null; this.inertia = null; this.samples = [];
     if (this.pointers.size === 2) { const [a, b] = [...this.pointers.values()]; this.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
     this.orbit.vAz = this.orbit.vEl = 0;
   }
+  /** حساسية الدوران بالنسبة لحجم اللوحة: سحب عرض الشاشة كله ≈ 250°، وارتفاعها ≈ 120°؛ اللمس أهدأ قليلًا من الفأرة. */
+  rotRates(type) { const w = Math.max(600, this.canvas.clientWidth || 800), h = Math.max(400, this.canvas.clientHeight || 600), k = type === 'touch' ? .85 : 1; return { az: 4.36 / w * k, el: 2.1 / h * k }; }
   onMove(e) {
     const p = this.pointers.get(e.pointerId); if (!p) return;
     const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
@@ -473,9 +486,15 @@ export class DrawViewer {
       const [a, b] = [...this.pointers.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       this.dolly(this.pinch.d / Math.max(d, 1)); this.pan(mx - this.pinch.mx, my - this.pinch.my); this.pinch = { d, mx, my }; return;
     }
+    if (this.pointers.size > 2) return;
     const panning = p.button === 2 || p.button === 1 || p.shift;
     if (panning) this.pan(dx, dy);
-    else if (this.mode !== 'top') { const o = this.orbit; o.az -= dx * .0062; o.el = clamp(o.el + dy * .0052, 2 * DEG, 89.5 * DEG); o.vAz = -dx * .0062; o.vEl = dy * .0052; this.applyOrbitCamera(); this.requestRender(); }
+    else if (this.mode !== 'top') {
+      const g = this.goalOrbit(), r = this.rotRates(p.type), dAz = -dx * r.az, dEl = dy * r.el;
+      g.az += dAz; g.el = clamp(g.el + dEl, 2 * DEG, 89.5 * DEG);
+      const t = performance.now(); (this.samples ||= []).push({ t, dAz, dEl }); while (this.samples.length && t - this.samples[0].t > 90) this.samples.shift();
+      this.kick();
+    }
     else this.pan(dx, dy);
   }
   onUp(e) {
@@ -488,17 +507,29 @@ export class DrawViewer {
       const hit = this.pick(e.clientX, e.clientY);
       if (this.autoSelect) { if (hit?.room) this.highlightRoom(hit.room.key); else if (!hit) this.highlightRoom(null); }
       this.emit('pick', hit);
-    } else if (this.mode !== 'walk' && this.mode !== 'top' && (Math.abs(this.orbit.vAz) > .0008 || Math.abs(this.orbit.vEl) > .0008)) this.kick();
+    } else if (this.mode !== 'walk' && this.mode !== 'top' && this.pointers.size === 0) {
+      // استمرار الدوران بعد رفع الإصبع: من متوسط السرعة في آخر 90 مللي ثانية (لا من آخر حركة وحدها)
+      const t = performance.now(), rec = (this.samples || []).filter(s => t - s.t < 90);
+      if (rec.length > 1) {
+        const span = Math.max(16, t - rec[0].t) / 1000, vAz = rec.reduce((a, s) => a + s.dAz, 0) / span, vEl = rec.reduce((a, s) => a + s.dEl, 0) / span;
+        if (Math.hypot(vAz, vEl) > .25) { this.inertia = { vAz: clamp(vAz, -6, 6), vEl: clamp(vEl, -3, 3) }; this.kick(); }
+      }
+    }
+    this.samples = [];
   }
-  onWheel(e) { e.preventDefault(); if (this.mode === 'walk') { this.walkStep(-e.deltaY * .004, 0); this.afterWalk(); return; } this.dolly(Math.exp(e.deltaY * (e.ctrlKey ? .01 : .0012))); }
-  dolly(f) { const o = this.orbit; o.dist = clamp(o.dist * f, o.minDist, o.maxDist); this.applyOrbitCamera(); this.requestRender(); }
+  onWheel(e) {
+    e.preventDefault(); if (this.mode === 'walk') { this.walkStep(-e.deltaY * .004, 0); this.afterWalk(); return; }
+    // قرص لوحة اللمس (ctrlKey) قيم صغيرة متتالية؛ عجلة الفأرة قيم كبيرة: حدّ لكل حدث يمنع القفزات
+    this.inertia = null; this.dolly(clamp(Math.exp(e.deltaY * (e.ctrlKey ? .011 : .0011)), .82, 1.22));
+  }
+  dolly(f) { const o = this.orbit, g = this.goalOrbit(); g.dist = clamp(g.dist * f, o.minDist, o.maxDist); this.kick(); }
   pan(dx, dy) {
-    const T = this.THREE, o = this.orbit, h = this.canvas.clientHeight || 1, k = 2 * o.dist * Math.tan(this.camera.fov * DEG / 2) / h;
+    const T = this.THREE, o = this.orbit, g = this.goalOrbit(), h = this.canvas.clientHeight || 1, k = 2 * g.dist * Math.tan(this.camera.fov * DEG / 2) / h;
     const right = new T.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 0), up = new T.Vector3().setFromMatrixColumn(this.camera.matrixWorld, 1);
     if (this.mode === 'top') up.set(0, 0, -1).applyAxisAngle(new T.Vector3(0, 1, 0), 0);
-    o.target.addScaledVector(right, -dx * k).addScaledVector(up, dy * k);
-    const b = this.built?.bounds; if (b) { o.target.x = clamp(o.target.x, b.x0 - 40, b.x1 + 40); o.target.z = clamp(o.target.z, -b.y1 - 40, -b.y0 + 40); o.target.y = clamp(o.target.y, -1, 20); }
-    this.applyOrbitCamera(); this.requestRender();
+    g.target.addScaledVector(right, -dx * k).addScaledVector(up, dy * k);
+    const b = this.built?.bounds; if (b) { g.target.x = clamp(g.target.x, b.x0 - 40, b.x1 + 40); g.target.z = clamp(g.target.z, -b.y1 - 40, -b.y0 + 40); g.target.y = clamp(g.target.y, -1, 20); }
+    void o; this.kick();
   }
 
   // ---------------------------------------------------------------------------------------------------------- loop / render
@@ -526,13 +557,22 @@ export class DrawViewer {
       if (k >= 1) { const d = tw.done; this.tween = null; d?.(); } else active = true;
       this.needsRender = true;
     }
-    // orbit inertia
-    if (this.mode !== 'walk' && !this.tween && this.pointers.size === 0) {
-      const o = this.orbit;
-      if (Math.abs(o.vAz) > .0004 || Math.abs(o.vEl) > .0004) {
-        o.az += o.vAz; o.el = clamp(o.el + o.vEl, 2 * DEG, 89.5 * DEG); const damp = Math.pow(.88, dt * 60); o.vAz *= damp; o.vEl *= damp;
-        this.applyOrbitCamera(); active = true; this.needsRender = true;
-      } else o.vAz = o.vEl = 0;
+    // الاستمرار بعد رفع الإصبع (يتباطأ أسيًّا) ثم تقريب الكاميرا من الهدف بنعومة
+    if (this.mode !== 'walk' && !this.tween) {
+      if (this.inertia && this.pointers.size === 0) {
+        const g = this.goalOrbit(), iv = this.inertia;
+        g.az += iv.vAz * dt; g.el = clamp(g.el + iv.vEl * dt, 2 * DEG, 89.5 * DEG);
+        const k = Math.exp(-dt * 4.2); iv.vAz *= k; iv.vEl *= k;
+        if (Math.hypot(iv.vAz, iv.vEl) < .02) this.inertia = null;
+        active = true;
+      }
+      if (this.goal) {
+        const o = this.orbit, g = this.goal, a = 1 - Math.exp(-dt * 18);
+        o.az += (g.az - o.az) * a; o.el += (g.el - o.el) * a; o.dist += (g.dist - o.dist) * a; o.target.lerp(g.target, a);
+        this.applyOrbitCamera(); this.needsRender = true;
+        const done = Math.abs(g.az - o.az) < 1e-4 && Math.abs(g.el - o.el) < 1e-4 && Math.abs(g.dist - o.dist) / g.dist < 1e-4 && o.target.distanceTo(g.target) < 1e-4;
+        if (done && !this.inertia && this.pointers.size === 0) { o.az = g.az; o.el = g.el; o.dist = g.dist; o.target.copy(g.target); this.applyOrbitCamera(); this.goal = null; } else active = true;
+      }
     }
     // walking
     if (this.mode === 'walk' && !this.tween) {

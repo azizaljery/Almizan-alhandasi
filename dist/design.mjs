@@ -24,16 +24,16 @@ function init() {
 
 function show(index) {
   session.current = index; saveSession(localStorage, session);
-  doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null;
+  doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null;
   const d = session.designs[index], S = summarizeDoc(doc), req = session.input.requirements || {};
   const specs = [
     ['غرف النوم', S.specs.bedrooms], ['دورات المياه', S.specs.baths], ['المجالس', S.specs.majlis], ['الأدوار', S.specs.floors],
     ['مسطح البناء', fmt(S.specs.built) + ' م²'], ['أبعاد المبنى', `${fmt(S.specs.width)} × ${fmt(S.specs.depth)} م`], ['المداخل', S.specs.entries],
   ];
-  const levels = doc.levels.length > 1 ? el('div', { class: 'seg', role: 'tablist' }, doc.levels.map(l => el('button', { 'data-level': l.id, class: l.id === levelId ? 'on' : '', onclick: () => { levelId = l.id; view = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === levelId)); paint(); } }, l.name))) : null;
+  const levels = doc.levels.length > 1 ? el('div', { class: 'seg', role: 'tablist' }, doc.levels.map(l => el('button', { 'data-level': l.id, class: l.id === levelId ? 'on' : '', onclick: () => { levelId = l.id; view = null; goal = null; inertia = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === levelId)); paint(); } }, l.name))) : null;
   const zoneToggle = el('label', {}, el('input', { type: 'checkbox', id: 'zonesOn', checked: zonesOn, onchange: e => { zonesOn = e.target.checked; paint(); legend(); } }), 'تلوين المناطق');
   const plan = el('div', { class: 'card plancard' },
-    el('div', { class: 'planbar' }, levels, zoneToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { view = null; paint(); } }, '⤢'))),
+    el('div', { class: 'planbar' }, levels, zoneToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
     el('div', { class: 'planwrap', id: 'planWrap' }, el('canvas', { id: 'plan', 'aria-label': 'مسقط التصميم' })),
     el('div', { class: 'legend', id: 'legend' }));
   const applied = [...(req.understood || [])];
@@ -66,15 +66,76 @@ function legend() {
 }
 
 // ------------------------------------------------------------------------------------------ المسقط
+// اللمس والفأرة بدقة: إصبع واحد يسحب 1:1، إصبعان تكبير حول منتصفهما مع السحب، والعجلة/لوحة اللمس تكبير حول المؤشر.
+// التكبير بالأزرار والعجلة ينساب (تحريك ناعم)، والسحب يستمر قليلًا بعد رفع الإصبع ثم يتوقف تدريجيًا.
+let goal = null, raf = 0, lastT = 0, inertia = null;
+const MIN_S = 4, MAX_S = 400;
+function size() { const r = $('plan').getBoundingClientRect(); return { W: r.width, H: r.height, L: r.left, T: r.top }; }
+function zoomAround(v, f, sx, sy) {
+  const { W, H } = size(), s = Math.max(MIN_S, Math.min(MAX_S, v.scale * f));
+  const wx = (sx - W / 2) / v.scale + v.cx, wy = v.cy - (sy - H / 2) / v.scale;
+  return { scale: s, cx: wx - (sx - W / 2) / s, cy: wy + (sy - H / 2) / s };
+}
+function animate(now) {
+  raf = 0; const dt = lastT ? Math.min(.05, (now - lastT) / 1000) : .016; lastT = now;
+  let more = false;
+  if (inertia && view) {
+    view = { ...view, cx: view.cx - inertia.vx * dt / view.scale, cy: view.cy + inertia.vy * dt / view.scale };
+    const k = Math.exp(-dt * 6); inertia.vx *= k; inertia.vy *= k;
+    if (Math.hypot(inertia.vx, inertia.vy) < 8) inertia = null; else more = true;
+  }
+  if (goal && view) {
+    const a = 1 - Math.exp(-dt * 16);
+    view = { scale: view.scale + (goal.scale - view.scale) * a, cx: view.cx + (goal.cx - view.cx) * a, cy: view.cy + (goal.cy - view.cy) * a };
+    if (Math.abs(goal.scale - view.scale) / goal.scale < .002 && Math.hypot(goal.cx - view.cx, goal.cy - view.cy) * view.scale < .4) { view = goal; goal = null; } else more = true;
+  }
+  paint();
+  if (more) raf = requestAnimationFrame(animate); else lastT = 0;
+}
+const run = () => { if (!raf) raf = requestAnimationFrame(animate); };
 function bindPlan() {
-  const c = $('plan'); let drag = null;
-  c.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, cx: view?.cx, cy: view?.cy }; c.setPointerCapture(e.pointerId); c.style.cursor = 'grabbing'; });
-  c.addEventListener('pointermove', e => { if (!drag || !view) return; view = { ...view, cx: drag.cx - (e.clientX - drag.x) / view.scale, cy: drag.cy + (e.clientY - drag.y) / view.scale }; paint(); });
-  c.addEventListener('pointerup', () => { drag = null; c.style.cursor = 'grab'; });
-  c.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+  const c = $('plan'), pts = new Map(); let pinch = null, samples = [];
+  c.addEventListener('pointerdown', e => {
+    c.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); goal = null; inertia = null; samples = [];
+    if (pts.size === 2) { const [p, q] = [...pts.values()]; pinch = { d: Math.hypot(p.x - q.x, p.y - q.y), mx: (p.x + q.x) / 2, my: (p.y + q.y) / 2 }; }
+    c.style.cursor = 'grabbing';
+  });
+  c.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId); if (!p || !view) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+    if (pts.size >= 2 && pinch) {
+      const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, { L, T } = size();
+      view = zoomAround(view, d / Math.max(1, pinch.d), mx - L, my - T);
+      view = { ...view, cx: view.cx - (mx - pinch.mx) / view.scale, cy: view.cy + (my - pinch.my) / view.scale };
+      pinch = { d, mx, my }; paint(); return;
+    }
+    if (pts.size !== 1) return;
+    view = { ...view, cx: view.cx - dx / view.scale, cy: view.cy + dy / view.scale };
+    const t = performance.now(); samples.push({ t, dx, dy }); while (samples.length && t - samples[0].t > 90) samples.shift();
+    paint();
+  });
+  const up = e => {
+    pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
+    if (pts.size === 0) {
+      c.style.cursor = 'grab';
+      const t = performance.now(), recent = samples.filter(s => t - s.t < 90);
+      if (recent.length > 1) { const span = Math.max(16, t - recent[0].t) / 1000, vx = recent.reduce((a, s) => a + s.dx, 0) / span, vy = recent.reduce((a, s) => a + s.dy, 0) / span; if (Math.hypot(vx, vy) > 120) { inertia = { vx: Math.max(-2500, Math.min(2500, vx)), vy: Math.max(-2500, Math.min(2500, vy)) }; run(); } }
+      samples = [];
+    } else if (pts.size === 1) samples = [];
+  };
+  c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+  c.addEventListener('wheel', e => {
+    e.preventDefault(); if (!view) return; inertia = null;
+    const { L, T } = size(), base = goal || view;
+    // لوحة اللمس/القرص ترسل ctrlKey بقيم صغيرة متتالية؛ الفأرة قيم كبيرة: معاملان مختلفان مع حدّ لكل حدث
+    const f = Math.max(.8, Math.min(1.25, Math.exp(-e.deltaY * (e.ctrlKey ? .012 : .0018))));
+    goal = zoomAround(base, f, e.clientX - L, e.clientY - T); run();
+  }, { passive: false });
+  // Safari (آيباد/ماك) يرسل إيماءات قرص خاصة؛ نمنع تكبير الصفحة نفسها فوق المسقط
+  for (const g of ['gesturestart', 'gesturechange', 'gestureend']) c.addEventListener(g, e => e.preventDefault());
   new ResizeObserver(() => paint()).observe($('planWrap'));
 }
-function zoom(f) { if (!view) return; view = { ...view, scale: Math.max(4, Math.min(400, view.scale * f)) }; paint(); }
+function zoom(f) { if (!view) return; const { W, H } = size(); goal = zoomAround(goal || view, f, W / 2, H / 2); run(); }
 function paint() {
   const c = $('plan'); if (!c) return;
   const r = c.getBoundingClientRect(), dpr = Math.min(2.5, devicePixelRatio || 1), W = Math.max(10, r.width), H = Math.max(10, r.height);
@@ -115,4 +176,4 @@ $('fbGo').addEventListener('click', async () => {
 });
 
 try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, e.message), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
-globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; } }; // للاختبارات الحية
+globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية
