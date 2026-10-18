@@ -14,7 +14,7 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', a
 const results = []; const check = (n, ok, d = '') => { results.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
 const p = await (await b.newContext({ viewport: { width: 1360, height: 900 } })).newPage(); const errs = [];
 p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::/.test(m.text())) errs.push(m.text()); }); p.on('pageerror', e => errs.push(e.message)); p.on('dialog', d => d.accept());
-const TEXT = process.env.VILLA_TEXT || 'أبغى فيلا فيها 4 غرف نوم وحدة منها ماستر بغرفة ملابس، كل غرفة بحمامها، مجلس رجال كبير مع دورة مياه للضيوف، ومجلس نساء بمدخل مستقل، صالة عائلية، مطبخ مفتوح على الطعام، وغرفة خادمة بحمام قريبة من المطبخ، والمطبخ في الخلف';
+const TEXT = process.env.VILLA_TEXT || 'أبغى فيلا فيها 4 غرف نوم وحدة منها ماستر بغرفة ملابس، كل غرفة بحمامها، مجلس رجال كبير مع دورة مياه للضيوف، ومجلس نساء بمدخل مستقل، صالة عائلية، مطبخ مفتوح على الطعام، وغرفة خادمة بحمام قريبة من المطبخ، والمطبخ في الخلف، وخل التصميم عصري ومريح';
 await p.goto(base + '/home.html'); await p.click('#start');
 await p.fill('#landLength', process.env.VILLA_L || '30'); await p.fill('#landWidth', process.env.VILLA_W || '20'); await p.check('input[data-kind=street][value=s]'); await p.check('input[data-kind=entry][value=s]');
 if (process.env.VILLA_FLOORS === '2') { const f = p.locator('#landFloors, input[name=floors][value="2"], select#floors'); if (await f.count()) { const tag = await f.first().evaluate(e => e.tagName); if (tag === 'SELECT') await f.first().selectOption('2'); else await f.first().check(); } }
@@ -23,6 +23,8 @@ await p.click('text=أتحدث بحرية');
 await p.fill('#chat form.free textarea', TEXT); await p.click('#chat form.free button[type=submit]');
 await p.waitForSelector('#chat form.counts');
 const understood = await p.locator('#chat ul.understood li').allInnerTexts();
+const chatTxt = await p.locator('#chat').innerText();
+check('شرعاء تقول بصدق ما لم تفهمه وتطلب إعادة الصياغة', /لم أفهمها بدقة/.test(chatTxt) && /عصري ومريح/.test(chatTxt), chatTxt.split('\n').filter(l => /لم أفهم|عصري/.test(l)).join(' | '));
 check('شرعاء يعرض ما فهمه من الكلام', understood.length >= 5, understood.join(' | '));
 const vals = {}; for (const n of ['bedrooms', 'majlis', 'baths', 'kitchens', 'halls', 'dining']) vals[n] = await p.locator(`#chat form.counts input[name=${n}]`).inputValue();
 check('الأعداد معبّأة من الكلام (دورات المياه حمام لكل غرفة)', vals.bedrooms === '4' && vals.majlis === '2' && vals.baths === '7', JSON.stringify(vals));
@@ -40,12 +42,21 @@ const led1 = await p.locator('#ledger').innerText();
 check('سجل التنفيذ «هل نُفّذ طلبك؟» يعرض بنود الكلام مقيسة', /هل نُفّذ طلبك/.test(led1) && /المطبخ/.test(led1) && /في الخلف/.test(led1) && await p.locator('#ledger li.good, #ledger li.bad').count() >= 3, led1.split('\n').slice(0, 4).join(' | '));
 check('القواعد المكانية منفذة في التصميم الأول', await p.locator('#ledger li.bad').count() === 0, led1.split('\n').slice(0, 3).join(' | '));
 await p.screenshot({ path: out + '/design-1.png', fullPage: false });
+// تعديل محدد: يُطبَّق على التصميم نفسه، وشرعاء ترد بما نفّذته
+await p.click('#btnAnother'); await p.waitForSelector('#shara:not([hidden])');
+await p.fill('#fbText', 'خل التصميم أحلى'); await p.click('#fbGo'); await p.waitForTimeout(400);
+check('ملاحظة غير مفهومة: لا تصميم عشوائي، بل طلب إعادة صياغة', /لم أفهم ملاحظتك/.test(await p.locator('#fbStatus').innerText()) && await p.evaluate(() => globalThis.__mizanDesign.session.designs.length) === 1);
+await p.fill('#fbText', 'لا تحط غرف النوم على الشارع، والمجلس على يمين المدخل'); await p.click('#fbGo');
+await p.waitForFunction(() => globalThis.__mizanDesign.session.designs.length === 2, null, { timeout: 60000 }); await p.waitForTimeout(400);
+const rep1 = await p.locator('#sharaReply').innerText();
+check('رد شرعاء يذكر ما نفّذته من التعديل', /شرعاء/.test(rep1) && /غرف النوم/.test(rep1) && /يمين الداخل/.test(rep1), rep1.split('\n').slice(0, 4).join(' | '));
+await p.click('.history button >> nth=0'); await p.waitForTimeout(300);
 // طلب تصميم آخر
 await p.click('#btnAnother'); await p.waitForSelector('#shara:not([hidden])');
 await p.click('#fbChips .chip[data-id=rooms_small]'); await p.fill('#fbText', 'المجلس في الجهة الشرقية والماستر بعيدة عن المجلس');
-await p.click('#fbGo'); await p.waitForFunction(() => globalThis.__mizanDesign.session.designs.length === 2, null, { timeout: 60000 }); await p.waitForTimeout(500);
-check('«اطلب تصميمًا آخر» يولّد تصميمًا ثانيًا مختلفًا', await p.locator('h1').innerText() === 'التصميم 2' && await p.evaluate(() => { const s = globalThis.__mizanDesign.session; return s.designs[0].pat !== s.designs[1].pat; }));
-check('سجل التصاميم يسمح بالرجوع', await p.locator('.history button').count() === 2);
+await p.click('#fbGo'); await p.waitForFunction(() => globalThis.__mizanDesign.session.designs.length === 3, null, { timeout: 60000 }); await p.waitForTimeout(500);
+check('«اطلب تصميمًا آخر» يولّد تصميمًا آخر بالملاحظات', await p.locator('h1').innerText() === 'التصميم 3');
+check('سجل التصاميم يسمح بالرجوع', await p.locator('.history button').count() === 3);
 const led2 = await p.locator('#ledger').innerText();
 check('ملاحظة شرعاء المكانية نُفّذت في التصميم الثاني', /جهة الشرق/.test(led2) && /بعيدًا عن/.test(led2) && await p.locator('#ledger li.bad').count() === 0, led2.split('\n').slice(0, 5).join(' | '));
 await p.screenshot({ path: out + '/design-2.png', fullPage: false });

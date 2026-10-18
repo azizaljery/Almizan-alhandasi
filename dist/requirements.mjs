@@ -31,7 +31,7 @@ const ROOM_WORDS = [
  * يستخرج المتطلبات من النص. counts: أعداد مفهومة مسبقًا (من الفهم المحلي أو الذكاء) تُستعمل أساسًا.
  * يعيد { counts, extras:{maid,driver,office,prayer,storage,laundry}, prefs, areas, understood[], unsupported[] }.
  */
-export function extractRequirements(text, { counts = {}, discovery = null } = {}) {
+export function extractRequirements(text, { counts = {}, discovery = null, clauses = true } = {}) {
   const t = normalizeAr(text), understood = [], unsupported = [];
   const has = re => re.test(t);
   const prefs = {}, extras = {}, areas = {};
@@ -57,21 +57,28 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
   if (bedHits.length === 1 && !mm) c.bedrooms = bedHits[0];
   if (has(/ماستر|الرئيسيه/) && !c.bedrooms) c.bedrooms = 1;
   // المطبخ
-  if (has(/مطبخ (مفتوح|مكشوف) (ع|على|علي) (ال)?صاله(?! (ال)?طعام)/)) { prefs.kitchenOpenHall = true; understood.push('مطبخ مفتوح على الصالة'); }
-  else if (has(/مطبخ (مفتوح|امريكي|اميركي|مكشوف)|(open|اوبن) ?(kitchen|كيتشن)/)) { prefs.openKitchen = true; understood.push('مطبخ مفتوح على الطعام'); }
-  else if (has(/مطبخ (مغلق|مقفل|مستقل)/)) { prefs.openKitchen = false; understood.push('مطبخ مغلق بباب'); }
+  // المطبخ: «مقفل مو مفتوح» مغلق؛ يُسمح بكلمتين بين المطبخ والصفة («المطبخ يكون مفتوح»)
+  const K2 = '(?: [^ ،,.]+){0,2} ';
+  if (has(new RegExp(`مطبخ${K2}(مغلق|مقفل|مسكر|مستقل|بباب)|مطبخ${K2}(مو|مب|غير|ما يكون|لا يكون) ?مفتوح`))) { prefs.openKitchen = false; understood.push('مطبخ مغلق بباب'); }
+  else if (has(new RegExp(`مطبخ${K2}(مفتوح|مكشوف) (ع|على|علي) (ال)?صاله(?! (ال)?طعام)`))) { prefs.kitchenOpenHall = true; understood.push('مطبخ مفتوح على الصالة'); }
+  else if (has(new RegExp(`مطبخ${K2}(مفتوح|امريكي|اميركي|مكشوف)|(open|اوبن) ?(kitchen|كيتشن)`))) { prefs.openKitchen = true; understood.push('مطبخ مفتوح على الطعام'); }
   if (has(/مطبخ (تحضيري|خارجي|ثاني)|مطبخين/)) { c.kitchens = Math.max(c.kitchens || 0, 2); understood.push('مطبخ ثانٍ (تحضيري)'); }
   // الطعام: «مفتوح على الطعام» أو «غرفة طعام» تعني وجودها
   if (has(/طعام|سفره|اكل/) && !c.dining && !/(بدون|بلا|من غير|ما ابي|ما ابغي|لا اريد|ما احتاج|لا احتاج) (ال)?(غرفه |صاله )?(ال)?(طعام|سفره)/.test(t)) { c.dining = 1; }
   // المداخل
   if (has(/مدخل (مستقل|منفصل|خاص|ثاني) ?(لل)?(نساء|نسوان|عائله|حريم|اهل)|مدخل (لل)?(نساء|العائله|الحريم)|مدخلين|(نساء|النساء|العائله|الحريم)[^،,.]{0,8} ?(ب|مع|له|لها)? ?مدخل (مستقل|منفصل|خاص)/)) { prefs.familyEntrance = true; understood.push('مدخل مستقل للعائلة/النساء'); }
-  if (has(/مدخل (مستقل|منفصل|خاص)? ?(لل)?(رجال|ضيوف|مجلس)|مجلس (ب|له|مع) ?مدخل/)) { prefs.guestEntrance = true; understood.push('مدخل مستقل للضيوف إلى المجلس'); }
+  if (has(/مدخل (مستقل|منفصل|خاص)? ?(لل)?(رجال|ضيوف|مجلس)|مجلس (ب|له|مع) ?مدخل|مجلس (ال)?رجال[^،,.]{0,14}(مستقل|منفصل)|مستقل(ه)? ب ?مدخل/)) { prefs.guestEntrance = true; understood.push('مجلس الرجال بمدخل مستقل عن العائلة'); }
+  if (has(/مجلس (ال)?(نساء|حريم)[^،,.]{0,14}(مستقل|منفصل|بعيد)/)) { prefs.womenSeparate = true; understood.push('مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)'); }
+  if (has(/(حمامات|دورات المياه|الحمام|دوره المياه)[^،,.]{0,10}(ما|لا|مو) ?(تفتح|يفتح|تطل|يطل|تكون|يكون) (ع|على|علي|في) (ال)?صاله/)) { prefs.bathsOffHall = true; understood.push('دورات المياه لا تفتح على الصالة مباشرة'); }
   // فراغات إضافية
   const maid = t.match(/(غرفه )?(خادمه|خدامه|عامله|شغاله|الخادمه|العامله)([^،,.]{0,25})/);
-  if (maid) { extras.maid = { bath: /حمام|دوره مياه/.test(maid[3]) || has(/خادمه (ب|مع) ?حمام/) }; understood.push('غرفة خادمة' + (extras.maid.bath ? ' بحمام' : '')); }
+  if (maid) { extras.maid = { bath: /حمام|دوره مياه/.test(maid[3]) || has(/خادمه (ب|مع) ?حمام/), ext: has(/خادمه[^،.]{0,40}(باب|مدخل) (على|ع|علي|من|ل) ?(ال)?(حوش|خارج|برا|ساحه)/) }; understood.push('غرفة خادمة' + (extras.maid.bath ? ' بحمام' : '') + (extras.maid.ext ? ' وباب على الحوش' : '')); }
+  // غرفة ضيوف للنوم (قرب المجلس)
+  const gr = t.match(/غرف(ه)? (نوم )?(ال|لل|ل)?(ضيوف|ضيف)([^،,.]{0,20})/);
+  if (gr) { extras.guestRoom = { bath: /حمام|دوره مياه/.test(gr[5]) }; understood.push('غرفة نوم للضيوف' + (extras.guestRoom.bath ? ' بحمامها' : '')); }
   const driver = t.match(/(غرفه )?(سائق|سواق|السائق|السواق)([^،,.]{0,25})/);
   if (driver) { extras.driver = { bath: /حمام|دوره مياه/.test(driver[3]) }; understood.push('غرفة سائق بمدخل خارجي' + (extras.driver.bath ? ' وحمام' : '')); }
-  if (has(/(^|[\sو])(ال)?مكتب(?!ه)/)) { extras.office = true; understood.push('مكتب'); }
+  if (has(/(^|[\sو])(ال)?مكتب(?!ه)/)) { const ext = has(/مكتب[^،,.]{0,12}(مدخل|باب) (خارجي|مستقل|خاص|من برا|من الخارج)/); extras.office = ext ? { ext: true } : true; understood.push(ext ? 'مكتب بمدخل خارجي مستقل' : 'مكتب'); }
   if (has(/مصلي|مصلا/)) { extras.prayer = true; understood.push('مصلى'); }
   if (has(/مستودع|مخزن|بانتري|بنتري/)) { extras.storage = true; understood.push('مخزن'); }
   if (has(/غسيل|غسيل الملابس|لاندري|مغسله ملابس/)) { extras.laundry = true; understood.push('غرفة غسيل'); }
@@ -86,7 +93,7 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
     if (m2) { const a = num(m2[1]); if (a >= 4 && a <= 150 && !areas[key]) { areas[key] = a; understood.push(`${label(key)} ${a} م²`); } }
   }
   // أحجام وصفية (تكبير 30٪ من المقاس التصميمي، لا رقم مخترع)
-  for (const [key, re] of [['majlis', /مجلس( رجال| الرجال)? (كبير|واسع|فخم)/], ['hall', /صاله( عائليه)? (كبيره|واسعه)/], ['kitchen', /مطبخ (كبير|واسع)/], ['master', /(ماستر|الرئيسيه) (كبيره|واسعه)/]]) {
+  for (const [key, re] of [['majlis', /مجلس( رجال| الرجال)?( [^ ،,.]+){0,2} (كبير|واسع|فخم|عريض)(?![\u0600-\u06FF])/], ['hall', /صاله( عائليه)?( [^ ،,.]+){0,2} (كبيره|واسعه|فخمه|عريضه)(?![\u0600-\u06FF])/], ['kitchen', /مطبخ( [^ ،,.]+){0,2} (كبير|واسع|عريض)(?![\u0600-\u06FF])/], ['master', /(ماستر|الرئيسيه)( [^ ،,.]+){0,2} (كبيره|واسعه|كبير|واسع)(?![\u0600-\u06FF])/]]) {
     if (!areas[key] && re.test(t)) { prefs['big_' + key] = true; understood.push(`${label(key)} ${['hall', 'master'].includes(key) ? 'واسعة' : 'واسع'}`); }
   }
   // سعة المجلس: «يتسع لعشرين شخص» ← المساحة بافتراض تصميمي 1.6 م² للشخص في جلسة جدارية (ليس اشتراطًا نظاميًا)
@@ -109,6 +116,10 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
   if (R.floors) { prefs.floors = R.floors; understood.push(R.floors === 2 ? 'دوران (أرضي وأول)' : 'دور واحد'); }
   for (const r of rules) understood.push(r.text);
   if (has(/كراج|قراج|جراج|موقف|مواقف|مظله سيار/)) unsupported.push('مواقف السيارات (الكراج): تبقى في الارتداد الأمامي ولا تُرسم في هذا الإصدار.');
+  if (has(/(بيت|فيلا|منزل|مبني) (صغير|اقتصادي)|اقتصادي/) && !tweaks.envScale) { tweaks.envScale = .9; tweaks.bedroomScale = (tweaks.bedroomScale || 1) * .95; understood.push('مسطح أصغر (اقتصادي): المبنى أصغر بنحو 10٪ من المقاسات التصميمية المعتادة'); }
+  if (has(/(?<![\u0600-\u06FF])(?<!(?:حمام|حمامها|بحمام|بحمامها|دوره مياه) (?:ال)?)(?:ال)?ملحق(?![\u0600-\u06FF])/)) unsupported.push('الملحق الخارجي: لا يُرسم في هذا الإصدار؛ يمكن إضافته في المرسم.');
+  if (has(/(?<![\u0600-\u06FF])و?(?:ال)?(?:سطح|روف)(?![\u0600-\u06FF])/)) unsupported.push('السطح وغرفة السطح: لا تُرسم في هذا الإصدار.');
+  if (has(/(?<![\u0600-\u06FF])و?(?:ال)?(?:بلكون|بلكونه|بلكونات|شرفه|شرفات|تراس)(?![\u0600-\u06FF])/)) unsupported.push('الشرفات والتراس: لا تُرسم في هذا الإصدار.');
   if (has(/فناء|حوش داخلي|كورت ?يارد/)) unsupported.push('الفناء الداخلي: هذا المولّد لا يرسمه بعد؛ ما يزيد عن المبنى يبقى ساحات خارجية.');
   if (has(/مسبح|حمام سباحه/)) unsupported.push('المسبح: خارج المبنى ولا يُرسم في هذا الإصدار.');
   if (has(/مصعد|اسانسير/)) unsupported.push('المصعد: غير مدعوم في هذا الإصدار.');
@@ -124,7 +135,23 @@ export function extractRequirements(text, { counts = {}, discovery = null } = {}
     const need = Math.min(2, c.majlis || 0) + 1 + Math.ceil((c.bedrooms - 1) / 2) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
     if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة${c.majlis ? '، ودورة مياه للضيوف' : ''})`); }
   }
-  return { counts: c, extras, prefs, areas, rules, tweaks, understood: [...new Set(understood)], unsupported };
+  return { counts: c, extras, prefs, areas, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear: clauses ? unclearClauses(text) : [] };
+}
+
+// كلمات لا تحمل طلبًا (طلب، تحية، حشو) وكلمات البرنامج التي تُفهم أعدادًا
+const FILLER = new Set('ابي ابغي ابغا ابا اريد نبي نبغي ودي ودنا حاب احب ابيه ابيها ابيهم بيت البيت فيلا الفيلا منزل المنزل فيها فيه يكون تكون تصير يصير لازم خل خلي خله خلها مع و في على ع من الي اللي الى عن ب ل يا لو سمحت الله يعطيك العافيه شكرا السلام عليكم مرحبا هلا اهلا ايضا كمان بعد زين طيب ان انه انها حق حقي حقنا لنا لي عندي عندنا عائله عايله كبيره صغيره نحن احنا نفر اشخاص شخص افراد اسره تصميم صمم صممي ارسم ارسمي حط حطي سو سوي يكون فيه واحد وحده اثنين ثنتين ثلاث اربع خمس ست سبع ثمان تسع عشر دور الدور ارضي واحد فقط بس'.split(' '));
+const PROGRAM = /^(?:و|ب|ل|ال|بال|وال|لل)*(?:غرف|غرفه|غرفتين|نوم|ماستر|مجلس|مجالس|مجلسين|صاله|صالات|صالتين|مطبخ|مطابخ|طعام|سفره|حمام|حمامات|حمامين|دوره|دورات|مياه|خادمه|سائق|مكتب|مصلي|غسيل|مخزن|رجال|نساء|ضيوف|رئيسيه)$/;
+/** عبارات من كلام العميل لم يُستخرج منها شيء: تُعرض له بصدق ليعيد صياغتها بدل أن تُهمل بصمت. */
+export function unclearClauses(text) {
+  const out = [];
+  for (const raw of String(text || '').split(/[،,.؛;\n!?؟]+|\s(?=و(?:ابي|ابغى|ابغي|اريد|خل|خلي|ودي|لا |ما ))/)) {
+    const clause = raw.trim(); if (clause.length < 4) continue;
+    const r = extractRequirements(clause, { clauses: false });
+    if (r.understood.length || r.unsupported.length) continue;
+    const t = normalizeAr(clause), toks = t.split(' ').filter(w => w && !FILLER.has(w) && !FILLER.has(w.replace(/^و/, '')) && !/^\d+(?:[.,]\d+)?$/.test(w) && !PROGRAM.test(w));
+    if (toks.length >= 1) out.push(clause.replace(/^و(?=\S)/, ''));
+  }
+  return out.slice(0, 6);
 }
 function label(key) { return { master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[key] || key; }
 
