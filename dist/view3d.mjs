@@ -27,7 +27,7 @@ function applySun() {
   $('dateTxt').textContent = date.toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'long' });
   const h = Math.floor(hour), mm = Math.round((hour - h) * 60); $('timeTxt').textContent = `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   $('sunTxt').textContent = s.altitudeDeg > 0 ? `ارتفاع الشمس ${s.altitudeDeg.toFixed(0)}° واتجاهها ${s.azimuthDeg.toFixed(0)}° من الشمال.` : 'الشمس تحت الأفق في هذا الوقت.';
-  viewer?.setSun({ azimuthDeg: s.azimuthDeg, altitudeDeg: Math.max(2, s.altitudeDeg), north: doc?.north || 0 });
+  viewer?.setSun({ azimuthDeg: s.azimuthDeg, altitudeDeg: s.altitudeDeg, north: doc?.north || 0 });
 }
 
 async function init() {
@@ -50,7 +50,7 @@ async function init() {
 }
 
 document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.addEventListener('click', () => { if (viewer?.built) viewer.setMode(b.dataset.mode); syncMode(); }));
-document.querySelectorAll('#styleSeg [data-style]').forEach(b => b.addEventListener('click', () => { viewer?.setStyle(b.dataset.style); document.querySelectorAll('#styleSeg [data-style]').forEach(x => x.classList.toggle('on', x === b)); }));
+document.querySelectorAll('#styleSeg [data-style]').forEach(b => b.addEventListener('click', () => { viewer?.setStyle(b.dataset.style); applySun(); document.querySelectorAll('#styleSeg [data-style]').forEach(x => x.classList.toggle('on', x === b)); }));
 for (const id of ['city', 'day', 'hour']) $(id).addEventListener('input', applySun);
 $('shot').addEventListener('click', async () => {
   if (!viewer?.built) return;

@@ -16,8 +16,8 @@ const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 export const STYLES = Object.freeze({
   day: {
-    zenith: '#5d92cf', horizon: '#dfeaf3', ground: '#d8d0bd', sun: '#fff1da', sunIntensity: 2.7, hemiSky: '#cfe2f5', hemiGround: '#b8a888', hemi: .42,
-    env: 1.0, exposure: .9, fog: '#dde7ee', sunAltitude: 52, glassGlow: 0, lamp: 0.25,
+    zenith: '#5d92cf', horizon: '#dfeaf3', ground: '#d8d0bd', sun: '#fff1da', sunIntensity: 3.4, hemiSky: '#cfe2f5', hemiGround: '#b8a888', hemi: .25,
+    env: .6, exposure: .95, fog: '#dde7ee', sunAltitude: 52, glassGlow: 0, lamp: 0.25,
   },
   dusk: {
     zenith: '#243257', horizon: '#f2a46b', ground: '#6b5560', sun: '#ff9d5c', sunIntensity: 2.3, hemiSky: '#8d9ad0', hemiGround: '#8a6c62', hemi: .62,
@@ -106,7 +106,7 @@ export class DrawViewer {
     // The visible sky dome writes raw colours to the canvas (no tone mapping), so it needs the sRGB numbers, not linear ones.
     for (const k of ['top', 'horizon', 'ground', 'sunColor']) this.skyUniforms[k].value.convertLinearToSRGB();
     this.scene.fog = new T.Fog(new T.Color(S.fog), 90, 420);
-    this.sun.color.set(S.sun); this.sun.intensity = S.sunIntensity; this.hemi.color.set(S.hemiSky); this.hemi.groundColor.set(S.hemiGround); this.hemi.intensity = S.hemi;
+    this.sun.color.set(S.sun); this.sun.intensity = S.sunIntensity * this.sunFade(); this.hemi.color.set(S.hemiSky); this.hemi.groundColor.set(S.hemiGround); this.hemi.intensity = S.hemi;
     this.renderer.toneMappingExposure = S.exposure;
     this.updateSunVector();
     this.rebuildEnvironment();
@@ -129,10 +129,16 @@ export class DrawViewer {
 
   /** Sun in compass terms: azimuth clockwise from north, altitude above the horizon; `north` = plan rotation of north (degrees, clockwise from plan-up). */
   setSun({ azimuthDeg = this.sunState.azimuthDeg, altitudeDeg = this.sunState.altitudeDeg, north = this.sunState.north } = {}) {
+    // below the horizon: no direct sun and no shadow (sky light only); the direction is kept just above the horizon for the sky glow
+    this.belowHorizon = altitudeDeg <= 0;
     this.sunState = { azimuthDeg, altitudeDeg: clamp(altitudeDeg, 1, 89), north };
+    this.sun.intensity = (STYLES[this.style] || STYLES.day).sunIntensity * this.sunFade();
+    this.sun.castShadow = this.shadowsOn && !this.belowHorizon;
     this.updateSunVector(); this.fitShadow(); this.emit('sun'); this.requestRender();
   }
 
+  /** Direct sunlight fades near the horizon (longer path through the atmosphere) and is off below it. */
+  sunFade() { if (this.belowHorizon) return 0; const a = this.sunState?.altitudeDeg ?? 45; return a >= 12 ? 1 : .35 + .65 * a / 12; }
   /** Unit vector from the ground towards the sun, in three.js coordinates. */
   sunDirection() {
     const { azimuthDeg, altitudeDeg, north } = this.sunState, az = azimuthDeg * DEG, al = altitudeDeg * DEG, n = north * DEG;
@@ -153,7 +159,7 @@ export class DrawViewer {
     const dir = this.sunDirection();
     this.sun.position.copy(c).addScaledVector(dir, R * 3); this.sun.target.position.copy(c); this.sun.target.updateMatrixWorld();
     const cam = this.sun.shadow.camera; cam.left = -R; cam.right = R; cam.top = R; cam.bottom = -R; cam.near = R * 1.2; cam.far = R * 5.4; cam.updateProjectionMatrix();
-    this.sun.shadow.needsUpdate = true;
+    this.markShadowDirty();
   }
 
   // ---------------------------------------------------------------------------------------------------------- document
@@ -202,7 +208,8 @@ export class DrawViewer {
     this.visibleLevels = new Set([this.built.levels[i].id]);
     this.applyVisibility(); this.emit('level'); this.requestRender();
   }
-  markShadowDirty() { this.sun.shadow.needsUpdate = true; }
+  // three.js r160: with shadowMap.autoUpdate=false the renderer-level flag gates every light; the light flag alone never redraws the map
+  markShadowDirty() { this.renderer.shadowMap.needsUpdate = true; this.sun.shadow.needsUpdate = true; }
   applyVisibility() {
     if (!this.built) return;
     this.markShadowDirty();

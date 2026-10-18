@@ -1,6 +1,6 @@
 {
   "schema": "mizan-release-fingerprint/1",
-  "createdAt": "2026-10-17T19:07:39.960Z",
+  "createdAt": "2026-10-18T05:29:35.827Z",
   "tests": {
     "declared": 938,
     "run": null
@@ -82,7 +82,7 @@
     "dist/draw/topology.mjs": "d6ece2a9f57ec1a6f983ecdbd8beab4a49e52eff724714ef7e9e3ff16899bf25",
     "dist/draw/tour-ui.mjs": "6199e5353d309cfa9851541a5dbc40c57b3b943f1bd82c886cffbbc7dc4c79a0",
     "dist/draw/tour.mjs": "f779a8054495eb555d3aa2f83e77d4dbe64719b30173cada62eb85b8c40fdc80",
-    "dist/draw/viewer-draw.mjs": "c109718b7c66f05cd8d145fb4c958c6d149b1149f6d864a8b9f60f0b533a724b",
+    "dist/draw/viewer-draw.mjs": "0d917a3b30df1da11be8ccb44f7ca7db21f8df588572f1502adcfbc1226869c5",
     "dist/draw/wall-geometry.mjs": "0aa8e8b6f647dfdea037ef32d58ae07d279cde6d28af0fc4c2b6886dd87dece8",
     "dist/draw/webm-fix.mjs": "a9259426c4841db6eeea743625d4e7a280d7dadc63c5ee944ae0a358172653b4",
     "dist/engineering.mjs": "528553da71a7b5458a664895f552ad986d31062197b972714f430713fc47fc94",
@@ -366,7 +366,7 @@
     "dist/vendor/three.module.js": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495",
     "dist/view-projection.mjs": "0cb6485a2f2ec72125cf8f6289d521255c4f62f4b23bb3fc67dd52785eacda12",
     "dist/view3d.html": "c82787ee3af696cd07e120a987685f8f35b1f852f5b3b893270d7b86a38c3982",
-    "dist/view3d.mjs": "300cc05ca72fe97df20ee86bb16a4c3d8521d162897ccf369409fb654e3d7695",
+    "dist/view3d.mjs": "d19381d84ad0a417e70ee407c5ac935c537ab4e746f129132adec84b90d41fe1",
     "dist/viewer3d.mjs": "ee936d872e37e5abcdca311016f0453a9452cee6d235e418c5c1b87e3dd0256c",
     "dist/villa-layout.mjs": "109b91b986e71a3de50049f517fdf28799d7151abee46fca38ec9f032410ce6d",
     "dist/workspace.css": "e22e6f9b7ad8e4b6d65fe0286d50acff2eae69e87de58f31326431699c61c14d"
@@ -405,9 +405,9 @@
     "dist/client/design-exploration.mjs": "24cc68b6d3ff303674e56fdf64bb68fc2812a40da4855318d9afde2d81cafab5",
     "dist/client/design-insights.mjs": "703c74d4906e6fbcf97e7c5ef79ac6b4f9218796dd9b8e56effc1f759c3b48b9",
     "dist/client/design-selection.mjs": "ba5d862020e28e4c511a7f431b5abd130bb427959df42de74b2988dc03e1a6d5",
-    "dist/client/design-session.mjs": "112c0a8e503926115dd77307c99520099b3c97722e35872f78d62afe22063700",
+    "dist/client/design-session.mjs": "627898e92c5fecf26b0ea79f0888082a947ac26921019f92c87689e196441bba",
     "dist/client/design.html": "79d9615ee540ca9d11dde945e7a0e770143f3e0320e397ca585c776be38caf6f",
-    "dist/client/design.mjs": "a40c2e45981de5965fb666a28941833a9aa76b4815b1ea2c84127da9fbc93b43",
+    "dist/client/design.mjs": "0af1e3edecd64b452848315c046f87295b2443e730d53806f4a0fc0d4789f2b2",
     "dist/client/draw/_harness3d.html": "3b6929759ee56485b5ef4f143639b2ab39aeaff106236c7cbfe6f56356dc7512",
     "dist/client/draw/assistant-client.mjs": "3e1c58becbf6683ec239f2efae05a084a6c79e12d016af53efcb6e3dd4856654",
     "dist/client/draw/assistant-local.mjs": "fac3ee8a7444479ee9030b87e7c0b42542cac44759fcedad90e3b50aa94e87ff",
@@ -507,7 +507,7 @@
     "dist/client/geometry-editor.mjs": "af74da013684088f97d1845c99f87c62593750271ecef007ca9718a64d692629",
     "dist/client/geometry-session.mjs": "f0a092b2f1329fbac7387e66de30d146226b8459bc1f56f25b4be0fa3e9d47b6",
     "dist/client/home-design-engine.mjs": "f3956d4d6a2a2e572db603a263f16686e9fdd8c7bd51d256fc505826a2319633",
-    "dist/client/home-flow.mjs": "bcf99dd5421f532540a20e0be052710f1b09c73d4fcbe2172e23e1a3848434ff",
+    "dist/client/home-flow.mjs": "404697cb7183e1b18b002a3a6006898784096734f6ad4527da87062c22ae549c",
     "dist/client/home.css": "0e8d9823fa56d5f703c23fdda46e734f54be797bad3a1ee042fd62076f159978",
     "dist/client/home.html": "33e3975e49a6ee896fe6673f9e80ff5563c798d55bab6d3e4b8af6ba017f8b34",
     "dist/client/home.mjs": "f87f427a8c2508f0eac9805fdf5ec4bba6d5c4559ab6d04cc385de66182d3318",
@@ -685,7 +685,7 @@
     "dist/client/planner.mjs": "02bc7faf6ad21e3cdf7f7e212ffa318252f9acf817e34f6addf8dec0fc1dd6e9",
     "dist/client/portal.mjs": "4794b03f8afff902bc5d6a713241d3aef2bc6eca89d339cbf22fe4651cc1612d",
     "dist/client/preference-evidence.mjs": "dbdd78ca204c23ad8d12b0bcce57154746ec5554a860d71d892c1b083f86075b",
-    "dist/client/present.css": "2f4dd4ccea934739c2cc20d00ff579abf6b6c6d6c158e0d67b9d3d552a43c70b",
+    "dist/client/present.css": "929c85d05ebd870f0013aae820bd3ba75169959f8179db8e5fe60ca2c328729a",
     "dist/client/presentation-board.mjs": "598306f843dcdb8f40c3dcff84f1d8ad061793aa0a6f93b464bd1f89b3134ce7",
     "dist/client/presentation-ui.mjs": "eca25db1aab3cb38e004beeabd8231b13935a900071b74b92ca7b04e0668874b",
     "dist/client/program-relationship-contract.mjs": "6cad4d191532989a5e009aa13d6b59074e771d1223c138976313270dabbed54b",
@@ -697,8 +697,9 @@
     "dist/client/requirement-evidence.mjs": "9cad5b5aaaf7910315a360402864e90c5f68c7aef8fd2deaca2b8648ae14ca97",
     "dist/client/requirement-tiers.mjs": "c2f9dff6473d051070e35bf13fe913de9a0cd2af9827cf5783babeb58730a970",
     "dist/client/requirements-engine.mjs": "502c99ce5d4aeda575fcbeb9a04fb19da5758f7cb74171ca7f171f867adbbdda",
-    "dist/client/requirements.mjs": "d20f79ff518af5e725f8f5b55cfc7f0e533bd3157918f7576d4f3583066f03b3",
+    "dist/client/requirements.mjs": "04b37c9454caa8285b2a7013282518c710e7ad4cc9ed0c304b4855566f0ddd6c",
     "dist/client/royal-studio.css": "a9ceac7a0fa641c9c1ab54679fd1be31b9aca33ec6021e3c0360ce1df90461cb",
+    "dist/client/rules.mjs": "3b2d4bac0a47185319343ce36bb0efc0fe295f035db2d20977f33ae3339f363c",
     "dist/client/site-solar.mjs": "828e5c4520c7e3892e86fa1c29d4d0a12b17a73789ba4502092c08f3fe18e0ea",
     "dist/client/solar-context.mjs": "2d6a58f1c30856d0adf0d5a8d9134b10192b98bd500cfbd609c2f06de887b744",
     "dist/client/solar-path.mjs": "33d21d6628a6e2a1ec8c5026ca0a8f2643e97c9593f81e7f7fecb964b3629919",
@@ -726,7 +727,7 @@
     "dist/client/view3d.html": "c82787ee3af696cd07e120a987685f8f35b1f852f5b3b893270d7b86a38c3982",
     "dist/client/view3d.mjs": "300cc05ca72fe97df20ee86bb16a4c3d8521d162897ccf369409fb654e3d7695",
     "dist/client/viewer3d.mjs": "ee936d872e37e5abcdca311016f0453a9452cee6d235e418c5c1b87e3dd0256c",
-    "dist/client/villa-layout.mjs": "cd12ca1df554a1e263a6dae6d90b5eba0611a48243766fd0e3ad07235dfab4be",
+    "dist/client/villa-layout.mjs": "109b91b986e71a3de50049f517fdf28799d7151abee46fca38ec9f032410ce6d",
     "dist/client/workspace.css": "e22e6f9b7ad8e4b6d65fe0286d50acff2eae69e87de58f31326431699c61c14d"
   }
 }
