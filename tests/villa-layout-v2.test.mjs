@@ -62,8 +62,11 @@ test('البرنامج والأنماط: ستة أنماط مختلفة طوبو
   assert.ok(P.wcs.length >= 1, 'دورة مياه عامة كفراغ');
   assert.equal(P.extraBaths, 0);
   const modes = new Set(partiTrees(P, { W: 17 }).map(t => t.mode));
-  for (const m of ['courtyard', 'ell', 'yoo', 'gallery', 'split', 'compact']) assert.ok(modes.has(m), 'النمط ' + m);
-  assert.ok(modes.size >= 6);
+  // تنظيمات مختلفة فعلًا: حوش، L، U، رواق، كتلتان، نواة T، الصالة في الخلف، مجلس على الواجهة الجانبية، مدخل في الركن
+  for (const m of ['courtyard', 'ell', 'yoo', 'gallery', 'split', 'tcore', 'hallback', 'sidemajlis', 'cornerentry']) assert.ok(modes.has(m), 'النمط ' + m);
+  assert.ok(modes.size >= 9);
+  // الدوران: الصالة المركزية المدمجة (compact) للأرضي مع السلم
+  assert.ok(partiTrees(P, { W: 17, stair: true }).some(t => t.mode === 'compact'));
   for (const m of modes) assert.ok(PARTI_AR[m], 'وصف عربي للنمط ' + m);
   assert.throws(() => programV2({}), /غرفة نوم/);
 });

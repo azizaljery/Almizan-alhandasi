@@ -90,6 +90,21 @@ for (const C of CASES) {
       const bP = prog(first.doc), aP = prog(after);
       row.edit = { text: C.edit, ms: Math.round(performance.now() - t1), reply, beforePattern: session.designs[0].pat, afterPattern: session.designs[1].pat, samePattern: session.designs[1].pat === session.designs[0].pat, difference: difference(first.doc, after), roomsKept: bRooms.every(n => aRooms.includes(n)), roomsLost: bRooms.filter(n => !aRooms.includes(n)), programRoomsKept: bP.every(n => aP.includes(n)) && nb(after) >= nb(first.doc), programRoomsLost: bP.filter(n => !aP.includes(n)), editLedgerBefore: verifyRequest(first.doc, session.input.requirements, { entry }).map(x => ({ text: x.text, status: x.status, why: x.why })), after: metrics(after, session.input.requirements, entry) };
     } catch (e) { row.edit = { text: C.edit, error: e.message, code: e.code || null }; }
+    // التعديل نفسه على كل بديل معروض (لا الأول فقط): هل بقي النمط؟ وكم تغيّر المخطط؟ وهل بقيت الغرف؟
+    row.editAll = [];
+    for (let i = 0; i < out.designs.length && engine === 'v2'; i++) {
+      try {
+        const d = out.designs[i], s0 = createSession({ land, counts: req.counts, requirements: req, result: { doc: d.doc, pat: d.pat, mirror: d.mirror, summary: d.summary, notes: d.notes, villaEngine: 'v2' }, engine });
+        const { session, reply } = await redesign(s0, { text: C.edit });
+        const after = JSON.parse(session.designs[1].doc);
+        writeFileSync(dir + `edit-alt${i + 1}-after.json`, session.designs[1].doc);
+        // غرف البرنامج (نوم، مجالس، صالة، طعام، مطبخ، خدمة) بالاسم، ودورات المياه بالعدد — لا أجزاء الأجنحة (مدخل جناح/خزانة)
+        const PROG2 = ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'service'];
+        const names = x => docRooms(x).rooms.filter(r => PROG2.includes(r.type)).map(r => r.name).sort(), nB = x => docRooms(x).rooms.filter(r => r.type === 'bath').length;
+        const bN = names(d.doc), aN = names(after), bathsKept = nB(after) >= nB(d.doc);
+        row.editAll.push({ alt: i + 1, beforePattern: d.pat, afterPattern: session.designs[1].pat, samePattern: session.designs[1].pat === d.pat, unchanged: !!reply.unchanged, difference: difference(d.doc, after), programRoomsKept: bN.every(n => aN.includes(n)) && bathsKept, done: reply.done, failed: reply.failed, patternChanged: reply.patternChanged || null, note: session.designs[1].notes.slice(-1)[0] || '' });
+      } catch (e) { row.editAll.push({ alt: i + 1, error: e.message }); }
+    }
   }
   writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));
   summary.push(row);

@@ -20,8 +20,8 @@ export const FEEDBACK = Object.freeze([
   { id: 'majlis_small', label: 'المجلس صغير', apply: (r, t) => { t.majlisScale = (t.majlisScale || 1) * 1.25; } },
   { id: 'kitchen_small', label: 'المطبخ والطعام صغيران', apply: (r, t) => { t.kitchenScale = (t.kitchenScale || 1) * 1.2; } },
   // «الممرات كثيرة»: تُستبعد الأنماط ذات الممر/الرواق الطويل (المولّد الأول: tee وrows؛ الثاني: الرواق والصفوف
-  // والكتلتان وL الخلفي)، ويُضاعف وزن الحركة في التقييم
-  { id: 'corridors', label: 'الممرات كثيرة', apply: (r, t) => { t.avoidModes = [...new Set([...(t.avoidModes || []), 'tee', 'rows', 'gallery', 'split', 'ellback'])]; t.lessCorridors = true; } },
+  // والكتلتان وL الخلفي والحوش برواقه والجناحان بممرّيهما)، ويُضاعف وزن الحركة في التقييم
+  { id: 'corridors', label: 'الممرات كثيرة', apply: (r, t) => { t.avoidModes = [...new Set([...(t.avoidModes || []), 'tee', 'rows', 'gallery', 'split', 'ellback', 'courtyard', 'wings'])]; t.lessCorridors = true; } },
   { id: 'kitchen_open', label: 'أريد المطبخ مفتوحًا على الطعام', apply: r => { r.prefs.openKitchen = true; } },
   { id: 'kitchen_closed', label: 'أريد المطبخ مغلقًا', apply: r => { r.prefs.openKitchen = false; } },
   { id: 'baths_all', label: 'أريد حمامًا لكل غرفة', apply: r => { r.prefs.allEnsuite = true; r.prefs.sharedBaths = false; const c = r.counts; c.baths = Math.max(c.baths || 0, (c.bedrooms || 0) + Math.min(2, c.majlis || 0)); } },
@@ -105,7 +105,9 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   if (different) changes.push('توزيع مختلف للغرف');
   const cur = s.designs[s.current];
   const exclude = different ? s.designs.map(d => d.pat).filter(Boolean) : [];
-  const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null, doc: cur.doc };
+  // تعديل نصي بلا خيارات (مثل «انقل المطبخ…»): تعديل موضعي على المخطط المعروض نفسه أولًا (local)؛
+  // خيارات التقييم الجاهزة (غرف صغيرة، ممرات كثيرة…) تبقى إعادة توليد تفضّل النمط المعروض
+  const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null, doc: cur.doc, local: !picks.length && !!more };
   // «احتفظ بهذا التوزيع» بلا تغيير يمس المخطط (مثل تغيير الواجهة): المخطط نفسه حرفيًا، بلا توليد
   const reuse = !different && !!more?.keepLayout && !layoutChange;
   const out = reuse
