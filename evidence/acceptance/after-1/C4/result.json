@@ -1,0 +1,183 @@
+{
+ "id": "C4",
+ "engine": "v2",
+ "name": "أرض ضيقة وعميقة",
+ "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام، والغرف في الخلف بعيدة عن الشارع",
+ "understood": [
+  "«غرف النوم» في الخلف"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "split",
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+   "hall": {
+    "w": 4.82,
+    "l": 7.08,
+    "ratio": 1.47
+   },
+   "rooms": 18,
+   "net": 186.12,
+   "circulationPct": 20.21,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«غرف النوم» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "gallery",
+   "summary": "رواق طولي (ممر محوري) تتوزع عليه الفراغات من الأمام إلى الخلف",
+   "hall": {
+    "w": 4.93,
+    "l": 5.72,
+    "ratio": 1.16
+   },
+   "rooms": 17,
+   "net": 214.74,
+   "circulationPct": 33.36,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "«غرف النوم» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "midwing",
+   "summary": "غرف النوم في الوسط على ممر، والصالة والخدمة في الخلف على الحديقة الخلفية",
+   "hall": {
+    "w": 4.81,
+    "l": 6.01,
+    "ratio": 1.25
+   },
+   "rooms": 17,
+   "net": 180.79,
+   "circulationPct": 19.4,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«غرف النوم» في الخلف",
+     "ok": false,
+     "why": "«غرفة نوم 2» ليس في نصف المبنى من جهة الخلف."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 1
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "split",
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان (معكوس)",
+   "hall": {
+    "w": 4.81,
+    "l": 7.08,
+    "ratio": 1.47
+   },
+   "rooms": 18,
+   "net": 186.21,
+   "circulationPct": 20.16,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«غرف النوم» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 432,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.09,
+   0.23,
+   0
+  ],
+  [
+   0.09,
+   0,
+   0.22,
+   0.09
+  ],
+  [
+   0.23,
+   0.22,
+   0,
+   0.23
+  ],
+  [
+   0,
+   0.09,
+   0.23,
+   0
+  ]
+ ],
+ "modes": [
+  "split",
+  "gallery",
+  "midwing"
+ ],
+ "minDifference": 0,
+ "meanDifference": 0.14,
+ "rejectedCandidates": 0
+}

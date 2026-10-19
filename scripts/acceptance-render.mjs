@@ -1,7 +1,10 @@
 // يرسم صور الأدلة لمرحلة: مسقط كل بديل (كل دور) بالأبعاد والمناطق، ومجسّم ثلاثي الأبعاد لأفضل بديل في كل حالة.
-// الاستعمال: node scripts/acceptance-render.mjs <stage>
+// الاستعمال: node scripts/acceptance-render.mjs <stage> [نمط الحالات] [--engine v1|v2] [--no3d]
+// (المحرك لا يغيّر الرسم هنا: الصور تُرسم من مستندات المرحلة نفسها؛ يُقبل العلم للاتساق مع acceptance-run.)
 import http from 'node:http'; import { readFile, readdir } from 'node:fs/promises'; import { existsSync } from 'node:fs'; import { join, normalize, extname } from 'node:path';
-const stage = process.argv[2] || 'before', only = process.argv[3] ? new RegExp(process.argv[3]) : null;
+const argv = process.argv.slice(2), flags = new Set(argv.filter(a => a.startsWith('--')));
+const pos = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--engine');
+const stage = pos[0] || 'before', only = pos[1] ? new RegExp(pos[1]) : null, no3d = flags.has('--no3d');
 const root = new URL('../dist/', import.meta.url).pathname, ev = new URL(`../evidence/acceptance/${stage}/`, import.meta.url).pathname;
 const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.wasm': 'application/wasm' };
 const HARNESS = `<!doctype html><html dir="rtl"><head><meta charset="utf-8"><style>body{margin:0;background:#fff;font-family:Tahoma}canvas{display:block}</style></head><body><canvas id="c" width="1400" height="1000" style="width:1400px;height:1000px"></canvas><script type="module">
@@ -29,6 +32,7 @@ for (const id of cases) {
     const raw = await readFile(ev + id + '/' + f, 'utf8'), n = JSON.parse(raw).levels.length;
     for (let li = 0; li < n; li++) { await p.evaluate(([r, i, t]) => window.draw(r, i, t), [raw, li, `${id} — ${f.replace('.json', '')}`]); await p.locator('#c').screenshot({ path: ev + id + '/' + f.replace('.json', '') + (n > 1 ? `-L${li + 1}` : '') + '.png' }); }
   }
+  if (no3d) { console.log(id, 'صور:', files.length); continue; }
   // ثلاثي الأبعاد لأفضل بديل
   const raw = await readFile(ev + id + '/' + (files.includes('alt-1.json') ? 'alt-1.json' : files[0]), 'utf8');
   const q = await ctx.newPage(); await q.setViewportSize({ width: 1360, height: 860 });
