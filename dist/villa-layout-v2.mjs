@@ -286,7 +286,7 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   const root = foyer || cid('stair'); if (!hall || !root) return no('6');
   // الصالة غرفة حقيقية
   { const r = hall.r, s = Math.min(W_(r), H_(r)), l = Math.max(W_(r), H_(r));
-    if (s < 4.2 - 1e-6) bad('hall-narrow', 4.2 - s); if (l / s > 2.5) bad('hall-aspect', l / s - 2.5);
+    if (s < 4.2 - 1e-6) bad('hall-narrow', 4.2 - s); if (l / s > 2.2) bad('hall-aspect', l / s - 2.2); // الحد في البوابة 2.5؛ نطلب 2.2 ليبقى هامش
     pen += 90 * Math.max(0, l / s - 1.6) + 70 * Math.max(0, 5.0 - s);
     const ha = A_(r), ht = P.hallArea; pen += 140 * Math.log(ha / ht) ** 2 * (P.hallFixed ? 4 : 1) + 80 * Math.max(0, l / s - 2.0); if (ha > ht * 1.55) bad('hall-big', (ha - ht * 1.55) / 8); if (ha < ht * .6) bad('hall-small', (ht * .6 - ha) / 8);
     { const e = expLen(r, solids); if (e < 2.4) bad('hall-dark', (2.4 - e) / 2); } }
@@ -314,7 +314,7 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     pen += 40 * Math.log(a / b.area) ** 2 * Math.max(1, b.area / 15) * (b.fixedArea ? 5 : 1);
     { const strip = b.kind === 'majlis' && b.guestWc ? 7 : 0, net = a - strip, tgt = b.area - strip;
       if (['majlis', 'suite', 'kitchen', 'dining', 'family'].includes(b.kind) && net < tgt * .75) bad('small:' + b.kind, (tgt * .75 - net) / 4);
-      if (['majlis', 'kitchen', 'dining', 'maid', 'family'].includes(b.kind) && !b.fixedArea && net > tgt * 1.7) bad('big:' + b.kind, (net - tgt * 1.7) / 4); }
+      if (['majlis', 'kitchen', 'dining', 'maid', 'family', 'suite'].includes(b.kind) && !b.fixedArea && net > tgt * (b.kind === 'suite' ? 1.9 : 1.7)) bad('big:' + b.kind, (net - tgt * 1.7) / 4); }
     const md = DEP[b.kind] || 2.4; if (s < md * .85) bad('min-side', md * .85 - s); if (s < md) pen += 50 * (md - s);
     // الوصول: لكل فراغ مضيف من الحركة، أو من جار مسموح (المطبخ من الطعام، الخادمة من المطبخ)، ومجلس الرجال من الواجهة
     const cT = Math.max(0, ...circ.map(c => touch(r, c.r))), cNoFoyer = Math.max(0, ...circ.filter(c => c.id !== 'foyer').map(c => touch(r, c.r)));
@@ -347,7 +347,7 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
       // الواجهة الخارجية على جهة غير جهة الباب (يبقى للغرفة نافذة بعد الشريط)
       if (expLen(r, solids, SIDES.filter(x => x !== door)) < 2.4) pen += 90;
     }
-    const mx = MAX_ASP[b.kind] || 2; if (asp > mx + .8 && b.kind !== 'wc') bad('aspect:' + b.kind, asp - mx - .8); if (asp > mx) pen += 70 * (asp - mx) * Math.max(1, b.area / 15) + 120 * Math.max(0, asp - mx - .5);
+    const mx = MAX_ASP[b.kind] || 2; { const lim = ['majlis', 'suite', 'dining', 'kitchen', 'family'].includes(b.kind) ? .45 : .8; if (asp > mx + lim && b.kind !== 'wc') bad('aspect:' + b.kind, asp - mx - lim); } if (asp > mx) pen += 70 * (asp - mx) * Math.max(1, b.area / 15) + 120 * Math.max(0, asp - mx - .5);
     const need = HABIT_EXP[b.kind]; if (need) { const e = expLen(r, solids); if (e < need) pen += b.kind === 'family' ? 25 : 90; }
     if (b.kind === 'majlis') { pen += 4 * r.y0; for (const q of placed) if (q.block.kind === 'suite' && !q.block.guest && touch(r, q.r) > .5) pen += 30; }
     if (b.kind === 'suite' && !b.guest && r.y0 < TOL && D > 14) pen += 12; // غرفة نوم على الشارع
@@ -1316,8 +1316,4 @@ function addStair(doc, sr, T, level) {
   return applyCommand(doc, { type: 'add-stair', level, kind: 'U', x: p.x, y: p.y, rot, w, run: sr.y1 - sr.y0 - .2, flip }).doc;
 }
 
-export const __optimize = optimize;
-export const __upperFor = (...a) => upperFor(...a);
-export const __solveFixed = (...a) => solveFixed(...a);
-export const __candidates = (...a) => candidates(...a);
 export default { generateVillaDesigns, generateVillaTwoFloors, programV2, partiTrees, scoreV2, realizeV2, drawPlanV2, siteOf, difference, roomsDifference, hardGates, VILLA_V2_ENGINE_VERSION };
