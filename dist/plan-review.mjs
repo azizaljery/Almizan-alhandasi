@@ -1,0 +1,492 @@
+// محرك المراجعة المستقل (plan-review): يحكم على مستند رسم منتهٍ (mizan-draw/1) وعلى طلب العميل فقط،
+// ولا يقرأ شيئًا من حالة المولّد (لا ledger ولا mode ولا ترتيب). المولّد لا يقيّم نفسه هنا.
+//
+//  1) بوابات صلبة (نجاح/رسوب) لكل منها سبب عربي وقيمة مقيسة وعتبة ومصدر العتبة.
+//  2) درجة 0–100 منفصلة عن البوابات، مفككة إلى مكوّنات (الحركة، الإضاءة، عمق الخصوصية، وضوح النطاقات،
+//     جودة النسب، ملاءمة الأثاث)، ومعها AZIZ وMizan Score كمكوّنين بوزن حُدد بعد قياس ارتباطهما بالبوابات
+//     على مجموعة الأدلة «قبل» (انظر EXTERNAL_WEIGHTS وdocs/research/plan-review-before.md).
+//  3) reviewDesigns(docs, request) يرتّب: الناجح في البوابات أولًا ثم بالدرجة. rejectionTable للواجهة.
+//
+// كل الهندسة من analyzeDoc (dist/draw/digest.mjs): الغرف، والفتحات بجانبيها، ورسم الحركة عبر الأبواب،
+// والوصول من المدخل أو من السلم. لا قيمة نظامية تُدّعى بلا مصدر محقق: كل عتبة تحمل `source` و`verified`.
+import { analyzeDoc, isWindowKind } from './draw/digest.mjs';
+import { ROOM_TYPES } from './draw/catalog.mjs';
+import { reviewDoc, wallRect, GUIDELINES } from './draw/review.mjs';
+import { pointInPolygon, ccw, sub, norm, dot } from './draw/geom.mjs';
+import { docToLegacy } from './draw/export-legacy.mjs';
+import { calculateMizanScore } from './mizan-score.mjs';
+import { rankByDNA } from './design-dna.mjs';
+import { validatePlot } from './planner.mjs';
+
+export const PLAN_REVIEW_VERSION = 'plan-review/1.0.0';
+export const UNVERIFIED_AR = 'قيمة تصميمية غير متحققة نظاميًا';
+
+const MOMAH_URL = 'https://momah.gov.sa/sites/default/files/2024-07/ashtratat%20a%27nsha%20almbany%20alsknyt%20almnshwrt%20%60ly%20mwq%60%20alwzart%20.pdf';
+const MOMAH_NOTE = 'اشتراطات إنشاء المباني السكنية (وزارة البلديات والإسكان 1446هـ) — النص المستخرج آليًا مشوّه في مواضع ولم يُطابَق يدويًا بعد (docs/research/competitors-saudi-2026-10-19.md)';
+
+/**
+ * أدنى عرض صافٍ لكل نوع غرفة (م). القيم مرشّحة من ملف الوزارة لكنها «يُراجع» في بحث المنافسين،
+ * فتبقى كلها verified:false وتُعلَن «قيمة تصميمية غير متحققة نظاميًا» حتى يطابقها مهندس يدويًا.
+ */
+export const MIN_CLEAR_WIDTH = Object.freeze({
+  living:   { min: 2.8, source: MOMAH_NOTE + ' — «معيشة أو طعام أو صالة: عرض 2.8م»', url: MOMAH_URL, verified: false },
+  dining:   { min: 2.8, source: MOMAH_NOTE + ' — «معيشة أو طعام أو صالة: عرض 2.8م»', url: MOMAH_URL, verified: false },
+  majlis:   { min: 2.8, source: MOMAH_NOTE + ' — المجلس عومل كفراغ معيشة (2.8م)؛ لا بند مستقل للمجلس', url: MOMAH_URL, verified: false },
+  bedroom:  { min: 2.1, source: MOMAH_NOTE + ' — «نوم: عرض 2.1م»', url: MOMAH_URL, verified: false },
+  master:   { min: 2.1, source: MOMAH_NOTE + ' — «نوم: عرض 2.1م»', url: MOMAH_URL, verified: false },
+  service:  { min: 2.1, source: MOMAH_NOTE + ' — «غرفة سائق أو عاملة: عرض 2.1م»', url: MOMAH_URL, verified: false },
+  office:   { min: 2.1, source: 'لا بند للمكتب؛ عومل كغرفة نوم (2.1م) — ' + MOMAH_NOTE, url: MOMAH_URL, verified: false },
+  kitchen:  { min: 1.8, source: MOMAH_NOTE + ' — «مطبخ: عرض 1.8م»', url: MOMAH_URL, verified: false },
+  bath:     { min: 1.4, source: MOMAH_NOTE + ' — «حمام: عرض 1.4م» (حمام فيه دش أو حوض)', url: MOMAH_URL, verified: false },
+  wc:       { min: 1.0, source: MOMAH_NOTE + ' — «مرحاض: عرض 1م» (دورة مياه بلا دش ولا حوض)', url: MOMAH_URL, verified: false },
+  corridor: { min: 0.9, source: MOMAH_NOTE + ' — «ممرات داخلية: عرض 0.90م»', url: MOMAH_URL, verified: false },
+});
+
+/** عتبات البوابات والدرجة التي لا مصدر نظاميًا لها: قيم تصميمية معلنة. */
+export const DESIGN_THRESHOLDS = Object.freeze({
+  hallAspectMax: { value: 2.5, source: 'تكليف المالك (نسبة الصالة ≤ 2.5:1)', verified: false },
+  roomAspectGood: { value: 1.6, source: 'قيمة تصميمية للدرجة فقط', verified: false },
+  roomAspectBad: { value: 3.0, source: 'قيمة تصميمية للدرجة فقط', verified: false },
+  circulationBand: { value: [6, 15], source: 'نطاق تصميمي للدرجة فقط (نسبة الممرات والمداخل من الصافي)', verified: false },
+  windowToFloor: { value: GUIDELINES.windowToFloor, source: 'GUIDELINES.windowToFloor في dist/draw/review.mjs (إرشادي)', verified: false },
+  privacyDepthGood: { value: 3, source: 'قيمة تصميمية: ثلاثة أبواب بين مدخل الضيوف وغرفة النوم', verified: false },
+  setbackTolerance: { value: 0.02, source: 'سماحية قياس 2 سم', verified: false },
+});
+
+/** الغرف المعيشية التي يجب أن تكون لها نافذة خارجية أو على فناء (تكليف المالك + غرفة الخادمة لأنها غرفة نوم). */
+export const HABITABLE_TYPES = Object.freeze(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'office', 'service']);
+const BED_TYPES = new Set(['bedroom', 'master']);
+const WET_TYPES = new Set(['bath']);                       // دورات المياه؛ الغسيل مستثنى (مجاورته للمطبخ مقبولة)
+const NO_WET_DOOR = new Set(['kitchen', 'dining', 'majlis']);
+const CIRC_TYPES = new Set(['corridor', 'entrance']);
+
+export const GATES = Object.freeze([
+  { id: 'REACH', ar: 'كل الغرف يُوصل إليها من المدخل' },
+  { id: 'DAYLIGHT', ar: 'نافذة خارجية أو على فناء لكل غرفة معيشية' },
+  { id: 'MIN_WIDTH', ar: 'أدنى عرض صافٍ لكل نوع غرفة' },
+  { id: 'HALL_ASPECT', ar: 'نسبة طول الصالة إلى عرضها ≤ 2.5' },
+  { id: 'WET_DOOR', ar: 'دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس' },
+  { id: 'GUEST_ROUTE', ar: 'مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم' },
+  { id: 'BED_MAJLIS', ar: 'لا غرفة نوم تفتح على المجلس مباشرة' },
+  { id: 'STAIRS', ar: 'السلم يُوصل إليه عند وجود دورين' },
+  { id: 'PLOT', ar: 'المبنى داخل الأرض وخطوط الارتداد' },
+  { id: 'PROGRAM', ar: 'أعداد الغرف المطلوبة موجودة فعلًا في الرسم' },
+]);
+const GATE_AR = Object.fromEntries(GATES.map(g => [g.id, g.ar]));
+
+/**
+ * أوزان AZIZ وMizan Score في الدرجة. حُددت بعد قياس الارتباط على evidence/acceptance/before (39 بديلًا،
+ * scripts/plan-review-run.mjs). كلاهما ضعيف الاتساق مع البوابات، فوُزن كل منهما 3 من 100 فقط:
+ *  - مع عدد البوابات الراسبة: AZIZ r=-0.21 (داخل الحالة -0.20)، Mizan r=-0.28 (داخل الحالة -0.27) — ضعيف.
+ *  - مع بوابة نسبة الصالة: r=-0.46 لكليهما — بإشارة معاكسة (يكافئان الصالة-الممر).
+ *  - مع نسبة الحركة: 0.94 و0.90 — يقيسان الممرات أساسًا. وAZIZ↔Mizan r=0.96 (شبه متطابقين).
+ *  - AZIZ بالبصمة = AZIZ المحايد حرفيًا حين لا إجابات اكتشاف (الأوزان لا تغيّر الترتيب).
+ * يُعاد القياس بتشغيل السكربت، ويُعدَّل هذا الوزن يدويًا فقط بعد قراءة النتائج.
+ */
+export const EXTERNAL_WEIGHTS = Object.freeze({ aziz: 3, mizan: 3 });
+export const EXTERNAL_MEASURED = Object.freeze({
+  evidence: 'evidence/acceptance/before/*/alt-*.json', n: 39,
+  aziz: { failsPearson: -0.21, failsWithinCase: -0.2, internalPearson: 0.48, hallAspectGate: -0.46, circulation: 0.94, verdict: 'غير متسق مع البوابات: وزن منخفض' },
+  mizan: { failsPearson: -0.28, failsWithinCase: -0.27, internalPearson: 0.47, hallAspectGate: -0.46, circulation: 0.9, verdict: 'غير متسق مع البوابات: وزن منخفض' },
+  azizVsMizan: 0.96,
+});
+export const SCORE_WEIGHTS = Object.freeze({ circulation: 15, daylight: 20, privacy: 20, zoning: 15, proportion: 15, furniture: 9, ...EXTERNAL_WEIGHTS });
+export const COMPONENT_AR = Object.freeze({ circulation: 'نسبة الحركة', daylight: 'الإضاءة الطبيعية', privacy: 'عمق الخصوصية', zoning: 'وضوح النطاقات', proportion: 'جودة النسب', furniture: 'ملاءمة الأثاث', aziz: 'AZIZ (بصمة التصميم)', mizan: 'Mizan Score' });
+
+const r2 = v => Math.round(v * 100) / 100;
+const clamp01 = v => Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0));
+const roomName = r => `«${r.name}»`;
+
+// ------------------------------------------------------------------------------------------ helpers
+function roomDoors(lv, room) {
+  const out = [];
+  for (const op of lv.openings) {
+    if (!op.door) continue;
+    const mine = op.sides.find(s => s.room.id === room.id);
+    if (mine) out.push({ op, other: mine.other === 'outside' ? null : lv.roomsById.get(mine.other) || null, outside: mine.other === 'outside' || mine.exterior });
+  }
+  return out;
+}
+function daylightOf(lv, room) {
+  let area = 0, count = 0;
+  for (const op of lv.openings) {
+    const glazed = op.window || op.kind === 'slider';
+    if (!glazed) continue;
+    if (op.sides.some(s => s.room.id === room.id && s.exterior)) { area += op.area; count++; }
+  }
+  return { count, area };
+}
+const hasFixture = (doc, lv, room, kinds) => doc.fixtures.some(f => f.level === lv.level.id && kinds.includes(f.kind) && lv.roomAt({ x: f.x, y: f.y })?.id === room.id);
+function clearWidth(room) { return room.shape === 'rectangle' ? room.rect.w : Math.min(room.rect.w, room.eqWidth); }
+function widthRule(doc, lv, room) {
+  if (room.type === 'bath') return hasFixture(doc, lv, room, ['shower', 'bathtub']) ? { key: 'bath', ...MIN_CLEAR_WIDTH.bath } : { key: 'wc', ...MIN_CLEAR_WIDTH.wc };
+  return MIN_CLEAR_WIDTH[room.type] ? { key: room.type, ...MIN_CLEAR_WIDTH[room.type] } : null;
+}
+/** ممر أو مدخل يفتح مباشرة على غرفة نوم: جزء من النطاق الخاص. */
+function isPrivate(lv, room) {
+  if (room.type === 'living' || BED_TYPES.has(room.type)) return true;
+  if (CIRC_TYPES.has(room.type)) return roomDoors(lv, room).some(d => d.other && BED_TYPES.has(d.other.type));
+  return false;
+}
+function bfs(lv, starts, allow = () => true) {
+  const dist = new Map(), prev = new Map(), q = [];
+  for (const s of starts) if (!dist.has(s)) { dist.set(s, 0); q.push(s); }
+  while (q.length) {
+    const id = q.shift();
+    for (const e of lv.graph.get(id) || []) {
+      if (dist.has(e.to)) continue;
+      const room = lv.roomsById.get(e.to);
+      if (!room || !allow(room)) continue;
+      dist.set(e.to, dist.get(id) + 1); prev.set(e.to, id); q.push(e.to);
+    }
+  }
+  const path = id => { const p = [id]; while (prev.has(p[0])) p.unshift(prev.get(p[0])); return p; };
+  return { dist, path };
+}
+/** مداخل الضيوف: أبواب المدخل المعلَّمة (أو أي باب خارجي غير المرآب) في الدور الأرضي، وأي باب خارجي يفتح على مجلس. */
+function guestStarts(lv) {
+  const ids = new Set(lv.entries.map(e => e.room));
+  for (const r of lv.rooms) if (r.type === 'majlis' && roomDoors(lv, r).some(d => d.outside && d.op.kind !== 'garage')) ids.add(r.id);
+  return [...ids];
+}
+
+// --------------------------------------------------------------------------------------------- gates
+function plotFrame(doc) {
+  const poly = doc.plot?.polygon?.length >= 3 ? ccw(doc.plot.polygon.map(p => ({ x: p.x, y: p.y }))) : null;
+  if (!poly) return null;
+  const north = Number(doc.north) || 0, sb = doc.plot.setbacks || {};
+  const edges = poly.map((a, i) => {
+    const b = poly[(i + 1) % poly.length], u = norm(sub(b, a)), out = { x: u.y, y: -u.x };
+    const bearing = ((Math.atan2(out.x, out.y) * 180 / Math.PI + north) % 360 + 360) % 360;
+    const side = ['n', 'e', 's', 'w'][Math.round(bearing / 90) % 4];
+    return { a, u, out, side, setback: Number(sb[side]) || 0 };
+  });
+  return { poly, edges };
+}
+
+function gateResult(id, ok, value, threshold, reasons, extra = {}) {
+  return { id, ar: GATE_AR[id], ok, value, threshold, reasons_ar: reasons, ...extra };
+}
+
+export function evaluateGates(doc, request = {}, model = analyzeDoc(doc)) {
+  const gates = [];
+  const ground = model.levels[0];
+  const allRooms = model.levels.flatMap(lv => lv.rooms.map(room => ({ lv, room })));
+  const real = allRooms.filter(({ room }) => !room.unlabelled);
+
+  // 1) الوصول
+  {
+    const bad = [];
+    for (const { lv, room } of real) {
+      if (!lv.seedKind) { bad.push(`${roomName(room)} (${lv.level.name}): لا مدخل ولا سلم يصل إلى هذا الدور`); continue; }
+      if (!lv.reach.has(room.id)) bad.push(`${roomName(room)} (${lv.level.name}) لا يصل إليها مسار أبواب من ${lv.seedKind === 'entry' ? 'المدخل' : 'السلم'}`);
+    }
+    if (!ground?.entries.length) bad.unshift('لا باب مدخل إلى الخارج في الدور الأرضي');
+    gates.push(gateResult('REACH', !bad.length, { unreachable: bad.length, rooms: real.length }, 'صفر غرف معزولة', bad, { source: 'منطق وظيفي (لا عتبة رقمية)' }));
+  }
+  // 2) الإضاءة
+  {
+    const bad = [], seen = [];
+    for (const { lv, room } of real) {
+      if (!HABITABLE_TYPES.includes(room.type)) continue;
+      const d = daylightOf(lv, room); seen.push(room.id);
+      if (!d.count) bad.push(`${roomName(room)} بلا نافذة على الخارج أو على فناء`);
+    }
+    gates.push(gateResult('DAYLIGHT', !bad.length, { withoutWindow: bad.length, checked: seen.length }, '≥ نافذة واحدة', bad, { source: 'تكليف المالك؛ ' + UNVERIFIED_AR }));
+  }
+  // 3) أدنى عرض صافٍ
+  {
+    const bad = [], measured = [];
+    for (const { lv, room } of real) {
+      const rule = widthRule(doc, lv, room); if (!rule) continue;
+      const w = clearWidth(room); measured.push({ room: room.id, type: rule.key, width: r2(w), min: rule.min });
+      if (w < rule.min - 1e-6) bad.push(`عرض ${roomName(room)} ${r2(w)} م أقل من ${rule.min} م (${UNVERIFIED_AR})`);
+    }
+    const worst = measured.reduce((m, x) => (!m || x.width - x.min < m.width - m.min ? x : m), null);
+    gates.push(gateResult('MIN_WIDTH', !bad.length, { violations: bad.length, tightest: worst }, Object.fromEntries(Object.entries(MIN_CLEAR_WIDTH).map(([k, v]) => [k, v.min])), bad,
+      { source: MOMAH_NOTE, url: MOMAH_URL, verified: false, label: UNVERIFIED_AR }));
+  }
+  // 4) نسبة الصالة
+  {
+    const max = DESIGN_THRESHOLDS.hallAspectMax.value, bad = [], ratios = [];
+    for (const { room } of real) {
+      if (room.type !== 'living') continue;
+      const ratio = room.rect.w > 0 ? room.rect.l / room.rect.w : Infinity; ratios.push({ room: room.id, ratio: r2(ratio) });
+      if (ratio > max + 1e-6) bad.push(`${roomName(room)} ${r2(room.rect.w)}×${r2(room.rect.l)} م نسبتها ${r2(ratio)}:1 أكبر من ${max}:1 — تعمل ممرًا لا صالة`);
+    }
+    gates.push(gateResult('HALL_ASPECT', !bad.length, { worst: ratios.reduce((m, x) => Math.max(m, x.ratio), 0), halls: ratios }, `≤ ${max}:1`, bad, { source: DESIGN_THRESHOLDS.hallAspectMax.source + '؛ ' + UNVERIFIED_AR }));
+  }
+  // 5) أبواب دورات المياه
+  {
+    const bad = [];
+    for (const { lv, room } of real) {
+      if (!WET_TYPES.has(room.type)) continue;
+      for (const d of roomDoors(lv, room)) if (d.other && NO_WET_DOOR.has(d.other.type)) bad.push(`${roomName(room)} تفتح مباشرة على ${roomName(d.other)} (${ROOM_TYPES[d.other.type].ar})`);
+    }
+    gates.push(gateResult('WET_DOOR', !bad.length, { violations: bad.length }, 'صفر أبواب', bad, { source: 'تكليف المالك؛ ' + UNVERIFIED_AR }));
+  }
+  // 6) مسار الضيوف إلى المجلس
+  {
+    const majlis = ground ? ground.rooms.filter(r => r.type === 'majlis') : [];
+    const bad = [], routes = [];
+    if (ground && majlis.length) {
+      const starts = guestStarts(ground).filter(id => !isPrivate(ground, ground.roomsById.get(id)));
+      const forbidden = r => isPrivate(ground, r) || ['kitchen', 'service', 'laundry'].includes(r.type) || WET_TYPES.has(r.type) || r.type === 'storage';
+      const clean = bfs(ground, starts, r => !forbidden(r) || r.type === 'majlis');
+      const any = bfs(ground, guestStarts(ground));
+      for (const m of majlis) {
+        const ok = clean.dist.has(m.id);
+        const anyPath = any.dist.has(m.id) ? any.path(m.id) : null;
+        const through = anyPath ? anyPath.map(id => ground.roomsById.get(id)).filter(r => r && r.id !== m.id && forbidden(r)) : [];
+        routes.push({ majlis: m.id, clean: ok, doors: ok ? clean.dist.get(m.id) : null, shortest: anyPath, through: through.map(r => r.id) });
+        if (!ok) bad.push(anyPath ? `الوصول إلى ${roomName(m)} من مدخل الضيوف يمر عبر ${through.map(roomName).join('، ') || 'فراغ خاص'}` : `${roomName(m)} لا مسار إليه من أي مدخل`);
+      }
+    }
+    gates.push(gateResult('GUEST_ROUTE', !bad.length, { routes }, 'مسار نظيف لكل مجلس', bad, { source: 'تكليف المالك + AlKhateeb et al. (فصل نطاق الضيوف) — ' + UNVERIFIED_AR, applicable: majlis.length > 0 }));
+  }
+  // 7) غرفة نوم على المجلس
+  {
+    const bad = [];
+    for (const { lv, room } of real) {
+      if (room.type !== 'majlis') continue;
+      for (const d of roomDoors(lv, room)) if (d.other && BED_TYPES.has(d.other.type)) bad.push(`${roomName(d.other)} تفتح مباشرة على ${roomName(room)}`);
+    }
+    gates.push(gateResult('BED_MAJLIS', !bad.length, { violations: bad.length }, 'صفر أبواب', bad, { source: 'تكليف المالك؛ ' + UNVERIFIED_AR }));
+  }
+  // 8) السلم
+  {
+    const two = model.levels.length >= 2, bad = [];
+    let value = { levels: model.levels.length };
+    if (two) {
+      const st = ground.stairs;
+      if (!st.length) bad.push('مستند بدورين بلا سلم في الدور الأرضي');
+      for (const s of st) {
+        if (!s.room) bad.push(`السلم ${s.id} لا يقع داخل أي فراغ مغلق`);
+        else if (!ground.reach.has(s.room)) bad.push(`السلم ${s.id} في ${roomName(ground.roomsById.get(s.room))} ولا يصل إليه مسار من المدخل`);
+        else value = { ...value, stair: s.id, room: s.room, doorsFromEntry: ground.reach.get(s.room).doors };
+      }
+      for (const lv of model.levels.slice(1)) if (lv.seedKind !== 'stair') bad.push(`${lv.level.name}: لا سلم يهبط إلى فراغ فيه`);
+    }
+    gates.push(gateResult('STAIRS', !bad.length, value, 'سلم في فراغ موصول بالمدخل', bad, { source: 'منطق وظيفي', applicable: two }));
+  }
+  // 9) الأرض والارتداد
+  {
+    const frame = plotFrame(doc), bad = [];
+    let worst = 0;
+    if (!frame) bad.push('لا مضلع أرض في المستند');
+    else {
+      const tol = DESIGN_THRESHOLDS.setbackTolerance.value;
+      const pts = [];
+      for (const w of doc.walls) for (const p of wallRect(w)) pts.push({ p, what: `الجدار ${w.id}` });
+      for (const { room } of real) for (const p of room.net) pts.push({ p, what: roomName(room) });
+      const hits = new Map();
+      for (const { p, what } of pts) {
+        let over = pointInPolygon(p, frame.poly, 1e-9) ? 0 : Infinity;
+        for (const e of frame.edges) { const inside = -dot(sub(p, e.a), e.out); over = Math.max(over, e.setback - inside); }
+        if (over > tol) { worst = Math.max(worst, over); if (!hits.has(what)) hits.set(what, over); }
+      }
+      for (const [what, over] of hits) bad.push(Number.isFinite(over) ? `${what} يتجاوز خط الارتداد بـ ${r2(over)} م` : `${what} خارج حدود الأرض`);
+    }
+    gates.push(gateResult('PLOT', !bad.length, { maxOverrun: Number.isFinite(worst) ? r2(worst) : 'خارج الأرض', setbacks: doc.plot?.setbacks || null }, 'داخل الارتداد (سماحية 2 سم)', bad.slice(0, 6).concat(bad.length > 6 ? [`و${bad.length - 6} عناصر أخرى`] : []),
+      { source: 'الارتدادات من مستند الأرض نفسه (doc.plot.setbacks)؛ قيمها النظامية «متعارضة: يُراجع» في بحث المنافسين' }));
+  }
+  // 10) البرنامج المطلوب
+  {
+    const c = request.counts || {}, bad = [];
+    const have = {
+      bedrooms: real.filter(({ room }) => BED_TYPES.has(room.type)).length,
+      majlis: real.filter(({ room }) => room.type === 'majlis').length,
+      kitchens: real.filter(({ room }) => room.type === 'kitchen').length,
+      halls: real.filter(({ room }) => room.type === 'living').length,
+      dining: real.filter(({ room }) => room.type === 'dining').length,
+      baths: real.filter(({ room }) => room.type === 'bath').length,
+    };
+    const AR = { bedrooms: 'غرف النوم', majlis: 'المجالس', kitchens: 'المطابخ', halls: 'الصالات', dining: 'غرف الطعام', baths: 'دورات المياه' };
+    for (const k of Object.keys(AR)) if (Number.isInteger(c[k]) && have[k] < c[k]) bad.push(`${AR[k]}: المطلوب ${c[k]} والمرسوم ${have[k]}`);
+    gates.push(gateResult('PROGRAM', !bad.length, { requested: c, drawn: have }, 'المرسوم ≥ المطلوب', bad, { source: 'طلب العميل (request.counts)', applicable: Object.keys(c).length > 0 }));
+  }
+  return gates;
+}
+
+// --------------------------------------------------------------------------------------------- score
+function zoneOf(lv, room) {
+  if (room.type === 'majlis') return 'guest';
+  if (BED_TYPES.has(room.type)) return 'private';
+  if (['living', 'dining', 'kitchen'].includes(room.type)) return 'family';
+  return null;
+}
+function bboxOf(rooms) {
+  if (!rooms.length) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const r of rooms) for (const p of r.net) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+  return { x0, y0, x1, y1, area: (x1 - x0) * (y1 - y0) };
+}
+function overlapRatio(a, b) {
+  if (!a || !b) return 0;
+  const w = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), h = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+  if (w <= 0 || h <= 0) return 0;
+  return (w * h) / Math.max(1e-9, Math.min(a.area, b.area));
+}
+
+export function scoreComponents(doc, request = {}, model = analyzeDoc(doc)) {
+  const comp = {}, detail = {};
+  const real = model.levels.flatMap(lv => lv.rooms.filter(r => !r.unlabelled).map(room => ({ lv, room })));
+  const indoor = real.filter(({ room }) => !ROOM_TYPES[room.type]?.open);
+  const net = indoor.reduce((s, { room }) => s + room.area, 0);
+
+  // الحركة: نسبة الممرات والمداخل من الصافي، داخل النطاق = 1
+  const circ = indoor.filter(({ room }) => CIRC_TYPES.has(room.type)).reduce((s, { room }) => s + room.area, 0);
+  const pct = net > 0 ? 100 * circ / net : 0;
+  const [lo, hi] = DESIGN_THRESHOLDS.circulationBand.value;
+  comp.circulation = pct < lo ? clamp01(pct / lo) : pct > hi ? clamp01(1 - (pct - hi) / 15) : 1;
+  detail.circulation = { pct: r2(pct), band: [lo, hi] };
+
+  // الإضاءة: نسبة الزجاج إلى الأرضية لكل غرفة معيشية مقابل 10٪ الإرشادية
+  const hab = real.filter(({ room }) => HABITABLE_TYPES.includes(room.type));
+  const t = DESIGN_THRESHOLDS.windowToFloor.value;
+  const per = hab.map(({ lv, room }) => { const d = daylightOf(lv, room); return { room: room.id, ratio: r2(room.area > 0 ? d.area / room.area : 0) }; });
+  comp.daylight = per.length ? per.reduce((s, x) => s + clamp01(x.ratio / t), 0) / per.length : null;
+  detail.daylight = { target: t, rooms: per };
+
+  // عمق الخصوصية: أبواب من مدخل الضيوف إلى كل غرفة نوم، ومن المجلس إلى أقرب غرفة نوم
+  const ground = model.levels[0];
+  const depths = [];
+  if (ground) {
+    const starts = guestStarts(ground);
+    const fromEntry = bfs(ground, starts), majlis = ground.rooms.filter(r => r.type === 'majlis').map(r => r.id);
+    const fromMajlis = majlis.length ? bfs(ground, majlis) : null;
+    const good = DESIGN_THRESHOLDS.privacyDepthGood.value;
+    for (const lv of model.levels) for (const room of lv.rooms) {
+      if (!BED_TYPES.has(room.type)) continue;
+      if (lv !== ground) { depths.push({ room: room.id, entry: 'دور علوي', score: 1 }); continue; }
+      const de = fromEntry.dist.get(room.id), dm = fromMajlis ? fromMajlis.dist.get(room.id) : undefined;
+      const s1 = de === undefined ? 0 : clamp01((de - 1) / (good - 1));
+      const s2 = dm === undefined ? (fromMajlis ? 1 : s1) : clamp01((dm - 1) / (good - 1));
+      depths.push({ room: room.id, entry: de ?? null, majlis: dm ?? null, score: r2((s1 + s2) / 2) });
+    }
+  }
+  comp.privacy = depths.length ? depths.reduce((s, x) => s + x.score, 0) / depths.length : null;
+  detail.privacy = { bedrooms: depths };
+
+  // وضوح النطاقات: تداخل الصناديق المحيطة لنطاق الضيوف مع الخاص ومع العائلة، وأبواب مباشرة ضيوف↔خاص
+  if (ground) {
+    const by = { guest: [], family: [], private: [] };
+    for (const r of ground.rooms) { const z = zoneOf(ground, r); if (z) by[z].push(r); }
+    const bb = Object.fromEntries(Object.entries(by).map(([k, v]) => [k, bboxOf(v)]));
+    const gp = overlapRatio(bb.guest, bb.private), gf = overlapRatio(bb.guest, bb.family);
+    let cross = 0;
+    for (const r of by.guest) for (const d of roomDoors(ground, r)) if (d.other && (zoneOf(ground, d.other) === 'private' || isPrivate(ground, d.other))) cross++;
+    comp.zoning = by.guest.length ? clamp01(1 - 0.6 * gp - 0.2 * gf - 0.3 * cross) : clamp01(1 - 0.3 * overlapRatio(bb.family, bb.private));
+    detail.zoning = { guestPrivateOverlap: r2(gp), guestFamilyOverlap: r2(gf), guestToPrivateDoors: cross };
+  } else comp.zoning = null;
+
+  // جودة النسب: نسبة الطول إلى العرض والعرض مقابل حد الكتالوج التصميمي
+  const g = DESIGN_THRESHOLDS.roomAspectGood.value, b = DESIGN_THRESHOLDS.roomAspectBad.value;
+  const props = hab.map(({ room }) => {
+    const ratio = room.rect.w > 0 ? room.rect.l / room.rect.w : b;
+    const a = ratio <= g ? 1 : clamp01(1 - (ratio - g) / (b - g));
+    const cat = ROOM_TYPES[room.type]?.minWidth || 0;
+    const w = cat ? clamp01(clearWidth(room) / cat) : 1;
+    return { room: room.id, ratio: r2(ratio), score: r2(a * w) };
+  });
+  comp.proportion = props.length ? props.reduce((s, x) => s + x.score, 0) / props.length : null;
+  detail.proportion = { rooms: props };
+
+  // الأثاث: قطع خارج الغرف أو متداخلة، وأبواب يعترض فتحها شيء (من مراجع الرسم المستقل review.mjs)
+  if (doc.fixtures?.length) {
+    const rv = reviewDoc(doc, { model, only: ['FIXTURE_OUTSIDE', 'FIXTURE_OVERLAP', 'SWING_BLOCKED'] });
+    const n = c => rv.filter(i => i.code === c).length;
+    const issues = { outside: n('FIXTURE_OUTSIDE'), overlap: n('FIXTURE_OVERLAP'), swingBlocked: n('SWING_BLOCKED') };
+    comp.furniture = clamp01(1 - (issues.outside + issues.overlap + issues.swingBlocked) / 6);
+    detail.furniture = { fixtures: doc.fixtures.length, ...issues };
+  } else { comp.furniture = null; detail.furniture = { fixtures: 0, note: 'لا أثاث في الرسم: المكوّن غير مُقيَّم' }; }
+  return { comp, detail };
+}
+
+/** AZIZ (rankByDNA) وMizan Score على المستند نفسه بعد تحويله إلى النموذج القديم. null مع سبب إن تعذّر. */
+export function externalScores(doc, request = {}) {
+  const out = { aziz: null, mizan: null, notes: [] };
+  const mizans = [];
+  for (const lv of doc.levels) {
+    try { const s = calculateMizanScore(docToLegacy(doc, { level: lv.id }).model)?.score; if (Number.isFinite(s)) mizans.push(s); }
+    catch (e) { out.notes.push(`Mizan Score تعذّر في ${lv.name}: ${e.message}`); }
+  }
+  if (mizans.length) out.mizan = r2(mizans.reduce((a, b) => a + b, 0) / mizans.length / 10); // 0..1000 → 0..100
+  try {
+    const land = request.land || {};
+    const xs = (doc.plot?.polygon || []).map(p => p.x), ys = (doc.plot?.polygon || []).map(p => p.y);
+    const width = Number(land.width) || (xs.length ? Math.max(...xs) - Math.min(...xs) : 0);
+    const length = Number(land.length) || (ys.length ? Math.max(...ys) - Math.min(...ys) : 0);
+    const streets = land.streets || doc.streets || [doc.entry || 's'];
+    const plot = validatePlot({ width, length, floors: 1, streets: Object.fromEntries(streets.map(s => [s, true])), entry: (land.entries || doc.entries || [doc.entry || streets[0]])[0] });
+    const model = { ...docToLegacy(doc, { level: doc.levels[0].id }).model, strategy: 'review' };
+    const dna = rankByDNA({ plot, rooms: [], discovery: request.discovery || {}, idea: request.text || '', counts: request.counts || {}, models: [model] });
+    const s = dna.rows[0]?.score;
+    if (Number.isFinite(s)) out.aziz = s;
+    if (doc.levels.length > 1) out.notes.push('AZIZ يُحسب للدور الأرضي فقط كما في مسار الفيلا.');
+  } catch (e) { out.notes.push('AZIZ تعذّر: ' + e.message); }
+  return out;
+}
+
+// ----------------------------------------------------------------------------------------- public API
+/**
+ * مراجعة مستند واحد.
+ * @param {object} doc  mizan-draw/1
+ * @param {{ text?: string, counts?: object, land?: object, discovery?: object }} request
+ * @param {{ external?: boolean }} [opts]  external:false يتخطى AZIZ وMizan (أسرع، للاختبارات)
+ */
+export function reviewDesign(doc, request = {}, { external = true } = {}) {
+  const model = analyzeDoc(doc);
+  const gates = evaluateGates(doc, request, model);
+  const passed = gates.every(g => g.ok);
+  const { comp, detail } = scoreComponents(doc, request, model);
+  const ext = external ? externalScores(doc, request) : { aziz: null, mizan: null, notes: ['AZIZ وMizan غير محسوبين (external:false)'] };
+  comp.aziz = ext.aziz === null ? null : clamp01(ext.aziz / 100);
+  comp.mizan = ext.mizan === null ? null : clamp01(ext.mizan / 100);
+  let sum = 0, wsum = 0;
+  const breakdown = Object.keys(SCORE_WEIGHTS).map(k => {
+    const v = comp[k], w = SCORE_WEIGHTS[k];
+    if (v !== null && v !== undefined) { sum += v * w; wsum += w; }
+    return { id: k, ar: COMPONENT_AR[k], value: v === null || v === undefined ? null : r2(v * 100), weight: w, detail: detail[k] ?? (k === 'aziz' ? { raw: ext.aziz } : k === 'mizan' ? { raw0to100: ext.mizan } : null) };
+  });
+  for (const b of breakdown) b.effectiveWeight = b.value === null ? 0 : r2(100 * b.weight / wsum);
+  const score = wsum ? r2(100 * sum / wsum) : null;
+  const rejectReasons_ar = gates.filter(g => !g.ok).flatMap(g => g.reasons_ar.map(r => `${g.ar}: ${r}`));
+  return { version: PLAN_REVIEW_VERSION, gates, passed, failedGates: gates.filter(g => !g.ok).map(g => g.id), score, breakdown, rejectReasons_ar, external: ext };
+}
+
+/** يراجع عدة مستندات ويرتّبها: الناجح في كل البوابات أولًا، ثم الأعلى درجة. يحفظ index الأصلي. */
+export function reviewDesigns(docs, request = {}, opts = {}) {
+  const rows = docs.map((doc, index) => ({ index, title: doc.title || `بديل ${index + 1}`, ...reviewDesign(doc, request, opts) }));
+  return rows.sort((a, b) => (b.passed - a.passed) || (a.failedGates.length - b.failedGates.length) || ((b.score ?? -1) - (a.score ?? -1)) || a.index - b.index);
+}
+
+/** جدول الرفض للواجهة: عمود لكل بوابة، صف لكل بديل، مع أسباب الرفض بالعربية. */
+export function rejectionTable(reviews) {
+  return {
+    columns: [{ id: 'label', ar: 'البديل' }, ...GATES.map(g => ({ id: g.id, ar: g.ar })), { id: 'score', ar: 'الدرجة' }, { id: 'verdict', ar: 'الحكم' }],
+    rows: reviews.map(r => ({
+      index: r.index, label: r.label || `بديل ${r.index + 1}`, passed: r.passed, score: r.score,
+      cells: Object.fromEntries(r.gates.map(g => [g.id, { ok: g.ok, applicable: g.applicable !== false, text: g.ok ? (g.applicable === false ? 'لا ينطبق' : 'ناجح') : g.reasons_ar[0] }])),
+      verdict: r.passed ? 'مقبول' : `مرفوض (${r.failedGates.length} بوابة)`,
+      reasons_ar: r.rejectReasons_ar,
+    })),
+  };
+}
+
+// ------------------------------------------------------------------------------------------ statistics
+export function pearson(xs, ys) {
+  const pairs = xs.map((x, i) => [x, ys[i]]).filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+  const n = pairs.length; if (n < 3) return null;
+  const mx = pairs.reduce((s, p) => s + p[0], 0) / n, my = pairs.reduce((s, p) => s + p[1], 0) / n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (const [x, y] of pairs) { sxy += (x - mx) * (y - my); sxx += (x - mx) ** 2; syy += (y - my) ** 2; }
+  return sxx && syy ? r2(sxy / Math.sqrt(sxx * syy)) : null;
+}
+const ranks = v => { const idx = v.map((x, i) => [x, i]).sort((a, b) => a[0] - b[0]); const r = new Array(v.length); for (let i = 0; i < idx.length;) { let j = i; while (j + 1 < idx.length && idx[j + 1][0] === idx[i][0]) j++; for (let k = i; k <= j; k++) r[idx[k][1]] = (i + j) / 2 + 1; i = j + 1; } return r; };
+export function spearman(xs, ys) {
+  const keep = xs.map((x, i) => Number.isFinite(x) && Number.isFinite(ys[i]));
+  return pearson(ranks(xs.filter((_, i) => keep[i])), ranks(ys.filter((_, i) => keep[i])));
+}
+
+export default { PLAN_REVIEW_VERSION, GATES, MIN_CLEAR_WIDTH, DESIGN_THRESHOLDS, SCORE_WEIGHTS, EXTERNAL_WEIGHTS, evaluateGates, scoreComponents, externalScores, reviewDesign, reviewDesigns, rejectionTable, pearson, spearman };
