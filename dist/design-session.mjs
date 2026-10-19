@@ -19,7 +19,9 @@ export const FEEDBACK = Object.freeze([
   { id: 'hall_small', label: 'الصالة صغيرة', apply: (r, t) => { t.hallScale = (t.hallScale || 1) * 1.3; } },
   { id: 'majlis_small', label: 'المجلس صغير', apply: (r, t) => { t.majlisScale = (t.majlisScale || 1) * 1.25; } },
   { id: 'kitchen_small', label: 'المطبخ والطعام صغيران', apply: (r, t) => { t.kitchenScale = (t.kitchenScale || 1) * 1.2; } },
-  { id: 'corridors', label: 'الممرات كثيرة', apply: (r, t) => { t.avoidModes = [...new Set([...(t.avoidModes || []), 'tee', 'rows'])]; } },
+  // «الممرات كثيرة»: تُستبعد الأنماط ذات الممر/الرواق الطويل (المولّد الأول: tee وrows؛ الثاني: الرواق والصفوف
+  // والكتلتان وL الخلفي)، ويُضاعف وزن الحركة في التقييم
+  { id: 'corridors', label: 'الممرات كثيرة', apply: (r, t) => { t.avoidModes = [...new Set([...(t.avoidModes || []), 'tee', 'rows', 'gallery', 'split', 'ellback'])]; t.lessCorridors = true; } },
   { id: 'kitchen_open', label: 'أريد المطبخ مفتوحًا على الطعام', apply: r => { r.prefs.openKitchen = true; } },
   { id: 'kitchen_closed', label: 'أريد المطبخ مغلقًا', apply: r => { r.prefs.openKitchen = false; } },
   { id: 'baths_all', label: 'أريد حمامًا لكل غرفة', apply: r => { r.prefs.allEnsuite = true; r.prefs.sharedBaths = false; const c = r.counts; c.baths = Math.max(c.baths || 0, (c.bedrooms || 0) + Math.min(2, c.majlis || 0)); } },
@@ -29,21 +31,22 @@ export const FEEDBACK = Object.freeze([
 const clone = v => JSON.parse(JSON.stringify(v));
 
 /** يبدأ جلسة من نتيجة التوليد الأولى. */
-export function createSession({ land, counts, requirements, discovery, idea = '', result }) {
+export function createSession({ land, counts, requirements, discovery, idea = '', result, engine = null }) {
   const req = clone(requirements || extractRequirements(idea || '', { counts: counts || {}, discovery }));
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
   // التعارضات في الطلب: تُرفق بالجلسة مع سؤال للعميل (لا رمي ولا تعديل للطلب)
   let conflicts = []; try { conflicts = detectConflicts(req, land || {}); } catch { conflicts = []; }
   return {
-    v: 1, input: { land, discovery, idea, requirements: req },
+    // المولّد: الثاني افتراضيًا؛ engine:'v1' يبقي المولّد الأول (احتياط) لكل إعادة تصميم في الجلسة
+    v: 1, input: { land, discovery, idea, requirements: req, engine: engine || (result?.villaEngine === 'v1' ? 'v1' : null) },
     conflicts, reply: conflicts.length ? { conflicts, questions: conflicts.map(c => c.question_ar) } : null,
     designs: [entry(result, null)], current: 0, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
-    alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc) })),
+    alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', review: a.review || null })),
   };
 }
 function entry(result, feedback) {
-  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null };
+  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, review: result.review || null, mirror: result.mirror ?? null };
 }
 export const currentDoc = s => parseDoc(s.designs[s.current].doc);
 
@@ -102,12 +105,12 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   if (different) changes.push('توزيع مختلف للغرف');
   const cur = s.designs[s.current];
   const exclude = different ? s.designs.map(d => d.pat).filter(Boolean) : [];
-  const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null };
+  const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null, doc: cur.doc };
   // «احتفظ بهذا التوزيع» بلا تغيير يمس المخطط (مثل تغيير الواجهة): المخطط نفسه حرفيًا، بلا توليد
   const reuse = !different && !!more?.keepLayout && !layoutChange;
   const out = reuse
-    ? { doc: parseDoc(cur.doc), pat: cur.pat, mirror: cur.mirror ?? null, summary: cur.summary, notes: cur.notes, floors: cur.floors, engine: cur.engine, same: true }
-    : await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer });
+    ? { doc: parseDoc(cur.doc), pat: cur.pat, mirror: cur.mirror ?? null, summary: cur.summary, notes: cur.notes, floors: cur.floors, engine: cur.engine, review: cur.review || null, same: true }
+    : await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, ...(s.input.engine ? { engine: s.input.engine } : {}) });
   // رد شرعاء: البنود التي طلبها الآن، مقيسة من المخطط الجديد
   const entryDir = s.input.land?.entries?.[0] || 's';
   let ledger = []; try { ledger = verifyRequest(out.doc, req, { entry: entryDir }); } catch { ledger = out.ledger || []; }
@@ -124,6 +127,8 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
     otherFails: ledger.filter(x => st(x) === 'failed' && !mine.includes(x)).map(x => ({ text: x.text, why: x.why })),
     conflicts: [], questions: [],
   };
+  // طلب تعديل (لا «توزيع مختلف») غيّر النمط: التوزيع المعروض لم يحقق الطلب فاختير أقرب توزيع يحققه — يُقال صراحة
+  if (!different && !reuse && cur.pat && out.pat && out.pat !== cur.pat) reply.patternChanged = { from: cur.pat, to: out.pat, why_ar: 'التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه، وبقية الغرف كما هي.' };
   s.designs.push(entry(out, { picks, text, changes, reply }));
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;

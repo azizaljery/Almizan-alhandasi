@@ -93,7 +93,8 @@ test('C1: مجلس رجال بمدخل مستقل ومجلس نساء من مد�
     assertSound(d.doc, r.counts); assertInsideSetbacks(d.doc);
     assert.deepEqual(hardGates(d.doc, out.program), []);
     const names = docRooms(d.doc).rooms.map(x => x.name);
-    for (const n of ['مجلس الرجال', 'دورة مياه الرجال', 'مجلس النساء', 'ممر النساء', 'مدخل العائلة', 'الصالة', 'المطبخ', 'غرفة الخادمة', 'غرفة الملابس']) assert.ok(names.includes(n) || (n === 'غرفة الملابس' && names.includes('غرفة ملابس')), n);
+    // مجلس النساء: ممر ودورة مياه على جانبه، أو مغاسل ودورة مياه خلفه — المهم دورة مياه النساء داخل منطقتهن
+    for (const n of ['مجلس الرجال', 'دورة مياه الرجال', 'مجلس النساء', 'دورة مياه النساء', 'مدخل العائلة', 'الصالة', 'المطبخ', 'غرفة الخادمة', 'غرفة الملابس']) assert.ok(names.includes(n) || (n === 'غرفة الملابس' && names.includes('غرفة ملابس')), n);
     const P = d.ledger.find(x => x.id === 'P-sep'); assert.ok(P && P.ok, 'فصل الرجال عن النساء: ' + P?.why);
   }
   for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .1, `البديلان ${i + 1} و${j + 1} مختلفان تنظيميًا`);

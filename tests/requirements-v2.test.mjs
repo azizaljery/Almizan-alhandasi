@@ -2,7 +2,7 @@
 // التعديلات (نقل المطبخ، الواجهة الحجرية مع إبقاء التوزيع)، وصدق السجل (لا «نُفّذ» لما لم يُقَس).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { extractRules, rulePenalty, verifyRequest, LEVEL_WEIGHT, SUBJECTS, docStairs } from '../dist/rules.mjs';
+import { extractRules, rulePenalty, verifyRequest, LEVEL_WEIGHT, SUBJECTS, docStairs, docRooms } from '../dist/rules.mjs';
 import { extractRequirements, normalizeAr, coverage, detectConflicts, withAi } from '../dist/requirements.mjs';
 import { AI_SUBJECTS, sanitizeAiRequirements } from '../dist/ai-requirements.mjs';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
@@ -193,8 +193,13 @@ test('C8: «انقل المطبخ بجوار الطعام وخل المطبخ ف
   assert.deepEqual(e.rules.map(r => [r.kind, r.a, r.b || r.side, r.quote]), [['adjacent', 'kitchen', 'dining', 'المطبخ بجوار الطعام'], ['place', 'kitchen', 'back', 'المطبخ في الخلف']]);
   const req = extractRequirements(C.text, { counts: C.counts }), first = await generateInitialDesign({ land, counts: req.counts, requirements: req });
   const { session, reply } = await redesign(createSession({ land, counts: req.counts, requirements: req, result: first }), { text: C.edit });
-  assert.equal(session.designs[1].pat, session.designs[0].pat); assert.equal(session.input.requirements.counts.bedrooms, 4, 'عدد الغرف لا يتغير');
-  assert.deepEqual([...reply.done, ...reply.failed.map(x => x.text)].sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort());
+  assert.equal(session.input.requirements.counts.bedrooms, 4, 'عدد الغرف لا يتغير');
+  // النمط نفسه إن حقق الطلب، وإلا أقرب نمط يحققه — والرد يقول ذلك صراحة
+  if (session.designs[1].pat !== session.designs[0].pat) { assert.ok(reply.patternChanged, 'الرد يذكر تغيّر التوزيع'); assert.equal(reply.patternChanged.from, session.designs[0].pat); }
+  assert.deepEqual(reply.done.sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort(), JSON.stringify(reply.failed));
+  // غرف البرنامج كلها باقية بعد التعديل
+  const prog = d => docRooms(JSON.parse(d)).rooms.filter(r => ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen'].includes(r.type)).map(r => r.name).sort();
+  assert.deepEqual(prog(session.designs[1].doc), prog(session.designs[0].doc));
 });
 test('C9: «احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر» — facade {material:stone} وkeepLayout، والمخطط نفسه، والبند «بانتظار العرض» لا «نُفّذ»', async () => {
   const C = CASES.find(c => c.id === 'C9'), land = { floors: 1, ...C.land };
@@ -238,7 +243,12 @@ test('السجل: مدخل النساء وشكل الأرض «لم يُتحقق�
   const C5 = CASES.find(c => c.id === 'C5'), r5 = extractRequirements(C5.text, { counts: C5.counts });
   const o5 = await generateInitialDesign({ land: { floors: 1, ...C5.land }, counts: r5.counts, requirements: r5 });
   const s = verifyRequest(o5.doc, r5, { entry: 's' }).find(x => x.id === 'S-shape');
-  assert.equal(s.status, 'unverified'); assert.equal(s.ok, false); assert.match(s.why, /مستطيلة/);
+  // المولّد الثاني يمثّل المضلع فعلًا: البند يُقاس من مضلع الأرض في المستند (الواجهة والخلف والعمق واحتواء الجدران)
+  assert.equal(s.status, 'done', s.why); assert.equal(s.ok, true); assert.match(s.why, /الواجهة 18 م، الخلف 24 م، العمق 30 م/);
+  // ومستند بأرض مستطيلة لا يُعد منفّذًا أبدًا
+  const v1 = await generateInitialDesign({ land: { floors: 1, ...C5.land }, counts: r5.counts, requirements: r5, engine: 'v1' });
+  const s1 = verifyRequest(v1.doc, r5, { entry: 's' }).find(x => x.id === 'S-shape');
+  assert.equal(s1.ok, false); assert.match(s1.why, /مستطيل/);
 });
 test('السجل: الأبعاد مقيسة من المستطيل الصافي، والدرج مقيس من سلالم المستند', async () => {
   const C6 = CASES.find(c => c.id === 'C6'), req = extractRequirements(C6.text, { counts: C6.counts });

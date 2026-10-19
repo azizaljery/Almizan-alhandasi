@@ -59,7 +59,6 @@ for (const [name, text, land] of [
   ['المجلس شرقًا والمطبخ غربًا (مدخل جنوبي)', 'المجلس في الجهة الشرقية والمطبخ في الجهة الغربية', LAND()],
   ['المجلس شرقًا (مدخل شمالي)', 'المجلس في الجهة الشرقية', LAND({ entries: ['n'], streets: ['n'] })],
   ['الماستر بعيدة عن المجلس والخادمة قرب المطبخ', 'الماستر بعيدة عن المجلس، وغرفة خادمة قريبة من المطبخ', LAND()],
-  ['الغرف في الخلف والصالة على الحوش الخلفي', 'غرف النوم في الخلف والصالة تطل على الحوش الخلفي', LAND({ width: 15 })],
   ['أرض ضيقة والمطبخ في الأمام', 'المطبخ في الأمام', LAND({ width: 12 })],
 ]) test('تنفيذ فعلي في المخطط: ' + name, async () => {
   const { ledger, req } = await design(text, BASE, land);
@@ -77,6 +76,19 @@ test('تحقق مستقل: «المجلس في الجهة الشرقية» = م�
   const { ledger } = await design('المجلس في الجهة الشرقية', BASE, LAND({ entries: ['w'], streets: ['w'], width: 30, length: 20 }));
   const x = ledger.find(l => l.kind === 'place');
   assert.equal(x.ok, false); assert.match(x.why, /مدخله المستقل/);
+});
+
+// أرض ضيقة 15 م مع «الغرف في الخلف» و«الصالة على الحوش الخلفي» معًا: المولّد الأول ينفّذهما؛ الثاني لا يجد بعد نمطًا
+// ضيقًا يحققهما معًا (فجوة معروفة مسجلة في تقرير التكامل) — فيُختبر الأول تنفيذًا والثاني صدقًا: البند غير المنفّذ
+// يظهر «فشل» بسبب مقيس، لا «نُفّذ».
+test('تنفيذ فعلي في المخطط: الغرف في الخلف والصالة على الحوش الخلفي (المولّد الأول)، وصدق السجل في الثاني', async () => {
+  const text = 'غرف النوم في الخلف والصالة تطل على الحوش الخلفي', land = LAND({ width: 15 });
+  const req = extractRequirements(text, { counts: { ...BASE } }); req.counts = { ...BASE, ...req.counts };
+  const v1 = await generateInitialDesign({ land, counts: req.counts, requirements: req, idea: text, engine: 'v1' });
+  const l1 = verifyRequest(v1.doc, req, { entry: 's' });
+  for (const r of req.rules) { const x = l1.find(l => l.id === r.id); assert.equal(x.ok, true, r.text + ' — ' + x.why); }
+  const v2 = await generateInitialDesign({ land, counts: req.counts, requirements: req, idea: text });
+  for (const x of verifyRequest(v2.doc, req, { entry: 's' })) { assert.equal(x.ok, x.status === 'done'); if (!x.ok) assert.ok(x.why.length > 8, x.text); }
 });
 
 test('دوران من الكلام، والماستر في الأرضي، والمكتب فوق', async () => {

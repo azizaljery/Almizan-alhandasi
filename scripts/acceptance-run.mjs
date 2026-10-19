@@ -64,7 +64,9 @@ for (const C of CASES) {
   } catch (e) { row.error = e.message; }
   row.ms = Math.round(performance.now() - t0);
   if (out) {
-    out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, summary: d.summary, ...metrics(d.doc, req, entry) }); });
+    // المراجعة المستقلة (plan-review) المرفقة بكل بديل من المولّد الثاني: البوابات الراسبة والدرجة وأسباب الرفض
+    const rv = d => (d.review ? { passed: d.review.passed, failedGates: d.review.failedGates, score: d.review.score, rejectReasons_ar: d.review.rejectReasons_ar } : null);
+    out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
     row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length;
     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));
     row.modes = [...new Set(out.designs.map(d => d.mode))];
@@ -74,15 +76,19 @@ for (const C of CASES) {
   }
   if (C.edit && out) {
     try {
-      const first = await generateInitialDesign({ land, counts: req.counts, requirements: req });
-      const s0 = createSession({ land, counts: req.counts, requirements: req, result: first });
+      const first = await generateInitialDesign({ land, counts: req.counts, requirements: req, engine });
+      const s0 = createSession({ land, counts: req.counts, requirements: req, result: first, engine });
       writeFileSync(dir + 'edit-before.json', serialize(first.doc));
       const t1 = performance.now();
       const { session, reply } = await redesign(s0, { text: C.edit });
       const after = JSON.parse(session.designs[1].doc);
       writeFileSync(dir + 'edit-after.json', session.designs[1].doc);
       const bRooms = docRooms(first.doc).rooms.map(r => r.name).sort(), aRooms = docRooms(after).rooms.map(r => r.name).sort();
-      row.edit = { text: C.edit, ms: Math.round(performance.now() - t1), reply, samePattern: session.designs[1].pat === session.designs[0].pat, difference: difference(first.doc, after), roomsKept: bRooms.every(n => aRooms.includes(n)), roomsLost: bRooms.filter(n => !aRooms.includes(n)), after: metrics(after, session.input.requirements, entry) };
+      // غرف البرنامج (نوم، مجالس، صالة، طعام، مطبخ، خدمة، دورات مياه بالعدد) مقابل كل الأسماء (ومنها أجزاء الأجنحة كمدخل الجناح)
+      const PROG = ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'service'];
+      const prog = d => docRooms(d).rooms.filter(r => PROG.includes(r.type)).map(r => r.name).sort(), nb = d => docRooms(d).rooms.filter(r => r.type === 'bath').length;
+      const bP = prog(first.doc), aP = prog(after);
+      row.edit = { text: C.edit, ms: Math.round(performance.now() - t1), reply, beforePattern: session.designs[0].pat, afterPattern: session.designs[1].pat, samePattern: session.designs[1].pat === session.designs[0].pat, difference: difference(first.doc, after), roomsKept: bRooms.every(n => aRooms.includes(n)), roomsLost: bRooms.filter(n => !aRooms.includes(n)), programRoomsKept: bP.every(n => aP.includes(n)) && nb(after) >= nb(first.doc), programRoomsLost: bP.filter(n => !aP.includes(n)), editLedgerBefore: verifyRequest(first.doc, session.input.requirements, { entry }).map(x => ({ text: x.text, status: x.status, why: x.why })), after: metrics(after, session.input.requirements, entry) };
     } catch (e) { row.edit = { text: C.edit, error: e.message, code: e.code || null }; }
   }
   writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));

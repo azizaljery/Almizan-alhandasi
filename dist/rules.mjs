@@ -296,6 +296,14 @@ const contact = (a, b) => {
 // «قرب»: لفراغ واحد ≤ 2 م (ممر أو باب)، ولمجموعة غرف (غرف الأبناء قرب الماستر) ≤ 4.2 م (عرض صالة أو غرفة بينهما)
 const nearGap = r => (S[r.a]?.plural ? 4.2 : 2.0);
 const ctr = r => ({ x: (r.x0 + r.x1) / 2, y: (r.y0 + r.y1) / 2 });
+/**
+ * «على الواجهة الخلفية / تطل على الحوش الخلفي» (touch): يتحقق أيضًا حين يرتد الفراغ عن حد المبنى لكن جهته تلك
+ * مكشوفة بلا أي فراغ مبني أمامها في امتداده (يطل على حديقة أو فناء مفتوح على تلك الجهة، كصالة بين جناحي U).
+ */
+function openToward(r, side, others) {
+  const ax = side[0] === 'y' ? ['x0', 'x1'] : ['y0', 'y1'], hi = side.endsWith('1');
+  return !others.some(o => o !== r && Math.min(r[ax[1]], o[ax[1]]) - Math.max(r[ax[0]], o[ax[0]]) > .3 && (hi ? o[side.replace('1', '0')] >= r[side] - .05 : o[side.replace('0', '1')] <= r[side] + .05));
+}
 /** كم ينقص المستطيل عن تحقيق الموضع (0 = متحقق). sides بإحداثيات قانونية أو مستند. */
 function placeDeficit(r, side, mode, B) {
   const w = B.x1 - B.x0, d = B.y1 - B.y0, c = ctr(r);
@@ -320,7 +328,8 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
     if (r.kind === 'place') {
       for (const m of [0, 1]) {
         const side = canonSide(entry, r.side, !!m); if (!side) continue;
-        const pens = A.map(a => { const def = placeDeficit(a, side, r.mode, B); return def > (r.mode === 'touch' ? .05 : 0) ? 45 + 18 * def : 0; });
+        const solids = [...placed.map(p => p.r), ...circ.filter(c => c.id !== 'stair' && c.id !== 'stairs').map(c => c.r)];
+        const pens = A.map(a => { const def = r.mode === 'touch' && openToward(a, side, solids) ? 0 : placeDeficit(a, side, r.mode, B); return def > (r.mode === 'touch' ? .05 : 0) ? 45 + 18 * def : 0; });
         const pen = any ? Math.min(...pens) : pens.reduce((x, y) => x + y, 0);
         if (side[0] !== 'x') { base += pen; break; } p[m] += pen;
       }
@@ -332,7 +341,7 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
     if (any) { const ok = A.some(a => Bs.some(b => r.kind === 'adjacent' ? contact(a, b) >= 1 : r.kind === 'near' ? contact(a, b) >= .8 || gapOf(a, b) <= 1.8 : contact(a, b) <= .3)); if (!ok) base += 55; return; }
     for (const a of A) {
       const best = Math.min(...Bs.map(b => r.kind === 'adjacent' ? (contact(a, b) >= 1.0 ? 0 : 1 + gapOf(a, b)) : r.kind === 'near' ? (contact(a, b) >= .8 || gapOf(a, b) <= nearGap(r) - .2 ? 0 : gapOf(a, b) - nearGap(r) + 1.2) : 0));
-      if (r.kind === 'far') { const need = Math.max(7, diag * .4); for (const b of Bs) { const dd = Math.hypot(ctr(a).x - ctr(b).x, ctr(a).y - ctr(b).y); if (contact(a, b) > .3) base += 55; if (dd < need) base += 10 * (need - dd); } continue; }
+      if (r.kind === 'far') { const need = Math.max(7, diag * .4); for (const b of Bs) { const dd = Math.hypot(ctr(a).x - ctr(b).x, ctr(a).y - ctr(b).y); if (contact(a, b) > .3) base += 55; if (dd < need) base += 30 + 20 * (need - dd); } continue; } // عتبة التحقق نفسها: أي نقص عنها = بند غير منفّذ
       if (best > 0) base += 50 + 14 * best;
     }
   };
@@ -413,6 +422,9 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
     const res = { id: r.id, text: r.text, kind: r.kind, level: r.level || 'must', ok: true, why: '' };
     if (!A.length) { res.ok = false; res.why = `لا يوجد «${subjAr(r.a)}» في هذا التصميم.`; out.push(res); continue; }
     if (r.kind === 'floor') {
+      // القاعدة الأخص تتقدم: «غرف النوم فوق» مع «غرفة أمي في الأرضي» — غرفة كبار السن خارج القاعدة العامة
+      const own = rules.filter(o => o !== r && o.kind === 'floor' && o.floor !== r.floor && o.a !== r.a).flatMap(o => sel(o.a));
+      if (own.length) A = A.filter(a => !own.includes(a));
       const want = r.floor === 'upper' ? 1 : 0, bad = A.filter(a => (a.li > 0 ? 1 : 0) !== want);
       if (doc.levels.length < 2 && want === 1) { res.ok = false; res.why = 'التصميم بدور واحد؛ اختر دورين في بيانات الأرض أو اكتب «دورين».'; }
       else if (bad.length) { res.ok = false; res.why = `«${bad[0].name}» في ${bad[0].li ? 'الدور العلوي' : 'الدور الأرضي'}.`; }
@@ -420,12 +432,14 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
     }
     if (r.kind === 'place') {
       const side = docSide(r.side, entry), where = r.side === 'front' ? 'الواجهة الأمامية' : r.side === 'back' ? 'الخلف' : r.side === 'right' ? 'يمين الداخل' : r.side === 'left' ? 'يسار الداخل' : COMPASS_AR[r.side];
-      const fail = a => placeDeficit(a, side, r.mode, B) > (r.mode === 'touch' ? .45 : r.mode === 'avoid' ? .15 : 0);
+      const lvRooms = a => rooms.filter(o => o.level === a.level && o !== a && !['courtyard', 'terrace'].includes(o.type));
+      const fail = a => !(r.mode === 'touch' && openToward(a, side, lvRooms(a))) && placeDeficit(a, side, r.mode, B) > (r.mode === 'touch' ? .45 : r.mode === 'avoid' ? .15 : 0);
       const bad = S[r.a]?.any ? (A.every(fail) ? A.slice(0, 1) : []) : A.filter(fail);
       if (bad.length && r.mode === 'center') { res.ok = false; res.why = `«${bad[0].name}» ليس في وسط المبنى.`; out.push(res); continue; }
       if (bad.length && r.mode === 'avoid') { res.ok = false; res.why = `«${bad[0].name}» يلامس جدار ${where}.`; out.push(res); continue; }
       const menConflict = r.a === 'majlis' && side !== docSide('front', entry) && rooms.some(x => x.name === 'مدخل الرجال' || x.name === 'مجلس الرجال' || x.name === 'المجلس');
       if (bad.length) { res.ok = false; res.why = (r.mode === 'touch' ? `«${bad[0].name}» لا يلامس جدار ${where} (يبعد ${r1(placeDeficit(bad[0], side, 'touch', B))} م).` : `«${bad[0].name}» ليس في نصف المبنى من جهة ${where}.`) + (menConflict && side === docSide('back', entry) ? ' مجلس الرجال يبقى على الواجهة الأمامية ليأخذ مدخله المستقل عن العائلة، وهذه الجهة خلف المبنى.' : ''); }
+      else if (r.mode === 'touch') { const far = A.find(a => placeDeficit(a, side, 'touch', B) > .45); if (far) res.why = `«${far.name}» يرتد ${r1(placeDeficit(far, side, 'touch', B))} م عن حد المبنى ويطل على ${where} بلا فراغ مبني أمامه (حديقة أو فناء مفتوح).`; }
       out.push(res); continue;
     }
     const same = (a, b) => a.level === b.level;
@@ -517,7 +531,13 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     else out.push({ id: 'P-fam', kind: 'pref', text: 'مدخل مستقل للعائلة/النساء', ok: false, status: 'unverified', why: WOMEN.includes('مدخل العائلة') && men ? 'للعائلة مدخل («مدخل العائلة») وللرجال مدخل، لكن المخطط لا يسمّي مدخلًا خاصًا بالنساء؛ لا يمكن التحقق آليًا من أنه مدخل النساء المستقل.' : 'لم يُعثر على باب خارجي مستقل لمنطقة العائلة/النساء؛ يحتاج مراجعة.' });
   }
   if (pr.kitchenOpenHall) { const k = sel('kitchen')[0], h = sel('hall').filter(x => !k || x.level === k.level)[0], n = !!(k && h && contact(k, h) >= .8); out.push({ id: 'P-khall', kind: 'pref', text: 'مطبخ مفتوح على الصالة', ok: n, why: n ? '' : !k || !h ? 'المطبخ أو الصالة غير موجودين.' : 'المطبخ لا يجاور الصالة في هذا التصميم.' }); }
-  if (pr.openKitchen === false) out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: false, status: 'unverified', why: 'المخطط لا يميّز آليًا هنا بين فتحة مفتوحة وباب للمطبخ؛ راجعه في المسقط.' });
+  if (pr.openKitchen === false) {
+    // مقيس من فتحات المستند: كل فتحة بين المطبخ وفراغ داخلي آخر باب يُغلق (لا قوس/فتحة)؛ بلا مطبخ = لا يُحكم
+    const M = analyzeDoc(doc), ops = M.levels.flatMap(L => L.openings.filter(op => op.door && op.left && op.right && [op.left, op.right].some(x => x.name === 'المطبخ')));
+    const open = ops.filter(op => !['door', 'door2', 'slider'].includes(op.kind)).map(op => (op.left.name === 'المطبخ' ? op.right : op.left).name);
+    if (!sel('kitchen').length) out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: false, status: 'unverified', why: 'لا يوجد مطبخ باسم «المطبخ» في المخطط للقياس.' });
+    else out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: !open.length, why: open.length ? `المطبخ مفتوح على «${open[0]}» بفتحة بلا باب.` : `فتحات المطبخ الداخلية كلها أبواب (${ops.length}).` });
+  }
   // الأبعاد الصريحة («4×5»): مقيسة من المستطيل الصافي للفراغ مع السماحية المعلنة
   for (const [k, d] of Object.entries(req.dims || {})) {
     const sid = AREA_SUBJ[k]; if (!sid || !d || !(d.w > 0) || !(d.l > 0)) continue;
@@ -530,7 +550,7 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, why: (bad ? `«${bad.r.name}» ${r1(bad.s[0])}×${r1(bad.s[1])} م` : `الفعلي ${got.map(g => `${r1(g.s[0])}×${r1(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران).' });
   }
   // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
-  if (req.site?.irregular) out.push({ id: 'S-shape', kind: 'site', text: `شكل الأرض: ${req.site.shapeAr || 'غير منتظم'}`, ok: false, status: 'unverified', why: 'المولّد يقبل أرضًا مستطيلة فقط (عرض × طول)؛ صُمّم على مستطيل، وشكل الأرض الفعلي لم يُمثَّل ولم يُتحقق منه.' });
+  if (req.site?.irregular) out.push(verifySite(doc, req.site, entry));
   const fac = req.tweaks?.facade;
   if (fac && typeof fac === 'object') out.push({ id: 'F-facade', kind: 'facade', text: `الواجهة: ${[fac.materialAr, fac.styleAr].filter(Boolean).join('، ') || 'تعديل'}`, ok: false, status: 'pending-render', why: 'سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار.' });
   const BIG = { majlis: ['majlis', 30, 'مجلس واسع'], hall: ['hall', 35, 'صالة واسعة'], kitchen: ['kitchen', 15, 'مطبخ واسع'], master: ['master', 22, 'غرفة رئيسية واسعة'] };
@@ -539,6 +559,31 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     const r0 = list[0]; out.push({ id: 'B-' + k, kind: 'area', text: `${ar} (${min} م² صافية أو أكثر)`, ok: !!r0 && r0.area >= min, why: r0 ? (r0.area >= min ? `الفعلي ${r1(r0.area)} م².` : `الفعلي ${r1(r0.area)} م² فقط.`) : 'الفراغ غير موجود.' });
   }
   return withStatus(out);
+}
+/**
+ * شكل الأرض من كلام العميل (req.site: الواجهة والخلف والعمق) مقيس من مضلع الأرض في المستند نفسه، ومعه احتواء
+ * الجدران داخله. مستطيل في المستند = لم يُمثَّل الشكل (فشل صريح لا «منفّذ»). بلا أبعاد في الطلب = «لم يُتحقق».
+ */
+function verifySite(doc, site, entry) {
+  const text = `شكل الأرض: ${site.shapeAr || 'غير منتظم'}${site.front && site.back ? ` (الواجهة ${site.front} م والخلف ${site.back} م${site.depth ? ` والعمق ${site.depth} م` : ''})` : ''}`;
+  const res = { id: 'S-shape', kind: 'site', text, ok: false, why: '' };
+  const poly = doc.plot?.polygon || [];
+  const isRect = poly.length === 4 && poly.every((p, i) => { const q = poly[(i + 1) % 4]; return Math.abs(p.x - q.x) < 1e-6 || Math.abs(p.y - q.y) < 1e-6; });
+  if (poly.length < 3 || isRect) { res.why = 'الأرض في المستند مستطيل؛ شكل الأرض المطلوب لم يُمثَّل.'; return res; }
+  // الضلع الأمامي: الأقرب إلى جهة المدخل؛ الخلفي: الأبعد. العمق: المسافة بينهما على محور المدخل
+  const ax = ['s', 'n'].includes(entry) ? 'y' : 'x', sgn = entry === 's' || entry === 'w' ? 1 : -1;
+  const edges = poly.map((p, i) => { const q = poly[(i + 1) % poly.length]; return { p, q, L: Math.hypot(q.x - p.x, q.y - p.y), m: sgn * (p[ax] + q[ax]) / 2, flat: Math.abs(p[ax] - q[ax]) < .05 * Math.hypot(q.x - p.x, q.y - p.y) }; }).filter(e => e.flat);
+  if (edges.length < 2) { res.status = 'unverified'; res.why = 'مضلع الأرض في المستند بلا ضلعين موازيين للواجهة؛ لا يمكن قياس الواجهة والخلف آليًا.'; return res; }
+  edges.sort((a, b) => a.m - b.m);
+  const fr = edges[0], bk = edges[edges.length - 1], depth = bk.m - fr.m, r1v = v => Math.round(v * 10) / 10;
+  const okDim = (got, want) => !(want > 0) || Math.abs(got - want) <= .5;
+  const dimsOk = okDim(fr.L, site.front) && okDim(bk.L, site.back) && okDim(depth, site.depth);
+  // الجدران داخل المضلع
+  const inside = pt => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a.y > pt.y) !== (b.y > pt.y) && pt.x < (b.x - a.x) * (pt.y - a.y) / (b.y - a.y) + a.x) c = !c; } return c; };
+  const out = (doc.walls || []).filter(w => !inside(w.a) || !inside(w.b)).length;
+  res.ok = dimsOk && !out;
+  res.why = `في المستند: الواجهة ${r1v(fr.L)} م، الخلف ${r1v(bk.L)} م، العمق ${r1v(depth)} م${out ? `؛ ${out} جدار خارج حدود الأرض` : '؛ كل الجدران داخل حدود الأرض'}.` + (dimsOk ? '' : ' الأبعاد لا تطابق الطلب (±0.5 م).');
+  return res;
 }
 /**
  * حالة كل بند: done (نُفّذ ومقيس)، failed (مقيس ولم يتحقق)، unverified (لا يمكن قياسه آليًا)، pending-render (مسجَّل وعرضه لاحقًا).
