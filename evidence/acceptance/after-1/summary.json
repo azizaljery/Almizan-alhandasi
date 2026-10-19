@@ -1,0 +1,2370 @@
+[
+ {
+  "id": "C1",
+  "engine": "v2",
+  "name": "منزل سعودي بمجلس رجال ومجلس نساء ومداخل مستقلة",
+  "text": "فيلا دور واحد: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل ودورة مياه، ومجلس نساء مستقل عن الرجال بمدخل خاص للعائلة، صالة، طعام جنب المطبخ، والمطبخ في الخلف، وغرفة خادمة بحمام قريبة من المطبخ",
+  "understood": [
+   "غرفة ملابس للغرفة الرئيسية",
+   "مدخل مستقل للعائلة/النساء",
+   "مجلس الرجال بمدخل مستقل عن العائلة",
+   "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+   "غرفة خادمة بحمام",
+   "دور واحد",
+   "«الطعام» بجوار «المطبخ»",
+   "«المطبخ» في الخلف",
+   "«غرفة الخادمة» قرب «المطبخ»"
+  ],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 4.53,
+     "l": 7.47,
+     "ratio": 1.65
+    },
+    "rooms": 24,
+    "net": 251.76,
+    "circulationPct": 16.98,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 4,
+    "ledger": [
+     {
+      "text": "«الطعام» بجوار «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة الخادمة» قرب «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "حمام الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة ملابس للغرفة الرئيسية",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مدخل مستقل للضيوف إلى المجلس",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 4.08,
+     "l": 6.77,
+     "ratio": 1.66
+    },
+    "rooms": 23,
+    "net": 266.39,
+    "circulationPct": 23.62,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«الطعام» بجوار «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": false,
+      "why": "«المطبخ» ليس في نصف المبنى من جهة الخلف."
+     },
+     {
+      "text": "«غرفة الخادمة» قرب «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "حمام الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة ملابس للغرفة الرئيسية",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مدخل مستقل للضيوف إلى المجلس",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 5.33,
+     "l": 6.67,
+     "ratio": 1.25
+    },
+    "rooms": 26,
+    "net": 308.22,
+    "circulationPct": 18.19,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 3,
+    "ledger": [
+     {
+      "text": "«الطعام» بجوار «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": false,
+      "why": "«المطبخ» ليس في نصف المبنى من جهة الخلف."
+     },
+     {
+      "text": "«غرفة الخادمة» قرب «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "حمام الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة ملابس للغرفة الرئيسية",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مدخل مستقل للضيوف إلى المجلس",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "split",
+    "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+    "hall": {
+     "w": 4.08,
+     "l": 8.98,
+     "ratio": 2.2
+    },
+    "rooms": 25,
+    "net": 285.71,
+    "circulationPct": 23.09,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "«الطعام» بجوار «المطبخ»",
+      "ok": false,
+      "why": "«صالة الطعام» لا يلاصق «المطبخ» (بينهما 4.3 م)."
+     },
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": false,
+      "why": "«المطبخ» ليس في نصف المبنى من جهة الخلف."
+     },
+     {
+      "text": "«غرفة الخادمة» قرب «المطبخ»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "حمام الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة ملابس للغرفة الرئيسية",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مدخل مستقل للضيوف إلى المجلس",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 2
+   }
+  ],
+  "notes": [],
+  "ms": 4581,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.2,
+    0.29,
+    0.24
+   ],
+   [
+    0.2,
+    0,
+    0.23,
+    0.23
+   ],
+   [
+    0.29,
+    0.23,
+    0,
+    0.19
+   ],
+   [
+    0.24,
+    0.23,
+    0.19,
+    0
+   ]
+  ],
+  "modes": [
+   "yoo",
+   "wings",
+   "courtyard",
+   "split"
+  ],
+  "minDifference": 0.19,
+  "meanDifference": 0.23,
+  "rejectedCandidates": 0
+ },
+ {
+  "id": "C2",
+  "engine": "v2",
+  "name": "فيلا لعائلة متعددة الأجيال",
+  "text": "عائلة ثلاثة أجيال: غرفة أرضية لأبوي وأمي قريبة من الصالة وبعيدة عن المجلس، الماستر، وثلاث غرف للعيال جنب بعض، ومجلس، وصالة كبيرة تطل على الحوش الخلفي، والمطبخ مقفل",
+  "understood": [
+   "مطبخ مغلق بباب",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "الصالة واسعة",
+   "«غرفة كبار السن» قرب «الصالة»",
+   "«غرفة كبار السن» بعيدًا عن «المجلس»",
+   "«غرفة كبار السن» في الدور الأرضي",
+   "«غرف الأبناء» متجاورة",
+   "«الصالة» على الواجهة الخلفية"
+  ],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "ellback",
+    "summary": "شكل L معكوس: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+    "hall": {
+     "w": 4.98,
+     "l": 8.14,
+     "ratio": 1.63
+    },
+    "rooms": 23,
+    "net": 237.03,
+    "circulationPct": 19.8,
+    "bedrooms": 5,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "«غرفة كبار السن» قرب «الصالة»",
+      "ok": false,
+      "why": "«غرفة كبار السن» بعيد عن «الصالة» (بينهما 2.2 م)."
+     },
+     {
+      "text": "«غرفة كبار السن» بعيدًا عن «المجلس»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة كبار السن» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرف الأبناء» متجاورة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«الصالة» على الواجهة الخلفية",
+      "ok": false,
+      "why": "«الصالة» لا يلامس جدار الخلف (يبعد 7.5 م)."
+     },
+     {
+      "text": "5 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة لكبار السن قرب الصالة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "صالة واسعة (35 م² صافية أو أكثر)",
+      "ok": true,
+      "why": "الفعلي 40 م²."
+     }
+    ],
+    "ledgerFails": 2
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 5.43,
+     "l": 8.62,
+     "ratio": 1.59
+    },
+    "rooms": 23,
+    "net": 258.63,
+    "circulationPct": 18.5,
+    "bedrooms": 5,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 3,
+    "ledger": [
+     {
+      "text": "«غرفة كبار السن» قرب «الصالة»",
+      "ok": false,
+      "why": "«غرفة كبار السن» بعيد عن «الصالة» (بينهما 3.6 م)."
+     },
+     {
+      "text": "«غرفة كبار السن» بعيدًا عن «المجلس»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة كبار السن» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرف الأبناء» متجاورة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«الصالة» على الواجهة الخلفية",
+      "ok": false,
+      "why": "«الصالة» لا يلامس جدار الخلف (يبعد 8 م)."
+     },
+     {
+      "text": "5 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة لكبار السن قرب الصالة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "صالة واسعة (35 م² صافية أو أكثر)",
+      "ok": true,
+      "why": "الفعلي 46.8 م²."
+     }
+    ],
+    "ledgerFails": 2
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 5.28,
+     "l": 6.72,
+     "ratio": 1.27
+    },
+    "rooms": 23,
+    "net": 268.1,
+    "circulationPct": 20.86,
+    "bedrooms": 5,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "«غرفة كبار السن» قرب «الصالة»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة كبار السن» بعيدًا عن «المجلس»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة كبار السن» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرف الأبناء» متجاورة",
+      "ok": false,
+      "why": "«غرفة نوم 5» لا تلاصق أيًّا من بقية المجموعة."
+     },
+     {
+      "text": "«الصالة» على الواجهة الخلفية",
+      "ok": false,
+      "why": "«الصالة» لا يلامس جدار الخلف (يبعد 9.4 م)."
+     },
+     {
+      "text": "5 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة لكبار السن قرب الصالة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "صالة واسعة (35 م² صافية أو أكثر)",
+      "ok": true,
+      "why": "الفعلي 35.5 م²."
+     }
+    ],
+    "ledgerFails": 2
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 5.43,
+     "l": 8.87,
+     "ratio": 1.63
+    },
+    "rooms": 23,
+    "net": 276.63,
+    "circulationPct": 23.81,
+    "bedrooms": 5,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "«غرفة كبار السن» قرب «الصالة»",
+      "ok": false,
+      "why": "«غرفة كبار السن» بعيد عن «الصالة» (بينهما 3.6 م)."
+     },
+     {
+      "text": "«غرفة كبار السن» بعيدًا عن «المجلس»",
+      "ok": false,
+      "why": "«غرفة كبار السن» ملاصق لـ«المجلس»."
+     },
+     {
+      "text": "«غرفة كبار السن» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرف الأبناء» متجاورة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«الصالة» على الواجهة الخلفية",
+      "ok": false,
+      "why": "«الصالة» لا يلامس جدار الخلف (يبعد 7.4 م)."
+     },
+     {
+      "text": "5 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة لكبار السن قرب الصالة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "صالة واسعة (35 م² صافية أو أكثر)",
+      "ok": true,
+      "why": "الفعلي 48.1 م²."
+     }
+    ],
+    "ledgerFails": 3
+   }
+  ],
+  "notes": [],
+  "ms": 1737,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.23,
+    0.16,
+    0.18
+   ],
+   [
+    0.23,
+    0,
+    0.26,
+    0.26
+   ],
+   [
+    0.16,
+    0.26,
+    0,
+    0.26
+   ],
+   [
+    0.18,
+    0.26,
+    0.26,
+    0
+   ]
+  ],
+  "modes": [
+   "ellback",
+   "yoo",
+   "courtyard",
+   "wings"
+  ],
+  "minDifference": 0.16,
+  "meanDifference": 0.23,
+  "rejectedCandidates": 1
+ },
+ {
+  "id": "C3",
+  "engine": "v2",
+  "name": "أرض زاوية (شارعان)",
+  "text": "3 غرف نوم ومجلس رجال على الشارع ومجلس نساء، والمطبخ بجانب الطعام، ومدخل ثاني من الشارع الشرقي",
+  "understood": [
+   "«المجلس» على الشارع (الواجهة الأمامية)",
+   "«المطبخ» بجوار «الطعام»",
+   "«المدخل» في جهة الشرق"
+  ],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "ellback",
+    "summary": "شكل L معكوس: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+    "hall": {
+     "w": 4.93,
+     "l": 7.53,
+     "ratio": 1.53
+    },
+    "rooms": 20,
+    "net": 227.32,
+    "circulationPct": 20.51,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» بجوار «الطعام»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المدخل» في جهة الشرق",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 4.93,
+     "l": 5.52,
+     "ratio": 1.12
+    },
+    "rooms": 19,
+    "net": 245.47,
+    "circulationPct": 20.29,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» بجوار «الطعام»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المدخل» في جهة الشرق",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 4.88,
+     "l": 7.37,
+     "ratio": 1.51
+    },
+    "rooms": 21,
+    "net": 225.46,
+    "circulationPct": 21.88,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» بجوار «الطعام»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المدخل» في جهة الشرق",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 4.88,
+     "l": 6.47,
+     "ratio": 1.32
+    },
+    "rooms": 20,
+    "net": 216.61,
+    "circulationPct": 16.74,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 3,
+    "ledger": [
+     {
+      "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» بجوار «الطعام»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المدخل» في جهة الشرق",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  ],
+  "notes": [],
+  "ms": 2683,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.24,
+    0.21,
+    0.21
+   ],
+   [
+    0.24,
+    0,
+    0.17,
+    0.28
+   ],
+   [
+    0.21,
+    0.17,
+    0,
+    0.24
+   ],
+   [
+    0.21,
+    0.28,
+    0.24,
+    0
+   ]
+  ],
+  "modes": [
+   "ellback",
+   "courtyard",
+   "wings",
+   "yoo"
+  ],
+  "minDifference": 0.17,
+  "meanDifference": 0.22,
+  "rejectedCandidates": 0
+ },
+ {
+  "id": "C4",
+  "engine": "v2",
+  "name": "أرض ضيقة وعميقة",
+  "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام، والغرف في الخلف بعيدة عن الشارع",
+  "understood": [
+   "«غرف النوم» في الخلف"
+  ],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "split",
+    "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+    "hall": {
+     "w": 4.82,
+     "l": 7.08,
+     "ratio": 1.47
+    },
+    "rooms": 18,
+    "net": 186.12,
+    "circulationPct": 20.21,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«غرف النوم» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "gallery",
+    "summary": "رواق طولي (ممر محوري) تتوزع عليه الفراغات من الأمام إلى الخلف",
+    "hall": {
+     "w": 4.93,
+     "l": 5.72,
+     "ratio": 1.16
+    },
+    "rooms": 17,
+    "net": 214.74,
+    "circulationPct": 33.36,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 3,
+    "ledger": [
+     {
+      "text": "«غرف النوم» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "midwing",
+    "summary": "غرف النوم في الوسط على ممر، والصالة والخدمة في الخلف على الحديقة الخلفية",
+    "hall": {
+     "w": 4.81,
+     "l": 6.01,
+     "ratio": 1.25
+    },
+    "rooms": 17,
+    "net": 180.79,
+    "circulationPct": 19.4,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«غرف النوم» في الخلف",
+      "ok": false,
+      "why": "«غرفة نوم 2» ليس في نصف المبنى من جهة الخلف."
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "split",
+    "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان (معكوس)",
+    "hall": {
+     "w": 4.81,
+     "l": 7.08,
+     "ratio": 1.47
+    },
+    "rooms": 18,
+    "net": 186.21,
+    "circulationPct": 20.16,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«غرف النوم» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  ],
+  "notes": [],
+  "ms": 432,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.09,
+    0.23,
+    0
+   ],
+   [
+    0.09,
+    0,
+    0.22,
+    0.09
+   ],
+   [
+    0.23,
+    0.22,
+    0,
+    0.23
+   ],
+   [
+    0,
+    0.09,
+    0.23,
+    0
+   ]
+  ],
+  "modes": [
+   "split",
+   "gallery",
+   "midwing"
+  ],
+  "minDifference": 0,
+  "meanDifference": 0.14,
+  "rejectedCandidates": 0
+ },
+ {
+  "id": "C5",
+  "engine": "v2",
+  "name": "أرض غير منتظمة",
+  "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+  "understood": [],
+  "unclear": [
+   "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م"
+  ],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 4.98,
+     "l": 5.77,
+     "ratio": 1.16
+    },
+    "rooms": 17,
+    "net": 179.1,
+    "circulationPct": 19.78,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 4.88,
+     "l": 5.86,
+     "ratio": 1.2
+    },
+    "rooms": 18,
+    "net": 191.07,
+    "circulationPct": 25.22,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 4.88,
+     "l": 6.02,
+     "ratio": 1.23
+    },
+    "rooms": 19,
+    "net": 220.17,
+    "circulationPct": 23.3,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "midwing",
+    "summary": "غرف النوم في الوسط على ممر، والصالة والخدمة في الخلف على الحديقة الخلفية",
+    "hall": {
+     "w": 4.81,
+     "l": 6.01,
+     "ratio": 1.25
+    },
+    "rooms": 17,
+    "net": 187.71,
+    "circulationPct": 17.21,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  ],
+  "notes": [
+   "المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده."
+  ],
+  "ms": 1542,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.31,
+    0.29,
+    0.26
+   ],
+   [
+    0.31,
+    0,
+    0.26,
+    0.36
+   ],
+   [
+    0.29,
+    0.26,
+    0,
+    0.32
+   ],
+   [
+    0.26,
+    0.36,
+    0.32,
+    0
+   ]
+  ],
+  "modes": [
+   "yoo",
+   "wings",
+   "courtyard",
+   "midwing"
+  ],
+  "minDifference": 0.26,
+  "meanDifference": 0.3,
+  "rejectedCandidates": 0
+ },
+ {
+  "id": "C6",
+  "engine": "v2",
+  "name": "تصميم بطابق واحد",
+  "text": "دور واحد، ثلاث غرف نوم بالضبط، المطبخ 4×5، مجلس 5×6، والمطبخ في الخلف",
+  "understood": [
+   "المجلس 5×6 م (30 م²)",
+   "المطبخ 4×5 م (20 م²)",
+   "دور واحد",
+   "«المطبخ» في الخلف"
+  ],
+  "unclear": [
+   "ثلاث غرف نوم بالضبط"
+  ],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 4.88,
+     "l": 7.32,
+     "ratio": 1.5
+    },
+    "rooms": 17,
+    "net": 211.62,
+    "circulationPct": 16.61,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المجلس» بمساحة 30 م² تقريبًا",
+      "ok": true,
+      "why": "الفعلي 30.2 م² (صافٍ داخل الجدران)."
+     },
+     {
+      "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+      "ok": true,
+      "why": "الفعلي 21 م² (صافٍ داخل الجدران)."
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 5.08,
+     "l": 6.57,
+     "ratio": 1.29
+    },
+    "rooms": 19,
+    "net": 241.44,
+    "circulationPct": 22.73,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المجلس» بمساحة 30 م² تقريبًا",
+      "ok": false,
+      "why": "مساحة «المجلس» الصافية 24.8 م²."
+     },
+     {
+      "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+      "ok": true,
+      "why": "الفعلي 21.6 م² (صافٍ داخل الجدران)."
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "midwing",
+    "summary": "غرف النوم في الوسط على ممر، والصالة والخدمة في الخلف على الحديقة الخلفية",
+    "hall": {
+     "w": 4.82,
+     "l": 6.72,
+     "ratio": 1.39
+    },
+    "rooms": 17,
+    "net": 213.28,
+    "circulationPct": 15.45,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المجلس» بمساحة 30 م² تقريبًا",
+      "ok": true,
+      "why": "الفعلي 25.8 م² (صافٍ داخل الجدران)."
+     },
+     {
+      "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+      "ok": false,
+      "why": "مساحة «المطبخ» الصافية 16.9 م²."
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 4.88,
+     "l": 5.82,
+     "ratio": 1.19
+    },
+    "rooms": 18,
+    "net": 217.31,
+    "circulationPct": 23.32,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": false,
+      "why": "«المطبخ» ليس في نصف المبنى من جهة الخلف."
+     },
+     {
+      "text": "«المجلس» بمساحة 30 م² تقريبًا",
+      "ok": true,
+      "why": "الفعلي 27.7 م² (صافٍ داخل الجدران)."
+     },
+     {
+      "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+      "ok": true,
+      "why": "الفعلي 22.8 م² (صافٍ داخل الجدران)."
+     },
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دور واحد",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   }
+  ],
+  "notes": [],
+  "ms": 1410,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.31,
+    0.26,
+    0.32
+   ],
+   [
+    0.31,
+    0,
+    0.34,
+    0.25
+   ],
+   [
+    0.26,
+    0.34,
+    0,
+    0.38
+   ],
+   [
+    0.32,
+    0.25,
+    0.38,
+    0
+   ]
+  ],
+  "modes": [
+   "yoo",
+   "courtyard",
+   "midwing",
+   "wings"
+  ],
+  "minDifference": 0.25,
+  "meanDifference": 0.31,
+  "rejectedCandidates": 0
+ },
+ {
+  "id": "C7",
+  "engine": "v2",
+  "name": "تصميم متعدد الأدوار",
+  "text": "دورين: المجالس والطعام والمطبخ تحت، و5 غرف نوم فوق، والماستر في الدور العلوي بعيدة عن الدرج، وغرفة لأمي في الأرضي",
+  "understood": [
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "دوران (أرضي وأول)",
+   "«المطبخ» في الدور الأرضي",
+   "«غرف النوم» في الدور العلوي",
+   "«غرفة النوم الرئيسية» في الدور العلوي",
+   "«غرفة كبار السن» في الدور الأرضي"
+  ],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "sidehall",
+    "summary": "جناح خدمة على جانب وصالة على الجانب المقابل، وغرف النوم خلفهما على ممر (دوران)",
+    "hall": {
+     "w": 4.68,
+     "l": 4.87,
+     "ratio": 1.04
+    },
+    "rooms": 24,
+    "net": 315.01,
+    "circulationPct": 11.89,
+    "bedrooms": 5,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«المطبخ» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرف النوم» في الدور العلوي",
+      "ok": false,
+      "why": "«غرفة كبار السن» في الدور الأرضي."
+     },
+     {
+      "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة كبار السن» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "5 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دوران",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة لكبار السن قرب الصالة",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "compact",
+    "summary": "صالة مركزية مدمجة: الضيافة في الأمام، والخدمة في جناح، وغرف النوم في جناح مقابل (دوران)",
+    "hall": {
+     "w": 4.08,
+     "l": 6.07,
+     "ratio": 1.49
+    },
+    "rooms": 23,
+    "net": 288.94,
+    "circulationPct": 7.2,
+    "bedrooms": 5,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "«المطبخ» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرف النوم» في الدور العلوي",
+      "ok": false,
+      "why": "«غرفة كبار السن» في الدور الأرضي."
+     },
+     {
+      "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«غرفة كبار السن» في الدور الأرضي",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "5 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "دوران",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "غرفة لكبار السن قرب الصالة",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 1
+   }
+  ],
+  "notes": [],
+  "ms": 674,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 2,
+  "diversity": [
+   [
+    0,
+    0.15
+   ],
+   [
+    0.15,
+    0
+   ]
+  ],
+  "modes": [
+   "sidehall",
+   "compact"
+  ],
+  "minDifference": 0.15,
+  "meanDifference": 0.15,
+  "rejectedCandidates": 0
+ },
+ {
+  "id": "C8",
+  "engine": "v2",
+  "name": "تعديل موقع غرفة دون حذف الغرف الأخرى",
+  "text": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+  "understood": [],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 4.88,
+     "l": 6.77,
+     "ratio": 1.39
+    },
+    "rooms": 20,
+    "net": 210.39,
+    "circulationPct": 19.07,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 4.58,
+     "l": 6.52,
+     "ratio": 1.42
+    },
+    "rooms": 20,
+    "net": 215.87,
+    "circulationPct": 25.68,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "ellback",
+    "summary": "شكل L معكوس: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+    "hall": {
+     "w": 4.66,
+     "l": 7.03,
+     "ratio": 1.51
+    },
+    "rooms": 20,
+    "net": 215.42,
+    "circulationPct": 19.8,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "gallery",
+    "summary": "رواق طولي (ممر محوري) تتوزع عليه الفراغات من الأمام إلى الخلف",
+    "hall": {
+     "w": 4.08,
+     "l": 6.07,
+     "ratio": 1.49
+    },
+    "rooms": 20,
+    "net": 238.01,
+    "circulationPct": 23.2,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 2,
+    "bathPrivacy": 0,
+    "reviewWarnings": 4,
+    "ledger": [
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  ],
+  "notes": [],
+  "ms": 1158,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.29,
+    0.29,
+    0.12
+   ],
+   [
+    0.29,
+    0,
+    0.2,
+    0.26
+   ],
+   [
+    0.29,
+    0.2,
+    0,
+    0.24
+   ],
+   [
+    0.12,
+    0.26,
+    0.24,
+    0
+   ]
+  ],
+  "modes": [
+   "yoo",
+   "wings",
+   "ellback",
+   "gallery"
+  ],
+  "minDifference": 0.12,
+  "meanDifference": 0.23,
+  "rejectedCandidates": 0,
+  "edit": {
+   "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
+   "ms": 555,
+   "reply": {
+    "done": [
+     "«المطبخ» بجوار «الطعام»",
+     "«المطبخ» في الخلف"
+    ],
+    "failed": [],
+    "picks": [],
+    "unclear": [],
+    "unsupported": [],
+    "kept": true,
+    "unchanged": true,
+    "otherFails": []
+   },
+   "samePattern": true,
+   "difference": 0,
+   "roomsKept": true,
+   "roomsLost": [],
+   "after": {
+    "hall": {
+     "w": 4.08,
+     "l": 8.68,
+     "ratio": 2.13
+    },
+    "rooms": 16,
+    "net": 212.38,
+    "circulationPct": 17.05,
+    "bedrooms": 4,
+    "noWindow": 1,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "«المطبخ» بجوار «الطعام»",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "«المطبخ» في الخلف",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  }
+ },
+ {
+  "id": "C9",
+  "engine": "v2",
+  "name": "تغيير الواجهة دون تغيير المخطط",
+  "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+  "understood": [],
+  "unclear": [],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 4.93,
+     "l": 5.67,
+     "ratio": 1.15
+    },
+    "rooms": 17,
+    "net": 179.2,
+    "circulationPct": 20.48,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 2,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 4.88,
+     "l": 6.02,
+     "ratio": 1.23
+    },
+    "rooms": 19,
+    "net": 220.17,
+    "circulationPct": 23.3,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 5.03,
+     "l": 8.12,
+     "ratio": 1.61
+    },
+    "rooms": 18,
+    "net": 214.9,
+    "circulationPct": 22.67,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 0,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "midwing",
+    "summary": "غرف النوم في الوسط على ممر، والصالة والخدمة في الخلف على الحديقة الخلفية",
+    "hall": {
+     "w": 4.81,
+     "l": 6.01,
+     "ratio": 1.25
+    },
+    "rooms": 17,
+    "net": 187.71,
+    "circulationPct": 17.21,
+    "bedrooms": 3,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "3 غرف نوم",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  ],
+  "notes": [],
+  "ms": 1346,
+  "requestedAlternatives": 4,
+  "producedAlternatives": 4,
+  "diversity": [
+   [
+    0,
+    0.29,
+    0.31,
+    0.26
+   ],
+   [
+    0.29,
+    0,
+    0.26,
+    0.32
+   ],
+   [
+    0.31,
+    0.26,
+    0,
+    0.36
+   ],
+   [
+    0.26,
+    0.32,
+    0.36,
+    0
+   ]
+  ],
+  "modes": [
+   "yoo",
+   "courtyard",
+   "wings",
+   "midwing"
+  ],
+  "minDifference": 0.26,
+  "meanDifference": 0.3,
+  "rejectedCandidates": 0,
+  "edit": {
+   "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
+   "error": "لم أفهم ملاحظتك بدقة فلم أغيّر شيئًا: «احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر». اكتبها بصيغة مباشرة مثل: «المطبخ في الخلف»، «الماستر بعيدة عن المجلس»، «المجلس أكبر»، «غرفة النوم 4×5»، أو اختر من الخيارات.",
+   "code": "SHARA_UNCLEAR"
+  }
+ },
+ {
+  "id": "C10",
+  "engine": "v2",
+  "name": "خمسة بدائل مختلفة تنظيميًا لطلب واحد",
+  "text": "4 غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، طعام، مطبخ، غرفة خادمة",
+  "understood": [
+   "غرفة خادمة"
+  ],
+  "unclear": [
+   "4 غرف نوم منها ماستر"
+  ],
+  "unsupported": [],
+  "designs": [
+   {
+    "file": "alt-1.json",
+    "mode": "wings",
+    "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+    "hall": {
+     "w": 4.88,
+     "l": 6.67,
+     "ratio": 1.37
+    },
+    "rooms": 25,
+    "net": 261.27,
+    "circulationPct": 22.86,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-2.json",
+    "mode": "courtyard",
+    "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+    "hall": {
+     "w": 4.88,
+     "l": 6.32,
+     "ratio": 1.29
+    },
+    "rooms": 25,
+    "net": 280.43,
+    "circulationPct": 20.88,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 3,
+    "ledger": [
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-3.json",
+    "mode": "yoo",
+    "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+    "hall": {
+     "w": 5.08,
+     "l": 7.02,
+     "ratio": 1.38
+    },
+    "rooms": 24,
+    "net": 244.97,
+    "circulationPct": 17.5,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 4,
+    "ledger": [
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-4.json",
+    "mode": "ellback",
+    "summary": "شكل L معكوس: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+    "hall": {
+     "w": 4.48,
+     "l": 9.14,
+     "ratio": 2.04
+    },
+    "rooms": 24,
+    "net": 270.16,
+    "circulationPct": 21.03,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 1,
+    "unreachable": 0,
+    "swingBlocked": 0,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   },
+   {
+    "file": "alt-5.json",
+    "mode": "split",
+    "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+    "hall": {
+     "w": 4.08,
+     "l": 7.73,
+     "ratio": 1.89
+    },
+    "rooms": 25,
+    "net": 273.86,
+    "circulationPct": 22.83,
+    "bedrooms": 4,
+    "noWindow": 0,
+    "minWidth": 0,
+    "unreachable": 0,
+    "swingBlocked": 1,
+    "bathPrivacy": 0,
+    "reviewWarnings": 1,
+    "ledger": [
+     {
+      "text": "غرفة الخادمة",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "4 غرف نوم",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس للرجال ومجلس للنساء",
+      "ok": true,
+      "why": ""
+     },
+     {
+      "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+      "ok": true,
+      "why": ""
+     }
+    ],
+    "ledgerFails": 0
+   }
+  ],
+  "notes": [],
+  "ms": 3031,
+  "requestedAlternatives": 5,
+  "producedAlternatives": 5,
+  "diversity": [
+   [
+    0,
+    0.19,
+    0.26,
+    0.24,
+    0.24
+   ],
+   [
+    0.19,
+    0,
+    0.3,
+    0.21,
+    0.21
+   ],
+   [
+    0.26,
+    0.3,
+    0,
+    0.25,
+    0.25
+   ],
+   [
+    0.24,
+    0.21,
+    0.25,
+    0,
+    0.17
+   ],
+   [
+    0.24,
+    0.21,
+    0.25,
+    0.17,
+    0
+   ]
+  ],
+  "modes": [
+   "wings",
+   "courtyard",
+   "yoo",
+   "ellback",
+   "split"
+  ],
+  "minDifference": 0.17,
+  "meanDifference": 0.23,
+  "rejectedCandidates": 1
+ }
+]
