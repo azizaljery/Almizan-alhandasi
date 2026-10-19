@@ -1,16 +1,23 @@
 // يشغّل حالات القبول المعمارية على الشيفرة الحالية ويحفظ: المستندات، ومقاييس كل بديل، وسجل المطابقة،
-// ومصفوفة اختلاف البدائل، والزمن. الاستعمال: node scripts/acceptance-run.mjs <stage>  (مثل before / after-1)
+// ومصفوفة اختلاف البدائل، والزمن. الاستعمال: node scripts/acceptance-run.mjs <stage> [نمط الحالات] [--engine v1|v2]
+// (أو MIZAN_ENGINE=v2). الافتراضي v1: المولّد المنشور dist/villa-layout.mjs؛ و v2: dist/villa-layout-v2.mjs.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { CASES } from './acceptance-cases.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
-import { generateVillaDesigns, generateVillaTwoFloors } from '../dist/villa-layout.mjs';
+import * as V1 from '../dist/villa-layout.mjs';
+import * as V2 from '../dist/villa-layout-v2.mjs';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
 import { createSession, redesign } from '../dist/design-session.mjs';
 import { verifyRequest, docRooms } from '../dist/rules.mjs';
 import { reviewDoc } from '../dist/draw/review.mjs';
 import { serialize } from '../dist/draw/doc.mjs';
 
-const stage = process.argv[2] || 'before', only = process.argv[3] ? new RegExp(process.argv[3]) : null;
+const argv = process.argv.slice(2), ei = argv.indexOf('--engine');
+const engine = (ei >= 0 ? argv[ei + 1] : process.env.MIZAN_ENGINE) || 'v1';
+if (!['v1', 'v2'].includes(engine)) throw Error('المحرك v1 أو v2 فقط');
+const pos = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--engine');
+const stage = pos[0] || 'before', only = pos[1] ? new RegExp(pos[1]) : null;
+const { generateVillaDesigns, generateVillaTwoFloors } = engine === 'v2' ? V2 : V1;
 const OUT = new URL(`../evidence/acceptance/${stage}/`, import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 const r2 = v => Math.round(v * 100) / 100;
@@ -22,7 +29,9 @@ export function metrics(doc, req, entry) {
   const rv = reviewDoc(doc), by = c => rv.filter(i => i.code === c).length;
   const led = verifyRequest(doc, req, { entry });
   const beds = rooms.filter(r => r.type === 'bedroom' || r.type === 'master');
+  const hall = rooms.find(r => r.name === 'الصالة' && r.li === 0) || rooms.find(r => /^الصالة/.test(r.name));
   return {
+    hall: hall ? { w: r2(Math.min(hall.x1 - hall.x0, hall.y1 - hall.y0)), l: r2(Math.max(hall.x1 - hall.x0, hall.y1 - hall.y0)), ratio: r2(Math.max(hall.x1 - hall.x0, hall.y1 - hall.y0) / Math.min(hall.x1 - hall.x0, hall.y1 - hall.y0)) } : null,
     rooms: rooms.length, net: r2(net), circulationPct: r2(100 * circ / Math.max(1, net)), bedrooms: beds.length,
     noWindow: by('NO_WINDOW'), minWidth: by('MIN_WIDTH'), unreachable: by('UNREACHABLE_ROOM'), swingBlocked: by('SWING_BLOCKED'), bathPrivacy: by('BATH_PRIVACY'),
     reviewWarnings: rv.filter(i => i.severity === 'warning').length,
@@ -43,8 +52,10 @@ for (const C of CASES) {
   const dir = OUT + C.id + '/'; mkdirSync(dir, { recursive: true });
   const req = extractRequirements(C.text, { counts: C.counts }); req.counts = { ...req.counts, ...C.counts };
   const land = { floors: 1, ...C.land }, entry = land.entries[0];
-  const row = { id: C.id, name: C.name, text: C.text, understood: req.understood, unclear: req.unclear, unsupported: req.unsupported, designs: [], notes: [] };
-  if (C.irregular) row.notes.push('المولّد يقبل أرضًا مستطيلة فقط (عرض × طول)؛ شكل الأرض في الطلب لا يُمثَّل. وُلّد على مستطيل محيط.');
+  const row = { id: C.id, engine, name: C.name, text: C.text, understood: req.understood, unclear: req.unclear, unsupported: req.unsupported, designs: [], notes: [] };
+  if (C.irregular && engine === 'v1') row.notes.push('المولّد يقبل أرضًا مستطيلة فقط (عرض × طول)؛ شكل الأرض في الطلب لا يُمثَّل. وُلّد على مستطيل محيط.');
+  if (C.irregular && engine === 'v2') row.notes.push('المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده.');
+  if (engine === 'v1') delete land.polygon;
   const t0 = performance.now();
   let out;
   try {
@@ -57,6 +68,9 @@ for (const C of CASES) {
     row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length;
     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));
     row.modes = [...new Set(out.designs.map(d => d.mode))];
+    const pairs = row.diversity.flatMap((r, i) => r.filter((_, j) => j > i));
+    row.minDifference = pairs.length ? Math.min(...pairs) : null; row.meanDifference = pairs.length ? r2(pairs.reduce((a, b) => a + b, 0) / pairs.length) : null;
+    if (out.rejected) row.rejectedCandidates = out.rejected.length;
   }
   if (C.edit && out) {
     try {

@@ -13,7 +13,8 @@ export const CASES = [
   { id: 'C4', name: 'أرض ضيقة وعميقة', land: { width: 12, length: 36, streets: ['s'], entries: ['s'] },
     text: '3 غرف نوم ومجلس وصالة ومطبخ وطعام، والغرف في الخلف بعيدة عن الشارع',
     counts: { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 } },
-  { id: 'C5', name: 'أرض غير منتظمة', irregular: true, land: { width: 20, length: 30, streets: ['s'], entries: ['s'] },
+  // المضلع الفعلي كما في نص الطلب (الواجهة 18 م جنوبًا، الخلف 24 م، العمق 30 م)؛ المولّد الأول يتجاهله ويبقى على 20×30
+  { id: 'C5', name: 'أرض غير منتظمة', irregular: true, land: { width: 20, length: 30, streets: ['s'], entries: ['s'], polygon: [{ x: 3, y: 0 }, { x: 21, y: 0 }, { x: 24, y: 30 }, { x: 0, y: 30 }] },
     text: 'أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ',
     counts: { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 } },
   { id: 'C6', name: 'تصميم بطابق واحد', land: { width: 20, length: 28, streets: ['s'], entries: ['s'] },
