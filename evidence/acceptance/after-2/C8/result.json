@@ -1,0 +1,282 @@
+{
+ "id": "C8",
+ "engine": "v2",
+ "name": "تعديل موقع غرفة دون حذف الغرف الأخرى",
+ "text": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [
+  "4 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "ellback",
+   "pat": "ellback:b0r",
+   "summary": "شكل L معكوس: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.88,
+    "l": 6.28,
+    "ratio": 1.29
+   },
+   "rooms": 20,
+   "net": 213.87,
+   "circulationPct": 20.07,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "wings",
+   "pat": "wings:w0r",
+   "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 75.99,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.88,
+    "l": 5.82,
+    "ratio": 1.19
+   },
+   "rooms": 18,
+   "net": 226.79,
+   "circulationPct": 23.2,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "ell",
+   "pat": "ell:l0r",
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 93.15,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 8.32,
+    "ratio": 2.04
+   },
+   "rooms": 20,
+   "net": 225.67,
+   "circulationPct": 19.38,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "courtyard",
+   "pat": "courtyard:k1",
+   "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 78.36,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.02,
+    "l": 4.43,
+    "ratio": 1.1
+   },
+   "rooms": 22,
+   "net": 274.61,
+   "circulationPct": 19.91,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 2915,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.21,
+   0.22,
+   0.21
+  ],
+  [
+   0.21,
+   0,
+   0.21,
+   0.22
+  ],
+  [
+   0.22,
+   0.21,
+   0,
+   0.31
+  ],
+  [
+   0.21,
+   0.22,
+   0.31,
+   0
+  ]
+ ],
+ "modes": [
+  "ellback",
+  "wings",
+  "ell",
+  "courtyard"
+ ],
+ "minDifference": 0.21,
+ "meanDifference": 0.23,
+ "rejectedCandidates": 0,
+ "edit": {
+  "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
+  "ms": 3087,
+  "reply": {
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "pending": [],
+   "unverified": [],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": false,
+   "unchanged": false,
+   "reused": false,
+   "otherFails": [],
+   "conflicts": [],
+   "questions": [],
+   "patternChanged": {
+    "from": "ellback:b0r",
+    "to": "courtyard:k1r",
+    "why_ar": "التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه، وبقية الغرف كما هي."
+   }
+  },
+  "beforePattern": "ellback:b0r",
+  "afterPattern": "courtyard:k1r",
+  "samePattern": false,
+  "difference": 0.12,
+  "roomsKept": false,
+  "roomsLost": [
+   "غرفة الملابس",
+   "مدخل الرجال"
+  ],
+  "programRoomsKept": true,
+  "programRoomsLost": [],
+  "editLedgerBefore": [
+   {
+    "text": "«المطبخ» بجوار «الطعام»",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "«المطبخ» في الخلف",
+    "status": "failed",
+    "why": "«المطبخ» ليس في نصف المبنى من جهة الخلف."
+   },
+   {
+    "text": "4 غرف نوم",
+    "status": "done",
+    "why": ""
+   }
+  ],
+  "after": {
+   "hall": {
+    "w": 4.88,
+    "l": 5.52,
+    "ratio": 1.13
+   },
+   "rooms": 22,
+   "net": 236.36,
+   "circulationPct": 19.6,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ }
+}

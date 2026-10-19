@@ -1,0 +1,315 @@
+{
+ "id": "C6",
+ "engine": "v2",
+ "name": "تصميم بطابق واحد",
+ "text": "دور واحد، ثلاث غرف نوم بالضبط، المطبخ 4×5، مجلس 5×6، والمطبخ في الخلف",
+ "understood": [
+  "3 غرف نوم (بالضبط)",
+  "المجلس 5×6 م (30 م²)",
+  "المطبخ 4×5 م (20 م²)",
+  "دور واحد",
+  "«المطبخ» في الخلف"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "courtyard",
+   "pat": "courtyard:k1r",
+   "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 90.08,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 5.02,
+    "l": 5.08,
+    "ratio": 1.01
+   },
+   "rooms": 17,
+   "net": 241.33,
+   "circulationPct": 20.45,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 30.9 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 19.5 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 5×6.2 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 3.8×5.2 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "ell",
+   "pat": "ell:l0",
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 84.46,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 7.32,
+    "ratio": 1.79
+   },
+   "rooms": 15,
+   "net": 219.26,
+   "circulationPct": 21.49,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 29.7 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 19.4 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 5.1×5.8 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 4.1×4.8 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "ellback",
+   "pat": "ellback:b0",
+   "summary": "شكل L معكوس: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 90.45,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.02,
+    "l": 8.38,
+    "ratio": 2.09
+   },
+   "rooms": 18,
+   "net": 252.79,
+   "circulationPct": 19.98,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 28 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 19.7 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 4.8×5.8 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 3.9×5 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "ell",
+   "pat": "ell:l0r",
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.85,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 7.52,
+    "ratio": 1.84
+   },
+   "rooms": 17,
+   "net": 208.62,
+   "circulationPct": 18.87,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": false,
+     "why": "«المطبخ» ليس في نصف المبنى من جهة الخلف."
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 30.9 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 19.5 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 5×6.2 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 3.8×5.1 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 1
+  }
+ ],
+ "notes": [],
+ "ms": 2674,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.32,
+   0.21,
+   0.22
+  ],
+  [
+   0.32,
+   0,
+   0.26,
+   0.22
+  ],
+  [
+   0.21,
+   0.26,
+   0,
+   0.22
+  ],
+  [
+   0.22,
+   0.22,
+   0.22,
+   0
+  ]
+ ],
+ "modes": [
+  "courtyard",
+  "ell",
+  "ellback"
+ ],
+ "minDifference": 0.21,
+ "meanDifference": 0.24,
+ "rejectedCandidates": 0
+}
