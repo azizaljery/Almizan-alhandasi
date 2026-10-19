@@ -1,7 +1,7 @@
 // جلسة التصميم: التصميم الأولي يُعرض على العميل، ويطلب بديلًا بعد أن تسأله شرعاء عمّا لم يعجبه،
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
 import { generateInitialDesign } from './home-flow.mjs';
-import { extractRequirements } from './requirements.mjs';
+import { extractRequirements, detectConflicts } from './requirements.mjs';
 import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
@@ -32,8 +32,11 @@ const clone = v => JSON.parse(JSON.stringify(v));
 export function createSession({ land, counts, requirements, discovery, idea = '', result }) {
   const req = clone(requirements || extractRequirements(idea || '', { counts: counts || {}, discovery }));
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
+  // التعارضات في الطلب: تُرفق بالجلسة مع سؤال للعميل (لا رمي ولا تعديل للطلب)
+  let conflicts = []; try { conflicts = detectConflicts(req, land || {}); } catch { conflicts = []; }
   return {
     v: 1, input: { land, discovery, idea, requirements: req },
+    conflicts, reply: conflicts.length ? { conflicts, questions: conflicts.map(c => c.question_ar) } : null,
     designs: [entry(result, null)], current: 0, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
     alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc) })),
@@ -60,34 +63,66 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
     const err = Error('لم أفهم ملاحظتك بدقة فلم أغيّر شيئًا' + (more.unclear.length ? ': ' + more.unclear.map(x => '«' + x + '»').join('، ') : '') + '. اكتبها بصيغة مباشرة مثل: «المطبخ في الخلف»، «الماستر بعيدة عن المجلس»، «المجلس أكبر»، «غرفة النوم 4×5»، أو اختر من الخيارات.');
     err.code = 'SHARA_UNCLEAR'; err.unclear = more.unclear; throw err;
   }
+  const before = (() => { try { return new Set(detectConflicts(req, s.input.land || {}).map(c => c.key)); } catch { return new Set(); } })();
   for (const id of picks) { const f = FEEDBACK.find(x => x.id === id); if (!f) throw Error('خيار غير معروف.'); f.apply(req, req.tweaks); changes.push(f.label); }
+  let layoutChange = picks.length > 0;
   if (more) {
+    const any = o => Object.keys(o || {}).length > 0;
+    layoutChange ||= !!(more.rules?.length || any(more.prefs) || any(more.extras) || any(more.areas) || any(more.dims) || any(more.textCounts) || more.absent?.length || Object.values(more.tweaks || {}).some(v => typeof v === 'number'));
     Object.assign(req.prefs, more.prefs); Object.assign(req.extras, more.extras); Object.assign(req.areas, more.areas);
-    for (const [k, v] of Object.entries(more.counts)) if (Number.isInteger(v) && (v > 0 || (v === 0 && ['majlis', 'dining'].includes(k)))) req.counts[k] = v;
+    req.dims = { ...(req.dims || {}), ...(more.dims || {}) };
+    // الأعداد: ما ذكره العميل صراحة في الملاحظة فقط (لا يُنزل «الماستر …» عدد الغرف إلى 1)، و«بدون مجلس/طعام»، والحمامات المحسوبة لطلبه
+    for (const [k, v] of Object.entries(more.textCounts || {})) if (Number.isInteger(v) && v > 0) req.counts[k] = v;
+    for (const k of ['majlis', 'dining']) if (more.counts?.[k] === 0) req.counts[k] = 0;
+    if (more.counts?.dining > 0 && !req.counts.dining) req.counts.dining = more.counts.dining; // ذكر الطعام في الملاحظة يعني وجوده
+    if (Number.isInteger(more.counts?.baths) && (more.prefs?.allEnsuite || more.prefs?.sharedBaths) && more.counts.baths > (req.counts.baths || 0)) req.counts.baths = more.counts.baths;
+    if (Number.isInteger(more.counts?.kitchens) && more.counts.kitchens > (req.counts.kitchens || 0)) req.counts.kitchens = more.counts.kitchens;
     req.rules = mergeRules(req.rules || [], more.rules || []);
-    for (const [k, v] of Object.entries(more.tweaks || {})) req.tweaks[k] = (req.tweaks[k] || 1) * v;
+    // معاملات التكبير تتضاعف؛ التعديلات البنيوية (الواجهة) تُستبدل كما هي
+    for (const [k, v] of Object.entries(more.tweaks || {})) req.tweaks[k] = typeof v === 'number' ? (typeof req.tweaks[k] === 'number' ? req.tweaks[k] : 1) * v : JSON.parse(JSON.stringify(v));
+    if (more.keepLayout) req.keepLayout = true;
+    if (more.absent?.length) req.absent = [...new Set([...(req.absent || []), ...more.absent])];
     if (more.unsupported?.length) req.unsupported = [...new Set([...(req.unsupported || []), ...more.unsupported])];
     req.understood = [...new Set([...(req.understood || []), ...more.understood])];
     changes.push(...more.understood);
     s.input.idea = [s.input.idea, text].filter(Boolean).join('\n');
+  }
+  // تعارض جديد (في الملاحظة نفسها أو بينها وبين الطلب السابق): لا تصميم، بل سؤال للعميل — بلا رمي
+  let fresh = [];
+  try {
+    const all = [...(more ? detectConflicts({ ...more, counts: { ...req.counts, ...(more.textCounts || {}) } }, s.input.land || {}) : []), ...detectConflicts(req, s.input.land || {})];
+    const keys = new Set(); fresh = all.filter(c => !before.has(c.key) && !keys.has(c.key) && keys.add(c.key));
+  } catch { fresh = []; }
+  if (fresh.length) {
+    const reply = { conflicts: fresh, questions: fresh.map(c => c.question_ar), done: [], failed: [], pending: [], unverified: [], picks: picks.map(id => FEEDBACK.find(f => f.id === id)?.label).filter(Boolean), unclear: more?.unclear || [], unsupported: more?.unsupported || [], kept: true, unchanged: true, otherFails: [] };
+    const keep = clone(session); keep.conflicts = fresh; keep.reply = { conflicts: fresh, questions: reply.questions };
+    return { session: keep, changes: [], reply };
   }
   const different = picks.includes('layout') || (!picks.length && !more);
   if (different) changes.push('توزيع مختلف للغرف');
   const cur = s.designs[s.current];
   const exclude = different ? s.designs.map(d => d.pat).filter(Boolean) : [];
   const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null };
-  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer });
+  // «احتفظ بهذا التوزيع» بلا تغيير يمس المخطط (مثل تغيير الواجهة): المخطط نفسه حرفيًا، بلا توليد
+  const reuse = !different && !!more?.keepLayout && !layoutChange;
+  const out = reuse
+    ? { doc: parseDoc(cur.doc), pat: cur.pat, mirror: cur.mirror ?? null, summary: cur.summary, notes: cur.notes, floors: cur.floors, engine: cur.engine, same: true }
+    : await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer });
   // رد شرعاء: البنود التي طلبها الآن، مقيسة من المخطط الجديد
   const entryDir = s.input.land?.entries?.[0] || 's';
   let ledger = []; try { ledger = verifyRequest(out.doc, req, { entry: entryDir }); } catch { ledger = out.ledger || []; }
   const asked = new Set([...(more?.understood || [])]);
-  const mine = ledger.filter(x => asked.has(x.text) || (more?.rules || []).some(r => r.text === x.text));
+  const mine = ledger.filter(x => asked.has(x.text) || (more?.rules || []).some(r => r.text === x.text) || (x.id === 'F-facade' && more?.tweaks?.facade));
   const unchanged = !different && serialize(out.doc) === cur.doc;
+  const st = x => x.status || (x.ok ? 'done' : 'failed');
   const reply = {
-    done: mine.filter(x => x.ok).map(x => x.text), failed: mine.filter(x => !x.ok).map(x => ({ text: x.text, why: x.why })),
+    done: mine.filter(x => st(x) === 'done').map(x => x.text), failed: mine.filter(x => st(x) === 'failed').map(x => ({ text: x.text, why: x.why })),
+    pending: mine.filter(x => st(x) === 'pending-render').map(x => ({ text: x.text, why: x.why })),
+    unverified: mine.filter(x => st(x) === 'unverified').map(x => ({ text: x.text, why: x.why })),
     picks: picks.map(id => FEEDBACK.find(f => f.id === id)?.label).filter(Boolean),
-    unclear: more?.unclear || [], unsupported: more?.unsupported || [], kept: !different && !!out.same, unchanged,
-    otherFails: ledger.filter(x => !x.ok && !mine.includes(x)).map(x => ({ text: x.text, why: x.why })),
+    unclear: more?.unclear || [], unsupported: more?.unsupported || [], kept: !different && !!out.same, unchanged, reused: reuse,
+    otherFails: ledger.filter(x => st(x) === 'failed' && !mine.includes(x)).map(x => ({ text: x.text, why: x.why })),
+    conflicts: [], questions: [],
   };
   s.designs.push(entry(out, { picks, text, changes, reply }));
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);

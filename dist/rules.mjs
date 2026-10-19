@@ -3,33 +3,38 @@
 // ثلاث وظائف: extractRules (نص مطبَّع ← قواعد)، rulePenalty (تقييم في الإطار القانوني للمولّد)،
 // verifyRules (تحقق هندسي من المستند الناتج: نُفّذ/لم يُنفَّذ مع السبب). نقي: لا DOM ولا شبكة.
 import { analyzeDoc } from './draw/digest.mjs';
+import { stairLayout } from './draw/stairs3d.mjs';
 
 const AR = '\\u0600-\\u06FF';
 const PRE = `(?<![${AR}])(?:[وفبك]?(?:ال|لل)|[وفبكل])?`; // أدوات ملتصقة: و، ب، ل، ال، بال، لل...
 const END = `(?![${AR}])`;
+// بدائل إنجليزية (النص مطبَّع بأحرف صغيرة): حدود كلمة لاتينية
+const EN = re => `(?<![a-z])(?:${re})(?![a-z])`;
 
 /** الفراغات التي يمكن الإشارة إليها في الكلام. */
 export const SUBJECTS = Object.freeze([
-  { id: 'majlis_w', ar: 'مجلس النساء', re: `مجلس (?:ال)?(?:نساء|حريم|نسوان|عائله)|مجالس (?:ال)?نساء` },
-  { id: 'elderly', ar: 'غرفة كبار السن', re: `غرفه(?: نوم)?(?: ارضيه)? (?:ال|لل|ل)?(?:والده|والد|والدين|ام|اب|ابوي|امي|ابوي وامي|جده|جدتي|جدي|كبار السن|كبير السن|شياب|اهلي)|والده|والدين|كبار السن|كبير السن` },
-  { id: 'guest', ar: 'غرفة الضيوف', re: `غرف(?:ه)? (?:نوم )?(?:ال|لل|ل)?(?:ضيوف|ضيف)` },
-  { id: 'guestwc', ar: 'دورة مياه الضيوف', re: `(?:حمام|دوره مياه|دورات مياه|تواليت) (?:ال|لل|ل)?(?:ضيوف|رجال|مجلس)` },
-  { id: 'servicedoor', ar: 'باب الخدمة', re: `(?:باب|مدخل) (?:ال)?خدمه` },
-  { id: 'kids', ar: 'غرف الأبناء', plural: true, re: `غرف(?:ه)? (?:ال|لل|ل)?(?:اولاد|اطفال|بنات|عيال|ابناء|عيالي|صغار|شباب)|اولاد|اطفال|عيال|ابناء|بزران` },
-  { id: 'onebed', ar: 'غرفة نوم', any: true, re: `غرفه نوم(?! (?:ال)?رئيسيه)` },
-  { id: 'master', ar: 'غرفة النوم الرئيسية', re: `غرفه (?:ال)?نوم (?:ال)?رئيسيه|غرفه (?:ال)?ماستر|غرفه (?:ال)?رئيسيه|ماستر|غرفتي` },
-  { id: 'maid', ar: 'غرفة الخادمة', re: `(?:غرفه (?:ال)?)?(?:خادمه|خدامه|عامله|شغاله)` },
-  { id: 'driver', ar: 'غرفة السائق', re: `(?:غرفه (?:ال)?)?(?:سائق|سواق)` },
-  { id: 'laundry', ar: 'غرفة الغسيل', re: `(?:غرفه (?:ال)?)?غسيل` },
-  { id: 'storage', ar: 'المخزن', re: `مخزن|مستودع` },
-  { id: 'bedrooms', ar: 'غرف النوم', plural: true, re: `(?:كل |جميع )?(?:ال)?غرف (?:ال)?نوم|(?:كل|جميع) (?:ال)?غرف|غرف(?! (?:ال)?(?:ملابس|غسيل|خادمه|سائق|طعام))` },
-  { id: 'majlis', ar: 'المجلس', re: `مجلس(?: (?:ال)?رجال)?(?! (?:ال)?طعام)|مجالس|ديوانيه` },
-  { id: 'dining', ar: 'الطعام', re: `(?:غرفه|صاله|مجلس) (?:ال)?طعام|طعام|سفره|مقلط|مقالط` },
-  { id: 'kitchen', ar: 'المطبخ', re: `مطبخ(?! (?:ال)?(?:تحضيري|ثاني|خارجي))` },
-  { id: 'hall', ar: 'الصالة', re: `صاله(?: (?:ال)?(?:عائليه|معيشه|جلوس))?|ليفنج|معيشه` },
-  { id: 'office', ar: 'المكتب', re: `مكتب` },
-  { id: 'prayer', ar: 'المصلى', re: `مصلي|مصلا` },
-  { id: 'entrance', ar: 'المدخل', re: `مدخل(?: (?:ال)?رئيسي)?|باب (?:ال)?(?:رئيسي|بيت)` },
+  { id: 'majlis_w', ar: 'مجلس النساء', re: `مجلس (?:ال)?(?:نساء|حريم|نسوان|عائله)|مجالس (?:ال)?نساء|${EN("(?:women'?s?|ladies'?) majlis")}` },
+  { id: 'elderly', ar: 'غرفة كبار السن', re: `غرفه(?: نوم)?(?: ارضيه)? (?:ال|لل|ل)?(?:والده|والد|والدين|ام|اب|ابوي|امي|ابوي وامي|جده|جدتي|جدي|كبار السن|كبير السن|شياب|اهلي)|والده|والدين|كبار السن|كبير السن|${EN("(?:parents'?|elderly|grandparents'?)(?: bed ?room| room)?")}` },
+  { id: 'guest', ar: 'غرفة الضيوف', re: `غرف(?:ه)? (?:نوم )?(?:ال|لل|ل)?(?:ضيوف|ضيف)|${EN('guest (?:bed ?)?room')}` },
+  { id: 'guestwc', ar: 'دورة مياه الضيوف', re: `(?:حمام|دوره مياه|دورات مياه|تواليت) (?:ال|لل|ل)?(?:ضيوف|رجال|مجلس)|${EN('guest (?:toilet|wc|bath ?room)')}` },
+  { id: 'servicedoor', ar: 'باب الخدمة', re: `(?:باب|مدخل) (?:ال)?خدمه|${EN('service (?:door|entrance)')}` },
+  { id: 'kids', ar: 'غرف الأبناء', plural: true, re: `غرف(?:ه)? (?:ال|لل|ل)?(?:اولاد|اطفال|بنات|عيال|ابناء|عيالي|صغار|شباب)|اولاد|اطفال|عيال|ابناء|بزران|${EN("(?:kids'?|children'?s?) (?:bed ?)?rooms?")}` },
+  { id: 'onebed', ar: 'غرفة نوم', any: true, re: `غرفه نوم(?! (?:ال)?رئيسيه)|${EN('(?:a|one) bed ?room')}` },
+  { id: 'master', ar: 'غرفة النوم الرئيسية', re: `غرفه (?:ال)?نوم (?:ال)?رئيسيه|غرفه (?:ال)?ماستر|غرفه (?:ال)?رئيسيه|ماستر|غرفتي|${EN('master(?: bed ?room| suite)?')}` },
+  { id: 'maid', ar: 'غرفة الخادمة', re: `(?:غرفه (?:ال)?)?(?:خادمه|خدامه|عامله|شغاله)|${EN("maid'?s?(?: room)?")}` },
+  { id: 'driver', ar: 'غرفة السائق', re: `(?:غرفه (?:ال)?)?(?:سائق|سواق)|${EN("driver'?s?(?: room)?")}` },
+  { id: 'laundry', ar: 'غرفة الغسيل', re: `(?:غرفه (?:ال)?)?غسيل|${EN('laundry(?: room)?')}` },
+  { id: 'storage', ar: 'المخزن', re: `مخزن|مستودع|${EN('(?:storage(?: room)?|store ?room|pantry)')}` },
+  { id: 'bedrooms', ar: 'غرف النوم', plural: true, re: `(?:كل |جميع )?(?:ال)?غرف (?:ال)?نوم|(?:كل|جميع) (?:ال)?غرف|غرف(?! (?:ال)?(?:ملابس|غسيل|خادمه|سائق|طعام))|${EN('(?:all (?:the )?)?bed ?rooms')}` },
+  { id: 'majlis', ar: 'المجلس', re: `مجلس(?: (?:ال)?رجال)?(?! (?:ال)?طعام)|مجالس|ديوانيه|${EN("(?:men'?s? )?majlis|guest (?:sitting|reception)(?: room)?")}` },
+  { id: 'dining', ar: 'الطعام', re: `(?:غرفه|صاله|مجلس) (?:ال)?طعام|طعام|سفره|مقلط|مقالط|${EN('dining(?: room| area)?')}` },
+  { id: 'kitchen', ar: 'المطبخ', re: `مطبخ(?! (?:ال)?(?:تحضيري|ثاني|خارجي))|${EN('kitchen')}` },
+  { id: 'hall', ar: 'الصالة', re: `صاله(?: (?:ال)?(?:عائليه|معيشه|جلوس))?|ليفنج|معيشه|${EN('(?:living(?: room)?|family (?:hall|room|living)|hall)')}` },
+  { id: 'office', ar: 'المكتب', re: `مكتب|${EN('(?:office|study)')}` },
+  { id: 'prayer', ar: 'المصلى', re: `مصلي|مصلا|${EN('prayer(?: room)?')}` },
+  // الدرج الداخلي: يُشار إليه في الكلام («بعيدة عن الدرج») فلا يُسقط بصمت؛ يُقاس من سلالم المستند
+  { id: 'stairs', ar: 'الدرج', re: `درج(?: (?:ال)?داخلي)?|سلم(?: (?:ال)?داخلي)?|${EN('stair(?:s|case|way)?')}` },
+  { id: 'entrance', ar: 'المدخل', re: `مدخل(?: (?:ال)?رئيسي)?|باب (?:ال)?(?:رئيسي|بيت)|${EN('(?:main )?entrance')}` },
 ]);
 const S = Object.fromEntries(SUBJECTS.map(s => [s.id, { ...s, rx: new RegExp(`${PRE}(?:${s.re})${END}`, 'g') }]));
 const subjAr = id => S[id]?.ar || id;
@@ -50,18 +55,41 @@ const PLACES = [
   { side: 'left', mode: 'half', re: `(?:على |ع |في |ب)?(?:ال)?يسار(?: (?:ال)?(?:مدخل|داخل|بيت|واجهه))?` },
   { side: 'center', mode: 'center', re: `(?:في |ب)?(?:ال)?(?:وسط|نص|منتصف) (?:ال)?(?:بيت|فيلا|مبني|دور)|(?:في|ب) ?(?:ال)?(?:وسط|نص|منتصف)` },
   { side: 's', mode: 'half', re: `(?:في |ب)?(?:ال)?(?:جهه|ناحيه|جانب) (?:ال)?(?:جنوبي(?:ه)?|جنوب)|(?:ال)?جنوبي(?:ه)?|(?:جهه|ناحيه) (?:ال)?جنوب|(?:في|ب) ?(?:ال)?جنوب` },
+  // English
+  { side: 'front', mode: 'touch', re: EN('(?:facing|on|overlooking|onto) the street|street side') },
+  { side: 'back', mode: 'touch', re: EN('overlooking the (?:garden|back ?yard|yard)') },
+  { side: 'front', mode: 'half', re: EN('(?:at|in|to) the front') },
+  { side: 'back', mode: 'half', re: EN('(?:at|in|to) the (?:back|rear)|away from the street') },
+  ...['north', 'south', 'east', 'west'].map(d => ({ side: d[0], mode: 'half', re: EN(`(?:(?:on|at|in|to) the )?${d}(?:ern)?(?: side)?`) })),
+  { side: 'center', mode: 'center', re: EN('(?:in the )?(?:center|centre|middle)(?: of the (?:house|villa))?') },
+  { side: 'right', mode: 'half', re: EN('(?:on|to) the right(?: of the entrance)?') },
+  { side: 'left', mode: 'half', re: EN('(?:on|to) the left(?: of the entrance)?') },
 ].map(p => ({ ...p, rx: new RegExp(`(?<![${AR}])و?(?:${p.re})${END}`, 'g') }));
 const FLOORS = [
-  { floor: 'upper', re: `(?:في |ب)?(?:ال)?(?:دور|طابق) (?:ال)?(?:علوي|اول|ثاني|فوق)|(?:في |ب)?(?:ال)?علوي|فوق` },
-  { floor: 'ground', re: `(?:في |ب)?(?:ال)?(?:دور|طابق) (?:ال)?ارضي|(?:في |ب)(?:ال)?ارضي|(?:ال)?ارضي(?:ه)?|تحت(?! (?:ال)?(?:درج|سلم))` },
+  { floor: 'upper', re: `(?:في |ب)?(?:ال)?(?:دور|طابق) (?:ال)?(?:علوي|اول|ثاني|فوق)|(?:في |ب)?(?:ال)?علوي|فوق|${EN('upstairs|(?:on the )?(?:first|upper|second|top) floor')}` },
+  { floor: 'ground', re: `(?:في |ب)?(?:ال)?(?:دور|طابق) (?:ال)?ارضي|(?:في |ب)(?:ال)?ارضي|(?:ال)?ارضي(?:ه)?|تحت(?! (?:ال)?(?:درج|سلم))|${EN('downstairs|(?:on the )?ground floor')}` },
 ].map(p => ({ ...p, rx: new RegExp(`(?<![${AR}])و?(?:${p.re})${END}`, 'g') }));
 // العلاقات بالترتيب: النفي أولًا (لأن «مو قريب» يحوي «قريب»)
 const RELS = [
-  { kind: 'far', re: `(?:مو|مب|ما|لا|ليس|مش) ?(?:تكون|يكون|تصير|يصير)? ?(?:قريب(?:ه)?|جنب|بجنب|بجانب|ملاصق(?:ه)?|لاصق(?:ه)?|مجاور(?:ه)?) ?(?:من|عن|ل|لل)?|بعيد(?:ه)? (?:عن|من)|ابعد (?:ما يكون )?(?:عن|من)|منفصل(?:ه)? عن|معزول(?:ه)? عن` },
-  { kind: 'adjacent', re: `بجانب|بجنب|جنب|جمب|ملاصق(?:ه)?(?: ل| لل)?|لاصق(?:ه)?|مجاور(?:ه)?(?: ل| لل)?|بجوار|جوار|لصق|مفتوح(?:ه)? (?:ع|على|علي)|يفتح (?:ع|على|علي)|تفتح (?:ع|على|علي)|متصل(?:ه)? (?:ب|مع)|يتصل (?:ب|مع)|تتصل (?:ب|مع)` },
-  { kind: 'near', re: `قريب(?:ه)? (?:من|م|ل|لل)|قريب(?:ه)?|بالقرب من|قرب|عند` },
+  { kind: 'far', re: `(?:مو|مب|ما|لا|ليس|مش) ?(?:تكون|يكون|تصير|يصير)? ?(?:قريب(?:ه)?|جنب|بجنب|بجانب|ملاصق(?:ه)?|لاصق(?:ه)?|مجاور(?:ه)?) ?(?:من|عن|ل|لل)?|بعيد(?:ه)? (?:عن|من)|ابعد (?:ما يكون )?(?:عن|من)|منفصل(?:ه)? عن|معزول(?:ه)? عن|${EN("(?:far (?:away )?from|away from|not (?:be )?(?:near|close to|next to|adjacent to)|separated? from)")}` },
+  { kind: 'adjacent', re: `بجانب|بجنب|جنب|جمب|ملاصق(?:ه)?(?: ل| لل)?|لاصق(?:ه)?|مجاور(?:ه)?(?: ل| لل)?|بجوار|جوار|لصق|مفتوح(?:ه)? (?:ع|على|علي)|يفتح (?:ع|على|علي)|تفتح (?:ع|على|علي)|متصل(?:ه)? (?:ب|مع)|يتصل (?:ب|مع)|تتصل (?:ب|مع)|${EN('next to|adjacent to|beside|opens? (?:on)?to|open to|connected to|attached to')}` },
+  { kind: 'near', re: `قريب(?:ه)? (?:من|م|ل|لل)|قريب(?:ه)?|بالقرب من|قرب|عند|${EN('near(?: to)?|close to')}` },
 ].map(p => ({ ...p, rx: new RegExp(`(?<![${AR}])و?(?:${p.re})${END}`, 'g') }));
 const NEG = new RegExp(`(?<![${AR}])و?(?:بدون|بلا|من غير|ما ابي|ما ابغي|لا ابي|لا ابغي|ما ابا|ما بي|ما نبي|ما نبغي|لا اريد|لا نريد|ما اريد|ما احتاج|لا احتاج|ما نحتاج|لا نحتاج|مافي|ما فيه|ما يحتاج|لا داعي ل|ما له داعي)(?: (?:ال)?(?:غرفه|صاله))? ((?:ال)?(?:مجلس|مجالس|طعام|سفره|ممرات|ممر|مكتب|مصلي|خادمه|سائق))`, 'g');
+const NEG_EN = /(?<![a-z])(?:no|without|don'?t (?:want|need)(?: an?)?|do not (?:want|need)(?: an?)?|skip the) (majlis|dining(?: room)?|corridors?|office|study|prayer room|maid'?s? room|driver'?s? room)(?![a-z])/g;
+// درجة الطلب: «يفضل/لو أمكن/ياليت» تفضيل، والنفي («لا/ما أبي/بدون/ممنوع») منع، وغير ذلك إلزام («لازم/ضروري/أبي»)
+const PREFER_CUE = new RegExp(`(?<![${AR}])(?:و|ف)?(?:يفضل|نفضل|افضل|الافضل|يستحسن|لو امكن|اذا امكن|ان امكن|لو تقدر|اذا تقدر|قدر الامكان|قد ما تقدر|ياليت|يا ليت|ليت|حبذا|ودي لو|مو شرط|مب شرط|ليس شرطا|مو ضروري|مب ضروري|غير ضروري|مو لازم|مب لازم|اختياري)(?![${AR}])|(?<![a-z])(?:prefer(?:ably|red)?|ideally|if possible|nice to have|would be nice|optional(?:ly)?|not (?:required|necessary|a must))(?![a-z])`);
+const MUST_CUE = new RegExp(`(?<![${AR}])(?:و|ف)?(?:لازم|ضروري|ضروريا|يجب|يلزم|لا ?بد|اكيد|شرط|الزامي|ابي|ابغي|ابغا|ابا|اريد|نبي|نبغي|نريد|بالضبط|ضروره)(?![${AR}])|(?<![a-z])(?:must|need(?:s)? to|required?|have to|has to|mandatory|should|exactly)(?![a-z])`);
+const FORBID_CUE = new RegExp(`(?<![${AR}])(?:و|ف)?(?:ممنوع|يمنع|لا يجوز|اياك|ابدا)(?![${AR}])|(?<![a-z])(?:never|forbidden|must not|mustn'?t)(?![a-z])`);
+/** درجة الطلب من نص نافذته: prefer يتقدم (لأن «مو ضروري» تحوي «ضروري»)، ثم النفي، ثم الإلزام الصريح أو الافتراضي. */
+export function levelOf(window, negated = false) {
+  if (PREFER_CUE.test(window)) return { level: 'prefer', levelCue: 'explicit' };
+  if (negated || FORBID_CUE.test(window)) return { level: 'forbid', levelCue: negated ? 'negation' : 'explicit' };
+  if (MUST_CUE.test(window)) return { level: 'must', levelCue: 'explicit' };
+  return { level: 'must', levelCue: 'default' };
+}
+/** وزن العقوبة بحسب الدرجة: الإلزام والمنع سواء (حدّان)، والتفضيل أخف. */
+export const LEVEL_WEIGHT = Object.freeze({ must: 1, forbid: 1, prefer: 0.35 });
 
 const GROUND_ONLY = new Set(['majlis', 'majlis_w', 'kitchen', 'dining', 'entrance', 'driver', 'maid']);
 const find = (rx, t) => { rx.lastIndex = 0; const out = []; let m; while ((m = rx.exec(t))) { out.push({ start: m.index, end: m.index + m[0].length, text: m[0] }); if (m[0] === '') rx.lastIndex++; } return out; };
@@ -78,75 +106,105 @@ function subjectsBefore(subs, at, t) {
   const last = before[before.length - 1]; if (/[0-9]/.test(t.slice(last.end, at)) || at - last.end > 28) return [];
   const chain = [last];
   for (let i = before.length - 2; i >= 0; i--) { const gap = t.slice(before[i].end, chain[0].start).trim(); if (gap === '') chain.unshift(before[i]); else break; }
+  const numBefore = /\d|واحد|اثنين|ثلاث|اربع|خمس/.test(t.slice(Math.max(0, chain[0].start - 8), chain[0].start));
   // عطف مباشر يُقبل فقط لقائمة من اثنين وبلا عدد قبلها؛ قائمة البرنامج («3 غرف ومجلس وصالة والمطبخ...») تُبقي الأقرب
-  if (chain.length === 2 && !/\d|واحد|اثنين|ثلاث|اربع|خمس/.test(t.slice(Math.max(0, chain[0].start - 8), chain[0].start))) return chain.map(c => c.id);
+  if (chain.length === 2 && !numBefore) return chain.map(c => c.id);
+  // «المجالس والطعام والمطبخ تحت»: سلسلة معرّفة كلها (بأل) وبلا عدد قبلها = كلها فاعل؛ القائمة النكرة تبقى برنامجًا
+  if (chain.length >= 3 && !numBefore && chain.every(c => /^\s*(?:و|ف)?(?:ال|بال|لل|وال)/.test(t.slice(c.start, c.end)))) return chain.map(c => c.id);
   return [last.id];
 }
 
 /**
- * يستخرج القواعد من نص مطبَّع (normalizeAr). يعيد { rules[], absent[], floors, noCorridors }.
- * rules: { id, kind:'place'|'near'|'adjacent'|'far'|'floor', a, b?, side?, mode?, floor?, text }.
+ * يستخرج القواعد من نص مطبَّع (normalizeAr). يعيد { rules[], absent[], floors, noCorridors, orphans[] }.
+ * rules: { id, kind:'place'|'near'|'adjacent'|'far'|'apart'|'cluster'|'floor', a, b?, side?, mode?, floor?, text,
+ *          level:'must'|'prefer'|'forbid', levelCue:'explicit'|'negation'|'default', quote, at:[from,to] }.
+ * orphans: عبارات علاقة («بعيدة عن …»، «جنب بعض»، «بين …») لم يُعرف طرفاها — تُعرض للعميل بدل أن تسقط بصمت.
  */
 export function extractRules(t) {
-  const rules = [], absent = new Set(); let floors = null, noCorridors = false;
+  t = String(t || '');
+  const rules = [], absent = new Set(), orphans = []; let floors = null, noCorridors = false;
   const seen = new Set();
-  const push = r => { const k = [r.kind, r.a, r.b, r.side, r.floor].join('|'); if (seen.has(k) || (r.b && r.a === r.b)) return; seen.add(k); rules.push({ id: 'R' + (rules.length + 1), ...r, text: ruleText(r) }); };
+  let made = null;
+  const push = (r, span, neg = false) => {
+    const k = [r.kind, r.a, r.b, r.side, r.floor].join('|'); if (seen.has(k) || (r.b && r.a === r.b)) return; seen.add(k);
+    const rule = { id: 'R' + (rules.length + 1), ...r, text: ruleText(r) };
+    if (made && span) made.push({ rule, span, neg });
+    rules.push(rule);
+  };
   // عدم الوجود
   for (const m of t.matchAll(NEG)) {
     const w = m[1].replace(/^ال/, '');
     if (/^(مجلس|مجالس)$/.test(w)) absent.add('majlis'); else if (/^(طعام|سفره)$/.test(w)) absent.add('dining');
     else if (/^ممر/.test(w)) noCorridors = true; else if (w === 'مكتب') absent.add('office'); else if (w === 'مصلي') absent.add('prayer'); else if (w === 'خادمه') absent.add('maid'); else if (w === 'سائق') absent.add('driver');
   }
+  for (const m of t.matchAll(NEG_EN)) {
+    const w = m[1];
+    if (w === 'majlis') absent.add('majlis'); else if (/^dining/.test(w)) absent.add('dining'); else if (/^corridor/.test(w)) noCorridors = true;
+    else if (w === 'office' || w === 'study') absent.add('office'); else if (/^prayer/.test(w)) absent.add('prayer'); else if (/^maid/.test(w)) absent.add('maid'); else if (/^driver/.test(w)) absent.add('driver');
+  }
   if (/(?<![؀-ۿ])(?:ما|لا|بدون|مو) ?(?:ابي|ابغي|اريد|نبي)? ?ممرات|ممرات (?:قليله|اقل)|بلا ممرات|(?:ما|لا) (?:ابي|ابغي|اريد) ممر/.test(t)) noCorridors = true;
   // عدد الأدوار
-  if (/(?<![؀-ۿ])(?:دورين|دوران|طابقين|طابقان|دور ارضي و ?(?:دور )?(?:اول|علوي)|ارضي و ?(?:اول|علوي))/.test(t)) floors = 2;
-  else if (/(?<![؀-ۿ])(?:دور واحد|طابق واحد|دور ارضي فقط|ارضي فقط)/.test(t)) floors = 1;
-  const NEGW = new RegExp(`(?<![${AR}])(?:لا|ما|مو|مب|ليس|مش|بلاش|غير|ابد)(?![${AR}])`);
-  const TOGETHER = new RegExp(`(?<![${AR}])(?:جنب|بجنب|بجانب|بجوار|ورا|مع|قرب|قريب(?:ه|ين)? من) بعض(?:ها|هم)?(?![${AR}])|(?<![${AR}])(?:متجاور(?:ه|ين)|متلاصق(?:ه|ين)|مع بعض)(?![${AR}])`, 'g');
-  const BETWEEN = new RegExp(`(?<![${AR}])(?:بين|وسط ما بين)(?![${AR}])`, 'g');
-  for (const clause of t.split(/[،,.؛;\n!?؟]+/)) {
-    const c = ' ' + clause.trim() + ' ';
+  if (/(?<![؀-ۿ])(?:دورين|دوران|طابقين|طابقان|دور ارضي و ?(?:دور )?(?:اول|علوي)|ارضي و ?(?:اول|علوي))|(?<![a-z])(?:(?:two|2)[- ](?:floors?|stor(?:e)?ys?|levels?)|double[- ]stor(?:e)?y|duplex)(?![a-z])/.test(t)) floors = 2;
+  else if (/(?<![؀-ۿ])(?:دور واحد|طابق واحد|دور ارضي فقط|ارضي فقط)|(?<![a-z])(?:(?:one|single|1)[- ](?:floor|stor(?:e)?y|level)|bungalow|ground floor only)(?![a-z])/.test(t)) floors = 1;
+  const NEGW = new RegExp(`(?<![${AR}])(?:و|ف)?(?:لا|ما|مو|مب|ليس|مش|بلاش|غير|ابد|ممنوع|يمنع)(?![${AR}])|(?<![a-z])(?:not|don'?t|dont|never|avoid|no)(?![a-z])`);
+  // «مو شرط/مو ضروري» تليين للطلب (تفضيل) لا نفي له
+  const SOFT = new RegExp(`(?<![${AR}])(?:و|ف)?(?:مو|مب|ليس|غير|مش) ?(?:شرط(?:ا)?|ضروري|لازم)(?![${AR}])|(?<![a-z])not (?:required|necessary|a must)(?![a-z])`, 'g');
+  const TOGETHER = new RegExp(`(?<![${AR}])(?:جنب|بجنب|بجانب|بجوار|ورا|مع|قرب|قريب(?:ه|ين)? من) بعض(?:ها|هم)?(?![${AR}])|(?<![${AR}])(?:متجاور(?:ه|ين)|متلاصق(?:ه|ين)|مع بعض)(?![${AR}])|(?<![a-z])(?:next to each other|together|adjacent to each other)(?![a-z])`, 'g');
+  const BETWEEN = new RegExp(`(?<![${AR}])(?:بين|وسط ما بين)(?![${AR}])|(?<![a-z])between(?![a-z])`, 'g');
+  const SPLIT = /[،,.؛;\n!?؟]+/g;
+  const pieces = []; { let last = 0, m; SPLIT.lastIndex = 0; while ((m = SPLIT.exec(t))) { pieces.push([last, m.index]); last = m.index + m[0].length; } pieces.push([last, t.length]); }
+  for (const [p0, p1] of pieces) {
+    const raw = t.slice(p0, p1), lead = raw.length - raw.trimStart().length, clause = raw.trim();
+    const off = p0 + lead - 1; // c[i] ↔ t[off + i]
+    const c = ' ' + clause + ' ';
     if (c.trim().length < 3) continue;
+    made = [];
     const subs = subjectsIn(c), used = [];
     const overlapsUsed = m => used.some(u => m.start < u.end && u.start < m.end);
     // النفي قبل العبارة: «لا تحط غرف النوم على الشارع»، «المجلس ما يكون جنب المطبخ»
-    const negated = (from, to) => { const lastUsed = Math.max(0, ...used.filter(u => u.end <= to).map(u => u.end)); return NEGW.test(c.slice(Math.max(lastUsed, from - 16, 0), to)); };
-    const firstStart = ids => Math.min(...subs.filter(x => ids.includes(x.id)).map(x => x.start));
+    const negated = (from, to) => { const lastUsed = Math.max(0, ...used.filter(u => u.end <= to).map(u => u.end)); return NEGW.test(c.slice(Math.max(lastUsed, from - 16, 0), to).replace(SOFT, ' ')); };
+    // بداية الفاعل: أقرب ورود لكل فراغ قبل العبارة (لا أول ورود في الجملة: «انقل المطبخ … وخل المطبخ في الخلف»)
+    const firstStart = (ids, at = c.length) => { const v = Math.min(...ids.map(id => Math.max(...subs.filter(x => x.id === id && x.start < at).map(x => x.start)))); return Number.isFinite(v) ? v : at; };
     // «وعن المجلس»، «ومن المطبخ»: فراغات معطوفة بعد العبارة تأخذ العلاقة نفسها
     const coordinated = end => { const out = []; let at = end; for (;;) { const m = c.slice(at).match(/^\s*و\s*(?:عن|من|لل|ل|ب)?\s*/); if (!m) break; const nx = subs.find(x => x.start >= at + m[0].length - 3 && x.start <= at + m[0].length + 1); if (!nx) break;
       // «من المطبخ والطعام» أو «عن الشارع وعن المجلس» عطف؛ «الماستر ومجلس» (نكرة بلا حرف جر) بقية قائمة البرنامج
       if (!/(عن|من|ل|ب)\s*$/.test(m[0]) && !/^(?:و)?(?:ال|بال|لل)/.test(c.slice(nx.start, nx.end))) break;
-      out.push(nx.id); at = nx.end; } return out; };
+      out.push(nx); at = nx.end; } return out; };
+    const tailOf = end => { const m = c.slice(end).match(/^\s*(?:[^\s]+\s*){0,2}/); let s = m ? m[0] : ''; const cut = s.search(/\sو/); if (cut >= 0) s = s.slice(0, cut); return s.trimEnd(); };
+    const orphan = (m, kind) => orphans.push({ kind, quote: (c.slice(m.start, m.end) + tailOf(m.end)).trim(), at: [off + m.start, off + m.end + tailOf(m.end).length] });
     // «بين A و B»
     for (const m of find(BETWEEN, c)) {
       const A = subjectsBefore(subs, m.start, c), after = subs.filter(x => x.start >= m.end && x.start - m.end <= 30).slice(0, 2);
-      if (A.length !== 1 || after.length !== 2) continue;
+      if (A.length !== 1 || after.length !== 2) { orphan(m, 'between'); continue; }
       used.push({ start: m.start, end: after[1].end });
-      for (const b of after) push({ kind: 'adjacent', a: A[0], b: b.id });
+      for (const b of after) push({ kind: 'adjacent', a: A[0], b: b.id }, [firstStart(A, m.start), after[1].end]);
     }
     // «جنب بعض»: فراغان معطوفان متجاوران، أو مجموعة غرف متجاورة
     for (const m of find(TOGETHER, c)) {
       if (overlapsUsed(m)) continue;
-      const before = subs.filter(x => x.end <= m.start), last = before[before.length - 1]; if (!last) continue;
+      const before = subs.filter(x => x.end <= m.start), last = before[before.length - 1]; if (!last) { orphan(m, 'together'); continue; }
       const prev = before[before.length - 2], joined = prev && /^\s*$/.test(c.slice(prev.end, last.start));
-      used.push(m);
-      if (joined) push({ kind: negated(prev.start, m.start) ? 'apart' : 'adjacent', a: prev.id, b: last.id });
-      else if (S[last.id]?.plural) push({ kind: 'cluster', a: last.id });
+      if (joined) { used.push(m); const neg = negated(prev.start, m.start); push({ kind: neg ? 'apart' : 'adjacent', a: prev.id, b: last.id }, [prev.start, m.end], neg); }
+      else if (S[last.id]?.plural) { used.push(m); push({ kind: 'cluster', a: last.id }, [last.start, m.end]); }
+      else orphan(m, 'together');
     }
     // العلاقات بترتيب ورودها؛ «A قريبة من B وبعيدة عن C»: المعطوف بالواو يعود على الفاعل نفسه
     const relHits = [];
     for (const rel of RELS) for (const m of find(rel.rx, c)) if (!overlapsUsed(m) && !relHits.some(h => m.start < h.end && h.start < m.end)) relHits.push({ ...m, kind: rel.kind });
     relHits.sort((a, b) => a.start - b.start);
-    let lastA = null;
+    let lastA = null, lastAStart = 0;
     for (const m of relHits) {
       const after = subs.find(x => x.start >= m.end && x.start - m.end <= 6);
-      let A = subjectsBefore(subs, m.start, c);
-      if (lastA && /^و/.test(m.text)) A = lastA;
+      let A = subjectsBefore(subs, m.start, c), aStart = A.length ? firstStart(A, m.start) : m.start;
+      if (lastA && /^و/.test(m.text)) { A = lastA; aStart = m.start; }
       if (!after || !A.length) continue;
-      used.push({ start: m.start, end: after.end }); lastA = A;
+      used.push({ start: m.start, end: after.end }); lastA = A; lastAStart = aStart;
       // «لا تحط المجلس جنب المطبخ»: النفي يقلب الملاصقة والقرب إلى «غير ملاصق»
-      const kind = m.kind !== 'far' && negated(firstStart(A), m.start) ? 'apart' : m.kind;
-      for (const b of [after.id, ...coordinated(after.end)]) for (const a of A) push({ kind, a, b });
+      const negFar = m.kind === 'far' && /^و?(?:مو|مب|ما|لا|ليس|مش|not)(?![؀-ۿa-z])/.test(m.text);
+      const neg = m.kind !== 'far' && negated(firstStart(A, m.start), m.start);
+      const kind = neg ? 'apart' : m.kind;
+      const co = coordinated(after.end), end = co.length ? co[co.length - 1].end : after.end;
+      for (const b of [after, ...co]) for (const a of A) push({ kind, a, b: b.id }, [aStart, end], neg || negFar);
     }
     const consumed = new Set();
     for (const p of PLACES) for (const m of find(p.rx, c)) {
@@ -157,14 +215,14 @@ export function extractRules(t) {
       inside.forEach(x => consumed.add(x));
       const A = subjectsBefore(subs.filter(x => !consumed.has(x)), m.start, c); if (!A.length) continue;
       used.push(m);
-      const neg = negated(firstStart(A), m.start);
+      const neg = negated(firstStart(A, m.start), m.start), span = [firstStart(A, m.start), m.end];
       for (const a of A) {
-        if (!neg) push({ kind: 'place', a, side: p.side, mode: p.mode });
-        else if (p.mode === 'touch') push({ kind: 'place', a, side: p.side, mode: 'avoid' });
-        else if (OPP_SIDE[p.side]) push({ kind: 'place', a, side: OPP_SIDE[p.side], mode: 'half' });
+        if (!neg) push({ kind: 'place', a, side: p.side, mode: p.mode }, span);
+        else if (p.mode === 'touch') push({ kind: 'place', a, side: p.side, mode: 'avoid' }, span, true);
+        else if (OPP_SIDE[p.side]) push({ kind: 'place', a, side: OPP_SIDE[p.side], mode: 'half' }, span, true);
       }
       // «بعيدة عن الشارع وعن المجلس»
-      if (/بعيد/.test(m.text)) for (const b of coordinated(m.end)) for (const a of A) push({ kind: 'far', a, b });
+      if (/بعيد|away/.test(m.text)) { const co = coordinated(m.end); if (co.length) { used.push({ start: m.end, end: co[co.length - 1].end }); for (const b of co) for (const a of A) push({ kind: 'far', a, b: b.id }, [firstStart(A, m.start), co[co.length - 1].end]); } }
     }
     for (const f of FLOORS) for (const m of find(f.rx, c)) {
       if (overlapsUsed(m)) continue;
@@ -175,10 +233,23 @@ export function extractRules(t) {
       // «مجلس ومكتب فوق»: ما لا يصعد للعلوي (المجلس والمطبخ والخدمة) لا يُعطف عليه الدور إلا إن ذُكر وحده
       if (f.floor === 'upper' && A.length > 1) A = A.filter(a => !GROUND_ONLY.has(a));
       used.push(m);
-      for (const a of A) push({ kind: 'floor', a, floor: f.floor });
+      for (const a of A) push({ kind: 'floor', a, floor: f.floor }, [host ? host.start : firstStart(A, m.start), m.end]);
     }
+    // عبارات علاقة لم يُعرف طرفاها: لا تسقط بصمت
+    for (const m of relHits) if (!overlapsUsed(m)) orphan(m, 'relation');
+    // درجة كل قاعدة واقتباسها من نافذتها في الجملة: من نهاية القاعدة السابقة (وذيلها) إلى نهاية هذه وذيلها حتى «و» التالية
+    made.sort((x, y) => x.span[0] - y.span[0] || x.span[1] - y.span[1]);
+    let winStart = 0, prevSpan = null;
+    for (const e of made) {
+      const [from, to] = e.span;
+      if (prevSpan && (prevSpan[0] !== from || prevSpan[1] !== to)) winStart = Math.max(winStart, Math.min(from, prevSpan[1] + tailOf(prevSpan[1]).length));
+      const tail = tailOf(to), win = c.slice(winStart, to + tail.length);
+      Object.assign(e.rule, levelOf(win, e.neg), { quote: c.slice(from, to).trim(), at: [off + from, off + to] });
+      prevSpan = e.span;
+    }
+    made = null;
   }
-  return { rules, absent: [...absent], floors, noCorridors };
+  return { rules, absent: [...absent], floors, noCorridors, orphans };
 }
 export function ruleText(r) {
   const A = `«${subjAr(r.a)}»`;
@@ -212,6 +283,8 @@ const BLOCK_OF = {
 export function blocksFor(id, blocks) { const pick = BLOCK_OF[id]; return pick && !['laundry', 'storage', 'hall'].includes(id) ? blocks.filter(pick) : []; }
 function rectsOf(id, placed, circ) {
   if (id === 'hall') { const h = circ.find(c => c.id === 'hall'); if (h) return [h.r]; }
+  // الدرج: يُقيَّم فقط إن مرّر المولّد مستطيله ضمن الحركة ({ id: 'stairs', r })؛ وإلا لا عقوبة (ويبقى التحقق من المستند)
+  if (id === 'stairs') { const s = circ.find(c => c.id === 'stairs' || c.id === 'stair'); return s ? [s.r] : []; }
   if (id === 'entrance') { const f = circ.find(c => c.id === 'foyer'); return f ? [f.r] : []; }
   const pick = BLOCK_OF[id]; return pick ? placed.filter(p => pick(p.block)).map(p => p.r) : [];
 }
@@ -240,9 +313,9 @@ function placeDeficit(r, side, mode, B) {
 export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
   const B = { x0: 0, y0: 0, x1: W, y1: D }, diag = Math.hypot(W, D);
   let base = 0; const p = [0, 0];
-  for (const r of rules) {
-    if (r.kind === 'floor') continue;
-    const A = rectsOf(r.a, placed, circ); if (!A.length) continue;
+  const step = r => {
+    if (r.kind === 'floor') return;
+    const A = rectsOf(r.a, placed, circ); if (!A.length) return;
     const any = !!S[r.a]?.any;
     if (r.kind === 'place') {
       for (const m of [0, 1]) {
@@ -251,17 +324,23 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
         const pen = any ? Math.min(...pens) : pens.reduce((x, y) => x + y, 0);
         if (side[0] !== 'x') { base += pen; break; } p[m] += pen;
       }
-      continue;
+      return;
     }
-    if (r.kind === 'cluster') { for (const a of A) if (A.length > 1 && !A.some(b => b !== a && contact(a, b) >= 1.0)) base += 45; continue; }
-    const Bs = rectsOf(r.b, placed, circ); if (!Bs.length) continue;
-    if (r.kind === 'apart') { for (const a of A) for (const b of Bs) if (a !== b && contact(a, b) > .3) base += 60; continue; }
-    if (any) { const ok = A.some(a => Bs.some(b => r.kind === 'adjacent' ? contact(a, b) >= 1 : r.kind === 'near' ? contact(a, b) >= .8 || gapOf(a, b) <= 1.8 : contact(a, b) <= .3)); if (!ok) base += 55; continue; }
+    if (r.kind === 'cluster') { for (const a of A) if (A.length > 1 && !A.some(b => b !== a && contact(a, b) >= 1.0)) base += 45; return; }
+    const Bs = rectsOf(r.b, placed, circ); if (!Bs.length) return;
+    if (r.kind === 'apart') { for (const a of A) for (const b of Bs) if (a !== b && contact(a, b) > .3) base += 60; return; }
+    if (any) { const ok = A.some(a => Bs.some(b => r.kind === 'adjacent' ? contact(a, b) >= 1 : r.kind === 'near' ? contact(a, b) >= .8 || gapOf(a, b) <= 1.8 : contact(a, b) <= .3)); if (!ok) base += 55; return; }
     for (const a of A) {
       const best = Math.min(...Bs.map(b => r.kind === 'adjacent' ? (contact(a, b) >= 1.0 ? 0 : 1 + gapOf(a, b)) : r.kind === 'near' ? (contact(a, b) >= .8 || gapOf(a, b) <= nearGap(r) - .2 ? 0 : gapOf(a, b) - nearGap(r) + 1.2) : 0));
       if (r.kind === 'far') { const need = Math.max(7, diag * .4); for (const b of Bs) { const dd = Math.hypot(ctr(a).x - ctr(b).x, ctr(a).y - ctr(b).y); if (contact(a, b) > .3) base += 55; if (dd < need) base += 10 * (need - dd); } continue; }
       if (best > 0) base += 50 + 14 * best;
     }
+  };
+  // وزن كل قاعدة بدرجتها: الإلزام والمنع كاملان، والتفضيل أخف (قاعدة بلا درجة = إلزام، كما كانت)
+  for (const r of rules) {
+    const b0 = base, q0 = p[0], q1 = p[1]; step(r);
+    const w = LEVEL_WEIGHT[r.level] ?? 1;
+    if (w !== 1) { base = b0 + (base - b0) * w; p[0] = q0 + (p[0] - q0) * w; p[1] = q1 + (p[1] - q1) * w; }
   }
   return { base, p };
 }
@@ -285,6 +364,19 @@ export function docRooms(doc) {
   });
   const ws = doc.walls.filter(w => w.level === doc.levels[0].id), bx = ws.flatMap(w => [w.a.x, w.b.x]), by = ws.flatMap(w => [w.a.y, w.b.y]);
   return { rooms, B: { x0: Math.min(...bx), x1: Math.max(...bx), y0: Math.min(...by), y1: Math.max(...by) } };
+}
+/** سلالم المستند كمستطيلات (من درجاتها الفعلية)، في دورها وفي الدور الذي تصعد إليه (فتحة الدرج). */
+export function docStairs(doc) {
+  const out = [];
+  (doc.stairs || []).forEach(s => {
+    const li = doc.levels.findIndex(l => l.id === s.level); if (li < 0) return;
+    let pts = [];
+    try { pts = stairLayout(s, 3.2).steps.flatMap(st => st.poly); } catch { pts = []; }
+    if (!pts.length) pts = [{ x: s.x - (s.w || 1.1) / 2, y: s.y }, { x: s.x + (s.w || 1.1) / 2, y: s.y + (s.run || 3.2) }];
+    const xs = pts.map(q => q.x), ys = pts.map(q => q.y), box = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+    for (const i of [li, li + 1]) if (doc.levels[i]) out.push({ name: 'الدرج', type: 'stairs', level: doc.levels[i].id, li: i, area: (box.x1 - box.x0) * (box.y1 - box.y0), ...box });
+  });
+  return out;
 }
 /** أبواب المستند: لكل غرفة جيرانها عبر الأبواب، وأبوابها الخارجية. */
 export function doorInfo(doc) {
@@ -312,12 +404,13 @@ const r1 = v => Math.round(v * 10) / 10;
  */
 export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
   const { rooms, B } = docRooms(doc), out = [], diag = Math.hypot(B.x1 - B.x0, B.y1 - B.y0);
-  const sel = id => rooms.filter(r => ROOM_OF[id]?.(r));
+  const stairs = docStairs(doc);
+  const sel = id => id === 'stairs' ? stairs : rooms.filter(r => ROOM_OF[id]?.(r));
   // الصالة: الرئيسية أولًا
   const pickHall = list => { const main = list.filter(r => r.name === 'الصالة'); return main.length ? main : list.slice(0, 1); };
   for (const r of rules) {
     let A = sel(r.a); if (r.a === 'hall') A = pickHall(A);
-    const res = { id: r.id, text: r.text, kind: r.kind, ok: true, why: '' };
+    const res = { id: r.id, text: r.text, kind: r.kind, level: r.level || 'must', ok: true, why: '' };
     if (!A.length) { res.ok = false; res.why = `لا يوجد «${subjAr(r.a)}» في هذا التصميم.`; out.push(res); continue; }
     if (r.kind === 'floor') {
       const want = r.floor === 'upper' ? 1 : 0, bad = A.filter(a => (a.li > 0 ? 1 : 0) !== want);
@@ -356,7 +449,7 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
     }
     out.push(res);
   }
-  return out;
+  return withStatus(out);
 }
 
 
@@ -401,14 +494,63 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
   if (req.extras?.guestRoom) { const g = rooms.some(r => r.name === 'غرفة الضيوف'), ok = g && (!req.extras.guestRoom.bath || rooms.some(r => r.name === 'حمام غرفة الضيوف')); out.push({ id: 'X-guest', kind: 'extra', text: 'غرفة نوم للضيوف' + (req.extras.guestRoom.bath ? ' بحمامها' : ''), ok, why: ok ? '' : g ? 'عدد دورات المياه لا يكفي لحمامها؛ زده واحدًا.' : 'لم تتسع غرفة الضيوف في هذا التصميم.' }); }
   if (pr.masterDressing) { const n = rooms.some(r => /^غرفة (ال)?ملابس$/.test(r.name)); out.push({ id: 'P-dress', kind: 'pref', text: 'غرفة ملابس للغرفة الرئيسية', ok: n, why: n ? '' : 'لم تتسع غرفة الملابس في هذا التصميم.' }); }
   if (pr.openKitchen) { const k = sel('kitchen')[0], d = sel('dining')[0], n = !!(k && d && contact(k, d) >= .8); out.push({ id: 'P-open', kind: 'pref', text: 'مطبخ مفتوح على الطعام', ok: n, why: n ? '' : 'المطبخ لا يجاور الطعام في هذا التصميم.' }); }
-  if (pr.elderlyRoom) { const n = sel('elderly').length > 0 || rooms.some(r => r.type === 'master' && r.li === 0 && doc.levels.length > 1); out.push({ id: 'P-old', kind: 'pref', text: 'غرفة لكبار السن قرب الصالة', ok: n, why: n ? '' : 'لا توجد غرفة مخصصة لكبار السن.' }); }
-  if (pr.guestEntrance) { const n = rooms.some(r => r.name === 'مدخل الرجال') || doc.openings.filter(o => o.entry).length >= 2; out.push({ id: 'P-guest', kind: 'pref', text: 'مدخل مستقل للضيوف إلى المجلس', ok: n, why: n ? '' : 'المجلس لا يلامس الواجهة في هذا التصميم.' }); }
+  if (pr.elderlyRoom) {
+    const old = sel('elderly');
+    if (old.length) {
+      const halls = sel('hall').filter(h => h.level === old[0].level), g = halls.length ? Math.min(...halls.map(h => contact(old[0], h) >= .6 ? 0 : gapOf(old[0], h))) : null;
+      if (g === null) out.push({ id: 'P-old', kind: 'pref', text: 'غرفة لكبار السن قرب الصالة', ok: false, status: 'unverified', why: 'غرفة كبار السن موجودة، ولا توجد صالة في دورها للقياس.' });
+      else out.push({ id: 'P-old', kind: 'pref', text: 'غرفة لكبار السن قرب الصالة', ok: g <= 2, why: g <= 2 ? `«${old[0].name}» ${g ? `على ${r1(g)} م من الصالة` : 'تلاصق الصالة'}.` : `«${old[0].name}» تبعد ${r1(g)} م عن الصالة.` });
+    } else if (rooms.some(r => r.type === 'master' && r.li === 0 && doc.levels.length > 1)) out.push({ id: 'P-old', kind: 'pref', text: 'غرفة لكبار السن قرب الصالة', ok: false, status: 'unverified', why: 'لا توجد غرفة باسم «غرفة كبار السن»؛ الغرفة الرئيسية في الأرضي قد تؤدي الغرض، ولا يمكن التحقق آليًا من أنها المقصودة.' });
+    else out.push({ id: 'P-old', kind: 'pref', text: 'غرفة لكبار السن قرب الصالة', ok: false, why: 'لا توجد غرفة مخصصة لكبار السن.' });
+  }
+  if (pr.guestEntrance) {
+    const D = doorInfo(doc), own = ['مدخل الرجال', 'مجلس الرجال', 'المجلس'].find(n => D.extDoors(n) > 0), entries = doc.openings.filter(o => o.entry).length;
+    if (own) out.push({ id: 'P-guest', kind: 'pref', text: 'مدخل مستقل للضيوف إلى المجلس', ok: true, why: `«${own}» له باب خارجي.` });
+    else if (entries >= 2) out.push({ id: 'P-guest', kind: 'pref', text: 'مدخل مستقل للضيوف إلى المجلس', ok: false, status: 'unverified', why: `في المخطط ${entries} مداخل، ولم يُعثر على باب خارجي يفتح على المجلس أو مدخل الرجال مباشرة؛ لا يمكن ربط أحدها بالمجلس آليًا.` });
+    else out.push({ id: 'P-guest', kind: 'pref', text: 'مدخل مستقل للضيوف إلى المجلس', ok: false, why: 'المجلس لا يلامس الواجهة في هذا التصميم.' });
+  }
+  // مدخل العائلة/النساء المستقل: يُثبت فقط بباب خارجي إلى فراغ نسائي مسمّى؛ غير ذلك «لم يُتحقق» ولا يُعد منفّذًا
+  if (pr.familyEntrance) {
+    const D = doorInfo(doc), WOMEN = ['مدخل النساء', 'ممر النساء', 'مجلس النساء', 'مدخل العائلة'].filter(n => D.extDoors(n) > 0), men = ['مدخل الرجال', 'مجلس الرجال', 'المجلس'].some(n => D.extDoors(n) > 0);
+    const w = WOMEN.find(n => n !== 'مدخل العائلة');
+    if (w && men) out.push({ id: 'P-fam', kind: 'pref', text: 'مدخل مستقل للعائلة/النساء', ok: true, why: `«${w}» له باب خارجي مستقل عن مدخل الرجال.` });
+    else out.push({ id: 'P-fam', kind: 'pref', text: 'مدخل مستقل للعائلة/النساء', ok: false, status: 'unverified', why: WOMEN.includes('مدخل العائلة') && men ? 'للعائلة مدخل («مدخل العائلة») وللرجال مدخل، لكن المخطط لا يسمّي مدخلًا خاصًا بالنساء؛ لا يمكن التحقق آليًا من أنه مدخل النساء المستقل.' : 'لم يُعثر على باب خارجي مستقل لمنطقة العائلة/النساء؛ يحتاج مراجعة.' });
+  }
+  if (pr.kitchenOpenHall) { const k = sel('kitchen')[0], h = sel('hall').filter(x => !k || x.level === k.level)[0], n = !!(k && h && contact(k, h) >= .8); out.push({ id: 'P-khall', kind: 'pref', text: 'مطبخ مفتوح على الصالة', ok: n, why: n ? '' : !k || !h ? 'المطبخ أو الصالة غير موجودين.' : 'المطبخ لا يجاور الصالة في هذا التصميم.' }); }
+  if (pr.openKitchen === false) out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: false, status: 'unverified', why: 'المخطط لا يميّز آليًا هنا بين فتحة مفتوحة وباب للمطبخ؛ راجعه في المسقط.' });
+  // الأبعاد الصريحة («4×5»): مقيسة من المستطيل الصافي للفراغ مع السماحية المعلنة
+  for (const [k, d] of Object.entries(req.dims || {})) {
+    const sid = AREA_SUBJ[k]; if (!sid || !d || !(d.w > 0) || !(d.l > 0)) continue;
+    let list = sel(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); } if (sid === 'majlis') list = list.slice(0, 1);
+    const tol = Number.isFinite(d.tol) ? d.tol : .3, want = [Math.min(d.w, d.l), Math.max(d.w, d.l)];
+    const text = `${list.length === 1 ? `«${list[0].name}»` : subjAr(sid)} بأبعاد ${want[0]}×${want[1]} م (±${tol} م)`;
+    if (!list.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, why: 'الفراغ غير موجود في هذا التصميم.' }); continue; }
+    const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
+    const bad = got.find(g => !g.ok);
+    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, why: (bad ? `«${bad.r.name}» ${r1(bad.s[0])}×${r1(bad.s[1])} م` : `الفعلي ${got.map(g => `${r1(g.s[0])}×${r1(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران).' });
+  }
+  // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
+  if (req.site?.irregular) out.push({ id: 'S-shape', kind: 'site', text: `شكل الأرض: ${req.site.shapeAr || 'غير منتظم'}`, ok: false, status: 'unverified', why: 'المولّد يقبل أرضًا مستطيلة فقط (عرض × طول)؛ صُمّم على مستطيل، وشكل الأرض الفعلي لم يُمثَّل ولم يُتحقق منه.' });
+  const fac = req.tweaks?.facade;
+  if (fac && typeof fac === 'object') out.push({ id: 'F-facade', kind: 'facade', text: `الواجهة: ${[fac.materialAr, fac.styleAr].filter(Boolean).join('، ') || 'تعديل'}`, ok: false, status: 'pending-render', why: 'سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار.' });
   const BIG = { majlis: ['majlis', 30, 'مجلس واسع'], hall: ['hall', 35, 'صالة واسعة'], kitchen: ['kitchen', 15, 'مطبخ واسع'], master: ['master', 22, 'غرفة رئيسية واسعة'] };
   for (const [k, [sid, min, ar]] of Object.entries(BIG)) if (pr['big_' + k] && !(req.areas || {})[k]) {
     let list = sel(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); }
     const r0 = list[0]; out.push({ id: 'B-' + k, kind: 'area', text: `${ar} (${min} م² صافية أو أكثر)`, ok: !!r0 && r0.area >= min, why: r0 ? (r0.area >= min ? `الفعلي ${r1(r0.area)} م².` : `الفعلي ${r1(r0.area)} م² فقط.`) : 'الفراغ غير موجود.' });
   }
-  return out;
+  return withStatus(out);
+}
+/**
+ * حالة كل بند: done (نُفّذ ومقيس)، failed (مقيس ولم يتحقق)، unverified (لا يمكن قياسه آليًا)، pending-render (مسجَّل وعرضه لاحقًا).
+ * ok=true فقط مع done، فلا يُعد بند غير مقيس منفّذًا عند أي مستهلك قديم.
+ */
+export const LEDGER_STATUS = Object.freeze(['done', 'failed', 'unverified', 'pending-render']);
+function withStatus(list) {
+  for (const x of list) {
+    if (!LEDGER_STATUS.includes(x.status)) x.status = x.ok ? 'done' : 'failed';
+    if (x.status !== 'done') x.ok = false;
+  }
+  return list;
 }
 
 /** القاعدة الجديدة تحل محل القديمة لنفس الفراغ ونوع الطلب (مثل: «المطبخ في الأمام» بعد «المطبخ في الخلف»). */
@@ -419,4 +561,10 @@ export function mergeRules(old = [], add = []) {
 }
 
 
-export default { mergeRules, extractRules, rulePenalty, verifyRules, verifyRequest, canonSide, SUBJECTS };
+/** أسماء عربية للفراغات والجهات (لأسئلة التعارض والرسائل). */
+export const subjectAr = subjAr;
+export const SIDE_LABELS = Object.freeze({ ...SIDE_AR });
+export const OPPOSITE_SIDE = Object.freeze({ ...OPP_SIDE });
+export const GROUND_ONLY_SUBJECTS = Object.freeze([...GROUND_ONLY]);
+
+export default { mergeRules, extractRules, rulePenalty, verifyRules, verifyRequest, canonSide, SUBJECTS, levelOf, LEVEL_WEIGHT, LEDGER_STATUS, docStairs };
