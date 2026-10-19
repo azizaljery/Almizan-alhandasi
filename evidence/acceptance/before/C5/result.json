@@ -1,0 +1,139 @@
+{
+ "id": "C5",
+ "name": "أرض غير منتظمة",
+ "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+ "understood": [],
+ "unclear": [
+  "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م"
+ ],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين",
+   "rooms": 16,
+   "net": 189.43,
+   "circulationPct": 12.63,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين",
+   "rooms": 16,
+   "net": 188.58,
+   "circulationPct": 11.17,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين",
+   "rooms": 16,
+   "net": 188.55,
+   "circulationPct": 12.43,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين",
+   "rooms": 16,
+   "net": 189.32,
+   "circulationPct": 10.15,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [
+  "المولّد يقبل أرضًا مستطيلة فقط (عرض × طول)؛ شكل الأرض في الطلب لا يُمثَّل. وُلّد على مستطيل محيط."
+ ],
+ "ms": 401,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.24,
+   0.31,
+   0.18
+  ],
+  [
+   0.24,
+   0,
+   0.24,
+   0.24
+  ],
+  [
+   0.31,
+   0.24,
+   0,
+   0.24
+  ],
+  [
+   0.18,
+   0.24,
+   0.24,
+   0
+  ]
+ ],
+ "modes": [
+  "center"
+ ]
+}

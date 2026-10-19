@@ -1,0 +1,187 @@
+{
+ "id": "C8",
+ "name": "تعديل موقع غرفة دون حذف الغرف الأخرى",
+ "text": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "tee",
+   "summary": "صالة مركزية وممر خلفي لأجنحة النوم (شكل T)",
+   "rooms": 16,
+   "net": 212.38,
+   "circulationPct": 17.05,
+   "bedrooms": 4,
+   "noWindow": 1,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين",
+   "rooms": 19,
+   "net": 212.18,
+   "circulationPct": 13.98,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "tee",
+   "summary": "صالة مركزية وممر خلفي لأجنحة النوم (شكل T)",
+   "rooms": 18,
+   "net": 211.78,
+   "circulationPct": 16.15,
+   "bedrooms": 4,
+   "noWindow": 1,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "tee",
+   "summary": "صالة مركزية وممر خلفي لأجنحة النوم (شكل T)",
+   "rooms": 18,
+   "net": 211.87,
+   "circulationPct": 19.81,
+   "bedrooms": 4,
+   "noWindow": 1,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 529,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.25,
+   0.09,
+   0.2
+  ],
+  [
+   0.25,
+   0,
+   0.29,
+   0.32
+  ],
+  [
+   0.09,
+   0.29,
+   0,
+   0.2
+  ],
+  [
+   0.2,
+   0.32,
+   0.2,
+   0
+  ]
+ ],
+ "modes": [
+  "tee",
+  "center"
+ ],
+ "edit": {
+  "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
+  "ms": 872,
+  "reply": {
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": true,
+   "unchanged": true,
+   "otherFails": []
+  },
+  "samePattern": true,
+  "difference": 0,
+  "roomsKept": true,
+  "roomsLost": [],
+  "after": {
+   "rooms": 16,
+   "net": 212.38,
+   "circulationPct": 17.05,
+   "bedrooms": 4,
+   "noWindow": 1,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ }
+}

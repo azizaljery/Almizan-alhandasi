@@ -1,0 +1,263 @@
+{
+ "id": "C7",
+ "name": "تصميم متعدد الأدوار",
+ "text": "دورين: المجالس والطعام والمطبخ تحت، و5 غرف نوم فوق، والماستر في الدور العلوي بعيدة عن الدرج، وغرفة لأمي في الأرضي",
+ "understood": [
+  "غرفة نوم قريبة من الصالة لكبار السن",
+  "دوران (أرضي وأول)",
+  "«المطبخ» في الدور الأرضي",
+  "«غرف النوم» في الدور العلوي",
+  "«غرفة النوم الرئيسية» في الدور العلوي",
+  "«غرفة كبار السن» في الدور الأرضي"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين (دوران)",
+   "rooms": 20,
+   "net": 291.6,
+   "circulationPct": 6.01,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرف النوم» في الدور العلوي",
+     "ok": false,
+     "why": "«غرفة كبار السن» في الدور الأرضي."
+    },
+    {
+     "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دوران",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 1
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "side",
+   "summary": "صالة جانبية بطول المبنى (دوران)",
+   "rooms": 23,
+   "net": 327.46,
+   "circulationPct": 7.94,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرف النوم» في الدور العلوي",
+     "ok": false,
+     "why": "«غرفة كبار السن» في الدور الأرضي."
+    },
+    {
+     "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دوران",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 1
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "side",
+   "summary": "صالة جانبية بطول المبنى (دوران)",
+   "rooms": 23,
+   "net": 327.28,
+   "circulationPct": 8.96,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرف النوم» في الدور العلوي",
+     "ok": false,
+     "why": "«غرفة كبار السن» في الدور الأرضي."
+    },
+    {
+     "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دوران",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 1
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "center",
+   "summary": "صالة مركزية بين جناحين (دوران)",
+   "rooms": 20,
+   "net": 328.03,
+   "circulationPct": 9.47,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرف النوم» في الدور العلوي",
+     "ok": false,
+     "why": "«غرفة كبار السن» في الدور الأرضي."
+    },
+    {
+     "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دوران",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 1
+  }
+ ],
+ "notes": [],
+ "ms": 431,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.3,
+   0.29,
+   0.15
+  ],
+  [
+   0.3,
+   0,
+   0.04,
+   0.29
+  ],
+  [
+   0.29,
+   0.04,
+   0,
+   0.28
+  ],
+  [
+   0.15,
+   0.29,
+   0.28,
+   0
+  ]
+ ],
+ "modes": [
+  "center",
+  "side"
+ ]
+}
