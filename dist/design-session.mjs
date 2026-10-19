@@ -2,7 +2,9 @@
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
 import { generateInitialDesign } from './home-flow.mjs';
 import { extractRequirements } from './requirements.mjs';
-import { verifyRequest } from './rules.mjs';
+import { verifyRequest, mergeRules } from './rules.mjs';
+import { withAi } from './requirements.mjs';
+export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
 
 export const SESSION_KEY = 'mizan.design.session.v1';
@@ -49,11 +51,11 @@ export const currentDoc = s => parseDoc(s.designs[s.current].doc);
  * - نص لم يُفهم منه شيء ولا خيار معه: لا يُولَّد تصميم؛ يُرمى SHARA_UNCLEAR ليعيد العميل الصياغة.
  * يعيد { session, changes, reply } — reply: ما نُفّذ وما لم يُنفَّذ (بسببه) وما لم يُفهم، مقيسًا من المخطط الجديد.
  */
-export async function redesign(session, { picks = [], text = '' } = {}, { generate = generateInitialDesign } = {}) {
+export async function redesign(session, { picks = [], text = '', ai = null } = {}, { generate = generateInitialDesign } = {}) {
   const s = clone(session), req = s.input.requirements, changes = [];
   req.prefs ||= {}; req.tweaks ||= {}; req.counts ||= {}; req.extras ||= {}; req.areas ||= {};
   let more = null;
-  if (text && text.trim().length >= 3) more = extractRequirements(text, { counts: {} });
+  if (text && text.trim().length >= 3) more = withAi(extractRequirements(text, { counts: {} }), ai);
   if (more && !more.understood.length && !more.unsupported.length && !picks.length) {
     const err = Error('لم أفهم ملاحظتك بدقة فلم أغيّر شيئًا' + (more.unclear.length ? ': ' + more.unclear.map(x => '«' + x + '»').join('، ') : '') + '. اكتبها بصيغة مباشرة مثل: «المطبخ في الخلف»، «الماستر بعيدة عن المجلس»، «المجلس أكبر»، «غرفة النوم 4×5»، أو اختر من الخيارات.');
     err.code = 'SHARA_UNCLEAR'; err.unclear = more.unclear; throw err;
@@ -91,13 +93,6 @@ export async function redesign(session, { picks = [], text = '' } = {}, { genera
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
   return { session: s, changes, reply };
-}
-
-/** القاعدة الجديدة تحل محل القديمة لنفس الفراغ ونوع الطلب (مثل: «المطبخ في الأمام» بعد «المطبخ في الخلف»). */
-export function mergeRules(old = [], add = []) {
-  const key = r => r.kind === 'place' ? `place|${r.a}|${['e', 'w'].includes(r.side) ? 'x' : ['front', 'back', 'n', 's'].includes(r.side) ? 'y' : r.side}` : r.kind === 'floor' ? `floor|${r.a}` : `rel|${r.a}|${r.b}`;
-  const m = new Map(); for (const r of [...old, ...add]) m.set(key(r), r);
-  return [...m.values()].map((r, i) => ({ ...r, id: 'R' + (i + 1) }));
 }
 
 export function approve(session) { const s = clone(session); s.approved = s.current; return s; }

@@ -11,7 +11,7 @@ import { legacyToDoc } from './draw/import-legacy.mjs';
 import { applyCommand } from './draw/doc.mjs';
 import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H } from './multi-floor.mjs';
 import { generateVillaDesigns, generateVillaTwoFloors, countsFromRooms } from './villa-layout.mjs';
-import { extractRequirements } from './requirements.mjs';
+import { extractRequirements, withAi } from './requirements.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
 
 export const SHARA_NAME = 'شرعاء';
@@ -115,7 +115,8 @@ export class SharaSession {
       if (text.length < 3) throw Error('اكتب وصفًا قصيرًا على الأقل.');
       this.idea = text.slice(0, 4000); this.phase = 'counts';
       // ما يتجاوز الأعداد (حمام لكل غرفة، مطبخ مفتوح، خادمة، مدخل مستقل، مقاسات...) يُستخرج من النص نفسه ويصل للمولّد
-      const req = extractRequirements(text, { counts: value?.counts && typeof value.counts === 'object' ? value.counts : {} });
+      // فهم Claude (إن أُدخل رمز الدخول) يُدمج مع الفهم المحلي؛ المحلي يتقدم عند التعارض
+      const req = withAi(extractRequirements(text, { counts: value?.counts && typeof value.counts === 'object' ? value.counts : {} }), value?.requirements || null);
       this.requirements = req;
       // أعداد مفهومة من النص تُعبّأ مسبقًا؛ ما لم يُفهم يبقى فارغًا ويُطلب من العميل.
       const seen = req.counts;

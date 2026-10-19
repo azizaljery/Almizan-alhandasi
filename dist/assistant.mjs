@@ -1,4 +1,5 @@
 import { normalizeRooms } from './planner.mjs';
+import { sanitizeAiRequirements } from './ai-requirements.mjs';
 
 export const AI_ENABLED = true;
 // Enabling the client does not verify that the separately deployed Worker is ready.
@@ -27,7 +28,8 @@ export function validateSuggestion(raw) {
     if (!Array.isArray(raw[k]) || raw[k].length > 12 || raw[k].some(s => typeof s !== 'string' || s.length > 600)) throw Error('اقتراح غير صالح.');
     result[k] = [...raw[k]];
   }
-  if (!Array.isArray(raw.rooms) || raw.rooms.length > 30 || (!raw.rooms.length && ![...result.questions, ...result.unhandled].some(s => s.trim()))) throw Error('اقتراح غير صالح.');
+  if (!Array.isArray(raw.rooms) || raw.rooms.length > 30 || (!raw.rooms.length && ![...result.questions, ...result.unhandled].some(s => s.trim()) && !(sanitizeAiRequirements(raw.requirements)?.rules.length))) throw Error('اقتراح غير صالح.');
+  const req = sanitizeAiRequirements(raw.requirements); if (req) result.requirements = req;
   result.rooms = raw.rooms.length ? normalizeRooms(raw.rooms).map(({ name, type, area, position, side, dimensions }) => ({ name, type, area, position, side, ...(dimensions ? { dimensions: { ...dimensions } } : {}) })) : [];
   return result;
 }

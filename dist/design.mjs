@@ -6,6 +6,8 @@ import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
 import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
 import { serialize } from './draw/doc.mjs';
+import { requestBrief } from './assistant.mjs';
+import { normalizeLand } from './home-flow.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -184,10 +186,18 @@ function openShara() {
 $('fbClose').addEventListener('click', () => { $('shara').hidden = true; });
 $('fbGo').addEventListener('click', async () => {
   const picks = [...document.querySelectorAll('#fbChips .chip[aria-pressed=true]')].map(b => b.dataset.id), text = $('fbText').value.trim();
-  $('fbGo').disabled = true; $('fbStatus').textContent = 'أصمّم بديلًا مختلفًا بناءً على ملاحظاتك…';
+  $('fbGo').disabled = true; $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
   await new Promise(r => setTimeout(r, 30));
   try {
-    const out = await redesign(session, { picks, text });
+    // رمز الدخول (إن أُدخل في المحادثة): Claude يفهم الملاحظة أيضًا، ويُدمج فهمه مع الفهم المحلي
+    let ai = null, code = ''; try { code = sessionStorage.getItem('mizan.ai.code') || ''; } catch { /* لا تخزين */ }
+    if (code && text.length >= 8) {
+      $('fbStatus').textContent = 'أفهم ملاحظتك عبر Claude…';
+      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: { summary: 'ملاحظة تعديل على تصميم معروض؛ استخرج ما تطلبه الملاحظة فقط.', rooms: [] } }, { accessCode: code, signal: AbortSignal.timeout?.(45000) })).brief.requirements || null; }
+      catch { ai = null; }
+      $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
+    }
+    const out = await redesign(session, { picks, text, ai });
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });

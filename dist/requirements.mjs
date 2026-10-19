@@ -3,7 +3,7 @@
 // والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
 // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
 
-import { extractRules } from './rules.mjs';
+import { extractRules, mergeRules, ruleText } from './rules.mjs';
 
 const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
 /** تطبيع عربي: حذف التشكيل والتطويل، توحيد الألف والتاء المربوطة والياء، والأرقام الهندية إلى لاتينية. */
@@ -156,3 +156,34 @@ export function unclearClauses(text) {
 function label(key) { return { master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[key] || key; }
 
 export default { extractRequirements, normalizeAr };
+
+const ABSENT_AR = { majlis: 'بدون مجلس', dining: 'بدون غرفة طعام', office: 'بدون مكتب', prayer: 'بدون مصلى', maid: 'بدون غرفة خادمة', driver: 'بدون غرفة سائق' };
+const PREF_AR = { allEnsuite: 'كل غرفة نوم بحمامها الملحق', sharedBaths: 'غرف النوم (عدا الرئيسية) تتشارك دورات المياه', masterDressing: 'غرفة ملابس للغرفة الرئيسية', openKitchen: 'مطبخ مفتوح على الطعام', closedKitchen: 'مطبخ مغلق بباب', kitchenOpenHall: 'مطبخ مفتوح على الصالة', familyEntrance: 'مدخل مستقل للعائلة/النساء', guestEntrance: 'مجلس الرجال بمدخل مستقل عن العائلة', womenSeparate: 'مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)', bathsOffHall: 'دورات المياه لا تفتح على الصالة مباشرة', noCorridors: 'أقل ما يمكن من الممرات (الحركة عبر الصالة)', elderlyRoom: 'غرفة نوم قريبة من الصالة لكبار السن' };
+const EXTRA_AR2 = { maid: 'غرفة خادمة', driver: 'غرفة سائق', office: 'مكتب', prayer: 'مصلى', storage: 'مخزن', laundry: 'غرفة غسيل', guestRoom: 'غرفة نوم للضيوف' };
+/**
+ * يدمج فهم Claude (منقّحًا بـ sanitizeAiRequirements) مع الفهم المحلي. المحلي يتقدم عند التعارض لأنه حتمي ومختبر؛
+ * وما فهمه Claude وفات المحلي يُضاف. «لم أفهم» تصير حكم Claude (هو الأقدر على الصياغات الحرة).
+ */
+export function withAi(local, ai) {
+  if (!ai || typeof ai !== 'object') return local;
+  const out = JSON.parse(JSON.stringify(local)), und = [...(out.understood || [])];
+  out.counts ||= {}; out.prefs ||= {}; out.extras ||= {}; out.areas ||= {};
+  const aiRules = (ai.rules || []).map(r => ({ ...r, ai: true, text: ruleText(r) }));
+  out.rules = mergeRules(aiRules, out.rules || []);
+  for (const r of out.rules) if (!und.includes(r.text)) und.push(r.text);
+  for (const k of ai.absent || []) { if (k === 'majlis' || k === 'dining') out.counts[k] = 0; else delete out.extras[k]; und.push(ABSENT_AR[k]); }
+  if (ai.floors && !out.prefs.floors) { out.prefs.floors = ai.floors; und.push(ai.floors === 2 ? 'دوران (أرضي وأول)' : 'دور واحد'); }
+  for (const p of ai.prefs || []) {
+    if (p === 'closedKitchen') { if (out.prefs.openKitchen === undefined) { out.prefs.openKitchen = false; und.push(PREF_AR[p]); } continue; }
+    if (out.prefs[p] === undefined) { out.prefs[p] = true; und.push(PREF_AR[p]); }
+  }
+  for (const [k, v] of Object.entries(ai.extras || {})) if (!out.extras[k]) {
+    out.extras[k] = ['maid', 'driver', 'guestRoom'].includes(k) ? { bath: !!v.bath, ext: !!v.ext } : k === 'office' ? (v.ext ? { ext: true } : true) : true;
+    und.push(EXTRA_AR2[k] + (v.bath ? ' بحمام' : '') + (v.ext ? ' بباب خارجي' : ''));
+  }
+  for (const [k, a] of Object.entries(ai.areas || {})) if (!out.areas[k]) { out.areas[k] = a; und.push(`${{ master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[k]} ${a} م²`); }
+  out.understood = [...new Set(und.filter(Boolean))];
+  out.unclear = [...(ai.unclear || [])];
+  out.source = 'claude';
+  return out;
+}
