@@ -3,7 +3,7 @@
 // والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
 // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
 
-import { extractRules, mergeRules, ruleText } from './rules.mjs';
+import { extractRules, mergeRules, ruleText, subjectAr, SIDE_LABELS, OPPOSITE_SIDE } from './rules.mjs';
 
 const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
 /** تطبيع عربي: حذف التشكيل والتطويل، توحيد الألف والتاء المربوطة والياء، والأرقام الهندية إلى لاتينية. */
@@ -13,19 +13,41 @@ export function normalizeAr(text) {
     .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
     .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
     .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
-    .replace(/[×xX*]/g, '×').replace(/\s+/g, ' ').trim();
+    // «4x5» و«4 م x 5» و«4*5» أبعاد؛ حرف x داخل كلمة إنجليزية («next») يبقى كما هو
+    .replace(/(\d(?:\s*(?:م|m))?)\s*[xX*]\s*(?=\d)/g, '$1×').replace(/\s+/g, ' ').trim().toLowerCase();
 }
 const num = s => (s in AR_NUM ? AR_NUM[s] : Number(s));
 
 // كلمات الفراغات ← المفتاح المستعمل في المولّد
 const ROOM_WORDS = [
-  ['master', 'غرفه (?:النوم )?(?:الرئيسيه|ماستر)|الماستر|ماستر'],
-  ['majlis', 'مجلس(?: الرجال| رجال| النساء| نساء)?'],
-  ['hall', 'صاله(?: عائليه| المعيشه| معيشه)?|الصاله'],
-  ['dining', '(?:صاله|غرفه)? ?(?:ال)?طعام'],
-  ['kitchen', '(?:ال)?مطبخ'],
-  ['bedroom', 'غرفه نوم|غرف نوم|غرف (?:لل|ال|ل)?(?:اولاد|اطفال|بنات|عيال|ابناء)|غرفتين|غرفتان|(?:باقي |بقيه )?(?:ال)?غرف|غرفه'],
+  ['master', 'غرفه (?:النوم )?(?:الرئيسيه|ماستر)|الماستر|ماستر|master(?: bed ?room| suite)?'],
+  ['majlis', 'مجلس(?: الرجال| رجال| النساء| نساء)?|majlis'],
+  ['hall', 'صاله(?: عائليه| المعيشه| معيشه)?|الصاله|living(?: room)?|family hall'],
+  ['dining', '(?:صاله|غرفه)? ?(?:ال)?طعام|dining(?: room)?'],
+  ['kitchen', '(?:ال)?مطبخ|kitchen'],
+  ['bedroom', 'غرفه نوم|غرف نوم|غرف (?:لل|ال|ل)?(?:اولاد|اطفال|بنات|عيال|ابناء)|غرفتين|غرفتان|(?:باقي |بقيه )?(?:ال)?غرف|غرفه|(?:kids |children )?bed ?rooms?'],
 ];
+// مواد الواجهة وطرزها (تُحمل في المتطلبات؛ عرضها في المجسّم لاحقًا)
+const FACADE_MATERIALS = [
+  ['stone', 'حجر', 'حجر(?:ي|يه)?|stone'], ['marble', 'رخام', 'رخام|marble'], ['granite', 'جرانيت', 'جرانيت|granite'],
+  ['wood', 'خشب', 'خشب(?:ي|يه)?|wood(?:en)?'], ['glass', 'زجاج', 'زجاج(?:ي|يه)?|glass'], ['brick', 'طوب', 'طوب|بريك|brick'],
+  ['cladding', 'كلادينج', 'كلادينج|كلادنق|كلادينق|الوكبوند|alucobond|cladding'], ['plaster', 'لياسة ودهان', 'لياسه|دهان|بلاستر|plaster|paint(?:ed)?'],
+];
+const FACADE_STYLES = [
+  ['najdi', 'نجدي', 'نجدي(?:ه)?|najdi'], ['salmani', 'سلماني', 'سلماني(?:ه)?|salmani'], ['modern', 'حديث', 'حديث(?:ه)?|مودرن|عصري(?:ه)?|modern|contemporary'],
+  ['classic', 'كلاسيكي', 'كلاسيك(?:ي|يه)?|classic(?:al)?'], ['hijazi', 'حجازي', 'حجازي(?:ه)?|hijazi'],
+];
+const pickWord = (list, s) => { for (const [id, ar, re] of list) if (new RegExp(`(?<![\\u0600-\\u06FFa-z])(?:ال|بال|و)?(?:${re})(?![\\u0600-\\u06FFa-z])`).test(s)) return { id, ar }; return null; };
+/** يربط موضعًا في النص المطبَّع بعبارة العميل الأصلية (الكلمات تتطابق واحدة بواحدة بعد التطبيع). */
+function origMapper(text) {
+  const orig = String(text || '').trim().split(/\s+/).filter(Boolean), normTok = orig.map(w => normalizeAr(w));
+  const joined = normTok.join(' ');
+  if (joined !== normalizeAr(text)) return (t, a, b) => t.slice(a, b).trim();
+  const starts = []; let p = 0; for (const w of normTok) { starts.push(p); p += w.length + 1; }
+  const idx = pos => { let i = 0; while (i + 1 < starts.length && starts[i + 1] <= pos) i++; return i; };
+  return (t, a, b) => orig.slice(idx(a), idx(Math.max(a, b - 1)) + 1).join(' ').replace(/^[،,.؛;:!?؟]+|[،,.؛;:!?؟]+$/g, '').trim();
+}
+const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ? .1 : /تقريبا|حوالي|تقريبي|نحو|approx(?:imately)?|about|around/.test(s) ? .5 : .3;
 
 /**
  * يستخرج المتطلبات من النص. counts: أعداد مفهومة مسبقًا (من الفهم المحلي أو الذكاء) تُستعمل أساسًا.
@@ -34,8 +56,9 @@ const ROOM_WORDS = [
 export function extractRequirements(text, { counts = {}, discovery = null, clauses = true } = {}) {
   const t = normalizeAr(text), understood = [], unsupported = [];
   const has = re => re.test(t);
-  const prefs = {}, extras = {}, areas = {};
+  const prefs = {}, extras = {}, areas = {}, dims = {}, textCounts = {};
   const c = { ...counts };
+  const quoteOf = origMapper(text);
 
   // حمام لكل غرفة
   if (has(/(كل|جميع) (ال)?غرف(ه)?( ال)?(نوم)? ?(ب|مع|فيها|لها|عندها|داخلها)? ?(حمام|دوره مياه|دورات مياه)|حمام (خاص )?(لكل|في كل) غرفه|(كل|جميع) (ال)?غرف ماستر|غرف(ه)? ماستر (كلها|جميعها)|حمامات داخليه/)) {
@@ -47,15 +70,22 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   // الماستر وغرفة الملابس
   if (has(/غرفه (ال)?ملابس|دريسنج|دريسنق|walk ?in/)) { prefs.masterDressing = true; understood.push('غرفة ملابس للغرفة الرئيسية'); }
   const mm = t.match(/(\d+|واحد|اثنين|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه) غرف(ه)? (نوم )?ماستر/);
-  if (mm) { const n = num(mm[1]); if (Number.isInteger(n) && n >= 1 && n <= 10) { c.bedrooms = Math.max(c.bedrooms || 0, n); prefs.allEnsuite = true; understood.push(`${n} غرف نوم ماستر (كل غرفة بحمامها)`); } }
+  if (mm) { const n = num(mm[1]); if (Number.isInteger(n) && n >= 1 && n <= 10) { c.bedrooms = Math.max(c.bedrooms || 0, n); textCounts.bedrooms = c.bedrooms; prefs.allEnsuite = true; understood.push(`${n} غرف نوم ماستر (كل غرفة بحمامها)`); } }
   // «4 غرف» أو «ثلاث غرف نوم»: عدد صريح واحد لغرف النوم يتقدم على العد التقريبي من الكلمات
   const NUMW = '\\d+|واحد|اثنين|ثنتين|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه|ست|سته|سبع|سبعه|ثمان|ثمانيه|تسع|تسعه|عشر|عشره';
   const bedRe = new RegExp(`(?<![\\u0600-\\u06FF0-9])و?(${NUMW}) (?:غرف|غرفه)(?: (?:ال)?نوم)?(?! (?:ال)?(?:ملابس|غسيل|خادمه|سائق|طعام|ماستر))(?![\\u0600-\\u06FF])( (?:لل|ل|ال)?(?:عيال|اولاد|اطفال|بنات|ابناء|بزران))?`, 'g');
   // «الماستر وثلاث غرف للعيال» = أربع غرف نوم
   const masterSaid = /ماستر|(?:غرفه (?:ال)?نوم |ال)رئيسيه/.test(t);
-  const bedHits = [...t.matchAll(bedRe)].map(m => num(m[1]) + (m[2] && masterSaid ? 1 : 0)).filter(n => Number.isInteger(n) && n >= 1 && n <= 10);
-  if (bedHits.length === 1 && !mm) c.bedrooms = bedHits[0];
+  // و«ثلاث غرف للعيال» مع «غرفة لأبوي وأمي» = غرفة الوالدين من غرف النوم أيضًا (المولّد يعدّها منها)
+  const elderSaid = /غرف(?:ه)?(?: نوم)?(?: ارضيه)? (?:لل|ل)(?:ابوي|امي|والد|والده|والدين|جدي|جدتي|كبار السن|كبير السن|اهلي)|غرف(?:ه)? (?:ال)?(?:والد|والده|والدين)/.test(t);
+  const bedHits = [...t.matchAll(bedRe)].map(m => num(m[1]) + (m[2] && masterSaid ? 1 : 0) + (m[2] && elderSaid ? 1 : 0)).filter(n => Number.isInteger(n) && n >= 1 && n <= 10);
+  const exactBeds = has(/غرف(?:ه)?(?: (?:ال)?نوم)? (?:بالضبط|بالظبط|فقط|بس|لا اكثر|لا اقل|تماما)|exactly \d+ bed/);
+  if (bedHits.length === 1 && !mm) { c.bedrooms = bedHits[0]; textCounts.bedrooms = bedHits[0]; understood.push(`${bedHits[0]} غرف نوم${exactBeds ? ' (بالضبط)' : ''}`); }
+  else if (bedHits.length > 1 && !mm) understood.push(`أعداد غرف نوم متعددة في الكلام (${bedHits.join('، ')}): يُعتمد العدد في النموذج`);
+  const enBeds = !mm && !bedHits.length && t.match(/(?<![a-z0-9])(\d+|one|two|three|four|five|six|seven|eight) bed ?rooms?(?![a-z])/);
+  if (enBeds) { const n = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8 }[enBeds[1]] || Number(enBeds[1]); if (n >= 1 && n <= 10) { c.bedrooms = n; textCounts.bedrooms = n; understood.push(`${n} غرف نوم`); } }
   if (has(/ماستر|الرئيسيه/) && !c.bedrooms) c.bedrooms = 1;
+  if (has(/ماستر|غرفه (?:ال)?نوم (?:ال)?رئيسيه|master/)) understood.push('غرفة نوم رئيسية (ماستر)');
   // المطبخ
   // المطبخ: «مقفل مو مفتوح» مغلق؛ يُسمح بكلمتين بين المطبخ والصفة («المطبخ يكون مفتوح»)
   const K2 = '(?: [^ ،,.]+){0,2} ';
@@ -86,9 +116,23 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (has(/كبار السن|كبير السن|(ا|ل)لوالد|(?<![\u0600-\u06FF])(و|ل|لل)?(امي|ابوي|جدتي|جدي)(?![\u0600-\u06FF])|(?<![\u0600-\u06FF])(لل|ل)(ام|اب)(?![\u0600-\u06FF])/) || discovery?.life?.seniors) { prefs.elderlyRoom = true; understood.push('غرفة نوم قريبة من الصالة لكبار السن'); }
   // مقاسات صريحة: «مجلس 5×6» أو «مجلس 30 م²»
   for (const [key, words] of ROOM_WORDS) {
-    const GAP = '\\s*(?:(?:كبيره|كبير|واسعه|واسع|صغيره|صغير|فخم|فخمه)\\s*)?(?:(?:كل|لكل) (?:وحده|واحده|غرفه|وحده منها|واحد)\\s*)?(?:(?:ب|و)?(?:مساحه|مساحتها|مساحته|مقاس|مقاسها|مقاسه|ابعاد|ابعادها|ابعاده)\\s*)?';
-    const re = new RegExp(`(?:${words})${GAP}(\\d+(?:\\.\\d+)?)\\s*(?:×|في)\\s*(\\d+(?:\\.\\d+)?)`), m = t.match(re);
-    if (m) { const a = num(m[1]) * num(m[2]); if (a >= 4 && a <= 150 && !areas[key]) { areas[key] = Math.round(a * 100) / 100; understood.push(`${label(key)} ${m[1]}×${m[2]} م (${areas[key]} م²)`); } continue; }
+    const GAP = '\\s*(?:(?:تقريبا|حوالي|بالضبط|تماما)\\s*)?(?:(?:كبيره|كبير|واسعه|واسع|صغيره|صغير|فخم|فخمه)\\s*)?(?:(?:كل|لكل) (?:وحده|واحده|غرفه|وحده منها|واحد)\\s*)?(?:(?:ب|و)?(?:مساحه|مساحتها|مساحته|مقاس|مقاسها|مقاسه|ابعاد|ابعادها|ابعاده)\\s*)?';
+    // «4×5»، «4 في 5»، «4 م × 5 م»، «4 by 5»، «عرض 4 وطول 5»، «طول 5 وعرض 4»
+    const N = '(\\d+(?:\\.\\d+)?)', U = '\\s*(?:م|متر|m)?\\s*';
+    const re = new RegExp(`(?:${words})${GAP}${N}${U}(?:×|في|by)\\s*${N}`), mx = t.match(re);
+    const reWL = new RegExp(`(?:${words})${GAP}(?:ب|و)?(?:ال)?(?:عرض(?:ها|ه)?|width)\\s*${N}${U}(?:و|،|,|and)?\\s*(?:ب)?(?:ال)?(?:طول(?:ها|ه)?|length)\\s*${N}`), mw = t.match(reWL);
+    const reLW = new RegExp(`(?:${words})${GAP}(?:ب|و)?(?:ال)?(?:طول(?:ها|ه)?|length)\\s*${N}${U}(?:و|،|,|and)?\\s*(?:ب)?(?:ال)?(?:عرض(?:ها|ه)?|width)\\s*${N}`), ml = t.match(reLW);
+    const m = mx || mw || (ml ? Object.assign([ml[0], ml[2], ml[1]], { index: ml.index }) : null);
+    if (m) {
+      const w = num(m[1]), l = num(m[2]), a = w * l;
+      if (a >= 4 && a <= 150 && !areas[key]) {
+        areas[key] = Math.round(a * 100) / 100;
+        const near = t.slice(Math.max(0, m.index - 10), m.index).split(/[،,.؛;]/).pop() + t.slice(m.index, m.index + m[0].length + 14).split(/[،,.؛;]/)[0];
+        dims[key] = { w: Math.min(w, l), l: Math.max(w, l), tol: tolOf(near), quote: quoteOf(t, m.index, m.index + m[0].length) };
+        understood.push(`${label(key)} ${m[1]}×${m[2]} م (${areas[key]} م²)`);
+      }
+      continue;
+    }
     const re2 = new RegExp(`(?:${words})${GAP}(\\d+(?:\\.\\d+)?)\\s*(?:م2|م²|متر مربع|مترمربع|متر)`), m2 = t.match(re2);
     if (m2) { const a = num(m2[1]); if (a >= 4 && a <= 150 && !areas[key]) { areas[key] = a; understood.push(`${label(key)} ${a} م²`); } }
   }
@@ -124,6 +168,29 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (has(/مسبح|حمام سباحه/)) unsupported.push('المسبح: خارج المبنى ولا يُرسم في هذا الإصدار.');
   if (has(/مصعد|اسانسير/)) unsupported.push('المصعد: غير مدعوم في هذا الإصدار.');
   if (has(/قبو|بدروم/)) unsupported.push('القبو: غير مدعوم في هذا الإصدار.');
+  // شكل الأرض غير المستطيل: يُحمل بنيويًا ويُعلن أنه غير مدعوم (المولّد مستطيل فقط)
+  let site = null;
+  const sh = t.match(/(?:ال)?(?:ارض|قطعه|القطعه|الارض)[^،.؛]{0,24}?(شبه منحرف|منحرف(?:ه)?|غير منتظم(?:ه)?|غير مستطيل(?:ه)?|مثلث(?:ه)?|مثلثيه|زاويه حاده|مايل(?:ه)?|غير مربع(?:ه)?|منكسر(?:ه)?)|(?<![a-z])(?:irregular|trapezoid(?:al)?|triangular|non-rectangular) (?:plot|land|site)/);
+  if (sh) {
+    const shapeAr = sh[1] ? sh[1].replace(/ه$/, '') : 'غير منتظم', g = re => { const m = t.match(re); return m ? Number(m[1]) : null; };
+    site = { irregular: true, shape: /منحرف|trapez/.test(sh[0]) ? 'trapezoid' : /مثلث|triang/.test(sh[0]) ? 'triangle' : 'irregular', shapeAr, front: g(/(?:ال)?واجهه (\d+(?:\.\d+)?)/), back: g(/(?:ال)?خلف(?:يه)? (\d+(?:\.\d+)?)/), depth: g(/عمق(?:ها|ه)? (\d+(?:\.\d+)?)/), quote: quoteOf(t, sh.index, Math.min(t.length, sh.index + sh[0].length)) };
+    unsupported.push(`شكل الأرض (${shapeAr}${site.front ? `: الواجهة ${site.front} م` : ''}${site.back ? `، الخلف ${site.back} م` : ''}${site.depth ? `، العمق ${site.depth} م` : ''}): المولّد يقبل أرضًا مستطيلة فقط؛ سيُصمَّم على مستطيل ويُعلَّم البند «لم يُتحقق».`);
+  }
+  // «احتفظ بهذا التوزيع»: تعديل لا يغيّر المخطط
+  const keepLayout = has(/(?:احتفظ|حافظ|خل|خلي|ابق|ابقي|ثبت|بدون ما تغير|لا تغير|ما تغير|لا تغيير)(?: علي| على)? ?(?:ب?هذا |ب?هذي |ب?نفس |ب)?(?:ال)?(?:توزيع|تقسيم|مخطط|مسقط)|نفس (?:ال)?(?:توزيع|تقسيم|مخطط|مسقط)|(?<![a-z])keep (?:the |this )?(?:same )?(?:layout|plan)(?![a-z])/);
+  if (keepLayout) understood.push('الإبقاء على التوزيع الحالي كما هو');
+  // الواجهة: مادة أو طراز — تُحمل كتعديل facade، وعرضها في المجسّم لاحقًا
+  const fm = t.match(/(?<![؀-ۿa-z])(?:ال|و|بال)?(?:واجهه|واجهات|facade|elevation)s?(?![؀-ۿa-z])([^،,.؛]{0,40})/);
+  if (fm) {
+    const zone = t.slice(Math.max(0, fm.index - 30), fm.index).split(/[،,.؛;]/).pop() + ' ' + fm[0], mat = pickWord(FACADE_MATERIALS, zone), sty = pickWord(FACADE_STYLES, zone);
+    if (mat || sty) {
+      tweaks.facade = { ...(mat ? { material: mat.id, materialAr: mat.ar } : {}), ...(sty ? { style: sty.id, styleAr: sty.ar } : {}), keepLayout: !!keepLayout };
+      understood.push(`الواجهة: ${[mat?.ar, sty?.ar].filter(Boolean).join('، ')} (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)`);
+    }
+  }
+  // اقتباس كل قاعدة بكلام العميل الأصلي
+  for (const r of rules) if (Array.isArray(r.at)) r.quote = quoteOf(t, r.at[0], r.at[1]) || r.quote;
+  const orphanQuotes = (R.orphans || []).map(o => quoteOf(t, o.at[0], o.at[1]) || o.quote).filter(Boolean);
 
   // حمام لكل غرفة يرفع عدد دورات المياه إلى ما يكفي
   if (prefs.allEnsuite && c.bedrooms) {
@@ -135,12 +202,17 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
     const need = Math.min(2, c.majlis || 0) + 1 + Math.ceil((c.bedrooms - 1) / 2) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
     if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة${c.majlis ? '، ودورة مياه للضيوف' : ''})`); }
   }
-  return { counts: c, extras, prefs, areas, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear: clauses ? unclearClauses(text) : [] };
+  const uc = clauses ? unclearClauses(text) : [];
+  const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
+  return {
+    counts: c, extras, prefs, areas, dims, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear,
+    textCounts, givenCounts: { ...counts }, absent: [...R.absent], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
+  };
 }
 
 // كلمات لا تحمل طلبًا (طلب، تحية، حشو) وكلمات البرنامج التي تُفهم أعدادًا
-const FILLER = new Set('ابي ابغي ابغا ابا اريد نبي نبغي ودي ودنا حاب احب ابيه ابيها ابيهم بيت البيت فيلا الفيلا منزل المنزل فيها فيه يكون تكون تصير يصير لازم خل خلي خله خلها مع و في على ع من الي اللي الى عن ب ل يا لو سمحت الله يعطيك العافيه شكرا السلام عليكم مرحبا هلا اهلا ايضا كمان بعد زين طيب ان انه انها حق حقي حقنا لنا لي عندي عندنا عائله عايله كبيره صغيره نحن احنا نفر اشخاص شخص افراد اسره تصميم صمم صممي ارسم ارسمي حط حطي سو سوي يكون فيه واحد وحده اثنين ثنتين ثلاث اربع خمس ست سبع ثمان تسع عشر دور الدور ارضي واحد فقط بس'.split(' '));
-const PROGRAM = /^(?:و|ب|ل|ال|بال|وال|لل)*(?:غرف|غرفه|غرفتين|نوم|ماستر|مجلس|مجالس|مجلسين|صاله|صالات|صالتين|مطبخ|مطابخ|طعام|سفره|حمام|حمامات|حمامين|دوره|دورات|مياه|خادمه|سائق|مكتب|مصلي|غسيل|مخزن|رجال|نساء|ضيوف|رئيسيه)$/;
+const FILLER = new Set('ابي ابغي ابغا ابا اريد نبي نبغي ودي ودنا حاب احب ابيه ابيها ابيهم بيت البيت فيلا الفيلا منزل المنزل فيها فيه يكون تكون تصير يصير لازم خل خلي خله خلها مع و في على ع من الي اللي الى عن ب ل يا لو سمحت الله يعطيك العافيه شكرا السلام عليكم مرحبا هلا اهلا ايضا كمان بعد زين طيب ان انه انها حق حقي حقنا لنا لي عندي عندنا عائله عايله كبيره صغيره نحن احنا نفر اشخاص شخص افراد اسره تصميم صمم صممي ارسم ارسمي حط حطي سو سوي يكون فيه واحد وحده اثنين ثنتين ثلاث اربع خمس ست سبع ثمان تسع عشر دور الدور ارضي واحد فقط بس بالضبط بالظبط تماما تقريبا حوالي منها منهم منهن الباقي باقي بقيه ثلاثه اربعه خمسه سته سبعه ثمانيه تسعه عشره i want we need need please a an the with and of in on house villa home'.split(' '));
+const PROGRAM = /^(?:و|ب|ل|ال|بال|وال|لل)*(?:غرف|غرفه|غرفتين|نوم|ماستر|مجلس|مجالس|مجلسين|صاله|صالات|صالتين|مطبخ|مطابخ|طعام|سفره|حمام|حمامات|حمامين|دوره|دورات|مياه|خادمه|سائق|مكتب|مصلي|غسيل|مخزن|رجال|نساء|ضيوف|رئيسيه)$|^(?:bed ?rooms?|majlis|kitchens?|living|hall|dining|rooms?|bath(?:room)?s?|toilets?|maid|driver|office|master)$/;
 /** عبارات من كلام العميل لم يُستخرج منها شيء: تُعرض له بصدق ليعيد صياغتها بدل أن تُهمل بصمت. */
 export function unclearClauses(text) {
   const out = [];
@@ -151,11 +223,44 @@ export function unclearClauses(text) {
     const t = normalizeAr(clause), toks = t.split(' ').filter(w => w && !FILLER.has(w) && !FILLER.has(w.replace(/^و/, '')) && !/^\d+(?:[.,]\d+)?$/.test(w) && !PROGRAM.test(w));
     if (toks.length >= 1) out.push(clause.replace(/^و(?=\S)/, ''));
   }
-  return out.slice(0, 6);
+  // بلا حدّ: لا تُسقط عبارة غير مفهومة لأن ما قبلها كثير
+  return out;
+}
+const CLAUSE_SPLIT = /[،,.؛;\n!?؟]+|\s(?=و(?:ابي|ابغى|ابغي|اريد|خل|خلي|ودي|لا |ما ))/;
+/**
+ * مصير كل عبارة من كلام العميل: understood (فُهمت وما فُهم منها)، unsupported (فُهمت ولا يدعمها الإصدار)، unclear (لم تُفهم).
+ * عبارة فُهم بعضها وسقط بعضها (علاقة بلا طرف: «بعيدة عن …») تأخذ مدخلًا ثانيًا unclear باقتباسه.
+ * يعيد { clauses:[{ quote, fate, items, kind? }], dropped:[] } — dropped عبارة أو بند لم يصل إلى الطلب الكامل req (يجب أن تكون فارغة).
+ */
+export function coverage(text, req = null) {
+  const full = req || extractRequirements(text);
+  const und = new Set(full.understood || []), uns = new Set(full.unsupported || []), unc = full.unclear || [];
+  const inUnclear = q => unc.some(u => u === q || u.includes(q) || q.includes(u));
+  const clauses = [], dropped = [];
+  for (const raw of String(text || '').split(CLAUSE_SPLIT)) {
+    const quote = (raw || '').trim().replace(/^و(?=\S)/, ''); if (!quote || !normalizeAr(quote).replace(/[^\p{L}\p{N}]/gu, '')) continue;
+    const r = extractRequirements(raw.trim(), { clauses: false }), entries = [];
+    if (r.understood.length) entries.push({ quote, fate: 'understood', items: r.understood });
+    if (r.unsupported.length) entries.push({ quote, fate: 'unsupported', items: r.unsupported });
+    if (!entries.length) {
+      const toks = normalizeAr(quote).split(' ').filter(Boolean), content = toks.filter(w => !FILLER.has(w) && !FILLER.has(w.replace(/^و/, '')) && !/^\d+(?:[.,]\d+)?$/.test(w) && !PROGRAM.test(w));
+      if (content.length && quote.length >= 4) entries.push({ quote, fate: 'unclear', items: [] });
+      else if (toks.some(w => PROGRAM.test(w) || /^\d/.test(w))) entries.push({ quote, fate: 'understood', kind: 'program', items: ['ضمن برنامج الغرف (الأعداد المحددة في النموذج أو المفهومة من الكلام)'] });
+      else entries.push({ quote, fate: 'understood', kind: 'filler', items: ['لا يحمل طلبًا (تحية أو حشو)'] });
+    }
+    for (const o of r.orphans || []) entries.push({ quote: o, fate: 'unclear', kind: 'orphan', items: ['عبارة علاقة لم يُعرف طرفاها'] });
+    // اتساق مع الطلب الكامل: ما فُهم في العبارة يجب أن يكون في الطلب، وما لم يُفهم يجب أن يُعرض في unclear
+    for (const e of entries) {
+      const ok = e.fate === 'unclear' ? inUnclear(e.quote) : e.fate === 'unsupported' ? e.items.every(x => uns.has(x)) : (e.kind ? true : e.items.some(x => und.has(x)));
+      if (!ok) dropped.push({ ...e, why: 'لم يصل إلى الطلب الكامل' });
+    }
+    clauses.push(...entries);
+  }
+  return { clauses, dropped };
 }
 function label(key) { return { master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[key] || key; }
 
-export default { extractRequirements, normalizeAr };
+export default { extractRequirements, normalizeAr, coverage: (...a) => coverage(...a), detectConflicts: (...a) => detectConflicts(...a) };
 
 const ABSENT_AR = { majlis: 'بدون مجلس', dining: 'بدون غرفة طعام', office: 'بدون مكتب', prayer: 'بدون مصلى', maid: 'بدون غرفة خادمة', driver: 'بدون غرفة سائق' };
 const PREF_AR = { allEnsuite: 'كل غرفة نوم بحمامها الملحق', sharedBaths: 'غرف النوم (عدا الرئيسية) تتشارك دورات المياه', masterDressing: 'غرفة ملابس للغرفة الرئيسية', openKitchen: 'مطبخ مفتوح على الطعام', closedKitchen: 'مطبخ مغلق بباب', kitchenOpenHall: 'مطبخ مفتوح على الصالة', familyEntrance: 'مدخل مستقل للعائلة/النساء', guestEntrance: 'مجلس الرجال بمدخل مستقل عن العائلة', womenSeparate: 'مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)', bathsOffHall: 'دورات المياه لا تفتح على الصالة مباشرة', noCorridors: 'أقل ما يمكن من الممرات (الحركة عبر الصالة)', elderlyRoom: 'غرفة نوم قريبة من الصالة لكبار السن' };
@@ -183,7 +288,83 @@ export function withAi(local, ai) {
   }
   for (const [k, a] of Object.entries(ai.areas || {})) if (!out.areas[k]) { out.areas[k] = a; und.push(`${{ master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[k]} ${a} م²`); }
   out.understood = [...new Set(und.filter(Boolean))];
-  out.unclear = [...(ai.unclear || [])];
+  // «لم أفهم» حكم Claude، لكن عبارة علاقة سقطت محليًا لا تختفي إلا إن غطّتها قاعدة من Claude باقتباسها
+  const covered = o => aiRules.some(r => r.quote && normalizeAr(r.quote).includes(normalizeAr(o)));
+  out.unclear = [...new Set([...(ai.unclear || []), ...(local.orphans || []).filter(o => !covered(o))])];
   out.source = 'claude';
+  return out;
+}
+
+// ------------------------------------------------------------------------------------------ التعارضات قبل التوليد
+const SUBJ_AR = id => subjectAr(id);
+const FLOOR_AR = { ground: 'الدور الأرضي', upper: 'الدور العلوي' };
+const AREA_ROOM_AR = { master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' };
+const ABSENT_SUBJ = { majlis: ['majlis', 'majlis_w'], dining: ['dining'], office: ['office'], prayer: ['prayer'], maid: ['maid'], driver: ['driver'] };
+const r1c = v => Math.round(v * 10) / 10;
+/**
+ * يكشف التعارضات في الطلب قبل التوليد، ولكل تعارض سؤال بلهجة سعودية بسيطة للعميل. لا يرمي ولا يغيّر الطلب.
+ * يعيد [{ type, key, items, quotes, question_ar }]. land اختيارية: { width, length, floors, setbacks? }.
+ * الحدود المستعملة هندسية بحتة (مساحة الأرض × الأدوار، أبعاد الأرض)؛ لا نسبة بناء نظامية مفترضة.
+ */
+export function detectConflicts(req = {}, land = {}) {
+  const out = [], rules = req.rules || [], seen = new Set();
+  // المفتاح من نوع التعارض ونصوصه (لا من أرقام القواعد التي يعيد الدمج ترقيمها)
+  const add = (type, items, quotes, question_ar) => { const key = type + '|' + [...quotes.filter(Boolean).map(x => normalizeAr(x))].sort().join('|') + '|' + items.filter(x => !/^R\d+$/.test(x)).join('|'); if (seen.has(key)) return; seen.add(key); out.push({ type, key, items, quotes: quotes.filter(Boolean), question_ar }); };
+  const q = r => r.quote || r.text;
+  // 1) موضعان متقابلان لنفس الفراغ («المطبخ في الأمام» و«المطبخ في الخلف»)، أو يطل ولا يطل على الجهة نفسها
+  const places = rules.filter(r => r.kind === 'place');
+  for (let i = 0; i < places.length; i++) for (let j = i + 1; j < places.length; j++) {
+    const a = places[i], b = places[j]; if (a.a !== b.a) continue;
+    const pos = x => x.mode !== 'avoid';
+    if (pos(a) && pos(b) && OPPOSITE_SIDE[a.side] === b.side) add('place-opposite', [a.id, b.id], [q(a), q(b)], `ذكرت إن «${SUBJ_AR(a.a)}» يكون ${SIDE_LABELS[a.side]} و${SIDE_LABELS[b.side]} بنفس الوقت — وين تبيه بالضبط؟`);
+    else if (a.side === b.side && (a.mode === 'avoid') !== (b.mode === 'avoid')) add('place-avoid', [a.id, b.id], [q(a), q(b)], `مرة قلت «${SUBJ_AR(a.a)}» على ${a.side === 'front' ? 'الشارع' : 'هذي الجهة'} ومرة قلت لا — أي واحد تقصد؟`);
+  }
+  // 2) ملاصق/قريب وبعيد/غير ملاصق لنفس الزوج
+  const rels = rules.filter(r => ['adjacent', 'near', 'far', 'apart'].includes(r.kind));
+  for (let i = 0; i < rels.length; i++) for (let j = i + 1; j < rels.length; j++) {
+    const a = rels[i], b = rels[j], same = (a.a === b.a && a.b === b.b) || (a.a === b.b && a.b === b.a); if (!same) continue;
+    const close = x => x.kind === 'adjacent' || x.kind === 'near';
+    if (close(a) !== close(b)) { const c = close(a) ? a : b, f = close(a) ? b : a; add('relation-contradiction', [c.id, f.id], [q(c), q(f)], `ذكرت إن «${SUBJ_AR(c.a)}» ${c.kind === 'adjacent' ? 'جنب' : 'قريب من'} «${SUBJ_AR(c.b)}»، وذكرت إنه ${f.kind === 'far' ? 'بعيد عنه' : 'ما يلاصقه'} — تبيهم جنب بعض ولا بعيدين؟`); }
+  }
+  // 3) نفس الفراغ في الأرضي والعلوي
+  const fl = rules.filter(r => r.kind === 'floor');
+  for (let i = 0; i < fl.length; i++) for (let j = i + 1; j < fl.length; j++) {
+    const a = fl[i], b = fl[j];
+    if (a.a === b.a && a.floor !== b.floor) add('floor-both', [a.id, b.id], [q(a), q(b)], `«${SUBJ_AR(a.a)}» تبيه في الدور الأرضي ولا العلوي؟ ذكرت الاثنين.`);
+    // «غرف النوم فوق» و«غرفة الوالدة في الأرضي»: هل الثانية من ضمن الأولى؟
+    // («غرف الأبناء» لا تشمل الرئيسية ولا غرفة الوالدين في المولّد، فلا تعارض معها)
+    const grp = x => x.a === 'bedrooms', member = x => ['elderly', 'master', 'onebed'].includes(x.a);
+    for (const [g, m] of [[a, b], [b, a]]) if (grp(g) && member(m) && g.floor !== m.floor)
+      add('floor-group-member', [g.id, m.id], [q(g), q(m)], `قلت ${SUBJ_AR(g.a)} في ${FLOOR_AR[g.floor]}، و«${SUBJ_AR(m.a)}» في ${FLOOR_AR[m.floor]} — «${SUBJ_AR(m.a)}» من ضمن عدد غرف النوم اللي ذكرته ولا زيادة عليها؟`);
+  }
+  // 4) عدد الأدوار: الكلام مقابل بيانات الأرض، ودور واحد مع طلبات تحتاج دورين
+  const said = req.prefs?.floors || null, landFloors = Number.isInteger(land?.floors) ? land.floors : null;
+  if (said && landFloors && said !== landFloors) add('floors-mismatch', ['prefs.floors', 'land.floors'], [said === 2 ? 'دورين' : 'دور واحد'], `بيانات الأرض فيها ${landFloors === 2 ? 'دورين' : 'دور واحد'}، وكلامك يقول ${said === 2 ? 'دورين' : 'دور واحد'} — كم دور تبي؟`);
+  const single = said === 1 || (!said && landFloors === 1);
+  const upper = fl.filter(r => r.floor === 'upper'), stairsRules = rules.filter(r => r.a === 'stairs' || r.b === 'stairs');
+  if (single && (upper.length || stairsRules.length)) {
+    const what = [...new Set([...upper.map(r => `«${SUBJ_AR(r.a)}» في الدور العلوي`), ...stairsRules.map(r => `مكان «الدرج»`)])];
+    add('single-floor-two-floor-features', [...upper, ...stairsRules].map(r => r.id), [...upper, ...stairsRules].map(q), `${said === 1 ? 'طلبت دور واحد' : 'بيانات الأرض دور واحد'}، وذكرت ${what.join(' و')} — تبي البيت دورين، ولا نخلي كل شي في الأرضي؟`);
+  }
+  // 5) «بدون X» مع قاعدة عن X
+  for (const k of req.absent || []) for (const r of rules) if ((ABSENT_SUBJ[k] || []).some(s => r.a === s || r.b === s))
+    add('absent-but-placed', ['absent.' + k, r.id], [q(r)], `قلت بدون «${SUBJ_AR(ABSENT_SUBJ[k][0])}»، وبعدين حددت مكانه — تبيه ولا لا؟`);
+  // 6) العدد في الكلام مقابل العدد في النموذج
+  const tc = req.textCounts || {}, given = req.givenCounts || {};
+  if (Number.isInteger(tc.bedrooms) && Number.isInteger(given.bedrooms) && given.bedrooms > 0 && tc.bedrooms !== given.bedrooms)
+    add('count-mismatch', ['textCounts.bedrooms', 'counts.bedrooms'], [`${tc.bedrooms} غرف نوم`], `فهمت من كلامك إن غرف النوم ${tc.bedrooms}، والعدد المختار في النموذج ${given.bedrooms} — كم غرفة نوم تبي بالضبط؟`);
+  // 7) المقاسات مقابل الأرض: مجموع المساحات الصريحة أكبر من الأرض × الأدوار، أو بُعد أكبر من الأرض نفسها
+  const W = Number(land?.width) || 0, L = Number(land?.length) || 0;
+  if (W > 0 && L > 0) {
+    const floors = said || landFloors || 1, sb = land.setbacks || null;
+    const net = sb && ['n', 's', 'e', 'w'].every(k => Number.isFinite(sb[k])) ? Math.max(0, (W - sb.e - sb.w) * (L - sb.n - sb.s)) : null;
+    const cap = (net ?? W * L) * floors, basis = net != null ? `مساحة الأرض بعد الارتدادات × ${floors === 2 ? 'دورين' : 'دور'}` : `مساحة الأرض كلها × ${floors === 2 ? 'دورين' : 'دور'} (بدون ارتدادات)`;
+    const beds = Math.max(1, (req.counts?.bedrooms || 1) - (req.areas?.master ? 1 : 0));
+    const sum = Object.entries(req.areas || {}).reduce((s, [k, a]) => s + a * (k === 'bedroom' ? beds : 1), 0);
+    if (sum > cap) add('area-exceeds-land', Object.keys(req.areas || {}).map(k => 'areas.' + k), Object.values(req.dims || {}).map(d => d.quote), `مجموع المساحات اللي طلبتها حوالي ${r1c(sum)} م² صافي، وهذا أكبر من ${basis} (${r1c(cap)} م²) — تبي نصغّر المقاسات ولا نزيد دور؟`);
+    const lo = Math.min(W, L), hi = Math.max(W, L);
+    for (const [k, d] of Object.entries(req.dims || {})) if (d && (d.w > lo || d.l > hi))
+      add('dims-exceed-land', ['dims.' + k], [d.quote], `مقاس ${AREA_ROOM_AR[k] || k} ${d.w}×${d.l} م أكبر من أبعاد الأرض (${lo}×${hi} م) — متأكد من المقاس؟`);
+  }
   return out;
 }

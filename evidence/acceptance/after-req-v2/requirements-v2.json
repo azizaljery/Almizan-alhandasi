@@ -1,0 +1,682 @@
+[
+ {
+  "id": "C1",
+  "text": "فيلا دور واحد: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل ودورة مياه، ومجلس نساء مستقل عن الرجال بمدخل خاص للعائلة، صالة، طعام جنب المطبخ، والمطبخ في الخلف، وغرفة خادمة بحمام قريبة من المطبخ",
+  "understood": [
+   "غرفة ملابس للغرفة الرئيسية",
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مدخل مستقل للعائلة/النساء",
+   "مجلس الرجال بمدخل مستقل عن العائلة",
+   "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+   "غرفة خادمة بحمام",
+   "دور واحد",
+   "«الطعام» بجوار «المطبخ»",
+   "«المطبخ» في الخلف",
+   "«غرفة الخادمة» قرب «المطبخ»"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [
+   {
+    "kind": "adjacent",
+    "a": "dining",
+    "b": "kitchen",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "طعام جنب المطبخ"
+   },
+   {
+    "kind": "place",
+    "a": "kitchen",
+    "side": "back",
+    "mode": "half",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والمطبخ في الخلف"
+   },
+   {
+    "kind": "near",
+    "a": "maid",
+    "b": "kitchen",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "وغرفة خادمة بحمام قريبة من المطبخ"
+   }
+  ],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 4
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "فيلا دور واحد: 4 غرف نوم منها ماستر بغرفة ملابس",
+    "fate": "understood"
+   },
+   {
+    "quote": "مجلس رجال بمدخل مستقل ودورة مياه",
+    "fate": "understood"
+   },
+   {
+    "quote": "مجلس نساء مستقل عن الرجال بمدخل خاص للعائلة",
+    "fate": "understood"
+   },
+   {
+    "quote": "صالة",
+    "fate": "understood",
+    "kind": "program"
+   },
+   {
+    "quote": "طعام جنب المطبخ",
+    "fate": "understood"
+   },
+   {
+    "quote": "المطبخ في الخلف",
+    "fate": "understood"
+   },
+   {
+    "quote": "غرفة خادمة بحمام قريبة من المطبخ",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ },
+ {
+  "id": "C2",
+  "text": "عائلة ثلاثة أجيال: غرفة أرضية لأبوي وأمي قريبة من الصالة وبعيدة عن المجلس، الماستر، وثلاث غرف للعيال جنب بعض، ومجلس، وصالة كبيرة تطل على الحوش الخلفي، والمطبخ مقفل",
+  "understood": [
+   "5 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مغلق بباب",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "الصالة واسعة",
+   "«غرفة كبار السن» قرب «الصالة»",
+   "«غرفة كبار السن» بعيدًا عن «المجلس»",
+   "«غرفة كبار السن» في الدور الأرضي",
+   "«غرف الأبناء» متجاورة",
+   "«الصالة» على الواجهة الخلفية"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [
+   {
+    "kind": "near",
+    "a": "elderly",
+    "b": "hall",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرفة أرضية لأبوي وأمي قريبة من الصالة"
+   },
+   {
+    "kind": "far",
+    "a": "elderly",
+    "b": "majlis",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "وبعيدة عن المجلس"
+   },
+   {
+    "kind": "floor",
+    "a": "elderly",
+    "floor": "ground",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرفة أرضية"
+   },
+   {
+    "kind": "cluster",
+    "a": "kids",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرف للعيال جنب بعض"
+   },
+   {
+    "kind": "place",
+    "a": "hall",
+    "side": "back",
+    "mode": "touch",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "وصالة كبيرة تطل على الحوش الخلفي"
+   }
+  ],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 5
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "عائلة ثلاثة أجيال: غرفة أرضية لأبوي وأمي قريبة من الصالة وبعيدة عن المجلس",
+    "fate": "understood"
+   },
+   {
+    "quote": "الماستر",
+    "fate": "understood"
+   },
+   {
+    "quote": "ثلاث غرف للعيال جنب بعض",
+    "fate": "understood"
+   },
+   {
+    "quote": "مجلس",
+    "fate": "understood",
+    "kind": "program"
+   },
+   {
+    "quote": "صالة كبيرة تطل على الحوش الخلفي",
+    "fate": "understood"
+   },
+   {
+    "quote": "المطبخ مقفل",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ },
+ {
+  "id": "C3",
+  "text": "3 غرف نوم ومجلس رجال على الشارع ومجلس نساء، والمطبخ بجانب الطعام، ومدخل ثاني من الشارع الشرقي",
+  "understood": [
+   "3 غرف نوم",
+   "«المجلس» على الشارع (الواجهة الأمامية)",
+   "«المطبخ» بجوار «الطعام»",
+   "«المدخل» في جهة الشرق"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [
+   {
+    "kind": "place",
+    "a": "majlis",
+    "side": "front",
+    "mode": "touch",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "ومجلس رجال على الشارع"
+   },
+   {
+    "kind": "adjacent",
+    "a": "kitchen",
+    "b": "dining",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والمطبخ بجانب الطعام"
+   },
+   {
+    "kind": "place",
+    "a": "entrance",
+    "side": "e",
+    "mode": "half",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "ومدخل ثاني من الشارع الشرقي"
+   }
+  ],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 3
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "3 غرف نوم ومجلس رجال على الشارع ومجلس نساء",
+    "fate": "understood"
+   },
+   {
+    "quote": "المطبخ بجانب الطعام",
+    "fate": "understood"
+   },
+   {
+    "quote": "مدخل ثاني من الشارع الشرقي",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ },
+ {
+  "id": "C4",
+  "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام، والغرف في الخلف بعيدة عن الشارع",
+  "understood": [
+   "3 غرف نوم",
+   "«غرف النوم» في الخلف"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [
+   {
+    "kind": "place",
+    "a": "bedrooms",
+    "side": "back",
+    "mode": "half",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والغرف في الخلف"
+   }
+  ],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 3
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+    "fate": "understood"
+   },
+   {
+    "quote": "الغرف في الخلف بعيدة عن الشارع",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ },
+ {
+  "id": "C5",
+  "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+  "understood": [
+   "3 غرف نوم"
+  ],
+  "unsupported": [
+   "شكل الأرض (شبه منحرف: الواجهة 18 م، الخلف 24 م، العمق 30 م): المولّد يقبل أرضًا مستطيلة فقط؛ سيُصمَّم على مستطيل ويُعلَّم البند «لم يُتحقق»."
+  ],
+  "unclear": [],
+  "rules": [],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 3
+  },
+  "site": {
+   "irregular": true,
+   "shape": "trapezoid",
+   "shapeAr": "شبه منحرف",
+   "front": 18,
+   "back": 24,
+   "depth": 30,
+   "quote": "أرض شكلها شبه منحرف"
+  },
+  "coverage": [
+   {
+    "quote": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م",
+    "fate": "unsupported"
+   },
+   {
+    "quote": "3 غرف ومجلس وصالة ومطبخ",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ },
+ {
+  "id": "C6",
+  "text": "دور واحد، ثلاث غرف نوم بالضبط، المطبخ 4×5، مجلس 5×6، والمطبخ في الخلف",
+  "understood": [
+   "3 غرف نوم (بالضبط)",
+   "المجلس 5×6 م (30 م²)",
+   "المطبخ 4×5 م (20 م²)",
+   "دور واحد",
+   "«المطبخ» في الخلف"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [
+   {
+    "kind": "place",
+    "a": "kitchen",
+    "side": "back",
+    "mode": "half",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والمطبخ في الخلف"
+   }
+  ],
+  "dims": {
+   "majlis": {
+    "w": 5,
+    "l": 6,
+    "tol": 0.3,
+    "quote": "مجلس 5×6"
+   },
+   "kitchen": {
+    "w": 4,
+    "l": 5,
+    "tol": 0.3,
+    "quote": "المطبخ 4×5"
+   }
+  },
+  "areas": {
+   "majlis": 30,
+   "kitchen": 20
+  },
+  "textCounts": {
+   "bedrooms": 3
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "دور واحد",
+    "fate": "understood"
+   },
+   {
+    "quote": "ثلاث غرف نوم بالضبط",
+    "fate": "understood"
+   },
+   {
+    "quote": "المطبخ 4×5",
+    "fate": "understood"
+   },
+   {
+    "quote": "مجلس 5×6",
+    "fate": "understood"
+   },
+   {
+    "quote": "المطبخ في الخلف",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ },
+ {
+  "id": "C7",
+  "text": "دورين: المجالس والطعام والمطبخ تحت، و5 غرف نوم فوق، والماستر في الدور العلوي بعيدة عن الدرج، وغرفة لأمي في الأرضي",
+  "understood": [
+   "5 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "دوران (أرضي وأول)",
+   "«المجلس» في الدور الأرضي",
+   "«الطعام» في الدور الأرضي",
+   "«المطبخ» في الدور الأرضي",
+   "«غرف النوم» في الدور العلوي",
+   "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»",
+   "«غرفة النوم الرئيسية» في الدور العلوي",
+   "«غرفة كبار السن» في الدور الأرضي"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [
+   {
+    "kind": "floor",
+    "a": "majlis",
+    "floor": "ground",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المجالس والطعام والمطبخ تحت"
+   },
+   {
+    "kind": "floor",
+    "a": "dining",
+    "floor": "ground",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المجالس والطعام والمطبخ تحت"
+   },
+   {
+    "kind": "floor",
+    "a": "kitchen",
+    "floor": "ground",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المجالس والطعام والمطبخ تحت"
+   },
+   {
+    "kind": "floor",
+    "a": "bedrooms",
+    "floor": "upper",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرف نوم فوق"
+   },
+   {
+    "kind": "far",
+    "a": "master",
+    "b": "stairs",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والماستر في الدور العلوي بعيدة عن الدرج"
+   },
+   {
+    "kind": "floor",
+    "a": "master",
+    "floor": "upper",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والماستر في الدور العلوي"
+   },
+   {
+    "kind": "floor",
+    "a": "elderly",
+    "floor": "ground",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "وغرفة لأمي في الأرضي"
+   }
+  ],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 5
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "دورين: المجالس والطعام والمطبخ تحت",
+    "fate": "understood"
+   },
+   {
+    "quote": "5 غرف نوم فوق",
+    "fate": "understood"
+   },
+   {
+    "quote": "الماستر في الدور العلوي بعيدة عن الدرج",
+    "fate": "understood"
+   },
+   {
+    "quote": "غرفة لأمي في الأرضي",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": [
+   {
+    "type": "floor-group-member",
+    "quotes": [
+     "غرف نوم فوق",
+     "وغرفة لأمي في الأرضي"
+    ],
+    "question_ar": "قلت غرف النوم في الدور العلوي، و«غرفة كبار السن» في الدور الأرضي — «غرفة كبار السن» من ضمن عدد غرف النوم اللي ذكرته ولا زيادة عليها؟"
+   }
+  ]
+ },
+ {
+  "id": "C8",
+  "text": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+  "understood": [
+   "4 غرف نوم"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 4
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": [],
+  "edit": {
+   "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
+   "understood": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "unclear": [],
+   "unsupported": [],
+   "keepLayout": false,
+   "tweaks": {},
+   "rules": [
+    {
+     "kind": "adjacent",
+     "a": "kitchen",
+     "b": "dining",
+     "level": "must",
+     "quote": "المطبخ بجوار الطعام"
+    },
+    {
+     "kind": "place",
+     "a": "kitchen",
+     "side": "back",
+     "level": "must",
+     "quote": "المطبخ في الخلف"
+    }
+   ],
+   "reply": {
+    "done": [
+     "«المطبخ» بجوار «الطعام»",
+     "«المطبخ» في الخلف"
+    ],
+    "failed": [],
+    "pending": [],
+    "unverified": [],
+    "unclear": [],
+    "kept": true,
+    "unchanged": true,
+    "reused": false,
+    "conflicts": []
+   },
+   "sameDoc": true,
+   "samePattern": true,
+   "bedroomsAfter": 4
+  }
+ },
+ {
+  "id": "C9",
+  "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+  "understood": [
+   "3 غرف نوم"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 3
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": [],
+  "edit": {
+   "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
+   "understood": [
+    "الإبقاء على التوزيع الحالي كما هو",
+    "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)"
+   ],
+   "unclear": [],
+   "unsupported": [],
+   "keepLayout": true,
+   "tweaks": {
+    "facade": {
+     "material": "stone",
+     "materialAr": "حجر",
+     "keepLayout": true
+    }
+   },
+   "rules": [],
+   "reply": {
+    "done": [],
+    "failed": [],
+    "pending": [
+     {
+      "text": "الواجهة: حجر",
+      "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+     }
+    ],
+    "unverified": [],
+    "unclear": [],
+    "kept": true,
+    "unchanged": true,
+    "reused": true,
+    "conflicts": []
+   },
+   "sameDoc": true,
+   "samePattern": true,
+   "bedroomsAfter": 3
+  }
+ },
+ {
+  "id": "C10",
+  "text": "4 غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، طعام، مطبخ، غرفة خادمة",
+  "understood": [
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "غرفة خادمة"
+  ],
+  "unsupported": [],
+  "unclear": [],
+  "rules": [],
+  "dims": {},
+  "areas": {},
+  "textCounts": {
+   "bedrooms": 4
+  },
+  "site": null,
+  "coverage": [
+   {
+    "quote": "4 غرف نوم منها ماستر",
+    "fate": "understood"
+   },
+   {
+    "quote": "مجلس رجال ومجلس نساء",
+    "fate": "understood",
+    "kind": "program"
+   },
+   {
+    "quote": "صالة",
+    "fate": "understood",
+    "kind": "program"
+   },
+   {
+    "quote": "طعام",
+    "fate": "understood",
+    "kind": "program"
+   },
+   {
+    "quote": "مطبخ",
+    "fate": "understood",
+    "kind": "program"
+   },
+   {
+    "quote": "غرفة خادمة",
+    "fate": "understood"
+   }
+  ],
+  "dropped": [],
+  "conflicts": []
+ }
+]

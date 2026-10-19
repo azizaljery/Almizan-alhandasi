@@ -11,7 +11,7 @@ import { legacyToDoc } from './draw/import-legacy.mjs';
 import { applyCommand } from './draw/doc.mjs';
 import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H } from './multi-floor.mjs';
 import { generateVillaDesigns, generateVillaTwoFloors, countsFromRooms } from './villa-layout.mjs';
-import { extractRequirements, withAi } from './requirements.mjs';
+import { extractRequirements, withAi, detectConflicts } from './requirements.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
 
 export const SHARA_NAME = 'شرعاء';
@@ -126,6 +126,9 @@ export class SharaSession {
       if (req.understood.length) out.push(msg('فهمت من كلامك وسأطبّقه في التصميم:', { kind: 'list', items: req.understood }));
       if (req.unsupported.length) out.push(msg('لن أطبّقه في هذا الإصدار:', { kind: 'list', items: req.unsupported }));
       if (req.unclear?.length) out.push(msg('هذه العبارات لم أفهمها بدقة، فلن أطبّقها كما هي. أعد كتابتها بصيغة مباشرة مثل: «المطبخ في الخلف»، «الماستر بعيدة عن المجلس»، «غرفة 4×5»، «المجلس على يمين المدخل».', { kind: 'list', items: req.unclear.map(x => '«' + x + '»') }));
+      // تعارض في الكلام نفسه («المطبخ في الأمام وفي الخلف»): سؤال صريح قبل التوليد
+      let conflicts = []; try { conflicts = detectConflicts(req, {}); } catch { conflicts = []; }
+      if (conflicts.length) out.push(msg('قبل التصميم أبي أتأكد منك:', { kind: 'list', items: conflicts.map(c => c.question_ar) }));
       out.push(msg('راجع الأعداد التالية وعدّلها إن لزم.' + (notes.length ? '\n' + notes.join('\n') : '')));
       return this.#push([...out, this.#counts()]);
     }

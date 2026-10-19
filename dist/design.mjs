@@ -38,7 +38,8 @@ function show(index) {
     el('div', { class: 'planbar' }, levels, zoneToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
     el('div', { class: 'planwrap', id: 'planWrap' }, el('canvas', { id: 'plan', 'aria-label': 'مسقط التصميم' })),
     el('div', { class: 'legend', id: 'legend' }));
-  const ledger = ledgerFor(session, doc), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok);
+  // «لم يُتحقق» و«بانتظار العرض» ليست منفّذة ولا مخفقة: تُعرض وحدها بسببها
+  const ledger = ledgerFor(session, doc), open = ledger.filter(x => x.status === 'unverified' || x.status === 'pending-render'), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok && !open.includes(x));
   const side = el('div', { class: 'actions card' },
     el('h2', {}, 'ما رأيك في هذا التصميم؟'),
     el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واعرضه ثلاثي الأبعاد ←'),
@@ -50,6 +51,8 @@ function show(index) {
     ledger.length ? el('p', { class: 'score ' + (miss.length ? 'part' : 'full') }, miss.length ? `نُفّذ ${done.length} من ${ledger.length} بنود، وبقي ${miss.length}` : `نُفّذت كل البنود (${ledger.length})`) : el('p', { class: 'sub' }, 'لم تذكر طلبات مكانية أو مقاسات؛ طُبّقت الأعداد التي حددتها.'),
     miss.length ? el('ul', { class: 'tick' }, miss.map(x => el('li', { class: 'bad', 'data-rule': x.id }, el('b', {}, x.text), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
     done.length ? el('ul', { class: 'tick' }, done.map(x => el('li', { class: 'good', 'data-rule': x.id }, x.text, x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
+    open.length ? el('ul', { class: 'tick' }, open.map(x => el('li', { class: 'no', 'data-rule': x.id, 'data-status': x.status }, el('b', {}, x.text + (x.status === 'pending-render' ? ' — بانتظار العرض' : ' — لم يُتحقق منه آليًا')), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
+    (session.conflicts || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'في طلبك نقاط تحتاج توضيح:'), el('ul', { class: 'tick' }, session.conflicts.map(c => el('li', { class: 'no', 'data-conflict': c.type }, c.question_ar)))) : null,
     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
@@ -198,6 +201,8 @@ $('fbGo').addEventListener('click', async () => {
       $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
     }
     const out = await redesign(session, { picks, text, ai });
+    // تعارض في الملاحظة: لا تصميم جديد؛ نسأل العميل ونبقي النافذة مفتوحة ليعيد الكتابة
+    if (out.reply?.conflicts?.length) { $('fbStatus').textContent = 'قبل ما أعدّل: ' + out.reply.questions.join(' — '); $('fbGo').disabled = false; return; }
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });
