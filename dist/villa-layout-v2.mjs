@@ -213,14 +213,25 @@ function areaOf(n) {
 }
 /** يوزع الطول L على العناصر بنسبة مساحاتها مع حد أدنى لكل منها وثابت للممرات؛ null إن لم يتسع. */
 function dist(L, items) {
-  const mins = items.map(x => x.fix || x.min); if (sum(mins) > L + 1e-6) return null;
-  const fixed = new Map(); items.forEach((x, i) => { if (x.fix) fixed.set(i, x.fix); });
-  for (let k = 0; k <= items.length; k++) {
-    const rest = L - sum([...fixed.values()]), free = items.map((_, i) => i).filter(i => !fixed.has(i));
-    if (!free.length) { const flex = items.map((x, i) => i).filter(i => !items[i].fix); const out = items.map((_, i) => fixed.get(i)); if (flex.length) for (const i of flex) out[i] += rest / flex.length; else out[out.length - 1] += rest; return out; }
-    const tot = sum(free.map(i => items[i].a)) || 1; let ch = false;
-    for (const i of free) { const d = rest * items[i].a / tot; if (d < items[i].min - 1e-9) { fixed.set(i, items[i].min); ch = true; } }
-    if (!ch) return items.map((x, i) => (fixed.has(i) ? fixed.get(i) : rest * x.a / tot));
+  // الخوارزمية نفسها بلا Map ولا مصفوفات وسيطة في كل دورة (في قلب البحث): ترتيب الجمع نفسه (ترتيب الإدراج) فالنتيجة نفسها حرفيًا
+  const n = items.length;
+  let sm = 0; for (let i = 0; i < n; i++) sm += items[i].fix || items[i].min;
+  if (sm > L + 1e-6) return null;
+  const isF = new Array(n).fill(false), fv = new Array(n), order = [];
+  for (let i = 0; i < n; i++) if (items[i].fix) { isF[i] = true; fv[i] = items[i].fix; order.push(i); }
+  for (let k = 0; k <= n; k++) {
+    let fs = 0; for (const i of order) fs += fv[i];
+    const rest = L - fs;
+    let nFree = 0, tot = 0; for (let i = 0; i < n; i++) if (!isF[i]) { nFree++; tot += items[i].a; }
+    if (!nFree) {
+      const out = new Array(n); for (let i = 0; i < n; i++) out[i] = fv[i];
+      let nFlex = 0; for (let i = 0; i < n; i++) if (!items[i].fix) nFlex++;
+      if (nFlex) { for (let i = 0; i < n; i++) if (!items[i].fix) out[i] += rest / nFlex; } else out[n - 1] += rest;
+      return out;
+    }
+    tot = tot || 1; let ch = false;
+    for (let i = 0; i < n; i++) { if (isF[i]) continue; const d = rest * items[i].a / tot; if (d < items[i].min - 1e-9) { isF[i] = true; fv[i] = items[i].min; order.push(i); ch = true; } }
+    if (!ch) { const out = new Array(n); for (let i = 0; i < n; i++) out[i] = isF[i] ? fv[i] : rest * items[i].a / tot; return out; }
   }
   return null;
 }
@@ -2042,9 +2053,23 @@ function localEdit(P, site, land, prefer, { title, requirements, entry, refDR, p
  * ذاكرة نتائج اختيارية يحقنها المضيف (globalThis.__mizanGenCache = { get(key), set(key, value) }): المولّد حتمي، فالطلب
  * نفسه يعطي البدائل نفسها؛ تستعملها مجموعة الاختبارات لمشاركة النتائج بين ملفاتها في التشغيل الواحد. بلا مضيف = لا شيء.
  */
+/**
+ * مفتاح الذاكرة: الطلب نفسه بصيغة قانونية — مفاتيح الكائنات مرتبة، والقيم الافتراضية للمعاملات (exclude: []، prefer: null،
+ * العنوان الافتراضي) محذوفة؛ فالطلب نفسه من مسارين (generateInitialDesign والمولّد مباشرة) يُحسب مرة واحدة. لا يُحذف شيء
+ * من المتطلبات نفسها (السجل يُقاس منها).
+ */
+function cacheKey(args) {
+  const DEF = { exclude: a => Array.isArray(a) && !a.length, prefer: v => v == null, title: v => v === 'تصميم أولي من شرعاء' };
+  const canon = (v, top) => {
+    if (Array.isArray(v)) return '[' + v.map(x => canon(x)).join(',') + ']';
+    if (v && typeof v === 'object') return '{' + Object.keys(v).filter(k => v[k] !== undefined && !(top && DEF[k]?.(v[k]))).sort().map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+    return v === undefined ? 'null' : JSON.stringify(v);
+  };
+  return canon(args, true);
+}
 function cached(kind, args, fn) {
   const hook = globalThis.__mizanGenCache; if (!hook) return fn(args);
-  let key; try { key = VILLA_V2_ENGINE_VERSION + '|' + kind + '|' + JSON.stringify(args); } catch { return fn(args); }
+  let key; try { key = VILLA_V2_ENGINE_VERSION + '|' + kind + '|' + cacheKey(args); } catch { return fn(args); }
   const hit = hook.get(key);
   if (hit) { const P = programV2(args.counts, args.requirements || {}); P.entry = hit.program?.entry; hit.program = P; return hit; }
   const out = fn(args); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
