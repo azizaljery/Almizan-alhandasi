@@ -1,5 +1,6 @@
 // الجولة الثالثة على المولّد الثاني: تعديل موضعي يحفظ النمط، وبوابات جودة معمارية على المخطط المرسوم،
 // وحركة أقل، وسلم بمقاس سلم لا صالة، وتنظيمات جديدة (مجلس على الواجهة الجانبية، مدخل في الركن، الصالة في الخلف).
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, qualityGates, difference, partiTrees, programV2 } from '../dist/villa-layout-v2.mjs';
@@ -21,7 +22,10 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
     const { C, r, land } = caseReq(id);
     const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
     // C6 («المطبخ في الخلف» صارمًا ومقاسات صريحة): لا يُعرض بديل مطبخه وسط البيت، فقد يقل العدد إلى اثنين
-    assert.ok(out.designs.length >= (id === 'C6' ? 2 : 3), id + ': عدد البدائل');
+    // قرار المالك (الجولة الخامسة): لا يُرفع العدد على حساب الجودة — بديلان على الأقل مختلفان فعلًا (≥ 0.16)، ويُذكر سبب النقص
+    assert.ok(out.designs.length >= 2, id + ': عدد البدائل');
+    for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16, `${id}: البديلان ${i + 1} و${j + 1} متقاربان`);
+    if (out.designs.length < (C.want || 4)) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);
     for (const d of out.designs) {
       assert.deepEqual(qualityGates(d.doc), [], `${id} ${d.pat}`);
       const { rooms } = docRooms(d.doc), beds = rooms.filter(x => x.type === 'bedroom' || x.type === 'master'), m = beds.find(x => x.type === 'master');
@@ -36,7 +40,10 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
 
 test('بوابة الجودة ترفض فعلًا: إن صارت الرئيسية أصغر غرف النوم يُذكر ذلك سببًا للرفض', () => {
   const { r, land } = caseReq('C9');
-  const d = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 1 }).designs[0];
+  // الجولة السادسة: البديل الأول قد يكون غرف أبنائه متساوية (بيت الحوش)؛ الاختبار يحتاج بديلًا فيه غرفتا نوم مختلفتا
+  // المساحة ليبدّل تسمية الرئيسية مع أصغرهما — يُختار أول بديل معروض كذلك (الفحص نفسه على البوابة لم يتغير)
+  const spread = x => { const a = docRooms(x.doc).rooms.filter(q => q.type === 'bedroom').map(q => q.area); return Math.max(...a) - Math.min(...a); };
+  const all = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 4 }).designs, d = all.find(x => spread(x) > .3) || all[0];
   const doc = JSON.parse(serialize(d.doc)), rooms = docRooms(doc).rooms;
   const small = rooms.filter(x => x.type === 'bedroom').sort((a, b) => a.area - b.area)[0], big = rooms.filter(x => x.type === 'bedroom').sort((a, b) => b.area - a.area)[0];
   assert.ok(big.area > small.area + .3, 'البرنامج فيه غرفتا نوم مختلفتا المساحة');
@@ -87,8 +94,11 @@ test('الحركة: متوسط نسبة المداخل والممرات في ب�
 test('C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وتنظيمان مختلفان للعلوي على الأقل (أجنحة على المحور / رواق خلفي)', () => {
   const { r, land } = caseReq('C7');
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: 4 });
-  assert.ok(out.designs.length >= 2);
+  // الجولة السابعة: الطعام ≥ 3.3 م صافيًا جعل التنظيم الأرضي الثاني (compact:c3p) لا يتسع لمحور السلم، وبقية الأرضيات الناجحة
+  // نسخ شكلية من الأول (اختلاف معماري 0.10 لأن العلوي نفسه) — قرار المالك: لا حشو للعدد؛ يكفي بديل واحد سليم والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 1); if (out.designs.length < 4) assert.match(out.shortfall_ar || '', /من 4 مطلوبة/);
   for (const d of out.designs) for (const s of docRooms(d.doc).rooms.filter(x => x.name === 'الدرج')) assert.ok(s.area <= 18, `${d.pat}: الدرج ${s.area} م²`);
-  const ups = new Set(out.designs.map(d => d.pat.split('/')[1].slice(0, 2)));
-  assert.ok(ups.size >= 2, [...ups].join(' '));
+  // الجولة الخامسة: تنظيم الدور الأرضي نفسه يختلف بين البدائل (لا علوي مختلف على أرضي واحد)
+  const grounds = out.designs.map(d => d.pat.split('/')[0]);
+  assert.equal(new Set(grounds).size, grounds.length, grounds.join(' '));
 });

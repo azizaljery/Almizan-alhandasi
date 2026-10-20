@@ -1,0 +1,324 @@
+{
+ "id": "L3",
+ "name": "فصحى رسمية — أرض زاوية بمدخلين، حمام لكل غرفة، مكتب بمدخل خارجي، بلا غرفة طعام",
+ "words": 175,
+ "ms": 12,
+ "text": "السادة المهندسون المحترمون، تحية طيبة وبعد. نرغب في تصميم فيلا سكنية من دور واحد على أرض زاوية أبعادها ٢٥ × ٢٥ مترًا، يحدها شارع من الجنوب وشارع من الشرق. نريد أن يكون مدخل الرجال من الشارع الجنوبي، وأن يكون للعائلة مدخل مستقل من الشارع الشرقي. يتكون البرنامج من غرفة نوم رئيسية مقاسها ٥ × ٦ أمتار مع غرفة ملابس، وثلاث غرف نوم أخرى للأبناء، على أن تكون لكل غرفة دورة مياه خاصة بها. نحتاج مجلسًا للرجال على الشارع الجنوبي، ومجلسًا للنساء منفصلًا تمامًا عن مجلس الرجال. لا نحتاج غرفة طعام منفصلة، فنحن نتناول الطعام عادة في الصالة، ونريد أن تكون الصالة واسعة بمساحة ٤٠ مترًا مربعًا. نريد المطبخ مفتوحًا على الصالة، مع مخزن ملحق به. كما نحتاج مكتبًا للعمل بمدخل خارجي مستقل لاستقبال المراجعين دون دخولهم إلى البيت، ومصلى صغيرًا قريبًا من المجلس. نفضّل أن تكون غرف النوم في الجهة الشمالية بعيدًا عن الشوارع إن أمكن ذلك. أما الواجهة فنرغب أن تكون بطراز نجدي معاصر يعكس هوية المنطقة. ونود أن يراعي التصميم التهوية الطبيعية وتوجيه الشمس. نشكر لكم حسن تعاونكم، ونتطلع إلى استلام المقترح الأولي.",
+ "formCounts": {
+  "bedrooms": 4,
+  "majlis": 3,
+  "baths": 1,
+  "kitchens": 1,
+  "halls": 1,
+  "dining": 1
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "pref": {
+    "tp": 2,
+    "fn": 4,
+    "fp": 1,
+    "precision": 0.667,
+    "recall": 0.333
+   },
+   "extra": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "absent": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "dims": {
+    "tp": 1,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.5
+   },
+   "rule": {
+    "tp": 1,
+    "fn": 2,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.333
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 1,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.5
+   },
+   "unsupported": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 1,
+    "precision": 0,
+    "recall": null
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   }
+  },
+  "precision": 0.889,
+  "recall": 0.667,
+  "f1": 0.762,
+  "tp": [
+   "count:bedrooms=4",
+   "count:majlis=2",
+   "count:kitchens=1",
+   "count:dining=0",
+   "pref:masterDressing",
+   "pref:allEnsuite",
+   "extra:office",
+   "extra:office.ext",
+   "extra:prayer",
+   "extra:storage",
+   "absent:dining",
+   "area:hall=40",
+   "rule:place:bedrooms:n",
+   "floors=1",
+   "facade:najdi",
+   "unclear:التهوية الطبيعية"
+  ],
+  "missed": [
+   "pref:guestEntrance",
+   "pref:familyEntrance",
+   "pref:womenSeparate",
+   "pref:kitchenOpenHall",
+   "dim:master=5x6",
+   "rule:place:majlis:s",
+   "rule:close:majlis+prayer",
+   "facade:modern"
+  ],
+  "wrong": [
+   "pref:openKitchen",
+   "unsupported:annex"
+  ],
+  "levels": [
+   {
+    "item": "rule:place:bedrooms:n",
+    "want": "prefer",
+    "got": "prefer",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "baths": 6,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 0
+  },
+  "prefs": {
+   "allEnsuite": true,
+   "masterDressing": true,
+   "openKitchen": true,
+   "floors": 1
+  },
+  "extras": {
+   "office": {
+    "ext": true
+   },
+   "prayer": true,
+   "storage": true
+  },
+  "absent": [
+   "dining"
+  ],
+  "dims": {},
+  "areas": {
+   "hall": 40
+  },
+  "rules": [
+   {
+    "item": "place:entrance:s",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "مدخل الرجال من الشارع الجنوبي",
+    "text": "«المدخل» في جهة الجنوب"
+   },
+   {
+    "item": "place:entrance:e",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "مدخل مستقل من الشارع الشرقي",
+    "text": "«المدخل» في جهة الشرق"
+   },
+   {
+    "item": "place:bedrooms:n",
+    "level": "prefer",
+    "levelCue": "explicit",
+    "quote": "غرف النوم في الجهة الشمالية",
+    "text": "«غرف النوم» في جهة الشمال"
+   }
+  ],
+  "tweaks": {
+   "facade": {
+    "style": "najdi",
+    "styleAr": "نجدي",
+    "keepLayout": false
+   }
+  },
+  "unsupported": [
+   "الملحق الخارجي: لا يُرسم في هذا الإصدار؛ يمكن إضافته في المرسم."
+  ],
+  "unclear": [
+   "السادة المهندسون المحترمون",
+   "تحية طيبة وبعد",
+   "يحدها شارع من الجنوب وشارع من الشرق",
+   "نحتاج مجلسًا للرجال على الشارع الجنوبي",
+   "مجلسًا للنساء منفصلًا تمامًا عن مجلس الرجال",
+   "فنحن نتناول الطعام عادة في الصالة",
+   "نود أن يراعي التصميم التهوية الطبيعية وتوجيه الشمس",
+   "نشكر لكم حسن تعاونكم",
+   "نتطلع إلى استلام المقترح الأولي"
+  ],
+  "understood": [
+   "كل غرفة نوم بحمامها الملحق",
+   "غرفة ملابس للغرفة الرئيسية",
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مفتوح على الطعام",
+   "مكتب بمدخل خارجي مستقل",
+   "مصلى",
+   "مخزن",
+   "الصالة 40 م²",
+   "بدون غرفة طعام",
+   "دور واحد",
+   "«المدخل» في جهة الجنوب",
+   "«المدخل» في جهة الشرق",
+   "«غرف النوم» في جهة الشمال",
+   "الواجهة: نجدي (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+   "عدد دورات المياه 6 (حمام لكل غرفة + دورتا مياه الرجال والنساء)"
+  ]
+ },
+ "conflicts": [],
+ "coverage": {
+  "clauses": 24,
+  "fates": {
+   "unclear": 9,
+   "understood": 14,
+   "unsupported": 1
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "السادة المهندسون المحترمون",
+   "تحية طيبة وبعد",
+   "يحدها شارع من الجنوب وشارع من الشرق",
+   "نحتاج مجلسًا للرجال على الشارع الجنوبي",
+   "مجلسًا للنساء منفصلًا تمامًا عن مجلس الرجال",
+   "فنحن نتناول الطعام عادة في الصالة",
+   "نود أن يراعي التصميم التهوية الطبيعية وتوجيه الشمس",
+   "نشكر لكم حسن تعاونكم",
+   "نتطلع إلى استلام المقترح الأولي"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "kitchens": 1,
+   "dining": 0
+  },
+  "prefs": [
+   "guestEntrance",
+   "familyEntrance",
+   "masterDressing",
+   "allEnsuite",
+   "womenSeparate",
+   "kitchenOpenHall"
+  ],
+  "extras": [
+   "office",
+   "office.ext",
+   "prayer",
+   "storage"
+  ],
+  "absent": [
+   "dining"
+  ],
+  "dims": {
+   "master": [
+    5,
+    6
+   ]
+  },
+  "areas": {
+   "hall": 40
+  },
+  "rules": [
+   {
+    "r": "place:majlis:s",
+    "level": "must"
+   },
+   {
+    "r": "close:prayer+majlis",
+    "level": "must"
+   },
+   {
+    "r": "place:bedrooms:n",
+    "level": "prefer"
+   }
+  ],
+  "floors": 1,
+  "facade": [
+   "najdi",
+   "modern"
+  ],
+  "unsupported": [],
+  "conflicts": [],
+  "unclear": [
+   "التهوية الطبيعية"
+  ],
+  "optional": [
+   "rule:away:majlis+majlis_w",
+   "rule:close:hall+kitchen",
+   "rule:close:kitchen+storage",
+   "pref:big_hall",
+   "count:baths",
+   "unsupported:site",
+   "rule:place:entrance:s",
+   "rule:place:entrance:e"
+  ],
+  "traps": "«مخزن ملحق به» ليس ملحقًا خارجيًا؛ «بعيدًا عن الشوارع» هي نفس جهة الشمال."
+ },
+ "traps": "«مخزن ملحق به» ليس ملحقًا خارجيًا؛ «بعيدًا عن الشوارع» هي نفس جهة الشمال."
+}

@@ -376,6 +376,19 @@ export function applyCommand(doc, command) {
   return { doc: next, ids: result.ids || [], ...result };
 }
 
+// أوامر تُلحق عناصر جديدة فقط (أو تقلب فتحة): آمنة للتنفيذ في المكان مع استعادة كاملة عند الرفض
+const APPEND_ONLY = new Set(['add-wall', 'add-opening', 'add-label', 'add-zone', 'add-fixture', 'add-stair', 'add-column', 'add-dimension', 'add-text', 'flip-opening']);
+/**
+ * للمولّدات التي تملك المستند الذي تبنيه (لم يُسلَّم لأحد بعد): الأمر نفسه دون نسخ المستند كاملًا في كل خطوة.
+ * النتيجة مطابقة لـ applyCommand؛ وعند الرفض تُستعاد العدادات وأطوال المجموعات فلا يبقى أثر. غير ذلك من الأوامر يُنسخ.
+ */
+export function applyCommandOwned(doc, command) {
+  if (!APPEND_ONLY.has(command?.type)) return applyCommand(doc, command);
+  const counters = { ...doc.counters }, lens = COLLECTIONS.map(k => doc[k]?.length);
+  try { const result = HANDLERS[command.type](doc, command) || {}; return { doc, ids: result.ids || [], ...result }; }
+  catch (e) { doc.counters = counters; COLLECTIONS.forEach((k, i) => { if (doc[k]) doc[k].length = lens[i]; }); throw e; }
+}
+
 /** Structural validation; returns issues, never throws. */
 export function validateDoc(doc) {
   const issues = [], seen = new Set();

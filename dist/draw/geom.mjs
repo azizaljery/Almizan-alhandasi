@@ -9,8 +9,8 @@ export const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y });
 export const mul = (a, k) => ({ x: a.x * k, y: a.y * k });
 export const dot = (a, b) => a.x * b.x + a.y * b.y;
 export const cross = (a, b) => a.x * b.y - a.y * b.x;
-export const len = a => Math.hypot(a.x, a.y);
-export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+export const len = a => Math.sqrt(a.x * a.x + a.y * a.y); // لا Math.hypot: أبطأ بكثير والقيم هنا صغيرة (لا فيض)
+export const dist = (a, b) => { const dx = a.x - b.x, dy = a.y - b.y; return Math.sqrt(dx * dx + dy * dy); };
 export const lerp = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
 export const norm = a => { const l = len(a); return l < EPS ? { x: 0, y: 0 } : { x: a.x / l, y: a.y / l }; };
 export const perp = a => ({ x: -a.y, y: a.x }); // 90 degrees counter-clockwise

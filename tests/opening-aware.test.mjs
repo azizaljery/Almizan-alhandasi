@@ -1,4 +1,5 @@
 // AZ-06 — مقارنة تراعي الفتحات: وحدة نقية تقرأ موضع الأبواب والنوافذ ولا تغيّر اختيار AZIZ ولا ترتيب البدائل.
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assessOpenings, compareOpeningAware, OPENING_AWARE_VERSION, AXIS_LABELS } from '../dist/opening-aware.mjs';

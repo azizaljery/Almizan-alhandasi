@@ -1,0 +1,356 @@
+{
+ "id": "L11",
+ "name": "درجات الإلزام — لازم/يفضل/لو أمكن/ممنوع/ياليت",
+ "words": 151,
+ "ms": 19,
+ "text": "السلام عليكم، عندي أرض ٢٠×٢٥ والشارع شمالي، وأبي دور واحد. البرنامج باختصار: أربع غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، مطبخ وطعام، وغرفة خادمة. وعشان تعرف وضعنا، احنا ستة: أنا وزوجتي وأربعة عيال، والعاملة ساكنة معنا من سنين. الحين الأولويات، وأرجو تنتبه للفرق بينها لأن مو كلها بنفس الأهمية عندي. لازم المجلس يكون على الشارع، هذا شرط ما أتنازل عنه. ويفضل المطبخ يكون في الخلف، لكن مو ضروري إذا ما ضبط مع باقي التصميم. ولو أمكن الماستر بعيدة عن المجلس. وممنوع غرف النوم تطل على الشارع، هذا خط أحمر عندي. والطعام لازم جنب المطبخ. ومجلس النساء ياليت يكون قريب من الصالة. وغرفة الخادمة ضروري تكون جنب المطبخ. والمدخل الرئيسي يفضل يكون في وسط الواجهة. أي شي غير هذا اتركه لخبرتكم، بس لا تخالفون اللي قلت عنه لازم أو ممنوع. وإذا اضطريتوا تتنازلون عن شي فتنازلوا عن اللي قلت يفضل أو لو أمكن، وقولوا لي وش اللي تنازلتوا عنه بالضبط.",
+ "formCounts": {
+  "bedrooms": 4,
+  "majlis": 1,
+  "kitchens": 1,
+  "halls": 1
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "pref": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "extra": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "absent": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "rule": {
+    "tp": 7,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unsupported": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   }
+  },
+  "precision": 1,
+  "recall": 1,
+  "f1": 1,
+  "tp": [
+   "count:bedrooms=4",
+   "count:majlis=2",
+   "count:kitchens=1",
+   "count:dining=1",
+   "extra:maid",
+   "rule:place:majlis:n",
+   "rule:place:kitchen:s",
+   "rule:away:majlis+master",
+   "rule:place:bedrooms:!n",
+   "rule:close:dining+kitchen",
+   "rule:close:hall+majlis_w",
+   "rule:close:kitchen+maid",
+   "floors=1"
+  ],
+  "missed": [],
+  "wrong": [],
+  "levels": [
+   {
+    "item": "rule:place:majlis:n",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:kitchen:s",
+    "want": "prefer",
+    "got": "prefer",
+    "ok": true
+   },
+   {
+    "item": "rule:away:majlis+master",
+    "want": "prefer",
+    "got": "prefer",
+    "ok": true
+   },
+   {
+    "item": "rule:place:bedrooms:!n",
+    "want": "forbid",
+    "got": "forbid",
+    "ok": true
+   },
+   {
+    "item": "rule:close:dining+kitchen",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:hall+majlis_w",
+    "want": "prefer",
+    "got": "prefer",
+    "ok": true
+   },
+   {
+    "item": "rule:close:kitchen+maid",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "prefs": {
+   "floors": 1
+  },
+  "extras": {
+   "maid": {
+    "bath": false,
+    "ext": false
+   }
+  },
+  "absent": [],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "place:majlis:n",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "المجلس يكون على الشارع",
+    "text": "«المجلس» على الشارع (الواجهة الأمامية)"
+   },
+   {
+    "item": "place:kitchen:s",
+    "level": "prefer",
+    "levelCue": "explicit",
+    "quote": "المطبخ يكون في الخلف",
+    "text": "«المطبخ» في الخلف"
+   },
+   {
+    "item": "away:majlis+master",
+    "level": "prefer",
+    "levelCue": "explicit",
+    "quote": "الماستر بعيدة عن المجلس",
+    "text": "«غرفة النوم الرئيسية» بعيدًا عن «المجلس»"
+   },
+   {
+    "item": "place:bedrooms:!n",
+    "level": "forbid",
+    "levelCue": "negation",
+    "quote": "غرف النوم تطل على الشارع",
+    "text": "«غرف النوم» لا يطل على الشارع"
+   },
+   {
+    "item": "close:dining+kitchen",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "والطعام لازم جنب المطبخ",
+    "text": "«الطعام» بجوار «المطبخ»"
+   },
+   {
+    "item": "close:hall+majlis_w",
+    "level": "prefer",
+    "levelCue": "explicit",
+    "quote": "ومجلس النساء ياليت يكون قريب من الصالة",
+    "text": "«مجلس النساء» قرب «الصالة»"
+   },
+   {
+    "item": "close:kitchen+maid",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "وغرفة الخادمة ضروري تكون جنب المطبخ",
+    "text": "«غرفة الخادمة» بجوار «المطبخ»"
+   },
+   {
+    "item": "place:entrance:n",
+    "level": "prefer",
+    "levelCue": "explicit",
+    "quote": "والمدخل الرئيسي يفضل يكون في وسط الواجهة",
+    "text": "«المدخل» على الشارع (الواجهة الأمامية)"
+   },
+   {
+    "item": "place:entrance:center",
+    "level": "prefer",
+    "levelCue": "explicit",
+    "quote": "والمدخل الرئيسي يفضل يكون في وسط",
+    "text": "«المدخل» في وسط البيت"
+   }
+  ],
+  "tweaks": {},
+  "unsupported": [],
+  "unclear": [
+   "عندي أرض ٢٠×٢٥ والشارع شمالي",
+   "عشان تعرف وضعنا",
+   "احنا ستة: أنا وزوجتي وأربعة عيال",
+   "الحين الأولويات",
+   "أرجو تنتبه للفرق بينها لأن مو كلها بنفس الأهمية عندي",
+   "هذا شرط ما أتنازل عنه",
+   "لكن مو ضروري إذا ما ضبط مع باقي التصميم",
+   "هذا خط أحمر عندي",
+   "أي شي غير هذا اتركه لخبرتكم",
+   "بس لا تخالفون اللي قلت عنه لازم أو ممنوع",
+   "إذا اضطريتوا تتنازلون عن شي فتنازلوا عن اللي قلت يفضل أو لو أمكن",
+   "قولوا لي وش اللي تنازلتوا عنه بالضبط"
+  ],
+  "understood": [
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "غرفة خادمة",
+   "دور واحد",
+   "«المجلس» على الشارع (الواجهة الأمامية)",
+   "«المطبخ» في الخلف",
+   "«غرفة النوم الرئيسية» بعيدًا عن «المجلس»",
+   "«غرف النوم» لا يطل على الشارع",
+   "«الطعام» بجوار «المطبخ»",
+   "«مجلس النساء» قرب «الصالة»",
+   "«غرفة الخادمة» بجوار «المطبخ»",
+   "«المدخل» على الشارع (الواجهة الأمامية)",
+   "«المدخل» في وسط البيت"
+  ]
+ },
+ "conflicts": [],
+ "coverage": {
+  "clauses": 28,
+  "fates": {
+   "filler": 1,
+   "unclear": 12,
+   "understood": 12,
+   "program": 3
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "عندي أرض ٢٠×٢٥ والشارع شمالي",
+   "عشان تعرف وضعنا",
+   "احنا ستة: أنا وزوجتي وأربعة عيال",
+   "الحين الأولويات",
+   "أرجو تنتبه للفرق بينها لأن مو كلها بنفس الأهمية عندي",
+   "هذا شرط ما أتنازل عنه",
+   "لكن مو ضروري إذا ما ضبط مع باقي التصميم",
+   "هذا خط أحمر عندي",
+   "أي شي غير هذا اتركه لخبرتكم",
+   "بس لا تخالفون اللي قلت عنه لازم أو ممنوع",
+   "إذا اضطريتوا تتنازلون عن شي فتنازلوا عن اللي قلت يفضل أو لو أمكن",
+   "قولوا لي وش اللي تنازلتوا عنه بالضبط"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "kitchens": 1,
+   "dining": 1
+  },
+  "prefs": [],
+  "extras": [
+   "maid"
+  ],
+  "absent": [],
+  "rules": [
+   {
+    "r": "place:majlis:n",
+    "level": "must"
+   },
+   {
+    "r": "place:kitchen:s",
+    "level": "prefer"
+   },
+   {
+    "r": "away:majlis+master",
+    "level": "prefer"
+   },
+   {
+    "r": "place:bedrooms:!n",
+    "level": "forbid"
+   },
+   {
+    "r": "close:dining+kitchen",
+    "level": "must"
+   },
+   {
+    "r": "close:hall+majlis_w",
+    "level": "prefer"
+   },
+   {
+    "r": "close:kitchen+maid",
+    "level": "must"
+   }
+  ],
+  "floors": 1,
+  "unsupported": [],
+  "conflicts": [],
+  "unclear": [],
+  "optional": [
+   "count:baths",
+   "rule:place:entrance:center",
+   "rule:place:entrance:n"
+  ],
+  "traps": "كل قاعدة بدرجتها؛ «مو ضروري» تليين لا نفي."
+ },
+ "traps": "كل قاعدة بدرجتها؛ «مو ضروري» تليين لا نفي."
+}

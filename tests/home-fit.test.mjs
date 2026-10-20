@@ -1,3 +1,4 @@
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateInitialDesign, diagnoseFit, friendlyBuildError, SharaSession } from '../dist/home-flow.mjs';

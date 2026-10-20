@@ -1,5 +1,6 @@
 // الجولة الرابعة: تحقق معماري صادق من «X في الخلف» (zone)، وتنفيذه فعلًا في المولّد الثاني (C1، C6، C8 وتعديله)،
 // وغرفة كبار السن ملاصقة للصالة مع صالة غير شريطية بمساحة بقدر البرنامج (C2)، و«الماستر بعيدة عن الدرج» (C7).
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -102,7 +103,9 @@ test('C1 وC6: كل بديل معروض يحقق «المطبخ في الخلف�
 test('C2: غرفة كبار السن ملاصقة للصالة في كل بديل، والصالة غير شريطية (≤ 2.0) ومساحتها بقدر البرنامج', () => {
   const { C, r, land } = caseReq('C2');
   const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
-  assert.ok(out.designs.length >= 2);
+  // الجولة السابعة: بديل «بعد-6» الثاني (courtring:cr2) كان حوشه شقًا 3.35 × 9.3 م بين رواقين — صار الحوش ≥ 4.5 م بنسبة ≤ 2
+  // فلا يتسع هذا التنظيم لبرنامج C2، وبقية التنظيمات تخالف «الصالة على الواجهة الخلفية» أو غيره؛ لا حشو: بديل واحد والنقص مذكور
+  assert.ok(out.designs.length >= 1); if (out.designs.length < 4) assert.match(out.shortfall_ar || '', /من 4 مطلوبة/);
   for (const d of out.designs) {
     const { rooms } = docRooms(d.doc), e = rooms.find(x => x.name === 'غرفة كبار السن'), h = rooms.find(x => x.name === 'الصالة');
     const near = verifyRules(d.doc, rules('غرفة لأمي قريبة من الصالة'), { entry: 's' })[0];
@@ -119,7 +122,9 @@ test('C2: غرفة كبار السن ملاصقة للصالة في كل بدي�
 test('C7: «الماستر بعيدة عن الدرج» متحقق في كل بديل معروض (لا يُعرض بديل يخالفه لسد العدد)', () => {
   const { C, r, land } = caseReq('C7');
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
-  assert.ok(out.designs.length >= 2);
+  // الجولة السابعة: الطعام ≥ 3.3 م صافيًا جعل التنظيم الأرضي الثاني (compact:c3p) لا يتسع لمحور السلم، وبقية الأرضيات الناجحة
+  // نسخ شكلية من الأول (اختلاف معماري 0.10 لأن العلوي نفسه) — قرار المالك: لا حشو للعدد؛ يكفي بديل واحد سليم والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 1); if (out.designs.length < 4) assert.match(out.shortfall_ar || '', /من 4 مطلوبة/);
   for (const d of out.designs) {
     const x = verifyRequest(d.doc, r, { entry: 's' }).find(q => q.kind === 'far' && /الدرج/.test(q.text));
     assert.ok(x && x.ok, `${d.pat}: ${x?.why}`);

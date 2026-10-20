@@ -1,0 +1,241 @@
+{
+ "id": "C6",
+ "engine": "v2",
+ "name": "تصميم بطابق واحد",
+ "text": "دور واحد، ثلاث غرف نوم بالضبط، المطبخ 4×5، مجلس 5×6، والمطبخ في الخلف",
+ "understood": [
+  "3 غرف نوم (بالضبط)",
+  "المجلس 5×6 م (30 م²)",
+  "المطبخ 4×5 م (20 م²)",
+  "دور واحد",
+  "«المطبخ» في الخلف"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "hallback",
+   "pat": "hallback:h0",
+   "summary": "الصالة في الخلف على الحديقة: الضيافة صف أمامي، والخدمة والصالة خلفها، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.83,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.48,
+    "l": 8.76,
+    "ratio": 1.96
+   },
+   "rooms": 16,
+   "net": 209.93,
+   "circulationPct": 13.97,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 29 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 19.3 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 4.8×6 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 4×4.8 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "splitrear",
+   "pat": "splitrear:p0r",
+   "summary": "كتلتان: الضيافة والصالة بين فناءين أمامًا، وكتلة خلفية فيها الطعام والمطبخ على الواجهة الخلفية وغرف النوم على ممرها",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.94,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.32,
+    "l": 8.58,
+    "ratio": 1.99
+   },
+   "rooms": 17,
+   "net": 227.54,
+   "circulationPct": 12.61,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 28.9 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 20.3 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 5×5.8 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 4.1×5 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "rearbar",
+   "pat": "rearbar:r2",
+   "summary": "شريط خدمة خلفي: الضيافة أمامًا، والصالة وحديقة جانبية في الوسط، والطعام والمطبخ والخادمة صفًا على الواجهة الخلفية، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 89.27,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 7.73,
+    "ratio": 1.89
+   },
+   "rooms": 15,
+   "net": 179.24,
+   "circulationPct": 15.63,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 30 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 19.6 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 5.1×5.9 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 3.8×5.2 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 5064,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 3,
+ "diversity": [
+  [
+   0,
+   0.22,
+   0.22
+  ],
+  [
+   0.22,
+   0,
+   0.26
+  ],
+  [
+   0.22,
+   0.26,
+   0
+  ]
+ ],
+ "modes": [
+  "hallback",
+  "splitrear",
+  "rearbar"
+ ],
+ "minDifference": 0.22,
+ "meanDifference": 0.23,
+ "rejectedCandidates": 1
+}

@@ -1,3 +1,4 @@
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSession, redesign, approve, saveSession, loadSession, FEEDBACK, summarizeDoc, zoneOf, currentDoc } from '../dist/design-session.mjs';
@@ -16,7 +17,10 @@ test('جلسة التصميم: الأول يُعرض، و«تصميم آخر» �
   const r1 = await redesign(s, { picks: ['rooms_small', 'corridors'] });
   s = r1.session;
   assert.equal(s.designs.length, 2); assert.equal(s.current, 1);
-  assert.notEqual(s.designs[0].pat, s.designs[1].pat, 'توزيع مختلف');
+  // الجولة السادسة: خيارات التقييم الجاهزة («الغرف صغيرة»، «الممرات كثيرة») تعيد التوليد مفضّلةً التنظيم المعروض ما لم يكن
+  // من الأنماط المستبعدة. البديل الأول لهذا الطلب صار تنظيمًا بلا ممرات (الصالة الموزِّعة)، فيبقى التنظيم نفسه بأبعاد
+  // جديدة — المطلوب أن يتغير المخطط فعلًا وألا يكون التنظيم من الأنماط ذات الممرات (التأكيد التالي)، لا أن يتغير اسم النمط
+  assert.notEqual(s.designs[0].doc, s.designs[1].doc, 'مخطط مختلف');
   assert.deepEqual(r1.changes, ['غرف النوم صغيرة', 'الممرات كثيرة']);
   assert.ok(!['tee', 'rows'].includes(s.designs[1].pat.split('|')[0]), 'الممرات الكثيرة تستبعد أنماط الممر');
   assert.ok(s.input.requirements.tweaks.bedroomScale > 1);

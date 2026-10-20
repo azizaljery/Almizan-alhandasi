@@ -1,5 +1,6 @@
 // تكامل المرحلة الثانية: المتطلبات v2 + المولّد الثاني + المراجعة المستقلة (plan-review) بوابةً نهائية،
 // والجلسة ومسار البيت على المولّد الثاني (والأول احتياط بـ engine:'v1').
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, siteOf, landWithSite, difference } from '../dist/villa-layout-v2.mjs';
@@ -55,7 +56,10 @@ test('C5: الأرض شبه منحرف في المستند، والبند مقي
 test('C7: دوران — الماستر بعيدة عن الدرج المرسوم (مقيسة من سلالم المستند) في كل بديل، وبديلان على الأقل كلها ناجحة في المراجعة', () => {
   const { C, r } = caseReq('C7'), land = { floors: 2, ...C.land };
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: 4 });
-  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`);
+  // الجولة السابعة: الطعام ≥ 3.3 م صافيًا جعل التنظيم الأرضي الثاني (compact:c3p) لا يتسع لمحور السلم، وبقية الأرضيات الناجحة
+  // نسخ شكلية من الأول (اختلاف معماري 0.10 لأن العلوي نفسه) — قرار المالك: لا حشو للعدد؛ يكفي بديل واحد سليم والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 1, `البدائل ${out.designs.length}`);
+  if (out.designs.length < 4) assert.match(out.shortfall_ar || '', /من 4 مطلوبة/);
   for (const d of out.designs) { const f = d.ledger.find(x => x.kind === 'far' && /الدرج/.test(x.text)); assert.equal(f.status, 'done', d.pat + ' ' + f.why); }
   assertReviewed(out.designs, r, land);
   const far = out.designs[0].ledger.find(x => x.kind === 'far' && /الدرج/.test(x.text));

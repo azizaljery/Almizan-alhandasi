@@ -1,0 +1,324 @@
+{
+ "id": "C5",
+ "engine": "v2",
+ "name": "أرض غير منتظمة",
+ "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+ "understood": [
+  "3 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [
+  "شكل الأرض (شبه منحرف: الواجهة 18 م، الخلف 24 م، العمق 30 م): المولّد يقبل أرضًا مستطيلة فقط؛ سيُصمَّم على مستطيل ويُعلَّم البند «لم يُتحقق»."
+ ],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "cornerentry",
+   "pat": "cornerentry:e0t",
+   "summary": "المدخل في ركن الواجهة لا في محورها، والمجلس على بقية الواجهة، والصالة خلف المدخل، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 98.16,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.22,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 15.87
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 4.66,
+    "area": 14.83
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.99,
+    "l": 6.38,
+    "ratio": 1.28
+   },
+   "rooms": 16,
+   "net": 183.65,
+   "circulationPct": 14.85,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "courtring",
+   "pat": "courtring:cr0",
+   "summary": "بيت الحوش: حوش في قلب البيت يحيط به رواقان قصيران، الصالة أمامه والرئيسية خلفه، وغرف الأبناء على جانب والطعام والمطبخ على الجانب المقابل",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 91.91,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 3.48,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 15.75
+   },
+   "kitchen": {
+    "w": 3.92,
+    "l": 5.02,
+    "area": 19.63
+   },
+   "narrowestSubCirculation": {
+    "name": "ممر الغرف",
+    "clear": 1.31
+   },
+   "hall": {
+    "w": 4.98,
+    "l": 5.63,
+    "ratio": 1.13
+   },
+   "rooms": 18,
+   "net": 198.55,
+   "circulationPct": 9.23,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "ell",
+   "pat": "ell:l0r",
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.65,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.28,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 17.06
+   },
+   "kitchen": {
+    "w": 3.41,
+    "l": 4.17,
+    "area": 14.22
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.83,
+    "l": 6.97,
+    "ratio": 1.44
+   },
+   "rooms": 16,
+   "net": 192.03,
+   "circulationPct": 15.04,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "split",
+   "pat": "split:s0rt",
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.37,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 9.86,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 14.98
+   },
+   "kitchen": {
+    "w": 3.12,
+    "l": 4.17,
+    "area": 12.97
+   },
+   "narrowestSubCirculation": {
+    "name": "ممر الغرف",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.82,
+    "l": 6.53,
+    "ratio": 1.36
+   },
+   "rooms": 18,
+   "net": 206.47,
+   "circulationPct": 16.84,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [
+  "المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده."
+ ],
+ "ms": 13561,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.29,
+   0.25,
+   0.22
+  ],
+  [
+   0.29,
+   0,
+   0.27,
+   0.32
+  ],
+  [
+   0.25,
+   0.27,
+   0,
+   0.28
+  ],
+  [
+   0.22,
+   0.32,
+   0.28,
+   0
+  ]
+ ],
+ "modes": [
+  "cornerentry",
+  "courtring",
+  "ell",
+  "split"
+ ],
+ "minDifference": 0.22,
+ "meanDifference": 0.27,
+ "rejectedCandidates": 0,
+ "archDiversity": [
+  [
+   0,
+   0.433,
+   0.308,
+   0.242
+  ],
+  [
+   0.433,
+   0,
+   0.407,
+   0.338
+  ],
+  [
+   0.308,
+   0.407,
+   0,
+   0.34
+  ],
+  [
+   0.242,
+   0.338,
+   0.34,
+   0
+  ]
+ ],
+ "minArchDifference": 0.242,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ }
+}
