@@ -1,0 +1,99 @@
+{
+ "note": "الطلب نفسه مرتين (scripts/acceptance-run.mjs بالمحرك v2) — بصمة SHA-256 لكل بديل في التشغيلين",
+ "cases": {
+  "C1": [
+   {
+    "file": "alt-1.json",
+    "run1": "2ef7b92617a0842c",
+    "run2": "2ef7b92617a0842c",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "ef5b90bb56f93735",
+    "run2": "ef5b90bb56f93735",
+    "identical": true
+   }
+  ],
+  "C2": [
+   {
+    "file": "alt-1.json",
+    "run1": "db5832aaa572ce76",
+    "run2": "db5832aaa572ce76",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "7b39d79d0b393276",
+    "run2": "7b39d79d0b393276",
+    "identical": true
+   }
+  ],
+  "C5": [
+   {
+    "file": "alt-1.json",
+    "run1": "df8ca63b0aa885de",
+    "run2": "df8ca63b0aa885de",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "dfc077329a75d717",
+    "run2": "dfc077329a75d717",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "a2fd9c246007217a",
+    "run2": "a2fd9c246007217a",
+    "identical": true
+   },
+   {
+    "file": "alt-4.json",
+    "run1": "1d128ef276c47540",
+    "run2": "1d128ef276c47540",
+    "identical": true
+   }
+  ],
+  "C7": [
+   {
+    "file": "alt-1.json",
+    "run1": "8c33abf096f33dfd",
+    "run2": "8c33abf096f33dfd",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "c0f2f21fa6ff4590",
+    "run2": "c0f2f21fa6ff4590",
+    "identical": true
+   }
+  ],
+  "C10": [
+   {
+    "file": "alt-1.json",
+    "run1": "2b15055f445672ea",
+    "run2": "2b15055f445672ea",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "df577a3ac3de1b33",
+    "run2": "df577a3ac3de1b33",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "6b00b2beb3fa1714",
+    "run2": "6b00b2beb3fa1714",
+    "identical": true
+   },
+   {
+    "file": "alt-4.json",
+    "run1": "a53cd903ce6b67d3",
+    "run2": "a53cd903ce6b67d3",
+    "identical": true
+   }
+  ]
+ }
+}
