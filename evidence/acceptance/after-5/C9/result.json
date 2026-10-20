@@ -1,0 +1,320 @@
+{
+ "id": "C9",
+ "engine": "v2",
+ "name": "تغيير الواجهة دون تغيير المخطط",
+ "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [
+  "3 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "cornerentry",
+   "pat": "cornerentry:e0",
+   "summary": "المدخل في ركن الواجهة لا في محورها، والمجلس على بقية الواجهة، والصالة خلف المدخل",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 98.56,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 5.62,
+    "l": 6.38,
+    "ratio": 1.14
+   },
+   "rooms": 16,
+   "net": 195.59,
+   "circulationPct": 13.6,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "ell",
+   "pat": "ell:l0r",
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 97.58,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.93,
+    "l": 6.86,
+    "ratio": 1.39
+   },
+   "rooms": 16,
+   "net": 178.83,
+   "circulationPct": 15.84,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "split",
+   "pat": "split:s0r",
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 93.66,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.47,
+    "l": 7.13,
+    "ratio": 1.6
+   },
+   "rooms": 16,
+   "net": 182.43,
+   "circulationPct": 18.21,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "sidemajlis",
+   "pat": "sidemajlis:j1",
+   "summary": "مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 88.31,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.88,
+    "l": 7.82,
+    "ratio": 1.6
+   },
+   "rooms": 17,
+   "net": 202.83,
+   "circulationPct": 14.52,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 3423,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.27,
+   0.22,
+   0.32
+  ],
+  [
+   0.27,
+   0,
+   0.26,
+   0.18
+  ],
+  [
+   0.22,
+   0.26,
+   0,
+   0.28
+  ],
+  [
+   0.32,
+   0.18,
+   0.28,
+   0
+  ]
+ ],
+ "modes": [
+  "cornerentry",
+  "ell",
+  "split",
+  "sidemajlis"
+ ],
+ "minDifference": 0.18,
+ "meanDifference": 0.26,
+ "rejectedCandidates": 0,
+ "edit": {
+  "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
+  "ms": 27,
+  "reply": {
+   "done": [],
+   "failed": [],
+   "pending": [
+    {
+     "text": "الواجهة: حجر",
+     "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+    }
+   ],
+   "unverified": [],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": true,
+   "unchanged": true,
+   "reused": true,
+   "otherFails": [],
+   "conflicts": [],
+   "questions": []
+  },
+  "beforePattern": "cornerentry:e0",
+  "afterPattern": "cornerentry:e0",
+  "samePattern": true,
+  "difference": 0,
+  "roomsKept": true,
+  "roomsLost": [],
+  "programRoomsKept": true,
+  "programRoomsLost": [],
+  "editLedgerBefore": [
+   {
+    "text": "3 غرف نوم",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "الواجهة: حجر",
+    "status": "pending-render",
+    "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+   }
+  ],
+  "after": {
+   "hall": {
+    "w": 5.62,
+    "l": 6.38,
+    "ratio": 1.14
+   },
+   "rooms": 16,
+   "net": 195.59,
+   "circulationPct": 13.6,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "الواجهة: حجر",
+     "ok": false,
+     "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+    }
+   ],
+   "ledgerFails": 1
+  }
+ },
+ "editAll": [
+  {
+   "alt": 1,
+   "beforePattern": "cornerentry:e0",
+   "afterPattern": "cornerentry:e0",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [],
+   "failed": [],
+   "patternChanged": null,
+   "note": "مسطح الدور 213 م² داخل غلاف 11.25 × 18.9 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات."
+  },
+  {
+   "alt": 2,
+   "beforePattern": "ell:l0r",
+   "afterPattern": "ell:l0r",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [],
+   "failed": [],
+   "patternChanged": null,
+   "note": "مسطح الدور 195 م² داخل غلاف 16.5 × 15.3 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات وحديقة داخل كتلة المبنى."
+  },
+  {
+   "alt": 3,
+   "beforePattern": "split:s0r",
+   "afterPattern": "split:s0r",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [],
+   "failed": [],
+   "patternChanged": null,
+   "note": "مسطح الدور 201 م² داخل غلاف 16.7 × 16.3 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات وحديقة داخل كتلة المبنى."
+  },
+  {
+   "alt": 4,
+   "beforePattern": "sidemajlis:j1",
+   "afterPattern": "sidemajlis:j1",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [],
+   "failed": [],
+   "patternChanged": null,
+   "note": "مسطح الدور 222 م² داخل غلاف 16.65 × 16.4 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات وحديقة داخل كتلة المبنى."
+  }
+ ]
+}

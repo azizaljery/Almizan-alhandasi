@@ -1,0 +1,216 @@
+{
+ "id": "C5",
+ "engine": "v2",
+ "name": "أرض غير منتظمة",
+ "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+ "understood": [
+  "3 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [
+  "شكل الأرض (شبه منحرف: الواجهة 18 م، الخلف 24 م، العمق 30 م): المولّد يقبل أرضًا مستطيلة فقط؛ سيُصمَّم على مستطيل ويُعلَّم البند «لم يُتحقق»."
+ ],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "ellback",
+   "pat": "ellback:b0rt",
+   "summary": "شكل L خلفي: جناح نوم عرضي في الخلف وحديقة جانبية أمامية، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.75,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.83,
+    "l": 6.53,
+    "ratio": 1.35
+   },
+   "rooms": 17,
+   "net": 203.66,
+   "circulationPct": 14.65,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "hallback",
+   "pat": "hallback:h0",
+   "summary": "الصالة في الخلف على الحديقة: الضيافة صف أمامي، والخدمة والصالة خلفها، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.74,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.83,
+    "l": 6.32,
+    "ratio": 1.31
+   },
+   "rooms": 17,
+   "net": 185.28,
+   "circulationPct": 17.12,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "sidehall",
+   "pat": "sidehall:n0",
+   "summary": "جناح خدمة على جانب وصالة على الجانب المقابل، وغرف النوم خلفهما على ممر",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.74,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.97,
+    "l": 6.38,
+    "ratio": 1.28
+   },
+   "rooms": 17,
+   "net": 190.76,
+   "circulationPct": 16.02,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "sidemajlis",
+   "pat": "sidemajlis:j0t",
+   "summary": "مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.35,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 5.33,
+    "l": 7.23,
+    "ratio": 1.36
+   },
+   "rooms": 17,
+   "net": 221.77,
+   "circulationPct": 15.58,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [
+  "المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده."
+ ],
+ "ms": 7603,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.29,
+   0.23,
+   0.23
+  ],
+  [
+   0.29,
+   0,
+   0.26,
+   0.31
+  ],
+  [
+   0.23,
+   0.26,
+   0,
+   0.28
+  ],
+  [
+   0.23,
+   0.31,
+   0.28,
+   0
+  ]
+ ],
+ "modes": [
+  "ellback",
+  "hallback",
+  "sidehall",
+  "sidemajlis"
+ ],
+ "minDifference": 0.23,
+ "meanDifference": 0.27,
+ "rejectedCandidates": 0
+}

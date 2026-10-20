@@ -1,0 +1,344 @@
+{
+ "id": "C8",
+ "engine": "v2",
+ "name": "تعديل موقع غرفة دون حذف الغرف الأخرى",
+ "text": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [
+  "4 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "hallback",
+   "pat": "hallback:h0",
+   "summary": "الصالة في الخلف على الحديقة: الضيافة صف أمامي، والخدمة والصالة خلفها، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.16,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.98,
+    "l": 6.92,
+    "ratio": 1.39
+   },
+   "rooms": 20,
+   "net": 199.81,
+   "circulationPct": 17.19,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "split",
+   "pat": "split:s0r",
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.02,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.81,
+    "l": 7.78,
+    "ratio": 1.62
+   },
+   "rooms": 21,
+   "net": 224.34,
+   "circulationPct": 19.47,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "courtyard",
+   "pat": "courtyard:k1r",
+   "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 91.12,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 5.03,
+    "l": 5.67,
+    "ratio": 1.13
+   },
+   "rooms": 21,
+   "net": 232.33,
+   "circulationPct": 17.46,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "sidemajlis",
+   "pat": "sidemajlis:j1",
+   "summary": "مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 91.18,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.68,
+    "l": 7.77,
+    "ratio": 1.66
+   },
+   "rooms": 20,
+   "net": 219.68,
+   "circulationPct": 16.04,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 7097,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.29,
+   0.28,
+   0.2
+  ],
+  [
+   0.29,
+   0,
+   0.23,
+   0.31
+  ],
+  [
+   0.28,
+   0.23,
+   0,
+   0.34
+  ],
+  [
+   0.2,
+   0.31,
+   0.34,
+   0
+  ]
+ ],
+ "modes": [
+  "hallback",
+  "split",
+  "courtyard",
+  "sidemajlis"
+ ],
+ "minDifference": 0.2,
+ "meanDifference": 0.28,
+ "rejectedCandidates": 0,
+ "edit": {
+  "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
+  "ms": 365,
+  "reply": {
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "pending": [],
+   "unverified": [],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": true,
+   "unchanged": true,
+   "reused": false,
+   "otherFails": [],
+   "conflicts": [],
+   "questions": []
+  },
+  "beforePattern": "hallback:h0",
+  "afterPattern": "hallback:h0",
+  "samePattern": true,
+  "difference": 0,
+  "roomsKept": true,
+  "roomsLost": [],
+  "programRoomsKept": true,
+  "programRoomsLost": [],
+  "editLedgerBefore": [
+   {
+    "text": "«المطبخ» بجوار «الطعام»",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "«المطبخ» في الخلف",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "4 غرف نوم",
+    "status": "done",
+    "why": ""
+   }
+  ],
+  "after": {
+   "hall": {
+    "w": 4.98,
+    "l": 6.92,
+    "ratio": 1.39
+   },
+   "rooms": 20,
+   "net": 199.81,
+   "circulationPct": 17.19,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ },
+ "editAll": [
+  {
+   "alt": 1,
+   "beforePattern": "hallback:h0",
+   "afterPattern": "hallback:h0",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "طلبك متحقق في المخطط المعروض كما هو (مقيس من المخطط)، فلم يُغيَّر شيء."
+  },
+  {
+   "alt": 2,
+   "beforePattern": "split:s0r",
+   "afterPattern": "yoo:u0",
+   "samePattern": false,
+   "unchanged": false,
+   "difference": 0.28,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": {
+    "from": "split:s0r",
+    "to": "yoo:u0",
+    "why_ar": "التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه، وبقية الغرف كما هي."
+   },
+   "note": "وُجد 2 بدائل مختلفة تنظيميًا فقط تجتاز المراجعة وتنفّذ بنود طلبك لهذا البرنامج وهذه الأرض (من 4 مطلوبة)؛ لم يُضف مخطط معكوس لأنه ليس بديلًا مختلفًا، ولا بديل يخالف بندًا صريحًا من طلبك."
+  },
+  {
+   "alt": 3,
+   "beforePattern": "courtyard:k1r",
+   "afterPattern": "courtyard:k1r",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0.12,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "عُدّل المخطط المعروض نفسه (النمط ذاته): تبادل «المطبخ» و«غرفة النوم الرئيسية» موضعيهما، وبقية الغرف في أماكنها."
+  },
+  {
+   "alt": 4,
+   "beforePattern": "sidemajlis:j1",
+   "afterPattern": "sidemajlis:j1",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "طلبك متحقق في المخطط المعروض كما هو (مقيس من المخطط)، فلم يُغيَّر شيء."
+  }
+ ]
+}

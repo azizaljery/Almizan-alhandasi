@@ -1,0 +1,295 @@
+{
+ "id": "C3",
+ "engine": "v2",
+ "name": "أرض زاوية (شارعان)",
+ "text": "3 غرف نوم ومجلس رجال على الشارع ومجلس نساء، والمطبخ بجانب الطعام، ومدخل ثاني من الشارع الشرقي",
+ "understood": [
+  "3 غرف نوم",
+  "«المجلس» على الشارع (الواجهة الأمامية)",
+  "«المطبخ» بجوار «الطعام»",
+  "«المدخل» في جهة الشرق"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "yoo",
+   "pat": "yoo:u0r",
+   "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.1,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.83,
+    "l": 6.22,
+    "ratio": 1.29
+   },
+   "rooms": 19,
+   "net": 209.43,
+   "circulationPct": 14.66,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "cornerentry",
+   "pat": "cornerentry:e0",
+   "summary": "المدخل في ركن الواجهة لا في محورها، والمجلس على بقية الواجهة، والصالة خلف المدخل",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 93.99,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 5.91,
+    "l": 6.38,
+    "ratio": 1.08
+   },
+   "rooms": 20,
+   "net": 210.92,
+   "circulationPct": 16.18,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 4,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "hallback",
+   "pat": "hallback:h0",
+   "summary": "الصالة في الخلف على الحديقة: الضيافة صف أمامي، والخدمة والصالة خلفها، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.97,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 6.32,
+    "l": 6.68,
+    "ratio": 1.06
+   },
+   "rooms": 20,
+   "net": 221.14,
+   "circulationPct": 15.35,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 4,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "courtyard",
+   "pat": "courtyard:k1",
+   "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 90.13,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.83,
+    "l": 7.22,
+    "ratio": 1.49
+   },
+   "rooms": 19,
+   "net": 257.34,
+   "circulationPct": 18.12,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 4,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 9698,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.31,
+   0.18,
+   0.26
+  ],
+  [
+   0.31,
+   0,
+   0.27,
+   0.27
+  ],
+  [
+   0.18,
+   0.27,
+   0,
+   0.22
+  ],
+  [
+   0.26,
+   0.27,
+   0.22,
+   0
+  ]
+ ],
+ "modes": [
+  "yoo",
+  "cornerentry",
+  "hallback",
+  "courtyard"
+ ],
+ "minDifference": 0.18,
+ "meanDifference": 0.25,
+ "rejectedCandidates": 1
+}
