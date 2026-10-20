@@ -1,0 +1,865 @@
+{
+ "version": "arch-difference/1.0.0",
+ "weights": {
+  "adjacency": 0.3,
+  "circulation": 0.2,
+  "zoning": 0.5
+ },
+ "thresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "stage": "after-5",
+ "summary": {
+  "pairs": 39,
+  "cosmetic": 6,
+  "partial": 13,
+  "distinct": 20
+ },
+ "cases": {
+  "C1": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json"
+   ],
+   "requested": 4,
+   "produced": 2,
+   "matrix": [
+    [
+     0,
+     0.173
+    ],
+    [
+     0.173,
+     0
+    ]
+   ],
+   "min": 0.173,
+   "mean": 0.173,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.173,
+     "adjacency": 0.124,
+     "circulation": 0.436,
+     "zoning": 0.098,
+     "verdict": "cosmetic",
+     "oldCentroid": 0.22
+    }
+   ],
+   "cosmeticPairs": [
+    [
+     1,
+     2
+    ]
+   ],
+   "shortfallReason": null
+  },
+  "C2": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json"
+   ],
+   "requested": 4,
+   "produced": 2,
+   "matrix": [
+    [
+     0,
+     0.133
+    ],
+    [
+     0.133,
+     0
+    ]
+   ],
+   "min": 0.133,
+   "mean": 0.133,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.133,
+     "adjacency": 0.039,
+     "circulation": 0.201,
+     "zoning": 0.163,
+     "verdict": "cosmetic",
+     "oldCentroid": 0.18
+    }
+   ],
+   "cosmeticPairs": [
+    [
+     1,
+     2
+    ]
+   ],
+   "shortfallReason": null
+  },
+  "C3": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.324,
+     0.182,
+     0.25
+    ],
+    [
+     0.324,
+     0,
+     0.312,
+     0.242
+    ],
+    [
+     0.182,
+     0.312,
+     0,
+     0.302
+    ],
+    [
+     0.25,
+     0.242,
+     0.302,
+     0
+    ]
+   ],
+   "min": 0.182,
+   "mean": 0.269,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.324,
+     "adjacency": 0.082,
+     "circulation": 0.193,
+     "zoning": 0.522,
+     "verdict": "distinct",
+     "oldCentroid": 0.31
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.182,
+     "adjacency": 0.116,
+     "circulation": 0.085,
+     "zoning": 0.26,
+     "verdict": "partial",
+     "oldCentroid": 0.18
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.25,
+     "adjacency": 0.143,
+     "circulation": 0.358,
+     "zoning": 0.27,
+     "verdict": "partial",
+     "oldCentroid": 0.26
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.312,
+     "adjacency": 0.057,
+     "circulation": 0.27,
+     "zoning": 0.482,
+     "verdict": "distinct",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.242,
+     "adjacency": 0.153,
+     "circulation": 0.23,
+     "zoning": 0.3,
+     "verdict": "partial",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.302,
+     "adjacency": 0.163,
+     "circulation": 0.393,
+     "zoning": 0.349,
+     "verdict": "distinct",
+     "oldCentroid": 0.22
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  },
+  "C4": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json"
+   ],
+   "requested": 4,
+   "produced": 2,
+   "matrix": [
+    [
+     0,
+     0.242
+    ],
+    [
+     0.242,
+     0
+    ]
+   ],
+   "min": 0.242,
+   "mean": 0.242,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.242,
+     "adjacency": 0.192,
+     "circulation": 0.414,
+     "zoning": 0.203,
+     "verdict": "partial",
+     "oldCentroid": 0.18
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  },
+  "C5": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.371,
+     0.307,
+     0.139
+    ],
+    [
+     0.371,
+     0,
+     0.334,
+     0.424
+    ],
+    [
+     0.307,
+     0.334,
+     0,
+     0.394
+    ],
+    [
+     0.139,
+     0.424,
+     0.394,
+     0
+    ]
+   ],
+   "min": 0.139,
+   "mean": 0.328,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.371,
+     "adjacency": 0.115,
+     "circulation": 0.19,
+     "zoning": 0.596,
+     "verdict": "distinct",
+     "oldCentroid": 0.29
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.307,
+     "adjacency": 0.105,
+     "circulation": 0.352,
+     "zoning": 0.411,
+     "verdict": "distinct",
+     "oldCentroid": 0.23
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.139,
+     "adjacency": 0.026,
+     "circulation": 0.208,
+     "zoning": 0.18,
+     "verdict": "cosmetic",
+     "oldCentroid": 0.23
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.334,
+     "adjacency": 0.051,
+     "circulation": 0.267,
+     "zoning": 0.53,
+     "verdict": "distinct",
+     "oldCentroid": 0.26
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.424,
+     "adjacency": 0.141,
+     "circulation": 0.383,
+     "zoning": 0.61,
+     "verdict": "distinct",
+     "oldCentroid": 0.31
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.394,
+     "adjacency": 0.132,
+     "circulation": 0.52,
+     "zoning": 0.5,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    }
+   ],
+   "cosmeticPairs": [
+    [
+     1,
+     4
+    ]
+   ],
+   "shortfallReason": null
+  },
+  "C6": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json"
+   ],
+   "requested": 4,
+   "produced": 3,
+   "matrix": [
+    [
+     0,
+     0.363,
+     0.166
+    ],
+    [
+     0.363,
+     0,
+     0.283
+    ],
+    [
+     0.166,
+     0.283,
+     0
+    ]
+   ],
+   "min": 0.166,
+   "mean": 0.271,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.363,
+     "adjacency": 0.227,
+     "circulation": 0.344,
+     "zoning": 0.453,
+     "verdict": "distinct",
+     "oldCentroid": 0.22
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.166,
+     "adjacency": 0.099,
+     "circulation": 0.212,
+     "zoning": 0.188,
+     "verdict": "cosmetic",
+     "oldCentroid": 0.22
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.283,
+     "adjacency": 0.139,
+     "circulation": 0.154,
+     "zoning": 0.42,
+     "verdict": "partial",
+     "oldCentroid": 0.26
+    }
+   ],
+   "cosmeticPairs": [
+    [
+     1,
+     3
+    ]
+   ],
+   "shortfallReason": null
+  },
+  "C7": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json"
+   ],
+   "requested": 4,
+   "produced": 3,
+   "matrix": [
+    [
+     0,
+     0.269,
+     0.093
+    ],
+    [
+     0.269,
+     0,
+     0.23
+    ],
+    [
+     0.093,
+     0.23,
+     0
+    ]
+   ],
+   "min": 0.093,
+   "mean": 0.197,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.269,
+     "adjacency": 0.089,
+     "circulation": 0.175,
+     "zoning": 0.415,
+     "verdict": "partial",
+     "oldCentroid": 0.3
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.093,
+     "adjacency": 0.019,
+     "circulation": 0.046,
+     "zoning": 0.156,
+     "verdict": "cosmetic",
+     "oldCentroid": 0.19
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.23,
+     "adjacency": 0.089,
+     "circulation": 0.165,
+     "zoning": 0.341,
+     "verdict": "partial",
+     "oldCentroid": 0.18
+    }
+   ],
+   "cosmeticPairs": [
+    [
+     1,
+     3
+    ]
+   ],
+   "shortfallReason": null
+  },
+  "C8": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.313,
+     0.381,
+     0.146
+    ],
+    [
+     0.313,
+     0,
+     0.31,
+     0.413
+    ],
+    [
+     0.381,
+     0.31,
+     0,
+     0.372
+    ],
+    [
+     0.146,
+     0.413,
+     0.372,
+     0
+    ]
+   ],
+   "min": 0.146,
+   "mean": 0.323,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.313,
+     "adjacency": 0.077,
+     "circulation": 0.312,
+     "zoning": 0.455,
+     "verdict": "distinct",
+     "oldCentroid": 0.29
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.381,
+     "adjacency": 0.109,
+     "circulation": 0.261,
+     "zoning": 0.593,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.146,
+     "adjacency": 0.044,
+     "circulation": 0.191,
+     "zoning": 0.19,
+     "verdict": "cosmetic",
+     "oldCentroid": 0.2
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.31,
+     "adjacency": 0.11,
+     "circulation": 0.434,
+     "zoning": 0.381,
+     "verdict": "distinct",
+     "oldCentroid": 0.23
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.413,
+     "adjacency": 0.101,
+     "circulation": 0.497,
+     "zoning": 0.566,
+     "verdict": "distinct",
+     "oldCentroid": 0.31
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.372,
+     "adjacency": 0.089,
+     "circulation": 0.071,
+     "zoning": 0.662,
+     "verdict": "distinct",
+     "oldCentroid": 0.34
+    }
+   ],
+   "cosmeticPairs": [
+    [
+     1,
+     4
+    ]
+   ],
+   "shortfallReason": null
+  },
+  "C9": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.288,
+     0.208,
+     0.473
+    ],
+    [
+     0.288,
+     0,
+     0.332,
+     0.372
+    ],
+    [
+     0.208,
+     0.332,
+     0,
+     0.403
+    ],
+    [
+     0.473,
+     0.372,
+     0.403,
+     0
+    ]
+   ],
+   "min": 0.208,
+   "mean": 0.346,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.288,
+     "adjacency": 0.028,
+     "circulation": 0.188,
+     "zoning": 0.483,
+     "verdict": "partial",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.208,
+     "adjacency": 0.167,
+     "circulation": 0.269,
+     "zoning": 0.209,
+     "verdict": "partial",
+     "oldCentroid": 0.22
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.473,
+     "adjacency": 0.162,
+     "circulation": 0.53,
+     "zoning": 0.637,
+     "verdict": "distinct",
+     "oldCentroid": 0.32
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.332,
+     "adjacency": 0.167,
+     "circulation": 0.082,
+     "zoning": 0.53,
+     "verdict": "distinct",
+     "oldCentroid": 0.26
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.372,
+     "adjacency": 0.135,
+     "circulation": 0.343,
+     "zoning": 0.525,
+     "verdict": "distinct",
+     "oldCentroid": 0.18
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.403,
+     "adjacency": 0.176,
+     "circulation": 0.346,
+     "zoning": 0.563,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  },
+  "C10": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 5,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.286,
+     0.319,
+     0.394
+    ],
+    [
+     0.286,
+     0,
+     0.241,
+     0.234
+    ],
+    [
+     0.319,
+     0.241,
+     0,
+     0.288
+    ],
+    [
+     0.394,
+     0.234,
+     0.288,
+     0
+    ]
+   ],
+   "min": 0.234,
+   "mean": 0.294,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.286,
+     "adjacency": 0.181,
+     "circulation": 0.187,
+     "zoning": 0.388,
+     "verdict": "partial",
+     "oldCentroid": 0.25
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.319,
+     "adjacency": 0.105,
+     "circulation": 0.181,
+     "zoning": 0.503,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.394,
+     "adjacency": 0.1,
+     "circulation": 0.369,
+     "zoning": 0.58,
+     "verdict": "distinct",
+     "oldCentroid": 0.32
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.241,
+     "adjacency": 0.17,
+     "circulation": 0.361,
+     "zoning": 0.235,
+     "verdict": "partial",
+     "oldCentroid": 0.26
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.234,
+     "adjacency": 0.14,
+     "circulation": 0.274,
+     "zoning": 0.275,
+     "verdict": "partial",
+     "oldCentroid": 0.29
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.288,
+     "adjacency": 0.15,
+     "circulation": 0.407,
+     "zoning": 0.323,
+     "verdict": "partial",
+     "oldCentroid": 0.21
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  }
+ }
+}

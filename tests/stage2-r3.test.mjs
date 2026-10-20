@@ -40,7 +40,10 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
 
 test('بوابة الجودة ترفض فعلًا: إن صارت الرئيسية أصغر غرف النوم يُذكر ذلك سببًا للرفض', () => {
   const { r, land } = caseReq('C9');
-  const d = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 1 }).designs[0];
+  // الجولة السادسة: البديل الأول قد يكون غرف أبنائه متساوية (بيت الحوش)؛ الاختبار يحتاج بديلًا فيه غرفتا نوم مختلفتا
+  // المساحة ليبدّل تسمية الرئيسية مع أصغرهما — يُختار أول بديل معروض كذلك (الفحص نفسه على البوابة لم يتغير)
+  const spread = x => { const a = docRooms(x.doc).rooms.filter(q => q.type === 'bedroom').map(q => q.area); return Math.max(...a) - Math.min(...a); };
+  const all = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 4 }).designs, d = all.find(x => spread(x) > .3) || all[0];
   const doc = JSON.parse(serialize(d.doc)), rooms = docRooms(doc).rooms;
   const small = rooms.filter(x => x.type === 'bedroom').sort((a, b) => a.area - b.area)[0], big = rooms.filter(x => x.type === 'bedroom').sort((a, b) => b.area - a.area)[0];
   assert.ok(big.area > small.area + .3, 'البرنامج فيه غرفتا نوم مختلفتا المساحة');

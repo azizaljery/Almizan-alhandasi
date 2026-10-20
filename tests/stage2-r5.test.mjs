@@ -48,7 +48,11 @@ test('C6: كل بديل ينفّذ «المطبخ في الخلف» والمقا
 test('C7: أرضي مختلف لكل بديل، والماستر بعيدة عن الدرج المرسوم في كل بديل', () => {
   const { C, r } = caseReq('C7');
   const out = generateVillaTwoFloors({ land: { floors: 2, ...C.land }, counts: r.counts, requirements: r, keep: 4 });
-  assert.ok(out.designs.length >= 3, `البدائل ${out.designs.length}`);
+  // الجولة السادسة: الاختيار بالاختلاف المعماري (≥ 0.18) والعلوي لا يبرز فوق حديقة أرضية. في «بعد-5» كان البديل الثالث
+  // نسخة شكلية من الأول (اختلاف معماري 0.09) وعلويّه فوق فراغ أرضي؛ قرار المالك: لا حشو للعدد — يكفي بديلان مختلفان فعلًا
+  // (والنقص مذكور بسببه في shortfall_ar)
+  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`);
+  if (out.designs.length < 4) assert.ok(out.shortfall_ar && /من 4 مطلوبة/.test(out.shortfall_ar), 'سبب النقص مذكور');
   const grounds = out.designs.map(d => d.pat.split('/')[0]);
   assert.equal(new Set(grounds).size, grounds.length, grounds.join(' '));
   for (const d of out.designs) { const far = d.ledger.find(x => x.kind === 'far'); assert.ok(far && far.ok, d.pat + ': ' + far?.why); }

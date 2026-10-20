@@ -11,6 +11,7 @@ import { createSession, redesign } from '../dist/design-session.mjs';
 import { verifyRequest, docRooms } from '../dist/rules.mjs';
 import { reviewDoc } from '../dist/draw/review.mjs';
 import { serialize } from '../dist/draw/doc.mjs';
+import { archMatrix, THRESHOLDS as ARCH_T } from '../dist/arch-difference.mjs';
 
 const argv = process.argv.slice(2), ei = argv.indexOf('--engine');
 const engine = (ei >= 0 ? argv[ei + 1] : process.env.MIZAN_ENGINE) || 'v1';
@@ -30,7 +31,15 @@ export function metrics(doc, req, entry) {
   const led = verifyRequest(doc, req, { entry });
   const beds = rooms.filter(r => r.type === 'bedroom' || r.type === 'master');
   const hall = rooms.find(r => r.name === 'الصالة' && r.li === 0) || rooms.find(r => /^الصالة/.test(r.name));
+  // الجولة السادسة: أطول ممر غرف (ومن جهة واحدة أم جهتين)، وأصغر غرفة نوم، والمطبخ، وأضيق مدخل/ممر فرعي — مقيسة من المستند
+  const cors = V2.planCorridors(rooms), kit = rooms.find(r => r.type === 'kitchen' && r.name === 'المطبخ');
+  const subs = rooms.filter(r => ['corridor', 'entrance'].includes(r.type)).map(r => ({ name: r.name, s: Math.min(r.x1 - r.x0, r.y1 - r.y0) })).sort((a, b) => a.s - b.s);
+  const bedMin = beds.length ? beds.reduce((a, b) => (b.area < a.area ? b : a)) : null;
   return {
+    corridorMax: cors.length ? cors.reduce((a, c) => (c.len > a.len ? c : a)) : null,
+    smallestBedroom: bedMin ? { name: bedMin.name, area: r2(bedMin.area) } : null,
+    kitchen: kit ? { w: r2(Math.min(kit.x1 - kit.x0, kit.y1 - kit.y0)), l: r2(Math.max(kit.x1 - kit.x0, kit.y1 - kit.y0)), area: r2(kit.area) } : null,
+    narrowestSubCirculation: subs[0] ? { name: subs[0].name, clear: r2(subs[0].s) } : null,
     hall: hall ? { w: r2(Math.min(hall.x1 - hall.x0, hall.y1 - hall.y0)), l: r2(Math.max(hall.x1 - hall.x0, hall.y1 - hall.y0)), ratio: r2(Math.max(hall.x1 - hall.x0, hall.y1 - hall.y0) / Math.min(hall.x1 - hall.x0, hall.y1 - hall.y0)) } : null,
     rooms: rooms.length, net: r2(net), circulationPct: r2(100 * circ / Math.max(1, net)), bedrooms: beds.length,
     noWindow: by('NO_WINDOW'), minWidth: by('MIN_WIDTH'), unreachable: by('UNREACHABLE_ROOM'), swingBlocked: by('SWING_BLOCKED'), bathPrivacy: by('BATH_PRIVACY'),
@@ -73,6 +82,11 @@ for (const C of CASES) {
     const pairs = row.diversity.flatMap((r, i) => r.filter((_, j) => j > i));
     row.minDifference = pairs.length ? Math.min(...pairs) : null; row.meanDifference = pairs.length ? r2(pairs.reduce((a, b) => a + b, 0) / pairs.length) : null;
     if (out.rejected) row.rejectedCandidates = out.rejected.length;
+    // الاختلاف المعماري (الحاكم في الاختيار منذ الجولة السادسة): المصفوفة وأدناه والأزواج الشكلية (< 0.18)
+    const am = archMatrix(out.designs.map(d => d.doc));
+    row.archDiversity = am.matrix; row.minArchDifference = am.min; row.cosmeticPairs = am.cosmeticPairs.map(p => [p.i + 1, p.j + 1]); row.archThresholds = ARCH_T;
+    // سبب النقص عن العدد المطلوب (نص عربي من المولّد نفسه: ما بُني وما رُفض ولماذا)
+    if (out.designs.length < (C.want || 4)) row.shortfallReason = out.shortfall_ar || 'لم يذكر المولّد سببًا.';
   }
   if (C.edit && out) {
     try {
@@ -109,6 +123,6 @@ for (const C of CASES) {
   writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));
   summary.push(row);
   const best = row.designs[0];
-  console.log(`${C.id} ${C.name}: ${row.error ? 'خطأ: ' + row.error : `${row.producedAlternatives}/${row.requestedAlternatives} بدائل، أنماط ${row.modes.join('/')}, اختلاف أدنى ${Math.min(...row.diversity.flatMap((r, i) => r.filter((_, j) => j > i)))}، أفضل: إخفاق ${best.ledgerFails}، بلا نافذة ${best.noWindow}، حركة ${best.circulationPct}%`} ${row.ms}ms${row.edit ? ' | تعديل: ' + (row.edit.error ? 'خطأ ' + row.edit.error.slice(0, 80) : `نفس النمط ${row.edit.samePattern}، غرف محفوظة ${row.edit.roomsKept}، فرق ${row.edit.difference}`) : ''}`);
+  console.log(`${C.id} ${C.name}: ${row.error ? 'خطأ: ' + row.error : `${row.producedAlternatives}/${row.requestedAlternatives} بدائل، أنماط ${row.modes.join('/')}, اختلاف معماري أدنى ${row.minArchDifference}، مراكز ${Math.min(...row.diversity.flatMap((r, i) => r.filter((_, j) => j > i)))}، أفضل: إخفاق ${best.ledgerFails}، بلا نافذة ${best.noWindow}، حركة ${best.circulationPct}%`} ${row.ms}ms${row.edit ? ' | تعديل: ' + (row.edit.error ? 'خطأ ' + row.edit.error.slice(0, 80) : `نفس النمط ${row.edit.samePattern}، غرف محفوظة ${row.edit.roomsKept}، فرق ${row.edit.difference}`) : ''}`);
 }
 writeFileSync(OUT + 'summary.json', JSON.stringify(summary, null, 1));

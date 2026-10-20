@@ -11,6 +11,26 @@ const ROOT = new URL('../', import.meta.url).pathname, OUT = ROOT + 'evidence/re
 mkdirSync(OUT, { recursive: true });
 const r3 = v => Math.round(v * 1000) / 1000;
 
+// --stage <مرحلة>: مصفوفات الاختلاف المعماري لبدائل كل حالة في تلك المرحلة فقط → evidence/acceptance/<مرحلة>/arch-difference.json
+// (مع المقياس القديم للمراكز من result.json للمقارنة). بلا هذا العلم: المعايرة كما كانت (قبل وafter-4).
+{ const si = process.argv.indexOf('--stage');
+  if (si >= 0) {
+    const stage = process.argv[si + 1], base = loadBase(stage), cases = {};
+    for (const id of [...new Set(base.map(b => b.case))]) {
+      const docs = base.filter(b => b.case === id), m = archMatrix(docs.map(d => d.doc));
+      const resPath = ROOT + `evidence/acceptance/${stage}/${id}/result.json`, res = existsSync(resPath) ? JSON.parse(readFileSync(resPath, 'utf8')) : null, old = res?.diversity || null;
+      cases[id] = { files: docs.map(d => d.file), requested: res?.requestedAlternatives ?? null, produced: docs.length, matrix: m.matrix, min: m.min, mean: m.mean,
+        pairs: m.pairs.map(p => ({ pair: [p.i + 1, p.j + 1], total: p.total, adjacency: p.adjacency, circulation: p.circulation, zoning: p.zoning, verdict: p.verdict, oldCentroid: old ? old[p.i][p.j] : null })),
+        cosmeticPairs: m.cosmeticPairs.map(p => [p.i + 1, p.j + 1]), shortfallReason: res?.shortfallReason || null };
+    }
+    const all = Object.values(cases).flatMap(c => c.pairs);
+    const summary = { pairs: all.length, cosmetic: all.filter(p => p.verdict === 'cosmetic').length, partial: all.filter(p => p.verdict === 'partial').length, distinct: all.filter(p => p.verdict === 'distinct').length };
+    writeFileSync(ROOT + `evidence/acceptance/${stage}/arch-difference.json`, JSON.stringify({ version: ARCH_DIFF_VERSION, weights: WEIGHTS, thresholds: THRESHOLDS, stage, summary, cases }, null, 1));
+    console.log(stage, JSON.stringify(summary));
+    for (const [id, c] of Object.entries(cases)) console.log(id, `${c.produced}/${c.requested}`, 'min', c.min, c.pairs.map(p => `${p.pair.join('-')}:${p.total}${p.verdict === 'cosmetic' ? '*' : ''}`).join('  '));
+    process.exit(0);
+  } }
+
 // أحكام بشرية من قراءة المساقط (evidence/acceptance/*/alt-*.png) لأزواج المعايرة: same = نفس التنظيم، diff = تنظيم مختلف
 const HUMAN = [
   { stage: 'before', case: 'C4', pair: [1, 2], human: 'same', why: 'المخطط نفسه تمامًا بعمق كلي مختلف قليلًا (26.3 م مقابل 27.45 م)؛ المقياس القديم 0 أيضًا' },
