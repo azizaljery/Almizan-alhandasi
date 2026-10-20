@@ -1,0 +1,3135 @@
+{
+ "reviewer": "plan-review/1.1.0",
+ "tag": "after",
+ "rows": [
+  {
+   "id": "no-window-bedroom@C1-alt-1",
+   "mutation": "no-window-bedroom",
+   "ar": "حذف نوافذ غرفة نوم (بلا نافذة خارجية)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "DAYLIGHT"
+   ],
+   "allowed": [
+    "WINDOW_SIZE"
+   ],
+   "note": "حُذفت 1 نافذة من «غرفة نوم 4»",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.41,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 4» بلا نافذة على الخارج أو على فناء"
+   ]
+  },
+  {
+   "id": "no-window-bedroom@C2-alt-1",
+   "mutation": "no-window-bedroom",
+   "ar": "حذف نوافذ غرفة نوم (بلا نافذة خارجية)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "DAYLIGHT"
+   ],
+   "allowed": [
+    "WINDOW_SIZE"
+   ],
+   "note": "حُذفت 2 نافذة من «غرفة كبار السن»",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 88.66,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة كبار السن» بلا نافذة على الخارج أو على فناء"
+   ]
+  },
+  {
+   "id": "no-window-bedroom@C3-alt-1",
+   "mutation": "no-window-bedroom",
+   "ar": "حذف نوافذ غرفة نوم (بلا نافذة خارجية)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "DAYLIGHT"
+   ],
+   "allowed": [
+    "WINDOW_SIZE"
+   ],
+   "note": "حُذفت 1 نافذة من «غرفة نوم 3»",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 93.35,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 3» بلا نافذة على الخارج أو على فناء"
+   ]
+  },
+  {
+   "id": "window-interior-only@C2-alt-1",
+   "mutation": "window-interior-only",
+   "ar": "نافذة غرفة النوم على ممر داخلي لا على الخارج (خفي)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "DAYLIGHT"
+   ],
+   "allowed": [
+    "WINDOW_SIZE"
+   ],
+   "note": "نوافذ «غرفة كبار السن» الخارجية حُذفت ووُضعت نافذة على «ممر الغرف» الداخلي",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 88.66,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة كبار السن» بلا نافذة على الخارج أو على فناء"
+   ]
+  },
+  {
+   "id": "window-interior-only@C4-alt-1",
+   "mutation": "window-interior-only",
+   "ar": "نافذة غرفة النوم على ممر داخلي لا على الخارج (خفي)",
+   "case": "C4",
+   "file": "alt-1.json",
+   "expected": [
+    "DAYLIGHT"
+   ],
+   "allowed": [
+    "WINDOW_SIZE"
+   ],
+   "note": "نوافذ «غرفة نوم 3» الخارجية حُذفت ووُضعت نافذة على «الصالة» الداخلي",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.85,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 3» بلا نافذة على الخارج أو على فناء"
+   ]
+  },
+  {
+   "id": "window-interior-only@C6-alt-1",
+   "mutation": "window-interior-only",
+   "ar": "نافذة غرفة النوم على ممر داخلي لا على الخارج (خفي)",
+   "case": "C6",
+   "file": "alt-1.json",
+   "expected": [
+    "DAYLIGHT"
+   ],
+   "allowed": [
+    "WINDOW_SIZE"
+   ],
+   "note": "نوافذ «غرفة نوم 2» الخارجية حُذفت ووُضعت نافذة على «ممر الغرف» الداخلي",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 88.07,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 2» بلا نافذة على الخارج أو على فناء"
+   ]
+  },
+  {
+   "id": "window-too-small@C1-alt-1",
+   "mutation": "window-too-small",
+   "ar": "نافذة غرفة النوم صغيرة جدًا (0.5×0.5 م) (خفي)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "WINDOW_SIZE"
+   ],
+   "allowed": [],
+   "note": "نافذة «غرفة النوم الرئيسية» صارت 0.5×0.5 م (1.191٪ من الأرضية)",
+   "passed": false,
+   "fired": [
+    "WINDOW_SIZE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.41,
+   "reasons": [
+    "مساحة زجاج الغرفة المعيشية لا تقل عن الحد الأدنى من أرضيتها: زجاج «غرفة النوم الرئيسية» 0.25 م² = 1.19٪ من أرضيتها (20.99 م²)، أقل من 3٪ (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "window-too-small@C2-alt-1",
+   "mutation": "window-too-small",
+   "ar": "نافذة غرفة النوم صغيرة جدًا (0.5×0.5 م) (خفي)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "WINDOW_SIZE"
+   ],
+   "allowed": [],
+   "note": "نافذة «غرفة النوم الرئيسية» صارت 0.5×0.5 م (1.249٪ من الأرضية)",
+   "passed": false,
+   "fired": [
+    "WINDOW_SIZE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 88.9,
+   "reasons": [
+    "مساحة زجاج الغرفة المعيشية لا تقل عن الحد الأدنى من أرضيتها: زجاج «غرفة النوم الرئيسية» 0.25 م² = 1.25٪ من أرضيتها (20.02 م²)، أقل من 3٪ (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "window-too-small@C3-alt-1",
+   "mutation": "window-too-small",
+   "ar": "نافذة غرفة النوم صغيرة جدًا (0.5×0.5 م) (خفي)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "WINDOW_SIZE"
+   ],
+   "allowed": [],
+   "note": "نافذة «غرفة النوم الرئيسية» صارت 0.5×0.5 م (1.301٪ من الأرضية)",
+   "passed": false,
+   "fired": [
+    "WINDOW_SIZE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 93.61,
+   "reasons": [
+    "مساحة زجاج الغرفة المعيشية لا تقل عن الحد الأدنى من أرضيتها: زجاج «غرفة النوم الرئيسية» 0.25 م² = 1.3٪ من أرضيتها (19.21 م²)، أقل من 3٪ (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "hall-strip@C2-alt-1",
+   "mutation": "hall-strip",
+   "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "HALL_ASPECT"
+   ],
+   "allowed": [],
+   "note": "«الصالة» ضُيّقت إلى 2.862×8.015 م",
+   "passed": false,
+   "fired": [
+    "HALL_ASPECT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 83.24,
+   "reasons": [
+    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 2.86×8.02 م نسبتها 2.8:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة"
+   ]
+  },
+  {
+   "id": "hall-strip@C1-alt-2",
+   "mutation": "hall-strip",
+   "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
+   "case": "C1",
+   "file": "alt-2.json",
+   "expected": [
+    "HALL_ASPECT"
+   ],
+   "allowed": [],
+   "note": "«الصالة» ضُيّقت إلى 2.971×8.315 م",
+   "passed": false,
+   "fired": [
+    "HALL_ASPECT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 83.1,
+   "reasons": [
+    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 2.97×8.32 م نسبتها 2.8:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة"
+   ]
+  },
+  {
+   "id": "hall-strip@C2-alt-2",
+   "mutation": "hall-strip",
+   "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
+   "case": "C2",
+   "file": "alt-2.json",
+   "expected": [
+    "HALL_ASPECT"
+   ],
+   "allowed": [],
+   "note": "«الصالة» ضُيّقت إلى 3.28×9.165 م",
+   "passed": false,
+   "fired": [
+    "HALL_ASPECT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 83.09,
+   "reasons": [
+    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 3.28×9.16 م نسبتها 2.79:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة"
+   ]
+  },
+  {
+   "id": "bedroom-narrow@C1-alt-1",
+   "mutation": "bedroom-narrow",
+   "ar": "غرفة نوم أضيق من الحد الأدنى (1.9 م)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "MIN_WIDTH"
+   ],
+   "allowed": [],
+   "note": "غرفة النوم «غرفة نوم 4» صار عرضه 1.9 م",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.96,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 4» 1.9 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "bedroom-narrow@C2-alt-1",
+   "mutation": "bedroom-narrow",
+   "ar": "غرفة نوم أضيق من الحد الأدنى (1.9 م)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "MIN_WIDTH"
+   ],
+   "allowed": [],
+   "note": "غرفة النوم «غرفة كبار السن» صار عرضه 1.9 م",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 90.68,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة كبار السن» 1.9 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "bedroom-narrow@C3-alt-1",
+   "mutation": "bedroom-narrow",
+   "ar": "غرفة نوم أضيق من الحد الأدنى (1.9 م)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "MIN_WIDTH"
+   ],
+   "allowed": [],
+   "note": "غرفة النوم «غرفة نوم 3» صار عرضه 1.9 م",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.38,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 3» 1.9 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "corridor-075@C1-alt-1",
+   "mutation": "corridor-075",
+   "ar": "ممر بعرض 0.75 م (خفي)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "MIN_WIDTH"
+   ],
+   "allowed": [
+    "DOOR_SWING"
+   ],
+   "note": "الممر «ممر الغرف» صار عرضه 0.75 م",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 95.92,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «ممر الغرف» 0.74 م أقل من 0.9 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "corridor-075@C2-alt-1",
+   "mutation": "corridor-075",
+   "ar": "ممر بعرض 0.75 م (خفي)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "MIN_WIDTH"
+   ],
+   "allowed": [
+    "DOOR_SWING"
+   ],
+   "note": "الممر «ممر الغرف» صار عرضه 0.75 م",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.6,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «ممر الغرف» 0.74 م أقل من 0.9 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "corridor-075@C3-alt-1",
+   "mutation": "corridor-075",
+   "ar": "ممر بعرض 0.75 م (خفي)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "MIN_WIDTH"
+   ],
+   "allowed": [
+    "DOOR_SWING"
+   ],
+   "note": "الممر «ممر الغرف» صار عرضه 0.75 م",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.01,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «ممر الغرف» 0.7 م أقل من 0.9 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "wc-door-kitchen@C1-alt-2",
+   "mutation": "wc-door-kitchen",
+   "ar": "دورة مياه تفتح على المطبخ",
+   "case": "C1",
+   "file": "alt-2.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «حمام الخادمة» نُقل ليفتح على «المطبخ»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 90.52,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام الخادمة» تفتح مباشرة على «المطبخ» (مطبخ)"
+   ]
+  },
+  {
+   "id": "wc-door-kitchen@C3-alt-3",
+   "mutation": "wc-door-kitchen",
+   "ar": "دورة مياه تفتح على المطبخ",
+   "case": "C3",
+   "file": "alt-3.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه الرجال» نُقل ليفتح على «المطبخ»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 95.45,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه الرجال» تفتح مباشرة على «المطبخ» (مطبخ)"
+   ]
+  },
+  {
+   "id": "wc-door-kitchen@C9-alt-4",
+   "mutation": "wc-door-kitchen",
+   "ar": "دورة مياه تفتح على المطبخ",
+   "case": "C9",
+   "file": "alt-4.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «حمام الرئيسية» نُقل ليفتح على «المطبخ»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.53,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام الرئيسية» تفتح مباشرة على «المطبخ» (مطبخ)"
+   ]
+  },
+  {
+   "id": "wc-door-majlis@C1-alt-1",
+   "mutation": "wc-door-majlis",
+   "ar": "دورة مياه تفتح على المجلس",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه الرجال» نُقل ليفتح على «مجلس الرجال»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.32,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه الرجال» تفتح مباشرة على «مجلس الرجال» (مجلس)"
+   ]
+  },
+  {
+   "id": "wc-door-majlis@C2-alt-1",
+   "mutation": "wc-door-majlis",
+   "ar": "دورة مياه تفتح على المجلس",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه الرجال» نُقل ليفتح على «المجلس»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.62,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه الرجال» تفتح مباشرة على «المجلس» (مجلس)"
+   ]
+  },
+  {
+   "id": "wc-door-majlis@C3-alt-1",
+   "mutation": "wc-door-majlis",
+   "ar": "دورة مياه تفتح على المجلس",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه الرجال» نُقل ليفتح على «مجلس الرجال»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.01,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه الرجال» تفتح مباشرة على «مجلس الرجال» (مجلس)"
+   ]
+  },
+  {
+   "id": "wc-door-dining@C1-alt-1",
+   "mutation": "wc-door-dining",
+   "ar": "دورة مياه تفتح على الطعام (خفي)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه النساء» نُقل ليفتح على «صالة الطعام»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 97.92,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه النساء» تفتح مباشرة على «صالة الطعام» (غرفة طعام)"
+   ]
+  },
+  {
+   "id": "wc-door-dining@C2-alt-1",
+   "mutation": "wc-door-dining",
+   "ar": "دورة مياه تفتح على الطعام (خفي)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه الرجال» نُقل ليفتح على «صالة الطعام»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.62,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه الرجال» تفتح مباشرة على «صالة الطعام» (غرفة طعام)"
+   ]
+  },
+  {
+   "id": "wc-door-dining@C3-alt-1",
+   "mutation": "wc-door-dining",
+   "ar": "دورة مياه تفتح على الطعام (خفي)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "WET_DOOR"
+   ],
+   "allowed": [],
+   "note": "باب «دورة مياه النساء» نُقل ليفتح على «صالة الطعام»",
+   "passed": false,
+   "fired": [
+    "WET_DOOR"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 97.6,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه النساء» تفتح مباشرة على «صالة الطعام» (غرفة طعام)"
+   ]
+  },
+  {
+   "id": "guest-through-hall@C3-alt-1",
+   "mutation": "guest-through-hall",
+   "ar": "الوصول إلى المجلس عبر صالة العائلة",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "GUEST_ROUTE"
+   ],
+   "allowed": [],
+   "note": "أبواب «مجلس الرجال» الخاصة حُذفت وصار الدخول إليه من «مدخل الجناح»",
+   "passed": false,
+   "fired": [
+    "GUEST_ROUTE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 89.45,
+   "reasons": [
+    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «مجلس الرجال» من مدخل الضيوف يمر عبر «الصالة»، «ممر الغرف»، «مدخل الجناح»"
+   ]
+  },
+  {
+   "id": "guest-through-hall@C5-alt-1",
+   "mutation": "guest-through-hall",
+   "ar": "الوصول إلى المجلس عبر صالة العائلة",
+   "case": "C5",
+   "file": "alt-1.json",
+   "expected": [
+    "GUEST_ROUTE"
+   ],
+   "allowed": [],
+   "note": "أبواب «المجلس» الخاصة حُذفت وصار الدخول إليه من «الصالة»",
+   "passed": false,
+   "fired": [
+    "GUEST_ROUTE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.46,
+   "reasons": [
+    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «المجلس» من مدخل الضيوف يمر عبر «الصالة»"
+   ]
+  },
+  {
+   "id": "guest-through-hall@C10-alt-1",
+   "mutation": "guest-through-hall",
+   "ar": "الوصول إلى المجلس عبر صالة العائلة",
+   "case": "C10",
+   "file": "alt-1.json",
+   "expected": [
+    "GUEST_ROUTE"
+   ],
+   "allowed": [],
+   "note": "أبواب «مجلس الرجال» الخاصة حُذفت وصار الدخول إليه من «مدخل الجناح»",
+   "passed": false,
+   "fired": [
+    "GUEST_ROUTE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 89.13,
+   "reasons": [
+    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «مجلس الرجال» من مدخل الضيوف يمر عبر «الصالة»، «ممر الغرف»، «مدخل الجناح»"
+   ]
+  },
+  {
+   "id": "bedroom-door-majlis@C1-alt-1",
+   "mutation": "bedroom-door-majlis",
+   "ar": "غرفة نوم تفتح على المجلس",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "BED_MAJLIS"
+   ],
+   "allowed": [],
+   "note": "باب جديد بين «غرفة نوم 3» و«مجلس الرجال»",
+   "passed": false,
+   "fired": [
+    "BED_MAJLIS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 87.55,
+   "reasons": [
+    "لا غرفة نوم تفتح على المجلس مباشرة: «غرفة نوم 3» تفتح مباشرة على «مجلس الرجال»"
+   ]
+  },
+  {
+   "id": "bedroom-door-majlis@C3-alt-1",
+   "mutation": "bedroom-door-majlis",
+   "ar": "غرفة نوم تفتح على المجلس",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "BED_MAJLIS"
+   ],
+   "allowed": [],
+   "note": "باب جديد بين «غرفة نوم 3» و«مجلس الرجال»",
+   "passed": false,
+   "fired": [
+    "BED_MAJLIS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 85.9,
+   "reasons": [
+    "لا غرفة نوم تفتح على المجلس مباشرة: «غرفة نوم 3» تفتح مباشرة على «مجلس الرجال»"
+   ]
+  },
+  {
+   "id": "bedroom-door-majlis@C10-alt-1",
+   "mutation": "bedroom-door-majlis",
+   "ar": "غرفة نوم تفتح على المجلس",
+   "case": "C10",
+   "file": "alt-1.json",
+   "expected": [
+    "BED_MAJLIS"
+   ],
+   "allowed": [],
+   "note": "باب جديد بين «غرفة نوم 2» و«مجلس الرجال»",
+   "passed": false,
+   "fired": [
+    "BED_MAJLIS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 86.47,
+   "reasons": [
+    "لا غرفة نوم تفتح على المجلس مباشرة: «غرفة نوم 2» تفتح مباشرة على «مجلس الرجال»"
+   ]
+  },
+  {
+   "id": "unreachable-room@C1-alt-1",
+   "mutation": "unreachable-room",
+   "ar": "غرفة نوم بلا باب (معزولة)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "REACH"
+   ],
+   "allowed": [],
+   "note": "حُذفت أبواب «غرفة نوم 4» (1)",
+   "passed": false,
+   "fired": [
+    "REACH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 93.66,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 4» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل"
+   ]
+  },
+  {
+   "id": "unreachable-room@C2-alt-1",
+   "mutation": "unreachable-room",
+   "ar": "غرفة نوم بلا باب (معزولة)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "REACH"
+   ],
+   "allowed": [],
+   "note": "حُذفت أبواب «غرفة كبار السن» (3)",
+   "passed": false,
+   "fired": [
+    "REACH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 89.96,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة كبار السن» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «خزانة ملابس» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «حمام غرفة كبار السن» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل"
+   ]
+  },
+  {
+   "id": "unreachable-room@C3-alt-1",
+   "mutation": "unreachable-room",
+   "ar": "غرفة نوم بلا باب (معزولة)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "REACH"
+   ],
+   "allowed": [],
+   "note": "حُذفت أبواب «غرفة نوم 3» (1)",
+   "passed": false,
+   "fired": [
+    "REACH"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.46,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 3» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل"
+   ]
+  },
+  {
+   "id": "no-front-door@C1-alt-1",
+   "mutation": "no-front-door",
+   "ar": "لا باب مدخل إلى الخارج (خفي)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "REACH"
+   ],
+   "allowed": [
+    "GUEST_ROUTE",
+    "STAIRS"
+   ],
+   "note": "حُذفت كل الأبواب الخارجية (4)",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "GUEST_ROUTE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 85.68,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: لا باب مدخل إلى الخارج في الدور الأرضي",
+    "كل الغرف يُوصل إليها من المدخل: «مجلس النساء» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «مدخل العائلة» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الصالة» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "no-front-door@C2-alt-1",
+   "mutation": "no-front-door",
+   "ar": "لا باب مدخل إلى الخارج (خفي)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "REACH"
+   ],
+   "allowed": [
+    "GUEST_ROUTE",
+    "STAIRS"
+   ],
+   "note": "حُذفت كل الأبواب الخارجية (3)",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "GUEST_ROUTE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 82.52,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: لا باب مدخل إلى الخارج في الدور الأرضي",
+    "كل الغرف يُوصل إليها من المدخل: «المجلس» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «مدخل العائلة» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الصالة» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "no-front-door@C3-alt-1",
+   "mutation": "no-front-door",
+   "ar": "لا باب مدخل إلى الخارج (خفي)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "REACH"
+   ],
+   "allowed": [
+    "GUEST_ROUTE",
+    "STAIRS"
+   ],
+   "note": "حُذفت كل الأبواب الخارجية (4)",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "GUEST_ROUTE"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 85.37,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: لا باب مدخل إلى الخارج في الدور الأرضي",
+    "كل الغرف يُوصل إليها من المدخل: «مدخل العائلة» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «مجلس النساء» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الصالة» (الدور الأرضي): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "swing-blocked@C1-alt-1",
+   "mutation": "swing-blocked",
+   "ar": "باب يصطدم فتحه بجدار أو بباب آخر",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "DOOR_SWING"
+   ],
+   "allowed": [],
+   "note": "الباب o21 يُفتح نحو الباب o19",
+   "passed": false,
+   "fired": [
+    "DOOR_SWING"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.73,
+   "reasons": [
+    "لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود: الباب o19 («ممر الغرف» ↔ «مدخل الجناح») يصطدم فتحه بـ الباب o21",
+    "لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود: الباب o21 («حمام غرفة 2» ↔ «مدخل الجناح») يصطدم فتحه بـ الباب o19"
+   ]
+  },
+  {
+   "id": "swing-blocked@C2-alt-1",
+   "mutation": "swing-blocked",
+   "ar": "باب يصطدم فتحه بجدار أو بباب آخر",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "DOOR_SWING"
+   ],
+   "allowed": [],
+   "note": "الباب o15 يُفتح نحو الباب o13",
+   "passed": false,
+   "fired": [
+    "DOOR_SWING"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 89.43,
+   "reasons": [
+    "لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود: الباب o13 («ممر الغرف» ↔ «مدخل الجناح») يصطدم فتحه بـ الباب o15",
+    "لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود: الباب o15 («مدخل الجناح» ↔ «حمام غرفة 4») يصطدم فتحه بـ الباب o13"
+   ]
+  },
+  {
+   "id": "swing-blocked@C3-alt-1",
+   "mutation": "swing-blocked",
+   "ar": "باب يصطدم فتحه بجدار أو بباب آخر",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "DOOR_SWING"
+   ],
+   "allowed": [],
+   "note": "الباب o14 يُفتح نحو الباب o12",
+   "passed": false,
+   "fired": [
+    "DOOR_SWING"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.41,
+   "reasons": [
+    "لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود: الباب o12 («مدخل الجناح» ↔ «ممر الغرف») يصطدم فتحه بـ الباب o14",
+    "لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود: الباب o14 («مدخل الجناح» ↔ «حمام غرفة 3») يصطدم فتحه بـ الباب o12"
+   ]
+  },
+  {
+   "id": "overlap-label@C1-alt-1",
+   "mutation": "overlap-label",
+   "ar": "غرفتان على فراغ واحد (تسمية غرفة النوم داخل غرفة مجاورة)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "INTEGRITY"
+   ],
+   "allowed": [
+    "PROGRAM",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "HALL_ASPECT"
+   ],
+   "note": "تسمية «غرفة نوم 4» نُقلت داخل «ممر الغرف»: فراغ واحد عليه غرفتان، والفراغ الأصلي بلا تسمية",
+   "passed": false,
+   "fired": [
+    "PROGRAM",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.5,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: غرف النوم: المطلوب 4 والمرسوم 3",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ واحد عليه 2 غرف («ممر الغرف»، «غرفة نوم 4») — غرف متراكبة",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 18.58 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "overlap-label@C2-alt-1",
+   "mutation": "overlap-label",
+   "ar": "غرفتان على فراغ واحد (تسمية غرفة النوم داخل غرفة مجاورة)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "INTEGRITY"
+   ],
+   "allowed": [
+    "PROGRAM",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "HALL_ASPECT"
+   ],
+   "note": "تسمية «غرفة كبار السن» نُقلت داخل «ممر الغرف»: فراغ واحد عليه غرفتان، والفراغ الأصلي بلا تسمية",
+   "passed": false,
+   "fired": [
+    "PROGRAM",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 90.77,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: غرف النوم: المطلوب 5 والمرسوم 4",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ واحد عليه 2 غرف («ممر الغرف»، «غرفة كبار السن») — غرف متراكبة",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 17.08 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "overlap-label@C3-alt-1",
+   "mutation": "overlap-label",
+   "ar": "غرفتان على فراغ واحد (تسمية غرفة النوم داخل غرفة مجاورة)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "INTEGRITY"
+   ],
+   "allowed": [
+    "PROGRAM",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "HALL_ASPECT"
+   ],
+   "note": "تسمية «غرفة نوم 3» نُقلت داخل «مدخل الجناح»: فراغ واحد عليه غرفتان، والفراغ الأصلي بلا تسمية",
+   "passed": false,
+   "fired": [
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.17,
+   "reasons": [
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 3» بلا نافذة على الخارج أو على فناء",
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 3» 1.18 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ واحد عليه 2 غرف («غرفة نوم 3»، «مدخل الجناح») — غرف متراكبة",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 14.37 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "overlap-walls@C1-alt-1",
+   "mutation": "overlap-walls",
+   "ar": "غرفة مرسومة فوق غرفة أخرى (جدران متقاطعة)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "INTEGRITY"
+   ],
+   "allowed": [
+    "REACH",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "PROGRAM",
+    "HALL_ASPECT",
+    "WET_DOOR",
+    "DOOR_SWING",
+    "BED_MAJLIS",
+    "GUEST_ROUTE"
+   ],
+   "note": "نسخة من جدران «غرفة نوم 4» أُزيحت 1.53 م فوق الغرفة المجاورة",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "MIN_WIDTH",
+    "INTEGRITY",
+    "DOOR_SWING"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 88.72,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «حمام غرفة 2» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 2» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 4» 1.75 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)",
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 2» 2.05 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)"
+   ]
+  },
+  {
+   "id": "overlap-walls@C2-alt-1",
+   "mutation": "overlap-walls",
+   "ar": "غرفة مرسومة فوق غرفة أخرى (جدران متقاطعة)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "INTEGRITY"
+   ],
+   "allowed": [
+    "REACH",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "PROGRAM",
+    "HALL_ASPECT",
+    "WET_DOOR",
+    "DOOR_SWING",
+    "BED_MAJLIS",
+    "GUEST_ROUTE"
+   ],
+   "note": "نسخة من جدران «غرفة كبار السن» أُزيحت 1.44 م فوق الغرفة المجاورة",
+   "passed": false,
+   "fired": [
+    "MIN_WIDTH",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 88.93,
+   "reasons": [
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة كبار السن» 1.64 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)",
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «حمام غرفة كبار السن» 1.32 م أقل من 1.4 م (قيمة تصميمية غير متحققة نظاميًا)",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 7.11 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "overlap-walls@C3-alt-1",
+   "mutation": "overlap-walls",
+   "ar": "غرفة مرسومة فوق غرفة أخرى (جدران متقاطعة)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "INTEGRITY"
+   ],
+   "allowed": [
+    "REACH",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "PROGRAM",
+    "HALL_ASPECT",
+    "WET_DOOR",
+    "DOOR_SWING",
+    "BED_MAJLIS",
+    "GUEST_ROUTE"
+   ],
+   "note": "نسخة من جدران «غرفة نوم 3» أُزيحت 1.665 م فوق الغرفة المجاورة",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "MIN_WIDTH",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 90.98,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 3» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 3» 1.91 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)",
+    "أدنى عرض صافٍ لكل نوع غرفة: عرض «غرفة نوم 2» 1.91 م أقل من 2.1 م (قيمة تصميمية غير متحققة نظاميًا)",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 6.2 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "setback-front@C1-alt-1",
+   "mutation": "setback-front",
+   "ar": "المبنى يتجاوز خط الارتداد الأمامي",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "PLOT"
+   ],
+   "allowed": [],
+   "note": "المبنى أُزيح 0.93 م نحو الشارع فتجاوز الارتداد الأمامي (3 م) بنحو 0.8 م",
+   "passed": false,
+   "fired": [
+    "PLOT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.32,
+   "reasons": [
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w1 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w3 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w6 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w9 يتجاوز خط الارتداد بـ 0.8 م"
+   ]
+  },
+  {
+   "id": "setback-front@C2-alt-1",
+   "mutation": "setback-front",
+   "ar": "المبنى يتجاوز خط الارتداد الأمامي",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "PLOT"
+   ],
+   "allowed": [],
+   "note": "المبنى أُزيح 0.93 م نحو الشارع فتجاوز الارتداد الأمامي (3 م) بنحو 0.8 م",
+   "passed": false,
+   "fired": [
+    "PLOT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 91.03,
+   "reasons": [
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w1 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w3 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w5 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w6 يتجاوز خط الارتداد بـ 0.8 م"
+   ]
+  },
+  {
+   "id": "setback-front@C3-alt-1",
+   "mutation": "setback-front",
+   "ar": "المبنى يتجاوز خط الارتداد الأمامي",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "PLOT"
+   ],
+   "allowed": [],
+   "note": "المبنى أُزيح 0.93 م نحو الشارع فتجاوز الارتداد الأمامي (3 م) بنحو 0.8 م",
+   "passed": false,
+   "fired": [
+    "PLOT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.01,
+   "reasons": [
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w1 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w3 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w6 يتجاوز خط الارتداد بـ 0.8 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w8 يتجاوز خط الارتداد بـ 0.8 م"
+   ]
+  },
+  {
+   "id": "setback-side@C1-alt-1",
+   "mutation": "setback-side",
+   "ar": "جدار جانبي خارج خط الارتداد الجانبي",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "PLOT"
+   ],
+   "allowed": [],
+   "note": "المبنى أُزيح 1.17 م شرقًا فتجاوز الارتداد الجانبي (1.5 م) بنحو متر",
+   "passed": false,
+   "fired": [
+    "PLOT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.32,
+   "reasons": [
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w10 يتجاوز خط الارتداد بـ 0.88 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w14 يتجاوز خط الارتداد بـ 1 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w17 يتجاوز خط الارتداد بـ 1 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w18 يتجاوز خط الارتداد بـ 1 م"
+   ]
+  },
+  {
+   "id": "setback-side@C2-alt-1",
+   "mutation": "setback-side",
+   "ar": "جدار جانبي خارج خط الارتداد الجانبي",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "PLOT"
+   ],
+   "allowed": [],
+   "note": "المبنى أُزيح 2.37 م شرقًا فتجاوز الارتداد الجانبي (1.5 م) بنحو متر",
+   "passed": false,
+   "fired": [
+    "PLOT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 91.03,
+   "reasons": [
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w8 يتجاوز خط الارتداد بـ 0.88 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w12 يتجاوز خط الارتداد بـ 1 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w15 يتجاوز خط الارتداد بـ 1 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w20 يتجاوز خط الارتداد بـ 1 م"
+   ]
+  },
+  {
+   "id": "setback-side@C3-alt-1",
+   "mutation": "setback-side",
+   "ar": "جدار جانبي خارج خط الارتداد الجانبي",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "PLOT"
+   ],
+   "allowed": [],
+   "note": "المبنى أُزيح 2.72 م شرقًا فتجاوز الارتداد الجانبي (3 م) بنحو متر",
+   "passed": false,
+   "fired": [
+    "PLOT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.01,
+   "reasons": [
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w6 يتجاوز خط الارتداد بـ 0.88 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w12 يتجاوز خط الارتداد بـ 1 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w17 يتجاوز خط الارتداد بـ 1 م",
+    "المبنى داخل الأرض وخطوط الارتداد: الجدار w18 يتجاوز خط الارتداد بـ 1 م"
+   ]
+  },
+  {
+   "id": "delete-requested-bedroom@C1-alt-1",
+   "mutation": "delete-requested-bedroom",
+   "ar": "حذف غرفة نوم طلبها العميل (تحويلها مخزنًا)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "PROGRAM"
+   ],
+   "allowed": [],
+   "note": "«غرفة نوم 4» حُذفت من البرنامج (صارت مخزنًا)",
+   "passed": false,
+   "fired": [
+    "PROGRAM"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.65,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: غرف النوم: المطلوب 4 والمرسوم 3"
+   ]
+  },
+  {
+   "id": "delete-requested-bedroom@C2-alt-1",
+   "mutation": "delete-requested-bedroom",
+   "ar": "حذف غرفة نوم طلبها العميل (تحويلها مخزنًا)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "PROGRAM"
+   ],
+   "allowed": [],
+   "note": "«غرفة كبار السن» حُذفت من البرنامج (صارت مخزنًا)",
+   "passed": false,
+   "fired": [
+    "PROGRAM"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 92.06,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: غرف النوم: المطلوب 5 والمرسوم 4"
+   ]
+  },
+  {
+   "id": "delete-requested-bedroom@C3-alt-1",
+   "mutation": "delete-requested-bedroom",
+   "ar": "حذف غرفة نوم طلبها العميل (تحويلها مخزنًا)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "PROGRAM"
+   ],
+   "allowed": [],
+   "note": "«غرفة نوم 3» حُذفت من البرنامج (صارت مخزنًا)",
+   "passed": false,
+   "fired": [
+    "PROGRAM"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 97.38,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: غرف النوم: المطلوب 3 والمرسوم 2"
+   ]
+  },
+  {
+   "id": "delete-requested-majlis@C1-alt-1",
+   "mutation": "delete-requested-majlis",
+   "ar": "حذف المجلس المطلوب (إزالة تسميته)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "PROGRAM"
+   ],
+   "allowed": [
+    "INTEGRITY"
+   ],
+   "note": "تسمية «مجلس النساء» حُذفت: المجلس المطلوب لم يعد في الرسم",
+   "passed": false,
+   "fired": [
+    "PROGRAM",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 97.21,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: المجالس: المطلوب 2 والمرسوم 1",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 24.57 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "delete-requested-majlis@C2-alt-1",
+   "mutation": "delete-requested-majlis",
+   "ar": "حذف المجلس المطلوب (إزالة تسميته)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "PROGRAM"
+   ],
+   "allowed": [
+    "INTEGRITY"
+   ],
+   "note": "تسمية «المجلس» حُذفت: المجلس المطلوب لم يعد في الرسم",
+   "passed": false,
+   "fired": [
+    "PROGRAM",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 89.16,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: المجالس: المطلوب 1 والمرسوم 0",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 27.91 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "delete-requested-majlis@C3-alt-1",
+   "mutation": "delete-requested-majlis",
+   "ar": "حذف المجلس المطلوب (إزالة تسميته)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "PROGRAM"
+   ],
+   "allowed": [
+    "INTEGRITY"
+   ],
+   "note": "تسمية «مجلس النساء» حُذفت: المجلس المطلوب لم يعد في الرسم",
+   "passed": false,
+   "fired": [
+    "PROGRAM",
+    "INTEGRITY"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.76,
+   "reasons": [
+    "أعداد الغرف المطلوبة موجودة فعلًا في الرسم: المجالس: المطلوب 2 والمرسوم 1",
+    "كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة): الدور الأرضي: فراغ مغلق 23.88 م² بلا تسمية (غرفة مرسومة فوق أخرى أو جدار زائد)"
+   ]
+  },
+  {
+   "id": "kitchen-front@C1-alt-1",
+   "mutation": "kitchen-front",
+   "ar": "المطبخ في النصف الأمامي والطلب يقول «المطبخ في الخلف»",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "PLACEMENT"
+   ],
+   "allowed": [
+    "WET_DOOR",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "GUEST_ROUTE",
+    "BED_MAJLIS"
+   ],
+   "note": "المطبخ بودّل مع «غرفة نوم 3» فصار في الواجهة (عمق 0.332)",
+   "passed": false,
+   "fired": [
+    "PLACEMENT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.1,
+   "reasons": [
+    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «المطبخ» في الخلف: «المطبخ» على عمق 33.21٪ من الواجهة (المطلوب ≥ 50٪)"
+   ]
+  },
+  {
+   "id": "kitchen-front@C6-alt-1",
+   "mutation": "kitchen-front",
+   "ar": "المطبخ في النصف الأمامي والطلب يقول «المطبخ في الخلف»",
+   "case": "C6",
+   "file": "alt-1.json",
+   "expected": [
+    "PLACEMENT"
+   ],
+   "allowed": [
+    "WET_DOOR",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "GUEST_ROUTE",
+    "BED_MAJLIS"
+   ],
+   "note": "المطبخ بودّل مع «غرفة نوم 2» فصار في الواجهة (عمق 0.114)",
+   "passed": false,
+   "fired": [
+    "WET_DOOR",
+    "PLACEMENT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 91.62,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام غرفة 2» تفتح مباشرة على «المطبخ» (مطبخ)",
+    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «المطبخ» في الخلف: «المطبخ» على عمق 11.41٪ من الواجهة (المطلوب ≥ 50٪)"
+   ]
+  },
+  {
+   "id": "kitchen-front@C1-alt-2",
+   "mutation": "kitchen-front",
+   "ar": "المطبخ في النصف الأمامي والطلب يقول «المطبخ في الخلف»",
+   "case": "C1",
+   "file": "alt-2.json",
+   "expected": [
+    "PLACEMENT"
+   ],
+   "allowed": [
+    "WET_DOOR",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "GUEST_ROUTE",
+    "BED_MAJLIS"
+   ],
+   "note": "المطبخ بودّل مع «غرفة نوم 2» فصار في الواجهة (عمق 0.086)",
+   "passed": false,
+   "fired": [
+    "WET_DOOR",
+    "PLACEMENT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 90.17,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام غرفة 2» تفتح مباشرة على «المطبخ» (مطبخ)",
+    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «المطبخ» في الخلف: «المطبخ» على عمق 8.6٪ من الواجهة (المطلوب ≥ 50٪)"
+   ]
+  },
+  {
+   "id": "bedrooms-front@C4-alt-1",
+   "mutation": "bedrooms-front",
+   "ar": "غرف النوم في النصف الأمامي والطلب يقول «الغرف في الخلف»",
+   "case": "C4",
+   "file": "alt-1.json",
+   "expected": [
+    "PLACEMENT"
+   ],
+   "allowed": [
+    "WET_DOOR",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "GUEST_ROUTE",
+    "BED_MAJLIS",
+    "HALL_ASPECT"
+   ],
+   "note": "3 غرف نوم بودّلت مع فراغات النهار الأمامية فصار النوم في الواجهة",
+   "passed": false,
+   "fired": [
+    "WET_DOOR",
+    "GUEST_ROUTE",
+    "PLACEMENT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 82.82,
+   "reasons": [
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام غرفة 3» تفتح مباشرة على «صالة الطعام» (غرفة طعام)",
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام الرئيسية» تفتح مباشرة على «المجلس» (مجلس)",
+    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «المجلس» من مدخل الضيوف يمر عبر «مدخل العائلة»، «غرفة نوم 2»، «ممر الغرف»",
+    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «غرف النوم» في الخلف: «غرفة نوم 2»، «غرفة نوم 3»، «غرفة النوم الرئيسية» على عمق 28.55٪ من الواجهة (المطلوب ≥ 50٪)"
+   ]
+  },
+  {
+   "id": "bedrooms-front@C4-alt-2",
+   "mutation": "bedrooms-front",
+   "ar": "غرف النوم في النصف الأمامي والطلب يقول «الغرف في الخلف»",
+   "case": "C4",
+   "file": "alt-2.json",
+   "expected": [
+    "PLACEMENT"
+   ],
+   "allowed": [
+    "WET_DOOR",
+    "DAYLIGHT",
+    "MIN_WIDTH",
+    "GUEST_ROUTE",
+    "BED_MAJLIS",
+    "HALL_ASPECT"
+   ],
+   "note": "3 غرف نوم بودّلت مع فراغات النهار الأمامية فصار النوم في الواجهة",
+   "passed": false,
+   "fired": [
+    "GUEST_ROUTE",
+    "PLACEMENT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 84.49,
+   "reasons": [
+    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «المجلس» من مدخل الضيوف يمر عبر «مدخل العائلة»، «غرفة النوم الرئيسية»، «ممر الغرف»",
+    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «غرف النوم» في الخلف: «غرفة النوم الرئيسية»، «غرفة نوم 3»، «غرفة نوم 2» على عمق 21.19٪ من الواجهة (المطلوب ≥ 50٪)"
+   ]
+  },
+  {
+   "id": "stairs-room-closed@C7-alt-1",
+   "mutation": "stairs-room-closed",
+   "ar": "غرفة السلم بلا باب (السلم معزول)",
+   "case": "C7",
+   "file": "alt-1.json",
+   "expected": [
+    "STAIRS"
+   ],
+   "allowed": [
+    "REACH"
+   ],
+   "note": "حُذفت أبواب «الدرج» التي فيها السلم",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "STAIRS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 91.6,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «صالة الطعام» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «الصالة» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «المطبخ» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل"
+   ]
+  },
+  {
+   "id": "stairs-room-closed@C7-alt-2",
+   "mutation": "stairs-room-closed",
+   "ar": "غرفة السلم بلا باب (السلم معزول)",
+   "case": "C7",
+   "file": "alt-2.json",
+   "expected": [
+    "STAIRS"
+   ],
+   "allowed": [
+    "REACH"
+   ],
+   "note": "حُذفت أبواب «الدرج» التي فيها السلم",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "STAIRS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 94.4,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «صالة الطعام» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «الصالة» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
+    "كل الغرف يُوصل إليها من المدخل: «المطبخ» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل"
+   ]
+  },
+  {
+   "id": "stairs-deleted@C7-alt-1",
+   "mutation": "stairs-deleted",
+   "ar": "دوران بلا سلم في الأرضي",
+   "case": "C7",
+   "file": "alt-1.json",
+   "expected": [
+    "STAIRS"
+   ],
+   "allowed": [
+    "REACH"
+   ],
+   "note": "حُذف السلم من الدور الأرضي والدور الأول باقٍ",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "STAIRS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 93.73,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «ممر الغرف» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «حمام غرفة 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "stairs-deleted@C7-alt-2",
+   "mutation": "stairs-deleted",
+   "ar": "دوران بلا سلم في الأرضي",
+   "case": "C7",
+   "file": "alt-2.json",
+   "expected": [
+    "STAIRS"
+   ],
+   "allowed": [
+    "REACH"
+   ],
+   "note": "حُذف السلم من الدور الأرضي والدور الأول باقٍ",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "STAIRS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.53,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «ممر الغرف» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «حمام غرفة 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "stairs-moved-out@C7-alt-1",
+   "mutation": "stairs-moved-out",
+   "ar": "السلم خارج المبنى (لا فراغ مغلق حوله)",
+   "case": "C7",
+   "file": "alt-1.json",
+   "expected": [
+    "STAIRS"
+   ],
+   "allowed": [
+    "REACH"
+   ],
+   "note": "السلم نُقل خارج جدران المبنى",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "STAIRS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 93.73,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «ممر الغرف» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «حمام غرفة 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "stairs-moved-out@C7-alt-2",
+   "mutation": "stairs-moved-out",
+   "ar": "السلم خارج المبنى (لا فراغ مغلق حوله)",
+   "case": "C7",
+   "file": "alt-2.json",
+   "expected": [
+    "STAIRS"
+   ],
+   "allowed": [
+    "REACH"
+   ],
+   "note": "السلم نُقل خارج جدران المبنى",
+   "passed": false,
+   "fired": [
+    "REACH",
+    "STAIRS"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.53,
+   "reasons": [
+    "كل الغرف يُوصل إليها من المدخل: «غرفة نوم 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «ممر الغرف» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
+    "كل الغرف يُوصل إليها من المدخل: «حمام غرفة 3» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور"
+   ]
+  },
+  {
+   "id": "mirror-pair@C1-alt-1",
+   "mutation": "mirror-pair",
+   "ar": "بديل معكوس مطابق لبديل آخر",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "DISTINCT"
+   ],
+   "allowed": [],
+   "note": "البديل نفسه معكوسًا يمينًا ويسارًا مع تبديل اسمي غرفتين",
+   "passed": false,
+   "fired": [
+    "DISTINCT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.32,
+   "reasons": [
+    "البديل مختلف معماريًا عن البدائل الأعلى منه (لا نسخة معكوسة أو شكلية): تنظيمه نسخة شكلية من «تصميم أولي من شرعاء» (الاختلاف المعماري 0 < 0.18: تجاور 0، حركة 0، نطاقات 0)"
+   ]
+  },
+  {
+   "id": "mirror-pair@C2-alt-1",
+   "mutation": "mirror-pair",
+   "ar": "بديل معكوس مطابق لبديل آخر",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "DISTINCT"
+   ],
+   "allowed": [],
+   "note": "البديل نفسه معكوسًا يمينًا ويسارًا مع تبديل اسمي غرفتين",
+   "passed": false,
+   "fired": [
+    "DISTINCT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 91.03,
+   "reasons": [
+    "البديل مختلف معماريًا عن البدائل الأعلى منه (لا نسخة معكوسة أو شكلية): تنظيمه نسخة شكلية من «C2/alt-1 — بديل معكوس مطابق لبديل آخر» (الاختلاف المعماري 0 < 0.18: تجاور 0، حركة 0، نطاقات 0)"
+   ]
+  },
+  {
+   "id": "mirror-pair@C3-alt-1",
+   "mutation": "mirror-pair",
+   "ar": "بديل معكوس مطابق لبديل آخر",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "DISTINCT"
+   ],
+   "allowed": [],
+   "note": "البديل نفسه معكوسًا يمينًا ويسارًا مع تبديل اسمي غرفتين",
+   "passed": false,
+   "fired": [
+    "DISTINCT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.01,
+   "reasons": [
+    "البديل مختلف معماريًا عن البدائل الأعلى منه (لا نسخة معكوسة أو شكلية): تنظيمه نسخة شكلية من «تصميم أولي من شرعاء» (الاختلاف المعماري 0 < 0.18: تجاور 0، حركة 0، نطاقات 0)"
+   ]
+  },
+  {
+   "id": "mirror-nudged-pair@C1-alt-1",
+   "mutation": "mirror-nudged-pair",
+   "ar": "بديل معكوس مع إزاحة جدار داخلي 0.3 م (خفي)",
+   "case": "C1",
+   "file": "alt-1.json",
+   "expected": [
+    "DISTINCT"
+   ],
+   "allowed": [],
+   "note": "البديل نفسه معكوسًا مع تقصير غرفة نوم 0.3 م",
+   "passed": false,
+   "fired": [
+    "DISTINCT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.32,
+   "reasons": [
+    "البديل مختلف معماريًا عن البدائل الأعلى منه (لا نسخة معكوسة أو شكلية): تنظيمه نسخة شكلية من «C1/alt-1 — بديل معكوس مع إزاحة جدار داخلي 0.3 م (خفي)» (الاختلاف المعماري 0.001 < 0.18: تجاور 0، حركة 0، نطاقات 0.002)"
+   ]
+  },
+  {
+   "id": "mirror-nudged-pair@C2-alt-1",
+   "mutation": "mirror-nudged-pair",
+   "ar": "بديل معكوس مع إزاحة جدار داخلي 0.3 م (خفي)",
+   "case": "C2",
+   "file": "alt-1.json",
+   "expected": [
+    "DISTINCT"
+   ],
+   "allowed": [],
+   "note": "البديل نفسه معكوسًا مع تقصير غرفة نوم 0.3 م",
+   "passed": false,
+   "fired": [
+    "DISTINCT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 90.94,
+   "reasons": [
+    "البديل مختلف معماريًا عن البدائل الأعلى منه (لا نسخة معكوسة أو شكلية): تنظيمه نسخة شكلية من «تصميم أولي من شرعاء» (الاختلاف المعماري 0.002 < 0.18: تجاور 0، حركة 0، نطاقات 0.003)"
+   ]
+  },
+  {
+   "id": "mirror-nudged-pair@C3-alt-1",
+   "mutation": "mirror-nudged-pair",
+   "ar": "بديل معكوس مع إزاحة جدار داخلي 0.3 م (خفي)",
+   "case": "C3",
+   "file": "alt-1.json",
+   "expected": [
+    "DISTINCT"
+   ],
+   "allowed": [],
+   "note": "البديل نفسه معكوسًا مع تقصير غرفة نوم 0.3 م",
+   "passed": false,
+   "fired": [
+    "DISTINCT"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [],
+   "score": 96.01,
+   "reasons": [
+    "البديل مختلف معماريًا عن البدائل الأعلى منه (لا نسخة معكوسة أو شكلية): تنظيمه نسخة شكلية من «تصميم أولي من شرعاء» (الاختلاف المعماري 0.002 < 0.18: تجاور 0، حركة 0، نطاقات 0.003)"
+   ]
+  }
+ ],
+ "clean": [
+  {
+   "id": "C1/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 96.32
+  },
+  {
+   "id": "C1/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 90.52
+  },
+  {
+   "id": "C1/alt-3.json",
+   "passed": true,
+   "fired": [],
+   "score": 95.54
+  },
+  {
+   "id": "C2/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 91.03
+  },
+  {
+   "id": "C2/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 91.61
+  },
+  {
+   "id": "C3/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 96.01
+  },
+  {
+   "id": "C3/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 95.23
+  },
+  {
+   "id": "C3/alt-3.json",
+   "passed": true,
+   "fired": [],
+   "score": 93.85
+  },
+  {
+   "id": "C3/alt-4.json",
+   "passed": true,
+   "fired": [],
+   "score": 90.71
+  },
+  {
+   "id": "C4/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 99.89
+  },
+  {
+   "id": "C4/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 94.84
+  },
+  {
+   "id": "C5/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 99.25
+  },
+  {
+   "id": "C5/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 98.34
+  },
+  {
+   "id": "C5/alt-3.json",
+   "passed": true,
+   "fired": [],
+   "score": 95.97
+  },
+  {
+   "id": "C6/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 91.11
+  },
+  {
+   "id": "C6/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 93.68
+  },
+  {
+   "id": "C7/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 93.73
+  },
+  {
+   "id": "C7/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 96.53
+  },
+  {
+   "id": "C8/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 96.34
+  },
+  {
+   "id": "C8/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 96.12
+  },
+  {
+   "id": "C8/alt-3.json",
+   "passed": true,
+   "fired": [],
+   "score": 97.48
+  },
+  {
+   "id": "C8/alt-4.json",
+   "passed": true,
+   "fired": [],
+   "score": 93.61
+  },
+  {
+   "id": "C9/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 97.9
+  },
+  {
+   "id": "C9/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 97.7
+  },
+  {
+   "id": "C9/alt-3.json",
+   "passed": true,
+   "fired": [],
+   "score": 91.62
+  },
+  {
+   "id": "C9/alt-4.json",
+   "passed": true,
+   "fired": [],
+   "score": 94.13
+  },
+  {
+   "id": "C10/alt-1.json",
+   "passed": true,
+   "fired": [],
+   "score": 95.24
+  },
+  {
+   "id": "C10/alt-2.json",
+   "passed": true,
+   "fired": [],
+   "score": 96.58
+  },
+  {
+   "id": "C10/alt-3.json",
+   "passed": true,
+   "fired": [],
+   "score": 90.52
+  },
+  {
+   "id": "C10/alt-4.json",
+   "passed": true,
+   "fired": [],
+   "score": 91.66
+  },
+  {
+   "id": "C10/alt-5.json",
+   "passed": true,
+   "fired": [],
+   "score": 94.23
+  }
+ ],
+ "cleanSets": [
+  {
+   "case": "C1",
+   "rejectedAsDuplicate": [
+    "alt-3.json"
+   ]
+  },
+  {
+   "case": "C2",
+   "rejectedAsDuplicate": [
+    "alt-1.json"
+   ]
+  },
+  {
+   "case": "C3",
+   "rejectedAsDuplicate": []
+  },
+  {
+   "case": "C4",
+   "rejectedAsDuplicate": []
+  },
+  {
+   "case": "C5",
+   "rejectedAsDuplicate": []
+  },
+  {
+   "case": "C6",
+   "rejectedAsDuplicate": [
+    "alt-1.json"
+   ]
+  },
+  {
+   "case": "C7",
+   "rejectedAsDuplicate": [
+    "alt-1.json"
+   ]
+  },
+  {
+   "case": "C8",
+   "rejectedAsDuplicate": [
+    "alt-4.json"
+   ]
+  },
+  {
+   "case": "C9",
+   "rejectedAsDuplicate": []
+  },
+  {
+   "case": "C10",
+   "rejectedAsDuplicate": []
+  }
+ ],
+ "summary": {
+  "n": 77,
+  "detected": 77,
+  "rejected": 77,
+  "cleanN": 31,
+  "cleanPassed": 31,
+  "perType": [
+   {
+    "mutation": "no-window-bedroom",
+    "ar": "حذف نوافذ غرفة نوم (بلا نافذة خارجية)",
+    "expected": [
+     "DAYLIGHT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 92.14,
+    "fired": {
+     "DAYLIGHT": 3
+    }
+   },
+   {
+    "mutation": "window-interior-only",
+    "ar": "نافذة غرفة النوم على ممر داخلي لا على الخارج (خفي)",
+    "expected": [
+     "DAYLIGHT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 91.19,
+    "fired": {
+     "DAYLIGHT": 3
+    }
+   },
+   {
+    "mutation": "window-too-small",
+    "ar": "نافذة غرفة النوم صغيرة جدًا (0.5×0.5 م) (خفي)",
+    "expected": [
+     "WINDOW_SIZE"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 92.31,
+    "fired": {
+     "WINDOW_SIZE": 3
+    }
+   },
+   {
+    "mutation": "hall-strip",
+    "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
+    "expected": [
+     "HALL_ASPECT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 83.14,
+    "fired": {
+     "HALL_ASPECT": 3
+    }
+   },
+   {
+    "mutation": "bedroom-narrow",
+    "ar": "غرفة نوم أضيق من الحد الأدنى (1.9 م)",
+    "expected": [
+     "MIN_WIDTH"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 93.34,
+    "fired": {
+     "MIN_WIDTH": 3
+    }
+   },
+   {
+    "mutation": "corridor-075",
+    "ar": "ممر بعرض 0.75 م (خفي)",
+    "expected": [
+     "MIN_WIDTH"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.84,
+    "fired": {
+     "MIN_WIDTH": 3
+    }
+   },
+   {
+    "mutation": "wc-door-kitchen",
+    "ar": "دورة مياه تفتح على المطبخ",
+    "expected": [
+     "WET_DOOR"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 92.83,
+    "fired": {
+     "WET_DOOR": 3
+    }
+   },
+   {
+    "mutation": "wc-door-majlis",
+    "ar": "دورة مياه تفتح على المجلس",
+    "expected": [
+     "WET_DOOR"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.98,
+    "fired": {
+     "WET_DOOR": 3
+    }
+   },
+   {
+    "mutation": "wc-door-dining",
+    "ar": "دورة مياه تفتح على الطعام (خفي)",
+    "expected": [
+     "WET_DOOR"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 96.05,
+    "fired": {
+     "WET_DOOR": 3
+    }
+   },
+   {
+    "mutation": "guest-through-hall",
+    "ar": "الوصول إلى المجلس عبر صالة العائلة",
+    "expected": [
+     "GUEST_ROUTE"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 91.01,
+    "fired": {
+     "GUEST_ROUTE": 3
+    }
+   },
+   {
+    "mutation": "bedroom-door-majlis",
+    "ar": "غرفة نوم تفتح على المجلس",
+    "expected": [
+     "BED_MAJLIS"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 86.64,
+    "fired": {
+     "BED_MAJLIS": 3
+    }
+   },
+   {
+    "mutation": "unreachable-room",
+    "ar": "غرفة نوم بلا باب (معزولة)",
+    "expected": [
+     "REACH"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 92.03,
+    "fired": {
+     "REACH": 3
+    }
+   },
+   {
+    "mutation": "no-front-door",
+    "ar": "لا باب مدخل إلى الخارج (خفي)",
+    "expected": [
+     "REACH"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 84.52,
+    "fired": {
+     "GUEST_ROUTE": 3,
+     "REACH": 3
+    }
+   },
+   {
+    "mutation": "swing-blocked",
+    "ar": "باب يصطدم فتحه بجدار أو بباب آخر",
+    "expected": [
+     "DOOR_SWING"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 92.86,
+    "fired": {
+     "DOOR_SWING": 3
+    }
+   },
+   {
+    "mutation": "overlap-label",
+    "ar": "غرفتان على فراغ واحد (تسمية غرفة النوم داخل غرفة مجاورة)",
+    "expected": [
+     "INTEGRITY"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 93.15,
+    "fired": {
+     "DAYLIGHT": 1,
+     "MIN_WIDTH": 1,
+     "INTEGRITY": 3,
+     "PROGRAM": 2
+    }
+   },
+   {
+    "mutation": "overlap-walls",
+    "ar": "غرفة مرسومة فوق غرفة أخرى (جدران متقاطعة)",
+    "expected": [
+     "INTEGRITY"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 89.54,
+    "fired": {
+     "MIN_WIDTH": 3,
+     "REACH": 2,
+     "DOOR_SWING": 1,
+     "INTEGRITY": 3
+    }
+   },
+   {
+    "mutation": "setback-front",
+    "ar": "المبنى يتجاوز خط الارتداد الأمامي",
+    "expected": [
+     "PLOT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.45,
+    "fired": {
+     "PLOT": 3
+    }
+   },
+   {
+    "mutation": "setback-side",
+    "ar": "جدار جانبي خارج خط الارتداد الجانبي",
+    "expected": [
+     "PLOT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.45,
+    "fired": {
+     "PLOT": 3
+    }
+   },
+   {
+    "mutation": "delete-requested-bedroom",
+    "ar": "حذف غرفة نوم طلبها العميل (تحويلها مخزنًا)",
+    "expected": [
+     "PROGRAM"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 95.36,
+    "fired": {
+     "PROGRAM": 3
+    }
+   },
+   {
+    "mutation": "delete-requested-majlis",
+    "ar": "حذف المجلس المطلوب (إزالة تسميته)",
+    "expected": [
+     "PROGRAM"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.38,
+    "fired": {
+     "INTEGRITY": 3,
+     "PROGRAM": 3
+    }
+   },
+   {
+    "mutation": "kitchen-front",
+    "ar": "المطبخ في النصف الأمامي والطلب يقول «المطبخ في الخلف»",
+    "expected": [
+     "PLACEMENT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 92.63,
+    "fired": {
+     "WET_DOOR": 2,
+     "PLACEMENT": 3
+    }
+   },
+   {
+    "mutation": "bedrooms-front",
+    "ar": "غرف النوم في النصف الأمامي والطلب يقول «الغرف في الخلف»",
+    "expected": [
+     "PLACEMENT"
+    ],
+    "n": 2,
+    "detected": 2,
+    "rejected": 2,
+    "meanScore": 83.66,
+    "fired": {
+     "WET_DOOR": 1,
+     "GUEST_ROUTE": 2,
+     "PLACEMENT": 2
+    }
+   },
+   {
+    "mutation": "stairs-room-closed",
+    "ar": "غرفة السلم بلا باب (السلم معزول)",
+    "expected": [
+     "STAIRS"
+    ],
+    "n": 2,
+    "detected": 2,
+    "rejected": 2,
+    "meanScore": 93,
+    "fired": {
+     "REACH": 2,
+     "STAIRS": 2
+    }
+   },
+   {
+    "mutation": "stairs-deleted",
+    "ar": "دوران بلا سلم في الأرضي",
+    "expected": [
+     "STAIRS"
+    ],
+    "n": 2,
+    "detected": 2,
+    "rejected": 2,
+    "meanScore": 95.13,
+    "fired": {
+     "REACH": 2,
+     "STAIRS": 2
+    }
+   },
+   {
+    "mutation": "stairs-moved-out",
+    "ar": "السلم خارج المبنى (لا فراغ مغلق حوله)",
+    "expected": [
+     "STAIRS"
+    ],
+    "n": 2,
+    "detected": 2,
+    "rejected": 2,
+    "meanScore": 95.13,
+    "fired": {
+     "REACH": 2,
+     "STAIRS": 2
+    }
+   },
+   {
+    "mutation": "mirror-pair",
+    "ar": "بديل معكوس مطابق لبديل آخر",
+    "expected": [
+     "DISTINCT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.45,
+    "fired": {
+     "DISTINCT": 3
+    }
+   },
+   {
+    "mutation": "mirror-nudged-pair",
+    "ar": "بديل معكوس مع إزاحة جدار داخلي 0.3 م (خفي)",
+    "expected": [
+     "DISTINCT"
+    ],
+    "n": 3,
+    "detected": 3,
+    "rejected": 3,
+    "meanScore": 94.42,
+    "fired": {
+     "DISTINCT": 3
+    }
+   }
+  ],
+  "gates": [
+   "DAYLIGHT",
+   "WINDOW_SIZE",
+   "HALL_ASPECT",
+   "MIN_WIDTH",
+   "WET_DOOR",
+   "GUEST_ROUTE",
+   "BED_MAJLIS",
+   "REACH",
+   "DOOR_SWING",
+   "INTEGRITY",
+   "PROGRAM",
+   "PLOT",
+   "PLACEMENT",
+   "STAIRS",
+   "DISTINCT"
+  ],
+  "confusion": {
+   "no-window-bedroom": {
+    "DAYLIGHT": 3,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "window-interior-only": {
+    "DAYLIGHT": 3,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "window-too-small": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 3,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "hall-strip": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 3,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "bedroom-narrow": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 3,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "corridor-075": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 3,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "wc-door-kitchen": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 3,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "wc-door-majlis": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 3,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "wc-door-dining": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 3,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "guest-through-hall": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 3,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "bedroom-door-majlis": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 3,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "unreachable-room": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 3,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "no-front-door": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 3,
+    "BED_MAJLIS": 0,
+    "REACH": 3,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "swing-blocked": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 3,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "overlap-label": {
+    "DAYLIGHT": 1,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 1,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 3,
+    "PROGRAM": 2,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "overlap-walls": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 3,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 2,
+    "DOOR_SWING": 1,
+    "INTEGRITY": 3,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "setback-front": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 3,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "setback-side": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 3,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "delete-requested-bedroom": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 3,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "delete-requested-majlis": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 3,
+    "PROGRAM": 3,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "kitchen-front": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 2,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 3,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "bedrooms-front": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 1,
+    "GUEST_ROUTE": 2,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 2,
+    "STAIRS": 0,
+    "DISTINCT": 0
+   },
+   "stairs-room-closed": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 2,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 2,
+    "DISTINCT": 0
+   },
+   "stairs-deleted": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 2,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 2,
+    "DISTINCT": 0
+   },
+   "stairs-moved-out": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 2,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 2,
+    "DISTINCT": 0
+   },
+   "mirror-pair": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 3
+   },
+   "mirror-nudged-pair": {
+    "DAYLIGHT": 0,
+    "WINDOW_SIZE": 0,
+    "HALL_ASPECT": 0,
+    "MIN_WIDTH": 0,
+    "WET_DOOR": 0,
+    "GUEST_ROUTE": 0,
+    "BED_MAJLIS": 0,
+    "REACH": 0,
+    "DOOR_SWING": 0,
+    "INTEGRITY": 0,
+    "PROGRAM": 0,
+    "PLOT": 0,
+    "PLACEMENT": 0,
+    "STAIRS": 0,
+    "DISTINCT": 3
+   }
+  },
+  "scores": {
+   "defective": {
+    "mean": 92.16,
+    "min": 82.52,
+    "p50": 92.62,
+    "max": 97.92
+   },
+   "clean": {
+    "mean": 94.75,
+    "min": 90.52,
+    "p50": 95.23,
+    "max": 99.89
+   },
+   "defectivePassed": [],
+   "defectiveAboveCleanMin": 54
+  }
+ }
+}
