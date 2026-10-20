@@ -1,0 +1,264 @@
+[
+ {
+  "case": "C1",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C1",
+  "file": "alt-2.json",
+  "fails": 1,
+  "failed": [
+   "«غرفة الخادمة» قرب «المطبخ» — «غرفة الخادمة» بعيد عن «المطبخ» (بينهما 2.2 م)."
+  ]
+ },
+ {
+  "case": "C1",
+  "file": "alt-3.json",
+  "fails": 1,
+  "failed": [
+   "«غرفة الخادمة» قرب «المطبخ» — «غرفة الخادمة» بعيد عن «المطبخ» (بينهما 3.3 م)."
+  ]
+ },
+ {
+  "case": "C2",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C2",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C3",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C3",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C3",
+  "file": "alt-3.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C3",
+  "file": "alt-4.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C4",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C4",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C5",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C5",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C5",
+  "file": "alt-3.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C6",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C6",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C7",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C7",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "alt-3.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "alt-4.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "edit-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "edit-alt1-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "edit-alt2-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "edit-alt3-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "edit-alt4-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C8",
+  "file": "edit-before.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "alt-3.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "alt-4.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "edit-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "edit-alt1-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "edit-alt2-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "edit-alt3-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "edit-alt4-after.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C9",
+  "file": "edit-before.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C10",
+  "file": "alt-1.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C10",
+  "file": "alt-2.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C10",
+  "file": "alt-3.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C10",
+  "file": "alt-4.json",
+  "fails": 0,
+  "failed": []
+ },
+ {
+  "case": "C10",
+  "file": "alt-5.json",
+  "fails": 0,
+  "failed": []
+ }
+]

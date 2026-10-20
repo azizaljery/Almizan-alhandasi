@@ -1,0 +1,352 @@
+{
+ "id": "C8",
+ "engine": "v2",
+ "name": "تعديل موقع غرفة دون حذف الغرف الأخرى",
+ "text": "4 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [
+  "4 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "hallback",
+   "pat": "hallback:h0",
+   "summary": "الصالة في الخلف على الحديقة: الضيافة صف أمامي، والخدمة والصالة خلفها، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.16,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.98,
+    "l": 6.92,
+    "ratio": 1.39
+   },
+   "rooms": 20,
+   "net": 199.81,
+   "circulationPct": 17.19,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "ellback",
+   "pat": "ellback:b0r",
+   "summary": "شكل L خلفي: جناح نوم عرضي في الخلف وحديقة جانبية أمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.01,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.88,
+    "l": 6.38,
+    "ratio": 1.31
+   },
+   "rooms": 20,
+   "net": 211.53,
+   "circulationPct": 17.15,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "tcore",
+   "pat": "tcore:t0",
+   "summary": "نواة T: الضيافة والخدمة والصالة أمامًا، وخلفها كتلة النوم بممر أوسط قصير تُفتح عليه الغرف من جهتيه",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.37,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.52,
+    "l": 9.38,
+    "ratio": 2.08
+   },
+   "rooms": 20,
+   "net": 224.34,
+   "circulationPct": 14.28,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 1,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "sidemajlis",
+   "pat": "sidemajlis:j0",
+   "summary": "مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.57,
+    "rejectReasons_ar": []
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 6.43,
+    "ratio": 1.58
+   },
+   "rooms": 19,
+   "net": 200.7,
+   "circulationPct": 18.49,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 5483,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.29,
+   0.27,
+   0.34
+  ],
+  [
+   0.29,
+   0,
+   0.24,
+   0.24
+  ],
+  [
+   0.27,
+   0.24,
+   0,
+   0.23
+  ],
+  [
+   0.34,
+   0.24,
+   0.23,
+   0
+  ]
+ ],
+ "modes": [
+  "hallback",
+  "ellback",
+  "tcore",
+  "sidemajlis"
+ ],
+ "minDifference": 0.23,
+ "meanDifference": 0.27,
+ "rejectedCandidates": 0,
+ "edit": {
+  "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
+  "ms": 221,
+  "reply": {
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "pending": [],
+   "unverified": [],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": true,
+   "unchanged": true,
+   "reused": false,
+   "otherFails": [],
+   "conflicts": [],
+   "questions": []
+  },
+  "beforePattern": "hallback:h0",
+  "afterPattern": "hallback:h0",
+  "samePattern": true,
+  "difference": 0,
+  "roomsKept": true,
+  "roomsLost": [],
+  "programRoomsKept": true,
+  "programRoomsLost": [],
+  "editLedgerBefore": [
+   {
+    "text": "«المطبخ» بجوار «الطعام»",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "«المطبخ» في الخلف",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "4 غرف نوم",
+    "status": "done",
+    "why": ""
+   }
+  ],
+  "after": {
+   "hall": {
+    "w": 4.98,
+    "l": 6.92,
+    "ratio": 1.39
+   },
+   "rooms": 20,
+   "net": 199.81,
+   "circulationPct": 17.19,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ },
+ "editAll": [
+  {
+   "alt": 1,
+   "beforePattern": "hallback:h0",
+   "afterPattern": "hallback:h0",
+   "samePattern": true,
+   "unchanged": true,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "طلبك متحقق في المخطط المعروض كما هو (مقيس من المخطط)، فلم يُغيَّر شيء."
+  },
+  {
+   "alt": 2,
+   "beforePattern": "ellback:b0r",
+   "afterPattern": "hallback:h0",
+   "samePattern": false,
+   "unchanged": false,
+   "difference": 0.28,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": {
+    "from": "ellback:b0r",
+    "to": "hallback:h0",
+    "why_ar": "التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه، وبقية الغرف كما هي."
+   },
+   "note": "مسطح الدور 218 م² داخل غلاف 16.35 × 15.4 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات وحديقة داخل كتلة المبنى."
+  },
+  {
+   "alt": 3,
+   "beforePattern": "tcore:t0",
+   "afterPattern": "ell:l0",
+   "samePattern": false,
+   "unchanged": false,
+   "difference": 0.25,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": {
+    "from": "tcore:t0",
+    "to": "ell:l0",
+    "why_ar": "التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه، وبقية الغرف كما هي."
+   },
+   "note": "مسطح الدور 219 م² داخل غلاف 16.65 × 15.6 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات وحديقة داخل كتلة المبنى."
+  },
+  {
+   "alt": 4,
+   "beforePattern": "sidemajlis:j0",
+   "afterPattern": "yoo:u0",
+   "samePattern": false,
+   "unchanged": false,
+   "difference": 0.31,
+   "programRoomsKept": true,
+   "done": [
+    "«المطبخ» بجوار «الطعام»",
+    "«المطبخ» في الخلف"
+   ],
+   "failed": [],
+   "patternChanged": {
+    "from": "sidemajlis:j0",
+    "to": "yoo:u0",
+    "why_ar": "التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه، وبقية الغرف كما هي."
+   },
+   "note": "مسطح الدور 220 م² داخل غلاف 16.4 × 15.25 م من مساحة قابلة للبناء 423 م²؛ الباقي ساحات وحديقة داخل كتلة المبنى."
+  }
+ ]
+}
