@@ -482,6 +482,13 @@ export function parseEdit(text, doc, { more = null, history = [], lastSubject = 
 const ctxOf = (doc, req) => ({ request: { counts: req?.counts || {} }, entry: req?.entry || doc.entry || 's' });
 const PREFER = new Set(['corridor', 'entrance', 'living', 'storage', 'laundry', 'service', 'other']);
 /** يجرّب المرشحين، ويختار الأقل كلفة مما ينجح في الفحص والبوابات ويحقق الطلب مقيسًا. */
+const DONOR_FREE = new Set(['corridor', 'entrance', 'storage', 'laundry']);
+/** سؤال الإذن: ما الذي سيتغير في غيرها لو نُفّذ. */
+function consentAsk(it, consent, strict) {
+  const side = describeChanges(consent.cmp.changed.filter(x => !x.inScope && x.kind !== 'openings' && x.kind !== 'added')).map(x => x.text_ar);
+  const what = it.text_ar.replace(/[«»]/g, '');
+  return { ok: false, ask: strict === 'all' ? `طلبت ألا ألمس بقية البيت، وتحقيق «${what}» يحتاج: ${side.join('؛ ')}. أنفّذه بهذا، ولا تبقيه كما هو؟` : `تحقيق «${what}» يحتاج تغيير غرفة لم تذكرها: ${side.join('؛ ')}. أنفّذه بهذا؟ (قل «نعم» أو «لا»)`, why_ar: `يحتاج تغيير غرفة أخرى (${side.join('؛ ')})؛ لم أغيّر شيئًا قبل موافقتك.` };
+}
 function choose(before, cands, { scope, request, check, strict = false }) {
   const Ib = inspect(before), tried = [];
   let best = null, consent = null;
@@ -493,7 +500,10 @@ function choose(before, cands, { scope, request, check, strict = false }) {
     if (!got.ok) { tried.push({ desc: c.desc, why: [got.why] }); continue; }
     const cost = cmp.cost + (c.penalty || 0);
     // «والباقي لا تلمسه»: مرشح يغيّر غرفة أخرى لا يُنفَّذ، بل يُعرض على العميل ليوافق
-    if (strict && cmp.changed.some(x => !x.inScope && ['resized', 'removed', 'added', 'shape', 'renamed'].includes(x.kind))) { if (!consent || cost < consent.cost) consent = { ...c, cmp, cost, measured: got.measured }; continue; }
+    // غرفة لم يذكرها العميل لا تتغير بلا إذنه: الممر والمدخل والمخزن والغسيل مانحون مقبولون معلَنون، وما عداها
+    // (غرفة نوم، طعام، حمام…) يُعرض على العميل ليوافق أولًا؛ و«لا تلمس الباقي» لا يقبل أي مانح
+    const blocked = x => !x.inScope && ['resized', 'removed', 'shape', 'renamed'].includes(x.kind) && (strict === 'all' || (strict === 'free' && !DONOR_FREE.has(x.type)));
+    if (strict && strict !== 'none' && cmp.changed.some(blocked)) { if (!consent || cost < consent.cost) consent = { ...c, cmp, cost, measured: got.measured }; continue; }
     if (!best || cost < best.cost - 1e-9) best = { ...c, cmp, cost, measured: got.measured };
   }
   return { best, tried, consent };
@@ -627,16 +637,16 @@ function doResize(doc, it, req) {
     // الاتجاه أولًا: «أكبر» يعني أكبر فعلًا (لا يكفي أن يتغير)، ثم بلوغ ثلثي المطلوب على الأقل
     const k = Rn.area / R.area; return { ok: want > 1 ? k >= 1 + (want - 1) * .9 : k <= 1 - (1 - want) * .9, measured: m, why: `النسبة ${r2(k)}` };
   };
-  const strict = !!req?.strict;
-  let { best, tried, consent } = choose(doc, cands, { scope: new Set([R.id]), request, check, strict });
+  const strict = req?.strict || false;
+  // جناح الغرفة نفسها (حمامها وغرفة ملابسها) من نطاق الطلب: «الرئيسية ٥×٦» قد تأخذ من حمامها لا من غرفة أخرى
+  const suite = roomList(I).filter(x => x.id !== R.id && (R.type === 'master' ? /^(?:حمام الرئيسية|غرفة (?:ال)?ملابس)$/.test(x.name) : /^غرفة نوم (\d+)$/.test(R.name) && x.name === `حمام غرفة ${R.name.match(/(\d+)$/)[1]}`));
+  const scopeR = new Set([R.id, ...suite.map(x => x.id)]);
+  let { best, tried, consent } = choose(doc, cands, { scope: scopeR, request, check, strict });
   let note = '';
   // «أوسع» تعني في الكلام الدارج «أرحب» أيضًا: إن تعذّر التوسيع في العرض يُجرَّب الطول (ويُقال ذلك)
-  if (!best && it.along) { const alt = resizeCands(doc, I, R, { ...it, along: null }).cands; const r = choose(doc, alt, { scope: new Set([R.id]), request, check, strict }); if (r.best) { best = r.best; note = `تعذّر التوسيع في العرض (${[...new Set(tried.flatMap(x => x.why))].slice(0, 1).join('') || 'يلزمه تغيير غرفة أخرى'}) فكُبّرت في الطول`; } tried = [...tried, ...r.tried]; consent ||= r.consent; }
+  if (!best && it.along) { const alt = resizeCands(doc, I, R, { ...it, along: null }).cands; const r = choose(doc, alt, { scope: scopeR, request, check, strict }); if (r.best) { best = r.best; note = `تعذّر التوسيع في العرض (${[...new Set(tried.flatMap(x => x.why))].slice(0, 1).join('') || 'يلزمه تغيير غرفة أخرى'}) فكُبّرت في الطول`; } tried = [...tried, ...r.tried]; consent ||= r.consent; }
   if (globalThis.__peDebug) console.error('RESIZE tried', cands.length, tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 30));
-  if (!best && consent) {
-    const side = describeChanges(consent.cmp.changed.filter(x => !x.inScope && x.kind !== 'openings')).map(x => x.text_ar);
-    return { ok: false, ask: `طلبت ألا ألمس بقية البيت، وتحقيق «${it.text_ar.replace(/[«»]/g, '')}» يحتاج: ${side.join('؛ ')}. أنفّذه بهذا، ولا تبقيه كما هو؟`, why_ar: `يحتاج تغيير غرفة أخرى (${side.join('؛ ')})، وقد طلبت ألا تُلمس؛ لم أغيّر شيئًا وسألتك.` };
-  }
+  if (!best && consent) return consentAsk(it, consent, strict);
   if (!best) return { ok: false, why_ar: `لم أجد جدارًا يمكن إزاحته لـ«${R.name}» دون كسر بوابة أو تغيير غير مقبول (${tried.length} محاولة: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || 'لا مرشح'}).`, tried };
   const ext = (best.moves || []).filter(m => m.exterior).length;
   const nameOf = id => I.rooms.get(id)?.name || id;
@@ -686,7 +696,8 @@ function doDelete(doc, it, req) {
   if ((R.type === 'bedroom' || R.type === 'master') && req2.counts.bedrooms) req2.counts.bedrooms--;
   if (R.type === 'dining' && req2.counts.dining) req2.counts.dining--;
   const check = Ia => { const gone = !Ia.rooms.has(R.id) || Ia.rooms.get(R.id).name !== R.name; return { ok: gone, why: 'ما زالت موجودة' }; };
-  const { best, tried } = choose(doc, cands, { scope: new Set([R.id, ...(cands.map(c => c.mergedInto).filter(Boolean).length ? [] : [])]), request: req2, check });
+  const { best, tried, consent } = choose(doc, cands, { scope: new Set([R.id]), request: req2, check, strict: req?.strict || false });
+  if (!best && consent) return consentAsk(it, consent, req?.strict);
   if (!best) return { ok: false, why_ar: `تعذّر حذف «${R.name}» موضعيًا: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ')}` };
   return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, toStorage: !!best.toStorage, removedRoom: { id: R.id, name: R.name, area: r2(R.area) } };
 }
@@ -748,6 +759,15 @@ function buildExtension(doc, I, kind, spec, opts, g, label) {
       const [a0, a1] = spanOf(w, wa), cc = acrossOf(w.a, wa);
       if (wa === ax) { const inner = out1 > 0 ? cc > c + E && cc < c2 + E : cc < c - E && cc > c2 - E; if (inner && a1 > q0 + E && a0 < q1 - E) fail('CLASH', 'الكتلة تتقاطع مع المبنى (' + w.id + ')'); }
       else if (cc > q0 - E && cc < q1 + E && a1 > lo + E && a0 < hi - E) fail('CLASH', 'الكتلة تتقاطع مع المبنى (' + w.id + ')');
+    }
+    // لا شقّ ضيق بين الكتلة وجزء آخر من المبنى (فراغ أقل من 1.3 م بين المحورين لا يُمشى فيه ولا يضيء، ويحجب نوافذ الجار)
+    {
+      const B = ax === 'x' ? { x0: lo, x1: hi, y0: q0, y1: q1 } : { x0: q0, x1: q1, y0: lo, y1: hi };
+      for (const w of d.walls.filter(x => x.level === lv)) {
+        const sx0 = Math.min(w.a.x, w.b.x), sx1 = Math.max(w.a.x, w.b.x), sy0 = Math.min(w.a.y, w.b.y), sy1 = Math.max(w.a.y, w.b.y);
+        const gap = Math.hypot(Math.max(0, sx0 - B.x1, B.x0 - sx1), Math.max(0, sy0 - B.y1, B.y0 - sy1));
+        if (gap > .05 && gap < 1.3) fail('SLIVER', `شق ضيق ${r2(gap)} م بين الكتلة والمبنى`);
+      }
     }
     // فتحات جدار الاستناد في المقطع: الأبواب ممنوعة (لا يُسد مدخل)، والنوافذ تُنقل خارج المقطع أو تُحذف
     const removed = [], shifted = [];
@@ -880,7 +900,8 @@ function doAdd(doc, it, req) {
     return { ok: true, measured: { area: r2(r.area) } };
   };
   const scope = new Set(); // المضاف جديد: ما تغيّر غيره يُحسب
-  const { best, tried } = choose(doc, allCands.filter(c => c.doc), { scope, request: req2, check });
+  const { best, tried, consent } = choose(doc, allCands.filter(c => c.doc), { scope, request: req2, check, strict: req?.strict || false });
+  if (!best && consent) return consentAsk({ text_ar: it.text_ar || `إضافة ${label.name}` }, consent, req?.strict);
   if (globalThis.__peDebug) console.error('ADD tried', cands.length, tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 40), cands.filter(c => !c.doc).map(c => c.err).slice(0, 40));
   if (!best) return { ok: false, why_ar: `لم أجد موضعًا لـ${label.name} داخل خطوط الارتداد ولا غرفة مناسبة أقتطع منها دون كسر بوابة (${[...new Set(tried.flatMap(x => x.why))].slice(0, 3).join('، ') || 'لا مرشح'}).` };
   return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, removedOpenings: best.removedOpenings || [], added: label };
@@ -930,7 +951,8 @@ function doRule(doc, it, req) {
     cands.push({ ...c, swapped: [a.id, b.id] });
   }
   const check = Ia => { const v = verifyRules(Ia.model.doc, [rule], { entry })[0]; return { ok: v.ok, why: v.why }; };
-  const { best, tried } = choose(doc, cands, { scope: new Set(A.map(a => a.id)), request, check });
+  const { best, tried, consent } = choose(doc, cands, { scope: new Set(A.map(a => a.id)), request, check, strict: req?.strict || false });
+  if (!best && consent) return { ...consentAsk({ text_ar: rule.text }, consent, req?.strict), fallback: true };
   if (!best) return { ok: false, fallback: true, why_ar: `«${rule.text}» غير متحقق في المعروض، ولا تبديل موضعي بين غرفتين متقاربتين في المساحة يحققه دون كسر بوابة${tried.length ? ` (${tried.length} محاولة)` : ''}.` };
   return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, swapped: best.swapped };
 }
@@ -1032,7 +1054,7 @@ export function applyEdits(doc0, parsed, { req = null, history = [] } = {}) {
   if (unhandled?.length) return { status: 'fallback', unhandled, why_ar: `لا تعديل موضعي لـ: ${unhandled.map(u => `«${u}»`).join('، ')}`, doc: doc0, results: [] };
   let doc = clone(doc0);
   const results = [], pending = [];
-  req = { ...(req || {}), strict: !!parsed.keep };
+  req = { ...(req || {}), strict: parsed.keep ? 'all' : req?.consent ? 'none' : 'free' };
   let restore = null, fallback = null;
   // الرجوع إلى تصميم سابق (كله أو مع الإبقاء على تعديلات): يُبنى من السجل ثم تُعاد التعديلات المحلية المطلوبة
   for (const it of intents.filter(i => i.op === 'restore')) {

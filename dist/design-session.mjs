@@ -1,7 +1,7 @@
 // جلسة التصميم: التصميم الأولي يُعرض على العميل، ويطلب بديلًا بعد أن تسأله شرعاء عمّا لم يعجبه،
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
 import { generateInitialDesign } from './home-flow.mjs';
-import { extractRequirements, detectConflicts } from './requirements.mjs';
+import { extractRequirements, detectConflicts, normalizeAr } from './requirements.mjs';
 import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
@@ -65,9 +65,19 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   let more = null;
   if (text && text.trim().length >= 2) more = withAi(extractRequirements(text, { counts: {} }), ai);
   // التعديل الموضعي أولًا (dist/plan-edit.mjs): نوايا التعديل على المستند المعروض نفسه، بلا إعادة توليد
-  let parsed = null;
+  let parsed = null, consent = false;
   const curDoc = s.designs[s.current].doc;
-  if (local && !picks.length && more) {
+  // جواب سؤال الإذن («تحقيقه يحتاج تغيير غرفة لم تذكرها — أنفّذه؟»): «نعم» تنفّذ المقترح نفسه، «لا» تبقي المخطط
+  const pend = s.pendingEdit; delete s.pendingEdit;
+  if (pend && !picks.length && text) {
+    const tt = normalizeAr(text);
+    if (/^(?:نعم|ايه|ايوه|اي|اكيد|تمام|طيب|موافق|نفذ|نفذه|نفذها|اوكي|ok|yes|خلاص نفذ|يلا)(?:[ ،,.!]|$)/.test(tt)) { parsed = { intents: pend.intents, unhandled: [], questions: [], keep: false, refs: [] }; consent = true; text = pend.text; more = withAi(extractRequirements(text, { counts: {} }), ai); }
+    else if (/^(?:لا|لأ|لا شكرا|خله|خلها|اتركه|لا تنفذ|no)(?:[ ،,.!]|$)/.test(tt)) {
+      const keep = clone(session); delete keep.pendingEdit;
+      return { session: keep, changes: [], reply: { local: true, mode: 'declined', done: [], failed: [], pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: true, unchanged: true, otherFails: [], conflicts: [], questions: [], summary_ar: 'تمام، أبقيت المخطط كما هو حرفيًا.' } };
+    }
+  }
+  if (local && !picks.length && more && !parsed) {
     try { parsed = parseEdit(text, parseDoc(curDoc), { more, lastSubject: lastSubjectOf(s) }); } catch { parsed = null; }
     if (parsed?.questions?.length) {
       // غرفة غير محددة («غرفة البنت»): سؤال، والمخطط كما هو
@@ -124,7 +134,7 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   // التعديل الموضعي: ينفَّذ على المستند المعروض؛ إن لم يوجد حل موضعي يُعاد التوليد ويُقال ذلك صراحة مع ما تغيّر
   let fallbackNote = null;
   if (localIntents) {
-    const out = localTurn(s, req, parsed, { text, picks, changes, more, original: session });
+    const out = localTurn(s, req, parsed, { text, picks, changes, more, original: session, consent });
     if (out.session) return out;
     fallbackNote = out.fallback;
   } else if (parsed && parsed.unhandled?.length && more) fallbackNote = { why_ar: `لا تعديل موضعي لـ: ${parsed.unhandled.map(u => `«${u}»`).join('، ')}؛ هذا يحتاج إعادة توزيع.` };
@@ -206,10 +216,10 @@ const SCOPE_OPS = new Set(['resize', 'delete', 'extDoor', 'revertRoom']);
  * دور تعديل موضعي كامل: ينفّذ النوايا على المستند المعروض، أو يرجع إلى تصميم سابق ويعيد التعديلات المطلوب إبقاؤها.
  * يعيد { session, changes, reply } عند النجاح، أو { fallback } إن لم يوجد حل موضعي.
  */
-function localTurn(s, req, parsed, { text, picks, changes, more, original }) {
+function localTurn(s, req, parsed, { text, picks, changes, more, original, consent = false }) {
   const cur = s.designs[s.current], doc0 = parseDoc(cur.doc), entryDir = s.input.land?.entries?.[0] || 's';
   const history = s.designs.slice(0, s.current + 1).map(d => ({ doc: d.doc, edit: d.feedback?.edit || null, text: d.feedback?.text || '' }));
-  const reqE = { ...req, entry: entryDir };
+  const reqE = { ...req, entry: entryDir, consent };
   let res = applyEdits(doc0, parsed, { req: reqE, history });
   let restored = null;
   if (res.status === 'restore') {
@@ -234,7 +244,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original }) {
     restored = { index: R.index, replayed: rp.ok, lost: rp.lost, lostTurns };
   }
   if (res.status === 'clarify') {
-    const q = res.questions, keep = clone(original); keep.reply = { conflicts: q, questions: q.map(x => x.question_ar) };
+    const q = res.questions, keep = clone(original); if (q.some(x => x.type === 'needs-consent')) keep.pendingEdit = { text, intents: parsed.intents }; keep.reply = { conflicts: q, questions: q.map(x => x.question_ar) };
     return { session: keep, changes: [], reply: { conflicts: q, questions: q.map(x => x.question_ar), done: [], failed: res.results.filter(r => !r.ok).map(r => ({ text: r.text_ar, why: r.why_ar })), pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: true, unchanged: true, otherFails: [], local: true, mode: 'clarify' } };
   }
   if (res.status === 'fallback') return { fallback: { why_ar: res.why_ar, intents: parsed.unhandled?.length ? null : parsed.intents, failed: res.results.filter(r => !r.ok) } };
@@ -280,7 +290,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original }) {
     doneTxt.length ? `نُفّذ: ${doneTxt.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
     reply.failed.length ? `لم يُنفَّذ: ${reply.failed.map(f => `${f.text} — ${f.why}`).join('؛ ')}.` : '',
     reply.pending.length ? `محفوظ ولم يظهر في المجسّم بعد: ${reply.pending.map(p => p.text).join('، ')}.` : '',
-    unrequested.length ? `تغيّر أيضًا لأن التعديل يحتاجه: ${unrequested.map(c => c.text_ar).join('؛ ')}.` : '',
+    unrequested.length ? (restored ? `وعادت معه إلى حالها في ذلك التصميم: ${unrequested.map(c => c.text_ar).join('؛ ')}.` : `تغيّر أيضًا لأن التعديل يحتاجه: ${unrequested.map(c => c.text_ar).join('؛ ')}.`) : '',
     restored?.lost?.length || restored?.lostTurns?.length ? `لم يُعَد بعد الرجوع: ${[...restored.lost.map(l => `${l.text}${l.why ? ` (${l.why})` : ''}`), ...restored.lostTurns.map(t => `«${t}»`)].join('، ')} — قل «أعده» إن أردته ولو بإعادة توزيع.` : '',
     `بقية الغرف (${Math.max(0, same)}) كما هي مقيسًا${reply.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`,
   ].filter(Boolean).join(' ');

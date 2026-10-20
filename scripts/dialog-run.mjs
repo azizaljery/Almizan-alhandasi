@@ -271,12 +271,18 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
   const initMs = Math.round(performance.now() - t0);
   for (let i = 0; i < Math.min(S.turns.length, maxTurns); i++) {
     const T = S.turns[i], before = docs[i], t1 = performance.now();
-    let outcome = 'applied', reply = null, changes = [], error = null;
+    let outcome = 'applied', reply = null, changes = [], error = null, ifConsented = null;
     const mark = performance.now();
     try {
       const r = await redesign(s, { text: T.text });
       reply = r.reply; changes = r.changes;
       if (r.reply?.conflicts?.length) outcome = 'asked'; else s = r.session;
+      // سؤال إذن (التعديل يحتاج غرفة لم يذكرها العميل): الجلسة تبقى كما هي، ويُقاس ما كان سيحدث لو قال «نعم»
+      if (r.reply?.conflicts?.some(c => c.type === 'needs-consent')) {
+        const y = await redesign(r.session, { text: 'نعم' }), ad = currentDoc(y.session), pr = preservation(before, ad, T.scope);
+        const ck = T.checks.map(ck => runCheck(ck, { after: ad, before, docs: [...docs, ad], entry, outcome: 'applied' }));
+        ifConsented = { happened: ck.every(c => c.ok), checks: ck, violations: pr.violations.map(v => ({ name: v.name, areaPct: v.areaPct, shift: v.shift })), summary: y.reply?.summary_ar || null };
+      }
     } catch (e) { error = { code: e.code || null, message: e.message, unclear: e.unclear || [] }; outcome = e.code === 'SHARA_UNCLEAR' ? 'unclear' : 'error'; }
     const after = currentDoc(s), pat = s.designs[s.current].pat;
     docs.push(after); pats.push(pat);
@@ -297,7 +303,7 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
       mode: reply?.mode || (outcome === 'unclear' ? 'unclear' : reply?.reused ? 'reused' : 'regenerated'), summary: reply?.summary_ar || reply?.fallback?.said_ar || null,
       declared: (reply?.changed || reply?.fallback?.changed || []).filter(c => !c.inScope && c.kind !== 'openings').map(c => c.name),
       undeclared: pres.violations.filter(v => !(reply?.changed || reply?.fallback?.changed || []).some(c => c.name === v.name && c.kind !== 'openings')).length,
-      fallback: reply?.fallback ? { why: reply.fallback.why_ar, said: reply.fallback.said_ar } : null, questionsAsked: (reply?.questions || []).length, replyMs: Math.round(performance.now() - mark),
+      fallback: reply?.fallback ? { why: reply.fallback.why_ar, said: reply.fallback.said_ar } : null, questionsAsked: (reply?.questions || []).length, questions: reply?.questions || [], ifConsented, replyMs: Math.round(performance.now() - mark),
     });
   }
   return { id: S.id, name: S.name, land, text: S.text, counts: S.counts, initMs, docs, turns };
@@ -376,7 +382,7 @@ async function main() {
     sess.docs.forEach((d, i) => writeFileSync(dir + `doc-${i}.json`, serialize(d)));
     for (const t of sess.turns) writeFileSync(dir + `turn-${t.n}.json`, JSON.stringify(t, null, 1));
     if (!noPng) jobs.push(...renderJobs(sess, dir));
-    summary.sessions.push({ id: S.id, name: S.name, initMs: sess.initMs, turns: sess.turns.map(t => ({ n: t.n, text: t.text, outcome: t.outcome, mode: t.mode, summary: t.summary, declared: t.declared, undeclared: t.undeclared, geometryIdentical: t.preservation.geometryIdentical, happened: t.happened, failedChecks: t.checks.filter(c => !c.ok).map(c => ({ type: c.type, why: c.why, measured: c.measured })), trivial: t.happened && t.checks.every(c => c.alreadyBefore !== false) && t.checks.some(c => c.alreadyBefore === true), violations: t.preservation.violations, openingChanges: t.preservation.openingChanges.length, patternKept: t.patternKept, difference: t.preservation.difference, envelope: t.preservation.envelope, idsStable: t.preservation.idsStable, claimMismatch: t.claimMismatch, ledger: t.ledger, understood: t.understood, error: t.error?.message || null, ms: t.ms })) });
+    summary.sessions.push({ id: S.id, name: S.name, initMs: sess.initMs, turns: sess.turns.map(t => ({ n: t.n, text: t.text, outcome: t.outcome, mode: t.mode, summary: t.summary, questions: t.questions, ifConsented: t.ifConsented ? { happened: t.ifConsented.happened, violations: t.ifConsented.violations } : null, declared: t.declared, undeclared: t.undeclared, geometryIdentical: t.preservation.geometryIdentical, happened: t.happened, failedChecks: t.checks.filter(c => !c.ok).map(c => ({ type: c.type, why: c.why, measured: c.measured })), trivial: t.happened && t.checks.every(c => c.alreadyBefore !== false) && t.checks.some(c => c.alreadyBefore === true), violations: t.preservation.violations, openingChanges: t.preservation.openingChanges.length, patternKept: t.patternKept, difference: t.preservation.difference, envelope: t.preservation.envelope, idsStable: t.preservation.idsStable, claimMismatch: t.claimMismatch, ledger: t.ledger, understood: t.understood, error: t.error?.message || null, ms: t.ms })) });
     for (const t of sess.turns) console.log(`${S.id} د${t.n} «${t.text}»: ${t.outcome} | تحقق ${t.happened}${t.happened && t.checks.some(c => c.alreadyBefore === true) && t.checks.every(c => c.alreadyBefore !== false) ? ' (كان متحققًا قبل التعديل)' : ''} | مخالفات ${t.violations} (رئيسية ${t.mainViolations}) | فتحات ${t.preservation.openingChanges.length} | نمط محفوظ ${t.patternKept} | فرق ${t.preservation.difference}${t.claimMismatch ? ' | ادعاء تنفيذ غير صحيح' : ''}`);
   }
   // الإجمالي

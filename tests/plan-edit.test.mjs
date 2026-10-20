@@ -155,3 +155,21 @@ test('الجلسة: التعديل الموضعي أولًا (الواجهة ث�
   const c = await redesign(b.session, { text: 'ارجع للتصميم السابق' }, { generate: noGen });
   assert.equal(c.reply.mode, 'restore'); assert.equal(serialize(currentDoc(c.session)), b.session.designs[1].doc);
 });
+
+test('سؤال الإذن: مقاس يحتاج تصغير غرفة لم يذكرها العميل يُسأل أولًا، و«نعم» تنفّذه معلنًا، و«لا» تبقيه حرفيًا', async () => {
+  const d0 = DOC('S4', 1), land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 };
+  const req = extractRequirements('4 غرف نوم منها ماستر ومجلس وصالة ومطبخ وطعام وغرفة غسيل', { counts: { bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 } });
+  const s0 = createSession({ land, counts: req.counts, requirements: req, result: { doc: d0, pat: 'test:p', summary: '', notes: [] } });
+  const noGen = async () => { throw Error('لا إعادة توليد'); };
+  const a = await redesign(s0, { text: 'المطبخ ٤×٥' }, { generate: noGen });
+  const ask = a.reply.conflicts.find(c => c.type === 'needs-consent');
+  if (!ask) { assert.deepEqual(a.reply.unrequested.filter(c => !['corridor', 'entrance', 'storage', 'laundry'].includes(c.type)), [], 'لا مانح من الغرف الرئيسية بلا إذن'); return; }
+  assert.match(ask.question_ar, /أنفّذه/); assert.equal(currentDoc(a.session).walls.length, d0.walls.length); assert.equal(serialize(currentDoc(a.session)), a.session.designs[0].doc);
+  const no = await redesign(a.session, { text: 'لا' }, { generate: noGen });
+  assert.equal(no.reply.mode, 'declined'); assert.equal(no.session.designs.length, 1);
+  const yes = await redesign(a.session, { text: 'نعم' }, { generate: noGen });
+  assert.equal(yes.reply.mode, 'local'); assert.ok(yes.reply.done.length, JSON.stringify(yes.reply.failed));
+  const k = [...inspect(currentDoc(yes.session)).rooms.values()].find(x => x.name === 'المطبخ'), w = Math.min(k.net.x1 - k.net.x0, k.net.y1 - k.net.y0), l = Math.max(k.net.x1 - k.net.x0, k.net.y1 - k.net.y0);
+  assert.ok(Math.abs(w - 4) <= .35 && Math.abs(l - 5) <= .35, `${w}×${l}`);
+  assert.ok(yes.reply.unrequested.length >= 1, 'المانح معلن في الرد'); assert.match(yes.reply.summary_ar, /تغيّر أيضًا/);
+});
