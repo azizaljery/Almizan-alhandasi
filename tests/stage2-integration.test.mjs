@@ -51,10 +51,12 @@ test('C5: الأرض شبه منحرف في المستند، والبند مقي
   for (const d of out.designs) assert.ok(d.review.gates.find(g => g.id === 'PLOT').ok);
 });
 
-test('C7: دوران — الماستر بعيدة عن الدرج المرسوم (مقيسة من سلالم المستند) في البديل الأول، و3 بدائل على الأقل كلها ناجحة في المراجعة', () => {
+// (الجولة الرابعة: البدائل المخالفة لـ«الماستر بعيدة عن الدرج» لا تُعرض لسد العدد — بديلان على الأقل كلاهما ينفّذه)
+test('C7: دوران — الماستر بعيدة عن الدرج المرسوم (مقيسة من سلالم المستند) في كل بديل، وبديلان على الأقل كلها ناجحة في المراجعة', () => {
   const { C, r } = caseReq('C7'), land = { floors: 2, ...C.land };
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: 4 });
-  assert.ok(out.designs.length >= 3, `البدائل ${out.designs.length}`);
+  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`);
+  for (const d of out.designs) { const f = d.ledger.find(x => x.kind === 'far' && /الدرج/.test(x.text)); assert.equal(f.status, 'done', d.pat + ' ' + f.why); }
   assertReviewed(out.designs, r, land);
   const far = out.designs[0].ledger.find(x => x.kind === 'far' && /الدرج/.test(x.text));
   assert.equal(far.status, 'done', far.why);

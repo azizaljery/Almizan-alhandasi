@@ -22,7 +22,7 @@ test('النفي لا ينقلب: «لا تحط غرف النوم على الش�
   assert.deepEqual(R('لا تخلي المجلس جنب المطبخ'), ['apart:majlis:kitchen:']);
 });
 test('يمين ويسار الداخل، والوسط، و«جنب بعض»، و«بين»، والعطف بحرف الجر', () => {
-  assert.deepEqual(R('المجلس يكون يمين المدخل والمطبخ يسار'), ['place:majlis:right:half', 'place:kitchen:left:half']);
+  assert.deepEqual(R('المجلس يكون يمين المدخل والمطبخ يسار'), ['place:majlis:right:zone', 'place:kitchen:left:zone']);
   assert.deepEqual(R('خل الصاله وسط البيت'), ['place:hall:center:center']);
   assert.deepEqual(R('غرف العيال جنب بعض'), ['cluster:kids::']);
   assert.deepEqual(R('المجلس والمقلط جنب بعض'), ['adjacent:majlis:dining:']);

@@ -42,12 +42,21 @@ const subjAr = id => S[id]?.ar || id;
 const COMPASS_AR = { n: 'الشمال', s: 'الجنوب', e: 'الشرق', w: 'الغرب' };
 const SIDE_AR = { front: 'في الأمام', back: 'في الخلف', n: 'في جهة الشمال', s: 'في جهة الجنوب', e: 'في جهة الشرق', w: 'في جهة الغرب', right: 'على يمين الداخل من الشارع', left: 'على يسار الداخل من الشارع', center: 'في وسط البيت' };
 const OPP_SIDE = { front: 'back', back: 'front', n: 's', s: 'n', e: 'w', w: 'e', right: 'left', left: 'right' };
-// المواضع: touch = يلامس الجدار الخارجي لتلك الجهة، half = في نصف المبنى من تلك الجهة
+// المواضع (mode) — ثلاث درجات صرامة، كلها تُقاس من المخطط نفسه:
+//  touch = «على الشارع / يطل على الحوش الخلفي»: يلامس الجدار الخارجي لتلك الجهة (أو يطل عليها بلا فراغ مبني أمامه).
+//  zone  = «في الخلف / ورا / في الأمام / في الشرق / يمين الداخل» (الافتراضي، ومنه «المطبخ في الخلف»): في تلك الجهة
+//          فعلًا — يلامس واجهتها (جدارها الخارجي، أو حافته مكشوفة نحوها ومركزه في نصفها)، أو مركزه في الثلث
+//          الخارجي من امتداد المبنى من تلك الجهة ولا تقع بينه وبين واجهتها على امتداد عرضه غرفة سكنية غير خدمية
+//          (نوم، مجلس، صالة، طعام، مكتب). مطبخ في وسط البيت وخلفه جناح النوم ليس «في الخلف» ولو كان مركزه في النصف الخلفي.
+//  half  = في نصف المبنى من تلك الجهة فقط (مركزه): للصيغ المتساهلة صراحة («بعيد عن الشارع») ولنفي الجهة المقابلة
+//          («ما يكون في الخلف» = في النصف الأمامي).
+//  وأيضًا avoid (لا يلامس جدار تلك الجهة) و center (وسط المبنى).
 const PLACES = [
   { side: 'front', mode: 'touch', re: `(?:يطل|تطل|مطل|مطله)? ?(?:ع|على|علي) (?:ال)?(?:شارع|واجهه)|جهه (?:ال)?شارع|(?:ب|في )?(?:ال)?واجهه` },
   { side: 'back', mode: 'touch', re: `(?:يطل|تطل|مطل|مطله) (?:ع|على|علي) (?:ال)?(?:حوش|حديقه|فناء|ارتداد)(?: (?:ال)?خلفي(?:ه)?)?|(?:ع|على|علي) (?:ال)?(?:حوش|حديقه) (?:ال)?خلفي(?:ه)?` },
   { side: 'front', mode: 'half', re: `(?:في|ب) ?(?:ال)?(?:امام|مقدمه|قدام)|(?:ال)?امامي(?:ه)?|قدام` },
-  { side: 'back', mode: 'half', re: `(?:في|ب) ?(?:ال)?(?:خلف|ورا|وراء|عمق|اخر (?:ال)?بيت)|(?:ال)?خلفي(?:ه)?|ورا|بعيد(?:ه)? عن (?:ال)?شارع` },
+  { side: 'back', mode: 'half', re: `بعيد(?:ه)? عن (?:ال)?شارع` },
+  { side: 'back', mode: 'half', re: `(?:في|ب) ?(?:ال)?(?:خلف|ورا|وراء|عمق|اخر (?:ال)?بيت)|(?:ال)?خلفي(?:ه)?|ورا` },
   { side: 'e', mode: 'half', re: `(?:في |ب)?(?:ال)?(?:جهه|ناحيه|جانب) (?:ال)?(?:شرقي(?:ه)?|شرق)|(?:ال)?شرقي(?:ه)?|(?:جهه|ناحيه) (?:ال)?شرق|(?:في|ب) ?(?:ال)?شرق` },
   { side: 'w', mode: 'half', re: `(?:في |ب)?(?:ال)?(?:جهه|ناحيه|جانب) (?:ال)?(?:غربي(?:ه)?|غرب)|(?:ال)?غربي(?:ه)?|(?:جهه|ناحيه) (?:ال)?غرب|(?:في|ب) ?(?:ال)?غرب` },
   { side: 'n', mode: 'half', re: `(?:في |ب)?(?:ال)?(?:جهه|ناحيه|جانب) (?:ال)?(?:شمالي(?:ه)?|شمال)|(?:ال)?شمالي(?:ه)?|(?:جهه|ناحيه) (?:ال)?شمال|(?:في|ب) ?(?:ال)?شمال` },
@@ -59,12 +68,13 @@ const PLACES = [
   { side: 'front', mode: 'touch', re: EN('(?:facing|on|overlooking|onto) the street|street side') },
   { side: 'back', mode: 'touch', re: EN('overlooking the (?:garden|back ?yard|yard)') },
   { side: 'front', mode: 'half', re: EN('(?:at|in|to) the front') },
-  { side: 'back', mode: 'half', re: EN('(?:at|in|to) the (?:back|rear)|away from the street') },
+  { side: 'back', mode: 'half', re: EN('away from the street') },
+  { side: 'back', mode: 'half', re: EN('(?:at|in|to) the (?:back|rear)') },
   ...['north', 'south', 'east', 'west'].map(d => ({ side: d[0], mode: 'half', re: EN(`(?:(?:on|at|in|to) the )?${d}(?:ern)?(?: side)?`) })),
   { side: 'center', mode: 'center', re: EN('(?:in the )?(?:center|centre|middle)(?: of the (?:house|villa))?') },
   { side: 'right', mode: 'half', re: EN('(?:on|to) the right(?: of the entrance)?') },
   { side: 'left', mode: 'half', re: EN('(?:on|to) the left(?: of the entrance)?') },
-].map(p => ({ ...p, rx: new RegExp(`(?<![${AR}])و?(?:${p.re})${END}`, 'g') }));
+].map(p => ({ ...p, mode: p.mode === 'half' && !/بعيد|away/.test(p.re) ? 'zone' : p.mode, rx: new RegExp(`(?<![${AR}])و?(?:${p.re})${END}`, 'g') }));
 const FLOORS = [
   { floor: 'upper', re: `(?:في |ب)?(?:ال)?(?:دور|طابق) (?:ال)?(?:علوي|اول|ثاني|فوق)|(?:في |ب)?(?:ال)?علوي|فوق|${EN('upstairs|(?:on the )?(?:first|upper|second|top) floor')}` },
   { floor: 'ground', re: `(?:في |ب)?(?:ال)?(?:دور|طابق) (?:ال)?ارضي|(?:في |ب)(?:ال)?ارضي|(?:ال)?ارضي(?:ه)?|تحت(?! (?:ال)?(?:درج|سلم))|${EN('downstairs|(?:on the )?ground floor')}` },
@@ -315,6 +325,29 @@ function placeDeficit(r, side, mode, B) {
   return Math.max(0, .5 - f) * (side[0] === 'x' ? w : d);
 }
 /**
+ * «X في الخلف» (zone) — تحقق معماري لا مركزي: يعيد { def, why } حيث def = 0 متحقق، وإلا مقدار العجز بالمتر
+ * (أقل الطرق الثلاث كلفة: مسافة ملامسة الواجهة، أو بُعد المركز عن الثلث الخارجي + عقوبة غرفة سكنية بينه وبين الواجهة).
+ *  others: كل المستطيلات المبنية في الدور نفسه (للانكشاف نحو الجهة)، habit: الغرف السكنية غير الخدمية (عدا X وأقرانه).
+ */
+export function zoneCheck(r, side, B, others, habit) {
+  const w = B.x1 - B.x0, d = B.y1 - B.y0, c = ctr(r), ext = side[0] === 'x' ? w : d;
+  const tdef = placeDeficit(r, side, 'touch', B);
+  // بُعد المركز عن تلك الواجهة كنسبة من امتداد المبنى (0 = عليها)
+  const f = side === 'y0' ? (c.y - B.y0) / d : side === 'y1' ? (B.y1 - c.y) / d : side === 'x0' ? (c.x - B.x0) / w : (B.x1 - c.x) / w;
+  if (tdef <= .45) return { def: 0, how: 'touch' };
+  if (f <= .5 && openToward(r, side, others)) return { def: 0, how: 'open' };
+  // غرفة سكنية بين X والواجهة على امتداد عرضه: خلفه (نحو الجهة) وتتقاطع مع امتداده بمتر على الأقل (أو نصف عرضه)
+  const ax = side[0] === 'y' ? ['x0', 'x1'] : ['y0', 'y1'], hi = side.endsWith('1'), span = r[ax[1]] - r[ax[0]];
+  const between = habit.filter(o => o !== r && Math.min(r[ax[1]], o[ax[1]]) - Math.max(r[ax[0]], o[ax[0]]) >= Math.min(1.0, span * .5) && (hi ? o[side.replace('1', '0')] >= r[side] - .3 : o[side.replace('0', '1')] <= r[side] + .3));
+  const third = Math.max(0, f - 1 / 3) * ext;
+  const zdef = third + (between.length ? 2.5 + .5 * between.length : 0);
+  if (zdef <= 0) return { def: 0, how: 'third' };
+  return { def: Math.min(tdef, zdef), tdef, third, between, f };
+}
+// أنواع الكتل والغرف السكنية غير الخدمية (تمنع «في الخلف» إن وقعت بين الفراغ والواجهة)
+const HABIT_KIND = new Set(['suite', 'majlis', 'family', 'dining', 'office', 'prayer']);
+const HABIT_TYPE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'office', 'prayer']);
+/**
  * عقوبة القواعد لترتيب مرشح. يعيد { base, p:[بلا مرآة، بمرآة] } — الجهات الجانبية تعتمد على المرآة،
  * فيختار المولّد المرآة التي تحقق طلب العميل.
  */
@@ -329,7 +362,9 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
       for (const m of [0, 1]) {
         const side = canonSide(entry, r.side, !!m); if (!side) continue;
         const solids = [...placed.map(p => p.r), ...circ.filter(c => c.id !== 'stair' && c.id !== 'stairs').map(c => c.r)];
-        const pens = A.map(a => { const def = r.mode === 'touch' && openToward(a, side, solids) ? 0 : placeDeficit(a, side, r.mode, B); return def > (r.mode === 'touch' ? .05 : 0) ? 45 + 18 * def : 0; });
+        const habit = r.mode === 'zone' ? [...placed.filter(p => HABIT_KIND.has(p.block.kind) && !A.includes(p.r)).map(p => p.r), ...circ.filter(c => c.id === 'hall' && !A.includes(c.r)).map(c => c.r)] : [];
+        // المدخل في جهة: باب الدخول الثاني يحققه المولّد على تلك الواجهة؛ هنا يبقى تقريب النصف كما كان
+        const pens = A.map(a => { const def = r.mode === 'zone' && r.a !== 'entrance' ? zoneCheck(a, side, B, solids, habit).def : r.mode === 'touch' && openToward(a, side, solids) ? 0 : placeDeficit(a, side, r.mode, B); return def > (r.mode === 'touch' ? .05 : 0) ? 45 + 18 * def : 0; });
         const pen = any ? Math.min(...pens) : pens.reduce((x, y) => x + y, 0);
         if (side[0] !== 'x') { base += pen; break; } p[m] += pen;
       }
@@ -433,8 +468,23 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
     if (r.kind === 'place') {
       const side = docSide(r.side, entry), where = r.side === 'front' ? 'الواجهة الأمامية' : r.side === 'back' ? 'الخلف' : r.side === 'right' ? 'يمين الداخل' : r.side === 'left' ? 'يسار الداخل' : COMPASS_AR[r.side];
       const lvRooms = a => rooms.filter(o => o.level === a.level && o !== a && !['courtyard', 'terrace'].includes(o.type));
-      const fail = a => !(r.mode === 'touch' && openToward(a, side, lvRooms(a))) && placeDeficit(a, side, r.mode, B) > (r.mode === 'touch' ? .45 : r.mode === 'avoid' ? .15 : 0);
+      // zone: الغرف السكنية غير الخدمية في الدور نفسه (عدا الفراغ وأقرانه في القاعدة نفسها)
+      const zc = a => zoneCheck(a, side, B, lvRooms(a), lvRooms(a).filter(o => HABIT_TYPE.has(o.type) && !A.includes(o)));
+      const fail = a => r.mode === 'zone' ? zc(a).def > 0 : !(r.mode === 'touch' && openToward(a, side, lvRooms(a))) && placeDeficit(a, side, r.mode, B) > (r.mode === 'touch' ? .45 : r.mode === 'avoid' ? .15 : 0);
+      // «مدخل ثاني من الشارع الشرقي»: المدخل في جهة = باب دخول خارجي على واجهة تلك الجهة (أيًّا كانت الغرفة التي يفتح عليها)
+      if (r.a === 'entrance' && ['zone', 'half', 'touch'].includes(r.mode)) {
+        const g = doc.levels[0].id, onSide = o => { const w = doc.walls.find(x => x.id === o.wall); if (!w) return false; const ax = side[0], v = B[side]; return Math.abs(w.a[ax] - v) < .35 && Math.abs(w.b[ax] - v) < .35; };
+        const doorAt = doc.openings.find(o => o.entry && o.level === g && onSide(o));
+        if (doorAt) { res.why = `باب دخول خارجي على واجهة ${where}.`; out.push(res); continue; }
+      }
       const bad = S[r.a]?.any ? (A.every(fail) ? A.slice(0, 1) : []) : A.filter(fail);
+      if (bad.length && r.mode === 'zone') {
+        const z = zc(bad[0]), parts = [`لا يلامس الواجهة ${where === 'الخلف' ? 'الخلفية' : where === 'الواجهة الأمامية' ? 'الأمامية' : 'من جهة ' + where} (يبعد ${r1(z.tdef)} م)`];
+        if (z.third > 0) parts.push(`ومركزه على ${Math.round(z.f * 100)}% من عمق المبنى من تلك الجهة لا في ثلثه الخارجي`);
+        if (z.between?.length) parts.push(`و${z.between.length > 1 ? 'تقع' : 'يقع'} بينه وبين تلك الواجهة «${z.between.map(o => o.name).join('» و«')}»`);
+        const menC = r.a === 'majlis' && side === docSide('back', entry) && rooms.some(x => x.name === 'مدخل الرجال' || x.name === 'مجلس الرجال' || x.name === 'المجلس');
+        res.ok = false; res.why = `«${bad[0].name}» ${parts.join('، ')}.` + (menC ? ' مجلس الرجال يبقى على الواجهة الأمامية ليأخذ مدخله المستقل عن العائلة، وهذه الجهة خلف المبنى.' : ''); out.push(res); continue;
+      }
       if (bad.length && r.mode === 'center') { res.ok = false; res.why = `«${bad[0].name}» ليس في وسط المبنى.`; out.push(res); continue; }
       if (bad.length && r.mode === 'avoid') { res.ok = false; res.why = `«${bad[0].name}» يلامس جدار ${where}.`; out.push(res); continue; }
       const menConflict = r.a === 'majlis' && side !== docSide('front', entry) && rooms.some(x => x.name === 'مدخل الرجال' || x.name === 'مجلس الرجال' || x.name === 'المجلس');

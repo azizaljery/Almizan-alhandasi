@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, qualityGates, difference, partiTrees, programV2 } from '../dist/villa-layout-v2.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
-import { docRooms } from '../dist/rules.mjs';
+import { docRooms, verifyRules } from '../dist/rules.mjs';
 import { createSession, redesign } from '../dist/design-session.mjs';
 import { serialize } from '../dist/draw/doc.mjs';
 import { CASES } from '../scripts/acceptance-cases.mjs';
@@ -20,7 +20,8 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
   for (const id of ['C1', 'C6', 'C10']) {
     const { C, r, land } = caseReq(id);
     const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
-    assert.ok(out.designs.length >= 3, id + ': ثلاثة بدائل على الأقل');
+    // C6 («المطبخ في الخلف» صارمًا ومقاسات صريحة): لا يُعرض بديل مطبخه وسط البيت، فقد يقل العدد إلى اثنين
+    assert.ok(out.designs.length >= (id === 'C6' ? 2 : 3), id + ': عدد البدائل');
     for (const d of out.designs) {
       assert.deepEqual(qualityGates(d.doc), [], `${id} ${d.pat}`);
       const { rooms } = docRooms(d.doc), beds = rooms.filter(x => x.type === 'bedroom' || x.type === 'master'), m = beds.find(x => x.type === 'master');
@@ -56,12 +57,15 @@ test('C8: التعديل على كل بديل يحفظ النمط والغرف �
     const after = JSON.parse(session.designs[1].doc);
     assert.deepEqual([...reply.done].sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort(), d.pat + ' ' + JSON.stringify(reply.failed));
     assert.deepEqual(prog(after), prog(d.doc), d.pat + ': غرف البرنامج نفسها');
+    // «في الخلف» صارمًا (الجولة الرابعة): على الواجهة الخلفية أو في ثلثها الخلفي بلا غرفة سكنية خلفه
+    { const k = verifyRules(after, [{ id: 'K', kind: 'place', a: 'kitchen', side: 'back', mode: 'zone', text: 'المطبخ في الخلف' }], { entry: 's' })[0]; assert.equal(k.ok, true, d.pat + ': ' + k.why); }
     if (session.designs[1].pat === d.pat) { kept++; assert.ok(difference(d.doc, after) <= .15, `${d.pat}: فرق ${difference(d.doc, after)}`); }
     else assert.ok(reply.patternChanged && /أقرب توزيع/.test(reply.patternChanged.why_ar), 'تغيّر النمط يُقال صراحة');
     if (reply.unchanged) assert.equal(session.designs[1].doc, session.designs[0].doc, 'متحقق أصلًا: المخطط نفسه حرفيًا');
   }
-  // يُحفظ النمط حيث يوجد حل موضعي (نصف البدائل على الأقل هنا)، وحيث لا يوجد يُقال ذلك صراحة (فوق)
-  assert.ok(kept >= Math.ceil(out.designs.length / 2), `حُفظ النمط في ${kept} من ${out.designs.length}`);
+  // «في الخلف» صارمًا (الجولة الرابعة): أنماط جناح النوم فيها يشغل الخلف كله لا حل موضعي لها (المبادلة بغرفة نوم تجعل
+  // المطبخ لا يُبلغ إلا عبر ممر النوم فتُرفض)، فيُنتقل إلى أقرب نمط ويُقال ذلك (فوق)؛ ويُحفظ النمط حيث يوجد حل
+  assert.ok(kept >= 1, `حُفظ النمط في ${kept} من ${out.designs.length}`);
 });
 
 test('خيارات التقييم الجاهزة تبقى إعادة توليد (لا تعديلًا موضعيًا): «الممرات كثيرة» تستبعد أنماط الرواق والحوش', () => {
@@ -83,7 +87,7 @@ test('الحركة: متوسط نسبة المداخل والممرات في ب�
 test('C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وتنظيمان مختلفان للعلوي على الأقل (أجنحة على المحور / رواق خلفي)', () => {
   const { r, land } = caseReq('C7');
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: 4 });
-  assert.ok(out.designs.length >= 3);
+  assert.ok(out.designs.length >= 2);
   for (const d of out.designs) for (const s of docRooms(d.doc).rooms.filter(x => x.name === 'الدرج')) assert.ok(s.area <= 18, `${d.pat}: الدرج ${s.area} م²`);
   const ups = new Set(out.designs.map(d => d.pat.split('/')[1].slice(0, 2)));
   assert.ok(ups.size >= 2, [...ups].join(' '));

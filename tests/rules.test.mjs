@@ -59,11 +59,19 @@ for (const [name, text, land] of [
   ['المجلس شرقًا والمطبخ غربًا (مدخل جنوبي)', 'المجلس في الجهة الشرقية والمطبخ في الجهة الغربية', LAND()],
   ['المجلس شرقًا (مدخل شمالي)', 'المجلس في الجهة الشرقية', LAND({ entries: ['n'], streets: ['n'] })],
   ['الماستر بعيدة عن المجلس والخادمة قرب المطبخ', 'الماستر بعيدة عن المجلس، وغرفة خادمة قريبة من المطبخ', LAND()],
-  ['أرض ضيقة والمطبخ في الأمام', 'المطبخ في الأمام', LAND({ width: 12 })],
 ]) test('تنفيذ فعلي في المخطط: ' + name, async () => {
   const { ledger, req } = await design(text, BASE, land);
   assert.ok(req.rules.length >= 1, 'فُهمت القاعدة');
   for (const r of req.rules) { const x = ledger.find(l => l.id === r.id); assert.ok(x, 'في السجل: ' + r.text); assert.equal(x.ok, true, r.text + ' — ' + x.why); }
+});
+
+// أرض ضيقة (12 م) و«المطبخ في الأمام»: بالتحقق الصارم (zone) لا يُحسب مطبخٌ خلف المجلس «في الأمام». الصف الأمامي
+// لا يتسع للمجلس والمدخل والمطبخ معًا على هذا العرض؛ فيُختبر صدق السجل: إما منفّذ فعلًا، أو «فشل» بسبب مقيس يسمّي العائق
+test('صدق السجل: أرض ضيقة والمطبخ في الأمام', async () => {
+  const { ledger, req, out } = await design('المطبخ في الأمام', BASE, LAND({ width: 12 }));
+  const x = ledger.find(l => l.id === req.rules[0].id), { rooms, B } = docRooms(out.doc), k = rooms.find(r => r.name === 'المطبخ');
+  if (x.ok) assert.ok(k.y0 - B.y0 <= .45 || (k.y0 + k.y1) / 2 - B.y0 <= (B.y1 - B.y0) / 3, 'منفّذ = يلامس الواجهة الأمامية أو في ثلثها');
+  else assert.match(x.why, /لا يلامس الواجهة الأمامية/);
 });
 
 test('تحقق مستقل: «المجلس في الجهة الشرقية» = مركزه شرق منتصف المبنى في إحداثيات المستند', async () => {
@@ -78,15 +86,16 @@ test('تحقق مستقل: «المجلس في الجهة الشرقية» = م�
   assert.equal(x.ok, false); assert.match(x.why, /مدخله المستقل/);
 });
 
-// أرض ضيقة 15 م مع «الغرف في الخلف» و«الصالة على الحوش الخلفي» معًا: المولّد الأول ينفّذهما؛ الثاني لا يجد بعد نمطًا
-// ضيقًا يحققهما معًا (فجوة معروفة مسجلة في تقرير التكامل) — فيُختبر الأول تنفيذًا والثاني صدقًا: البند غير المنفّذ
-// يظهر «فشل» بسبب مقيس، لا «نُفّذ».
-test('تنفيذ فعلي في المخطط: الغرف في الخلف والصالة على الحوش الخلفي (المولّد الأول)، وصدق السجل في الثاني', async () => {
+// أرض ضيقة 15 م مع «الغرف في الخلف» و«الصالة على الحوش الخلفي» معًا: المولّد الأول ينفّذ «الصالة على الحوش»؛ و«الغرف في
+// الخلف» بالتحقق الصارم (كل غرفة على الواجهة الخلفية أو في ثلثها الخلفي بلا غرفة سكنية خلفها) لا يتحقق فيه لغرفة جانبية في
+// منتصف العمق — فيُختبر صدق السجل في المولّدين: البند غير المنفّذ يظهر «فشل» بسبب مقيس، لا «نُفّذ».
+test('صدق السجل: الغرف في الخلف والصالة على الحوش الخلفي (المولّدان)', async () => {
   const text = 'غرف النوم في الخلف والصالة تطل على الحوش الخلفي', land = LAND({ width: 15 });
   const req = extractRequirements(text, { counts: { ...BASE } }); req.counts = { ...BASE, ...req.counts };
   const v1 = await generateInitialDesign({ land, counts: req.counts, requirements: req, idea: text, engine: 'v1' });
   const l1 = verifyRequest(v1.doc, req, { entry: 's' });
-  for (const r of req.rules) { const x = l1.find(l => l.id === r.id); assert.equal(x.ok, true, r.text + ' — ' + x.why); }
+  assert.equal(l1.find(l => l.kind === 'place' && l.text.includes('الصالة')).ok, true);
+  for (const x of l1) { assert.equal(x.ok, x.status === 'done'); if (!x.ok) assert.ok(x.why.length > 8, x.text); }
   const v2 = await generateInitialDesign({ land, counts: req.counts, requirements: req, idea: text });
   for (const x of verifyRequest(v2.doc, req, { entry: 's' })) { assert.equal(x.ok, x.status === 'done'); if (!x.ok) assert.ok(x.why.length > 8, x.text); }
 });
@@ -102,8 +111,13 @@ test('السجل يكشف ما لم يُنفَّذ بسبب مقيس، ولا ي
   const fake = extractRequirements('المطبخ في الخلف', { counts: BASE });
   // نقيس قاعدة لم تُعطَ للمولّد: قد تتحقق صدفة أو لا، والمهم أن الحكم من الهندسة
   const led = verifyRequest(out.doc, fake, { entry: 's' });
-  const { rooms, B } = docRooms(out.doc), k = rooms.find(r => r.name === 'المطبخ');
-  assert.equal(led[0].ok, (k.y0 + k.y1) / 2 >= (B.y0 + B.y1) / 2);
+  // «في الخلف» (zone): يلامس الواجهة الخلفية، أو مركزه في الثلث الخلفي ولا غرفة سكنية بينه وبينها — حساب مستقل هنا
+  const { rooms, B } = docRooms(out.doc), k = rooms.find(r => r.name === 'المطبخ'), d = B.y1 - B.y0, cy = (k.y0 + k.y1) / 2;
+  const behind = rooms.filter(o => o.level === k.level && ['bedroom', 'master', 'majlis', 'living', 'dining', 'office'].includes(o.type) && o.y0 >= k.y1 - .3 && Math.min(o.x1, k.x1) - Math.max(o.x0, k.x0) >= Math.min(1, (k.x1 - k.x0) / 2));
+  const open = !rooms.some(o => o !== k && o.level === k.level && !['courtyard', 'terrace'].includes(o.type) && Math.min(o.x1, k.x1) - Math.max(o.x0, k.x0) > .3 && o.y0 >= k.y1 - .05);
+  const want = B.y1 - k.y1 <= .45 || (open && cy - B.y0 >= d / 2) || (B.y1 - cy <= d / 3 && !behind.length);
+  assert.equal(led[0].ok, want, led[0].why);
+  if (led[0].ok) assert.ok(cy >= (B.y0 + B.y1) / 2, 'المنفّذ في النصف الخلفي على الأقل');
   const none = verifyRequest(out.doc, extractRequirements('المكتب قرب المدخل', { counts: BASE }), { entry: 's' });
   assert.equal(none.find(x => x.kind === 'near').ok, false); assert.match(none.find(x => x.kind === 'near').why, /لا يوجد/);
 });
