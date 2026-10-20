@@ -11,6 +11,8 @@ export function normalizeAr(text) {
   return String(text || '')
     .replace(/[ً-ْـ]/g, '')
     .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+    // الفاصلة العشرية العربية «٥٫٥» = 5.5 (كانت تُقرأ 5 وتسقط الكسر)، وفاصل الآلاف «١٬٢٠٠» يُحذف
+    .replace(/(\d|[٠-٩])٫(?=\d|[٠-٩])/g, '$1.').replace(/(\d|[٠-٩])٬(?=\d|[٠-٩])/g, '$1')
     .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
     .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
     // «4x5» و«4 م x 5» و«4*5» أبعاد؛ حرف x داخل كلمة إنجليزية («next») يبقى كما هو
@@ -60,8 +62,10 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   const c = { ...counts };
   const quoteOf = origMapper(text);
 
-  // حمام لكل غرفة
-  if (has(/(كل|جميع) (ال)?غرف(ه)?( ال)?(نوم)? ?(ب|مع|فيها|لها|عندها|داخلها)? ?(حمام|دوره مياه|دورات مياه)|حمام (خاص )?(لكل|في كل) غرفه|(كل|جميع) (ال)?غرف ماستر|غرف(ه)? ماستر (كلها|جميعها)|حمامات داخليه/)) {
+  // حمام لكل غرفة — ونفيه («مو لازم كل غرفة بحمام»، «ما أبي كل غرفة بحمام»، «ما يحتاج حمام لكل غرفة») حمامات مشتركة لا العكس
+  const ensuiteNeg = has(/(?<![\u0600-\u06FF])و?(?:مو|مب|ما|لا|ليس|مش|غير) ?(?:لازم|شرط|ضروري|ابي|ابغي|ابغا|نبي|نبغي|اريد|نريد|يحتاج|احتاج|نحتاج)? ?(?:يكون |تكون )?(?:(?:كل|جميع) (?:ال)?غرف(?:ه)?[^،,.]{0,14}(?:حمام|دوره مياه)|حمام (?:خاص )?(?:لكل|في كل) غرفه)/);
+  if (ensuiteNeg) { prefs.sharedBaths = true; understood.push('غرف النوم (عدا الرئيسية) تتشارك دورات المياه'); }
+  else if (has(/(كل|جميع) (ال)?غرف(ه)?( ال)?(نوم)? ?(ب|مع|فيها|لها|عندها|داخلها)? ?(حمام|دوره مياه|دورات مياه)|حمام (خاص )?(لكل|في كل) غرفه|(كل|جميع) (ال)?غرف ماستر|غرف(ه)? ماستر (كلها|جميعها)|حمامات داخليه/)) {
     prefs.allEnsuite = true; understood.push('كل غرفة نوم بحمامها الملحق');
   }
   else if (has(/حمام(ات)? مشترك|(تتشارك|يتشاركون|تشترك|مشتركه في) (ال)?(حمام|دوره مياه)|حمام (بين|لكل) (كل )?غرفتين|دوره مياه مشتركه|(مو|ما|لا|ليس) (لازم|شرط|ضروري) (كل غرفه|حمام لكل)/)) {
@@ -151,10 +155,31 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   // القواعد المكانية وعدم الوجود وعدد الأدوار
   const R = extractRules(t);
   const rules = R.rules;
-  for (const k of R.absent) {
+  // «ما نحتاج مجلس نساء» / «ما أبي مجلس نساء»: بدون مجلس النساء فقط — كانت تُقرأ «بدون مجلس» فتُلغى المجالس كلها
+  // ومنها مجلس الرجال الذي طلبه العميل. يبقى مجلس واحد ما لم ينفِ المجلس نفسه في موضع آخر.
+  const NO_WOMEN = `(?<![\\u0621-\\u064A])[وف]?(?:بدون|بلا|من غير|(?:ما|لا) ?(?:ابي|ابغي|ابغا|نبي|نبغي|نبغا|اريد|نريد|احتاج|نحتاج|يحتاج)) (?:ال)?(?:مجلس|مجالس) (?:ال)?(?:نساء|حريم|نسوان)`;
+  let absentKeys = R.absent;
+  if (absentKeys.includes('majlis') && new RegExp(NO_WOMEN).test(t) && !extractRules(t.replace(new RegExp(NO_WOMEN, 'g'), ' ')).absent.includes('majlis')) {
+    absentKeys = absentKeys.filter(k => k !== 'majlis'); c.majlis = c.majlis === 0 ? 0 : Math.min(c.majlis ?? 1, 1); understood.push('بدون مجلس نساء (مجلس واحد)');
+  }
+  for (const k of absentKeys) {
     if (k === 'majlis') { c.majlis = 0; understood.push('بدون مجلس'); }
     else if (k === 'dining') { c.dining = 0; understood.push('بدون غرفة طعام'); }
     else { delete extras[k]; understood.push('بدون ' + ({ office: 'مكتب', prayer: 'مصلى', maid: 'غرفة خادمة', driver: 'غرفة سائق' }[k] || k)); }
+  }
+  // «احذف المكتب»، «شيل المصلى»، «ما نبغى خدامة»، «ما فيه داعي لغرفة خادمة ولا سواق»: حذف أو رفض صريح —
+  // (حدود الكلمة بالحروف العربية وحدها: الفاصلة «،» من نطاق U+0600 فلا تُعدّ حرفًا)
+  // كانت تُقرأ طلبَ إضافة (الكلمة وحدها تكفي لإضافة الفراغ). تُحذف من الإضافات وتُسجَّل «بدون …».
+  const DROP_WORD = { مكتب: 'office', مصلي: 'prayer', مصلا: 'prayer', خادمه: 'maid', خدامه: 'maid', شغاله: 'maid', عامله: 'maid', سائق: 'driver', سواق: 'driver', غسيل: 'laundry', مخزن: 'storage', مستودع: 'storage' };
+  const DROP_AR = { office: 'مكتب', prayer: 'مصلى', maid: 'غرفة خادمة', driver: 'غرفة سائق', laundry: 'غرفة غسيل', storage: 'مخزن' };
+  const DW = Object.keys(DROP_WORD).join('|');
+  const DROP_RE = new RegExp(`(?<![\\u0621-\\u064A])[وف]?(?:(?:احذف|احذفو|احذفوا|حذف|شيل|شيلو|شيلوا|امسح|الغ|الغي|ازل|ازيل|بلاش)(?: لي| لنا)? |(?:ما|لا) ?(?:ابي|ابغي|ابغا|نبي|نبغي|نبغا|اريد|نريد|احتاج|نحتاج|يحتاج) |(?:ما )?(?:فيه |في )?(?:له |لها )?داعي ?)(?:ال|لل|ل)?(?:غرفه )?(?:ال)?(${DW})(?![\\u0621-\\u064A])((?: ولا (?:ال|لل|ل)?(?:غرفه )?(?:ال)?(?:${DW})(?![\\u0621-\\u064A]))*)`, 'g');
+  const drop = new Set();
+  for (const m of t.matchAll(DROP_RE)) { drop.add(DROP_WORD[m[1]]); for (const w of (m[2] || '').matchAll(new RegExp(`(${DW})`, 'g'))) drop.add(DROP_WORD[w[1]]); }
+  for (const k of drop) {
+    delete extras[k];
+    for (let i = understood.length - 1; i >= 0; i--) if (understood[i].startsWith(DROP_AR[k])) understood.splice(i, 1);
+    understood.push('بدون ' + DROP_AR[k]);
   }
   if (R.noCorridors) { prefs.noCorridors = true; understood.push('أقل ما يمكن من الممرات (الحركة عبر الصالة)'); }
   if (R.floors) { prefs.floors = R.floors; understood.push(R.floors === 2 ? 'دوران (أرضي وأول)' : 'دور واحد'); }
@@ -206,7 +231,7 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
   return {
     counts: c, extras, prefs, areas, dims, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear,
-    textCounts, givenCounts: { ...counts }, absent: [...R.absent], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
+    textCounts, givenCounts: { ...counts }, absent: [...new Set([...absentKeys, ...drop])], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
   };
 }
 

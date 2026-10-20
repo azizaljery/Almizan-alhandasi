@@ -27,6 +27,22 @@ test('القياس صادق: الفهم الكامل F1=1، والمخطط مق�
   assert.deepEqual(THRESHOLDS, { areaPct: 5, shift: .5 });
 });
 
+test('إصلاحات المحلل التي كشفتها المدوّنة: الرفض والحذف لا يُقرآن إضافة، والفاصلة العشرية العربية، ونفي «حمام لكل غرفة»', async () => {
+  const { extractRequirements } = await import('../dist/requirements.mjs');
+  const r = t => extractRequirements(t);
+  let q = r('احذف المكتب'); assert.ok(!q.extras.office && q.absent.includes('office'));
+  q = r('شيل المصلى'); assert.ok(!q.extras.prayer && q.absent.includes('prayer'));
+  q = r('ما نبغى خدامة ساكنة عندنا'); assert.ok(!q.extras.maid && q.absent.includes('maid'));
+  q = r('ما فيه داعي لغرفة خادمة ولا سواق، ما نحتاجهم'); assert.ok(!q.extras.maid && !q.extras.driver);
+  q = r('أبي غرفة خادمة ومكتب ومصلى'); assert.ok(q.extras.maid && q.extras.office && q.extras.prayer && !q.absent.length);
+  q = r('مجلس واحد يكفي، يعني ما نحتاج مجلس نساء'); assert.equal(q.counts.majlis, 1); assert.ok(!q.absent.includes('majlis'));
+  q = r('بدون مجلس'); assert.equal(q.counts.majlis, 0);
+  q = r('مو لازم كل غرفة بحمام، يتشاركون عادي'); assert.ok(q.prefs.sharedBaths && !q.prefs.allEnsuite);
+  q = r('وما يحتاج حمام لكل غرفة'); assert.ok(q.prefs.sharedBaths && !q.prefs.allEnsuite);
+  q = r('كل غرفة بحمامها'); assert.ok(q.prefs.allEnsuite);
+  q = r('غرفة النوم الرئيسية بعرض ٤ وطول ٥٫٥ م'); assert.deepEqual([q.dims.master.w, q.dims.master.l], [4, 5.5]);
+});
+
 test('الأداة تعمل على حالتين: طلب طويل وجلسة تعديل (دوران) مع إثبات الحفظ على المستند', { timeout: 60000 }, async () => {
   const L = await runLong(LONG[0]);
   for (const f of FIELDS) assert.ok(f in L.score.per, f);
