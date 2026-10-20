@@ -94,7 +94,9 @@ test('الحركة: متوسط نسبة المداخل والممرات في ب�
 test('C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وتنظيمان مختلفان للعلوي على الأقل (أجنحة على المحور / رواق خلفي)', () => {
   const { r, land } = caseReq('C7');
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: 4 });
-  assert.ok(out.designs.length >= 2);
+  // الجولة السابعة: الطعام ≥ 3.3 م صافيًا جعل التنظيم الأرضي الثاني (compact:c3p) لا يتسع لمحور السلم، وبقية الأرضيات الناجحة
+  // نسخ شكلية من الأول (اختلاف معماري 0.10 لأن العلوي نفسه) — قرار المالك: لا حشو للعدد؛ يكفي بديل واحد سليم والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 1); if (out.designs.length < 4) assert.match(out.shortfall_ar || '', /من 4 مطلوبة/);
   for (const d of out.designs) for (const s of docRooms(d.doc).rooms.filter(x => x.name === 'الدرج')) assert.ok(s.area <= 18, `${d.pat}: الدرج ${s.area} م²`);
   // الجولة الخامسة: تنظيم الدور الأرضي نفسه يختلف بين البدائل (لا علوي مختلف على أرضي واحد)
   const grounds = out.designs.map(d => d.pat.split('/')[0]);
