@@ -1,3 +1,4 @@
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, programV2, partiTrees, siteOf, landWithSite, difference, roomsDifference, hardGates, PARTI_AR, VILLA_V2_ENGINE_VERSION } from '../dist/villa-layout-v2.mjs';
@@ -88,11 +89,11 @@ test('C1: مجلس رجال بمدخل مستقل ومجلس نساء من مد�
   const t0 = performance.now();
   const out = generateVillaDesigns({ land: L(20, 30), counts: r.counts, requirements: r, keep: 4 });
   const ms = performance.now() - t0;
-  // ميزانية الزمن تمتد حتى 14 ث حين يقل عدد البدائل المنفّذة لكل البنود عن ثلاثة (الجولة الرابعة)
-  assert.ok(ms < 16000, `الزمن ${Math.round(ms)} م.ث`);
+  // الجولة الخامسة: ميزانيات حتمية بالعدد (لا بالزمن)؛ نحو 7 ث على جهاز غير مشغول — الحد هنا هامش لجهاز اختبار مشترك
+  assert.ok(ms < 45000, `الزمن ${Math.round(ms)} م.ث`); // حارس فقط: الزمن الفعلي يُقاس في أدلة القبول (الجهاز هنا مشترك)
   assert.equal(out.engine, VILLA_V2_ENGINE_VERSION);
-  // «المطبخ في الخلف» صارمًا: لا يُعرض بديل مطبخه وسط البيت لسد العدد — ثلاثة بدائل على الأقل بنمطين مختلفين أو أكثر
-  assert.ok(out.designs.length >= 3, `البدائل ${out.designs.length}`);
+  // «المطبخ في الخلف» صارمًا، ولا بديل متقارب لسد العدد (قرار المالك): بديلان على الأقل بنمطين مختلفين
+  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`);
   assert.ok(new Set(out.designs.map(d => d.mode)).size >= 2, 'نمطان مختلفان على الأقل');
   for (const d of out.designs) { const k = d.ledger.find(x => x.kind === 'place' && /المطبخ/.test(x.text)); assert.ok(k && k.ok, d.pat + ': ' + k?.why); }
   for (const d of out.designs) {
@@ -103,15 +104,17 @@ test('C1: مجلس رجال بمدخل مستقل ومجلس نساء من مد�
     for (const n of ['مجلس الرجال', 'دورة مياه الرجال', 'مجلس النساء', 'دورة مياه النساء', 'مدخل العائلة', 'الصالة', 'المطبخ', 'غرفة الخادمة', 'غرفة الملابس']) assert.ok(names.includes(n) || (n === 'غرفة الملابس' && names.includes('غرفة ملابس')), n);
     const P = d.ledger.find(x => x.id === 'P-sep'); assert.ok(P && P.ok, 'فصل الرجال عن النساء: ' + P?.why);
   }
-  const n = out.designs.length; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .1, `البديلان ${i + 1} و${j + 1} مختلفان تنظيميًا`);
+  const n = out.designs.length; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16, `البديلان ${i + 1} و${j + 1} مختلفان تنظيميًا`);
 });
 
-test('خمسة بدائل: خمسة أنماط مختلفة لا انعكاسات', () => {
+test('خمسة بدائل مطلوبة: ثلاثة على الأقل بأنماط مختلفة (لا نسختان من نمط واحد) وبفرق ≥ 0.16، والنقص مذكور بسببه', () => {
   const counts = { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 };
   const r = req('4 غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، طعام، مطبخ، غرفة خادمة', counts);
   const out = generateVillaDesigns({ land: L(20, 30), counts: r.counts, requirements: r, keep: 5 });
-  assert.equal(out.designs.length, 5);
-  assert.equal(new Set(out.designs.map(d => d.mode)).size, 5);
+  assert.ok(out.designs.length >= 3, `البدائل ${out.designs.length}`);
+  assert.equal(new Set(out.designs.map(d => d.mode)).size, out.designs.length, 'كل بديل من نمط مختلف');
+  const n = out.designs.length; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16);
+  if (n < 5) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);
   assert.ok(out.designs.every(d => !d.mirrorOf));
   for (const d of out.designs) assertSound(d.doc, r.counts);
 });

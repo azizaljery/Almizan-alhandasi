@@ -1,5 +1,6 @@
 // نموذج المتطلبات v2: درجات الطلب (إلزام/تفضيل/منع)، الأبعاد الحقيقية، لا إسقاط صامت (التغطية)، التعارضات قبل التوليد،
 // التعديلات (نقل المطبخ، الواجهة الحجرية مع إبقاء التوزيع)، وصدق السجل (لا «نُفّذ» لما لم يُقَس).
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { extractRules, rulePenalty, verifyRequest, LEVEL_WEIGHT, SUBJECTS, docStairs, docRooms } from '../dist/rules.mjs';

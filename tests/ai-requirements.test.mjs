@@ -1,5 +1,6 @@
 // فهم Claude المكاني: مخطط الأداة في الوكيل، والتنقيح الصارم، والدمج مع الفهم المحلي، ووصوله إلى التصميم.
 // كل ردود المزوّد محاكاة؛ لا مفتاح حقيقي ولا اتصال.
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AI_SUBJECTS, sanitizeAiRequirements } from '../dist/ai-requirements.mjs';

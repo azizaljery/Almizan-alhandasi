@@ -1,4 +1,5 @@
 // تعليمات العميل المكانية: الفهم (القواعد) ثم التنفيذ الفعلي في المخطط الناتج (سجل التنفيذ مقيس من المستند).
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { extractRules, verifyRequest, docRooms, canonSide } from '../dist/rules.mjs';

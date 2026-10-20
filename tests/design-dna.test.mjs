@@ -1,3 +1,4 @@
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildDNA, weightsFromDNA, rankByDNA, geometryFingerprint, fingerprint, DNA_AXES } from '../dist/design-dna.mjs';

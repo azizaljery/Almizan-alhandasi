@@ -1,5 +1,6 @@
 // الجولة الرابعة: تحقق معماري صادق من «X في الخلف» (zone)، وتنفيذه فعلًا في المولّد الثاني (C1، C6، C8 وتعديله)،
 // وغرفة كبار السن ملاصقة للصالة مع صالة غير شريطية بمساحة بقدر البرنامج (C2)، و«الماستر بعيدة عن الدرج» (C7).
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

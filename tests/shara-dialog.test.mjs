@@ -1,5 +1,6 @@
 // شرعاء تتعاون: تفهم النفي واليمين واليسار و«جنب بعض» و«بين»، وتقول بصدق ما لم تفهمه،
 // وتطبّق التعديل على التصميم المعروض نفسه بدل توزيع جديد، وترد بما نفّذته وما لم تستطعه.
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { extractRules, docRooms, doorInfo } from '../dist/rules.mjs';

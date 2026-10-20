@@ -1,3 +1,4 @@
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSession, redesign, approve, saveSession, loadSession, FEEDBACK, summarizeDoc, zoneOf, currentDoc } from '../dist/design-session.mjs';

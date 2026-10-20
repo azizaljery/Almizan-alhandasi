@@ -1,5 +1,6 @@
 // الجولة الثالثة على المولّد الثاني: تعديل موضعي يحفظ النمط، وبوابات جودة معمارية على المخطط المرسوم،
 // وحركة أقل، وسلم بمقاس سلم لا صالة، وتنظيمات جديدة (مجلس على الواجهة الجانبية، مدخل في الركن، الصالة في الخلف).
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, qualityGates, difference, partiTrees, programV2 } from '../dist/villa-layout-v2.mjs';
@@ -21,7 +22,10 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
     const { C, r, land } = caseReq(id);
     const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
     // C6 («المطبخ في الخلف» صارمًا ومقاسات صريحة): لا يُعرض بديل مطبخه وسط البيت، فقد يقل العدد إلى اثنين
-    assert.ok(out.designs.length >= (id === 'C6' ? 2 : 3), id + ': عدد البدائل');
+    // قرار المالك (الجولة الخامسة): لا يُرفع العدد على حساب الجودة — بديلان على الأقل مختلفان فعلًا (≥ 0.16)، ويُذكر سبب النقص
+    assert.ok(out.designs.length >= 2, id + ': عدد البدائل');
+    for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16, `${id}: البديلان ${i + 1} و${j + 1} متقاربان`);
+    if (out.designs.length < (C.want || 4)) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);
     for (const d of out.designs) {
       assert.deepEqual(qualityGates(d.doc), [], `${id} ${d.pat}`);
       const { rooms } = docRooms(d.doc), beds = rooms.filter(x => x.type === 'bedroom' || x.type === 'master'), m = beds.find(x => x.type === 'master');
@@ -89,6 +93,7 @@ test('C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وت�
   const out = generateVillaTwoFloors({ land, counts: r.counts, requirements: r, keep: 4 });
   assert.ok(out.designs.length >= 2);
   for (const d of out.designs) for (const s of docRooms(d.doc).rooms.filter(x => x.name === 'الدرج')) assert.ok(s.area <= 18, `${d.pat}: الدرج ${s.area} م²`);
-  const ups = new Set(out.designs.map(d => d.pat.split('/')[1].slice(0, 2)));
-  assert.ok(ups.size >= 2, [...ups].join(' '));
+  // الجولة الخامسة: تنظيم الدور الأرضي نفسه يختلف بين البدائل (لا علوي مختلف على أرضي واحد)
+  const grounds = out.designs.map(d => d.pat.split('/')[0]);
+  assert.equal(new Set(grounds).size, grounds.length, grounds.join(' '));
 });

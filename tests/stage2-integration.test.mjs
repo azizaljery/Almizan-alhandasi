@@ -1,5 +1,6 @@
 // تكامل المرحلة الثانية: المتطلبات v2 + المولّد الثاني + المراجعة المستقلة (plan-review) بوابةً نهائية،
 // والجلسة ومسار البيت على المولّد الثاني (والأول احتياط بـ engine:'v1').
+import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, siteOf, landWithSite, difference } from '../dist/villa-layout-v2.mjs';
