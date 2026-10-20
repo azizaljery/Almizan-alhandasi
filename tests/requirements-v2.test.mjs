@@ -201,7 +201,7 @@ test('C8: «انقل المطبخ بجوار الطعام وخل المطبخ ف
   const prog = d => docRooms(JSON.parse(d)).rooms.filter(r => ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen'].includes(r.type)).map(r => r.name).sort();
   assert.deepEqual(prog(session.designs[1].doc), prog(session.designs[0].doc));
 });
-test('C9: «احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر» — facade {material:stone} وkeepLayout، والمخطط نفسه، والبند «بانتظار العرض» لا «نُفّذ»', async () => {
+test('C9: «احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر» — facade {material:stone} وkeepLayout، والهندسة نفسها حرفيًا، والمادة في المستند ويعرضها المجسّم (plan-edit)', async () => {
   const C = CASES.find(c => c.id === 'C9'), land = { floors: 1, ...C.land };
   const e = extractRequirements(C.edit, { counts: {} });
   assert.equal(e.keepLayout, true); assert.equal(e.tweaks.facade.material, 'stone'); assert.equal(e.tweaks.facade.keepLayout, true);
@@ -209,12 +209,17 @@ test('C9: «احتفظ بهذا التوزيع وغيّر الواجهة إلى 
   const req = extractRequirements(C.text, { counts: C.counts }), first = await generateInitialDesign({ land, counts: req.counts, requirements: req });
   const s0 = createSession({ land, counts: req.counts, requirements: req, result: first });
   const { session, reply } = await redesign(s0, { text: C.edit });
-  assert.equal(session.designs[1].doc, session.designs[0].doc, 'المخطط نفسه حرفيًا'); assert.ok(reply.reused && reply.unchanged);
-  assert.deepEqual(reply.done, []); assert.equal(reply.pending.length, 1); assert.match(reply.pending[0].text, /حجر/);
+  // الجولة r5 (التعديل الموضعي): الجدران والفتحات والتسميات نفسها حرفيًا، والمادة حقل في المستند (doc.finish.facade)
+  // يقرأه المجسّم (scene3d: base 'stone') — فالبند «نُفّذ» مقيسًا من المستند لا «بانتظار العرض»
+  const geom = d => { const x = JSON.parse(d); return JSON.stringify([x.walls, x.openings, x.labels]); };
+  assert.equal(geom(session.designs[1].doc), geom(session.designs[0].doc), 'الهندسة نفسها حرفيًا'); assert.ok(reply.local && reply.geometryIdentical);
+  assert.equal(JSON.parse(session.designs[1].doc).finish.facade.base, 'stone');
+  assert.ok(reply.done.some(t => /حجر/.test(t))); assert.deepEqual(reply.pending, []);
   const led = ledgerFor(session), f = led.find(x => x.id === 'F-facade');
-  assert.equal(f.status, 'pending-render'); assert.equal(f.ok, false);
+  assert.equal(f.status, 'done'); assert.equal(f.ok, true);
   // معامل عددي لاحق لا يتلف بنية الواجهة
-  const { session: s2 } = await redesign(session, { text: 'المجلس أكبر' });
+  // (إعادة التوليد صراحة: الطلب يُدمج ويُحمل؛ التعديل الموضعي يُختبر في tests/plan-edit.test.mjs)
+  const { session: s2 } = await redesign(session, { text: 'المجلس أكبر' }, { local: false });
   assert.equal(s2.input.requirements.tweaks.facade.material, 'stone'); assert.equal(s2.input.requirements.tweaks.majlisScale, 1.25);
 });
 for (const [text, mat] of [['الواجهة رخام', 'marble'], ['ابي واجهة حجرية', 'stone'], ['خل الواجهه خشب وزجاج', 'wood'], ['stone facade please', 'stone'], ['facade in brick', 'brick']]) test('الواجهة: ' + text, () => {

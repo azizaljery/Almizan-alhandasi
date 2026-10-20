@@ -272,6 +272,7 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
   for (let i = 0; i < Math.min(S.turns.length, maxTurns); i++) {
     const T = S.turns[i], before = docs[i], t1 = performance.now();
     let outcome = 'applied', reply = null, changes = [], error = null;
+    const mark = performance.now();
     try {
       const r = await redesign(s, { text: T.text });
       reply = r.reply; changes = r.changes;
@@ -292,6 +293,11 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
       questions: reply?.questions || [], patternBefore: pats[i], patternAfter: pat, patternKept: pats[i] === pat, patternChanged: reply?.patternChanged || null,
       checks, happened, ledger: { done: ledgerDone, failed: ledgerFailed, pending: ledgerPending, unchanged: reply?.unchanged ?? null, reused: reply?.reused ?? null }, claimMismatch,
       preservation: pres, violations: pres.violations.length, mainViolations: pres.mainViolations,
+      // r5: كيف نُفّذ الدور (تعديل موضعي/رجوع/سؤال/إعادة توليد صريحة/لم يُنفَّذ)، وما أعلنه الرد من تغيّرات
+      mode: reply?.mode || (outcome === 'unclear' ? 'unclear' : reply?.reused ? 'reused' : 'regenerated'), summary: reply?.summary_ar || reply?.fallback?.said_ar || null,
+      declared: (reply?.changed || reply?.fallback?.changed || []).filter(c => !c.inScope && c.kind !== 'openings').map(c => c.name),
+      undeclared: pres.violations.filter(v => !(reply?.changed || reply?.fallback?.changed || []).some(c => c.name === v.name && c.kind !== 'openings')).length,
+      fallback: reply?.fallback ? { why: reply.fallback.why_ar, said: reply.fallback.said_ar } : null, questionsAsked: (reply?.questions || []).length, replyMs: Math.round(performance.now() - mark),
     });
   }
   return { id: S.id, name: S.name, land, text: S.text, counts: S.counts, initMs, docs, turns };
@@ -314,7 +320,7 @@ window.drawPair = (rawA, rawB, li, cA, cB, hA, hB, sA, sB, foot) => { const A = 
   return true; };
 window.ready = true;</script></body></html>`;
 const C_TARGET = '#9cc3f0', C_VIOL = '#f19a9a', C_OPEN = '#f5c77a';
-async function renderAll(jobs, distRoot) {
+export async function renderAll(jobs, distRoot) {
   if (!jobs.length) return;
   const http = await import('node:http'), { readFile } = await import('node:fs/promises'), { existsSync } = await import('node:fs'), { join, normalize, extname } = await import('node:path');
   const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
@@ -351,7 +357,7 @@ function renderJobs(sess, dir) {
 // ------------------------------------------------------------------------------------------ التشغيل
 async function main() {
   const argv = process.argv.slice(2), oi = argv.indexOf('--only'), only = oi >= 0 ? new RegExp(argv[oi + 1]) : null, noPng = argv.includes('--no-png');
-  const stage = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--only')[0] || 'r4';
+  const stage = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--only')[0] || 'r5edit';
   const OUT = new URL(`../evidence/dialog/${stage}/`, import.meta.url).pathname, distRoot = new URL('../dist/', import.meta.url).pathname;
   mkdirSync(OUT + 'long', { recursive: true }); mkdirSync(OUT + 'sessions', { recursive: true });
   const summary = { stage, at: new Date().toISOString(), thresholds: THRESHOLDS, long: [], sessions: [] };
@@ -370,7 +376,7 @@ async function main() {
     sess.docs.forEach((d, i) => writeFileSync(dir + `doc-${i}.json`, serialize(d)));
     for (const t of sess.turns) writeFileSync(dir + `turn-${t.n}.json`, JSON.stringify(t, null, 1));
     if (!noPng) jobs.push(...renderJobs(sess, dir));
-    summary.sessions.push({ id: S.id, name: S.name, initMs: sess.initMs, turns: sess.turns.map(t => ({ n: t.n, text: t.text, outcome: t.outcome, happened: t.happened, failedChecks: t.checks.filter(c => !c.ok).map(c => ({ type: c.type, why: c.why, measured: c.measured })), trivial: t.happened && t.checks.every(c => c.alreadyBefore !== false) && t.checks.some(c => c.alreadyBefore === true), violations: t.preservation.violations, openingChanges: t.preservation.openingChanges.length, patternKept: t.patternKept, difference: t.preservation.difference, envelope: t.preservation.envelope, idsStable: t.preservation.idsStable, claimMismatch: t.claimMismatch, ledger: t.ledger, understood: t.understood, error: t.error?.message || null, ms: t.ms })) });
+    summary.sessions.push({ id: S.id, name: S.name, initMs: sess.initMs, turns: sess.turns.map(t => ({ n: t.n, text: t.text, outcome: t.outcome, mode: t.mode, summary: t.summary, declared: t.declared, undeclared: t.undeclared, geometryIdentical: t.preservation.geometryIdentical, happened: t.happened, failedChecks: t.checks.filter(c => !c.ok).map(c => ({ type: c.type, why: c.why, measured: c.measured })), trivial: t.happened && t.checks.every(c => c.alreadyBefore !== false) && t.checks.some(c => c.alreadyBefore === true), violations: t.preservation.violations, openingChanges: t.preservation.openingChanges.length, patternKept: t.patternKept, difference: t.preservation.difference, envelope: t.preservation.envelope, idsStable: t.preservation.idsStable, claimMismatch: t.claimMismatch, ledger: t.ledger, understood: t.understood, error: t.error?.message || null, ms: t.ms })) });
     for (const t of sess.turns) console.log(`${S.id} د${t.n} «${t.text}»: ${t.outcome} | تحقق ${t.happened}${t.happened && t.checks.some(c => c.alreadyBefore === true) && t.checks.every(c => c.alreadyBefore !== false) ? ' (كان متحققًا قبل التعديل)' : ''} | مخالفات ${t.violations} (رئيسية ${t.mainViolations}) | فتحات ${t.preservation.openingChanges.length} | نمط محفوظ ${t.patternKept} | فرق ${t.preservation.difference}${t.claimMismatch ? ' | ادعاء تنفيذ غير صحيح' : ''}`);
   }
   // الإجمالي
@@ -380,6 +386,13 @@ async function main() {
     missed: L.reduce((a, b) => a + b.missed.length, 0), wrong: L.reduce((a, b) => a + b.wrong.length, 0), dropped: L.reduce((a, b) => a + b.dropped, 0),
     turns: T.length, happened: T.filter(t => t.happened).length, happenedTrivially: T.filter(t => t.trivial).length, turnsWithViolations: T.filter(t => t.violations.length).length, violations: T.reduce((a, t) => a + t.violations.length, 0), claimMismatches: T.filter(t => t.claimMismatch).length,
     outcomes: T.reduce((a, t) => (a[t.outcome] = (a[t.outcome] || 0) + 1, a), {}),
+    // r5: طريقة تنفيذ كل دور، والمخالفات في الأدوار الموضعية وحدها (غير المعلنة منها خاصة)
+    modes: T.reduce((a, t) => (a[t.mode] = (a[t.mode] || 0) + 1, a), {}),
+    localTurns: T.filter(t => t.mode === 'local').length,
+    localTurnsWithViolations: T.filter(t => t.mode === 'local' && t.violations.length).length,
+    localViolations: T.filter(t => t.mode === 'local').reduce((a, t) => a + t.violations.length, 0),
+    localUndeclared: T.filter(t => t.mode === 'local').reduce((a, t) => a + (t.undeclared || 0), 0),
+    undeclared: T.reduce((a, t) => a + (t.undeclared || 0), 0),
   };
   writeFileSync(OUT + 'summary.json', JSON.stringify(summary, null, 1));
   console.log('الإجمالي:', JSON.stringify(summary.totals));
