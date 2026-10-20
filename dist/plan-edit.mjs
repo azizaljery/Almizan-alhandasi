@@ -416,7 +416,7 @@ export function parseEdit(text, doc, { more = null, history = [], lastSubject = 
     // قواعد الدور نفسه عن الفراغ المضاف («أضف مكتب في الخلف»): يُختار موضع الإضافة الذي يحققها من البداية
     // (لا إضافة في الأمام ثم تبديل يحتاج إذنًا)؛ وقاعدة الموضع تبقى نية مستقلة تُقاس بعد الإضافة
     const addRules = (more.rules || []).filter(r => ['place', 'near', 'adjacent'].includes(r.kind) && (r.a === k || r.b === k));
-    intents.push({ op: 'add', kind, bath: !!(v && v.bath), ext: !!(v && v.ext), rules: addRules.length ? addRules : null, near: nearRule ? (nearRule.a === k ? nearRule.b : nearRule.a) : null, text_ar: `إضافة ${AR_KIND[kind]}${v && v.bath ? ' بحمام' : ''}${nearRule ? ' ' + nearRule.text.replace(/^.*?(?=قريب|بجوار|جنب)/, '') : ''}` });
+    intents.push({ op: 'add', kind, bath: !!(v && v.bath), ext: !!(v && v.ext), rules: addRules.length ? addRules : null, near: nearRule ? (nearRule.a === k ? nearRule.b : nearRule.a) : null, text_ar: `إضافة ${AR_KIND[kind]}${v && v.bath ? ' بحمام' : ''}${nearRule ? ` (${nearRule.text})` : ''}` });
     if (nearRule) used.add('rule:' + nearRule.text);
   }
   const beds = rooms.filter(r => r.type === 'bedroom' || r.type === 'master').length;
@@ -754,7 +754,10 @@ function extensionCands(doc, I, kind, spec, opts) {
         // مواضع: محاذاة لطرفي حد المضيف ووسطه
         const runGaps = s0 => coverage(doc, H.level, ax, c, s0, s0 + Wc);
         // مواضع: محاذاة لطرفي حد المضيف ووسطه، وتجاوزه إلى جاره مع بقاء 1.3 م على المضيف للباب (تترك نافذته)
-        for (const p0 of [e.s0, e.s1 - Wc, (e.s0 + e.s1) / 2 - Wc / 2, e.s0 - Wc + 1.3, e.s1 - 1.3]) {
+        // (الجولة السابعة) ومواضع تشارك جدارًا عموديًا قائمًا خارج المضيف (امتداد سابق كغرفة الغسيل): الكتلة تلاصقه فلا
+        // يبقى بينهما شق، ويُستعمل جداره نفسه
+        const near = doc.walls.filter(w => w.level === H.level && axisOfWall(w) === other(ax) && (out1 > 0 ? Math.max(acrossOf(w.a, other(ax)) === undefined ? 0 : 0, ...[w.a, w.b].map(q => acrossOf(q, ax))) > c + E : Math.min(...[w.a, w.b].map(q => acrossOf(q, ax))) < c - E)).map(w => alongOf(w.a, ax)).filter(v => v > e.s0 - Wc && v < e.s1 + Wc);
+        for (const p0 of [e.s0, e.s1 - Wc, (e.s0 + e.s1) / 2 - Wc / 2, e.s0 - Wc + 1.3, e.s1 - 1.3, ...near.flatMap(v => [v, v - Wc])]) {
           const q0 = R3(p0), q1 = R3(p0 + Wc);
           if (runGaps(q0).length) continue; // الكتلة يجب أن تستند إلى جدار خارجي متصل
           if (spec.door === 'host' && Math.min(q1, e.s1) - Math.max(q0, e.s0) < 1.25) continue;
@@ -774,12 +777,15 @@ function buildExtension(doc, I, kind, spec, opts, g, label) {
       const wa = axisOfWall(w); if (!wa) continue;
       const [a0, a1] = spanOf(w, wa), cc = acrossOf(w.a, wa);
       if (wa === ax) { const inner = out1 > 0 ? cc > c + E && cc < c2 + E : cc < c - E && cc > c2 - E; if (inner && a1 > q0 + E && a0 < q1 - E) fail('CLASH', 'الكتلة تتقاطع مع المبنى (' + w.id + ')'); }
-      else if (cc > q0 - E && cc < q1 + E && a1 > lo + E && a0 < hi - E) fail('CLASH', 'الكتلة تتقاطع مع المبنى (' + w.id + ')');
+      // جدار عمودي على خط حافة الكتلة نفسه (جدار امتداد ملاصق) يُشارَك ولا يُعد تقاطعًا
+      else if (cc > q0 + E && cc < q1 - E && a1 > lo + E && a0 < hi - E) fail('CLASH', 'الكتلة تتقاطع مع المبنى (' + w.id + ')');
     }
     // لا شقّ ضيق بين الكتلة وجزء آخر من المبنى (فراغ أقل من 1.3 م بين المحورين لا يُمشى فيه ولا يضيء، ويحجب نوافذ الجار)
     {
       const B = ax === 'x' ? { x0: lo, x1: hi, y0: q0, y1: q1 } : { x0: q0, x1: q1, y0: lo, y1: hi };
-      for (const w of d.walls.filter(x => x.level === lv)) {
+      // جدار يقع كله في جهة المضيف (داخل خط الاستناد) لا يصنع شقًا خارجيًا مع الكتلة (درجة في الواجهة لا شق)
+      const inner = w => { const v = [w.a, w.b].map(q => acrossOf(q, ax)); return out1 > 0 ? Math.max(...v) <= c + E : Math.min(...v) >= c - E; };
+      for (const w of d.walls.filter(x => x.level === lv && !inner(x))) {
         const sx0 = Math.min(w.a.x, w.b.x), sx1 = Math.max(w.a.x, w.b.x), sy0 = Math.min(w.a.y, w.b.y), sy1 = Math.max(w.a.y, w.b.y);
         const gap = Math.hypot(Math.max(0, sx0 - B.x1, B.x0 - sx1), Math.max(0, sy0 - B.y1, B.y0 - sy1));
         if (gap > .05 && gap < 1.3) fail('SLIVER', `شق ضيق ${r2(gap)} م بين الكتلة والمبنى`);
@@ -803,7 +809,9 @@ function buildExtension(doc, I, kind, spec, opts, g, label) {
       else { d.openings = d.openings.filter(x => x !== o); removed.push(clone(o)); }
     }
     const P = (acr, al) => PT(ax, acr, al);
-    addWall(d, lv, P(c, q0), P(c2, q0), tExt); addWall(d, lv, P(c, q1), P(c2, q1), tExt);
+    // جدار جانبي على خط جدار قائم يغطيه كله (امتداد سابق ملاصق): لا يُكرَّر
+    const sideWall = q => { if (!coverage(d, lv, other(ax), q, lo, hi).length) return; addWall(d, lv, P(c, q), P(c2, q), tExt); };
+    sideWall(q0); sideWall(q1);
     const outer = addWall(d, lv, P(c2, q0), P(c2, q1), tExt);
     const bathW = opts.bath && spec.bath && !g.rotated && !g.stack ? spec.bath.w : 0;
     // الحمام في الطرف البعيد عن المضيف (أو أي طرف للسائق)
@@ -860,6 +868,8 @@ function carveCands(doc, I, kind, spec, opts, label) {
     // المانح من منطقة الفراغ نفسها: الخدمة من الخدمة؛ والصالة/الممر للمصلى والمكتب وغرفة النوم فقط
     if (!D.rect || !(spec.hosts === '*' || spec.hosts.includes(D.type) || (['living', 'corridor'].includes(D.type) && ['prayer', 'office', 'bedroom'].includes(kind)))) continue;
     if (D.area < needA + (D.type === 'living' ? 18 : D.type === 'kitchen' ? 9 : 6)) continue;
+    // مصلى للضيوف «قرب المجلس» لا يُقتطع من الصالة العائلية: بابه إليها فيعبر الضيف القسم العائلي
+    if (kind === 'prayer' && opts.near === 'majlis' && ['living', 'corridor'].includes(D.type)) continue;
     for (const s of SIDES) {
       const G = sideGeom(D, s), habitable = spec.win > 0;
       const extHere = D.sides[s].some(e => e.nb === 'outside');
@@ -897,34 +907,45 @@ function carveCands(doc, I, kind, spec, opts, label) {
   return out.filter(c => c.doc).map(c => ({ ...c, penalty: .5 }));
 }
 function nextBedName(I) { let n = 2; const names = new Set(roomList(I).map(r => r.name)); while (names.has(`غرفة نوم ${n}`)) n++; return n; }
+// (الجولة السابعة) مقاس مدمج للفراغ المضاف حين لا يتسع المقاس التصميمي بجوار المضيف المطلوب: مصلى لشخصين أو ثلاثة 2.5 × 2.8 م،
+// ومكتب 2.6 × 3.0 م — يُجرَّب قبل إعادة توزيع البيت كله، ويُقال المقاس في الرد
+const ADD_COMPACT = { prayer: { w: 2.5, d: 2.8 }, office: { w: 2.6, d: 3.0 } };
 function doAdd(doc, it, req) {
-  const I = inspect(doc), spec = ADD_SPEC[it.kind]; if (!spec) return { ok: false, why_ar: 'نوع غير مدعوم' };
+  const I = inspect(doc), spec0 = ADD_SPEC[it.kind]; if (!spec0) return { ok: false, why_ar: 'نوع غير مدعوم' };
   const { request, entry } = ctxOf(doc, req);
   const n = it.kind === 'bedroom' ? nextBedName(I) : null;
   const ens = it.kind === 'bedroom' && !!(req?.prefs?.allEnsuite);
-  const label = { name: it.kind === 'bedroom' ? `غرفة نوم ${n}` : spec.name, bath: it.kind === 'bedroom' ? (ens ? `حمام غرفة ${n}` : null) : it.bath && spec.bath ? spec.bath.name : null };
-  const opts = { bath: !!label.bath };
-  const cands = extensionCands(doc, I, it.kind, spec, opts).map(({ g, penalty }) => ({ ...buildExtension(doc, I, it.kind, spec, opts, g, label), penalty: penalty + (g.s && doc.entry && compassSide(g.s) === (entry || 's') ? .6 : 0) }));
-  const allCands = cands;
-  if (!opts.bath) cands.push(...carveCands(doc, I, it.kind, spec, opts, label));
+  const label = { name: it.kind === 'bedroom' ? `غرفة نوم ${n}` : spec0.name, bath: it.kind === 'bedroom' ? (ens ? `حمام غرفة ${n}` : null) : it.bath && spec0.bath ? spec0.bath.name : null };
+  const opts = { bath: !!label.bath, near: it.near || null };
   const req2 = { ...request, counts: { ...request.counts } };
   const nearR = it.near ? [{ id: 'N', kind: 'near', a: it.kind, b: it.near, text: 'قرب', level: 'must' }] : null;
   // كل قواعد الدور عن المضاف أولًا (الموضع والقرب معًا)؛ إن لم يحققها موضع، القرب وحده كما كان
   const allR = it.rules?.length ? it.rules.map((r, i) => ({ ...r, id: 'A' + i, level: r.level || 'must' })) : null;
-  const checkWith = rule => Ia => {
-    const r = [...Ia.rooms.values()].find(x => x.name === label.name); if (!r) return { ok: false, why: 'لم تُنشأ' };
-    if (r.area < spec.w * spec.d * .7) return { ok: false, why: 'أصغر من اللازم' };
-    if (rule) for (const v of verifyRules(Ia.model.doc, rule, { entry })) if (!v.ok) return { ok: false, why: v.why };
-    return { ok: true, measured: { area: r2(r.area) } };
-  };
   const scope = new Set(); // المضاف جديد: ما تغيّر غيره يُحسب
-  const okCands = allCands.filter(c => c.doc);
-  let { best, tried, consent } = allR ? choose(doc, okCands, { scope, request: req2, check: checkWith(allR), strict: req?.strict || false }) : { best: null, tried: [], consent: null };
-  if (!best && !consent) ({ best, tried, consent } = choose(doc, okCands, { scope, request: req2, check: checkWith(nearR), strict: req?.strict || false }));
+  const attempt = spec => {
+    const cands = extensionCands(doc, I, it.kind, spec, opts).map(({ g, penalty }) => ({ ...buildExtension(doc, I, it.kind, spec, opts, g, label), at: `${g.H.name}:${g.s}:${r2(g.q0)}`, penalty: penalty + (g.s && doc.entry && compassSide(g.s) === (entry || 's') ? .6 : 0) }));
+    if (!opts.bath) cands.push(...carveCands(doc, I, it.kind, spec, opts, label));
+    const checkWith = rule => Ia => {
+      const r = [...Ia.rooms.values()].find(x => x.name === label.name); if (!r) return { ok: false, why: 'لم تُنشأ' };
+      if (r.area < spec.w * spec.d * .7) return { ok: false, why: 'أصغر من اللازم' };
+      if (rule) for (const v of verifyRules(Ia.model.doc, rule, { entry })) if (!v.ok) return { ok: false, why: v.why };
+      return { ok: true, measured: { area: r2(r.area) } };
+    };
+    const okCands = cands.filter(c => c.doc);
+    let res = allR ? choose(doc, okCands, { scope, request: req2, check: checkWith(allR), strict: req?.strict || false }) : { best: null, tried: [], consent: null };
+    if (!res.best && !res.consent) res = choose(doc, okCands, { scope, request: req2, check: checkWith(nearR), strict: req?.strict || false });
+    if (globalThis.__peDebug) console.error('ADD tried', spec.w + '×' + spec.d, cands.length, res.tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 40), cands.filter(c => !c.doc).map(c => c.err + ' @' + c.at).slice(0, 60));
+    return res;
+  };
+  let { best, tried, consent } = attempt(spec0), compact = null;
+  if (!best && !consent && ADD_COMPACT[it.kind]) {
+    const sc = { ...spec0, ...ADD_COMPACT[it.kind] }, r = attempt(sc);
+    if (r.best || r.consent) { ({ best, consent } = r); compact = sc; } tried = [...tried, ...r.tried];
+  }
   if (!best && consent) return consentAsk({ text_ar: it.text_ar || `إضافة ${label.name}` }, consent, req?.strict);
-  if (globalThis.__peDebug) console.error('ADD tried', cands.length, tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 40), cands.filter(c => !c.doc).map(c => c.err).slice(0, 40));
   if (!best) return { ok: false, why_ar: `لم أجد موضعًا لـ${label.name} داخل خطوط الارتداد ولا غرفة مناسبة أقتطع منها دون كسر بوابة (${[...new Set(tried.flatMap(x => x.why))].slice(0, 3).join('، ') || 'لا مرشح'}).` };
-  return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, removedOpenings: best.removedOpenings || [], added: label };
+  const how = compact ? `${best.how_ar} — بمقاس مدمج ${compact.w}×${compact.d} م لأن المقاس المعتاد ${spec0.w}×${spec0.d} م لا يتسع بجوارها` : best.how_ar;
+  return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: how, removedOpenings: best.removedOpenings || [], added: label };
 }
 const compassSide = s => ({ x0: 'w', x1: 'e', y0: 's', y1: 'n' }[s]);
 

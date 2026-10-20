@@ -8,7 +8,7 @@ import { extractRequirements, detectConflicts } from '../dist/requirements.mjs';
 import { parseEdit, applyEdits, inspect, compareDocs, KEEP } from '../dist/plan-edit.mjs';
 import { createSession, redesign, ledgerFor, currentDoc } from '../dist/design-session.mjs';
 import { evaluateGates } from '../dist/plan-review.mjs';
-import { doorInfo } from '../dist/rules.mjs';
+import { doorInfo, verifyRules } from '../dist/rules.mjs';
 
 const DOC = (s, n) => parseDoc(readFileSync(new URL(`../evidence/dialog/r4b/sessions/${s}/doc-${n}.json`, import.meta.url), 'utf8'));
 const REQ = { counts: { bedrooms: 4, majlis: 1, kitchens: 1, dining: 1 }, entry: 's' };
@@ -172,4 +172,32 @@ test('سؤال الإذن: مقاس يحتاج تصغير غرفة لم يذكر
   const k = [...inspect(currentDoc(yes.session)).rooms.values()].find(x => x.name === 'المطبخ'), w = Math.min(k.net.x1 - k.net.x0, k.net.y1 - k.net.y0), l = Math.max(k.net.x1 - k.net.x0, k.net.y1 - k.net.y0);
   assert.ok(Math.abs(w - 4) <= .35 && Math.abs(l - 5) <= .35, `${w}×${l}`);
   assert.ok(yes.reply.unrequested.length >= 1, 'المانح معلن في الرد'); assert.match(yes.reply.summary_ar, /تغيّر أيضًا/);
+});
+
+// ---- الجولة السابعة
+const FIX = n => parseDoc(readFileSync(new URL(`./fixtures/${n}.json`, import.meta.url), 'utf8'));
+test('(r7) «أضف مصلى قريب من المجلس» بجوار امتداد سابق (غرفة الغسيل): مصلى مدمج ملاصق للمجلس يُدخل إليه منه، بلا شق ولا جدار مكرر', () => {
+  const d = FIX('r7-s5-after-laundry'), more = extractRequirements('أضف مصلى قريب من المجلس', { counts: {} });
+  const p = parseEdit('أضف مصلى قريب من المجلس', d, { more }), r = applyEdits(d, p, { req: { counts: { bedrooms: 3, majlis: 1, kitchens: 1, dining: 1 }, entry: 's' } });
+  assert.equal(r.status, 'local', JSON.stringify(r.results.map(x => x.why_ar)));
+  const I = inspect(r.doc), pr = [...I.rooms.values()].find(x => x.name === 'المصلى'), mj = [...I.rooms.values()].find(x => x.name === 'المجلس');
+  assert.ok(pr && pr.area >= 5.5, `المصلى ${pr?.area}`);
+  assert.ok(pr.links.some(l => l.to === mj.id), 'باب المصلى إلى المجلس (مسار الضيف لا يعبر القسم العائلي)');
+  assert.deepEqual(unrequested(d, r.doc, ['المصلى']), []);
+  const key = w => [w.a.x, w.a.y, w.b.x, w.b.y].map(v => v.toFixed(2)).sort().join(',');
+  const keys = r.doc.walls.map(key); assert.equal(new Set(keys).size, keys.length, 'لا جدار مكرر');
+  assert.match(r.results[0].how_ar, /مقاس مدمج/);
+});
+test('(r7) التعديل الموضعي لا يكسر بندًا سابقًا متحققًا: «المكتب ورى» لا يُنفَّذ بتبادل يبعد الخادمة عن المطبخ', () => {
+  const d = FIX('r7-maid-kitchen-back'), text = 'خل المكتب ورى';
+  const more = extractRequirements('ابي مكتب في الخلف', { counts: {} }); more.extras = { office: {} };
+  const rules = [{ id: 'R1', kind: 'near', a: 'maid', b: 'kitchen', text: '«غرفة الخادمة» قرب «المطبخ»', level: 'must' }, { id: 'R2', kind: 'place', a: 'kitchen', side: 'back', mode: 'half', text: '«المطبخ» في الخلف', level: 'must' }];
+  // بإذن العميل («نعم») أيضًا: بلا هذا الحارس كان التبادل يُنفَّذ («تبادلت المكتب وغرفة الخادمة») فتبعد الخادمة عن المطبخ
+  const p = parseEdit(text, d, { more }), r = applyEdits(d, p, { req: { counts: { bedrooms: 3, majlis: 1, kitchens: 1, dining: 1 }, rules, entry: 's', consent: true } });
+  const after = r.status === 'local' ? r.doc : d;
+  const v = verifyRules(after, rules, { entry: 's' });
+  assert.ok(v.every(x => x.ok), v.map(x => x.why).join(' | '));
+  assert.ok(!r.results.some(x => /تبادلت/.test(x.how_ar || '') && /الخادمة/.test(x.how_ar || '')));
+  // ولا سؤال إذن يعرض تبادلًا مع غرفة الخادمة
+  for (const x of r.results) assert.ok(!/غرفة الخادمة/.test(x.ask || ''), x.ask);
 });
