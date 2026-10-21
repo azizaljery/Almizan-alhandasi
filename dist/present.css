@@ -127,4 +127,4 @@ table.gates tr.bad td{color:#7a2a1d}
 table.gates .why{display:block;color:#6b6a5f;font-size:12.5px}
 /* (الجولة الثامنة) الجوال: الترويسة لا تلتصق (كانت تغطي ثلث الشاشة في العرض ثلاثي الأبعاد بزرّيها)، والمجسّم قبل لوحة التحكم */
 @media(max-width:600px){.ph{position:static}.ph .btn{padding:7px 12px;font-size:13px}}
-@media(max-width:860px){.v3 .stage{order:-1}}
+@media(max-width:860px){.v3{grid-template-rows:60vh auto}.v3 .stage{order:-1}}
