@@ -110,7 +110,8 @@ test('مسار البيت والجلسة: الثاني افتراضيًا، وا
 test('C8: تعديل المطبخ يُنفَّذ فعلًا (بجوار الطعام وفي الخلف) مع بقاء غرف البرنامج، وتغيّر النمط يُقال صراحة', async () => {
   const { C, r, land } = caseReq('C8');
   const first = await generateInitialDesign({ land, counts: r.counts, requirements: r });
-  const { session, reply } = await redesign(createSession({ land, counts: r.counts, requirements: r, result: first }), { text: C.edit });
+  let { session, reply } = await redesign(createSession({ land, counts: r.counts, requirements: r, result: first }), { text: C.edit });
+  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
   assert.deepEqual([...reply.done].sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort(), JSON.stringify(reply.failed));
   const after = JSON.parse(session.designs[1].doc);
   const led = verifyRequest(after, { rules: mergeRules([], extractRequirements(C.edit, { counts: {} }).rules) }, { entry: 's' });

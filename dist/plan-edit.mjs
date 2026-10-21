@@ -294,7 +294,7 @@ function rekey(B, A) {
 }
 /** التغيّرات المعلنة للعميل: غير المطلوبة أولًا (ما تغيّر خارج النطاق فوق الحدين). */
 export function describeChanges(changed) {
-  const AR = c => c.kind === 'removed' ? `«${c.name}» أزيلت` : c.kind === 'added' ? `«${c.name}» أضيفت (${c.areaAfter} م²)` : c.kind === 'renamed' ? `«${c.nameBefore}» صارت «${c.name}»` : c.kind === 'openings' ? `«${c.name}»: تغيّرت فتحاتها فقط (أبواب ${c.doors >= 0 ? '+' : ''}${c.doors}، نوافذ ${c.windows >= 0 ? '+' : ''}${c.windows})` : c.kind === 'shape' ? `«${c.name}»: شكلها صار ${c.shape === 'L' ? 'على شكل L' : 'غير مستطيل'} بالمساحة نفسها تقريبًا` : `«${c.name}» ${c.areaAfter > c.areaBefore ? 'كبرت' : 'صغرت'} من ${c.areaBefore} إلى ${c.areaAfter} م² (${c.areaPct > 0 ? '+' : ''}${c.areaPct}٪${c.shift > KEEP.shift ? `، وانزاح مركزها ${c.shift} م` : ''})`;
+  const AR = c => c.kind === 'removed' ? `«${c.name}» أزيلت` : c.kind === 'added' ? `«${c.name}» أضيفت (${c.areaAfter} م²)` : c.kind === 'renamed' ? `«${c.nameBefore}» صارت «${c.name}»` : c.kind === 'openings' ? `«${c.name}»: تغيّرت فتحاتها فقط (أبواب ${c.doors >= 0 ? '+' : ''}${c.doors}، نوافذ ${c.windows >= 0 ? '+' : ''}${c.windows})` : c.kind === 'shape' ? `«${c.name}»: شكلها صار ${c.shape === 'L' ? 'على شكل L' : 'غير مستطيل'} بالمساحة نفسها تقريبًا` : (Math.abs(c.areaPct || 0) < .5 && c.shift > KEEP.shift ? `«${c.name}» انتقلت بالمساحة نفسها (${c.areaAfter} م²؛ انزاح مركزها ${c.shift} م)` : `«${c.name}» ${c.areaAfter > c.areaBefore ? 'كبرت' : 'صغرت'} من ${c.areaBefore} إلى ${c.areaAfter} م² (${c.areaPct > 0 ? '+' : ''}${c.areaPct}٪${c.shift > KEEP.shift ? `، وانزاح مركزها ${c.shift} م` : ''})`);
   return changed.map(c => ({ ...c, text_ar: AR(c) }));
 }
 
@@ -1325,7 +1325,9 @@ function doDoor(doc, it, req) {
     if (!doorOk(A, B) && !req?.consent) return { ok: false, ask: `باب بين «${A.name}» و«${B.name}» يكشف ${A.type === 'majlis' || B.type === 'majlis' ? 'القسم العائلي للضيوف' : 'غرفة النوم على فراغ مشترك'}؛ أنفّذه مع ذلك؟ (قل «نعم» أو «لا»)`, why_ar: 'يحتاج موافقتك؛ لم أغيّر شيئًا.' };
     let made = null;
     const c = build(doc, d => { made = placeOnSegment(d, A.level, seg, 'door', .9, (seg.s0 + seg.s1) / 2); if (!made) fail('NO_ROOM', 'لا موضع حرًا لباب على الجدار المشترك'); return { desc: 'door-add', how_ar: `أُضيف باب عرضه 0.9 م في الجدار المشترك بين «${A.name}» و«${B.name}» (طوله ${r2(seg.len)} م)`, subjectDoor: made.id }; });
-    const { best, tried } = choose(doc, [c].filter(x => x.doc), { scope: new Set([A.id, B.id]), request, check: linkCheck(A.id, B.id, true) });
+    // (الجولة الحادية عشرة) باب بين المجلس والطعام طلبه العميل نصًا في هذا التعديل: شرط العميل يغلب افتراض خصوصية المجلس
+    const asked = [A.type, B.type].includes('majlis') && [A.type, B.type].includes('dining') ? { ...request, majlisDining: true } : request;
+    const { best, tried } = choose(doc, [c].filter(x => x.doc), { scope: new Set([A.id, B.id]), request: asked, check: linkCheck(A.id, B.id, true) });
     if (!best) return { ok: false, why_ar: `تعذّر فتح باب بين «${A.name}» و«${B.name}»: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || c.err || 'لا مرشح'}` };
     return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, subjectDoor: best.subjectDoor };
   }

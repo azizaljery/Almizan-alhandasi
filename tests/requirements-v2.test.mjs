@@ -193,7 +193,9 @@ test('C8: «انقل المطبخ بجوار الطعام وخل المطبخ ف
   const e = extractRequirements(C.edit, { counts: {} });
   assert.deepEqual(e.rules.map(r => [r.kind, r.a, r.b || r.side, r.quote]), [['adjacent', 'kitchen', 'dining', 'المطبخ بجوار الطعام'], ['place', 'kitchen', 'back', 'المطبخ في الخلف']]);
   const req = extractRequirements(C.text, { counts: C.counts }), first = await generateInitialDesign({ land, counts: req.counts, requirements: req });
-  const { session, reply } = await redesign(createSession({ land, counts: req.counts, requirements: req, result: first }), { text: C.edit });
+  let { session, reply } = await redesign(createSession({ land, counts: req.counts, requirements: req, result: first }), { text: C.edit });
+  // (الجولة العاشرة/الحادية عشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح المعروض في السؤال
+  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
   assert.equal(session.input.requirements.counts.bedrooms, 4, 'عدد الغرف لا يتغير');
   // النمط نفسه إن حقق الطلب، وإلا أقرب نمط يحققه — والرد يقول ذلك صراحة
   if (session.designs[1].pat !== session.designs[0].pat) { assert.ok(reply.patternChanged, 'الرد يذكر تغيّر التوزيع'); assert.equal(reply.patternChanged.from, session.designs[0].pat); }

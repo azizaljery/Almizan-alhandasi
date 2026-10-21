@@ -129,7 +129,8 @@ test('طلب تصميم آخر بنص مكاني: القاعدة الجديدة 
   const s0 = createSession({ land: LAND(), counts: req.counts, requirements: req, result: first });
   let { session, reply } = await redesign(s0, { text: 'المطبخ في الأمام والماستر بعيدة عن المجلس' });
   // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح
-  if (reply.mode === 'ask-regenerate') ({ session } = await redesign(session, { text: 'نعم' }));
+  // (الجولة الحادية عشرة) أو سؤال إذن موضعي (تغيير غرفة لم يذكرها العميل): «نعم» تعتمده
+  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session } = await redesign(session, { text: 'نعم' }));
   const rules = session.input.requirements.rules;
   assert.deepEqual(rules.map(r => r.kind + ':' + r.a + ':' + (r.side || r.b)).sort(), ['far:master:majlis', 'place:kitchen:front']);
   const led = ledgerFor(session);

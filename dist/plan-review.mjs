@@ -218,6 +218,7 @@ function requestRules(request) {
 }
 /** هل طلب العميل أن يفتح المجلس على الطعام (مقلط/طعام الضيوف/الطعام بجانب المجلس)؟ حينها يغلب طلبه الافتراضي. */
 export function majlisDiningAsked(request = {}) {
+  if (request.majlisDining) return true; // تعديل صريح من العميل («افتح باب بين المجلس والطعام»)
   const t = norm_ar(request.text);
   if (/مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)|(?:الطعام|السفره) (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?مجلس/.test(t)) return true;
   return requestRules(request).some(r => ['adjacent', 'near'].includes(r.kind) && !r.negated && r.mode !== 'avoid' && ((r.a === 'dining' && /^majlis/.test(r.b || '')) || (r.b === 'dining' && /^majlis/.test(r.a || ''))));

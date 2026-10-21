@@ -1,6 +1,7 @@
 // «اتصال الغرف عبر الأبواب والحركة الفعلية» (scripts/circulation-proof.mjs): أطوال مسارات حقيقية على شبكة مشي بخلوص جسم،
 // والعيوب المعروفة من مجموعة المخططات المعيبة تُكشف، وعيوب الدرج في بدائل C7 (الجولة التاسعة) تُكشف.
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { circulationProof, serializable } from '../scripts/circulation-proof.mjs';
 import { miniDoc, rect, loadDoc } from './_mini-docs.mjs';
@@ -40,11 +41,13 @@ test('باب 0.7 م = تنبيه عرض، وغرفة لا تُبلغ إلا عب
 
 test('مجموعة المخططات المعيبة: غرفة بلا باب، ومجلس الرجال عبر جناح العائلة، ولا مدخل، وباب يصطدم فتحه', () => {
   assert.ok(has(circulationProof(loadDoc('evidence/review-proof/corpus/unreachable-room__C1-alt-1.json')), 'UNREACHABLE', 'serious'));
-  const g = circulationProof(loadDoc('evidence/review-proof/corpus/guest-through-hall__C10-alt-1.json'));
+  const g = circulationProof(loadDoc('evidence/review-proof/corpus/guest-through-hall__C2-alt-1.json'));
   assert.ok(has(g, 'GUEST_CROSSES_FAMILY', 'serious') && has(g, 'GUEST_NO_OWN_ENTRY', 'serious'), JSON.stringify(g.findings.map(f => f.code)));
   assert.ok(has(circulationProof(loadDoc('evidence/review-proof/corpus/no-front-door__C1-alt-1.json')), 'NO_ENTRANCE', 'serious'));
-  const s = circulationProof(loadDoc('evidence/review-proof/corpus/swing-blocked__C1-alt-1.json'));
-  assert.ok(s.findings.some(f => f.code === 'DOOR_SWING' && f.elements.includes('o21')));
+  // الباب المقصود في العيب من بيانات المجموعة نفسها (target) — تُعاد صناعة المجموعة على أساس كل جولة
+  const sj = JSON.parse(readFileSync(new URL('../evidence/review-proof/corpus/swing-blocked__C1-alt-1.json', import.meta.url), 'utf8'));
+  const s = circulationProof(sj.doc);
+  assert.ok(s.findings.some(f => f.code === 'DOOR_SWING' && f.elements.includes(sj.target)), sj.target);
 });
 
 test('بدائل C7 (الجولة التاسعة): الدرج في البديل الأول مسدود البداية والوصول، والثالث يُصعد إليه ويصل كل الأدوار', () => {
