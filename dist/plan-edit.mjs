@@ -13,7 +13,7 @@
 // بعد كل تعديل: بوابات plan-review (لا بوابة كانت ناجحة ترسب)، وثبات كل غرفة أخرى مقيسًا (مساحة/مركز/فتحات).
 // إن رسب المرشح يُجرَّب التالي؛ وإن لم يوجد حل موضعي يُقال ذلك صراحة (status:'fallback') ولا يُدّعى شيء.
 import { analyzeDoc } from './draw/digest.mjs';
-import { serialize, parseDoc, nextId, fitOpening } from './draw/doc.mjs';
+import { serialize, parseDoc, nextId, fitOpening, validateDoc } from './draw/doc.mjs';
 import { mergeFinish } from './draw/doc.mjs';
 import { normalizeAr } from './requirements.mjs';
 import { verifyRules } from './rules.mjs';
@@ -256,7 +256,8 @@ export function compareDocs(before, after, { scope = new Set(), request = {}, ga
     const a = A.rooms.get(c.id), b = B.rooms.get(c.id), T = ROOM_TYPES[a.type] || ROOM_TYPES.other, wOf = r => Math.min(r.net.x1 - r.net.x0, r.net.y1 - r.net.y0), w = wOf(a);
     const circ = a.type === 'corridor' || a.type === 'entrance';
     if (w < wOf(b) - .01 && w < Math.max(T.minWidth || 0, circ ? 1.2 : 0) - 1e-6) why.push(`«${a.name}» يضيق إلى ${r2(w)} م`);
-    else if (a.area < (T.minArea || 0) - 1e-6) why.push(`«${a.name}» تصغر إلى ${r2(a.area)} م²`);
+    // (الجولة العاشرة) فراغ كان أصلًا دون حده الأدنى ويخسر أقل من 5٪ لا يُرفض به المرشح (يُعلن تغيّره كغيره)
+    else if (a.area < (T.minArea || 0) - 1e-6 && !(b.area < (T.minArea || 0) && a.area >= b.area * .95)) why.push(`«${a.name}» تصغر إلى ${r2(a.area)} م²`);
     else if (c.areaPct < (circ ? -50 : -34)) why.push(`«${a.name}» تخسر ${-c.areaPct}٪ من مساحتها`);
   }
   for (const [id, a] of A.rooms) if (!B.rooms.has(id)) changed.push({ id, name: a.name, type: a.type, kind: 'added', inScope: scope.has(id), areaAfter: r2(a.area) });
@@ -308,9 +309,9 @@ const REFS = [
   { key: 'men', re: /مجلس (?:ال)?رجال|(?<![؀-ۿ])(?:ال|بال|و|وال|لل)?مجلس(?![؀-ۿ])|majlis/, pick: rooms => rooms.filter(r => r.type === 'majlis' && r.name !== 'مجلس النساء'), label: () => 'المجلس' },
   { key: 'master', re: /ماستر|(?:غرفه (?:ال)?نوم )?(?:ال)?رئيسيه|master/, pick: rooms => rooms.filter(r => r.type === 'master'), label: () => 'غرفة النوم الرئيسية' },
   { key: 'dining', re: /(?:صاله |غرفه )?(?:ال)?طعام|(?:ال)?مقلط|(?:ال)?سفره|dining/, pick: rooms => rooms.filter(r => r.type === 'dining'), label: () => 'الطعام' },
-  { key: 'hall', re: /(?<![؀-ۿ])(?:ال|بال|و|وال)?صاله(?! (?:ال)?طعام)|living/, pick: rooms => { const l = rooms.filter(r => r.type === 'living'); const m = l.filter(r => r.name === 'الصالة'); return m.length ? m : l; }, label: () => 'الصالة' },
+  { key: 'hall', re: /(?<![؀-ۿ])(?:ال|بال|و|وال|لل)?صاله(?! (?:ال)?طعام)|living/, pick: rooms => { const l = rooms.filter(r => r.type === 'living'); const m = l.filter(r => r.name === 'الصالة'); return m.length ? m : l; }, label: () => 'الصالة' },
   { key: 'kitchen', re: /(?:ال)?مطبخ|kitchen/, pick: rooms => rooms.filter(r => r.type === 'kitchen'), label: () => 'المطبخ' },
-  { key: 'office', re: /(?<![؀-ۿ])(?:ال|بال|و|وال)?مكتب(?!ه)/, pick: rooms => rooms.filter(r => r.name === 'المكتب' || r.type === 'office'), label: () => 'المكتب' },
+  { key: 'office', re: /(?<![؀-ۿ])(?:ال|بال|و|وال|لل)?مكتب(?!ه)/, pick: rooms => rooms.filter(r => r.name === 'المكتب' || r.type === 'office'), label: () => 'المكتب' },
   { key: 'prayer', re: /مصلي|مصلا/, pick: rooms => rooms.filter(r => r.name === 'المصلى'), label: () => 'المصلى' },
   { key: 'maid', re: /خادمه|خدامه|شغاله|عامله/, pick: rooms => rooms.filter(r => r.name === 'غرفة الخادمة'), label: () => 'غرفة الخادمة' },
   { key: 'driver', re: /سائق|سواق/, pick: rooms => rooms.filter(r => r.name === 'غرفة السائق'), label: () => 'غرفة السائق' },
@@ -367,15 +368,66 @@ export function parseEdit(text, doc, { more = null, history = [], lastSubject = 
   }
   if (questions.length) return { intents: [], unhandled, questions, keep, refs };
 
+  // 0) (الجولة العاشرة) الأبواب والنوافذ: فتح باب بين غرفتين، سدّ باب، نقل باب، تكبير/تصغير/إضافة نافذة.
+  // تُقرأ قبل الحذف والتكبير: «كبّر نافذة الصالة» لا تكبّر الصالة، و«شيل باب المطبخ» لا تحذف المطبخ
+  const opRefs = ref => ref ? [ref] : [];
+  const DOOR = '(?:ال)?(?:باب|ابواب|بابين)', WIN = '(?:ال)?(?:نافذه|نوافذ|شباك|شبابيك|دريشه|دريشات)';
+  const doorAdd = new RegExp(`(?<![؀-ۿ])(?:افتح|افتحو|اضف|ضيف|سو|سوي|حط|اعمل|ابي|ابغي|نبي|ودي)(?: لي| لنا)? ${DOOR}(?: جديد)? (?:بين|من)`).test(t) || new RegExp(`(?<![؀-ۿ])(?:اربط|وصل) .+ ب${DOOR}`).test(t);
+  const doorClose = new RegExp(`(?<![؀-ۿ])(?:سد|سدو|سكر|سكرو|اقفل|اغلق|الغ|الغي|شيل|احذف|امسح|ازل|بلاش)(?: لي)? ${DOOR}`).test(t);
+  const doorMove = new RegExp(`(?<![؀-ۿ])(?:انقل|حرك|زحزح|غير مكان|بدل مكان|غير موقع)(?: لي)? ${DOOR}`).test(t);
+  const winBig = new RegExp(`(?<![؀-ۿ])(?:كبر|كبرو|وسع|وسعو|زود|زيد|عرض)(?: لي)? ${WIN}`).test(t);
+  const winSmall = new RegExp(`(?<![؀-ۿ])(?:صغر|صغرو|ضيق|قلل)(?: لي)? ${WIN}`).test(t);
+  const winAdd = new RegExp(`(?<![؀-ۿ])(?:افتح|اضف|ضيف|سو|سوي|حط|اعمل|ابي|ابغي|نبي)(?: لي| لنا)? ${WIN}`).test(t);
+  const winClose = new RegExp(`(?<![؀-ۿ])(?:سد|سكر|اقفل|الغ|الغي|شيل|احذف|امسح|بلاش)(?: لي)? ${WIN}`).test(t);
+  const takeRef = r => { for (const id of r.ids) { used.add('room:' + id); used.add('resize:' + id); } };
+  const one = r => r && r.ids.length === 1;
+  if (doorAdd || doorClose || doorMove) {
+    const rs = refs.filter(one);
+    rs.forEach(takeRef);
+    const lastDoor = lastSubject && String(lastSubject).startsWith('door:') ? String(lastSubject).slice(5) : null;
+    if (doorAdd) {
+      if (rs.length >= 2) intents.push({ op: 'door', action: 'add', a: rs[0].ids[0], b: rs[1].ids[0], aName: rs[0].names[0], bName: rs[1].names[0], text_ar: `باب بين «${rs[0].names[0]}» و«${rs[1].names[0]}»` });
+      else questions.push({ type: 'ambiguous-door', key: 'door|add', question_ar: `بين أي غرفتين تريد الباب؟ اذكر الغرفتين (مثل «افتح باب بين المطبخ والطعام») ولن أغيّر شيئًا قبلها.` });
+    } else if (doorClose) {
+      if (rs.length >= 2) intents.push({ op: 'door', action: 'close', a: rs[0].ids[0], b: rs[1].ids[0], aName: rs[0].names[0], bName: rs[1].names[0], text_ar: `سدّ الباب بين «${rs[0].names[0]}» و«${rs[1].names[0]}»` });
+      else if (rs.length === 1) intents.push({ op: 'door', action: 'close', a: rs[0].ids[0], aName: rs[0].names[0], b: /(?:خارج|برا|بره|الشارع|الحوش)/.test(t) ? 'outside' : null, text_ar: `سدّ باب «${rs[0].names[0]}»` });
+      else if (lastDoor) intents.push({ op: 'door', action: 'close', openingId: lastDoor, text_ar: 'سدّ الباب الذي عُدّل في الطلب السابق' });
+      else questions.push({ type: 'ambiguous-door', key: 'door|close', question_ar: 'أي باب تقصد؟ اذكر الغرفة أو الغرفتين (مثل «سد الباب بين المطبخ والصالة») ولن أغيّر شيئًا قبلها.' });
+    } else if (doorMove) {
+      const to = rs[1] && /(?:على|الى|جهه|ناحيه|صوب|يفتح|يطل)/.test(t.slice(rs[0].end, rs[1].index)) ? rs[1] : null;
+      if (rs.length) intents.push({ op: 'door', action: 'move', a: rs[0].ids[0], aName: rs[0].names[0], to: to ? to.ids[0] : null, toName: to ? to.names[0] : null, end: /(?:الطرف|الزاويه|الركن|الجانب|الطرف الثاني|الجهه الثانيه)/.test(t) ? 'far' : null, text_ar: `نقل باب «${rs[0].names[0]}»${to ? ` ليفتح على «${to.names[0]}»` : ''}` });
+      else if (lastDoor) intents.push({ op: 'door', action: 'move', openingId: lastDoor, text_ar: 'نقل الباب الذي عُدّل في الطلب السابق' });
+      else questions.push({ type: 'ambiguous-door', key: 'door|move', question_ar: 'باب أي غرفة تريد نقله؟ اذكرها (مثل «انقل باب غرفة نوم 2») ولن أغيّر شيئًا قبلها.' });
+    }
+  } else if (winBig || winSmall || winAdd || winClose) {
+    const rs = refs.filter(one); rs.forEach(takeRef);
+    const amountW = t.match(/(\d+(?:\.\d+)?)\s*(?:م|متر|سم)(?![؀-ۿ²2])/);
+    const width = amountW ? (/سم/.test(amountW[0]) ? +amountW[1] / 100 : +amountW[1]) : null;
+    const action = winBig ? 'bigger' : winSmall ? 'smaller' : winClose ? 'close' : 'add';
+    const AR = { bigger: 'تكبير نافذة', smaller: 'تصغير نافذة', close: 'سدّ نافذة', add: 'إضافة نافذة' };
+    if (rs.length) intents.push({ op: 'window', action, a: rs[0].ids[0], aName: rs[0].names[0], width, text_ar: `${AR[action]} «${rs[0].names[0]}»${width ? ` (${width} م)` : ''}` });
+    else questions.push({ type: 'ambiguous-window', key: 'window|' + action, question_ar: 'نافذة أي غرفة تقصد؟ اذكرها (مثل «كبّر نافذة الصالة») ولن أغيّر شيئًا قبلها.' });
+  }
+  if (questions.length) return { intents: [], unhandled, questions, keep, refs };
+  const openingOnly = intents.some(i => i.op === 'door' || i.op === 'window');
+
   // 1) التراجع والإرجاع
   const undoVerb = /(?<![؀-ۿ])(?:رجع|رجعه|رجعها|رجعو|ارجع|ارجعي|ترجع|رد|ردها|رده|تراجع|الغ(?:ي)? (?:اخر |ال)?تعديل|ابي (?:ال)?(?:تصميم|مخطط) (?:ال)?(?:سابق|اول|قبل))/;
   const asFirst = /(?:مثل|زي|كما|نفس) ?(?:ما كان|ما كانت|كان|كانت)? ?(?:ال)?(?:اول|اولي|قبل|سابق|بالبدايه|في البدايه)|(?:مكانه|مكانها|موضعه|موضعها|حجمه|حجمها|مقاسه|مقاسها) (?:ال)?(?:اول|اولي|سابق|قديم|الاصلي)|(?:ال)?(?:اول|الاصلي)(?![؀-ۿ])/;
-  if (undoVerb.test(t)) {
-    const toFirst = /(?:ال)?اول|بالبدايه|البدايه|الاصلي|الاصل/.test(t);
+  // (الجولة العاشرة) الرجوع إلى نسخة بعينها: «ارجع للنسخة الثانية»، «ابي التصميم رقم 3»
+  const ORD = { الاولي: 1, الاول: 1, الثانيه: 2, الثاني: 2, الثالثه: 3, الثالث: 3, الرابعه: 4, الرابع: 4, الخامسه: 5, الخامس: 5, السادسه: 6, السادس: 6, السابعه: 7, السابع: 7, الثامنه: 8, الثامن: 8, التاسعه: 9, التاسع: 9, العاشره: 10, العاشر: 10 };
+  const verM = t.match(/(?:النسخه|نسخه|الاصدار|اصدار|التصميم|تصميم|المخطط|مخطط)\s*(?:رقم\s*)?(\d+|الاولي|الاول|الثانيه|الثاني|الثالثه|الثالث|الرابعه|الرابع|الخامسه|الخامس|السادسه|السادس|السابعه|السابع|الثامنه|الثامن|التاسعه|التاسع|العاشره|العاشر)(?![؀-ۿ\d])/);
+  const verN = verM ? (Number(verM[1]) || ORD[verM[1]]) : null;
+  if (!openingOnly && (undoVerb.test(t) || (verN && /(?<![؀-ۿ])(?:ابي|ابغي|نبي|خل|خلي|اعرض|رجعني|ارجعني|رجعنا|نرجع)(?![؀-ۿ])/.test(t)))) {
+    const toFirst = verN ? verN === 1 : /(?:ال)?اول|بالبدايه|البدايه|الاصلي|الاصل/.test(t);
     const roomRef = refs.find(r => r.ids.length === 1 && !['person'].includes(r.key));
-    const keepRe = /(?:مع (?:ال)?(?:ابقاء|احتفاظ|حفاظ) (?:على )?|بس خل |وخل |واترك |وابق )(.+)$/;
+    const keepRe = /(?:مع (?:ال)?(?:ابقاء|احتفاظ|حفاظ) (?:على )?|بس خل |وخل |واترك |وابق |بس ابق |بس اترك )(.+)$/;
     const km = t.match(keepRe);
-    if (/(?:تصميم|مخطط|توزيع|تعديل)/.test(t) && !(roomRef && !km && asFirst.test(t) && !/(?:تصميم|مخطط|توزيع)/.test(t))) {
+    if (verN && verN > 1) {
+      const keepRefs = km ? roomRefs(km[1], rooms) : [];
+      intents.push({ op: 'restore', to: 'version', version: verN, keepIds: keepRefs.flatMap(r => r.ids), keepLabels: keepRefs.map(r => r.label), text_ar: `الرجوع إلى النسخة ${verN}${keepRefs.length ? ` مع الإبقاء على تعديل ${keepRefs.map(r => `«${r.label}»`).join(' و')}` : ''}` });
+      used.add('restore');
+    } else if ((verN === 1 || /(?:تصميم|مخطط|توزيع|تعديل|نسخه)/.test(t)) && !(roomRef && !km && asFirst.test(t) && !/(?:تصميم|مخطط|توزيع|نسخه)/.test(t))) {
       const keepRefs = km ? roomRefs(km[1], rooms) : [];
       intents.push({ op: 'restore', to: toFirst ? 'first' : 'previous', keepIds: keepRefs.flatMap(r => r.ids), keepLabels: keepRefs.map(r => r.label), text_ar: km ? `الرجوع إلى ${toFirst ? 'التصميم الأول' : 'التصميم السابق'} مع الإبقاء على تعديل ${keepRefs.map(r => `«${r.label}»`).join(' و') || km[1]}` : `الرجوع إلى ${toFirst ? 'التصميم الأول' : 'التصميم السابق'}` });
       used.add('restore');
@@ -528,7 +580,15 @@ function choose(before, cands, { scope, request, check, strict = false }) {
   }
   return { best, tried, consent };
 }
-function build(doc, fn) { const d = clone(doc); try { const meta = fn(d) || {}; sanitizeOpenings(doc, d); dropStaleDims(d); return { doc: d, ...meta }; } catch (e) { return { doc: null, err: e.message }; } }
+function build(doc, fn) {
+  const d = clone(doc);
+  try {
+    const meta = fn(d) || {}; sanitizeOpenings(doc, d); dropStaleDims(d);
+    // (الجولة العاشرة) المرشح يجب أن يكون مستندًا صالحًا (لا جدار شبه معدوم، ولا فتحة بلا جدار) — كما يفحصه parseDoc
+    const bad = validateDoc(d).filter(x => x.severity === 'error'); if (bad.length) fail('INVALID', 'مستند غير صالح: ' + bad.map(x => x.code).join('،'));
+    return { doc: d, ...meta };
+  } catch (e) { return { doc: null, err: e.message }; }
+}
 /** خط بُعد لم تعد نهايتاه على جدار (بعد حذف أو إزاحة) يُحذف بدل أن يقيس شيئًا غير موجود. */
 function dropStaleDims(doc) {
   const onWall = (p, level) => doc.walls.some(w => { if (w.level !== level) return false; const ax = axisOfWall(w); if (!ax) return false; const [a, b] = spanOf(w, ax); return near(acrossOf(p, ax), acrossOf(w.a, ax), .03) && alongOf(p, ax) >= a - .03 && alongOf(p, ax) <= b + .03; });
@@ -586,6 +646,41 @@ function moveSide(doc, I, R, s, g, extT = null, span = null) {
   dropCutFixtures(doc, R.level);
   return { strip, losers: [...new Set(nbs.filter(n => n !== 'outside' && n !== 'void'))], exterior };
 }
+/**
+ * (الجولة العاشرة) إزاحة سلسلة جدارين: جيران الغرفة R على جهة s (شريط رفيع مثل غرفة ملابس وحمام، أو مغاسل ودورة مياه)
+ * ينتقلون كما هم مسافة g بخطّي جدرانهم معًا، فتكبر R وتصغر الغرفة التي بعدهم — لا يضيق الجار ولا يختفي.
+ * الشرط: جهة R داخلية كلها، والجيران مستطيلات تتصل امتداداتهم بلا فجوة وخطهم البعيد واحد.
+ */
+function chainShift(doc, I, R, s, g) {
+  const G = sideGeom(R, s); if (!G) fail('SIDE', 'جهة غير مستقيمة');
+  const segs = R.sides[s] || []; if (!segs.length || segs.some(e => e.nb === 'outside' || e.nb === 'void')) fail('CHAIN_EXT', 'جهة خارجية');
+  const N = [...new Set(segs.map(e => e.nb))].map(id => I.rooms.get(id));
+  if (N.some(n => !n || !n.rect || n.level !== R.level)) fail('CHAIN_SHAPE', 'جار غير مستطيل');
+  const far = N[0].cl[s]; if (N.some(n => !near(n.cl[s], far, .02))) fail('CHAIN_FAR', 'خط الجيران البعيد غير واحد');
+  const opp = { x0: 'x1', x1: 'x0', y0: 'y1', y1: 'y0' }[s];
+  if (N.some(n => !near(n.cl[opp], G.c, .02))) fail('CHAIN_NEAR', 'الجيران لا يلاصقون الغرفة');
+  // امتداد الشريط على الخط: اتحاد امتدادات الجيران (قد يتجاوز R، مثل غرفة ملابس تمتد بجانب الممر)
+  const ext = N.map(n => G.ax === 'x' ? [n.cl.y0, n.cl.y1] : [n.cl.x0, n.cl.x1]).sort((a, b) => a[0] - b[0]);
+  let n0 = ext[0][0], n1 = ext[0][1]; for (const [a, b] of ext.slice(1)) { if (a > n1 + E) fail('CHAIN_GAP', 'فجوة بين الجيران'); n1 = Math.max(n1, b); }
+  if (n0 > G.s0 + E || n1 < G.s1 - E) fail('CHAIN_SHORT', 'الجيران لا يغطون الجهة');
+  const width = Math.abs(far - G.c); if (width > 3.2) fail('CHAIN_WIDE', 'الجار ليس شريطًا رفيعًا');
+  const d = G.out * g, lv = R.level;
+  // النمو: الخط البعيد أولًا (يتسع الشريط مؤقتًا) ثم القريب؛ التصغير: القريب أولًا ثم البعيد — فلا يتقاطع الخطان
+  const lines = g > 0 ? [far, G.c] : [G.c, far];
+  let curI = I; const strips = [];
+  for (const c of lines) {
+    const st = moveSpan(doc, lv, G.ax, c, n0, n1, d, { I: curI });
+    strips.push(st);
+    for (const l of doc.labels) if (l.level === lv && inStrip(l.seed, st, .05)) { const o = curI.rooms.get(l.id); if (o && o.id !== R.id && !N.some(n => n.id === o.id)) { const p = anchorOutside(o, st); if (!p) fail('LABEL', 'تسمية فقدت غرفتها.'); l.seed = { x: R3(p.x), y: R3(p.y) }; } }
+    curI = inspect(doc);
+  }
+  // تسميات الجيران وأثاثهم ينتقلون معهم
+  for (const n of N) { const l = doc.labels.find(x => x.id === n.id); if (l) l.seed = PT(G.ax, acrossOf(l.seed, G.ax) + d, alongOf(l.seed, G.ax)); }
+  for (const f of doc.fixtures) if (f.level === lv && N.some(n => f.x > n.net.x0 && f.x < n.net.x1 && f.y > n.net.y0 && f.y < n.net.y1)) { if (G.ax === 'x') f.x = R3(f.x + d); else f.y = R3(f.y + d); }
+  dropCutFixtures(doc, lv);
+  const beyond = [...new Set(N.flatMap(n => (n.sides[s] || []).map(e => e.nb)).filter(x => x !== 'outside' && x !== 'void'))];
+  return { strip: strips[strips.length - 1], losers: g > 0 ? beyond : [R.id], exterior: false, chain: { moved: N.map(n => n.id), beyond } };
+}
 /** أقصى إزاحة للخارج لجهة خارجية حتى خط الارتداد (وجه الجدار الخارجي). */
 function maxOut(doc, R, s) {
   const P = doc.plot?.polygon; if (!P?.length) return Infinity;
@@ -596,27 +691,57 @@ function maxOut(doc, R, s) {
   return s.endsWith('1') ? lim - (G.c + t) : (G.c - t) - lim;
 }
 /** مرشحو التعديل: كل جهة (أو جهتان لمقاس صريح)، بالمسافة اللازمة لتحقيق المطلوب. */
-function resizeCands(doc, I, R, spec) {
+function resizeCands(doc, I, R, spec, scopeIds = new Set([R.id])) {
   const out = [];
   const clampOut = (s, g, RR = R, base = doc) => { if (g <= 0 || !(RR.sides[s] || []).every(e => e.nb === 'outside')) return g; const m = maxOut(base, RR, s); return g > m ? Math.floor(m / .01) * .01 : g; };
   const one = (s, g, base = doc, BI = I, BR = R, tag = '') => { g = clampOut(s, g, BR, base); if (Math.abs(g) < .05) return null; const r = build(base, d => { const m = moveSide(d, BI, BR, s, g); return { desc: `${tag}${s}:${g > 0 ? '+' : ''}${r2(g)}`, moves: [...(base.moves || []), { s, g, exterior: m.exterior, losers: m.losers }] }; }); return r.doc ? r : null; };
   if (spec.target) {
-    const D = netDims(R), axes = [];
-    const want = { x: D.short === 'x' ? spec.target.w : spec.target.l, y: D.short === 'y' ? spec.target.w : spec.target.l };
-    for (const ax of ['x', 'y']) { const cur = ax === 'x' ? D.wx : D.wy, dlt = want[ax] - cur; if (Math.abs(dlt) > Math.min(.1, (spec.tol ?? .35) * .5)) axes.push({ ax, dlt }); }
-    if (!axes.length) return { already: true, cands: [] };
-    const opts = ({ ax, dlt }) => [[`${ax}0`, snap(dlt)], [`${ax}1`, snap(dlt)], ...(Math.abs(dlt) >= .6 ? [[`${ax}0|${ax}1`, snap(dlt / 2)]] : [])];
-    const applyOpt = (base, BI, BR, [ss, g]) => {
-      const parts = ss.split('|'); let cur = { doc: base, moves: base.moves || [] }, ci = BI, cr = BR;
-      for (const s of parts) { const gg = clampOut(s, g, cr, cur.doc); if (Math.abs(gg) < .03) return null; const r = build(cur.doc, d => { const m = moveSide(d, ci, cr, s, gg); return { moves: [...cur.moves, { s, g: gg, exterior: m.exterior, losers: m.losers }] }; }); if (!r.doc) return null; cur = r; ci = inspect(r.doc); cr = ci.rooms.get(R.id); if (!cr || !cr.rect) return null; }
-      return { ...cur, desc: `${ss}:${r2(g)}`, I: ci, R: cr };
-    };
-    let level1 = opts(axes[0]).map(o => applyOpt(doc, I, R, o)).filter(Boolean);
-    if (axes.length === 1) return { cands: level1 };
-    // المحور الثاني على أفضل ثلاثة من الأول (بكلفة تقديرية سريعة)
-    const quick = c => { try { return compareDocs(doc, c.doc, { scope: new Set([R.id]), gates: false, Ib: I }).cost; } catch { return 99; } };
-    level1 = level1.map(c => ({ c, k: quick(c) })).sort((a, b) => a.k - b.k).slice(0, 3).map(x => x.c);
-    for (const c1 of level1) for (const o of opts(axes[1])) { const c2 = applyOpt(c1.doc, c1.I, c1.R, o); if (c2) out.push({ ...c2, desc: c1.desc + ' + ' + c2.desc, moves: c2.moves }); }
+    // (الجولة العاشرة) المقاس في الاتجاهين (6×7 قد يكون 6 عرضًا أو 7 عرضًا — يُجرَّب الاثنان)، ومحور ضمن السماحية لا يُلمس،
+    // ولكل محور: جهة واحدة، أو الجهتان مناصفة، أو «الخارجية أولًا» (حتى خط الارتداد ثم الباقي من الجهة الأخرى)، أو إزاحة
+    // سلسلة جدارين (الجار الرفيع ينتقل كما هو وتصغر الغرفة التي بعده) — وبالمقدار الكامل أو الأدنى الذي يبلغ السماحية
+    const D = netDims(R), tol = spec.tol ?? .35;
+    const orients = [{ x: D.short === 'x' ? spec.target.w : spec.target.l, y: D.short === 'y' ? spec.target.w : spec.target.l }];
+    if (Math.abs(spec.target.w - spec.target.l) > .05) orients.push({ x: orients[0].y, y: orients[0].x });
+    let any = false;
+    for (const want of orients) {
+      const axes = [];
+      for (const ax of ['x', 'y']) { const cur = ax === 'x' ? D.wx : D.wy, dlt = want[ax] - cur; if (Math.abs(dlt) > tol + 1e-9) axes.push({ ax, dlt }); }
+      if (!axes.length) return { already: true, cands: [] };
+      any = true;
+      // الأدنى الذي يبلغ السماحية: إزاحة صغيرة (6 سم فأكثر) لا تُقرَّب إلى 5 سم أعلى فتأخذ من الجار أكثر من اللازم
+      const minAmt = dlt => { const m = Math.abs(dlt) - tol + .01; return Math.sign(dlt) * (m < .1 ? R3(Math.max(.06, m)) : snap(m)); };
+      const amounts = ({ dlt }) => [...new Set([snap(dlt), minAmt(dlt)].filter(g => Math.abs(g) >= .05))];
+      const opts = a => {
+        const o = [], s0 = `${a.ax}0`, s1 = `${a.ax}1`;
+        for (const g of amounts(a)) {
+          o.push([[s0, g]], [[s1, g]]);
+          if (Math.abs(g) >= .6) o.push([[s0, snap(g / 2)], [s1, snap(g / 2)]]);
+          for (const [se, so] of [[s0, s1], [s1, s0]]) if (g > 0 && (R.sides[se] || []).length && R.sides[se].every(e => e.nb === 'outside')) { const e = Math.floor(Math.min(g, maxOut(doc, R, se)) / .01) * .01; if (e >= .05 && g - e >= .05) o.push([[se, r2(e)], [so, snap(g - e)]]); }
+          o.push([['chain:' + s0, g]], [['chain:' + s1, g]]);
+        }
+        return o;
+      };
+      const applyOpt = (base, BI, BR, moves, prior = []) => {
+        let cur = { doc: base, moves: prior }, ci = BI, cr = BR;
+        for (const [s0, g] of moves) {
+          const chain = s0.startsWith('chain:'), s = chain ? s0.slice(6) : s0;
+          const gg = chain ? g : clampOut(s, g, cr, cur.doc); if (Math.abs(gg) < .03) return null;
+          const r = build(cur.doc, d => { const m = chain ? chainShift(d, ci, cr, s, gg) : moveSide(d, ci, cr, s, gg); return { moves: [...cur.moves, { s, g: gg, exterior: m.exterior, losers: m.losers, chain: chain ? m.chain : null }] }; });
+          if (!r.doc) return null; cur = r; ci = inspect(r.doc); cr = ci.rooms.get(R.id); if (!cr || !cr.rect) return null;
+        }
+        return { ...cur, desc: moves.map(([s, g]) => `${s}:${r2(g)}`).join('|'), I: ci, R: cr };
+      };
+      // المتبقي عن المقاس المطلوب كلفةٌ صغيرة: الأدق أولًا متى تساوت التغييرات
+      const resid = c => { const Dn = netDims(c.R); return .6 * (Math.abs(Dn.wx - want.x) + Math.abs(Dn.wy - want.y)); };
+      let level1 = opts(axes[0]).map(o => applyOpt(doc, I, R, o)).filter(Boolean).map(c => ({ ...c, penalty: resid(c) }));
+      if (axes.length === 1) { out.push(...level1); continue; }
+      // المحور الثاني على أفضل أربعة من الأول (بكلفة تقديرية سريعة)
+      // المرشح الصالح أولًا (لا يضيّق جارًا تحت حده) ثم الأقل كلفة — فلا تزاحم المرشحاتُ الراسبة السلسلةَ الصالحة الأغلى
+      const quick = c => { try { const k = compareDocs(doc, c.doc, { scope: scopeIds, gates: false, Ib: I }); return k.cost + (k.ok ? 0 : 100) + (c.penalty || 0); } catch { return 999; } };
+      level1 = level1.map(c => ({ c, k: quick(c) })).sort((a, b) => a.k - b.k).slice(0, 5).map(x => x.c);
+      for (const c1 of level1) for (const o of opts(axes[1])) { const c2 = applyOpt(c1.doc, c1.I, c1.R, o, c1.moves || []); if (c2) out.push({ ...c2, desc: c1.desc + ' + ' + c2.desc, moves: c2.moves, penalty: resid(c2) }); }
+    }
+    if (!any) return { already: true, cands: [] };
     return { cands: out };
   }
   let sides = SIDES;
@@ -645,12 +770,19 @@ function doResize(doc, it, req) {
   if (!R.rect && it.target) return { ok: false, why_ar: `«${R.name}» ليست مستطيلة؛ لا أضبط مقاس غرفة غير منتظمة موضعيًا.` };
   const { request } = ctxOf(doc, req);
   const D0 = netDims(R);
-  const { cands, already } = resizeCands(doc, I, R, it);
+  // جناح الغرفة نفسها (حمامها وغرفة ملابسها) من نطاق الطلب: «الرئيسية ٥×٦» قد تأخذ من حمامها لا من غرفة أخرى؛
+  // (الجولة العاشرة) والجناح أيضًا كل غرفة صغيرة (حمام/خزانة/ملابس) لا يُدخل إليها إلا من الغرفة نفسها
+  const privateTo = x => ['bath', 'storage'].includes(x.type) && x.links.length > 0 && x.links.every(l => l.to === R.id);
+  const suite = roomList(I).filter(x => x.id !== R.id && ((R.type === 'master' ? /^(?:حمام الرئيسية|غرفة (?:ال)?ملابس)$/.test(x.name) : /^غرفة نوم (\d+)$/.test(R.name) && x.name === `حمام غرفة ${R.name.match(/(\d+)$/)[1]}`) || privateTo(x)));
+  const scopeR = new Set([R.id, ...suite.map(x => x.id)]);
+  const { cands, already } = resizeCands(doc, I, R, it, scopeR);
   const measure = Rn => { const D = netDims(Rn); return { before: { w: r2(D0.w), l: r2(D0.l), area: r2(R.area) }, after: { w: r2(D.w), l: r2(D.l), area: r2(Rn.area) }, ratio: r2(Rn.area / R.area) }; };
   if (already) return { ok: true, already: true, doc, measured: measure(R), why_ar: `«${R.name}» مقاسها الصافي ${r2(D0.w)}×${r2(D0.l)} م ضمن السماحية أصلًا؛ لم أغيّر شيئًا.` };
   const check = (Ia) => {
     const Rn = Ia.rooms.get(R.id); if (!Rn) return { ok: false, why: 'الغرفة اختفت' };
     const m = measure(Rn);
+    // غرف الجناح تبقى صالحة: لا تضيق تحت حد نوعها ولا تختفي
+    for (const x of suite) { const y = Ia.rooms.get(x.id); if (!y) return { ok: false, why: `«${x.name}» اختفت` }; const T = ROOM_TYPES[y.type] || ROOM_TYPES.other, w = Math.min(y.net.x1 - y.net.x0, y.net.y1 - y.net.y0); if (w < (T.minWidth || 0) - 1e-6 && w < Math.min(x.net.x1 - x.net.x0, x.net.y1 - x.net.y0) - .01) return { ok: false, why: `«${x.name}» تضيق إلى ${r2(w)} م` }; }
     if (it.target) { const D = netDims(Rn), tol = it.tol ?? .35; return { ok: Math.abs(D.w - it.target.w) <= tol && Math.abs(D.l - it.target.l) <= tol, measured: m, why: `المقاس ${r2(D.w)}×${r2(D.l)}` }; }
     const want = it.factor ?? (it.area ? it.area / R.area : null);
     if (it.amount) return { ok: Math.sign(Rn.area - R.area) === Math.sign(it.amount) && Math.abs(Rn.area - R.area) > .3, measured: m, why: 'الاتجاه' };
@@ -658,19 +790,16 @@ function doResize(doc, it, req) {
     const k = Rn.area / R.area; return { ok: want > 1 ? k >= 1 + (want - 1) * .9 : k <= 1 - (1 - want) * .9, measured: m, why: `النسبة ${r2(k)}` };
   };
   const strict = req?.strict || false;
-  // جناح الغرفة نفسها (حمامها وغرفة ملابسها) من نطاق الطلب: «الرئيسية ٥×٦» قد تأخذ من حمامها لا من غرفة أخرى
-  const suite = roomList(I).filter(x => x.id !== R.id && (R.type === 'master' ? /^(?:حمام الرئيسية|غرفة (?:ال)?ملابس)$/.test(x.name) : /^غرفة نوم (\d+)$/.test(R.name) && x.name === `حمام غرفة ${R.name.match(/(\d+)$/)[1]}`));
-  const scopeR = new Set([R.id, ...suite.map(x => x.id)]);
   let { best, tried, consent } = choose(doc, cands, { scope: scopeR, request, check, strict });
   let note = '';
   // «أوسع» تعني في الكلام الدارج «أرحب» أيضًا: إن تعذّر التوسيع في العرض يُجرَّب الطول (ويُقال ذلك)
-  if (!best && it.along) { const alt = resizeCands(doc, I, R, { ...it, along: null }).cands; const r = choose(doc, alt, { scope: scopeR, request, check, strict }); if (r.best) { best = r.best; note = `تعذّر التوسيع في العرض (${[...new Set(tried.flatMap(x => x.why))].slice(0, 1).join('') || 'يلزمه تغيير غرفة أخرى'}) فكُبّرت في الطول`; } tried = [...tried, ...r.tried]; consent ||= r.consent; }
-  if (globalThis.__peDebug) console.error('RESIZE tried', cands.length, tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 30));
+  if (!best && it.along) { const alt = resizeCands(doc, I, R, { ...it, along: null }, scopeR).cands; const r = choose(doc, alt, { scope: scopeR, request, check, strict }); if (r.best) { best = r.best; note = `تعذّر التوسيع في العرض (${[...new Set(tried.flatMap(x => x.why))].slice(0, 1).join('') || 'يلزمه تغيير غرفة أخرى'}) فكُبّرت في الطول`; } tried = [...tried, ...r.tried]; consent ||= r.consent; }
+  if (globalThis.__peDebug) console.error('RESIZE tried', cands.length, tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 40), 'best', best?.desc, best?.cost, 'consent', consent?.desc, consent?.cost);
   if (!best && consent) return consentAsk(it, consent, strict);
   if (!best) return { ok: false, why_ar: `لم أجد جدارًا يمكن إزاحته لـ«${R.name}» دون كسر بوابة أو تغيير غير مقبول (${tried.length} محاولة: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || 'لا مرشح'}).`, tried };
   const ext = (best.moves || []).filter(m => m.exterior).length;
   const nameOf = id => I.rooms.get(id)?.name || id;
-  return { ok: true, doc: best.doc, cmp: best.cmp, measured: best.measured, how_ar: [note, ...(best.moves || []).map(m => m.exterior ? `أُزيح الجدار الخارجي ${m.g > 0 ? 'للخارج' : 'للداخل'} ${Math.abs(r2(m.g))} م (داخل خطوط الارتداد)` : `أُزيح الجدار المشترك مع ${m.losers.map(id => `«${nameOf(id)}»`).join(' و')} ${Math.abs(r2(m.g))} م`)].filter(Boolean).join('، '), envelope: ext > 0 };
+  return { ok: true, doc: best.doc, cmp: best.cmp, measured: best.measured, how_ar: [note, ...(best.moves || []).map(m => m.chain ? `انتقلت ${m.chain.moved.map(id => `«${nameOf(id)}»`).join(' و')} كما هي ${Math.abs(r2(m.g))} م (جداراها معًا)${m.chain.beyond.length ? `، فتغيّرت ${m.chain.beyond.map(id => `«${nameOf(id)}»`).join(' و')}` : ''}` : m.exterior ? `أُزيح الجدار الخارجي ${m.g > 0 ? 'للخارج' : 'للداخل'} ${Math.abs(r2(m.g))} م (داخل خطوط الارتداد)` : `أُزيح الجدار المشترك مع ${m.losers.map(id => `«${nameOf(id)}»`).join(' و')} ${Math.abs(r2(m.g))} م`)].filter(Boolean).join('، '), envelope: ext > 0 };
 }
 
 // -------------------------------------------------- الحذف
@@ -978,6 +1107,109 @@ function linkRooms(doc, I, aId, bId, kind = 'door') {
   const w = wallAt(doc, A.level, e.ax, e.c, (e.s0 + e.s1) / 2, .5); if (!w) return false;
   try { addOpening(doc, w, kind, (e.s0 + e.s1) / 2, kind === 'arch' ? Math.min(1.6, e.len - .4) : .9); return true; } catch { return false; }
 }
+// -------------------------------------------------- (الجولة العاشرة) عكس شريط من الغرف
+/**
+ * الأشرطة التي تقع فيها الغرفة A: صف غرف بعمق A نفسه (على المحور العرضي) تملأ مستطيلًا كاملًا، ومقسوم بجدران كاملة
+ * العمق إلى شرائح (مثل الشريط الأمامي: المجلس | مدخل الرجال ودورة المياه | مدخل العائلة).
+ * يعيد [{ ax, lv, b0, b1, c0, c1, ids, slices }] — ax محور الصف (الشرائح مرتبة عليه)، وb0..b1 امتداده، وc0..c1 عمقه.
+ */
+function bandsOf(I, A) {
+  const out = [];
+  for (const ax of ['x', 'y']) {
+    const c0 = ax === 'x' ? A.cl.y0 : A.cl.x0, c1 = ax === 'x' ? A.cl.y1 : A.cl.x1;
+    const acr = r => ax === 'x' ? [r.cl.y0, r.cl.y1] : [r.cl.x0, r.cl.x1], alg = r => ax === 'x' ? [r.cl.x0, r.cl.x1] : [r.cl.y0, r.cl.y1];
+    const S = new Map(roomList(I).filter(r => r.level === A.level && r.rect && acr(r)[0] >= c0 - E && acr(r)[1] <= c1 + E).map(r => [r.id, r]));
+    const comp = new Set([A.id]), queue = [A];
+    while (queue.length) { const r = queue.shift(); for (const e of Object.values(r.sides).flat()) if (S.has(e.nb) && !comp.has(e.nb)) { comp.add(e.nb); queue.push(S.get(e.nb)); } }
+    const rs = [...comp].map(id => S.get(id) || A);
+    const b0 = Math.min(...rs.map(r => alg(r)[0])), b1 = Math.max(...rs.map(r => alg(r)[1]));
+    const sum = rs.reduce((s, r) => s + (r.cl.x1 - r.cl.x0) * (r.cl.y1 - r.cl.y0), 0);
+    if (Math.abs(sum - (b1 - b0) * (c1 - c0)) > .005 * (b1 - b0) * (c1 - c0)) continue;
+    const cuts = [...new Set(rs.flatMap(r => alg(r).map(v => R3(v))))].sort((a, b) => a - b).filter(p => !rs.some(r => alg(r)[0] < p - E && alg(r)[1] > p + E));
+    if (cuts.length < 3) continue;
+    const slices = cuts.slice(0, -1).map((p, i) => ({ s0: p, s1: cuts[i + 1], ids: rs.filter(r => alg(r)[0] >= p - E && alg(r)[1] <= cuts[i + 1] + E).map(r => r.id) }));
+    out.push({ ax, lv: A.level, b0, b1, c0, c1, ids: [...comp], slices });
+  }
+  return out;
+}
+const PRIVATE_T = new Set(['bedroom', 'master']);
+/** هل يصح باب بين غرفتين (بعد العكس)؟ المجلس لا يفتح على الصالة العائلية ولا غرف النوم، وغرفة النوم لا تفتح على الطعام والمطبخ والمجلس. */
+function doorOk(X, Y) {
+  if (!X || !Y) return true;
+  const t = [X.type, Y.type], has = k => t.includes(k), guest = r => r.type === 'majlis' || /الرجال|الضيوف/.test(r.name);
+  if ((guest(X) && (Y.type === 'living' || PRIVATE_T.has(Y.type) || Y.type === 'kitchen')) || (guest(Y) && (X.type === 'living' || PRIVATE_T.has(X.type) || X.type === 'kitchen'))) return false;
+  if (t.some(x => PRIVATE_T.has(x)) && (has('dining') || has('kitchen') || has('majlis'))) return false;
+  if (has('bath') && !t.some(x => PRIVATE_T.has(x) || x === 'corridor' || x === 'entrance' || x === 'living' || x === 'service')) return false;
+  return true;
+}
+/**
+ * يعكس الشريط حول منتصفه (الشرائح بترتيب معكوس، وكل شريحة معكوسة)، فتبقى علاقات الغرف داخله كما هي؛ والأبواب على حدود
+ * الشريط مع ما خلفه تُعاد تعليقًا: تبقى على جارها القديم إن بقي ملاصقًا، أو تنتقل إلى جار جديد مناسب، أو تُسد إن كان
+ * الجار الجديد غير مناسب (المجلس لا يفتح على الصالة العائلية). الجدران خارج الشريط لا تُمس.
+ */
+function reflectBand(doc, I, band) {
+  return build(doc, d => {
+    const { ax, lv, b0, b1, c0, c1 } = band, oax = other(ax); // ax 'x': الشريط أفقي، جدرانه القاطعة رأسية (axisOfWall = 'x')
+    const al = p => alongOf(p, oax), ac = p => acrossOf(p, oax); // على امتداد الشريط وعرضه
+    const M = v => R3(b0 + b1 - v);
+    const refl = p => oax === 'x' ? { x: R3(p.x), y: M(p.y) } : { x: M(p.x), y: R3(p.y) };
+    const inside = (p, m = E) => al(p) >= b0 - m && al(p) <= b1 + m && ac(p) >= c0 - m && ac(p) <= c1 + m;
+    // تصنيف الجدران: حدود الشريط (موازية له على c0/c1)، ونهايتاه (قاطعة على b0/b1)، وداخله (تُعكس)
+    const isBoundary = w => axisOfWall(w) === oax && (near(acrossOf(w.a, oax), c0) || near(acrossOf(w.a, oax), c1));
+    const isEnd = w => axisOfWall(w) === ax && (near(acrossOf(w.a, ax), b0) || near(acrossOf(w.a, ax), b1));
+    const interior = d.walls.filter(w => w.level === lv && inside(w.a) && inside(w.b) && !isBoundary(w) && !isEnd(w));
+    if (!interior.length) fail('BAND_EMPTY', 'لا جدار داخل الشريط');
+    const intIds = new Set(interior.map(w => w.id));
+    // فتحات الحدود والنهايتين: موضعها المطلق قبل العكس
+    const absPos = o => { const w = wallById(d, o.wall), axw = axisOfWall(w); if (!axw) return null; const dir = Math.sign(alongOf(w.b, axw) - alongOf(w.a, axw)) || 1; return { w, axw, c: acrossOf(w.a, axw), pos: alongOf(w.a, axw) + dir * o.at }; };
+    const Lm = I.model.levelById.get(lv), opSides = new Map(Lm.openings.map(op => [op.id, op]));
+    const bandSet = new Set(band.ids);
+    const moved = [];
+    for (const o of d.openings.filter(x => x.level === lv || interior.some(w => w.id === x.wall))) {
+      if (intIds.has(o.wall)) { if (o.hinge) o.hinge = o.hinge === 'left' ? 'right' : 'left'; continue; }
+      const P0 = absPos(o); if (!P0) continue;
+      const w = P0.w;
+      if (isBoundary(w) && P0.pos > b0 + E && P0.pos < b1 - E) moved.push({ o, line: P0.axw, c: P0.c, pos: M(P0.pos), wasPos: P0.pos, kind: 'boundary' });
+      else if (isEnd(w) && P0.pos > c0 + E && P0.pos < c1 - E) {
+        const op = opSides.get(o.id), ext = !op || op.sides.some(s => s.other === 'outside') || op.sides.length < 2;
+        if (ext) moved.push({ o, line: P0.axw, c: near(P0.c, b0) ? b1 : b0, pos: P0.pos, wasPos: P0.pos, kind: 'end' });
+        else moved.push({ o, line: P0.axw, c: P0.c, pos: P0.pos, wasPos: P0.pos, kind: 'endInner' });
+      }
+    }
+    for (const w of interior) { const a = refl(w.a), b = refl(w.b); w.a = a; w.b = b; }
+    // إعادة استضافة فتحات الحدود والنهايتين على الجدار الذي يغطي موضعها الجديد على الخط نفسه
+    for (const m of moved) {
+      const host = d.walls.find(w => w.level === lv && onLine(w, m.line, m.c) && spanOf(w, m.line)[0] <= m.pos - m.o.w / 2 - .05 + 1e-6 && spanOf(w, m.line)[1] >= m.pos + m.o.w / 2 + .05 - 1e-6);
+      if (!host) { if (isWin(m.o.kind)) { d.openings = d.openings.filter(x => x !== m.o); continue; } fail('BAND_HOST', 'لا جدار يستضيف فتحة بعد العكس'); }
+      const dir = Math.sign(alongOf(host.b, m.line) - alongOf(host.a, m.line)) || 1;
+      m.o.wall = host.id; m.o.at = R3((m.pos - alongOf(host.a, m.line)) * dir);
+      if (m.kind !== 'endInner' && m.o.hinge) m.o.hinge = m.o.hinge === 'left' ? 'right' : 'left';
+    }
+    for (const l of d.labels) if (l.level === lv && inside(l.seed, 0) && bandSet.has(l.id)) l.seed = refl(l.seed);
+    for (const f of d.fixtures) if (f.level === lv && inside(f, 0)) { const p = refl(f); f.x = p.x; f.y = p.y; f.rot = oax === 'y' ? Math.PI - (f.rot || 0) : -(f.rot || 0); }
+    // إعادة تعليق الأبواب على الحدود والنهايتين
+    const Ia = inspect(d), La = Ia.model.levelById.get(lv), dropped = [], rehung = [];
+    for (const m of moved) {
+      if (!d.openings.includes(m.o) || !DOORISH(m.o.kind) && m.o.kind !== 'arch') continue;
+      const before = opSides.get(m.o.id), after = La.openings.find(op => op.id === m.o.id);
+      if (!before || !after) continue;
+      const bandB = before.sides.find(s => bandSet.has(s.room.id)), bandA = after.sides.find(s => bandSet.has(s.room.id));
+      if (!bandB || !bandA || bandB.room.id !== bandA.room.id) continue;
+      const Y0 = bandB.other, Y1 = bandA.other;
+      if (Y0 === Y1) continue;
+      const X = Ia.rooms.get(bandA.room.id);
+      // الجار القديم ما زال ملاصقًا على الخط نفسه؟ يُنقل الباب إلى الجزء المشترك
+      const seg = Y0 !== 'outside' ? Object.values(X.sides).flat().filter(e => e.nb === Y0 && e.ax === m.line && near(e.c, m.c) && e.len >= m.o.w + .3).sort((p, q) => q.len - p.len)[0] : null;
+      if (seg) { const w = wallAt(d, lv, m.line, m.c, (seg.s0 + seg.s1) / 2, m.o.w / 2 + .05); if (w) { const pos = Math.max(seg.s0 + m.o.w / 2 + .15, Math.min(seg.s1 - m.o.w / 2 - .15, m.pos)), dir = Math.sign(alongOf(w.b, m.line) - alongOf(w.a, m.line)) || 1; m.o.wall = w.id; m.o.at = R3((pos - alongOf(w.a, m.line)) * dir); rehung.push({ id: m.o.id, from: Y0, to: Y0 }); continue; } }
+      if (Y1 !== 'outside' && doorOk(X, Ia.rooms.get(Y1))) { rehung.push({ id: m.o.id, from: Y0, to: Y1 }); continue; }
+      if (Y1 === 'outside' && !m.o.entry) fail('DOOR_OUT', 'باب داخلي سيفتح على الخارج');
+      d.openings = d.openings.filter(x => x !== m.o); dropped.push({ id: m.o.id, from: X.id, to: Y0 });
+    }
+    const nm = id => I.rooms.get(id)?.name || id;
+    const order = band.slices.map(s => s.ids.map(nm).join('+'));
+    return { desc: `reflect:${ax}:${r2(b0)}-${r2(b1)}`, how_ar: `عُكس الشريط ${ax === 'x' ? 'الأفقي' : 'الرأسي'} (${order.join(' | ')}) حول منتصفه فصار ترتيبه (${[...order].reverse().join(' | ')})، والجدران خارجه كما هي${rehung.filter(r => r.to !== r.from).length ? `؛ وصار ${rehung.filter(r => r.to !== r.from).map(r => `باب كان إلى «${nm(r.from)}» يفتح على «${Ia.rooms.get(r.to)?.name || r.to}»`).join('، ')}` : ''}${dropped.length ? `؛ وسُدّ ${dropped.map(x => `باب «${nm(x.from)}» إلى «${nm(x.to)}»`).join('، ')}` : ''}`, band };
+  });
+}
 function doRule(doc, it, req) {
   const { request, entry } = ctxOf(doc, req), rule = { ...it.rule, id: 'E', level: it.rule.level || 'must' };
   const v0 = verifyRules(doc, [rule], { entry })[0];
@@ -985,9 +1217,18 @@ function doRule(doc, it, req) {
   if (!['place', 'adjacent', 'near'].includes(rule.kind)) return { ok: false, fallback: true, why_ar: `«${rule.text}» غير متحقق، ولا تعديل موضعي له.` };
   const I = inspect(doc), rooms = roomList(I);
   const SUBJ = { kitchen: r => r.type === 'kitchen', dining: r => r.type === 'dining', office: r => r.name === 'المكتب', prayer: r => r.name === 'المصلى', maid: r => r.name === 'غرفة الخادمة', driver: r => r.name === 'غرفة السائق', laundry: r => r.name === 'غرفة الغسيل', storage: r => r.name === 'المخزن' };
-  const A = rooms.filter(r => SUBJ[rule.a]?.(r));
-  if (!A.length) return { ok: false, fallback: true, why_ar: `«${rule.text}»: لا تبديل موضعي لهذا الفراغ (يبقى في موضعه إلا بإعادة توزيع).` };
+  // (الجولة العاشرة) فراغات لا تُبادل بغرفة أخرى لكن يمكن عكس شريطها: المجلس، والرئيسية، والصالة، ومجلس النساء
+  const BAND_SUBJ = { majlis: r => r.type === 'majlis' && r.name !== 'مجلس النساء', majlis_w: r => r.name === 'مجلس النساء', master: r => r.type === 'master', hall: r => r.name === 'الصالة', ...SUBJ };
+  const A = rooms.filter(r => SUBJ[rule.a]?.(r)), AB = rooms.filter(r => BAND_SUBJ[rule.a]?.(r));
+  if (!A.length && !AB.length) return { ok: false, fallback: true, why_ar: `«${rule.text}»: لا تبديل موضعي لهذا الفراغ (يبقى في موضعه إلا بإعادة توزيع).` };
   const cands = [];
+  // عكس الشريط الذي فيه الفراغ (الشريط الأمامي مثلًا) — ونطاق الطلب: الفراغ وجناح الضيافة معه والحركة في الشريط
+  const bandScope = new Set(AB.map(a => a.id));
+  for (const a of AB) for (const band of bandsOf(I, a)) {
+    const c = reflectBand(doc, I, band); if (!c.doc) { if (globalThis.__peDebug) console.error('BAND fail', c.err); continue; }
+    for (const id of band.ids) { const r = I.rooms.get(id); if (r && (['corridor', 'entrance'].includes(r.type) || (/الرجال|الضيوف/.test(r.name) && a.type === 'majlis') || (rule.a === 'master' && /الرئيسية|ملابس/.test(r.name)))) bandScope.add(id); }
+    cands.push({ ...c, penalty: 1 });
+  }
   for (const a of A) for (const b of rooms) {
     if (b.id === a.id || !SWAP_T.has(b.type) || b.level !== a.level) continue;
     const k = b.area / a.area; if (k < .7 || k > 1.43) continue;
@@ -996,9 +1237,10 @@ function doRule(doc, it, req) {
     cands.push({ ...c, swapped: [a.id, b.id] });
   }
   const check = Ia => { const v = verifyRules(Ia.model.doc, [rule], { entry })[0]; return { ok: v.ok, why: v.why }; };
-  const { best, tried, consent } = choose(doc, cands, { scope: new Set(A.map(a => a.id)), request, check, strict: req?.strict || false });
+  const { best, tried, consent } = choose(doc, cands, { scope: new Set([...A.map(a => a.id), ...bandScope]), request, check, strict: req?.strict || false });
+  if (globalThis.__peDebug) console.error('RULE tried', cands.length, tried.map(x => x.desc + ': ' + x.why.join('|')).slice(0, 20), 'best', best?.desc, 'consent', consent?.desc);
   if (!best && consent) return { ...consentAsk({ text_ar: rule.text }, consent, req?.strict), fallback: true };
-  if (!best) return { ok: false, fallback: true, why_ar: `«${rule.text}» غير متحقق في المعروض، ولا تبديل موضعي بين غرفتين متقاربتين في المساحة يحققه دون كسر بوابة${tried.length ? ` (${tried.length} محاولة)` : ''}.` };
+  if (!best) return { ok: false, fallback: true, why_ar: `«${rule.text}» غير متحقق في المعروض، ولا تبديل موضعي بين غرفتين متقاربتين في المساحة ولا عكس شريط يحققه دون كسر بوابة${tried.length ? ` (${tried.length} محاولة: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ')})` : ''}.` };
   return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, swapped: best.swapped };
 }
 
@@ -1043,6 +1285,161 @@ function doExtDoor(doc, it, req) {
   const { best, tried } = choose(doc, cands, { scope: new Set([R.id]), request, check });
   if (!best) return { ok: false, why_ar: 'تعذّر: ' + [...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') };
   return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar };
+}
+
+// -------------------------------------------------- (الجولة العاشرة) الأبواب والنوافذ
+const KIND_AR_OP = { door: 'باب', door2: 'باب مزدوج', slider: 'باب منزلق', arch: 'فتحة مفتوحة', garage: 'باب كراج', window: 'نافذة', window2: 'نافذة' };
+/** الفتحات بين غرفتين (أو غرفة والخارج) من التحليل: [{ op, other }] */
+function openingsBetween(I, aId, bId = null, test = op => op.door) {
+  const A = I.rooms.get(aId); if (!A) return [];
+  const L = I.model.levelById.get(A.level);
+  return L.openings.filter(op => test(op) && op.sides.some(s => s.room.id === aId && (bId === null || s.other === bId))).map(op => ({ op, other: op.sides.find(s => s.room.id === aId).other }));
+}
+/** المقطع المشترك الأطول بين غرفتين (على جدار واحد مستقيم) أو بين غرفة والخارج. */
+const sharedEdges = (R, nb) => Object.values(R.sides).flat().filter(e => e.nb === nb).sort((p, q) => q.len - p.len);
+/** يضع فتحة على مقطع (ax، c، s0..s1) في أقرب موضع حر إلى pos، بعيدًا عن الفتحات الأخرى؛ يعيد الفتحة أو null. */
+function placeOnSegment(doc, lv, seg, kind, width, pos, extra = {}, ignore = null) {
+  const lo = seg.s0 + width / 2 + .15, hi = seg.s1 - width / 2 - .15; if (hi < lo - 1e-6) return null;
+  const tries = [Math.max(lo, Math.min(hi, pos))]; for (let k = 1; k <= 30; k++) for (const sg of [1, -1]) { const p = tries[0] + sg * k * .1; if (p >= lo - 1e-6 && p <= hi + 1e-6) tries.push(p); }
+  for (const p of tries) {
+    const w = wallAt(doc, lv, seg.ax, seg.c, p, width / 2 + .02); if (!w) continue;
+    if (openingsOf(doc, w).some(x => x.o !== ignore && Math.abs(x.pos - p) < x.half + width / 2 + .1)) continue;
+    const dir = Math.sign(alongOf(w.b, seg.ax) - alongOf(w.a, seg.ax)) || 1;
+    if (ignore) { ignore.wall = w.id; ignore.at = R3((p - alongOf(w.a, seg.ax)) * dir); return ignore; }
+    return addOpening(doc, w, kind, p, width, extra);
+  }
+  return null;
+}
+function doDoor(doc, it, req) {
+  const I = inspect(doc), { request } = ctxOf(doc, req), nm = id => id === 'outside' ? 'الخارج' : I.rooms.get(id)?.name || id;
+  const A = it.a ? I.rooms.get(it.a) : null;
+  if (it.a && !A) return { ok: false, why_ar: `«${it.aName}» غير موجودة في المخطط.` };
+  const linkCheck = (aId, bId, want) => Ia => { const ok = openingsBetween(Ia, aId, bId).length > 0; return { ok: ok === want, why: want ? 'لا باب بينهما' : 'ما زال بينهما باب' }; };
+  if (it.action === 'add') {
+    const B = I.rooms.get(it.b); if (!B) return { ok: false, why_ar: `«${it.bName}» غير موجودة في المخطط.` };
+    const ex = openingsBetween(I, A.id, B.id);
+    if (ex.length) return { ok: true, already: true, doc, subjectDoor: ex[0].op.id, why_ar: `بين «${A.name}» و«${B.name}» ${KIND_AR_OP[ex[0].op.kind] || 'باب'} أصلًا؛ لم أغيّر شيئًا.` };
+    const seg = sharedEdges(A, B.id)[0];
+    if (!seg) return { ok: false, why_ar: `«${A.name}» و«${B.name}» لا تتجاوران في المخطط؛ الباب بينهما يحتاج نقل إحداهما.` };
+    if (seg.len < 1.1) return { ok: false, why_ar: `الجدار المشترك بين «${A.name}» و«${B.name}» ${r2(seg.len)} م فقط ولا يتسع لباب.` };
+    if (!doorOk(A, B) && !req?.consent) return { ok: false, ask: `باب بين «${A.name}» و«${B.name}» يكشف ${A.type === 'majlis' || B.type === 'majlis' ? 'القسم العائلي للضيوف' : 'غرفة النوم على فراغ مشترك'}؛ أنفّذه مع ذلك؟ (قل «نعم» أو «لا»)`, why_ar: 'يحتاج موافقتك؛ لم أغيّر شيئًا.' };
+    let made = null;
+    const c = build(doc, d => { made = placeOnSegment(d, A.level, seg, 'door', .9, (seg.s0 + seg.s1) / 2); if (!made) fail('NO_ROOM', 'لا موضع حرًا لباب على الجدار المشترك'); return { desc: 'door-add', how_ar: `أُضيف باب عرضه 0.9 م في الجدار المشترك بين «${A.name}» و«${B.name}» (طوله ${r2(seg.len)} م)`, subjectDoor: made.id }; });
+    const { best, tried } = choose(doc, [c].filter(x => x.doc), { scope: new Set([A.id, B.id]), request, check: linkCheck(A.id, B.id, true) });
+    if (!best) return { ok: false, why_ar: `تعذّر فتح باب بين «${A.name}» و«${B.name}»: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || c.err || 'لا مرشح'}` };
+    return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, subjectDoor: best.subjectDoor };
+  }
+  if (it.action === 'close') {
+    let list = it.openingId ? (() => { const L = I.model.levels.flatMap(l => l.openings); const op = L.find(o => o.id === it.openingId); return op ? [{ op, other: op.sides[1]?.room.id || 'outside' }] : []; })() : openingsBetween(I, A.id, it.b ?? null);
+    if (it.openingId && !list.length) return { ok: false, why_ar: 'الباب المقصود لم يعد في المخطط.' };
+    if (!list.length) return { ok: true, already: true, doc, why_ar: `لا باب ${it.b ? `بين «${A.name}» و«${nm(it.b)}»` : `لـ«${A.name}»`} أصلًا؛ لم أغيّر شيئًا.` };
+    if (list.length > 1 && !it.b) return { ok: false, ask: `لـ«${A.name}» ${list.length} أبواب: ${list.map(x => `إلى «${nm(x.other)}»`).join('، ')} — أيها تقصد؟`, why_ar: 'أكثر من باب؛ لم أغيّر شيئًا.', question: true };
+    const ids = new Set(list.map(x => x.op.id)), names = list.map(x => `${KIND_AR_OP[x.op.kind] || 'باب'} ${x.op.sides.map(s => `«${s.room.name}»`).join(' و')}${x.op.sides.length < 2 ? ' إلى الخارج' : ''}`);
+    const c = build(doc, d => { d.openings = d.openings.filter(o => !ids.has(o.id)); return { desc: 'door-close', how_ar: `سُدّ ${names.join('، ')} (صار جدارًا متصلًا)` }; });
+    const scope = new Set(list.flatMap(x => x.op.sides.map(s => s.room.id)));
+    const check = Ia => ({ ok: [...ids].every(id => !Ia.model.levels.some(l => l.openings.some(o => o.id === id))), why: 'ما زال الباب' });
+    const { best, tried } = choose(doc, [c].filter(x => x.doc), { scope, request, check });
+    if (!best) return { ok: false, why_ar: `لم أسدّ ${names.join('، ')}: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || c.err}` };
+    return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar };
+  }
+  if (it.action === 'move') {
+    // الباب المقصود: المعرّف من الطلب السابق، أو باب الغرفة إلى حركتها (ممر/مدخل/صالة) أولًا
+    const CIRC = new Set(['corridor', 'entrance', 'living']);
+    let list, R = A;
+    if (it.openingId) {
+      const op = I.model.levels.flatMap(l => l.openings).find(o => o.id === it.openingId);
+      if (!op) return { ok: false, why_ar: 'الباب المقصود لم يعد في المخطط.' };
+      const side = op.sides.find(s => !CIRC.has(s.room.type)) || op.sides[0]; R = I.rooms.get(side.room.id);
+      list = [{ op, other: side.other }];
+    } else list = openingsBetween(I, A.id);
+    if (!list.length || !R) return { ok: false, why_ar: `${A ? `«${A.name}»` : 'الغرفة'} بلا باب أنقله.` };
+    list.sort((p, q) => (CIRC.has(I.rooms.get(q.other)?.type) ? 1 : 0) - (CIRC.has(I.rooms.get(p.other)?.type) ? 1 : 0));
+    const cur = list[0], o0 = cur.op;
+    const cands = [];
+    if (it.to) {
+      const T = I.rooms.get(it.to); if (!T) return { ok: false, why_ar: `«${it.toName}» غير موجودة.` };
+      if (openingsBetween(I, R.id, T.id).length) return { ok: true, already: true, doc, why_ar: `باب «${R.name}» يفتح على «${T.name}» أصلًا.` };
+      const seg = sharedEdges(R, T.id)[0];
+      if (!seg || seg.len < 1.1) return { ok: false, why_ar: `«${R.name}» لا تشترك مع «${T.name}» في جدار يتسع لباب.` };
+      cands.push(build(doc, d => { const o = d.openings.find(x => x.id === o0.id); const p = placeOnSegment(d, R.level, seg, o.kind, Math.min(o.w, seg.len - .4), (seg.s0 + seg.s1) / 2, {}, o); if (!p) fail('NO_ROOM', 'لا موضع'); return { desc: 'door-move-to', how_ar: `نُقل ${KIND_AR_OP[o0.kind] || 'الباب'} «${R.name}» من «${nm(cur.other)}» إلى الجدار المشترك مع «${T.name}»`, subjectDoor: o0.id }; }));
+    } else {
+      // على الجدار المشترك نفسه مع الجار نفسه: أبعد موضع ممكن عن الموضع الحالي (0.6 م على الأقل)
+      const seg = sharedEdges(R, cur.other).find(e => { const p = acrossOf(o0.p, e.ax); return near(p, e.c, .05) && alongOf(o0.p, e.ax) >= e.s0 - .05 && alongOf(o0.p, e.ax) <= e.s1 + .05; });
+      if (seg) {
+        const pos0 = alongOf(o0.p, seg.ax), lo = seg.s0 + o0.w / 2 + .15, hi = seg.s1 - o0.w / 2 - .15;
+        for (const target of [hi, lo]) if (Math.abs(target - pos0) >= .6) cands.push({ ...build(doc, d => { const o = d.openings.find(x => x.id === o0.id); const p = placeOnSegment(d, R.level, seg, o.kind, o.w, target, {}, o); if (!p) fail('NO_ROOM', 'لا موضع'); return { desc: 'door-slide', how_ar: `انتقل ${KIND_AR_OP[o0.kind] || 'الباب'} «${R.name}» إلى «${nm(cur.other)}» على الجدار نفسه ${r2(Math.abs(target - pos0))} م نحو ${seg.ax === 'x' ? (target > pos0 ? 'الشمال' : 'الجنوب') : (target > pos0 ? 'الشرق' : 'الغرب')}`, subjectDoor: o0.id }; }), penalty: it.end === 'far' ? 0 : Math.abs(Math.abs(target - pos0) - 1) * .1 });
+      }
+      // أو إلى جدار مشترك آخر مع الجار نفسه أو مع حركة أخرى
+      for (const e of Object.values(R.sides).flat()) {
+        if (e === seg || e.nb === 'outside' || e.nb === 'void' || e.len < 1.2) continue;
+        const N = I.rooms.get(e.nb); if (!N || (e.nb !== cur.other && !CIRC.has(N.type))) continue;
+        if (!doorOk(R, N)) continue;
+        cands.push({ ...build(doc, d => { const o = d.openings.find(x => x.id === o0.id); const p = placeOnSegment(d, R.level, e, o.kind, Math.min(o.w, e.len - .4), (e.s0 + e.s1) / 2, {}, o); if (!p) fail('NO_ROOM', 'لا موضع'); return { desc: 'door-move:' + N.name, how_ar: `نُقل ${KIND_AR_OP[o0.kind] || 'الباب'} «${R.name}» إلى جدارها المشترك مع «${N.name}»`, subjectDoor: o0.id }; }), penalty: 1 });
+      }
+    }
+    const check = Ia => { const Lx = Ia.model.levels.flatMap(l => l.openings), op = Lx.find(x => x.id === o0.id); return { ok: !!op && Math.hypot(op.p.x - o0.p.x, op.p.y - o0.p.y) >= .5 && op.sides.some(s => s.room.id === R.id), why: 'الباب لم ينتقل' }; };
+    const { best, tried } = choose(doc, cands.filter(c => c.doc), { scope: new Set([R.id, cur.other, ...(it.to ? [it.to] : [])]), request, check });
+    if (!best) return { ok: false, why_ar: `لم أجد موضعًا آخر لباب «${R.name}» دون كسر بوابة (${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || 'الجدار المشترك لا يتسع لموضع آخر'}).` };
+    return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, subjectDoor: best.subjectDoor };
+  }
+  return { ok: false, why_ar: 'عملية باب غير معروفة' };
+}
+function doWindow(doc, it, req) {
+  const I = inspect(doc), { request } = ctxOf(doc, req), R = I.rooms.get(it.a); if (!R) return { ok: false, why_ar: `«${it.aName}» غير موجودة.` };
+  const L = I.model.levelById.get(R.level);
+  const wins = L.openings.filter(op => op.window && op.sides.some(s => s.room.id === R.id && s.exterior));
+  // الخارج: الهواء الطلق أو فراغ مكشوف (حوش داخلي، شرفة)
+  const openNb = nb => nb === 'outside' || !!ROOM_TYPES[I.rooms.get(nb)?.type]?.open;
+  const extEdges = Object.values(R.sides).flat().filter(e => openNb(e.nb) && e.len >= 1);
+  const segOf = op => extEdges.find(e => near(acrossOf(op.p, e.ax), e.c, .05) && alongOf(op.p, e.ax) >= e.s0 - .05 && alongOf(op.p, e.ax) <= e.s1 + .05);
+  const scope = new Set([R.id]);
+  if (it.action === 'bigger' || it.action === 'smaller') {
+    if (!wins.length) return { ok: false, why_ar: `«${R.name}» بلا نافذة خارجية${extEdges.length ? '؛ قل «أضف نافذة» إن أردت واحدة' : ' ولا تلامس جدارًا خارجيًا'}.` };
+    // المجال الحر حول كل نافذة على مقطعها الخارجي: بعيدًا 0.3 م عن الأركان و0.1 م عن الفتحات الأخرى؛ تُكبَّر التي يتسع لها
+    // جدارها أكثر (الأعرض عند التساوي)
+    const room = op => { const seg = segOf(op); if (!seg) return null; const pos0 = alongOf(op.p, seg.ax); let lo = seg.s0 + .3, hi = seg.s1 - .3; for (const x of L.openings) { if (x.id === op.id || !near(acrossOf(x.p, seg.ax), seg.c, .05) || Math.abs(x.u.x) > .5 !== Math.abs(op.u.x) > .5) continue; const p = alongOf(x.p, seg.ax); if (p < seg.s0 - .05 || p > seg.s1 + .05) continue; if (p < pos0) lo = Math.max(lo, p + x.w / 2 + .1); else hi = Math.min(hi, p - x.w / 2 - .1); } return { op, seg, pos0, lo, hi, free: hi - lo }; };
+    const opts = wins.map(room).filter(Boolean);
+    if (!opts.length) return { ok: false, why_ar: 'نوافذ الغرفة ليست على جدار خارجي مستقيم.' };
+    const wantOf = op => it.width ? it.width : it.action === 'bigger' ? Math.min(op.w * 1.5, op.w + .8) : Math.max(.6, op.w * .7);
+    // «نافذة الصالة» بالمفرد = نافذتها الرئيسية (الأعرض) متى اتسع جدارها لزيادة 0.3 م على الأقل، وإلا التي يتسع لها جدارها أكثر
+    const gain = o => Math.min(wantOf(o.op), o.free) - o.op.w, rank = o => gain(o) >= .3 ? 100 + o.op.w : gain(o);
+    opts.sort((p, q) => it.action === 'bigger' ? rank(q) - rank(p) : q.op.w - p.op.w);
+    const { op: main, seg, pos0, lo, hi } = opts[0], want = wantOf(main);
+    if (it.action === 'bigger' && want <= main.w + .05) return { ok: true, already: true, doc, why_ar: `نافذة «${R.name}» ${r2(main.w)} م أصلًا.` };
+    const free = hi - lo, width = r2(Math.min(want, free));
+    if (it.action === 'bigger' && width < main.w + .15) return { ok: false, why_ar: `لا مجال لتكبير نافذة «${R.name}»: المقطع الحر حولها ${r2(free)} م وهي ${r2(main.w)} م.` };
+    const c = build(doc, d => {
+      const o = d.openings.find(x => x.id === main.id), w = wallById(d, o.wall), axw = axisOfWall(w), dir = Math.sign(alongOf(w.b, axw) - alongOf(w.a, axw)) || 1;
+      const center = Math.max(lo + width / 2, Math.min(hi - width / 2, pos0));
+      const host = wallAt(d, R.level, seg.ax, seg.c, center, width / 2 + .02); if (!host) fail('NO_WALL', 'لا جدار واحد يتسع للنافذة');
+      const dir2 = Math.sign(alongOf(host.b, axw) - alongOf(host.a, axw)) || 1; void dir;
+      o.wall = host.id; o.w = width; o.at = R3((center - alongOf(host.a, axw)) * dir2);
+      return { desc: 'window-' + it.action, how_ar: `${it.action === 'bigger' ? 'كُبّرت' : 'صُغّرت'} نافذة «${R.name}» من ${r2(main.w)} إلى ${width} م (الارتفاع نفسه، على الجدار نفسه)`, measured: { before: r2(main.w), after: width } };
+    });
+    const check = Ia => { const op = Ia.model.levels.flatMap(l => l.openings).find(x => x.id === main.id); return { ok: !!op && (it.action === 'bigger' ? op.w > main.w + .1 : op.w < main.w - .1), why: 'العرض لم يتغير' }; };
+    const { best, tried } = choose(doc, [c].filter(x => x.doc), { scope, request, check });
+    if (!best) return { ok: false, why_ar: `تعذّر: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ') || c.err}` };
+    return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar, measured: c.measured };
+  }
+  if (it.action === 'add') {
+    if (!extEdges.length) return { ok: false, why_ar: `«${R.name}» لا تلامس جدارًا خارجيًا؛ النافذة تحتاج نقلها إلى طرف المبنى.` };
+    const cands = [];
+    for (const e of [...extEdges].sort((p, q) => q.len - p.len)) { const width = r2(Math.min(it.width || 1.4, e.len - .8)); if (width < .6) continue; cands.push(build(doc, d => { const o = placeOnSegment(d, R.level, e, 'window', width, (e.s0 + e.s1) / 2); if (!o) fail('NO_ROOM', 'لا موضع حر'); return { desc: 'window-add', how_ar: `أُضيفت نافذة ${width} م في الجدار الخارجي لـ«${R.name}»` }; })); }
+    const n0 = wins.length, check = Ia => ({ ok: Ia.model.levelById.get(R.level).openings.filter(op => op.window && op.sides.some(s => s.room.id === R.id && s.exterior)).length > n0, why: 'لم تُضف' });
+    const { best, tried } = choose(doc, cands.filter(x => x.doc), { scope, request, check });
+    if (!best) return { ok: false, why_ar: `لا موضع حرًا لنافذة في جدران «${R.name}» الخارجية (${[...new Set(tried.flatMap(x => x.why))].slice(0, 1).join('') || 'الجدران مشغولة بفتحات'}).` };
+    return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar };
+  }
+  if (it.action === 'close') {
+    if (!wins.length) return { ok: true, already: true, doc, why_ar: `«${R.name}» بلا نافذة أصلًا.` };
+    if (wins.length > 1) return { ok: false, ask: `لـ«${R.name}» ${wins.length} نوافذ؛ أيها تقصد (مثل «النافذة الشرقية»)؟`, why_ar: 'أكثر من نافذة؛ لم أغيّر شيئًا.', question: true };
+    if ((ROOM_TYPES[R.type] || {}).windowRequired && !req?.consent) return { ok: false, ask: `«${R.name}» تحتاج نافذة للإضاءة والتهوية، وهذه نافذتها الوحيدة؛ أسدّها مع ذلك؟`, why_ar: 'يحتاج موافقتك؛ لم أغيّر شيئًا.' };
+    const id = wins[0].id, c = build(doc, d => { d.openings = d.openings.filter(o => o.id !== id); return { desc: 'window-close', how_ar: `سُدّت نافذة «${R.name}»` }; });
+    const { best, tried } = choose(doc, [c].filter(x => x.doc), { scope, request, check: Ia => ({ ok: !Ia.model.levels.some(l => l.openings.some(o => o.id === id)), why: 'ما زالت' }) });
+    if (!best) return { ok: false, why_ar: `تعذّر: ${[...new Set(tried.flatMap(x => x.why))].slice(0, 2).join('، ')}` };
+    return { ok: true, doc: best.doc, cmp: best.cmp, how_ar: best.how_ar };
+  }
+  return { ok: false, why_ar: 'عملية نافذة غير معروفة' };
 }
 
 // -------------------------------------------------- الواجهة
@@ -1102,10 +1499,16 @@ export function applyEdits(doc0, parsed, { req = null, history = [] } = {}) {
   req = { ...(req || {}), strict: parsed.keep ? 'all' : req?.consent ? 'none' : 'free' };
   let restore = null, fallback = null;
   // الرجوع إلى تصميم سابق (كله أو مع الإبقاء على تعديلات): يُبنى من السجل ثم تُعاد التعديلات المحلية المطلوبة
+  const restoreFail = [];
   for (const it of intents.filter(i => i.op === 'restore')) {
-    const idx = it.to === 'first' ? 0 : Math.max(0, history.length - 2);
-    restore = { index: idx, keepIds: it.keepIds || [], keepOnly: true };
+    // النسخة برقمها في الجلسة (version)؛ السجل القديم بلا أرقام: ترتيبه + 1
+    const verOf = (h, i) => h.version ?? i + 1;
+    let idx = it.to === 'first' ? 0 : it.to === 'version' ? history.findIndex((h, i) => verOf(h, i) === it.version) : Math.max(0, history.length - 2);
+    if (it.to === 'version' && idx < 0) { restoreFail.push({ op: 'restore', text_ar: it.text_ar, ok: false, why_ar: `النسخة ${it.version} غير محفوظة في الجلسة (المحفوظ: ${history.map((h, i) => verOf(h, i)).join('، ') || 'لا شيء'}).`, intent: it }); continue; }
+    if (it.to === 'version' && idx === history.length - 1) { restoreFail.push({ op: 'restore', text_ar: it.text_ar, ok: true, already: true, why_ar: `النسخة ${it.version} هي المعروضة الآن؛ لم أغيّر شيئًا.`, intent: it }); continue; }
+    restore = { index: idx, version: it.to === 'version' ? it.version : verOf(history[idx] || {}, idx), keepIds: it.keepIds || [], keepOnly: true };
   }
+  if (restoreFail.length && !restore && intents.every(i => i.op === 'restore')) return restoreFail.every(r => r.ok) ? { status: 'local', doc: clone(doc0), results: restoreFail, pending: [], changed: [], unchanged: true, geometryIdentical: true } : { status: 'clarify', questions: restoreFail.map(r => ({ type: 'ambiguous-version', key: 'version|' + r.intent.version, question_ar: r.why_ar + ' أي نسخة تقصد؟' })), doc: doc0, results: restoreFail };
   const reqBase = req;
   for (const it of intents) {
     if (it.op === 'restore') continue;
@@ -1128,16 +1531,18 @@ export function applyEdits(doc0, parsed, { req = null, history = [] } = {}) {
       else if (it.op === 'rule') r = doRule(doc, it, req);
       else if (it.op === 'kitchenOpen') r = doKitchenOpen(doc, it, req);
       else if (it.op === 'extDoor') r = doExtDoor(doc, it, req);
+      else if (it.op === 'door') r = doDoor(doc, it, req);
+      else if (it.op === 'window') r = doWindow(doc, it, req);
       else if (it.op === 'revertRoom') { r = doRevertRoom(doc, it, req, history); if (!r.ok && r.restore) restore = { index: r.restore.index, keepIds: [], dropRoom: it.id, room: it.name }; }
       else if (it.op === 'none') r = { ok: it.ok !== false, already: true, doc, why_ar: it.why_ar };
       else r = { ok: false, why_ar: 'نية غير معروفة' };
     } catch (e) { r = { ok: false, why_ar: 'خطأ داخلي في التعديل الموضعي: ' + e.message }; }
     if (r.ok && r.doc && !r.deferred) doc = r.doc;
     if (!r.ok && r.fallback) fallback = { why_ar: r.why_ar };
-    results.push({ op: it.op, text_ar: it.text_ar, ok: !!r.ok, ask: r.ask || null, already: !!r.already, how_ar: r.how_ar || null, why_ar: r.why_ar || null, measured: r.measured || null, restore: !!(restore && (it.op === 'revertRoom' || it.op === 'bedCount') && !r.ok) || !!r.deferred, intent: it, removedOpenings: r.removedOpenings || [], envelope: !!r.envelope });
+    results.push({ op: it.op, text_ar: it.text_ar, ok: !!r.ok, ask: r.ask || null, question: !!r.question, already: !!r.already, how_ar: r.how_ar || null, why_ar: r.why_ar || null, measured: r.measured || null, restore: !!(restore && (it.op === 'revertRoom' || it.op === 'bedCount') && !r.ok) || !!r.deferred, intent: it, removedOpenings: r.removedOpenings || [], envelope: !!r.envelope, subjectDoor: r.subjectDoor || null });
   }
   const asks = results.filter(r => !r.ok && r.ask);
-  if (asks.length && !results.some(r => r.ok && !r.already)) return { status: 'clarify', questions: asks.map(r => ({ type: 'needs-consent', key: 'consent|' + r.text_ar, question_ar: r.ask })), doc: doc0, results };
+  if (asks.length && !results.some(r => r.ok && !r.already)) return { status: 'clarify', questions: asks.map(r => ({ type: r.question ? 'ambiguous-opening' : 'needs-consent', key: (r.question ? 'which|' : 'consent|') + r.text_ar, question_ar: r.ask })), doc: doc0, results };
   if (restore) return { status: 'restore', restore, results, pending, doc };
   if (fallback && !results.some(x => x.ok && !x.already)) return { status: 'fallback', why_ar: fallback.why_ar, results, doc: doc0 };
   const cmp = compareDocs(doc0, doc, { gates: false });
@@ -1166,6 +1571,7 @@ export function measureIntents(before, after, intents, { entry = 's' } = {}) {
       if (it.op === 'kitchenOpen') { const K = A.find(r => r.type === 'kitchen'), T = A.find(r => it.to === 'hall' ? r.type === 'living' : r.type === 'dining'); const ls = K && T ? K.links.filter(l => l.to === T.id) : []; return res(ls.length && ls.every(l => (l.kind === 'arch') === it.open), ''); }
       if (it.op === 'extDoor') { const I = inspect(after), R = roomList(I).find(r => r.name === it.name); const L = R && I.model.levelById.get(R.level); return res(!!L && L.openings.some(op => op.door && op.sides.some(x => x.room.id === R.id && x.other === 'outside')), ''); }
       if (it.op === 'none' || it.op === 'facade') return res(true, '');
+      if (it.op === 'door' && it.action === 'add') { const Ia = inspect(after), a = roomList(Ia).find(r => r.name === it.aName), b = roomList(Ia).find(r => r.name === it.bName); return res(!!a && !!b && openingsBetween(Ia, a.id, b.id).length > 0, ''); }
     } catch (e) { return res(false, e.message); }
     return res(false, 'غير مقيس');
   });
@@ -1176,10 +1582,11 @@ export function replayIntents(doc, intents, { req = null } = {}) {
   const ok = [], lost = [];
   let cur = doc;
   for (const it0 of intents) {
-    if (!['facade', 'resize', 'delete', 'add', 'kitchenOpen', 'extDoor', 'rule', 'bedCount'].includes(it0.op)) continue;
+    if (!['facade', 'resize', 'delete', 'add', 'kitchenOpen', 'extDoor', 'rule', 'bedCount', 'door', 'window'].includes(it0.op)) continue;
     // المعرّف من مستند آخر: تُحل الغرفة باسمها في هذا المستند
     let it = it0;
     if (it0.id && it0.name) { const I = inspect(cur), r = I.rooms.get(it0.id); if (!r || r.name !== it0.name) { const m = roomList(I).find(x => x.name === it0.name); if (!m) { lost.push({ text: it0.text_ar, why: `«${it0.name}» غير موجودة` }); continue; } it = { ...it0, id: m.id }; } }
+    for (const [k, kn] of [['a', 'aName'], ['b', 'bName'], ['to', 'toName']]) if (it[k] && it[kn]) { const I = inspect(cur), r = I.rooms.get(it[k]); if (!r || r.name !== it[kn]) { const m = roomList(I).find(x => x.name === it[kn]); if (m) it = { ...it, [k]: m.id }; } }
     const res = applyEdits(cur, { intents: [it], unhandled: [], questions: [] }, { req });
     const r = res.results[0];
     if (res.status === 'local' && r?.ok) { cur = res.doc; ok.push(it.text_ar); } else lost.push({ text: it.text_ar, why: r?.why_ar || res.why_ar || '' });

@@ -288,6 +288,36 @@ export const SESSIONS = [
       { text: 'مجلس النساء أبيه بمدخل مستقل من برا', scope: ['النساء'], checks: [{ type: 'extAccess', room: '^مجلس النساء$' }] },
     ],
   },
+  // (الجولة العاشرة) الأبواب والنوافذ: كل تعديل يمس فتحة واحدة فقط (مقيسًا بالبصمة الهندسية)، و«سد الباب» بلا غرفة
+  // يعود على الباب الذي فُتح للتو، والرجوع إلى النسخة الأولى حرفيًا بعد فتحه وسده
+  {
+    id: 'S7', name: 'الأبواب والنوافذ: فتح باب بين المجلس والطعام ثم «سد الباب»، نقل باب غرفة 2، تكبير نافذة الصالة، باب موجود أصلًا',
+    land: { width: 22, length: 30, streets: ['s'], entries: ['s'] },
+    text: '4 غرف نوم منها ماستر ومجلس وصالة ومطبخ وطعام وغرفة غسيل',
+    counts: { bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 },
+    turns: [
+      { text: 'افتح باب بين المجلس والطعام', scope: [MAJ, 'طعام'], checks: [{ type: 'doorBetween', a: MAJ, b: 'طعام' }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'سد الباب', scope: [MAJ, 'طعام'], checks: [{ type: 'noDoorBetween', a: MAJ, b: 'طعام' }, { type: 'fpSame', turn: 0 }] },
+      { text: 'انقل باب غرفة 2', scope: ['^غرفة نوم 2$'], checks: [{ type: 'doorMoved', room: '^غرفة نوم 2$', min: .5 }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'كبّر نافذة الصالة', scope: [HALL], checks: [{ type: 'windowWider', room: HALL, factor: 1.2 }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'افتح باب بين المطبخ والطعام', scope: ['^المطبخ$', 'طعام'], checks: [{ type: 'doorBetween', a: '^المطبخ$', b: 'طعام' }, { type: 'unchanged' }] },
+    ],
+  },
+  // الرجوع إلى نسخة بعينها، ثم «رجّع مثل أول بس خل تعديل المجلس»: الناتج مطابق للنسخة المطلوبة بالبصمة، أو لا يختلف
+  // عن النسخة الأولى إلا بالعناصر نفسها التي غيّرها تعديل المجلس أول مرة
+  {
+    id: 'S8', name: 'تعديلات متتابعة ثم «ارجع للنسخة الثانية» ثم «رجّع مثل أول بس خل تعديل المجلس»',
+    land: { width: 20, length: 30, streets: ['s'], entries: ['s'] },
+    text: '3 غرف نوم منها ماستر، مجلس، صالة، مطبخ وطعام',
+    counts: { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 },
+    turns: [
+      { text: 'كبّر نافذة الصالة', scope: [HALL], checks: [{ type: 'windowWider', room: HALL, factor: 1.2 }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'المجلس أصغر', scope: [MAJ], checks: [{ type: 'smaller', room: MAJ, factor: .9 }] },
+      { text: 'غيّر الواجهة حجر', scope: [], checks: [{ type: 'docField', field: 'facade' }, { type: 'unchanged' }] },
+      { text: 'ارجع للنسخة الثانية', scope: [MAJ], checks: [{ type: 'fpSame', turn: 1 }] },
+      { text: 'رجّع مثل أول بس خل تعديل المجلس', scope: [MAJ, HALL], checks: [{ type: 'smaller', room: MAJ, factor: .9 }, { type: 'windowNarrower', room: HALL, factor: .9 }, { type: 'fpReplay', turn: 0, editTurn: 2 }] },
+    ],
+  },
 ];
 
 export default { LONG, SESSIONS };

@@ -13,6 +13,7 @@ import { createSession, redesign, currentDoc } from '../dist/design-session.mjs'
 import { docRooms, doorInfo } from '../dist/rules.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 import { serialize, parseDoc } from '../dist/draw/doc.mjs';
+import { fingerprint, diffFingerprint, compactDiff, outsideRegion, touchedKeys } from '../dist/plan-fingerprint.mjs';
 
 const r2 = v => Math.round(v * 100) / 100, r3 = v => Math.round(v * 1000) / 1000;
 // الحدود (من التكليف): تغيّر مساحة غرفة لم تُطلب > 5٪ أو إزاحة مركزها > 0.5 م = مخالفة
@@ -257,10 +258,48 @@ export function runCheck(ck, ctx) {
       const di = doorInfo(after), own = di.extDoors(r.name), via = di.neighbors(r.name).filter(n => /^مدخل/.test(n) && /النساء/.test(n) && di.extDoors(n) > 0);
       return res(own > 0 || via.length > 0, { ownExteriorDoors: own, dedicatedEntrance: via, neighbors: di.neighbors(r.name) }, 'لا باب خارجي خاص ولا مدخل مستقل خاص بها');
     }
+    // (الجولة العاشرة) الأبواب والنوافذ والرجوع، مقيسة من المستند وبالبصمة الهندسية
+    case 'doorBetween': case 'noDoorBetween': {
+      const a = one(ck.a), b = one(ck.b); if (!a || !b) return res(false, null, 'غرفة غير موجودة');
+      const kinds = a.links.filter(l => l.to === b.id).map(l => l.kind);
+      return res(ck.type === 'doorBetween' ? kinds.length > 0 : kinds.length === 0, { openings: kinds }, ck.type === 'doorBetween' ? 'لا باب بينهما' : 'ما زال بينهما باب');
+    }
+    case 'doorMoved': {
+      const pos = d => { const m = analyzeDoc(d), out = new Map(); for (const L of m.levels) for (const op of L.openings) if (op.door && op.sides.some(x => new RegExp(ck.room).test(x.room.name))) out.set(op.id, op.p); return out; };
+      const A = pos(before), B = pos(after); let best = 0;
+      for (const [id, p] of A) { const q = B.get(id); if (q) best = Math.max(best, Math.hypot(q.x - p.x, q.y - p.y)); }
+      return res(best >= (ck.min || .5) && B.size >= A.size, { moved: r2(best), doorsBefore: A.size, doorsAfter: B.size }, `أكبر إزاحة لباب الغرفة ${r2(best)} م`);
+    }
+    case 'windowWider': case 'windowNarrower': {
+      // كل نافذة بمعرّفها: أكبر نسبة تغيّر في عرض نافذة من نوافذ الغرفة (النافذة المقصودة قد لا تكون الأعرض)
+      const w = d => { const m = analyzeDoc(d), out = new Map(); for (const L of m.levels) for (const op of L.openings) if (op.window && op.sides.some(x => new RegExp(ck.room).test(x.room.name))) out.set(op.id, op.w); return out; };
+      const A = w(before), B = w(after); let best = null;
+      for (const [id, a] of A) { const b = B.get(id); if (b === undefined) continue; const k = b / a; if (!best || (ck.type === 'windowWider' ? k > best.k : k < best.k)) best = { id, a, b, k }; }
+      if (!best) return res(false, null, 'لا نافذة للغرفة');
+      return res(ck.type === 'windowWider' ? best.k >= (ck.factor || 1.1) : best.k <= (ck.factor || .9), { window: best.id, before: r2(best.a), after: r2(best.b), ratio: r2(best.k) }, `النافذة ${best.id}: ${r2(best.a)} ← ${r2(best.b)} م`);
+    }
+    case 'fpSame': { const d = diffFingerprint(docs[ck.turn], after); return res(d.identical, { touched: d.counts.touched, unchanged: d.counts.unchanged }, `يختلف عن مخطط الدور ${ck.turn} في ${d.counts.touched} عنصرًا`); }
+    case 'fpTouched': { const d = diffFingerprint(before, after), kinds = ck.kinds || null, extra = [...d.changed, ...d.added, ...d.removed].filter(e => e.kind !== 'fixture' && kinds && !kinds.includes(e.kind)); return res(d.counts.touched <= (ck.max ?? Infinity) && d.counts.touched >= (ck.min ?? 0) && !extra.length, { touched: d.counts.touched, byKind: d.byKind, outsideKinds: extra.map(e => e.name_ar) }, `تغيّر ${d.counts.touched} عنصرًا${extra.length ? ' ومنها خارج النوع المطلوب' : ''}`); }
+    case 'fpReplay': {
+      // الرجوع إلى مخطط الدور turn مع إعادة تعديل الدور editTurn: الفرق عن ذلك المخطط هو العناصر نفسها التي غيّرها التعديل أول مرة
+      const rep = touchedKeys(diffFingerprint(docs[ck.turn], after)), orig = touchedKeys(diffFingerprint(docs[ck.editTurn - 1], docs[ck.editTurn]));
+      const common = [...rep].filter(k => orig.has(k)).length, union = new Set([...rep, ...orig]).size, j = union ? common / union : 1;
+      return res(j >= (ck.min ?? .9), { replayTouched: rep.size, originalTouched: orig.size, common, jaccard: r2(j) }, `تشابه العناصر المتغيرة ${r2(j)}`);
+    }
     default: return res(false, null, 'فحص غير معروف');
   }
 }
 
+/** علامات الرسم من فرق البصمة: قطع الجدران من مفاتيحها (W|دور|x,y|x,y)، والفتحات بمستطيلها. */
+export function marksOf(fpd) {
+  const seg = (e, color) => { const m = e.key.match(/^W\|([^|]+)\|([-\d.]+),([-\d.]+)\|([-\d.]+),([-\d.]+)/); return m ? { level: m[1], a: { x: +m[2], y: +m[3] }, b: { x: +m[4], y: +m[5] }, color } : null; };
+  const one = (e, color) => e.kind === 'wall' ? seg(e, color) : e.kind === 'opening' && e.box ? { level: e.level, box: e.box, color } : null;
+  const RED = '#d62828', PUR = '#7b2cbf';
+  return {
+    before: [...fpd.removed.map(e => one(e, RED)), ...fpd.changed.map(e => e.before && one({ ...e.before, key: e.key }, RED))].filter(Boolean),
+    after: [...fpd.added.map(e => one(e, PUR)), ...fpd.changed.map(e => one(e, PUR))].filter(Boolean),
+  };
+}
 /** جلسة تعديل متتابعة: التصميم الأول ثم كل دور، مع إثبات الحفظ وفحوص الطلب على المستند. */
 export async function runSession(S, { maxTurns = Infinity } = {}) {
   const land = { floors: 1, ...S.land }, entry = land.entries[0], t0 = performance.now();
@@ -281,14 +320,19 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
       if (r.reply?.conflicts?.some(c => c.type === 'needs-consent')) {
         const y = await redesign(r.session, { text: 'نعم' }), ad = currentDoc(y.session), pr = preservation(before, ad, T.scope);
         const ck = T.checks.map(ck => runCheck(ck, { after: ad, before, docs: [...docs, ad], entry, outcome: 'applied' }));
-        ifConsented = { happened: ck.every(c => c.ok), checks: ck, violations: pr.violations.map(v => ({ name: v.name, areaPct: v.areaPct, shift: v.shift })), summary: y.reply?.summary_ar || null };
+        const fpc = diffFingerprint(before, ad);
+        ifConsented = { happened: ck.every(c => c.ok), checks: ck, violations: pr.violations.map(v => ({ name: v.name, areaPct: v.areaPct, shift: v.shift })), summary: y.reply?.summary_ar || null, mode: y.reply?.mode || null, fingerprint: fpc.counts, rooms: [...fpc.changed, ...fpc.added, ...fpc.removed].filter(e => e.kind === 'room').map(e => e.name_ar) };
+        // المقترح نفسه (لا يُكتب في JSON): يُرسم «لو وافق العميل» بجانب «قبل»
+        Object.defineProperty(ifConsented, 'doc', { value: ad, enumerable: false }); Object.defineProperty(ifConsented, 'marks', { value: marksOf(fpc), enumerable: false }); Object.defineProperty(ifConsented, 'pres', { value: pr, enumerable: false });
       }
     } catch (e) { error = { code: e.code || null, message: e.message, unclear: e.unclear || [] }; outcome = e.code === 'SHARA_UNCLEAR' ? 'unclear' : 'error'; }
     const after = currentDoc(s), pat = s.designs[s.current].pat;
     docs.push(after); pats.push(pat);
     const pres = preservation(before, after, T.scope);
+    // البصمة الهندسية: كل عنصر (قطعة جدار، فتحة، غرفة، الواجهة) قبل الدور وبعده — ما تغيّر وما بقي ثابتًا حرفيًا
+    const fpd = diffFingerprint(before, after);
     // alreadyBefore: هل كان الفحص ناجحًا قبل التعديل أصلًا؟ (نجاح بلا تغيير ليس دليلًا على الفهم)
-    const NOPRE = new Set(['bigger', 'smaller', 'sameAs', 'unchanged', 'clarify', 'revertDoc', 'docField']);
+    const NOPRE = new Set(['bigger', 'smaller', 'sameAs', 'unchanged', 'clarify', 'revertDoc', 'docField', 'doorMoved', 'windowWider', 'windowNarrower', 'fpSame', 'fpTouched', 'fpReplay']);
     const checks = T.checks.map(ck => ({ ...runCheck(ck, { after, before, docs, entry, outcome }), alreadyBefore: NOPRE.has(ck.type) ? null : runCheck(ck, { after: before, before, docs, entry, outcome }).ok }));
     const happened = checks.every(c => c.ok);
     // السجل (ما يقوله النظام عن نفسه) مقابل القياس: «نُفّذ» في السجل مع فحص راسب = ادعاء غير صحيح
@@ -299,6 +343,7 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
       questions: reply?.questions || [], patternBefore: pats[i], patternAfter: pat, patternKept: pats[i] === pat, patternChanged: reply?.patternChanged || null,
       checks, happened, ledger: { done: ledgerDone, failed: ledgerFailed, pending: ledgerPending, unchanged: reply?.unchanged ?? null, reused: reply?.reused ?? null }, claimMismatch,
       preservation: pres, violations: pres.violations.length, mainViolations: pres.mainViolations,
+      fingerprint: compactDiff(fpd, 80), fpMarks: marksOf(fpd), replyFingerprint: reply?.fingerprint?.counts || null, restoreProof: reply?.restoreProof || null,
       // r5: كيف نُفّذ الدور (تعديل موضعي/رجوع/سؤال/إعادة توليد صريحة/لم يُنفَّذ)، وما أعلنه الرد من تغيّرات
       mode: reply?.mode || (outcome === 'unclear' ? 'unclear' : reply?.reused ? 'reused' : 'regenerated'), summary: reply?.summary_ar || reply?.fallback?.said_ar || null,
       declared: (reply?.changed || reply?.fallback?.changed || []).filter(c => !c.inScope && c.kind !== 'openings').map(c => c.name),
@@ -317,12 +362,18 @@ const one = (cv, doc, li, colors, bounds, head, sub) => { const lv = doc.levels[
   renderPlan(ctx, { doc, levelId: lv.id, view, W: 1000, H: 720, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: true, areas: true, fixtures: false, underlay: false, roomDims: true }, roomFill: rm => colors[rm.id] || '#f3f1ec' }); ctx.restore();
   ctx.fillStyle = '#1d2a24'; ctx.textAlign = 'right'; ctx.font = 'bold 24px Tahoma'; ctx.fillText(head, 980, 34); ctx.font = '17px Tahoma'; ctx.fillText(sub, 980, 60);
   ctx.strokeStyle = '#999'; ctx.beginPath(); ctx.moveTo(cv.id === 'a' ? 0 : 999, 0); ctx.lineTo(cv.id === 'a' ? 0 : 999, 860); ctx.stroke(); };
-window.drawPair = (rawA, rawB, li, cA, cB, hA, hB, sA, sB, foot) => { const A = parseDoc(rawA), B = parseDoc(rawB);
+// طبقة البصمة: قطع الجدران والفتحات التي تغيّرت (أحمر في «قبل» لما أزيل، وبنفسجي في «بعد» لما أضيف أو تغيّر)
+const overlay = (cv, doc, li, bounds, marks) => { if (!marks || !marks.length) return; const lv = doc.levels[li], ctx = cv.getContext('2d'), view = fitView(bounds, 1000, 720, 30);
+  ctx.save(); ctx.translate(0, 70); const S = p => ({ x: (p.x - view.cx) * view.scale + 500, y: 360 - (p.y - view.cy) * view.scale });
+  for (const m of marks) { if (m.level && m.level !== lv.id) continue; ctx.strokeStyle = m.color; ctx.globalAlpha = .8; if (m.a) { const a = S(m.a), b = S(m.b); ctx.lineWidth = Math.max(5, (m.t || .2) * view.scale + 3); ctx.lineCap = 'butt'; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } else if (m.box) { const a = S({ x: m.box.x0, y: m.box.y1 }), b = S({ x: m.box.x1, y: m.box.y0 }); ctx.lineWidth = 3; ctx.strokeRect(a.x - 3, a.y - 3, b.x - a.x + 6, b.y - a.y + 6); } }
+  ctx.restore(); ctx.globalAlpha = 1; };
+window.drawPair = (rawA, rawB, li, cA, cB, hA, hB, sA, sB, foot, mA, mB, foot2) => { const A = parseDoc(rawA), B = parseDoc(rawB);
   const ba = docBounds(A, A.levels[li].id), bb = docBounds(B, B.levels[li]?.id || B.levels[0].id), u = { x0: Math.min(ba.x0, bb.x0) - 1.5, y0: Math.min(ba.y0, bb.y0) - 1.5, x1: Math.max(ba.x1, bb.x1) + 1.5, y1: Math.max(ba.y1, bb.y1) + 1.5 };
   // RTL: «قبل» على اليمين و«بعد» على اليسار
   // الصفحة RTL: اللوحة الأولى (a) على اليمين = «قبل»، والثانية (b) على اليسار = «بعد»
   one(document.getElementById('a'), A, li, cA, u, hA, sA); one(document.getElementById('b'), B, Math.min(li, B.levels.length - 1), cB, u, hB, sB);
-  for (const id of ['a', 'b']) { const ctx = document.getElementById(id).getContext('2d'); ctx.fillStyle = '#333'; ctx.font = '15px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(id === 'b' ? foot : 'أزرق: ما طلبه العميل · أحمر: تغيّر دون طلب (> 5٪ مساحة أو > 0.5 م إزاحة) · برتقالي: تغيّرت فتحاته فقط', 980, 845); }
+  overlay(document.getElementById('a'), A, li, u, mA); overlay(document.getElementById('b'), B, Math.min(li, B.levels.length - 1), u, mB);
+  for (const id of ['a', 'b']) { const ctx = document.getElementById(id).getContext('2d'); ctx.fillStyle = '#333'; ctx.font = '15px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(id === 'b' ? foot : 'أزرق: ما طلبه العميل · أحمر: تغيّر دون طلب (> 5٪ أو > 0.5 م) · برتقالي: فتحاته فقط', 980, 822); ctx.fillText(id === 'b' ? (foot2 || '') : 'خطوط حمراء: عناصر أزيلت/تغيّرت (البصمة) · خطوط بنفسجية في «بعد»: عناصر أضيفت/تغيّرت', 980, 846); }
   return true; };
 window.ready = true;</script></body></html>`;
 const C_TARGET = '#9cc3f0', C_VIOL = '#f19a9a', C_OPEN = '#f5c77a';
@@ -342,7 +393,7 @@ export async function renderAll(jobs, distRoot) {
   const page = await (await br.newContext({ viewport: { width: 2000, height: 860 } })).newPage();
   page.on('pageerror', e => console.error('خطأ في صفحة الرسم:', e.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/__d.html`); await page.waitForFunction(() => window.ready);
-  for (const j of jobs) { await page.evaluate(a => window.drawPair(...a), [j.a, j.b, j.li, j.cA, j.cB, j.hA, j.hB, j.sA, j.sB, j.foot]); await page.locator('#w').screenshot({ path: j.path }); }
+  for (const j of jobs) { await page.evaluate(a => window.drawPair(...a), [j.a, j.b, j.li, j.cA, j.cB, j.hA, j.hB, j.sA, j.sB, j.foot, j.mA || [], j.mB || [], j.foot2 || '']); await page.locator('#w').screenshot({ path: j.path }); }
   await br.close(); server.close();
 }
 function renderJobs(sess, dir) {
@@ -355,7 +406,15 @@ function renderJobs(sess, dir) {
     for (const v of t.preservation.violations) if (v.idAfter) cB[v.idAfter] = C_VIOL;
     const verdict = `${t.happened ? 'تحقق الطلب (مقيس)' : 'لم يتحقق الطلب (مقيس)'} · مخالفات الحفظ: ${t.violations} · ${t.outcome === 'unclear' ? 'شرعاء: لم أفهم' : t.outcome === 'asked' ? 'شرعاء سألت' : t.outcome === 'error' ? 'خطأ' : 'نُفّذ'}`;
     for (let li = 0; li < Math.max(A.levels.length, B.levels.length); li++)
-      jobs.push({ path: `${dir}turn-${t.n}${A.levels.length > 1 ? '-L' + (li + 1) : ''}.png`, a: serialize(A), b: serialize(B), li: Math.min(li, A.levels.length - 1), cA, cB, hA: `${sess.id} — قبل الدور ${t.n}`, hB: `بعد: «${t.text}»`, sA: `النمط ${t.patternBefore || '-'}`, sB: `النمط ${t.patternAfter || '-'} · الفرق ${t.preservation.difference}`, foot: verdict });
+      jobs.push({ path: `${dir}turn-${t.n}${A.levels.length > 1 ? '-L' + (li + 1) : ''}.png`, a: serialize(A), b: serialize(B), li: Math.min(li, A.levels.length - 1), cA, cB, hA: `${sess.id} — قبل الدور ${t.n}`, hB: `بعد: «${t.text}»`, sA: `النمط ${t.patternBefore || '-'}`, sB: `النمط ${t.patternAfter || '-'} · الفرق ${t.preservation.difference} · ${t.mode}`, foot: verdict, mA: t.fpMarks?.before, mB: t.fpMarks?.after, foot2: `البصمة: تغيّر ${t.fingerprint.counts.touched} عنصرًا، وبقي ${t.fingerprint.counts.unchanged} ثابتًا حرفيًا (جدران ${(t.fingerprint.byKind.wall?.changed || 0) + (t.fingerprint.byKind.wall?.added || 0) + (t.fingerprint.byKind.wall?.removed || 0)}، فتحات ${(t.fingerprint.byKind.opening?.changed || 0) + (t.fingerprint.byKind.opening?.added || 0) + (t.fingerprint.byKind.opening?.removed || 0)}، غرف ${(t.fingerprint.byKind.room?.changed || 0) + (t.fingerprint.byKind.room?.added || 0) + (t.fingerprint.byKind.room?.removed || 0)})` });
+    // سؤال الإذن: المقترح كما كان سيُنفَّذ لو قال العميل «نعم» (الجلسة نفسها لم تتغير)
+    if (t.ifConsented?.doc) {
+      const C = t.ifConsented.doc, cC = {};
+      for (const r of roomsOf(C)) if (inScope(r.name, t.scope)) cC[r.id] = C_TARGET;
+      for (const v of t.ifConsented.pres.violations) if (v.idAfter) cC[v.idAfter] = C_VIOL;
+      const fc = t.ifConsented.fingerprint;
+      jobs.push({ path: `${dir}turn-${t.n}-if-consented.png`, a: serialize(A), b: serialize(C), li: 0, cA, cB: cC, hA: `${sess.id} — قبل الدور ${t.n}`, hB: `لو وافق: «${t.text}»`, sA: `النمط ${t.patternBefore || '-'}`, sB: `سؤال إذن (${t.mode}) — لم يُنفَّذ بعد · ${t.ifConsented.mode || ''}`, foot: `لو وافق: تحقق الطلب ${t.ifConsented.happened ? 'نعم' : 'لا'} · مخالفات الحفظ ${t.ifConsented.violations.length}`, mA: t.ifConsented.marks.before, mB: t.ifConsented.marks.after, foot2: `البصمة لو وافق: تغيّر ${fc.touched} عنصرًا، وبقي ${fc.unchanged} ثابتًا حرفيًا` });
+    }
   });
   return jobs;
 }
@@ -382,7 +441,7 @@ async function main() {
     sess.docs.forEach((d, i) => writeFileSync(dir + `doc-${i}.json`, serialize(d)));
     for (const t of sess.turns) writeFileSync(dir + `turn-${t.n}.json`, JSON.stringify(t, null, 1));
     if (!noPng) jobs.push(...renderJobs(sess, dir));
-    summary.sessions.push({ id: S.id, name: S.name, initMs: sess.initMs, turns: sess.turns.map(t => ({ n: t.n, text: t.text, outcome: t.outcome, mode: t.mode, summary: t.summary, questions: t.questions, ifConsented: t.ifConsented ? { happened: t.ifConsented.happened, violations: t.ifConsented.violations } : null, declared: t.declared, undeclared: t.undeclared, geometryIdentical: t.preservation.geometryIdentical, happened: t.happened, failedChecks: t.checks.filter(c => !c.ok).map(c => ({ type: c.type, why: c.why, measured: c.measured })), trivial: t.happened && t.checks.every(c => c.alreadyBefore !== false) && t.checks.some(c => c.alreadyBefore === true), violations: t.preservation.violations, openingChanges: t.preservation.openingChanges.length, patternKept: t.patternKept, difference: t.preservation.difference, envelope: t.preservation.envelope, idsStable: t.preservation.idsStable, claimMismatch: t.claimMismatch, ledger: t.ledger, understood: t.understood, error: t.error?.message || null, ms: t.ms })) });
+    summary.sessions.push({ id: S.id, name: S.name, initMs: sess.initMs, turns: sess.turns.map(t => ({ n: t.n, text: t.text, outcome: t.outcome, mode: t.mode, summary: t.summary, questions: t.questions, ifConsented: t.ifConsented ? { happened: t.ifConsented.happened, violations: t.ifConsented.violations } : null, declared: t.declared, undeclared: t.undeclared, geometryIdentical: t.preservation.geometryIdentical, happened: t.happened, failedChecks: t.checks.filter(c => !c.ok).map(c => ({ type: c.type, why: c.why, measured: c.measured })), trivial: t.happened && t.checks.every(c => c.alreadyBefore !== false) && t.checks.some(c => c.alreadyBefore === true), violations: t.preservation.violations, openingChanges: t.preservation.openingChanges.length, patternKept: t.patternKept, difference: t.preservation.difference, envelope: t.preservation.envelope, idsStable: t.preservation.idsStable, claimMismatch: t.claimMismatch, ledger: t.ledger, understood: t.understood, error: t.error?.message || null, ms: t.ms, fingerprint: { counts: t.fingerprint.counts, byKind: t.fingerprint.byKind, region: t.fingerprint.region, summary: t.fingerprint.summary_ar, rooms: [...t.fingerprint.changed, ...t.fingerprint.added, ...t.fingerprint.removed].filter(e => e.kind === 'room').map(e => e.name_ar) }, replyFingerprint: t.replyFingerprint, ifConsentedFingerprint: t.ifConsented?.fingerprint || null, restoreProof: t.restoreProof || null })) });
     for (const t of sess.turns) console.log(`${S.id} د${t.n} «${t.text}»: ${t.outcome} | تحقق ${t.happened}${t.happened && t.checks.some(c => c.alreadyBefore === true) && t.checks.every(c => c.alreadyBefore !== false) ? ' (كان متحققًا قبل التعديل)' : ''} | مخالفات ${t.violations} (رئيسية ${t.mainViolations}) | فتحات ${t.preservation.openingChanges.length} | نمط محفوظ ${t.patternKept} | فرق ${t.preservation.difference}${t.claimMismatch ? ' | ادعاء تنفيذ غير صحيح' : ''}`);
   }
   // الإجمالي
@@ -399,6 +458,9 @@ async function main() {
     localViolations: T.filter(t => t.mode === 'local').reduce((a, t) => a + t.violations.length, 0),
     localUndeclared: T.filter(t => t.mode === 'local').reduce((a, t) => a + (t.undeclared || 0), 0),
     undeclared: T.reduce((a, t) => a + (t.undeclared || 0), 0),
+    // البصمة الهندسية: مجموع العناصر التي تغيّرت والتي بقيت ثابتة حرفيًا، وفي الأدوار الموضعية وحدها
+    fpTouched: T.reduce((a, t) => a + t.fingerprint.counts.touched, 0), fpUnchanged: T.reduce((a, t) => a + t.fingerprint.counts.unchanged, 0),
+    fpLocalTouched: T.filter(t => t.mode === 'local').reduce((a, t) => a + t.fingerprint.counts.touched, 0), fpLocalUnchanged: T.filter(t => t.mode === 'local').reduce((a, t) => a + t.fingerprint.counts.unchanged, 0),
   };
   writeFileSync(OUT + 'summary.json', JSON.stringify(summary, null, 1));
   console.log('الإجمالي:', JSON.stringify(summary.totals));

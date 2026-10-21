@@ -71,6 +71,8 @@ test('من محادثة شرعاء إلى المخطط: ما فهمه Claude ي�
   assert.ok(led.length >= 2 && led.every(x => x.ok), led.map(x => x.text + ' ' + x.why).join('؛ '));
   // وفي التعديل: ai يُمرَّر إلى redesign
   const ds = createSession({ land: LAND, counts: s.counts, requirements: s.requirements, result: out });
-  const { reply } = await redesign(ds, { text: 'خل المكتب ورى', ai: sanitizeAiRequirements({ rules: [{ kind: 'place', a: 'office', side: 'back', mode: 'half', quote: 'المكتب ورى' }], extras: [{ kind: 'office' }], unclear: [] }) });
+  let { reply, session: s1 } = await redesign(ds, { text: 'خل المكتب ورى', ai: sanitizeAiRequirements({ rules: [{ kind: 'place', a: 'office', side: 'back', mode: 'half', quote: 'المكتب ورى' }], extras: [{ kind: 'office' }], unclear: [] }) });
+  // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح
+  if (reply.mode === 'ask-regenerate') ({ reply } = await redesign(s1, { text: 'نعم' }));
   assert.ok(reply.done.some(t => /المكتب/.test(t)), JSON.stringify(reply));
 });

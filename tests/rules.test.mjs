@@ -127,7 +127,9 @@ test('طلب تصميم آخر بنص مكاني: القاعدة الجديدة 
   const req = extractRequirements('3 غرف ومجلس والمطبخ في الخلف', { counts: BASE });
   const first = await generateInitialDesign({ land: LAND(), counts: req.counts, requirements: req });
   const s0 = createSession({ land: LAND(), counts: req.counts, requirements: req, result: first });
-  const { session } = await redesign(s0, { text: 'المطبخ في الأمام والماستر بعيدة عن المجلس' });
+  let { session, reply } = await redesign(s0, { text: 'المطبخ في الأمام والماستر بعيدة عن المجلس' });
+  // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح
+  if (reply.mode === 'ask-regenerate') ({ session } = await redesign(session, { text: 'نعم' }));
   const rules = session.input.requirements.rules;
   assert.deepEqual(rules.map(r => r.kind + ':' + r.a + ':' + (r.side || r.b)).sort(), ['far:master:majlis', 'place:kitchen:front']);
   const led = ledgerFor(session);

@@ -62,7 +62,9 @@ test('C8: التعديل على كل بديل يحفظ النمط والغرف �
   let kept = 0;
   for (const d of out.designs) {
     const s0 = createSession({ land, counts: r.counts, requirements: r, result: { doc: d.doc, pat: d.pat, mirror: d.mirror, summary: d.summary, notes: d.notes, villaEngine: 'v2' } });
-    const { session, reply } = await redesign(s0, { text: C.edit });
+    let { session, reply } = await redesign(s0, { text: C.edit });
+    // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح نفسه
+    if (reply.mode === 'ask-regenerate') ({ session, reply } = await redesign(session, { text: 'نعم' }));
     const after = JSON.parse(session.designs[1].doc);
     assert.deepEqual([...reply.done].sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort(), d.pat + ' ' + JSON.stringify(reply.failed));
     assert.deepEqual(prog(after), prog(d.doc), d.pat + ': غرف البرنامج نفسها');
