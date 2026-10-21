@@ -13,20 +13,31 @@
 // المستند الناتج بصيغة mizan-draw/1 نفسها (+x شرق، +y شمال) فيعمل معه المرسم والعرض ثلاثي الأبعاد والتحليل كما هي.
 // المقاسات المستهدفة افتراضات تصميمية من التطبيق قابلة للضبط، وليست اشتراطات نظامية. نقي: لا DOM ولا تخزين ولا شبكة.
 import { createDoc, applyCommand, applyCommandOwned, parseDoc } from './draw/doc.mjs';
+import { FIXTURES } from './draw/catalog.mjs';
+import { circulationProof, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
 import { footprint, validatePlot } from './planner.mjs';
 import { buildProgram, checkDoc, relaxFixtures, quality, DESIGN_TARGETS, canonicalSide } from './villa-layout.mjs';
 import { rulePenalty, verifyRequest, docRooms, blocksFor } from './rules.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
-import { reviewDesign, reviewDesigns, majlisDiningAsked } from './plan-review.mjs';
+import { reviewDesign, reviewDesigns, majlisDiningAsked, heavyGate, HEAVY_GATES } from './plan-review.mjs';
 import { chooseStair, risersFor, riseOf } from './stair-geometry.mjs';
-import { archSignature, archDifference, THRESHOLDS as ARCH_T } from './arch-difference.mjs';
+import { archSignature, archDifference, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, explainDifference } from './arch-difference.mjs';
 import { stackingGates, stackingReport } from './stacking.mjs';
 
-export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-6'; // الجولة التاسعة: تنظيمات دورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج الارتفاع، في الخلف، في كتلة عائلية) تُحل للدورين معًا مع اتساق التراكب، والرئيسية الأرضية ≤ 24 م²، وغرف النوم لا تفتح على الصالة إلا في «الصالة الموزِّعة» بباب في طرف الجدار، وأنماط H وL للصالة الخلفية؛ الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
+export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-7'; // الجولة الحادية عشرة: الاختيار بالمقياس الوظيفي v2، والبوابات الثقيلة (إنشائية مبدئية، حركة فعلية، تطابق 2D/3D) على المعروض، وفتحات لا تعبر التقاطعات، وأثاث يُتحقق منه، وبحث ثانٍ موجّه بالتنوع؛ // الجولة التاسعة: تنظيمات دورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج الارتفاع، في الخلف، في كتلة عائلية) تُحل للدورين معًا مع اتساق التراكب، والرئيسية الأرضية ≤ 24 م²، وغرف النوم لا تفتح على الصالة إلا في «الصالة الموزِّعة» بباب في طرف الجدار، وأنماط H وL للصالة الخلفية؛ الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
 // أدنى محور لمدخل/ممر فرعي (مدخل الجناح، ممر دورة المياه): صافيه بعد الجدارين ≥ 1.2 م — لا زوايا دخول ضيقة
 const VEST_MIN = 1.4;
+// (الجولة الحادية عشرة) أدنى بعد بين حافة الفتحة ووجه جدار يلتقي بخطها (قيمة تصميمية افتراضية للميزان): لا فتحة تعبر تقاطعًا
+const JUNC_CLEAR = .15;
+// (الجولة الحادية عشرة) باب دورة المياه (ومنها دورة مياه الضيوف) 0.8 م صافيًا — قيمة تصميمية افتراضية للميزان
+const GUEST_WC_DOOR = .8;
+// تلامس فراغين يُفتح بينهما باب: باب 0.8 م وبعد 0.15 م من وجه الجدار المتقاطع في طرفيه (≈ 1.22 م)، بهامش لجدار خارجي
+const DOOR_TOUCH = 1.3;
+const SLAB_SPAN_MAX = 5.95;
+// تلامس بين 1.1 و DOOR_TOUCH يتسع لباب أضيق فقط أو بلا بعد 0.15 م عن التقاطع: جزاء متدرج يوجّه البحث (والمرسوم يُحكم عليه بالبوابات)
+const touchPen = t => (t > 0 && t < DOOR_TOUCH ? 400 * (DOOR_TOUCH - t) : 0);
 const snap = v => Math.round(v / SNAP) * SNAP;
 const r2 = v => Math.round(v * 100) / 100;
 const sum = a => a.reduce((s, v) => s + v, 0);
@@ -590,6 +601,7 @@ export function partiTrees(P, { stair = false, W = Infinity, irregular = false }
         if (mst && kids.length >= 2) { const kh = Math.ceil(kids.length / 2), kA = kids.slice(0, kh), kB = kids.slice(kh);
           P6('centralhall', 'ch2', Y(X(Mz('y1'), VOID(10), F(), Wz('x0', 'x')), X(Zd(kA, 'x1', 'y'), H(), Y(Zd(kB, 'x0', 'y'), OV())), X(Z([...flex, ...wcA, ...Md, ...K], 'y0', 'x'), Z(Dn, 'y0', 'x'), Z([mst], 'y0', 'x')))); }
         P6('centralhall', 'ch1', Y(X(Mz('y1'), VOID(10), F(), Wz('x0', 'x')), X(Zd(bA, 'x1', 'y'), H(), Zd(bB, 'x0', 'y')), X(Z([...flex, ...wcA, ...Md, ...K], 'y0', 'x'), Z(Dn, 'y0', 'x'), OV(8)))); }
+
       // (ج) كتلتان (عامة أمامًا، وعائلية خلفًا) بينهما رواق زجاجي وحديقتان: الخلفية فيها الطعام والمطبخ ونواة النوم
       if (mst && kids.length >= 2) P6('splitpod', 'sp1', Y(X(Mz('y1'), Y(F(), H()), Y(Wm ? Wz('x0') : null, rearK ? null : Z([...flex, ...wcA, ...Dn], 'x0', 'y'))), X(VOID(gardenA * .3), C('link', { fix: 1.6, area: 8 }), VOID(gardenA * .3)), X(rearK ? Y(Z([...flex, ...wcA, ...Dn], 'x1', 'y'), Z([...K, ...Md], 'x1', 'y')) : Z([...K, ...Md], 'x1', 'y'), pod(kids, mst))));
       // (د) جناح النوم خلفي بعرض المبنى حول الصالة: الضيافة أمامًا، والخدمة والطعام صفًا وسطًا يعبره ممر قصير،
@@ -800,6 +812,9 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     pen += 90 * Math.max(0, l / s - 1.6) + 70 * Math.max(0, 5.0 - s);
     const ha = A_(r), ht = P.hallArea; pen += 140 * Math.log(ha / ht) ** 2 * (P.hallFixed ? 4 : 1) + 160 * Math.max(0, l / s - 1.9); const big = ctx.upper ? 1.9 : P.hallArea > 32 ? 1.3 : 1.5; if (ha > ht * big) bad('hall-big', (ha - ht * big) / 8); // مساحة الصالة بقدر البرنامج: لا تمتص فائض الغلاف if (ha < ht * .6) bad('hall-small', (ht * .6 - ha) / 8);
     { const e = expLen(r, solids); if (e < 2.4) bad('hall-dark', (2.4 - e) / 2); } }
+  // (الجولة الحادية عشرة) بحر البلاطة الصافي (الضلع الأقصر للفراغ المستطيل) ≤ 6 م: أكبر منه ملاحظة جسيمة في المراجعة الإنشائية
+  // المبدئية (PRECHECK_LIMITS.slabSerious؛ قيمة تصميمية افتراضية للميزان، لا تصميم إنشائي) — مخالفة في البحث لا تُبنى ثم تُرفض
+  for (const q of [...placed.map(p => p.r), ...circ.map(c => c.r)]) { const sp = Math.min(W_(q), H_(q)) - WALL_NET; if (sp > SLAB_SPAN_MAX) bad('slab-span', sp - SLAB_SPAN_MAX); }
   // المدخل على الواجهة ويتصل بالصالة (مباشرة أو عبر السلم)
   // المدخل على الواجهة الأمامية — أو خلف فناء مدخل مكشوف يطل على الشارع (جناح ضيافة يتقدم الكتلة العائلية: ctx.foyerYard)
   if (foyer) { const r = foyer.r; if (r.y0 > TOL && !(ctx.foyerYard && streetLen(r, solids) >= 1.4)) return no('foyer-front'); if (Math.min(W_(r), H_(r)) < 2.4 - 1e-6) bad('foyer-small', 2.4 - Math.min(W_(r), H_(r)));
@@ -812,14 +827,14 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     const fa = A_(r); if (fa > fMax) bad('foyer-big', (fa - fMax) / 6); pen += 120 * Math.log(fa / fT) ** 2 + 4 * Math.max(0, W_(r) / H_(r) - 2) + 4 * Math.max(0, H_(r) / W_(r) - 2.2); }
   // شبكة الحركة متصلة من المدخل
   { const seen = new Set([root.id]), q = [root.id];
-    while (q.length) { const a = cid(q.pop()); for (const c of circ) if (!seen.has(c.id) && touch(a.r, c.r) >= 1.2) { seen.add(c.id); q.push(c.id); } }
+    while (q.length) { const a = cid(q.pop()); for (const c of circ) if (!seen.has(c.id) && touch(a.r, c.r) >= 1.2) { seen.add(c.id); q.push(c.id); pen += touchPen(touch(a.r, c.r)); } }
     // متدرج: كم ينقص كل عنصر حركة منفصل ليلامس الشبكة بعرض باب (1.2 م) — فيتجه البحث إلى وصله
     if (seen.size < circ.length) {
       const gap = (a, b) => Math.hypot(Math.max(0, Math.max(a.x0, b.x0) - Math.min(a.x1, b.x1)), Math.max(0, Math.max(a.y0, b.y0) - Math.min(a.y1, b.y1)));
       const lack = sum(circ.filter(c => !seen.has(c.id)).map(c => Math.min(...circ.filter(o => seen.has(o.id)).map(o => { const t = touch(c.r, o.r); return t > 0 ? 1.2 - t : 1.2 + gap(c.r, o.r); }))));
       bad('circ-graph', lack);
     } }
-  { const st = cid('stair'); if (st) { const a = A_(st.r), mn = Math.min(W_(st.r), H_(st.r)); if (mn < 2.6) bad('stair-narrow', 2.6 - mn); pen += 6 * Math.max(0, a - 14); if (a > 18.2) bad('stair-big', (a - 18.2) / 4); } }
+  { const st = cid('stair'); if (st) { const a = A_(st.r), mn = Math.min(W_(st.r), H_(st.r)); if (mn < 2.6) bad('stair-narrow', 2.6 - mn); pen += 6 * Math.max(0, a - 14); const amax = mn >= 4.2 ? 20.5 : 18.2; if (a > amax) bad('stair-big', (a - amax) / 4); } } // (الجولة الحادية عشرة) غرفة سلم يُعبر خلالها من البهو إلى الصالة (ضلعاها ≥ 4.2 م) حتى 20.5 م²
   for (const c of circ) if (!['foyer', 'hall', 'stair'].includes(c.id)) {
     const s = Math.min(W_(c.r), H_(c.r)); if (s < 1.2 - 1e-6) bad('corr-narrow', 1.2 - s);
     // ممر بلا غرفة تفتح عليه = هدر
@@ -866,10 +881,10 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     const cT = Math.max(0, ...circ.filter(c => !(ctx.upper && c.id === 'stair')).map(c => touch(r, c.r))), cNoFoyer = Math.max(0, ...circ.filter(c => c.id !== 'foyer' && !(ctx.upper && c.id === 'stair')).map(c => touch(r, c.r)));
     // مجلس الرجال على الواجهة الأمامية، أو على واجهة جانبية بمدخل مستقل من الارتداد الجانبي (حافة خارجية ≥ 3.4 م)
     if (b.kind === 'majlis' && b.men) { if (r.y0 > TOL) { const sx = Math.max(...['x0', 'x1'].map(sd => sum(exposed(r, sd, solids).map(e => e.to - e.from)))); if (sx < 3.4) bad('men-front', r.y0); else pen += 15; } }
-    else if (b.kind === 'kitchen') { const dn = placed.find(q => q.block.kind === 'dining'); if (cT < 1.1 && !(dn && touch(r, dn.r) >= 1.2)) bad('kitchen-access', 1.1 - cT); }
+    else if (b.kind === 'kitchen') { const dn = placed.find(q => q.block.kind === 'dining'), td = dn ? touch(r, dn.r) : 0; if (cT < 1.1 && td < 1.2) bad('kitchen-access', 1.1 - cT); else if (Math.max(cT, td) < DOOR_TOUCH) pen += touchPen(Math.max(cT, td)); }
     else if (b.kind === 'maid') { const k = find('kitchen1'); if (cT < 1.1 && !(k && touch(r, k.r) >= 1.0) && !placed.some(q => q.block.laundry && touch(r, q.r) >= 1.0)) bad('maid-access', 1.1 - cT); }
     else if (b.kind === 'store') { const k = find('kitchen1'); if (!(k && touch(r, k.r) >= 1.0) && !(b.laundry && cT >= 1.1)) bad('store-access', 1); }
-    else if (cT < 1.1) bad('access:' + b.kind, 1.1 - cT);
+    else if (cT < 1.1) bad('access:' + b.kind, 1.1 - cT); else pen += touchPen(cT);
     // جناح بدورة مياه مشتركة: باب الغرفة وباب دورة المياه كلاهما على الحركة — تلامس يتسع لهما معًا
     if (b.kind === 'suite' && b.bathShared && cNoFoyer < T.stripD + 1.3) bad('shared-bath-access', T.stripD + 1.3 - cNoFoyer);
     if (b.kind === 'suite' && !b.guest && cNoFoyer < 1.2) pen += 45; // غرفة نوم تفتح على مدخل العائلة: خصوصية ضعيفة
@@ -930,10 +945,8 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
       // (تقدير الشريط تقريبي: رفض تحت الحد بهامش 0.25 م وجزاء حتى الحد؛ الحكم الدقيق على المرسوم في qualityGates، وحين يتعارض
       // الحد مع بند صريح من الطلب يُقبل مجلس أضيق بملاحظة — admitMajlisBar)
       // وحين يربط العميل المجلس ببند صريح (غرفة الضيوف قرب المجلس…) لا يوجّه الحدُّ الافتراضي البحثَ: بنده يتقدم (توجيه المالك)
-      if (!P.majlisRuled) {
-        if (b.men || b.primary) { const dw = MAJLIS_MIN_W - (mw - WALL_NET); if (dw > .25) bad('majlis-width', dw); else if (dw > 0) pen += 200 * dw; }
-        else if (mw - WALL_NET < MAJLIS_MIN_W) pen += 80 * (MAJLIS_MIN_W - (mw - WALL_NET));
-      }
+      // (الجولة الحادية عشرة) مجلس النساء أيضًا ≥ 4.2 م صافيًا (قيمة تصميمية افتراضية للميزان؛ العميل يغلبها بمقاس أو بند صريح)
+      if (!P.majlisRuled) { const dw = MAJLIS_MIN_W - (mw - WALL_NET); if (dw > .25) bad(b.men || b.primary ? 'majlis-width' : 'women-width', dw); else if (dw > 0) pen += 200 * dw; }
       const cap = MAJLIS_CAP * (b.men || b.primary ? MAJLIS_NET : WOMEN_NET);
       if (na > cap) bad('majlis-big', (na - cap) / 4); else if (na > cap - 4) pen += 15 * (na - cap + 4);
     }
@@ -986,7 +999,7 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   }
   const k = find('kitchen1'), dn = find('dining1');
   // المطبخ يجاور الطعام مباشرة (لا تفصلهما الصالة): حد صلب متى وُجدا معًا
-  if (k && dn) { const t = touch(k.r, dn.r); if (t < 1.2) bad('kitchen-dining', 1.2 - t); else pen -= 10; }
+  if (k && dn) { const t = touch(k.r, dn.r); if (t < 1.2) bad('kitchen-dining', 1.2 - t); else { pen += touchPen(t); pen -= 10; } }
   if (P.men && dn && touch(find(P.men.id).r, dn.r) >= 1.2) pen -= 10; // الطعام للضيافة يجاور مجلس الرجال
   if (P.men && P.women[0]) { const m = find(P.men.id), wm = find(P.women[0].id); if (m && wm && touch(m.r, wm.r) > .5) pen += 10; }
   if (P.maid && k) pen += touch(find(P.maid.id).r, k.r) >= 1 ? -8 : 12;
@@ -1024,7 +1037,7 @@ function bestDoorSide(p, circ, placed) {
   const b = p.block, r = p.r, priv = b.kind === 'suite' || b.kind === 'maid';
   const lens = SIDES.map(s => { let L = 0; for (const c of circ) { if (priv && c.id === 'foyer') continue; const e = shared(r, c.r); if (e && e.side === s) L += e.to - e.from; } return L; });
   const pref = SIDES.indexOf(p.door);
-  if (pref >= 0 && lens[pref] >= 1.1) return p.door;
+  if (pref >= 0 && lens[pref] >= DOOR_TOUCH) return p.door;
   const i = lens.indexOf(Math.max(...lens)); if (lens[i] >= 1.1) return SIDES[i];
   const hostKind = b.kind === 'kitchen' ? 'dining' : b.kind === 'maid' || b.kind === 'store' ? 'kitchen' : null;
   const host = hostKind && placed.find(q => q.block.kind === hostKind && touch(r, q.r) >= 1);
@@ -1255,7 +1268,7 @@ export function siteOf(land = {}) {
 // ------------------------------------------------------------------------------------------ التفصيل: غرف وأبواب
 const CIRC_TYPE = { foyer: 'entrance', hall: 'living', stair: 'stairs' };
 /** يحوّل الترتيب المحلول إلى غرف (مع تقسيم الأجنحة والمجالس) وأبواب. الإحداثيات قانونية داخل الغلاف. */
-export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
+export function realizeV2(cand, P, { secondEntry = null, upper = false, below = null } = {}) {
   const T = DESIGN_TARGETS, rooms = [], doors = [], notes = [];
   let extraBaths = P.extraBaths;
   const sn = r => ({ x0: snap(r.x0), y0: snap(r.y0), x1: snap(r.x1), y1: snap(r.y1) });
@@ -1318,6 +1331,14 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
       const endC = end => { const lo = end === perp[0] ? e0.from : e0.to - seg, hi = lo + seg; return Math.max(0, ...spans.map(e => Math.min(hi, e.to) - Math.max(lo, e.from))); };
       const c0 = endC(perp[0]), c1 = endC(perp[1]);
       if (Math.max(c0, c1) >= 1.05 && Math.min(c0, c1) < 1.05) { stripSide.set(p, c0 >= c1 ? perp[1] : perp[0]); continue; }
+    }
+    // (الجولة الحادية عشرة) الدور العلوي: شريط الحمام على الجهة التي تقع فوق فراغ رطب أو خدمي في الأرضي (مطبخ، دورة مياه، غسيل،
+    // خادمة، مخزن) ما أمكن — لمسارات الصرف؛ تفضيل لا شرط (الجهة الأخرى تبقى إن لم يكن تحت أي منهما رطب)
+    if (below && p.block.kind === 'suite') {
+      const t0 = p.block.master ? T.masterStripD : T.stripD, wet = below.filter(q => ['bath', 'kitchen', 'laundry', 'service', 'storage'].includes(q.type));
+      const ov = sd => { const [st] = cut(p.r, sd, t0); return sum(wet.map(q => Math.max(0, Math.min(st.x1, q.x1) - Math.max(st.x0, q.x0)) * Math.max(0, Math.min(st.y1, q.y1) - Math.max(st.y0, q.y0)))); };
+      const o0 = ov(perp[0]), o1 = ov(perp[1]);
+      if (Math.abs(o0 - o1) >= 1.2) { stripSide.set(p, o0 > o1 ? perp[0] : perp[1]); continue; }
     }
     const already = perp.find(s => suites.some(q => q !== p && stripSide.get(q) === opp[s] && Math.abs(p.r[s] - q.r[opp[s]]) < TOL && touch(p.r, q.r) > 1));
     if (already) { stripSide.set(p, already); continue; }
@@ -1396,7 +1417,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
   function circDoor(id, r, side, kind, w, prefer) {
     const priv = /^suite|bath|vest|maid/.test(id);
     const spansOn = sd => circRooms.map(c => { const s = shared(r, c); return s && s.side === sd ? { ...s, cid: c.id } : null; }).filter(Boolean);
-    const okLen = sp => sp.to - sp.from >= Math.min(w, .8) + .25;
+    const okLen = sp => sp.to - sp.from >= Math.min(w, .8) + 2 * (JUNC_CLEAR + .06);
     let spans = spansOn(side).filter(okLen);
     if (!spans.length) spans = SIDES.flatMap(spansOn).filter(okLen);
     if (!spans.length) { notes.push(`تعذّر وصل «${id}» بالحركة.`); return false; }
@@ -1428,7 +1449,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
       const connect = (room, sd, pos) => (b.kind === 'maid' ? (hostDoor(room, ['kitchen']) || circDoor(room.id, room, sd, 'door', .9, pos)) : circDoor(room.id, room, sd, 'door', .95, pos));
       if (b.kind === 'driver') {
         const room = add(b.bath ? cut(r, isX(side) ? 'y1' : 'x1', 1.6)[1] : r, { id: b.id, type, name: b.name, kind: 'driver', door: side });
-        if (b.bath) { const [strip] = cut(r, isX(side) ? 'y1' : 'x1', 1.6); const bt = add(strip, { id: b.id + '-bath', type: 'bath', name: bathName, kind: 'bath', door: isX(side) ? 'y0' : 'x0' }); const e = shared(bt, room); if (e) doors.push({ a: bt.id, b: room.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .75 }); }
+        if (b.bath) { const [strip] = cut(r, isX(side) ? 'y1' : 'x1', 1.6); const bt = add(strip, { id: b.id + '-bath', type: 'bath', name: bathName, kind: 'bath', door: isX(side) ? 'y0' : 'x0' }); const e = shared(bt, room); if (e) doors.push({ a: bt.id, b: room.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: GUEST_WC_DOOR }); }
         const e = edges(room, true).sort((a, c) => (c.to - c.from) - (a.to - a.from))[0];
         if (e && e.to - e.from >= 1.2) doors.push({ a: room.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .9, service: true, entry: true });
         else { circDoor(room.id, room, side, 'door', .9); notes.push('غرفة السائق لم تلامس جدارًا خارجيًا فوُصلت بالداخل؛ يُفضّل نقلها لمدخل خارجي.'); }
@@ -1515,7 +1536,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
         const wc = add(wcR, { id: b.id + '-wc', type: 'bath', name: 'دورة مياه الرجال', kind: 'wc', door: 'y0', far: 'y1', zone: 'men' });
         doors.push({ a: lobby.id, edge: { axis: 'y', at: lobby.y0, from: lobby.x0, to: lobby.x1 }, pos: (lobby.x0 + lobby.x1) / 2, kind: 'door', w: Math.min(1.1, W_(lobby) - .3), entry: true, men: true });
         const em = shared(m, lobby); if (em) doors.push({ a: m.id, b: lobby.id, edge: em, pos: em.from + Math.min(1.2, (em.to - em.from) / 2), kind: 'arch', w: Math.min(1.4, em.to - em.from - .4) });
-        const ew = shared(wc, lobby); if (ew) doors.push({ a: wc.id, b: lobby.id, edge: ew, pos: (ew.from + ew.to) / 2, kind: 'door', w: .75 });
+        const ew = shared(wc, lobby); if (ew) doors.push({ a: wc.id, b: lobby.id, edge: ew, pos: (ew.from + ew.to) / 2, kind: 'door', w: GUEST_WC_DOOR });
         pendingService.push(m);
       } else if (front) {
         const canBack = b.guestWc && H_(r) - 1.5 >= 3.6 && W_(r) >= T.guestWcL + 1.2;
@@ -1555,7 +1576,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
       const wc = add(wcR, { id: b.id + '-wc', type: 'bath', name: b.women ? 'دورة مياه النساء' : 'دورة مياه الضيوف', kind: 'wc', door: nearEnd, far: opp[nearEnd], zone: 'women' });
       const le = edgeOf(lobby, side); circDoor(lobby.id, lobby, side, 'door2', 1.2, nearEnd === 'y0' || nearEnd === 'x0' ? le.from + .9 : le.to - .9);
       const em = shared(m, lobby); if (em) doors.push({ a: m.id, b: lobby.id, edge: em, pos: (em.from + em.to) / 2, kind: 'arch', w: Math.min(1.6, em.to - em.from - .4) });
-      const ew = shared(wc, lobby); if (ew) doors.push({ a: wc.id, b: lobby.id, edge: ew, pos: (ew.from + ew.to) / 2, kind: 'door', w: .75 });
+      const ew = shared(wc, lobby); if (ew) doors.push({ a: wc.id, b: lobby.id, edge: ew, pos: (ew.from + ew.to) / 2, kind: 'door', w: GUEST_WC_DOOR });
     } else {
       // شريط المغاسل ودورة المياه خلف الباب، أو على جهة عمودية على الباب (داخلية لا تحجب الواجهة) إن لم يتسع خلفه
       const fits = sd => b.guestWc && (isX(sd) ? W_(r) : H_(r)) - 1.5 >= 3.6 && sideLen(r, sd) >= T.guestWcL + 1.2;
@@ -1576,7 +1597,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
     const wc = add(wcR, { id: m.id + '-wc', type: 'bath', name: zone === 'men' ? 'دورة مياه الرجال' : 'دورة مياه النساء', kind: 'wc', door: opp[ext], far: ext, zone });
     const wash = add(washR, { id: m.id + '-wash', type: 'corridor', name: 'مغاسل', kind: 'lobby', door: 'y0', zone });
     const e1 = shared(wash, m); if (e1) doors.push({ a: wash.id, b: m.id, edge: e1, pos: (e1.from + e1.to) / 2, kind: 'arch', w: Math.min(1.4, e1.to - e1.from - .3) });
-    const e2 = shared(wc, wash); if (e2) doors.push({ a: wc.id, b: wash.id, edge: e2, pos: (e2.from + e2.to) / 2, kind: 'door', w: .75 });
+    const e2 = shared(wc, wash); if (e2) doors.push({ a: wc.id, b: wash.id, edge: e2, pos: (e2.from + e2.to) / 2, kind: 'door', w: GUEST_WC_DOOR });
   }
   function foyerWc(majlis) {
     const fw = W_(foyer), fd = H_(foyer); if (fw < 3.8 || fd < 2.4) return false;
@@ -1587,7 +1608,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
     Object.assign(wcR, { y0: foyer.y0 });
     const wc = add(wcR, { id: 'guest-wc', type: 'bath', name: 'دورة مياه الضيوف', kind: 'wc', door: opp[sd], far: 'y1' });
     const e = shared(wc, foyer); if (!e) return false;
-    doors.push({ a: wc.id, b: 'foyer', edge: e, pos: e.from + .55, kind: 'door', w: .75 });
+    doors.push({ a: wc.id, b: 'foyer', edge: e, pos: e.from + .55, kind: 'door', w: GUEST_WC_DOOR });
     const main = doors.find(d => d.entry && d.a === 'foyer'); if (main) main.edge = { axis: 'y', at: foyer.y0, from: foyer.x0, to: foyer.x1 };
     for (const d of doors) if ((d.a === 'foyer' || d.b === 'foyer') && d.b && d.edge && !d.entry) { const o = rooms.find(x => x.id === (d.a === 'foyer' ? d.b : d.a)); const e2 = o && shared(foyer, o); if (e2) { d.edge = e2; d.w = Math.min(d.w, e2.to - e2.from - .4); } }
     return true;
@@ -1610,7 +1631,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false } = {}) {
     const lob = add(storeR, { id: host.id + '-lobby', type: 'corridor', name: host.kind === 'kitchen' ? 'ممر الخدمة' : 'ممر', kind: 'lobby', door: side });
     const e1 = edgeOf(lob, side); circDoor(lob.id, lob, side, host.kind === 'kitchen' ? 'door' : 'arch', host.kind === 'kitchen' ? .95 : 1.4, (e1.from + e1.to) / 2);
     const e2 = shared(lob, host); if (e2) doors.push({ a: lob.id, b: host.id, edge: e2, pos: (e2.from + e2.to) / 2, kind: 'arch', w: Math.min(1.6, e2.to - e2.from - .3) });
-    const e3 = shared(bath, lob); if (e3) doors.push({ a: bath.id, b: lob.id, edge: e3, pos: (e3.from + e3.to) / 2, kind: 'door', w: .75 });
+    const e3 = shared(bath, lob); if (e3) doors.push({ a: bath.id, b: lob.id, edge: e3, pos: (e3.from + e3.to) / 2, kind: 'door', w: GUEST_WC_DOOR });
     return true;
   }
   function kitchenStrip(host, items) {
@@ -1651,7 +1672,7 @@ export function drawPlanV2(doc0, lay, { level, T }) {
   for (const axis of ['x', 'y']) for (const [at, list] of lines[axis]) {
     const pts = [...new Set(list.flatMap(s => [r2(s.a), r2(s.b)]))].sort((p, q) => p - q);
     let cur = null;
-    const flush = () => { if (!cur) return; const pa = axis === 'y' ? T(cur.a, at) : T(at, cur.a), pb = axis === 'y' ? T(cur.b, at) : T(at, cur.b); const id = run({ type: 'add-wall', level, a: pa, b: pb, t: cur.t, ...(cur.rail ? { kind: 'parapet', h: 1.1 } : {}) })[0]; walls.push({ axis, at, a: cur.a, b: cur.b, id, pa, rail: !!cur.rail }); cur = null; };
+    const flush = () => { if (!cur) return; const pa = axis === 'y' ? T(cur.a, at) : T(at, cur.a), pb = axis === 'y' ? T(cur.b, at) : T(at, cur.b); const id = run({ type: 'add-wall', level, a: pa, b: pb, t: cur.t, ...(cur.rail ? { kind: 'parapet', h: 1.1 } : {}) })[0]; walls.push({ axis, at, a: cur.a, b: cur.b, id, pa, t: cur.t, rail: !!cur.rail }); cur = null; };
     for (let i = 0; i + 1 < pts.length; i++) {
       const m = (pts[i] + pts[i + 1]) / 2, L = list.filter(s => s.side === 'L' && s.a < m && s.b > m), R = list.filter(s => s.side === 'R' && s.a < m && s.b > m);
       if (!L.length && !R.length) { flush(); continue; }
@@ -1663,10 +1684,33 @@ export function drawPlanV2(doc0, lay, { level, T }) {
     }
     flush();
   }
-  const opening = (axis, at, pos, kind, extra = {}) => {
+  // (الجولة الحادية عشرة) لا فتحة تعبر تقاطع جدار داخلي: كل فتحة تبعد ≥ JUNC_CLEAR عن وجه أي جدار يلتقي بخطها وعن طرفي جدارها،
+  // ولا تتراكب مع فتحة أخرى على الجدار نفسه، وتبقى داخل حافة غرفتها (range). تُزاح داخل المجال الحر، وتُصغّر النافذة إن لزم
+  // (حتى 0.6 م)، وإلا لا تُرسم — لا يُترك لـ fitOpening أن يزلقها فوق تقاطع ولا للمجسّم أن يُسقطها بصمت.
+  const placedAt = new Map();
+  const freeSpans = (w, lo0, hi0, gap) => {
+    let spans = [[Math.max(lo0, w.a), Math.min(hi0, w.b)]];
+    const cutOut = (lo, hi) => { spans = spans.flatMap(([a, b]) => (hi <= a || lo >= b ? [[a, b]] : [[a, lo], [hi, b]].filter(([x, y]) => y - x > 1e-6))); };
+    cutOut(-Infinity, w.a + JUNC_CLEAR); cutOut(w.b - JUNC_CLEAR, Infinity);
+    for (const x of walls) if (x !== w && x.axis !== w.axis && w.at >= x.a - TOL && w.at <= x.b + TOL && x.at > w.a - TOL && x.at < w.b + TOL) cutOut(x.at - (x.t || INT) / 2 - JUNC_CLEAR, x.at + (x.t || INT) / 2 + JUNC_CLEAR);
+    for (const o of doc.openings) if (o.wall === w.id) { const c = docToCanon(o, w); cutOut(c - o.w / 2 - gap, c + o.w / 2 + gap); }
+    return spans;
+  };
+  const opening = (axis, at, pos, kind, extra = {}, range = null) => {
     const w = walls.find(x => x.axis === axis && Math.abs(x.at - at) < TOL && pos >= x.a - TOL && pos <= x.b + TOL); if (!w) return null;
-    const p = axis === 'y' ? T(pos, at) : T(at, pos);
-    try { return run({ type: 'add-opening', wall: w.id, kind, at: Math.hypot(p.x - w.pa.x, p.y - w.pa.y), ...extra })[0]; } catch { return null; }
+    const door = ['door', 'door2', 'arch', 'slider', 'garage'].includes(kind), want = extra.w ?? (kind === 'window2' ? 2.2 : kind === 'window' ? 1.4 : .9);
+    const spans = freeSpans(w, range ? range[0] : -Infinity, range ? range[1] : Infinity, door ? .1 : .15);
+    const fits = spans.filter(([a, b]) => b - a >= want - 1e-6).sort((p, q) => Math.max(0, p[0] + want / 2 - pos, pos - (p[1] - want / 2)) - Math.max(0, q[0] + want / 2 - pos, pos - (q[1] - want / 2)));
+    let c, ww = want;
+    if (fits.length) c = Math.max(fits[0][0] + want / 2, Math.min(fits[0][1] - want / 2, pos));
+    else {
+      const minW = door ? Math.min(want, .8) : .6, big = spans.filter(([a, b]) => b - a >= minW - 1e-6).sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0];
+      if (!big) return null;
+      ww = Math.floor((big[1] - big[0]) / SNAP) * SNAP; if (ww < minW - 1e-6) return null; c = (big[0] + big[1]) / 2;
+    }
+    if (door && Math.abs(c - pos) > 1.2) return null; // لا يبتعد الباب عن موضعه المقصود أكثر من 1.2 م (يبقى بين غرفتيه)
+    const p = axis === 'y' ? T(c, at) : T(at, c);
+    try { const id = run({ type: 'add-opening', wall: w.id, kind, at: Math.hypot(p.x - w.pa.x, p.y - w.pa.y), ...extra, ...(ww !== want || extra.w !== undefined ? { w: ww } : {}) })[0]; placedAt.set(id, { pos: c, w: ww }); return id; } catch { return null; }
   };
   const byId = new Map(rooms.map(r => [r.id, r]));
   const doorAt = [];
@@ -1675,25 +1719,27 @@ export function drawPlanV2(doc0, lay, { level, T }) {
     const a = byId.get(d.a);
     const into = a ? (e.axis === 'x' ? (a.x0 + a.x1) / 2 > e.at : (a.y0 + a.y1) / 2 > e.at) : true;
     const pIn = e.axis === 'y' ? T(pos, e.at + (into ? 1 : -1)) : T(e.at + (into ? 1 : -1), pos);
-    const id = opening(e.axis, e.at, pos, d.kind, { w, entry: !!(d.entry || d.entry2) });
+    const id = opening(e.axis, e.at, pos, d.kind, { w, entry: !!(d.entry || d.entry2) }, [e.from, e.to]);
+    if (!id && globalThis.__v2dbgOpen) globalThis.__v2dbgOpen.push({ a: d.a, b: d.b, kind: d.kind, w, pos, e: [e.axis, e.at, e.from, e.to], walls: walls.filter(x => x.axis === e.axis && Math.abs(x.at - e.at) < TOL).map(x => [x.a, x.b, x.t]) });
     if (id && ['door', 'door2'].includes(d.kind)) setSwing(id, pIn);
-    doorAt.push({ room: d.a, other: d.b, axis: e.axis, at: e.at, pos, w });
+    const got = id ? placedAt.get(id) : null;
+    doorAt.push({ room: d.a, other: d.b, axis: e.axis, at: e.at, pos: got ? got.pos : pos, w: got ? got.w : w, id, kind: d.kind });
   }
   const lightOf = r => SIDES.flatMap(s => exposed(r, s, solid));
   for (const r of solid) {
     if (r.kind === 'lobby' || r.type === 'storage' || r.type === 'stairs') continue;
     for (const e of lightOf(r)) {
       const len = e.to - e.from, busy = doorAt.filter(d => d.axis === e.axis && Math.abs(d.at - e.at) < TOL && d.pos > e.from - .1 && d.pos < e.to + .1);
-      if (r.type === 'bath') { if (len >= 1 && !busy.length) opening(e.axis, e.at, (e.from + e.to) / 2, 'window', { w: .6, h: .6, sill: 1.7 }); continue; }
-      if (r.type === 'corridor' || r.type === 'entrance') { if (len >= 1.4 && !busy.some(d => Math.abs(d.pos - (e.from + e.to) / 2) < d.w / 2 + .7)) opening(e.axis, e.at, (e.from + e.to) / 2, 'window', { w: Math.min(1.2, len - .5) }); continue; }
+      if (r.type === 'bath') { if (len >= 1 && !busy.length) opening(e.axis, e.at, (e.from + e.to) / 2, 'window', { w: .6, h: .6, sill: 1.7 }, [e.from, e.to]); continue; }
+      if (r.type === 'corridor' || r.type === 'entrance') { if (len >= 1.4 && !busy.some(d => Math.abs(d.pos - (e.from + e.to) / 2) < d.w / 2 + .7)) opening(e.axis, e.at, (e.from + e.to) / 2, 'window', { w: Math.min(1.2, len - .5) }, [e.from, e.to]); continue; }
       if (len < 1.6) continue;
       const big = ['majlis', 'living', 'dining', 'master'].includes(r.type) && len >= 3.4;
       const spots = big && len >= 6.5 ? [e.from + len * .27, e.from + len * .73] : [(e.from + e.to) / 2];
       for (let sp of spots) {
         const ww = big ? 2.2 : 1.4;
         const clash = d => Math.abs(d.pos - sp) < d.w / 2 + ww / 2 + .25;
-        if (busy.some(clash)) { const d = busy[0]; sp = d.pos > (e.from + e.to) / 2 ? e.from + .35 + ww / 2 : e.to - .35 - ww / 2; if (busy.some(clash) || sp - ww / 2 < e.from + .2 || sp + ww / 2 > e.to - .2) { if (len - d.w - .9 >= 1) { const w2 = Math.min(ww, len - d.w - .9); const a2 = d.pos > (e.from + e.to) / 2 ? e.from + .3 + w2 / 2 : e.to - .3 - w2 / 2; opening(e.axis, e.at, a2, 'window', { w: w2 }); } continue; } }
-        opening(e.axis, e.at, sp, big ? 'window2' : 'window');
+        if (busy.some(clash)) { const d = busy[0]; sp = d.pos > (e.from + e.to) / 2 ? e.from + .35 + ww / 2 : e.to - .35 - ww / 2; if (busy.some(clash) || sp - ww / 2 < e.from + .2 || sp + ww / 2 > e.to - .2) { if (len - d.w - .9 >= 1) { const w2 = Math.min(ww, len - d.w - .9); const a2 = d.pos > (e.from + e.to) / 2 ? e.from + .3 + w2 / 2 : e.to - .3 - w2 / 2; opening(e.axis, e.at, a2, 'window', { w: w2 }, [e.from, e.to]); } continue; } }
+        opening(e.axis, e.at, sp, big ? 'window2' : 'window', {}, [e.from, e.to]);
       }
     }
   }
@@ -1709,7 +1755,7 @@ export function drawPlanV2(doc0, lay, { level, T }) {
       const len = e.to - e.from, occ = busy.reduce((a, d) => a + d.w + .3, 0), w2 = Math.min(1.2, len - occ - .3); if (w2 < .6) continue;
       const cands2 = [e.from + .15 + w2 / 2, e.to - .15 - w2 / 2, (e.from + e.to) / 2];
       const sp = cands2.find(c => busy.every(d => Math.abs(d.pos - c) >= d.w / 2 + w2 / 2 + .1)); if (sp === undefined) continue;
-      if (opening(e.axis, e.at, sp, 'window', { w: w2 })) break;
+      if (opening(e.axis, e.at, sp, 'window', { w: w2 }, [e.from, e.to])) break;
     }
   }
   function docToCanon(o, wl) { const B = wl.axis === 'y' ? T(wl.b, wl.at) : T(wl.at, wl.b), L = Math.hypot(B.x - wl.pa.x, B.y - wl.pa.y); return wl.a + (wl.b - wl.a) * o.at / L; }
@@ -1735,86 +1781,181 @@ export function drawPlanV2(doc0, lay, { level, T }) {
   }
 }
 
-/** الأثاث (منقول من المولّد الأول مع جهة خارجية عامة بدل حدود المستطيل). */
+/**
+ * الأثاث الاسترشادي (الجولة الحادية عشرة: يُتحقق منه قبل رسمه). لكل غرفة تُجرَّب ترتيبات بالترتيب، ويُرسم أول ترتيب يحقق:
+ *  (1) لا قطعة في المنطقة الحرة أمام أي باب أو فتحة للغرفة (عمق DOOR_FRONT)، وفي دورة المياه لا مرحاض ولا مغسلة ولا دش داخل
+ *      منطقة فتح بابها (عرض الباب × عمقه)؛
+ *  (2) الممرات الرئيسية بين أبواب الغرفة (ومن بابها الوحيد إلى وسطها الحر) بعرض صافٍ ≥ ROUTE_W بين قطع الأثاث.
+ * إن لم يتحقق أي ترتيب يُرسم أبسطه الذي يحقق الشرطين، وإلا تُترك الغرفة بلا أثاث (الأثاث استرشادي؛ لا يُرسم ما يسد الحركة).
+ * القيم 0.6 م و0.9 م قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا).
+ */
+// المنطقة الحرة أمام الباب مقيسة من محور الجدار: 0.6 م من وجهه + نصف سماكة الجدار الخارجي (0.125) + هامش
+const DOOR_FRONT = .75, ROUTE_W = .9, WALL_GAP = .3;
 function furnish(rooms, T, run, doorAt, LVL, outSides) {
   const rotFor = (bx, by) => { const a = T(0, 0), b = T(bx, by); return Math.atan2(b.x - a.x, -(b.y - a.y)); };
-  const F = (kind, x, y, bx, by, extra = {}) => { const p = T(x, y); try { run({ type: 'add-fixture', level: LVL, kind, x: p.x, y: p.y, rot: rotFor(bx, by), ...extra }); } catch { /* لم تتسع */ } };
+  const emit = p => { const q = T(p.x, p.y); try { run({ type: 'add-fixture', level: LVL, kind: p.kind, x: q.x, y: q.y, rot: rotFor(p.bx, p.by), ...p.extra }); } catch { /* لم تتسع */ } };
   const dir = { x0: [-1, 0], x1: [1, 0], y0: [0, -1], y1: [0, 1] };
-  const doorsOn = (r, s) => doorAt.filter(d => (d.room === r.id || d.other === r.id) && d.axis === (isX(s) ? 'x' : 'y') && Math.abs(d.at - r[s]) < TOL && d.pos > (isX(s) ? r.y0 : r.x0) - TOL && d.pos < (isX(s) ? r.y1 : r.x1) + TOL);
+  const sideOfDoor = (r, d) => (d.axis === 'x' ? (Math.abs(r.x0 - d.at) < TOL ? 'x0' : Math.abs(r.x1 - d.at) < TOL ? 'x1' : null) : (Math.abs(r.y0 - d.at) < TOL ? 'y0' : Math.abs(r.y1 - d.at) < TOL ? 'y1' : null));
+  const doorsOf = r => doorAt.filter(d => (d.room === r.id || d.other === r.id) && d.id).map(d => ({ ...d, s: sideOfDoor(r, d) })).filter(d => d.s && d.pos > (isX(d.s) ? r.y0 : r.x0) - TOL && d.pos < (isX(d.s) ? r.y1 : r.x1) + TOL);
+  const doorsOn = (r, s) => doorsOf(r).filter(d => d.s === s);
   const freeSides = r => SIDES.filter(s => !doorsOn(r, s).length);
   const onWall = (r, s, inset, t) => (isX(s) ? { x: s === 'x0' ? r.x0 + inset : r.x1 - inset, y: t } : { x: t, y: s === 'y0' ? r.y0 + inset : r.y1 - inset });
   const mid = (r, s) => (isX(s) ? (r.y0 + r.y1) / 2 : (r.x0 + r.x1) / 2);
+  const span = (r, s) => (isX(s) ? [r.y0, r.y1] : [r.x0, r.x1]);
   const m = .1;
+  const Pc = (kind, x, y, bx, by, extra = {}) => ({ kind, x, y, bx, by, extra, w: extra.w ?? FIXTURES[kind].w, d: extra.d ?? FIXTURES[kind].d });
+  const box = p => { const alongX = p.bx === 0, hw = (alongX ? p.w : p.d) / 2, hh = (alongX ? p.d : p.w) / 2; return { x0: p.x - hw, x1: p.x + hw, y0: p.y - hh, y1: p.y + hh }; };
+  const hit = (a, b) => Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) > 1e-6 && Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0) > 1e-6;
+  const zoneOf = (r, d, depth) => { const lo = d.pos - d.w / 2, hi = d.pos + d.w / 2; return isX(d.s) ? { x0: d.s === 'x0' ? r.x0 : r.x1 - depth, x1: d.s === 'x0' ? r.x0 + depth : r.x1, y0: lo, y1: hi } : { x0: lo, x1: hi, y0: d.s === 'y0' ? r.y0 : r.y1 - depth, y1: d.s === 'y0' ? r.y0 + depth : r.y1 }; };
+  /** فراغات حرة على جدار s بعد استبعاد امتداد الأبواب (± هامش) والأركان. */
+  const freeRuns = (r, s, margin = .25, corner = .1) => {
+    let runs = [[span(r, s)[0] + corner, span(r, s)[1] - corner]];
+    for (const d of doorsOn(r, s)) { const lo = d.pos - d.w / 2 - margin, hi = d.pos + d.w / 2 + margin; runs = runs.flatMap(([a, b]) => (hi <= a || lo >= b ? [[a, b]] : [[a, lo], [hi, b]].filter(([x, y]) => y - x > .05))); }
+    // الأبواب على الجدارين المجاورين تحجز ركنها بعمق المنطقة الحرة
+    for (const d of doorsOf(r).filter(x => x.s !== s && x.s !== opp[s])) {
+      const z = zoneOf(r, d, DOOR_FRONT), [a0, a1] = isX(s) ? [z.y0, z.y1] : [z.x0, z.x1];
+      const nearWall = isX(s) ? (s === 'x0' ? z.x0 <= r.x0 + .9 : z.x1 >= r.x1 - .9) : (s === 'y0' ? z.y0 <= r.y0 + .9 : z.y1 >= r.y1 - .9);
+      if (nearWall) runs = runs.flatMap(([a, b]) => (a1 <= a || a0 >= b ? [[a, b]] : [[a, a0], [a1, b]].filter(([x, y]) => y - x > .05)));
+    }
+    return runs.sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]));
+  };
+  /** التحقق: المناطق الحرة أمام الأبواب، ومنطقة فتح باب دورة المياه، والممرات الرئيسية ≥ ROUTE_W بين الأثاث. */
+  const valid = (r, list) => {
+    const boxes = list.filter(p => p.kind !== 'rug').map(p => ({ p, b: box(p) })), doors = doorsOf(r);
+    // لا قطعتان متداخلتان (وإلا أزاحهما relaxFixtures إلى منطقة باب)، وكل قطعة داخل الغرفة
+    for (let i = 0; i < boxes.length; i++) {
+      const b = boxes[i].b; if (b.x0 < r.x0 + .04 || b.x1 > r.x1 - .04 || b.y0 < r.y0 + .04 || b.y1 > r.y1 - .04) return false;
+      for (let j = i + 1; j < boxes.length; j++) { const o = boxes[j].b; if (Math.min(b.x1, o.x1) - Math.max(b.x0, o.x0) > .02 && Math.min(b.y1, o.y1) - Math.max(b.y0, o.y0) > .02) return false; }
+    }
+    for (const d of doors) {
+      // عمق المنطقة الحرة: 0.6 م أمام الباب، أو مدى فتح ضلفته إن كان أكبر (فلا يزيح relaxFixtures القطعة إلى منطقة باب آخر)
+      const z = zoneOf(r, d, Math.max(DOOR_FRONT, d.kind === 'door' ? d.w + .08 : d.kind === 'door2' ? d.w / 2 + .08 : 0));
+      if (boxes.some(({ b }) => hit(b, z))) return false;
+      if (r.type === 'bath' && ['door', 'door2'].includes(d.kind)) { const zw = zoneOf(r, d, Math.max(DOOR_FRONT, d.w + .06)); if (boxes.some(({ p, b }) => ['wc', 'basin', 'shower', 'bathtub'].includes(p.kind) && hit(b, zw))) return false; }
+    }
+    if (!boxes.length || r.type === 'bath' || r.type === 'kitchen' && !doors.length) return true;
+    // شبكة 10 سم داخل الغرفة: خلية حرة إن بعدت ≥ ROUTE_W/2 عن كل قطعة و≥ WALL_GAP عن الجدران
+    const c = .1, x0 = r.x0 + .06, y0 = r.y0 + .06, nx = Math.max(1, Math.floor((W_(r) - .12) / c)), ny = Math.max(1, Math.floor((H_(r) - .12) / c));
+    const free = new Uint8Array(nx * ny), R = ROUTE_W / 2;
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const x = x0 + (i + .5) * c, y = y0 + (j + .5) * c;
+      if (x - x0 < WALL_GAP - 1e-9 || x0 + nx * c - x < WALL_GAP - 1e-9 || y - y0 < WALL_GAP - 1e-9 || y0 + ny * c - y < WALL_GAP - 1e-9) continue;
+      let ok = true; for (const { b } of boxes) { const dx = Math.max(b.x0 - x, 0, x - b.x1), dy = Math.max(b.y0 - y, 0, y - b.y1); if (dx * dx + dy * dy < R * R - 1e-9) { ok = false; break; } }
+      if (ok) free[j * nx + i] = 1;
+    }
+    const cellAt = (x, y) => { const i = Math.floor((x - x0) / c), j = Math.floor((y - y0) / c); return i >= 0 && j >= 0 && i < nx && j < ny ? j * nx + i : -1; };
+    // نقطة كل باب: 0.5 م داخل الغرفة أمام وسطه (أقرب خلية حرة ضمن 0.3 م)
+    const anchor = d => { const p = isX(d.s) ? { x: d.s === 'x0' ? r.x0 + .5 : r.x1 - .5, y: d.pos } : { x: d.pos, y: d.s === 'y0' ? r.y0 + .5 : r.y1 - .5 }; for (const [dx, dy] of [[0, 0], [.1, 0], [-.1, 0], [0, .1], [0, -.1], [.2, 0], [-.2, 0], [0, .2], [0, -.2], [.3, 0], [-.3, 0], [0, .3], [0, -.3]]) { const k = cellAt(p.x + dx, p.y + dy); if (k >= 0 && free[k]) return k; } return -1; };
+    const seeds = doors.map(anchor);
+    if (seeds.some(k => k < 0)) return false;
+    // البلوغ من أول باب
+    const seen = new Uint8Array(nx * ny), q = [seeds[0]]; seen[seeds[0]] = 1;
+    while (q.length) { const k = q.pop(), i = k % nx, j = (k - i) / nx; for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = i + di, b = j + dj; if (a < 0 || b < 0 || a >= nx || b >= ny) continue; const kk = b * nx + a; if (free[kk] && !seen[kk]) { seen[kk] = 1; q.push(kk); } } }
+    if (!seeds.every(k => seen[k])) return false;
+    // غرفة بباب واحد: يبقى من الباب ممر إلى فراغ حر في وسطها أو إلى جانب القطعة الرئيسية (≥ 1 م²)
+    if (doors.length === 1) { let n = 0; for (let k = 0; k < nx * ny; k++) n += seen[k]; if (n * c * c < 1) return false; }
+    return true;
+  };
+  const place = (r, layouts) => { for (const L of layouts) { const list = L.filter(Boolean); if (valid(r, list)) { list.forEach(emit); return true; } } return false; };
   for (const r of rooms) {
     const w = W_(r), h = H_(r);
-    if (r.type === 'courtyard') { if (Math.min(w, h) >= 3) F('tree', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1); continue; }
+    if (r.type === 'courtyard') { if (Math.min(w, h) >= 3) emit(Pc('tree', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1)); continue; }
     if (r.type === 'master' || r.type === 'bedroom') {
       if (w < 2.6 || h < 2.6) continue;
       const free = freeSides(r);
-      const pref = [r.strip ? opp[r.strip] : null, opp[r.door], ...free].filter(s => s && free.includes(s));
-      const s = pref[0]; if (!s) continue;
-      const dbl = r.type === 'master' || sideLen(r, s) >= 3.2, bw = dbl ? 1.8 : 1.0, bd = dbl ? 2.1 : 2.0;
-      if (sideLen(r, s) < bw + .2 || (isX(s) ? w : h) < bd + .8) continue;
-      const c = onWall(r, s, m + bd / 2, mid(r, s)), [bx, by] = dir[s];
-      F(dbl ? 'bed-double' : 'bed-single', c.x, c.y, bx, by);
-      for (const k of dbl ? [-1, 1] : [1]) { const t = mid(r, s) + k * (bw / 2 + .3); const n = onWall(r, s, m + .22, t); if (Math.abs(t - mid(r, s)) + .25 < sideLen(r, s) / 2) F('nightstand', n.x, n.y, bx, by); }
-      if (!r.strip && (isX(s) ? h : w) >= 3) { const o2 = [isX(s) ? 'y1' : 'x1', isX(s) ? 'y0' : 'x0'].find(z => free.includes(z)); if (o2) { const c2 = onWall(r, o2, m + .3, mid(r, o2)); F('wardrobe', c2.x, c2.y, ...dir[o2], { w: Math.min(sideLen(r, o2) - .6, 2.2) }); } }
+      const pref = [...new Set([r.strip ? opp[r.strip] : null, opp[r.door], ...free, ...SIDES].filter(s => s && SIDES.includes(s)))];
+      const layouts = [];
+      for (const s of pref) for (const full of [true, false]) {
+        const run = freeRuns(r, s, .15)[0]; if (!run) continue;
+        const dbl = r.type === 'master' || run[1] - run[0] >= 3.2, bw = dbl ? 1.8 : 1.0, bd = dbl ? 2.1 : 2.0;
+        if (run[1] - run[0] < bw + .2 || (isX(s) ? w : h) < bd + .8) continue;
+        const t = Math.max(run[0] + bw / 2 + (full ? .5 : 0), Math.min(run[1] - bw / 2 - (full ? .5 : 0), mid(r, s)));
+        const c = onWall(r, s, m + bd / 2, t), [bx, by] = dir[s], L = [Pc(dbl ? 'bed-double' : 'bed-single', c.x, c.y, bx, by)];
+        if (full) for (const k of dbl ? [-1, 1] : [1]) { const tt = t + k * (bw / 2 + .3); if (tt - .25 > run[0] && tt + .25 < run[1]) { const n = onWall(r, s, m + .22, tt); L.push(Pc('nightstand', n.x, n.y, bx, by)); } }
+        if (full && !r.strip && (isX(s) ? h : w) >= 3) { const o2 = [isX(s) ? 'y1' : 'x1', isX(s) ? 'y0' : 'x0'].find(z => freeRuns(r, z, .15)[0]?.[1] - freeRuns(r, z, .15)[0]?.[0] >= 1.4); if (o2) { const rr = freeRuns(r, o2, .15)[0], ww2 = Math.min(rr[1] - rr[0] - .2, 2.2), c2 = onWall(r, o2, m + .3, (rr[0] + rr[1]) / 2); L.push(Pc('wardrobe', c2.x, c2.y, ...dir[o2], { w: ww2 })); } }
+        layouts.push(L);
+      }
+      place(r, layouts);
       continue;
     }
     if (r.type === 'majlis') {
       if (w < 3 || h < 3) continue;
-      const free = freeSides(r), longS = w >= h ? ['y0', 'y1'] : ['x0', 'x1'];
-      for (const s of longS) { const c = onWall(r, s, m + .4, mid(r, s)); F('majlis-sofa', c.x, c.y, ...dir[s], { w: Math.min(sideLen(r, s) - 1.2, 4.4) }); }
-      const shortS = (w >= h ? ['x0', 'x1'] : ['y0', 'y1']).filter(s => free.includes(s));
-      if (shortS.length) { const s = shortS[0], c = onWall(r, s, m + .4, mid(r, s)); F('majlis-sofa', c.x, c.y, ...dir[s], { w: Math.max(1.2, Math.min(sideLen(r, s) - 2.0, 3.2)) }); }
-      F('rug', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1, { w: Math.max(1.4, Math.min(w - 2.2, 3.6)), d: Math.max(1.2, Math.min(h - 2.2, 2.6)) });
-      F('coffee-table', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1);
+      const longS = w >= h ? ['y0', 'y1'] : ['x0', 'x1'], shortS = w >= h ? ['x0', 'x1'] : ['y0', 'y1'];
+      const seat = (s, minLen = 1.2, max = 4.4, k = 2, corner = .15) => freeRuns(r, s, .3, corner).filter(([a, b]) => b - a >= minLen).slice(0, k).map(([a, b]) => { const len = Math.min(b - a, max), c = onWall(r, s, m + .4, (a + b) / 2); return Pc('majlis-sofa', c.x, c.y, ...dir[s], { w: len }); });
+      const center = [Pc('rug', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1, { w: Math.max(1.4, Math.min(w - 2.2, 3.6)), d: Math.max(1.2, Math.min(h - 2.2, 2.6)) }), Pc('coffee-table', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1)];
+      place(r, [[...longS.flatMap(s => seat(s)), ...shortS.flatMap(s => seat(s, 1.2, 3.2, 1, .98)), ...center], [...longS.flatMap(s => seat(s)), ...center], [...longS.flatMap(s => seat(s, 1.2, 4.4, 1)), center[0]], [...longS.flatMap(s => seat(s, 1.2, 4.4, 1))]]);
       continue;
     }
     if ((r.type === 'living' && !r.circ) || r.id === 'hall') {
       if (w < 3.2 || h < 3.2) continue;
-      const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2, along = w >= h;
-      if (along) { F('sofa-3', cx, cy - 1.15, 0, -1); F('sofa-3', cx, cy + 1.15, 0, 1); F('rug', cx, cy, 0, -1, { w: Math.min(w - 1.6, 3.4), d: 2.6 }); }
-      else { F('sofa-3', cx - 1.15, cy, -1, 0); F('sofa-3', cx + 1.15, cy, 1, 0); F('rug', cx, cy, -1, 0, { w: Math.min(h - 1.6, 3.4), d: 2.6 }); }
-      F('coffee-table', cx, cy, along ? 0 : -1, along ? -1 : 0);
+      const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2, along = w >= h, layouts = [];
+      // (أ) جلسة متقابلة في الوسط (كما كانت)، (ب) جلسة على جدار حر بلا أبواب مع كنبة ثنائية أو كرسيين مقابلها، (ج) كنبة على جدار وطاولة فقط
+      if (along) layouts.push([Pc('sofa-3', cx, cy - 1.15, 0, -1), Pc('sofa-3', cx, cy + 1.15, 0, 1), Pc('rug', cx, cy, 0, -1, { w: Math.min(w - 1.6, 3.4), d: 2.6 }), Pc('coffee-table', cx, cy, 0, -1)]);
+      else layouts.push([Pc('sofa-3', cx - 1.15, cy, -1, 0), Pc('sofa-3', cx + 1.15, cy, 1, 0), Pc('rug', cx, cy, -1, 0, { w: Math.min(h - 1.6, 3.4), d: 2.6 }), Pc('coffee-table', cx, cy, -1, 0)]);
+      const sides = [...SIDES].sort((a, b) => (freeRuns(r, b, .3)[0]?.[1] - freeRuns(r, b, .3)[0]?.[0] || 0) - (freeRuns(r, a, .3)[0]?.[1] - freeRuns(r, a, .3)[0]?.[0] || 0));
+      for (const s of sides) {
+        const run = freeRuns(r, s, .3)[0]; if (!run || run[1] - run[0] < 2.4) continue;
+        const t = Math.max(run[0] + 1.1, Math.min(run[1] - 1.1, (run[0] + run[1]) / 2)), [bx, by] = dir[s], deep = isX(s) ? w : h;
+        const at = k => onWall(r, s, k, t), sofa = at(m + .48), tab = at(m + .95 + .5 + .3), opp2 = at(m + .95 + .5 + .6 + .5 + .45);
+        const base = [Pc('sofa-3', sofa.x, sofa.y, bx, by), Pc('rug', tab.x, tab.y, bx, by, { w: 2.4, d: 1.7 }), Pc('coffee-table', tab.x, tab.y, bx, by)];
+        if (deep >= 4.6) layouts.push([...base, Pc('sofa-2', opp2.x, opp2.y, -bx, -by)]);
+        if (deep >= 4.4) { const t1 = t - .65, t2 = t + .65, a1 = onWall(r, s, m + .95 + .5 + .6 + .5 + .4, t1), a2 = onWall(r, s, m + .95 + .5 + .6 + .5 + .4, t2); layouts.push([...base, Pc('armchair', a1.x, a1.y, -bx, -by), Pc('armchair', a2.x, a2.y, -bx, -by)]); }
+        layouts.push(base, [base[0], base[2]]);
+      }
+      place(r, layouts);
       continue;
     }
     if (r.type === 'dining') {
       if (w < 2.6 || h < 2.6) continue;
-      const along = w >= h, len = Math.min(Math.max(w, h) - 1.8, 3.0);
-      F('dining-table', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, along ? 0 : -1, along ? -1 : 0, { w: Math.max(1.4, len), d: 1.0 });
+      const along = w >= h, cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2, layouts = [];
+      for (const len of [Math.min(Math.max(w, h) - 1.8, 3.0), 2.2, 1.6]) for (const off of [0, .4, -.4, .7, -.7]) {
+        if (len < 1.4) continue;
+        const x = along ? cx : cx + off, y = along ? cy + off : cy;
+        layouts.push([Pc('dining-table', x, y, along ? 0 : -1, along ? -1 : 0, { w: Math.max(1.4, len), d: 1.0 })]);
+      }
+      place(r, layouts);
       continue;
     }
     if (r.type === 'kitchen') {
       if (w < 2.2 || h < 2.2) continue;
-      const free = freeSides(r), ext = outSides(r).filter(s => free.includes(s));
-      const s = ext[0] || free[0]; if (!s) continue;
-      const L = sideLen(r, s), c = onWall(r, s, m + .3, mid(r, s));
-      const runW = Math.min(L - 1.15, 4.2), shift = -(.45);
-      const cr = isX(s) ? { x: c.x, y: c.y + shift } : { x: c.x + shift, y: c.y };
-      F('kitchen-run', cr.x, cr.y, ...dir[s], { w: runW });
-      const end = isX(s) ? { x: c.x, y: Math.max(cr.y + runW / 2 + .45, r.y1 - m - .4) } : { x: Math.max(cr.x + runW / 2 + .45, r.x1 - m - .4), y: c.y }; F('fridge', end.x, end.y, ...dir[s]);
-      const o = free.find(z => z !== s && z !== opp[s]); if (o && sideLen(r, o) >= 2.4) { const c2 = onWall(r, o, m + .3, mid(r, o)); F('kitchen-run', c2.x, c2.y, ...dir[o], { w: Math.min(sideLen(r, o) - 1.4, 3) }); }
+      const free = freeSides(r), ext = outSides(r).filter(s => free.includes(s)), layouts = [];
+      for (const s of [...new Set([...ext, ...free, ...SIDES])]) {
+        const run = freeRuns(r, s, .1, .05)[0]; if (!run || run[1] - run[0] < 1.6) continue;
+        const L = run[1] - run[0], runW = Math.min(L - .85, 4.2), [bx, by] = dir[s];
+        const c = onWall(r, s, m + .3, run[0] + runW / 2 + .02), fr = onWall(r, s, m + .35, run[0] + runW + .45);
+        const one = [Pc('kitchen-run', c.x, c.y, bx, by, { w: runW })]; if (L - runW >= .8) one.push(Pc('fridge', fr.x, fr.y, bx, by));
+        const o = [isX(s) ? 'y0' : 'x0', isX(s) ? 'y1' : 'x1'].map(z => ({ z, run: freeRuns(r, z, .1, .7)[0] })).filter(x => x.run && x.run[1] - x.run[0] >= 1.6)[0];
+        if (o) { const c2 = onWall(r, o.z, m + .3, (o.run[0] + o.run[1]) / 2); layouts.push([...one, Pc('kitchen-run', c2.x, c2.y, ...dir[o.z], { w: Math.min(o.run[1] - o.run[0] - .1, 3) })]); }
+        layouts.push(one);
+      }
+      place(r, layouts);
       continue;
     }
     if (r.type === 'bath') {
       if (w < 1 || h < 1) continue;
-      const doorSides = SIDES.filter(s => doorsOn(r, s).length);
-      const longSides = (w >= h ? ['y0', 'y1'] : ['x0', 'x1']).filter(s => !doorSides.includes(s));
-      const s = longSides[0] || SIDES.find(z => !doorSides.includes(z)); if (!s) continue;
-      const L = sideLen(r, s), [lo, hi] = isX(s) ? [r.y0, r.y1] : [r.x0, r.x1];
-      const dAll = SIDES.flatMap(z => doorsOn(r, z).map(d => ({ z, d })));
-      let farEnd = r.far ? ((r.far === 'x1' || r.far === 'y1') ? 'hi' : 'lo') : 'hi';
-      if (dAll.length) { const { z, d } = dAll[0]; const along = isX(s) === isX(z) ? null : d.pos; if (along !== null) farEnd = along - lo < hi - along ? 'hi' : 'lo'; else farEnd = (z === 'x1' || z === 'y1') ? 'lo' : 'hi'; }
-      const at = k => (farEnd === 'hi' ? lo + k : hi - k);
-      const pw = onWall(r, s, m + .32, at(.45)); F('wc', pw.x, pw.y, ...dir[s]);
-      const pb = onWall(r, s, m + .25, at(1.15)); if (L >= 1.6) F('basin', pb.x, pb.y, ...dir[s]);
-      if (L >= 2.3 && Math.min(w, h) >= 1.2) { const ps = onWall(r, s, .55, farEnd === 'hi' ? hi - .55 : lo + .55); F('shower', ps.x, ps.y, ...dir[s], { w: .9, d: .9 }); }
+      const ds = doorsOf(r), d0 = ds[0];
+      const longSides = w >= h ? ['y0', 'y1'] : ['x0', 'x1'], layouts = [];
+      // المرحاض على الجدار البعيد عن الباب (خارج منطقة فتحه وعرضه)، والمغسلة قرب الباب خارج منطقته، والدش في الطرف الآخر إن اتسع
+      const sidesTry = [...new Set([d0 ? opp[d0.s] : null, ...longSides, ...SIDES].filter(Boolean))].filter(s => !ds.some(d => d.s === s));
+      for (const s of sidesTry) {
+        const [lo, hi] = span(r, s), L = hi - lo;
+        const dp = d0 ? (isX(s) === isX(d0.s) ? null : d0.pos) : null;
+        const farHi = dp === null ? (d0 ? !(d0.s === 'x1' || d0.s === 'y1') : (r.far ? (r.far === 'x1' || r.far === 'y1') : true)) : dp - lo < hi - dp;
+        for (const k of [.45, .55, .7]) {
+          const at = x => (farHi ? hi - x : lo + x);
+          const pw = onWall(r, s, m + .32, at(k)), L1 = [Pc('wc', pw.x, pw.y, ...dir[s])];
+          if (L >= 1.6) { const pb = onWall(r, s, m + .25, at(k + .7)); L1.push(Pc('basin', pb.x, pb.y, ...dir[s])); }
+          if (L >= 2.3 && Math.min(w, h) >= 1.2) { const ps = onWall(r, s, .55, farHi ? lo + .55 : hi - .55); layouts.push([...L1, Pc('shower', ps.x, ps.y, ...dir[s], { w: .9, d: .9 })]); }
+          layouts.push(L1, [L1[0]]);
+        }
+      }
+      place(r, layouts);
       continue;
     }
     if (r.kind === 'dress') {
-      const free = freeSides(r), s = (w >= h ? ['y0', 'y1'] : ['x0', 'x1']).find(z => free.includes(z)); if (!s) continue;
-      const c = onWall(r, s, m + .3, mid(r, s)); F('wardrobe', c.x, c.y, ...dir[s], { w: Math.min(sideLen(r, s) - .3, 2.8) });
+      const s = (w >= h ? ['y0', 'y1'] : ['x0', 'x1']).find(z => freeRuns(r, z, .15)[0]); if (!s) continue;
+      const rr = freeRuns(r, s, .15)[0], c = onWall(r, s, m + .3, (rr[0] + rr[1]) / 2);
+      place(r, [[Pc('wardrobe', c.x, c.y, ...dir[s], { w: Math.min(rr[1] - rr[0] - .1, 2.8) })]]);
     }
   }
 }
@@ -1896,8 +2037,8 @@ export function qualityGates(doc, lay = null, { kitchenFront = false, majlisAske
   for (const mj of rooms.filter(r => r.type === 'majlis')) {
     if (majlisAsked) continue;
     const w = Math.min(mj.x1 - mj.x0, mj.y1 - mj.y0), cap = MAJLIS_CAP * (/نساء/.test(mj.name) ? WOMEN_NET : MAJLIS_NET);
-    const main = mj.name === 'مجلس الرجال' || rooms.filter(r => r.type === 'majlis').length === 1;
-    if (main && w < MAJLIS_MIN_W - .05) why.push(`«${mj.name}» عرضه الصافي ${r2(w)} م أقل من ${MAJLIS_MIN_W} م (جلسة متقابلة).`);
+    // (الجولة الحادية عشرة) الحد نفسه لمجلس النساء (كان للرئيسي فقط فخرج مجلس نساء شريطي 3.82 م في C10)
+    if (w < MAJLIS_MIN_W - .05) why.push(`«${mj.name}» عرضه الصافي ${r2(w)} م أقل من ${MAJLIS_MIN_W} م (جلسة متقابلة).`);
     if (mj.area > cap + .3) why.push(`«${mj.name}» ${r2(mj.area)} م² متضخم (> ${r2(cap)} م²).`);
   }
   for (const dn of rooms.filter(r => r.type === 'dining')) if (!diningAsked && dn.area > DIN_MAX_AREA + .3) why.push(`«${dn.name}» ${r2(dn.area)} م² متضخم (> ${DIN_MAX_AREA} م²).`);
@@ -2004,7 +2145,7 @@ const PREFER_BONUS = 1000;
 const MIN_ALT_DIFF = .16, HALL_ALT_ASPECT = 2.2, HALL_ALT_DRAWN = 2.15; // الصالة المرسومة في البدائل ≤ 2.15 (كما تقيسها الاختبارات وأدلة القبول؛ كانت 2.2 فتسرب «صالة-ممر» 2.18)
 // والحاكم: الاختلاف المعماري (dist/arch-difference.mjs) — دون عتبة «الشكلي» (0.18) البديلان التنظيم نفسه
 const MIN_ARCH_DIFF = ARCH_T.cosmetic;
-const BUILD_MAX = 18, BUILD_SPARE = 4, BUILD_MAX2 = 8, SCHED_EXTRA = 70;
+const BUILD_MAX = 18, BUILD_SPARE = 4, BUILD_MAX2 = 8, SCHED_EXTRA = 70, SECOND_MAX = 20; // (الجولة الحادية عشرة) البحث الثاني: حتى 10 أشجار لم يُبنَ من نمطها شيء
 function patOf(c) { return c.mode + ':' + c.tag; }
 
 /** يولّد المرشحين لكل نمط ويحل أبعادهم. */
@@ -2087,15 +2228,19 @@ function pickDiverse(pool, keep) {
   const D = new Map(), d = (a, b) => { const k = a.pat < b.pat ? a.pat + '|' + b.pat : b.pat + '|' + a.pat; if (!D.has(k)) D.set(k, roomsDifference(a.dr, b.dr)); return D.get(k); };
   // الاختلاف المعماري (تجاور + حركة + نطاقات، dist/arch-difference.mjs): المقياس الحاكم للاختيار. يُحسب كسولًا ويُخزَّن،
   // ولا يُحسب أصلًا لزوج مرفوض بالمقياس القديم أو بقاعدة العائلة (لا حاجة إليه، وهو أغلى)
-  const AD = new Map(), sigOf = c => (c.sig ||= archSignature(c.doc));
-  const ad = (a, b) => { const k = a.pat < b.pat ? a.pat + '|' + b.pat : b.pat + '|' + a.pat; if (!AD.has(k)) AD.set(k, archDifference(sigOf(a), sigOf(b)).total); return AD.get(k); };
+  // (الجولة الحادية عشرة) المقياس الحاكم: الاختلاف الوظيفي v2 (توزيع الوظائف، الحركة، الخصوصية، العلاقات). زوج مقبول معًا فقط إن كان
+  // «مختلفًا معماريًا» (بعدان جوهريان على الأقل)؛ «اختلاف جزئي» لا يكفي، وموضع السلم والغلاف لا يُحتسبان بذاتهما. والهدف: أعلى أدنى إجمالي v2
+  const AD = new Map(), sigOf = c => (c.sig2 ||= archSignatureV2(c.doc));
+  const adv = (a, b) => { const k = a.pat < b.pat ? a.pat + '|' + b.pat : b.pat + '|' + a.pat; if (!AD.has(k)) AD.set(k, archDifferenceV2(sigOf(a), sigOf(b))); return AD.get(k); };
+  const ad = (a, b) => adv(a, b).total, distinct = (a, b) => adv(a, b).verdict === 'distinct';
   const famOf = x => String(x.pat).split('/')[0].split(':')[0] + (String(x.pat).includes('/') ? ':' + String(x.pat).split('/')[0].split(':')[1] : '');
   /** زوج مقبول معًا: ليس من العائلة نفسها، والمقياسان فوق عتبتيهما (القديم ≥ 0.16، والمعماري ≥ عتبة «الشكلي» 0.18). */
   // (الجولة التاسعة) الكتلة: بيت تقسمه حديقة/حوش داخل غلافه (كتلتان) تنظيم مختلف عن كتلة مصمتة ولو تتابعت الغرف نفسها —
   // على الأرض الضيقة تتقارب مراكز الغرف حتمًا، فالفرق في الفراغات المكشوفة داخل الغلاف (≥ 12 م²) يقوم مقام إزاحة المراكز
   const openA = c => (c.cand?.sol ? sum([...(c.cand.sol.voids || []), ...(c.cand.sol.courts || [])].filter(v => v.x0 > .05 || v.y0 > .05).map(A_)) : 0);
   const massDiff = (a, b) => Math.abs(openA(a) - openA(b)) >= 12;
-  const okPair = (a, b) => (edit || famOf(a) !== famOf(b)) && (d(a, b) >= MIN_ALT_DIFF || massDiff(a, b)) && ad(a, b) >= MIN_ARCH_DIFF;
+  void massDiff; void d;
+  const okPair = (a, b) => (edit || famOf(a) !== famOf(b)) && distinct(a, b);
   // المرسى (البديل الأول المعروض): الأفضل، أو بديل قريب منه جودةً وبالبنود نفسها — فلا يقيّد الأفضلُ وحده تنوع المجموعة
   const anchors = new Set(edit ? [best] : pool.filter(c => c.fails === best.fails && c.quality <= q0 + 120).slice(0, 4));
   /** أفضل مجموعة بحجم need من cand (كل زوج ≥ 0.12 وفيها مرسى)، أو null. */
@@ -2138,7 +2283,7 @@ function pickDiverse(pool, keep) {
   const first = ord.filter(c => anchors.has(c)).sort((a, b) => a.fails - b.fails || (a.editDiff ?? 0) - (b.editDiff ?? 0) || a.quality - b.quality)[0] || ord[0];
   const sel = [first, ...ord.filter(c => c !== first).sort((a, b) => a.fails - b.fails || a.quality - b.quality)];
   // لا يُعرض بديلان شبه متطابقين (بالمقياسين: المراكز ≥ 0.16 والمعماري ≥ 0.18)
-  const fin = sel.filter((c, i) => i === 0 || sel.slice(0, i).every(o => (d(o, c) >= MIN_ALT_DIFF || massDiff(o, c)) && ad(o, c) >= MIN_ARCH_DIFF));
+  const fin = sel.filter((c, i) => i === 0 || sel.slice(0, i).every(o => distinct(o, c)));
   fin.forEach(c => {
     const others = fin.filter(o => o !== c);
     c.minDiff = others.length ? Math.min(...others.map(o => d(o, c))) : null;
@@ -2363,18 +2508,41 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   if (prof) { prof.build = (prof.build || 0) + tp() - tq; prof.nbuilt = (prof.nbuilt || 0) + built.length + rejected.length; tq = tp(); }
   // (الجولة الثامنة) مجلس النساء ≥ 20 م² حدٌّ في الاختيار متى أتاحه البرنامج: إن بلغه بديل واحد على الأقل (بعد تحسين
   // refineWomen) لا يُعرض بديل أصغر منه ولو قلّ العدد (الجودة قبل العدد، قرار المالك)؛ وإن لم يبلغه أي بديل يبقى الاختيار كما هو
-  let designs = pickDiverse([...built], keep);
+  let designs = pickReviewed(built, keep, requirements, land, counts);
+  // (الجولة الحادية عشرة) بحث ثانٍ موجّه بالتنوع: إن قلّ المعروض عن المطلوب تحت المقياس الوظيفي v2، تُعطى التنظيمات التي لم يُبنَ منها
+  // شيء بعد (أنماط بتوزيع وحركة مختلفين: الصالة الموزِّعة، بيت الحوش، نواة النوم، الصف الخلفي…) بحثًا أعمق (DEEP_ITERS، سماحية 4)
+  // ثم تُبنى وتمر على البوابات نفسها كاملة ويُعاد الاختيار. لا تُخفَّض أي عتبة؛ ما لا يجتاز يُرفض بسببه.
+  if (designs.length < keep && !refDR && !prefPat && !globalThis.__v2noSecond) {
+    const have = new Set([...built.map(d => d.mode), ...rejected.map(r => String(r.pat).split(':')[0])]);
+    const trees2 = partiTrees(P, { W: site.W, irregular: !!site.placeRects }).filter(t => !have.has(t.mode) && !avoid.has(t.mode)).slice(0, SECOND_MAX).map(t => ({ ...t, tree: cloneTree(t.tree), iters: Math.max(t.iters || 0, DEEP_ITERS), tol: Math.max(t.tol || 2, 4), seed: t.tag + '#d' }));
+    const done2 = new Set();
+    let c2 = []; try { c2 = trees2.length ? candidates(P, site, { rules: P.rules, entry, trees: trees2, avoid, exclude: ex }) : []; } catch { c2 = []; }
+    for (const cand of c2) {
+      if (done2.has(cand.mode)) continue; // تنظيم واحد من كل نمط
+      try {
+        const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : false;
+        const d = buildDesign(cand, P, site, land, { title, mirror, requirements, entry });
+        if (d.reject.length) { rejected.push({ pat: patOf(cand), why: d.reject, by: 'second-pass', doc: d.doc }); continue; }
+        if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', doc: d.doc }); continue; }
+        d.secondPass = true; built.push(d); done2.add(cand.mode);
+      } catch (e) { rejected.push({ pat: patOf(cand), why: [String(e.message || e)] }); }
+    }
+    if (done2.size) designs = pickReviewed(built, keep, requirements, land, counts);
+    if (globalThis.__v2dbg) globalThis.__v2dbg.second = { trees: trees2.map(t => t.tag), built: [...done2] };
+  }
   { const wa = d => (d.dr?.rooms || []).find(r => r.name === 'مجلس النساء')?.area ?? Infinity;
     if (P.women?.length && !P.women[0].fixedArea && !refDR && designs.some(d => wa(d) < WOMEN_NET)) {
-      const ok = built.filter(d => wa(d) >= WOMEN_NET);
-      if (ok.length) { for (const d of built) if (wa(d) < WOMEN_NET && designs.includes(d)) d.womenSmall = r2(wa(d)); designs = pickDiverse(ok, keep); } } }
+      const ok = built.filter(d => wa(d) >= WOMEN_NET && d._heavy !== false);
+      const alt = ok.length ? pickReviewed(ok, keep, requirements, land, counts) : [];
+      if (alt.length) { for (const d of built) if (wa(d) < WOMEN_NET && designs.includes(d)) d.womenSmall = r2(wa(d)); designs = alt; } } }
+  if (!designs.length) throw reviewFailure(built, rejected);
   if (prof) { prof.pick = (prof.pick || 0) + tp() - tq; tq = tp(); }
   // أرض غير منتظمة: بين المعروض بديل واحد على الأقل يتبع شكل الأرض (أعرض من أي مستطيل يتسع فيها) إن وُجد ناجحًا
   if (site.rectW && !refDR) {
     const follows = d => d.env.w > site.rectW(d.env.d) + .25;
     if (!designs.some(follows)) {
       const pool2 = built.filter(d => follows(d) && !designs.includes(d) && d.fails <= designs[0].fails).sort((a, b) => a.quality - b.quality);
-      const okWith = (d, others) => others.every(o => roomsDifference(o.dr, d.dr) >= MIN_ALT_DIFF && archDifference(o.sig ||= archSignature(o.doc), d.sig ||= archSignature(d.doc)).total >= MIN_ARCH_DIFF);
+      const okWith = (d, others) => heavyReview(d, requirements, land, counts) && others.every(o => archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), d.sig2 ||= archSignatureV2(d.doc)).verdict === 'distinct');
       // يُضاف إن بقي مكان، وإلا يحل محل بديل غير الأول (من الآخر) بشرط أن يبقى مختلفًا معماريًا عن كل الباقين
       let done = false;
       if (designs.length < keep) { const c = pool2.find(d => okWith(d, designs)); if (c) { designs.push(c); done = true; } }
@@ -2382,17 +2550,26 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
         const rest = designs.filter((_, j) => j !== i), c = pool2.find(d => okWith(d, rest));
         if (c) { designs.splice(i, 1); designs.push(c); done = true; }
       }
+      // (الجولة الحادية عشرة) تحت المقياس v2 قد تكون النسخة المتدرجة «نسخة معدّلة» من الأول نفسه (الغلاف وحده لا يُحتسب): تحل محله
+      // — التنظيم نفسه يتبع شكل الأرض — إن لم تخفق في بند أكثر وبقيت مختلفة عن الباقين
+      if (!done && designs.length) { const rest = designs.slice(1), c = pool2.find(d => d.fails <= designs[0].fails && okWith(d, rest) && archDifferenceV2(designs[0].sig2 ||= archSignatureV2(designs[0].doc), d.sig2 ||= archSignatureV2(d.doc)).verdict !== 'distinct'); if (c) { c.notes = [...c.notes, 'التنظيم نفسه للبديل الأفضل بغلاف يتبع شكل الأرض (أعرض في الخلف).']; designs[0] = c; done = true; } }
+      // وإلا يُقال صراحة: وُجد تنظيم يتبع شكل الأرض لكنه ليس «مختلفًا معماريًا» عن المعروض ولا يحل محل أحدها
+      if (!done && designs.length && pool2.some(d => d._heavy !== false)) designs[0].landShapeNote = `يوجد تنظيم يتبع شكل الأرض (${pool2.filter(d => d._heavy !== false).map(d => PARTI_AR[d.mode] ? d.mode : d.pat).join('، ')}) لكنه ليس مختلفًا معماريًا عن البدائل المعروضة (المقياس الوظيفي v2) ولا نسخة من أفضلها فيحل محله؛ لم يُعرض.`;
     }
   }
   designs.forEach(d => { d.same = !!prefPat && d.pat === prefPat; }); // التعديل بقي على التوزيع المعروض نفسه
   // لا انعكاسات لسد العدد: المخطط المعكوس ليس بديلًا تنظيميًا (اختلافه صفر)؛ يُعرض العدد الفعلي ويُذكر السبب
   const finalD = finalReviewSet(designs, requirements, land, counts);
+  if (!finalD.length) throw reviewFailure(built, rejected);
+  { const ln = designs.find(d => d.landShapeNote); if (ln) finalD[0].notes = [...finalD[0].notes, ln.landShapeNote]; }
   if (prof) { prof.final = (prof.final || 0) + tp() - tq; }
   if (finalD.length < keep) finalD[0].notes = [...finalD[0].notes, `وُجد ${finalD.length} ${finalD.length === 1 ? 'بديل' : 'بدائل'} مختلفة تنظيميًا فقط تجتاز المراجعة وتنفّذ بنود طلبك لهذا البرنامج وهذه الأرض (من ${keep} مطلوبة)؛ لم يُضف مخطط معكوس لأنه ليس بديلًا مختلفًا، ولا بديل يخالف بندًا صريحًا من طلبك.`];
   const shortfall_ar = refDR ? null : shortfallReason(keep, finalD, built, rejected);
   finalD.forEach(d => { delete d.cand; delete d.dr; delete d.reject; delete d.sig; delete d.droppedBy; });
-  return { designs: finalD, program: P, W: r2(site.W), D: r2(site.D), engine: VILLA_V2_ENGINE_VERSION, shortfall_ar, rejected: rejected.map(({ doc, ...r }) => r), pool: built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })), ms: Math.round(now() - t0) };
+  return { designs: finalD, program: P, W: r2(site.W), D: r2(site.D), engine: VILLA_V2_ENGINE_VERSION, shortfall_ar, rejected: [...rejected.map(({ doc, ...r }) => r), ...heavyRejected(built)], pool: built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails, heavy: d._heavy ?? null, env: d.env ? { w: d.env.w, d: d.env.d } : null, follows: site.rectW && d.env ? r2(d.env.w - site.rectW(d.env.d)) : null })), ms: Math.round(now() - t0) };
 }
+/** البدائل المبنية التي رسبت في البوابات الثقيلة (تُضم إلى «رُفض» بأسبابها). */
+const heavyRejected = built => built.filter(d => d.heavyFail).map(d => ({ pat: d.pat, by: 'heavy-gates', gates: d.heavyFail, why: d.heavyGates.filter(g => !g.ok).flatMap(g => g.reasons_ar.slice(0, 3).map(x => `${HEAVY_AR[g.id]}: ${x}`)) }));
 
 function refineMajlis(built, soft, P, site, land, { title, requirements, entry, counts, nearMiss = [] }) {
   const dressFail = d => (d.ledger || []).filter(l => !l.ok).length === 1 && (d.ledger || []).some(l => !l.ok && /غرفة ملابس/.test(l.text));
@@ -2468,20 +2645,28 @@ function refineWomen(built, P, site, land, { title, requirements, entry, counts 
  * سبب النقص عن العدد المطلوب (نص عربي يُحفظ مع النتيجة): ما الذي بُني وما الذي رُفض ولماذا — مقيس من المرشحين أنفسهم،
  * لا عبارة عامة. built: البدائل التي اجتازت البوابات؛ shown: المعروضة؛ rejected: ما رسب قبل ذلك.
  */
+/** لا بديل اجتاز البوابات الثقيلة: خطأ صريح بأسبابها (لا يُعرض بديل راسب لسد الفراغ). */
+function reviewFailure(built, rejected) {
+  const why = [...new Set(built.flatMap(d => (d.heavyGates || []).filter(g => !g.ok).flatMap(g => g.reasons_ar.slice(0, 2).map(r => `${HEAVY_AR[g.id] || g.id}: ${r}`))))].slice(0, 6);
+  const e = Error(`لم يجتز أي بديل مبني (${built.length}) البوابات الثقيلة (المراجعة الإنشائية المبدئية، والحركة الفعلية مع الأثاث، والتطابق 2D/3D)${why.length ? ': ' + why.join('؛ ') : ''}.`);
+  e.code = 'VILLA_REVIEW_FAILED'; e.rejected = rejected; return e;
+}
+const HEAVY_AR = { STRUCTURAL: 'المراجعة الإنشائية المبدئية', CIRCULATION: 'الحركة الفعلية', CONSISTENCY_2D3D: 'التطابق 2D/3D' };
 function shortfallReason(keep, shown, built, rejected) {
   if (shown.length >= keep) return null;
   const parts = [], best = shown[0];
-  const sigOf = c => (c.sig ||= archSignature(c.doc));
+  const sigOf = c => (c.sig2 ||= archSignatureV2(c.doc));
   const famOf = x => String(x.pat).split('/')[0].split(':')[0] + (String(x.pat).includes('/') ? ':' + String(x.pat).split('/')[0].split(':')[1] : '');
-  let cosmetic = 0, family = 0, ledger = 0, other = 0, street = 0, women = []; const ledgerWhy = new Set();
+  let cosmetic = 0, partial = 0, family = 0, ledger = 0, other = 0, street = 0, heavy = 0, women = []; const ledgerWhy = new Set(), heavyWhy = new Map();
   for (const c of built) {
     if (shown.includes(c)) continue;
     if (c.womenSmall) { women.push(c.womenSmall); continue; }
     if (best && c.fails > best.fails) { ledger++; for (const l of c.ledger || []) if (!l.ok) ledgerWhy.add(l.text); continue; }
     if ((c.streetBeds || []).length && !(best?.streetBeds || []).length) { street++; continue; }
+    if (c.heavyFail) { heavy++; for (const g of c.heavyFail) heavyWhy.set(g, (heavyWhy.get(g) || 0) + 1); continue; }
     if (shown.some(o => famOf(o) === famOf(c))) { family++; continue; }
-    const near = shown.length ? Math.min(...shown.map(o => archDifference(sigOf(o), sigOf(c)).total)) : 1;
-    if (near < MIN_ARCH_DIFF || shown.some(o => o.dr && c.dr && roomsDifference(o.dr, c.dr) < MIN_ALT_DIFF)) cosmetic++; else other++;
+    const v = shown.map(o => archDifferenceV2(sigOf(o), sigOf(c)).verdict);
+    if (v.includes('variant')) cosmetic++; else if (v.includes('partial')) partial++; else other++;
   }
   const rej = new Map();
   // صياغة للعميل: سبب الرفض بجملة سليمة (كانت «رُفض 4 في لا يتسع على الأرض»)
@@ -2493,7 +2678,9 @@ function shortfallReason(keep, shown, built, rejected) {
   if (women.length) parts.push(`${women.length} مجلس النساء فيها أصغر من ${WOMEN_NET} م² (${women.join('، ')} م²) والبرنامج يتسع لأكبر منه`);
   if (street) parts.push(`${street} فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)`);
   if (family) parts.push(`${family} تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)`);
-  if (cosmetic) parts.push(`${cosmetic} نسخة شكلية من بديل معروض (اختلاف معماري < ${MIN_ARCH_DIFF} أو إزاحة مراكز الغرف < ${MIN_ALT_DIFF})`);
+  if (heavy) parts.push(`${heavy} رسبت في البوابات الثقيلة (${[...heavyWhy].map(([g, n]) => `${HEAVY_AR[g] || g} ${n}`).join('، ')})`);
+  if (cosmetic) parts.push(`${cosmetic} نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)`);
+  if (partial) parts.push(`${partial} اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان)`);
   if (other) parts.push(`${other} لم تدخل مجموعة تحقق أدنى اختلاف مع كل البدائل المعروضة معًا`);
   return parts.join('؛ ') + '. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).';
 }
@@ -2513,9 +2700,32 @@ function compactReview(rv) {
     breakdown: rv.breakdown.map(b => ({ id: b.id, ar: b.ar, value: b.value, weight: b.weight })) };
 }
 function gateReview(d, requirements, land, counts) {
-  const rv = reviewDesign(d.doc, reviewRequest(requirements, land, counts), { external: false });
+  const rv = reviewDesign(d.doc, reviewRequest(requirements, land, counts), { external: false, heavy: false });
   d.review = compactReview(rv);
   return rv.passed;
+}
+/**
+ * (الجولة الحادية عشرة) البوابات الثقيلة (المراجعة الإنشائية المبدئية، الحركة الفعلية، التطابق 2D/3D) لبديل واحد، مرة واحدة (مخزّنة).
+ * أبطأ من غيرها، فلا تُحسب لكل مرشح بل للمختار فقط في pickReviewed.
+ */
+function heavyReview(d, requirements, land, counts) {
+  if (d._heavy !== undefined) return d._heavy;
+  const req = reviewRequest(requirements, land, counts);
+  d.heavyGates = HEAVY_GATES.map(id => heavyGate(id, d.doc, req));
+  d._heavy = d.heavyGates.every(g => g.ok);
+  if (!d._heavy) d.heavyFail = d.heavyGates.filter(g => !g.ok).map(g => g.id);
+  return d._heavy;
+}
+/** يختار بـ pickDiverse ثم يمرر المختار على البوابات الثقيلة؛ الراسب يُستبعد من المجموعة ويُعاد الاختيار (لا يُعرض راسب أبدًا). */
+function pickReviewed(pool, keep, requirements, land, counts, pick = pickDiverse) {
+  let rest = [...pool];
+  for (let guard = 0; guard < 16 && rest.length; guard++) {
+    const sel = pick([...rest], keep);
+    const bad = sel.filter(d => !heavyReview(d, requirements, land, counts));
+    if (!bad.length) return sel;
+    rest = rest.filter(d => !bad.includes(d));
+  }
+  return [];
 }
 /** مراجعة كاملة (مع AZIZ وMizan بوزنهما المقيس) للبدائل المختارة فقط. */
 function finalReview(d, requirements, land, counts) {
@@ -2529,15 +2739,20 @@ function finalReview(d, requirements, land, counts) {
 function finalReviewSet(designs, requirements, land, counts) {
   if (!designs.length) return designs;
   let rows = null;
-  try { rows = reviewDesigns(designs.map(d => d.doc), reviewRequest(requirements, land, counts), { distinct: true }); } catch { rows = null; }
+  try { rows = reviewDesigns(designs.map(d => d.doc), reviewRequest(requirements, land, counts), { distinct: true, heavy: false }); } catch { rows = null; }
   if (!rows) { designs.forEach(d => finalReview(d, requirements, land, counts)); return designs; }
   const byIdx = new Map(rows.map(r => [r.index, r]));
   const kept = [];
   designs.forEach((d, i) => {
-    const r = byIdx.get(i); d.review = compactReview(r);
-    if (i === 0 || r.passed) kept.push(d);
+    const r = byIdx.get(i);
+    // البوابات الثقيلة محسوبة في pickReviewed (مرة واحدة)؛ تُضم إلى المراجعة المعروضة
+    if (heavyReview(d, requirements, land, counts) === false) { r.passed = false; r.failedGates = [...r.failedGates, ...d.heavyFail]; r.rejectReasons_ar = [...r.rejectReasons_ar, ...d.heavyGates.filter(g => !g.ok).flatMap(g => g.reasons_ar.map(x => `${g.ar}: ${x}`))]; }
+    r.gates = [...r.gates.filter(g => g.id !== 'DISTINCT'), ...(d.heavyGates || []), ...r.gates.filter(g => g.id === 'DISTINCT')];
+    d.review = compactReview(r);
+    if (r.passed) kept.push(d);
     else d.droppedBy = r.failedGates;
   });
+  if (!kept.length) return kept;
   const dropped = designs.filter(d => !kept.includes(d));
   if (dropped.length) kept[0].notes = [...kept[0].notes, `استُبعد ${dropped.length} من البدائل في المراجعة النهائية للمجموعة (${[...new Set(dropped.flatMap(d => d.droppedBy || []))].join('، ')}): لا يُعرض بديل تنظيمه نسخة شكلية من بديل آخر أو راسب في بوابة.`];
   return kept;
@@ -2604,7 +2819,9 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
     const pat = patOf(g) + '/' + up.tag; if (exSet.has(pat)) return;
     try {
       const mirror = g.rp && g.rp.p[0] !== g.rp.p[1] ? g.rp.p[1] < g.rp.p[0] : false;
-      const ul = realizeV2(up, U, { upper: true });
+      // (الجولة الحادية عشرة) حمامات العلوي فوق الرطب في الأرضي ما أمكن: يُعطى العلوي فراغات الأرضي المحققة
+      let gRooms = null; try { gRooms = realizeV2(g, G, {}).rooms; } catch { gRooms = null; }
+      const ul = realizeV2(up, U, { upper: true, below: gRooms });
       const stairR = g.sol.circ.find(c => c.id === 'stair').r;
       const d = buildDesign(g, G, site, land, {
         title, mirror, requirements, entry, second: doc0 => {
@@ -2642,21 +2859,23 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
       let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch { r = null; }
       if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'] }); continue; }
       const n0 = designs.length;
-      build2(r.g, r.up, { summary: `${TF_PARTI_AR[tr.mode]}؛ والعلوي: ${TF_UPPER_AR[tr.org] || ''} (دوران)`, note: tr.mode === 'sidestair' ? 'السلم على جدار الجار بجوار بهو مزدوج الارتفاع، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'rearstair' ? 'السلم في الخلف بجوار الصالة، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'stairhall' ? 'السلم بين بهو المدخل والصالة، ويصل إلى الدور العلوي بين الصالة العلوية الأمامية والردهة.' : 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، والدور العلوي فوق الكتلة العائلية فقط.' });
+      build2(r.g, r.up, { summary: `${TF_PARTI_AR[tr.mode]}؛ والعلوي: ${TF_UPPER_AR[tr.org] || ''} (دوران)`, note: tr.mode === 'sidestair' ? 'السلم على جدار الجار بجوار بهو مزدوج الارتفاع، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'rearstair' ? 'السلم في الخلف بجوار الصالة، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'stairhall' ? 'السلم بين بهو المدخل والصالة، ويصل إلى الدور العلوي بين الصالة العلوية الأمامية والردهة.' : tr.mode === 'guestgarden' ? 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، وغرفة كبار السن على حديقة خاصة بعيدة عن الضيافة؛ والسلم في آخر جناح الخدمة يصل إلى الصالة العلوية.' : tr.mode === 'rowsup' ? 'السلم خلف المدخل يصل إلى ردهة علوية بين الصالة العائلية الأمامية ورواق الغرف الخلفي.' : 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، والدور العلوي فوق الكتلة العائلية فقط.' });
       if (designs.length > n0) doneModes.add(tr.mode); // بديل واحد من كل تنظيم أرضي يكفي (الاختيار يعرض واحدًا من كل عائلة)
     } }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; e.rejected = rejected; throw e; }
   for (const d of designs) d.dr = docRooms(d.doc);
   if (globalThis.__v2dbg) { globalThis.__v2pool = designs.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = designs.map(d => ({ pat: d.pat, doc: d.doc })); }
-  const out = pickDiverse(designs, keep);
+  const out = pickReviewed(designs, keep, requirements, land, counts);
+  if (!out.length) throw reviewFailure(designs, rejected);
 
   const prefPat2 = prefer && typeof prefer === 'object' ? prefer.pat ?? null : prefer;
   out.forEach(d => { d.same = !!prefPat2 && d.pat === prefPat2; });
   const finalD = finalReviewSet(out, requirements, land, counts);
+  if (!finalD.length) throw reviewFailure(designs, rejected);
   if (finalD.length < keep) finalD[0].notes = [...finalD[0].notes, `وُجد ${finalD.length} ${finalD.length === 1 ? 'بديل' : 'بدائل'} مختلفة تنظيميًا فقط تجتاز المراجعة وتنفّذ بنود طلبك (من ${keep} مطلوبة)؛ لا يُعرض بديل يخالف بندًا صريحًا من طلبك لسد العدد.`];
   const shortfall_ar = shortfallReason(keep, finalD, designs, rejected);
   finalD.forEach(d => { delete d.cand; delete d.dr; delete d.reject; delete d.sig; delete d.droppedBy; });
-  return { designs: finalD, program: P, W: r2(site.W), D: r2(site.D), engine: VILLA_V2_ENGINE_VERSION, floors: 2, shortfall_ar, rejected: rejected.map(({ doc, ...r }) => r), ms: Math.round(now() - t0) };
+  return { designs: finalD, program: P, W: r2(site.W), D: r2(site.D), engine: VILLA_V2_ENGINE_VERSION, floors: 2, shortfall_ar, rejected: [...rejected.map(({ doc, ...r }) => r), ...heavyRejected(designs)], pool: designs.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails, heavy: d._heavy ?? null })), ms: Math.round(now() - t0) };
 }
 /**
  * الدور العلوي على غلاف الأرضي نفسه: عمود المحور بعرض عمود السلم تمامًا والسلم في موضعه، وتنظيمات للمحور:
@@ -2815,7 +3034,10 @@ function addStair(doc, sr, T, level, side = 'x0', { farMaster = false } = {}) {
   // المسافة كما يقيسها سجل المطابقة (rules.mjs): بين مركز صندوق السلم ومركز الرئيسية
   const ctrDist = (b, R) => { const xs = R.net.map(p => p.x), ys = R.net.map(p => p.y); return Math.hypot((b.x0 + b.x1) / 2 - (Math.min(...xs) + Math.max(...xs)) / 2, (b.y0 + b.y1) / 2 - (Math.min(...ys) + Math.max(...ys)) / 2); };
   const prefer = b => (ms ? -Math.round(ctrDist(b, ms) / .25) * 10 : 0) + Math.hypot((b.x0 + b.x1) / 2 - pref.x, (b.y0 + b.y1) / 2 - pref.y) / 10;
-  const pick = chooseStair(model, li, mid, { level, prefer });
+  // (الجولة الحادية عشرة) السلم المختار يُمشى فعلًا: من المدخل إلى أول درجة، ومن آخر درجة إلى كل فراغات الدور العلوي
+  // (dist/circulation-proof.mjs بحدود البوابة) — لا يُقبل سلم تفصل فتحته بسطة الوصول عن الصالة العلوية
+  const walkable = st => { try { const d = applyCommand(doc, { type: 'add-stair', ...st }).doc; return !circulationProof(d, { limits: CIRC_GATE_LIMITS }).findings.some(f => f.severity === 'serious' && /^STAIR_|^UNREACHABLE$|^NO_WALKABLE_PATH$/.test(f.code)); } catch { return false; } };
+  const pick = chooseStair(model, li, mid, { level, prefer, accept: globalThis.__noWalk ? null : walkable });
   if (pick) { const { kind, x, y, rot, w, run, flip, steps } = pick.stair; return applyCommand(doc, { type: 'add-stair', level, kind, x, y, rot, w, run, flip, steps }).doc; }
   // لا سلم يتسع ويُوصل إليه: يُرسم السلم السابق (U) بعدد قوائمه الصحيح، فترفضه بوابة STAIR_GEOMETRY ويُذكر السبب
   const wh = sr.x1 - sr.x0, w = Math.max(.9, Math.min(1.2, (wh - .3) / 2)), ac = side === 'x1' ? sr.x1 - .15 - w / 2 : sr.x0 + .15 + w / 2, y0 = sr.y0 + .16;
@@ -2830,6 +3052,8 @@ function addStair(doc, sr, T, level, side = 'x0', { farMaster = false } = {}) {
 // بدور واحد)، ولكل منها تنظيمات علوية مختلفة (صالة أمامية وممر محوري / ردهة وصالة خلفية). العلوي يُبنى على «إطار» من
 // خطوط جدران الأرضي نفسها (قطوع ثابتة)، فتقع جدرانه الرئيسية فوق جدران الأرضي، والسلم في موضعه، والفراغ المزدوج فوق البهو.
 export const TF_PARTI_AR = Object.freeze({
+  guestgarden: 'جناح ضيافة بدور واحد (المجلس وسطحه مكشوف) في الركن الأمامي، وغرفة كبار السن في الركن الخلفي على حديقتها الخاصة، والكتلة العائلية بدورين والسلم في آخر جناح الخدمة',
+  rowsup: 'صفّان: الضيافة والمدخل والسلم والطعام أمامًا، والصالة وكبار السن والمطبخ على الحديقة خلفًا؛ وفي العلوي صالة عائلية أمامية والغرف عنقودًا خلفيًا',
   sidestair: 'السلم على جدار الجار ببهو مدخل مزدوج الارتفاع: المجلس على الواجهة، والصالة خلف البهو، والطعام والمطبخ جناحًا جانبيًا',
   rearstair: 'السلم في الخلف بجوار الصالة: المدخل فالصالة في المحور، والمجلس وغرفة الأرضي جناح، والطعام والمطبخ جناح مقابل',
   guestwing: 'جناح ضيافة بدور واحد (المجلس) أمام كتلة عائلية بدورين، بينهما فناء المدخل',
@@ -2913,6 +3137,26 @@ function tfTrees(G, U) {
     const colC = Y(D2(Y(Wm ? Z([Wm], 'x0', 'y') : null, Z([...flex, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y')), kC.length || wcs.length ? Y(OV(8), Z([...wcs, ...kC], 'x0', 'y')) : VOID(8)), ST());
     push('rearstair', 'c' + nA, 'lounge', X(colA, colB, colC), { need: sol => { const h = sol.circ.find(c => c.id === 'hall').r; return colNeed(h.x0, 4.2) + colNeed(5.0, h.x0) + colNeed(W_(h), 4.4) + colNeed(5.0, W_(h)) + colNeed(sol.ew - h.x1, 3.8) + colNeed(5.0, sol.ew - h.x1); } });
   }
+  // (الجولة الحادية عشرة، توجيه المالك لـ C7) تنظيمان يختلفان في توزيع الوظائف والعلاقات لا في موضع السلم وحده:
+  // (هـ) جناح ضيافة بدور واحد: المجلس في الركن الأمامي وسطحه مكشوف، وخلفه حديقة خاصة لغرفة كبار السن في الركن الخلفي (تُفتح عليها،
+  //      بعيدة عن الضيافة)، والكتلة العائلية بدورين: المدخل فالصالة في المحور، والطعام والمطبخ جناح مقابل والسلم في آخره. العلوي:
+  //      الرئيسية فوق غرفة كبار السن في الركن الخلفي (أبعد ما تكون عن السلم في الركن المقابل)، وغرفة فوق المدخل، والصالة العلوية خلفها
+  const eldG = back.find(b => b.elderly) || null;
+  if (M && kids.length && eldG) for (let nC = 0; nC <= Math.min(1, kids.length - 1); nC++) {
+    const kC = kids.slice(1, kids.length - nC), kB = kids.slice(kids.length - nC);
+    const colA = Y(D2(Mz('y1'), VOID(30)), D2(VOID(14), VOID(14)), D2(Y(Z(back, 'x1', 'y'), OV(6)), Z([master], 'x1', 'y')));
+    const colB = Y(D2(X(F(), OV(5)), Z([kids[0], ...kB], 'y1', 'x')), D2(H(), UH()), D2(OV(6), OV(6)));
+    const colC = Y(D2(Y(Wm ? Z([Wm], 'x0', 'y') : null, Z([...flex, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y')), kC.length || wcs.length ? Y(OV(8), Z([...wcs, ...kC], 'x0', 'y')) : VOID(8)), ST());
+    push('guestgarden', 'g' + nC, 'lounge', X(colA, colB, colC), { need: sol => { const h = sol.circ.find(c => c.id === 'hall').r; return colNeed(h.x0, 4.2) + colNeed(5.0, h.x0) + colNeed(W_(h), 4.4) + colNeed(5.0, W_(h)) + colNeed(sol.ew - h.x1, 3.8) + colNeed(5.0, sol.ew - h.x1); } });
+  }
+  // (و) صالة علوية أمامية والغرف عنقود خلفي: الأرضي صفّان — أمامي (المجلس | المدخل والسلم | الطعام يخدم المجلس) وخلفي على الحديقة
+  //      (غرفة كبار السن قرب الصالة | الصالة | المطبخ والخدمة)؛ العلوي: صالة عائلية أمامية فوق المجلس والمدخل تطل على الشارع،
+  //      والغرف كلها صفًا خلفيًا على رواق عرضي والرئيسية في الركن الخلفي البعيد عن السلم
+  if (M && kids.length >= 2) {
+    const front = X(D2(Mz('y1'), UH()), Y(D2(F(), C('lobby', { fix: 1.6, area: 6 })), ST()), D2(Z([...flex, ...Dn], 'y1', 'x'), Z([kids[0]], 'y1', 'x')));
+    const rear = X(D2(Y(back.length ? Z(back, 'x1', 'y') : null, OV(6)), Y(C('gallery', { fix: 1.5, area: 10 }), Z([master], 'y0', 'x'))), D2(H(), Y(C('gallery2', { fix: 1.5, area: 8 }), Z([...wcs, ...kids.slice(1, -1)], 'y0', 'x'))), D2(Y(Z([...K, ...Md], 'x0', 'y'), OV(6)), Y(OV(6), Z(kids.slice(-1), 'x0', 'y'))));
+    push('rowsup', 'r0', 'front', Y(front, rear));
+  }
   if (M && kids.length) for (let nA = 0; nA <= Math.min(2, kids.length - 1); nA++) {
     // (ب) السلم في قلب البيت بين بهو المدخل والصالة الأرضية (الصالة خلفه على الحديقة)، والمجلس وغرفة الأرضي جناح والطعام
     //     والمطبخ جناح. العلوي: صالة علوية أمامية فوق البهو تطل على الشارع، وردهة خلف السلم تفتح عليها غرفة في آخر المحور
@@ -2920,7 +3164,10 @@ function tfTrees(G, U) {
     const kA = kids.slice(1, 1 + nA), kC = kids.slice(1 + nA);
     // (الجانبان في العلوي: سطح مكشوف اختياري في طرف الجناح فوق فراغ أرضي مبني، لا غرفة مضخمة لملء العمق)
     const colA = D2(Y(Mz('y1'), back.length ? Z(back, 'x1', 'y') : null), Y(OV(8), Z([...kA, master], 'x1', 'y')));
-    const colB = Y(D2(C('foyer', { area: 16, big: true }), UH()), ST(), D2(H(), Y(C('lobby', { fix: 1.4, area: 6 }), Z([kids[0]], 'y0', 'x'))));
+    // (الجولة الحادية عشرة) غرفة السلم هنا يُدخل إليها من البهو أمامها ويُخرج منها إلى الصالة خلفها: تحتاج عمق القلبتين (U بـ 18 قائمة
+    // ونائمة 0.28 م ≈ 3.45 م) وممرًا حرًا 0.9 م أمام أول قائمة — 4.4 م لا 3.7 (كانت كل تنظيمات «السلم في القلب» ترسب في هندسة السلم)
+    const ST4 = () => D2(C('stair', { fix: 4.4, area: 3.8 * 4.4 }), C('stair', { fix: 4.4, area: 3.8 * 4.4 }));
+    const colB = Y(D2(C('foyer', { area: 16, big: true }), UH()), ST4(), D2(H(), Y(C('lobby', { fix: 1.4, area: 6 }), Z([kids[0]], 'y0', 'x'))));
     const colC = D2(Y(Wm ? Z([Wm], 'x0', 'y') : OV(8), Z([...flex, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y'), OV(8)), kC.length || wcs.length ? Y(OV(8), Z([...wcs, ...kC], 'x0', 'y'), OV(8)) : VOID(8));
     push('stairhall', 'h' + nA, 'front', X(colA, colB, colC), { need: sol => { const h = sol.circ.find(c => c.id === 'hall').r; return colNeed(h.x0, 4.2) + colNeed(5.0, h.x0) + colNeed(W_(h), 4.3) + colNeed(4.8, W_(h)) + colNeed(sol.ew - h.x1, 4.2) + colNeed(5.0, sol.ew - h.x1); } });
   }
@@ -2959,7 +3206,14 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
     // من المخالفات، وعلى المستطيلات قبل ذلك
     let st = null;
     if (!viol) try {
-      const gr = realizeV2({ sol, ew, ed, mode: tr.mode }, G, {}).rooms.filter(r => !r.open), ur = realizeV2({ sol: u, ew, ed, mode: 'upper' }, U, { upper: true }).rooms.filter(r => !r.open && !r.dh); st = rectStack(edgeLines(gr), edgeLines(ur, u.dh || []));
+      const gL = realizeV2({ sol, ew, ed, mode: tr.mode }, G, {}), uL = realizeV2({ sol: u, ew, ed, mode: 'upper' }, U, { upper: true, below: gL.rooms });
+      const gr = gL.rooms.filter(r => !r.open), ur = uL.rooms.filter(r => !r.open && !r.dh); st = rectStack(edgeLines(gr), edgeLines(ur, u.dh || []));
+      // (الجولة الحادية عشرة) على المفصّل كما سيُرسم: المجلس (والنساء) عرضه الصافي ≥ 4.2 م ما لم يحدد العميل مقاسه، وكل غرفة علوية
+      // يصلها باب من الحركة (لا غرفة بلا باب بعد تفصيل الأشرطة) — كانا يُكتشفان بعد البناء فيُرفض التنظيم كله
+      if (!majlisAsked(G)) for (const mj of gr.filter(r => r.type === 'majlis')) { const w = Math.min(W_(mj), H_(mj)) - WALL_NET; if (w < MAJLIS_MIN_W - .05) { viol++; pen += 600 + 400 * (MAJLIS_MIN_W - w); } }
+      { const adj = new Map(); for (const d of uL.doors) if (d.b) { (adj.get(d.a) || adj.set(d.a, []).get(d.a)).push(d.b); (adj.get(d.b) || adj.set(d.b, []).get(d.b)).push(d.a); }
+        const seen = new Set(['stair']), q = ['stair']; while (q.length) for (const n of adj.get(q.pop()) || []) if (!seen.has(n)) { seen.add(n); q.push(n); }
+        const lost = uL.rooms.filter(r => !r.open && !r.dh && !seen.has(r.id)).length; if (lost) { viol++; pen += 600 + 200 * lost; } }
       // الرئيسية المفصّلة (الغرفة دون حمامها) لا تصغر عن غرفة نوم أخرى في أي دور (غير كبار السن)
       const beds = [...gr, ...ur].filter(r => r.type === 'master' || (r.type === 'bedroom' && !/كبار السن|الضيوف/.test(r.name))), m = beds.find(r => r.type === 'master');
       const netA = r => (W_(r) - WALL_NET) * (H_(r) - WALL_NET);

@@ -221,7 +221,7 @@ export function checkStair(model, stair, li, rules = STAIR_RULES) {
  * والمواضع، ويعيد أول سلم يجتاز checkStair بأفضل ترتيب (أعرض، ثم U فمستقيم فـL، ثم prefer). null إن لم يتسع شيء.
  * prefer(box) → رقم أصغر أفضل (مثل البعد عن الرئيسية حين «الماستر بعيدة عن الدرج»).
  */
-export function chooseStair(model, li, roomPoint, { level, prefer = null, rules = STAIR_RULES } = {}) {
+export function chooseStair(model, li, roomPoint, { level, prefer = null, rules = STAIR_RULES, accept = null, maxAccept = 8 } = {}) {
   const lv = model.levels[li], S = lv.roomAt(roomPoint); if (!S) return null;
   const { rise } = riseOf(model.doc.levels, li), N = risersFor(rise);
   const xs = S.net.map(p => p.x), ys = S.net.map(p => p.y), R = { x0: Math.min(...xs) + TOL, x1: Math.max(...xs) - TOL, y0: Math.min(...ys) + TOL, y1: Math.max(...ys) - TOL };
@@ -253,7 +253,9 @@ export function chooseStair(model, li, roomPoint, { level, prefer = null, rules 
   for (const c of cands) {
     const k = JSON.stringify(c.st); if (seen.has(k)) continue; seen.add(k);
     const res = checkStair(model, c.st, li, rules);
-    if (res.ok) return { stair: { ...c.st, level }, check: res };
+    // (الجولة الحادية عشرة) accept: فحص إضافي من المستدعي (المشي الفعلي من المدخل عبر الدرج إلى كل الدور العلوي)؛ يُجرَّب حتى maxAccept
+    if (res.ok && (!accept || maxAccept-- <= 0 ? !accept : accept({ ...c.st, level }))) return { stair: { ...c.st, level }, check: res };
+    if (res.ok && accept && maxAccept < 0) break;
   }
   return null;
 }

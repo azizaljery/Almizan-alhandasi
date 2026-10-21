@@ -76,7 +76,29 @@ export const currentDoc = s => parseDoc(s.designs[s.current].doc);
  * - نص لم يُفهم منه شيء ولا خيار معه: لا يُولَّد تصميم؛ يُرمى SHARA_UNCLEAR ليعيد العميل الصياغة.
  * يعيد { session, changes, reply } — reply: ما نُفّذ وما لم يُنفَّذ (بسببه) وما لم يُفهم، مقيسًا من المخطط الجديد.
  */
-export async function redesign(session, { picks = [], text = '', ai = null } = {}, { generate = generateInitialDesign, local = true } = {}) {
+/**
+ * (الجولة الحادية عشرة) جواب سؤال التعارض: طلب فيه بندان متعارضان (المطبخ في الأمام وفي الخلف، المجلس جنب المطبخ وبعيد عنه)
+ * يُسأل عنه عند الإنشاء؛ وملاحظة العميل التالية التي تحسم أحد الطرفين تُسجَّل في الطلب نفسه (يبقى البند المختار ويُحذف المعارض)
+ * ويُرفع التعارض من الجلسة ويُذكر في الرد — حتى لو لم يتحقق البند في المخطط بعد (يبقى الطلب محسومًا لإعادة التصميم).
+ */
+export async function redesign(session, args = {}, opts = {}) {
+  const pending = (session.conflicts || []).filter(c => c && c.key && c.type !== 'needs-consent');
+  const res = await redesign0(session, args, opts);
+  if (!pending.length || !args.text || !res?.session) return res;
+  let more = null; try { more = extractRequirements(args.text, { counts: {} }); } catch { more = null; }
+  if (!more?.rules?.length) return res;
+  const S = res.session, req = S.input.requirements;
+  req.rules = mergeRules(req.rules || [], more.rules);
+  let now = new Set(); try { now = new Set(detectConflicts(req, S.input.land || {}).map(c => c.key)); } catch { now = new Set(); }
+  const resolved = pending.filter(c => !now.has(c.key));
+  if (!resolved.length) return res;
+  S.conflicts = (S.conflicts || []).filter(c => !resolved.some(r => r.key === c.key));
+  const kept = r => r.quote || r.text || `${r.a} ${r.side || r.b || ''}`;
+  res.reply = { ...res.reply, resolved: resolved.map(c => ({ type: c.type, question_ar: c.question_ar, answer_ar: args.text.trim(), kept: more.rules.map(kept) })),
+    summary_ar: [`سجّلت اختيارك: ${more.rules.map(kept).join('، ')} (حُسم ${resolved.length === 1 ? 'التعارض' : resolved.length + ' تعارضات'} في طلبك، والبند المعارض حُذف).`, res.reply?.summary_ar].filter(Boolean).join(' ') };
+  return res;
+}
+async function redesign0(session, { picks = [], text = '', ai = null } = {}, { generate = generateInitialDesign, local = true } = {}) {
   const s = clone(session), req = s.input.requirements, changes = [];
   req.prefs ||= {}; req.tweaks ||= {}; req.counts ||= {}; req.extras ||= {}; req.areas ||= {};
   let more = null;

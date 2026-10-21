@@ -12,7 +12,7 @@ import { docRooms } from '../dist/rules.mjs';
 import { parseDoc, applyCommand } from '../dist/draw/doc.mjs';
 import { reviewDoc } from '../dist/draw/review.mjs';
 import { ROOM_TYPES } from '../dist/draw/catalog.mjs';
-import { archDifference, THRESHOLDS } from '../dist/arch-difference.mjs';
+import { archDifference, THRESHOLDS, archDifferenceV2 } from '../dist/arch-difference.mjs';
 import { CASES } from '../scripts/acceptance-cases.mjs';
 
 const caseReq = id => { const C = CASES.find(c => c.id === id), r = extractRequirements(C.text, { counts: C.counts }); r.counts = { ...r.counts, ...C.counts }; return { C, r, land: { floors: 1, ...C.land } }; };
@@ -87,9 +87,10 @@ test('غرف النوم على الصالة العائلية: مرفوضة خا�
 
 test('الأرض الضيقة (C4): بيت بكتلتين وحديقة جانبية ورواق بديل مختلف عن الكتلة المصمتة', () => {
   const out = gen('C4');
-  assert.ok(out.designs.length >= 2, out.designs.map(d => d.pat).join(' '));
-  assert.ok(out.designs.some(d => /^split/.test(d.pat)), out.designs.map(d => d.pat).join(' '));
-  assert.ok(archDifference(out.designs[0].doc, out.designs[1].doc).total >= THRESHOLDS.cosmetic);
+  // (الجولة الحادية عشرة) تحت المقياس الوظيفي v2 الكتلتان والكتلة المصمتة على أرض عرضها المبني 8.7 م «نسخة معدّلة» من التنظيم نفسه
+  // (التتابع نفسه من الأمام للخلف: الضيافة فالصالة فالنوم)؛ فلا يُعرض إلا بديل واحد ويُذكر السبب المقيس
+  assert.ok(out.designs.length >= 2 || /جزئي|نسخة معدّلة|لا بعد جوهري|تنويع على تنظيم/.test(out.shortfall_ar || ''), out.designs.map(d => d.pat).join(' ') + ' ' + out.shortfall_ar);
+  for (let i = 1; i < out.designs.length; i++) assert.equal(archDifferenceV2(out.designs[0].doc, out.designs[i].doc).verdict, 'distinct');
 });
 
 test('C2: الصالة الكبيرة على الحديقة الخلفية وغرف الأبناء متجاورة وكبار السن قرب الصالة في البديل المعروض', () => {

@@ -11,7 +11,7 @@ import { createSession, redesign } from '../dist/design-session.mjs';
 import { verifyRequest, docRooms } from '../dist/rules.mjs';
 import { reviewDoc } from '../dist/draw/review.mjs';
 import { serialize } from '../dist/draw/doc.mjs';
-import { archMatrix, THRESHOLDS as ARCH_T } from '../dist/arch-difference.mjs';
+import { archMatrix, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, explainDifference, SUBSTANTIVE_V2 } from '../dist/arch-difference.mjs';
 
 const argv = process.argv.slice(2), ei = argv.indexOf('--engine');
 const engine = (ei >= 0 ? argv[ei + 1] : process.env.MIZAN_ENGINE) || 'v1';
@@ -74,7 +74,9 @@ for (const C of CASES) {
   row.ms = Math.round(performance.now() - t0);
   if (out) {
     // المراجعة المستقلة (plan-review) المرفقة بكل بديل من المولّد الثاني: البوابات الراسبة والدرجة وأسباب الرفض
-    const rv = d => (d.review ? { passed: d.review.passed, failedGates: d.review.failedGates, score: d.review.score, rejectReasons_ar: d.review.rejectReasons_ar } : null);
+    const HEAVY = ['STRUCTURAL', 'CIRCULATION', 'CONSISTENCY_2D3D'];
+    const rv = d => (d.review ? { passed: d.review.passed, failedGates: d.review.failedGates, score: d.review.score, rejectReasons_ar: d.review.rejectReasons_ar,
+      gates: Object.fromEntries((d.review.gates || []).map(g => [g.id, { ok: g.ok, applicable: g.applicable }])), heavy: Object.fromEntries((d.review.gates || []).filter(g => HEAVY.includes(g.id)).map(g => [g.id, { ok: g.ok, value: g.value }])) } : null);
     out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
     row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length;
     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));
@@ -85,6 +87,11 @@ for (const C of CASES) {
     // الاختلاف المعماري (الحاكم في الاختيار منذ الجولة السادسة): المصفوفة وأدناه والأزواج الشكلية (< 0.18)
     const am = archMatrix(out.designs.map(d => d.doc));
     row.archDiversity = am.matrix; row.minArchDifference = am.min; row.cosmeticPairs = am.cosmeticPairs.map(p => [p.i + 1, p.j + 1]); row.archThresholds = ARCH_T;
+    // (الجولة الحادية عشرة) المقياس الوظيفي v2 الحاكم: لكل زوج الحكم والأبعاد الجوهرية والشرح العربي (explainDifference)
+    const sig2 = out.designs.map(d => archSignatureV2(d.doc)), pairs2 = [];
+    for (let i = 0; i < sig2.length; i++) for (let j = i + 1; j < sig2.length; j++) { const dd = archDifferenceV2(sig2[i], sig2[j]), ex = explainDifference(dd); pairs2.push({ pair: [i + 1, j + 1], verdict: dd.verdict, verdict_ar: dd.verdict_ar, substantive: dd.substantive, dims: { zoning: dd.zoning, circulation: dd.circulation, privacy: dd.privacy, relations: dd.relations }, total: dd.total, explanation_ar: ex.text }); }
+    row.archV2 = { thresholds: SUBSTANTIVE_V2, pairs: pairs2, allDistinct: pairs2.every(p => p.verdict === 'distinct'), minSubstantive: pairs2.length ? Math.min(...pairs2.map(p => p.substantive.length)) : null, minTotal: pairs2.length ? Math.min(...pairs2.map(p => p.total)) : null };
+    row.heavyRejected = (out.rejected || []).filter(r => r.by === 'heavy-gates');
     // سبب النقص عن العدد المطلوب (نص عربي من المولّد نفسه: ما بُني وما رُفض ولماذا)
     if (out.designs.length < (C.want || 4)) row.shortfallReason = out.shortfall_ar || 'لم يذكر المولّد سببًا.';
   }

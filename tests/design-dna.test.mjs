@@ -61,7 +61,10 @@ test('إجابات مختلفة تعطي بصمة ميزان مختلفة وأو
   const a = await generateInitialDesign({ land, rooms, discovery: empty, idea: '', counts });
   const b = await generateInitialDesign({ land, rooms, discovery: rich, idea: '', counts });
   assert.notEqual(a.dna.fingerprint, b.dna.fingerprint);
-  assert.notDeepEqual(a.dna.rows.map(r => r.score), b.dna.rows.map(r => r.score));
+  // الأوزان تختلف دائمًا؛ والدرجات تختلف ما لم تكن البدائل قرب التمام في كل المحاور (الشرط نفسه في الاختبار السابق) —
+  // (الجولة الحادية عشرة: البدائل المعروضة تجتاز الحركة الفعلية والتطابق، فقد تتطابق درجاتها المقرّبة)
+  assert.notDeepEqual(a.dna.weights, b.dna.weights);
+  assert.ok(JSON.stringify(a.dna.rows.map(r => r.score)) !== JSON.stringify(b.dna.rows.map(r => r.score)) || [...a.dna.rows, ...b.dna.rows].every(r => r.score >= 95), JSON.stringify([a.dna.rows.map(r => r.score), b.dna.rows.map(r => r.score)]));
 });
 
 test('بصمة الهندسة: ثابتة لترتيب العناصر والعنوان، وتتغير بتحريك جدار أو إضافة فتحة', async () => {

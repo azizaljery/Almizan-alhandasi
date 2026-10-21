@@ -56,6 +56,8 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     const E = Number.isFinite(lv.elevation) && (i === 0 || lv.elevation > 0) ? lv.elevation : acc, H = lv.height || 3.2; acc = E + H;
     const walls = doc.walls.filter(w => w.level === lv.id), openings = doc.openings.filter(o => o.level === lv.id || walls.some(w => w.id === o.wall));
     const solids = buildWallSolids(walls, openings, { levelHeight: H, defaultThickness: doc.settings?.defaultThickness });
+    // (Round 11) fail loudly: an opening the model drops or moves is reported, never hidden
+    if (solids.issues.length) { (result.openingIssues ||= []).push(...solids.issues.map(i => ({ ...i, level: lv.id }))); if (solids.issues.some(i => i.code === 'DROPPED') && typeof console !== 'undefined') console.warn('[mizan 3D] openings not built:', solids.issues.filter(i => i.code === 'DROPPED').map(i => `${i.id}: ${i.reason}`).join('; ')); }
     const analysis = analyzeWalls(walls);
     return { i, lv, id: lv.id, name: lv.name, E, H, walls, openings, solids, analysis };
   });
@@ -106,6 +108,9 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     const PA = new MeshBuilder(THREE);  // parapet + coping
     const F = new MeshBuilder(THREE);   // fixtures
     const S = new MeshBuilder(THREE);   // stairs
+    // (Round 11) the guard rail around a stairwell hole belongs to the level whose floor has the hole: built with that level,
+    // so isolating the ground floor no longer shows the upper rail floating above it
+    for (const job of L.railJobs || []) job(S);
     const D = new MeshBuilder(THREE);   // decals
     for (const key of ['paint', 'render', 'plinth', 'accent', 'reveal']) W.bucket(key, { color: true });
     D.bucket('aoDecal', { alpha: true });
@@ -338,13 +343,16 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       // skip the hole edge nearest to the arrival (top) step
       let skip = 0, best = Infinity;
       for (let i = 0; i < 4; i++) { const a = lay.hole[i], b = lay.hole[(i + 1) % 4], m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, d = dist(m, lc); if (d < best) { best = d; skip = i; } }
-      for (let i = 0; i < 4; i++) {
-        if (i === skip) continue;
-        const a = lay.hole[i], b = lay.hole[(i + 1) % 4], len = dist(a, b), n = Math.max(1, Math.ceil(len / 1.2));
-        S.beam('metal', P3(a.x, a.y, yFloor + .96), P3(b.x, b.y, yFloor + .96), .05, .04);
-        S.beam('metal', P3(a.x, a.y, yFloor + .5), P3(b.x, b.y, yFloor + .5), .02, .02);
-        for (let k = 0; k <= n; k++) { const t = k / n, px = a.x + (b.x - a.x) * t, py = a.y + (b.y - a.y) * t; S.beam('metal', P3(px, py, yFloor), P3(px, py, yFloor + .96), .04, .04); }
-      }
+      const rail = B => {
+        for (let i = 0; i < 4; i++) {
+          if (i === skip) continue;
+          const a = lay.hole[i], b = lay.hole[(i + 1) % 4], len = dist(a, b), n = Math.max(1, Math.ceil(len / 1.2));
+          B.beam('metal', P3(a.x, a.y, yFloor + .96), P3(b.x, b.y, yFloor + .96), .05, .04);
+          B.beam('metal', P3(a.x, a.y, yFloor + .5), P3(b.x, b.y, yFloor + .5), .02, .02);
+          for (let k = 0; k <= n; k++) { const t = k / n, px = a.x + (b.x - a.x) * t, py = a.y + (b.y - a.y) * t; B.beam('metal', P3(px, py, yFloor), P3(px, py, yFloor + .96), .04, .04); }
+        }
+      };
+      if (upper) (upper.railJobs ||= []).push(rail); else rail(S); // roof hatch (no upper level): stays with this level
     }
 
     // ---- fixtures ---------------------------------------------------------------------------------------------------
@@ -414,7 +422,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
   // ---- statistics ---------------------------------------------------------------------------------------------------
   let meshes = 0, triangles = 0;
   group.traverse(o => { if (o.isMesh) { meshes++; const g = o.geometry; triangles += (g.index ? g.index.count : g.attributes.position.count) / 3; } });
-  result.stats = { meshes, triangles, rooms: rooms.size, levels: lvData.length };
+  result.stats = { meshes, triangles, rooms: rooms.size, levels: lvData.length, openingIssues: (result.openingIssues || []).length, openingsDropped: (result.openingIssues || []).filter(i => i.code === 'DROPPED').length };
 
   /** Which room contains a plan point on a level (id or index)? */
   result.roomAt = (x, y, levelRef = 0) => {

@@ -650,7 +650,8 @@ function withStatus(list) {
 
 /** القاعدة الجديدة تحل محل القديمة لنفس الفراغ ونوع الطلب (مثل: «المطبخ في الأمام» بعد «المطبخ في الخلف»). */
 export function mergeRules(old = [], add = []) {
-  const key = r => r.kind === 'place' ? `place|${r.a}|${['e', 'w'].includes(r.side) ? 'x' : ['front', 'back', 'n', 's'].includes(r.side) ? 'y' : r.side}` : r.kind === 'floor' ? `floor|${r.a}` : `rel|${r.a}|${r.b}`;
+  // (الجولة الحادية عشرة) يمين الداخل ويساره محور واحد أيضًا: «المجلس يمين» بعد «المجلس يسار» يحل محله (كان يُبقيهما فيبقى التعارض)
+  const key = r => r.kind === 'place' ? `place|${r.a}|${['e', 'w'].includes(r.side) ? 'x' : ['front', 'back', 'n', 's'].includes(r.side) ? 'y' : ['right', 'left'].includes(r.side) ? 'lr' : r.side}` : r.kind === 'floor' ? `floor|${r.a}` : `rel|${r.a}|${r.b}`;
   const m = new Map(); for (const r of [...old, ...add]) m.set(key(r), r);
   return [...m.values()].map((r, i) => ({ ...r, id: 'R' + (i + 1) }));
 }

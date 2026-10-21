@@ -5,7 +5,7 @@
 // الاستعمال: node scripts/arch-difference-run.mjs [--png]
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { loadBase, mirrorX } from './defect-corpus.mjs';
-import { archDifference, archMatrix, WEIGHTS, THRESHOLDS, ARCH_DIFF_VERSION } from '../dist/arch-difference.mjs';
+import { archDifference, archMatrix, WEIGHTS, THRESHOLDS, ARCH_DIFF_VERSION, archMatrixV2, archDifferenceV2, archSignatureV2, explainDifference, SUBSTANTIVE_V2, ARCH_DIFF_V2_VERSION } from '../dist/arch-difference.mjs';
 
 const ROOT = new URL('../', import.meta.url).pathname, OUT = ROOT + 'evidence/review-proof/';
 mkdirSync(OUT, { recursive: true });
@@ -22,12 +22,18 @@ const r3 = v => Math.round(v * 1000) / 1000;
       cases[id] = { files: docs.map(d => d.file), requested: res?.requestedAlternatives ?? null, produced: docs.length, matrix: m.matrix, min: m.min, mean: m.mean,
         pairs: m.pairs.map(p => ({ pair: [p.i + 1, p.j + 1], total: p.total, adjacency: p.adjacency, circulation: p.circulation, zoning: p.zoning, verdict: p.verdict, oldCentroid: old ? old[p.i][p.j] : null })),
         cosmeticPairs: m.cosmeticPairs.map(p => [p.i + 1, p.j + 1]), shortfallReason: res?.shortfallReason || null };
+      // (الجولة الحادية عشرة) المقياس الوظيفي v2 الحاكم مع الشرح العربي لكل زوج
+      const sg = docs.map(d => archSignatureV2(d.doc)), v2 = [];
+      for (let i = 0; i < sg.length; i++) for (let j = i + 1; j < sg.length; j++) { const dd = archDifferenceV2(sg[i], sg[j]); v2.push({ pair: [i + 1, j + 1], verdict: dd.verdict, substantive: dd.substantive, zoning: dd.zoning, circulation: dd.circulation, privacy: dd.privacy, relations: dd.relations, total: dd.total, explanation_ar: explainDifference(dd).text }); }
+      cases[id].v2 = { version: ARCH_DIFF_V2_VERSION, thresholds: SUBSTANTIVE_V2, pairs: v2, matrix: sg.map((a, i) => sg.map((b, j) => (i === j ? 0 : v2.find(p => (p.pair[0] === i + 1 && p.pair[1] === j + 1) || (p.pair[0] === j + 1 && p.pair[1] === i + 1)).total))) };
     }
     const all = Object.values(cases).flatMap(c => c.pairs);
-    const summary = { pairs: all.length, cosmetic: all.filter(p => p.verdict === 'cosmetic').length, partial: all.filter(p => p.verdict === 'partial').length, distinct: all.filter(p => p.verdict === 'distinct').length };
+    const all2 = Object.values(cases).flatMap(c => c.v2.pairs);
+    const summary = { pairs: all.length, cosmetic: all.filter(p => p.verdict === 'cosmetic').length, partial: all.filter(p => p.verdict === 'partial').length, distinct: all.filter(p => p.verdict === 'distinct').length,
+      v2: { pairs: all2.length, variant: all2.filter(p => p.verdict === 'variant').length, partial: all2.filter(p => p.verdict === 'partial').length, distinct: all2.filter(p => p.verdict === 'distinct').length } };
     writeFileSync(ROOT + `evidence/acceptance/${stage}/arch-difference.json`, JSON.stringify({ version: ARCH_DIFF_VERSION, weights: WEIGHTS, thresholds: THRESHOLDS, stage, summary, cases }, null, 1));
     console.log(stage, JSON.stringify(summary));
-    for (const [id, c] of Object.entries(cases)) console.log(id, `${c.produced}/${c.requested}`, 'min', c.min, c.pairs.map(p => `${p.pair.join('-')}:${p.total}${p.verdict === 'cosmetic' ? '*' : ''}`).join('  '));
+    for (const [id, c] of Object.entries(cases)) console.log(id, `${c.produced}/${c.requested}`, 'v2', c.v2.pairs.map(p => `${p.pair.join('-')}:${p.verdict}(${p.substantive.join('+')})`).join('  '));
     process.exit(0);
   } }
 

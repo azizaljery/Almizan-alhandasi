@@ -18,6 +18,7 @@ import { mergeFinish } from './draw/doc.mjs';
 import { normalizeAr } from './requirements.mjs';
 import { verifyRules } from './rules.mjs';
 import { evaluateGates } from './plan-review.mjs';
+import { openingConsistency, clearOpeningsOfJunctions } from './draw/wall-geometry.mjs';
 import { ROOM_TYPES } from './draw/catalog.mjs';
 
 export const PLAN_EDIT_VERSION = 'plan-edit/1.0.0';
@@ -263,8 +264,9 @@ export function compareDocs(before, after, { scope = new Set(), request = {}, ga
   for (const [id, a] of A.rooms) if (!B.rooms.has(id)) changed.push({ id, name: a.name, type: a.type, kind: 'added', inScope: scope.has(id), areaAfter: r2(a.area) });
   let newFails = [];
   if (gates && !why.length) {
-    const gb = new Set(evaluateGates(before, request).filter(g => !g.ok).map(g => g.id));
-    const ga = evaluateGates(after, request).filter(g => !g.ok && !gb.has(g.id));
+    // (الجولة الحادية عشرة) ومعها التطابق 2D/3D (سريع): تعديل لا يضع فتحة على تقاطع جدارين ولا فتحة يُسقطها المجسّم
+    const gb = new Set(evaluateGates(before, request, undefined, { heavy: ['CONSISTENCY_2D3D'] }).filter(g => !g.ok).map(g => g.id));
+    const ga = evaluateGates(after, request, undefined, { heavy: ['CONSISTENCY_2D3D'] }).filter(g => !g.ok && !gb.has(g.id));
     newFails = ga.map(g => ({ id: g.id, ar: g.ar, reasons: g.reasons_ar.slice(0, 2) }));
     if (newFails.length) why.push('بوابة راسبة: ' + newFails.map(g => g.ar + (g.reasons[0] ? ` (${g.reasons[0]})` : '')).join('، '));
   }
@@ -584,6 +586,10 @@ function build(doc, fn) {
   const d = clone(doc);
   try {
     const meta = fn(d) || {}; sanitizeOpenings(doc, d); dropStaleDims(d);
+    // (الجولة الحادية عشرة) فتحة صار التعديل يضعها على تقاطع جدارين (أو على وجهه) تنزلق على جدارها إلى أقرب موضع سليم —
+    // فقط الفتحات التي لم تكن فيها مشكلة قبل التعديل (لا يُمس غيرها)
+    { const was = new Set(openingConsistency(doc).issues.map(i => i.id)), now = openingConsistency(d).issues.map(i => i.id).filter(id => !was.has(id));
+      if (now.length) clearOpeningsOfJunctions(d, { only: now }); }
     // (الجولة العاشرة) المرشح يجب أن يكون مستندًا صالحًا (لا جدار شبه معدوم، ولا فتحة بلا جدار) — كما يفحصه parseDoc
     const bad = validateDoc(d).filter(x => x.severity === 'error'); if (bad.length) fail('INVALID', 'مستند غير صالح: ' + bad.map(x => x.code).join('،'));
     return { doc: d, ...meta };

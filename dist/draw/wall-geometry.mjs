@@ -143,24 +143,31 @@ export function buildWallSolids(walls, openings = [], opts = {}) {
   const bySource = new Map();
   for (const seg of segments) for (const s of seg.sources) { if (!bySource.has(s.wall.id)) bySource.set(s.wall.id, []); bySource.get(s.wall.id).push({ seg, ...s }); }
   for (const seg of segments) seg.openings = [];
+  // (Round 11) an opening is never dropped or moved silently: every drop / slide / shrink is recorded in `issues`
+  // (code DROPPED | SHIFTED | RESIZED, with the reason) and, with opts.strict, throws.
+  const issues = [];
+  const issue = (o, code, reason, extra = {}) => issues.push({ id: o.id, wall: o.wall, kind: o.kind, code, reason, ...extra });
   for (const o of openings) {
     const srcs = bySource.get(o.wall);
-    if (!srcs) continue;
+    if (!srcs) { if (list.some(w => w.id === o.wall) || walls.some(w => w.id === o.wall)) issue(o, 'DROPPED', 'its wall has no solid segment'); continue; }
     // the opening belongs to the segment it overlaps most; when it straddles a junction it is slid clear of it
     let best = null;
     for (const s of srcs) {
       const overlap = Math.min(o.at + o.w / 2, s.s1) - Math.max(o.at - o.w / 2, s.s0);
       if (overlap > .1 && (!best || overlap > best.overlap)) best = { s, overlap };
     }
-    if (!best) continue;
+    if (!best) { issue(o, 'DROPPED', 'it overlaps no wall segment by more than 0.1 m'); continue; }
+    if (srcs.filter(x => Math.min(o.at + o.w / 2, x.s1) - Math.max(o.at - o.w / 2, x.s0) > .01).length > 1) issue(o, 'CROSSES_JUNCTION', 'it straddles a wall junction (split between segments)');
     const { s } = best, seg = s.seg, L = s.s1 - s.s0;
     let c = o.at - s.s0; if (s.reversed) c = L - c;
     const lo = Math.max(seg.cap.aL, seg.cap.aR, 0) + .03, hi = Math.min(seg.cap.bL, seg.cap.bR, seg.length) - .03;
     let w = o.w, x0 = c - w / 2;
     if (w > hi - lo) { w = hi - lo; x0 = lo; } else x0 = Math.max(lo, Math.min(hi - w, x0));
-    if (w < .1) continue;
+    if (w < .1) { issue(o, 'DROPPED', 'no room left between the junctions at both ends of its segment'); continue; }
     const x1 = x0 + w, H = seg.h, z0 = Math.max(0, o.sill ?? 0), z1 = Math.min(H, z0 + (o.h ?? 2.1));
-    if (z1 - z0 < .05) continue;
+    if (z1 - z0 < .05) { issue(o, 'DROPPED', 'no height left under the wall top'); continue; }
+    if (Math.abs(w - o.w) > 1e-6) issue(o, 'RESIZED', 'clipped to fit its segment', { by: Math.round((o.w - w) * 1000) / 1000 });
+    else if (Math.abs(x0 - (c - o.w / 2)) > 1e-6) issue(o, 'SHIFTED', 'slid clear of a junction', { by: Math.round(Math.abs(x0 - (c - o.w / 2)) * 1000) / 1000 });
     seg.openings.push({ id: o.id, wallId: o.wall, segId: seg.id, kind: o.kind, x0, x1, c: (x0 + x1) / 2, w, z0, z1, h: z1 - z0, sill: z0,
       swing: o.swing || null, hinge: s.reversed ? (o.hinge === 'right' ? 'left' : 'right') : (o.hinge || 'left'), entry: !!o.entry,
       adjusted: Math.abs(x0 - (c - o.w / 2)) > 1e-6 || Math.abs(w - o.w) > 1e-6, reversedSource: !!s.reversed,
@@ -170,14 +177,19 @@ export function buildWallSolids(walls, openings = [], opts = {}) {
   const solids = { nodes: index.nodes, segments, joints, openings: openingsOut, polygons: [] };
   for (const seg of segments) {
     seg.openings.sort((p, q) => p.x0 - q.x0);
-    // drop overlaps (later one loses)
-    seg.openings = seg.openings.filter((o, i, arr) => i === 0 || o.x0 >= arr[i - 1].x1 - 1e-6);
+    // drop overlaps (later one loses) — recorded, never silent
+    seg.openings = seg.openings.filter((o, i, arr) => { const keep = i === 0 || o.x0 >= arr[i - 1].x1 - 1e-6; if (!keep) issue(o, 'DROPPED', `it overlaps opening ${arr[i - 1].id} after sliding`, { with: arr[i - 1].id }); return keep; });
     seg.pieces = piecesOf(seg);
     for (const o of seg.openings) openingsOut.push(o);
     solids.polygons.push({ segId: seg.id, poly: seg.quad });
   }
   for (const j of joints) solids.polygons.push({ joint: true, poly: j.poly });
   solids.byId = new Map(segments.map(s => [s.id, s]));
+  solids.issues = issues;
+  if (opts.strict && issues.some(i => i.code === 'DROPPED')) {
+    const e = new Error('wall-geometry: openings dropped: ' + issues.filter(i => i.code === 'DROPPED').map(i => `${i.id} (${i.reason})`).join('; '));
+    e.code = 'OPENING_DROPPED'; e.issues = issues; throw e;
+  }
   return solids;
 }
 
@@ -250,4 +262,49 @@ export function pointBlocked(solids, p, zLo = .25, zHi = 1.8) {
   return false;
 }
 
-export default { buildWallSolids, footprint, expectedFaceArea, pieceFaceArea, planPolygons, totalPlanArea, blockingPolygons, pointBlocked };
+/**
+ * (Round 11) 2D/3D opening consistency of a whole document without THREE: builds the wall solids of every level exactly as the
+ * 3D scene does (scene3d.mjs) and returns every opening the 3D model would drop, slide or shrink, with the reason.
+ * shiftTol: slides up to this many metres count as minor (reported, not failing).
+ */
+export function openingConsistency(doc, { shiftTol = .05 } = {}) {
+  const out = [];
+  for (const lv of doc.levels || []) {
+    const walls = doc.walls.filter(w => w.level === lv.id), openings = doc.openings.filter(o => o.level === lv.id || walls.some(w => w.id === o.wall));
+    const solids = buildWallSolids(walls, openings, { levelHeight: lv.height || 3.2, defaultThickness: doc.settings?.defaultThickness });
+    for (const i of solids.issues) out.push({ ...i, level: lv.id, major: i.code === 'DROPPED' || i.code === 'CROSSES_JUNCTION' || (i.by ?? 0) > shiftTol });
+  }
+  return { ok: !out.some(i => i.major), issues: out };
+}
+
+/**
+ * (Round 11) Slides openings that the 3D model would drop, split or shift (they straddle a junction or overlap its face) along
+ * their own wall to the nearest position that lies inside ONE wall segment, `clear` metres from both junction faces and `gap`
+ * from every other opening — width unchanged. `only`: ids to consider (default: every opening with an issue). Mutates `doc`;
+ * returns { moved: [{id, from, to}], failed: [id] }.
+ */
+export function clearOpeningsOfJunctions(doc, { only = null, clear = .15, gap = .1 } = {}) {
+  const moved = [], failed = [];
+  for (const lv of doc.levels || []) {
+    const walls = doc.walls.filter(w => w.level === lv.id);
+    const opens = () => doc.openings.filter(o => o.level === lv.id || walls.some(w => w.id === o.wall));
+    const solids = buildWallSolids(walls, opens(), { levelHeight: lv.height || 3.2, defaultThickness: doc.settings?.defaultThickness });
+    const bad = new Set(solids.issues.map(i => i.id).filter(id => !only || only.includes(id)));
+    if (!bad.size) continue;
+    const bySource = new Map();
+    for (const seg of solids.segments) for (const src of seg.sources) { if (!bySource.has(src.wall.id)) bySource.set(src.wall.id, []); bySource.get(src.wall.id).push({ seg, ...src }); }
+    for (const o of opens().filter(x => bad.has(x.id))) {
+      let spans = (bySource.get(o.wall) || []).map(({ seg, s0, s1, reversed }) => {
+        const lo = Math.max(seg.cap.aL, seg.cap.aR, 0) + clear, hi = Math.min(seg.cap.bL, seg.cap.bR, seg.length) - clear;
+        return reversed ? [s1 - hi, s1 - lo] : [s0 + lo, s0 + hi];
+      }).filter(([a, b]) => b - a > 1e-6);
+      for (const q of doc.openings) if (q !== o && q.wall === o.wall) { const a = q.at - q.w / 2 - gap, b = q.at + q.w / 2 + gap; spans = spans.flatMap(([x, y]) => (b <= x || a >= y ? [[x, y]] : [[x, a], [b, y]].filter(([m, n]) => n - m > 1e-6))); }
+      const fit = spans.filter(([a, b]) => b - a >= o.w - 1e-6).map(([a, b]) => Math.max(a + o.w / 2, Math.min(b - o.w / 2, o.at))).sort((p, q) => Math.abs(p - o.at) - Math.abs(q - o.at))[0];
+      if (fit === undefined) { failed.push(o.id); continue; }
+      if (Math.abs(fit - o.at) > 1e-6) { moved.push({ id: o.id, from: o.at, to: Math.round(fit * 1000) / 1000 }); o.at = Math.round(fit * 1000) / 1000; }
+    }
+  }
+  return { moved, failed };
+}
+
+export default { buildWallSolids, openingConsistency, clearOpeningsOfJunctions, footprint, expectedFaceArea, pieceFaceArea, planPolygons, totalPlanArea, blockingPolygons, pointBlocked };

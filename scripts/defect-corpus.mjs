@@ -460,6 +460,45 @@ def('majlis-door-family', 'المجلس يفتح على الطعام العائ�
   }
   return null;
 });
+// ---- (الجولة الحادية عشرة) عيوب البوابات الثقيلة
+// نافذة على تقاطع جدار داخلي مع الواجهة: المجسّم يزيحها أو يُسقطها، وعمود التقاطع داخل الفتحة
+def('opening-junction', 'نافذة تعبر تقاطع جدار داخلي مع الواجهة', ['CONSISTENCY_2D3D'], ['STRUCTURAL', 'DAYLIGHT', 'WINDOW_SIZE', 'CIRCULATION'], (doc, { model }) => {
+  for (const lv of model.levels) for (const op of lv.openings.filter(o => o.window && o.sides.some(x => x.exterior))) {
+    const w = op.wall, L = wlen(w), u = unit(w);
+    for (const v of doc.walls.filter(x => x.level === lv.level.id && x.id !== w.id)) for (const e of [v.a, v.b]) {
+      const sAt = (e.x - w.a.x) * u.x + (e.y - w.a.y) * u.y, off = Math.abs((e.x - w.a.x) * -u.y + (e.y - w.a.y) * u.x);
+      if (off > 0.02 || sAt < op.o.w / 2 + 0.3 || sAt > L - op.o.w / 2 - 0.3 || Math.abs(sAt - op.o.at) > 3) continue;
+      if (doc.openings.some(o => o.wall === w.id && o.id !== op.id && Math.abs(o.at - sAt) < (o.w + op.o.w) / 2 + 0.05)) continue;
+      const o = doc.openings.find(x => x.id === op.id); o.at = r3(sAt);
+      return { note: `النافذة ${op.id} نُقلت فصار منتصفها على تقاطع الجدار ${v.id} مع ${w.id}`, target: op.id };
+    }
+  }
+  return null;
+});
+// مرحاض داخل منطقة فتح باب دورة المياه (أمام الباب مباشرة)
+def('wc-at-door', 'المرحاض أمام باب دورة المياه داخل منطقة فتحه', ['CIRCULATION'], ['DOOR_SWING'], (doc, { model }) => {
+  for (const lv of model.levels) for (const op of lv.openings.filter(o => o.kind === 'door')) {
+    const sd = op.sides.find(x => x.room.type === 'bath'); if (!sd) continue;
+    const f = doc.fixtures.find(x => x.level === lv.level.id && x.kind === 'wc' && sd.room.net && lv.roomAt({ x: x.x, y: x.y })?.id === sd.room.id); if (!f) continue;
+    const inward = { x: -sd.outward.x, y: -sd.outward.y }, d = (op.wall.t ?? 0.2) / 2 + 0.45;
+    f.x = r3(op.p.x + inward.x * d); f.y = r3(op.p.y + inward.y * d);
+    return { note: `المرحاض ${f.id} نُقل أمام الباب ${op.id} داخل «${sd.room.name}»`, target: f.id };
+  }
+  return null;
+});
+// كنبة أمام باب أو فتحة الصالة/المجلس تسد المدخل
+def('sofa-at-door', 'كنبة أو جلسة أمام باب الصالة أو المجلس تسد المدخل', ['CIRCULATION'], ['DOOR_SWING'], (doc, { model }) => {
+  for (const lv of model.levels) for (const op of lv.openings.filter(o => o.door && o.kind !== 'garage')) {
+    for (const sd of op.sides) {
+      if (!['living', 'majlis'].includes(sd.room.type)) continue;
+      const f = doc.fixtures.find(x => x.level === lv.level.id && ['sofa-3', 'majlis-sofa'].includes(x.kind) && lv.roomAt({ x: x.x, y: x.y })?.id === sd.room.id); if (!f) continue;
+      const inward = { x: -sd.outward.x, y: -sd.outward.y }, d = (op.wall.t ?? 0.2) / 2 + 0.55;
+      f.x = r3(op.p.x + inward.x * d); f.y = r3(op.p.y + inward.y * d); f.rot = Math.atan2(op.u.y, op.u.x);
+      return { note: `${f.kind} ${f.id} نُقلت أمام ${op.kind === 'arch' ? 'الفتحة' : 'الباب'} ${op.id} في «${sd.room.name}»`, target: f.id };
+    }
+  }
+  return null;
+});
 // عيب على مستوى المجموعة: البديل الثاني نسخة معكوسة من الأول (مع أسماء غرف مبدّلة) — ليس بديلًا معماريًا
 def('mirror-pair', 'بديل معكوس مطابق لبديل آخر', ['DISTINCT'], [], (doc) => {
   const m = mirrorX(doc), beds = m.labels.filter(l => l.type === 'bedroom');

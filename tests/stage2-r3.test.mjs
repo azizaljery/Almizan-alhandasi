@@ -4,7 +4,7 @@ import './_gen-cache.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, qualityGates, difference, partiTrees, programV2 } from '../dist/villa-layout-v2.mjs';
-import { archDifference, THRESHOLDS } from '../dist/arch-difference.mjs';
+import { archDifference, THRESHOLDS, archDifferenceV2 } from '../dist/arch-difference.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
 import { docRooms, verifyRules } from '../dist/rules.mjs';
 import { createSession, redesign } from '../dist/design-session.mjs';
@@ -24,9 +24,9 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
     const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
     // C6 («المطبخ في الخلف» صارمًا ومقاسات صريحة): لا يُعرض بديل مطبخه وسط البيت، فقد يقل العدد إلى اثنين
     // قرار المالك (الجولة الخامسة): لا يُرفع العدد على حساب الجودة — بديلان على الأقل مختلفان فعلًا (≥ 0.16)، ويُذكر سبب النقص
-    assert.ok(out.designs.length >= 2, id + ': عدد البدائل');
-    // (الجولة التاسعة) أو كتلة تقسمها حديقة مقابل كتلة مصمتة بتنظيم مختلف معماريًا (≥ 0.18) ولو تقاربت مراكز الغرف
-    for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16 || archDifference(out.designs[i].doc, out.designs[j].doc).total >= THRESHOLDS.cosmetic, `${id}: البديلان ${i + 1} و${j + 1} متقاربان`);
+    // (الجولة الحادية عشرة) المقياس الوظيفي v2: كل زوج معروض «مختلف معماريًا»؛ وإن قل العدد عن اثنين يُذكر السبب المقيس (نسخ/جزئي)
+    assert.ok(out.designs.length >= 2 || /جزئي|نسخة معدّلة|لا بعد جوهري|تنويع على تنظيم/.test(out.shortfall_ar || ''), id + ': عدد البدائل ' + out.shortfall_ar);
+    for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.equal(archDifferenceV2(out.designs[i].doc, out.designs[j].doc).verdict, 'distinct', `${id}: البديلان ${i + 1} و${j + 1} ليسا مختلفين معماريًا (v2)`);
     if (out.designs.length < (C.want || 4)) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);
     for (const d of out.designs) {
       assert.deepEqual(qualityGates(d.doc), [], `${id} ${d.pat}`);

@@ -55,7 +55,10 @@ test('بدائل C7 (الجولة التاسعة): الدرج في البديل 
   const a1 = circulationProof(loadDoc('evidence/acceptance/after-9/C7/alt-1.json'));
   assert.ok(has(a1, 'STAIR_ACCESS', 'serious') && has(a1, 'STAIR_ARRIVAL', 'serious'), JSON.stringify(a1.findings.map(f => f.code)));
   const a3 = circulationProof(loadDoc('evidence/acceptance/after-9/C7/alt-3.json'));
-  assert.equal(a3.counts.serious, 0, JSON.stringify(a3.findings.filter(f => f.severity === 'serious')));
+  // (الجولة الحادية عشرة) عيوب خلوص الأبواب الجديدة (المرحاض في منطقة الباب، والأثاث أمام الباب) موجودة في أدلة الجولة التاسعة
+  // وليست موضوع هذا الاختبار (الدرج): يُستثنى رمزاها هنا، ويختبرهما اختبار مستقل
+  const doorZone = new Set(['WC_DOOR_CLASH', 'FURNITURE_AT_DOOR']);
+  assert.equal(a3.findings.filter(f => f.severity === 'serious' && !doorZone.has(f.code)).length, 0, JSON.stringify(a3.findings.filter(f => f.severity === 'serious')));
   // في الثالث: بسطة الوصول أعلى الدرج ضيقة (تنبيه لا جسيم)، وكل غرفة في الدور الأول تُبلغ مشيًا من مدخل العائلة عبر الدرج بممر 0.3 م
   assert.ok(has(a3, 'STAIR_ARRIVAL', 'warn'));
   const up = a3.rooms.filter(x => x.level === 'L2' && x.type !== 'void').map(x => ({ ...x, d: x.bare.reachable ? x.bare : x.tight }));
