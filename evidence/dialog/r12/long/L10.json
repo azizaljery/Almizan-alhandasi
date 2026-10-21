@@ -1,0 +1,340 @@
+{
+ "id": "L10",
+ "name": "نفي كثيف — العميل يبدأ بما لا يريده",
+ "words": 154,
+ "ms": 19,
+ "text": "أبي أوضح من البداية وش اللي ما أبيه، لأن المكاتب السابقة كانت تحط أشياء ما طلبتها وأضطر أرجع وأشرح من جديد. ما أبي مجلس نساء، ولا أبي غرفة طعام، ولا أبي مكتب، ولا أبي مصلى، ولا أبي غرفة خادمة. أبي بس غرفة سواق بحمام. وما أبي المطبخ يكون على الشارع أبدًا، ولا أبي غرف النوم تطل على الشارع. ولا تحط المجلس جنب غرف النوم. طيب اللي أبيه: ثلاث غرف نوم منها ماستر، ومجلس رجال واحد بمدخل مستقل، وصالة، ومطبخ مفتوح على الصالة. وما أبي كل غرفة بحمام، يكفي حمام مشترك للعيال. الأرض ١٨×٢٨ والشارع جنوبي، والبيت دور واحد. ولا أبي ممرات طويلة. وأبي مخزن صغير جنب المطبخ. وما أبي الواجهة زجاج لأن الحر عندنا شديد والزجاج يدخل الحرارة، أبيها حجر. ترى قبل كذا صمموا لي بيت فيه مكتب ومصلى وغرفة خادمة وأنا ما طلبتهم، وصار البيت أكبر من حاجتي وارتفعت التكلفة علي. وأرجو ما تضيفون شي من عندكم، اللي ما ذكرته معناه ما أبيه.",
+ "formCounts": {},
+ "interpretError": "راجع مساحة حمام؛ المساحة المقبولة بين 4 و120 م².",
+ "score": {
+  "per": {
+   "count": {
+    "tp": 3,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.75
+   },
+   "pref": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "extra": {
+    "tp": 3,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "absent": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "rule": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 1,
+    "fp": 1,
+    "precision": 0,
+    "recall": 0
+   },
+   "unsupported": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   }
+  },
+  "precision": 0.95,
+  "recall": 0.905,
+  "f1": 0.927,
+  "tp": [
+   "count:bedrooms=3",
+   "count:majlis=1",
+   "count:dining=0",
+   "pref:guestEntrance",
+   "pref:kitchenOpenHall",
+   "pref:sharedBaths",
+   "pref:noCorridors",
+   "extra:driver",
+   "extra:driver.bath",
+   "extra:storage",
+   "absent:dining",
+   "absent:office",
+   "absent:prayer",
+   "absent:maid",
+   "rule:place:kitchen:!s",
+   "rule:place:bedrooms:!s",
+   "rule:away:bedrooms+majlis",
+   "rule:close:kitchen+storage",
+   "floors=1"
+  ],
+  "missed": [
+   "count:kitchens=1",
+   "facade:stone"
+  ],
+  "wrong": [
+   "facade:glass"
+  ],
+  "levels": [
+   {
+    "item": "rule:place:kitchen:!s",
+    "want": "forbid",
+    "got": "forbid",
+    "ok": true
+   },
+   {
+    "item": "rule:place:bedrooms:!s",
+    "want": "forbid",
+    "got": "forbid",
+    "ok": true
+   },
+   {
+    "item": "rule:away:bedrooms+majlis",
+    "want": "forbid",
+    "got": "forbid",
+    "ok": true
+   },
+   {
+    "item": "rule:close:kitchen+storage",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 3,
+   "dining": 0,
+   "majlis": 1,
+   "baths": 4
+  },
+  "prefs": {
+   "sharedBaths": true,
+   "kitchenOpenHall": true,
+   "guestEntrance": true,
+   "noCorridors": true,
+   "floors": 1
+  },
+  "extras": {
+   "driver": {
+    "bath": true
+   },
+   "storage": true
+  },
+  "absent": [
+   "dining",
+   "office",
+   "prayer",
+   "maid"
+  ],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "place:kitchen:!s",
+    "level": "forbid",
+    "levelCue": "negation",
+    "quote": "المطبخ يكون على الشارع",
+    "text": "«المطبخ» لا يطل على الشارع"
+   },
+   {
+    "item": "place:bedrooms:!s",
+    "level": "forbid",
+    "levelCue": "negation",
+    "quote": "غرف النوم تطل على الشارع",
+    "text": "«غرف النوم» لا يطل على الشارع"
+   },
+   {
+    "item": "away:bedrooms+majlis",
+    "level": "forbid",
+    "levelCue": "negation",
+    "quote": "المجلس جنب غرف النوم",
+    "text": "«المجلس» غير ملاصق لـ«غرف النوم»"
+   },
+   {
+    "item": "close:hall+kitchen",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "ومطبخ مفتوح على الصالة",
+    "text": "«المطبخ» بجوار «الصالة»"
+   },
+   {
+    "item": "close:kitchen+storage",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "مخزن صغير جنب المطبخ",
+    "text": "«المخزن» بجوار «المطبخ»"
+   }
+  ],
+  "tweaks": {
+   "facade": {
+    "material": "glass",
+    "materialAr": "زجاج",
+    "keepLayout": false
+   }
+  },
+  "unsupported": [],
+  "unclear": [
+   "أبي أوضح من البداية وش اللي ما أبيه",
+   "لأن المكاتب السابقة كانت تحط أشياء ما طلبتها وأضطر أرجع وأشرح من جديد",
+   "الأرض ١٨×٢٨ والشارع جنوبي",
+   "أبيها حجر",
+   "صار البيت أكبر من حاجتي وارتفعت التكلفة علي",
+   "أرجو ما تضيفون شي من عندكم",
+   "اللي ما ذكرته معناه ما أبيه"
+  ],
+  "understood": [
+   "غرف النوم (عدا الرئيسية) تتشارك دورات المياه",
+   "3 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مفتوح على الصالة",
+   "مجلس الرجال بمدخل مستقل عن العائلة",
+   "غرفة سائق بمدخل خارجي وحمام",
+   "مخزن",
+   "بدون مجلس نساء (مجلس واحد)",
+   "بدون غرفة طعام",
+   "بدون مكتب",
+   "بدون مصلى",
+   "بدون غرفة خادمة",
+   "أقل ما يمكن من الممرات (الحركة عبر الصالة)",
+   "دور واحد",
+   "«المطبخ» لا يطل على الشارع",
+   "«غرف النوم» لا يطل على الشارع",
+   "«المجلس» غير ملاصق لـ«غرف النوم»",
+   "«المطبخ» بجوار «الصالة»",
+   "«المخزن» بجوار «المطبخ»",
+   "الواجهة: زجاج (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+   "عدد دورات المياه 4 (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة، ودورة مياه للضيوف)"
+  ]
+ },
+ "conflicts": [],
+ "coverage": {
+  "clauses": 27,
+  "fates": {
+   "unclear": 7,
+   "understood": 19,
+   "program": 1
+  },
+  "dropped": [
+   {
+    "quote": "ترى قبل كذا صمموا لي بيت فيه مكتب ومصلى وغرفة خادمة وأنا ما طلبتهم",
+    "fate": "understood",
+    "items": [
+     "غرفة خادمة",
+     "مكتب",
+     "مصلى"
+    ],
+    "why": "لم يصل إلى الطلب الكامل"
+   }
+  ],
+  "unclearClauses": [
+   "أبي أوضح من البداية وش اللي ما أبيه",
+   "لأن المكاتب السابقة كانت تحط أشياء ما طلبتها وأضطر أرجع وأشرح من جديد",
+   "الأرض ١٨×٢٨ والشارع جنوبي",
+   "أبيها حجر",
+   "صار البيت أكبر من حاجتي وارتفعت التكلفة علي",
+   "أرجو ما تضيفون شي من عندكم",
+   "اللي ما ذكرته معناه ما أبيه"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "kitchens": 1,
+   "dining": 0
+  },
+  "prefs": [
+   "guestEntrance",
+   "kitchenOpenHall",
+   "sharedBaths",
+   "noCorridors"
+  ],
+  "extras": [
+   "driver",
+   "driver.bath",
+   "storage"
+  ],
+  "absent": [
+   "dining",
+   "office",
+   "prayer",
+   "maid"
+  ],
+  "rules": [
+   {
+    "r": "place:kitchen:!s",
+    "level": "forbid"
+   },
+   {
+    "r": "place:bedrooms:!s",
+    "level": "forbid"
+   },
+   {
+    "r": "away:bedrooms+majlis",
+    "level": "forbid"
+   },
+   {
+    "r": "close:kitchen+storage",
+    "level": "must"
+   }
+  ],
+  "floors": 1,
+  "facade": [
+   "stone"
+  ],
+  "unsupported": [],
+  "conflicts": [],
+  "unclear": [],
+  "optional": [
+   "rule:close:hall+kitchen",
+   "count:baths"
+  ],
+  "traps": "«ما أبي مجلس نساء» لا تعني «بدون مجلس»؛ «ما أبي الواجهة زجاج… أبيها حجر» = حجر لا زجاج."
+ },
+ "traps": "«ما أبي مجلس نساء» لا تعني «بدون مجلس»؛ «ما أبي الواجهة زجاج… أبيها حجر» = حجر لا زجاج."
+}

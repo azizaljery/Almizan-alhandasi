@@ -280,7 +280,10 @@ export function runCheck(ck, ctx) {
       if (!best) return res(false, null, 'لا نافذة للغرفة');
       return res(ck.type === 'windowWider' ? best.k >= (ck.factor || 1.1) : best.k <= (ck.factor || .9), { window: best.id, before: r2(best.a), after: r2(best.b), ratio: r2(best.k) }, `النافذة ${best.id}: ${r2(best.a)} ← ${r2(best.b)} م`);
     }
-    case 'fpSame': { const d = diffFingerprint(docs[ck.turn], after); return res(d.identical, { touched: d.counts.touched, unchanged: d.counts.unchanged }, `يختلف عن مخطط الدور ${ck.turn} في ${d.counts.touched} عنصرًا`); }
+    case 'fpSame': {
+      // (الجولة الثانية عشرة) الدور التالي لم يغيّر شيئًا (الباب موجود أصلًا: باب المقلط الافتراضي) — «سد الباب» يسد ذلك الباب، فالمقياس أن يمس فتحة واحدة فقط
+      if (docs[ck.turn + 1] && diffFingerprint(docs[ck.turn], docs[ck.turn + 1]).identical && docs[ck.turn + 1] !== after) { const d1 = diffFingerprint(docs[ck.turn + 1], after); return res(d1.counts.touched <= 1, { touched: d1.counts.touched, unchanged: d1.counts.unchanged, preExisting: true }, `الباب كان موجودًا قبل طلب فتحه؛ سدّه مسّ ${d1.counts.touched} عنصرًا (المسموح 1)`); }
+      const d = diffFingerprint(docs[ck.turn], after); return res(d.identical, { touched: d.counts.touched, unchanged: d.counts.unchanged }, `يختلف عن مخطط الدور ${ck.turn} في ${d.counts.touched} عنصرًا`); }
     case 'fpTouched': { const d = diffFingerprint(before, after), kinds = ck.kinds || null, extra = [...d.changed, ...d.added, ...d.removed].filter(e => e.kind !== 'fixture' && kinds && !kinds.includes(e.kind)); return res(d.counts.touched <= (ck.max ?? Infinity) && d.counts.touched >= (ck.min ?? 0) && !extra.length, { touched: d.counts.touched, byKind: d.byKind, outsideKinds: extra.map(e => e.name_ar) }, `تغيّر ${d.counts.touched} عنصرًا${extra.length ? ' ومنها خارج النوع المطلوب' : ''}`); }
     case 'fpReplay': {
       // الرجوع إلى مخطط الدور turn مع إعادة تعديل الدور editTurn: الفرق عن ذلك المخطط هو العناصر نفسها التي غيّرها التعديل أول مرة

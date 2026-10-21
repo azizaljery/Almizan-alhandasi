@@ -5,6 +5,7 @@
 // لا رقم نظامي هنا: كل العتبات قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا).
 import { ROOM_TYPES } from './draw/catalog.mjs';
 import { pointInPolygon, ccw, sub, dot, norm } from './draw/geom.mjs';
+import { PARKING_RULE, requiredParking, plotArea } from './site-parking.mjs';
 
 export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للميزان';
 export const SAUDI_GATES = Object.freeze([
@@ -14,7 +15,7 @@ export const SAUDI_GATES = Object.freeze([
   { id: 'DAY_WC', ar: 'دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف)' },
   { id: 'MAID_BATH', ar: 'غرفة الخادمة بحمامها' },
   { id: 'KITCHEN_SERVICE', ar: 'المطبخ ≥ 14 م² صافيًا وبباب خدمة خارجي غير الواجهة' },
-  { id: 'PARKING', ar: 'موقف سيارة أو موقفان مرسومان داخل حدود الأرض خارج المبنى' },
+  { id: 'PARKING', ar: 'المواقف المطلوبة نظاميًا (موقف لأرض ≤ 400 م²، وموقفان لما فوقها) مرسومة داخل حدود الأرض خارج المبنى' },
   { id: 'DEEP_PLAN_LIGHT', ar: 'مبنى أعمق من 18 م فيه حوش أو منور داخلي' },
   { id: 'SITE_FIT', ar: 'لا كتلة «شريط ضيق» على أرض عرضها القابل للبناء ≥ 14 م' },
   { id: 'SHADING', ar: 'تظليل النوافذ الخارجية (بروز أفقي أو زعانف) معرَّف في واجهة المستند' },
@@ -35,6 +36,7 @@ export function clientAsks(request = {}) {
     MAID_NO_BATH: /(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:بدون|بلا|من غير) ?(?:حمام|دوره مياه)/.test(t),
     KITCHEN_SERVICE: /باب (?:خلفي|خدمه) (?:لل|في ال)?مطبخ|مطبخ[^،.]{0,15}باب (?:خلفي|خدمه|علي الحوش)/.test(t),
     PARKING: /موقف|مواقف|كراج|قراج|جراج|مظله سيار|سيارات/.test(t),
+    SHADING: /تظليل (?:ال)?نوافذ|كاسرات? (?:ال)?شمس|مظلات? (?:علي )?(?:ال)?نوافذ/.test(t),
     NO_MAJLIS_DINING: /مجلس[^،.]{0,20}(?:بعيد|منفصل|مستقل) (?:عن|من) (?:ال)?(?:طعام|سفره)/.test(t),
   };
 }
@@ -111,7 +113,13 @@ export function measureSaudiProgram(doc, request = {}, model) {
       if (plot && !z.polygon.every(p => pointInPolygon(p, plot, .05))) bad.push(`«${z.name}» خارج حدود الأرض`);
       if (z.polygon.some(p => G.roomAt(p)) || G.rooms.some(r => pointInPolygon(r.inside, z.polygon, 0))) bad.push(`«${z.name}» يتداخل مع المبنى`);
     }
-    push('PARKING', bays.length >= 1 && !bad.length, { bays: bays.length }, bays.length ? bad : ['لا موقف سيارة مرسوم'], true);
+    // العدد اشتراط نظامي متحقق (المستوى أ): موقف لأرض ≤ 400 م² وموقفان لما فوقها (PARKING_RULE بمصدره)
+    const need = plot ? requiredParking(plotArea(plot)) : 1;
+    if (bays.length && bays.length < need) bad.push(`${bays.length} موقف مرسوم والمطلوب نظاميًا ${need} لأرض ${need === 2 ? '>' : '≤'} 400 م²`);
+    // يُقاس حيث يمثّل المستند مواقف الموقع (مناطق «garage»): المسقط المرسوم يدويًا أو بالمولّد الأول بلا مواقف لا يُحكم عليه بها —
+    // والمولّد الثاني يرفض بنفسه البديل الذي لا يتسع فيه العدد المطلوب (buildDesign)
+    push('PARKING', !bad.length, { bays: bays.length, required: need, rule: PARKING_RULE.item }, bays.length ? bad : ['المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي'], bays.length > 0);
+    out[out.length - 1].regulation = PARKING_RULE;
   }
   // 8) العمق والإضاءة: مبنى أعمق من 18 م على محور المدخل بلا حوش ولا منور
   {

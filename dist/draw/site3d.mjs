@@ -52,13 +52,33 @@ export function buildSite(THREE, doc, lib, ctx) {
   const pedW = 1.1, carW = 4.2;
   // (الجولة الثانية عشرة) مواقف مرسومة في المستند (مناطق garage): بوابة السيارات أمامها على الحد نفسه، والسيارات عليها
   const bays = (doc.zones || []).filter(z => z.type === 'garage' && (z.polygon || []).length >= 3 && (!doc.levels?.[0] || z.level === doc.levels[0].id));
-  const bayOnEdge = bays.map(z => { const c = { x: z.polygon.reduce((a, p) => a + p.x, 0) / z.polygon.length, y: z.polygon.reduce((a, p) => a + p.y, 0) / z.polygon.length }; const ss = z.polygon.map(along); return { z, c, s0: Math.min(...ss), s1: Math.max(...ss), near: Math.abs(dot(sub(c, E0), eOut)) }; }).filter(b => b.near < 6.5);
-  let carS = doorS + pedW / 2 + .6 + carW / 2, carGW = carW;
-  if (bayOnEdge.length) { const s0 = Math.max(.35, Math.min(...bayOnEdge.map(b => b.s0)) - .1), s1 = Math.min(eLen - .35, Math.max(...bayOnEdge.map(b => b.s1)) + .1); carS = (s0 + s1) / 2; carGW = Math.max(2.6, s1 - s0); }
-  else if (carS + carW / 2 > eLen - .5) carS = doorS - pedW / 2 - .6 - carW / 2;
-  const hasCarGate = carS - carGW / 2 > .3 && carS + carGW / 2 < eLen - .3 && Math.abs(carS - doorS) > pedW / 2 + carGW / 2 + .2;
-  const gates = [{ kind: 'ped', s: doorS, w: pedW }]; if (hasCarGate) gates.push({ kind: 'car', s: carS, w: carGW });
-  out.entryEdge = entryEdge; out.gates = gates.map(gt => ({ ...gt, pos: add(E0, mul(eDir, gt.s)), normal: eOut }));
+  // (الجولة الثانية عشرة) بوابة سيارات لكل مجموعة مواقف متجاورة على حد شارع (المدخل أو شارع آخر) — المواقف المتفرقة لا تُحبس خلف السور
+  const edgeOf = i => { const A = plot[i], Bq = plot[(i + 1) % plot.length], d = norm(sub(Bq, A)); return { A, len: dist(A, Bq), dir: d, out: { x: d.y, y: -d.x } }; };
+  const gateEdges = [entryEdge];
+  for (const sd of doc.streets || []) { const v = ENTRY_VEC[sd]; if (!v) continue; let bi = -1, bs = -1; plot.forEach((p, i) => { const e = edgeOf(i), sc = dot(e.out, v); if (sc > .7 && e.len * sc > bs) { bs = e.len * sc; bi = i; } }); if (bi >= 0 && !gateEdges.includes(bi)) gateEdges.push(bi); }
+  const gates = [{ kind: 'ped', edge: entryEdge, s: doorS, w: pedW }];
+  const onEdge = new Map();
+  for (const z of bays) {
+    const c = { x: z.polygon.reduce((a, p) => a + p.x, 0) / z.polygon.length, y: z.polygon.reduce((a, p) => a + p.y, 0) / z.polygon.length };
+    let pick = null; for (const ei of gateEdges) { const e = edgeOf(ei), near = Math.abs(dot(sub(c, e.A), e.out)); if (near < 6.5 && (!pick || near < pick.near)) pick = { ei, near, e }; }
+    if (!pick) continue; const ss = z.polygon.map(p => dot(sub(p, pick.e.A), pick.e.dir));
+    (onEdge.get(pick.ei) || onEdge.set(pick.ei, []).get(pick.ei)).push({ s0: Math.min(...ss), s1: Math.max(...ss) });
+  }
+  for (const [ei, list] of onEdge) {
+    const e = edgeOf(ei); list.sort((a, b) => a.s0 - b.s0);
+    const groups = []; for (const b of list) { const g = groups[groups.length - 1]; if (g && b.s0 - g.s1 < .6) g.s1 = Math.max(g.s1, b.s1); else groups.push({ ...b }); }
+    for (const g of groups) {
+      let s0 = Math.max(.35, g.s0 - .1), s1 = Math.min(e.len - .35, g.s1 + .1);
+      // لا تتراكب مع بوابة المشاة: تُقص من جهتها
+      if (ei === entryEdge) { const p0 = doorS - pedW / 2 - .3, p1 = doorS + pedW / 2 + .3; if (s0 < p1 && s1 > p0) { if (doorS < (s0 + s1) / 2) s0 = p1; else s1 = p0; } }
+      if (s1 - s0 >= 2.4) gates.push({ kind: 'car', edge: ei, s: (s0 + s1) / 2, w: s1 - s0 });
+    }
+  }
+  if (!bays.length) {
+    let carS = doorS + pedW / 2 + .6 + carW / 2; if (carS + carW / 2 > eLen - .5) carS = doorS - pedW / 2 - .6 - carW / 2;
+    if (carS - carW / 2 > .3 && carS + carW / 2 < eLen - .3) gates.push({ kind: 'car', edge: entryEdge, s: carS, w: carW });
+  }
+  out.entryEdge = entryEdge; out.gates = gates.map(gt => { const e = edgeOf(gt.edge); return { ...gt, pos: add(e.A, mul(e.dir, gt.s)), normal: e.out }; });
 
   // ---- boundary wall ------------------------------------------------------------------------------------
   const wallH = 1.9, wallT = .22, postS = .46, postH = 2.2;
@@ -71,7 +91,7 @@ export function buildSite(THREE, doc, lib, ctx) {
     const q = plot[(i + 1) % plot.length], len = dist(p, q), d = norm(sub(q, p));
     const pts = (s) => add(p, mul(d, s));
     let cuts = [];
-    if (i === entryEdge) for (const gt of gates) cuts.push([gt.s - gt.w / 2, gt.s + gt.w / 2]);
+    for (const gt of gates) if (gt.edge === i) cuts.push([gt.s - gt.w / 2, gt.s + gt.w / 2]);
     cuts.sort((a, b) => a[0] - b[0]);
     let cursor = 0; const spans = [];
     for (const [a, b] of cuts) { spans.push([cursor, a]); cursor = b; }
@@ -97,7 +117,7 @@ export function buildSite(THREE, doc, lib, ctx) {
   }
   // gate leaves: dark metal frame with slats
   for (const gt of gates) {
-    const c = add(E0, mul(eDir, gt.s)), ry = Math.atan2(eDir.y, eDir.x);
+    const { A: gA, dir: eDir, out: eOut } = edgeOf(gt.edge), c = add(gA, mul(eDir, gt.s)), ry = Math.atan2(eDir.y, eDir.x);
     const at = (u, y, sx, sy, sz) => { const p = add(c, mul(eDir, u)); B.box('metal', p.x, g0 + y, -p.y, sx, sy, sz, ry); };
     const w = gt.w - .1, h = gt.kind === 'car' ? 1.75 : 1.85, y0 = .12;
     at(0, y0 + .04, w, .08, .06); at(0, y0 + h - .04, w, .08, .06); at(0, y0 + h * .55, w, .05, .05);

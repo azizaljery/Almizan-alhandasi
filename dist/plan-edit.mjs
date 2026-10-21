@@ -20,6 +20,7 @@ import { verifyRules } from './rules.mjs';
 import { evaluateGates } from './plan-review.mjs';
 import { openingConsistency, clearOpeningsOfJunctions } from './draw/wall-geometry.mjs';
 import { ROOM_TYPES } from './draw/catalog.mjs';
+import { refreshParking } from './site-parking.mjs';
 
 export const PLAN_EDIT_VERSION = 'plan-edit/1.0.0';
 /** حدود «تغيّر دون طلب» (مثل أداة إثبات الحوار): مساحة > 5٪ أو إزاحة مركز > 0.5 م. */
@@ -592,6 +593,8 @@ function build(doc, fn) {
       if (now.length) clearOpeningsOfJunctions(d, { only: now }); }
     // (الجولة العاشرة) المرشح يجب أن يكون مستندًا صالحًا (لا جدار شبه معدوم، ولا فتحة بلا جدار) — كما يفحصه parseDoc
     const bad = validateDoc(d).filter(x => x.severity === 'error'); if (bad.length) fail('INVALID', 'مستند غير صالح: ' + bad.map(x => x.code).join('،'));
+    // (الجولة الثانية عشرة) موقف مرسوم صار تحت المبنى بعد التعديل: يُعاد تخطيط المواقف على المبنى الجديد
+    refreshParking(d);
     return { doc: d, ...meta };
   } catch (e) { return { doc: null, err: e.message }; }
 }

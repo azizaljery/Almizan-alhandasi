@@ -31,7 +31,7 @@ export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للم
 /**
  * (الجولة العاشرة، توجيه المالك) طبقة كل عتبة: شرط العميل يغلب الافتراضي دائمًا؛ والافتراضي لا يصير «نظاميًا» إلا بمصدر متحقق.
  *  client: ما كتبه العميل أو أدخله (الأعداد، المواضع، الأرض)؛ mizan-default: قيم الميزان الافتراضية (غير متحققة نظاميًا)؛
- *  regulation: اشتراط نظامي متحقق بمصدر (لا يوجد منه شيء بعد)؛ functional: منطق وظيفي أو هندسي بلا عتبة رقمية.
+ *  regulation: اشتراط نظامي متحقق بمصدر (منذ الجولة الثانية عشرة: عدد المواقف PARKING)؛ functional: منطق وظيفي أو هندسي بلا عتبة رقمية.
  */
 export const TIER_AR = Object.freeze({ client: 'شرط العميل', 'mizan-default': MIZAN_DEFAULT_AR, regulation: 'اشتراط نظامي متحقق', functional: 'منطق وظيفي (لا عتبة رقمية)' });
 export const GATE_TIER = Object.freeze({
@@ -446,7 +446,7 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc), { heav
       const ratio = room.area > 0 ? d.area / room.area : 0; ratios.push({ room: room.id, ratio: r2(ratio) });
       if (ratio < min - 1e-9) bad.push(`زجاج ${roomName(room)} ${r2(d.area)} م² = ${r2(100 * ratio)}٪ من أرضيتها (${r2(room.area)} م²)، أقل من ${100 * min}٪ (${UNVERIFIED_AR})`);
     }
-    gates.push(gateResult('WINDOW_SIZE', !bad.length, { worst: ratios.reduce((m, x) => Math.min(m, x.ratio), Infinity), rooms: ratios.length }, `≥ ${100 * min}٪ من الأرضية`, bad, { source: DESIGN_THRESHOLDS.windowToFloorMin.source }));
+    gates.push(gateResult('WINDOW_SIZE', !bad.length, { worst: ratios.reduce((m, x) => Math.min(m, x.ratio), Infinity), rooms: ratios.length, ratios }, `≥ ${100 * min}٪ من الأرضية`, bad, { source: DESIGN_THRESHOLDS.windowToFloorMin.source }));
   }
   // 14) المواضع التي طلبها العميل نصًا (في الأمام / في الخلف)، مقيسة من المستند وحده
   {
@@ -462,6 +462,8 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc), { heav
   }
   // 15) (الجولة الثانية عشرة) البرنامج السعودي والموقع والمناخ — مقيسة من المستند؛ الطبقة من الطلب: شرط العميل يرسب، والافتراضي ملاحظة
   for (const g of measureSaudiProgram(doc, request, model)) {
+    // اشتراط نظامي متحقق بمصدر (المواقف): يرسب كبوابة كشرط العميل، وطبقته «اشتراط نظامي متحقق» بمصدره
+    if (g.regulation) { const ok = g.pass || !g.applicable; gates.push(gateResult(g.id, ok, { pass: g.pass, ...g.value }, g.ar, g.reasons_ar, { tier: 'regulation', applicable: g.applicable, source: `${g.regulation.source} — ${g.regulation.url} (${g.regulation.note_ar})` })); continue; }
     const tier = g.clientAsked ? 'client' : 'mizan-default', ok = g.pass || !g.clientAsked || !g.applicable;
     gates.push(gateResult(g.id, ok, { pass: g.pass, ...g.value }, g.ar, g.clientAsked ? g.reasons_ar : [], { tier, applicable: g.applicable, notes_ar: g.clientAsked ? [] : g.reasons_ar.map(x => `${x} (${MIZAN_DEFAULT_AR}؛ ملاحظة)`),
       source: g.clientAsked ? 'طلب العميل نصًا' : MIZAN_DEFAULT_AR + '، ' + UNVERIFIED_AR }));

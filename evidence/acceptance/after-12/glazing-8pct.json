@@ -1,0 +1,238 @@
+{
+ "note": "قياس فقط — بوابة WINDOW_SIZE باقية على 3% (قيمة تصميمية افتراضية للميزان). النظامي المرشح 8% من مساحة الأرضية: data/regulations-sa.json (dev/regulations bdc31d4) البند daylight.glazing_min_ratio، المستوى ب (نص رسمي بـOCR مشوّه + مصدر ثانوي)، فلا يُبدَّل بصمت.",
+ "alternatives": 24,
+ "wouldFailAt8": 3,
+ "rows": [
+  {
+   "case": "C1",
+   "file": "alt-1.json",
+   "rooms": 10,
+   "worst": 0.04,
+   "passAt3": true,
+   "wouldFailAt8": true,
+   "below8": [
+    {
+     "room": "الصالة",
+     "ratio": 0.04
+    }
+   ]
+  },
+  {
+   "case": "C1",
+   "file": "alt-2.json",
+   "rooms": 10,
+   "worst": 0.09,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C2",
+   "file": "alt-1.json",
+   "rooms": 9,
+   "worst": 0.09,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C3",
+   "file": "alt-1.json",
+   "rooms": 8,
+   "worst": 0.09,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C3",
+   "file": "alt-2.json",
+   "rooms": 8,
+   "worst": 0.05,
+   "passAt3": true,
+   "wouldFailAt8": true,
+   "below8": [
+    {
+     "room": "الصالة",
+     "ratio": 0.05
+    }
+   ]
+  },
+  {
+   "case": "C4",
+   "file": "alt-1.json",
+   "rooms": 7,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-1.json",
+   "rooms": 7,
+   "worst": 0.12,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-2.json",
+   "rooms": 7,
+   "worst": 0.11,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-3.json",
+   "rooms": 7,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-4.json",
+   "rooms": 7,
+   "worst": 0.11,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C6",
+   "file": "alt-1.json",
+   "rooms": 7,
+   "worst": 0.11,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C6",
+   "file": "alt-2.json",
+   "rooms": 7,
+   "worst": 0.11,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C7",
+   "file": "alt-1.json",
+   "rooms": 11,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-1.json",
+   "rooms": 8,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-2.json",
+   "rooms": 8,
+   "worst": 0.12,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-3.json",
+   "rooms": 8,
+   "worst": 0.12,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-4.json",
+   "rooms": 8,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-1.json",
+   "rooms": 7,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-2.json",
+   "rooms": 7,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-3.json",
+   "rooms": 7,
+   "worst": 0.04,
+   "passAt3": true,
+   "wouldFailAt8": true,
+   "below8": [
+    {
+     "room": "الصالة",
+     "ratio": 0.04
+    }
+   ]
+  },
+  {
+   "case": "C9",
+   "file": "alt-4.json",
+   "rooms": 7,
+   "worst": 0.08,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C10",
+   "file": "alt-1.json",
+   "rooms": 10,
+   "worst": 0.09,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C10",
+   "file": "alt-2.json",
+   "rooms": 10,
+   "worst": 0.08,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  },
+  {
+   "case": "C10",
+   "file": "alt-3.json",
+   "rooms": 10,
+   "worst": 0.1,
+   "passAt3": true,
+   "wouldFailAt8": false,
+   "below8": []
+  }
+ ]
+}

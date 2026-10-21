@@ -87,6 +87,7 @@ test('حدود الفراغات الافتراضية على المرسوم (ما
 
 test('طبقة كل بوابة في مخرج المراجع: شرط العميل / قيمة افتراضية للميزان / منطق وظيفي — ولا شيء «نظامي» بلا مصدر متحقق', () => {
   const r = reviewDesign(ev('after-9', 'C1', 1), request('C1'), { external: false });
-  for (const g of r.gates) { assert.ok(['client', 'mizan-default', 'functional', 'regulation'].includes(g.tier), g.id); assert.equal(g.tier_ar, TIER_AR[g.tier]); assert.notEqual(g.tier, 'regulation', g.id); }
+  // (الجولة الثانية عشرة) «نظامي» لعدد المواقف وحده، بمصدره المتحقق (اشتراطات إنشاء المباني السكنية 1446هـ)
+  for (const g of r.gates) { assert.ok(['client', 'mizan-default', 'functional', 'regulation'].includes(g.tier), g.id); assert.equal(g.tier_ar, TIER_AR[g.tier]); if (g.tier === 'regulation') { assert.equal(g.id, 'PARKING'); assert.match(g.source, /اشتراطات إنشاء المباني السكنية/); } }
   assert.equal(GATE_TIER.PROGRAM, 'client'); assert.equal(GATE_TIER.STAIR_GEOMETRY, 'mizan-default'); assert.equal(GATE_TIER.MAJLIS_PRIVACY, 'mizan-default');
 });

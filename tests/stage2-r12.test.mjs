@@ -10,7 +10,7 @@ import { generateVillaDesigns, generateVillaTwoFloors, programV2 } from '../dist
 import { verifyRequest, docRooms } from '../dist/rules.mjs';
 import { reviewDesign } from '../dist/plan-review.mjs';
 import { measureSaudiProgram, clientAsks } from '../dist/saudi-program.mjs';
-import { planParking } from '../dist/site-parking.mjs';
+import { planParking, PARKING_RULE, requiredParking } from '../dist/site-parking.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 import { buildBuildingScene } from '../dist/draw/scene3d.mjs';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
@@ -113,14 +113,24 @@ test('C1 وC9 مولَّدين: مدخل العائلة منكسر، ودهلي�
   }
 });
 
-test('المراجعة المستقلة: بند البرنامج السعودي بوابة إن طلبه العميل، وملاحظة معلنة إن كان قيمة افتراضية للميزان', () => {
+test('المراجعة المستقلة: بند البرنامج السعودي بوابة إن طلبه العميل، وملاحظة معلنة إن كان قيمة افتراضية للميزان، والمواقف اشتراط نظامي بمصدره', () => {
   const { C, r, land } = caseReq('C9');
   const d = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 4 }).designs[0];
-  const noBays = JSON.parse(JSON.stringify(d.doc)); noBays.zones = [];
-  const asDefault = reviewDesign(noBays, { text: C.text, counts: C.counts }, { external: false, heavy: false }).gates.find(g => g.id === 'PARKING');
+  const noShade = JSON.parse(JSON.stringify(d.doc)); noShade.finish = { ...(noShade.finish || {}), facade: { ...(noShade.finish?.facade || {}), shading: false } };
+  const asDefault = reviewDesign(noShade, { text: C.text, counts: C.counts }, { external: false, heavy: false }).gates.find(g => g.id === 'SHADING');
   assert.equal(asDefault.ok, true); assert.equal(asDefault.tier, 'mizan-default'); assert.ok(asDefault.notes_ar.length >= 1);
-  const asked = reviewDesign(noBays, { text: C.text + '، وموقف لسيارتين', counts: C.counts }, { external: false, heavy: false }).gates.find(g => g.id === 'PARKING');
+  const asked = reviewDesign(noShade, { text: C.text + '، مع تظليل النوافذ', counts: C.counts }, { external: false, heavy: false }).gates.find(g => g.id === 'SHADING');
   assert.equal(asked.ok, false); assert.equal(asked.tier, 'client');
+  // المواقف: العدد اشتراط نظامي متحقق (موقف لأرض ≤ 400 م²، وموقفان لما فوقها) — يرسب بلا طلب العميل، ومصدره مذكور
+  const oneBay = JSON.parse(JSON.stringify(d.doc)); oneBay.zones = oneBay.zones.filter(z => z.type === 'garage').slice(0, 1);
+  const pk1 = reviewDesign(oneBay, { text: C.text, counts: C.counts }, { external: false, heavy: false }).gates.find(g => g.id === 'PARKING');
+  assert.equal(pk1.ok, false, 'أرض 600 م² بموقف واحد: نقص عن المطلوب نظاميًا'); assert.equal(pk1.tier, 'regulation');
+  assert.match(pk1.source, /اشتراطات إنشاء المباني السكنية/); assert.equal(pk1.value.required, 2);
+  // مستند لا يمثّل مواقف الموقع (مرسوم يدويًا أو بالمولّد الأول): البوابة غير منطبقة ومذكور أنها لم تُقس — لا رسوب ولا نجاح مدّعى
+  const noBays = JSON.parse(JSON.stringify(d.doc)); noBays.zones = [];
+  const pk0 = reviewDesign(noBays, { text: C.text, counts: C.counts }, { external: false, heavy: false }).gates.find(g => g.id === 'PARKING');
+  assert.equal(pk0.ok, true); assert.equal(pk0.applicable, false); assert.match(pk0.reasons_ar[0], /لم يُقس/);
+  assert.equal(requiredParking(400), 1); assert.equal(requiredParking(401), 2); assert.equal(PARKING_RULE.level, 'official-confirmed');
   assert.equal(clientAsks({ text: 'غرفة خادمة بحمام' }).MAID_BATH, true);
   assert.equal(clientAsks({ text: 'غرفة خادمة بدون حمام' }).MAID_BATH, false);
 });
@@ -134,11 +144,15 @@ test('الموقع: لا كتلة «شريط ضيق» على أرض عريضة (
   assert.ok(out.designs.some(d => docRooms(d.doc).rooms.some(x => x.name === 'منور')), out.designs.map(d => d.pat).join(' '));
 });
 
-test('المواقف: موقفان عموديان حين يتسع الارتداد، داخل الأرض وخارج المبنى وممرات الأبواب', () => {
+test('المواقف: العدد النظامي مرسوم داخل الأرض وخارج المبنى وممرات الأبواب، والمبنى يُزاح إلى الخلف إن لم يتسع أمامه', () => {
   const { r, land } = caseReq('C5'); const d = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 4 }).designs[0];
   const bays = d.doc.zones.filter(z => z.type === 'garage');
-  assert.ok(bays.length >= 1 && bays.length <= 2);
-  const p = planParking(d.doc); assert.equal(p.bays.length, bays.length);
+  assert.equal(bays.length, 2, 'أرض 630 م²: موقفان نظاميًا');
+  const p = planParking(d.doc); assert.equal(p.bays.length, bays.length); assert.equal(p.required, 2);
+  // الأرض الضيقة العميقة (C4، 432 م²): لا يتسع موقفان أمام المبنى في الارتداد 3 م، فيُزاح المبنى إلى الخلف ويُذكر ذلك
+  const c4 = caseReq('C4'), d4 = generateVillaDesigns({ land: c4.land, counts: c4.r.counts, requirements: c4.r, keep: 4 }).designs[0];
+  assert.equal(d4.doc.zones.filter(z => z.type === 'garage').length, 2);
+  assert.ok(d4.notes.some(n => /أُزيح المبنى/.test(n)), d4.notes.join(' | '));
 });
 
 test('المجسّم: تظليل النوافذ الخارجية (بروز أفقي، وزعانف على الشرق والغرب)، والشارعان في أرض الزاوية، والسيارة على الموقف المرسوم', () => {
@@ -159,4 +173,17 @@ test('تعديل الواجهة (C9): المادة في المستند حجر و
   assert.equal(after.finish.facade.base, 'stone');
   assert.ok(reply.geometryIdentical);
   assert.ok(reply.done.some(t => /الواجهة/.test(t)));
+});
+
+test('المواقف النظامية على أرض 15×30 (450 م²): لا يتسع موقفان ولا بالحجز — يُعرض البديل ونقصه النظامي معلن وبوابته راسبة ظاهرة', () => {
+  const BASE = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, text = 'غرف النوم في الخلف والصالة تطل على الحوش الخلفي';
+  const req = extractRequirements(text, { counts: { ...BASE } }); req.counts = { ...BASE, ...req.counts };
+  const out = generateVillaDesigns({ land: { width: 15, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts: req.counts, requirements: req });
+  assert.ok(out.designs.length >= 1);
+  for (const d of out.designs) {
+    const n = d.doc.zones.filter(z => z.type === 'garage').length;
+    if (n >= 2) continue;
+    assert.ok(d.parkingShortfall); assert.ok(d.notes.some(x => /نقص نظامي معلن/.test(x) && /اشتراطات إنشاء المباني السكنية/.test(x)), d.notes.join(' | '));
+    assert.deepEqual(d.review.failedGates, ['PARKING']);
+  }
 });

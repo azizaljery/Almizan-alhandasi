@@ -384,8 +384,10 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   // «نُفّذ» لما تغيّر فعلًا فقط؛ ما كان متحققًا أصلًا (أو حذف فراغ غير موجود) يُذكر وحده بسببه
   // حذف فراغ غير موجود أصلًا ليس «نُفّذ»: يُذكر وحده بسببه (ما كان متحققًا أصلًا يبقى في «نُفّذ» كما كان)
   const absent = r => r.ok && r.already && r.intent?.op === 'none' && /غير موجود/.test(r.why_ar || '');
+  // (الجولة الثانية عشرة) ما كان متحققًا أصلًا بسبب مقيس (مثل باب المقلط الافتراضي بين المجلس والطعام) يُعرض في «لم يحتج تغييرًا» لا «نُفّذ»
   const doneTxt = res.results.filter(r => r.ok && !absent(r)).map(r => r.text_ar);
-  const alreadyTxt = res.results.filter(absent).map(r => `${r.text_ar}${r.why_ar ? ' — ' + r.why_ar.replace(/[.。]+$/, '') : ''}`);
+  const alreadyTxt = res.results.filter(r => absent(r) || (r.ok && r.already && r.why_ar)).map(r => `${r.text_ar}${r.why_ar ? ' — ' + r.why_ar.replace(/[.。]+$/, '') : ''}`);
+  const doneShown = res.results.filter(r => r.ok && !absent(r) && !(r.already && r.why_ar)).map(r => r.text_ar);
   // الرجوع يعيد الواجهة أيضًا: يُقال صراحة إن تغيّرت مادتها
   const facA = doc0.finish?.facade?.material || null, facB = res.doc.finish?.facade?.material || null;
   const facadeNote = facA !== facB ? (facB ? `الواجهة صارت «${res.doc.finish.facade.materialAr || facB}»` : `الواجهة عادت إلى مادتها في ذلك التصميم (أُلغي «${doc0.finish?.facade?.materialAr || facA}»)`) : null;
@@ -408,7 +410,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   if (fpd) reply.fingerprint = compactDiff(fpd);
   if (restored?.proof) reply.restoreProof = restored.proof;
   reply.summary_ar = [
-    doneTxt.length ? `نُفّذ: ${doneTxt.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
+    doneShown.length ? `نُفّذ: ${doneShown.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
     alreadyTxt.length ? `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.` : '',
     reply.failed.length ? `لم يُنفَّذ: ${reply.failed.map(f => `${f.text} — ${f.why}`).join('؛ ')}.` : '',
     reply.pending.length ? `محفوظ ولم يظهر في المجسّم بعد: ${reply.pending.map(p => p.text).join('، ')}.` : '',

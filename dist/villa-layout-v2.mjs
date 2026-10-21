@@ -25,7 +25,7 @@ import { chooseStair, risersFor, riseOf } from './stair-geometry.mjs';
 import { archSignature, archDifference, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, explainDifference } from './arch-difference.mjs';
 import { stackingGates, stackingReport } from './stacking.mjs';
 import { applyLiteralReadings } from './requirements.mjs';
-import { planParking } from './site-parking.mjs';
+import { planParking, PARKING_RULE } from './site-parking.mjs';
 
 export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-8'; // الجولة الثانية عشرة: القراءة الحرفية للتعارض غير المجاب، والبرنامج السعودي الافتراضي (مدخل منكسر، دهليز المجلس، المقلط، دورة مياه يومية، حمام الخادمة، مطبخ ≥ 14 م² بباب خدمة، المواقف)، ومنع الشريط على الأرض العريضة، والمنور للعميق، وتنظيم «السلم في المقدمة» لخمس غرف علوية؛ // الجولة الحادية عشرة: الاختيار بالمقياس الوظيفي v2، والبوابات الثقيلة (إنشائية مبدئية، حركة فعلية، تطابق 2D/3D) على المعروض، وفتحات لا تعبر التقاطعات، وأثاث يُتحقق منه، وبحث ثانٍ موجّه بالتنوع؛ // الجولة التاسعة: تنظيمات دورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج الارتفاع، في الخلف، في كتلة عائلية) تُحل للدورين معًا مع اتساق التراكب، والرئيسية الأرضية ≤ 24 م²، وغرف النوم لا تفتح على الصالة إلا في «الصالة الموزِّعة» بباب في طرف الجدار، وأنماط H وL للصالة الخلفية؛ الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
@@ -1295,13 +1295,17 @@ export function siteOf(land = {}) {
   if (!poly) {
     // الوجه الخارجي للجدار (لا محوره) داخل خط الارتداد: يُنقص نصف سماكة الجدار الخارجي من كل جهة
     const f0 = footprint(plot), hw = EXT / 2 + .005, fp = { ...f0, x: f0.x + hw, y: f0.y + hw, w: f0.w - 2 * hw, h: f0.h - 2 * hw };
+    // (الجولة الثانية عشرة) عمق محجوز أمام المبنى للمواقف المطلوبة نظاميًا (يُطلب حين لا يتسع العدد بغيره) — الارتداد النظامي المرسوم كما هو
+    const rsv = Math.max(0, Number(land.parkReserve) || 0);
+    if (rsv) { if (entry === 's') { fp.y += rsv; fp.h -= rsv; } else if (entry === 'n') fp.h -= rsv; else if (entry === 'w') { fp.x += rsv; fp.w -= rsv; } else fp.w -= rsv; }
     const W = ['s', 'n'].includes(entry) ? fp.w : fp.h, D = ['s', 'n'].includes(entry) ? fp.h : fp.w;
     return { plot, entry, fp, W, D, polygon: [{ x: 0, y: 0 }, { x: plot.width, y: 0 }, { x: plot.width, y: plot.length }, { x: 0, y: plot.length }], setbacks: f0.sb, fit: null, place: (ew) => ({ ox: snap((W - ew) / 2), oy: 0 }), maxBuilt: null, irregular: false };
   }
   // مضلع: الإحداثيات تُنقل بحيث يبدأ صندوقه من الصفر
   const P0 = poly.map(p => ({ x: p.x - off.x, y: p.y - off.y }));
   const sbOf = s => (plot.streets[s] ? plot.streetSetback : plot.neighborSetback);
-  const { pts: inner } = insetPolygon(P0, s => sbOf(s) + EXT / 2 + .005);
+  const rsv = Math.max(0, Number(land.parkReserve) || 0);
+  const { pts: inner } = insetPolygon(P0, s => sbOf(s) + (s === entry ? rsv : 0) + EXT / 2 + .005);
   const ix = inner.map(p => p.x), iy = inner.map(p => p.y);
   const fp = { x: Math.min(...ix), y: Math.min(...iy), w: Math.max(...ix) - Math.min(...ix), h: Math.max(...iy) - Math.min(...iy) };
   const toC = unframe(fp, entry), canon = inner.map(toC);
@@ -2346,6 +2350,8 @@ function transformFor(site, cand, mirror) {
   const F = frameOf(site.fp, site.entry);
   let pl = site.place(cand.ew, cand.ed);
   if (site.placeRects) { const rs = solidRects(cand.sol).map(r => (mirror ? { ...r, x0: cand.ew - r.x1, x1: cand.ew - r.x0 } : r)); const q = site.placeRects(rs, cand.ew, cand.ed); if (q.over > 1e-6) throw Error('المبنى لا يتسع داخل حدود الأرض بهذا الاتجاه.'); pl = q; }
+  // (الجولة الثانية عشرة) إزاحة المبنى إلى الخلف لاتساع المواقف المطلوبة نظاميًا في الارتداد الأمامي (أرض مستطيلة فقط)
+  if (cand.parkShift && !site.placeRects) pl = { ...pl, oy: pl.oy + cand.parkShift };
   return { T: (x, y) => F(pl.ox + (mirror ? cand.ew - x : x), pl.oy + y), pl };
 }
 const describe = c => (PARTI_AR[c.mode] || c.mode) + (c.stepped ? '، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع' : '');
@@ -2654,8 +2660,33 @@ function cached(kind, args, fn) {
   if (hit) { const P = programV2(args.counts, args.requirements || {}); P.entry = hit.program?.entry; hit.program = P; return hit; }
   const out = fn(args); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
 }
-export function generateVillaDesigns(args) { return withReadings(interpret(args), a => cached('one', a, generateVillaDesigns0)); }
-export function generateVillaTwoFloors(args) { return withReadings(interpret(args), a => cached('two', a, generateVillaTwoFloors0)); }
+export function generateVillaDesigns(args) { return withReadings(interpret(args), a => cached('one', a, x => withParkReserve(x, generateVillaDesigns0))); }
+export function generateVillaTwoFloors(args) { return withReadings(interpret(args), a => cached('two', a, x => withParkReserve(x, generateVillaTwoFloors0))); }
+/**
+ * (الجولة الثانية عشرة) عدد المواقف اشتراط نظامي (PARKING_RULE): إن رُفضت كل البدائل ولو واحد منها لعدم اتساع المواقف،
+ * يُعاد التوليد بعمق محجوز أمام المبنى (موقف عمودي 5.5 م وهامشاه ناقص الارتداد الأمامي) — يُذكر في الملاحظات.
+ */
+function withParkReserve(args, gen) {
+  try { return gen(args); } catch (e) {
+    const pkWhy = /موقف مطلوب نظاميًا/;
+    if (e?.code !== 'VILLA_BUILD_FAILED' || args.land?.parkReserve || !(e.rejected || []).some(r => (r.why || []).some(w => pkWhy.test(String(w))))) throw e;
+    const rsv = Math.round(Math.max(.5, 5.9 - 3) * 100) / 100;
+    try {
+      const out = gen({ ...args, land: { ...args.land, parkReserve: rsv } });
+      for (const d of out.designs) d.notes = [...(d.notes || []), `حُجز ${rsv} م أمام المبنى فوق الارتداد الأمامي لتتسع المواقف المطلوبة نظاميًا (${PARKING_RULE.source})؛ دون ذلك لم يتسع العدد في أي بديل.`];
+      return out;
+    } catch (e2) {
+      if (e2?.code !== 'VILLA_BUILD_FAILED') throw e2;
+      // ولا بالحجز: يُعرض البديل ونقصه النظامي معلن (بوابة المواقف راسبة ظاهرة في مراجعته) — لا يُخفى ولا يُدّعى التحقق
+      PARK_SHORT_OK = true;
+      try {
+        const out = gen(args);
+        for (const d of out.designs) { const n = (d.doc.zones || []).filter(z => z.type === 'garage').length; d.parkingShortfall = true; d.notes = [...(d.notes || []), `نقص نظامي معلن: لم يتسع في هذه الأرض لهذا البرنامج إلا ${n} من موقفين مطلوبين نظاميًا لأرض > 400 م² (${PARKING_RULE.source})، ولا بحجز ${rsv} م أمام المبنى (لم يتسع البرنامج حينها). يحتاج قرارك: تصغير البرنامج أو موقف مظلل داخل كتلة المبنى (غير مدعوم بعد).`]; }
+        return out;
+      } finally { PARK_SHORT_OK = false; }
+    }
+  }
+}
 /**
  * (الجولة الثانية عشرة) قبل التوليد: تعارض لم يُجب عنه يُرسم بالقراءة الحرفية لكلام العميل (applyLiteralReadings — يعدّل
  * requirements.counts في مكانه فيقيس السجل والمراجعة البرنامج نفسه)، والأعداد الممرَّرة تتبعه.
@@ -2954,8 +2985,11 @@ function compactReview(rv) {
 function gateReview(d, requirements, land, counts) {
   const rv = reviewDesign(d.doc, reviewRequest(requirements, land, counts), { external: false, heavy: false });
   d.review = compactReview(rv);
-  return rv.passed;
+  return rv.passed || parkShortOnly(rv);
 }
+/** (الجولة الثانية عشرة) في وضع «نقص المواقف المعلن» فقط: الراسب الوحيد بوابة المواقف النظامية — يُعرض البديل وبوابته راسبة ظاهرة. */
+let PARK_SHORT_OK = false;
+const parkShortOnly = rv => PARK_SHORT_OK && rv.failedGates.length > 0 && rv.failedGates.every(g => g === 'PARKING');
 /**
  * (الجولة الحادية عشرة) البوابات الثقيلة (المراجعة الإنشائية المبدئية، الحركة الفعلية، التطابق 2D/3D) لبديل واحد، مرة واحدة (مخزّنة).
  * أبطأ من غيرها، فلا تُحسب لكل مرشح بل للمختار فقط في pickReviewed.
@@ -3001,7 +3035,7 @@ function finalReviewSet(designs, requirements, land, counts) {
     if (heavyReview(d, requirements, land, counts) === false) { r.passed = false; r.failedGates = [...r.failedGates, ...d.heavyFail]; r.rejectReasons_ar = [...r.rejectReasons_ar, ...d.heavyGates.filter(g => !g.ok).flatMap(g => g.reasons_ar.map(x => `${g.ar}: ${x}`))]; }
     r.gates = [...r.gates.filter(g => g.id !== 'DISTINCT'), ...(d.heavyGates || []), ...r.gates.filter(g => g.id === 'DISTINCT')];
     d.review = compactReview(r);
-    if (r.passed) kept.push(d);
+    if (r.passed || parkShortOnly(r)) kept.push(d);
     else d.droppedBy = r.failedGates;
   });
   if (!kept.length) return kept;
@@ -3028,10 +3062,20 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   doc = drawPlanV2(doc, layout, { level: LV, T });
   if (second) doc = second(doc);
   // (الجولة الثانية عشرة) مواقف السيارات في الارتداد (قيمة تصميمية افتراضية للميزان): مناطق «garage» يرسمها المسقط والمجسّم ويقيسها المراجع
-  try { const pk = planParking(doc); for (const b of pk.bays) doc = applyCommand(doc, { type: 'add-zone', level: LV, name: 'موقف سيارة', roomType: 'garage', polygon: b.polygon }).doc; layout.notes.push(pk.note_ar); } catch { /* الموقف معلوماتي */ }
+  // عدد المواقف اشتراط نظامي متحقق (site-parking.mjs PARKING_RULE): إن لم يتسع العدد أمام المبنى وفي الأرض عمق زائد خلفه،
+  // يُزاح المبنى إلى الخلف بقدر ما يتسع موقف عمودي على الشارع (5.5 م وهامشاه) ويُعاد بناؤه مرة واحدة
+  let pk = null; try { pk = planParking(doc); } catch { pk = null; }
+  if (pk && pk.bays.length < pk.required && cand.parkShift == null && !site.placeRects) {
+    const front = site.setbacks?.[site.entry] ?? 3, need = Math.max(0, 5.9 - front), room = site.D - cand.ed, shift = snap(Math.min(room, need));
+    cand.parkShift = shift >= .5 && room >= need - .05 ? shift : 0;
+    if (cand.parkShift) return buildDesign(cand, P, site, land, { title, mirror, requirements, entry, second });
+  }
+  if (pk) { for (const b of pk.bays) doc = applyCommand(doc, { type: 'add-zone', level: LV, name: 'موقف سيارة', roomType: 'garage', polygon: b.polygon }).doc; layout.notes.push(pk.note_ar + (cand.parkShift ? ` أُزيح المبنى ${cand.parkShift} م إلى الخلف ليتسع العدد المطلوب أمامه.` : '')); }
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
   const qg = qualityGates(relaxed, layout, { kitchenFront: (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), ...gateOpts(P), narrow: site.W < NARROW_W });
   const reject = [...hardGates(relaxed, P, rv), ...qg];
+  // عدد المواقف اشتراط نظامي متحقق: بديل لا يتسع فيه العدد المطلوب أمامه ولا بإزاحة المبنى إلى الخلف لا يُعرض
+  if (pk && pk.bays.length < pk.required && !PARK_SHORT_OK) reject.push(`لم يتسع إلا ${pk.bays.length} من ${pk.required} موقف مطلوب نظاميًا داخل الأرض خارج المبنى وممرات الأبواب (${PARKING_RULE.source}).`);
   // (الجولة الثانية عشرة) لا كتلة «شريط ضيق» على أرض عرضها القابل للبناء ≥ 14 م (نموذج الأرض الضيقة لا يناسبها؛ قرار المراجع المستقل)
   if (site.W >= 14 && cand.ew < .6 * site.W && cand.ed > 2 * cand.ew) reject.push(`كتلة «شريط ضيق» ${r2(cand.ew)} × ${r2(cand.ed)} م على أرض عرضها القابل للبناء ${r2(site.W)} م: نموذج الأرض الضيقة لا يستجيب لعرض هذه الأرض.`);
   const ledger = verifyRequest(relaxed, requirements, { entry });

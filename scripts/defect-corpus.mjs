@@ -31,7 +31,7 @@ export function requestFor(caseId) {
   return { text: C.text, counts: C.counts, land: { floors: 1, ...C.land } };
 }
 /** البدائل الناجحة (المستندات الأصلية) لمرحلة: [{ case, file, doc, request }] بترتيب ثابت. */
-export const BASE_STAGE = 'after-11'; // (الجولة الحادية عشرة) البدائل التي تجتاز البوابات الثقيلة وDISTINCT v2
+export const BASE_STAGE = 'after-12'; // (الجولة الثانية عشرة) البدائل التي تجتاز البوابات الثقيلة وDISTINCT v2 وبنود البرنامج السعودي والمواقف النظامية
 export function loadBase(stage = BASE_STAGE) {
   const dir = ROOT + `evidence/acceptance/${stage}/`, out = [];
   for (const C of CASES) {
@@ -450,8 +450,9 @@ def('stair-narrow', 'قلبة السلم بعرض 0.8 م (خفي)', ['STAIR_GEOM
 // (الجولة العاشرة) المجلس يفتح على الطعام العائلي أو الصالة أو المطبخ (والعميل لم يطلب «مقلط»)
 def('majlis-door-family', 'المجلس يفتح على الطعام العائلي أو الصالة أو المطبخ', ['MAJLIS_PRIVACY'], ['GUEST_ROUTE', 'DOOR_SWING', 'WET_DOOR'], (doc, { model }) => {
   for (const { lv, room } of roomsOf(model, r => r.type === 'majlis')) {
-    for (const t of ['dining', 'living', 'kitchen']) {
-      const o = lv.rooms.find(r => r.type === t && sharedEdges(room, r).some(x => x.len >= 1.4));
+    // (الجولة الثانية عشرة) «صالة الطعام والمقلط» طعام ضيوف يفتح على المجلس بالتصميم (المقلط) — ليس عيبًا؛ العيب فتح المجلس على فراغ عائلي
+    for (const t of ['living', 'kitchen', 'dining']) {
+      const o = lv.rooms.find(r => r.type === t && !/المقلط|الضيوف/.test(r.name || '') && sharedEdges(room, r).some(x => x.len >= 1.4));
       if (!o) continue;
       const e = sharedEdges(room, o).sort((a, b) => b.len - a.len)[0];
       if (!addDoorOnEdge(doc, lv.level.id, e, 'door', 0.9)) continue;

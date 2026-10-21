@@ -1,0 +1,5421 @@
+{
+ "after-12": {
+  "rows": [
+   {
+    "case": "C1",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه مشتركة"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": true,
+      "tier": "client",
+      "value": {
+       "maid": 1
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 18.42,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 20.2,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 21,
+        "w": 3.5,
+        "d": 6,
+        "open": [
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.6,
+       "buildingD": 20.2,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C1",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": true,
+      "tier": "client",
+      "value": {
+       "maid": 1
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.23,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.65,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 33.5,
+        "w": 4,
+        "d": 9.5,
+        "open": [
+         "y1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.45,
+       "buildingD": 19.65,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C2",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.82
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 17.5,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.4,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 15.75,
+        "w": 4.5,
+        "d": 3.5,
+        "open": [
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.35,
+       "buildingD": 19.4,
+       "buildableW": 19
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C3",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 19.96,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 15.8,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 18.55,
+       "buildingD": 15.8,
+       "buildableW": 20.5
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C3",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.05,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 15.45,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 17.2,
+       "buildingD": 15.45,
+       "buildableW": 20.5
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C4",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 12.82,
+       "serviceDoor": true
+      },
+      "why": [
+       "المطبخ 12.82 م² أصغر من 14 م²"
+      ]
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 26.4,
+       "courtOrLightwell": true,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 8.5,
+       "buildingD": 26.4,
+       "buildableW": 9
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -0.92
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.92,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 18.9,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 50,
+        "w": 4,
+        "d": 12.5,
+        "open": [
+         "x0",
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.8,
+       "buildingD": 18.9,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": [
+        "صالة الطعام والمقلط"
+       ]
+      },
+      "why": [
+       "«صالة الطعام والمقلط» مفتوح على العائلة بفتحة بلا باب وهو على المجلس"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 15.63,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.05,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": [
+       "عمق المبنى 19.05 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته"
+      ]
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 12,
+       "buildingD": 19.05,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-3",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.73
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 17.6,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 16.4,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.25,
+       "buildingD": 16.4,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-4",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.33
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 15.37,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 14.55,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 17.4,
+       "buildingD": 14.55,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C6",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 19.81,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 17.35,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.3,
+       "buildingD": 17.35,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C6",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 18.89,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 16.45,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.2,
+       "buildingD": 16.45,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C7",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الدرج",
+         "overlap": -1.28
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": false,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 31.32,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 14.9,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 12.95,
+       "buildingD": 14.9,
+       "buildableW": 15
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C8",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.78
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 22.1,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 20.35,
+       "courtOrLightwell": true,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 13.5,
+       "buildingD": 20.35,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C8",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.82,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 18.5,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 46.75,
+        "w": 8.5,
+        "d": 5.5,
+        "open": [
+         "x0",
+         "y1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.3,
+       "buildingD": 18.5,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C8",
+    "alt": "alt-3",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -0.91
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.47,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.65,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 42,
+        "w": 3.5,
+        "d": 12,
+        "open": [
+         "x0",
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.6,
+       "buildingD": 19.65,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C8",
+    "alt": "alt-4",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «المجلس» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 18.31,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 18.8,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 15.75,
+        "w": 4.5,
+        "d": 3.5,
+        "open": [
+         "x0",
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.65,
+       "buildingD": 18.8,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C9",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.43,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 16.55,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.35,
+       "buildingD": 16.55,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C9",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -0.18
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.22,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 20.2,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 47.25,
+        "w": 3.5,
+        "d": 13.5,
+        "open": [
+         "x0",
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 15.3,
+       "buildingD": 20.2,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C9",
+    "alt": "alt-3",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.67
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «المجلس» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.22,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 18.6,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 12,
+        "w": 4,
+        "d": 3,
+        "open": [
+         "x1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 13.25,
+       "buildingD": 18.6,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C9",
+    "alt": "alt-4",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -0.07
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.27,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 17.3,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.15,
+       "buildingD": 17.3,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": []
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": [
+       "غرفة الخادمة بلا حمام يُفتح منها"
+      ]
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 15.95,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.1,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 21,
+        "w": 3.5,
+        "d": 6,
+        "open": [
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.4,
+       "buildingD": 19.1,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.53
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": [
+        "صالة الطعام والمقلط"
+       ]
+      },
+      "why": [
+       "«صالة الطعام والمقلط» مفتوح على العائلة بفتحة بلا باب وهو على المجلس"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 19.86,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 22.5,
+       "courtOrLightwell": true,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.05,
+       "buildingD": 22.5,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-3",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": -1.38
+        }
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "link": true,
+       "diningOpenToFamily": []
+      },
+      "why": []
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": [
+       "غرفة الخادمة بلا حمام يُفتح منها"
+      ]
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.72,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 2,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": []
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.3,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 42.75,
+        "w": 4.5,
+        "d": 9.5,
+        "open": [
+         "y1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.65,
+       "buildingD": 19.3,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   }
+  ],
+  "totals": {
+   "FAMILY_ENTRY_SCREEN": {
+    "applicable": 24,
+    "pass": 24,
+    "client": 0
+   },
+   "MAJLIS_LOBBY": {
+    "applicable": 24,
+    "pass": 21,
+    "client": 0
+   },
+   "MAJLIS_DINING": {
+    "applicable": 23,
+    "pass": 10,
+    "client": 0
+   },
+   "DAY_WC": {
+    "applicable": 24,
+    "pass": 10,
+    "client": 0
+   },
+   "MAID_BATH": {
+    "applicable": 5,
+    "pass": 3,
+    "client": 2
+   },
+   "KITCHEN_SERVICE": {
+    "applicable": 24,
+    "pass": 23,
+    "client": 0
+   },
+   "PARKING": {
+    "applicable": 24,
+    "pass": 24,
+    "client": 0
+   },
+   "DEEP_PLAN_LIGHT": {
+    "applicable": 24,
+    "pass": 23,
+    "client": 0
+   },
+   "SITE_FIT": {
+    "applicable": 24,
+    "pass": 24,
+    "client": 0
+   },
+   "SHADING": {
+    "applicable": 24,
+    "pass": 24,
+    "client": 0
+   }
+  }
+ },
+ "after-11": {
+  "rows": [
+   {
+    "case": "C1",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 0.88
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 0.88 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": [
+        "دورة مياه مشتركة"
+       ]
+      },
+      "why": []
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": true,
+      "tier": "client",
+      "value": {
+       "maid": 1
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 17.71,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 20.45,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 19.5,
+        "w": 3,
+        "d": 6.5,
+        "open": [
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.65,
+       "buildingD": 20.45,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C1",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": true,
+      "tier": "client",
+      "value": {
+       "maid": 1
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 13.99,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.6,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 39,
+        "w": 4.5,
+        "d": 11,
+        "open": [
+         "y1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.55,
+       "buildingD": 19.6,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C2",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 13.03,
+       "serviceDoor": true
+      },
+      "why": [
+       "المطبخ 13.03 م² أصغر من 14 م²"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.85,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 15.75,
+        "w": 4.5,
+        "d": 3.5,
+        "open": [
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.4,
+       "buildingD": 19.85,
+       "buildableW": 19
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C3",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.86,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 15.95,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 17.35,
+       "buildingD": 15.95,
+       "buildableW": 20.5
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C3",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 10.64,
+       "serviceDoor": true
+      },
+      "why": [
+       "المطبخ 10.64 م² أصغر من 14 م²"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 15.4,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 17.1,
+       "buildingD": 15.4,
+       "buildableW": 20.5
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C4",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 10.54,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ 10.54 م² أصغر من 14 م²",
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 22.95,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": [
+       "عمق المبنى 22.95 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته"
+      ]
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 8.65,
+       "buildingD": 22.95,
+       "buildableW": 9
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 17.95,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 14.3,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 17.4,
+       "buildingD": 14.3,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 12.04,
+       "serviceDoor": true
+      },
+      "why": [
+       "المطبخ 12.04 م² أصغر من 14 م²"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.35,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 52,
+        "w": 4,
+        "d": 13,
+        "open": [
+         "x0",
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.1,
+       "buildingD": 19.35,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-3",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «المجلس» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.9,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 17.25,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.6,
+       "buildingD": 17.25,
+       "buildableW": 21
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C5",
+    "alt": "alt-4",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 13.24,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ 13.24 م² أصغر من 14 م²",
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 23.25,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": [
+       "عمق المبنى 23.25 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته"
+      ]
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 9.35,
+       "buildingD": 23.25,
+       "buildableW": 21
+      },
+      "why": [
+       "كتلة شريط 9.35×23.25 م على أرض عرضها القابل للبناء 21 م"
+      ]
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C6",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 18.89,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 16.45,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.2,
+       "buildingD": 16.45,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C7",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «المجلس» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": false,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.21,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 12.2,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 12.75,
+       "buildingD": 12.2,
+       "buildableW": 15
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C8",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «المجلس» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 17.07,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 22.25,
+       "courtOrLightwell": true,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 14.65,
+       "buildingD": 22.25,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C8",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 13.64,
+       "serviceDoor": true
+      },
+      "why": [
+       "المطبخ 13.64 م² أصغر من 14 م²"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.85,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 89.25,
+        "w": 8.5,
+        "d": 10.5,
+        "open": [
+         "x0",
+         "y1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.35,
+       "buildingD": 19.85,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C9",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «المجلس» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 18.31,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 15.95,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 15.8,
+       "buildingD": 15.95,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C9",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "المجلس"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 0
+      },
+      "why": []
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 12.77,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ 12.77 م² أصغر من 14 م²",
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 23.4,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": [
+       "عمق المبنى 23.4 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته"
+      ]
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 9.2,
+       "buildingD": 23.4,
+       "buildableW": 17
+      },
+      "why": [
+       "كتلة شريط 9.2×23.4 م على أرض عرضها القابل للبناء 17 م"
+      ]
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-1",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.48
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.48 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": [
+       "غرفة الخادمة بلا حمام يُفتح منها"
+      ]
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 13.72,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ 13.72 م² أصغر من 14 م²",
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 18.1,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 18,
+        "w": 3,
+        "d": 6,
+        "open": [
+         "y0"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.65,
+       "buildingD": 18.1,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-2",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": [
+       "غرفة الخادمة بلا حمام يُفتح منها"
+      ]
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 18.94,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 20.15,
+       "courtOrLightwell": true,
+       "recess": null
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.55,
+       "buildingD": 20.15,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-3",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": []
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": [
+       "غرفة الخادمة بلا حمام يُفتح منها"
+      ]
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "area": 16.32,
+       "serviceDoor": true
+      },
+      "why": []
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 19.35,
+       "courtOrLightwell": false,
+       "recess": {
+        "area": 40,
+        "w": 4,
+        "d": 10,
+        "open": [
+         "y1"
+        ]
+       }
+      },
+      "why": []
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 16.2,
+       "buildingD": 19.35,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   },
+   {
+    "case": "C10",
+    "alt": "alt-4",
+    "items": {
+     "FAMILY_ENTRY_SCREEN": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "checked": [
+        {
+         "room": "مدخل العائلة",
+         "to": "الصالة",
+         "overlap": 1.6
+        }
+       ]
+      },
+      "why": [
+       "من باب «مدخل العائلة» الخارجي يُرى «الصالة» مباشرة عبر فتحة بلا باب تقابله (تراكب 1.6 م)"
+      ]
+     },
+     "MAJLIS_LOBBY": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "majlis": [
+        "مجلس الرجال"
+       ]
+      },
+      "why": [
+       "الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز)"
+      ]
+     },
+     "MAJLIS_DINING": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "link": false,
+       "diningOpenToFamily": []
+      },
+      "why": [
+       "لا باب بين مجلس الرجال والطعام"
+      ]
+     },
+     "DAY_WC": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "wcs": []
+      },
+      "why": [
+       "لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي"
+      ]
+     },
+     "MAID_BATH": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "maid": 1
+      },
+      "why": [
+       "غرفة الخادمة بلا حمام يُفتح منها"
+      ]
+     },
+     "KITCHEN_SERVICE": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "area": 14.2,
+       "serviceDoor": false
+      },
+      "why": [
+       "المطبخ بلا باب خدمة خارجي (غير الواجهة)"
+      ]
+     },
+     "PARKING": {
+      "applicable": false,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "bays": 0,
+       "required": 2,
+       "rule": "parking.spaces_per_villa"
+      },
+      "why": [
+       "المستند لا يمثّل مواقف الموقع (لا مناطق «garage»)؛ لم يُقس العدد النظامي"
+      ]
+     },
+     "DEEP_PLAN_LIGHT": {
+      "applicable": true,
+      "pass": false,
+      "tier": "mizan-default",
+      "value": {
+       "depth": 20.45,
+       "courtOrLightwell": false,
+       "recess": null
+      },
+      "why": [
+       "عمق المبنى 20.45 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته"
+      ]
+     },
+     "SITE_FIT": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "buildingW": 14.95,
+       "buildingD": 20.45,
+       "buildableW": 17
+      },
+      "why": []
+     },
+     "SHADING": {
+      "applicable": true,
+      "pass": true,
+      "tier": "mizan-default",
+      "value": {
+       "shading": "default"
+      },
+      "why": []
+     }
+    }
+   }
+  ],
+  "totals": {
+   "FAMILY_ENTRY_SCREEN": {
+    "applicable": 20,
+    "pass": 0,
+    "client": 0
+   },
+   "MAJLIS_LOBBY": {
+    "applicable": 20,
+    "pass": 11,
+    "client": 0
+   },
+   "MAJLIS_DINING": {
+    "applicable": 19,
+    "pass": 0,
+    "client": 0
+   },
+   "DAY_WC": {
+    "applicable": 20,
+    "pass": 1,
+    "client": 0
+   },
+   "MAID_BATH": {
+    "applicable": 6,
+    "pass": 2,
+    "client": 2
+   },
+   "KITCHEN_SERVICE": {
+    "applicable": 20,
+    "pass": 9,
+    "client": 0
+   },
+   "PARKING": {
+    "applicable": 0,
+    "pass": 0,
+    "client": 0
+   },
+   "DEEP_PLAN_LIGHT": {
+    "applicable": 20,
+    "pass": 16,
+    "client": 0
+   },
+   "SITE_FIT": {
+    "applicable": 20,
+    "pass": 18,
+    "client": 0
+   },
+   "SHADING": {
+    "applicable": 20,
+    "pass": 20,
+    "client": 0
+   }
+  }
+ }
+}

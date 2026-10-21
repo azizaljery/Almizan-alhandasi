@@ -374,7 +374,9 @@ function drawStreets(ctx, doc, S, k) {
   const poly = doc.plot.polygon, sides = [...new Set([...(doc.streets || []), doc.entry || 's'])].filter(x => STREET_VEC[x]);
   for (const sd of sides) {
     const v = STREET_VEC[sd]; let best = null;
-    poly.forEach((a, i) => { const b = poly[(i + 1) % poly.length], L = Math.hypot(b.x - a.x, b.y - a.y); if (L < .5) return; const ux = (b.x - a.x) / L, uy = (b.y - a.y) / L; for (const n of [{ x: uy, y: -ux }, { x: -uy, y: ux }]) { const d = n.x * v.x + n.y * v.y; if (d > .7 && (!best || L * d > best.s)) best = { a, b, n, s: L * d }; } });
+    // العمودي الخارجي فقط (بعيدًا عن مركز الأرض): ضلع الخلف في أرض غير منتظمة أطول من الأمامي ولا يُختار للشارع الجنوبي
+    const cx = poly.reduce((t, p) => t + p.x, 0) / poly.length, cy = poly.reduce((t, p) => t + p.y, 0) / poly.length;
+    poly.forEach((a, i) => { const b = poly[(i + 1) % poly.length], L = Math.hypot(b.x - a.x, b.y - a.y); if (L < .5) return; const ux = (b.x - a.x) / L, uy = (b.y - a.y) / L, mx = (a.x + b.x) / 2 - cx, my = (a.y + b.y) / 2 - cy; for (const n of [{ x: uy, y: -ux }, { x: -uy, y: ux }]) { if (n.x * mx + n.y * my <= 0) continue; const d = n.x * v.x + n.y * v.y; if (d > .7 && (!best || L * d > best.s)) best = { a, b, n, s: L * d }; } });
     if (!best) continue;
     const off = (p, t) => ({ x: p.x + best.n.x * t, y: p.y + best.n.y * t }), q = [best.a, best.b, off(best.b, 7), off(best.a, 7)].map(S);
     ctx.save(); ctx.setLineDash([]); ctx.fillStyle = 'rgba(70,74,80,.10)'; ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fill();

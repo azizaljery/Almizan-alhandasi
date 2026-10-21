@@ -39,7 +39,7 @@ export const LONG = [
       dims: { majlis: [5, 7] },
       rules: [{ r: 'place:majlis:s', level: 'must' }, { r: 'close:guestwc+majlis', level: 'must' }, { r: 'place:hall:center', level: 'must' }, { r: 'place:kitchen:n', level: 'must' }, { r: 'close:dining+kitchen', level: 'must' }, { r: 'close:kitchen+maid', level: 'must' }],
       floors: 1, unsupported: ['garage'], conflicts: [], unclear: ['إضاءة طبيعية'],
-      optional: ['rule:away:majlis+majlis_w', 'pref:big_majlis', 'count:baths'],
+      optional: ['rule:away:majlis+majlis_w', 'pref:big_majlis', 'count:baths', 'pref:parking'], // (الجولة الثانية عشرة) «مظلة سيارتين قدام»: مواقف تُرسم في الارتداد
       traps: '«المسجد جنبنا» ليست قاعدة مكانية للمصلى؛ «خمس غرف» صُحّحت إلى أربع.',
     },
   },
@@ -127,7 +127,7 @@ export const LONG = [
       extras: ['office', 'office.ext', 'laundry'], absent: ['maid'],
       rules: [{ r: 'close:dining+kitchen', level: 'must' }, { r: 'close:guestwc+majlis', level: 'must' }, { r: 'place:master:n', level: 'must' }],
       facade: ['glass', 'wood', 'modern'], unsupported: ['garage'], conflicts: [], unclear: ['Gym room'],
-      optional: ['count:baths'],
+      optional: ['count:baths', 'pref:parking'], // «Garage لسيارتين»: مواقف في الارتداد (والكراج المغلق غير مدعوم)
       traps: '«no women majlis needed» لا تعني «بدون مجلس»؛ مادتان للواجهة (زجاج وخشب).',
     },
   },
@@ -155,7 +155,7 @@ export const LONG = [
       extras: ['maid', 'maid.bath', 'storage'], absent: [],
       rules: [{ r: 'close:elderly+hall', level: 'must' }, { r: 'place:majlis:e', level: 'must' }, { r: 'close:dining+kitchen', level: 'must' }, { r: 'place:kitchen:w', level: 'must' }, { r: 'away:kitchen+majlis', level: 'must' }, { r: 'cluster:kids', level: 'must' }, { r: 'place:hall:w', level: 'must' }],
       facade: ['stone'], unsupported: ['garage'], conflicts: [], unclear: [],
-      optional: ['count:baths'],
+      optional: ['count:baths', 'pref:parking'], // «كراج يكفي سيارتين»: مواقف في الارتداد (والكراج المغلق غير مدعوم)
       traps: '«المطبخ كان صغير وفي نص البيت» و«المجلس كان داخل البيت» وصف للبيت القديم لا طلب؛ «ثلاث غرف… وغرفة رابعة للوالدة» = أربع.',
     },
   },
