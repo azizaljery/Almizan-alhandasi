@@ -1,0 +1,777 @@
+{
+ "n": 5,
+ "text": "الصالة أكبر شوي",
+ "scope": [
+  "^الصالة$"
+ ],
+ "outcome": "applied",
+ "error": null,
+ "ms": 359,
+ "understood": [
+  "الصالة أكبر",
+  "«الصالة» أكبر قليلًا"
+ ],
+ "unclear": [],
+ "questions": [],
+ "patternBefore": "centralhall:ch1",
+ "patternAfter": "centralhall:ch1",
+ "patternKept": true,
+ "patternChanged": null,
+ "checks": [
+  {
+   "type": "bigger",
+   "ok": true,
+   "measured": {
+    "before": 37.87,
+    "after": 42.3,
+    "ratio": 1.12
+   },
+   "why": "النسبة 1.12 والمطلوب ≥ 1.1",
+   "alreadyBefore": null
+  }
+ ],
+ "happened": true,
+ "ledger": {
+  "done": [
+   "«الصالة» أكبر قليلًا"
+  ],
+  "failed": [],
+  "pending": [],
+  "unchanged": false,
+  "reused": false
+ },
+ "claimMismatch": false,
+ "preservation": {
+  "rows": [
+   {
+    "name": "مدخل العائلة",
+    "type": "entrance",
+    "li": 0,
+    "idBefore": "r1",
+    "idAfter": "r1",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 13.99,
+    "areaAfter": 12.34,
+    "areaPct": -11.8,
+    "shift": 0.35,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": false
+   },
+   {
+    "name": "مجلس النساء",
+    "type": "majlis",
+    "li": 0,
+    "idBefore": "r6",
+    "idAfter": "r6",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 23.18,
+    "areaAfter": 23.18,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": true
+   },
+   {
+    "name": "مغاسل",
+    "type": "corridor",
+    "li": 0,
+    "idBefore": "r8",
+    "idAfter": "r8",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 4.11,
+    "areaAfter": 4.11,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "مغاسل",
+    "type": "corridor",
+    "li": 0,
+    "idBefore": "r5",
+    "idAfter": "r5",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 4.92,
+    "areaAfter": 4.92,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "مدخل الجناح",
+    "type": "corridor",
+    "li": 0,
+    "idBefore": "r10",
+    "idAfter": "r10",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 3.73,
+    "areaAfter": 3.73,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": false
+   },
+   {
+    "name": "مدخل الجناح",
+    "type": "corridor",
+    "li": 0,
+    "idBefore": "r13",
+    "idAfter": "r13",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 4.02,
+    "areaAfter": 4.02,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": false
+   },
+   {
+    "name": "الصالة",
+    "type": "living",
+    "li": 0,
+    "idBefore": "r2",
+    "idAfter": "r2",
+    "sameId": true,
+    "inScope": true,
+    "areaBefore": 37.87,
+    "areaAfter": 42.3,
+    "areaPct": 11.7,
+    "shift": 0.53,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": true
+   },
+   {
+    "name": "حمام غرفة 2",
+    "type": "bath",
+    "li": 0,
+    "idBefore": "r11",
+    "idAfter": "r11",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 4.71,
+    "areaAfter": 4.71,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": false
+   },
+   {
+    "name": "دورة مياه مشتركة",
+    "type": "bath",
+    "li": 0,
+    "idBefore": "r14",
+    "idAfter": "r14",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 4.71,
+    "areaAfter": 4.71,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": false
+   },
+   {
+    "name": "غرفة نوم 4",
+    "type": "bedroom",
+    "li": 0,
+    "idBefore": "r15",
+    "idAfter": "r15",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 18.75,
+    "areaAfter": 18.75,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": true
+   },
+   {
+    "name": "غرفة ملابس",
+    "type": "storage",
+    "li": 0,
+    "idBefore": "r18",
+    "idAfter": "r18",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 5.37,
+    "areaAfter": 5.37,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": false
+   },
+   {
+    "name": "غرفة النوم الرئيسية",
+    "type": "master",
+    "li": 0,
+    "idBefore": "r16",
+    "idAfter": "r16",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 19.79,
+    "areaAfter": 19.79,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": true
+   },
+   {
+    "name": "مجلس الرجال",
+    "type": "majlis",
+    "li": 0,
+    "idBefore": "r3",
+    "idAfter": "r3",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 26,
+    "areaAfter": 26,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": true
+   },
+   {
+    "name": "دورة مياه الرجال",
+    "type": "bath",
+    "li": 0,
+    "idBefore": "r4",
+    "idAfter": "r4",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 2.37,
+    "areaAfter": 2.37,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "غرفة نوم 2",
+    "type": "bedroom",
+    "li": 0,
+    "idBefore": "r9",
+    "idAfter": "r9",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 18.45,
+    "areaAfter": 18.45,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": true
+   },
+   {
+    "name": "غرفة نوم 3",
+    "type": "bedroom",
+    "li": 0,
+    "idBefore": "r12",
+    "idAfter": "r12",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 18.87,
+    "areaAfter": 18.87,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": true
+   },
+   {
+    "name": "حمام الخادمة",
+    "type": "bath",
+    "li": 0,
+    "idBefore": "r20",
+    "idAfter": "r20",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 2.98,
+    "areaAfter": 2.98,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "غرفة الخادمة",
+    "type": "service",
+    "li": 0,
+    "idBefore": "r19",
+    "idAfter": "r19",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 13.09,
+    "areaAfter": 13.09,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": true
+   },
+   {
+    "name": "دورة مياه النساء",
+    "type": "bath",
+    "li": 0,
+    "idBefore": "r7",
+    "idAfter": "r7",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 2.37,
+    "areaAfter": 2.37,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "حمام الرئيسية",
+    "type": "bath",
+    "li": 0,
+    "idBefore": "r17",
+    "idAfter": "r17",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 6.27,
+    "areaAfter": 6.27,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "خزانة",
+    "type": "storage",
+    "li": 0,
+    "idBefore": "r21",
+    "idAfter": "r21",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 3.37,
+    "areaAfter": 3.37,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": false,
+    "main": false
+   },
+   {
+    "name": "المطبخ",
+    "type": "kitchen",
+    "li": 0,
+    "idBefore": "r22",
+    "idAfter": "r22",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 17.71,
+    "areaAfter": 17.71,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": true
+   },
+   {
+    "name": "صالة الطعام",
+    "type": "dining",
+    "li": 0,
+    "idBefore": "r23",
+    "idAfter": "r23",
+    "sameId": true,
+    "inScope": false,
+    "areaBefore": 21.52,
+    "areaAfter": 21.52,
+    "areaPct": 0,
+    "shift": 0,
+    "doors": 0,
+    "windows": 0,
+    "arches": 0,
+    "adjacentToTarget": true,
+    "main": true
+   }
+  ],
+  "removed": [],
+  "added": [],
+  "violations": [
+   {
+    "name": "مدخل العائلة",
+    "kind": "moved/resized",
+    "areaPct": -11.8,
+    "shift": 0.35,
+    "main": false,
+    "adjacentToTarget": true,
+    "idAfter": "r1"
+   }
+  ],
+  "openingChanges": [],
+  "mainViolations": 0,
+  "envelope": {
+   "before": {
+    "w": 16.65,
+    "d": 20.45
+   },
+   "after": {
+    "w": 16.65,
+    "d": 20.45
+   }
+  },
+  "idsStable": "23/23",
+  "difference": 0,
+  "geometryIdentical": false
+ },
+ "violations": 1,
+ "mainViolations": 0,
+ "fingerprint": {
+  "version": "plan-fingerprint/1.0.0",
+  "before": "a35ad3f1",
+  "after": "cb975f55",
+  "identical": false,
+  "counts": {
+   "changed": 4,
+   "added": 4,
+   "removed": 3,
+   "unchanged": 136,
+   "touched": 11,
+   "total": 147
+  },
+  "byKind": {
+   "wall": {
+    "changed": 0,
+    "added": 4,
+    "removed": 3,
+    "unchanged": 67
+   },
+   "opening": {
+    "changed": 2,
+    "added": 0,
+    "removed": 0,
+    "unchanged": 44
+   },
+   "room": {
+    "changed": 2,
+    "added": 0,
+    "removed": 0,
+    "unchanged": 21
+   },
+   "finish": {
+    "changed": 0,
+    "added": 0,
+    "removed": 0,
+    "unchanged": 1
+   },
+   "roof": {
+    "changed": 0,
+    "added": 0,
+    "removed": 0,
+    "unchanged": 1
+   },
+   "level": {
+    "changed": 0,
+    "added": 0,
+    "removed": 0,
+    "unchanged": 1
+   },
+   "site": {
+    "changed": 0,
+    "added": 0,
+    "removed": 0,
+    "unchanged": 1
+   },
+   "fixture": {
+    "changed": 0,
+    "added": 0,
+    "removed": 13,
+    "unchanged": 32
+   }
+  },
+  "region": {
+   "x0": 8.13,
+   "x1": 13.33,
+   "y0": 3.13,
+   "y1": 18.83
+  },
+  "changed": [
+   {
+    "key": "O|o2",
+    "kind": "opening",
+    "name_ar": "فتحة مفتوحة بين «الصالة» و«مدخل العائلة»",
+    "how_ar": "تغيّر موضعها أو مقاسها أو نوعها"
+   },
+   {
+    "key": "O|o27",
+    "kind": "opening",
+    "name_ar": "نافذة بين «الصالة» و«الخارج»",
+    "how_ar": "تغيّر موضعها أو مقاسها أو نوعها"
+   },
+   {
+    "key": "R|L1|r1",
+    "kind": "room",
+    "name_ar": "«مدخل العائلة»",
+    "how_ar": "المساحة 13.99 ← 12.34 م²"
+   },
+   {
+    "key": "R|L1|r2",
+    "kind": "room",
+    "name_ar": "«الصالة»",
+    "how_ar": "المساحة 37.87 ← 42.3 م²"
+   }
+  ],
+  "added": [
+   {
+    "key": "W|L1|10.93,8.53|8.13,8.53",
+    "kind": "wall",
+    "name_ar": "جدار خارجي لـ«الصالة»"
+   },
+   {
+    "key": "W|L1|10.93,8.53|12.43,8.53",
+    "kind": "wall",
+    "name_ar": "جدار بين «الصالة» و«مدخل العائلة»"
+   },
+   {
+    "key": "W|L1|8.13,8.53|8.13,9.63",
+    "kind": "wall",
+    "name_ar": "جدار خارجي لـ«الصالة»"
+   },
+   {
+    "key": "W|L1|12.43,8.53|12.43,9.63",
+    "kind": "wall",
+    "name_ar": "جدار بين «الصالة» و«مدخل العائلة»"
+   }
+  ],
+  "removed": [
+   {
+    "key": "W|L1|10.93,3.13|10.93,9.63",
+    "kind": "wall",
+    "name_ar": "جدار خارجي لـ«مدخل العائلة»"
+   },
+   {
+    "key": "W|L1|10.93,9.63|8.13,9.63",
+    "kind": "wall",
+    "name_ar": "جدار خارجي لـ«الصالة»"
+   },
+   {
+    "key": "W|L1|10.93,9.63|12.43,9.63",
+    "kind": "wall",
+    "name_ar": "جدار بين «الصالة» و«مدخل العائلة»"
+   }
+  ],
+  "summary_ar": "البصمة الهندسية: تغيّر 11 عنصرًا (7 جدران، فتحتان، غرفتان)، وبقي ثابتًا حرفيًا 136 عنصرًا؛ وتغيّر من الأثاث 13 قطعةَ أثاث."
+ },
+ "fpMarks": {
+  "before": [
+   {
+    "level": "L1",
+    "a": {
+     "x": 10.93,
+     "y": 3.13
+    },
+    "b": {
+     "x": 10.93,
+     "y": 9.63
+    },
+    "color": "#d62828"
+   },
+   {
+    "level": "L1",
+    "a": {
+     "x": 10.93,
+     "y": 9.63
+    },
+    "b": {
+     "x": 8.13,
+     "y": 9.63
+    },
+    "color": "#d62828"
+   },
+   {
+    "level": "L1",
+    "a": {
+     "x": 10.93,
+     "y": 9.63
+    },
+    "b": {
+     "x": 12.43,
+     "y": 9.63
+    },
+    "color": "#d62828"
+   },
+   {
+    "level": "L1",
+    "box": {
+     "x0": 11.21,
+     "x1": 12.21,
+     "y0": 9.57,
+     "y1": 9.69
+    },
+    "color": "#d62828"
+   },
+   {
+    "level": "L1",
+    "box": {
+     "x0": 8.83,
+     "x1": 10.23,
+     "y0": 9.51,
+     "y1": 9.76
+    },
+    "color": "#d62828"
+   }
+  ],
+  "after": [
+   {
+    "level": "L1",
+    "a": {
+     "x": 10.93,
+     "y": 8.53
+    },
+    "b": {
+     "x": 8.13,
+     "y": 8.53
+    },
+    "color": "#7b2cbf"
+   },
+   {
+    "level": "L1",
+    "a": {
+     "x": 10.93,
+     "y": 8.53
+    },
+    "b": {
+     "x": 12.43,
+     "y": 8.53
+    },
+    "color": "#7b2cbf"
+   },
+   {
+    "level": "L1",
+    "a": {
+     "x": 8.13,
+     "y": 8.53
+    },
+    "b": {
+     "x": 8.13,
+     "y": 9.63
+    },
+    "color": "#7b2cbf"
+   },
+   {
+    "level": "L1",
+    "a": {
+     "x": 12.43,
+     "y": 8.53
+    },
+    "b": {
+     "x": 12.43,
+     "y": 9.63
+    },
+    "color": "#7b2cbf"
+   },
+   {
+    "level": "L1",
+    "box": {
+     "x0": 11.21,
+     "x1": 12.21,
+     "y0": 8.47,
+     "y1": 8.59
+    },
+    "color": "#7b2cbf"
+   },
+   {
+    "level": "L1",
+    "box": {
+     "x0": 8.83,
+     "x1": 10.23,
+     "y0": 8.4,
+     "y1": 8.65
+    },
+    "color": "#7b2cbf"
+   }
+  ]
+ },
+ "replyFingerprint": {
+  "changed": 4,
+  "added": 4,
+  "removed": 3,
+  "unchanged": 136,
+  "touched": 11,
+  "total": 147
+ },
+ "restoreProof": null,
+ "mode": "local",
+ "summary": "نُفّذ: «الصالة» أكبر قليلًا (أُزيح الجدار المشترك مع «مدخل العائلة» 1.1 م). تغيّر أيضًا لأن التعديل يحتاجه: «مدخل العائلة» صغرت من 13.99 إلى 12.34 م² (-11.8٪). بقية الغرف (21) كما هي مقيسًا. البصمة الهندسية: تغيّر 11 عنصرًا (7 جدران، فتحتان، غرفتان)، وبقي ثابتًا حرفيًا 136 عنصرًا؛ وتغيّر من الأثاث 13 قطعةَ أثاث.",
+ "declared": [
+  "مدخل العائلة"
+ ],
+ "undeclared": 0,
+ "fallback": null,
+ "questionsAsked": 0,
+ "ifConsented": null,
+ "replyMs": 359
+}

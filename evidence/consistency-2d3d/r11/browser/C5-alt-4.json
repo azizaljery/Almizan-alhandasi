@@ -1,0 +1,318 @@
+{
+ "source": "evidence/acceptance/after-11/C5/alt-4.json",
+ "mode": "browser",
+ "ms": 8178,
+ "pageErrors": [],
+ "summary": {
+  "walls": 19,
+  "openings": 32,
+  "rooms": 17,
+  "levels": 1,
+  "mismatches": 0,
+  "major": 0,
+  "minor": 0,
+  "byCode": {}
+ },
+ "mismatches": [],
+ "measured": {
+  "levels": [
+   {
+    "id": "L1",
+    "elevation": 0,
+    "height": 3.2,
+    "top": 3.2
+   }
+  ],
+  "openings": {
+   "o1": {
+    "found": true,
+    "s0": 7.35,
+    "s1": 8.95,
+    "center": 8.15,
+    "width": 1.6,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o2": {
+    "found": true,
+    "s0": 7.168,
+    "s1": 9.068,
+    "center": 8.118,
+    "width": 1.9,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o3": {
+    "found": true,
+    "s0": 8.067,
+    "s1": 9.067,
+    "center": 8.567,
+    "width": 1,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o4": {
+    "found": true,
+    "s0": 5.6,
+    "s1": 6.7,
+    "center": 6.15,
+    "width": 1.1,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o5": {
+    "found": true,
+    "s0": 0.5,
+    "s1": 1.9,
+    "center": 1.2,
+    "width": 1.4,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o6": {
+    "found": true,
+    "s0": 0.4,
+    "s1": 1.2,
+    "center": 0.8,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o7": {
+    "found": true,
+    "s0": 0.85,
+    "s1": 2.65,
+    "center": 1.75,
+    "width": 1.8,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o8": {
+    "found": true,
+    "s0": 4.675,
+    "s1": 5.625,
+    "center": 5.15,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o9": {
+    "found": true,
+    "s0": 0.225,
+    "s1": 1.175,
+    "center": 0.7,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o10": {
+    "found": true,
+    "s0": 0.225,
+    "s1": 1.175,
+    "center": 0.7,
+    "width": 0.95,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o11": {
+    "found": true,
+    "s0": 0.8,
+    "s1": 1.6,
+    "center": 1.2,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o12": {
+    "found": true,
+    "s0": 6.725,
+    "s1": 7.675,
+    "center": 7.2,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o13": {
+    "found": true,
+    "s0": 2.525,
+    "s1": 3.475,
+    "center": 3,
+    "width": 0.95,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o14": {
+    "found": true,
+    "s0": 0.65,
+    "s1": 1.45,
+    "center": 1.05,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o15": {
+    "found": true,
+    "s0": 10.417,
+    "s1": 11.317,
+    "center": 10.867,
+    "width": 0.9,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o16": {
+    "found": true,
+    "s0": 6.218,
+    "s1": 7.118,
+    "center": 6.668,
+    "width": 0.9,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o17": {
+    "found": true,
+    "s0": 0.65,
+    "s1": 1.45,
+    "center": 1.05,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o18": {
+    "found": true,
+    "s0": 1.7,
+    "s1": 2.65,
+    "center": 2.175,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o19": {
+    "found": true,
+    "s0": 1.825,
+    "s1": 3.025,
+    "center": 2.425,
+    "width": 1.2,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o20": {
+    "found": true,
+    "s0": 5.586,
+    "s1": 7.786,
+    "center": 6.686,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o21": {
+    "found": true,
+    "s0": 8.714,
+    "s1": 10.914,
+    "center": 9.814,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o22": {
+    "found": true,
+    "s0": 16.85,
+    "s1": 18.05,
+    "center": 17.45,
+    "width": 1.2,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o23": {
+    "found": true,
+    "s0": 8.075,
+    "s1": 9.075,
+    "center": 8.575,
+    "width": 1,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o24": {
+    "found": true,
+    "s0": 1.325,
+    "s1": 3.525,
+    "center": 2.425,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o25": {
+    "found": true,
+    "s0": 1.575,
+    "s1": 3.775,
+    "center": 2.675,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o26": {
+    "found": true,
+    "s0": 5.5,
+    "s1": 7.7,
+    "center": 6.6,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o27": {
+    "found": true,
+    "s0": 9.3,
+    "s1": 10.7,
+    "center": 10,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o28": {
+    "found": true,
+    "s0": 12.65,
+    "s1": 14.85,
+    "center": 13.75,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o29": {
+    "found": true,
+    "s0": 17,
+    "s1": 18.4,
+    "center": 17.7,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o30": {
+    "found": true,
+    "s0": 20.7,
+    "s1": 22.1,
+    "center": 21.4,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o31": {
+    "found": true,
+    "s0": 2.175,
+    "s1": 3.575,
+    "center": 2.875,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o32": {
+    "found": true,
+    "s0": 6.2,
+    "s1": 7.4,
+    "center": 6.8,
+    "width": 1.2,
+    "head": 2.2,
+    "sill": 1
+   }
+  },
+  "stairs": []
+ }
+}

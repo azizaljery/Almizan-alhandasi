@@ -1,0 +1,827 @@
+{
+ "disclaimer": "مراجعة مبدئية — ليست تصميمًا إنشائيًا ولا تغني عن مهندس إنشائي مرخّص",
+ "limitsNote": "الحدود المستعملة قيم تصميمية استرشادية لم يُتحقق منها مقابل كود البناء السعودي (SBC 304) ولا بحساب إنشائي.",
+ "generatedFrom": "evidence/acceptance/after-11",
+ "docs": [
+  {
+   "key": "C1-alt-1",
+   "source": "evidence/acceptance/after-11/C1/alt-1.json",
+   "ms": 64,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 36,
+     "maxSpan": {
+      "room": "r3",
+      "name": "مجلس الرجال",
+      "span": 4.82
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.22,
+      "fill": 0.89,
+      "w": 16.9,
+      "l": 20.7,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C1-alt-2",
+   "source": "evidence/acceptance/after-11/C1/alt-2.json",
+   "ms": 19,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 40,
+     "maxSpan": {
+      "room": "r12",
+      "name": "مجلس الرجال",
+      "span": 4.51
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.18,
+      "fill": 0.88,
+      "w": 16.8,
+      "l": 19.85,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C2-alt-1",
+   "source": "evidence/acceptance/after-11/C2/alt-1.json",
+   "ms": 26,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 2
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 36,
+     "maxSpan": {
+      "room": "r3",
+      "name": "الصالة",
+      "span": 4.88
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.21,
+      "fill": 0.82,
+      "w": 16.65,
+      "l": 20.1,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C3-alt-1",
+   "source": "evidence/acceptance/after-11/C3/alt-1.json",
+   "ms": 14,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 33,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.83
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.09,
+      "fill": 0.89,
+      "w": 16.2,
+      "l": 17.6,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C3-alt-2",
+   "source": "evidence/acceptance/after-11/C3/alt-2.json",
+   "ms": 14,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 0
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 26,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.83
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.11,
+      "fill": 0.89,
+      "w": 15.65,
+      "l": 17.35,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C4-alt-1",
+   "source": "evidence/acceptance/after-11/C4/alt-1.json",
+   "ms": 11,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 23,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.97
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 2.61,
+      "fill": 1,
+      "w": 8.9,
+      "l": 23.2,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C5-alt-1",
+   "source": "evidence/acceptance/after-11/C5/alt-1.json",
+   "ms": 13,
+   "counts": {
+    "serious": 0,
+    "warn": 1,
+    "info": 0
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 26,
+     "maxSpan": {
+      "room": "r12",
+      "name": "المجلس",
+      "span": 5.11
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.21,
+      "fill": 0.9,
+      "w": 14.55,
+      "l": 17.65,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [
+    {
+     "code": "SLAB_SPAN",
+     "level": "L1",
+     "message": "بحر صافٍ ≈ 5.11 م في «المجلس» (الدور الأرضي) يتجاوز 5.00 م: بلاطة مصمتة بهذا البحر تحتاج عادة جسورًا ساقطة أو عمودًا وسطيًا أو نظام بلاطة آخر يقرره مهندس إنشائي.",
+     "elements": [
+      "r12"
+     ]
+    }
+   ],
+   "images": []
+  },
+  {
+   "key": "C5-alt-2",
+   "source": "evidence/acceptance/after-11/C5/alt-2.json",
+   "ms": 15,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 2
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 37,
+     "maxSpan": {
+      "room": "r5",
+      "name": "المجلس",
+      "span": 4.97
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.2,
+      "fill": 0.72,
+      "w": 16.35,
+      "l": 19.6,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C5-alt-3",
+   "source": "evidence/acceptance/after-11/C5/alt-3.json",
+   "ms": 20,
+   "counts": {
+    "serious": 0,
+    "warn": 1,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 34,
+     "maxSpan": {
+      "room": "r5",
+      "name": "المجلس",
+      "span": 5.61
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.04,
+      "fill": 0.86,
+      "w": 16.85,
+      "l": 17.5,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [
+    {
+     "code": "SLAB_SPAN",
+     "level": "L1",
+     "message": "بحر صافٍ ≈ 5.61 م في «المجلس» (الدور الأرضي) يتجاوز 5.00 م: بلاطة مصمتة بهذا البحر تحتاج عادة جسورًا ساقطة أو عمودًا وسطيًا أو نظام بلاطة آخر يقرره مهندس إنشائي.",
+     "elements": [
+      "r5"
+     ]
+    }
+   ],
+   "images": []
+  },
+  {
+   "key": "C5-alt-4",
+   "source": "evidence/acceptance/after-11/C5/alt-4.json",
+   "ms": 10,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 27,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.82
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 2.45,
+      "fill": 1,
+      "w": 9.6,
+      "l": 23.5,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C6-alt-1",
+   "source": "evidence/acceptance/after-11/C6/alt-1.json",
+   "ms": 9,
+   "counts": {
+    "serious": 0,
+    "warn": 1,
+    "info": 2
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 28,
+     "maxSpan": {
+      "room": "r6",
+      "name": "المجلس",
+      "span": 5.07
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.02,
+      "fill": 0.8,
+      "w": 16.45,
+      "l": 16.7,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [
+    {
+     "code": "SLAB_SPAN",
+     "level": "L1",
+     "message": "بحر صافٍ ≈ 5.07 م في «المجلس» (الدور الأرضي) يتجاوز 5.00 م: بلاطة مصمتة بهذا البحر تحتاج عادة جسورًا ساقطة أو عمودًا وسطيًا أو نظام بلاطة آخر يقرره مهندس إنشائي.",
+     "elements": [
+      "r6"
+     ]
+    }
+   ],
+   "images": []
+  },
+  {
+   "key": "C7-alt-1",
+   "source": "evidence/acceptance/after-11/C7/alt-1.json",
+   "ms": 34,
+   "counts": {
+    "serious": 0,
+    "warn": 8,
+    "info": 7
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 19,
+     "maxSpan": {
+      "room": "r4",
+      "name": "المجلس",
+      "span": 4.57
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.04,
+      "fill": 1,
+      "w": 12.45,
+      "l": 13,
+      "parts": 1
+     },
+     "mass": null
+    },
+    {
+     "id": "L2",
+     "columns": 20,
+     "maxSpan": {
+      "room": "r14",
+      "name": "غرفة النوم الرئيسية",
+      "span": 4.57
+     },
+     "columnContinuity": {
+      "total": 20,
+      "aligned": 16,
+      "offset": 0,
+      "onWall": 4,
+      "none": 0,
+      "intermediate": 0,
+      "pct": 80
+     },
+     "wetStacking": {
+      "upper": 4,
+      "stacked": 1,
+      "pct": 25
+     },
+     "shape": null,
+     "mass": {
+      "areaRatio": 0.93,
+      "eccX": 0.02,
+      "eccY": 0.03
+     }
+    }
+   ],
+   "serious": [],
+   "warn": [
+    {
+     "code": "WALL_ON_BEAM",
+     "level": "L2",
+     "message": "الجدار w32 (الدور الأول، سماكة 25 سم) محمول على جسر/بلاطة بطول 3.80 م بين ركيزتين في الدور الأرضي (لا جدار تحته).",
+     "elements": [
+      "w32"
+     ]
+    },
+    {
+     "code": "COLUMN_ON_WALL",
+     "level": "L2",
+     "message": "العمود المقترح L2-C4 (الدور الأول) يقع فوق الجدار w4 لا فوق عمود: جدار البلوك لا يحمل عمودًا؛ يلزم عمود تحته أو جسر تحويل.",
+     "elements": [
+      "L2-C4",
+      "w4"
+     ]
+    },
+    {
+     "code": "COLUMN_ON_WALL",
+     "level": "L2",
+     "message": "العمود المقترح L2-C5 (الدور الأول) يقع فوق الجدار w1 لا فوق عمود: جدار البلوك لا يحمل عمودًا؛ يلزم عمود تحته أو جسر تحويل.",
+     "elements": [
+      "L2-C5",
+      "w1"
+     ]
+    },
+    {
+     "code": "COLUMN_ON_WALL",
+     "level": "L2",
+     "message": "العمود المقترح L2-C6 (الدور الأول) يقع فوق الجدار w3 لا فوق عمود: جدار البلوك لا يحمل عمودًا؛ يلزم عمود تحته أو جسر تحويل.",
+     "elements": [
+      "L2-C6",
+      "w3"
+     ]
+    },
+    {
+     "code": "COLUMN_ON_WALL",
+     "level": "L2",
+     "message": "العمود المقترح L2-C10 (الدور الأول) يقع فوق الجدار w2 لا فوق عمود: جدار البلوك لا يحمل عمودًا؛ يلزم عمود تحته أو جسر تحويل.",
+     "elements": [
+      "L2-C10",
+      "w2"
+     ]
+    },
+    {
+     "code": "WET_NOT_STACKED",
+     "level": "L2",
+     "message": "«حمام غرفة 5» (الدور الأول) ليس فوق فراغ رطب؛ تحته «صالة الطعام»: مواسير الصرف ستمر في سقف فراغ معيشي أو تحتاج مسارًا رأسيًا مستقلًا (تنسيق MEP).",
+     "elements": [
+      "r24",
+      "r10"
+     ]
+    },
+    {
+     "code": "WET_NOT_STACKED",
+     "level": "L2",
+     "message": "«حمام غرفة 3» (الدور الأول) ليس فوق فراغ رطب؛ تحته «الصالة»: مواسير الصرف ستمر في سقف فراغ معيشي أو تحتاج مسارًا رأسيًا مستقلًا (تنسيق MEP).",
+     "elements": [
+      "r22",
+      "r2"
+     ]
+    },
+    {
+     "code": "WET_NOT_STACKED",
+     "level": "L2",
+     "message": "«حمام الرئيسية» (الدور الأول) ليس فوق فراغ رطب؛ تحته «المجلس»: مواسير الصرف ستمر في سقف فراغ معيشي أو تحتاج مسارًا رأسيًا مستقلًا (تنسيق MEP).",
+     "elements": [
+      "r15",
+      "r4"
+     ]
+    }
+   ],
+   "images": [
+    "evidence/structural-precheck/r11/C7-alt-1-L1.png",
+    "evidence/structural-precheck/r11/C7-alt-1-L2.png"
+   ]
+  },
+  {
+   "key": "C8-alt-1",
+   "source": "evidence/acceptance/after-11/C8/alt-1.json",
+   "ms": 15,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 34,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.88
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.51,
+      "fill": 0.89,
+      "w": 14.9,
+      "l": 22.5,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C8-alt-2",
+   "source": "evidence/acceptance/after-11/C8/alt-2.json",
+   "ms": 12,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 2
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 32,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.88
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.21,
+      "fill": 0.73,
+      "w": 16.6,
+      "l": 20.1,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C9-alt-1",
+   "source": "evidence/acceptance/after-11/C9/alt-1.json",
+   "ms": 11,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 2
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 30,
+     "maxSpan": {
+      "room": "r4",
+      "name": "المجلس",
+      "span": 4.17
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.01,
+      "fill": 0.81,
+      "w": 16.05,
+      "l": 16.2,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C9-alt-2",
+   "source": "evidence/acceptance/after-11/C9/alt-2.json",
+   "ms": 11,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 27,
+     "maxSpan": {
+      "room": "r4",
+      "name": "المجلس",
+      "span": 4.82
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 2.5,
+      "fill": 1,
+      "w": 9.45,
+      "l": 23.65,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C10-alt-1",
+   "source": "evidence/acceptance/after-11/C10/alt-1.json",
+   "ms": 13,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 37,
+     "maxSpan": {
+      "room": "r2",
+      "name": "الصالة",
+      "span": 4.93
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.09,
+      "fill": 0.9,
+      "w": 16.9,
+      "l": 18.35,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C10-alt-2",
+   "source": "evidence/acceptance/after-11/C10/alt-2.json",
+   "ms": 16,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 43,
+     "maxSpan": {
+      "room": "r13",
+      "name": "مجلس الرجال",
+      "span": 4.82
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.21,
+      "fill": 1,
+      "w": 16.8,
+      "l": 20.4,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C10-alt-3",
+   "source": "evidence/acceptance/after-11/C10/alt-3.json",
+   "ms": 13,
+   "counts": {
+    "serious": 0,
+    "warn": 0,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 38,
+     "maxSpan": {
+      "room": "r10",
+      "name": "مجلس الرجال",
+      "span": 4.26
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.19,
+      "fill": 0.88,
+      "w": 16.45,
+      "l": 19.6,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [],
+   "images": []
+  },
+  {
+   "key": "C10-alt-4",
+   "source": "evidence/acceptance/after-11/C10/alt-4.json",
+   "ms": 14,
+   "counts": {
+    "serious": 0,
+    "warn": 1,
+    "info": 1
+   },
+   "levels": [
+    {
+     "id": "L1",
+     "columns": 38,
+     "maxSpan": {
+      "room": "r7",
+      "name": "مجلس الرجال",
+      "span": 5.03
+     },
+     "columnContinuity": null,
+     "wetStacking": null,
+     "shape": {
+      "aspect": 1.36,
+      "fill": 0.97,
+      "w": 15.2,
+      "l": 20.7,
+      "parts": 1
+     },
+     "mass": null
+    }
+   ],
+   "serious": [],
+   "warn": [
+    {
+     "code": "SLAB_SPAN",
+     "level": "L1",
+     "message": "بحر صافٍ ≈ 5.03 م في «مجلس الرجال» (الدور الأرضي) يتجاوز 5.00 م: بلاطة مصمتة بهذا البحر تحتاج عادة جسورًا ساقطة أو عمودًا وسطيًا أو نظام بلاطة آخر يقرره مهندس إنشائي.",
+     "elements": [
+      "r7"
+     ]
+    }
+   ],
+   "images": []
+  }
+ ]
+}

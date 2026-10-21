@@ -1,0 +1,264 @@
+{
+ "id": "C7",
+ "engine": "v2",
+ "name": "تصميم متعدد الأدوار",
+ "text": "دورين: المجالس والطعام والمطبخ تحت، و5 غرف نوم فوق، والماستر في الدور العلوي بعيدة عن الدرج، وغرفة لأمي في الأرضي",
+ "understood": [
+  "5 غرف نوم",
+  "غرفة نوم رئيسية (ماستر)",
+  "غرفة نوم قريبة من الصالة لكبار السن",
+  "دوران (أرضي وأول)",
+  "«المجلس» في الدور الأرضي",
+  "«الطعام» في الدور الأرضي",
+  "«المطبخ» في الدور الأرضي",
+  "«غرف النوم» في الدور العلوي",
+  "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»",
+  "«غرفة النوم الرئيسية» في الدور العلوي",
+  "«غرفة كبار السن» في الدور الأرضي"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "rearstair",
+   "pat": "rearstair:c1/ulounge",
+   "summary": "السلم في الخلف بجوار الصالة: المدخل فالصالة في المحور، والمجلس وغرفة الأرضي جناح، والطعام والمطبخ جناح مقابل؛ والعلوي: ردهة الدرج تفتح على صالة علوية خلفية تطل على الحديقة، والغرف حولها (دوران)",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 98.04,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 8,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 2,
+        "info": 18
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": null,
+   "smallestBedroom": {
+    "name": "غرفة نوم 5",
+    "area": 14.03
+   },
+   "kitchen": {
+    "w": 3.62,
+    "l": 3.93,
+    "area": 14.21
+   },
+   "narrowestSubCirculation": {
+    "name": "مغاسل",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 8.32,
+    "ratio": 2.04
+   },
+   "rooms": 24,
+   "net": 275.29,
+   "circulationPct": 7.71,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«المجلس» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«الطعام» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرف النوم» في الدور العلوي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة النوم الرئيسية» في الدور العلوي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دوران",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": "«غرفة كبار السن» تلاصق الصالة."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 22174,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "rearstair"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 13,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [],
+  "allDistinct": true,
+  "minSubstantive": null,
+  "minTotal": null
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 16، اجتاز البوابات منهم 3؛ ورُفض 12 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي، و1 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («غرفة النوم الرئيسية» بعيدًا عن «الدرج»)؛ 1 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}

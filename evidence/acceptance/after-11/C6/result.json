@@ -1,0 +1,248 @@
+{
+ "id": "C6",
+ "engine": "v2",
+ "name": "تصميم بطابق واحد",
+ "text": "دور واحد، ثلاث غرف نوم بالضبط، المطبخ 4×5، مجلس 5×6، والمطبخ في الخلف",
+ "understood": [
+  "3 غرف نوم (بالضبط)",
+  "المجلس 5×6 م (30 م²)",
+  "المطبخ 4×5 م (20 م²)",
+  "دور واحد",
+  "«المطبخ» في الخلف"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "yoo",
+   "pat": "yoo:u0r",
+   "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 98.34,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 1,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 2
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.28,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 15.09
+   },
+   "kitchen": {
+    "w": 3.82,
+    "l": 5.02,
+    "area": 18.89
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 5.57,
+    "ratio": 1.36
+   },
+   "rooms": 16,
+   "net": 193.23,
+   "circulationPct": 15.27,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بمساحة 30 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 31.5 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بمساحة 20 م² تقريبًا",
+     "ok": true,
+     "why": "الفعلي 18.9 م² (صافٍ داخل الجدران)."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المجلس» بأبعاد 5×6 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 5.1×6.2 م (المستطيل الصافي داخل الجدران)."
+    },
+    {
+     "text": "«المطبخ» بأبعاد 4×5 م (±0.3 م)",
+     "ok": true,
+     "why": "الفعلي 3.8×5 م (المستطيل الصافي داخل الجدران)."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 4583,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "yoo"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 3,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [],
+  "allDistinct": true,
+  "minSubstantive": null,
+  "minTotal": null
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 13، اجتاز البوابات منهم 10؛ ورُفض 3 في بوابات الجودة والسلامة؛ 4 تخالف بندًا صريحًا من الطلب («المطبخ» في الخلف)؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 1 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 2 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}

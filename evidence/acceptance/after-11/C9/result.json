@@ -1,0 +1,622 @@
+{
+ "id": "C9",
+ "engine": "v2",
+ "name": "تغيير الواجهة دون تغيير المخطط",
+ "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [
+  "3 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "yoo",
+   "pat": "yoo:u0",
+   "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.04,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 0,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 3
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 8.36,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.57
+   },
+   "kitchen": {
+    "w": 4.1,
+    "l": 4.46,
+    "area": 18.31
+   },
+   "narrowestSubCirculation": {
+    "name": "مغاسل",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 6.57,
+    "ratio": 1.61
+   },
+   "rooms": 17,
+   "net": 182.51,
+   "circulationPct": 16.44,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "sidehall",
+   "pat": "sidehall:n0",
+   "summary": "جناح خدمة على جانب وصالة على الجانب المقابل، وغرف النوم خلفهما على ممر",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.19,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 0,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 1,
+        "info": 0
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 11.42,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 19.03
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 4.01,
+    "area": 12.77
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.81,
+    "l": 6.68,
+    "ratio": 1.39
+   },
+   "rooms": 17,
+   "net": 197.16,
+   "circulationPct": 17.72,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 6842,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 2,
+ "diversity": [
+  [
+   0,
+   0.33
+  ],
+  [
+   0.33,
+   0
+  ]
+ ],
+ "modes": [
+  "yoo",
+  "sidehall"
+ ],
+ "minDifference": 0.33,
+ "meanDifference": 0.33,
+ "rejectedCandidates": 4,
+ "archDiversity": [
+  [
+   0,
+   0.392
+  ],
+  [
+   0.392,
+   0
+  ]
+ ],
+ "minArchDifference": 0.392,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [
+   {
+    "pair": [
+     1,
+     2
+    ],
+    "verdict": "distinct",
+    "verdict_ar": "مختلف معماريًا",
+    "substantive": [
+     "zoning",
+     "relations"
+    ],
+    "dims": {
+     "zoning": 0.342,
+     "circulation": 0.208,
+     "privacy": 0.104,
+     "relations": 0.347
+    },
+    "total": 0.262,
+    "explanation_ar": "الحكم: مختلف معماريًا — الأبعاد الجوهرية: توزيع الوظائف، العلاقات الأساسية (المطلوب بعدان على الأقل).\nتوزيع الوظائف (0.342، العتبة 0.25): مختلف جوهريًا — الدور الأرضي: النوم والخدمة غير متجاورين ← متجاوران؛ الدور الأرضي: الضيافة والنوم في جهتين متقابلتين ← في الجهة نفسها؛ الدور الأرضي: النوم والخدمة في جهتين متقابلتين ← في الجهة نفسها؛ الدور الأرضي: المعيشة العائلية في الوسط وسطًا، على الحديقة ← في الأمام على طرف؛ الدور الأرضي: النوم في الخلف على طرف ← في الخلف على طرف؛ الدور الأرضي: الخدمة في الخلف على طرف، على الحديقة ← في الوسط على طرف.\nبنية الحركة (0.208، العتبة 0.25): متقارب — الدور الأرضي: حلقات الحركة 0 ← 1؛ تسلسل المداخل: مدخل العائلة→الصالة، المجلس ← مدخل العائلة→الصالة، مدخل الرجال→المجلس.\nتدرّج الخصوصية (0.104، العتبة 0.2): متقارب — الدور الأرضي: ترتيب النطاقات من الأعم إلى الأخص كان «الضيافة ثم المعيشة العائلية ثم النوم ثم الخدمة» فصار «الضيافة ثم المعيشة العائلية ثم الخدمة ثم النوم».\nالعلاقات الأساسية (0.347، العتبة 0.2): مختلف جوهريًا — المطبخ–الصالة: عبر فراغ وسيط ← متصلان مباشرة؛ الصالة–الحديقة الخلفية: متصلان مباشرة ← بعيدان/منفصلان؛ باب خدمة للمطبخ: متصلان مباشرة ← بعيدان/منفصلان؛ المجلس–دورة مياه الضيوف: متصلان مباشرة ← عبر فراغ وسيط؛ الرئيسية–غرف الأبناء: متصلان مباشرة ← عبر فراغ وسيط.\nغير محتسب بذاته: الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.748 ← 0.952، نسبة العرض للعمق 0.99 ← 0.387)."
+   }
+  ],
+  "allDistinct": true,
+  "minSubstantive": 2,
+  "minTotal": 0.262
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 12، اجتاز البوابات منهم 8؛ ورُفض 4 في بوابات الجودة والسلامة؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 4 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+ "edit": {
+  "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
+  "ms": 239,
+  "consentAsked": null,
+  "reply": {
+   "local": true,
+   "mode": "local",
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "pending": [],
+   "unverified": [],
+   "already": [],
+   "how": [
+    "صارت واجهة المجسّم حجر، والمخطط نفسه حرفيًا (لم يتحرك جدار)"
+   ],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": true,
+   "unchanged": false,
+   "reused": false,
+   "geometryIdentical": true,
+   "changed": [],
+   "unrequested": [],
+   "restored": null,
+   "otherFails": [],
+   "conflicts": [],
+   "questions": [],
+   "keptRooms": 17,
+   "alreadyTxt": [],
+   "fingerprint": {
+    "version": "plan-fingerprint/1.0.0",
+    "before": "42ca4717",
+    "after": "d47ba8cb",
+    "identical": false,
+    "counts": {
+     "changed": 1,
+     "added": 0,
+     "removed": 0,
+     "unchanged": 110,
+     "touched": 1,
+     "total": 111
+    },
+    "byKind": {
+     "wall": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 52
+     },
+     "opening": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 38
+     },
+     "room": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 17
+     },
+     "finish": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 0
+     },
+     "roof": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 1
+     },
+     "level": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 1
+     },
+     "site": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 1
+     },
+     "fixture": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 25
+     }
+    },
+    "region": null,
+    "changed": [
+     {
+      "key": "F|finish",
+      "kind": "finish",
+      "name_ar": "الواجهة والتشطيب",
+      "how_ar": "تغيّر"
+     }
+    ],
+    "added": [],
+    "removed": [],
+    "summary_ar": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 110 عنصرًا."
+   },
+   "summary_ar": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر، والمخطط نفسه حرفيًا (لم يتحرك جدار)). بقية الغرف (17) كما هي مقيسًا، والجدران والفتحات نفسها حرفيًا. البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 110 عنصرًا.",
+   "version": 2
+  },
+  "beforePattern": "yoo:u0",
+  "afterPattern": "yoo:u0",
+  "samePattern": true,
+  "difference": 0,
+  "roomsKept": true,
+  "roomsLost": [],
+  "programRoomsKept": true,
+  "programRoomsLost": [],
+  "editLedgerBefore": [
+   {
+    "text": "3 غرف نوم",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "الواجهة: حجر",
+    "status": "pending-render",
+    "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+   }
+  ],
+  "after": {
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 8.36,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.57
+   },
+   "kitchen": {
+    "w": 4.1,
+    "l": 4.46,
+    "area": 18.31
+   },
+   "narrowestSubCirculation": {
+    "name": "مغاسل",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 6.57,
+    "ratio": 1.61
+   },
+   "rooms": 17,
+   "net": 182.51,
+   "circulationPct": 16.44,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "الواجهة: حجر",
+     "ok": false,
+     "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+    }
+   ],
+   "ledgerFails": 1
+  }
+ },
+ "editAll": [
+  {
+   "alt": 1,
+   "consentAsked": null,
+   "beforePattern": "yoo:u0",
+   "afterPattern": "yoo:u0",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "تعديل موضعي: الواجهة: حجر"
+  },
+  {
+   "alt": 2,
+   "consentAsked": null,
+   "beforePattern": "sidehall:n0",
+   "afterPattern": "sidehall:n0",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "تعديل موضعي: الواجهة: حجر"
+  }
+ ]
+}
