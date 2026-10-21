@@ -23,8 +23,9 @@ import { checkStair, STAIR_RULES, stairClientRules } from './stair-geometry.mjs'
 import { structuralPrecheck, PRECHECK_DISCLAIMER } from './structural-precheck.mjs';
 import { circulationGate, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
 import { openingConsistency } from './draw/wall-geometry.mjs';
+import { SAUDI_GATES, measureSaudiProgram } from './saudi-program.mjs';
 
-export const PLAN_REVIEW_VERSION = 'plan-review/1.3.0';
+export const PLAN_REVIEW_VERSION = 'plan-review/1.4.0'; // الجولة الثانية عشرة: بوابات البرنامج السعودي والموقع والمناخ (شرط العميل بوابة، والافتراضي ملاحظة)
 export const UNVERIFIED_AR = 'قيمة تصميمية غير متحققة نظاميًا';
 export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للميزان';
 /**
@@ -109,6 +110,8 @@ export const GATES = Object.freeze([
   { id: 'STRUCTURAL', ar: 'لا ملاحظة جسيمة في المراجعة الإنشائية المبدئية (مراجعة مبدئية لا تصميم إنشائي)' },
   { id: 'CIRCULATION', ar: 'الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب' },
   { id: 'CONSISTENCY_2D3D', ar: 'كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران)' },
+  // (الجولة الثانية عشرة) البرنامج السعودي والموقع والمناخ: بوابة إن طلبه العميل نصًا، وملاحظة إن كان قيمة افتراضية للميزان
+  ...SAUDI_GATES,
 ]);
 /** بوابة على مستوى مجموعة البدائل (reviewDesigns مع distinct): البديل ليس نسخة شكلية من بديل أعلى منه. */
 export const SET_GATES = Object.freeze([{ id: 'DISTINCT', ar: 'البديل «مختلف معماريًا» (v2: بعدان جوهريان على الأقل من توزيع الوظائف والحركة والخصوصية والعلاقات) عن كل بديل أعلى منه' }]);
@@ -456,6 +459,12 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc), { heav
       if (!res.ok) bad.push(`${r.text}: ${res.why}`);
     }
     gates.push(gateResult('PLACEMENT', !bad.length, { checked, unchecked }, 'كل موضع مطلوب محقق', bad, { source: 'نص طلب العميل (extractRequirements) + ' + DESIGN_THRESHOLDS.placementHalf.source, applicable: checked.length > 0 }));
+  }
+  // 15) (الجولة الثانية عشرة) البرنامج السعودي والموقع والمناخ — مقيسة من المستند؛ الطبقة من الطلب: شرط العميل يرسب، والافتراضي ملاحظة
+  for (const g of measureSaudiProgram(doc, request, model)) {
+    const tier = g.clientAsked ? 'client' : 'mizan-default', ok = g.pass || !g.clientAsked || !g.applicable;
+    gates.push(gateResult(g.id, ok, { pass: g.pass, ...g.value }, g.ar, g.clientAsked ? g.reasons_ar : [], { tier, applicable: g.applicable, notes_ar: g.clientAsked ? [] : g.reasons_ar.map(x => `${x} (${MIZAN_DEFAULT_AR}؛ ملاحظة)`),
+      source: g.clientAsked ? 'طلب العميل نصًا' : MIZAN_DEFAULT_AR + '، ' + UNVERIFIED_AR }));
   }
   const want = heavy === true ? HEAVY_GATES : Array.isArray(heavy) ? heavy : [];
   for (const id of want) gates.push(heavyGate(id, doc, request));

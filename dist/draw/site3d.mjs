@@ -50,10 +50,14 @@ export function buildSite(THREE, doc, lib, ctx) {
   const along = p => dot(sub(p, E0), eDir);
   const doorS = ctx.entryPoint ? Math.max(1.2, Math.min(eLen - 1.2, along(ctx.entryPoint))) : eLen / 2;
   const pedW = 1.1, carW = 4.2;
-  let carS = doorS + pedW / 2 + .6 + carW / 2;
-  if (carS + carW / 2 > eLen - .5) carS = doorS - pedW / 2 - .6 - carW / 2;
-  const hasCarGate = carS - carW / 2 > .4 && carS + carW / 2 < eLen - .4;
-  const gates = [{ kind: 'ped', s: doorS, w: pedW }]; if (hasCarGate) gates.push({ kind: 'car', s: carS, w: carW });
+  // (الجولة الثانية عشرة) مواقف مرسومة في المستند (مناطق garage): بوابة السيارات أمامها على الحد نفسه، والسيارات عليها
+  const bays = (doc.zones || []).filter(z => z.type === 'garage' && (z.polygon || []).length >= 3 && (!doc.levels?.[0] || z.level === doc.levels[0].id));
+  const bayOnEdge = bays.map(z => { const c = { x: z.polygon.reduce((a, p) => a + p.x, 0) / z.polygon.length, y: z.polygon.reduce((a, p) => a + p.y, 0) / z.polygon.length }; const ss = z.polygon.map(along); return { z, c, s0: Math.min(...ss), s1: Math.max(...ss), near: Math.abs(dot(sub(c, E0), eOut)) }; }).filter(b => b.near < 6.5);
+  let carS = doorS + pedW / 2 + .6 + carW / 2, carGW = carW;
+  if (bayOnEdge.length) { const s0 = Math.max(.35, Math.min(...bayOnEdge.map(b => b.s0)) - .1), s1 = Math.min(eLen - .35, Math.max(...bayOnEdge.map(b => b.s1)) + .1); carS = (s0 + s1) / 2; carGW = Math.max(2.6, s1 - s0); }
+  else if (carS + carW / 2 > eLen - .5) carS = doorS - pedW / 2 - .6 - carW / 2;
+  const hasCarGate = carS - carGW / 2 > .3 && carS + carGW / 2 < eLen - .3 && Math.abs(carS - doorS) > pedW / 2 + carGW / 2 + .2;
+  const gates = [{ kind: 'ped', s: doorS, w: pedW }]; if (hasCarGate) gates.push({ kind: 'car', s: carS, w: carGW });
   out.entryEdge = entryEdge; out.gates = gates.map(gt => ({ ...gt, pos: add(E0, mul(eDir, gt.s)), normal: eOut }));
 
   // ---- boundary wall ------------------------------------------------------------------------------------
@@ -119,23 +123,33 @@ export function buildSite(THREE, doc, lib, ctx) {
     out.path = { from, to };
   }
 
-  // ---- street (outside the entry edge) ------------------------------------------------------------------
-  {
-    const ext = 18, sw = 1.8, road = 7.4;
-    const s0 = -ext, s1 = eLen + ext;
-    const P = (s, o) => add(add(E0, mul(eDir, s)), mul(eOut, o));
-    const quad = (s0_, s1_, o0, o1) => [P(s0_, o0), P(s1_, o0), P(s1_, o1), P(s0_, o1)];
-    B.flatPoly('sidewalk', ccw(quad(s0, s1, .1, sw)), [], g0 - .0, 1, p => [p.x, -p.y]);
-    B.flatPoly('asphalt', ccw(quad(s0, s1, sw, sw + road)), [], g0 - .03, 1);
-    for (let s = s0; s < s1; s += 5) B.flatPoly('laneLine', ccw(quad(s, s + 2.6, sw + road / 2 - .08, sw + road / 2 + .08)), [], g0 - .028, 1);
-    B.flatPoly('sidewalk', ccw(quad(s0, s1, sw + road, sw + road + 1.6)), [], g0 - .0, 1, p => [p.x, -p.y]);
-    out.street = { edge: entryEdge };
+  // ---- streets: the entry edge and (Round 12) every other street side of the plot (corner plots show both streets) -------
+  const streetEdges = [entryEdge];
+  for (const sd of doc.streets || []) {
+    const v = ENTRY_VEC[sd]; if (!v) continue; let bi = -1, bs = -1;
+    plot.forEach((p, i) => { const q = plot[(i + 1) % plot.length], len = dist(p, q), d = norm(sub(q, p)), n = { x: d.y, y: -d.x }, s = dot(n, v); if (s > .7 && len * s > bs) { bs = len * s; bi = i; } });
+    if (bi >= 0 && !streetEdges.includes(bi)) streetEdges.push(bi);
   }
+  out.streets = [];
+  for (const ei of streetEdges) {
+    const A0 = plot[ei], A1 = plot[(ei + 1) % plot.length], aLen = dist(A0, A1), aDir = norm(sub(A1, A0)), aOut = { x: aDir.y, y: -aDir.x };
+    const ext = 18, sw = 1.8, road = 7.4;
+    const s0 = -ext, s1 = aLen + ext;
+    const P = (s, o) => add(add(A0, mul(aDir, s)), mul(aOut, o));
+    const quad = (s0_, s1_, o0, o1) => [P(s0_, o0), P(s1_, o0), P(s1_, o1), P(s0_, o1)];
+    const lift = ei === entryEdge ? 0 : -.002; // الشارع الثاني تحت الأول عند تقاطعهما (لا تومض الأسطح)
+    B.flatPoly('sidewalk', ccw(quad(s0, s1, .1, sw)), [], g0 + lift, 1, p => [p.x, -p.y]);
+    B.flatPoly('asphalt', ccw(quad(s0, s1, sw, sw + road)), [], g0 - .03 + lift, 1);
+    for (let s = s0; s < s1; s += 5) B.flatPoly('laneLine', ccw(quad(s, s + 2.6, sw + road / 2 - .08, sw + road / 2 + .08)), [], g0 - .028 + lift, 1);
+    B.flatPoly('sidewalk', ccw(quad(s0, s1, sw + road, sw + road + 1.6)), [], g0 + lift, 1, p => [p.x, -p.y]);
+    out.streets.push({ edge: ei });
+  }
+  out.street = { edge: entryEdge };
 
   // ---- trees, shrubs, car -------------------------------------------------------------------------------
   const keep = buildingPoly ? insetPolygon(buildingPoly, -.8, { grow: true }) : null;
   const inside = p => pointInPolygon(p, plot, 0) && (!keep || !pointInPolygon(p, keep, 0));
-  const clearOfGates = p => out.gates.every(gt => dist(p, gt.pos) > 3.2) && !(ctx.entryPoint && dist(p, ctx.entryPoint) < 3.4);
+  const clearOfGates = p => out.gates.every(gt => dist(p, gt.pos) > 3.2) && !(ctx.entryPoint && dist(p, ctx.entryPoint) < 3.4) && !bays.some(z => pointInPolygon(p, z.polygon, 0) || z.polygon.some(q => dist(q, p) < 1.2));
   const placed = [];
   const place = (kind, p, dims, rotY = 0) => {
     const grp = buildFixture(THREE, kind, dims, lib.fixtures);
@@ -162,8 +176,21 @@ export function buildSite(THREE, doc, lib, ctx) {
       place('tree', p, { w: 2.3, d: 2.3, h: 3.6, seed: k }); out.trees++;
     }
   }
+  // (الجولة الثانية عشرة) السيارات على المواقف المرسومة في المستند (لا موضع يُخترع للسيارة)
+  if (!ctx.skipCar && plot && bays.length) {
+    out.parking = [];
+    for (const z of bays) {
+      const xs = z.polygon.map(p => p.x), ys = z.polygon.map(p => p.y), c = { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
+      const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys), alongX = w >= h;
+      B.flatPoly('concrete', z.polygon.map(p => ({ x: p.x, y: p.y })), [], g0 + .006, 1);
+      // مقدمة السيارة نحو داخل الأرض (بعيدًا عن الشارع)
+      const toIn = { x: cx - c.x, y: cy - c.y }, nose = alongX ? { x: Math.sign(toIn.x) || 1, y: 0 } : { x: 0, y: Math.sign(toIn.y) || 1 };
+      place('car', c, { w: 1.9, d: 4.6, h: 1.5 }, Math.atan2(nose.x, nose.y));
+      out.parking.push(c);
+    }
+  }
   // parked car: free rectangle nearest to the vehicle gate (or the pedestrian gate)
-  if (!ctx.skipCar && plot) {
+  else if (!ctx.skipCar && plot) {
     const anchor = (out.gates[1] || out.gates[0])?.pos || { x: cx, y: cy };
     const cars = [];
     for (let x = bb.x0 + 1; x <= bb.x1 - 1; x += .4) for (let y = bb.y0 + 1; y <= bb.y1 - 1; y += .4) for (const heading of [0, Math.PI / 2]) {

@@ -171,7 +171,8 @@ test('تعارض: العدد في الكلام غير العدد في النمو
 test('لا تعارضات وهمية في حالات القبول عدا ما يستحق السؤال', () => {
   for (const C of CASES) {
     const c = detectConflicts(extractRequirements(C.text, { counts: C.counts }), { floors: 1, ...C.land });
-    if (C.id === 'C7') assert.deepEqual(c.map(x => x.type), ['floor-group-member']);
+    // (الجولة الثانية عشرة) C7: «المجالس» بالجمع بلا تحديد سؤال أيضًا (مجلس أم مجلسان؟) مع الافتراضي المرسوم
+    if (C.id === 'C7') assert.deepEqual(c.map(x => x.type), ['floor-group-member', 'majlis-plural']);
     else assert.deepEqual(c.map(x => x.type), [], C.id + ': ' + JSON.stringify(c));
   }
 });

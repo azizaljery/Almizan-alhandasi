@@ -1,7 +1,7 @@
 // جلسة التصميم: التصميم الأولي يُعرض على العميل، ويطلب بديلًا بعد أن تسأله شرعاء عمّا لم يعجبه،
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
 import { generateInitialDesign } from './home-flow.mjs';
-import { extractRequirements, detectConflicts, normalizeAr } from './requirements.mjs';
+import { extractRequirements, detectConflicts, normalizeAr, parseReadingAnswer } from './requirements.mjs';
 import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
@@ -82,6 +82,13 @@ export const currentDoc = s => parseDoc(s.designs[s.current].doc);
  * ويُرفع التعارض من الجلسة ويُذكر في الرد — حتى لو لم يتحقق البند في المخطط بعد (يبقى الطلب محسومًا لإعادة التصميم).
  */
 export async function redesign(session, args = {}, opts = {}) {
+  // (الجولة الثانية عشرة) جواب سؤال القراءة الحرفية أو الكلمة الغامضة («من ضمنها» / «زيادة»، «مجلسين» / «مجلس واحد»): يُسجَّل في
+  // الطلب (req.answers) ويُعاد التوليد ببرنامجه إن تغيّر البرنامج، ويُرفع السؤال — لا يُرمى «لم أفهم» على جواب سؤال طرحناه
+  const reading = (session.conflicts || []).filter(c => ['floor-group-member', 'majlis-plural'].includes(c?.type));
+  if (reading.length && args.text && !args.picks?.length && !session.pendingEdit) {
+    const ans = parseReadingAnswer(args.text, reading.map(c => c.type));
+    if (Object.keys(ans).length) return answerReading(session, ans, args.text, opts);
+  }
   const pending = (session.conflicts || []).filter(c => c && c.key && c.type !== 'needs-consent');
   const res = await redesign0(session, args, opts);
   if (!pending.length || !args.text || !res?.session) return res;
@@ -97,6 +104,34 @@ export async function redesign(session, args = {}, opts = {}) {
   res.reply = { ...res.reply, resolved: resolved.map(c => ({ type: c.type, question_ar: c.question_ar, answer_ar: args.text.trim(), kept: more.rules.map(kept) })),
     summary_ar: [`سجّلت اختيارك: ${more.rules.map(kept).join('، ')} (حُسم ${resolved.length === 1 ? 'التعارض' : resolved.length + ' تعارضات'} في طلبك، والبند المعارض حُذف).`, res.reply?.summary_ar].filter(Boolean).join(' ') };
   return res;
+}
+/** يسجّل جواب العميل عن القراءة/الغموض ويعيد التوليد إن تغيّر البرنامج (عدد غرف النوم أو المجالس). */
+async function answerReading(session, ans, text, { generate = generateInitialDesign } = {}) {
+  const s = clone(session), req = s.input.requirements; req.answers = { ...(req.answers || {}), ...ans }; req.counts ||= {};
+  const before = { bedrooms: req.counts.bedrooms, majlis: req.counts.majlis };
+  if (ans['majlis-plural']) req.counts.majlis = ans['majlis-plural'];
+  if (ans['floor-group-member']) { const n = req.textCounts?.bedrooms; if (Number.isInteger(n)) req.counts.bedrooms = ans['floor-group-member'] === 'included' ? n : Math.max(req.counts.bedrooms || 0, n + 1); }
+  // الحمامات تتبع المجلس الثاني (دورة مياه النساء) إن لم تكفِ
+  if (ans['majlis-plural'] === 2 && before.majlis < 2) req.counts.baths = Math.max(req.counts.baths || 0, (req.counts.baths || 0) + 1);
+  const resolvedTypes = Object.keys(ans);
+  s.conflicts = (s.conflicts || []).filter(c => !resolvedTypes.includes(c.type));
+  const what = [ans['floor-group-member'] === 'included' ? `«غرفة كبار السن» من ضمن عدد غرف النوم (${req.counts.bedrooms} غرف)` : ans['floor-group-member'] === 'extra' ? `«غرفة كبار السن» زيادة على العدد (${req.counts.bedrooms} غرف نوم)` : null,
+    ans['majlis-plural'] === 2 ? 'مجلسان: رجال ونساء' : ans['majlis-plural'] === 1 ? 'مجلس رجال واحد' : null].filter(Boolean);
+  const changed = req.counts.bedrooms !== before.bedrooms || req.counts.majlis !== before.majlis;
+  const resolved = (session.conflicts || []).filter(c => resolvedTypes.includes(c.type)).map(c => ({ type: c.type, question_ar: c.question_ar, answer_ar: text.trim(), kept: what }));
+  if (!changed) {
+    s.reply = null;
+    return { session: s, changes: [], reply: { local: true, mode: 'answered', resolved, done: what, failed: [], pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: true, unchanged: true, otherFails: [], conflicts: s.conflicts, questions: (s.conflicts || []).map(c => c.question_ar),
+      summary_ar: `سجّلت جوابك: ${what.join('، ')}. المخطط المعروض مرسوم بهذه القراءة أصلًا فلم يتغيّر شيء.` } };
+  }
+  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, ...(s.input.engine ? { engine: s.input.engine } : {}) });
+  const entryDir = s.input.land?.entries?.[0] || 's';
+  let ledger = []; try { ledger = verifyRequest(out.doc, req, { entry: entryDir }); } catch { ledger = out.ledger || []; }
+  const reply = { local: false, mode: 'answered-regenerated', resolved, done: what, failed: ledger.filter(x => !x.ok && x.status !== 'pending-render').map(x => ({ text: x.text, why: x.why })).slice(0, 6), pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: false, unchanged: false, otherFails: [], conflicts: s.conflicts, questions: (s.conflicts || []).map(c => c.question_ar),
+    summary_ar: `سجّلت جوابك: ${what.join('، ')}. تغيّر برنامج البيت بجوابك، فأعدت توليده بهذا البرنامج (${req.counts.bedrooms} غرف نوم${req.counts.majlis ? `، ${req.counts.majlis === 2 ? 'مجلسان' : 'مجلس واحد'}` : ''}).` };
+  pushDesign(s, entry(out, { picks: [], text, changes: what, reply }));
+  s.reply = null;
+  return { session: s, changes: what, reply };
 }
 async function redesign0(session, { picks = [], text = '', ai = null } = {}, { generate = generateInitialDesign, local = true } = {}) {
   const s = clone(session), req = s.input.requirements, changes = [];

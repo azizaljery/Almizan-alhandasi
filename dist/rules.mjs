@@ -542,6 +542,14 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
   if (c.dining === 0) { const n = sel('dining').length; out.push({ id: 'C-dining', kind: 'count', text: 'بدون غرفة طعام', ok: n === 0, why: n ? 'توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا.' : '' }); }
   if (Number.isInteger(c.bedrooms) && c.bedrooms > 0) { const n = sel('bedrooms').length; out.push({ id: 'C-bed', kind: 'count', text: `${c.bedrooms} غرف نوم`, ok: n === c.bedrooms, why: n === c.bedrooms ? '' : `في التصميم ${n}.` }); }
   if (c.majlis >= 2) { const w = sel('majlis_w').length, m = sel('majlis').length; out.push({ id: 'C-maj2', kind: 'count', text: 'مجلس للرجال ومجلس للنساء', ok: w >= 1 && m >= 1, why: '' }); }
+  // (الجولة الثانية عشرة) القراءة الحرفية لتعارض لم يُجب عنه: العدد المذكور في دوره، والغرفة الأخرى زيادة عليه في دورها — مقيس من المستند
+  for (const L of req.literal || []) {
+    const fl = x => (L[x] === 'upper' ? 1 : 0), memSel = sel(L.member), beds = sel('bedrooms').filter(r => !memSel.includes(r));
+    const inG = beds.filter(r => (r.li > 0 ? 1 : 0) === fl('groupFloor')).length, mem = memSel.filter(r => (r.li > 0 ? 1 : 0) === fl('memberFloor')).length;
+    const flAr = x => (L[x] === 'upper' ? 'الدور العلوي' : 'الدور الأرضي');
+    out.push({ id: 'L-' + L.type, kind: 'count', text: `${L.groupCount} غرف نوم في ${flAr('groupFloor')}، و«${subjAr(L.member)}» زيادة عليها في ${flAr('memberFloor')}${L.answered ? '' : ' (القراءة الحرفية لطلبك)'}`, ok: inG === L.groupCount && mem >= 1,
+      why: inG === L.groupCount && mem >= 1 ? `في ${flAr('groupFloor')} ${inG} غرف نوم، و«${subjAr(L.member)}» في ${flAr('memberFloor')}.` : `في ${flAr('groupFloor')} ${inG} غرف نوم${mem ? '' : `، ولا «${subjAr(L.member)}» في ${flAr('memberFloor')}`}.` });
+  }
   const pr = req.prefs || {};
   if (pr.floors) { const n = doc.levels.length; out.push({ id: 'P-floors', kind: 'pref', text: pr.floors === 2 ? 'دوران' : 'دور واحد', ok: n === pr.floors, why: n === pr.floors ? '' : `التصميم ${n === 2 ? 'بدورين' : 'بدور واحد'}.` }); }
   if (pr.noCorridors) { const n = rooms.filter(r => r.name === 'ممر الغرف').length; out.push({ id: 'P-corr', kind: 'pref', text: 'بلا ممرات طويلة (الحركة عبر الصالة)', ok: n === 0, why: n ? 'يوجد ممر للغرف.' : '' }); }

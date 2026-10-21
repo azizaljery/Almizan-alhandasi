@@ -331,6 +331,28 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       }
     }
 
+    // ---- (Round 12) window shading: a horizontal overhang over every exterior window, and vertical fins on windows that face
+    //      east or west (low sun) — Mizan default façade detail; doc.finish.facade.shading === false turns it off
+    if (opt.shading !== false && fac.shading !== false) {
+      const north = (Number(doc.north) || 0) * Math.PI / 180;
+      for (const seg of L.solids.segments) {
+        if (seg.ext === 0 || seg.kind === 'fence' || seg.kind === 'parapet') continue;
+        const out = mul(seg.left, seg.ext), side = { x: -out.y, y: out.x }, face = seg.t / 2;
+        // true compass of the outward normal (plan +y = north when doc.north = 0)
+        const bx = out.x * Math.cos(north) + out.y * Math.sin(north), eastWest = Math.abs(bx) > .7;
+        for (const o of seg.openings) {
+          if (!['window', 'window2'].includes(o.kind) || !(o.w >= .5)) continue;
+          const proj = o.w >= 2 ? .6 : .45, ow = o.w + .3, z = o.z1 + .1;
+          const q0 = add(add(o.center, mul(out, face - .01)), mul(side, -ow / 2)), q1 = add(add(o.center, mul(out, face - .01)), mul(side, ow / 2));
+          O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [q0, q1, add(q1, mul(out, proj)), add(q0, mul(out, proj))], E + z, E + z + .1);
+          if (eastWest) for (const sg of [-1, 1]) {
+            const c0 = add(add(o.center, mul(out, face - .01)), mul(side, sg * (o.w / 2 + .1))), c1 = add(c0, mul(side, sg * .06)), fp = Math.min(proj, .35);
+            O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [c0, c1, add(c1, mul(out, fp)), add(c0, mul(out, fp))], E + (o.z0 ?? o.z1 - (o.h || 1.2)), E + z);
+          }
+        }
+      }
+    }
+
     // ---- stairs -----------------------------------------------------------------------------------------------------
     for (const st of L.stairs) emitStair(S, st.layout, E, { glass: 'glass' });
     // guard rail around the stairwell hole in the floor above

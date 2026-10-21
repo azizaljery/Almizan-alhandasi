@@ -58,7 +58,7 @@ const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ?
 export function extractRequirements(text, { counts = {}, discovery = null, clauses = true } = {}) {
   const t = normalizeAr(text), understood = [], unsupported = [], countFixes = [];
   const has = re => re.test(t);
-  const prefs = {}, extras = {}, areas = {}, dims = {}, textCounts = {};
+  const prefs = {}, extras = {}, areas = {}, dims = {}, textCounts = {}, ambiguous = [];
   const c = { ...counts };
   const quoteOf = origMapper(text);
 
@@ -126,7 +126,9 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (has(/(حمامات|دورات المياه|الحمام|دوره المياه)[^،,.]{0,10}(ما|لا|مو) ?(تفتح|يفتح|تطل|يطل|تكون|يكون) (ع|على|علي|في) (ال)?صاله/)) { prefs.bathsOffHall = true; understood.push('دورات المياه لا تفتح على الصالة مباشرة'); }
   // فراغات إضافية
   const maid = t.match(/(غرفه )?(خادمه|خدامه|عامله|شغاله|الخادمه|العامله)([^،,.]{0,25})/);
-  if (maid) { extras.maid = { bath: /حمام|دوره مياه/.test(maid[3]) || has(/خادمه (ب|مع) ?حمام/), ext: has(/خادمه[^،.]{0,40}(باب|مدخل) (على|ع|علي|من|ل) ?(ال)?(حوش|خارج|برا|ساحه)/) }; understood.push('غرفة خادمة' + (extras.maid.bath ? ' بحمام' : '') + (extras.maid.ext ? ' وباب على الحوش' : '')); }
+  // (الجولة الثانية عشرة) «غرفة خادمة بدون حمام» نفيٌ صريح (كانت كلمة «حمام» وحدها تُقرأ طلبًا): noBath يمنع حمام الخادمة الافتراضي
+  const maidNoBath = !!maid && /(?:بدون|بلا|من غير|مو|ما|لا|ما لها|ما له|ما تحتاج|ما يحتاج) ?(?:لها |له )?(?:حمام|دوره مياه)/.test(maid[3]);
+  if (maid) { extras.maid = { bath: !maidNoBath && (/حمام|دوره مياه/.test(maid[3]) || has(/خادمه (ب|مع) ?حمام/)), ...(maidNoBath ? { noBath: true } : {}), ext: has(/خادمه[^،.]{0,40}(باب|مدخل) (على|ع|علي|من|ل) ?(ال)?(حوش|خارج|برا|ساحه)/) }; understood.push('غرفة خادمة' + (extras.maid.bath ? ' بحمام' : '') + (extras.maid.ext ? ' وباب على الحوش' : '')); }
   // غرفة ضيوف للنوم (قرب المجلس)
   const gr = t.match(/غرف(ه)? (نوم )?(ال|لل|ل)?(ضيوف|ضيف)([^،,.]{0,20})/);
   if (gr) { extras.guestRoom = { bath: /حمام|دوره مياه/.test(gr[5]) }; understood.push('غرفة نوم للضيوف' + (extras.guestRoom.bath ? ' بحمامها' : '')); }
@@ -196,6 +198,13 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
     const explicit = ex ? (ex[1] ? num(ex[1]) : /مجلسين|مجلسان/.test(ex[0]) ? 2 : 1) : null;
     const said = explicit ?? (men || women ? (men && women ? 2 : 1) : null);
     if (said !== null && Number.isInteger(said) && c.majlis !== 0 && c.majlis !== said) { countFixes.push(`المجالس ${said} (لا ${c.majlis ?? 'غير محدد'})`); c.majlis = said; }
+    // (الجولة الثانية عشرة) «المجالس» بالجمع بلا تحديد (لا عدد صريح، ولا رجال ونساء معًا): غامض — مجلس أم مجلسان؟ يُسأل العميل،
+    // والافتراضي المعلن (قيمة تصميمية افتراضية للميزان، العرف السعودي حين لا يُذكر الرجال والنساء): مجلس رجال واحد ما لم يحدد النموذج غيره
+    const plural = t.match(/(?<![؀-ۿ])(?:و|ب|بال|ال|لل|وال)?مجالس(?![؀-ۿ])/);
+    if (plural && explicit === null && !(men && women) && !absentKeys.includes('majlis')) {
+      ambiguous.push({ type: 'majlis-plural', quote: quoteOf(t, plural.index, plural.index + plural[0].length) || 'المجالس' });
+      if (!(Number.isInteger(c.majlis) && c.majlis > 0)) { c.majlis = 1; understood.push('مجلس رجال واحد (قيمة تصميمية افتراضية للميزان؛ «المجالس» غامضة: سؤال للعميل)'); }
+    }
     // المطبخ: ذكره مرتين ليس مطبخين — المطبخ الثاني يُطلب صراحة
     if (c.kitchens > 1 && !/مطبخين|مطبخ (?:ال)?(?:تحضيري|خارجي|ثاني)|(?:2|two|اثنين) (?:مطابخ|kitchens)/.test(t)) { countFixes.push(`مطبخ واحد (لا ${c.kitchens})`); c.kitchens = 1; }
   }
@@ -221,7 +230,9 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (R.noCorridors) { prefs.noCorridors = true; understood.push('أقل ما يمكن من الممرات (الحركة عبر الصالة)'); }
   if (R.floors) { prefs.floors = R.floors; understood.push(R.floors === 2 ? 'دوران (أرضي وأول)' : 'دور واحد'); }
   for (const r of rules) understood.push(r.text);
-  if (has(/كراج|قراج|جراج|موقف|مواقف|مظله سيار/)) unsupported.push('مواقف السيارات (الكراج): تبقى في الارتداد الأمامي ولا تُرسم في هذا الإصدار.');
+  // (الجولة الثانية عشرة) مواقف السيارات تُرسم في الارتداد داخل حدود الأرض (موقف أو موقفان)؛ الكراج المغلق داخل المبنى لا يُرسم بعد
+  if (has(/موقف|مواقف|مظله سيار|سيارات|سيارتين/)) { prefs.parking = true; understood.push('مواقف سيارات في الارتداد داخل حدود الأرض'); }
+  if (has(/كراج|قراج|جراج/)) unsupported.push('الكراج المغلق داخل المبنى: لا يُرسم في هذا الإصدار؛ تُرسم مواقف مكشوفة في الارتداد بدلًا منه.');
   if (has(/(بيت|فيلا|منزل|مبني) (صغير|اقتصادي)|اقتصادي/) && !tweaks.envScale) { tweaks.envScale = .9; tweaks.bedroomScale = (tweaks.bedroomScale || 1) * .95; understood.push('مسطح أصغر (اقتصادي): المبنى أصغر بنحو 10٪ من المقاسات التصميمية المعتادة'); }
   if (has(/(?<![\u0600-\u06FF])(?<!(?:حمام|حمامها|بحمام|بحمامها|دوره مياه) (?:ال)?)(?:ال)?ملحق(?![\u0600-\u06FF])/)) unsupported.push('الملحق الخارجي: لا يُرسم في هذا الإصدار؛ يمكن إضافته في المرسم.');
   if (has(/(?<![\u0600-\u06FF])و?(?:ال)?(?:سطح|روف)(?![\u0600-\u06FF])/)) unsupported.push('السطح وغرفة السطح: لا تُرسم في هذا الإصدار.');
@@ -269,7 +280,7 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   return {
     counts: c, extras, prefs, areas, dims, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear,
     textCounts, givenCounts: { ...counts }, absent: [...new Set([...absentKeys, ...drop])], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
-    ...(corrected ? { countCorrection: { bedrooms: corrected } } : {}), ...(countFixes.length ? { countFixes } : {}),
+    ...(corrected ? { countCorrection: { bedrooms: corrected } } : {}), ...(countFixes.length ? { countFixes } : {}), ...(ambiguous.length ? { ambiguous } : {}),
   };
 }
 
@@ -399,8 +410,17 @@ export function detectConflicts(req = {}, land = {}) {
     // «غرف النوم فوق» و«غرفة الوالدة في الأرضي»: هل الثانية من ضمن الأولى؟
     // («غرف الأبناء» لا تشمل الرئيسية ولا غرفة الوالدين في المولّد، فلا تعارض معها)
     const grp = x => x.a === 'bedrooms', member = x => ['elderly', 'master', 'onebed'].includes(x.a);
-    for (const [g, m] of [[a, b], [b, a]]) if (grp(g) && member(m) && g.floor !== m.floor)
-      add('floor-group-member', [g.id, m.id], [q(g), q(m)], `قلت ${SUBJ_AR(g.a)} في ${FLOOR_AR[g.floor]}، و«${SUBJ_AR(m.a)}» في ${FLOOR_AR[m.floor]} — «${SUBJ_AR(m.a)}» من ضمن عدد غرف النوم اللي ذكرته ولا زيادة عليها؟`);
+    // (الجولة الثانية عشرة) ما دام السؤال بلا جواب يُرسم بالقراءة الحرفية (العدد المذكور في دوره، والغرفة الأخرى زيادة عليه في دورها)،
+    // ويُذكر ذلك في السؤال نفسه؛ جواب العميل (req.answers) يحسمه فلا يُسأل ثانية
+    for (const [g, m] of [[a, b], [b, a]]) if (grp(g) && member(m) && g.floor !== m.floor && !req.answers?.['floor-group-member']) {
+      const n = req.textCounts?.bedrooms, lit = Number.isInteger(n) && m.a !== 'master' ? ` رسمت الآن القراءة الحرفية لكلامك: ${n} غرف نوم في ${FLOOR_AR[g.floor]}، و«${SUBJ_AR(m.a)}» زيادة عليها في ${FLOOR_AR[m.floor]} (${n + 1} غرف نوم)؛ إن كانت من ضمن الـ${n} قل «من ضمنها».` : '';
+      add('floor-group-member', [g.id, m.id], [q(g), q(m)], `قلت ${SUBJ_AR(g.a)} في ${FLOOR_AR[g.floor]}، و«${SUBJ_AR(m.a)}» في ${FLOOR_AR[m.floor]} — «${SUBJ_AR(m.a)}» من ضمن عدد غرف النوم اللي ذكرته ولا زيادة عليها؟${lit}`);
+    }
+  }
+  // (الجولة الثانية عشرة) كلمة برنامج غامضة: «المجالس» بالجمع بلا تحديد — مجلس أم مجلسان؟ (الافتراضي المرسوم مذكور في السؤال)
+  for (const amb of req.ambiguous || []) if (amb.type === 'majlis-plural' && !req.answers?.['majlis-plural']) {
+    const n = req.counts?.majlis;
+    add('majlis-plural', ['counts.majlis'], [amb.quote], `ذكرت «${amb.quote}» بالجمع — تبي مجلس رجال ومجلس نساء، ولا مجلس رجال واحد؟ رسمت الآن ${n >= 2 ? 'مجلسين (رجال ونساء) كما في الأعداد' : 'مجلس رجال واحد (قيمة تصميمية افتراضية للميزان)'} حتى تجاوبني.`);
   }
   // 4) عدد الأدوار: الكلام مقابل بيانات الأرض، ودور واحد مع طلبات تحتاج دورين
   const said = req.prefs?.floors || null, landFloors = Number.isInteger(land?.floors) ? land.floors : null;
@@ -418,7 +438,9 @@ export function detectConflicts(req = {}, land = {}) {
   const tc = req.textCounts || {}, given = req.givenCounts || {};
   // عدد النموذج الذي جمع العددين قبل التصحيح وبعده (أو أخذ الأول) ليس تعارضًا: العميل صحّح كلامه بنفسه
   const cc = req.countCorrection?.bedrooms, polluted = cc && (given.bedrooms === cc.from || given.bedrooms === cc.from + cc.to);
-  if (Number.isInteger(tc.bedrooms) && Number.isInteger(given.bedrooms) && given.bedrooms > 0 && tc.bedrooms !== given.bedrooms && !polluted)
+  // (الجولة الثانية عشرة) عدد النموذج = العدد المذكور + الغرفة الزائدة في الدور الآخر (القراءة الحرفية) ليس تعارضًا
+  const literalSum = Number.isInteger(tc.bedrooms) && given.bedrooms === tc.bedrooms + 1 && out.some(c => c.type === 'floor-group-member') && req.answers?.['floor-group-member'] !== 'included';
+  if (Number.isInteger(tc.bedrooms) && Number.isInteger(given.bedrooms) && given.bedrooms > 0 && tc.bedrooms !== given.bedrooms && !polluted && !literalSum)
     add('count-mismatch', ['textCounts.bedrooms', 'counts.bedrooms'], [`${tc.bedrooms} غرف نوم`], `فهمت من كلامك إن غرف النوم ${tc.bedrooms}، والعدد المختار في النموذج ${given.bedrooms} — كم غرفة نوم تبي بالضبط؟`);
   // 7) المقاسات مقابل الأرض: مجموع المساحات الصريحة أكبر من الأرض × الأدوار، أو بُعد أكبر من الأرض نفسها
   const W = Number(land?.width) || 0, L = Number(land?.length) || 0;
@@ -432,6 +454,52 @@ export function detectConflicts(req = {}, land = {}) {
     const lo = Math.min(W, L), hi = Math.max(W, L);
     for (const [k, d] of Object.entries(req.dims || {})) if (d && (d.w > lo || d.l > hi))
       add('dims-exceed-land', ['dims.' + k], [d.quote], `مقاس ${AREA_ROOM_AR[k] || k} ${d.w}×${d.l} م أكبر من أبعاد الأرض (${lo}×${hi} م) — متأكد من المقاس؟`);
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------------------------------ القراءة الحرفية (الجولة الثانية عشرة)
+const LIT_MEMBERS = new Set(['elderly', 'onebed']);
+/**
+ * تعارض كُشف ولم يُجب عنه يُرسم بالقراءة الحرفية لكلام العميل، لا بافتراض صامت: «5 غرف نوم فوق… وغرفة لأمي في الأرضي»
+ * = 5 في العلوي + غرفة الأم في الأرضي (6 غرف نوم). يبقى السؤال ظاهرًا (detectConflicts) حتى يجيب العميل؛ وجوابه (req.answers)
+ * يغلب: «من ضمنها» ← العدد المذكور كله، «زيادة» ← القراءة الحرفية. يعدّل req.counts في مكانه ويسجّل req.literal (بند في السجل).
+ * متكرر الاستدعاء بلا أثر مضاعف. يعيد req.
+ */
+export function applyLiteralReadings(req = {}, land = {}) {
+  if (!req || typeof req !== 'object') return req;
+  req.counts ||= {};
+  const ans = req.answers?.['floor-group-member'];
+  const rules = req.rules || [], n = req.textCounts?.bedrooms;
+  const lit = [];
+  if (Number.isInteger(n) && n > 0 && ans !== 'included') {
+    const grp = rules.find(r => r.kind === 'floor' && r.a === 'bedrooms');
+    const mem = grp ? rules.filter(r => r.kind === 'floor' && LIT_MEMBERS.has(r.a) && r.floor !== grp.floor) : [];
+    for (const m of mem.slice(0, 1)) {
+      const total = n + 1;
+      if (!(Number.isInteger(req.counts.bedrooms) && req.counts.bedrooms >= total)) req.counts.bedrooms = total;
+      lit.push({ type: 'floor-group-member', groupFloor: grp.floor, groupCount: n, member: m.a, memberFloor: m.floor, total, answered: !!ans,
+        reading_ar: `${n} غرف نوم في ${FLOOR_AR[grp.floor]} و«${SUBJ_AR(m.a)}» زيادة عليها في ${FLOOR_AR[m.floor]} (${total} غرف نوم)`, why_ar: ans ? 'بجواب العميل («زيادة عليها»).' : 'القراءة الحرفية لكلام العميل؛ السؤال باقٍ حتى يجيب.' });
+    }
+  }
+  if (ans === 'included' && Number.isInteger(n) && n > 0) req.counts.bedrooms = n;
+  req.literal = lit;
+  return req;
+}
+/**
+ * (الجولة الثانية عشرة) جواب العميل على سؤال القراءة/الغموض من نصه: { 'floor-group-member': 'included'|'extra' } و/أو { 'majlis-plural': 1|2 }.
+ * لا يخمّن: عبارة لا تطابق أحد الجوابين لا تُعدّ جوابًا.
+ */
+export function parseReadingAnswer(text, types = []) {
+  const t = normalizeAr(text), out = {};
+  if (types.includes('floor-group-member')) {
+    const neg = /(?:مو|مب|ما|لا|ليست|ليس|غير|مش) ?(?:من ?ضمن|ضمن|منها|من العدد|محسوبه)/.test(t);
+    if (!neg && /(?<![\u0600-\u06FF])(?:من ?ضمن(?:ها|هم|هن)?|ضمن (?:ال)?(?:عدد|خمس|غرف)|من (?:ال)?(?:عدد|خمس|اربع|ست)|محسوبه|تنحسب|داخل العدد|منها(?![\u0600-\u06FF]))/.test(t)) out['floor-group-member'] = 'included';
+    else if (neg || /(?:زياده|زيادة|اضافيه|اضافه|زايده|خارج العدد|غير (?:ال)?(?:خمس|عدد)|فوق (?:ال)?(?:خمس|عدد)|لحالها|مستقله عن|سادسه|سابعه)/.test(t)) out['floor-group-member'] = 'extra';
+  }
+  if (types.includes('majlis-plural')) {
+    if (/مجلسين|مجلسان|رجال ونساء|رجال و ?(?:ال)?نساء|(?:مجلس|مجالس) (?:لل|ال)?(?:نساء|حريم)|ثنين|اثنين/.test(t)) out['majlis-plural'] = 2;
+    else if (/مجلس (?:واحد|وحيد)|واحد (?:بس|فقط)|(?:بس|فقط) (?:مجلس )?(?:ال)?رجال|رجال (?:بس|فقط)|ما (?:ابي|نبي|احتاج|نحتاج) (?:مجلس )?(?:ال)?نساء/.test(t)) out['majlis-plural'] = 1;
   }
   return out;
 }

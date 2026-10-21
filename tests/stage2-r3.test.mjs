@@ -101,7 +101,9 @@ test('C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وت�
   // الجولة السابعة: الطعام ≥ 3.3 م صافيًا جعل التنظيم الأرضي الثاني (compact:c3p) لا يتسع لمحور السلم، وبقية الأرضيات الناجحة
   // نسخ شكلية من الأول (اختلاف معماري 0.10 لأن العلوي نفسه) — قرار المالك: لا حشو للعدد؛ يكفي بديل واحد سليم والنقص مذكور بسببه
   assert.ok(out.designs.length >= 1); if (out.designs.length < 4) assert.match(out.shortfall_ar || '', /من 4 مطلوبة/);
-  for (const d of out.designs) for (const s of docRooms(d.doc).rooms.filter(x => x.name === 'الدرج')) assert.ok(s.area <= 18, `${d.pat}: الدرج ${s.area} م²`);
+  // (الجولة الثانية عشرة) غرفة سلم يُعبر خلالها من البهو إلى الصالة (ضلعاها ≥ 4.2 م: القلبتان وممر حر أمام أول قائمة) حتى 20.5 م²
+  // — الحد نفسه في التقييم منذ الجولة الحادية عشرة (scoreV2: stair-big)؛ وغيرها ≤ 18 م² كما كان
+  for (const d of out.designs) for (const s of docRooms(d.doc).rooms.filter(x => x.name === 'الدرج')) { const thru = Math.min(s.x1 - s.x0, s.y1 - s.y0) >= 4.2 - .2; assert.ok(s.area <= (thru ? 20.5 : 18), `${d.pat}: الدرج ${s.area} م²`); }
   // الجولة الخامسة: تنظيم الدور الأرضي نفسه يختلف بين البدائل (لا علوي مختلف على أرضي واحد)
   const grounds = out.designs.map(d => d.pat.split('/')[0]);
   assert.equal(new Set(grounds).size, grounds.length, grounds.join(' '));

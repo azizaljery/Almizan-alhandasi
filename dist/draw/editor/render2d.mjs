@@ -62,6 +62,23 @@ export function renderPlan(ctx, st) {
   if (doc.plot?.polygon?.length > 2) {
     ctx.save(); ctx.setLineDash([10, 6]); ctx.strokeStyle = THEME.accent2; ctx.lineWidth = 1.6; ctx.fillStyle = 'rgba(198,161,91,.05)';
     ctx.beginPath(); doc.plot.polygon.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+    // (الجولة الثانية عشرة) الشوارع المحيطة بالأرض (كل جهات doc.streets، لا جهة المدخل وحدها — أرض الزاوية بشارعين): شريط رمادي خارج الحد
+    if (flags.streets !== false && levelId === doc.levels[0]?.id) drawStreets(ctx, doc, S, k);
+  }
+  // (الجولة الثانية عشرة) مواقف السيارات (مناطق «garage» في هذا الدور): مستطيل مخطط بسيارة وكلمة «موقف»
+  for (const z of (doc.zones || [])) {
+    if (z.level !== levelId || z.type !== 'garage' || (z.polygon || []).length < 3) continue;
+    const pts = z.polygon.map(S);
+    ctx.save(); ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
+    ctx.fillStyle = 'rgba(150,150,150,.16)'; ctx.fill(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#7d7d7d'; ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
+    const xs = z.polygon.map(p => p.x), ys = z.polygon.map(p => p.y), w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys), c = S({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 });
+    const long = Math.max(w, h), cw = 1.8 * k, cl = Math.min(4.5, long - .6) * k, horiz = w >= h;
+    ctx.translate(c.x, c.y); if (!horiz) ctx.rotate(Math.PI / 2);
+    ctx.strokeStyle = '#8a8a8a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-cl / 2, -cw / 2, cl, cw, Math.min(8, cw / 4)) : ctx.rect(-cl / 2, -cw / 2, cl, cw); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-cl / 2 + cl * .28, -cw / 2); ctx.lineTo(-cl / 2 + cl * .28, cw / 2); ctx.moveTo(cl / 2 - cl * .22, -cw / 2); ctx.lineTo(cl / 2 - cl * .22, cw / 2); ctx.stroke();
+    if (!horiz) ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#5f5f5f'; ctx.font = `600 ${Math.max(10, Math.min(13, k * .32))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('موقف', 0, 0);
+    ctx.restore();
   }
 
   // ------------------------------------------------------------------ underlay (level below) as faint lines
@@ -349,3 +366,21 @@ function drawScaleBar(ctx, x, y, k) {
 }
 
 export default { THEME, makeView, toScreen, toWorld, fitView, docBounds, renderPlan };
+
+const STREET_VEC = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
+const STREET_AR = { s: 'الجنوبي', n: 'الشمالي', e: 'الشرقي', w: 'الغربي' };
+/** (الجولة الثانية عشرة) شريط الشارع خارج كل حد للأرض يطل على شارع (doc.streets)، باسمه وجهته؛ المدخل الرئيسي بخط أغمق. */
+function drawStreets(ctx, doc, S, k) {
+  const poly = doc.plot.polygon, sides = [...new Set([...(doc.streets || []), doc.entry || 's'])].filter(x => STREET_VEC[x]);
+  for (const sd of sides) {
+    const v = STREET_VEC[sd]; let best = null;
+    poly.forEach((a, i) => { const b = poly[(i + 1) % poly.length], L = Math.hypot(b.x - a.x, b.y - a.y); if (L < .5) return; const ux = (b.x - a.x) / L, uy = (b.y - a.y) / L; for (const n of [{ x: uy, y: -ux }, { x: -uy, y: ux }]) { const d = n.x * v.x + n.y * v.y; if (d > .7 && (!best || L * d > best.s)) best = { a, b, n, s: L * d }; } });
+    if (!best) continue;
+    const off = (p, t) => ({ x: p.x + best.n.x * t, y: p.y + best.n.y * t }), q = [best.a, best.b, off(best.b, 7), off(best.a, 7)].map(S);
+    ctx.save(); ctx.setLineDash([]); ctx.fillStyle = 'rgba(70,74,80,.10)'; ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fill();
+    const s0 = S(off(best.a, 1.6)), s1 = S(off(best.b, 1.6)); ctx.strokeStyle = 'rgba(70,74,80,.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(s0.x, s0.y); ctx.lineTo(s1.x, s1.y); ctx.stroke();
+    const m = S(off({ x: (best.a.x + best.b.x) / 2, y: (best.a.y + best.b.y) / 2 }, 1.0)); ctx.fillStyle = sd === (doc.entry || 's') ? '#3d4248' : '#6a6f75';
+    ctx.font = `600 ${Math.max(11, Math.min(14, k * .34))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.translate(m.x, m.y);
+    if (Math.abs(best.n.x) > .7) ctx.rotate(-Math.PI / 2); ctx.fillText(`الشارع ${STREET_AR[sd]}${sd === (doc.entry || 's') ? ' (المدخل)' : ''}`, 0, 0); ctx.restore();
+  }
+}
