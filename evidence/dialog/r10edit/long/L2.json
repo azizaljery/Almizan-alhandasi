@@ -1,0 +1,357 @@
+{
+ "id": "L2",
+ "name": "جدة — دوران، كلمات إنجليزية، تراجع عن المطبخ المفتوح، لا خادمة ولا مسبح",
+ "words": 160,
+ "ms": 20,
+ "text": "مرحبا، أنا أبو فيصل من جدة. الأرض ١٨ في ٢٥ والشارع من جهة الغرب، ونبغى البيت دورين. الدور الأرضي يكون فيه المجلس والمقلط والمطبخ، والمجلس يكون على الشارع وله مدخل خاص للرجال، يعني ما أبغى الضيوف يشوفون أهل البيت أبدًا. وكمان نبغى غرفة نوم لأمي في الأرضي قريبة من الصالة لأنها كبيرة في السن وما تقدر تطلع الدرج. الدور العلوي فيه خمس غرف نوم: الماستر حقتي أنا وزوجتي، وأبغاها بعيدة عن الدرج عشان الهدوء، والباقي للعيال. كل غرفة بحمامها، هذا شي أساسي عندنا. المطبخ أبغاه open kitchen على الطعام زي البيوت الحديثة... لا ترى غيرت رأيي، خليه مقفل أحسن عشان الريحة والدخان. ما نبغى خدامة ساكنة عندنا، تجي الصبح وتروح، فما يحتاج غرفة خادمة. بس نبغى غرفة سواق بحمام، وتكون من برا. الواجهة نبغاها modern بحجر فاتح. ولو فيه مصعد صغير لأمي يكون ممتاز بس مو شرط. وفيه بلكونة للماستر نطل منها على البحر إذا أمكن. وما أبغى مسبح لأنه يحتاج صيانة وتكاليف ما لها داعي. وشكرًا لكم وبانتظار التصميم.",
+ "formCounts": {
+  "bedrooms": 6,
+  "majlis": 1,
+  "baths": 2,
+  "kitchens": 2,
+  "halls": 1
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 3,
+    "fn": 1,
+    "fp": 1,
+    "precision": 0.75,
+    "recall": 0.75
+   },
+   "pref": {
+    "tp": 3,
+    "fn": 1,
+    "fp": 2,
+    "precision": 0.6,
+    "recall": 0.75
+   },
+   "extra": {
+    "tp": 2,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "absent": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "rule": {
+    "tp": 3,
+    "fn": 5,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.375
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 1,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.5
+   },
+   "unsupported": {
+    "tp": 2,
+    "fn": 0,
+    "fp": 1,
+    "precision": 0.667,
+    "recall": 1
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 1,
+    "precision": 0,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   }
+  },
+  "precision": 0.762,
+  "recall": 0.667,
+  "f1": 0.711,
+  "tp": [
+   "count:majlis=1",
+   "count:kitchens=1",
+   "count:dining=1",
+   "pref:guestEntrance",
+   "pref:elderlyRoom",
+   "pref:allEnsuite",
+   "extra:driver",
+   "extra:driver.bath",
+   "absent:maid",
+   "rule:place:majlis:w",
+   "rule:floor:elderly:ground",
+   "rule:close:elderly+hall",
+   "floors=2",
+   "facade:modern",
+   "unsupported:elevator",
+   "unsupported:balcony"
+  ],
+  "missed": [
+   "count:bedrooms=6",
+   "pref:closedKitchen",
+   "rule:floor:majlis:ground",
+   "rule:floor:dining:ground",
+   "rule:floor:kitchen:ground",
+   "rule:floor:bedrooms:upper",
+   "rule:away:master+stairs",
+   "facade:stone"
+  ],
+  "wrong": [
+   "count:bedrooms=5",
+   "pref:openKitchen",
+   "pref:big_hall",
+   "unsupported:pool",
+   "conflict:count-mismatch"
+  ],
+  "levels": [
+   {
+    "item": "rule:place:majlis:w",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:floor:elderly:ground",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:elderly+hall",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 5,
+   "majlis": 1,
+   "baths": 7,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "prefs": {
+   "allEnsuite": true,
+   "openKitchen": true,
+   "guestEntrance": true,
+   "elderlyRoom": true,
+   "big_hall": true,
+   "floors": 2
+  },
+  "extras": {
+   "driver": {
+    "bath": true
+   }
+  },
+  "absent": [
+   "maid"
+  ],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "place:majlis:w",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والمجلس يكون على الشارع",
+    "text": "«المجلس» على الشارع (الواجهة الأمامية)"
+   },
+   {
+    "item": "close:elderly+hall",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرفة نوم لأمي في الأرضي قريبة من الصالة",
+    "text": "«غرفة كبار السن» قرب «الصالة»"
+   },
+   {
+    "item": "floor:elderly:ground",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "غرفة نوم لأمي في الأرضي",
+    "text": "«غرفة كبار السن» في الدور الأرضي"
+   }
+  ],
+  "tweaks": {
+   "facade": {
+    "style": "modern",
+    "styleAr": "حديث",
+    "keepLayout": false
+   }
+  },
+  "unsupported": [
+   "الشرفات والتراس: لا تُرسم في هذا الإصدار.",
+   "المسبح: خارج المبنى ولا يُرسم في هذا الإصدار.",
+   "المصعد: غير مدعوم في هذا الإصدار."
+  ],
+  "unclear": [
+   "أنا أبو فيصل من جدة",
+   "الأرض ١٨ في ٢٥ والشارع من جهة الغرب",
+   "الدور الأرضي يكون فيه المجلس والمقلط والمطبخ",
+   "يعني ما أبغى الضيوف يشوفون أهل البيت أبدًا",
+   "ما تقدر تطلع الدرج",
+   "أبغاها بعيدة عن الدرج عشان الهدوء",
+   "الباقي للعيال",
+   "هذا شي أساسي عندنا",
+   "لا ترى غيرت رأيي",
+   "خليه مقفل أحسن عشان الريحة والدخان",
+   "تجي الصبح وتروح",
+   "تكون من برا",
+   "شكرًا لكم وبانتظار التصميم"
+  ],
+  "understood": [
+   "كل غرفة نوم بحمامها الملحق",
+   "5 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مفتوح على الطعام",
+   "مجلس الرجال بمدخل مستقل عن العائلة",
+   "غرفة سائق بمدخل خارجي وحمام",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "الصالة واسعة",
+   "بدون غرفة خادمة",
+   "دوران (أرضي وأول)",
+   "«المجلس» على الشارع (الواجهة الأمامية)",
+   "«غرفة كبار السن» قرب «الصالة»",
+   "«غرفة كبار السن» في الدور الأرضي",
+   "الواجهة: حديث (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+   "عدد دورات المياه 7 (حمام لكل غرفة + دورة مياه الرجال + حمام السائق)"
+  ]
+ },
+ "conflicts": [
+  {
+   "type": "count-mismatch",
+   "question": "فهمت من كلامك إن غرف النوم 5، والعدد المختار في النموذج 6 — كم غرفة نوم تبي بالضبط؟"
+  }
+ ],
+ "coverage": {
+  "clauses": 30,
+  "fates": {
+   "filler": 1,
+   "unclear": 13,
+   "understood": 12,
+   "orphan": 1,
+   "unsupported": 3
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "أنا أبو فيصل من جدة",
+   "الأرض ١٨ في ٢٥ والشارع من جهة الغرب",
+   "الدور الأرضي يكون فيه المجلس والمقلط والمطبخ",
+   "يعني ما أبغى الضيوف يشوفون أهل البيت أبدًا",
+   "ما تقدر تطلع الدرج",
+   "أبغاها بعيدة عن الدرج عشان الهدوء",
+   "بعيدة عن الدرج عشان",
+   "الباقي للعيال",
+   "هذا شي أساسي عندنا",
+   "لا ترى غيرت رأيي",
+   "خليه مقفل أحسن عشان الريحة والدخان",
+   "تجي الصبح وتروح",
+   "تكون من برا",
+   "شكرًا لكم وبانتظار التصميم"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 6,
+   "majlis": 1,
+   "kitchens": 1,
+   "dining": 1
+  },
+  "prefs": [
+   "guestEntrance",
+   "elderlyRoom",
+   "allEnsuite",
+   "closedKitchen"
+  ],
+  "extras": [
+   "driver",
+   "driver.bath"
+  ],
+  "absent": [
+   "maid"
+  ],
+  "rules": [
+   {
+    "r": "floor:majlis:ground",
+    "level": "must"
+   },
+   {
+    "r": "floor:dining:ground",
+    "level": "must"
+   },
+   {
+    "r": "floor:kitchen:ground",
+    "level": "must"
+   },
+   {
+    "r": "place:majlis:w",
+    "level": "must"
+   },
+   {
+    "r": "floor:elderly:ground",
+    "level": "must"
+   },
+   {
+    "r": "close:elderly+hall",
+    "level": "must"
+   },
+   {
+    "r": "floor:bedrooms:upper",
+    "level": "must"
+   },
+   {
+    "r": "away:master+stairs",
+    "level": "must"
+   }
+  ],
+  "floors": 2,
+  "facade": [
+   "stone",
+   "modern"
+  ],
+  "unsupported": [
+   "elevator",
+   "balcony"
+  ],
+  "conflicts": [],
+  "unclear": [],
+  "optional": [
+   "rule:floor:master:upper",
+   "conflict:floor-group-member",
+   "count:baths",
+   "rule:floor:kids:upper"
+  ],
+  "traps": "«ما أبغى مسبح» ليس طلب مسبح؛ «open kitchen» تراجع عنه العميل إلى مطبخ مقفل؛ غرفة الأم سادسة غرف النوم."
+ },
+ "traps": "«ما أبغى مسبح» ليس طلب مسبح؛ «open kitchen» تراجع عنه العميل إلى مطبخ مقفل؛ غرفة الأم سادسة غرف النوم."
+}

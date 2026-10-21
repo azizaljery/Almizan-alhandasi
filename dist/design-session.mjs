@@ -8,9 +8,24 @@ export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
 import { parseEdit, applyEdits, replayIntents, compareDocs, describeChanges, inspect, measureIntents, FACADE_RENDER } from './plan-edit.mjs';
 import { reviewDesign } from './plan-review.mjs';
+import { fingerprint, diffFingerprint, compactDiff, touchedKeys, countAr } from './plan-fingerprint.mjs';
 
 export const SESSION_KEY = 'mizan.design.session.v1';
-const MAX_DESIGNS = 8;
+// (الجولة العاشرة) 12 نسخة محفوظة (كانت 8) ولكل نسخة رقم ثابت في الجلسة (version) لا يتغير بحذف الأقدم:
+// «ارجع للنسخة الثانية» تعني النسخة رقم 2 دائمًا
+const MAX_DESIGNS = 12;
+/** يضيف تصميمًا إلى سجل الجلسة برقم نسخة جديد، ويحذف الأقدم فوق الحد. */
+function pushDesign(s, d) {
+  const maxV = Math.max(0, ...s.designs.map((x, i) => x.version ?? i + 1));
+  s.nextVersion = Math.max(s.nextVersion || 0, maxV + 1);
+  d.version = s.nextVersion++;
+  s.designs.push(d);
+  if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
+  s.current = s.designs.length - 1;
+  return d.version;
+}
+/** رقم النسخة المعروضة. */
+export const versionOf = (s, i = s.current) => s.designs[i]?.version ?? i + 1;
 
 /** ما الذي لم يعجبك؟ كل خيار يغيّر الطلب تغييرًا محددًا معلنًا (لا تخمين). */
 export const FEEDBACK = Object.freeze([
@@ -42,7 +57,7 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
     // المولّد: الثاني افتراضيًا؛ engine:'v1' يبقي المولّد الأول (احتياط) لكل إعادة تصميم في الجلسة
     v: 1, input: { land, discovery, idea, requirements: req, engine: engine || (result?.villaEngine === 'v1' ? 'v1' : null) },
     conflicts, reply: conflicts.length ? { conflicts, questions: conflicts.map(c => c.question_ar) } : null,
-    designs: [entry(result, null)], current: 0, approved: null, createdAt: Date.now(),
+    designs: [{ ...entry(result, null), version: 1 }], current: 0, nextVersion: 2, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
     alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], mirror: a.mirror ?? null, review: a.review || null })),
     // كم بديلًا عُرض من المطلوب، وسبب النقص، وأسباب رفض المرشحين (من المولّد نفسه) — تعرضها صفحة التصميم
@@ -73,7 +88,15 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   const pend = s.pendingEdit; delete s.pendingEdit;
   if (pend && !picks.length && text) {
     const tt = normalizeAr(text);
-    if (/^(?:نعم|ايه|ايوه|اي|اكيد|تمام|طيب|موافق|نفذ|نفذه|نفذها|اوكي|ok|yes|خلاص نفذ|يلا)(?:[ ،,.!]|$)/.test(tt)) { parsed = { intents: pend.intents, unhandled: [], questions: [], keep: false, refs: [] }; consent = true; text = pend.text; more = withAi(extractRequirements(text, { counts: {} }), ai); }
+    const yes = /^(?:نعم|ايه|ايوه|اي|اكيد|تمام|طيب|موافق|نفذ|نفذه|نفذها|اوكي|ok|yes|خلاص نفذ|يلا|اعد التوزيع|اعده)(?:[ ،,.!]|$)/.test(tt);
+    // (الجولة العاشرة) موافقة على إعادة التوزيع المقترحة: يُعتمد التصميم الذي عُرض أثره قبل السؤال نفسه حرفيًا
+    if (yes && pend.regen) {
+      const s2 = clone(session); delete s2.pendingEdit; s2.input = clone(pend.input);
+      const d = clone(pend.design); d.feedback = { ...(d.feedback || {}), reply: { ...pend.reply, consented: true } };
+      pushDesign(s2, d); s2.reply = null;
+      return { session: s2, changes: d.feedback.changes || [], reply: { ...pend.reply, consented: true, summary_ar: `أعدت توزيع البيت كما وافقت. ${pend.reply.fingerprint?.summary_ar || ''}`.trim() } };
+    }
+    if (yes) { parsed = { intents: pend.intents, unhandled: [], questions: [], keep: false, refs: [] }; consent = true; text = pend.text; more = withAi(extractRequirements(text, { counts: {} }), ai); }
     else if (/^(?:لا|لأ|لا شكرا|خله|خلها|اتركه|لا تنفذ|no)(?:[ ،,.!]|$)/.test(tt)) {
       const keep = clone(session); delete keep.pendingEdit;
       return { session: keep, changes: [], reply: { local: true, mode: 'declined', done: [], failed: [], pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: true, unchanged: true, otherFails: [], conflicts: [], questions: [], summary_ar: 'تمام، أبقيت المخطط كما هو حرفيًا.' } };
@@ -189,15 +212,29 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
     }
     reply.fallbackMeasured = m;
   }
+  // البصمة الهندسية بين المعروض والناتج: كم عنصرًا تغيّر وكم بقي ثابتًا حرفيًا
+  let fpd = null; try { fpd = diffFingerprint(parseDoc(cur.doc), out.doc); reply.fingerprint = compactDiff(fpd); } catch { fpd = null; }
   if (fallbackNote && !unchanged) {
     let ch = []; try { ch = describeChanges(compareDocs(parseDoc(cur.doc), out.doc, { gates: false, byName: true }).changed); } catch { ch = []; }
+    const rooms = ch.filter(c => c.kind !== 'openings');
     reply.mode = 'regenerated';
-    reply.fallback = { why_ar: fallbackNote.why_ar, said_ar: `لم أجد تعديلًا موضعيًا يحقق طلبك على المخطط المعروض، فأعدت توزيع البيت. تغيّر ${ch.filter(c => c.kind !== 'openings').length} فراغًا: ${ch.filter(c => c.kind !== 'openings').slice(0, 12).map(c => c.text_ar).join('؛ ') || '—'}.`, changed: ch };
+    reply.fallback = { why_ar: fallbackNote.why_ar, said_ar: `لم أجد تعديلًا موضعيًا يحقق طلبك على المخطط المعروض، فأعدت توزيع البيت. تغيّر ${rooms.length} فراغًا: ${rooms.slice(0, 12).map(c => c.text_ar).join('؛ ') || '—'}.${fpd ? ' ' + fpd.summary_ar : ''}`, changed: ch };
     if (reply.patternChanged) reply.patternChanged.why_ar = 'التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه — وتغيّرت معه غرف أخرى (مذكورة في الرد).';
+    // (الجولة العاشرة) طلب تعديل لم يُحل موضعيًا: لا يُعاد توزيع البيت قبل موافقة العميل — يُعرض أثره مقيسًا بالبصمة
+    // (كم عنصرًا سيتغير، وأي الغرف) ويُحفظ التصميم المقترح نفسه ليُعتمد حرفيًا بـ«نعم»
+    if (fallbackNote.intents?.length) {
+      const why = (fallbackNote.failed || []).map(f => (f.why_ar || '').replace(/\s*\(\d+ محاولة[^)]*\)+/, '')).filter(Boolean).join('؛ ') || fallbackNote.why_ar || '';
+      const before = fpd ? fpd.counts.unchanged + fpd.counts.changed + fpd.counts.removed : 0;
+      const q = `لم أجد تعديلًا موضعيًا يحقق طلبك دون المساس ببقية البيت${why ? ` (${why.replace(/[.。]+$/, '')})` : ''}. تحقيقه يحتاج إعادة توزيع البيت: ${fpd ? `لا يبقى ثابتًا حرفيًا إلا ${countAr(fpd.counts.unchanged)} من ${countAr(before)} في المخطط الحالي (البصمة الهندسية)` : 'يتغير معظم المخطط'}، وتتغير ${countAr(rooms.length, 'room')} لم تطلبها${rooms.length ? ` (${rooms.slice(0, 6).map(c => `«${c.name}»`).join('، ')}${rooms.length > 6 ? '…' : ''})` : ''}. أعيد توزيع البيت؟ (قل «نعم» أو «لا»)`;
+      const proposal = { ...reply, mode: 'regenerated' };
+      const keep = clone(session);
+      keep.pendingEdit = { regen: true, text, input: s.input, design: entry(out, { picks, text, changes, reply: proposal, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }), reply: proposal };
+      const cq = { type: 'needs-consent', key: 'regen|' + text, question_ar: q };
+      keep.reply = { conflicts: [cq], questions: [q] };
+      return { session: keep, changes: [], reply: { local: true, mode: 'ask-regenerate', conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [], proposal: { fingerprint: reply.fingerprint || null, changed: ch, measured: reply.fallbackMeasured || null, pattern: out.pat || null }, summary_ar: q } };
+    }
   }
-  s.designs.push(entry(out, { picks, text, changes, reply, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }));
-  if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
-  s.current = s.designs.length - 1;
+  pushDesign(s, entry(out, { picks, text, changes, reply, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }));
   return { session: s, changes, reply };
 }
 
@@ -210,7 +247,7 @@ function compactReview(rv) {
 /** آخر فراغ عدّله العميل (لفهم الضمير في «رجّعه مقفل»). */
 function lastSubjectOf(s) {
   const ed = s.designs[s.current]?.feedback?.edit;
-  for (const it of [...(ed?.intents || [])].reverse()) { if (it.op === 'kitchenOpen') return 'kitchen'; if (it.subjectType) return it.subjectType; }
+  for (const it of [...(ed?.intents || [])].reverse()) { if (it.subjectDoor) return 'door:' + it.subjectDoor; if (it.op === 'kitchenOpen') return 'kitchen'; if (it.subjectType) return it.subjectType; }
   return null;
 }
 const SCOPE_OPS = new Set(['resize', 'delete', 'extDoor', 'revertRoom']);
@@ -220,7 +257,7 @@ const SCOPE_OPS = new Set(['resize', 'delete', 'extDoor', 'revertRoom']);
  */
 function localTurn(s, req, parsed, { text, picks, changes, more, original, consent = false }) {
   const cur = s.designs[s.current], doc0 = parseDoc(cur.doc), entryDir = s.input.land?.entries?.[0] || 's';
-  const history = s.designs.slice(0, s.current + 1).map(d => ({ doc: d.doc, edit: d.feedback?.edit || null, text: d.feedback?.text || '' }));
+  const history = s.designs.slice(0, s.current + 1).map((d, i) => ({ doc: d.doc, edit: d.feedback?.edit || null, text: d.feedback?.text || '', version: d.version ?? i + 1 }));
   const reqE = { ...req, entry: entryDir, consent };
   let res = applyEdits(doc0, parsed, { req: reqE, history });
   let restored = null;
@@ -242,8 +279,17 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
     // نوايا هذا الدور الأخرى (غير الإرجاع) على الناتج
     const rest = parsed.intents.filter(i => !['restore', 'revertRoom', 'bedCount'].includes(i.op));
     res = rest.length ? applyEdits(rp.doc, { intents: rest, unhandled: [], questions: [] }, { req: reqE, history }) : { status: 'local', doc: rp.doc, results: [], pending: [] };
-    res.results = [...parsed.intents.filter(i => ['restore', 'revertRoom', 'bedCount'].includes(i.op)).map(i => ({ op: i.op, text_ar: i.text_ar, ok: true, how_ar: `رجعت إلى ${R.index === 0 ? 'التصميم الأول' : `التصميم رقم ${R.index + 1} في الجلسة`}${rp.ok.length ? ` وأعدت عليه: ${rp.ok.join('، ')}` : ''}`, intent: i })), ...res.results];
-    restored = { index: R.index, replayed: rp.ok, lost: rp.lost, lostTurns };
+    const ver = history[R.index].version;
+    res.results = [...parsed.intents.filter(i => ['restore', 'revertRoom', 'bedCount'].includes(i.op)).map(i => ({ op: i.op, text_ar: i.text_ar, ok: true, how_ar: `رجعت إلى ${R.index === 0 ? 'التصميم الأول (النسخة 1)' : `النسخة ${ver}`}${rp.ok.length ? ` وأعدت عليها: ${rp.ok.join('، ')}` : ''}`, intent: i })), ...res.results];
+    restored = { index: R.index, version: ver, replayed: rp.ok, lost: rp.lost, lostTurns, keepNames: keepIntents.flatMap(i => [i.name, i.aName, i.bName]).filter(Boolean) };
+    // (الجولة العاشرة) إثبات الرجوع بالبصمة: الناتج مقارنًا بالنسخة نفسها — مطابق حرفيًا، أو لا يختلف عنها إلا بما غيّرته
+    // التعديلات المعادة، وهي العناصر نفسها التي غيّرتها تلك التعديلات أول مرة
+    try {
+      const vs = diffFingerprint(base, res.doc), replay = touchedKeys(vs), orig = new Set();
+      later.forEach((h, k) => { if (h.edit?.intents?.some(it => keepIntents.includes(it))) { const prev = k === 0 ? base : parseDoc(later[k - 1].doc); for (const key of touchedKeys(diffFingerprint(prev, parseDoc(h.doc)))) orig.add(key); } });
+      const common = [...replay].filter(k => orig.has(k)).length;
+      restored.proof = { version: ver, identical: vs.identical, counts: vs.counts, replayedEdits: rp.ok, replayTouched: replay.size, originalTouched: orig.size, common, summary_ar: vs.identical ? `البصمة: الناتج مطابق للنسخة ${ver} حرفيًا (${countAr(vs.counts.unchanged)}).` : `البصمة: الناتج لا يختلف عن النسخة ${ver} إلا في ${countAr(vs.counts.touched)} أعاد تغييرها ${rp.ok.map(x => `«${x}»`).join(' و') || 'هذا الطلب'}${orig.size ? ` (${common} منها هي نفسها التي غيّرها ذلك التعديل أول مرة من ${orig.size})` : ''}، وبقي ثابتًا حرفيًا كما في النسخة ${ver}: ${countAr(vs.counts.unchanged)}.` };
+    } catch { /* الإثبات معلوماتي */ }
   }
   if (res.status === 'clarify') {
     const q = res.questions, keep = clone(original); if (q.some(x => x.type === 'needs-consent')) keep.pendingEdit = { text, intents: parsed.intents }; keep.reply = { conflicts: q, questions: q.map(x => x.question_ar) };
@@ -256,7 +302,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   for (const r of res.results) { const it = r.intent || {}; if (SCOPE_OPS.has(it.op) && it.id) scope.add(it.id); }
   for (const r of res.results) if (r.intent?.op === 'kitchenOpen') for (const x of I0.rooms.values()) if (x.type === 'kitchen' || x.type === 'dining' || (r.intent.to === 'hall' && x.type === 'living')) scope.add(x.id);
   for (const id of I1.rooms.keys()) if (!I0.rooms.has(id)) scope.add(id);
-  if (restored) { const it = parsed.intents.find(i => i.op === 'revertRoom'); if (it) scope.add(it.id); }
+  if (restored) { const it = parsed.intents.find(i => i.op === 'revertRoom'); if (it) scope.add(it.id); for (const x of I0.rooms.values()) if (restored.keepNames.includes(x.name)) scope.add(x.id); }
   const cmp = compareDocs(doc0, res.doc, { scope, gates: false, byName: !!restored });
   const changed = describeChanges(cmp.changed);
   const failedRes = res.results.filter(r => !r.ok);
@@ -272,7 +318,10 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   if (beds !== [...I0.rooms.values()].filter(r => r.type === 'bedroom' || r.type === 'master').length) req.counts.bedrooms = beds;
   const baths = [...I1.rooms.values()].filter(r => r.type === 'bath').length; if (baths > (req.counts.baths || 0)) req.counts.baths = baths;
   for (const [k, t] of [['majlis', 'majlis'], ['dining', 'dining']]) { const n = [...I1.rooms.values()].filter(r => r.type === t).length; if (Number.isInteger(req.counts[k]) && n < req.counts[k]) req.counts[k] = n; }
-  const intents = parsed.intents.map(i => ({ ...i, subjectType: i.id ? I0.rooms.get(i.id)?.type || null : i.op === 'kitchenOpen' ? 'kitchen' : null }));
+  const doorOf = new Map(res.results.filter(r => r.subjectDoor).map(r => [r.intent, r.subjectDoor]));
+  const intents = parsed.intents.map(i => ({ ...i, subjectType: i.id ? I0.rooms.get(i.id)?.type || null : i.op === 'kitchenOpen' ? 'kitchen' : null, ...(doorOf.has(i) ? { subjectDoor: doorOf.get(i) } : {}) }));
+  // البصمة الهندسية للدور: كل عنصر قبل التعديل وبعده
+  let fpd = null; try { fpd = diffFingerprint(doc0, res.doc); } catch { fpd = null; }
   // «نُفّذ» لما تغيّر فعلًا فقط؛ ما كان متحققًا أصلًا (أو حذف فراغ غير موجود) يُذكر وحده بسببه
   // حذف فراغ غير موجود أصلًا ليس «نُفّذ»: يُذكر وحده بسببه (ما كان متحققًا أصلًا يبقى في «نُفّذ» كما كان)
   const absent = r => r.ok && r.already && r.intent?.op === 'none' && /غير موجود/.test(r.why_ar || '');
@@ -289,7 +338,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
     already: res.results.filter(r => r.ok && r.already).map(r => ({ text: r.text_ar, why: r.why_ar })),
     how: res.results.filter(r => r.ok && r.how_ar).map(r => r.how_ar),
     // عبارة الرجوع («رجّع مثل أول») يفهمها التعديل الموضعي وإن لم يفهمها مستخرج المتطلبات: لا تُعرض «غير مفهومة»
-    picks: [], unclear: (more?.unclear || []).filter(u => !(parsed.intents.some(i => ['restore', 'revertRoom'].includes(i.op)) && /(?:^|\s)(?:رجع|ارجع|ترجع|رد|تراجع)/.test(normalizeAr(u)))), unsupported: more?.unsupported || [], kept: true,
+    picks: [], unclear: (more?.unclear || []).filter(u => !(parsed.intents.some(i => ['restore', 'revertRoom'].includes(i.op)) && /(?:^|\s)(?:رجع|ارجع|ترجع|رد|تراجع|نسخه)/.test(normalizeAr(u))) && !(parsed.intents.some(i => i.op === 'door' || i.op === 'window') && /(?:باب|ابواب|نافذه|نوافذ|شباك|دريشه)/.test(normalizeAr(u)))), unsupported: more?.unsupported || [], kept: true,
     unchanged: serialize(res.doc) === cur.doc, reused: false, geometryIdentical: JSON.stringify([res.doc.walls, res.doc.openings, res.doc.labels]) === JSON.stringify([doc0.walls, doc0.openings, doc0.labels]),
     changed, unrequested, restored,
     otherFails: ledger.filter(x => !(x.status ? x.status === 'done' : x.ok) && x.status !== 'pending-render').map(x => ({ text: x.text, why: x.why })).slice(0, 6),
@@ -297,6 +346,8 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   };
   const same = I0.rooms.size - changed.filter(c => c.kind !== 'added').length;
   reply.keptRooms = Math.max(0, same); reply.alreadyTxt = alreadyTxt; if (restored && facadeNote) reply.facadeNote = facadeNote;
+  if (fpd) reply.fingerprint = compactDiff(fpd);
+  if (restored?.proof) reply.restoreProof = restored.proof;
   reply.summary_ar = [
     doneTxt.length ? `نُفّذ: ${doneTxt.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
     alreadyTxt.length ? `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.` : '',
@@ -306,6 +357,8 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
     unrequested.length ? (restored ? `وعادت معه إلى حالها في ذلك التصميم: ${unrequested.map(c => c.text_ar).join('؛ ')}.` : `تغيّر أيضًا لأن التعديل يحتاجه: ${unrequested.map(c => c.text_ar).join('؛ ')}.`) : '',
     restored?.lost?.length || restored?.lostTurns?.length ? `لم يُعَد بعد الرجوع: ${[...restored.lost.map(l => `${l.text}${l.why ? ` (${l.why})` : ''}`), ...restored.lostTurns.map(t => `«${t}»`)].join('، ')} — قل «أعده» إن أردته ولو بإعادة توزيع.` : '',
     `بقية الغرف (${Math.max(0, same)}) كما هي مقيسًا${reply.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`,
+    fpd ? fpd.summary_ar : '',
+    restored?.proof ? restored.proof.summary_ar : '',
   ].filter(Boolean).join(' ');
   // جزء نُفّذ وجزء يحتاج إذنًا (غرفة لم يذكرها العميل): يُسأل عنه صراحة ويُحفظ ليُنفَّذ بـ«نعم» على المخطط الجديد
   const asks = failedRes.filter(r => r.ask);
@@ -313,9 +366,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   changes.push(...doneTxt);
   if (text) s.input.idea = [s.input.idea, text].filter(Boolean).join('\n');
   let review = null; try { review = compactReview(reviewDesign(res.doc, { text: s.input.idea || '', counts: { ...req.counts }, land: s.input.land || {} }, { external: false })); } catch { review = cur.review || null; }
-  s.designs.push({ doc: serialize(res.doc), pat: cur.pat, summary: cur.summary, notes: [...(cur.notes || []).filter(n => !/^تعديل موضعي/.test(n)), `تعديل موضعي: ${doneTxt.join('، ') || '—'}`], floors: cur.floors, feedback: { picks, text, changes: [...changes], reply, edit: { local: true, intents } }, engine: cur.engine, ledger, review, mirror: cur.mirror ?? null });
-  if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
-  s.current = s.designs.length - 1;
+  reply.version = pushDesign(s, { doc: serialize(res.doc), pat: cur.pat, summary: cur.summary, notes: [...(cur.notes || []).filter(n => !/^تعديل موضعي/.test(n)), `تعديل موضعي: ${doneTxt.join('، ') || '—'}`], floors: cur.floors, feedback: { picks, text, changes: [...changes], reply, edit: { local: true, intents } }, engine: cur.engine, ledger, review, mirror: cur.mirror ?? null });
   return { session: s, changes, reply };
   }
 }

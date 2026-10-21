@@ -95,8 +95,11 @@ function showAlternative(i) {
   const a = session.alternatives[i]; if (!a) return;
   let at = session.designs.findIndex(x => x.doc === a.doc);
   if (at < 0) {
-    session.designs.push({ doc: a.doc, pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], floors: parseDoc(a.doc).levels.length, feedback: null, engine: a.strategy || '', ledger: null, review: a.review || null, mirror: a.mirror ?? null, alt: i });
-    if (session.designs.length > 8) session.designs.splice(0, session.designs.length - 8);
+    // رقم نسخة ثابت (مثل design-session): «ارجع للنسخة N» يعني هذه النسخة دائمًا
+    const version = Math.max(session.nextVersion || 0, ...session.designs.map((x, k) => (x.version ?? k + 1) + 1));
+    session.nextVersion = version + 1;
+    session.designs.push({ doc: a.doc, pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], floors: parseDoc(a.doc).levels.length, feedback: null, engine: a.strategy || '', ledger: null, review: a.review || null, mirror: a.mirror ?? null, alt: i, version });
+    if (session.designs.length > 12) session.designs.splice(0, session.designs.length - 12);
     at = session.designs.length - 1;
   }
   show(at); scrollTo({ top: 0, behavior: 'smooth' });
@@ -117,7 +120,7 @@ function reviewCard(d) {
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
-  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'التصميم رقم ' + (r.restored.index + 1)} كما طلبت.` : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
+  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'النسخة ' + (r.restored.version ?? r.restored.index + 1)} كما طلبت.` : r.mode === 'ask-regenerate' ? 'لم أجد تعديلًا موضعيًا يحقق طلبك؛ لم أغيّر شيئًا قبل موافقتك.' : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
   // ما تغيّر في المخطط فعلًا (مقيسًا): من التعديل الموضعي أو من إعادة التوزيع المعلنة
   const changed = [...(r.changed || []), ...(r.fallback?.changed || [])].filter(c => c.kind !== 'openings');
@@ -130,6 +133,9 @@ function sharaReply(fb) {
     changed.length ? el('div', {}, el('p', { class: 'sub' }, r.restored ? 'عاد إلى حاله في ذلك التصميم:' : 'تغيّر في المخطط:'), el('ul', { class: 'tick' }, changed.map(c => li(c.inScope === false && !r.restored ? 'no' : 'good', c.text_ar)))) : null,
     r.facadeNote ? el('p', { class: 'sub' }, r.facadeNote + '.') : null,
     Number.isInteger(r.keptRooms) ? el('p', { class: 'sub' }, `بقية الغرف (${r.keptRooms}) كما هي مقيسًا${r.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`) : null,
+    // البصمة الهندسية: كم عنصرًا تغيّر وكم بقي ثابتًا حرفيًا، وإثبات الرجوع إلى النسخة
+    r.fingerprint?.summary_ar && r.mode !== 'ask-regenerate' ? el('p', { class: 'sub', 'data-fingerprint': '' }, r.fingerprint.summary_ar + (Number.isInteger(r.version) ? ` (النسخة ${r.version})` : '')) : null,
+    r.restoreProof?.summary_ar ? el('p', { class: 'sub', 'data-restore-proof': '' }, r.restoreProof.summary_ar) : null,
     (r.questions || []).length ? el('ul', { class: 'tick' }, r.questions.map(q => li('no', q))) : null,
     r.unclear.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أفهم هذه العبارات فلم أطبّقها؛ اكتبها بصيغة مباشرة (مثل: «المطبخ في الخلف»):'), el('ul', { class: 'tick' }, r.unclear.map(t => li('no', '«' + t + '»')))) : null,
     r.unsupported.length ? el('ul', { class: 'tick' }, r.unsupported.map(t => li('no', t))) : null);
@@ -253,7 +259,8 @@ $('fbGo').addEventListener('click', async () => {
     }
     const out = await redesign(session, { picks, text, ai });
     // تعارض في الملاحظة: لا تصميم جديد؛ نسأل العميل ونبقي النافذة مفتوحة ليعيد الكتابة
-    if (out.reply?.conflicts?.length) { $('fbStatus').textContent = 'قبل ما أعدّل: ' + out.reply.questions.join(' — '); $('fbGo').disabled = false; return; }
+    // سؤال إذن (تعديل يمس غرفة لم تُذكر، أو إعادة توزيع البيت): يُحفظ المقترح في الجلسة ليُنفَّذ بـ«نعم» حرفيًا
+    if (out.reply?.conflicts?.length) { if (out.reply.conflicts.some(c => c.type === 'needs-consent') && out.session?.pendingEdit) { session = out.session; saveSession(localStorage, session); } $('fbStatus').textContent = 'قبل ما أعدّل: ' + out.reply.questions.join(' — '); $('fbGo').disabled = false; return; }
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });
