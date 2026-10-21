@@ -233,8 +233,20 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     }
 
     // ---- rooms: floors, ceilings, roofs, slabs ----------------------------------------------------------------------
+    // فراغ مزدوج الارتفاع (نوع «void» في الدور الذي فوقه): لا أرضية له في دوره، والفراغ الذي تحته بلا سقف ولا سطح هناك
+    const isVoid = sp => !!ROOM_TYPES[sp.type]?.void;
+    const voidsAbove = (lvData[L.i + 1]?.spaces || []).filter(isVoid);
     for (const sp of L.spaces) {
       const holes = holesFor(L, sp), net = sp.net, polyHoles = sp.holes;
+      if (isVoid(sp)) {
+        rooms.set(sp.key, { key: sp.key, id: sp.key, spaceId: sp.id, levelId: L.id, levelIndex: L.i, name: sp.name, type: sp.type, label: sp.label, floorKind: null, area: sp.area, polygon: net, holes: polyHoles, bounds: boundsOf(net), centroid: sp.centroid, inside: sp.inside, elevation: E, height: H, open: false, floor: null, edges: sp.edges, void: true });
+        C.flatPoly('ceiling', net, [...polyHoles, ...holes.own], E + ceilZ, -1, p => [p.x, p.y]);
+        if (!sp.covered) R.flatPoly('roof', net, [...polyHoles, ...holes.own], E + H, 1, p => [p.x, -p.y]);
+        continue;
+      }
+      // فراغ تحت فراغ مزدوج: يُترك السقف (والسطح) مفتوحًا بقدر الفراغ العلوي — كله إن غطّاه، أو ثقبًا إن كان داخله
+      const vAll = voidsAbove.some(v => pointInPolygon(sp.inside, v.net, 1e-9) && sp.net.every(p => pointInPolygon(p, v.net, .12)));
+      const vHoles = vAll ? [] : voidsAbove.filter(v => v.net.every(p => pointInPolygon(p, sp.net, .12))).map(v => v.net);
       const floorKey = (doc.finish?.floors || {})[sp.type] || ROOM_TYPES[sp.type]?.floor || 'tile';
       const floorMat = lib.get(floorKey) || lib.get('tile');
       const fb = new MeshBuilder(THREE);
@@ -249,9 +261,9 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       const bnds = boundsOf(net);
       const room = { key: sp.key, id: sp.key, spaceId: sp.id, levelId: L.id, levelIndex: L.i, name: sp.name, type: sp.type, label: sp.label, floorKind: floorKey, area: sp.area, polygon: net, holes: polyHoles, bounds: bnds, centroid: sp.centroid, inside: sp.inside, elevation: E, height: H, open: sp.open, floor: mesh, edges: sp.edges };
       rooms.set(sp.key, room);
-      if (!sp.open) {
-        C.flatPoly('ceiling', net, [...polyHoles, ...holes.own], E + ceilZ, -1, p => [p.x, p.y]);
-        if (!sp.covered) R.flatPoly('roof', net, [...polyHoles, ...holes.own], E + H, 1, p => [p.x, -p.y]);
+      if (!sp.open && !vAll) {
+        C.flatPoly('ceiling', net, [...polyHoles, ...holes.own, ...vHoles], E + ceilZ, -1, p => [p.x, p.y]);
+        if (!sp.covered) R.flatPoly('roof', net, [...polyHoles, ...holes.own, ...vHoles], E + H, 1, p => [p.x, -p.y]);
       }
       holes.own.forEach(h => { // the hole's edge in the slab above
         for (let i = 0; i < 4; i++) { const a = h[i], b = h[(i + 1) % 4]; S.quad('slabEdge', P3(a.x, a.y, E + ceilZ), P3(b.x, b.y, E + ceilZ), P3(b.x, b.y, E + H), P3(a.x, a.y, E + H), null, [[0, 0], [dist(a, b), 0], [dist(a, b), T], [0, T]]); }

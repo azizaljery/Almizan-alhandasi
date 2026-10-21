@@ -85,7 +85,7 @@ function structureOfLevel(doc, lvl, A, isTop) {
   if (!outline) return { empty: true, warnings: ['لا يوجد محيط مبنى مغلق؛ لا يمكن حساب البلاطة والأحمال.'] };
 
   // 0) خلايا المسقط (دقة 0.5 م) داخل المحيط دون الأفنية المسمّاة؛ تُستعمل لضمان تغطية الأعمدة
-  const courtyards = (doc.labels || []).filter(l => l.level === lvl.id && l.type === 'courtyard').map(l => analysis.spaces.find(s => s.net && pointInPolygon(l.seed, s.net))).filter(Boolean);
+  const courtyards = (doc.labels || []).filter(l => l.level === lvl.id && (l.type === 'courtyard' || l.type === 'void')).map(l => analysis.spaces.find(s => s.net && pointInPolygon(l.seed, s.net))).filter(Boolean);
   const ox = outline.map(p => p.x), oy = outline.map(p => p.y), x0 = Math.min(...ox), y0 = Math.min(...oy), x1 = Math.max(...ox), y1 = Math.max(...oy);
   const coarse = [];
   for (let x = x0 + 0.25; x < x1; x += 0.5) for (let y = y0 + 0.25; y < y1; y += 0.5) { const p = { x, y }; if (pointInPolygon(p, outline) && !courtyards.some(c => pointInPolygon(p, c.net))) coarse.push(p); }

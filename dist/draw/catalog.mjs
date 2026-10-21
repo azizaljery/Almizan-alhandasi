@@ -19,6 +19,8 @@ export const ROOM_TYPES = Object.freeze({
   balcony:   { ar: 'شرفة',          color: '#e4ebe0', floor: 'tile',   wet: false, habitable: false, minArea: 3,   minWidth: 1.2, windowRequired: false, open: true },
   courtyard: { ar: 'فناء داخلي',     color: '#d7e3cf', floor: 'grass',  wet: false, habitable: false, minArea: 6,   minWidth: 2.0, windowRequired: false, open: true },
   garage:    { ar: 'مواقف سيارات',   color: '#dcdcdc', floor: 'concrete', wet: false, habitable: false, minArea: 15, minWidth: 2.7, windowRequired: false },
+  // فراغ مزدوج الارتفاع في دور علوي (فوق بهو المدخل أو الصالة): لا أرضية في دوره، ولا سقف للفراغ الذي تحته؛ يحده درابزين
+  void:      { ar: 'فراغ مزدوج الارتفاع', color: '#f6f3ec', floor: 'tile', wet: false, habitable: false, minArea: 0, minWidth: 0, windowRequired: false, void: true },
   other:     { ar: 'غير محدد',       color: '#f1ede4', floor: 'tile',   wet: false, habitable: false, minArea: 0,   minWidth: 0,   windowRequired: false },
 });
 export const roomTypeName = type => (ROOM_TYPES[type] || ROOM_TYPES.other).ar;

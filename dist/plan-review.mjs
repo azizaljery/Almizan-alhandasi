@@ -197,7 +197,8 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc)) {
   const gates = [];
   const ground = model.levels[0];
   const allRooms = model.levels.flatMap(lv => lv.rooms.map(room => ({ lv, room })));
-  const real = allRooms.filter(({ room }) => !room.unlabelled);
+  // الفراغ المزدوج الارتفاع (نوع void) ليس غرفة يُدخل إليها ولا مسطحًا: لا يدخل في البوابات
+  const real = allRooms.filter(({ room }) => !room.unlabelled && !ROOM_TYPES[room.type]?.void);
 
   // 1) الوصول
   {
@@ -466,7 +467,7 @@ function overlapRatio(a, b) {
 
 export function scoreComponents(doc, request = {}, model = analyzeDoc(doc)) {
   const comp = {}, detail = {};
-  const real = model.levels.flatMap(lv => lv.rooms.filter(r => !r.unlabelled).map(room => ({ lv, room })));
+  const real = model.levels.flatMap(lv => lv.rooms.filter(r => !r.unlabelled && !ROOM_TYPES[r.type]?.void).map(room => ({ lv, room })));
   const indoor = real.filter(({ room }) => !ROOM_TYPES[room.type]?.open);
   const net = indoor.reduce((s, { room }) => s + room.area, 0);
 

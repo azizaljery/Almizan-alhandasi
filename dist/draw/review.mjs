@@ -223,7 +223,7 @@ export function reviewDoc(doc, options = {}) {
       const first = lv.entries[0];
       push('ENTRY_UNFLAGGED', 'يوجد باب للخارج لكن لم يُحدَّد أيّ باب كباب المدخل الرئيسي.', [first.via], { label: 'تحديده كباب المدخل', commands: [{ type: 'update', id: first.via, patch: { entry: true } }] });
     }
-    if (lv.seedKind) for (const r of lv.rooms) if (!lv.reach.has(r.id)) push('UNREACHABLE_ROOM', `«${r.name}» لا يمكن الوصول إليها عبر الأبواب من ${lv.seedKind === 'entry' ? 'المدخل' : 'الدرج'}؛ لا يوجد باب أو فتحة تربطها بباقي الغرف.`, [r.id]);
+    if (lv.seedKind) for (const r of lv.rooms) if (!lv.reach.has(r.id) && !ROOM_TYPES[r.type]?.void) push('UNREACHABLE_ROOM', `«${r.name}» لا يمكن الوصول إليها عبر الأبواب من ${lv.seedKind === 'entry' ? 'المدخل' : 'الدرج'}؛ لا يوجد باب أو فتحة تربطها بباقي الغرف.`, [r.id]);
 
     // --- rooms
     for (const r of lv.rooms) {
