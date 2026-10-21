@@ -1,0 +1,382 @@
+{
+ "id": "L6",
+ "name": "عائلة ممتدة — غرفة للوالدين، غرف العيال جنب بعض، حمامات لا تفتح على الصالة، فناء داخلي",
+ "words": 164,
+ "ms": 14,
+ "text": "مساء الخير. نبي نصمم بيت العائلة على أرض ٢٥×٣٢، والشارع شمالي. البيت دور واحد لأن أبوي وأمي كبار في السن ويسكنون معنا. نبي غرفة لأبوي وأمي قريبة من الصالة وبعيدة عن المجلس، وتكون بحمامها ومدخلها واسع للكرسي المتحرك. وفيه الماستر لي ولزوجتي، وثلاث غرف للعيال جنب بعض. الصالة نبيها كبيرة وتطل على الحوش الخلفي. المجلس على الشارع، ومجلس النساء يكون مستقل وبعيد عن مجلس الرجال. والمطبخ مقفل وجنبه غرفة الطعام. الحمامات لا تفتح على الصالة أبدًا، هذي نقطة مهمة عندنا لأن الضيوف يجلسون أحيانًا في الصالة. نبي غرفة سواق بحمام ويكون لها باب من برا، وغرفة خادمة بحمام قريبة من المطبخ. وغرفة غسيل. ونبي فناء داخلي في نص البيت يدخل منه النور والهوا، وإذا ما تقدرون عادي. ولا نبي درج داخلي لأن البيت دور واحد ولا نفكر نزيد دور. وعيالنا أربعة: ولدين وبنتين، والكبيرة في الجامعة، ونحب نجتمع كلنا بعد العشاء، عشان كذا الصالة هي قلب البيت عندنا. والوالد يحب يجلس الصبح في الشمس، فلو فيه مكان مشمس يكون زين. والسلام عليكم ورحمة الله.",
+ "formCounts": {
+  "majlis": 3,
+  "baths": 3,
+  "kitchens": 1,
+  "halls": 1
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "pref": {
+    "tp": 5,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "extra": {
+    "tp": 5,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "absent": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "rule": {
+    "tp": 6,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.857
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unsupported": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 0,
+    "fn": 1,
+    "fp": 0,
+    "precision": null,
+    "recall": 0
+   }
+  },
+  "precision": 1,
+  "recall": 0.917,
+  "f1": 0.957,
+  "tp": [
+   "count:bedrooms=5",
+   "count:majlis=2",
+   "count:kitchens=1",
+   "count:dining=1",
+   "pref:elderlyRoom",
+   "pref:closedKitchen",
+   "pref:bathsOffHall",
+   "pref:womenSeparate",
+   "pref:big_hall",
+   "extra:driver",
+   "extra:driver.bath",
+   "extra:maid",
+   "extra:maid.bath",
+   "extra:laundry",
+   "rule:close:elderly+hall",
+   "rule:away:elderly+majlis",
+   "rule:cluster:kids",
+   "rule:place:hall:s",
+   "rule:place:majlis:n",
+   "rule:close:kitchen+maid",
+   "floors=1",
+   "unsupported:courtyard"
+  ],
+  "missed": [
+   "rule:close:dining+kitchen",
+   "unclear:الكرسي المتحرك"
+  ],
+  "wrong": [],
+  "levels": [
+   {
+    "item": "rule:close:elderly+hall",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:away:elderly+majlis",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:cluster:kids",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:hall:s",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:majlis:n",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:kitchen+maid",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "majlis": 2,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "bedrooms": 5,
+   "dining": 1
+  },
+  "prefs": {
+   "openKitchen": false,
+   "womenSeparate": true,
+   "bathsOffHall": true,
+   "elderlyRoom": true,
+   "big_hall": true,
+   "floors": 1
+  },
+  "extras": {
+   "maid": {
+    "bath": true,
+    "ext": false
+   },
+   "driver": {
+    "bath": true
+   },
+   "laundry": true
+  },
+  "absent": [],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "close:elderly+hall",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "غرفة لأبوي وأمي قريبة من الصالة",
+    "text": "«غرفة كبار السن» قرب «الصالة»"
+   },
+   {
+    "item": "away:elderly+majlis",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "وبعيدة عن المجلس",
+    "text": "«غرفة كبار السن» بعيدًا عن «المجلس»"
+   },
+   {
+    "item": "cluster:kids",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرف للعيال جنب بعض",
+    "text": "«غرف الأبناء» متجاورة"
+   },
+   {
+    "item": "place:hall:s",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "الصالة نبيها كبيرة وتطل على الحوش الخلفي",
+    "text": "«الصالة» على الواجهة الخلفية"
+   },
+   {
+    "item": "place:majlis:n",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المجلس على الشارع",
+    "text": "«المجلس» على الشارع (الواجهة الأمامية)"
+   },
+   {
+    "item": "away:majlis+majlis_w",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "ومجلس النساء يكون مستقل وبعيد عن مجلس الرجال",
+    "text": "«مجلس النساء» بعيدًا عن «المجلس»"
+   },
+   {
+    "item": "close:kitchen+maid",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "وغرفة خادمة بحمام قريبة من المطبخ",
+    "text": "«غرفة الخادمة» قرب «المطبخ»"
+   }
+  ],
+  "tweaks": {},
+  "unsupported": [
+   "الفناء الداخلي: هذا المولّد لا يرسمه بعد؛ ما يزيد عن المبنى يبقى ساحات خارجية."
+  ],
+  "unclear": [
+   "مساء الخير",
+   "نبي نصمم بيت العائلة على أرض ٢٥×٣٢",
+   "الشارع شمالي",
+   "تكون بحمامها ومدخلها واسع للكرسي المتحرك",
+   "هذي نقطة مهمة عندنا لأن الضيوف يجلسون أحيانًا في الصالة",
+   "إذا ما تقدرون عادي",
+   "لا نفكر نزيد دور",
+   "عيالنا أربعة: ولدين وبنتين",
+   "الكبيرة في الجامعة",
+   "نحب نجتمع كلنا بعد العشاء",
+   "عشان كذا الصالة هي قلب البيت عندنا",
+   "فلو فيه مكان مشمس يكون زين",
+   "السلام عليكم ورحمة الله",
+   "تفتح على الصالة أبدًا"
+  ],
+  "understood": [
+   "5 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مغلق بباب",
+   "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+   "دورات المياه لا تفتح على الصالة مباشرة",
+   "غرفة خادمة بحمام",
+   "غرفة سائق بمدخل خارجي وحمام",
+   "غرفة غسيل",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "الصالة واسعة",
+   "دور واحد",
+   "«غرفة كبار السن» قرب «الصالة»",
+   "«غرفة كبار السن» بعيدًا عن «المجلس»",
+   "«غرف الأبناء» متجاورة",
+   "«الصالة» على الواجهة الخلفية",
+   "«المجلس» على الشارع (الواجهة الأمامية)",
+   "«مجلس النساء» بعيدًا عن «المجلس»",
+   "«غرفة الخادمة» قرب «المطبخ»"
+  ]
+ },
+ "conflicts": [],
+ "coverage": {
+  "clauses": 29,
+  "fates": {
+   "unclear": 13,
+   "understood": 14,
+   "orphan": 1,
+   "unsupported": 1
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "مساء الخير",
+   "نبي نصمم بيت العائلة على أرض ٢٥×٣٢",
+   "الشارع شمالي",
+   "تكون بحمامها ومدخلها واسع للكرسي المتحرك",
+   "تفتح على الصالة أبدًا",
+   "هذي نقطة مهمة عندنا لأن الضيوف يجلسون أحيانًا في الصالة",
+   "إذا ما تقدرون عادي",
+   "لا نفكر نزيد دور",
+   "عيالنا أربعة: ولدين وبنتين",
+   "الكبيرة في الجامعة",
+   "نحب نجتمع كلنا بعد العشاء",
+   "عشان كذا الصالة هي قلب البيت عندنا",
+   "فلو فيه مكان مشمس يكون زين",
+   "السلام عليكم ورحمة الله"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 5,
+   "majlis": 2,
+   "kitchens": 1,
+   "dining": 1
+  },
+  "prefs": [
+   "elderlyRoom",
+   "closedKitchen",
+   "bathsOffHall",
+   "womenSeparate",
+   "big_hall"
+  ],
+  "extras": [
+   "driver",
+   "driver.bath",
+   "maid",
+   "maid.bath",
+   "laundry"
+  ],
+  "absent": [],
+  "rules": [
+   {
+    "r": "close:elderly+hall",
+    "level": "must"
+   },
+   {
+    "r": "away:elderly+majlis",
+    "level": "must"
+   },
+   {
+    "r": "cluster:kids",
+    "level": "must"
+   },
+   {
+    "r": "place:hall:s",
+    "level": "must"
+   },
+   {
+    "r": "place:majlis:n",
+    "level": "must"
+   },
+   {
+    "r": "close:dining+kitchen",
+    "level": "must"
+   },
+   {
+    "r": "close:kitchen+maid",
+    "level": "must"
+   }
+  ],
+  "floors": 1,
+  "unsupported": [
+   "courtyard"
+  ],
+  "conflicts": [],
+  "unclear": [
+   "الكرسي المتحرك"
+  ],
+  "optional": [
+   "rule:away:majlis+majlis_w",
+   "count:baths"
+  ],
+  "traps": "«ولا نبي درج داخلي» ليست قاعدة مكانية؛ ثلاث غرف للعيال + الماستر + الوالدين = خمس."
+ },
+ "traps": "«ولا نبي درج داخلي» ليست قاعدة مكانية؛ ثلاث غرف للعيال + الماستر + الوالدين = خمس."
+}

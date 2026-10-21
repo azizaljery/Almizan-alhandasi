@@ -1,0 +1,449 @@
+{
+ "id": "C10",
+ "engine": "v2",
+ "name": "خمسة بدائل مختلفة تنظيميًا لطلب واحد",
+ "text": "4 غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، طعام، مطبخ، غرفة خادمة",
+ "understood": [
+  "4 غرف نوم",
+  "غرفة نوم رئيسية (ماستر)",
+  "غرفة خادمة"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "centralhall",
+   "pat": "centralhall:ch2",
+   "summary": "الصالة المركزية الموزِّعة: غرف النوم على جانبيها تُفتح عليها مباشرة بلا ممرات، والضيافة صف أمامي، والطعام والمطبخ صف خلفي على الحديقة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.83,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": null,
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.84
+   },
+   "kitchen": {
+    "w": 3.19,
+    "l": 4.41,
+    "area": 14.04
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.99,
+    "l": 7.28,
+    "ratio": 1.46
+   },
+   "rooms": 23,
+   "net": 244.1,
+   "circulationPct": 11.24,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 4,
+   "ledger": [
+    {
+     "text": "غرفة الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "courtyard",
+   "pat": "courtyard:k1r",
+   "summary": "حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.28,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 9.66,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.61
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 5.97,
+    "area": 18.79
+   },
+   "narrowestSubCirculation": {
+    "name": "مغاسل",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.63,
+    "l": 7.52,
+    "ratio": 1.62
+   },
+   "rooms": 26,
+   "net": 328.82,
+   "circulationPct": 13.52,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "غرفة الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "yoo",
+   "pat": "yoo:u0r",
+   "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.39,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 10.98,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 14.37
+   },
+   "kitchen": {
+    "w": 3.95,
+    "l": 4.03,
+    "area": 15.92
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 6.62,
+    "ratio": 1.62
+   },
+   "rooms": 23,
+   "net": 244.94,
+   "circulationPct": 15.44,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "غرفة الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "split",
+   "pat": "split:s0r",
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 89.97,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 10.92,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.59
+   },
+   "kitchen": {
+    "w": 3.12,
+    "l": 4.12,
+    "area": 12.82
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.28,
+    "l": 8.73,
+    "ratio": 2.04
+   },
+   "rooms": 25,
+   "net": 265.42,
+   "circulationPct": 15.27,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "غرفة الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-5.json",
+   "mode": "sidemajlis",
+   "pat": "sidemajlis:j0",
+   "summary": "مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.58,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 10.92,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.59
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 4.66,
+    "area": 14.83
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.48,
+    "l": 9.58,
+    "ratio": 2.14
+   },
+   "rooms": 23,
+   "net": 258.87,
+   "circulationPct": 16.23,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "غرفة الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 7268,
+ "requestedAlternatives": 5,
+ "producedAlternatives": 5,
+ "diversity": [
+  [
+   0,
+   0.33,
+   0.29,
+   0.3,
+   0.34
+  ],
+  [
+   0.33,
+   0,
+   0.25,
+   0.27,
+   0.23
+  ],
+  [
+   0.29,
+   0.25,
+   0,
+   0.29,
+   0.28
+  ],
+  [
+   0.3,
+   0.27,
+   0.29,
+   0,
+   0.23
+  ],
+  [
+   0.34,
+   0.23,
+   0.28,
+   0.23,
+   0
+  ]
+ ],
+ "modes": [
+  "centralhall",
+  "courtyard",
+  "yoo",
+  "split",
+  "sidemajlis"
+ ],
+ "minDifference": 0.23,
+ "meanDifference": 0.28,
+ "rejectedCandidates": 1,
+ "archDiversity": [
+  [
+   0,
+   0.275,
+   0.292,
+   0.382,
+   0.425
+  ],
+  [
+   0.275,
+   0,
+   0.299,
+   0.249,
+   0.245
+  ],
+  [
+   0.292,
+   0.299,
+   0,
+   0.318,
+   0.395
+  ],
+  [
+   0.382,
+   0.249,
+   0.318,
+   0,
+   0.331
+  ],
+  [
+   0.425,
+   0.245,
+   0.395,
+   0.331,
+   0
+  ]
+ ],
+ "minArchDifference": 0.245,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ }
+}

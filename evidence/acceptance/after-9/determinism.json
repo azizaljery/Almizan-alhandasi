@@ -1,0 +1,285 @@
+{
+ "note": "الطلب نفسه مرتين (scripts/acceptance-run.mjs بالمحرك v2، تشغيلان مستقلان) — بصمة SHA-256 لكل مستند (البدائل ومستندات التعديل) في التشغيلين",
+ "identical": 43,
+ "total": 43,
+ "cases": {
+  "C1": [
+   {
+    "file": "alt-1.json",
+    "run1": "8542456a7b8da314",
+    "run2": "8542456a7b8da314",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "dc467b1bce58e4dc",
+    "run2": "dc467b1bce58e4dc",
+    "identical": true
+   }
+  ],
+  "C2": [
+   {
+    "file": "alt-1.json",
+    "run1": "b7ec3a797ddd6be4",
+    "run2": "b7ec3a797ddd6be4",
+    "identical": true
+   }
+  ],
+  "C3": [
+   {
+    "file": "alt-1.json",
+    "run1": "1e648aa0644a15fe",
+    "run2": "1e648aa0644a15fe",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "d04a0c06984b217b",
+    "run2": "d04a0c06984b217b",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "756895aaa42554e0",
+    "run2": "756895aaa42554e0",
+    "identical": true
+   }
+  ],
+  "C4": [
+   {
+    "file": "alt-1.json",
+    "run1": "3c2d29517f9333f3",
+    "run2": "3c2d29517f9333f3",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "2e0a6470f4ffa76b",
+    "run2": "2e0a6470f4ffa76b",
+    "identical": true
+   }
+  ],
+  "C5": [
+   {
+    "file": "alt-1.json",
+    "run1": "aab11ea87a4b5920",
+    "run2": "aab11ea87a4b5920",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "ec4883075b92ac83",
+    "run2": "ec4883075b92ac83",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "7adcfd9d326e6e7f",
+    "run2": "7adcfd9d326e6e7f",
+    "identical": true
+   },
+   {
+    "file": "alt-4.json",
+    "run1": "5c0fe47011761a68",
+    "run2": "5c0fe47011761a68",
+    "identical": true
+   }
+  ],
+  "C6": [
+   {
+    "file": "alt-1.json",
+    "run1": "b8015a4c7e5516aa",
+    "run2": "b8015a4c7e5516aa",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "2953d05342276fe0",
+    "run2": "2953d05342276fe0",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "92330f1deab11fab",
+    "run2": "92330f1deab11fab",
+    "identical": true
+   }
+  ],
+  "C7": [
+   {
+    "file": "alt-1.json",
+    "run1": "73ebf38b61d23ebb",
+    "run2": "73ebf38b61d23ebb",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "800b1413cce1ebd4",
+    "run2": "800b1413cce1ebd4",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "b31ba7378af4bed1",
+    "run2": "b31ba7378af4bed1",
+    "identical": true
+   }
+  ],
+  "C8": [
+   {
+    "file": "alt-1.json",
+    "run1": "b8a9f0c66299b65a",
+    "run2": "b8a9f0c66299b65a",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "73be644d61d17729",
+    "run2": "73be644d61d17729",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "24702f99bd92988f",
+    "run2": "24702f99bd92988f",
+    "identical": true
+   },
+   {
+    "file": "alt-4.json",
+    "run1": "8ee7cf078e0b569c",
+    "run2": "8ee7cf078e0b569c",
+    "identical": true
+   },
+   {
+    "file": "edit-after.json",
+    "run1": "b8a9f0c66299b65a",
+    "run2": "b8a9f0c66299b65a",
+    "identical": true
+   },
+   {
+    "file": "edit-alt1-after.json",
+    "run1": "b8a9f0c66299b65a",
+    "run2": "b8a9f0c66299b65a",
+    "identical": true
+   },
+   {
+    "file": "edit-alt2-after.json",
+    "run1": "6ff35bd35f11d0b7",
+    "run2": "6ff35bd35f11d0b7",
+    "identical": true
+   },
+   {
+    "file": "edit-alt3-after.json",
+    "run1": "3c27033e11cccbd9",
+    "run2": "3c27033e11cccbd9",
+    "identical": true
+   },
+   {
+    "file": "edit-alt4-after.json",
+    "run1": "a07964f61e6a110e",
+    "run2": "a07964f61e6a110e",
+    "identical": true
+   },
+   {
+    "file": "edit-before.json",
+    "run1": "b8a9f0c66299b65a",
+    "run2": "b8a9f0c66299b65a",
+    "identical": true
+   }
+  ],
+  "C9": [
+   {
+    "file": "alt-1.json",
+    "run1": "fcfae3d53af20517",
+    "run2": "fcfae3d53af20517",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "a936fb5b6ca2eba8",
+    "run2": "a936fb5b6ca2eba8",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "d1c6c89cad7758cd",
+    "run2": "d1c6c89cad7758cd",
+    "identical": true
+   },
+   {
+    "file": "alt-4.json",
+    "run1": "f5908bff095bc3f5",
+    "run2": "f5908bff095bc3f5",
+    "identical": true
+   },
+   {
+    "file": "edit-after.json",
+    "run1": "14751b6b77af796b",
+    "run2": "14751b6b77af796b",
+    "identical": true
+   },
+   {
+    "file": "edit-alt1-after.json",
+    "run1": "14751b6b77af796b",
+    "run2": "14751b6b77af796b",
+    "identical": true
+   },
+   {
+    "file": "edit-alt2-after.json",
+    "run1": "4e356567d1218f99",
+    "run2": "4e356567d1218f99",
+    "identical": true
+   },
+   {
+    "file": "edit-alt3-after.json",
+    "run1": "ba09d98cf8e51e8d",
+    "run2": "ba09d98cf8e51e8d",
+    "identical": true
+   },
+   {
+    "file": "edit-alt4-after.json",
+    "run1": "8f3af89ff864183c",
+    "run2": "8f3af89ff864183c",
+    "identical": true
+   },
+   {
+    "file": "edit-before.json",
+    "run1": "fcfae3d53af20517",
+    "run2": "fcfae3d53af20517",
+    "identical": true
+   }
+  ],
+  "C10": [
+   {
+    "file": "alt-1.json",
+    "run1": "e95886f6b15a84c5",
+    "run2": "e95886f6b15a84c5",
+    "identical": true
+   },
+   {
+    "file": "alt-2.json",
+    "run1": "8ecd1efe283cdc63",
+    "run2": "8ecd1efe283cdc63",
+    "identical": true
+   },
+   {
+    "file": "alt-3.json",
+    "run1": "2f951bbebdfbcaaf",
+    "run2": "2f951bbebdfbcaaf",
+    "identical": true
+   },
+   {
+    "file": "alt-4.json",
+    "run1": "17dddb8be2232147",
+    "run2": "17dddb8be2232147",
+    "identical": true
+   },
+   {
+    "file": "alt-5.json",
+    "run1": "90259a9a37c13efc",
+    "run2": "90259a9a37c13efc",
+    "identical": true
+   }
+  ]
+ }
+}
