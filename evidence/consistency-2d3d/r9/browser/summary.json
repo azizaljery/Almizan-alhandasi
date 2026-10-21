@@ -1,0 +1,609 @@
+{
+ "mode": "browser",
+ "note": "المجسّم مقيس من مشهده المبني فعلًا (أشعة ورؤوس مثلثات) ومقارن بالمستند؛ التسامحات: موضع/عرض/سماكة/ارتفاع 2 سم (وإزاحة حتى 5 سم مع عرض مطابق = طفيفة)، حدود الأرضية 3 سم، امتداد الجدار 16 سم (تقاطعات الزوايا)، المساحة 1%.",
+ "docs": [
+  {
+   "key": "C1-alt-1",
+   "source": "evidence/acceptance/after-9/C1/alt-1.json",
+   "ms": 18004,
+   "walls": 31,
+   "openings": 46,
+   "rooms": 23,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o32 (window) في w8 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C1-alt-2",
+   "source": "evidence/acceptance/after-9/C1/alt-2.json",
+   "ms": 17078,
+   "walls": 31,
+   "openings": 47,
+   "rooms": 24,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 0,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o7 على w1: الرسم 7.875 والمجسّم 7.845 (فرق -0.030 م)"
+   ]
+  },
+  {
+   "key": "C2-alt-1",
+   "source": "evidence/acceptance/after-9/C2/alt-1.json",
+   "ms": 18509,
+   "walls": 30,
+   "openings": 43,
+   "rooms": 21,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 0,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o22 على w6: الرسم 9.705 والمجسّم 9.670 (فرق -0.035 م)"
+   ]
+  },
+  {
+   "key": "C3-alt-1",
+   "source": "evidence/acceptance/after-9/C3/alt-1.json",
+   "ms": 19229,
+   "walls": 25,
+   "openings": 37,
+   "rooms": 19,
+   "levels": 1,
+   "mismatches": 5,
+   "major": 5,
+   "minor": 0,
+   "byCode": {
+    "OPENING_POSITION": 2,
+    "OPENING_WIDTH": 1,
+    "OPENING_HEAD": 1,
+    "OPENING_SILL": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o25 على w6: الرسم 7.520 والمجسّم 7.940 (فرق 0.420 م)",
+    "موضع o27 على w6: الرسم 9.340 والمجسّم 7.940 (فرق -1.400 م)",
+    "عرض o27: الرسم 1.400 والمجسّم 2.200",
+    "أعلى o27: الرسم 2.200 والمجسّم 2.300",
+    "جلسة o27: الرسم 1.000 والمجسّم 0.800"
+   ]
+  },
+  {
+   "key": "C3-alt-2",
+   "source": "evidence/acceptance/after-9/C3/alt-2.json",
+   "ms": 20155,
+   "walls": 23,
+   "openings": 36,
+   "rooms": 19,
+   "levels": 1,
+   "mismatches": 2,
+   "major": 1,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1,
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o19 على w15: الرسم 7.125 والمجسّم 7.095 (فرق -0.030 م)",
+    "الفتحة o26 (window) في w8 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C3-alt-3",
+   "source": "evidence/acceptance/after-9/C3/alt-3.json",
+   "ms": 16289,
+   "walls": 27,
+   "openings": 44,
+   "rooms": 21,
+   "levels": 1,
+   "mismatches": 6,
+   "major": 6,
+   "minor": 0,
+   "byCode": {
+    "OPENING_WIDTH": 2,
+    "OPENING_MISSING": 1,
+    "OPENING_POSITION": 1,
+    "OPENING_HEAD": 1,
+    "OPENING_SILL": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "عرض o30: الرسم 2.200 والمجسّم 1.320",
+    "الفتحة o31 (window) في w16 لا فراغ لها في جدار المجسّم",
+    "موضع o32 على w7: الرسم 9.490 والمجسّم 10.200 (فرق 0.710 م)",
+    "عرض o32: الرسم 0.600 والمجسّم 2.020",
+    "أعلى o32: الرسم 2.300 والمجسّم 2.200",
+    "جلسة o32: الرسم 1.700 والمجسّم 1.000"
+   ]
+  },
+  {
+   "key": "C4-alt-1",
+   "source": "evidence/acceptance/after-9/C4/alt-1.json",
+   "ms": 14735,
+   "walls": 16,
+   "openings": 31,
+   "rooms": 14,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C4-alt-2",
+   "source": "evidence/acceptance/after-9/C4/alt-2.json",
+   "ms": 14805,
+   "walls": 24,
+   "openings": 40,
+   "rooms": 18,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C5-alt-1",
+   "source": "evidence/acceptance/after-9/C5/alt-1.json",
+   "ms": 16021,
+   "walls": 18,
+   "openings": 34,
+   "rooms": 16,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C5-alt-2",
+   "source": "evidence/acceptance/after-9/C5/alt-2.json",
+   "ms": 18118,
+   "walls": 28,
+   "openings": 41,
+   "rooms": 18,
+   "levels": 1,
+   "mismatches": 6,
+   "major": 4,
+   "minor": 2,
+   "byCode": {
+    "OPENING_POSITION": 3,
+    "OPENING_WIDTH": 1,
+    "OPENING_HEAD": 1,
+    "OPENING_SILL": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o8 على w1: الرسم 8.900 والمجسّم 8.870 (فرق -0.030 م)",
+    "موضع o10 على w18: الرسم 0.595 والمجسّم 0.630 (فرق 0.035 م)",
+    "موضع o26 على w13: الرسم 3.720 والمجسّم 2.075 (فرق -1.645 م)",
+    "عرض o26: الرسم 1.850 والمجسّم 1.400",
+    "أعلى o26: الرسم 2.200 والمجسّم 2.100",
+    "جلسة o26: الرسم 1.000 والمجسّم 0.000"
+   ]
+  },
+  {
+   "key": "C5-alt-3",
+   "source": "evidence/acceptance/after-9/C5/alt-3.json",
+   "ms": 21502,
+   "walls": 22,
+   "openings": 32,
+   "rooms": 16,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C5-alt-4",
+   "source": "evidence/acceptance/after-9/C5/alt-4.json",
+   "ms": 19139,
+   "walls": 27,
+   "openings": 38,
+   "rooms": 17,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o24 (window) في w7 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C6-alt-1",
+   "source": "evidence/acceptance/after-9/C6/alt-1.json",
+   "ms": 10598,
+   "walls": 22,
+   "openings": 33,
+   "rooms": 16,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C6-alt-2",
+   "source": "evidence/acceptance/after-9/C6/alt-2.json",
+   "ms": 9178,
+   "walls": 25,
+   "openings": 36,
+   "rooms": 17,
+   "levels": 1,
+   "mismatches": 3,
+   "major": 2,
+   "minor": 1,
+   "byCode": {
+    "OPENING_MISSING": 1,
+    "OPENING_POSITION": 2
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o4 (door2) في w12 لا فراغ لها في جدار المجسّم",
+    "موضع o7 على w15: الرسم 0.725 والمجسّم 0.755 (فرق 0.030 م)",
+    "موضع o25 على w12: الرسم 5.005 والمجسّم 5.390 (فرق 0.385 م)"
+   ]
+  },
+  {
+   "key": "C6-alt-3",
+   "source": "evidence/acceptance/after-9/C6/alt-3.json",
+   "ms": 8647,
+   "walls": 27,
+   "openings": 41,
+   "rooms": 17,
+   "levels": 1,
+   "mismatches": 2,
+   "major": 0,
+   "minor": 2,
+   "byCode": {
+    "OPENING_POSITION": 2
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o7 على w2: الرسم 8.425 والمجسّم 8.395 (فرق -0.030 م)",
+    "موضع o21 على w4: الرسم 3.825 والمجسّم 3.795 (فرق -0.030 م)"
+   ]
+  },
+  {
+   "key": "C7-alt-1",
+   "source": "evidence/acceptance/after-9/C7/alt-1.json",
+   "ms": 29966,
+   "walls": 32,
+   "openings": 46,
+   "rooms": 24,
+   "levels": 2,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o15 (window) في w7 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C7-alt-2",
+   "source": "evidence/acceptance/after-9/C7/alt-2.json",
+   "ms": 37543,
+   "walls": 35,
+   "openings": 56,
+   "rooms": 26,
+   "levels": 2,
+   "mismatches": 2,
+   "major": 2,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1,
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o8 (door2) في w8 لا فراغ لها في جدار المجسّم",
+    "موضع o23 على w8: الرسم 9.180 والمجسّم 9.690 (فرق 0.510 م)"
+   ]
+  },
+  {
+   "key": "C7-alt-3",
+   "source": "evidence/acceptance/after-9/C7/alt-3.json",
+   "ms": 43246,
+   "walls": 32,
+   "openings": 49,
+   "rooms": 22,
+   "levels": 2,
+   "mismatches": 2,
+   "major": 2,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1,
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o6 (door2) في w7 لا فراغ لها في جدار المجسّم",
+    "موضع o20 على w7: الرسم 3.930 والمجسّم 4.640 (فرق 0.710 م)"
+   ]
+  },
+  {
+   "key": "C8-alt-1",
+   "source": "evidence/acceptance/after-9/C8/alt-1.json",
+   "ms": 25342,
+   "walls": 30,
+   "openings": 44,
+   "rooms": 21,
+   "levels": 1,
+   "mismatches": 6,
+   "major": 4,
+   "minor": 2,
+   "byCode": {
+    "OPENING_POSITION": 3,
+    "OPENING_WIDTH": 1,
+    "OPENING_HEAD": 1,
+    "OPENING_SILL": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o8 على w1: الرسم 8.575 والمجسّم 8.545 (فرق -0.030 م)",
+    "موضع o10 على w18: الرسم 0.595 والمجسّم 0.630 (فرق 0.035 م)",
+    "موضع o28 على w13: الرسم 3.570 والمجسّم 2.000 (فرق -1.570 م)",
+    "عرض o28: الرسم 1.700 والمجسّم 1.400",
+    "أعلى o28: الرسم 2.200 والمجسّم 2.100",
+    "جلسة o28: الرسم 1.000 والمجسّم 0.000"
+   ]
+  },
+  {
+   "key": "C8-alt-2",
+   "source": "evidence/acceptance/after-9/C8/alt-2.json",
+   "ms": 22238,
+   "walls": 29,
+   "openings": 45,
+   "rooms": 21,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o30 (window) في w15 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C8-alt-3",
+   "source": "evidence/acceptance/after-9/C8/alt-3.json",
+   "ms": 23978,
+   "walls": 24,
+   "openings": 36,
+   "rooms": 19,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C8-alt-4",
+   "source": "evidence/acceptance/after-9/C8/alt-4.json",
+   "ms": 26287,
+   "walls": 27,
+   "openings": 42,
+   "rooms": 20,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o27 (window) في w9 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C9-alt-1",
+   "source": "evidence/acceptance/after-9/C9/alt-1.json",
+   "ms": 27093,
+   "walls": 18,
+   "openings": 34,
+   "rooms": 16,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C9-alt-2",
+   "source": "evidence/acceptance/after-9/C9/alt-2.json",
+   "ms": 27561,
+   "walls": 25,
+   "openings": 39,
+   "rooms": 17,
+   "levels": 1,
+   "mismatches": 2,
+   "major": 1,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1,
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o7 على w1: الرسم 8.325 والمجسّم 8.295 (فرق -0.030 م)",
+    "الفتحة o25 (window) في w12 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C9-alt-3",
+   "source": "evidence/acceptance/after-9/C9/alt-3.json",
+   "ms": 25961,
+   "walls": 22,
+   "openings": 31,
+   "rooms": 16,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "C9-alt-4",
+   "source": "evidence/acceptance/after-9/C9/alt-4.json",
+   "ms": 18213,
+   "walls": 26,
+   "openings": 39,
+   "rooms": 18,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o27 (window) في w16 لا فراغ لها في جدار المجسّم"
+   ]
+  },
+  {
+   "key": "C10-alt-1",
+   "source": "evidence/acceptance/after-9/C10/alt-1.json",
+   "ms": 21741,
+   "walls": 33,
+   "openings": 45,
+   "rooms": 23,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 0,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o19 على w23: الرسم 10.655 والمجسّم 10.620 (فرق -0.035 م)"
+   ]
+  },
+  {
+   "key": "C10-alt-2",
+   "source": "evidence/acceptance/after-9/C10/alt-2.json",
+   "ms": 24270,
+   "walls": 32,
+   "openings": 51,
+   "rooms": 26,
+   "levels": 1,
+   "mismatches": 2,
+   "major": 2,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1,
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o12 (door2) في w16 لا فراغ لها في جدار المجسّم",
+    "موضع o40 على w16: الرسم 11.580 والمجسّم 12.090 (فرق 0.510 م)"
+   ]
+  },
+  {
+   "key": "C10-alt-3",
+   "source": "evidence/acceptance/after-9/C10/alt-3.json",
+   "ms": 20809,
+   "walls": 28,
+   "openings": 46,
+   "rooms": 23,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 0,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o7 على w1: الرسم 8.625 والمجسّم 8.595 (فرق -0.030 م)"
+   ]
+  },
+  {
+   "key": "C10-alt-4",
+   "source": "evidence/acceptance/after-9/C10/alt-4.json",
+   "ms": 23908,
+   "walls": 34,
+   "openings": 51,
+   "rooms": 25,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 0,
+   "minor": 1,
+   "byCode": {
+    "OPENING_POSITION": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "موضع o8 على w1: الرسم 9.530 والمجسّم 9.495 (فرق -0.035 م)"
+   ]
+  },
+  {
+   "key": "C10-alt-5",
+   "source": "evidence/acceptance/after-9/C10/alt-5.json",
+   "ms": 19114,
+   "walls": 28,
+   "openings": 44,
+   "rooms": 23,
+   "levels": 1,
+   "mismatches": 1,
+   "major": 1,
+   "minor": 0,
+   "byCode": {
+    "OPENING_MISSING": 1
+   },
+   "pageErrors": 0,
+   "sample": [
+    "الفتحة o30 (window) في w7 لا فراغ لها في جدار المجسّم"
+   ]
+  }
+ ]
+}
