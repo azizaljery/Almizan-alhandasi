@@ -257,7 +257,19 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
     dna.geometryFingerprint = geometryFingerprint(best.doc);
     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
   } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror };
+}
+
+/**
+ * ما يُعرض للعميل عن البدائل: كم عُرض من المطلوب، وسبب النقص كما كتبه المولّد، وأسباب رفض المرشحين مجمّعة
+ * (أول سبب لكل مرشح، بعدده). لا يُخترع شيء هنا: النصوص من المولّد ومحرك المراجعة نفسيهما.
+ */
+export function alternativesInfo(out, requested) {
+  const rejected = Array.isArray(out?.rejected) ? out.rejected : [];
+  const why = new Map();
+  for (const r of rejected) { const t = String((r.why || [])[0] || 'بلا سبب مكتوب').slice(0, 220); why.set(t, (why.get(t) || 0) + 1); }
+  return { requested, shown: out?.designs?.length || 0, shortfall_ar: out?.shortfall_ar || null, rejectedCount: rejected.length,
+    rejected: [...why].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([text, count]) => ({ text, count })) };
 }
 
 /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
@@ -265,7 +277,7 @@ function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = nul
   const villaEngine = villaEngineOf(engine);
   const out = VILLA[villaEngine].two({ land, counts, requirements, keep: villaEngine === 'v2' ? 4 : 3, exclude, prefer });
   const best = out.designs[0];
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror })), alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, villaEngine === 'v2' ? 4 : 3), selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror };
 }
 
 /** دوران: الأرضي والعلوي بسلم متطابق (انظر multi-floor.mjs). بلا بصمة تصميم ولا بدائل: تُقدَّم لدور واحد فقط. */

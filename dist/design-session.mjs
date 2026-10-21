@@ -44,7 +44,9 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
     conflicts, reply: conflicts.length ? { conflicts, questions: conflicts.map(c => c.question_ar) } : null,
     designs: [entry(result, null)], current: 0, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
-    alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', review: a.review || null })),
+    alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], mirror: a.mirror ?? null, review: a.review || null })),
+    // كم بديلًا عُرض من المطلوب، وسبب النقص، وأسباب رفض المرشحين (من المولّد نفسه) — تعرضها صفحة التصميم
+    alternativesInfo: result.alternativesInfo ? clone(result.alternativesInfo) : null,
   };
 }
 function entry(result, feedback) {
@@ -271,7 +273,14 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   const baths = [...I1.rooms.values()].filter(r => r.type === 'bath').length; if (baths > (req.counts.baths || 0)) req.counts.baths = baths;
   for (const [k, t] of [['majlis', 'majlis'], ['dining', 'dining']]) { const n = [...I1.rooms.values()].filter(r => r.type === t).length; if (Number.isInteger(req.counts[k]) && n < req.counts[k]) req.counts[k] = n; }
   const intents = parsed.intents.map(i => ({ ...i, subjectType: i.id ? I0.rooms.get(i.id)?.type || null : i.op === 'kitchenOpen' ? 'kitchen' : null }));
-  const doneTxt = res.results.filter(r => r.ok).map(r => r.text_ar);
+  // «نُفّذ» لما تغيّر فعلًا فقط؛ ما كان متحققًا أصلًا (أو حذف فراغ غير موجود) يُذكر وحده بسببه
+  // حذف فراغ غير موجود أصلًا ليس «نُفّذ»: يُذكر وحده بسببه (ما كان متحققًا أصلًا يبقى في «نُفّذ» كما كان)
+  const absent = r => r.ok && r.already && r.intent?.op === 'none' && /غير موجود/.test(r.why_ar || '');
+  const doneTxt = res.results.filter(r => r.ok && !absent(r)).map(r => r.text_ar);
+  const alreadyTxt = res.results.filter(absent).map(r => `${r.text_ar}${r.why_ar ? ' — ' + r.why_ar.replace(/[.。]+$/, '') : ''}`);
+  // الرجوع يعيد الواجهة أيضًا: يُقال صراحة إن تغيّرت مادتها
+  const facA = doc0.finish?.facade?.material || null, facB = res.doc.finish?.facade?.material || null;
+  const facadeNote = facA !== facB ? (facB ? `الواجهة صارت «${res.doc.finish.facade.materialAr || facB}»` : `الواجهة عادت إلى مادتها في ذلك التصميم (أُلغي «${doc0.finish?.facade?.materialAr || facA}»)`) : null;
   let ledger = []; try { ledger = verifyRequest(res.doc, req, { entry: entryDir }).map(x => facadeStatus(x, res.doc, req)); } catch { ledger = []; }
   const unrequested = changed.filter(c => !c.inScope && c.kind !== 'openings');
   const reply = {
@@ -279,17 +288,21 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
     done: doneTxt, failed: failedRes.map(r => ({ text: r.text_ar, why: r.why_ar })), pending: (res.pending || []).map(p => ({ text: p.text, why: p.why })), unverified: [],
     already: res.results.filter(r => r.ok && r.already).map(r => ({ text: r.text_ar, why: r.why_ar })),
     how: res.results.filter(r => r.ok && r.how_ar).map(r => r.how_ar),
-    picks: [], unclear: more?.unclear || [], unsupported: more?.unsupported || [], kept: true,
+    // عبارة الرجوع («رجّع مثل أول») يفهمها التعديل الموضعي وإن لم يفهمها مستخرج المتطلبات: لا تُعرض «غير مفهومة»
+    picks: [], unclear: (more?.unclear || []).filter(u => !(parsed.intents.some(i => ['restore', 'revertRoom'].includes(i.op)) && /(?:^|\s)(?:رجع|ارجع|ترجع|رد|تراجع)/.test(normalizeAr(u)))), unsupported: more?.unsupported || [], kept: true,
     unchanged: serialize(res.doc) === cur.doc, reused: false, geometryIdentical: JSON.stringify([res.doc.walls, res.doc.openings, res.doc.labels]) === JSON.stringify([doc0.walls, doc0.openings, doc0.labels]),
     changed, unrequested, restored,
     otherFails: ledger.filter(x => !(x.status ? x.status === 'done' : x.ok) && x.status !== 'pending-render').map(x => ({ text: x.text, why: x.why })).slice(0, 6),
     conflicts: [], questions: [],
   };
   const same = I0.rooms.size - changed.filter(c => c.kind !== 'added').length;
+  reply.keptRooms = Math.max(0, same); reply.alreadyTxt = alreadyTxt; if (restored && facadeNote) reply.facadeNote = facadeNote;
   reply.summary_ar = [
     doneTxt.length ? `نُفّذ: ${doneTxt.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
+    alreadyTxt.length ? `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.` : '',
     reply.failed.length ? `لم يُنفَّذ: ${reply.failed.map(f => `${f.text} — ${f.why}`).join('؛ ')}.` : '',
     reply.pending.length ? `محفوظ ولم يظهر في المجسّم بعد: ${reply.pending.map(p => p.text).join('، ')}.` : '',
+    restored && facadeNote ? facadeNote + '.' : '',
     unrequested.length ? (restored ? `وعادت معه إلى حالها في ذلك التصميم: ${unrequested.map(c => c.text_ar).join('؛ ')}.` : `تغيّر أيضًا لأن التعديل يحتاجه: ${unrequested.map(c => c.text_ar).join('؛ ')}.`) : '',
     restored?.lost?.length || restored?.lostTurns?.length ? `لم يُعَد بعد الرجوع: ${[...restored.lost.map(l => `${l.text}${l.why ? ` (${l.why})` : ''}`), ...restored.lostTurns.map(t => `«${t}»`)].join('، ')} — قل «أعده» إن أردته ولو بإعادة توزيع.` : '',
     `بقية الغرف (${Math.max(0, same)}) كما هي مقيسًا${reply.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`,

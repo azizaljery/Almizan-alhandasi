@@ -382,6 +382,10 @@ export function parseEdit(text, doc, { more = null, history = [], lastSubject = 
     } else if (roomRef && (asFirst.test(t) || !/مقفل|مغلق|مفتوح|\d/.test(t))) {
       intents.push({ op: 'revertRoom', id: roomRef.ids[0], name: roomRef.names[0], to: toFirst ? 'first' : 'previous', text_ar: `إرجاع «${roomRef.names[0]}» ${toFirst ? 'إلى ما كانت عليه في التصميم الأول' : 'إلى ما كانت عليه قبل آخر تعديل'}` });
       used.add('room:' + roomRef.ids[0]);
+    } else if (!refs.length && !km && /(?<![؀-ۿ])(?:رجع|ارجع|ترجع|رد|تراجع)(?![؀-ۿ])/.test(t) && !/مقفل|مغلق|مسكر|مفتوح|\d/.test(t)) {
+      // فعل الرجوع بلا ضمير ولا غرفة («رجّع مثل أول»، «تراجع»): الرجوع بالمخطط كله؛ «أول/الأصلي» = التصميم الأول
+      intents.push({ op: 'restore', to: toFirst ? 'first' : 'previous', keepIds: [], keepLabels: [], text_ar: `الرجوع إلى ${toFirst ? 'التصميم الأول' : 'التصميم السابق'}` });
+      used.add('restore');
     }
   }
   // 2) الواجهة

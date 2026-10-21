@@ -5,7 +5,7 @@ import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
 import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
-import { serialize } from './draw/doc.mjs';
+import { serialize, parseDoc } from './draw/doc.mjs';
 import { requestBrief } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
 
@@ -62,24 +62,75 @@ function show(index) {
     el('tfoot', {}, el('tr', {}, el('th', {}, 'إجمالي المساحات الصافية'), doc.levels.length > 1 ? el('th', {}) : null, el('th', {}), el('th', { class: 'num' }, fmt(S.specs.net)), el('th', {}))));
   const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم السابقة' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', onclick: () => show(i) }, 'التصميم ' + (i + 1)))) : null;
   const replyCard = sharaReply(d.feedback);
-  $('main').replaceChildren(
+  // replaceChildren(null) يكتب النص «null» في الصفحة: البطاقات الغائبة تُستبعد
+  $('main').replaceChildren(...[
     replyCard,
     el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.')), history),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, reqCard)),
-    el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
+    altsCard(d),
+    el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), el('div', { class: 'actions', style: 'gap:16px' }, reviewCard(d), notes))].filter(Boolean));
   legend(); bindPlan(); paint();
+}
+
+/**
+ * البدائل المختلفة معماريًا من الطلب الأول: كم عُرض من المطلوب، وسبب النقص كما كتبه المولّد، وأسباب رفض المرشحين.
+ * كل زر يعرض البديل نفسه (يُضاف إلى سجل التصاميم مرة واحدة) — لا تكميل للعدد بنسخ شكلية (قرار المالك).
+ */
+function altsCard(d) {
+  const alts = session.alternatives || [], info = session.alternativesInfo || null;
+  if (!alts.length && !info) return null;
+  const want = info?.requested ?? alts.length, cur = d.doc;
+  const verdict = a => a.review ? (a.review.passed ? 'اجتاز المراجعة' : 'لم يجتز المراجعة') : '';
+  return el('section', { class: 'card alts', id: 'alts', 'aria-label': 'البدائل' },
+    el('h2', {}, 'البدائل المختلفة معماريًا'),
+    el('p', { class: 'score ' + (alts.length < want ? 'part' : 'full') }, `عُرض ${alts.length} من ${want} مطلوبة`),
+    el('div', { class: 'altlist' }, alts.map((a, i) => el('button', { type: 'button', 'data-alt': String(i), class: a.doc === cur ? 'on' : '', onclick: () => showAlternative(i) },
+      el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null))),
+    info?.shortfall_ar ? el('p', { class: 'shortfall sub' }, 'لماذا أقل من المطلوب؟ ' + info.shortfall_ar) : null,
+    info?.rejected?.length ? el('details', { class: 'rejected' }, el('summary', {}, `المرشحون المرفوضون (${info.rejectedCount}) وأسبابهم`),
+      el('ul', { class: 'tick' }, info.rejected.map(r => el('li', { class: 'bad' }, r.text + (r.count > 1 ? ` (${r.count})` : ''))))) : null);
+}
+function showAlternative(i) {
+  const a = session.alternatives[i]; if (!a) return;
+  let at = session.designs.findIndex(x => x.doc === a.doc);
+  if (at < 0) {
+    session.designs.push({ doc: a.doc, pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], floors: parseDoc(a.doc).levels.length, feedback: null, engine: a.strategy || '', ledger: null, review: a.review || null, mirror: a.mirror ?? null, alt: i });
+    if (session.designs.length > 8) session.designs.splice(0, session.designs.length - 8);
+    at = session.designs.length - 1;
+  }
+  show(at); scrollTo({ top: 0, behavior: 'smooth' });
+}
+/** المراجعة المعمارية المستقلة (plan-review) للتصميم المعروض: كل بوابة بنتيجتها وسببها، والدرجة. */
+function reviewCard(d) {
+  const rv = d.review;
+  const box = el('section', { class: 'card review', id: 'review', 'aria-label': 'المراجعة المعمارية' }, el('h2', {}, 'المراجعة المعمارية المستقلة'));
+  if (!rv?.gates?.length) { box.append(el('p', { class: 'sub' }, 'لم تُراجَع هذه النسخة آليًا (عُدّلت في المرسم أو من مصدر آخر).')); return box; }
+  box.append(el('p', { class: 'score ' + (rv.passed ? 'full' : 'part') }, (rv.passed ? 'اجتاز كل البوابات' : `رسب في ${rv.failedGates.length} بوابة`) + (Number.isFinite(rv.score) ? ` — الدرجة ${fmt(rv.score)} من 100` : '')));
+  box.append(el('table', { class: 'rooms gates' }, el('thead', {}, el('tr', {}, el('th', {}, 'البوابة'), el('th', {}, 'النتيجة'))),
+    el('tbody', {}, rv.gates.map(g => el('tr', { 'data-gate': g.id, class: g.ok ? '' : 'bad' }, el('td', {}, g.ar || g.id),
+      el('td', {}, g.ok ? (g.applicable === false ? 'لا ينطبق' : 'ناجح') : el('span', {}, 'راسب', (g.reasons_ar || [])[0] ? el('small', { class: 'why' }, ' — ' + g.reasons_ar[0]) : null)))))));
+  box.append(el('p', { class: 'sub' }, 'المراجعة آلية مستقلة عن المولّد، وعتباتها قيم تصميمية معلنة لا اشتراطات نظامية متحققة؛ المراجعة المعمارية البشرية مطلوبة قبل الاعتماد النهائي.'));
+  return box;
 }
 
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
-  const head = r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
+  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'التصميم رقم ' + (r.restored.index + 1)} كما طلبت.` : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
+  // ما تغيّر في المخطط فعلًا (مقيسًا): من التعديل الموضعي أو من إعادة التوزيع المعلنة
+  const changed = [...(r.changed || []), ...(r.fallback?.changed || [])].filter(c => c.kind !== 'openings');
   return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
     el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), head)),
-    (r.done.length || r.picks.length) ? el('ul', { class: 'tick' }, [...r.picks.map(t => li('good', t)), ...r.done.map(t => li('good', t))]) : null,
-    r.failed.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أستطع تنفيذه في هذه الأرض مع بقية طلباتك:'), el('ul', { class: 'tick' }, r.failed.map(x => li('bad', x.text, x.why)))) : null,
+    (r.done.length || r.picks.length) ? el('div', {}, el('p', { class: 'sub' }, 'نُفّذ:'), el('ul', { class: 'tick' }, [...r.picks.map(t => li('good', t)), ...r.done.map(t => li('good', t))])) : null,
+    r.failed.length ? el('div', {}, el('p', { class: 'sub' }, 'لم يُنفَّذ — لم أستطع تنفيذه في هذه الأرض مع بقية طلباتك:'), el('ul', { class: 'tick' }, r.failed.map(x => li('bad', x.text, x.why)))) : null,
+    (r.already || []).filter(x => !r.done.includes(x.text)).length ? el('div', {}, el('p', { class: 'sub' }, 'لم يحتج تغييرًا:'), el('ul', { class: 'tick' }, r.already.filter(x => !r.done.includes(x.text)).map(x => li('no', x.text, x.why)))) : null,
+    r.fallback?.said_ar ? el('p', { class: 'sub' }, r.fallback.said_ar) : null,
+    changed.length ? el('div', {}, el('p', { class: 'sub' }, r.restored ? 'عاد إلى حاله في ذلك التصميم:' : 'تغيّر في المخطط:'), el('ul', { class: 'tick' }, changed.map(c => li(c.inScope === false && !r.restored ? 'no' : 'good', c.text_ar)))) : null,
+    r.facadeNote ? el('p', { class: 'sub' }, r.facadeNote + '.') : null,
+    Number.isInteger(r.keptRooms) ? el('p', { class: 'sub' }, `بقية الغرف (${r.keptRooms}) كما هي مقيسًا${r.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`) : null,
+    (r.questions || []).length ? el('ul', { class: 'tick' }, r.questions.map(q => li('no', q))) : null,
     r.unclear.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أفهم هذه العبارات فلم أطبّقها؛ اكتبها بصيغة مباشرة (مثل: «المطبخ في الخلف»):'), el('ul', { class: 'tick' }, r.unclear.map(t => li('no', '«' + t + '»')))) : null,
     r.unsupported.length ? el('ul', { class: 'tick' }, r.unsupported.map(t => li('no', t))) : null);
 }
