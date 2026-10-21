@@ -48,7 +48,12 @@ test('التوليد يعيد بصمة وبدائل محوّلة وبصمة هن
   assert.ok(Number.isInteger(out.dna.bestIndex));
   assert.equal(out.dna.geometryFingerprint, geometryFingerprint(out.doc));
   assert.ok(out.alternatives.length >= 1 && out.alternatives.every(a => a.doc.schema === 'mizan-draw/1'));
-  assert.ok(out.dna.rows.some(r => r.score !== r.neutralScore), 'ميزان العميل يغيّر الدرجة فعلًا');
+  // ميزان العميل يغيّر أوزان التقييم فعلًا (وأثره على الدرجات بين ميزانين مختلفين في الاختبار التالي). الجولة الثامنة:
+  // حد المجلس ≥ 24 م² أسقط البديل الوحيد الذي كانت درجته تختلف عن المحايدة (sidehall:n0، مجلسه 22.84 م²)، والبدائل
+  // الثلاثة الباقية تامة في كل المقاييس فدرجتها واحدة بأي أوزان — فالتأكيد صار على الأوزان لا على بديل بعينه
+  const neutralW = weightsFromDNA(buildDNA({ plot, rooms, discovery: empty, counts }).values);
+  assert.notDeepEqual(out.dna.weights, neutralW, 'ميزان العميل يغيّر أوزان التقييم فعلًا');
+  assert.ok(out.dna.rows.some(r => r.score !== r.neutralScore) || out.dna.rows.every(r => r.score >= 95), 'الدرجة تختلف عن المحايدة ما لم تكن البدائل تامة');
   assert.equal(out.dna.rows.every(r => Number.isFinite(r.score)), true);
 });
 

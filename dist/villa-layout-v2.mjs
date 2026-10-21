@@ -21,7 +21,7 @@ import { analyzeDoc } from './draw/digest.mjs';
 import { reviewDesign, reviewDesigns } from './plan-review.mjs';
 import { archSignature, archDifference, THRESHOLDS as ARCH_T } from './arch-difference.mjs';
 
-export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-4'; // الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
+export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-5'; // الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
 // أدنى محور لمدخل/ممر فرعي (مدخل الجناح، ممر دورة المياه): صافيه بعد الجدارين ≥ 1.2 م — لا زوايا دخول ضيقة
 const VEST_MIN = 1.4;
@@ -350,6 +350,8 @@ export function partiTrees(P, { stair = false, W = Infinity, irregular = false }
   // الصف الخلفي يتسع لعدد محدود من الأجنحة بعرض الأرض؛ الزائد (كبار السن أولًا) يذهب إلى صف الصالة أو جناح جانبي
   const rowOrder = [...S].reverse().concat(wcB, Fam); let acc = 0; const bedsRow = [], over = [];
   for (const b of rowOrder) { acc += runOf(b) + .15; (acc <= W - .3 || b.master ? bedsRow : over).push(b); }
+  // (الجولة الثامنة) الأنماط ذات صف النوم الخلفي (galBeds(bedsRow)) تضع الزائد (كبار السن أولًا) بجوار الصالة على جهة
+  // الحديقة؛ كانت تُسقطه فيُبنى المرشح ثم يُرفض «عدد غرف النوم 4 بدل 5» (C2: split وsidemajlis)
   const overZ = d => (over.length ? Z(over, d, 'y') : null);
   const out = [];
   // منطقة الخدمة العائلية بتنظيمين: «عمود» (الطعام والمطبخ والخادمة متتالية على امتداد الجناح) أو «زوج»
@@ -471,20 +473,20 @@ export function partiTrees(P, { stair = false, W = Infinity, irregular = false }
     if (Wm) push('hallback', 'h1', X(Y(X(Mz('y1'), F(), Z([...flex, ...Md, ...wcA], 'x0', 'x')), X(Y(Z([Wm], 'x1', 'y'), OV()), H(), DK('x0')), VOID(gardenA)), FB(corrBeds(beds))));
     // (6ب) الصالة على الواجهة الجانبية: الضيافة صف أمامي، ثم صف عائلي (الصالة على الجانب، فالطعام والمطبخ متجاوران،
     // فالخادمة والمرافق)، ثم رواق غرف النوم بعرض المبنى؛ و(6ج) الصف العائلي نفسه وجناح النوم بطول المبنى
-    push('sideliving', 'z0', Y(X(Mz('y1'), F(), Wz('x0', 'x')), X(H(), DK('x0'), Z([...flex, ...Md, ...wcA], 'x0', 'y')), galBeds(bedsRow, 'x1')));
+    push('sideliving', 'z0', Y(X(Mz('y1'), F(), Wz('x0', 'x')), X(overZ('x1'), H(), DK('x0'), Z([...flex, ...Md, ...wcA], 'x0', 'y')), galBeds(bedsRow, 'x1')));
     push('sideliving', 'z1', X(Y(X(Mz('y1'), F(), Wz('x0', 'x')), X(H(), DK('x0'), Z([...flex, ...Md, ...wcA], 'x0', 'y')), OV()), FB(corrBeds(beds))));
     // (6د) مجلس الرجال على الواجهة الجانبية بمدخله المستقل من الارتداد الجانبي، خلف مجلس النساء (أو حديقة أمامية)؛
     // النوم رواقًا خلفيًا (j0) أو جناحًا بطول المبنى (j1)
     const WzG = () => (Wm ? Wz('x1') : VOID(gardenA * .4));
     if (M) {
-      push('sidemajlis', 'j0', Y(X(Y(WzG(), Z([M], 'x1', 'y')), Y(F(), H()), Y(SVZ('x0'), OV())), galBeds(bedsRow)));
+      push('sidemajlis', 'j0', Y(X(Y(WzG(), Z([M], 'x1', 'y')), Y(F(), H()), Y(SVZ('x0'), overZ('x0') || OV())), galBeds(bedsRow)));
       push('sidemajlis', 'j1', X(Y(WzG(), Z([M], 'x1', 'y'), SVZ('x1'), OV()), Y(F(), H(), VOID(gardenA)), FB(corrBeds(beds))));
     }
     // (6هـ) المدخل في ركن الواجهة (لا في المحور): المجلسان على بقية الواجهة، والصالة خلف المدخل على الواجهة الجانبية
-    push('cornerentry', 'e0', Y(X(Mz('y1'), Wm ? Z([Wm], 'x1', 'x') : null, F()), X(SVZ('x1'), H()), galBeds(bedsRow)));
+    push('cornerentry', 'e0', Y(X(Mz('y1'), Wm ? Z([Wm], 'x1', 'x') : null, F()), X(SVZ('x1'), H(), overZ('x0')), galBeds(bedsRow)));
     push('cornerentry', 'e1', X(FB(corrBeds(beds, 'x1')), Y(X(F(), Wz('x0', 'x'), Mz('y1')), X(H(), SVZ('x0')), OV())));
     // (6و) جناح الخدمة في الأمام بجوار المدخل (الخادمة والمرافق على الواجهة)، والمطبخ والطعام خلفه، والصالة خلف المدخل
-    if (!Wm) push('svcfront', 'v0', Y(X(Mz('y1'), F(), Z([...flex, ...Md, ...wcA], 'x0', 'y')), X(H(), DK('x0')), galBeds(bedsRow)));
+    if (!Wm) push('svcfront', 'v0', Y(X(Mz('y1'), F(), Z([...flex, ...Md, ...wcA], 'x0', 'y')), X(overZ('x1'), H(), DK('x0')), galBeds(bedsRow)));
     // (6ز) أنماط «الخدمة في الخلف» بالبناء لا بالترشيح (تُولَّد حين يطلب العميل المطبخ/الطعام/الخدمة في الخلف):
     // المطبخ في موضعه الخلفي من شجرة النمط نفسها، والطعام بجواره يلامس الصالة، والخادمة ملاصقة للمطبخ
     if (rearSvc && K.length && Dn.length) {
@@ -503,7 +505,7 @@ export function partiTrees(P, { stair = false, W = Infinity, irregular = false }
       both('splitrear', 'p0', sw => Y(cols([VOID(gardenA * .3)], [H()], [VOID(gardenA * .3)], sw), X(Y(Z(Dn, 'y0', 'x'), Z([...K, ...Md, ...flex], 'y0', 'x')), corrBeds(bedsW))));
     }
     // (7) كتلتان: عامة أمامًا وخاصة خلفًا، بينهما ممر زجاجي في امتداد المحور وفناءان جانبيان؛ الطعام والمطبخ معًا
-    both('split', 's0', sw => Y(cols([Z([...flex, ...wcA, ...Md], 'x1', 'y'), VOID(gardenA * .3)], [H(), C('link', { area: 8 })], [DK('x0'), VOID(gardenA * .3)], sw), galBeds(bedsRow)));
+    both('split', 's0', sw => Y(cols([Z([...flex, ...wcA, ...Md], 'x1', 'y'), overZ('x1') || VOID(gardenA * .3)], [H(), C('link', { area: 8 })], [DK('x0'), VOID(gardenA * .3)], sw), galBeds(bedsRow)));
     // ---- الجولة السادسة: تنظيمات مختلفة فعلًا للبرامج الكبيرة في دور واحد (حركة قصيرة، لا ممر طويل بجانب صف غرف)
     {
       const mst = S.find(b => b.master) || null, kids = beds.filter(b => b !== mst);
@@ -699,6 +701,14 @@ const KIT_MIN_AXIS = 3.25, DIN_MAX_ASP = 1.8;
 const BED_MIN = 12, BED_MIN_MASTER = 16, KIT_MIN_AREA = 10, WALL_NET = .19;
 // (الجولة السابعة) المجلس الرئيسي ≥ 24 م² صافيًا ما أمكن، والطعام ≥ 3.3 م وغرفة الخادمة ≥ 2.7 م صافيًا (حدود)
 const MAJLIS_NET = 24, DIN_MIN_NET = 3.3, MAID_MIN_NET = 2.7;
+// (الجولة الثامنة) حدود فراغات معلنة (قيم تصميمية لا اشتراطات نظامية): المجلس الرئيسي ≥ 24 م² صافيًا حدٌّ صلب في الاختيار
+// (كان جزاءً فخرج 21.6 م² بعد إعادة توزيع في تعديل C8)، ومجلس النساء ≥ 20 م² ما أمكن (جزاء)، والطعام ≥ 12 م² (صلب)،
+// والرئيسية في الدور العلوي ≤ 26 م² (صلب) ما لم يطلب العميل مقاسها أو «ماستر كبيرة»
+const WOMEN_NET = 20, DIN_MIN_AREA = 12, MASTER_UP_MAX = 26;
+/** هل طلب العميل مقاس المجلس الرئيسي أو تصغيره؟ (حينها لا يُفرض حد 24 م²) */
+const majlisAsked = P => !!(P.men?.fixedArea || (!P.men && P.blocks.find(b => b.kind === 'majlis')?.fixedArea) || (P.tweaks?.majlisScale && P.tweaks.majlisScale < 1) || P.dims?.majlis);
+/** هل طلب العميل غرفة رئيسية كبيرة أو بمقاس؟ (حينها لا سقف 26 م² للعلوية) */
+const masterAsked = P => !!(P.blocks.find(b => b.master)?.fixedArea || P.dims?.master || P.prefs?.big_master || (P.tweaks?.bedroomScale && P.tweaks.bedroomScale > 1));
 const CORR_SINGLE_MAX = 10, CORR_SINGLE_HARD = 12.5, CORR_DOUBLE_MAX = 14;
 /**
  * تحميل الممر: طوله، وهل تفتح الغرف عليه من جهة واحدة فقط. «من الجهتين» = على كل جانب طويل غرف (أو فراغات) تلامسه
@@ -822,7 +832,9 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
       pen += 25 * Math.log(bw * bdp / want) ** 2;
       if (b.kind === 'suite' && !b.guest) bedA.push({ b, a: bw * bdp });
       // حد مهني صلب: صافي غرفة النوم (بعد الحمام والخزانة والجدران) ≥ 12 م²، والرئيسية ≥ 16 م²؛ ويُستحسن هامش فوقه
-      if (b.kind === 'suite') { const net = (bw - WALL_NET) * (bdp - WALL_NET), lim = b.master ? BED_MIN_MASTER : BED_MIN; if (net < lim) bad('bed-small', (lim - net) / 2); else if (net < lim + 1.5) pen += 30 * (lim + 1.5 - net); }
+      if (b.kind === 'suite') { const net = (bw - WALL_NET) * (bdp - WALL_NET), lim = b.master ? BED_MIN_MASTER : BED_MIN; if (net < lim) bad('bed-small', (lim - net) / 2); else if (net < lim + 1.5) pen += 30 * (lim + 1.5 - net);
+        // الرئيسية في الدور العلوي لا تتضخم (≤ 26 م² صافيًا) ما لم يطلبها العميل كبيرة
+        if (b.master && ctx.upper && !masterAsked(P)) { if (net > MASTER_UP_MAX) bad('master-big', (net - MASTER_UP_MAX) / 2); else if (net > MASTER_UP_MAX - 2) pen += 20 * (net - MASTER_UP_MAX + 2); } }
       // الدوران: غرفة الأرضي (كبار السن) لا تزيد على الرئيسية في العلوي (تقدير الرئيسية: مقاسها المستهدف)
       if (ctx.capSuite && b.kind === 'suite' && !b.master && bw * bdp > ctx.capSuite) bad('suite-over-master', (bw * bdp - ctx.capSuite) / 3);
       asp = Math.max(bw, bdp) / Math.max(.1, Math.min(bw, bdp));
@@ -841,8 +853,10 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
       let na = (w - WALL_NET) * (h - WALL_NET);
       if (b.guestWc && b.men) { const m = menStrip(r); na = (m.w - WALL_NET) * (m.h - WALL_NET); }
       else if (b.guestWc) na = Math.max((w - T.guestStripW - WALL_NET) * (h - WALL_NET), (w - WALL_NET) * (h - T.guestStripW - WALL_NET));
-      if (na < MAJLIS_NET) pen += 60 * (MAJLIS_NET - na);
+      if (na < MAJLIS_NET) pen += 60 * (MAJLIS_NET - na); // التقدير هنا تقريبي (الشريط)؛ الحد الصلب الدقيق على المرسوم في qualityGates
     }
+    // الطعام صافيه ≥ 12 م²: جزاء يوجّه البحث هنا، والحد الصلب على المخطط المرسوم (qualityGates)
+    if (b.kind === 'dining' && !b.fixedArea) { const na = (w - WALL_NET) * (h - WALL_NET), m = .2, k = 60; if (na < DIN_MIN_AREA + m) pen += k * (DIN_MIN_AREA + m - na); }
     // الطعام صافيه ≥ 3.3 م، وغرفة الخادمة بلا حمام ≥ 2.7 م (حدّان صلبان)
     if (b.kind === 'dining' && s - WALL_NET < DIN_MIN_NET - 1e-6) bad('dining-narrow', DIN_MIN_NET - (s - WALL_NET));
     if (b.kind === 'maid' && !b.bath && s - WALL_NET < MAID_MIN_NET - 1e-6) bad('maid-narrow', MAID_MIN_NET - (s - WALL_NET));
@@ -1751,8 +1765,13 @@ export function hardGates(doc, P, rv = reviewDoc(doc)) {
  * المطبخ لا يطل على الشارع (ما لم يُطلب)، والطعام والمطبخ يُبلغان من المدخل دون المرور بممر غرف النوم.
  * lay: التخطيط القانوني للدور الأرضي (y0 = الواجهة الأمامية). يعيد أسباب الرفض بالعربية.
  */
-export function qualityGates(doc, lay = null, { kitchenFront = false } = {}) {
+export function qualityGates(doc, lay = null, { kitchenFront = false, majlisAsked = false, diningAsked = false, masterAsked = false } = {}) {
   const why = [], { rooms } = docRooms(doc), M = analyzeDoc(doc);
+  // (الجولة الثامنة) المجلس الرئيسي (الرجال، أو الوحيد) ≥ 24 م² صافيًا، والطعام ≥ 12 م²، والرئيسية العلوية ≤ 26 م² — مقيسة من المرسوم
+  { const mj = rooms.filter(r => r.type === 'majlis' && r.li === 0), pm = mj.find(r => r.name === 'مجلس الرجال') || (mj.length === 1 ? mj[0] : null);
+    if (pm && !majlisAsked && pm.area < MAJLIS_NET - .05) why.push(`«${pm.name}» ${r2(pm.area)} م² أصغر من ${MAJLIS_NET} م².`); }
+  for (const dn of rooms.filter(r => r.type === 'dining')) if (!diningAsked && dn.area < DIN_MIN_AREA - .05) why.push(`«${dn.name}» ${r2(dn.area)} م² أصغر من ${DIN_MIN_AREA} م².`);
+  for (const ms of rooms.filter(r => r.type === 'master' && r.li > 0)) if (!masterAsked && ms.area > MASTER_UP_MAX + .3) why.push(`«${ms.name}» في الدور العلوي ${r2(ms.area)} م² متضخمة (> ${MASTER_UP_MAX} م²).`);
   const dims = r => { const w = r.x1 - r.x0, d = r.y1 - r.y0; return { s: Math.min(w, d), l: Math.max(w, d) }; };
   const beds = rooms.filter(r => r.type === 'bedroom' || r.type === 'master'), master = beds.find(r => r.type === 'master');
   if (master) { const big = beds.filter(r => r !== master && r.name !== 'غرفة الضيوف').sort((a, b) => b.area - a.area)[0]; if (big && big.area > master.area + .3) why.push(`غرفة النوم الرئيسية ${r2(master.area)} م² أصغر من «${big.name}» ${r2(big.area)} م².`); }
@@ -2157,7 +2176,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(site.W)} × ${r2(site.D)} م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
     err.code = ex.size ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; err.need = need; err.available = site.W * site.D; throw err;
   }
-  const built = [], rejected = []; let tried = 0;
+  const built = [], rejected = [], softMajlis = []; let tried = 0;
   // ترتيب البناء بالتناوب بين الأنماط (أفضل كل نمط أولًا، ثم ثاني كل نمط…): ميزانية البناء الثابتة تصل إلى
   // تنظيمات مختلفة فعلًا بدل نسخ كثيرة من نمط واحد. المرشح المفضَّل (التعديل) يبقى أولًا.
   { const by = new Map(); for (const c of cands) { const k = c.mode + (c.stepped ? '#t' : ''); if (!by.has(k)) by.set(k, []); by.get(k).push(c); }
@@ -2173,18 +2192,27 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     try {
       const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : prefPat && patOf(cand) === prefPat && prefMirror !== null ? prefMirror : false;
       const d = buildDesign(cand, P, site, land, { title, mirror, requirements, entry });
+      if (onlyMajlisBar(d.reject) && gateReview(d, requirements, land, counts)) { softMajlis.push(d); continue; }
       if (d.reject.length) { rejected.push({ pat: patOf(cand), why: [...d.reject, ...d.notes.filter(n => /لم تتسع|لم تجد|تعذّر/.test(n))], doc: d.doc }); continue; }
       if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', doc: d.doc }); continue; }
       built.push(d);
     } catch (e) { rejected.push({ pat: patOf(cand), why: [String(e.message || e)] }); }
   }
+  admitMajlisBar(built, softMajlis, rejected);
   if (!built.length) { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; throw err; }
   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
+  if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
   if (refDR) for (const d of built) d.editDiff = roomsDifference(d.dr, refDR);
   // أفضل تعديل موضعي (لم ينفّذ كل البنود) يدخل المقارنة: يُقدَّم ما دام لا يخفق في بنود أكثر من غيره
   if (local.length) { built.push(local[0]); local[0].notes = [...local[0].notes, 'عُدّل المخطط المعروض نفسه قدر الإمكان؛ بعض البنود لم يتحقق في هذا النمط.']; }
   if (prof) { prof.build = (prof.build || 0) + tp() - tq; prof.nbuilt = (prof.nbuilt || 0) + built.length + rejected.length; tq = tp(); }
-  const designs = pickDiverse(built, keep);
+  // (الجولة الثامنة) مجلس النساء ≥ 20 م² حدٌّ في الاختيار متى أتاحه البرنامج: إن بلغه بديل واحد على الأقل (بعد تحسين
+  // refineWomen) لا يُعرض بديل أصغر منه ولو قلّ العدد (الجودة قبل العدد، قرار المالك)؛ وإن لم يبلغه أي بديل يبقى الاختيار كما هو
+  let designs = pickDiverse([...built], keep);
+  { const wa = d => (d.dr?.rooms || []).find(r => r.name === 'مجلس النساء')?.area ?? Infinity;
+    if (P.women?.length && !P.women[0].fixedArea && !refDR && designs.some(d => wa(d) < WOMEN_NET)) {
+      const ok = built.filter(d => wa(d) >= WOMEN_NET);
+      if (ok.length) { for (const d of built) if (wa(d) < WOMEN_NET && designs.includes(d)) d.womenSmall = r2(wa(d)); designs = pickDiverse(ok, keep); } } }
   if (prof) { prof.pick = (prof.pick || 0) + tp() - tq; tq = tp(); }
   // أرض غير منتظمة: بين المعروض بديل واحد على الأقل يتبع شكل الأرض (أعرض من أي مستطيل يتسع فيها) إن وُجد ناجحًا
   if (site.rectW && !refDR) {
@@ -2211,6 +2239,58 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   return { designs: finalD, program: P, W: r2(site.W), D: r2(site.D), engine: VILLA_V2_ENGINE_VERSION, shortfall_ar, rejected: rejected.map(({ doc, ...r }) => r), pool: built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })), ms: Math.round(now() - t0) };
 }
 
+/** الرفض الوحيد هو حد المجلس الرئيسي (24 م²)؟ */
+const onlyMajlisBar = why => why.length > 0 && why.every(w => /^«(?:مجلس الرجال|المجلس)» [\d.]+ م² أصغر من \d+ م²\.$/.test(w));
+/**
+ * (الجولة الثامنة) حد المجلس الرئيسي ≥ 24 م² صلب في الاختيار، إلا حين يتعارض مع طلب العميل الصريح: إن كان كل بديل
+ * يحقق الحد يخالف بندًا من الطلب (أو لا بديل أصلًا) وبديلٌ تحته ينفّذ بنودًا أكثر، يُقبل الأفضل منها وحده مع ملاحظة
+ * صريحة بمساحة المجلس وسببها (البند الصريح يتقدم على الحد التصميمي المعلن). وإلا تُعد المرفوضة في «رُفض».
+ */
+function admitMajlisBar(built, soft, rejected) {
+  if (!soft.length) return;
+  const best = built.length ? Math.min(...built.map(d => d.fails)) : Infinity;
+  const pick = soft.filter(d => d.fails < best).sort((a, b) => a.fails - b.fails || a.quality - b.quality)[0];
+  for (const d of soft) if (d !== pick) rejected.push({ pat: d.pat, why: d.reject, doc: d.doc });
+  if (!pick) return;
+  pick.notes = [...pick.notes, `${pick.reject[0].replace(/\.$/, '')}: قُبل لأن كل بديل بمجلس ≥ 24 م² ${built.length ? 'يخالف بندًا صريحًا من طلبك' : 'لم يتسع على هذه الأرض'}؛ بندك الصريح يتقدم على الحد التصميمي.`];
+  pick.majlisBelowBar = true; pick.reject = [];
+  built.push(pick);
+}
+
+/**
+ * (الجولة الثامنة) مجلس النساء ≥ 20 م² صافيًا ما أمكن: لكل بديل ناجح مجلس نسائه المرسوم أصغر من ذلك، يُعاد حل أبعاد
+ * النمط نفسه (الشجرة ذاتها) مع جزاء على صغر مجلس النساء، ويُستبدل به فقط إن اجتاز البوابات والمراجعة ولم يخفق في
+ * بنود أكثر ولم يكبر جزاؤه كثيرًا. جزاء عام في التقييم جُرّب فأسقط بديلًا في C3 وC10 (البحث يتغير كله)، فصار تحسينًا
+ * موضعيًا للنمط الذي بُني فعلًا. لا رفض: الأرض الصغيرة قد لا تتسع (يبقى الأصل).
+ */
+function refineWomen(built, P, site, land, { title, requirements, entry, counts }) {
+  const W = P.women?.[0]; if (!W || W.fixedArea || (P.tweaks?.majlisScale && P.tweaks.majlisScale < 1)) return;
+  const wArea = d => { const r = (d.dr?.rooms || []).find(x => x.name === 'مجلس النساء'); return r ? r.area : Infinity; };
+  const T = DESIGN_TARGETS, trees = partiTrees(P, { W: site.W, irregular: !!site.placeRects });
+  let margin = .8;
+  const extra = sol => { const p = sol.placed.find(q => q.block === W) || sol.placed.find(q => q.block.id === W.id); if (!p) return 0; const w = W_(p.r), h = H_(p.r);
+    const na = W.guestWc ? Math.max((w - T.guestStripW - WALL_NET) * (h - WALL_NET), (w - WALL_NET) * (h - T.guestStripW - WALL_NET)) : (w - WALL_NET) * (h - WALL_NET);
+    return na < WOMEN_NET + margin ? 90 * (WOMEN_NET + margin - na) : 0; };
+  for (let i = 0; i < built.length; i++) {
+    const d = built[i]; if (wArea(d) >= WOMEN_NET || !d.cand) continue;
+    const tr = trees.find(t => t.tag === d.cand.tag && t.mode === d.cand.mode && !!t.stepped === !!d.cand.stepped); if (!tr) continue;
+    // محاولتان بهامش متزايد (التقدير على المحاور، والمرسوم صافٍ من الجدران)؛ تتوقف متى بلغ المرسوم 20 م²
+    for (const m of [.8, 1.8]) {
+      margin = m;
+      try {
+        const c = candidates(P, site, { rules: P.rules, entry, trees: [tr], extra })[0]; if (!c) continue;
+        const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
+        const cur = built[i];
+        if (n.reject.length || n.fails > d.fails || wArea(n) <= wArea(cur) + .3 || n.quality > d.quality + 400) continue;
+        if (!gateReview(n, requirements, land, counts)) continue;
+        n.notes = [...n.notes, `كُبّر «مجلس النساء» إلى ${r2(wArea(n))} م² صافيًا (كان ${r2(wArea(d))} م²) بإعادة ضبط أبعاد التنظيم نفسه.`];
+        built[i] = n;
+        if (wArea(n) >= WOMEN_NET) break;
+      } catch { /* يبقى الأصل */ }
+    }
+  }
+}
+
 /**
  * سبب النقص عن العدد المطلوب (نص عربي يُحفظ مع النتيجة): ما الذي بُني وما الذي رُفض ولماذا — مقيس من المرشحين أنفسهم،
  * لا عبارة عامة. built: البدائل التي اجتازت البوابات؛ shown: المعروضة؛ rejected: ما رسب قبل ذلك.
@@ -2220,9 +2300,10 @@ function shortfallReason(keep, shown, built, rejected) {
   const parts = [], best = shown[0];
   const sigOf = c => (c.sig ||= archSignature(c.doc));
   const famOf = x => String(x.pat).split('/')[0].split(':')[0] + (String(x.pat).includes('/') ? ':' + String(x.pat).split('/')[0].split(':')[1] : '');
-  let cosmetic = 0, family = 0, ledger = 0, other = 0, street = 0; const ledgerWhy = new Set();
+  let cosmetic = 0, family = 0, ledger = 0, other = 0, street = 0, women = []; const ledgerWhy = new Set();
   for (const c of built) {
     if (shown.includes(c)) continue;
+    if (c.womenSmall) { women.push(c.womenSmall); continue; }
     if (best && c.fails > best.fails) { ledger++; for (const l of c.ledger || []) if (!l.ok) ledgerWhy.add(l.text); continue; }
     if ((c.streetBeds || []).length && !(best?.streetBeds || []).length) { street++; continue; }
     if (shown.some(o => famOf(o) === famOf(c))) { family++; continue; }
@@ -2230,11 +2311,13 @@ function shortfallReason(keep, shown, built, rejected) {
     if (near < MIN_ARCH_DIFF || shown.some(o => o.dr && c.dr && roomsDifference(o.dr, c.dr) < MIN_ALT_DIFF)) cosmetic++; else other++;
   }
   const rej = new Map();
-  for (const r of rejected) { const k = r.by === 'plan-review' ? 'مراجعة plan-review (' + (r.gates || []).join('، ') + ')' : /لا يتسع|لا ترتيب|لا دور علوي/.test((r.why || [])[0] || '') ? 'لا يتسع على الأرض' : 'بوابات الجودة والسلامة'; rej.set(k, (rej.get(k) || 0) + 1); }
+  // صياغة للعميل: سبب الرفض بجملة سليمة (كانت «رُفض 4 في لا يتسع على الأرض»)
+  for (const r of rejected) { const k = r.by === 'plan-review' ? 'في المراجعة المعمارية المستقلة (' + (r.gates || []).join('، ') + ')' : /لا يتسع|لا ترتيب|لا دور علوي/.test((r.why || [])[0] || '') ? (/لا دور علوي/.test((r.why || [])[0] || '') ? 'لأن الدور العلوي لا يتسع فوق مسقطه الأرضي' : 'لأنه لا يتسع على الأرض') : 'في بوابات الجودة والسلامة'; rej.set(k, (rej.get(k) || 0) + 1); }
   parts.push(`عُرض ${shown.length} من ${keep} مطلوبة`);
   parts.push(`المرشحون المبنيون من أنماط تنظيمية مختلفة ${built.length + rejected.length}، اجتاز البوابات منهم ${built.length}`);
-  if (rejected.length) parts.push('ورُفض ' + [...rej].map(([k, n]) => `${n} في ${k}`).join('، و'));
+  if (rejected.length) parts.push('ورُفض ' + [...rej].map(([k, n]) => `${n} ${k}`).join('، و'));
   if (ledger) parts.push(`${ledger} تخالف بندًا صريحًا من الطلب (${[...ledgerWhy].slice(0, 3).join('، ')})`);
+  if (women.length) parts.push(`${women.length} مجلس النساء فيها أصغر من ${WOMEN_NET} م² (${women.join('، ')} م²) والبرنامج يتسع لأكبر منه`);
   if (street) parts.push(`${street} فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)`);
   if (family) parts.push(`${family} تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)`);
   if (cosmetic) parts.push(`${cosmetic} نسخة شكلية من بديل معروض (اختلاف معماري < ${MIN_ARCH_DIFF} أو إزاحة مراكز الغرف < ${MIN_ALT_DIFF})`);
@@ -2296,6 +2379,8 @@ function streetBedrooms(rooms) {
   const ov = (a, b) => Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
   return solid.filter(r => ['bedroom', 'master'].includes(r.type) && r.name !== 'غرفة الضيوف' && r.y0 - y0 < 3 - TOL && !solid.some(o => o !== r && ov(o, r) > .6 && o.y1 <= r.y0 + .1)).map(r => r.name);
 }
+/** ما طلبه العميل صراحة فيُعفى من حدود الفراغات المعلنة في بوابة الجودة. */
+const gateOpts = P => ({ majlisAsked: majlisAsked(P), diningAsked: !!(P.blocks.find(b => b.kind === 'dining')?.fixedArea || P.dims?.dining || (P.tweaks?.kitchenScale && P.tweaks.kitchenScale < 1)), masterAsked: masterAsked(P) });
 function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, second = null }) {
   const layout = realizeV2(cand, P, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
   const { T, pl } = transformFor(site, cand, mirror);
@@ -2303,7 +2388,7 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   doc = drawPlanV2(doc, layout, { level: LV, T });
   if (second) doc = second(doc);
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
-  const qg = qualityGates(relaxed, layout, { kitchenFront: (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))) });
+  const qg = qualityGates(relaxed, layout, { kitchenFront: (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), ...gateOpts(P) });
   const reject = [...hardGates(relaxed, P, rv), ...qg];
   const ledger = verifyRequest(relaxed, requirements, { entry });
   const builtA = sum(layout.rooms.filter(r => !r.open).map(A_));
@@ -2362,7 +2447,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
         },
       });
       const allP = { ...P, counts: P.counts, upperHallName };
-      const reject = [...hardGates(d.doc, allP), ...qualityGates(d.doc).filter(w => !d.qgates.includes(w)), ...d.qgates];
+      const reject = [...hardGates(d.doc, allP), ...qualityGates(d.doc, null, gateOpts(allP)).filter(w => !d.qgates.includes(w)), ...d.qgates];
       if (reject.length) { rejected.push({ pat, why: reject }); continue; }
       if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat, why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review' }); continue; }
       d.pat = pat; d.summary = describe(g) + ' (دوران)'; d.notes = [...new Set([...d.notes, ...ul.notes, 'السلم بين مدخل العائلة والصالة، ويصل إلى الصالة العلوية في الموضع نفسه.'])];
