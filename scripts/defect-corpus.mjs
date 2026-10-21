@@ -31,7 +31,8 @@ export function requestFor(caseId) {
   return { text: C.text, counts: C.counts, land: { floors: 1, ...C.land } };
 }
 /** البدائل الناجحة (المستندات الأصلية) لمرحلة: [{ case, file, doc, request }] بترتيب ثابت. */
-export function loadBase(stage = 'after-4') {
+export const BASE_STAGE = 'after-10'; // (الجولة العاشرة) البدائل السليمة بالمراجع الحالي (بوابتا هندسة السلم وخصوصية المجلس)
+export function loadBase(stage = BASE_STAGE) {
   const dir = ROOT + `evidence/acceptance/${stage}/`, out = [];
   for (const C of CASES) {
     if (!existsSync(dir + C.id)) continue;
@@ -240,7 +241,7 @@ def('window-too-small', 'نافذة غرفة النوم صغيرة جدًا (0.5
   }
   return null;
 });
-def('hall-strip', 'الصالة شريط طويل (نسبة > 2.5:1)', ['HALL_ASPECT'], [], (doc, { model }) => {
+def('hall-strip', 'الصالة شريط طويل (نسبة > 2.5:1)', ['HALL_ASPECT'], ['MIN_WIDTH', 'MAJLIS_PRIVACY'], (doc, { model }) => {
   for (const { lv, room } of roomsOf(model, r => r.type === 'living' && boxy(r))) {
     const B = boxOf(room), wx = B.x1 - B.x0, wy = B.y1 - B.y0, long = Math.max(wx, wy), target = Math.max(2.95, long / 2.75);
     if (long / target <= 2.55) continue;
@@ -290,7 +291,7 @@ function wetOnto(target) {
 def('wc-door-kitchen', 'دورة مياه تفتح على المطبخ', ['WET_DOOR'], [], wetOnto('kitchen'));
 def('wc-door-majlis', 'دورة مياه تفتح على المجلس', ['WET_DOOR'], [], wetOnto('majlis'));
 def('wc-door-dining', 'دورة مياه تفتح على الطعام (خفي)', ['WET_DOOR'], [], wetOnto('dining'));
-def('guest-through-hall', 'الوصول إلى المجلس عبر صالة العائلة', ['GUEST_ROUTE'], [], (doc, { model }) => {
+def('guest-through-hall', 'الوصول إلى المجلس عبر صالة العائلة', ['GUEST_ROUTE'], ['MAJLIS_PRIVACY'], (doc, { model }) => {
   for (const { lv, room } of roomsOf(model, r => r.type === 'majlis')) {
     const fam = lv.rooms.filter(r => r.type === 'living' || (r.type === 'corridor' && doorsOf(lv, r).some(o => o.sides.some(s => s.other !== 'outside' && BED.includes(lv.roomsById.get(s.other)?.type)))));
     const via = fam.find(r => sharedEdges(room, r).some(x => x.len >= 1.2));
@@ -304,7 +305,7 @@ def('guest-through-hall', 'الوصول إلى المجلس عبر صالة ال
   }
   return null;
 });
-def('bedroom-door-majlis', 'غرفة نوم تفتح على المجلس', ['BED_MAJLIS'], [], (doc, { model }) => {
+def('bedroom-door-majlis', 'غرفة نوم تفتح على المجلس', ['BED_MAJLIS'], ['MAJLIS_PRIVACY'], (doc, { model }) => {
   for (const { lv, room } of roomsOf(model, r => BED.includes(r.type))) {
     const mj = lv.rooms.find(r => r.type === 'majlis' && sharedEdges(room, r).some(x => x.len >= 1.2));
     if (!mj) continue;
@@ -402,7 +403,7 @@ def('kitchen-front', 'المطبخ في النصف الأمامي والطلب �
   doc.fixtures = doc.fixtures.filter(f => !inRoom(f, k.room) && !inRoom(f, front.room));
   return { note: `المطبخ بودّل مع «${front.room.name}» فصار في الواجهة (عمق ${r3(depthOf(model, front.room))})`, target: k.room.id };
 });
-def('bedrooms-front', 'غرف النوم في النصف الأمامي والطلب يقول «الغرف في الخلف»', ['PLACEMENT'], ['WET_DOOR', 'DAYLIGHT', 'MIN_WIDTH', 'GUEST_ROUTE', 'BED_MAJLIS', 'HALL_ASPECT'], (doc, { model, request }) => {
+def('bedrooms-front', 'غرف النوم في النصف الأمامي والطلب يقول «الغرف في الخلف»', ['PLACEMENT'], ['WET_DOOR', 'DAYLIGHT', 'MIN_WIDTH', 'GUEST_ROUTE', 'BED_MAJLIS', 'HALL_ASPECT', 'MAJLIS_PRIVACY'], (doc, { model, request }) => {
   if (!/الغرف في الخلف/.test(request.text || '')) return null;
   const beds = roomsOf(model, r => BED.includes(r.type)).sort((p, q) => depthOf(model, q.room) - depthOf(model, p.room));
   const front = roomsOf(model, r => ['majlis', 'living', 'dining', 'kitchen'].includes(r.type)).sort((p, q) => depthOf(model, p.room) - depthOf(model, q.room));
@@ -414,7 +415,7 @@ def('bedrooms-front', 'غرف النوم في النصف الأمامي والط
   doc.fixtures = [];
   return { note: `${n} غرف نوم بودّلت مع فراغات النهار الأمامية فصار النوم في الواجهة`, target: beds[0].room.id };
 });
-def('stairs-room-closed', 'غرفة السلم بلا باب (السلم معزول)', ['STAIRS'], ['REACH'], (doc, { model }) => {
+def('stairs-room-closed', 'غرفة السلم بلا باب (السلم معزول)', ['STAIRS'], ['REACH', 'STAIR_GEOMETRY'], (doc, { model }) => {
   if (model.levels.length < 2) return null;
   const lv = model.levels[0], s = lv.stairs.find(x => x.room); if (!s) return null;
   const room = lv.roomsById.get(s.room); const ds = doorsOf(lv, room);
@@ -427,11 +428,37 @@ def('stairs-deleted', 'دوران بلا سلم في الأرضي', ['STAIRS'], 
   doc.stairs = doc.stairs.filter(s => !st.includes(s));
   return { note: 'حُذف السلم من الدور الأرضي والدور الأول باقٍ' };
 });
-def('stairs-moved-out', 'السلم خارج المبنى (لا فراغ مغلق حوله)', ['STAIRS'], ['REACH'], (doc, { model }) => {
+def('stairs-moved-out', 'السلم خارج المبنى (لا فراغ مغلق حوله)', ['STAIRS'], ['REACH', 'STAIR_GEOMETRY'], (doc, { model }) => {
   if (model.levels.length < 2) return null;
   const s = doc.stairs.find(x => x.level === model.levels[0].level.id); if (!s) return null;
   const xs = doc.walls.flatMap(w => [w.a.x, w.b.x]); s.x = r3(Math.min(...xs) - 0.9);
   return { note: 'السلم نُقل خارج جدران المبنى' };
+});
+// (الجولة العاشرة) سلم قصير: سلم مستقيم بطول 3.0 م لدور ارتفاعه ≥ 3 م (يحتاج ≈ 4.8 م بنائمة 28 سم) — نائمة أقل من الحد
+def('stair-too-short', 'سلم مستقيم قصير (3.0 م) لا تتسع نوائمه لارتفاع الدور', ['STAIR_GEOMETRY'], ['STAIRS', 'REACH'], (doc, { model }) => {
+  if (model.levels.length < 2) return null;
+  const s = doc.stairs.find(x => x.level === model.levels[0].level.id); if (!s) return null;
+  s.kind = 'straight'; s.run = 3.0; delete s.steps;
+  return { note: 'السلم صار مستقيمًا بطول 3.0 م في غرفته نفسها', target: s.id };
+});
+// (الجولة العاشرة) سلم ضيق: عرض القلبة 0.8 م
+def('stair-narrow', 'قلبة السلم بعرض 0.8 م (خفي)', ['STAIR_GEOMETRY'], ['STAIRS', 'REACH'], (doc, { model }) => {
+  if (model.levels.length < 2) return null;
+  const s = doc.stairs.find(x => x.level === model.levels[0].level.id); if (!s) return null;
+  s.w = 0.8; return { note: 'عرض قلبة السلم 0.8 م', target: s.id };
+});
+// (الجولة العاشرة) المجلس يفتح على الطعام العائلي أو الصالة أو المطبخ (والعميل لم يطلب «مقلط»)
+def('majlis-door-family', 'المجلس يفتح على الطعام العائلي أو الصالة أو المطبخ', ['MAJLIS_PRIVACY'], ['GUEST_ROUTE', 'DOOR_SWING', 'WET_DOOR'], (doc, { model }) => {
+  for (const { lv, room } of roomsOf(model, r => r.type === 'majlis')) {
+    for (const t of ['dining', 'living', 'kitchen']) {
+      const o = lv.rooms.find(r => r.type === t && sharedEdges(room, r).some(x => x.len >= 1.4));
+      if (!o) continue;
+      const e = sharedEdges(room, o).sort((a, b) => b.len - a.len)[0];
+      if (!addDoorOnEdge(doc, lv.level.id, e, 'door', 0.9)) continue;
+      return { note: `باب جديد بين «${room.name}» و«${o.name}»`, target: room.id };
+    }
+  }
+  return null;
 });
 // عيب على مستوى المجموعة: البديل الثاني نسخة معكوسة من الأول (مع أسماء غرف مبدّلة) — ليس بديلًا معماريًا
 def('mirror-pair', 'بديل معكوس مطابق لبديل آخر', ['DISTINCT'], [], (doc) => {
@@ -454,7 +481,7 @@ export const MUTATIONS = Object.freeze(M);
  * يبني المجموعة: لكل تحوير يمرّ على البدائل الناجحة بالتناوب بين الحالات ويأخذ حتى perType تطبيقات ناجحة.
  * يعيد [{ id, mutation, ar, expected, allowed, set, case, file, request, doc, base, note }].
  */
-export function buildCorpus({ stage = 'after-4', perType = 3, base = loadBase(stage) } = {}) {
+export function buildCorpus({ stage = BASE_STAGE, perType = 3, base = loadBase(stage) } = {}) {
   const byCase = new Map(); for (const b of base) { if (!byCase.has(b.case)) byCase.set(b.case, []); byCase.get(b.case).push(b); }
   const order = []; for (let i = 0; order.length < base.length; i++) for (const list of byCase.values()) if (list[i]) order.push(list[i]);
   const out = [];
@@ -477,7 +504,7 @@ export function buildCorpus({ stage = 'after-4', perType = 3, base = loadBase(st
 // ---------------------------------------------------------------------------------------------- evaluation
 export const DISTINCT_DEFAULT = true; // عتبة plan-review المعايرة (arch-difference THRESHOLDS.cosmetic)
 /** يقيّم المجموعة بوحدة مراجعة معيّنة (الحالية أو نسخة سابقة) ويعيد الصفوف والملخص. */
-export function evaluateCorpus(corpus, reviewer, { clean = loadBase('after-4') } = {}) {
+export function evaluateCorpus(corpus, reviewer, { clean = loadBase(BASE_STAGE) } = {}) {
   const { reviewDesign, reviewDesigns } = reviewer;
   const rows = [];
   for (const c of corpus) {

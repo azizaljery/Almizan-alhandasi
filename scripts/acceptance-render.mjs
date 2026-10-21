@@ -41,6 +41,22 @@ for (const id of cases) {
   try { await q.waitForFunction(() => globalThis.__mizanViewer?.built, null, { timeout: 90000 }); await q.evaluate(() => { const e = document.getElementById('hour'); e.value = 9; e.dispatchEvent(new Event('input')); }); await q.waitForTimeout(1500); await q.locator('#threeHost').screenshot({ path: ev + id + '/3d-alt-1.png' }); await q.evaluate(() => globalThis.__mizanViewer.setMode('dollhouse')); await q.waitForTimeout(1500); await q.locator('#threeHost').screenshot({ path: ev + id + '/3d-alt-1-dollhouse.png' }); }
   catch (e) { console.log(id, '3D فشل:', e.message); }
   await q.close();
+  // (الجولة العاشرة) السلم في ثلاثي الأبعاد لكل بديل فيه سلم: الدور الأرضي وحده (القلبات والبسطة) ثم الدور العلوي (الفتحة والدرابزين)
+  for (const f of files.filter(x => /^alt-\d+\.json$/.test(x))) {
+    const rawS = await readFile(ev + id + '/' + f, 'utf8'), d = JSON.parse(rawS); if (!(d.stairs || []).length || d.levels.length < 2) continue;
+    const s0 = d.stairs[0], L0 = d.levels.find(l => l.id === s0.level) || d.levels[0], L1 = d.levels[d.levels.indexOf(L0) + 1];
+    const z = await ctx.newPage(); await z.setViewportSize({ width: 1100, height: 760 });
+    try {
+      await z.goto(base + '/home.html'); await z.evaluate(s => localStorage.setItem('mizan.studio.doc.v1', s), rawS); await z.goto(base + '/view3d.html');
+      await z.waitForFunction(() => globalThis.__mizanViewer?.built, null, { timeout: 90000 });
+      // مركز السلم من تخطيطه نفسه (stairLayout) لا من نقطة البدء
+      const c = await z.evaluate(async ([st, rise]) => { const { stairLayout } = await import('/draw/stairs3d.mjs'); const lay = stairLayout(st, rise); const pts = lay.steps.flatMap(x => x.poly); const xs = pts.map(p => p.x), ys = pts.map(p => p.y); return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 }; }, [s0, (L1?.elevation ?? 3.2) - (L0.elevation || 0)]);
+      const shot = async (lvl, elev, name) => { await z.evaluate(([lv, e, cx, cy]) => { const v = globalThis.__mizanViewer; v.setMode('dollhouse', { animate: false }); v.showLevel(lv); v.orbitTo({ target: [cx, e + .8, -cy], distance: 9, elevationDeg: 58, azimuthDeg: 30 }); }, [lvl, elev, c.x, c.y]); await z.waitForTimeout(1200); await z.locator('#threeHost').screenshot({ path: ev + id + '/' + f.replace('.json', '') + name }); };
+      await shot(L0.id, L0.elevation || 0, '-stair3d-L1.png');
+      if (L1) await shot(L1.id, L1.elevation, '-stair3d-L2.png');
+    } catch (e) { console.log(id, f, 'سلم 3D فشل:', e.message); }
+    await z.close();
+  }
   console.log(id, 'صور:', files.length);
 }
 await b.close(); server.close();

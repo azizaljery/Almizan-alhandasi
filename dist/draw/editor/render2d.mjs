@@ -4,6 +4,7 @@ import { ROOM_TYPES, FIXTURES, fixtureName } from '../catalog.mjs';
 import { swingSectors, wallRect, fixtureRect } from '../review.mjs';
 import { dist, sub, add, mul, norm, perp, rotate, len } from '../geom.mjs';
 import { stairBox } from './hit.mjs';
+import { stairLayout } from '../stairs3d.mjs';
 import { gridStep } from './snap.mjs';
 
 export const THEME = {
@@ -131,19 +132,31 @@ export function renderPlan(ctx, st) {
   }
 
   // ------------------------------------------------------------------ stairs
+  // (الجولة العاشرة) السلم يُرسم من stairLayout نفسه الذي يبني المجسّم ويقيسه المراجع: النوائم والبسطة وخط الصعود بسهمه؛
+  // وفي الدور الذي فوقه يُرسم السلم الصاعد إليه بخط خفيف وسهم إلى الوصول (فتحة السلم).
+  const lvIdx = id => doc.levels.findIndex(l => l.id === id);
+  const riseFor = id => { const i = lvIdx(id), L = doc.levels[i], U = doc.levels[i + 1]; const r = U && Number.isFinite(U.elevation) && Number.isFinite(L?.elevation) ? U.elevation - L.elevation : NaN; return r > .5 ? r : (L?.height > .5 ? L.height : 3.2); };
   for (const s of doc.stairs) {
-    if (s.level !== levelId) continue;
-    const box = stairBox(s).map(S), picked = sel.has(s.id);
-    ctx.beginPath(); box.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.fillStyle = '#f3efe6'; ctx.fill(); ctx.strokeStyle = picked ? THEME.select : THEME.fixtureLine; ctx.lineWidth = picked ? 2.4 : 1.3; ctx.stroke();
-    const r = s.rot || 0, f = { x: Math.sin(r), y: Math.cos(r) }, q = { x: Math.cos(r), y: -Math.sin(r) }, w = s.w ?? 1.1, run = s.run ?? 3.2;
-    if (!s.kind || s.kind === 'straight') {
-      const n = Math.max(4, Math.round(run / .27));
-      ctx.strokeStyle = THEME.inkSoft; ctx.lineWidth = 1;
-      for (let i = 1; i < n; i++) { const b = run * i / n, a = S({ x: s.x + q.x * -w / 2 + f.x * b, y: s.y + q.y * -w / 2 + f.y * b }), c = S({ x: s.x + q.x * w / 2 + f.x * b, y: s.y + q.y * w / 2 + f.y * b }); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(c.x, c.y); ctx.stroke(); }
-    }
-    const a = S({ x: s.x + f.x * .25, y: s.y + f.y * .25 }), b = S({ x: s.x + f.x * Math.min(run - .3, run * .85), y: s.y + f.y * Math.min(run - .3, run * .85) });
-    ctx.strokeStyle = THEME.accent; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    const ang = Math.atan2(b.y - a.y, b.x - a.x); ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - 9 * Math.cos(ang - .4), b.y - 9 * Math.sin(ang - .4)); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - 9 * Math.cos(ang + .4), b.y - 9 * Math.sin(ang + .4)); ctx.stroke();
+    const own = s.level === levelId, above = !own && levelId && lvIdx(levelId) === lvIdx(s.level) + 1;
+    if (levelId && !own && !above) continue;
+    const picked = sel.has(s.id);
+    let lay = null; try { lay = stairLayout(s, riseFor(s.level)); } catch { lay = null; }
+    if (!lay) { const box = stairBox(s).map(S); ctx.beginPath(); box.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.strokeStyle = THEME.fixtureLine; ctx.lineWidth = 1.3; ctx.stroke(); continue; }
+    const poly = (pts, fill, stroke, lw, dash) => { const q = pts.map(S); ctx.save(); if (dash) ctx.setLineDash(dash); ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); if (fill) { ctx.fillStyle = fill; ctx.fill(); } ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); ctx.restore(); };
+    if (own) {
+      for (const st of lay.steps) poly(st.poly, st.type === 'landing' ? '#ebe5d8' : '#f6f2ea', picked ? THEME.select : THEME.inkSoft, st.type === 'landing' ? 1.2 : .9);
+    } else for (const st of lay.steps) poly(st.poly, null, 'rgba(90,90,90,.55)', .7, [3, 3]);
+    // خط الصعود: مراكز القلبات متصلة عبر البسطة، ينتهي بسهم عند آخر نائمة
+    const path = [];
+    for (const fl of lay.flights) { path.push(lay.toWorld(fl.a0, fl.b0)); path.push(lay.toWorld(fl.a1, fl.b1)); }
+    const P = path.map(S);
+    ctx.save(); ctx.strokeStyle = own ? THEME.accent : 'rgba(29,42,36,.6)'; ctx.lineWidth = own ? 1.6 : 1.1;
+    ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.stroke();
+    ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(P[0].x, P[0].y, 3.2, 0, 7); ctx.fill();
+    const b = P[P.length - 1], a = P[P.length - 2], ang = Math.atan2(b.y - a.y, b.x - a.x);
+    ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - 10 * Math.cos(ang - .45), b.y - 10 * Math.sin(ang - .45)); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - 10 * Math.cos(ang + .45), b.y - 10 * Math.sin(ang + .45)); ctx.stroke();
+    if (own && k >= 18) { const c = P[0]; ctx.font = `600 ${Math.max(9, k * .2)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(251,249,244,.9)'; const t = `صعود ${lay.N} قائمة`; const off = mul(norm(sub(P[0], P[1])), 11); ctx.strokeText(t, c.x + off.x, c.y + off.y); ctx.fillStyle = THEME.accent; ctx.fillText(t, c.x + off.x, c.y + off.y); }
+    ctx.restore();
   }
 
   // ------------------------------------------------------------------ fixtures

@@ -19,9 +19,22 @@ import { rankByDNA } from './design-dna.mjs';
 import { validatePlot } from './planner.mjs';
 import { extractRequirements } from './requirements.mjs';
 import { archDifference, archSignature, THRESHOLDS as ARCH_THRESHOLDS } from './arch-difference.mjs';
+import { checkStair, STAIR_RULES, stairClientRules } from './stair-geometry.mjs';
 
-export const PLAN_REVIEW_VERSION = 'plan-review/1.1.0';
+export const PLAN_REVIEW_VERSION = 'plan-review/1.2.0';
 export const UNVERIFIED_AR = 'قيمة تصميمية غير متحققة نظاميًا';
+export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للميزان';
+/**
+ * (الجولة العاشرة، توجيه المالك) طبقة كل عتبة: شرط العميل يغلب الافتراضي دائمًا؛ والافتراضي لا يصير «نظاميًا» إلا بمصدر متحقق.
+ *  client: ما كتبه العميل أو أدخله (الأعداد، المواضع، الأرض)؛ mizan-default: قيم الميزان الافتراضية (غير متحققة نظاميًا)؛
+ *  regulation: اشتراط نظامي متحقق بمصدر (لا يوجد منه شيء بعد)؛ functional: منطق وظيفي أو هندسي بلا عتبة رقمية.
+ */
+export const TIER_AR = Object.freeze({ client: 'شرط العميل', 'mizan-default': MIZAN_DEFAULT_AR, regulation: 'اشتراط نظامي متحقق', functional: 'منطق وظيفي (لا عتبة رقمية)' });
+export const GATE_TIER = Object.freeze({
+  REACH: 'functional', DAYLIGHT: 'mizan-default', MIN_WIDTH: 'mizan-default', HALL_ASPECT: 'mizan-default', WET_DOOR: 'mizan-default',
+  GUEST_ROUTE: 'mizan-default', BED_MAJLIS: 'mizan-default', STAIRS: 'functional', STAIR_GEOMETRY: 'mizan-default', MAJLIS_PRIVACY: 'mizan-default',
+  PLOT: 'client', PROGRAM: 'client', INTEGRITY: 'functional', DOOR_SWING: 'functional', WINDOW_SIZE: 'mizan-default', PLACEMENT: 'client', DISTINCT: 'mizan-default',
+});
 
 const MOMAH_URL = 'https://momah.gov.sa/sites/default/files/2024-07/ashtratat%20a%27nsha%20almbany%20alsknyt%20almnshwrt%20%60ly%20mwq%60%20alwzart%20.pdf';
 const MOMAH_NOTE = 'اشتراطات إنشاء المباني السكنية (وزارة البلديات والإسكان 1446هـ) — النص المستخرج آليًا مشوّه في مواضع ولم يُطابَق يدويًا بعد (docs/research/competitors-saudi-2026-10-19.md)';
@@ -78,6 +91,8 @@ export const GATES = Object.freeze([
   { id: 'GUEST_ROUTE', ar: 'مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم' },
   { id: 'BED_MAJLIS', ar: 'لا غرفة نوم تفتح على المجلس مباشرة' },
   { id: 'STAIRS', ar: 'السلم يُوصل إليه عند وجود دورين' },
+  { id: 'STAIR_GEOMETRY', ar: 'السلم يتسع في غرفته بقوائم ونوائم وعرض وبسطة سليمة، ويُوصل إليه أسفله وأعلاه' },
+  { id: 'MAJLIS_PRIVACY', ar: 'المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج' },
   { id: 'PLOT', ar: 'المبنى داخل الأرض وخطوط الارتداد' },
   { id: 'PROGRAM', ar: 'أعداد الغرف المطلوبة موجودة فعلًا في الرسم' },
   { id: 'INTEGRITY', ar: 'كل فراغ مغلق غرفة واحدة مسمّاة (لا غرف متراكبة ولا جدران مفتوحة)' },
@@ -190,8 +205,27 @@ function plotFrame(doc) {
 }
 
 function gateResult(id, ok, value, threshold, reasons, extra = {}) {
-  return { id, ar: GATE_AR[id], ok, value, threshold, reasons_ar: reasons, ...extra };
+  const tier = extra.tier || GATE_TIER[id] || 'functional';
+  return { id, ar: GATE_AR[id], ok, value, threshold, reasons_ar: reasons, ...extra, tier, tier_ar: TIER_AR[tier] };
 }
+const norm_ar = t => String(t || '').replace(/[ةه]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي');
+const REQ_CACHE = new Map();
+function requestRules(request) {
+  if (Array.isArray(request.rules)) return request.rules;
+  if (!request.text) return [];
+  if (!REQ_CACHE.has(request.text)) { let v; try { v = extractRequirements(request.text, { counts: request.counts || {} }).rules || []; } catch { v = []; } if (REQ_CACHE.size > 64) REQ_CACHE.clear(); REQ_CACHE.set(request.text, v); }
+  return REQ_CACHE.get(request.text);
+}
+/** هل طلب العميل أن يفتح المجلس على الطعام (مقلط/طعام الضيوف/الطعام بجانب المجلس)؟ حينها يغلب طلبه الافتراضي. */
+export function majlisDiningAsked(request = {}) {
+  const t = norm_ar(request.text);
+  if (/مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)|(?:الطعام|السفره) (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?مجلس/.test(t)) return true;
+  return requestRules(request).some(r => ['adjacent', 'near'].includes(r.kind) && !r.negated && r.mode !== 'avoid' && ((r.a === 'dining' && /^majlis/.test(r.b || '')) || (r.b === 'dining' && /^majlis/.test(r.a || ''))));
+}
+/** هل حدد العميل مقاس المجلس نصًا (مجلس 5×6)؟ حينها لا يُفرض العرض الافتراضي. */
+const majlisDimsAsked = request => /مجلس[^،.\n]{0,14}\d+(?:\.\d+)?\s*[×xX*]\s*\d/.test(norm_ar(request.text));
+/** (الجولة العاشرة) أدنى عرض صافٍ للمجلس الرئيسي (الرجال أو الوحيد) قيمة افتراضية للميزان (لا يكفي 2.8 م للجلسة المتقابلة)؛ مجلس النساء يبقى على حد الغرف المعيشية. */
+export const MAJLIS_MIN_WIDTH = Object.freeze({ min: 4.2, tier: 'mizan-default', label: MIZAN_DEFAULT_AR, source: 'جلستان متقابلتان (0.8 م لكل منهما) وممر 2.6 م بينهما — ' + MIZAN_DEFAULT_AR + '، ' + UNVERIFIED_AR, verified: false });
 
 export function evaluateGates(doc, request = {}, model = analyzeDoc(doc)) {
   const gates = [];
@@ -222,15 +256,18 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc)) {
   }
   // 3) أدنى عرض صافٍ
   {
-    const bad = [], measured = [];
+    const bad = [], measured = [], notes = [];
     for (const { lv, room } of real) {
       const rule = widthRule(doc, lv, room); if (!rule) continue;
       const w = clearWidth(room); measured.push({ room: room.id, type: rule.key, width: r2(w), min: rule.min });
       if (w < rule.min - 1e-6) bad.push(`عرض ${roomName(room)} ${r2(w)} م أقل من ${rule.min} م (${UNVERIFIED_AR})`);
+      // المجلس: عرض الجلسة المتقابلة (افتراضي للميزان) ما لم يحدد العميل مقاسه
+      // المجلس الرئيسي: عرض الجلسة المتقابلة قيمة افتراضية للميزان — ملاحظة لا رفض هنا (المولّد يفرضها ما لم يتعارض مع بند صريح من الطلب)
+      else if (room.type === 'majlis' && !/نساء|حريم/.test(room.name || '') && !majlisDimsAsked(request) && w < MAJLIS_MIN_WIDTH.min - 0.05) notes.push(`عرض ${roomName(room)} ${r2(w)} م أقل من ${MAJLIS_MIN_WIDTH.min} م لجلسة متقابلة (${MIZAN_DEFAULT_AR}؛ ملاحظة)`);
     }
     const worst = measured.reduce((m, x) => (!m || x.width - x.min < m.width - m.min ? x : m), null);
-    gates.push(gateResult('MIN_WIDTH', !bad.length, { violations: bad.length, tightest: worst }, Object.fromEntries(Object.entries(MIN_CLEAR_WIDTH).map(([k, v]) => [k, v.min])), bad,
-      { source: MOMAH_NOTE, url: MOMAH_URL, verified: false, label: UNVERIFIED_AR }));
+    gates.push(gateResult('MIN_WIDTH', !bad.length, { violations: bad.length, tightest: worst }, { ...Object.fromEntries(Object.entries(MIN_CLEAR_WIDTH).map(([k, v]) => [k, v.min])), majlisSeating: majlisDimsAsked(request) ? 'طلب العميل مقاس المجلس' : MAJLIS_MIN_WIDTH.min }, bad,
+      { source: MOMAH_NOTE + ' ؛ وعرض المجلس ' + MAJLIS_MIN_WIDTH.min + ' م (ملاحظة): ' + MAJLIS_MIN_WIDTH.source, url: MOMAH_URL, verified: false, label: UNVERIFIED_AR, notes_ar: notes }));
   }
   // 4) نسبة الصالة
   {
@@ -294,6 +331,36 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc)) {
       for (const lv of model.levels.slice(1)) if (lv.seedKind !== 'stair') bad.push(`${lv.level.name}: لا سلم يهبط إلى فراغ فيه`);
     }
     gates.push(gateResult('STAIRS', !bad.length, value, 'سلم في فراغ موصول بالمدخل', bad, { source: 'منطق وظيفي', applicable: two }));
+  }
+  // 8ب) هندسة السلم (الجولة العاشرة): الأبعاد من ارتفاع الدور الفعلي، والنوع يتسع في غرفته، والوصول أسفله وأعلاه، والفتحة العلوية
+  {
+    const client = stairClientRules(request.text), rules = { ...STAIR_RULES, ...(client || {}) };
+    const bad = [], values = [];
+    for (let li = 0; li < model.levels.length; li++) for (const s of doc.stairs.filter(x => x.level === model.levels[li].level.id)) {
+      const res = checkStair(model, s, li, rules);
+      values.push({ stair: s.id, ...res.value });
+      for (const p of res.problems) bad.push(`السلم ${s.id}${res.value?.room ? ` في «${res.value.room}»` : ''}: ${p}`);
+    }
+    const thr = { riserMax: rules.riserMax.value, treadMin: rules.treadMin.value, widthMin: rules.widthMin.value, landing: 'عمق البسطة ≥ عرض القلبة', pass: rules.passMin.value };
+    gates.push(gateResult('STAIR_GEOMETRY', !bad.length, { stairs: values }, thr, bad, { source: `dist/stair-geometry.mjs — ${STAIR_RULES.riserMax.source}`, label: client ? 'عرض الدرج من طلب العميل؛ والباقي ' + MIZAN_DEFAULT_AR : MIZAN_DEFAULT_AR,
+      tiers: Object.fromEntries(Object.entries(rules).map(([k, v]) => [k, v.tier])), applicable: doc.stairs.length > 0 }));
+  }
+  // 8ج) خصوصية المجلس (الجولة العاشرة): أبوابه إلى مدخله/ممره أو مغاسله أو دورة مياه الضيوف أو طعام الضيوف أو الخارج فقط —
+  //     لا إلى الصالة أو الطعام العائلي أو المطبخ أو النوم أو المجلس الآخر؛ إلا الطعام إن طلبه العميل («مقلط»، «المجلس على الطعام»)
+  {
+    const asked = majlisDiningAsked(request), bad = [], seen = [];
+    const guestDining = r => r.type === 'dining' && /ضيوف|مقلط|ضياف|الرجال/.test(r.name || '');
+    for (const { lv, room } of real) {
+      if (room.type !== 'majlis') continue;
+      for (const d of roomDoors(lv, room)) {
+        if (!d.other || d.outside) continue;
+        const o = d.other, okType = ['entrance', 'corridor'].includes(o.type) ? !isPrivate(lv, o) && !/الغرف|الجناح/.test(o.name || '') : o.type === 'bath' ? true : o.type === 'dining' ? (guestDining(o) || asked) : false;
+        seen.push({ majlis: room.id, other: o.id, type: o.type, ok: okType });
+        if (!okType) bad.push(`${roomName(room)} يفتح مباشرة على ${roomName(o)} (${ROOM_TYPES[o.type]?.ar || o.type})${o.type === 'dining' ? ' — طعام عائلي؛ اذكر «مقلط» أو «المجلس على الطعام» إن أردته' : ''}`);
+      }
+    }
+    gates.push(gateResult('MAJLIS_PRIVACY', !bad.length, { doors: seen, clientAskedDining: asked }, 'أبواب المجلس إلى مدخله أو مغاسله أو طعام الضيوف أو الخارج فقط', bad,
+      { source: 'تكليف المالك (المجلس مستقل عن العائلة) — ' + MIZAN_DEFAULT_AR + (asked ? '؛ والطعام مسموح لأن العميل طلبه (شرط العميل يغلب)' : ''), applicable: real.some(({ room }) => room.type === 'majlis') }));
   }
   // 9) الأرض والارتداد
   {
@@ -615,7 +682,7 @@ export function reviewDesigns(docs, request = {}, opts = {}) {
       const ok = !near || near.d.total >= min;
       const g = { id: 'DISTINCT', ar: GATE_AR.DISTINCT, ok, value: near ? { nearest: near.k.index, total: near.d.total, adjacency: near.d.adjacency, circulation: near.d.circulation, zoning: near.d.zoning } : null, threshold: `≥ ${min}`,
         reasons_ar: ok ? [] : [`تنظيمه نسخة شكلية من «${near.k.title}» (الاختلاف المعماري ${near.d.total} < ${min}: تجاور ${near.d.adjacency}، حركة ${near.d.circulation}، نطاقات ${near.d.zoning})`],
-        source: 'dist/arch-difference.mjs — ' + DESIGN_THRESHOLDS.distinctMin.source };
+        source: 'dist/arch-difference.mjs — ' + DESIGN_THRESHOLDS.distinctMin.source, tier: 'mizan-default', tier_ar: TIER_AR['mizan-default'] };
       r.gates = [...r.gates, g];
       if (!ok) { r.passed = false; r.failedGates = [...r.failedGates, 'DISTINCT']; r.rejectReasons_ar = [...r.rejectReasons_ar, `${g.ar}: ${g.reasons_ar[0]}`]; }
       else if (r.passed) kept.push(r);
@@ -653,4 +720,4 @@ export function spearman(xs, ys) {
   return pearson(ranks(xs.filter((_, i) => keep[i])), ranks(ys.filter((_, i) => keep[i])));
 }
 
-export default { PLAN_REVIEW_VERSION, GATES, SET_GATES, FIXED_FIXTURES, MIN_CLEAR_WIDTH, DESIGN_THRESHOLDS, SCORE_WEIGHTS, EXTERNAL_WEIGHTS, evaluateGates, scoreComponents, externalScores, reviewDesign, reviewDesigns, rejectionTable, pearson, spearman };
+export default { PLAN_REVIEW_VERSION, TIER_AR, GATE_TIER, MAJLIS_MIN_WIDTH, majlisDiningAsked, GATES, SET_GATES, FIXED_FIXTURES, MIN_CLEAR_WIDTH, DESIGN_THRESHOLDS, SCORE_WEIGHTS, EXTERNAL_WEIGHTS, evaluateGates, scoreComponents, externalScores, reviewDesign, reviewDesigns, rejectionTable, pearson, spearman };

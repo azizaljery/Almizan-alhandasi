@@ -3,9 +3,12 @@
 // Document stair {x, y, rot, w, run, kind: 'straight'|'L'|'U', flip}.
 //   (x, y) is the middle of the FIRST riser line, the stair climbs along local +y (rot turns it clockwise,
 //   like fixtures), `w` is the clear width and `run` the length of the footprint along the climb.
+//   `steps` (optional) = the number of risers chosen by the generator (dist/stair-geometry.mjs); otherwise the fewest
+//   risers not higher than MAX_RISER. The same layout is drawn in 2D (render2d), built in 3D and measured by plan-review.
 import { P3 } from './meshbuilder.mjs';
 
-const MAX_RISER = .2;
+// (الجولة العاشرة) أعلى قائمة 0.18 م — «قيمة تصميمية افتراضية للميزان» غير متحققة نظاميًا (dist/stair-geometry.mjs)
+export const MAX_RISER = .18;
 
 export function stairLayout(stair, rise) {
   const w = stair.w ?? 1.1, run = stair.run ?? 3.2, kind = stair.kind || 'straight', r = stair.rot || 0;
@@ -13,7 +16,7 @@ export function stairLayout(stair, rise) {
   const side = stair.flip ? -1 : 1;
   const to = (a, b) => ({ x: stair.x + q.x * a + f.x * b, y: stair.y + q.y * a + f.y * b });
   const rect = (a0, a1, b0, b1) => [to(a0, b0), to(a1, b0), to(a1, b1), to(a0, b1)];
-  const N = Math.max(3, Math.ceil(rise / MAX_RISER - 1e-9)), riser = rise / N;   // N risers; N-1 steps; the last riser meets the floor above
+  const N = Number.isInteger(stair.steps) && stair.steps >= 3 ? stair.steps : Math.max(3, Math.ceil(rise / MAX_RISER - 1e-9)), riser = rise / N;   // N risers; N-1 steps; the last riser meets the floor above
   const steps = [];            // {poly, top, type}
   const flights = [];           // for rails and walking: {from:{a,b}, to:{a,b}, h0, h1}
   const hw = w / 2;
@@ -126,4 +129,4 @@ export function emitStair(b, layout, E, keys = {}, { rail = true } = {}) {
   }
 }
 
-export default { stairLayout, stairHeightAt, emitStair };
+export default { stairLayout, stairHeightAt, emitStair, MAX_RISER };

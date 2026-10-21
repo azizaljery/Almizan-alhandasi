@@ -189,7 +189,7 @@ const HANDLERS = {
   },
   'add-stair'(doc, c) {
     levelOf(doc, c.level);
-    const s = { id: nextId(doc, 'stairs'), level: c.level, kind: c.kind || 'straight', x: limit(point(c, 'stair')).x, y: c.y, rot: c.rot || 0, w: c.w ?? 1.1, run: c.run ?? 3.2, flip: !!c.flip };
+    const s = { id: nextId(doc, 'stairs'), level: c.level, kind: c.kind || 'straight', x: limit(point(c, 'stair')).x, y: c.y, rot: c.rot || 0, w: c.w ?? 1.1, run: c.run ?? 3.2, flip: !!c.flip, ...(Number.isInteger(c.steps) && c.steps >= 3 ? { steps: c.steps } : {}) };
     doc.stairs.push(s); return { ids: [s.id] };
   },
   'add-column'(doc, c) {

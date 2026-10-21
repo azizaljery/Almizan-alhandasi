@@ -9,7 +9,7 @@ import { runMultiEngineDesign } from './multi-engine.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
 import { legacyToDoc } from './draw/import-legacy.mjs';
 import { applyCommand } from './draw/doc.mjs';
-import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H } from './multi-floor.mjs';
+import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H, programFromCounts } from './multi-floor.mjs';
 import { generateVillaDesigns as v1Designs, generateVillaTwoFloors as v1TwoFloors, countsFromRooms } from './villa-layout.mjs';
 import { generateVillaDesigns as v2Designs, generateVillaTwoFloors as v2TwoFloors } from './villa-layout-v2.mjs';
 // المولّد المهني: الإصدار الثاني (أنماط تنظيمية + مراجعة مستقلة نهائية) افتراضيًا؛ الأول متاح بـ engine:'v1'
@@ -216,7 +216,7 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
     const c2 = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
     const req2 = requirements || extractRequirements(idea || '', { counts: c2, discovery: disc });
     try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, engine }); }
-    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length) throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms, discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
+    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length) throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
   }
   // المولّد المهني أولًا (أجنحة نوم بحماماتها، صالة محورية، مجلس بممر ضيوف ودورة مياه)؛ المحرك السابق احتياط فقط
   const villaCounts = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);

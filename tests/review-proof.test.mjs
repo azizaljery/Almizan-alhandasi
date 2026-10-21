@@ -1,11 +1,15 @@
 // إثبات أن المراجع المستقل (dist/plan-review.mjs) يرفض المخططات المعيبة فعلًا (passed=false بالبوابة المتوقعة)
-// ولا يكتفي بخفض الدرجة. المجموعة تُبنى من بدائل after-4 الناجحة بتحويرات مضبوطة (scripts/defect-corpus.mjs).
+// ولا يكتفي بخفض الدرجة. المجموعة تُبنى من بدائل المرحلة الأحدث الناجحة (BASE_STAGE، الجولة العاشرة: after-10) بتحويرات
+// مضبوطة (scripts/defect-corpus.mjs)؛ وكشف الأزواج الشكلية في after-4 يُقاس بالمقياس المعماري مباشرة.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as R from '../dist/plan-review.mjs';
-import { buildCorpus, evaluateCorpus, loadBase, MUTATIONS, mirrorX, requestFor } from '../scripts/defect-corpus.mjs';
+import { buildCorpus, evaluateCorpus, loadBase, MUTATIONS, mirrorX, requestFor, BASE_STAGE } from '../scripts/defect-corpus.mjs';
+import { archSignature, archDifference, THRESHOLDS } from '../dist/arch-difference.mjs';
 
-const base = loadBase('after-4');
+const base = loadBase(BASE_STAGE);
+// عيوب الدورين لا تُطبَّق إلا على بدائل بدورين (C7 وحدها؛ بديل واحد في after-10)
+const TWO_FLOOR = new Set(['stairs-room-closed', 'stairs-deleted', 'stairs-moved-out', 'stair-too-short', 'stair-narrow']);
 const corpus = buildCorpus({ base });
 const res = evaluateCorpus(corpus, R, { clean: base });
 const byType = t => res.rows.filter(r => r.mutation === t);
@@ -13,7 +17,10 @@ const doc = (c, f) => base.find(b => b.case === c && b.file === f);
 
 test('المجموعة: ≥ 40 مستندًا معيبًا، كل نوع عيب مطبَّق ومعه بوابته المتوقعة', () => {
   assert.ok(corpus.length >= 40, `المستندات المعيبة ${corpus.length}`);
-  for (const m of MUTATIONS) assert.ok(byType(m.id).length >= 2, `العيب ${m.id} طُبّق ${byType(m.id).length} مرات فقط`);
+  const twoFloorDocs = base.filter(b => b.doc.levels.length > 1).length;
+  // wc-door-kitchen: لا دورة مياه تجاور المطبخ في بدائل after-10 فلا موضع للتحوير (طُبّق على after-4 في الجولات السابقة)
+  const NA = new Set(['wc-door-kitchen']);
+  for (const m of MUTATIONS) if (!NA.has(m.id)) assert.ok(byType(m.id).length >= (TWO_FLOOR.has(m.id) ? Math.min(2, twoFloorDocs) : 2), `العيب ${m.id} طُبّق ${byType(m.id).length} مرات فقط`);
   for (const c of corpus) { assert.ok(c.expected.length >= 1); assert.ok(c.note && c.note.length > 5, c.id); }
 });
 
@@ -22,7 +29,7 @@ test('كل مستند معيب مرفوض (passed=false) بالبوابة الم
   assert.deepEqual(missed.map(r => `${r.id}: ${r.fired.join('+') || 'لا بوابة'}`), []);
 });
 
-test('لا رفض كاذب: كل بدائل after-4 السليمة تجتاز البوابات', () => {
+test('لا رفض كاذب: كل البدائل السليمة في المرحلة الأحدث تجتاز البوابات', () => {
   const bad = res.clean.filter(r => !r.passed);
   assert.deepEqual(bad.map(r => `${r.id}: ${r.fired.join('+')}`), []);
 });
@@ -36,7 +43,7 @@ test('الدرجة وحدها لا تكفي: معيبون كثيرون بدرج�
 });
 
 test('العيوب التي كان المراجع 1.0.0 يمرّرها صارت تُرفض: نافذة صغيرة، فتح باب، تراكب، موضع، نسخة معكوسة', () => {
-  for (const t of ['window-too-small', 'swing-blocked', 'overlap-label', 'overlap-walls', 'kitchen-front', 'bedrooms-front', 'mirror-pair', 'mirror-nudged-pair']) {
+  for (const t of ['window-too-small', 'swing-blocked', 'overlap-label', 'overlap-walls', 'kitchen-front', 'bedrooms-front', 'mirror-pair', 'mirror-nudged-pair', 'stair-too-short', 'majlis-door-family']) {
     const rows = byType(t);
     assert.ok(rows.length && rows.every(r => r.detected && !r.passed), t);
   }
@@ -91,10 +98,23 @@ test('DISTINCT: النسخة المعكوسة من بديل تُرفض في revi
   assert.ok(out[0].passed);
 });
 
-test('البدائل الأصلية: شرط الاختلاف يكشف الأزواج الشكلية في after-4 (C1 و C2 و C6 و C7 و C8) ويقبل البقية', () => {
-  const flagged = Object.fromEntries(res.cleanSets.map(s => [s.case, s.rejectedAsDuplicate]));
-  for (const id of ['C1', 'C2', 'C6', 'C7', 'C8']) assert.equal(flagged[id].length, 1, id);
-  for (const id of ['C3', 'C4', 'C5', 'C9', 'C10']) assert.deepEqual(flagged[id], [], id);
+test('البدائل الأصلية: المقياس المعماري يكشف الأزواج الشكلية في after-4 (C1 و C2 و C6 و C7 و C8) ولا يرى في البقية زوجًا شكليًا؛ وبدائل المرحلة الأحدث بلا نسخ شكلية', () => {
+  const old = loadBase('after-4'), cosmetic = id => { const ds = old.filter(b => b.case === id).map(b => archSignature(b.doc)); let n = 0; for (let i = 0; i < ds.length; i++) for (let j = i + 1; j < ds.length; j++) if (archDifference(ds[i], ds[j]).total < THRESHOLDS.cosmetic) n++; return n; };
+  for (const id of ['C1', 'C2', 'C6', 'C7', 'C8']) assert.ok(cosmetic(id) >= 1, id);
+  for (const id of ['C3', 'C4', 'C5', 'C9', 'C10']) assert.equal(cosmetic(id), 0, id);
+  for (const s of res.cleanSets) assert.deepEqual(s.rejectedAsDuplicate, [], s.case);
+});
+
+test('STAIR_GEOMETRY وMAJLIS_PRIVACY: السلم القصير أو الضيق والمجلس على الطعام العائلي مرفوضة بالبوابة نفسها، وطبقتها «قيمة تصميمية افتراضية للميزان»', () => {
+  for (const t of ['stair-too-short', 'stair-narrow', 'majlis-door-family']) { const rows = byType(t); assert.ok(rows.length >= 1, t); assert.ok(rows.every(r => r.detected && !r.passed), t); }
+  const c = corpus.find(x => x.mutation === 'stair-too-short'), g = R.reviewDesign(c.doc, c.request, { external: false }).gates.find(x => x.id === 'STAIR_GEOMETRY');
+  assert.equal(g.ok, false); assert.equal(g.tier, 'mizan-default'); assert.match(g.reasons_ar.join(' '), /النائمة/);
+  const m = corpus.find(x => x.mutation === 'majlis-door-family');
+  const asked = R.reviewDesign(m.doc, { ...m.request, text: m.request.text + '، والمجلس على الطعام (مقلط)' }, { external: false }).gates.find(x => x.id === 'MAJLIS_PRIVACY');
+  const opened = R.reviewDesign(m.doc, m.request, { external: false }).gates.find(x => x.id === 'MAJLIS_PRIVACY');
+  assert.equal(opened.ok, false);
+  // طلب العميل يغلب الافتراضي: الطعام مسموح حين يطلبه، والصالة والمطبخ لا
+  if (/«(صالة الطعام|الطعام)»/.test(opened.reasons_ar[0])) assert.equal(asked.ok, true);
 });
 
 test('طلب الحالة يُقرأ من acceptance-cases (لا قيم مخترعة)', () => {
