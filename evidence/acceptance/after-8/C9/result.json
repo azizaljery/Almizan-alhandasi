@@ -1,0 +1,465 @@
+{
+ "id": "C9",
+ "engine": "v2",
+ "name": "تغيير الواجهة دون تغيير المخطط",
+ "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+ "understood": [
+  "3 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "hallback",
+   "pat": "hallback:h0",
+   "summary": "الصالة في الخلف على الحديقة: الضيافة صف أمامي، والخدمة والصالة خلفها، وجناح النوم بطول المبنى",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.65,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.22,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.59
+   },
+   "kitchen": {
+    "w": 3.12,
+    "l": 3.72,
+    "area": 11.57
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.93,
+    "l": 6.62,
+    "ratio": 1.34
+   },
+   "rooms": 17,
+   "net": 186.14,
+   "circulationPct": 16.97,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "sidemajlis",
+   "pat": "sidemajlis:j0",
+   "summary": "مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 93.81,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 8.11,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 16.73
+   },
+   "kitchen": {
+    "w": 3.31,
+    "l": 3.32,
+    "area": 10.99
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 8.43,
+    "ratio": 2.07
+   },
+   "rooms": 16,
+   "net": 189.73,
+   "circulationPct": 15.42,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "wings",
+   "pat": "wings:w0",
+   "summary": "جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.59,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 9.77,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.69
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 5.27,
+    "area": 16.74
+   },
+   "narrowestSubCirculation": {
+    "name": "مغاسل",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.78,
+    "l": 8.41,
+    "ratio": 1.76
+   },
+   "rooms": 18,
+   "net": 216.48,
+   "circulationPct": 18.5,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-4.json",
+   "mode": "sidehall",
+   "pat": "sidehall:n0",
+   "summary": "جناح خدمة على جانب وصالة على الجانب المقابل، وغرف النوم خلفهما على ممر",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 97.3,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 11.42,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 21.67
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 4.71,
+    "area": 14.99
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.87,
+    "l": 6.68,
+    "ratio": 1.37
+   },
+   "rooms": 17,
+   "net": 207.93,
+   "circulationPct": 15.64,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 3250,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 4,
+ "diversity": [
+  [
+   0,
+   0.26,
+   0.25,
+   0.29
+  ],
+  [
+   0.26,
+   0,
+   0.24,
+   0.24
+  ],
+  [
+   0.25,
+   0.24,
+   0,
+   0.29
+  ],
+  [
+   0.29,
+   0.24,
+   0.29,
+   0
+  ]
+ ],
+ "modes": [
+  "hallback",
+  "sidemajlis",
+  "wings",
+  "sidehall"
+ ],
+ "minDifference": 0.24,
+ "meanDifference": 0.26,
+ "rejectedCandidates": 2,
+ "archDiversity": [
+  [
+   0,
+   0.418,
+   0.418,
+   0.348
+  ],
+  [
+   0.418,
+   0,
+   0.249,
+   0.386
+  ],
+  [
+   0.418,
+   0.249,
+   0,
+   0.313
+  ],
+  [
+   0.348,
+   0.386,
+   0.313,
+   0
+  ]
+ ],
+ "minArchDifference": 0.249,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "edit": {
+  "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
+  "ms": 49,
+  "reply": {
+   "local": true,
+   "mode": "local",
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "pending": [],
+   "unverified": [],
+   "already": [],
+   "how": [
+    "صارت واجهة المجسّم حجر، والمخطط نفسه حرفيًا (لم يتحرك جدار)"
+   ],
+   "picks": [],
+   "unclear": [],
+   "unsupported": [],
+   "kept": true,
+   "unchanged": false,
+   "reused": false,
+   "geometryIdentical": true,
+   "changed": [],
+   "unrequested": [],
+   "restored": null,
+   "otherFails": [],
+   "conflicts": [],
+   "questions": [],
+   "keptRooms": 17,
+   "alreadyTxt": [],
+   "summary_ar": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر، والمخطط نفسه حرفيًا (لم يتحرك جدار)). بقية الغرف (17) كما هي مقيسًا، والجدران والفتحات نفسها حرفيًا."
+  },
+  "beforePattern": "hallback:h0",
+  "afterPattern": "hallback:h0",
+  "samePattern": true,
+  "difference": 0,
+  "roomsKept": true,
+  "roomsLost": [],
+  "programRoomsKept": true,
+  "programRoomsLost": [],
+  "editLedgerBefore": [
+   {
+    "text": "3 غرف نوم",
+    "status": "done",
+    "why": ""
+   },
+   {
+    "text": "الواجهة: حجر",
+    "status": "pending-render",
+    "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+   }
+  ],
+  "after": {
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.22,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.59
+   },
+   "kitchen": {
+    "w": 3.12,
+    "l": 3.72,
+    "area": 11.57
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 4.93,
+    "l": 6.62,
+    "ratio": 1.34
+   },
+   "rooms": 17,
+   "net": 186.14,
+   "circulationPct": 16.97,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "الواجهة: حجر",
+     "ok": false,
+     "why": "سُجّل طلب الواجهة في المتطلبات وحُفظ التوزيع؛ عرض مادة الواجهة في المجسّم لم يُنفَّذ بعد في هذا الإصدار."
+    }
+   ],
+   "ledgerFails": 1
+  }
+ },
+ "editAll": [
+  {
+   "alt": 1,
+   "beforePattern": "hallback:h0",
+   "afterPattern": "hallback:h0",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "تعديل موضعي: الواجهة: حجر"
+  },
+  {
+   "alt": 2,
+   "beforePattern": "sidemajlis:j0",
+   "afterPattern": "sidemajlis:j0",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "تعديل موضعي: الواجهة: حجر"
+  },
+  {
+   "alt": 3,
+   "beforePattern": "wings:w0",
+   "afterPattern": "wings:w0",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "تعديل موضعي: الواجهة: حجر"
+  },
+  {
+   "alt": 4,
+   "beforePattern": "sidehall:n0",
+   "afterPattern": "sidehall:n0",
+   "samePattern": true,
+   "unchanged": false,
+   "difference": 0,
+   "programRoomsKept": true,
+   "done": [
+    "الواجهة: حجر"
+   ],
+   "failed": [],
+   "patternChanged": null,
+   "note": "تعديل موضعي: الواجهة: حجر"
+  }
+ ]
+}

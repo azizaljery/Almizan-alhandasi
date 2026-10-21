@@ -1,0 +1,100 @@
+{
+ "id": "C4",
+ "engine": "v2",
+ "name": "أرض ضيقة وعميقة",
+ "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام، والغرف في الخلف بعيدة عن الشارع",
+ "understood": [
+  "3 غرف نوم",
+  "«غرف النوم» في الخلف"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "tcore",
+   "pat": "tcore:n7",
+   "summary": "نواة T: الضيافة والخدمة والصالة أمامًا، وخلفها كتلة النوم بممر أوسط قصير تُفتح عليه الغرف من جهتيه",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.99,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.28,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 18.5
+   },
+   "kitchen": {
+    "w": 3.32,
+    "l": 3.33,
+    "area": 11.04
+   },
+   "narrowestSubCirculation": {
+    "name": "ممر الغرف",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.97,
+    "l": 7.93,
+    "ratio": 1.6
+   },
+   "rooms": 14,
+   "net": 198.62,
+   "circulationPct": 13.81,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«غرف النوم» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 369,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "tcore"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 0,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 4، اجتاز البوابات منهم 4؛ 3 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}
