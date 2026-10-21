@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node scripts/run-tests.mjs",
+    "test:fresh": "node -e \"require('fs').rmSync('.cache/gen',{recursive:true,force:true})\" && node scripts/run-tests.mjs",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "release:check": "node scripts/release-fingerprint.mjs"
