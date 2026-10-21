@@ -1,0 +1,687 @@
+{
+ "version": "arch-difference/1.0.0",
+ "weights": {
+  "adjacency": 0.3,
+  "circulation": 0.2,
+  "zoning": 0.5
+ },
+ "thresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "stage": "after-10",
+ "summary": {
+  "pairs": 30,
+  "cosmetic": 0,
+  "partial": 14,
+  "distinct": 16
+ },
+ "cases": {
+  "C1": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json"
+   ],
+   "requested": 4,
+   "produced": 2,
+   "matrix": [
+    [
+     0,
+     0.286
+    ],
+    [
+     0.286,
+     0
+    ]
+   ],
+   "min": 0.286,
+   "mean": 0.286,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.286,
+     "adjacency": 0.097,
+     "circulation": 0.224,
+     "zoning": 0.425,
+     "verdict": "partial",
+     "oldCentroid": 0.28
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 3، اجتاز البوابات منهم 3؛ 1 تخالف بندًا صريحًا من الطلب («المطبخ» في الخلف، «غرفة الخادمة» قرب «المطبخ»). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  "C2": {
+   "files": [
+    "alt-1.json"
+   ],
+   "requested": 4,
+   "produced": 1,
+   "matrix": [
+    [
+     0
+    ]
+   ],
+   "min": null,
+   "mean": null,
+   "pairs": [],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 11، اجتاز البوابات منهم 9؛ ورُفض 2 في بوابات الجودة والسلامة؛ 8 تخالف بندًا صريحًا من الطلب (صالة واسعة (35 م² صافية أو أكثر)، «الصالة» على الواجهة الخلفية، «غرف الأبناء» متجاورة). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  "C3": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json"
+   ],
+   "requested": 4,
+   "produced": 3,
+   "matrix": [
+    [
+     0,
+     0.248,
+     0.292
+    ],
+    [
+     0.248,
+     0,
+     0.342
+    ],
+    [
+     0.292,
+     0.342,
+     0
+    ]
+   ],
+   "min": 0.248,
+   "mean": 0.294,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.248,
+     "adjacency": 0.107,
+     "circulation": 0.184,
+     "zoning": 0.359,
+     "verdict": "partial",
+     "oldCentroid": 0.29
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.292,
+     "adjacency": 0.082,
+     "circulation": 0.237,
+     "zoning": 0.44,
+     "verdict": "partial",
+     "oldCentroid": 0.26
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.342,
+     "adjacency": 0.153,
+     "circulation": 0.326,
+     "zoning": 0.461,
+     "verdict": "distinct",
+     "oldCentroid": 0.35
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 13، اجتاز البوابات منهم 10؛ ورُفض 3 في بوابات الجودة والسلامة؛ 2 تخالف بندًا صريحًا من الطلب («المدخل» في جهة الشرق)؛ 1 مجلس النساء فيها أصغر من 20 م² (15.89 م²) والبرنامج يتسع لأكبر منه؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 3 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  "C4": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json"
+   ],
+   "requested": 4,
+   "produced": 2,
+   "matrix": [
+    [
+     0,
+     0.213
+    ],
+    [
+     0.213,
+     0
+    ]
+   ],
+   "min": 0.213,
+   "mean": 0.213,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.213,
+     "adjacency": 0.197,
+     "circulation": 0.409,
+     "zoning": 0.144,
+     "verdict": "partial",
+     "oldCentroid": 0.16
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 4، اجتاز البوابات منهم 4؛ 2 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  "C5": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.372,
+     0.297,
+     0.368
+    ],
+    [
+     0.372,
+     0,
+     0.267,
+     0.388
+    ],
+    [
+     0.297,
+     0.267,
+     0,
+     0.29
+    ],
+    [
+     0.368,
+     0.388,
+     0.29,
+     0
+    ]
+   ],
+   "min": 0.267,
+   "mean": 0.33,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.372,
+     "adjacency": 0.083,
+     "circulation": 0.378,
+     "zoning": 0.543,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.297,
+     "adjacency": 0.014,
+     "circulation": 0.189,
+     "zoning": 0.509,
+     "verdict": "partial",
+     "oldCentroid": 0.25
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.368,
+     "adjacency": 0.151,
+     "circulation": 0.524,
+     "zoning": 0.436,
+     "verdict": "distinct",
+     "oldCentroid": 0.15
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.267,
+     "adjacency": 0.068,
+     "circulation": 0.192,
+     "zoning": 0.416,
+     "verdict": "partial",
+     "oldCentroid": 0.16
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.388,
+     "adjacency": 0.093,
+     "circulation": 0.152,
+     "zoning": 0.659,
+     "verdict": "distinct",
+     "oldCentroid": 0.31
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.29,
+     "adjacency": 0.135,
+     "circulation": 0.335,
+     "zoning": 0.364,
+     "verdict": "partial",
+     "oldCentroid": 0.19
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  },
+  "C6": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json"
+   ],
+   "requested": 4,
+   "produced": 2,
+   "matrix": [
+    [
+     0,
+     0.36
+    ],
+    [
+     0.36,
+     0
+    ]
+   ],
+   "min": 0.36,
+   "mean": 0.36,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.36,
+     "adjacency": 0.123,
+     "circulation": 0.295,
+     "zoning": 0.528,
+     "verdict": "distinct",
+     "oldCentroid": 0.18
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 13، اجتاز البوابات منهم 10؛ ورُفض 3 في بوابات الجودة والسلامة؛ 4 تخالف بندًا صريحًا من الطلب («المطبخ» في الخلف)؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 2 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  "C7": {
+   "files": [
+    "alt-1.json"
+   ],
+   "requested": 4,
+   "produced": 1,
+   "matrix": [
+    [
+     0
+    ]
+   ],
+   "min": null,
+   "mean": null,
+   "pairs": [],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 14، اجتاز البوابات منهم 3؛ ورُفض 9 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي، و2 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («غرفة النوم الرئيسية» بعيدًا عن «الدرج»)؛ 1 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  "C8": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.212,
+     0.357,
+     0.323
+    ],
+    [
+     0.212,
+     0,
+     0.353,
+     0.218
+    ],
+    [
+     0.357,
+     0.353,
+     0,
+     0.321
+    ],
+    [
+     0.323,
+     0.218,
+     0.321,
+     0
+    ]
+   ],
+   "min": 0.212,
+   "mean": 0.297,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.212,
+     "adjacency": 0.159,
+     "circulation": 0.441,
+     "zoning": 0.152,
+     "verdict": "partial",
+     "oldCentroid": 0.23
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.357,
+     "adjacency": 0.057,
+     "circulation": 0.261,
+     "zoning": 0.576,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.323,
+     "adjacency": 0.068,
+     "circulation": 0.456,
+     "zoning": 0.423,
+     "verdict": "distinct",
+     "oldCentroid": 0.25
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.353,
+     "adjacency": 0.146,
+     "circulation": 0.275,
+     "zoning": 0.509,
+     "verdict": "distinct",
+     "oldCentroid": 0.26
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.218,
+     "adjacency": 0.111,
+     "circulation": 0.085,
+     "zoning": 0.336,
+     "verdict": "partial",
+     "oldCentroid": 0.23
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.321,
+     "adjacency": 0.056,
+     "circulation": 0.293,
+     "zoning": 0.491,
+     "verdict": "distinct",
+     "oldCentroid": 0.14
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  },
+  "C9": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 4,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.284,
+     0.264,
+     0.32
+    ],
+    [
+     0.284,
+     0,
+     0.386,
+     0.327
+    ],
+    [
+     0.264,
+     0.386,
+     0,
+     0.3
+    ],
+    [
+     0.32,
+     0.327,
+     0.3,
+     0
+    ]
+   ],
+   "min": 0.264,
+   "mean": 0.314,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.284,
+     "adjacency": 0.068,
+     "circulation": 0.195,
+     "zoning": 0.449,
+     "verdict": "partial",
+     "oldCentroid": 0.17
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.264,
+     "adjacency": 0.135,
+     "circulation": 0.329,
+     "zoning": 0.316,
+     "verdict": "partial",
+     "oldCentroid": 0.2
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.32,
+     "adjacency": 0.173,
+     "circulation": 0.073,
+     "zoning": 0.506,
+     "verdict": "distinct",
+     "oldCentroid": 0.24
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.386,
+     "adjacency": 0.093,
+     "circulation": 0.147,
+     "zoning": 0.658,
+     "verdict": "distinct",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.327,
+     "adjacency": 0.158,
+     "circulation": 0.254,
+     "zoning": 0.457,
+     "verdict": "distinct",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.3,
+     "adjacency": 0.117,
+     "circulation": 0.348,
+     "zoning": 0.39,
+     "verdict": "distinct",
+     "oldCentroid": 0.17
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": null
+  },
+  "C10": {
+   "files": [
+    "alt-1.json",
+    "alt-2.json",
+    "alt-3.json",
+    "alt-4.json"
+   ],
+   "requested": 5,
+   "produced": 4,
+   "matrix": [
+    [
+     0,
+     0.307,
+     0.295,
+     0.381
+    ],
+    [
+     0.307,
+     0,
+     0.251,
+     0.225
+    ],
+    [
+     0.295,
+     0.251,
+     0,
+     0.307
+    ],
+    [
+     0.381,
+     0.225,
+     0.307,
+     0
+    ]
+   ],
+   "min": 0.225,
+   "mean": 0.294,
+   "pairs": [
+    {
+     "pair": [
+      1,
+      2
+     ],
+     "total": 0.307,
+     "adjacency": 0.184,
+     "circulation": 0.338,
+     "zoning": 0.369,
+     "verdict": "distinct",
+     "oldCentroid": 0.34
+    },
+    {
+     "pair": [
+      1,
+      3
+     ],
+     "total": 0.295,
+     "adjacency": 0.152,
+     "circulation": 0.422,
+     "zoning": 0.33,
+     "verdict": "partial",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      1,
+      4
+     ],
+     "total": 0.381,
+     "adjacency": 0.139,
+     "circulation": 0.435,
+     "zoning": 0.504,
+     "verdict": "distinct",
+     "oldCentroid": 0.28
+    },
+    {
+     "pair": [
+      2,
+      3
+     ],
+     "total": 0.251,
+     "adjacency": 0.151,
+     "circulation": 0.191,
+     "zoning": 0.334,
+     "verdict": "partial",
+     "oldCentroid": 0.27
+    },
+    {
+     "pair": [
+      2,
+      4
+     ],
+     "total": 0.225,
+     "adjacency": 0.148,
+     "circulation": 0.343,
+     "zoning": 0.223,
+     "verdict": "partial",
+     "oldCentroid": 0.25
+    },
+    {
+     "pair": [
+      3,
+      4
+     ],
+     "total": 0.307,
+     "adjacency": 0.058,
+     "circulation": 0.174,
+     "zoning": 0.51,
+     "verdict": "distinct",
+     "oldCentroid": 0.27
+    }
+   ],
+   "cosmeticPairs": [],
+   "shortfallReason": "عُرض 4 من 5 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 11، اجتاز البوابات منهم 9؛ ورُفض 2 في بوابات الجودة والسلامة؛ 3 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 2 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  }
+ }
+}

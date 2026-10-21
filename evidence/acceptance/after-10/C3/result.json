@@ -1,0 +1,301 @@
+{
+ "id": "C3",
+ "engine": "v2",
+ "name": "أرض زاوية (شارعان)",
+ "text": "3 غرف نوم ومجلس رجال على الشارع ومجلس نساء، والمطبخ بجانب الطعام، ومدخل ثاني من الشارع الشرقي",
+ "understood": [
+  "3 غرف نوم",
+  "«المجلس» على الشارع (الواجهة الأمامية)",
+  "«المطبخ» بجوار «الطعام»",
+  "«المدخل» في جهة الشرق"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "ell",
+   "pat": "ell:l0p",
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 94.2,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 7.28,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 14.91
+   },
+   "kitchen": {
+    "w": 3.11,
+    "l": 5.72,
+    "area": 17.8
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.78,
+    "l": 6.97,
+    "ratio": 1.46
+   },
+   "rooms": 19,
+   "net": 235.39,
+   "circulationPct": 15.08,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 1,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "centralhall",
+   "pat": "centralhall:ch0",
+   "summary": "الصالة المركزية الموزِّعة: غرف النوم على جانبيها تُفتح عليها مباشرة بلا ممرات، والضيافة صف أمامي، والطعام والمطبخ صف خلفي على الحديقة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.82,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": null,
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 14.37
+   },
+   "kitchen": {
+    "w": 3.12,
+    "l": 3.42,
+    "area": 10.64
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.98,
+    "l": 7.28,
+    "ratio": 1.46
+   },
+   "rooms": 19,
+   "net": 215.54,
+   "circulationPct": 9.99,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 2,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "cornerentry",
+   "pat": "cornerentry:e0",
+   "summary": "المدخل في ركن الواجهة لا في محورها، والمجلس على بقية الواجهة، والصالة خلف المدخل",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 92.97,
+    "rejectReasons_ar": []
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 8.12,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.17
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 6.12,
+    "area": 19.45
+   },
+   "narrowestSubCirculation": {
+    "name": "ممر الغرف",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 6.37,
+    "l": 6.68,
+    "ratio": 1.05
+   },
+   "rooms": 20,
+   "net": 238.52,
+   "circulationPct": 16.48,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 2,
+   "bathPrivacy": 0,
+   "reviewWarnings": 4,
+   "ledger": [
+    {
+     "text": "«المجلس» على الشارع (الواجهة الأمامية)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» بجوار «الطعام»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المدخل» في جهة الشرق",
+     "ok": true,
+     "why": "باب دخول خارجي على واجهة الشرق."
+    },
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 7498,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 3,
+ "diversity": [
+  [
+   0,
+   0.29,
+   0.26
+  ],
+  [
+   0.29,
+   0,
+   0.35
+  ],
+  [
+   0.26,
+   0.35,
+   0
+  ]
+ ],
+ "modes": [
+  "ell",
+  "centralhall",
+  "cornerentry"
+ ],
+ "minDifference": 0.26,
+ "meanDifference": 0.3,
+ "rejectedCandidates": 3,
+ "archDiversity": [
+  [
+   0,
+   0.248,
+   0.292
+  ],
+  [
+   0.248,
+   0,
+   0.342
+  ],
+  [
+   0.292,
+   0.342,
+   0
+  ]
+ ],
+ "minArchDifference": 0.248,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "shortfallReason": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 13، اجتاز البوابات منهم 10؛ ورُفض 3 في بوابات الجودة والسلامة؛ 2 تخالف بندًا صريحًا من الطلب («المدخل» في جهة الشرق)؛ 1 مجلس النساء فيها أصغر من 20 م² (15.89 م²) والبرنامج يتسع لأكبر منه؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 3 نسخة شكلية من بديل معروض (اختلاف معماري < 0.18 أو إزاحة مراكز الغرف < 0.16). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}
