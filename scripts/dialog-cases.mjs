@@ -318,6 +318,33 @@ export const SESSIONS = [
       { text: 'رجّع مثل أول بس خل تعديل المجلس', scope: [MAJ, HALL], checks: [{ type: 'smaller', room: MAJ, factor: .9 }, { type: 'windowNarrower', room: HALL, factor: .9 }, { type: 'fpReplay', turn: 0, editTurn: 2 }] },
     ],
   },
+  // (الجولة الحادية عشرة) طلب طويل فيه تعارضان داخل الطلب نفسه: يُسأل عنهما مع التصميم الأول، ثم يحسم العميل كلًا منهما بجملة
+  {
+    id: 'S9', name: 'طلب متعارض: المجلس يمين الداخل ويساره، والمطبخ جنب المجلس وبعيد عنه — سؤال ثم حسم بجوابين، ثم تعديلان بعد الحسم',
+    land: { width: 20, length: 30, streets: ['s'], entries: ['s'] },
+    text: 'السلام عليكم، أبي أربع غرف نوم منها ماستر، ومجلس رجال، وصالة، ومطبخ وطعام. المجلس أبيه على يمين الداخل عشان قريب من الشارع، والمطبخ أبيه جنب المجلس عشان القهوة توصل بسرعة. أهلي يقولون المجلس يكون يسار المدخل عشان ما يطل على الجيران، وزوجتي تقول المطبخ لازم يكون بعيد عن المجلس عشان الريحة ما توصل للضيوف، وأنا ما قررت. الماستر بعيدة عن المجلس، ودورات المياه ما تفتح على الطعام.',
+    counts: { bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 },
+    turns: [
+      { text: 'المجلس على يمين الداخل', scope: [MAJ, 'مدخل'], checks: [{ type: 'resolved', left: 1 }, { type: 'side', room: MAJ, side: 'right' }] },
+      { text: 'المطبخ بعيد عن المجلس', scope: ['^المطبخ$', MAJ], checks: [{ type: 'resolved', left: 0 }, { type: 'far', a: '^المطبخ$', b: MAJ }] },
+      // بعد الحسم: تعديل موضعي عادي لا يعيد فتح التعارض، ثم تعديل لا يمس المخطط
+      { text: 'المجلس أصغر', scope: [MAJ], checks: [{ type: 'smaller', room: MAJ, factor: .9 }] },
+      { text: 'غيّر الواجهة حجر', scope: [], checks: [{ type: 'docField', field: 'facade' }, { type: 'unchanged' }] },
+    ],
+  },
+  {
+    id: 'S10', name: '(الجولة الحادية عشرة) الأبواب والنوافذ والطعام جنب المجلس — في S7 بعد إصلاح شريط الغسيل لا يجاور المجلس الطعام: فتح باب بين المجلس والطعام ثم «سد الباب»، نقل باب غرفة 2، تكبير نافذة الصالة، باب موجود أصلًا',
+    land: { width: 22, length: 30, streets: ['s'], entries: ['s'] },
+    text: '4 غرف نوم منها ماستر ومجلس وصالة ومطبخ وطعام، والطعام جنب المجلس',
+    counts: { bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 },
+    turns: [
+      { text: 'افتح باب بين المجلس والطعام', scope: [MAJ, 'طعام'], checks: [{ type: 'doorBetween', a: MAJ, b: 'طعام' }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'سد الباب', scope: [MAJ, 'طعام'], checks: [{ type: 'noDoorBetween', a: MAJ, b: 'طعام' }, { type: 'fpSame', turn: 0 }] },
+      { text: 'انقل باب غرفة 2', scope: ['^غرفة نوم 2$'], checks: [{ type: 'doorMoved', room: '^غرفة نوم 2$', min: .5 }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'كبّر نافذة الصالة', scope: [HALL], checks: [{ type: 'windowWider', room: HALL, factor: 1.2 }, { type: 'fpTouched', max: 1, kinds: ['opening'] }] },
+      { text: 'افتح باب بين المطبخ والطعام', scope: ['^المطبخ$', 'طعام'], checks: [{ type: 'doorBetween', a: '^المطبخ$', b: 'طعام' }, { type: 'unchanged' }] },
+    ],
+  },
 ];
 
 export default { LONG, SESSIONS };

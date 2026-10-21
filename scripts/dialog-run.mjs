@@ -200,6 +200,8 @@ export function runCheck(ck, ctx) {
   const one = (re, rooms = R) => pick(rooms, re)[0] || null;
   const res = (ok, measured, why = '') => ({ type: ck.type, ok: !!ok, measured, why });
   switch (ck.type) {
+    // (الجولة الحادية عشرة) جواب سؤال التعارض: حُسم في الطلب (الرد يذكره) ولم يبقَ سؤال تعارض في الجلسة
+    case 'resolved': return res(!!ctx.reply?.resolved?.length && (ck.left == null ? !ctx.conflictsLeft : ctx.conflictsLeft === ck.left), { resolved: (ctx.reply?.resolved || []).map(x => x.type), conflictsLeft: ctx.conflictsLeft ?? null }, 'لم يُحسم التعارض بجواب العميل');
     case 'side': {
       const r = one(ck.room); if (!r) return res(false, null, 'الغرفة غير موجودة');
       const c = absSide(ck.side, entry), W = B.x1 - B.x0, D = B.y1 - B.y0;
@@ -333,7 +335,8 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
     const fpd = diffFingerprint(before, after);
     // alreadyBefore: هل كان الفحص ناجحًا قبل التعديل أصلًا؟ (نجاح بلا تغيير ليس دليلًا على الفهم)
     const NOPRE = new Set(['bigger', 'smaller', 'sameAs', 'unchanged', 'clarify', 'revertDoc', 'docField', 'doorMoved', 'windowWider', 'windowNarrower', 'fpSame', 'fpTouched', 'fpReplay']);
-    const checks = T.checks.map(ck => ({ ...runCheck(ck, { after, before, docs, entry, outcome }), alreadyBefore: NOPRE.has(ck.type) ? null : runCheck(ck, { after: before, before, docs, entry, outcome }).ok }));
+    const conflictsLeft = (s.conflicts || []).filter(c => c.type !== 'needs-consent').length;
+    const checks = T.checks.map(ck => ({ ...runCheck(ck, { after, before, docs, entry, outcome, reply, conflictsLeft }), alreadyBefore: NOPRE.has(ck.type) || ck.type === 'resolved' ? null : runCheck(ck, { after: before, before, docs, entry, outcome }).ok }));
     const happened = checks.every(c => c.ok);
     // السجل (ما يقوله النظام عن نفسه) مقابل القياس: «نُفّذ» في السجل مع فحص راسب = ادعاء غير صحيح
     const ledgerDone = reply?.done || [], ledgerFailed = (reply?.failed || []).map(x => x.text), ledgerPending = (reply?.pending || []).map(x => x.text);

@@ -150,3 +150,32 @@ for (const K of CONFLICTING) test(`طلب طويل متعارض ${K.id}: يُس�
   assert.equal((session.conflicts || []).filter(c => K.types.includes(c.type)).length, 0, 'التعارض حُسم');
   assert.ok(reply.resolved?.length >= 1 && /سجّلت اختيارك/.test(reply.summary_ar), JSON.stringify(reply).slice(0, 300));
 });
+
+// ---- (الجولة الحادية عشرة، بعد جلسات الحوار) ثلاث ثغرات كشفتها الجلسات S9 وS5
+test('تعارضان في طلب واحد: جواب أحدهما يحسمه وحده، والتعارض الآخر يبقى سؤالًا (لا يُدمج بصمت)', async () => {
+  const { mergeRules } = await import('../dist/rules.mjs');
+  const near = { kind: 'near', a: 'kitchen', b: 'majlis', text: 'المطبخ جنب المجلس' }, far = { kind: 'far', a: 'kitchen', b: 'majlis', text: 'المطبخ بعيد عن المجلس' };
+  const right = { kind: 'place', a: 'majlis', side: 'right' }, left = { kind: 'place', a: 'majlis', side: 'left' };
+  const kept = mergeRules([near, far, right, left], [{ ...right }], { keepOld: true }).map(rk);
+  assert.ok(kept.includes('near:kitchen:majlis') && kept.includes('far:kitchen:majlis'), `التعارض الآخر حُذف بصمت: ${kept}`);
+  assert.ok(kept.includes('place:majlis:right') && !kept.includes('place:majlis:left'), kept.join(' '));
+});
+test('الحركة الفعلية: غرفة لا تبلغها أبواب مدخل العائلة (سائق بباب خارجي خاص) تُقاس من بابها هي لا تُرسب', () => {
+  const d = miniDoc({ levels: [{
+    walls: [...rect(0, 0, 10, 4), [3, 0, 3, 4, 0.12], [6, 0, 6, 4, 0.12]],
+    openings: [[0, 'door', 4.5, 1.2, { entry: true }], [0, 'door', 1.5, 0.9, { entry: true }], [5, 'door', 2, 0.95]],
+    labels: [['غرفة السائق', 'bedroom', 1.5, 2], ['مدخل العائلة', 'entrance', 4.5, 2], ['الصالة', 'living', 8, 2]],
+  }] });
+  const rep = circulationProof(d, { limits: CIRC_GATE_LIMITS });
+  const drv = rep.rooms.find(x => x.name === 'غرفة السائق');
+  assert.ok(drv && drv.bare?.reachable, JSON.stringify(drv));
+  assert.ok(!rep.findings.some(f => f.code === 'NO_WALKABLE_PATH' && f.elements.includes(drv.id)), JSON.stringify(rep.findings));
+});
+test('المولّد: غرفة الغسيل التي طلبها العميل تتسع بجوار المطبخ (مع غرفة سائق بحمام)', async () => {
+  const text = '3 غرف نوم منها ماستر، مجلس، صالة، مطبخ وطعام، وغرفة غسيل وغرفة سائق بحمام';
+  const counts = { bedrooms: 3, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 };
+  const req = extractRequirements(text, { counts }); req.counts = { ...req.counts, ...counts };
+  const res = await generateInitialDesign({ land: { width: 20, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts: req.counts, requirements: req });
+  const docs = [res.doc, ...(res.alternatives || []).map(a => a.doc)].filter(Boolean);
+  for (const doc of docs) { const names = analyzeDoc(doc).levels.flatMap(L => L.rooms.map(r => r.name)); assert.ok(names.includes('غرفة الغسيل'), names.join('، ')); assert.ok(names.includes('غرفة السائق')); }
+});

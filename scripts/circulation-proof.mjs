@@ -22,10 +22,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     const cd = join(ROOT, 'evidence/review-proof/corpus');
     for (const f of readdirSync(cd).filter(f => /^(unreachable-room|guest-through-hall|swing-blocked|corridor-075|no-front-door|stairs-room-closed|bedroom-door-majlis)__/.test(f)).sort()) { const j = JSON.parse(readFileSync(join(cd, f), 'utf8')); list.push({ key: 'corpus__' + f.replace('.json', ''), case: 'corpus', src: relative(ROOT, join(cd, f)), doc: j.doc, mutation: j.mutation, expected: j.expected }); }
   }
-  const summary = { note: CIRC_NOTE, stage, docs: [] }, jobs = [];
+  const summary = { note: CIRC_NOTE, stage, limits: argv.includes('--gate') ? CIRC_GATE_LIMITS : 'CIRC_LIMITS', docs: [] }, jobs = [];
   const { frameFor, planLayer, page, legend, renderPNGs, esc } = await import('./plan-overlay-svg.mjs');
   for (const d of list) {
-    const t0 = performance.now(), rep = circulationProof(d.doc), ms = Math.round(performance.now() - t0);
+    const t0 = performance.now(), rep = circulationProof(d.doc, argv.includes('--gate') ? { limits: CIRC_GATE_LIMITS } : {}), ms = Math.round(performance.now() - t0);
     const sub = d.case === 'corpus' ? join(out, 'corpus') : out; mkdirSync(sub, { recursive: true });
     writeFileSync(join(sub, d.key + '.json'), JSON.stringify({ source: d.src, ms, mutation: d.mutation, ...serializable(rep) }, null, 1));
     const row = { key: d.key, source: d.src, ms, counts: rep.counts, mutation: d.mutation || null, entrances: rep.entrances,

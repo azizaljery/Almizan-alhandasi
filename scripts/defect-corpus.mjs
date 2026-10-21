@@ -31,7 +31,7 @@ export function requestFor(caseId) {
   return { text: C.text, counts: C.counts, land: { floors: 1, ...C.land } };
 }
 /** البدائل الناجحة (المستندات الأصلية) لمرحلة: [{ case, file, doc, request }] بترتيب ثابت. */
-export const BASE_STAGE = 'after-10'; // (الجولة العاشرة) البدائل السليمة بالمراجع الحالي (بوابتا هندسة السلم وخصوصية المجلس)
+export const BASE_STAGE = 'after-11'; // (الجولة الحادية عشرة) البدائل التي تجتاز البوابات الثقيلة وDISTINCT v2
 export function loadBase(stage = BASE_STAGE) {
   const dir = ROOT + `evidence/acceptance/${stage}/`, out = [];
   for (const C of CASES) {

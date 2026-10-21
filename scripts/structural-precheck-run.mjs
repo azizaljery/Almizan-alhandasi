@@ -65,7 +65,8 @@ const stageDir = join(ROOT, stage);
 for (const c of readdirSync(stageDir).filter(d => statSync(join(stageDir, d)).isDirectory()).sort((a, b) => +a.slice(1) - +b.slice(1))) {
   for (const f of readdirSync(join(stageDir, c)).filter(f => /^alt-\d+\.json$/.test(f)).sort()) {
     const doc = JSON.parse(readFileSync(join(stageDir, c, f), 'utf8'));
-    if (doc.levels?.length > 1) docs.push({ key: `${c}-${f.replace('.json', '')}`, src: relative(ROOT, join(stageDir, c, f)), doc, png: !flag('--no-png') });
+    // (الجولة الحادية عشرة) --all-docs: مستندات الدور الواحد أيضًا (البحور والأعمدة المقترحة والفتحات على التقاطعات) — صور للأدوار المتعددة فقط
+    if (doc.levels?.length > 1 || flag('--all-docs')) docs.push({ key: `${c}-${f.replace('.json', '')}`, src: relative(ROOT, join(stageDir, c, f)), doc, png: !flag('--no-png') && (doc.levels?.length > 1 || flag('--png-all')) });
   }
 }
 if (flag('--all-multi')) {

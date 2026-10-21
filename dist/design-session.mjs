@@ -88,7 +88,7 @@ export async function redesign(session, args = {}, opts = {}) {
   let more = null; try { more = extractRequirements(args.text, { counts: {} }); } catch { more = null; }
   if (!more?.rules?.length) return res;
   const S = res.session, req = S.input.requirements;
-  req.rules = mergeRules(req.rules || [], more.rules);
+  req.rules = mergeRules(session.input?.requirements?.rules || [], more.rules, { keepOld: true });
   let now = new Set(); try { now = new Set(detectConflicts(req, S.input.land || {}).map(c => c.key)); } catch { now = new Set(); }
   const resolved = pending.filter(c => !now.has(c.key));
   if (!resolved.length) return res;
@@ -116,7 +116,7 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       const s2 = clone(session); delete s2.pendingEdit; s2.input = clone(pend.input);
       const d = clone(pend.design); d.feedback = { ...(d.feedback || {}), reply: { ...pend.reply, consented: true } };
       pushDesign(s2, d); s2.reply = null;
-      return { session: s2, changes: d.feedback.changes || [], reply: { ...pend.reply, consented: true, summary_ar: `أعدت توزيع البيت كما وافقت. ${pend.reply.fingerprint?.summary_ar || ''}`.trim() } };
+      return { session: s2, changes: d.feedback.changes || [], reply: { ...pend.reply, consented: true, summary_ar: `أعدت توزيع البيت كما وافقت. ${pend.reply.fingerprint?.summary_ar || ''}${pend.reply.lost?.length ? ` لا يتحقق فيه مما طلبته سابقًا: ${pend.reply.lost.map(x => `«${x.text}»`).join('، ')}.` : ''}`.trim() } };
     }
     if (yes) { parsed = { intents: pend.intents, unhandled: [], questions: [], keep: false, refs: [] }; consent = true; text = pend.text; more = withAi(extractRequirements(text, { counts: {} }), ai); }
     else if (/^(?:لا|لأ|لا شكرا|خله|خلها|اتركه|لا تنفذ|no)(?:[ ،,.!]|$)/.test(tt)) {
@@ -151,7 +151,7 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
     if (more.counts?.dining > 0 && !req.counts.dining) req.counts.dining = more.counts.dining; // ذكر الطعام في الملاحظة يعني وجوده
     if (Number.isInteger(more.counts?.baths) && (more.prefs?.allEnsuite || more.prefs?.sharedBaths) && more.counts.baths > (req.counts.baths || 0)) req.counts.baths = more.counts.baths;
     if (Number.isInteger(more.counts?.kitchens) && more.counts.kitchens > (req.counts.kitchens || 0)) req.counts.kitchens = more.counts.kitchens;
-    req.rules = mergeRules(req.rules || [], more.rules || []);
+    req.rules = mergeRules(req.rules || [], more.rules || [], { keepOld: true });
     // معاملات التكبير تتضاعف؛ التعديلات البنيوية (الواجهة) تُستبدل كما هي
     for (const [k, v] of Object.entries(more.tweaks || {})) req.tweaks[k] = typeof v === 'number' ? (typeof req.tweaks[k] === 'number' ? req.tweaks[k] : 1) * v : JSON.parse(JSON.stringify(v));
     if (more.keepLayout) req.keepLayout = true;
@@ -247,13 +247,15 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
     if (fallbackNote.intents?.length) {
       const why = (fallbackNote.failed || []).map(f => (f.why_ar || '').replace(/\s*\(\d+ محاولة[^)]*\)+/, '')).filter(Boolean).join('؛ ') || fallbackNote.why_ar || '';
       const before = fpd ? fpd.counts.unchanged + fpd.counts.changed + fpd.counts.removed : 0;
-      const q = `لم أجد تعديلًا موضعيًا يحقق طلبك دون المساس ببقية البيت${why ? ` (${why.replace(/[.。]+$/, '')})` : ''}. تحقيقه يحتاج إعادة توزيع البيت: ${fpd ? `لا يبقى ثابتًا حرفيًا إلا ${countAr(fpd.counts.unchanged)} من ${countAr(before)} في المخطط الحالي (البصمة الهندسية)` : 'يتغير معظم المخطط'}، وتتغير ${countAr(rooms.length, 'room')} لم تطلبها${rooms.length ? ` (${rooms.slice(0, 6).map(c => `«${c.name}»`).join('، ')}${rooms.length > 6 ? '…' : ''})` : ''}. أعيد توزيع البيت؟ (قل «نعم» أو «لا»)`;
-      const proposal = { ...reply, mode: 'regenerated' };
+      // (الجولة الحادية عشرة) ما طلبه العميل سابقًا ومتحقق في المعروض ولا يتحقق في التوزيع المقترح: يُذكر في السؤال نفسه (لا يضيع بصمت)
+      let lost = []; try { const okNow = new Set(verifyRequest(parseDoc(cur.doc), req, { entry: entryDir }).filter(x => x.ok).map(x => x.text)); lost = ledger.filter(x => !x.ok && okNow.has(x.text)).map(x => ({ text: x.text, why: x.why })); } catch { lost = []; }
+      const q = `لم أجد تعديلًا موضعيًا يحقق طلبك دون المساس ببقية البيت${why ? ` (${why.replace(/[.。]+$/, '')})` : ''}. تحقيقه يحتاج إعادة توزيع البيت: ${fpd ? `لا يبقى ثابتًا حرفيًا إلا ${countAr(fpd.counts.unchanged)} من ${countAr(before)} في المخطط الحالي (البصمة الهندسية)` : 'يتغير معظم المخطط'}، وتتغير ${countAr(rooms.length, 'room')} لم تطلبها${rooms.length ? ` (${rooms.slice(0, 6).map(c => `«${c.name}»`).join('، ')}${rooms.length > 6 ? '…' : ''})` : ''}.${lost.length ? ` وتنبيه: في التوزيع الجديد لا يتحقق ما طلبته سابقًا ومتحقق الآن: ${lost.map(x => `«${x.text}»`).join('، ')}.` : ''} أعيد توزيع البيت؟ (قل «نعم» أو «لا»)`;
+      const proposal = { ...reply, mode: 'regenerated', lost };
       const keep = clone(session);
       keep.pendingEdit = { regen: true, text, input: s.input, design: entry(out, { picks, text, changes, reply: proposal, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }), reply: proposal };
       const cq = { type: 'needs-consent', key: 'regen|' + text, question_ar: q };
       keep.reply = { conflicts: [cq], questions: [q] };
-      return { session: keep, changes: [], reply: { local: true, mode: 'ask-regenerate', conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [], proposal: { fingerprint: reply.fingerprint || null, changed: ch, measured: reply.fallbackMeasured || null, pattern: out.pat || null }, summary_ar: q } };
+      return { session: keep, changes: [], reply: { local: true, mode: 'ask-regenerate', conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [], proposal: { fingerprint: reply.fingerprint || null, changed: ch, measured: reply.fallbackMeasured || null, pattern: out.pat || null, lost }, summary_ar: q } };
     }
   }
   pushDesign(s, entry(out, { picks, text, changes, reply, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }));

@@ -205,6 +205,7 @@ export function circulationProof(doc, opts = {}) {
   const bfs = (starts, avoid = () => false) => { const seen = new Map(starts.map(s => [s, [s]])), q = [...starts]; while (q.length) { const id = q.shift(); for (const e of adj.get(id) || []) if (!seen.has(e.to) && !avoid(e.to)) { seen.set(e.to, [...seen.get(id), e.to]); q.push(e.to); } } return seen; };
   const allStarts = [...new Set(ents.map(e => e.room))];
   const reachG = bfs(allStarts);
+  const famReach = famEnt ? bfs([famEnt.room]) : new Map();
 
   // ---- (ب)(ج) الشبكتان
   const grids = { bare: buildGrid(doc, model, { furniture: false, K }), furn: buildGrid(doc, model, { furniture: true, K }) };
@@ -237,7 +238,8 @@ export function circulationProof(doc, opts = {}) {
     const score = e => { const m = measure(grids.bare, runs.bare[e.via], r, L.levelIndex); return m?.reachable ? m.toCenter : Infinity; };
     const pick = list => list.map(e => ({ e, d: score(e) })).filter(x => Number.isFinite(x.d)).sort((a, b) => a.d - b.d)[0]?.e;
     // العائلة لا تُحوَّل بصمت إلى مدخل آخر: إن لم يبلغها مدخلها بخلوص 0.5 م تبقى منه وتُعلن «ممرًا ضيقًا»
-    const from = pick(pref) || (z === 'family' ? famEnt : pick(ents)) || pref[0] || famEnt;
+    // (الجولة الحادية عشرة) غرفة لا تبلغها أبواب مدخل العائلة أصلًا (غرفة سائق بباب خارجي خاص) تُقاس من مدخلها هي
+    const from = pick(pref) || (z === 'family' && famReach.has(r.id) ? famEnt : pick(ents)) || pref[0] || famEnt;
     const altFrom = z === 'family' && famEnt && from === famEnt && !Number.isFinite(score(famEnt)) ? pick(ents.filter(e => e !== famEnt)) : null;
     const bare = from ? measure(grids.bare, runs.bare[from.via], r, L.levelIndex) : null, furn = from ? measure(grids.furn, runs.furn[from.via], r, L.levelIndex) : null;
     const straight = from ? (() => { const op = G0.openings.find(o => o.id === from.via); const c = r.centroid; return r2(Math.hypot(c.x - op.p.x, c.y - op.p.y)); })() : null;

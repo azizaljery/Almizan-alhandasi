@@ -1415,7 +1415,9 @@ function doWindow(doc, it, req) {
     const { op: main, seg, pos0, lo, hi } = opts[0], want = wantOf(main);
     if (it.action === 'bigger' && want <= main.w + .05) return { ok: true, already: true, doc, why_ar: `نافذة «${R.name}» ${r2(main.w)} م أصلًا.` };
     const free = hi - lo, width = r2(Math.min(want, free));
-    if (it.action === 'bigger' && width < main.w + .15) return { ok: false, why_ar: `لا مجال لتكبير نافذة «${R.name}»: المقطع الحر حولها ${r2(free)} م وهي ${r2(main.w)} م.` };
+    // (الجولة الحادية عشرة) «كبّر» بلا عرض محدد: تكبير ملموس (≥ 0.3 م و≥ 15٪) أو لا شيء — كان يقبل 0.15 م ويقول «نُفّذ»
+    const minGain = it.width ? .15 : Math.max(.3, main.w * .15);
+    if (it.action === 'bigger' && width < main.w + minGain - 1e-6) return { ok: false, why_ar: `لا مجال لتكبير ملموس لنافذة «${R.name}»: المقطع الحر حولها ${r2(free)} م وهي ${r2(main.w)} م (أقصى زيادة ${r2(Math.max(0, free - main.w))} م).` };
     const c = build(doc, d => {
       const o = d.openings.find(x => x.id === main.id), w = wallById(d, o.wall), axw = axisOfWall(w), dir = Math.sign(alongOf(w.b, axw) - alongOf(w.a, axw)) || 1;
       const center = Math.max(lo + width / 2, Math.min(hi - width / 2, pos0));

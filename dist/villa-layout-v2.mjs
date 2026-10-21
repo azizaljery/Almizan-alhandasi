@@ -885,6 +885,12 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     else if (b.kind === 'maid') { const k = find('kitchen1'); if (cT < 1.1 && !(k && touch(r, k.r) >= 1.0) && !placed.some(q => q.block.laundry && touch(r, q.r) >= 1.0)) bad('maid-access', 1.1 - cT); }
     else if (b.kind === 'store') { const k = find('kitchen1'); if (!(k && touch(r, k.r) >= 1.0) && !(b.laundry && cT >= 1.1)) bad('store-access', 1); }
     else if (cT < 1.1) bad('access:' + b.kind, 1.1 - cT); else pen += touchPen(cT);
+    // (الجولة الحادية عشرة) غرفة الغسيل/المخزن التي طلبها العميل شريطًا بعمق 1.6 م بجوار المطبخ: المطبخ يتسع له ويبقى ≥ 3.25 م و10 م² بعده
+    if (b.id === 'kitchen1' && P.kitchenStrip?.length) {
+      const need = P.kitchenStrip.length === 2 ? 3.4 : 1.6;
+      const lack = (a1, a2) => Math.max(0, KIT_MIN_AXIS - (a1 - 1.6)) + Math.max(0, (KIT_MIN_AREA + .3 - (a1 - 1.6 - WALL_NET) * (a2 - WALL_NET)) / 3) + Math.max(0, need - a2);
+      const def = Math.min(lack(w, h), lack(h, w)); if (def > 0) pen += 250 + 300 * def;
+    }
     // جناح بدورة مياه مشتركة: باب الغرفة وباب دورة المياه كلاهما على الحركة — تلامس يتسع لهما معًا
     if (b.kind === 'suite' && b.bathShared && cNoFoyer < T.stripD + 1.3) bad('shared-bath-access', T.stripD + 1.3 - cNoFoyer);
     if (b.kind === 'suite' && !b.guest && cNoFoyer < 1.2) pen += 45; // غرفة نوم تفتح على مدخل العائلة: خصوصية ضعيفة
@@ -1637,10 +1643,15 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
   function kitchenStrip(host, items) {
     const perp = isX(host.door) ? ['y0', 'y1'] : ['x0', 'x1'];
     const awayDin = perp.filter(z => !(din && touch(host, din) > .5 && shared(host, din)?.side === z));
-    const sd = awayDin[0] || perp[1];
-    if ((isX(sd) ? W_(host) : H_(host)) - 1.6 < KIT_MIN_AXIS) return false;
-    if (((isX(sd) ? W_(host) - 1.6 : W_(host)) - WALL_NET) * ((isX(sd) ? H_(host) : H_(host) - 1.6) - WALL_NET) < KIT_MIN_AREA + .3) return false; // المطبخ بعد الشريط ≥ 10 م²
-    const L = sideLen(host, sd), need = items.length === 2 ? 3.4 : 1.6; if (L < need) return false;
+    // (الجولة الحادية عشرة) الشريط على جانب عمودي على الباب بعيدًا عن الطعام، وإلا الجانب المقابل للباب، وإلا الجانب العمودي الآخر —
+    // كان يجرب جانبًا واحدًا فتسقط غرفة الغسيل التي طلبها العميل في أغلب التنظيمات
+    const need = items.length === 2 ? 3.4 : 1.6;
+    const fits = z => z && z !== host.door && (isX(z) ? W_(host) : H_(host)) - 1.6 >= KIT_MIN_AXIS
+      && ((isX(z) ? W_(host) - 1.6 : W_(host)) - WALL_NET) * ((isX(z) ? H_(host) : H_(host) - 1.6) - WALL_NET) >= KIT_MIN_AREA + .3 // المطبخ بعد الشريط ≥ 10 م²
+      && sideLen(host, z) >= need;
+    const sd = [...new Set([...awayDin, opp[host.door], ...perp])].find(fits);
+    if (!sd) return false;
+    const L = sideLen(host, sd);
     const [strip, rest] = cut(host, sd, 1.6);
     Object.assign(host, sn(rest));
     for (const d of doors.filter(d => d.a === host.id && !d.b)) doors.splice(doors.indexOf(d), 1);
@@ -2649,7 +2660,7 @@ function refineWomen(built, P, site, land, { title, requirements, entry, counts 
 function reviewFailure(built, rejected) {
   const why = [...new Set(built.flatMap(d => (d.heavyGates || []).filter(g => !g.ok).flatMap(g => g.reasons_ar.slice(0, 2).map(r => `${HEAVY_AR[g.id] || g.id}: ${r}`))))].slice(0, 6);
   const e = Error(`لم يجتز أي بديل مبني (${built.length}) البوابات الثقيلة (المراجعة الإنشائية المبدئية، والحركة الفعلية مع الأثاث، والتطابق 2D/3D)${why.length ? ': ' + why.join('؛ ') : ''}.`);
-  e.code = 'VILLA_REVIEW_FAILED'; e.rejected = rejected; return e;
+  e.code = 'VILLA_REVIEW_FAILED'; e.rejected = rejected; Object.defineProperty(e, 'built', { value: built, enumerable: false }); return e;
 }
 const HEAVY_AR = { STRUCTURAL: 'المراجعة الإنشائية المبدئية', CIRCULATION: 'الحركة الفعلية', CONSISTENCY_2D3D: 'التطابق 2D/3D' };
 function shortfallReason(keep, shown, built, rejected) {

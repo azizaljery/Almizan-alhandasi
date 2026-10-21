@@ -20,7 +20,9 @@ test('المجموعة: ≥ 40 مستندًا معيبًا، كل نوع عيب 
   const twoFloorDocs = base.filter(b => b.doc.levels.length > 1).length;
   // wc-door-kitchen: لا دورة مياه تجاور المطبخ في بدائل after-10 فلا موضع للتحوير (طُبّق على after-4 في الجولات السابقة)
   const NA = new Set(['wc-door-kitchen']);
-  for (const m of MUTATIONS) if (!NA.has(m.id)) assert.ok(byType(m.id).length >= (TWO_FLOOR.has(m.id) ? Math.min(2, twoFloorDocs) : 2), `العيب ${m.id} طُبّق ${byType(m.id).length} مرات فقط`);
+  // (الجولة الحادية عشرة) bedrooms-front: في بدائل after-11 لا يوجد صف نوم يُنقل إلى الواجهة إلا في بديل C4 الوحيد
+  const ONCE = new Set(['bedrooms-front']);
+  for (const m of MUTATIONS) if (!NA.has(m.id)) assert.ok(byType(m.id).length >= (TWO_FLOOR.has(m.id) ? Math.min(2, twoFloorDocs) : ONCE.has(m.id) ? 1 : 2), `العيب ${m.id} طُبّق ${byType(m.id).length} مرات فقط`);
   for (const c of corpus) { assert.ok(c.expected.length >= 1); assert.ok(c.note && c.note.length > 5, c.id); }
 });
 
@@ -62,10 +64,13 @@ test('WINDOW_SIZE: نافذة 0.5×0.5 في غرفة نوم ترسب، والب�
 test('DOOR_SWING: الجدار أو الباب في مسار الفتح يرسب؛ قطعة السباكة ملاحظة إلا في strict', () => {
   const c = corpus.find(x => x.mutation === 'swing-blocked');
   assert.ok(R.reviewDesign(c.doc, c.request, { external: false }).failedGates.includes('DOOR_SWING'));
-  const b = doc('C1', 'alt-1.json');
+  // (الجولة الحادية عشرة) بدائل after-11 لا مرحاض فيها داخل فتح الباب (المولّد يتحقق)، فالمثال من العيب wc-at-door: بوابة DOOR_SWING
+  // تجعله ملاحظة ما لم يكن strict — وبوابة الحركة الفعلية (CIRCULATION) ترفضه في الحالتين
+  const b = corpus.find(x => x.mutation === 'wc-at-door');
   const loose = R.reviewDesign(b.doc, b.request, { external: false }), strict = R.reviewDesign(b.doc, b.request, { external: false, strict: true });
   const g = loose.gates.find(x => x.id === 'DOOR_SWING');
   assert.equal(g.ok, true); assert.ok(g.value.fixedFixtureBlocked >= 1); assert.ok(g.notes_ar.length >= 1);
+  assert.ok(loose.failedGates.includes('CIRCULATION'));
   assert.equal(strict.passed, false); assert.ok(strict.failedGates.includes('DOOR_SWING'));
 });
 
@@ -94,7 +99,7 @@ test('DISTINCT: النسخة المعكوسة من بديل تُرفض في revi
   const out = R.reviewDesigns([b.doc, m], b.request, { external: false, distinct: true });
   const rej = out.filter(r => r.failedGates.includes('DISTINCT'));
   assert.equal(rej.length, 1); assert.equal(rej[0].passed, false);
-  assert.match(rej[0].rejectReasons_ar.at(-1), /نسخة شكلية/);
+  assert.match(rej[0].rejectReasons_ar.at(-1), /نسخة معدّلة|نسخة شكلية/);
   assert.ok(out[0].passed);
 });
 
