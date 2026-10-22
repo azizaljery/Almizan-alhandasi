@@ -48,7 +48,10 @@ export function normalizeLand(raw = {}) {
   const plot = validatePlot({ width, length, floors: 1, streets: Object.fromEntries(streets.map(s => [s, true])), entry: entries[0] });
   // مضلع الأرض (أرض غير منتظمة) يمر كما هو إلى المولّد الثاني؛ يُهمل إن لم يكن نقاطًا رقمية صالحة
   const polygon = Array.isArray(raw.polygon) && raw.polygon.length >= 3 && raw.polygon.every(p => Number.isFinite(Number(p?.x)) && Number.isFinite(Number(p?.y))) ? raw.polygon.map(p => ({ x: Number(p.x), y: Number(p.y) })) : null;
-  return { plot, land: { length, width, streets, entries, floors, ...(polygon ? { polygon } : {}) } };
+  // (الجولة الثالثة عشرة) عرض شارع المدخل (م) إن عُرف: الارتداد الأمامي النظامي خُمس العرض (≥ 3 م، و≥ 6 م لشوارع ≥ 30 م)؛ وإلا 3 م افتراضًا ويُسأل
+  const sw = raw.streetWidth === undefined || raw.streetWidth === null || raw.streetWidth === '' ? null : Number(raw.streetWidth);
+  if (sw !== null && !(Number.isFinite(sw) && sw >= 4 && sw <= 120)) throw Error('عرض الشارع بالمتر بين 4 و120، أو اتركه فارغًا.');
+  return { plot, land: { length, width, streets, entries, floors, ...(polygon ? { polygon } : {}), ...(sw ? { streetWidth: sw } : {}) } };
 }
 
 // ------------------------------------------------------------------------------------------------ شرعاء

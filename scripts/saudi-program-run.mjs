@@ -7,7 +7,7 @@ import { parseDoc } from '../dist/draw/doc.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 import { measureSaudiProgram, SAUDI_GATES } from '../dist/saudi-program.mjs';
 
-const stages = process.argv.slice(2); if (!stages.length) stages.push('after-12');
+const stages = process.argv.slice(2); if (!stages.length) stages.push('after-13');
 const out = {};
 for (const stage of stages) {
   const dir = new URL(`../evidence/acceptance/${stage}/`, import.meta.url).pathname; if (!existsSync(dir)) continue;

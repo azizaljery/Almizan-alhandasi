@@ -1,5 +1,6 @@
 // EX-01 — Export Provenance Manifest. Traceability only: the manifest names the exported bytes, the verified identity
 // of the source model and the app build. It must never alter export content or geometry.
+import './_gen-cache.mjs'; // (الجولة الثالثة عشرة) ذاكرة نتائج المولّدات والمراجع بين ملفات الاختبار وبين التشغيلات
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';

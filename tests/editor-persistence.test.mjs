@@ -1,3 +1,4 @@
+import './_gen-cache.mjs'; // (الجولة الثالثة عشرة) ذاكرة نتائج المولّدات والمراجع بين ملفات الاختبار وبين التشغيلات
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateModel, generateTopologyModel, defaultRooms, normalizeRooms, validatePlot, validateModel, openingPoint, removeOpening, placeOpening, quantities } from '../dist/planner.mjs';

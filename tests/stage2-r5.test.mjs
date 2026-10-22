@@ -63,8 +63,9 @@ test('C7: أرضي مختلف لكل بديل، والماستر بعيدة عن
 test('الحتمية: الطلب نفسه مرتين = البدائل نفسها حرفيًا (لا ميزانية زمنية)', () => {
   for (const id of ['C4', 'C6']) {
     const { C, r, land } = caseReq(id);
-    const run = () => fresh(() => generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 }));
-    const a = run(), b = run();
+    // (الجولة الثالثة عشرة) تشغيل فعلي واحد (fresh) يُقارن بالتشغيل العادي (الذي قد يأتي من ذاكرة تشغيل آخر: حتمية عبر العمليات أيضًا)
+    const args = () => ({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
+    const a = fresh(() => generateVillaDesigns(args())), b = generateVillaDesigns(args());
     assert.deepEqual(a.designs.map(d => d.pat), b.designs.map(d => d.pat), id);
     assert.equal(a.designs.map(d => serialize(d.doc)).join('|'), b.designs.map(d => serialize(d.doc)).join('|'), id);
   }

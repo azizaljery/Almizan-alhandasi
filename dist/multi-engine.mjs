@@ -99,7 +99,28 @@ function modelFor(pair) {
     },
   };
 }
-export async function runMultiEngineDesign({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null, seed = 1, previous = [], ensuite = false }) {
+/**
+ * ذاكرة نتائج اختيارية يحقنها المضيف (globalThis.__mizanGenCache، كما في مولّدي الفيلا): المحرك حتمي بالبذرة، فالطلب نفسه = النتيجة نفسها؛
+ * تستعملها حزمة الاختبارات. المفتاح يبدأ بـ«me|». لا يُخزَّن إلا ما يُعاد من JSON كما هو (لا دوال ولا Map/Set ولا NaN).
+ */
+function jsonSafe(v, depth = 0) {
+  if (v === null || typeof v === 'string' || typeof v === 'boolean') return true;
+  if (typeof v === 'number') return Number.isFinite(v);
+  if (typeof v !== 'object' || depth > 40) return false;
+  if (Array.isArray(v)) return v.every(x => x !== undefined && jsonSafe(x, depth + 1));
+  if (Object.getPrototypeOf(v) !== Object.prototype && Object.getPrototypeOf(v) !== null) return false;
+  return Object.values(v).every(x => x === undefined || jsonSafe(x, depth + 1));
+}
+export async function runMultiEngineDesign(args) {
+  const hook = globalThis.__mizanGenCache; if (!hook) return runMultiEngineDesign0(args);
+  let key; try { key = 'me|' + canonicalJSON(args); } catch { return runMultiEngineDesign0(args); }
+  // النسخة من الذاكرة تفقد تطابق المراجع: selectedModel هو models[selectedIndex] نفسه
+  const hit = hook.get(key); if (hit) { if (hit.models && Number.isInteger(hit.selectedIndex)) hit.selectedModel = hit.models[hit.selectedIndex]; return hit; }
+  const out = await runMultiEngineDesign0(args);
+  try { if (jsonSafe(out)) hook.set(key, out); } catch { /* لا يُخزَّن */ }
+  return out;
+}
+async function runMultiEngineDesign0({ plot, rooms, idea = '', discovery = {}, briefContext = null, selectedShape = null, seed = 1, previous = [], ensuite = false }) {
   const request = await buildDesignRequest({ plot, rooms, idea, discovery, briefContext, selectedShape });
   const allowedShapes = requestedDesignShapes({ idea, discovery, selectedShape });
   const before = canonicalJSON({ plot, rooms });

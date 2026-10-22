@@ -1,5 +1,6 @@
 // DEC-002 / ID-01 — a restored model whose geometry no longer matches its stored geometryHash must not keep
 // presenting a stale candidateId / review as if it were verified. Fail CLOSED to "needs review"; never reject the file.
+import './_gen-cache.mjs'; // (الجولة الثالثة عشرة) ذاكرة نتائج المولّدات والمراجع بين ملفات الاختبار وبين التشغيلات
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { defaultRooms, normalizeRooms, validatePlot } from '../dist/planner.mjs';

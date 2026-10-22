@@ -1,3 +1,4 @@
+import './_gen-cache.mjs'; // (الجولة الثالثة عشرة) ذاكرة نتائج المولّدات والمراجع بين ملفات الاختبار وبين التشغيلات
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateVillaDesigns, generateVillaTwoFloors, buildProgram, checkDoc, canonicalSide, DESIGN_TARGETS } from '../dist/villa-layout.mjs';

@@ -347,4 +347,17 @@ export const SESSIONS = [
   },
 ];
 
+// (الجولة الثالثة عشرة) سؤال عرض الشارع (ناعم، ليس تعارضًا): جوابه يعيد التوليد بالارتداد الأمامي النظامي (25 م ← 5 م)، ثم تعديل عادي بعده
+SESSIONS.push({
+  id: 'S11', name: '(الجولة الثالثة عشرة) عرض الشارع مجهول ← سؤال؛ «عرض الشارع 25 م» ← إعادة التوليد بارتداد 5 م نظاميًا، ثم «المجلس أصغر»',
+  land: { width: 20, length: 30, streets: ['s'], entries: ['s'] },
+  text: '3 غرف نوم ومجلس وصالة ومطبخ وطعام',
+  counts: { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 },
+  turns: [
+    { text: 'عرض الشارع 25 م', scope: ['.*'], checks: [{ type: 'plotSetback', side: 's', value: 5, streetWidth: 25 }] },
+    { text: 'المجلس أصغر', scope: [MAJ], checks: [{ type: 'smaller', room: MAJ, factor: .9 }, { type: 'plotSetback', side: 's', value: 5, streetWidth: 25 }] },
+    { text: 'الصالة أوسع', scope: [HALL], checks: [{ type: 'bigger', room: HALL, factor: 1.1 }] },
+    { text: 'غيّر الواجهة حجر', scope: [], checks: [{ type: 'docField', field: 'facade' }, { type: 'unchanged' }, { type: 'plotSetback', side: 's', value: 5, streetWidth: 25 }] },
+  ],
+});
 export default { LONG, SESSIONS };

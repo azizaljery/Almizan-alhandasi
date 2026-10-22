@@ -7,7 +7,8 @@
 // الاستعمال: node scripts/run-tests.mjs [ملفات…] [أعلام node --test…]؛ MIZAN_TEST_CONCURRENCY يغيّر العدد،
 // MIZAN_TEST_ORDER=name يعيد الترتيب الأبجدي.
 import { spawn } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { availableParallelism } from 'node:os';
 import { readDurations, DURATIONS_FILE } from '../tests/_durations-reporter.mjs';
 import { BASELINE_DURATIONS, BROWSER_FILES } from '../tests/_test-durations.mjs';
@@ -33,5 +34,7 @@ const reps = userReps.length ? userReps : [`--test-reporter=${process.stdout.isT
 const dests = userReps.length ? userDests : [];
 while (dests.length < reps.length) dests.push('--test-reporter-destination=stdout');
 const reporterArgs = [...reps.flatMap((r, i) => [r, dests[i]]), `--test-reporter=${root}tests/_durations-reporter.mjs`, `--test-reporter-destination=${DURATIONS_FILE}.log`];
+// node يفتح وجهة المُبلِّغ قبل أي اختبار (وقبل أن يُنشئ _gen-cache.mjs المجلد): مجلد .cache لا بد أن يوجد أولًا (استنساخ جديد/worktree)
+mkdirSync(dirname(DURATIONS_FILE), { recursive: true });
 const child = spawn(process.execPath, ['--test', `--test-concurrency=${n}`, ...reporterArgs, ...rest, ...list], { cwd: root, stdio: 'inherit' });
 child.on('exit', (code, sig) => process.exit(sig ? 1 : code));

@@ -341,6 +341,8 @@ const HANDLERS = {
   'set-plot'(doc, c) {
     if (c.polygon !== undefined) { doc.plot = c.polygon ? { polygon: c.polygon.map((p, i) => limit(point(p, 'plot[' + i + ']'))).map(pt), setbacks: c.setbacks || doc.plot?.setbacks || null } : null; }
     else if (doc.plot && c.setbacks) doc.plot.setbacks = c.setbacks;
+    // (الجولة الثالثة عشرة) عرض شارع المدخل (م) إن عُرف: يقيس به المراجع الارتداد الأمامي النظامي؛ null = مجهول
+    if (c.streetWidth !== undefined && doc.plot) { const sw = Number(c.streetWidth); doc.plot.streetWidth = sw > 0 ? sw : null; }
     if (c.north !== undefined) doc.north = ((num(c.north, 'north') % 360) + 360) % 360;
     if (c.streets !== undefined) doc.streets = sideList(c.streets, 'streets');
     if (c.entries !== undefined) {

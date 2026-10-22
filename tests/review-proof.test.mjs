@@ -1,17 +1,20 @@
 // إثبات أن المراجع المستقل (dist/plan-review.mjs) يرفض المخططات المعيبة فعلًا (passed=false بالبوابة المتوقعة)
 // ولا يكتفي بخفض الدرجة. المجموعة تُبنى من بدائل المرحلة الأحدث الناجحة (BASE_STAGE، الجولة العاشرة: after-10) بتحويرات
 // مضبوطة (scripts/defect-corpus.mjs)؛ وكشف الأزواج الشكلية في after-4 يُقاس بالمقياس المعماري مباشرة.
+import './_gen-cache.mjs'; // (الجولة الثالثة عشرة) ذاكرة نتائج المولّدات والمراجع بين ملفات الاختبار وبين التشغيلات
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as R from '../dist/plan-review.mjs';
 import { buildCorpus, evaluateCorpus, loadBase, MUTATIONS, mirrorX, requestFor, BASE_STAGE } from '../scripts/defect-corpus.mjs';
 import { archSignature, archDifference, THRESHOLDS } from '../dist/arch-difference.mjs';
+import { memo } from './_memo.mjs';
 
 const base = loadBase(BASE_STAGE);
 // عيوب الدورين لا تُطبَّق إلا على بدائل بدورين (C7 وحدها؛ بديل واحد في after-10)
 const TWO_FLOOR = new Set(['stairs-room-closed', 'stairs-deleted', 'stairs-moved-out', 'stair-too-short', 'stair-narrow']);
 const corpus = buildCorpus({ base });
-const res = evaluateCorpus(corpus, R, { clean: base });
+// (الجولة الثالثة عشرة) تقييم المجموعة كلها (≈ 90 مراجعة ثقيلة) يُحفظ على القرص ببصمة شيفرة المراجع ومولّد المجموعة ومستندات المرحلة
+const res = memo('review-proof-corpus', { code: ['dist/plan-review.mjs', 'scripts/defect-corpus.mjs'], files: base.map(b => `evidence/acceptance/${BASE_STAGE}/${b.case}/${b.file}`), key: BASE_STAGE + '|' + corpus.map(c => c.id).join(',') }, () => evaluateCorpus(corpus, R, { clean: base }));
 const byType = t => res.rows.filter(r => r.mutation === t);
 const doc = (c, f) => base.find(b => b.case === c && b.file === f);
 

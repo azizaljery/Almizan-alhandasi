@@ -25,13 +25,17 @@ export function codeFingerprint(entry) {
 
 if (process.env.NODE_TEST_CONTEXT && !process.env.MIZAN_NO_GEN_CACHE && !globalThis.__mizanGenCache) {
   const root = new URL('../', import.meta.url).pathname;
-  const fp = codeFingerprint(root + 'dist/villa-layout-v2.mjs');
+  // (الجولة الثالثة عشرة) أربع ذاكرات ببصمات مستقلة: المولّد الثاني (المفتاح يبدأ بإصداره villa-v2-…)، والمولّد الأول (villa-zones-…)،
+  // والمحرك المتعدد dist/multi-engine.mjs (me|)، والمراجع المستقل dist/plan-review.mjs (rv|) — فتعديل أحدها لا يُبطل ذاكرة الآخرين
+  const fps = { v2: codeFingerprint(root + 'dist/villa-layout-v2.mjs'), v1: 'v1-' + codeFingerprint(root + 'dist/villa-layout.mjs'), me: 'me-' + codeFingerprint(root + 'dist/multi-engine.mjs'), rv: 'rv-' + codeFingerprint(root + 'dist/plan-review.mjs') };
   const base = process.env.MIZAN_GEN_CACHE_DIR || join(root, '.cache', 'gen');
-  const dir = join(base, fp);
-  mkdirSync(dir, { recursive: true });
+  const dirs = Object.fromEntries(Object.entries(fps).map(([k, f]) => [k, join(base, f)]));
+  for (const d of Object.values(dirs)) mkdirSync(d, { recursive: true });
+  const dirOf = k => (k.startsWith('me|') ? dirs.me : k.startsWith('rv|') ? dirs.rv : k.startsWith('villa-zones') ? dirs.v1 : dirs.v2);
+  const dir = dirs.v2;
   try { const gi = join(root, '.cache', '.gitignore'); if (!existsSync(gi)) writeFileSync(gi, '*\n'); } catch { /* لا يهم */ }
   // بصمة قديمة = شيفرة تغيّرت: تُحذف (عملية أخرى قد تحذفها في اللحظة نفسها، فالفشل مقبول)
-  try { for (const d of readdirSync(base)) if (d !== fp) rmSync(join(base, d), { recursive: true, force: true }); } catch { /* لا يهم */ }
+  try { const keep = new Set(Object.values(fps)); for (const d of readdirSync(base)) if (!keep.has(d)) rmSync(join(base, d), { recursive: true, force: true }); } catch { /* لا يهم */ }
   // تطبيع المفتاح: land.floors لا يقرؤه المولّد الثاني (عدد الأدوار من نوع النداء one/two)، فالطلب به وبدونه نتيجة واحدة —
   // يُحذف من المفتاح ما دام مصدر المولّد لا يقرؤه (يُتحقق من ذلك هنا لا بالافتراض)
   const normFloors = !/land\??\.floors|floors\s*[,}=][^\n]*\bland\b/.test(readFileSync(root + 'dist/villa-layout-v2.mjs', 'utf8'));
@@ -46,7 +50,7 @@ if (process.env.NODE_TEST_CONTEXT && !process.env.MIZAN_NO_GEN_CACHE && !globalT
     dir,
     get(k) {
       if (!mem.has(k)) {
-        const f = join(dir, h(k));
+        const f = join(dirOf(k), h(k));
         let s = null; try { s = readFileSync(f, 'utf8'); JSON.parse(s); } catch { s = null; } // ملف ناقص أو تالف = غياب
         if (s == null) { t0s.set(k, performance.now()); log('miss', k); return null; }
         mem.set(k, s);
@@ -54,6 +58,6 @@ if (process.env.NODE_TEST_CONTEXT && !process.env.MIZAN_NO_GEN_CACHE && !globalT
       log('hit', k);
       return JSON.parse(mem.get(k)); // نسخة جديدة في كل مرة: لا يتأثر اختبار بتعديل اختبار آخر على النتيجة
     },
-    set(k, v) { log('set', k); const s = JSON.stringify(v), f = join(dir, h(k)), t = `${f}.${process.pid}`; mem.set(k, s); writeFileSync(t, s); renameSync(t, f); },
+    set(k, v) { log('set', k); const s = JSON.stringify(v), f = join(dirOf(k), h(k)), t = `${f}.${process.pid}`; mem.set(k, s); writeFileSync(t, s); renameSync(t, f); },
   };
 }

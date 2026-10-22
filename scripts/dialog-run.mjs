@@ -240,6 +240,8 @@ export function runCheck(ck, ctx) {
     case 'absent': { const r = pick(R, ck.room); return res(!r.length, { found: r.map(x => x.name) }, 'الغرفة ما زالت في المخطط'); }
     case 'present': { const r = pick(R, ck.room); return res(r.length > 0, { found: r.map(x => x.name) }, 'الغرفة غير موجودة'); }
     case 'count': { const n = R.filter(r => ck.types.includes(r.type) && r.name !== 'غرفة الضيوف').length; return res(n === ck.n, { n }, `العدد ${n} والمطلوب ${ck.n}`); }
+    // (الجولة الثالثة عشرة) جواب عرض الشارع: ارتداد الجهة في مستند الأرض = المطلوب نظاميًا، وعرض الشارع محفوظ في المستند
+    case 'plotSetback': { const v = after.plot?.setbacks?.[ck.side]; return res(Math.abs((v ?? -1) - ck.value) < .01 && (ck.streetWidth == null || after.plot?.streetWidth === ck.streetWidth), { setback: v, streetWidth: after.plot?.streetWidth ?? null }, 'الارتداد المرسوم لا يطابق النظامي لعرض الشارع'); }
     case 'docField': { const has = JSON.stringify(after).includes(`"${ck.field}"`); return res(has, { found: has }, `المستند لا يحمل الحقل «${ck.field}»: الطلب غير ممثّل في المخطط ولا في المجسّم`); }
     case 'unchanged': { const same = JSON.stringify([before.walls, before.openings, before.labels]) === JSON.stringify([after.walls, after.openings, after.labels]); return res(same, { identical: same, difference: difference(before, after) }, 'المخطط تغيّر مع أن الطلب لا يمسّه'); }
     case 'clarify': {

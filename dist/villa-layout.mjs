@@ -892,7 +892,19 @@ function furnish(rooms, T, run, doorAt, W, D, LVL = LV) {
  * يولّد بدائل مخطط فيلا لدور واحد. land: { length, width, streets, entries }، counts كما في buildProgram.
  * يعيد { designs:[{doc, penalty, key, notes, summary, mode}], program, W, D } أو يرمي خطأ بالسبب.
  */
-export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null }) {
+/**
+ * ذاكرة نتائج اختيارية يحقنها المضيف (globalThis.__mizanGenCache = { get(key), set(key, value) }) كما في المولّد الثاني: المولّد حتمي،
+ * فالطلب نفسه يعطي البدائل نفسها؛ تستعملها حزمة الاختبارات لمشاركة النتائج بين ملفاتها وبين التشغيلات. بلا مضيف = لا شيء.
+ * المفتاح يبدأ بإصدار المحرك (villa-zones-…) فيميّزه المضيف عن مفاتيح المولّد الثاني.
+ */
+function cachedV1(kind, args, fn) {
+  const hook = globalThis.__mizanGenCache; if (!hook) return fn(args);
+  let key; try { key = VILLA_ENGINE_VERSION + '|' + kind + '|' + JSON.stringify(args, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(x => [x, v[x]])) : v)); } catch { return fn(args); }
+  const hit = hook.get(key); if (hit) return hit;
+  const out = fn(args); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
+}
+export function generateVillaDesigns(args) { return cachedV1('one', args, generateVillaDesigns0); }
+function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null }) {
   const tw = requirements.tweaks || {};
   const prefPat = prefer?.pat ?? prefer, prefMirror = prefer?.mirror ?? null;
   const program = buildProgram(counts, requirements);
@@ -958,7 +970,8 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
  * دوران: الأرضي للضيافة والخدمة (مجالس، طعام، مطبخ، خادمة، مكتب، غرفة كبار السن) والسلم في نهاية الصالة؛
  * العلوي لأجنحة النوم حول صالة علوية، والسلم في الموضع ذاته. الغلاف واحد للدورين (العلوي فوق الأرضي تمامًا).
  */
-export function generateVillaTwoFloors({ land, counts, requirements = {}, keep = 3, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null }) {
+export function generateVillaTwoFloors(args) { return cachedV1('two', args, generateVillaTwoFloors0); }
+function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null }) {
   const tw = requirements.tweaks || {}, exSet = new Set(exclude), prefPat = prefer?.pat ?? prefer, prefMirror = prefer?.mirror ?? null;
   const program = buildProgram(counts, requirements);
   const groundKinds = new Set(['majlis', 'dining', 'kitchen', 'maid', 'office', 'prayer', 'driver']);

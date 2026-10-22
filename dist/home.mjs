@@ -48,7 +48,7 @@ for (const key of ['n', 's', 'e', 'w']) {
     + `<label class="tog dis" data-entry-label="${key}"><input type="checkbox" data-kind="entry" value="${key}" disabled> مدخل</label>`;
   grid.append(box);
 }
-function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1 }; }
+function readLand() { const sw = $('landStreetWidth')?.valueAsNumber; return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1, ...(sw > 0 ? { streetWidth: sw } : {}) }; }
 function refreshLand() {
   for (const key of ['n', 's', 'e', 'w']) {
     const entry = grid.querySelector(`input[data-kind=entry][value=${key}]`), onStreet = land.streets.has(key);
@@ -188,7 +188,7 @@ function row(table, cells, head) { const tr = el('tr'); for (const c of cells) {
 
 function applyOption(o) {
   session.counts = { ...o.counts }; confirmedLand = o.land;
-  $('landLength').value = o.land.length; $('landWidth').value = o.land.width;
+  $('landLength').value = o.land.length; $('landWidth').value = o.land.width; if ($('landStreetWidth')) $('landStreetWidth').value = o.land.streetWidth > 0 ? o.land.streetWidth : '';
   land.entries = new Set(o.land.entries);
   grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
   refreshLand(); build();

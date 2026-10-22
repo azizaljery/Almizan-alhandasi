@@ -276,6 +276,26 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
     const need = Math.min(2, c.majlis || 0) + 1 + Math.ceil((c.bedrooms - 1) / 2) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
     if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة${c.majlis ? '، ودورة مياه للضيوف' : ''})`); }
   }
+  // (الجولة الثالثة عشرة، قرار المالك) نسبة الزجاج إلى أرضية الغرفة اختيار العميل لا قيمة افتراضية: عامة («الزجاج 12٪»، «نوافذ كبيرة») أو
+  // لغرفة («المجلس زجاج 20٪»، «غرف النوم نوافذ صغيرة»، «نوافذ كبيرة للصالة»). «كبيرة» تُقرأ 15٪ و«صغيرة» 5٪ ويُذكر ذلك له. تُحمل في prefs.glazing
+  { const GROOMS = [['women', 'مجلس (?:ال)?(?:نساء|حريم)'], ['majlis', '(?:ال)?مجلس(?: (?:ال)?رجال)?|(?:ال)?مجالس'], ['master', '(?:ال)?ماستر|(?:الغرفه )?الرئيسيه'], ['bedroom', 'غرف(?:ه)? (?:ال)?نوم|(?:ال)?غرف(?:ه)?'], ['living', '(?:ال)?صاله'], ['kitchen', '(?:ال)?مطبخ'], ['dining', '(?:ال)?طعام|(?:ال)?سفره']];
+    const KW = /(?:ال)?(?:زجاج|نوافذ|نافذه|شبابيك|شباك|دريش)\w*/g, PCT = /(\d+(?:[.,]\d+)?) ?(?:٪|%|بالمئه|بالميه|في المئه|بالمائه)/, BIG = /(?:كبير|واسع|كثير|عريض)/, SMALL = /(?:صغير|قليل|ضيق)/;
+    const ROOM_AR = { women: 'مجلس النساء', majlis: 'المجلس', master: 'الغرفة الرئيسية', bedroom: 'غرف النوم', living: 'الصالة', kitchen: 'المطبخ', dining: 'الطعام' };
+    const glazing = { rooms: {} }; let any = false;
+    for (const m of t.matchAll(KW)) {
+      const a = Math.max(0, m.index - 28), b = Math.min(t.length, m.index + m[0].length + 22), win = t.slice(a, b), after = t.slice(m.index, b), before = t.slice(a, m.index + m[0].length);
+      const conj = t[m.index - 1] === 'و' || t.slice(Math.max(0, m.index - 2), m.index) === 'و '; // «ونوافذ…»: عبارة جديدة لا تأخذ رقم ما قبلها
+      const just = conj ? '' : t.slice(Math.max(0, m.index - 12), m.index), pm = after.match(PCT) || just.match(PCT); let pct = pm ? Number(pm[1].replace(',', '.')) : null, how = pct !== null ? `${pct}٪` : null;
+      const wordWin = after + ' ' + (conj ? '' : t.slice(Math.max(0, m.index - 10), m.index));
+      if (pct === null) { if (BIG.test(wordWin)) { pct = 15; how = 'كبيرة (قُرئت 15٪)'; } else if (SMALL.test(wordWin)) { pct = 5; how = 'صغيرة (قُرئت 5٪)'; } }
+      if (pct === null || !(pct >= 1 && pct <= 60)) continue;
+      const near = t.slice(Math.max(0, m.index - 14), m.index), roomRe = re => new RegExp(`(?<![\\u0600-\\u06FF])(?:لل|ل|و|ب|في)?(?:${re})(?![\\u0600-\\u06FF])`);
+      const firstIn = str => { let best = null; for (const g of GROOMS) { const mm = str.match(roomRe(g[1])); if (mm && (!best || mm.index < best.i)) best = { g, i: mm.index }; } return best?.g || null; };
+      const room = firstIn(after) || (!conj && (firstIn(near) || firstIn(before))) || null;
+      if (room) { if (glazing.rooms[room[0]] === undefined) { glazing.rooms[room[0]] = pct; understood.push(`زجاج ${ROOM_AR[room[0]]} ${how} من أرضيتها (طلب العميل)`); any = true; } }
+      else if (glazing.all === undefined) { glazing.all = pct; understood.push(`زجاج الغرف ${how} من أرضيتها (طلب العميل)`); any = true; }
+    }
+    if (any) prefs.glazing = glazing; }
   const uc = clauses ? unclearClauses(text) : [];
   const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
   return {

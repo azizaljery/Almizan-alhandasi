@@ -9,6 +9,7 @@ import { parseDoc, serialize } from './draw/doc.mjs';
 import { parseEdit, applyEdits, replayIntents, compareDocs, describeChanges, inspect, measureIntents, FACADE_RENDER } from './plan-edit.mjs';
 import { reviewDesign } from './plan-review.mjs';
 import { fingerprint, diffFingerprint, compactDiff, touchedKeys, countAr } from './plan-fingerprint.mjs';
+import { streetWidthQuestion, parseStreetWidthAnswer, frontSetbackFor } from './regulations-sa.mjs';
 
 export const SESSION_KEY = 'mizan.design.session.v1';
 // (الجولة العاشرة) 12 نسخة محفوظة (كانت 8) ولكل نسخة رقم ثابت في الجلسة (version) لا يتغير بحذف الأقدم:
@@ -57,6 +58,8 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
     // المولّد: الثاني افتراضيًا؛ engine:'v1' يبقي المولّد الأول (احتياط) لكل إعادة تصميم في الجلسة
     v: 1, input: { land, discovery, idea, requirements: req, engine: engine || (result?.villaEngine === 'v1' ? 'v1' : null) },
     conflicts, reply: conflicts.length ? { conflicts, questions: conflicts.map(c => c.question_ar) } : null,
+    // (الجولة الثالثة عشرة) أسئلة الموقع الناعمة (لا تعارض في الطلب): عرض شارع المدخل إن جُهل — الارتداد الأمامي مرسوم 3 م افتراضًا
+    siteQuestions: [streetWidthQuestion(land || {})].filter(Boolean),
     designs: [{ ...entry(result, null), version: 1 }], current: 0, nextVersion: 2, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
     alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], mirror: a.mirror ?? null, review: a.review || null })),
@@ -89,6 +92,11 @@ export async function redesign(session, args = {}, opts = {}) {
     const ans = parseReadingAnswer(args.text, reading.map(c => c.type));
     if (Object.keys(ans).length) return answerReading(session, ans, args.text, opts);
   }
+  // (الجولة الثالثة عشرة) جواب سؤال عرض الشارع («الشارع 20 م»): يُسجَّل في الأرض، ويُعاد التوليد إن تغيّر الارتداد الأمامي النظامي عن المرسوم
+  if ((session.siteQuestions || []).some(q => q?.type === 'street-width') && args.text && !args.picks?.length && !session.pendingEdit) {
+    const w = parseStreetWidthAnswer(args.text);
+    if (w) return answerStreetWidth(session, w, args.text, opts);
+  }
   const pending = (session.conflicts || []).filter(c => c && c.key && c.type !== 'needs-consent');
   const res = await redesign0(session, args, opts);
   if (!pending.length || !args.text || !res?.session) return res;
@@ -104,6 +112,28 @@ export async function redesign(session, args = {}, opts = {}) {
   res.reply = { ...res.reply, resolved: resolved.map(c => ({ type: c.type, question_ar: c.question_ar, answer_ar: args.text.trim(), kept: more.rules.map(kept) })),
     summary_ar: [`سجّلت اختيارك: ${more.rules.map(kept).join('، ')} (حُسم ${resolved.length === 1 ? 'التعارض' : resolved.length + ' تعارضات'} في طلبك، والبند المعارض حُذف).`, res.reply?.summary_ar].filter(Boolean).join(' ') };
   return res;
+}
+/** (الجولة الثالثة عشرة) جواب عرض الشارع: يُسجَّل land.streetWidth؛ إن صار الارتداد الأمامي النظامي أكبر من المرسوم يُعاد التوليد به. */
+async function answerStreetWidth(session, width, text, { generate = generateInitialDesign } = {}) {
+  const s = clone(session); s.input.land = { ...(s.input.land || {}), streetWidth: width };
+  s.siteQuestions = (s.siteQuestions || []).filter(q => q.type !== 'street-width');
+  const was = frontSetbackFor(session.input.land?.streetWidth), now = frontSetbackFor(width);
+  const resolved = [{ type: 'street-width', question_ar: (session.siteQuestions || []).find(q => q.type === 'street-width')?.question_ar || '', answer_ar: text.trim(), kept: [`عرض الشارع ${width} م`] }];
+  const what = [`عرض شارع المدخل ${width} م: الارتداد الأمامي النظامي ${now.value} م (${now.why_ar})`];
+  if (now.value === was.value) {
+    s.reply = null;
+    return { session: s, changes: [], reply: { local: true, mode: 'answered', resolved, done: what, failed: [], pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: true, unchanged: true, otherFails: [], conflicts: s.conflicts, questions: (s.conflicts || []).map(c => c.question_ar),
+      summary_ar: `سجّلت عرض الشارع ${width} م. الارتداد الأمامي المرسوم (${was.value} م) يطابق النظامي (${now.value} م) فلم يتغيّر المخطط — وصارت طبقته «اشتراط نظامي متحقق».` } };
+  }
+  const req = s.input.requirements;
+  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, ...(s.input.engine ? { engine: s.input.engine } : {}) });
+  const entryDir = s.input.land?.entries?.[0] || 's';
+  let ledger = []; try { ledger = verifyRequest(out.doc, req, { entry: entryDir }); } catch { ledger = out.ledger || []; }
+  const reply = { local: false, mode: 'answered-regenerated', resolved, done: what, failed: ledger.filter(x => !x.ok && x.status !== 'pending-render').map(x => ({ text: x.text, why: x.why })).slice(0, 6), pending: [], unverified: [], picks: [], unclear: [], unsupported: [], kept: false, unchanged: false, otherFails: [], conflicts: s.conflicts, questions: (s.conflicts || []).map(c => c.question_ar),
+    summary_ar: `سجّلت عرض الشارع ${width} م: الارتداد الأمامي النظامي ${now.value} م بدل ${was.value} م المرسومة، فأعدت توليد المخطط داخل الارتداد الجديد.` };
+  pushDesign(s, entry(out, { picks: [], text, changes: what, reply }));
+  s.reply = null;
+  return { session: s, changes: what, reply };
 }
 /** يسجّل جواب العميل عن القراءة/الغموض ويعيد التوليد إن تغيّر البرنامج (عدد غرف النوم أو المجالس). */
 async function answerReading(session, ans, text, { generate = generateInitialDesign } = {}) {

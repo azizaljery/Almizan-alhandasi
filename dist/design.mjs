@@ -53,6 +53,7 @@ function show(index) {
     done.length ? el('ul', { class: 'tick' }, done.map(x => el('li', { class: 'good', 'data-rule': x.id }, x.text, x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
     open.length ? el('ul', { class: 'tick' }, open.map(x => el('li', { class: 'no', 'data-rule': x.id, 'data-status': x.status }, el('b', {}, x.text + (x.status === 'pending-render' ? ' — بانتظار العرض' : ' — لم يُتحقق منه آليًا')), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
     (session.conflicts || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'في طلبك نقاط تحتاج توضيح:'), el('ul', { class: 'tick' }, session.conflicts.map(c => el('li', { class: 'no', 'data-conflict': c.type }, c.question_ar)))) : null,
+    (session.siteQuestions || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'عن الموقع (اختياري):'), el('ul', { class: 'tick' }, session.siteQuestions.map(c => el('li', { class: 'no', 'data-site-question': c.type }, c.question_ar)))) : null,
     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),

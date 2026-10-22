@@ -24,8 +24,11 @@ import { structuralPrecheck, PRECHECK_DISCLAIMER } from './structural-precheck.m
 import { circulationGate, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
 import { openingConsistency } from './draw/wall-geometry.mjs';
 import { SAUDI_GATES, measureSaudiProgram } from './saudi-program.mjs';
+import { SETBACK_NEIGHBOUR, SETBACK_FRONT, COVERAGE_MAX, GLAZING_MIN, frontSetbackFor } from './regulations-sa.mjs';
+import { plotArea as polyAreaOf } from './site-parking.mjs';
+import { clientGlazing, GLAZING_CLIENT_AR } from './glazing.mjs';
 
-export const PLAN_REVIEW_VERSION = 'plan-review/1.4.0'; // الجولة الثانية عشرة: بوابات البرنامج السعودي والموقع والمناخ (شرط العميل بوابة، والافتراضي ملاحظة)
+export const PLAN_REVIEW_VERSION = 'plan-review/1.5.0'; // الجولة الثالثة عشرة: بوابتا الارتدادات النظامية (الجار 1.5 م، الأمامي خُمس عرض الشارع) ونسبة البناء 75% بطبقة «اشتراط نظامي متحقق» بمصدرهما، وملاحظة الزجاج 8% النظامية المحتملة (لا بوابة)؛ // الجولة الثانية عشرة: بوابات البرنامج السعودي والموقع والمناخ (شرط العميل بوابة، والافتراضي ملاحظة)
 export const UNVERIFIED_AR = 'قيمة تصميمية غير متحققة نظاميًا';
 export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للميزان';
 /**
@@ -38,6 +41,8 @@ export const GATE_TIER = Object.freeze({
   REACH: 'functional', DAYLIGHT: 'mizan-default', MIN_WIDTH: 'mizan-default', HALL_ASPECT: 'mizan-default', WET_DOOR: 'mizan-default',
   GUEST_ROUTE: 'mizan-default', BED_MAJLIS: 'mizan-default', STAIRS: 'functional', STAIR_GEOMETRY: 'mizan-default', MAJLIS_PRIVACY: 'mizan-default',
   PLOT: 'client', PROGRAM: 'client', INTEGRITY: 'functional', DOOR_SWING: 'functional', WINDOW_SIZE: 'mizan-default', PLACEMENT: 'client', DISTINCT: 'mizan-default',
+  // (الجولة الثالثة عشرة) اشتراطات نظامية متحققة (المستوى أ) بمصدرها: الارتدادات ونسبة البناء
+  SETBACK_REG: 'regulation', COVERAGE: 'regulation',
   // (الجولة الحادية عشرة) البوابات «الثقيلة»: المراجعة الإنشائية المبدئية، والحركة الفعلية، والتطابق 2D/3D
   STRUCTURAL: 'mizan-default', CIRCULATION: 'functional', CONSISTENCY_2D3D: 'functional',
 });
@@ -86,6 +91,7 @@ export const FIXED_FIXTURES = Object.freeze(['wc', 'basin', 'shower', 'bathtub',
 /** الغرف المعيشية التي يجب أن تكون لها نافذة خارجية أو على فناء (تكليف المالك + غرفة الخادمة لأنها غرفة نوم). */
 export const HABITABLE_TYPES = Object.freeze(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'office', 'service']);
 const BED_TYPES = new Set(['bedroom', 'master']);
+const SIDE_AR = { n: 'الشمال', s: 'الجنوب', e: 'الشرق', w: 'الغرب' };
 const WET_TYPES = new Set(['bath']);                       // دورات المياه؛ الغسيل مستثنى (مجاورته للمطبخ مقبولة)
 const NO_WET_DOOR = new Set(['kitchen', 'dining', 'majlis']);
 const CIRC_TYPES = new Set(['corridor', 'entrance']);
@@ -107,6 +113,9 @@ export const GATES = Object.freeze([
   { id: 'DOOR_SWING', ar: 'لا باب يصطدم فتحه بجدار أو بباب آخر أو بعمود' },
   { id: 'WINDOW_SIZE', ar: 'مساحة زجاج الغرفة المعيشية لا تقل عن الحد الأدنى من أرضيتها' },
   { id: 'PLACEMENT', ar: 'مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة' },
+  // (الجولة الثالثة عشرة) اشتراطات نظامية متحققة بمصدرها (data/regulations-sa.json، المستوى أ)
+  { id: 'SETBACK_REG', ar: 'الارتدادات النظامية: ارتداد الجار لا يقل عن 1.5 م، والأمامي خُمس عرض الشارع ولا يقل عن 3 م (6 م لشوارع ≥ 30 م)' },
+  { id: 'COVERAGE', ar: 'نسبة البناء في الدور الأرضي لا تتجاوز 75% من مساحة الأرض' },
   { id: 'STRUCTURAL', ar: 'لا ملاحظة جسيمة في المراجعة الإنشائية المبدئية (مراجعة مبدئية لا تصميم إنشائي)' },
   { id: 'CIRCULATION', ar: 'الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب' },
   { id: 'CONSISTENCY_2D3D', ar: 'كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران)' },
@@ -241,7 +250,15 @@ const majlisDimsAsked = request => /مجلس[^،.\n]{0,14}\d+(?:\.\d+)?\s*[×xX*
 /** (الجولة العاشرة) أدنى عرض صافٍ للمجلس قيمة افتراضية للميزان (لا يكفي 2.8 م للجلسة المتقابلة)؛ (الجولة الحادية عشرة) ومجلس النساء كذلك — ملاحظة هنا، والمولّد يفرضها ما لم يحدد العميل غيرها. */
 export const MAJLIS_MIN_WIDTH = Object.freeze({ min: 4.2, tier: 'mizan-default', label: MIZAN_DEFAULT_AR, source: 'جلستان متقابلتان (0.8 م لكل منهما) وممر 2.6 م بينهما — ' + MIZAN_DEFAULT_AR + '، ' + UNVERIFIED_AR, verified: false });
 
-export function evaluateGates(doc, request = {}, model = analyzeDoc(doc), { heavy = false } = {}) {
+export function evaluateGates(doc, request = {}, model = null, opts = {}) {
+  // (الجولة الثالثة عشرة) الذاكرة الاختيارية نفسها (globalThis.__mizanGenCache): البوابات حتمية للمستند والطلب والخيارات — محرك التعديل
+  // الموضعي يقيّم مرشحين كثرًا بها في الاختبارات
+  const hook = globalThis.__mizanGenCache; if (!hook) return evaluateGates0(doc, request, model || analyzeDoc(doc), opts);
+  let key; try { key = 'rv|eg|' + PLAN_REVIEW_VERSION + '|' + JSON.stringify([doc, request, opts]); } catch { return evaluateGates0(doc, request, model || analyzeDoc(doc), opts); }
+  const hit = hook.get(key); if (hit) return hit;
+  const out = evaluateGates0(doc, request, model || analyzeDoc(doc), opts); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
+}
+function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = false } = {}) {
   const gates = [];
   const ground = model.levels[0];
   const allRooms = model.levels.flatMap(lv => lv.rooms.map(room => ({ lv, room })));
@@ -395,7 +412,42 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc), { heav
       for (const [what, over] of hits) bad.push(Number.isFinite(over) ? `${what} يتجاوز خط الارتداد بـ ${r2(over)} م` : `${what} خارج حدود الأرض`);
     }
     gates.push(gateResult('PLOT', !bad.length, { maxOverrun: Number.isFinite(worst) ? r2(worst) : 'خارج الأرض', setbacks: doc.plot?.setbacks || null }, 'داخل الارتداد (سماحية 2 سم)', bad.slice(0, 6).concat(bad.length > 6 ? [`و${bad.length - 6} عناصر أخرى`] : []),
-      { source: 'الارتدادات من مستند الأرض نفسه (doc.plot.setbacks)؛ قيمها النظامية «متعارضة: يُراجع» في بحث المنافسين' }));
+      { source: 'الارتدادات من مستند الأرض نفسه (doc.plot.setbacks)؛ ارتداد الجار والأمامي نظاميان في بوابة SETBACK_REG (الجولة الثالثة عشرة)' }));
+  }
+  // 9ب) (الجولة الثالثة عشرة) الارتدادات النظامية — تُقاس من المسافة الفعلية بين الجدران وحد الأرض، لا من قيم المستند: ارتداد الجار
+  //     (وممرات المشاة) ≥ 1.5 م، والأمامي على شارع المدخل خُمس عرض الشارع ولا يقل عن 3 م (6 م لشوارع ≥ 30 م) حين يُعرف العرض؛ وإلا
+  //     3 م قيمة تصميمية افتراضية (ملاحظة لا رسوب). الشوارع الجانبية/الخلفية (max(2, w/5)) مستواها «ب» فلا تُقاس.
+  {
+    const frame = plotFrame(doc), bad = [], notes = [], sides = {};
+    if (frame) {
+      const streets = new Set(doc.streets || [doc.entry || 's']), entry = doc.entry || 's';
+      const pts = []; for (const w of doc.walls) for (const p of wallRect(w)) pts.push(p);
+      const front = frontSetbackFor(doc.plot?.streetWidth);
+      for (const e of frame.edges) {
+        let clear = Infinity; for (const p of pts) clear = Math.min(clear, -dot(sub(p, e.a), e.out));
+        if (!pts.length) clear = null;
+        const kind = e.side === entry ? 'front' : streets.has(e.side) ? 'street' : 'neighbour';
+        const req = kind === 'neighbour' ? { value: SETBACK_NEIGHBOUR.value, tier: 'regulation' } : kind === 'front' ? front : null;
+        const cur = sides[e.side]; if (!cur || (clear !== null && clear < cur.clear)) sides[e.side] = { kind, clear: clear === null ? null : r2(clear), required: req ? req.value : null, tier: req ? req.tier : 'n/a' };
+        if (clear === null || !req) continue;
+        const tol = DESIGN_THRESHOLDS.setbackTolerance.value;
+        if (clear < req.value - tol) {
+          const msg = `جهة ${SIDE_AR[e.side]}: المبنى على ${r2(clear)} م من حد الأرض والمطلوب ${req.value} م`;
+          if (req.tier === 'regulation') bad.push(msg + (kind === 'front' ? ` (شارع ${doc.plot.streetWidth} م)` : ' (ارتداد الجار)')); else notes.push(msg + ' (عرض الشارع غير معلوم: ' + MIZAN_DEFAULT_AR + ')');
+        }
+      }
+      if (!front.known) notes.push(front.why_ar);
+    }
+    gates.push(gateResult('SETBACK_REG', !bad.length, { sides, streetWidth: doc.plot?.streetWidth ?? null, frontRequired: frame ? frontSetbackFor(doc.plot?.streetWidth).value : null }, `الجار ≥ ${SETBACK_NEIGHBOUR.value} م؛ الأمامي max(${SETBACK_FRONT.min}, عرض الشارع/5) و≥ ${SETBACK_FRONT.min30} م لشوارع ≥ ${SETBACK_FRONT.wide} م`, bad,
+      { tier: 'regulation', applicable: !!frame, notes_ar: notes, regulation: { neighbour: SETBACK_NEIGHBOUR, front: SETBACK_FRONT }, source: `${SETBACK_NEIGHBOUR.source} — ${SETBACK_NEIGHBOUR.url} (${SETBACK_NEIGHBOUR.note_ar})` }));
+  }
+  // 9ج) (الجولة الثالثة عشرة) نسبة البناء: مسقط الدور الأرضي (الغلاف الخارجي للجدران) ≤ 75% من مساحة الأرض — المستوى أ
+  {
+    const G = model.levels[0], plot = doc.plot?.polygon?.length >= 3 ? doc.plot.polygon : null;
+    const built = G ? G.analysis.outlines.reduce((a, o) => a + o.area, 0) : 0, land = plot ? polyAreaOf(plot) : 0;
+    const ratio = land > 0 ? built / land : null, ok = ratio === null || ratio <= COVERAGE_MAX.value / 100 + 1e-6;
+    gates.push(gateResult('COVERAGE', ok, { built: r2(built), plot: r2(land), ratioPct: ratio === null ? null : r2(100 * ratio) }, `≤ ${COVERAGE_MAX.value}٪`, ok ? [] : [`مسقط الدور الأرضي ${r2(built)} م² = ${r2(100 * ratio)}٪ من الأرض (${r2(land)} م²)، أكثر من ${COVERAGE_MAX.value}٪`],
+      { tier: 'regulation', applicable: ratio !== null, regulation: COVERAGE_MAX, source: `${COVERAGE_MAX.source} — ${COVERAGE_MAX.url} (${COVERAGE_MAX.note_ar})` }));
   }
   // 10) البرنامج المطلوب
   {
@@ -439,14 +491,24 @@ export function evaluateGates(doc, request = {}, model = analyzeDoc(doc), { heav
   }
   // 13) حجم النوافذ: الغرفة المعيشية التي لها نافذة خارجية لا يقل زجاجها عن الحد الأدنى من أرضيتها
   {
-    const min = DESIGN_THRESHOLDS.windowToFloorMin.value, bad = [], ratios = [];
+    const min = DESIGN_THRESHOLDS.windowToFloorMin.value, bad = [], ratios = [], notes = [];
+    const entry = doc.entry || 's';
+    // (الجولة الثالثة عشرة، قرار المالك) نسبة الزجاج اختيار العميل: ما طلبه (prefs.glazing من كلامه) يُعرض بجانب المحقق معلومةً؛ لا نطاق افتراضي
+    let glz = request.glazing || request.prefs?.glazing || null;
+    if (!glz && request.text) { try { glz = extractRequirements(request.text, { counts: request.counts || {} }).prefs?.glazing || null; } catch { glz = null; } }
     for (const { lv, room } of real) {
       if (!HABITABLE_TYPES.includes(room.type)) continue;
       const d = daylightOf(lv, room); if (!d.count) continue; // بلا نافذة: بوابة الإضاءة تتولاه
-      const ratio = room.area > 0 ? d.area / room.area : 0; ratios.push({ room: room.id, ratio: r2(ratio) });
-      if (ratio < min - 1e-9) bad.push(`زجاج ${roomName(room)} ${r2(d.area)} م² = ${r2(100 * ratio)}٪ من أرضيتها (${r2(room.area)} م²)، أقل من ${100 * min}٪ (${UNVERIFIED_AR})`);
+      const ratio = room.area > 0 ? d.area / room.area : 0, pct = r2(100 * ratio);
+      const ext = (room.edges || []).filter(e => e.exterior && e.length >= .5), extLen = r2(ext.reduce((a, e) => a + e.length, 0));
+      const facing = ext.some(e => e.side === entry) && !ext.some(e => e.side !== entry) ? 'street' : 'garden';
+      const want = clientGlazing({ type: room.type, name: room.name }, glz);
+      ratios.push({ room: room.id, name: roomName(room), ratio: r2(ratio), pct, glass: r2(d.area), requested: want, facing, exteriorLength: extLen, meetsRequest: want === null ? null : pct >= want - .5 });
+      if (ratio < min - 1e-9) bad.push(`زجاج ${roomName(room)} ${r2(d.area)} م² = ${pct}٪ من أرضيتها (${r2(room.area)} م²)، أقل من ${100 * min}٪ (${UNVERIFIED_AR})`);
+      else if (want !== null && pct < want - .5) notes.push(`زجاج ${roomName(room)} ${pct}٪ من أرضيتها وطلب العميل ${want}٪ (${GLAZING_CLIENT_AR}؛ جدارها الخارجي ${extLen} م)`);
     }
-    gates.push(gateResult('WINDOW_SIZE', !bad.length, { worst: ratios.reduce((m, x) => Math.min(m, x.ratio), Infinity), rooms: ratios.length, ratios }, `≥ ${100 * min}٪ من الأرضية`, bad, { source: DESIGN_THRESHOLDS.windowToFloorMin.source }));
+    gates.push(gateResult('WINDOW_SIZE', !bad.length, { worst: ratios.reduce((m, x) => Math.min(m, x.ratio), Infinity), rooms: ratios.length, requestedRooms: ratios.filter(x => x.requested !== null).length, belowRequest: ratios.filter(x => x.meetsRequest === false).length, ratios }, `≥ ${100 * min}٪ من الأرضية (رفض)؛ النسبة لكل غرفة معلومة، وما طلبه العميل بجانبها`, bad,
+      { source: DESIGN_THRESHOLDS.windowToFloorMin.source + '؛ نسبة الزجاج اختيار العميل (prefs.glazing، dist/glazing.mjs) — لا نطاق افتراضي؛ مرجع: 8٪ من اشتراطات الوزارة §5-1-15.2 (المستوى ب، غير مطابَق يدويًا) — ليس بوابة', notes_ar: notes }));
   }
   // 14) المواضع التي طلبها العميل نصًا (في الأمام / في الخلف)، مقيسة من المستند وحده
   {
@@ -701,9 +763,17 @@ export function externalScores(doc, request = {}) {
  * @param {{ external?: boolean, strict?: boolean }} [opts]  external:false يتخطى AZIZ وMizan (أسرع، للاختبارات)؛
  *   strict:true يجعل اصطدام فتح الباب بقطعة سباكة/مطبخ مثبتة رسوبًا (لا ملاحظة)
  */
-export function reviewDesign(doc, request = {}, { external = true, strict = false, heavy = true } = {}) {
+export function reviewDesign(doc, request = {}, opts = {}) {
+  // (الجولة الثالثة عشرة) ذاكرة اختيارية يحقنها المضيف (globalThis.__mizanGenCache، حزمة الاختبارات): المراجعة حتمية للمستند والطلب
+  // نفسيهما، والبوابات الثقيلة غالية؛ المفتاح «rv|» + الإصدار + المستند والطلب والخيارات كاملة (المضيف يبصمها)
+  const hook = globalThis.__mizanGenCache; if (!hook) return reviewDesign0(doc, request, opts);
+  let key; try { key = 'rv|' + PLAN_REVIEW_VERSION + '|' + JSON.stringify([doc, request, opts]); } catch { return reviewDesign0(doc, request, opts); }
+  const hit = hook.get(key); if (hit) return hit;
+  const out = reviewDesign0(doc, request, opts); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
+}
+function reviewDesign0(doc, request = {}, { external = true, strict = false, heavy = true } = {}) {
   const model = analyzeDoc(doc);
-  const gates = evaluateGates(doc, strict ? { ...request, strict: true } : request, model, { heavy });
+  const gates = evaluateGates0(doc, strict ? { ...request, strict: true } : request, model, { heavy });
   const passed = gates.every(g => g.ok);
   const { comp, detail } = scoreComponents(doc, request, model);
   const ext = external ? externalScores(doc, request) : { aziz: null, mizan: null, notes: ['AZIZ وMizan غير محسوبين (external:false)'] };
@@ -718,7 +788,21 @@ export function reviewDesign(doc, request = {}, { external = true, strict = fals
   for (const b of breakdown) b.effectiveWeight = b.value === null ? 0 : r2(100 * b.weight / wsum);
   const score = wsum ? r2(100 * sum / wsum) : null;
   const rejectReasons_ar = gates.filter(g => !g.ok).flatMap(g => g.reasons_ar.map(r => `${g.ar}: ${r}`));
-  return { version: PLAN_REVIEW_VERSION, gates, passed, failedGates: gates.filter(g => !g.ok).map(g => g.id), score, breakdown, rejectReasons_ar, external: ext };
+  return { version: PLAN_REVIEW_VERSION, gates, passed, failedGates: gates.filter(g => !g.ok).map(g => g.id), score, breakdown, rejectReasons_ar, external: ext, regulatoryNotes_ar: regulatoryNotes(gates) };
+}
+/**
+ * (الجولة الثالثة عشرة) «ملاحظة نظامية محتملة»: بنود مستواها «ب» (نص رسمي بـOCR مشوّه + مصدر ثانوي) لا تُبدَّل بها بوابة ولا يُرفض بها
+ * بديل — تُعرض للمالك ليقرر. الآن: الزجاج ≥ 8% من أرضية الغرفة المعيشية (بوابة الرفض WINDOW_SIZE تبقى 3%).
+ */
+export function regulatoryNotes(gates) {
+  const out = [], ws = gates.find(g => g.id === 'WINDOW_SIZE');
+  if (ws?.value?.ratios?.length) {
+    // (قرار المالك) رقم الوزارة 8٪ مرجع بمستوى تحققه لا بوابة؛ الحكم على كل غرفة بهدفها المرن (ملاحظة في البوابة نفسها)
+    const below = ws.value.ratios.filter(x => x.ratio < GLAZING_MIN.value / 100 - 1e-9);
+    if (below.length) out.push({ id: 'GLAZING_REF', kind: 'مرجع نظامي (ليس بوابة)', level: GLAZING_MIN.level, item: GLAZING_MIN.item, rooms: below.map(x => ({ room: x.room, name: x.name || x.room, ratioPct: r2(100 * x.ratio), requested: x.requested ?? null })),
+      text_ar: `مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر ${GLAZING_MIN.value}٪ من أرضية الغرفة؛ دون هذا الرقم هنا: ${below.map(x => `${x.name || x.room} ${r2(100 * x.ratio)}٪${x.requested != null ? ` (طلب العميل ${x.requested}٪)` : ''}`).join('، ')}. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض ${100 * DESIGN_THRESHOLDS.windowToFloorMin.value}٪ كما هي.`, source: GLAZING_MIN.source, url: GLAZING_MIN.url });
+  }
+  return out;
 }
 
 /** يراجع عدة مستندات ويرتّبها: الناجح في كل البوابات أولًا، ثم الأعلى درجة. يحفظ index الأصلي. */

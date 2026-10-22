@@ -3,6 +3,7 @@
 // and are pinned here so that any change to the generators or to quantities() is a visible, deliberate decision.
 // KNOWN GAP (review #2): the non-v2 branch of quantities() (model.builtArea ?? building.w*building.h, planner.mjs) is not covered — every generator now emits v2 models.
 // This test observes only; it does not change the generator. If a value differs, STOP and record it — do not retune the numbers.
+import './_gen-cache.mjs'; // (الجولة الثالثة عشرة) ذاكرة نتائج المولّدات والمراجع بين ملفات الاختبار وبين التشغيلات
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { defaultRooms, normalizeRooms, validatePlot, quantities } from '../dist/planner.mjs';
