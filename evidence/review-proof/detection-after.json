@@ -1,5 +1,5 @@
 {
- "reviewer": "plan-review/1.4.0",
+ "reviewer": "plan-review/1.5.0",
  "tag": "after",
  "rows": [
   {
@@ -128,10 +128,10 @@
    ]
   },
   {
-   "id": "window-interior-only@C5-alt-1",
+   "id": "window-interior-only@C7-alt-1",
    "mutation": "window-interior-only",
    "ar": "نافذة غرفة النوم على ممر داخلي لا على الخارج (خفي)",
-   "case": "C5",
+   "case": "C7",
    "file": "alt-1.json",
    "expected": [
     "DAYLIGHT"
@@ -139,7 +139,7 @@
    "allowed": [
     "WINDOW_SIZE"
    ],
-   "note": "نوافذ «غرفة نوم 2» الخارجية حُذفت ووُضعت نافذة على «ممر الغرف» الداخلي",
+   "note": "نوافذ «غرفة كبار السن» الخارجية حُذفت ووُضعت نافذة على «الصالة» الداخلي",
    "passed": false,
    "fired": [
     "DAYLIGHT"
@@ -147,9 +147,9 @@
    "detected": true,
    "rejected": true,
    "unexpected": [],
-   "score": 91.67,
+   "score": 96.71,
    "reasons": [
-    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 2» بلا نافذة على الخارج أو على فناء"
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة كبار السن» بلا نافذة على الخارج أو على فناء"
    ]
   },
   {
@@ -295,10 +295,10 @@
    ]
   },
   {
-   "id": "hall-strip@C5-alt-1",
+   "id": "hall-strip@C6-alt-1",
    "mutation": "hall-strip",
    "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
-   "case": "C5",
+   "case": "C6",
    "file": "alt-1.json",
    "expected": [
     "HALL_ASPECT"
@@ -307,19 +307,27 @@
     "MIN_WIDTH",
     "MAJLIS_PRIVACY"
    ],
-   "note": "«الصالة» ضُيّقت إلى 2.765×7.43 م",
+   "note": "«الصالة» ضُيّقت إلى 2.83×7.615 م",
    "passed": false,
    "fired": [
-    "MIN_WIDTH",
-    "HALL_ASPECT"
+    "HALL_ASPECT",
+    "STRUCTURAL",
+    "CIRCULATION",
+    "CONSISTENCY_2D3D"
    ],
    "detected": true,
    "rejected": true,
-   "unexpected": [],
-   "score": 92.37,
+   "unexpected": [
+    "STRUCTURAL",
+    "CIRCULATION",
+    "CONSISTENCY_2D3D"
+   ],
+   "score": 92.52,
    "reasons": [
-    "أدنى عرض صافٍ لكل نوع غرفة: عرض «الصالة» 2.75 م أقل من 2.8 م (قيمة تصميمية غير متحققة نظاميًا)",
-    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 2.77×7.43 م نسبتها 2.69:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة"
+    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 2.83×7.61 م نسبتها 2.69:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة",
+    "لا ملاحظة جسيمة في المراجعة الإنشائية المبدئية (مراجعة مبدئية لا تصميم إنشائي): العمود المقترح L1-C27 (تقاطع جدران) يقع داخل الفتحة o23 في الجدار w14 (الدور الأرضي).",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: coffee-table f3 في المنطقة الحرة أمام باب o9 من جهة «الصالة» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
+    "كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران): الفتحة o23 (window2) تعبر تقاطع جدارين"
    ]
   },
   {
@@ -497,11 +505,11 @@
    ]
   },
   {
-   "id": "wc-door-kitchen@C5-alt-2",
+   "id": "wc-door-kitchen@C4-alt-1",
    "mutation": "wc-door-kitchen",
    "ar": "دورة مياه تفتح على المطبخ",
-   "case": "C5",
-   "file": "alt-2.json",
+   "case": "C4",
+   "file": "alt-1.json",
    "expected": [
     "WET_DOOR"
    ],
@@ -517,12 +525,10 @@
    "unexpected": [
     "CIRCULATION"
    ],
-   "score": 98.27,
+   "score": 93.71,
    "reasons": [
     "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه» تفتح مباشرة على «المطبخ» (مطبخ)",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: kitchen-run f16 في المنطقة الحرة أمام باب o38 من جهة «المطبخ» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: المرحاض f32 داخل منطقة فتح باب «دورة مياه» (o38، عرضه 0.8 م): الباب لا يُفتح كاملًا أو لا يبقى ممر للدخول. [منطق وظيفي (لا عتبة رقمية)]",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: خزائن مطبخ f16 يضيّق المسار في «المطبخ» عند (11.7، 11.88) إلى أقل من 0.6 م، فلا تُبلغ مشيًا مع الأثاث المرسوم: «دورة مياه». [قيمة تصميمية افتراضية للميزان]"
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: المغسلة f28 داخل منطقة فتح باب «دورة مياه» (o42، عرضه 0.8 م): الباب لا يُفتح كاملًا أو لا يبقى ممر للدخول. [منطق وظيفي (لا عتبة رقمية)]"
    ]
   },
   {
@@ -575,11 +581,12 @@
    "unexpected": [
     "CIRCULATION"
    ],
-   "score": 92.55,
+   "score": 94.38,
    "reasons": [
     "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه» تفتح مباشرة على «المطبخ» (مطبخ)",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: kitchen-run f24 وfridge f25 في المنطقة الحرة أمام باب o40 من جهة «المطبخ» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: خزائن مطبخ f24 يضيّق المسار في «المطبخ» عند (17.15، 18.58) إلى أقل من 0.6 م، فلا تُبلغ مشيًا مع الأثاث المرسوم: «دورة مياه». [قيمة تصميمية افتراضية للميزان]"
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: kitchen-run f26 في المنطقة الحرة أمام باب o42 من جهة «المطبخ» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: المرحاض f33 داخل منطقة فتح باب «دورة مياه» (o42، عرضه 0.8 م): الباب لا يُفتح كاملًا أو لا يبقى ممر للدخول. [منطق وظيفي (لا عتبة رقمية)]",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: خزائن مطبخ f26 يضيّق المسار في «المطبخ» عند (15.15، 17.88) إلى أقل من 0.6 م، فلا تُبلغ مشيًا مع الأثاث المرسوم: «دورة مياه». [قيمة تصميمية افتراضية للميزان]"
    ]
   },
   {
@@ -696,11 +703,11 @@
    ]
   },
   {
-   "id": "wc-door-dining@C5-alt-1",
+   "id": "wc-door-dining@C5-alt-2",
    "mutation": "wc-door-dining",
    "ar": "دورة مياه تفتح على الطعام (خفي)",
    "case": "C5",
-   "file": "alt-1.json",
+   "file": "alt-2.json",
    "expected": [
     "WET_DOOR"
    ],
@@ -725,16 +732,16 @@
    ]
   },
   {
-   "id": "wc-door-dining@C5-alt-2",
+   "id": "wc-door-dining@C6-alt-2",
    "mutation": "wc-door-dining",
    "ar": "دورة مياه تفتح على الطعام (خفي)",
-   "case": "C5",
+   "case": "C6",
    "file": "alt-2.json",
    "expected": [
     "WET_DOOR"
    ],
    "allowed": [],
-   "note": "باب «دورة مياه» نُقل ليفتح على «صالة الطعام والمقلط»",
+   "note": "باب «دورة مياه» نُقل ليفتح على «صالة الطعام»",
    "passed": false,
    "fired": [
     "WET_DOOR"
@@ -742,9 +749,9 @@
    "detected": true,
    "rejected": true,
    "unexpected": [],
-   "score": 98.27,
+   "score": 100,
    "reasons": [
-    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه» تفتح مباشرة على «صالة الطعام والمقلط» (غرفة طعام)"
+    "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «دورة مياه» تفتح مباشرة على «صالة الطعام» (غرفة طعام)"
    ]
   },
   {
@@ -1518,11 +1525,13 @@
    "passed": false,
    "fired": [
     "PLOT",
+    "SETBACK_REG",
     "PARKING"
    ],
    "detected": true,
    "rejected": true,
    "unexpected": [
+    "SETBACK_REG",
     "PARKING"
    ],
    "score": 95.06,
@@ -1546,11 +1555,14 @@
    "note": "المبنى أُزيح 2.32 م شرقًا فتجاوز الارتداد الجانبي (1.5 م) بنحو متر",
    "passed": false,
    "fired": [
-    "PLOT"
+    "PLOT",
+    "SETBACK_REG"
    ],
    "detected": true,
    "rejected": true,
-   "unexpected": [],
+   "unexpected": [
+    "SETBACK_REG"
+   ],
    "score": 97.14,
    "reasons": [
     "المبنى داخل الأرض وخطوط الارتداد: الجدار w12 يتجاوز خط الارتداد بـ 0.88 م",
@@ -1854,12 +1866,12 @@
    "unexpected": [
     "CIRCULATION"
    ],
-   "score": 84.73,
+   "score": 83.24,
    "reasons": [
     "دورات المياه لا تفتح على المطبخ أو الطعام أو المجلس: «حمام الرئيسية» تفتح مباشرة على «المجلس» (مجلس)",
-    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «المجلس» من مدخل الضيوف يمر عبر «مدخل العائلة»، «غرفة نوم 2»، «رواق»",
+    "مسار الضيوف إلى المجلس لا يمر بالصالة أو النوم: الوصول إلى «المجلس» من مدخل الضيوف يمر عبر «مدخل العائلة»، «غرفة نوم 2»، «ممر»",
     "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «المجلس» يفتح مباشرة على «ممر الغرف» (ممر)",
-    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «غرف النوم» في الخلف: «غرفة نوم 2»، «غرفة نوم 3»، «غرفة النوم الرئيسية» على عمق 25.22٪ من الواجهة (المطلوب ≥ 50٪)"
+    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «غرف النوم» في الخلف: «غرفة نوم 2»، «غرفة نوم 3»، «غرفة النوم الرئيسية» على عمق 23.09٪ من الواجهة (المطلوب ≥ 50٪)"
    ]
   },
   {
@@ -1888,7 +1900,7 @@
    "unexpected": [
     "CIRCULATION"
    ],
-   "score": 96.75,
+   "score": 96.87,
    "reasons": [
     "كل الغرف يُوصل إليها من المدخل: «الدرج» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
     "كل الغرف يُوصل إليها من المدخل: «الصالة» (الدور الأرضي) لا يصل إليها مسار أبواب من المدخل",
@@ -1922,7 +1934,7 @@
     "STRUCTURAL",
     "CIRCULATION"
    ],
-   "score": 98.52,
+   "score": 98.64,
    "reasons": [
     "كل الغرف يُوصل إليها من المدخل: «خزانة ملابس» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
     "كل الغرف يُوصل إليها من المدخل: «ممر الغرف» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
@@ -1958,7 +1970,7 @@
     "STRUCTURAL",
     "CIRCULATION"
    ],
-   "score": 98.52,
+   "score": 98.64,
    "reasons": [
     "كل الغرف يُوصل إليها من المدخل: «خزانة ملابس» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
     "كل الغرف يُوصل إليها من المدخل: «ممر الغرف» (الدور الأول): لا مدخل ولا سلم يصل إلى هذا الدور",
@@ -1987,7 +1999,7 @@
    "detected": true,
    "rejected": true,
    "unexpected": [],
-   "score": 98.52,
+   "score": 98.64,
    "reasons": [
     "السلم يتسع في غرفته بقوائم ونوائم وعرض وبسطة سليمة، ويُوصل إليه أسفله وأعلاه: السلم s1 في «الدرج»: النائمة 17.65 سم أقل من 28 سم",
     "السلم يتسع في غرفته بقوائم ونوائم وعرض وبسطة سليمة، ويُوصل إليه أسفله وأعلاه: السلم s1 في «الدرج»: آخر قائمة تصل إلى فراغ مزدوج أو خارج المبنى في الدور العلوي"
@@ -2014,41 +2026,9 @@
    "detected": true,
    "rejected": true,
    "unexpected": [],
-   "score": 98.52,
+   "score": 98.64,
    "reasons": [
     "السلم يتسع في غرفته بقوائم ونوائم وعرض وبسطة سليمة، ويُوصل إليه أسفله وأعلاه: السلم s1 في «الدرج»: عرض القلبة 0.8 م أقل من 1 م"
-   ]
-  },
-  {
-   "id": "majlis-door-family@C5-alt-1",
-   "mutation": "majlis-door-family",
-   "ar": "المجلس يفتح على الطعام العائلي أو الصالة أو المطبخ",
-   "case": "C5",
-   "file": "alt-1.json",
-   "expected": [
-    "MAJLIS_PRIVACY"
-   ],
-   "allowed": [
-    "GUEST_ROUTE",
-    "DOOR_SWING",
-    "WET_DOOR"
-   ],
-   "note": "باب جديد بين «المجلس» و«المطبخ»",
-   "passed": false,
-   "fired": [
-    "MAJLIS_PRIVACY",
-    "CIRCULATION"
-   ],
-   "detected": true,
-   "rejected": true,
-   "unexpected": [
-    "CIRCULATION"
-   ],
-   "score": 93.12,
-   "reasons": [
-    "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «المجلس» يفتح مباشرة على «المطبخ» (مطبخ)",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: kitchen-run f11 في المنطقة الحرة أمام باب o49 من جهة «المطبخ» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f5 في المنطقة الحرة أمام باب o49 من جهة «المجلس» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
    ]
   },
   {
@@ -2068,14 +2048,18 @@
    "note": "باب جديد بين «المجلس» و«الصالة»",
    "passed": false,
    "fired": [
-    "MAJLIS_PRIVACY"
+    "MAJLIS_PRIVACY",
+    "CIRCULATION"
    ],
    "detected": true,
    "rejected": true,
-   "unexpected": [],
-   "score": 92.85,
+   "unexpected": [
+    "CIRCULATION"
+   ],
+   "score": 92.97,
    "reasons": [
-    "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «المجلس» يفتح مباشرة على «الصالة» (صالة معيشة)"
+    "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «المجلس» يفتح مباشرة على «الصالة» (صالة معيشة)",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: sofa-3 f1 في المنطقة الحرة أمام باب o59 من جهة «الصالة» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
    ]
   },
   {
@@ -2107,6 +2091,38 @@
    "reasons": [
     "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «المجلس» يفتح مباشرة على «الصالة» (صالة معيشة)",
     "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f9 في المنطقة الحرة أمام باب o45 من جهة «المجلس» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
+   ]
+  },
+  {
+   "id": "majlis-door-family@C1-alt-2",
+   "mutation": "majlis-door-family",
+   "ar": "المجلس يفتح على الطعام العائلي أو الصالة أو المطبخ",
+   "case": "C1",
+   "file": "alt-2.json",
+   "expected": [
+    "MAJLIS_PRIVACY"
+   ],
+   "allowed": [
+    "GUEST_ROUTE",
+    "DOOR_SWING",
+    "WET_DOOR"
+   ],
+   "note": "باب جديد بين «مجلس الرجال» و«الصالة»",
+   "passed": false,
+   "fired": [
+    "MAJLIS_PRIVACY",
+    "CIRCULATION"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [
+    "CIRCULATION"
+   ],
+   "score": 91.87,
+   "reasons": [
+    "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «مجلس الرجال» يفتح مباشرة على «الصالة» (صالة معيشة)",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f5 في المنطقة الحرة أمام باب o54 من جهة «مجلس الرجال» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: sofa-3 f1 في المنطقة الحرة أمام باب o54 من جهة «الصالة» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
    ]
   },
   {
@@ -2541,31 +2557,31 @@
    "id": "C4/alt-1.json",
    "passed": true,
    "fired": [],
-   "score": 95.05
+   "score": 93.71
   },
   {
    "id": "C5/alt-1.json",
    "passed": true,
    "fired": [],
-   "score": 94.71
+   "score": 99.46
   },
   {
    "id": "C5/alt-2.json",
    "passed": true,
    "fired": [],
-   "score": 98.27
+   "score": 94.71
   },
   {
    "id": "C5/alt-3.json",
    "passed": true,
    "fired": [],
-   "score": 99.52
+   "score": 97.88
   },
   {
    "id": "C5/alt-4.json",
    "passed": true,
    "fired": [],
-   "score": 92.55
+   "score": 94.38
   },
   {
    "id": "C6/alt-1.json",
@@ -2583,7 +2599,7 @@
    "id": "C7/alt-1.json",
    "passed": true,
    "fired": [],
-   "score": 98.52
+   "score": 98.64
   },
   {
    "id": "C8/alt-1.json",
@@ -2724,7 +2740,7 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 93.2,
+    "meanScore": 94.88,
     "fired": {
      "DAYLIGHT": 3
     }
@@ -2752,14 +2768,13 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 89.26,
+    "meanScore": 89.31,
     "fired": {
      "HALL_ASPECT": 3,
      "MAJLIS_PRIVACY": 1,
-     "STRUCTURAL": 2,
-     "CIRCULATION": 2,
-     "CONSISTENCY_2D3D": 2,
-     "MIN_WIDTH": 1
+     "STRUCTURAL": 3,
+     "CIRCULATION": 3,
+     "CONSISTENCY_2D3D": 3
     }
    },
    {
@@ -2804,7 +2819,7 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 95.52,
+    "meanScore": 94.61,
     "fired": {
      "CIRCULATION": 3,
      "WET_DOOR": 3
@@ -2834,7 +2849,7 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 96.57,
+    "meanScore": 97.15,
     "fired": {
      "CIRCULATION": 2,
      "WET_DOOR": 3
@@ -2980,7 +2995,8 @@
     "meanScore": 96.31,
     "fired": {
      "PLOT": 3,
-     "PARKING": 1
+     "PARKING": 1,
+     "SETBACK_REG": 2
     }
    },
    {
@@ -3035,7 +3051,7 @@
     "n": 1,
     "detected": 1,
     "rejected": 1,
-    "meanScore": 84.73,
+    "meanScore": 83.24,
     "fired": {
      "MAJLIS_PRIVACY": 1,
      "CIRCULATION": 1,
@@ -3053,7 +3069,7 @@
     "n": 1,
     "detected": 1,
     "rejected": 1,
-    "meanScore": 96.75,
+    "meanScore": 96.87,
     "fired": {
      "CIRCULATION": 1,
      "REACH": 1,
@@ -3070,7 +3086,7 @@
     "n": 1,
     "detected": 1,
     "rejected": 1,
-    "meanScore": 98.52,
+    "meanScore": 98.64,
     "fired": {
      "STRUCTURAL": 1,
      "CIRCULATION": 1,
@@ -3087,7 +3103,7 @@
     "n": 1,
     "detected": 1,
     "rejected": 1,
-    "meanScore": 98.52,
+    "meanScore": 98.64,
     "fired": {
      "STRUCTURAL": 1,
      "CIRCULATION": 1,
@@ -3105,7 +3121,7 @@
     "n": 1,
     "detected": 1,
     "rejected": 1,
-    "meanScore": 98.52,
+    "meanScore": 98.64,
     "fired": {
      "STAIR_GEOMETRY": 1
     }
@@ -3119,7 +3135,7 @@
     "n": 1,
     "detected": 1,
     "rejected": 1,
-    "meanScore": 98.52,
+    "meanScore": 98.64,
     "fired": {
      "STAIR_GEOMETRY": 1
     }
@@ -3133,10 +3149,10 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 92.12,
+    "meanScore": 91.74,
     "fired": {
      "MAJLIS_PRIVACY": 3,
-     "CIRCULATION": 2
+     "CIRCULATION": 3
     }
    },
    {
@@ -3232,6 +3248,7 @@
    "PROGRAM",
    "PLOT",
    "PARKING",
+   "SETBACK_REG",
    "PLACEMENT",
    "STAIRS",
    "STAIR_GEOMETRY",
@@ -3256,6 +3273,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3279,6 +3297,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3302,6 +3321,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3312,10 +3332,10 @@
     "WINDOW_SIZE": 0,
     "HALL_ASPECT": 3,
     "MAJLIS_PRIVACY": 1,
-    "STRUCTURAL": 2,
-    "CIRCULATION": 2,
-    "CONSISTENCY_2D3D": 2,
-    "MIN_WIDTH": 1,
+    "STRUCTURAL": 3,
+    "CIRCULATION": 3,
+    "CONSISTENCY_2D3D": 3,
+    "MIN_WIDTH": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
@@ -3325,6 +3345,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3348,6 +3369,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3371,6 +3393,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3394,6 +3417,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3417,6 +3441,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3440,6 +3465,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3463,6 +3489,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3486,6 +3513,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3509,6 +3537,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3532,6 +3561,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3555,6 +3585,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3578,6 +3609,7 @@
     "PROGRAM": 2,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3601,6 +3633,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3624,6 +3657,7 @@
     "PROGRAM": 0,
     "PLOT": 3,
     "PARKING": 2,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3647,6 +3681,7 @@
     "PROGRAM": 0,
     "PLOT": 3,
     "PARKING": 1,
+    "SETBACK_REG": 2,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3670,6 +3705,7 @@
     "PROGRAM": 3,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3693,6 +3729,7 @@
     "PROGRAM": 3,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3716,6 +3753,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 3,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3739,6 +3777,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 1,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3762,6 +3801,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 1,
     "STAIR_GEOMETRY": 1,
@@ -3785,6 +3825,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 1,
     "STAIR_GEOMETRY": 0,
@@ -3808,6 +3849,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 1,
     "STAIR_GEOMETRY": 1,
@@ -3831,6 +3873,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 1,
@@ -3854,6 +3897,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 1,
@@ -3865,7 +3909,7 @@
     "HALL_ASPECT": 0,
     "MAJLIS_PRIVACY": 3,
     "STRUCTURAL": 0,
-    "CIRCULATION": 2,
+    "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
     "MIN_WIDTH": 0,
     "DOOR_SWING": 0,
@@ -3877,6 +3921,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3900,6 +3945,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3923,6 +3969,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3946,6 +3993,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 0,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3969,6 +4017,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 1,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -3992,6 +4041,7 @@
     "PROGRAM": 0,
     "PLOT": 0,
     "PARKING": 1,
+    "SETBACK_REG": 0,
     "PLACEMENT": 0,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
@@ -4000,19 +4050,19 @@
   },
   "scores": {
    "defective": {
-    "mean": 94.21,
-    "min": 84.73,
+    "mean": 94.23,
+    "min": 83.24,
     "p50": 95.06,
-    "max": 98.52
+    "max": 100
    },
    "clean": {
-    "mean": 96.17,
-    "min": 92.55,
+    "mean": 96.18,
+    "min": 93.66,
     "p50": 96.55,
     "max": 100
    },
    "defectivePassed": [],
-   "defectiveAboveCleanMin": 68
+   "defectiveAboveCleanMin": 60
   }
  }
 }

@@ -1,0 +1,3202 @@
+{
+ "after-13": {
+  "note": "نسبة الزجاج اختيار العميل (لا قيمة افتراضية): المحقق لكل غرفة معلومة وما طلبه بجانبه؛ بوابة الرفض 3% كما هي؛ 8% الوزارة (المستوى ب) مرجع",
+  "alternatives": 24,
+  "rooms": 195,
+  "requestedRooms": 0,
+  "belowRequest": 0,
+  "below8": 6,
+  "failAt3": 0,
+  "rows": [
+   {
+    "case": "C1",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس النساء»",
+      "pct": 22.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.85
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 3.92,
+      "requested": null,
+      "facing": "street",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 8.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 25.15,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.4
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 26.61,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.6
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.01,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.4
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 10.07,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.8
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 26.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.6
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 9.12,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 29.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.8
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 4٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C1",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 11.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 31.22,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.65
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 13.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.8
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 19.44,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.85
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 20.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.7
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 27.66,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.5
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 8.59,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 19.25,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C2",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 8.65,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.1
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.41,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.45
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 63.76,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 12.05
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 9.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.4
+     },
+     {
+      "name": "«غرفة كبار السن»",
+      "pct": 11.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.6
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.64,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.65
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 5»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C3",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 9.39,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.41,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.45
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 14.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 16.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.65
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 22.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 25.06,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.75
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C3",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 25.31,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.75
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 4.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 2.95
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 28.06,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.91,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 22.55,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.75
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 50,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.65
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 5٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C4",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 16.18,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 29.38,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 26.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.43,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 20.27,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 9.95,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 9.82,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 30.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.3
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 21.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.1
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.65
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 24.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.75
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 22.26,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.62,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.6
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 25.24,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 23.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.9
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 22.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.1
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 42.68,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 14.4
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 5.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 2.4
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 19.2,
+      "requested": null,
+      "facing": "street",
+      "exteriorLength": 7.65
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 36.29,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.9
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 8.08,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.05
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.4
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 22.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.1
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 34.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.75
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 6٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C5",
+    "file": "alt-4.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 10.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 9.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.45
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 7.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.15
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 37.2,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.8
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 26.25,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.4
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 26.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.6
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 42.81,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.25
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «المطبخ» 7٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C6",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 10.62,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 30.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.5
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 20.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 16.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.3
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 22.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.15
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 24.05,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.35
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C6",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 14.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 31.95,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.7
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 30.54,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.85
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 26.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.9
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 20.97,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.65
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C7",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«المجلس»",
+      "pct": 18.39,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.25
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 8.97,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.6
+     },
+     {
+      "name": "«غرفة كبار السن»",
+      "pct": 21.35,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.35
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 29.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.25
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 8.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.45
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 10.63,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.35,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.2
+     },
+     {
+      "name": "«الصالة العلوية»",
+      "pct": 10.89,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.6
+     },
+     {
+      "name": "«غرفة نوم 5»",
+      "pct": 25.24,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     },
+     {
+      "name": "«غرفة نوم 6»",
+      "pct": 15.08,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.15
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 41.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.55
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«صالة الطعام»",
+      "pct": 33.38,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.65
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 24.81,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 0
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 15.2,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.9
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 12.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.5
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 11.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.35
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 16.23,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.1
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 9.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.1
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 24.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 11.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.4
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 22.68,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.1
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 27.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.3
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 24.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.99,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.99,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 23.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.5
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 24.1,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.25
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 27.85,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.2
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 29.93,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 12.1
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.22,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.05
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 24.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.75
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-4.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 9.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 31.09,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.75
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 21.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.4
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 31.18,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.1
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 27.52,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 13.3
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 24.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.85
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C9",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 10.46,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.65
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.75
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.44,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 24.41,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 23.77,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.15,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C9",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 16.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 21.39,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 30.3,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 10.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.45
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.63,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.05
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 22.67,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C9",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 4.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.15
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 22.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.3
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 53.59,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.4
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 20.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.45
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.4
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 9.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.9
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 25.06,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 4٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C9",
+    "file": "alt-4.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.05,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.35
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 25.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.7
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 9.9,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.85
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 7.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.85
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 38.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.8
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.33,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 36.05,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.05
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C10",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس النساء»",
+      "pct": 30.33,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.7
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 9.36,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.5
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 20.43,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.7
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 26.33,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.3,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.81,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.85
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 17.78,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.6
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 19.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 22.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.6
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C10",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 19.55,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 0
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 16.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 31.56,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.7
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 8.01,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.45
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 14.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.95
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 24.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.85
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 26.75,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.35
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 20.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.75
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 14.34,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.55
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C10",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 12.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.45
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 10.07,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.6
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 28.61,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.65
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 20.09,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 44.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 34.03,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.35
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 26.7,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.45
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   }
+  ]
+ },
+ "after-12": {
+  "note": "نسبة الزجاج اختيار العميل (لا قيمة افتراضية): المحقق لكل غرفة معلومة وما طلبه بجانبه؛ بوابة الرفض 3% كما هي؛ 8% الوزارة (المستوى ب) مرجع",
+  "alternatives": 24,
+  "rooms": 195,
+  "requestedRooms": 0,
+  "belowRequest": 0,
+  "below8": 4,
+  "failAt3": 0,
+  "rows": [
+   {
+    "case": "C1",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس النساء»",
+      "pct": 22.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.85
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 3.92,
+      "requested": null,
+      "facing": "street",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 8.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 25.15,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.4
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 26.61,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.6
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.01,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.4
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 10.07,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.8
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 26.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.6
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 9.12,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 29.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.8
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 4٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C1",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 11.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 31.22,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.65
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 13.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.8
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 19.44,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.85
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 20.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.7
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 27.66,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.5
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 8.59,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 19.25,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C2",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 8.65,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.1
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.41,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.45
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 63.76,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 12.05
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 9.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.4
+     },
+     {
+      "name": "«غرفة كبار السن»",
+      "pct": 11.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.6
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.64,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.65
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 5»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C3",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 9.39,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.41,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.45
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 14.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 16.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.65
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 22.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 25.06,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.75
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C3",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 25.31,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.75
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 4.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 2.95
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 28.06,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.91,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 22.55,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.75
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 50,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.65
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 5٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C4",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 31.12,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.8
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 29.38,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 26.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.43,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 20.27,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 9.95,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 22.26,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.62,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.6
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 25.24,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 23.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.9
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 22.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.1
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 42.68,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 14.4
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 18.24,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.75,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 17.31,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.25
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.29,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 21.46,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 27.3,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.35
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 26.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.85
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«صالة الطعام»",
+      "pct": 36.02,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.15
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 9.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.95
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 19.09,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.35
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 32.51,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.55
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 22.7,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.2
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.99,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.99,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C5",
+    "file": "alt-4.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 11.61,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.55
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 36.77,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.1
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 35.38,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.05
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 22.51,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.2
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.07,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.5
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 22.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.15
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.93,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.15
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C6",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 10.62,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 30.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.5
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 20.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 16.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.3
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 22.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.15
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 24.05,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.35
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C6",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 14.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 31.95,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.7
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 30.54,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.85
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 26.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.9
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 20.97,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.65
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C7",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«المجلس»",
+      "pct": 19,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 9.52,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.5
+     },
+     {
+      "name": "«غرفة كبار السن»",
+      "pct": 20.82,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.45
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 31.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.85
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 12.65
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 12.22,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.2
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«الصالة العلوية»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.5
+     },
+     {
+      "name": "«غرفة نوم 5»",
+      "pct": 24.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.85
+     },
+     {
+      "name": "«غرفة نوم 6»",
+      "pct": 15.45,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 42.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.4
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«صالة الطعام»",
+      "pct": 33.38,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.65
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 24.81,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 0
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 15.2,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.9
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 12.74,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.5
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 11.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.35
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 16.23,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.1
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 9.6,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.1
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 24.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 11.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.4
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 22.68,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.1
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 27.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.3
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 24.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.99,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.99,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 23.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.5
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 24.1,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.25
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 27.85,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.2
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 29.93,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 12.1
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.22,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.05
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 24.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.75
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C8",
+    "file": "alt-4.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 9.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 31.09,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.75
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 21.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.4
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 31.18,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.1
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 27.52,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 13.3
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 24.11,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.85
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.84,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C9",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 10.46,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.65
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 33.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.75
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 23.44,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.28,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 24.41,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 23.77,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.9
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.15,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C9",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 16.71,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 21.39,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 30.3,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 10.42,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 25.98,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.45
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 23.63,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.05
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 22.67,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C9",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 4.16,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.15
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 22.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.3
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 53.59,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.4
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 20.72,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.45
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.4
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 9.21,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.9
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 25.06,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": [
+     "مرجع نظامي (المستوى ب، لم يُطابَق يدويًا؛ ليس بوابة): اشتراطات الوزارة §5-1-15.2 تذكر 8٪ من أرضية الغرفة؛ دون هذا الرقم هنا: «الصالة» 4٪. نسبة الزجاج اختيار العميل (لا قيمة افتراضية)، وبوابة الرفض 3٪ كما هي."
+    ]
+   },
+   {
+    "case": "C9",
+    "file": "alt-4.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.05,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.35
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 25.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.7
+     },
+     {
+      "name": "«المجلس»",
+      "pct": 9.9,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.85
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 7.83,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.85
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 38.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.8
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.33,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 36.05,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.05
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C10",
+    "file": "alt-1.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس النساء»",
+      "pct": 30.33,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.7
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 9.36,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 5.5
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 20.43,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.7
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 26.33,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.3,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 11.81,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.85
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 17.78,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.6
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 10.53,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.3
+     },
+     {
+      "name": "«صالة الطعام»",
+      "pct": 19.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.5
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 22.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.6
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C10",
+    "file": "alt-2.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«الصالة»",
+      "pct": 19.55,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 0
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 16.92,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 31.56,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 11.7
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 8.01,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.45
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 14.69,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.95
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 11.47,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.4
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 24.96,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 7.85
+     },
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 26.75,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.35
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 20.13,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.75
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 14.34,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.55
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   },
+   {
+    "case": "C10",
+    "file": "alt-3.json",
+    "passAt3": true,
+    "rooms": [
+     {
+      "name": "«مجلس الرجال»",
+      "pct": 12.37,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.45
+     },
+     {
+      "name": "«الصالة»",
+      "pct": 10.07,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 4.6
+     },
+     {
+      "name": "«صالة الطعام والمقلط»",
+      "pct": 28.61,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 6.65
+     },
+     {
+      "name": "«المطبخ»",
+      "pct": 20.09,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 8.3
+     },
+     {
+      "name": "«غرفة الخادمة»",
+      "pct": 44.73,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.2
+     },
+     {
+      "name": "«غرفة النوم الرئيسية»",
+      "pct": 34.03,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 9.35
+     },
+     {
+      "name": "«مجلس النساء»",
+      "pct": 26.7,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 10.45
+     },
+     {
+      "name": "«غرفة نوم 4»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 2»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     },
+     {
+      "name": "«غرفة نوم 3»",
+      "pct": 12.14,
+      "requested": null,
+      "facing": "garden",
+      "exteriorLength": 3.7
+     }
+    ],
+    "notes_ar": [],
+    "reference_ar": []
+   }
+  ]
+ }
+}
