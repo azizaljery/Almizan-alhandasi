@@ -13,6 +13,17 @@ window.draw = (raw, levelIndex, title) => { const doc = parseDoc(raw), lv = doc.
 const b0 = docBounds(doc, lv.id), pp = doc.plot?.polygon || [], b = pp.length ? { x0: Math.min(b0.x0, ...pp.map(q => q.x)) + 1.6, y0: Math.min(b0.y0, ...pp.map(q => q.y)) + 1.6, x1: Math.max(b0.x1, ...pp.map(q => q.x)) - 1.6, y1: Math.max(b0.y1, ...pp.map(q => q.y)) - 1.6 } : b0, view = fitView({ x0: Math.min(b.x0, b0.x0) - 2.6, y0: Math.min(b.y0, b0.y0) - 2.6, x1: Math.max(b.x1, b0.x1) + 2.6, y1: Math.max(b.y1, b0.y1) + 1.4 }, 1400, 940, 40);
 ctx.save(); ctx.translate(0, 60); renderPlan(ctx, { doc, levelId: lv.id, view, W: 1400, H: 940, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true }, roomFill: rm => ZONES[zoneOf(rm.label)].color }); ctx.restore();
 ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 26px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title + (doc.levels.length > 1 ? ' — ' + lv.name : ''), 1380, 40); return true; };
+window.drawDiff = async (rawB, rawA, title) => { const { diffFingerprint } = await import('/plan-fingerprint.mjs'); const B = parseDoc(rawB), A = parseDoc(rawA), D = diffFingerprint(B, A); const c = document.getElementById('c'), ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1400,1000);
+const lv = A.levels[0], bb = docBounds(A, lv.id), b0 = docBounds(B, B.levels[0].id), box = { x0: Math.min(bb.x0, b0.x0) - 1.2, y0: Math.min(bb.y0, b0.y0) - 1.2, x1: Math.max(bb.x1, b0.x1) + 1.2, y1: Math.max(bb.y1, b0.y1) + 1.2 }, view = fitView(box, 690, 860, 20);
+const half = (doc, x, marks, label) => { const m = analyzeDoc(doc), L = m.levelById.get(doc.levels[0].id); ctx.save(); ctx.translate(x, 96); ctx.beginPath(); ctx.rect(0,0,690,860); ctx.clip(); renderPlan(ctx, { doc, levelId: doc.levels[0].id, view, W: 690, H: 860, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: false, areas: true, fixtures: true, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
+  const X = v => (v - view.cx) * view.scale + 345, Y = v => (view.cy - v) * view.scale + 430;
+  for (const [e, col, dash, fill] of marks) { const b = e.box; if (!b) continue; ctx.setLineDash(dash ? [7,4] : []); ctx.strokeStyle = col; ctx.lineWidth = e.kind === 'room' ? 2.5 : 3; const r = [X(b.x0) - (e.kind === 'room' ? 0 : 3), Y(b.y1) - (e.kind === 'room' ? 0 : 3), (b.x1 - b.x0) * view.scale + (e.kind === 'room' ? 0 : 6), (b.y1 - b.y0) * view.scale + (e.kind === 'room' ? 0 : 6)]; if (fill && e.kind === 'room') { ctx.fillStyle = fill; ctx.fillRect(...r); } ctx.strokeRect(...r); }
+  ctx.restore(); ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 20px Tahoma'; ctx.textAlign = 'center'; ctx.fillText(label, x + 345, 92); };
+const pl = e => e.kind !== 'fixture';
+half(B, 710, [...D.changed.filter(pl).map(e => [{ ...e, box: e.before?.box || e.box }, '#b5651d', false, 'rgba(181,101,29,.15)']), ...D.removed.filter(pl).map(e => [e, '#b5651d', true, 'rgba(181,101,29,.15)'])], 'قبل');
+half(A, 0, [...D.changed.filter(pl).map(e => [e, '#c62828', false, 'rgba(198,40,40,.16)']), ...D.added.filter(pl).map(e => [e, '#c62828', false, 'rgba(198,40,40,.16)'])], 'بعد');
+ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 24px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title, 1380, 36); ctx.font = '15px Tahoma'; ctx.fillText(D.identical ? 'البصمة الهندسية: لم يتغيّر أي عنصر — المخطط كما هو حرفيًا' : D.summary_ar.slice(0, 150), 1380, 60);
+ctx.font = '13px Tahoma'; ctx.fillText('المظلل: ما تغيّر (بني قبل، أحمر بعد)؛ المتقطع: ما أزيل. مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, 985); return D.counts; };
 window.ready = true;</script></body></html>`;
 const server = http.createServer(async (req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
@@ -32,6 +43,11 @@ for (const id of cases) {
     const raw = await readFile(ev + id + '/' + f, 'utf8'), n = JSON.parse(raw).levels.length;
     for (let li = 0; li < n; li++) { await p.evaluate(([r, i, t]) => window.draw(r, i, t), [raw, li, `${id} — ${f.replace('.json', '')}`]); await p.locator('#c').screenshot({ path: ev + id + '/' + f.replace('.json', '') + (n > 1 ? `-L${li + 1}` : '') + '.png' }); }
   }
+  // (الجولة الرابعة عشرة) فرق كل تعديل مرسومًا (قبل | بعد) بالبصمة الهندسية: ما تغيّر مظلل وما أزيل متقطع
+  const diffs = [];
+  if (files.includes('edit-before.json') && files.includes('edit-after.json')) diffs.push(['edit-before.json', 'edit-after.json', 'edit-diff.png']);
+  for (const f of files) { const m = /^edit-alt(\d+)-after\.json$/.exec(f); if (m && files.includes(`alt-${m[1]}.json`)) diffs.push([`alt-${m[1]}.json`, f, `edit-alt${m[1]}-diff.png`]); }
+  for (const [bf, af, out] of diffs) { const rb = await readFile(ev + id + '/' + bf, 'utf8'), ra = await readFile(ev + id + '/' + af, 'utf8'); await p.evaluate(([x, y, t]) => window.drawDiff(x, y, t), [rb, ra, `${id} — فرق التعديل: ${bf.replace('.json', '')} ← ${af.replace('.json', '')}`]); await p.locator('#c').screenshot({ path: ev + id + '/' + out }); }
   if (no3d) { console.log(id, 'صور:', files.length); continue; }
   // ثلاثي الأبعاد لأفضل بديل
   const raw = await readFile(ev + id + '/' + (files.includes('alt-1.json') ? 'alt-1.json' : files[0]), 'utf8');

@@ -1672,8 +1672,15 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
       let t = grow(ss0, t0);
       // (الجولة الثانية عشرة) شريط الرئيسية القصير لا يتسع لحمام وغرفة ملابس: عمقه بقدر حمام ≤ 7 م² صافيًا (لا حمام متضخم)
       if (b.master && !masterAsked(P) && L - (b.master ? T.masterBathL : T.bathL) < .95 && (L - WALL_NET) * (t - WALL_NET) > MASTER_BATH_MAX) t = Math.max(1.8, Math.floor((MASTER_BATH_MAX / Math.max(.5, L - WALL_NET) + WALL_NET) / SNAP) * SNAP);
-      const [strip, rest] = cut(r, ss, t);
       let bl = b.master && L - bl0 < 1.5 && L - 2.4 >= 1.5 ? L - 1.5 : Math.min(bl0, L);
+      // (الجولة الرابعة عشرة) غرفة ملابس حقيقية للرئيسية الكبيرة (> 20 م²): ≥ 2.0 × 2.5 م صافيًا (قيمة تصميمية افتراضية للميزان؛
+      // المراجع المستقل r13: غرف ملابس رمزية 1.38 × 2.02) — يتعمق الشريط إلى 2.25 م ويُقصر الحمام إن بقيت الغرفة ≥ 16 م² وضلعها ≥ 3.4 م
+      if (b.master && !masterAsked(P) && !R14_OFF.has('dress')) {
+        const tD = 2.25, needL = 2.7, r0 = cut(r, ss, t)[1], restT = cut(r, ss, Math.max(t, tD))[1];
+        const big = (W_(r0) - WALL_NET) * (H_(r0) - WALL_NET) > 20, rn = (W_(restT) - WALL_NET) * (H_(restT) - WALL_NET), rmin = Math.min(W_(restT), H_(restT)) - WALL_NET;
+        if (big && rn >= 16 && rmin >= 3.4) { let bl2 = bl; if (L - bl2 < needL && L - needL >= 1.9) bl2 = snap(L - needL); if (L - bl2 >= needL - 1e-6) { t = Math.max(t, tD); bl = bl2; } }
+      }
+      const [strip, rest] = cut(r, ss, t);
       // (الجولة العاشرة) حمام الرئيسية ≤ 7 م² صافيًا ما لم تُطلب كبيرة: الزائد لغرفة الملابس (إن بقي لها ≥ 1.5 م)
       // (الجولة الثانية عشرة) وإن بقي أقل من 1.5 م وأكثر من 0.95 م: الزائد خزانة صغيرة تُفتح من الغرفة (لا حمام متضخم)
       if (b.master && !masterAsked(P)) { const cap = Math.max(1.8, MASTER_BATH_MAX / Math.max(.5, t - WALL_NET) + WALL_NET); if (bl > cap && L - cap >= .95) bl = Math.floor(cap / SNAP) * SNAP; }

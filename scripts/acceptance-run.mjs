@@ -78,8 +78,8 @@ for (const C of CASES) {
     const HEAVY = ['STRUCTURAL', 'CIRCULATION', 'CONSISTENCY_2D3D'];
     const rv = d => (d.review ? { passed: d.review.passed, failedGates: d.review.failedGates, score: d.review.score, rejectReasons_ar: d.review.rejectReasons_ar,
       gates: Object.fromEntries((d.review.gates || []).map(g => [g.id, { ok: g.ok, applicable: g.applicable }])), heavy: Object.fromEntries((d.review.gates || []).filter(g => HEAVY.includes(g.id)).map(g => [g.id, { ok: g.ok, value: g.value }])) } : null);
-    out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
-    row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length;
+    out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, presentation: d.presentation || null, prefFails: d.prefFails || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
+    row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length; row.hidden = out.hidden || []; row.presentation = out.presentation || null; row.proposalLabel_ar = out.presentation?.label_ar || null;
     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));
     row.modes = [...new Set(out.designs.map(d => d.mode))];
     const pairs = row.diversity.flatMap((r, i) => r.filter((_, j) => j > i));
