@@ -196,7 +196,12 @@ test('C8: «انقل المطبخ بجوار الطعام وخل المطبخ ف
   const req = extractRequirements(C.text, { counts: C.counts }), first = await generateInitialDesign({ land, counts: req.counts, requirements: req });
   let { session, reply } = await redesign(createSession({ land, counts: req.counts, requirements: req, result: first }), { text: C.edit });
   // (الجولة العاشرة/الحادية عشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح المعروض في السؤال
-  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
+  // (الجولة الرابعة عشرة) خيارات صريحة: لا يُعاد بديل معروض على أنه تعديل؛ إن لم يوجد توزيع جديد يحققه يبقى المخطط حرفيًا
+  if (reply.mode === 'ask-options') {
+    const act = reply.options.find(o => o.id === 'zone') || reply.options.find(o => o.id === 'full');
+    if (!act) { assert.ok(reply.options.some(o => o.id === 'shown'), 'يدل على البدائل المعروضة التي تحققه'); const k = await redesign(session, { text: '1' }); assert.equal(k.session.designs.length, 1); return; }
+    ({ session, reply } = await redesign(session, { text: String(act.n) }));
+  } else if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
   assert.equal(session.input.requirements.counts.bedrooms, 4, 'عدد الغرف لا يتغير');
   // النمط نفسه إن حقق الطلب، وإلا أقرب نمط يحققه — والرد يقول ذلك صراحة
   if (session.designs[1].pat !== session.designs[0].pat) { assert.ok(reply.patternChanged, 'الرد يذكر تغيّر التوزيع'); assert.equal(reply.patternChanged.from, session.designs[0].pat); }

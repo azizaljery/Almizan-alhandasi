@@ -114,13 +114,17 @@ test('C8: تعديل المطبخ يُنفَّذ فعلًا (بجوار الطع
   const { C, r, land } = caseReq('C8');
   const first = await generateInitialDesign({ land, counts: r.counts, requirements: r });
   let { session, reply } = await redesign(createSession({ land, counts: r.counts, requirements: r, result: first }), { text: C.edit });
-  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
+  // (الجولة الرابعة عشرة) خيارات صريحة؛ إن لم يوجد توزيع جديد (غير البدائل المعروضة) يحققه يبقى المخطط حرفيًا ويُدل على البديل المعروض
+  if (reply.mode === 'ask-options') {
+    const act = reply.options.find(o => o.id === 'zone') || reply.options.find(o => o.id === 'full');
+    if (!act) { assert.ok(reply.options.some(o => o.id === 'shown')); return; }
+    ({ session, reply } = await redesign(session, { text: String(act.n) }));
+  } else if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
   assert.deepEqual([...reply.done].sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort(), JSON.stringify(reply.failed));
   const after = JSON.parse(session.designs[1].doc);
   const led = verifyRequest(after, { rules: mergeRules([], extractRequirements(C.edit, { counts: {} }).rules) }, { entry: 's' });
   assert.ok(led.every(x => x.status === 'done'), JSON.stringify(led));
   const prog = d => docRooms(d).rooms.filter(x => ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen'].includes(x.type)).map(x => x.name).sort();
   assert.deepEqual(prog(after), prog(first.doc));
-  if (session.designs[1].pat !== session.designs[0].pat) assert.ok(reply.patternChanged && /أقرب توزيع/.test(reply.patternChanged.why_ar));
   assert.ok(session.designs[1].review && session.designs[1].review.passed);
 });

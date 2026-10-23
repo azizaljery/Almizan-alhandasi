@@ -74,5 +74,7 @@ test('من محادثة شرعاء إلى المخطط: ما فهمه Claude ي�
   let { reply, session: s1 } = await redesign(ds, { text: 'خل المكتب ورى', ai: sanitizeAiRequirements({ rules: [{ kind: 'place', a: 'office', side: 'back', mode: 'half', quote: 'المكتب ورى' }], extras: [{ kind: 'office' }], unclear: [] }) });
   // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح
   if (reply.mode === 'ask-regenerate') ({ reply } = await redesign(s1, { text: 'نعم' }));
+  // (الجولة الرابعة عشرة) خيارات صريحة: يختار العميل إعادة التوزيع (أو المنطقة الواحدة) برقمها
+  if (reply.mode === 'ask-options') { const o = reply.options.find(x => x.id === 'zone') || reply.options.find(x => x.id === 'full'); ({ reply } = await redesign(s1, { text: String(o.n) })); }
   assert.ok(reply.done.some(t => /المكتب/.test(t)), JSON.stringify(reply));
 });

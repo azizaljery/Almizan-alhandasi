@@ -35,7 +35,7 @@ test('جلسة التصميم: الأول يُعرض، و«تصميم آخر» �
 test('ملخص العرض: مواصفات وجدول فراغات بالمناطق من المستند نفسه', async () => {
   const out = await generateInitialDesign({ land, rooms: null, discovery, counts });
   const S = summarizeDoc(out.doc);
-  assert.equal(S.specs.bedrooms, 4); assert.equal(S.specs.majlis, 2); assert.equal(S.specs.baths, 5); assert.equal(S.specs.floors, 1);
+  assert.equal(S.specs.bedrooms, 4); assert.equal(S.specs.majlis, 2); assert.ok(S.specs.baths >= 5, 'الحمامات المطلوبة (وقد تزيد دورة المياه اليومية الافتراضية)'); assert.equal(S.specs.floors, 1);
   assert.ok(S.specs.entries >= 2 && S.specs.net > 100 && S.specs.built >= S.specs.net);
   assert.ok(S.rooms.some(r => r.zone === 'men') && S.rooms.some(r => r.zone === 'women') && S.rooms.some(r => r.zone === 'service'));
   assert.equal(zoneOf({ name: 'دورة مياه الرجال', type: 'bath' }), 'men'); assert.equal(zoneOf({ name: 'مجلس النساء', type: 'majlis' }), 'women');

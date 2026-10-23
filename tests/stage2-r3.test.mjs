@@ -65,13 +65,15 @@ test('C8: التعديل على كل بديل يحفظ النمط والغرف �
     let { session, reply } = await redesign(s0, { text: C.edit });
     // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح نفسه
     if (reply.mode === 'ask-regenerate') ({ session, reply } = await redesign(session, { text: 'نعم' }));
+    // (الجولة الرابعة عشرة) لا حل موضعي ولا توزيع جديد غير المعروض: يبقى المخطط حرفيًا (لا يُعاد بديل معروض على أنه تعديل)
+    if (reply.mode === 'ask-options') { const act = reply.options.find(o => o.id === 'zone') || reply.options.find(o => o.id === 'full'); if (!act) { const k = await redesign(session, { text: '1' }); assert.equal(k.session.designs.length, 1, d.pat); continue; } ({ session, reply } = await redesign(session, { text: String(act.n) })); }
     const after = JSON.parse(session.designs[1].doc);
     assert.deepEqual([...reply.done].sort(), ['«المطبخ» بجوار «الطعام»', '«المطبخ» في الخلف'].sort(), d.pat + ' ' + JSON.stringify(reply.failed));
     assert.deepEqual(prog(after), prog(d.doc), d.pat + ': غرف البرنامج نفسها');
     // «في الخلف» صارمًا (الجولة الرابعة): على الواجهة الخلفية أو في ثلثها الخلفي بلا غرفة سكنية خلفه
     { const k = verifyRules(after, [{ id: 'K', kind: 'place', a: 'kitchen', side: 'back', mode: 'zone', text: 'المطبخ في الخلف' }], { entry: 's' })[0]; assert.equal(k.ok, true, d.pat + ': ' + k.why); }
     if (session.designs[1].pat === d.pat) { kept++; assert.ok(difference(d.doc, after) <= .15, `${d.pat}: فرق ${difference(d.doc, after)}`); }
-    else assert.ok(reply.patternChanged && /أقرب توزيع/.test(reply.patternChanged.why_ar), 'تغيّر النمط يُقال صراحة');
+    else assert.ok(reply.choice === 'full' || reply.choice === 'zone' || (reply.patternChanged && /أقرب توزيع/.test(reply.patternChanged.why_ar)), 'تغيّر النمط باختيار صريح أو يُقال صراحة');
     if (reply.unchanged) assert.equal(session.designs[1].doc, session.designs[0].doc, 'متحقق أصلًا: المخطط نفسه حرفيًا');
   }
   // «في الخلف» صارمًا (الجولة الرابعة): أنماط جناح النوم فيها يشغل الخلف كله لا حل موضعي لها (المبادلة بغرفة نوم تجعل

@@ -149,9 +149,11 @@ test('اسأل قبل إعادة التوزيع: طلب لا حل موضعيًا
   const proposal = DOC('S1', 1); let calls = 0;
   const gen = async () => { calls++; return { doc: parseDoc(serialize(proposal)), pat: 'regen', summary: '', notes: [], floors: 1 }; };
   const o = await redesign(s0, { text: 'انقل المطبخ ورا جنب الطعام' }, { generate: gen });
-  assert.equal(calls, 1); assert.equal(o.reply.mode, 'ask-regenerate');
-  assert.equal(o.reply.conflicts[0].type, 'needs-consent'); assert.match(o.reply.questions[0], /إعادة توزيع البيت/); assert.match(o.reply.questions[0], /البصمة الهندسية/);
-  assert.ok(o.reply.proposal.fingerprint.counts.touched > 50);
+  // (الجولة الرابعة عشرة) خيارات صريحة بدل «نعم/لا»: إبقاء المخطط، أو إعادة توزيع البيت (المقترح نفسه، مقيسًا بالبصمة)
+  assert.equal(calls, 1); assert.equal(o.reply.mode, 'ask-options');
+  assert.equal(o.reply.conflicts[0].type, 'needs-consent'); assert.match(o.reply.questions[0], /أعد توزيع البيت/); assert.match(o.reply.questions[0], /البصمة الهندسية/);
+  assert.deepEqual(o.reply.options.map(x => x.id), ['keep', 'full']);
+  assert.ok(o.reply.proposal.full.fingerprint.counts.touched > 50);
   assert.ok(diffFingerprint(currentDoc(s0), currentDoc(o.session)).identical, 'لم يتغير شيء قبل الموافقة');
   const no = await redesign(o.session, { text: 'لا' }, { generate: noGen });
   assert.ok(diffFingerprint(currentDoc(s0), currentDoc(no.session)).identical); assert.ok(!no.session.pendingEdit);
