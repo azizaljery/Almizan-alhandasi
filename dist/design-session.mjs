@@ -9,6 +9,7 @@ import { parseDoc, serialize } from './draw/doc.mjs';
 import { parseEdit, applyEdits, replayIntents, compareDocs, describeChanges, inspect, measureIntents, FACADE_RENDER } from './plan-edit.mjs';
 import { reviewDesign } from './plan-review.mjs';
 import { fingerprint, diffFingerprint, compactDiff, touchedKeys, countAr } from './plan-fingerprint.mjs';
+import { zoneDiff, matchShown, roomsHash, sideOccupants } from './edit-truth.mjs';
 import { streetWidthQuestion, parseStreetWidthAnswer, frontSetbackFor } from './regulations-sa.mjs';
 
 export const SESSION_KEY = 'mizan.design.session.v1';
@@ -176,6 +177,38 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
   if (pend && !picks.length && text) {
     const tt = normalizeAr(text);
     const yes = /^(?:نعم|ايه|ايوه|اي|اكيد|تمام|طيب|موافق|نفذ|نفذه|نفذها|اوكي|ok|yes|خلاص نفذ|يلا|اعد التوزيع|اعده)(?:[ ،,.!]|$)/.test(tt);
+    // (الجولة الرابعة عشرة) جواب خيارات التعديل: رقم الخيار أو كلمته. «نعم» وحدها تُقبل إن كان خيار تنفيذ واحد فقط.
+    if (pend.options) {
+      const dig = tt.replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+      const num = (/^\(?([1-4])\)?(?:[ ،,.!]|$)/.exec(dig) || /(?:الخيار|خيار|رقم) ?([1-4])/.exec(dig) || [])[1];
+      const acts = ['zone', 'full'].filter(k => pend[k]);
+      let pick = num ? (pend.order || ['keep', 'zone', 'shown', 'full'])[+num - 1] || null : /^(?:لا|ابق|ابقه|ابقها|خله|خلها|اتركه)(?:[ ،,.!]|$)/.test(tt) ? 'keep' : /منطقه/.test(tt) ? 'zone' : /البديل|البدائل/.test(tt) ? 'shown' : /(?:البيت|المخطط) كله|توزيع كامل|كامل/.test(tt) ? 'full' : yes && acts.length === 1 ? acts[0] : null;
+      const altNum = (/البديل ?([1-9])/.exec(dig) || [])[1];
+      const base = { done: [], failed: [], pending: [], unverified: [], picks: [], unclear: [], unsupported: [], otherFails: [], conflicts: [], questions: [] };
+      if (pick === 'keep') { const k = clone(session); delete k.pendingEdit; k.reply = null; return { session: k, changes: [], reply: { ...base, local: true, mode: 'declined', kept: true, unchanged: true, summary_ar: 'تمام، أبقيت المخطط كما هو حرفيًا.' } }; }
+      if ((pick === 'zone' || pick === 'full') && pend[pick]) {
+        const s2 = clone(session); delete s2.pendingEdit; s2.input = clone(pend.input);
+        const d = clone(pend[pick]), info = pend[pick + 'Info'];
+        const said = pick === 'zone' ? `أعدت توزيع ${info.changed[0] || 'منطقة واحدة'} وحدها كما اخترت، وبقيت ${info.kept.join(' و')} ثابتة حرفيًا (البصمة الهندسية).` : `أعدت توزيع البيت كما اخترت: تغيّرت ${info.changed.join(' و')}${info.kept.length ? ` وبقيت ${info.kept.join(' و')}` : ''}.`;
+        d.feedback = { ...(d.feedback || {}), reply: { ...(d.feedback?.reply || {}), consented: true, choice: pick } };
+        pushDesign(s2, d); s2.reply = null;
+        const fp = d.feedback.reply.fingerprint;
+        return { session: s2, changes: d.feedback.changes || [], reply: { ...pend.reply, ...base, done: pend.reply.done || [], mode: pick === 'zone' ? 'zone-regenerated' : 'regenerated', choice: pick, consented: true, zoneDiff: d.feedback.reply.zoneDiff, fingerprint: fp, kept: false, unchanged: false, summary_ar: `${said} ${fp?.summary_ar || ''}`.trim() } };
+      }
+      if (pick === 'shown' && pend.shownOk?.length) {
+        const i = altNum && pend.shownOk.includes(+altNum - 1) ? +altNum - 1 : pend.shownOk[0], a = (session.alternatives || []).find(x => x.index === i);
+        if (a) {
+          const s2 = clone(session); delete s2.pendingEdit;
+          const d = { doc: a.doc, pat: a.pat || null, summary: a.summary || '', notes: [...(a.notes || []), `البديل ${i + 1} كما عُرض (اختاره العميل بدل تعديل المخطط السابق؛ ليس تعديلًا له).`], floors: 1, feedback: { picks: [], text, changes: [], reply: { mode: 'switched-alternative', alternative: i + 1 } }, engine: '', ledger: null, review: a.review || null, mirror: a.mirror ?? null };
+          pushDesign(s2, d); s2.reply = null;
+          return { session: s2, changes: [], reply: { ...base, local: false, mode: 'switched-alternative', alternative: i + 1, kept: false, unchanged: false, summary_ar: `عرضت البديل ${i + 1} كما هو — وهو بديل مختلف يحقق طلبك، لا تعديل للمخطط السابق (المخطط السابق محفوظ في النسخ).` } };
+        }
+      }
+      // جواب غير محدد: يُعاد السؤال نفسه بخياراته (لا تنفيذ بالتخمين)
+      const k = clone(session); k.pendingEdit = pend;
+      const q = (session.reply?.questions || [])[0] || '';
+      return { session: k, changes: [], reply: { ...base, local: true, mode: 'ask-options', kept: true, unchanged: true, conflicts: session.reply?.conflicts || [], questions: [q], summary_ar: `اختر رقم الخيار حتى لا أنفّذ بالتخمين. ${q}`.trim() } };
+    }
     // (الجولة العاشرة) موافقة على إعادة التوزيع المقترحة: يُعتمد التصميم الذي عُرض أثره قبل السؤال نفسه حرفيًا
     if (yes && pend.regen) {
       const s2 = clone(session); delete s2.pendingEdit; s2.input = clone(pend.input);
@@ -309,18 +342,47 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
     if (reply.patternChanged) reply.patternChanged.why_ar = 'التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه — وتغيّرت معه غرف أخرى (مذكورة في الرد).';
     // (الجولة العاشرة) طلب تعديل لم يُحل موضعيًا: لا يُعاد توزيع البيت قبل موافقة العميل — يُعرض أثره مقيسًا بالبصمة
     // (كم عنصرًا سيتغير، وأي الغرف) ويُحفظ التصميم المقترح نفسه ليُعتمد حرفيًا بـ«نعم»
-    if (fallbackNote.intents?.length) {
-      const why = (fallbackNote.failed || []).map(f => (f.why_ar || '').replace(/\s*\(\d+ محاولة[^)]*\)+/, '')).filter(Boolean).join('؛ ') || fallbackNote.why_ar || '';
-      const before = fpd ? fpd.counts.unchanged + fpd.counts.changed + fpd.counts.removed : 0;
-      // (الجولة الحادية عشرة) ما طلبه العميل سابقًا ومتحقق في المعروض ولا يتحقق في التوزيع المقترح: يُذكر في السؤال نفسه (لا يضيع بصمت)
-      let lost = []; try { const okNow = new Set(verifyRequest(parseDoc(cur.doc), req, { entry: entryDir }).filter(x => x.ok).map(x => x.text)); lost = ledger.filter(x => !x.ok && okNow.has(x.text)).map(x => ({ text: x.text, why: x.why })); } catch { lost = []; }
-      const q = `لم أجد تعديلًا موضعيًا يحقق طلبك دون المساس ببقية البيت${why ? ` (${why.replace(/[.。]+$/, '')})` : ''}. تحقيقه يحتاج إعادة توزيع البيت: ${fpd ? `لا يبقى ثابتًا حرفيًا إلا ${countAr(fpd.counts.unchanged)} من ${countAr(before)} في المخطط الحالي (البصمة الهندسية)` : 'يتغير معظم المخطط'}، وتتغير ${countAr(rooms.length, 'room')} لم تطلبها${rooms.length ? ` (${rooms.slice(0, 6).map(c => `«${c.name}»`).join('، ')}${rooms.length > 6 ? '…' : ''})` : ''}.${lost.length ? ` وتنبيه: في التوزيع الجديد لا يتحقق ما طلبته سابقًا ومتحقق الآن: ${lost.map(x => `«${x.text}»`).join('، ')}.` : ''} أعيد توزيع البيت؟ (قل «نعم» أو «لا»)`;
-      const proposal = { ...reply, mode: 'regenerated', lost };
+    // (الجولة الرابعة عشرة) صدق التعديل: لا يُستبدل المخطط المعروض بصمت، ولا يُقدَّم بديل سبق عرضه على أنه «نتيجة التعديل».
+    // يُقال السبب الهندسي وتُعرض الخيارات مقيسة بالبصمة: (1) إبقاء المخطط، (2) إعادة توزيع منطقة واحدة مع بقاء بصمة المناطق
+    // الأخرى حرفيًا، (3) البدائل المعروضة التي تحقق الطلب أصلًا، (4) إعادة توزيع البيت كله (إن لم تكن بديلًا معروضًا).
+    {
+      const why = (fallbackNote.failed || []).map(f => (f.why_ar || '').replace(/\s*\(\d+ محاولة[\s\S]*$/, '').replace(/[.。]+$/, '')).filter(Boolean).join('؛ ') || fallbackNote.why_ar || '';
+      const curD = parseDoc(cur.doc), intents = (fallbackNote.intents || []).filter(i => i.op !== 'none');
+      const mineTexts = new Set(mine.map(x => x.text));
+      const achieves = d => { try { if (intents.length) { const mm = measureIntents(curD, d, intents, { entry: entryDir }); return mm.length > 0 && mm.every(x => x.ok); } const L = verifyRequest(d, req, { entry: entryDir }).filter(x => mineTexts.has(x.text)); return L.length > 0 && L.every(x => x.ok); } catch { return false; } };
+      const curH = roomsHash(curD);
+      const shown = (s.alternatives || []).map(a => ({ index: a.index, doc: parseDoc(a.doc) })).filter(a => roomsHash(a.doc) !== curH);
+      const pool = [], seenH = new Set([curH]);
+      for (const c of [{ ...out }, ...(out.alternatives || []).slice(1).map(a => ({ ...out, doc: a.doc, pat: a.pat || null, summary: a.summary || out.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
+        const h = roomsHash(c.doc); if (seenH.has(h)) continue; seenH.add(h);
+        c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
+      }
+      const fresh = pool.filter(c => c.ok && !c.shownAs).sort((a, b) => a.zd.changed.length - b.zd.changed.length);
+      const zoneCand = fresh.find(c => c.zd.changed.length <= 1) || null, fullCand = fresh.find(c => c !== zoneCand) || null;
+      const shownOk = shown.filter(a => achieves(a.doc)).map(a => a.index);
+      const nearestShown = pool.find(c => c.ok && c.shownAs);
+      const fpOf = c => { try { const d = diffFingerprint(curD, c.doc); return { d, compact: compactDiff(d) }; } catch { return null; } };
+      const zf = zoneCand ? fpOf(zoneCand) : null, ff = fullCand ? fpOf(fullCand) : null;
+      const minZones = pool.filter(c => c.ok).reduce((m, c) => Math.min(m, c.zd.changed.length), Infinity);
+      const opts = [{ id: 'keep', n: 1, text_ar: 'أبقِ المخطط المعروض كما هو حرفيًا' }];
+      if (zoneCand) opts.push({ id: 'zone', n: 2, text_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}` });
+      if (shownOk.length) opts.push({ id: 'shown', n: 3, alts: shownOk, text_ar: `اعرض ${shownOk.length === 1 ? 'البديل' : 'البدائل'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط)` });
+      if (fullCand) opts.push({ id: 'full', n: 4, text_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة` });
+      // بلغة العميل: من يشغل الجهة المطلوبة الآن (مثل «خلف البيت تشغله منطقة النوم…»)
+      let occ = ''; try { const sides = [...new Set(intents.filter(i => i.op === 'rule' && i.rule?.kind === 'place' && ['back', 'front'].includes(i.rule.side)).map(i => i.rule.side))];
+        occ = sides.map(sd => { const o = sideOccupants(curD, sd, entryDir); return o ? ` ${sd === 'back' ? 'خلف' : 'مقدمة'} هذا المخطط ${o.length > 1 ? 'تشغلها' : 'تشغله'} ${o.map(z => `${z.zone_ar.replace(/ \(.*\)$/, '')} (${z.rooms.map(n => `«${n}»`).join('، ')})`).join(' و')}${o.some(z => z.zone === 'sleep') ? '؛ نقل المطبخ إليها يزيح غرف النوم إلى موضع المطبخ أو الطعام أو يجعل المطبخ على ممر النوم' : ''}.` : ''; }).join(''); } catch { occ = ''; }
+      opts.forEach((o, k) => { o.n = k + 1; });
+      const zoneWhy = (occ || '') + (zoneCand ? '' : Number.isFinite(minZones) ? ` إعادة توزيع منطقة واحدة لا تكفي: أقرب توزيع يحقق طلبك يغيّر ${minZones} من مناطق البيت.` : ' ولم أجد توزيعًا يحققه بإعادة توزيع منطقة واحدة.');
+      const dupWhy = nearestShown ? ` وأقرب توزيع يحققه هو البديل ${nearestShown.shownAs.index + 1} المعروض لك أصلًا${nearestShown.shownAs.identical ? ' حرفيًا' : ' بتنظيمه'} — لا أقدّمه على أنه تعديل لهذا المخطط.` : '';
+      let lost = []; try { const okNow = new Set(verifyRequest(curD, req, { entry: entryDir }).filter(x => x.ok).map(x => x.text)); lost = ledger.filter(x => !x.ok && okNow.has(x.text)).map(x => ({ text: x.text, why: x.why })); } catch { lost = []; }
+      const q = `لم أجد تعديلًا موضعيًا يحقق طلبك على هذا المخطط نفسه${why ? `. السبب الهندسي: ${why.replace(/[.。]+$/, '')}` : ''}.${zoneWhy}${dupWhy} اختر رقمًا: ${opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ')}.`;
       const keep = clone(session);
-      keep.pendingEdit = { regen: true, text, input: s.input, design: entry(out, { picks, text, changes, reply: proposal, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }), reply: proposal };
-      const cq = { type: 'needs-consent', key: 'regen|' + text, question_ar: q };
+      const mk = c => entry(c, { picks, text, changes, reply: { ...reply, mode: 'regenerated', zoneDiff: { changed: c.zd.changed, kept: c.zd.kept }, fingerprint: fpOf(c)?.compact || null }, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null });
+      keep.pendingEdit = { options: true, order: opts.map(o => o.id), text, input: s.input, zone: zoneCand ? mk(zoneCand) : null, full: fullCand ? mk(fullCand) : null, shownOk, zoneInfo: zoneCand ? { changed: zoneCand.zd.changed_ar, kept: zoneCand.zd.kept_ar } : null, fullInfo: fullCand ? { changed: fullCand.zd.changed_ar, kept: fullCand.zd.kept_ar } : null, reply: { ...reply, lost } };
+      const cq = { type: 'needs-consent', key: 'options|' + text, question_ar: q };
       keep.reply = { conflicts: [cq], questions: [q] };
-      return { session: keep, changes: [], reply: { local: true, mode: 'ask-regenerate', conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [], proposal: { fingerprint: reply.fingerprint || null, changed: ch, measured: reply.fallbackMeasured || null, pattern: out.pat || null, lost }, summary_ar: q } };
+      return { session: keep, changes: [], reply: { local: true, mode: 'ask-options', options: opts, conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [],
+        proposal: { zone: zoneCand ? { pattern: zoneCand.pat || null, zones: zoneCand.zd, fingerprint: zf?.compact || null } : null, full: fullCand ? { pattern: fullCand.pat || null, zones: fullCand.zd, fingerprint: ff?.compact || null } : null, shownSatisfying: shownOk.map(i => i + 1), nearestIsShown: nearestShown ? nearestShown.shownAs.index + 1 : null, measured: reply.fallbackMeasured || null, lost }, summary_ar: q } };
     }
   }
   pushDesign(s, entry(out, { picks, text, changes, reply, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }));

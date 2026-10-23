@@ -28,7 +28,7 @@ const r2 = v => Math.round(v * 100) / 100;
  * يقترح مواقف السيارات لمستند (الدور الأرضي): يعيد { bays:[{ polygon, side, kind }], note_ar }. لا يعدّل المستند.
  * max: أقصى عدد (افتراضيًا 2).
  */
-export function planParking(doc, { max = null } = {}) {
+export function planParking(doc, { max = null, parallel = false } = {}) {
   const plot0 = doc.plot?.polygon; if (!plot0 || plot0.length < 3) return { bays: [], note_ar: 'لا مضلع أرض في المستند.' };
   const need = requiredParking(plotArea(plot0)); if (max == null) max = need;
   const plot = ccw(plot0.map(p => ({ x: p.x, y: p.y })));
@@ -47,12 +47,19 @@ export function planParking(doc, { max = null } = {}) {
       if (o.y < -.7) boxes.push({ x0: p.x - hw, x1: p.x + hw, y0: y0 - 1, y1: p.y + .2 }); // باب على الشارع: ممره إلى حد الأرض
       else { const q = { x: p.x + o.x * 1.8, y: p.y + o.y * 1.8 }; boxes.push({ x0: Math.min(p.x, q.x) - hw, x1: Math.max(p.x, q.x) + hw, y0: Math.min(p.y, q.y) - hw, y1: Math.max(p.y, q.y) + hw }); }
     }
+    // (الجولة الرابعة عشرة) لا موقف يلاصق نافذة (0.5 م أمامها) — السيارة أمام نافذة المجلس أو الصالة عيب (المراجع المستقل r13)
+    const wins = G.openings.filter(op => op.window && op.sides.some(s => s.exterior)).map(op => ({ p: op.p, out: op.sides.find(x => x.exterior).outward, w: op.w }));
+    for (const wv of wins) { const p = F(wv.p), o = rot(wv.out, a), hw = wv.w / 2 + .2, q = { x: p.x + o.x * .5, y: p.y + o.y * .5 }; boxes.push({ x0: Math.min(p.x, q.x) - (Math.abs(o.x) > .7 ? 0 : hw), x1: Math.max(p.x, q.x) + (Math.abs(o.x) > .7 ? 0 : hw), y0: Math.min(p.y, q.y) - (Math.abs(o.x) > .7 ? hw : 0), y1: Math.max(p.y, q.y) + (Math.abs(o.x) > .7 ? hw : 0) }); }
     const inside = r => [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]].every(([x, y]) => pointInPolygon({ x, y }, P, 1e-6) && distToPoly({ x, y }, P) >= .08);
-    const hit = r => boxes.some(b => r.x0 < b.x1 && r.x1 > b.x0 && r.y0 < b.y1 && r.y1 > b.y0);
+    // تجويف: المبنى على جانبي الموقف عند منتصف عمقه (0.8 م يمينه ويساره) — لا يُقبل
+    const atB = (x, y) => !!G.roomAt(Fi({ x, y }));
+    const niche = r => { const ym = (r.y0 + r.y1) / 2; return atB(r.x0 - .8, ym) && atB(r.x1 + .8, ym); };
+    const hit = r => boxes.some(b => r.x0 < b.x1 && r.x1 > b.x0 && r.y0 < b.y1 && r.y1 > b.y0) || niche(r);
     // الحد الأمامي عند x: أدنى y للمضلع على ذلك العمود (أرض غير منتظمة)
     const frontAt = (xa, xb) => { let m = -Infinity; for (const x of [xa, (xa + xb) / 2, xb]) m = Math.max(m, minYAt(P, x)); return m; };
     const cands = [];
-    for (const kind of ['perp', 'para']) {
+    // (الجولة الرابعة عشرة) عمودي على الشارع فقط (عمق 5.5 م) — الموازي في ارتداد ضحل لا يُقترح إلا بطلب العميل
+    for (const kind of parallel ? ['perp', 'para'] : ['perp']) {
       const { w, d } = BAY[kind];
       for (let x = x0 + .15; x + w <= x1 - .15 + 1e-9; x += .1) {
         const fy = frontAt(x, x + w); if (!Number.isFinite(fy)) continue;

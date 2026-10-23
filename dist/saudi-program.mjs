@@ -19,7 +19,16 @@ export const SAUDI_GATES = Object.freeze([
   { id: 'DEEP_PLAN_LIGHT', ar: 'مبنى أعمق من 18 م فيه حوش أو منور داخلي' },
   { id: 'SITE_FIT', ar: 'لا كتلة «شريط ضيق» على أرض عرضها القابل للبناء ≥ 14 م' },
   { id: 'SHADING', ar: 'تظليل النوافذ الخارجية (بروز أفقي أو زعانف) معرَّف في واجهة المستند' },
+  // (الجولة الرابعة عشرة) بنود المراجع المستقل r13 — قيم تصميمية افتراضية للميزان (قوية في المولّد: لا يُعرض بديل يخالفها ما أمكن)
+  { id: 'BED_BATH', ar: 'لكل غرفة نوم حمام: خاص بها (أو في مدخل جناحها)، أو مشترك يُفتح على الممر نفسه الذي تُفتح عليه' },
+  { id: 'SERVE_ROUTE', ar: 'مسار تقديم من المطبخ إلى مجلس الرجال لا يمر بالصالة ولا بممرات العائلة ولا النوم (عبر المقلط أو ممر خدمة)' },
+  { id: 'MAJLIS_BED_WALL', ar: 'المجلس لا يشترك في جدار مع غرفة نوم (فاصل خدمي أو دورة مياه أو ممر)' },
+  { id: 'MAJLIS_STREET_ENTRY', ar: 'مدخل مجلس الرجال على واجهة الشارع أو قريب منها — لا عبر ارتداد جانبي أضيق من 3 م' },
+  { id: 'REAR_YARD', ar: 'حوش خلفي خاص لا يقل عن 6 م متى سمح عمق الأرض (لا يُدفع المبنى إلى الخلف تاركًا فناءً أماميًا ميتًا)' },
+  { id: 'PARKING_LAYOUT', ar: 'المواقف عمودية على الشارع بعمق 5.5 م، خارج ممرات المداخل، ولا أمام نافذة أو باب، ولا في تجويف داخل كتلة المبنى' },
 ]);
+/** (الجولة الرابعة عشرة) البنود التي يعاملها المولّد «قيمة افتراضية قوية»: لا يُعرض بديل يخالفها إلا بطلب العميل أو إن لم يتسع غيره (ويُذكر). */
+export const STRONG_DEFAULTS = Object.freeze(['MAID_BATH', 'BED_BATH', 'SERVE_ROUTE', 'MAJLIS_BED_WALL', 'MAJLIS_STREET_ENTRY', 'DAY_WC', 'REAR_YARD', 'PARKING_LAYOUT']);
 const AR = Object.fromEntries(SAUDI_GATES.map(g => [g.id, g.ar]));
 const r2 = v => Math.round(v * 100) / 100;
 const nAr = t => String(t || '').replace(/[ةه]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي');
@@ -38,6 +47,15 @@ export function clientAsks(request = {}) {
     PARKING: /موقف|مواقف|كراج|قراج|جراج|مظله سيار|سيارات/.test(t),
     SHADING: /تظليل (?:ال)?نوافذ|كاسرات? (?:ال)?شمس|مظلات? (?:علي )?(?:ال)?نوافذ/.test(t),
     NO_MAJLIS_DINING: /مجلس[^،.]{0,20}(?:بعيد|منفصل|مستقل) (?:عن|من) (?:ال)?(?:طعام|سفره)/.test(t),
+    BED_BATH: /(?:حمام|دوره مياه) (?:لكل|في كل) غرف|كل غرفه (?:ب|فيها |لها )?(?:حمام|دوره مياه)/.test(t),
+    NO_BED_BATH: /(?:بعض |)غرف[^،.]{0,15}(?:بدون|بلا|من غير) (?:حمام|دورات? مياه)/.test(t),
+    SERVE_ROUTE: /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس|مقلط/.test(t),
+    MAJLIS_BED_WALL: /المجلس[^،.]{0,20}(?:بعيد|منفصل) (?:عن|من) (?:ال)?(?:غرف|نوم)|عزل (?:المجلس|صوت)/.test(t),
+    MAJLIS_STREET_ENTRY: /(?:باب|مدخل) (?:ال)?مجلس[^،.]{0,15}(?:علي|من) (?:ال)?شارع|مجلس (?:رجال )?علي (?:ال)?شارع/.test(t),
+    MAJLIS_SIDE_OK: /(?:باب|مدخل) (?:ال)?مجلس[^،.]{0,15}(?:من )?(?:ال)?(?:جنب|جانب|ارتداد)/.test(t),
+    REAR_YARD: /حوش (?:خلفي|ورا)|حديقه (?:خلفيه|ورا)/.test(t),
+    PARKING_LAYOUT: /موقف[^،.]{0,15}(?:عمودي|قدام|امام)|مواقف[^،.]{0,15}(?:عموديه|قدام|امام)/.test(t),
+    PARKING_PARALLEL: /موقف[^،.]{0,15}(?:موازي|طولي)/.test(t),
   };
 }
 
@@ -143,6 +161,137 @@ export function measureSaudiProgram(doc, request = {}, model) {
   {
     const sh = doc.finish?.facade?.shading;
     push('SHADING', sh !== false, { shading: sh ?? 'default' }, sh === false ? ['التظليل مُلغى في واجهة المستند'] : [], true);
+  }
+  for (const g of measureR14(doc, request, model, ask)) push(g.id, g.pass, g.value, g.reasons, g.applicable);
+  return out;
+}
+
+// ------------------------------------------------------------------------------------------ (الجولة الرابعة عشرة)
+const BEDS = new Set(['bedroom', 'master']);
+/** طول الجدار المشترك بين غرفتين (أنصاف الحواف على الحافة نفسها في تحليل الجدران). */
+export function sharedWall(a, b) {
+  const ids = new Set(b.edges.map(e => e.edgeId));
+  return a.edges.filter(e => ids.has(e.edgeId)).reduce((s, e) => s + e.length, 0);
+}
+const doorOps = lv => lv.openings.filter(op => op.door);
+const nbrs = (lv, room) => roomDoors(lv, room).filter(d => !d.outside && d.other).map(d => d.other);
+/** صندوق المبنى (جدران الدور) وصندوق الأرض في الإطار القانوني للمدخل: x عبر الواجهة، y من الشارع إلى الخلف. */
+function frameBoxes(doc, G) {
+  const e = doc.entry || 's', F = p => (e === 's' ? { x: p.x, y: p.y } : e === 'n' ? { x: -p.x, y: -p.y } : e === 'e' ? { x: p.y, y: -p.x } : { x: -p.y, y: p.x });
+  const wp = G.walls.filter(w => (w.kind || 'wall') !== 'fence').flatMap(w => [w.a, w.b]).map(F);
+  const pp = (doc.plot?.polygon || []).map(F);
+  const box = ps => ({ x0: Math.min(...ps.map(p => p.x)), x1: Math.max(...ps.map(p => p.x)), y0: Math.min(...ps.map(p => p.y)), y1: Math.max(...ps.map(p => p.y)) });
+  return { F, b: wp.length ? box(wp) : null, plot: pp.length >= 3 ? pp : null, pbox: pp.length >= 3 ? box(pp) : null };
+}
+/** حد المضلع (القانوني) عند x: أدنى y (الأمام) وأعلى y (الخلف). */
+function plotYAt(P, x) {
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length]; if ((a.x - x) * (b.x - x) > 0) continue; if (Math.abs(a.x - b.x) < 1e-9) { lo = Math.min(lo, a.y, b.y); hi = Math.max(hi, a.y, b.y); continue; } const y = a.y + (b.y - a.y) * (x - a.x) / (b.x - a.x); lo = Math.min(lo, y); hi = Math.max(hi, y); }
+  return [lo, hi];
+}
+function plotXAt(P, y) {
+  let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length]; if ((a.y - y) * (b.y - y) > 0) continue; if (Math.abs(a.y - b.y) < 1e-9) { lo = Math.min(lo, a.x, b.x); hi = Math.max(hi, a.x, b.x); continue; } const x = a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y); lo = Math.min(lo, x); hi = Math.max(hi, x); }
+  return [lo, hi];
+}
+/**
+ * البنود الستة الجديدة (BED_BATH, SERVE_ROUTE, MAJLIS_BED_WALL, MAJLIS_STREET_ENTRY, REAR_YARD, PARKING_LAYOUT) مقيسة من المستند.
+ * كل العتبات قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا).
+ */
+export function measureR14(doc, request = {}, model, ask = clientAsks(request)) {
+  const out = [], G = model.levels[0]; if (!G) return out;
+  const one = model.levels.length === 1, sb = doc.plot?.setbacks || {};
+  const push = (id, pass, value, reasons, applicable = true) => out.push({ id, pass, value, reasons, applicable });
+  // 1) حمام لكل غرفة نوم: باب حمام في الغرفة، أو في فراغ تُفتح عليه الغرفة (مدخل جناحها أو الممر) وليس غرفة نوم أخرى
+  {
+    const bad = [], seen = [];
+    for (const lv of model.levels) for (const R of lv.rooms.filter(r => BEDS.has(r.type))) {
+      const direct = nbrs(lv, R);
+      let ok = direct.some(o => o.type === 'bath'), via = ok ? 'خاص' : null;
+      if (!ok) for (const V of direct) { if (BEDS.has(V.type) || V.type === 'bath') continue; const b = nbrs(lv, V).find(o => o.type === 'bath'); if (b) { ok = true; via = `«${b.name}» على «${V.name}»`; break; } }
+      seen.push({ room: R.name, level: lv.level.name || lv.level.id, ok, via });
+      if (!ok) bad.push(`«${R.name}» بلا حمام خاص ولا حمام مشترك يُفتح على الممر الذي تُفتح عليه`);
+    }
+    push('BED_BATH', !bad.length, { rooms: seen }, bad, seen.length > 0 && !ask.NO_BED_BATH);
+  }
+  // 2) مسار التقديم: من مجلس الرجال إلى المطبخ عبر أبواب، والفراغات الوسيطة طعام أو دهليز الرجال أو مغاسل أو ممر خدمة أو مخزن
+  {
+    const men = G.rooms.filter(isMenMajlis), kit = G.rooms.find(r => r.type === 'kitchen'), din = G.rooms.some(r => r.type === 'dining');
+    const pass = new Set(), okMid = r => r.type === 'dining' || r.type === 'storage' || r.type === 'pantry' || (['corridor', 'entrance'].includes(r.type) && /الرجال|مغاسل|خدم|مقلط|تقديم/.test(r.name || ''));
+    let route = null;
+    if (men.length && kit) {
+      const prev = new Map([[men[0].id, null]]), q = [men[0]];
+      while (q.length && !route) { const r = q.shift(); for (const o of nbrs(G, r)) { if (prev.has(o.id)) continue; prev.set(o.id, r.id); if (o.id === kit.id) { route = []; for (let k = o.id; k; k = prev.get(k)) route.unshift(G.roomsById.get(k).name); break; } if (okMid(o)) q.push(o); } }
+      void pass;
+    }
+    push('SERVE_ROUTE', !!route, { route }, route ? [] : ['لا مسار تقديم من المطبخ إلى مجلس الرجال إلا عبر الصالة أو ممرات العائلة'], one && men.length > 0 && !!kit && din && !ask.NO_MAJLIS_DINING);
+  }
+  // 3) المجلس لا يشترك في جدار مع غرفة نوم
+  {
+    const bad = [], seen = [];
+    for (const lv of model.levels) for (const m of lv.rooms.filter(r => r.type === 'majlis')) for (const b of lv.rooms.filter(r => BEDS.has(r.type))) {
+      const L = sharedWall(m, b); if (L > .3) { seen.push({ majlis: m.name, bedroom: b.name, length: r2(L) }); bad.push(`«${m.name}» يشترك في جدار ${r2(L)} م مع «${b.name}»`); }
+    }
+    push('MAJLIS_BED_WALL', !bad.length, { pairs: seen }, bad, model.levels.some(lv => lv.rooms.some(r => r.type === 'majlis')));
+  }
+  const fb = frameBoxes(doc, G);
+  // 4) مدخل مجلس الرجال: على واجهة شارع، أو على جانب ارتداده ≥ 3 م وقريب من الواجهة (≤ 4 م من خطها الأمامي)
+  {
+    const streets = new Set([doc.entry || 's', ...(doc.streets || [])]);
+    const host = G.rooms.filter(r => isMenMajlis(r) || (/الرجال/.test(r.name || '') && ['corridor', 'entrance'].includes(r.type)));
+    const ext = host.flatMap(h => roomDoors(G, h).filter(d => d.outside).map(d => ({ h, op: d.op, side: d.op.sides.find(s => s.exterior)?.compass, out: d.op.sides.find(s => s.exterior)?.outward })));
+    const bad = [], seen = [];
+    for (const x of ext) {
+      if (streets.has(x.side)) { seen.push({ side: x.side, street: true }); continue; }
+      // عرض الارتداد أمام الباب: من الباب على اتجاهه إلى حد الأرض
+      let gap = null;
+      if (fb.plot) { const p = fb.F(x.op.p), o = fb.F({ x: x.out.x, y: x.out.y }); if (Math.abs(o.x) > .7) { const [lo, hi] = plotXAt(fb.plot, p.y); gap = o.x > 0 ? hi - p.x : p.x - lo; } else { const [lo, hi] = plotYAt(fb.plot, p.x); gap = o.y > 0 ? hi - p.y : p.y - lo; } }
+      const fromFront = fb.b ? fb.F(x.op.p).y - fb.b.y0 : null;
+      seen.push({ side: x.side, street: false, setback: gap === null ? null : r2(gap), fromFront: fromFront === null ? null : r2(fromFront) });
+      if (gap !== null && (gap < 3 - .05 || fromFront > 4.05) && !ask.MAJLIS_SIDE_OK) bad.push(`مدخل «${x.h.name}» على جانب ${x.side} عبر ارتداد ${r2(gap)} م${fromFront > 4.05 ? ` وعلى بعد ${r2(fromFront)} م من الواجهة الأمامية` : ''} — يمشي الضيف بمحاذاة جدار البيت`);
+    }
+    push('MAJLIS_STREET_ENTRY', !bad.length, { doors: seen }, bad, ext.length > 0);
+  }
+  // 5) الحوش الخلفي ≥ 6 م متى سمح العمق؛ لا فناء أمامي ميت
+  if (fb.b && fb.plot) {
+    const xs = [fb.b.x0 + .2, (fb.b.x0 + fb.b.x1) / 2, fb.b.x1 - .2];
+    const rear = Math.min(...xs.map(x => plotYAt(fb.plot, x)[1] - fb.b.y1)), front = Math.max(...xs.map(x => fb.b.y0 - plotYAt(fb.plot, x)[0]));
+    const fNeed = Math.max(sb[doc.entry || 's'] ?? 3, 0);
+    // مواقف أمام المبنى (لا بجانبه): يلزمها عمق 5.5 م وهامشاها أمام الواجهة
+    const bays = (doc.zones || []).filter(z => z.type === 'garage').map(z => z.polygon.map(fb.F)).map(ps => ({ x0: Math.min(...ps.map(p => p.x)), x1: Math.max(...ps.map(p => p.x)), y1: Math.max(...ps.map(p => p.y)) }));
+    const inFront = bays.some(b => b.x1 > fb.b.x0 + .3 && b.x0 < fb.b.x1 - .3 && b.y1 <= fb.b.y0 + .05);
+    const need = Math.max(fNeed, inFront ? 6 : 0), slack = front - need;
+    const ok = rear >= 6 - .05 || slack <= .5;
+    push('REAR_YARD', ok, { rear: r2(rear), front: r2(front), frontNeeded: r2(need), slack: r2(slack) }, ok ? [] : [`الحوش الخلفي ${r2(rear)} م والفناء الأمامي ${r2(front)} م (يكفي ${r2(need)} م): المبنى مدفوع إلى الخلف ${r2(Math.min(slack, 6 - rear))} م بلا سبب`], true);
+  }
+  // 6) المواقف: عمودية بعمق ≥ 5.4 م، لا في تجويف داخل كتلة المبنى، ولا أمام نافذة أو باب (1.2 م أمامها)، ولا على ممر مدخل
+  {
+    const zs = (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id), bad = [], seen = [];
+    const ext = G.openings.filter(op => op.sides.some(s => s.exterior) && (op.door || op.window)).map(op => { const s = op.sides.find(x => x.exterior); return { op, out: s.outward, door: op.door }; });
+    for (const z of zs) {
+      const ps = z.polygon.map(fb.F), b = { x0: Math.min(...ps.map(p => p.x)), x1: Math.max(...ps.map(p => p.x)), y0: Math.min(...ps.map(p => p.y)), y1: Math.max(...ps.map(p => p.y)) };
+      const w = b.x1 - b.x0, d = b.y1 - b.y0, perp = d >= w, depth = Math.max(w, d);
+      // تجويف: المبنى يحيط بالموقف من جانبيه (لا ركن L مفتوح من جانب) — عينات على بعد 0.8 م يمينه ويساره عند منتصف عمقه
+      const Fi = q => { const e = doc.entry || 's'; return e === 's' ? q : e === 'n' ? { x: -q.x, y: -q.y } : e === 'e' ? { x: -q.y, y: q.x } : { x: q.y, y: -q.x }; };
+      const ym = (Math.max(b.y0, fb.b ? fb.b.y0 : b.y0) + b.y1) / 2, atB = q => !!G.roomAt(Fi(q));
+      const niche = !!fb.b && b.y1 > fb.b.y0 + .3 && atB({ x: b.x0 - .8, y: ym }) && atB({ x: b.x1 + .8, y: ym });
+      const hits = [];
+      for (const e of ext) {
+        // الموقف العمودي: لا يسد بابًا (1.8 م أمامه) ولا يلاصق نافذة (0.5 م)؛ الموازي في ارتداد ضحل: لا نافذة في 1.2 م أمامه
+        const p = fb.F(e.op.p), o = fb.F({ x: e.out.x, y: e.out.y }), u = { x: -o.y, y: o.x }, hw = e.op.w / 2 + .2, reach = e.door ? 1.8 : perp ? .5 : 1.2;
+        const cs = [[-hw, 0], [hw, 0], [hw, reach], [-hw, reach]].map(([s, t]) => ({ x: p.x + u.x * s + o.x * t, y: p.y + u.y * s + o.y * t }));
+        const B = { x0: Math.min(...cs.map(c => c.x)), x1: Math.max(...cs.map(c => c.x)), y0: Math.min(...cs.map(c => c.y)), y1: Math.max(...cs.map(c => c.y)) };
+        if (B.x0 < b.x1 - .02 && B.x1 > b.x0 + .02 && B.y0 < b.y1 - .02 && B.y1 > b.y0 + .02) hits.push(e.door ? 'باب' : 'نافذة');
+      }
+      seen.push({ name: z.name, perpendicular: perp, depth: r2(depth), niche: !!niche, blocks: hits });
+      const why = [];
+      if (!perp && !ask.PARKING_PARALLEL) why.push('موازٍ للشارع');
+      if (depth < 5.4) why.push(`عمقه ${r2(depth)} م`);
+      if (niche) why.push('في تجويف داخل كتلة المبنى');
+      if (hits.length) why.push(`أمام ${[...new Set(hits)].join(' و')}`);
+      if (why.length) bad.push(`«${z.name}»: ${why.join('، ')}`);
+    }
+    push('PARKING_LAYOUT', !bad.length, { bays: seen }, bad, zs.length > 0);
   }
   return out;
 }

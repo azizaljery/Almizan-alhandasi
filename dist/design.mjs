@@ -8,6 +8,7 @@ import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
 import { serialize, parseDoc } from './draw/doc.mjs';
 import { requestBrief } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
+import { diffFingerprint } from './plan-fingerprint.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -15,6 +16,8 @@ const fmt = v => Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 })
 const toast = t => { const n = el('div', { class: 'toast', role: 'status' }, t); document.body.append(n); setTimeout(() => n.remove(), 3200); };
 
 let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null;
+// (الجولة الرابعة عشرة) فرق التعديل مرسومًا على المسقط: ما تغيّر عن النسخة السابقة (البصمة الهندسية) يُظلَّل، وما أزيل يُرسم متقطعًا
+let diffOn = true, diffInfo = null;
 
 function init() {
   if (!session) {
@@ -34,10 +37,14 @@ function show(index) {
   ];
   const levels = doc.levels.length > 1 ? el('div', { class: 'seg', role: 'tablist' }, doc.levels.map(l => el('button', { 'data-level': l.id, class: l.id === levelId ? 'on' : '', onclick: () => { levelId = l.id; view = null; goal = null; inertia = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === levelId)); paint(); } }, l.name))) : null;
   const zoneToggle = el('label', {}, el('input', { type: 'checkbox', id: 'zonesOn', checked: zonesOn, onchange: e => { zonesOn = e.target.checked; paint(); legend(); } }), 'تلوين المناطق');
+  diffInfo = null;
+  if (index > 0 && d.feedback) { try { const D = diffFingerprint(parseDoc(session.designs[index - 1].doc), doc); if (!D.identical) diffInfo = { now: [...D.changed, ...D.added].filter(e => e.kind !== 'fixture' && e.box), gone: D.removed.filter(e => e.kind !== 'fixture' && e.box), summary: D.summary_ar, from: session.designs[index - 1].version ?? index }; } catch { diffInfo = null; } }
+  const diffToggle = diffInfo ? el('label', { 'data-diff': '' }, el('input', { type: 'checkbox', id: 'diffOn', checked: diffOn, onchange: e => { diffOn = e.target.checked; paint(); } }), 'أظهر ما تغيّر عن النسخة ' + diffInfo.from) : null;
   const plan = el('div', { class: 'card plancard' },
-    el('div', { class: 'planbar' }, levels, zoneToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
+    el('div', { class: 'planbar' }, levels, zoneToggle, diffToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
     el('div', { class: 'planwrap', id: 'planWrap' }, el('canvas', { id: 'plan', 'aria-label': 'مسقط التصميم' })),
-    el('div', { class: 'legend', id: 'legend' }));
+    el('div', { class: 'legend', id: 'legend' }),
+    diffInfo ? el('p', { class: 'sub', 'data-diff-summary': '' }, 'المظلل بالأحمر ما تغيّر أو أضيف، والمتقطع ما أزيل — ' + diffInfo.summary) : null);
   // «لم يُتحقق» و«بانتظار العرض» ليست منفّذة ولا مخفقة: تُعرض وحدها بسببها
   const ledger = ledgerFor(session, doc), open = ledger.filter(x => x.status === 'unverified' || x.status === 'pending-render'), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok && !open.includes(x));
   const side = el('div', { class: 'actions card' },
@@ -121,7 +128,7 @@ function reviewCard(d) {
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
-  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'النسخة ' + (r.restored.version ?? r.restored.index + 1)} كما طلبت.` : r.mode === 'ask-regenerate' ? 'لم أجد تعديلًا موضعيًا يحقق طلبك؛ لم أغيّر شيئًا قبل موافقتك.' : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
+  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'النسخة ' + (r.restored.version ?? r.restored.index + 1)} كما طلبت.` : r.mode === 'ask-regenerate' || r.mode === 'ask-options' ? 'لم أجد تعديلًا موضعيًا يحقق طلبك؛ لم أغيّر شيئًا قبل اختيارك.' : r.mode === 'zone-regenerated' ? 'أعدت توزيع منطقة واحدة كما اخترت، وبقية المناطق ثابتة حرفيًا (المظلل على المسقط ما تغيّر).' : r.mode === 'switched-alternative' ? `عرضت البديل ${r.alternative} كما اخترت — بديل مختلف لا تعديل للمخطط السابق.` : r.mode === 'regenerated' && r.choice === 'full' ? 'أعدت توزيع البيت كما اخترت صراحة (المظلل على المسقط ما تغيّر).' : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
   // ما تغيّر في المخطط فعلًا (مقيسًا): من التعديل الموضعي أو من إعادة التوزيع المعلنة
   const changed = [...(r.changed || []), ...(r.fallback?.changed || [])].filter(c => c.kind !== 'openings');
@@ -230,6 +237,18 @@ function paint() {
     flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true },
     roomFill: zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
   });
+  if (diffOn && diffInfo) {
+    const X = x => (x - view.cx) * view.scale + W / 2, Y = y => (view.cy - y) * view.scale + H / 2;
+    const box = (b, pad = 0) => [X(b.x0) - pad, Y(b.y1) - pad, (b.x1 - b.x0) * view.scale + 2 * pad, (b.y1 - b.y0) * view.scale + 2 * pad];
+    ctx.save();
+    for (const e of diffInfo.gone.filter(e => e.level === levelId)) { ctx.setLineDash([6, 4]); ctx.strokeStyle = '#b5651d'; ctx.lineWidth = 2; ctx.strokeRect(...box(e.box, 2)); }
+    ctx.setLineDash([]);
+    for (const e of diffInfo.now.filter(e => e.level === levelId)) {
+      if (e.kind === 'room') { ctx.fillStyle = 'rgba(200,40,40,.16)'; ctx.fillRect(...box(e.box)); ctx.strokeStyle = 'rgba(200,40,40,.9)'; ctx.lineWidth = 2; ctx.strokeRect(...box(e.box)); }
+      else { ctx.strokeStyle = 'rgba(200,40,40,.85)'; ctx.lineWidth = 3; ctx.strokeRect(...box(e.box, 3)); }
+    }
+    ctx.restore();
+  }
 }
 
 // ------------------------------------------------------------------------------------------ الأفعال
@@ -261,7 +280,13 @@ $('fbGo').addEventListener('click', async () => {
     const out = await redesign(session, { picks, text, ai });
     // تعارض في الملاحظة: لا تصميم جديد؛ نسأل العميل ونبقي النافذة مفتوحة ليعيد الكتابة
     // سؤال إذن (تعديل يمس غرفة لم تُذكر، أو إعادة توزيع البيت): يُحفظ المقترح في الجلسة ليُنفَّذ بـ«نعم» حرفيًا
-    if (out.reply?.conflicts?.length) { if (out.reply.conflicts.some(c => c.type === 'needs-consent') && out.session?.pendingEdit) { session = out.session; saveSession(localStorage, session); } $('fbStatus').textContent = 'قبل ما أعدّل: ' + out.reply.questions.join(' — '); $('fbGo').disabled = false; return; }
+    if (out.reply?.conflicts?.length) {
+      if (out.reply.conflicts.some(c => c.type === 'needs-consent') && out.session?.pendingEdit) { session = out.session; saveSession(localStorage, session); }
+      $('fbStatus').textContent = 'قبل ما أعدّل: ' + out.reply.questions.join(' — ');
+      // (الجولة الرابعة عشرة) خيارات التعديل أزرارًا: لا يُستبدل المخطط إلا باختيار صريح من العميل
+      if (out.reply.mode === 'ask-options' && out.reply.options?.length) $('fbStatus').append(el('div', { class: 'opts', 'data-edit-options': '' }, out.reply.options.map(o => el('button', { type: 'button', class: 'chip', 'data-option': o.id, onclick: () => { $('fbText').value = String(o.n); document.querySelectorAll('#fbChips .chip').forEach(b => b.setAttribute('aria-pressed', 'false')); $('fbGo').click(); } }, `${o.n}) ${o.text_ar}`))));
+      $('fbGo').disabled = false; return;
+    }
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });

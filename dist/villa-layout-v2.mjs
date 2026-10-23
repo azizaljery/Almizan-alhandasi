@@ -2472,6 +2472,8 @@ function transformFor(site, cand, mirror) {
   if (site.placeRects) { const rs = solidRects(cand.sol).map(r => (mirror ? { ...r, x0: cand.ew - r.x1, x1: cand.ew - r.x0 } : r)); const q = site.placeRects(rs, cand.ew, cand.ed); if (q.over > 1e-6) throw Error('المبنى لا يتسع داخل حدود الأرض بهذا الاتجاه.'); pl = q; }
   // (الجولة الثانية عشرة) إزاحة المبنى إلى الخلف لاتساع المواقف المطلوبة نظاميًا في الارتداد الأمامي (أرض مستطيلة فقط)
   if (cand.parkShift && !site.placeRects) pl = { ...pl, oy: pl.oy + cand.parkShift };
+  // (الجولة الرابعة عشرة) المبنى على أحد جانبي الأرض (لا في وسطها) ليتسع موقفان عموديان بجانبه خارج ممرات الأبواب ونوافذ الواجهة
+  if (cand.parkSide && !site.placeRects) pl = { ...pl, ox: cand.parkSide === 'lo' ? 0 : snap(site.W - cand.ew - .02) };
   return { T: (x, y) => F(pl.ox + (mirror ? cand.ew - x : x), pl.oy + y), pl };
 }
 const describe = c => (PARTI_AR[c.mode] || c.mode) + (c.stepped ? '، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع' : '');
@@ -3185,11 +3187,26 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   // (الجولة الثانية عشرة) مواقف السيارات في الارتداد (قيمة تصميمية افتراضية للميزان): مناطق «garage» يرسمها المسقط والمجسّم ويقيسها المراجع
   // عدد المواقف اشتراط نظامي متحقق (site-parking.mjs PARKING_RULE): إن لم يتسع العدد أمام المبنى وفي الأرض عمق زائد خلفه،
   // يُزاح المبنى إلى الخلف بقدر ما يتسع موقف عمودي على الشارع (5.5 م وهامشاه) ويُعاد بناؤه مرة واحدة
-  let pk = null; try { pk = planParking(doc); } catch { pk = null; }
+  const parallel = /موقف[^،.]{0,15}(?:موازي|طولي)/.test(String(requirements?.text || requirements?.idea || ''));
+  let pk = null; try { pk = planParking(doc, { parallel }); } catch { pk = null; }
+  // (الجولة الرابعة عشرة) قبل إزاحة المبنى إلى الخلف (تصغير الحوش الخلفي): يُجرَّب المبنى على أحد جانبي الأرض فيتسع الموقفان
+  // العموديان بجانبه — الجهة الأقرب إلى مدخل العائلة أولًا (السيارة قرب باب العائلة لا أمام مجلس الضيوف)
+  if (pk && pk.bays.length < pk.required && cand.parkSide == null && cand.parkShift == null && !site.placeRects && site.W - cand.ew >= 1.55) {
+    const tries = [];
+    for (const s of ['lo', 'hi']) { try { const c2 = { ...cand, parkSide: s }; const d2 = buildDesign(c2, P, site, land, { title, mirror, requirements, entry, second }); const n = (d2.doc.zones || []).filter(z => z.type === 'garage').length; tries.push({ s, d2, n }); } catch { /* لا يتسع */ } }
+    const ok = tries.filter(t => t.n >= pk.required && !t.d2.reject.length).sort((a, b) => a.d2.quality - b.d2.quality);
+    if (ok.length) { cand.parkSide = ok[0].s; return ok[0].d2; }
+    cand.parkSide = null;
+  }
   if (pk && pk.bays.length < pk.required && cand.parkShift == null && !site.placeRects) {
     const front = site.setbacks?.[site.entry] ?? 3, need = Math.max(0, 5.9 - front), room = site.D - cand.ed, shift = snap(Math.min(room, need));
     cand.parkShift = shift >= .5 && room >= need - .05 ? shift : 0;
     if (cand.parkShift) return buildDesign(cand, P, site, land, { title, mirror, requirements, entry, second });
+  }
+  // تفضيل لا قاعدة (قرار المالك r14): إن لم يتسع العمودي بأي وضع للمبنى يُقبل الموازي ويُذكر لماذا لم يُطبَّق التفضيل
+  if (pk && pk.bays.length < pk.required && !parallel) {
+    let pk2 = null; try { pk2 = planParking(doc, { parallel: true }); } catch { pk2 = null; }
+    if (pk2 && pk2.bays.length > pk.bays.length) { pk = pk2; pk.note_ar += ' (تفضيل الميزان موقف عمودي بعمق 5.5 م لم يتسع في هذه الأرض لهذا المبنى لا بجانبه ولا أمامه، فرُسم موازيًا — قيمة تصميمية افتراضية للميزان لم تُطبَّق، والسبب ضيق الارتداد.)'; }
   }
   if (pk) { for (const b of pk.bays) doc = applyCommand(doc, { type: 'add-zone', level: LV, name: 'موقف سيارة', roomType: 'garage', polygon: b.polygon }).doc; layout.notes.push(pk.note_ar + (cand.parkShift ? ` أُزيح المبنى ${cand.parkShift} م إلى الخلف ليتسع العدد المطلوب أمامه.` : '')); }
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
