@@ -1,0 +1,336 @@
+{
+ "id": "L8",
+ "name": "طلبات مستحيلة — مقاسات أكبر من الأرض، دور واحد مع ماستر فوق، ملاصق وبعيد معًا",
+ "words": 157,
+ "ms": 16,
+ "text": "السلام عليكم، الأرض عندي ١٥×٢٠ وشارعها من الجنوب، وأبي دور واحد بس، ما أبي درج ولا دور ثاني لأن الوالد ما يقدر يطلع. أبي مجلس كبير جدًا مقاسه ١٢×١٦ عشان العزايم والمناسبات الكبيرة اللي نسويها كل شهر، وصالة ٨×١٠ تكفي العائلة كلها، والماستر ٦×٧ فيها جلسة صغيرة. والماستر أبيها في الدور العلوي بعيدة عن الإزعاج. وثلاث غرف نوم غير الماستر للعيال. المطبخ بجانب الطعام. وأبي مجلس النساء ومجلس الرجال جنب بعض عشان نفتحهم على بعض في المناسبات، بس برضو أبي مجلس النساء بعيد عن مجلس الرجال عشان الخصوصية لا صار عندنا ضيوف من برا. ترى أنا عارف إن الأرض صغيرة، بس أبي كل هذا يدخل بأي طريقة، وإذا ما دخل قولوا لي وش الحل بدل ما تحذفون شي بدون ما تقولون. وترى الوالد يجلس على كرسي متحرك، فالأبواب تكون عريضة لو سمحتوا. ونحن عشرة أنفار في البيت، والعزايم عندنا ما توقف طول السنة. وأهم شي لا تصغرون المجلس، وأبي الرد بسرعة لو سمحتوا لأننا مستعجلين على البناء.",
+ "formCounts": {},
+ "interpretError": "راجع مساحة مجلس؛ المساحة المقبولة بين 4 و120 م².",
+ "score": {
+  "per": {
+   "count": {
+    "tp": 3,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.75
+   },
+   "pref": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "extra": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "absent": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "dims": {
+    "tp": 2,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.667
+   },
+   "rule": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 1,
+    "precision": 0.8,
+    "recall": 1
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unsupported": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "conflict": {
+    "tp": 2,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.667
+   },
+   "unclear": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   }
+  },
+  "precision": 0.929,
+  "recall": 0.813,
+  "f1": 0.867,
+  "tp": [
+   "count:bedrooms=4",
+   "count:majlis=2",
+   "count:dining=1",
+   "pref:elderlyRoom",
+   "dim:hall=8x10",
+   "dim:master=6x7",
+   "rule:floor:master:upper",
+   "rule:close:dining+kitchen",
+   "rule:close:majlis+majlis_w",
+   "rule:away:majlis+majlis_w",
+   "floors=1",
+   "conflict:single-floor-two-floor-features",
+   "conflict:relation-contradiction"
+  ],
+  "missed": [
+   "count:kitchens=1",
+   "dim:majlis=12x16",
+   "conflict:area-exceeds-land"
+  ],
+  "wrong": [
+   "rule:floor:stairs:upper"
+  ],
+  "levels": [
+   {
+    "item": "rule:floor:master:upper",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:dining+kitchen",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:majlis+majlis_w",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:away:majlis+majlis_w",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 4,
+   "dining": 1,
+   "majlis": 2
+  },
+  "prefs": {
+   "womenSeparate": true,
+   "elderlyRoom": true,
+   "big_majlis": true,
+   "floors": 1
+  },
+  "extras": {},
+  "absent": [],
+  "dims": {
+   "master": {
+    "w": 6,
+    "l": 7,
+    "tol": 0.3,
+    "quote": "والماستر ٦×٧"
+   },
+   "hall": {
+    "w": 8,
+    "l": 10,
+    "tol": 0.3,
+    "quote": "وصالة ٨×١٠"
+   }
+  },
+  "areas": {
+   "master": 42,
+   "hall": 80
+  },
+  "rules": [
+   {
+    "item": "floor:stairs:upper",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "درج ولا دور ثاني",
+    "text": "«الدرج» في الدور العلوي"
+   },
+   {
+    "item": "floor:master:upper",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والماستر أبيها في الدور العلوي",
+    "text": "«غرفة النوم الرئيسية» في الدور العلوي"
+   },
+   {
+    "item": "close:dining+kitchen",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المطبخ بجانب الطعام",
+    "text": "«المطبخ» بجوار «الطعام»"
+   },
+   {
+    "item": "close:majlis+majlis_w",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "مجلس النساء ومجلس الرجال جنب بعض",
+    "text": "«مجلس النساء» بجوار «المجلس»"
+   },
+   {
+    "item": "away:majlis+majlis_w",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "مجلس النساء بعيد عن مجلس الرجال",
+    "text": "«مجلس النساء» بعيدًا عن «المجلس»"
+   }
+  ],
+  "tweaks": {},
+  "unsupported": [],
+  "unclear": [
+   "الأرض عندي ١٥×٢٠ وشارعها من الجنوب",
+   "ما أبي درج",
+   "ترى أنا عارف إن الأرض صغيرة",
+   "بس أبي كل هذا يدخل بأي طريقة",
+   "إذا ما دخل قولوا لي وش الحل بدل ما تحذفون شي بدون ما تقولون",
+   "فالأبواب تكون عريضة لو سمحتوا",
+   "نحن عشرة أنفار في البيت",
+   "العزايم عندنا ما توقف طول السنة",
+   "أهم شي لا تصغرون المجلس",
+   "أبي الرد بسرعة لو سمحتوا لأننا مستعجلين على البناء",
+   "بعيدة عن الإزعاج"
+  ],
+  "understood": [
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "الغرفة الرئيسية 6×7 م (42 م²)",
+   "الصالة 8×10 م (80 م²)",
+   "المجلس واسع",
+   "دور واحد",
+   "«الدرج» في الدور العلوي",
+   "«غرفة النوم الرئيسية» في الدور العلوي",
+   "«المطبخ» بجوار «الطعام»",
+   "«مجلس النساء» بجوار «المجلس»",
+   "«مجلس النساء» بعيدًا عن «المجلس»"
+  ]
+ },
+ "conflicts": [
+  {
+   "type": "relation-contradiction",
+   "question": "ذكرت إن «مجلس النساء» جنب «المجلس»، وذكرت إنه بعيد عنه — تبيهم جنب بعض ولا بعيدين؟"
+  },
+  {
+   "type": "single-floor-two-floor-features",
+   "question": "طلبت دور واحد، وذكرت «الدرج» في الدور العلوي و«غرفة النوم الرئيسية» في الدور العلوي ومكان «الدرج» — تبي البيت دورين، ولا نخلي كل شي في الأرضي؟"
+  }
+ ],
+ "coverage": {
+  "clauses": 23,
+  "fates": {
+   "filler": 1,
+   "unclear": 10,
+   "understood": 11,
+   "orphan": 1
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "الأرض عندي ١٥×٢٠ وشارعها من الجنوب",
+   "ما أبي درج",
+   "بعيدة عن الإزعاج",
+   "ترى أنا عارف إن الأرض صغيرة",
+   "بس أبي كل هذا يدخل بأي طريقة",
+   "إذا ما دخل قولوا لي وش الحل بدل ما تحذفون شي بدون ما تقولون",
+   "فالأبواب تكون عريضة لو سمحتوا",
+   "نحن عشرة أنفار في البيت",
+   "العزايم عندنا ما توقف طول السنة",
+   "أهم شي لا تصغرون المجلس",
+   "أبي الرد بسرعة لو سمحتوا لأننا مستعجلين على البناء"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "kitchens": 1,
+   "dining": 1
+  },
+  "prefs": [
+   "elderlyRoom"
+  ],
+  "extras": [],
+  "absent": [],
+  "dims": {
+   "majlis": [
+    12,
+    16
+   ],
+   "hall": [
+    8,
+    10
+   ],
+   "master": [
+    6,
+    7
+   ]
+  },
+  "rules": [
+   {
+    "r": "floor:master:upper",
+    "level": "must"
+   },
+   {
+    "r": "close:dining+kitchen",
+    "level": "must"
+   },
+   {
+    "r": "close:majlis+majlis_w",
+    "level": "must"
+   },
+   {
+    "r": "away:majlis+majlis_w",
+    "level": "must"
+   }
+  ],
+  "floors": 1,
+  "unsupported": [],
+  "conflicts": [
+   "single-floor-two-floor-features",
+   "relation-contradiction",
+   "area-exceeds-land"
+  ],
+  "unclear": [],
+  "optional": [
+   "pref:big_majlis",
+   "count:baths",
+   "pref:womenSeparate"
+  ],
+  "traps": "ثلاثة تعارضات يجب أن تُسأل كلها قبل التوليد."
+ },
+ "traps": "ثلاثة تعارضات يجب أن تُسأل كلها قبل التوليد."
+}

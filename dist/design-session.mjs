@@ -98,8 +98,16 @@ export async function redesign(session, args = {}, opts = {}) {
     const w = parseStreetWidthAnswer(args.text);
     if (w) return answerStreetWidth(session, w, args.text, opts);
   }
+  // (الجولة الخامسة عشرة) طلب جديد مفهوم بينما خيارات تعديل سابق معلّقة (لا رقم خيار ولا كلمته): لا يُعاد السؤال نفسه ولا يُنفَّذ بالتخمين —
+  // تُترك الخيارات السابقة دون تنفيذ (المخطط كما هو فيها) ويُقال ذلك صراحة، ويُعالَج الطلب الجديد
+  let droppedOptions = null;
+  if (session.pendingEdit?.options && args.text && !args.picks?.length && !isOptionAnswer(args.text)) {
+    let fresh = null; try { fresh = extractRequirements(args.text, { counts: {} }); } catch { fresh = null; }
+    if (fresh?.understood?.length) { droppedOptions = session.pendingEdit.text; session = clone(session); delete session.pendingEdit; session.reply = null; }
+  }
   const pending = (session.conflicts || []).filter(c => c && c.key && c.type !== 'needs-consent');
-  const res = await redesign0(session, args, opts);
+  const res0 = await redesign0(session, args, opts);
+  const res = droppedOptions && res0?.reply ? { ...res0, reply: { ...res0.reply, droppedOptions, summary_ar: `تركتُ خيارات طلبك السابق «${droppedOptions}» دون تنفيذ (المخطط كما كان فيها) لأنك طلبت شيئًا آخر. ${res0.reply.summary_ar || ''}`.trim() } } : res0;
   if (!pending.length || !args.text || !res?.session) return res;
   let more = null; try { more = extractRequirements(args.text, { counts: {} }); } catch { more = null; }
   if (!more?.rules?.length) return res;
@@ -113,6 +121,11 @@ export async function redesign(session, args = {}, opts = {}) {
   res.reply = { ...res.reply, resolved: resolved.map(c => ({ type: c.type, question_ar: c.question_ar, answer_ar: args.text.trim(), kept: more.rules.map(kept) })),
     summary_ar: [`سجّلت اختيارك: ${more.rules.map(kept).join('، ')} (حُسم ${resolved.length === 1 ? 'التعارض' : resolved.length + ' تعارضات'} في طلبك، والبند المعارض حُذف).`, res.reply?.summary_ar].filter(Boolean).join(' ') };
   return res;
+}
+/** جواب على خيارات تعديل معلّقة: رقم الخيار أو كلمته أو «نعم/لا» (القاعدة نفسها في redesign0). */
+function isOptionAnswer(text) {
+  const tt = normalizeAr(text).replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+  return /^\(?[1-4]\)?(?:[ ،,.!]|$)/.test(tt) || /(?:الخيار|خيار|رقم) ?[1-4]/.test(tt) || /^(?:لا|ابق|ابقه|ابقها|خله|خلها|اتركه|نعم|ايه|ايوه|اي|اكيد|تمام|طيب|موافق|نفذ|نفذه|نفذها|اوكي|ok|yes)(?:[ ،,.!]|$)/.test(tt) || /منطقه|البديل|البدائل|توزيع كامل|(?:البيت|المخطط) كله/.test(tt);
 }
 /** (الجولة الثالثة عشرة) جواب عرض الشارع: يُسجَّل land.streetWidth؛ إن صار الارتداد الأمامي النظامي أكبر من المرسوم يُعاد التوليد به. */
 async function answerStreetWidth(session, width, text, { generate = generateInitialDesign } = {}) {

@@ -322,7 +322,9 @@ export async function runSession(S, { maxTurns = Infinity } = {}) {
     try {
       const r = await redesign(s, { text: T.text });
       reply = r.reply; changes = r.changes;
-      if (r.reply?.conflicts?.length) outcome = 'asked'; else s = r.session;
+      // (الجولة الخامسة عشرة) سؤال خيارات التعديل (needs-consent): المخطط باقٍ حرفيًا، لكن الجلسة تحمل ما سجّله الرد (حسم التعارض، والخيارات
+      // المعلّقة) كما في الواجهة — تُعتمد؛ وسؤال تعارض حقيقي يبقي الجلسة السابقة كما كان
+      if (r.reply?.conflicts?.length) { outcome = 'asked'; if (r.reply.conflicts.every(c => c.type === 'needs-consent')) s = r.session; } else s = r.session;
       // سؤال إذن (التعديل يحتاج غرفة لم يذكرها العميل): الجلسة تبقى كما هي، ويُقاس ما كان سيحدث لو قال «نعم»
       if (r.reply?.conflicts?.some(c => c.type === 'needs-consent')) {
         const y = await redesign(r.session, { text: 'نعم' }), ad = currentDoc(y.session), pr = preservation(before, ad, T.scope);
