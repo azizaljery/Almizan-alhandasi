@@ -1,0 +1,1210 @@
+{
+ "source": "evidence/acceptance/after-15/C10/alt-2.json",
+ "ms": 778,
+ "note": "مسارات محسوبة من الرسم بخلوص جسم 0.25 م وعرض باب 0.8 م كقيم تصميمية استرشادية؛ ليست شهادة إخلاء ولا وصول شامل.",
+ "limits": {
+  "cell": 0.05,
+  "body": 0.25,
+  "bodyTight": 0.15,
+  "headroom": null,
+  "doorMin": 0.8,
+  "deadEnd": 2,
+  "deadEndWarn": 3,
+  "detour": 2.2,
+  "doorFront": 0.6
+ },
+ "entrances": [
+  {
+   "opening": "o1",
+   "room": "مدخل العائلة",
+   "zone": "family",
+   "role": "main"
+  },
+  {
+   "opening": "o3",
+   "room": "مدخل الرجال",
+   "zone": "men",
+   "role": "guest"
+  }
+ ],
+ "rooms": [
+  {
+   "id": "r1",
+   "name": "مدخل العائلة",
+   "type": "entrance",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 0.1,
+    "toCenter": 3.1
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 0.1,
+    "toCenter": 3.1,
+    "via": [
+     "مدخل العائلة"
+    ]
+   },
+   "straight": 3.17,
+   "detour": 0.98,
+   "altFrom": null
+  },
+  {
+   "id": "r6",
+   "name": "مجلس النساء",
+   "type": "majlis",
+   "level": "L1",
+   "zone": "women",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "مجلس النساء"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 2.27,
+    "toCenter": 4.86
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 2.27,
+    "toCenter": 4.74,
+    "via": [
+     "مدخل العائلة",
+     "مجلس النساء"
+    ]
+   },
+   "straight": 4.13,
+   "detour": 1.15,
+   "altFrom": null
+  },
+  {
+   "id": "r8",
+   "name": "مغاسل",
+   "type": "corridor",
+   "level": "L1",
+   "zone": "women",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "مجلس النساء",
+    "مغاسل"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 5.44,
+    "toCenter": 6.28
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 5.44,
+    "toCenter": 6.28,
+    "via": [
+     "مدخل العائلة",
+     "مجلس النساء",
+     "مغاسل"
+    ]
+   },
+   "straight": 6.01,
+   "detour": 1.04,
+   "altFrom": null
+  },
+  {
+   "id": "r10",
+   "name": "مدخل الجناح",
+   "type": "corridor",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "مدخل الجناح"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 10.42,
+    "toCenter": 11.46
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 10.42,
+    "toCenter": 11.46,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "مدخل الجناح"
+    ]
+   },
+   "straight": 8.91,
+   "detour": 1.29,
+   "altFrom": null
+  },
+  {
+   "id": "r2",
+   "name": "الصالة",
+   "type": "living",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 6.32,
+    "toCenter": 10.54
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 6.32,
+    "toCenter": 10,
+    "via": [
+     "مدخل العائلة",
+     "الصالة"
+    ]
+   },
+   "straight": 10.14,
+   "detour": 0.99,
+   "altFrom": null
+  },
+  {
+   "id": "r11",
+   "name": "حمام غرفة 2",
+   "type": "bath",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "مدخل الجناح",
+    "حمام غرفة 2"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 11.79,
+    "toCenter": 12.9
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 11.79,
+    "toCenter": 12.9,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "مدخل الجناح",
+     "حمام غرفة 2"
+    ]
+   },
+   "straight": 10.4,
+   "detour": 1.24,
+   "altFrom": null
+  },
+  {
+   "id": "r14",
+   "name": "حمام غرفة 3",
+   "type": "bath",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "مدخل الجناح",
+    "حمام غرفة 3"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 15.86,
+    "toCenter": 17.02
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 16.89,
+    "toCenter": 18.05,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "مدخل الجناح",
+     "حمام غرفة 3"
+    ]
+   },
+   "straight": 12.41,
+   "detour": 1.45,
+   "altFrom": null
+  },
+  {
+   "id": "r13",
+   "name": "مدخل الجناح",
+   "type": "corridor",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "مدخل الجناح"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 14.62,
+    "toCenter": 15.68
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 15.64,
+    "toCenter": 16.7,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "مدخل الجناح"
+    ]
+   },
+   "straight": 14.09,
+   "detour": 1.19,
+   "altFrom": null
+  },
+  {
+   "id": "r20",
+   "name": "المطبخ",
+   "type": "kitchen",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "صالة الطعام",
+    "المطبخ"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 17.77,
+    "toCenter": 19.45
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 17.77,
+    "toCenter": 19.45,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "صالة الطعام",
+     "المطبخ"
+    ]
+   },
+   "straight": 17.22,
+   "detour": 1.13,
+   "altFrom": null
+  },
+  {
+   "id": "r21",
+   "name": "صالة الطعام",
+   "type": "dining",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "صالة الطعام"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 14.4,
+    "toCenter": 17.07
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 14.4,
+    "toCenter": 17.38,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "صالة الطعام"
+    ]
+   },
+   "straight": 16.32,
+   "detour": 1.06,
+   "altFrom": null
+  },
+  {
+   "id": "r17",
+   "name": "خزانة ملابس",
+   "type": "storage",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "غرفة نوم 4",
+    "خزانة ملابس"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 10.4,
+    "toCenter": 11.27
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 10.4,
+    "toCenter": 11.27,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "غرفة نوم 4",
+     "خزانة ملابس"
+    ]
+   },
+   "straight": 7.37,
+   "detour": 1.53,
+   "altFrom": null
+  },
+  {
+   "id": "r15",
+   "name": "غرفة نوم 4",
+   "type": "bedroom",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "غرفة نوم 4"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 9.02,
+    "toCenter": 12.05
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 9.02,
+    "toCenter": 11.7,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "غرفة نوم 4"
+    ]
+   },
+   "straight": 10.06,
+   "detour": 1.16,
+   "altFrom": null
+  },
+  {
+   "id": "r5",
+   "name": "دورة مياه الرجال",
+   "type": "bath",
+   "level": "L1",
+   "zone": "men",
+   "from": "مدخل الرجال",
+   "fromOpening": "o3",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل الرجال",
+    "دورة مياه الرجال"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 2.97,
+    "toCenter": 3.91
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 2.97,
+    "toCenter": 3.86,
+    "via": [
+     "مدخل الرجال",
+     "دورة مياه الرجال"
+    ]
+   },
+   "straight": 3.82,
+   "detour": 1.01,
+   "altFrom": null
+  },
+  {
+   "id": "r3",
+   "name": "مجلس الرجال",
+   "type": "majlis",
+   "level": "L1",
+   "zone": "men",
+   "from": "مدخل الرجال",
+   "fromOpening": "o3",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل الرجال",
+    "مجلس الرجال"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 1.84,
+    "toCenter": 4.53
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 1.84,
+    "toCenter": 3.93,
+    "via": [
+     "مدخل الرجال",
+     "مجلس الرجال"
+    ]
+   },
+   "straight": 4.34,
+   "detour": 0.91,
+   "altFrom": null
+  },
+  {
+   "id": "r9",
+   "name": "غرفة نوم 2",
+   "type": "bedroom",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "مدخل الجناح",
+    "غرفة نوم 2"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 12.52,
+    "toCenter": 15.04
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 12.52,
+    "toCenter": 14.59,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "مدخل الجناح",
+     "غرفة نوم 2"
+    ]
+   },
+   "straight": 11.82,
+   "detour": 1.23,
+   "altFrom": null
+  },
+  {
+   "id": "r12",
+   "name": "غرفة نوم 3",
+   "type": "bedroom",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "مدخل الجناح",
+    "غرفة نوم 3"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 16.72,
+    "toCenter": 19.13
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 17.74,
+    "toCenter": 19.7,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "مدخل الجناح",
+     "غرفة نوم 3"
+    ]
+   },
+   "straight": 14.61,
+   "detour": 1.35,
+   "altFrom": null
+  },
+  {
+   "id": "r19",
+   "name": "حمام الخادمة",
+   "type": "bath",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "صالة الطعام",
+    "المطبخ",
+    "غرفة الخادمة",
+    "حمام الخادمة"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 23.61,
+    "toCenter": 24.43
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 23.61,
+    "toCenter": 24.38,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "صالة الطعام",
+     "المطبخ",
+     "غرفة الخادمة",
+     "حمام الخادمة"
+    ]
+   },
+   "straight": 17.16,
+   "detour": 1.42,
+   "altFrom": null
+  },
+  {
+   "id": "r18",
+   "name": "غرفة الخادمة",
+   "type": "service",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "صالة الطعام",
+    "المطبخ",
+    "غرفة الخادمة"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 21.44,
+    "toCenter": 22.9
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 21.44,
+    "toCenter": 22.9,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "صالة الطعام",
+     "المطبخ",
+     "غرفة الخادمة"
+    ]
+   },
+   "straight": 19.26,
+   "detour": 1.19,
+   "altFrom": null
+  },
+  {
+   "id": "r4",
+   "name": "مدخل الرجال",
+   "type": "corridor",
+   "level": "L1",
+   "zone": "men",
+   "from": "مدخل الرجال",
+   "fromOpening": "o3",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل الرجال"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 0.1,
+    "toCenter": 1.11
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 0.1,
+    "toCenter": 1.11,
+    "via": [
+     "مدخل الرجال"
+    ]
+   },
+   "straight": 1.3,
+   "detour": 0.85,
+   "altFrom": null
+  },
+  {
+   "id": "r7",
+   "name": "دورة مياه النساء",
+   "type": "bath",
+   "level": "L1",
+   "zone": "women",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "مجلس النساء",
+    "مغاسل",
+    "دورة مياه النساء"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 7.25,
+    "toCenter": 8.19
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 7.25,
+    "toCenter": 8.14,
+    "via": [
+     "مدخل العائلة",
+     "مجلس النساء",
+     "مغاسل",
+     "دورة مياه النساء"
+    ]
+   },
+   "straight": 7.35,
+   "detour": 1.11,
+   "altFrom": null
+  },
+  {
+   "id": "r16",
+   "name": "حمام غرفة 4",
+   "type": "bath",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "غرفة نوم 4",
+    "حمام غرفة 4"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 12.6,
+    "toCenter": 13.68
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 12.6,
+    "toCenter": 13.66,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "غرفة نوم 4",
+     "حمام غرفة 4"
+    ]
+   },
+   "straight": 8.45,
+   "detour": 1.62,
+   "altFrom": null
+  },
+  {
+   "id": "r24",
+   "name": "غرفة ملابس",
+   "type": "storage",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "غرفة النوم الرئيسية",
+    "غرفة ملابس"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 18.06,
+    "toCenter": 19.23
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 18.06,
+    "toCenter": 19.23,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "غرفة النوم الرئيسية",
+     "غرفة ملابس"
+    ]
+   },
+   "straight": 15.75,
+   "detour": 1.22,
+   "altFrom": null
+  },
+  {
+   "id": "r23",
+   "name": "حمام الرئيسية",
+   "type": "bath",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "غرفة النوم الرئيسية",
+    "حمام الرئيسية"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 18.95,
+    "toCenter": 20.27
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 18.95,
+    "toCenter": 20.27,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "غرفة النوم الرئيسية",
+     "حمام الرئيسية"
+    ]
+   },
+   "straight": 18.07,
+   "detour": 1.12,
+   "altFrom": null
+  },
+  {
+   "id": "r22",
+   "name": "غرفة النوم الرئيسية",
+   "type": "master",
+   "level": "L1",
+   "zone": "family",
+   "from": "مدخل العائلة",
+   "fromOpening": "o1",
+   "graphReachable": true,
+   "graphPath": [
+    "مدخل العائلة",
+    "الصالة",
+    "غرفة النوم الرئيسية"
+   ],
+   "bare": {
+    "reachable": true,
+    "toThreshold": 13.81,
+    "toCenter": 16.85
+   },
+   "actual": {
+    "reachable": true,
+    "toThreshold": 13.81,
+    "toCenter": 17.07,
+    "via": [
+     "مدخل العائلة",
+     "الصالة",
+     "غرفة النوم الرئيسية"
+    ]
+   },
+   "straight": 16.17,
+   "detour": 1.06,
+   "altFrom": null
+  }
+ ],
+ "doors": [
+  {
+   "id": "o1",
+   "level": "L1",
+   "kind": "door2",
+   "w": 1.4,
+   "between": [
+    "مدخل العائلة",
+    "الخارج"
+   ],
+   "entry": true,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o2",
+   "level": "L1",
+   "kind": "door",
+   "w": 1,
+   "between": [
+    "الصالة",
+    "مدخل العائلة"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o3",
+   "level": "L1",
+   "kind": "door",
+   "w": 1.1,
+   "between": [
+    "مدخل الرجال",
+    "الخارج"
+   ],
+   "entry": true,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o4",
+   "level": "L1",
+   "kind": "arch",
+   "w": 1.4,
+   "between": [
+    "مجلس الرجال",
+    "مدخل الرجال"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o5",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "دورة مياه الرجال",
+    "مدخل الرجال"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o6",
+   "level": "L1",
+   "kind": "door2",
+   "w": 1.4,
+   "between": [
+    "مدخل العائلة",
+    "مجلس النساء"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o7",
+   "level": "L1",
+   "kind": "arch",
+   "w": 1.4,
+   "between": [
+    "مغاسل",
+    "مجلس النساء"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o8",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "مغاسل",
+    "دورة مياه النساء"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o9",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.9,
+   "between": [
+    "مدخل الجناح",
+    "الصالة"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o10",
+   "level": "L1",
+   "kind": "arch",
+   "w": 0.9500000000000001,
+   "between": [
+    "غرفة نوم 2",
+    "مدخل الجناح"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o11",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "حمام غرفة 2",
+    "مدخل الجناح"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o12",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.95,
+   "between": [
+    "مدخل الجناح",
+    "الصالة"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o13",
+   "level": "L1",
+   "kind": "arch",
+   "w": 0.9500000000000001,
+   "between": [
+    "غرفة نوم 3",
+    "مدخل الجناح"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o14",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "مدخل الجناح",
+    "حمام غرفة 3"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o15",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.95,
+   "between": [
+    "الصالة",
+    "غرفة نوم 4"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o16",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "غرفة نوم 4",
+    "حمام غرفة 4"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o17",
+   "level": "L1",
+   "kind": "arch",
+   "w": 1.2,
+   "between": [
+    "غرفة نوم 4",
+    "خزانة ملابس"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o18",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "غرفة الخادمة",
+    "حمام الخادمة"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o19",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.9,
+   "between": [
+    "الخارج",
+    "المطبخ"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o20",
+   "level": "L1",
+   "kind": "arch",
+   "w": 1.8,
+   "between": [
+    "صالة الطعام",
+    "الصالة"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o21",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.95,
+   "between": [
+    "غرفة النوم الرئيسية",
+    "الصالة"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o22",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.8,
+   "between": [
+    "غرفة النوم الرئيسية",
+    "حمام الرئيسية"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o23",
+   "level": "L1",
+   "kind": "arch",
+   "w": 1.2,
+   "between": [
+    "غرفة النوم الرئيسية",
+    "غرفة ملابس"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o24",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.95,
+   "between": [
+    "المطبخ",
+    "صالة الطعام"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  },
+  {
+   "id": "o25",
+   "level": "L1",
+   "kind": "door",
+   "w": 0.85,
+   "between": [
+    "غرفة الخادمة",
+    "المطبخ"
+   ],
+   "entry": false,
+   "swingBlockedBy": []
+  }
+ ],
+ "findings": [
+  {
+   "severity": "info",
+   "code": "ENSUITE",
+   "message": "«خزانة ملابس» تابعة لـ«غرفة نوم 4» ولا تُبلغ إلا منها (ملحق خاص — طبيعي).",
+   "elements": [
+    "r17",
+    "r15"
+   ]
+  },
+  {
+   "severity": "info",
+   "code": "ENSUITE",
+   "message": "«حمام غرفة 4» تابعة لـ«غرفة نوم 4» ولا تُبلغ إلا منها (ملحق خاص — طبيعي).",
+   "elements": [
+    "r16",
+    "r15"
+   ]
+  },
+  {
+   "severity": "info",
+   "code": "ENSUITE",
+   "message": "«غرفة ملابس» تابعة لـ«غرفة النوم الرئيسية» ولا تُبلغ إلا منها (ملحق خاص — طبيعي).",
+   "elements": [
+    "r24",
+    "r22"
+   ]
+  },
+  {
+   "severity": "info",
+   "code": "ENSUITE",
+   "message": "«حمام الرئيسية» تابعة لـ«غرفة النوم الرئيسية» ولا تُبلغ إلا منها (ملحق خاص — طبيعي).",
+   "elements": [
+    "r23",
+    "r22"
+   ]
+  },
+  {
+   "severity": "info",
+   "code": "GUEST_VIA_FAMILY_ENTRANCE",
+   "message": "«مجلس النساء» تُبلغ من «مدخل العائلة».",
+   "elements": [
+    "r6",
+    "r1"
+   ]
+  },
+  {
+   "severity": "info",
+   "code": "GUEST_VIA_FAMILY_ENTRANCE",
+   "message": "«مغاسل» تُبلغ من «مدخل العائلة».",
+   "elements": [
+    "r8",
+    "r1"
+   ]
+  },
+  {
+   "severity": "info",
+   "code": "GUEST_VIA_FAMILY_ENTRANCE",
+   "message": "«دورة مياه النساء» تُبلغ من «مدخل العائلة».",
+   "elements": [
+    "r7",
+    "r1"
+   ]
+  }
+ ],
+ "counts": {
+  "serious": 0,
+  "warn": 0,
+  "info": 7
+ }
+}
