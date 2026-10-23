@@ -2494,6 +2494,8 @@ export function planCorridors(rooms) {
 // ------------------------------------------------------------------------------------------ الواجهة العامة
 function buildDoc(site, land, title) {
   let doc = createDoc({ title });
+  // (الجولة الرابعة عشرة) سترة السطح بارتفاع خصوصية 1.8 م — قيمة تصميمية افتراضية للميزان (يغيّرها العميل)
+  doc.roof = { ...(doc.roof || {}), parapet: 1.8, parapetTier: 'mizan-default' };
   doc = applyCommand(doc, { type: 'set-plot', polygon: site.polygon, setbacks: site.setbacks, north: 0, entry: site.entry, streetWidth: site.plot?.streetWidth ?? null }).doc;
   if (land?.streets?.length && land?.entries?.length) doc = applyCommand(doc, { type: 'set-plot', streets: land.streets, entries: land.entries }).doc;
   return doc;
@@ -3253,7 +3255,7 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
     cand.parkSide = null;
   }
   if (pk && pk.bays.length < pk.required && cand.parkShift == null && !site.placeRects) {
-    const front = site.setbacks?.[site.entry] ?? 3, need = Math.max(0, 5.9 - front), room = site.D - cand.ed, shift = snap(Math.min(room, need));
+    const front = site.setbacks?.[site.entry] ?? 3, need = Math.max(0, 6.5 - front), room = site.D - cand.ed, shift = snap(Math.min(room, need));
     cand.parkShift = shift >= .5 && room >= need - .05 ? shift : 0;
     if (cand.parkShift) return buildDesign(cand, P, site, land, { title, mirror, requirements, entry, second });
   }

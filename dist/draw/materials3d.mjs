@@ -112,20 +112,26 @@ const painters = {
     return { color: c };
   },
   stone({ S = 1024, size = 2, course = .25, seed = 61, palette = [[214, 196, 164], [204, 184, 150], [222, 206, 176], [196, 176, 142]] } = {}) {
-    const c = makeCanvas(S), x = c.getContext('2d'), b = makeCanvas(S), bx = b.getContext('2d'), r = rng(seed), rows = Math.round(size / course), rh = S / rows;
+    const c = makeCanvas(S), x = c.getContext('2d'), b = makeCanvas(S), bx = b.getContext('2d'), r = rng(seed);
     x.fillStyle = '#6f6554'; x.fillRect(0, 0, S, S); bx.fillStyle = '#202020'; bx.fillRect(0, 0, S, S);
-    for (let j = 0; j < rows; j++) {
+    // (Round 14) ashlar with varied course heights (a deep course, then thinner ones) and varied stone lengths — reads as cut
+    // stone rather than a repeated block; the pattern still tiles vertically because the course heights sum to S
+    const units = [], want = size / course; let tot = 0; while (tot < want - .4) { const u = [1.6, 1, .7, 1, 1.3][units.length % 5] * (.9 + r() * .2); units.push(u); tot += u; }
+    const scale = S / units.reduce((a, u) => a + u, 0); let y0 = 0;
+    for (let j = 0; j < units.length; j++) {
+      const rh = units[j] * scale;
       let px = -r() * S * .4;
       while (px < S) {
-        const len = S * (.17 + r() * .22), col = palette[Math.floor(r() * palette.length)], v = (r() - .5) * 14;
+        const len = S * (rh / S * size > course * 1.2 ? .22 + r() * .3 : .1 + r() * .22), col = palette[Math.floor(r() * palette.length)], v = (r() - .5) * 18;
         for (const off of [-S, 0, S]) {
           const X = px + off; if (X + len < 0 || X > S) continue;
-          x.fillStyle = `rgb(${clamp(col[0] + v)},${clamp(col[1] + v)},${clamp(col[2] + v)})`; x.fillRect(X + 2, j * rh + 2, len - 4, rh - 4);
-          bx.fillStyle = `rgb(${190 + Math.round(r() * 40)},${190},${190})`; bx.fillRect(X + 2, j * rh + 2, len - 4, rh - 4);
-          for (let k = 0; k < 9; k++) { const gy = j * rh + 4 + r() * (rh - 8); x.fillStyle = `rgba(90,70,45,${.1 + r() * .15})`; x.fillRect(X + 4 + r() * len * .5, gy, 12 + r() * len * .4, 1.5 + r() * 1.5); }
+          x.fillStyle = `rgb(${clamp(col[0] + v)},${clamp(col[1] + v)},${clamp(col[2] + v)})`; x.fillRect(X + 2, y0 + 2, len - 4, rh - 4);
+          bx.fillStyle = `rgb(${190 + Math.round(r() * 40)},${190},${190})`; bx.fillRect(X + 2, y0 + 2, len - 4, rh - 4);
+          for (let k = 0; k < 9; k++) { const gy = y0 + 4 + r() * (rh - 8); x.fillStyle = `rgba(90,70,45,${.08 + r() * .14})`; x.fillRect(X + 4 + r() * len * .5, gy, 10 + r() * len * .4, 1.2 + r() * 1.5); }
         }
         px += len;
       }
+      y0 += rh;
     }
     noise(x, S, S, 14, r);
     return { color: c, bump: b };

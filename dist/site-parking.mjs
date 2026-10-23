@@ -45,7 +45,11 @@ export function planParking(doc, { max = null, parallel = false } = {}) {
     for (const d of doors) {
       const p = F(d.p), o = rot(d.out, a), hw = d.w / 2 + .45;
       if (o.y < -.7) boxes.push({ x0: p.x - hw, x1: p.x + hw, y0: y0 - 1, y1: p.y + .2 }); // باب على الشارع: ممره إلى حد الأرض
-      else { const q = { x: p.x + o.x * 1.8, y: p.y + o.y * 1.8 }; boxes.push({ x0: Math.min(p.x, q.x) - hw, x1: Math.max(p.x, q.x) + hw, y0: Math.min(p.y, q.y) - hw, y1: Math.max(p.y, q.y) + hw }); }
+      else {
+        const q = { x: p.x + o.x * 1.8, y: p.y + o.y * 1.8 }; boxes.push({ x0: Math.min(p.x, q.x) - hw, x1: Math.max(p.x, q.x) + hw, y0: Math.min(p.y, q.y) - hw, y1: Math.max(p.y, q.y) + hw });
+        // (الجولة الرابعة عشرة) باب جانبي (مدخل النساء أو الخدمة): ممشاه في الارتداد الجانبي حتى الشارع لا يسده موقف
+        if (Math.abs(o.x) > .7) boxes.push({ x0: Math.min(p.x, q.x) - .1, x1: Math.max(p.x, q.x) + .1, y0: y0 - 1, y1: p.y + hw });
+      }
     }
     // (الجولة الرابعة عشرة) لا موقف يلاصق نافذة (0.5 م أمامها) — السيارة أمام نافذة المجلس أو الصالة عيب (المراجع المستقل r13)
     const wins = G.openings.filter(op => op.window && op.sides.some(s => s.exterior)).map(op => ({ p: op.p, out: op.sides.find(x => x.exterior).outward, w: op.w }));

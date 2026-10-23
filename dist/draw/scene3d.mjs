@@ -229,6 +229,9 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         const pt = (u, y) => [A.x + ux * u, E + y, -(A.y + uy * u)];
         PA.quad('fence', pt(0, H), pt(len, H), pt(len, H + parapetH), pt(0, H + parapetH), n3, [[0, H], [len, H], [len, H + parapetH], [0, H + parapetH]]);
       }
+      // (Round 14) projecting cornice band at roof level on the outer face (a classic stone cornice under the parapet)
+      if (opt.cornice !== false) { const outerL = !seg.sideL, A0 = outerL ? c.aL : c.aR, B0 = outerL ? c.bL : c.bR, nn = outerL ? seg.left : mul(seg.left, -1), dd = norm(sub(B0, A0));
+        const a0 = sub(A0, mul(dd, .16)), b0 = add(B0, mul(dd, .16)); PA.prism({ top: 'cap', side: 'cap', bottom: 'cap' }, [a0, b0, add(b0, mul(nn, .16)), add(a0, mul(nn, .16))], E + H - .04, E + H + .2); }
       parapetWalls.push({ id: seg.wallId + '#' + seg.id, level: L.id, a: seg.a, b: seg.b, t: seg.t + .1, h: .07, kind: 'wall' });
     }
     if (parapetWalls.length) {
@@ -342,9 +345,29 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         const bx = out.x * Math.cos(north) + out.y * Math.sin(north), eastWest = Math.abs(bx) > .7;
         for (const o of seg.openings) {
           if (!['window', 'window2'].includes(o.kind) || !(o.w >= .5)) continue;
-          const proj = o.w >= 2 ? .6 : .45, ow = o.w + .3, z = o.z1 + .1;
+          // (Round 14) deeper shading on the south and west (hot sun) — Mizan default; compass of the outward normal
+          const byC = out.y * Math.cos(north) - out.x * Math.sin(north), compass = eastWest ? (bx > 0 ? 'e' : 'w') : (byC > 0 ? 'n' : 's');
+          const hot = compass === 's' || compass === 'w';
+          const proj = hot ? (o.w >= 2 ? .95 : .8) : o.w >= 2 ? .6 : .45, ow = o.w + (hot ? .5 : .3), z = o.z1 + .1;
           const q0 = add(add(o.center, mul(out, face - .01)), mul(side, -ow / 2)), q1 = add(add(o.center, mul(out, face - .01)), mul(side, ow / 2));
           O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [q0, q1, add(q1, mul(out, proj)), add(q0, mul(out, proj))], E + z, E + z + .1);
+          // (Round 14) stone surround around every exterior window (head, jambs, sill band) — reads as cut-stone framing
+          { const fz0 = E + (o.z0 ?? o.z1 - (o.h || 1.2)) - .12, fz1 = E + o.z1 + .02, fw = .12, fo = .05;
+            for (const sg of [-1, 1]) { const j0 = add(add(o.center, mul(out, face - .01)), mul(side, sg * (o.w / 2))), j1 = add(j0, mul(side, sg * fw)); O.prism({ top: 'sillStone', side: 'sillStone', bottom: 'sillStone' }, [j0, j1, add(j1, mul(out, fo)), add(j0, mul(out, fo))], fz0, fz1); }
+            const h0 = add(add(o.center, mul(out, face - .01)), mul(side, -(o.w / 2 + fw))), h1 = add(add(o.center, mul(out, face - .01)), mul(side, o.w / 2 + fw));
+            O.prism({ top: 'sillStone', side: 'sillStone', bottom: 'sillStone' }, [h0, h1, add(h1, mul(out, fo + .02)), add(h0, mul(out, fo + .02))], fz0 - .06, fz0 + .06); }
+          // (Round 14) privacy screen (mashrabiya) on street-facing windows of a majlis or a dining room — Mizan default;
+          // doc.finish.facade.privacy === false turns it off (the client's choice wins)
+          const inner = seg.ext === 1 ? seg.sideR : seg.sideL, streets = new Set([doc.entry || 's', ...(doc.streets || [])]);
+          if (fac.privacy !== false && inner && ['majlis', 'dining'].includes(inner.type) && streets.has(compass)) {
+            const z0 = E + (o.z0 ?? o.z1 - (o.h || 1.2)) - .02, z1 = E + o.z1 + .02, off = face + .07, hw = o.w / 2 + .04, n = Math.max(6, Math.round(o.w / .07));
+            const at = (u, d) => add(add(o.center, mul(out, off + d)), mul(side, u));
+            for (const [u0, u1] of [[-hw - .05, -hw], [hw, hw + .05]]) O.prism({ top: 'wood', side: 'wood', bottom: 'wood' }, [at(u0, 0), at(u1, 0), at(u1, .05), at(u0, .05)], z0, z1);
+            for (const zz of [z0, z1 - .05]) O.prism({ top: 'wood', side: 'wood', bottom: 'wood' }, [at(-hw - .05, 0), at(hw + .05, 0), at(hw + .05, .05), at(-hw - .05, .05)], zz, zz + .05);
+            for (let k = 1; k < n; k++) { const u = -hw + 2 * hw * k / n; O.prism({ top: 'wood', side: 'wood', bottom: 'wood' }, [at(u - .012, .005), at(u + .012, .005), at(u + .012, .04), at(u - .012, .04)], z0 + .05, z1 - .05); }
+            for (let zz = z0 + .3; zz < z1 - .15; zz += .16) O.prism({ top: 'wood', side: 'wood', bottom: 'wood' }, [at(-hw, .005), at(hw, .005), at(hw, .04), at(-hw, .04)], zz, zz + .025);
+            (result.privacyScreens ||= []).push({ level: L.id, opening: o.id, room: inner.name, compass });
+          }
           if (eastWest) for (const sg of [-1, 1]) {
             const c0 = add(add(o.center, mul(out, face - .01)), mul(side, sg * (o.w / 2 + .1))), c1 = add(c0, mul(side, sg * .06)), fp = Math.min(proj, .35);
             O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [c0, c1, add(c1, mul(out, fp)), add(c0, mul(out, fp))], E + (o.z0 ?? o.z1 - (o.h || 1.2)), E + z);

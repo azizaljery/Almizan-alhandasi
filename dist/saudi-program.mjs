@@ -261,8 +261,9 @@ export function measureR14(doc, request = {}, model, ask = clientAsks(request)) 
     const fNeed = Math.max(sb[doc.entry || 's'] ?? 3, 0);
     // مواقف أمام المبنى (لا بجانبه): يلزمها عمق 5.5 م وهامشاها أمام الواجهة
     const bays = (doc.zones || []).filter(z => z.type === 'garage').map(z => z.polygon.map(fb.F)).map(ps => ({ x0: Math.min(...ps.map(p => p.x)), x1: Math.max(...ps.map(p => p.x)), y1: Math.max(...ps.map(p => p.y)) }));
-    const inFront = bays.some(b => b.x1 > fb.b.x0 + .3 && b.x0 < fb.b.x1 - .3 && b.y1 <= fb.b.y0 + .05);
-    const need = Math.max(fNeed, inFront ? 6 : 0), slack = front - need;
+    // الموقف أمام الواجهة يحتاج عمقه وخلوصًا 0.5 م عن نوافذها (وسماكة الجدار): عمق الموقف من حد الأرض + 0.8 م
+    const pf = Math.min(...xs.map(x => plotYAt(fb.plot, x)[0])), fr = bays.filter(b => b.x1 > fb.b.x0 + .3 && b.x0 < fb.b.x1 - .3 && b.y1 <= fb.b.y0 + .05);
+    const need = Math.max(fNeed, fr.length ? Math.max(...fr.map(b => b.y1 - pf)) + .8 : 0), slack = front - need;
     const ok = rear >= 6 - .05 || slack <= .5;
     push('REAR_YARD', ok, { rear: r2(rear), front: r2(front), frontNeeded: r2(need), slack: r2(slack) }, ok ? [] : [`الحوش الخلفي ${r2(rear)} م والفناء الأمامي ${r2(front)} م (يكفي ${r2(need)} م): المبنى مدفوع إلى الخلف ${r2(Math.min(slack, 6 - rear))} م بلا سبب`], true);
   }
