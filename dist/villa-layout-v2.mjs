@@ -3340,7 +3340,7 @@ function streetBedrooms(rooms) {
  */
 function typologyFit(cand, P, site) {
   let pen = 0;
-  if (site.placeRects && !cand.stepped) pen += 150; // أرض شبه منحرفة: المستطيل داخلها لا يستثمر شكلها
+  if (site.placeRects && !cand.stepped) pen += 300; // أرض شبه منحرفة: المستطيل داخلها لا يستثمر شكلها
   const kids = (P.suites || []).filter(b => !b.master).length;
   if (cand.mode === 'wings' && kids < 3) pen += 80; // جناح رئيسي منفصل لغرفتي أبناء فقط: حركة أطول بلا فائدة خصوصية تُذكر
   return pen;
