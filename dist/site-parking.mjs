@@ -28,7 +28,7 @@ const r2 = v => Math.round(v * 100) / 100;
  * يقترح مواقف السيارات لمستند (الدور الأرضي): يعيد { bays:[{ polygon, side, kind }], note_ar }. لا يعدّل المستند.
  * max: أقصى عدد (افتراضيًا 2).
  */
-export function planParking(doc, { max = null, parallel = false } = {}) {
+export function planParking(doc, { max = null, parallel = false, windows = true } = {}) {
   const plot0 = doc.plot?.polygon; if (!plot0 || plot0.length < 3) return { bays: [], note_ar: 'لا مضلع أرض في المستند.' };
   const need = requiredParking(plotArea(plot0)); if (max == null) max = need;
   const plot = ccw(plot0.map(p => ({ x: p.x, y: p.y })));
@@ -36,7 +36,7 @@ export function planParking(doc, { max = null, parallel = false } = {}) {
   const entry = doc.entry || 's', streets = [...new Set([entry, ...(doc.streets || [])])].filter(s => ANG[s] !== undefined);
   // العوائق: الجدران الأرضية بهامش 0.25 م، وممرات الأبواب الخارجية (من الباب إلى حد الأرض على جهة الشارع، و1.8 م لغيرها)
   const wallBoxes = G.walls.filter(w => (w.kind || 'wall') !== 'fence').map(w => wallRect(w));
-  const doors = G.openings.filter(op => op.door && op.sides.some(s => s.exterior)).map(op => { const s = op.sides.find(x => x.exterior); return { p: op.p, out: s.outward, w: op.w, entry: !!op.o.entry }; });
+  const doors = G.openings.filter(op => op.door && op.sides.some(s => s.exterior)).map(op => { const s = op.sides.find(x => x.exterior); return { p: op.p, out: s.outward, w: op.w, entry: !!op.o.entry, people: !!op.o.entry || /النساء|الرجال|مدخل|مجلس/.test(s.room?.name || '') }; });
   const best = [], all = [];
   for (const side of streets) {
     const a = ANG[side], F = p => rot(p, a), Fi = p => rot(p, -a);
@@ -48,12 +48,12 @@ export function planParking(doc, { max = null, parallel = false } = {}) {
       else {
         const q = { x: p.x + o.x * 1.8, y: p.y + o.y * 1.8 }; boxes.push({ x0: Math.min(p.x, q.x) - hw, x1: Math.max(p.x, q.x) + hw, y0: Math.min(p.y, q.y) - hw, y1: Math.max(p.y, q.y) + hw });
         // (الجولة الرابعة عشرة) باب جانبي (مدخل النساء أو الخدمة): ممشاه في الارتداد الجانبي حتى الشارع لا يسده موقف
-        if (Math.abs(o.x) > .7) boxes.push({ x0: Math.min(p.x, q.x) - .1, x1: Math.max(p.x, q.x) + .1, y0: y0 - 1, y1: p.y + hw });
+        if (Math.abs(o.x) > .7 && d.people) boxes.push({ x0: Math.min(p.x, q.x) - .1, x1: Math.max(p.x, q.x) + .1, y0: y0 - 1, y1: p.y + hw });
       }
     }
     // (الجولة الرابعة عشرة) لا موقف يلاصق نافذة (0.5 م أمامها) — السيارة أمام نافذة المجلس أو الصالة عيب (المراجع المستقل r13)
     const wins = G.openings.filter(op => op.window && op.sides.some(s => s.exterior)).map(op => ({ p: op.p, out: op.sides.find(x => x.exterior).outward, w: op.w }));
-    for (const wv of wins) { const p = F(wv.p), o = rot(wv.out, a), hw = wv.w / 2 + .2, q = { x: p.x + o.x * .5, y: p.y + o.y * .5 }; boxes.push({ x0: Math.min(p.x, q.x) - (Math.abs(o.x) > .7 ? 0 : hw), x1: Math.max(p.x, q.x) + (Math.abs(o.x) > .7 ? 0 : hw), y0: Math.min(p.y, q.y) - (Math.abs(o.x) > .7 ? hw : 0), y1: Math.max(p.y, q.y) + (Math.abs(o.x) > .7 ? hw : 0) }); }
+    if (windows) for (const wv of wins) { const p = F(wv.p), o = rot(wv.out, a), hw = wv.w / 2 + .2, q = { x: p.x + o.x * .5, y: p.y + o.y * .5 }; boxes.push({ x0: Math.min(p.x, q.x) - (Math.abs(o.x) > .7 ? 0 : hw), x1: Math.max(p.x, q.x) + (Math.abs(o.x) > .7 ? 0 : hw), y0: Math.min(p.y, q.y) - (Math.abs(o.x) > .7 ? hw : 0), y1: Math.max(p.y, q.y) + (Math.abs(o.x) > .7 ? hw : 0) }); }
     const inside = r => [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]].every(([x, y]) => pointInPolygon({ x, y }, P, 1e-6) && distToPoly({ x, y }, P) >= .08);
     // تجويف: المبنى على جانبي الموقف عند منتصف عمقه (0.8 م يمينه ويساره) — لا يُقبل
     const atB = (x, y) => !!G.roomAt(Fi({ x, y }));

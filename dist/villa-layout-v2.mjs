@@ -3263,6 +3263,8 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   if (pk && pk.bays.length < pk.required && !parallel) {
     let pk2 = null; try { pk2 = planParking(doc, { parallel: true }); } catch { pk2 = null; }
     if (pk2 && pk2.bays.length > pk.bays.length) { pk = pk2; pk.note_ar += ' (تفضيل الميزان موقف عمودي بعمق 5.5 م لم يتسع في هذه الأرض لهذا المبنى لا بجانبه ولا أمامه، فرُسم موازيًا — قيمة تصميمية افتراضية للميزان لم تُطبَّق، والسبب ضيق الارتداد.)'; }
+    // آخر الحلول: العدد النظامي أولًا ولو أمام نافذة (يُذكر ويظهر في «يحتاج تعديلات»)
+    if (pk.bays.length < pk.required) { let pk3 = null; try { pk3 = planParking(doc, { parallel: true, windows: false }); } catch { pk3 = null; } if (pk3 && pk3.bays.length > pk.bays.length) { pk = pk3; pk.note_ar += ' (لم يتسع العدد النظامي إلا بموقف أمام نافذة — تفضيل الميزان لم يُطبَّق في هذه الأرض لهذا المبنى.)'; } }
   }
   if (pk) { for (const b of pk.bays) doc = applyCommand(doc, { type: 'add-zone', level: LV, name: 'موقف سيارة', roomType: 'garage', polygon: b.polygon }).doc; layout.notes.push(pk.note_ar + (cand.parkShift ? ` أُزيح المبنى ${cand.parkShift} م إلى الخلف ليتسع العدد المطلوب أمامه.` : '')); }
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
