@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 280,
+ "ms": 244,
  "understood": [
   "المطبخ مغلق بباب"
  ],
@@ -543,5 +543,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 280
+ "replyMs": 245
 }

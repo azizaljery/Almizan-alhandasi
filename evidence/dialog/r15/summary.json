@@ -1,6 +1,6 @@
 {
  "stage": "r15",
- "at": "2026-10-23T19:43:48.606Z",
+ "at": "2026-10-23T20:34:01.895Z",
  "thresholds": {
   "areaPct": 5,
   "shift": 0.5
@@ -1426,7 +1426,7 @@
   {
    "id": "S1",
    "name": "مثال المالك: نقل المطبخ ثم تكبير المجلس ثم إرجاع المطبخ ثم حذف المكتب ثم الواجهة ثم «غرفة البنت»",
-   "initMs": 14978,
+   "initMs": 15802,
    "turns": [
     {
      "n": 1,
@@ -1587,7 +1587,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 16369,
+     "ms": 16367,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -1706,7 +1706,7 @@
       "«المجلس» 6×7 م"
      ],
      "error": null,
-     "ms": 1071,
+     "ms": 1088,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -1831,7 +1831,7 @@
       "إرجاع «المطبخ» إلى ما كانت عليه في التصميم الأول"
      ],
      "error": null,
-     "ms": 339,
+     "ms": 273,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -1950,7 +1950,7 @@
       "حذف «المكتب»"
      ],
      "error": null,
-     "ms": 432,
+     "ms": 357,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -2076,7 +2076,7 @@
       "الواجهة: حجر"
      ],
      "error": null,
-     "ms": 272,
+     "ms": 303,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -2192,7 +2192,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 59,
+     "ms": 45,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -2265,7 +2265,7 @@
   {
    "id": "S2",
    "name": "نقل الخادمة، إبعاد الماستر، زيادة غرفة ثم التراجع عنها، تكبير الصالة",
-   "initMs": 16733,
+   "initMs": 17111,
    "turns": [
     {
      "n": 1,
@@ -2314,7 +2314,7 @@
       "«غرفة الخادمة» بجوار «المطبخ»"
      ],
      "error": null,
-     "ms": 514,
+     "ms": 403,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -2434,7 +2434,7 @@
       "«غرفة النوم الرئيسية» بعيدًا عن «المجلس»"
      ],
      "error": null,
-     "ms": 370,
+     "ms": 348,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -2701,7 +2701,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 10566,
+     "ms": 11220,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -2815,7 +2815,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 72,
+     "ms": 62,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -2927,7 +2927,7 @@
       "«الصالة» أكبر قليلًا"
      ],
      "error": null,
-     "ms": 484,
+     "ms": 492,
      "fingerprint": {
       "counts": {
        "changed": 4,
@@ -3014,7 +3014,7 @@
   {
    "id": "S3",
    "name": "الواجهة وحدها مرتين، ثم فتح المطبخ ثم «رجّعه مقفل»",
-   "initMs": 6610,
+   "initMs": 7314,
    "turns": [
     {
      "n": 1,
@@ -3061,7 +3061,7 @@
       "الواجهة: حجر"
      ],
      "error": null,
-     "ms": 213,
+     "ms": 215,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -3182,7 +3182,7 @@
       "الواجهة: نجدي"
      ],
      "error": null,
-     "ms": 265,
+     "ms": 242,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -3304,7 +3304,7 @@
       "«المطبخ» بجوار «الطعام»"
      ],
      "error": null,
-     "ms": 403,
+     "ms": 244,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -3427,7 +3427,7 @@
       "المطبخ مغلق بباب"
      ],
      "error": null,
-     "ms": 280,
+     "ms": 244,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -3512,7 +3512,7 @@
   {
    "id": "S4",
    "name": "مقاسات متتابعة: الماستر ثم المطبخ ثم تصغير المجلس ثم الصالة ثم غرفة نوم بعينها",
-   "initMs": 7729,
+   "initMs": 11882,
    "turns": [
     {
      "n": 1,
@@ -3562,7 +3562,7 @@
       "«غرفة النوم الرئيسية» 5×6 م"
      ],
      "error": null,
-     "ms": 1778,
+     "ms": 1940,
      "fingerprint": {
       "counts": {
        "changed": 7,
@@ -3690,7 +3690,7 @@
       "«المطبخ» 4×5 م"
      ],
      "error": null,
-     "ms": 1234,
+     "ms": 1065,
      "fingerprint": {
       "counts": {
        "changed": 3,
@@ -3816,7 +3816,7 @@
       "«المجلس» أصغر"
      ],
      "error": null,
-     "ms": 416,
+     "ms": 413,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -3965,7 +3965,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 668,
+     "ms": 641,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -4083,7 +4083,7 @@
       "«غرفة نوم 2» 4×5 م"
      ],
      "error": null,
-     "ms": 854,
+     "ms": 711,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -4170,7 +4170,7 @@
   {
    "id": "S5",
    "name": "إضافة وحذف: غسيل، مصلى قرب المجلس، «شيل المصلى»، سائق بحمام، المجلس يمين الداخل",
-   "initMs": 6788,
+   "initMs": 6675,
    "turns": [
     {
      "n": 1,
@@ -4216,7 +4216,7 @@
       "إضافة غرفة غسيل"
      ],
      "error": null,
-     "ms": 553,
+     "ms": 585,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -4457,7 +4457,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 3566,
+     "ms": 3651,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -4573,7 +4573,7 @@
       "بدون مصلى"
      ],
      "error": null,
-     "ms": 228,
+     "ms": 356,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -4692,7 +4692,7 @@
       "إضافة غرفة سائق بحمام"
      ],
      "error": null,
-     "ms": 474,
+     "ms": 489,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -4931,7 +4931,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 6953,
+     "ms": 7993,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5011,7 +5011,7 @@
   {
    "id": "S6",
    "name": "مدخل شرقي: المطبخ في الخلف، الماستر شمالًا ثم إرجاعها، غرفة نوم 2 بمقاس، مدخل لمجلس النساء",
-   "initMs": 15388,
+   "initMs": 15344,
    "turns": [
     {
      "n": 1,
@@ -5057,7 +5057,7 @@
       "«المطبخ» في الخلف"
      ],
      "error": null,
-     "ms": 382,
+     "ms": 338,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5177,7 +5177,7 @@
       "«غرفة النوم الرئيسية» في جهة الشمال"
      ],
      "error": null,
-     "ms": 321,
+     "ms": 308,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5296,7 +5296,7 @@
       "إرجاع «غرفة النوم الرئيسية» إلى ما كانت عليه في التصميم الأول"
      ],
      "error": null,
-     "ms": 330,
+     "ms": 320,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5414,7 +5414,7 @@
       "«غرفة نوم 2» 4×5 م"
      ],
      "error": null,
-     "ms": 1428,
+     "ms": 1447,
      "fingerprint": {
       "counts": {
        "changed": 3,
@@ -5542,7 +5542,7 @@
       "«مجلس النساء» بمدخل خارجي مستقل"
      ],
      "error": null,
-     "ms": 581,
+     "ms": 544,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5627,7 +5627,7 @@
   {
    "id": "S7",
    "name": "الأبواب والنوافذ: فتح باب بين المجلس والطعام ثم «سد الباب»، نقل باب غرفة 2، تكبير نافذة الصالة، باب موجود أصلًا",
-   "initMs": 7552,
+   "initMs": 10831,
    "turns": [
     {
      "n": 1,
@@ -5672,7 +5672,7 @@
       "باب بين «المجلس» و«صالة الطعام والمقلط»"
      ],
      "error": null,
-     "ms": 316,
+     "ms": 306,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5790,7 +5790,7 @@
       "سدّ الباب الذي عُدّل في الطلب السابق"
      ],
      "error": null,
-     "ms": 323,
+     "ms": 333,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -5921,7 +5921,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 434,
+     "ms": 407,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -6041,7 +6041,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 394,
+     "ms": 297,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -6152,7 +6152,7 @@
       "باب بين «المطبخ» و«صالة الطعام والمقلط»"
      ],
      "error": null,
-     "ms": 349,
+     "ms": 265,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -6232,7 +6232,7 @@
   {
    "id": "S8",
    "name": "تعديلات متتابعة ثم «ارجع للنسخة الثانية» ثم «رجّع مثل أول بس خل تعديل المجلس»",
-   "initMs": 7065,
+   "initMs": 6446,
    "turns": [
     {
      "n": 1,
@@ -6277,7 +6277,7 @@
       "تكبير نافذة «الصالة»"
      ],
      "error": null,
-     "ms": 298,
+     "ms": 254,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -6401,7 +6401,7 @@
       "«المجلس» أصغر"
      ],
      "error": null,
-     "ms": 286,
+     "ms": 283,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -6527,7 +6527,7 @@
       "الواجهة: حجر"
      ],
      "error": null,
-     "ms": 213,
+     "ms": 199,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -6647,7 +6647,7 @@
       "الرجوع إلى النسخة 2"
      ],
      "error": null,
-     "ms": 301,
+     "ms": 209,
      "fingerprint": {
       "counts": {
        "changed": 3,
@@ -6788,7 +6788,7 @@
       "الرجوع إلى التصميم الأول مع الإبقاء على تعديل «المجلس»"
      ],
      "error": null,
-     "ms": 346,
+     "ms": 307,
      "fingerprint": {
       "counts": {
        "changed": 3,
@@ -6893,7 +6893,7 @@
   {
    "id": "S9",
    "name": "طلب متعارض: المجلس يمين الداخل ويساره، والمطبخ جنب المجلس وبعيد عنه — سؤال ثم حسم بجوابين، ثم تعديلان بعد الحسم",
-   "initMs": 14896,
+   "initMs": 15654,
    "turns": [
     {
      "n": 1,
@@ -7033,7 +7033,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 10813,
+     "ms": 11239,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -7152,7 +7152,7 @@
       "«المطبخ» بعيدًا عن «المجلس»"
      ],
      "error": null,
-     "ms": 291,
+     "ms": 252,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -7271,7 +7271,7 @@
       "«المجلس» أصغر"
      ],
      "error": null,
-     "ms": 343,
+     "ms": 344,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -7397,7 +7397,7 @@
       "الواجهة: حجر"
      ],
      "error": null,
-     "ms": 270,
+     "ms": 272,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -7477,7 +7477,7 @@
   {
    "id": "S10",
    "name": "(الجولة الحادية عشرة) الأبواب والنوافذ والطعام جنب المجلس — في S7 بعد إصلاح شريط الغسيل لا يجاور المجلس الطعام: فتح باب بين المجلس والطعام ثم «سد الباب»، نقل باب غرفة 2، تكبير نافذة الصالة، باب موجود أصلًا",
-   "initMs": 13044,
+   "initMs": 12302,
    "turns": [
     {
      "n": 1,
@@ -7528,7 +7528,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 9203,
+     "ms": 8998,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -7637,7 +7637,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 50,
+     "ms": 46,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -7756,7 +7756,7 @@
      },
      "understood": [],
      "error": null,
-     "ms": 9151,
+     "ms": 8537,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -7867,7 +7867,7 @@
       "تكبير نافذة «الصالة»"
      ],
      "error": null,
-     "ms": 221,
+     "ms": 213,
      "fingerprint": {
       "counts": {
        "changed": 1,
@@ -7990,7 +7990,7 @@
       "باب بين «المطبخ» و«صالة الطعام»"
      ],
      "error": null,
-     "ms": 219,
+     "ms": 252,
      "fingerprint": {
       "counts": {
        "changed": 0,
@@ -8070,7 +8070,7 @@
   {
    "id": "S11",
    "name": "(الجولة الثالثة عشرة) عرض الشارع مجهول ← سؤال؛ «عرض الشارع 25 م» ← إعادة التوليد بارتداد 5 م نظاميًا، ثم «المجلس أصغر»",
-   "initMs": 7091,
+   "initMs": 6296,
    "turns": [
     {
      "n": 1,
@@ -8115,7 +8115,7 @@
       "عرض شارع المدخل 25 م: الارتداد الأمامي النظامي 5 م (شارع 25 م: الارتداد الأمامي 5 م (خُمس عرض الشارع ولا يقل عن 3 م — اشتراط نظامي متحقق))"
      ],
      "error": null,
-     "ms": 6710,
+     "ms": 6209,
      "fingerprint": {
       "counts": {
        "changed": 59,
@@ -8252,7 +8252,7 @@
       "«المجلس» أصغر"
      ],
      "error": null,
-     "ms": 356,
+     "ms": 340,
      "fingerprint": {
       "counts": {
        "changed": 2,
@@ -8390,7 +8390,7 @@
       "«الصالة» أوسع"
      ],
      "error": null,
-     "ms": 421,
+     "ms": 357,
      "fingerprint": {
       "counts": {
        "changed": 5,
@@ -8517,7 +8517,7 @@
       "الواجهة: حجر"
      ],
      "error": null,
-     "ms": 280,
+     "ms": 303,
      "fingerprint": {
       "counts": {
        "changed": 1,

@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 432,
+ "ms": 357,
  "understood": [
   "بدون مكتب",
   "حذف «المكتب»"
@@ -631,5 +631,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 432
+ "replyMs": 357
 }

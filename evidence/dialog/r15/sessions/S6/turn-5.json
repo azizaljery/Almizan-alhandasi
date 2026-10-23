@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 581,
+ "ms": 544,
  "understood": [
   "مدخل مستقل للعائلة/النساء",
   "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
@@ -611,5 +611,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 581
+ "replyMs": 544
 }

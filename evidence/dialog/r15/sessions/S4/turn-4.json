@@ -6,7 +6,7 @@
  ],
  "outcome": "asked",
  "error": null,
- "ms": 668,
+ "ms": 641,
  "understood": [],
  "unclear": [],
  "questions": [
@@ -619,5 +619,5 @@
    "«ممر الغرف»"
   ]
  },
- "replyMs": 668
+ "replyMs": 641
 }

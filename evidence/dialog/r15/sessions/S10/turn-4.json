@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 221,
+ "ms": 213,
  "understood": [
   "تكبير نافذة «الصالة»"
  ],
@@ -590,5 +590,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 221
+ "replyMs": 213
 }

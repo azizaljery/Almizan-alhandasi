@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 286,
+ "ms": 283,
  "understood": [
   "المجلس أصغر",
   "«المجلس» أصغر"
@@ -572,5 +572,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 286
+ "replyMs": 283
 }

@@ -2617,12 +2617,6 @@
    "score": 93.74
   },
   {
-   "id": "C8/alt-4.json",
-   "passed": true,
-   "fired": [],
-   "score": 95.2
-  },
-  {
    "id": "C9/alt-1.json",
    "passed": true,
    "fired": [],
@@ -2663,12 +2657,6 @@
    "passed": true,
    "fired": [],
    "score": 97.35
-  },
-  {
-   "id": "C10/alt-4.json",
-   "passed": true,
-   "fired": [],
-   "score": 97.09
   }
  ],
  "cleanSets": [
@@ -2717,8 +2705,8 @@
   "n": 87,
   "detected": 87,
   "rejected": 87,
-  "cleanN": 25,
-  "cleanPassed": 25,
+  "cleanN": 23,
+  "cleanPassed": 23,
   "perType": [
    {
     "mutation": "no-window-bedroom",
@@ -4058,7 +4046,7 @@
     "max": 99.3
    },
    "clean": {
-    "mean": 96.46,
+    "mean": 96.49,
     "min": 93.71,
     "p50": 96.74,
     "max": 100

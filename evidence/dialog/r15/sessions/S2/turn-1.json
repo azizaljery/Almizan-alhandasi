@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 514,
+ "ms": 403,
  "understood": [
   "غرفة خادمة",
   "«غرفة الخادمة» بجوار «المطبخ»",
@@ -607,5 +607,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 514
+ "replyMs": 403
 }

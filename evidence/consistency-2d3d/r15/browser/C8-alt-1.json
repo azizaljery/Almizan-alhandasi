@@ -1,7 +1,7 @@
 {
  "source": "evidence/acceptance/after-15/C8/alt-1.json",
  "mode": "browser",
- "ms": 11804,
+ "ms": 11725,
  "pageErrors": [],
  "summary": {
   "walls": 23,

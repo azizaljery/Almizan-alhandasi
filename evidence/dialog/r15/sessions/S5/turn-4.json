@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 474,
+ "ms": 489,
  "understood": [
   "غرفة سائق بمدخل خارجي وحمام",
   "إضافة غرفة سائق بحمام"
@@ -754,5 +754,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 474
+ "replyMs": 489
 }

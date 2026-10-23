@@ -4,7 +4,7 @@
  "scope": [],
  "outcome": "asked",
  "error": null,
- "ms": 59,
+ "ms": 45,
  "understood": [],
  "unclear": [],
  "questions": [
@@ -519,5 +519,5 @@
  "fallback": null,
  "questionsAsked": 1,
  "ifConsented": null,
- "replyMs": 59
+ "replyMs": 45
 }

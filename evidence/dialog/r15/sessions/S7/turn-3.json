@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 434,
+ "ms": 407,
  "understood": [],
  "unclear": [
   "انقل باب غرفة 2"
@@ -638,5 +638,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 434
+ "replyMs": 407
 }

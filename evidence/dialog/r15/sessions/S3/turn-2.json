@@ -4,7 +4,7 @@
  "scope": [],
  "outcome": "applied",
  "error": null,
- "ms": 265,
+ "ms": 242,
  "understood": [
   "الواجهة: نجدي (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
   "الواجهة: نجدي"
@@ -511,5 +511,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 265
+ "replyMs": 242
 }

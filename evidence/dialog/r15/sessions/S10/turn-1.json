@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 9203,
+ "ms": 8998,
  "understood": [],
  "unclear": [
   "افتح باب بين المجلس والطعام"
@@ -547,5 +547,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 9203
+ "replyMs": 8998
 }

@@ -6,7 +6,7 @@
   {
    "key": "C1-alt-1",
    "source": "evidence/acceptance/after-15/C1/alt-1.json",
-   "ms": 828,
+   "ms": 964,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -335,7 +335,7 @@
   {
    "key": "C1-alt-2",
    "source": "evidence/acceptance/after-15/C1/alt-2.json",
-   "ms": 638,
+   "ms": 689,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -640,7 +640,7 @@
   {
    "key": "C2-alt-1",
    "source": "evidence/acceptance/after-15/C2/alt-1.json",
-   "ms": 663,
+   "ms": 682,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -921,7 +921,7 @@
   {
    "key": "C3-alt-1",
    "source": "evidence/acceptance/after-15/C3/alt-1.json",
-   "ms": 569,
+   "ms": 539,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -1184,7 +1184,7 @@
   {
    "key": "C3-alt-2",
    "source": "evidence/acceptance/after-15/C3/alt-2.json",
-   "ms": 659,
+   "ms": 798,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -1459,7 +1459,7 @@
   {
    "key": "C4-alt-1",
    "source": "evidence/acceptance/after-15/C4/alt-1.json",
-   "ms": 623,
+   "ms": 595,
    "counts": {
     "serious": 0,
     "warn": 1,
@@ -1734,7 +1734,7 @@
   {
    "key": "C5-alt-1",
    "source": "evidence/acceptance/after-15/C5/alt-1.json",
-   "ms": 574,
+   "ms": 527,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -1979,7 +1979,7 @@
   {
    "key": "C5-alt-2",
    "source": "evidence/acceptance/after-15/C5/alt-2.json",
-   "ms": 450,
+   "ms": 551,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -2224,7 +2224,7 @@
   {
    "key": "C5-alt-3",
    "source": "evidence/acceptance/after-15/C5/alt-3.json",
-   "ms": 443,
+   "ms": 514,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -2457,7 +2457,7 @@
   {
    "key": "C5-alt-4",
    "source": "evidence/acceptance/after-15/C5/alt-4.json",
-   "ms": 318,
+   "ms": 467,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -2678,7 +2678,7 @@
   {
    "key": "C6-alt-1",
    "source": "evidence/acceptance/after-15/C6/alt-1.json",
-   "ms": 438,
+   "ms": 633,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -2911,7 +2911,7 @@
   {
    "key": "C6-alt-2",
    "source": "evidence/acceptance/after-15/C6/alt-2.json",
-   "ms": 359,
+   "ms": 366,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -3144,7 +3144,7 @@
   {
    "key": "C7-alt-1",
    "source": "evidence/acceptance/after-15/C7/alt-1.json",
-   "ms": 852,
+   "ms": 762,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -3512,7 +3512,7 @@
   {
    "key": "C8-alt-1",
    "source": "evidence/acceptance/after-15/C8/alt-1.json",
-   "ms": 634,
+   "ms": 612,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -3783,7 +3783,7 @@
   {
    "key": "C8-alt-2",
    "source": "evidence/acceptance/after-15/C8/alt-2.json",
-   "ms": 547,
+   "ms": 593,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -4066,7 +4066,7 @@
   {
    "key": "C8-alt-3",
    "source": "evidence/acceptance/after-15/C8/alt-3.json",
-   "ms": 635,
+   "ms": 694,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -4347,304 +4347,9 @@
    ]
   },
   {
-   "key": "C8-alt-4",
-   "source": "evidence/acceptance/after-15/C8/alt-4.json",
-   "ms": 518,
-   "counts": {
-    "serious": 0,
-    "warn": 0,
-    "info": 2
-   },
-   "mutation": null,
-   "entrances": [
-    {
-     "opening": "o1",
-     "room": "مدخل العائلة",
-     "zone": "family",
-     "role": "main"
-    },
-    {
-     "opening": "o4",
-     "room": "المجلس",
-     "zone": "men",
-     "role": "guest"
-    }
-   ],
-   "paths": [
-    {
-     "room": "خزانة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 1.74,
-     "bareToCenter": 1.74,
-     "clearance": 0.5,
-     "straight": 1.82
-    },
-    {
-     "room": "مدخل العائلة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 1.75,
-     "bareToCenter": 1.75,
-     "clearance": 0.5,
-     "straight": 1.85
-    },
-    {
-     "room": "دورة مياه",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 3.28,
-     "bareToCenter": 3.28,
-     "clearance": 0.5,
-     "straight": 3.03
-    },
-    {
-     "room": "الصالة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 8.51,
-     "bareToCenter": 8.36,
-     "clearance": 0.5,
-     "straight": 7.81
-    },
-    {
-     "room": "ممر الغرف",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 10.09,
-     "bareToCenter": 10.09,
-     "clearance": 0.5,
-     "straight": 9.6
-    },
-    {
-     "room": "غرفة النوم الرئيسية",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 18.8,
-     "bareToCenter": 18.54,
-     "clearance": 0.5,
-     "straight": 17.41
-    },
-    {
-     "room": "المجلس",
-     "level": "L1",
-     "zone": "men",
-     "from": "المجلس",
-     "graph": true,
-     "actual": true,
-     "toCenter": 2.36,
-     "bareToCenter": 2.32,
-     "clearance": 0.5,
-     "straight": 2.38
-    },
-    {
-     "room": "مغاسل",
-     "level": "L1",
-     "zone": "men",
-     "from": "المجلس",
-     "graph": true,
-     "actual": true,
-     "toCenter": 5.19,
-     "bareToCenter": 4.87,
-     "clearance": 0.5,
-     "straight": 4.88
-    },
-    {
-     "room": "صالة الطعام",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 16.83,
-     "bareToCenter": 15.73,
-     "clearance": 0.5,
-     "straight": 13.51
-    },
-    {
-     "room": "المطبخ",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 19.35,
-     "bareToCenter": 19.09,
-     "clearance": 0.5,
-     "straight": 17.29
-    },
-    {
-     "room": "مدخل الجناح",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 12.93,
-     "bareToCenter": 12.93,
-     "clearance": 0.5,
-     "straight": 6.2
-    },
-    {
-     "room": "حمام غرفة 4",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 14.19,
-     "bareToCenter": 14.19,
-     "clearance": 0.5,
-     "straight": 7.61
-    },
-    {
-     "room": "حمام غرفة 2",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 13.95,
-     "bareToCenter": 13.95,
-     "clearance": 0.5,
-     "straight": 9.59
-    },
-    {
-     "room": "مدخل الجناح",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 12.6,
-     "bareToCenter": 12.6,
-     "clearance": 0.5,
-     "straight": 11.27
-    },
-    {
-     "room": "مدخل الجناح",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 13.98,
-     "bareToCenter": 13.98,
-     "clearance": 0.5,
-     "straight": 12.57
-    },
-    {
-     "room": "حمام غرفة 3",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 15.5,
-     "bareToCenter": 15.5,
-     "clearance": 0.5,
-     "straight": 14.32
-    },
-    {
-     "room": "دورة مياه الرجال",
-     "level": "L1",
-     "zone": "men",
-     "from": "المجلس",
-     "graph": true,
-     "actual": true,
-     "toCenter": 6.58,
-     "bareToCenter": 6.31,
-     "clearance": 0.5,
-     "straight": 3.73
-    },
-    {
-     "room": "غرفة نوم 4",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 15.95,
-     "bareToCenter": 16.35,
-     "clearance": 0.5,
-     "straight": 9.3
-    },
-    {
-     "room": "غرفة نوم 2",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 15.68,
-     "bareToCenter": 16.08,
-     "clearance": 0.5,
-     "straight": 11.87
-    },
-    {
-     "room": "غرفة نوم 3",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 17.23,
-     "bareToCenter": 17.63,
-     "clearance": 0.5,
-     "straight": 14.93
-    },
-    {
-     "room": "غرفة ملابس",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 21.92,
-     "bareToCenter": 21.92,
-     "clearance": 0.5,
-     "straight": 17.73
-    },
-    {
-     "room": "حمام الرئيسية",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 22.77,
-     "bareToCenter": 22.75,
-     "clearance": 0.5,
-     "straight": 19.47
-    }
-   ],
-   "findings": [],
-   "images": [
-    "evidence/circulation-proof/r15/C8-alt-4-L1.png"
-   ]
-  },
-  {
    "key": "C9-alt-1",
    "source": "evidence/acceptance/after-15/C9/alt-1.json",
-   "ms": 469,
+   "ms": 482,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -4901,7 +4606,7 @@
   {
    "key": "C9-alt-2",
    "source": "evidence/acceptance/after-15/C9/alt-2.json",
-   "ms": 464,
+   "ms": 654,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -5134,7 +4839,7 @@
   {
    "key": "C9-alt-3",
    "source": "evidence/acceptance/after-15/C9/alt-3.json",
-   "ms": 392,
+   "ms": 410,
    "counts": {
     "serious": 0,
     "warn": 1,
@@ -5385,7 +5090,7 @@
   {
    "key": "C9-alt-4",
    "source": "evidence/acceptance/after-15/C9/alt-4.json",
-   "ms": 454,
+   "ms": 388,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -5618,7 +5323,7 @@
   {
    "key": "C10-alt-1",
    "source": "evidence/acceptance/after-15/C10/alt-1.json",
-   "ms": 1070,
+   "ms": 800,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -5971,7 +5676,7 @@
   {
    "key": "C10-alt-2",
    "source": "evidence/acceptance/after-15/C10/alt-2.json",
-   "ms": 778,
+   "ms": 601,
    "counts": {
     "serious": 0,
     "warn": 0,
@@ -6288,7 +5993,7 @@
   {
    "key": "C10-alt-3",
    "source": "evidence/acceptance/after-15/C10/alt-3.json",
-   "ms": 818,
+   "ms": 1003,
    "counts": {
     "serious": 0,
     "warn": 1,
@@ -6654,323 +6359,6 @@
      "message": "في الممر «ممر الغرف» (الدور الأرضي) امتداد 3.09 م بعد آخر باب بلا مخرج (عند 13.41، 16.46)."
     }
    ],
-   "images": []
-  },
-  {
-   "key": "C10-alt-4",
-   "source": "evidence/acceptance/after-15/C10/alt-4.json",
-   "ms": 589,
-   "counts": {
-    "serious": 0,
-    "warn": 0,
-    "info": 4
-   },
-   "mutation": null,
-   "entrances": [
-    {
-     "opening": "o1",
-     "room": "مدخل العائلة",
-     "zone": "family",
-     "role": "main"
-    },
-    {
-     "opening": "o12",
-     "room": "مدخل الرجال",
-     "zone": "men",
-     "role": "guest"
-    }
-   ],
-   "paths": [
-    {
-     "room": "مجلس النساء",
-     "level": "L1",
-     "zone": "women",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 4.04,
-     "bareToCenter": 4.29,
-     "clearance": 0.5,
-     "straight": 4.04
-    },
-    {
-     "room": "مدخل العائلة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 1.81,
-     "bareToCenter": 1.81,
-     "clearance": 0.5,
-     "straight": 1.96
-    },
-    {
-     "room": "الصالة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 8.12,
-     "bareToCenter": 8.12,
-     "clearance": 0.5,
-     "straight": 7.24
-    },
-    {
-     "room": "مغاسل",
-     "level": "L1",
-     "zone": "women",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 6.22,
-     "bareToCenter": 6.19,
-     "clearance": 0.5,
-     "straight": 5.89
-    },
-    {
-     "room": "صالة الطعام",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 12.25,
-     "bareToCenter": 11.88,
-     "clearance": 0.5,
-     "straight": 8.55
-    },
-    {
-     "room": "المطبخ",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 14.53,
-     "bareToCenter": 14.18,
-     "clearance": 0.5,
-     "straight": 11.77
-    },
-    {
-     "room": "غرفة الخادمة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 16.89,
-     "bareToCenter": 16.89,
-     "clearance": 0.5,
-     "straight": 14.59
-    },
-    {
-     "room": "مدخل الرجال",
-     "level": "L1",
-     "zone": "men",
-     "from": "مدخل الرجال",
-     "graph": true,
-     "actual": true,
-     "toCenter": 1.3,
-     "bareToCenter": 1.3,
-     "clearance": 0.5,
-     "straight": 1.36
-    },
-    {
-     "room": "دورة مياه الرجال",
-     "level": "L1",
-     "zone": "men",
-     "from": "مدخل الرجال",
-     "graph": true,
-     "actual": true,
-     "toCenter": 3.6,
-     "bareToCenter": 3.6,
-     "clearance": 0.5,
-     "straight": 3.6
-    },
-    {
-     "room": "ممر الغرف",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 11.54,
-     "bareToCenter": 11.54,
-     "clearance": 0.5,
-     "straight": 10.85
-    },
-    {
-     "room": "غرفة النوم الرئيسية",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 20.13,
-     "bareToCenter": 19.87,
-     "clearance": 0.5,
-     "straight": 18.55
-    },
-    {
-     "room": "مدخل الجناح",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 12.7,
-     "bareToCenter": 12.7,
-     "clearance": 0.5,
-     "straight": 7.85
-    },
-    {
-     "room": "حمام غرفة 4",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 14.01,
-     "bareToCenter": 14.01,
-     "clearance": 0.5,
-     "straight": 9.19
-    },
-    {
-     "room": "حمام غرفة 2",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 15.38,
-     "bareToCenter": 15.38,
-     "clearance": 0.5,
-     "straight": 11.07
-    },
-    {
-     "room": "مدخل الجناح",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 14.05,
-     "bareToCenter": 14.05,
-     "clearance": 0.5,
-     "straight": 12.68
-    },
-    {
-     "room": "مدخل الجناح",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 15.47,
-     "bareToCenter": 15.47,
-     "clearance": 0.5,
-     "straight": 13.93
-    },
-    {
-     "room": "حمام غرفة 3",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 16.92,
-     "bareToCenter": 16.92,
-     "clearance": 0.5,
-     "straight": 15.63
-    },
-    {
-     "room": "دورة مياه النساء",
-     "level": "L1",
-     "zone": "women",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 8,
-     "bareToCenter": 8.02,
-     "clearance": 0.5,
-     "straight": 7.18
-    },
-    {
-     "room": "حمام الخادمة",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 18.39,
-     "bareToCenter": 18.44,
-     "clearance": 0.5,
-     "straight": 15.16
-    },
-    {
-     "room": "مجلس الرجال",
-     "level": "L1",
-     "zone": "men",
-     "from": "مدخل الرجال",
-     "graph": true,
-     "actual": true,
-     "toCenter": 4.96,
-     "bareToCenter": 4.72,
-     "clearance": 0.5,
-     "straight": 4.44
-    },
-    {
-     "room": "غرفة نوم 4",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 15.64,
-     "bareToCenter": 16.09,
-     "clearance": 0.5,
-     "straight": 10.95
-    },
-    {
-     "room": "غرفة نوم 2",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 17.05,
-     "bareToCenter": 17.5,
-     "clearance": 0.5,
-     "straight": 13.45
-    },
-    {
-     "room": "غرفة نوم 3",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 18.58,
-     "bareToCenter": 19.03,
-     "clearance": 0.5,
-     "straight": 16.41
-    },
-    {
-     "room": "حمام الرئيسية",
-     "level": "L1",
-     "zone": "family",
-     "from": "مدخل العائلة",
-     "graph": true,
-     "actual": true,
-     "toCenter": 23.87,
-     "bareToCenter": 23.87,
-     "clearance": 0.5,
-     "straight": 20.1
-    }
-   ],
-   "findings": [],
    "images": []
   }
  ]

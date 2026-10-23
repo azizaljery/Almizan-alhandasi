@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 228,
+ "ms": 356,
  "understood": [
   "بدون مصلى"
  ],
@@ -509,5 +509,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 228
+ "replyMs": 356
 }

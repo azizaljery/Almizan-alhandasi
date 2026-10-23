@@ -115,13 +115,6 @@
   },
   {
    "case": "C8",
-   "file": "alt-4.json",
-   "fails": 0,
-   "failed": [],
-   "partial": []
-  },
-  {
-   "case": "C8",
    "file": "edit-after.json",
    "fails": 0,
    "failed": [],
@@ -170,13 +163,6 @@
   },
   {
    "case": "C8",
-   "file": "edit-alt4-after.json",
-   "fails": 0,
-   "failed": [],
-   "partial": []
-  },
-  {
-   "case": "C8",
    "file": "edit-before.json",
    "fails": 0,
    "failed": [],
@@ -269,13 +255,6 @@
   {
    "case": "C10",
    "file": "alt-3.json",
-   "fails": 0,
-   "failed": [],
-   "partial": []
-  },
-  {
-   "case": "C10",
-   "file": "alt-4.json",
    "fails": 0,
    "failed": [],
    "partial": []

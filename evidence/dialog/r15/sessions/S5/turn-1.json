@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 553,
+ "ms": 585,
  "understood": [
   "غرفة غسيل",
   "إضافة غرفة غسيل"
@@ -616,5 +616,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 553
+ "replyMs": 585
 }

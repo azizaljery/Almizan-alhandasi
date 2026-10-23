@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 1234,
+ "ms": 1065,
  "understood": [
   "المطبخ 4×5 م (20 م²)",
   "«المطبخ» 4×5 م"
@@ -688,5 +688,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 1234
+ "replyMs": 1065
 }

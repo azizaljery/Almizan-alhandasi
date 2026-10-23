@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 6710,
+ "ms": 6209,
  "understood": [
   "عرض شارع المدخل 25 م: الارتداد الأمامي النظامي 5 م (شارع 25 م: الارتداد الأمامي 5 م (خُمس عرض الشارع ولا يقل عن 3 م — اشتراط نظامي متحقق))"
  ],
@@ -2889,5 +2889,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 6711
+ "replyMs": 6209
 }

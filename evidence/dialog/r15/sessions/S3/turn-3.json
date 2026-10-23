@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 403,
+ "ms": 244,
  "understood": [
   "مطبخ مفتوح على الطعام",
   "«المطبخ» بجوار «الطعام»",
@@ -535,5 +535,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 403
+ "replyMs": 244
 }

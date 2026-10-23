@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 219,
+ "ms": 252,
  "understood": [
   "باب بين «المطبخ» و«صالة الطعام»"
  ],
@@ -506,5 +506,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 219
+ "replyMs": 252
 }

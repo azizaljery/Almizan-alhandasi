@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 330,
+ "ms": 320,
  "understood": [
   "غرفة نوم رئيسية (ماستر)",
   "إرجاع «غرفة النوم الرئيسية» إلى ما كانت عليه في التصميم الأول"
@@ -585,5 +585,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 330
+ "replyMs": 320
 }

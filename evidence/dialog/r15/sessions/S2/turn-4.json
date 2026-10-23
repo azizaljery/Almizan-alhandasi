@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 72,
+ "ms": 62,
  "understood": [],
  "unclear": [],
  "questions": [],
@@ -601,5 +601,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 72
+ "replyMs": 62
 }

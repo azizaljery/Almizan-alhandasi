@@ -1,6 +1,6 @@
 {
  "note": "تشغيلان مستقلان لـ acceptance-run (after-15 وtmp-det15) — مقارنة sha256 لكل مستند (البدائل ومستندات التعديل ومقترحات خياراته)",
- "same": 39,
+ "same": 36,
  "diff": 0,
  "rows": [
   [
@@ -26,11 +26,6 @@
   [
    "C10",
    "alt-3.json",
-   true
-  ],
-  [
-   "C10",
-   "alt-4.json",
    true
   ],
   [
@@ -105,11 +100,6 @@
   ],
   [
    "C8",
-   "alt-4.json",
-   true
-  ],
-  [
-   "C8",
    "edit-after.json",
    true
   ],
@@ -136,11 +126,6 @@
   [
    "C8",
    "edit-alt3-opt-full.json",
-   true
-  ],
-  [
-   "C8",
-   "edit-alt4-after.json",
    true
   ],
   [

@@ -4,7 +4,7 @@
  "scope": [],
  "outcome": "applied",
  "error": null,
- "ms": 280,
+ "ms": 303,
  "understood": [
   "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
   "الواجهة: حجر"
@@ -519,5 +519,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 280
+ "replyMs": 303
 }

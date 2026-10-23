@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 421,
+ "ms": 357,
  "understood": [
   "الصالة أكبر",
   "«الصالة» أوسع"
@@ -742,5 +742,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 421
+ "replyMs": 358
 }

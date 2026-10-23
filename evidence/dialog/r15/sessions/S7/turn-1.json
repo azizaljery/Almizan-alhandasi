@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 316,
+ "ms": 306,
  "understood": [
   "باب بين «المجلس» و«صالة الطعام والمقلط»"
  ],
@@ -646,5 +646,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 316
+ "replyMs": 306
 }

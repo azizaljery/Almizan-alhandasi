@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 291,
+ "ms": 252,
  "understood": [
   "«المطبخ» بعيدًا عن «المجلس»",
   "«المطبخ» بعيدًا عن «المجلس»"
@@ -526,5 +526,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 291
+ "replyMs": 252
 }

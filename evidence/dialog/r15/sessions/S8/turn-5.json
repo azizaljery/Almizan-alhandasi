@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 346,
+ "ms": 307,
  "understood": [
   "الرجوع إلى التصميم الأول مع الإبقاء على تعديل «المجلس»"
  ],
@@ -640,5 +640,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 346
+ "replyMs": 307
 }

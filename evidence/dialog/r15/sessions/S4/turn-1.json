@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 1778,
+ "ms": 1940,
  "understood": [
   "غرفة نوم رئيسية (ماستر)",
   "الغرفة الرئيسية 5×6 م (30 م²)",
@@ -892,5 +892,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 1778
+ "replyMs": 1940
 }

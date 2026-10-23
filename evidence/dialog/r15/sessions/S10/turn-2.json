@@ -7,7 +7,7 @@
  ],
  "outcome": "asked",
  "error": null,
- "ms": 50,
+ "ms": 46,
  "understood": [],
  "unclear": [],
  "questions": [
@@ -496,5 +496,5 @@
  "fallback": null,
  "questionsAsked": 1,
  "ifConsented": null,
- "replyMs": 50
+ "replyMs": 46
 }

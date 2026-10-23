@@ -7,7 +7,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 1428,
+ "ms": 1447,
  "understood": [
   "«غرفة نوم 2» 4×5 م"
  ],
@@ -755,5 +755,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 1428
+ "replyMs": 1447
 }

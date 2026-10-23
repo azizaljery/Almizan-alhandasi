@@ -6,7 +6,7 @@
  ],
  "outcome": "applied",
  "error": null,
- "ms": 394,
+ "ms": 297,
  "understood": [],
  "unclear": [
   "كبّر نافذة الصالة"
@@ -639,5 +639,5 @@
  "fallback": null,
  "questionsAsked": 0,
  "ifConsented": null,
- "replyMs": 394
+ "replyMs": 297
 }
