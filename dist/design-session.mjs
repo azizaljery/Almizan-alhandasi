@@ -63,13 +63,13 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
     siteQuestions: [streetWidthQuestion(land || {})].filter(Boolean),
     designs: [{ ...entry(result, null), version: 1 }], current: 0, nextVersion: 2, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
-    alternatives: (result.alternatives || []).slice(0, 4).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], mirror: a.mirror ?? null, review: a.review || null })),
+    alternatives: (result.alternatives || []).slice(0, 5).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc), pat: a.pat || null, summary: a.summary || '', notes: a.notes || [], mirror: a.mirror ?? null, review: a.review || null , presentation: a.presentation || null})),
     // كم بديلًا عُرض من المطلوب، وسبب النقص، وأسباب رفض المرشحين (من المولّد نفسه) — تعرضها صفحة التصميم
     alternativesInfo: result.alternativesInfo ? clone(result.alternativesInfo) : null,
   };
 }
 function entry(result, feedback) {
-  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, review: result.review || null, mirror: result.mirror ?? null };
+  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, review: result.review || null, mirror: result.mirror ?? null, presentation: result.presentation || null };
 }
 export const currentDoc = s => parseDoc(s.designs[s.current].doc);
 

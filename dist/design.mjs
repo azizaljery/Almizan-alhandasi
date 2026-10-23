@@ -9,6 +9,7 @@ import { serialize, parseDoc } from './draw/doc.mjs';
 import { requestBrief } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
 import { diffFingerprint } from './plan-fingerprint.mjs';
+import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -73,7 +74,8 @@ function show(index) {
   // replaceChildren(null) يكتب النص «null» في الصفحة: البطاقات الغائبة تُستبعد
   $('main').replaceChildren(...[
     replyCard,
-    el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.')), history),
+    el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), el('div', { class: 'sub proposal-label', 'data-proposal-label': '' }, PROPOSAL_LABEL_AR)), history),
+    statusCard(d),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, reqCard)),
     altsCard(d),
@@ -94,7 +96,8 @@ function altsCard(d) {
     el('h2', {}, 'البدائل المختلفة معماريًا'),
     el('p', { class: 'score ' + (alts.length < want ? 'part' : 'full') }, `عُرض ${alts.length} من ${want} مطلوبة`),
     el('div', { class: 'altlist' }, alts.map((a, i) => el('button', { type: 'button', 'data-alt': String(i), class: a.doc === cur ? 'on' : '', onclick: () => showAlternative(i) },
-      el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null))),
+      el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null, a.presentation ? el('small', { 'data-alt-status': a.presentation.status }, a.presentation.label_ar + (a.presentation.status === 'needs-edits' ? ` (${a.presentation.edits_ar.length})` : '')) : null))),
+    info?.hidden?.length ? el('p', { class: 'sub', 'data-hidden': '' }, `حُجب ${info.hidden.length} ${info.hidden.length === 1 ? 'بديل' : 'بدائل'} لأنها تخالف بندًا إلزاميًا من طلبك: ${info.hidden.map(h => (h.reasons_ar || [])[0]).filter(Boolean).join('؛ ')}`) : null,
     info?.shortfall_ar ? el('p', { class: 'shortfall sub' }, 'لماذا أقل من المطلوب؟ ' + info.shortfall_ar) : null,
     info?.rejected?.length ? el('details', { class: 'rejected' }, el('summary', {}, `المرشحون المرفوضون (${info.rejectedCount}) وأسبابهم`),
       el('ul', { class: 'tick' }, info.rejected.map(r => el('li', { class: 'bad' }, r.text + (r.count > 1 ? ` (${r.count})` : ''))))) : null);
@@ -111,6 +114,20 @@ function showAlternative(i) {
     at = session.designs.length - 1;
   }
   show(at); scrollTo({ top: 0, behavior: 'smooth' });
+}
+/**
+ * (الجولة الرابعة عشرة) حالة العرض: «جاهز للعرض المبدئي» / «يحتاج تعديلات» (بقائمتها) / «محجوب» (بسببه) — لا يُعرض بديل يحتاج
+ * تعديلات على أنه جاهز. التصميم المعدَّل يدويًا أو في الجلسة بلا حالة محسوبة يُقال عنه ذلك صراحة.
+ */
+function statusCard(d) {
+  const p = d.presentation || (d.alt != null ? session.alternatives?.[d.alt]?.presentation : null);
+  if (!p) return el('section', { class: 'card status', 'data-status': 'unknown' }, el('p', { class: 'sub' }, 'حالة العرض لم تُحسب لهذه النسخة (عُدّلت بعد التوليد)؛ راجع «هل نُفّذ طلبك؟» والمراجعة المعمارية أدناه.'));
+  const cls = p.status === 'ready' ? 'full' : 'part';
+  return el('section', { class: 'card status', id: 'presentationStatus', 'data-status': p.status, 'aria-label': 'حالة العرض' },
+    el('p', { class: 'score ' + cls }, p.label_ar + (p.status === 'needs-edits' ? ` — ${p.edits_ar.length} ${p.edits_ar.length === 1 ? 'ملاحظة' : 'ملاحظات'}` : '')),
+    p.status === 'hidden' ? el('ul', { class: 'tick' }, p.hidden_ar.map(t => el('li', { class: 'bad' }, t))) : null,
+    p.status === 'needs-edits' ? el('ul', { class: 'tick' }, p.edits_ar.map(t => el('li', { class: 'no' }, t))) : null,
+    el('p', { class: 'sub' }, p.status === 'ready' ? 'اجتاز المراجعة ونُفّذت بنود طلبك وتفضيلات الميزان السعودية؛ يبقى مقترحًا مبدئيًا.' : p.status === 'needs-edits' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، لكن فيه تفضيلات افتراضية للميزان لم تتحقق (قابلة للتغيير) — لا يُقدَّم على أنه جاهز.' : 'لا يُعرض بديلًا: يخالف بندًا إلزاميًا من طلبك أو رسب في المراجعة.'));
 }
 /** المراجعة المعمارية المستقلة (plan-review) للتصميم المعروض: كل بوابة بنتيجتها وسببها، والدرجة. */
 function reviewCard(d) {

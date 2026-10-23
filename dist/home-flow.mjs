@@ -253,14 +253,14 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
   const villaEngine = villaEngineOf(engine);
   const out = VILLA[villaEngine].one({ land, counts, requirements, keep: 4, exclude, prefer });
   const best = out.designs[0], notes = [...new Set(best.notes)];
-  let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror }));
+  let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror, presentation: d.presentation || null }));
   try {
     const models = out.designs.map(d => ({ ...docToLegacy(d.doc).model, strategy: 'villa-' + d.mode }));
     dna = rankByDNA({ plot, rooms, discovery, idea, counts, models, selectedIndex: 0 });
     dna.geometryFingerprint = geometryFingerprint(best.doc);
     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
   } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
 }
 
 /**
@@ -271,7 +271,7 @@ export function alternativesInfo(out, requested) {
   const rejected = Array.isArray(out?.rejected) ? out.rejected : [];
   const why = new Map();
   for (const r of rejected) { const t = String((r.why || [])[0] || 'بلا سبب مكتوب').slice(0, 220); why.set(t, (why.get(t) || 0) + 1); }
-  return { requested, shown: out?.designs?.length || 0, shortfall_ar: out?.shortfall_ar || null, rejectedCount: rejected.length,
+  return { requested, shown: out?.designs?.length || 0, shortfall_ar: out?.shortfall_ar || null, rejectedCount: rejected.length, hidden: (out?.hidden || []).map(h => ({ reasons_ar: h.reasons_ar })), presentation: out?.presentation || null,
     rejected: [...why].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([text, count]) => ({ text, count })) };
 }
 
@@ -280,7 +280,7 @@ function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = nul
   const villaEngine = villaEngineOf(engine);
   const out = VILLA[villaEngine].two({ land, counts, requirements, keep: villaEngine === 'v2' ? 4 : 3, exclude, prefer });
   const best = out.designs[0];
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror })), alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, villaEngine === 'v2' ? 4 : 3), selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror, presentation: d.presentation || null })), alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, villaEngine === 'v2' ? 4 : 3), selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
 }
 
 /** دوران: الأرضي والعلوي بسلم متطابق (انظر multi-floor.mjs). بلا بصمة تصميم ولا بدائل: تُقدَّم لدور واحد فقط. */
