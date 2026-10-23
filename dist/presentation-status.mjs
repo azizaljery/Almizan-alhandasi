@@ -39,6 +39,8 @@ export function presentationStatus(design, request = {}) {
   const hidden = [...ledgerFails.map(x => `بند من طلبك لم يتحقق: «${x.text}»${x.why ? ` — ${x.why}` : ''}`), ...gateFails.map(g => `رسب في بوابة المراجعة ${g}`)];
   let prefs = [];
   try { prefs = measureSaudiProgram(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked && !g.regulation && g.id !== 'SHADING'); } catch { prefs = []; }
+  // المقلط ومسار التقديم بند واحد عند العميل: إن غاب المسار يُذكر مرة واحدة (SERVE_ROUTE)، ويبقى بند المقلط إن كان سببه انفتاح الطعام على العائلة
+  if (prefs.some(g => g.id === 'SERVE_ROUTE')) prefs = prefs.filter(g => g.id !== 'MAJLIS_DINING' || g.value?.link);
   const edits = [...prefs.map(g => `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})`), ...qualityNotes(doc, model).map(q => q.text_ar)];
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
   return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, edits_ar: edits, prefs: prefs.map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
