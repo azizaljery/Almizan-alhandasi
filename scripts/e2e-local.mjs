@@ -163,7 +163,7 @@ async function run(C, devId) {
     for (const [k, v] of Object.entries(C.counts)) await page.fill(`#chat form.counts input[name=${k}]`, String(v));
     await snap('3-shara', devId === 'mobile'); await hscroll('شرعاء');
     await page.click('#chat form.counts .cta');
-    await page.click('#chat .cta:has-text("توليد التصميم")');
+    await page.click('#chat .cta:has-text("توليد التصميم")', { timeout: 240000 }); // (r14) التوليد يحجز الخيط الرئيسي حتى ينتهي (الدوران ≈ 40–60 ث)
     const tg = Date.now();
     await page.waitForURL(/\/design(\.html)?$/, { timeout: 240000 });
     await page.waitForSelector('#plan', { timeout: 60000 }); await page.waitForTimeout(800);

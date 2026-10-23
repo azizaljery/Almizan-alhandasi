@@ -628,7 +628,7 @@
    }
   ],
   "notes": [],
-  "ms": 12718,
+  "ms": 14101,
   "requestedAlternatives": 4,
   "producedAlternatives": 2,
   "hidden": [],
@@ -1027,7 +1027,7 @@
    }
   ],
   "notes": [],
-  "ms": 17921,
+  "ms": 17646,
   "requestedAlternatives": 4,
   "producedAlternatives": 1,
   "hidden": [],
@@ -1647,7 +1647,7 @@
    }
   ],
   "notes": [],
-  "ms": 14624,
+  "ms": 15044,
   "requestedAlternatives": 4,
   "producedAlternatives": 2,
   "hidden": [],
@@ -1992,7 +1992,7 @@
    }
   ],
   "notes": [],
-  "ms": 1495,
+  "ms": 1542,
   "requestedAlternatives": 4,
   "producedAlternatives": 1,
   "hidden": [],
@@ -3092,7 +3092,7 @@
   "notes": [
    "المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده."
   ],
-  "ms": 8568,
+  "ms": 8945,
   "requestedAlternatives": 4,
   "producedAlternatives": 4,
   "hidden": [],
@@ -3889,7 +3889,7 @@
    }
   ],
   "notes": [],
-  "ms": 8328,
+  "ms": 8216,
   "requestedAlternatives": 4,
   "producedAlternatives": 2,
   "hidden": [],
@@ -4293,7 +4293,7 @@
    }
   ],
   "notes": [],
-  "ms": 56650,
+  "ms": 53208,
   "requestedAlternatives": 4,
   "producedAlternatives": 1,
   "hidden": [],
@@ -5358,7 +5358,7 @@
    }
   ],
   "notes": [],
-  "ms": 5049,
+  "ms": 5986,
   "requestedAlternatives": 4,
   "producedAlternatives": 4,
   "hidden": [],
@@ -5575,7 +5575,7 @@
   "heavyRejected": [],
   "edit": {
    "text": "انقل المطبخ بجوار الطعام وخل المطبخ في الخلف",
-   "ms": 7996,
+   "ms": 10189,
    "consentAsked": "لم أجد تعديلًا موضعيًا يحقق طلبك على هذا المخطط نفسه. السبب الهندسي: ««المطبخ» في الخلف» غير متحقق في المعروض، ولا تبديل موضعي بين غرفتين متقاربتين في المساحة ولا عكس شريط يحققه دون كسر بوابة. خلف هذا المخطط تشغله منطقة النوم («غرفة النوم الرئيسية»، «غرفة نوم 2»، «غرفة نوم 3»، «حمام الرئيسية»، «حمام غرفة 2»، «حمام غرفة 3»)؛ نقل المطبخ إليها يزيح غرف النوم إلى موضع المطبخ أو الطعام أو يجعل المطبخ على ممر النوم. إعادة توزيع منطقة واحدة لا تكفي: أقرب توزيع يحقق طلبك يغيّر 4 من مناطق البيت. وأقرب توزيع يحققه هو البديل 4 المعروض لك أصلًا حرفيًا — لا أقدّمه على أنه تعديل لهذا المخطط. اختر رقمًا: (1) أبقِ المخطط المعروض كما هو حرفيًا؛ (2) اعرض البدائل 2 و4 — تحقق طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط).",
    "options": [
     {
@@ -6836,7 +6836,7 @@
    }
   ],
   "notes": [],
-  "ms": 8490,
+  "ms": 9859,
   "requestedAlternatives": 4,
   "producedAlternatives": 4,
   "hidden": [],
@@ -7055,7 +7055,7 @@
   "heavyRejected": [],
   "edit": {
    "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
-   "ms": 284,
+   "ms": 308,
    "consentAsked": null,
    "options": null,
    "choice": null,
@@ -8217,7 +8217,7 @@
    }
   ],
   "notes": [],
-  "ms": 12736,
+  "ms": 13466,
   "requestedAlternatives": 5,
   "producedAlternatives": 3,
   "hidden": [],

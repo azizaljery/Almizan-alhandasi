@@ -1010,7 +1010,7 @@
   }
  ],
  "notes": [],
- "ms": 8490,
+ "ms": 9859,
  "requestedAlternatives": 4,
  "producedAlternatives": 4,
  "hidden": [],
@@ -1229,7 +1229,7 @@
  "heavyRejected": [],
  "edit": {
   "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
-  "ms": 284,
+  "ms": 308,
   "consentAsked": null,
   "options": null,
   "choice": null,

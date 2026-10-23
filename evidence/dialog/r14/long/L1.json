@@ -1,0 +1,374 @@
+{
+ "id": "L1",
+ "name": "الرياض — تصحيح عدد الغرف في منتصف الكلام، أرقام هندية، نفي مكتب ومصلى",
+ "words": 160,
+ "ms": 100,
+ "text": "السلام عليكم، الله يعطيكم العافية. أنا محمد من الرياض، عندي أرض ٢٠×٣٠ على شارع واحد من الجنوب، وأبي أبني فيلا دور واحد لي ولعيالي، احنا سبعة أنفار. أبي خمس غرف نوم... لا لا خلها أربع غرف نوم بس، لأن الميزانية ما تسمح. وحدة منهن ماستر لي أنا وأم العيال وفيها غرفة ملابس (walk in closet) وحمام خاص. باقي الغرف للعيال، ومو لازم كل غرفة بحمام، يتشاركون عادي. المجلس هو أهم شي عندي: مجلس رجال كبير مقاسه تقريبًا ٥×٧، يكون على الشارع وله مدخل مستقل عن العائلة، ودورة مياه الضيوف قريبة من المجلس. ومجلس نساء صغير منفصل عن مجلس الرجال. الصالة في وسط البيت، والمطبخ أبيه مقفل مو مفتوح لأن ريحة الطبخ تزعج، والمطبخ يكون في الخلف وجنب الطعام. غرفة خادمة بحمام قريبة من المطبخ. ما أبي مكتب، ولا أبي مصلى لأن المسجد جنبنا. أبي غرفة غسيل ومخزن صغير. وبالنسبة للكراج أبي مظلة سيارتين قدام. وشي ثاني مهم: أبي البيت فيه إضاءة طبيعية كثيرة وما يكون مظلم مثل بيتنا القديم. وشكرًا.",
+ "formCounts": {
+  "bedrooms": 9,
+  "majlis": 1,
+  "baths": 4,
+  "kitchens": 1,
+  "halls": 1
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "pref": {
+    "tp": 4,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.8
+   },
+   "extra": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "absent": {
+    "tp": 2,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 1,
+    "fp": 0,
+    "precision": null,
+    "recall": 0
+   },
+   "rule": {
+    "tp": 5,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.833
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unsupported": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   }
+  },
+  "precision": 1,
+  "recall": 0.88,
+  "f1": 0.936,
+  "tp": [
+   "count:bedrooms=4",
+   "count:majlis=2",
+   "count:kitchens=1",
+   "count:dining=1",
+   "pref:masterDressing",
+   "pref:sharedBaths",
+   "pref:womenSeparate",
+   "pref:closedKitchen",
+   "extra:maid",
+   "extra:maid.bath",
+   "extra:laundry",
+   "extra:storage",
+   "absent:office",
+   "absent:prayer",
+   "rule:close:guestwc+majlis",
+   "rule:place:hall:center",
+   "rule:place:kitchen:n",
+   "rule:close:dining+kitchen",
+   "rule:close:kitchen+maid",
+   "floors=1",
+   "unsupported:garage",
+   "unclear:إضاءة طبيعية"
+  ],
+  "missed": [
+   "pref:guestEntrance",
+   "dim:majlis=5x7",
+   "rule:place:majlis:s"
+  ],
+  "wrong": [],
+  "levels": [
+   {
+    "item": "rule:close:guestwc+majlis",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:hall:center",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:kitchen:n",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:dining+kitchen",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:kitchen+maid",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "baths": 6,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "prefs": {
+   "sharedBaths": true,
+   "masterDressing": true,
+   "openKitchen": false,
+   "womenSeparate": true,
+   "big_majlis": true,
+   "floors": 1,
+   "parking": true
+  },
+  "extras": {
+   "maid": {
+    "bath": true,
+    "ext": false
+   },
+   "storage": true,
+   "laundry": true
+  },
+  "absent": [
+   "office",
+   "prayer"
+  ],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "close:guestwc+majlis",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "ودورة مياه الضيوف قريبة من المجلس",
+    "text": "«دورة مياه الضيوف» قرب «المجلس»"
+   },
+   {
+    "item": "away:majlis+majlis_w",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "ومجلس نساء صغير منفصل عن مجلس الرجال",
+    "text": "«مجلس النساء» بعيدًا عن «المجلس»"
+   },
+   {
+    "item": "place:hall:center",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "الصالة في وسط البيت",
+    "text": "«الصالة» في وسط البيت"
+   },
+   {
+    "item": "close:dining+kitchen",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والمطبخ يكون في الخلف وجنب الطعام",
+    "text": "«المطبخ» بجوار «الطعام»"
+   },
+   {
+    "item": "place:kitchen:n",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "والمطبخ يكون في الخلف",
+    "text": "«المطبخ» في الخلف"
+   },
+   {
+    "item": "close:kitchen+maid",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرفة خادمة بحمام قريبة من المطبخ",
+    "text": "«غرفة الخادمة» قرب «المطبخ»"
+   }
+  ],
+  "tweaks": {},
+  "unsupported": [
+   "الكراج المغلق داخل المبنى: لا يُرسم في هذا الإصدار؛ تُرسم مواقف مكشوفة في الارتداد بدلًا منه."
+  ],
+  "unclear": [
+   "الله يعطيكم العافية",
+   "أنا محمد من الرياض",
+   "عندي أرض ٢٠×٣٠ على شارع واحد من الجنوب",
+   "احنا سبعة أنفار",
+   "لأن الميزانية ما تسمح",
+   "باقي الغرف للعيال",
+   "يتشاركون عادي",
+   "يكون على الشارع وله مدخل مستقل عن العائلة",
+   "شي ثاني مهم: أبي البيت فيه إضاءة طبيعية كثيرة",
+   "ما يكون مظلم مثل بيتنا القديم"
+  ],
+  "understood": [
+   "غرف النوم (عدا الرئيسية) تتشارك دورات المياه",
+   "غرفة ملابس للغرفة الرئيسية",
+   "4 غرف نوم (صحّحت العدد من 5 إلى 4)",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مغلق بباب",
+   "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+   "غرفة خادمة بحمام",
+   "مخزن",
+   "غرفة غسيل",
+   "المجلس واسع",
+   "بدون مكتب",
+   "بدون مصلى",
+   "دور واحد",
+   "«دورة مياه الضيوف» قرب «المجلس»",
+   "«مجلس النساء» بعيدًا عن «المجلس»",
+   "«الصالة» في وسط البيت",
+   "«المطبخ» بجوار «الطعام»",
+   "«المطبخ» في الخلف",
+   "«غرفة الخادمة» قرب «المطبخ»",
+   "مواقف سيارات في الارتداد داخل حدود الأرض",
+   "عدد دورات المياه 6 (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة، ودورة مياه للضيوف)"
+  ]
+ },
+ "conflicts": [],
+ "coverage": {
+  "clauses": 29,
+  "fates": {
+   "filler": 2,
+   "unclear": 10,
+   "understood": 16,
+   "unsupported": 1
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "الله يعطيكم العافية",
+   "أنا محمد من الرياض",
+   "عندي أرض ٢٠×٣٠ على شارع واحد من الجنوب",
+   "احنا سبعة أنفار",
+   "لأن الميزانية ما تسمح",
+   "باقي الغرف للعيال",
+   "يتشاركون عادي",
+   "يكون على الشارع وله مدخل مستقل عن العائلة",
+   "شي ثاني مهم: أبي البيت فيه إضاءة طبيعية كثيرة",
+   "ما يكون مظلم مثل بيتنا القديم"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "kitchens": 1,
+   "dining": 1
+  },
+  "prefs": [
+   "masterDressing",
+   "sharedBaths",
+   "guestEntrance",
+   "womenSeparate",
+   "closedKitchen"
+  ],
+  "extras": [
+   "maid",
+   "maid.bath",
+   "laundry",
+   "storage"
+  ],
+  "absent": [
+   "office",
+   "prayer"
+  ],
+  "dims": {
+   "majlis": [
+    5,
+    7
+   ]
+  },
+  "rules": [
+   {
+    "r": "place:majlis:s",
+    "level": "must"
+   },
+   {
+    "r": "close:guestwc+majlis",
+    "level": "must"
+   },
+   {
+    "r": "place:hall:center",
+    "level": "must"
+   },
+   {
+    "r": "place:kitchen:n",
+    "level": "must"
+   },
+   {
+    "r": "close:dining+kitchen",
+    "level": "must"
+   },
+   {
+    "r": "close:kitchen+maid",
+    "level": "must"
+   }
+  ],
+  "floors": 1,
+  "unsupported": [
+   "garage"
+  ],
+  "conflicts": [],
+  "unclear": [
+   "إضاءة طبيعية"
+  ],
+  "optional": [
+   "rule:away:majlis+majlis_w",
+   "pref:big_majlis",
+   "count:baths",
+   "pref:parking"
+  ],
+  "traps": "«المسجد جنبنا» ليست قاعدة مكانية للمصلى؛ «خمس غرف» صُحّحت إلى أربع."
+ },
+ "traps": "«المسجد جنبنا» ليست قاعدة مكانية للمصلى؛ «خمس غرف» صُحّحت إلى أربع."
+}
