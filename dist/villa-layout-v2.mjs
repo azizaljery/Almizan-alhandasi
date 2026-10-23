@@ -2255,7 +2255,9 @@ function furnish(rooms, T, run, doorAt, LVL, outSides) {
       const longS = w >= h ? ['y0', 'y1'] : ['x0', 'x1'], shortS = w >= h ? ['x0', 'x1'] : ['y0', 'y1'];
       const seat = (s, minLen = 1.2, max = 4.4, k = 2, corner = .15) => freeRuns(r, s, .3, corner).filter(([a, b]) => b - a >= minLen).slice(0, k).map(([a, b]) => { const len = Math.min(b - a, max), c = onWall(r, s, m + .4, (a + b) / 2); return Pc('majlis-sofa', c.x, c.y, ...dir[s], { w: len }); });
       const center = [Pc('rug', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1, { w: Math.max(1.4, Math.min(w - 2.2, 3.6)), d: Math.max(1.2, Math.min(h - 2.2, 2.6)) }), Pc('coffee-table', (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, 0, -1)];
-      place(r, [[...longS.flatMap(s => seat(s)), ...shortS.flatMap(s => seat(s, 1.2, 3.2, 1, .98)), ...center], [...longS.flatMap(s => seat(s)), ...center], [...longS.flatMap(s => seat(s, 1.2, 4.4, 1)), center[0]], [...longS.flatMap(s => seat(s, 1.2, 4.4, 1))]]);
+      place(r, [[...longS.flatMap(s => seat(s)), ...shortS.flatMap(s => seat(s, 1.2, 3.2, 1, .98)), ...center], [...longS.flatMap(s => seat(s)), ...center], [...longS.flatMap(s => seat(s, 1.2, 4.4, 1)), center[0]], [...longS.flatMap(s => seat(s, 1.2, 4.4, 1))],
+        // (الجولة الرابعة عشرة) لا مجلس بلا أثاث (المراجع المستقل r13، C9-2): جلسات على الجدارين القصيرين، أو على أي جدار حر، أو السجادة والطاولة وحدهما
+        [...shortS.flatMap(s => seat(s, 1.2, 4.4, 1)), ...center], [...SIDES.flatMap(s => seat(s, 1.0, 4.4, 1, .3)), center[0]], [...SIDES.flatMap(s => seat(s, 1.0, 4.4, 1, .3))], [center[0], center[1]], [center[0]]]);
       continue;
     }
     if ((r.type === 'living' && !r.circ) || r.id === 'hall') {
