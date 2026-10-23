@@ -20,6 +20,7 @@ import { buildProgram, checkDoc, relaxFixtures, quality, DESIGN_TARGETS, canonic
 import { rulePenalty, verifyRequest, docRooms, blocksFor } from './rules.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
+import { norm, sub, dot } from './draw/geom.mjs';
 import { reviewDesign, reviewDesigns, majlisDiningAsked, heavyGate, HEAVY_GATES } from './plan-review.mjs';
 import { chooseStair, risersFor, riseOf } from './stair-geometry.mjs';
 import { archSignature, archDifference, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, explainDifference } from './arch-difference.mjs';
@@ -2822,7 +2823,73 @@ function cached(kind, args, fn) {
   const out = fn(args); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
 }
 export function generateVillaDesigns(args) { return withPresentation(args, withReadings(interpret(args), a => cached('one', a, x => withParkReserve(x, generateVillaDesigns0)))); }
-export function generateVillaTwoFloors(args) { return withPresentation(args, withReadings(interpret(args), a => cached('two', a, x => withParkReserve(x, generateVillaTwoFloors0)))); }
+export function generateVillaTwoFloors(args) {
+  const out = withReadings(interpret(args), a => cached('two', a, x => withParkReserve(x, generateVillaTwoFloors0)));
+  for (const d of out.designs || []) tfPolish(d, args);
+  pluralMajlis(out, args);
+  return withPresentation(args, out);
+}
+/**
+ * (الجولة الرابعة عشرة) تشطيب مخطط الدورين بعد التوليد (المراجع المستقل r13، C7):
+ *  - ترقيم غرف النوم متتاليًا في كل دور (الرئيسية «1» ضمنًا إن كانت في الدور: 2، 3…؛ وإلا من 1) — لا «3–6» في العلوي؛
+ *  - منور سماوي فوق الدرج الداخلي (doc.stairs[].skylight) يُرسم في المجسّم ويُذكر — قيمة تصميمية افتراضية للميزان؛
+ *  - باب الرئيسية العلوية في طرف جدارها البعيد عن الدرج (لا على بسطة الوصول) إن بقيت الحركة الفعلية والتطابق سليمين.
+ */
+function tfPolish(d, args) {
+  const doc = d.doc; if (!doc || doc.levels.length < 2 || d._polished) return; d._polished = true;
+  // الترقيم
+  for (const lv of doc.levels) {
+    const L = doc.labels.filter(l => l.level === lv.id), beds = L.filter(l => l.type === 'bedroom' && /^غرفة نوم \d+$/.test(l.name)).sort((a, b) => +a.name.split(' ')[2] - +b.name.split(' ')[2]);
+    const start = L.some(l => l.type === 'master') ? 2 : 1, map = new Map(beds.map((l, i) => [l.name.split(' ')[2], String(start + i)]));
+    if ([...map].every(([a, b]) => a === b)) continue;
+    for (const l of L) { const m = /^(غرفة نوم|حمام غرفة|مدخل غرفة|خزانة غرفة) (\d+)$/.exec(l.name); if (m && map.has(m[2])) l.name = `${m[1]} ${map.get(m[2])}`; }
+    d.notes = [...(d.notes || []), `رُقّمت غرف النوم في «${lv.name || lv.id}» متتالية (${[...map.values()].join('، ')}).`];
+  }
+  // المنور السماوي فوق الدرج
+  if ((doc.stairs || []).length && !R14_OFF.has('skylight')) { for (const st of doc.stairs) st.skylight = true; d.notes = [...(d.notes || []), 'منور سماوي فوق الدرج يضيئه طبيعيًا (قيمة تصميمية افتراضية للميزان؛ مقاسه وتفصيله يُعتمدان مع المصمم).']; }
+  // باب الرئيسية بعيدًا عن الدرج
+  if (!R14_OFF.has('masterdoor')) try {
+    const M = analyzeDoc(doc), up = M.levels.find(lv => lv.rooms.some(r => r.type === 'master') && lv.rooms.some(r => r.type === 'stairs'));
+    const master = up?.rooms.find(r => r.type === 'master'), stair = up?.rooms.find(r => r.type === 'stairs');
+    const op = master && up.openings.find(o => o.door && o.sides.some(s => s.room.id === master.id) && o.sides.some(s => s.other !== 'outside' && ['living', 'corridor'].includes(up.roomsById.get(s.other)?.type)));
+    if (op && stair) {
+      const other = up.roomsById.get(op.sides.find(s => s.room.id === master.id).other), ids = new Set(other.edges.map(e => e.edgeId));
+      const es = master.edges.filter(e => ids.has(e.edgeId) && e.wallIds.includes(op.wall.id)), w = op.wall, u = norm(sub(w.b, w.a));
+      const ts = es.flatMap(e => [dot(sub(e.a, w.a), u), dot(sub(e.b, w.a), u)]);
+      if (ts.length) {
+        const lo = Math.min(...ts) + op.w / 2 + .2, hi = Math.max(...ts) - op.w / 2 - .2, sc = stair.centroid;
+        const cur = Math.hypot(op.p.x - sc.x, op.p.y - sc.y), o = doc.openings.find(x => x.id === op.id), old = o.at, req = reviewRequest(args.requirements || {}, args.land, args.counts);
+        const cands = []; for (let t = lo; t <= hi + 1e-6; t += .3) cands.push({ t, dd: Math.hypot(w.a.x + u.x * t - sc.x, w.a.y + u.y * t - sc.y) });
+        let moved = null;
+        for (const c of cands.filter(c => c.dd > cur + .8).sort((a, b) => b.dd - a.dd).slice(0, 6)) {
+          if (doc.openings.some(x => x !== o && x.wall === o.wall && Math.abs(x.at - c.t) < (x.w + o.w) / 2 + .15)) continue;
+          o.at = Math.round(c.t * 100) / 100;
+          if (['CIRCULATION', 'CONSISTENCY_2D3D'].every(id => heavyGate(id, doc, req).ok)) { moved = c; break; }
+          o.at = old;
+        }
+        if (moved) d.notes = [...d.notes, `باب الغرفة الرئيسية في طرف جدارها البعيد عن الدرج (${Math.round(moved.dd * 10) / 10} م من مركزه بدل ${Math.round(cur * 10) / 10} م).`];
+        else if (cands.some(c => c.dd > cur + .8)) d.notes = [...d.notes, 'جُرّب نقل باب الغرفة الرئيسية بعيدًا عن الدرج فتعارض مع أثاثها أو حركتها في كل موضع (بوابة الحركة الفعلية)؛ بقي في موضعه.'];
+      }
+    }
+  } catch { /* يبقى الباب في موضعه */ }
+}
+/**
+ * (الجولة الرابعة عشرة) «المجالس» بالجمع ولم يُجب السؤال: يبقى السؤال قائمًا، ويُضاف — إن اتسعت المساحة — بديل بمجلسين (رجال ونساء)
+ * مُعلَن القراءة، لا يُحتسب تكميلًا شكليًا (برنامج مختلف بقراءة أخرى لكلام العميل). لا يُضاف في التعديل ولا إن طلب العميل عددًا.
+ */
+function pluralMajlis(out, args) {
+  const req = args.requirements || {};
+  if (args.prefer || args._plural || !(req.ambiguous || []).some(a => a.type === 'majlis-plural') || req.answers?.['majlis-plural'] || (args.counts?.majlis ?? req.counts?.majlis) !== 1 || R14_OFF.has('plural')) return;
+  if ((out.designs || []).length >= (args.keep || 4)) return;
+  try {
+    const req2 = JSON.parse(JSON.stringify(req)); req2.counts = { ...(req2.counts || {}), majlis: 2, baths: (req2.counts?.baths || args.counts?.baths || 0) + 1 };
+    req2.answers = { ...(req2.answers || {}), 'majlis-plural': 2 };
+    const o2 = generateVillaTwoFloors({ ...args, _plural: true, counts: { ...args.counts, majlis: 2, baths: (args.counts?.baths || 0) + 1 }, requirements: req2, keep: 1 });
+    const d = o2.designs?.[0]; if (!d) return;
+    d.notes = [...(d.notes || []), `قراءة «المجالس» بالجمع: مجلس رجال ومجلس نساء (السؤال ما زال قائمًا: مجلسان أم مجلس واحد؟) — بديل بقراءة أخرى لكلامك لا تكملة للعدد.`];
+    d.pluralReading = true; out.designs.push(d);
+  } catch (e) { if (out.designs?.[0]) out.designs[0].notes = [...(out.designs[0].notes || []), `جُرّب بديل بمجلسين (رجال ونساء) لقراءة «المجالس» بالجمع فلم يتسع في هذه الأرض مع البرنامج نفسه (${String(e.message || e).slice(0, 120)})؛ السؤال ما زال قائمًا.`]; }
+}
 /**
  * (الجولة الرابعة عشرة، قرار المالك) حالة العرض لكل بديل (dist/presentation-status.mjs): «جاهز للعرض المبدئي» / «يحتاج تعديلات (تُذكر)» /
  * «محجوب (السبب)». المحجوب (يخالف بندًا إلزاميًا من طلب العميل أو رسب في بوابة) لا يُعرض ما دام غيره موجودًا — ويُذكر في out.hidden؛

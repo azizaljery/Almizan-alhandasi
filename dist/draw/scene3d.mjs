@@ -240,6 +240,17 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       for (const j of cop.joints) PA.prism({ top: 'cap', side: 'cap', bottom: 'none' }, j.poly, E + H + parapetH, E + H + parapetH + .07);
     }
 
+    // ---- (Round 14) roof skylight over the stairwell (doc.stairs[].skylight): a raised curb with a glazed top on the roof of the
+    //      top level above the stair space — daylight for an interior stair (Mizan default for a stair without an outside wall)
+    if (isTop && L.i > 0 && (doc.stairs || []).some(st => st.skylight)) for (const sp of L.spaces.filter(x => x.type === 'stairs')) {
+      const bb = boundsOf(sp.net), m = .45; if (bb.x1 - bb.x0 < 1.6 || bb.y1 - bb.y0 < 1.6) continue;
+      const q = [{ x: bb.x0 + m, y: bb.y0 + m }, { x: bb.x1 - m, y: bb.y0 + m }, { x: bb.x1 - m, y: bb.y1 - m }, { x: bb.x0 + m, y: bb.y1 - m }];
+      PA.prism({ top: 'cap', side: 'cap', bottom: 'none' }, q, E + H, E + H + .35);
+      const g = [{ x: q[0].x + .08, y: q[0].y + .08 }, { x: q[1].x - .08, y: q[1].y + .08 }, { x: q[2].x - .08, y: q[2].y - .08 }, { x: q[3].x + .08, y: q[3].y - .08 }];
+      O.prism({ top: 'glass', side: 'aluminium', bottom: 'none' }, g, E + H + .35, E + H + .42);
+      (result.skylights ||= []).push({ level: L.id, room: sp.name });
+    }
+
     // ---- rooms: floors, ceilings, roofs, slabs ----------------------------------------------------------------------
     // فراغ مزدوج الارتفاع (نوع «void» في الدور الذي فوقه): لا أرضية له في دوره، والفراغ الذي تحته بلا سقف ولا سطح هناك
     const isVoid = sp => !!ROOM_TYPES[sp.type]?.void;
