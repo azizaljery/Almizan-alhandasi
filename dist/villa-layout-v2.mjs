@@ -1493,6 +1493,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
     const has = rooms.some(r => r.type === 'bath' && doors.some(d => d.b && ((d.a === r.id && famCirc(d.b)) || (d.b === r.id && famCirc(d.a)))));
     let done = has ? 'existing' : null;
     if (!done && foyer && dayWcFoyer()) done = 'foyer';
+    if (!done && foyer && !R14_OFF.has('wcend') && dayWcFoyerEnd()) done = 'foyer';
     if (!done) for (const kind of ['dining', 'family', 'kitchen']) {
       const host = rooms.find(r => r.kind === kind && !r.dimLocked); if (!host) continue;
       // محاولة قابلة للتراجع: إن لم يتصل ممر دورة المياه بالحركة يُعاد كل شيء كما كان (لا فراغ معزول)
@@ -1832,6 +1833,22 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
     const e2 = shared(wc, wash); if (e2) doors.push({ a: wc.id, b: wash.id, edge: e2, pos: (e2.from + e2.to) / 2, kind: 'door', w: GUEST_WC_DOOR });
   }
   /** دورة مياه يومية في طرف البهو البعيد عن الباب الخارجي (البهو ≥ 3.9 م عرضًا ويبقى ≥ 2.4 م). */
+  /**
+   * (الجولة الرابعة عشرة) بهو مدخل عائلة طويل ضيق (عمقه ≥ 4.6 م، عرضه 2.1–3.6 م): دورة المياه اليومية في طرفه الخلفي بعرضه كله (1.7 م)
+   * إن لم تمر بذلك الجزء فتحة إلى غيره — البهو يبقى ≥ 2.9 م عمقًا. يُعاد كل شيء كما كان إن لم يتسع.
+   */
+  function dayWcFoyerEnd() {
+    const fw = W_(foyer), fd = H_(foyer), dWc = 1.7; if (fd < 4.6 || fw < 2.1 || fw > 3.6) return false;
+    const wcR = { ...foyer, y0: foyer.y1 - dWc };
+    const hit = doors.some(d => (d.a === 'foyer' || d.b === 'foyer') && d.edge && !d.entry && (d.edge.axis === 'y' ? Math.abs(d.edge.at - foyer.y1) < TOL : (() => { const pos = d.pos ?? (d.edge.from + d.edge.to) / 2; return pos + (d.w || .9) / 2 > wcR.y0 - .15; })()));
+    if (hit) return false;
+    Object.assign(foyer, { y1: snap(wcR.y0) });
+    const wc = add(wcR, { id: 'day-wc', type: 'bath', name: 'دورة مياه', kind: 'wc', door: 'y0', far: 'y1', day: true });
+    const e = shared(wc, foyer); if (!e) return false;
+    doors.push({ a: wc.id, b: 'foyer', edge: e, pos: e.from + Math.min(.6, (e.to - e.from) / 2), kind: 'door', w: GUEST_WC_DOOR });
+    for (const d of doors) if ((d.a === 'foyer' || d.b === 'foyer') && d.b && d.edge && !d.entry && d.b !== wc.id && d.a !== wc.id) { const o = rooms.find(x => x.id === (d.a === 'foyer' ? d.b : d.a)); const e2 = o && shared(foyer, o); if (e2) { d.edge = e2; d.w = Math.min(d.w, e2.to - e2.from - .4); } }
+    return true;
+  }
   function dayWcFoyer() {
     const fw = W_(foyer), fd = H_(foyer); if (fw < 3.6 || fd < 2.6) return false;
     const E = doors.find(d => d.a === 'foyer' && d.entry && !d.b), ep = E?.pos ?? (foyer.x0 + foyer.x1) / 2;
@@ -2528,7 +2545,12 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
         // استعمال ما لا يتسع له مستطيل كامل (المبنى يتبع شكل الأرض، كجناح خلفي أعرض على أرض تتسع للخلف)
         const pl = site.placeRects(solidRects(sol), ew, ed);
         if (pl.over > 1e-6) { s += 600 + 400 * pl.over; sol.viol = (sol.viol || 0) + 1; }
-        else s -= 40 * Math.max(0, ew - site.rectW(ed));
+        else {
+          s -= 40 * Math.max(0, ew - site.rectW(ed));
+          // (الجولة الرابعة عشرة) لا يُدفع المبنى إلى الخلف تاركًا فناءً أماميًا ميتًا: حوش خلفي ≥ 6 م (4.5 م بعد ارتداد الجار) متى سمح العمق
+          // — تفضيل سعودي افتراضي للميزان (جزاء لا رفض؛ المراجع المستقل r13: C5-1/3/4 بفناء أمامي 12–13 م وحوش خلفي 1.7 م)
+          if (!R14_OFF.has('yard')) { const rear = site.D - (pl.oy + ed); if (rear < 4.5 && pl.oy > .5) s += 90 * Math.min(4.5 - rear, pl.oy); }
+        }
       }
       const rp = rulePenalty(sol.placed, ruleCirc(sol.circ), ew, ed, rules, entry); lastRp = rp; return s + ruleK * (rp.base + Math.min(...rp.p)) + (extra ? extra(sol, ew, ed) : 0);
     };
