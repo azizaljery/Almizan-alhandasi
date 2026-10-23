@@ -53,7 +53,10 @@ test('التوليد يعيد بصمة وبدائل محوّلة وبصمة هن
   // الثلاثة الباقية تامة في كل المقاييس فدرجتها واحدة بأي أوزان — فالتأكيد صار على الأوزان لا على بديل بعينه
   const neutralW = weightsFromDNA(buildDNA({ plot, rooms, discovery: empty, counts }).values);
   assert.notDeepEqual(out.dna.weights, neutralW, 'ميزان العميل يغيّر أوزان التقييم فعلًا');
-  assert.ok(out.dna.rows.some(r => r.score !== r.neutralScore) || out.dna.rows.every(r => r.score >= 95), 'الدرجة تختلف عن المحايدة ما لم تكن البدائل تامة');
+  // (الجولة الخامسة عشرة) بديل لا يُقاس فيه إلا محوران لا تغيّر البصمة نسبة وزنيهما (كفاءة المساحة والهدر — «حوشان» درجته 93.7) درجته
+  // مساوية للمحايدة بالتعريف؛ التأكيد: درجة تختلف، أو كل بديل تام أو مقيس بمحاور لا تتأثر بالبصمة
+  const invariant = r => Object.entries(r.metrics || {}).filter(([, v]) => v != null).every(([k]) => ['spaceEfficiency', 'wasteControl'].includes(k));
+  assert.ok(out.dna.rows.some(r => r.score !== r.neutralScore) || out.dna.rows.every(r => r.score >= 95 || invariant(r)), 'الدرجة تختلف عن المحايدة ما لم تكن البدائل تامة');
   assert.equal(out.dna.rows.every(r => Number.isFinite(r.score)), true);
 });
 

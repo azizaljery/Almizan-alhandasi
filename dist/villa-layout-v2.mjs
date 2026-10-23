@@ -2650,7 +2650,10 @@ function pickDiverse(pool, keep) {
   const openA = c => (c.cand?.sol ? sum([...(c.cand.sol.voids || []), ...(c.cand.sol.courts || [])].filter(v => v.x0 > .05 || v.y0 > .05).map(A_)) : 0);
   const massDiff = (a, b) => Math.abs(openA(a) - openA(b)) >= 12;
   void massDiff; void d;
-  const okPair = (a, b) => (edit || famOf(a) !== famOf(b)) && distinct(a, b);
+  // (الجولة الخامسة عشرة) والمقياس الأول (تجاور + حركة + نطاقات) فوق عتبة «الشكلي» أيضًا كما يقول التعليق أعلاه: «الحوش الجانبي» و«المجلس
+  // الجانبي» على الأرض نفسها بعمود ضيافة وخدمة وصالة وسطى = v2 «مختلف» لكن v1 0.14 (متشابهان للعين) — لا يُعرضان معًا (لا حشو)
+  const V1 = new Map(), v1 = (a, b) => { const k = a.pat < b.pat ? a.pat + '|' + b.pat : b.pat + '|' + a.pat; if (!V1.has(k)) V1.set(k, archDifference(a.sig1 ||= archSignature(a.doc), b.sig1 ||= archSignature(b.doc)).total); return V1.get(k); };
+  const okPair = (a, b) => (edit || famOf(a) !== famOf(b)) && distinct(a, b) && (edit || v1(a, b) >= MIN_ARCH_DIFF);
   // المرسى (البديل الأول المعروض): الأفضل، أو بديل قريب منه جودةً وبالبنود نفسها — فلا يقيّد الأفضلُ وحده تنوع المجموعة
   const anchors = new Set(edit ? [best] : pool.filter(c => c.fails === best.fails && c.quality <= q0 + 120).slice(0, 4));
   /** أفضل مجموعة بحجم need من cand (كل زوج ≥ 0.12 وفيها مرسى)، أو null. */

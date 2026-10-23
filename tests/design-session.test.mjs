@@ -24,7 +24,10 @@ test('جلسة التصميم: الأول يُعرض، و«تصميم آخر» �
   assert.deepEqual(r1.changes, ['غرف النوم صغيرة', 'الممرات كثيرة']);
   assert.ok(!['tee', 'rows'].includes(s.designs[1].pat.split('|')[0]), 'الممرات الكثيرة تستبعد أنماط الممر');
   assert.ok(s.input.requirements.tweaks.bedroomScale > 1);
-  const r2 = await redesign(s, { text: 'أريد المطبخ مفتوحا وغرفة خادمة' });
+  let r2 = await redesign(s, { text: 'أريد المطبخ مفتوحا وغرفة خادمة' });
+  // (الجولة الرابعة عشرة/الخامسة عشرة) لا حل موضعي لإضافة غرفة الخادمة في المعروض: تُعرض الخيارات صراحة (لا استبدال صامت)، فيختار
+  // العميل إعادة التوزيع — ثم تُطبَّق ملاحظاته كلها
+  if (r2.reply.mode === 'ask-options') { assert.deepEqual(r2.changes, [], 'لا تغيير قبل اختيار العميل'); const o = r2.reply.options.find(x => x.id === 'zone') || r2.reply.options.find(x => x.id === 'full'); assert.ok(o, 'خيار إعادة توزيع'); r2 = await redesign(r2.session, { text: String(o.n) }); }
   assert.ok(r2.changes.some(c => /مطبخ مفتوح/.test(c)) && r2.changes.some(c => /خادمة/.test(c)));
   assert.ok(currentDoc(r2.session).labels.some(l => l.name === 'غرفة الخادمة'));
   const store = memStore(); assert.ok(saveSession(store, approve(r2.session)));
