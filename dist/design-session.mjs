@@ -2,7 +2,7 @@
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
 import { generateInitialDesign } from './home-flow.mjs';
 import { extractRequirements, detectConflicts, normalizeAr, parseReadingAnswer } from './requirements.mjs';
-import { verifyRequest, mergeRules } from './rules.mjs';
+import { verifyRequest, verifyRules, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
@@ -358,7 +358,21 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
         c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
       }
       const fresh = pool.filter(c => c.ok && !c.shownAs).sort((a, b) => a.zd.changed.length - b.zd.changed.length);
-      const zoneCand = fresh.find(c => c.zd.changed.length <= 1) || null, fullCand = fresh.find(c => c !== zoneCand) || null;
+      const zoneCand = fresh.find(c => c.zd.changed.length <= 1) || null;
+      let fullCand = fresh.find(c => c !== zoneCand) || null;
+      // (الجولة الخامسة عشرة) لا توزيع جديد في نتيجة التوليد المفضِّلة للنمط المعروض: يُبحث مرة ثانية بأنماط غير المعروضة كلها
+      // (المعروض والبدائل) — فيصير خيار «توزيع جديد» حقيقيًا لا بديلًا معروضًا بثوب التعديل
+      if (!fullCand) {
+        try {
+          const ex2 = [...new Set([cur.pat, ...(s.alternatives || []).map(a => a.pat)].filter(Boolean))];
+          const out2 = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude: ex2, ...(s.input.engine ? { engine: s.input.engine } : {}) });
+          for (const c of [{ ...out2 }, ...(out2.alternatives || []).slice(1).map(a => ({ ...out2, doc: a.doc, pat: a.pat || null, summary: a.summary || out2.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
+            const h = roomsHash(c.doc); if (seenH.has(h)) continue; seenH.add(h);
+            c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
+            if (c.ok && !c.shownAs) { fullCand = c; break; }
+          }
+        } catch { /* لا توزيع جديد */ }
+      }
       const shownOk = shown.filter(a => achieves(a.doc)).map(a => a.index);
       const nearestShown = pool.find(c => c.ok && c.shownAs);
       const fpOf = c => { try { const d = diffFingerprint(curD, c.doc); return { d, compact: compactDiff(d) }; } catch { return null; } };
@@ -373,22 +387,46 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
         occ = sides.map(sd => { const o = sideOccupants(curD, sd, entryDir); return o ? ` ${sd === 'back' ? 'خلف' : 'مقدمة'} هذا المخطط ${o.length > 1 ? 'تشغلها' : 'تشغله'} ${o.map(z => `${z.zone_ar.replace(/ \(.*\)$/, '')} (${z.rooms.map(n => `«${n}»`).join('، ')})`).join(' و')}${o.some(z => z.zone === 'sleep') ? '؛ نقل المطبخ إليها يزيح غرف النوم إلى موضع المطبخ أو الطعام أو يجعل المطبخ على ممر النوم' : ''}.` : ''; }).join(''); } catch { occ = ''; }
       opts.forEach((o, k) => { o.n = k + 1; });
       const zoneWhy = (occ || '') + (zoneCand ? '' : Number.isFinite(minZones) ? ` إعادة توزيع منطقة واحدة لا تكفي: أقرب توزيع يحقق طلبك يغيّر ${minZones} من مناطق البيت.` : ' ولم أجد توزيعًا يحققه بإعادة توزيع منطقة واحدة.');
-      const dupWhy = nearestShown ? ` وأقرب توزيع يحققه هو البديل ${nearestShown.shownAs.index + 1} المعروض لك أصلًا${nearestShown.shownAs.identical ? ' حرفيًا' : ' بتنظيمه'} — لا أقدّمه على أنه تعديل لهذا المخطط.` : '';
+      const part0 = partialReading(curD, parsed?.intents || [], entryDir);
+      const dupWhy = nearestShown ? ` وأقرب توزيع يحققه هو البديل ${nearestShown.shownAs.index + 1} المعروض لك أصلًا${nearestShown.shownAs.identical ? ' حرفيًا' : ' بتنظيمه'} — لا أقدّمه على أنه تعديل لهذا المخطط${part0 ? '' : '.'}` : '';
       let lost = []; try { const okNow = new Set(verifyRequest(curD, req, { entry: entryDir }).filter(x => x.ok).map(x => x.text)); lost = ledger.filter(x => !x.ok && okNow.has(x.text)).map(x => ({ text: x.text, why: x.why })); } catch { lost = []; }
-      const q = `لم أجد تعديلًا موضعيًا يحقق طلبك على هذا المخطط نفسه${why ? `. السبب الهندسي: ${why.replace(/[.。]+$/, '')}` : ''}.${zoneWhy}${dupWhy} اختر رقمًا: ${opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ')}.`;
+      // (الجولة الخامسة عشرة) التحقق الجزئي: ما تحقق من الطلب في المعروض نفسه (مقيسًا بسجل المطابقة نفسه)، وما تحقق بقراءة دون
+      // أخرى (المطبخ خلف الطعام نسبيًا لا على الواجهة الخلفية) — يُقال صراحة قبل الخيارات، بالنص نفسه الذي يكتبه السجل الصارم
+      const part = part0;
+      if (!fullCand) opts.push({ id: 'none-new', n: opts.length + 1, info: true, text_ar: 'توزيع جديد غير البدائل المعروضة يحققه: لم أجد (بحثت بأنماط غير المعروضة كلها)' });
+      opts.forEach((o, k) => { o.n = k + 1; });
+      const choose = opts.filter(o => !o.info);
+      const optsAr = opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ');
+      const q = part
+        ? `الشرط متحقق جزئيًا: ${part.text_ar}. ولا تعديل موضعي يحققه حرفيًا على هذا المخطط نفسه:${occ || ''}${zoneWhy.replace(occ || '', '')}${dupWhy}؛ لتحقيقه حرفيًا: الخيارات ${optsAr}. اختر رقمًا من ${choose.map(o => o.n).join(' أو ')}.`
+        : `لم أجد تعديلًا موضعيًا يحقق طلبك على هذا المخطط نفسه${why ? `. السبب الهندسي: ${why.replace(/[.。]+$/, '')}` : ''}.${zoneWhy}${dupWhy} اختر رقمًا: ${optsAr}.`;
       const keep = clone(session);
       const mk = c => entry(c, { picks, text, changes, reply: { ...reply, mode: 'regenerated', zoneDiff: { changed: c.zd.changed, kept: c.zd.kept }, fingerprint: fpOf(c)?.compact || null }, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null });
-      keep.pendingEdit = { options: true, order: opts.map(o => o.id), text, input: s.input, zone: zoneCand ? mk(zoneCand) : null, full: fullCand ? mk(fullCand) : null, shownOk, zoneInfo: zoneCand ? { changed: zoneCand.zd.changed_ar, kept: zoneCand.zd.kept_ar } : null, fullInfo: fullCand ? { changed: fullCand.zd.changed_ar, kept: fullCand.zd.kept_ar } : null, reply: { ...reply, lost } };
+      keep.pendingEdit = { options: true, order: opts.map(o => (o.info ? null : o.id)), text, input: s.input, zone: zoneCand ? mk(zoneCand) : null, full: fullCand ? mk(fullCand) : null, shownOk, zoneInfo: zoneCand ? { changed: zoneCand.zd.changed_ar, kept: zoneCand.zd.kept_ar } : null, fullInfo: fullCand ? { changed: fullCand.zd.changed_ar, kept: fullCand.zd.kept_ar } : null, reply: { ...reply, lost } };
       const cq = { type: 'needs-consent', key: 'options|' + text, question_ar: q };
       keep.reply = { conflicts: [cq], questions: [q] };
       return { session: keep, changes: [], reply: { local: true, mode: 'ask-options', options: opts, conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [],
-        proposal: { zone: zoneCand ? { pattern: zoneCand.pat || null, zones: zoneCand.zd, fingerprint: zf?.compact || null } : null, full: fullCand ? { pattern: fullCand.pat || null, zones: fullCand.zd, fingerprint: ff?.compact || null } : null, shownSatisfying: shownOk.map(i => i + 1), nearestIsShown: nearestShown ? nearestShown.shownAs.index + 1 : null, measured: reply.fallbackMeasured || null, lost }, summary_ar: q } };
+        partial: part || null, proposal: { zone: zoneCand ? { pattern: zoneCand.pat || null, zones: zoneCand.zd, fingerprint: zf?.compact || null } : null, full: fullCand ? { pattern: fullCand.pat || null, zones: fullCand.zd, fingerprint: ff?.compact || null } : null, shownSatisfying: shownOk.map(i => i + 1), nearestIsShown: nearestShown ? nearestShown.shownAs.index + 1 : null, measured: reply.fallbackMeasured || null, lost }, summary_ar: q } };
     }
   }
   pushDesign(s, entry(out, { picks, text, changes, reply, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }));
   return { session: s, changes, reply };
 }
 
+/**
+ * (الجولة الخامسة عشرة) التحقق الجزئي لطلب تعديل على المخطط المعروض: بنود الطلب (القواعد) مقيسة بـverifyRules نفسه الذي يكتب
+ * السجل الصارم. يعيد { text_ar, ok[], partial[], failed[] } إن تحقق شيء منه (كليًا أو بقراءة نسبية) ولم يتحقق كله حرفيًا، وإلا null.
+ */
+export function partialReading(doc, intents = [], entry = 's') {
+  const rules = intents.filter(i => i.op === 'rule' && i.rule).map((i, k) => ({ ...i.rule, id: 'P' + k }));
+  if (!rules.length) return null;
+  let v = []; try { v = verifyRules(doc, rules, { entry }); } catch { return null; }
+  const ok = v.filter(x => x.ok), part = v.filter(x => !x.ok && x.partial), no = v.filter(x => !x.ok && !x.partial);
+  if (!part.length && !(ok.length && no.length)) return null;
+  const dot = t => String(t || '').replace(/[.。]+$/, '');
+  const text_ar = [...ok.map(x => `${x.text} متحقق حرفيًا (مقيس)`), ...part.map(x => `${x.text} متحقق بالقراءة النسبية — ${dot(x.partial.text_ar)} — لا بالقراءة الحرفية (على الواجهة الخلفية أو في ثلثها الخارجي): ${dot(x.partial.literal_ar)}`), ...no.map(x => `${x.text} غير متحقق: ${dot(x.why)}`)].join('؛ ');
+  return { text_ar, ok: ok.map(x => x.text), partial: part.map(x => ({ text: x.text, relative_ar: x.partial.text_ar, literal_ar: x.partial.literal_ar })), failed: no.map(x => ({ text: x.text, why: x.why })) };
+}
 const ABSENT_SUBJ = { majlis: ['majlis', 'majlis_w'], dining: ['dining'], office: ['office'], prayer: ['prayer'], maid: ['maid'], driver: ['driver'], laundry: ['laundry'], storage: ['storage'] };
 function compactReview(rv) {
   return { version: rv.version, passed: rv.passed, failedGates: rv.failedGates, score: rv.score, rejectReasons_ar: rv.rejectReasons_ar,
@@ -478,7 +516,9 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   const absent = r => r.ok && r.already && r.intent?.op === 'none' && /غير موجود/.test(r.why_ar || '');
   // (الجولة الثانية عشرة) ما كان متحققًا أصلًا بسبب مقيس (مثل باب المقلط الافتراضي بين المجلس والطعام) يُعرض في «لم يحتج تغييرًا» لا «نُفّذ»
   const doneTxt = res.results.filter(r => r.ok && !absent(r)).map(r => r.text_ar);
-  const alreadyTxt = res.results.filter(r => absent(r) || (r.ok && r.already && r.why_ar)).map(r => `${r.text_ar}${r.why_ar ? ' — ' + r.why_ar.replace(/[.。]+$/, '') : ''}`);
+  const ALREADY_RE = /متحقق في المخطط المعروض كما هو/;
+  const alreadyTxt = res.results.filter(r => absent(r) || (r.ok && r.already && r.why_ar)).map(r => `${r.text_ar}${r.why_ar && !ALREADY_RE.test(r.why_ar) ? ' — ' + r.why_ar.replace(/[.。]+$/, '') : ''}`);
+  const allAlready = res.results.length > 0 && res.results.every(r => r.ok && r.already && ALREADY_RE.test(r.why_ar || ''));
   const doneShown = res.results.filter(r => r.ok && !absent(r) && !(r.already && r.why_ar)).map(r => r.text_ar);
   // الرجوع يعيد الواجهة أيضًا: يُقال صراحة إن تغيّرت مادتها
   const facA = doc0.finish?.facade?.material || null, facB = res.doc.finish?.facade?.material || null;
@@ -503,7 +543,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   if (restored?.proof) reply.restoreProof = restored.proof;
   reply.summary_ar = [
     doneShown.length ? `نُفّذ: ${doneShown.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
-    alreadyTxt.length ? `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.` : '',
+    alreadyTxt.length ? (allAlready ? `طلبك متحقق أصلًا في هذا المخطط حرفيًا (مقيس بسجل المطابقة): ${alreadyTxt.join('، و')}؛ فلم أغيّر شيئًا.` : `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.`) : '',
     reply.failed.length ? `لم يُنفَّذ: ${reply.failed.map(f => `${f.text} — ${f.why}`).join('؛ ')}.` : '',
     reply.pending.length ? `محفوظ ولم يظهر في المجسّم بعد: ${reply.pending.map(p => p.text).join('، ')}.` : '',
     restored && facadeNote ? facadeNote + '.' : '',
@@ -519,7 +559,7 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   changes.push(...doneTxt);
   if (text) s.input.idea = [s.input.idea, text].filter(Boolean).join('\n');
   let review = null; try { review = compactReview(reviewDesign(res.doc, { text: s.input.idea || '', counts: { ...req.counts }, land: s.input.land || {} }, { external: false })); } catch { review = cur.review || null; }
-  reply.version = pushDesign(s, { doc: serialize(res.doc), pat: cur.pat, summary: cur.summary, notes: [...(cur.notes || []).filter(n => !/^تعديل موضعي/.test(n)), `تعديل موضعي: ${doneTxt.join('، ') || '—'}`], floors: cur.floors, feedback: { picks, text, changes: [...changes], reply, edit: { local: true, intents } }, engine: cur.engine, ledger, review, mirror: cur.mirror ?? null });
+  reply.version = pushDesign(s, { doc: serialize(res.doc), pat: cur.pat, summary: cur.summary, notes: [...(cur.notes || []).filter(n => !/^(?:تعديل موضعي|لم يحتج تغييرًا)/.test(n)), `${reply.unchanged ? 'لم يحتج تغييرًا (متحقق أصلًا في المعروض)' : 'تعديل موضعي'}: ${doneTxt.join('، ') || '—'}`], floors: cur.floors, feedback: { picks, text, changes: [...changes], reply, edit: { local: true, intents } }, engine: cur.engine, ledger, review, mirror: cur.mirror ?? null });
   return { session: s, changes, reply };
   }
 }

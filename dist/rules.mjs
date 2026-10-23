@@ -344,6 +344,20 @@ export function zoneCheck(r, side, B, others, habit) {
   if (zdef <= 0) return { def: 0, how: 'third' };
   return { def: Math.min(tdef, zdef), tdef, third, between, f };
 }
+/**
+ * (الجولة الخامسة عشرة) «في الخلف» بالقراءة النسبية: الفراغ أبعد عن الشارع من كل فراغات الاستقبال في دوره (المجلس، الطعام،
+ * المداخل) بنصف متر على الأقل، ولا يلامس الواجهة الأمامية. يعيد نصًا عربيًا مقيسًا أو null.
+ */
+function relativeBack(a, backSide, entry, rooms, B) {
+  const front = docSide('front', entry); if (!front || front === 'c') return null;
+  const ax = backSide[0], hi = backSide.endsWith('1'), depth = r => (hi ? ctr(r)[ax] : -ctr(r)[ax]);
+  if (placeDeficit(a, front, 'touch', B) <= .45) return null;
+  const rec = rooms.filter(o => o !== a && o.level === a.level && (o.type === 'majlis' || o.type === 'dining' || (o.type === 'entrance' && /مدخل/.test(o.name || ''))));
+  if (!rec.length || rec.some(o => depth(o) > depth(a) - .5)) return null;
+  const names = [...new Set(rec.filter(o => o.type !== 'entrance').map(o => o.name))];
+  const ext = ax === 'x' ? B.x1 - B.x0 : B.y1 - B.y0, fromFront = Math.round(100 * Math.abs(ctr(a)[ax] - B[front]) / ext);
+  return `«${a.name}» خلف ${names.length ? names.map(n => `«${n}»`).join(' و') : 'المداخل'} بالنسبة للشارع (أبعد منها عن الشارع، ومركزه على ${fromFront}% من عمق المبنى من الواجهة الأمامية)`;
+}
 // أنواع الكتل والغرف السكنية غير الخدمية (تمنع «في الخلف» إن وقعت بين الفراغ والواجهة)
 const HABIT_KIND = new Set(['suite', 'majlis', 'family', 'dining', 'office', 'prayer']);
 const HABIT_TYPE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'office', 'prayer']);
@@ -483,7 +497,12 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
         if (z.third > 0) parts.push(`ومركزه على ${Math.round(z.f * 100)}% من عمق المبنى من تلك الجهة لا في ثلثه الخارجي`);
         if (z.between?.length) parts.push(`و${z.between.length > 1 ? 'تقع' : 'يقع'} بينه وبين تلك الواجهة «${z.between.map(o => o.name).join('» و«')}»`);
         const menC = r.a === 'majlis' && side === docSide('back', entry) && rooms.some(x => x.name === 'مدخل الرجال' || x.name === 'مجلس الرجال' || x.name === 'المجلس');
-        res.ok = false; res.why = `«${bad[0].name}» ${parts.join('، ')}.` + (menC ? ' مجلس الرجال يبقى على الواجهة الأمامية ليأخذ مدخله المستقل عن العائلة، وهذه الجهة خلف المبنى.' : ''); out.push(res); continue;
+        res.ok = false; res.why = `«${bad[0].name}» ${parts.join('، ')}.` + (menC ? ' مجلس الرجال يبقى على الواجهة الأمامية ليأخذ مدخله المستقل عن العائلة، وهذه الجهة خلف المبنى.' : '');
+        // (الجولة الخامسة عشرة) القراءة النسبية لـ«في الخلف»: الفراغ خلف منطقة الاستقبال (المجلس والطعام والمداخل) بالنسبة للشارع
+        // ولا يلامس الواجهة الأمامية — تُذكر «تحققًا جزئيًا» بجانب سبب القراءة الحرفية (الحكم يبقى غير متحقق حرفيًا).
+        // النص نفسه يقرؤه السجل الصارم ورد التعديل، فلا تناقض بينهما.
+        if (r.side === 'back') { const rel = relativeBack(bad[0], side, entry, rooms, B); if (rel) res.partial = { reading: 'relative', text_ar: rel, literal_ar: res.why }; }
+        out.push(res); continue;
       }
       if (bad.length && r.mode === 'center') { res.ok = false; res.why = `«${bad[0].name}» ليس في وسط المبنى.`; out.push(res); continue; }
       if (bad.length && r.mode === 'avoid') { res.ok = false; res.why = `«${bad[0].name}» يلامس جدار ${where}.`; out.push(res); continue; }

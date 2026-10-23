@@ -1,7 +1,7 @@
 // يشغّل حالات القبول المعمارية على الشيفرة الحالية ويحفظ: المستندات، ومقاييس كل بديل، وسجل المطابقة،
 // ومصفوفة اختلاف البدائل، والزمن. الاستعمال: node scripts/acceptance-run.mjs <stage> [نمط الحالات] [--engine v1|v2]
 // (أو MIZAN_ENGINE=v2). الافتراضي v1: المولّد المنشور dist/villa-layout.mjs؛ و v2: dist/villa-layout-v2.mjs.
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { CASES } from './acceptance-cases.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
 import * as V1 from '../dist/villa-layout.mjs';
@@ -56,6 +56,12 @@ export function difference(a, b) {
   return r2(Math.min(one(false), one(true)));
 }
 
+/** (الجولة الخامسة عشرة) يحفظ مقترحات خيارات التعديل (منطقة واحدة / توزيع جديد) مستندات أدلة: <prefix>-opt-zone.json و<prefix>-opt-full.json. */
+function savePending(session, dir, prefix) {
+  const pe = session.pendingEdit; if (!pe) return;
+  for (const k of ['zone', 'full']) if (pe[k]?.doc) writeFileSync(dir + `${prefix}-opt-${k}.json`, pe[k].doc);
+}
+function listPending(dir, prefix) { return ['zone', 'full'].filter(k => existsSync(dir + `${prefix}-opt-${k}.json`)).map(k => `${prefix}-opt-${k}.json`); }
 const summary = [];
 for (const C of CASES) {
   if (only && !only.test(C.id)) continue;
@@ -106,7 +112,8 @@ for (const C of CASES) {
       // (الجولة الرابعة عشرة) لا حل موضعي: تُعرض الخيارات (إبقاء / منطقة واحدة / بديل معروض يحققه / توزيع كامل جديد) — يُسجَّل
       // السؤال والخيارات، ثم يختار «العميل» المنطقة الواحدة إن عُرضت، وإلا يُبقي المخطط (لا استبدال صامت)
       let consentAsked = null, options = null, choice = null;
-      if (reply.mode === 'ask-options') { consentAsked = reply.questions?.[0] || true; options = reply.options; choice = String((options.find(o => o.id === 'zone') || options[0]).n); ({ session, reply } = await redesign(session, { text: choice })); }
+      let partial = null;
+      if (reply.mode === 'ask-options') { consentAsked = reply.questions?.[0] || true; options = reply.options; partial = reply.partial || null; savePending(session, dir, 'edit'); choice = String((options.find(o => o.id === 'zone') || options[0]).n); ({ session, reply } = await redesign(session, { text: choice })); }
       else if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) { consentAsked = reply.questions?.[0] || true; ({ session, reply } = await redesign(session, { text: 'نعم' })); }
       const after = JSON.parse((session.designs[1] || session.designs[0]).doc);
       writeFileSync(dir + 'edit-after.json', (session.designs[1] || session.designs[0]).doc);
@@ -116,7 +123,7 @@ for (const C of CASES) {
       const prog = d => docRooms(d).rooms.filter(r => PROG.includes(r.type)).map(r => r.name).sort(), nb = d => docRooms(d).rooms.filter(r => r.type === 'bath').length;
       const bP = prog(first.doc), aP = prog(after);
       const aD = session.designs[1] || session.designs[0];
-      row.edit = { text: C.edit, ms: Math.round(performance.now() - t1), consentAsked, options, choice, reply, beforePattern: session.designs[0].pat, afterPattern: aD.pat, samePattern: aD.pat === session.designs[0].pat, kept: !session.designs[1], shownMatch: matchShown(after, out.designs.map((x, j) => ({ index: j, doc: x.doc }))), zoneDiff: zoneDiff(first.doc, after), difference: difference(first.doc, after), roomsKept: bRooms.every(n => aRooms.includes(n)), roomsLost: bRooms.filter(n => !aRooms.includes(n)), programRoomsKept: bP.every(n => aP.includes(n)) && nb(after) >= nb(first.doc), programRoomsLost: bP.filter(n => !aP.includes(n)), editLedgerBefore: verifyRequest(first.doc, session.input.requirements, { entry }).map(x => ({ text: x.text, status: x.status, why: x.why })), after: metrics(after, session.input.requirements, entry) };
+      row.edit = { text: C.edit, ms: Math.round(performance.now() - t1), consentAsked, options, choice, partial, reply, beforePattern: session.designs[0].pat, afterPattern: aD.pat, samePattern: aD.pat === session.designs[0].pat, kept: !session.designs[1], shownMatch: matchShown(after, out.designs.map((x, j) => ({ index: j, doc: x.doc }))), zoneDiff: zoneDiff(first.doc, after), difference: difference(first.doc, after), roomsKept: bRooms.every(n => aRooms.includes(n)), roomsLost: bRooms.filter(n => !aRooms.includes(n)), programRoomsKept: bP.every(n => aP.includes(n)) && nb(after) >= nb(first.doc), programRoomsLost: bP.filter(n => !aP.includes(n)), editLedgerBefore: verifyRequest(first.doc, session.input.requirements, { entry }).map(x => ({ text: x.text, status: x.status, why: x.why })), after: metrics(after, session.input.requirements, entry) };
     } catch (e) { row.edit = { text: C.edit, error: e.message, code: e.code || null }; }
     // التعديل نفسه على كل بديل معروض (لا الأول فقط): هل بقي النمط؟ وكم تغيّر المخطط؟ وهل بقيت الغرف؟
     row.editAll = [];
@@ -124,17 +131,19 @@ for (const C of CASES) {
       try {
         const d = out.designs[i], shownAlts = out.designs.map((x, j) => ({ index: j, doc: x.doc, pat: x.pat, summary: x.summary, notes: x.notes, mirror: x.mirror, review: x.review || null }));
         const s0 = createSession({ land, counts: req.counts, requirements: req, result: { doc: d.doc, pat: d.pat, mirror: d.mirror, summary: d.summary, notes: d.notes, villaEngine: 'v2', alternatives: shownAlts }, engine });
-        let { session, reply } = await redesign(s0, { text: C.edit }), asked = null, options = null, choice = null;
-        if (reply.mode === 'ask-options') { asked = reply.questions?.[0] || true; options = reply.options; choice = String((options.find(o => o.id === 'zone') || options[0]).n); ({ session, reply } = await redesign(session, { text: choice })); }
+        let { session, reply } = await redesign(s0, { text: C.edit }), asked = null, options = null, choice = null, partial = null;
+        const first = reply;
+        if (reply.mode === 'ask-options') { asked = reply.questions?.[0] || true; options = reply.options; partial = reply.partial || null; savePending(session, dir, `edit-alt${i + 1}`); choice = String((options.find(o => o.id === 'zone') || options[0]).n); ({ session, reply } = await redesign(session, { text: choice })); }
         else if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) { asked = reply.questions?.[0] || true; ({ session, reply } = await redesign(session, { text: 'نعم' })); }
-        if (!session.designs[1]) { row.editAll.push({ alt: i + 1, notDone: true, kept: true, consentAsked: asked, options, choice, reply_ar: reply.summary_ar || null, failed: reply.failed }); continue; }
+        // (الجولة الخامسة عشرة) المخطط المُبقى يُكتب أيضًا (edit-altN-after = المعروض حرفيًا) لتُرسم صورة فرقه بالسبب والخيارات المرقّمة
+        if (!session.designs[1]) { writeFileSync(dir + `edit-alt${i + 1}-after.json`, serialize(d.doc)); row.editAll.push({ alt: i + 1, notDone: true, kept: true, consentAsked: asked, options, choice, partial, question_ar: asked === true ? null : asked, reply_ar: reply.summary_ar || null, failed: first.failed, unchanged: true, zoneDiff: zoneDiff(d.doc, d.doc), proposals: listPending(dir, `edit-alt${i + 1}`) }); continue; }
         const after = JSON.parse(session.designs[1].doc);
         writeFileSync(dir + `edit-alt${i + 1}-after.json`, session.designs[1].doc);
         // غرف البرنامج (نوم، مجالس، صالة، طعام، مطبخ، خدمة) بالاسم، ودورات المياه بالعدد — لا أجزاء الأجنحة (مدخل جناح/خزانة)
         const PROG2 = ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'service'];
         const names = x => docRooms(x).rooms.filter(r => PROG2.includes(r.type)).map(r => r.name).sort(), nB = x => docRooms(x).rooms.filter(r => r.type === 'bath').length;
         const bN = names(d.doc), aN = names(after), bathsKept = nB(after) >= nB(d.doc);
-        row.editAll.push({ alt: i + 1, consentAsked: asked, options, choice, mode: reply.mode || null, shownMatch: matchShown(after, shownAlts.filter(x => x.index !== i)), zoneDiff: zoneDiff(d.doc, after), beforePattern: d.pat, afterPattern: session.designs[1].pat, samePattern: session.designs[1].pat === d.pat, unchanged: !!reply.unchanged, difference: difference(d.doc, after), programRoomsKept: bN.every(n => aN.includes(n)) && bathsKept, done: reply.done, failed: reply.failed, patternChanged: reply.patternChanged || null, note: session.designs[1].notes.slice(-1)[0] || '' });
+        row.editAll.push({ alt: i + 1, consentAsked: asked, options, choice, mode: reply.mode || null, shownMatch: matchShown(after, shownAlts.filter(x => x.index !== i)), zoneDiff: zoneDiff(d.doc, after), beforePattern: d.pat, afterPattern: session.designs[1].pat, samePattern: session.designs[1].pat === d.pat, unchanged: !!reply.unchanged, difference: difference(d.doc, after), programRoomsKept: bN.every(n => aN.includes(n)) && bathsKept, done: reply.done, failed: reply.failed, already: (reply.already || []).map(x => x.text), reply_ar: reply.summary_ar || null, question_ar: typeof asked === 'string' ? asked : null, partial, patternChanged: reply.patternChanged || null, note: session.designs[1].notes.slice(-1)[0] || '' });
       } catch (e) { row.editAll.push({ alt: i + 1, error: e.message }); }
     }
   }

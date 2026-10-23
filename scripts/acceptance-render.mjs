@@ -9,11 +9,16 @@ const root = new URL('../dist/', import.meta.url).pathname, ev = new URL(`../evi
 const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.wasm': 'application/wasm' };
 const HARNESS = `<!doctype html><html dir="rtl"><head><meta charset="utf-8"><style>body{margin:0;background:#fff;font-family:Tahoma}canvas{display:block}</style></head><body><canvas id="c" width="1400" height="1000" style="width:1400px;height:1000px"></canvas><script type="module">
 import { renderPlan, fitView, docBounds } from '/draw/editor/render2d.mjs'; import { analyzeDoc } from '/draw/digest.mjs'; import { exteriorWallIds } from '/draw/topology.mjs'; import { parseDoc } from '/draw/doc.mjs'; import { ZONES, zoneOf } from '/design-session.mjs';
-window.draw = (raw, levelIndex, title) => { const doc = parseDoc(raw), lv = doc.levels[levelIndex], m = analyzeDoc(doc), L = m.levelById.get(lv.id); const c = document.getElementById('c'), ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1400,1000);
+const sizeC = h => { const c = document.getElementById('c'); if (c.height !== h) { c.height = h; c.style.height = h + 'px'; } return c; };
+const wrapAr = (ctx, text, w) => { const out = []; for (const para of String(text).split('\n')) { let line = ''; for (const word of para.split(' ')) { const t = line ? line + ' ' + word : word; if (ctx.measureText(t).width > w && line) { out.push(line); line = word; } else line = t; } if (line) out.push(line); } return out; };
+window.draw = (raw, levelIndex, title) => { sizeC(1000); const doc = parseDoc(raw), lv = doc.levels[levelIndex], m = analyzeDoc(doc), L = m.levelById.get(lv.id); const c = document.getElementById('c'), ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1400,1000);
 const b0 = docBounds(doc, lv.id), pp = doc.plot?.polygon || [], b = pp.length ? { x0: Math.min(b0.x0, ...pp.map(q => q.x)) + 1.6, y0: Math.min(b0.y0, ...pp.map(q => q.y)) + 1.6, x1: Math.max(b0.x1, ...pp.map(q => q.x)) - 1.6, y1: Math.max(b0.y1, ...pp.map(q => q.y)) - 1.6 } : b0, view = fitView({ x0: Math.min(b.x0, b0.x0) - 2.6, y0: Math.min(b.y0, b0.y0) - 2.6, x1: Math.max(b.x1, b0.x1) + 2.6, y1: Math.max(b.y1, b0.y1) + 1.4 }, 1400, 940, 40);
 ctx.save(); ctx.translate(0, 60); renderPlan(ctx, { doc, levelId: lv.id, view, W: 1400, H: 940, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true }, roomFill: rm => ZONES[zoneOf(rm.label)].color }); ctx.restore();
 ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 26px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title + (doc.levels.length > 1 ? ' — ' + lv.name : ''), 1380, 40); return true; };
-window.drawDiff = async (rawB, rawA, title) => { const { diffFingerprint } = await import('/plan-fingerprint.mjs'); const B = parseDoc(rawB), A = parseDoc(rawA), D = diffFingerprint(B, A); const c = document.getElementById('c'), ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1400,1000);
+window.drawDiff = async (rawB, rawA, title, notes = []) => { const { diffFingerprint } = await import('/plan-fingerprint.mjs'); const B = parseDoc(rawB), A = parseDoc(rawA), D = diffFingerprint(B, A);
+  // (الجولة الخامسة عشرة) سبب عدم التنفيذ أو التحقق الجزئي والخيارات المرقّمة تحت المسقطين — الصورة تحمل ما قيل للعميل
+  let c = sizeC(1000), ctx = c.getContext('2d'); ctx.font = '17px Tahoma'; const wrapped = []; for (const n of notes) { const isHead = n.startsWith('#'); ctx.font = isHead ? 'bold 18px Tahoma' : '17px Tahoma'; for (const l of wrapAr(ctx, isHead ? n.slice(1) : n, 1350)) wrapped.push([l, isHead]); }
+  const H = 1000 + (wrapped.length ? wrapped.length * 27 + 30 : 0); c = sizeC(H); ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1400,H);
 const lv = A.levels[0], bb = docBounds(A, lv.id), b0 = docBounds(B, B.levels[0].id), box = { x0: Math.min(bb.x0, b0.x0) - 1.2, y0: Math.min(bb.y0, b0.y0) - 1.2, x1: Math.max(bb.x1, b0.x1) + 1.2, y1: Math.max(bb.y1, b0.y1) + 1.2 }, view = fitView(box, 690, 860, 20);
 const half = (doc, x, marks, label) => { const m = analyzeDoc(doc), L = m.levelById.get(doc.levels[0].id); ctx.save(); ctx.translate(x, 96); ctx.beginPath(); ctx.rect(0,0,690,860); ctx.clip(); renderPlan(ctx, { doc, levelId: doc.levels[0].id, view, W: 690, H: 860, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: false, areas: true, fixtures: true, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
   const X = v => (v - view.cx) * view.scale + 345, Y = v => (view.cy - v) * view.scale + 430;
@@ -23,7 +28,9 @@ const pl = e => e.kind !== 'fixture';
 half(B, 710, [...D.changed.filter(pl).map(e => [{ ...e, box: e.before?.box || e.box }, '#b5651d', false, 'rgba(181,101,29,.15)']), ...D.removed.filter(pl).map(e => [e, '#b5651d', true, 'rgba(181,101,29,.15)'])], 'قبل');
 half(A, 0, [...D.changed.filter(pl).map(e => [e, '#c62828', false, 'rgba(198,40,40,.16)']), ...D.added.filter(pl).map(e => [e, '#c62828', false, 'rgba(198,40,40,.16)'])], 'بعد');
 ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 24px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title, 1380, 36); ctx.font = '15px Tahoma'; ctx.fillText(D.identical ? 'البصمة الهندسية: لم يتغيّر أي عنصر — المخطط كما هو حرفيًا' : D.summary_ar.slice(0, 150), 1380, 60);
-ctx.font = '13px Tahoma'; ctx.fillText('المظلل: ما تغيّر (بني قبل، أحمر بعد)؛ المتقطع: ما أزيل. مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, 985); return D.counts; };
+ctx.font = '13px Tahoma'; ctx.fillText('المظلل: ما تغيّر (بني قبل، أحمر بعد)؛ المتقطع: ما أزيل. مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, 985);
+  if (wrapped.length) { ctx.fillStyle = '#f4efe4'; ctx.fillRect(10, 1000, 1380, H - 1010); let y = 1030; for (const [l, head] of wrapped) { ctx.font = head ? 'bold 18px Tahoma' : '17px Tahoma'; ctx.fillStyle = head ? '#7a3e12' : '#1d2a24'; ctx.fillText(l, 1375, y); y += 27; } }
+  return D.counts; };
 window.ready = true;</script></body></html>`;
 const server = http.createServer(async (req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
@@ -45,9 +52,23 @@ for (const id of cases) {
   }
   // (الجولة الرابعة عشرة) فرق كل تعديل مرسومًا (قبل | بعد) بالبصمة الهندسية: ما تغيّر مظلل وما أزيل متقطع
   const diffs = [];
-  if (files.includes('edit-before.json') && files.includes('edit-after.json')) diffs.push(['edit-before.json', 'edit-after.json', 'edit-diff.png']);
-  for (const f of files) { const m = /^edit-alt(\d+)-after\.json$/.exec(f); if (m && files.includes(`alt-${m[1]}.json`)) diffs.push([`alt-${m[1]}.json`, f, `edit-alt${m[1]}-diff.png`]); }
-  for (const [bf, af, out] of diffs) { const rb = await readFile(ev + id + '/' + bf, 'utf8'), ra = await readFile(ev + id + '/' + af, 'utf8'); await p.evaluate(([x, y, t]) => window.drawDiff(x, y, t), [rb, ra, `${id} — فرق التعديل: ${bf.replace('.json', '')} ← ${af.replace('.json', '')}`]); await p.locator('#c').screenshot({ path: ev + id + '/' + out }); }
+  // نص الرد على العميل لكل تعديل (من result.json): التحقق الجزئي أو السبب، والخيارات المرقّمة، وما اختير
+  let res = null; try { res = JSON.parse(await readFile(ev + id + '/result.json', 'utf8')); } catch { res = null; }
+  const notesOf = e => {
+    if (!e) return [];
+    const out = [];
+    if (e.partial?.text_ar) out.push('#الشرط متحقق جزئيًا: ' + e.partial.text_ar);
+    else if (e.question_ar || (typeof e.consentAsked === 'string' && e.consentAsked)) out.push('#لم يُنفَّذ على هذا المخطط — السبب: ' + String(e.question_ar || e.consentAsked).replace(/ ?(?:؛ )?لتحقيقه حرفيًا: الخيارات[\s\S]*$| ?اختر رقمًا[\s\S]*$/, ''));
+    else if (e.reply_ar || e.reply?.summary_ar) out.push('#الرد: ' + (e.reply_ar && !e.notDone ? e.reply_ar : e.reply?.summary_ar || e.reply_ar));
+    if (e.options?.length) { out.push('#لتحقيقه حرفيًا: الخيارات'); for (const o of e.options) out.push(`(${o.n}) ${o.text_ar}`); }
+    if (e.choice) out.push(`#اختار العميل: (${e.choice}) — ${(e.reply_ar || e.reply?.summary_ar || '').slice(0, 220)}`);
+    return out;
+  };
+  if (files.includes('edit-before.json') && files.includes('edit-after.json')) diffs.push(['edit-before.json', 'edit-after.json', 'edit-diff.png', notesOf(res?.edit)]);
+  for (const f of files) { const m = /^edit-alt(\d+)-after\.json$/.exec(f); if (m && files.includes(`alt-${m[1]}.json`)) diffs.push([`alt-${m[1]}.json`, f, `edit-alt${m[1]}-diff.png`, notesOf((res?.editAll || []).find(x => x.alt === +m[1]))]); }
+  // مقترحات الخيارات (منطقة واحدة / توزيع جديد) مرسومة فرقًا عن المخطط المعروض
+  for (const f of files) { const m = /^edit-alt(\d+)-opt-(zone|full)\.json$/.exec(f); if (m && files.includes(`alt-${m[1]}.json`)) diffs.push([`alt-${m[1]}.json`, f, `edit-alt${m[1]}-opt-${m[2]}-diff.png`, [`#خيار «${m[2] === 'zone' ? 'إعادة توزيع منطقة واحدة' : 'توزيع جديد غير البدائل المعروضة'}» كما عُرض على العميل (لم يُختر في هذا الدليل؛ يُعتمد فقط بموافقته)`]]); }
+  for (const [bf, af, out, notes] of diffs) { const rb = await readFile(ev + id + '/' + bf, 'utf8'), ra = await readFile(ev + id + '/' + af, 'utf8'); await p.evaluate(([x, y, t, n]) => window.drawDiff(x, y, t, n), [rb, ra, `${id} — فرق التعديل: ${bf.replace('.json', '')} ← ${af.replace('.json', '')}`, notes || []]); await p.locator('#c').screenshot({ path: ev + id + '/' + out }); }
   if (no3d) { console.log(id, 'صور:', files.length); continue; }
   // ثلاثي الأبعاد لأفضل بديل
   const raw = await readFile(ev + id + '/' + (files.includes('alt-1.json') ? 'alt-1.json' : files[0]), 'utf8');
