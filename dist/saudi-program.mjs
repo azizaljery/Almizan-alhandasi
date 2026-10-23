@@ -209,6 +209,8 @@ export function measureR14(doc, request = {}, model, ask = clientAsks(request)) 
       const direct = nbrs(lv, R);
       let ok = direct.some(o => o.type === 'bath'), via = ok ? 'خاص' : null;
       if (!ok) for (const V of direct) { if (BEDS.has(V.type) || V.type === 'bath') continue; const b = nbrs(lv, V).find(o => o.type === 'bath'); if (b) { ok = true; via = `«${b.name}» على «${V.name}»`; break; } }
+      // مدخل جناح الغرفة نفسها (ممر قصير لا يخدم غيرها) يُفتح على ممر النوم الذي عليه الحمام المشترك
+      if (!ok) for (const V of direct.filter(o => /مدخل الجناح/.test(o.name || '') && !nbrs(lv, o).some(x => BEDS.has(x.type) && x.id !== R.id))) { for (const C2 of nbrs(lv, V)) { if (BEDS.has(C2.type) || C2.type === 'bath') continue; const b = nbrs(lv, C2).find(o => o.type === 'bath' && /مشترك|دورة مياه$/.test(o.name || '')); if (b) { ok = true; via = `«${b.name}» على «${C2.name}»`; break; } } if (ok) break; }
       seen.push({ room: R.name, level: lv.level.name || lv.level.id, ok, via });
       if (!ok) bad.push(`«${R.name}» بلا حمام خاص ولا حمام مشترك يُفتح على الممر الذي تُفتح عليه`);
     }

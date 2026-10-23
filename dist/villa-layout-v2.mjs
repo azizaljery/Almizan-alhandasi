@@ -28,8 +28,12 @@ import { applyLiteralReadings } from './requirements.mjs';
 import { planParking, PARKING_RULE } from './site-parking.mjs';
 import { frontSetbackFor } from './regulations-sa.mjs';
 import { clientGlazing } from './glazing.mjs';
+import { presentationStatus, STATUS_AR, PROPOSAL_LABEL_AR } from './presentation-status.mjs';
+import { measureSaudiProgram } from './saudi-program.mjs';
 
 export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-9'; // الجولة الثالثة عشرة: الارتداد الأمامي من عرض الشارع (اشتراط نظامي متحقق)، وسقف المطبخ الافتراضي مع اقتطاع غرفة غسيل من المطبخ المفرط، ودورة المياه اليومية من طرف الصالة بممر، والزجاج بهدف مرن لكل غرفة، وممر العلوي في «السلم في المقدمة» بعمق ثابت؛ // الجولة الثانية عشرة: القراءة الحرفية للتعارض غير المجاب، والبرنامج السعودي الافتراضي (مدخل منكسر، دهليز المجلس، المقلط، دورة مياه يومية، حمام الخادمة، مطبخ ≥ 14 م² بباب خدمة، المواقف)، ومنع الشريط على الأرض العريضة، والمنور للعميق، وتنظيم «السلم في المقدمة» لخمس غرف علوية؛ // الجولة الحادية عشرة: الاختيار بالمقياس الوظيفي v2، والبوابات الثقيلة (إنشائية مبدئية، حركة فعلية، تطابق 2D/3D) على المعروض، وفتحات لا تعبر التقاطعات، وأثاث يُتحقق منه، وبحث ثانٍ موجّه بالتنوع؛ // الجولة التاسعة: تنظيمات دورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج الارتفاع، في الخلف، في كتلة عائلية) تُحل للدورين معًا مع اتساق التراكب، والرئيسية الأرضية ≤ 24 م²، وغرف النوم لا تفتح على الصالة إلا في «الصالة الموزِّعة» بباب في طرف الجدار، وأنماط H وL للصالة الخلفية؛ الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
+// تجارب الجولة الرابعة عشرة: R14_OFF يعطّل تعديلًا بعينه للقياس (لا أثر له في التشغيل العادي)
+const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
 // أدنى محور لمدخل/ممر فرعي (مدخل الجناح، ممر دورة المياه): صافيه بعد الجدارين ≥ 1.2 م — لا زوايا دخول ضيقة
 const VEST_MIN = 1.4;
@@ -1039,6 +1043,8 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     // الطعام صافيه ≥ 3.3 م، وغرفة الخادمة بلا حمام ≥ 2.7 م (حدّان صلبان)
     if (b.kind === 'dining' && s - WALL_NET < DIN_MIN_NET - 1e-6) bad('dining-narrow', DIN_MIN_NET - (s - WALL_NET));
     if (b.kind === 'maid' && !b.bath && s - WALL_NET < MAID_MIN_NET - 1e-6) bad('maid-narrow', MAID_MIN_NET - (s - WALL_NET));
+    // (الجولة الرابعة عشرة) حمام الخادمة الافتراضي يُقتطع عند التفصيل شريطًا 1.65 م: ضلعها الأطول يتسع له مع غرفة ≥ 2.7 م صافيًا (تفضيل: جزاء لا رفض)
+    if (!R14_OFF.has('maid') && b.kind === 'maid' && b.mizanBath && Math.max(w, h) < 1.65 + MAID_MIN_NET + WALL_NET) pen += 220 * (1.65 + MAID_MIN_NET + WALL_NET - Math.max(w, h));
     // جودة فراغات الأسرة (حدود صلبة): مطبخ صافي عرضه ≥ 3.0 م (المحور ≥ 3.25)، وطعام لا شريطي (≤ 1.8)،
     // والمطبخ لا يطل على الشارع (الواجهة الأمامية) ما لم يطلبه العميل صراحة
     if (b.id === 'kitchen1') {
@@ -1082,6 +1088,8 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   if (P.men && dn && touch(find(P.men.id).r, dn.r) >= 1.2) pen -= 10; // الطعام للضيافة يجاور مجلس الرجال
   // (الجولة الثانية عشرة) المقلط الافتراضي: تجاور المجلس والطعام بطول يتسع لباب خدمة يُكافأ، وغيابه جزاء (لا رفض)
   if (P.majlisDiningDefault && P.men && dn) { const t = touch(find(P.men.id).r, dn.r); pen += t >= DOOR_TOUCH + .4 ? -45 : 35; }
+  // (الجولة الرابعة عشرة) جُرّب جزاء «المجلس يشترك في جدار مع غرفة نوم» وجزاء أقوى لغياب المقلط في البحث نفسه: خفّضا عدد البدائل
+  // المعروضة (23 ← 20 و22 على تسع حالات) بلا تحسن مقابل في البند — أُزيلا؛ البندان يُقاسان ويُذكران في حالة العرض («يحتاج تعديلات»).
   if (P.men && P.women[0]) { const m = find(P.men.id), wm = find(P.women[0].id); if (m && wm && touch(m.r, wm.r) > .5) pen += 10; }
   if (P.maid && k) pen += touch(find(P.maid.id).r, k.r) >= 1 ? -8 : 12;
   if (k) { const ext = SIDES.filter(s => s !== 'y0').some(s => exposed(k.r, s, solids).some(e => e.to - e.from >= 1.6)); if (!ext) pen += ctx.upper ? 15 : 70; } // باب خدمة إلى الحوش (الجولة الثانية عشرة: قيمة افتراضية للميزان بجزاء أقوى)
@@ -2782,8 +2790,23 @@ function cached(kind, args, fn) {
   if (hit) { const P = programV2(args.counts, args.requirements || {}); P.entry = hit.program?.entry; hit.program = P; return hit; }
   const out = fn(args); try { hook.set(key, out); } catch { /* لا يُخزَّن */ } return out;
 }
-export function generateVillaDesigns(args) { return withReadings(interpret(args), a => cached('one', a, x => withParkReserve(x, generateVillaDesigns0))); }
-export function generateVillaTwoFloors(args) { return withReadings(interpret(args), a => cached('two', a, x => withParkReserve(x, generateVillaTwoFloors0))); }
+export function generateVillaDesigns(args) { return withPresentation(args, withReadings(interpret(args), a => cached('one', a, x => withParkReserve(x, generateVillaDesigns0)))); }
+export function generateVillaTwoFloors(args) { return withPresentation(args, withReadings(interpret(args), a => cached('two', a, x => withParkReserve(x, generateVillaTwoFloors0)))); }
+/**
+ * (الجولة الرابعة عشرة، قرار المالك) حالة العرض لكل بديل (dist/presentation-status.mjs): «جاهز للعرض المبدئي» / «يحتاج تعديلات (تُذكر)» /
+ * «محجوب (السبب)». المحجوب (يخالف بندًا إلزاميًا من طلب العميل أو رسب في بوابة) لا يُعرض ما دام غيره موجودًا — ويُذكر في out.hidden؛
+ * وإن حُجبت كلها يبقى الأول بحالته «محجوب» ظاهرة (لا يُقدَّم جاهزًا). في التوليد الأول يتقدم الجاهز على ما يحتاج تعديلات (ترتيب ثابت بعده).
+ */
+function withPresentation(args, out) {
+  if (!out?.designs?.length) return out;
+  const req = reviewRequest(args.requirements || {}, args.land, args.counts);
+  for (const d of out.designs) { try { d.presentation = presentationStatus(d, req); } catch (e) { d.presentation = { status: 'needs-edits', label_ar: STATUS_AR['needs-edits'], hidden_ar: [], edits_ar: ['تعذّر حساب حالة العرض: ' + (e.message || e)], prefs: [], proposal_ar: PROPOSAL_LABEL_AR }; } }
+  const hid = out.designs.filter(d => d.presentation.status === 'hidden'), vis = out.designs.filter(d => d.presentation.status !== 'hidden');
+  if (vis.length && hid.length) { out.hidden = [...(out.hidden || []), ...hid.map(d => ({ pat: d.pat, reasons_ar: d.presentation.hidden_ar }))]; out.designs = vis; }
+  if (!args.prefer && out.designs.length > 1) { const rk = d => (d.presentation.status === 'ready' ? 0 : 1); const ord = out.designs.map((d, i) => [d, i]).sort((a, b) => rk(a[0]) - rk(b[0]) || a[1] - b[1]).map(x => x[0]); out.designs = ord; }
+  out.presentation = { ready: out.designs.filter(d => d.presentation.status === 'ready').length, needsEdits: out.designs.filter(d => d.presentation.status === 'needs-edits').length, hidden: (out.hidden || []).length, label_ar: PROPOSAL_LABEL_AR };
+  return out;
+}
 /**
  * (الجولة الثانية عشرة) عدد المواقف اشتراط نظامي (PARKING_RULE): إن رُفضت كل البدائل ولو واحد منها لعدم اتساع المواقف،
  * يُعاد التوليد بعمق محجوز أمام المبنى (موقف عمودي 5.5 م وهامشاه ناقص الارتداد الأمامي) — يُذكر في الملاحظات.
@@ -3176,6 +3199,8 @@ function streetBedrooms(rooms) {
   return solid.filter(r => ['bedroom', 'master'].includes(r.type) && r.name !== 'غرفة الضيوف' && r.y0 - y0 < 3 - TOL && !solid.some(o => o !== r && ov(o, r) > .6 && o.y1 <= r.y0 + .1)).map(r => r.name);
 }
 /** ما طلبه العميل صراحة فيُعفى من حدود الفراغات المعلنة في بوابة الجودة. */
+/** أوزان جزاء التفضيلات السعودية في الاختيار (قيم تصميمية افتراضية للميزان). */
+const PREF_W = { MAID_BATH: 150, BED_BATH: 150, SERVE_ROUTE: 120, MAJLIS_BED_WALL: 120, MAJLIS_STREET_ENTRY: 150, DAY_WC: 80, REAR_YARD: 120, PARKING_LAYOUT: 100, MAJLIS_DINING: 40 };
 const gateOpts = P => ({ majlisAsked: majlisAsked(P), diningAsked: !!(P.blocks.find(b => b.kind === 'dining')?.fixedArea || P.dims?.dining || (P.tweaks?.kitchenScale && P.tweaks.kitchenScale < 1)), masterAsked: masterAsked(P) });
 function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, second = null }) {
   const layout = realizeV2(cand, P, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
@@ -3191,7 +3216,7 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   let pk = null; try { pk = planParking(doc, { parallel }); } catch { pk = null; }
   // (الجولة الرابعة عشرة) قبل إزاحة المبنى إلى الخلف (تصغير الحوش الخلفي): يُجرَّب المبنى على أحد جانبي الأرض فيتسع الموقفان
   // العموديان بجانبه — الجهة الأقرب إلى مدخل العائلة أولًا (السيارة قرب باب العائلة لا أمام مجلس الضيوف)
-  if (pk && pk.bays.length < pk.required && cand.parkSide == null && cand.parkShift == null && !site.placeRects && site.W - cand.ew >= 1.55) {
+  if (!R14_OFF.has('park') && pk && pk.bays.length < pk.required && cand.parkSide == null && cand.parkShift == null && !site.placeRects && site.W - cand.ew >= 1.55) {
     const tries = [];
     for (const s of ['lo', 'hi']) { try { const c2 = { ...cand, parkSide: s }; const d2 = buildDesign(c2, P, site, land, { title, mirror, requirements, entry, second }); const n = (d2.doc.zones || []).filter(z => z.type === 'garage').length; tries.push({ s, d2, n }); } catch { /* لا يتسع */ } }
     const ok = tries.filter(t => t.n >= pk.required && !t.d2.reject.length).sort((a, b) => a.d2.quality - b.d2.quality);
@@ -3221,7 +3246,11 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   layout.notes.push(`مسطح الدور ${Math.round(builtA)} م² داخل غلاف ${r2(cand.ew)} × ${r2(cand.ed)} م من مساحة قابلة للبناء ${Math.round(site.W * site.D)} م²؛ الباقي ساحات${cand.sol.voids.length ? ' وحديقة داخل كتلة المبنى' : ''}${cand.sol.courts.length ? '، وحوش داخلي مكشوف' : ''}.`);
   if (site.irregular) layout.notes.push('الأرض غير منتظمة: الارتدادات أُزيحت داخل حدود المضلع الفعلية، وكل فراغ مبني داخلها' + (site.rectW && cand.ew > site.rectW(cand.ed) + .05 ? `؛ عرض المبنى ${r2(cand.ew)} م يتجاوز أعرض مستطيل يتسع في الأرض (${r2(site.rectW(cand.ed))} م) لأن الكتلة تتبع شكلها.` : '.'));
   const bedFront = (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && ['bedrooms', 'master', 'kids', 'elderly', 'onebed'].includes(r.a));
-  return { doc: relaxed, cand, dr: docRooms(relaxed), reject, penalty: r2(cand.pen), streetBeds: bedFront ? [] : streetBedrooms(layout.rooms), quality: r2(cand.pen + q.cost), same: false, mirror, issues: q.issues, mode: cand.mode, parti: cand.tag, env: { w: cand.ew, d: cand.ed, ox: pl.ox, oy: pl.oy }, pat: patOf(cand), notes: [...P.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, qgates: qg, ledger, fails: ledger.filter(x => !x.ok).length };
+  // (الجولة الرابعة عشرة) التفضيلات السعودية الافتراضية (حمام الخادمة، حمام لكل غرفة، مسار التقديم، فاصل المجلس، مدخل المجلس، دورة المياه
+  // اليومية، الحوش الخلفي، المواقف): جزاء في الاختيار لا رفض (قرار المالك: تفضيلات تُدرس لكل أرض، تُذكر إن لم تُطبَّق)
+  let prefFails = []; try { prefFails = measureSaudiProgram(relaxed, reviewRequest(requirements, land, null), analyzeDoc(relaxed)).filter(g => g.applicable && !g.pass && !g.clientAsked && PREF_W[g.id]).map(g => g.id); } catch { prefFails = []; }
+  const prefPen = R14_OFF.has('prefq') ? 0 : sum(prefFails.map(id => PREF_W[id]));
+  return { doc: relaxed, cand, dr: docRooms(relaxed), reject, penalty: r2(cand.pen), streetBeds: bedFront ? [] : streetBedrooms(layout.rooms), quality: r2(cand.pen + q.cost + prefPen), prefFails, same: false, mirror, issues: q.issues, mode: cand.mode, parti: cand.tag, env: { w: cand.ew, d: cand.ed, ox: pl.ox, oy: pl.oy }, pat: patOf(cand), notes: [...P.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, qgates: qg, ledger, fails: ledger.filter(x => !x.ok).length };
 }
 
 /**
