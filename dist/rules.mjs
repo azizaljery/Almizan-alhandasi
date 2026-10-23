@@ -457,6 +457,40 @@ const docSide = (side, entry) => {
   return { n: 'y1', s: 'y0', e: 'x1', w: 'x0' }[c];
 };
 const r1 = v => Math.round(v * 10) / 10;
+/** (الجولة الخامسة عشرة) أدنى مسار مشي من وصول الدرج إلى باب غرفة «بعيدة عن الدرج» — قيمة تصميمية افتراضية للميزان. */
+export const FAR_STAIR_PATH = 6.0;
+/**
+ * مسار المشي في دور الغرفة من مركز آخر درجة لأقرب درج يصل إليه إلى أقرب باب للغرفة: شبكة نقاط (وصول الدرج + منتصفات الأبواب)
+ * تتصل داخل كل غرفة بخطوط مستقيمة (تقدير أدنى: أي التفاف حول ركن يزيده)، ودايكسترا. room: { name, level } من docRooms.
+ * يعيد { dist, via[] } أو null إن لم يصل درج إلى دور الغرفة.
+ */
+export function stairPathTo(doc, room) {
+  const A = analyzeDoc(doc), li = doc.levels.findIndex(l => l.id === room.level); if (li <= 0) return null;
+  const L = A.levelById.get(room.level), below = doc.levels[li - 1]?.id; if (!L) return null;
+  const R = L.rooms.find(x => x.name === room.name); if (!R) return null;
+  const starts = [];
+  for (const s of doc.stairs || []) {
+    if (s.level !== below) continue;
+    let lay = null; try { lay = stairLayout(s, (doc.levels[li].elevation ?? 3.2) - (doc.levels[li - 1].elevation || 0)); } catch { lay = null; }
+    const last = lay?.steps?.[lay.steps.length - 1]?.poly; if (!last) continue;
+    const top = { x: last.reduce((t, q) => t + q.x, 0) / last.length, y: last.reduce((t, q) => t + q.y, 0) / last.length };
+    const host = L.roomAt(top); if (host) starts.push({ p: top, room: host.id });
+  }
+  if (!starts.length) return null;
+  const doors = L.openings.filter(op => op.door && op.left && op.right && op.left.id !== op.right.id).map(op => ({ p: op.p, rooms: [op.left.id, op.right.id] }));
+  const N = [...starts.map(s => ({ p: s.p, rooms: [s.room], start: true })), ...doors], d = N.map(n => (n.start ? 0 : Infinity)), prev = N.map(() => -1), done = N.map(() => false);
+  for (;;) {
+    let i = -1; for (let k = 0; k < N.length; k++) if (!done[k] && d[k] < Infinity && (i < 0 || d[k] < d[i])) i = k;
+    if (i < 0) break; done[i] = true;
+    if (!N[i].start && N[i].rooms.includes(R.id)) {
+      const via = []; for (let k = prev[i]; k >= 0 && !N[k].start; k = prev[k]) { const nm = N[k].rooms.map(id => L.roomsById.get(id)?.name).filter(Boolean); via.unshift(nm.join('/')); }
+      return { dist: d[i], via: [...new Set(via)].slice(0, 4) };
+    }
+    if (N[i].rooms.includes(R.id) && !N[i].start) continue;
+    for (let k = 0; k < N.length; k++) { if (done[k] || N[k].start) continue; if (!N[i].rooms.some(x => N[k].rooms.includes(x))) continue; if (!N[i].start && N[i].rooms.includes(R.id)) continue; const w = Math.hypot(N[i].p.x - N[k].p.x, N[i].p.y - N[k].p.y); if (d[i] + w < d[k]) { d[k] = d[i] + w; prev[k] = i; } }
+  }
+  return null;
+}
 /**
  * يتحقق من كل قاعدة على المستند. يعيد [{ id, text, ok, why }] — ok=false مع سبب مقيس.
  */
@@ -524,6 +558,13 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
         const need = Math.max(7, diag * .4);
         const close = Bs.find(b => b !== a && same(a, b) && (contact(a, b) > .3 || Math.hypot(ctr(a).x - ctr(b).x, ctr(a).y - ctr(b).y) < need));
         if (close) { res.ok = false; res.why = contact(a, close) > .3 ? `«${a.name}» ملاصق لـ«${close.name}».` : `المسافة بين «${a.name}» و«${close.name}» ${r1(Math.hypot(ctr(a).x - ctr(close).x, ctr(a).y - ctr(close).y))} م فقط.`; break; }
+        // (الجولة الخامسة عشرة) «بعيدة عن الدرج» بمسار المشي لا بالمراكز: من آخر درجة (وصول الدرج) إلى باب الغرفة عبر الأبواب
+        // ≥ FAR_STAIR_PATH م (قيمة تصميمية افتراضية للميزان) — باب على ممر ملاصق لبيت الدرج لا يحقق «بعيدة» ولو بعد مركزها
+        if (r.b === 'stairs' || r.a === 'stairs') {
+          const room = r.a === 'stairs' ? null : a; let pd = null; try { pd = room ? stairPathTo(doc, room) : null; } catch { pd = null; }
+          if (pd && pd.dist < FAR_STAIR_PATH) { res.ok = false; res.why = `مسار المشي من وصول الدرج إلى باب «${a.name}» ${r1(pd.dist)} م فقط (المطلوب ≥ ${FAR_STAIR_PATH} م، قيمة تصميمية افتراضية للميزان)${pd.via.length ? ` عبر ${pd.via.map(n => `«${n}»`).join(' ثم ')}` : ''}.`; break; }
+          if (pd) res.why = `مسار المشي من وصول الدرج إلى باب «${a.name}» ${r1(pd.dist)} م (≥ ${FAR_STAIR_PATH} م)${pd.via.length ? ` عبر ${pd.via.map(n => `«${n}»`).join(' ثم ')}` : ''}.`;
+        }
         continue;
       }
       if (!cands.length) { res.ok = false; res.why = `«${a.name}» و«${subjAr(r.b)}» في دورين مختلفين.`; break; }
@@ -624,7 +665,8 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     if (!list.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, why: 'الفراغ غير موجود في هذا التصميم.' }); continue; }
     const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
     const bad = got.find(g => !g.ok);
-    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, why: (bad ? `«${bad.r.name}» ${r1(bad.s[0])}×${r1(bad.s[1])} م` : `الفعلي ${got.map(g => `${r1(g.s[0])}×${r1(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران).' });
+    const g0 = got[0]; // (الجولة الخامسة عشرة) المرسوم والمطلوب لملاحظة «ضمن السماح لا مطابق»
+    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, why: (bad ? `«${bad.r.name}» ${r1(bad.s[0])}×${r1(bad.s[1])} م` : `الفعلي ${got.map(g => `${r1(g.s[0])}×${r1(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران).' });
   }
   // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
   if (req.site?.irregular) out.push(verifySite(doc, req.site, entry));

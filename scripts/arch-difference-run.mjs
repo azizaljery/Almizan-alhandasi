@@ -31,8 +31,20 @@ const r3 = v => Math.round(v * 1000) / 1000;
     const all2 = Object.values(cases).flatMap(c => c.v2.pairs);
     const summary = { pairs: all.length, cosmetic: all.filter(p => p.verdict === 'cosmetic').length, partial: all.filter(p => p.verdict === 'partial').length, distinct: all.filter(p => p.verdict === 'distinct').length,
       v2: { pairs: all2.length, variant: all2.filter(p => p.verdict === 'variant').length, partial: all2.filter(p => p.verdict === 'partial').length, distinct: all2.filter(p => p.verdict === 'distinct').length } };
-    writeFileSync(ROOT + `evidence/acceptance/${stage}/arch-difference.json`, JSON.stringify({ version: ARCH_DIFF_VERSION, weights: WEIGHTS, thresholds: THRESHOLDS, stage, summary, cases }, null, 1));
+    // (الجولة الخامسة عشرة) تكرار التنظيم عبر الحالات (المراجع المستقل r14: C5-alt3≈C9-alt3…): كل زوج بديلين من حالتين مختلفتين بعدد الأدوار نفسه
+    // بالمقياس الوظيفي v2؛ «نسخة معدّلة» = التنظيم نفسه يتكرر. --baseline <مرحلة> يضيف الجدول نفسه لمرحلة سابقة للمقارنة.
+    const cross = st => {
+      const B = loadBase(st), items = B.map(b => ({ id: `${b.case}-${b.file.replace('.json', '')}`, c: b.case, lv: b.doc.levels.length, sig: archSignatureV2(b.doc), pat: (() => { try { const r = JSON.parse(readFileSync(ROOT + `evidence/acceptance/${st}/${b.case}/result.json`, 'utf8')); return r.designs?.[+b.file.match(/\d+/)[0] - 1]?.pat || null; } catch { return null; } })() }));
+      const rows = [];
+      for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) { const a = items[i], b = items[j]; if (a.c === b.c || a.lv !== b.lv) continue; const dd = archDifferenceV2(a.sig, b.sig); rows.push({ a: a.id, b: b.id, patA: a.pat, patB: b.pat, verdict: dd.verdict, total: dd.total, substantive: dd.substantive }); }
+      const modes = {}; for (const it of items) { const m = String(it.pat || '').split(':')[0]; if (m) (modes[m] ||= []).push(it.id); }
+      return { stage: st, alternatives: items.length, pairs: rows.length, variant: rows.filter(r => r.verdict === 'variant').length, partial: rows.filter(r => r.verdict === 'partial').length, distinct: rows.filter(r => r.verdict === 'distinct').length,
+        repeated: rows.filter(r => r.verdict === 'variant').sort((x, y) => x.total - y.total), modes: Object.fromEntries(Object.entries(modes).sort((x, y) => y[1].length - x[1].length)), distinctModes: Object.keys(modes).length };
+    };
+    const crossCase = cross(stage), bi = process.argv.indexOf('--baseline'), crossBase = bi >= 0 ? cross(process.argv[bi + 1]) : null;
+    writeFileSync(ROOT + `evidence/acceptance/${stage}/arch-difference.json`, JSON.stringify({ version: ARCH_DIFF_VERSION, weights: WEIGHTS, thresholds: THRESHOLDS, stage, summary, cases, crossCase, crossCaseBaseline: crossBase }, null, 1));
     console.log(stage, JSON.stringify(summary));
+    for (const X of [crossBase, crossCase].filter(Boolean)) { console.log(`تكرار عبر الحالات ${X.stage}: ${X.alternatives} بديلًا، ${X.pairs} زوجًا، نسخة معدّلة ${X.variant}، جزئي ${X.partial}، مختلف ${X.distinct}؛ أنماط مختلفة ${X.distinctModes}`); for (const r of X.repeated) console.log('  ', r.a, '≈', r.b, r.patA, r.patB, r.total); }
     for (const [id, c] of Object.entries(cases)) console.log(id, `${c.produced}/${c.requested}`, 'v2', c.v2.pairs.map(p => `${p.pair.join('-')}:${p.verdict}(${p.substantive.join('+')})`).join('  '));
     process.exit(0);
   } }
