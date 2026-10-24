@@ -95,10 +95,11 @@ test('المراجعة بوابة نهائية: البديل الراسب يُر
   assert.ok(out.designs.every(d => d.review.passed));
 });
 
-test('مسار البيت والجلسة: الثاني افتراضيًا، والأول احتياط بـ engine:\'v1\' طوال الجلسة', async () => {
+// (الجولة العشرون، توجيه المالك أولًا) المحرك الثالث (العلاقات والقيود) افتراضي في مسار البيت، والأول والثاني باقيان وقابلان للاختيار صراحة
+test('مسار البيت والجلسة: الثالث افتراضيًا، والأول احتياط بـ engine:\'v1\' طوال الجلسة', async () => {
   const { r, land } = caseReq('C9');
   const v2 = await generateInitialDesign({ land, counts: r.counts, requirements: r });
-  assert.equal(v2.villaEngine, 'v2'); assert.ok(v2.review && v2.review.passed); assert.ok(v2.alternatives.every(a => a.review && a.review.passed));
+  assert.equal(v2.villaEngine, 'v3'); assert.ok(v2.review && v2.review.passed); assert.ok(v2.alternatives.every(a => a.review && a.review.passed));
   const v1 = await generateInitialDesign({ land, counts: r.counts, requirements: r, engine: 'v1' });
   assert.equal(v1.villaEngine, 'v1'); assert.notEqual(v1.engine, v2.engine);
   const s1 = createSession({ land, counts: r.counts, requirements: r, result: v1, engine: 'v1' });

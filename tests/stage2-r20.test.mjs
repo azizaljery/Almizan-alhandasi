@@ -54,6 +54,10 @@ test('كشف الاستحالة قبل التوليد: البرنامج أكبر
   assert.equal(dim.feasible, false); assert.ok(dim.hard.some(h => h.id.startsWith('DIM_')), JSON.stringify(dim.hard));
   const ok = analyzeFeasibility({ land: { width: 20, length: 30, streets: ['s'], entries: ['s'] }, counts: { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 }, requirements: extractRequirements('4 غرف ومجلسين') });
   assert.equal(ok.feasible, true, ok.report_ar);
+  // بندان متعارضان من العميل نفسه (المطبخ أمامًا وخلفًا) ليسا استحالة على الأرض: ملاحظة معلنة بالاسم العربي، والحوار يسأل أيهما يريد
+  const cf = analyzeFeasibility({ land: { width: 22, length: 30, streets: ['s'], entries: ['s'] }, counts: { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, requirements: extractRequirements('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف') });
+  assert.equal(cf.feasible, true); const w = cf.warnings.find(x => x.id === 'PLACE_CONFLICT'); assert.ok(w, JSON.stringify(cf.warnings));
+  assert.match(w.ar, /«المطبخ» في الأمام وفي الخلف/); assert.equal(internalLeaks(w.ar).length, 0);
 });
 test('المحرك الثالث لا يعيد نتيجة فارغة بلا تفسير: الطلب المستحيل خطأ بتقرير عربي (VILLA_INFEASIBLE) قبل أي رسم', () => {
   const land = { width: 12, length: 18, streets: ['s'], entries: ['s'], floors: 1 }, counts = { bedrooms: 6, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 };

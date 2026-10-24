@@ -177,6 +177,8 @@ for (id of cases) {
     try {
       await z.goto(base + '/home.html'); await z.evaluate(s => localStorage.setItem('mizan.studio.doc.v1', s), rawS); await z.goto(base + '/view3d.html');
       await z.waitForFunction(() => globalThis.__mizanViewer?.built, null, { timeout: 90000 });
+      // (الجولة العشرون) شريط الصفحة العلوي يغطي أعلى المشهد: كان زر الرجوع يظهر مقصوصًا في لقطات السلم (مراجعة r19، C7) — يُخفى للّقطة
+      await z.evaluate(() => { for (const e of document.querySelectorAll('header.ph, header')) e.style.display = 'none'; });
       // مركز السلم من تخطيطه نفسه (stairLayout) لا من نقطة البدء
       const c = await z.evaluate(async ([st, rise]) => { const { stairLayout } = await import('/draw/stairs3d.mjs'); const lay = stairLayout(st, rise); const pts = lay.steps.flatMap(x => x.poly); const xs = pts.map(p => p.x), ys = pts.map(p => p.y); return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 }; }, [s0, (L1?.elevation ?? 3.2) - (L0.elevation || 0)]);
       const shot = async (lvl, elev, name) => { await z.evaluate(([lv, e, cx, cy]) => { const v = globalThis.__mizanViewer; v.setMode('dollhouse', { animate: false }); v.showLevel(lv); v.orbitTo({ target: [cx, e + .8, -cy], distance: 9, elevationDeg: 58, azimuthDeg: 30 }); }, [lvl, elev, c.x, c.y]); await z.waitForTimeout(1200); await z.locator('#threeHost').screenshot({ path: ev + id + '/' + f.replace('.json', '') + name }); };

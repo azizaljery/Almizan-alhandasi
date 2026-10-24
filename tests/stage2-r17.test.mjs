@@ -23,8 +23,11 @@ test('HALL_SMALL وHALL_THROUGH: C9-2 (after-16) يُكشف فيه العيبا�
   assert.deepEqual(fails(ev('after-16', 'C9', 'alt-2.json')).sort(), ['HALL_SMALL', 'HALL_THROUGH']);
   for (const [id, a] of [['C1', 1], ['C2', 1], ['C8', 1], ['C10', 1]]) assert.deepEqual(fails(ev('after-16', id, `alt-${a}.json`)), [], `${id}-${a}`);
   // العيب يجعل البديل «يحتاج تعديلات» لا «جاهز»، والطلب الصريح «صالة صغيرة» يعفي منه
+  // (الجولة العشرون) وهذا المستند فيه أيضًا نافذتا المجلس والمقلط على الحوش الداخلي العائلي (COURT_OVERLOOK — العيب نفسه الذي عدّه المراجع
+  // r19 إلزاميًا في C9-4) ⇐ محجوب؛ وعيوب الصالة تبقى مقيسة في قائمته
   const d = ev('after-16', 'C9', 'alt-2.json');
-  assert.equal(presentationStatus({ doc: d, ledger: [], review: { passed: true } }, { text: '3 غرف' }).status, 'needs-edits');
+  const st = presentationStatus({ doc: d, ledger: [], review: { passed: true } }, { text: '3 غرف' });
+  assert.equal(st.status, 'hidden'); assert.deepEqual(st.mandatory, ['COURT_OVERLOOK']); assert.ok(['HALL_SMALL', 'HALL_THROUGH'].every(x => st.major.includes(x)));
   assert.deepEqual(fails(d, 'أبي صالة صغيرة'), []);
   // القياس ضمن عيوب الجولة 16 نفسها (المولّد وحالة العرض يقرآنه من مكان واحد)
   assert.ok(measureR16(d).some(g => g.id === 'HALL_SMALL' && !g.pass));

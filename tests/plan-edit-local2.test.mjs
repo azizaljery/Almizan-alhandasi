@@ -46,7 +46,11 @@ test('البصمة: جدار قُسم إلى قطعتين على خطه نفسه
 });
 
 test('(أ-د) «المجلس على يمين الداخل»: عكس الشريط الأمامي موضعيًا — كل ما تغيّر داخل الشريط، وبقية البيت ثابتة بالبصمة', () => {
-  const d = DOC('S5', 4), { p, r } = edit(d, 'خل المجلس على يمين الداخل', { req: { counts: { bedrooms: 3, majlis: 1, kitchens: 1, dining: 1 } } });
+  // (الجولة العشرون، حارس التغيير) عكس الشريط يجعل الطعام الذي يصله ضيف الرجال مفتوحًا على مدخل العائلة: شرط GUEST_DINING كان متحققًا
+  // فسقط — فلا يُعتمد موضعيًا دون موافقة صريحة، ويُذكر السبب. بالموافقة الصريحة (consent) يُنفَّذ العكس الموضعي نفسه كما كان يُختبر.
+  const d = DOC('S5', 4), RQ = { counts: { bedrooms: 3, majlis: 1, kitchens: 1, dining: 1 } };
+  { const g = edit(d, 'خل المجلس على يمين الداخل', { req: RQ }).r; assert.equal(g.status, 'fallback'); assert.deepEqual(g.guard.map(x => x.id), ['GUEST_DINING']); assert.match(g.why_ar, /يُفسد شروطًا/); }
+  const { p, r } = edit(d, 'خل المجلس على يمين الداخل', { req: { ...RQ, consent: true } });
   assert.equal(p.intents[0].op, 'rule');
   assert.equal(r.status, 'local'); assert.ok(r.results[0].ok, r.results[0].why_ar); assert.match(r.results[0].how_ar, /عُكس الشريط/);
   assert.ok(verifyRules(r.doc, [{ ...p.intents[0].rule, id: 'X' }], { entry: 's' })[0].ok, 'المجلس يمين الداخل مقيسًا');
@@ -93,12 +97,18 @@ test('(ب) إزاحة سلسلة جدارين: «غرفة نوم ٢ ٤×٥ وا�
 });
 
 test('الأبواب: فتح باب بين غرفتين متجاورتين = فتحة واحدة، و«سد الباب» يعود عليه فيرجع المخطط حرفيًا', () => {
-  const d = DOC('S4', 0), { p, r } = edit(d, 'افتح باب بين المجلس والطعام');
+  // (الجولة العشرون، حارس التغيير) الباب يجعل الطعام مقلطًا للضيف ونافذته على الحوش العائلي: COURT_OVERLOOK كان متحققًا فسقط — يُرفض موضعيًا
+  // بسببه المذكور، وبالموافقة الصريحة يُفتح الباب نفسه كما كان يُختبر
+  const d = DOC('S4', 0);
+  { const g = edit(d, 'افتح باب بين المجلس والطعام').r; assert.equal(g.status, 'fallback'); assert.deepEqual(g.guard.map(x => x.id), ['COURT_OVERLOOK']); }
+  const { p, r } = edit(d, 'افتح باب بين المجلس والطعام', { req: { consent: true } });
   assert.deepEqual(p.intents.map(i => [i.op, i.action]), [['door', 'add']]);
   assert.equal(r.status, 'local'); assert.ok(r.results[0].ok);
   const fd = diffFingerprint(d, r.doc); assert.equal(fd.counts.touched, 1); assert.equal(fd.added[0].kind, 'opening');
   const id = r.results[0].subjectDoor; assert.ok(id);
-  const c = edit(r.doc, 'سد الباب', { lastSubject: 'door:' + id }).r;
+  // (الجولة العشرون) سدّه يعيد المجلس معزولًا بلا باب داخلي (MAJLIS_ISOLATED كان متحققًا بالباب): يُرفض موضعيًا بسببه، وبالموافقة يُسد
+  { const g = edit(r.doc, 'سد الباب', { lastSubject: 'door:' + id }).r; assert.equal(g.status, 'fallback'); assert.deepEqual(g.guard.map(x => x.id), ['MAJLIS_ISOLATED']); }
+  const c = edit(r.doc, 'سد الباب', { lastSubject: 'door:' + id, req: { consent: true } }).r;
   assert.equal(c.status, 'local'); assert.ok(c.results[0].ok, c.results[0].why_ar);
   assert.ok(diffFingerprint(d, c.doc).identical, 'بعد فتحه وسده: مطابق للأصل بالبصمة');
   // «سد الباب» بلا غرفة ولا باب سابق: سؤال لا تخمين

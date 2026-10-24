@@ -159,7 +159,11 @@ export function renderPlan(ctx, st) {
       // داخل الباب أولًا (خطوط الأبعاد كلها خارج الواجهة، فلا يتراكب معها)، ثم خارجه
       const inP = S(add(add(w.a, mul(u, o.at)), mul(n, (w.t / 2 + .5))));
       const outC = ([al, ou]) => ({ x: base.x + ax / aL * al * tw + ox / oL * ou * fs * 1.15, y: base.y + ay / aL * al * tw + oy / oL * ou * fs * 1.15 }), inC = al => ({ x: inP.x + ax / aL * al * tw, y: inP.y + ay / aL * al * tw, inside: true });
-      const cands = [outC([0, 0]), outC([.6, 0]), outC([-.6, 0]), outC([1.1, 0]), outC([-1.1, 0]), inC(0), inC(.7), inC(-.7), outC([0, 1]), outC([0, 2])];
+      // (الجولة العشرون) لا تُكتب «مدخل» داخل فراغ اسمه الظاهر «مدخل …» (الدهليز أو بهو المدخل): تتكرر الكلمة فوق اسمه (C3 في مراجعة r19)
+      const inW = add(add(w.a, mul(u, o.at)), mul(n, (w.t / 2 + .5))), inPoly = (p, P) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) if ((P[i].y > p.y) !== (P[j].y > p.y) && p.x < (P[j].x - P[i].x) * (p.y - P[i].y) / (P[j].y - P[i].y) + P[i].x) c = !c; return c; };
+      const inRoom = flags.areas === false ? null : (st.analysis?.rooms || []).find(r => (r.net || []).length > 2 && inPoly(inW, r.net));
+      const noInside = !!inRoom && /مدخل/.test(inRoom.name || inRoom.label?.name || '');
+      const cands = [outC([0, 0]), outC([.6, 0]), outC([-.6, 0]), outC([1.1, 0]), outC([-1.1, 0]), ...(noInside ? [] : [inC(0), inC(.7), inC(-.7)]), outC([0, 1]), outC([0, 2]), ...(noInside ? [outC([.6, 1]), outC([-.6, 1])] : [])];
       // أقل تراكب: صفر إن خلا الموضع، وإلا أصغر مساحة تراكب (كلمة «مدخل» أخرى ×3، ثم أرقام الأبعاد، ثم تسميات الغرف)
       const ov = (b, q, h) => Math.max(0, (b.w + tw) / 2 - Math.abs(b.x - q.x)) * Math.max(0, (h + fs) / 2 - Math.abs(b.y - q.y));
       let bestC = Infinity;

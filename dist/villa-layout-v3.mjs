@@ -84,7 +84,9 @@ export function unitsOf(P, { stair = false } = {}) {
   ].filter(Boolean);
   // بنود الموضع الصريحة من طلب العميل: قيود صلبة على الوحدات
   const MAP = { kitchen: 'KS', dining: 'DN', majlis: 'M', majlis_m: 'M', majlis_w: 'W', hall: 'H', master: 'S*', bedrooms: 'S*', kids: 'S*', maid: 'KS', laundry: 'KS', service: 'KS' };
-  for (const r of P.rules || []) if (r.kind === 'place' && MAP[r.a] && (r.side === 'back' || r.side === 'front') && r.mode !== 'avoid' && r.level !== 'prefer')
+  // بندان متعارضان من العميل للفراغ نفسه (أمام وخلف): لا يُفرض أي منهما حتى يجيب العميل عن سؤال التعارض (feasibility: PLACE_CONFLICT)
+  const both = new Set(Object.keys(MAP).filter(a => ['front', 'back'].every(sd => (P.rules || []).some(r => r.kind === 'place' && r.a === a && r.side === sd && r.mode !== 'avoid'))));
+  for (const r of P.rules || []) if (r.kind === 'place' && MAP[r.a] && !both.has(r.a) && (r.side === 'back' || r.side === 'front') && r.mode !== 'avoid' && r.level !== 'prefer')
     if (MAP[r.a] === 'S*' ? U.some(u => u.sleep) : has(MAP[r.a])) rel.push({ a: MAP[r.a], kind: r.side === 'back' ? 'back' : 'front', hard: true, client: true, ar: 'بند العميل: ' + (r.text || r.a) });
   return { units: U, rel };
 }
@@ -262,6 +264,10 @@ function sleepVariants(blocks, c, lit, idx) {
   const along = c === 'y0' || c === 'y1' ? 'y' : 'x'; // الممر عموديًا على حد الصالة
   const sA = along === 'y' ? ['x0', 'x1'] : ['y0', 'y1'];
   const run = list => sum(list.map(b => K.runOf(b) + .15));
+  // (الجولة العشرون) طول الصف بالمقياس الذي يُقيَّد به فعلًا: الجناح «الجانبي» (الحمام بجانب الغرفة، runMin = suiteRun) أطول من «العميق»
+  // (الحمام أمام الغرفة) — كان الفحص بالأقصر فيُبنى جناح جانبي ممره > 12.5 م حتمًا (corr-long)
+  const runSide = list => sum(list.map(b => K.suiteRun(b, 0) + .15)), runDeep = list => sum(list.map(b => K.suiteRun(b, 99) + .15));
+  const runFor = (list, deep) => (deep ? runDeep(list) : runSide(list));
   const corr = () => C('corr' + idx, { fix: 1.5, area: 14 });
   const L = (list, door, deep = false) => { const z = Z(list, door, along);
     if (deep) z.minCross = Math.max(...list.map(b => (b.kind === 'suite' && b.bath ? (b.master ? 5.9 : 5.3) : 0)));
@@ -278,21 +284,25 @@ function sleepVariants(blocks, c, lit, idx) {
   for (const deep of [false, true]) for (const [side, exL] of [[sA[0], sA[1]], [sA[1], sA[0]]]) {
     if (!lit.includes(exL)) continue;
     const list = m && rest.length >= 2 ? rest : blocks, mm = m && rest.length >= 2 ? m : null;
-    if (run(list) > K.CORR_SINGLE_HARD - .2 || !list.length) continue;
+    if (runFor(list, deep) > K.CORR_SINGLE_HARD - .2 || !list.length) continue;
     const node = side === sA[0] ? mk(corr(), L(list, side, deep)) : mk(L(list, side, deep), corr());
     out.push({ tag: (deep ? 'C' : 'c') + (side === sA[0] ? 'a' : 'b'), tree: withM(node, mm) });
   }
   // (ب) ممر أوسط والغرف على جانبيه (جهتا الضوء متقابلتان)
   if (lit.includes(sA[0]) && lit.includes(sA[1]) && rest.length >= 2) {
     const h = Math.ceil(rest.length / 2), A = rest.slice(0, h), B = rest.slice(h);
-    if (Math.max(run(A), run(B)) <= K.CORR_SINGLE_HARD - .2) out.push({ tag: 'p', tree: withM(mk3(L(A, sA[1]), corr(), L(B, sA[0])), m) });
+    if (Math.max(runSide(A), runSide(B)) <= K.CORR_SINGLE_HARD - .2) out.push({ tag: 'p', tree: withM(mk3(L(A, sA[1]), corr(), L(B, sA[0])), m) });
+    else if (Math.max(runDeep(A), runDeep(B)) <= K.CORR_SINGLE_HARD - .2) out.push({ tag: 'P', tree: withM(mk3(L(A, sA[1], true), corr(), L(B, sA[0], true)), m) });
   }
   // (ج) الغرف على الصالة مباشرة (بلا ممر) — ثلاث غرف فأقل، والضوء في الجهة المقابلة للصالة
   // (د) رواق موازٍ لحد الصالة يلاصقها، والغرف صفًا خلفه على جهة الضوء المقابلة، والرئيسية في طرف الرواق بعمق الجناح كله
   if (lit.includes(OPP[c])) {
     const par = along === 'y' ? 'x' : 'y', list = m && rest.length >= 2 ? rest : blocks, mm = m && rest.length >= 2 ? m : null;
-    if (run(list) <= K.CORR_SINGLE_HARD - .2 && list.length) {
-      const g = C('gal' + idx, { fix: 1.5, area: 12 }), row = Z(list, c, par); if (row.runMin === undefined) row.runMin = Object.fromEntries(list.map(b => [b.id, K.suiteRun(b, 0)]));
+    const deepG = runSide(list) > K.CORR_SINGLE_HARD - .2;
+    if (runFor(list, deepG) <= K.CORR_SINGLE_HARD - .2 && list.length) {
+      const g = C('gal' + idx, { fix: 1.5, area: 12 }), row = Z(list, c, par);
+      if (deepG) row.minCross = Math.max(...list.map(b => (b.kind === 'suite' && b.bath ? (b.master ? 5.9 : 5.3) : 0)));
+      else if (row.runMin === undefined) row.runMin = Object.fromEntries(list.map(b => [b.id, K.suiteRun(b, 0)]));
       const band = par === 'x' ? (c === 'y0' ? Y(g, row) : Y(row, g)) : (c === 'x0' ? X(g, row) : X(row, g));
       if (!mm) out.push({ tag: 'g', tree: band });
       else for (const end of [0, 1]) { const mz = Z([mm], par === 'x' ? (end ? 'x0' : 'x1') : (end ? 'y0' : 'y1'), par === 'x' ? 'y' : 'x'); out.push({ tag: 'g' + end, tree: par === 'x' ? (end ? X(band, mz) : X(mz, band)) : (end ? Y(band, mz) : Y(mz, band)) }); }
@@ -331,7 +341,15 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
     if (u.circ === 'stair') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
     if (u.circ === 'link') { const vert = (r.y1 - r.y0) >= (r.x1 - r.x0); const lk = C('link', { fix: 1.8, area: 8 }); return vert ? X(OV(6), lk, OV(6)) : Y(OV(6), lk, OV(6)); }
     const d = k === 'M' ? 'y1' : k === 'W' ? doorTo(r, ['F']) : k === 'DN' ? doorTo(r, ['H', 'F', 'M']) : k === 'KS' ? doorTo(r, ['DN', 'H']) : doorTo(r, ['F', 'H']);
-    const z = Z(u.blocks, d, d === 'y0' || d === 'y1' ? 'x' : 'y');
+    let dd = d;
+    // (الجولة العشرون) وحدة الخدمة بفراغين يحتاجان نافذة (المطبخ وغرفة الخادمة): إن كان ضوء الوحدة على طرفي الشريط وحدهما فلا يصل إلا
+    // الطرف — يُدار الشريط ليمتد على جهة الضوء (كل فراغ عليها) وبابه من الجهة المقابلة إن لامست الطعام أو الصالة (dark:maid كان يُسقط أشجارًا)
+    if (k === 'KS' && u.blocks.filter(b => ['kitchen', 'maid', 'driver'].includes(b.kind)).length >= 2) {
+      const lit = litSides(r), along = s => (s === 'y0' || s === 'y1' ? ['y0', 'y1'] : ['x0', 'x1']);
+      const full = dx => along(dx).some(s => lit.includes(s));
+      if (!full(d)) { const d2 = ['x0', 'x1', 'y0', 'y1'].filter(s => !along(d).includes(s) && !lit.includes(s)).find(s => ['DN', 'H', 'F'].some(q => R[q] && adjLen(r, R[q]) > 0 && sideTo(r, R[q]) === s)); if (d2 && full(d2)) dd = d2; }
+    }
+    const z = Z(u.blocks, dd, dd === 'y0' || dd === 'y1' ? 'x' : 'y');
     // المجلس: عرض صافٍ ≥ 4.2 م بجدرانه (قيمة الميزان) — أدنى امتداده في الاتجاهين، لا تقدير 4 م العام
     if (k === 'M' || k === 'W') { z.minCross = 4.45; z.runMin = Object.fromEntries(u.blocks.map(b => [b.id, majRun(b)])); }
     // فراغ خارجي اختياري على جهة خارجية (غير الشارع): يمتص فرق الأبعاد بين الوحدات المقترنة في صف أو عمود فيصير ارتدادًا/حديقة صغيرة،
@@ -345,7 +363,12 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
   };
   // أنواع النوم لكل جناح: حاصل ضرب صغير (حتى 4 أشجار لكل توزيع)
   const sleepKeys = Object.keys(R).filter(k => k[0] === 'S');
-  const sv = sleepKeys.map((k, i) => { const r = R[k], c = doorTo(r, ['H']); const v = sleepVariants(U.get(k).blocks, c, litSides(r), String.fromCharCode(65 + i)); return v.length ? v : null; });
+  // (الجولة العشرون) جناح النوم لا يتمدد ليملأ خليته: فراغ خارجي اختياري في طرفه البعيد عن الصالة (جهة خارجية غير الشارع) يمتص فرق العمق،
+  // فلا يطول ممر الجناح مع طول الخلية (corr-long كان أكثر ما يُسقط أشجار الأرض الطويلة) — ما لم يطلب العميل النوم على تلك الواجهة
+  const sleepBack = (P.rules || []).some(q => q.kind === 'place' && q.side === 'back' && ['bedrooms', 'master', 'kids', 'elderly'].includes(q.a));
+  const slack = (t, r, c) => { const far = OPP[c], ex = bnd(r, nc, nr); if (!ex.includes(far) || far === 'y0' || (far === 'y1' && sleepBack)) return t;
+    return far === 'y1' ? Y(t, OV(8)) : far === 'x1' ? X(t, OV(8)) : X(OV(8), t); };
+  const sv = sleepKeys.map((k, i) => { const r = R[k], c = doorTo(r, ['H']); const v = sleepVariants(U.get(k).blocks, c, litSides(r), String.fromCharCode(65 + i)).map(x => ({ ...x, tree: slack(x.tree, r, c) })); return v.length ? v : null; });
   if (sv.some(v => !v)) return [];
   const combos = []; const rec = (i, acc) => { if (combos.length >= 6) return; if (i === sv.length) { combos.push(acc); return; } for (const v of sv[i]) rec(i + 1, [...acc, v]); }; rec(0, []);
   return cuts.flatMap((cut, ci) => combos.map(cmb => {

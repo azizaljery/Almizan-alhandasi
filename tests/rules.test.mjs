@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { extractRules, verifyRequest, docRooms, canonSide } from '../dist/rules.mjs';
 import { extractRequirements, normalizeAr } from '../dist/requirements.mjs';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
-import { createSession, redesign, ledgerFor, mergeRules } from '../dist/design-session.mjs';
+import { createSession, redesign, ledgerFor, mergeRules, currentDoc } from '../dist/design-session.mjs';
+import { serialize } from '../dist/draw/doc.mjs';
 
 const R = t => extractRules(normalizeAr(t)).rules.map(r => [r.kind, r.a, r.b || r.side || r.floor].join(':'));
 const LAND = (o = {}) => ({ width: 20, length: 30, streets: ['s'], entries: ['s'], floors: 1, ...o });
@@ -116,7 +117,10 @@ test('السجل يكشف ما لم يُنفَّذ بسبب مقيس، ولا ي
   const { rooms, B } = docRooms(out.doc), k = rooms.find(r => r.name === 'المطبخ'), d = B.y1 - B.y0, cy = (k.y0 + k.y1) / 2;
   const behind = rooms.filter(o => o.level === k.level && ['bedroom', 'master', 'majlis', 'living', 'dining', 'office'].includes(o.type) && o.y0 >= k.y1 - .3 && Math.min(o.x1, k.x1) - Math.max(o.x0, k.x0) >= Math.min(1, (k.x1 - k.x0) / 2));
   const open = !rooms.some(o => o !== k && o.level === k.level && !['courtyard', 'terrace'].includes(o.type) && Math.min(o.x1, k.x1) - Math.max(o.x0, k.x0) > .3 && o.y0 >= k.y1 - .05);
-  const want = B.y1 - k.y1 <= .45 || (open && cy - B.y0 >= d / 2) || (B.y1 - cy <= d / 3 && !behind.length);
+  // (الجولة العشرون) بالقراءة الحرفية لـ«في الخلف» المعتمدة منذ r16 (zoneCheck literal: C6-2 في المراجعة المستقلة r15): «مفتوح على الخلف من
+  // منتصف العمق» لا يكفي — كان هذا الحساب المستقل يقبله فلم يطابق السجل حين ولّد المحرك الثالث مطبخًا خلفه حديقة على 48% من العمق
+  void open;
+  const want = B.y1 - k.y1 <= .45 || (B.y1 - cy <= d / 3 && !behind.length);
   assert.equal(led[0].ok, want, led[0].why);
   if (led[0].ok) assert.ok(cy >= (B.y0 + B.y1) / 2, 'المنفّذ في النصف الخلفي على الأقل');
   const none = verifyRequest(out.doc, extractRequirements('المكتب قرب المدخل', { counts: BASE }), { entry: 's' });
@@ -130,10 +134,21 @@ test('طلب تصميم آخر بنص مكاني: القاعدة الجديدة 
   let { session, reply } = await redesign(s0, { text: 'المطبخ في الأمام والماستر بعيدة عن المجلس' });
   // (الجولة العاشرة) لا حل موضعي: يُسأل العميل قبل إعادة التوزيع، و«نعم» تعتمد المقترح
   // (الجولة الحادية عشرة) أو سؤال إذن موضعي (تغيير غرفة لم يذكرها العميل): «نعم» تعتمده
-  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session } = await redesign(session, { text: 'نعم' }));
+  if (reply.mode === 'ask-regenerate' || (reply.conflicts || []).some(c => c.type === 'needs-consent')) ({ session, reply } = await redesign(session, { text: 'نعم' }));
   const rules = session.input.requirements.rules;
-  assert.deepEqual(rules.map(r => r.kind + ':' + r.a + ':' + (r.side || r.b)).sort(), ['far:master:majlis', 'place:kitchen:front']);
-  const led = ledgerFor(session);
-  assert.ok(led.filter(x => x.id.startsWith('R')).every(x => x.ok), led.map(x => x.text + ' ' + x.why).join('؛ '));
+  // (الجولة العشرون) على أرض 20×30 كانت التنظيمات التي تحقق «المطبخ في الأمام» و«الماستر بعيدة عن المجلس» معًا كلها محجوبة بمخالفة إلزامية
+  // (مسار ضيف الرجال إلى الطعام عبر العائلة: yoo:u0r وwings:w0p في المحرك الثاني قبل الجولة) — وكانت الجلسة تعتمد أحدها مخططًا حاليًا.
+  // الآن لا يُعتمد مخطط يخالف شرطًا إلزاميًا: إما يتحقق الطلب كله (القاعدتان الجديدتان محل القديمة، والسجل كله متحقق)، وإما يُقال صراحة إنه
+  // لم يُنفَّذ ويبقى المعروض والقاعدة القديمة حرفيًا — لا حالة ثالثة (قاعدة جديدة بلا تحقق، أو مخطط تغيّر بلا تنفيذ).
+  if (rules.some(r => r.side === 'front')) {
+    assert.deepEqual(rules.map(r => r.kind + ':' + r.a + ':' + (r.side || r.b)).sort(), ['far:master:majlis', 'place:kitchen:front']);
+    const led = ledgerFor(session);
+    assert.ok(led.filter(x => x.id.startsWith('R')).every(x => x.ok), led.map(x => x.text + ' ' + x.why).join('؛ '));
+  } else {
+    assert.deepEqual(rules.map(r => r.kind + ':' + r.a + ':' + (r.side || r.b)), ['place:kitchen:back']);
+    assert.equal(reply.mode, 'not-done'); assert.ok(reply.kept && reply.unchanged, 'المعروض باقٍ حرفيًا');
+    assert.match(reply.summary_ar, /لم يُنفَّذ: «المطبخ» في الأمام/); assert.match(reply.summary_ar, /جرّبت إعادة توزيع البيت فلم تحقق الطلب/);
+    assert.ok(serialize(currentDoc(session)) === serialize(first.doc), 'لا مخطط جديد بلا تنفيذ');
+  }
   assert.equal(mergeRules([{ kind: 'place', a: 'kitchen', side: 'e' }], [{ kind: 'place', a: 'kitchen', side: 'w' }]).length, 1);
 });

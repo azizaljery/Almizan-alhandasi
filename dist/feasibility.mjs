@@ -4,6 +4,8 @@
 // الأرقام: نسبة البناء 75٪ والارتداد الجانبي 1.5 م اشتراطان نظاميان (المستوى أ في data/regulations-sa.json)؛ معامل الجدران والحركة (1.15) وأدنى
 // العروض قيم تقديرية للميزان (غير نظامية) — تُذكر كذلك. الحكم «مستحيل» يُطلق فقط حين يتجاوز المطلوبُ المتاحَ بلا شك؛ ما دون ذلك «تنبيه».
 import { programV2, siteOf, landWithSite } from './villa-layout-v2.mjs';
+import { SUBJECTS } from './rules.mjs';
+const SUBJECT_AR = Object.fromEntries(SUBJECTS.map(s => [s.id, s.ar]));
 
 export const FEAS_LIMITS = Object.freeze({ grossFactor: 1.15, warnFactor: .92, minMajlisW: 4.2, minFoyerW: 2.4, wall: .25, tier: 'تقدير الميزان (غير نظامي)' });
 const r1 = v => Math.round(v * 10) / 10;
@@ -47,7 +49,9 @@ export function analyzeFeasibility({ land = {}, counts = {}, requirements = {} }
   }
   // (4) بنود الموضع المتعارضة: الفراغ نفسه في الأمام وفي الخلف معًا
   const place = (P.rules || []).filter(r => r.kind === 'place' && r.mode !== 'avoid');
-  for (const a of new Set(place.map(r => r.a))) { const sides = new Set(place.filter(r => r.a === a).map(r => r.side)); if (sides.has('front') && sides.has('back')) { hard.push({ id: 'PLACE_CONFLICT', ar: `بندان متعارضان: «${a}» في الأمام وفي الخلف معًا.` }); options.add('اختيار موضع واحد لهذا الفراغ'); } }
+  // (الجولة العشرون) تعارض بين بندين من العميل نفسه ليس استحالة على الأرض: الحوار يسأل العميل أيهما يريد (detectConflicts) ويُرفق السؤال
+  // بالتصميم الأول — فهو ملاحظة معلنة لا رفض للتوليد. والاسم عربي (كان يظهر معرّفًا داخليًا «kitchen»)
+  for (const a of new Set(place.map(r => r.a))) { const sides = new Set(place.filter(r => r.a === a).map(r => r.side)); if (sides.has('front') && sides.has('back')) warn.push({ id: 'PLACE_CONFLICT', ar: `بندان متعارضان في طلبك: «${SUBJECT_AR[a] || 'الفراغ نفسه'}» في الأمام وفي الخلف معًا — سأسألك أيهما تريد، والتصميم الأول مؤقت حتى تجيب.` }); }
   // (5) الدوران بلا غرف نوم للعلوي
   if (floors === 2 && !P.blocks.some(b => b.kind === 'suite' && !b.elderly)) warn.push({ id: 'NO_UPPER', ar: 'دوران مطلوبان ولا غرف نوم للدور الأول؛ دور واحد يكفي هذا البرنامج.' });
   const feasible = hard.length === 0;

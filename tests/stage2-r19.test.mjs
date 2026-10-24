@@ -9,6 +9,7 @@ import { parseDoc } from '../dist/draw/doc.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 import { pointInPolygon } from '../dist/draw/geom.mjs';
 import { measureR16, MANDATORY_R16 } from '../dist/privacy-defects.mjs';
+import { R20_MANDATORY, R20_MAJOR } from '../dist/r20-checks.mjs';
 import { presentationStatus } from '../dist/presentation-status.mjs';
 import { extractRequirements, applyLiteralReadings, DIM_TOL } from '../dist/requirements.mjs';
 import { verifyRequest } from '../dist/rules.mjs';
@@ -28,10 +29,17 @@ test('اتساق الحكم في كل الحالات: لا بديل معروض (
     res.designs.forEach((d, i) => {
       const doc = ev(STAGE, C.id, d.file), ledger = verifyRequest(doc, req, { entry: land.entries[0] });
       const st = presentationStatus({ doc, ledger, review: d.review }, rq);
-      const mand = measureR16(doc, rq).filter(g => g.applicable && !g.pass && !g.clientAsked && MANDATORY_R16.includes(g.id));
+      const mand = measureR16(doc, rq).filter(g => g.applicable && !g.pass && !g.clientAsked && MANDATORY_R16.includes(g.id) && !R20_MANDATORY.includes(g.id)); // مخالفات r20 تُفسَّر أدناه
       const client = ledger.filter(x => !x.ok && !['unverified', 'pending-render'].includes(x.status));
       if (mand.length || client.length || d.review?.passed === false) assert.equal(d.presentation.status, 'hidden', `${C.id}-${i + 1}: ${[...mand.map(g => g.id), ...client.map(x => x.text)].join('، ')}`);
-      assert.equal(st.status, d.presentation.status, `${C.id}-${i + 1}: الحالة المحفوظة تطابق المقيسة الآن`);
+      // (الجولة العشرون) قياسات r20 (بعد المراجعة العمياء r19) تُعيد الحكم على أدلة r19 المحفوظة: الفرق مسموح فقط إن كان كله من معرفات r20
+      // (FAMILY_WC، HALL_LT_MAJLIS، HALL_DAYLIGHT عيوبًا، وMAJLIS_ISOLATED، COURT_OVERLOOK إلزاميتين) — أي فرق آخر يرسب كما كان
+      if (st.status !== d.presentation.status) {
+        const R20 = new Set([...R20_MANDATORY, ...R20_MAJOR]), newMand = st.mandatory.filter(x => !R20.has(x)), newMajor = st.major.filter(x => !R20.has(x));
+        const explained = d.presentation.status === 'ready' ? (st.status === 'needs-edits' ? !st.mandatory.length && st.major.length > 0 && !newMajor.length : st.status === 'hidden' && st.mandatory.length > 0 && !newMand.length && !newMajor.length)
+          : d.presentation.status === 'needs-edits' && st.status === 'hidden' && st.mandatory.length > 0 && !newMand.length;
+        assert.ok(explained, `${C.id}-${i + 1}: الحالة المحفوظة ${d.presentation.status} والمقيسة ${st.status} (${[...st.mandatory, ...st.major]}) — فرق لا تفسره قياسات r20`);
+      }
       n++;
     });
     // المحجوب لا يُعرض بديلًا صالحًا: لا يبقى في القائمة ما دام غيره ظاهرًا

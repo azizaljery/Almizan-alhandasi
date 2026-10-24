@@ -3542,9 +3542,11 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
   const ar = d => { const R = d.dr?.rooms || []; const h = R.find(r => r.name === 'الصالة' && r.li === 0), m = R.find(r => r.type === 'majlis' && !/النساء/.test(r.name) && r.li === 0); return h && m ? { h: h.area, m: m.area } : null; };
   const trees = partiTrees(P, { W: site.W, D: site.D, irregular: !!site.placeRects });
   for (let i = 0; i < built.length; i++) {
-    const d = built[i], a0 = ar(d); if (!a0 || a0.h >= a0.m || !d.cand) continue;
-    const tr = trees.find(t => t.tag === d.cand.tag && t.mode === d.cand.mode && !!t.stepped === !!d.cand.stepped); if (!tr) continue;
+    const d0 = built[i], a0 = ar(d0); if (!a0 || a0.h >= a0.m || !d0.cand) continue;
+    const tr = trees.find(t => t.tag === d0.cand.tag && t.mode === d0.cand.mode && !!t.stepped === !!d0.cand.stepped); if (!tr) continue;
     for (const margin of [2, 4, 6, 8]) {
+      // (الجولة العشرون) تحسن جزئي (زالت عيوب والصالة ما زالت أصغر) يُقبل ثم تُجرَّب الهوامش الأكبر عليه — كان يتوقف عنده (C4: 24.6 مقابل 25.1)
+      const d = built[i]; { const ac = ar(d); if (ac && ac.h >= ac.m) break; }
       // (الجولة التاسعة عشرة) والرئيسية لا تتضخم بما يُقتطع من غيرها (C4: حل الصالة الأكبر رُفض «الرئيسية 25.7 م² متضخمة»)
       const extra = sol => { const h = sol.circ.find(c => c.id === 'hall'), mj = sol.placed.find(p => p.block.kind === 'majlis' && p.block.men); if (!h || !mj) return 0;
         const ms = R14_OFF.has('r19hall') ? null : sol.placed.find(p => p.block.master), mx = ms ? Math.max(0, A_(ms.r) - ms.block.area * 1.12) : 0;
@@ -3561,7 +3563,7 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
         if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
         n.dr = n.dr || docRooms(n.doc);
         n.notes = [...n.notes, a1.h >= a1.m ? `كُبّرت «الصالة» إلى ${r2(a1.h)} م² فصارت لا تصغر عن «المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) بإعادة ضبط أبعاد التنظيم نفسه — هدف تصميمي افتراضي للميزان.` : `أُعيد ضبط أبعاد التنظيم نفسه: «الصالة» ${r2(a1.h)} م² و«المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) — زال ${d.major.filter(x => !n.major.includes(x)).join(' و')}، وما زالت الصالة أصغر من المجلس (هدف الميزان الافتراضي لم يتحقق على هذه الأرض الضيقة).`];
-        built[i] = n; break;
+        built[i] = n; if (a1.h >= a1.m || R14_OFF.has('r20hall')) break;
       } catch { /* يبقى الأصل */ }
     }
   }
@@ -3779,6 +3781,11 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   // (الجولة السابعة عشرة) الصالة لا تبقى ممرًا عابرًا (إزاحة أبوابها حتى تتسع جلسة عائلية)، و«مقهوي» يخدم مجلس الرجال من المطبخ أو الطعام
   // متى اتسع (dist/r17-polish.mjs) — مكتوبة في الملاحظات
   if (!R14_OFF.has('r17')) { try { const g = R14_OFF.has('r20guard') ? { applied: true, result: polishR17(doc) } : guarded(doc, d => polishR17(d), measureRequest(requirements, land, null)); if (g.applied && g.result.notes_ar.length) layout.notes.push(...g.result.notes_ar); else if (!g.applied) layout.notes.push('لم يُعتمد صقل الصالة/المقهوي على هذا المخطط لأنه يُفسد شرطًا آخر: ' + g.regressions.map(x => x.ar).join('؛ ') + '.'); } catch { /* يبقى كما رُسم */ } }
+  // (الجولة العشرون) غرفة الملابس المطلوبة تُقاس على المرسوم بعد الصقل (نقل مدخل الماستر إلى الممر يقتطع منها): إن صغرت عن الهدف تُذكر صراحة
+  if (P.prefs?.masterDressing && !R14_OFF.has('r17dress') && !layout.notes.some(n => /غرفة الملابس المطلوبة/.test(n))) { try {
+    const dr = analyzeDoc(doc).levels.flatMap(l => l.rooms).find(x => /^غرفة (?:ال)?ملابس$/.test(x.name));
+    if (dr && dr.area < DRESS_ASKED_NET - .1) layout.notes.push(`غرفة الملابس المطلوبة ${r2(dr.area)} م² صافيًا — أقل من ${DRESS_ASKED_NET} م² (قيمة تصميمية افتراضية للميزان) بعد نقل مدخل الرئيسية إلى الممر؛ تُكبَّر في المرسم إن أردت.`);
+  } catch { /* */ } }
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
   const qg = qualityGates(relaxed, layout, { kitchenFront: (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), ...gateOpts(P), narrow: site.W < NARROW_W });
   const reject = [...hardGates(relaxed, P, rv), ...qg];
@@ -4115,7 +4122,7 @@ function edgeLines(rects, skip = []) {
 }
 /** أطول امتداد جدار علوي بلا جدار أرضي تحته ولا ركيزة (تقدير على المستطيلات، كما يقيسه stackingReport على المرسوم). */
 function rectStack(GL, ul, exterior = null) {
-  let run = 0, free = 0;
+  let run = 0, free = 0, seg = null;
   for (const ax of ['h', 'v']) for (const [c, list] of ul[ax]) for (const [s0, s1] of list) {
     if (exterior && exterior(ax, c, s0, s1)) continue;
     const sup = [];
@@ -4123,10 +4130,10 @@ function rectStack(GL, ul, exterior = null) {
     const ox = ax === 'h' ? 'v' : 'h';
     for (const [gc, gl] of GL[ox]) if (gc >= s0 - .3 && gc <= s1 + .3) for (const [a, b] of gl) if (c >= a - .3 && c <= b + .3) { const p = Math.max(s0, Math.min(s1, gc)); sup.push([p, p]); }
     sup.sort((a, b) => a[0] - b[0]);
-    let at = s0; for (const [a, b] of sup) { if (a > at) { run = Math.max(run, a - at); free += a - at; } at = Math.max(at, b); }
-    if (s1 > at) { run = Math.max(run, s1 - at); free += s1 - at; }
+    let at = s0; for (const [a, b] of sup) { if (a > at) { if (a - at > run) seg = [ax, c, at, a]; run = Math.max(run, a - at); free += a - at; } at = Math.max(at, b); }
+    if (s1 > at) { if (s1 - at > run) seg = [ax, c, at, s1]; run = Math.max(run, s1 - at); free += s1 - at; }
   }
-  return { run, free };
+  return { run, free, seg };
 }
 /** عقدة «للدورين معًا»: مستطيل واحد، فيه شجرة الأرضي g وشجرة العلوي u (القطوع المشتركة فوقها خطوط جدران للدورين). */
 const D2 = (g, u) => { if (!g || !u) return null; const n = { t: 'dual', g, u }; if (g.t === 'circ' && g.fix) n.fix = g.fix; if (g.opt && u.opt) n.opt = true; return n; };
@@ -4319,7 +4326,7 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
   };
   let best = null;
   for (const b of optimizeSteps(tr.tree, site, evalFn, { iters: globalThis.__v2iters || (U.suites.length >= 5 ? 2 * tr.iters : tr.iters), seed: 'tf' + tr.tag, tol: tr.tol })) best = b;
-  if (globalThis.__v2dbg) { const d = globalThis.__v2dbg; if (best) { const v0 = best.sol.viol, v1 = best.sol.up?.viol; const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); const o2 = {}; globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, { ...U, men: null, women: [] }, best.ew, best.ed, { upper: true }); globalThis.__v2dbg = d; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; d['tfj:' + tr.mode + ':' + tr.tag] = `viol ${best.sol.viol} T[${[...(best.sol._tfwhy || [])]}] G[${Object.keys(o)}] U[${Object.keys(o2)}] st=${r2(best.sol.stack?.run || 0)} env ${r2(best.ew)}x${r2(best.ed)}`; if (d.keepSol) d['tfsol:' + tr.mode + ':' + tr.tag] = { g: best.sol, u: best.sol.up, ew: best.ew, ed: best.ed }; } else d['tfj:' + tr.mode + ':' + tr.tag] = 'none'; }
+  if (globalThis.__v2dbg) { const d = globalThis.__v2dbg; if (best) { const v0 = best.sol.viol, v1 = best.sol.up?.viol; const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); const o2 = {}; globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, { ...U, men: null, women: [] }, best.ew, best.ed, { upper: true }); globalThis.__v2dbg = d; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; d['tfj:' + tr.mode + ':' + tr.tag] = `viol ${best.sol.viol} T[${[...(best.sol._tfwhy || [])]}] G[${Object.keys(o)}] U[${Object.keys(o2)}] st=${r2(best.sol.stack?.run || 0)}${best.sol.stack?.seg ? '@' + best.sol.stack.seg.map(v => typeof v === 'number' ? r2(v) : v).join(',') : ''} env ${r2(best.ew)}x${r2(best.ed)}`; if (d.keepSol) d['tfsol:' + tr.mode + ':' + tr.tag] = { g: best.sol, u: best.sol.up, ew: best.ew, ed: best.ed }; } else d['tfj:' + tr.mode + ':' + tr.tag] = 'none'; }
   if (!best || best.sol.viol) return null;
   const rp = rulePenalty(best.sol.placed, ruleCirc(best.sol.circ), best.ew, best.ed, rules, entry);
   const g = { mode: tr.mode, tag: tr.tag, tree: tr.tree, stepped: false, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p, rp };
