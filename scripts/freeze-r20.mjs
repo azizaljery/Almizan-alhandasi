@@ -19,7 +19,7 @@ if (dirty) { console.error('شيفرة غير مودعة — أودعها قبل
 const sealed = sha('scripts/heldout2-cases.mjs');
 if (sealed !== SEALED_SHA) { console.error('ملف الحالات المحجوزة الثانية تغيّر عما أودعه المنسّق: ' + sealed); process.exit(1); }
 const out = {
-  note_ar: 'تجميد الجولة 20: المحرك الثالث (والثاني والأول كما هما) ومعايير التقييم (القياسات والعتبات وحالة العرض والمعيار المجمّد «مختلف معماريًا» r19 دون تغيير) عند هذا الإيداع؛ الحالات المحجوزة H6–H10 لم تُفتح ولم تُشغَّل قبله، وتُولَّد بعده مرة واحدة في after-20-heldout2 ولا تُغيَّر الشيفرة بعدها في الجولة. التقييم الآلي ليس اعتمادًا هندسيًا ولا إنشائيًا.',
+  note_ar: 'تجميد الجولة 20: المحركات الثلاثة (الافتراضي الثالث، والأول والثاني قابلان للاختيار بحالهما عند هذا الإيداع) ومعايير التقييم (القياسات والعتبات وحالة العرض والمعيار المجمّد «مختلف معماريًا» r19 دون تغيير) عند هذا الإيداع؛ الحالات المحجوزة H6–H10 لم تُفتح ولم تُشغَّل قبله، وتُولَّد بعده مرة واحدة في after-20-heldout2 ولا تُغيَّر الشيفرة بعدها في الجولة. التقييم الآلي ليس اعتمادًا هندسيًا ولا إنشائيًا.',
   engineCommit: head, workingTreeCleanForEngine: true,
   engines: { v3: (/VILLA_V3_ENGINE_VERSION = '([^']+)'/.exec(readFileSync(ROOT + 'dist/villa-layout-v3.mjs', 'utf8')) || [])[1], v2: (/VILLA_V2_ENGINE_VERSION = '([^']+)'/.exec(readFileSync(ROOT + 'dist/villa-layout-v2.mjs', 'utf8')) || [])[1], default: 'v3' },
   sealedHeldout2: { file: 'scripts/heldout2-cases.mjs', sha256: sealed, matchesCoordinator: true, openedBeforeFreeze: false },
