@@ -96,6 +96,12 @@ for (const C of CASES) {
     const HEAVY = ['STRUCTURAL', 'CIRCULATION', 'CONSISTENCY_2D3D'];
     const rv = d => (d.review ? { passed: d.review.passed, failedGates: d.review.failedGates, score: d.review.score, rejectReasons_ar: d.review.rejectReasons_ar,
       gates: Object.fromEntries((d.review.gates || []).map(g => [g.id, { ok: g.ok, applicable: g.applicable }])), heavy: Object.fromEntries((d.review.gates || []).filter(g => HEAVY.includes(g.id)).map(g => [g.id, { ok: g.ok, value: g.value }])) } : null);
+    // (الجولة العشرون، توجيه المالك سادسًا) الأفكار الجديدة غير الصالحة تُحفظ تجارب بحثية في مجلد منفصل، لا بدائل للعميل: المحجوبة بمخالفة إلزامية
+    // (والمعروض كله محجوبًا: لا بديل صالح) — evidence/research-experiments/<المرحلة>/<الحالة>/
+    { const hd = [...(out.hiddenDocs || []), ...out.designs.filter(d => d.presentation?.status === 'hidden').map(d => ({ pat: d.pat, doc: d.doc, reasons_ar: d.presentation.hidden_ar, summary: d.summary }))];
+      if (hd.length) { const rdir = new URL(`../evidence/research-experiments/${stage}/${C.id}/`, import.meta.url).pathname; mkdirSync(rdir, { recursive: true });
+        hd.forEach((h, i) => writeFileSync(rdir + `experiment-${i + 1}.json`, serialize(h.doc)));
+        writeFileSync(rdir + 'experiments.json', JSON.stringify(hd.map((h, i) => ({ file: `experiment-${i + 1}.json`, pattern: h.pat, summary: h.summary, why_not_shown_ar: h.reasons_ar, status_ar: 'تجربة بحثية — لا تُعرض للعميل' })), null, 1)); } }
     out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, presentation: d.presentation || null, prefFails: d.prefFails || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
     row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length; row.hidden = out.hidden || []; row.presentation = out.presentation || null; row.proposalLabel_ar = out.presentation?.label_ar || null;
     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));

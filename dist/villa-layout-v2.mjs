@@ -3143,6 +3143,8 @@ function withPresentation(args, out) {
   const hid = out.designs.filter(d => d.presentation.status === 'hidden'), vis = out.designs.filter(d => d.presentation.status !== 'hidden');
   if (vis.length && hid.length) {
     out.hidden = [...(out.hidden || []), ...hid.map(d => ({ pat: d.pat, reasons_ar: d.presentation.hidden_ar, pluralReading: !!d.pluralReading }))]; out.designs = vis;
+    // (الجولة العشرون) المستندات المحجوبة تُحفظ تجارب بحثية (لا تُعرض للعميل) — خاصية غير معدودة لا تدخل JSON النتيجة
+    Object.defineProperty(out, 'hiddenDocs', { value: hid.map(d => ({ pat: d.pat, doc: d.doc, reasons_ar: d.presentation.hidden_ar, summary: d.summary })), enumerable: false, configurable: true });
     // (الجولة التاسعة عشرة) يُقال للعميل صراحة كم لم يُعرض ولماذا — ومنه قراءة «المجالس» التي لم تُرسم سليمة
     const one = hid.filter(d => !d.pluralReading && vis.some(v => v.pluralReading)), why = [...new Set(hid.flatMap(d => d.presentation.hidden_ar.map(x => x.replace(/ \(شرط إلزامي في الميزان[^)]*\)$/, ''))))].slice(0, 2).join('؛ ');
     const msg = one.length ? `قراءة «المجالس» بمجلس واحد لم تُعرض: البديل الذي اتسع بها فيه مخالفة إلزامية (${why})؛ عُرضت قراءة المجلسين وحدها، والسؤال قائم: مجلس رجال ومجلس نساء، أم مجلس واحد؟` : `لم يُعرض ${hid.length} ${hid.length === 1 ? 'بديل' : 'بدائل'} فيها مخالفة إلزامية (${why}).`;
