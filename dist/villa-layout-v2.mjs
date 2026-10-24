@@ -3282,6 +3282,12 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   // (الجولة العشرون) بديل بُني ومجلسه لا يصل الطعام إلا عبر العائلة أو معزول (GUEST_DINING — مخالفة إلزامية): يُعاد حل التنظيم نفسه ووصلة الضيافة
   // (المجلس يلامس الطعام بباب مقلط) مخالفة في البحث (hardLink) — تحسين للتصميم نفسه لا إخفاء له
   if (!refDR && !R14_OFF.has('r20link')) refineGuest(built, P, site, land, { title, requirements, entry, counts });
+  // (الجولة العشرون) دورة مياه العائلة قبل الاختيار أيضًا: المرشح الذي لا عيب جوهريًا فيه غيرها ولا مخالفة إلزامية كان يُستبعد من الاختيار
+  // بجزاء العيب (لا حشو) فلا يصل إلى إصلاحه بعد الاختيار — يُصلح في مكانه أولًا (أفضل أربعة بالجودة، حد زمني حتمي)
+  if (!refDR && !R14_OFF.has('r20daywc') && !R14_OFF.has('r20daywcpool')) {
+    const sub = built.filter(d => d.cand && (d.r16 || []).includes('FAMILY_WC') && !(d.r16 || []).some(id => MANDATORY_R16.includes(id)) && !d.reject?.length).sort((a, b) => a.quality - b.quality).slice(0, 4);
+    if (sub.length) { const idx = sub.map(d => built.indexOf(d)); refineDayWc(sub, P, site, land, { title, requirements, entry, counts, pool: true }); sub.forEach((n, k) => { built[idx[k]] = n; }); }
+  }
   if (!built.length) { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; throw err; }
   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
@@ -3433,7 +3439,7 @@ function withDayWc(tree, side, at = 'hall') {
   const walk = (n, parent, i) => { if (done || !n) return; if (n.t === 'circ' && n.id === at) { const z = Z([DAY_WC_BLOCK], side === 'x' ? 'x1' : 'y0', side === 'x' ? 'y' : 'x'); const rep = side === 'x' ? mk('x', [z, { ...n }]) : mk('y', [{ ...n }, z]); if (parent) { parent.k[i] = rep; } else Object.assign(t, rep); done = true; return; } if (n.k) n.k.forEach((c, j) => walk(c, n, j)); if (n.t === 'dual') { walk(n.g, null, 0); } };
   walk(t, null, 0); return done ? t : null;
 }
-function refineDayWc(designs, P, site, land, { title, requirements, entry, counts }) {
+function refineDayWc(designs, P, site, land, { title, requirements, entry, counts, pool = false }) {
   const req = measureRequest(requirements, land, null), lacks = d => { try { return measureR16(d.doc, req).some(g => g.id === 'FAMILY_WC' && g.applicable && !g.pass); } catch { return false; } };
   const trees = partiTrees(P, { W: site.W, D: site.D, irregular: !!site.placeRects });
   for (let i = 0; i < designs.length; i++) {
@@ -3447,7 +3453,7 @@ function refineDayWc(designs, P, site, land, { title, requirements, entry, count
         const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
         if (globalThis.__v2dbg) globalThis.__v2dbg.daywc.push({ reject: n.reject.slice(0, 2), fails: [d.fails, n.fails], failed: (n.ledger || []).filter(x => !x.ok).map(x => x.text + ': ' + x.why), lacks: lacks(n), r16: n.r16 });
         if (n.reject.length || n.fails > d.fails || lacks(n) || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
-        if (designs.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
+        if (!pool && designs.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
         n.secondPass = d.secondPass; n.dr = n.dr || docRooms(n.doc);
         n.notes = [...n.notes, 'أُضيفت دورة مياه للعائلة بجوار الصالة تُدخل منها، بإعادة ضبط أبعاد التنظيم نفسه (قيمة تصميمية افتراضية للميزان).'];
         designs[i] = n; break;

@@ -12,8 +12,9 @@ const HABITABLE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'k
  * كل الشروط مقيسة من المستند وحده (المقاييس نفسها التي تحكم حالة العرض).
  */
 export function invariants(doc, request = {}) {
+  // الملاحظات (tier: note — المدخلان المتجاوران، الحمام بلا نافذة) معلومات للعميل لا شروط: لا تمنع تغييرًا يُصلح عيبًا
   const model = analyzeDoc(doc), checks = {};
-  try { for (const g of measureR16(doc, request, model)) if (g.applicable && !g.clientAsked) checks[g.id] = { pass: g.pass, ar: g.ar, why: (g.reasons_ar || [])[0] || '' }; } catch { /* لا قياس */ }
+  try { for (const g of measureR16(doc, request, model)) if (g.applicable && !g.clientAsked && g.tier !== 'note') checks[g.id] = { pass: g.pass, ar: g.ar, why: (g.reasons_ar || [])[0] || '' }; } catch { /* لا قياس */ }
   const counts = {}, dark = [];
   for (const lv of model.levels) for (const r of lv.rooms) {
     if (PROG_TYPES.includes(r.type)) counts[r.type] = (counts[r.type] || 0) + 1;
