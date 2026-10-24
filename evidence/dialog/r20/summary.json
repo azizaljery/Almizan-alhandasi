@@ -1,0 +1,8910 @@
+{
+ "stage": "r20",
+ "at": "2026-10-24T23:17:12.351Z",
+ "thresholds": {
+  "areaPct": 5,
+  "shift": 0.5
+ },
+ "long": [
+  {
+   "id": "L1",
+   "name": "الرياض — تصحيح عدد الغرف في منتصف الكلام، أرقام هندية، نفي مكتب ومصلى",
+   "words": 160,
+   "interpretError": null,
+   "f1": 0.936,
+   "precision": 1,
+   "recall": 0.88,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 4,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.8
+    },
+    "extra": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 1,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    },
+    "rule": {
+     "tp": 5,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.833
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unsupported": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    }
+   },
+   "missed": [
+    "pref:guestEntrance",
+    "dim:majlis=5x7",
+    "rule:place:majlis:s"
+   ],
+   "wrong": [],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [],
+   "unclearClauses": [
+    "الله يعطيكم العافية",
+    "أنا محمد من الرياض",
+    "عندي أرض ٢٠×٣٠ على شارع واحد من الجنوب",
+    "احنا سبعة أنفار",
+    "لأن الميزانية ما تسمح",
+    "باقي الغرف للعيال",
+    "يتشاركون عادي",
+    "يكون على الشارع وله مدخل مستقل عن العائلة",
+    "شي ثاني مهم: أبي البيت فيه إضاءة طبيعية كثيرة",
+    "ما يكون مظلم مثل بيتنا القديم"
+   ]
+  },
+  {
+   "id": "L2",
+   "name": "جدة — دوران، كلمات إنجليزية، تراجع عن المطبخ المفتوح، لا خادمة ولا مسبح",
+   "words": 160,
+   "interpretError": null,
+   "f1": 0.711,
+   "precision": 0.762,
+   "recall": 0.667,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 3,
+     "fn": 1,
+     "fp": 1,
+     "precision": 0.75,
+     "recall": 0.75
+    },
+    "pref": {
+     "tp": 3,
+     "fn": 1,
+     "fp": 2,
+     "precision": 0.6,
+     "recall": 0.75
+    },
+    "extra": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 3,
+     "fn": 5,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.375
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 1,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.5
+    },
+    "unsupported": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0.667,
+     "recall": 1
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    }
+   },
+   "missed": [
+    "count:bedrooms=6",
+    "pref:closedKitchen",
+    "rule:floor:majlis:ground",
+    "rule:floor:dining:ground",
+    "rule:floor:kitchen:ground",
+    "rule:floor:bedrooms:upper",
+    "rule:away:master+stairs",
+    "facade:stone"
+   ],
+   "wrong": [
+    "count:bedrooms=5",
+    "pref:openKitchen",
+    "pref:big_hall",
+    "unsupported:pool",
+    "conflict:count-mismatch"
+   ],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [
+    "count-mismatch"
+   ],
+   "unclearClauses": [
+    "أنا أبو فيصل من جدة",
+    "الأرض ١٨ في ٢٥ والشارع من جهة الغرب",
+    "الدور الأرضي يكون فيه المجلس والمقلط والمطبخ",
+    "يعني ما أبغى الضيوف يشوفون أهل البيت أبدًا",
+    "ما تقدر تطلع الدرج",
+    "أبغاها بعيدة عن الدرج عشان الهدوء",
+    "بعيدة عن الدرج عشان",
+    "الباقي للعيال",
+    "هذا شي أساسي عندنا",
+    "لا ترى غيرت رأيي",
+    "خليه مقفل أحسن عشان الريحة والدخان",
+    "تجي الصبح وتروح",
+    "تكون من برا",
+    "شكرًا لكم وبانتظار التصميم"
+   ]
+  },
+  {
+   "id": "L3",
+   "name": "فصحى رسمية — أرض زاوية بمدخلين، حمام لكل غرفة، مكتب بمدخل خارجي، بلا غرفة طعام",
+   "words": 175,
+   "interpretError": null,
+   "f1": 0.762,
+   "precision": 0.889,
+   "recall": 0.667,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 2,
+     "fn": 4,
+     "fp": 1,
+     "precision": 0.667,
+     "recall": 0.333
+    },
+    "extra": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "dims": {
+     "tp": 1,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.5
+    },
+    "rule": {
+     "tp": 1,
+     "fn": 2,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.333
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 1,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.5
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    }
+   },
+   "missed": [
+    "pref:guestEntrance",
+    "pref:familyEntrance",
+    "pref:womenSeparate",
+    "pref:kitchenOpenHall",
+    "dim:master=5x6",
+    "rule:place:majlis:s",
+    "rule:close:majlis+prayer",
+    "facade:modern"
+   ],
+   "wrong": [
+    "pref:openKitchen",
+    "unsupported:annex"
+   ],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [],
+   "unclearClauses": [
+    "السادة المهندسون المحترمون",
+    "تحية طيبة وبعد",
+    "يحدها شارع من الجنوب وشارع من الشرق",
+    "نحتاج مجلسًا للرجال على الشارع الجنوبي",
+    "مجلسًا للنساء منفصلًا تمامًا عن مجلس الرجال",
+    "فنحن نتناول الطعام عادة في الصالة",
+    "نود أن يراعي التصميم التهوية الطبيعية وتوجيه الشمس",
+    "نشكر لكم حسن تعاونكم",
+    "نتطلع إلى استلام المقترح الأولي"
+   ]
+  },
+  {
+   "id": "L4",
+   "name": "القصيم — عميل محتار: كلام متعارض عن المطبخ والمجلس دون حسم",
+   "words": 166,
+   "interpretError": null,
+   "f1": 0.974,
+   "precision": 0.95,
+   "recall": 1,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 3,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0.8,
+     "recall": 1
+    },
+    "extra": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "absent": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 7,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "unclear": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    }
+   },
+   "missed": [],
+   "wrong": [
+    "pref:elderlyRoom"
+   ],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [
+    "place-opposite",
+    "relation-contradiction"
+   ],
+   "unclearClauses": [
+    "الصراحة أنا محتار شوي وبكتب لك كل اللي في بالي وأنت شوف",
+    "الأرض عندي في بريدة ٢٢×٣٠",
+    "الشارع جنوبي",
+    "أنا للحين ما قررت",
+    "شوفوا لنا الأنسب",
+    "تفتح على الصالة",
+    "أبي مكان للشواء برا في الحوش",
+    "جلسة خارجية للشتاء",
+    "أكره الممرات",
+    "ترى احنا ستة: أنا وزوجتي وأربعة عيال",
+    "أكبرهم عمره خمسطعش سنة وأصغرهم سنتين",
+    "أبي التكييف يكون مخفي قدر الإمكان",
+    "الأسقف عالية شوي عشان الحر",
+    "بس هذا اللي في بالي حاليًا",
+    "إذا تذكرت شي ثاني أرسله لك"
+   ]
+  },
+  {
+   "id": "L5",
+   "name": "أرض ضيقة — بيت اقتصادي، مطبخ أمريكي، «ما نحتاج مجلس نساء»، نفي غير مباشر للخادمة والسائق",
+   "words": 158,
+   "interpretError": null,
+   "f1": 0.938,
+   "precision": 0.938,
+   "recall": 0.938,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 3,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "extra": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 1,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    },
+    "rule": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "facade": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    }
+   },
+   "missed": [
+    "area:kitchen=12"
+   ],
+   "wrong": [
+    "conflict:count-mismatch"
+   ],
+   "levels": [],
+   "dropped": 2,
+   "conflicts": [
+    "count-mismatch"
+   ],
+   "unclearClauses": [
+    "أنا موظف وميزانيتي محدودة",
+    "الشارع من الجنوب",
+    "نحن أربعة: أنا وزوجتي وولدين",
+    "مجلس واحد يكفي ونستخدمه للرجال والنساء",
+    "مساحته حوالي ١٢ متر مربع",
+    "ما نحتاجهم",
+    "بس حاليًا لا تحسبها",
+    "أبي حوش خلفي صغير للعيال يلعبون فيه بأمان",
+    "ما أبي حجر لأنه غالي",
+    "أنا أصلًا أشتغل من الصبح للعصر",
+    "زوجتي معلمة",
+    "فالبيت يكون فاضي أغلب النهار",
+    "أهلنا في مدينة ثانية ويجوننا مرة أو مرتين في السنة بس",
+    "أتمنى التصميم يكون عملي",
+    "ما فيه مساحات ضايعة",
+    "لأن كل ريال محسوب"
+   ]
+  },
+  {
+   "id": "L6",
+   "name": "عائلة ممتدة — غرفة للوالدين، غرف العيال جنب بعض، حمامات لا تفتح على الصالة، فناء داخلي",
+   "words": 164,
+   "interpretError": null,
+   "f1": 0.957,
+   "precision": 1,
+   "recall": 0.917,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 5,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "extra": {
+     "tp": 5,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 6,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.857
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unsupported": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 1,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    }
+   },
+   "missed": [
+    "rule:close:dining+kitchen",
+    "unclear:الكرسي المتحرك"
+   ],
+   "wrong": [],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [],
+   "unclearClauses": [
+    "مساء الخير",
+    "نبي نصمم بيت العائلة على أرض ٢٥×٣٢",
+    "الشارع شمالي",
+    "تكون بحمامها ومدخلها واسع للكرسي المتحرك",
+    "تفتح على الصالة أبدًا",
+    "هذي نقطة مهمة عندنا لأن الضيوف يجلسون أحيانًا في الصالة",
+    "إذا ما تقدرون عادي",
+    "لا نفكر نزيد دور",
+    "عيالنا أربعة: ولدين وبنتين",
+    "الكبيرة في الجامعة",
+    "نحب نجتمع كلنا بعد العشاء",
+    "عشان كذا الصالة هي قلب البيت عندنا",
+    "فلو فيه مكان مشمس يكون زين",
+    "السلام عليكم ورحمة الله"
+   ]
+  },
+  {
+   "id": "L7",
+   "name": "خليط إنجليزي — شاب يكتب نصف كلامه بالإنجليزية",
+   "words": 162,
+   "interpretError": null,
+   "f1": 0.6,
+   "precision": 0.9,
+   "recall": 0.45,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 3,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.75
+    },
+    "pref": {
+     "tp": 1,
+     "fn": 3,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.25
+    },
+    "extra": {
+     "tp": 0,
+     "fn": 3,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    },
+    "absent": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 3,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 3,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 1,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    }
+   },
+   "missed": [
+    "count:dining=1",
+    "pref:masterDressing",
+    "pref:guestEntrance",
+    "pref:big_hall",
+    "extra:office",
+    "extra:office.ext",
+    "extra:laundry",
+    "facade:glass",
+    "facade:wood",
+    "facade:modern",
+    "unsupported:garage"
+   ],
+   "wrong": [
+    "conflict:count-mismatch"
+   ],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [
+    "count-mismatch"
+   ],
+   "unclearClauses": [
+    "ابي villa modern على أرض 20x30",
+    "الشارع south",
+    "We are a young family",
+    "أنا وزوجتي وولدين وبنت",
+    "الباقي للأطفال",
+    "Majlis للرجال with separate entrance",
+    "و no women majlis needed لأن زوجتي تستقبل ضيوفها في الصالة",
+    "ابي home office بمدخل خارجي لأني أشتغل من البيت وعملائي يجون أحيانًا",
+    "Gym room لو ينفع",
+    "مو ضروري",
+    "The living room big and bright",
+    "أحب الإضاءة",
+    "Laundry room ضروري",
+    "we don't need it",
+    "الواجهة glass and wood",
+    "modern style",
+    "شي مثل البيوت اللي في كاليفورنيا",
+    "My wife works from home too sometimes",
+    "بس هي تستخدم الصالة",
+    "We also have a cat",
+    "so no carpet please",
+    "إذا فيه مجال ابي ceiling عالي شوي",
+    "Budget متوسطة",
+    "فلا تبالغون",
+    "Thanks a lot",
+    "أنتظر التصميم الأولي"
+   ]
+  },
+  {
+   "id": "L8",
+   "name": "طلبات مستحيلة — مقاسات أكبر من الأرض، دور واحد مع ماستر فوق، ملاصق وبعيد معًا",
+   "words": 157,
+   "interpretError": "راجع مساحة مجلس؛ المساحة المقبولة بين 4 و120 م².",
+   "f1": 0.867,
+   "precision": 0.929,
+   "recall": 0.813,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 3,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.75
+    },
+    "pref": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "extra": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "absent": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "dims": {
+     "tp": 2,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.667
+    },
+    "rule": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0.8,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 2,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.667
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    }
+   },
+   "missed": [
+    "count:kitchens=1",
+    "dim:majlis=12x16",
+    "conflict:area-exceeds-land"
+   ],
+   "wrong": [
+    "rule:floor:stairs:upper"
+   ],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [
+    "relation-contradiction",
+    "single-floor-two-floor-features"
+   ],
+   "unclearClauses": [
+    "الأرض عندي ١٥×٢٠ وشارعها من الجنوب",
+    "ما أبي درج",
+    "بعيدة عن الإزعاج",
+    "ترى أنا عارف إن الأرض صغيرة",
+    "بس أبي كل هذا يدخل بأي طريقة",
+    "إذا ما دخل قولوا لي وش الحل بدل ما تحذفون شي بدون ما تقولون",
+    "فالأبواب تكون عريضة لو سمحتوا",
+    "نحن عشرة أنفار في البيت",
+    "العزايم عندنا ما توقف طول السنة",
+    "أهم شي لا تصغرون المجلس",
+    "أبي الرد بسرعة لو سمحتوا لأننا مستعجلين على البناء"
+   ]
+  },
+  {
+   "id": "L9",
+   "name": "الشرقية — قصة طويلة وحشو كثير، ووصف للبيت القديم (ماضٍ) يجب ألا يُفهم طلبًا",
+   "words": 204,
+   "interpretError": null,
+   "f1": 0.765,
+   "precision": 0.867,
+   "recall": 0.684,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 3,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.75
+    },
+    "pref": {
+     "tp": 2,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.667
+    },
+    "extra": {
+     "tp": 3,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 4,
+     "fn": 3,
+     "fp": 1,
+     "precision": 0.8,
+     "recall": 0.571
+    },
+    "floors": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 1,
+     "fp": 0,
+     "precision": null,
+     "recall": 0
+    },
+    "unsupported": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 1,
+     "precision": 0,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    }
+   },
+   "missed": [
+    "count:dining=1",
+    "pref:guestEntrance",
+    "rule:place:kitchen:w",
+    "rule:away:kitchen+majlis",
+    "rule:cluster:kids",
+    "facade:stone"
+   ],
+   "wrong": [
+    "rule:place:kitchen:center",
+    "conflict:count-mismatch"
+   ],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [
+    "count-mismatch"
+   ],
+   "unclearClauses": [
+    "السلام عليكم ورحمة الله",
+    "الله يا أخوي قصتي طويلة شوي فاسمح لي",
+    "احنا ساكنين في الدمام من عشرين سنة في بيت شعبي قديم",
+    "البيت هذا تعبنا فيه",
+    "المجلس كان داخل البيت والضيوف يمرون من قدام الحريم",
+    "هذا شي ما نبيه يتكرر أبد",
+    "الحين الحمد لله اشترينا أرض في الخبر مساحتها ٢٠ في ٣٠",
+    "الشارع من الشرق",
+    "أنا أبي بيت يريحنا",
+    "احنا خمسة: أنا وأم العيال وثلاث بنات",
+    "هذا أهم شي عندي بعد تجربتنا",
+    "يكون في الخلف بعيد عن المجلس",
+    "بعيد عن المجلس",
+    "البنات يبون غرفهم جنب بعض",
+    "جنب بعض",
+    "جنب بعض",
+    "إذا فيه مجال مظلة للضيوف",
+    "بصراحة أنا ما أفهم في التصاميم",
+    "فاللي تشوفونه زين سووه",
+    "بس لا تنسون اللي قلته عن المجلس والمطبخ",
+    "شي أخير",
+    "الجيران عندهم بيت واجهته حجر وطالع حلو",
+    "دي تكون واجهتنا نفسه حجر بس بلون فاتح",
+    "الله يجزاكم خير ويعطيكم العافية"
+   ]
+  },
+  {
+   "id": "L10",
+   "name": "نفي كثيف — العميل يبدأ بما لا يريده",
+   "words": 154,
+   "interpretError": "راجع مساحة حمام؛ المساحة المقبولة بين 4 و120 م².",
+   "f1": 0.927,
+   "precision": 0.95,
+   "recall": 0.905,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 3,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.75
+    },
+    "pref": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "extra": {
+     "tp": 3,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 1,
+     "fp": 1,
+     "precision": 0,
+     "recall": 0
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    }
+   },
+   "missed": [
+    "count:kitchens=1",
+    "facade:stone"
+   ],
+   "wrong": [
+    "facade:glass"
+   ],
+   "levels": [],
+   "dropped": 1,
+   "conflicts": [],
+   "unclearClauses": [
+    "أبي أوضح من البداية وش اللي ما أبيه",
+    "لأن المكاتب السابقة كانت تحط أشياء ما طلبتها وأضطر أرجع وأشرح من جديد",
+    "الأرض ١٨×٢٨ والشارع جنوبي",
+    "أبيها حجر",
+    "صار البيت أكبر من حاجتي وارتفعت التكلفة علي",
+    "أرجو ما تضيفون شي من عندكم",
+    "اللي ما ذكرته معناه ما أبيه"
+   ]
+  },
+  {
+   "id": "L11",
+   "name": "درجات الإلزام — لازم/يفضل/لو أمكن/ممنوع/ياليت",
+   "words": 151,
+   "interpretError": null,
+   "f1": 1,
+   "precision": 1,
+   "recall": 1,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "extra": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "dims": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "rule": {
+     "tp": 7,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    }
+   },
+   "missed": [],
+   "wrong": [],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [],
+   "unclearClauses": [
+    "عندي أرض ٢٠×٢٥ والشارع شمالي",
+    "عشان تعرف وضعنا",
+    "احنا ستة: أنا وزوجتي وأربعة عيال",
+    "الحين الأولويات",
+    "أرجو تنتبه للفرق بينها لأن مو كلها بنفس الأهمية عندي",
+    "هذا شرط ما أتنازل عنه",
+    "لكن مو ضروري إذا ما ضبط مع باقي التصميم",
+    "هذا خط أحمر عندي",
+    "أي شي غير هذا اتركه لخبرتكم",
+    "بس لا تخالفون اللي قلت عنه لازم أو ممنوع",
+    "إذا اضطريتوا تتنازلون عن شي فتنازلوا عن اللي قلت يفضل أو لو أمكن",
+    "قولوا لي وش اللي تنازلتوا عنه بالضبط"
+   ]
+  },
+  {
+   "id": "L12",
+   "name": "مقاسات بصيغ مختلفة — فاصلة عشرية عربية، «في»، by، «بعرض وطول»، سعة أشخاص",
+   "words": 156,
+   "interpretError": null,
+   "f1": 0.968,
+   "precision": 1,
+   "recall": 0.938,
+   "levelAccuracy": 1,
+   "per": {
+    "count": {
+     "tp": 4,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "pref": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "extra": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "absent": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "dims": {
+     "tp": 5,
+     "fn": 1,
+     "fp": 0,
+     "precision": 1,
+     "recall": 0.833
+    },
+    "rule": {
+     "tp": 2,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "floors": {
+     "tp": 1,
+     "fn": 0,
+     "fp": 0,
+     "precision": 1,
+     "recall": 1
+    },
+    "facade": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unsupported": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "conflict": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    },
+    "unclear": {
+     "tp": 0,
+     "fn": 0,
+     "fp": 0,
+     "precision": null,
+     "recall": null
+    }
+   },
+   "missed": [
+    "dim:bedroom=4x4"
+   ],
+   "wrong": [],
+   "levels": [],
+   "dropped": 0,
+   "conflicts": [],
+   "unclearClauses": [
+    "أنا مهندس مدني وأعرف وش أبي بالضبط",
+    "فبعطيك المقاسات واحد واحد عشان ما يصير لبس",
+    "الأرض ٢٢ × ٣٠ م",
+    "الشارع جنوبي",
+    "كل وحدة ٤×٤ تقريبًا",
+    "المقاسات اللي عطيتك هي الصافية من داخل الجدران مو من برا",
+    "فانتبه لها",
+    "إذا فيه مقاس ما يركب مع الأرض قولي قبل لا ترسم",
+    "إذا تحتاج تزيد أو تنقص نص متر هنا أو هناك ما عندي مشكلة",
+    "للعلم أنا اشتغلت على مشاريع سكنية كثيرة",
+    "أعرف إن أغلب المكاتب تكبّر الصالة على حساب الغرف",
+    "أنا ما أبي هذا",
+    "ارتفاع السقف ٣٫٢ م لو سمحت",
+    "الباقي فيه مرونة شوي"
+   ]
+  }
+ ],
+ "sessions": [
+  {
+   "id": "S1",
+   "name": "مثال المالك: نقل المطبخ ثم تكبير المجلس ثم إرجاع المطبخ ثم حذف المكتب ثم الواجهة ثم «غرفة البنت»",
+   "initMs": 52442,
+   "turns": [
+    {
+     "n": 1,
+     "text": "انقل المطبخ ورا جنب الطعام",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "طلبك «المطبخ» في الخلف» متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه. اختر رقمًا: (1) أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده.",
+     "questions": [
+      "طلبك «المطبخ» في الخلف» متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه. اختر رقمًا: (1) أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده."
+     ],
+     "ifConsented": {
+      "happened": true,
+      "violations": [
+       {
+        "name": "مدخل الرجال",
+        "areaPct": 49.53,
+        "shift": 8.75
+       },
+       {
+        "name": "رواق",
+        "areaPct": -8.54,
+        "shift": 1.98
+       },
+       {
+        "name": "دورة مياه الرجال",
+        "areaPct": -14.39,
+        "shift": 8.19
+       },
+       {
+        "name": "مدخل العائلة",
+        "areaPct": 52.08,
+        "shift": 5.13
+       },
+       {
+        "name": "المكتب",
+        "areaPct": 133.08,
+        "shift": 9.34
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": -6.86,
+        "shift": 17.63
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": 0,
+        "shift": 22.95
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 28.67,
+        "shift": 4.17
+       },
+       {
+        "name": "المجلس",
+        "areaPct": -9.38,
+        "shift": 9.36
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": 0.6,
+        "shift": 6.35
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 3.38
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 7.34
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 5.35,
+        "shift": 13.61
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": -7.7,
+        "shift": 11.2
+       },
+       {
+        "name": "حمام غرفة 4",
+        "areaPct": 0,
+        "shift": 11.88
+       },
+       {
+        "name": "غرفة نوم 4",
+        "areaPct": -9.38,
+        "shift": 16.43
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 0,
+        "shift": 9.09
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": 0,
+        "shift": 4.98
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": -9.38,
+        "shift": 8.16
+       },
+       {
+        "name": "دورة مياه"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "side",
+       "why": "مركز الغرفة ليس في نصف تلك الجهة",
+       "measured": {
+        "compass": "n",
+        "frac": 0.5,
+        "edgeGap": 8.11,
+        "exteriorWallToward": false
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.3
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.3
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«المطبخ» في الخلف"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 18660,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 136,
+       "touched": 0,
+       "total": 136
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 63
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 39
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 136 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 62,
+      "added": 59,
+      "removed": 70,
+      "unchanged": 4,
+      "touched": 191,
+      "total": 195
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "كبّر المجلس ٦×٧",
+     "outcome": "error",
+     "mode": "regenerated",
+     "summary": null,
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "dims",
+       "why": "المقاس 4.26×6.67 والمطلوب 6×7 (±0.35)",
+       "measured": {
+        "w": 4.26,
+        "l": 6.67,
+        "area": 28.43
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.3
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.3
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": null,
+      "reused": null
+     },
+     "understood": [],
+     "error": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (16.74 × 25.24 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 234 م².",
+     "ms": 19949,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 136,
+       "touched": 0,
+       "total": 136
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 63
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 39
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 136 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "رجّع المطبخ مثل أول",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "اختر رقم الخيار حتى لا أنفّذ بالتخمين. طلبك «المطبخ» في الخلف» متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه. اختر رقمًا: (1) أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده.",
+     "questions": [
+      "طلبك «المطبخ» في الخلف» متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه. اختر رقمًا: (1) أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده."
+     ],
+     "ifConsented": {
+      "happened": false,
+      "violations": [
+       {
+        "name": "مدخل الرجال",
+        "areaPct": 49.53,
+        "shift": 8.75
+       },
+       {
+        "name": "رواق",
+        "areaPct": -8.54,
+        "shift": 1.98
+       },
+       {
+        "name": "دورة مياه الرجال",
+        "areaPct": -14.39,
+        "shift": 8.19
+       },
+       {
+        "name": "مدخل العائلة",
+        "areaPct": 52.08,
+        "shift": 5.13
+       },
+       {
+        "name": "المكتب",
+        "areaPct": 133.08,
+        "shift": 9.34
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": -6.86,
+        "shift": 17.63
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": 0,
+        "shift": 22.95
+       },
+       {
+        "name": "صالة الطعام والمقلط",
+        "areaPct": -26.09,
+        "shift": 12.23
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 28.67,
+        "shift": 4.17
+       },
+       {
+        "name": "المجلس",
+        "areaPct": -9.38,
+        "shift": 9.36
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": 0.6,
+        "shift": 6.35
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 3.38
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 7.34
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 5.35,
+        "shift": 13.61
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": -7.7,
+        "shift": 11.2
+       },
+       {
+        "name": "حمام غرفة 4",
+        "areaPct": 0,
+        "shift": 11.88
+       },
+       {
+        "name": "غرفة نوم 4",
+        "areaPct": -9.38,
+        "shift": 16.43
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 0,
+        "shift": 9.09
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": 0,
+        "shift": 4.98
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": -9.38,
+        "shift": 8.16
+       },
+       {
+        "name": "دورة مياه"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.3
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.3
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 74,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 136,
+       "touched": 0,
+       "total": 136
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 63
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 39
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 136 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 62,
+      "added": 59,
+      "removed": 70,
+      "unchanged": 4,
+      "touched": 191,
+      "total": 195
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "احذف المكتب",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "تركتُ خيارات طلبك السابق «انقل المطبخ ورا جنب الطعام» دون تنفيذ (المخطط كما كان فيها) لأنك طلبت شيئًا آخر. نُفّذ: حذف «المكتب» (أُزيلت «المكتب» من المبنى نفسه (كانت على طرف الغلاف)، فصغر المسطح 12.86 م² ولم تتغير غرفة أخرى). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 1,
+     "patternKept": true,
+     "difference": 0.04,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.3
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.3
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "حذف «المكتب»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "بدون مكتب",
+      "حذف «المكتب»"
+     ],
+     "error": null,
+     "ms": 792,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 6,
+       "unchanged": 130,
+       "touched": 6,
+       "total": 136
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 2,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 3,
+        "unchanged": 44
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 1,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 39
+       }
+      },
+      "region": {
+       "x0": 12.02,
+       "x1": 16.66,
+       "y0": 14.56,
+       "y1": 17.88
+      },
+      "summary": "البصمة الهندسية: تغيّر 6 عناصر (جداران، 3 فتحات، غرفة)، وبقي ثابتًا حرفيًا 130 عنصرًا.",
+      "rooms": [
+       "«المكتب»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 6,
+      "unchanged": 130,
+      "touched": 6,
+      "total": 136
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "غيّر الواجهة حجر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر على كل الواجهات الظاهرة والدروة (الافتراضي)، والمخطط نفسه حرفيًا (لم يتحرك جدار) — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.3
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.3
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الواجهة: حجر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+      "الواجهة: حجر"
+     ],
+     "error": null,
+     "ms": 285,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 129,
+       "touched": 1,
+       "total": 130
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 44
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 39
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 129 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 129,
+      "touched": 1,
+      "total": 130
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 6,
+     "text": "خل كل شي مثل ما هو بس كبّر غرفة البنت",
+     "outcome": "asked",
+     "mode": "clarify",
+     "summary": null,
+     "questions": [
+      "أي غرفة تقصد بـ«غرفة بنت»؟ في المخطط «غرفة نوم 2» و«غرفة نوم 3» و«غرفة نوم 4» — اكتب اسمها أو رقمها (مثل «غرفة نوم 2») ولن أغيّر شيئًا قبلها."
+     ],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.3
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.3
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 44,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 130,
+       "touched": 0,
+       "total": 130
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 44
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 39
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 130 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S2",
+   "name": "نقل الخادمة، إبعاد الماستر، زيادة غرفة ثم التراجع عنها، تكبير الصالة",
+   "initMs": 44101,
+   "turns": [
+    {
+     "n": 1,
+     "text": "أبي غرفة الخادمة جنب المطبخ",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "لم يحتج تغييرًا: غرفة خادمة — «غرفة الخادمة» موجودة في المخطط أصلًا؛ «غرفة الخادمة» بجوار «المطبخ». بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 16.7,
+       "d": 19.75
+      },
+      "after": {
+       "w": 16.7,
+       "d": 19.75
+      }
+     },
+     "idsStable": "25/25",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "غرفة خادمة",
+       "«غرفة الخادمة» بجوار «المطبخ»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "غرفة خادمة",
+      "«غرفة الخادمة» بجوار «المطبخ»",
+      "غرفة خادمة",
+      "«غرفة الخادمة» بجوار «المطبخ»"
+     ],
+     "error": null,
+     "ms": 669,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 154,
+       "touched": 0,
+       "total": 154
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 75
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 50
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 154 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 154,
+      "touched": 0,
+      "total": 154
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "خل الماستر بعيدة عن المجلس",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "طلبك متحقق أصلًا في هذا المخطط: «غرفة النوم الرئيسية» بعيدًا عن «المجلس»؛ فلم أغيّر شيئًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 16.7,
+       "d": 19.75
+      },
+      "after": {
+       "w": 16.7,
+       "d": 19.75
+      }
+     },
+     "idsStable": "25/25",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«غرفة النوم الرئيسية» بعيدًا عن «المجلس»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "غرفة نوم رئيسية (ماستر)",
+      "«غرفة النوم الرئيسية» بعيدًا عن «المجلس»",
+      "«غرفة النوم الرئيسية» بعيدًا عن «المجلس»"
+     ],
+     "error": null,
+     "ms": 342,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 154,
+       "touched": 0,
+       "total": 154
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 75
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 50
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 154 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 154,
+      "touched": 0,
+      "total": 154
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "زيد غرفة نوم وحدة",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "طلبك «زيادة غرفة نوم واحدة» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — لكنه لا يحقق بندًا آخر من طلبك.",
+     "questions": [
+      "طلبك «زيادة غرفة نوم واحدة» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — لكنه لا يحقق بندًا آخر من طلبك."
+     ],
+     "ifConsented": {
+      "happened": true,
+      "violations": [
+       {
+        "name": "مدخل العائلة",
+        "areaPct": 46.41,
+        "shift": 4.01
+       },
+       {
+        "name": "دورة مياه النساء",
+        "areaPct": -6.76,
+        "shift": 5.67
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 15.38,
+        "shift": 4.53
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": 2.11,
+        "shift": 2.05
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": -0.87,
+        "shift": 4.75
+       },
+       {
+        "name": "مدخل الرجال",
+        "areaPct": 27.86,
+        "shift": 3.62
+       },
+       {
+        "name": "مجلس الرجال",
+        "areaPct": -17.46,
+        "shift": 5.55
+       },
+       {
+        "name": "صالة الطعام والمقلط",
+        "areaPct": 44.52,
+        "shift": 6.14
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": 8.82,
+        "shift": 7.42
+       },
+       {
+        "name": "المطبخ",
+        "areaPct": 17,
+        "shift": 6.29
+       },
+       {
+        "name": "غرفة نوم 4",
+        "areaPct": -25.05,
+        "shift": 9.36
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 1.49
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 6.18
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 21.34,
+        "shift": 10.38
+       },
+       {
+        "name": "دورة مياه الرجال",
+        "areaPct": 16.81,
+        "shift": 4.97
+       },
+       {
+        "name": "غرفة الخادمة",
+        "areaPct": -23.05,
+        "shift": 7.13
+       },
+       {
+        "name": "مجلس النساء",
+        "areaPct": 16.6,
+        "shift": 2.64
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": 42.07,
+        "shift": 5.33
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": 5.8,
+        "shift": 3.7
+       },
+       {
+        "name": "دورة مياه"
+       },
+       {
+        "name": "ممر النساء"
+       },
+       {
+        "name": "غرفة الملابس"
+       },
+       {
+        "name": "خزانة"
+       },
+       {
+        "name": "حمام الخادمة"
+       },
+       {
+        "name": "دورة مياه مشتركة"
+       },
+       {
+        "name": "الحوش الداخلي"
+       },
+       {
+        "name": "حمام الخادمة والغسيل"
+       },
+       {
+        "name": "مغاسل"
+       },
+       {
+        "name": "ممر الغرف"
+       },
+       {
+        "name": "مدخل الجناح"
+       },
+       {
+        "name": "غرفة ملابس"
+       },
+       {
+        "name": "حمام غرفة 4"
+       },
+       {
+        "name": "حمام غرفة 3"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "count",
+       "why": "العدد 4 والمطلوب 5",
+       "measured": {
+        "n": 4
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 16.7,
+       "d": 19.75
+      },
+      "after": {
+       "w": 16.7,
+       "d": 19.75
+      }
+     },
+     "idsStable": "25/25",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "زيادة غرفة نوم واحدة"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 19265,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 154,
+       "touched": 0,
+       "total": 154
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 75
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 50
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 154 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 68,
+      "added": 99,
+      "removed": 82,
+      "unchanged": 4,
+      "touched": 249,
+      "total": 253
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "لا خلاص رجعها أربع غرف",
+     "outcome": "applied",
+     "mode": "declined",
+     "summary": "تمام، أبقيت المخطط كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 16.7,
+       "d": 19.75
+      },
+      "after": {
+       "w": 16.7,
+       "d": 19.75
+      }
+     },
+     "idsStable": "25/25",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 45,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 154,
+       "touched": 0,
+       "total": 154
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 75
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 50
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 154 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "الصالة أكبر شوي",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «الصالة» أكبر قليلًا (أُزيح الجدار الخارجي للخارج 0.95 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 4,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 16.7,
+       "d": 19.75
+      },
+      "after": {
+       "w": 16.7,
+       "d": 19.75
+      }
+     },
+     "idsStable": "25/25",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«الصالة» أكبر قليلًا"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الصالة أكبر",
+      "«الصالة» أكبر قليلًا"
+     ],
+     "error": null,
+     "ms": 407,
+     "fingerprint": {
+      "counts": {
+       "changed": 4,
+       "added": 1,
+       "removed": 1,
+       "unchanged": 149,
+       "touched": 6,
+       "total": 155
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 1,
+        "unchanged": 74
+       },
+       "opening": {
+        "changed": 3,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 24
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 10,
+        "unchanged": 31
+       }
+      },
+      "region": {
+       "x0": 6.48,
+       "x1": 13.39,
+       "y0": 9.53,
+       "y1": 17.63
+      },
+      "summary": "البصمة الهندسية: تغيّر 6 عناصر (جداران، 3 فتحات، غرفة)، وبقي ثابتًا حرفيًا 149 عنصرًا؛ وتغيّر من الأثاث 10 قطع أثاث.",
+      "rooms": [
+       "«الصالة»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 4,
+      "added": 1,
+      "removed": 1,
+      "unchanged": 149,
+      "touched": 6,
+      "total": 155
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S3",
+   "name": "الواجهة وحدها مرتين، ثم فتح المطبخ ثم «رجّعه مقفل»",
+   "initMs": 38927,
+   "turns": [
+    {
+     "n": 1,
+     "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر على كل الواجهات الظاهرة والدروة (الافتراضي)، والمخطط نفسه حرفيًا (لم يتحرك جدار) — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الواجهة: حجر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الإبقاء على التوزيع الحالي كما هو",
+      "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+      "الواجهة: حجر"
+     ],
+     "error": null,
+     "ms": 399,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 127,
+       "touched": 1,
+       "total": 128
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 127 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 127,
+      "touched": 1,
+      "total": 128
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "خل الواجهة نجدي",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: الواجهة: نجدي (حُفظ طلب الواجهة في المستند، والمخطط نفسه حرفيًا (لم يتحرك جدار)). محفوظ ولم يظهر في المجسّم بعد: طراز الواجهة: نجدي. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الواجهة: نجدي"
+      ],
+      "failed": [],
+      "pending": [
+       "طراز الواجهة: نجدي"
+      ],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الواجهة: نجدي (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+      "الواجهة: نجدي"
+     ],
+     "error": null,
+     "ms": 378,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 127,
+       "touched": 1,
+       "total": 128
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 127 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 127,
+      "touched": 1,
+      "total": 128
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "المطبخ يكون مفتوح على الطعام",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "طلبك «المطبخ مفتوح على الطعام» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده.",
+     "questions": [
+      "طلبك «المطبخ مفتوح على الطعام» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده."
+     ],
+     "ifConsented": {
+      "happened": true,
+      "violations": [
+       {
+        "name": "مدخل العائلة",
+        "areaPct": 8.11,
+        "shift": 0.3
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 12.23,
+        "shift": 1.46
+       },
+       {
+        "name": "دورة مياه",
+        "areaPct": 227.77,
+        "shift": 9.48
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": -0.24,
+        "shift": 0.85
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 0.85
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 0.85
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": 0,
+        "shift": 0.85
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": 8.34,
+        "shift": 0.75
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": 0,
+        "shift": 0.85
+       },
+       {
+        "name": "المجلس",
+        "areaPct": 35.82,
+        "shift": 1.06
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": -27.72,
+        "shift": 0.83
+       },
+       {
+        "name": "مدخل الرجال",
+        "areaPct": 0,
+        "shift": 2.1
+       },
+       {
+        "name": "دورة مياه الرجال",
+        "areaPct": 0,
+        "shift": 2.1
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": 0,
+        "shift": 0.85
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 0,
+        "shift": 0.85
+       },
+       {
+        "name": "خزانة"
+       },
+       {
+        "name": "خزانة ملابس الرئيسية"
+       },
+       {
+        "name": "ممر"
+       },
+       {
+        "name": "غرفة ملابس"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "openTo",
+       "why": "لا فتحة مفتوحة بينهما",
+       "measured": {
+        "openings": [
+         "door"
+        ],
+        "sharedWall": true
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "المطبخ مفتوح على الطعام"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 21666,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 128,
+       "touched": 0,
+       "total": 128
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 128 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 60,
+      "added": 46,
+      "removed": 54,
+      "unchanged": 14,
+      "touched": 160,
+      "total": 174
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "لا لا رجّعه مقفل",
+     "outcome": "applied",
+     "mode": "declined",
+     "summary": "تمام، أبقيت المخطط كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 33,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 128,
+       "touched": 0,
+       "total": 128
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 128 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S4",
+   "name": "مقاسات متتابعة: الماستر ثم المطبخ ثم تصغير المجلس ثم الصالة ثم غرفة نوم بعينها",
+   "initMs": 40372,
+   "turns": [
+    {
+     "n": 1,
+     "text": "غرفة النوم الرئيسية ٥×٦",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «غرفة النوم الرئيسية» 5×6 م (أُزيح الجدار الخارجي للخارج 1.9 م (داخل خطوط الارتداد)، أُزيح الجدار المشترك مع «حمام الرئيسية» و«خزانة ملابس الرئيسية» 0.35 م). تغيّر أيضًا لأن التعديل يحتاجه: «حمام الرئيسية» كبرت من 5.27 إلى 6.18 م² (+17.37٪)؛ «خزانة ملابس الرئيسية» كبرت من 2.78 إلى 3.26 م² (+17.37٪). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [
+      "حمام الرئيسية",
+      "خزانة ملابس الرئيسية"
+     ],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0.07,
+     "envelope": {
+      "before": {
+       "w": 15.4,
+       "d": 18.9
+      },
+      "after": {
+       "w": 17.3,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«غرفة النوم الرئيسية» 5×6 م"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "غرفة نوم رئيسية (ماستر)",
+      "الغرفة الرئيسية 5×6 م (30 م²)",
+      "«غرفة النوم الرئيسية» 5×6 م"
+     ],
+     "error": null,
+     "ms": 2104,
+     "fingerprint": {
+      "counts": {
+       "changed": 6,
+       "added": 6,
+       "removed": 3,
+       "unchanged": 134,
+       "touched": 15,
+       "total": 149
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 6,
+        "removed": 3,
+        "unchanged": 65
+       },
+       "opening": {
+        "changed": 3,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 45
+       },
+       "room": {
+        "changed": 3,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 11,
+        "unchanged": 25
+       }
+      },
+      "region": {
+       "x0": 12.73,
+       "x1": 19.06,
+       "y0": 17.88,
+       "y1": 25.53
+      },
+      "summary": "البصمة الهندسية: تغيّر 15 عنصرًا (9 جدران، 3 فتحات، 3 غرف)، وبقي ثابتًا حرفيًا 134 عنصرًا؛ وتغيّر من الأثاث 11 قطعةَ أثاث.",
+      "rooms": [
+       "«غرفة النوم الرئيسية»",
+       "«حمام الرئيسية»",
+       "«خزانة ملابس الرئيسية»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 6,
+      "added": 6,
+      "removed": 3,
+      "unchanged": 134,
+      "touched": 15,
+      "total": 149
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "المطبخ ٤×٥",
+     "outcome": "applied",
+     "mode": "not-done",
+     "summary": "لم يُنفَّذ: «المطبخ» 4×5 م — لم أجد جدارًا يمكن إزاحته لـ«المطبخ» دون كسر بوابة أو تغيير غير مقبول (41 محاولة: بوابة راسبة: نافذة خارجية أو على فناء لكل غرفة معيشية («المطبخ» بلا نافذة على الخارج أو على فناء)، أدنى عرض صافٍ لكل نوع غرفة (عرض «ممر الغرف» 0.87 م أقل من 0.9 م (قيمة تصميمية غير متحققة نظاميًا))، كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران) (الفتحة o36 (window) تعبر تقاطع جدارين)، بوابة راسبة: نافذة خارجية أو على فناء لكل غرفة معيشية («المطبخ» بلا نافذة على الخارج أو على فناء)، أدنى عرض صافٍ لكل نوع غرفة (عرض «ممر الغرف» 0.89 م أقل من 0.9 م (قيمة تصميمية غير متحققة نظاميًا))، كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران) (الفتحة o36 (window) تعبر تقاطع جدارين)).. جرّبت إعادة توزيع البيت فلم تحقق الطلب أيضًا، فأبقيت المخطط المعروض كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "dims",
+       "why": "المقاس 3.18×5.88 والمطلوب 4×5 (±0.35)",
+       "measured": {
+        "w": 3.18,
+        "l": 5.88,
+        "area": 18.64
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 17.3,
+       "d": 18.9
+      },
+      "after": {
+       "w": 17.3,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«المطبخ» 4×5 م"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [],
+     "error": null,
+     "ms": 17154,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 145,
+       "touched": 0,
+       "total": 145
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 70
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 48
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 145 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "المجلس أصغر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «المجلس» أصغر (أُزيح الجدار الخارجي للداخل 0.9 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 17.3,
+       "d": 18.9
+      },
+      "after": {
+       "w": 17.3,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«المجلس» أصغر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "المجلس أصغر",
+      "«المجلس» أصغر"
+     ],
+     "error": null,
+     "ms": 783,
+     "fingerprint": {
+      "counts": {
+       "changed": 3,
+       "added": 1,
+       "removed": 3,
+       "unchanged": 139,
+       "touched": 7,
+       "total": 146
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 3,
+        "unchanged": 67
+       },
+       "opening": {
+        "changed": 2,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 46
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       }
+      },
+      "region": {
+       "x0": 1.51,
+       "x1": 7.63,
+       "y0": 6.63,
+       "y1": 11.21
+      },
+      "summary": "البصمة الهندسية: تغيّر 7 عناصر (4 جدران، فتحتان، غرفة)، وبقي ثابتًا حرفيًا 139 عنصرًا.",
+      "rooms": [
+       "«المجلس»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 3,
+      "added": 1,
+      "removed": 3,
+      "unchanged": 139,
+      "touched": 7,
+      "total": 146
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "خل كل شي زي ما هو بس الصالة أوسع",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «الصالة» أوسع (أُزيح الجدار الخارجي للخارج 0.85 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 17.3,
+       "d": 18.9
+      },
+      "after": {
+       "w": 17.3,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«الصالة» أوسع"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الصالة أكبر",
+      "«الصالة» أوسع"
+     ],
+     "error": null,
+     "ms": 1120,
+     "fingerprint": {
+      "counts": {
+       "changed": 4,
+       "added": 1,
+       "removed": 1,
+       "unchanged": 140,
+       "touched": 6,
+       "total": 146
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 1,
+        "unchanged": 69
+       },
+       "opening": {
+        "changed": 3,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 45
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       }
+      },
+      "region": {
+       "x0": 9.23,
+       "x1": 16.76,
+       "y0": 9.78,
+       "y1": 18.01
+      },
+      "summary": "البصمة الهندسية: تغيّر 6 عناصر (جداران، 3 فتحات، غرفة)، وبقي ثابتًا حرفيًا 140 عنصرًا.",
+      "rooms": [
+       "«الصالة»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 4,
+      "added": 1,
+      "removed": 1,
+      "unchanged": 140,
+      "touched": 6,
+      "total": 146
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "ودي غرفة نوم ٢ تكون ٤×٥ والباقي لا تلمسها",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «غرفة نوم 2» 4×5 م (أُزيح الجدار المشترك مع «غرفة نوم 4» 0.15 م، أُزيح الجدار الخارجي للخارج 1.15 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0.02,
+     "envelope": {
+      "before": {
+       "w": 17.3,
+       "d": 18.9
+      },
+      "after": {
+       "w": 17.3,
+       "d": 20.05
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«غرفة نوم 2» 4×5 م"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "«غرفة نوم 2» 4×5 م"
+     ],
+     "error": null,
+     "ms": 1136,
+     "fingerprint": {
+      "counts": {
+       "changed": 3,
+       "added": 4,
+       "removed": 3,
+       "unchanged": 141,
+       "touched": 10,
+       "total": 151
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 4,
+        "removed": 3,
+        "unchanged": 69
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 2,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 25
+       }
+      },
+      "region": {
+       "x0": 1.63,
+       "x1": 9.03,
+       "y0": 19.38,
+       "y1": 26.81
+      },
+      "summary": "البصمة الهندسية: تغيّر 10 عناصر (7 جدران، فتحة، غرفتان)، وبقي ثابتًا حرفيًا 141 عنصرًا.",
+      "rooms": [
+       "«غرفة نوم 2»",
+       "«غرفة نوم 4»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 3,
+      "added": 4,
+      "removed": 3,
+      "unchanged": 141,
+      "touched": 10,
+      "total": 151
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S5",
+   "name": "إضافة وحذف: غسيل، مصلى قرب المجلس، «شيل المصلى»، سائق بحمام، المجلس يمين الداخل",
+   "initMs": 36244,
+   "turns": [
+    {
+     "n": 1,
+     "text": "أبي غرفة غسيل",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: إضافة غرفة غسيل (أُضيفت غرفة الغسيل امتدادًا للمبنى ملاصقة لـ«المطبخ» وبابها إليها (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 1,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "إضافة غرفة غسيل"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "غرفة غسيل",
+      "إضافة غرفة غسيل"
+     ],
+     "error": null,
+     "ms": 1492,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 5,
+       "removed": 1,
+       "unchanged": 126,
+       "touched": 7,
+       "total": 133
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 2,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 1,
+        "added": 2,
+        "removed": 1,
+        "unchanged": 41
+       },
+       "room": {
+        "changed": 0,
+        "added": 1,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": {
+       "x0": 3.16,
+       "x1": 7.01,
+       "y0": 10.96,
+       "y1": 13.53
+      },
+      "summary": "البصمة الهندسية: تغيّر 7 عناصر (جداران، 4 فتحات، غرفة)، وبقي ثابتًا حرفيًا 126 عنصرًا.",
+      "rooms": [
+       "«غرفة الغسيل»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 5,
+      "removed": 1,
+      "unchanged": 126,
+      "touched": 7,
+      "total": 133
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "أضف مصلى قريب من المجلس",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "طلبك «إضافة مصلى («المصلى» قرب «المجلس»)» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك. (لم أجد توزيعًا جديدًا آخر غير المعروض يحقق طلبك — بحثت بأنماط غير المعروضة كلها.)",
+     "questions": [
+      "طلبك «إضافة مصلى («المصلى» قرب «المجلس»)» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك. (لم أجد توزيعًا جديدًا آخر غير المعروض يحقق طلبك — بحثت بأنماط غير المعروضة كلها.)"
+     ],
+     "ifConsented": {
+      "happened": false,
+      "violations": []
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "present",
+       "why": "الغرفة غير موجودة",
+       "measured": {
+        "found": []
+       }
+      },
+      {
+       "type": "near",
+       "why": "غرفة غير موجودة",
+       "measured": null
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "إضافة مصلى («المصلى» قرب «المجلس»)"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 80997,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 134,
+       "touched": 0,
+       "total": 134
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 65
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 44
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 134 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 134,
+      "touched": 0,
+      "total": 134
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "شيل المصلى",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "تركتُ خيارات طلبك السابق «أضف مصلى قريب من المجلس» دون تنفيذ (المخطط كما كان فيها) لأنك طلبت شيئًا آخر. لم يحتج تغييرًا: بدون مصلى — غير موجود في المخطط المعروض أصلًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "بدون مصلى"
+     ],
+     "error": null,
+     "ms": 311,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 134,
+       "touched": 0,
+       "total": 134
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 65
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 44
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 134 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 134,
+      "touched": 0,
+      "total": 134
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "أبي غرفة سائق بحمام",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: إضافة غرفة سائق بحمام (أُضيفت غرفة السائق وحمامها امتدادًا للمبنى ملاصقة لـ«المجلس» وبابها إلى الخارج (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 1,
+     "patternKept": true,
+     "difference": 0.1,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 22.8
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "إضافة غرفة سائق بحمام"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "غرفة سائق بمدخل خارجي وحمام",
+      "إضافة غرفة سائق بحمام"
+     ],
+     "error": null,
+     "ms": 421,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 11,
+       "removed": 1,
+       "unchanged": 133,
+       "touched": 12,
+       "total": 145
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 5,
+        "removed": 0,
+        "unchanged": 65
+       },
+       "opening": {
+        "changed": 0,
+        "added": 4,
+        "removed": 1,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 0,
+        "added": 2,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": {
+       "x0": 1.63,
+       "x1": 6.6,
+       "y0": 3.06,
+       "y1": 6.76
+      },
+      "summary": "البصمة الهندسية: تغيّر 12 عنصرًا (5 جدران، 5 فتحات، غرفتان)، وبقي ثابتًا حرفيًا 133 عنصرًا.",
+      "rooms": [
+       "«حمام السائق»",
+       "«غرفة السائق»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 11,
+      "removed": 1,
+      "unchanged": 133,
+      "touched": 12,
+      "total": 145
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "خل المجلس على يمين الداخل",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "طلبك «المجلس» على يمين الداخل من الشارع» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك.",
+     "questions": [
+      "طلبك «المجلس» على يمين الداخل من الشارع» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك."
+     ],
+     "ifConsented": {
+      "happened": true,
+      "violations": [
+       {
+        "name": "صالة الطعام والمقلط",
+        "areaPct": 0.46,
+        "shift": 4.62
+       },
+       {
+        "name": "مدخل العائلة",
+        "areaPct": -14.04,
+        "shift": 6.52
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 7.14,
+        "shift": 5.32
+       },
+       {
+        "name": "دورة مياه",
+        "areaPct": 123.37,
+        "shift": 12.08
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": -1.02,
+        "shift": 1.79
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": 0.66,
+        "shift": 2.6
+       },
+       {
+        "name": "المطبخ",
+        "areaPct": -18.42,
+        "shift": 6.88
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": 7.16,
+        "shift": 1.22
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": -6.86,
+        "shift": 0.96
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": -8.84,
+        "shift": 0.56
+       },
+       {
+        "name": "غرفة الغسيل",
+        "areaPct": -1.29,
+        "shift": 10.15
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": -22.38,
+        "shift": 3.98
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": -22.38,
+        "shift": 3.65
+       },
+       {
+        "name": "حمام السائق",
+        "areaPct": -1.29,
+        "shift": 6.24
+       },
+       {
+        "name": "غرفة السائق",
+        "areaPct": 17.92,
+        "shift": 3.6
+       },
+       {
+        "name": "مدخل الجناح"
+       },
+       {
+        "name": "خزانة"
+       },
+       {
+        "name": "مدخل الجناح"
+       },
+       {
+        "name": "خزانة ملابس الرئيسية"
+       },
+       {
+        "name": "ممر"
+       },
+       {
+        "name": "ممر الغرف"
+       },
+       {
+        "name": "غرفة ملابس"
+       },
+       {
+        "name": "خزانة ملابس"
+       },
+       {
+        "name": "خزانة ملابس"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "side",
+       "why": "مركز الغرفة ليس في نصف تلك الجهة",
+       "measured": {
+        "compass": "e",
+        "frac": 0.22,
+        "edgeGap": 8.11,
+        "exteriorWallToward": false
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 22.8
+      },
+      "after": {
+       "w": 14.2,
+       "d": 22.8
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«المجلس» على يمين الداخل من الشارع"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 19667,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 146,
+       "touched": 0,
+       "total": 146
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 72
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 146 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 65,
+      "added": 69,
+      "removed": 70,
+      "unchanged": 11,
+      "touched": 204,
+      "total": 215
+     },
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S6",
+   "name": "مدخل شرقي: المطبخ في الخلف، الماستر شمالًا ثم إرجاعها، غرفة نوم 2 بمقاس، مدخل لمجلس النساء",
+   "initMs": 57162,
+   "turns": [
+    {
+     "n": 1,
+     "text": "المطبخ في الخلف",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "طلبك «المطبخ» في الخلف» متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه. اختر رقمًا: (1) أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط؛ (2) اعرض التصميم 2 — يحقق طلبك (تصميم آخر، لا تعديل لهذا)؛ (3) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده.",
+     "questions": [
+      "طلبك «المطبخ» في الخلف» متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه. اختر رقمًا: (1) أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط؛ (2) اعرض التصميم 2 — يحقق طلبك (تصميم آخر، لا تعديل لهذا)؛ (3) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده."
+     ],
+     "ifConsented": {
+      "happened": true,
+      "violations": [
+       {
+        "name": "صالة الطعام والمقلط",
+        "areaPct": -15.89,
+        "shift": 8.96
+       },
+       {
+        "name": "مدخل العائلة",
+        "areaPct": -4.03,
+        "shift": 2.65
+       },
+       {
+        "name": "ممر النساء",
+        "areaPct": 0,
+        "shift": 2.7
+       },
+       {
+        "name": "دورة مياه النساء",
+        "areaPct": 0.01,
+        "shift": 2.7
+       },
+       {
+        "name": "خزانة",
+        "areaPct": 3.16,
+        "shift": 5.94
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 17.01,
+        "shift": 4.45
+       },
+       {
+        "name": "ممر",
+        "areaPct": 0,
+        "shift": 4.85
+       },
+       {
+        "name": "دورة مياه",
+        "areaPct": 6.54,
+        "shift": 5.87
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": -1.46,
+        "shift": 0.84
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 0.57
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 5.35,
+        "shift": 0.83
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 2.25
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": -5.49,
+        "shift": 8.22
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": -1.77,
+        "shift": 0.9
+       },
+       {
+        "name": "حمام غرفة 4",
+        "areaPct": 0,
+        "shift": 6.55
+       },
+       {
+        "name": "غرفة نوم 4",
+        "areaPct": -7.2,
+        "shift": 6.55
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": -40.33,
+        "shift": 1.65
+       },
+       {
+        "name": "مجلس الرجال",
+        "areaPct": 44.55,
+        "shift": 0.05
+       },
+       {
+        "name": "غرفة الخادمة",
+        "areaPct": 10.48,
+        "shift": 8
+       },
+       {
+        "name": "مدخل الرجال",
+        "areaPct": 0,
+        "shift": 0.9
+       },
+       {
+        "name": "دورة مياه الرجال",
+        "areaPct": 0,
+        "shift": 0.9
+       },
+       {
+        "name": "مجلس النساء",
+        "areaPct": -5.36,
+        "shift": 2.82
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 0,
+        "shift": 8.25
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": 0,
+        "shift": 0.86
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": -7.2,
+        "shift": 0.85
+       },
+       {
+        "name": "حمام الخادمة"
+       },
+       {
+        "name": "حمام الخادمة والغسيل"
+       },
+       {
+        "name": "خزانة ملابس الرئيسية"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "side",
+       "why": "مركز الغرفة ليس في نصف تلك الجهة",
+       "measured": {
+        "compass": "w",
+        "frac": 0.45,
+        "edgeGap": 8.01,
+        "exteriorWallToward": true
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 19,
+       "d": 19.25
+      },
+      "after": {
+       "w": 19,
+       "d": 19.25
+      }
+     },
+     "idsStable": "27/27",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«المطبخ» في الخلف"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 22834,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 159,
+       "touched": 0,
+       "total": 159
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 79
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 49
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 27
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 46
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 159 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 73,
+      "added": 74,
+      "removed": 71,
+      "unchanged": 15,
+      "touched": 218,
+      "total": 233
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "الماستر في جهة الشمال",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "تركتُ خيارات طلبك السابق «المطبخ في الخلف» دون تنفيذ (المخطط كما كان فيها) لأنك طلبت شيئًا آخر. طلبك متحقق أصلًا في هذا المخطط: «غرفة النوم الرئيسية» في جهة الشمال؛ فلم أغيّر شيئًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 19,
+       "d": 19.25
+      },
+      "after": {
+       "w": 19,
+       "d": 19.25
+      }
+     },
+     "idsStable": "27/27",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«غرفة النوم الرئيسية» في جهة الشمال"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "غرفة نوم رئيسية (ماستر)",
+      "«غرفة النوم الرئيسية» في جهة الشمال",
+      "«غرفة النوم الرئيسية» في جهة الشمال"
+     ],
+     "error": null,
+     "ms": 289,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 159,
+       "touched": 0,
+       "total": 159
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 79
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 49
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 27
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 46
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 159 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 159,
+      "touched": 0,
+      "total": 159
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "رجّع الماستر مكانها الأول",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "لم يحتج تغييرًا: إرجاع «غرفة النوم الرئيسية» إلى ما كانت عليه في التصميم الأول — «غرفة النوم الرئيسية» في موضعها الأول أصلًا (مقيس)؛ لم أغيّر شيئًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 19,
+       "d": 19.25
+      },
+      "after": {
+       "w": 19,
+       "d": 19.25
+      }
+     },
+     "idsStable": "27/27",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "إرجاع «غرفة النوم الرئيسية» إلى ما كانت عليه في التصميم الأول"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "غرفة نوم رئيسية (ماستر)",
+      "إرجاع «غرفة النوم الرئيسية» إلى ما كانت عليه في التصميم الأول"
+     ],
+     "error": null,
+     "ms": 305,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 159,
+       "touched": 0,
+       "total": 159
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 79
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 49
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 27
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 46
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 159 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 159,
+      "touched": 0,
+      "total": 159
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "كبّر غرفة نوم ٢ لتصير ٤×٥",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «غرفة نوم 2» 4×5 م (أُزيح الجدار الخارجي للخارج 1.5 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 19,
+       "d": 19.25
+      },
+      "after": {
+       "w": 19,
+       "d": 19.25
+      }
+     },
+     "idsStable": "27/27",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«غرفة نوم 2» 4×5 م"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "«غرفة نوم 2» 4×5 م"
+     ],
+     "error": null,
+     "ms": 1917,
+     "fingerprint": {
+      "counts": {
+       "changed": 2,
+       "added": 3,
+       "removed": 1,
+       "unchanged": 156,
+       "touched": 6,
+       "total": 162
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 3,
+        "removed": 1,
+        "unchanged": 78
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 48
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 26
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 12,
+        "unchanged": 34
+       }
+      },
+      "region": {
+       "x0": 1.87,
+       "x1": 6.22,
+       "y0": 6.11,
+       "y1": 11.43
+      },
+      "summary": "البصمة الهندسية: تغيّر 6 عناصر (4 جدران، فتحة، غرفة)، وبقي ثابتًا حرفيًا 156 عنصرًا؛ وتغيّر من الأثاث 12 قطعةَ أثاث.",
+      "rooms": [
+       "«غرفة نوم 2»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 2,
+      "added": 3,
+      "removed": 1,
+      "unchanged": 156,
+      "touched": 6,
+      "total": 162
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "مجلس النساء أبيه بمدخل مستقل من برا",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «مجلس النساء» بمدخل خارجي مستقل (أُضيف لـ«مجلس النساء» باب خارجي مستقل على جدارها الشرقي). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 19,
+       "d": 19.25
+      },
+      "after": {
+       "w": 19,
+       "d": 19.25
+      }
+     },
+     "idsStable": "27/27",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«مجلس النساء» بمدخل خارجي مستقل"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "مدخل مستقل للعائلة/النساء",
+      "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+      "«مجلس النساء» بمدخل خارجي مستقل"
+     ],
+     "error": null,
+     "ms": 973,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 1,
+       "removed": 0,
+       "unchanged": 161,
+       "touched": 1,
+       "total": 162
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 81
+       },
+       "opening": {
+        "changed": 0,
+        "added": 1,
+        "removed": 0,
+        "unchanged": 49
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 27
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 34
+       }
+      },
+      "region": {
+       "x0": 20.75,
+       "x1": 21,
+       "y0": 17.86,
+       "y1": 18.76
+      },
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (فتحة)، وبقي ثابتًا حرفيًا 161 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 1,
+      "removed": 0,
+      "unchanged": 161,
+      "touched": 1,
+      "total": 162
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S7",
+   "name": "الأبواب والنوافذ: فتح باب بين المجلس والطعام ثم «سد الباب»، نقل باب غرفة 2، تكبير نافذة الصالة، باب موجود أصلًا",
+   "initMs": 44300,
+   "turns": [
+    {
+     "n": 1,
+     "text": "افتح باب بين المجلس والطعام",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "لم يحتج تغييرًا: باب بين «المجلس» و«صالة الطعام والمقلط» — بين «المجلس» و«صالة الطعام والمقلط» باب أصلًا؛ لم أغيّر شيئًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.4,
+       "d": 18.9
+      },
+      "after": {
+       "w": 15.4,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "باب بين «المجلس» و«صالة الطعام والمقلط»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "باب بين «المجلس» و«صالة الطعام والمقلط»"
+     ],
+     "error": null,
+     "ms": 288,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 143,
+       "touched": 0,
+       "total": 143
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 68
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 48
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 143 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 143,
+      "touched": 0,
+      "total": 143
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "سد الباب",
+     "outcome": "applied",
+     "mode": "not-done",
+     "summary": "لم يُنفَّذ: سدّ الباب الذي عُدّل في الطلب السابق. جرّبت إعادة توزيع البيت فلم تحقق الطلب أيضًا، فأبقيت المخطط المعروض كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "noDoorBetween",
+       "why": "ما زال بينهما باب",
+       "measured": {
+        "openings": [
+         "door"
+        ]
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.4,
+       "d": 18.9
+      },
+      "after": {
+       "w": 15.4,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "سدّ الباب الذي عُدّل في الطلب السابق"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [],
+     "error": null,
+     "ms": 444,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 143,
+       "touched": 0,
+       "total": 143
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 68
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 48
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 143 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "انقل باب غرفة 2",
+     "outcome": "applied",
+     "mode": "not-done",
+     "summary": "لم يُنفَّذ: نقل باب «غرفة نوم 2» — لم أجد موضعًا آخر لباب «غرفة نوم 2» دون كسر بوابة (الجدار المشترك لا يتسع لموضع آخر).. جرّبت إعادة توزيع البيت فلم تحقق الطلب أيضًا، فأبقيت المخطط المعروض كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "doorMoved",
+       "why": "أكبر إزاحة لباب الغرفة 0 م",
+       "measured": {
+        "moved": 0,
+        "doorsBefore": 1,
+        "doorsAfter": 1
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.4,
+       "d": 18.9
+      },
+      "after": {
+       "w": 15.4,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "نقل باب «غرفة نوم 2»"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [],
+     "error": null,
+     "ms": 360,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 143,
+       "touched": 0,
+       "total": 143
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 68
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 48
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 143 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "كبّر نافذة الصالة",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: تكبير نافذة «الصالة» (كُبّرت نافذة «الصالة» من 2.2 إلى 3 م (الارتفاع نفسه، على الجدار نفسه)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.4,
+       "d": 18.9
+      },
+      "after": {
+       "w": 15.4,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "تكبير نافذة «الصالة»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "تكبير نافذة «الصالة»"
+     ],
+     "error": null,
+     "ms": 529,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 142,
+       "touched": 1,
+       "total": 143
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 68
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": {
+       "x0": 13.31,
+       "x1": 13.56,
+       "y0": 10.69,
+       "y1": 13.69
+      },
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (فتحة)، وبقي ثابتًا حرفيًا 142 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 142,
+      "touched": 1,
+      "total": 143
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "افتح باب بين المطبخ والطعام",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "لم يحتج تغييرًا: باب بين «المطبخ» و«صالة الطعام والمقلط» — بين «المطبخ» و«صالة الطعام والمقلط» باب أصلًا؛ لم أغيّر شيئًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.4,
+       "d": 18.9
+      },
+      "after": {
+       "w": 15.4,
+       "d": 18.9
+      }
+     },
+     "idsStable": "23/23",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "باب بين «المطبخ» و«صالة الطعام والمقلط»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "باب بين «المطبخ» و«صالة الطعام والمقلط»"
+     ],
+     "error": null,
+     "ms": 354,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 143,
+       "touched": 0,
+       "total": 143
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 68
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 48
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 143 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 143,
+      "touched": 0,
+      "total": 143
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S8",
+   "name": "تعديلات متتابعة ثم «ارجع للنسخة الثانية» ثم «رجّع مثل أول بس خل تعديل المجلس»",
+   "initMs": 36636,
+   "turns": [
+    {
+     "n": 1,
+     "text": "كبّر نافذة الصالة",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: تكبير نافذة «الصالة» (كُبّرت نافذة «الصالة» من 2.2 إلى 3 م (الارتفاع نفسه، على الجدار نفسه)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "تكبير نافذة «الصالة»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "تكبير نافذة «الصالة»"
+     ],
+     "error": null,
+     "ms": 423,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 127,
+       "touched": 1,
+       "total": 128
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 42
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 30
+       }
+      },
+      "region": {
+       "x0": 15.71,
+       "x1": 15.96,
+       "y0": 12.66,
+       "y1": 15.66
+      },
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (فتحة)، وبقي ثابتًا حرفيًا 127 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 127,
+      "touched": 1,
+      "total": 128
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "المجلس أصغر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «المجلس» أصغر (أُزيح الجدار الخارجي للداخل 0.9 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«المجلس» أصغر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "المجلس أصغر",
+      "«المجلس» أصغر"
+     ],
+     "error": null,
+     "ms": 520,
+     "fingerprint": {
+      "counts": {
+       "changed": 2,
+       "added": 1,
+       "removed": 3,
+       "unchanged": 123,
+       "touched": 6,
+       "total": 129
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 3,
+        "unchanged": 58
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 42
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 19
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 10,
+        "unchanged": 20
+       }
+      },
+      "region": {
+       "x0": 1.51,
+       "x1": 7.78,
+       "y0": 6.63,
+       "y1": 11.08
+      },
+      "summary": "البصمة الهندسية: تغيّر 6 عناصر (4 جدران، فتحة، غرفة)، وبقي ثابتًا حرفيًا 123 عنصرًا؛ وتغيّر من الأثاث 10 قطع أثاث.",
+      "rooms": [
+       "«المجلس»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 2,
+      "added": 1,
+      "removed": 3,
+      "unchanged": 123,
+      "touched": 6,
+      "total": 129
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "غيّر الواجهة حجر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر على كل الواجهات الظاهرة والدروة (الافتراضي)، والمخطط نفسه حرفيًا (لم يتحرك جدار) — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الواجهة: حجر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+      "الواجهة: حجر"
+     ],
+     "error": null,
+     "ms": 213,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 127,
+       "touched": 1,
+       "total": 128
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 127 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 127,
+      "touched": 1,
+      "total": 128
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "ارجع للنسخة الثانية",
+     "outcome": "applied",
+     "mode": "restore",
+     "summary": "نُفّذ: الرجوع إلى النسخة 2 (رجعت إلى النسخة 2). الواجهة عادت إلى مادتها في ذلك التصميم (أُلغي «حجر»). وعادت معه إلى حالها في ذلك التصميم: «المجلس» كبرت من 21.3 إلى 25.08 م² (+17.75٪). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [
+      "المجلس"
+     ],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الرجوع إلى النسخة 2"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الرجوع إلى النسخة 2"
+     ],
+     "error": null,
+     "ms": 217,
+     "fingerprint": {
+      "counts": {
+       "changed": 3,
+       "added": 3,
+       "removed": 1,
+       "unchanged": 124,
+       "touched": 7,
+       "total": 131
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 3,
+        "removed": 1,
+        "unchanged": 60
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 42
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 19
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 10,
+        "removed": 0,
+        "unchanged": 20
+       }
+      },
+      "region": {
+       "x0": 1.51,
+       "x1": 7.78,
+       "y0": 6.63,
+       "y1": 11.08
+      },
+      "summary": "البصمة الهندسية: تغيّر 7 عناصر (4 جدران، فتحة، غرفة، الواجهة)، وبقي ثابتًا حرفيًا 124 عنصرًا؛ وتغيّر من الأثاث 10 قطع أثاث.",
+      "rooms": [
+       "«المجلس»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 3,
+      "added": 3,
+      "removed": 1,
+      "unchanged": 124,
+      "touched": 7,
+      "total": 131
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": {
+      "version": 2,
+      "identical": true,
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 128,
+       "touched": 0,
+       "total": 128
+      },
+      "replayedEdits": [],
+      "replayTouched": 0,
+      "originalTouched": 0,
+      "common": 0,
+      "summary_ar": "البصمة: الناتج مطابق للنسخة 2 حرفيًا (128 عنصرًا)."
+     }
+    },
+    {
+     "n": 5,
+     "text": "رجّع مثل أول بس خل تعديل المجلس",
+     "outcome": "applied",
+     "mode": "restore",
+     "summary": "نُفّذ: الرجوع إلى التصميم الأول مع الإبقاء على تعديل «المجلس» (رجعت إلى التصميم الأول (النسخة 1) وأعدت عليها: «المجلس» أصغر). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 14.2,
+       "d": 19.35
+      }
+     },
+     "idsStable": "20/20",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الرجوع إلى التصميم الأول مع الإبقاء على تعديل «المجلس»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الرجوع إلى التصميم الأول مع الإبقاء على تعديل «المجلس»"
+     ],
+     "error": null,
+     "ms": 364,
+     "fingerprint": {
+      "counts": {
+       "changed": 3,
+       "added": 1,
+       "removed": 3,
+       "unchanged": 122,
+       "touched": 7,
+       "total": 129
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 3,
+        "unchanged": 58
+       },
+       "opening": {
+        "changed": 2,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 19
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 10,
+        "unchanged": 20
+       }
+      },
+      "region": {
+       "x0": 1.51,
+       "x1": 15.96,
+       "y0": 6.63,
+       "y1": 15.66
+      },
+      "summary": "البصمة الهندسية: تغيّر 7 عناصر (4 جدران، فتحتان، غرفة)، وبقي ثابتًا حرفيًا 122 عنصرًا؛ وتغيّر من الأثاث 10 قطع أثاث.",
+      "rooms": [
+       "«المجلس»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 3,
+      "added": 1,
+      "removed": 3,
+      "unchanged": 122,
+      "touched": 7,
+      "total": 129
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": {
+      "version": 1,
+      "identical": false,
+      "counts": {
+       "changed": 2,
+       "added": 1,
+       "removed": 3,
+       "unchanged": 123,
+       "touched": 6,
+       "total": 129
+      },
+      "replayedEdits": [
+       "«المجلس» أصغر"
+      ],
+      "replayTouched": 6,
+      "originalTouched": 6,
+      "common": 6,
+      "summary_ar": "البصمة: الناتج لا يختلف عن النسخة 1 إلا في 6 عناصر أعاد تغييرها ««المجلس» أصغر» (6 منها هي نفسها التي غيّرها ذلك التعديل أول مرة من 6)، وبقي ثابتًا حرفيًا كما في النسخة 1: 123 عنصرًا."
+     }
+    }
+   ]
+  },
+  {
+   "id": "S9",
+   "name": "طلب متعارض: المجلس يمين الداخل ويساره، والمطبخ جنب المجلس وبعيد عنه — سؤال ثم حسم بجوابين، ثم تعديلان بعد الحسم",
+   "initMs": 60183,
+   "turns": [
+    {
+     "n": 1,
+     "text": "المجلس على يمين الداخل",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "سجّلت اختيارك: المجلس على يمين الداخل (حُسم التعارض في طلبك، والبند المعارض حُذف). طلبك «المجلس» على يمين الداخل من الشارع» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — لكنه لا يحقق بندًا آخر من طلبك.",
+     "questions": [
+      "طلبك «المجلس» على يمين الداخل من الشارع» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — لكنه لا يحقق بندًا آخر من طلبك."
+     ],
+     "ifConsented": {
+      "happened": false,
+      "violations": [
+       {
+        "name": "صالة الطعام والمقلط",
+        "areaPct": 3.72,
+        "shift": 5.68
+       },
+       {
+        "name": "الصالة",
+        "areaPct": -1.63,
+        "shift": 9.64
+       },
+       {
+        "name": "دورة مياه",
+        "areaPct": 0,
+        "shift": 11.34
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": -1.78,
+        "shift": 11.04
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": 0,
+        "shift": 11.04
+       },
+       {
+        "name": "ممر",
+        "areaPct": -3.19,
+        "shift": 6.24
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": -2.42,
+        "shift": 3.67
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": -2.46,
+        "shift": 11.14
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": 0,
+        "shift": 5
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": -2.46,
+        "shift": 3.6
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 0,
+        "shift": 9.8
+       },
+       {
+        "name": "حمام غرفة 4",
+        "areaPct": 0,
+        "shift": 5.2
+       },
+       {
+        "name": "غرفة نوم 4",
+        "areaPct": -2.46,
+        "shift": 3.8
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "side",
+       "why": "مركز الغرفة ليس في نصف تلك الجهة",
+       "measured": {
+        "compass": "e",
+        "frac": 0.23,
+        "edgeGap": 8.21,
+        "exteriorWallToward": false
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.5
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.5
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«المجلس» على يمين الداخل من الشارع"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 24052,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 131,
+       "touched": 0,
+       "total": 131
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 45
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 38
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 131 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 65,
+      "added": 42,
+      "removed": 45,
+      "unchanged": 21,
+      "touched": 152,
+      "total": 173
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "المطبخ بعيد عن المجلس",
+     "outcome": "asked",
+     "mode": "ask-options",
+     "summary": "سجّلت اختيارك: المطبخ بعيد عن المجلس (حُسم التعارض في طلبك، والبند المعارض حُذف). تركتُ خيارات طلبك السابق «المجلس على يمين الداخل» دون تنفيذ (المخطط كما كان فيها) لأنك طلبت شيئًا آخر. طلبك «المطبخ» بعيدًا عن «المجلس» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده.",
+     "questions": [
+      "طلبك «المطبخ» بعيدًا عن «المجلس» لا يتحقق بتعديل صغير على هذا المخطط. اختر رقمًا: (1) أبقِ المخطط كما هو — لا يحقق طلبك؛ (2) أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك — يحتاج تعديلات قبل اعتماده."
+     ],
+     "ifConsented": {
+      "happened": false,
+      "violations": [
+       {
+        "name": "صالة الطعام والمقلط",
+        "areaPct": -25.02,
+        "shift": 7.19
+       },
+       {
+        "name": "مدخل العائلة",
+        "areaPct": 42.76,
+        "shift": 4.49
+       },
+       {
+        "name": "الصالة",
+        "areaPct": 49.71,
+        "shift": 3.74
+       },
+       {
+        "name": "غرفة النوم الرئيسية",
+        "areaPct": 3.22,
+        "shift": 7.91
+       },
+       {
+        "name": "حمام الرئيسية",
+        "areaPct": -38.98,
+        "shift": 12.5
+       },
+       {
+        "name": "ممر الغرف",
+        "areaPct": 2.1,
+        "shift": 7.03
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 6.22
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 7.94
+       },
+       {
+        "name": "مدخل الجناح",
+        "areaPct": 0,
+        "shift": 14.29
+       },
+       {
+        "name": "غرفة نوم 2",
+        "areaPct": -0.66,
+        "shift": 11.8
+       },
+       {
+        "name": "حمام غرفة 3",
+        "areaPct": 0,
+        "shift": 6.15
+       },
+       {
+        "name": "غرفة نوم 3",
+        "areaPct": -2.46,
+        "shift": 10.6
+       },
+       {
+        "name": "مدخل الرجال",
+        "areaPct": 69.77,
+        "shift": 3.79
+       },
+       {
+        "name": "دورة مياه الرجال",
+        "areaPct": 0,
+        "shift": 4.05
+       },
+       {
+        "name": "حمام غرفة 2",
+        "areaPct": 0,
+        "shift": 9.8
+       },
+       {
+        "name": "حمام غرفة 4",
+        "areaPct": 0,
+        "shift": 11.67
+       },
+       {
+        "name": "غرفة نوم 4",
+        "areaPct": -4.23,
+        "shift": 15.78
+       },
+       {
+        "name": "دورة مياه"
+       },
+       {
+        "name": "ممر"
+       },
+       {
+        "name": "خزانة ملابس الرئيسية"
+       }
+      ]
+     },
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "far",
+       "why": "المسافة بين المركزين 5.66 م (المطلوب ≥ 8 م ولا جدار مشترك)",
+       "measured": {
+        "centroidDist": 5.66,
+        "sharedWall": true
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.5
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.5
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«المطبخ» بعيدًا عن «المجلس»"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 23833,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 131,
+       "touched": 0,
+       "total": 131
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 45
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 38
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 131 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": {
+      "changed": 58,
+      "added": 51,
+      "removed": 66,
+      "unchanged": 7,
+      "touched": 175,
+      "total": 182
+     },
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "المجلس أصغر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "تركتُ خيارات طلبك السابق «المطبخ بعيد عن المجلس» دون تنفيذ (المخطط كما كان فيها) لأنك طلبت شيئًا آخر. نُفّذ: «المجلس» أصغر (أُزيح الجدار الخارجي للداخل 1 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.5
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.5
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«المجلس» أصغر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "المجلس أصغر",
+      "«المجلس» أصغر"
+     ],
+     "error": null,
+     "ms": 325,
+     "fingerprint": {
+      "counts": {
+       "changed": 3,
+       "added": 1,
+       "removed": 3,
+       "unchanged": 125,
+       "touched": 7,
+       "total": 132
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 3,
+        "unchanged": 58
+       },
+       "opening": {
+        "changed": 2,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 43
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 20
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 10,
+        "unchanged": 28
+       }
+      },
+      "region": {
+       "x0": 1.51,
+       "x1": 8.38,
+       "y0": 6.51,
+       "y1": 11.08
+      },
+      "summary": "البصمة الهندسية: تغيّر 7 عناصر (4 جدران، فتحتان، غرفة)، وبقي ثابتًا حرفيًا 125 عنصرًا؛ وتغيّر من الأثاث 10 قطع أثاث.",
+      "rooms": [
+       "«المجلس»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 3,
+      "added": 1,
+      "removed": 3,
+      "unchanged": 125,
+      "touched": 7,
+      "total": 132
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "غيّر الواجهة حجر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر على كل الواجهات الظاهرة والدروة (الافتراضي)، والمخطط نفسه حرفيًا (لم يتحرك جدار) — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 19.5
+      },
+      "after": {
+       "w": 14.9,
+       "d": 19.5
+      }
+     },
+     "idsStable": "21/21",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الواجهة: حجر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+      "الواجهة: حجر"
+     ],
+     "error": null,
+     "ms": 214,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 130,
+       "touched": 1,
+       "total": 131
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 61
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 45
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 21
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 28
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 130 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 130,
+      "touched": 1,
+      "total": 131
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S10",
+   "name": "(الجولة الحادية عشرة) الأبواب والنوافذ والطعام جنب المجلس — في S7 بعد إصلاح شريط الغسيل لا يجاور المجلس الطعام: فتح باب بين المجلس والطعام ثم «سد الباب»، نقل باب غرفة 2، تكبير نافذة الصالة، باب موجود أصلًا",
+   "initMs": 37232,
+   "turns": [
+    {
+     "n": 1,
+     "text": "افتح باب بين المجلس والطعام",
+     "outcome": "applied",
+     "mode": "not-done",
+     "summary": "لم يُنفَّذ: باب بين «المجلس» و«صالة الطعام» — «المجلس» و«صالة الطعام» لا تتجاوران في المخطط؛ الباب بينهما يحتاج نقل إحداهما.. جرّبت إعادة توزيع البيت فلم تحقق الطلب أيضًا، فأبقيت المخطط المعروض كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "doorBetween",
+       "why": "لا باب بينهما",
+       "measured": {
+        "openings": []
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 21.4
+      },
+      "after": {
+       "w": 14.9,
+       "d": 21.4
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "باب بين «المجلس» و«صالة الطعام»"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [],
+     "error": null,
+     "ms": 18597,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 139,
+       "touched": 0,
+       "total": 139
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 66
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 139 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "سد الباب",
+     "outcome": "asked",
+     "mode": "clarify",
+     "summary": null,
+     "questions": [
+      "أي باب تقصد؟ اذكر الغرفة أو الغرفتين (مثل «سد الباب بين المطبخ والصالة») ولن أغيّر شيئًا قبلها."
+     ],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 21.4
+      },
+      "after": {
+       "w": 14.9,
+       "d": 21.4
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": null
+     },
+     "understood": [],
+     "error": null,
+     "ms": 61,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 139,
+       "touched": 0,
+       "total": 139
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 66
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 139 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "انقل باب غرفة 2",
+     "outcome": "applied",
+     "mode": "not-done",
+     "summary": "لم يُنفَّذ: نقل باب «غرفة نوم 2» — لم أجد موضعًا آخر لباب «غرفة نوم 2» دون كسر بوابة (الجدار المشترك لا يتسع لموضع آخر).. جرّبت إعادة توزيع البيت فلم تحقق الطلب أيضًا، فأبقيت المخطط المعروض كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "doorMoved",
+       "why": "أكبر إزاحة لباب الغرفة 0 م",
+       "measured": {
+        "moved": 0,
+        "doorsBefore": 1,
+        "doorsAfter": 1
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 21.4
+      },
+      "after": {
+       "w": 14.9,
+       "d": 21.4
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "نقل باب «غرفة نوم 2»"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [],
+     "error": null,
+     "ms": 20102,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 139,
+       "touched": 0,
+       "total": 139
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 66
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 139 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "كبّر نافذة الصالة",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: تكبير نافذة «الصالة» (كُبّرت نافذة «الصالة» من 2.2 إلى 3 م (الارتفاع نفسه، على الجدار نفسه)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 21.4
+      },
+      "after": {
+       "w": 14.9,
+       "d": 21.4
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "تكبير نافذة «الصالة»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "تكبير نافذة «الصالة»"
+     ],
+     "error": null,
+     "ms": 350,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 138,
+       "touched": 1,
+       "total": 139
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 66
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 46
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": {
+       "x0": 15.81,
+       "x1": 16.06,
+       "y0": 12.23,
+       "y1": 15.23
+      },
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (فتحة)، وبقي ثابتًا حرفيًا 138 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 138,
+      "touched": 1,
+      "total": 139
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 5,
+     "text": "افتح باب بين المطبخ والطعام",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "لم يحتج تغييرًا: باب بين «المطبخ» و«صالة الطعام» — بين «المطبخ» و«صالة الطعام» باب أصلًا؛ لم أغيّر شيئًا. بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 14.9,
+       "d": 21.4
+      },
+      "after": {
+       "w": 14.9,
+       "d": 21.4
+      }
+     },
+     "idsStable": "22/22",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "باب بين «المطبخ» و«صالة الطعام»"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [
+      "باب بين «المطبخ» و«صالة الطعام»"
+     ],
+     "error": null,
+     "ms": 247,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 139,
+       "touched": 0,
+       "total": 139
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 66
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 47
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 22
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 36
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 139 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 139,
+      "touched": 0,
+      "total": 139
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  },
+  {
+   "id": "S11",
+   "name": "(الجولة الثالثة عشرة) عرض الشارع مجهول ← سؤال؛ «عرض الشارع 25 م» ← إعادة التوليد بارتداد 5 م نظاميًا، ثم «المجلس أصغر»",
+   "initMs": 34739,
+   "turns": [
+    {
+     "n": 1,
+     "text": "عرض الشارع 25 م",
+     "outcome": "applied",
+     "mode": "answered-regenerated",
+     "summary": "سجّلت عرض الشارع 25 م: الارتداد الأمامي النظامي 5 م بدل 3 م المرسومة، فأعدت توليد المخطط داخل الارتداد الجديد.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": false,
+     "difference": 0.1,
+     "envelope": {
+      "before": {
+       "w": 14.2,
+       "d": 19.35
+      },
+      "after": {
+       "w": 15.3,
+       "d": 15.1
+      }
+     },
+     "idsStable": "10/15",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "عرض شارع المدخل 25 م: الارتداد الأمامي النظامي 5 م (شارع 25 م: الارتداد الأمامي 5 م (خُمس عرض الشارع ولا يقل عن 3 م — اشتراط نظامي متحقق))"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": null
+     },
+     "understood": [
+      "عرض شارع المدخل 25 م: الارتداد الأمامي النظامي 5 م (شارع 25 م: الارتداد الأمامي 5 م (خُمس عرض الشارع ولا يقل عن 3 م — اشتراط نظامي متحقق))"
+     ],
+     "error": null,
+     "ms": 33646,
+     "fingerprint": {
+      "counts": {
+       "changed": 57,
+       "added": 53,
+       "removed": 65,
+       "unchanged": 6,
+       "touched": 175,
+       "total": 181
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 50,
+        "removed": 58,
+        "unchanged": 3
+       },
+       "opening": {
+        "changed": 41,
+        "added": 0,
+        "removed": 2,
+        "unchanged": 0
+       },
+       "room": {
+        "changed": 15,
+        "added": 3,
+        "removed": 5,
+        "unchanged": 0
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "fixture": {
+        "changed": 30,
+        "added": 5,
+        "removed": 0,
+        "unchanged": 0
+       }
+      },
+      "region": {
+       "x0": 1.51,
+       "x1": 17.76,
+       "y0": 6.51,
+       "y1": 26.11
+      },
+      "summary": "البصمة الهندسية: تغيّر 175 عنصرًا (108 جدارًا، 43 فتحةً، 23 غرفةً، الأرض)، وبقي ثابتًا حرفيًا 6 عناصر؛ وتغيّر من الأثاث 35 قطعةَ أثاث.",
+      "rooms": [
+       "«صالة الطعام والمقلط»",
+       "«مدخل العائلة»",
+       "«الصالة»",
+       "«ممر الغرف»",
+       "«المطبخ»",
+       "«المجلس»",
+       "«مدخل الرجال»",
+       "«دورة مياه الرجال»",
+       "«حمام غرفة 3»",
+       "«حمام غرفة 2»",
+       "«دورة مياه»",
+       "«غرفة نوم 2»",
+       "«غرفة النوم الرئيسية»",
+       "«غرفة نوم 3»",
+       "«حمام الرئيسية»",
+       "«خزانة ملابس»",
+       "«خزانة ملابس»",
+       "«غرفة ملابس»",
+       "«مدخل الجناح»",
+       "«خزانة»",
+       "«مدخل الجناح»",
+       "«خزانة ملابس الرئيسية»",
+       "«ممر»"
+      ]
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 2,
+     "text": "المجلس أصغر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: «المجلس» أصغر (أُزيح الجدار الخارجي للداخل 0.7 م (داخل خطوط الارتداد)). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": false,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.3,
+       "d": 15.1
+      },
+      "after": {
+       "w": 15.3,
+       "d": 15.1
+      }
+     },
+     "idsStable": "18/18",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "«المجلس» أصغر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "المجلس أصغر",
+      "«المجلس» أصغر"
+     ],
+     "error": null,
+     "ms": 320,
+     "fingerprint": {
+      "counts": {
+       "changed": 2,
+       "added": 1,
+       "removed": 3,
+       "unchanged": 112,
+       "touched": 6,
+       "total": 118
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 1,
+        "removed": 3,
+        "unchanged": 51
+       },
+       "opening": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 40
+       },
+       "room": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 17
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 12,
+        "unchanged": 23
+       }
+      },
+      "region": {
+       "x0": 2.21,
+       "x1": 6.88,
+       "y0": 6.63,
+       "y1": 12.58
+      },
+      "summary": "البصمة الهندسية: تغيّر 6 عناصر (4 جدران، فتحة، غرفة)، وبقي ثابتًا حرفيًا 112 عنصرًا؛ وتغيّر من الأثاث 12 قطعةَ أثاث.",
+      "rooms": [
+       "«المجلس»"
+      ]
+     },
+     "replyFingerprint": {
+      "changed": 2,
+      "added": 1,
+      "removed": 3,
+      "unchanged": 112,
+      "touched": 6,
+      "total": 118
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 3,
+     "text": "الصالة أوسع",
+     "outcome": "applied",
+     "mode": "not-done",
+     "summary": "لم يُنفَّذ: «الصالة» أوسع — لم أجد جدارًا يمكن إزاحته لـ«الصالة» دون كسر بوابة أو تغيير غير مقبول (5 محاولة: بوابة راسبة: أدنى عرض صافٍ لكل نوع غرفة (عرض «صالة الطعام والمقلط» 2.68 م أقل من 2.8 م (قيمة تصميمية غير متحققة نظاميًا))، النسبة 1.15).. جرّبت إعادة توزيع البيت فلم تحقق الطلب أيضًا، فأبقيت المخطط المعروض كما هو حرفيًا.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": false,
+     "failedChecks": [
+      {
+       "type": "bigger",
+       "why": "النسبة 1 والمطلوب ≥ 1.1",
+       "measured": {
+        "before": 31.36,
+        "after": 31.36,
+        "ratio": 1
+       }
+      }
+     ],
+     "trivial": false,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.3,
+       "d": 15.1
+      },
+      "after": {
+       "w": 15.3,
+       "d": 15.1
+      }
+     },
+     "idsStable": "18/18",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [],
+      "failed": [
+       "«الصالة» أوسع"
+      ],
+      "pending": [],
+      "unchanged": true,
+      "reused": false
+     },
+     "understood": [],
+     "error": null,
+     "ms": 323,
+     "fingerprint": {
+      "counts": {
+       "changed": 0,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 117,
+       "touched": 0,
+       "total": 117
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 54
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 18
+       },
+       "finish": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 117 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": null,
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    },
+    {
+     "n": 4,
+     "text": "غيّر الواجهة حجر",
+     "outcome": "applied",
+     "mode": "local",
+     "summary": "نُفّذ: الواجهة: حجر (صارت واجهة المجسّم حجر على كل الواجهات الظاهرة والدروة (الافتراضي)، والمخطط نفسه حرفيًا (لم يتحرك جدار) — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي). بقية الغرف كما هي.",
+     "questions": [],
+     "ifConsented": null,
+     "declared": [],
+     "undeclared": 0,
+     "geometryIdentical": true,
+     "happened": true,
+     "failedChecks": [],
+     "trivial": true,
+     "violations": [],
+     "openingChanges": 0,
+     "patternKept": true,
+     "difference": 0,
+     "envelope": {
+      "before": {
+       "w": 15.3,
+       "d": 15.1
+      },
+      "after": {
+       "w": 15.3,
+       "d": 15.1
+      }
+     },
+     "idsStable": "18/18",
+     "claimMismatch": false,
+     "ledger": {
+      "done": [
+       "الواجهة: حجر"
+      ],
+      "failed": [],
+      "pending": [],
+      "unchanged": false,
+      "reused": false
+     },
+     "understood": [
+      "الواجهة: حجر (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)",
+      "الواجهة: حجر"
+     ],
+     "error": null,
+     "ms": 214,
+     "fingerprint": {
+      "counts": {
+       "changed": 1,
+       "added": 0,
+       "removed": 0,
+       "unchanged": 116,
+       "touched": 1,
+       "total": 117
+      },
+      "byKind": {
+       "wall": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 54
+       },
+       "opening": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 41
+       },
+       "room": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 18
+       },
+       "finish": {
+        "changed": 1,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 0
+       },
+       "roof": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "level": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "site": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 1
+       },
+       "fixture": {
+        "changed": 0,
+        "added": 0,
+        "removed": 0,
+        "unchanged": 23
+       }
+      },
+      "region": null,
+      "summary": "البصمة الهندسية: تغيّر عنصر واحد (الواجهة)، وبقي ثابتًا حرفيًا 116 عنصرًا.",
+      "rooms": []
+     },
+     "replyFingerprint": {
+      "changed": 1,
+      "added": 0,
+      "removed": 0,
+      "unchanged": 116,
+      "touched": 1,
+      "total": 117
+     },
+     "ifConsentedFingerprint": null,
+     "restoreProof": null
+    }
+   ]
+  }
+ ],
+ "totals": {
+  "longCases": 12,
+  "meanF1": 0.867,
+  "meanPrecision": 0.932,
+  "meanRecall": 0.822,
+  "missed": 45,
+  "wrong": 14,
+  "dropped": 3,
+  "turns": 53,
+  "happened": 38,
+  "happenedTrivially": 12,
+  "turnsWithViolations": 0,
+  "violations": 0,
+  "claimMismatches": 0,
+  "outcomes": {
+   "asked": 11,
+   "error": 1,
+   "applied": 41
+  },
+  "modes": {
+   "ask-options": 9,
+   "regenerated": 1,
+   "local": 30,
+   "clarify": 2,
+   "declined": 2,
+   "not-done": 6,
+   "restore": 2,
+   "answered-regenerated": 1
+  },
+  "localTurns": 30,
+  "localTurnsWithViolations": 0,
+  "localViolations": 0,
+  "localUndeclared": 0,
+  "undeclared": 0,
+  "fpTouched": 293,
+  "fpUnchanged": 7137,
+  "fpLocalTouched": 104,
+  "fpLocalUnchanged": 4117
+ }
+}

@@ -1,0 +1,407 @@
+{
+ "id": "H8",
+ "engine": "v3",
+ "name": "دوران على 18×30 والشارع جنوبي",
+ "text": "دورين: تحت مجلس رجال ومجلس نساء وصالة وطعام ومطبخ وغرفة لأبوي بحمامها، وفوق 4 غرف نوم منها ماستر بعيد عن الدرج وصالة علوية صغيرة",
+ "understood": [
+  "4 غرف نوم",
+  "غرفة نوم رئيسية (ماستر)",
+  "غرفة نوم قريبة من الصالة لكبار السن",
+  "دوران (أرضي وأول)",
+  "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "frontstair",
+   "pat": "frontstair:fsg2/uspine",
+   "presentation": {
+    "status": "needs-edits",
+    "label_ar": "يحتاج تعديلات",
+    "hidden_ar": [],
+    "edits_ar": [
+     "حمام في الدور العلوي فوق فراغ جاف حساس في الأرضي (مجلس، طعام، مدخل، صالة، نوم) لا فوق رطب أو خدمة: «حمام غرفة 4» فوق «مجلس النساء» (88٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة) (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+    ],
+    "notes_ar": [
+     "مدخل الرجال ومدخل العائلة متجاوران على الواجهة نفسها: باب الرجال وباب العائلة على الواجهة نفسها بينهما 1.67 م"
+    ],
+    "specialist_ar": [
+     "حمام في الدور العلوي فوق فراغ جاف حساس في الأرضي (مجلس، طعام، مدخل، صالة، نوم) لا فوق رطب أو خدمة: «حمام غرفة 4» فوق «مجلس النساء» (88٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة) (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+    ],
+    "categories": {
+     "mandatory": 0,
+     "architectural": 1,
+     "specialist": 1,
+     "notes": 1
+    },
+    "mandatory": [],
+    "prefs": [],
+    "major": [
+     "WET_STACK"
+    ],
+    "r16": [
+     "WET_STACK"
+    ],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [],
+   "summary": "السلم في المقدمة خلف بهو المدخل والصالة خلفه: المجلس وغرفة الأرضي جناح، والطعام والمطبخ جناح مقابل؛ والعلوي: الصالة العلوية في الأمام وممر محوري إلى الجناح الرئيسي في آخره، والغرف على جانبيه (دوران)",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 98.23,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": false
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": false
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 11,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 24
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 1,
+    "len": 4.53,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة كبار السن",
+    "area": 13.84
+   },
+   "kitchen": {
+    "w": 3.11,
+    "l": 4.56,
+    "area": 14.22
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الرجال",
+    "clear": 1.32
+   },
+   "hall": {
+    "w": 4.53,
+    "l": 7.32,
+    "ratio": 1.61
+   },
+   "rooms": 31,
+   "net": 371.32,
+   "circulationPct": 8.99,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 1,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»",
+     "ok": true,
+     "why": "مسار المشي من وصول الدرج إلى باب «غرفة النوم الرئيسية» 9.1 م (≥ 6 م) عبر «ممر الغرف/الدرج» ثم «الصالة العائلية/ممر الغرف»."
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دوران",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": "«غرفة كبار السن» تلاصق الصالة."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "feasibility": {
+  "feasible": true,
+  "hard": [],
+  "warnings": [],
+  "options_ar": [],
+  "numbers": {
+   "buildableW": 14.7,
+   "buildableD": 25.2,
+   "buildableArea": 372,
+   "coverageArea": 405,
+   "programNet": 274,
+   "neededGrossPerFloor": 179,
+   "floors": 2
+  },
+  "report_ar": "الطلب ممكن على هذه الأرض."
+ },
+ "search": {
+  "twoFloors": {
+   "grids": [
+    {
+     "nc": 3,
+     "nr": 4,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 4,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 5,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 6,
+     "ground": 0,
+     "joint": 0
+    }
+   ]
+  }
+ },
+ "ms": 74127,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "hidden": [],
+ "presentation": {
+  "ready": 0,
+  "needsEdits": 1,
+  "hidden": 0,
+  "label_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+ },
+ "proposalLabel_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا",
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "frontstair"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 16,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [],
+  "allDistinct": true,
+  "minSubstantive": null,
+  "minTotal": null
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 17، اجتاز البوابات منهم 1؛ ورُفض 1 في المراجعة المعمارية المستقلة (STAIR_GEOMETRY)، و11 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي، و4 في بوابات الجودة والسلامة. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+ "notice": {
+  "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+  "lines_ar": [
+   "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+   "السبب: جرّبتُ 17 تنظيمًا مختلفًا، اجتاز الفحص منها 1؛ ورُفض 1 في المراجعة المعمارية، و11 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي، و4 في فحوص الجودة والسلامة. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+   "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+  ]
+ }
+}

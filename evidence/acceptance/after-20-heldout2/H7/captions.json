@@ -1,0 +1,16 @@
+{
+ "notice.png": {
+  "case": "H7",
+  "source": [
+   "result.json"
+  ],
+  "internal_ar": "H7 — إشعار العميل (العدد وسببه أو تقرير التعذّر)"
+ },
+ "alt-1.png": {
+  "case": "H7",
+  "source": [
+   "alt-1.json"
+  ],
+  "internal_ar": "H7 — alt-1"
+ }
+}
