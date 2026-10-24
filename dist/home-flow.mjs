@@ -12,9 +12,11 @@ import { applyCommand } from './draw/doc.mjs';
 import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H, programFromCounts } from './multi-floor.mjs';
 import { generateVillaDesigns as v1Designs, generateVillaTwoFloors as v1TwoFloors, countsFromRooms } from './villa-layout.mjs';
 import { generateVillaDesigns as v2Designs, generateVillaTwoFloors as v2TwoFloors } from './villa-layout-v2.mjs';
+import { generateVillaDesigns as v3Designs, generateVillaTwoFloors as v3TwoFloors } from './villa-layout-v3.mjs';
 // المولّد المهني: الإصدار الثاني (أنماط تنظيمية + مراجعة مستقلة نهائية) افتراضيًا؛ الأول متاح بـ engine:'v1'
-const VILLA = { v1: { one: v1Designs, two: v1TwoFloors }, v2: { one: v2Designs, two: v2TwoFloors } };
-const villaEngineOf = engine => (engine === 'v1' ? 'v1' : 'v2');
+// (الجولة العشرون) المحرك الثالث (العلاقات والقيود + كشف الاستحالة) هو الافتراضي؛ الأول والثاني قابلان للاختيار بالاسم كما هما
+const VILLA = { v1: { one: v1Designs, two: v1TwoFloors }, v2: { one: v2Designs, two: v2TwoFloors }, v3: { one: v3Designs, two: v3TwoFloors } };
+const villaEngineOf = engine => (engine === 'v1' ? 'v1' : engine === 'v2' ? 'v2' : 'v3');
 import { extractRequirements, withAi, detectConflicts } from './requirements.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
 
@@ -219,14 +221,14 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
     const c2 = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
     const req2 = requirements || extractRequirements(idea || '', { counts: c2, discovery: disc });
     try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, engine }); }
-    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length) throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
+    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || villaEngineOf(engine) === 'v3') throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
   }
   // المولّد المهني أولًا (أجنحة نوم بحماماتها، صالة محورية، مجلس بممر ضيوف ودورة مياه)؛ المحرك السابق احتياط فقط
   const villaCounts = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
   let villaFail = null;
   const req = requirements || extractRequirements(idea || '', { counts: villaCounts, discovery: disc });
   if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, engine }); }
-  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length) throw err; villaFail = err.message; }
+  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || villaEngineOf(engine) === 'v3') throw err; villaFail = err.message; }
   const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
   const notes = [];
@@ -278,7 +280,7 @@ export function alternativesInfo(out, requested) {
 /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
 function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, engine = 'auto' }) {
   const villaEngine = villaEngineOf(engine);
-  const out = VILLA[villaEngine].two({ land, counts, requirements, keep: villaEngine === 'v2' ? 4 : 3, exclude, prefer });
+  const out = VILLA[villaEngine].two({ land, counts, requirements, keep: villaEngine === 'v1' ? 3 : 4, exclude, prefer });
   const best = out.designs[0];
   return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror, presentation: d.presentation || null })), alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, villaEngine === 'v2' ? 4 : 3), selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
 }
@@ -350,6 +352,8 @@ export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow 
 
 /** رسالة قصيرة للعميل بدل تفاصيل كل محرك. الخطأ الأصلي يبقى في التفاصيل التقنية. */
 export function friendlyBuildError(err) {
+  // (الجولة العشرون) المحرك الثالث يرفق تقريرًا عربيًا (التعارض والخيارات وما يُغيَّر في الطلب)
+  if (err?.report_ar) return err.report_ar;
   const raw = String(err?.message || err || '');
   if (err instanceof MultiFloorError) return raw;
   if (/No candidate passed|لم يجد محرك/.test(raw)) return 'لم أجد توزيعًا يتسع لهذا البرنامج في دور واحد على هذه الأرض، دون حذف أو تصغير أي غرفة.';

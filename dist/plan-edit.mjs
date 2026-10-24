@@ -12,6 +12,8 @@
 //   - التراجع: من سجل الجلسة (تصميم سابق) مع إعادة تطبيق التعديلات المحلية المطلوب إبقاؤها.
 // بعد كل تعديل: بوابات plan-review (لا بوابة كانت ناجحة ترسب)، وثبات كل غرفة أخرى مقيسًا (مساحة/مركز/فتحات).
 // إن رسب المرشح يُجرَّب التالي؛ وإن لم يوجد حل موضعي يُقال ذلك صراحة (status:'fallback') ولا يُدّعى شيء.
+import { invariants, regressions } from './change-guard.mjs';
+const R20_GUARD_OFF = String(globalThis.process?.env?.R14_OFF || '').includes('r20guard');
 import { analyzeDoc } from './draw/digest.mjs';
 import { serialize, parseDoc, nextId, fitOpening, validateDoc } from './draw/doc.mjs';
 import { mergeFinish } from './draw/doc.mjs';
@@ -1562,6 +1564,13 @@ export function applyEdits(doc0, parsed, { req = null, history = [] } = {}) {
   if (asks.length && !results.some(r => r.ok && !r.already)) return { status: 'clarify', questions: asks.map(r => ({ type: r.question ? 'ambiguous-opening' : 'needs-consent', key: (r.question ? 'which|' : 'consent|') + r.text_ar, question_ar: r.ask })), doc: doc0, results };
   if (restore) return { status: 'restore', restore, results, pending, doc };
   if (fallback && !results.some(x => x.ok && !x.already)) return { status: 'fallback', why_ar: fallback.why_ar, results, doc: doc0 };
+  // (الجولة العشرون، توجيه المالك رابعًا) حارس التغيير الشامل: التعديل الموضعي لا يُعتمد إن أسقط شرطًا كان متحققًا في المخطط (الصالة ≥ المجلس،
+  // دورة مياه العائلة، ضوء الغرف، الوصول، الخصوصية، المخالفات الإلزامية) — إلا ما يطلبه العميل نفسه (حذف غرفة من نوعها)، أو بموافقته الصريحة
+  if (!R20_GUARD_OFF && results.some(r => r.ok && !r.already)) {
+    const deleted = new Set(intents.filter(i => i.op === 'delete' || (i.op === 'bedCount' && i.n < i.from)).map(i => 'COUNT_' + String(i.kind || i.type || (i.op === 'bedCount' ? 'bedroom' : '')).toUpperCase()));
+    const reg = regressions(invariants(doc0, req || {}), invariants(doc, req || {})).filter(x => !(intents.some(i => i.op === 'delete' || i.op === 'bedCount') && x.id.startsWith('COUNT_')) && !deleted.has(x.id));
+    if (reg.length && !reqBase?.consent) return { status: 'fallback', guard: reg, why_ar: 'لم أعتمد التعديل الموضعي لأنه يُفسد شروطًا أخرى كانت متحققة في المخطط: ' + reg.map(x => x.ar).join('؛ ') + '.', results, doc: doc0 };
+  }
   const cmp = compareDocs(doc0, doc, { gates: false });
   return { status: 'local', doc, results, pending, changed: describeChanges(cmp.changed), envelope: cmp.envelope, unchanged: serialize(doc) === serialize(doc0), geometryIdentical: JSON.stringify([doc.walls, doc.openings, doc.labels]) === JSON.stringify([doc0.walls, doc0.openings, doc0.labels]) };
 }

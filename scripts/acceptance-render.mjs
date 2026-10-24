@@ -53,6 +53,12 @@ ctx.font = '13px Tahoma'; ctx.fillText('المقياس نفسه في الصور�
   if (fac) { const fw = 680, fh = 380; ctx.drawImage(fac[0], 710, 1030, fw, fh); ctx.drawImage(fac[1], 10, 1030, fw, fh); ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 20px Tahoma'; ctx.textAlign = 'center'; ctx.fillText('الواجهة قبل', 1050, 1022); ctx.fillText('الواجهة بعد', 350, 1022); ctx.textAlign = 'right'; }
   if (wrapped.length) { ctx.fillStyle = '#f4efe4'; ctx.fillRect(10, 1000 + FH, 1380, H - 1010 - FH); let y = 1030 + FH; for (const [l, head] of wrapped) { ctx.font = head ? 'bold 18px Tahoma' : '17px Tahoma'; ctx.fillStyle = head ? '#7a3e12' : '#1d2a24'; ctx.fillText(l, 1375, y); y += 27; } }
   return { counts: D.counts, caption: CAP }; };
+// (الجولة العشرون) إشعار العميل: العدد المعروض من المطلوب وسببه، أو تقرير التعذّر — صورة كما يراها العميل
+window.drawNotice = (title, lines) => { const W = 1400, c0 = sizeC(1000), ctx0 = c0.getContext('2d'); ctx0.font = '20px Tahoma'; const L = lines.flatMap(t => wrapAr(ctx0, t, 1320));
+  const H = 130 + L.length * 34 + 60, c = sizeC(H), ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = '#fbf7ee'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#7a3e12'; ctx.fillRect(W - 14, 0, 14, H); ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 28px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title, W - 40, 56);
+  ctx.font = '20px Tahoma'; let y = 108; for (const l of L) { ctx.fillText(l, W - 40, y); y += 34; }
+  ctx.font = '13px Tahoma'; ctx.fillStyle = '#5a5a5a'; ctx.fillText('مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', W - 40, H - 18); return true; };
 window.ready = true;</script></body></html>`;
 const server = http.createServer(async (req, res) => {
   const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
@@ -95,8 +101,11 @@ const facadeShot = async (rawDoc, name) => {
 };
 for (id of cases) {
   const files = (await readdir(ev + id)).filter(f => f.endsWith('.json') && f !== 'result.json' && f !== 'captions.json');
-  if (!files.length) { console.log(id, 'لا مستندات (خطأ توليد في result.json) — لا صور'); continue; } // (الجولة التاسعة عشرة) حالة محجوزة بلا بديل
   const captions = {};
+  // (الجولة العشرون) إشعار العميل (العدد وسببه، أو تقرير التعذّر) — يُرسم أيضًا للحالة التي لم يُنتج لها مخطط
+  { let r0 = null; try { r0 = JSON.parse(await readFile(ev + id + '/result.json', 'utf8')); } catch { r0 = null; }
+    if (r0?.notice) { for (const t of [r0.notice.title_ar, ...r0.notice.lines_ar]) guard(t, 'notice.png'); await p.evaluate(([t, l]) => window.drawNotice(t, l), [r0.notice.title_ar, r0.notice.lines_ar]); await p.locator('#c').screenshot({ path: ev + id + '/notice.png' }); captions['notice.png'] = { case: id, source: ['result.json'], internal_ar: `${id} — إشعار العميل (العدد وسببه أو تقرير التعذّر)` }; } }
+  if (!files.length) { writeFileSync(ev + id + '/captions.json', JSON.stringify(captions, null, 1)); console.log(id, 'لا مستندات — إشعار العميل وحده'); continue; }
   for (const f of files) {
     const raw = await readFile(ev + id + '/' + f, 'utf8'), n = JSON.parse(raw).levels.length;
     for (let li = 0; li < n; li++) { const png = f.replace('.json', '') + (n > 1 ? `-L${li + 1}` : '') + '.png'; captions[png] = { case: id, source: [f], internal_ar: `${id} — ${f.replace('.json', '')}` };
@@ -113,7 +122,7 @@ for (id of cases) {
     else if (e.question_ar || (typeof e.consentAsked === 'string' && e.consentAsked)) out.push('#لم يُنفَّذ على هذا المخطط — السبب: ' + String(e.question_ar || e.consentAsked).replace(/ ?(?:؛ )?لتحقيقه حرفيًا: الخيارات[\s\S]*$| ?اختر رقمًا[\s\S]*$/, ''));
     else if (e.reply_ar || e.reply?.summary_ar) out.push('#الرد: ' + (e.reply_ar && !e.notDone ? e.reply_ar : e.reply?.summary_ar || e.reply_ar));
     // (الجولة الثامنة عشرة) بعد الاختيار بلغة العميل؛ أن الاختيار هنا محاكاة اختبار القبول يُكتب في captions.json وحده
-    if (e.choice) out.push(`#بعد اختيار الخيار (${e.choice}): ${(e.reply_ar || e.reply?.summary_ar || '').slice(0, 220)}`);
+    // (الجولة العشرون، المراجعة العمياء r19) لا «بعد اختيار الخيار (1)» في الصورة: العميل لم يختر بعد؛ الاختيار المحاكى في captions.json وحده
     return out;
   };
   // صورة الخيارات قبل الاختيار: رسالة العميل والخيارات بمصغّراتها (المعروض، أو المقترح المحفوظ، أو البديل المعروض)

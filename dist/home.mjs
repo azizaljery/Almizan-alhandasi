@@ -238,6 +238,8 @@ async function build() {
   } catch (err) {
     setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
     $('buildText').textContent = 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…';
+    // (الجولة العشرون) تقرير المحرك الثالث يكفي (التعارض والخيارات من كشف الاستحالة والبحث نفسه) — لا تجارب إضافية بطيئة
+    if (err?.report_ar || err?.feasibility) { $('buildText').textContent = ''; return; }
     try { renderReport(await diagnoseFit({ land: confirmedLand, counts: session.counts, discovery: input.discovery, idea: input.idea }), err); $('buildText').textContent = ''; }
     catch (e2) { $('buildText').textContent = 'تعذّر التحليل التفصيلي.'; console.warn(e2); }
   }

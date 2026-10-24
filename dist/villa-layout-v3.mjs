@@ -88,6 +88,9 @@ export function unitsOf(P, { stair = false } = {}) {
     if (MAP[r.a] === 'S*' ? U.some(u => u.sleep) : has(MAP[r.a])) rel.push({ a: MAP[r.a], kind: r.side === 'back' ? 'back' : 'front', hard: true, client: true, ar: 'بند العميل: ' + (r.text || r.a) });
   return { units: U, rel };
 }
+const R14_OFF_V3 = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
+/** دورة المياه اليومية للعائلة (قيمة تصميمية افتراضية للميزان: dayWc) كتلة حقيقية في أشجار المحرك الثالث بجوار الصالة. */
+const DAY_WC = Object.freeze({ id: 'wcDay', kind: 'wc', rank: 2, area: 3.6, name: 'دورة مياه' });
 const kitchenFront = P => (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a)));
 
 // ---------------------------------------------------------------------------------------------- (3) الشبكة وبحث القيود
@@ -315,7 +318,10 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
     if (k[0] === 'G') { const enclosed = !bnd(r, nc, nr).length; return enclosed ? COURT(Math.max(K.COURT_MIN ** 2 + 1, gardenA * .6)) : VOID(gardenA * .6); }
     // المدخل: بهو صغير بجانبه فناء مدخل اختياري (يمتص عرض الخلية فلا يتضخم البهو)
     if (u.circ === 'foyer') { const f = C('foyer', P.dayWc ? { area: K.FOYER_WC_AREA, wc: true } : { area: T.foyer * .85 }); return R.M && sideTo(r, R.M) === 'x0' ? X(f, OV(6)) : X(OV(6), f); }
-    if (u.circ === 'hall') { const h = C('hall', { area: P.hallArea }), ex = bnd(r, nc, nr).filter(sd => sd !== 'y0');
+    if (u.circ === 'hall') { const h0 = C('hall', { area: P.hallArea }), ex = bnd(r, nc, nr).filter(sd => sd !== 'y0');
+      // دورة مياه العائلة بالبناء (FAMILY_WC): في البرنامج دورة مياه يومية افتراضية — تُوضع بجانب الصالة على جهتها الداخلية وبابها منها
+      const inner = ['x0', 'x1'].find(sd => !bnd(r, nc, nr).includes(sd));
+      const h = P.dayWc && !R14_OFF_V3.has('r20daywc') ? (inner === 'x0' ? X(Z([DAY_WC], 'x1', 'y'), h0) : inner === 'x1' ? X(h0, Z([DAY_WC], 'x0', 'y')) : Y(h0, Z([DAY_WC], 'y0', 'x'))) : h0;
       // الصالة على حد خارجي: حديقة اختيارية على تلك الجهة تمتص فائض الخلية (لا صالة ممتدة) وتطل عليها
       return ex.includes('y1') ? Y(h, OV(10)) : ex.includes('x1') ? X(h, OV(10)) : ex.includes('x0') ? X(OV(10), h) : h; }
     if (u.circ === 'stair') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
@@ -429,7 +435,7 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
     if (nL >= nFirst + nLate) break;
     const ts = ts0;
     const mode = 'r3' + ESC(plainKey(L)); K.describeAs(mode, describeLayout(L));
-    for (const t of ts) out.push({ mode, tag: mode.slice(2) + t.vtag, tree: t.tree, iters: K.DEEP_ITERS, tol: 4, late: nL >= nFirst, hardLink: !!(P.guestLink && units.some(u => u.key === 'M') && units.some(u => u.key === 'DN')), v3: { grid: [L.nc, L.nr], R: L.R, score: Math.round(L.score * 100) / 100 } });
+    for (const t of ts) out.push({ mode, tag: mode.slice(2) + t.vtag, tree: t.tree, iters: K.DEEP_ITERS, tol: 4, late: nL >= nFirst, hardHall: !!P.men, hardLink: !!(P.guestLink && units.some(u => u.key === 'M') && units.some(u => u.key === 'DN')), v3: { grid: [L.nc, L.nr], R: L.R, score: Math.round(L.score * 100) / 100 } });
     nL++;
   }
   log.picked = nL; log.dimFail = dimFail;

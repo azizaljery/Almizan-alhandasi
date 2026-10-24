@@ -60,7 +60,7 @@ export function presentationStatus(design, request = {}) {
   // المقلط ومسار التقديم بند واحد عند العميل: إن غاب المسار يُذكر مرة واحدة (SERVE_ROUTE)، ويبقى بند المقلط إن كان سببه انفتاح الطعام على العائلة
   if (prefs.some(g => g.id === 'SERVE_ROUTE')) prefs = prefs.filter(g => g.id !== 'MAJLIS_DINING' || g.value?.link);
   // (الجولة السادسة عشرة) عيوب أثبتتها المراجعة المستقلة r15 (privacy-defects.mjs): كلها عيوب تُصلح قبل العرض (لا ملاحظات)
-  let r16 = []; try { r16 = measureR16(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked); } catch { r16 = []; }
+  let r16 = [], r20notes = []; try { const all = measureR16(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked); r16 = all.filter(g => g.tier !== 'note'); r20notes = all.filter(g => g.tier === 'note'); } catch { r16 = []; }
   // (الجولة التاسعة عشرة، توجيه المالك أولًا) المخالفة الإلزامية في الميزان (MANDATORY_R16: ضيف يعبر العائلة إلى الطعام، موقف لا تدخله السيارة)
   // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
@@ -69,7 +69,9 @@ export function presentationStatus(design, request = {}) {
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
     ...qualityNotes(doc, model, request).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
-    ...toleranceNotes(design.ledger || [])];
+    ...toleranceNotes(design.ledger || []),
+    // (الجولة العشرون) ملاحظات مقيسة لا تحجب ولا تُعدّ عيبًا: المدخلان متجاوران، والحمامات بلا نافذة (تهوية ميكانيكية)
+    ...r20notes.map(g => ({ id: g.id, major: false, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')}` }))];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)

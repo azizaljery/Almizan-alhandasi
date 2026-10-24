@@ -14,6 +14,7 @@ import { verifyRequest, docRooms } from '../dist/rules.mjs';
 import { reviewDoc } from '../dist/draw/review.mjs';
 import { serialize } from '../dist/draw/doc.mjs';
 import { zoneDiff, matchShown } from '../dist/edit-truth.mjs';
+import { shortfallNotice } from '../dist/client-text.mjs';
 import { archMatrix, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, explainDifference, SUBSTANTIVE_V2 } from '../dist/arch-difference.mjs';
 
 const argv = process.argv.slice(2), ei = argv.indexOf('--engine');
@@ -158,6 +159,8 @@ for (const C of CASES) {
       } catch (e) { row.editAll.push({ alt: i + 1, error: e.message }); }
     }
   }
+  // (الجولة العشرون) إشعار العميل كما يُعرض له حين يقل العدد أو لا يُنتج مخطط (يُرسم صورة notice.png)
+  row.notice = shortfallNotice({ requested: C.want || 4, shown: row.designs.length, shortfall_ar: row.shortfallReason || null, hidden: row.hidden || [], report_ar: row.error ? (row.report_ar || row.error) : null });
   writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));
   summary.push(row);
   const best = row.designs[0];

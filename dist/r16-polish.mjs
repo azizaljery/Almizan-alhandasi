@@ -65,11 +65,11 @@ function exposedEdge(doc, G, room, e, wd) {
  * يصلح عيوب الخصوصية والحركة القابلة للإصلاح الموضعي على المستند (يعدّله في مكانه — مستند يملكه المولّد). يعيد { notes_ar[], changed }.
  */
 export function polishR16(doc) {
-  const notes = []; let changed = false;
+  const notes = [], skip = new Set(); let changed = false;
   // 1) النوافذ المكشوفة
   for (let pass = 0; pass < 12; pass++) {
     const G = analyzeDoc(doc).levels[0]; if (!G) break;
-    const ex = exposedWindows(doc, G); if (!ex.length) break;
+    const ex = exposedWindows(doc, G).filter(y => !skip.has(y.op.o.id)); if (!ex.length) break;
     const x = ex[0], o = x.op.o, room = x.room;
     const others = G.openings.filter(op => op.window && op.id !== x.op.id && op.sides.some(s => s.room.id === room.id && s.exterior && s.other === 'outside'));
     const sound = others.filter(op => !ex.some(y => y.op.id === op.id));
@@ -92,6 +92,12 @@ export function polishR16(doc) {
     if (glaze >= .08 * room.area) { doc.openings = doc.openings.filter(q => q.id !== o.id); notes.push(`أُلغيت نافذة «${room.name}» المطلة على ${x.why}؛ يكفيها نوافذها الأخرى (خصوصية).`); changed = true; continue; }
     // (ج) تفضيل أخير: جلسة عالية 1.6 م (نافذة علوية تُدخل الضوء ولا تكشف الغرفة)
     const live = doc.openings.find(q => q.id === o.id); if (!live) continue;
+    // (الجولة العشرون، المراجعة العمياء r19: C5-3) الصالة العائلية لا تُترك بنوافذ علوية وحدها: حل الخصوصية لا يُفقدها الإطلالة والضوء على
+    // مستوى الجلوس — إن كانت هذه آخر نافذة عادية لها تبقى، ويبقى العيب مذكورًا (يُصلح بسور حاجب أو مشربية أو بتنظيم لا تطل فيه الصالة على الشارع)
+    if (isFamilyHall(room) && !R14_OFF.has('r20hallsill') && !G.openings.some(op => op.window && op.id !== x.op.id && (op.o?.sill ?? 1) < 1.5 && op.sides.some(s => s.room.id === room.id))) {
+      notes.push(`نافذة «${room.name}» المطلة على ${x.why} بقيت بجلستها: هي نافذتها العادية الوحيدة، ورفعها يُفقد الصالة الإطلالة والضوء — يُستحسن سور حاجب أو مشربية أمامها.`);
+      skip.add(o.id); continue;
+    }
     // عرض النافذة العلوية: زجاجها ≥ 5% من أرضية الغرفة ما اتسع جدارها (دون تداخل مع فتحات الجدار نفسه)
     const edge = room.edges.find(e => e.exterior && Math.abs((x.op.p.x - e.a.x) * (e.b.y - e.a.y) - (x.op.p.y - e.a.y) * (e.b.x - e.a.x)) / (e.length || 1) < .3);
     const wall = doc.walls.find(w => w.id === live.wall), h = .9;

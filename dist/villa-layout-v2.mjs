@@ -32,6 +32,7 @@ import { clientGlazing } from './glazing.mjs';
 import { presentationStatus, STATUS_AR, PROPOSAL_LABEL_AR, MAJOR_PREFS } from './presentation-status.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
+import { guarded, invariants as guardInv, regressions as guardReg } from './change-guard.mjs';
 import { polishR17 } from './r17-polish.mjs';
 import { polishR16 } from './r16-polish.mjs';
 
@@ -1211,6 +1212,8 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   // (الجولة العشرون، المراجع المستقل r19: H1 وH5 مجلس معزول بلا باب داخلي) وصلة الضيافة شرط توليد لا جزاء: مجلس الرجال (بدهليزه) يلامس الطعام
   // بطول يتسع لباب خدمة (مقلط)، فلا يُبنى تنظيم يعبر فيه الضيف العائلة أو يُخدم المجلس من الخارج — مخالفة في البحث نفسه (GUEST_DINING إلزامي
   // يحجب البديل بعد البناء على أي حال). يُعفى بطلب العميل فصل المجلس عن الطعام (P.guestLink = false)
+  // (الجولة العشرون، المراجعة العمياء r19: C4 وC6 وC8-2) الصالة ≥ مجلس الرجال صافيًا — شرط توليد في أشجار المحرك الثالث (HALL_LT_MAJLIS عيب معماري بعد البناء)
+  if (ctx.hardHall && !ctx.upper && !P.hallFixed && P.men && !R14_OFF.has('r20hall')) { const mj = find(P.men.id); if (mj) { const need = A_(mj.r) - (mj.block.guestWc ? 7 : 0) + 1.0, ha = A_(hall.r); if (ha < need) bad('hall-lt-majlis', (need - ha) / 6); } }
   if (ctx.hardLink && P.guestLink && P.men && dn && !ctx.upper && !R14_OFF.has('r20link')) { const mj = find(P.men.id); if (mj) { const t = touch(mj.r, dn.r); if (t < DOOR_TOUCH + .2) bad('guest-link', (DOOR_TOUCH + .2 - t) / 1.5); } }
   // (الجولة الرابعة عشرة) جُرّب جزاء «المجلس يشترك في جدار مع غرفة نوم» وجزاء أقوى لغياب المقلط في البحث نفسه: خفّضا عدد البدائل
   // المعروضة (23 ← 20 و22 على تسع حالات) بلا تحسن مقابل في البند — أُزيلا؛ البندان يُقاسان ويُذكران في حالة العرض («يحتاج تعديلات»).
@@ -2717,7 +2720,7 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
   for (const tr of trees || partiTrees(P, { stair, W: site.W, D: site.D, irregular: !!site.placeRects }).filter(t => !t.late)) {
     if (avoid.has(tr.mode) || exclude.has(tr.mode + ':' + tr.tag)) continue;
     let lastRp = null;
-    const ctxT = tr.foyerYard || tr.hardDress || tr.hardLink ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: !!tr.hardLink } : ctx;
+    const ctxT = tr.foyerYard || tr.hardDress || tr.hardLink || tr.hardHall ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: !!tr.hardLink, hardHall: !!tr.hardHall } : ctx;
     const evalFn = (sol, ew, ed) => {
       let s = scoreV2(sol, P, ew, ed, ctxT); if (s === null) return null;
       // (الجولة التاسعة) أنماط تضع المجلس في شريط ضيافة ضيق: حد 24 م² مخالفةٌ في البحث نفسه (لا يُبنى ثم يُرفض)
@@ -3336,6 +3339,8 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   if (!designs.length) throw reviewFailure(built, rejected);
   // (الجولة الثامنة عشرة) الصالة ≥ المجلس: تحسين موضعي للبدائل المختارة نفسها (لا يغيّر الاختيار)، يُقبل إن بقي مختلفًا معماريًا عن الباقين
   if (!refDR) refineHall(designs, P, site, land, { title, requirements, entry, counts });
+  // (الجولة العشرون) دورة مياه العائلة بالبناء للبديل المختار الذي يفتقدها (FAMILY_WC): كتلة دورة مياه بجوار الصالة في شجرته نفسها
+  if (!refDR && !R14_OFF.has('r20daywc')) refineDayWc(designs, P, site, land, { title, requirements, entry, counts });
   if (prof) { prof.pick = (prof.pick || 0) + tp() - tq; tq = tp(); }
   // أرض غير منتظمة: بين المعروض بديل واحد على الأقل يتبع شكل الأرض (أعرض من أي مستطيل يتسع فيها) إن وُجد ناجحًا
   if (site.rectW && !refDR) {
@@ -3405,10 +3410,43 @@ function refineParking(built, P, site, land, { title, requirements, entry, count
       if (!c) continue;
       const n = buildDesign(c, P, site2, land2, { title, mirror: d.mirror, requirements, entry });
       if (globalThis.__v2dbg) (globalThis.__v2dbg.refine ||= []).push({ park: d.pat, reject: n.reject.slice(0, 2), r16: n.r16, fails: n.fails });
-      if (n.reject.length || n.fails > d.fails || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land2, counts)) continue;
+      if (n.reject.length || n.fails > d.fails || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land2, counts) || !noRegress(d, n, requirements, land2)) continue;
       n.notes = [...n.notes, `حُجز ${rsv} م أمام المبنى فوق الارتداد الأمامي ليتسع موقف عمودي على الشارع (5.5 م) بدل موقف موازٍ لا تدخله السيارة عمليًا أمام نافذة.`];
       built.splice(built.indexOf(d), 1, n);
     } catch { /* يبقى كما هو (ويُحجب بمخالفته) */ }
+  }
+}
+/** (الجولة العشرون) حارس الاستبدال: البديل المعاد حله لا يحل محل الأصل إن أسقط شرطًا كان متحققًا فيه (الصالة، دورة المياه، الضوء، الوصول…). */
+function noRegress(d, n, requirements, land) {
+  if (R14_OFF.has('r20guard')) return true;
+  try { const req = measureRequest(requirements, land, null), reg = guardReg(d._inv ||= guardInv(d.doc, req), guardInv(n.doc, req)); if (reg.length && globalThis.__v2dbg) (globalThis.__v2dbg.guard ||= []).push({ pat: d.pat, reg: reg.map(x => x.id) }); return !reg.length; } catch { return true; }
+}
+/** (الجولة العشرون) يزرع كتلة دورة مياه يومية بجوار الصالة في شجرة التنظيم نفسها (جراحة شجرة عامة، لا لنمط بعينه). */
+const DAY_WC_BLOCK = Object.freeze({ id: 'wcDay', kind: 'wc', rank: 2, area: 3.6, name: 'دورة مياه' });
+function withDayWc(tree, side) {
+  const t = cloneTree(tree); let done = false;
+  const walk = (n, parent, i) => { if (done || !n) return; if (n.t === 'circ' && n.id === 'hall') { const z = Z([DAY_WC_BLOCK], side === 'x' ? 'x1' : 'y0', side === 'x' ? 'y' : 'x'); const rep = side === 'x' ? mk('x', [z, { ...n }]) : mk('y', [{ ...n }, z]); if (parent) { parent.k[i] = rep; } else Object.assign(t, rep); done = true; return; } if (n.k) n.k.forEach((c, j) => walk(c, n, j)); if (n.t === 'dual') { walk(n.g, null, 0); } };
+  walk(t, null, 0); return done ? t : null;
+}
+function refineDayWc(designs, P, site, land, { title, requirements, entry, counts }) {
+  const req = measureRequest(requirements, land, null), lacks = d => { try { return measureR16(d.doc, req).some(g => g.id === 'FAMILY_WC' && g.applicable && !g.pass); } catch { return false; } };
+  const trees = partiTrees(P, { W: site.W, D: site.D, irregular: !!site.placeRects });
+  for (let i = 0; i < designs.length; i++) {
+    const d = designs[i]; if (!d.cand || !lacks(d)) continue;
+    const tr = trees.find(t => t.tag === d.cand.tag && t.mode === d.cand.mode && !!t.stepped === !!d.cand.stepped); if (!tr) continue;
+    for (const side of ['x', 'y']) {
+      const tree = withDayWc(tr.tree, side); if (!tree) continue;
+      try {
+        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree, seed: tr.tag + '#w' + side, iters: Math.max(tr.iters || 0, DEEP_ITERS), tol: Math.max(tr.tol || 2, 4), hardLink: tr.hardLink, hardHall: tr.hardHall }] })[0]; if (globalThis.__v2dbg) (globalThis.__v2dbg.daywc ||= []).push({ pat: d.pat, side, cand: !!c }); if (!c) continue;
+        const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
+        if (globalThis.__v2dbg) globalThis.__v2dbg.daywc.push({ reject: n.reject.slice(0, 2), fails: [d.fails, n.fails], lacks: lacks(n), r16: n.r16 });
+        if (n.reject.length || n.fails > d.fails || lacks(n) || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
+        if (designs.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
+        n.secondPass = d.secondPass; n.dr = n.dr || docRooms(n.doc);
+        n.notes = [...n.notes, 'أُضيفت دورة مياه للعائلة بجوار الصالة تُدخل منها، بإعادة ضبط أبعاد التنظيم نفسه (قيمة تصميمية افتراضية للميزان).'];
+        designs[i] = n; break;
+      } catch { /* يبقى الأصل */ }
+    }
   }
 }
 function refineGuest(built, P, site, land, { title, requirements, entry, counts }) {
@@ -3423,7 +3461,7 @@ function refineGuest(built, P, site, land, { title, requirements, entry, counts 
       if (!c) continue;
       const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
       if (globalThis.__v2dbg) (globalThis.__v2dbg.refine ||= []).push({ guest: d.pat, reject: n.reject.slice(0, 2), r16: n.r16, fails: n.fails });
-      if (n.reject.length || n.fails > d.fails || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land, counts)) continue;
+      if (n.reject.length || n.fails > d.fails || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
       n.notes = [...n.notes, 'أُعيد ضبط التنظيم نفسه ليلاصق مجلس الرجال صالة الطعام بباب مقلط: الضيف يصل إلى الطعام دون عبور العائلة.'];
       built.splice(built.indexOf(d), 1, n);
     } catch { /* يبقى كما هو (ويُحجب بمخالفته) */ }
@@ -3478,7 +3516,7 @@ function refineWomen(built, P, site, land, { title, requirements, entry, counts 
         const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
         const cur = built[i];
         if (n.reject.length || n.fails > d.fails || wArea(n) <= wArea(cur) + .3 || n.quality > d.quality + 400) continue;
-        if (!gateReview(n, requirements, land, counts)) continue;
+        if (!gateReview(n, requirements, land, counts) || !noRegress(cur, n, requirements, land)) continue;
         n.notes = [...n.notes, `كُبّر «مجلس النساء» إلى ${r2(wArea(n))} م² صافيًا (كان ${r2(wArea(d))} م²) بإعادة ضبط أبعاد التنظيم نفسه.`];
         built[i] = n;
         if (wArea(n) >= WOMEN_NET) break;
@@ -3506,13 +3544,14 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
         const ms = R14_OFF.has('r19hall') ? null : sol.placed.find(p => p.block.master), mx = ms ? Math.max(0, A_(ms.r) - ms.block.area * 1.12) : 0;
         const need = A_(mj.r) - (mj.block.guestWc ? 7 : 0) + margin, ha = A_(h.r); return (ha < need ? 60 * (need - ha) : 0) + 80 * mx; };
       try {
-        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree: cloneTree(tr.tree), hardMajlis: !!P.men && !majlisAsked(P), seed: tr.tag + '#h' }], extra })[0]; if (!c) continue;
+        // (الجولة العشرون) والصالة ≥ المجلس مخالفة في إعادة الحل (hardHall) لا جزاء فقط — في المحاولتين الأخيرتين
+        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree: cloneTree(tr.tree), hardMajlis: !!P.men && !majlisAsked(P), hardHall: margin >= 6 && !R14_OFF.has('r20hall'), seed: tr.tag + '#h' }], extra })[0]; if (!c) continue;
         const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry }), a1 = ar(n); n.secondPass = d.secondPass;
         if (globalThis.__v2dbg) (globalThis.__v2dbg.hall ||= []).push({ pat: d.pat, margin, a0, a1, reject: n.reject, fails: [d.fails, n.fails], major: [d.major, n.major], q: [d.quality, n.quality] });
         // يُقبل إن صارت الصالة ≥ المجلس، أو (الجولة التاسعة عشرة) زالت عيوب جوهرية مقيسة (الصالة الصغيرة/الممر) دون عيب جديد ولو بقيت أصغر
         const fewer = !R14_OFF.has('r19hall') && n.major.length < d.major.length;
         if (n.reject.length || n.fails > d.fails || !a1 || (a1.h < a1.m && !fewer) || n.major.some(x => !d.major.includes(x)) || n.major.length > d.major.length || n.quality > d.quality + 400) continue;
-        if (!gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts)) continue;
+        if (!gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
         if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
         n.dr = n.dr || docRooms(n.doc);
         n.notes = [...n.notes, a1.h >= a1.m ? `كُبّرت «الصالة» إلى ${r2(a1.h)} م² فصارت لا تصغر عن «المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) بإعادة ضبط أبعاد التنظيم نفسه — هدف تصميمي افتراضي للميزان.` : `أُعيد ضبط أبعاد التنظيم نفسه: «الصالة» ${r2(a1.h)} م² و«المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) — زال ${d.major.filter(x => !n.major.includes(x)).join(' و')}، وما زالت الصالة أصغر من المجلس (هدف الميزان الافتراضي لم يتحقق على هذه الأرض الضيقة).`];
@@ -3562,7 +3601,7 @@ function shortfallReason(keep, shown, built, rejected0) {
   if (ledger) parts.push(`${ledger} تخالف بندًا صريحًا من الطلب (${[...ledgerWhy].slice(0, 3).join('، ')})`);
   if (women.length) parts.push(`${women.length} مجلس النساء فيها أصغر من ${WOMEN_NET} م² (${women.join('، ')} م²) والبرنامج يتسع لأكبر منه`);
   if (street) parts.push(`${street} فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)`);
-  if (guest) parts.push(`${guest} لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض (${[...guestPat].map(m => PARTI_AR[m] ? `«${PARTI_AR[m].split(':')[0]}»` : m).join('، ')})`);
+  if (guest) parts.push(`${guest} لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض${[...guestPat].some(m => PARTI_AR[m]) ? ` (${[...guestPat].filter(m => PARTI_AR[m]).map(m => `«${PARTI_AR[m].split(':')[0]}»`).join('، ')})` : ''}`);
   if (parkBad) parts.push(`${parkBad} لا تدخل السيارة موقفها عمليًا (موقف موازٍ في ارتداد ضحل أمام نافذة)`);
   if (family) parts.push(`${family} تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)`);
   if (heavy) parts.push(`${heavy} رسبت في البوابات الثقيلة (${[...heavyWhy].map(([g, n]) => `${HEAVY_AR[g] || g} ${n}`).join('، ')})`);
@@ -3729,10 +3768,11 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   if (pk) { for (const b of pk.bays) doc = applyCommand(doc, { type: 'add-zone', level: LV, name: 'موقف سيارة', roomType: 'garage', polygon: b.polygon }).doc; layout.notes.push(pk.note_ar + (cand.parkShift ? ` أُزيح المبنى ${cand.parkShift} م إلى الخلف ليتسع العدد المطلوب أمامه.` : '')); }
   // (الجولة السادسة عشرة) تحسين التصميم لا تخفيف المعيار: نوافذ الغرف الخاصة عن المواقف والشارع، وباب الماستر من ممر الغرف،
   // وباب المقلط — حلول معمارية على هذا المخطط لهذه الأرض، مكتوبة في ملاحظاته (dist/r16-polish.mjs)
-  if (!R14_OFF.has('r16')) { try { const pol = polishR16(doc); if (pol.notes_ar.length) layout.notes.push(...pol.notes_ar); } catch { /* يبقى كما رُسم */ } }
+  // (الجولة العشرون) الصقل محروس: إن أسقط شرطًا كان متحققًا (ضوء الصالة، دورة مياه، وصول…) يُعاد المستند كما كان ويُذكر السبب
+  if (!R14_OFF.has('r16')) { try { const g = R14_OFF.has('r20guard') ? { applied: true, result: polishR16(doc) } : guarded(doc, d => polishR16(d), measureRequest(requirements, land, null)); if (g.applied && g.result.notes_ar.length) layout.notes.push(...g.result.notes_ar); else if (!g.applied) layout.notes.push('لم يُعتمد صقل الخصوصية على هذا المخطط لأنه يُفسد شرطًا آخر: ' + g.regressions.map(x => x.ar).join('؛ ') + '.'); } catch { /* يبقى كما رُسم */ } }
   // (الجولة السابعة عشرة) الصالة لا تبقى ممرًا عابرًا (إزاحة أبوابها حتى تتسع جلسة عائلية)، و«مقهوي» يخدم مجلس الرجال من المطبخ أو الطعام
   // متى اتسع (dist/r17-polish.mjs) — مكتوبة في الملاحظات
-  if (!R14_OFF.has('r17')) { try { const pol = polishR17(doc); if (pol.notes_ar.length) layout.notes.push(...pol.notes_ar); } catch { /* يبقى كما رُسم */ } }
+  if (!R14_OFF.has('r17')) { try { const g = R14_OFF.has('r20guard') ? { applied: true, result: polishR17(doc) } : guarded(doc, d => polishR17(d), measureRequest(requirements, land, null)); if (g.applied && g.result.notes_ar.length) layout.notes.push(...g.result.notes_ar); else if (!g.applied) layout.notes.push('لم يُعتمد صقل الصالة/المقهوي على هذا المخطط لأنه يُفسد شرطًا آخر: ' + g.regressions.map(x => x.ar).join('؛ ') + '.'); } catch { /* يبقى كما رُسم */ } }
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
   const qg = qualityGates(relaxed, layout, { kitchenFront: (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), ...gateOpts(P), narrow: site.W < NARROW_W });
   const reject = [...hardGates(relaxed, P, rv), ...qg];
@@ -3752,7 +3792,7 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   // مجلس يلاصق الرئيسية، أو مدخل مجلس من ارتداد جانبي ضيق — فيتقدم ما لا يحتاج تعديلًا قبل العرض
   const majorExtra = sum(prefG.map(g => (g.id === 'MAJLIS_BED_WALL' && (g.value?.pairs || []).some(p => /الرئيسية/.test(p.bedroom)) ? 180 : g.id === 'MAJLIS_STREET_ENTRY' || g.id === 'BED_BATH' || g.id === 'MAID_BATH' ? 120 : 0)));
   // (الجولة السادسة عشرة) العيوب التي أثبتتها المراجعة المستقلة r15 (privacy-defects.mjs) وبقيت بعد التحسين: جزاء العيب الجوهري
-  let r16 = []; try { r16 = measureR16(relaxed, measureRequest(requirements, land, null), analyzeDoc(relaxed)).filter(g => g.applicable && !g.pass && !g.clientAsked).map(g => g.id); } catch { r16 = []; }
+  let r16 = []; try { r16 = measureR16(relaxed, measureRequest(requirements, land, null), analyzeDoc(relaxed)).filter(g => g.applicable && !g.pass && !g.clientAsked && g.tier !== 'note').map(g => g.id); } catch { r16 = []; }
   const r16Pen = R14_OFF.has('r16') ? 0 : sum(r16.map(id => R16_W[id] || 150));
   const prefPen = (R14_OFF.has('prefq') ? 0 : sum(prefFails.map(id => PREF_W[id])) + (R14_OFF.has('fit') ? 0 : majorExtra + typologyFit(cand, P, site))) + r16Pen;
   return { doc: relaxed, cand, dr: docRooms(relaxed), reject, penalty: r2(cand.pen), streetBeds: bedFront ? [] : streetBedrooms(layout.rooms), quality: r2(cand.pen + q.cost + prefPen), prefFails, r16, major: [...new Set([...prefMajor, ...r16])], same: false, mirror, issues: q.issues, mode: cand.mode, parti: cand.tag, env: { w: cand.ew, d: cand.ed, ox: pl.ox, oy: pl.oy }, pat: patOf(cand), notes: [...P.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, qgates: qg, ledger, fails: ledger.filter(x => !x.ok).length };

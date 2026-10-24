@@ -12,6 +12,7 @@
 //  PARKING_SHALLOW  — موقف موازٍ للشارع في ارتداد أمامي أقل من 5.5 م وأمام نافذة.
 import { analyzeDoc } from './draw/digest.mjs';
 import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
+import { measureR20, R20_MANDATORY } from './r20-checks.mjs';
 
 export const R16_DEFECTS = Object.freeze({
   WINDOW_PARKING: { ar: 'نافذة غرفة خاصة تطل على ساحة المواقف أو البوابة (أقل من 3 م) بلا حجب', tier: 'architectural' },
@@ -32,7 +33,8 @@ export const R16_DEFECTS = Object.freeze({
  *  - PARKING_SHALLOW: موقف لا تدخله السيارة عمليًا (موازٍ في ارتداد ضحل أمام نافذة) — يُعفى بطلب العميل موقفًا موازيًا.
  * هذه قيم الميزان الافتراضية (غير نظامية)؛ المراجع المستقل عدّها إلزامية في r17–r18. البنود الصريحة من طلب العميل والبوابات تبقى محجوبة كما هي.
  */
-export const MANDATORY_R16 = Object.freeze(['GUEST_DINING', 'PARKING_SHALLOW']);
+// (الجولة العشرون) ومعها المجلس المعزول ونافذة المجلس/المقلط على حوش العائلة (r20-checks.mjs، المراجعة العمياء r19)
+export const MANDATORY_R16 = Object.freeze(['GUEST_DINING', 'PARKING_SHALLOW', ...(globalThis.process?.env?.R14_OFF || '').includes('r20chk') ? [] : R20_MANDATORY]);
 /** (الجولة التاسعة عشرة) ما يحتاج مراجعة متخصصة (صحية/إنشائية) لا يحكم عليه الميزان: يُذكر منفصلًا عن العيب والمخالفة. */
 export const SPECIALIST_R16 = Object.freeze(['WET_STACK']);
 /** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا). */
@@ -185,6 +187,7 @@ export function measureR16(doc, request = {}, model = analyzeDoc(doc)) {
   // (الجولة السابعة عشرة) الصالة العائلية صغيرة نسبةً إلى مجلس الرجال، أو ممر عابر لا تبقى فيه جلسة عائلية (المراجع المستقل r16: C9-2)
   for (const g of measureHall(doc, request, model)) out.push(g);
   for (const g of measureUpper(doc, request, model)) out.push(g);
+  if (!String(globalThis.process?.env?.R14_OFF || '').includes('r20chk')) for (const g of measureR20(doc, request, model)) out.push(g);
   return out;
 }
 

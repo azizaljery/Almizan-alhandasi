@@ -23,4 +23,23 @@ export const isClientSafe = text => internalLeaks(text).length === 0;
 /** اسم البديل للعميل: «التصميم 2» (لا alt-2). */
 export const designName = i => `التصميم ${i}`;
 
-export default { INTERNAL_PATTERNS, internalLeaks, isClientSafe, designName };
+/**
+ * (الجولة العشرون، توجيه المالك سابعًا؛ المراجعة العمياء r19: C10 بديل واحد من خمسة، وH3/H4 بلا مخطط — ولا صورة تقول للعميل ذلك)
+ * إشعار العميل حين يقل المعروض عن المطلوب أو لا يُنتج مخطط: العدد صريحًا، والسبب، وما يمكن تغييره. نص عربي بلا لغة داخلية.
+ * { requested, shown, shortfall_ar, hidden:[{reasons_ar}], report_ar } → { title_ar, lines_ar[] } أو null إن عُرض العدد كاملًا.
+ */
+export function shortfallNotice({ requested = 1, shown = 0, shortfall_ar = null, hidden = [], report_ar = null } = {}) {
+  if (shown >= requested && !report_ar) return null;
+  const clean = t => String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, 'جرّبتُ $1 تنظيمًا مختلفًا، اجتاز الفحص منها $2')
+    .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').trim();
+  if (!shown) {
+    const lines = String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean);
+    return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.'] };
+  }
+  const why = clean(shortfall_ar).replace(/^عُرض \d+ من \d+ مطلوبة؛ ?/, '');
+  return { title_ar: `عُرض ${shown} من ${requested} ${requested === 1 ? 'تصميم' : 'تصاميم'} طلبتها`,
+    lines_ar: [`أعرض لك ${shown === 1 ? 'تصميمًا واحدًا' : shown === 2 ? 'تصميمين' : shown + ' تصاميم'} فقط من ${requested} طلبتها.`, why ? 'السبب: ' + why : null,
+      hidden?.length ? `لم أعرض ${hidden.length} ${hidden.length === 1 ? 'تصميمًا' : 'تصاميم'} لأن فيها مخالفة لشرط أساسي: ${[...new Set(hidden.flatMap(h => h.reasons_ar || []))].slice(0, 2).map(clean).join('؛ ')}` : null,
+      'لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم.'].filter(Boolean) };
+}
+export default { INTERNAL_PATTERNS, internalLeaks, isClientSafe, designName, shortfallNotice };
