@@ -49,7 +49,11 @@ function origMapper(text) {
   const idx = pos => { let i = 0; while (i + 1 < starts.length && starts[i + 1] <= pos) i++; return i; };
   return (t, a, b) => orig.slice(idx(a), idx(Math.max(a, b - 1)) + 1).join(' ').replace(/^[،,.؛;:!?؟]+|[،,.؛;:!?؟]+$/g, '').trim();
 }
-const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ? .1 : /تقريبا|حوالي|تقريبي|نحو|approx(?:imately)?|about|around/.test(s) ? .5 : .3;
+// (الجولة التاسعة عشرة، توجيه المالك رابعًا) سماحية المقاس الصريح لكل ضلع على حدة (لا المساحة): ±0.05 م افتراضًا و«بالضبط» — تفاوت
+// اللياسة والتشطيب على وجهي الجدار، لا تقريب تصميمي؛ و±0.30 م فقط حين يقول العميل «تقريبًا/حوالي». (كانت ±0.3 افتراضًا: مطبخ 3.86×4.96
+// اعتُدّ مطابقًا لطلب 4×5 — المالك لا يقبل ذلك.) RULES_DIM_TOL مصدر واحد لها في الشيفرة والتقارير ونص العميل.
+export const DIM_TOL = Object.freeze({ exact: .05, default: .05, approx: .3 });
+const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ? DIM_TOL.exact : /تقريبا|حوالي|تقريبي|نحو|approx(?:imately)?|about|around/.test(s) ? DIM_TOL.approx : DIM_TOL.default;
 
 /**
  * يستخرج المتطلبات من النص. counts: أعداد مفهومة مسبقًا (من الفهم المحلي أو الذكاء) تُستعمل أساسًا.

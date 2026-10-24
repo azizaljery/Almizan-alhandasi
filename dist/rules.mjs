@@ -664,16 +664,17 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     else out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: !open.length, why: open.length ? `المطبخ مفتوح على «${open[0]}» بفتحة بلا باب.` : `فتحات المطبخ الداخلية كلها أبواب (${ops.length}).` });
   }
   // الأبعاد الصريحة («4×5»): مقيسة من المستطيل الصافي للفراغ مع السماحية المعلنة
+  const r2d = v => Math.round(v * 100) / 100;
   for (const [k, d] of Object.entries(req.dims || {})) {
     const sid = AREA_SUBJ[k]; if (!sid || !d || !(d.w > 0) || !(d.l > 0)) continue;
     let list = sel(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); } if (sid === 'majlis') list = list.slice(0, 1);
-    const tol = Number.isFinite(d.tol) ? d.tol : .3, want = [Math.min(d.w, d.l), Math.max(d.w, d.l)];
-    const text = `${list.length === 1 ? `«${list[0].name}»` : subjAr(sid)} بأبعاد ${want[0]}×${want[1]} م (±${tol} م)`;
+    const tol = Number.isFinite(d.tol) ? d.tol : .05, want = [Math.min(d.w, d.l), Math.max(d.w, d.l)];
+    const text = `${list.length === 1 ? `«${list[0].name}»` : subjAr(sid)} بأبعاد ${want[0]}×${want[1]} م (كل ضلع ±${tol} م)`;
     if (!list.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, why: 'الفراغ غير موجود في هذا التصميم.' }); continue; }
     const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
     const bad = got.find(g => !g.ok);
     const g0 = got[0]; // (الجولة الخامسة عشرة) المرسوم والمطلوب لملاحظة «ضمن السماح لا مطابق»
-    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, why: (bad ? `«${bad.r.name}» ${r1(bad.s[0])}×${r1(bad.s[1])} م` : `الفعلي ${got.map(g => `${r1(g.s[0])}×${r1(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران).' });
+    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
   }
   // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
   if (req.site?.irregular) out.push(verifySite(doc, req.site, entry));

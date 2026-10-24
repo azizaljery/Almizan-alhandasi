@@ -94,7 +94,7 @@ function toleranceNotes(ledger) {
   for (const x of ledger) {
     if (!x.ok || x.kind !== 'dims' || !x.actual || !x.want) continue;
     const off = Math.max(Math.abs(x.actual.s - x.want.s), Math.abs(x.actual.l - x.want.l));
-    if (off > .1) out.push({ id: 'DIM_TOLERANCE', major: false, text_ar: `${x.text}: المرسوم ${x.actual.s}×${x.actual.l} م — ضمن السماح ±0.3 م لا مطابق` });
+    if (off > .02) out.push({ id: 'DIM_TOLERANCE', major: false, text_ar: `${x.text}: المرسوم ${x.actual.s}×${x.actual.l} م — ضمن السماحية المعلنة لا مطابق حرفيًا (أكبر فرق ${Math.round(off * 100) / 100} م)` });
   }
   return out;
 }

@@ -29,7 +29,7 @@ window.drawOptions = (title, message, options) => { const W = 1400, c0 = sizeC(1
       ctx.restore(); }
     else { ctx.fillStyle = '#8a7a5a'; ctx.font = '15px Tahoma'; ctx.textAlign = 'center'; ctx.fillText('لا مخطط جديد', bx + bw / 2, y + 110); ctx.textAlign = 'right'; }
     // (الجولة السابعة عشرة) وسم صريح على كل خيار: يحقق طلبك / لا يحقق طلبك
-    if (o.achieves === false || o.achieves === true) { const tag = o.achieves ? 'يحقق طلبك' : 'لا يحقق طلبك'; ctx.font = 'bold 15px Tahoma'; const tw = ctx.measureText(tag).width + 16; ctx.fillStyle = o.achieves ? '#2e6b3a' : '#b3261e'; ctx.fillRect(bx + bw - 8 - tw, y + 12, tw, 24); ctx.fillStyle = '#fff'; ctx.textAlign = 'right'; ctx.fillText(tag, bx + bw - 16, y + 30); }
+    if (o.achieves === false || o.achieves === true || o.achieves === 'partial') { const tag = o.achieves === 'partial' ? 'يحقق جزءًا من طلبك' : o.achieves ? 'يحقق طلبك' : 'لا يحقق طلبك'; ctx.font = 'bold 15px Tahoma'; const tw = ctx.measureText(tag).width + 16; ctx.fillStyle = o.achieves === 'partial' ? '#9a6a00' : o.achieves ? '#2e6b3a' : '#b3261e'; ctx.fillRect(bx + bw - 8 - tw, y + 12, tw, 24); ctx.fillStyle = '#fff'; ctx.textAlign = 'right'; ctx.fillText(tag, bx + bw - 16, y + 30); }
     ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 16px Tahoma'; let ty = y + 240; for (const l of wrapAr(ctx, '(' + o.n + ') ' + o.text, bw - 16).slice(0, 3)) { ctx.fillText(l, bx + bw - 8, ty); ty += 21; }
     x = bx - 14; }
   ctx.font = '13px Tahoma'; ctx.fillStyle = '#1d2a24'; ctx.fillText('مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, H - 12); return true; };
