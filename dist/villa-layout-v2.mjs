@@ -1038,6 +1038,9 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     else if (b.kind === 'kitchen') { const dn = placed.find(q => q.block.kind === 'dining'), td = dn ? touch(r, dn.r) : 0; if (cT < 1.1 && td < 1.2) bad('kitchen-access', 1.1 - cT); else if (Math.max(cT, td) < DOOR_TOUCH) pen += touchPen(Math.max(cT, td)); }
     else if (b.kind === 'maid') { const k = find('kitchen1'); if (cT < 1.1 && !(k && touch(r, k.r) >= 1.0) && !placed.some(q => q.block.laundry && touch(r, q.r) >= 1.0)) bad('maid-access', 1.1 - cT); }
     else if (b.kind === 'store') { const k = find('kitchen1'); if (!(k && touch(r, k.r) >= 1.0) && !(b.laundry && cT >= 1.1)) bad('store-access', 1); }
+    // (الجولة العشرين) غرفة السائق تُدخل من الخارج (الحوش/الارتداد قرب البوابة) — الممارسة السعودية المعتادة، والتفصيل يضع بابها على الجدار
+    // الخارجي (realizeV2: detail) — كانت تُطلب من الحركة الداخلية فرسبت تنظيمات البرنامج الواسع كلها «access:driver» (H3)
+    else if (b.kind === 'driver' && !R14_OFF.has('r20driver')) { const ex = expLen(r, solids); if (ex < 1.4 && cT < 1.1) bad('access:driver', 1.4 - ex); else if (ex < 1.4) pen += 40; }
     else if (cT < 1.1) bad('access:' + b.kind, 1.1 - cT); else pen += touchPen(cT);
     // (الجولة الحادية عشرة) غرفة الغسيل/المخزن التي طلبها العميل شريطًا بعمق 1.6 م بجوار المطبخ: المطبخ يتسع له ويبقى ≥ 3.25 م و10 م² بعده
     if (b.id === 'kitchen1' && P.kitchenStrip?.length) {
@@ -1174,6 +1177,10 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   if (P.men && dn && touch(find(P.men.id).r, dn.r) >= 1.2) pen -= 10; // الطعام للضيافة يجاور مجلس الرجال
   // (الجولة الثانية عشرة) المقلط الافتراضي: تجاور المجلس والطعام بطول يتسع لباب خدمة يُكافأ، وغيابه جزاء (لا رفض)
   if (P.majlisDiningDefault && P.men && dn) { const t = touch(find(P.men.id).r, dn.r); pen += t >= DOOR_TOUCH + .4 ? -45 : 35; }
+  // (الجولة العشرون، المراجع المستقل r19: H1 وH5 مجلس معزول بلا باب داخلي) وصلة الضيافة شرط توليد لا جزاء: مجلس الرجال (بدهليزه) يلامس الطعام
+  // بطول يتسع لباب خدمة (مقلط)، فلا يُبنى تنظيم يعبر فيه الضيف العائلة أو يُخدم المجلس من الخارج — مخالفة في البحث نفسه (GUEST_DINING إلزامي
+  // يحجب البديل بعد البناء على أي حال). يُعفى بطلب العميل فصل المجلس عن الطعام (P.guestLink = false)
+  if (ctx.hardLink && P.guestLink && P.men && dn && !ctx.upper && !R14_OFF.has('r20link')) { const mj = find(P.men.id); if (mj) { const t = touch(mj.r, dn.r); if (t < DOOR_TOUCH + .2) bad('guest-link', (DOOR_TOUCH + .2 - t) / 1.5); } }
   // (الجولة الرابعة عشرة) جُرّب جزاء «المجلس يشترك في جدار مع غرفة نوم» وجزاء أقوى لغياب المقلط في البحث نفسه: خفّضا عدد البدائل
   // المعروضة (23 ← 20 و22 على تسع حالات) بلا تحسن مقابل في البند — أُزيلا؛ البندان يُقاسان ويُذكران في حالة العرض («يحتاج تعديلات»).
   if (P.men && P.women[0]) { const m = find(P.men.id), wm = find(P.women[0].id); if (m && wm && touch(m.r, wm.r) > .5) pen += 10; }
@@ -1243,7 +1250,7 @@ function* optimizeSteps(tree, site, evalFn, { iters = 140, seed = 'x', tol = 2 }
   // مناطق بأكثر من كتلة: ترتيب الكتل داخلها قابل للتبديل (المطبخ قبل الطعام أو بعده…) — يبقى النمط نفسه
   const zones = nodes.filter(n => n.t === 'zone' && n.b.length > 1);
   const minW = minExt(tree, 'x'), minD = minExt(tree, 'y');
-  if (minW > site.W + 1e-6 || minD > site.D + 1e-6) return null; // لا يتسع بأدنى أبعاده: لا يُستنزف فيه البحث
+  if (minW > site.W + 1e-6 || minD > site.D + 1e-6) { if (globalThis.__v2dbg) globalThis.__v2dbg['min:' + seed] = [Math.round(minW * 100) / 100, Math.round(minD * 100) / 100, Math.round(site.W * 100) / 100, Math.round(site.D * 100) / 100]; return null; } // لا يتسع بأدنى أبعاده: لا يُستنزف فيه البحث
   // ذاكرة تقييم بالهندسة الناتجة: تغيّر وزن صغير كثيرًا ما يعطي المستطيلات نفسها بعد التقريب إلى 5 سم — لا يُعاد تقييمها
   // (التقييم دالة في المستطيلات وكتلها فقط؛ النتيجة نفسها حرفيًا، أسرع)
   const memo = new Map(), rk = r => Math.round(r.x0 * 20) + ',' + Math.round(r.y0 * 20) + ',' + Math.round(r.x1 * 20) + ',' + Math.round(r.y1 * 20);
@@ -2664,7 +2671,7 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
   for (const tr of trees || partiTrees(P, { stair, W: site.W, irregular: !!site.placeRects }).filter(t => !t.late)) {
     if (avoid.has(tr.mode) || exclude.has(tr.mode + ':' + tr.tag)) continue;
     let lastRp = null;
-    const ctxT = tr.foyerYard || tr.hardDress ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress } : ctx;
+    const ctxT = tr.foyerYard || tr.hardDress || tr.hardLink ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: !!tr.hardLink } : ctx;
     const evalFn = (sol, ew, ed) => {
       let s = scoreV2(sol, P, ew, ed, ctxT); if (s === null) return null;
       // (الجولة التاسعة) أنماط تضع المجلس في شريط ضيافة ضيق: حد 24 م² مخالفةٌ في البحث نفسه (لا يُبنى ثم يُرفض)
@@ -3218,6 +3225,9 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   // (الجولة التاسعة عشرة) موقف لا تدخله السيارة (موازٍ في ارتداد ضحل أمام نافذة — مخالفة إلزامية): يُعاد حل التنظيم نفسه بعمق محجوز أمام
   // المبنى يتسع لموقف عمودي 5.5 م (لا يُرسم الموازي أمام نافذة) — حل معماري للأرض لا إخفاء للبديل
   if (!refDR && !R14_OFF.has('r19park')) refineParking(built, P, site, land, { title, requirements, entry, counts });
+  // (الجولة العشرون) بديل بُني ومجلسه لا يصل الطعام إلا عبر العائلة أو معزول (GUEST_DINING — مخالفة إلزامية): يُعاد حل التنظيم نفسه ووصلة الضيافة
+  // (المجلس يلامس الطعام بباب مقلط) مخالفة في البحث (hardLink) — تحسين للتصميم نفسه لا إخفاء له
+  if (!refDR && !R14_OFF.has('r20link')) refineGuest(built, P, site, land, { title, requirements, entry, counts });
   if (!built.length) { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; throw err; }
   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
@@ -3351,6 +3361,24 @@ function refineParking(built, P, site, land, { title, requirements, entry, count
       if (globalThis.__v2dbg) (globalThis.__v2dbg.refine ||= []).push({ park: d.pat, reject: n.reject.slice(0, 2), r16: n.r16, fails: n.fails });
       if (n.reject.length || n.fails > d.fails || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land2, counts)) continue;
       n.notes = [...n.notes, `حُجز ${rsv} م أمام المبنى فوق الارتداد الأمامي ليتسع موقف عمودي على الشارع (5.5 م) بدل موقف موازٍ لا تدخله السيارة عمليًا أمام نافذة.`];
+      built.splice(built.indexOf(d), 1, n);
+    } catch { /* يبقى كما هو (ويُحجب بمخالفته) */ }
+  }
+}
+function refineGuest(built, P, site, land, { title, requirements, entry, counts }) {
+  if (!P.guestLink || !P.men) return;
+  const bad = built.filter(d => (d.r16 || []).includes('GUEST_DINING') && d.cand); if (!bad.length) return;
+  const trees = partiTrees(P, { W: site.W, irregular: !!site.placeRects });
+  for (const d of bad) {
+    const tr = trees.find(t => t.tag === d.cand.tag && t.mode === d.cand.mode && !!t.stepped === !!d.cand.stepped); if (!tr) continue;
+    try {
+      const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree: cloneTree(tr.tree), hardLink: true, seed: tr.tag + '#g', iters: Math.max(tr.iters || 0, DEEP_ITERS), tol: Math.max(tr.tol || 2, 4) }] })[0];
+      if (globalThis.__v2dbg) (globalThis.__v2dbg.refine ||= []).push({ guest: d.pat, cand: !!c });
+      if (!c) continue;
+      const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
+      if (globalThis.__v2dbg) (globalThis.__v2dbg.refine ||= []).push({ guest: d.pat, reject: n.reject.slice(0, 2), r16: n.r16, fails: n.fails });
+      if (n.reject.length || n.fails > d.fails || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land, counts)) continue;
+      n.notes = [...n.notes, 'أُعيد ضبط التنظيم نفسه ليلاصق مجلس الرجال صالة الطعام بباب مقلط: الضيف يصل إلى الطعام دون عبور العائلة.'];
       built.splice(built.indexOf(d), 1, n);
     } catch { /* يبقى كما هو (ويُحجب بمخالفته) */ }
   }
