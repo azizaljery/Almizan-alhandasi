@@ -301,7 +301,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -361,7 +361,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -451,7 +451,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -481,7 +481,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -522,7 +522,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -642,7 +642,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -672,7 +672,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",

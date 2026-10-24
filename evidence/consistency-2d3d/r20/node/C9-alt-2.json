@@ -1,0 +1,399 @@
+{
+ "source": "evidence/acceptance/after-20/C9/alt-2.json",
+ "mode": "node",
+ "ms": 488,
+ "pageErrors": [],
+ "summary": {
+  "walls": 28,
+  "openings": 41,
+  "rooms": 18,
+  "levels": 1,
+  "mismatches": 0,
+  "major": 0,
+  "minor": 0,
+  "byCode": {}
+ },
+ "mismatches": [],
+ "measured": {
+  "levels": [
+   {
+    "id": "L1",
+    "elevation": 0,
+    "height": 3.2,
+    "top": 3.2
+   }
+  ],
+  "openings": {
+   "o1": {
+    "found": true,
+    "s0": 8.16,
+    "s1": 9.56,
+    "center": 8.86,
+    "width": 1.4,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o2": {
+    "found": true,
+    "s0": 6.35,
+    "s1": 7.35,
+    "center": 6.85,
+    "width": 1,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o3": {
+    "found": true,
+    "s0": 6.85,
+    "s1": 8.25,
+    "center": 7.55,
+    "width": 1.4,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o4": {
+    "found": true,
+    "s0": 4.7,
+    "s1": 5.8,
+    "center": 5.25,
+    "width": 1.1,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o5": {
+    "found": true,
+    "s0": 0.5,
+    "s1": 1.9,
+    "center": 1.2,
+    "width": 1.4,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o6": {
+    "found": true,
+    "s0": 0.4,
+    "s1": 1.2,
+    "center": 0.8,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o7": {
+    "found": true,
+    "s0": 2.55,
+    "s1": 3.35,
+    "center": 2.95,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o8": {
+    "found": true,
+    "s0": 1.475,
+    "s1": 2.675,
+    "center": 2.075,
+    "width": 1.2,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o9": {
+    "found": true,
+    "s0": 5.775,
+    "s1": 6.725,
+    "center": 6.25,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o10": {
+    "found": true,
+    "s0": 5,
+    "s1": 5.9,
+    "center": 5.45,
+    "width": 0.9,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o11": {
+    "found": true,
+    "s0": 0.34,
+    "s1": 1.29,
+    "center": 0.815,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o12": {
+    "found": true,
+    "s0": 1.94,
+    "s1": 2.74,
+    "center": 2.34,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o13": {
+    "found": true,
+    "s0": 3.175,
+    "s1": 4.225,
+    "center": 3.7,
+    "width": 1.05,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o14": {
+    "found": true,
+    "s0": 2.04,
+    "s1": 2.99,
+    "center": 2.515,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o15": {
+    "found": true,
+    "s0": 2.56,
+    "s1": 3.36,
+    "center": 2.96,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o16": {
+    "found": true,
+    "s0": 0.575,
+    "s1": 1.775,
+    "center": 1.175,
+    "width": 1.2,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o17": {
+    "found": true,
+    "s0": 6.81,
+    "s1": 7.76,
+    "center": 7.285,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o18": {
+    "found": true,
+    "s0": 2.56,
+    "s1": 3.36,
+    "center": 2.96,
+    "width": 0.8,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o19": {
+    "found": true,
+    "s0": 0.575,
+    "s1": 1.775,
+    "center": 1.175,
+    "width": 1.2,
+    "head": 2.3,
+    "sill": 0
+   },
+   "o20": {
+    "found": true,
+    "s0": 0.45,
+    "s1": 1.35,
+    "center": 0.9,
+    "width": 0.9,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o21": {
+    "found": true,
+    "s0": 1.275,
+    "s1": 2.225,
+    "center": 1.75,
+    "width": 0.95,
+    "head": 2.1,
+    "sill": 0
+   },
+   "o22": {
+    "found": true,
+    "s0": 1.2,
+    "s1": 2.4,
+    "center": 1.8,
+    "width": 1.2,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o23": {
+    "found": true,
+    "s0": 7.15,
+    "s1": 9.35,
+    "center": 8.25,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o24": {
+    "found": true,
+    "s0": 1.2,
+    "s1": 2.4,
+    "center": 1.8,
+    "width": 1.2,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o25": {
+    "found": true,
+    "s0": 0.275,
+    "s1": 1.275,
+    "center": 0.775,
+    "width": 1,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o26": {
+    "found": true,
+    "s0": 1.85,
+    "s1": 4.05,
+    "center": 2.95,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o27": {
+    "found": true,
+    "s0": 1.125,
+    "s1": 3.325,
+    "center": 2.225,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o28": {
+    "found": true,
+    "s0": 0.625,
+    "s1": 2.025,
+    "center": 1.325,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o29": {
+    "found": true,
+    "s0": 6.7,
+    "s1": 7.3,
+    "center": 7,
+    "width": 0.6,
+    "head": 2.3,
+    "sill": 1.7
+   },
+   "o30": {
+    "found": true,
+    "s0": 0.975,
+    "s1": 3.175,
+    "center": 2.075,
+    "width": 2.2,
+    "head": 2.3,
+    "sill": 0.8
+   },
+   "o31": {
+    "found": true,
+    "s0": 1.4,
+    "s1": 2.8,
+    "center": 2.1,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o32": {
+    "found": true,
+    "s0": 0.625,
+    "s1": 2.025,
+    "center": 1.325,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o33": {
+    "found": true,
+    "s0": 2.375,
+    "s1": 3.775,
+    "center": 3.075,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o34": {
+    "found": true,
+    "s0": 0.975,
+    "s1": 3.175,
+    "center": 2.075,
+    "width": 2.2,
+    "head": 2.5,
+    "sill": 1.6
+   },
+   "o35": {
+    "found": true,
+    "s0": 1.175,
+    "s1": 1.775,
+    "center": 1.475,
+    "width": 0.6,
+    "head": 2.3,
+    "sill": 1.7
+   },
+   "o36": {
+    "found": true,
+    "s0": 4.95,
+    "s1": 5.55,
+    "center": 5.25,
+    "width": 0.6,
+    "head": 2.3,
+    "sill": 1.7
+   },
+   "o37": {
+    "found": true,
+    "s0": 5.35,
+    "s1": 6.75,
+    "center": 6.05,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o38": {
+    "found": true,
+    "s0": 8.2,
+    "s1": 8.8,
+    "center": 8.5,
+    "width": 0.6,
+    "head": 2.3,
+    "sill": 1.7
+   },
+   "o39": {
+    "found": true,
+    "s0": 11.95,
+    "s1": 13.35,
+    "center": 12.65,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o40": {
+    "found": true,
+    "s0": 3.225,
+    "s1": 4.625,
+    "center": 3.925,
+    "width": 1.4,
+    "head": 2.2,
+    "sill": 1
+   },
+   "o41": {
+    "found": true,
+    "s0": 9.9,
+    "s1": 10.5,
+    "center": 10.2,
+    "width": 0.6,
+    "head": 2.3,
+    "sill": 1.7
+   }
+  },
+  "stairs": []
+ }
+}

@@ -1,0 +1,609 @@
+{
+ "id": "H2",
+ "engine": "v3",
+ "name": "أرض ضيقة 15 م بمجلسين",
+ "text": "3 غرف نوم ومجلس رجال ومجلس نساء وصالة ومطبخ مقفل وطعام",
+ "understood": [
+  "3 غرف نوم",
+  "مطبخ مغلق بباب"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "ell",
+   "pat": "ell:n10",
+   "presentation": {
+    "status": "hidden",
+    "label_ar": "محجوب",
+    "hidden_ar": [
+     "رسب في بوابة المراجعة PARKING"
+    ],
+    "edits_ar": [],
+    "notes_ar": [
+     "مبنى أعمق من 18 م فيه حوش أو منور داخلي: عمق المبنى 25.05 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+     "المواقف عمودية على الشارع بعمق 5.5 م، خارج ممرات المداخل، ولا أمام نافذة أو باب، ولا في تجويف داخل كتلة المبنى: «موقف سيارة»: موازٍ للشارع (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+     "غرفة الملابس 1.68×2.28 م أصغر من 2.0×2.5 م لرئيسية 21.07 م²",
+     "مدخل الرجال ومدخل العائلة متجاوران على الواجهة نفسها: باب الرجال وباب العائلة على الواجهة نفسها بينهما 1.67 م",
+     "حمامات بلا نافذة خارجية (تحتاج تهوية ميكانيكية): 4 من 6: دورة مياه، حمام الرئيسية، حمام غرفة 3، حمام غرفة 2 — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+    ],
+    "specialist_ar": [],
+    "categories": {
+     "mandatory": 1,
+     "architectural": 0,
+     "specialist": 0,
+     "notes": 5
+    },
+    "mandatory": [],
+    "prefs": [
+     "DEEP_PLAN_LIGHT",
+     "PARKING_LAYOUT"
+    ],
+    "major": [],
+    "r16": [],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [
+    "PARKING_LAYOUT"
+   ],
+   "summary": "شكل L: جناح نوم جانبي بطول المبنى وحديقة خلفية في الركن تطل عليها الصالة",
+   "review": {
+    "passed": false,
+    "failedGates": [
+     "PARKING"
+    ],
+    "score": 95.04,
+    "rejectReasons_ar": [
+     "المواقف المطلوبة نظاميًا (موقف لأرض ≤ 400 م²، وموقفان لما فوقها) مرسومة داخل حدود الأرض خارج المبنى: 1 موقف مرسوم والمطلوب نظاميًا 2 لأرض > 400 م²"
+    ],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": false
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": false,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 1,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 1,
+        "info": 3
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 11.42,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 19.21
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 5.52,
+    "area": 17.28
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.21
+   },
+   "hall": {
+    "w": 5.08,
+    "l": 5.77,
+    "ratio": 1.13
+   },
+   "rooms": 22,
+   "net": 241.79,
+   "circulationPct": 18.23,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 1,
+   "reviewWarnings": 3,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مطبخ مغلق بباب",
+     "ok": true,
+     "why": "فتحات المطبخ الداخلية كلها أبواب (2)."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "feasibility": {
+  "feasible": true,
+  "hard": [],
+  "warnings": [],
+  "options_ar": [],
+  "numbers": {
+   "buildableW": 11.7,
+   "buildableD": 27.2,
+   "buildableArea": 320,
+   "coverageArea": 360,
+   "programNet": 205,
+   "neededGrossPerFloor": 235,
+   "floors": 1
+  },
+  "report_ar": "الطلب ممكن على هذه الأرض."
+ },
+ "search": {
+  "units": [
+   {
+    "key": "M",
+    "zone": "guest",
+    "area": 33
+   },
+   {
+    "key": "W",
+    "zone": "guest",
+    "area": 29
+   },
+   {
+    "key": "DN",
+    "zone": "guest",
+    "area": 15
+   },
+   {
+    "key": "KS",
+    "zone": "service",
+    "area": 16
+   },
+   {
+    "key": "F",
+    "zone": "circ",
+    "area": 9
+   },
+   {
+    "key": "H",
+    "zone": "family",
+    "area": 30
+   },
+   {
+    "key": "LK",
+    "zone": "circ",
+    "area": 8
+   },
+   {
+    "key": "S1",
+    "zone": "sleep",
+    "area": 73
+   }
+  ],
+  "rel": [
+   {
+    "a": "F",
+    "kind": "front",
+    "hard": true,
+    "ar": "مدخل العائلة على الشارع"
+   },
+   {
+    "a": "H",
+    "b": [
+     "F",
+     "LK"
+    ],
+    "kind": "touch",
+    "hard": true,
+    "ar": "الصالة تلامس مدخل العائلة (أو رواقًا منه)"
+   },
+   {
+    "a": "LK",
+    "b": "F",
+    "kind": "touch",
+    "hard": true,
+    "ar": "رواق الوصل من مدخل العائلة"
+   },
+   {
+    "a": "LK",
+    "b": "H",
+    "kind": "touch",
+    "hard": true,
+    "ar": "رواق الوصل إلى الصالة"
+   },
+   {
+    "a": "M",
+    "kind": "frontOrSide",
+    "hard": true,
+    "ar": "مجلس الرجال على الشارع أو على واجهة جانبية (مدخل مستقل)"
+   },
+   {
+    "a": "W",
+    "b": "F",
+    "kind": "touch",
+    "hard": true,
+    "ar": "مجلس النساء من مدخل العائلة"
+   },
+   {
+    "a": "DN",
+    "b": "KS",
+    "kind": "touch",
+    "hard": true,
+    "ar": "الطعام يلامس المطبخ"
+   },
+   {
+    "a": "DN",
+    "b": [
+     "H",
+     "F"
+    ],
+    "kind": "touch",
+    "hard": true,
+    "ar": "الطعام يُبلغ من العائلة (الصالة أو المدخل)"
+   },
+   {
+    "a": "M",
+    "b": "DN",
+    "kind": "touch",
+    "hard": true,
+    "ar": "وصلة الضيافة: مجلس الرجال يلامس الطعام (مقلط) فلا يعبر الضيف العائلة"
+   },
+   {
+    "a": "KS",
+    "kind": "notFront",
+    "hard": true,
+    "ar": "المطبخ لا يطل على الشارع"
+   },
+   {
+    "a": "S1",
+    "b": "H",
+    "kind": "touch",
+    "hard": true,
+    "ar": "جناح النوم يلامس الصالة (ممره منها)"
+   },
+   {
+    "a": "M",
+    "kind": "light",
+    "hard": true,
+    "ar": "ضوء طبيعي من الخارج أو من حديقة/حوش"
+   },
+   {
+    "a": "W",
+    "kind": "light",
+    "hard": true,
+    "ar": "ضوء طبيعي من الخارج أو من حديقة/حوش"
+   },
+   {
+    "a": "DN",
+    "kind": "light",
+    "hard": true,
+    "ar": "ضوء طبيعي من الخارج أو من حديقة/حوش"
+   },
+   {
+    "a": "KS",
+    "kind": "light",
+    "hard": true,
+    "ar": "ضوء طبيعي من الخارج أو من حديقة/حوش"
+   },
+   {
+    "a": "H",
+    "kind": "light",
+    "hard": true,
+    "ar": "ضوء طبيعي من الخارج أو من حديقة/حوش"
+   },
+   {
+    "a": "S1",
+    "kind": "light",
+    "hard": true,
+    "ar": "ضوء طبيعي من الخارج أو من حديقة/حوش"
+   },
+   {
+    "a": "S1",
+    "kind": "notFront",
+    "hard": false,
+    "w": 3,
+    "ar": "غرف النوم لا تطل على الشارع"
+   },
+   {
+    "a": "M",
+    "b": "S*",
+    "kind": "apart",
+    "hard": false,
+    "w": 1,
+    "ar": "المجلس لا يلاصق غرف النوم"
+   },
+   {
+    "a": "M",
+    "b": "W",
+    "kind": "apart",
+    "hard": false,
+    "w": 0.6,
+    "ar": "مجلس الرجال لا يلاصق مجلس النساء"
+   },
+   {
+    "a": "H",
+    "b": "G",
+    "kind": "touch",
+    "hard": false,
+    "w": 1.2,
+    "ar": "الصالة تطل على حديقة أو حوش"
+   },
+   {
+    "a": "H",
+    "kind": "notFront",
+    "hard": false,
+    "w": 1,
+    "ar": "الصالة لا تطل على الشارع"
+   },
+   {
+    "a": "DN",
+    "b": "F",
+    "kind": "apart",
+    "hard": false,
+    "w": 0.4,
+    "ar": "الطعام لا يفتح على مدخل العائلة (ممر عبور)"
+   }
+  ],
+  "grids": [
+   {
+    "nc": 2,
+    "nr": 4,
+    "valid": 4,
+    "nodes": 29187,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 5,
+    "valid": 6,
+    "nodes": 227619,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 6,
+    "valid": 24,
+    "nodes": 989017,
+    "exhausted": true
+   }
+  ],
+  "distinctTopologies": 8,
+  "dimFit": 4,
+  "picked": 0,
+  "dimFail": 4,
+  "trees": 0,
+  "library": 25,
+  "synth": 0
+ },
+ "ms": 59671,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "hidden": [],
+ "presentation": {
+  "ready": 0,
+  "needsEdits": 0,
+  "hidden": 0,
+  "label_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+ },
+ "proposalLabel_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا",
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "ell"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 7,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [],
+  "allDistinct": true,
+  "minSubstantive": null,
+  "minTotal": null
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 8، اجتاز البوابات منهم 1؛ ورُفض 6 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة (PROGRAM). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+ "notice": {
+  "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+  "lines_ar": [
+   "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+   "السبب: جرّبتُ 8 تنظيمات مختلفة، اجتاز الفحص منها 1؛ ورُفض 6 في فحوص الجودة والسلامة، و1 في المراجعة المعمارية. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+   "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+  ]
+ }
+}

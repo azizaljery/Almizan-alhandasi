@@ -8,13 +8,16 @@ import { readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 
 import { parseDoc } from '../dist/draw/doc.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 import { measureR16, isPrivateRoom } from '../dist/privacy-defects.mjs';
+import { R20_DEFECTS } from '../dist/r20-checks.mjs';
 import { presentationStatus } from '../dist/presentation-status.mjs';
 import { CASES } from './acceptance-cases.mjs';
 
 const stage = process.argv[2] || 'after-16', ROOT = new URL('../', import.meta.url).pathname;
 const req = id => { const C = CASES.find(c => c.id === id); return { text: C.text, counts: C.counts, land: { floors: 1, ...C.land } }; };
 const load = (st, id, f) => parseDoc(readFileSync(ROOT + `evidence/acceptance/${st}/${id}/${f}`, 'utf8'));
-const fails = (doc, id) => measureR16(doc, req(id)).filter(g => g.applicable && !g.pass && !g.clientAsked).map(g => g.id);
+// (الجولة العشرون) قياسات r20 صارت ضمن measureR16؛ هذه المجموعة تقيس قياسات r16 وحدها (قياسات r20 في r20-defect-corpus.mjs)
+const R20_IDS = new Set(Object.keys(R20_DEFECTS));
+const fails = (doc, id) => measureR16(doc, req(id)).filter(g => g.applicable && !g.pass && !g.clientAsked && !R20_IDS.has(g.id)).map(g => g.id);
 const status = (doc, id) => presentationStatus({ doc, ledger: [], review: { passed: true } }, req(id)).status;
 const rows = [];
 // (1) إيجابيات حقيقية من حكم المراجع r15 (العيب مذكور نصًا في ملاحظاته)

@@ -19,7 +19,9 @@
    "detected": true,
    "got": [
     "WET_STACK",
-    "MASTER_STAIR_DOOR"
+    "MASTER_STAIR_DOOR",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ],
    "status": "needs-edits"
   },
@@ -33,7 +35,12 @@
    "got": [
     "GUEST_DINING",
     "WET_STACK",
-    "MASTER_STAIR_DOOR"
+    "MASTER_STAIR_DOOR",
+    "MAJLIS_ISOLATED",
+    "HALL_LT_MAJLIS",
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ],
    "status": "hidden"
   },
@@ -41,13 +48,17 @@
    "kind": "negative-upper",
    "alt": "C1-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C1-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -57,20 +68,28 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C2-1",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C2-1",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -80,20 +99,27 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "FAMILY_WC",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C3-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C3-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -103,20 +129,30 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C4-1",
    "detected": false,
-   "got": []
+   "got": [
+    "HALL_LT_MAJLIS",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C4-1",
    "detected": false,
-   "got": []
+   "got": [
+    "HALL_LT_MAJLIS",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -126,20 +162,30 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "HALL_LT_MAJLIS",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C5-1",
    "detected": false,
-   "got": []
+   "got": [
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C5-1",
    "detected": false,
-   "got": []
+   "got": [
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -149,20 +195,29 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C5-2",
    "detected": false,
-   "got": []
+   "got": [
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C5-2",
    "detected": false,
-   "got": []
+   "got": [
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -172,20 +227,33 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C5-3",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "HALL_DAYLIGHT",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C5-3",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "HALL_DAYLIGHT",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -195,20 +263,31 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "FAMILY_WC",
+    "HALL_DAYLIGHT",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C6-1",
    "detected": false,
-   "got": []
+   "got": [
+    "HALL_LT_MAJLIS",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C6-1",
    "detected": false,
-   "got": []
+   "got": [
+    "HALL_LT_MAJLIS",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -218,7 +297,10 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "HALL_LT_MAJLIS",
+    "BATH_NO_WINDOW"
    ]
   },
   {
@@ -226,7 +308,9 @@
    "alt": "C7-1",
    "detected": false,
    "got": [
-    "WET_STACK"
+    "WET_STACK",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
@@ -239,20 +323,30 @@
    "detected": true,
    "got": [
     "WET_STACK",
-    "MASTER_STAIR_DOOR"
+    "MASTER_STAIR_DOOR",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C8-1",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C8-1",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -262,20 +356,28 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C8-2",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C8-2",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -285,20 +387,26 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C8-3",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C8-3",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -308,20 +416,26 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C9-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C9-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -331,20 +445,29 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C9-2",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C9-2",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -354,20 +477,30 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "FAMILY_WC",
+    "ENTRANCES_TOGETHER",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C9-3",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C9-3",
    "detected": false,
-   "got": []
+   "got": [
+    "FAMILY_WC",
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -377,7 +510,10 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "FAMILY_WC",
+    "BATH_NO_WINDOW"
    ]
   },
   {
@@ -385,7 +521,10 @@
    "alt": "C9-4",
    "detected": false,
    "got": [
-    "HALL_SMALL"
+    "HALL_SMALL",
+    "COURT_OVERLOOK",
+    "HALL_LT_MAJLIS",
+    "BATH_NO_WINDOW"
    ]
   },
   {
@@ -393,7 +532,10 @@
    "alt": "C9-4",
    "detected": false,
    "got": [
-    "HALL_SMALL"
+    "HALL_SMALL",
+    "COURT_OVERLOOK",
+    "HALL_LT_MAJLIS",
+    "BATH_NO_WINDOW"
    ]
   },
   {
@@ -405,20 +547,28 @@
    "detected": true,
    "got": [
     "GUEST_DINING",
-    "HALL_SMALL"
+    "HALL_SMALL",
+    "MAJLIS_ISOLATED",
+    "COURT_OVERLOOK",
+    "HALL_LT_MAJLIS",
+    "BATH_NO_WINDOW"
    ]
   },
   {
    "kind": "negative-upper",
    "alt": "C10-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "negative-mandatory",
    "alt": "C10-1",
    "detected": false,
-   "got": []
+   "got": [
+    "BATH_NO_WINDOW"
+   ]
   },
   {
    "kind": "fabricated-guest",
@@ -428,7 +578,9 @@
    ],
    "detected": true,
    "got": [
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "MAJLIS_ISOLATED",
+    "BATH_NO_WINDOW"
    ]
   }
  ]

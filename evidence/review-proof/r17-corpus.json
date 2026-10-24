@@ -4,7 +4,7 @@
   "note_ar": "كشف نوعي عيب الصالة (HALL_SMALL وHALL_THROUGH): إيجابيات حقيقية من حكم المراجع المستقل r16 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، وإيجابيات مصنوعة بتحوير واحد على بدائل «جاهزة»، وسلبيات (الجاهزة كما هي، وبدائل after-16 التي لم يسجّل فيها المراجع العيب). الإيجابية المصنوعة لا تُعد كشفًا إلا إن تغيّرت الصالة فعلًا عن قيمها: تحوير لا يمس الجلسة قد لا يكون عيبًا.",
   "positives": 34,
   "detected": 25,
-  "positivesNotReady": 25,
+  "positivesNotReady": 30,
   "real": "4/4",
   "synthetic": "21/30",
   "byMutation": {
@@ -170,7 +170,7 @@
     "HALL_SMALL",
     "HALL_THROUGH"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r16",
@@ -181,7 +181,7 @@
     "HALL_SMALL",
     "HALL_THROUGH"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r16-clean",
@@ -258,7 +258,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -267,7 +267,7 @@
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -276,7 +276,7 @@
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "clean",
@@ -315,7 +315,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -406,7 +406,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -436,7 +436,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -468,7 +468,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -584,7 +584,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -604,7 +604,7 @@
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "clean",
@@ -612,7 +612,7 @@
    "expected": null,
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -621,7 +621,7 @@
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "synthetic",
@@ -630,7 +630,7 @@
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": false,
    "got": [],
-   "status": "ready"
+   "status": "needs-edits"
   },
   {
    "kind": "clean",

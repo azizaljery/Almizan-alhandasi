@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { parseDoc } from '../dist/draw/doc.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 import { measureR16, MANDATORY_R16 } from '../dist/privacy-defects.mjs';
+import { R20_MANDATORY } from '../dist/r20-checks.mjs';
 import { presentationStatus } from '../dist/presentation-status.mjs';
 import { extractRequirements, applyLiteralReadings } from '../dist/requirements.mjs';
 import { verifyRequest } from '../dist/rules.mjs';
@@ -33,7 +34,7 @@ for (const C of CASES) {
   (res.designs || []).forEach((d, i) => {
     const doc = load(stage, C.id, d.file), got = fails(doc, C.id), two = doc.levels.length > 1;
     if (!two) rows.push({ kind: 'negative-upper', alt: `${C.id}-${i + 1}`, detected: got.some(x => ['WET_STACK', 'MASTER_STAIR_DOOR'].includes(x)), got });
-    if (d.presentation?.status !== 'hidden') rows.push({ kind: 'negative-mandatory', alt: `${C.id}-${i + 1}`, detected: got.some(x => MANDATORY_R16.includes(x)), got });
+    if (d.presentation?.status !== 'hidden') rows.push({ kind: 'negative-mandatory', alt: `${C.id}-${i + 1}`, detected: got.some(x => MANDATORY_R16.includes(x) && !R20_MANDATORY.includes(x)), got }); // (r20) المخالفتان الإلزاميتان الجديدتان تُقاسان في r20-defect-corpus
     // (أ) الباب الفاصل بين الصالة العلوية والدرج يعود قوسًا
     // (أ) الباب الذي سجّل المولّد أنه يفصل الصالة العلوية عن الدرج (ملاحظة البديل في polish-notes.json) يعود قوسًا ⇐ يجب أن يُكشف
     if (two) { const PN = existsSync(ROOT + `evidence/acceptance/${stage}/polish-notes.json`) ? JSON.parse(readFileSync(ROOT + `evidence/acceptance/${stage}/polish-notes.json`, 'utf8')) : {};

@@ -1,0 +1,66 @@
+{
+ "mode": "node",
+ "note": "المجسّم مقيس من مشهده المبني فعلًا (أشعة ورؤوس مثلثات) ومقارن بالمستند؛ التسامحات: موضع/عرض/سماكة/ارتفاع 2 سم (وإزاحة حتى 5 سم مع عرض مطابق = طفيفة)، حدود الأرضية 3 سم، امتداد الجدار 16 سم (تقاطعات الزوايا)، المساحة 1%.",
+ "docs": [
+  {
+   "key": "H1-alt-1",
+   "source": "evidence/acceptance/after-20-heldout-known/H1/alt-1.json",
+   "ms": 1902,
+   "walls": 31,
+   "openings": 47,
+   "rooms": 24,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "H2-alt-1",
+   "source": "evidence/acceptance/after-20-heldout-known/H2/alt-1.json",
+   "ms": 1283,
+   "walls": 26,
+   "openings": 41,
+   "rooms": 22,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "H3-alt-1",
+   "source": "evidence/acceptance/after-20-heldout-known/H3/alt-1.json",
+   "ms": 1181,
+   "walls": 33,
+   "openings": 48,
+   "rooms": 28,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  },
+  {
+   "key": "H5-alt-1",
+   "source": "evidence/acceptance/after-20-heldout-known/H5/alt-1.json",
+   "ms": 1769,
+   "walls": 30,
+   "openings": 48,
+   "rooms": 22,
+   "levels": 1,
+   "mismatches": 0,
+   "major": 0,
+   "minor": 0,
+   "byCode": {},
+   "pageErrors": 0,
+   "sample": []
+  }
+ ]
+}

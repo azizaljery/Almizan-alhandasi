@@ -1,0 +1,155 @@
+{
+ "notice.png": {
+  "case": "C8",
+  "source": [
+   "result.json"
+  ],
+  "internal_ar": "C8 — إشعار العميل (العدد وسببه أو تقرير التعذّر)"
+ },
+ "alt-1.png": {
+  "case": "C8",
+  "source": [
+   "alt-1.json"
+  ],
+  "internal_ar": "C8 — alt-1"
+ },
+ "alt-2.png": {
+  "case": "C8",
+  "source": [
+   "alt-2.json"
+  ],
+  "internal_ar": "C8 — alt-2"
+ },
+ "alt-3.png": {
+  "case": "C8",
+  "source": [
+   "alt-3.json"
+  ],
+  "internal_ar": "C8 — alt-3"
+ },
+ "edit-after.png": {
+  "case": "C8",
+  "source": [
+   "edit-after.json"
+  ],
+  "internal_ar": "C8 — edit-after"
+ },
+ "edit-alt1-after.png": {
+  "case": "C8",
+  "source": [
+   "edit-alt1-after.json"
+  ],
+  "internal_ar": "C8 — edit-alt1-after"
+ },
+ "edit-alt2-after.png": {
+  "case": "C8",
+  "source": [
+   "edit-alt2-after.json"
+  ],
+  "internal_ar": "C8 — edit-alt2-after"
+ },
+ "edit-alt3-after.png": {
+  "case": "C8",
+  "source": [
+   "edit-alt3-after.json"
+  ],
+  "internal_ar": "C8 — edit-alt3-after"
+ },
+ "edit-before.png": {
+  "case": "C8",
+  "source": [
+   "edit-before.json"
+  ],
+  "internal_ar": "C8 — edit-before"
+ },
+ "edit-alt2-options.png": {
+  "case": "C8",
+  "source": [
+   "alt-2.json"
+  ],
+  "internal_ar": "C8 — خيارات التعديل (alt-2) كما تُعرض قبل الاختيار"
+ },
+ "edit-alt3-options.png": {
+  "case": "C8",
+  "source": [
+   "alt-3.json"
+  ],
+  "internal_ar": "C8 — خيارات التعديل (alt-3) كما تُعرض قبل الاختيار"
+ },
+ "edit-diff.png": {
+  "case": "C8",
+  "source": [
+   "edit-before.json",
+   "edit-after.json"
+  ],
+  "internal_ar": "C8 — فرق التعديل: edit-before ← edit-after",
+  "client_ar": "لم يتغيّر شيء في المخطط — كما هو حرفيًا",
+  "kind": "identical",
+  "evidence_ar": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 126 عنصرًا. الغرف: 21 قبل؛ انتقلت 0، وتغيّر مقاس 0، وأضيفت 0، وأزيلت 0، وبقيت 21 كما هي.",
+  "rooms": {
+   "before": 21,
+   "moved": 0,
+   "resized": 0,
+   "added": 0,
+   "removed": 0,
+   "same": 21
+  }
+ },
+ "edit-alt1-diff.png": {
+  "case": "C8",
+  "source": [
+   "alt-1.json",
+   "edit-alt1-after.json"
+  ],
+  "internal_ar": "C8 — فرق التعديل: alt-1 ← edit-alt1-after",
+  "client_ar": "لم يتغيّر شيء في المخطط — كما هو حرفيًا",
+  "kind": "identical",
+  "evidence_ar": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 126 عنصرًا. الغرف: 21 قبل؛ انتقلت 0، وتغيّر مقاس 0، وأضيفت 0، وأزيلت 0، وبقيت 21 كما هي.",
+  "rooms": {
+   "before": 21,
+   "moved": 0,
+   "resized": 0,
+   "added": 0,
+   "removed": 0,
+   "same": 21
+  }
+ },
+ "edit-alt2-diff.png": {
+  "case": "C8",
+  "source": [
+   "alt-2.json",
+   "edit-alt2-after.json"
+  ],
+  "internal_ar": "C8 — فرق التعديل: alt-2 ← edit-alt2-after — الاختيار (1) محاكاة اختبار القبول، لا اختيار عميل حقيقي",
+  "client_ar": "لم يتغيّر شيء في المخطط — كما هو حرفيًا",
+  "kind": "identical",
+  "evidence_ar": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 130 عنصرًا. الغرف: 21 قبل؛ انتقلت 0، وتغيّر مقاس 0، وأضيفت 0، وأزيلت 0، وبقيت 21 كما هي.",
+  "rooms": {
+   "before": 21,
+   "moved": 0,
+   "resized": 0,
+   "added": 0,
+   "removed": 0,
+   "same": 21
+  }
+ },
+ "edit-alt3-diff.png": {
+  "case": "C8",
+  "source": [
+   "alt-3.json",
+   "edit-alt3-after.json"
+  ],
+  "internal_ar": "C8 — فرق التعديل: alt-3 ← edit-alt3-after — الاختيار (1) محاكاة اختبار القبول، لا اختيار عميل حقيقي",
+  "client_ar": "لم يتغيّر شيء في المخطط — كما هو حرفيًا",
+  "kind": "identical",
+  "evidence_ar": "البصمة الهندسية: لم يتغيّر أي عنصر؛ بقي ثابتًا حرفيًا 145 عنصرًا. الغرف: 24 قبل؛ انتقلت 0، وتغيّر مقاس 0، وأضيفت 0، وأزيلت 0، وبقيت 24 كما هي.",
+  "rooms": {
+   "before": 24,
+   "moved": 0,
+   "resized": 0,
+   "added": 0,
+   "removed": 0,
+   "same": 24
+  }
+ }
+}

@@ -1,0 +1,82 @@
+{
+ "note_ar": "قياسات r20 على أدلة after-19 (المعروفة والمحجوزة الأولى). المراجع وكيل ذكاء اصطناعي لا معماري مرخّص. الإنذار = رسوب القياس على بديل حكم عليه المراجع «يُعرض» دون ملاحظة من النوع نفسه.",
+ "real": [
+  {
+   "id": "COURT_OVERLOOK",
+   "positives": 1,
+   "detected": 1,
+   "alts": [
+    "C9-4"
+   ]
+  },
+  {
+   "id": "HALL_LT_MAJLIS",
+   "positives": 2,
+   "detected": 2,
+   "alts": [
+    "C4-1",
+    "C6-1"
+   ]
+  },
+  {
+   "id": "HALL_DAYLIGHT",
+   "positives": 1,
+   "detected": 1,
+   "alts": [
+    "C5-3"
+   ]
+  },
+  {
+   "id": "MAJLIS_ISOLATED",
+   "positives": 2,
+   "detected": 2,
+   "alts": [
+    "H1-1",
+    "H5-1"
+   ]
+  },
+  {
+   "id": "FAMILY_WC",
+   "positives": 1,
+   "detected": 1,
+   "alts": [
+    "C9-3"
+   ]
+  }
+ ],
+ "synthetic": {
+  "MAJLIS_ISOLATED": "18/18",
+  "HALL_DAYLIGHT": "19/19",
+  "FAMILY_WC": "14/14"
+ },
+ "alarms": {
+  "COURT_OVERLOOK": {
+   "count": 0,
+   "of": 9,
+   "alts": []
+  },
+  "HALL_LT_MAJLIS": {
+   "count": 0,
+   "of": 9,
+   "alts": []
+  },
+  "HALL_DAYLIGHT": {
+   "count": 0,
+   "of": 9,
+   "alts": []
+  },
+  "MAJLIS_ISOLATED": {
+   "count": 0,
+   "of": 9,
+   "alts": []
+  },
+  "FAMILY_WC": {
+   "count": 2,
+   "of": 9,
+   "alts": [
+    "C8-1",
+    "C9-2"
+   ]
+  }
+ }
+}

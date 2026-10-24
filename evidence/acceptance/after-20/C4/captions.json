@@ -1,0 +1,16 @@
+{
+ "notice.png": {
+  "case": "C4",
+  "source": [
+   "result.json"
+  ],
+  "internal_ar": "C4 — إشعار العميل (العدد وسببه أو تقرير التعذّر)"
+ },
+ "alt-1.png": {
+  "case": "C4",
+  "source": [
+   "alt-1.json"
+  ],
+  "internal_ar": "C4 — alt-1"
+ }
+}
