@@ -1612,7 +1612,8 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
   }
   if (!upper && secondEntry) {
     // المدخل الثاني: إلى المدخل أو الصالة أو الضيافة — لا إلى ممر غرف النوم
-    const prefer = [...circRooms.filter(c => ['foyer', 'hall', 'stair'].includes(c.id)), ...rooms.filter(r => ['majlis', 'family', 'dining'].includes(r.kind) || r.kind === 'lobby')];
+    // (الجولة التاسعة عشرة) دهليز الرجال قبل المجلس نفسه: الباب الخارجي لا يُفتح على المجلس مباشرة متى لامس الدهليز تلك الجهة
+    const prefer = [...circRooms.filter(c => ['foyer', 'hall', 'stair'].includes(c.id)), ...rooms.filter(r => r.kind === 'lobby'), ...rooms.filter(r => ['majlis', 'family', 'dining'].includes(r.kind))];
     let done = false;
     for (const r of prefer) {
       const e = edges(r, true).find(x => x.side === secondEntry);
@@ -1832,7 +1833,10 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
     const interiorX = ['x0', 'x1'].filter(z => !isExtSide(r, z));
     if (men) {
       const front = r.y0 < TOL;
-      const stripSide = interiorX.sort((a, c) => Math.abs(r[a] - fx) - Math.abs(r[c] - fx))[0] || (fx > (r.x0 + r.x1) / 2 ? 'x1' : 'x0');
+      // (الجولة التاسعة عشرة؛ المراجع المستقل r18: C3-1) المدخل الثاني للأرض على جهة المجلس (أرض زاوية): شريط الدهليز على تلك الجهة الخارجية،
+      // فيدخل الضيف من الشارع الثاني إلى الدهليز لا إلى المجلس مباشرة
+      const side2 = !upper && secondEntry && ['x0', 'x1'].includes(secondEntry) && isExtSide(r, secondEntry) && !R14_OFF.has('r19lobby2') ? secondEntry : null;
+      const stripSide = side2 || interiorX.sort((a, c) => Math.abs(r[a] - fx) - Math.abs(r[c] - fx))[0] || (fx > (r.x0 + r.x1) / 2 ? 'x1' : 'x0');
       const L2 = sideLen(r, stripSide), restW = W_(r) - T.guestStripW;
       // (الجولة التاسعة عشرة، توجيه المالك رابعًا) مقاس المجلس الصريح: الشريط (الدهليز ودورة المياه) يأخذ الزائد فيبلغ المجلس الصافي مقاس
       // العميل ضلعًا ضلعًا (±0.05 م) — لا يُقبل «قريب بالمساحة»
@@ -3421,17 +3425,21 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
     const d = built[i], a0 = ar(d); if (!a0 || a0.h >= a0.m || !d.cand) continue;
     const tr = trees.find(t => t.tag === d.cand.tag && t.mode === d.cand.mode && !!t.stepped === !!d.cand.stepped); if (!tr) continue;
     for (const margin of [2, 4, 6, 8]) {
+      // (الجولة التاسعة عشرة) والرئيسية لا تتضخم بما يُقتطع من غيرها (C4: حل الصالة الأكبر رُفض «الرئيسية 25.7 م² متضخمة»)
       const extra = sol => { const h = sol.circ.find(c => c.id === 'hall'), mj = sol.placed.find(p => p.block.kind === 'majlis' && p.block.men); if (!h || !mj) return 0;
-        const need = A_(mj.r) - (mj.block.guestWc ? 7 : 0) + margin, ha = A_(h.r); return ha < need ? 60 * (need - ha) : 0; };
+        const ms = R14_OFF.has('r19hall') ? null : sol.placed.find(p => p.block.master), mx = ms ? Math.max(0, A_(ms.r) - ms.block.area * 1.12) : 0;
+        const need = A_(mj.r) - (mj.block.guestWc ? 7 : 0) + margin, ha = A_(h.r); return (ha < need ? 60 * (need - ha) : 0) + 80 * mx; };
       try {
         const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree: cloneTree(tr.tree), hardMajlis: !!P.men && !majlisAsked(P), seed: tr.tag + '#h' }], extra })[0]; if (!c) continue;
         const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry }), a1 = ar(n); n.secondPass = d.secondPass;
         if (globalThis.__v2dbg) (globalThis.__v2dbg.hall ||= []).push({ pat: d.pat, margin, a0, a1, reject: n.reject, fails: [d.fails, n.fails], major: [d.major, n.major], q: [d.quality, n.quality] });
-        if (n.reject.length || n.fails > d.fails || !a1 || a1.h < a1.m || n.major.some(x => !d.major.includes(x)) || n.major.length > d.major.length || n.quality > d.quality + 400) continue;
+        // يُقبل إن صارت الصالة ≥ المجلس، أو (الجولة التاسعة عشرة) زالت عيوب جوهرية مقيسة (الصالة الصغيرة/الممر) دون عيب جديد ولو بقيت أصغر
+        const fewer = !R14_OFF.has('r19hall') && n.major.length < d.major.length;
+        if (n.reject.length || n.fails > d.fails || !a1 || (a1.h < a1.m && !fewer) || n.major.some(x => !d.major.includes(x)) || n.major.length > d.major.length || n.quality > d.quality + 400) continue;
         if (!gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts)) continue;
         if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
         n.dr = n.dr || docRooms(n.doc);
-        n.notes = [...n.notes, `كُبّرت «الصالة» إلى ${r2(a1.h)} م² فصارت لا تصغر عن «المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) بإعادة ضبط أبعاد التنظيم نفسه — هدف تصميمي افتراضي للميزان.`];
+        n.notes = [...n.notes, a1.h >= a1.m ? `كُبّرت «الصالة» إلى ${r2(a1.h)} م² فصارت لا تصغر عن «المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) بإعادة ضبط أبعاد التنظيم نفسه — هدف تصميمي افتراضي للميزان.` : `أُعيد ضبط أبعاد التنظيم نفسه: «الصالة» ${r2(a1.h)} م² و«المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) — زال ${d.major.filter(x => !n.major.includes(x)).join(' و')}، وما زالت الصالة أصغر من المجلس (هدف الميزان الافتراضي لم يتحقق على هذه الأرض الضيقة).`];
         built[i] = n; break;
       } catch { /* يبقى الأصل */ }
     }
@@ -3449,8 +3457,10 @@ function reviewFailure(built, rejected) {
   e.code = 'VILLA_REVIEW_FAILED'; e.rejected = rejected; Object.defineProperty(e, 'built', { value: built, enumerable: false }); return e;
 }
 const HEAVY_AR = { STRUCTURAL: 'المراجعة الإنشائية المبدئية', CIRCULATION: 'الحركة الفعلية', CONSISTENCY_2D3D: 'التطابق 2D/3D' };
-function shortfallReason(keep, shown, built, rejected) {
+function shortfallReason(keep, shown, built, rejected0) {
   if (shown.length >= keep) return null;
+  // (الجولة التاسعة عشرة) المرفوض يُعدّ بالتنظيم لا بالمحاولة (البدايات الثلاث في البحث الثاني تكرر النمط نفسه)، ولا يُعدّ ما بُني منه بعد إعادة الحل
+  const builtPats = new Set(built.map(d => d.pat)), rejected = [...new Map(rejected0.filter(r => !builtPats.has(r.pat)).map(r => [r.pat, r])).values()];
   const parts = [], best = shown[0];
   const sigOf = c => (c.sig2 ||= archSignatureV2(c.doc));
   const famOf = x => String(x.pat).split('/')[0].split(':')[0] + (String(x.pat).includes('/') ? ':' + String(x.pat).split('/')[0].split(':')[1] : '');
