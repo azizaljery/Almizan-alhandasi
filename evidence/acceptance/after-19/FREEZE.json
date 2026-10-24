@@ -1,0 +1,39 @@
+{
+ "note_ar": "تجميد الجولة 19: المحرك ومعايير التقييم (الأوزان والعتبات والقياسات) كما هي عند هذا الإيداع؛ أدلة الحالات المحجوزة after-19-heldout تُولَّد بهذا الإيداع ولا تُغيَّر الشيفرة بعده في الجولة. التقييم الآلي ليس اعتمادًا هندسيًا ولا إنشائيًا.",
+ "engineCommit": "fbf158cf6ef0b3ebb2c02611d796e54f8a362bea",
+ "workingTreeCleanForEngine": true,
+ "engineVersion": "villa-v2-partis-17",
+ "sha256": {
+  "dist/villa-layout-v2.mjs": "97d013531c3ef97194236df307fe2973395a39304f3036ffb4103d735be0460f",
+  "dist/plan-review.mjs": "c59c709ab647972a08a275faae59789e4937aca1d283df0fda5e6b57a904eae0",
+  "dist/presentation-status.mjs": "4d9cbfd0d56920f4f4260d8d52337f618d00754b84fe67e4fda54aaa1348d090",
+  "dist/privacy-defects.mjs": "f444589c2e9f6ab92b085042bf7ebdd3b0a8ef09831b96a980dca371d05dca60",
+  "dist/requirements.mjs": "0acaf32e71c0958b433fce9051209a8fd166ac9804446a41aaf4a6b6e70735e4",
+  "dist/arch-difference.mjs": "77c6bcc4cd1cee3b2a7bab951bb50fc5d849a556d7428da6dde2686257d73e83",
+  "dist/saudi-program.mjs": "0d3d3fa84882de3797593945639a6c703c5cdc9befa2d3269155b7757799d0a5",
+  "dist/r16-polish.mjs": "8a87767cb5535e8b5e6715572d9a77f2345ecddbc23f8f1f69dcbf2e2fa5c8a5",
+  "dist/r17-polish.mjs": "7945848f560396152f1fbfb80cfb68b51343248e5e48e1d55937f3bb1f4805f9",
+  "dist/rules.mjs": "67a603f63bdf2f29fd140dd66ded0a26cc0e2b7ddc119661df1806b19a63a823",
+  "dist/site-parking.mjs": "6a2818c68244a815e96707fa8dbca4910cd42deedc231245368079663804fe87",
+  "dist/stacking.mjs": "e7ef0e888beb39561cbde035efae9e3e8f76d8cd658cabf585ed3c5b3e7c643f",
+  "dist/glazing.mjs": "d7753167e8aef75a8c20c61ec13554211b495794b71818fd3e3f3f9f167be974",
+  "dist/circulation-proof.mjs": "8bee138cb9425f5517f3ed6571ac28520314c0af37c87f221ba397ffeff0028f",
+  "dist/design-session.mjs": "b0704437cb6556deb79f05e244399b0991f715d9f5770fd0f7c68a59a5779900",
+  "dist/plan-edit.mjs": "e2540153af82d7218b84e67ad497f38370469eeb6e79ad8b4f796b9463756921",
+  "dist/edit-truth.mjs": "08958122d613e13b9529b2c812a92c490170586d7b250b0fd60d82e97f8cfa52",
+  "dist/villa-layout.mjs": "e05ee81777845de3dc158b4b62a108c9baf6536e0968bd4df3ff5714b769cdc6",
+  "dist/draw/editor/render2d.mjs": "708e54e89d08bbeb684ffb81cdfcf4aaf73e87274111559b15851b0d1f42c85a",
+  "dist/arch-criterion.mjs": "9042e09703d33d7e1ff7d018a6bb092ea6614db0d17cccd6797f44f209c3c9d4",
+  "docs/research/arch-difference-criterion-r19.md": "ba624a17f1e370460c53e4a4d49ef98dbfcc393a9cf51110d370ef394fd18c35",
+  "scripts/r19-defect-corpus.mjs": "3250a8a883256ab52099e3c6127154c3c737074693e6375a626edaafa7c77e85",
+  "scripts/acceptance-cases.mjs": "ee0a93e7de3e05b28ca8b092386b109d9ab687cf77f33bdc49299f96fec9e4a6",
+  "scripts/heldout-cases.mjs": "84f7a7565652b7a926d04e1e8d04553b87ce501b571e7fe982a4aa689e8d16a0",
+  "scripts/mizan-ledger.mjs": "f56d5d3089886176240ffa829f77957959795bd126b9cef270f4c8056b9fefd3",
+  "scripts/innovation-r19.mjs": "40fce73683c0a963645734fa963370354bfee72df5706e4d347e37d5bfd6b870"
+ },
+ "tests": {
+  "files": 160,
+  "sha256": "4bb225f221e95d5cc4020db9db87944b9ac2ce5785533c8395e1c95298ddf51a"
+ },
+ "frozenAt": "2026-10-24T17:47:56.178Z"
+}
