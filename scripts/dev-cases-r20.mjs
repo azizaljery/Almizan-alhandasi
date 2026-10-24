@@ -1,0 +1,36 @@
+// (الجولة العشرون) حالات تطوير إضافية D1–D10: كتبها المطوّر في الجولة 20 لاختبار التعميم أثناء الضبط (أراضٍ عريضة قليلة العمق، وشوارع
+// شمالية وشرقية وغربية، وزوايا على أي جهتين، وبرامج واسعة، ودوران بلا غرف نوم أرضية، ومقاسات صريحة). ليست حالات محجوزة: تُستعمل في الضبط
+// علنًا، ولا علاقة لها بالحالات المحجوزة الثانية H6–H10 (scripts/heldout2-cases.mjs) التي لم تُفتح ولم تُشغَّل قبل التجميد.
+// نصوص الطلبات مكتوبة كما يكتبها عميل، والأرقام فيها أمثلة لا قيم افتراضية في الموقع.
+export const DEV = [
+  { id: 'D1', name: 'أرض عريضة 28×20 والشارع جنوبي', land: { width: 28, length: 20, streets: ['s'], entries: ['s'] },
+    text: '4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، طعام، مطبخ، غرفة خادمة',
+    counts: { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D2', name: 'أرض عريضة كبيرة 32×24 والشارع شمالي وبرنامج واسع', land: { width: 32, length: 24, streets: ['n'], entries: ['n'] },
+    text: '5 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة كبيرة، طعام، مطبخ، غرفة سائق، غرفة خادمة',
+    counts: { bedrooms: 5, majlis: 2, baths: 7, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D3', name: 'أرض 22×30 والشارع غربي', land: { width: 22, length: 30, streets: ['w'], entries: ['w'] },
+    text: '4 غرف نوم ومجلس رجال ومجلس نساء وصالة ومطبخ وطعام',
+    counts: { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D4', name: 'زاوية 25×25 شمالية غربية', land: { width: 25, length: 25, streets: ['n', 'w'], entries: ['n', 'w'] },
+    text: '3 غرف نوم ومجلس رجال ومجلس نساء وصالة ومطبخ وطعام، ومدخل ثاني من الشارع الغربي',
+    counts: { bedrooms: 3, majlis: 2, baths: 5, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D5', name: 'دوران على 18×24 والشارع غربي', land: { width: 18, length: 24, streets: ['w'], entries: ['w'], floors: 2 },
+    text: 'دورين: المجلس والطعام والمطبخ في الأرضي، و4 غرف نوم فوق منها الماستر',
+    counts: { bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D6', name: 'أرض 24×32 وبرنامج واسع بدور واحد', land: { width: 24, length: 32, streets: ['s'], entries: ['s'] },
+    text: '6 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، طعام، مطبخ، غرفة سائق، غرفة خادمة',
+    counts: { bedrooms: 6, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D7', name: 'أرض ضيقة 16×30 بمجلسين', land: { width: 16, length: 30, streets: ['s'], entries: ['s'] },
+    text: '3 غرف نوم ومجلس رجال ومجلس نساء وصالة ومطبخ وطعام',
+    counts: { bedrooms: 3, majlis: 2, baths: 5, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D8', name: 'دوران على 20×30 وغرفة أرضية', land: { width: 20, length: 30, streets: ['s'], entries: ['s'], floors: 2 },
+    text: 'دورين: مجلس رجال ومجلس نساء والطعام والمطبخ تحت، وغرفة نوم لأبوي في الأرضي، و4 غرف نوم فوق منها الماستر',
+    counts: { bedrooms: 5, majlis: 2, baths: 7, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D9', name: 'زاوية 30×30 جنوبية شرقية وبرنامج واسع', land: { width: 30, length: 30, streets: ['s', 'e'], entries: ['s'] },
+    text: '5 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، طعام، مطبخ، غرفة خادمة، ومكتب',
+    counts: { bedrooms: 5, majlis: 2, baths: 7, kitchens: 1, halls: 1, dining: 1 } },
+  { id: 'D10', name: 'مقاسات صريحة والشارع شمالي', land: { width: 20, length: 28, streets: ['n'], entries: ['n'] },
+    text: 'دور واحد، 3 غرف نوم، مجلس 5×6، المطبخ 4×4',
+    counts: { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 } },
+];

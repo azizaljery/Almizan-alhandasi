@@ -7,6 +7,7 @@ import { HELDOUT } from './heldout-cases.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
 import * as V1 from '../dist/villa-layout.mjs';
 import * as V2 from '../dist/villa-layout-v2.mjs';
+import * as V3 from '../dist/villa-layout-v3.mjs';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
 import { createSession, redesign } from '../dist/design-session.mjs';
 import { verifyRequest, docRooms } from '../dist/rules.mjs';
@@ -17,11 +18,18 @@ import { archMatrix, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, ex
 
 const argv = process.argv.slice(2), ei = argv.indexOf('--engine');
 const engine = (ei >= 0 ? argv[ei + 1] : process.env.MIZAN_ENGINE) || 'v1';
-if (!['v1', 'v2'].includes(engine)) throw Error('المحرك v1 أو v2 فقط');
-const ci = argv.indexOf('--cases'), CASES = ci >= 0 && argv[ci + 1] === 'heldout' ? HELDOUT : MAIN_CASES; // (الجولة 19) الحالات المحجوزة H1–H5
+if (!['v1', 'v2', 'v3'].includes(engine)) throw Error('المحرك v1 أو v2 أو v3');
+// (الجولة 19) الحالات المحجوزة H1–H5 (صارت معروفة بعد مراجعة r19)؛ (الجولة 20) dev: حالات تطوير D1–D10، وheldout2: الحالات المحجوزة الثانية
+// H6–H10 — تُحمَّل ديناميكيًا عند طلبها وحده (لا تُفتح ولا تُشغَّل قبل التجميد)، وأي مصفوفة حالات يصدّرها الملف تُستعمل كما هي
+const ci = argv.indexOf('--cases'), setName = ci >= 0 ? argv[ci + 1] : 'main';
+let CASES = MAIN_CASES;
+if (setName === 'heldout') CASES = HELDOUT;
+else if (setName === 'dev') CASES = (await import('./dev-cases-r20.mjs')).DEV;
+else if (setName === 'heldout2') { const m = await import('./heldout2-cases.mjs'); CASES = Object.values(m).find(v => Array.isArray(v) && v.every(c => c && c.id && c.land && c.text)); if (!CASES) throw Error('heldout2-cases.mjs: لا مصفوفة حالات'); }
+else if (setName !== 'main') throw Error('--cases: main | heldout | heldout2 | dev');
 const pos = argv.filter((a, i) => !a.startsWith('--') && !['--engine', '--cases'].includes(argv[i - 1]));
 const stage = pos[0] || 'before', only = pos[1] ? new RegExp(pos[1]) : null;
-const { generateVillaDesigns, generateVillaTwoFloors } = engine === 'v2' ? V2 : V1;
+const { generateVillaDesigns, generateVillaTwoFloors } = engine === 'v3' ? V3 : engine === 'v2' ? V2 : V1;
 const OUT = new URL(`../evidence/acceptance/${stage}/`, import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 const r2 = v => Math.round(v * 100) / 100;
@@ -72,14 +80,15 @@ for (const C of CASES) {
   const land = { floors: 1, ...C.land }, entry = land.entries[0];
   const row = { id: C.id, engine, name: C.name, text: C.text, understood: req.understood, unclear: req.unclear, unsupported: req.unsupported, designs: [], notes: [] };
   if (C.irregular && engine === 'v1') row.notes.push('المولّد يقبل أرضًا مستطيلة فقط (عرض × طول)؛ شكل الأرض في الطلب لا يُمثَّل. وُلّد على مستطيل محيط.');
-  if (C.irregular && engine === 'v2') row.notes.push('المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده.');
+  if (C.irregular && engine !== 'v1') row.notes.push('المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده.');
   if (engine === 'v1') delete land.polygon;
   const t0 = performance.now();
   let out;
   try {
     const fn = (land.floors >= 2 || req.prefs?.floors === 2) ? generateVillaTwoFloors : generateVillaDesigns;
     out = fn({ land, counts: req.counts, requirements: req, keep: C.want || 4 });
-  } catch (e) { row.error = e.message; }
+  } catch (e) { row.error = e.message; row.errorCode = e.code || null; if (e.report_ar) row.report_ar = e.report_ar; if (e.feasibility) row.feasibility = e.feasibility; if (e.search) row.search = e.search; }
+  if (out?.engine3) { row.feasibility = out.engine3.feasibility; row.search = out.engine3.search; }
   row.ms = Math.round(performance.now() - t0);
   if (out) {
     // المراجعة المستقلة (plan-review) المرفقة بكل بديل من المولّد الثاني: البوابات الراسبة والدرجة وأسباب الرفض
@@ -129,7 +138,7 @@ for (const C of CASES) {
     } catch (e) { row.edit = { text: C.edit, error: e.message, code: e.code || null }; }
     // التعديل نفسه على كل بديل معروض (لا الأول فقط): هل بقي النمط؟ وكم تغيّر المخطط؟ وهل بقيت الغرف؟
     row.editAll = [];
-    for (let i = 0; i < out.designs.length && engine === 'v2'; i++) {
+    for (let i = 0; i < out.designs.length && engine !== 'v1'; i++) {
       try {
         const d = out.designs[i], shownAlts = out.designs.map((x, j) => ({ index: j, doc: x.doc, pat: x.pat, summary: x.summary, notes: x.notes, mirror: x.mirror, review: x.review || null }));
         const s0 = createSession({ land, counts: req.counts, requirements: req, result: { doc: d.doc, pat: d.pat, mirror: d.mirror, summary: d.summary, notes: d.notes, villaEngine: 'v2', alternatives: shownAlts }, engine });
