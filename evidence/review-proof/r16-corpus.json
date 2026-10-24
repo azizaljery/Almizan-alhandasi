@@ -1,14 +1,14 @@
 {
- "stage": "after-17",
+ "stage": "after-18",
  "summary": {
   "note_ar": "كشف أنواع العيوب الجديدة (privacy-defects.mjs): الإيجابيات الحقيقية من حكم المراجع المستقل r15 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، والمصنوعة بتحوير واحد على بدائل «جاهزة»، والسلبيات هي البدائل الجاهزة كما هي.",
-  "positives": 48,
-  "detected": 48,
-  "positivesNotReady": 48,
+  "positives": 49,
+  "detected": 49,
+  "positivesNotReady": 49,
   "byType": {
    "WINDOW_PARKING": "21/21",
    "HALL_STREET": "2/2",
-   "GUEST_DINING": "17/17",
+   "GUEST_DINING": "18/18",
    "MASTER_VIA_DRESS": "6/6",
    "PARKING_SHALLOW": "2/2"
   },
@@ -509,6 +509,17 @@
    "detected": true,
    "got": [
     "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-2.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
    ],
    "status": "needs-edits"
   },

@@ -1,0 +1,331 @@
+{
+ "summary": {
+  "note_ar": "المراجع المستقل وكيل ذكاء اصطناعي (Claude) بدور معماري، ليس معماريًا بشريًا مرخّصًا؛ والمخططات هنا مستندات after-17 نفسها، فالمقارنة تقيس القياس وحده لا تحسين التصميم.",
+  "stage": "after-17",
+  "verdicts": "docs/research/verdicts-r17.json",
+  "alternatives": 22,
+  "agreementBefore": 19,
+  "agreementAfter": 20,
+  "readyPrecisionBefore": {
+   "ready": 12,
+   "reviewerShow": 11
+  },
+  "readyPrecisionAfter": {
+   "ready": 11,
+   "reviewerShow": 11
+  },
+  "statusBefore": {
+   "ready": 12,
+   "needsEdits": 10,
+   "hidden": 0
+  },
+  "statusAfter": {
+   "ready": 11,
+   "needsEdits": 11,
+   "hidden": 0
+  },
+  "falseReadyAfter": [],
+  "stricterThanReviewerAfter": [
+   {
+    "alt": "C3-1",
+    "why": [
+     "مجلس الرجال بدهليز: الباب الخارجي لا يفتح على المجلس مباشرة: الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز) (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+    ]
+   },
+   {
+    "alt": "C10-3",
+    "why": [
+     "موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة: «موقف سيارة» موازٍ للشارع في ارتداد 3.13 م أمام نافذة «مجلس الرجال» — دخول السيارة غير عملي (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+    ]
+   }
+  ]
+ },
+ "rows": [
+  {
+   "alt": "C1-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C1-2",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام» إلا عبر منطقة العائلة (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C2-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C3-1",
+   "reviewer": "show",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": false,
+   "agreeAfter": false,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": [
+    "مجلس الرجال بدهليز: الباب الخارجي لا يفتح على المجلس مباشرة: الباب الخارجي يفتح على «مجلس الرجال» مباشرة (بلا دهليز) (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C3-2",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام» إلا عبر منطقة العائلة (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C4-1",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "الصالة العائلية صغيرة نسبةً إلى مجلس الرجال (أقل من 0.8 من مساحته): «الصالة» 20.4 م² مقابل «المجلس» 25.95 م² (0.79 من مساحته؛ الحد 0.8) (عيب معماري — قيمة تصميمية افتراضية للميزان)",
+    "الصالة العائلية ممر عابر: مسارات الحركة الرئيسية لا تترك فيها جلسة عائلية 3.0 × 3.6 م: في «الصالة» (4.02×5.08 م، 5 أبواب) لا موضع لجلسة 3×3.6 م يلتف حولها ممر 0.9 م يصل أبوابها كلها دون أن تقع في منطقة فتح باب — الصالة ممر عابر إلى «ممر»، «رواق»، «ممر الغرف»، «غرفة النوم الرئيسية» (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ]
+  },
+  {
+   "alt": "C5-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C5-2",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C5-3",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "PARKING_SHALLOW"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة: «موقف سيارة» موازٍ للشارع في ارتداد 3.13 م أمام نافذة «المجلس» — دخول السيارة غير عملي (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ]
+  },
+  {
+   "alt": "C5-4",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C6-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C7-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C7-2",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C8-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C8-2",
+   "reviewer": "show-after-edits",
+   "before": "ready",
+   "after": "needs-edits",
+   "agreeBefore": false,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: «صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «مدخل العائلة» — الضيف في منطقة العائلة ولا تُغلق عليه (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C9-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C9-2",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C9-3",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C9-4",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C10-1",
+   "reviewer": "show",
+   "before": "ready",
+   "after": "ready",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [],
+   "hidden_ar": [],
+   "edits_ar": []
+  },
+  {
+   "alt": "C10-2",
+   "reviewer": "show-after-edits",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": true,
+   "agreeAfter": true,
+   "newDefects": [
+    "GUEST_DINING"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام» إلا عبر منطقة العائلة (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ]
+  },
+  {
+   "alt": "C10-3",
+   "reviewer": "show",
+   "before": "needs-edits",
+   "after": "needs-edits",
+   "agreeBefore": false,
+   "agreeAfter": false,
+   "newDefects": [
+    "PARKING_SHALLOW"
+   ],
+   "hidden_ar": [],
+   "edits_ar": [
+    "موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة: «موقف سيارة» موازٍ للشارع في ارتداد 3.13 م أمام نافذة «مجلس الرجال» — دخول السيارة غير عملي (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ]
+  }
+ ]
+}

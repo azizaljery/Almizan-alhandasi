@@ -128,10 +128,10 @@
    ]
   },
   {
-   "id": "window-interior-only@C1-alt-2",
+   "id": "window-interior-only@C7-alt-2",
    "mutation": "window-interior-only",
    "ar": "نافذة غرفة النوم على ممر داخلي لا على الخارج (خفي)",
-   "case": "C1",
+   "case": "C7",
    "file": "alt-2.json",
    "expected": [
     "DAYLIGHT"
@@ -139,7 +139,7 @@
    "allowed": [
     "WINDOW_SIZE"
    ],
-   "note": "نوافذ «غرفة نوم 4» الخارجية حُذفت ووُضعت نافذة على «مغاسل» الداخلي",
+   "note": "نوافذ «غرفة كبار السن» الخارجية حُذفت ووُضعت نافذة على «الصالة» الداخلي",
    "passed": false,
    "fired": [
     "DAYLIGHT"
@@ -147,9 +147,9 @@
    "detected": true,
    "rejected": true,
    "unexpected": [],
-   "score": 93.36,
+   "score": 97.28,
    "reasons": [
-    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة نوم 4» بلا نافذة على الخارج أو على فناء"
+    "نافذة خارجية أو على فناء لكل غرفة معيشية: «غرفة كبار السن» بلا نافذة على الخارج أو على فناء"
    ]
   },
   {
@@ -259,43 +259,6 @@
    ]
   },
   {
-   "id": "hall-strip@C1-alt-2",
-   "mutation": "hall-strip",
-   "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
-   "case": "C1",
-   "file": "alt-2.json",
-   "expected": [
-    "HALL_ASPECT"
-   ],
-   "allowed": [
-    "MIN_WIDTH",
-    "MAJLIS_PRIVACY"
-   ],
-   "note": "«الصالة» ضُيّقت إلى 3.24×9.08 م",
-   "passed": false,
-   "fired": [
-    "HALL_ASPECT",
-    "MAJLIS_PRIVACY",
-    "STRUCTURAL",
-    "CIRCULATION",
-    "CONSISTENCY_2D3D"
-   ],
-   "detected": true,
-   "rejected": true,
-   "unexpected": [
-    "STRUCTURAL",
-    "CIRCULATION",
-    "CONSISTENCY_2D3D"
-   ],
-   "score": 87.13,
-   "reasons": [
-    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 3.24×9.08 م نسبتها 2.8:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة",
-    "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «مجلس النساء» يفتح مباشرة على «مدخل العائلة» (مدخل)",
-    "لا ملاحظة جسيمة في المراجعة الإنشائية المبدئية (مراجعة مبدئية لا تصميم إنشائي): العمود المقترح L1-C29 (تقاطع جدران) يقع داخل الفتحة o23 في الجدار w21 (الدور الأرضي).",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: «الصالة» لا تُبلغ إلا عبر «غرفة نوم 4». [منطق وظيفي (لا عتبة رقمية)]"
-   ]
-  },
-  {
    "id": "hall-strip@C5-alt-3",
    "mutation": "hall-strip",
    "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
@@ -321,6 +284,37 @@
    "reasons": [
     "أدنى عرض صافٍ لكل نوع غرفة: عرض «الصالة» 2.73 م أقل من 2.8 م (قيمة تصميمية غير متحققة نظاميًا)",
     "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 2.77×7.98 م نسبتها 2.89:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة"
+   ]
+  },
+  {
+   "id": "hall-strip@C9-alt-3",
+   "mutation": "hall-strip",
+   "ar": "الصالة شريط طويل (نسبة > 2.5:1)",
+   "case": "C9",
+   "file": "alt-3.json",
+   "expected": [
+    "HALL_ASPECT"
+   ],
+   "allowed": [
+    "MIN_WIDTH",
+    "MAJLIS_PRIVACY"
+   ],
+   "note": "«الصالة» ضُيّقت إلى 2.924×8.43 م",
+   "passed": false,
+   "fired": [
+    "HALL_ASPECT",
+    "CONSISTENCY_2D3D"
+   ],
+   "detected": true,
+   "rejected": true,
+   "unexpected": [
+    "CONSISTENCY_2D3D"
+   ],
+   "score": 93.2,
+   "reasons": [
+    "نسبة طول الصالة إلى عرضها ≤ 2.5: «الصالة» 2.92×8.43 م نسبتها 2.88:1 أكبر من 2.5:1 — تعمل ممرًا لا صالة",
+    "كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران): الفتحة o3 (arch) تعبر تقاطع جدارين",
+    "كل فتحة في المسقط موجودة في المجسّم بموضعها وعرضها (لا فتحة تعبر تقاطع جدران): الفتحة o3 (arch) منزاحة في المجسّم بـ 19.6 سم"
    ]
   },
   {
@@ -914,37 +908,6 @@
     "لا غرفة نوم تفتح على المجلس مباشرة: «غرفة نوم 3» تفتح مباشرة على «مجلس النساء»",
     "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «مجلس النساء» يفتح مباشرة على «غرفة نوم 3» (غرفة نوم)",
     "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f17 في المنطقة الحرة أمام باب o40 من جهة «مجلس النساء» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
-   ]
-  },
-  {
-   "id": "bedroom-door-majlis@C1-alt-2",
-   "mutation": "bedroom-door-majlis",
-   "ar": "غرفة نوم تفتح على المجلس",
-   "case": "C1",
-   "file": "alt-2.json",
-   "expected": [
-    "BED_MAJLIS"
-   ],
-   "allowed": [
-    "MAJLIS_PRIVACY"
-   ],
-   "note": "باب جديد بين «غرفة نوم 3» و«مجلس الرجال»",
-   "passed": false,
-   "fired": [
-    "BED_MAJLIS",
-    "MAJLIS_PRIVACY",
-    "CIRCULATION"
-   ],
-   "detected": true,
-   "rejected": true,
-   "unexpected": [
-    "CIRCULATION"
-   ],
-   "score": 86.5,
-   "reasons": [
-    "لا غرفة نوم تفتح على المجلس مباشرة: «غرفة نوم 3» تفتح مباشرة على «مجلس الرجال»",
-    "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «مجلس الرجال» يفتح مباشرة على «غرفة نوم 3» (غرفة نوم)",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f6 في المنطقة الحرة أمام باب o48 من جهة «مجلس الرجال» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
    ]
   },
   {
@@ -1777,35 +1740,6 @@
    ]
   },
   {
-   "id": "kitchen-front@C1-alt-2",
-   "mutation": "kitchen-front",
-   "ar": "المطبخ في النصف الأمامي والطلب يقول «المطبخ في الخلف»",
-   "case": "C1",
-   "file": "alt-2.json",
-   "expected": [
-    "PLACEMENT"
-   ],
-   "allowed": [
-    "WET_DOOR",
-    "DAYLIGHT",
-    "MIN_WIDTH",
-    "GUEST_ROUTE",
-    "BED_MAJLIS"
-   ],
-   "note": "المطبخ بودّل مع «غرفة نوم 4» فصار في الواجهة (عمق 0.395)",
-   "passed": false,
-   "fired": [
-    "PLACEMENT"
-   ],
-   "detected": true,
-   "rejected": true,
-   "unexpected": [],
-   "score": 95.28,
-   "reasons": [
-    "مواضع الغرف التي حددها العميل (في الأمام/في الخلف) محققة: «المطبخ» في الخلف: «المطبخ» على عمق 39.47٪ من الواجهة (المطلوب ≥ 50٪)"
-   ]
-  },
-  {
    "id": "bedrooms-front@C4-alt-1",
    "mutation": "bedrooms-front",
    "ar": "غرف النوم في النصف الأمامي والطلب يقول «الغرف في الخلف»",
@@ -2247,10 +2181,11 @@
    "unexpected": [
     "CIRCULATION"
    ],
-   "score": 89.82,
+   "score": 89.8,
    "reasons": [
     "المجلس لا يفتح إلا على مدخله أو مغاسله ودورة مياه الضيوف أو طعام الضيوف أو الخارج: «المجلس» يفتح مباشرة على «الصالة» (صالة معيشة)",
-    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f5 في المنطقة الحرة أمام باب o47 من جهة «المجلس» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: majlis-sofa f7 في المنطقة الحرة أمام باب o45 من جهة «المجلس» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]",
+    "الحركة الفعلية مع الأثاث والدرج: كل غرفة تُبلغ مشيًا، ولا أثاث يسد ممرًا أو بابًا، ولا مرحاض في منطقة فتح الباب: sofa-3 f1 في المنطقة الحرة أمام باب o45 من جهة «الصالة» (عمق 0.6 م): الأثاث يسد المدخل. [قيمة تصميمية افتراضية للميزان]"
    ]
   },
   {
@@ -2662,12 +2597,6 @@
    "score": 96.65
   },
   {
-   "id": "C1/alt-2.json",
-   "passed": true,
-   "fired": [],
-   "score": 95.28
-  },
-  {
    "id": "C2/alt-1.json",
    "passed": true,
    "fired": [],
@@ -2678,12 +2607,6 @@
    "passed": true,
    "fired": [],
    "score": 96.74
-  },
-  {
-   "id": "C3/alt-2.json",
-   "passed": true,
-   "fired": [],
-   "score": 96.9
   },
   {
    "id": "C4/alt-1.json",
@@ -2710,12 +2633,6 @@
    "score": 97.22
   },
   {
-   "id": "C5/alt-4.json",
-   "passed": true,
-   "fired": [],
-   "score": 99.55
-  },
-  {
    "id": "C6/alt-1.json",
    "passed": true,
    "fired": [],
@@ -2737,13 +2654,13 @@
    "id": "C8/alt-1.json",
    "passed": true,
    "fired": [],
-   "score": 94.61
+   "score": 94.58
   },
   {
    "id": "C8/alt-2.json",
    "passed": true,
    "fired": [],
-   "score": 95.19
+   "score": 96.49
   },
   {
    "id": "C9/alt-1.json",
@@ -2764,12 +2681,6 @@
    "score": 96.36
   },
   {
-   "id": "C9/alt-4.json",
-   "passed": true,
-   "fired": [],
-   "score": 99.63
-  },
-  {
    "id": "C10/alt-1.json",
    "passed": true,
    "fired": [],
@@ -2777,12 +2688,6 @@
   },
   {
    "id": "C10/alt-2.json",
-   "passed": true,
-   "fired": [],
-   "score": 97.26
-  },
-  {
-   "id": "C10/alt-3.json",
    "passed": true,
    "fired": [],
    "score": 97.35
@@ -2833,11 +2738,11 @@
   }
  ],
  "summary": {
-  "n": 91,
-  "detected": 91,
-  "rejected": 91,
-  "cleanN": 22,
-  "cleanPassed": 22,
+  "n": 89,
+  "detected": 89,
+  "rejected": 89,
+  "cleanN": 17,
+  "cleanPassed": 17,
   "perType": [
    {
     "mutation": "no-window-bedroom",
@@ -2862,7 +2767,7 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 94.46,
+    "meanScore": 95.76,
     "fired": {
      "DAYLIGHT": 3
     }
@@ -2890,14 +2795,13 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 90.68,
+    "meanScore": 92.71,
     "fired": {
      "HALL_ASPECT": 3,
      "MIN_WIDTH": 2,
-     "STRUCTURAL": 2,
-     "CIRCULATION": 2,
-     "CONSISTENCY_2D3D": 2,
-     "MAJLIS_PRIVACY": 1
+     "STRUCTURAL": 1,
+     "CIRCULATION": 1,
+     "CONSISTENCY_2D3D": 2
     }
    },
    {
@@ -2991,8 +2895,8 @@
     "meanScore": 90.98,
     "fired": {
      "CIRCULATION": 3,
-     "MAJLIS_PRIVACY": 3,
-     "GUEST_ROUTE": 3
+     "GUEST_ROUTE": 3,
+     "MAJLIS_PRIVACY": 3
     }
    },
    {
@@ -3001,14 +2905,14 @@
     "expected": [
      "BED_MAJLIS"
     ],
-    "n": 3,
-    "detected": 3,
-    "rejected": 3,
-    "meanScore": 87.15,
+    "n": 2,
+    "detected": 2,
+    "rejected": 2,
+    "meanScore": 87.48,
     "fired": {
-     "CIRCULATION": 3,
-     "MAJLIS_PRIVACY": 3,
-     "BED_MAJLIS": 3
+     "CIRCULATION": 2,
+     "MAJLIS_PRIVACY": 2,
+     "BED_MAJLIS": 2
     }
    },
    {
@@ -3158,12 +3062,12 @@
     "expected": [
      "PLACEMENT"
     ],
-    "n": 2,
-    "detected": 2,
-    "rejected": 2,
-    "meanScore": 95.76,
+    "n": 1,
+    "detected": 1,
+    "rejected": 1,
+    "meanScore": 96.23,
     "fired": {
-     "PLACEMENT": 2
+     "PLACEMENT": 1
     }
    },
    {
@@ -3178,9 +3082,9 @@
     "meanScore": 83.24,
     "fired": {
      "CIRCULATION": 1,
-     "MAJLIS_PRIVACY": 1,
      "WET_DOOR": 1,
      "GUEST_ROUTE": 1,
+     "MAJLIS_PRIVACY": 1,
      "PLACEMENT": 1
     }
    },
@@ -3273,7 +3177,7 @@
     "n": 3,
     "detected": 3,
     "rejected": 3,
-    "meanScore": 90.86,
+    "meanScore": 90.85,
     "fired": {
      "CIRCULATION": 3,
      "MAJLIS_PRIVACY": 3
@@ -3362,10 +3266,10 @@
    "STRUCTURAL",
    "CIRCULATION",
    "CONSISTENCY_2D3D",
-   "MAJLIS_PRIVACY",
    "DOOR_SWING",
    "WET_DOOR",
    "GUEST_ROUTE",
+   "MAJLIS_PRIVACY",
    "BED_MAJLIS",
    "REACH",
    "INTEGRITY",
@@ -3387,10 +3291,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3411,10 +3315,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3435,10 +3339,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3456,13 +3360,13 @@
     "WINDOW_SIZE": 0,
     "HALL_ASPECT": 3,
     "MIN_WIDTH": 2,
-    "STRUCTURAL": 2,
-    "CIRCULATION": 2,
+    "STRUCTURAL": 1,
+    "CIRCULATION": 1,
     "CONSISTENCY_2D3D": 2,
-    "MAJLIS_PRIVACY": 1,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3483,10 +3387,10 @@
     "STRUCTURAL": 3,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 3,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3507,10 +3411,10 @@
     "STRUCTURAL": 1,
     "CIRCULATION": 1,
     "CONSISTENCY_2D3D": 3,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 1,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3531,10 +3435,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 3,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3555,10 +3459,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 3,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3579,10 +3483,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 1,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 3,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3603,10 +3507,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 3,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 3,
+    "MAJLIS_PRIVACY": 3,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3625,13 +3529,13 @@
     "HALL_ASPECT": 0,
     "MIN_WIDTH": 0,
     "STRUCTURAL": 0,
-    "CIRCULATION": 3,
+    "CIRCULATION": 2,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 3,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
-    "BED_MAJLIS": 3,
+    "MAJLIS_PRIVACY": 2,
+    "BED_MAJLIS": 2,
     "REACH": 0,
     "INTEGRITY": 0,
     "PROGRAM": 0,
@@ -3651,10 +3555,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 3,
     "INTEGRITY": 0,
@@ -3675,10 +3579,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 3,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 3,
     "INTEGRITY": 0,
@@ -3699,10 +3603,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 3,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3723,10 +3627,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 3,
@@ -3747,10 +3651,10 @@
     "STRUCTURAL": 3,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 3,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 1,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 3,
     "INTEGRITY": 3,
@@ -3771,10 +3675,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3795,10 +3699,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3819,10 +3723,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3843,10 +3747,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 3,
@@ -3867,10 +3771,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3878,7 +3782,7 @@
     "PLOT": 0,
     "PARKING": 0,
     "SETBACK_REG": 0,
-    "PLACEMENT": 2,
+    "PLACEMENT": 1,
     "STAIRS": 0,
     "STAIR_GEOMETRY": 0,
     "DISTINCT": 0
@@ -3891,10 +3795,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 1,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 1,
     "DOOR_SWING": 0,
     "WET_DOOR": 1,
     "GUEST_ROUTE": 1,
+    "MAJLIS_PRIVACY": 1,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -3915,10 +3819,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 2,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 2,
     "INTEGRITY": 0,
@@ -3939,10 +3843,10 @@
     "STRUCTURAL": 2,
     "CIRCULATION": 2,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 2,
     "INTEGRITY": 0,
@@ -3963,10 +3867,10 @@
     "STRUCTURAL": 2,
     "CIRCULATION": 2,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 2,
     "INTEGRITY": 0,
@@ -3987,10 +3891,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4011,10 +3915,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4035,10 +3939,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 3,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 3,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4059,10 +3963,10 @@
     "STRUCTURAL": 3,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 3,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4083,10 +3987,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4107,10 +4011,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 3,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4131,10 +4035,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4155,10 +4059,10 @@
     "STRUCTURAL": 0,
     "CIRCULATION": 0,
     "CONSISTENCY_2D3D": 0,
-    "MAJLIS_PRIVACY": 0,
     "DOOR_SWING": 0,
     "WET_DOOR": 0,
     "GUEST_ROUTE": 0,
+    "MAJLIS_PRIVACY": 0,
     "BED_MAJLIS": 0,
     "REACH": 0,
     "INTEGRITY": 0,
@@ -4174,16 +4078,16 @@
   },
   "scores": {
    "defective": {
-    "mean": 94.02,
+    "mean": 94.2,
     "min": 83.24,
-    "p50": 94.85,
+    "p50": 95.06,
     "max": 99.3
    },
    "clean": {
-    "mean": 96.6,
+    "mean": 96.35,
     "min": 92.2,
-    "p50": 96.74,
-    "max": 99.63
+    "p50": 96.49,
+    "max": 99.21
    },
    "defectivePassed": [],
    "defectiveAboveCleanMin": 64

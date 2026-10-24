@@ -1,0 +1,377 @@
+{
+ "id": "C1",
+ "engine": "v2",
+ "name": "منزل سعودي بمجلس رجال ومجلس نساء ومداخل مستقلة",
+ "text": "فيلا دور واحد: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل ودورة مياه، ومجلس نساء مستقل عن الرجال بمدخل خاص للعائلة، صالة، طعام جنب المطبخ، والمطبخ في الخلف، وغرفة خادمة بحمام قريبة من المطبخ",
+ "understood": [
+  "غرفة ملابس للغرفة الرئيسية",
+  "4 غرف نوم",
+  "غرفة نوم رئيسية (ماستر)",
+  "مدخل مستقل للعائلة/النساء",
+  "مجلس الرجال بمدخل مستقل عن العائلة",
+  "مجلس النساء منفصل عن منطقة الرجال (لا باب بينهما)",
+  "غرفة خادمة بحمام",
+  "دور واحد",
+  "«الطعام» بجوار «المطبخ»",
+  "«المطبخ» في الخلف",
+  "«غرفة الخادمة» قرب «المطبخ»"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "yoo",
+   "pat": "yoo:u0",
+   "presentation": {
+    "status": "ready",
+    "label_ar": "جاهز للعرض المبدئي",
+    "hidden_ar": [],
+    "edits_ar": [],
+    "notes_ar": [
+     "المجلس لا يشترك في جدار مع غرفة نوم (فاصل خدمي أو دورة مياه أو ممر): «مجلس النساء» يشترك في جدار 6.05 م مع «غرفة نوم 4» (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+    ],
+    "prefs": [
+     "MAJLIS_BED_WALL"
+    ],
+    "major": [],
+    "r16": [],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [
+    "MAJLIS_BED_WALL"
+   ],
+   "summary": "شكل U: جناحان (نوم وخدمة) حول حديقة خلفية، والضيافة في القاعدة الأمامية",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 95.73,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 0,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 6
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 10.68,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.84
+   },
+   "kitchen": {
+    "w": 3.73,
+    "l": 4.35,
+    "area": 16.23
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 4.08,
+    "l": 7.11,
+    "ratio": 1.74
+   },
+   "rooms": 25,
+   "net": 259.86,
+   "circulationPct": 13.27,
+   "bedrooms": 4,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«الطعام» بجوار «المطبخ»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«المطبخ» في الخلف",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة الخادمة» قرب «المطبخ»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "حمام الخادمة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "4 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس للرجال ومجلس للنساء",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "دور واحد",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة ملابس للغرفة الرئيسية",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "مدخل مستقل للضيوف إلى المجلس",
+     "ok": true,
+     "why": "«مدخل الرجال» له باب خارجي."
+    },
+    {
+     "text": "مدخل مستقل للعائلة/النساء",
+     "ok": true,
+     "why": "«مجلس النساء» له باب خارجي مستقل عن مدخل الرجال."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 17515,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "hidden": [],
+ "presentation": {
+  "ready": 1,
+  "needsEdits": 0,
+  "hidden": 0,
+  "label_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+ },
+ "proposalLabel_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا",
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "yoo"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 3,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [],
+  "allDistinct": true,
+  "minSubstantive": null,
+  "minTotal": null
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 6، اجتاز البوابات منهم 3؛ ورُفض 3 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («المطبخ» في الخلف)؛ 1 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}

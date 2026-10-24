@@ -1,0 +1,424 @@
+{
+ "summary": {
+  "note_ar": "المراجع المستقل وكيل ذكاء اصطناعي (Claude) بدور معماري، ليس معماريًا بشريًا مرخّصًا. الإيجابي المصنوع قد لا يصنع العيب دائمًا (مسار آخر للضيف عبر فراغات الضيافة).",
+  "stage": "after-18",
+  "realPositives": {
+   "n": 7,
+   "detected": 7,
+   "needsEdits": 7
+  },
+  "madeArch": {
+   "n": 9,
+   "detected": 9
+  },
+  "madeNoLink": {
+   "n": 12,
+   "detected": 12
+  },
+  "falseAlarms": {
+   "n": 25,
+   "detected": 0
+  }
+ },
+ "rows": [
+  {
+   "kind": "real-r17-clean",
+   "alt": "C1-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C1-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C2-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C3-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C3-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C5-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C5-2",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C5-4",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C6-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C7-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C7-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C8-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C8-2",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «مدخل العائلة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C9-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C9-2",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C9-3",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C9-4",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C10-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "real-r17",
+   "alt": "C10-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r17-clean",
+   "alt": "C10-3",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C1-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C1-1",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C1-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C2-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C2-1",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C2-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C5-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C5-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C5-2",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C5-2",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C5-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C6-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C6-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C7-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C7-1",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C7-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C8-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C8-1",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C8-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C8-2",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C8-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C9-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C9-1",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «مدخل العائلة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C9-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C9-2",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C9-2",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C9-2",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C9-3",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C9-3",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C9-3",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «المجلس» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "stage-clean",
+   "alt": "C10-1",
+   "expected": false,
+   "detected": false,
+   "why": null
+  },
+  {
+   "kind": "made-arch",
+   "alt": "C10-1",
+   "expected": true,
+   "detected": true,
+   "why": "«صالة الطعام والمقلط» الذي يصله ضيف الرجال مفتوح بلا باب على «الصالة» — الضيف في منطقة العائلة ولا تُغلق عليه",
+   "status": "needs-edits"
+  },
+  {
+   "kind": "made-no-link",
+   "alt": "C10-1",
+   "expected": true,
+   "detected": true,
+   "why": "لا مسار للضيف من «مجلس الرجال» إلى «صالة الطعام والمقلط» إلا عبر منطقة العائلة",
+   "status": "needs-edits"
+  }
+ ]
+}

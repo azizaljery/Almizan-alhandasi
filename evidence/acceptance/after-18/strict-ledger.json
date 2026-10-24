@@ -1,0 +1,192 @@
+{
+ "stage": "after-18",
+ "rows": [
+  {
+   "case": "C1",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C2",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C3",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C4",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-3.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C6",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C7",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C7",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-alt1-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-alt2-after.json",
+   "fails": 1,
+   "failed": [
+    "تعديل: «المطبخ» في الخلف — «المطبخ» لا يلامس الواجهة الخلفية (يبعد 8.4 م)، ومركزه على 60% من عمق المبنى من تلك الجهة لا في ثلثه الخارجي، وتقع بينه وبين تلك الواجهة «غرفة نوم 4» و«غرفة نوم 3»."
+   ],
+   "partial": [
+    "تعديل: «المطبخ» في الخلف — جزئي: «المطبخ» خلف «المجلس» و«صالة الطعام والمقلط» بالنسبة للشارع (أبعد منها عن الشارع، ومركزه على 40% من عمق المبنى من الواجهة الأمامية)"
+   ]
+  },
+  {
+   "case": "C8",
+   "file": "edit-before.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-3.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt1-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt2-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt3-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-before.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C10",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C10",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  }
+ ],
+ "contradictions": []
+}
