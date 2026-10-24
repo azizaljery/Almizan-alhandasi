@@ -1214,7 +1214,7 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   // يحجب البديل بعد البناء على أي حال). يُعفى بطلب العميل فصل المجلس عن الطعام (P.guestLink = false)
   // (الجولة العشرون، المراجعة العمياء r19: C4 وC6 وC8-2) الصالة ≥ مجلس الرجال صافيًا — شرط توليد في أشجار المحرك الثالث (HALL_LT_MAJLIS عيب معماري بعد البناء)
   if (ctx.hardHall && !ctx.upper && !P.hallFixed && P.men && !R14_OFF.has('r20hall')) { const mj = find(P.men.id); if (mj) { const need = A_(mj.r) - (mj.block.guestWc ? 7 : 0) + 1.0, ha = A_(hall.r); if (ha < need) bad('hall-lt-majlis', (need - ha) / 6); } }
-  if (ctx.hardLink && P.guestLink && P.men && dn && !ctx.upper && !R14_OFF.has('r20link')) { const mj = find(P.men.id); if (mj) { const t = touch(mj.r, dn.r); if (t < DOOR_TOUCH + .2) bad('guest-link', (DOOR_TOUCH + .2 - t) / 1.5); } }
+  if (ctx.hardLink && P.guestLink && P.men && dn && !ctx.upper && !R14_OFF.has('r20link')) { const mj = find(P.men.id); if (mj) { const t = touch(mj.r, dn.r); if (t < DOOR_TOUCH + .9) bad('guest-link', (DOOR_TOUCH + .9 - t) / 1.5); } } // 2.2 م: يبقى بعد شريط الدهليز والجدران تلامس يتسع لباب
   // (الجولة الرابعة عشرة) جُرّب جزاء «المجلس يشترك في جدار مع غرفة نوم» وجزاء أقوى لغياب المقلط في البحث نفسه: خفّضا عدد البدائل
   // المعروضة (23 ← 20 و22 على تسع حالات) بلا تحسن مقابل في البند — أُزيلا؛ البندان يُقاسان ويُذكران في حالة العرض («يحتاج تعديلات»).
   if (P.men && P.women[0]) { const m = find(P.men.id), wm = find(P.women[0].id); if (m && wm && touch(m.r, wm.r) > .5) pen += 10; }
@@ -1606,7 +1606,10 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
   }
   for (const m of pendingService) {
     // (الجولة العاشرة) باب خدمة من المجلس إلى الطعام فقط إن طلبه العميل («مقلط»، «المجلس على الطعام»)؛ ولا إلى المطبخ أبدًا
-    const host = P.majlisDining || P.majlisDiningDefault ? rooms.find(x => x.kind === 'dining' && touch(m, x) >= 1.2) : null;
+    let host = P.majlisDining || P.majlisDiningDefault ? rooms.find(x => x.kind === 'dining' && touch(m, x) >= 1.2) : null;
+    // (الجولة العشرون) الطعام يلامس دهليز الرجال لا المجلس نفسه (شريط الدهليز على جهة الطعام): الباب من الدهليز إلى المقلط — الضيف لا يعبر العائلة
+    if (!host && (P.majlisDining || P.majlisDiningDefault) && !R14_OFF.has('r20lobbydoor')) { const lb = rooms.find(x => x.id === m.id + '-lobby'), dn = lb && rooms.find(x => x.kind === 'dining' && touch(lb, x) >= 1.2);
+      if (dn) { const e = shared(lb, dn); doors.push({ a: lb.id, b: dn.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .9 }); dn.guestDoor = true; if (!P.majlisDining) { dn.name = dn.name.replace(/^صالة الطعام$/, 'صالة الطعام والمقلط'); dn.mizanDining = true; } notes.push(`مجلس الرجال بمدخل خارجي مستقل${m.noWc ? '' : ' ودورة مياه خاصة'}؛ دهليزه يُفتح على «${dn.name}» للضيافة، ولا يمر الضيف بالعائلة.`); continue; } }
     // (الجولة الثانية عشرة) المقلط الافتراضي (قيمة تصميمية افتراضية للميزان): الطعام يُسمّى «والمقلط» ويُغلق على العائلة بباب
     if (host && !P.majlisDining) { host.name = host.name.replace(/^صالة الطعام$/, 'صالة الطعام والمقلط'); host.mizanDining = true; }
     if (host) { const e = shared(m, host); doors.push({ a: m.id, b: host.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .9 }); host.guestDoor = true; notes.push(`مجلس الرجال بمدخل خارجي مستقل${m.noWc ? '' : ' ودورة مياه خاصة'}، ولا يمر الضيف بالعائلة؛ له باب خدمة إلى «${host.name}» للضيافة.`); }

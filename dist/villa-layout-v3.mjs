@@ -320,8 +320,10 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
     if (u.circ === 'foyer') { const f = C('foyer', P.dayWc ? { area: K.FOYER_WC_AREA, wc: true } : { area: T.foyer * .85 }); return R.M && sideTo(r, R.M) === 'x0' ? X(f, OV(6)) : X(OV(6), f); }
     if (u.circ === 'hall') { const h0 = C('hall', { area: P.hallArea }), ex = bnd(r, nc, nr).filter(sd => sd !== 'y0');
       // دورة مياه العائلة بالبناء (FAMILY_WC): في البرنامج دورة مياه يومية افتراضية — تُوضع بجانب الصالة على جهتها الداخلية وبابها منها
-      const inner = ['x0', 'x1'].find(sd => !bnd(r, nc, nr).includes(sd));
-      const h = P.dayWc && !R14_OFF_V3.has('r20daywc') ? (inner === 'x0' ? X(Z([DAY_WC], 'x1', 'y'), h0) : inner === 'x1' ? X(h0, Z([DAY_WC], 'x0', 'y')) : Y(h0, Z([DAY_WC], 'y0', 'x'))) : h0;
+      // جهة الصالة الداخلية التي لا تلامس فيها وحدةً تحتاج بابًا منها (المدخل، الطعام، النوم، الرواق، الخدمة، مجلس النساء) — وإلا لا كتلة
+      const needs = ['F', 'DN', 'KS', 'W', 'LK', 'S1', 'S2', 'XP', 'ST'].filter(k => R[k]);
+      const inner = ['x0', 'x1', 'y1'].find(sd => !bnd(r, nc, nr).includes(sd) && !needs.some(k => sideTo(r, R[k]) === sd) && !Object.keys(R).some(k => k[0] === 'G' && sideTo(r, R[k]) === sd));
+      const h = P.dayWc && inner && !R14_OFF_V3.has('r20daywc') ? (inner === 'x0' ? X(Z([DAY_WC], 'x1', 'y'), h0) : inner === 'x1' ? X(h0, Z([DAY_WC], 'x0', 'y')) : Y(h0, Z([DAY_WC], 'y0', 'x'))) : h0;
       // الصالة على حد خارجي: حديقة اختيارية على تلك الجهة تمتص فائض الخلية (لا صالة ممتدة) وتطل عليها
       return ex.includes('y1') ? Y(h, OV(10)) : ex.includes('x1') ? X(h, OV(10)) : ex.includes('x0') ? X(OV(10), h) : h; }
     if (u.circ === 'stair') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
