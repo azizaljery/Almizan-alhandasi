@@ -135,7 +135,9 @@ export function polishR16(doc) {
           const wall = doc.walls.find(w => w.id === e.wallIds?.[0]); if (!wall || wall.kind === 'fence') continue;
           const at = freeAt(doc, wall, projAt(wall, e.a), projAt(wall, e.b), .9); if (at == null) continue;
           try { const r = applyCommand(doc, { type: 'add-opening', wall: wall.id, kind: 'door', at, w: .9 }); Object.assign(doc, r.doc); } catch { continue; }
-          notes.push(`باب مقلط بين «${h.name}» و«${D.name}»: يصل ضيف الرجال إلى الطعام دون أن يعبر منطقة العائلة (تفضيل سعودي افتراضي للميزان).`);
+          // (الجولة السابعة عشرة) الطعام صار مقلطًا للضيوف أيضًا: يُسمّى كذلك (كما يسمّيه التفصيل حين يلاصق المجلس من البداية)
+          if (D.name === 'صالة الطعام') for (const lb of doc.labels.filter(l => D.labelIds.includes(l.id))) lb.name = 'صالة الطعام والمقلط';
+          notes.push(`باب مقلط بين «${h.name}» و«${D.name === 'صالة الطعام' ? 'صالة الطعام والمقلط' : D.name}»: يصل ضيف الرجال إلى الطعام دون أن يعبر منطقة العائلة (تفضيل سعودي افتراضي للميزان).`);
           done = true; changed = true; break;
         }
         if (done) break; } if (done) break; }

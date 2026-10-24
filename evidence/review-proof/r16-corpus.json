@@ -1,18 +1,18 @@
 {
- "stage": "after-16",
+ "stage": "after-17",
  "summary": {
   "note_ar": "كشف أنواع العيوب الجديدة (privacy-defects.mjs): الإيجابيات الحقيقية من حكم المراجع المستقل r15 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، والمصنوعة بتحوير واحد على بدائل «جاهزة»، والسلبيات هي البدائل الجاهزة كما هي.",
-  "positives": 44,
-  "detected": 44,
-  "positivesNotReady": 44,
+  "positives": 48,
+  "detected": 48,
+  "positivesNotReady": 48,
   "byType": {
-   "WINDOW_PARKING": "19/19",
+   "WINDOW_PARKING": "21/21",
    "HALL_STREET": "2/2",
-   "GUEST_DINING": "16/16",
-   "MASTER_VIA_DRESS": "5/5",
+   "GUEST_DINING": "17/17",
+   "MASTER_VIA_DRESS": "6/6",
    "PARKING_SHALLOW": "2/2"
   },
-  "negatives": 10,
+  "negatives": 12,
   "falsePositives": 0,
   "missed": []
  },
@@ -80,7 +80,8 @@
    "detected": true,
    "got": [
     "WINDOW_PARKING",
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "HALL_SMALL"
    ],
    "status": "needs-edits"
   },
@@ -245,7 +246,8 @@
    "detected": true,
    "got": [
     "WINDOW_PARKING",
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "HALL_SMALL"
    ],
    "status": "needs-edits"
   },
@@ -321,36 +323,6 @@
   },
   {
    "kind": "clean",
-   "alt": "C4/alt-1.json",
-   "expected": null,
-   "detected": false,
-   "got": [],
-   "status": "ready"
-  },
-  {
-   "kind": "synthetic",
-   "alt": "C4/alt-1.json",
-   "mutation": "موقف أمام نافذة «الصالة»",
-   "expected": "WINDOW_PARKING",
-   "detected": true,
-   "got": [
-    "WINDOW_PARKING"
-   ],
-   "status": "needs-edits"
-  },
-  {
-   "kind": "synthetic",
-   "alt": "C4/alt-1.json",
-   "mutation": "حذف باب المقلط بين المجلس والطعام",
-   "expected": "GUEST_DINING",
-   "detected": true,
-   "got": [
-    "GUEST_DINING"
-   ],
-   "status": "needs-edits"
-  },
-  {
-   "kind": "clean",
    "alt": "C5/alt-1.json",
    "expected": null,
    "detected": false,
@@ -420,7 +392,7 @@
   {
    "kind": "synthetic",
    "alt": "C6/alt-1.json",
-   "mutation": "موقف أمام نافذة «الصالة»",
+   "mutation": "موقف أمام نافذة «صالة الطعام والمقلط»",
    "expected": "WINDOW_PARKING",
    "detected": true,
    "got": [
@@ -431,6 +403,47 @@
   {
    "kind": "synthetic",
    "alt": "C6/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C6/alt-1.json",
+   "mutation": "الماستر لا تُدخل إلا عبر غرفة الملابس من الصالة",
+   "expected": "MASTER_VIA_DRESS",
+   "detected": true,
+   "got": [
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C7/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C7/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C7/alt-1.json",
    "mutation": "حذف باب المقلط بين المجلس والطعام",
    "expected": "GUEST_DINING",
    "detected": true,
@@ -482,6 +495,25 @@
   },
   {
    "kind": "clean",
+   "alt": "C8/alt-2.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-2.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
    "alt": "C9/alt-1.json",
    "expected": null,
    "detected": false,
@@ -532,6 +564,36 @@
   {
    "kind": "synthetic",
    "alt": "C9/alt-2.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C9/alt-3.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-3.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-3.json",
    "mutation": "حذف باب المقلط بين المجلس والطعام",
    "expected": "GUEST_DINING",
    "detected": true,

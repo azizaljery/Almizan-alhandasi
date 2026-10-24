@@ -80,13 +80,14 @@ test('الجلسة: جواب «من ضمنها» يعيد التوليد ببر�
   assert.equal(beds.length, 5);
 });
 
-test('البرنامج السعودي الافتراضي: علامات البرنامج معلنة ومطبخ ≥ 15.6 م² هدفًا، والمقلط لا يُفرض على دورين ولا مع اعتراض العميل', () => {
+test('البرنامج السعودي الافتراضي: علامات البرنامج معلنة ومطبخ ≥ 15.6 م² هدفًا، والمقلط افتراضي في الدور الواحد والدورين (الجولة 17) ولا يُفرض مع اعتراض العميل', () => {
   const P = programV2({ bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, extractRequirements('3 غرف ومجلس وصالة ومطبخ وطعام', {}));
   assert.ok(P.mizanDefaults.some(m => m.id === 'kitchen') && P.mizanDefaults.some(m => m.id === 'familyEntry'));
   assert.ok(P.blocks.find(b => b.id === 'kitchen1').area >= 15.6);
   assert.equal(P.majlisDiningDefault, true);
   const P2 = programV2({ bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, extractRequirements('دورين: 3 غرف ومجلس وطعام', {}));
-  assert.equal(P2.majlisDiningDefault, false);
+  // (الجولة السابعة عشرة) المقلط الافتراضي صار للأرضي في الدورين أيضًا (المراجع المستقل r16، C7: المجلس بلا باب داخلي إلى الطعام)
+  assert.equal(P2.majlisDiningDefault, true);
   const P3 = programV2({ bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, extractRequirements('3 غرف ومجلس والمجلس بعيد عن الطعام', {}));
   assert.equal(P3.majlisDiningDefault, false);
   // مطبخ بمقاس صريح لا يُكبَّر

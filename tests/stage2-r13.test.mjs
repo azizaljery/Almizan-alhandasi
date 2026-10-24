@@ -120,7 +120,8 @@ test('المولّد يبلغ نسبة الزجاج التي طلبها العم
   for (const d of plain.designs) { const g = reviewDesign(d.doc, { text: C.text, counts: C.counts, land }, { external: false, heavy: false }).gates.find(x => x.id === 'WINDOW_SIZE'); assert.equal(g.value.requestedRooms, 0); assert.deepEqual(g.notes_ar, []); }
   // C7: المطبخ كان 31 م² (after-12) — الآن ≤ 24 م² صافيًا وبجانبه غرفة غسيل ومخزن تُفتح منه (قيمة افتراضية معلنة في الملاحظات)
   const c7 = caseReq('C7'), two = generateVillaTwoFloors({ land: c7.land, counts: c7.r.counts, requirements: c7.r, keep: 4 });
-  const d7 = two.designs[0], rs = docRooms(d7.doc).rooms, kit = rs.find(x => x.type === 'kitchen' && x.li === 0), ut = rs.find(x => x.name === 'غرفة الغسيل والمخزن');
+  // (الجولة السابعة عشرة) البديل بقراءة «المجلسين» قد يتقدم (جاهز)؛ اقتطاع الغسيل من المطبخ المفرط يُفحص على بديل القراءة الأولى
+  const d7 = two.designs.find(x => !x.pluralReading) || two.designs[0], rs = docRooms(d7.doc).rooms, kit = rs.find(x => x.type === 'kitchen' && x.li === 0), ut = rs.find(x => x.name === 'غرفة الغسيل والمخزن');
   assert.ok(kit.area <= 24, `المطبخ ${kit.area}`); assert.ok(ut && ut.area >= 6, 'غرفة الغسيل'); assert.ok(d7.notes.some(n => /اقتُطع من طرفه غرفة غسيل/.test(n))); assert.ok(d7.review.passed);
   // C4 (أرض 12 م): دورة مياه يومية من طرف الصالة بممر إلى الممر الخلفي؛ المطبخ يبقى < 14 م² (الأرض لا تتسع: مذكور في المراجعة ملاحظةً)
   const c4 = caseReq('C4'), o4 = generateVillaDesigns({ land: c4.land, counts: c4.r.counts, requirements: c4.r, keep: 4 }), d4 = o4.designs[0];

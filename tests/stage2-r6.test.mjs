@@ -65,5 +65,6 @@ test('C7 (دوران): العلوي لا يبرز فوق فراغ أرضي، و�
     const over = u.reduce((s, q) => s + Math.max(0, q.area - cover(q)), 0);
     assert.ok(over <= 3, `${d.pat}: بروز علوي ${over.toFixed(1)} م²`);
   }
-  for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.ok(archDifference(out.designs[i].doc, out.designs[j].doc).total >= THRESHOLDS.cosmetic);
+  // (الجولة السابعة عشرة) البديل بقراءة «المجلسين» برنامج آخر لكلام العميل (معلن، لا تكملة للعدد): لا يُقارن بديلًا تنظيميًا
+  for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) if (!out.designs[i].pluralReading && !out.designs[j].pluralReading) assert.ok(archDifference(out.designs[i].doc, out.designs[j].doc).total >= THRESHOLDS.cosmetic);
 });

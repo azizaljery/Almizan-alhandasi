@@ -49,7 +49,8 @@ test('C7 دوران: كل بديل معروض متسق التراكب وينفّ
     assert.equal(d.doc.stairs.length, 1, d.pat);
     assert.ok(d.review.gates.find(g => g.id === 'STAIR_GEOMETRY').ok, d.pat);
   }
-  for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.ok(archDifference(out.designs[i].doc, out.designs[j].doc).total >= THRESHOLDS.cosmetic, `${i + 1}/${j + 1}`);
+  // (الجولة السابعة عشرة) البديل بقراءة «المجلسين» برنامج آخر لكلام العميل (معلن، لا تكملة للعدد): لا يُقارن بديلًا تنظيميًا
+  for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) if (!out.designs[i].pluralReading && !out.designs[j].pluralReading) assert.ok(archDifference(out.designs[i].doc, out.designs[j].doc).total >= THRESHOLDS.cosmetic, `${i + 1}/${j + 1}`);
 });
 
 test('البهو المزدوج الارتفاع: فراغ «void» في العلوي فوق مدخل العائلة، يحده درابزين نحو الحركة فقط، ولا يُعد غرفة معزولة', () => {

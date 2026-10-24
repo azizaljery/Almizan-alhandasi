@@ -449,7 +449,7 @@ export function partialReading(doc, intents = [], entry = 's') {
   const dot = t => String(t || '').replace(/[.。]+$/, '');
   const text_ar = [...ok.map(x => `${x.text} متحقق حرفيًا (مقيس)`), ...part.map(x => `${x.text} متحقق بالقراءة النسبية — ${dot(x.partial.text_ar)} — لا بالقراءة الحرفية (على الواجهة الخلفية أو في ثلثها الخارجي): ${dot(x.partial.literal_ar)}`), ...no.map(x => `${x.text} غير متحقق: ${dot(x.why)}`)].join('؛ ');
   // (الجولة السابعة عشرة) بلغة العميل: نعم/لا لكل بند، والموضع بكلمات (لا «القراءة النسبية» ولا نسب مئوية؛ تلك في text_ar للتفصيل المطوي)
-  const where = x => { const m = /(\d+)\s*[٪%]/.exec(String(x.partial?.text_ar || '') + ' ' + String(x.partial?.literal_ar || '')); const v = m ? +m[1] : null; return v == null ? 'ليس على الواجهة الخلفية' : v < 40 ? 'هو في مقدمة البيت' : v <= 66 ? 'هو في منتصف البيت' : 'هو قرب الخلف لكن لا يلامس الواجهة الخلفية'; };
+  const where = x => { const m = /(\d+)\s*[٪%] من عمق المبنى من الواجهة الأمامية/.exec(String(x.partial?.text_ar || '')) || /(\d+)\s*[٪%]/.exec(String(x.partial?.text_ar || '')); const v = m ? +m[1] : null; return v == null ? 'ليس على الواجهة الخلفية' : v < 33 ? 'هو في مقدمة البيت' : v <= 66 ? 'هو في منتصف البيت' : 'هو قرب الخلف لكن لا يلامس الواجهة الخلفية'; };
   const plain_ar = [...ok.map(x => `${x.text}: نعم`), ...part.map(x => `${x.text}: لا — ${where(x)}`), ...no.map(x => `${x.text}: لا`)].join('. ') + '.';
   return { text_ar, plain_ar, ok: ok.map(x => x.text), partial: part.map(x => ({ text: x.text, relative_ar: x.partial.text_ar, literal_ar: x.partial.literal_ar })), failed: no.map(x => ({ text: x.text, why: x.why })) };
 }

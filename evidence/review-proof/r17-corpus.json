@@ -1,0 +1,576 @@
+{
+ "stage": "after-17",
+ "summary": {
+  "note_ar": "كشف نوعي عيب الصالة (HALL_SMALL وHALL_THROUGH): إيجابيات حقيقية من حكم المراجع المستقل r16 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، وإيجابيات مصنوعة بتحوير واحد على بدائل «جاهزة»، وسلبيات (الجاهزة كما هي، وبدائل after-16 التي لم يسجّل فيها المراجع العيب). الإيجابية المصنوعة لا تُعد كشفًا إلا إن تغيّرت الصالة فعلًا عن قيمها: تحوير لا يمس الجلسة قد لا يكون عيبًا.",
+  "positives": 28,
+  "detected": 19,
+  "positivesNotReady": 19,
+  "real": "4/4",
+  "synthetic": "15/24",
+  "byMutation": {
+   "جدار بفتحة يقسم الصالة (45% من طولها)": "9/12",
+   "جدار بفتحة يضيّق الصالة إلى 3.5 م": "6/12"
+  },
+  "negatives": 31,
+  "falsePositives": 0,
+  "falsePositiveAlts": [],
+  "missed": [
+   "C1/alt-1.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "C2/alt-1.json جدار بفتحة يقسم الصالة (45% من طولها)",
+   "C2/alt-1.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "C5/alt-2.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "C7/alt-1.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "C9/alt-1.json جدار بفتحة يقسم الصالة (45% من طولها)",
+   "C9/alt-2.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "C9/alt-3.json جدار بفتحة يقسم الصالة (45% من طولها)",
+   "C9/alt-3.json جدار بفتحة يضيّق الصالة إلى 3.5 م"
+  ]
+ },
+ "rows": [
+  {
+   "kind": "real-r16-clean",
+   "alt": "C1-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C1-2",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C2-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C3-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C3-2",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16",
+   "alt": "C4-1",
+   "expected": "HALL_SMALL",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r16",
+   "alt": "C4-1",
+   "expected": "HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C5-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C5-2",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C5-3",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C5-4",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C6-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C7-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C8-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C8-2",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C9-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16",
+   "alt": "C9-2",
+   "expected": "HALL_SMALL",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r16",
+   "alt": "C9-2",
+   "expected": "HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C9-3",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C9-4",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C10-1",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C10-2",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show-after-edits"
+  },
+  {
+   "kind": "real-r16-clean",
+   "alt": "C10-3",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "reviewer": "show"
+  },
+  {
+   "kind": "clean",
+   "alt": "C1/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C1/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C1/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "clean",
+   "alt": "C2/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C2/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C2/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "clean",
+   "alt": "C5/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C5/alt-2.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-2.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-2.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "clean",
+   "alt": "C6/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C6/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C6/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C7/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C7/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C7/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "clean",
+   "alt": "C8/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C8/alt-2.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-2.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-2.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C9/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C9/alt-2.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-2.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-2.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "clean",
+   "alt": "C9/alt-3.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-3.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-3.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "clean",
+   "alt": "C10/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C10/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C10/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  }
+ ]
+}

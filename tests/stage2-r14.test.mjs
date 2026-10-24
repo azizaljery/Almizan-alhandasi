@@ -1,6 +1,7 @@
 // الجولة الرابعة عشرة: صدق التعديل (لا يُعاد بديل معروض على أنه نتيجة تعديل، وخيارات صريحة بالبصمة بالمناطق)، وحالة العرض لكل بديل
 // (جاهز/يحتاج تعديلات/محجوب)، وبنود المراجع المستقل r13 مقيسة (تفضيلات لا قواعد)، والمواقف العمودية، ووسم «مقترح معماري مبدئي».
 import './_gen-cache.mjs';
+import { verifyRules } from '../dist/rules.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -73,7 +74,10 @@ test('البصمة بالمناطق: مخطط مطابق لبديل معروض �
 
 test('صدق التعديل (C8 البديل 1): لا يُعاد بديل معروض، تُعرض الخيارات بالسبب الهندسي، و«1» يبقي المخطط حرفيًا، واختيار البديل المعروض يُعلن أنه ليس تعديلًا', async () => {
   const { r, land } = caseReq('C8'), out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 4 });
-  const i = out.designs.findIndex(d => d.pat.startsWith('courtyard')); assert.ok(i >= 0, 'بديل الحوش معروض');
+  // (الجولة السابعة عشرة) بديل الحوش لم يعد معروضًا (حل محله «جناح الضيافة» الجاهز)؛ يُفحص على أول بديل لا يتحقق فيه الطلب حرفيًا
+  let i = out.designs.findIndex(d => d.pat.startsWith('courtyard'));
+  if (i < 0) i = out.designs.findIndex(d => !verifyRules(d.doc, [{ id: 'K', kind: 'place', a: 'kitchen', side: 'back', mode: 'zone', text: 'المطبخ في الخلف' }], { entry: 's' })[0].ok);
+  assert.ok(i >= 0, 'بديل لا يتحقق فيه الطلب');
   const alts = out.designs.map((x, j) => ({ index: j, doc: x.doc, pat: x.pat, summary: x.summary, notes: x.notes, mirror: x.mirror, review: x.review || null }));
   const d = out.designs[i], s0 = createSession({ land, counts: r.counts, requirements: r, result: { doc: d.doc, pat: d.pat, mirror: d.mirror, summary: d.summary, notes: d.notes, villaEngine: 'v2', alternatives: alts }, engine: 'v2' });
   const a = await redesign(s0, { text: 'انقل المطبخ بجوار الطعام وخل المطبخ في الخلف' });
