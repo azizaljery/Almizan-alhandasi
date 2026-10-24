@@ -8,6 +8,7 @@ export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
 import { parseEdit, applyEdits, replayIntents, compareDocs, describeChanges, inspect, measureIntents, FACADE_RENDER } from './plan-edit.mjs';
 import { reviewDesign } from './plan-review.mjs';
+import { presentationStatus } from './presentation-status.mjs';
 import { fingerprint, diffFingerprint, compactDiff, touchedKeys, countAr } from './plan-fingerprint.mjs';
 import { zoneDiff, matchShown, roomsHash, sideOccupants } from './edit-truth.mjs';
 import { streetWidthQuestion, parseStreetWidthAnswer, frontSetbackFor } from './regulations-sa.mjs';
@@ -394,10 +395,12 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       // (الجولة السادسة عشرة) لغة العميل: نص الخيار جملة قصيرة بلا أرقام جدران ولا مصطلحات (detail_ar يحفظ التفصيل الهندسي
       // للملحق)، ولكل خيار مصغّر (thumb) يرسمه العرض. وخيار «توزيع جديد» لا يُعرض إلا مقيسًا يحقق الطلب حرفيًا (achieves أعلاه).
       const zoneShort = z => String(z || '').replace(/ \(.*\)$/, '');
+      // حالة المقترح نفسه (presentation-status): إن كان يحتاج تعديلات يُقال ذلك بجانب الخيار — لا يُقدَّم جاهزًا
+      const pstat = c => { try { const st = presentationStatus({ doc: c.doc, ledger: verifyRequest(c.doc, req, { entry: entryDir }), review: c.review || null }, { text: s.input.idea || req.text || '', counts: { ...req.counts }, land: s.input.land || {} }); return st.status === 'ready' ? '' : st.status === 'hidden' ? ' — لكنه لا يحقق بندًا آخر من طلبك' : ' — يحتاج تعديلات قبل اعتماده'; } catch { return ''; } };
       const opts = [{ id: 'keep', n: 1, text_ar: 'أبقِ المخطط كما هو', detail_ar: 'أبقِ المخطط المعروض كما هو حرفيًا', thumb: { src: 'current' } }];
-      if (zoneCand) opts.push({ id: 'zone', n: 2, text_ar: `أعيد ترتيب ${zoneShort(zoneCand.zd.changed_ar[0]) || 'جزء واحد من البيت'} فقط، ويبقى الباقي كما هو`, detail_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}`, thumb: { src: 'pending', key: 'zone' } });
+      if (zoneCand) opts.push({ id: 'zone', n: 2, text_ar: `أعيد ترتيب ${zoneShort(zoneCand.zd.changed_ar[0]) || 'جزء واحد من البيت'} فقط، ويبقى الباقي كما هو${pstat(zoneCand)}`, detail_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}`, thumb: { src: 'pending', key: 'zone' } });
       if (shownOk.length) opts.push({ id: 'shown', n: 3, alts: shownOk, text_ar: `اعرض ${shownOk.length === 1 ? 'التصميم' : 'التصاميم'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك (تصميم آخر، لا تعديل لهذا)`, detail_ar: `اعرض ${shownOk.length === 1 ? 'البديل' : 'البدائل'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط)`, thumb: { src: 'alt', index: shownOk[0] } });
-      if (fullCand) opts.push({ id: 'full', n: 4, text_ar: 'أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك', detail_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة، مقيس يحقق طلبك حرفيًا`, thumb: { src: 'pending', key: 'full' } });
+      if (fullCand) opts.push({ id: 'full', n: 4, text_ar: `أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك${pstat(fullCand)}`, detail_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة، مقيس يحقق طلبك حرفيًا`, thumb: { src: 'pending', key: 'full' } });
       // بلغة العميل: من يشغل الجهة المطلوبة الآن (مثل «خلف البيت تشغله منطقة النوم…»)
       let occ = ''; try { const sides = [...new Set(intents.filter(i => i.op === 'rule' && i.rule?.kind === 'place' && ['back', 'front'].includes(i.rule.side)).map(i => i.rule.side))];
         occ = sides.map(sd => { const o = sideOccupants(curD, sd, entryDir); return o ? ` ${sd === 'back' ? 'خلف' : 'مقدمة'} هذا المخطط ${o.length > 1 ? 'تشغلها' : 'تشغله'} ${o.map(z => `${z.zone_ar.replace(/ \(.*\)$/, '')} (${z.rooms.map(n => `«${n}»`).join('، ')})`).join(' و')}${o.some(z => z.zone === 'sleep') ? '؛ نقل المطبخ إليها يزيح غرف النوم إلى موضع المطبخ أو الطعام أو يجعل المطبخ على ممر النوم' : ''}.` : ''; }).join(''); } catch { occ = ''; }
@@ -562,16 +565,16 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   if (restored?.proof) reply.restoreProof = restored.proof;
   reply.summary_ar = [
     doneShown.length ? `نُفّذ: ${doneShown.join('، ')}${reply.how.length ? ` (${reply.how.join('؛ ')})` : ''}.` : '',
-    alreadyTxt.length ? (allAlready ? `طلبك متحقق أصلًا في هذا المخطط حرفيًا (مقيس بسجل المطابقة): ${alreadyTxt.join('، و')}؛ فلم أغيّر شيئًا.` : `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.`) : '',
+    alreadyTxt.length ? (allAlready ? `طلبك متحقق أصلًا في هذا المخطط: ${alreadyTxt.join('، و')}؛ فلم أغيّر شيئًا.` : `لم يحتج تغييرًا: ${alreadyTxt.join('؛ ')}.`) : '',
     reply.failed.length ? `لم يُنفَّذ: ${reply.failed.map(f => `${f.text} — ${f.why}`).join('؛ ')}.` : '',
     reply.pending.length ? `محفوظ ولم يظهر في المجسّم بعد: ${reply.pending.map(p => p.text).join('، ')}.` : '',
     restored && facadeNote ? facadeNote + '.' : '',
     unrequested.length ? (restored ? `وعادت معه إلى حالها في ذلك التصميم: ${unrequested.map(c => c.text_ar).join('؛ ')}.` : `تغيّر أيضًا لأن التعديل يحتاجه: ${unrequested.map(c => c.text_ar).join('؛ ')}.`) : '',
     restored?.lost?.length || restored?.lostTurns?.length ? `لم يُعَد بعد الرجوع: ${[...restored.lost.map(l => `${l.text}${l.why ? ` (${l.why})` : ''}`), ...restored.lostTurns.map(t => `«${t}»`)].join('، ')} — قل «أعده» إن أردته ولو بإعادة توزيع.` : '',
-    `بقية الغرف (${Math.max(0, same)}) كما هي مقيسًا${reply.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`,
-    fpd ? fpd.summary_ar : '',
-    restored?.proof ? restored.proof.summary_ar : '',
+    // (الجولة السادسة عشرة) لغة العميل: لا عدّ جدران ولا «بصمة هندسية» في الرسالة؛ التفصيل الهندسي في detail_ar (يُطوى في العرض)
+    'بقية الغرف كما هي.',
   ].filter(Boolean).join(' ');
+  reply.detail_ar = [`بقية الغرف (${Math.max(0, same)}) كما هي مقيسًا${reply.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`, fpd ? fpd.summary_ar : '', restored?.proof ? restored.proof.summary_ar : '', alreadyTxt.length && allAlready ? 'مقيس بسجل المطابقة.' : ''].filter(Boolean).join(' ');
   // جزء نُفّذ وجزء يحتاج إذنًا (غرفة لم يذكرها العميل): يُسأل عنه صراحة ويُحفظ ليُنفَّذ بـ«نعم» على المخطط الجديد
   const asks = failedRes.filter(r => r.ask);
   if (asks.length) { s.pendingEdit = { text, intents: asks.map(r => r.intent).filter(Boolean) }; reply.questions = asks.map(r => r.ask); reply.summary_ar += ' ' + asks.map(r => r.ask).join(' '); }

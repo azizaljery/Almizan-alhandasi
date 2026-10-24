@@ -444,7 +444,7 @@ export function partiTrees(P, { stair = false, W = Infinity, irregular = false }
   // مدخل مضغوط (≈ 8.5 م²): الحركة لا تُهدر في الردهة؛ (الجولة الثالثة عشرة) ومع دورة المياه اليومية الافتراضية يتسع البهو لها (≈ 11.5 م²،
   // عمقه ≥ 2.7 م حين يكون في عمود المحور) فتُقتطع من طرفه عند التفصيل — البهو الباقي بالمساحة المضغوطة نفسها
   const F = () => C('foyer', P.dayWc ? { area: FOYER_WC_AREA, wc: true } : { area: T.foyer * .85 });
-  const H = () => C('hall', { area: P.hallArea + 1 });
+  const H = () => C('hall', { area: P.hallArea });
   // السلم U بقلبتين (ارتفاع دور ≈ 3.2 م، درجة ≈ 0.28–0.30 م) يحتاج نحو 3.7 م طولًا؛ عرض فراغه عرض محور الصالة
   const ST = () => (stair ? C('stair', { fix: 3.7, area: 4.4 * 3.7 }) : null);
   const corr = (id = 'corr') => C(id, { fix: 1.5, area: 14 }); // صافي ≥ 1.25 م حتى بين جدارين خارجيين (على حوش)
@@ -3066,7 +3066,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   if (!refDR) refineMajlis(built, softMajlis, P, site, land, { title, requirements, entry, counts, nearMiss });
   admitMajlisBar(built, softMajlis, rejected);
   if (!built.length) { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; throw err; }
-  if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
+  if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
   // (الجولة الثانية عشرة) إعادة التوزيع بعد تعذّر التعديل الموضعي تحفظ ما يميّز المخطط المعروض: الحوش الداخلي وغرفة ملابس الرئيسية
   // (المراجع المستقل: تعديل C8 أفقد الحوش وغرفة الملابس) — فقدهما يُحتسب بعدًا إضافيًا عن المعروض فيتقدم ما يحفظهما

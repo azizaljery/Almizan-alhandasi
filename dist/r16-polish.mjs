@@ -11,6 +11,7 @@ import { analyzeDoc } from './draw/digest.mjs';
 import { applyCommand } from './draw/doc.mjs';
 import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defects.mjs';
 import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
+import { measureR14 } from './saudi-program.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
 const OUT_DIR = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
@@ -32,6 +33,7 @@ function freeAt(doc, wall, s0, s1, wd, prefer = null) {
   return cands.find(ok) ?? null;
 }
 const roomDoors = (lv, room) => lv.openings.filter(op => op.door && op.sides.some(s => s.room.id === room.id)).map(op => { const me = op.sides.find(s => s.room.id === room.id); return { op, other: me.other === 'outside' ? null : lv.roomsById.get(me.other) || null }; });
+const nbrs = (lv, room) => roomDoors(lv, room).filter(d => d.other).map(d => d.other);
 const sharedEdges = (a, b) => { const ids = new Set(b.edges.map(e => e.edgeId)); return a.edges.filter(e => ids.has(e.edgeId)).sort((p, q) => q.length - p.length); };
 
 /** نوافذ الغرف الخاصة التي تطل على المواقف (أو الصالة على الشارع) بلا حجب، في الدور الأرضي. */
@@ -139,7 +141,67 @@ export function polishR16(doc) {
         if (done) break; } if (done) break; }
     }
   }
+  // 4) غرفة نوم بلا حمام يصلها (C7-1 في المراجعة r15): دورة مياه مشتركة تُقتطع من طرف الممر الذي تُفتح عليه الغرفة — ممر عريض
+  //    (≥ 1.9 م) أطول مما تحتاجه الحركة؛ تُفتح على الممر نفسه، ويبقى الممر ≥ 1.4 م طولًا ومفتوحًا على أبوابه كلها
+  {
+    const model = analyzeDoc(doc);
+    let bad = []; try { bad = (measureR14(doc, {}, model).find(g => g.id === 'BED_BATH')?.value?.rooms || []).filter(x => !x.ok); } catch { bad = []; }
+    for (const b of bad) {
+      const lv = model.levels.find(l => (l.level.name || l.level.id) === b.level) || model.levels.find(l => l.rooms.some(r => r.name === b.room)); if (!lv) continue;
+      const R = lv.rooms.find(r => r.name === b.room); if (!R) continue;
+      const done = carveBath(doc, lv, R); if (done) { notes.push(done); changed = true; break; }
+    }
+  }
   return { notes_ar: notes, changed };
+}
+const bbox = poly => ({ x0: Math.min(...poly.map(p => p.x)), x1: Math.max(...poly.map(p => p.x)), y0: Math.min(...poly.map(p => p.y)), y1: Math.max(...poly.map(p => p.y)) });
+function carveBath(doc, lv, R) {
+  const L = lv.level.id, T = .12;
+  for (const SPAN of [1.6, 1.45, 1.8, 2.0, 1.25]) { const got = carveBathSpan(doc, lv, R, L, SPAN, T); if (got) return got; }
+  return null;
+}
+function carveBathSpan(doc, lv, R, L, SPAN, T) {
+  for (const d of roomDoors(lv, R).filter(x => x.other && x.other.type === 'corridor')) {
+    const V = d.other, B = bbox(V.net), w = B.x1 - B.x0, h = B.y1 - B.y0, ax = w >= h ? 'x' : 'y', long = Math.max(w, h), short = Math.min(w, h);
+    if (short < 1.9 || long < SPAN + T + 1.4 || Math.abs(V.area - w * h) > .05 * w * h) continue; // ممر مستطيل (قد يحمل رأسًا على استقامة)
+    const vDoors = lv.openings.filter(op => op.door && op.sides.some(s => s.room.id === V.id));
+    for (const end of ['lo', 'hi']) {
+      const c = ax === 'x' ? (end === 'lo' ? B.x0 + SPAN + T / 2 : B.x1 - SPAN - T / 2) : (end === 'lo' ? B.y0 + SPAN + T / 2 : B.y1 - SPAN - T / 2);
+      const inBath = q => (ax === 'x' ? (end === 'lo' ? q.x < c + T : q.x > c - T) : (end === 'lo' ? q.y < c + T : q.y > c - T));
+      // لا باب من أبواب الممر في الطرف المقتطع (ولا باب الغرفة نفسها)
+      if (vDoors.some(op => inBath(op.p))) continue;
+      // الجدار الجديد بين خطّي الجدارين الحاملين (الوجه + نصف السماكة)
+      // طرفا الجدار على خطّي محور الجدارين الحاملين (لا على وجهيهما) فتتصل الطوبولوجيا
+      const host = (face, sign) => { const ws = doc.walls.filter(w => w.level === L && (w.kind || 'wall') === 'wall' && (ax === 'x' ? Math.abs(w.a.y - w.b.y) < 1e-6 && Math.min(w.a.x, w.b.x) <= c + 1e-6 && Math.max(w.a.x, w.b.x) >= c - 1e-6 : Math.abs(w.a.x - w.b.x) < 1e-6 && Math.min(w.a.y, w.b.y) <= c + 1e-6 && Math.max(w.a.y, w.b.y) >= c - 1e-6)); const at = w => (ax === 'x' ? w.a.y : w.a.x); const h0 = ws.filter(w => Math.abs(at(w) - (face + sign * (w.t || .2) / 2)) < .03).sort((p, q) => Math.abs(at(p) - face) - Math.abs(at(q) - face))[0]; return h0 ? at(h0) : null; };
+      const e0 = host(ax === 'x' ? B.y0 : B.x0, -1), e1 = host(ax === 'x' ? B.y1 : B.x1, 1); if (e0 == null || e1 == null) continue;
+      // لا فتحة على الجدارين الحاملين تعبر موضع الجدار الجديد (لا تقاطع تحت فتحة — بوابة التطابق 2D/3D)
+      const crosses = doc.openings.some(o => { const w = doc.walls.find(x => x.id === o.wall); if (!w || w.level !== L) return false; const horiz = Math.abs(w.a.y - w.b.y) < 1e-6; if (ax === 'x' ? !horiz : horiz) return false; const lineAt = ax === 'x' ? w.a.y : w.a.x; if (Math.abs(lineAt - e0) > .01 && Math.abs(lineAt - e1) > .01) return false; const ux = (w.b.x - w.a.x), uy = (w.b.y - w.a.y), Lw = Math.hypot(ux, uy) || 1, pos = ax === 'x' ? w.a.x + ux / Lw * o.at : w.a.y + uy / Lw * o.at; return Math.abs(pos - c) < o.w / 2 + T / 2 + .15; }); // JUNC_CLEAR كما في المولّد
+      if (crosses) continue;
+      const ea = ax === 'x' ? { x: c, y: e0 } : { x: e0, y: c }, eb = ax === 'x' ? { x: c, y: e1 } : { x: e1, y: c };
+      const snapshot = JSON.stringify(doc);
+      try {
+        let r = applyCommand(doc, { type: 'add-wall', level: L, a: ea, b: eb, t: T }); Object.assign(doc, r.doc);
+        const wall = doc.walls[doc.walls.length - 1];
+        r = applyCommand(doc, { type: 'add-opening', wall: wall.id, kind: 'door', at: Math.hypot(eb.x - ea.x, eb.y - ea.y) / 2, w: .8 }); Object.assign(doc, r.doc);
+        const bx = ax === 'x' ? { x0: end === 'lo' ? B.x0 : c + T / 2, x1: end === 'lo' ? c - T / 2 : B.x1, y0: B.y0, y1: B.y1 } : { x0: B.x0, x1: B.x1, y0: end === 'lo' ? B.y0 : c + T / 2, y1: end === 'lo' ? c - T / 2 : B.y1 };
+        // تسمية الممر تبقى في الجزء الباقي منه
+        const rest = ax === 'x' ? { x: end === 'lo' ? (c + B.x1) / 2 : (B.x0 + c) / 2, y: (B.y0 + B.y1) / 2 } : { x: (B.x0 + B.x1) / 2, y: end === 'lo' ? (c + B.y1) / 2 : (B.y0 + c) / 2 };
+        for (const lb of doc.labels.filter(l => l.level === L && V.labelIds.includes(l.id))) lb.seed = { x: r2(rest.x), y: r2(rest.y) };
+        r = applyCommand(doc, { type: 'add-label', level: L, seed: { x: (bx.x0 + bx.x1) / 2, y: (bx.y0 + bx.y1) / 2 }, name: 'دورة مياه مشتركة', roomType: 'bath' }); Object.assign(doc, r.doc);
+        // المرحاض والمغسلة على الجدار البعيد عن الباب (الطرف)
+        const far = ax === 'x' ? (end === 'lo' ? { rot: -Math.PI / 2, x: bx.x0 + .35 } : { rot: Math.PI / 2, x: bx.x1 - .35 }) : (end === 'lo' ? { rot: 0, y: bx.y0 + .35 } : { rot: Math.PI, y: bx.y1 - .35 });
+        const along = ax === 'x' ? [bx.y0 + .45, bx.y1 - .45] : [bx.x0 + .45, bx.x1 - .45];
+        for (const [k, kind] of [[0, 'wc'], [1, 'basin']]) { const pos = ax === 'x' ? { x: far.x, y: along[k] } : { x: along[k], y: far.y }; r = applyCommand(doc, { type: 'add-fixture', level: L, kind, x: pos.x, y: pos.y, rot: far.rot }); Object.assign(doc, r.doc); }
+        // تحقق: الغرفة صار لها حمام على ممرها، والممر ما زال يصل كل أبوابه
+        const m2 = analyzeDoc(doc), lv2 = m2.levels.find(l => l.level.id === L), R2 = lv2.rooms.find(x => x.name === R.name), V2 = lv2.roomAt({ x: d.op.p.x + (V.centroid.x - d.op.p.x) * .2, y: d.op.p.y + (V.centroid.y - d.op.p.y) * .2 });
+        const okBath = R2 && V2 && nbrs(lv2, V2).some(o => o.type === 'bath' && o.name === 'دورة مياه مشتركة');
+        const lostReach = lv2.rooms.some(x => x.type !== 'other' && !lv2.reach.has(x.id)) && lv2.seedKind;
+        if (!okBath || lostReach) throw Error('carve-check');
+        return `اقتُطعت دورة مياه مشتركة (${SPAN}×${r2(short)} م) من طرف «${V.name}» العريض، تُفتح عليه — لـ«${R.name}» حمام على ممرها (قيمة تصميمية افتراضية للميزان).`;
+      } catch { const back = JSON.parse(snapshot); for (const k of Object.keys(doc)) delete doc[k]; Object.assign(doc, back); }
+    }
+  }
+  return null;
 }
 export default { polishR16 };
 void r2;

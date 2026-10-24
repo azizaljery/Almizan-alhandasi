@@ -25,7 +25,7 @@ test('بوابات الجودة على المرسوم: الرئيسية لا ت�
     // C6 («المطبخ في الخلف» صارمًا ومقاسات صريحة): لا يُعرض بديل مطبخه وسط البيت، فقد يقل العدد إلى اثنين
     // قرار المالك (الجولة الخامسة): لا يُرفع العدد على حساب الجودة — بديلان على الأقل مختلفان فعلًا (≥ 0.16)، ويُذكر سبب النقص
     // (الجولة الحادية عشرة) المقياس الوظيفي v2: كل زوج معروض «مختلف معماريًا»؛ وإن قل العدد عن اثنين يُذكر السبب المقيس (نسخ/جزئي)
-    assert.ok(out.designs.length >= 2 || /جزئي|نسخة معدّلة|لا بعد جوهري|تنويع على تنظيم/.test(out.shortfall_ar || ''), id + ': عدد البدائل ' + out.shortfall_ar);
+    assert.ok(out.designs.length >= 2 || /جزئي|نسخة معدّلة|لا بعد جوهري|تنويع على تنظيم|تخالف بندًا صريحًا من الطلب/.test(out.shortfall_ar || '') /* (الجولة السادسة عشرة) «في الخلف» حرفيًا: C6 بديل واحد لا حشو، والسبب المقيس مذكور */, id + ': عدد البدائل ' + out.shortfall_ar);
     for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) assert.equal(archDifferenceV2(out.designs[i].doc, out.designs[j].doc).verdict, 'distinct', `${id}: البديلان ${i + 1} و${j + 1} ليسا مختلفين معماريًا (v2)`);
     if (out.designs.length < (C.want || 4)) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);
     for (const d of out.designs) {
