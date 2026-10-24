@@ -209,7 +209,8 @@ function saudiDefaults(P, req = {}) {
   out.push({ id: 'dayWc', ar: 'دورة مياه يومية تُدخل من الصالة أو المدخل' });
   // المقلط: باب بين مجلس الرجال والطعام (الدور الواحد) ما لم يعارضه العميل
   const opposed = rules.some(r => ['far', 'apart'].includes(r.kind) && [r.a, r.b].some(x => /^majlis/.test(String(x || ''))) && [r.a, r.b].includes('dining'));
-  P.majlisDiningDefault = !P.majlisDining && !opposed && !!P.men && P.dining.length > 0 && (pr.floors || 1) === 1;
+  // (الجولة السابعة عشرة) والدوران أيضًا: المجلس والطعام في الأرضي (المراجع المستقل r16، C7) — كان للدور الواحد فقط
+  P.majlisDiningDefault = !P.majlisDining && !opposed && !!P.men && P.dining.length > 0 && ((pr.floors || 1) === 1 || !R14_OFF.has('r17tf'));
   // (الجولة السابعة عشرة) ضيف الرجال يصل إلى الطعام دون عبور العائلة (GUEST_DINING) — في الدور الواحد والدورين: يوجّه البحث إلى
   // ملاصقة المجلس للطعام (باب مقلط) ما لم يطلب العميل فصلهما
   P.guestLink = !opposed && !!P.men && P.dining.length > 0 && !/مجلس[^،.]{0,20}(?:بعيد|منفصل|مستقل) (?:عن|من) (?:ال)?(?:طعام|سفر)/.test(String(req.text || req.idea || '').replace(/[ةه]/g, 'ه'));
@@ -890,6 +891,8 @@ const CORR_SINGLE_MAX = 10, CORR_SINGLE_HARD = 12.5, CORR_DOUBLE_MAX = 14;
 // (الجولة العاشرة) قيم تصميمية افتراضية للميزان (لا اشتراطات نظامية؛ ما يطلبه العميل يغلبها): عرض المجلس الصافي ≥ 4.2 م
 // (جلستان متقابلتان)، والمجلس لا يتضخم فوق 1.6 من حده (24 م² للرئيسي، 20 للنساء)، والطعام ≤ 23 م²، وحمام الرئيسية ≤ 7 م²،
 // والرئيسية العلوية ≥ 18 م² صافية؛ وممر الغرف المحمَّل من جهة واحدة فوق 10.5 م جزاء أشد (إلا في الأرض الضيقة < 13 م عرضًا)
+// (الجولة السابعة عشرة) غرفة الملابس: «غرفة» متى بلغ صافيها 4 م²؛ وحين يطلبها العميل ≥ 4.5 م² (قيم تصميمية افتراضية للميزان)
+const DRESS_ROOM_NET = 4.0, DRESS_ASKED_NET = 4.5;
 const MAJLIS_MIN_W = 4.2, MAJLIS_CAP = 1.6, DIN_MAX_AREA = 23, MASTER_BATH_MAX = 7, MASTER_UP_MIN = 18, CORR_SINGLE_SOFT_HARD = 10.5, NARROW_W = 13;
 /**
  * تحميل الممر: طوله، وهل تفتح الغرف عليه من جهة واحدة فقط. «من الجهتين» = على كل جانب طويل غرف (أو فراغات) تلامسه
@@ -1726,10 +1729,23 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
       let bl = b.master && L - bl0 < 1.5 && L - 2.4 >= 1.5 ? L - 1.5 : Math.min(bl0, L);
       // (الجولة الرابعة عشرة) غرفة ملابس حقيقية للرئيسية الكبيرة (> 20 م²): ≥ 2.0 × 2.5 م صافيًا (قيمة تصميمية افتراضية للميزان؛
       // المراجع المستقل r13: غرف ملابس رمزية 1.38 × 2.02) — يتعمق الشريط إلى 2.25 م ويُقصر الحمام إن بقيت الغرفة ≥ 16 م² وضلعها ≥ 3.4 م
+      // (الجولة السابعة عشرة) وحين يطلب العميل «ماستر بغرفة ملابس»: غرفة ملابس ≥ 4.5 م² صافيًا (DRESS_ASKED_NET، قيمة تصميمية افتراضية
+      // للميزان يغلبها مقاس العميل) أيًّا كانت مساحة الرئيسية، ما بقيت الغرفة ≥ 14.5 م² صافيًا وضلعها ≥ 3.4 م (المراجع المستقل r16: 2.5–2.9 م²)
       if (b.master && !masterAsked(P) && !R14_OFF.has('dress')) {
+        const askedD = !!P.prefs?.masterDressing && !R14_OFF.has('r17dress');
         const tD = 2.25, needL = 2.7, r0 = cut(r, ss, t)[1], restT = cut(r, ss, Math.max(t, tD))[1];
         const big = (W_(r0) - WALL_NET) * (H_(r0) - WALL_NET) > 20, rn = (W_(restT) - WALL_NET) * (H_(restT) - WALL_NET), rmin = Math.min(W_(restT), H_(restT)) - WALL_NET;
-        if (big && rn >= 16 && rmin >= 3.4) { let bl2 = bl; if (L - bl2 < needL && L - needL >= 1.9) bl2 = snap(L - needL); if (L - bl2 >= needL - 1e-6) { t = Math.max(t, tD); bl = bl2; } }
+        let done = false;
+        if ((big && rn >= 16 || askedD && rn >= 14.5) && rmin >= 3.4) { let bl2 = bl; if (L - bl2 < needL && L - needL >= 1.9) bl2 = snap(L - needL); if (L - bl2 >= needL - 1e-6) { t = Math.max(t, tD); bl = bl2; done = true; } }
+        // المطلوبة ولم تتسع بالعمق 2.25 م: شريط أعمق (حتى 2.9 م) بطول أقصر — الحمام لا يقصر عن 1.9 م ولا يصغر عن 4 م²
+        if (askedD && !done) for (const nl of [2.5, 2.3, 2.1]) {
+          if (L - nl < 1.9 - 1e-6) continue;
+          const tN = snap(DRESS_ASKED_NET / (nl - WALL_NET) + WALL_NET + .02), t2 = Math.max(t, tN); if (t2 > 2.9) continue;
+          if ((L - nl - WALL_NET) * (t2 - WALL_NET) < 4.0) continue; // وحمام الرئيسية لا يصغر عن 4 م² صافيًا
+          const rT = cut(r, ss, t2)[1], rn2 = (W_(rT) - WALL_NET) * (H_(rT) - WALL_NET), rm2 = Math.min(W_(rT), H_(rT)) - WALL_NET;
+          if (rn2 < 14.5 || rm2 < 3.4) continue;
+          t = t2; bl = Math.min(bl, snap(L - nl)); done = true; break;
+        }
       }
       const [strip, rest] = cut(r, ss, t);
       // (الجولة العاشرة) حمام الرئيسية ≤ 7 م² صافيًا ما لم تُطلب كبيرة: الزائد لغرفة الملابس (إن بقي لها ≥ 1.5 م)
@@ -1743,7 +1759,11 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
       if (b.bathShared) { bath.name = 'دورة مياه مشتركة'; bath.far = opp[side]; const ebs = edgeOf(bath, side); circDoor(bath.id, bath, side, 'door', .8, (ebs.from + ebs.to) / 2); }
       else { const eb = shared(bath, bed); if (eb) { const at = edgeOf(r, side).at, pos = Math.abs(eb.from - at) < Math.abs(eb.to - at) ? eb.from + .55 : eb.to - .55; doors.push({ a: bath.id, b: b.id, edge: eb, pos, kind: 'door', w: .8 }); } }
       if (closetR) {
-        const cl = add(closetR, { id: b.id + '-dress', type: 'storage', name: b.master ? 'غرفة ملابس' : b.kind === 'suite' ? 'خزانة ملابس' : 'خزانة', kind: 'dress', door: ss });
+        // (الجولة السابعة عشرة) تسمية صادقة: خزانة الرئيسية الصغيرة (< 4 م² صافيًا) «خزانة ملابس» لا «غرفة ملابس» ما لم يطلب العميل
+        // غرفة ملابس (فيبقى اسمها ويُذكر نقصها عن 4.5 م² في ملاحظات البديل)
+        const clNet = (W_(closetR) - WALL_NET) * (H_(closetR) - WALL_NET), smallCl = b.master && clNet < DRESS_ROOM_NET && !P.prefs?.masterDressing && !R14_OFF.has('r17dress');
+        const cl = add(closetR, { id: b.id + '-dress', type: 'storage', name: b.master && !smallCl ? 'غرفة ملابس' : b.kind === 'suite' ? 'خزانة ملابس' : 'خزانة', kind: 'dress', door: ss });
+        if (b.master && P.prefs?.masterDressing && clNet < DRESS_ASKED_NET - .05) notes.push(`غرفة الملابس المطلوبة ${r2(clNet)} م² صافيًا — أقل من ${DRESS_ASKED_NET} م² (قيمة تصميمية افتراضية للميزان): لم يتسع جناح الرئيسية في هذا البديل لأكثر منها دون أن تضيق الغرفة.`);
         const ec = shared(cl, bed); if (ec) doors.push({ a: cl.id, b: b.id, edge: ec, pos: (ec.from + ec.to) / 2, kind: ec.to - ec.from >= 1.6 ? 'arch' : 'door', w: Math.min(1.2, ec.to - ec.from - .3) });
       }
       return;
@@ -2905,6 +2925,9 @@ function tfPolish(d, args) {
   if ((doc.stairs || []).length && !R14_OFF.has('skylight')) { for (const st of doc.stairs) st.skylight = true; d.notes = [...(d.notes || []), 'منور سماوي فوق الدرج يضيئه طبيعيًا (قيمة تصميمية افتراضية للميزان؛ مقاسه وتفصيله يُعتمدان مع المصمم).']; }
   // باب الرئيسية بعيدًا عن الدرج (بمسار المشي من وصول الدرج — الجولة الخامسة عشرة)
   if (!R14_OFF.has('masterdoor')) { const r = masterDoorFar(doc, reviewRequest(args.requirements || {}, args.land, args.counts)); if (r?.note) d.notes = [...(d.notes || []), r.note]; }
+  // (الجولة السابعة عشرة) بيت درج للسطح: الوصول إلى السطح متوقع في الفيلا السعودية (الخزانات والتكييف) — المرسم والمجسّم لا يمثّلان دور سطح
+  // بعد، فلا يُرسم ولا يُدّعى؛ يُذكر أنه يلزم فوق الدرج نفسه (المراجع المستقل r16، C7)
+  if ((doc.stairs || []).length && !R14_OFF.has('r17roof')) d.notes = [...(d.notes || []), 'بيت درج للسطح: يلزم فوق الدرج نفسه إن كان الوصول إلى السطح مطلوبًا (الخزانات والتكييف) — لم يُرسم في هذا المقترح لأن المرسم والمجسّم لا يمثّلان دور السطح بعد؛ يُضاف في التصميم التفصيلي.'];
   // السجل بعد التشطيب (الباب والترقيم): يُقاس من المستند النهائي نفسه
   try { const entry = args.land?.entries?.[0] || doc.entry || 's'; d.ledger = verifyRequest(doc, args.requirements || {}, { entry }); d.fails = d.ledger.filter(x => !x.ok).length; } catch { /* يبقى السابق */ }
 }
@@ -2949,7 +2972,8 @@ function pluralMajlis(out, args) {
     const req2 = JSON.parse(JSON.stringify(req)); req2.counts = { ...(req2.counts || {}), majlis: 2, baths: (req2.counts?.baths || args.counts?.baths || 0) + 1 };
     req2.answers = { ...(req2.answers || {}), 'majlis-plural': 2 };
     // بحث مختصر (ميزانية تكرارات أقل) — قراءة ثانية لا تُضاعف زمن التوليد على العميل
-    const it0 = globalThis.__v2iters; globalThis.__v2iters = 50; let o2;
+    // (الجولة السابعة عشرة) بحث كامل لا مختصر: القراءة الأخرى تنظيم حقيقي يُعرض (C7: مجلسان يتسعان بالبحث الكامل ولا يتسعان بالمختصر)
+    const it0 = globalThis.__v2iters; globalThis.__v2iters = R14_OFF.has('r17plural') ? 50 : it0; let o2;
     try { o2 = generateVillaTwoFloors({ ...args, _plural: true, counts: { ...args.counts, majlis: 2, baths: (args.counts?.baths || 0) + 1 }, requirements: req2, keep: 1 }); } finally { globalThis.__v2iters = it0; }
     const d = o2.designs?.[0]; if (!d) return;
     d.notes = [...(d.notes || []), `قراءة «المجالس» بالجمع: مجلس رجال ومجلس نساء (السؤال ما زال قائمًا: مجلسان أم مجلس واحد؟) — بديل بقراءة أخرى لكلامك لا تكملة للعدد.`];
@@ -3286,7 +3310,7 @@ function shortfallReason(keep, shown, built, rejected) {
  * بديل يرسب في أي بوابة صلبة لا يُعرض أبدًا. يعيد true إن نجح، ويرفق المراجعة بالتصميم (بلا AZIZ/Mizan هنا للسرعة).
  */
 function reviewRequest(requirements, land, counts) {
-  return { text: requirements?.text || requirements?.idea || '', counts: { ...(counts || {}), ...(requirements?.counts || {}) }, land: land || {} };
+  return { text: requirements?.text || requirements?.idea || '', counts: { ...(counts || {}), ...(requirements?.counts || {}) }, land: land || {}, prefs: requirements?.prefs || {} };
 }
 function compactReview(rv) {
   const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, reasons_ar: g.reasons_ar });
@@ -3863,6 +3887,13 @@ function tfTrees(G, U) {
     const colC = D2(Y(Wm ? Z([Wm], 'x0', 'y') : null, Z([...K, ...Md], 'x0', 'y'), Z(back, 'x0', 'y')), Z([...wcs, ...kC, master], 'x0', 'y'));
     void colA2; void colC;
     const colC1 = D2(Y(Wm ? Z([Wm], 'x0', 'y') : null, Z([...flex, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y')), Z([...wcs, ...kC, master], 'x0', 'y'));
+    // (الجولة السابعة عشرة، C7؛ المراجع المستقل r16: المجلس بلا باب داخلي والطعام في الجهة المقابلة) جناح ضيافة وخدمة أيسر: المجلس فالمقلط
+    //     فالمطبخ والخادمة متتالية (باب مقلط، والتقديم من المطبخ لا يعبر الصالة)، وغرفة الأرضي (ومجلس النساء أمامها إن طُلب) جناحًا أيمن؛
+    //     العلوي كما هو: حمامات غرف الجناح الأيسر فوق المطبخ والخدمة (رطب فوق رطب) لا فوق المجلس، والرئيسية في الركن الخلفي البعيد عن السلم
+    const colAg = D2(Y(Mz('y1'), Z([...flex, ...Dn], 'x1', 'y'), Z([...K, ...Md], 'x1', 'y')), Z(kA, 'x1', 'y'));
+    const colCg = D2(Y(Wm ? Z([Wm], 'x0', 'y') : OV(8), Z(back, 'x0', 'y')), Z([...wcs, ...kC, master], 'x0', 'y'));
+    push('frontstair', 'fsg' + nA, 'spine', X(colAg, colB, colCg), { iters: 2 * DEEP_ITERS, need: sol => { const h = sol.circ.find(c => c.id === 'hall').r; return colNeed(h.x0, 4.75) + colNeed(W_(h), 4.4) + colNeed(5.2, W_(h)) + colNeed(sol.ew - h.x1, 4.2); } });
+    // (النسخة الأصلية بعد نسخة جناح الضيافة: تنظيم واحد من كل نمط يُبنى، فتتقدم النسخة التي لا يعبر فيها الضيف العائلة)
     push('frontstair', 'fs' + nA, 'spine', X(colA, colB, colC1), { need: sol => { const h = sol.circ.find(c => c.id === 'hall').r; return colNeed(h.x0, 4.2) + colNeed(W_(h), 4.4) + colNeed(5.2, W_(h)) + colNeed(sol.ew - h.x1, 4.2); } });
   }
   if (!Wm && M && kids.length) for (let nL = 1; nL <= Math.min(2, kids.length); nL++) {
@@ -3892,11 +3923,12 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
     const su = scoreV2(u, UP, ew, ed, { upper: true }); if (su === null) return null;
     let viol = vg + (u.viol || 0), pen = sg + su;
     // المجلس الرئيسي ≥ 24 م² صافيًا حدٌّ صلب على المرسوم (qualityGates): هنا مخالفة بهامش، فلا يُبنى بديل يرسب فيه
-    { const sh = majlisShort(sol, G); if (sh > 0) { viol++; pen += 600 + 200 * sh; } }
+    sol._tfwhy = new Set();
+    { const sh = majlisShort(sol, G); if (sh > 0) { viol++; pen += 600 + 200 * sh; sol._tfwhy.add('majlis-short'); } }
     const gR = [...sol.placed.map(p => p.r), ...sol.circ.map(c => c.r), ...sol.courts], uR = [...u.placed.map(p => p.r), ...u.circ.map(c => c.r)];
     // لا غرفة علوية فوق فراغ أرضي (حديقة/فناء/خارج الكتلة)
     // (الجولة الثانية عشرة) وجدار علوي فوق فراغ غير مبني ملاحظة جسيمة في المراجعة الإنشائية المبدئية: لا بروز يُترك هنا (كان يُسمح بـ 2 م²)
-    const ov = sum(uR.map(r => Math.max(0, A_(r) - sum(gR.map(q => ovl(r, q)))))); if (ov > .3) { viol++; pen += 600 + 40 * ov; }
+    const ov = sum(uR.map(r => Math.max(0, A_(r) - sum(gR.map(q => ovl(r, q)))))); if (ov > .3) { viol++; pen += 600 + 40 * ov; (sol._tfwhy ||= new Set()).add('ov'); }
     // التراكب: أطول جدار علوي بلا جدار أرضي تحته ولا ركيزة ≤ 5 م — مقيسًا على الغرف المفصّلة (أشرطة الحمامات) متى خلا الحل
     // من المخالفات، وعلى المستطيلات قبل ذلك
     let st = null;
@@ -3906,19 +3938,19 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
       u._masterRoom = ur.find(r => r.type === 'master') || null;
       // (الجولة الحادية عشرة) على المفصّل كما سيُرسم: المجلس (والنساء) عرضه الصافي ≥ 4.2 م ما لم يحدد العميل مقاسه، وكل غرفة علوية
       // يصلها باب من الحركة (لا غرفة بلا باب بعد تفصيل الأشرطة) — كانا يُكتشفان بعد البناء فيُرفض التنظيم كله
-      if (!majlisAsked(G)) for (const mj of gr.filter(r => r.type === 'majlis')) { const w = Math.min(W_(mj), H_(mj)) - WALL_NET; if (w < MAJLIS_MIN_W - .05) { viol++; pen += 600 + 400 * (MAJLIS_MIN_W - w); } }
+      if (!majlisAsked(G)) for (const mj of gr.filter(r => r.type === 'majlis')) { const w = Math.min(W_(mj), H_(mj)) - WALL_NET; if (w < MAJLIS_MIN_W - .05) { viol++; pen += 600 + 400 * (MAJLIS_MIN_W - w); sol._tfwhy.add('majlis-w'); } }
       { const adj = new Map(); for (const d of uL.doors) if (d.b) { (adj.get(d.a) || adj.set(d.a, []).get(d.a)).push(d.b); (adj.get(d.b) || adj.set(d.b, []).get(d.b)).push(d.a); }
         const seen = new Set(['stair']), q = ['stair']; while (q.length) for (const n of adj.get(q.pop()) || []) if (!seen.has(n)) { seen.add(n); q.push(n); }
-        const lost = uL.rooms.filter(r => !r.open && !r.dh && !seen.has(r.id)).length; if (lost) { viol++; pen += 600 + 200 * lost; } }
+        const lost = uL.rooms.filter(r => !r.open && !r.dh && !seen.has(r.id)).length; if (lost) { viol++; pen += 600 + 200 * lost; sol._tfwhy.add('lost'); } }
       // الرئيسية المفصّلة (الغرفة دون حمامها) لا تصغر عن غرفة نوم أخرى في أي دور (غير كبار السن)
       const beds = [...gr, ...ur].filter(r => r.type === 'master' || (r.type === 'bedroom' && !/كبار السن|الضيوف/.test(r.name))), m = beds.find(r => r.type === 'master');
       const netA = r => (W_(r) - WALL_NET) * (H_(r) - WALL_NET);
       // (الجولة العاشرة) الطعام المفصّل لا يتضخم (≤ 23 م²) ما لم يحدد العميل مقاسه
-      for (const dn of gr.filter(r => r.type === 'dining')) if (!G.dining.some(b => b.fixedArea) && netA(dn) > DIN_MAX_AREA + .2) { viol++; pen += 600 + 100 * (netA(dn) - DIN_MAX_AREA); }
-      if (m) { const big = Math.max(0, ...beds.filter(r => r !== m).map(netA)); if (big > netA(m) + .1) { viol++; pen += 600 + 100 * (big - netA(m)); } }
+      for (const dn of gr.filter(r => r.type === 'dining')) if (!G.dining.some(b => b.fixedArea) && netA(dn) > DIN_MAX_AREA + .2) { viol++; pen += 600 + 100 * (netA(dn) - DIN_MAX_AREA); sol._tfwhy.add('din-big'); }
+      if (m) { const big = Math.max(0, ...beds.filter(r => r !== m).map(netA)); if (big > netA(m) + .1) { viol++; pen += 600 + 100 * (big - netA(m)); sol._tfwhy.add('master-smaller-real'); } }
     } catch { st = null; }
     if (!st) st = rectStack(edgeLines(gR), edgeLines(uR, u.dh || []));
-    if (st.run > 5.0) { viol++; pen += 600 + 300 * (st.run - 5.0); } pen += 6 * st.free;
+    if (st.run > 5.0) { viol++; pen += 600 + 300 * (st.run - 5.0); sol._tfwhy.add('stack'); } pen += 6 * st.free;
     // الأجنحة العلوية فوق فراغات رطبة أرضية (تراكب التمديدات) أفضل
     const wetG = sol.placed.filter(p => ['kitchen', 'wc', 'maid'].includes(p.block.kind) || (p.block.kind === 'suite' && p.block.bath) || (p.block.kind === 'majlis' && p.block.guestWc)).map(p => p.r);
     for (const p of u.placed) if (p.block.kind === 'suite' && p.block.bath && wetG.some(w => ovl(p.r, w) >= 2)) pen -= 8;
@@ -3929,7 +3961,7 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
       // على المفصّل إن وُجد (غرفة الرئيسية دون حمامها وملابسها، كما يقيسها السجل)، وإلا على الكتلة بهامش 1 م
       const stc = ruleCirc(u.circ, u.stairSide).find(c => c.id === 'stair'), mR = u._masterRoom || u.placed.find(p => p.block.master)?.r, margin = u._masterRoom ? .1 : 1.0;
       if (mR && stc) { const need = Math.max(7, .4 * Math.hypot(ew + EXT, ed + EXT)) + margin, d = Math.hypot((mR.x0 + mR.x1 - stc.r.x0 - stc.r.x1) / 2, (mR.y0 + mR.y1 - stc.r.y0 - stc.r.y1) / 2);
-        if (d < need || touch(mR, stc.r) > .3) { viol++; pen += 600 + 300 * Math.max(.2, need - d); } }
+        if (d < need || touch(mR, stc.r) > .3) { viol++; pen += 600 + 300 * Math.max(.2, need - d); sol._tfwhy.add('far-stair'); } }
       delete u._masterRoom;
     }
     pen += RULE_K * (rg.base + Math.min(...rg.p) + ur.pen) + (tr.need ? tr.need({ ...sol, ew, ed }) : 0);
@@ -3938,7 +3970,7 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
   };
   let best = null;
   for (const b of optimizeSteps(tr.tree, site, evalFn, { iters: globalThis.__v2iters || (U.suites.length >= 5 ? 2 * tr.iters : tr.iters), seed: 'tf' + tr.tag, tol: tr.tol })) best = b;
-  if (globalThis.__v2dbg) { const d = globalThis.__v2dbg; if (best) { const v0 = best.sol.viol, v1 = best.sol.up?.viol; const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); const o2 = {}; globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, { ...U, men: null, women: [] }, best.ew, best.ed, { upper: true }); globalThis.__v2dbg = d; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; d['tfj:' + tr.mode + ':' + tr.tag] = `viol ${best.sol.viol} G[${Object.keys(o)}] U[${Object.keys(o2)}] st=${r2(best.sol.stack?.run || 0)} env ${r2(best.ew)}x${r2(best.ed)}`; if (d.keepSol) d['tfsol:' + tr.mode + ':' + tr.tag] = { g: best.sol, u: best.sol.up, ew: best.ew, ed: best.ed }; } else d['tfj:' + tr.mode + ':' + tr.tag] = 'none'; }
+  if (globalThis.__v2dbg) { const d = globalThis.__v2dbg; if (best) { const v0 = best.sol.viol, v1 = best.sol.up?.viol; const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); const o2 = {}; globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, { ...U, men: null, women: [] }, best.ew, best.ed, { upper: true }); globalThis.__v2dbg = d; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; d['tfj:' + tr.mode + ':' + tr.tag] = `viol ${best.sol.viol} T[${[...(best.sol._tfwhy || [])]}] G[${Object.keys(o)}] U[${Object.keys(o2)}] st=${r2(best.sol.stack?.run || 0)} env ${r2(best.ew)}x${r2(best.ed)}`; if (d.keepSol) d['tfsol:' + tr.mode + ':' + tr.tag] = { g: best.sol, u: best.sol.up, ew: best.ew, ed: best.ed }; } else d['tfj:' + tr.mode + ':' + tr.tag] = 'none'; }
   if (!best || best.sol.viol) return null;
   const rp = rulePenalty(best.sol.placed, ruleCirc(best.sol.circ), best.ew, best.ed, rules, entry);
   const g = { mode: tr.mode, tag: tr.tag, tree: tr.tree, stepped: false, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p, rp };

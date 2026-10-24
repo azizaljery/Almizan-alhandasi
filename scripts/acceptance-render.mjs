@@ -8,7 +8,7 @@ const stage = pos[0] || 'before', only = pos[1] ? new RegExp(pos[1]) : null, no3
 const root = new URL('../dist/', import.meta.url).pathname, ev = new URL(`../evidence/acceptance/${stage}/`, import.meta.url).pathname;
 const MIME = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.wasm': 'application/wasm' };
 const HARNESS = `<!doctype html><html dir="rtl"><head><meta charset="utf-8"><style>body{margin:0;background:#fff;font-family:Tahoma}canvas{display:block}</style></head><body><canvas id="c" width="1400" height="1000" style="width:1400px;height:1000px"></canvas><script type="module">
-import { renderPlan, fitView, docBounds } from '/draw/editor/render2d.mjs'; import { analyzeDoc } from '/draw/digest.mjs'; import { exteriorWallIds } from '/draw/topology.mjs'; import { parseDoc } from '/draw/doc.mjs'; import { ZONES, zoneOf } from '/design-session.mjs';
+import { renderPlan, fitView, docBounds } from '/draw/editor/render2d.mjs'; import { analyzeDoc } from '/draw/digest.mjs'; import { exteriorWallIds } from '/draw/topology.mjs'; import { parseDoc } from '/draw/doc.mjs'; import { ZONES, zoneOf, thumbLabels } from '/design-session.mjs';
 const sizeC = h => { const c = document.getElementById('c'); if (c.height !== h) { c.height = h; c.style.height = h + 'px'; } return c; };
 const wrapAr = (ctx, text, w) => { const out = []; for (const para of String(text).split('\\n')) { let line = ''; for (const word of para.split(' ')) { const t = line ? line + ' ' + word : word; if (ctx.measureText(t).width > w && line) { out.push(line); line = word; } else line = t; } if (line) out.push(line); } return out; };
 window.draw = (raw, levelIndex, title) => { sizeC(1000); const doc = parseDoc(raw), lv = doc.levels[levelIndex], m = analyzeDoc(doc), L = m.levelById.get(lv.id); const c = document.getElementById('c'), ctx = c.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle='#fff'; ctx.fillRect(0,0,1400,1000);
@@ -24,8 +24,12 @@ window.drawOptions = (title, message, options) => { const W = 1400, c0 = sizeC(1
   const n = options.length, bw = Math.min(330, (W - 40) / n - 14); let x = 1380;
   for (const o of options) { const bx = x - bw; ctx.fillStyle = '#f4efe4'; ctx.fillRect(bx, y, bw, 300); ctx.strokeStyle = '#c9b88f'; ctx.strokeRect(bx, y, bw, 300);
     if (o.raw) { const d = parseDoc(o.raw), lv = d.levels[0], m = analyzeDoc(d), L = m.levelById.get(lv.id), bb = docBounds(d, lv.id), v = fitView({ x0: bb.x0 - .5, y0: bb.y0 - .5, x1: bb.x1 + .5, y1: bb.y1 + .5 }, bw - 16, 210, 4);
-      ctx.save(); ctx.translate(bx + 8, y + 8); ctx.beginPath(); ctx.rect(0, 0, bw - 16, 210); ctx.clip(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, bw - 16, 210); renderPlan(ctx, { doc: d, levelId: lv.id, view: v, W: bw - 16, H: 210, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: false, areas: false, fixtures: false, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color }); ctx.restore(); }
+      ctx.save(); ctx.translate(bx + 8, y + 8); ctx.beginPath(); ctx.rect(0, 0, bw - 16, 210); ctx.clip(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, bw - 16, 210); renderPlan(ctx, { doc: d, levelId: lv.id, view: v, W: bw - 16, H: 210, analysis: L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null, flags: { grid: false, dims: false, areas: false, fixtures: false, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
+      if (L) { ctx.font = 'bold 14px Tahoma'; ctx.textAlign = 'center'; for (const t of thumbLabels(L.rooms)) { const tx = (t.x - v.cx) * v.scale + (bw - 16) / 2, ty = (v.cy - t.y) * v.scale + 105; ctx.fillStyle = 'rgba(255,255,255,.85)'; const w = ctx.measureText(t.text).width + 8; ctx.fillRect(tx - w / 2, ty - 13, w, 18); ctx.fillStyle = '#1d2a24'; ctx.fillText(t.text, tx, ty); } ctx.textAlign = 'right'; }
+      ctx.restore(); }
     else { ctx.fillStyle = '#8a7a5a'; ctx.font = '15px Tahoma'; ctx.textAlign = 'center'; ctx.fillText('لا مخطط جديد', bx + bw / 2, y + 110); ctx.textAlign = 'right'; }
+    // (الجولة السابعة عشرة) وسم صريح على كل خيار: يحقق طلبك / لا يحقق طلبك
+    if (o.achieves === false || o.achieves === true) { const tag = o.achieves ? 'يحقق طلبك' : 'لا يحقق طلبك'; ctx.font = 'bold 15px Tahoma'; const tw = ctx.measureText(tag).width + 16; ctx.fillStyle = o.achieves ? '#2e6b3a' : '#b3261e'; ctx.fillRect(bx + bw - 8 - tw, y + 12, tw, 24); ctx.fillStyle = '#fff'; ctx.textAlign = 'right'; ctx.fillText(tag, bx + bw - 16, y + 30); }
     ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 16px Tahoma'; let ty = y + 240; for (const l of wrapAr(ctx, '(' + o.n + ') ' + o.text, bw - 16).slice(0, 3)) { ctx.fillText(l, bx + bw - 8, ty); ty += 21; }
     x = bx - 14; }
   ctx.font = '13px Tahoma'; ctx.fillStyle = '#1d2a24'; ctx.fillText('الصورة كما تُعرض قبل اختيار العميل. مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, H - 12); return true; };
@@ -42,8 +46,8 @@ const half = (doc, x, marks, label) => { const m = analyzeDoc(doc), L = m.levelB
 const pl = e => e.kind !== 'fixture';
 half(B, 710, [...D.changed.filter(pl).map(e => [{ ...e, box: e.before?.box || e.box }, '#b5651d', false, 'rgba(181,101,29,.15)']), ...D.removed.filter(pl).map(e => [e, '#b5651d', true, 'rgba(181,101,29,.15)'])], 'قبل');
 half(A, 0, [...D.changed.filter(pl).map(e => [e, '#c62828', false, 'rgba(198,40,40,.16)']), ...D.added.filter(pl).map(e => [e, '#c62828', false, 'rgba(198,40,40,.16)'])], 'بعد');
-ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 24px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title, 1380, 36); ctx.font = '15px Tahoma'; ctx.fillText(D.identical ? 'البصمة الهندسية: لم يتغيّر أي عنصر — المخطط كما هو حرفيًا' : D.summary_ar.slice(0, 150), 1380, 60);
-ctx.font = '13px Tahoma'; ctx.fillText('المظلل: ما تغيّر (بني قبل، أحمر بعد)؛ المتقطع: ما أزيل. مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, 985);
+ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 24px Tahoma'; ctx.textAlign = 'right'; ctx.fillText(title, 1380, 36); ctx.font = '15px Tahoma'; { const nm = [...new Set([...D.changed, ...D.added, ...D.removed].filter(e => e.kind === 'room').map(e => e.name || e.label || e.after?.name || e.before?.name).filter(Boolean))]; ctx.fillText(D.identical ? 'لم يتغيّر شيء في المخطط — كما هو حرفيًا' : nm.length ? ('ما تغيّر (مظلل): ' + nm.slice(0, 9).join('، ') + (nm.length > 9 ? '…' : '')).slice(0, 170) : 'تغيّرت جدران أو أبواب أو نوافذ (مظللة)؛ الغرف نفسها في أماكنها', 1380, 60); }
+ctx.font = '13px Tahoma'; ctx.fillText('المقياس نفسه في الصورتين (المسطرة 5 م). المظلل: ما تغيّر (بني قبل، أحمر بعد)؛ المتقطع: ما أزيل. مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا.', 1380, 985);
   // (الجولة السادسة عشرة) تعديل الواجهة: الواجهة قبل وبعد في صورة الفرق نفسها (المطلوب تغييره هو الواجهة)
   if (fac) { const fw = 680, fh = 380; ctx.drawImage(fac[0], 710, 1030, fw, fh); ctx.drawImage(fac[1], 10, 1030, fw, fh); ctx.fillStyle = '#1d2a24'; ctx.font = 'bold 20px Tahoma'; ctx.textAlign = 'center'; ctx.fillText('الواجهة قبل', 1050, 1022); ctx.fillText('الواجهة بعد', 350, 1022); ctx.textAlign = 'right'; }
   if (wrapped.length) { ctx.fillStyle = '#f4efe4'; ctx.fillRect(10, 1000 + FH, 1380, H - 1010 - FH); let y = 1030 + FH; for (const [l, head] of wrapped) { ctx.font = head ? 'bold 18px Tahoma' : '17px Tahoma'; ctx.fillStyle = head ? '#7a3e12' : '#1d2a24'; ctx.fillText(l, 1375, y); y += 27; } }
@@ -88,7 +92,7 @@ for (id of cases) {
   const notesOf = e => {
     if (!e) return [];
     const out = [];
-    if (e.partial?.text_ar) out.push('#الشرط متحقق جزئيًا: ' + e.partial.text_ar);
+    if (e.partial?.plain_ar || e.partial?.text_ar) out.push('#متحقق جزئيًا: ' + (e.partial.plain_ar || e.partial.text_ar));
     else if (e.question_ar || (typeof e.consentAsked === 'string' && e.consentAsked)) out.push('#لم يُنفَّذ على هذا المخطط — السبب: ' + String(e.question_ar || e.consentAsked).replace(/ ?(?:؛ )?لتحقيقه حرفيًا: الخيارات[\s\S]*$| ?اختر رقمًا[\s\S]*$/, ''));
     else if (e.reply_ar || e.reply?.summary_ar) out.push('#الرد: ' + (e.reply_ar && !e.notDone ? e.reply_ar : e.reply?.summary_ar || e.reply_ar));
     // (الجولة السادسة عشرة) هذه الصورة بعد الاختيار: الاختيار في اختبار القبول محاكاة ويُكتب كذلك؛ الخيارات نفسها في صورة -options قبل الاختيار
@@ -105,7 +109,7 @@ for (id of cases) {
       if (o.thumb?.src === 'current') raw = await readFile(ev + id + '/' + cur, 'utf8');
       else if (o.thumb?.src === 'pending' && files.includes(`${prefix}-opt-${o.thumb.key}.json`)) raw = await readFile(ev + id + `/${prefix}-opt-${o.thumb.key}.json`, 'utf8');
       else if (o.thumb?.src === 'alt' && files.includes(`alt-${o.thumb.index + 1}.json`)) raw = await readFile(ev + id + `/alt-${o.thumb.index + 1}.json`, 'utf8');
-      opts.push({ n: o.n, text: o.text_ar, raw }); }
+      opts.push({ n: o.n, text: o.text_ar, raw, achieves: o.achieves }); }
     optionShots.push([`${id} — خيارات التعديل (${cur.replace('.json', '')})`, msg + ' اختر رقمًا:', opts, out]);
   };
   await addOptions(res?.edit, 'edit-before.json', 'edit', 'edit-options.png');

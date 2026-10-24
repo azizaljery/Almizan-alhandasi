@@ -397,10 +397,11 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       const zoneShort = z => String(z || '').replace(/ \(.*\)$/, '');
       // حالة المقترح نفسه (presentation-status): إن كان يحتاج تعديلات يُقال ذلك بجانب الخيار — لا يُقدَّم جاهزًا
       const pstat = c => { try { const st = presentationStatus({ doc: c.doc, ledger: verifyRequest(c.doc, req, { entry: entryDir }), review: c.review || null }, { text: s.input.idea || req.text || '', counts: { ...req.counts }, land: s.input.land || {} }); return st.status === 'ready' ? '' : st.status === 'hidden' ? ' — لكنه لا يحقق بندًا آخر من طلبك' : ' — يحتاج تعديلات قبل اعتماده'; } catch { return ''; } };
-      const opts = [{ id: 'keep', n: 1, text_ar: 'أبقِ المخطط كما هو', detail_ar: 'أبقِ المخطط المعروض كما هو حرفيًا', thumb: { src: 'current' } }];
-      if (zoneCand) opts.push({ id: 'zone', n: 2, text_ar: `أعيد ترتيب ${zoneShort(zoneCand.zd.changed_ar[0]) || 'جزء واحد من البيت'} فقط، ويبقى الباقي كما هو${pstat(zoneCand)}`, detail_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}`, thumb: { src: 'pending', key: 'zone' } });
-      if (shownOk.length) opts.push({ id: 'shown', n: 3, alts: shownOk, text_ar: `اعرض ${shownOk.length === 1 ? 'التصميم' : 'التصاميم'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك (تصميم آخر، لا تعديل لهذا)`, detail_ar: `اعرض ${shownOk.length === 1 ? 'البديل' : 'البدائل'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط)`, thumb: { src: 'alt', index: shownOk[0] } });
-      if (fullCand) opts.push({ id: 'full', n: 4, text_ar: `أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك${pstat(fullCand)}`, detail_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة، مقيس يحقق طلبك حرفيًا`, thumb: { src: 'pending', key: 'full' } });
+      // (الجولة السابعة عشرة) كل خيار لا يحقق الطلب يُوسم بذلك على الخيار نفسه (لا في العنوان وحده — المراجع المستقل r16)
+      const opts = [{ id: 'keep', n: 1, achieves: false, text_ar: 'أبقِ المخطط كما هو — لا يحقق طلبك', detail_ar: 'أبقِ المخطط المعروض كما هو حرفيًا (لا يحقق طلبك)', thumb: { src: 'current' } }];
+      if (zoneCand) opts.push({ id: 'zone', n: 2, achieves: true, text_ar: `أعيد ترتيب ${zoneShort(zoneCand.zd.changed_ar[0]) || 'جزء واحد من البيت'} فقط، ويبقى الباقي كما هو — يحقق طلبك${pstat(zoneCand)}`, detail_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}`, thumb: { src: 'pending', key: 'zone' } });
+      if (shownOk.length) opts.push({ id: 'shown', n: 3, achieves: true, alts: shownOk, text_ar: `اعرض ${shownOk.length === 1 ? 'التصميم' : 'التصاميم'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك (تصميم آخر، لا تعديل لهذا)`, detail_ar: `اعرض ${shownOk.length === 1 ? 'البديل' : 'البدائل'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط)`, thumb: { src: 'alt', index: shownOk[0] } });
+      if (fullCand) opts.push({ id: 'full', n: 4, achieves: true, text_ar: `أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك${pstat(fullCand)}`, detail_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة، مقيس يحقق طلبك حرفيًا`, thumb: { src: 'pending', key: 'full' } });
       // بلغة العميل: من يشغل الجهة المطلوبة الآن (مثل «خلف البيت تشغله منطقة النوم…»)
       let occ = ''; try { const sides = [...new Set(intents.filter(i => i.op === 'rule' && i.rule?.kind === 'place' && ['back', 'front'].includes(i.rule.side)).map(i => i.rule.side))];
         occ = sides.map(sd => { const o = sideOccupants(curD, sd, entryDir); return o ? ` ${sd === 'back' ? 'خلف' : 'مقدمة'} هذا المخطط ${o.length > 1 ? 'تشغلها' : 'تشغله'} ${o.map(z => `${z.zone_ar.replace(/ \(.*\)$/, '')} (${z.rooms.map(n => `«${n}»`).join('، ')})`).join(' و')}${o.some(z => z.zone === 'sleep') ? '؛ نقل المطبخ إليها يزيح غرف النوم إلى موضع المطبخ أو الطعام أو يجعل المطبخ على ممر النوم' : ''}.` : ''; }).join(''); } catch { occ = ''; }
@@ -447,7 +448,10 @@ export function partialReading(doc, intents = [], entry = 's') {
   if (!part.length && !(ok.length && no.length)) return null;
   const dot = t => String(t || '').replace(/[.。]+$/, '');
   const text_ar = [...ok.map(x => `${x.text} متحقق حرفيًا (مقيس)`), ...part.map(x => `${x.text} متحقق بالقراءة النسبية — ${dot(x.partial.text_ar)} — لا بالقراءة الحرفية (على الواجهة الخلفية أو في ثلثها الخارجي): ${dot(x.partial.literal_ar)}`), ...no.map(x => `${x.text} غير متحقق: ${dot(x.why)}`)].join('؛ ');
-  return { text_ar, ok: ok.map(x => x.text), partial: part.map(x => ({ text: x.text, relative_ar: x.partial.text_ar, literal_ar: x.partial.literal_ar })), failed: no.map(x => ({ text: x.text, why: x.why })) };
+  // (الجولة السابعة عشرة) بلغة العميل: نعم/لا لكل بند، والموضع بكلمات (لا «القراءة النسبية» ولا نسب مئوية؛ تلك في text_ar للتفصيل المطوي)
+  const where = x => { const m = /(\d+)\s*[٪%]/.exec(String(x.partial?.text_ar || '') + ' ' + String(x.partial?.literal_ar || '')); const v = m ? +m[1] : null; return v == null ? 'ليس على الواجهة الخلفية' : v < 40 ? 'هو في مقدمة البيت' : v <= 66 ? 'هو في منتصف البيت' : 'هو قرب الخلف لكن لا يلامس الواجهة الخلفية'; };
+  const plain_ar = [...ok.map(x => `${x.text}: نعم`), ...part.map(x => `${x.text}: لا — ${where(x)}`), ...no.map(x => `${x.text}: لا`)].join('. ') + '.';
+  return { text_ar, plain_ar, ok: ok.map(x => x.text), partial: part.map(x => ({ text: x.text, relative_ar: x.partial.text_ar, literal_ar: x.partial.literal_ar })), failed: no.map(x => ({ text: x.text, why: x.why })) };
 }
 const ABSENT_SUBJ = { majlis: ['majlis', 'majlis_w'], dining: ['dining'], office: ['office'], prayer: ['prayer'], maid: ['maid'], driver: ['driver'], laundry: ['laundry'], storage: ['storage'] };
 function compactReview(rv) {
@@ -622,6 +626,11 @@ export const ZONES = Object.freeze({
   family: { label: 'العائلة', color: '#efe7d6' },
   service: { label: 'الخدمة', color: '#d8e4da' },
 });
+/** (الجولة السابعة عشرة) وسوم المصغّرات: المطبخ والطعام والمجلس بكلمة واحدة على مراكزها (المراجع المستقل r16: لا يميّز العميل موقع الطعام). */
+export function thumbLabels(rooms = []) {
+  const word = r => (r.type === 'kitchen' ? 'مطبخ' : r.type === 'dining' ? 'طعام' : r.type === 'majlis' && !/النساء/.test(r.name || '') ? 'مجلس' : null);
+  return rooms.map(r => ({ text: word(r), x: r.centroid?.x, y: r.centroid?.y })).filter(t => t.text && Number.isFinite(t.x));
+}
 export function zoneOf(label) {
   const n = label?.name || '', t = label?.type || '';
   if (/الرجال/.test(n) || (t === 'majlis' && !/النساء/.test(n))) return 'men';

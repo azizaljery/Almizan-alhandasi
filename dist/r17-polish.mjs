@@ -50,26 +50,37 @@ export function polishHallSeat(doc) {
       }
     }
   }
+  // باب المطبخ على الصالة زائد إن كان للمطبخ باب على الطعام (والطعام على الصالة أو المدخل): يُستغنى عنه — المطبخ من الطعام
+  for (const op of ops) {
+    const other = op.sides.find(s => s.room.id !== hall.id)?.room;
+    if (other?.type !== 'kitchen') continue;
+    const viaDin = lv.openings.some(o => o.door && o.id !== op.id && o.sides.some(s => s.room.id === other.id) && o.sides.some(s => s.room.type === 'dining'));
+    if (viaDin) options.push({ id: op.id, remove: true, other: other.name });
+  }
   const tryApply = moves => {
-    const keep = moves.map(m => { const o = doc.openings.find(x => x.id === m.id); const old = o.at; o.at = m.at; return { o, old }; });
+    const removed = [];
+    const keep = moves.map(m => { const o = doc.openings.find(x => x.id === m.id); if (m.remove) { removed.push(o); doc.openings = doc.openings.filter(x => x !== o); return { o, old: null }; } const old = o.at; o.at = m.at; return { o, old }; });
+    const restore = () => { for (const k of keep) if (k.old != null) k.o.at = k.old; if (removed.length) doc.openings.push(...removed); };
     let ok = !hallFails(doc);
     if (ok) {
       const m2 = analyzeDoc(doc), lv2 = m2.levels.find(l => l.level.id === lv.level.id);
-      for (const m of moves) { const op = lv2.openings.find(x => x.id === m.id); if (!op || swingBlockers(m2, lv2, op).length || !doorwayClear(doc, lv2, op)) { ok = false; break; } }
+      for (const m of moves) { if (m.remove) continue; const op = lv2.openings.find(x => x.id === m.id); if (!op || swingBlockers(m2, lv2, op).length || !doorwayClear(doc, lv2, op)) { ok = false; break; } }
       // كل الفراغات ما زالت تُبلغ
       if (ok && lv2.seedKind && lv2.rooms.some(r => r.type !== 'other' && !lv2.reach.has(r.id))) ok = false;
     }
-    if (!ok) for (const k of keep) k.o.at = k.old;
+    if (!ok) restore();
     return ok;
   };
   // باب واحد أولًا (الأقرب إلى موضعه)، ثم بابان
-  options.sort((a, b) => Math.abs(a.at - doc.openings.find(x => x.id === a.id).at) - Math.abs(b.at - doc.openings.find(x => x.id === b.id).at));
-  for (const m of options) if (tryApply([m])) return `أُزيح باب «${m.other}» على جدار «${hall.name}» فاتسعت فيها جلسة عائلية 3.0 × 3.6 م يلتف حولها ممر الحركة (الصالة لا تبقى ممرًا عابرًا — قيمة تصميمية افتراضية للميزان).`;
+  const dAt = m => (m.remove ? 0 : Math.abs(m.at - doc.openings.find(x => x.id === m.id).at));
+  options.sort((a, b) => dAt(a) - dAt(b));
+  const say = m => (m.remove ? `أُلغي باب «${m.other}» على «${hall.name}» (يُدخل إليه من الطعام)` : `أُزيح باب «${m.other}» على جدار «${hall.name}»`);
+  for (const m of options) if (tryApply([m])) return `${say(m)} فاتسعت فيها جلسة عائلية 3.0 × 3.6 م يلتف حولها ممر الحركة (الصالة لا تبقى ممرًا عابرًا — قيمة تصميمية افتراضية للميزان).`;
   const byDoor = new Map(); for (const m of options) (byDoor.get(m.id) || byDoor.set(m.id, []).get(m.id)).push(m);
   const ids = [...byDoor.keys()];
   for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
     const A = byDoor.get(ids[i]).slice(0, 14), B = byDoor.get(ids[j]).slice(0, 14);
-    for (const a of A) for (const b of B) if (tryApply([a, b])) return `أُزيح بابا «${a.other}» و«${b.other}» على جدران «${hall.name}» فاتسعت فيها جلسة عائلية 3.0 × 3.6 م يلتف حولها ممر الحركة (قيمة تصميمية افتراضية للميزان).`;
+    for (const a of A) for (const b of B) if (tryApply([a, b])) return `${say(a)}، و${say(b).replace(/^أُ/, 'أُ')}، فاتسعت فيها جلسة عائلية 3.0 × 3.6 م يلتف حولها ممر الحركة (قيمة تصميمية افتراضية للميزان).`;
   }
   return null;
 }

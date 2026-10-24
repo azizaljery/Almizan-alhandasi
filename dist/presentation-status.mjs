@@ -23,12 +23,15 @@ const PREF_TIER_AR = 'تفضيل سعودي افتراضي للميزان (قا�
 const R16_TIER_AR = 'عيب معماري — قيمة تصميمية افتراضية للميزان';
 
 /** عيوب عرض/جودة قيست من المستند (المراجع المستقل r13) غير البرنامج السعودي: غرفة ملابس رمزية لرئيسية كبيرة، مجلس بلا أثاث. */
-export function qualityNotes(doc, model = analyzeDoc(doc)) {
+export function qualityNotes(doc, model = analyzeDoc(doc), request = {}) {
   const out = [];
+  // (الجولة السابعة عشرة) «ماستر بغرفة ملابس» في طلب العميل: غرفة الملابس ≥ 4.5 م² صافيًا (قيمة تصميمية افتراضية للميزان، يغلبها مقاس العميل)
+  const dressAsked = !!request.prefs?.masterDressing || /غرف(?:ة|ه) (?:ال)?ملابس/.test(String(request.text || ''));
   for (const lv of model.levels) {
     const master = lv.rooms.find(r => r.type === 'master');
     const dress = lv.rooms.find(r => /غرفة (?:ال)?ملابس/.test(r.name || ''));
-    if (master && master.area > 20 && dress) { const w = Math.min(dress.rect.w, dress.rect.l), l = Math.max(dress.rect.w, dress.rect.l); if (w < 2.0 - .05 || l < 2.5 - .05) out.push({ id: 'DRESSING', text_ar: `غرفة الملابس ${r2(w)}×${r2(l)} م أصغر من 2.0×2.5 م لرئيسية ${r2(master.area)} م²` }); }
+    if (dressAsked && master && dress && dress.area < 4.5 - .05) out.push({ id: 'DRESSING_ASKED', text_ar: `غرفة الملابس التي طلبتها ${r2(dress.area)} م² — أقل من 4.5 م² (قيمة تصميمية افتراضية للميزان)` });
+    else if (master && master.area > 20 && dress) { const w = Math.min(dress.rect.w, dress.rect.l), l = Math.max(dress.rect.w, dress.rect.l); if (w < 2.0 - .05 || l < 2.5 - .05) out.push({ id: 'DRESSING', text_ar: `غرفة الملابس ${r2(w)}×${r2(l)} م أصغر من 2.0×2.5 م لرئيسية ${r2(master.area)} م²` }); }
     for (const m of lv.rooms.filter(r => r.type === 'majlis')) {
       const n = (doc.fixtures || []).filter(f => f.level === lv.level.id && m.space && pointIn(m.net, { x: f.x, y: f.y })).length;
       if (!n) out.push({ id: 'MAJLIS_FURNITURE', text_ar: `«${m.name}» مرسوم بلا أثاث` });
@@ -58,7 +61,7 @@ export function presentationStatus(design, request = {}) {
   let r16 = []; try { r16 = measureR16(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked); } catch { r16 = []; }
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
     ...r16.map(g => ({ id: g.id, major: true, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
-    ...qualityNotes(doc, model).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
+    ...qualityNotes(doc, model, request).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
     ...toleranceNotes(design.ledger || [])];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';

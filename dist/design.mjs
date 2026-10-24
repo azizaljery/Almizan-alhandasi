@@ -1,6 +1,6 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
-import { loadSession, saveSession, redesign, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor } from './design-session.mjs';
+import { loadSession, saveSession, redesign, approve, FEEDBACK, ZONES, zoneOf, thumbLabels, summarizeDoc, currentDoc, ledgerFor } from './design-session.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
@@ -184,6 +184,8 @@ function optionThumb(o, sess) {
     const L = analyzeDoc(d).levelById.get(lvId), an = L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null;
     const b = docBounds(d, lvId), v = fitView({ x0: b.x0 - .5, y0: b.y0 - .5, x1: b.x1 + .5, y1: b.y1 + .5 }, 160, 120, 4), ctx = c.getContext('2d');
     if (ctx) renderPlan(ctx, { doc: d, levelId: lvId, view: v, W: 160, H: 120, analysis: an, flags: { grid: false, dims: false, areas: false, fixtures: false, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
+    // (الجولة السابعة عشرة) وسم المطبخ والطعام والمجلس على المصغّر
+    if (ctx && L) { ctx.save(); ctx.font = 'bold 10px Tahoma'; ctx.textAlign = 'center'; ctx.fillStyle = '#1d2a24'; for (const t of thumbLabels(L.rooms)) ctx.fillText(t.text, (t.x - v.cx) * v.scale + 80, (v.cy - t.y) * v.scale + 64); ctx.restore(); }
     return c;
   } catch { return null; }
 }
