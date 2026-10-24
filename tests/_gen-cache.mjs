@@ -27,7 +27,8 @@ if (process.env.NODE_TEST_CONTEXT && !process.env.MIZAN_NO_GEN_CACHE && !globalT
   const root = new URL('../', import.meta.url).pathname;
   // (الجولة الثالثة عشرة) أربع ذاكرات ببصمات مستقلة: المولّد الثاني (المفتاح يبدأ بإصداره villa-v2-…)، والمولّد الأول (villa-zones-…)،
   // والمحرك المتعدد dist/multi-engine.mjs (me|)، والمراجع المستقل dist/plan-review.mjs (rv|) — فتعديل أحدها لا يُبطل ذاكرة الآخرين
-  const fps = { v2: codeFingerprint(root + 'dist/villa-layout-v2.mjs') + '-' + codeFingerprint(root + 'dist/villa-layout-v3.mjs'), // (r20) المحرك الثالث يستورد الثاني لا العكس: بصمته جزء من المفتاح v1: 'v1-' + codeFingerprint(root + 'dist/villa-layout.mjs'), me: 'me-' + codeFingerprint(root + 'dist/multi-engine.mjs'), rv: 'rv-' + codeFingerprint(root + 'dist/plan-review.mjs') };
+  // (r20) المحرك الثالث يستورد الثاني لا العكس: بصمته جزء من مفتاح ذاكرة الثاني
+  const fps = { v2: codeFingerprint(root + 'dist/villa-layout-v2.mjs') + '-' + codeFingerprint(root + 'dist/villa-layout-v3.mjs'), v1: 'v1-' + codeFingerprint(root + 'dist/villa-layout.mjs'), me: 'me-' + codeFingerprint(root + 'dist/multi-engine.mjs'), rv: 'rv-' + codeFingerprint(root + 'dist/plan-review.mjs') };
   const base = process.env.MIZAN_GEN_CACHE_DIR || join(root, '.cache', 'gen');
   const dirs = Object.fromEntries(Object.entries(fps).map(([k, f]) => [k, join(base, f)]));
   for (const d of Object.values(dirs)) mkdirSync(d, { recursive: true });
