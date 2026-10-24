@@ -15,12 +15,14 @@
 // كل المخرجات «مقترح معماري مبدئي» لا مخطط تنفيذي، ولا ادعاء سلامة إنشائية.
 import { analyzeDoc } from './draw/digest.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
-import { measureR16 } from './privacy-defects.mjs';
+import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
 
 export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
 export const STATUS_AR = Object.freeze({ ready: 'جاهز للعرض المبدئي', 'needs-edits': 'يحتاج تعديلات', hidden: 'محجوب' });
 const PREF_TIER_AR = 'تفضيل سعودي افتراضي للميزان (قابل للتغيير)';
 const R16_TIER_AR = 'عيب معماري — قيمة تصميمية افتراضية للميزان';
+const MAND_TIER_AR = 'شرط إلزامي في الميزان (خصوصية/وظيفة) — يُعفى منه بطلب صريح من العميل';
+const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 
 /** عيوب عرض/جودة قيست من المستند (المراجع المستقل r13) غير البرنامج السعودي: غرفة ملابس رمزية لرئيسية كبيرة، مجلس بلا أثاث. */
 export function qualityNotes(doc, model = analyzeDoc(doc), request = {}) {
@@ -59,13 +61,20 @@ export function presentationStatus(design, request = {}) {
   if (prefs.some(g => g.id === 'SERVE_ROUTE')) prefs = prefs.filter(g => g.id !== 'MAJLIS_DINING' || g.value?.link);
   // (الجولة السادسة عشرة) عيوب أثبتتها المراجعة المستقلة r15 (privacy-defects.mjs): كلها عيوب تُصلح قبل العرض (لا ملاحظات)
   let r16 = []; try { r16 = measureR16(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked); } catch { r16 = []; }
+  // (الجولة التاسعة عشرة، توجيه المالك أولًا) المخالفة الإلزامية في الميزان (MANDATORY_R16: ضيف يعبر العائلة إلى الطعام، موقف لا تدخله السيارة)
+  // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
+  const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
+  for (const g of mand) hidden.push(`مخالفة إلزامية في الميزان — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
+  r16 = r16.filter(g => !mand.includes(g));
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
-    ...r16.map(g => ({ id: g.id, major: true, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
+    ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
     ...qualityNotes(doc, model, request).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
     ...toleranceNotes(design.ledger || [])];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
-  return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, edits_ar: edits, notes_ar: notes, prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: r16.map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
+  // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
+  const specialist = items.filter(x => x.specialist).map(x => x.text_ar);
+  return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
 }
 /** (الجولة الخامسة عشرة) تفضيلات سعودية يعدّها المعماري عيبًا يُصلح قبل العرض (لا ملاحظة): القاعدة الموثقة أعلى الملف. */
 export const MAJOR_PREFS = Object.freeze(['MAJLIS_STREET_ENTRY', 'MAJLIS_LOBBY', 'BED_BATH', 'MAID_BATH']);
@@ -85,7 +94,7 @@ function toleranceNotes(ledger) {
   for (const x of ledger) {
     if (!x.ok || x.kind !== 'dims' || !x.actual || !x.want) continue;
     const off = Math.max(Math.abs(x.actual.s - x.want.s), Math.abs(x.actual.l - x.want.l));
-    if (off > .1) out.push({ id: 'DIM_TOLERANCE', major: false, text_ar: `${x.text}: المرسوم ${x.actual.s}×${x.actual.l} م — ضمن السماح ±0.3 م لا مطابق` });
+    if (off > .02) out.push({ id: 'DIM_TOLERANCE', major: false, text_ar: `${x.text}: المرسوم ${x.actual.s}×${x.actual.l} م — ضمن السماحية المعلنة لا مطابق حرفيًا (أكبر فرق ${Math.round(off * 100) / 100} م)` });
   }
   return out;
 }

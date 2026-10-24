@@ -408,18 +408,21 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       opts.forEach((o, k) => { o.n = k + 1; });
       const zoneWhy = (occ || '') + (zoneCand ? '' : Number.isFinite(minZones) ? ` إعادة توزيع منطقة واحدة لا تكفي: أقرب توزيع يحقق طلبك يغيّر ${minZones} من مناطق البيت.` : ' ولم أجد توزيعًا يحققه بإعادة توزيع منطقة واحدة.');
       const part0 = partialReading(curD, parsed?.intents || [], entryDir);
+      // (الجولة التاسعة عشرة؛ المراجع المستقل r18) المخطط المتحقق جزئيًا يُوسم «يحقق جزءًا من طلبك» لا «لا يحقق طلبك»
+      if (part0 && opts[0]?.id === 'keep') Object.assign(opts[0], { achieves: 'partial', text_ar: 'أبقِ المخطط كما هو — يحقق جزءًا من طلبك فقط', detail_ar: 'أبقِ المخطط المعروض كما هو حرفيًا (يحقق جزءًا من طلبك فقط)' });
       const dupWhy = nearestShown ? ` وأقرب توزيع يحققه هو البديل ${nearestShown.shownAs.index + 1} المعروض لك أصلًا${nearestShown.shownAs.identical ? ' حرفيًا' : ' بتنظيمه'} — لا أقدّمه على أنه تعديل لهذا المخطط${part0 ? '' : '.'}` : '';
       let lost = []; try { const okNow = new Set(verifyRequest(curD, req, { entry: entryDir }).filter(x => x.ok).map(x => x.text)); lost = ledger.filter(x => !x.ok && okNow.has(x.text)).map(x => ({ text: x.text, why: x.why })); } catch { lost = []; }
       // (الجولة الخامسة عشرة) التحقق الجزئي: ما تحقق من الطلب في المعروض نفسه (مقيسًا بسجل المطابقة نفسه)، وما تحقق بقراءة دون
       // أخرى (المطبخ خلف الطعام نسبيًا لا على الواجهة الخلفية) — يُقال صراحة قبل الخيارات، بالنص نفسه الذي يكتبه السجل الصارم
       const part = part0;
-      if (!fullCand) opts.push({ id: 'none-new', n: opts.length + 1, info: true, text_ar: 'لم أجد توزيعًا جديدًا آخر يحقق طلبك', detail_ar: 'توزيع جديد غير البدائل المعروضة يحققه: لم أجد (بحثت بأنماط غير المعروضة كلها)' });
+      // (الجولة التاسعة عشرة؛ المراجع المستقل r18: C8-2) لا بطاقة خيار فارغة «لم أجد توزيعًا جديدًا»: يُقال في الجملة نفسها لا خيارًا بلا مخطط
+      const noNew = fullCand ? '' : ' (لم أجد توزيعًا جديدًا آخر غير المعروض يحقق طلبك — بحثت بأنماط غير المعروضة كلها.)';
       opts.forEach((o, k) => { o.n = k + 1; });
       const choose = opts.filter(o => !o.info);
       const optsAr = opts.map(o => `(${o.n}) ${o.detail_ar || o.text_ar}`).join('؛ ');
       // جملة واحدة واضحة للعميل ثم الخيارات المرقّمة؛ والتفصيل الهندسي (القراءة الحرفية والنسبية والسبب) في detail_ar
       const asked = part?.partial?.[0]?.text || (fallbackNote.failed || [])[0]?.text_ar || null;
-      const plain = `${part ? `طلبك ${asked ? `«${String(asked).replace(/^«|»$/g, '')}» ` : ''}متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه.` : `طلبك${asked ? ` «${String(asked).replace(/^«|»$/g, '')}»` : ''} لا يتحقق بتعديل صغير على هذا المخطط.`} اختر رقمًا: ${opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ')}.`;
+      const plain = `${part ? `طلبك ${asked ? `«${String(asked).replace(/^«|»$/g, '')}» ` : ''}متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه.` : `طلبك${asked ? ` «${String(asked).replace(/^«|»$/g, '')}»` : ''} لا يتحقق بتعديل صغير على هذا المخطط.`} اختر رقمًا: ${opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ')}.${noNew}`;
       const q = part
         ? `الشرط متحقق جزئيًا: ${part.text_ar}. ولا تعديل موضعي يحققه حرفيًا على هذا المخطط نفسه:${occ || ''}${zoneWhy.replace(occ || '', '')}${dupWhy}؛ لتحقيقه حرفيًا: الخيارات ${optsAr}. اختر رقمًا من ${choose.map(o => o.n).join(' أو ')}.`
         : `لم أجد تعديلًا موضعيًا يحقق طلبك على هذا المخطط نفسه${why ? `. السبب الهندسي: ${why.replace(/[.。]+$/, '')}` : ''}.${zoneWhy}${dupWhy} اختر رقمًا: ${optsAr}.`;

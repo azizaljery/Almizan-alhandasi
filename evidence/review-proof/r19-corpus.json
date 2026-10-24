@@ -1,0 +1,435 @@
+{
+ "summary": {
+  "stage": "after-19",
+  "realR18": "2/2",
+  "fabricatedStairDoor": "1/1",
+  "fabricatedGuest": "16/16",
+  "falseAlarmsUpper": "0/16",
+  "falseAlarmsMandatory": "0/17",
+  "note_ar": "الإيجابية تُعدّ كشفًا إن ظهر العيب المتوقع (والحالة «محجوب» للمخالفة الإلزامية)؛ السلبية تُعدّ إنذارًا كاذبًا إن ظهر فيها العيب. المراجع المستقل وكيل ذكاء اصطناعي، ليس معماريًا مرخّصًا."
+ },
+ "rows": [
+  {
+   "kind": "real-r18",
+   "alt": "C7-1",
+   "expected": [
+    "WET_STACK",
+    "MASTER_STAIR_DOOR"
+   ],
+   "detected": true,
+   "got": [
+    "WET_STACK",
+    "MASTER_STAIR_DOOR"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r18",
+   "alt": "C7-2",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING",
+    "WET_STACK",
+    "MASTER_STAIR_DOOR"
+   ],
+   "status": "hidden"
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C1-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C1-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C1-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C2-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C2-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C2-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C3-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C3-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C3-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C4-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C4-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C4-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C5-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C5-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C5-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C5-2",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C5-2",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C5-2",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C5-3",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C5-3",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C5-3",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C6-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C6-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C6-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C7-1",
+   "detected": false,
+   "got": [
+    "WET_STACK"
+   ]
+  },
+  {
+   "kind": "fabricated-stairdoor",
+   "alt": "C7-1",
+   "opening": "الصالة العلوية / ممر الغرف",
+   "expected": [
+    "MASTER_STAIR_DOOR"
+   ],
+   "detected": true,
+   "got": [
+    "WET_STACK",
+    "MASTER_STAIR_DOOR"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C8-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C8-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C8-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C8-2",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C8-2",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C8-2",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C8-3",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C8-3",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C8-3",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C9-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C9-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C9-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C9-2",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C9-2",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C9-2",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C9-3",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C9-3",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C9-3",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C9-4",
+   "detected": false,
+   "got": [
+    "HALL_SMALL"
+   ]
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C9-4",
+   "detected": false,
+   "got": [
+    "HALL_SMALL"
+   ]
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C9-4",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING",
+    "HALL_SMALL"
+   ]
+  },
+  {
+   "kind": "negative-upper",
+   "alt": "C10-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "negative-mandatory",
+   "alt": "C10-1",
+   "detected": false,
+   "got": []
+  },
+  {
+   "kind": "fabricated-guest",
+   "alt": "C10-1",
+   "expected": [
+    "GUEST_DINING"
+   ],
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ]
+  }
+ ]
+}

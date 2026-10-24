@@ -1,26 +1,25 @@
 {
- "stage": "after-18",
+ "stage": "after-19",
  "summary": {
   "note_ar": "كشف نوعي عيب الصالة (HALL_SMALL وHALL_THROUGH): إيجابيات حقيقية من حكم المراجع المستقل r16 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، وإيجابيات مصنوعة بتحوير واحد على بدائل «جاهزة»، وسلبيات (الجاهزة كما هي، وبدائل after-16 التي لم يسجّل فيها المراجع العيب). الإيجابية المصنوعة لا تُعد كشفًا إلا إن تغيّرت الصالة فعلًا عن قيمها: تحوير لا يمس الجلسة قد لا يكون عيبًا.",
-  "positives": 28,
-  "detected": 18,
-  "positivesNotReady": 18,
+  "positives": 34,
+  "detected": 25,
+  "positivesNotReady": 25,
   "real": "4/4",
-  "synthetic": "14/24",
+  "synthetic": "21/30",
   "byMutation": {
-   "جدار بفتحة يقسم الصالة (45% من طولها)": "8/12",
-   "جدار بفتحة يضيّق الصالة إلى 3.5 م": "6/12"
+   "جدار بفتحة يقسم الصالة (45% من طولها)": "10/15",
+   "جدار بفتحة يضيّق الصالة إلى 3.5 م": "11/15"
   },
-  "negatives": 31,
+  "negatives": 34,
   "falsePositives": 0,
   "falsePositiveAlts": [],
   "missed": [
    "C1/alt-1.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
    "C2/alt-1.json جدار بفتحة يقسم الصالة (45% من طولها)",
    "C2/alt-1.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
-   "C5/alt-2.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
-   "C7/alt-1.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
    "C8/alt-2.json جدار بفتحة يقسم الصالة (45% من طولها)",
+   "C8/alt-3.json جدار بفتحة يقسم الصالة (45% من طولها)",
    "C9/alt-1.json جدار بفتحة يقسم الصالة (45% من طولها)",
    "C9/alt-2.json جدار بفتحة يضيّق الصالة إلى 3.5 م",
    "C9/alt-3.json جدار بفتحة يقسم الصالة (45% من طولها)",
@@ -281,6 +280,68 @@
   },
   {
    "kind": "clean",
+   "alt": "C3/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C3/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C3/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C4/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C4/alt-1.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C4/alt-1.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
    "alt": "C5/alt-1.json",
    "expected": null,
    "detected": false,
@@ -324,7 +385,7 @@
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": true,
    "got": [
-    "HALL_SMALL"
+    "HALL_THROUGH"
    ],
    "status": "needs-edits"
   },
@@ -333,9 +394,41 @@
    "alt": "C5/alt-2.json",
    "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
    "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C5/alt-3.json",
+   "expected": null,
    "detected": false,
    "got": [],
    "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-3.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-3.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
   },
   {
    "kind": "clean",
@@ -368,35 +461,6 @@
     "HALL_THROUGH"
    ],
    "status": "needs-edits"
-  },
-  {
-   "kind": "clean",
-   "alt": "C7/alt-1.json",
-   "expected": null,
-   "detected": false,
-   "got": [],
-   "status": "ready"
-  },
-  {
-   "kind": "synthetic",
-   "alt": "C7/alt-1.json",
-   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
-   "expected": "HALL_SMALL|HALL_THROUGH",
-   "detected": true,
-   "got": [
-    "HALL_SMALL",
-    "HALL_THROUGH"
-   ],
-   "status": "needs-edits"
-  },
-  {
-   "kind": "synthetic",
-   "alt": "C7/alt-1.json",
-   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
-   "expected": "HALL_SMALL|HALL_THROUGH",
-   "detected": false,
-   "got": [],
-   "status": "ready"
   },
   {
    "kind": "clean",
@@ -449,6 +513,35 @@
   {
    "kind": "synthetic",
    "alt": "C8/alt-2.json",
+   "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": true,
+   "got": [
+    "HALL_SMALL",
+    "HALL_THROUGH"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C8/alt-3.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-3.json",
+   "mutation": "جدار بفتحة يقسم الصالة (45% من طولها)",
+   "expected": "HALL_SMALL|HALL_THROUGH",
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-3.json",
    "mutation": "جدار بفتحة يضيّق الصالة إلى 3.5 م",
    "expected": "HALL_SMALL|HALL_THROUGH",
    "detected": true,

@@ -27,7 +27,8 @@ for (const id of ['C1', 'C8', 'C10']) {
   test(`${id}: كل زوج من البدائل المعروضة مختلف معماريًا (≥ ${THRESHOLDS.cosmetic})، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة`, () => {
     const { C, r, land, out } = one(id);
     // (الجولة الثامنة عشرة) C1: بديل واحد يصل فيه ضيف الرجال إلى الطعام دون عبور العائلة؛ الثاني (الصالة الموزِّعة) لا يُعرض والنقص مذكور
-    assert.ok(out.designs.length >= (id === 'C1' ? 1 : 2), `البدائل ${out.designs.length}`); if (out.designs.length < 2) assert.match(out.shortfall_ar || '', /ضيف الرجال/);
+    // (الجولة التاسعة عشرة) C10: الحوش بعد إعادة حله بموقف عمودي (الموازي الضحل مخالفة إلزامية) «اختلاف جزئي» عن المعروض — بديل واحد والسبب مذكور
+    assert.ok(out.designs.length >= (id === 'C8' ? 2 : 1), `البدائل ${out.designs.length}`); if (out.designs.length < 2) assert.match(out.shortfall_ar || '', /ضيف الرجال|جزئي|مخالفة إلزامية/);
     for (let i = 0; i < out.designs.length; i++) for (let j = i + 1; j < out.designs.length; j++) {
       const d = archDifference(out.designs[i].doc, out.designs[j].doc).total;
       assert.ok(d >= THRESHOLDS.cosmetic, `${out.designs[i].pat} ↔ ${out.designs[j].pat}: ${d}`);

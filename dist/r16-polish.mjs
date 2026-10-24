@@ -14,6 +14,7 @@ import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
+const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 /** (الجولة الثامنة عشرة) عمق مواجهة نافذة غرفة النوم للمواقف عبر الارتداد (م) — قيمة تصميمية افتراضية للميزان. */
 const BED_GATE_DEPTH = 8;
 const OUT_DIR = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
@@ -113,6 +114,32 @@ export function polishR16(doc) {
       const live = doc.openings.find(q => q.id === op.o.id); if (!live) continue;
       live.sill = R16_LIMITS.highSill; live.h = .9;
       notes.push(`نافذة «${room.name}» المواجهة للمواقف وبوابة السيارات صارت علوية بجلسة ${R16_LIMITS.highSill} م، وللغرفة نافذتها الأخرى (خصوصية النوم — قيمة تصميمية افتراضية للميزان).`);
+      changed = true;
+    }
+  }
+  // 1-ج) (الجولة التاسعة عشرة؛ المراجع المستقل r18: C1 وC3 وC9-1 وC10-1) نافذة مجلس النساء أو صالة الطعام تواجه الشارع أو المواقف والبوابة
+  //      (حتى 8 م): نافذة علوية بجلسة 1.6 م — تفضيل سعودي افتراضي للميزان قابل للتغيير (زجاج معتم بدلها إن أراد العميل). لا يُدفع ثمنها من
+  //      الإضاءة: زجاج الغرفة كلها بعد التحويل ≥ 5٪ من أرضيتها (يُوسَّع عرض النافذة العلوية حتى ذلك ما اتسع جدارها)، وإلا تبقى النافذة
+  //      ويُذكر السبب. التهوية: النافذة العلوية تُفتح (قلّاب) — قيمة تصميمية للميزان غير متحققة نظاميًا.
+  if (!R14_OFF.has('r19sill')) {
+    const G = analyzeDoc(doc).levels[0], bays = G ? (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id) : [];
+    const streets = [...new Set([doc.entry || 's', ...(doc.streets || [])])].filter(st => OUT_DIR[st]);
+    const target = r => r.type === 'dining' || (r.type === 'majlis' && /النساء/.test(r.name || ''));
+    const faces = (op, out) => streets.some(st => out.x * OUT_DIR[st].x + out.y * OUT_DIR[st].y > .7) || bays.some(z => touch(viewQuad({ p: op.p, w: op.w, wall: op.wall }, out, BED_GATE_DEPTH, R16_LIMITS.viewSide), z.polygon));
+    for (const op of G ? G.openings.filter(o => o.window && (o.o.sill ?? 0) < R16_LIMITS.highSill - 1e-6) : []) {
+      const sd = op.sides.find(x => x.exterior && x.other === 'outside' && target(x.room)); if (!sd || !faces(op, sd.outward)) continue;
+      const room = sd.room, live = doc.openings.find(q => q.id === op.o.id); if (!live) continue;
+      const glassOf = () => doc.openings.filter(q => (q.kind || '').startsWith('window') && G.openings.some(o2 => o2.id === q.id && o2.sides.some(x => x.room.id === room.id && x.exterior))).reduce((t, q) => t + q.w * (q.h ?? 1.2), 0);
+      const old = { sill: live.sill, h: live.h, w: live.w, at: live.at };
+      live.sill = R16_LIMITS.highSill; live.h = .9;
+      // عرض النافذة العلوية حتى يبلغ زجاج الغرفة 5٪ من أرضيتها (على جدارها نفسه دون تداخل)
+      const wall = doc.walls.find(w => w.id === live.wall), edge = room.edges.find(e => e.exterior && Math.abs((op.p.x - e.a.x) * (e.b.y - e.a.y) - (op.p.y - e.a.y) * (e.b.x - e.a.x)) / (e.length || 1) < .3);
+      if (wall && edge && glassOf() < .05 * room.area) {
+        const s0 = Math.min(projAt(wall, edge.a), projAt(wall, edge.b)), s1 = Math.max(projAt(wall, edge.a), projAt(wall, edge.b)), ops = doc.openings.filter(q => q.wall === wall.id && q.id !== live.id);
+        for (let wd = Math.min(3.6, s1 - s0 - .3); wd > live.w; wd -= .1) { const lo = s0 + wd / 2 + .15, hi = s1 - wd / 2 - .15, at = Math.max(lo, Math.min(hi, old.at)); if (hi >= lo && ops.every(q => Math.abs(q.at - at) >= (q.w + wd) / 2 + .12)) { const w0 = live.w; live.w = Math.round(wd * 100) / 100; live.at = Math.round(at * 1000) / 1000; if (glassOf() >= .05 * room.area) break; live.w = w0; } }
+      }
+      if (glassOf() < .05 * room.area - 1e-6) { Object.assign(live, old); notes.push(`نافذة «${room.name}» تواجه ${streets.some(st => sd.outward.x * OUT_DIR[st].x + sd.outward.y * OUT_DIR[st].y > .7) ? 'الشارع' : 'المواقف'} وبقيت عادية: النافذة العلوية لا تُبقي للغرفة زجاجًا ≥ 5٪ من أرضيتها (الإضاءة أولًا) — يُستحسن زجاج معتم أو سور حاجب.`); continue; }
+      notes.push(`نافذة «${room.name}» المواجهة ${streets.some(st => sd.outward.x * OUT_DIR[st].x + sd.outward.y * OUT_DIR[st].y > .7) ? 'للشارع' : 'للمواقف والبوابة'} علوية بجلسة ${R16_LIMITS.highSill} م وعرض ${live.w} م (زجاج الغرفة ${r2(100 * glassOf() / room.area)}٪ من أرضيتها) — تفضيل سعودي افتراضي للميزان قابل للتغيير (زجاج معتم بدلها إن أردت).`);
       changed = true;
     }
   }

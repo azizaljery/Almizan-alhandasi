@@ -1,0 +1,373 @@
+{
+ "id": "L4",
+ "name": "القصيم — عميل محتار: كلام متعارض عن المطبخ والمجلس دون حسم",
+ "words": 166,
+ "ms": 19,
+ "text": "يا هلا والله. الصراحة أنا محتار شوي وبكتب لك كل اللي في بالي وأنت شوف. الأرض عندي في بريدة ٢٢×٣٠، والشارع جنوبي. أبي البيت دور واحد. نبي أربع غرف نوم، وحدة منهن ماستر. المطبخ أبيه في الأمام عشان أهلي يشوفون الشارع وهم يطبخون، وأبي المطبخ واسع لأن أمي تطبخ للعزايم كل جمعة. المجلس أبيه جنب المطبخ عشان الضيافة تكون سهلة والقهوة توصل بسرعة. الصالة كبيرة وفي النص. ترى زوجتي تقول المطبخ لازم يكون في الخلف عشان الخصوصية، وأنا للحين ما قررت، شوفوا لنا الأنسب. وبعدين المجلس أبيه بعيد عن المطبخ عشان الريحة ما توصل للضيوف. غرفة الماستر أبيها على يمين الداخل. وأبي غرف العيال جنب الماستر عشان نسمعهم بالليل. دورات المياه ما تفتح على الصالة. وأبي مكان للشواء برا في الحوش، وجلسة خارجية للشتاء. وما أبي ممرات طويلة، أكره الممرات. وترى احنا ستة: أنا وزوجتي وأربعة عيال، أكبرهم عمره خمسطعش سنة وأصغرهم سنتين. وأبي التكييف يكون مخفي قدر الإمكان، والأسقف عالية شوي عشان الحر. وبس هذا اللي في بالي حاليًا، وإذا تذكرت شي ثاني أرسله لك.",
+ "formCounts": {
+  "bedrooms": 4,
+  "majlis": 1,
+  "kitchens": 1,
+  "halls": 1
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 3,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "pref": {
+    "tp": 4,
+    "fn": 0,
+    "fp": 1,
+    "precision": 0.8,
+    "recall": 1
+   },
+   "extra": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "absent": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "rule": {
+    "tp": 7,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "floors": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "unsupported": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "conflict": {
+    "tp": 2,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "unclear": {
+    "tp": 2,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   }
+  },
+  "precision": 0.95,
+  "recall": 1,
+  "f1": 0.974,
+  "tp": [
+   "count:bedrooms=4",
+   "count:majlis=1",
+   "count:kitchens=1",
+   "pref:big_kitchen",
+   "pref:big_hall",
+   "pref:bathsOffHall",
+   "pref:noCorridors",
+   "rule:place:kitchen:s",
+   "rule:place:kitchen:n",
+   "rule:close:kitchen+majlis",
+   "rule:away:kitchen+majlis",
+   "rule:place:hall:center",
+   "rule:place:master:e",
+   "rule:close:kids+master",
+   "floors=1",
+   "conflict:place-opposite",
+   "conflict:relation-contradiction",
+   "unclear:مكان للشواء",
+   "unclear:جلسة خارجية"
+  ],
+  "missed": [],
+  "wrong": [
+   "pref:elderlyRoom"
+  ],
+  "levels": [
+   {
+    "item": "rule:place:kitchen:s",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:kitchen:n",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:kitchen+majlis",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:away:kitchen+majlis",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:hall:center",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:master:e",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:kids+master",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 1,
+   "kitchens": 1,
+   "halls": 1
+  },
+  "prefs": {
+   "bathsOffHall": true,
+   "elderlyRoom": true,
+   "big_hall": true,
+   "big_kitchen": true,
+   "noCorridors": true,
+   "floors": 1
+  },
+  "extras": {},
+  "absent": [],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "place:kitchen:s",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المطبخ أبيه في الأمام",
+    "text": "«المطبخ» في الأمام"
+   },
+   {
+    "item": "close:kitchen+majlis",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المجلس أبيه جنب المطبخ",
+    "text": "«المجلس» بجوار «المطبخ»"
+   },
+   {
+    "item": "place:hall:center",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "الصالة كبيرة وفي النص",
+    "text": "«الصالة» في وسط البيت"
+   },
+   {
+    "item": "place:kitchen:n",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "المطبخ لازم يكون في الخلف",
+    "text": "«المطبخ» في الخلف"
+   },
+   {
+    "item": "away:kitchen+majlis",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "المجلس أبيه بعيد عن المطبخ",
+    "text": "«المجلس» بعيدًا عن «المطبخ»"
+   },
+   {
+    "item": "place:master:e",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "غرفة الماستر أبيها على يمين الداخل",
+    "text": "«غرفة النوم الرئيسية» على يمين الداخل من الشارع"
+   },
+   {
+    "item": "close:kids+master",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "غرف العيال جنب الماستر",
+    "text": "«غرف الأبناء» بجوار «غرفة النوم الرئيسية»"
+   }
+  ],
+  "tweaks": {},
+  "unsupported": [],
+  "unclear": [
+   "الصراحة أنا محتار شوي وبكتب لك كل اللي في بالي وأنت شوف",
+   "الأرض عندي في بريدة ٢٢×٣٠",
+   "الشارع جنوبي",
+   "أنا للحين ما قررت",
+   "شوفوا لنا الأنسب",
+   "أبي مكان للشواء برا في الحوش",
+   "جلسة خارجية للشتاء",
+   "أكره الممرات",
+   "ترى احنا ستة: أنا وزوجتي وأربعة عيال",
+   "أكبرهم عمره خمسطعش سنة وأصغرهم سنتين",
+   "أبي التكييف يكون مخفي قدر الإمكان",
+   "الأسقف عالية شوي عشان الحر",
+   "بس هذا اللي في بالي حاليًا",
+   "إذا تذكرت شي ثاني أرسله لك",
+   "تفتح على الصالة"
+  ],
+  "understood": [
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "دورات المياه لا تفتح على الصالة مباشرة",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "الصالة واسعة",
+   "المطبخ واسع",
+   "أقل ما يمكن من الممرات (الحركة عبر الصالة)",
+   "دور واحد",
+   "«المطبخ» في الأمام",
+   "«المجلس» بجوار «المطبخ»",
+   "«الصالة» في وسط البيت",
+   "«المطبخ» في الخلف",
+   "«المجلس» بعيدًا عن «المطبخ»",
+   "«غرفة النوم الرئيسية» على يمين الداخل من الشارع",
+   "«غرف الأبناء» بجوار «غرفة النوم الرئيسية»"
+  ]
+ },
+ "conflicts": [
+  {
+   "type": "place-opposite",
+   "question": "ذكرت إن «المطبخ» يكون في الأمام وفي الخلف بنفس الوقت — وين تبيه بالضبط؟"
+  },
+  {
+   "type": "relation-contradiction",
+   "question": "ذكرت إن «المجلس» جنب «المطبخ»، وذكرت إنه بعيد عنه — تبيهم جنب بعض ولا بعيدين؟"
+  }
+ ],
+ "coverage": {
+  "clauses": 29,
+  "fates": {
+   "filler": 1,
+   "unclear": 14,
+   "understood": 13,
+   "orphan": 1
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "الصراحة أنا محتار شوي وبكتب لك كل اللي في بالي وأنت شوف",
+   "الأرض عندي في بريدة ٢٢×٣٠",
+   "الشارع جنوبي",
+   "أنا للحين ما قررت",
+   "شوفوا لنا الأنسب",
+   "تفتح على الصالة",
+   "أبي مكان للشواء برا في الحوش",
+   "جلسة خارجية للشتاء",
+   "أكره الممرات",
+   "ترى احنا ستة: أنا وزوجتي وأربعة عيال",
+   "أكبرهم عمره خمسطعش سنة وأصغرهم سنتين",
+   "أبي التكييف يكون مخفي قدر الإمكان",
+   "الأسقف عالية شوي عشان الحر",
+   "بس هذا اللي في بالي حاليًا",
+   "إذا تذكرت شي ثاني أرسله لك"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 1,
+   "kitchens": 1
+  },
+  "prefs": [
+   "big_kitchen",
+   "big_hall",
+   "bathsOffHall",
+   "noCorridors"
+  ],
+  "extras": [],
+  "absent": [],
+  "rules": [
+   {
+    "r": "place:kitchen:s",
+    "level": "must"
+   },
+   {
+    "r": "place:kitchen:n",
+    "level": "must"
+   },
+   {
+    "r": "close:kitchen+majlis",
+    "level": "must"
+   },
+   {
+    "r": "away:kitchen+majlis",
+    "level": "must"
+   },
+   {
+    "r": "place:hall:center",
+    "level": "must"
+   },
+   {
+    "r": "place:master:e",
+    "level": "must"
+   },
+   {
+    "r": "close:kids+master",
+    "level": "must"
+   }
+  ],
+  "floors": 1,
+  "unsupported": [],
+  "conflicts": [
+   "place-opposite",
+   "relation-contradiction"
+  ],
+  "unclear": [
+   "مكان للشواء",
+   "جلسة خارجية"
+  ],
+  "optional": [
+   "count:dining",
+   "count:baths"
+  ],
+  "traps": "«أمي تطبخ» ليست طلب غرفة لكبار السن؛ تعارضان صريحان يجب أن يُسألا لا أن يُختار أحدهما بصمت."
+ },
+ "traps": "«أمي تطبخ» ليست طلب غرفة لكبار السن؛ تعارضان صريحان يجب أن يُسألا لا أن يُختار أحدهما بصمت."
+}

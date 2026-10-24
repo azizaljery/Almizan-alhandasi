@@ -1,0 +1,937 @@
+{
+ "id": "C5",
+ "engine": "v2",
+ "name": "أرض غير منتظمة",
+ "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+ "understood": [
+  "3 غرف نوم"
+ ],
+ "unclear": [],
+ "unsupported": [
+  "شكل الأرض (شبه منحرف: الواجهة 18 م، الخلف 24 م، العمق 30 م): المولّد يقبل أرضًا مستطيلة فقط؛ سيُصمَّم على مستطيل ويُعلَّم البند «لم يُتحقق»."
+ ],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "cornerentry",
+   "pat": "cornerentry:e0t",
+   "presentation": {
+    "status": "ready",
+    "label_ar": "جاهز للعرض المبدئي",
+    "hidden_ar": [],
+    "edits_ar": [],
+    "notes_ar": [
+     "باب خدمة (مقلط) بين مجلس الرجال والطعام في الدور الواحد، والطعام يُغلق على العائلة بباب: «صالة الطعام والمقلط» مفتوح على العائلة بفتحة بلا باب وهو على المجلس (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+     "مبنى أعمق من 18 م فيه حوش أو منور داخلي: عمق المبنى 19.05 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+    ],
+    "specialist_ar": [],
+    "categories": {
+     "mandatory": 0,
+     "architectural": 0,
+     "specialist": 0,
+     "notes": 2
+    },
+    "mandatory": [],
+    "prefs": [
+     "MAJLIS_DINING",
+     "DEEP_PLAN_LIGHT"
+    ],
+    "major": [],
+    "r16": [],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [
+    "MAJLIS_DINING"
+   ],
+   "summary": "المدخل في ركن الواجهة لا في محورها، والمجلس على بقية الواجهة، والصالة خلف المدخل، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.4,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": false
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 1,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 2
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 8.01,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.67
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 4.92,
+    "area": 15.63
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.28
+   },
+   "hall": {
+    "w": 5.16,
+    "l": 7.03,
+    "ratio": 1.36
+   },
+   "rooms": 18,
+   "net": 190.43,
+   "circulationPct": 16.63,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-2.json",
+   "mode": "split",
+   "pat": "split:s0rt",
+   "presentation": {
+    "status": "ready",
+    "label_ar": "جاهز للعرض المبدئي",
+    "hidden_ar": [],
+    "edits_ar": [],
+    "notes_ar": [],
+    "specialist_ar": [],
+    "categories": {
+     "mandatory": 0,
+     "architectural": 0,
+     "specialist": 0,
+     "notes": 0
+    },
+    "mandatory": [],
+    "prefs": [],
+    "major": [],
+    "r16": [],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [],
+   "summary": "كتلتان: عامة في الأمام وخاصة في الخلف بينهما ممر زجاجي وفناءان جانبيان، والكتلة متدرجة: الصفوف الأمامية أضيق والجناح الخلفي بعرض الأرض الأوسع",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 96.15,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": false
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 0,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 5
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 9.82,
+    "single": true
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.44
+   },
+   "kitchen": {
+    "w": 3.56,
+    "l": 4.12,
+    "area": 14.67
+   },
+   "narrowestSubCirculation": {
+    "name": "ممر الغرف",
+    "clear": 1.38
+   },
+   "hall": {
+    "w": 4.02,
+    "l": 7.93,
+    "ratio": 1.98
+   },
+   "rooms": 19,
+   "net": 204.94,
+   "circulationPct": 15.15,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  },
+  {
+   "file": "alt-3.json",
+   "mode": "centralhall",
+   "pat": "centralhall:ch3",
+   "presentation": {
+    "status": "ready",
+    "label_ar": "جاهز للعرض المبدئي",
+    "hidden_ar": [],
+    "edits_ar": [],
+    "notes_ar": [
+     "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+    ],
+    "specialist_ar": [],
+    "categories": {
+     "mandatory": 0,
+     "architectural": 0,
+     "specialist": 0,
+     "notes": 1
+    },
+    "mandatory": [],
+    "prefs": [
+     "DAY_WC"
+    ],
+    "major": [],
+    "r16": [],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [
+    "DAY_WC"
+   ],
+   "summary": "الصالة المركزية الموزِّعة: غرف النوم على جانبيها تُفتح عليها مباشرة بلا ممرات، والضيافة صف أمامي، والطعام والمطبخ صف خلفي على الحديقة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 93.7,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": false
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 1,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 0,
+        "info": 3
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": null,
+   "smallestBedroom": {
+    "name": "غرفة نوم 2",
+    "area": 13.31
+   },
+   "kitchen": {
+    "w": 3.32,
+    "l": 5.47,
+    "area": 18.12
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الرجال",
+    "clear": 1.48
+   },
+   "hall": {
+    "w": 5.83,
+    "l": 7.38,
+    "ratio": 1.27
+   },
+   "rooms": 15,
+   "net": 192.46,
+   "circulationPct": 11.39,
+   "bedrooms": 3,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 0,
+   "ledger": [
+    {
+     "text": "3 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)",
+     "ok": true,
+     "why": "في المستند: الواجهة 18 م، الخلف 24 م، العمق 30 م؛ كل الجدران داخل حدود الأرض."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [
+  "المولّد الثاني: الأرض مضلع فعلي (الواجهة 18 م، الخلف 24 م، العمق 30 م) والارتدادات داخل حدوده."
+ ],
+ "ms": 28766,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 3,
+ "hidden": [],
+ "presentation": {
+  "ready": 3,
+  "needsEdits": 0,
+  "hidden": 0,
+  "label_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+ },
+ "proposalLabel_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا",
+ "diversity": [
+  [
+   0,
+   0.21,
+   0.25
+  ],
+  [
+   0.21,
+   0,
+   0.29
+  ],
+  [
+   0.25,
+   0.29,
+   0
+  ]
+ ],
+ "modes": [
+  "cornerentry",
+  "split",
+  "centralhall"
+ ],
+ "minDifference": 0.21,
+ "meanDifference": 0.25,
+ "rejectedCandidates": 7,
+ "archDiversity": [
+  [
+   0,
+   0.211,
+   0.352
+  ],
+  [
+   0.211,
+   0,
+   0.305
+  ],
+  [
+   0.352,
+   0.305,
+   0
+  ]
+ ],
+ "minArchDifference": 0.211,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [
+   {
+    "pair": [
+     1,
+     2
+    ],
+    "verdict": "distinct",
+    "verdict_ar": "مختلف معماريًا",
+    "substantive": [
+     "privacy",
+     "relations"
+    ],
+    "dims": {
+     "zoning": 0.202,
+     "circulation": 0.233,
+     "privacy": 0.26,
+     "relations": 0.25
+    },
+    "total": 0.233,
+    "explanation_ar": "الحكم: مختلف معماريًا — الأبعاد الجوهرية: تدرّج الخصوصية، العلاقات الأساسية (المطلوب بعدان على الأقل).\nتوزيع الوظائف (0.202، العتبة 0.25): متقارب — الدور الأرضي: الضيافة والخدمة غير متجاورين ← متجاوران؛ الدور الأرضي: النوم والخدمة متجاوران ← غير متجاورين؛ الدور الأرضي: الخدمة في الوسط على طرف ← في الوسط على طرف، على الحديقة.\nبنية الحركة (0.233، العتبة 0.25): متقارب — الدور الأرضي: عمق غرف النوم من المدخل 4 ← 5.333 خطوة؛ الدور الأرضي: حلقات الحركة 1 ← 0.\nتدرّج الخصوصية (0.26، العتبة 0.2): مختلف جوهريًا — فصل الضيوف عن العائلة: منفصلان تمامًا ← عبر فراغ عازل واحد.\nالعلاقات الأساسية (0.25، العتبة 0.2): مختلف جوهريًا — الطعام–الصالة: عبر فراغ وسيط ← متصلان مباشرة؛ المطبخ–الصالة: متصلان مباشرة ← عبر فراغ وسيط؛ الصالة–الحديقة الخلفية: بعيدان/منفصلان ← عبر فراغ وسيط؛ الرئيسية–غرف الأبناء: متصلان مباشرة ← عبر فراغ وسيط.\nغير محتسب بذاته: الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.862 ← 0.662، نسبة العرض للعمق 0.625 ← 0.9)."
+   },
+   {
+    "pair": [
+     1,
+     3
+    ],
+    "verdict": "distinct",
+    "verdict_ar": "مختلف معماريًا",
+    "substantive": [
+     "zoning",
+     "circulation",
+     "privacy"
+    ],
+    "dims": {
+     "zoning": 0.303,
+     "circulation": 0.575,
+     "privacy": 0.25,
+     "relations": 0.028
+    },
+    "total": 0.292,
+    "explanation_ar": "الحكم: مختلف معماريًا — الأبعاد الجوهرية: توزيع الوظائف، بنية الحركة، تدرّج الخصوصية (المطلوب بعدان على الأقل).\nتوزيع الوظائف (0.303، العتبة 0.25): مختلف جوهريًا — الدور الأرضي: المعيشة العائلية والنوم غير متجاورين ← متجاوران؛ الدور الأرضي: المعيشة العائلية في الوسط على طرف ← في الوسط وسطًا، على الشارع؛ الدور الأرضي: النوم في الخلف على طرف، على الحديقة ← في الخلف على طرف؛ الدور الأرضي: الخدمة في الوسط على طرف ← في الخلف على طرف، على الحديقة.\nبنية الحركة (0.575، العتبة 0.25): مختلف جوهريًا — الدور الأرضي: نوع التوزيع محور ممر واحد ← موزّع بالصالة؛ الدور الأرضي: قطع الممرات 2 ← 0؛ الدور الأرضي: عمق غرف النوم من المدخل 4 ← 3 خطوة.\nتدرّج الخصوصية (0.25، العتبة 0.2): مختلف جوهريًا — فصل الضيوف عن العائلة: منفصلان تمامًا ← عبر فراغ عازل واحد.\nالعلاقات الأساسية (0.028، العتبة 0.2): متقارب — الطعام–الصالة: عبر فراغ وسيط ← متصلان مباشرة.\nغير محتسب بذاته: الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.862 ← 0.779، نسبة العرض للعمق 0.625 ← 1.042)."
+   },
+   {
+    "pair": [
+     2,
+     3
+    ],
+    "verdict": "distinct",
+    "verdict_ar": "مختلف معماريًا",
+    "substantive": [
+     "zoning",
+     "circulation",
+     "relations"
+    ],
+    "dims": {
+     "zoning": 0.313,
+     "circulation": 0.7,
+     "privacy": 0.125,
+     "relations": 0.222
+    },
+    "total": 0.349,
+    "explanation_ar": "الحكم: مختلف معماريًا — الأبعاد الجوهرية: توزيع الوظائف، بنية الحركة، العلاقات الأساسية (المطلوب بعدان على الأقل).\nتوزيع الوظائف (0.313، العتبة 0.25): مختلف جوهريًا — الدور الأرضي: الضيافة والخدمة متجاوران ← غير متجاورين؛ الدور الأرضي: المعيشة العائلية والنوم غير متجاورين ← متجاوران؛ الدور الأرضي: النوم والخدمة غير متجاورين ← متجاوران؛ الدور الأرضي: المعيشة العائلية في الوسط وسطًا ← في الوسط وسطًا، على الشارع؛ الدور الأرضي: الخدمة في الوسط على طرف، على الحديقة ← في الخلف على طرف، على الحديقة.\nبنية الحركة (0.7، العتبة 0.25): مختلف جوهريًا — الدور الأرضي: نوع التوزيع محور ممر واحد ← موزّع بالصالة؛ الدور الأرضي: قطع الممرات 2 ← 0؛ الدور الأرضي: عمق غرف النوم من المدخل 5.333 ← 3 خطوة؛ الدور الأرضي: حلقات الحركة 0 ← 1.\nتدرّج الخصوصية (0.125، العتبة 0.2): متقارب — الدور الأرضي: ترتيب النطاقات من الأعم إلى الأخص كان «الضيافة ثم المعيشة العائلية ثم الخدمة ثم النوم» فصار «الضيافة ثم المعيشة العائلية ثم النوم ثم الخدمة».\nالعلاقات الأساسية (0.222، العتبة 0.2): مختلف جوهريًا — المطبخ–الصالة: عبر فراغ وسيط ← متصلان مباشرة؛ الصالة–الحديقة الخلفية: عبر فراغ وسيط ← بعيدان/منفصلان؛ الرئيسية–غرف الأبناء: عبر فراغ وسيط ← متصلان مباشرة.\nغير محتسب بذاته: الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.662 ← 0.779، نسبة العرض للعمق 0.9 ← 1.042)."
+   }
+  ],
+  "allDistinct": true,
+  "minSubstantive": 2,
+  "minTotal": 0.233
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 19، اجتاز البوابات منهم 14؛ ورُفض 5 في بوابات الجودة والسلامة؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («شكل L»، «مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور»، «جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما»)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 2 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 4 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}

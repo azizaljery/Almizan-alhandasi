@@ -1,0 +1,369 @@
+{
+ "id": "C2",
+ "engine": "v2",
+ "name": "فيلا لعائلة متعددة الأجيال",
+ "text": "عائلة ثلاثة أجيال: غرفة أرضية لأبوي وأمي قريبة من الصالة وبعيدة عن المجلس، الماستر، وثلاث غرف للعيال جنب بعض، ومجلس، وصالة كبيرة تطل على الحوش الخلفي، والمطبخ مقفل",
+ "understood": [
+  "5 غرف نوم",
+  "غرفة نوم رئيسية (ماستر)",
+  "مطبخ مغلق بباب",
+  "غرفة نوم قريبة من الصالة لكبار السن",
+  "الصالة واسعة",
+  "«غرفة كبار السن» قرب «الصالة»",
+  "«غرفة كبار السن» بعيدًا عن «المجلس»",
+  "«غرفة كبار السن» في الدور الأرضي",
+  "«غرف الأبناء» متجاورة",
+  "«الصالة» على الواجهة الخلفية"
+ ],
+ "unclear": [],
+ "unsupported": [],
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "mode": "hplan",
+   "pat": "hplan:hh2",
+   "presentation": {
+    "status": "ready",
+    "label_ar": "جاهز للعرض المبدئي",
+    "hidden_ar": [],
+    "edits_ar": [],
+    "notes_ar": [
+     "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+    ],
+    "specialist_ar": [],
+    "categories": {
+     "mandatory": 0,
+     "architectural": 0,
+     "specialist": 0,
+     "notes": 1
+    },
+    "mandatory": [],
+    "prefs": [
+     "DAY_WC"
+    ],
+    "major": [],
+    "r16": [],
+    "proposal_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+   },
+   "prefFails": [
+    "DAY_WC"
+   ],
+   "summary": "شكل H: جناحان متوازيان بطول البيت يصلهما جسر الصالة، بفناء أمامي للمدخل وحوش خلفي تطل عليه الصالة",
+   "review": {
+    "passed": true,
+    "failedGates": [],
+    "score": 90.94,
+    "rejectReasons_ar": [],
+    "gates": {
+     "REACH": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAYLIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "MIN_WIDTH": {
+      "ok": true,
+      "applicable": true
+     },
+     "HALL_ASPECT": {
+      "ok": true,
+      "applicable": true
+     },
+     "WET_DOOR": {
+      "ok": true,
+      "applicable": true
+     },
+     "GUEST_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_MAJLIS": {
+      "ok": true,
+      "applicable": true
+     },
+     "STAIRS": {
+      "ok": true,
+      "applicable": false
+     },
+     "STAIR_GEOMETRY": {
+      "ok": true,
+      "applicable": false
+     },
+     "MAJLIS_PRIVACY": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLOT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SETBACK_REG": {
+      "ok": true,
+      "applicable": true
+     },
+     "COVERAGE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PROGRAM": {
+      "ok": true,
+      "applicable": true
+     },
+     "INTEGRITY": {
+      "ok": true,
+      "applicable": true
+     },
+     "DOOR_SWING": {
+      "ok": true,
+      "applicable": true
+     },
+     "WINDOW_SIZE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PLACEMENT": {
+      "ok": true,
+      "applicable": false
+     },
+     "FAMILY_ENTRY_SCREEN": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_LOBBY": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_DINING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DAY_WC": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAID_BATH": {
+      "ok": true,
+      "applicable": false
+     },
+     "KITCHEN_SERVICE": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING": {
+      "ok": true,
+      "applicable": true
+     },
+     "DEEP_PLAN_LIGHT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SITE_FIT": {
+      "ok": true,
+      "applicable": true
+     },
+     "SHADING": {
+      "ok": true,
+      "applicable": true
+     },
+     "BED_BATH": {
+      "ok": true,
+      "applicable": true
+     },
+     "SERVE_ROUTE": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_BED_WALL": {
+      "ok": true,
+      "applicable": true
+     },
+     "MAJLIS_STREET_ENTRY": {
+      "ok": true,
+      "applicable": true
+     },
+     "REAR_YARD": {
+      "ok": true,
+      "applicable": true
+     },
+     "PARKING_LAYOUT": {
+      "ok": true,
+      "applicable": true
+     },
+     "STRUCTURAL": {
+      "ok": true,
+      "applicable": true
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "applicable": true
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "applicable": true
+     }
+    },
+    "heavy": {
+     "STRUCTURAL": {
+      "ok": true,
+      "value": {
+       "serious": 0,
+       "warn": 0,
+       "codes": []
+      }
+     },
+     "CIRCULATION": {
+      "ok": true,
+      "value": {
+       "fails": 0,
+       "codes": [],
+       "counts": {
+        "serious": 0,
+        "warn": 2,
+        "info": 4
+       }
+      }
+     },
+     "CONSISTENCY_2D3D": {
+      "ok": true,
+      "value": {
+       "major": 0,
+       "minor": 0
+      }
+     }
+    }
+   },
+   "corridorMax": {
+    "name": "ممر الغرف",
+    "li": 0,
+    "len": 10.92,
+    "single": false
+   },
+   "smallestBedroom": {
+    "name": "غرفة نوم 3",
+    "area": 13.94
+   },
+   "kitchen": {
+    "w": 3.18,
+    "l": 4.61,
+    "area": 14.68
+   },
+   "narrowestSubCirculation": {
+    "name": "مدخل الجناح",
+    "clear": 1.22
+   },
+   "hall": {
+    "w": 4.98,
+    "l": 8.52,
+    "ratio": 1.71
+   },
+   "rooms": 22,
+   "net": 241.53,
+   "circulationPct": 15.37,
+   "bedrooms": 5,
+   "noWindow": 0,
+   "minWidth": 0,
+   "unreachable": 0,
+   "swingBlocked": 0,
+   "bathPrivacy": 0,
+   "reviewWarnings": 1,
+   "ledger": [
+    {
+     "text": "«غرفة كبار السن» قرب «الصالة»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» بعيدًا عن «المجلس»",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرفة كبار السن» في الدور الأرضي",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«غرف الأبناء» متجاورة",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "«الصالة» على الواجهة الخلفية",
+     "ok": true,
+     "why": "«الصالة» يرتد 3.7 م عن حد المبنى ويطل على الخلف بلا فراغ مبني أمامه (حديقة أو فناء مفتوح)."
+    },
+    {
+     "text": "5 غرف نوم",
+     "ok": true,
+     "why": ""
+    },
+    {
+     "text": "غرفة لكبار السن قرب الصالة",
+     "ok": true,
+     "why": "«غرفة كبار السن» تلاصق الصالة."
+    },
+    {
+     "text": "مطبخ مغلق بباب",
+     "ok": true,
+     "why": "فتحات المطبخ الداخلية كلها أبواب (2)."
+    },
+    {
+     "text": "صالة واسعة (35 م² صافية أو أكثر)",
+     "ok": true,
+     "why": "الفعلي 42.4 م²."
+    }
+   ],
+   "ledgerFails": 0
+  }
+ ],
+ "notes": [],
+ "ms": 29761,
+ "requestedAlternatives": 4,
+ "producedAlternatives": 1,
+ "hidden": [],
+ "presentation": {
+  "ready": 1,
+  "needsEdits": 0,
+  "hidden": 0,
+  "label_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا"
+ },
+ "proposalLabel_ar": "مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا",
+ "diversity": [
+  [
+   0
+  ]
+ ],
+ "modes": [
+  "hplan"
+ ],
+ "minDifference": null,
+ "meanDifference": null,
+ "rejectedCandidates": 8,
+ "archDiversity": [
+  [
+   0
+  ]
+ ],
+ "minArchDifference": null,
+ "cosmeticPairs": [],
+ "archThresholds": {
+  "cosmetic": 0.18,
+  "distinct": 0.3
+ },
+ "archV2": {
+  "thresholds": {
+   "zoning": 0.25,
+   "circulation": 0.25,
+   "privacy": 0.2,
+   "relations": 0.2
+  },
+  "pairs": [],
+  "allDistinct": true,
+  "minSubstantive": null,
+  "minTotal": null
+ },
+ "heavyRejected": [],
+ "shortfallReason": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 14، اجتاز البوابات منهم 10؛ ورُفض 4 في بوابات الجودة والسلامة؛ 8 تخالف بندًا صريحًا من الطلب («غرف الأبناء» متجاورة، «الصالة» على الواجهة الخلفية، صالة واسعة (35 م² صافية أو أكثر))؛ 1 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («شكل H»). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+}

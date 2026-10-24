@@ -55,7 +55,8 @@ test('معايرة حالة العرض: عيوب جوهرية محددة، وا�
   // C5-alt3 بعد-14: مجلس يلاصق الرئيسية ومدخله من ارتداد ضيق ⇐ يحتاج تعديلات
   const C5 = CASES.find(c => c.id === 'C5');
   const b = presentationStatus({ doc: EV14('C5', 'alt-3.json'), ledger: [], review: { passed: true } }, { text: C5.text });
-  assert.equal(b.status, 'needs-edits'); assert.ok(b.major.includes('MAJLIS_STREET_ENTRY'));
+  // (الجولة التاسعة عشرة) وفيه ضيف يعبر العائلة وموقف موازٍ ضحل: مخالفتان إلزاميتان ⇐ محجوب، والعيوب الجوهرية تبقى مقيسة
+  assert.equal(b.status, 'hidden'); assert.deepEqual(b.mandatory, ['GUEST_DINING', 'PARKING_SHALLOW']); assert.ok(b.major.includes('MAJLIS_STREET_ENTRY'));
   // بند عميل غير متحقق ⇐ محجوب مهما كانت التفضيلات
   assert.equal(presentationStatus({ doc: EV14('C6', 'alt-1.json'), ledger: [{ text: 'x', ok: false }], review: { passed: true } }, { text: C6.text }).status, 'hidden');
   // مقاس ضمن السماح لا مطابق ⇐ ملاحظة صريحة

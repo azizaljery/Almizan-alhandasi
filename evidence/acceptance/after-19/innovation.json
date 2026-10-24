@@ -1,0 +1,1641 @@
+{
+ "summary": {
+  "note_ar": "البديل «جديد» إن كان مختلفًا معماريًا (بعدان جوهريان ≥ العتبات {\"zoning\":0.25,\"circulation\":0.25,\"privacy\":0.2,\"relations\":0.2}) عن كل بديل للحالة نفسها في after-18. الواجهة وشكل الغلاف وموضع السلم لا تُحتسب بذاتها.",
+  "old": "after-18",
+  "new": "after-19",
+  "criterion": {
+   "version": "arch-criterion/r19.1",
+   "measure": "arch-difference/2.0.0",
+   "dimensions": [
+    "zoning",
+    "circulation",
+    "privacy",
+    "relations"
+   ],
+   "thresholds": {
+    "zoning": 0.25,
+    "circulation": 0.25,
+    "privacy": 0.2,
+    "relations": 0.2
+   },
+   "distinctMinSubstantive": 2,
+   "notCounted": [
+    "translation",
+    "scale",
+    "mirror",
+    "facade",
+    "envelope",
+    "stairPosition"
+   ],
+   "newAlternative": "distinct-from-every-previous-alternative-of-the-same-case"
+  },
+  "perCase": [
+   {
+    "case": "C1",
+    "after-18": 1,
+    "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C2",
+    "after-18": 1,
+    "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C3",
+    "after-18": 1,
+    "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C4",
+    "after-18": 1,
+    "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C5",
+    "after-18": 3,
+    "after-19": 3,
+    "correctOld": 2,
+    "correctNew": 3,
+    "distinctCorrectOld": 2,
+    "distinctCorrectNew": 3,
+    "newSuccessful": 0,
+    "minPairTotal": 0.233,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C6",
+    "after-18": 1,
+    "after-19": 1,
+    "correctOld": 0,
+    "correctNew": 1,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C7",
+    "after-18": 2,
+    "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C8",
+    "after-18": 2,
+    "after-19": 3,
+    "correctOld": 2,
+    "correctNew": 3,
+    "distinctCorrectOld": 2,
+    "distinctCorrectNew": 3,
+    "newSuccessful": 1,
+    "minPairTotal": 0.186,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C9",
+    "after-18": 3,
+    "after-19": 4,
+    "correctOld": 3,
+    "correctNew": 4,
+    "distinctCorrectOld": 3,
+    "distinctCorrectNew": 4,
+    "newSuccessful": 1,
+    "minPairTotal": 0.167,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "C10",
+    "after-18": 2,
+    "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   }
+  ],
+  "totalNewSuccessful": 2,
+  "totals": {
+   "correctOld": 13,
+   "correctNew": 17,
+   "distinctCorrectOld": 13,
+   "distinctCorrectNew": 17
+  }
+ },
+ "rows": [
+  {
+   "case": "C1",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C1-1",
+     "pat": "yoo:u0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C1-1",
+      "oldPat": "yoo:u0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C1-1",
+     "vsOld": [
+      {
+       "old": "C1-1",
+       "oldPat": "yoo:u0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "C2",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C2-1",
+     "pat": "hplan:hh2",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C2-1",
+      "oldPat": "hplan:hh2",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C2-1",
+     "vsOld": [
+      {
+       "old": "C2-1",
+       "oldPat": "hplan:hh2",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "C3",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C3-1",
+     "pat": "ell:l0p",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C3-1",
+      "oldPat": "ell:l0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.071,
+      "dims": {
+       "zoning": 0.066,
+       "circulation": 0.117,
+       "privacy": 0.075,
+       "relations": 0.028
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C3-1",
+     "vsOld": [
+      {
+       "old": "C3-1",
+       "oldPat": "ell:l0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.071,
+       "dims": {
+        "zoning": 0.066,
+        "circulation": 0.117,
+        "privacy": 0.075,
+        "relations": 0.028
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "C4",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C4-1",
+     "pat": "tcore:n7w",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C4-1",
+      "oldPat": "tcore:n7w",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.003,
+      "dims": {
+       "zoning": 0.009,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C4-1",
+     "vsOld": [
+      {
+       "old": "C4-1",
+       "oldPat": "tcore:n7w",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.003,
+       "dims": {
+        "zoning": 0.009,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "C5",
+   "old": 3,
+   "new": 3,
+   "oldShown": 3,
+   "oldCorrect": 2,
+   "oldDistinctCorrect": 2,
+   "correct": 3,
+   "distinctCorrect": 3,
+   "successful": 3,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C5-1",
+     "pat": "cornerentry:e0t",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C5-1",
+      "oldPat": "cornerentry:e0t",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C5-1",
+     "vsOld": [
+      {
+       "old": "C5-1",
+       "oldPat": "cornerentry:e0t",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C5-2",
+       "oldPat": "hallback:h0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "privacy"
+       ],
+       "total": 0.219,
+       "dims": {
+        "zoning": 0.35,
+        "circulation": 0.175,
+        "privacy": 0.25,
+        "relations": 0.083
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.738 ← 0.862، نسبة العرض للعمق 1.032 ← 0.625)"
+       ]
+      },
+      {
+       "old": "C5-3",
+       "oldPat": "split:s0rt",
+       "verdict": "distinct",
+       "substantive": [
+        "privacy",
+        "relations"
+       ],
+       "total": 0.231,
+       "dims": {
+        "zoning": 0.194,
+        "circulation": 0.233,
+        "privacy": 0.26,
+        "relations": 0.25
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.669 ← 0.862، نسبة العرض للعمق 0.949 ← 0.625)"
+       ]
+      }
+     ]
+    },
+    {
+     "alt": "C5-2",
+     "pat": "split:s0rt",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C5-3",
+      "oldPat": "split:s0rt",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.009,
+      "dims": {
+       "zoning": 0.029,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C5-3",
+     "vsOld": [
+      {
+       "old": "C5-3",
+       "oldPat": "split:s0rt",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.009,
+       "dims": {
+        "zoning": 0.029,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C5-1",
+       "oldPat": "cornerentry:e0t",
+       "verdict": "distinct",
+       "substantive": [
+        "privacy",
+        "relations"
+       ],
+       "total": 0.233,
+       "dims": {
+        "zoning": 0.202,
+        "circulation": 0.233,
+        "privacy": 0.26,
+        "relations": 0.25
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.862 ← 0.662، نسبة العرض للعمق 0.625 ← 0.9)"
+       ]
+      },
+      {
+       "old": "C5-2",
+       "oldPat": "hallback:h0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "relations"
+       ],
+       "total": 0.266,
+       "dims": {
+        "zoning": 0.3,
+        "circulation": 0.383,
+        "privacy": 0.125,
+        "relations": 0.222
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.738 ← 0.662، نسبة العرض للعمق 1.032 ← 0.9)"
+       ]
+      }
+     ]
+    },
+    {
+     "alt": "C5-3",
+     "pat": "centralhall:ch3",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C5-2",
+      "oldPat": "hallback:h0",
+      "verdict": "partial",
+      "substantive": [
+       "circulation"
+      ],
+      "total": 0.189,
+      "dims": {
+       "zoning": 0.168,
+       "circulation": 0.5,
+       "privacy": 0,
+       "relations": 0.056
+      },
+      "ignored": []
+     },
+     "sameAsOld": null,
+     "vsOld": [
+      {
+       "old": "C5-2",
+       "oldPat": "hallback:h0",
+       "verdict": "partial",
+       "substantive": [
+        "circulation"
+       ],
+       "total": 0.189,
+       "dims": {
+        "zoning": 0.168,
+        "circulation": 0.5,
+        "privacy": 0,
+        "relations": 0.056
+       },
+       "ignored": []
+      },
+      {
+       "old": "C5-1",
+       "oldPat": "cornerentry:e0t",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "privacy"
+       ],
+       "total": 0.292,
+       "dims": {
+        "zoning": 0.303,
+        "circulation": 0.575,
+        "privacy": 0.25,
+        "relations": 0.028
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.862 ← 0.779، نسبة العرض للعمق 0.625 ← 1.042)"
+       ]
+      },
+      {
+       "old": "C5-3",
+       "oldPat": "split:s0rt",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "relations"
+       ],
+       "total": 0.351,
+       "dims": {
+        "zoning": 0.319,
+        "circulation": 0.7,
+        "privacy": 0.125,
+        "relations": 0.222
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.669 ← 0.779، نسبة العرض للعمق 0.949 ← 1.042)"
+       ]
+      }
+     ]
+    }
+   ],
+   "pairs": [
+    {
+     "pair": [
+      "C5-1",
+      "C5-2"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "privacy",
+      "relations"
+     ],
+     "total": 0.233,
+     "dims": {
+      "zoning": 0.202,
+      "circulation": 0.233,
+      "privacy": 0.26,
+      "relations": 0.25
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.862 ← 0.662، نسبة العرض للعمق 0.625 ← 0.9)"
+     ]
+    },
+    {
+     "pair": [
+      "C5-1",
+      "C5-3"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation",
+      "privacy"
+     ],
+     "total": 0.292,
+     "dims": {
+      "zoning": 0.303,
+      "circulation": 0.575,
+      "privacy": 0.25,
+      "relations": 0.028
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.862 ← 0.779، نسبة العرض للعمق 0.625 ← 1.042)"
+     ]
+    },
+    {
+     "pair": [
+      "C5-2",
+      "C5-3"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation",
+      "relations"
+     ],
+     "total": 0.349,
+     "dims": {
+      "zoning": 0.313,
+      "circulation": 0.7,
+      "privacy": 0.125,
+      "relations": 0.222
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.662 ← 0.779، نسبة العرض للعمق 0.9 ← 1.042)"
+     ]
+    }
+   ]
+  },
+  {
+   "case": "C6",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C6-1",
+     "pat": "sidecourt:sc0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C6-1",
+      "oldPat": "sidecourt:sc0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.075,
+      "dims": {
+       "zoning": 0.036,
+       "circulation": 0.05,
+       "privacy": 0.187,
+       "relations": 0.056
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C6-1",
+     "vsOld": [
+      {
+       "old": "C6-1",
+       "oldPat": "sidecourt:sc0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.075,
+       "dims": {
+        "zoning": 0.036,
+        "circulation": 0.05,
+        "privacy": 0.187,
+        "relations": 0.056
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "C7",
+   "old": 2,
+   "new": 1,
+   "oldShown": 2,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C7-1",
+     "pat": "frontstair:fsg3/uspine",
+     "status": "needs-edits",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C7-1",
+      "oldPat": "frontstair:fsg3/uspine",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C7-1",
+     "vsOld": [
+      {
+       "old": "C7-1",
+       "oldPat": "frontstair:fsg3/uspine",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C7-2",
+       "oldPat": "frontstair:fs3/uspine",
+       "verdict": "partial",
+       "substantive": [
+        "privacy"
+       ],
+       "total": 0.13,
+       "dims": {
+        "zoning": 0.138,
+        "circulation": 0.03,
+        "privacy": 0.255,
+        "relations": 0.12
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "C8",
+   "old": 2,
+   "new": 3,
+   "oldShown": 2,
+   "oldCorrect": 2,
+   "oldDistinctCorrect": 2,
+   "correct": 3,
+   "distinctCorrect": 3,
+   "successful": 3,
+   "newSuccessful": 1,
+   "alts": [
+    {
+     "alt": "C8-1",
+     "pat": "sidecourt:sc0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C8-1",
+      "oldPat": "sidecourt:sc0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.004,
+      "dims": {
+       "zoning": 0.012,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C8-1",
+     "vsOld": [
+      {
+       "old": "C8-1",
+       "oldPat": "sidecourt:sc0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.004,
+       "dims": {
+        "zoning": 0.012,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C8-2",
+       "oldPat": "guestblock:gb0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "privacy"
+       ],
+       "total": 0.205,
+       "dims": {
+        "zoning": 0.387,
+        "circulation": 0.1,
+        "privacy": 0.25,
+        "relations": 0.056
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.879 ← 0.8، نسبة العرض للعمق 0.83 ← 0.985)"
+       ]
+      }
+     ]
+    },
+    {
+     "alt": "C8-2",
+     "pat": "guestblock:gb0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C8-2",
+      "oldPat": "guestblock:gb0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.082,
+      "dims": {
+       "zoning": 0.09,
+       "circulation": 0.075,
+       "privacy": 0.078,
+       "relations": 0.083
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C8-2",
+     "vsOld": [
+      {
+       "old": "C8-2",
+       "oldPat": "guestblock:gb0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.082,
+       "dims": {
+        "zoning": 0.09,
+        "circulation": 0.075,
+        "privacy": 0.078,
+        "relations": 0.083
+       },
+       "ignored": []
+      },
+      {
+       "old": "C8-1",
+       "oldPat": "sidecourt:sc0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "privacy"
+       ],
+       "total": 0.272,
+       "dims": {
+        "zoning": 0.426,
+        "circulation": 0.175,
+        "privacy": 0.328,
+        "relations": 0.139
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.809 ← 0.852، نسبة العرض للعمق 1.022 ← 0.847)"
+       ]
+      }
+     ]
+    },
+    {
+     "alt": "C8-3",
+     "pat": "split:s0r",
+     "status": "ready",
+     "successful": true,
+     "new": true,
+     "successfulNew": true,
+     "correct": true,
+     "closestOld": {
+      "old": "C8-1",
+      "oldPat": "sidecourt:sc0",
+      "verdict": "distinct",
+      "substantive": [
+       "zoning",
+       "circulation"
+      ],
+      "total": 0.189,
+      "dims": {
+       "zoning": 0.337,
+       "circulation": 0.25,
+       "privacy": 0.094,
+       "relations": 0.028
+      },
+      "ignored": [
+       "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.809 ← 0.724، نسبة العرض للعمق 1.022 ← 0.703)"
+      ]
+     },
+     "sameAsOld": null,
+     "vsOld": [
+      {
+       "old": "C8-1",
+       "oldPat": "sidecourt:sc0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation"
+       ],
+       "total": 0.189,
+       "dims": {
+        "zoning": 0.337,
+        "circulation": 0.25,
+        "privacy": 0.094,
+        "relations": 0.028
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.809 ← 0.724، نسبة العرض للعمق 1.022 ← 0.703)"
+       ]
+      },
+      {
+       "old": "C8-2",
+       "oldPat": "guestblock:gb0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "privacy"
+       ],
+       "total": 0.215,
+       "dims": {
+        "zoning": 0.252,
+        "circulation": 0.25,
+        "privacy": 0.281,
+        "relations": 0.083
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.879 ← 0.724، نسبة العرض للعمق 0.83 ← 0.703)"
+       ]
+      }
+     ]
+    }
+   ],
+   "pairs": [
+    {
+     "pair": [
+      "C8-1",
+      "C8-2"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "privacy"
+     ],
+     "total": 0.269,
+     "dims": {
+      "zoning": 0.416,
+      "circulation": 0.175,
+      "privacy": 0.328,
+      "relations": 0.139
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.8 ← 0.852، نسبة العرض للعمق 0.985 ← 0.847)"
+     ]
+    },
+    {
+     "pair": [
+      "C8-1",
+      "C8-3"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation"
+     ],
+     "total": 0.186,
+     "dims": {
+      "zoning": 0.327,
+      "circulation": 0.25,
+      "privacy": 0.094,
+      "relations": 0.028
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.8 ← 0.724، نسبة العرض للعمق 0.985 ← 0.703)"
+     ]
+    },
+    {
+     "pair": [
+      "C8-2",
+      "C8-3"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "privacy"
+     ],
+     "total": 0.222,
+     "dims": {
+      "zoning": 0.256,
+      "circulation": 0.175,
+      "privacy": 0.297,
+      "relations": 0.167
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.852 ← 0.724، نسبة العرض للعمق 0.847 ← 0.703)"
+     ]
+    }
+   ]
+  },
+  {
+   "case": "C9",
+   "old": 3,
+   "new": 4,
+   "oldShown": 3,
+   "oldCorrect": 3,
+   "oldDistinctCorrect": 3,
+   "correct": 4,
+   "distinctCorrect": 4,
+   "successful": 4,
+   "newSuccessful": 1,
+   "alts": [
+    {
+     "alt": "C9-1",
+     "pat": "guestblock:gb0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C9-1",
+      "oldPat": "guestblock:gb0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C9-1",
+     "vsOld": [
+      {
+       "old": "C9-1",
+       "oldPat": "guestblock:gb0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C9-3",
+       "oldPat": "split:s0r",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "privacy"
+       ],
+       "total": 0.167,
+       "dims": {
+        "zoning": 0.269,
+        "circulation": 0.05,
+        "privacy": 0.266,
+        "relations": 0.083
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.715 ← 0.899، نسبة العرض للعمق 0.754 ← 0.723)"
+       ]
+      },
+      {
+       "old": "C9-2",
+       "oldPat": "hallback:h0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "privacy"
+       ],
+       "total": 0.279,
+       "dims": {
+        "zoning": 0.434,
+        "circulation": 0.25,
+        "privacy": 0.328,
+        "relations": 0.083
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.722 ← 0.899، نسبة العرض للعمق 0.988 ← 0.723)"
+       ]
+      }
+     ]
+    },
+    {
+     "alt": "C9-2",
+     "pat": "hallback:h0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C9-2",
+      "oldPat": "hallback:h0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C9-2",
+     "vsOld": [
+      {
+       "old": "C9-2",
+       "oldPat": "hallback:h0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C9-3",
+       "oldPat": "split:s0r",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation"
+       ],
+       "total": 0.2,
+       "dims": {
+        "zoning": 0.287,
+        "circulation": 0.3,
+        "privacy": 0.125,
+        "relations": 0.056
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.715 ← 0.722، نسبة العرض للعمق 0.754 ← 0.988)"
+       ]
+      },
+      {
+       "old": "C9-1",
+       "oldPat": "guestblock:gb0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "privacy"
+       ],
+       "total": 0.279,
+       "dims": {
+        "zoning": 0.434,
+        "circulation": 0.25,
+        "privacy": 0.328,
+        "relations": 0.083
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.722، نسبة العرض للعمق 0.723 ← 0.988)"
+       ]
+      }
+     ]
+    },
+    {
+     "alt": "C9-3",
+     "pat": "split:s0r",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C9-3",
+      "oldPat": "split:s0r",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0.008,
+      "dims": {
+       "zoning": 0.025,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C9-3",
+     "vsOld": [
+      {
+       "old": "C9-3",
+       "oldPat": "split:s0r",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0.008,
+       "dims": {
+        "zoning": 0.025,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C9-1",
+       "oldPat": "guestblock:gb0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "privacy"
+       ],
+       "total": 0.167,
+       "dims": {
+        "zoning": 0.268,
+        "circulation": 0.05,
+        "privacy": 0.266,
+        "relations": 0.083
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.709، نسبة العرض للعمق 0.723 ← 0.861)"
+       ]
+      },
+      {
+       "old": "C9-2",
+       "oldPat": "hallback:h0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation"
+       ],
+       "total": 0.204,
+       "dims": {
+        "zoning": 0.301,
+        "circulation": 0.3,
+        "privacy": 0.125,
+        "relations": 0.056
+       },
+       "ignored": []
+      }
+     ]
+    },
+    {
+     "alt": "C9-4",
+     "pat": "twincourt:tc0",
+     "status": "needs-edits",
+     "successful": true,
+     "new": true,
+     "successfulNew": true,
+     "correct": true,
+     "closestOld": {
+      "old": "C9-1",
+      "oldPat": "guestblock:gb0",
+      "verdict": "distinct",
+      "substantive": [
+       "zoning",
+       "circulation",
+       "relations"
+      ],
+      "total": 0.258,
+      "dims": {
+       "zoning": 0.35,
+       "circulation": 0.258,
+       "privacy": 0.094,
+       "relations": 0.278
+      },
+      "ignored": [
+       "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.662، نسبة العرض للعمق 0.723 ← 0.78)"
+      ]
+     },
+     "sameAsOld": null,
+     "vsOld": [
+      {
+       "old": "C9-1",
+       "oldPat": "guestblock:gb0",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "relations"
+       ],
+       "total": 0.258,
+       "dims": {
+        "zoning": 0.35,
+        "circulation": 0.258,
+        "privacy": 0.094,
+        "relations": 0.278
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.662، نسبة العرض للعمق 0.723 ← 0.78)"
+       ]
+      },
+      {
+       "old": "C9-3",
+       "oldPat": "split:s0r",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "privacy",
+        "relations"
+       ],
+       "total": 0.288,
+       "dims": {
+        "zoning": 0.314,
+        "circulation": 0.308,
+        "privacy": 0.203,
+        "relations": 0.306
+       },
+       "ignored": []
+      },
+      {
+       "old": "C9-2",
+       "oldPat": "hallback:h0",
+       "verdict": "distinct",
+       "substantive": [
+        "circulation",
+        "privacy",
+        "relations"
+       ],
+       "total": 0.32,
+       "dims": {
+        "zoning": 0.135,
+        "circulation": 0.496,
+        "privacy": 0.328,
+        "relations": 0.361
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.722 ← 0.662، نسبة العرض للعمق 0.988 ← 0.78)"
+       ]
+      }
+     ]
+    }
+   ],
+   "pairs": [
+    {
+     "pair": [
+      "C9-1",
+      "C9-2"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation",
+      "privacy"
+     ],
+     "total": 0.279,
+     "dims": {
+      "zoning": 0.434,
+      "circulation": 0.25,
+      "privacy": 0.328,
+      "relations": 0.083
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.722، نسبة العرض للعمق 0.723 ← 0.988)"
+     ]
+    },
+    {
+     "pair": [
+      "C9-1",
+      "C9-3"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "privacy"
+     ],
+     "total": 0.167,
+     "dims": {
+      "zoning": 0.268,
+      "circulation": 0.05,
+      "privacy": 0.266,
+      "relations": 0.083
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.709، نسبة العرض للعمق 0.723 ← 0.861)"
+     ]
+    },
+    {
+     "pair": [
+      "C9-1",
+      "C9-4"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation",
+      "relations"
+     ],
+     "total": 0.258,
+     "dims": {
+      "zoning": 0.35,
+      "circulation": 0.258,
+      "privacy": 0.094,
+      "relations": 0.278
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.899 ← 0.662، نسبة العرض للعمق 0.723 ← 0.78)"
+     ]
+    },
+    {
+     "pair": [
+      "C9-2",
+      "C9-3"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation"
+     ],
+     "total": 0.204,
+     "dims": {
+      "zoning": 0.301,
+      "circulation": 0.3,
+      "privacy": 0.125,
+      "relations": 0.056
+     },
+     "ignored_ar": []
+    },
+    {
+     "pair": [
+      "C9-2",
+      "C9-4"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "circulation",
+      "privacy",
+      "relations"
+     ],
+     "total": 0.32,
+     "dims": {
+      "zoning": 0.135,
+      "circulation": 0.496,
+      "privacy": 0.328,
+      "relations": 0.361
+     },
+     "ignored_ar": [
+      "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.722 ← 0.662، نسبة العرض للعمق 0.988 ← 0.78)"
+     ]
+    },
+    {
+     "pair": [
+      "C9-3",
+      "C9-4"
+     ],
+     "verdict": "distinct",
+     "substantive": [
+      "zoning",
+      "circulation",
+      "privacy",
+      "relations"
+     ],
+     "total": 0.293,
+     "dims": {
+      "zoning": 0.33,
+      "circulation": 0.308,
+      "privacy": 0.203,
+      "relations": 0.306
+     },
+     "ignored_ar": []
+    }
+   ]
+  },
+  {
+   "case": "C10",
+   "old": 2,
+   "new": 1,
+   "oldShown": 2,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
+   "successful": 1,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "C10-1",
+     "pat": "sidecourt:sc0",
+     "status": "ready",
+     "successful": true,
+     "new": false,
+     "successfulNew": false,
+     "correct": true,
+     "closestOld": {
+      "old": "C10-1",
+      "oldPat": "sidecourt:sc0",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "C10-1",
+     "vsOld": [
+      {
+       "old": "C10-1",
+       "oldPat": "sidecourt:sc0",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      },
+      {
+       "old": "C10-2",
+       "oldPat": "courtyard:k1",
+       "verdict": "distinct",
+       "substantive": [
+        "circulation",
+        "privacy"
+       ],
+       "total": 0.211,
+       "dims": {
+        "zoning": 0.174,
+        "circulation": 0.306,
+        "privacy": 0.231,
+        "relations": 0.144
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.861 ← 0.84، نسبة العرض للعمق 0.71 ← 0.829)"
+       ]
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  }
+ ]
+}

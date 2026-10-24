@@ -98,7 +98,8 @@ test('PLACEMENT: «المطبخ في الخلف» يُقاس من المستند
 });
 
 test('DISTINCT: النسخة المعكوسة من بديل تُرفض في reviewDesigns({distinct}) ولا تُرفض بدونه', () => {
-  const b = doc('C10', 'alt-2.json'), m = mirrorX(b.doc);
+  // (الجولة التاسعة عشرة) after-19 C10 بديل واحد (alt-2 لم يعد موجودًا) — الاختبار على النسخة المعكوسة لأي بديل
+  const b = doc('C10', 'alt-1.json'), m = mirrorX(b.doc);
   const plain = R.reviewDesigns([b.doc, m], b.request, { external: false });
   assert.ok(plain.every(r => r.passed));
   const out = R.reviewDesigns([b.doc, m], b.request, { external: false, distinct: true });

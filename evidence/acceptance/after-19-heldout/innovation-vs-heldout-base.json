@@ -1,0 +1,311 @@
+{
+ "summary": {
+  "note_ar": "البديل «جديد» إن كان مختلفًا معماريًا (بعدان جوهريان ≥ العتبات {\"zoning\":0.25,\"circulation\":0.25,\"privacy\":0.2,\"relations\":0.2}) عن كل بديل للحالة نفسها في heldout-base. الواجهة وشكل الغلاف وموضع السلم لا تُحتسب بذاتها.",
+  "old": "heldout-base",
+  "new": "after-19-heldout",
+  "criterion": {
+   "version": "arch-criterion/r19.1",
+   "measure": "arch-difference/2.0.0",
+   "dimensions": [
+    "zoning",
+    "circulation",
+    "privacy",
+    "relations"
+   ],
+   "thresholds": {
+    "zoning": 0.25,
+    "circulation": 0.25,
+    "privacy": 0.2,
+    "relations": 0.2
+   },
+   "distinctMinSubstantive": 2,
+   "notCounted": [
+    "translation",
+    "scale",
+    "mirror",
+    "facade",
+    "envelope",
+    "stairPosition"
+   ],
+   "newAlternative": "distinct-from-every-previous-alternative-of-the-same-case"
+  },
+  "perCase": [
+   {
+    "case": "H1",
+    "heldout-base": 1,
+    "after-19-heldout": 0,
+    "correctOld": 0,
+    "correctNew": 0,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 0,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "H2",
+    "heldout-base": 0,
+    "after-19-heldout": 0,
+    "correctOld": 0,
+    "correctNew": 0,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 0,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "H3",
+    "heldout-base": 0,
+    "after-19-heldout": 0,
+    "correctOld": 0,
+    "correctNew": 0,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 0,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "H4",
+    "heldout-base": 0,
+    "after-19-heldout": 0,
+    "correctOld": 0,
+    "correctNew": 0,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 0,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   },
+   {
+    "case": "H5",
+    "heldout-base": 1,
+    "after-19-heldout": 0,
+    "correctOld": 0,
+    "correctNew": 0,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 0,
+    "newSuccessful": 0,
+    "minPairTotal": null,
+    "allPairsDistinct": true
+   }
+  ],
+  "totalNewSuccessful": 0,
+  "totals": {
+   "correctOld": 0,
+   "correctNew": 0,
+   "distinctCorrectOld": 0,
+   "distinctCorrectNew": 0
+  }
+ },
+ "rows": [
+  {
+   "case": "H1",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 0,
+   "distinctCorrect": 0,
+   "successful": 0,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "H1-1",
+     "pat": "centralhall:ch2",
+     "status": "hidden",
+     "successful": false,
+     "new": false,
+     "successfulNew": false,
+     "correct": false,
+     "closestOld": {
+      "old": "H1-1",
+      "oldPat": "centralhall:ch2",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "H1-1",
+     "vsOld": [
+      {
+       "old": "H1-1",
+       "oldPat": "centralhall:ch2",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "H2",
+   "old": 1,
+   "new": 1,
+   "oldShown": 0,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 0,
+   "distinctCorrect": 0,
+   "successful": 0,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "H2-1",
+     "pat": "ell:n10",
+     "status": "hidden",
+     "successful": false,
+     "new": false,
+     "successfulNew": false,
+     "correct": false,
+     "closestOld": {
+      "old": "H2-1",
+      "oldPat": "ell:n10",
+      "verdict": "variant",
+      "substantive": [],
+      "total": 0,
+      "dims": {
+       "zoning": 0,
+       "circulation": 0,
+       "privacy": 0,
+       "relations": 0
+      },
+      "ignored": []
+     },
+     "sameAsOld": "H2-1",
+     "vsOld": [
+      {
+       "old": "H2-1",
+       "oldPat": "ell:n10",
+       "verdict": "variant",
+       "substantive": [],
+       "total": 0,
+       "dims": {
+        "zoning": 0,
+        "circulation": 0,
+        "privacy": 0,
+        "relations": 0
+       },
+       "ignored": []
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  },
+  {
+   "case": "H3",
+   "old": 0,
+   "new": 0,
+   "oldShown": 0,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 0,
+   "distinctCorrect": 0,
+   "successful": 0,
+   "newSuccessful": 0,
+   "alts": [],
+   "pairs": []
+  },
+  {
+   "case": "H4",
+   "old": 0,
+   "new": 0,
+   "oldShown": 0,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 0,
+   "distinctCorrect": 0,
+   "successful": 0,
+   "newSuccessful": 0,
+   "alts": [],
+   "pairs": []
+  },
+  {
+   "case": "H5",
+   "old": 1,
+   "new": 1,
+   "oldShown": 1,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 0,
+   "distinctCorrect": 0,
+   "successful": 0,
+   "newSuccessful": 0,
+   "alts": [
+    {
+     "alt": "H5-1",
+     "pat": "yoo:u0r",
+     "status": "hidden",
+     "successful": false,
+     "new": true,
+     "successfulNew": false,
+     "correct": false,
+     "closestOld": {
+      "old": "H5-1",
+      "oldPat": "courtyard:k1",
+      "verdict": "distinct",
+      "substantive": [
+       "zoning",
+       "circulation",
+       "privacy",
+       "relations"
+      ],
+      "total": 0.322,
+      "dims": {
+       "zoning": 0.357,
+       "circulation": 0.306,
+       "privacy": 0.242,
+       "relations": 0.361
+      },
+      "ignored": [
+       "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.755 ← 0.729، نسبة العرض للعمق 0.627 ← 0.849)"
+      ]
+     },
+     "sameAsOld": null,
+     "vsOld": [
+      {
+       "old": "H5-1",
+       "oldPat": "courtyard:k1",
+       "verdict": "distinct",
+       "substantive": [
+        "zoning",
+        "circulation",
+        "privacy",
+        "relations"
+       ],
+       "total": 0.322,
+       "dims": {
+        "zoning": 0.357,
+        "circulation": 0.306,
+        "privacy": 0.242,
+        "relations": 0.361
+       },
+       "ignored": [
+        "الدور الأرضي: شكل الغلاف تغيّر (الامتلاء 0.755 ← 0.729، نسبة العرض للعمق 0.627 ← 0.849)"
+       ]
+      }
+     ]
+    }
+   ],
+   "pairs": []
+  }
+ ]
+}

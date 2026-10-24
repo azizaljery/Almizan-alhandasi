@@ -113,7 +113,8 @@ test('خمسة بدائل مطلوبة: ثلاثة على الأقل بأنما�
   const r = req('4 غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، طعام، مطبخ، غرفة خادمة', counts);
   const out = generateVillaDesigns({ land: L(20, 30), counts: r.counts, requirements: r, keep: 5 });
   // (الجولة الثامنة عشرة) بديلان (التنظيمات التي يعبر فيها ضيف الرجال العائلة لا تُعرض، والبقية نسخ معدّلة)، والنقص مذكور بسببه
-  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`); if (out.designs.length < 5) assert.match(out.shortfall_ar || '', /ضيف الرجال/);
+  // (الجولة التاسعة عشرة) والموقف الموازي الضحل مخالفة إلزامية: الحوش أُعيد حله بموقف عمودي فصار «اختلافًا جزئيًا» عن المعروض — بديل واحد والسبب مذكور
+  assert.ok(out.designs.length >= 1, `البدائل ${out.designs.length}`); if (out.designs.length < 5) assert.match(out.shortfall_ar || '', /ضيف الرجال|جزئي/);
   assert.equal(new Set(out.designs.map(d => d.mode)).size, out.designs.length, 'كل بديل من نمط مختلف');
   const n = out.designs.length; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16);
   if (n < 5) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);

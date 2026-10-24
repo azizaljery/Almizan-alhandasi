@@ -1,18 +1,18 @@
 {
- "stage": "after-18",
+ "stage": "after-19",
  "summary": {
   "note_ar": "كشف أنواع العيوب الجديدة (privacy-defects.mjs): الإيجابيات الحقيقية من حكم المراجع المستقل r15 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، والمصنوعة بتحوير واحد على بدائل «جاهزة»، والسلبيات هي البدائل الجاهزة كما هي.",
-  "positives": 49,
-  "detected": 49,
-  "positivesNotReady": 49,
+  "positives": 54,
+  "detected": 54,
+  "positivesNotReady": 54,
   "byType": {
-   "WINDOW_PARKING": "21/21",
+   "WINDOW_PARKING": "24/24",
    "HALL_STREET": "2/2",
-   "GUEST_DINING": "18/18",
+   "GUEST_DINING": "20/20",
    "MASTER_VIA_DRESS": "6/6",
    "PARKING_SHALLOW": "2/2"
   },
-  "negatives": 12,
+  "negatives": 15,
   "falsePositives": 0,
   "missed": []
  },
@@ -37,7 +37,7 @@
     "HALL_STREET",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -49,7 +49,7 @@
     "HALL_STREET",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -61,7 +61,7 @@
     "HALL_STREET",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -83,7 +83,7 @@
     "GUEST_DINING",
     "HALL_SMALL"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -92,9 +92,11 @@
    "detected": true,
    "got": [
     "WINDOW_PARKING",
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "WET_STACK",
+    "MASTER_STAIR_DOOR"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -103,9 +105,11 @@
    "detected": true,
    "got": [
     "WINDOW_PARKING",
-    "GUEST_DINING"
+    "GUEST_DINING",
+    "WET_STACK",
+    "MASTER_STAIR_DOOR"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -159,7 +163,7 @@
     "WINDOW_PARKING",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -170,7 +174,7 @@
     "WINDOW_PARKING",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -193,7 +197,7 @@
     "HALL_STREET",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -205,7 +209,7 @@
     "HALL_STREET",
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -216,7 +220,7 @@
     "WINDOW_PARKING",
     "PARKING_SHALLOW"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -227,7 +231,7 @@
     "WINDOW_PARKING",
     "PARKING_SHALLOW"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -237,7 +241,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -249,7 +253,7 @@
     "GUEST_DINING",
     "HALL_SMALL"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "real-r15",
@@ -259,7 +263,7 @@
    "got": [
     "PARKING_SHALLOW"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -289,7 +293,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -319,7 +323,67 @@
    "got": [
     "GUEST_DINING"
    ],
+   "status": "hidden"
+  },
+  {
+   "kind": "clean",
+   "alt": "C3/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C3/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
    "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C3/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "hidden"
+  },
+  {
+   "kind": "clean",
+   "alt": "C4/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C4/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C4/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -349,7 +413,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -379,11 +443,11 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
-   "alt": "C6/alt-1.json",
+   "alt": "C5/alt-3.json",
    "expected": null,
    "detected": false,
    "got": [],
@@ -391,7 +455,7 @@
   },
   {
    "kind": "synthetic",
-   "alt": "C6/alt-1.json",
+   "alt": "C5/alt-3.json",
    "mutation": "موقف أمام نافذة «صالة الطعام والمقلط»",
    "expected": "WINDOW_PARKING",
    "detected": true,
@@ -402,6 +466,36 @@
   },
   {
    "kind": "synthetic",
+   "alt": "C5/alt-3.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "hidden"
+  },
+  {
+   "kind": "clean",
+   "alt": "C6/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C6/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
    "alt": "C6/alt-1.json",
    "mutation": "حذف باب المقلط بين المجلس والطعام",
    "expected": "GUEST_DINING",
@@ -409,7 +503,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "synthetic",
@@ -424,36 +518,6 @@
   },
   {
    "kind": "clean",
-   "alt": "C7/alt-1.json",
-   "expected": null,
-   "detected": false,
-   "got": [],
-   "status": "ready"
-  },
-  {
-   "kind": "synthetic",
-   "alt": "C7/alt-1.json",
-   "mutation": "موقف أمام نافذة «الصالة»",
-   "expected": "WINDOW_PARKING",
-   "detected": true,
-   "got": [
-    "WINDOW_PARKING"
-   ],
-   "status": "needs-edits"
-  },
-  {
-   "kind": "synthetic",
-   "alt": "C7/alt-1.json",
-   "mutation": "حذف باب المقلط بين المجلس والطعام",
-   "expected": "GUEST_DINING",
-   "detected": true,
-   "got": [
-    "GUEST_DINING"
-   ],
-   "status": "needs-edits"
-  },
-  {
-   "kind": "clean",
    "alt": "C8/alt-1.json",
    "expected": null,
    "detected": false,
@@ -480,7 +544,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "synthetic",
@@ -513,15 +577,34 @@
    "status": "needs-edits"
   },
   {
+   "kind": "clean",
+   "alt": "C8/alt-3.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
    "kind": "synthetic",
-   "alt": "C8/alt-2.json",
+   "alt": "C8/alt-3.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-3.json",
    "mutation": "حذف باب المقلط بين المجلس والطعام",
    "expected": "GUEST_DINING",
    "detected": true,
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -551,7 +634,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -581,7 +664,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -611,7 +694,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "clean",
@@ -641,7 +724,7 @@
    "got": [
     "GUEST_DINING"
    ],
-   "status": "needs-edits"
+   "status": "hidden"
   },
   {
    "kind": "synthetic",

@@ -17,12 +17,24 @@ export const R16_DEFECTS = Object.freeze({
   WINDOW_PARKING: { ar: 'نافذة غرفة خاصة تطل على ساحة المواقف أو البوابة (أقل من 3 م) بلا حجب', tier: 'architectural' },
   HALL_STREET: { ar: 'نافذة الصالة العائلية تطل على فناء أمامي مفتوح على الشارع بلا حجب', tier: 'architectural' },
   MASTER_VIA_DRESS: { ar: 'جناح النوم الرئيسي لا يُدخل إلا من الصالة عبر غرفة الملابس أو الحمام', tier: 'architectural' },
-  GUEST_DINING: { ar: 'ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام', tier: 'saudi-preference' },
-  PARKING_SHALLOW: { ar: 'موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة', tier: 'architectural' },
+  GUEST_DINING: { ar: 'ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام', tier: 'mizan-mandatory' },
+  PARKING_SHALLOW: { ar: 'موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة', tier: 'mizan-mandatory' },
   // (الجولة السابعة عشرة) — القياس أسفل الملف (measureHall)
   HALL_SMALL: { ar: 'الصالة العائلية صغيرة نسبةً إلى مجلس الرجال (أقل من 0.8 من مساحته)', tier: 'architectural' },
   HALL_THROUGH: { ar: 'الصالة العائلية ممر عابر: مسارات الحركة الرئيسية لا تترك فيها جلسة عائلية 3.0 × 3.6 م', tier: 'architectural' },
+  // (الجولة التاسعة عشرة) — القياس أسفل الملف (measureUpper)
+  WET_STACK: { ar: 'حمام في الدور العلوي فوق فراغ جاف حساس في الأرضي (مجلس، طعام، مدخل، صالة، نوم) لا فوق رطب أو خدمة', tier: 'architectural' },
+  MASTER_STAIR_DOOR: { ar: 'باب الغرفة الرئيسية على الفراغ المفتوح الذي يصل إليه الدرج (والعميل طلبها بعيدة عن الدرج)', tier: 'architectural' },
 });
+/**
+ * (الجولة التاسعة عشرة، توجيه المالك) العيوب التي تُعامل «مخالفة إلزامية» في الميزان: لا يُعرض البديل صالحًا أيًّا كانت درجته (محجوب).
+ *  - GUEST_DINING: خصوصية العائلة — ضيف الرجال يعبر منطقة العائلة إلى الطعام (يُعفى بطلب العميل فصل المجلس عن الطعام).
+ *  - PARKING_SHALLOW: موقف لا تدخله السيارة عمليًا (موازٍ في ارتداد ضحل أمام نافذة) — يُعفى بطلب العميل موقفًا موازيًا.
+ * هذه قيم الميزان الافتراضية (غير نظامية)؛ المراجع المستقل عدّها إلزامية في r17–r18. البنود الصريحة من طلب العميل والبوابات تبقى محجوبة كما هي.
+ */
+export const MANDATORY_R16 = Object.freeze(['GUEST_DINING', 'PARKING_SHALLOW']);
+/** (الجولة التاسعة عشرة) ما يحتاج مراجعة متخصصة (صحية/إنشائية) لا يحكم عليه الميزان: يُذكر منفصلًا عن العيب والمخالفة. */
+export const SPECIALIST_R16 = Object.freeze(['WET_STACK']);
 /** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا). */
 export const R16_LIMITS = Object.freeze({ viewDepth: 3, viewSide: 1, highSill: 1.6, bayDepth: 5.5 });
 
@@ -172,6 +184,51 @@ export function measureR16(doc, request = {}, model = analyzeDoc(doc)) {
   }
   // (الجولة السابعة عشرة) الصالة العائلية صغيرة نسبةً إلى مجلس الرجال، أو ممر عابر لا تبقى فيه جلسة عائلية (المراجع المستقل r16: C9-2)
   for (const g of measureHall(doc, request, model)) out.push(g);
+  for (const g of measureUpper(doc, request, model)) out.push(g);
+  return out;
+}
+
+// ———————————————————————————— (الجولة التاسعة عشرة) الدور العلوي ————————————————————————————
+//  WET_STACK          — حمام علوي يقع ≥ 25٪ منه فوق فراغ جاف حساس في الأرضي (مجلس، طعام، مدخل، صالة، غرفة نوم): تمديدات الصرف والعزل المائي
+//                       فوق سقف فراغ مأهول — عيب معماري، ومعه بند «يحتاج مراجعة صحية وإنشائية متخصصة» (لا يحكم الميزان على الصرف ولا العزل).
+//                       الحمام فوق رطب (مطبخ، دورة مياه، حمام، غسيل، خدمة) أو فوق ممر/درج لا يُعد. المراجع المستقل r18: C7-1.
+//  MASTER_STAIR_DOOR  — (حين يطلب العميل الرئيسية بعيدة عن الدرج) باب الرئيسية يُفتح على الفراغ المفتوح الذي يصل إليه الدرج: الدرج وما
+//                       يتصل به بفتحات بلا أبواب (قوس) فراغ واحد للعين والصوت. مسار المشي وحده (السجل: ≥ 6 م) لا يكفي — المراجع r18: C7-1.
+export const UPPER_LIMITS = Object.freeze({ wetShare: .25 });
+const DRY_SENSITIVE = new Set(['majlis', 'dining', 'entrance', 'living', 'bedroom', 'master']);
+export function measureUpper(doc, request = {}, model = analyzeDoc(doc)) {
+  const out = [], [G, U] = model.levels; if (!G || !U) return out;
+  const push = (id, pass, value, reasons, applicable = true) => out.push({ id, ar: R16_DEFECTS[id].ar, tier: R16_DEFECTS[id].tier, pass: !!pass, applicable, value, reasons_ar: reasons, clientAsked: false, specialist: SPECIALIST_R16.includes(id) });
+  // (أ) تراكب الحمامات
+  {
+    const rows = [], bad = [];
+    for (const b of U.rooms.filter(r => r.type === 'bath')) {
+      const xs = b.net.map(p => p.x), ys = b.net.map(p => p.y), hit = new Map(); let n = 0, wet = 0;
+      for (let x = Math.min(...xs) + .1; x < Math.max(...xs); x += .2) for (let y = Math.min(...ys) + .1; y < Math.max(...ys); y += .2) {
+        if (!pointInPolygon({ x, y }, b.net)) continue; n++; const g = G.roomAt({ x, y }); if (!g) continue;
+        if (DRY_SENSITIVE.has(g.type) && !/مغاسل|ممر/.test(g.name || '')) hit.set(g.name, (hit.get(g.name) || 0) + 1); else if (['bath', 'kitchen', 'service', 'laundry'].includes(g.type) || /غسيل|خادمة|مخزن/.test(g.name || '')) wet++;
+      }
+      const over = [...hit].filter(([, v]) => n && v / n >= UPPER_LIMITS.wetShare).map(([k, v]) => ({ over: k, pct: Math.round(100 * v / n) }));
+      rows.push({ bath: b.name, overWetPct: n ? Math.round(100 * wet / n) : 0, overDry: over });
+      for (const o of over) bad.push(`«${b.name}» فوق «${o.over}» (${o.pct}٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة)`);
+    }
+    push('WET_STACK', !bad.length, { baths: rows }, bad, rows.length > 0);
+  }
+  // (ب) باب الرئيسية والدرج
+  {
+    const t = String(request.text || '').replace(/[ةه]/g, 'ه');
+    const asked = /(?:ماستر|رئيسي)[^،.]{0,40}بعيد[^،.]{0,15}(?:درج|سلم)/.test(t) || (request.rules || []).some(r => r.kind === 'far' && [r.a, r.b].includes('master') && [r.a, r.b].includes('stairs'));
+    const M = U.rooms.find(r => r.type === 'master'), stair = U.rooms.find(r => r.type === 'stairs' || /^الدرج/.test(r.name || ''));
+    if (!asked || !M || !stair) push('MASTER_STAIR_DOOR', true, null, [], false);
+    else {
+      // الفراغ المفتوح للدرج: الدرج وكل ما يتصل به بفتحة بلا باب (قوس/فتحة)، تكرارًا
+      const openTo = r => U.openings.filter(op => op.sides.some(x => x.room.id === r.id) && !op.window && (op.o?.kind === 'arch' || op.o?.kind === 'opening')).map(op => op.sides.find(x => x.room.id === r.id)).map(me => (me && me.other !== 'outside' ? U.roomsById.get(me.other) : null)).filter(Boolean);
+      const cl = new Set([stair.id]), q = [stair]; while (q.length) for (const o of openTo(q.pop())) if (!cl.has(o.id) && ['corridor', 'living', 'entrance', 'stairs'].includes(o.type)) { cl.add(o.id); q.push(o); }
+      const doors = roomDoors(U, M).filter(d => d.other && d.other.type !== 'bath' && !/ملابس/.test(d.other.name || ''));
+      const onStair = doors.filter(d => cl.has(d.other.id));
+      push('MASTER_STAIR_DOOR', !onStair.length, { stairSpace: [...cl].map(id => U.roomsById.get(id)?.name), doorsTo: doors.map(d => d.other.name) }, onStair.length ? [`باب «${M.name}» على «${onStair[0].other.name}» — وهي فراغ واحد مفتوح مع الدرج (${[...cl].map(id => U.roomsById.get(id)?.name).filter(Boolean).join('، ')})`] : [], true);
+    }
+  }
   return out;
 }
 

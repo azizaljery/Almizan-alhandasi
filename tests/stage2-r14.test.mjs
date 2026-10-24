@@ -29,7 +29,9 @@ test('حالة العرض: بند عميل غير منفذ أو بوابة را�
   assert.equal(h.status, 'hidden'); assert.match(h.hidden_ar[0], /غرفة خادمة/);
   assert.equal(presentationStatus({ doc, ledger: [], review: { passed: false, failedGates: ['REACH'] } }, { text: C.text }).status, 'hidden');
   const e = presentationStatus({ doc, ledger: [], review: { passed: true } }, { text: C.text });
-  assert.equal(e.status, 'needs-edits'); assert.ok(e.prefs.includes('MAID_BATH'), 'C10-1 بعد-13: الخادمة بلا حمام');
+  // (الجولة التاسعة عشرة، توجيه المالك أولًا) في هذا المستند (بعد-13) ضيف يعبر العائلة وموقف موازٍ ضحل: مخالفتان إلزاميتان ⇐ محجوب، والتفضيلات تبقى مقيسة
+  assert.equal(e.status, 'hidden'); assert.deepEqual(e.mandatory, ['GUEST_DINING', 'PARKING_SHALLOW']); assert.ok(e.hidden_ar.every(t => /مخالفة إلزامية/.test(t)));
+  assert.ok(e.prefs.includes('MAID_BATH'), 'C10-1 بعد-13: الخادمة بلا حمام');
   assert.ok(e.edits_ar.every(t => typeof t === 'string' && t.length > 10));
 });
 
@@ -46,7 +48,9 @@ test('المولّد: كل بديل بحالة عرض، ولا محجوب بين
   const { r, land, C } = caseReq('C10');
   const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want });
   // (الجولة الثامنة عشرة) مسار ضيف الرجال إلى الطعام شرط افتراضي قوي: التنظيمات التي يعبر فيها الضيف العائلة لا تُعرض، والنقص مذكور بسببه
-  assert.ok(out.designs.length >= 2); if (out.designs.length < C.want) assert.match(out.shortfall_ar || '', /ضيف الرجال|مختلف/);
+  // (الجولة التاسعة عشرة) والموقف الذي لا تدخله السيارة مخالفة إلزامية؛ أُعيد حل تنظيم الحوش بعمق محجوز فصار «اختلافًا جزئيًا» عن المعروض —
+  // يقل العدد ويُذكر السبب (لا حشو)
+  assert.ok(out.designs.length >= 1); if (out.designs.length < C.want) assert.match(out.shortfall_ar || '', /ضيف الرجال|مختلف|جزئي/);
   for (const d of out.designs) { assert.ok(d.presentation); assert.notEqual(d.presentation.status, 'hidden'); assert.ok(!(d.presentation.prefs || []).includes('MAID_BATH'), d.pat + ': الخادمة بحمامها'); }
   const st = out.designs.map(d => d.presentation.status), firstEdit = st.indexOf('needs-edits');
   if (firstEdit >= 0) assert.ok(!st.slice(firstEdit).includes('ready'));

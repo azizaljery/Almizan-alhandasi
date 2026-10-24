@@ -2,7 +2,8 @@
 // ومصفوفة اختلاف البدائل، والزمن. الاستعمال: node scripts/acceptance-run.mjs <stage> [نمط الحالات] [--engine v1|v2]
 // (أو MIZAN_ENGINE=v2). الافتراضي v1: المولّد المنشور dist/villa-layout.mjs؛ و v2: dist/villa-layout-v2.mjs.
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
-import { CASES } from './acceptance-cases.mjs';
+import { CASES as MAIN_CASES } from './acceptance-cases.mjs';
+import { HELDOUT } from './heldout-cases.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
 import * as V1 from '../dist/villa-layout.mjs';
 import * as V2 from '../dist/villa-layout-v2.mjs';
@@ -17,7 +18,8 @@ import { archMatrix, THRESHOLDS as ARCH_T, archSignatureV2, archDifferenceV2, ex
 const argv = process.argv.slice(2), ei = argv.indexOf('--engine');
 const engine = (ei >= 0 ? argv[ei + 1] : process.env.MIZAN_ENGINE) || 'v1';
 if (!['v1', 'v2'].includes(engine)) throw Error('المحرك v1 أو v2 فقط');
-const pos = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--engine');
+const ci = argv.indexOf('--cases'), CASES = ci >= 0 && argv[ci + 1] === 'heldout' ? HELDOUT : MAIN_CASES; // (الجولة 19) الحالات المحجوزة H1–H5
+const pos = argv.filter((a, i) => !a.startsWith('--') && !['--engine', '--cases'].includes(argv[i - 1]));
 const stage = pos[0] || 'before', only = pos[1] ? new RegExp(pos[1]) : null;
 const { generateVillaDesigns, generateVillaTwoFloors } = engine === 'v2' ? V2 : V1;
 const OUT = new URL(`../evidence/acceptance/${stage}/`, import.meta.url).pathname;
