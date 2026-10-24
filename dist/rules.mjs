@@ -329,20 +329,23 @@ function placeDeficit(r, side, mode, B) {
  * (أقل الطرق الثلاث كلفة: مسافة ملامسة الواجهة، أو بُعد المركز عن الثلث الخارجي + عقوبة غرفة سكنية بينه وبين الواجهة).
  *  others: كل المستطيلات المبنية في الدور نفسه (للانكشاف نحو الجهة)، habit: الغرف السكنية غير الخدمية (عدا X وأقرانه).
  */
-export function zoneCheck(r, side, B, others, habit) {
+export function zoneCheck(r, side, B, others, habit, { literal = false } = {}) {
   const w = B.x1 - B.x0, d = B.y1 - B.y0, c = ctr(r), ext = side[0] === 'x' ? w : d;
   const tdef = placeDeficit(r, side, 'touch', B);
   // بُعد المركز عن تلك الواجهة كنسبة من امتداد المبنى (0 = عليها)
   const f = side === 'y0' ? (c.y - B.y0) / d : side === 'y1' ? (B.y1 - c.y) / d : side === 'x0' ? (c.x - B.x0) / w : (B.x1 - c.x) / w;
   if (tdef <= .45) return { def: 0, how: 'touch' };
-  if (f <= .5 && openToward(r, side, others)) return { def: 0, how: 'open' };
+  // (الجولة السادسة عشرة) «في الخلف» يُقرأ حرفيًا (literal): يلامس الواجهة الخلفية أو مركزه في ثلثها الخارجي بلا غرفة سكنية بينه
+  // وبينها. «مفتوح على الخلف من منتصف العمق» قراءة نسبية — تحقق جزئي لا كلي (C6-2 في المراجعة المستقلة r15)
+  const open = f <= .5 && openToward(r, side, others);
+  if (open && !literal) return { def: 0, how: 'open' };
   // غرفة سكنية بين X والواجهة على امتداد عرضه: خلفه (نحو الجهة) وتتقاطع مع امتداده بمتر على الأقل (أو نصف عرضه)
   const ax = side[0] === 'y' ? ['x0', 'x1'] : ['y0', 'y1'], hi = side.endsWith('1'), span = r[ax[1]] - r[ax[0]];
   const between = habit.filter(o => o !== r && Math.min(r[ax[1]], o[ax[1]]) - Math.max(r[ax[0]], o[ax[0]]) >= Math.min(1.0, span * .5) && (hi ? o[side.replace('1', '0')] >= r[side] - .3 : o[side.replace('0', '1')] <= r[side] + .3));
   const third = Math.max(0, f - 1 / 3) * ext;
   const zdef = third + (between.length ? 2.5 + .5 * between.length : 0);
   if (zdef <= 0) return { def: 0, how: 'third' };
-  return { def: Math.min(tdef, zdef), tdef, third, between, f };
+  return { def: Math.min(tdef, zdef), tdef, third, between, f, open };
 }
 /**
  * (الجولة الخامسة عشرة) «في الخلف» بالقراءة النسبية: الفراغ أبعد عن الشارع من كل فراغات الاستقبال في دوره (المجلس، الطعام،
@@ -378,7 +381,7 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
         const solids = [...placed.map(p => p.r), ...circ.filter(c => c.id !== 'stair' && c.id !== 'stairs').map(c => c.r)];
         const habit = r.mode === 'zone' ? [...placed.filter(p => HABIT_KIND.has(p.block.kind) && !A.includes(p.r)).map(p => p.r), ...circ.filter(c => c.id === 'hall' && !A.includes(c.r)).map(c => c.r)] : [];
         // المدخل في جهة: باب الدخول الثاني يحققه المولّد على تلك الواجهة؛ هنا يبقى تقريب النصف كما كان
-        const pens = A.map(a => { const def = r.mode === 'zone' && r.a !== 'entrance' ? zoneCheck(a, side, B, solids, habit).def : r.mode === 'touch' && openToward(a, side, solids) ? 0 : placeDeficit(a, side, r.mode, B); return def > (r.mode === 'touch' ? .05 : 0) ? 45 + 18 * def : 0; });
+        const pens = A.map(a => { const def = r.mode === 'zone' && r.a !== 'entrance' ? zoneCheck(a, side, B, solids, habit, { literal: r.side === 'back' }).def : r.mode === 'touch' && openToward(a, side, solids) ? 0 : placeDeficit(a, side, r.mode, B); return def > (r.mode === 'touch' ? .05 : 0) ? 45 + 18 * def : 0; });
         const pen = any ? Math.min(...pens) : pens.reduce((x, y) => x + y, 0);
         if (side[0] !== 'x') { base += pen; break; } p[m] += pen;
       }
@@ -517,7 +520,7 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
       const side = docSide(r.side, entry), where = r.side === 'front' ? 'الواجهة الأمامية' : r.side === 'back' ? 'الخلف' : r.side === 'right' ? 'يمين الداخل' : r.side === 'left' ? 'يسار الداخل' : COMPASS_AR[r.side];
       const lvRooms = a => rooms.filter(o => o.level === a.level && o !== a && !['courtyard', 'terrace'].includes(o.type));
       // zone: الغرف السكنية غير الخدمية في الدور نفسه (عدا الفراغ وأقرانه في القاعدة نفسها)
-      const zc = a => zoneCheck(a, side, B, lvRooms(a), lvRooms(a).filter(o => HABIT_TYPE.has(o.type) && !A.includes(o)));
+      const zc = a => zoneCheck(a, side, B, lvRooms(a), lvRooms(a).filter(o => HABIT_TYPE.has(o.type) && !A.includes(o)), { literal: r.side === 'back' });
       const fail = a => r.mode === 'zone' ? zc(a).def > 0 : !(r.mode === 'touch' && openToward(a, side, lvRooms(a))) && placeDeficit(a, side, r.mode, B) > (r.mode === 'touch' ? .45 : r.mode === 'avoid' ? .15 : 0);
       // «مدخل ثاني من الشارع الشرقي»: المدخل في جهة = باب دخول خارجي على واجهة تلك الجهة (أيًّا كانت الغرفة التي يفتح عليها)
       if (r.a === 'entrance' && ['zone', 'half', 'touch'].includes(r.mode)) {
@@ -535,7 +538,11 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
         // (الجولة الخامسة عشرة) القراءة النسبية لـ«في الخلف»: الفراغ خلف منطقة الاستقبال (المجلس والطعام والمداخل) بالنسبة للشارع
         // ولا يلامس الواجهة الأمامية — تُذكر «تحققًا جزئيًا» بجانب سبب القراءة الحرفية (الحكم يبقى غير متحقق حرفيًا).
         // النص نفسه يقرؤه السجل الصارم ورد التعديل، فلا تناقض بينهما.
-        if (r.side === 'back') { const rel = relativeBack(bad[0], side, entry, rooms, B); if (rel) res.partial = { reading: 'relative', text_ar: rel, literal_ar: res.why }; }
+        if (r.side === 'back') {
+          const rel = relativeBack(bad[0], side, entry, rooms, B);
+          if (rel) res.partial = { reading: 'relative', text_ar: rel + (z.open ? '، ويطل على الخلف بلا فراغ مبني خلفه' : ''), literal_ar: res.why };
+          else if (z.open) res.partial = { reading: 'open-rear', text_ar: `«${bad[0].name}» يطل على الخلف بلا فراغ مبني خلفه، لكن مركزه على ${Math.round(z.f * 100)}% من عمق المبنى من الواجهة الخلفية`, literal_ar: res.why };
+        }
         out.push(res); continue;
       }
       if (bad.length && r.mode === 'center') { res.ok = false; res.why = `«${bad[0].name}» ليس في وسط المبنى.`; out.push(res); continue; }
