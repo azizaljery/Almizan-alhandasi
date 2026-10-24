@@ -3249,7 +3249,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     // (يُكمل حتى 14 ث ما لم يوجد ثلاثة بدائل تنفّذ كل البنود — البدائل المخالفة لبند صريح لا تُعرض لسد العدد)
     // حتمي: ميزانية بعدد المرشحين المبنيين لا بالزمن (الطلب نفسه = البدائل نفسها مهما كان حمل الجهاز)
     // (أرض غير منتظمة: مرشحون إضافيون لتظهر النسخ المتدرجة التي تتبع شكل الأرض)
-    if (tried >= BUILD_MAX || built.filter(d => d.fails === 0).length >= keep + BUILD_SPARE + (site.rectW ? 3 : 0)) break;
+    if (tried >= (TREE_SOURCE?.buildMax || BUILD_MAX) || built.filter(d => d.fails === 0).length >= keep + BUILD_SPARE + (site.rectW ? 3 : 0) + (TREE_SOURCE?.spare || 0)) break;
     tried++;
     try {
       const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : prefPat && patOf(cand) === prefPat && prefMirror !== null ? prefMirror : false;
@@ -3838,7 +3838,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
       let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch { r = null; }
       if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'] }); continue; }
       const n0 = designs.length;
-      build2(r.g, r.up, { summary: `${TF_PARTI_AR[tr.mode]}؛ والعلوي: ${TF_UPPER_AR[tr.org] || ''} (دوران)`, note: tr.mode === 'frontstair' ? 'السلم في المقدمة خلف بهو المدخل، ويصل إلى ردهة علوية فوق البهو وصالة علوية خلفه؛ والرئيسية في الركن الخلفي البعيد.' : tr.mode === 'sidestair' ? 'السلم على جدار الجار بجوار بهو مزدوج الارتفاع، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'rearstair' ? 'السلم في الخلف بجوار الصالة، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'stairhall' ? 'السلم بين بهو المدخل والصالة، ويصل إلى الدور العلوي بين الصالة العلوية الأمامية والردهة.' : tr.mode === 'guestgarden' ? 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، وغرفة كبار السن على حديقة خاصة بعيدة عن الضيافة؛ والسلم في آخر جناح الخدمة يصل إلى الصالة العلوية.' : tr.mode === 'rowsup' ? 'السلم خلف المدخل يصل إلى ردهة علوية بين الصالة العائلية الأمامية ورواق الغرف الخلفي.' : 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، والدور العلوي فوق الكتلة العائلية فقط.' });
+      build2(r.g, r.up, { summary: `${TF_PARTI_AR[tr.mode] || DYN_AR.get(tr.mode) || tr.mode}؛ والعلوي: ${TF_UPPER_AR[tr.org] || DYN_AR.get(tr.mode + ':up') || ''} (دوران)`, note: tr.note_ar ? tr.note_ar : tr.mode === 'frontstair' ? 'السلم في المقدمة خلف بهو المدخل، ويصل إلى ردهة علوية فوق البهو وصالة علوية خلفه؛ والرئيسية في الركن الخلفي البعيد.' : tr.mode === 'sidestair' ? 'السلم على جدار الجار بجوار بهو مزدوج الارتفاع، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'rearstair' ? 'السلم في الخلف بجوار الصالة، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'stairhall' ? 'السلم بين بهو المدخل والصالة، ويصل إلى الدور العلوي بين الصالة العلوية الأمامية والردهة.' : tr.mode === 'guestgarden' ? 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، وغرفة كبار السن على حديقة خاصة بعيدة عن الضيافة؛ والسلم في آخر جناح الخدمة يصل إلى الصالة العلوية.' : tr.mode === 'rowsup' ? 'السلم خلف المدخل يصل إلى ردهة علوية بين الصالة العائلية الأمامية ورواق الغرف الخلفي.' : 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، والدور العلوي فوق الكتلة العائلية فقط.' });
       if (designs.length > n0) doneModes.add(tr.mode); // بديل واحد من كل تنظيم أرضي يكفي (الاختيار يعرض واحدًا من كل عائلة)
     } }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; e.rejected = rejected; throw e; }
@@ -4281,6 +4281,8 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
 }
 
 // (الجولة العشرون) أدوات بناء الأشجار والقيم التصميمية للمحرك الثالث (قراءة فقط — لا تغيّر سلوك هذا المحرك)
+/** (الجولة العشرون) مكتبة أشجار الدورين نفسها (للمحرك الثالث يضمها إلى المركّبة). */
+export const tfTreesLib = (G, U, site) => tfTrees(G, U, site);
 export const TREE_KIT = Object.freeze({ Z, C, X, Y, OV, VOID, COURT, WELL, D2, mk, cloneTree, runOf, depOf, minExt, areaOf, solve, suiteRun, DESIGN_TARGETS, FOYER_WC_AREA, DEEP_ITERS, CORR_SINGLE_HARD, NARROW_W, COURT_MIN,
   describeAs: (key, ar) => DYN_AR.set(key, ar), DOOR_TOUCH, WALL_NET });
 export default { generateVillaDesigns, generateVillaTwoFloors, programV2, partiTrees, scoreV2, realizeV2, drawPlanV2, siteOf, difference, roomsDifference, hardGates, VILLA_V2_ENGINE_VERSION };

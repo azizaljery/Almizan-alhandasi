@@ -46,6 +46,8 @@ export function unitsOf(P, { stair = false } = {}) {
   add('F', { zone: 'circ', circ: 'foyer', area: P.dayWc ? K.FOYER_WC_AREA : T.foyer * .85, maxCells: 1 });
   add('H', { zone: 'family', circ: 'hall', area: P.hallArea, light: true, maxCells: (P.rules || []).some(r => r.kind === 'place' && r.a === 'hall' && r.side === 'back') ? 3 : 2 });
   if (stair) add('ST', { zone: 'circ', circ: 'stair', area: 3.8 * 3.7, maxCells: 1 });
+  // رواق وصل اختياري بين مدخل العائلة وصالة لا تلامسه (الصالة على الواجهة الخلفية أو بعد حوش): لا يوضع إلا إن لامسهما معًا
+  add('LK', { zone: 'circ', circ: 'link', area: 8, maxCells: 2, optional: true });
   // النوم: جناح واحد، أو جناحان حين يطول ممر الجناح الواحد عن حده (لا ممر نوم أطول من 12.5 م)
   if (beds.length && !stair) {
     const runAll = sum(beds.filter(b => !b.master).map(b => K.runOf(b) + .15));
@@ -59,7 +61,9 @@ export function unitsOf(P, { stair = false } = {}) {
   // العلاقات: hard = لا يُقبل توزيع يخالفها؛ soft = تفضيل بوزن (يُوازن)
   const rel = [
     { a: 'F', kind: 'front', hard: true, ar: 'مدخل العائلة على الشارع' },
-    { a: 'H', b: 'F', kind: 'touch', hard: true, ar: 'الصالة تلامس مدخل العائلة' },
+    { a: 'H', b: ['F', 'LK'], kind: 'touch', hard: true, ar: 'الصالة تلامس مدخل العائلة (أو رواقًا منه)' },
+    { a: 'LK', b: 'F', kind: 'touch', hard: true, ar: 'رواق الوصل من مدخل العائلة' },
+    { a: 'LK', b: 'H', kind: 'touch', hard: true, ar: 'رواق الوصل إلى الصالة' },
     has('M') && { a: 'M', kind: 'frontOrSide', hard: true, ar: 'مجلس الرجال على الشارع أو على واجهة جانبية (مدخل مستقل)' },
     has('W') && { a: 'W', b: 'F', kind: 'touch', hard: true, ar: 'مجلس النساء من مدخل العائلة' },
     has('DN') && has('KS') && { a: 'DN', b: 'KS', kind: 'touch', hard: true, ar: 'الطعام يلامس المطبخ' },
@@ -89,9 +93,10 @@ const kitchenFront = P => (P.rules || []).some(r => r.kind === 'place' && r.side
 // ---------------------------------------------------------------------------------------------- (3) الشبكة وبحث القيود
 /** أبعاد الشبكة المرشحة من نسبة الأرض (أعمدة × صفوف). */
 export function gridShapes(W, D, nUnits) {
-  // كل شبكة 2–4 أعمدة × 2–4 صفوف تتسع للوحدات (ومعها حديقتان على الأكثر)، مرتبة بقرب خليتها من المربع ثم بقلة الخلايا الزائدة
-  const out = [];
-  for (let nc = 2; nc <= 4; nc++) for (let nr = 2; nr <= 4; nr++) { const n = nc * nr; if (n < nUnits || n > nUnits + 6) continue; out.push({ nc, nr, k: Math.abs(Math.log((W / nc) / (D / nr))) + .06 * Math.abs(n - nUnits - 3) }); }
+  // كل شبكة تتسع للوحدات (ومعها حديقتان على الأكثر) وتتسع لها الأرض بأدنى عرض خلية (≈ 4 م عرضًا، 3.6 م عمقًا)، مرتبة بقرب خليتها من
+  // المربع ثم بقرب عدد خلاياها من عدد الوحدات + 3 — الأرض الضيقة تأخذ عمودين وصفوفًا أكثر، والعريضة أعمدة أكثر
+  const out = [], cMax = Math.max(2, Math.min(5, Math.floor(W / 4.0))), rMax = Math.max(2, Math.min(6, Math.floor(D / 3.6)));
+  for (let nc = 2; nc <= cMax; nc++) for (let nr = 2; nr <= rMax; nr++) { const n = nc * nr; if (n < nUnits || n > nUnits + 6) continue; out.push({ nc, nr, k: Math.abs(Math.log((W / nc) / (D / nr))) + .06 * Math.abs(n - nUnits - 3) }); }
   return out.sort((a, b) => a.k - b.k).slice(0, 4).map(o => [o.nc, o.nr]);
 }
 const adjLen = (a, b) => { // طول الحافة المشتركة بين مستطيلي خلايا (بالخلايا)
@@ -111,7 +116,7 @@ function sideTo(a, b) {
  * بحث القيود على الشبكة: يملأ كل خلية بوحدة أو بحديقة (G، حتى اثنتين) بمستطيلات، ويعيد كل التوزيعات التي تجتاز القيود الصلبة.
  * التراجع مع تقليم مبكر (المدخل في الصف الأول، المطبخ ليس فيه، ما ليس له موضع)؛ ميزانية حتمية بعدد العقد.
  */
-export function enumerateLayouts(units, rel, nc, nr, { budget = 600000, gMax = 2 } = {}) {
+export function enumerateLayouts(units, rel, nc, nr, { budget = 1500000, gMax = 2, W = Infinity, D = Infinity } = {}) {
   const N = nc * nr, grid = new Array(N).fill(-1), place = new Map(), out = [];
   const keys = units.map(u => u.key);
   const hardFront = new Set(rel.filter(r => r.hard && r.kind === 'front').map(r => r.a));
@@ -124,12 +129,12 @@ export function enumerateLayouts(units, rel, nc, nr, { budget = 600000, gMax = 2
   const rec = () => {
     if (++nodes > budget) return;
     const c = grid.indexOf(-1);
-    if (c < 0) { if (place.size === units.length + gUsed) { const L = check(); if (L) out.push(L); } return; }
+    if (c < 0) { if (units.every(u => u.optional || place.has(u.key))) { const L = check(); if (L) out.push(L); } return; }
     const x0 = c % nc, y0 = (c - x0) / nc;
     // الوحدات غير الموضوعة بعد (وحديقة)
     const cand = units.filter(u => !place.has(u.key));
     // تقليم: إن بقيت وحدات أكثر من الخلايا الحرة لا حل
-    if (cand.length > grid.filter(v => v === -1).length) return;
+    if (cand.filter(u => !u.optional).length > grid.filter(v => v === -1).length) return;
     for (const u of cand) {
       if (hardNotFront.has(u.key) && y0 === 0) continue; // المطبخ على الشارع
       if (u.key === 'F' && y0 !== 0) continue;
@@ -139,7 +144,7 @@ export function enumerateLayouts(units, rel, nc, nr, { budget = 600000, gMax = 2
         if (hardFront.has(u.key) && r.y0 !== 0) continue;
         if (hardBack.has(u.key) && r.y1 !== nr) continue;
         fill(x0, y0, w, h, unitIdx.get(u.key)); place.set(u.key, r);
-        if (pairsOK(u.key)) rec();
+        if (pairsOK(u.key) && dimsOK()) rec();
         place.delete(u.key); fill(x0, y0, w, h, -1);
         if (nodes > budget) return;
       }
@@ -159,8 +164,17 @@ export function enumerateLayouts(units, rel, nc, nr, { budget = 600000, gMax = 2
   const touchRel = rel.filter(r => r.hard && r.kind === 'touch' && r.b !== 'S*');
   const pairsOK = k => { for (const r of touchRel) { if (r.a !== k && !(Array.isArray(r.b) ? r.b.includes(k) : r.b === k)) continue; const A = place.get(r.a); if (!A) continue; const bs = Array.isArray(r.b) ? r.b : [r.b]; if (!bs.every(b => place.has(b) || !keys.includes(b))) continue; if (!bs.some(b => place.has(b) && adjLen(A, place.get(b)) > 0)) return false; } return true; };
   // أحجام المستطيل الممكنة لكل وحدة من مساحتها نسبةً إلى متوسط مساحة الخلية (قيد أبعاد في البحث نفسه: لا مجلس في ثلاث خلايا ولا جناح نوم في خلية)
-  const cellA = sum(units.map(u => u.area)) * 1.12 / (nc * nr - 1);
-  const shapesFor = u => { const s = []; for (const [w, h] of [[1, 1], [1, 2], [2, 1], [1, 3], [3, 1], [2, 2]]) { const n = w * h; if (n > u.maxCells) continue; const ratio = n * cellA / u.area; if (n === 1 ? ratio <= 3.2 : ratio >= .55 && ratio <= 2.2) s.push([w, h]); } return s.length ? s : [[1, 1]]; };
+  const cellA = sum(units.filter(u => !u.optional).map(u => u.area)) * 1.12 / (nc * nr - 1);
+  // قيد أبعاد لازم لأي ترتيب قطع: كل خط أفقي يقطع الوحدات التي يمر بها جنبًا إلى جنب، فمجموع أدنى عروضها ≤ عرض الأرض؛ وكذلك كل خط
+  // رأسي وأدنى أعماقها ≤ عمقها (u.wmin/u.dmin حدود دنيا آمنة من أشجار الوحدة بكل اتجاهاتها) — يقلّم مبكرًا ما لا يتسع
+  const dimsOK = () => {
+    if (W === Infinity && D === Infinity) return true;
+    const P0 = [...place.entries()];
+    for (let y = 0; y < nr; y++) { let t = 0; for (const [k, r] of P0) if (r.y0 <= y && r.y1 > y) t += k[0] === 'G' ? 2.4 : (units[unitIdx.get(k)]?.wmin || 0); if (t > W + 1e-6) return false; }
+    for (let x = 0; x < nc; x++) { let t = 0; for (const [k, r] of P0) if (r.x0 <= x && r.x1 > x) t += k[0] === 'G' ? 2.4 : (units[unitIdx.get(k)]?.dmin || 0); if (t > D + 1e-6) return false; }
+    return true;
+  };
+  const shapesFor = u => { if (u.key === 'LK') return [[1, 1], [1, 2], [2, 1]]; const s = []; for (const [w, h] of [[1, 1], [1, 2], [2, 1], [1, 3], [3, 1], [2, 2]]) { const n = w * h; if (n > u.maxCells) continue; const ratio = n * cellA / u.area; if (ratio >= (n === 1 ? .4 : .55) && ratio <= (n === 1 ? 3.2 : 2.2)) s.push([w, h]); } return s.length ? s : [[1, 1]]; };
   // القيود الصلبة على توزيع كامل
   const check = () => {
     const R = Object.fromEntries(place), gs = [...place.keys()].filter(k => k[0] === 'G').map(k => R[k]);
@@ -210,8 +224,9 @@ function softScore(L, rel, units) {
   // الحوش الداخلي المغلق والحديقة الخلفية مزيّة مناخية؛ والمساحة التي تأخذها الحدائق من الشبكة كلفة
   for (const g of gs) { const enclosed = !bnd(g, nc, nr).length; s += enclosed ? .6 : g.y1 === nr ? .4 : .1; s -= .25 * (g.x1 - g.x0) * (g.y1 - g.y0); }
   // التناسب: كل خلية تمثل ≈ مساحة متقاربة — وحدة كبيرة في خلية واحدة ووحدة صغيرة في خليتين = بعد عن التوازن
-  const cellA = sum(units.map(u => u.area)) / (nc * nr - gs.length);
-  for (const u of units) { const r = R[u.key], n = (r.x1 - r.x0) * (r.y1 - r.y0); s -= .35 * Math.abs(Math.log((u.area / n) / cellA)); }
+  const cellA = sum(units.filter(u => !u.optional).map(u => u.area)) / (nc * nr - gs.length - (R.LK ? 1 : 0));
+  for (const u of units) { const r = R[u.key]; if (!r || u.optional) continue; const n = (r.x1 - r.x0) * (r.y1 - r.y0); s -= .35 * Math.abs(Math.log((u.area / n) / cellA)); }
+  if (R.LK) s -= .8; // رواق وصل كلفة حركة
   return s;
 }
 /** بصمة التنظيم: أزواج التجاور بين الوحدات ومواضعها الطولية (أمام/وسط/خلف) — مستقلة عن الانعكاس. */
@@ -270,7 +285,18 @@ function sleepVariants(blocks, c, lit, idx) {
     if (Math.max(run(A), run(B)) <= K.CORR_SINGLE_HARD - .2) out.push({ tag: 'p', tree: withM(mk3(L(A, sA[1]), corr(), L(B, sA[0])), m) });
   }
   // (ج) الغرف على الصالة مباشرة (بلا ممر) — ثلاث غرف فأقل، والضوء في الجهة المقابلة للصالة
-  if (blocks.length <= 3 && lit.includes(OPP[c])) out.push({ tag: 'd', tree: Z(blocks, c, along === 'y' ? 'x' : 'y') });
+  // (د) رواق موازٍ لحد الصالة يلاصقها، والغرف صفًا خلفه على جهة الضوء المقابلة، والرئيسية في طرف الرواق بعمق الجناح كله
+  if (lit.includes(OPP[c])) {
+    const par = along === 'y' ? 'x' : 'y', list = m && rest.length >= 2 ? rest : blocks, mm = m && rest.length >= 2 ? m : null;
+    if (run(list) <= K.CORR_SINGLE_HARD - .2 && list.length) {
+      const g = C('gal' + idx, { fix: 1.5, area: 12 }), row = Z(list, c, par); if (row.runMin === undefined) row.runMin = Object.fromEntries(list.map(b => [b.id, K.suiteRun(b, 0)]));
+      const band = par === 'x' ? (c === 'y0' ? Y(g, row) : Y(row, g)) : (c === 'x0' ? X(g, row) : X(row, g));
+      if (!mm) out.push({ tag: 'g', tree: band });
+      else for (const end of [0, 1]) { const mz = Z([mm], par === 'x' ? (end ? 'x0' : 'x1') : (end ? 'y0' : 'y1'), par === 'x' ? 'y' : 'x'); out.push({ tag: 'g' + end, tree: par === 'x' ? (end ? X(band, mz) : X(mz, band)) : (end ? Y(band, mz) : Y(mz, band)) }); }
+    }
+  }
+  // (الرئيسية لا تُفتح على الصالة عبر غرفة ملابسها — MASTER_VIA_DRESS: هذا النوع لغرف الأبناء وحدها)
+  if (blocks.length <= 3 && !m && lit.includes(OPP[c])) out.push({ tag: 'd', tree: Z(blocks, c, along === 'y' ? 'x' : 'y') });
   return out;
 }
 /** يحوّل توزيعًا على الشبكة إلى أشجار تقسيم (بأنواع جناح النوم الممكنة). */
@@ -287,11 +313,17 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
   const leafFixed = (k, r) => {
     const u = U.get(k);
     if (k[0] === 'G') { const enclosed = !bnd(r, nc, nr).length; return enclosed ? COURT(Math.max(K.COURT_MIN ** 2 + 1, gardenA * .6)) : VOID(gardenA * .6); }
-    if (u.circ === 'foyer') return C('foyer', P.dayWc ? { area: K.FOYER_WC_AREA, wc: true } : { area: T.foyer * .85 });
-    if (u.circ === 'hall') return C('hall', { area: P.hallArea });
+    // المدخل: بهو صغير بجانبه فناء مدخل اختياري (يمتص عرض الخلية فلا يتضخم البهو)
+    if (u.circ === 'foyer') { const f = C('foyer', P.dayWc ? { area: K.FOYER_WC_AREA, wc: true } : { area: T.foyer * .85 }); return R.M && sideTo(r, R.M) === 'x0' ? X(f, OV(6)) : X(OV(6), f); }
+    if (u.circ === 'hall') { const h = C('hall', { area: P.hallArea }), ex = bnd(r, nc, nr).filter(sd => sd !== 'y0');
+      // الصالة على حد خارجي: حديقة اختيارية على تلك الجهة تمتص فائض الخلية (لا صالة ممتدة) وتطل عليها
+      return ex.includes('y1') ? Y(h, OV(10)) : ex.includes('x1') ? X(h, OV(10)) : ex.includes('x0') ? X(OV(10), h) : h; }
     if (u.circ === 'stair') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
+    if (u.circ === 'link') { const vert = (r.y1 - r.y0) >= (r.x1 - r.x0); const lk = C('link', { fix: 1.8, area: 8 }); return vert ? X(OV(6), lk, OV(6)) : Y(OV(6), lk, OV(6)); }
     const d = k === 'M' ? 'y1' : k === 'W' ? doorTo(r, ['F']) : k === 'DN' ? doorTo(r, ['H', 'F', 'M']) : k === 'KS' ? doorTo(r, ['DN', 'H']) : doorTo(r, ['F', 'H']);
     const z = Z(u.blocks, d, d === 'y0' || d === 'y1' ? 'x' : 'y');
+    // المجلس: عرض صافٍ ≥ 4.2 م بجدرانه (قيمة الميزان) — أدنى امتداده في الاتجاهين، لا تقدير 4 م العام
+    if (k === 'M' || k === 'W') { z.minCross = 4.45; z.runMin = Object.fromEntries(u.blocks.map(b => [b.id, majRun(b)])); }
     // فراغ خارجي اختياري على جهة خارجية (غير الشارع): يمتص فرق الأبعاد بين الوحدات المقترنة في صف أو عمود فيصير ارتدادًا/حديقة صغيرة،
     // أو يختفي إن قل عن 2.4 م — بدل أن يتضخم المجلس أو الطعام أو المطبخ لملء الخلية
     const ex = bnd(r, nc, nr).filter(sd => sd !== 'y0');
@@ -333,6 +365,23 @@ export function distortion(tree, P, W, D) {
   }
   return best;
 }
+/** أدنى امتداد المجلس على طوله: 4.2 م صافيًا بجدرانه، ومعه شريط الدهليز ودورة المياه للمجلس الذي له دورة مياه (فلا يُفتح الباب الخارجي على المجلس) */
+const majRun = b => 4.45 + (b.guestWc ? (T.guestStripW || 1.5) : 0);
+/** حدود دنيا آمنة لعرض كل وحدة وعمقها (أصغر ما في أشجارها الممكنة بكل اتجاه) — للتقليم بالأبعاد في بحث القيود. */
+export function unitMins(units, P) {
+  const all = ['x0', 'x1', 'y0', 'y1'];
+  for (const u of units) {
+    let trees = [];
+    if (u.circ === 'foyer') trees = [C('foyer', { area: 8 })];
+    else if (u.circ === 'hall') trees = [C('hall', { area: P.hallArea })];
+    else if (u.circ === 'stair') trees = [C('stair', { area: 14 })];
+    else if (u.circ === 'link') { u.wmin = 1.8; u.dmin = 1.8; continue; }
+    else if (u.sleep) trees = ['y0', 'x0'].flatMap(c => sleepVariants(u.blocks, c, all, 'm').map(v => v.tree));
+    else { trees = [Z(u.blocks, 'y1', 'x'), Z(u.blocks, 'x1', 'y')]; if (u.key === 'M' || u.key === 'W') for (const z of trees) { z.minCross = 4.45; z.runMin = Object.fromEntries(u.blocks.map(b => [b.id, majRun(b)])); } }
+    u.wmin = trees.length ? Math.min(...trees.map(t => K.minExt(t, 'x'))) : 0; u.dmin = trees.length ? Math.min(...trees.map(t => K.minExt(t, 'y'))) : 0;
+  }
+  return units;
+}
 /** وصف عربي للتنظيم المركّب من مواضع وحداته (يُعرض للعميل ملخصًا). */
 export function describeLayout(L) {
   const { R, nc, nr } = L;
@@ -349,10 +398,11 @@ const ESC = s => { let h = 2166136261 >>> 0; for (const ch of s) { h ^= ch.charC
 /** يُبنى مرة لكل طلب: الأشجار المركّبة (الأولى للبحث الأول، والباقية «late» للبحث الثاني) وسجل البحث. */
 export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } = {}) {
   const { units, rel } = unitsOf(P, { stair });
+  unitMins(units, P);
   const log = { units: units.map(u => ({ key: u.key, zone: u.zone, area: Math.round(u.area) })), rel: rel.map(r => ({ ...r })), grids: [] };
   const all = [];
-  for (const [nc, nr] of gridShapes(W, D, units.length)) {
-    const e = enumerateLayouts(units, rel, nc, nr);
+  for (const [nc, nr] of gridShapes(W, D, units.filter(u => !u.optional).length)) {
+    const e = enumerateLayouts(units, rel, nc, nr, { W, D });
     log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted });
     all.push(...e.layouts);
   }
@@ -387,16 +437,150 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
   return { trees: out, log };
 }
 
+// ---------------------------------------------------------------------------------------------- الدوران: طبقتان على الشبكة نفسها
+/**
+ * الدوران: الأرضي يُركّب بالوحدات نفسها ومعها الدرج (ST)، ثم يُركّب العلوي على الشبكة نفسها فوق الخلايا المبنية وحدها: الدرج في خليته
+ * نفسها، والصالة العلوية تلامسه، وأجنحة النوم تلامسها ولها ضوء (خارج أو سطح مكشوف)، وما بقي سطح. الشجرة المشتركة تُقطع بخطوط لا تقطع
+ * مستطيلًا في أي من الدورين (فالدرج والجدران الحاملة على خطوط واحدة)، وما لا يُقطع مشتركًا يُحل لكل دور داخل مستطيله (عقدة مزدوجة).
+ */
+export function synthTwoFloors(G, U, site, { nOut = 12 } = {}) {
+  const gU = unitsOf(G, { stair: true }); unitMins(gU.units, G);
+  const sleepU = [...(U.family || []), ...(U.wcs || []), ...U.suites];
+  const uUnits = [{ key: 'UH', zone: 'family', circ: 'uhall', area: U.hallArea, light: true, maxCells: 2 }];
+  if (sleepU.length) {
+    const runAll = sum(sleepU.filter(b => !b.master).map(b => K.runOf(b) + .15));
+    if (sleepU.length >= 4) { const m = sleepU.filter(b => b.master), o = sleepU.filter(b => !b.master), h = Math.ceil(o.length / 2);
+      uUnits.push({ key: 'S1', sleep: true, blocks: o.slice(0, h), area: sum(o.slice(0, h).map(b => b.area)), light: true, maxCells: 2 }, { key: 'S2', sleep: true, blocks: [...o.slice(h), ...m], area: sum([...o.slice(h), ...m].map(b => b.area)), light: true, maxCells: 2 }); }
+    else uUnits.push({ key: 'S1', sleep: true, blocks: sleepU, area: sum(sleepU.map(b => b.area)), light: true, maxCells: 3 });
+  }
+  unitMins(uUnits.map(u => ({ ...u, circ: u.circ === 'uhall' ? 'hall' : u.circ })), U).forEach((x, i) => { uUnits[i].wmin = x.wmin; uUnits[i].dmin = x.dmin; });
+  const out = [], log = { grids: [] };
+  const gardenA = 24;
+  for (const [nc, nr] of gridShapes(site.W, site.D, gU.units.filter(u => !u.optional).length)) {
+    const e = enumerateLayouts(gU.units, gU.rel, nc, nr, { W: site.W, D: site.D, budget: 600000 });
+    const { picked } = pickLayouts(e.layouts, gU.rel, gU.units, 30, .15);
+    let ok = 0;
+    for (const L of picked) {
+      if (out.length >= nOut * 2) break;
+      const ups = upperLayouts(L, uUnits); log.ups = (log.ups || 0) + ups.length;
+      // ترتيب العلوي بتراكب الجدران: أجنحة النوم فوق وحدات أرضية مقسّمة (الخدمة، الطعام، المجلسان) أو فوق جناح نوم أرضي، والصالة العلوية فوق
+      // الصالة الأرضية أو المدخل — جدران العلوي على جدران الأرضي ما أمكن (التراكب يُقاس بعدها على المفصّل)
+      const under = (r, ks) => { let n = 0, t = 0; for (let y = r.y0; y < r.y1; y++) for (let x = r.x0; x < r.x1; x++) { t++; const g = Object.entries(L.R).find(([, q]) => x >= q.x0 && x < q.x1 && y >= q.y0 && y < q.y1)?.[0] || ''; if (ks.some(k => g.startsWith(k))) n++; } return t ? n / t : 0; };
+      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (k[0] === 'S' ? under(r, ['KS', 'DN', 'S', 'W', 'M']) : k === 'UH' ? under(r, ['H', 'F', 'LK']) : 0), 0);
+      ups.sort((a, b) => b.align - a.align);
+      for (const Lu of ups.slice(0, 6)) {
+        const tr = jointTree(L, Lu, gU.units, uUnits, G, U, gardenA, site); if (!tr) { log.noTree = (log.noTree || 0) + 1; continue; }
+        if (K.minExt(tr, 'x') > site.W + 1e-6 || K.minExt(tr, 'y') > site.D + 1e-6) { log.dimFail = (log.dimFail || 0) + 1; (log.dimEx ||= []).length < 6 && log.dimEx.push([K.minExt(tr, 'x').toFixed(1), K.minExt(tr, 'y').toFixed(1), Object.entries(L.R).map(([k, r]) => k + r.x0 + r.y0 + r.x1 + r.y1).join(' '), Object.entries(Lu.R).map(([k, r]) => k + r.x0 + r.y0 + r.x1 + r.y1).join(' ')]); continue; }
+        const mode = 'r3d' + ESC(plainKey(L) + '/' + plainKey(Lu));
+        K.describeAs(mode, describeLayout(L)); K.describeAs(mode + ':up', 'العلوي مركّب من علاقاته: الصالة العلوية على الدرج وأجنحة النوم حولها، وما بقي فوق الأرضي سطح مكشوف');
+        out.push({ mode, tag: mode.slice(3), org: 'rel', tree: tr, iters: K.DEEP_ITERS, tol: 4, note_ar: 'الدرج في موضعه للدورين، والصالة العلوية عليه، وأجنحة النوم حولها؛ التنظيم مركّب من علاقات البرنامج.' });
+        ok++; if (ok % 2 === 0) break;
+      }
+    }
+    log.grids.push({ nc, nr, ground: e.layouts.length, joint: ok });
+  }
+  return { trees: out.slice(0, nOut), log };
+}
+/** توزيعات العلوي على شبكة الأرضي: فوق الخلايا المبنية وحدها، والدرج في خليته. */
+function upperLayouts(L, uUnits) {
+  const { R, nc, nr } = L, N = nc * nr;
+  const ground = new Array(N).fill(null);
+  for (const [k, r] of Object.entries(R)) for (let y = r.y0; y < r.y1; y++) for (let x = r.x0; x < r.x1; x++) ground[y * nc + x] = k;
+  const st = R.ST; if (!st) return [];
+  const grid = ground.map(k => (k && k[0] !== 'G' ? -1 : -2)); // -2: فوق حديقة/حوش (لا غرف)
+  for (let y = st.y0; y < st.y1; y++) for (let x = st.x0; x < st.x1; x++) grid[y * nc + x] = 99;
+  const place = new Map([['ST', st]]), out = []; let nodes = 0, tUsed = 0;
+  const free = (x0, y0, w, h) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (x >= nc || y >= nr || grid[y * nc + x] !== -1) return false; return true; };
+  const fill = (x0, y0, w, h, v) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) grid[y * nc + x] = v; };
+  const opens = () => { const v = []; for (let i = 0; i < N; i++) if (grid[i] === -2) { const x = i % nc, y = (i - x) / nc; v.push({ x0: x, y0: y, x1: x + 1, y1: y + 1 }); } return v; };
+  const ok = () => {
+    const Rr = Object.fromEntries(place), T0 = [...place.keys()].filter(k => k[0] === 'T').map(k => Rr[k]), voids = [...opens(), ...T0];
+    const lit = r => bnd(r, nc, nr).length || voids.some(v => adjLen(r, v) > 0);
+    if (!Rr.UH || !adjLen(Rr.UH, st)) return false;
+    for (const u of uUnits) { const r = Rr[u.key]; if (!r) return false; if (u.sleep && !adjLen(r, Rr.UH)) return false; if (u.light && !lit(r)) return false; }
+    return true;
+  };
+  const rec = () => {
+    if (++nodes > 200000 || out.length >= 12) return;
+    const c = grid.indexOf(-1);
+    if (c < 0) { if (uUnits.every(u => place.has(u.key)) && ok()) out.push({ nc, nr, R: Object.fromEntries(place) }); return; }
+    const x0 = c % nc, y0 = (c - x0) / nc;
+    for (const u of uUnits.filter(u => !place.has(u.key))) for (const [w, h] of [[1, 1], [1, 2], [2, 1], [1, 3], [3, 1]].filter(([w, h]) => w * h <= u.maxCells)) {
+      if (!free(x0, y0, w, h)) continue; const r = { x0, y0, x1: x0 + w, y1: y0 + h };
+      fill(x0, y0, w, h, 1); place.set(u.key, r); rec(); place.delete(u.key); fill(x0, y0, w, h, -1);
+    }
+    if (tUsed < 3) { const r = { x0, y0, x1: x0 + 1, y1: y0 + 1 }; fill(x0, y0, 1, 1, 2); place.set('T' + tUsed, r); tUsed++; rec(); tUsed--; place.delete('T' + (tUsed)); fill(x0, y0, 1, 1, -1); }
+  };
+  rec();
+  return out;
+}
+/** الشجرة المشتركة للدورين: قطوع مشتركة ثم عقد مزدوجة؛ الدرج ورقة مشتركة. */
+function jointTree(L, Lu, gUnits, uUnits, G, U, gardenA, site = { W: 20, D: 20 }) {
+  const cellW = site.W / L.nc, cellH = site.D / L.nr;
+  const { nc, nr } = L, Ug = new Map(gUnits.map(u => [u.key, u])), Uu = new Map(uUnits.map(u => [u.key, u]));
+  const gR = Object.entries(L.R).map(([k, r]) => ({ k, r })), uR = Object.entries(Lu.R).map(([k, r]) => ({ k, r }));
+  // خلايا فوق الحديقة أو بلا وحدة علوية: «سطح» مفرد لكل خلية
+  const cov = new Set(); for (const { r } of uR) for (let y = r.y0; y < r.y1; y++) for (let x = r.x0; x < r.x1; x++) cov.add(y * nc + x);
+  for (let i = 0; i < nc * nr; i++) if (!cov.has(i)) { const x = i % nc, y = (i - x) / nc; uR.push({ k: 'T~' + i, r: { x0: x, y0: y, x1: x + 1, y1: y + 1 } }); }
+  const gLeaf = ({ k, r }) => {
+    if (k === 'ST') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
+    const u = Ug.get(k);
+    if (k[0] === 'G') return bnd(r, nc, nr).length ? VOID(gardenA * .6) : COURT(Math.max(K.COURT_MIN ** 2 + 1, gardenA * .6));
+    if (u.circ === 'foyer') return C('foyer', G.dayWc ? { area: K.FOYER_WC_AREA, wc: true } : { area: T.foyer * .85 });
+    if (u.circ === 'hall') return C('hall', { area: G.hallArea });
+    if (u.circ === 'link') return C('link', { area: 8 });
+    const z = Z(u.blocks, k === 'M' ? 'y1' : 'x1', k === 'M' ? 'x' : 'y'); if (k === 'M' || k === 'W') { z.minCross = 4.45; z.runMin = Object.fromEntries(u.blocks.map(b => [b.id, majRun(b)])); }
+    if (u.sleep) { const v = sleepVariants(u.blocks, 'y0', ['x0', 'x1', 'y0', 'y1'], 'g')[0]; return v ? v.tree : z; }
+    return z;
+  };
+  const uLeaf = ({ k, r }) => {
+    if (k === 'ST') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
+    if (k[0] === 'T') return OV(6);
+    if (k === 'UH') return C('hall', { area: U.hallArea });
+    const u = Uu.get(k), c = sideTo(r, Lu.R.UH) || 'y0';
+    const lit = [...bnd(r, nc, nr)];
+    const vs = sleepVariants(u.blocks, c, lit.length ? lit : ['x0', 'x1', 'y0', 'y1'], k === 'S1' ? 'U' : 'V');
+    // أنسب الأنواع لأبعاد الخلية التقريبية (لا الأول دائمًا)
+    const cw = (r.x1 - r.x0) * cellW, ch = (r.y1 - r.y0) * cellH, v = vs.sort((a, b) => Math.max(K.minExt(a.tree, 'x') / cw, K.minExt(a.tree, 'y') / ch) - Math.max(K.minExt(b.tree, 'x') / cw, K.minExt(b.tree, 'y') / ch))[0];
+    return v ? v.tree : Z(u.blocks, c, c[0] === 'y' ? 'x' : 'y');
+  };
+  const inR = (rs, reg) => rs.filter(({ r }) => r.x0 >= reg.x0 && r.x1 <= reg.x1 && r.y0 >= reg.y0 && r.y1 <= reg.y1);
+  const sep = (rs, reg, leaf) => { const c = guillotine(rs.map(x => x.r), reg); if (!c) return null; const f = n => (n.leaf ? leaf(rs.find(x => x.r === n.leaf)) : n.dir === 'x' ? X(f(n.k[0]), f(n.k[1])) : Y(f(n.k[0]), f(n.k[1]))); return f(c); };
+  const rec = reg => {
+    const g = inR(gR, reg), u = inR(uR, reg);
+    if (g.length === 1 && u.length === 1) { if (g[0].k === 'ST') return D2(gLeaf(g[0]), uLeaf(u[0])); return D2(gLeaf(g[0]), uLeaf(u[0])); }
+    for (let x = reg.x0 + 1; x < reg.x1; x++) if ([...g, ...u].every(({ r }) => r.x1 <= x || r.x0 >= x)) { const a = rec({ ...reg, x1: x }), b = rec({ ...reg, x0: x }); if (a && b) return X(a, b); }
+    for (let y = reg.y0 + 1; y < reg.y1; y++) if ([...g, ...u].every(({ r }) => r.y1 <= y || r.y0 >= y)) { const a = rec({ ...reg, y1: y }), b = rec({ ...reg, y0: y }); if (a && b) return Y(a, b); }
+    if (g.some(x => x.k === 'ST')) return null; // الدرج لا يُحل منفصلًا في الدورين
+    const a = sep(g, reg, gLeaf), b = sep(u, reg, uLeaf); return a && b ? D2(a, b) : null;
+  };
+  try { return rec({ x0: 0, y0: 0, x1: nc, y1: nr }); } catch { return null; }
+}
+
 // ---------------------------------------------------------------------------------------------- الواجهة
 /** مصدر الأشجار (withTreeSource): للدور الواحد الأشجار المركّبة؛ والدوران يُترك للمحرك الثاني إلى أن يُدعم (يُذكر). */
 function source(log) {
   const memo = new Map();
   return {
     tag: VILLA_V3_ENGINE_VERSION,
-    trees: (P, { stair, W, D }) => {
+    buildMax: 30, spare: 3,
+    tfTrees: (G, U, site) => {
+      if (!site) return null;
+      const r = synthTwoFloors(G, U, site); log.twoFloors = r.log;
+      const lib = V2.withTreeSource(null, () => V2.tfTreesLib(G, U, site));
+      return [...r.trees, ...lib];
+    },
+    trees: (P, opts) => {
+      const { stair, W, D } = opts;
       if (stair) return null; // الدوران: أشجار المحرك الثاني (tfTrees/الأرضي بالسلم) في هذا الإصدار
       const k = `${W.toFixed(2)}x${D.toFixed(2)}|${P.blocks.map(b => b.id + ':' + Math.round(b.area)).join(',')}`;
-      if (!memo.has(k)) { const r = synthTrees(P, { W, D }); memo.set(k, r.trees); Object.assign(log, r.log); }
+      if (!memo.has(k)) {
+        const r = synthTrees(P, { W, D }); Object.assign(log, r.log);
+        // فضاء البحث = التنظيمات المركّبة من العلاقات ∪ مكتبة الخبرة (أنماط المحرك الثاني) — كلها تمر بالقيود والبوابات نفسها
+        const lib = V2.withTreeSource(null, () => V2.partiTrees(P, opts));
+        log.library = lib.length; log.synth = r.trees.length;
+        memo.set(k, [...r.trees, ...lib]);
+      }
       return memo.get(k).map(t => ({ ...t, tree: K.cloneTree(t.tree) }));
     },
   };
