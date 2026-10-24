@@ -24,7 +24,8 @@ test('أنماط «الخدمة في الخلف» تُولَّد فقط حين �
 test('C1: المطبخ في الخلف، والطعام بجواره، وغرفة الخادمة نفسها (لا حمامها) على بعد ≤ 2 م من المطبخ في كل بديل', () => {
   const { C, r, land } = caseReq('C1');
   const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || 4 });
-  assert.ok(out.designs.length >= 2);
+  // (الجولة الثامنة عشرة) الصالة الموزِّعة (البديل الثاني سابقًا) يعبر فيها ضيف الرجال العائلة إلى الطعام فلا تُعرض؛ النقص مذكور بسببه
+  assert.ok(out.designs.length >= 1); if (out.designs.length < 2) assert.match(out.shortfall_ar || '', /ضيف الرجال/);
   for (const d of out.designs) {
     assert.ok(d.ledger.every(x => x.ok), d.pat + ': ' + d.ledger.filter(x => !x.ok).map(x => x.why).join(' | '));
     const { rooms } = docRooms(d.doc), k = rooms.find(x => x.name === 'المطبخ'), m = rooms.find(x => x.name === 'غرفة الخادمة');

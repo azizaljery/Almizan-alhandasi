@@ -25,7 +25,8 @@ test('المجموعة: ≥ 40 مستندًا معيبًا، كل نوع عيب 
   // wc-door-kitchen: لا دورة مياه تجاور المطبخ في بدائل after-10 فلا موضع للتحوير (طُبّق على after-4 في الجولات السابقة)
   const NA = new Set(['wc-door-kitchen']);
   // (الجولة الحادية عشرة) bedrooms-front: في بدائل after-11 لا يوجد صف نوم يُنقل إلى الواجهة إلا في بديل C4 الوحيد
-  const ONCE = new Set(['bedrooms-front']);
+  // (الجولة الثامنة عشرة) kitchen-front: بدائل after-18 أقل (لا يُعرض بديل يعبر فيه ضيف الرجال العائلة)، فيبقى للتحوير موضع واحد
+  const ONCE = new Set(['bedrooms-front', 'kitchen-front']);
   for (const m of MUTATIONS) if (!NA.has(m.id)) assert.ok(byType(m.id).length >= (TWO_FLOOR.has(m.id) ? Math.min(2, twoFloorDocs) : ONCE.has(m.id) ? 1 : 2), `العيب ${m.id} طُبّق ${byType(m.id).length} مرات فقط`);
   for (const c of corpus) { assert.ok(c.expected.length >= 1); assert.ok(c.note && c.note.length > 5, c.id); }
 });

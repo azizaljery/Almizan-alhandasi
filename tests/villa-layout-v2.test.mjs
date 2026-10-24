@@ -93,8 +93,9 @@ test('C1: مجلس رجال بمدخل مستقل ومجلس نساء من مد�
   assert.ok(ms < 45000, `الزمن ${Math.round(ms)} م.ث`); // حارس فقط: الزمن الفعلي يُقاس في أدلة القبول (الجهاز هنا مشترك)
   assert.equal(out.engine, VILLA_V2_ENGINE_VERSION);
   // «المطبخ في الخلف» صارمًا، ولا بديل متقارب لسد العدد (قرار المالك): بديلان على الأقل بنمطين مختلفين
-  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`);
-  assert.ok(new Set(out.designs.map(d => d.mode)).size >= 2, 'نمطان مختلفان على الأقل');
+  // (الجولة الثامنة عشرة) ولا بديل يعبر فيه ضيف الرجال العائلة إلى الطعام ما دام غيره لا يعبرها: بديل واحد على هذه الأرض، والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 1, `البدائل ${out.designs.length}`);
+  if (out.designs.length < 2) assert.match(out.shortfall_ar || '', /ضيف الرجال/); else assert.ok(new Set(out.designs.map(d => d.mode)).size >= 2, 'نمطان مختلفان على الأقل');
   for (const d of out.designs) { const k = d.ledger.find(x => x.kind === 'place' && /المطبخ/.test(x.text)); assert.ok(k && k.ok, d.pat + ': ' + k?.why); }
   for (const d of out.designs) {
     assertSound(d.doc, r.counts); assertInsideSetbacks(d.doc);
@@ -111,7 +112,8 @@ test('خمسة بدائل مطلوبة: ثلاثة على الأقل بأنما�
   const counts = { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 };
   const r = req('4 غرف نوم منها ماستر، مجلس رجال ومجلس نساء، صالة، طعام، مطبخ، غرفة خادمة', counts);
   const out = generateVillaDesigns({ land: L(20, 30), counts: r.counts, requirements: r, keep: 5 });
-  assert.ok(out.designs.length >= 3, `البدائل ${out.designs.length}`);
+  // (الجولة الثامنة عشرة) بديلان (التنظيمات التي يعبر فيها ضيف الرجال العائلة لا تُعرض، والبقية نسخ معدّلة)، والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 2, `البدائل ${out.designs.length}`); if (out.designs.length < 5) assert.match(out.shortfall_ar || '', /ضيف الرجال/);
   assert.equal(new Set(out.designs.map(d => d.mode)).size, out.designs.length, 'كل بديل من نمط مختلف');
   const n = out.designs.length; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) assert.ok(difference(out.designs[i].doc, out.designs[j].doc) >= .16);
   if (n < 5) assert.match(out.designs[0].notes.join(' '), /مختلفة تنظيميًا فقط/);

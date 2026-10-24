@@ -45,7 +45,8 @@ test('بنود المراجع المستقل r13 مقيسة من المستند:
 test('المولّد: كل بديل بحالة عرض، ولا محجوب بين المعروض متى وُجد غيره، والجاهز قبل ما يحتاج تعديلات؛ وحمام الخادمة في C10', () => {
   const { r, land, C } = caseReq('C10');
   const out = generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want });
-  assert.ok(out.designs.length >= 3);
+  // (الجولة الثامنة عشرة) مسار ضيف الرجال إلى الطعام شرط افتراضي قوي: التنظيمات التي يعبر فيها الضيف العائلة لا تُعرض، والنقص مذكور بسببه
+  assert.ok(out.designs.length >= 2); if (out.designs.length < C.want) assert.match(out.shortfall_ar || '', /ضيف الرجال|مختلف/);
   for (const d of out.designs) { assert.ok(d.presentation); assert.notEqual(d.presentation.status, 'hidden'); assert.ok(!(d.presentation.prefs || []).includes('MAID_BATH'), d.pat + ': الخادمة بحمامها'); }
   const st = out.designs.map(d => d.presentation.status), firstEdit = st.indexOf('needs-edits');
   if (firstEdit >= 0) assert.ok(!st.slice(firstEdit).includes('ready'));

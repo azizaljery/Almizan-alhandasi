@@ -105,6 +105,10 @@ export function renderPlan(ctx, st) {
   // ------------------------------------------------------------------ walls
   const ends = new Map(), key = p => Math.round(p.x * 200) + ',' + Math.round(p.y * 200);
   const levelWalls = doc.walls.filter(w => w.level === levelId), entryBoxes = [];
+  // مواضع تسميات الغرف التقريبية (اسم وأبعاد ومساحة) — لا تقع عليها كلمة «مدخل» حين تُرسم داخل الباب
+  const labelBoxes = flags.areas ? (st.analysis?.rooms || []).filter(r => Math.sqrt(r.area) * k >= 34).map(r => { const c = S(r.label ? r.label.seed : r.centroid), xs = (r.net || []).map(p => p.x), w = xs.length ? (Math.max(...xs) - Math.min(...xs)) * k * .9 : 60, big = Math.min(17, Math.max(10, Math.sqrt(r.area) * k / 7.5)); return { x: c.x, y: c.y + big * .4, w: Math.min(w, 140), h: big * 4.2 }; }) : [];
+  // (الجولة الثامنة عشرة) مواضع أرقام الأبعاد (لتبتعد عنها كلمة «مدخل»: كانت تغطي «3.25 م» فتقرأ «3.2»)
+  const dimBoxes = flags.dims ? doc.dimensions.filter(d => d.level === levelId).map(d => { const u = norm(sub(d.b, d.a)), nn = { x: -u.y, y: u.x }, off = d.offset ?? .6, sa = S(add(d.a, mul(nn, off))), sb = S(add(d.b, mul(nn, off))), fs = Math.max(10, Math.min(13, k * .26)); ctx.font = `600 ${fs}px ${FONT}`; const tw = ctx.measureText(d.text || fmtLen(dist(d.a, d.b))).width + 6, horiz = Math.abs(sb.x - sa.x) >= Math.abs(sb.y - sa.y); return { x: (sa.x + sb.x) / 2 + (horiz ? 0 : -(fs / 2 + 2)), y: (sa.y + sb.y) / 2 + (horiz ? -(fs / 2 + 2) : 0), w: horiz ? tw : fs * 1.4, h: horiz ? fs * 1.4 : tw }; }) : [];
   for (const w of levelWalls) for (const e of [w.a, w.b]) ends.set(key(e), (ends.get(key(e)) || 0) + 1);
   const ext = st.analysis?.exteriorWallIds || new Set();
   const wallPath = w => {
@@ -148,10 +152,21 @@ export function renderPlan(ctx, st) {
       }
     }
     // (الجولة الثامنة عشرة) كلمة «مدخل» لا تتراكب مع كلمة مدخل مجاور («مدخلدخل» في المصغّرات): تُزاح خارجًا بسطر حتى تخلو
-    if (o.entry && flags.entryLabels !== false) { const fs = Math.max(11, k * .28); ctx.font = `700 ${fs}px ${FONT}`; const tw = ctx.measureText('مدخل').width + 4; let t = null;
-      for (let s = 0; s < 4; s++) { const off = mul(n, -(w.t / 2 + .55)), p = S(add(add(w.a, mul(u, o.at)), off)), on = S(add(add(w.a, mul(u, o.at)), mul(n, -(w.t / 2 + .55 + 1)))), dx = on.x - p.x, dy = on.y - p.y, L = Math.hypot(dx, dy) || 1, q = { x: p.x + dx / L * s * fs * 1.15, y: p.y + dy / L * s * fs * 1.15 };
-        if (!entryBoxes.some(b => Math.abs(b.x - q.x) < (b.w + tw) / 2 && Math.abs(b.y - q.y) < fs * 1.05)) { t = q; break; } }
-      if (t) entryBoxes.push({ x: t.x, y: t.y, w: tw, fs }); }
+    if (o.entry && flags.entryLabels !== false) { const fs = Math.max(11, k * .28); ctx.font = `700 ${fs}px ${FONT}`; const tw = ctx.measureText('مدخل').width + 4; let t = null, first = null;
+      // المواضع المرشحة: أمام الباب، ثم إزاحة على امتداد الجدار (يمينًا ويسارًا)، ثم خارجًا — الأقرب إلى الباب أولًا
+      const base = S(add(add(w.a, mul(u, o.at)), mul(n, -(w.t / 2 + .55)))), outP = S(add(add(w.a, mul(u, o.at)), mul(n, -(w.t / 2 + 1.55)))), alP = S(add(add(w.a, mul(u, o.at + 1)), mul(n, -(w.t / 2 + .55))));
+      const ox = outP.x - base.x, oy = outP.y - base.y, oL = Math.hypot(ox, oy) || 1, ax = alP.x - base.x, ay = alP.y - base.y, aL = Math.hypot(ax, ay) || 1;
+      // داخل الباب أولًا (خطوط الأبعاد كلها خارج الواجهة، فلا يتراكب معها)، ثم خارجه
+      const inP = S(add(add(w.a, mul(u, o.at)), mul(n, (w.t / 2 + .5))));
+      const outC = ([al, ou]) => ({ x: base.x + ax / aL * al * tw + ox / oL * ou * fs * 1.15, y: base.y + ay / aL * al * tw + oy / oL * ou * fs * 1.15 }), inC = al => ({ x: inP.x + ax / aL * al * tw, y: inP.y + ay / aL * al * tw, inside: true });
+      const cands = [outC([0, 0]), outC([.6, 0]), outC([-.6, 0]), outC([1.1, 0]), outC([-1.1, 0]), inC(0), inC(.7), inC(-.7), outC([0, 1]), outC([0, 2])];
+      // أقل تراكب: صفر إن خلا الموضع، وإلا أصغر مساحة تراكب (كلمة «مدخل» أخرى ×3، ثم أرقام الأبعاد، ثم تسميات الغرف)
+      const ov = (b, q, h) => Math.max(0, (b.w + tw) / 2 - Math.abs(b.x - q.x)) * Math.max(0, (h + fs) / 2 - Math.abs(b.y - q.y));
+      let bestC = Infinity;
+      for (const q of cands) { first ||= q;
+        const c = 3 * entryBoxes.reduce((a, b) => a + ov(b, q, fs), 0) + dimBoxes.reduce((a, b) => a + ov(b, q, b.h), 0) + (q.inside ? labelBoxes.reduce((a, b) => a + ov(b, q, b.h), 0) : 0) + (flags.areas === false ? (q.inside ? 0 : .5) : (q.inside ? .5 : 0)); // المصغّر (بلا تسميات غرف): داخل الباب أولًا فلا يُقص عند حافته
+        if (c < bestC - 1e-9) { bestC = c; t = q; } if (c <= 1e-9) break; }
+      t ||= first; if (t) entryBoxes.push({ x: t.x, y: t.y, w: tw, fs }); }
   }
 
   // ------------------------------------------------------------------ stairs
@@ -241,7 +256,7 @@ export function renderPlan(ctx, st) {
   }
 
   // (الجولة الثامنة عشرة) كلمة «مدخل» بعد خطوط الأبعاد وبهالة: لا يغطيها رقم بُعد ولا تغطيه
-  for (const b of entryBoxes) { ctx.save(); ctx.font = `700 ${b.fs}px ${FONT}`; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(251,249,244,.95)'; ctx.strokeText('مدخل', b.x, b.y); ctx.fillStyle = THEME.accent; ctx.fillText('مدخل', b.x, b.y); ctx.restore(); }
+  for (const b of entryBoxes) { ctx.save(); ctx.font = `700 ${b.fs}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(251,249,244,.95)'; ctx.strokeText('مدخل', b.x, b.y); ctx.fillStyle = THEME.accent; ctx.fillText('مدخل', b.x, b.y); ctx.restore(); }
   // ------------------------------------------------------------------ selection highlights for walls
   for (const w of levelWalls) if (sel.has(w.id) || st.hover?.id === w.id) {
     const q = wallPath(w); ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();
