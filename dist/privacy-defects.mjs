@@ -19,6 +19,9 @@ export const R16_DEFECTS = Object.freeze({
   MASTER_VIA_DRESS: { ar: 'جناح النوم الرئيسي لا يُدخل إلا من الصالة عبر غرفة الملابس أو الحمام', tier: 'architectural' },
   GUEST_DINING: { ar: 'ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام', tier: 'saudi-preference' },
   PARKING_SHALLOW: { ar: 'موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة', tier: 'architectural' },
+  // (الجولة السابعة عشرة) — القياس أسفل الملف (measureHall)
+  HALL_SMALL: { ar: 'الصالة العائلية صغيرة نسبةً إلى مجلس الرجال (أقل من 0.8 من مساحته)', tier: 'architectural' },
+  HALL_THROUGH: { ar: 'الصالة العائلية ممر عابر: مسارات الحركة الرئيسية لا تترك فيها جلسة عائلية 3.0 × 3.6 م', tier: 'architectural' },
 });
 /** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا). */
 export const R16_LIMITS = Object.freeze({ viewDepth: 3, viewSide: 1, highSill: 1.6, bayDepth: 5.5 });
@@ -154,6 +157,127 @@ export function measureR16(doc, request = {}, model = analyzeDoc(doc)) {
       if (depth < R16_LIMITS.bayDepth - .05 && facing.length && !parallelAsked) bad.push(`«${z.name || 'موقف'}» موازٍ للشارع في ارتداد ${r2(depth)} م أمام نافذة «${facing[0]}» — دخول السيارة غير عملي`);
     }
     push('PARKING_SHALLOW', !bad.length, { bays: seen }, bad, bays.length > 0, parallelAsked);
+  }
+  // (الجولة السابعة عشرة) الصالة العائلية صغيرة نسبةً إلى مجلس الرجال، أو ممر عابر لا تبقى فيه جلسة عائلية (المراجع المستقل r16: C9-2)
+  for (const g of measureHall(doc, request, model)) out.push(g);
+  return out;
+}
+
+// ———————————————————————————— (الجولة السابعة عشرة) الصالة العائلية ————————————————————————————
+//  HALL_SMALL   — الصالة العائلية (أكبرها في دور المجلس) أصغر من 0.8 × مساحة مجلس الرجال: أولوية معكوسة لبيت عائلي.
+//  HALL_THROUGH — مسارات الحركة الرئيسية التي تعبر الصالة (من مدخل العائلة إلى غرف النوم والمطبخ والطعام والدرج… حين يكون أقصر
+//                 طريقها عبر الصالة) مع مناطق فتح أبوابها لا تترك فيها مستطيل جلسة عائلية حرًّا 3.0 × 3.6 م.
+//  القيمتان (0.8، و3.0 × 3.6 م: كنبة ثلاثية ومقعدان متقابلان وطاولة وسطى بهوامشها) قيم تصميمية افتراضية للميزان — غير نظامية،
+//  ويغلبها طلب العميل نصًّا (صالة صغيرة / صغّر الصالة).
+export const R17_LIMITS = Object.freeze({ hallToMajlis: .8, seatW: 3.0, seatL: 3.6, routeW: .9, doorZone: .9, cell: .1 });
+const PASS_TYPES = new Set(['entrance', 'corridor', 'living', 'stairs', 'dining']);
+const DEST_TYPES = new Set(['bedroom', 'master', 'kitchen', 'dining', 'stairs', 'office', 'service', 'laundry', 'majlis', 'living', 'corridor']);
+const isMenSpace = r => isMenMajlis(r) || /الرجال|الضيوف/.test(r.name || '');
+
+/** نقطة الباب داخل الغرفة: مركز الفتحة مزاحًا إلى داخلها بنصف سماكة الجدار و0.45 م. */
+function doorIn(op, room, extra = .45) {
+  const me = op.sides.find(s => s.room.id === room.id); if (!me) return op.p;
+  const t = (op.wall?.t || .2) / 2 + extra; return { x: op.p.x - me.outward.x * t, y: op.p.y - me.outward.y * t };
+}
+/**
+ * مسارات الحركة الرئيسية في دور: أقصر طريق (بمسافة المشي بين الأبواب) من أبواب مدخل العائلة إلى كل فراغ مقصود، عبر فراغات الحركة
+ * وحدها (مدخل، ممر، صالة، درج، طعام). يعيد [{ dest, rooms:[...], legs:[{room, a, b}] }] — legs: كل عبور لغرفة من باب إلى باب.
+ */
+export function mainRoutes(lv) {
+  const doorsOf = new Map(lv.rooms.map(r => [r.id, []]));
+  for (const op of lv.openings) if (op.door) for (const s of op.sides) doorsOf.get(s.room.id)?.push(op);
+  // المصادر: أبواب المدخل العائلي الخارجية (لا مدخل الرجال)، وإلا أبواب الصالة الخارجية، وفي العلوي: الدرج
+  const fam = lv.rooms.filter(r => r.type === 'entrance' && !isMenSpace(r));
+  let src = [];
+  for (const r of fam) for (const op of doorsOf.get(r.id)) if (op.sides.some(s => s.room.id === r.id && s.other === 'outside')) src.push({ op, room: r });
+  if (!src.length) for (const r of lv.rooms.filter(x => x.type === 'stairs')) for (const op of doorsOf.get(r.id)) src.push({ op, room: r, virtual: true });
+  if (!src.length) for (const r of lv.rooms.filter(isFamilyHall)) for (const op of doorsOf.get(r.id)) if (op.sides.some(s => s.room.id === r.id && s.other === 'outside')) src.push({ op, room: r });
+  // ديكسترا على الأبواب: الانتقال من باب إلى باب داخل غرفة حركة بمسافة المشي بينهما
+  const dist = new Map(), prev = new Map(), done = new Set();
+  for (const s of src) { dist.set(s.op.id, 0); prev.set(s.op.id, null); }
+  const byId = new Map(lv.openings.map(o => [o.id, o]));
+  for (;;) {
+    let u = null, du = Infinity; for (const [k, v] of dist) if (!done.has(k) && v < du) { du = v; u = k; }
+    if (u == null) break; done.add(u);
+    const op = byId.get(u);
+    for (const s of op.sides) {
+      const R = s.room; if (!PASS_TYPES.has(R.type) || isMenSpace(R)) continue;
+      // لا يُعبر فراغ من الباب الذي دخل منه إلى الخارج (المصدر يدخل المدخل فقط)
+      for (const o2 of doorsOf.get(R.id)) {
+        if (o2.id === u) continue;
+        const a = doorIn(op, R), b = doorIn(o2, R), nd = du + Math.hypot(a.x - b.x, a.y - b.y) + .01;
+        if (nd < (dist.get(o2.id) ?? Infinity)) { dist.set(o2.id, nd); prev.set(o2.id, { from: u, room: R }); }
+      }
+    }
+  }
+  const routes = [];
+  for (const D of lv.rooms) {
+    if (!DEST_TYPES.has(D.type) || isMenSpace(D) || (D.type === 'majlis' && !isWomen(D))) continue;
+    let best = null; for (const op of doorsOf.get(D.id)) { const d = dist.get(op.id); if (d != null && (!best || d < best.d)) best = { op, d }; }
+    if (!best) continue;
+    const legs = []; for (let k = best.op.id; prev.get(k); k = prev.get(k).from) { const p = prev.get(k); legs.unshift({ room: p.room, a: byId.get(p.from), b: byId.get(k) }); }
+    routes.push({ dest: D, d: best.d, legs });
+  }
+  return routes;
+}
+/**
+ * هل تتسع الصالة لجلسة عائلية w × l (بأي اتجاه) تبقى معها كل أبواب الصالة متصلة بممر صافٍ ≥ 0.9 م حول الجلسة، دون أن تقع الجلسة
+ * في منطقة فتح باب (0.9 م أمامه)؟ — أي: الحركة الرئيسية تلتف حول الجلسة لا تقطعها. يعيد { fits, at, freeArea, doors }.
+ */
+export function seatingZone(hall, routes, lv, L = R17_LIMITS) {
+  const poly = hall.net, xs = poly.map(p => p.x), ys = poly.map(p => p.y), c = .15;
+  const x0 = Math.min(...xs), y0 = Math.min(...ys), nx = Math.max(1, Math.floor((Math.max(...xs) - x0) / c + 1e-6)), ny = Math.max(1, Math.floor((Math.max(...ys) - y0) / c + 1e-6));
+  const ctr = (i, j) => ({ x: x0 + (i + .5) * c, y: y0 + (j + .5) * c });
+  const inside = new Uint8Array(nx * ny); for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) inside[j * nx + i] = pointInPolygon(ctr(i, j), poly, 1e-9) ? 1 : 0;
+  const doors = lv.openings.filter(op => op.door && op.sides.some(s => s.room.id === hall.id));
+  const zone = op => { const me = op.sides.find(s => s.room.id === hall.id), t = (op.wall?.t || .2) / 2, inn = { x: -me.outward.x, y: -me.outward.y }, u = { x: -inn.y, y: inn.x }, hw = Math.max(op.w, L.doorZone) / 2;
+    return [[-hw, t], [hw, t], [hw, t + L.doorZone], [-hw, t + L.doorZone]].map(([q, d]) => ({ x: op.p.x + u.x * q + inn.x * d, y: op.p.y + u.y * q + inn.y * d })); };
+  // منطقة فتح الباب للأبواب المفصلية وحدها (القوس والمنزلق لا يدور فيهما مصراع؛ اتصالهما بالممشى يُفحص أدناه)
+  const dz = new Uint8Array(nx * ny); for (const op of doors.filter(o => o.kind === 'door' || o.kind === 'door2')) { const z = zone(op); for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) if (pointInPolygon(ctr(i, j), z, 1e-9)) dz[j * nx + i] = 1; }
+  const cellOf = p => [Math.max(0, Math.min(nx - 1, Math.floor((p.x - x0) / c))), Math.max(0, Math.min(ny - 1, Math.floor((p.y - y0) / c)))];
+  const dcell = doors.map(op => cellOf(doorIn(op, hall, .3)));
+  const R = Math.max(1, Math.round(L.routeW / 2 / c)); // نصف عرض الممر بالخلايا
+  let free = 0; for (let k = 0; k < nx * ny; k++) free += inside[k];
+  const tryAt = (i0, j0, W, H) => {
+    // الجلسة لا تقع في منطقة فتح باب
+    for (let j = j0; j < j0 + H; j++) for (let i = i0; i < i0 + W; i++) if (!inside[j * nx + i] || dz[j * nx + i]) return false;
+    const blockedAt = (i, j) => i < 0 || j < 0 || i >= nx || j >= ny || !inside[j * nx + i] || (i >= i0 && i < i0 + W && j >= j0 && j < j0 + H);
+    // الخلية «ممشى» إن خلا مربع نصف قطره R حولها (جسم بعرض 0.9 م يمر فيها)
+    const walk = new Uint8Array(nx * ny);
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { let ok = !blockedAt(i, j); for (let dj = -R + 1; ok && dj < R; dj++) for (let di = -R + 1; ok && di < R; di++) if (blockedAt(i + di, j + dj)) ok = false; walk[j * nx + i] = ok ? 1 : 0; }
+    // كل باب يصل إلى أقرب خلية ممشى (عتبة الباب نفسها تُعد ممشى — الباب أضيق من الممر)
+    const near = ([ci, cj]) => { let best = null, bd = Infinity; for (let j = Math.max(0, cj - 4); j <= Math.min(ny - 1, cj + 4); j++) for (let i = Math.max(0, ci - 4); i <= Math.min(nx - 1, ci + 4); i++) if (walk[j * nx + i]) { const d = Math.abs(i - ci) + Math.abs(j - cj); if (d < bd) { bd = d; best = j * nx + i; } } return best; };
+    const starts = dcell.map(near); if (starts.some(x => x == null)) return false;
+    const seen = new Uint8Array(nx * ny), q = [starts[0]]; seen[starts[0]] = 1;
+    while (q.length) { const k = q.pop(), i = k % nx, j = (k - i) / nx; for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const a = i + di, b2 = j + dj; if (a < 0 || b2 < 0 || a >= nx || b2 >= ny) continue; const kk = b2 * nx + a; if (!seen[kk] && walk[kk]) { seen[kk] = 1; q.push(kk); } } }
+    return starts.every(k => seen[k]);
+  };
+  for (const [w, l] of [[L.seatW, L.seatL], [L.seatL, L.seatW]]) {
+    const W = Math.ceil(w / c - 1e-6), H = Math.ceil(l / c - 1e-6); if (W > nx || H > ny) continue;
+    for (let j = 0; j + H <= ny; j++) for (let i = 0; i + W <= nx; i++) if (tryAt(i, j, W, H)) return { fits: true, at: { x: r2(x0 + i * c), y: r2(y0 + j * c), w: r2(W * c), l: r2(H * c) }, freeArea: r2(free * c * c), doors: doors.length, routes: routes.length };
+  }
+  return { fits: false, at: null, freeArea: r2(free * c * c), doors: doors.length, routes: routes.length };
+}
+/** القياسان على المستند: الصالة العائلية الكبرى في دور مجلس الرجال. */
+export function measureHall(doc, request = {}, model = analyzeDoc(doc)) {
+  const out = [], text = String(request.text || '');
+  const smallAsked = /صال(?:ة|ه)[^،.]{0,12}(?:صغير|ضيق|صغّر|صغر)|(?:صغّر|صغر)[^،.]{0,6}الصال/.test(text);
+  const lv = model.levels.find(l => l.rooms.some(isMenMajlis)) || model.levels[0]; if (!lv) return out;
+  const hall = lv.rooms.filter(isFamilyHall).sort((a, b) => b.area - a.area)[0] || null;
+  const men = lv.rooms.filter(isMenMajlis).sort((a, b) => b.area - a.area)[0] || null;
+  const mk = (id, pass, value, reasons, applicable) => ({ id, ar: R16_DEFECTS[id].ar, tier: R16_DEFECTS[id].tier, pass: !!pass, applicable, value, reasons_ar: reasons, clientAsked: smallAsked });
+  {
+    const ok = !hall || !men || hall.area >= R17_LIMITS.hallToMajlis * men.area - 1e-6;
+    out.push(mk('HALL_SMALL', ok, hall && men ? { hall: r2(hall.area), majlis: r2(men.area), ratio: r2(hall.area / men.area) } : null,
+      ok ? [] : [`«${hall.name}» ${r2(hall.area)} م² مقابل «${men.name}» ${r2(men.area)} م² (${r2(hall.area / men.area)} من مساحته؛ الحد ${R17_LIMITS.hallToMajlis})`], !!(hall && men)));
+  }
+  {
+    let z = null, routes = [];
+    if (hall) { try { routes = mainRoutes(lv); z = seatingZone(hall, routes, lv); } catch { z = null; } }
+    const through = routes.filter(r => r.legs.some(g => g.room.id === hall?.id) && r.dest.id !== hall?.id).map(r => r.dest.name);
+    const ok = !z || z.fits;
+    out.push(mk('HALL_THROUGH', ok, z ? { seat: z.at, doors: z.doors, freeArea: z.freeArea, through: [...new Set(through)] } : null,
+      ok ? [] : [`في «${hall.name}» (${r2(hall.rect.w)}×${r2(hall.rect.l)} م، ${z.doors} أبواب) لا موضع لجلسة ${R17_LIMITS.seatW}×${R17_LIMITS.seatL} م يلتف حولها ممر ${R17_LIMITS.routeW} م يصل أبوابها كلها دون أن تقع في منطقة فتح باب — الصالة ممر عابر إلى ${[...new Set(through)].slice(0, 4).map(n => `«${n}»`).join('، ')}`], !!z));
   }
   return out;
 }
