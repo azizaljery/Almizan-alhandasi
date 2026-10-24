@@ -5,7 +5,7 @@
   {
    "key": "C1-alt-1",
    "source": "evidence/acceptance/after-17/C1/alt-1.json",
-   "ms": 30890,
+   "ms": 11367,
    "walls": 31,
    "openings": 50,
    "rooms": 25,
@@ -20,7 +20,7 @@
   {
    "key": "C1-alt-2",
    "source": "evidence/acceptance/after-17/C1/alt-2.json",
-   "ms": 30261,
+   "ms": 11017,
    "walls": 31,
    "openings": 47,
    "rooms": 23,
@@ -35,7 +35,7 @@
   {
    "key": "C2-alt-1",
    "source": "evidence/acceptance/after-17/C2/alt-1.json",
-   "ms": 26392,
+   "ms": 11008,
    "walls": 31,
    "openings": 47,
    "rooms": 22,
@@ -50,7 +50,7 @@
   {
    "key": "C3-alt-1",
    "source": "evidence/acceptance/after-17/C3/alt-1.json",
-   "ms": 26030,
+   "ms": 11064,
    "walls": 26,
    "openings": 39,
    "rooms": 20,
@@ -65,7 +65,7 @@
   {
    "key": "C3-alt-2",
    "source": "evidence/acceptance/after-17/C3/alt-2.json",
-   "ms": 26030,
+   "ms": 11913,
    "walls": 23,
    "openings": 35,
    "rooms": 19,
@@ -80,7 +80,7 @@
   {
    "key": "C4-alt-1",
    "source": "evidence/acceptance/after-17/C4/alt-1.json",
-   "ms": 23384,
+   "ms": 10032,
    "walls": 24,
    "openings": 41,
    "rooms": 20,
@@ -95,7 +95,7 @@
   {
    "key": "C5-alt-1",
    "source": "evidence/acceptance/after-17/C5/alt-1.json",
-   "ms": 25688,
+   "ms": 11933,
    "walls": 28,
    "openings": 36,
    "rooms": 18,
@@ -110,7 +110,7 @@
   {
    "key": "C5-alt-2",
    "source": "evidence/acceptance/after-17/C5/alt-2.json",
-   "ms": 17191,
+   "ms": 10991,
    "walls": 23,
    "openings": 37,
    "rooms": 17,
@@ -125,7 +125,7 @@
   {
    "key": "C5-alt-3",
    "source": "evidence/acceptance/after-17/C5/alt-3.json",
-   "ms": 16969,
+   "ms": 10053,
    "walls": 26,
    "openings": 42,
    "rooms": 18,
@@ -140,7 +140,7 @@
   {
    "key": "C5-alt-4",
    "source": "evidence/acceptance/after-17/C5/alt-4.json",
-   "ms": 17529,
+   "ms": 10641,
    "walls": 22,
    "openings": 33,
    "rooms": 16,
@@ -155,7 +155,7 @@
   {
    "key": "C6-alt-1",
    "source": "evidence/acceptance/after-17/C6/alt-1.json",
-   "ms": 17659,
+   "ms": 10533,
    "walls": 23,
    "openings": 39,
    "rooms": 19,
@@ -170,7 +170,7 @@
   {
    "key": "C7-alt-1",
    "source": "evidence/acceptance/after-17/C7/alt-1.json",
-   "ms": 22045,
+   "ms": 11219,
    "walls": 38,
    "openings": 62,
    "rooms": 32,
@@ -185,7 +185,7 @@
   {
    "key": "C7-alt-2",
    "source": "evidence/acceptance/after-17/C7/alt-2.json",
-   "ms": 19774,
+   "ms": 11285,
    "walls": 35,
    "openings": 58,
    "rooms": 29,
@@ -200,7 +200,7 @@
   {
    "key": "C8-alt-1",
    "source": "evidence/acceptance/after-17/C8/alt-1.json",
-   "ms": 17779,
+   "ms": 9994,
    "walls": 23,
    "openings": 39,
    "rooms": 20,
@@ -215,7 +215,7 @@
   {
    "key": "C8-alt-2",
    "source": "evidence/acceptance/after-17/C8/alt-2.json",
-   "ms": 19039,
+   "ms": 10637,
    "walls": 28,
    "openings": 46,
    "rooms": 23,
@@ -230,7 +230,7 @@
   {
    "key": "C9-alt-1",
    "source": "evidence/acceptance/after-17/C9/alt-1.json",
-   "ms": 19806,
+   "ms": 10864,
    "walls": 28,
    "openings": 44,
    "rooms": 21,
@@ -245,7 +245,7 @@
   {
    "key": "C9-alt-2",
    "source": "evidence/acceptance/after-17/C9/alt-2.json",
-   "ms": 17836,
+   "ms": 10112,
    "walls": 23,
    "openings": 36,
    "rooms": 17,
@@ -260,7 +260,7 @@
   {
    "key": "C9-alt-3",
    "source": "evidence/acceptance/after-17/C9/alt-3.json",
-   "ms": 17795,
+   "ms": 10960,
    "walls": 27,
    "openings": 43,
    "rooms": 19,
@@ -275,7 +275,7 @@
   {
    "key": "C9-alt-4",
    "source": "evidence/acceptance/after-17/C9/alt-4.json",
-   "ms": 17879,
+   "ms": 10631,
    "walls": 22,
    "openings": 34,
    "rooms": 16,
@@ -290,7 +290,7 @@
   {
    "key": "C10-alt-1",
    "source": "evidence/acceptance/after-17/C10/alt-1.json",
-   "ms": 19097,
+   "ms": 10412,
    "walls": 31,
    "openings": 53,
    "rooms": 27,
@@ -305,7 +305,7 @@
   {
    "key": "C10-alt-2",
    "source": "evidence/acceptance/after-17/C10/alt-2.json",
-   "ms": 18139,
+   "ms": 11223,
    "walls": 33,
    "openings": 49,
    "rooms": 24,
@@ -320,7 +320,7 @@
   {
    "key": "C10-alt-3",
    "source": "evidence/acceptance/after-17/C10/alt-3.json",
-   "ms": 18878,
+   "ms": 11405,
    "walls": 33,
    "openings": 55,
    "rooms": 28,

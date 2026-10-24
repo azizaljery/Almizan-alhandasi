@@ -1,0 +1,326 @@
+{
+ "id": "L7",
+ "name": "خليط إنجليزي — شاب يكتب نصف كلامه بالإنجليزية",
+ "words": 162,
+ "ms": 19,
+ "text": "Hi, ابي villa modern على أرض 20x30، والشارع south. We are a young family، أنا وزوجتي وولدين وبنت. I need 4 bedrooms، one of them master suite with walk-in closet، والباقي للأطفال. Open kitchen please، مع dining area next to the kitchen. Majlis للرجال with separate entrance، و no women majlis needed لأن زوجتي تستقبل ضيوفها في الصالة. ابي home office بمدخل خارجي لأني أشتغل من البيت وعملائي يجون أحيانًا. Gym room لو ينفع، مو ضروري. The living room big and bright، أحب الإضاءة. Laundry room ضروري. No maid room، we don't need it. Guest bathroom near the majlis. وأبي the master bedroom away from the street عشان الإزعاج. Garage لسيارتين قدام البيت. والواجهة glass and wood، modern style، شي مثل البيوت اللي في كاليفورنيا. My wife works from home too sometimes، بس هي تستخدم الصالة. We also have a cat، so no carpet please. وإذا فيه مجال ابي ceiling عالي شوي. Budget متوسطة، فلا تبالغون. Thanks a lot، وأنتظر التصميم الأولي.",
+ "formCounts": {
+  "bedrooms": 5,
+  "majlis": 3,
+  "baths": 1,
+  "kitchens": 2,
+  "halls": 2
+ },
+ "interpretError": null,
+ "score": {
+  "per": {
+   "count": {
+    "tp": 3,
+    "fn": 1,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.75
+   },
+   "pref": {
+    "tp": 1,
+    "fn": 3,
+    "fp": 0,
+    "precision": 1,
+    "recall": 0.25
+   },
+   "extra": {
+    "tp": 0,
+    "fn": 3,
+    "fp": 0,
+    "precision": null,
+    "recall": 0
+   },
+   "absent": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "dims": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "rule": {
+    "tp": 3,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   },
+   "floors": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 0,
+    "precision": null,
+    "recall": null
+   },
+   "facade": {
+    "tp": 0,
+    "fn": 3,
+    "fp": 0,
+    "precision": null,
+    "recall": 0
+   },
+   "unsupported": {
+    "tp": 0,
+    "fn": 1,
+    "fp": 0,
+    "precision": null,
+    "recall": 0
+   },
+   "conflict": {
+    "tp": 0,
+    "fn": 0,
+    "fp": 1,
+    "precision": 0,
+    "recall": null
+   },
+   "unclear": {
+    "tp": 1,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1,
+    "recall": 1
+   }
+  },
+  "precision": 0.9,
+  "recall": 0.45,
+  "f1": 0.6,
+  "tp": [
+   "count:bedrooms=4",
+   "count:majlis=1",
+   "count:kitchens=1",
+   "pref:openKitchen",
+   "absent:maid",
+   "rule:close:dining+kitchen",
+   "rule:close:guestwc+majlis",
+   "rule:place:master:n",
+   "unclear:Gym room"
+  ],
+  "missed": [
+   "count:dining=1",
+   "pref:masterDressing",
+   "pref:guestEntrance",
+   "pref:big_hall",
+   "extra:office",
+   "extra:office.ext",
+   "extra:laundry",
+   "facade:glass",
+   "facade:wood",
+   "facade:modern",
+   "unsupported:garage"
+  ],
+  "wrong": [
+   "conflict:count-mismatch"
+  ],
+  "levels": [
+   {
+    "item": "rule:close:dining+kitchen",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:close:guestwc+majlis",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   },
+   {
+    "item": "rule:place:master:n",
+    "want": "must",
+    "got": "must",
+    "ok": true
+   }
+  ],
+  "levelAccuracy": 1
+ },
+ "extracted": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 1,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 2
+  },
+  "prefs": {
+   "openKitchen": true,
+   "parking": true
+  },
+  "extras": {},
+  "absent": [
+   "maid"
+  ],
+  "dims": {},
+  "areas": {},
+  "rules": [
+   {
+    "item": "close:dining+kitchen",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "dining area next to the kitchen",
+    "text": "«الطعام» بجوار «المطبخ»"
+   },
+   {
+    "item": "close:guestwc+majlis",
+    "level": "must",
+    "levelCue": "default",
+    "quote": "Guest bathroom near the majlis",
+    "text": "«دورة مياه الضيوف» قرب «المجلس»"
+   },
+   {
+    "item": "place:master:n",
+    "level": "must",
+    "levelCue": "explicit",
+    "quote": "master bedroom away from the street",
+    "text": "«غرفة النوم الرئيسية» في الخلف"
+   }
+  ],
+  "tweaks": {},
+  "unsupported": [],
+  "unclear": [
+   "ابي villa modern على أرض 20x30",
+   "الشارع south",
+   "We are a young family",
+   "أنا وزوجتي وولدين وبنت",
+   "الباقي للأطفال",
+   "Majlis للرجال with separate entrance",
+   "و no women majlis needed لأن زوجتي تستقبل ضيوفها في الصالة",
+   "ابي home office بمدخل خارجي لأني أشتغل من البيت وعملائي يجون أحيانًا",
+   "Gym room لو ينفع",
+   "مو ضروري",
+   "The living room big and bright",
+   "أحب الإضاءة",
+   "Laundry room ضروري",
+   "we don't need it",
+   "الواجهة glass and wood",
+   "modern style",
+   "شي مثل البيوت اللي في كاليفورنيا",
+   "My wife works from home too sometimes",
+   "بس هي تستخدم الصالة",
+   "We also have a cat",
+   "so no carpet please",
+   "إذا فيه مجال ابي ceiling عالي شوي",
+   "Budget متوسطة",
+   "فلا تبالغون",
+   "Thanks a lot",
+   "أنتظر التصميم الأولي"
+  ],
+  "understood": [
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "مطبخ مفتوح على الطعام",
+   "بدون غرفة خادمة",
+   "«الطعام» بجوار «المطبخ»",
+   "«دورة مياه الضيوف» قرب «المجلس»",
+   "«غرفة النوم الرئيسية» في الخلف",
+   "مواقف سيارات في الارتداد داخل حدود الأرض"
+  ]
+ },
+ "conflicts": [
+  {
+   "type": "count-mismatch",
+   "question": "فهمت من كلامك إن غرف النوم 4، والعدد المختار في النموذج 5 — كم غرفة نوم تبي بالضبط؟"
+  }
+ ],
+ "coverage": {
+  "clauses": 35,
+  "fates": {
+   "filler": 1,
+   "unclear": 26,
+   "understood": 8
+  },
+  "dropped": [],
+  "unclearClauses": [
+   "ابي villa modern على أرض 20x30",
+   "الشارع south",
+   "We are a young family",
+   "أنا وزوجتي وولدين وبنت",
+   "الباقي للأطفال",
+   "Majlis للرجال with separate entrance",
+   "و no women majlis needed لأن زوجتي تستقبل ضيوفها في الصالة",
+   "ابي home office بمدخل خارجي لأني أشتغل من البيت وعملائي يجون أحيانًا",
+   "Gym room لو ينفع",
+   "مو ضروري",
+   "The living room big and bright",
+   "أحب الإضاءة",
+   "Laundry room ضروري",
+   "we don't need it",
+   "الواجهة glass and wood",
+   "modern style",
+   "شي مثل البيوت اللي في كاليفورنيا",
+   "My wife works from home too sometimes",
+   "بس هي تستخدم الصالة",
+   "We also have a cat",
+   "so no carpet please",
+   "إذا فيه مجال ابي ceiling عالي شوي",
+   "Budget متوسطة",
+   "فلا تبالغون",
+   "Thanks a lot",
+   "أنتظر التصميم الأولي"
+  ]
+ },
+ "expected": {
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 1,
+   "kitchens": 1,
+   "dining": 1
+  },
+  "prefs": [
+   "masterDressing",
+   "openKitchen",
+   "guestEntrance",
+   "big_hall"
+  ],
+  "extras": [
+   "office",
+   "office.ext",
+   "laundry"
+  ],
+  "absent": [
+   "maid"
+  ],
+  "rules": [
+   {
+    "r": "close:dining+kitchen",
+    "level": "must"
+   },
+   {
+    "r": "close:guestwc+majlis",
+    "level": "must"
+   },
+   {
+    "r": "place:master:n",
+    "level": "must"
+   }
+  ],
+  "facade": [
+   "glass",
+   "wood",
+   "modern"
+  ],
+  "unsupported": [
+   "garage"
+  ],
+  "conflicts": [],
+  "unclear": [
+   "Gym room"
+  ],
+  "optional": [
+   "count:baths",
+   "pref:parking"
+  ],
+  "traps": "«no women majlis needed» لا تعني «بدون مجلس»؛ مادتان للواجهة (زجاج وخشب)."
+ },
+ "traps": "«no women majlis needed» لا تعني «بدون مجلس»؛ مادتان للواجهة (زجاج وخشب)."
+}

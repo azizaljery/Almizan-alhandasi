@@ -6,7 +6,7 @@
   {
    "key": "C7-alt-1",
    "source": "evidence/acceptance/after-17/C7/alt-1.json",
-   "ms": 157,
+   "ms": 149,
    "counts": {
     "serious": 0,
     "warn": 13,
@@ -190,7 +190,7 @@
   {
    "key": "C7-alt-2",
    "source": "evidence/acceptance/after-17/C7/alt-2.json",
-   "ms": 40,
+   "ms": 44,
    "counts": {
     "serious": 0,
     "warn": 9,

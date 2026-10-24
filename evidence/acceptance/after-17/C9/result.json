@@ -1016,7 +1016,7 @@
   }
  ],
  "notes": [],
- "ms": 14110,
+ "ms": 14073,
  "requestedAlternatives": 4,
  "producedAlternatives": 4,
  "hidden": [],
@@ -1232,7 +1232,7 @@
  "heavyRejected": [],
  "edit": {
   "text": "احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر",
-  "ms": 299,
+  "ms": 301,
   "consentAsked": null,
   "options": null,
   "choice": null,
@@ -1267,8 +1267,8 @@
    "alreadyTxt": [],
    "fingerprint": {
     "version": "plan-fingerprint/1.0.0",
-    "before": "930f2ea8",
-    "after": "7d246c9c",
+    "before": "6203701f",
+    "after": "e9f6790f",
     "identical": false,
     "counts": {
      "changed": 1,
