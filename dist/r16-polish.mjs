@@ -14,6 +14,8 @@ import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
+/** (الجولة الثامنة عشرة) عمق مواجهة نافذة غرفة النوم للمواقف عبر الارتداد (م) — قيمة تصميمية افتراضية للميزان. */
+const BED_GATE_DEPTH = 8;
 const OUT_DIR = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
 const isFamilyHall = r => r.type === 'living' && !/الضيوف|الطعام|مغاسل/.test(r.name || '');
 const isMenMajlis = r => r.type === 'majlis' && !/النساء/.test(r.name || '');
@@ -98,6 +100,22 @@ export function polishR16(doc) {
     notes.push(`نافذة «${room.name}» المطلة على ${x.why} بجلسة عالية ${R16_LIMITS.highSill} م (لا جدار خارجي آخر للغرفة لا يطل عليه) — تفضيل قابل للتغيير: زجاج معتم بدلها إن أراد العميل.`);
     changed = true;
   }
+  // 1-ب) (الجولة الثامنة عشرة) نافذة غرفة نوم تواجه المواقف وبوابة السيارات عبر الارتداد (أبعد من مجال الرؤية القريب 3 م، حتى 8 م)
+  //      — المراجع المستقل r17: C6 وC3-2 وC5-2. للغرفة نافذة أخرى لا تواجهها: تُرفع جلسة المواجهة إلى 1.6 م (ضوء بلا كشف)؛ وإلا تبقى
+  //      وتُذكر. تحسين تصميم لا قياس: القياس WINDOW_PARKING باقٍ على 3 م.
+  {
+    const G = analyzeDoc(doc).levels[0], bays = G ? (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id) : [];
+    const faces = (op, out) => bays.some(z => touch(viewQuad({ p: op.p, w: op.w, wall: op.wall }, out, BED_GATE_DEPTH, R16_LIMITS.viewSide), z.polygon));
+    for (const op of G && bays.length ? G.openings.filter(o => o.window && (o.o.sill ?? 0) < R16_LIMITS.highSill - 1e-6) : []) {
+      const s = op.sides.find(x => x.exterior && x.other === 'outside' && ['bedroom', 'master'].includes(x.room.type)); if (!s || !faces(op, s.outward)) continue;
+      const room = s.room, others = G.openings.filter(q => q.window && q.id !== op.id && q.sides.some(x => x.room.id === room.id && x.exterior && x.other === 'outside' && !faces(q, x.outward)));
+      if (!others.length) { notes.push(`نافذة «${room.name}» تواجه المواقف عبر الارتداد ولا جدار خارجي آخر للغرفة؛ بقيت (يُستحسن زجاج معتم أو سور حاجب).`); continue; }
+      const live = doc.openings.find(q => q.id === op.o.id); if (!live) continue;
+      live.sill = R16_LIMITS.highSill; live.h = .9;
+      notes.push(`نافذة «${room.name}» المواجهة للمواقف وبوابة السيارات صارت علوية بجلسة ${R16_LIMITS.highSill} م، وللغرفة نافذتها الأخرى (خصوصية النوم — قيمة تصميمية افتراضية للميزان).`);
+      changed = true;
+    }
+  }
   // 2) الماستر عبر غرفة الملابس من الصالة: باب من ممر الغرف أو مدخل الجناح أو البهو الملاصق
   {
     const model = analyzeDoc(doc);
@@ -141,6 +159,24 @@ export function polishR16(doc) {
           done = true; changed = true; break;
         }
         if (done) break; } if (done) break; }
+    }
+  }
+  // 3-ب) (الجولة الثامنة عشرة) الطعام الذي يصله ضيف الرجال مفتوح بقوس (بلا باب) على مدخل العائلة أو الصالة أو ممر النوم: يُغلق
+  //      على العائلة بباب في الموضع نفسه (مزدوج إن اتسعت الفتحة ≥ 1.4 م) — «والطعام يُغلق على العائلة بباب» نص التفضيل في البرنامج
+  {
+    const model = analyzeDoc(doc), G = model.levels[0];
+    const m = measureR16(doc, {}, model).find(g => g.id === 'GUEST_DINING');
+    const fam = m?.value?.exposedTo || [];
+    if (G && m && m.applicable && !m.pass && fam.length) {
+      const D = G.rooms.find(r => r.type === 'dining' && r.name === m.value.route?.[m.value.route.length - 1]);
+      for (const d of D ? roomDoors(G, D) : []) {
+        if (!d.other || !fam.includes(d.other.name) || d.op.o.kind !== 'arch') continue;
+        const o = doc.openings.find(q => q.id === d.op.o.id); if (!o) continue;
+        const dbl = o.w >= 1.4 - 1e-9;
+        Object.assign(o, dbl ? { kind: 'door2', w: Math.min(o.w, 1.6) } : { kind: 'door', w: Math.min(o.w, .9) }, { h: 2.1, sill: 0, swing: 'in', hinge: o.hinge || 'left' });
+        notes.push(`«${D.name}» يُغلق على «${d.other.name}» ${dbl ? 'بباب مزدوج' : 'بباب'} بدل الفتحة المفتوحة: ضيف الرجال في الطعام لا يكون في منطقة العائلة (تفضيل سعودي افتراضي للميزان).`);
+        changed = true;
+      }
     }
   }
   // 4) غرفة نوم بلا حمام يصلها (C7-1 في المراجعة r15): دورة مياه مشتركة تُقتطع من طرف الممر الذي تُفتح عليه الغرفة — ممر عريض

@@ -136,8 +136,20 @@ export function measureR16(doc, request = {}, model = analyzeDoc(doc)) {
         if (hit) { viaFam = []; for (let k = prev.get(hit.id); k && k !== m.id; k = prev.get(k)) viaFam.unshift(G.roomsById.get(k).name); }
       }
     }
+    // (الجولة الثامنة عشرة) الطعام الذي يصله الضيف لا يُفتح على منطقة العائلة (مدخل العائلة أو الصالة أو ممر النوم) بفتحة بلا باب:
+    // الضيف الجالس فيه يكون في مدخل العائلة نفسه، والعائلة لا تُغلقه — وهذا نص التفضيل في البرنامج نفسه («والطعام يُغلق على العائلة
+    // بباب»). C8-2 في after-17 وصل ضيفه إلى الطعام من «مدخل الرجال» والطعام مفتوح بقوس على «مدخل العائلة» فاجتاز القياس
+    // (المراجع المستقل r17 حكم عليه «بعد تعديل»). ممر وسيط بين الطعام والصالة (لا فتحة مباشرة) لا يُعدّ هنا: المراجع قبله في C5-1 وC6-1 وC10-3.
+    let exposed = null;
+    if (route) {
+      const dn = G.rooms.find(r => r.type === 'dining' && r.name === route[route.length - 1]);
+      const famSide = o => (o.type === 'entrance' && !/الرجال|الضيوف/.test(o.name || '')) || isFamilyHall(o) || (o.type === 'corridor' && /الغرف|النوم|الجناح/.test(o.name || ''));
+      const open = dn ? roomDoors(G, dn).filter(d => d.other && famSide(d.other) && d.op.o?.kind === 'arch') : [];
+      if (open.length) exposed = open.map(d => d.other.name);
+    }
     const applicable = men.length > 0 && din.length > 0 && !noLink;
-    push('GUEST_DINING', !!route || !applicable, { route, crosses: viaFam }, route || !applicable ? [] : [viaFam?.length ? `من «${men[0].name}» إلى «${din[0].name}» يعبر الضيف ${viaFam.map(n => `«${n}»`).join(' ثم ')}` : `لا مسار للضيف من «${men[0].name}» إلى «${din[0].name}» إلا عبر منطقة العائلة`], applicable, noLink);
+    const ok = !!route && !exposed;
+    push('GUEST_DINING', ok || !applicable, { route, crosses: viaFam, exposedTo: exposed }, ok || !applicable ? [] : exposed ? [`«${route[route.length - 1]}» الذي يصله ضيف الرجال مفتوح بلا باب على ${exposed.map(n => `«${n}»`).join(' و')} — الضيف في منطقة العائلة ولا تُغلق عليه`] : [viaFam?.length ? `من «${men[0].name}» إلى «${din[0].name}» يعبر الضيف ${viaFam.map(n => `«${n}»`).join(' ثم ')}` : `لا مسار للضيف من «${men[0].name}» إلى «${din[0].name}» إلا عبر منطقة العائلة`], applicable, noLink);
   }
   // (د) موقف موازٍ في ارتداد ضحل أمام نافذة
   {

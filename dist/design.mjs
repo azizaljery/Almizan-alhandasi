@@ -8,7 +8,7 @@ import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
 import { serialize, parseDoc } from './draw/doc.mjs';
 import { requestBrief } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
-import { diffFingerprint } from './plan-fingerprint.mjs';
+import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 
 const $ = id => document.getElementById(id);
@@ -39,13 +39,13 @@ function show(index) {
   const levels = doc.levels.length > 1 ? el('div', { class: 'seg', role: 'tablist' }, doc.levels.map(l => el('button', { 'data-level': l.id, class: l.id === levelId ? 'on' : '', onclick: () => { levelId = l.id; view = null; goal = null; inertia = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === levelId)); paint(); } }, l.name))) : null;
   const zoneToggle = el('label', {}, el('input', { type: 'checkbox', id: 'zonesOn', checked: zonesOn, onchange: e => { zonesOn = e.target.checked; paint(); legend(); } }), 'تلوين المناطق');
   diffInfo = null;
-  if (index > 0 && d.feedback) { try { const D = diffFingerprint(parseDoc(session.designs[index - 1].doc), doc); if (!D.identical) diffInfo = { now: [...D.changed, ...D.added].filter(e => e.kind !== 'fixture' && e.box), gone: D.removed.filter(e => e.kind !== 'fixture' && e.box), summary: D.summary_ar, from: session.designs[index - 1].version ?? index }; } catch { diffInfo = null; } }
+  if (index > 0 && d.feedback) { try { const D = diffFingerprint(parseDoc(session.designs[index - 1].doc), doc); if (!D.identical) diffInfo = { now: [...D.changed, ...D.added].filter(e => e.kind !== 'fixture' && e.box), gone: D.removed.filter(e => e.kind !== 'fixture' && e.box), summary: diffCaption(D).client_ar, detail: D.summary_ar, from: session.designs[index - 1].version ?? index }; } catch { diffInfo = null; } }
   const diffToggle = diffInfo ? el('label', { 'data-diff': '' }, el('input', { type: 'checkbox', id: 'diffOn', checked: diffOn, onchange: e => { diffOn = e.target.checked; paint(); } }), 'أظهر ما تغيّر عن النسخة ' + diffInfo.from) : null;
   const plan = el('div', { class: 'card plancard' },
     el('div', { class: 'planbar' }, levels, zoneToggle, diffToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
     el('div', { class: 'planwrap', id: 'planWrap' }, el('canvas', { id: 'plan', 'aria-label': 'مسقط التصميم' })),
     el('div', { class: 'legend', id: 'legend' }),
-    diffInfo ? el('p', { class: 'sub', 'data-diff-summary': '' }, 'المظلل بالأحمر ما تغيّر أو أضيف، والمتقطع ما أزيل — ' + diffInfo.summary) : null);
+    diffInfo ? el('p', { class: 'sub', 'data-diff-summary': '', title: diffInfo.detail }, diffInfo.summary + ' — المظلل بالأحمر ما تغيّر أو أضيف، والمتقطع ما أزيل.') : null);
   // «لم يُتحقق» و«بانتظار العرض» ليست منفّذة ولا مخفقة: تُعرض وحدها بسببها
   const ledger = ledgerFor(session, doc), open = ledger.filter(x => x.status === 'unverified' || x.status === 'pending-render'), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok && !open.includes(x));
   const side = el('div', { class: 'actions card' },
@@ -183,7 +183,7 @@ function optionThumb(o, sess) {
     const d = typeof raw === 'string' ? parseDoc(raw) : raw, lvId = d.levels[0].id, c = el('canvas', { width: 160, height: 120, class: 'opt-thumb', 'data-thumb': o.id, style: 'display:block;margin:0 auto 4px;background:#fff;border-radius:6px' });
     const L = analyzeDoc(d).levelById.get(lvId), an = L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null;
     const b = docBounds(d, lvId), v = fitView({ x0: b.x0 - .5, y0: b.y0 - .5, x1: b.x1 + .5, y1: b.y1 + .5 }, 160, 120, 4), ctx = c.getContext('2d');
-    if (ctx) renderPlan(ctx, { doc: d, levelId: lvId, view: v, W: 160, H: 120, analysis: an, flags: { grid: false, dims: false, areas: false, fixtures: false, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
+    if (ctx) renderPlan(ctx, { doc: d, levelId: lvId, view: v, W: 160, H: 120, analysis: an, flags: { grid: false, dims: false, areas: false, fixtures: false, underlay: false, roomDims: false, scaleBar: false, compass: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
     // (الجولة السابعة عشرة) وسم المطبخ والطعام والمجلس على المصغّر
     if (ctx && L) { ctx.save(); ctx.font = 'bold 10px Tahoma'; ctx.textAlign = 'center'; ctx.fillStyle = '#1d2a24'; for (const t of thumbLabels(L.rooms)) ctx.fillText(t.text, (t.x - v.cx) * v.scale + 80, (v.cy - t.y) * v.scale + 64); ctx.restore(); }
     return c;

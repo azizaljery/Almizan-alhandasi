@@ -104,7 +104,7 @@ export function renderPlan(ctx, st) {
 
   // ------------------------------------------------------------------ walls
   const ends = new Map(), key = p => Math.round(p.x * 200) + ',' + Math.round(p.y * 200);
-  const levelWalls = doc.walls.filter(w => w.level === levelId);
+  const levelWalls = doc.walls.filter(w => w.level === levelId), entryBoxes = [];
   for (const w of levelWalls) for (const e of [w.a, w.b]) ends.set(key(e), (ends.get(key(e)) || 0) + 1);
   const ext = st.analysis?.exteriorWallIds || new Set();
   const wallPath = w => {
@@ -145,7 +145,11 @@ export function renderPlan(ctx, st) {
         ctx.save(); if (o.kind === 'arch') ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore();
       }
     }
-    if (o.entry) { const c = S(add(w.a, mul(u, o.at))), off = mul(n, -(w.t / 2 + .55)); const t = S(add(add(w.a, mul(u, o.at)), off)); ctx.fillStyle = THEME.accent; ctx.font = `700 ${Math.max(11, k * .28)}px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText('مدخل', t.x, t.y); }
+    // (الجولة الثامنة عشرة) كلمة «مدخل» لا تتراكب مع كلمة مدخل مجاور («مدخلدخل» في المصغّرات): تُزاح خارجًا بسطر حتى تخلو
+    if (o.entry && flags.entryLabels !== false) { const fs = Math.max(11, k * .28); ctx.font = `700 ${fs}px ${FONT}`; const tw = ctx.measureText('مدخل').width + 4; let t = null;
+      for (let s = 0; s < 4; s++) { const off = mul(n, -(w.t / 2 + .55)), p = S(add(add(w.a, mul(u, o.at)), off)), on = S(add(add(w.a, mul(u, o.at)), mul(n, -(w.t / 2 + .55 + 1)))), dx = on.x - p.x, dy = on.y - p.y, L = Math.hypot(dx, dy) || 1, q = { x: p.x + dx / L * s * fs * 1.15, y: p.y + dy / L * s * fs * 1.15 };
+        if (!entryBoxes.some(b => Math.abs(b.x - q.x) < (b.w + tw) / 2 && Math.abs(b.y - q.y) < fs * 1.05)) { t = q; break; } }
+      if (t) { entryBoxes.push({ x: t.x, y: t.y, w: tw }); ctx.fillStyle = THEME.accent; ctx.textAlign = 'center'; ctx.fillText('مدخل', t.x, t.y); } }
   }
 
   // ------------------------------------------------------------------ stairs
@@ -193,13 +197,23 @@ export function renderPlan(ctx, st) {
   if (flags.areas) for (const r of rooms) {
     const c = S(r.label ? r.label.seed : r.centroid);
     const px = Math.sqrt(r.area) * k; if (px < 34) continue;
-    const maxW = Math.max(30, (r.rect ? Math.max(r.rect.w, r.rect.l) : Math.sqrt(r.area)) * k * .86);
+    // (الجولة الثامنة عشرة) عرض الاسم محدود بعرض الغرفة الأفقي الفعلي (لا بضلعها الأطول): «صالة الطعام والمقلط» كانت تعبر
+    // الجدار فوق «مدخل الرجال» وتخفي الباب بينهما (المراجع المستقل r17)؛ والاسم الطويل يُلفّ سطرين بدل أن يُخفى
+    const xs = (r.net || []).map(p => p.x), spanX = xs.length ? (Math.max(...xs) - Math.min(...xs)) : Math.sqrt(r.area);
+    const maxW = Math.max(24, Math.min((r.rect ? Math.max(r.rect.w, r.rect.l) : Math.sqrt(r.area)) * k * .86, spanX * k * .9));
     let big = Math.min(17, Math.max(10, px / 7.5));
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = `600 ${big}px ${FONT}`; while (big > 8.5 && ctx.measureText(r.name).width > maxW) { big -= .5; ctx.font = `600 ${big}px ${FONT}`; }
-    const showName = ctx.measureText(r.name).width <= maxW * 1.05;
+    const fits = (lines, f) => { ctx.font = `600 ${f}px ${FONT}`; return lines.every(l => ctx.measureText(l).width <= maxW); };
+    const words = String(r.name).split(' ');
+    const two = words.length > 1 ? (() => { let best = null; for (let i = 1; i < words.length; i++) { const L = [words.slice(0, i).join(' '), words.slice(i).join(' ')]; ctx.font = `600 ${big}px ${FONT}`; const m = Math.max(...L.map(l => ctx.measureText(l).width)); if (!best || m < best.m) best = { L, m }; } return best.L; })() : null;
+    let lines = [r.name];
+    while (big > 8.5 && !fits(lines, big)) { if (two && lines.length === 1 && big <= 12.5) { lines = two; continue; } big -= .5; }
+    if (!fits(lines, big) && two) lines = two;
+    ctx.font = `600 ${big}px ${FONT}`;
+    const showName = lines.every(l => ctx.measureText(l).width <= maxW * 1.12) || r.area >= 2;
     const halo = (text, y, font, color) => { ctx.font = font; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(251,249,244,.92)'; ctx.strokeText(text, c.x, y); ctx.fillStyle = color; ctx.fillText(text, c.x, y); };
-    if (showName) halo(r.name, c.y - big * .55, `600 ${big}px ${FONT}`, r.unlabelled ? THEME.inkSoft : THEME.ink);
+    const lh = big * 1.1, top = c.y - big * .55 - (lines.length - 1) * lh;
+    if (showName) lines.forEach((l, i) => halo(l, top + i * lh, `600 ${big}px ${FONT}`, r.unlabelled ? THEME.inkSoft : THEME.ink));
     if (flags.roomDims && r.rect && r.rect.w > .5 && showName) {
       // عرض العرض (للمخططات المعروضة على العميل): الأبعاد ثم المساحة، كما في صفحات المخططات المهنية
       const dims = `${r.rect.l.toFixed(2)} × ${r.rect.w.toFixed(2)}`, fs = Math.max(8.5, big * .72);
@@ -260,8 +274,9 @@ export function renderPlan(ctx, st) {
     ctx.fillRect(a.x, a.y, b.x - a.x, b.y - a.y); ctx.strokeRect(a.x, a.y, b.x - a.x, b.y - a.y); ctx.restore();
   }
   // north arrow + scale bar
-  drawCompass(ctx, 48, 54, doc.north || 0);
-  drawScaleBar(ctx, 24, H - 34, k);
+  // (الجولة الثامنة عشرة) المصغّرات بلا مقياس رسم (شريط «10 م» كان يقع فوق المجلس في مصغّر الخيارات)
+  if (flags.compass !== false) drawCompass(ctx, 48, 54, doc.north || 0);
+  if (flags.scaleBar !== false) drawScaleBar(ctx, 24, H - 34, k);
   ctx.restore();
 }
 

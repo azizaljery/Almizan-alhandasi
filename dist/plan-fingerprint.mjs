@@ -109,7 +109,7 @@ export function fingerprint(doc) {
 }
 
 // ------------------------------------------------------------------------------------------ المقارنة
-const slim = e => ({ key: e.key, kind: e.kind, level: e.level, id: e.id, name_ar: e.name_ar, ...(e.area !== undefined ? { area: e.area } : {}), ...(e.len !== undefined ? { len: e.len } : {}), box: e.box ? { x0: r2(e.box.x0), x1: r2(e.box.x1), y0: r2(e.box.y0), y1: r2(e.box.y1) } : null });
+const slim = e => ({ key: e.key, kind: e.kind, level: e.level, id: e.id, name_ar: e.name_ar, ...(e.name !== undefined ? { name: e.name } : {}), ...(e.area !== undefined ? { area: e.area } : {}), ...(e.len !== undefined ? { len: e.len } : {}), box: e.box ? { x0: r2(e.box.x0), x1: r2(e.box.x1), y0: r2(e.box.y0), y1: r2(e.box.y1) } : null });
 /**
  * يقارن بصمتين (أو مستندين): { changed, unchanged, added, removed, counts, byKind, region, summary_ar }.
  * المطابقة بالمعرّف أولًا؛ ثم الفتحات والغرف التي تغيّر معرّفها بالمحتوى نفسه حرفيًا (ثابتة)؛ ثم الغرف بالاسم (تغيّرت).
@@ -178,6 +178,49 @@ function summarize(counts, byKind, identical) {
   const fx = byKind.fixture, fxT = fx ? fx.changed + fx.added + fx.removed : 0;
   return `البصمة الهندسية: تغيّر ${countAr(counts.touched)} (${parts.join('، ')})، وبقي ثابتًا حرفيًا ${countAr(counts.unchanged)}${fxT ? `؛ وتغيّر من الأثاث ${countAr(fxT, 'fixture')}` : ''}.`;
 }
+// (الجولة الثامنة عشرة) العنوان الفرعي لصورة الفرق من البصمة نفسها لا من قالب عام (المراجع المستقل r17: صورة فرق C8 قالت
+// «الغرف نفسها في أماكنها» وقد انتقلت الغرف كلها، وفروق واجهة C9 قالت «تغيّرت جدران…» ولم يتغيّر في المخطط شيء).
+/** حد انتقال الغرفة (م): إزاحة مركز مستطيلها أكثر من هذا = «انتقلت»؛ وأقل منه مع تغيّر الشكل = «تغيّر مقاسها». */
+export const ROOM_MOVE_M = .5;
+/** نسبة الغرف المنتقلة (من غرف المخطط قبل) التي يُسمّى بعدها الفرق «توزيعًا جديدًا». */
+export const RELAYOUT_SHARE = .5;
+const ctr = b => b ? { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 } : null;
+/**
+ * يصف الفرق بلغة العميل من البصمة: { kind, client_ar, evidence_ar, rooms: { before, moved, resized, added, removed, same } }.
+ * kind: identical | facade | relayout | rooms | openings. client_ar للعميل (بلا معرّفات ولا أعداد عناصر)،
+ * وevidence_ar للأدلة الداخلية (الأعداد والبصمة).
+ */
+export function diffCaption(d) {
+  const touched = [...d.changed, ...d.added, ...d.removed].filter(e => e.kind !== 'fixture');
+  const layout = touched.filter(e => !['finish', 'roof'].includes(e.kind));
+  const facade = touched.some(e => e.kind === 'finish'), roof = touched.some(e => e.kind === 'roof');
+  const nm = e => e.name || String(e.name_ar || '').replace(/[«»]/g, '');
+  const changedRooms = d.changed.filter(e => e.kind === 'room');
+  const moved = changedRooms.filter(e => { const a = ctr(e.before?.box), b = ctr(e.box); return a && b && Math.hypot(a.x - b.x, a.y - b.y) > ROOM_MOVE_M; });
+  const resized = changedRooms.filter(e => !moved.includes(e));
+  const addedR = d.added.filter(e => e.kind === 'room'), removedR = d.removed.filter(e => e.kind === 'room');
+  const same = d.unchanged.filter(k => k.startsWith('R|')).length;
+  const before = same + changedRooms.length + removedR.length;
+  const rooms = { before, moved: moved.length, resized: resized.length, added: addedR.length, removed: removedR.length, same };
+  const evidence_ar = `${d.summary_ar} الغرف: ${before} قبل؛ انتقلت ${moved.length}، وتغيّر مقاس ${resized.length}، وأضيفت ${addedR.length}، وأزيلت ${removedR.length}، وبقيت ${same} كما هي.`;
+  const withFacade = facade ? '، وتغيّرت مادة الواجهة' : '';
+  if (!layout.length) {
+    if (facade || roof) return { kind: 'facade', client_ar: `لم يتغيّر المخطط — تغيّرت ${facade && roof ? 'مادة الواجهة والسطح' : facade ? 'مادة الواجهة' : 'السطح'} فقط`, evidence_ar, rooms };
+    return { kind: 'identical', client_ar: 'لم يتغيّر شيء في المخطط — كما هو حرفيًا', evidence_ar, rooms };
+  }
+  const relocated = moved.length + removedR.length; // الغرفة التي أزيلت باسمها وظهرت غيرها في موضع آخر انتقال كذلك
+  if (before && relocated / before >= RELAYOUT_SHARE) return { kind: 'relayout', client_ar: `توزيع جديد: انتقلت الغرف (${relocated} من ${before})${same ? `، وبقي ${same === 1 ? 'فراغ واحد' : same === 2 ? 'فراغان' : same + ' فراغات'} كما ${same === 1 ? 'هو' : 'هي'}` : ''}${withFacade}`, evidence_ar, rooms };
+  const roomTouched = [...moved, ...resized, ...addedR, ...removedR];
+  if (roomTouched.length) {
+    const names = [...new Set(roomTouched.map(nm).filter(Boolean))];
+    const list = names.slice(0, 8).join('، ') + (names.length > 8 ? '…' : '');
+    const verb = moved.length || removedR.length || addedR.length ? 'ما تغيّر (مظلل)' : 'تغيّر مقاس (مظلل)';
+    return { kind: 'rooms', client_ar: `${verb}: ${list}؛ وبقية الغرف في أماكنها${withFacade}`, evidence_ar, rooms };
+  }
+  const ops = layout.filter(e => e.kind === 'opening').length, walls = layout.filter(e => e.kind === 'wall').length;
+  const what = ops && walls ? 'جدران وأبواب أو نوافذ' : ops ? 'أبواب أو نوافذ' : walls ? 'جدران' : 'عناصر في المخطط';
+  return { kind: 'openings', client_ar: `تغيّرت ${what} (مظللة)؛ الغرف نفسها في أماكنها${withFacade}`, evidence_ar, rooms };
+}
 /** نسخة مختصرة للرد والتخزين: الأعداد، والعناصر التي تغيّرت بأسمائها (حتى limit)، والمنطقة. */
 export function compactDiff(d, limit = 60) {
   const pick = L => L.filter(e => e.kind !== 'fixture').slice(0, limit).map(e => ({ key: e.key, kind: e.kind, name_ar: e.name_ar, ...(e.how_ar ? { how_ar: e.how_ar } : {}) }));
@@ -192,4 +235,4 @@ export function outsideRegion(d, box, margin = .3) {
 /** مفاتيح العناصر التي مسّها الفرق (تغيّرت/أضيفت/أزيلت) — لمقارنة فرقين (مثل إعادة تعديل بعد الرجوع). */
 export const touchedKeys = d => new Set([...d.changed, ...d.added, ...d.removed].filter(e => e.kind !== 'fixture').map(e => e.key));
 
-export default { FINGERPRINT_VERSION, PLAN_KINDS, countAr, fingerprint, diffFingerprint, compactDiff, outsideRegion, touchedKeys, fnv };
+export default { FINGERPRINT_VERSION, PLAN_KINDS, countAr, fingerprint, diffFingerprint, diffCaption, compactDiff, outsideRegion, touchedKeys, fnv };
