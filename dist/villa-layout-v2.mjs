@@ -3426,9 +3426,9 @@ function noRegress(d, n, requirements, land) {
 }
 /** (الجولة العشرون) يزرع كتلة دورة مياه يومية بجوار الصالة في شجرة التنظيم نفسها (جراحة شجرة عامة، لا لنمط بعينه). */
 const DAY_WC_BLOCK = Object.freeze({ id: 'wcDay', kind: 'wc', rank: 2, area: 3.6, name: 'دورة مياه' });
-function withDayWc(tree, side) {
+function withDayWc(tree, side, at = 'hall') {
   const t = cloneTree(tree); let done = false;
-  const walk = (n, parent, i) => { if (done || !n) return; if (n.t === 'circ' && n.id === 'hall') { const z = Z([DAY_WC_BLOCK], side === 'x' ? 'x1' : 'y0', side === 'x' ? 'y' : 'x'); const rep = side === 'x' ? mk('x', [z, { ...n }]) : mk('y', [{ ...n }, z]); if (parent) { parent.k[i] = rep; } else Object.assign(t, rep); done = true; return; } if (n.k) n.k.forEach((c, j) => walk(c, n, j)); if (n.t === 'dual') { walk(n.g, null, 0); } };
+  const walk = (n, parent, i) => { if (done || !n) return; if (n.t === 'circ' && n.id === at) { const z = Z([DAY_WC_BLOCK], side === 'x' ? 'x1' : 'y0', side === 'x' ? 'y' : 'x'); const rep = side === 'x' ? mk('x', [z, { ...n }]) : mk('y', [{ ...n }, z]); if (parent) { parent.k[i] = rep; } else Object.assign(t, rep); done = true; return; } if (n.k) n.k.forEach((c, j) => walk(c, n, j)); if (n.t === 'dual') { walk(n.g, null, 0); } };
   walk(t, null, 0); return done ? t : null;
 }
 function refineDayWc(designs, P, site, land, { title, requirements, entry, counts }) {
@@ -3437,12 +3437,13 @@ function refineDayWc(designs, P, site, land, { title, requirements, entry, count
   for (let i = 0; i < designs.length; i++) {
     const d = designs[i]; if (!d.cand || !lacks(d)) continue;
     const tr = trees.find(t => t.tag === d.cand.tag && t.mode === d.cand.mode && !!t.stepped === !!d.cand.stepped); if (!tr) continue;
-    for (const side of ['x', 'y']) {
-      const tree = withDayWc(tr.tree, side); if (!tree) continue;
+    // بجوار بهو المدخل أولًا (لا يمس مساحة الصالة)، ثم بجوار الصالة
+    for (const [at, side] of [['foyer', 'x'], ['foyer', 'y'], ['hall', 'x'], ['hall', 'y']]) {
+      const tree = withDayWc(tr.tree, side, at); if (!tree) continue;
       try {
-        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree, seed: tr.tag + '#w' + side, iters: Math.max(tr.iters || 0, DEEP_ITERS), tol: Math.max(tr.tol || 2, 4), hardLink: tr.hardLink, hardHall: tr.hardHall }] })[0]; if (globalThis.__v2dbg) (globalThis.__v2dbg.daywc ||= []).push({ pat: d.pat, side, cand: !!c }); if (!c) continue;
+        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree, seed: tr.tag + '#w' + at + side, iters: Math.max(tr.iters || 0, DEEP_ITERS), tol: Math.max(tr.tol || 2, 4), hardLink: tr.hardLink, hardHall: tr.hardHall }] })[0]; if (globalThis.__v2dbg) (globalThis.__v2dbg.daywc ||= []).push({ pat: d.pat, side, cand: !!c }); if (!c) continue;
         const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry });
-        if (globalThis.__v2dbg) globalThis.__v2dbg.daywc.push({ reject: n.reject.slice(0, 2), fails: [d.fails, n.fails], lacks: lacks(n), r16: n.r16 });
+        if (globalThis.__v2dbg) globalThis.__v2dbg.daywc.push({ reject: n.reject.slice(0, 2), fails: [d.fails, n.fails], failed: (n.ledger || []).filter(x => !x.ok).map(x => x.text + ': ' + x.why), lacks: lacks(n), r16: n.r16 });
         if (n.reject.length || n.fails > d.fails || lacks(n) || (n.r16 || []).some(id => MANDATORY_R16.includes(id)) || !gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
         if (designs.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
         n.secondPass = d.secondPass; n.dr = n.dr || docRooms(n.doc);
@@ -3548,7 +3549,7 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
         const need = A_(mj.r) - (mj.block.guestWc ? 7 : 0) + margin, ha = A_(h.r); return (ha < need ? 60 * (need - ha) : 0) + 80 * mx; };
       try {
         // (الجولة العشرون) والصالة ≥ المجلس مخالفة في إعادة الحل (hardHall) لا جزاء فقط — في المحاولتين الأخيرتين
-        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree: cloneTree(tr.tree), hardMajlis: !!P.men && !majlisAsked(P), hardHall: margin >= 6 && !R14_OFF.has('r20hall'), seed: tr.tag + '#h' }], extra })[0]; if (!c) continue;
+        const c = candidates(P, site, { rules: P.rules, entry, trees: [{ ...tr, tree: cloneTree(tr.tree), hardMajlis: !!P.men && !majlisAsked(P), hardHall: margin >= 6 && !R14_OFF.has('r20hall'), seed: tr.tag + '#h' + (R14_OFF.has('r20hall') ? '' : margin), ...(R14_OFF.has('r20hall') ? {} : { iters: Math.max(tr.iters || 0, DEEP_ITERS), tol: Math.max(tr.tol || 2, 4) }) }], extra })[0]; if (globalThis.__v2dbg) (globalThis.__v2dbg.hall ||= []).push({ pat: d.pat, margin, cand: !!c }); if (!c) continue;
         const n = buildDesign(c, P, site, land, { title, mirror: d.mirror, requirements, entry }), a1 = ar(n); n.secondPass = d.secondPass;
         if (globalThis.__v2dbg) (globalThis.__v2dbg.hall ||= []).push({ pat: d.pat, margin, a0, a1, reject: n.reject, fails: [d.fails, n.fails], major: [d.major, n.major], q: [d.quality, n.quality] });
         // يُقبل إن صارت الصالة ≥ المجلس، أو (الجولة التاسعة عشرة) زالت عيوب جوهرية مقيسة (الصالة الصغيرة/الممر) دون عيب جديد ولو بقيت أصغر

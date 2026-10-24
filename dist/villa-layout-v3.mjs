@@ -325,7 +325,9 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
       const inner = ['x0', 'x1', 'y1'].find(sd => !bnd(r, nc, nr).includes(sd) && !needs.some(k => sideTo(r, R[k]) === sd) && !Object.keys(R).some(k => k[0] === 'G' && sideTo(r, R[k]) === sd));
       const h = P.dayWc && inner && !R14_OFF_V3.has('r20daywc') ? (inner === 'x0' ? X(Z([DAY_WC], 'x1', 'y'), h0) : inner === 'x1' ? X(h0, Z([DAY_WC], 'x0', 'y')) : Y(h0, Z([DAY_WC], 'y0', 'x'))) : h0;
       // الصالة على حد خارجي: حديقة اختيارية على تلك الجهة تمتص فائض الخلية (لا صالة ممتدة) وتطل عليها
-      return ex.includes('y1') ? Y(h, OV(10)) : ex.includes('x1') ? X(h, OV(10)) : ex.includes('x0') ? X(OV(10), h) : h; }
+      // (بند العميل «الصالة على الخلف/تطل على الحديقة»: لا فراغ يفصلها عن الواجهة الخلفية — الفائض جانبًا)
+      const backRule = (P.rules || []).some(q => q.kind === 'place' && q.a === 'hall' && q.side === 'back');
+      return ex.includes('y1') && !backRule ? Y(h, OV(10)) : ex.includes('x1') ? X(h, OV(10)) : ex.includes('x0') ? X(OV(10), h) : h; }
     if (u.circ === 'stair') return C('stair', { fix: 3.7, area: 3.8 * 3.7 });
     if (u.circ === 'link') { const vert = (r.y1 - r.y0) >= (r.x1 - r.x0); const lk = C('link', { fix: 1.8, area: 8 }); return vert ? X(OV(6), lk, OV(6)) : Y(OV(6), lk, OV(6)); }
     const d = k === 'M' ? 'y1' : k === 'W' ? doorTo(r, ['F']) : k === 'DN' ? doorTo(r, ['H', 'F', 'M']) : k === 'KS' ? doorTo(r, ['DN', 'H']) : doorTo(r, ['F', 'H']);
@@ -335,7 +337,8 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
     // فراغ خارجي اختياري على جهة خارجية (غير الشارع): يمتص فرق الأبعاد بين الوحدات المقترنة في صف أو عمود فيصير ارتدادًا/حديقة صغيرة،
     // أو يختفي إن قل عن 2.4 م — بدل أن يتضخم المجلس أو الطعام أو المطبخ لملء الخلية
     const ex = bnd(r, nc, nr).filter(sd => sd !== 'y0');
-    if (k !== 'M' && ex.includes('y1')) return Y(z, OV(8));
+    const clientBack = (P.rules || []).some(q => q.kind === 'place' && q.side === 'back' && u.blocks.some(b => b.kind === q.a || (q.a === 'kitchen' && b.kind === 'kitchen') || (q.a === 'dining' && b.kind === 'dining')));
+    if (k !== 'M' && ex.includes('y1') && !clientBack) return Y(z, OV(8));
     if (ex.includes('x0')) return X(OV(8), z);
     if (ex.includes('x1')) return X(z, OV(8));
     return z;
