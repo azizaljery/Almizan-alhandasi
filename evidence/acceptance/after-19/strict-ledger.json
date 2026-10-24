@@ -1,0 +1,208 @@
+{
+ "stage": "after-19",
+ "rows": [
+  {
+   "case": "C1",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C2",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C3",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C4",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C5",
+   "file": "alt-3.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C6",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C7",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "alt-3.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-alt1-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-alt2-after.json",
+   "fails": 1,
+   "failed": [
+    "تعديل: «المطبخ» في الخلف — «المطبخ» لا يلامس الواجهة الخلفية (يبعد 8.1 م)، ومركزه على 59% من عمق المبنى من تلك الجهة لا في ثلثه الخارجي، ويقع بينه وبين تلك الواجهة «غرفة نوم 3»."
+   ],
+   "partial": [
+    "تعديل: «المطبخ» في الخلف — جزئي: «المطبخ» خلف «صالة الطعام والمقلط» و«المجلس» بالنسبة للشارع (أبعد منها عن الشارع، ومركزه على 41% من عمق المبنى من الواجهة الأمامية)"
+   ]
+  },
+  {
+   "case": "C8",
+   "file": "edit-alt3-after.json",
+   "fails": 1,
+   "failed": [
+    "تعديل: «المطبخ» في الخلف — «المطبخ» لا يلامس الواجهة الخلفية (يبعد 11.4 م)، ومركزه على 64% من عمق المبنى من تلك الجهة لا في ثلثه الخارجي، ويقع بينه وبين تلك الواجهة «غرفة نوم 3»."
+   ],
+   "partial": []
+  },
+  {
+   "case": "C8",
+   "file": "edit-before.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-2.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-3.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "alt-4.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt1-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt2-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt3-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-alt4-after.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C9",
+   "file": "edit-before.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  },
+  {
+   "case": "C10",
+   "file": "alt-1.json",
+   "fails": 0,
+   "failed": [],
+   "partial": []
+  }
+ ],
+ "contradictions": []
+}

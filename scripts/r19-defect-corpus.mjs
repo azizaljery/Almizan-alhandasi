@@ -35,8 +35,12 @@ for (const C of CASES) {
     if (!two) rows.push({ kind: 'negative-upper', alt: `${C.id}-${i + 1}`, detected: got.some(x => ['WET_STACK', 'MASTER_STAIR_DOOR'].includes(x)), got });
     if (d.presentation?.status !== 'hidden') rows.push({ kind: 'negative-mandatory', alt: `${C.id}-${i + 1}`, detected: got.some(x => MANDATORY_R16.includes(x)), got });
     // (أ) الباب الفاصل بين الصالة العلوية والدرج يعود قوسًا
-    if (two) { const M = analyzeDoc(doc), U = M.levels[1]; const sep = (d.notes || []).find(n => /الصالة العلوية تُغلق على الدرج/.test(n));
-      if (sep) { const nm = [...sep.matchAll(/«([^»]+)»/g)].map(m => m[1]).slice(0, 2); const op = U.openings.find(o => !o.window && o.sides.length === 2 && nm.every(n => o.sides.some(s => s.room.name === n)) && /door/.test(o.o.kind)); if (op) { const doc2 = JSON.parse(JSON.stringify(doc)); Object.assign(doc2.openings.find(o => o.id === op.id), { kind: 'arch' }); const g2 = fails(doc2, C.id); rows.push({ kind: 'fabricated-stairdoor', alt: `${C.id}-${i + 1}`, expected: ['MASTER_STAIR_DOOR'], detected: g2.includes('MASTER_STAIR_DOOR'), got: g2 }); } } }
+    // (أ) الباب الذي سجّل المولّد أنه يفصل الصالة العلوية عن الدرج (ملاحظة البديل في polish-notes.json) يعود قوسًا ⇐ يجب أن يُكشف
+    if (two) { const PN = existsSync(ROOT + `evidence/acceptance/${stage}/polish-notes.json`) ? JSON.parse(readFileSync(ROOT + `evidence/acceptance/${stage}/polish-notes.json`, 'utf8')) : {};
+      const sep = (PN[C.id] || []).find(x => x.alt === i + 1)?.notes_ar?.find(n => /الصالة العلوية تُغلق على الدرج/.test(n));
+      if (sep) { const nm = [...sep.matchAll(/«([^»]+)»/g)].map(m => m[1]).slice(0, 2), U = analyzeDoc(doc).levels[1];
+        const op = U.openings.find(o => !o.window && o.sides.length === 2 && /^door/.test(o.o.kind || '') && nm.every(n => o.sides.some(s => s.room.name === n)));
+        if (op) { const doc2 = JSON.parse(JSON.stringify(doc)); Object.assign(doc2.openings.find(o => o.id === op.id), { kind: 'arch' }); const g2 = fails(doc2, C.id); rows.push({ kind: 'fabricated-stairdoor', alt: `${C.id}-${i + 1}`, opening: nm.join(' / '), expected: ['MASTER_STAIR_DOOR'], detected: g2.includes('MASTER_STAIR_DOOR'), got: g2 }); } } }
     // (ب) باب المقلط بين المجلس (أو دهليز الرجال) والطعام يُلغى (جدار مصمت) في بديل معروض لدور واحد
     if (!two && d.presentation?.status !== 'hidden') { const G = analyzeDoc(doc).levels[0], isM = r => (r.type === 'majlis' && !/النساء/.test(r.name)) || /الرجال/.test(r.name || '');
       const ops = G.openings.filter(o => o.door && o.sides.length === 2 && o.sides.some(s => s.room.type === 'dining') && o.sides.some(s => isM(s.room)));

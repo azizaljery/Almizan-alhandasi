@@ -1,0 +1,23 @@
+{
+ "alt-1.png": {
+  "case": "C5",
+  "source": [
+   "alt-1.json"
+  ],
+  "internal_ar": "C5 — alt-1"
+ },
+ "alt-2.png": {
+  "case": "C5",
+  "source": [
+   "alt-2.json"
+  ],
+  "internal_ar": "C5 — alt-2"
+ },
+ "alt-3.png": {
+  "case": "C5",
+  "source": [
+   "alt-3.json"
+  ],
+  "internal_ar": "C5 — alt-3"
+ }
+}

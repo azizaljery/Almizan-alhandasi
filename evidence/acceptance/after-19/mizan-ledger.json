@@ -1,0 +1,591 @@
+{
+ "summary": {
+  "note_ar": "سجل Mizan Score — مقيس بالشيفرة الحالية على مستندات المرحلة. المراجع المستقل وكيل ذكاء اصطناعي، لا معماري مرخّص؛ ولا يُعدّ أي تقييم آلي هنا اعتمادًا هندسيًا أو إنشائيًا (اعتماد معماري سعودي مرخّص شرط قبل طلب النشر).",
+  "stage": "after-19",
+  "verdicts": null,
+  "alternatives": 17,
+  "errors": [],
+  "status": {
+   "ready": 15,
+   "needsEdits": 2,
+   "hidden": 0
+  },
+  "shownWithMandatoryViolation": [],
+  "agreement": "غير متحقق",
+  "agreement3": "غير متحقق",
+  "readyPrecision": "غير متحقق"
+ },
+ "rows": [
+  {
+   "alt": "C1-1",
+   "pat": "yoo:u0",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "«الطعام» بجوار «المطبخ»",
+     "«المطبخ» في الخلف",
+     "«غرفة الخادمة» قرب «المطبخ»",
+     "غرفة الخادمة",
+     "حمام الخادمة",
+     "4 غرف نوم",
+     "مجلس للرجال ومجلس للنساء",
+     "دور واحد",
+     "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)",
+     "غرفة ملابس للغرفة الرئيسية",
+     "مدخل مستقل للضيوف إلى المجلس",
+     "مدخل مستقل للعائلة/النساء"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "المجلس لا يشترك في جدار مع غرفة نوم (فاصل خدمي أو دورة مياه أو ممر): «مجلس النساء» يشترك في جدار 6.05 م مع «غرفة نوم 4» (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C2-1",
+   "pat": "hplan:hh2",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "«غرفة كبار السن» قرب «الصالة»",
+     "«غرفة كبار السن» بعيدًا عن «المجلس»",
+     "«غرفة كبار السن» في الدور الأرضي",
+     "«غرف الأبناء» متجاورة",
+     "«الصالة» على الواجهة الخلفية",
+     "5 غرف نوم",
+     "غرفة لكبار السن قرب الصالة",
+     "مطبخ مغلق بباب",
+     "صالة واسعة (35 م² صافية أو أكثر)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C3-1",
+   "pat": "ell:l0p",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "«المجلس» على الشارع (الواجهة الأمامية)",
+     "«المطبخ» بجوار «الطعام»",
+     "«المدخل» في جهة الشرق",
+     "3 غرف نوم",
+     "مجلس للرجال ومجلس للنساء",
+     "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "المجلس لا يشترك في جدار مع غرفة نوم (فاصل خدمي أو دورة مياه أو ممر): «مجلس النساء» يشترك في جدار 4.1 م مع «غرفة نوم 3» (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+    "المواقف عمودية على الشارع بعمق 5.5 م، خارج ممرات المداخل، ولا أمام نافذة أو باب، ولا في تجويف داخل كتلة المبنى: «موقف سيارة»: موازٍ للشارع (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C4-1",
+   "pat": "tcore:n7w",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "«غرف النوم» في الخلف",
+     "3 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C5-1",
+   "pat": "cornerentry:e0t",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم",
+     "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "باب خدمة (مقلط) بين مجلس الرجال والطعام في الدور الواحد، والطعام يُغلق على العائلة بباب: «صالة الطعام والمقلط» مفتوح على العائلة بفتحة بلا باب وهو على المجلس (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+    "مبنى أعمق من 18 م فيه حوش أو منور داخلي: عمق المبنى 19.05 م بلا حوش ولا منور ولا فناء مفتوح بين أجنحته (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C5-2",
+   "pat": "split:s0rt",
+   "file": "alt-2.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم",
+     "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C5-3",
+   "pat": "centralhall:ch3",
+   "file": "alt-3.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم",
+     "شكل الأرض: شبه منحرف (الواجهة 18 م والخلف 24 م والعمق 30 م)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C6-1",
+   "pat": "sidecourt:sc0",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "«المطبخ» في الخلف",
+     "«المجلس» بمساحة 30 م² تقريبًا",
+     "«المطبخ» بمساحة 20 م² تقريبًا",
+     "3 غرف نوم",
+     "دور واحد",
+     "«المجلس» بأبعاد 5×6 م (كل ضلع ±0.05 م)",
+     "«المطبخ» بأبعاد 4×5 م (كل ضلع ±0.05 م)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C7-1",
+   "pat": "frontstair:fsg3/uspine",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "«المجلس» في الدور الأرضي",
+     "«الطعام» في الدور الأرضي",
+     "«المطبخ» في الدور الأرضي",
+     "«غرف النوم» في الدور العلوي",
+     "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»",
+     "«غرفة النوم الرئيسية» في الدور العلوي",
+     "«غرفة كبار السن» في الدور الأرضي",
+     "6 غرف نوم",
+     "5 غرف نوم في الدور العلوي، و«غرفة كبار السن» زيادة عليها في الدور الأرضي (القراءة الحرفية لطلبك)",
+     "دوران",
+     "غرفة لكبار السن قرب الصالة"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [
+    "حمام في الدور العلوي فوق فراغ جاف حساس في الأرضي (مجلس، طعام، مدخل، صالة، نوم) لا فوق رطب أو خدمة: «دورة مياه مشتركة» فوق «مدخل العائلة» (100٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة)؛ «حمام غرفة 2» فوق «صالة الطعام والمقلط» (100٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة)؛ «حمام الرئيسية» فوق «مجلس النساء» (64٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة) (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ],
+   "notes": [
+    "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [
+    "حمام في الدور العلوي فوق فراغ جاف حساس في الأرضي (مجلس، طعام، مدخل، صالة، نوم) لا فوق رطب أو خدمة: «دورة مياه مشتركة» فوق «مدخل العائلة» (100٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة)؛ «حمام غرفة 2» فوق «صالة الطعام والمقلط» (100٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة)؛ «حمام الرئيسية» فوق «مجلس النساء» (64٪) — يحتاج مراجعة صحية وإنشائية متخصصة (الصرف والعزل المائي وفتحة صيانة) (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ],
+   "system": "needs-edits",
+   "system_ar": "يحتاج تعديلات",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C8-1",
+   "pat": "sidecourt:sc0",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "4 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+    "غرفة الملابس 1.68×2.28 م أصغر من 2.0×2.5 م لرئيسية 20.65 م²"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C8-2",
+   "pat": "guestblock:gb0",
+   "file": "alt-2.json",
+   "mandatory": {
+    "clientPassed": [
+     "4 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "باب خدمة (مقلط) بين مجلس الرجال والطعام في الدور الواحد، والطعام يُغلق على العائلة بباب: لا باب بين مجلس الرجال والطعام (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C8-3",
+   "pat": "split:s0r",
+   "file": "alt-3.json",
+   "mandatory": {
+    "clientPassed": [
+     "4 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C9-1",
+   "pat": "guestblock:gb0",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C9-2",
+   "pat": "hallback:h0",
+   "file": "alt-2.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C9-3",
+   "pat": "split:s0r",
+   "file": "alt-3.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "دورة مياه يومية تُدخل من الصالة أو بهو المدخل (لا عبر جناح نوم ولا منطقة الضيوف): لا دورة مياه تُدخل من الصالة أو بهو المدخل أو ممر عائلي (تفضيل سعودي افتراضي للميزان (قابل للتغيير))"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C9-4",
+   "pat": "twincourt:tc0",
+   "file": "alt-4.json",
+   "mandatory": {
+    "clientPassed": [
+     "3 غرف نوم"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [
+    "الصالة العائلية صغيرة نسبةً إلى مجلس الرجال (أقل من 0.8 من مساحته): «الصالة» 21.62 م² مقابل «المجلس» 36.37 م² (0.59 من مساحته؛ الحد 0.8) (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ],
+   "notes": [],
+   "specialist": [],
+   "system": "needs-edits",
+   "system_ar": "يحتاج تعديلات",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  },
+  {
+   "alt": "C10-1",
+   "pat": "sidecourt:sc0",
+   "file": "alt-1.json",
+   "mandatory": {
+    "clientPassed": [
+     "غرفة الخادمة",
+     "4 غرف نوم",
+     "مجلس للرجال ومجلس للنساء",
+     "مجلس الرجال بمدخله المستقل، ومجلس النساء منفصل عنه (لا باب بينهما)"
+    ],
+    "clientViolated": [],
+    "gatesFailed": [],
+    "mizanPassed": [
+     "GUEST_DINING",
+     "PARKING_SHALLOW"
+    ],
+    "mizanViolated": [],
+    "unverified": []
+   },
+   "mandatoryOk": true,
+   "architectural": [],
+   "notes": [
+    "غرفة الملابس 1.68×2.28 م أصغر من 2.0×2.5 م لرئيسية 23.11 م²"
+   ],
+   "specialist": [],
+   "system": "ready",
+   "system_ar": "جاهز للعرض المبدئي",
+   "reviewer": "غير متحقق (لا حكم مراجع مستقل على هذه المستندات بعد)",
+   "agree": null,
+   "agree3": null,
+   "disagreement_ar": null,
+   "prevention": []
+  }
+ ]
+}
