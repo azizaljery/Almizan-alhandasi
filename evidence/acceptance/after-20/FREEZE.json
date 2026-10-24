@@ -1,0 +1,57 @@
+{
+ "note_ar": "تجميد الجولة 20: المحركات الثلاثة (الافتراضي الثالث، والأول والثاني قابلان للاختيار بحالهما عند هذا الإيداع) ومعايير التقييم (القياسات والعتبات وحالة العرض والمعيار المجمّد «مختلف معماريًا» r19 دون تغيير) عند هذا الإيداع؛ الحالات المحجوزة H6–H10 لم تُفتح ولم تُشغَّل قبله، وتُولَّد بعده مرة واحدة في after-20-heldout2 ولا تُغيَّر الشيفرة بعدها في الجولة. التقييم الآلي ليس اعتمادًا هندسيًا ولا إنشائيًا.",
+ "engineCommit": "599a7e6b762ded2d8eff17dee3ad23851d1cf7cf",
+ "workingTreeCleanForEngine": true,
+ "engines": {
+  "v3": "villa-v3-relations-1",
+  "v2": "villa-v2-partis-17",
+  "default": "v3"
+ },
+ "sealedHeldout2": {
+  "file": "scripts/heldout2-cases.mjs",
+  "sha256": "831c937f72925d4cc315aa046562597f7ce4d6e6e9f368778b52fd2778d9e732",
+  "matchesCoordinator": true,
+  "openedBeforeFreeze": false
+ },
+ "sha256": {
+  "dist/villa-layout-v3.mjs": "6722a563a169b27523795241fbdc0150591277b3400698974e73eb966b38c4d7",
+  "dist/feasibility.mjs": "f7d93fc32d44a21dfc6220b9f5fb62d7d34e896a5f38ac9b2c761b831ad39d21",
+  "dist/r20-checks.mjs": "ea62296bae5ff7ea443e23798b8ed56c5828cb854dce7f85c75a384d1b782b49",
+  "dist/change-guard.mjs": "62cebf261526c319a4604bf28e58611d6ad9e8de0bc6ba31fd275d4b50043774",
+  "dist/client-text.mjs": "1a3064d2c332c1a3545104ad14c252ae364083af738b10c353ceb903486f4660",
+  "dist/villa-layout-v2.mjs": "8709e76c5f1afcc904cef8ed5e11d9f009884986bd66dc4834dd3e77506ab68d",
+  "dist/villa-layout.mjs": "e05ee81777845de3dc158b4b62a108c9baf6536e0968bd4df3ff5714b769cdc6",
+  "dist/plan-review.mjs": "c59c709ab647972a08a275faae59789e4937aca1d283df0fda5e6b57a904eae0",
+  "dist/presentation-status.mjs": "6f5ce3b35ebed3eb28afcb84b9ff975f1cf60c08b6ceda22556cb3b8eaf3f8dd",
+  "dist/privacy-defects.mjs": "8a9cc0b58c23325ff0f8bc4cc68f028c6a4c402792683d36f000a6fa035a5071",
+  "dist/requirements.mjs": "0acaf32e71c0958b433fce9051209a8fd166ac9804446a41aaf4a6b6e70735e4",
+  "dist/arch-difference.mjs": "77c6bcc4cd1cee3b2a7bab951bb50fc5d849a556d7428da6dde2686257d73e83",
+  "dist/saudi-program.mjs": "0d3d3fa84882de3797593945639a6c703c5cdc9befa2d3269155b7757799d0a5",
+  "dist/r16-polish.mjs": "4222e18bdfa440c8cf58b643ee1530bc761895e62c28610c2367029df05f7bd6",
+  "dist/r17-polish.mjs": "7945848f560396152f1fbfb80cfb68b51343248e5e48e1d55937f3bb1f4805f9",
+  "dist/rules.mjs": "67a603f63bdf2f29fd140dd66ded0a26cc0e2b7ddc119661df1806b19a63a823",
+  "dist/site-parking.mjs": "6a2818c68244a815e96707fa8dbca4910cd42deedc231245368079663804fe87",
+  "dist/stacking.mjs": "e7ef0e888beb39561cbde035efae9e3e8f76d8cd658cabf585ed3c5b3e7c643f",
+  "dist/glazing.mjs": "d7753167e8aef75a8c20c61ec13554211b495794b71818fd3e3f3f9f167be974",
+  "dist/circulation-proof.mjs": "8bee138cb9425f5517f3ed6571ac28520314c0af37c87f221ba397ffeff0028f",
+  "dist/design-session.mjs": "b0704437cb6556deb79f05e244399b0991f715d9f5770fd0f7c68a59a5779900",
+  "dist/plan-edit.mjs": "d7663446b27a68130791fcdef020f82dba9986da69a9befd26e4e6dc0beb54ca",
+  "dist/edit-truth.mjs": "08958122d613e13b9529b2c812a92c490170586d7b250b0fd60d82e97f8cfa52",
+  "dist/home-flow.mjs": "6254c0b91ac45b6be085fefbd588baa86b64c50ceb06788367fa14c162f13fdf",
+  "dist/draw/editor/render2d.mjs": "36f421359d805b9777711762d889fac4fb9a6f1ec934c4e051f68ca1ee75de8c",
+  "dist/arch-criterion.mjs": "9042e09703d33d7e1ff7d018a6bb092ea6614db0d17cccd6797f44f209c3c9d4",
+  "docs/research/arch-difference-criterion-r19.md": "ba624a17f1e370460c53e4a4d49ef98dbfcc393a9cf51110d370ef394fd18c35",
+  "scripts/acceptance-cases.mjs": "ee0a93e7de3e05b28ca8b092386b109d9ab687cf77f33bdc49299f96fec9e4a6",
+  "scripts/heldout-cases.mjs": "84f7a7565652b7a926d04e1e8d04553b87ce501b571e7fe982a4aa689e8d16a0",
+  "scripts/heldout2-cases.mjs": "831c937f72925d4cc315aa046562597f7ce4d6e6e9f368778b52fd2778d9e732",
+  "scripts/dev-cases-r20.mjs": "5b7cecfef5bf58fc364ee9419e598fcfad0d716b8e525f9cbbc4bfabc62e8bbf",
+  "scripts/acceptance-run.mjs": "25aad1a440ab737719c583185f66afa954d5601d403e68ebbf0915e308bc8c8d",
+  "scripts/mizan-ledger.mjs": "f56d5d3089886176240ffa829f77957959795bd126b9cef270f4c8056b9fefd3",
+  "scripts/innovation-r19.mjs": "40fce73683c0a963645734fa963370354bfee72df5706e4d347e37d5bfd6b870"
+ },
+ "tests": {
+  "files": 161,
+  "sha256": "f30dc6c9575291f31241a8fd64d84c9a10f55a371c2176b23521bb8441d93c71"
+ },
+ "frozenAt": "2026-10-24T23:29:23.213Z"
+}
