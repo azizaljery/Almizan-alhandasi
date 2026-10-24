@@ -3,11 +3,41 @@
   "note_ar": "البديل «جديد» إن كان مختلفًا معماريًا (بعدان جوهريان ≥ العتبات {\"zoning\":0.25,\"circulation\":0.25,\"privacy\":0.2,\"relations\":0.2}) عن كل بديل للحالة نفسها في after-18. الواجهة وشكل الغلاف وموضع السلم لا تُحتسب بذاتها.",
   "old": "after-18",
   "new": "after-19",
+  "criterion": {
+   "version": "arch-criterion/r19.1",
+   "measure": "arch-difference/2.0.0",
+   "dimensions": [
+    "zoning",
+    "circulation",
+    "privacy",
+    "relations"
+   ],
+   "thresholds": {
+    "zoning": 0.25,
+    "circulation": 0.25,
+    "privacy": 0.2,
+    "relations": 0.2
+   },
+   "distinctMinSubstantive": 2,
+   "notCounted": [
+    "translation",
+    "scale",
+    "mirror",
+    "facade",
+    "envelope",
+    "stairPosition"
+   ],
+   "newAlternative": "distinct-from-every-previous-alternative-of-the-same-case"
+  },
   "perCase": [
    {
     "case": "C1",
     "after-18": 1,
     "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
@@ -16,6 +46,10 @@
     "case": "C2",
     "after-18": 1,
     "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
@@ -24,6 +58,10 @@
     "case": "C3",
     "after-18": 1,
     "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
@@ -32,6 +70,10 @@
     "case": "C4",
     "after-18": 1,
     "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
@@ -40,6 +82,10 @@
     "case": "C5",
     "after-18": 3,
     "after-19": 3,
+    "correctOld": 2,
+    "correctNew": 3,
+    "distinctCorrectOld": 2,
+    "distinctCorrectNew": 3,
     "newSuccessful": 0,
     "minPairTotal": 0.233,
     "allPairsDistinct": true
@@ -48,6 +94,10 @@
     "case": "C6",
     "after-18": 1,
     "after-19": 1,
+    "correctOld": 0,
+    "correctNew": 1,
+    "distinctCorrectOld": 0,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
@@ -56,6 +106,10 @@
     "case": "C7",
     "after-18": 2,
     "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
@@ -64,6 +118,10 @@
     "case": "C8",
     "after-18": 2,
     "after-19": 3,
+    "correctOld": 2,
+    "correctNew": 3,
+    "distinctCorrectOld": 2,
+    "distinctCorrectNew": 3,
     "newSuccessful": 1,
     "minPairTotal": 0.186,
     "allPairsDistinct": true
@@ -72,6 +130,10 @@
     "case": "C9",
     "after-18": 3,
     "after-19": 4,
+    "correctOld": 3,
+    "correctNew": 4,
+    "distinctCorrectOld": 3,
+    "distinctCorrectNew": 4,
     "newSuccessful": 1,
     "minPairTotal": 0.167,
     "allPairsDistinct": true
@@ -80,12 +142,22 @@
     "case": "C10",
     "after-18": 2,
     "after-19": 1,
+    "correctOld": 1,
+    "correctNew": 1,
+    "distinctCorrectOld": 1,
+    "distinctCorrectNew": 1,
     "newSuccessful": 0,
     "minPairTotal": null,
     "allPairsDistinct": true
    }
   ],
-  "totalNewSuccessful": 2
+  "totalNewSuccessful": 2,
+  "totals": {
+   "correctOld": 13,
+   "correctNew": 17,
+   "distinctCorrectOld": 13,
+   "distinctCorrectNew": 17
+  }
  },
  "rows": [
   {
@@ -93,6 +165,10 @@
    "old": 1,
    "new": 1,
    "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -103,6 +179,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C1-1",
       "oldPat": "yoo:u0",
@@ -143,6 +220,10 @@
    "old": 1,
    "new": 1,
    "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -153,6 +234,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C2-1",
       "oldPat": "hplan:hh2",
@@ -193,6 +275,10 @@
    "old": 1,
    "new": 1,
    "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -203,6 +289,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C3-1",
       "oldPat": "ell:l0",
@@ -243,6 +330,10 @@
    "old": 1,
    "new": 1,
    "oldShown": 1,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -253,6 +344,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C4-1",
       "oldPat": "tcore:n7w",
@@ -293,6 +385,10 @@
    "old": 3,
    "new": 3,
    "oldShown": 3,
+   "oldCorrect": 2,
+   "oldDistinctCorrect": 2,
+   "correct": 3,
+   "distinctCorrect": 3,
    "successful": 3,
    "newSuccessful": 0,
    "alts": [
@@ -303,6 +399,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C5-1",
       "oldPat": "cornerentry:e0t",
@@ -380,6 +477,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C5-3",
       "oldPat": "split:s0rt",
@@ -458,6 +556,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C5-2",
       "oldPat": "hallback:h0",
@@ -608,6 +707,10 @@
    "old": 1,
    "new": 1,
    "oldShown": 1,
+   "oldCorrect": 0,
+   "oldDistinctCorrect": 0,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -618,6 +721,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C6-1",
       "oldPat": "sidecourt:sc0",
@@ -658,6 +762,10 @@
    "old": 2,
    "new": 1,
    "oldShown": 2,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -668,6 +776,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C7-1",
       "oldPat": "frontstair:fsg3/uspine",
@@ -724,6 +833,10 @@
    "old": 2,
    "new": 3,
    "oldShown": 2,
+   "oldCorrect": 2,
+   "oldDistinctCorrect": 2,
+   "correct": 3,
+   "distinctCorrect": 3,
    "successful": 3,
    "newSuccessful": 1,
    "alts": [
@@ -734,6 +847,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C8-1",
       "oldPat": "sidecourt:sc0",
@@ -792,6 +906,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C8-2",
       "oldPat": "guestblock:gb0",
@@ -850,6 +965,7 @@
      "successful": true,
      "new": true,
      "successfulNew": true,
+     "correct": true,
      "closestOld": {
       "old": "C8-1",
       "oldPat": "sidecourt:sc0",
@@ -984,6 +1100,10 @@
    "old": 3,
    "new": 4,
    "oldShown": 3,
+   "oldCorrect": 3,
+   "oldDistinctCorrect": 3,
+   "correct": 4,
+   "distinctCorrect": 4,
    "successful": 4,
    "newSuccessful": 1,
    "alts": [
@@ -994,6 +1114,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C9-1",
       "oldPat": "guestblock:gb0",
@@ -1072,6 +1193,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C9-2",
       "oldPat": "hallback:h0",
@@ -1150,6 +1272,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C9-3",
       "oldPat": "split:s0r",
@@ -1225,6 +1348,7 @@
      "successful": true,
      "new": true,
      "successfulNew": true,
+     "correct": true,
      "closestOld": {
       "old": "C9-1",
       "oldPat": "guestblock:gb0",
@@ -1444,6 +1568,10 @@
    "old": 2,
    "new": 1,
    "oldShown": 2,
+   "oldCorrect": 1,
+   "oldDistinctCorrect": 1,
+   "correct": 1,
+   "distinctCorrect": 1,
    "successful": 1,
    "newSuccessful": 0,
    "alts": [
@@ -1454,6 +1582,7 @@
      "successful": true,
      "new": false,
      "successfulNew": false,
+     "correct": true,
      "closestOld": {
       "old": "C10-1",
       "oldPat": "sidecourt:sc0",
