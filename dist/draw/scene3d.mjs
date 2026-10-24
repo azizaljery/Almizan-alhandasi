@@ -37,7 +37,7 @@ const sign = v => v < 0 ? -1 : 1;
 
 export function buildBuildingScene(doc, THREE, options = {}) {
   const fin = doc.finish || {}, fac = fin.facade || {};
-  const opt = { ...DEFAULTS, ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...options };
+  const opt = { ...DEFAULTS, ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...(fac.base === 'stone' && fac.scope === 'front' ? { stoneAccent: 'front' } : {}), ...options };
   const ownLib = !opt.materials;
   const lib = opt.materials || createMaterialLibrary(THREE, { textures: opt.textures, maxAnisotropy: opt.maxAnisotropy, quality: opt.quality });
   const group = new THREE.Group(); group.name = 'mizan-building';
@@ -45,7 +45,12 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     const m = lib.m, paint = (mat, c) => { if (mat && c) mat.color.set(c); };
     paint(m.render, fac.color); paint(m.accent, fac.accentColor); paint(m.plinth, fac.plinthColor || fac.accentColor); paint(m.coping, fac.copingColor || fin.roof);
     paint(m.aluminium, fin.aluminium); paint(m.doorEntry, fin.entryDoor); paint(m.fence, fin.fence);
-    if (fac.base === 'stone') { m.render.map = m.accent.map; m.render.bumpMap = m.accent.bumpMap; m.render.bumpScale = m.accent.bumpScale; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
+    // (Round 18) façade scope: 'front' = the street façade only (stone accent on the segments facing the entry street); 'all' (default) =
+    // every exterior wall and the parapet; 'all+fence' = and the plot fence too — the independent reviewer r17 saw parapet and fence left
+    // in plaster after «غيّر الواجهة إلى حجر»
+    const scope = fac.base === 'stone' ? (fac.scope || 'all') : null;
+    if (fac.base === 'stone' && scope !== 'front') { m.render.map = m.accent.map; m.render.bumpMap = m.accent.bumpMap; m.render.bumpScale = m.accent.bumpScale; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
+    if (scope === 'all+fence') { m.fence.map = m.accent.map; m.fence.bumpMap = m.accent.bumpMap; m.fence.bumpScale = m.accent.bumpScale; m.fence.color.copy(m.accent.color); m.fence.needsUpdate = true; }
     if (fac.base === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
   }
   const T = opt.slab, PL = opt.plinth;
@@ -126,6 +131,9 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     const accentSegs = new Set();
     if (opt.stoneAccent === 'entry' && ground) for (const seg of L.solids.segments) if (seg.ext !== 0 && seg.openings.some(o => o.entry)) accentSegs.add(seg.id);
     if (opt.stoneAccent === 'all' && ground) for (const seg of L.solids.segments) if (seg.ext !== 0) accentSegs.add(seg.id);
+    // (Round 18) street façade only: exterior segments whose outward normal faces the entry street (all levels)
+    if (opt.stoneAccent === 'front') { const OUT = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } }[doc.entry || 's'] || { x: 0, y: -1 };
+      for (const seg of L.solids.segments) if (seg.ext !== 0) { const out = seg.ext === 1 ? seg.left : mul(seg.left, -1); if (out.x * OUT.x + out.y * OUT.y > .7) accentSegs.add(seg.id); } }
 
     const groundExt = ground ? PL + .08 : 0, plinthTop = .9;
     const colRows = (len, jS, jE) => ({ cols: [...(jS ? [.12, .5] : []), ...(jE ? [len - .5, len - .12] : [])] });
@@ -227,7 +235,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       for (const [A, Bp, nrm] of [[c.aL, c.bL, seg.left], [c.aR, c.bR, mul(seg.left, -1)]]) {
         const len = dist(A, Bp), ux = (Bp.x - A.x) / len, uy = (Bp.y - A.y) / len, n3 = [nrm.x, 0, -nrm.y];
         const pt = (u, y) => [A.x + ux * u, E + y, -(A.y + uy * u)];
-        PA.quad('fence', pt(0, H), pt(len, H), pt(len, H + parapetH), pt(0, H + parapetH), n3, [[0, H], [len, H], [len, H + parapetH], [0, H + parapetH]]);
+        PA.quad(fac.base === 'stone' && ['all', 'all+fence'].includes(fac.scope || 'all') ? 'fenceStone' : 'fence', pt(0, H), pt(len, H), pt(len, H + parapetH), pt(0, H + parapetH), n3, [[0, H], [len, H], [len, H + parapetH], [0, H + parapetH]]);
       }
       // (Round 14) projecting cornice band at roof level on the outer face (a classic stone cornice under the parapet)
       if (opt.cornice !== false) { const outerL = !seg.sideL, A0 = outerL ? c.aL : c.aR, B0 = outerL ? c.bL : c.bR, nn = outerL ? seg.left : mul(seg.left, -1), dd = norm(sub(B0, A0));

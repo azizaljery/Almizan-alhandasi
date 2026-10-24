@@ -31,7 +31,7 @@ export function requestFor(caseId) {
   return { text: C.text, counts: C.counts, land: { floors: 1, ...C.land } };
 }
 /** البدائل الناجحة (المستندات الأصلية) لمرحلة: [{ case, file, doc, request }] بترتيب ثابت. */
-export const BASE_STAGE = 'after-17'; // (الجولة السابعة عشرة: after-17) // (الجولة السادسة عشرة: after-16) // (الجولة الخامسة عشرة: after-15) // (الجولة الرابعة عشرة: after-14) // (الجولة الثالثة عشرة: after-13؛ الثانية عشرة) البدائل التي تجتاز البوابات الثقيلة وDISTINCT v2 وبنود البرنامج السعودي والمواقف النظامية
+export const BASE_STAGE = 'after-18'; // (الجولة الثامنة عشرة: after-18) // (الجولة السابعة عشرة: after-17) // (الجولة السادسة عشرة: after-16) // (الجولة الخامسة عشرة: after-15) // (الجولة الرابعة عشرة: after-14) // (الجولة الثالثة عشرة: after-13؛ الثانية عشرة) البدائل التي تجتاز البوابات الثقيلة وDISTINCT v2 وبنود البرنامج السعودي والمواقف النظامية
 export function loadBase(stage = BASE_STAGE) {
   const dir = ROOT + `evidence/acceptance/${stage}/`, out = [];
   for (const C of CASES) {

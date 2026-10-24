@@ -445,7 +445,7 @@ export function parseEdit(text, doc, { more = null, history = [], lastSubject = 
   }
   // 2) الواجهة
   const fac = more?.tweaks?.facade;
-  if (fac && (fac.material || fac.style)) intents.push({ op: 'facade', material: fac.material || null, materialAr: fac.materialAr || null, style: fac.style || null, styleAr: fac.styleAr || null, text_ar: `الواجهة: ${[fac.materialAr, fac.styleAr].filter(Boolean).join('، ')}` });
+  if (fac && (fac.material || fac.style)) intents.push({ op: 'facade', material: fac.material || null, materialAr: fac.materialAr || null, style: fac.style || null, styleAr: fac.styleAr || null, scope: fac.scope || null, text_ar: `الواجهة: ${[fac.materialAr, fac.styleAr].filter(Boolean).join('، ')}` });
   // 3) فتح المطبخ وإغلاقه (ومنه «رجّعه مقفل» بضمير يعود على آخر غرفة عُدّلت)
   const pronounKitchen = /(?:رجعه|خله|خليه|رده|اقفله|سكره|افتحه|خليه|يكون) ?(?:مقفل|مغلق|مسكر|مفتوح)?/.test(t) && /مقفل|مغلق|مسكر|مفتوح/.test(t) && !refOf('kitchen') && lastSubject === 'kitchen';
   let openK = more?.prefs?.openKitchen;
@@ -1461,11 +1461,15 @@ export const FACADE_RENDER = Object.freeze({ stone: 'stone', plaster: 'render' }
 function doFacade(doc, it) {
   const d = clone(doc), base = it.material ? FACADE_RENDER[it.material] || null : null;
   d.finish = mergeFinish(d.finish, base ? { facade: { base } } : {});
-  d.finish.facade = { ...(d.finish.facade || {}), ...(it.material ? { material: it.material, materialAr: it.materialAr } : {}), ...(it.style ? { style: it.style, styleAr: it.styleAr } : {}) };
+  // (الجولة الثامنة عشرة) نطاق المادة: ما حدده العميل، وإلا الافتراضي «كل الواجهات الظاهرة والدروة» موسومًا ويُسأل عنه
+  const scope = it.material ? (it.scope || 'all') : null;
+  d.finish.facade = { ...(d.finish.facade || {}), ...(it.material ? { material: it.material, materialAr: it.materialAr, scope, scopeAsked: !!it.scope } : {}), ...(it.style ? { style: it.style, styleAr: it.styleAr } : {}) };
   const rendered = !!base, pending = [];
+  const where = scope === 'front' ? 'على الواجهة الأمامية (المطلة على الشارع) فقط' : scope === 'all+fence' ? 'على كل الواجهات الظاهرة والدروة والسور' : 'على كل الواجهات الظاهرة والدروة (الافتراضي)';
+  const ask = it.material && !it.scope ? ' — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي' : '';
   if (it.material && !base) pending.push({ text: `الواجهة: ${it.materialAr}`, why: `حُفظت المادة «${it.materialAr}» في المستند، والمجسّم لا يملك خامة «${it.materialAr}» بعد فيعرض اللياسة حتى تُضاف.` });
   if (it.style) pending.push({ text: `طراز الواجهة: ${it.styleAr}`, why: `حُفظ الطراز «${it.styleAr}» في المستند؛ تفاصيل الطراز (الزخارف والفتحات) لا تُرسم في المجسّم بعد.` });
-  return { ok: true, doc: d, geometryIdentical: true, rendered, pending, how_ar: `${rendered ? `صارت واجهة المجسّم ${it.materialAr}` : 'حُفظ طلب الواجهة في المستند'}، والمخطط نفسه حرفيًا (لم يتحرك جدار)` };
+  return { ok: true, doc: d, geometryIdentical: true, rendered, pending, how_ar: `${rendered ? `صارت واجهة المجسّم ${it.materialAr} ${where}` : 'حُفظ طلب الواجهة في المستند'}، والمخطط نفسه حرفيًا (لم يتحرك جدار)${rendered ? ask : ''}` };
 }
 
 // ------------------------------------------------------------------------------------------ التراجع

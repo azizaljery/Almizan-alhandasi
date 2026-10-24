@@ -128,7 +128,9 @@ export function renderPlan(ctx, st) {
     const isWin = o.kind === 'window' || o.kind === 'window2', picked = sel.has(o.id), hov = st.hover?.id === o.id;
     ctx.strokeStyle = picked ? THEME.select : hov ? THEME.accent : THEME.ink; ctx.lineWidth = picked ? 2.4 : 1.4;
     if (isWin) {
-      for (const f of [-.5, 0, .5]) { const a = S(add(p0, mul(n, hw * f * 1.6))), b = S(add(p1, mul(n, hw * f * 1.6))); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = f === 0 ? THEME.glass : (picked ? THEME.select : THEME.ink); ctx.lineWidth = f === 0 ? 2 : 1.2; ctx.stroke(); }
+      // (الجولة الثامنة عشرة) النافذة العلوية (جلسة ≥ 1.5 م) تُرسم متقطعة كما في المساقط المهنية، فيُرى أنها لا تكشف الغرفة
+      const high = (o.sill ?? 0) >= 1.5 - 1e-6;
+      for (const f of [-.5, 0, .5]) { const a = S(add(p0, mul(n, hw * f * 1.6))), b = S(add(p1, mul(n, hw * f * 1.6))); ctx.save(); if (high) ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = f === 0 ? THEME.glass : (picked ? THEME.select : THEME.ink); ctx.lineWidth = f === 0 ? 2 : 1.2; ctx.stroke(); ctx.restore(); }
       for (const p of [p0, p1]) { const a = S(add(p, mul(n, hw))), b = S(sub(p, mul(n, hw))); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.strokeStyle = picked ? THEME.select : THEME.ink; ctx.lineWidth = 1.2; ctx.stroke(); }
     } else {
       for (const p of [p0, p1]) { const a = S(add(p, mul(n, hw))), b = S(sub(p, mul(n, hw))); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
@@ -149,7 +151,7 @@ export function renderPlan(ctx, st) {
     if (o.entry && flags.entryLabels !== false) { const fs = Math.max(11, k * .28); ctx.font = `700 ${fs}px ${FONT}`; const tw = ctx.measureText('مدخل').width + 4; let t = null;
       for (let s = 0; s < 4; s++) { const off = mul(n, -(w.t / 2 + .55)), p = S(add(add(w.a, mul(u, o.at)), off)), on = S(add(add(w.a, mul(u, o.at)), mul(n, -(w.t / 2 + .55 + 1)))), dx = on.x - p.x, dy = on.y - p.y, L = Math.hypot(dx, dy) || 1, q = { x: p.x + dx / L * s * fs * 1.15, y: p.y + dy / L * s * fs * 1.15 };
         if (!entryBoxes.some(b => Math.abs(b.x - q.x) < (b.w + tw) / 2 && Math.abs(b.y - q.y) < fs * 1.05)) { t = q; break; } }
-      if (t) { entryBoxes.push({ x: t.x, y: t.y, w: tw }); ctx.fillStyle = THEME.accent; ctx.textAlign = 'center'; ctx.fillText('مدخل', t.x, t.y); } }
+      if (t) entryBoxes.push({ x: t.x, y: t.y, w: tw, fs }); }
   }
 
   // ------------------------------------------------------------------ stairs
@@ -238,6 +240,8 @@ export function renderPlan(ctx, st) {
     }
   }
 
+  // (الجولة الثامنة عشرة) كلمة «مدخل» بعد خطوط الأبعاد وبهالة: لا يغطيها رقم بُعد ولا تغطيه
+  for (const b of entryBoxes) { ctx.save(); ctx.font = `700 ${b.fs}px ${FONT}`; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(251,249,244,.95)'; ctx.strokeText('مدخل', b.x, b.y); ctx.fillStyle = THEME.accent; ctx.fillText('مدخل', b.x, b.y); ctx.restore(); }
   // ------------------------------------------------------------------ selection highlights for walls
   for (const w of levelWalls) if (sel.has(w.id) || st.hover?.id === w.id) {
     const q = wallPath(w); ctx.beginPath(); q.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath();

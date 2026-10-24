@@ -258,7 +258,10 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (fm) {
     const zone = t.slice(Math.max(0, fm.index - 30), fm.index).split(/[،,.؛;]/).pop() + ' ' + fm[0], mat = pickWord(FACADE_MATERIALS, zone), sty = pickWord(FACADE_STYLES, zone);
     if (mat || sty) {
-      tweaks.facade = { ...(mat ? { material: mat.id, materialAr: mat.ar } : {}), ...(sty ? { style: sty.id, styleAr: sty.ar } : {}), keepLayout: !!keepLayout };
+      // (الجولة الثامنة عشرة) نطاق الواجهة: «الأمامية فقط» / «كل الواجهات» / «والسور» — وإلا يبقى غير محدد (الافتراضي في التعديل: كل الواجهات
+      // الظاهرة والدروة، ويُسأل العميل) — المراجع المستقل r17: الحجر على الواجهة الأمامية وحدها بدا «خفيفًا»
+      const scope = /(?:واجهه|واجهات) ?(?:ال)?امامي(?:ه)? ?(?:فقط|بس|وحدها)|(?:فقط|بس) ?(?:ال)?(?:واجهه|واجهات) ?(?:ال)?امامي/.test(t) ? 'front' : /(?:ال)?سور/.test(t) ? 'all+fence' : /(?:كل|جميع) (?:ال)?(?:واجهات|جهات)/.test(t) ? 'all' : null;
+      tweaks.facade = { ...(mat ? { material: mat.id, materialAr: mat.ar } : {}), ...(sty ? { style: sty.id, styleAr: sty.ar } : {}), keepLayout: !!keepLayout, ...(scope ? { scope } : {}) };
       understood.push(`الواجهة: ${[mat?.ar, sty?.ar].filter(Boolean).join('، ')} (يُحفظ في المتطلبات، وعرضه في المجسّم لاحقًا)`);
     }
   }

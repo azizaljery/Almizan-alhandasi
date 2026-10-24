@@ -5,7 +5,7 @@ import { CASES } from './acceptance-cases.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
 import { generateVillaDesigns, generateVillaTwoFloors } from '../dist/villa-layout-v2.mjs';
 const stage = process.argv[2] || 'after-17', ROOT = new URL('../', import.meta.url).pathname, out = {};
-const KEEP = /مقهوي|جلسة عائلية|غرفة الملابس|خزانة|مقلط|نافذة|بيت درج|المجلسين|«المجالس»|الماستر|الرئيسية|دورة مياه مشتركة|موقف|المواقف/;
+const KEEP = /يُغلق على|كُبّرت «الصالة»|فوق فراغات جافة|مدخل الجناح|مقهوي|جلسة عائلية|غرفة الملابس|خزانة|مقلط|نافذة|بيت درج|المجلسين|«المجالس»|الماستر|الرئيسية|دورة مياه مشتركة|موقف|المواقف/;
 for (const C of CASES) {
   const req = extractRequirements(C.text, { counts: C.counts }); req.counts = { ...req.counts, ...C.counts };
   const land = { floors: 1, ...C.land }, fn = land.floors >= 2 ? generateVillaTwoFloors : generateVillaDesigns;
