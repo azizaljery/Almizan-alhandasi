@@ -15,6 +15,7 @@ import { measureR20, R20_MANDATORY } from '../dist/r20-checks.mjs';
 import { MANDATORY_R16 } from '../dist/privacy-defects.mjs';
 import { presentationStatus } from '../dist/presentation-status.mjs';
 import { invariants, regressions, guardChange, guarded } from '../dist/change-guard.mjs';
+import { parseEdit, applyEdits } from '../dist/plan-edit.mjs';
 import { polishR16 } from '../dist/r16-polish.mjs';
 import { shortfallNotice, internalLeaks } from '../dist/client-text.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
@@ -163,6 +164,20 @@ test('حارس التغيير: تغيير يُسقط شرطًا كان متحق�
   assert.equal(g3.applied, true);
   assert.deepEqual(regressions(invariants(doc), invariants(doc)), []);
   assert.equal(guardChange(doc, doc).ok, true);
+});
+// (توجيه المالك r20، رابعًا) فحص شامل بعد كل تعديل من العميل على مخططات حقيقية: تكبير المطبخ لا يصغّر الصالة عن المجلس، وتعديل الخصوصية
+// لا يُفقد الصالة ضوءها، ولا تعديل يُسقط دورة مياه العائلة — إما يُنفَّذ والشروط التي كانت متحققة باقية، وإما يُرفض موضعيًا بسببه المذكور
+test('حارس التغيير على تعديلات العميل (مطبخ أكبر، نوافذ المجلس عالية، مطبخ أكبر بكثير): لا شرط متحقق يسقط في نتيجة «local»', { skip: !have19 }, () => {
+  const REQ = { counts: { bedrooms: 4, majlis: 1, kitchens: 1, dining: 1 }, entry: 's' };
+  let local = 0, refused = 0;
+  for (const id of ['C1', 'C2', 'C4', 'C6', 'C8', 'C9', 'C10']) for (const t of ['كبر المطبخ', 'خل نوافذ المجلس عالية', 'كبر المطبخ 4 متر']) {
+    const doc = doc19('after-19', id, 'alt-1.json'), before = invariants(doc, {});
+    const more = extractRequirements(t, { counts: {} }), p = parseEdit(t, doc, { more });
+    const r = applyEdits(doc, p, { req: REQ, history: [] });
+    if (r.status === 'local' && !r.unchanged) { local++; const reg = regressions(before, invariants(r.doc, {})); assert.deepEqual(reg.map(x => x.id), [], `${id} «${t}»`); }
+    if (r.status === 'fallback' && r.guard) { refused++; assert.ok(r.guard.length > 0 && /يُفسد شروطًا/.test(r.why_ar)); }
+  }
+  assert.ok(local >= 3 && local + refused > 0, `نُفّذ ${local} ورُفض بسبب مذكور ${refused}`);
 });
 test('لا بديل «جاهز» بلا دورة مياه للعائلة ولا بصالة أصغر من المجلس (حالة العرض)', { skip: !have19 }, () => {
   assert.notEqual(presentationStatus({ doc: doc19('after-19', 'C9', 'alt-3.json'), ledger: [], review: null }, { text: '' }).status, 'ready');

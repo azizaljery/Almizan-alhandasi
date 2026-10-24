@@ -644,11 +644,13 @@ export function generateVillaTwoFloors(args) {
 /** تقرير عربي حين لا يُنتج أي بديل: ما الذي جُرّب، وما الذي تعارض، وما الذي يمكن تغييره. */
 export function failureReport(e, feas, log) {
   const lines = ['لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.'];
-  if (log?.grids?.length) lines.push(`جُرّبت ${log.grids.map(g => `شبكة ${g.nc}×${g.nr} (${g.valid} توزيعًا يحقق القيود الصلبة)`).join('، ')}، واختير منها ${log.picked || 0} تنظيمًا مختلفًا للأبعاد.`);
+  const cntAr = (n, one, few, many) => (n === 1 ? one : n >= 3 && n <= 10 ? `${n} ${few}` : `${n} ${many}`);
+  if (log?.grids?.length) lines.push(`جُرّبت ${log.grids.map(g => `شبكة ${g.nc}×${g.nr} (القيود الصلبة متحققة في ${cntAr(g.valid, 'توزيع واحد', 'توزيعات', 'توزيعًا')})`).join('، ')}، واختير منها ${cntAr(log.picked || 0, 'تنظيم واحد', 'تنظيمات مختلفة', 'تنظيمًا مختلفًا')} للأبعاد.`);
   if (log?.grids?.length && log.grids.every(g => !g.valid)) lines.push('لا توزيع يحقق القيود الصلبة معًا على هذه الأرض: ' + (log.rel || []).filter(r => r.hard && r.client).map(r => r.ar).join('، ') || '');
   if (feas?.warnings?.length) lines.push('ملاحظات قبل التوليد: ' + feas.warnings.map(w => w.ar).join('؛ '));
   lines.push('السبب من المولّد: ' + String(e.message || e));
-  lines.push('ما يمكن تغييره: ' + (feas?.options_ar?.length ? feas.options_ar.join('؛ ') : 'تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.'));
+  const two = (feas?.numbers?.floors || 1) >= 2 || /لدورين/.test(String(e.message || ''));
+  lines.push('ما يمكن تغييره: ' + (feas?.options_ar?.length ? feas.options_ar.join('؛ ') : two ? (/التراكب الإنشائي/.test(String(e.message)) ? 'أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.' : 'تقليل عدد الغرف أو مساحاتها، أو أرض أكبر، أو تخفيف بند موضع صريح.') : 'تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.'));
   return lines.join('\n');
 }
 export default { generateVillaDesigns, generateVillaTwoFloors, synthTrees, unitsOf, enumerateLayouts, guillotine, VILLA_V3_ENGINE_VERSION };

@@ -30,8 +30,8 @@ export const designName = i => `التصميم ${i}`;
  */
 export function shortfallNotice({ requested = 1, shown = 0, shortfall_ar = null, hidden = [], report_ar = null } = {}) {
   if (shown >= requested && !report_ar) return null;
-  const clean = t => String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, 'جرّبتُ $1 تنظيمًا مختلفًا، اجتاز الفحص منها $2')
-    .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').trim();
+  const clean = t => String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, (_, a, b) => `جرّبتُ ${a} ${+a >= 3 && +a <= 10 ? 'تنظيمات مختلفة' : 'تنظيمًا مختلفًا'}، اجتاز الفحص منها ${b}`)
+    .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').replace(/\s+([.،؛])/g, '$1').trim();
   if (!shown) {
     const lines = String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean);
     return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.'] };

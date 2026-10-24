@@ -3787,6 +3787,10 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   // (الجولة السابعة عشرة) الصالة لا تبقى ممرًا عابرًا (إزاحة أبوابها حتى تتسع جلسة عائلية)، و«مقهوي» يخدم مجلس الرجال من المطبخ أو الطعام
   // متى اتسع (dist/r17-polish.mjs) — مكتوبة في الملاحظات
   if (!R14_OFF.has('r17')) { try { const g = R14_OFF.has('r20guard') ? { applied: true, result: polishR17(doc) } : guarded(doc, d => polishR17(d), measureRequest(requirements, land, null)); if (g.applied && g.result.notes_ar.length) layout.notes.push(...g.result.notes_ar); else if (!g.applied) layout.notes.push('لم يُعتمد صقل الصالة/المقهوي على هذا المخطط لأنه يُفسد شرطًا آخر: ' + g.regressions.map(x => x.ar).join('؛ ') + '.'); } catch { /* يبقى كما رُسم */ } }
+  // (الجولة العشرون، ملاحظة متكررة في المراجعات r15–r19) الارتداد الجانبي/الخلفي الضيق: 1.5 م حد عام (المستوى أ)، واشتراطات البلدية
+  // أو المخطط المعتمد للأرض قد تشترط أكثر — لم يُتحقق منها (لا مصدر لها في الطلب)
+  { const sb = doc.plot?.setbacks || {}, streets = new Set(doc.streets || []), narrow = Object.entries(sb).filter(([k, v]) => !streets.has(k) && Number(v) > 0 && Number(v) < 2);
+    if (narrow.length) layout.notes.push(`الارتداد ${narrow.map(([k, v]) => `${{ s: 'الجنوبي', n: 'الشمالي', e: 'الشرقي', w: 'الغربي' }[k] || k} ${r2(+v)} م`).join(' و')}: الحد العام 1.5 م (المستوى أ)؛ اشتراطات البلدية أو المخطط المعتمد لهذه الأرض قد تختلف — غير متحقق.`); }
   // (الجولة العشرون) غرفة الملابس المطلوبة تُقاس على المرسوم بعد الصقل (نقل مدخل الماستر إلى الممر يقتطع منها): إن صغرت عن الهدف تُذكر صراحة
   if (P.prefs?.masterDressing && !R14_OFF.has('r17dress') && !layout.notes.some(n => /غرفة الملابس المطلوبة/.test(n))) { try {
     const dr = analyzeDoc(doc).levels.flatMap(l => l.rooms).find(x => /^غرفة (?:ال)?ملابس$/.test(x.name));
@@ -3895,12 +3899,17 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
     for (const tr of tfTrees(G, U, site)) {
       if (avoidM.has(tr.mode) || doneModes.has(tr.mode)) continue;
       let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch { r = null; }
-      if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'] }); continue; }
+      if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'], tfWhy: tr._why || [] }); continue; }
       const n0 = designs.length;
       build2(r.g, r.up, { summary: `${TF_PARTI_AR[tr.mode] || DYN_AR.get(tr.mode) || tr.mode}؛ والعلوي: ${TF_UPPER_AR[tr.org] || DYN_AR.get(tr.mode + ':up') || ''} (دوران)`, note: tr.note_ar ? tr.note_ar : tr.mode === 'frontstair' ? 'السلم في المقدمة خلف بهو المدخل، ويصل إلى ردهة علوية فوق البهو وصالة علوية خلفه؛ والرئيسية في الركن الخلفي البعيد.' : tr.mode === 'sidestair' ? 'السلم على جدار الجار بجوار بهو مزدوج الارتفاع، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'rearstair' ? 'السلم في الخلف بجوار الصالة، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'stairhall' ? 'السلم بين بهو المدخل والصالة، ويصل إلى الدور العلوي بين الصالة العلوية الأمامية والردهة.' : tr.mode === 'guestgarden' ? 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، وغرفة كبار السن على حديقة خاصة بعيدة عن الضيافة؛ والسلم في آخر جناح الخدمة يصل إلى الصالة العلوية.' : tr.mode === 'rowsup' ? 'السلم خلف المدخل يصل إلى ردهة علوية بين الصالة العائلية الأمامية ورواق الغرف الخلفي.' : 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، والدور العلوي فوق الكتلة العائلية فقط.' });
       if (designs.length > n0) doneModes.add(tr.mode); // بديل واحد من كل تنظيم أرضي يكفي (الاختيار يعرض واحدًا من كل عائلة)
     } }
-  if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; e.rejected = rejected; throw e; }
+  if (!designs.length) {
+    // (الجولة العشرون) سبب التعذّر مقيسًا: أكثر ما رسبت به تنظيمات الدورين المشتركة (لا جملة عامة)
+    const TFW_AR = { stack: 'جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي)', ov: 'غرفة علوية فوق فراغ غير مبني في الأرضي', 'majlis-short': 'المجلس أصغر من 24 م²', 'majlis-w': 'عرض المجلس الصافي أقل من 4.2 م', lost: 'غرفة علوية لا يصلها باب', 'master-smaller-real': 'الرئيسية أصغر من غرفة نوم أخرى', 'far-stair': 'الرئيسية قريبة من الدرج خلاف طلبك', 'din-big': 'الطعام متضخم' };
+    const cnt = {}; for (const r of rejected) for (const w of r.tfWhy || []) if (TFW_AR[w]) cnt[w] = (cnt[w] || 0) + 1;
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 2), n = rejected.filter(r => r.tfWhy).length;
+    const e = Error('تعذّر بناء أي بديل سليم لدورين.' + (top.length ? ` جُرّب ${n} ${n >= 3 && n <= 10 ? 'تنظيمات مشتركة' : 'تنظيمًا مشتركًا'} للدورين، وأكثر ما منعها: ${top.map(([w, c]) => `${TFW_AR[w]} (${c})`).join('، ')}.` : '')); e.code = 'VILLA_BUILD_FAILED'; e.rejected = rejected; e.twoFloorWhy = cnt; throw e; }
   for (const d of designs) d.dr = docRooms(d.doc);
   if (globalThis.__v2dbg) { globalThis.__v2pool = designs.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = designs.map(d => ({ pat: d.pat, doc: d.doc })); }
   const out = pickReviewed(designs, keep, requirements, land, counts);
@@ -4333,7 +4342,7 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
   let best = null;
   for (const b of optimizeSteps(tr.tree, site, evalFn, { iters: globalThis.__v2iters || (U.suites.length >= 5 ? 2 * tr.iters : tr.iters), seed: 'tf' + tr.tag, tol: tr.tol })) best = b;
   if (globalThis.__v2dbg) { const d = globalThis.__v2dbg; if (best) { const v0 = best.sol.viol, v1 = best.sol.up?.viol; const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); const o2 = {}; globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, { ...U, men: null, women: [] }, best.ew, best.ed, { upper: true }); globalThis.__v2dbg = d; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; d['tfj:' + tr.mode + ':' + tr.tag] = `viol ${best.sol.viol} T[${[...(best.sol._tfwhy || [])]}] G[${Object.keys(o)}] U[${Object.keys(o2)}] st=${r2(best.sol.stack?.run || 0)}${best.sol.stack?.seg ? '@' + best.sol.stack.seg.map(v => typeof v === 'number' ? r2(v) : v).join(',') : ''} env ${r2(best.ew)}x${r2(best.ed)}`; if (d.keepSol) d['tfsol:' + tr.mode + ':' + tr.tag] = { g: best.sol, u: best.sol.up, ew: best.ew, ed: best.ed }; } else d['tfj:' + tr.mode + ':' + tr.tag] = 'none'; }
-  if (!best || best.sol.viol) return null;
+  if (!best || best.sol.viol) { tr._why = best ? [...(best.sol._tfwhy || [])] : ['none']; return null; }
   const rp = rulePenalty(best.sol.placed, ruleCirc(best.sol.circ), best.ew, best.ed, rules, entry);
   const g = { mode: tr.mode, tag: tr.tag, tree: tr.tree, stepped: false, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p, rp };
   return { g, up: { mode: 'upper', tag: 'u' + tr.org, org: tr.org, sol: best.sol.up, ew: best.ew, ed: best.ed, pen: best.p } };

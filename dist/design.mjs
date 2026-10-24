@@ -10,6 +10,7 @@ import { requestBrief } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
 import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
+import { shortfallNotice } from './client-text.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -98,7 +99,9 @@ function altsCard(d) {
     el('div', { class: 'altlist' }, alts.map((a, i) => el('button', { type: 'button', 'data-alt': String(i), class: a.doc === cur ? 'on' : '', onclick: () => showAlternative(i) },
       el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null, a.presentation ? el('small', { 'data-alt-status': a.presentation.status }, a.presentation.label_ar + (a.presentation.status === 'needs-edits' ? ` (${a.presentation.edits_ar.length})` : '')) : null))),
     info?.hidden?.length ? el('p', { class: 'sub', 'data-hidden': '' }, `حُجب ${info.hidden.length} ${info.hidden.length === 1 ? 'بديل' : 'بدائل'} لأنها تخالف بندًا إلزاميًا من طلبك: ${info.hidden.map(h => (h.reasons_ar || [])[0]).filter(Boolean).join('؛ ')}`) : null,
-    info?.shortfall_ar ? el('p', { class: 'shortfall sub' }, 'لماذا أقل من المطلوب؟ ' + info.shortfall_ar) : null,
+    // (الجولة العشرون) إشعار النقص بنص العميل نفسه الذي في الصور (shortfallNotice): العدد صريحًا وسببه وما يمكن تغييره، بلا لغة داخلية
+    (() => { const n = alts.length < want ? shortfallNotice({ requested: want, shown: alts.length, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
+      return n ? el('div', { class: 'shortfall sub', role: 'note', 'data-shortfall': '' }, el('b', {}, n.title_ar), ...n.lines_ar.map(t => el('p', {}, t))) : null; })(),
     info?.rejected?.length ? el('details', { class: 'rejected' }, el('summary', {}, `المرشحون المرفوضون (${info.rejectedCount}) وأسبابهم`),
       el('ul', { class: 'tick' }, info.rejected.map(r => el('li', { class: 'bad' }, r.text + (r.count > 1 ? ` (${r.count})` : ''))))) : null);
 }
