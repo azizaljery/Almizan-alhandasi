@@ -1,0 +1,585 @@
+{
+ "stage": "after-16",
+ "summary": {
+  "note_ar": "كشف أنواع العيوب الجديدة (privacy-defects.mjs): الإيجابيات الحقيقية من حكم المراجع المستقل r15 (وكيل ذكاء اصطناعي، ليس معماريًا بشريًا مرخّصًا)، والمصنوعة بتحوير واحد على بدائل «جاهزة»، والسلبيات هي البدائل الجاهزة كما هي.",
+  "positives": 44,
+  "detected": 44,
+  "positivesNotReady": 44,
+  "byType": {
+   "WINDOW_PARKING": "19/19",
+   "HALL_STREET": "2/2",
+   "GUEST_DINING": "16/16",
+   "MASTER_VIA_DRESS": "5/5",
+   "PARKING_SHALLOW": "2/2"
+  },
+  "negatives": 10,
+  "falsePositives": 0,
+  "missed": []
+ },
+ "rows": [
+  {
+   "kind": "real-r15",
+   "alt": "C1-1",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C1-2",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "HALL_STREET",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C1-2",
+   "expected": "HALL_STREET",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "HALL_STREET",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C1-2",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "HALL_STREET",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C6-1",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C6-2",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C7-1",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C7-1",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C8-1",
+   "expected": "MASTER_VIA_DRESS",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C9-1",
+   "expected": "MASTER_VIA_DRESS",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C9-1",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C9-2",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C9-3",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C9-3",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C10-1",
+   "expected": "MASTER_VIA_DRESS",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C10-2",
+   "expected": "HALL_STREET",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "HALL_STREET",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C10-2",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "HALL_STREET",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C10-3",
+   "expected": "PARKING_SHALLOW",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "PARKING_SHALLOW"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C10-3",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "PARKING_SHALLOW"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C5-4",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C6-2",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING",
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "real-r15",
+   "alt": "C5-2",
+   "expected": "PARKING_SHALLOW",
+   "detected": true,
+   "got": [
+    "PARKING_SHALLOW"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C1/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C1/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C1/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C2/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C2/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C2/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C4/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C4/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C4/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C5/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C5/alt-2.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-2.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C5/alt-2.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C6/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C6/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C6/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C8/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C8/alt-1.json",
+   "mutation": "الماستر لا تُدخل إلا عبر غرفة الملابس من الصالة",
+   "expected": "MASTER_VIA_DRESS",
+   "detected": true,
+   "got": [
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C9/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C9/alt-2.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-2.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C9/alt-2.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "clean",
+   "alt": "C10/alt-1.json",
+   "expected": null,
+   "detected": false,
+   "got": [],
+   "status": "ready"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C10/alt-1.json",
+   "mutation": "موقف أمام نافذة «الصالة»",
+   "expected": "WINDOW_PARKING",
+   "detected": true,
+   "got": [
+    "WINDOW_PARKING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C10/alt-1.json",
+   "mutation": "حذف باب المقلط بين المجلس والطعام",
+   "expected": "GUEST_DINING",
+   "detected": true,
+   "got": [
+    "GUEST_DINING"
+   ],
+   "status": "needs-edits"
+  },
+  {
+   "kind": "synthetic",
+   "alt": "C10/alt-1.json",
+   "mutation": "الماستر لا تُدخل إلا عبر غرفة الملابس من الصالة",
+   "expected": "MASTER_VIA_DRESS",
+   "detected": true,
+   "got": [
+    "MASTER_VIA_DRESS"
+   ],
+   "status": "needs-edits"
+  }
+ ]
+}

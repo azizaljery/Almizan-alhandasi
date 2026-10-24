@@ -1,0 +1,399 @@
+{
+ "note_ar": "حالة after-15 بمعايرة الجولة 15 (المحفوظة)، وحالة after-16 بمعايرة الجولة 16 الأشد — «جاهز» في after-16 يعني خلوه من العيوب الجديدة أيضًا.",
+ "after15": {
+  "alternatives": 23,
+  "ready": 20,
+  "needsEdits": 3
+ },
+ "after16": {
+  "alternatives": 21,
+  "ready": 10,
+  "needsEdits": 11,
+  "hidden": 0
+ },
+ "cases": [
+  {
+   "case": "C1",
+   "requested": 4,
+   "after15": {
+    "count": 2,
+    "ready": 2,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "yoo:u0",
+     "centralhall:ch1"
+    ]
+   },
+   "after16": {
+    "count": 2,
+    "ready": 1,
+    "needs-edits": 1,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "yoo:u0",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-2.json",
+      "pat": "centralhall:ch1",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     }
+    ]
+   },
+   "shortfall16": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 5، اجتاز البوابات منهم 4؛ ورُفض 1 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («المطبخ» في الخلف)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C2",
+   "requested": 4,
+   "after15": {
+    "count": 1,
+    "ready": 1,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "hplan:hh0"
+    ]
+   },
+   "after16": {
+    "count": 1,
+    "ready": 1,
+    "needs-edits": 0,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "hplan:hh2",
+      "status": "ready",
+      "defects": []
+     }
+    ]
+   },
+   "shortfall16": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 15، اجتاز البوابات منهم 10؛ ورُفض 5 في بوابات الجودة والسلامة؛ 8 تخالف بندًا صريحًا من الطلب («الصالة» على الواجهة الخلفية، صالة واسعة (35 م² صافية أو أكثر)، «غرف الأبناء» متجاورة)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C3",
+   "requested": 4,
+   "after15": {
+    "count": 2,
+    "ready": 1,
+    "needs-edits": 1,
+    "hidden": 0,
+    "pats": [
+     "centralhall:ch0",
+     "ell:l0"
+    ]
+   },
+   "after16": {
+    "count": 2,
+    "ready": 0,
+    "needs-edits": 2,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "ell:l0",
+      "status": "needs-edits",
+      "defects": [
+       "MAJLIS_LOBBY"
+      ]
+     },
+     {
+      "file": "alt-2.json",
+      "pat": "centralhall:ch0",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     }
+    ]
+   },
+   "shortfall16": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 19، اجتاز البوابات منهم 14؛ ورُفض 5 في بوابات الجودة والسلامة؛ 9 تخالف بندًا صريحًا من الطلب («المجلس» على الشارع (الواجهة الأمامية)، «المدخل» في جهة الشرق)؛ 2 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C4",
+   "requested": 4,
+   "after15": {
+    "count": 1,
+    "ready": 1,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "tcore:n7w"
+    ]
+   },
+   "after16": {
+    "count": 1,
+    "ready": 1,
+    "needs-edits": 0,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "tcore:n7w",
+      "status": "ready",
+      "defects": []
+     }
+    ]
+   },
+   "shortfall16": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 5، اجتاز البوابات منهم 4؛ ورُفض 1 في بوابات الجودة والسلامة؛ 3 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C5",
+   "requested": 4,
+   "after15": {
+    "count": 4,
+    "ready": 4,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "cornerentry:e0t",
+     "split:s0rt",
+     "hallback:h0",
+     "ell:l0r"
+    ]
+   },
+   "after16": {
+    "count": 4,
+    "ready": 2,
+    "needs-edits": 2,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "cornerentry:e0t",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-2.json",
+      "pat": "hallback:h0",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-3.json",
+      "pat": "split:s0rt",
+      "status": "needs-edits",
+      "defects": [
+       "PARKING_SHALLOW"
+      ]
+     },
+     {
+      "file": "alt-4.json",
+      "pat": "ell:l0r",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     }
+    ]
+   },
+   "shortfall16": null
+  },
+  {
+   "case": "C6",
+   "requested": 4,
+   "after15": {
+    "count": 2,
+    "ready": 2,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "hallback:h0",
+     "yoo:u0r"
+    ]
+   },
+   "after16": {
+    "count": 1,
+    "ready": 1,
+    "needs-edits": 0,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "hallback:h0",
+      "status": "ready",
+      "defects": []
+     }
+    ]
+   },
+   "shortfall16": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 14، اجتاز البوابات منهم 11؛ ورُفض 3 في بوابات الجودة والسلامة؛ 7 تخالف بندًا صريحًا من الطلب («المطبخ» في الخلف، «المجلس» بأبعاد 5×6 م (±0.3 م))؛ 3 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C7",
+   "requested": 4,
+   "after15": {
+    "count": 1,
+    "ready": 0,
+    "needs-edits": 1,
+    "hidden": 0,
+    "pats": [
+     "frontstair:fs3/uspine"
+    ]
+   },
+   "after16": {
+    "count": 1,
+    "ready": 0,
+    "needs-edits": 1,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "frontstair:fs3/uspine",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     }
+    ]
+   },
+   "shortfall16": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 21، اجتاز البوابات منهم 1؛ ورُفض 20 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C8",
+   "requested": 4,
+   "after15": {
+    "count": 3,
+    "ready": 3,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "sidecourt:sc0",
+     "courtyard:k1r",
+     "split:s0r"
+    ]
+   },
+   "after16": {
+    "count": 2,
+    "ready": 1,
+    "needs-edits": 1,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "sidecourt:sc0",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-2.json",
+      "pat": "courtyard:k1r",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     }
+    ]
+   },
+   "shortfall16": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 11، اجتاز البوابات منهم 10؛ ورُفض 1 في بوابات الجودة والسلامة؛ 1 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 4 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 2 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان)؛ 1 لم تدخل مجموعة تحقق أدنى اختلاف مع كل البدائل المعروضة معًا. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  },
+  {
+   "case": "C9",
+   "requested": 4,
+   "after15": {
+    "count": 4,
+    "ready": 3,
+    "needs-edits": 1,
+    "hidden": 0,
+    "pats": [
+     "sidecourt:sc0",
+     "hallback:h0",
+     "wings:w0",
+     "sidemajlis:j0"
+    ]
+   },
+   "after16": {
+    "count": 4,
+    "ready": 2,
+    "needs-edits": 2,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "hallback:h0",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-2.json",
+      "pat": "twincourt:tc0",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-3.json",
+      "pat": "wings:w0",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     },
+     {
+      "file": "alt-4.json",
+      "pat": "sidemajlis:j0",
+      "status": "needs-edits",
+      "defects": [
+       "MAJLIS_LOBBY",
+       "MAJLIS_STREET_ENTRY",
+       "GUEST_DINING"
+      ]
+     }
+    ]
+   },
+   "shortfall16": null
+  },
+  {
+   "case": "C10",
+   "requested": 5,
+   "after15": {
+    "count": 3,
+    "ready": 3,
+    "needs-edits": 0,
+    "hidden": 0,
+    "pats": [
+     "sidecourt:sc0",
+     "centralhall:ch2",
+     "courtyard:k1"
+    ]
+   },
+   "after16": {
+    "count": 3,
+    "ready": 1,
+    "needs-edits": 2,
+    "hidden": 0,
+    "alts": [
+     {
+      "file": "alt-1.json",
+      "pat": "sidecourt:sc0",
+      "status": "ready",
+      "defects": []
+     },
+     {
+      "file": "alt-2.json",
+      "pat": "centralhall:ch2",
+      "status": "needs-edits",
+      "defects": [
+       "GUEST_DINING"
+      ]
+     },
+     {
+      "file": "alt-3.json",
+      "pat": "courtyard:k1",
+      "status": "needs-edits",
+      "defects": [
+       "PARKING_SHALLOW"
+      ]
+     }
+    ]
+   },
+   "shortfall16": "عُرض 3 من 5 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 14، اجتاز البوابات منهم 8؛ ورُفض 5 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة (WINDOW_SIZE)؛ 2 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 2 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان)؛ 1 لم تدخل مجموعة تحقق أدنى اختلاف مع كل البدائل المعروضة معًا. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك)."
+  }
+ ]
+}
