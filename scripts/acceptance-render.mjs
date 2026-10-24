@@ -95,6 +95,7 @@ const facadeShot = async (rawDoc, name) => {
 };
 for (id of cases) {
   const files = (await readdir(ev + id)).filter(f => f.endsWith('.json') && f !== 'result.json' && f !== 'captions.json');
+  if (!files.length) { console.log(id, 'لا مستندات (خطأ توليد في result.json) — لا صور'); continue; } // (الجولة التاسعة عشرة) حالة محجوزة بلا بديل
   const captions = {};
   for (const f of files) {
     const raw = await readFile(ev + id + '/' + f, 'utf8'), n = JSON.parse(raw).levels.length;
