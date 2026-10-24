@@ -151,7 +151,9 @@ test('اسأل قبل إعادة التوزيع: طلب لا حل موضعيًا
   const o = await redesign(s0, { text: 'انقل المطبخ ورا جنب الطعام' }, { generate: gen });
   // (الجولة الرابعة عشرة) خيارات صريحة بدل «نعم/لا»: إبقاء المخطط، أو إعادة توزيع البيت (المقترح نفسه، مقيسًا بالبصمة)
   assert.equal(calls, 1); assert.equal(o.reply.mode, 'ask-options');
-  assert.equal(o.reply.conflicts[0].type, 'needs-consent'); assert.match(o.reply.questions[0], /أعد توزيع البيت/); assert.match(o.reply.questions[0], /البصمة الهندسية/);
+  assert.equal(o.reply.conflicts[0].type, 'needs-consent'); assert.match(o.reply.detail_ar, /أعد توزيع البيت/); assert.match(o.reply.detail_ar, /البصمة الهندسية/);
+  // (الجولة السادسة عشرة) رسالة العميل بلغته: جملة واحدة وخيارات مرقّمة، بلا عدّ جدران ولا «البصمة الهندسية»
+  assert.match(o.reply.questions[0], /اختر رقمًا/); assert.doesNotMatch(o.reply.questions[0], /البصمة|جدار|حرفيًا/);
   assert.deepEqual(o.reply.options.map(x => x.id), ['keep', 'full']);
   assert.ok(o.reply.proposal.full.fingerprint.counts.touched > 50);
   assert.ok(diffFingerprint(currentDoc(s0), currentDoc(o.session)).identical, 'لم يتغير شيء قبل الموافقة');

@@ -147,7 +147,7 @@ function reviewCard(d) {
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
-  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'النسخة ' + (r.restored.version ?? r.restored.index + 1)} كما طلبت.` : r.mode === 'ask-regenerate' || r.mode === 'ask-options' ? 'لم أجد تعديلًا موضعيًا يحقق طلبك؛ لم أغيّر شيئًا قبل اختيارك.' : r.mode === 'zone-regenerated' ? 'أعدت توزيع منطقة واحدة كما اخترت، وبقية المناطق ثابتة حرفيًا (المظلل على المسقط ما تغيّر).' : r.mode === 'switched-alternative' ? `عرضت البديل ${r.alternative} كما اخترت — بديل مختلف لا تعديل للمخطط السابق.` : r.mode === 'regenerated' && r.choice === 'full' ? 'أعدت توزيع البيت كما اخترت صراحة (المظلل على المسقط ما تغيّر).' : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
+  const head = r.restored ? `رجعت إلى ${r.restored.index === 0 ? 'التصميم الأول' : 'النسخة ' + (r.restored.version ?? r.restored.index + 1)} كما طلبت.` : r.mode === 'ask-regenerate' || r.mode === 'ask-options' ? 'لم أجد تعديلًا صغيرًا يحقق طلبك؛ لم أغيّر شيئًا قبل اختيارك.' : r.mode === 'zone-regenerated' ? 'أعدت توزيع منطقة واحدة كما اخترت، وبقية المناطق ثابتة حرفيًا (المظلل على المسقط ما تغيّر).' : r.mode === 'switched-alternative' ? `عرضت البديل ${r.alternative} كما اخترت — بديل مختلف لا تعديل للمخطط السابق.` : r.mode === 'regenerated' && r.choice === 'full' ? 'أعدت توزيع البيت كما اخترت صراحة (المظلل على المسقط ما تغيّر).' : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
   // ما تغيّر في المخطط فعلًا (مقيسًا): من التعديل الموضعي أو من إعادة التوزيع المعلنة
   const changed = [...(r.changed || []), ...(r.fallback?.changed || [])].filter(c => c.kind !== 'openings');
@@ -161,11 +161,31 @@ function sharaReply(fb) {
     r.facadeNote ? el('p', { class: 'sub' }, r.facadeNote + '.') : null,
     Number.isInteger(r.keptRooms) ? el('p', { class: 'sub' }, `بقية الغرف (${r.keptRooms}) كما هي مقيسًا${r.geometryIdentical ? '، والجدران والفتحات نفسها حرفيًا' : ''}.`) : null,
     // البصمة الهندسية: كم عنصرًا تغيّر وكم بقي ثابتًا حرفيًا، وإثبات الرجوع إلى النسخة
-    r.fingerprint?.summary_ar && r.mode !== 'ask-regenerate' ? el('p', { class: 'sub', 'data-fingerprint': '' }, r.fingerprint.summary_ar + (Number.isInteger(r.version) ? ` (النسخة ${r.version})` : '')) : null,
-    r.restoreProof?.summary_ar ? el('p', { class: 'sub', 'data-restore-proof': '' }, r.restoreProof.summary_ar) : null,
+    // (الجولة السادسة عشرة) لغة العميل: عدّ الجدران والفتحات (البصمة الهندسية) تفصيل هندسي مطوي لا رسالة للعميل
+    (r.fingerprint?.summary_ar && r.mode !== 'ask-regenerate') || r.restoreProof?.summary_ar || r.fallback?.detail_ar ? el('details', { class: 'sub eng-detail' }, el('summary', {}, 'تفاصيل هندسية'),
+      r.fingerprint?.summary_ar && r.mode !== 'ask-regenerate' ? el('p', { class: 'sub', 'data-fingerprint': '' }, r.fingerprint.summary_ar + (Number.isInteger(r.version) ? ` (النسخة ${r.version})` : '')) : null,
+      r.restoreProof?.summary_ar ? el('p', { class: 'sub', 'data-restore-proof': '' }, r.restoreProof.summary_ar) : null) : null,
     (r.questions || []).length ? el('ul', { class: 'tick' }, r.questions.map(q => li('no', q))) : null,
     r.unclear.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أفهم هذه العبارات فلم أطبّقها؛ اكتبها بصيغة مباشرة (مثل: «المطبخ في الخلف»):'), el('ul', { class: 'tick' }, r.unclear.map(t => li('no', '«' + t + '»')))) : null,
     r.unsupported.length ? el('ul', { class: 'tick' }, r.unsupported.map(t => li('no', t))) : null);
+}
+
+/** مصغّر مخطط خيار التعديل (160×120): لا يُرسم إن لم يتوفر مستنده. */
+function optionThumb(o, sess) {
+  let raw = null;
+  try {
+    if (o.thumb?.src === 'current') raw = sess.designs[sess.current]?.doc;
+    else if (o.thumb?.src === 'pending') raw = sess.pendingEdit?.[o.thumb.key]?.doc;
+    else if (o.thumb?.src === 'alt') raw = (sess.alternatives || []).find(a => a.index === o.thumb.index)?.doc;
+  } catch { raw = null; }
+  if (!raw) return null;
+  try {
+    const d = typeof raw === 'string' ? parseDoc(raw) : raw, lvId = d.levels[0].id, c = el('canvas', { width: 160, height: 120, class: 'opt-thumb', 'data-thumb': o.id, style: 'display:block;margin:0 auto 4px;background:#fff;border-radius:6px' });
+    const L = analyzeDoc(d).levelById.get(lvId), an = L ? { rooms: L.rooms, gaps: [], exteriorWallIds: exteriorWallIds(L.analysis) } : null;
+    const b = docBounds(d, lvId), v = fitView({ x0: b.x0 - .5, y0: b.y0 - .5, x1: b.x1 + .5, y1: b.y1 + .5 }, 160, 120, 4), ctx = c.getContext('2d');
+    if (ctx) renderPlan(ctx, { doc: d, levelId: lvId, view: v, W: 160, H: 120, analysis: an, flags: { grid: false, dims: false, areas: false, fixtures: false, underlay: false, roomDims: false }, roomFill: rm => ZONES[zoneOf(rm.label)].color });
+    return c;
+  } catch { return null; }
 }
 
 function legend() {
@@ -303,7 +323,8 @@ $('fbGo').addEventListener('click', async () => {
       if (out.reply.conflicts.some(c => c.type === 'needs-consent') && out.session?.pendingEdit) { session = out.session; saveSession(localStorage, session); }
       $('fbStatus').textContent = 'قبل ما أعدّل: ' + out.reply.questions.join(' — ');
       // (الجولة الرابعة عشرة) خيارات التعديل أزرارًا: لا يُستبدل المخطط إلا باختيار صريح من العميل
-      if (out.reply.mode === 'ask-options' && out.reply.options?.length) $('fbStatus').append(el('div', { class: 'opts', 'data-edit-options': '' }, out.reply.options.map(o => el('button', { type: 'button', class: 'chip', 'data-option': o.id, onclick: () => { $('fbText').value = String(o.n); document.querySelectorAll('#fbChips .chip').forEach(b => b.setAttribute('aria-pressed', 'false')); $('fbGo').click(); } }, `${o.n}) ${o.text_ar}`))));
+      // (الجولة السادسة عشرة) لكل خيار مصغّر للمخطط الذي سيُعرض إن اختاره (المعروض، أو المقترح المحفوظ، أو البديل المعروض)
+      if (out.reply.mode === 'ask-options' && out.reply.options?.length) $('fbStatus').append(el('div', { class: 'opts', 'data-edit-options': '' }, out.reply.options.map(o => el(o.info ? 'div' : 'button', { type: 'button', class: 'chip opt', 'data-option': o.id, ...(o.info ? {} : { onclick: () => { $('fbText').value = String(o.n); document.querySelectorAll('#fbChips .chip').forEach(b => b.setAttribute('aria-pressed', 'false')); $('fbGo').click(); } }) }, optionThumb(o, out.session), `${o.n}) ${o.text_ar}`))));
       $('fbGo').disabled = false; return;
     }
     session = out.session; saveSession(localStorage, session);

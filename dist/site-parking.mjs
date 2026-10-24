@@ -28,7 +28,16 @@ const r2 = v => Math.round(v * 100) / 100;
  * يقترح مواقف السيارات لمستند (الدور الأرضي): يعيد { bays:[{ polygon, side, kind }], note_ar }. لا يعدّل المستند.
  * max: أقصى عدد (افتراضيًا 2).
  */
-export function planParking(doc, { max = null, parallel = false, windows = true } = {}) {
+export function planParking(doc, opts = {}) {
+  // (الجولة السادسة عشرة) الخصوصية أولًا: لا موقف في مجال رؤية نافذة غرفة خاصة (3 م أمامها) — وإن لم يتسع العدد المطلوب بذلك
+  // يُرجع إلى التخطيط السابق (ونافذة الغرفة تُعالج في المولّد بنقلها أو جلسة عالية، وتقيسها privacy-defects.mjs)
+  const a = planParking0(doc, { ...opts, privacy: opts.privacy ?? true });
+  if (opts.privacy === false || a.bays.length >= (a.required || 1)) return a;
+  const b = planParking0(doc, { ...opts, privacy: false });
+  return b.bays.length > a.bays.length ? b : a;
+}
+const PRIVATE_ROOM = r => !!r && ((r.type === 'majlis' && /النساء/.test(r.name || '')) || r.type === 'bedroom' || r.type === 'master' || r.type === 'dining' || (r.type === 'living' && !/الضيوف|الطعام|مغاسل/.test(r.name || '')));
+function planParking0(doc, { max = null, parallel = false, windows = true, privacy = false } = {}) {
   const plot0 = doc.plot?.polygon; if (!plot0 || plot0.length < 3) return { bays: [], note_ar: 'لا مضلع أرض في المستند.' };
   const need = requiredParking(plotArea(plot0)); if (max == null) max = need;
   const plot = ccw(plot0.map(p => ({ x: p.x, y: p.y })));
@@ -54,6 +63,12 @@ export function planParking(doc, { max = null, parallel = false, windows = true 
     // (الجولة الرابعة عشرة) لا موقف يلاصق نافذة (0.5 م أمامها) — السيارة أمام نافذة المجلس أو الصالة عيب (المراجع المستقل r13)
     const wins = G.openings.filter(op => op.window && op.sides.some(s => s.exterior)).map(op => ({ p: op.p, out: op.sides.find(x => x.exterior).outward, w: op.w }));
     if (windows) for (const wv of wins) { const p = F(wv.p), o = rot(wv.out, a), hw = wv.w / 2 + .2, q = { x: p.x + o.x * .5, y: p.y + o.y * .5 }; boxes.push({ x0: Math.min(p.x, q.x) - (Math.abs(o.x) > .7 ? 0 : hw), x1: Math.max(p.x, q.x) + (Math.abs(o.x) > .7 ? 0 : hw), y0: Math.min(p.y, q.y) - (Math.abs(o.x) > .7 ? hw : 0), y1: Math.max(p.y, q.y) + (Math.abs(o.x) > .7 ? hw : 0) }); }
+    // (الجولة السادسة عشرة) مجال رؤية النافذة 3 م أمامها و1 م على جانبيها: لا موقف فيه لنافذة غرفة خاصة (privacy)، ولا موقف موازٍ
+    // أمام أي نافذة (الموازي في ارتداد ضحل أمام نافذة عيب — C10-3 في المراجعة المستقلة r15)
+    const viewBox = wv => { const p = F(wv.p), o = rot(wv.out, a), u = { x: -o.y, y: o.x }, hw = wv.w / 2 + 1, cs = [[-hw, .1], [hw, .1], [hw, 3.1], [-hw, 3.1]].map(([s2, t]) => ({ x: p.x + u.x * s2 + o.x * t, y: p.y + u.y * s2 + o.y * t })); return { x0: Math.min(...cs.map(c => c.x)), x1: Math.max(...cs.map(c => c.x)), y0: Math.min(...cs.map(c => c.y)), y1: Math.max(...cs.map(c => c.y)) }; };
+    const winsAll = G.openings.filter(op => op.window && op.sides.some(s => s.exterior && s.other === 'outside') && (op.o.sill ?? 0) < 1.6).map(op => { const s = op.sides.find(x => x.exterior && x.other === 'outside'); return { p: op.p, out: s.outward, w: op.w, priv: PRIVATE_ROOM(s.room) }; });
+    const privBoxes = privacy ? winsAll.filter(wv => wv.priv).map(viewBox) : [], paraBoxes = windows ? winsAll.map(viewBox) : [];
+    const ov = (r, list) => list.some(b => r.x0 < b.x1 && r.x1 > b.x0 && r.y0 < b.y1 && r.y1 > b.y0);
     const inside = r => [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]].every(([x, y]) => pointInPolygon({ x, y }, P, 1e-6) && distToPoly({ x, y }, P) >= .08);
     // تجويف: المبنى على جانبي الموقف عند منتصف عمقه (0.8 م يمينه ويساره) — لا يُقبل
     const atB = (x, y) => !!G.roomAt(Fi({ x, y }));
@@ -68,7 +83,7 @@ export function planParking(doc, { max = null, parallel = false, windows = true 
       for (let x = x0 + .15; x + w <= x1 - .15 + 1e-9; x += .1) {
         const fy = frontAt(x, x + w); if (!Number.isFinite(fy)) continue;
         const r = { x0: x, x1: x + w, y0: fy + .1, y1: fy + .1 + d };
-        if (!inside(r) || hit(r)) continue;
+        if (!inside(r) || hit(r) || ov(r, privBoxes) || (kind === 'para' && ov(r, paraBoxes))) continue;
         cands.push({ r, kind, side, F, Fi, fam: Math.min(...doors.filter(q => q.entry).map(q => Math.hypot(F(q.p).x - (x + w / 2), F(q.p).y - fy)), 99) });
       }
     }

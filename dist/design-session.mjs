@@ -351,7 +351,7 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
     let ch = []; try { ch = describeChanges(compareDocs(parseDoc(cur.doc), out.doc, { gates: false, byName: true }).changed); } catch { ch = []; }
     const rooms = ch.filter(c => c.kind !== 'openings');
     reply.mode = 'regenerated';
-    reply.fallback = { why_ar: fallbackNote.why_ar, said_ar: `لم أجد تعديلًا موضعيًا يحقق طلبك على المخطط المعروض، فأعدت توزيع البيت. تغيّر ${rooms.length} فراغًا: ${rooms.slice(0, 12).map(c => c.text_ar).join('؛ ') || '—'}.${fpd ? ' ' + fpd.summary_ar : ''}`, changed: ch };
+    reply.fallback = { why_ar: fallbackNote.why_ar, said_ar: `لم أجد تعديلًا صغيرًا يحقق طلبك على المخطط المعروض، فأعدت ترتيب البيت. تغيّر ${rooms.length} فراغًا: ${rooms.slice(0, 12).map(c => c.text_ar).join('؛ ') || '—'}.`, detail_ar: fpd ? fpd.summary_ar : null, changed: ch };
     if (reply.patternChanged) reply.patternChanged.why_ar = 'التوزيع المعروض لا يحقق طلبك كما هو؛ اخترت أقرب توزيع إليه يحققه — وتغيّرت معه غرف أخرى (مذكورة في الرد).';
     // (الجولة العاشرة) طلب تعديل لم يُحل موضعيًا: لا يُعاد توزيع البيت قبل موافقة العميل — يُعرض أثره مقيسًا بالبصمة
     // (كم عنصرًا سيتغير، وأي الغرف) ويُحفظ التصميم المقترح نفسه ليُعتمد حرفيًا بـ«نعم»
@@ -391,10 +391,13 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       const fpOf = c => { try { const d = diffFingerprint(curD, c.doc); return { d, compact: compactDiff(d) }; } catch { return null; } };
       const zf = zoneCand ? fpOf(zoneCand) : null, ff = fullCand ? fpOf(fullCand) : null;
       const minZones = pool.filter(c => c.ok).reduce((m, c) => Math.min(m, c.zd.changed.length), Infinity);
-      const opts = [{ id: 'keep', n: 1, text_ar: 'أبقِ المخطط المعروض كما هو حرفيًا' }];
-      if (zoneCand) opts.push({ id: 'zone', n: 2, text_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}` });
-      if (shownOk.length) opts.push({ id: 'shown', n: 3, alts: shownOk, text_ar: `اعرض ${shownOk.length === 1 ? 'البديل' : 'البدائل'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط)` });
-      if (fullCand) opts.push({ id: 'full', n: 4, text_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة` });
+      // (الجولة السادسة عشرة) لغة العميل: نص الخيار جملة قصيرة بلا أرقام جدران ولا مصطلحات (detail_ar يحفظ التفصيل الهندسي
+      // للملحق)، ولكل خيار مصغّر (thumb) يرسمه العرض. وخيار «توزيع جديد» لا يُعرض إلا مقيسًا يحقق الطلب حرفيًا (achieves أعلاه).
+      const zoneShort = z => String(z || '').replace(/ \(.*\)$/, '');
+      const opts = [{ id: 'keep', n: 1, text_ar: 'أبقِ المخطط كما هو', detail_ar: 'أبقِ المخطط المعروض كما هو حرفيًا', thumb: { src: 'current' } }];
+      if (zoneCand) opts.push({ id: 'zone', n: 2, text_ar: `أعيد ترتيب ${zoneShort(zoneCand.zd.changed_ar[0]) || 'جزء واحد من البيت'} فقط، ويبقى الباقي كما هو`, detail_ar: `أعد توزيع ${zoneCand.zd.changed_ar[0] || 'منطقة واحدة'} وحدها، وتبقى ${zoneCand.zd.kept_ar.join(' و')} ثابتة حرفيًا${zf ? ` (${zf.d.summary_ar})` : ''}`, thumb: { src: 'pending', key: 'zone' } });
+      if (shownOk.length) opts.push({ id: 'shown', n: 3, alts: shownOk, text_ar: `اعرض ${shownOk.length === 1 ? 'التصميم' : 'التصاميم'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك (تصميم آخر، لا تعديل لهذا)`, detail_ar: `اعرض ${shownOk.length === 1 ? 'البديل' : 'البدائل'} ${shownOk.map(i => i + 1).join(' و')} — ${shownOk.length === 1 ? 'يحقق' : 'تحقق'} طلبك أصلًا (بديل مختلف، لا تعديل لهذا المخطط)`, thumb: { src: 'alt', index: shownOk[0] } });
+      if (fullCand) opts.push({ id: 'full', n: 4, text_ar: 'أعيد ترتيب البيت كله بتوزيع جديد يحقق طلبك', detail_ar: `أعد توزيع البيت: تتغير ${fullCand.zd.changed_ar.join(' و')}${fullCand.zd.kept.length ? ` وتبقى ${fullCand.zd.kept_ar.join(' و')}` : ''}${ff ? ` (${ff.d.summary_ar})` : ''} — توزيع جديد غير البدائل المعروضة، مقيس يحقق طلبك حرفيًا`, thumb: { src: 'pending', key: 'full' } });
       // بلغة العميل: من يشغل الجهة المطلوبة الآن (مثل «خلف البيت تشغله منطقة النوم…»)
       let occ = ''; try { const sides = [...new Set(intents.filter(i => i.op === 'rule' && i.rule?.kind === 'place' && ['back', 'front'].includes(i.rule.side)).map(i => i.rule.side))];
         occ = sides.map(sd => { const o = sideOccupants(curD, sd, entryDir); return o ? ` ${sd === 'back' ? 'خلف' : 'مقدمة'} هذا المخطط ${o.length > 1 ? 'تشغلها' : 'تشغله'} ${o.map(z => `${z.zone_ar.replace(/ \(.*\)$/, '')} (${z.rooms.map(n => `«${n}»`).join('، ')})`).join(' و')}${o.some(z => z.zone === 'sleep') ? '؛ نقل المطبخ إليها يزيح غرف النوم إلى موضع المطبخ أو الطعام أو يجعل المطبخ على ممر النوم' : ''}.` : ''; }).join(''); } catch { occ = ''; }
@@ -406,20 +409,23 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       // (الجولة الخامسة عشرة) التحقق الجزئي: ما تحقق من الطلب في المعروض نفسه (مقيسًا بسجل المطابقة نفسه)، وما تحقق بقراءة دون
       // أخرى (المطبخ خلف الطعام نسبيًا لا على الواجهة الخلفية) — يُقال صراحة قبل الخيارات، بالنص نفسه الذي يكتبه السجل الصارم
       const part = part0;
-      if (!fullCand) opts.push({ id: 'none-new', n: opts.length + 1, info: true, text_ar: 'توزيع جديد غير البدائل المعروضة يحققه: لم أجد (بحثت بأنماط غير المعروضة كلها)' });
+      if (!fullCand) opts.push({ id: 'none-new', n: opts.length + 1, info: true, text_ar: 'لم أجد توزيعًا جديدًا آخر يحقق طلبك', detail_ar: 'توزيع جديد غير البدائل المعروضة يحققه: لم أجد (بحثت بأنماط غير المعروضة كلها)' });
       opts.forEach((o, k) => { o.n = k + 1; });
       const choose = opts.filter(o => !o.info);
-      const optsAr = opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ');
+      const optsAr = opts.map(o => `(${o.n}) ${o.detail_ar || o.text_ar}`).join('؛ ');
+      // جملة واحدة واضحة للعميل ثم الخيارات المرقّمة؛ والتفصيل الهندسي (القراءة الحرفية والنسبية والسبب) في detail_ar
+      const asked = part?.partial?.[0]?.text || (fallbackNote.failed || [])[0]?.text_ar || null;
+      const plain = `${part ? `طلبك ${asked ? `«${String(asked).replace(/^«|»$/g, '')}» ` : ''}متحقق جزئيًا في هذا المخطط، ولا يكتمل بتعديل صغير عليه.` : `طلبك${asked ? ` «${String(asked).replace(/^«|»$/g, '')}»` : ''} لا يتحقق بتعديل صغير على هذا المخطط.`} اختر رقمًا: ${opts.map(o => `(${o.n}) ${o.text_ar}`).join('؛ ')}.`;
       const q = part
         ? `الشرط متحقق جزئيًا: ${part.text_ar}. ولا تعديل موضعي يحققه حرفيًا على هذا المخطط نفسه:${occ || ''}${zoneWhy.replace(occ || '', '')}${dupWhy}؛ لتحقيقه حرفيًا: الخيارات ${optsAr}. اختر رقمًا من ${choose.map(o => o.n).join(' أو ')}.`
         : `لم أجد تعديلًا موضعيًا يحقق طلبك على هذا المخطط نفسه${why ? `. السبب الهندسي: ${why.replace(/[.。]+$/, '')}` : ''}.${zoneWhy}${dupWhy} اختر رقمًا: ${optsAr}.`;
       const keep = clone(session);
       const mk = c => entry(c, { picks, text, changes, reply: { ...reply, mode: 'regenerated', zoneDiff: { changed: c.zd.changed, kept: c.zd.kept }, fingerprint: fpOf(c)?.compact || null }, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null });
       keep.pendingEdit = { options: true, order: opts.map(o => (o.info ? null : o.id)), text, input: s.input, zone: zoneCand ? mk(zoneCand) : null, full: fullCand ? mk(fullCand) : null, shownOk, zoneInfo: zoneCand ? { changed: zoneCand.zd.changed_ar, kept: zoneCand.zd.kept_ar } : null, fullInfo: fullCand ? { changed: fullCand.zd.changed_ar, kept: fullCand.zd.kept_ar } : null, reply: { ...reply, lost } };
-      const cq = { type: 'needs-consent', key: 'options|' + text, question_ar: q };
-      keep.reply = { conflicts: [cq], questions: [q] };
-      return { session: keep, changes: [], reply: { local: true, mode: 'ask-options', options: opts, conflicts: [cq], questions: [q], done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [],
-        partial: part || null, proposal: { zone: zoneCand ? { pattern: zoneCand.pat || null, zones: zoneCand.zd, fingerprint: zf?.compact || null } : null, full: fullCand ? { pattern: fullCand.pat || null, zones: fullCand.zd, fingerprint: ff?.compact || null } : null, shownSatisfying: shownOk.map(i => i + 1), nearestIsShown: nearestShown ? nearestShown.shownAs.index + 1 : null, measured: reply.fallbackMeasured || null, lost }, summary_ar: q } };
+      const cq = { type: 'needs-consent', key: 'options|' + text, question_ar: plain, detail_ar: q };
+      keep.reply = { conflicts: [cq], questions: [plain] };
+      return { session: keep, changes: [], reply: { local: true, mode: 'ask-options', options: opts, conflicts: [cq], questions: [plain], detail_ar: q, done: [], failed: (fallbackNote.failed || []).map(f => ({ text: f.text_ar, why: f.why_ar })), pending: [], unverified: [], picks: [], unclear: reply.unclear, unsupported: reply.unsupported, kept: true, unchanged: true, otherFails: [], changed: [], unrequested: [],
+        partial: part || null, proposal: { zone: zoneCand ? { pattern: zoneCand.pat || null, zones: zoneCand.zd, fingerprint: zf?.compact || null } : null, full: fullCand ? { pattern: fullCand.pat || null, zones: fullCand.zd, fingerprint: ff?.compact || null } : null, shownSatisfying: shownOk.map(i => i + 1), nearestIsShown: nearestShown ? nearestShown.shownAs.index + 1 : null, measured: reply.fallbackMeasured || null, lost }, summary_ar: plain } };
     }
   }
   pushDesign(s, entry(out, { picks, text, changes, reply, edit: parsed?.intents?.length ? { local: false, intents: parsed.intents } : null }));

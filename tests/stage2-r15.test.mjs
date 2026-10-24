@@ -20,9 +20,11 @@ test('«المطبخ في الخلف» في C8-alt1 بعد-14: غير متحقق
   const adj = v.find(x => x.kind === 'adjacent'), back = v.find(x => x.kind === 'place');
   assert.equal(adj.ok, true); assert.equal(back.ok, false);
   assert.ok(back.partial, 'قراءة نسبية'); assert.match(back.partial.text_ar, /خلف «صالة الطعام»/); assert.match(back.partial.literal_ar, /لا يلامس الواجهة الخلفية/);
-  // البديل 2 (الصالة في الخلف): متحقق حرفيًا بلا قراءة جزئية
+  // البديل 2 (الصالة في الخلف): (الجولة السادسة عشرة، قراءة واحدة لـ«في الخلف») المطبخ مفتوح على الخلف لكن مركزه على 40% من العمق
+  // — كان يُعدّ حرفيًا بقراءة «مفتوح على الخلف»؛ صار «متحققًا جزئيًا» كما حكم المراجع المستقل على C6-2
   const v2 = verifyRules(EV14('C8', 'alt-2.json'), editRules(), { entry: 's' });
-  assert.ok(v2.every(x => x.ok && !x.partial));
+  assert.ok(v2.find(x => x.kind === 'adjacent').ok);
+  const b2 = v2.find(x => x.kind === 'place'); assert.equal(b2.ok, false); assert.ok(b2.partial); assert.match(b2.partial.text_ar, /بلا فراغ مبني خلفه/);
 });
 
 test('رد التعديل: «الشرط متحقق جزئيًا» يذكر المتحقق حرفيًا والنسبي، ولا شيء إن تحقق الطلب كله', () => {
@@ -30,7 +32,9 @@ test('رد التعديل: «الشرط متحقق جزئيًا» يذكر ال�
   const p = partialReading(EV14('C8', 'alt-1.json'), intents, 's');
   assert.ok(p); assert.deepEqual(p.ok, ['«المطبخ» بجوار «الطعام»']); assert.equal(p.partial.length, 1);
   assert.match(p.text_ar, /متحقق حرفيًا \(مقيس\)/); assert.match(p.text_ar, /بالقراءة النسبية/);
-  assert.equal(partialReading(EV14('C8', 'alt-2.json'), intents, 's'), null);
+  // (الجولة السادسة عشرة) البديل 2 متحقق جزئيًا أيضًا (القراءة الحرفية الواحدة)؛ و«لا شيء» حين يتحقق الطلب كله حرفيًا
+  assert.equal(partialReading(EV14('C8', 'alt-2.json'), intents, 's').partial.length, 1);
+  assert.equal(partialReading(EV14('C8', 'alt-1.json'), intents.slice(0, 1), 's'), null);
 });
 
 test('«بعيدة عن الدرج» بمسار المشي: C7 بعد-14 باب الرئيسية على 5.8 م من وصول الدرج (< 6 م) فلا تحقق', () => {
@@ -44,9 +48,10 @@ test('«بعيدة عن الدرج» بمسار المشي: C7 بعد-14 باب 
 test('معايرة حالة العرض: عيوب جوهرية محددة، والطفيفة ملاحظات لا تجعل البديل «يحتاج تعديلات»، والمحجوب لا يُرفع', () => {
   assert.deepEqual([...MAJOR_PREFS].sort(), ['BED_BATH', 'MAID_BATH', 'MAJLIS_LOBBY', 'MAJLIS_STREET_ENTRY']);
   const C6 = CASES.find(c => c.id === 'C6');
-  // C6-alt1 بعد-14: دورة مياه يومية فقط ⇐ جاهز بملاحظة
+  // C6-alt1 بعد-14: دورة مياه يومية ملاحظة لا عيب؛ (الجولة السادسة عشرة) لكن نافذة غرفة نوم 2 فوق المواقف (أثبتها المراجع r15) ⇐
+  // يحتاج تعديلات بهذا العيب وحده، والملاحظة تبقى ملاحظة
   const a = presentationStatus({ doc: EV14('C6', 'alt-1.json'), ledger: [], review: { passed: true } }, { text: C6.text });
-  assert.equal(a.status, 'ready'); assert.ok(a.notes_ar.length >= 1); assert.equal(a.edits_ar.length, 0);
+  assert.equal(a.status, 'needs-edits'); assert.ok(a.notes_ar.length >= 1); assert.deepEqual(a.major, ['WINDOW_PARKING']);
   // C5-alt3 بعد-14: مجلس يلاصق الرئيسية ومدخله من ارتداد ضيق ⇐ يحتاج تعديلات
   const C5 = CASES.find(c => c.id === 'C5');
   const b = presentationStatus({ doc: EV14('C5', 'alt-3.json'), ledger: [], review: { passed: true } }, { text: C5.text });
@@ -58,7 +63,7 @@ test('معايرة حالة العرض: عيوب جوهرية محددة، وا�
   assert.ok(t.notes_ar.some(n => /ضمن السماح/.test(n)));
 });
 
-test('ثلاثة تنظيمات جديدة موصوفة، وإصدار المولّد partis-11', () => {
+test('ثلاثة تنظيمات جديدة موصوفة، وإصدار المولّد partis-11 أو أحدث', () => {
   for (const m of ['gardenl', 'twincourt', 'sidecourt']) assert.ok(PARTI_AR[m] && PARTI_AR[m].length > 30, m);
-  assert.match(VILLA_V2_ENGINE_VERSION, /partis-11/);
+  assert.match(VILLA_V2_ENGINE_VERSION, /partis-1[1-9]/);
 });

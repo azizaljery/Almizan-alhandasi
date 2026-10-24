@@ -78,7 +78,8 @@ test('صدق التعديل (C8 البديل 1): لا يُعاد بديل معر
   const d = out.designs[i], s0 = createSession({ land, counts: r.counts, requirements: r, result: { doc: d.doc, pat: d.pat, mirror: d.mirror, summary: d.summary, notes: d.notes, villaEngine: 'v2', alternatives: alts }, engine: 'v2' });
   const a = await redesign(s0, { text: 'انقل المطبخ بجوار الطعام وخل المطبخ في الخلف' });
   assert.equal(a.reply.mode, 'ask-options'); assert.equal(a.session.designs.length, 1, 'لا تصميم جديد قبل الاختيار');
-  assert.match(a.reply.questions[0], /السبب الهندسي|خلف هذا المخطط/);
+  assert.match(a.reply.detail_ar, /السبب الهندسي|خلف هذا المخطط|متحقق جزئيًا/);
+  assert.match(a.reply.questions[0], /اختر رقمًا/); assert.doesNotMatch(a.reply.questions[0], /البصمة|جدار|القراءة/);
   assert.equal(a.reply.options[0].id, 'keep');
   for (const o of a.reply.options.filter(o => o.id === 'zone' || o.id === 'full')) assert.ok(o.text_ar.length > 10);
   // «نعم» وحدها مع أكثر من خيار ليست اختيارًا: يُعاد السؤال
