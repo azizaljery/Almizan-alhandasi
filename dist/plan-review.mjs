@@ -378,6 +378,7 @@ function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = fa
   }
   // 8ج) خصوصية المجلس (الجولة العاشرة): أبوابه إلى مدخله/ممره أو مغاسله أو دورة مياه الضيوف أو طعام الضيوف أو الخارج فقط —
   //     لا إلى الصالة أو الطعام العائلي أو المطبخ أو النوم أو المجلس الآخر؛ إلا الطعام إن طلبه العميل («مقلط»، «المجلس على الطعام»)
+  //     (الجولة السابعة عشرة) و«مقهوي» الضيافة (غرفة تحضير قهوة تُفتح على المجلس، وقد يُفتح بابها الآخر على المطبخ للتقديم)
   {
     const asked = majlisDiningAsked(request), bad = [], seen = [];
     const guestDining = r => r.type === 'dining' && /ضيوف|مقلط|ضياف|الرجال/.test(r.name || '');
@@ -385,7 +386,7 @@ function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = fa
       if (room.type !== 'majlis') continue;
       for (const d of roomDoors(lv, room)) {
         if (!d.other || d.outside) continue;
-        const o = d.other, okType = ['entrance', 'corridor'].includes(o.type) ? !isPrivate(lv, o) && !/الغرف|الجناح/.test(o.name || '') : o.type === 'bath' ? true : o.type === 'dining' ? (guestDining(o) || asked) : false;
+        const o = d.other, okType = ['entrance', 'corridor'].includes(o.type) ? !isPrivate(lv, o) && !/الغرف|الجناح/.test(o.name || '') : o.type === 'bath' ? true : o.type === 'dining' ? (guestDining(o) || asked) : o.type === 'storage' && /^مقهوي/.test(o.name || '') ? true : false; // (الجولة السابعة عشرة) المقهوي فراغ خدمة الضيافة نفسها (تحضير القهوة)، لا فراغ عائلي
         seen.push({ majlis: room.id, other: o.id, type: o.type, ok: okType });
         if (!okType) bad.push(`${roomName(room)} يفتح مباشرة على ${roomName(o)} (${ROOM_TYPES[o.type]?.ar || o.type})${o.type === 'dining' ? ' — طعام عائلي؛ اذكر «مقلط» أو «المجلس على الطعام» إن أردته' : ''}`);
       }

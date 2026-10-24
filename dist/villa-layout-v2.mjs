@@ -29,12 +29,13 @@ import { applyLiteralReadings } from './requirements.mjs';
 import { planParking, PARKING_RULE } from './site-parking.mjs';
 import { frontSetbackFor } from './regulations-sa.mjs';
 import { clientGlazing } from './glazing.mjs';
-import { presentationStatus, STATUS_AR, PROPOSAL_LABEL_AR } from './presentation-status.mjs';
+import { presentationStatus, STATUS_AR, PROPOSAL_LABEL_AR, MAJOR_PREFS } from './presentation-status.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16 } from './privacy-defects.mjs';
+import { polishR17 } from './r17-polish.mjs';
 import { polishR16 } from './r16-polish.mjs';
 
-export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-12'; // الجولة السادسة عشرة: تحسين التصميم لا تخفيف المعيار — المواقف خارج مجال رؤية الغرف الخاصة، ونقل النافذة المكشوفة أو جلستها العالية، وباب الماستر من ممر الغرف، وباب المقلط، وجزاء العيوب التي أثبتتها المراجعة r15؛ // الجولة الخامسة عشرة: ثلاثة تنظيمات جديدة (L حول حديقة عائلية، حوشان، الحوش الجانبي) وملاءمة النمط للأرض والبرنامج، وباب الرئيسية العلوية بمسار المشي من وصول الدرج، والمقاس المطابق أفضل داخل السماح؛ // الجولة الرابعة عشرة: صدق التعديل وحالة العرض، والتفضيلات السعودية جزاءً، والمواقف العمودية بجانب المبنى، والحوش الخلفي للأرض غير المنتظمة، وغرفة الملابس، وأثاث المجلس، وتشطيب الدورين (الترقيم والمنور وباب الرئيسية وقراءة المجالس)؛ // الجولة الثالثة عشرة: الارتداد الأمامي من عرض الشارع (اشتراط نظامي متحقق)، وسقف المطبخ الافتراضي مع اقتطاع غرفة غسيل من المطبخ المفرط، ودورة المياه اليومية من طرف الصالة بممر، والزجاج بهدف مرن لكل غرفة، وممر العلوي في «السلم في المقدمة» بعمق ثابت؛ // الجولة الثانية عشرة: القراءة الحرفية للتعارض غير المجاب، والبرنامج السعودي الافتراضي (مدخل منكسر، دهليز المجلس، المقلط، دورة مياه يومية، حمام الخادمة، مطبخ ≥ 14 م² بباب خدمة، المواقف)، ومنع الشريط على الأرض العريضة، والمنور للعميق، وتنظيم «السلم في المقدمة» لخمس غرف علوية؛ // الجولة الحادية عشرة: الاختيار بالمقياس الوظيفي v2، والبوابات الثقيلة (إنشائية مبدئية، حركة فعلية، تطابق 2D/3D) على المعروض، وفتحات لا تعبر التقاطعات، وأثاث يُتحقق منه، وبحث ثانٍ موجّه بالتنوع؛ // الجولة التاسعة: تنظيمات دورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج الارتفاع، في الخلف، في كتلة عائلية) تُحل للدورين معًا مع اتساق التراكب، والرئيسية الأرضية ≤ 24 م²، وغرف النوم لا تفتح على الصالة إلا في «الصالة الموزِّعة» بباب في طرف الجدار، وأنماط H وL للصالة الخلفية؛ الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
+export const VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-13'; // الجولة السابعة عشرة: الصالة العائلية لا تصغر عن 0.8 من مجلس الرجال ولا تبقى ممرًا عابرًا (جلسة 3.0×3.6 م)، والمجلس يلاصق الطعام (مقلط) جزاءً في البحث، واختيار المجموعة الأقل عيوبًا جوهرية بين المجموعات المختلفة معماريًا، والمقهوي، وغرفة الملابس ≥ 4.5 م² حين تُطلب؛ // الجولة السادسة عشرة: تحسين التصميم لا تخفيف المعيار — المواقف خارج مجال رؤية الغرف الخاصة، ونقل النافذة المكشوفة أو جلستها العالية، وباب الماستر من ممر الغرف، وباب المقلط، وجزاء العيوب التي أثبتتها المراجعة r15؛ // الجولة الخامسة عشرة: ثلاثة تنظيمات جديدة (L حول حديقة عائلية، حوشان، الحوش الجانبي) وملاءمة النمط للأرض والبرنامج، وباب الرئيسية العلوية بمسار المشي من وصول الدرج، والمقاس المطابق أفضل داخل السماح؛ // الجولة الرابعة عشرة: صدق التعديل وحالة العرض، والتفضيلات السعودية جزاءً، والمواقف العمودية بجانب المبنى، والحوش الخلفي للأرض غير المنتظمة، وغرفة الملابس، وأثاث المجلس، وتشطيب الدورين (الترقيم والمنور وباب الرئيسية وقراءة المجالس)؛ // الجولة الثالثة عشرة: الارتداد الأمامي من عرض الشارع (اشتراط نظامي متحقق)، وسقف المطبخ الافتراضي مع اقتطاع غرفة غسيل من المطبخ المفرط، ودورة المياه اليومية من طرف الصالة بممر، والزجاج بهدف مرن لكل غرفة، وممر العلوي في «السلم في المقدمة» بعمق ثابت؛ // الجولة الثانية عشرة: القراءة الحرفية للتعارض غير المجاب، والبرنامج السعودي الافتراضي (مدخل منكسر، دهليز المجلس، المقلط، دورة مياه يومية، حمام الخادمة، مطبخ ≥ 14 م² بباب خدمة، المواقف)، ومنع الشريط على الأرض العريضة، والمنور للعميق، وتنظيم «السلم في المقدمة» لخمس غرف علوية؛ // الجولة الحادية عشرة: الاختيار بالمقياس الوظيفي v2، والبوابات الثقيلة (إنشائية مبدئية، حركة فعلية، تطابق 2D/3D) على المعروض، وفتحات لا تعبر التقاطعات، وأثاث يُتحقق منه، وبحث ثانٍ موجّه بالتنوع؛ // الجولة التاسعة: تنظيمات دورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج الارتفاع، في الخلف، في كتلة عائلية) تُحل للدورين معًا مع اتساق التراكب، والرئيسية الأرضية ≤ 24 م²، وغرف النوم لا تفتح على الصالة إلا في «الصالة الموزِّعة» بباب في طرف الجدار، وأنماط H وL للصالة الخلفية؛ الجولة الثامنة: المجلس الرئيسي ≥ 24 م² حد صلب، مجلس النساء ≥ 20 م² ما أمكن، الطعام ≥ 12 م²، الرئيسية العلوية ≤ 26 م²؛ الجولة السابعة: الحوش فناء لا شق (≥ 4.5 م ونسبة ≤ 2)، لا غرف نوم على الشارع ما لم تُطلب، المجلس ≥ 24 م² والطعام ≥ 3.3 م والخادمة ≥ 2.7 م؛ والسادسة: الاختيار بالاختلاف المعماري، تنظيمات الحوش والصالة الموزِّعة، حدود مهنية للممرات والغرف
 // تجارب الجولة الرابعة عشرة: R14_OFF يعطّل تعديلًا بعينه للقياس (لا أثر له في التشغيل العادي)
 const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
@@ -209,6 +210,9 @@ function saudiDefaults(P, req = {}) {
   // المقلط: باب بين مجلس الرجال والطعام (الدور الواحد) ما لم يعارضه العميل
   const opposed = rules.some(r => ['far', 'apart'].includes(r.kind) && [r.a, r.b].some(x => /^majlis/.test(String(x || ''))) && [r.a, r.b].includes('dining'));
   P.majlisDiningDefault = !P.majlisDining && !opposed && !!P.men && P.dining.length > 0 && (pr.floors || 1) === 1;
+  // (الجولة السابعة عشرة) ضيف الرجال يصل إلى الطعام دون عبور العائلة (GUEST_DINING) — في الدور الواحد والدورين: يوجّه البحث إلى
+  // ملاصقة المجلس للطعام (باب مقلط) ما لم يطلب العميل فصلهما
+  P.guestLink = !opposed && !!P.men && P.dining.length > 0 && !/مجلس[^،.]{0,20}(?:بعيد|منفصل|مستقل) (?:عن|من) (?:ال)?(?:طعام|سفر)/.test(String(req.text || req.idea || '').replace(/[ةه]/g, 'ه'));
   if (P.majlisDiningDefault) out.push({ id: 'majlisDining', ar: 'باب خدمة (مقلط) من مجلس الرجال إلى الطعام للضيافة، والطعام يُغلق على العائلة بباب' });
   out.push({ id: 'familyEntry', ar: 'مدخل العائلة منكسر أو بحاجز بصري (لا خط رؤية مستقيم من الباب إلى الصالة)' });
   if (P.men) out.push({ id: 'majlisLobby', ar: 'مجلس الرجال بدهليز دخول (لا يُفتح الباب الخارجي على المجلس مباشرة)' });
@@ -429,6 +433,8 @@ export const PARTI_AR = Object.freeze({
   gardenl: 'L حول حديقة عائلية: شريط الضيافة بعرض البيت أمامًا، وكتلة العائلة والنوم على جانب واحد، والحديقة في الركن الخلفي المقابل تطل عليها الصالة ونواة النوم',
   twincourt: 'حوشان بلا فرق مناسيب: حوش للضيوف في جناح الضيافة بين المجلس والمقلط، وحوش للعائلة في قلب البيت خلف الصالة يطل عليه ممر النوم',
   sidecourt: 'بيت الحوش الجانبي: شريط ضيافة أمامي، والطعام والمطبخ فالصالة فحوش جانبي مكشوف تطل عليه الصالة ورواق النوم، وصف النوم خلفًا',
+  // (الجولة السابعة عشرة)
+  guestblock: 'جناح ضيافة أمامي: المجلس والمقلط متجاوران على الواجهة بباب بينهما والمطبخ خلف المقلط يخدمه، والمدخل العائلي والصالة عمود بجانبه، وغرف النوم خلفًا',
 });
 /** يبني أشجار الأنماط للبرنامج. كل نمط له بديل أو أكثر بالطوبولوجيا (لا بالانعكاس). */
 export function partiTrees(P, { stair = false, W = Infinity, irregular = false } = {}) {
@@ -685,6 +691,17 @@ export function partiTrees(P, { stair = false, W = Infinity, irregular = false }
       //     الصالة ثم حوش العائلة (يطل عليه ممر النوم) فالرئيسية خلفه؛ وعمود الضيافة والخدمة على جانب، وغرف الأبناء على الجانب المقابل
       if (mst && kids.length && K.length && Dn.length)
         P6('twincourt', 'tc0', X(Y(Mz('y1'), { ...Z([...flexF, ...wcA, ...Dn], 'x1', 'y'), minCross: 4.6 }, Z([...K, ...Md], 'x1', 'y')), Y(F(), X(COURT(Math.max(23, courtA * .8)), corr('ringW')), H(), X(COURT(Math.max(23, courtA * .8)), corr('ringE')), Z([mst], 'y0', 'x')), Y(Wm ? Wz('x0') : OV(6), FB(corrBeds(kids, 'x0')))));
+      // (الجولة السابعة عشرة) جناح ضيافة أمامي بأربعة فراغات (المراجع المستقل r16: مجلس الرجال المعزول في 8 من 21 بديلًا): المجلس والمقلط
+      //     متجاوران على الواجهة بباب بينهما، والمطبخ خلف المقلط يخدمه مباشرة، والخادمة والمرافق خلف المجلس بجوار المطبخ — الضيف لا يعبر
+      //     العائلة والتقديم لا يعبر الصالة؛ والمدخل العائلي (ومجلس النساء) والصالة عمود بجانبه، وغرف النوم رواقًا خلفيًا
+      if (M && K.length && Dn.length) {
+        // أعمدة: (المجلس وخلفه المرافق) | (المقلط وخلفه المطبخ والخادمة) | (المدخل العائلي ومجلس النساء، وخلفهما الصالة) — المقلط يلامس
+        // المدخل العائلي (طعام العائلة من جهتها بباب يُغلق) والمطبخ يلامس الصالة؛ وغرف النوم رواقًا خلفيًا بعرض البيت
+        const gRest = [...wcA, ...flexF], c1 = () => Y(Mz('x1'), gRest.length ? Z(gRest, 'x1', 'y') : OV(6)), c2 = () => Y(Z(Dn, 'x1', 'y'), Z([...K, ...Md], 'x1', 'y'));
+        P6('guestblock', 'gb0', Y(X(c1(), c2(), Y(Wm ? X(F(), Wz('x0', 'x')) : F(), over.length ? X(H(), overZ('x0')) : H())), galBeds(bedsRow)));
+        // والنوم جناحًا بطول المبنى على ممره (بلا مجلس نساء)
+        if (!Wm) P6('guestblock', 'gb1', X(c1(), c2(), Y(F(), H(), OV(8)), FB(corrBeds(beds))));
+      }
       // (ح) بيت الحوش الجانبي (للعرض القابل للبناء 11.5–18.5 م): شريط الضيافة أمامًا، وفي الوسط عمود الطعام والمطبخ فالصالة فحوش جانبي
       //     مكشوف على الارتداد (يغلقه شريط الضيافة أمامه وصف النوم خلفه وسور الأرض جانبه) تطل عليه الصالة ورواق النوم، وصف النوم خلفًا
       if (W >= 11.5 && W <= 18.5 && mst && kids.length && K.length && Dn.length)
@@ -906,6 +923,10 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     pen += 90 * Math.max(0, l / s - 1.6) + 70 * Math.max(0, 5.0 - s);
     const ha = A_(r), ht = P.hallArea; pen += 140 * Math.log(ha / ht) ** 2 * (P.hallFixed ? 4 : 1) + 160 * Math.max(0, l / s - 1.9); const big = ctx.upper || ctx.minDepth ? 1.9 : P.hallArea > 32 ? 1.3 : 1.5; if (ha > ht * big) bad('hall-big', (ha - ht * big) / 8); // مساحة الصالة بقدر البرنامج: لا تمتص فائض الغلاف if (ha < ht * .6) bad('hall-small', (ht * .6 - ha) / 8);
     { const e = expLen(r, solids); if (e < 2.4) bad('hall-dark', (2.4 - e) / 2); } }
+  // (الجولة السابعة عشرة) الصالة العائلية لا تصغر عن 0.8 من مجلس الرجال (HALL_SMALL، privacy-defects.mjs؛ المراجع المستقل r16: C9-2
+  // صالة 19.5 م² مقابل مجلس 34.6 م²) — جزاء متدرج في البحث لا رفض (قيمة تصميمية افتراضية للميزان؛ هامش 1.5 م² لجدران المرسوم)
+  if (!ctx.upper && !P.hallFixed && !R14_OFF.has('r17hall')) { const mj = placed.find(p => p.block.kind === 'majlis' && p.block.men); if (mj) { const need = .8 * (A_(mj.r) - (mj.block.guestWc ? 7 : 0)) + 1.5, ha = A_(hall.r); if (ha < need) pen += 90 * (need - ha); } }
+  // (جُرّب جزاءً في البحث نفسه فغيّر حلول كل الأنماط وأسقط بدائل جاهزة في C5 — سُحب؛ صار ترتيبًا للبناء داخل كل نمط: guestLinked)
   // (الجولة الحادية عشرة) بحر البلاطة الصافي (الضلع الأقصر للفراغ المستطيل) ≤ 6 م: أكبر منه ملاحظة جسيمة في المراجعة الإنشائية
   // المبدئية (PRECHECK_LIMITS.slabSerious؛ قيمة تصميمية افتراضية للميزان، لا تصميم إنشائي) — مخالفة في البحث لا تُبنى ثم تُرفض
   for (const q of [...placed.map(p => p.r), ...circ.map(c => c.r)]) { const sp = Math.min(W_(q), H_(q)) - WALL_NET; if (sp > SLAB_SPAN_MAX) bad('slab-span', sp - SLAB_SPAN_MAX); }
@@ -2675,7 +2696,9 @@ function pickDiverse(pool, keep) {
         // دوران: تنظيم الدور الأرضي نفسه يختلف بين البدائل ما أمكن (لا علوي مختلف على أرضي واحد)
         const grounds = new Set(set.map(x => String(x.pat).split('/')[0])).size;
         // الهدف: أعلى «أدنى اختلاف معماري» في المجموعة أولًا، ثم متوسطه، ثم الجودة والبنود
-        const sc = (n ? 3 * mn + .5 * sm / n : 0) + .05 * modes + .04 * grounds - sum(set.map(c => .00015 * Math.max(0, c.quality - q0) + .06 * (c.fails - best.fails)));
+        // (الجولة السابعة عشرة) بين مجموعتين بالعدد نفسه ومختلفتين معماريًا: تتقدم التي فيها بدائل أقل تحتاج تعديلات (عيب جوهري مقيس:
+        // ضيف يعبر العائلة إلى الطعام، صالة ممر…) — المراجع المستقل r16: البدائل المعزولة المجلس اختيرت للتنوع وحده وفي المرشحين ما يخلو منه
+        const sc = (n ? 3 * mn + .5 * sm / n : 0) + .05 * modes + .04 * grounds - sum(set.map(c => .00015 * Math.max(0, c.quality - q0) + .06 * (c.fails - best.fails) + (R14_OFF.has('r17sel') ? 0 : (c.major?.length ? .6 + .2 * (c.major.length - 1) : 0))));
         if (sc > sc0) { sc0 = sc; set0 = set; }
         return;
       }
@@ -3040,7 +3063,11 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   const built = [], rejected = [], softMajlis = [], nearMiss = []; let tried = 0;
   // ترتيب البناء بالتناوب بين الأنماط (أفضل كل نمط أولًا، ثم ثاني كل نمط…): ميزانية البناء الثابتة تصل إلى
   // تنظيمات مختلفة فعلًا بدل نسخ كثيرة من نمط واحد. المرشح المفضَّل (التعديل) يبقى أولًا.
+  // (الجولة السابعة عشرة) داخل كل نمط تُبنى أولًا النسخة التي يلاصق فيها مجلس الرجال الطعام (باب مقلط ممكن ≥ 1.3 م) — ميزانية البناء
+  // تصل إلى النسخة التي لا يعبر فيها الضيف العائلة قبل نسختها المعزولة المجلس (المراجع المستقل r16: wings وcourtyard في C8 وC9)
+  const linkedOf = c => { if (!P.guestLink || R14_OFF.has('r17link')) return 0; const pl = c.sol?.placed || [], mj = pl.find(p => p.block.kind === 'majlis' && p.block.men), dn = pl.filter(p => p.block.kind === 'dining'); return mj && dn.length && Math.max(...dn.map(d => touch(mj.r, d.r))) >= 1.3 ? 0 : 1; };
   { const by = new Map(); for (const c of cands) { const k = c.mode + (c.stepped ? '#t' : ''); if (!by.has(k)) by.set(k, []); by.get(k).push(c); }
+    for (const L of by.values()) L.sort((a, b) => linkedOf(a) - linkedOf(b) || a.pen - b.pen);
     const rr = []; for (let r = 0; rr.length < cands.length; r++) for (const L of by.values()) if (L[r]) rr.push(L[r]);
     cands.splice(0, cands.length, ...rr); }
   for (const cand of cands) {
@@ -3393,6 +3420,9 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   // (الجولة السادسة عشرة) تحسين التصميم لا تخفيف المعيار: نوافذ الغرف الخاصة عن المواقف والشارع، وباب الماستر من ممر الغرف،
   // وباب المقلط — حلول معمارية على هذا المخطط لهذه الأرض، مكتوبة في ملاحظاته (dist/r16-polish.mjs)
   if (!R14_OFF.has('r16')) { try { const pol = polishR16(doc); if (pol.notes_ar.length) layout.notes.push(...pol.notes_ar); } catch { /* يبقى كما رُسم */ } }
+  // (الجولة السابعة عشرة) الصالة لا تبقى ممرًا عابرًا (إزاحة أبوابها حتى تتسع جلسة عائلية)، و«مقهوي» يخدم مجلس الرجال من المطبخ أو الطعام
+  // متى اتسع (dist/r17-polish.mjs) — مكتوبة في الملاحظات
+  if (!R14_OFF.has('r17')) { try { const pol = polishR17(doc); if (pol.notes_ar.length) layout.notes.push(...pol.notes_ar); } catch { /* يبقى كما رُسم */ } }
   const relaxed = relaxFixtures(doc), rv = reviewDoc(relaxed), q = quality(relaxed);
   const qg = qualityGates(relaxed, layout, { kitchenFront: (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), ...gateOpts(P), narrow: site.W < NARROW_W });
   const reject = [...hardGates(relaxed, P, rv), ...qg];
@@ -3407,7 +3437,7 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   const bedFront = (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && ['bedrooms', 'master', 'kids', 'elderly', 'onebed'].includes(r.a));
   // (الجولة الرابعة عشرة) التفضيلات السعودية الافتراضية (حمام الخادمة، حمام لكل غرفة، مسار التقديم، فاصل المجلس، مدخل المجلس، دورة المياه
   // اليومية، الحوش الخلفي، المواقف): جزاء في الاختيار لا رفض (قرار المالك: تفضيلات تُدرس لكل أرض، تُذكر إن لم تُطبَّق)
-  let prefFails = [], prefG = []; try { prefG = measureSaudiProgram(relaxed, reviewRequest(requirements, land, null), analyzeDoc(relaxed)).filter(g => g.applicable && !g.pass && !g.clientAsked && PREF_W[g.id]); prefFails = prefG.map(g => g.id); } catch { prefFails = []; }
+  let prefFails = [], prefG = [], prefMajor = []; try { const all = measureSaudiProgram(relaxed, reviewRequest(requirements, land, null), analyzeDoc(relaxed)).filter(g => g.applicable && !g.pass && !g.clientAsked && !g.regulation); prefG = all.filter(g => PREF_W[g.id]); prefFails = prefG.map(g => g.id); prefMajor = all.filter(g => MAJOR_PREFS.includes(g.id) || (g.id === 'MAJLIS_BED_WALL' && (g.value?.pairs || []).some(p => /الرئيسية/.test(p.bedroom)))).map(g => g.id); } catch { prefFails = []; }
   // (الجولة الخامسة عشرة) العيب الجوهري (ما يجعل البديل «يحتاج تعديلات»، presentation-status.mjs) جزاؤه أثقل من الملاحظة الطفيفة:
   // مجلس يلاصق الرئيسية، أو مدخل مجلس من ارتداد جانبي ضيق — فيتقدم ما لا يحتاج تعديلًا قبل العرض
   const majorExtra = sum(prefG.map(g => (g.id === 'MAJLIS_BED_WALL' && (g.value?.pairs || []).some(p => /الرئيسية/.test(p.bedroom)) ? 180 : g.id === 'MAJLIS_STREET_ENTRY' || g.id === 'BED_BATH' || g.id === 'MAID_BATH' ? 120 : 0)));
@@ -3415,7 +3445,7 @@ function buildDesign(cand, P, site, land, { title, mirror, requirements, entry, 
   let r16 = []; try { r16 = measureR16(relaxed, reviewRequest(requirements, land, null), analyzeDoc(relaxed)).filter(g => g.applicable && !g.pass && !g.clientAsked).map(g => g.id); } catch { r16 = []; }
   const r16Pen = R14_OFF.has('r16') ? 0 : sum(r16.map(id => R16_W[id] || 150));
   const prefPen = (R14_OFF.has('prefq') ? 0 : sum(prefFails.map(id => PREF_W[id])) + (R14_OFF.has('fit') ? 0 : majorExtra + typologyFit(cand, P, site))) + r16Pen;
-  return { doc: relaxed, cand, dr: docRooms(relaxed), reject, penalty: r2(cand.pen), streetBeds: bedFront ? [] : streetBedrooms(layout.rooms), quality: r2(cand.pen + q.cost + prefPen), prefFails, r16, same: false, mirror, issues: q.issues, mode: cand.mode, parti: cand.tag, env: { w: cand.ew, d: cand.ed, ox: pl.ox, oy: pl.oy }, pat: patOf(cand), notes: [...P.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, qgates: qg, ledger, fails: ledger.filter(x => !x.ok).length };
+  return { doc: relaxed, cand, dr: docRooms(relaxed), reject, penalty: r2(cand.pen), streetBeds: bedFront ? [] : streetBedrooms(layout.rooms), quality: r2(cand.pen + q.cost + prefPen), prefFails, r16, major: [...new Set([...prefMajor, ...r16])], same: false, mirror, issues: q.issues, mode: cand.mode, parti: cand.tag, env: { w: cand.ew, d: cand.ed, ox: pl.ox, oy: pl.oy }, pat: patOf(cand), notes: [...P.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, qgates: qg, ledger, fails: ledger.filter(x => !x.ok).length };
 }
 
 /**
