@@ -1,0 +1,425 @@
+[
+ {
+  "case": "C1",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "غرفة الملابس 2.78 م² صغيرة جدًا لماستر بغرفة ملابس"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "غرفة النوم 4 بلا حمام خاص وتشارك جدارًا مع مجلس النساء"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الباب الخارجي لمجلس النساء على ارتداد جانبي ضيق قرابة 1.8 م"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الموقف الأيمن أمام ممر النساء مباشرة"
+   },
+   {
+    "tier": "aesthetic",
+    "text_ar": "واجهة بسيطة متكررة والحجر في القاعدة فقط"
+   }
+  ]
+ },
+ {
+  "case": "C1",
+  "alt": 2,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "مجلس الرجال بلا باب داخلي؛ طريق الضيف إلى الطعام الخلفي يعبر صالة العائلة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "باب الماستر وغرفة 4 على الصالة مباشرة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "نافذة الصالة على فناء أمامي مفتوح والموقف أمامه"
+   }
+  ]
+ },
+ {
+  "case": "C2",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "إطلالة الصالة على الحوش الخلفي بنافذة واحدة ضيقة؛ يُقترح فتحات أعرض"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "حمام كبار السن صغير بلا تجهيز لسهولة الوصول وغرفتهم ملاصقة للمطبخ"
+   },
+   {
+    "tier": "aesthetic",
+    "text_ar": "مدخل العائلة مكشوف على الفناء الأمامي"
+   }
+  ]
+ },
+ {
+  "case": "C3",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "المواقف في الركن الخلفي تكشف الحوش الخلفي ويمشي الضيف على الارتداد الشرقي"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "ارتداد أمامي قرابة 3 م ونوافذ المجلسين على الشارع مباشرة (الاشتراط غير متحقق منه)"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "نوافذ المطبخ والطعام على الارتداد المطل على الشارع الشرقي"
+   }
+  ]
+ },
+ {
+  "case": "C3",
+  "alt": 2,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "مجلس الرجال بلا باب داخلي وطريق الضيف إلى الطعام يعبر الصالة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "باب الماستر على الصالة ونوافذه الشرقية باتجاه الشارع ومسار المواقف"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "صالة الطعام 13.2 م² صغيرة"
+   }
+  ]
+ },
+ {
+  "case": "C4",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "الصالة 20.4 م² صغيرة وتعمل ممرًا"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "ارتدادات جانبية قرابة 1.7 م ونوافذ على الجار"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "المنور 1.95 م يحتاج تصريفًا وعزلًا وتحققًا"
+   }
+  ]
+ },
+ {
+  "case": "C5",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "كتلة ضيقة لا تستفيد من اتساع الأرض الخلفي"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "صالة الطعام 12.36 م² صغيرة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "ارتداد أمامي قرابة 3 م"
+   }
+  ]
+ },
+ {
+  "case": "C5",
+  "alt": 2,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "غرفة الملابس 2.78 م²"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "قريب تنظيميًا من البديل 1"
+   }
+  ]
+ },
+ {
+  "case": "C5",
+  "alt": 3,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "موقف موازٍ للشارع في ارتداد قرابة 3 م ضيق للمناورة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الصالة طويلة ضيقة ونوافذها غربية فقط"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الغرفتان 2 و3 صغيرتان"
+   }
+  ]
+ },
+ {
+  "case": "C5",
+  "alt": 4,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس معزول بلا باب داخلي والطعام في الطرف المقابل"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس ملاصق لمنطقة الغرف"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "نافذة الطعام على الواجهة الأمامية والبوابة"
+   }
+  ]
+ },
+ {
+  "case": "C6",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "المطبخ 4.11×4.81 والمجلس 5.01×5.76 أقصر من 4×5 و5×6 بقرابة 20 سم؛ يُؤكد مع العميل"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "حمام الماستر 3.75 م² صغير"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "ارتداد أمامي قرابة 3 م"
+   }
+  ]
+ },
+ {
+  "case": "C7",
+  "alt": 1,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "الطلب يذكر المجالس بالجمع والمقدَّم مجلس واحد؛ يحتاج توضيحًا"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس بلا باب داخلي والطعام عبر مدخل العائلة وبهو الدرج"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الماستر بعيدة عن الدرج متحقق جزئيًا فقط (3–4 م من رأس الدرج)"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "نوافذ الدور العلوي على الجيران بارتداد قرابة 2.4 م"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "حمامات علوية فوق المجلس الأرضي؛ لا بيت درج ظاهر؛ يلزم تحقق إنشائي وصحي"
+   },
+   {
+    "tier": "aesthetic",
+    "text_ar": "تسمية غرفة كبار السن بدل غرفة الوالدة"
+   }
+  ]
+ },
+ {
+  "case": "C8",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "غرفة الملابس 2.92 م² ضيقة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس على ارتداد أمامي قرابة 2.9 م"
+   },
+   {
+    "tier": "aesthetic",
+    "text_ar": "تداخل نص ممر الغرف مع غرفة الملابس"
+   }
+  ]
+ },
+ {
+  "case": "C8",
+  "alt": 2,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس بلا باب داخلي والطعام في الطرف المقابل عبر مدخل العائلة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الطعام بنافذة على الشارع والمطبخ في منتصف العمق"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "غرفة الملابس 2.78 م²"
+   }
+  ]
+ },
+ {
+  "case": "C9",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "غرفة الملابس 2.78 م²"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "ارتداد أمامي قرابة 3 م"
+   },
+   {
+    "tier": "aesthetic",
+    "text_ar": "نمط متكرر مع C8-1 وC5-2 وC10-1"
+   }
+  ]
+ },
+ {
+  "case": "C9",
+  "alt": 2,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "الصالة 19.47 م² مقابل مجلس 34.61 م² وأولوية معكوسة وحركة عابرة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "ماستر 16.99 م² بملابس 2.47 وحمام 4.35"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس طويل 4.42×7.88"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "فناءان مكشوفان يحتاجان تصريفًا وعزلًا وتحققًا"
+   }
+  ]
+ },
+ {
+  "case": "C9",
+  "alt": 3,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس بلا باب داخلي وطريق الضيف إلى الطعام يعبر الصالة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "المجلس يشارك جدارًا مع غرفة النوم 3"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الطعام يطل على منطقة المواقف"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الغرفتان 2 و3 صغيرتان"
+   }
+  ]
+ },
+ {
+  "case": "C9",
+  "alt": 4,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "مدخل رجال جانبي بلا دهليز والمجلس بلا باب داخلي والطعام بعيد"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الطعام بنافذة على الشارع والبوابة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "موقف أمام المجلس مباشرة"
+   }
+  ]
+ },
+ {
+  "case": "C10",
+  "alt": 1,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "مدخل الماستر غير صريح من الممر"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الماستر ملاصق للمطبخ"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "صالة الطعام 14.75 م² صغيرة لمجلس 30 م²"
+   }
+  ]
+ },
+ {
+  "case": "C10",
+  "alt": 2,
+  "verdict": "show-after-edits",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "مجلس الرجال بلا باب داخلي والطعام لا يُصل إليه إلا عبر الصالة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الطعام ملاصق للماستر وباب الماستر على الصالة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "نافذة الصالة على فناء أمامي والموقف أمامه"
+   }
+  ]
+ },
+ {
+  "case": "C10",
+  "alt": 3,
+  "verdict": "show",
+  "findings": [
+   {
+    "tier": "architectural",
+    "text_ar": "مواقف موازية في ارتداد قرابة 3 م ضيقة للمناورة"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "الغرفتان 2 و3 بعرض 3.0–3.3 م"
+   },
+   {
+    "tier": "architectural",
+    "text_ar": "تصريف الفناء الداخلي وعزله"
+   }
+  ]
+ }
+]
