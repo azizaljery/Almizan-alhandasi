@@ -63,10 +63,14 @@ test('(أ-د) «المجلس على يمين الداخل»: عكس الشريط
   assert.deepEqual(newGateFails(d, r.doc, { counts: { bedrooms: 3, majlis: 1, kitchens: 1, dining: 1 } }), []);
 });
 
-test('(ب) «كبّر المجلس ٦×٧» على مجلس واجهته على خط الارتداد: الخارجية حتى الارتداد ثم الباقي من الداخل — بإذن لأن الصالة يتغير شكلها', () => {
-  const d = DOC('S1', 0), { r } = edit(d, 'كبّر المجلس ٦×٧');
+test('(ب) «كبّر المجلس ٦×٧ تقريبًا» على مجلس واجهته على خط الارتداد: الخارجية حتى الارتداد ثم الباقي من الداخل — بإذن لأن الصالة يتغير شكلها', () => {
+  // (الجولة التاسعة عشرة، توجيه المالك رابعًا) المقاس بلا «تقريبًا» يُقاس ضلعًا ضلعًا ±0.05 م: على هذا المخطط لا يتحقق دون تضييق «المغاسل»
+  // ودورة المياه تحت حدهما، فيقال ذلك ولا يُدّعى (كان ±0.35 م يقبل 6.3×7). و«تقريبًا» (±0.3 م) يُبقي مسار الإذن كما كان.
+  const d = DOC('S1', 0), ex = edit(d, 'كبّر المجلس ٦×٧').r;
+  assert.equal(ex.results[0].ok, false); assert.match(ex.results[0].why_ar, /لم أجد جدارًا/);
+  const { r } = edit(d, 'كبّر المجلس ٦×٧ تقريبا');
   assert.equal(r.status, 'clarify'); assert.equal(r.questions[0].type, 'needs-consent'); assert.match(r.questions[0].question_ar, /الصالة/);
-  const y = edit(d, 'كبّر المجلس ٦×٧', { req: { consent: true } }).r;
+  const y = edit(d, 'كبّر المجلس ٦×٧ تقريبا', { req: { consent: true } }).r;
   assert.equal(y.status, 'local'); assert.ok(y.results[0].ok, y.results[0].why_ar);
   const M = [...inspect(y.doc).rooms.values()].find(x => x.name === 'المجلس'), w = Math.min(M.net.x1 - M.net.x0, M.net.y1 - M.net.y0), l = Math.max(M.net.x1 - M.net.x0, M.net.y1 - M.net.y0);
   assert.ok(Math.abs(w - 6) <= .3 && Math.abs(l - 7) <= .3, `${w}×${l}`);

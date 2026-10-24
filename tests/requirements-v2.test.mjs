@@ -69,9 +69,10 @@ for (const [text, key, w, l] of [
   assert.equal(r.areas[key], w * l, 'المساحة باقية للمستهلكين القدامى');
 });
 test('سماحية الأبعاد: «بالضبط» أضيق و«تقريبًا» أوسع، ولا تنتقل من عبارة مجاورة', () => {
-  assert.equal(extractRequirements('المطبخ 4×5 بالضبط', {}).dims.kitchen.tol, .1);
-  assert.equal(extractRequirements('المطبخ تقريبا 4×5', {}).dims.kitchen.tol, .5);
-  assert.equal(extractRequirements('ثلاث غرف نوم بالضبط، المطبخ 4×5', {}).dims.kitchen.tol, .3);
+  // (الجولة التاسعة عشرة، توجيه المالك رابعًا) ضلعًا ضلعًا: الافتراضي ±0.05 م (كان ±0.3)، و«بالضبط» ±0.03، و«تقريبًا» ±0.3 (كان ±0.5) — تشديد لا تخفيف
+  assert.equal(extractRequirements('المطبخ 4×5 بالضبط', {}).dims.kitchen.tol, .03);
+  assert.equal(extractRequirements('المطبخ تقريبا 4×5', {}).dims.kitchen.tol, .3);
+  assert.equal(extractRequirements('ثلاث غرف نوم بالضبط، المطبخ 4×5', {}).dims.kitchen.tol, .05);
 });
 test('حرف x في الكلمات الإنجليزية لا يتحول إلى ×', () => {
   assert.equal(normalizeAr('next to'), 'next to'); assert.equal(normalizeAr('4x5'), '4×5'); assert.equal(normalizeAr('4 X 5'), '4×5');
