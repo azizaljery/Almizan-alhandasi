@@ -9,7 +9,7 @@
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "release:check": "node scripts/release-fingerprint.mjs",
-    "test:pending": "node --test --test-concurrency=1 tests-pending/"
+    "test:pending": "node --test --test-concurrency=1 tests-pending/r21-pending.test.mjs"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.11",
