@@ -3,6 +3,7 @@
 // والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
 // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
 
+import { buildSharedBrief } from './shared-brief.mjs';
 import { extractRules, mergeRules, ruleText, subjectAr, SIDE_LABELS, OPPOSITE_SIDE } from './rules.mjs';
 
 const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
@@ -59,6 +60,13 @@ const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ?
  * يستخرج المتطلبات من النص. counts: أعداد مفهومة مسبقًا (من الفهم المحلي أو الذكاء) تُستعمل أساسًا.
  * يعيد { counts, extras:{maid,driver,office,prayer,storage,laundry}, prefs, areas, understood[], unsupported[] }.
  */
+/** (الجولة 21 — مقترح) نص العميل والعقد الموحد (shared-brief.mjs) وعدد التصاميم المطلوب نصًا: يحملها الطلب نفسه فيقرؤها المولّد والمراجع معًا. */
+function sharedOf(text, rules, dims) {
+  if (R21_OFF.has('r21brief')) return {};
+  const brief = buildSharedBrief(String(text || ''), { rules, dims });
+  return { text: String(text || ''), brief, ...(brief.requestedCount ? { want: brief.requestedCount } : {}) };
+}
+const R21_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 export function extractRequirements(text, { counts = {}, discovery = null, clauses = true } = {}) {
   const t = normalizeAr(text), understood = [], unsupported = [], countFixes = [];
   const has = re => re.test(t);
@@ -309,6 +317,7 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
     counts: c, extras, prefs, areas, dims, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear,
     textCounts, givenCounts: { ...counts }, absent: [...new Set([...absentKeys, ...drop])], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
     ...(corrected ? { countCorrection: { bedrooms: corrected } } : {}), ...(countFixes.length ? { countFixes } : {}), ...(ambiguous.length ? { ambiguous } : {}),
+    ...sharedOf(text, rules, dims),
   };
 }
 

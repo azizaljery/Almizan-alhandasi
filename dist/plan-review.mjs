@@ -9,6 +9,7 @@
 //
 // كل الهندسة من analyzeDoc (dist/draw/digest.mjs): الغرف، والفتحات بجانبيها، ورسم الحركة عبر الأبواب،
 // والوصول من المدخل أو من السلم. لا قيمة نظامية تُدّعى بلا مصدر محقق: كل عتبة تحمل `source` و`verified`.
+import { briefMajlisDoor } from './shared-brief.mjs';
 import { analyzeDoc, isWindowKind } from './draw/digest.mjs';
 import { ROOM_TYPES } from './draw/catalog.mjs';
 import { reviewDoc, wallRect, swingBlockers, GUIDELINES } from './draw/review.mjs';
@@ -241,6 +242,8 @@ function requestRules(request) {
 /** هل طلب العميل أن يفتح المجلس على الطعام (مقلط/طعام الضيوف/الطعام بجانب المجلس)؟ حينها يغلب طلبه الافتراضي. */
 export function majlisDiningAsked(request = {}) {
   if (request.majlisDining) return true; // تعديل صريح من العميل («افتح باب بين المجلس والطعام»)
+  // (الجولة 21 — مقترح) العقد الموحد: الباب المباشر أو طعام الضيوف وحدهما يطلبان الباب؛ «قريب/جنب» (NEAR) لا يفرض بابًا. المولّد يقرأ الدالة نفسها
+  if (request.brief?.version) return briefMajlisDoor(request.brief);
   const t = norm_ar(request.text);
   if (/مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)|(?:الطعام|السفره) (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?مجلس/.test(t)) return true;
   return requestRules(request).some(r => ['adjacent', 'near'].includes(r.kind) && !r.negated && r.mode !== 'avoid' && ((r.a === 'dining' && /^majlis/.test(r.b || '')) || (r.b === 'dining' && /^majlis/.test(r.a || ''))));

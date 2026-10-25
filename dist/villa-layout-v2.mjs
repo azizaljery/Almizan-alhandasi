@@ -12,6 +12,7 @@
 //       بدائل بأقصى اختلاف تنظيمي بالمقياس نفسه المستعمل في أدلة القبول (difference).
 // المستند الناتج بصيغة mizan-draw/1 نفسها (+x شرق، +y شمال) فيعمل معه المرسم والعرض ثلاثي الأبعاد والتحليل كما هي.
 // المقاسات المستهدفة افتراضات تصميمية من التطبيق قابلة للضبط، وليست اشتراطات نظامية. نقي: لا DOM ولا تخزين ولا شبكة.
+import { briefOf, sharedReviewRequest } from './shared-brief.mjs';
 import { createDoc, applyCommand, applyCommandOwned, parseDoc } from './draw/doc.mjs';
 import { FIXTURES } from './draw/catalog.mjs';
 import { circulationProof, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
@@ -136,7 +137,9 @@ function expLen(r, solids, sides = SIDES) {
 export function programV2(counts, req = {}) {
   const P = buildProgram(counts, req), B = P.blocks;
   // (الجولة العاشرة) هل طلب العميل أن يفتح المجلس على الطعام (مقلط)؟ وإلا فالمجلس لا يفتح على الطعام العائلي ولا المطبخ
-  P.majlisDining = majlisDiningAsked({ text: req.text || req.idea || '', rules: P.rules || [] });
+  // (الجولة 21 — مقترح) القراءة نفسها التي يقرؤها المراجع (العقد الموحد: NEAR ≠ باب مباشر)
+  P.brief = R14_OFF.has('r21brief') ? null : briefOf(req);
+  P.majlisDining = majlisDiningAsked({ text: req.text || req.idea || '', rules: P.rules || [], ...(P.brief ? { brief: P.brief } : {}) });
   // (الجولة التاسعة عشرة) «مجلس رجال على الشارع» بند صريح: شريط الدهليز ودورة المياه جانبي (menStrip) لا أمامي
   P.majlisStreet = (P.rules || []).some(r => r.kind === 'place' && r.side === 'front' && /^majlis/.test(String(r.a || '')));
   P.majlisRuled = (P.rules || []).some(r => r.kind !== 'place' && [r.a, r.b].some(x => /^(majlis|guest)/.test(String(x || ''))));
@@ -3288,7 +3291,9 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     const sub = built.filter(d => d.cand && (d.r16 || []).includes('FAMILY_WC') && !(d.r16 || []).some(id => MANDATORY_R16.includes(id)) && !d.reject?.length).sort((a, b) => a.quality - b.quality).slice(0, 4);
     if (sub.length) { const idx = sub.map(d => built.indexOf(d)); refineDayWc(sub, P, site, land, { title, requirements, entry, counts, pool: true }); sub.forEach((n, k) => { built[idx[k]] = n; }); }
   }
-  if (!built.length) { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; throw err; }
+  const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; return err; };
+  // (الجولة 21 — مقترح) لا يُعلن الفشل قبل البحث الثاني المصمم لقلة البدائل (كان يُرمى هنا فلا يُجرَّب) — kit pipeline: «البحث الثاني دائمًا»
+  if (!built.length && (refDR || prefPat || globalThis.__v2noSecond || R14_OFF.has('r21second'))) throw buildFailed();
   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
   // (الجولة الثانية عشرة) إعادة التوزيع بعد تعذّر التعديل الموضعي تحفظ ما يميّز المخطط المعروض: الحوش الداخلي وغرفة ملابس الرئيسية
@@ -3347,7 +3352,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
       const ok = built.filter(d => wa(d) >= WOMEN_NET && d._heavy !== false);
       const alt = ok.length ? pickReviewed(ok, keep, requirements, land, counts) : [];
       if (alt.length) { for (const d of built) if (wa(d) < WOMEN_NET && designs.includes(d)) d.womenSmall = r2(wa(d)); designs = alt; } } }
-  if (!designs.length) throw reviewFailure(built, rejected);
+  if (!designs.length) throw built.length ? reviewFailure(built, rejected) : buildFailed();
   // (الجولة الثامنة عشرة) الصالة ≥ المجلس: تحسين موضعي للبدائل المختارة نفسها (لا يغيّر الاختيار)، يُقبل إن بقي مختلفًا معماريًا عن الباقين
   if (!refDR) refineHall(designs, P, site, land, { title, requirements, entry, counts });
   // (الجولة العشرون) دورة مياه العائلة بالبناء للبديل المختار الذي يفتقدها (FAMILY_WC): كتلة دورة مياه بجوار الصالة في شجرته نفسها
@@ -3630,6 +3635,8 @@ function shortfallReason(keep, shown, built, rejected0) {
  * بديل يرسب في أي بوابة صلبة لا يُعرض أبدًا. يعيد true إن نجح، ويرفق المراجعة بالتصميم (بلا AZIZ/Mizan هنا للسرعة).
  */
 function reviewRequest(requirements, land, counts) {
+  // (الجولة 21 — مقترح) طلب المراجعة من العقد الموحد نفسه الذي قرأه المولّد (kit sharedReviewRequest)
+  if (!R14_OFF.has('r21brief')) return sharedReviewRequest(requirements, land, counts);
   return { text: requirements?.text || requirements?.idea || '', counts: { ...(counts || {}), ...(requirements?.counts || {}) }, land: land || {}, prefs: requirements?.prefs || {} };
 }
 /** (الجولة التاسعة عشرة) طلب القياسات (privacy-defects) ومعه قواعد العميل المستخرجة (الرئيسية بعيدة عن الدرج…) — لا يُمرَّر إلى plan-review
