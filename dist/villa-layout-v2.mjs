@@ -43,6 +43,10 @@ const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(','
 // (withTreeSource، تنفيذ متزامن) تُطلب الأشجار منه بدل partiTrees/tfTrees، وتبقى كل خطوات الأبعاد والتفصيل والبوابات والاختيار كما هي.
 // غير مضبوط = سلوك المحرك الثاني نفسه حرفيًا.
 let TREE_SOURCE = null;
+// (الجولة 21 — عقد النتائج) حد زمني اختياري للبحث: انتهاؤه «بحث غير مكتمل» (TIME_LIMIT) لا استحالة أبدًا
+let DEADLINE = null, TIMED_OUT = false;
+export function withDeadline(ms, fn) { const prev = DEADLINE, pt = TIMED_OUT; DEADLINE = Number.isFinite(ms) && ms > 0 ? now() + ms : null; TIMED_OUT = false; try { return fn(); } catch (e) { if (TIMED_OUT && e && typeof e === 'object') e.timedOut = true; throw e; } finally { DEADLINE = prev; TIMED_OUT = pt; } }
+const timeUp = () => { if (DEADLINE !== null && now() > DEADLINE) { TIMED_OUT = true; return true; } return false; };
 export function withTreeSource(src, fn) { const prev = TREE_SOURCE; TREE_SOURCE = src; try { return fn(); } finally { TREE_SOURCE = prev; } }
 const DYN_AR = new Map(); // وصف عربي للتنظيمات المركّبة (المحرك الثالث)
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
@@ -2813,9 +2817,13 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
     if (!open.length) break;
     step(open[0]); finish();
   }
+  // (الجولة 21) إحصاء ما منع التنظيمات التي لم يتسع لها حل (لتقرير التعذّر للعميل بأسبابه المقيسة لا بجملة عامة)
+  const failStats = {}; let failN = 0;
   for (const { tr, best, ms } of jobs) {
     if (globalThis.__v2dbg) globalThis.__v2dbg['ms:' + tr.tag] = Math.round(ms) + (best && !best.sol.viol ? '' : 'x');
     if (!best || best.sol.viol) {
+      failN++; if (!best) failStats['no-fit'] = (failStats['no-fit'] || 0) + 1;
+      else { const keep = globalThis.__v2dbg, o = {}; globalThis.__v2dbg = o; try { scoreV2(best.sol, P, best.ew, best.ed, ctx); } finally { globalThis.__v2dbg = keep; } for (const w of Object.keys(o)) failStats[w] = (failStats[w] || 0) + 1; }
       const d = globalThis.__v2dbg;
       if (d && tr.swaps) (d.localFail ||= []).push({ swaps: tr.swaps, best: !!best, viol: best ? (() => { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, ctx); globalThis.__v2dbg = d; return Object.keys(o).join(','); })() : null });
       if (d) { d['tree:' + tr.tag] = best ? best.sol.viol : -1; if (best) { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, ctx); globalThis.__v2dbg = d; d['why:' + tr.tag] = Object.keys(o).join(','); if (d.keepSol) d['sol:' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed }; } }
@@ -2825,7 +2833,9 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
     if (globalThis.__v2dbg?.keepSol) globalThis.__v2dbg['sol:' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed, ok: true };
     out.push({ mode: tr.mode, tag: tr.tag, tree: tr.tree, late: !!tr.late, stepped: !!tr.stepped, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p - (prefPat && patOf(tr) === prefPat ? PREFER_BONUS : 0), rp, swaps: tr.swaps || null });
   }
-  return out.sort((a, b) => a.pen - b.pen);
+  out.sort((a, b) => a.pen - b.pen);
+  Object.defineProperty(out, 'failStats', { value: { tried: jobs.length, failed: failN, why: failStats }, enumerable: false });
+  return out;
 }
 
 /**
@@ -3065,7 +3075,7 @@ function cacheKey(args) {
   return canon(args, true);
 }
 function cached(kind, args, fn) {
-  const hook = globalThis.__mizanGenCache; if (!hook) return fn(args);
+  const hook = globalThis.__mizanGenCache; if (!hook || DEADLINE !== null) return fn(args);
   let key; try { key = VILLA_V2_ENGINE_VERSION + (TREE_SOURCE ? '|' + TREE_SOURCE.tag : '') + '|' + kind + '|' + cacheKey(args); } catch { return fn(args); }
   const hit = hook.get(key);
   if (hit) { const P = programV2(args.counts, args.requirements || {}); P.entry = hit.program?.entry; hit.program = P; return hit; }
@@ -3287,7 +3297,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
   if (!cands.length) {
     const need = sum(P.blocks.map(b => b.area)) + DESIGN_TARGETS.foyer + P.hallArea;
     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(site.W)} × ${r2(site.D)} م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
-    err.code = ex.size ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; err.need = need; err.available = site.W * site.D; throw err;
+    err.code = ex.size ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; err.need = need; err.available = site.W * site.D; err.treeStats = cands.failStats || null; throw err;
   }
   const built = [], rejected = [], softMajlis = [], nearMiss = []; let tried = 0;
   // ترتيب البناء بالتناوب بين الأنماط (أفضل كل نمط أولًا، ثم ثاني كل نمط…): ميزانية البناء الثابتة تصل إلى
@@ -3304,6 +3314,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     // (أرض غير منتظمة: مرشحون إضافيون لتظهر النسخ المتدرجة التي تتبع شكل الأرض)
     // (الجولة 21) لا يتوقف البحث عند ميزانية البناء ولم يُبنَ شيء بعد: يُكمل حتى ضعفها (حتمي بعدد المرشحين) — كان الطلب العادي يُرفض
     // «تعذّر بناء أي بديل» وفي المرشحين ما لم يُبنَ (H6 في r20)؛ البوابات نفسها، ولا عتبة تُخفَّض
+    if (timeUp()) break;
     { const cap = TREE_SOURCE?.buildMax || BUILD_MAX; if ((tried >= cap && (built.length || R14_OFF.has('r21budget') || tried >= 2 * cap)) || built.filter(d => d.fails === 0).length >= keep + BUILD_SPARE + (site.rectW ? 3 : 0) + (TREE_SOURCE?.spare || 0)) break; }
     tried++;
     try {
@@ -3335,7 +3346,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     const sub = built.filter(d => d.cand && (d.r16 || []).includes('FAMILY_WC') && !(d.r16 || []).some(id => MANDATORY_R16.includes(id)) && !d.reject?.length).sort((a, b) => a.quality - b.quality).slice(0, 4);
     if (sub.length) { const idx = sub.map(d => built.indexOf(d)); refineDayWc(sub, P, site, land, { title, requirements, entry, counts, pool: true }); sub.forEach((n, k) => { built[idx[k]] = n; }); }
   }
-  const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; return err; };
+  const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = TIMED_OUT ? 'VILLA_TIME_LIMIT' : 'VILLA_BUILD_FAILED'; err.timedOut = TIMED_OUT; err.rejected = rejected; err.treeStats = cands.failStats || null; return err; };
   // (الجولة 21) لا بديل مبني بعد البحث الأول: يُطلق البحث الثاني (كان الخطأ يُرمى قبله فلا يُجرَّب ما صُمم لقلة البدائل أصلًا)
   if (!built.length && (refDR || prefPat || globalThis.__v2noSecond || R14_OFF.has('r21second'))) throw buildFailed();
   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
@@ -3361,6 +3372,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     const done2 = new Set(), near2 = [];
     let c2 = []; try { c2 = trees2.length ? candidates(P, site, { rules: P.rules, entry, trees: trees2, avoid, exclude: ex }) : []; } catch { c2 = []; }
     for (const cand of c2) {
+      if (timeUp()) break;
       const k2 = cand.late ? cand.mode + ':' + cand.tag : cand.mode;
       if (done2.has(k2)) continue; // تنظيم واحد من كل نمط (والتنظيم الجديد بوسمه)
       try {
@@ -3939,7 +3951,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
   };
   if (!cands.length) rejected.push({ pat: '*', why: ['لا ترتيب أرضي ناجح'] });
   for (const g of cands) {
-    if (designs.length >= keep + 3 || ++gTried > BUILD_MAX2) break; // حتمي: بعدد الترتيبات الأرضية لا بالزمن
+    if (designs.length >= keep + 3 || ++gTried > BUILD_MAX2 || timeUp()) break; // حتمي: بعدد الترتيبات الأرضية لا بالزمن
     const ups = upperFor(g, U, site, rules2, entry);
     if (globalThis.__v2dbg) { const st = g.sol.circ.find(c => c.id === 'stair').r; globalThis.__v2dbg['g:' + patOf(g)] = [g.ew, g.ed, st.x0, st.x1, st.y0, st.y1, ups.map(u => u.tag).join('/'), 'voids=' + JSON.stringify(g.sol.voids.map(v => [v.x0, v.x1, v.y0, v.y1].map(x => Math.round(x * 10) / 10)))].join(' '); }
     if (!ups.length) { rejected.push({ pat: patOf(g), why: ['لا دور علوي يتسع على هذا الغلاف'] }); continue; }
@@ -3950,6 +3962,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
   { const avoidM = new Set(tw.avoidModes || []), ctxG = { narrow: site.W < NARROW_W, dinRealized: true, bigOK: U.suites.length >= 5, maxBuilt: site.maxBuilt, kitchenFront: rules2.some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), capSuite: P.suites.some(b => b.master && uBlocks.includes(b)) ? DESIGN_TARGETS.master - 1 : 0, bedFront: false };
     const doneModes = new Set();
     for (const tr of tfTrees(G, U, site)) {
+      if (timeUp()) break;
       if (avoidM.has(tr.mode) || doneModes.has(tr.mode)) continue;
       let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch { r = null; }
       if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'], tfWhy: tr._why || [] }); continue; }
@@ -3962,7 +3975,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
     const TFW_AR = { stack: 'جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي)', ov: 'غرفة علوية فوق فراغ غير مبني في الأرضي', 'majlis-short': 'المجلس أصغر من 24 م²', 'majlis-w': 'عرض المجلس الصافي أقل من 4.2 م', lost: 'غرفة علوية لا يصلها باب', 'master-smaller-real': 'الرئيسية أصغر من غرفة نوم أخرى', 'far-stair': 'الرئيسية قريبة من الدرج خلاف طلبك', 'din-big': 'الطعام متضخم' };
     const cnt = {}; for (const r of rejected) for (const w of r.tfWhy || []) if (TFW_AR[w]) cnt[w] = (cnt[w] || 0) + 1;
     const top = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 2), n = rejected.filter(r => r.tfWhy).length;
-    const e = Error('تعذّر بناء أي بديل سليم لدورين.' + (top.length ? ` جُرّب ${n} ${n >= 3 && n <= 10 ? 'تنظيمات مشتركة' : 'تنظيمًا مشتركًا'} للدورين، وأكثر ما منعها: ${top.map(([w, c]) => `${TFW_AR[w]} (${c})`).join('، ')}.` : '')); e.code = 'VILLA_BUILD_FAILED'; e.rejected = rejected; e.twoFloorWhy = cnt; throw e; }
+    const e = Error('تعذّر بناء أي بديل سليم لدورين.' + (top.length ? ` جُرّب ${n} ${n >= 3 && n <= 10 ? 'تنظيمات مشتركة' : 'تنظيمًا مشتركًا'} للدورين، وأكثر ما منعها: ${top.map(([w, c]) => `${TFW_AR[w]} (${c})`).join('، ')}.` : '')); e.code = TIMED_OUT ? 'VILLA_TIME_LIMIT' : 'VILLA_BUILD_FAILED'; e.timedOut = TIMED_OUT; e.rejected = rejected; e.twoFloorWhy = cnt; throw e; }
   for (const d of designs) d.dr = docRooms(d.doc);
   if (globalThis.__v2dbg) { globalThis.__v2pool = designs.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = designs.map(d => ({ pat: d.pat, doc: d.doc })); }
   const out = pickReviewed(designs, keep, requirements, land, counts);

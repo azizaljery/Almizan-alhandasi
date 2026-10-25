@@ -19,6 +19,8 @@
 // المحركان الأول والثاني باقيان كما هما وقابلان للاختيار (engine: 'v1' | 'v2' | 'v3').
 import * as V2 from './villa-layout-v2.mjs';
 import { analyzeFeasibility } from './feasibility.mjs';
+import { explainFailure } from './infeasibility-report.mjs';
+import { toClientAr } from './client-language.mjs';
 
 export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
 const K = V2.TREE_KIT;
@@ -619,38 +621,84 @@ function source(log) {
     },
   };
 }
-function attach(out, feas, log) {
+function attach(out, feas, log, args = {}) {
   if (!out) return out;
   out.engine3 = { version: VILLA_V3_ENGINE_VERSION, feasibility: feas, search: log };
+  // (الجولة 21) نص العميل بعربية واضحة: الملاحظات والوصف وسبب النقص (النص الداخلي باقٍ في shortfall_ar للأدلة)
+  for (const d of out.designs || []) { if (d.summary) d.summary = toClientAr(d.summary); if (Array.isArray(d.notes)) d.notes = d.notes.map(toClientAr).filter(Boolean); }
+  if (out.shortfall_ar) out.shortfall_client_ar = toClientAr(out.shortfall_ar);
+  const requested = args.keep || 4, warnings = [...(feas?.warnings || []).map(w => ({ id: w.id, ar: toClientAr(w.ar), items: w.items || null })), ...(out.timedOut ? [{ id: 'TIME_LIMIT', ar: 'انتهى وقت البحث قبل أن يُكمل كل التنظيمات؛ قد توجد تصاميم أخرى.' }] : [])];
+  out.result = { status: 'SOLVED', requestedCount: requested, shownCount: (out.designs || []).length, warnings };
   return out;
 }
-/** دور واحد. يكشف الاستحالة أولًا؛ ثم يولّد بالمصدر المركّب. أي فشل يُعاد خطأً يحمل تقريرًا عربيًا (لا نتيجة فارغة بلا تفسير). */
+// ---------------------------------------------------------------------------------------------- (الجولة 21) عقد نتائج التوليد
+/** رمز تشخيصي حتمي للطلب (لا بيانات شخصية): يربط تقرير العميل بسجل البحث. */
+const diagId = (args, code) => 'D' + ESC(JSON.stringify([args?.land?.width, args?.land?.length, args?.land?.streets, args?.land?.floors, args?.counts, (args?.requirements?.rules || []).map(r => r.text), Object.keys(args?.requirements?.dims || {}), code]));
+/**
+ * يصنّف الفشل (توجيه المالك r21، الموجز التقني، الحل 1):
+ *  PROVEN_INFEASIBLE — بدليل صالح فقط: حد أدنى للمساحة أكبر من المتاح، أو مقاس صريح أطول من البناء، أو عرض أضيق من المجلس، أو تعارض منطقي
+ *                       بين بندين؛ ومعه البنود المتعارضة ومرجع الدليل.
+ *  SEARCH_INCOMPLETE — كل ما سواه: انتهاء الوقت (TIME_LIMIT)، أو استنفاد ما جرّبه البحث بلا دليل (SEARCH_EXHAUSTED_WITHOUT_PROOF)، أو خطأ
+ *                       برمجي (SOLVER_ERROR)، أو حالة لا يدعمها المحرك (UNSUPPORTED_CASE). لا يُسمّى أي منها «مستحيلًا».
+ */
+export function classifyFailure(e, feas, args = {}) {
+  if (e?.code === 'VILLA_INFEASIBLE' && feas && !feas.feasible && (feas.hard || []).every(h => h.proof))
+    return { status: 'PROVEN_INFEASIBLE', conflictingConstraintIds: feas.conflictingConstraintIds || [], proofReference: feas.proofReference || [], suggestions: feas.options_ar || [] };
+  const reason = e?.timedOut || e?.code === 'VILLA_TIME_LIMIT' ? 'TIME_LIMIT' : e?.code === 'VILLA_UNSUPPORTED' ? 'UNSUPPORTED_CASE'
+    : ['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_REVIEW_FAILED', 'VILLA_EXHAUSTED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(e?.code) ? 'SEARCH_EXHAUSTED_WITHOUT_PROOF' : 'SOLVER_ERROR';
+  return { status: 'SEARCH_INCOMPLETE', reason, diagnosticId: diagId(args, e?.code || 'ERR'), retryable: reason === 'TIME_LIMIT' || reason === 'SOLVER_ERROR' };
+}
+/** بنود العميل القابلة للتخفيف (للبحث المضاد): بنود الموضع والقرب، والمقاسات الصريحة (تُقبل تقريبية). */
+function relaxableItems(req = {}) {
+  const out = [];
+  for (const r of req.rules || []) if (['place', 'near', 'adjacent', 'far', 'apart'].includes(r.kind) && r.mode !== 'avoid') out.push({ kind: 'rule', id: r.id, ar: r.quote || r.text, how_ar: `دون بند «${r.quote || r.text}»`, option_ar: `تخفيف بند «${r.quote || r.text}»`, apply: q => ({ ...q, rules: (q.rules || []).filter(x => x.id !== r.id) }) });
+  for (const [k, dm] of Object.entries(req.dims || {})) if (dm && (dm.tol ?? .05) < .3) out.push({ kind: 'dims', id: 'dims.' + k, ar: dm.quote, how_ar: `مع قبول «${dm.quote}» تقريبيًا (±30 سم)`, option_ar: `قبول «${dm.quote}» تقريبيًا (±30 سم)`, apply: q => ({ ...q, dims: { ...q.dims, [k]: { ...dm, tol: .3 } } }) });
+  return out.slice(0, 3);
+}
+/** البحث المضاد: يعيد التوليد بتخفيف كل بند وحده (مقيس، لا تخمين) — يُطلق في الفشل وحده، ولا يتكرر داخل نفسه. */
+function counterfactual(gen, args) {
+  const out = [];
+  for (const it of relaxableItems(args.requirements || {})) {
+    let ok = false, found = 0;
+    try { const o = gen({ ...args, keep: 1, requirements: it.apply(args.requirements), _cf: true }); found = (o.designs || []).filter(d => d.presentation?.status !== 'hidden').length; ok = found > 0; } catch { ok = false; }
+    out.push({ id: it.id, item_ar: it.ar, how_ar: it.how_ar, option_ar: it.option_ar, ok, found });
+  }
+  return out;
+}
+function fail(e, feas, log, args, gen, two) {
+  e.feasibility = feas; e.search = log;
+  e.result = classifyFailure(e, feas, args);
+  const cf = !args._cf && e.result.status === 'SEARCH_INCOMPLETE' && e.result.reason === 'SEARCH_EXHAUSTED_WITHOUT_PROOF' && !globalThis.process?.env?.R14_OFF?.includes('r21cf') ? counterfactual(gen, args) : [];
+  e.counterfactual = cf;
+  e.report = explainFailure({ error: e, feasibility: feas, counterfactual: cf, twoFloors: two, land: args.land, status: e.result });
+  e.report_ar = e.report.report_ar;
+  if (e.result.status === 'SEARCH_INCOMPLETE') e.result.suggestions = e.report.options_ar;
+  return e;
+}
+/** دور واحد. يكشف الاستحالة أولًا؛ ثم يولّد بالمصدر المركّب. أي فشل يُعاد خطأً يحمل تقريرًا عربيًا وحالة العقد (e.result). */
 export function generateVillaDesigns(args) {
   const feas = analyzeFeasibility(args);
-  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; e.feasibility = feas; throw e; }
+  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, false); }
   const log = {};
   try {
-    const out = V2.withTreeSource(source(log), () => V2.generateVillaDesigns(args));
-    return attach(out, feas, log);
-  } catch (e) { e.feasibility = feas; e.search = log; e.report_ar = failureReport(e, feas, log); throw e; }
+    const out = V2.withDeadline(args.timeLimitMs, () => V2.withTreeSource(source(log), () => V2.generateVillaDesigns(args)));
+    return attach(out, feas, log, args);
+  } catch (e) { throw fail(e, feas, log, args, generateVillaDesigns, false); }
 }
 export function generateVillaTwoFloors(args) {
+  if (Number(args?.land?.floors) > 2) { const e = Error('المحرك يدعم دورًا أو دورين فقط.'); e.code = 'VILLA_UNSUPPORTED'; throw fail(e, null, {}, args, null, true); }
   const feas = analyzeFeasibility({ ...args, land: { ...args.land, floors: 2 } });
-  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; e.feasibility = feas; throw e; }
+  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, true); }
   const log = {};
-  try { return attach(V2.withTreeSource(source(log), () => V2.generateVillaTwoFloors(args)), feas, log); }
-  catch (e) { e.feasibility = feas; e.search = log; e.report_ar = failureReport(e, feas, log); throw e; }
+  try { return attach(V2.withDeadline(args.timeLimitMs, () => V2.withTreeSource(source(log), () => V2.generateVillaTwoFloors(args))), feas, log, args); }
+  catch (e) { throw fail(e, feas, log, args, generateVillaTwoFloors, true); }
 }
-/** تقرير عربي حين لا يُنتج أي بديل: ما الذي جُرّب، وما الذي تعارض، وما الذي يمكن تغييره. */
-export function failureReport(e, feas, log) {
-  const lines = ['لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.'];
-  const cntAr = (n, one, few, many) => (n === 1 ? one : n >= 3 && n <= 10 ? `${n} ${few}` : `${n} ${many}`);
-  if (log?.grids?.length) lines.push(`جُرّبت ${log.grids.map(g => `شبكة ${g.nc}×${g.nr} (القيود الصلبة متحققة في ${cntAr(g.valid, 'توزيع واحد', 'توزيعات', 'توزيعًا')})`).join('، ')}، واختير منها ${cntAr(log.picked || 0, 'تنظيم واحد', 'تنظيمات مختلفة', 'تنظيمًا مختلفًا')} للأبعاد.`);
-  if (log?.grids?.length && log.grids.every(g => !g.valid)) lines.push('لا توزيع يحقق القيود الصلبة معًا على هذه الأرض: ' + (log.rel || []).filter(r => r.hard && r.client).map(r => r.ar).join('، ') || '');
-  if (feas?.warnings?.length) lines.push('ملاحظات قبل التوليد: ' + feas.warnings.map(w => w.ar).join('؛ '));
-  lines.push('السبب من المولّد: ' + String(e.message || e));
-  const two = (feas?.numbers?.floors || 1) >= 2 || /لدورين/.test(String(e.message || ''));
-  lines.push('ما يمكن تغييره: ' + (feas?.options_ar?.length ? feas.options_ar.join('؛ ') : two ? (/التراكب الإنشائي/.test(String(e.message)) ? 'أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.' : 'تقليل عدد الغرف أو مساحاتها، أو أرض أكبر، أو تخفيف بند موضع صريح.') : 'تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.'));
-  return lines.join('\n');
+/** (الجولة 21) واجهة بلا استثناء: تعيد عقد النتيجة نفسه { status, ... } مع البدائل أو التقرير. */
+export function generate(args) {
+  const two = Number(args?.land?.floors) >= 2 || args?.requirements?.prefs?.floors === 2;
+  try { const out = (two ? generateVillaTwoFloors : generateVillaDesigns)(args); return { ...out.result, alternatives: out.designs, out }; }
+  catch (e) { return { ...(e.result || { status: 'SEARCH_INCOMPLETE', reason: 'SOLVER_ERROR', diagnosticId: diagId(args, 'ERR'), retryable: true }), report: e.report || null, report_ar: e.report_ar || String(e.message || e), error: e }; }
 }
-export default { generateVillaDesigns, generateVillaTwoFloors, synthTrees, unitsOf, enumerateLayouts, guillotine, VILLA_V3_ENGINE_VERSION };
+/** تقرير عربي حين لا يُنتج أي بديل (يبقى للتوافق؛ صار يمر بمحرك الشرح نفسه). */
+export function failureReport(e, feas, log) { return explainFailure({ error: e, feasibility: feas }).report_ar; }
+export default { generate, classifyFailure, generateVillaDesigns, generateVillaTwoFloors, synthTrees, unitsOf, enumerateLayouts, guillotine, VILLA_V3_ENGINE_VERSION };

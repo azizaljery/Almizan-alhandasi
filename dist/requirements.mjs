@@ -303,12 +303,16 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
       else if (glazing.all === undefined) { glazing.all = pct; understood.push(`زجاج الغرف ${how} من أرضيتها (طلب العميل)`); any = true; }
     }
     if (any) prefs.glazing = glazing; }
+  // (الجولة 21) عدد التصاميم الذي طلبه العميل نصًا («أبي ثلاثة تصاميم»، «5 بدائل»): يُعرض العدد الحقيقي مقابله، لا 4 افتراضيًا
+  let want = null; { const NUM = { واحد: 1, اثنين: 2, ثنين: 2, ثلاث: 3, ثلاثه: 3, اربع: 4, اربعه: 4, خمس: 5, خمسه: 5, ست: 6, سته: 6 };
+    const m = /(?:^|\s)(\d|واحد|اثنين|ثنين|ثلاثه|ثلاث|اربعه|اربع|خمسه|خمس|سته|ست)\s+(?:تصاميم|تصميمات|بدائل|خيارات|مخططات|اقتراحات)/.exec(t);
+    if (m) { const n = /\d/.test(m[1]) ? Number(m[1]) : NUM[m[1]]; if (n >= 1 && n <= 6) { want = n; understood.push(`${n} ${n === 1 ? 'تصميم' : n === 2 ? 'تصميمان' : 'تصاميم'} مطلوبة (طلب العميل)`); } } }
   const uc = clauses ? unclearClauses(text) : [];
   const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
   return {
     counts: c, extras, prefs, areas, dims, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear,
     textCounts, givenCounts: { ...counts }, absent: [...new Set([...absentKeys, ...drop])], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
-    ...(corrected ? { countCorrection: { bedrooms: corrected } } : {}), ...(countFixes.length ? { countFixes } : {}), ...(ambiguous.length ? { ambiguous } : {}),
+    ...(corrected ? { countCorrection: { bedrooms: corrected } } : {}), ...(countFixes.length ? { countFixes } : {}), ...(ambiguous.length ? { ambiguous } : {}), ...(want ? { want } : {}),
   };
 }
 

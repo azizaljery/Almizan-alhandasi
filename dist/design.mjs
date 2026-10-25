@@ -11,6 +11,7 @@ import { normalizeLand } from './home-flow.mjs';
 import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 import { shortfallNotice } from './client-text.mjs';
+import { toClientAr } from './client-language.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -65,7 +66,7 @@ function show(index) {
     (session.siteQuestions || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'عن الموقع (اختياري):'), el('ul', { class: 'tick' }, session.siteQuestions.map(c => el('li', { class: 'no', 'data-site-question': c.type }, c.question_ar)))) : null,
     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
-  const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
+  const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, toClientAr(t)))),
     d.feedback ? el('p', { class: 'sub' }, 'عدّلتُ هذا التصميم بناءً على: ' + d.feedback.changes.join('، ')) : null);
   const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
     el('tbody', {}, S.rooms.filter(r => r.area >= 2).map(r => el('tr', {}, el('td', {}, el('span', { class: 'z', style: `background:${ZONES[r.zone].color}` }), r.name), doc.levels.length > 1 ? el('td', {}, r.level) : null, el('td', { class: 'num' }, `${fmt(r.l)} × ${fmt(r.w)}`), el('td', { class: 'num' }, fmt(r.area)), el('td', {}, ZONES[r.zone].label)))),
