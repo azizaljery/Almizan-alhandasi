@@ -13,6 +13,7 @@
 // المستند الناتج بصيغة mizan-draw/1 نفسها (+x شرق، +y شمال) فيعمل معه المرسم والعرض ثلاثي الأبعاد والتحليل كما هي.
 // المقاسات المستهدفة افتراضات تصميمية من التطبيق قابلة للضبط، وليست اشتراطات نظامية. نقي: لا DOM ولا تخزين ولا شبكة.
 import { briefOf, sharedReviewRequest } from './shared-brief.mjs';
+import { r19DifferentOf } from './diversity-r21.mjs';
 import { createDoc, applyCommand, applyCommandOwned, parseDoc } from './draw/doc.mjs';
 import { FIXTURES } from './draw/catalog.mjs';
 import { circulationProof, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
@@ -2927,7 +2928,8 @@ function pickDiverse(pool, keep) {
   // «مختلفًا معماريًا» (بعدان جوهريان على الأقل)؛ «اختلاف جزئي» لا يكفي، وموضع السلم والغلاف لا يُحتسبان بذاتهما. والهدف: أعلى أدنى إجمالي v2
   const AD = new Map(), sigOf = c => (c.sig2 ||= archSignatureV2(c.doc));
   const adv = (a, b) => { const k = a.pat < b.pat ? a.pat + '|' + b.pat : b.pat + '|' + a.pat; if (!AD.has(k)) AD.set(k, archDifferenceV2(sigOf(a), sigOf(b))); return AD.get(k); };
-  const ad = (a, b) => adv(a, b).total, distinct = (a, b) => adv(a, b).verdict === 'distinct';
+  // (الجولة 21 — مقترح 07) «مختلف» بمحوّل المعيار المجمّد r19 (dist/diversity-r21.mjs r19DifferentOf: قاعدة ARCH_CRITERION_R19 وعتباته نفسها) — لا معيار جديد
+  const ad = (a, b) => adv(a, b).total, distinct = (a, b) => (R14_OFF.has('r21div') ? adv(a, b).verdict === 'distinct' : r19DifferentOf(adv(a, b)));
   const famOf = x => String(x.pat).split('/')[0].split(':')[0] + (String(x.pat).includes('/') ? ':' + String(x.pat).split('/')[0].split(':')[1] : '');
   /** زوج مقبول معًا: ليس من العائلة نفسها، والمقياسان فوق عتبتيهما (القديم ≥ 0.16، والمعماري ≥ عتبة «الشكلي» 0.18). */
   // (الجولة التاسعة) الكتلة: بيت تقسمه حديقة/حوش داخل غلافه (كتلتان) تنظيم مختلف عن كتلة مصمتة ولو تتابعت الغرف نفسها —
@@ -3448,7 +3450,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
       else if (!R14_OFF.has('r19aug')) {
         designs = [...prev];
         const famOf = x => String(x.pat).split(':')[0], mand = c => (c.r16 || []).filter(id => MANDATORY_R16.includes(id)).length;
-        const okWith = c => designs.every(o => famOf(o) !== famOf(c) && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), c.sig2 ||= archSignatureV2(c.doc)).verdict === 'distinct' && archDifference(o.sig1 ||= archSignature(o.doc), c.sig1 ||= archSignature(c.doc)).total >= MIN_ARCH_DIFF);
+        const okWith = c => designs.every(o => famOf(o) !== famOf(c) && r19DifferentOf(archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), c.sig2 ||= archSignatureV2(c.doc))) && archDifference(o.sig1 ||= archSignature(o.doc), c.sig1 ||= archSignature(c.doc)).total >= MIN_ARCH_DIFF);
         for (const c of built.filter(d => d.secondPass && !designs.includes(d) && d.fails <= prev[0].fails && !mand(d) && !(d.streetBeds || []).length).sort((a, b) => a.quality - b.quality)) {
           if (designs.length >= keep) break;
           if (okWith(c) && heavyReview(c, requirements, land, counts)) designs.push(c);
@@ -3474,7 +3476,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     if (!designs.some(follows)) {
       // (الجولة التاسعة عشرة) ولا يدخل ما فيه مخالفة إلزامية (كان يحل محل بديل سليم ثم يُحجب فيقل العدد: C5)
       const pool2 = built.filter(d => follows(d) && !designs.includes(d) && d.fails <= designs[0].fails && (R14_OFF.has('r19mand') || !(d.r16 || []).some(id => MANDATORY_R16.includes(id)))).sort((a, b) => a.quality - b.quality);
-      const okWith = (d, others) => heavyReview(d, requirements, land, counts) && others.every(o => archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), d.sig2 ||= archSignatureV2(d.doc)).verdict === 'distinct');
+      const okWith = (d, others) => heavyReview(d, requirements, land, counts) && others.every(o => r19DifferentOf(archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), d.sig2 ||= archSignatureV2(d.doc))));
       // يُضاف إن بقي مكان، وإلا يحل محل بديل غير الأول (من الآخر) بشرط أن يبقى مختلفًا معماريًا عن كل الباقين
       let done = false;
       if (designs.length < keep) { const c = pool2.find(d => okWith(d, designs)); if (c) { designs.push(c); done = true; } }

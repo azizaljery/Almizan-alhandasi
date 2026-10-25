@@ -132,3 +132,23 @@ test('06 الفحص الطوبولوجي قبل حل الأبعاد (kit topolog
   assert.equal(guestTopology({ t: 'y', k: [Zt(['M'], 'x'), Zt(['H'], 'x')], w: [1, 1] }, 'M', 'DN'), null);
 });
 
+// ------------------------------------------------------------------------------------------------ 07 التنوع قبل الهندسة ومحوّل r19
+import { diversifyTopologies, r19Different, r19DifferentOf, layoutFingerprint } from '../dist/diversity-r21.mjs';
+import { archSignatureV2, archDifferenceV2 } from '../dist/arch-difference.mjs';
+import { sameOrDifferent } from '../dist/arch-criterion.mjs';
+test('07 المعيار المجمّد r19 لم يُمس: dist/arch-criterion.mjs ووثيقته كما في الأساس 3b212e7', () => {
+  for (const f of ['dist/arch-criterion.mjs', 'dist/arch-difference.mjs', 'docs/research/arch-difference-criterion-r19.md']) {
+    const base = execFileSync('git', ['show', '3b212e7:' + f], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 26 });
+    assert.equal(readFileSync(root + f, 'utf8'), base, f);
+  }
+});
+test('07 diversifyTopologies أول ظهور لكل بصمة بالترتيب حتى الحد، والبصمة الوظيفية مستقلة عن الانعكاس', () => {
+  assert.deepEqual(diversifyTopologies([1, 2, 3, 4, 5, 6], 2, x => x % 3), [1, 2]);
+  assert.deepEqual(diversifyTopologies(['a1', 'a2', 'b1', 'c1'], 9, x => x[0]), ['a1', 'b1', 'c1']);
+  const L = { nc: 3, nr: 3, R: { M: { x0: 0, y0: 0, x1: 1, y1: 1 }, F: { x0: 1, y0: 0, x1: 2, y1: 1 }, DN: { x0: 2, y0: 0, x1: 3, y1: 1 }, H: { x0: 0, y0: 1, x1: 2, y1: 2 }, KS: { x0: 2, y0: 1, x1: 3, y1: 2 }, S1: { x0: 0, y0: 2, x1: 3, y1: 3 } } };
+  const mir = { nc: 3, nr: 3, R: Object.fromEntries(Object.entries(L.R).map(([k, r]) => [k, { x0: 3 - r.x1, x1: 3 - r.x0, y0: r.y0, y1: r.y1 }])) };
+  assert.equal(layoutFingerprint(L), layoutFingerprint(mir));
+  const moved = { nc: 3, nr: 3, R: { ...L.R, M: { x0: 0, y0: 1, x1: 1, y1: 2 }, H: { x0: 0, y0: 0, x1: 2, y1: 1 }, F: { x0: 1, y0: 1, x1: 2, y1: 2 } } };
+  assert.notEqual(layoutFingerprint(L), layoutFingerprint(moved), 'المجلس من الأمام إلى الوسط تنظيم آخر');
+});
+
