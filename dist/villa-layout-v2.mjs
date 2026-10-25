@@ -3257,7 +3257,9 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     // (يُكمل حتى 14 ث ما لم يوجد ثلاثة بدائل تنفّذ كل البنود — البدائل المخالفة لبند صريح لا تُعرض لسد العدد)
     // حتمي: ميزانية بعدد المرشحين المبنيين لا بالزمن (الطلب نفسه = البدائل نفسها مهما كان حمل الجهاز)
     // (أرض غير منتظمة: مرشحون إضافيون لتظهر النسخ المتدرجة التي تتبع شكل الأرض)
-    if (tried >= (TREE_SOURCE?.buildMax || BUILD_MAX) || built.filter(d => d.fails === 0).length >= keep + BUILD_SPARE + (site.rectW ? 3 : 0) + (TREE_SOURCE?.spare || 0)) break;
+    // (الجولة 21) لا يتوقف البحث عند ميزانية البناء ولم يُبنَ شيء بعد: يُكمل حتى ضعفها (حتمي بعدد المرشحين) — كان الطلب العادي يُرفض
+    // «تعذّر بناء أي بديل» وفي المرشحين ما لم يُبنَ (H6 في r20)؛ البوابات نفسها، ولا عتبة تُخفَّض
+    { const cap = TREE_SOURCE?.buildMax || BUILD_MAX; if ((tried >= cap && (built.length || R14_OFF.has('r21budget') || tried >= 2 * cap)) || built.filter(d => d.fails === 0).length >= keep + BUILD_SPARE + (site.rectW ? 3 : 0) + (TREE_SOURCE?.spare || 0)) break; }
     tried++;
     try {
       const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : prefPat && patOf(cand) === prefPat && prefMirror !== null ? prefMirror : false;
@@ -3288,7 +3290,9 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
     const sub = built.filter(d => d.cand && (d.r16 || []).includes('FAMILY_WC') && !(d.r16 || []).some(id => MANDATORY_R16.includes(id)) && !d.reject?.length).sort((a, b) => a.quality - b.quality).slice(0, 4);
     if (sub.length) { const idx = sub.map(d => built.indexOf(d)); refineDayWc(sub, P, site, land, { title, requirements, entry, counts, pool: true }); sub.forEach((n, k) => { built[idx[k]] = n; }); }
   }
-  if (!built.length) { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; throw err; }
+  const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; return err; };
+  // (الجولة 21) لا بديل مبني بعد البحث الأول: يُطلق البحث الثاني (كان الخطأ يُرمى قبله فلا يُجرَّب ما صُمم لقلة البدائل أصلًا)
+  if (!built.length && (refDR || prefPat || globalThis.__v2noSecond || R14_OFF.has('r21second'))) throw buildFailed();
   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
   // (الجولة الثانية عشرة) إعادة التوزيع بعد تعذّر التعديل الموضعي تحفظ ما يميّز المخطط المعروض: الحوش الداخلي وغرفة ملابس الرئيسية
@@ -3347,7 +3351,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
       const ok = built.filter(d => wa(d) >= WOMEN_NET && d._heavy !== false);
       const alt = ok.length ? pickReviewed(ok, keep, requirements, land, counts) : [];
       if (alt.length) { for (const d of built) if (wa(d) < WOMEN_NET && designs.includes(d)) d.womenSmall = r2(wa(d)); designs = alt; } } }
-  if (!designs.length) throw reviewFailure(built, rejected);
+  if (!designs.length) throw built.length ? reviewFailure(built, rejected) : buildFailed();
   // (الجولة الثامنة عشرة) الصالة ≥ المجلس: تحسين موضعي للبدائل المختارة نفسها (لا يغيّر الاختيار)، يُقبل إن بقي مختلفًا معماريًا عن الباقين
   if (!refDR) refineHall(designs, P, site, land, { title, requirements, entry, counts });
   // (الجولة العشرون) دورة مياه العائلة بالبناء للبديل المختار الذي يفتقدها (FAMILY_WC): كتلة دورة مياه بجوار الصالة في شجرته نفسها
@@ -3630,7 +3634,11 @@ function shortfallReason(keep, shown, built, rejected0) {
  * بديل يرسب في أي بوابة صلبة لا يُعرض أبدًا. يعيد true إن نجح، ويرفق المراجعة بالتصميم (بلا AZIZ/Mizan هنا للسرعة).
  */
 function reviewRequest(requirements, land, counts) {
-  return { text: requirements?.text || requirements?.idea || '', counts: { ...(counts || {}), ...(requirements?.counts || {}) }, land: land || {}, prefs: requirements?.prefs || {} };
+  const text = requirements?.text || requirements?.idea || '';
+  // (الجولة 21) «العميل طلب الطعام على المجلس» تُقرأ هنا كما يقرؤها المولّد (النص والبنود المستخرجة: «طعام قريب من المجلس»): كانت المراجعة
+  // تقرأ النص وحده — والمتطلبات لا تحمل النص — فيرسم المولّد باب المجلس إلى الطعام لأن العميل طلبه وترفضه البوابة «طعام عائلي» (H6 في r20)
+  const majlisDining = R14_OFF.has('r21mdin') ? undefined : (majlisDiningAsked({ text, rules: requirements?.rules || [] }) || undefined);
+  return { text, counts: { ...(counts || {}), ...(requirements?.counts || {}) }, land: land || {}, prefs: requirements?.prefs || {}, ...(majlisDining ? { majlisDining } : {}) };
 }
 /** (الجولة التاسعة عشرة) طلب القياسات (privacy-defects) ومعه قواعد العميل المستخرجة (الرئيسية بعيدة عن الدرج…) — لا يُمرَّر إلى plan-review
  *  (تمريرها هناك فعّل بوابة الموضع على نص لم تكن تقرؤه فأسقط بدائل سليمة: تغيير معايرة غير مقصود، سُحب). */
