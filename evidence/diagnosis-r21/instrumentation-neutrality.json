@@ -1,0 +1,9 @@
+{
+ "purpose": "حياد أدوات التشخيص: النتائج بلا سجل وبالسجل متطابقة حرفيًا (بصمات المخططات والنتيجة دون الزمن)",
+ "root": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-base/",
+ "cases": 100,
+ "identical": true,
+ "diffs": [],
+ "offSha256": "55beb5107d67cc7e2343656c810a6a17cbfc4686f3b7df7858f913acf29bb0ac",
+ "onSha256": "55beb5107d67cc7e2343656c810a6a17cbfc4686f3b7df7858f913acf29bb0ac"
+}
