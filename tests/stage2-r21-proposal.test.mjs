@@ -73,7 +73,10 @@ test('03 انتهاء المهلة «بحث غير مكتمل» قابل للإ�
 });
 test('03 الشهادة غير المتحقق منها مرفوضة؛ والتعارض المنطقي بين بندين إلزاميين يُقبل بشهادته (kit: unverified infeasibility is refused)', () => {
   const land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 };
-  const r = req('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف', counts), f = analyzeFeasibility({ land, counts, requirements: r });
+  const r = req('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف', counts);
+  const soft = analyzeFeasibility({ land, counts, requirements: r }); // عقد r20 الافتراضي: ملاحظة وسؤال، والشهادة مرفقة
+  assert.equal(soft.feasible, true); const sw = soft.warnings.find(x => x.id === 'CLIENT_CONFLICT'); assert.ok(sw?.certificate); assert.equal(verifyCertificate(sw.certificate, { land, counts, requirements: r }).valid, true);
+  const f = analyzeFeasibility({ land, counts, requirements: r, logicalHard: true });
   assert.equal(f.feasible, false); const h = f.hard.find(x => x.id === 'CONFLICT'); assert.ok(h.certificate);
   assert.equal(verifyCertificate(h.certificate, { land, counts, requirements: r }).valid, true);
   assert.equal(verifyCertificate({ ...h.certificate, b: 'R99' }, { land, counts, requirements: r }).valid, false, 'بند غير موجود');

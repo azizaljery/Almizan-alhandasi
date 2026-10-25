@@ -37,7 +37,7 @@ const poolGuest = pool.map(p => ({ pat: p.pat, defects: guest(p.doc) }));
 // تنوع الحوض بالمعيار المجمّد: أكبر مجموعة «مختلفة معماريًا» جشعًا
 const distinct = []; for (const p of pool) { try { const d = typeof p.doc === 'string' ? parseDoc(p.doc) : p.doc; if (distinct.every(q => sameOrDifferent(q.d, d).different)) distinct.push({ pat: p.pat, d }); } catch { /* */ } }
 const rep = {
-  case: { set, id, land, text: C.text, keep }, engineRoot: root, ms,
+  case: { set, id, land, text: C.text, keep }, engineRoot: root, ms, maxRssMB: Math.round(process.resourceUsage().maxRSS / 1024),
   command: `node scripts/diagnose-r21.mjs ${set} ${id}${opt('root') ? ' --root ' + opt('root') : ''}`,
   stage1_brief: { understood: req.understood, unclear: req.unclear, rules: (req.rules || []).map(r => `${r.kind}:${r.a}${r.b ? '/' + r.b : ''}${r.side ? ':' + r.side : ''} «${r.quote || r.text}»`), dims: req.dims, prefs: req.prefs },
   stage2_constraints: search.units ? { units: search.units, hard: (search.rel || []).filter(r => r.hard).map(r => r.ar), soft: (search.rel || []).filter(r => !r.hard).map(r => r.ar) } : null,

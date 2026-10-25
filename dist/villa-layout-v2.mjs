@@ -3768,8 +3768,12 @@ function compactReview(rv) {
 function gateReview(d, requirements, land, counts) {
   const rv = reviewDesign(d.doc, reviewRequest(requirements, land, counts), { external: false, heavy: false });
   d.review = compactReview(rv);
-  return rv.passed || parkShortOnly(rv);
+  return rv.passed || parkShortOnly(rv) || ledgerOnly(rv);
 }
+// (الجولة 21 — مقترح 01، بعد npm test: tests/rules.test.mjs «صدق السجل») المراجع صار يقرأ نص العميل من العقد الموحد، فصارت بوابة PLACEMENT (مواضع
+// «في الأمام/في الخلف» من النص) تحجب التوليد كله — وقبلها كانت المراجعة في التوليد بلا نص فلا تنطبق. مواضع العميل في التوليد يحكمها سجل البنود
+// (verifyRequest) والاختيار (pickDiverse: لا بديل يخالف موضعًا حققه الأفضل) وحالة العرض، ويُذكر الفائت للعميل صراحة؛ فلا تُضاف حاجبة جديدة هنا
+const ledgerOnly = rv => !R14_OFF.has('r21place') && rv.failedGates.length > 0 && rv.failedGates.every(g => g === 'PLACEMENT' || (PARK_SHORT_OK && g === 'PARKING'));
 /** (الجولة الثانية عشرة) في وضع «نقص المواقف المعلن» فقط: الراسب الوحيد بوابة المواقف النظامية — يُعرض البديل وبوابته راسبة ظاهرة. */
 let PARK_SHORT_OK = false;
 const parkShortOnly = rv => PARK_SHORT_OK && rv.failedGates.length > 0 && rv.failedGates.every(g => g === 'PARKING');
@@ -3819,7 +3823,7 @@ function finalReviewSet(designs, requirements, land, counts) {
     if (heavyReview(d, requirements, land, counts) === false) { r.passed = false; r.failedGates = [...r.failedGates, ...d.heavyFail]; r.rejectReasons_ar = [...r.rejectReasons_ar, ...d.heavyGates.filter(g => !g.ok).flatMap(g => g.reasons_ar.map(x => `${g.ar}: ${x}`))]; }
     r.gates = [...r.gates.filter(g => g.id !== 'DISTINCT'), ...(d.heavyGates || []), ...r.gates.filter(g => g.id === 'DISTINCT')];
     d.review = compactReview(r);
-    if (r.passed || parkShortOnly(r)) kept.push(d);
+    if (r.passed || parkShortOnly(r) || ledgerOnly(r)) kept.push(d);
     else d.droppedBy = r.failedGates;
   });
   if (!kept.length) return kept;

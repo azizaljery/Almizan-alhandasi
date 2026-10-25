@@ -22,7 +22,7 @@ const AR_DIM = { majlis: 'المجلس', kitchen: 'المطبخ', dining: 'ال�
 // (الجولة 21 — مقترح) الحدود الدنيا وشهاداتها ومدققها المستقل في certificates.mjs (الجدول نفسه للمنتج والمدقق)
 /** أنواع تعارض بنود العميل المنطقية: لا يوجد مخطط يحققها معًا (دليل منطقي)، فلا يُرسم حتى يختار العميل. */
 export const LOGICAL_CONFLICTS = Object.freeze(['place-opposite', 'relation-contradiction', 'floor-both']); // ما له شهادة يتحقق منها المدقق؛ وسائر أنواع التعارض أسئلة للعميل لا استحالة
-export function analyzeFeasibility({ land = {}, counts = {}, requirements = {}, provisional = false } = {}) {
+export function analyzeFeasibility({ land = {}, counts = {}, requirements = {}, provisional = false, logicalHard = false } = {}) {
   const hard = [], warn = [], options = new Set();
   let site, P;
   try { site = siteOf(landWithSite(land, requirements)); P = programV2(counts, requirements); }
@@ -73,7 +73,9 @@ export function analyzeFeasibility({ land = {}, counts = {}, requirements = {}, 
     const ruleIds = (c.items || []).filter(x => /^R\d+$/.test(x)), cert = ruleIds.length === 2 ? logicalCertificate(c.type, ruleIds[0], ruleIds[1]) : null;
     if (!cert) { warn.push({ id: 'CLIENT_CONFLICT', type: c.type, ar: `بندان في طلبك يحتاجان توضيحًا: ${qs.map(q => `«${q}»`).join(' و')}.`, question_ar: c.question_ar }); continue; }
     const item = { id: 'CONFLICT', type: c.type, items: c.items || [], quotes: qs, proof: 'logical-contradiction', certificate: cert, ar: `بندان في طلبك لا يجتمعان في أي مخطط: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' و') || 'بندان متقابلان'}.`, question_ar: c.question_ar };
-    if (provisional) warn.push({ ...item, id: 'CLIENT_CONFLICT' }); else { hard.push(item); options.add(`اختيار أحد البندين: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' أو ')}`); }
+    // (بعد npm test: tests/stage2-r20.test.mjs) عقد r20 باقٍ افتراضيًا: تعارض بندين من العميل ملاحظة وسؤال لا استحالة، والشهادة مرفقة بالملاحظة
+    // ليتحقق منها من شاء. «استحالة مثبتة» بها فقط بطلب صريح (logicalHard) — قرار للمالك (docs/research/r21-proposal/PROPOSAL.md §03)
+    if (provisional || !logicalHard) warn.push({ ...item, id: 'CLIENT_CONFLICT' }); else { hard.push(item); options.add(`اختيار أحد البندين: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' أو ')}`); }
   }
   const feasible = hard.length === 0;
   const report_ar = feasible ? (warn.length ? 'الطلب ممكن على هذه الأرض، مع ملاحظات: ' + warn.map(w => w.ar).join('؛ ') : 'الطلب ممكن على هذه الأرض.')
