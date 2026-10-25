@@ -365,11 +365,14 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       const mineTexts = new Set(mine.map(x => x.text));
       const achieves = d => { try { if (intents.length) { const mm = measureIntents(curD, d, intents, { entry: entryDir }); return mm.length > 0 && mm.every(x => x.ok); } const L = verifyRequest(d, req, { entry: entryDir }).filter(x => mineTexts.has(x.text)); return L.length > 0 && L.every(x => x.ok); } catch { return false; } };
       const curH = roomsHash(curD);
+      // (الجولة 21) المرشح «معروض أصلًا» فقط إن كان البديل المعروض المشابه يحقق الطلب نفسه؛ وإلا فهو تصميم جديد لهذا الطلب (يضيف ما طلبه
+      // العميل على تنظيم قريب من بديل معروض) — كان يُسقَط فلا يبقى للعميل إلا «أبقِ المخطط» (تراجع جلسة التصميم في r20)
+      const shownThatAchieves = m => { if (!m || m.identical) return m; const sd = (s.alternatives || []).find(a => a.index === m.index); try { return sd && achieves(parseDoc(sd.doc)) ? m : null; } catch { return m; } };
       const shown = (s.alternatives || []).map(a => ({ index: a.index, doc: parseDoc(a.doc) })).filter(a => roomsHash(a.doc) !== curH);
       const pool = [], seenH = new Set([curH]);
       for (const c of [{ ...out }, ...(out.alternatives || []).slice(1).map(a => ({ ...out, doc: a.doc, pat: a.pat || null, summary: a.summary || out.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
         const h = roomsHash(c.doc); if (seenH.has(h)) continue; seenH.add(h);
-        c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
+        c.ok = achieves(c.doc); c.shownAs = shownThatAchieves(matchShown(c.doc, shown)); c.zd = zoneDiff(curD, c.doc); pool.push(c);
       }
       const fresh = pool.filter(c => c.ok && !c.shownAs).sort((a, b) => a.zd.changed.length - b.zd.changed.length);
       const zoneCand = fresh.find(c => c.zd.changed.length <= 1) || null;
@@ -382,7 +385,7 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
           const out2 = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude: ex2, ...(s.input.engine ? { engine: s.input.engine } : {}) });
           for (const c of [{ ...out2 }, ...(out2.alternatives || []).slice(1).map(a => ({ ...out2, doc: a.doc, pat: a.pat || null, summary: a.summary || out2.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
             const h = roomsHash(c.doc); if (seenH.has(h)) continue; seenH.add(h);
-            c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
+            c.ok = achieves(c.doc); c.shownAs = shownThatAchieves(matchShown(c.doc, shown)); c.zd = zoneDiff(curD, c.doc); pool.push(c);
             if (c.ok && !c.shownAs) { fullCand = c; break; }
           }
         } catch { /* لا توزيع جديد */ }
