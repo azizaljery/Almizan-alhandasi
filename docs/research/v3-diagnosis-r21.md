@@ -290,7 +290,48 @@ flowchart TD
 | `WET_STACK` (حمام علوي فوق فراغ جاف) | `privacy-defects.mjs` | عيب معماري (C7، H8 «يحتاج تعديلات») | ملاحظة «تحتاج مراجعة مختص» (صحي/إنشائي)، لا عيب يمنع «جاهز»، إلا بطلب صريح |
 | الماستر على الواجهة بجوار مدخل العائلة | (غير مقيس؛ r20: C9-2) | — | تفضيل خصوصية لين في البحث، وإلزامي فقط بطلب العميل |
 
-## 11) ما لا يُدّعى
+## 11) البنية المقترحة (بعد) — امتداد للوحدات الحالية لا منظومة موازية
+
+```mermaid
+flowchart TD
+  A["كلام العميل"] --> B["Brief Compiler = extractRequirements<br/>+ want (عدد التصاميم) — كل بند بمصدره (quote)"]
+  B --> C["Constraint Graph = programV2 + unitsOf/rel<br/>كل قيد: طبقته (عميل/نظام/ميزان/تفضيل) ومصدره"]
+  C --> F["Feasibility Solver = analyzeFeasibility<br/>دليل فقط: حد أدنى للمساحة، مقاس، عرض، تعارض منطقي بين بندين"]
+  F -->|دليل| P["PROVEN_INFEASIBLE<br/>البنود المتعارضة + مرجع الدليل + خيارات"]
+  F --> T["Topology = enumerateLayouts + مكتبة v2<br/>+ مسار الضيف رسمًا بيانيًا لكل شجرة (§6)<br/>+ بصمة مسبقة للتنوع (§7)"]
+  T --> G["Geometry = candidates/solve<br/>المقاس قيد بناء (§3)، العلوي على حوامل الأرضي (§4)"]
+  G --> V["Hard Validator = hardGates + gateReview + حارس التغيير<br/>قبل التصنيف"]
+  V --> Q["AZIZ + Mizan Score + pickDiverse (المعيار المجمّد r19)"]
+  Q --> S["SOLVED {alternatives, requestedCount, warnings}"]
+  G -->|لا حل بلا دليل| I["SEARCH_INCOMPLETE {TIME_LIMIT | SEARCH_EXHAUSTED_WITHOUT_PROOF | SOLVER_ERROR | UNSUPPORTED_CASE}"]
+  P & I & S --> X["Client Explanation = explainFailure + toClientAr + shortfallNotice<br/>أرقام حقيقية متسقة، بلا مصطلحات، واعتراف بحد المحرك"]
+```
+
+## 12) حياد أدوات التشخيص (قرار المالك، الضابط الثاني)
+
+- **الأداة:** `scripts/instrumentation-neutrality.mjs run off|on` في عمليتين منفصلتين على الأساس `3b212e7` (C1–C10، H1–H10، والعينة المجمّدة 80)، ثم `compare` لبصمات المخططات (sha256 للمستند المسلسل) والنتيجة دون الزمن.
+- **النتيجة:** `evidence/diagnosis-r21/instrumentation-neutrality.json`.
+- **اختبار دائم:** `tests/stage2-r21.test.mjs` «حياد التشخيص»: السجل مطفأ افتراضيًا، ولا يشغّله المحرك بنفسه، والنتيجة بالسجل وبدونه متطابقة حرفيًا (حالة معروفة صغيرة).
+
+## ملحق أ) الملفات والدوال المعنية (الأساس 3b212e7)
+
+| الملف | الدالة (الأسطر) | الدور |
+|---|---|---|
+| `dist/requirements.mjs` | `extractRequirements` (62–312)، `detectConflicts` (413–486) | فهم الطلب؛ لا يحمل النص (308–312)؛ كشف التعارض للحوار |
+| `dist/feasibility.mjs` | `analyzeFeasibility` (19–62) | الاستحالة بالتقدير ×1.15 (26–37) |
+| `dist/villa-layout-v3.mjs` | `unitsOf` (35–92)، `gridShapes` (100–106)، `enumerateLayouts` (124–208)، `pickLayouts` (251–258)، `sleepVariants` (262–314)، `layoutTrees` (316–379)، `synthTrees` (433–472)، `synthTwoFloors` (480–517)، `upperLayouts` (519–550)، `jointTree` (552–592)، `source` (596–621)، `generateVillaDesigns` (628–636)، `failureReport` (645–655) | العلاقات والقيود والتنظيم والدوران وتقرير الفشل |
+| `dist/villa-layout-v2.mjs` | `programV2` (136–232)، `solve` (338–…)، `scoreV2` (965–…)، `realizeV2` (1500–…)، `candidates` (2718–2887)، `pickDiverse` (2790–…)، `generateVillaDesigns0` (3206–…)، `refineGuest` (3464–…)، `shortfallReason` (3589–…)، `reviewRequest` (3632–3634)، `pickReviewed` (3666–…)، `generateVillaTwoFloors0` (3828–…)، `upperFor` (3934–…)، `rectStack` (4139–…)، `tfTrees` (4171–…)، `tfJoint` (4285–…) | البرنامج والهندسة والتقييم والتفصيل والاختيار والدوران |
+| `dist/plan-review.mjs` | `majlisDiningAsked` (242–247)، بوابة `MAJLIS_PRIVACY` (379–396) | المراجعة بعد البناء |
+| `dist/privacy-defects.mjs` | `measureR16` (85–…)، `GUEST_DINING` (166)، `MANDATORY_R16` (37) | المخالفات الإلزامية |
+| `dist/r20-checks.mjs` | `MAJLIS_ISOLATED`، `R20_MANDATORY` (21) | المجلس المعزول |
+| `dist/presentation-status.mjs` | `presentationStatus` | حالة العرض بالطبقات |
+| `dist/arch-criterion.mjs` | `sameOrDifferent` (23–27) | المعيار المجمّد r19 (لا يُغيَّر) |
+| `dist/client-text.mjs` | `shortfallNotice` (31–…)، `INTERNAL_PATTERNS` (7–15) | إشعار العميل |
+| `dist/structural-precheck.mjs` | `PRECHECK_LIMITS.bridgeMax = 5.0` (35) | حد الجدار بلا حامل (لم يُغيَّر) |
+
+المقتطفات الحرفية بأرقام أسطرها في الأقسام 2–7 أعلاه.
+
+## 13) ما لا يُدّعى
 
 - لا تحسن في التعميم مثبت بعد: الحالات المعروفة (H1–H10) استُعملت في التشخيص، والمقياس الوحيد للتعميم بذرة `eval` في العينة المجمّدة بعد الإصلاحات المعتمدة.
 - H4 غير محلول. والتنوع في C10 غير محلول.
