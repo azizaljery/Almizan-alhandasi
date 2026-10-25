@@ -3,7 +3,7 @@
 // والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
 // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
 
-import { buildSharedBrief } from './shared-brief.mjs';
+import { buildSharedBrief, parseRequestedCount } from './shared-brief.mjs';
 import { extractRules, mergeRules, ruleText, subjectAr, SIDE_LABELS, OPPOSITE_SIDE } from './rules.mjs';
 
 const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
@@ -311,6 +311,8 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
       else if (glazing.all === undefined) { glazing.all = pct; understood.push(`زجاج الغرف ${how} من أرضيتها (طلب العميل)`); any = true; }
     }
     if (any) prefs.glazing = glazing; }
+  // (الجولة 21 — مقترح) عدد التصاميم الذي طلبه العميل نصًا (يقرؤه العقد الموحد parseRequestedCount؛ هنا سطر «فهمت» فقط)
+  { const n = parseRequestedCount(text); if (n) understood.push(`${n} ${n === 1 ? 'تصميم' : n === 2 ? 'تصميمان' : 'تصاميم'} مطلوبة (طلب العميل)`); }
   const uc = clauses ? unclearClauses(text) : [];
   const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
   return {

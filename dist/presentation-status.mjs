@@ -16,12 +16,14 @@
 import { analyzeDoc } from './draw/digest.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
+import { toClientAr, GATE_AR } from './client-language.mjs';
+export { GATE_AR };
 
 export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
 export const STATUS_AR = Object.freeze({ ready: 'جاهز للعرض المبدئي', 'needs-edits': 'يحتاج تعديلات', hidden: 'محجوب' });
 const PREF_TIER_AR = 'تفضيل سعودي افتراضي للميزان (قابل للتغيير)';
 const R16_TIER_AR = 'عيب معماري — قيمة تصميمية افتراضية للميزان';
-const MAND_TIER_AR = 'شرط إلزامي في الميزان (خصوصية/وظيفة) — يُعفى منه بطلب صريح من العميل';
+const MAND_TIER_AR = 'شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً';
 const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 
 /** عيوب عرض/جودة قيست من المستند (المراجع المستقل r13) غير البرنامج السعودي: غرفة ملابس رمزية لرئيسية كبيرة، مجلس بلا أثاث. */
@@ -54,7 +56,7 @@ export function presentationStatus(design, request = {}) {
   const rv = design.review || null, gateFails = rv && rv.passed === false ? (rv.failedGates || []) : [];
   // (الجولة السادسة عشرة) قراءة واحدة لـ«في الخلف» في السجل وحالة العرض ورد التعديل: ما لم يتحقق حرفيًا وتحققت قراءته النسبية
   // «متحقق جزئيًا» — يبقى بندًا إلزاميًا غير متحقق (محجوب، لا «جاهز»)، ويُذكر أنه جزئي بالنص نفسه الذي يقرؤه السجل الصارم
-  const hidden = [...ledgerFails.map(x => x.partial ? `بند من طلبك متحقق جزئيًا فقط: «${x.text}» — ${x.partial.text_ar}؛ لا حرفيًا: ${x.partial.literal_ar || x.why}` : `بند من طلبك لم يتحقق: «${x.text}»${x.why ? ` — ${x.why}` : ''}`), ...gateFails.map(g => `رسب في بوابة المراجعة ${g}`)];
+  const hidden = [...ledgerFails.map(x => x.partial ? `بند من طلبك متحقق جزئيًا فقط: «${x.text}» — ${x.partial.text_ar}؛ لا حرفيًا: ${x.partial.literal_ar || x.why}` : `بند من طلبك لم يتحقق: «${x.text}»${x.why ? ` — ${x.why}` : ''}`), ...gateFails.map(g => `لم يجتز فحص «${GATE_AR[g] || 'المراجعة المعمارية'}»`)];
   let prefs = [];
   try { prefs = measureSaudiProgram(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked && !g.regulation && g.id !== 'SHADING'); } catch { prefs = []; }
   // المقلط ومسار التقديم بند واحد عند العميل: إن غاب المسار يُذكر مرة واحدة (SERVE_ROUTE)، ويبقى بند المقلط إن كان سببه انفتاح الطعام على العائلة
@@ -64,7 +66,7 @@ export function presentationStatus(design, request = {}) {
   // (الجولة التاسعة عشرة، توجيه المالك أولًا) المخالفة الإلزامية في الميزان (MANDATORY_R16: ضيف يعبر العائلة إلى الطعام، موقف لا تدخله السيارة)
   // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
-  for (const g of mand) hidden.push(`مخالفة إلزامية في الميزان — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
+  for (const g of mand) hidden.push(`شرط أساسي غير متحقق — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
   r16 = r16.filter(g => !mand.includes(g));
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
@@ -72,6 +74,9 @@ export function presentationStatus(design, request = {}) {
     ...toleranceNotes(design.ledger || []),
     // (الجولة العشرون) ملاحظات مقيسة لا تحجب ولا تُعدّ عيبًا: المدخلان متجاوران، والحمامات بلا نافذة (تهوية ميكانيكية)
     ...r20notes.map(g => ({ id: g.id, major: false, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')}` }))];
+  // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
+  for (const x of items) x.text_ar = toClientAr(x.text_ar);
+  for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)

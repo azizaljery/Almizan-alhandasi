@@ -87,7 +87,7 @@ for (const C of CASES) {
   let out;
   try {
     const fn = (land.floors >= 2 || req.prefs?.floors === 2) ? generateVillaTwoFloors : generateVillaDesigns;
-    out = fn({ land, counts: req.counts, requirements: req, keep: C.want || 4 });
+    out = fn({ land, counts: req.counts, requirements: req, keep: (C.want || req.want || 4) });
   } catch (e) { row.error = e.message; row.errorCode = e.code || null; if (e.report_ar) row.report_ar = e.report_ar; if (e.feasibility) row.feasibility = e.feasibility; if (e.search) row.search = e.search; }
   if (out?.engine3) { row.feasibility = out.engine3.feasibility; row.search = out.engine3.search; }
   row.ms = Math.round(performance.now() - t0);
@@ -103,7 +103,7 @@ for (const C of CASES) {
         hd.forEach((h, i) => writeFileSync(rdir + `experiment-${i + 1}.json`, serialize(h.doc)));
         writeFileSync(rdir + 'experiments.json', JSON.stringify(hd.map((h, i) => ({ file: `experiment-${i + 1}.json`, pattern: h.pat, summary: h.summary, why_not_shown_ar: h.reasons_ar, status_ar: 'تجربة بحثية — لا تُعرض للعميل' })), null, 1)); } }
     out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, presentation: d.presentation || null, prefFails: d.prefFails || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
-    row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length; row.hidden = out.hidden || []; row.presentation = out.presentation || null; row.proposalLabel_ar = out.presentation?.label_ar || null;
+    row.requestedAlternatives = (C.want || req.want || 4); row.producedAlternatives = out.designs.length; row.hidden = out.hidden || []; row.presentation = out.presentation || null; row.proposalLabel_ar = out.presentation?.label_ar || null;
     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));
     row.modes = [...new Set(out.designs.map(d => d.mode))];
     const pairs = row.diversity.flatMap((r, i) => r.filter((_, j) => j > i));
@@ -118,7 +118,7 @@ for (const C of CASES) {
     row.archV2 = { thresholds: SUBSTANTIVE_V2, pairs: pairs2, allDistinct: pairs2.every(p => p.verdict === 'distinct'), minSubstantive: pairs2.length ? Math.min(...pairs2.map(p => p.substantive.length)) : null, minTotal: pairs2.length ? Math.min(...pairs2.map(p => p.total)) : null };
     row.heavyRejected = (out.rejected || []).filter(r => r.by === 'heavy-gates');
     // سبب النقص عن العدد المطلوب (نص عربي من المولّد نفسه: ما بُني وما رُفض ولماذا)
-    if (out.designs.length < (C.want || 4)) row.shortfallReason = out.shortfall_ar || 'لم يذكر المولّد سببًا.';
+    if (out.designs.length < ((C.want || req.want || 4))) row.shortfallReason = out.shortfall_ar || 'لم يذكر المولّد سببًا.';
   }
   if (C.edit && out) {
     try {
@@ -166,7 +166,7 @@ for (const C of CASES) {
     }
   }
   // (الجولة العشرون) إشعار العميل كما يُعرض له حين يقل العدد أو لا يُنتج مخطط (يُرسم صورة notice.png)
-  row.notice = shortfallNotice({ requested: C.want || 4, shown: row.designs.length, shortfall_ar: row.shortfallReason || null, hidden: row.hidden || [], report_ar: row.error ? (row.report_ar || row.error) : null });
+  row.notice = shortfallNotice({ requested: (C.want || req.want || 4), shown: row.designs.length, shortfall_ar: row.shortfallReason || null, hidden: row.hidden || [], report_ar: row.error ? (row.report_ar || row.error) : null });
   writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));
   summary.push(row);
   const best = row.designs[0];
