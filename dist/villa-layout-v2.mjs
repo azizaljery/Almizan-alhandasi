@@ -401,7 +401,7 @@ function dist(L, items) {
  * يعيد { run, v, a, c, err, … } (a على امتداد الصف، c عرضيًا) أو null.
  */
 const SUITE_TD_RANGE = b => (b.master ? [2.2, 3.2] : [1.95, 2.9]), SUITE_T_RANGE = b => (b.master ? [1.9, 2.8] : [1.5, 2.4]);
-function dimPlan(b, crossNet, ends, dir = null, runAxis = null, fit = false) {
+function dimPlan(b, crossNet, ends, dir = null, runAxis = null, fit = false, alt = 0) {
   if (!b.dimGross || !b.dimNet || R14_OFF.has('r21dimfix')) return null;
   const T = DESIGN_TARGETS, sN = b.dimNet.s, lN = b.dimNet.l, orient = sN === lN ? [[sN, lN]] : [[sN, lN], [lN, sN]], opts = [];
   if (b.kind === 'majlis' && b.guestWc) {
@@ -426,16 +426,19 @@ function dimPlan(b, crossNet, ends, dir = null, runAxis = null, fit = false) {
   const tol0 = b.dimNet.tol ?? .05;
   if (fit) opts.sort((x, y) => (x.err > tol0) - (y.err > tol0) || x.run - y.run || x.err - y.err);
   else opts.sort((x, y) => x.err - y.err || (x.rank || 0) - (y.rank || 0) || x.a - y.a);
-  return { ...opts[0], tol: b.dimNet.tol, runAxis: runAxis || dir };
+  // الاتجاه الآخر متغير بحث (n.dimO في المنطقة، يقلبه التلدين): أفضل خيار بالضلع الآخر على الامتداد — يُجرَّب الاتجاهان كلاهما في البحث
+  // لا بقاعدة ثابتة؛ والحكم بالقياس بعد التفصيل
+  const pick = alt && !fit ? opts.find(o => o.a !== opts[0].a) || opts[0] : opts[0];
+  return { ...pick, tol: b.dimNet.tol, runAxis: runAxis || dir, alt: pick !== opts[0] };
 }
-const dimRun = (b, crossNet, allowRun, dir = null, runAxis = null, plans = null, fit = false) => { const pl = dimPlan(b, crossNet, allowRun, dir, runAxis, fit); if (pl && plans) plans.set(b, pl); return pl ? pl.run : 0; };
+const dimRun = (b, crossNet, allowRun, dir = null, runAxis = null, plans = null, fit = false, alt = 0) => { const pl = dimPlan(b, crossNet, allowRun, dir, runAxis, fit, alt); if (pl && plans) plans.set(b, pl); return pl ? pl.run : 0; };
 /** سماحية ورقة بمقاس صريح (منطقة بكتلة واحدة، أو عقدة كل أبنائها اختيارية عداها). */
 function dimTolOf(c) { if (c.t === 'zone') return c.b.length === 1 ? c.b[0].dimNet?.tol || 0 : 0; if ((c.t === 'x' || c.t === 'y') && c.k) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? dimTolOf(solid[0]) : 0; } return 0; }
 /** محور امتداد صف لمنطقة: العمودي على اتجاه بابها (باب على x0/x1 ⇐ الصف على y). */
 const runAxisOf = z => (z.door ? (isX(z.door) ? 'y' : 'x') : z.along);
 /** (الجولة 21) امتداد ثابت لعقدة على محور dir: منطقة بكتلة واحدة بمقاس صريح، أو عقدة متعامدة كل أبنائها فراغات اختيارية عدا واحد كذلك. */
 function fixExtOf(c, dir, crossNet, allow, plans = null) {
-  if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir, runAxisOf(c), plans) : 0;
+  if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir, runAxisOf(c), plans, false, c.dimO || 0) : 0;
   if ((c.t === 'x' || c.t === 'y') && c.t !== dir && !c.at) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? fixExtOf(solid[0], dir, crossNet, allow, plans) : 0; }
   return 0;
 }
@@ -493,7 +496,7 @@ function solve(tree, ew, ed) {
     if (n.t === 'zone') {
       const dir = n.along, L = dir === 'x' ? W_(r) : H_(r), cross = dir === 'x' ? H_(r) : W_(r);
       const ext = edgesExt(r), [s0, s1, c0, c1] = dir === 'x' ? ['x0', 'x1', 'y0', 'y1'] : ['y0', 'y1', 'x0', 'x1'], crN = cross - wallPair(ext[c0], ext[c1]), last = n.b.length - 1;
-      let zF = n.b.map((b, i) => (last > 0 ? dimRun(b, crN, wallPair(i === 0 && ext[s0], i === last && ext[s1]), dir, runAxisOf(n), plans) : 0));
+      let zF = n.b.map((b, i) => (last > 0 ? dimRun(b, crN, wallPair(i === 0 && ext[s0], i === last && ext[s1]), dir, runAxisOf(n), plans, false, n.dimO || 0) : 0));
       const zItems = () => n.b.map((b, i) => ({ min: suiteRun(b, cross), fix: zF[i], a: b.area * n.w[i], ft: zF[i] ? b.dimNet?.tol || 0 : 0 }));
       let sz = dist(L, zItems());
       // (02b) الصف لا يتسع بخطة أقل فرق عرضي: خطة الاتساع (الاتجاه/المتغير الأقصر امتدادًا) قبل إعلان تعذر الحل
@@ -1450,8 +1453,10 @@ function* optimizeSteps(tree, site, evalFn, { iters = 140, seed = 'x', tol = 2 }
   };
   // جهة المخزن المقتطع من مطبخ بمقاس صريح (جهة الحركة أو الجهة المقابلة) متغير بحث أيضًا
   const kz = []; (function walk(n) { if (n.t === 'zone' && n.b.some(b => (b.dimGross && b.kind === 'kitchen') || b.kind === 'maid')) kz.push(n); if (n.k) n.k.forEach(walk); })(tree);
-  const snapW = () => ({ ws: nodes.map(n => [...n.w]), ord: zones.map(z => [...z.b]), ps: kz.map(z => z.pside || 0) });
-  const load = st => { nodes.forEach((n, i) => { n.w = [...st.ws[i]]; }); zones.forEach((z, i) => { z.b = [...st.ord[i]]; }); kz.forEach((z, i) => { z.pside = st.ps[i]; }); };
+  // (02b) اتجاه المقاس الصريح متغير بحث لكل منطقة فيها كتلة بمقاس (الاتجاهان يُجرَّبان)؛ لا مناطق كهذه ⇐ البحث كما كان حرفيًا
+  const dz = []; if (!R14_OFF.has('r21dimfix') && !R14_OFF.has('r21dimorient')) (function walk(n) { if (n.t === 'zone' && n.b.some(b => b.dimNet && b.dimNet.s !== b.dimNet.l)) dz.push(n); if (n.k) n.k.forEach(walk); })(tree);
+  const snapW = () => ({ ws: nodes.map(n => [...n.w]), ord: zones.map(z => [...z.b]), ps: kz.map(z => z.pside || 0), dor: dz.map(z => z.dimO || 0) });
+  const load = st => { nodes.forEach((n, i) => { n.w = [...st.ws[i]]; }); zones.forEach((z, i) => { z.b = [...st.ord[i]]; }); kz.forEach((z, i) => { z.pside = st.ps[i]; }); dz.forEach((z, i) => { z.dimO = st.dor[i]; }); };
   let best = null;
   const ord0 = zones.map(z => [...z.b]);
   const inits = [];
@@ -1486,9 +1491,10 @@ function* optimizeSteps(tree, site, evalFn, { iters = 140, seed = 'x', tol = 2 }
     if (phase === 1) { if (tol <= 2 || !(lb.sol.viol >= 1 && lb.sol.viol <= tol)) break; cur = lb; ew = lb.ew; ed = lb.ed; curW = lb.weights; load(curW); }
     const nIt = phase ? iters * (globalThis.__v2cfg?.polish ?? POLISH_K) : iters, T0 = phase ? SA_T0 * .4 : SA_T0;
     for (let it = 0; it < nIt; it++) {
-      const ws = { ws: curW.ws.map(x => [...x]), ord: curW.ord.map(x => [...x]), ps: [...curW.ps] }; let nw = ew, nd = ed;
+      const ws = { ws: curW.ws.map(x => [...x]), ord: curW.ord.map(x => [...x]), ps: [...curW.ps], dor: [...curW.dor] }; let nw = ew, nd = ed;
       const pick = R();
       if (kz.length && pick > .96) { const i = Math.floor(R() * kz.length); ws.ps[i] = 1 - ws.ps[i]; }
+      else if (dz.length && pick > .92) { const i = Math.floor(R() * dz.length); ws.dor[i] = 1 - ws.dor[i]; }
       else if (pick < .18) nw = snap(ew * Math.exp((R() - .5) * .16)); else if (pick < .36) nd = snap(ed * Math.exp((R() - .5) * .16));
       else if (pick < .46 && zones.length) {
         // تبديل كتلتين متجاورتين في منطقة (مع وزنيهما)
@@ -1512,7 +1518,7 @@ function* optimizeSteps(tree, site, evalFn, { iters = 140, seed = 'x', tol = 2 }
       for (let round = 0; round < (globalThis.__v2cfg?.cd ?? CD_ROUNDS); round++) {
         let improved = false;
         for (const m of moves) {
-          const ws = { ws: curW.ws.map(x => [...x]), ord: curW.ord.map(x => [...x]), ps: [...curW.ps] }; let nw = ew, nd = ed;
+          const ws = { ws: curW.ws.map(x => [...x]), ord: curW.ord.map(x => [...x]), ps: [...curW.ps], dor: [...curW.dor] }; let nw = ew, nd = ed;
           if (m.ew) nw = snap(ew + m.ew); else if (m.ed) nd = snap(ed + m.ed); else ws.ws[m.i][m.j] *= m.f;
           load(ws); const c = ev(nw, nd);
           if (c && c.p < cur.p - 1e-9) { cur = c; ew = nw; ed = nd; curW = ws; improved = true; } else load(curW);
