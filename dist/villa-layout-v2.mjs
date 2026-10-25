@@ -3959,10 +3959,11 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
   if (!cands.length) rejected.push({ pat: '*', why: ['لا ترتيب أرضي ناجح'] });
   for (const g of cands) {
     if (designs.length >= keep + 3 || ++gTried > BUILD_MAX2 || timeUp()) break; // حتمي: بعدد الترتيبات الأرضية لا بالزمن
-    const ups = upperFor(g, U, site, rules2, entry);
+    // (الجولة 21 — مقترح) العلوي على شبكة حوامل الأرضي أولًا، ثم أنماط upperFor كما كانت
+    const ups = [...upperExtrude(g, G, U, site), ...(upperFor(g, U, site, rules2, entry) || [])];
     if (globalThis.__v2dbg) { const st = g.sol.circ.find(c => c.id === 'stair').r; globalThis.__v2dbg['g:' + patOf(g)] = [g.ew, g.ed, st.x0, st.x1, st.y0, st.y1, ups.map(u => u.tag).join('/'), 'voids=' + JSON.stringify(g.sol.voids.map(v => [v.x0, v.x1, v.y0, v.y1].map(x => Math.round(x * 10) / 10)))].join(' '); }
     if (!ups.length) { rejected.push({ pat: patOf(g), why: ['لا دور علوي يتسع على هذا الغلاف'] }); continue; }
-    for (const up of ups.slice(0, 3)) build2(g, up, { summary: describe(g) + ' (دوران)', note: 'السلم بين مدخل العائلة والصالة، ويصل إلى الصالة العلوية في الموضع نفسه.' });
+    for (const up of ups.slice(0, 4)) build2(g, up, { summary: describe(g) + ' (دوران)', note: up.extruded ? 'غرف الدور الأول فوق غرف الأرضي وجدرانها على خطوط جدرانه أو محمولة عليها بامتداد لا يتجاوز 5 م، والصالة العلوية على الدرج؛ وما زاد سطح مكشوف. (فحص مبدئي لا اعتماد إنشائي.)' : 'السلم بين مدخل العائلة والصالة، ويصل إلى الصالة العلوية في الموضع نفسه.' });
   }
   // (الجولة التاسعة) تنظيمات الدورين بموضع سلم مختلف (على جدار الجار ببهو مزدوج، في الخلف، كتلة عائلية بدورين وجناح
   // ضيافة بدور واحد، في قلب البيت حول فراغ مزدوج)، ولكل أرضي تنظيمان علويان مختلفان (ممر محوري / ردهة وصالة)
@@ -4004,6 +4005,106 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
  *  (أبعد ما يكون عن السلم، تُفتح عليه الصالة)؛ deepK: جناح فوق المدخل، والصالة، والرئيسية خلفها.
  * والأجنحة يمينًا ويسارًا بتوزيعات مختلفة تفتح على عمود المحور مباشرة (بلا ممرات). يُقيَّم بالدالة نفسها والقواعد.
  */
+/**
+ * (الجولة 21 — التراكب الإنشائي قيدُ توليد لا فحصًا بعده) الدور العلوي على «شبكة الحوامل»: يُفصَّل الأرضي أولًا، ثم تُتخذ خطوط جدرانه
+ * (إحداثيات حواف غرفه) شبكةً غير منتظمة، ويُبحث بالتراجع عن توزيع للعلوي كل فراغ فيه مستطيل من خلاياها:
+ *  - قيود صلبة: الدرج في خلاياه نفسها؛ الصالة العلوية تلامسه؛ كل غرفة نوم تلامس الصالة العلوية أو ممرًا منها بطول يتسع لباب (≥ 1 م) ولها
+ *    ضلع خارجي ≥ 1.5 م للنافذة، ومساحتها بين حدها الأدنى (بحمامها) و1.9 منه، وأقصر أضلاعها ≥ 3 م؛ لا غرفة فوق خلية غير مبنية في الأرضي؛
+ *  - التراكب: كل ضلع داخلي لكل فراغ علوي يقع على خط جدار أرضي أو بين ركيزتين (جدار أرضي يقطعه) بامتداد ≤ 5 م (الحد نفسه في الفحص)؛
+ *  - ما لا يحتاجه البرنامج من الخلايا المبنية سطح مكشوف.
+ * التفضيل: الصالة العلوية فوق الحركة الأرضية، وأقل سطح، والرئيسية الأكبر. يعيد حتى ثلاثة توزيعات مختلفة (موضع الرئيسية)، أو [].
+ */
+function upperExtrude(g, G, U, site) {
+  if (R14_OFF.has('r21extrude')) return [];
+  let gL; try { gL = realizeV2(g, G, {}); } catch { return []; }
+  const sr = g.sol.circ.find(c => c.id === 'stair')?.r; if (!sr) return [];
+  const ew = g.ew, ed = g.ed;
+  const gr = gL.rooms.filter(r => !r.open);
+  const GL = edgeLines(gr);
+  // الإحداثيات: حواف غرف الأرضي، مجمّعة (لا خلية أضيق من 1 م إلا ما فرضه الدرج)
+  const clus = vals => { const v = [...new Set(vals.map(x => Math.round(x * 20) / 20))].sort((a, b) => a - b), out = []; for (const x of v) { if (out.length && x - out[out.length - 1] < 1.0) continue; out.push(x); } return out; };
+  const clus2 = (fixed, vals) => { const f = [...new Set(fixed.map(x => Math.round(x * 20) / 20))]; const v = clus([...f, ...vals.filter(x => f.every(y => Math.abs(x - y) >= 1.0))]); return [...new Set([...v.filter(x => f.every(y => Math.abs(x - y) >= 1.0 || x === y)), ...f])].sort((a, b) => a - b); };
+  // وخطوط وسيطة في الفواصل الأطول من 5 م (جدار علوي يعبر فراغًا أرضيًا بامتداد ≤ 5 م محمول على جداريه — والفحص edgesOK يحكم)
+  const sub = v => { const o = []; for (let k = 0; k < v.length; k++) { o.push(v[k]); if (k + 1 < v.length && v[k + 1] - v[k] > 5.0) { const n = Math.ceil((v[k + 1] - v[k]) / 3.6); for (let t = 1; t < n; t++) o.push(Math.round((v[k] + (v[k + 1] - v[k]) * t / n) * 20) / 20); } } return o; };
+  const X = sub(clus2([0, ew, sr.x0, sr.x1], gr.flatMap(r => [r.x0, r.x1]))), Y = sub(clus2([0, ed, sr.y0, sr.y1], gr.flatMap(r => [r.y0, r.y1])));
+  const dbgX = why => { if (globalThis.__extDbg) globalThis.__extDbg.push({ pat: patOf(g), why, X, Y }); return []; };
+  if (!X.includes(Math.round(sr.x0 * 20) / 20) || !X.includes(Math.round(sr.x1 * 20) / 20) || !Y.includes(Math.round(sr.y0 * 20) / 20) || !Y.includes(Math.round(sr.y1 * 20) / 20)) return dbgX('stair-off-grid');
+  const nc = X.length - 1, nr = Y.length - 1; if (nc < 2 || nr < 2 || nc * nr > 64) return dbgX('grid-size');
+  const cellR = (i, j) => ({ x0: X[i], x1: X[i + 1], y0: Y[j], y1: Y[j + 1] });
+  const builtA = q => sum(gr.map(r => Math.max(0, Math.min(q.x1, r.x1) - Math.max(q.x0, r.x0)) * Math.max(0, Math.min(q.y1, r.y1) - Math.max(q.y0, r.y0))));
+  const built = []; for (let j = 0; j < nr; j++) for (let i = 0; i < nc; i++) { const q = cellR(i, j); built.push(builtA(q) >= A_(q) * .9); }
+  const isStair = (i, j) => { const q = cellR(i, j); return q.x0 >= sr.x0 - .03 && q.x1 <= sr.x1 + .03 && q.y0 >= sr.y0 - .03 && q.y1 <= sr.y1 + .03; };
+  // دعم ضلع داخلي: أطول امتداد بلا جدار أرضي تحته ولا جدار أرضي يقطعه (كما في rectStack)
+  const runOfEdge = (ax, c, s0, s1) => {
+    const sup = [];
+    for (const [gc, gl] of GL[ax]) if (Math.abs(gc - c) <= .2) for (const [a2, b2] of gl) { const p = Math.max(s0, a2), q = Math.min(s1, b2); if (q - p > .02) sup.push([p, q]); }
+    for (const [gc, gl] of GL[ax === 'h' ? 'v' : 'h']) if (gc >= s0 - .3 && gc <= s1 + .3) for (const [a2, b2] of gl) if (c >= a2 - .3 && c <= b2 + .3) { const p = Math.max(s0, Math.min(s1, gc)); sup.push([p, p]); }
+    sup.sort((a2, b2) => a2[0] - b2[0]); let at = s0, run = 0; for (const [a2, b2] of sup) { if (a2 > at) run = Math.max(run, a2 - at); at = Math.max(at, b2); } return Math.max(run, s1 - at);
+  };
+  const onExt = (r, sd) => (sd === 'x0' ? r.x0 <= .05 : sd === 'x1' ? r.x1 >= ew - .05 : sd === 'y0' ? r.y0 <= .05 : r.y1 >= ed - .05);
+  const extLen = r => SIDES.filter(sd => onExt(r, sd)).reduce((a2, sd) => a2 + (sd[0] === 'x' ? H_(r) : W_(r)), 0);
+  const edgesOK = r => { // الأضلاع الداخلية (غير الخارجية) مدعومة
+    if (!onExt(r, 'y0') && runOfEdge('h', r.y0, r.x0, r.x1) > 5.0) return false; if (!onExt(r, 'y1') && runOfEdge('h', r.y1, r.x0, r.x1) > 5.0) return false;
+    if (!onExt(r, 'x0') && runOfEdge('v', r.x0, r.y0, r.y1) > 5.0) return false; if (!onExt(r, 'x1') && runOfEdge('v', r.x1, r.y0, r.y1) > 5.0) return false; return true; };
+  const suites = [...U.suites].sort((a2, b2) => (b2.master ? 1 : 0) - (a2.master ? 1 : 0)), extra = [...(U.wcs || []), ...U.blocks.filter(b2 => ['office', 'prayer'].includes(b2.kind))];
+  const need = b2 => (b2.master ? MASTER_UP_MIN + .5 : BED_MIN + 1.6) + (b2.bath ? (b2.master ? 5 : 5.4) : 0) + (b2.dress || b2.master ? 3.5 : 0);
+  const units = [{ key: 'UH', lo: Math.max(14, (U.hallArea || 20) * .7), hi: Math.max(40, (U.hallArea || 20) * 2.2), hall: true }, ...suites.map((b2, k) => ({ key: 'S' + k, block: b2, lo: need(b2) + (b2.master ? 2 : 0), hi: b2.master ? MASTER_UP_MAX + 11 : need(b2) * 1.7, room: true })), ...extra.map((b2, k) => ({ key: 'E' + k, block: b2, lo: b2.kind === 'wc' ? 3 : 8, hi: b2.kind === 'wc' ? 9 : 16 })), { key: 'C0', corr: true, opt: true, lo: 2.4, hi: 18 }, { key: 'C1', corr: true, opt: true, lo: 2.4, hi: 18 }];
+  const cellA = []; for (let j = 0; j < nr; j++) for (let i = 0; i < nc; i++) cellA.push(A_(cellR(i, j)));
+  // (بحث بالوحدات أولًا) لكل وحدة مستطيلاتها الممكنة من الخلايا المبنية (غير الدرج) بمقاسها وتراكب أضلاعها؛ ثم تراجع: الصالة العلوية على الدرج،
+  // ثم الممرات (0–2) منها، ثم الغرف تلامس الصالة أو ممرًا بطول باب ولها ضلع خارجي؛ وما بقي من الخلايا المبنية سطح مكشوف
+  const okCell = (i, j) => built[j * nc + i] && !isStair(i, j);
+  const rectsFor = u => { const out = []; for (let j0 = 0; j0 < nr; j0++) for (let i0 = 0; i0 < nc; i0++) for (let j1 = j0 + 1; j1 <= nr; j1++) for (let i1 = i0 + 1; i1 <= nc; i1++) {
+    let ok = true; for (let j = j0; j < j1 && ok; j++) for (let i = i0; i < i1; i++) if (!okCell(i, j)) { ok = false; break; } if (!ok) break;
+    const r = { x0: X[i0], x1: X[i1], y0: Y[j0], y1: Y[j1] }, a2 = A_(r); if (a2 > u.hi) break; if (a2 < u.lo) continue;
+    if ((u.room && (Math.min(W_(r), H_(r)) < (u.block.master ? 4.3 : u.block.bath ? 3.9 : 3.2) || (u.block.bath && Math.max(W_(r), H_(r)) < (u.block.master ? 5.6 : 4.8)) || extLen(r) < 1.5)) || (u.hall && (Math.min(W_(r), H_(r)) < 3.2 || extLen(r) < 1.5)) || (!u.room && !u.hall && Math.min(W_(r), H_(r)) < 1.2) || (u.corr && (Math.min(W_(r), H_(r)) > 2.4 || Math.max(W_(r), H_(r)) < 2.4))) continue;
+    if (!edgesOK(r)) continue;
+    out.push({ i0, j0, i1, j1, r }); } return out; };
+  const C = new Map(units.map(u => [u.key, rectsFor(u)]));
+  const ovl = (p, q) => p.i0 < q.i1 && q.i0 < p.i1 && p.j0 < q.j1 && q.j0 < p.j1;
+  const sols = []; let nodes = 0;
+  const rooms = units.filter(u => !u.corr && !u.hall).sort((a2, b2) => b2.lo - a2.lo), corrs = units.filter(u => u.corr);
+  const P0 = new Map();
+  const recRooms = (k, hubs) => {
+    if (++nodes > 120000 || sols.length >= 30) return;
+    if (k === rooms.length) { sols.push({ P: new Map(P0) }); return; }
+    const u = rooms[k], taken = [...P0.values()];
+    for (const c of C.get(u.key)) { if (taken.some(t => ovl(t, c))) continue; const d = Math.max(...hubs.map(h => touch(c.r, h))); if (d < (u.room ? 1.0 : .9)) continue;
+      P0.set(u.key, c); recRooms(k + 1, hubs); P0.delete(u.key); if (nodes > 120000 || sols.length >= 30) return; }
+  };
+  const uhC = C.get('UH').filter(c => touch(c.r, sr) >= 1.0);
+  for (const nC of [0, 1, 2]) {
+    for (const uh of uhC) {
+      P0.clear(); P0.set('UH', uh);
+      const recC = (m, hubs) => {
+        if (m === nC) { recRooms(0, hubs); return; }
+        for (const c of C.get(corrs[m].key)) { if ([...P0.values()].some(t => ovl(t, c)) || !hubs.some(h => touch(c.r, h) >= 1.0)) continue; P0.set(corrs[m].key, c); recC(m + 1, [...hubs, c.r]); P0.delete(corrs[m].key); if (nodes > 120000 || sols.length >= 30) return; }
+      };
+      recC(0, [uh.r]);
+      if (nodes > 120000 || sols.length >= 30) break;
+    }
+    if (sols.length) break;
+  }
+  // الممر الميت (لا يخدم غرفة) لا يُقبل
+  for (let k = sols.length - 1; k >= 0; k--) { const S = sols[k]; for (const u of corrs) { const c = S.P.get(u.key); if (c && !rooms.some(r0 => r0.room && touch(S.P.get(r0.key).r, c.r) >= 1.0)) { sols.splice(k, 1); break; } } }
+  for (const S of sols) { let used = 0; for (const c of S.P.values()) used += A_(c.r); S.terr = sum(built.map((b2, k) => (b2 ? cellA[k] : 0))) - used - A_(sr); }
+  const rectOf = c => c.r;
+  if (!sols.length) return dbgX('no-solution nodes=' + nodes);
+  // التفضيل: أقل سطح، والصالة العلوية فوق الحركة الأرضية
+  const circG = gr.filter(r => ['entrance', 'corridor', 'living'].includes(r.type));
+  const sc = S => { const uh = rectOf(S.P.get('UH')); return S.terr * 1 - sum(circG.map(r => Math.max(0, Math.min(uh.x1, r.x1) - Math.max(uh.x0, r.x0)) * Math.max(0, Math.min(uh.y1, r.y1) - Math.max(uh.y0, r.y0)))) / Math.max(1, A_(uh)); };
+  sols.sort((a2, b2) => sc(a2) - sc(b2));
+  const out = [], seenM = new Set();
+  for (const S of sols) {
+    const mk0 = units.find(u => u.block?.master)?.key, mpos = mk0 ? JSON.stringify(S.P.get(mk0)) : 'x'; if (seenM.has(mpos)) continue; seenM.add(mpos);
+    const placed = units.filter(u => u.block).map(u => ({ block: u.block, r: rectOf(S.P.get(u.key)), door: 'y0' }));
+    const circ = [{ id: 'stair', r: { ...sr } }, { id: 'hall', r: rectOf(S.P.get('UH')) }, ...units.filter(u => u.corr && S.P.has(u.key)).map((u, k) => ({ id: 'corrX' + k, r: rectOf(S.P.get(u.key)) }))];
+    out.push({ mode: 'upper', tag: 'ux' + out.length + ESC2(mpos), org: 'extrude', sol: { placed, circ, courts: [], voids: [], dh: [], stairSide: 'x0' }, ew, ed, pen: 0, extruded: true });
+    if (out.length >= 3) break;
+  }
+  if (globalThis.__extDbg) globalThis.__extDbg.push({ pat: patOf(g), grid: [nc, nr], sols: sols.length, nodes });
+  return out;
+}
+const ESC2 = s => { let h = 2166136261 >>> 0; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).slice(0, 4); };
 function upperFor(g, U, site, rules = [], entry = 's') {
   const sr = g.sol.circ.find(c => c.id === 'stair')?.r; if (!sr) return null;
   const ew = g.ew, ed = g.ed, x0 = sr.x0, x1 = sr.x1;

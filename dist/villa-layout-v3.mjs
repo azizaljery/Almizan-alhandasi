@@ -611,10 +611,11 @@ function source(log) {
     },
     trees: (P, opts) => {
       const { stair, W, D } = opts;
-      if (stair) return null; // الدوران: أشجار المحرك الثاني (tfTrees/الأرضي بالسلم) في هذا الإصدار
-      const k = `${W.toFixed(2)}x${D.toFixed(2)}|${P.blocks.map(b => b.id + ':' + Math.round(b.area)).join(',')}`;
+      // (الجولة 21 — مقترح) الأرضي بالسلم يُركَّب من العلاقات أيضًا (بعد إصلاح ST) ويُضم إلى المكتبة — فيُبنى عليه العلوي من جدرانه
+      if (stair && R14_OFF_V3.has('r21gstair')) return null;
+      const k = `${stair ? 'S' : ''}${W.toFixed(2)}x${D.toFixed(2)}|${P.blocks.map(b => b.id + ':' + Math.round(b.area)).join(',')}`;
       if (!memo.has(k)) {
-        const r = synthTrees(P, { W, D }); Object.assign(log, r.log);
+        const r = synthTrees(P, { W, D, stair: !!stair }); if (stair) log.groundStair = r.log; else Object.assign(log, r.log);
         // فضاء البحث = التنظيمات المركّبة من العلاقات ∪ مكتبة الخبرة (أنماط المحرك الثاني) — كلها تمر بالقيود والبوابات نفسها
         const lib = V2.withTreeSource(null, () => V2.partiTrees(P, opts));
         log.library = lib.length; log.synth = r.trees.length;
