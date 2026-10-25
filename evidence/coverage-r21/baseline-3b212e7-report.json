@@ -1,0 +1,372 @@
+{
+ "label": "baseline-3b212e7",
+ "seeds": {
+  "dev": {
+   "n": 40,
+   "valid": 14,
+   "validPct": 35,
+   "hiddenOnly": 7,
+   "claimedInfeasible": 3,
+   "provenInfeasible": 0,
+   "searchIncomplete": 16,
+   "claimedWithProofNow": 0,
+   "claimed": [
+    {
+     "id": "R8",
+     "proofNow": false,
+     "lowerBound": 75,
+     "available": 171
+    },
+    {
+     "id": "R17",
+     "proofNow": false,
+     "lowerBound": 148,
+     "available": 270
+    },
+    {
+     "id": "R34",
+     "proofNow": false,
+     "lowerBound": 119,
+     "available": 191
+    }
+   ],
+   "oneFloor": {
+    "n": 30,
+    "valid": 14
+   },
+   "twoFloors": {
+    "n": 10,
+    "valid": 0
+   },
+   "distinctValidPerCase": {
+    "mean": 0.73,
+    "histogram": [
+     26,
+     4,
+     7,
+     1,
+     2,
+     0
+    ]
+   },
+   "requestedTotal": 149,
+   "distinctTotal": 29,
+   "ms": {
+    "mean": 38182,
+    "max": 154409
+   },
+   "rssMBmax": 1387,
+   "failureStage": {
+    "selection (all shown hidden)": 7,
+    "validation": 13,
+    "feasibility": 3,
+    "allocation": 3
+   },
+   "topFailureCauses": [
+    [
+     "no-upper-fits",
+     190
+    ],
+    [
+     "tree:dims:bedroom",
+     181
+    ],
+    [
+     "tree:dims:kitchen",
+     123
+    ],
+    [
+     "tf:stack",
+     116
+    ],
+    [
+     "tree:hall-aspect",
+     110
+    ],
+    [
+     "tree:dining-strip",
+     91
+    ],
+    [
+     "tree:slab-span",
+     83
+    ],
+    [
+     "tree:corr-long",
+     70
+    ],
+    [
+     "tree:dims:majlis",
+     65
+    ],
+    [
+     "tree:small:suite",
+     63
+    ],
+    [
+     "tree:circ-graph",
+     62
+    ],
+    [
+     "tree:women-width",
+     55
+    ],
+    [
+     "tree:hall-big",
+     47
+    ],
+    [
+     "tree:bed-small",
+     40
+    ],
+    [
+     "tf:none",
+     38
+    ]
+   ],
+   "leaks": 0,
+   "noticesWithBannedTerms": [
+    "R1",
+    "R2",
+    "R5",
+    "R6",
+    "R9",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R15",
+    "R18",
+    "R19",
+    "R20",
+    "R21",
+    "R22",
+    "R23",
+    "R24",
+    "R25",
+    "R26",
+    "R27",
+    "R28",
+    "R29",
+    "R31",
+    "R32",
+    "R35",
+    "R36",
+    "R37",
+    "R39",
+    "R40"
+   ],
+   "noticesWithContradictions": [
+    "R5",
+    "R8",
+    "R10",
+    "R12",
+    "R17",
+    "R19",
+    "R24",
+    "R25",
+    "R27",
+    "R29",
+    "R34",
+    "R37",
+    "R40"
+   ]
+  },
+  "eval": {
+   "n": 40,
+   "valid": 9,
+   "validPct": 22.5,
+   "hiddenOnly": 6,
+   "claimedInfeasible": 7,
+   "provenInfeasible": 0,
+   "searchIncomplete": 18,
+   "claimedWithProofNow": 0,
+   "claimed": [
+    {
+     "id": "R12",
+     "proofNow": false,
+     "lowerBound": 158,
+     "available": 248
+    },
+    {
+     "id": "R14",
+     "proofNow": false,
+     "lowerBound": 149,
+     "available": 243
+    },
+    {
+     "id": "R20",
+     "proofNow": false,
+     "lowerBound": 75,
+     "available": 232
+    },
+    {
+     "id": "R23",
+     "proofNow": false,
+     "lowerBound": 160,
+     "available": 217
+    },
+    {
+     "id": "R24",
+     "proofNow": false,
+     "lowerBound": 159,
+     "available": 187
+    },
+    {
+     "id": "R27",
+     "proofNow": false,
+     "lowerBound": 166,
+     "available": 232
+    },
+    {
+     "id": "R33",
+     "proofNow": false,
+     "lowerBound": 82,
+     "available": 199
+    }
+   ],
+   "oneFloor": {
+    "n": 29,
+    "valid": 8
+   },
+   "twoFloors": {
+    "n": 11,
+    "valid": 1
+   },
+   "distinctValidPerCase": {
+    "mean": 0.38,
+    "histogram": [
+     31,
+     5,
+     2,
+     2,
+     0,
+     0
+    ]
+   },
+   "requestedTotal": 146,
+   "distinctTotal": 15,
+   "ms": {
+    "mean": 33915,
+    "max": 129001
+   },
+   "rssMBmax": 1393,
+   "failureStage": {
+    "allocation": 3,
+    "validation": 15,
+    "selection (all shown hidden)": 6,
+    "feasibility": 7
+   },
+   "topFailureCauses": [
+    [
+     "tree:dims:bedroom",
+     164
+    ],
+    [
+     "tree:hall-aspect",
+     156
+    ],
+    [
+     "no-upper-fits",
+     149
+    ],
+    [
+     "tree:corr-long",
+     122
+    ],
+    [
+     "tree:dims:majlis",
+     109
+    ],
+    [
+     "tree:dining-strip",
+     98
+    ],
+    [
+     "tree:dims:kitchen",
+     96
+    ],
+    [
+     "tree:circ-graph",
+     88
+    ],
+    [
+     "tree:foyer-big",
+     77
+    ],
+    [
+     "tree:slab-span",
+     74
+    ],
+    [
+     "tf:stack",
+     72
+    ],
+    [
+     "tree:hall-big",
+     66
+    ],
+    [
+     "tree:majlis-width",
+     61
+    ],
+    [
+     "tree:women-width",
+     58
+    ],
+    [
+     "tree:access:wc",
+     42
+    ]
+   ],
+   "leaks": 0,
+   "noticesWithBannedTerms": [
+    "R1",
+    "R2",
+    "R4",
+    "R5",
+    "R6",
+    "R7",
+    "R10",
+    "R15",
+    "R16",
+    "R17",
+    "R18",
+    "R19",
+    "R21",
+    "R22",
+    "R25",
+    "R26",
+    "R28",
+    "R29",
+    "R30",
+    "R32",
+    "R34",
+    "R35",
+    "R36",
+    "R37",
+    "R38",
+    "R39",
+    "R40"
+   ],
+   "noticesWithContradictions": [
+    "R1",
+    "R4",
+    "R5",
+    "R7",
+    "R12",
+    "R14",
+    "R17",
+    "R20",
+    "R21",
+    "R23",
+    "R24",
+    "R26",
+    "R27",
+    "R33",
+    "R34",
+    "R36"
+   ]
+  }
+ }
+}
