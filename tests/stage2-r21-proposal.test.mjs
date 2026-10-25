@@ -38,3 +38,18 @@ test('01 الطلب بلا عقد (مستدعٍ قديم) يُبنى عقده م
   const b = briefOf({ text: 'ابي مقلط للضيوف' }); assert.equal(briefMajlisDoor(b), true);
   assert.deepEqual(buildSharedBrief('', {}).relations, []);
 });
+
+// ------------------------------------------------------------------------------------------------ 02 المقاسات الصريحة قيد بناء (H10)
+import { verifyRequest } from '../dist/rules.mjs';
+import * as V3 from '../dist/villa-layout-v3.mjs';
+test('02 المقاس الصريح صافيه وسماحيته كما قالهما العميل (لا 0.2 م جدارًا ثابتًا ولا سماحية مصفّرة)', () => {
+  const r = req('مجلس 5×6، مطبخ 4×4', { bedrooms: 3, majlis: 1 }), P = programV2({ bedrooms: 3, majlis: 1, kitchens: 1, halls: 1, dining: 1 }, r);
+  const k = P.blocks.find(b => b.id === 'kitchen1'); assert.deepEqual([k.dimNet.s, k.dimNet.l, k.dimNet.tol], [4, 4, .05]);
+});
+test('02 مطبخ 4×4 ومجلس 5×6 على أرض تتسع: يُرسمان بمقاسيهما طولًا وعرضًا (يُعاد القياس من المرسوم بعد التفصيل)', { timeout: 900000 }, () => {
+  const counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, r = req('دور واحد، 3 غرف نوم، مجلس 5×6، المطبخ 4×4', counts);
+  const o = V3.generateVillaDesigns({ land: { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts: r.counts, requirements: r, keep: 2 });
+  const d = o.designs.find(x => x.presentation?.status !== 'hidden'); assert.ok(d, 'بديل غير محجوب');
+  const L = verifyRequest(d.doc, r, { entry: 's' }).filter(x => x.kind === 'dims'); assert.equal(L.length, 2);
+  for (const x of L) { assert.equal(x.ok, true, x.text + ' ' + JSON.stringify(x.actual)); assert.ok(Math.abs(x.actual.s - x.want.s) <= .05 && Math.abs(x.actual.l - x.want.l) <= .05); }
+});
