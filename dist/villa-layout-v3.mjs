@@ -502,7 +502,9 @@ export function synthTwoFloors(G, U, site, { nOut = 12 } = {}) {
       // ترتيب العلوي بتراكب الجدران: أجنحة النوم فوق وحدات أرضية مقسّمة (الخدمة، الطعام، المجلسان) أو فوق جناح نوم أرضي، والصالة العلوية فوق
       // الصالة الأرضية أو المدخل — جدران العلوي على جدران الأرضي ما أمكن (التراكب يُقاس بعدها على المفصّل)
       const under = (r, ks) => { let n = 0, t = 0; for (let y = r.y0; y < r.y1; y++) for (let x = r.x0; x < r.x1; x++) { t++; const g = Object.entries(L.R).find(([, q]) => x >= q.x0 && x < q.x1 && y >= q.y0 && y < q.y1)?.[0] || ''; if (ks.some(k => g.startsWith(k))) n++; } return t ? n / t : 0; };
-      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (k[0] === 'S' ? under(r, ['KS', 'DN', 'S', 'W', 'M']) : k === 'UH' ? under(r, ['H', 'F', 'LK']) : 0), 0);
+      // (الجولة 21) مجلس الرجال فراغ واسع بلا جدران داخلية: غرف النوم فوقه تحمل جدرانًا طويلة بلا حامل (H4 في r20) — تحته الصالة العلوية أو سطح،
+      // وغرف النوم فوق الخدمة والطعام ومجلس النساء وجناح النوم الأرضي (جدران أكثر تحتها)
+      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (k[0] === 'S' ? under(r, R14_OFF_V3.has('r21stack') ? ['KS', 'DN', 'S', 'W', 'M'] : ['KS', 'DN', 'S', 'W']) - (R14_OFF_V3.has('r21stack') ? 0 : under(r, ['M', 'H'])) : k === 'UH' ? under(r, R14_OFF_V3.has('r21stack') ? ['H', 'F', 'LK'] : ['H', 'F', 'LK', 'M']) : k[0] === 'T' && !R14_OFF_V3.has('r21stack') ? .8 * under(r, ['M', 'W', 'H']) : 0), 0);
       ups.sort((a, b) => b.align - a.align);
       for (const Lu of ups.slice(0, 6)) {
         const tr = jointTree(L, Lu, gU.units, uUnits, G, U, gardenA, site); if (!tr) { log.noTree = (log.noTree || 0) + 1; continue; }
@@ -545,7 +547,8 @@ function upperLayouts(L, uUnits) {
       if (!free(x0, y0, w, h)) continue; const r = { x0, y0, x1: x0 + w, y1: y0 + h };
       fill(x0, y0, w, h, 1); place.set(u.key, r); rec(); place.delete(u.key); fill(x0, y0, w, h, -1);
     }
-    if (tUsed < 3) { const r = { x0, y0, x1: x0 + 1, y1: y0 + 1 }; fill(x0, y0, 1, 1, 2); place.set('T' + tUsed, r); tUsed++; rec(); tUsed--; place.delete('T' + (tUsed)); fill(x0, y0, 1, 1, -1); }
+    // (الجولة 21) السطح المكشوف فوق الفراغات الأرضية الواسعة (المجالس) خلية خلية: كان حده 3 فتُجبر غرف النوم فوق المجلس على الأرض العريضة
+    if (tUsed < (R14_OFF_V3.has('r21stack') ? 3 : 6)) { const r = { x0, y0, x1: x0 + 1, y1: y0 + 1 }; fill(x0, y0, 1, 1, 2); place.set('T' + tUsed, r); tUsed++; rec(); tUsed--; place.delete('T' + (tUsed)); fill(x0, y0, 1, 1, -1); }
   };
   rec();
   return out;
@@ -577,7 +580,13 @@ function jointTree(L, Lu, gUnits, uUnits, G, U, gardenA, site = { W: 20, D: 20 }
     const lit = [...bnd(r, nc, nr)];
     const vs = sleepVariants(u.blocks, c, lit.length ? lit : ['x0', 'x1', 'y0', 'y1'], k === 'S1' ? 'U' : 'V');
     // أنسب الأنواع لأبعاد الخلية التقريبية (لا الأول دائمًا)
-    const cw = (r.x1 - r.x0) * cellW, ch = (r.y1 - r.y0) * cellH, v = vs.sort((a, b) => Math.max(K.minExt(a.tree, 'x') / cw, K.minExt(a.tree, 'y') / ch) - Math.max(K.minExt(b.tree, 'x') / cw, K.minExt(b.tree, 'y') / ch))[0];
+    const cw = (r.x1 - r.x0) * cellW, ch = (r.y1 - r.y0) * cellH;
+    // (الجولة 21) التراكب قبل الهندسة: جدار الممر الطويل وفواصل الغرف أطول من 5 م فوق فراغ أرضي واسع لا يحمله شيء — يُقدَّم النوع الذي
+    // تقع جدرانه الطويلة على البعد الأقصر للخلية (الممر عموديًا على الحد الأطول)، ثم الأنسب أبعادًا
+    const fit = t => Math.max(K.minExt(t.tree, 'x') / cw, K.minExt(t.tree, 'y') / ch);
+    const longAx = t => { const ax = c[0] === 'y' ? 'y' : 'x', par = ax === 'y' ? 'x' : 'y', k = t.tag[0].toLowerCase(); return k === 'g' ? par : k === 'd' ? ax : ax; };
+    const excess = t => { if (R14_OFF_V3.has('r21stack')) return 0; const a = longAx(t), lw = a === 'x' ? cw : ch, cr = a === 'x' ? ch : cw; return Math.max(0, lw - 5) + Math.max(0, cr - 1.5 - 5); };
+    const v = vs.filter(t => fit(t) <= 1.02).sort((a, b) => excess(a) - excess(b) || fit(a) - fit(b))[0] || vs.sort((a, b) => fit(a) - fit(b))[0];
     return v ? v.tree : Z(u.blocks, c, c[0] === 'y' ? 'x' : 'y');
   };
   const inR = (rs, reg) => rs.filter(({ r }) => r.x0 >= reg.x0 && r.x1 <= reg.x1 && r.y0 >= reg.y0 && r.y1 <= reg.y1);

@@ -359,16 +359,40 @@ function fixExtOf(c, dir, crossNet, allow) {
 }
 /** (الجولة 21) سماكة الجدارين على طرفي امتداد: خارجي (EXT) على حد الغلاف، وإلا داخلي (INT) — كما يقيس التقييم والسجل الصافي. */
 const wallPair = (extA, extB) => (extA ? EXT / 2 : INT / 2) + (extB ? EXT / 2 : INT / 2);
+/**
+ * (الجولة 21) خطوط جدران الأرضي داخل مستطيل r: { v: [{c, s0, s1}] خطوط رأسية (x ثابت)، h: أفقية } من حواف فراغاته الموضوعة.
+ * تُستعمل وحدها لجذب قطوع العلوي فوقها (جدار علوي فوق جدار أرضي = حمل مباشر).
+ */
+function supportLines(out, r) {
+  const L = { v: [], h: [] }, rs = [...out.placed.map(p => p.r), ...out.circ.map(c => c.r), ...out.courts];
+  for (const q of rs) {
+    const ix0 = Math.max(q.x0, r.x0), ix1 = Math.min(q.x1, r.x1), iy0 = Math.max(q.y0, r.y0), iy1 = Math.min(q.y1, r.y1); if (ix1 - ix0 < .3 || iy1 - iy0 < .3) continue;
+    for (const x of [q.x0, q.x1]) if (x > r.x0 + .3 && x < r.x1 - .3) L.v.push({ c: x, s0: iy0, s1: iy1 });
+    for (const y of [q.y0, q.y1]) if (y > r.y0 + .3 && y < r.y1 - .3) L.h.push({ c: y, s0: ix0, s1: ix1 });
+  }
+  return L;
+}
+/** يجذب قطعًا على المحور dir (x: خط رأسي) إلى أقرب خط جدار أرضي يغطي نصف امتداده على الأقل، ضمن 1.2 م وحدود [lo, hi]. */
+const SUPPORT_SNAP = 2.0;
+function snapToSupport(sup, dir, q, [s0, s1], lo, hi) {
+  const lines = dir === 'x' ? sup.v : sup.h, len = s1 - s0; let best = null;
+  const by = new Map(); for (const l of lines) { if (Math.abs(l.c - q) > SUPPORT_SNAP) continue; const k = Math.round(l.c * 100); const ov = Math.max(0, Math.min(s1, l.s1) - Math.max(s0, l.s0)); by.set(k, (by.get(k) || 0) + ov); }
+  for (const [k, cov] of by) { const c = k / 100; if (cov < len * .5 - 1e-6 || c < lo - 1e-6 || c > hi + 1e-6) continue; if (!best || Math.abs(c - q) < Math.abs(best - q) - 1e-9 || (Math.abs(Math.abs(c - q) - Math.abs(best - q)) < 1e-9 && c < best)) best = c; }
+  return best ?? q;
+}
 /** يحل الشجرة داخل غلاف ew×ed: يعيد الكتل الموضوعة والحركة والأحواش والفراغات الخارجية، أو null. */
 function solve(tree, ew, ed) {
   const out = { placed: [], circ: [], courts: [], voids: [], dh: [] };
+  let sup = null; // (الجولة 21) خطوط جدران الأرضي تحت عقدة علوية مزدوجة
   const edgesExt = q => ({ x0: q.x0 <= 1e-6, x1: q.x1 >= ew - 1e-6, y0: q.y0 <= 1e-6, y1: q.y1 >= ed - 1e-6 });
   let o = out; // (الجولة التاسعة) عقدة «dual»: الدوران معًا في المستطيل نفسه — الأرضي في out والعلوي في out.up
   const rec = (n, r) => {
     if (n.t === 'dual') {
       if (!rec(n.g, r)) return false;
       const keep = o; o = out.up ||= { placed: [], circ: [], courts: [], voids: [], dh: [] };
-      const ok = rec(n.u, r); o = keep; return ok;
+      // (الجولة 21) التراكب الإنشائي قيدُ توليد: جدران العلوي في هذا المستطيل تنجذب إلى خطوط جدران الأرضي تحته (لا فحصًا بعد البناء فقط)
+      const prevSup = sup; sup = R14_OFF.has('r21stack') ? null : supportLines(out, r);
+      const ok = rec(n.u, r); sup = prevSup; o = keep; return ok;
     }
     // (الجولة التاسعة) عقدة «إطار» بقطوع ثابتة (إحداثيات مطلقة من الدور الأرضي): جدران العلوي على خطوط جدران الأرضي
     if ((n.t === 'x' || n.t === 'y') && n.at) {
@@ -400,7 +424,14 @@ function solve(tree, ew, ed) {
       for (let i = 0; i < n.k.length; i++) {
         if (sz[i] === 0 && n.k[i].opt) continue;
         const nxt = sz.findIndex((v, q) => q > i && v > 0);
-        const q = i === lastI ? end : nxt === lastI && preLast !== null ? preLast : dimF[i] ? r1c(p + sz[i]) : snap(p + sz[i]);
+        let q = i === lastI ? end : nxt === lastI && preLast !== null ? preLast : dimF[i] ? r1c(p + sz[i]) : snap(p + sz[i]);
+        const fixedK = c => (c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir;
+        if (sup && i !== lastI && !dimF[i] && !fixedK(n.k[i])) {
+          const rest = n.k.slice(i + 1).reduce((a, c, j) => a + (sz[i + 1 + j] > 0 ? minExt(c, dir) : 0), 0);
+          // الممر الثابت الأخير يتسع حتى 1.6 من عرضه ليقع جداره على جدار أرضي (ممر 1.5 م ← حتى 2.4 م)، ولا يضيق
+          if (nxt === lastI && fixedK(n.k[nxt])) { const f = n.k[nxt].fix; q = snapToSupport(sup, dir, q, dir === 'x' ? [r.y0, r.y1] : [r.x0, r.x1], Math.max(p + minExt(n.k[i], dir), end - f * 1.6), end - f); }
+          else if (!(nxt >= 0 && fixedK(n.k[nxt]))) q = snapToSupport(sup, dir, q, dir === 'x' ? [r.y0, r.y1] : [r.x0, r.x1], p + minExt(n.k[i], dir), end - rest);
+        }
         if (q - p < .5) return false;
         if (!rec(n.k[i], dir === 'x' ? { x0: p, x1: q, y0: r.y0, y1: r.y1 } : { x0: r.x0, x1: r.x1, y0: p, y1: q })) return false;
         p = q;
@@ -415,7 +446,9 @@ function solve(tree, ew, ed) {
       let p = dir === 'x' ? r.x0 : r.y0; const end = dir === 'x' ? r.x1 : r.y1;
       const r1z = v => Math.round(v * 100) / 100, preZ = last > 0 && zF[last] ? r1z(end - sz[last]) : null;
       n.b.forEach((b, i) => {
-        const q = i === n.b.length - 1 ? end : i === last - 1 && preZ !== null ? preZ : zF[i] ? r1z(p + sz[i]) : snap(p + sz[i]), slot = dir === 'x' ? { x0: p, x1: q, y0: r.y0, y1: r.y1 } : { x0: r.x0, x1: r.x1, y0: p, y1: q };
+        let q = i === n.b.length - 1 ? end : i === last - 1 && preZ !== null ? preZ : zF[i] ? r1z(p + sz[i]) : snap(p + sz[i]);
+        if (sup && i !== last && !zF[i] && !(i === last - 1 && preZ !== null)) { const cz = dir === 'x' ? H_(r) : W_(r), rest = n.b.slice(i + 1).reduce((a, x) => a + suiteRun(x, cz), 0); q = snapToSupport(sup, dir, q, dir === 'x' ? [r.y0, r.y1] : [r.x0, r.x1], p + suiteRun(b, cz), end - rest); }
+        const slot = dir === 'x' ? { x0: p, x1: q, y0: r.y0, y1: r.y1 } : { x0: r.x0, x1: r.x1, y0: p, y1: q };
         p = q;
         // مطبخ بمقاس صريح في عمود أعرض منه: الزائد مخزن حقيقي يُفتح من المطبخ (لا يُمطّ المطبخ عن مقاسه)؛
         // وغرفة خادمة في عمود خدمة عريض: الزائد غرفة غسيل بجوارها تُفتح من المطبخ أو الحركة (لا غرفة خادمة متضخمة)
@@ -3964,7 +3997,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
     for (const tr of tfTrees(G, U, site)) {
       if (timeUp()) break;
       if (avoidM.has(tr.mode) || doneModes.has(tr.mode)) continue;
-      let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch { r = null; }
+      let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch (err) { r = null; tr._why = [...(tr._why || []), "throw:" + String(err?.message || err).slice(0, 60)]; }
       if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'], tfWhy: tr._why || [] }); continue; }
       const n0 = designs.length;
       build2(r.g, r.up, { summary: `${TF_PARTI_AR[tr.mode] || DYN_AR.get(tr.mode) || tr.mode}؛ والعلوي: ${TF_UPPER_AR[tr.org] || DYN_AR.get(tr.mode + ':up') || ''} (دوران)`, note: tr.note_ar ? tr.note_ar : tr.mode === 'frontstair' ? 'السلم في المقدمة خلف بهو المدخل، ويصل إلى ردهة علوية فوق البهو وصالة علوية خلفه؛ والرئيسية في الركن الخلفي البعيد.' : tr.mode === 'sidestair' ? 'السلم على جدار الجار بجوار بهو مزدوج الارتفاع، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'rearstair' ? 'السلم في الخلف بجوار الصالة، ويصل إلى الدور العلوي في الموضع نفسه.' : tr.mode === 'stairhall' ? 'السلم بين بهو المدخل والصالة، ويصل إلى الدور العلوي بين الصالة العلوية الأمامية والردهة.' : tr.mode === 'guestgarden' ? 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، وغرفة كبار السن على حديقة خاصة بعيدة عن الضيافة؛ والسلم في آخر جناح الخدمة يصل إلى الصالة العلوية.' : tr.mode === 'rowsup' ? 'السلم خلف المدخل يصل إلى ردهة علوية بين الصالة العائلية الأمامية ورواق الغرف الخلفي.' : 'المجلس جناح ضيافة بدور واحد (سطحه مكشوف)، والدور العلوي فوق الكتلة العائلية فقط.' });
@@ -4408,7 +4441,13 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
   let best = null;
   for (const b of optimizeSteps(tr.tree, site, evalFn, { iters: globalThis.__v2iters || (U.suites.length >= 5 ? 2 * tr.iters : tr.iters), seed: 'tf' + tr.tag, tol: tr.tol })) best = b;
   if (globalThis.__v2dbg) { const d = globalThis.__v2dbg; if (best) { const v0 = best.sol.viol, v1 = best.sol.up?.viol; const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); const o2 = {}; globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, { ...U, men: null, women: [] }, best.ew, best.ed, { upper: true }); globalThis.__v2dbg = d; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; d['tfj:' + tr.mode + ':' + tr.tag] = `viol ${best.sol.viol} T[${[...(best.sol._tfwhy || [])]}] G[${Object.keys(o)}] U[${Object.keys(o2)}] st=${r2(best.sol.stack?.run || 0)}${best.sol.stack?.seg ? '@' + best.sol.stack.seg.map(v => typeof v === 'number' ? r2(v) : v).join(',') : ''} env ${r2(best.ew)}x${r2(best.ed)}`; if (d.keepSol) d['tfsol:' + tr.mode + ':' + tr.tag] = { g: best.sol, u: best.sol.up, ew: best.ew, ed: best.ed }; } else d['tfj:' + tr.mode + ':' + tr.tag] = 'none'; }
-  if (!best || best.sol.viol) { tr._why = best ? [...(best.sol._tfwhy || [])] : ['none']; return null; }
+  if (globalThis.__tfBest && best) globalThis.__tfBest[tr.mode + ':' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed, stack: best.sol.stack };
+  if (!best || best.sol.viol) {
+    tr._why = best ? [...(best.sol._tfwhy || [])] : ['none'];
+    // (الجولة 21) وأسباب التقييم نفسه في الدورين (كانت تُسقط فلا يعرف التقرير لماذا رسب التنظيم)
+    if (best) { const keep = globalThis.__v2dbg, v0 = best.sol.viol, v1 = best.sol.up?.viol, o = {}, o2 = {}; try { globalThis.__v2dbg = o; scoreV2(best.sol, G, best.ew, best.ed, ctxG); globalThis.__v2dbg = o2; if (best.sol.up) scoreV2(best.sol.up, UP, best.ew, best.ed, { upper: true }); } finally { globalThis.__v2dbg = keep; best.sol.viol = v0; if (best.sol.up) best.sol.up.viol = v1; }
+      tr._why.push(...Object.keys(o).map(k => 'g:' + k), ...Object.keys(o2).map(k => 'u:' + k)); }
+    return null; }
   const rp = rulePenalty(best.sol.placed, ruleCirc(best.sol.circ), best.ew, best.ed, rules, entry);
   const g = { mode: tr.mode, tag: tr.tag, tree: tr.tree, stepped: false, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p, rp };
   return { g, up: { mode: 'upper', tag: 'u' + tr.org, org: tr.org, sol: best.sol.up, ew: best.ew, ed: best.ed, pen: best.p } };
