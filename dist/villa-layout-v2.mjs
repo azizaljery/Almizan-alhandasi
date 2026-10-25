@@ -246,7 +246,8 @@ function dimBlocks(key, P) {
   if (key === 'kitchen') return B.filter(b => b.id === 'kitchen1');
   if (key === 'dining') return B.filter(b => b.kind === 'dining');
   if (key === 'master') return B.filter(b => b.master);
-  if (key === 'bedroom') return B.filter(b => b.kind === 'suite' && !b.master && !b.guest);
+  // (02b) «غرف النوم» بالمعنى نفسه في السجل (rules.mjs AREA_SUBJ.bedroom = kids): غير الرئيسية ولا كبار السن ولا الضيوف
+  if (key === 'bedroom') return B.filter(b => b.kind === 'suite' && !b.master && !b.guest && (R14_OFF.has('r21dimfix') || !b.elderly));
   return [];
 }
 
@@ -374,7 +375,9 @@ function dist(L, items) {
     if (!nFree) {
       const out = new Array(n); for (let i = 0; i < n; i++) out[i] = fv[i];
       let nFlex = 0; for (let i = 0; i < n; i++) if (!items[i].fix) nFlex++;
-      if (nFlex) { for (let i = 0; i < n; i++) if (!items[i].fix) out[i] += rest / nFlex; } else out[n - 1] += rest;
+      // (02b) كل الأبناء ثابتون: الباقي يُوزَّع على ذوات المقاس الصريح بالتساوي ما دام ضمن سماحية كل منها (لا يُلقى كله على الأخير فيخرج عن مقاسه)
+      const fts = []; for (let i = 0; i < n; i++) if (items[i].ft) fts.push(i);
+      if (nFlex) { for (let i = 0; i < n; i++) if (!items[i].fix) out[i] += rest / nFlex; } else if (fts.length && fts.every(i => Math.abs(rest / fts.length) <= items[i].ft + 1e-9)) { for (const i of fts) out[i] += rest / fts.length; } else out[n - 1] += rest;
       return out;
     }
     tot = tot || 1; let ch = false;
@@ -384,22 +387,56 @@ function dist(L, items) {
   return null;
 }
 /**
- * (الجولة 21) المقاس الصريح قيدُ بناء لا هدفُ بحث: امتداد الكتلة على صفها يُثبَّت على أحد ضلعيها المطلوبين (الأطول إن لم يتسع العمق له،
- * وإلا الأقصر)، فلا يبقى للبحث إلا ضلع واحد يطابقه بدل ضلعين مقترنين بعرض العمود كله (H10 وH5 في r20: dims:* أكثر ما أسقط الأشجار).
- * لا تُثبَّت غرف النوم بحماماتها (المقاس للغرفة دون الحمام) ولا مجلس الرجال بشريط دهليزه (الشريط يمتص الفرق في التفصيل).
+ * (الجولة 21 — 02b، قرار المالك «إعادة للتعديل») المقاس الصريح قيدُ بناء لكل نوع غرفة له مقاس من العميل (المجلس، المطبخ، الطعام، غرف النوم، الرئيسية).
+ * ما يُقاس وبين ماذا (عقد واحد مع السجل dist/rules.mjs «D-…»): المقاس الصافي بين **الوجوه الداخلية** للجدران، كل ضلع على حدة. إحداثيات القطع
+ * في الشجرة **محاور جدران**، فالامتداد الإجمالي = الصافي + نصف سماكة جدار كل طرف بحسب نوعه الفعلي: خارجي EXT/2 على حد الغلاف أو مقابل فراغ
+ * مكشوف، وإلا داخلي INT/2 — ولا يُجمع جداران بلا معرفة نوعيهما (wallPair). السماحية من تفسير الطلب نفسه (DIM_TOL في requirements.mjs:
+ * «بالضبط» ±0.03، بلا وصف ±0.05، «تقريبًا» ±0.30)، وأدنى دقة هندسية للقطع الثابت 1 سم (r1c/r1z) — لا رقم يفرضه المحرك على الكل.
+ * الاتجاه (أي الضلعين على امتداد الصف): يُختار بقابلية التحقيق الفعلية — الضلع الآخر يقابل العرض الصافي المتاح عرضيًا (crossNet، معروف
+ * لحظة الحل) بأقل فرق؛ والطلب لا يحدد اتجاهًا (المقاس بلا اتجاه في المحلل)، فالدوران مسموح. (كانت عتبة ثابتة 0.30 م بلا اشتقاق — أُزيلت.)
+ * الجناح بحمامه: متغيران معلنان بدل تخمين التفصيل — «عميق» (الحمام ومدخل الجناح على جهة الباب: الامتداد = الضلع الصافي + الجداران، والعمق
+ * يمتصه الشريط ضمن مدى الحمام) أو «جانبي» (الحمام شريط على طرف الامتداد: الامتداد = الضلع + الشريط + جداراه، والعمق = الضلع الآخر)؛ التفصيل
+ * يقطع الغرفة على مقاسها والشريط يأخذ الباقي (realizeV2)، والتقييم يتنبأ بالنتيجة نفسها (scoreV2). لا يُغيَّر المقاس الصريح لتسهيل البحث:
+ * ما لا يتحقق يُقاس بعد التفصيل ويُحجب البديل بسببه المقيس.
+ * يعيد { run, v, a, c, err, … } (a على امتداد الصف، c عرضيًا) أو null.
  */
-const dimRun = (b, crossNet, allowRun, dir = null) => {
-  if (!b.dimGross || b.kind === 'suite' || R14_OFF.has('r21dimfix')) return 0;
-  if (!b.dimNet) return 0; const sN = b.dimNet.s, lN = b.dimNet.l;
-  // مجلس الرجال بشريط دهليزه: الشريط العرضي (الأمامي، بعمق MEN_LOBBY_D) على محور y — يُثبَّت العرض (x) على الضلع الصافي وحده، والعمق (y)
-  // على الضلع الآخر + الدهليز؛ الضلع الأطول حيث يتسع الآخر له
-  if (b.kind === 'majlis' && b.guestWc) { if (!b.men || !dir) return 0; return dir === 'x' ? (crossNet - MEN_LOBBY_D >= lN - .3 ? sN : lN) + allowRun : (crossNet >= lN - .3 ? sN : lN) + MEN_LOBBY_D + allowRun; }
-  return (crossNet >= lN - .3 ? sN : lN) + allowRun;
-};
+const SUITE_TD_RANGE = b => (b.master ? [2.2, 3.2] : [1.95, 2.9]), SUITE_T_RANGE = b => (b.master ? [1.9, 2.8] : [1.5, 2.4]);
+function dimPlan(b, crossNet, ends, dir = null, runAxis = null, fit = false) {
+  if (!b.dimGross || !b.dimNet || R14_OFF.has('r21dimfix')) return null;
+  const T = DESIGN_TARGETS, sN = b.dimNet.s, lN = b.dimNet.l, orient = sN === lN ? [[sN, lN]] : [[sN, lN], [lN, sN]], opts = [];
+  if (b.kind === 'majlis' && b.guestWc) {
+    // مجلس الرجال بشريط دهليزه الأمامي (MEN_LOBBY_D على محور y، كما في menStrip): على x الامتداد = الصافي، وعرضيًا الصافي + الدهليز؛ على y العكس
+    if (!b.men || !dir) return null;
+    for (const [a, c] of orient) opts.push(dir === 'x' ? { run: a + ends, v: 'lobby', a, c, err: Math.abs(crossNet - MEN_LOBBY_D - c) } : { run: a + MEN_LOBBY_D + ends, v: 'lobby', a, c, err: Math.abs(crossNet - c) });
+  } else if (b.kind === 'suite' && b.bath && !b.nearHall) {
+    if (R14_OFF.has('r21dimsuite')) return null;
+    // الجناح يُثبَّت على محور امتداد صفه فقط (محور جهة بابه)؛ على المحور الآخر يبقى البحث والقياس بعد التفصيل
+    if (runAxis && dir && dir !== runAxis) return null;
+    const bl0 = b.master ? T.masterBathL : T.bathL, tdR = SUITE_TD_RANGE(b), tR = SUITE_T_RANGE(b), t0 = b.master ? T.masterStripD : T.stripD;
+    for (const [a, c] of orient) {
+      const td = crossNet - c; // جهة الباب داخلية (على الحركة): عمق الشريط الإجمالي = العرض الصافي − ضلع الغرفة
+      if (a + ends >= Math.max(1.25 + bl0 * .9, VEST_MIN + 2.1) && td >= tdR[0] - 1e-6 && td <= tdR[1] + 1e-6) opts.push({ run: a + ends, v: 'deep', a, c, err: 0, td, rank: 1 });
+      opts.push({ run: a + t0 + INT / 2 + ends / 2, v: 'side', a, c, err: Math.abs(crossNet - c), t: t0, rank: 0, tR });
+    }
+  } else for (const [a, c] of orient) opts.push({ run: a + ends, v: 'plain', a, c, err: Math.abs(crossNet - c) });
+  if (!opts.length) return null;
+  // أقل فرق عرضي أولًا (قابلية التحقيق)؛ ثم الجانبي قبل العميق (أقل فراغات حركة) ثم الضلع الأقصر على الامتداد — ترتيب حتمي
+  // وضع «الاتساع» (fit، حين لا يتسع الصف بالخطة الأولى): الممكن ضمن السماحية بأقصر امتداد أولًا، ثم أقصر امتداد — الاختيار بين بدائل
+  // المقاس نفسه (الاتجاه والمتغير) لا تغيير له؛ وما خرج عن السماحية يُقاس ويُرفض بعد التفصيل
+  const tol0 = b.dimNet.tol ?? .05;
+  if (fit) opts.sort((x, y) => (x.err > tol0) - (y.err > tol0) || x.run - y.run || x.err - y.err);
+  else opts.sort((x, y) => x.err - y.err || (x.rank || 0) - (y.rank || 0) || x.a - y.a);
+  return { ...opts[0], tol: b.dimNet.tol, runAxis: runAxis || dir };
+}
+const dimRun = (b, crossNet, allowRun, dir = null, runAxis = null, plans = null, fit = false) => { const pl = dimPlan(b, crossNet, allowRun, dir, runAxis, fit); if (pl && plans) plans.set(b, pl); return pl ? pl.run : 0; };
+/** سماحية ورقة بمقاس صريح (منطقة بكتلة واحدة، أو عقدة كل أبنائها اختيارية عداها). */
+function dimTolOf(c) { if (c.t === 'zone') return c.b.length === 1 ? c.b[0].dimNet?.tol || 0 : 0; if ((c.t === 'x' || c.t === 'y') && c.k) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? dimTolOf(solid[0]) : 0; } return 0; }
+/** محور امتداد صف لمنطقة: العمودي على اتجاه بابها (باب على x0/x1 ⇐ الصف على y). */
+const runAxisOf = z => (z.door ? (isX(z.door) ? 'y' : 'x') : z.along);
 /** (الجولة 21) امتداد ثابت لعقدة على محور dir: منطقة بكتلة واحدة بمقاس صريح، أو عقدة متعامدة كل أبنائها فراغات اختيارية عدا واحد كذلك. */
-function fixExtOf(c, dir, crossNet, allow) {
-  if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir) : 0;
-  if ((c.t === 'x' || c.t === 'y') && c.t !== dir && !c.at) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? fixExtOf(solid[0], dir, crossNet, allow) : 0; }
+function fixExtOf(c, dir, crossNet, allow, plans = null) {
+  if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir, runAxisOf(c), plans) : 0;
+  if ((c.t === 'x' || c.t === 'y') && c.t !== dir && !c.at) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? fixExtOf(solid[0], dir, crossNet, allow, plans) : 0; }
   return 0;
 }
 /** (الجولة 21) سماكة الجدارين على طرفي امتداد: خارجي (EXT) على حد الغلاف، وإلا داخلي (INT) — كما يقيس التقييم والسجل الصافي. */
@@ -408,6 +445,7 @@ const wallPair = (extA, extB) => (extA ? EXT / 2 : INT / 2) + (extB ? EXT / 2 : 
 function solve(tree, ew, ed) {
   const out = { placed: [], circ: [], courts: [], voids: [], dh: [] };
   const edgesExt = q => ({ x0: q.x0 <= 1e-6, x1: q.x1 >= ew - 1e-6, y0: q.y0 <= 1e-6, y1: q.y1 >= ed - 1e-6 });
+  const plans = new Map(); // (02b) خطة المقاس الصريح لكل كتلة في هذا الحل: تُحمل إلى التفصيل والتقييم مع موضعها
   let o = out; // (الجولة التاسعة) عقدة «dual»: الدوران معًا في المستطيل نفسه — الأرضي في out والعلوي في out.up
   const rec = (n, r) => {
     if (n.t === 'dual') {
@@ -431,8 +469,8 @@ function solve(tree, ew, ed) {
       const ext = edgesExt(r), [s0, s1, c0, c1] = dir === 'x' ? ['x0', 'x1', 'y0', 'y1'] : ['y0', 'y1', 'x0', 'x1'];
       const crN = (dir === 'x' ? H_(r) : W_(r)) - wallPair(ext[c0], ext[c1]), last = n.k.length - 1;
       const isOpen = q => q && (q.t === 'void' || q.t === 'court');
-      const dimF = n.k.map((c, i) => (last > 0 && !((c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir) ? fixExtOf(c, dir, crN, wallPair(i === 0 ? ext[s0] : isOpen(n.k[i - 1]), i === last ? ext[s1] : isOpen(n.k[i + 1]))) : 0));
-      const sz = dist(L, n.k.map((c, i) => ({ min: minExt(c, dir), fix: (c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir ? c.fix : dimF[i], a: areaOf(c) * n.w[i] })));
+      const dimF = n.k.map((c, i) => (last > 0 && !((c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir) ? fixExtOf(c, dir, crN, wallPair(i === 0 ? ext[s0] : isOpen(n.k[i - 1]), i === last ? ext[s1] : isOpen(n.k[i + 1])), plans) : 0));
+      const sz = dist(L, n.k.map((c, i) => ({ min: minExt(c, dir), fix: (c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir ? c.fix : dimF[i], a: areaOf(c) * n.w[i], ft: dimF[i] ? dimTolOf(c) : 0 })));
       if (!sz) return false;
       // فراغ خارجي اختياري (حديقة/ارتداد يمتص فرق العمق بين الأجنحة): أقل من 2.4 م لا يُترك شريطًا ضيقًا بل يُضم لجاره
       // (الجولة 21) لا يُضم إلى ورقة بمقاس صريح ثابت ما دام له جار مرن
@@ -455,8 +493,15 @@ function solve(tree, ew, ed) {
     if (n.t === 'zone') {
       const dir = n.along, L = dir === 'x' ? W_(r) : H_(r), cross = dir === 'x' ? H_(r) : W_(r);
       const ext = edgesExt(r), [s0, s1, c0, c1] = dir === 'x' ? ['x0', 'x1', 'y0', 'y1'] : ['y0', 'y1', 'x0', 'x1'], crN = cross - wallPair(ext[c0], ext[c1]), last = n.b.length - 1;
-      const zF = n.b.map((b, i) => (last > 0 ? dimRun(b, crN, wallPair(i === 0 && ext[s0], i === last && ext[s1]), dir) : 0));
-      const sz = dist(L, n.b.map((b, i) => ({ min: suiteRun(b, cross), fix: zF[i], a: b.area * n.w[i] }))); if (!sz) return false;
+      let zF = n.b.map((b, i) => (last > 0 ? dimRun(b, crN, wallPair(i === 0 && ext[s0], i === last && ext[s1]), dir, runAxisOf(n), plans) : 0));
+      const zItems = () => n.b.map((b, i) => ({ min: suiteRun(b, cross), fix: zF[i], a: b.area * n.w[i], ft: zF[i] ? b.dimNet?.tol || 0 : 0 }));
+      let sz = dist(L, zItems());
+      // (02b) الصف لا يتسع بخطة أقل فرق عرضي: خطة الاتساع (الاتجاه/المتغير الأقصر امتدادًا) قبل إعلان تعذر الحل
+      if (!sz && zF.some(Boolean)) { zF = n.b.map((b, i) => (last > 0 ? dimRun(b, crN, wallPair(i === 0 && ext[s0], i === last && ext[s1]), dir, runAxisOf(n), plans, true) : 0)); sz = dist(L, zItems()); }
+      // ولا يتسع بها أيضًا: الأجنحة تعود إلى البحث بجزاء المقاس (لا تُثبَّت في هذا الحل) فلا تُغلق الشجرة على التلدين — المقاس لا يتغير، ويُقاس بعد
+      // التفصيل ويُرفض البديل إن خرج عنه
+      if (!sz && zF.some((f, i) => f && n.b[i].kind === 'suite')) { zF = zF.map((f, i) => (n.b[i].kind === 'suite' ? (plans.delete(n.b[i]), 0) : f)); sz = dist(L, zItems()); }
+      if (!sz) return false;
       let p = dir === 'x' ? r.x0 : r.y0; const end = dir === 'x' ? r.x1 : r.y1;
       const r1z = v => Math.round(v * 100) / 100, preZ = last > 0 && zF[last] ? r1z(end - sz[last]) : null;
       n.b.forEach((b, i) => {
@@ -490,7 +535,7 @@ function solve(tree, ew, ed) {
           o.placed.push({ block: { ...extra, area: A_(pan) }, r: pan, door: opp[ps] });
           return;
         }
-        o.placed.push({ block: b, r: slot, door: n.door });
+        const dp = plans.get(b); o.placed.push(dp ? { block: b, r: slot, door: n.door, dp } : { block: b, r: slot, door: n.door });
       });
       return true;
     }
@@ -989,7 +1034,9 @@ function orderZones(tree, P) {
  * تنظيم الجناح بحمامه: «عميق» (حمام ومدخل جناح على جهة الباب والغرفة خلفهما) أو «جانبي» (شريط حمام وخزانة
  * عمودي على الباب). يختار ما يعطي الغرفة أكبر بعد أدنى. along: طول جهة الباب، dep: العمق.
  */
-function suiteVariant(b, along, dep) {
+function suiteVariant(b, along, dep, dp = null) {
+  // (02b) جناح بمقاس صريح: المتغير مقرر في الحل (dimPlan)، لا يُعاد تخمينه من الأبعاد
+  if (dp && (dp.v === 'deep' || dp.v === 'side') && b.bath && !b.nearHall) return dp.v === 'deep' ? { deep: true, bw: along, bdp: dep - (dp.td ?? (b.master ? 2.4 : 2.1)) } : { deep: false, bw: along - (dp.t ?? (b.master ? DESIGN_TARGETS.masterStripD : DESIGN_TARGETS.stripD)), bdp: dep };
   const T = DESIGN_TARGETS, bl0 = b.master ? T.masterBathL : b.kind === 'suite' ? T.bathL : 2.2, td = b.master ? 2.4 : 2.1, sd = b.master ? T.masterStripD : b.kind === 'maid' ? 1.6 : T.stripD;
   const side = { deep: false, bw: along - sd, bdp: dep };
   // مدخل الجناح (أو غرفة الملابس) بجانب الحمام: صافيه ≥ 1.2 م (محوره ≥ VEST_MIN)، والحمام لا يقصر عن 2.1 م
@@ -1198,13 +1245,13 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     if (b.kind === 'suite' || ((b.kind === 'maid' || b.kind === 'driver') && b.bath)) {
       const door = bestDoorSide(p, circ, placed), along = sideLen(r, door), dep = isX(door) ? w : h;
       let bw = along, bdp = dep;
-      if (b.bath) ({ bw, bdp } = suiteVariant(b, along, dep));
+      if (b.bath) ({ bw, bdp } = suiteVariant(b, along, dep, p.dp));
       const ms = Math.min(bw, bdp), want = b.kind !== 'suite' ? 9 : b.master ? T.master : T.bedroom;
       { const lim = b.master ? 3.5 : b.kind === 'suite' ? 3.2 : b.kind === 'maid' ? MAID_MIN_NET + WALL_NET : 2.5; if (ms < lim) bad('suite-narrow', lim - ms); } // غرفة نوم صافيها ≥ 3.0 م
       if (ms < 3.3) pen += 60 * (3.3 - ms);
       // غرفة ملابس مطلوبة للرئيسية: تتسع في الشريط متى بلغ عمق الجناح 3.9 م (أو في مدخل الجناح العميق). جزاء في البحث العام؛
       // ومخالفة في إعادة الحل الموضعية (ctx.hardDress، refineMajlis) لنمط بُني ولم تتسع فيه
-      if (b.master && b.bath && P.prefs?.masterDressing && dep < 3.9 && !suiteVariant(b, along, dep).deep) { if (ctx.hardDress) bad('master-dress', 3.9 - dep); else pen += 70 + 40 * (3.9 - dep); }
+      if (b.master && b.bath && P.prefs?.masterDressing && dep < 3.9 && !suiteVariant(b, along, dep, p.dp).deep) { if (ctx.hardDress) bad('master-dress', 3.9 - dep); else pen += 70 + 40 * (3.9 - dep); }
       pen += 25 * Math.log(bw * bdp / want) ** 2;
       if (b.kind === 'suite' && !b.guest) bedA.push({ b, a: bw * bdp });
       // حد مهني صلب: صافي غرفة النوم (بعد الحمام والخزانة والجدران) ≥ 12 م²، والرئيسية ≥ 16 م²؛ ويُستحسن هامش فوقه
@@ -1283,14 +1330,19 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
   // الأبعاد الصريحة: المقاس الصافي (المحور ناقص الجدار) قريب من المطلوب بأي اتجاه
   for (const [key, dm] of Object.entries(P.dims || {})) {
     if (!dm || !(dm.w > 0 && dm.l > 0)) continue;
-    const pick = key === 'majlis' ? placed.filter(q => q.block.kind === 'majlis' && (q.block.men || !P.men)).slice(0, 1) : key === 'kitchen' ? placed.filter(q => q.block.id === 'kitchen1') : key === 'dining' ? placed.filter(q => q.block.kind === 'dining') : key === 'master' ? placed.filter(q => q.block.master) : key === 'bedroom' ? placed.filter(q => q.block.kind === 'suite' && !q.block.master) : key === 'hall' ? [{ block: {}, r: hall.r }] : [];
+    const pick = key === 'majlis' ? placed.filter(q => q.block.kind === 'majlis' && (q.block.men || !P.men)).slice(0, 1) : key === 'kitchen' ? placed.filter(q => q.block.id === 'kitchen1') : key === 'dining' ? placed.filter(q => q.block.kind === 'dining') : key === 'master' ? placed.filter(q => q.block.master) : key === 'bedroom' ? placed.filter(q => q.block.kind === 'suite' && !q.block.master && (R14_OFF.has('r21dimfix') || (!q.block.elderly && !q.block.guest))) : key === 'hall' ? [{ block: {}, r: hall.r }] : [];
     for (const q of pick) {
       // الصافي كما يقيسه السجل: نصف سماكة الجدار من كل جهة (خارجي إن كانت الجهة كلها على الخارج، وإلا داخلي)
       const half = s => (expLen(q.r, solids, [s]) >= sideLen(q.r, s) - .05 ? EXT / 2 : INT / 2);
       let w = W_(q.r) - half('x0') - half('x1'), h = H_(q.r) - half('y0') - half('y1');
       // شريط ممر الضيوف ودورة مياههم: في مجلس الرجال على جهة x دائمًا (كما في التفصيل)، وفي غيره على جهة الباب
       if (q.block.kind === 'majlis' && q.block.guestWc) { if (q.block.men) { const m = menStrip(q.r, P); if (m.side === 'side') w -= T.guestStripW; else if (m.side === 'back') h -= MEN_LOBBY_D - half('y0') + INT / 2; } else { const d = bestDoorSide(q, circ, placed); if (isX(d)) w -= T.guestStripW; else h -= T.guestStripW; } }
-      if (q.block.kind === 'suite' && q.block.bath) { const v = suiteVariant(q.block, Math.max(w, h), Math.min(w, h)); w = v.bw; h = v.bdp; }
+      if (q.block.kind === 'suite' && q.block.bath && q.dp && (q.dp.v === 'deep' || q.dp.v === 'side')) {
+        // (02b) تنبؤ بالتفصيل نفسه: الغرفة تُقطع على مقاسها والشريط يأخذ الباقي ما دام في مداه، وإلا الشريط الاسمي (فيخرج المقاس ويُقاس)
+        const b0 = q.block, dp = q.dp, runX = !isX(q.door), nRun = runX ? w : h, nDep = runX ? h : w;
+        if (dp.v === 'deep') { const td = nDep - dp.c, R = SUITE_TD_RANGE(b0); w = nRun; h = td >= R[0] - 1e-6 && td <= R[1] + 1e-6 ? dp.c : nDep - (b0.master ? 2.4 : 2.1); }
+        else { const t = nRun - dp.a, R = SUITE_T_RANGE(b0); w = t >= R[0] - 1e-6 && t <= R[1] + 1e-6 ? dp.a : nRun - (b0.master ? T.masterStripD : T.stripD); h = nDep; }
+      } else if (q.block.kind === 'suite' && q.block.bath) { const v = suiteVariant(q.block, Math.max(w, h), Math.min(w, h)); w = v.bw; h = v.bdp; }
       // (الجولة 21 — مقترح) سماحية العميل نفسها لا تُصفَّر في البحث (كانت ناقص 0.08 ⇐ صفر لـ«4×4»)؛ والحكم النهائي بالقياس على المرسوم
       const tol = R14_OFF.has('r21dimfix') ? Math.max(0, (Number.isFinite(dm.tol) ? dm.tol : .05) - .08) : (Number.isFinite(dm.tol) ? dm.tol : .05), a = [Math.min(w, h), Math.max(w, h)], t = [Math.min(dm.w, dm.l), Math.max(dm.w, dm.l)];
       // (الجولة التاسعة عشرة) مجلس الرجال بشريط دهليز: الشريط يمتص حتى 0.9 م من ضلعه (التفصيل يضبطه على المقاس)، فالخطأ بُعد المطلوب عن المجال
@@ -1600,7 +1652,10 @@ const CIRC_TYPE = { foyer: 'entrance', hall: 'living', stair: 'stairs' };
 export function realizeV2(cand, P, { secondEntry = null, upper = false, below = null } = {}) {
   const T = DESIGN_TARGETS, rooms = [], doors = [], notes = [];
   let extraBaths = P.extraBaths;
-  const sn = r => ({ x0: snap(r.x0), y0: snap(r.y0), x1: snap(r.x1), y1: snap(r.y1) });
+  // (02b) طلب فيه مقاس صريح: الإحداثيات بدقة 1 سم (القطوع الثابتة في الحل بدقة 1 سم وكانت تُعاد هنا إلى شبكة 5 سم فيضيع حتى 2.5 سم لكل وجه)؛
+  // غيرها على شبكة 5 سم كما كانت — والقطوع غير الثابتة على شبكة 5 سم أصلًا، فلا تتغير
+  const fine = !R14_OFF.has('r21dimfix') && !R14_OFF.has('r21fine') && Object.keys(P.dims || {}).length > 0, g5 = fine ? (v => Math.round(v * 100) / 100) : snap;
+  const sn = r => ({ x0: g5(r.x0), y0: g5(r.y0), x1: g5(r.x1), y1: g5(r.y1) });
   const add = (r, o) => { const x = { ...sn(r), ...o }; rooms.push(x); return x; };
   const placed = cand.sol.placed.map(p => ({ ...p, r: sn(p.r) })), circ = cand.sol.circ.map(c => ({ ...c, r: sn(c.r) }));
   for (const p of placed) p.door = bestDoorSide(p, circ, placed);
@@ -1655,7 +1710,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
     if (away) { stripSide.set(p, p.block.bathShared ? opp[away] : away); continue; }
     // التنظيم «العميق» (مدخل جناح بجانب الحمام على جهة الباب): المدخل في الطرف الذي يلامس فيه عنصر حركة واحد بطول باب
     // (لا عند ملتقى ممر وصالة يتقاسمان الجهة)، والحمام في الطرف الآخر
-    if (spans.length && p.block.kind === 'suite' && suiteVariant(p.block, sideLen(p.r, p.door), isX(p.door) ? W_(p.r) : H_(p.r)).deep) {
+    if (spans.length && p.block.kind === 'suite' && suiteVariant(p.block, sideLen(p.r, p.door), isX(p.door) ? W_(p.r) : H_(p.r), p.dp).deep) {
       const e0 = edgeOf(p.r, p.door), seg = VEST_MIN + .2;
       const endC = end => { const lo = end === perp[0] ? e0.from : e0.to - seg, hi = lo + seg; return Math.max(0, ...spans.map(e => Math.min(hi, e.to) - Math.max(lo, e.from))); };
       const c0 = endC(perp[0]), c1 = endC(perp[1]);
@@ -1898,8 +1953,12 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
         const dt = Math.min(1.4, depth - 3.5, (net - cap) / Math.max(1, along - WALL_NET) + .05);
         return dt > .05 ? snap(base + dt) : base;
       };
-      if (suiteVariant(b, sideLen(r, side), sideLen(r, ss0)).deep) {
-        const td = grow(side, b.master ? 2.4 : 2.1);
+      // (02b) جناح بمقاس صريح (p.dp من الحل): الغرفة تُقطع على ضلعيها الصافيين بين الوجوه الداخلية، والشريط (حمام ومدخل) يأخذ الباقي ضمن مداه
+      const dpS = p.dp && (p.dp.v === 'deep' || p.dp.v === 'side') && !R14_OFF.has('r21dimsuite') && p.dp.runAxis === (isX(side) ? 'y' : 'x') ? p.dp : null;
+      const hw = sd => (isExtSide(r, sd) ? EXT / 2 : INT / 2), r1d = v => Math.round(v * 100) / 100;
+      if (suiteVariant(b, sideLen(r, side), sideLen(r, ss0), dpS).deep) {
+        let td = grow(side, b.master ? 2.4 : 2.1);
+        if (dpS) { const depthG = isX(side) ? W_(r) : H_(r), tdX = r1d(depthG - dpS.c - INT / 2 - hw(opp[side])), R = SUITE_TD_RANGE(b); if (tdX >= R[0] - 1e-6 && tdX <= R[1] + 1e-6) td = tdX; }
         const [strip, rest] = cut(r, side, td);
         const near = ss0;
         // (الجولة العاشرة) حمام الرئيسية ≤ 7 م² صافيًا ما لم تُطلب كبيرة: الزائد من الشريط لغرفة الملابس
@@ -1924,6 +1983,8 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
       }
       const ss = ss0, L = sideLen(r, ss);
       let t = grow(ss0, t0);
+      let tFixed = false;
+      if (dpS) { const runG = isX(ss) ? W_(r) : H_(r), tX = r1d(runG - dpS.a - INT / 2 - hw(opp[ss])), R = SUITE_T_RANGE(b); if (tX >= R[0] - 1e-6 && tX <= R[1] + 1e-6) { t = tX; tFixed = true; } }
       // (الجولة الثانية عشرة) شريط الرئيسية القصير لا يتسع لحمام وغرفة ملابس: عمقه بقدر حمام ≤ 7 م² صافيًا (لا حمام متضخم)
       if (b.master && !masterAsked(P) && L - (b.master ? T.masterBathL : T.bathL) < .95 && (L - WALL_NET) * (t - WALL_NET) > MASTER_BATH_MAX) t = Math.max(1.8, Math.floor((MASTER_BATH_MAX / Math.max(.5, L - WALL_NET) + WALL_NET) / SNAP) * SNAP);
       let bl = b.master && L - bl0 < 1.5 && L - 2.4 >= 1.5 ? L - 1.5 : Math.min(bl0, L);
@@ -3256,7 +3317,7 @@ function pluralMajlis(out, args) {
 function withPresentation(args, out) {
   if (!out?.designs?.length) return out;
   const req = measureRequest(args.requirements || {}, args.land, args.counts);
-  for (const d of out.designs) { try { d.presentation = presentationStatus(d, req); } catch (e) { d.presentation = { status: 'needs-edits', label_ar: STATUS_AR['needs-edits'], hidden_ar: [], edits_ar: ['تعذّر حساب حالة العرض: ' + (e.message || e)], prefs: [], proposal_ar: PROPOSAL_LABEL_AR }; } }
+  for (const d of out.designs) { try { d.presentation = presentationStatus(d, req); } catch (e) { d.presentation = { status: 'needs-edits', label_ar: STATUS_AR['needs-edits'], hidden_ar: [], edits_ar: ['تعذّر حساب حالة العرض لهذا البديل؛ يُراجع قبل اعتماده.'], hiddenReasons: [], diag: String(e?.message || e), prefs: [], proposal_ar: PROPOSAL_LABEL_AR }; } } // (02b) لا نص استثناء للعميل
   const hid = out.designs.filter(d => d.presentation.status === 'hidden'), vis = out.designs.filter(d => d.presentation.status !== 'hidden');
   if (vis.length && hid.length) {
     out.hidden = [...(out.hidden || []), ...hid.map(d => ({ pat: d.pat, reasons_ar: d.presentation.hidden_ar, pluralReading: !!d.pluralReading }))]; out.designs = vis;
@@ -4479,6 +4540,8 @@ function tfJoint(tr, G, U, site, rules, entry, ctxG) {
 // (الجولة العشرون) أدوات بناء الأشجار والقيم التصميمية للمحرك الثالث (قراءة فقط — لا تغيّر سلوك هذا المحرك)
 /** (الجولة العشرون) مكتبة أشجار الدورين نفسها (للمحرك الثالث يضمها إلى المركّبة). */
 export const tfTreesLib = (G, U, site) => tfTrees(G, U, site);
+/** (02b) أدوات المقاس الصريح للاختبار والقياس (لا تغيّر السلوك). */
+export const DIMS_KIT = Object.freeze({ dimPlan, wallPair, SUITE_TD_RANGE, SUITE_T_RANGE, MEN_LOBBY_D, EXT, INT });
 export const TREE_KIT = Object.freeze({ Z, C, X, Y, OV, VOID, COURT, WELL, D2, mk, cloneTree, runOf, depOf, minExt, areaOf, solve, suiteRun, DESIGN_TARGETS, FOYER_WC_AREA, DEEP_ITERS, CORR_SINGLE_HARD, NARROW_W, COURT_MIN,
   describeAs: (key, ar) => DYN_AR.set(key, ar), DOOR_TOUCH, WALL_NET });
 export default { generateVillaDesigns, generateVillaTwoFloors, programV2, partiTrees, scoreV2, realizeV2, drawPlanV2, siteOf, difference, roomsDifference, hardGates, VILLA_V2_ENGINE_VERSION };

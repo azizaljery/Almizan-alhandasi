@@ -67,6 +67,15 @@ export function presentationStatus(design, request = {}) {
   // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
   for (const g of mand) hidden.push(`شرط أساسي غير متحقق — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
+  // (الجولة 21 — 02b، قرار المالك: «لا محجوب بحقول أسباب فارغة») سبب مُهيكل لكل حجب، بالترتيب نفسه لـ hidden_ar: المرشح، والمرحلة، والقاعدة
+  // المسؤولة، والمقيس والحد (متى انطبقا)، ومصدر الشرط، ونص العميل. يُبنى من البنود نفسها التي حجبت، لا من تفسير مفترض.
+  const candidate = design.pat || design.id || null;
+  const hiddenReasons = [
+    ...ledgerFails.map(x => ({ candidate, stage: 'presentation', rule: x.id || ('LEDGER:' + (x.kind || 'item')), kind: x.kind || null, measured: x.failing ?? x.actual ?? null,
+      limit: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, source: 'client', quote: x.text || null })),
+    ...gateFails.map(g => ({ candidate, stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: null, limit: null, source: 'review' })),
+    ...mand.map(g => ({ candidate, stage: 'presentation', rule: g.id, kind: 'mandatory', measured: g.value ?? null, limit: null, source: MAND_TIER_AR })),
+  ].map((r, i) => ({ ...r, reason_ar: hidden[i] }));
   r16 = r16.filter(g => !mand.includes(g));
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
@@ -77,11 +86,12 @@ export function presentationStatus(design, request = {}) {
   // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
   for (const x of items) x.text_ar = toClientAr(x.text_ar);
   for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
+  for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason_ar = hidden[i];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
   const specialist = items.filter(x => x.specialist).map(x => x.text_ar);
-  return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
+  return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, hiddenReasons, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
 }
 /** (الجولة الخامسة عشرة) تفضيلات سعودية يعدّها المعماري عيبًا يُصلح قبل العرض (لا ملاحظة): القاعدة الموثقة أعلى الملف. */
 export const MAJOR_PREFS = Object.freeze(['MAJLIS_STREET_ENTRY', 'MAJLIS_LOBBY', 'BED_BATH', 'MAID_BATH']);

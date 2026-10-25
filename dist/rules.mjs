@@ -674,7 +674,8 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
     const bad = got.find(g => !g.ok);
     const g0 = got[0]; // (الجولة الخامسة عشرة) المرسوم والمطلوب لملاحظة «ضمن السماح لا مطابق»
-    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
+    // (الجولة 21 — 02b) القيمة المقيسة للفراغ الراسب نفسه (لا الأول دائمًا) والسماحية: يحملها سبب الحجب المُهيكل
+    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, tol, ...(bad ? { failing: { name: bad.r.name, s: r2d(bad.s[0]), l: r2d(bad.s[1]) } } : {}), why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
   }
   // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
   if (req.site?.irregular) out.push(verifySite(doc, req.site, entry));
