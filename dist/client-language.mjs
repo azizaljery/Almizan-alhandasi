@@ -20,6 +20,11 @@ export const BANNED_CLIENT_TERMS = Object.freeze([
   [/\b[a-z]{3,}:[a-z]{1,5}\d[a-z0-9]*\b/i, 'معرّف تنظيم داخلي'],
 ]);
 
+/** (الجولة 21) أسماء فحوص المراجعة بعربية العميل (كان يظهر الرمز الداخلي: «رسب في بوابة المراجعة PARKING»). */
+export const GATE_AR = Object.freeze({ BED_MAJLIS: 'فصل غرف النوم عن المجلس', COVERAGE: 'نسبة البناء', DAYLIGHT: 'الإضاءة الطبيعية', DOOR_SWING: 'حركة فتح الأبواب', GUEST_ROUTE: 'مسار الضيف',
+  HALL_ASPECT: 'تناسب الصالة', INTEGRITY: 'سلامة الرسم', MAJLIS_PRIVACY: 'خصوصية المجلس', MIN_WIDTH: 'أدنى عرض للفراغات', PLACEMENT: 'مواضع الفراغات المطلوبة', PLOT: 'حدود الأرض',
+  PROGRAM: 'اكتمال البرنامج', REACH: 'الوصول إلى كل الفراغات', SETBACK_REG: 'الارتدادات النظامية', STAIRS: 'الدرج', STAIR_GEOMETRY: 'أبعاد الدرج', WET_DOOR: 'أبواب دورات المياه', WINDOW_SIZE: 'مساحة النوافذ',
+  PARKING: 'مواقف السيارات', STRUCTURAL: 'المراجعة الإنشائية المبدئية', CIRCULATION: 'الحركة الفعلية مع الأثاث', CONSISTENCY_2D3D: 'تطابق المسقط والمجسم' });
 // إعادة الصوغ: الأطول أولًا (العبارات الكاملة قبل أجزائها)
 const REWRITE = [
   // أسباب النقص (shortfallReason)
@@ -50,7 +55,7 @@ const REWRITE = [
   [/البوابات الثقيلة \(([^)]*)\)/g, 'الفحوص المفصّلة ($1)'],
   [/البوابات الثقيلة/g, 'الفحوص المفصّلة'],
   [/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة'],
-  [/رسب في بوابة المراجعة\s+[A-Z_]+/g, 'لم يجتز المراجعة المعمارية'],
+  [/رسب في بوابة المراجعة\s+([A-Z_0-9]+)/g, (_, g) => `لم يجتز فحص «${GATE_AR[g] || 'المراجعة المعمارية'}»`],
   [/\(قرار المالك\)/g, ''],
   [/المولّد|المولد\b/g, 'المحرك'],
   [/القيود الصلبة/g, 'الشروط الأساسية'],
@@ -73,4 +78,4 @@ export function clientLint(text) {
   for (const [re, why] of BANNED_CLIENT_TERMS) { const m = re.exec(s); if (m) out.push({ match: m[0], why }); }
   return out;
 }
-export default { BANNED_CLIENT_TERMS, toClientAr, clientLint };
+export default { BANNED_CLIENT_TERMS, GATE_AR, toClientAr, clientLint };

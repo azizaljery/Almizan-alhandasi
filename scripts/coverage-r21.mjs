@@ -46,32 +46,66 @@ export function randomCase(R, i) {
 }
 export function casesFor(seedName, n) { const R = rng(SEEDS[seedName]); return Array.from({ length: n }, (_, i) => randomCase(R, i)); }
 
+/** تصنيف أسباب رفض التصاميم المبنية (نصوص الفحص) — للتقرير فقط. */
+const BUILT_WHY = [[/مجلس النساء[^.]*(?:عرضه|أصغر)/, 'women-majlis-size'], [/«(?:مجلس الرجال|المجلس)» (?:عرضه|[\d.]+ م² أصغر)/, 'men-majlis-size'], [/الرئيسية [\d.]+ م² أصغر من/, 'master-smaller'],
+  [/وصل «maid»|الخادمة[^.]*بالحركة/, 'maid-unreachable'], [/دورة مياه يومية/, 'family-wc-missing'], [/دورات المياه المرسومة|دورة مياه إضافية|دورة مياه الرجال لم تتسع/, 'baths-missing'],
+  [/الطعام عرضه/, 'dining-narrow'], [/بلا نافذة/, 'no-window'], [/يفتح مباشرة على/, 'majlis-door-family'], [/الحركة الفعلية/, 'circulation-furniture'], [/بلا جدار تحته|التراكب|فوق فراغ/, 'upper-wall-unsupported'],
+  [/لا يمكن الوصول|لا يوجد باب/, 'unreachable-room'], [/بند من طلبك|لم يتحقق: «/, 'client-item-failed'], [/لا دور علوي يتسع/, 'no-upper-fits'], [/لا ترتيب أرضي/, 'no-ground'], [/أضيق من 4.2|الصالة [\d.]+×/, 'hall-narrow']];
+const causeOf = w => (BUILT_WHY.find(([re]) => re.test(String(w))) || [null, 'other'])[1];
+
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const E = engine === 'v2' ? V2 : V3;
+  const root = opt('root') ? opt('root').replace(/\/$/, '') + '/' : new URL('../', import.meta.url).pathname;
+  const E = await import(root + `dist/villa-layout-${engine === 'v2' ? 'v2' : 'v3'}.mjs`);
+  const { extractRequirements: XR } = await import(root + 'dist/requirements.mjs');
+  const CL = await import(root + 'dist/client-text.mjs');
+  const { sameOrDifferent } = await import(root + 'dist/arch-criterion.mjs');
+  let lint = null; try { lint = (await import(root + 'dist/client-language.mjs')).clientLint; } catch { lint = null; }
   const out = [];
   const all = casesFor(seedName, N).filter((_, i) => i % part[1] === part[0]);
   for (const C of all) {
-    const req = extractRequirements(C.text, { counts: C.counts }); req.counts = { ...req.counts, ...C.counts };
+    const req = XR(C.text, { counts: C.counts }); req.counts = { ...req.counts, ...C.counts };
     const two = C.land.floors >= 2 || req.prefs?.floors === 2;
     const t0 = Date.now(), row = { id: C.id, land: C.land, text: C.text, want: C.want, floors: two ? 2 : 1 };
-    try {
-      const o = (two ? E.generateVillaTwoFloors : E.generateVillaDesigns)({ land: C.land, counts: req.counts, requirements: req, keep: C.want });
-      const st = o.designs.map(d => d.presentation?.status || 'unknown');
+    globalThis.__v2dbg = {}; globalThis.__v2rej = null;
+    let o = null, err = null;
+    try { o = (two ? E.generateVillaTwoFloors : E.generateVillaDesigns)({ land: C.land, counts: req.counts, requirements: req, keep: C.want, _cf: true }); } catch (e) { err = e; }
+    row.ms = Date.now() - t0; row.rssMB = Math.round(process.memoryUsage().rss / 1048576);
+    const dbg = globalThis.__v2dbg || {}, search = o?.engine3?.search || err?.search || {};
+    // سجل المراحل (غير سلوكي: من خطافات التشخيص الموجودة في المحرك)
+    const treeWhy = {}; let treesTried = 0, treesFailed = 0;
+    for (const [k, v] of Object.entries(dbg)) { if (k.startsWith('ms:')) { treesTried++; if (String(v).endsWith('x')) treesFailed++; } if (k.startsWith('why:')) for (const w of String(v).split(',').filter(Boolean)) treeWhy[w] = (treeWhy[w] || 0) + 1; }
+    const rej = o?.rejected || err?.rejected || [], rejWhy = {};
+    for (const r of rej) { const seen = new Set(); for (const w of [...(r.why || []), ...(r.tfWhy || []).map(x => 'tf:' + x)]) { const c = String(w).startsWith('tf:') ? w : causeOf(w); if (!seen.has(c)) { seen.add(c); rejWhy[c] = (rejWhy[c] || 0) + 1; } } }
+    row.stages = {
+      brief: { understood: (req.understood || []).length, unclear: (req.unclear || []).length, rules: (req.rules || []).length, dims: Object.keys(req.dims || {}) },
+      constraints: search.units ? { units: search.units.length, hard: (search.rel || []).filter(r => r.hard).length, clientHard: (search.rel || []).filter(r => r.hard && r.client).length } : null,
+      topology: search.grids ? { grids: search.grids.map(g => `${g.nc}x${g.nr}:${g.valid ?? g.ground}`), distinct: search.distinctTopologies ?? null, dimFit: search.dimFit ?? null, picked: search.picked ?? null, twoFloors: search.twoFloors ? { grids: (search.twoFloors.grids || []).map(g => `${g.nc}x${g.nr}:${g.ground}/${g.joint}`), noTree: search.twoFloors.noTree || 0, dimFail: search.twoFloors.dimFail || 0 } : null } : null,
+      allocation: { treesTried, treesFailed, topViolations: Object.entries(treeWhy).sort((a, b) => b[1] - a[1]).slice(0, 6) },
+      validation: { built: (o?.pool || []).length || null, rejected: rej.length, topReasons: Object.entries(rejWhy).sort((a, b) => b[1] - a[1]).slice(0, 6) },
+      timeout: !!(err?.timedOut || o?.timedOut),
+    };
+    if (o) {
+      const st = o.designs.map(d => d.presentation?.status || 'unknown'); row.statuses = st; row.pats = o.designs.map(d => d.pat);
       row.outcome = st.some(s => s !== 'hidden') ? 'sound' : 'hidden-only';
-      row.statuses = st; row.pats = o.designs.map(d => d.pat);
-      row.notice = shortfallNotice({ requested: C.want, shown: o.designs.length, shortfall_ar: o.designs.length < C.want ? (o.shortfall_ar || '') : null, hidden: o.hidden || [] });
-    } catch (e) {
-      row.outcome = e.code === 'VILLA_INFEASIBLE' ? 'infeasible' : 'failed'; row.code = e.code || null; row.error = String(e.message || e).slice(0, 400);
-      row.notice = shortfallNotice({ requested: C.want, shown: 0, report_ar: e.report_ar || e.message });
+      // البدائل المختلفة معماريًا (المعيار المجمّد r19) بين المعروضة غير المحجوبة
+      const ok = o.designs.filter(d => d.presentation?.status !== 'hidden'), pick = [];
+      for (const d of ok) { try { if (pick.every(p => sameOrDifferent(p.doc, d.doc).different)) pick.push(d); } catch { /* */ } }
+      row.distinctValid = pick.length; row.validShown = ok.length;
+      row.notice = CL.shortfallNotice({ requested: C.want, shown: o.designs.length, shortfall_ar: o.designs.length < C.want ? (o.shortfall_client_ar || o.shortfall_ar || '') : null, hidden: o.hidden || [] });
+    } else {
+      row.code = err?.code || null; row.error = String(err?.message || err).slice(0, 400); row.contract = err?.result || null;
+      row.outcome = err?.result ? (err.result.status === 'PROVEN_INFEASIBLE' ? 'proven-infeasible' : 'search-incomplete') : err?.code === 'VILLA_INFEASIBLE' ? 'claimed-infeasible' : 'search-incomplete';
+      row.notice = CL.shortfallNotice({ requested: C.want, shown: 0, report_ar: err?.report_ar || err?.message });
+      row.distinctValid = 0; row.validShown = 0;
     }
-    row.leaks = internalLeaks(JSON.stringify(row.notice || ''));
-    row.ms = Date.now() - t0;
+    const nt = JSON.stringify(row.notice || '');
+    row.leaks = [...(CL.internalLeaks(nt) || []).map(x => x.match), ...(lint ? lint(nt).map(x => x.match) : [])];
     out.push(row);
-    console.log(`${C.id} ${C.land.width}×${C.land.length} ${C.land.streets.join('+')} ${row.floors}F: ${row.outcome} ${row.statuses ? row.statuses.join(',') : row.code} (${row.ms}ms)${row.leaks.length ? ' LEAK ' + row.leaks.join('|') : ''}`);
+    console.log(`${C.id} ${C.land.width}×${C.land.length} ${C.land.streets.join('+')} ${row.floors}F: ${row.outcome} ${row.statuses ? row.statuses.join(',') : row.code} distinct=${row.distinctValid} (${row.ms}ms)${row.leaks.length ? ' LEAK ' + row.leaks.join('|') : ''}`);
   }
   const dir = new URL(`../evidence/coverage-r21/`, import.meta.url).pathname; mkdirSync(dir, { recursive: true });
   const f = `${dir}${label}-${seedName}${part[1] > 1 ? `-p${part[0]}of${part[1]}` : ''}.json`;
   const tally = k => out.filter(r => r.outcome === k).length;
-  writeFileSync(f, JSON.stringify({ label, seed: seedName, engine, n: out.length, sound: tally('sound'), hiddenOnly: tally('hidden-only'), infeasible: tally('infeasible'), failed: tally('failed'), rows: out }, null, 1));
-  console.log(`sound ${tally('sound')}/${out.length}, hidden-only ${tally('hidden-only')}, infeasible ${tally('infeasible')}, failed ${tally('failed')} → ${f}`);
+  writeFileSync(f, JSON.stringify({ label, seed: seedName, seedValue: SEEDS[seedName], n: out.length, engine, root, generator: 'scripts/coverage-r21.mjs randomCase()', sound: tally('sound'), hiddenOnly: tally('hidden-only'), provenInfeasible: tally('proven-infeasible'), claimedInfeasible: tally('claimed-infeasible'), searchIncomplete: tally('search-incomplete'), rows: out }, null, 1));
+  console.log(`sound ${tally('sound')}/${out.length} → ${f}`);
 }

@@ -134,4 +134,19 @@ export function reportContradictions(rep) {
   if (N && suff && N.neededGrossPerFloor > N.available) out.push(`يقول إن المساحة تكفي والمطلوب ${N.neededGrossPerFloor} > المتاح ${N.available}`);
   return out;
 }
-export default { explainFailure, failureCauses, reportContradictions, TREE_WHY_AR };
+/**
+ * فحص اتساق أي نص يراه العميل (لا تقارير هذا الملف وحدها — ومنها إشعارات الجولات السابقة): إن ذكر مساحة متاحة (W × D م أو «المتاح … م²»)
+ * ومساحة يحتاجها البرنامج أصغر منها، فلا يجوز أن يقترح تقليل الغرف أو دورًا ثانيًا أو أرضًا أكبر، ولا أن يصف الطلب بالمستحيل.
+ */
+export function textContradictions(text) {
+  const t = String(text || ''), out = [], num = s => Number(String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+  const avail = []; for (const m of t.matchAll(/\(?(\d+(?:\.\d+)?)\s*[×x]\s*(\d+(?:\.\d+)?)\s*م\)?/g)) avail.push(num(m[1]) * num(m[2]));
+  for (const m of t.matchAll(/(?:المتاح(?: للبناء)?|يبقى للبناء[^0-9]*\()\s*(\d+)\s*م²/g)) avail.push(num(m[1]));
+  const need = [...t.matchAll(/يحتاج(?: البرنامج)? نحو (\d+) م²/g)].map(m => num(m[1]));
+  const A = avail.length ? Math.max(...avail) : null, Nd = need.length ? Math.min(...need) : null;
+  if (A && Nd && Nd < A * .92 && /تقليل عدد الغرف|دور ثانٍ|دوران بدل|أرض أكبر|أرض أعمق|أرض أعرض/.test(t) && !/المساحة ضيقة/.test(t)) out.push(`المتاح ${Math.round(A)} م² والمطلوب ${Nd} م² ويقترح تصغير البرنامج أو أرضًا أكبر`);
+  if (A && Nd && Nd < A * .92 && /(?<!يعني أن طلبك )مستحيل|لا يمكن تحقيق الطلب/.test(t)) out.push('يصف الطلب بالمستحيل والمساحة تكفي');
+  if (/تقليل عدد الغرف|دور ثانٍ|دوران بدل/.test(t) && !/المساحة لا تكفي|المساحة ضيقة|أكبر مما تتسع|يزيد عن المتاح|لا يتسع/.test(t)) out.push('يقترح تصغير البرنامج أو دورًا ثانيًا بلا قياس يثبت ضيق المساحة');
+  return out;
+}
+export default { textContradictions, explainFailure, failureCauses, reportContradictions, TREE_WHY_AR };
