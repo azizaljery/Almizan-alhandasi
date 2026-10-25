@@ -1,0 +1,251 @@
+{
+ "case": {
+  "set": "heldout2",
+  "id": "H8",
+  "land": {
+   "floors": 2,
+   "width": 18,
+   "length": 30,
+   "streets": [
+    "s"
+   ],
+   "entries": [
+    "s"
+   ]
+  },
+  "text": "دورين: تحت مجلس رجال ومجلس نساء وصالة وطعام ومطبخ وغرفة لأبوي بحمامها، وفوق 4 غرف نوم منها ماستر بعيد عن الدرج وصالة علوية صغيرة",
+  "keep": 4
+ },
+ "engineRoot": "/home/claude/wt-r21p/",
+ "ms": 136078,
+ "command": "node scripts/diagnose-r21.mjs heldout2 H8",
+ "stage1_brief": {
+  "understood": [
+   "4 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "دوران (أرضي وأول)",
+   "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»"
+  ],
+  "unclear": [],
+  "rules": [
+   "far:master/stairs «ماستر بعيد عن الدرج»"
+  ],
+  "dims": {},
+  "prefs": {
+   "elderlyRoom": true,
+   "floors": 2
+  }
+ },
+ "stage2_constraints": null,
+ "stage3_topology": {
+  "grids": null,
+  "distinctTopologies": null,
+  "dimFit": null,
+  "dimFail": null,
+  "picked": null,
+  "synthTrees": 4,
+  "libraryTrees": 16,
+  "twoFloors": {
+   "grids": [
+    {
+     "nc": 3,
+     "nr": 4,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 4,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 5,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 6,
+     "ground": 0,
+     "joint": 0
+    }
+   ]
+  },
+  "groundStair": {
+   "grids": [
+    {
+     "nc": 3,
+     "nr": 4,
+     "valid": 4,
+     "nodes": 1500001,
+     "exhausted": false
+    },
+    {
+     "nc": 2,
+     "nr": 4,
+     "valid": 0,
+     "nodes": 9981,
+     "exhausted": true
+    },
+    {
+     "nc": 2,
+     "nr": 5,
+     "valid": 0,
+     "nodes": 569110,
+     "exhausted": true
+    },
+    {
+     "nc": 2,
+     "nr": 6,
+     "valid": 0,
+     "nodes": 1500001,
+     "exhausted": false
+    }
+   ],
+   "picked": 2
+  }
+ },
+ "stage4_allocation": {
+  "treesOptimized": 20,
+  "treesWithoutSolution": 14,
+  "topViolations": [
+   [
+    "stair-hub",
+    4
+   ],
+   [
+    "access:wc",
+    3
+   ],
+   [
+    "hall-dark",
+    2
+   ],
+   [
+    "foyer-big",
+    1
+   ],
+   [
+    "small:majlis",
+    1
+   ],
+   [
+    "majlis-wc",
+    1
+   ],
+   [
+    "women-width",
+    1
+   ],
+   [
+    "suite-over-master",
+    1
+   ]
+  ],
+  "treeStats": null
+ },
+ "stage5_validation": {
+  "rejected": 23,
+  "topReasons": [
+   [
+    "لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم",
+    10
+   ],
+   [
+    "دورات المياه المرسومة 7 من 8.",
+    7
+   ],
+   [
+    "tf:far-stair",
+    5
+   ],
+   [
+    "جدار في الدور الأول يمتد 5.2 م بلا جدار تحته ولا ركيزة (الحد 5 م).",
+    3
+   ],
+   [
+    "عرض «الصالة العائلية» 3.18 م أقل من الحد الإرشادي في الكتالوج لنوع «صا",
+    2
+   ],
+   [
+    "الصالة 9.32×3.18 أضيق من 4.2 م.",
+    2
+   ],
+   [
+    "الصالة 9.32×3.18 ممر لا غرفة (نسبة 2.93).",
+    2
+   ],
+   [
+    "«مجلس الرجال» 23.36 م² أصغر من 24 م².",
+    2
+   ],
+   [
+    "جدار في الدور الأول يمتد 6.3 م بلا جدار تحته ولا ركيزة (الحد 5 م).",
+    2
+   ],
+   [
+    "الصالة 5.87×3.48 أضيق من 4.2 م.",
+    2
+   ],
+   [
+    "tf:stack",
+    2
+   ],
+   [
+    "عرض «الصالة العائلية» التقريبي 3.15 م أقل من الحد الإرشادي في الكتالوج",
+    1
+   ],
+   [
+    "الصالة 12.15×3.18 أضيق من 4.2 م.",
+    1
+   ],
+   [
+    "الصالة 12.15×3.18 ممر لا غرفة (نسبة 3.82).",
+    1
+   ]
+  ],
+  "twoFloorWhy": null,
+  "pool": 1,
+  "poolGuestDefects": [
+   {
+    "pat": "frontstair:fsg2/uspine",
+    "defects": [
+     "WET_STACK",
+     "ENTRANCES_TOGETHER"
+    ]
+   }
+  ],
+  "poolDistinctByFrozenCriterion": [
+   "frontstair:fsg2/uspine"
+  ]
+ },
+ "stage6_selection": {
+  "shown": [
+   {
+    "pat": "frontstair:fsg2/uspine",
+    "status": "needs-edits",
+    "mandatory": [],
+    "r16": [
+     "WET_STACK",
+     "MASTER_STAIR_DOOR"
+    ]
+   }
+  ],
+  "shortfall_ar": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 24، اجتاز البوابات منهم 1؛ ورُفض 12 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة (STAIR_GEOMETRY)، و10 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "hidden": 0
+ },
+ "stage7_timeout": {
+  "timedOut": false,
+  "note": "المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs"
+ },
+ "error": null,
+ "result": {
+  "status": "SOLVED",
+  "requestedCount": 4,
+  "shownCount": 1,
+  "warnings": []
+ }
+}

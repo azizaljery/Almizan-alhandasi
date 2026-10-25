@@ -8,6 +8,8 @@ let clientLint = () => [], textContradictions = () => [];
 try { ({ clientLint } = await import('../dist/client-language.mjs')); } catch { /* */ }
 try { ({ textContradictions } = await import('../dist/infeasibility-report.mjs')); } catch { /* */ }
 const label = process.argv[2], dir = new URL('../evidence/coverage-r21/', import.meta.url).pathname;
+// (الجولة 21) بلا اسم قياس كان يكتب «undefined-report.json» فارغًا (شُغّل مرة بلا معامل) — يُرفض الآن
+if (!label) { console.error('الاستعمال: node scripts/coverage-report-r21.mjs <label>'); process.exit(2); }
 const load = s => [`${dir}${label}-${s}.json`, `${dir}${label}-${s}-p0of2.json`, `${dir}${label}-${s}-p1of2.json`].filter(existsSync).flatMap(f => JSON.parse(readFileSync(f, 'utf8')).rows);
 const pct = (a, b) => Math.round(1000 * a / Math.max(1, b)) / 10;
 const rep = { label, seeds: {} };
