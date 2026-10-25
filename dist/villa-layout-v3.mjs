@@ -29,6 +29,8 @@ const { Z, C, X, Y, OV, VOID, COURT, D2 } = K;
 const T = K.DESIGN_TARGETS;
 const sum = a => a.reduce((s, v) => s + v, 0);
 const OPP = { x0: 'x1', x1: 'x0', y0: 'y1', y1: 'y0' };
+/** (الجولة 21 — مقترح، kit upper.mjs extractSleepKeys) مفتاح جناح نوم S1، S2… — لا «ST» الدرج (كان يُعدّ جناح نوم في الأرضي بالسلم وفي قيود «النوم»). */
+export const isSleepKey = k => /^S\d+$/.test(k);
 
 // ---------------------------------------------------------------------------------------------- (2) الوحدات والعلاقات
 /**
@@ -186,10 +188,10 @@ export function enumerateLayouts(units, rel, nc, nr, { budget = 1500000, gMax = 
   // القيود الصلبة على توزيع كامل
   const check = () => {
     const R = Object.fromEntries(place), gs = [...place.keys()].filter(k => k[0] === 'G').map(k => R[k]);
-    const touch = (a, b) => (Array.isArray(b) ? b : [b]).some(k => k === 'S*' ? keys.filter(x => x[0] === 'S').some(s => adjLen(R[a], R[s]) > 0) : R[k] && adjLen(R[a], R[k]) > 0);
+    const touch = (a, b) => (Array.isArray(b) ? b : [b]).some(k => k === 'S*' ? keys.filter(isSleepKey).some(s => adjLen(R[a], R[s]) > 0) : R[k] && adjLen(R[a], R[k]) > 0);
     for (const r of rel) {
       if (!r.hard) continue;
-      if (r.a === 'S*') { const ss = keys.filter(x => x[0] === 'S'); if (r.kind === 'back' && !ss.some(s => R[s].y1 === nr)) return null; if (r.kind === 'front' && !ss.some(s => R[s].y0 === 0)) return null; continue; }
+      if (r.a === 'S*') { const ss = keys.filter(isSleepKey); if (r.kind === 'back' && !ss.some(s => R[s].y1 === nr)) return null; if (r.kind === 'front' && !ss.some(s => R[s].y0 === 0)) return null; continue; }
       const A = R[r.a]; if (!A) continue;
       if (r.kind === 'front' && A.y0 !== 0) return null;
       if (r.kind === 'back' && A.y1 !== nr) return null;
@@ -222,7 +224,7 @@ export function guillotine(rects, reg, order = 'xy') {
 function softScore(L, rel, units) {
   const { R, nc, nr } = L, keys = Object.keys(R), gs = keys.filter(k => k[0] === 'G').map(k => R[k]);
   let s = 0;
-  const touch = (a, b) => b === 'G' ? gs.some(g => adjLen(R[a], g) > 0) : b === 'S*' ? keys.filter(x => x[0] === 'S').some(k => adjLen(R[a], R[k]) > 0) : R[b] && adjLen(R[a], R[b]) > 0;
+  const touch = (a, b) => b === 'G' ? gs.some(g => adjLen(R[a], g) > 0) : b === 'S*' ? keys.filter(isSleepKey).some(k => adjLen(R[a], R[k]) > 0) : R[b] && adjLen(R[a], R[b]) > 0;
   for (const r of rel) {
     if (r.hard || !R[r.a]) continue;
     if (r.kind === 'notFront' && R[r.a].y0 === 0) s -= r.w;
@@ -240,7 +242,7 @@ function softScore(L, rel, units) {
 /** بصمة التنظيم: أزواج التجاور بين الوحدات ومواضعها الطولية (أمام/وسط/خلف) — مستقلة عن الانعكاس. */
 function signature(L) {
   const { R, nc, nr } = L, keys = Object.keys(R).sort(), pairs = [];
-  const nm = k => (k[0] === 'G' ? (bnd(R[k], nc, nr).length ? 'G' : 'C') : k[0] === 'S' ? 'S' : k);
+  const nm = k => (k[0] === 'G' ? (bnd(R[k], nc, nr).length ? 'G' : 'C') : isSleepKey(k) ? 'S' : k);
   for (let i = 0; i < keys.length; i++) for (let j = i + 1; j < keys.length; j++) if (adjLen(R[keys[i]], R[keys[j]]) > 0) pairs.push([nm(keys[i]), nm(keys[j])].sort().join('-'));
   const depth = keys.filter(k => k[0] !== 'G').map(k => nm(k) + (R[k].y0 === 0 ? 'f' : R[k].y1 === nr ? 'b' : 'm') + (R[k].y1 - R[k].y0 === nr ? 'F' : '')).sort();
   return new Set([...pairs, ...depth]);
@@ -365,7 +367,7 @@ export function layoutTrees(L, units, P, { gardenA = 30 } = {}) {
     return z;
   };
   // أنواع النوم لكل جناح: حاصل ضرب صغير (حتى 4 أشجار لكل توزيع)
-  const sleepKeys = Object.keys(R).filter(k => k[0] === 'S');
+  const sleepKeys = Object.keys(R).filter(isSleepKey);
   // (الجولة العشرون) جناح النوم لا يتمدد ليملأ خليته: فراغ خارجي اختياري في طرفه البعيد عن الصالة (جهة خارجية غير الشارع) يمتص فرق العمق،
   // فلا يطول ممر الجناح مع طول الخلية (corr-long كان أكثر ما يُسقط أشجار الأرض الطويلة) — ما لم يطلب العميل النوم على تلك الواجهة
   const sleepBack = (P.rules || []).some(q => q.kind === 'place' && q.side === 'back' && ['bedrooms', 'master', 'kids', 'elderly'].includes(q.a));
@@ -503,7 +505,7 @@ export function synthTwoFloors(G, U, site, { nOut = 12 } = {}) {
       // ترتيب العلوي بتراكب الجدران: أجنحة النوم فوق وحدات أرضية مقسّمة (الخدمة، الطعام، المجلسان) أو فوق جناح نوم أرضي، والصالة العلوية فوق
       // الصالة الأرضية أو المدخل — جدران العلوي على جدران الأرضي ما أمكن (التراكب يُقاس بعدها على المفصّل)
       const under = (r, ks) => { let n = 0, t = 0; for (let y = r.y0; y < r.y1; y++) for (let x = r.x0; x < r.x1; x++) { t++; const g = Object.entries(L.R).find(([, q]) => x >= q.x0 && x < q.x1 && y >= q.y0 && y < q.y1)?.[0] || ''; if (ks.some(k => g.startsWith(k))) n++; } return t ? n / t : 0; };
-      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (k[0] === 'S' ? under(r, ['KS', 'DN', 'S', 'W', 'M']) : k === 'UH' ? under(r, ['H', 'F', 'LK']) : 0), 0);
+      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (isSleepKey(k) ? under(r, ['KS', 'DN', 'S', 'W', 'M']) : k === 'UH' ? under(r, ['H', 'F', 'LK']) : 0), 0);
       ups.sort((a, b) => b.align - a.align);
       for (const Lu of ups.slice(0, 6)) {
         const tr = jointTree(L, Lu, gU.units, uUnits, G, U, gardenA, site); if (!tr) { log.noTree = (log.noTree || 0) + 1; continue; }

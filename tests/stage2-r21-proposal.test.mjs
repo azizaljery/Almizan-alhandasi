@@ -106,3 +106,14 @@ test('03 رسائل العميل: «1 من 5» بالعدد الحقيقي، و�
     assert.deepEqual(reportContradictions(rep), []); assert.deepEqual(textContradictions(rep.report_ar), []); assert.deepEqual(clientLint(rep.report_ar), []); assert.doesNotMatch(rep.report_ar, /VILLA_|internal/);
   }
 });
+
+// ------------------------------------------------------------------------------------------------ 04 تصنيف الدرج (ST) منفصلًا
+import { isSleepKey, unitsOf, layoutTrees } from '../dist/villa-layout-v3.mjs';
+test('04 الدرج «ST» ليس جناح نوم (kit: ST stair not classified as sleeping room)، والتحويل إلى شجرة لا يتعطل بتوزيع أرضي فيه الدرج', () => {
+  assert.equal(isSleepKey('ST'), false); assert.equal(isSleepKey('S1'), true); assert.equal(isSleepKey('S12'), true);
+  const r = req('مجلس رجال ومجلس نساء والطعام والمطبخ', { bedrooms: 1, majlis: 2 }), P = programV2({ bedrooms: 1, majlis: 2, baths: 3, kitchens: 1, halls: 1, dining: 1 }, r);
+  const { units } = unitsOf(P, { stair: true }); assert.ok(units.some(u => u.key === 'ST'));
+  const R = { M: { x0: 0, y0: 0, x1: 1, y1: 1 }, F: { x0: 1, y0: 0, x1: 2, y1: 1 }, ST: { x0: 2, y0: 0, x1: 3, y1: 1 }, H: { x0: 1, y0: 1, x1: 3, y1: 2 }, DN: { x0: 0, y0: 1, x1: 1, y1: 2 }, KS: { x0: 0, y0: 2, x1: 1, y1: 3 }, S1: { x0: 1, y0: 2, x1: 3, y1: 3 } };
+  const keep = Object.fromEntries(Object.entries(R).filter(([k]) => units.some(u => u.key === k)));
+  assert.doesNotThrow(() => layoutTrees({ nc: 3, nr: 3, R: keep }, units, P));
+});
