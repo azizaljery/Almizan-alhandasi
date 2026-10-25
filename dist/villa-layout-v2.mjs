@@ -12,7 +12,7 @@
 //       بدائل بأقصى اختلاف تنظيمي بالمقياس نفسه المستعمل في أدلة القبول (difference).
 // المستند الناتج بصيغة mizan-draw/1 نفسها (+x شرق، +y شمال) فيعمل معه المرسم والعرض ثلاثي الأبعاد والتحليل كما هي.
 // المقاسات المستهدفة افتراضات تصميمية من التطبيق قابلة للضبط، وليست اشتراطات نظامية. نقي: لا DOM ولا تخزين ولا شبكة.
-import { briefOf, sharedReviewRequest } from './shared-brief.mjs';
+import { briefOf, briefMajlisDoor, sharedReviewRequest } from './shared-brief.mjs';
 import { r19DifferentOf } from './diversity-r21.mjs';
 import { createDoc, applyCommand, applyCommandOwned, parseDoc } from './draw/doc.mjs';
 import { FIXTURES } from './draw/catalog.mjs';
@@ -2826,7 +2826,11 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
     let lastRp = null;
     // (الجولة 21 — مقترح 06) وصلة الضيافة قيدٌ في حل الأبعاد لكل مصادر الأشجار (المكتبة والمحرك الثالث والإعادة) متى أمكنت طوبولوجيًا في الشجرة؛
     // الشجرة التي لا يتلاصق فيها المجلس والطعام بأي مقاسات تُحل كما هي (قد يصل الضيف عبر دهليز الرجال) وتُعد في failStats — والحكم بعد التفصيل للأبواب
-    const topoLink = !tr.hardLink && P.guestLink && P.men && P.dining?.[0] && !R14_OFF.has('r21link') ? guestTopology(tr.tree, P.men.id, P.dining[0].id) : null;
+    // القيد في التلدين لأشجار المكتبة حين يكون الوصول طلبًا صريحًا من العميل (DIRECT_DOOR أو GUEST_ACCESS في العقد الموحد)؛ الوصلة الافتراضية للميزان
+    // تبقى على الإعادة بعد البناء (refineGuest: الشجرة نفسها بالقيد) — القياس: تعميمه على الافتراضي (مفتاح r21linkall) كسب C4 «جاهزًا» وأسقط بديلًا
+    // جاهزًا في C5 وحوّل H2 من «محجوب» إلى «لا بديل» (docs/research/r21-proposal/PROPOSAL.md §06)
+    const linkScope = R14_OFF.has('r21linkall') || briefMajlisDoor(P.brief);
+    const topoLink = !tr.hardLink && linkScope && P.guestLink && P.men && P.dining?.[0] && !R14_OFF.has('r21link') ? guestTopology(tr.tree, P.men.id, P.dining[0].id) : null;
     if (topoLink === false) topoNo++;
     const hardLinkT = !!tr.hardLink || topoLink === true;
     const ctxT = tr.foyerYard || tr.hardDress || hardLinkT || tr.hardHall ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: hardLinkT, hardHall: !!tr.hardHall } : ctx;
