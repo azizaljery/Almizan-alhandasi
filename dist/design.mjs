@@ -12,6 +12,8 @@ import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 import { shortfallNotice } from './client-text.mjs';
 import { toClientAr } from './client-language.mjs';
+// (الجولة 21 — مقترح 08) لا نص استثناء للعميل: رسالة المحرك العربية المعروفة (VILLA_*) بلغة العميل، وإلا نص ثابت
+const clientErr = (e, fallback) => (/^VILLA_/.test(String(e?.code || '')) && /[\u0600-\u06FF]/.test(String(e?.message || '')) ? toClientAr(e.message) : fallback);
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -336,8 +338,8 @@ $('fbGo').addEventListener('click', async () => {
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (err) { $('fbStatus').textContent = err.message || 'تعذّر تصميم بديل.'; $('fbGo').disabled = false; }
+  } catch (err) { $('fbStatus').textContent = clientErr(err, 'تعذّر تصميم بديل.'); $('fbGo').disabled = false; }
 });
 
-try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, e.message), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
+try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, clientErr(e, 'حدث خطأ أثناء تحميل الجلسة؛ أعد المحاولة أو ابدأ من الصفحة الرئيسية.')), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
 globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية

@@ -152,3 +152,50 @@ test('07 diversifyTopologies أول ظهور لكل بصمة بالترتيب ح
   assert.notEqual(layoutFingerprint(L), layoutFingerprint(moved), 'المجلس من الأمام إلى الوسط تنظيم آخر');
 });
 
+// ------------------------------------------------------------------------------------------------ 08 التعديل الآمن في طبقة المعاملة
+import { applySafeEdit, validateEdit } from '../dist/change-guard.mjs';
+import { analyzeDoc } from '../dist/draw/digest.mjs';
+import { parseDoc } from '../dist/draw/doc.mjs';
+let gen = null;
+const genMD = () => {
+  if (gen) return gen;
+  const counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, r = req('دور واحد، 3 غرف نوم، مجلس رجال، والمجلس يفتح على الطعام، صالة، مطبخ', counts);
+  const o = V3.generateVillaDesigns({ land: { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts: r.counts, requirements: r, keep: 4 });
+  return (gen = { r, o });
+};
+test('06+07 على بديل مولَّد بطلب «المجلس يفتح على الطعام»: كل معروض غير محجوب فيه باب فعلي بين المجلس والطعام ومسار ضيف بلا عبور العائلة (بعد التفصيل)، وحكم «مختلف» بالمحوّل = المعيار المجمّد', { timeout: 900000 }, () => {
+  const { r, o } = genMD(), shown = o.designs.filter(d => d.presentation?.status !== 'hidden');
+  assert.ok(shown.length >= 1);
+  for (const d of shown) {
+    const v = validateEdit(d.doc, r);
+    assert.ok(v.brief.some(b => b.kind === RELATIONS.DIRECT_DOOR), 'العقد فيه DIRECT_DOOR');
+    for (const b of v.brief) assert.equal(b.ok, true, b.kind);
+    const g = measureR16(d.doc, { text: r.text, counts: r.counts, rules: r.rules || [] }).find(x => x.id === 'GUEST_DINING'); assert.ok(!g || !g.applicable || g.pass);
+  }
+  const docs = o.designs.map(d => d.doc);
+  for (let i = 0; i < docs.length; i++) for (let j = i + 1; j < docs.length; j++) {
+    const d = archDifferenceV2(archSignatureV2(docs[i]), archSignatureV2(docs[j])), f = sameOrDifferent(docs[i], docs[j]).different;
+    assert.equal(r19DifferentOf(d), f); assert.equal(r19Different(docs[i], docs[j]), f); assert.equal(d.verdict === 'distinct', f);
+  }
+});
+test('08 applySafeEdit: حذف الباب المباشر المطلوب يُرفض والأصل لا يُمس؛ تعديل لا يُسقط شرطًا يُقبل؛ وما طلبه العميل في الدور يُعفى', { timeout: 900000 }, () => {
+  const { r, o } = genMD(), d = o.designs.find(x => x.presentation?.status !== 'hidden'), doc = d.doc;
+  const model = analyzeDoc(doc), ids = [];
+  for (const lv of model.levels) for (const op of lv.openings) { if (!op.door) continue; const all = op.sides.flatMap(s => [s.room, s.other && s.other !== 'outside' ? lv.roomsById.get(s.other) : null]).filter(Boolean); if (all.some(x => x.type === 'majlis') && all.some(x => x.type === 'dining')) ids.push(op.id); }
+  assert.ok(ids.length, 'باب بين المجلس والطعام في المولَّد');
+  const snap = JSON.stringify(doc);
+  const cut = applySafeEdit(doc, x => { x.openings = x.openings.filter(op => !ids.includes(op.id)); }, r);
+  assert.equal(cut.accepted, false); assert.equal(cut.reason, 'HARD_CONSTRAINT_VIOLATION'); assert.equal(JSON.stringify(doc), snap, 'الأصل لم يتغير');
+  assert.ok(cut.violations.some(v => /^BRIEF:/.test(v.id)), JSON.stringify(cut.violations));
+  for (const v of cut.violations) assert.deepEqual(lintClientText(v.ar), [], v.ar);
+  const ok = applySafeEdit(doc, x => { x.title = 'نسخة'; }, r);
+  assert.equal(ok.accepted, true); assert.equal(ok.doc.title, 'نسخة'); assert.notEqual(ok.doc, doc);
+  const exempt = applySafeEdit(doc, x => { x.openings = x.openings.filter(op => !ids.includes(op.id)); }, r, { exempt: cut.violations.map(v => v.id) });
+  assert.equal(exempt.accepted, true);
+});
+test('08 طبقة المعاملة نفسها (design-session): مع تعطيل حارس التعديل القديم يرفض applySafeEdit سد الباب المطلوب ويبقى الباب؛ ومع تعطيله أيضًا يُعتمد السد (الطبقة هي التي ترفض)', { timeout: 1200000 }, () => {
+  const run = off => JSON.parse(execFileSync(process.execPath, [root + 'tests/_r21-safe-edit-probe.mjs'], { cwd: root, env: { ...process.env, R14_OFF: off, NODE_TEST_CONTEXT: '' }, encoding: 'utf8', maxBuffer: 1 << 26 }).trim().split('\n').pop());
+  const withLayer = run('r20guard'), without = run('r20guard,r21safe');
+  assert.deepEqual(withLayer, { local: false, generated: true, doorKept: true });
+  assert.deepEqual(without, { local: true, generated: false, doorKept: false });
+});
