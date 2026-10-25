@@ -269,6 +269,45 @@ function mk(t, kids) {
 }
 const X = (...k) => mk('x', k), Y = (...k) => mk('y', k);
 /** نسخة من الشجرة بأوزان ومراتب مستقلة (البحث يعدّلها) مع الإبقاء على كتل البرنامج نفسها. */
+// (الجولة 21 — مقترح 06، مكيَّف من kit-r21/src/constraints.mjs topologyGuestRoute) فحص طوبولوجي رخيص قبل حل الأبعاد لكل مصادر الأشجار:
+// هل يمكن لكتلتين أن تشتركا في جدار في شجرة القطع هذه بأي مقاسات موجبة؟ (متفائل: لا يدّعي صحة هندسية ولا يقبل بديلًا — الحكم بعد التفصيل
+// للأبواب الفعلية في GUEST_DINING). السبب الجذري (docs/research/v3-diagnosis-r21.md: «وصلة الضيافة على أشجار المحرك الثالث فقط»): أشجار
+// المكتبة كانت تُحل بلا قيد الوصلة ثم تُحجب بعد البناء.
+const TOPO_SIDES = { x: ['x0', 'x1', 'y0', 'y1'], y: ['y0', 'y1', 'x0', 'x1'] };
+function topoSides(n, id) {
+  if (!n) return null;
+  if (n.t === 'dual') return topoSides(n.g, id);
+  if (n.t === 'zone') {
+    const i = n.b.findIndex(b => b.id === id); if (i < 0) return null;
+    const [s0, s1, c0, c1] = TOPO_SIDES[n.along], s = new Set([c0, c1]); if (i === 0) s.add(s0); if (i === n.b.length - 1) s.add(s1); return s;
+  }
+  if ((n.t === 'x' || n.t === 'y') && n.k) for (let i = 0; i < n.k.length; i++) {
+    const c = topoSides(n.k[i], id); if (!c) continue;
+    const [s0, s1, c0, c1] = TOPO_SIDES[n.t], s = new Set([...c].filter(v => v === c0 || v === c1));
+    if (c.has(s0) && n.k.slice(0, i).every(q => q.opt)) s.add(s0);
+    if (c.has(s1) && n.k.slice(i + 1).every(q => q.opt)) s.add(s1);
+    return s;
+  }
+  return null;
+}
+/** true: الكتلتان قد تتلاصقان في هذه الشجرة؛ false: لا تتلاصقان بأي مقاسات؛ null: إحداهما ليست في الشجرة (الأرضي). */
+export function guestTopology(tree, aId, bId) {
+  const rec = n => {
+    if (!n) return null;
+    if (n.t === 'dual') return rec(n.g);
+    if (n.t === 'zone') { const i = n.b.findIndex(b => b.id === aId), j = n.b.findIndex(b => b.id === bId); return i < 0 || j < 0 ? null : Math.abs(i - j) === 1; }
+    if ((n.t === 'x' || n.t === 'y') && n.k) {
+      const ia = n.k.findIndex(c => topoSides(c, aId)), ib = n.k.findIndex(c => topoSides(c, bId));
+      if (ia < 0 || ib < 0) return null;
+      if (ia === ib) return rec(n.k[ia]);
+      const [lo, hi] = ia < ib ? [ia, ib] : [ib, ia], [loId, hiId] = ia < ib ? [aId, bId] : [bId, aId], [s0, s1] = TOPO_SIDES[n.t];
+      if (!n.k.slice(lo + 1, hi).every(q => q.opt)) return false;
+      return topoSides(n.k[lo], loId).has(s1) && topoSides(n.k[hi], hiId).has(s0);
+    }
+    return null;
+  };
+  return rec(tree);
+}
 const cloneTree = n => { const c = n.t === 'zone' ? { ...n, b: [...n.b], w: [...n.w] } : n.k ? { ...n, k: n.k.map(cloneTree), w: [...n.w] } : n.t === 'dual' ? { ...n, g: cloneTree(n.g), u: cloneTree(n.u) } : { ...n }; delete c._mx; delete c._my; return c; };
 /** هامش خارجي جانبي (يبقى خارج المبنى) بعرض أدنى 0.6 م؛ عرضه متغير بحث. */
 const MARGIN = c => ({ t: 'void', area: Math.max(3, areaOf(c) * .05), min: .6, margin: true });
@@ -2780,10 +2819,16 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
   // غرف النوم على الواجهة الأمامية بطلب العميل («غرفة النوم على الشارع»): لا جزاء
   const bedFront = rules.some(r => r.kind === 'place' && r.side === 'front' && ['bedrooms', 'master', 'kids', 'elderly', 'onebed'].includes(r.a));
   const out = [], jobs = [], ctx = { maxBuilt: site.maxBuilt, minEnv, minDepth, backAfterStair, kitchenFront, capSuite, bedFront, foyerYard, narrow: site.W < NARROW_W };
+  let topoNo = 0;
   for (const tr of trees || partiTrees(P, { stair, W: site.W, D: site.D, irregular: !!site.placeRects }).filter(t => !t.late)) {
     if (avoid.has(tr.mode) || exclude.has(tr.mode + ':' + tr.tag)) continue;
     let lastRp = null;
-    const ctxT = tr.foyerYard || tr.hardDress || tr.hardLink || tr.hardHall ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: !!tr.hardLink, hardHall: !!tr.hardHall } : ctx;
+    // (الجولة 21 — مقترح 06) وصلة الضيافة قيدٌ في حل الأبعاد لكل مصادر الأشجار (المكتبة والمحرك الثالث والإعادة) متى أمكنت طوبولوجيًا في الشجرة؛
+    // الشجرة التي لا يتلاصق فيها المجلس والطعام بأي مقاسات تُحل كما هي (قد يصل الضيف عبر دهليز الرجال) وتُعد في failStats — والحكم بعد التفصيل للأبواب
+    const topoLink = !tr.hardLink && P.guestLink && P.men && P.dining?.[0] && !R14_OFF.has('r21link') ? guestTopology(tr.tree, P.men.id, P.dining[0].id) : null;
+    if (topoLink === false) topoNo++;
+    const hardLinkT = !!tr.hardLink || topoLink === true;
+    const ctxT = tr.foyerYard || tr.hardDress || hardLinkT || tr.hardHall ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: hardLinkT, hardHall: !!tr.hardHall } : ctx;
     const evalFn = (sol, ew, ed) => {
       let s = scoreV2(sol, P, ew, ed, ctxT); if (s === null) return null;
       // (الجولة التاسعة) أنماط تضع المجلس في شريط ضيافة ضيق: حد 24 م² مخالفةٌ في البحث نفسه (لا يُبنى ثم يُرفض)
@@ -2845,7 +2890,7 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
     out.push({ mode: tr.mode, tag: tr.tag, tree: tr.tree, late: !!tr.late, stepped: !!tr.stepped, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p - (prefPat && patOf(tr) === prefPat ? PREFER_BONUS : 0), rp, swaps: tr.swaps || null });
   }
   out.sort((a, b) => a.pen - b.pen);
-  Object.defineProperty(out, 'failStats', { value: { tried: jobs.length, failed: failN, why: failStats }, enumerable: false });
+  Object.defineProperty(out, 'failStats', { value: { tried: jobs.length, failed: failN, why: failStats, guestTopologyNone: topoNo }, enumerable: false });
   return out;
 }
 

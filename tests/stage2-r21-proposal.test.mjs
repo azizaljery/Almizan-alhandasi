@@ -117,3 +117,18 @@ test('04 الدرج «ST» ليس جناح نوم (kit: ST stair not classified 
   const keep = Object.fromEntries(Object.entries(R).filter(([k]) => units.some(u => u.key === k)));
   assert.doesNotThrow(() => layoutTrees({ nc: 3, nr: 3, R: keep }, units, P));
 });
+
+// ------------------------------------------------------------------------------------------------ 06 مسار الضيف لكل مصادر الأشجار
+import { guestTopology } from '../dist/villa-layout-v2.mjs';
+import { measureR16 } from '../dist/privacy-defects.mjs';
+import { execFileSync } from 'node:child_process';
+const Zt = (ids, along) => ({ t: 'zone', along, b: ids.map(id => ({ id })), w: ids.map(() => 1) });
+test('06 الفحص الطوبولوجي قبل حل الأبعاد (kit topologyGuestRoute): متجاوران ممكن، ويفصلهما صف لا، والقطري متفائل، والغائب null', () => {
+  assert.equal(guestTopology({ t: 'y', k: [Zt(['M', 'DN'], 'x'), Zt(['H'], 'x')], w: [1, 1] }, 'M', 'DN'), true);
+  assert.equal(guestTopology({ t: 'y', k: [Zt(['M', 'K'], 'x'), Zt(['H'], 'x'), Zt(['DN'], 'x')], w: [1, 1, 1] }, 'M', 'DN'), false);
+  assert.equal(guestTopology({ t: 'y', k: [Zt(['M', 'K', 'DN'], 'x'), Zt(['H'], 'x')], w: [1, 1] }, 'M', 'DN'), false, 'في المنطقة نفسها يفصلهما المطبخ');
+  assert.equal(guestTopology({ t: 'x', k: [{ t: 'y', k: [Zt(['M'], 'x'), Zt(['A'], 'x')], w: [1, 1] }, { t: 'y', k: [Zt(['B'], 'x'), Zt(['DN'], 'x')], w: [1, 1] }], w: [1, 1] }, 'M', 'DN'), true);
+  assert.equal(guestTopology({ t: 'y', k: [Zt(['M'], 'x'), { t: 'void', opt: true }, Zt(['DN'], 'x')], w: [1, 1, 1] }, 'M', 'DN'), true, 'فراغ اختياري قد ينطوي');
+  assert.equal(guestTopology({ t: 'y', k: [Zt(['M'], 'x'), Zt(['H'], 'x')], w: [1, 1] }, 'M', 'DN'), null);
+});
+
