@@ -334,9 +334,31 @@ function dist(L, items) {
   }
   return null;
 }
+/**
+ * (الجولة 21) المقاس الصريح قيدُ بناء لا هدفُ بحث: امتداد الكتلة على صفها يُثبَّت على أحد ضلعيها المطلوبين (الأطول إن لم يتسع العمق له،
+ * وإلا الأقصر)، فلا يبقى للبحث إلا ضلع واحد يطابقه بدل ضلعين مقترنين بعرض العمود كله (H10 وH5 في r20: dims:* أكثر ما أسقط الأشجار).
+ * لا تُثبَّت غرف النوم بحماماتها (المقاس للغرفة دون الحمام) ولا مجلس الرجال بشريط دهليزه (الشريط يمتص الفرق في التفصيل).
+ */
+const dimRun = (b, crossNet, allowRun, dir = null) => {
+  if (!b.dimGross || b.kind === 'suite' || R14_OFF.has('r21dimfix')) return 0;
+  const sN = b.dimGross.s - .2, lN = b.dimGross.l - .2;
+  // مجلس الرجال بشريط دهليزه: الشريط العرضي (الأمامي، بعمق MEN_LOBBY_D) على محور y — يُثبَّت العرض (x) على الضلع الصافي وحده، والعمق (y)
+  // على الضلع الآخر + الدهليز؛ الضلع الأطول حيث يتسع الآخر له
+  if (b.kind === 'majlis' && b.guestWc) { if (!b.men || !dir) return 0; return dir === 'x' ? (crossNet - MEN_LOBBY_D >= lN - .3 ? sN : lN) + allowRun : (crossNet >= lN - .3 ? sN : lN) + MEN_LOBBY_D + allowRun; }
+  return (crossNet >= lN - .3 ? sN : lN) + allowRun;
+};
+/** (الجولة 21) امتداد ثابت لعقدة على محور dir: منطقة بكتلة واحدة بمقاس صريح، أو عقدة متعامدة كل أبنائها فراغات اختيارية عدا واحد كذلك. */
+function fixExtOf(c, dir, crossNet, allow) {
+  if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir) : 0;
+  if ((c.t === 'x' || c.t === 'y') && c.t !== dir && !c.at) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? fixExtOf(solid[0], dir, crossNet, allow) : 0; }
+  return 0;
+}
+/** (الجولة 21) سماكة الجدارين على طرفي امتداد: خارجي (EXT) على حد الغلاف، وإلا داخلي (INT) — كما يقيس التقييم والسجل الصافي. */
+const wallPair = (extA, extB) => (extA ? EXT / 2 : INT / 2) + (extB ? EXT / 2 : INT / 2);
 /** يحل الشجرة داخل غلاف ew×ed: يعيد الكتل الموضوعة والحركة والأحواش والفراغات الخارجية، أو null. */
 function solve(tree, ew, ed) {
   const out = { placed: [], circ: [], courts: [], voids: [], dh: [] };
+  const edgesExt = q => ({ x0: q.x0 <= 1e-6, x1: q.x1 >= ew - 1e-6, y0: q.y0 <= 1e-6, y1: q.y1 >= ed - 1e-6 });
   let o = out; // (الجولة التاسعة) عقدة «dual»: الدوران معًا في المستطيل نفسه — الأرضي في out والعلوي في out.up
   const rec = (n, r) => {
     if (n.t === 'dual') {
@@ -355,15 +377,26 @@ function solve(tree, ew, ed) {
     }
     if (n.t === 'x' || n.t === 'y') {
       const dir = n.t, L = dir === 'x' ? W_(r) : H_(r);
-      const sz = dist(L, n.k.map((c, i) => ({ min: minExt(c, dir), fix: (c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir ? c.fix : 0, a: areaOf(c) * n.w[i] })));
+      // (الجولة 21) ورقة بكتلة واحدة بمقاس صريح بين إخوة يمتصون الفرق (فراغ اختياري أو منطقة مرنة): امتدادها ثابت على مقاسها الصافي
+      // وجداريها الفعليين (خارجي على حد الغلاف، وإلا داخلي)
+      const ext = edgesExt(r), [s0, s1, c0, c1] = dir === 'x' ? ['x0', 'x1', 'y0', 'y1'] : ['y0', 'y1', 'x0', 'x1'];
+      const crN = (dir === 'x' ? H_(r) : W_(r)) - wallPair(ext[c0], ext[c1]), last = n.k.length - 1;
+      const isOpen = q => q && (q.t === 'void' || q.t === 'court');
+      const dimF = n.k.map((c, i) => (last > 0 && !((c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir) ? fixExtOf(c, dir, crN, wallPair(i === 0 ? ext[s0] : isOpen(n.k[i - 1]), i === last ? ext[s1] : isOpen(n.k[i + 1]))) : 0));
+      const sz = dist(L, n.k.map((c, i) => ({ min: minExt(c, dir), fix: (c.t === 'circ' || c.t === 'dual') && c.fix && c.fixDir === dir ? c.fix : dimF[i], a: areaOf(c) * n.w[i] })));
       if (!sz) return false;
       // فراغ خارجي اختياري (حديقة/ارتداد يمتص فرق العمق بين الأجنحة): أقل من 2.4 م لا يُترك شريطًا ضيقًا بل يُضم لجاره
-      for (let i = 0; i < n.k.length; i++) if (n.k[i].opt && sz[i] < 2.4) { const j = i > 0 && !n.k[i - 1].opt ? i - 1 : n.k.findIndex(c => !c.opt); if (j < 0) return false; sz[j] += sz[i]; sz[i] = 0; }
+      // (الجولة 21) لا يُضم إلى ورقة بمقاس صريح ثابت ما دام له جار مرن
+      for (let i = 0; i < n.k.length; i++) if (n.k[i].opt && sz[i] < 2.4) { let j = i > 0 && !n.k[i - 1].opt ? i - 1 : n.k.findIndex(c => !c.opt); if (j >= 0 && dimF[j]) { const jj = n.k.findIndex((c, q) => !c.opt && !dimF[q]); if (jj >= 0) j = jj; } if (j < 0) return false; sz[j] += sz[i]; sz[i] = 0; }
       const lastI = sz.reduce((a, v, i) => (v > 0 ? i : a), -1);
       let p = dir === 'x' ? r.x0 : r.y0; const end = dir === 'x' ? r.x1 : r.y1;
+      // (الجولة 21) الورقة بمقاس صريح تُقطع على مقاسها بدقة 1 سم (لا تُقرَّب إلى شبكة 5 سم)، والأخيرة منها تُحسب من النهاية
+      const r1c = v => Math.round(v * 100) / 100;
+      const preLast = dimF[lastI] && n.k.findIndex((c, q) => sz[q] > 0) !== lastI ? r1c(end - sz[lastI]) : null;
       for (let i = 0; i < n.k.length; i++) {
         if (sz[i] === 0 && n.k[i].opt) continue;
-        const q = i === lastI ? end : snap(p + sz[i]);
+        const nxt = sz.findIndex((v, q) => q > i && v > 0);
+        const q = i === lastI ? end : nxt === lastI && preLast !== null ? preLast : dimF[i] ? r1c(p + sz[i]) : snap(p + sz[i]);
         if (q - p < .5) return false;
         if (!rec(n.k[i], dir === 'x' ? { x0: p, x1: q, y0: r.y0, y1: r.y1 } : { x0: r.x0, x1: r.x1, y0: p, y1: q })) return false;
         p = q;
@@ -372,17 +405,29 @@ function solve(tree, ew, ed) {
     }
     if (n.t === 'zone') {
       const dir = n.along, L = dir === 'x' ? W_(r) : H_(r), cross = dir === 'x' ? H_(r) : W_(r);
-      const sz = dist(L, n.b.map((b, i) => ({ min: suiteRun(b, cross), fix: 0, a: b.area * n.w[i] }))); if (!sz) return false;
+      const ext = edgesExt(r), [s0, s1, c0, c1] = dir === 'x' ? ['x0', 'x1', 'y0', 'y1'] : ['y0', 'y1', 'x0', 'x1'], crN = cross - wallPair(ext[c0], ext[c1]), last = n.b.length - 1;
+      const zF = n.b.map((b, i) => (last > 0 ? dimRun(b, crN, wallPair(i === 0 && ext[s0], i === last && ext[s1]), dir) : 0));
+      const sz = dist(L, n.b.map((b, i) => ({ min: suiteRun(b, cross), fix: zF[i], a: b.area * n.w[i] }))); if (!sz) return false;
       let p = dir === 'x' ? r.x0 : r.y0; const end = dir === 'x' ? r.x1 : r.y1;
+      const r1z = v => Math.round(v * 100) / 100, preZ = last > 0 && zF[last] ? r1z(end - sz[last]) : null;
       n.b.forEach((b, i) => {
-        const q = i === n.b.length - 1 ? end : snap(p + sz[i]), slot = dir === 'x' ? { x0: p, x1: q, y0: r.y0, y1: r.y1 } : { x0: r.x0, x1: r.x1, y0: p, y1: q };
+        const q = i === n.b.length - 1 ? end : i === last - 1 && preZ !== null ? preZ : zF[i] ? r1z(p + sz[i]) : snap(p + sz[i]), slot = dir === 'x' ? { x0: p, x1: q, y0: r.y0, y1: r.y1 } : { x0: r.x0, x1: r.x1, y0: p, y1: q };
         p = q;
         // مطبخ بمقاس صريح في عمود أعرض منه: الزائد مخزن حقيقي يُفتح من المطبخ (لا يُمطّ المطبخ عن مقاسه)؛
         // وغرفة خادمة في عمود خدمة عريض: الزائد غرفة غسيل بجوارها تُفتح من المطبخ أو الحركة (لا غرفة خادمة متضخمة)
         const run = dir === 'x' ? W_(slot) : H_(slot), cross = dir === 'x' ? H_(slot) : W_(slot);
         let tgt = null, extra = null;
-        if (b.dimGross && b.kind === 'kitchen' && !b.noPantry) { tgt = Math.abs(run - b.dimGross.l) <= Math.abs(run - b.dimGross.s) ? b.dimGross.s : b.dimGross.l; extra = { id: b.id + '-pantry', kind: 'store', name: 'المخزن', pantry: true }; }
+        if (b.dimGross && b.kind === 'kitchen' && !b.noPantry) { tgt = Math.abs(run - b.dimGross.l) <= Math.abs(run - b.dimGross.s) ? b.dimGross.s : b.dimGross.l; extra = { id: b.id + '-pantry', kind: 'store', name: 'المخزن', pantry: true };
+          // (الجولة 21) العمق المطلوب صافيًا + جدار المخزن الداخلي + جدار الجهة الأخرى الفعلي (كان 0.2 م ثابتًا فيبقى المطبخ أقل أو أكثر من مقاسه)
+          if (!R14_OFF.has('r21dimfix')) { const ps0 = n.pside ? n.door : opp[n.door], e2 = edgesExt(slot); tgt = tgt - .2 + INT / 2 + (e2[opp[ps0]] ? EXT / 2 : INT / 2); } }
         else if (b.kind === 'maid' && cross > 5.0) { tgt = 3.6; extra = { id: 'svc-laundry', kind: 'store', name: b.laundryName || 'غرفة الغسيل', laundry: true }; }
+        // (الجولة 21) المطبخ بمقاس صريح في منطقة امتدادها أطول من مقاسه بكثير (منطقة بكتلة واحدة لا يُثبَّت امتدادها): يُجعل الضلع الآخر على
+        // الامتداد والزائد مخزنًا على طرف الامتداد (كان المخزن على العرض وحده فيبقى المطبخ 6 م لطلب 4 م)
+        if (extra?.pantry && !R14_OFF.has('r21dimfix') && n.b.length === 1 && run - (tgt === b.dimGross.s ? b.dimGross.l : b.dimGross.s) >= 1.4 && cross - tgt < 1.4) {
+          const e2 = edgesExt(slot), rs = dir === 'x' ? ['x0', 'x1'] : ['y0', 'y1'], ps = n.pside ? rs[1] : rs[0];
+          const want = (tgt === b.dimGross.s ? b.dimGross.l : b.dimGross.s) - .2 + INT / 2 + (e2[opp[ps]] ? EXT / 2 : INT / 2);
+          if (run - want >= 1.4) { const [pan, kit] = cut(slot, ps, snap(run - want)); o.placed.push({ block: b, r: kit, door: n.door }); o.placed.push({ block: { ...extra, area: A_(pan) }, r: pan, door: opp[ps] }); if (run - want > 2.6) o.bigPantry = (o.bigPantry || 0) + (run - want - 2.6); return; }
+        }
         if (tgt && cross - tgt >= 1.4) {
           if (extra.pantry && cross - tgt > 2.6) o.bigPantry = (o.bigPantry || 0) + (cross - tgt - 2.6); // مخزن متضخم = مطبخ في عمود أعرض منه بكثير
           // الزائد على جهة الحركة أو الجهة المقابلة (متغير بحث): الغسيل على الحركة يصير مدخل خدمة للخادمة ويبقي نافذتها
