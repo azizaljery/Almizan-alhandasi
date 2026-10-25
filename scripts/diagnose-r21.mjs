@@ -5,6 +5,7 @@
 // والمراجعة) ← الاختيار والعرض ← المهلة. غير سلوكي: يقرأ خطافات التشخيص الموجودة في المحرك (__v2dbg، __v2rej، __v2pool، سجل البحث).
 // لا يُشغَّل على H11–H15 (المجموعة المختومة): يرفضها صراحة.
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { reportName, reportPath } from './_report-name.mjs';
 
 const argv = process.argv.slice(2), opt = k => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : null; };
 const [set, id] = argv.filter((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
@@ -49,6 +50,6 @@ const rep = {
   error: err ? { code: err.code || null, message: String(err.message || err), report_ar: err.report_ar || null, result: err.result || null } : null,
   result: out?.result || null,
 };
-const dir = here + `evidence/diagnosis-r21/${label}/`; mkdirSync(dir, { recursive: true });
-writeFileSync(dir + `${set}-${id}.json`, JSON.stringify(rep, null, 1));
+const dir = here + `evidence/diagnosis-r21/${reportName(label)}/`; mkdirSync(dir, { recursive: true });
+writeFileSync(reportPath(dir, [set, id]), JSON.stringify(rep, null, 1));
 console.log(JSON.stringify({ id, ms, outcome: out ? out.designs.map(d => d.pat + ':' + d.presentation?.status) : err.code, grids: rep.stage3_topology.grids, trees: rep.stage4_allocation.treesOptimized, noSol: rep.stage4_allocation.treesWithoutSolution, topViol: rep.stage4_allocation.topViolations.slice(0, 5), rejected: rep.stage5_validation.rejected, topRej: rep.stage5_validation.topReasons.slice(0, 5), poolDistinct: rep.stage5_validation.poolDistinctByFrozenCriterion.length, pool: rep.stage5_validation.pool }, null, 0));

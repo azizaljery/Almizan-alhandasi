@@ -1,0 +1,160 @@
+diff --git a/dist/diversity-r21.mjs b/dist/diversity-r21.mjs
+new file mode 100644
+index 0000000..e066bbe
+--- /dev/null
++++ b/dist/diversity-r21.mjs
+@@ -0,0 +1,49 @@
++// (الجولة 21 — مقترح 07، مكيَّف من kit-r21/src/diversity.mjs) التنوع قبل الهندسة، ومحوّل المعيار المجمّد r19.
++// السبب الجذري (docs/research/v3-diagnosis-r21.md، C10): الأشجار التي تصل إلى حل الأبعاد تُختار بالتفضيل ثم بعد جاكارد للتجاور (≥ 0.15) فقط،
++// فتصل تنظيمات متقاربة وظيفيًا (المجلس والصالة والخدمة والنوم في الأحزمة نفسها) — من 12 مرشحًا في حوض C10 خمسة سليمة ولا زوج منها «مختلف».
++// القاعدتان:
++//  1) diversifyTopologies (كما في الحزمة): أول ظهور لكل بصمة وظيفية قبل أي تكرار — فرز أولي فقط، لا يحكم على الاختلاف.
++//  2) r19Different: محوّل لا يغيّر المعيار — true فقط إن حكم sameOrDifferent المجمّد (dist/arch-criterion.mjs) «مختلف معماريًا»
++//     (بعدان جوهريان على الأقل). لا يُعدَّل dist/arch-criterion.mjs ولا عتباته ولا وثيقته.
++// وحدة نقية بلا أرقام حالات.
++import { ARCH_CRITERION_R19, sameOrDifferent } from './arch-criterion.mjs';
++
++/** أول ظهور لكل بصمة بالترتيب المعطى (الأفضل أولًا)، حتى limit. (kit diversifyTopologies) */
++export function diversifyTopologies(topologies, limit, fingerprint) {
++  const seen = new Set(), result = [];
++  for (const item of topologies) {
++    const key = fingerprint(item);
++    if (seen.has(key)) continue;
++    seen.add(key); result.push(item);
++    if (result.length === limit) break;
++  }
++  return result;
++}
++
++/** المحوّل: حكم المعيار المجمّد على توقيعين/مستندين → true فقط عند «مختلف معماريًا». */
++export const r19Different = (a, b) => sameOrDifferent(a, b).different === true;
++/** المحوّل نفسه على نتيجة archDifferenceV2 محسوبة سلفًا (بلا إعادة حساب): القاعدة والعتبات من ARCH_CRITERION_R19 نفسه. */
++export function r19DifferentOf(d) {
++  if (!d) return false;
++  const C = ARCH_CRITERION_R19, n = C.dimensions.filter(k => d[k] >= C.thresholds[k]).length;
++  return n >= C.distinctMinSubstantive;
++}
++
++/**
++ * بصمة وظيفية لتوزيع شبكي من المحرك الثالث (L = { R, nc, nr }) — تقريب قبل الهندسة لأبعاد المعيار: النطاقات (حزام العمق أمام/وسط/خلف
++ * لمجلس الرجال والصالة والخدمة والنوم، وهل يأخذ العرض كله) والعلاقات (المجلس↔الطعام، الصالة↔النوم، المطبخ↔الطعام). مستقلة عن الانعكاس.
++ */
++export function layoutFingerprint(L) {
++  const { R, nr, nc } = L;
++  const adj = (a, b) => {
++    if (!a || !b) return false;
++    const ox = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), oy = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
++    return (ox > 0 && (a.y1 === b.y0 || b.y1 === a.y0)) || (oy > 0 && (a.x1 === b.x0 || b.x1 === a.x0));
++  };
++  const band = r => (!r ? '-' : (r.y0 === 0 ? 'f' : '') + (r.y1 === nr ? 'b' : '') || 'm') + (r && r.x1 - r.x0 === nc ? 'W' : '');
++  const sleep = Object.keys(R).filter(k => /^S\d+$/.test(k)).map(k => R[k]);
++  const sBand = sleep.map(band).sort().join('+') || '-';
++  const anyAdj = (a, list) => list.some(b => adj(a, b));
++  return [band(R.M), band(R.H), band(R.KS), sBand, adj(R.M, R.DN) ? 'MD' : 'm.d', anyAdj(R.H, sleep) ? 'HS' : 'h.s', adj(R.KS, R.DN) ? 'KD' : 'k.d'].join('|');
++}
++export default { diversifyTopologies, r19Different, r19DifferentOf, layoutFingerprint };
+diff --git a/dist/villa-layout-v2.mjs b/dist/villa-layout-v2.mjs
+index e62f640..0d47a34 100644
+--- a/dist/villa-layout-v2.mjs
++++ b/dist/villa-layout-v2.mjs
+@@ -13,6 +13,7 @@
+ // المستند الناتج بصيغة mizan-draw/1 نفسها (+x شرق، +y شمال) فيعمل معه المرسم والعرض ثلاثي الأبعاد والتحليل كما هي.
+ // المقاسات المستهدفة افتراضات تصميمية من التطبيق قابلة للضبط، وليست اشتراطات نظامية. نقي: لا DOM ولا تخزين ولا شبكة.
+ import { briefOf, sharedReviewRequest } from './shared-brief.mjs';
++import { r19DifferentOf } from './diversity-r21.mjs';
+ import { createDoc, applyCommand, applyCommandOwned, parseDoc } from './draw/doc.mjs';
+ import { FIXTURES } from './draw/catalog.mjs';
+ import { circulationProof, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
+@@ -2927,7 +2928,8 @@ function pickDiverse(pool, keep) {
+   // «مختلفًا معماريًا» (بعدان جوهريان على الأقل)؛ «اختلاف جزئي» لا يكفي، وموضع السلم والغلاف لا يُحتسبان بذاتهما. والهدف: أعلى أدنى إجمالي v2
+   const AD = new Map(), sigOf = c => (c.sig2 ||= archSignatureV2(c.doc));
+   const adv = (a, b) => { const k = a.pat < b.pat ? a.pat + '|' + b.pat : b.pat + '|' + a.pat; if (!AD.has(k)) AD.set(k, archDifferenceV2(sigOf(a), sigOf(b))); return AD.get(k); };
+-  const ad = (a, b) => adv(a, b).total, distinct = (a, b) => adv(a, b).verdict === 'distinct';
++  // (الجولة 21 — مقترح 07) «مختلف» بمحوّل المعيار المجمّد r19 (dist/diversity-r21.mjs r19DifferentOf: قاعدة ARCH_CRITERION_R19 وعتباته نفسها) — لا معيار جديد
++  const ad = (a, b) => adv(a, b).total, distinct = (a, b) => (R14_OFF.has('r21div') ? adv(a, b).verdict === 'distinct' : r19DifferentOf(adv(a, b)));
+   const famOf = x => String(x.pat).split('/')[0].split(':')[0] + (String(x.pat).includes('/') ? ':' + String(x.pat).split('/')[0].split(':')[1] : '');
+   /** زوج مقبول معًا: ليس من العائلة نفسها، والمقياسان فوق عتبتيهما (القديم ≥ 0.16، والمعماري ≥ عتبة «الشكلي» 0.18). */
+   // (الجولة التاسعة) الكتلة: بيت تقسمه حديقة/حوش داخل غلافه (كتلتان) تنظيم مختلف عن كتلة مصمتة ولو تتابعت الغرف نفسها —
+@@ -3448,7 +3450,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+       else if (!R14_OFF.has('r19aug')) {
+         designs = [...prev];
+         const famOf = x => String(x.pat).split(':')[0], mand = c => (c.r16 || []).filter(id => MANDATORY_R16.includes(id)).length;
+-        const okWith = c => designs.every(o => famOf(o) !== famOf(c) && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), c.sig2 ||= archSignatureV2(c.doc)).verdict === 'distinct' && archDifference(o.sig1 ||= archSignature(o.doc), c.sig1 ||= archSignature(c.doc)).total >= MIN_ARCH_DIFF);
++        const okWith = c => designs.every(o => famOf(o) !== famOf(c) && r19DifferentOf(archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), c.sig2 ||= archSignatureV2(c.doc))) && archDifference(o.sig1 ||= archSignature(o.doc), c.sig1 ||= archSignature(c.doc)).total >= MIN_ARCH_DIFF);
+         for (const c of built.filter(d => d.secondPass && !designs.includes(d) && d.fails <= prev[0].fails && !mand(d) && !(d.streetBeds || []).length).sort((a, b) => a.quality - b.quality)) {
+           if (designs.length >= keep) break;
+           if (okWith(c) && heavyReview(c, requirements, land, counts)) designs.push(c);
+@@ -3474,7 +3476,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+     if (!designs.some(follows)) {
+       // (الجولة التاسعة عشرة) ولا يدخل ما فيه مخالفة إلزامية (كان يحل محل بديل سليم ثم يُحجب فيقل العدد: C5)
+       const pool2 = built.filter(d => follows(d) && !designs.includes(d) && d.fails <= designs[0].fails && (R14_OFF.has('r19mand') || !(d.r16 || []).some(id => MANDATORY_R16.includes(id)))).sort((a, b) => a.quality - b.quality);
+-      const okWith = (d, others) => heavyReview(d, requirements, land, counts) && others.every(o => archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), d.sig2 ||= archSignatureV2(d.doc)).verdict === 'distinct');
++      const okWith = (d, others) => heavyReview(d, requirements, land, counts) && others.every(o => r19DifferentOf(archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), d.sig2 ||= archSignatureV2(d.doc))));
+       // يُضاف إن بقي مكان، وإلا يحل محل بديل غير الأول (من الآخر) بشرط أن يبقى مختلفًا معماريًا عن كل الباقين
+       let done = false;
+       if (designs.length < keep) { const c = pool2.find(d => okWith(d, designs)); if (c) { designs.push(c); done = true; } }
+diff --git a/dist/villa-layout-v3.mjs b/dist/villa-layout-v3.mjs
+index 3aaf22f..f2efc77 100644
+--- a/dist/villa-layout-v3.mjs
++++ b/dist/villa-layout-v3.mjs
+@@ -22,6 +22,7 @@ import { verifyCertificate } from './certificates.mjs';
+ import { analyzeFeasibility } from './feasibility.mjs';
+ import { explainFailure } from './infeasibility-report.mjs';
+ import { toClientAr } from './client-language.mjs';
++import { diversifyTopologies, layoutFingerprint } from './diversity-r21.mjs';
+ 
+ export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
+ const K = V2.TREE_KIT;
+@@ -462,8 +463,22 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
+   for (const S of scored.slice(160)) S.rank = -Infinity;
+   const out = []; let nL = 0;
+   scored.sort((a, b) => b.rank - a.rank);
+-  const chosen = [];
+-  for (const S of scored) { if (S.rank === -Infinity || chosen.length >= nFirst + nLate) break; if (chosen.every(o => jaccard(o.L.sig, S.L.sig) >= .15)) chosen.push(S); }
++  // القاعدة السابقة (التفضيل وبعد جاكارد ≥ 0.15) كما هي
++  const ranked = scored.filter(S => S.rank !== -Infinity), base = [];
++  for (const S of ranked) { if (base.length >= nFirst + nLate) break; if (base.every(o => jaccard(o.L.sig, S.L.sig) >= .15)) base.push(S); }
++  // (الجولة 21 — مقترح 07، kit diversifyTopologies) التنوع قبل الهندسة: الأشجار الأولى (البحث الأول) كما كانت تمامًا، والمتأخرة (البحث الثاني المصمم
++  // لقلة البدائل المختلفة) تبدأ بأفضل توزيع من كل بصمة وظيفية لم تظهر في الأولى (النطاقات والعلاقات، dist/diversity-r21.mjs)، ثم بقية القائمة
++  // السابقة بترتيبها — العدد نفسه. (جُرّب أولًا: البصمات الجديدة في الأولى — أزاح شجرة حل مقاسين صريحين على 22×30 إلى المتأخرة فسقط الحل؛ سُحب.)
++  // الحكم بعد البناء للمعيار المجمّد r19 وحده
++  let chosen = base;
++  if (!R14_OFF_V3.has('r21div')) {
++    const fp = S => (S._fp ||= layoutFingerprint(S.L));
++    chosen = base.slice(0, nFirst);
++    const seenFp = new Set(chosen.map(fp));
++    const fresh = diversifyTopologies(ranked.filter(S => !chosen.includes(S) && !seenFp.has(fp(S))), nLate, fp);
++    for (const S of fresh) if (chosen.every(o => jaccard(o.L.sig, S.L.sig) >= .15)) chosen.push(S);
++    for (const S of base) { if (chosen.length >= nFirst + nLate) break; if (!chosen.includes(S)) chosen.push(S); }
++  }
+   for (const { L, ts: ts0 } of chosen) {
+     if (nL >= nFirst + nLate) break;
+     const ts = ts0;
+diff --git a/tests/stage2-r21-proposal.test.mjs b/tests/stage2-r21-proposal.test.mjs
+index 1e478d3..8bc91f5 100644
+--- a/tests/stage2-r21-proposal.test.mjs
++++ b/tests/stage2-r21-proposal.test.mjs
+@@ -132,3 +132,23 @@ test('06 الفحص الطوبولوجي قبل حل الأبعاد (kit topolog
+   assert.equal(guestTopology({ t: 'y', k: [Zt(['M'], 'x'), Zt(['H'], 'x')], w: [1, 1] }, 'M', 'DN'), null);
+ });
+ 
++// ------------------------------------------------------------------------------------------------ 07 التنوع قبل الهندسة ومحوّل r19
++import { diversifyTopologies, r19Different, r19DifferentOf, layoutFingerprint } from '../dist/diversity-r21.mjs';
++import { archSignatureV2, archDifferenceV2 } from '../dist/arch-difference.mjs';
++import { sameOrDifferent } from '../dist/arch-criterion.mjs';
++test('07 المعيار المجمّد r19 لم يُمس: dist/arch-criterion.mjs ووثيقته كما في الأساس 3b212e7', () => {
++  for (const f of ['dist/arch-criterion.mjs', 'dist/arch-difference.mjs', 'docs/research/arch-difference-criterion-r19.md']) {
++    const base = execFileSync('git', ['show', '3b212e7:' + f], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 26 });
++    assert.equal(readFileSync(root + f, 'utf8'), base, f);
++  }
++});
++test('07 diversifyTopologies أول ظهور لكل بصمة بالترتيب حتى الحد، والبصمة الوظيفية مستقلة عن الانعكاس', () => {
++  assert.deepEqual(diversifyTopologies([1, 2, 3, 4, 5, 6], 2, x => x % 3), [1, 2]);
++  assert.deepEqual(diversifyTopologies(['a1', 'a2', 'b1', 'c1'], 9, x => x[0]), ['a1', 'b1', 'c1']);
++  const L = { nc: 3, nr: 3, R: { M: { x0: 0, y0: 0, x1: 1, y1: 1 }, F: { x0: 1, y0: 0, x1: 2, y1: 1 }, DN: { x0: 2, y0: 0, x1: 3, y1: 1 }, H: { x0: 0, y0: 1, x1: 2, y1: 2 }, KS: { x0: 2, y0: 1, x1: 3, y1: 2 }, S1: { x0: 0, y0: 2, x1: 3, y1: 3 } } };
++  const mir = { nc: 3, nr: 3, R: Object.fromEntries(Object.entries(L.R).map(([k, r]) => [k, { x0: 3 - r.x1, x1: 3 - r.x0, y0: r.y0, y1: r.y1 }])) };
++  assert.equal(layoutFingerprint(L), layoutFingerprint(mir));
++  const moved = { nc: 3, nr: 3, R: { ...L.R, M: { x0: 0, y0: 1, x1: 1, y1: 2 }, H: { x0: 0, y0: 0, x1: 2, y1: 1 }, F: { x0: 1, y0: 1, x1: 2, y1: 2 } } };
++  assert.notEqual(layoutFingerprint(L), layoutFingerprint(moved), 'المجلس من الأمام إلى الوسط تنظيم آخر');
++});
++

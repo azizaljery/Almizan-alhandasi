@@ -4,6 +4,7 @@
 // الاستعمال: node scripts/coverage-r21.mjs <label> [--seed dev|eval] [--n 40] [--engine v3] [--part i/k]
 // بذرتان: «dev» تُستعمل في التطوير علنًا، و«eval» لا تُستعمل إلا للقياس قبل/بعد (لا ضبط عليها).
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { reportPath } from './_report-name.mjs';
 import { extractRequirements } from '../dist/requirements.mjs';
 import * as V2 from '../dist/villa-layout-v2.mjs';
 import * as V3 from '../dist/villa-layout-v3.mjs';
@@ -104,7 +105,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`${C.id} ${C.land.width}×${C.land.length} ${C.land.streets.join('+')} ${row.floors}F: ${row.outcome} ${row.statuses ? row.statuses.join(',') : row.code} distinct=${row.distinctValid} (${row.ms}ms)${row.leaks.length ? ' LEAK ' + row.leaks.join('|') : ''}`);
   }
   const dir = new URL(`../evidence/coverage-r21/`, import.meta.url).pathname; mkdirSync(dir, { recursive: true });
-  const f = `${dir}${label}-${seedName}${part[1] > 1 ? `-p${part[0]}of${part[1]}` : ''}.json`;
+  const f = reportPath(dir, [label, seedName, ...(part[1] > 1 ? [`p${part[0]}of${part[1]}`] : [])]);
   const tally = k => out.filter(r => r.outcome === k).length;
   writeFileSync(f, JSON.stringify({ label, seed: seedName, seedValue: SEEDS[seedName], n: out.length, engine, root, generator: 'scripts/coverage-r21.mjs randomCase()', sound: tally('sound'), hiddenOnly: tally('hidden-only'), provenInfeasible: tally('proven-infeasible'), claimedInfeasible: tally('claimed-infeasible'), searchIncomplete: tally('search-incomplete'), rows: out }, null, 1));
   console.log(`sound ${tally('sound')}/${out.length} → ${f}`);

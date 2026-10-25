@@ -1,0 +1,290 @@
+diff --git a/dist/change-guard.mjs b/dist/change-guard.mjs
+index 47207d7..3177f37 100644
+--- a/dist/change-guard.mjs
++++ b/dist/change-guard.mjs
+@@ -4,6 +4,8 @@
+ import { analyzeDoc } from './draw/digest.mjs';
+ import { measureR16 } from './privacy-defects.mjs';
+ import { reviewDoc } from './draw/review.mjs';
++import { verifyRequest } from './rules.mjs';
++import { briefOf, RELATIONS } from './shared-brief.mjs';
+ 
+ const PROG_TYPES = ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'bath', 'service'];
+ const HABITABLE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen']);
+@@ -48,4 +50,49 @@ export function guarded(doc, fn, request = {}) {
+   if (reg.length) { for (const k of Object.keys(doc)) delete doc[k]; Object.assign(doc, snap); return { applied: false, result, regressions: reg }; }
+   return { applied: true, result, regressions: [] };
+ }
+-export default { invariants, regressions, guardChange, guarded };
++
++// ------------------------------------------------------------------------------------------------ (الجولة 21 — مقترح 08) التعديل الآمن
++// مكيَّف من kit-r21/src/constraints.mjs applySafeEdit، في طبقة المعاملة (design-session) قبل حفظ أي تعديل موضعي. المدقق موسَّع بكل قواعد النظام
++// الحالية لا بقواعد الحزمة وحدها: (1) invariants أعلاه (المخالفات الإلزامية والعيوب والأعداد والضوء والوصول)، (2) سجل بنود العميل verifyRequest
++// (المقاسات الصريحة مقيسة من المرسوم، والمواضع، والقرب والبعد، والأعداد، والتفضيلات)، (3) علاقات العقد الموحد الصلبة: DIRECT_DOOR باب فعلي بين
++// المجلس والطعام، وGUEST_ACCESS (GUEST_DINING مقيسًا بالأبواب الفعلية ولو طلبه العميل نصًا).
++// الفرق المقصود عن الحزمة: الرفض لما **يسقطه التعديل** (شرط كان متحققًا فصار راسبًا) لا لكل رسوب قائم قبله — وإلا رُفض كل تعديل على مخطط فيه
++// عيب واحد ولو كان التعديل يصلح غيره. وما يغيّره العميل نفسه في الدور (exempt: معرّفات بنود السجل أو أنواع invariants) لا يُعد سقوطًا.
++const ledgerOk = x => (x.status ? x.status === 'done' || x.status === 'pending-render' : !!x.ok);
++function directDoorOk(doc, model) {
++  for (const lv of model.levels) for (const op of lv.openings) {
++    if (!op.door) continue;
++    const rs = op.sides.map(sd => (sd.room ? sd.room : null)).filter(Boolean), ot = op.sides.map(sd => (sd.other && sd.other !== 'outside' ? lv.roomsById.get(sd.other) : null)).filter(Boolean);
++    const all = [...rs, ...ot];
++    if (all.some(r => r.type === 'majlis' && !/النساء/.test(r.name || '')) && all.some(r => r.type === 'dining')) return true;
++  }
++  return false;
++}
++/** صورة تحقق كاملة لمستند: { inv, client: [{ id, text, ok }], brief: [{ id, kind, ok }], hard: [ما رسب] }. */
++export function validateEdit(doc, request = {}, { entry = 's' } = {}) {
++  const inv = invariants(doc, request), model = analyzeDoc(doc);
++  let client = []; try { client = verifyRequest(doc, request, { entry }).map(x => ({ id: x.id, kind: x.kind, text: x.text, ok: ledgerOk(x) })); } catch { client = []; }
++  const brief = [], B = briefOf(request);
++  for (const r of B.relations || []) {
++    if (r.level !== 'HARD') continue;
++    if (r.kind === RELATIONS.DIRECT_DOOR) brief.push({ id: 'BRIEF:' + r.id, kind: r.kind, quote: r.quote, ok: directDoorOk(doc, model) });
++    if (r.kind === RELATIONS.GUEST_ACCESS) { let ok = true; try { const g = measureR16(doc, request, model).find(x => x.id === 'GUEST_DINING'); ok = !g || !g.applicable || g.pass; } catch { ok = true; } brief.push({ id: 'BRIEF:' + r.id, kind: r.kind, quote: r.quote, ok }); }
++  }
++  return { inv, client, brief, hard: [...Object.entries(inv.checks).filter(([, c]) => !c.pass).map(([id]) => id), ...client.filter(c => !c.ok).map(c => c.id), ...brief.filter(b => !b.ok).map(b => b.id)] };
++}
++/**
++ * المعاملة: edit دالة تعدّل نسخة من المستند أو المستند بعد التعديل نفسه. يعيد { accepted, doc, before, after, violations, reason }.
++ * المستند الأصلي لا يُمس أبدًا؛ المقبول نسخة مستقلة.
++ */
++export function applySafeEdit(original, edit, request = {}, { entry = 's', exempt = [] } = {}) {
++  const ex = new Set(exempt), before = validateEdit(original, request, { entry });
++  let doc;
++  if (typeof edit === 'function') { doc = JSON.parse(JSON.stringify(original)); const r = edit(doc); if (r && typeof r === 'object' && r.levels) doc = r; }
++  else doc = edit;
++  const after = validateEdit(doc, request, { entry });
++  const violations = regressions(before.inv, after.inv).filter(x => !ex.has(x.id));
++  for (const c of after.client) { const b = before.client.find(y => y.id === c.id); if (b && b.ok && !c.ok && !ex.has(c.id)) violations.push({ id: c.id, ar: `بند من طلبك لم يعد متحققًا: «${c.text}»` }); }
++  for (const c of after.brief) { const b = before.brief.find(y => y.id === c.id); if (b && b.ok && !c.ok && !ex.has(c.id)) violations.push({ id: c.id, ar: c.kind === RELATIONS.DIRECT_DOOR ? 'الباب المباشر بين المجلس والطعام الذي طلبته لم يعد موجودًا' : 'ضيف الرجال لم يعد يصل إلى الطعام دون عبور العائلة' }); }
++  return violations.length ? { accepted: false, doc: original, before, after, violations, reason: 'HARD_CONSTRAINT_VIOLATION' } : { accepted: true, doc, before, after, violations: [], reason: null };
++}
++export default { invariants, regressions, guardChange, guarded, validateEdit, applySafeEdit };
+diff --git a/dist/design-session.mjs b/dist/design-session.mjs
+index b69f26e..734e786 100644
+--- a/dist/design-session.mjs
++++ b/dist/design-session.mjs
+@@ -8,6 +8,7 @@ export { mergeRules };
+ import { parseDoc, serialize } from './draw/doc.mjs';
+ import { parseEdit, applyEdits, replayIntents, compareDocs, describeChanges, inspect, measureIntents, FACADE_RENDER } from './plan-edit.mjs';
+ import { reviewDesign } from './plan-review.mjs';
++import { applySafeEdit } from './change-guard.mjs';
+ import { presentationStatus } from './presentation-status.mjs';
+ import { fingerprint, diffFingerprint, compactDiff, touchedKeys, countAr } from './plan-fingerprint.mjs';
+ import { zoneDiff, matchShown, roomsHash, sideOccupants } from './edit-truth.mjs';
+@@ -365,11 +366,15 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
+       const mineTexts = new Set(mine.map(x => x.text));
+       const achieves = d => { try { if (intents.length) { const mm = measureIntents(curD, d, intents, { entry: entryDir }); return mm.length > 0 && mm.every(x => x.ok); } const L = verifyRequest(d, req, { entry: entryDir }).filter(x => mineTexts.has(x.text)); return L.length > 0 && L.every(x => x.ok); } catch { return false; } };
+       const curH = roomsHash(curD);
++      // (الجولة 21 — مقترح 08، مكيَّف من fb31100 بقرار المالك «مراجعة مشروطة») المرشح «معروض أصلًا» فقط إن كان البديل المعروض المطابق له يحقق
++      // الطلب نفسه مقيسًا عليه هو (لا على المرشح) — وإلا فهو تصميم جديد لهذا الطلب. وتعذّر القياس لا يُعد تحققًا (كان fb31100 يعيد m عند الخطأ)،
++      // والمطابق حرفيًا يُقاس أيضًا: لا يُقال للعميل «البديل N المعروض يحقق طلبك» إلا بقياس
++      const shownThatAchieves = m => { if (!m || String(globalThis.process?.env?.R14_OFF || '').includes('r21shown')) return m; const sd = (s.alternatives || []).find(a => a.index === m.index); try { return sd && achieves(parseDoc(sd.doc)) ? m : null; } catch { return null; } };
+       const shown = (s.alternatives || []).map(a => ({ index: a.index, doc: parseDoc(a.doc) })).filter(a => roomsHash(a.doc) !== curH);
+       const pool = [], seenH = new Set([curH]);
+       for (const c of [{ ...out }, ...(out.alternatives || []).slice(1).map(a => ({ ...out, doc: a.doc, pat: a.pat || null, summary: a.summary || out.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
+         const h = roomsHash(c.doc); if (seenH.has(h)) continue; seenH.add(h);
+-        c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
++        c.ok = achieves(c.doc); c.shownAs = shownThatAchieves(matchShown(c.doc, shown)); c.zd = zoneDiff(curD, c.doc); pool.push(c);
+       }
+       const fresh = pool.filter(c => c.ok && !c.shownAs).sort((a, b) => a.zd.changed.length - b.zd.changed.length);
+       const zoneCand = fresh.find(c => c.zd.changed.length <= 1) || null;
+@@ -382,7 +387,7 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
+           const out2 = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude: ex2, ...(s.input.engine ? { engine: s.input.engine } : {}) });
+           for (const c of [{ ...out2 }, ...(out2.alternatives || []).slice(1).map(a => ({ ...out2, doc: a.doc, pat: a.pat || null, summary: a.summary || out2.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
+             const h = roomsHash(c.doc); if (seenH.has(h)) continue; seenH.add(h);
+-            c.ok = achieves(c.doc); c.shownAs = matchShown(c.doc, shown); c.zd = zoneDiff(curD, c.doc); pool.push(c);
++            c.ok = achieves(c.doc); c.shownAs = shownThatAchieves(matchShown(c.doc, shown)); c.zd = zoneDiff(curD, c.doc); pool.push(c);
+             if (c.ok && !c.shownAs) { fullCand = c; break; }
+           }
+         } catch { /* لا توزيع جديد */ }
+@@ -515,6 +520,17 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
+   }
+   if (res.status === 'fallback') return { fallback: { why_ar: res.why_ar, intents: parsed.unhandled?.length ? null : parsed.intents, failed: res.results.filter(r => !r.ok) } };
+   if (res.status !== 'local') return { fallback: { why_ar: 'لا حل موضعي' } };
++  // (الجولة 21 — مقترح 08، kit applySafeEdit) المعاملة: لا يُحفظ تعديل موضعي يُسقط شرطًا كان متحققًا — شروط النظام كلها وبنود العميل المقيسة
++  // (المقاسات والمواضع والقرب) وعلاقات العقد الصلبة (الباب المباشر ووصول الضيف). ما طلبه العميل في هذا الدور نفسه يُعفى بنوعه، والموافقة الصريحة
++  // تُعفي كما في حارس التعديل. الرجوع إلى نسخة سابقة لا يمر هنا (النسخة نفسها اعتُمدت حين عُرضت).
++  if (!restored && !consent && !String(globalThis.process?.env?.R14_OFF || '').includes('r21safe') && res.doc !== doc0) {
++    const ops = new Set(parsed.intents.map(i => i.op)), exempt = [];
++    const L0 = (() => { try { return verifyRequest(doc0, reqE, { entry: entryDir }); } catch { return []; } })();
++    for (const x of L0) if ((ops.has('resize') && (x.kind === 'dims' || x.kind === 'area')) || ((ops.has('delete') || ops.has('add') || ops.has('bedCount')) && x.kind === 'count') || (ops.has('rule') && ['place', 'far', 'near'].includes(x.kind))) exempt.push(x.id);
++    if (ops.has('delete') || ops.has('add') || ops.has('bedCount')) exempt.push(...['BEDROOM', 'MASTER', 'MAJLIS', 'LIVING', 'DINING', 'KITCHEN', 'BATH', 'SERVICE'].map(t => 'COUNT_' + t));
++    const safe = applySafeEdit(doc0, res.doc, reqE, { entry: entryDir, exempt });
++    if (!safe.accepted) return { fallback: { why_ar: 'لم أعتمد التعديل الموضعي لأنه يُفسد ما كان متحققًا في المخطط: ' + safe.violations.map(v => v.ar).join('؛ ') + '.', guard: safe.violations, intents: parsed.intents, failed: [] } };
++  }
+   // نطاق الطلب: الغرف التي ذكرها العميل والغرف المضافة؛ ما تغيّر غيرها يُعلن «لازمًا للتعديل»
+   const I0 = inspect(doc0), I1 = inspect(res.doc), scope = new Set();
+   for (const r of res.results) { const it = r.intent || {}; if (SCOPE_OPS.has(it.op) && it.id) scope.add(it.id); }
+diff --git a/dist/design.mjs b/dist/design.mjs
+index f9a950a..c38210c 100644
+--- a/dist/design.mjs
++++ b/dist/design.mjs
+@@ -12,6 +12,8 @@ import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
+ import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
+ import { shortfallNotice } from './client-text.mjs';
+ import { toClientAr } from './client-language.mjs';
++// (الجولة 21 — مقترح 08) لا نص استثناء للعميل: رسالة المحرك العربية المعروفة (VILLA_*) بلغة العميل، وإلا نص ثابت
++const clientErr = (e, fallback) => (/^VILLA_/.test(String(e?.code || '')) && /[\u0600-\u06FF]/.test(String(e?.message || '')) ? toClientAr(e.message) : fallback);
+ 
+ const $ = id => document.getElementById(id);
+ const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
+@@ -336,8 +338,8 @@ $('fbGo').addEventListener('click', async () => {
+     session = out.session; saveSession(localStorage, session);
+     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
+     scrollTo({ top: 0, behavior: 'smooth' });
+-  } catch (err) { $('fbStatus').textContent = err.message || 'تعذّر تصميم بديل.'; $('fbGo').disabled = false; }
++  } catch (err) { $('fbStatus').textContent = clientErr(err, 'تعذّر تصميم بديل.'); $('fbGo').disabled = false; }
+ });
+ 
+-try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, e.message), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
++try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, clientErr(e, 'حدث خطأ أثناء تحميل الجلسة؛ أعد المحاولة أو ابدأ من الصفحة الرئيسية.')), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
+ globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية
+diff --git a/dist/home-flow.mjs b/dist/home-flow.mjs
+index 7fe8583..ca9c921 100644
+--- a/dist/home-flow.mjs
++++ b/dist/home-flow.mjs
+@@ -222,14 +222,14 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
+     const c2 = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
+     const req2 = requirements || extractRequirements(idea || '', { counts: c2, discovery: disc });
+     try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, engine }); }
+-    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || villaEngineOf(engine) === 'v3') throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
++    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || villaEngineOf(engine) === 'v3') throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين يجتاز الفحوص؛ استُخدم المحرك السابق.'); return out; }
+   }
+   // المولّد المهني أولًا (أجنحة نوم بحماماتها، صالة محورية، مجلس بممر ضيوف ودورة مياه)؛ المحرك السابق احتياط فقط
+   const villaCounts = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
+   let villaFail = null;
+   const req = requirements || extractRequirements(idea || '', { counts: villaCounts, discovery: disc });
+   if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, engine }); }
+-  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || villaEngineOf(engine) === 'v3') throw err; villaFail = err.message; }
++  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || villaEngineOf(engine) === 'v3') throw err; villaFail = err.code === 'VILLA_NO_FIT' ? 'البرنامج أكبر مما تتسع له الأرض بتوزيعاته' : 'لم يجتز أي توزيع الفحوص'; } // (الجولة 21) لا نص استثناء
+   const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
+   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
+   const notes = [];
+@@ -247,7 +247,7 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
+     dna.geometryFingerprint = geometryFingerprint(doc);
+     // مقارنة ثانوية تراعي الفتحات (AZ-06): للعرض فقط، لا تغيّر selectedIndex ولا ترتيب البدائل.
+     try { dna.openingAware = compareOpeningAware({ models: result.models, selectedIndex: result.selectedIndex }); } catch { dna.openingAware = null; }
+-  } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
++  } catch { notes.push('تعذّر حساب بصمة التصميم لهذا البديل.'); } // (الجولة 21) لا نص استثناء
+   return { doc, report, notes, dna, alternatives, alternativesCount: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
+ }
+ 
+@@ -262,7 +262,7 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
+     dna = rankByDNA({ plot, rooms, discovery, idea, counts, models, selectedIndex: 0 });
+     dna.geometryFingerprint = geometryFingerprint(best.doc);
+     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
+-  } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
++  } catch { notes.push('تعذّر حساب بصمة التصميم لهذا البديل.'); } // (الجولة 21) لا نص استثناء
+   return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, requirements?.want || 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
+ }
+ 
+diff --git a/dist/plan-edit.mjs b/dist/plan-edit.mjs
+index 4fcf556..d9f31a0 100644
+--- a/dist/plan-edit.mjs
++++ b/dist/plan-edit.mjs
+@@ -570,7 +570,7 @@ function choose(before, cands, { scope, request, check, strict = false }) {
+   if (prior.length) { try { const v = verifyRules(before, prior, { entry: request.entry || 's' }); okBefore = prior.filter((_, i) => v[i]?.ok); } catch { okBefore = []; } }
+   for (const c of cands) {
+     if (!c || !c.doc) continue;
+-    let cmp; try { cmp = compareDocs(before, c.doc, { scope, request, Ib }); } catch (e) { tried.push({ desc: c.desc, why: [e.message] }); continue; }
++    let cmp; try { cmp = compareDocs(before, c.doc, { scope, request, Ib }); } catch { tried.push({ desc: c.desc, why: ['تعذّرت مقارنة هذا المرشح بالمعروض'] }); continue; } // (الجولة 21) لا نص استثناء
+     if (!cmp.ok) { tried.push({ desc: c.desc, why: cmp.why }); continue; }
+     if (okBefore.length) { let broke = null; try { const v = verifyRules(c.doc, okBefore, { entry: request.entry || 's' }); broke = okBefore.find((_, i) => !v[i]?.ok) || null; } catch { broke = null; } if (broke) { tried.push({ desc: c.desc, why: [`يكسر بندًا سابقًا من طلبك (${broke.text || broke.kind})`] }); continue; } }
+     const got = check ? check(cmp.I, c) : { ok: true };
+@@ -1555,7 +1555,7 @@ export function applyEdits(doc0, parsed, { req = null, history = [] } = {}) {
+       else if (it.op === 'revertRoom') { r = doRevertRoom(doc, it, req, history); if (!r.ok && r.restore) restore = { index: r.restore.index, keepIds: [], dropRoom: it.id, room: it.name }; }
+       else if (it.op === 'none') r = { ok: it.ok !== false, already: true, doc, why_ar: it.why_ar };
+       else r = { ok: false, why_ar: 'نية غير معروفة' };
+-    } catch (e) { r = { ok: false, why_ar: 'خطأ داخلي في التعديل الموضعي: ' + e.message }; }
++    } catch (e) { r = { ok: false, why_ar: 'تعذّر تنفيذ هذا التعديل موضعيًا على المخطط المعروض.', diag: String(e?.message || e) }; } // (الجولة 21) لا نص استثناء في رسالة العميل
+     if (r.ok && r.doc && !r.deferred) doc = r.doc;
+     if (!r.ok && r.fallback) fallback = { why_ar: r.why_ar };
+     results.push({ op: it.op, text_ar: it.text_ar, ok: !!r.ok, ask: r.ask || null, question: !!r.question, already: !!r.already, how_ar: r.how_ar || null, why_ar: r.why_ar || null, measured: r.measured || null, restore: !!(restore && (it.op === 'revertRoom' || it.op === 'bedCount') && !r.ok) || !!r.deferred, intent: it, removedOpenings: r.removedOpenings || [], envelope: !!r.envelope, subjectDoor: r.subjectDoor || null });
+@@ -1598,7 +1598,7 @@ export function measureIntents(before, after, intents, { entry = 's' } = {}) {
+       if (it.op === 'extDoor') { const I = inspect(after), R = roomList(I).find(r => r.name === it.name); const L = R && I.model.levelById.get(R.level); return res(!!L && L.openings.some(op => op.door && op.sides.some(x => x.room.id === R.id && x.other === 'outside')), ''); }
+       if (it.op === 'none' || it.op === 'facade') return res(true, '');
+       if (it.op === 'door' && it.action === 'add') { const Ia = inspect(after), a = roomList(Ia).find(r => r.name === it.aName), b = roomList(Ia).find(r => r.name === it.bName); return res(!!a && !!b && openingsBetween(Ia, a.id, b.id).length > 0, ''); }
+-    } catch (e) { return res(false, e.message); }
++    } catch { return res(false, 'تعذّر قياس هذا البند على المخطط الجديد.'); } // (الجولة 21) لا نص استثناء
+     return res(false, 'غير مقيس');
+   });
+ }
+diff --git a/tests/_r21-safe-edit-probe.mjs b/tests/_r21-safe-edit-probe.mjs
+new file mode 100644
+index 0000000..21e4500
+--- /dev/null
++++ b/tests/_r21-safe-edit-probe.mjs
+@@ -0,0 +1,15 @@
++// (الجولة 21 — مقترح 08) مسبار طبقة المعاملة لاختبار tests/stage2-r21-proposal.test.mjs: يُشغَّل في عملية مستقلة لأن مفاتيح R14_OFF تُقرأ عند التحميل.
++// يولّد بديلًا لطلب «المجلس يفتح على الطعام»، ويطلب في جلسة التصميم «سد الباب بين مجلس الرجال والطعام»، ويطبع: هل اعتُمد تعديل موضعي، وهل بقي الباب.
++import { extractRequirements } from '../dist/requirements.mjs';
++import * as V3 from '../dist/villa-layout-v3.mjs';
++import { createSession, redesign, currentDoc } from '../dist/design-session.mjs';
++import { validateEdit } from '../dist/change-guard.mjs';
++const counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 };
++const r = extractRequirements('دور واحد، 3 غرف نوم، مجلس رجال، والمجلس يفتح على الطعام، صالة، مطبخ', { counts }); r.counts = { ...r.counts, ...counts };
++const o = V3.generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 2 });
++const d = o.designs.find(x => x.presentation?.status !== 'hidden');
++const s = createSession({ land, counts: r.counts, requirements: r, result: { doc: d.doc, pat: d.pat } });
++let generated = false;
++const out = await redesign(s, { text: 'سد الباب بين مجلس الرجال والطعام' }, { generate: async () => { generated = true; throw Object.assign(Error('probe'), { code: 'VILLA_BUILD_FAILED' }); } }).catch(() => null);
++const doc = out?.session ? currentDoc(out.session) : d.doc, door = validateEdit(doc, r).brief.find(b => b.kind === 'DIRECT_DOOR');
++console.log(JSON.stringify({ local: out?.reply?.mode === 'local', generated, doorKept: !!door?.ok }));
+diff --git a/tests/stage2-r21-proposal.test.mjs b/tests/stage2-r21-proposal.test.mjs
+index 8bc91f5..fd8cbe0 100644
+--- a/tests/stage2-r21-proposal.test.mjs
++++ b/tests/stage2-r21-proposal.test.mjs
+@@ -152,3 +152,50 @@ test('07 diversifyTopologies أول ظهور لكل بصمة بالترتيب ح
+   assert.notEqual(layoutFingerprint(L), layoutFingerprint(moved), 'المجلس من الأمام إلى الوسط تنظيم آخر');
+ });
+ 
++// ------------------------------------------------------------------------------------------------ 08 التعديل الآمن في طبقة المعاملة
++import { applySafeEdit, validateEdit } from '../dist/change-guard.mjs';
++import { analyzeDoc } from '../dist/draw/digest.mjs';
++import { parseDoc } from '../dist/draw/doc.mjs';
++let gen = null;
++const genMD = () => {
++  if (gen) return gen;
++  const counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, r = req('دور واحد، 3 غرف نوم، مجلس رجال، والمجلس يفتح على الطعام، صالة، مطبخ', counts);
++  const o = V3.generateVillaDesigns({ land: { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts: r.counts, requirements: r, keep: 4 });
++  return (gen = { r, o });
++};
++test('06+07 على بديل مولَّد بطلب «المجلس يفتح على الطعام»: كل معروض غير محجوب فيه باب فعلي بين المجلس والطعام ومسار ضيف بلا عبور العائلة (بعد التفصيل)، وحكم «مختلف» بالمحوّل = المعيار المجمّد', { timeout: 900000 }, () => {
++  const { r, o } = genMD(), shown = o.designs.filter(d => d.presentation?.status !== 'hidden');
++  assert.ok(shown.length >= 1);
++  for (const d of shown) {
++    const v = validateEdit(d.doc, r);
++    assert.ok(v.brief.some(b => b.kind === RELATIONS.DIRECT_DOOR), 'العقد فيه DIRECT_DOOR');
++    for (const b of v.brief) assert.equal(b.ok, true, b.kind);
++    const g = measureR16(d.doc, { text: r.text, counts: r.counts, rules: r.rules || [] }).find(x => x.id === 'GUEST_DINING'); assert.ok(!g || !g.applicable || g.pass);
++  }
++  const docs = o.designs.map(d => d.doc);
++  for (let i = 0; i < docs.length; i++) for (let j = i + 1; j < docs.length; j++) {
++    const d = archDifferenceV2(archSignatureV2(docs[i]), archSignatureV2(docs[j])), f = sameOrDifferent(docs[i], docs[j]).different;
++    assert.equal(r19DifferentOf(d), f); assert.equal(r19Different(docs[i], docs[j]), f); assert.equal(d.verdict === 'distinct', f);
++  }
++});
++test('08 applySafeEdit: حذف الباب المباشر المطلوب يُرفض والأصل لا يُمس؛ تعديل لا يُسقط شرطًا يُقبل؛ وما طلبه العميل في الدور يُعفى', { timeout: 900000 }, () => {
++  const { r, o } = genMD(), d = o.designs.find(x => x.presentation?.status !== 'hidden'), doc = d.doc;
++  const model = analyzeDoc(doc), ids = [];
++  for (const lv of model.levels) for (const op of lv.openings) { if (!op.door) continue; const all = op.sides.flatMap(s => [s.room, s.other && s.other !== 'outside' ? lv.roomsById.get(s.other) : null]).filter(Boolean); if (all.some(x => x.type === 'majlis') && all.some(x => x.type === 'dining')) ids.push(op.id); }
++  assert.ok(ids.length, 'باب بين المجلس والطعام في المولَّد');
++  const snap = JSON.stringify(doc);
++  const cut = applySafeEdit(doc, x => { x.openings = x.openings.filter(op => !ids.includes(op.id)); }, r);
++  assert.equal(cut.accepted, false); assert.equal(cut.reason, 'HARD_CONSTRAINT_VIOLATION'); assert.equal(JSON.stringify(doc), snap, 'الأصل لم يتغير');
++  assert.ok(cut.violations.some(v => /^BRIEF:/.test(v.id)), JSON.stringify(cut.violations));
++  for (const v of cut.violations) assert.deepEqual(lintClientText(v.ar), [], v.ar);
++  const ok = applySafeEdit(doc, x => { x.title = 'نسخة'; }, r);
++  assert.equal(ok.accepted, true); assert.equal(ok.doc.title, 'نسخة'); assert.notEqual(ok.doc, doc);
++  const exempt = applySafeEdit(doc, x => { x.openings = x.openings.filter(op => !ids.includes(op.id)); }, r, { exempt: cut.violations.map(v => v.id) });
++  assert.equal(exempt.accepted, true);
++});
++test('08 طبقة المعاملة نفسها (design-session): مع تعطيل حارس التعديل القديم يرفض applySafeEdit سد الباب المطلوب ويبقى الباب؛ ومع تعطيله أيضًا يُعتمد السد (الطبقة هي التي ترفض)', { timeout: 1200000 }, () => {
++  const run = off => JSON.parse(execFileSync(process.execPath, [root + 'tests/_r21-safe-edit-probe.mjs'], { cwd: root, env: { ...process.env, R14_OFF: off, NODE_TEST_CONTEXT: '' }, encoding: 'utf8', maxBuffer: 1 << 26 }).trim().split('\n').pop());
++  const withLayer = run('r20guard'), without = run('r20guard,r21safe');
++  assert.deepEqual(withLayer, { local: false, generated: true, doorKept: true });
++  assert.deepEqual(without, { local: true, generated: false, doorKept: false });
++});
