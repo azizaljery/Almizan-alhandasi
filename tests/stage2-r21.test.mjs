@@ -1,6 +1,7 @@
 // الجولة 21 (الموجز التقني للمالك وقرار الاعتماد r21): عقد نتائج التوليد، وصدق رسائل العميل واتساقها، ومسار الضيف، والتعديل الآمن،
 // والمقاسات طولًا وعرضًا، والمواقف، والتكرار المعكوس، وعدم احتساب إصلاح حالة معروفة تعميمًا. ما لم يُنفَّذ بعد (بانتظار مراجعة المالك
 // للتعديلات المقترحة في docs/research/v3-diagnosis-r21.md) مكتوب اختبارًا «todo» يُسجَّل ولا يُخفى.
+// (الاختبارات المنتظرة — المتوقع رسوبها حتى تُعتمد الإصلاحات — في tests-pending/ ومشغّلها npm run test:pending، خارج الحزمة.)
 // المراجع المستقل وكيل ذكاء اصطناعي — ليس معماريًا مرخّصًا؛ ولا يُعدّ أي حكم آلي هنا اعتمادًا هندسيًا أو إنشائيًا.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -91,7 +92,6 @@ test('مسار الضيف: المجلس المعزول والضيف الذي ي�
   const ok = doc('after-20/C1/alt-1.json'), C1 = CASES.find(c => c.id === 'C1');
   assert.ok(!measureR16(ok, { text: C1.text, counts: C1.counts }).some(g => g.applicable && !g.pass && MANDATORY_R16.includes(g.id)));
 });
-test.todo('مسار الضيف بالرسم البياني داخل التوليد (قبل تثبيت الهندسة): بانتظار مراجعة المالك للتعديل المقترح (التشخيص §4)');
 test('لا يُعتمد مخطط فيه مخالفة إلزامية: «جاهز» لا يجتمع مع مخالفة إلزامية في أي بديل معروض في أدلة r20', { skip: !existsSync(ev('after-20/C10/result.json')) }, () => {
   for (const st of ['after-20', 'after-20-heldout-known', 'after-20-heldout2']) for (const id of [...CASES, ...HELDOUT, ...HELDOUT2].map(c => c.id)) {
     const f = ev(`${st}/${id}/result.json`); if (!existsSync(f)) continue;
@@ -119,7 +119,6 @@ test('المواقف: الموقف الموازي في ارتداد ضحل أم�
   assert.match(toClientAr(p.hidden_ar.join(' ')), /مواقف السيارات/);
   assert.ok(MANDATORY_R16.includes('PARKING_SHALLOW'));
 });
-test.todo('المواقف: إثبات مسار دخول السيارة وخروجها ودورانها (نموذج محافظ) — بانتظار مراجعة المالك (التشخيص §6)');
 test('التكرار: النسخة المعكوسة من بديل ليست «مختلفة معماريًا» بالمعيار المجمّد r19', { skip: !existsSync(ev('after-20/C10/alt-1.json')) }, () => {
   const a = doc('after-20/C10/alt-1.json'); assert.equal(sameOrDifferent(a, mirrorX(a)).different, false);
 });
