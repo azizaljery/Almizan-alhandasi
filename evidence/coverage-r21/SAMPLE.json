@@ -1,0 +1,2027 @@
+{
+ "purpose": "عينة التغطية المجمّدة للجولة 21 (قرار المالك): التعريف والمعاملات والبذور ثابتة قبل أي إصلاح؛ العينة نفسها لكل مقارنة قبل/بعد، ولا تُغيَّر.",
+ "generator": {
+  "file": "scripts/coverage-r21.mjs",
+  "functions": [
+   "randomCase",
+   "casesFor"
+  ],
+  "sourceSha256": "7f7bc43fe7e32ffc581978157871affa9227480ff1c27ccef67e9ccb6353847f",
+  "parameters": {
+   "width": "14–32 م",
+   "length": "20–36 م",
+   "streets": [
+    "s",
+    "s",
+    "n",
+    "e",
+    "w",
+    "s+e",
+    "n+w",
+    "s+w",
+    "n+e"
+   ],
+   "floors2": 0.25,
+   "bedrooms": "3–5 (دور) / 3–6 (دوران)",
+   "majlis2": 0.6,
+   "master": 0.7,
+   "dressing": "0.35 من الماستر",
+   "majlisDims": 0.2,
+   "kitchenDims": 0.15,
+   "kitchenBack": 0.25,
+   "diningNearMajlis": 0.25,
+   "hallGarden": 0.25,
+   "maid": 0.4,
+   "driver": 0.2,
+   "laundry": 0.15,
+   "bedroomDims": 0.1,
+   "want": "3 بنسبة 0.3 وإلا 4"
+  }
+ },
+ "seeds": {
+  "dev": {
+   "value": 2026102501,
+   "use": "تطوير علني"
+  },
+  "eval": {
+   "value": 2026102577,
+   "use": "قياس قبل/بعد فقط — لا ضبط عليه"
+  }
+ },
+ "n": {
+  "dev": 40,
+  "eval": 40
+ },
+ "limits": {
+  "time": "لا مهلة زمنية للحالة: ميزانيات المحرك الحتمية بعدد المحاولات؛ يُسجَّل الزمن والذاكرة (ms، rssMB) لكل حالة",
+  "processes": 2,
+  "machine": "حاوية بنواتين و7 ج.ب ذاكرة",
+  "node": "v22.22.0"
+ },
+ "sampleSha256": {
+  "dev": "65cababc213a4dd6ccaa8fe8e2850533490acb6f5542c5bd0425b56c90ed662c",
+  "eval": "8aa583a3a9fcde5313d895fe1d56a61a35d437f8c7ef13e3cc8fa94418cdcf71"
+ },
+ "sample": {
+  "dev": [
+   {
+    "id": "R1",
+    "land": {
+     "width": 27,
+     "length": 25,
+     "streets": [
+      "n"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام، غرفة خادمة",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R2",
+    "land": {
+     "width": 23,
+     "length": 32,
+     "streets": [
+      "e"
+     ],
+     "entries": [
+      "e"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R3",
+    "land": {
+     "width": 30,
+     "length": 35,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم، مجلس رجال، مجلس نساء، صالة، مطبخ في الخلف، طعام قريب من المجلس، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R4",
+    "land": {
+     "width": 32,
+     "length": 35,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة خادمة، كل غرفة 4×5 تقريبًا",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R5",
+    "land": {
+     "width": 17,
+     "length": 25,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 5 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال 6×7، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R6",
+    "land": {
+     "width": 29,
+     "length": 29,
+     "streets": [
+      "e"
+     ],
+     "entries": [
+      "e"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام، غرفة سائق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R7",
+    "land": {
+     "width": 25,
+     "length": 26,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ 3.5×5 في الخلف، طعام، غرفة سائق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R8",
+    "land": {
+     "width": 15,
+     "length": 20,
+     "streets": [
+      "e"
+     ],
+     "entries": [
+      "e"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم، مجلس 6×7، صالة كبيرة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R9",
+    "land": {
+     "width": 26,
+     "length": 29,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R10",
+    "land": {
+     "width": 16,
+     "length": 25,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ في الخلف، طعام، غرفة خادمة، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R11",
+    "land": {
+     "width": 18,
+     "length": 33,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم، مجلس، صالة، مطبخ، طعام، غرفة خادمة، غرفة غسيل",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R12",
+    "land": {
+     "width": 28,
+     "length": 22,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال 6×7 بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام، كل غرفة 4×5 تقريبًا",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R13",
+    "land": {
+     "width": 26,
+     "length": 20,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر، مجلس، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R14",
+    "land": {
+     "width": 23,
+     "length": 33,
+     "streets": [
+      "s",
+      "w"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 3 غرف نوم، مجلس، صالة، مطبخ، طعام قريب من المجلس، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R15",
+    "land": {
+     "width": 29,
+     "length": 29,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 6 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ في الخلف، طعام، غرفة غسيل، كل غرفة 4×5 تقريبًا، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 6,
+     "majlis": 2,
+     "baths": 8,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R16",
+    "land": {
+     "width": 28,
+     "length": 25,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم، مجلس، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R17",
+    "land": {
+     "width": 14,
+     "length": 34,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم، مجلس رجال 6×7، مجلس نساء، صالة كبيرة، مطبخ، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R18",
+    "land": {
+     "width": 22,
+     "length": 20,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 4 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ في الخلف، طعام قريب من المجلس، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R19",
+    "land": {
+     "width": 19,
+     "length": 25,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم، مجلس رجال 5×7، مجلس نساء، صالة، مطبخ، طعام، غرفة سائق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R20",
+    "land": {
+     "width": 27,
+     "length": 28,
+     "streets": [
+      "e"
+     ],
+     "entries": [
+      "e"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم، مجلس، صالة، مطبخ 4×4، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R21",
+    "land": {
+     "width": 28,
+     "length": 33,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R22",
+    "land": {
+     "width": 21,
+     "length": 34,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R23",
+    "land": {
+     "width": 23,
+     "length": 33,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R24",
+    "land": {
+     "width": 24,
+     "length": 32,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 5 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ 3.5×5، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R25",
+    "land": {
+     "width": 19,
+     "length": 32,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 5 غرف نوم، مجلس، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة خادمة بحمام، غرفة سائق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 1,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R26",
+    "land": {
+     "width": 28,
+     "length": 36,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ 4×5، طعام، غرفة خادمة، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R27",
+    "land": {
+     "width": 25,
+     "length": 28,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام، غرفة خادمة بحمام، غرفة سائق، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R28",
+    "land": {
+     "width": 22,
+     "length": 24,
+     "streets": [
+      "n"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R29",
+    "land": {
+     "width": 19,
+     "length": 28,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة سائق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R30",
+    "land": {
+     "width": 22,
+     "length": 21,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ، طعام، غرفة خادمة",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R31",
+    "land": {
+     "width": 29,
+     "length": 28,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم، مجلس، صالة كبيرة، مطبخ 4×4، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R32",
+    "land": {
+     "width": 25,
+     "length": 28,
+     "streets": [
+      "n"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R33",
+    "land": {
+     "width": 20,
+     "length": 24,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم، مجلس، صالة كبيرة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة خادمة بحمام، غرفة غسيل",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R34",
+    "land": {
+     "width": 15,
+     "length": 21,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R35",
+    "land": {
+     "width": 31,
+     "length": 26,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ 4×4، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R36",
+    "land": {
+     "width": 20,
+     "length": 31,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام، غرفة سائق، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R37",
+    "land": {
+     "width": 17,
+     "length": 23,
+     "streets": [
+      "n"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة، مطبخ في الخلف، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R38",
+    "land": {
+     "width": 26,
+     "length": 35,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم، مجلس، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R39",
+    "land": {
+     "width": 22,
+     "length": 26,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 5 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة، مطبخ، طعام، غرفة خادمة، غرفة سائق، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 1,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R40",
+    "land": {
+     "width": 15,
+     "length": 22,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 5 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال 5×7 بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 8,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   }
+  ],
+  "eval": [
+   {
+    "id": "R1",
+    "land": {
+     "width": 20,
+     "length": 24,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ 4×5، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R2",
+    "land": {
+     "width": 18,
+     "length": 22,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 6 غرف نوم منها ماستر، مجلس، صالة، مطبخ في الخلف، طعام، غرفة غسيل، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 6,
+     "majlis": 1,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R3",
+    "land": {
+     "width": 24,
+     "length": 26,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس، صالة، مطبخ 4×5، طعام، غرفة خادمة بحمام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R4",
+    "land": {
+     "width": 24,
+     "length": 26,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام، غرفة خادمة بحمام، غرفة سائق، غرفة غسيل",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R5",
+    "land": {
+     "width": 18,
+     "length": 29,
+     "streets": [
+      "s",
+      "w"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس 5×7، صالة كبيرة تطل على الحديقة، مطبخ، طعام، غرفة خادمة، غرفة سائق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R6",
+    "land": {
+     "width": 20,
+     "length": 34,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 5 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام، غرفة غسيل",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 8,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R7",
+    "land": {
+     "width": 25,
+     "length": 24,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 5 غرف نوم، مجلس 5×7، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 1,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R8",
+    "land": {
+     "width": 27,
+     "length": 26,
+     "streets": [
+      "s",
+      "w"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "5 غرف نوم، مجلس، صالة تطل على الحديقة، مطبخ، طعام، غرفة خادمة، غرفة غسيل",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 1,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R9",
+    "land": {
+     "width": 23,
+     "length": 25,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R10",
+    "land": {
+     "width": 28,
+     "length": 28,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "5 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 1,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R11",
+    "land": {
+     "width": 23,
+     "length": 34,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 6 غرف نوم، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام، غرفة خادمة، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 6,
+     "majlis": 2,
+     "baths": 9,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R12",
+    "land": {
+     "width": 18,
+     "length": 22,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 5 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس، غرفة خادمة بحمام، غرفة سائق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 8,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R13",
+    "land": {
+     "width": 25,
+     "length": 32,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ 4×5، طعام قريب من المجلس",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R14",
+    "land": {
+     "width": 15,
+     "length": 27,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال 5×7 بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس، غرفة خادمة",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R15",
+    "land": {
+     "width": 27,
+     "length": 32,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة كبيرة، مطبخ في الخلف، طعام، غرفة خادمة بحمام، غرفة سائق، كل غرفة 4×5 تقريبًا",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R16",
+    "land": {
+     "width": 14,
+     "length": 35,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة، مطبخ، طعام، غرفة غسيل",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R17",
+    "land": {
+     "width": 21,
+     "length": 36,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام، غرفة خادمة بحمام، غرفة سائق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R18",
+    "land": {
+     "width": 20,
+     "length": 21,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 6 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 6,
+     "majlis": 2,
+     "baths": 8,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R19",
+    "land": {
+     "width": 25,
+     "length": 21,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 5 غرف نوم، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ في الخلف، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R20",
+    "land": {
+     "width": 16,
+     "length": 23,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر، مجلس 6×7، صالة كبيرة تطل على الحديقة، مطبخ، طعام، غرفة غسيل",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R21",
+    "land": {
+     "width": 22,
+     "length": 30,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم، مجلس 5×6، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة سائق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R22",
+    "land": {
+     "width": 22,
+     "length": 34,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "5 غرف نوم منها ماستر، مجلس، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 1,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R23",
+    "land": {
+     "width": 15,
+     "length": 26,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 5 غرف نوم، مجلس رجال 6×7 بمدخل مستقل، مجلس نساء، صالة، مطبخ 4×4، طعام",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R24",
+    "land": {
+     "width": 15,
+     "length": 23,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال 6×7 بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R25",
+    "land": {
+     "width": 25,
+     "length": 35,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 3 غرف نوم، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ 4×5 في الخلف، طعام قريب من المجلس، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R26",
+    "land": {
+     "width": 20,
+     "length": 22,
+     "streets": [
+      "e"
+     ],
+     "entries": [
+      "e"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم، مجلس رجال، مجلس نساء، صالة، مطبخ في الخلف، طعام قريب من المجلس، غرفة خادمة، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R27",
+    "land": {
+     "width": 20,
+     "length": 20,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "5 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ 4×5، طعام، غرفة سائق، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 8,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R28",
+    "land": {
+     "width": 28,
+     "length": 23,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 3 غرف نوم، مجلس رجال 5×7، مجلس نساء، صالة، مطبخ 4×5، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R29",
+    "land": {
+     "width": 31,
+     "length": 24,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 4 غرف نوم منها ماستر، مجلس رجال 5×6، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R30",
+    "land": {
+     "width": 26,
+     "length": 29,
+     "streets": [
+      "n"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام قريب من المجلس، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R31",
+    "land": {
+     "width": 24,
+     "length": 22,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم، مجلس، صالة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R32",
+    "land": {
+     "width": 27,
+     "length": 24,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R33",
+    "land": {
+     "width": 17,
+     "length": 21,
+     "streets": [
+      "n",
+      "w"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 1
+    },
+    "text": "3 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة كبيرة، مطبخ، طعام، غرفة سائق",
+    "counts": {
+     "bedrooms": 3,
+     "majlis": 1,
+     "baths": 4,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R34",
+    "land": {
+     "width": 15,
+     "length": 30,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ في الخلف، طعام، غرفة سائق، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R35",
+    "land": {
+     "width": 23,
+     "length": 32,
+     "streets": [
+      "s",
+      "w"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس 4.5×6، صالة تطل على الحديقة، مطبخ، طعام، غرفة خادمة، غرفة سائق",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 1,
+     "baths": 5,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R36",
+    "land": {
+     "width": 26,
+     "length": 28,
+     "streets": [
+      "w"
+     ],
+     "entries": [
+      "w"
+     ],
+     "floors": 1
+    },
+    "text": "5 غرف نوم، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس، كل غرفة 4×4 تقريبًا",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R37",
+    "land": {
+     "width": 20,
+     "length": 32,
+     "streets": [
+      "s"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 5 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام، كل غرفة 4×5 تقريبًا، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R38",
+    "land": {
+     "width": 28,
+     "length": 26,
+     "streets": [
+      "s",
+      "e"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   },
+   {
+    "id": "R39",
+    "land": {
+     "width": 19,
+     "length": 23,
+     "streets": [
+      "n",
+      "e"
+     ],
+     "entries": [
+      "n"
+     ],
+     "floors": 2
+    },
+    "text": "دورين: 5 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة كبيرة تطل على الحديقة، مطبخ، طعام قريب من المجلس، وغرف النوم فوق",
+    "counts": {
+     "bedrooms": 5,
+     "majlis": 2,
+     "baths": 7,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 3
+   },
+   {
+    "id": "R40",
+    "land": {
+     "width": 21,
+     "length": 27,
+     "streets": [
+      "s",
+      "w"
+     ],
+     "entries": [
+      "s"
+     ],
+     "floors": 1
+    },
+    "text": "فيلا دور واحد: 4 غرف نوم، مجلس رجال بمدخل مستقل، مجلس نساء، صالة كبيرة، مطبخ، طعام",
+    "counts": {
+     "bedrooms": 4,
+     "majlis": 2,
+     "baths": 6,
+     "kitchens": 1,
+     "halls": 1,
+     "dining": 1
+    },
+    "want": 4
+   }
+  ]
+ }
+}
