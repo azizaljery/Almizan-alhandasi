@@ -6,3 +6,5 @@
 - الحتمية: `base` و`all` على بذرة التطوير أُعيدا مرتين (`*-dev-earlier-run.json`): النتائج والحالات والبدائل متطابقة 40/40؛ الزمن فقط يختلف بالحمل.
 - الملخص: `MATRIX.json` (`node scripts/matrix-r21-proposal.mjs`)؛ والقراءة في `docs/research/r21-proposal/PROPOSAL.md` §3.
 - `mx-a06` يقيس المتغير المعمم من 06 (`R14_OFF=r21linkall`)، لأن المتغير المقيَّد بطلب العميل يحتاج عقد 01 فلا أثر له وحده.
+- (02b) `mx-a02b` = الأساس + 02 + 02b (`687e7f2`)؛ `mx-a02b3` = ذلك + سطر العدد المطلوب (`parseRequestedCount` ⇐ `requirements.want`) بلا العقد الموحد؛ `mx-all02b` = رأس `687e7f2`؛ `mx-m02b` = الرأس نفسه بـ `R14_OFF=r21dimfix`. جلسة قياس لاحقة: الزمن يُقارن داخلها فقط.
+- تتبع H10: `evidence/diagnosis-r21/02b-H10-trace/old-02.json` (الأساس + 02 الأصلي) و`02b.json` (الرأس).

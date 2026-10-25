@@ -6,7 +6,8 @@ const here = new URL('../', import.meta.url).pathname;
 const DD = here + 'evidence/diagnosis-r21/proposal-matrix/', CD = here + 'evidence/coverage-r21/proposal-matrix/';
 const CONFIGS = [
   ['base', 'الأساس 3b212e7'], ['mx-a01', '01 وحده'], ['mx-a02', '02 وحده'], ['mx-a03', '03 وحده'], ['mx-a04', '04 وحده'], ['mx-a06', '06 وحده (المعمم)'], ['mx-a07', '07 وحده'],
-  ['all', 'الكل (f108aa1)'], ['mx-m01', 'الكل عدا 01'], ['mx-m02', 'الكل عدا 02'], ['mx-m03', 'الكل عدا 03'], ['mx-m04', 'الكل عدا 04'], ['mx-m06', 'الكل عدا 06'], ['mx-m07', 'الكل عدا 07'],
+['mx-a02b', '02+02b وحده'], ['mx-a02b3', '02+02b + العدد من 03'],
+    ['all', 'الكل (f108aa1)'], ['mx-all02b', 'الكل + 02b (687e7f2)'], ['mx-m02b', 'الكل + 02b عدا المقاسات (r21dimfix)'], ['mx-m01', 'الكل عدا 01'], ['mx-m02', 'الكل عدا 02'], ['mx-m03', 'الكل عدا 03'], ['mx-m04', 'الكل عدا 04'], ['mx-m06', 'الكل عدا 06'], ['mx-m07', 'الكل عدا 07'],
 ];
 const IDS = [...Array.from({ length: 10 }, (_, i) => ['main', 'C' + (i + 1)]), ...Array.from({ length: 5 }, (_, i) => ['heldout', 'H' + (i + 1)]), ...Array.from({ length: 5 }, (_, i) => ['heldout2', 'H' + (i + 6)])];
 const cases = label => IDS.map(([set, id]) => {

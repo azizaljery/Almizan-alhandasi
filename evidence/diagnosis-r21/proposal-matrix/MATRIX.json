@@ -2041,6 +2041,594 @@
    ]
   },
   {
+   "label": "mx-a02b",
+   "ar": "02+02b وحده",
+   "n": 20,
+   "cases": {
+    "withPlan": 15,
+    "visible": 24,
+    "ready": 18,
+    "mandatoryShown": 0,
+    "hiddenOnly": 3,
+    "failed": 2,
+    "sec": 731,
+    "peakMB": 1076
+   },
+   "dev": {
+    "n": 40,
+    "sound": 15,
+    "hiddenOnly": 7,
+    "proven": 0,
+    "claimed": 3,
+    "incomplete": 15,
+    "distinct": 32,
+    "leaks": 0,
+    "sec": 846,
+    "peakMB": 1470
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 28834,
+     "rss": 510,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "C2",
+     "ms": 41664,
+     "rss": 497,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ]
+    },
+    {
+     "id": "C3",
+     "ms": 43961,
+     "rss": 930,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ]
+    },
+    {
+     "id": "C4",
+     "ms": 14208,
+     "rss": 264,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ]
+    },
+    {
+     "id": "C5",
+     "ms": 51763,
+     "rss": 1076,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ]
+    },
+    {
+     "id": "C6",
+     "ms": 22582,
+     "rss": 501,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ]
+    },
+    {
+     "id": "C7",
+     "ms": 85898,
+     "rss": 446,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "C8",
+     "ms": 43877,
+     "rss": 577,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ]
+    },
+    {
+     "id": "C9",
+     "ms": 36113,
+     "rss": 506,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "r3o32n0:o32n0vg0:ready",
+      "r31sodw:1sodwvg0:ready"
+     ]
+    },
+    {
+     "id": "C10",
+     "ms": 46723,
+     "rss": 597,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "H1",
+     "ms": 33475,
+     "rss": 529,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ]
+    },
+    {
+     "id": "H2",
+     "ms": 26833,
+     "rss": 347,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ]
+    },
+    {
+     "id": "H3",
+     "ms": 29816,
+     "rss": 590,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "centralhall:ch2:hidden"
+     ]
+    },
+    {
+     "id": "H4",
+     "ms": 18841,
+     "rss": 258,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H5",
+     "ms": 33539,
+     "rss": 560,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ]
+    },
+    {
+     "id": "H6",
+     "ms": 24212,
+     "rss": 539,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H7",
+     "ms": 37069,
+     "rss": 519,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ]
+    },
+    {
+     "id": "H8",
+     "ms": 73134,
+     "rss": 310,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "H9",
+     "ms": 10161,
+     "rss": 261,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ]
+    },
+    {
+     "id": "H10",
+     "ms": 27839,
+     "rss": 550,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ]
+    }
+   ]
+  },
+  {
+   "label": "mx-a02b3",
+   "ar": "02+02b + العدد من 03",
+   "n": 20,
+   "cases": {
+    "withPlan": 15,
+    "visible": 24,
+    "ready": 18,
+    "mandatoryShown": 0,
+    "hiddenOnly": 3,
+    "failed": 2,
+    "sec": 730,
+    "peakMB": 1050
+   },
+   "dev": {
+    "n": 40,
+    "sound": 15,
+    "hiddenOnly": 7,
+    "proven": 0,
+    "claimed": 3,
+    "incomplete": 15,
+    "distinct": 32,
+    "leaks": 0,
+    "sec": 842,
+    "peakMB": 1458
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 27938,
+     "rss": 503,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "C2",
+     "ms": 42433,
+     "rss": 490,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ]
+    },
+    {
+     "id": "C3",
+     "ms": 43267,
+     "rss": 491,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ]
+    },
+    {
+     "id": "C4",
+     "ms": 13797,
+     "rss": 260,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ]
+    },
+    {
+     "id": "C5",
+     "ms": 51565,
+     "rss": 1050,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ]
+    },
+    {
+     "id": "C6",
+     "ms": 22176,
+     "rss": 511,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ]
+    },
+    {
+     "id": "C7",
+     "ms": 86265,
+     "rss": 476,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "C8",
+     "ms": 44603,
+     "rss": 509,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ]
+    },
+    {
+     "id": "C9",
+     "ms": 36109,
+     "rss": 507,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "r3o32n0:o32n0vg0:ready",
+      "r31sodw:1sodwvg0:ready"
+     ]
+    },
+    {
+     "id": "C10",
+     "ms": 46302,
+     "rss": 576,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "H1",
+     "ms": 33317,
+     "rss": 518,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ]
+    },
+    {
+     "id": "H2",
+     "ms": 27276,
+     "rss": 370,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ]
+    },
+    {
+     "id": "H3",
+     "ms": 29836,
+     "rss": 562,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "centralhall:ch2:hidden"
+     ]
+    },
+    {
+     "id": "H4",
+     "ms": 19130,
+     "rss": 216,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H5",
+     "ms": 33005,
+     "rss": 569,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ]
+    },
+    {
+     "id": "H6",
+     "ms": 24494,
+     "rss": 556,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H7",
+     "ms": 36831,
+     "rss": 518,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ]
+    },
+    {
+     "id": "H8",
+     "ms": 73900,
+     "rss": 365,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "H9",
+     "ms": 9962,
+     "rss": 266,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ]
+    },
+    {
+     "id": "H10",
+     "ms": 27829,
+     "rss": 541,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ]
+    }
+   ]
+  },
+  {
    "label": "all",
    "ar": "الكل (f108aa1)",
    "n": 20,
@@ -2332,6 +2920,595 @@
      "pat": [
       "r31bqbu:1bqbuhg0:hidden"
      ]
+    }
+   ]
+  },
+  {
+   "label": "mx-all02b",
+   "ar": "الكل + 02b (687e7f2)",
+   "n": 20,
+   "cases": {
+    "withPlan": 16,
+    "visible": 27,
+    "ready": 21,
+    "mandatoryShown": 0,
+    "hiddenOnly": 2,
+    "failed": 2,
+    "sec": 774,
+    "peakMB": 1087
+   },
+   "dev": {
+    "n": 40,
+    "sound": 17,
+    "hiddenOnly": 5,
+    "proven": 0,
+    "claimed": 0,
+    "incomplete": 18,
+    "distinct": 34,
+    "leaks": 0,
+    "sec": 838,
+    "peakMB": 1425
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 28020,
+     "rss": 505,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "C2",
+     "ms": 43254,
+     "rss": 511,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ]
+    },
+    {
+     "id": "C3",
+     "ms": 44796,
+     "rss": 972,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ]
+    },
+    {
+     "id": "C4",
+     "ms": 14522,
+     "rss": 277,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ]
+    },
+    {
+     "id": "C5",
+     "ms": 54768,
+     "rss": 1087,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ]
+    },
+    {
+     "id": "C6",
+     "ms": 22521,
+     "rss": 533,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ]
+    },
+    {
+     "id": "C7",
+     "ms": 97685,
+     "rss": 470,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "C8",
+     "ms": 45603,
+     "rss": 502,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ]
+    },
+    {
+     "id": "C9",
+     "ms": 36833,
+     "rss": 507,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ]
+    },
+    {
+     "id": "C10",
+     "ms": 48916,
+     "rss": 573,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "H1",
+     "ms": 32245,
+     "rss": 539,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ]
+    },
+    {
+     "id": "H2",
+     "ms": 36543,
+     "rss": 587,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ]
+    },
+    {
+     "id": "H3",
+     "ms": 29083,
+     "rss": 557,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H4",
+     "ms": 18007,
+     "rss": 257,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H5",
+     "ms": 31159,
+     "rss": 515,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ]
+    },
+    {
+     "id": "H6",
+     "ms": 45029,
+     "rss": 568,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ]
+    },
+    {
+     "id": "H7",
+     "ms": 36010,
+     "rss": 502,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ]
+    },
+    {
+     "id": "H8",
+     "ms": 71410,
+     "rss": 331,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "H9",
+     "ms": 9254,
+     "rss": 264,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ]
+    },
+    {
+     "id": "H10",
+     "ms": 28564,
+     "rss": 518,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ]
+    }
+   ]
+  },
+  {
+   "label": "mx-m02b",
+   "ar": "الكل + 02b عدا المقاسات (r21dimfix)",
+   "n": 20,
+   "cases": {
+    "withPlan": 14,
+    "visible": 24,
+    "ready": 18,
+    "mandatoryShown": 0,
+    "hiddenOnly": 3,
+    "failed": 3,
+    "sec": 768,
+    "peakMB": 1074
+   },
+   "dev": {
+    "n": 40,
+    "sound": 15,
+    "hiddenOnly": 7,
+    "proven": 0,
+    "claimed": 0,
+    "incomplete": 18,
+    "distinct": 30,
+    "leaks": 0,
+    "sec": 809,
+    "peakMB": 1453
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 27676,
+     "rss": 512,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "C2",
+     "ms": 44998,
+     "rss": 507,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ]
+    },
+    {
+     "id": "C3",
+     "ms": 43934,
+     "rss": 522,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ]
+    },
+    {
+     "id": "C4",
+     "ms": 14396,
+     "rss": 267,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ]
+    },
+    {
+     "id": "C5",
+     "ms": 54008,
+     "rss": 1074,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ]
+    },
+    {
+     "id": "C6",
+     "ms": 31903,
+     "rss": 575,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ]
+    },
+    {
+     "id": "C7",
+     "ms": 99101,
+     "rss": 448,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "C8",
+     "ms": 44736,
+     "rss": 512,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ]
+    },
+    {
+     "id": "C9",
+     "ms": 37848,
+     "rss": 616,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ]
+    },
+    {
+     "id": "C10",
+     "ms": 48007,
+     "rss": 576,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ]
+    },
+    {
+     "id": "H1",
+     "ms": 32286,
+     "rss": 531,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ]
+    },
+    {
+     "id": "H2",
+     "ms": 36962,
+     "rss": 394,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ]
+    },
+    {
+     "id": "H3",
+     "ms": 28558,
+     "rss": 529,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H4",
+     "ms": 18942,
+     "rss": 256,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": []
+    },
+    {
+     "id": "H5",
+     "ms": 33567,
+     "rss": 612,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "split:s0r:hidden"
+     ]
+    },
+    {
+     "id": "H6",
+     "ms": 43971,
+     "rss": 551,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ]
+    },
+    {
+     "id": "H7",
+     "ms": 35788,
+     "rss": 527,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ]
+    },
+    {
+     "id": "H8",
+     "ms": 74034,
+     "rss": 318,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ]
+    },
+    {
+     "id": "H9",
+     "ms": 9520,
+     "rss": 261,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ]
+    },
+    {
+     "id": "H10",
+     "ms": 7994,
+     "rss": 269,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "error": "VILLA_NO_FIT",
+     "pat": []
     }
    ]
   },
