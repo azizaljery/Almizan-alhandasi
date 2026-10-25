@@ -1,0 +1,51 @@
+{
+ "purpose": "خط الأساس للجولة 21 (قرار المالك: تثبيت المحرك الحالي قبل أي أداة تشخيص أو إصلاح). المحرك المثبَّت هو المحرك المدمج في dev/architect-v2 قبل أي عمل في الجولة 21.",
+ "commit": "3b212e7f816dff80ead90db219213d3a127759a3",
+ "branch": "dev/architect-v2",
+ "pinnedAt": "2026-10-25T05:20:36.776Z",
+ "files": {
+  "dist/villa-layout.mjs": "e05ee81777845de3dc158b4b62a108c9baf6536e0968bd4df3ff5714b769cdc6",
+  "dist/villa-layout-v2.mjs": "8709e76c5f1afcc904cef8ed5e11d9f009884986bd66dc4834dd3e77506ab68d",
+  "dist/villa-layout-v3.mjs": "6722a563a169b27523795241fbdc0150591277b3400698974e73eb966b38c4d7",
+  "dist/feasibility.mjs": "f7d93fc32d44a21dfc6220b9f5fb62d7d34e896a5f38ac9b2c761b831ad39d21",
+  "dist/requirements.mjs": "0acaf32e71c0958b433fce9051209a8fd166ac9804446a41aaf4a6b6e70735e4",
+  "dist/rules.mjs": "67a603f63bdf2f29fd140dd66ded0a26cc0e2b7ddc119661df1806b19a63a823",
+  "dist/arch-difference.mjs": "77c6bcc4cd1cee3b2a7bab951bb50fc5d849a556d7428da6dde2686257d73e83",
+  "dist/arch-criterion.mjs": "9042e09703d33d7e1ff7d018a6bb092ea6614db0d17cccd6797f44f209c3c9d4",
+  "dist/presentation-status.mjs": "6f5ce3b35ebed3eb28afcb84b9ff975f1cf60c08b6ceda22556cb3b8eaf3f8dd",
+  "dist/privacy-defects.mjs": "8a9cc0b58c23325ff0f8bc4cc68f028c6a4c402792683d36f000a6fa035a5071",
+  "dist/r20-checks.mjs": "ea62296bae5ff7ea443e23798b8ed56c5828cb854dce7f85c75a384d1b782b49",
+  "dist/plan-review.mjs": "c59c709ab647972a08a275faae59789e4937aca1d283df0fda5e6b57a904eae0",
+  "dist/mizan-score.mjs": "3f885cbb3a40cdd7682e756621f8f4f990138e0434ba47badeab13a42f3ab139",
+  "dist/saudi-program.mjs": "0d3d3fa84882de3797593945639a6c703c5cdc9befa2d3269155b7757799d0a5",
+  "dist/change-guard.mjs": "62cebf261526c319a4604bf28e58611d6ad9e8de0bc6ba31fd275d4b50043774",
+  "dist/client-text.mjs": "1a3064d2c332c1a3545104ad14c252ae364083af738b10c353ceb903486f4660",
+  "dist/home-flow.mjs": "6254c0b91ac45b6be085fefbd588baa86b64c50ceb06788367fa14c162f13fdf",
+  "dist/design-session.mjs": "b0704437cb6556deb79f05e244399b0991f715d9f5770fd0f7c68a59a5779900",
+  "dist/plan-edit.mjs": "d7663446b27a68130791fcdef020f82dba9986da69a9befd26e4e6dc0beb54ca",
+  "dist/structural-precheck.mjs": "718f392ee0e0c27b1ee3db1d40cb11bc3baf9b6e3a5c2f3c19b5b2088a0cdda4",
+  "dist/stacking.mjs": "e7ef0e888beb39561cbde035efae9e3e8f76d8cd658cabf585ed3c5b3e7c643f",
+  "dist/r16-polish.mjs": "4222e18bdfa440c8cf58b643ee1530bc761895e62c28610c2367029df05f7bd6",
+  "data/regulations-sa.json": "74838a90182c3d81d672f72f4a588da66e016e9e6d97e05b6955d3886444caf5",
+  "scripts/acceptance-run.mjs": "25aad1a440ab737719c583185f66afa954d5601d403e68ebbf0915e308bc8c8d",
+  "scripts/heldout3-cases.mjs": "e37afefbe17014849e9dbed83aab4bb3a91fab7b392684397742e6ea35bf8c8f"
+ },
+ "config": {
+  "engineDefault": "villaEngineOf = engine => (engine === 'v1' ? 'v1' : engine === 'v2' ? 'v2' : 'v3');",
+  "v2Version": "VILLA_V2_ENGINE_VERSION = 'villa-v2-partis-17'",
+  "v3Version": "VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1'",
+  "budgets": "const BUILD_MAX = 18, BUILD_SPARE = 4, BUILD_MAX2 = 8, SCHED_EXTRA = 70, SECOND_MAX = 20; // (الجولة الحادية عشرة) البحث الثاني: حتى 10 أشجار لم يُبنَ من نمطها شيء",
+  "v3Source": "buildMax: 30, spare: 3",
+  "deepIters": "const POLISH_K = 2, DEEP_ITERS = 320, CD_ROUNDS = 4, OVERHANG_MAX = 2; // طول مرحلة الصقل بمضاعفات طول التلدين",
+  "gridResolution": "cMax = Math.max(2, Math.min(5, Math.floor(W / 4.0))), rMax = Math.max(2, Math.min(6, Math.floor(D / 3.6)));",
+  "gridShapesKept": "slice(0, 4).map(o => [o.nc, o.nr])",
+  "enumerateBudget": "budget = 1500000",
+  "timeLimits": "لا مهلة زمنية: ميزانيات حتمية بعدد المحاولات (البناء والبدايات)",
+  "feasibility": "FEAS_LIMITS = Object.freeze({ grossFactor: 1.15, warnFactor: .92, minMajlisW: 4.2, minFoyerW: 2.4, wall: .25, tier: 'تقدير الميزان (غير نظامي)' });"
+ },
+ "sealed": {
+  "scripts/heldout3-cases.mjs": "e37afefbe17014849e9dbed83aab4bb3a91fab7b392684397742e6ea35bf8c8f",
+  "note": "H11–H15 مختومة: لم تُفتح ولم تُشغَّل"
+ },
+ "note": "أُضيفت في الفرع dev/stage2-r21 إيداعات سلوكية قبل هذا القرار (مذكورة في docs/research/v3-diagnosis-r21.md §0 للمراجعة)؛ هذا الملف يثبّت المحرك قبلها، وتُقاس عليه كل مقارنة قبل/بعد."
+}
