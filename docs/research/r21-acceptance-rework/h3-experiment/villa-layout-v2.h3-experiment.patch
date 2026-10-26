@@ -1,0 +1,126 @@
+--- /home/claude/wt-k2-prev/dist/villa-layout-v2.mjs	2026-10-26 14:56:25.359462144 +0300
++++ /tmp/h3copy/dist/villa-layout-v2.mjs	2026-10-26 23:16:28.272951802 +0300
+@@ -802,6 +802,73 @@
+         // (الجولة السادسة عشرة) H بجناح ضيافة وخدمة: المجلس على رأس الجناح الثاني فالطعام (مقلطًا يُفتح عليه) فالمطبخ فكبار السن —
+         //     ضيف الرجال يصل إلى الطعام دون أن يعبر المدخل العائلي أو الصالة، والمطبخ يخدم الطعام مباشرة؛ وجناح النوم كله في الجناح الأول
+         push('hplan', 'hh2', X(Y({ ...VOID(30), min: 3.5 }, corrBeds([...kidsT, mstT], 'x1')), Y(VOID(gardenA * .5), F(), H(), VOID(gardenA * .7)), Y(Mz('y1'), Z([...flex, ...wcA, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y'), eldT ? Z([eldT], 'x0', 'y') : null)), { iters: DEEP_ITERS, tol: 4, hardMajlis: true, foyerYard: true });
++        if (globalThis.__r21hall) {
++          const kk = kidsT, svcR = Y(Mz('y1'), Z([...flex, ...wcA, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y'), eldT ? Z([eldT], 'x0', 'y') : null), O = { iters: DEEP_ITERS, tol: 4, hardMajlis: true, foyerYard: true };
++          const dbl = X(Z(kk.slice(0, Math.ceil(kk.length / 2)), 'x1', 'y'), corr('cb'), Z(kk.slice(Math.ceil(kk.length / 2)), 'x0', 'y'));
++          // (حل 1) جناح نوم مزدوج التحميل: غرفتان على كل جانب ممر قصير والرئيسية في نهايته؛ الصالة في الوسط على الخلف؛ عمود الضيافة والخدمة مقابله
++          push('hplan', 'hh3', X(Y(dbl, Z([mstT], 'y0', 'x')), Y(F(), H(), VOID(gardenA)), svcR), O);
++          // (حل 2) الصالة بعد المدخل مباشرة ثم حديقة خلفية؛ الجناح المزدوج على اليمين وعمود الضيافة على اليسار
++          push('hplan', 'hh4', X(svcR, Y(F(), H(), VOID(gardenA)), Y(dbl, Z([mstT], 'y0', 'x'))), O);
++          // (حل 3) غرفتان على الممر الأحادي مع الرئيسية في نهايته، وغرفتان تُفتحان على الصالة نفسها من خلفها
++          push('hplan', 'hh5', X(corrBeds([...kk.slice(0, 2), mstT], 'x1'), Y(F(), X(H(), Z(kk.slice(2), 'x0', 'y'))), svcR), O);
++          // (حل 4) الجناحان على جانبي الصالة: الأبناء يُفتحون عليها، والخدمة والضيافة عمود كامل العمق
++          const hall3 = Y(F(), H(), VOID(gardenA)), svcA = Y(Mz('y1'), Z([...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y'), Z([...flex, ...wcA], 'x0', 'y')), svcB = Y(Mz('y1'), X(Z([...Dn], 'x0', 'y'), Z([...flex, ...wcA], 'x0', 'y')), Z([...K, ...Md], 'x0', 'y'));
++          const wing = Y(Wm ? Wz('x0', 'x') : null, Z(kk.slice(0, Math.ceil(kk.length / 2)), 'y1', 'x'), corr('cb'), Z(kk.slice(Math.ceil(kk.length / 2)), 'y0', 'x'), Z([mstT], 'y0', 'x'));
++          push('hplan', 'hh7', X(wing, hall3, svcR), O);
++          push('hplan', 'hh8', X(wing, hall3, svcA), O);
++          push('hplan', 'hh9', X(wing, hall3, svcB), O);
++          push('hplan', 'hhA', X(Y(Wm ? Wz('x0', 'x') : null, Y(Z(kk.slice(0, Math.ceil(kk.length / 2)), 'y1', 'x'), corr('cb'), Z(kk.slice(Math.ceil(kk.length / 2)), 'y0', 'x')), Z([mstT], 'y0', 'x')), hall3, svcA), O);
++          const cB = (list, d, id) => { if (!list.length) return null; const m = list[list.length - 1]?.master && list.length >= 3 ? list[list.length - 1] : null, rest = m ? list.slice(0, -1) : list; const run = d === 'x0' ? X(corr(id), Z(rest, 'x0', 'y')) : X(Z(rest, 'x1', 'y'), corr(id)); return m ? Y(run, Z([m], 'y0', 'x')) : run; };
++          const svcL = Y(Mz('y1'), Z([...flex, ...wcA, ...Dn], 'x1', 'y'), Z([...K, ...Md], 'x1', 'y'), eldT ? Z([eldT], 'x1', 'y') : null);
++          push('hplan', 'hhB', X(svcL, Y(F(), H(), VOID(gardenA)), Y(Wm ? Wz('x1', 'x') : null, cB(kk.slice(0, 2), 'x0', 'corrA'), cB([...kk.slice(2), mstT], 'x0', 'corrB'))), O);
++          push('hplan', 'hhC', X(svcL, Y(F(), H(), VOID(gardenA)), Y(Wm ? Wz('x1', 'x') : null, cB(kk.slice(0, 2), 'x0', 'corrA'), cB([...kk.slice(2), mstT], 'x0', 'corrB'), OV(6))), O);
++          push('hplan', 'hhD', X(svcL, Y(Wm ? Wz('x1', 'x') : null, F(), H(), VOID(gardenA)), Y(cB(kk.slice(0, 2), 'x0', 'corrA'), cB([...kk.slice(2), mstT], 'x0', 'corrB'))), O);
++          const wR = Y(Wm ? Wz('x1', 'x') : null, cB(kk.slice(0, 2), 'x0', 'corrA'), cB([...kk.slice(2), mstT], 'x0', 'corrB')), hallC = Y(F(), H(), VOID(gardenA));
++          const svcE = Y(Mz('y1'), Z([...Dn], 'x1', 'y'), Z([...K, ...Md], 'x1', 'y'), Z([...flex, ...wcA], 'x1', 'y'));
++          const svcF = Y(Mz('y1'), Z([...Dn], 'x1', 'y'), X(Z([...K], 'x1', 'y'), Z([...Md, ...flex, ...wcA], 'x1', 'y')));
++          const svcG = Y(Mz('y1'), Z([...Dn], 'x1', 'y'), Z([...K], 'x1', 'y'), Z([...flex, ...wcA, ...Md], 'x1', 'y'));
++          push('hplan', 'hhE', X(svcE, hallC, wR), O);
++          push('hplan', 'hhF', X(svcF, hallC, wR), O);
++          push('hplan', 'hhG', X(svcG, hallC, wR), O);
++          const hallL = Y(F(), X(VOID(gardenA * .8), C('link', { fix: 1.6, area: 11 })), H()), hallL2 = Y(F(), X(C('link', { fix: 1.6, area: 11 }), VOID(gardenA * .8)), H()), hallL3 = Y(F(), C('link', { area: 12 }), H());
++          push('hplan', 'hhH', X(svcE, hallL, wR), O);
++          push('hplan', 'hhI', X(svcE, hallL2, wR), O);
++          push('hplan', 'hhJ', X(svcE, hallL3, wR), O);
++          const svcK = Y(Mz('y1'), Z([...Dn], 'x1', 'y'), Z([...K], 'x1', 'y'), Z([...flex, ...wcA], 'x1', 'y'), Z([...Md], 'x1', 'y'));
++          push('hplan', 'hhK', X(svcK, hallL3, wR), O);
++          push('hplan', 'hhL', X(svcK, Y(F(), C('link', { area: 12 }), H(), OV(8)), wR), O);
++          const wR2 = Y(Wm ? Wz('x1', 'x') : null, cB(kk.slice(0, 2), 'x0', 'corrA'), cB([...kk.slice(2), mstT], 'x0', 'corrB'), OV(6));
++          push('hplan', 'hhM', X(svcK, hallL3, wR2), O);
++          const front = X(Mz('y1'), F(), Wm ? Wz('x0', 'x') : null);
++          const svcN = Y(Z([...Dn], 'x1', 'y'), Z([...K], 'x1', 'y'), Z([...flex, ...wcA, ...Md], 'x1', 'y')), svcN2 = Y(Z([...Dn], 'x1', 'y'), Z([...K], 'x1', 'y'), Z([...Md], 'x1', 'y'), Z([...flex, ...wcA], 'x1', 'y'));
++          const wR3 = Y(cB(kk.slice(0, 2), 'x0', 'corrA'), cB([...kk.slice(2), mstT], 'x0', 'corrB'));
++          push('hplan', 'hhN', Y(front, X(svcN, Y(C('link', { area: 10 }), H()), wR3)), O);
++          push('hplan', 'hhO', Y(front, X(svcN2, Y(C('link', { area: 10 }), H()), wR3)), O);
++          push('hplan', 'hhP', Y(front, X(svcN, Y(C('link', { area: 10 }), H(), OV(8)), wR3, OV(6))), O);
++          const OD = { ...O, hardDress: true };
++          push('hplan', 'hhQ', Y(front, X(svcN2, Y(C('link', { area: 10 }), H()), wR3)), OD);
++          const svcR2 = Y(Z([...Dn], 'x1', 'y'), X(Z([...K], 'x1', 'y'), Z([...Md, ...flex, ...wcA], 'x1', 'y')));
++          push('hplan', 'hhR', Y(front, X(svcR2, Y(C('link', { area: 10 }), H()), wR3)), OD);
++          const svcR3 = Y(Z([...Dn], 'x1', 'y'), Z([...flex, ...wcA, ...Md], 'x1', 'y'), Z([...K], 'x1', 'y'));
++          push('hplan', 'hhS', Y(front, X(svcR3, Y(C('link', { area: 10 }), H()), wR3)), OD);
++          push('hplan', 'hhT', Y(front, X(svcR2, Y(C('link', { area: 10 }), H()), wR3)), O);
++          const frontD = X(Z([...flex, ...wcA], 'y1', 'y'), Mz('y1'), F(), Wm ? Wz('x0', 'x') : null), svcU = Y(Z([...Dn], 'x1', 'y'), Z([...Md], 'x1', 'y'), Z([...K], 'x1', 'y'));
++          push('hplan', 'hhU', Y(frontD, X(svcN, Y(C('link', { area: 10 }), H()), wR3)), O);
++          const svcV = Y(Z([...Dn], 'x1', 'y'), Z([...K], 'x1', 'y'));
++          push('hplan', 'hhV', Y(front, X(Y(svcV, Z([...Md, ...flex, ...wcA], 'x1', 'x')), Y(C('link', { area: 10 }), H()), wR3)), O);
++          const cB2 = (list, d, id, mc) => { const m = list[list.length - 1]?.master ? list[list.length - 1] : null, rest = m ? list.slice(0, -1) : list; const run = d === 'x0' ? X(corr(id), Z(rest, 'x0', 'y')) : X(Z(rest, 'x1', 'y'), corr(id)); if (!m) return run; const cap = Z([m], 'y0', 'x'); cap.minCross = mc; return Y(run, cap); };
++          for (const [tag, mc, sv] of [['hhW', 5.9, svcN2], ['hhX', 5.5, svcN2], ['hhY', 6.4, svcN2]]) { const wRm = Y(cB(kk.slice(0, 2), 'x0', 'corrA'), cB2([...kk.slice(2), mstT], 'x0', 'corrB', mc)); push('hplan', tag, Y(front, X(sv, Y(C('link', { area: 10 }), H()), wRm)), O); }
++          { const wRm = Y(cB(kk.slice(0, 2), 'x0', 'corrA'), cB2([...kk.slice(2), mstT], 'x0', 'corrB', 5.5)), westSvc = Y(OV(14), Z([...Md, ...flex, ...wcA], 'x0', 'y'));
++            push('hplan', 'hhZ', Y(front, X(westSvc, svcV, Y(C('link', { area: 10 }), H()), wRm)), O);
++            push('hplan', 'hhZ2', Y(front, X(svcV, Y(C('link', { area: 10 }), H()), wRm, Y(OV(14), Z([...Md, ...flex, ...wcA], 'x1', 'y')))), O);
++            push('hplan', 'hhZ3', Y(front, X(Y(svcV, OV(8)), Y(C('link', { area: 10 }), H()), wRm, Y(OV(14), Z([...Md, ...flex, ...wcA], 'x1', 'y')))), O); }
++          { const wRm = Y(cB(kk.slice(0, 2), 'x0', 'corrA'), cB2([...kk.slice(2), mstT], 'x0', 'corrB', 5.5)), westSvc = Y(OV(14), Z([...Md, ...flex, ...wcA], 'x0', 'y'));
++            const svcW = Y(Z([...Dn], 'x1', 'y'), X(Z([...K], 'x1', 'y'), OV(8))), svcW2 = Y(Z([...Dn], 'x1', 'y'), X(OV(8), Z([...K], 'x1', 'y')));
++            push('hplan', 'hhZ4', Y(front, X(westSvc, svcW, Y(C('link', { area: 10 }), H()), wRm)), O);
++            push('hplan', 'hhZ5', Y(front, X(westSvc, svcW2, Y(C('link', { area: 10 }), H()), wRm)), O);
++            push('hplan', 'hhZ6', Y(front, X(svcW2, westSvc, Y(C('link', { area: 10 }), H()), wRm)), O); }
++          push('hplan', 'hh6', X(Y(Z(kk.slice(0, 2), 'x1', 'y'), Z([mstT], 'x1', 'y')), Y(F(), H(), Z(kk.slice(2), 'x0', 'y')), svcR), O);
++        }
+         // (L) جناح نوم بطول البيت (الأبناء فالرئيسية على ممر)، وشريط أمامي (المجلس | المدخل | الطعام)، والصالة في ركن الـL
+         //     على الحديقة الخلفية وكبار السن بجوارها، والمطبخ خلف الطعام
+         P9('hplan', 'hh1', X(Y(Mz('y1'), corrBeds([...kidsT, mstT], 'x1')), Y(F(), H(), VOID(gardenA)), Y(OV(10), Z([...flex, ...wcA, ...Dn], 'x0', 'y'), Z([...K, ...Md], 'x0', 'y'), eldT ? Z([eldT], 'x0', 'y') : null)));
+@@ -1152,7 +1219,7 @@
+   for (const q of [...placed.map(p => p.r), ...circ.map(c => c.r)]) { const sp = Math.min(W_(q), H_(q)) - WALL_NET; if (sp > SLAB_SPAN_MAX) bad('slab-span', sp - SLAB_SPAN_MAX); }
+   // المدخل على الواجهة ويتصل بالصالة (مباشرة أو عبر السلم)
+   // المدخل على الواجهة الأمامية — أو خلف فناء مدخل مكشوف يطل على الشارع (جناح ضيافة يتقدم الكتلة العائلية: ctx.foyerYard)
+-  if (foyer) { const r = foyer.r; if (r.y0 > TOL && !(ctx.foyerYard && streetLen(r, solids) >= 1.4)) return no('foyer-front'); if (Math.min(W_(r), H_(r)) < 2.4 - 1e-6) bad('foyer-small', 2.4 - Math.min(W_(r), H_(r)));
++  if (foyer) { const r = foyer.r; if (r.y0 > TOL && !(ctx.foyerYard && streetLen(r, solids) >= 1.4)) { if (globalThis.__dumpF && ctx.foyerYard && (globalThis.__dumpF.n = (globalThis.__dumpF.n||0)+1) < 4) console.log('FOYER', JSON.stringify(r), 'sl', streetLen(r, solids), JSON.stringify(placed.map(p => [p.block.name, p.r.x0, p.r.x1, p.r.y0, p.r.y1].map(v => typeof v==='number'?Math.round(v*100)/100:v))), JSON.stringify(circ.map(c => [c.kind||c.name, c.r]))); return no('foyer-front'); } if (Math.min(W_(r), H_(r)) < 2.4 - 1e-6) bad('foyer-small', 2.4 - Math.min(W_(r), H_(r)));
+     // المدخل يفتح على الصالة مباشرة، أو عبر عنصر حركة واحد (السلم، أو الرواق في الأرض الضيقة)
+     const viaLen = Math.max(0, ...circ.filter(c => c !== hall && c !== foyer).map(c => Math.min(touch(r, c.r), touch(c.r, hall.r))));
+     const fh = Math.max(touch(r, hall.r), viaLen); if (fh < 1.4) bad('foyer-hall', 1.4 - fh); else if (touch(r, hall.r) < 1.4) pen += 25;
+@@ -1167,6 +1234,7 @@
+     if (seen.size < circ.length) {
+       const gap = (a, b) => Math.hypot(Math.max(0, Math.max(a.x0, b.x0) - Math.min(a.x1, b.x1)), Math.max(0, Math.max(a.y0, b.y0) - Math.min(a.y1, b.y1)));
+       const lack = sum(circ.filter(c => !seen.has(c.id)).map(c => Math.min(...circ.filter(o => seen.has(o.id)).map(o => { const t = touch(c.r, o.r); return t > 0 ? 1.2 - t : 1.2 + gap(c.r, o.r); }))));
++      if (globalThis.__dumpCG && globalThis.__curTag === globalThis.__dumpCG.tag && (globalThis.__dumpCG.n = (globalThis.__dumpCG.n||0)+1) % 4000 === 1) console.log('CG', JSON.stringify(circ.map(c => [c.id, !seen.has(c.id), Object.fromEntries(Object.entries(c.r).map(([k,v])=>[k,Math.round(v*10)/10])) ])), 'lack', lack);
+       bad('circ-graph', lack);
+     } }
+   { const st = cid('stair'); if (st) { const a = A_(st.r), mn = Math.min(W_(st.r), H_(st.r)); if (mn < 2.6) bad('stair-narrow', 2.6 - mn); pen += 6 * Math.max(0, a - 14); const amax = mn >= 4.2 ? 20.5 : 18.2; if (a > amax) bad('stair-big', (a - amax) / 4); } } // (الجولة الحادية عشرة) غرفة سلم يُعبر خلالها من البهو إلى الصالة (ضلعاها ≥ 4.2 م) حتى 20.5 م²
+@@ -2912,8 +2980,9 @@
+     if (topoLink === false) topoNo++;
+     const hardLinkT = !!tr.hardLink || topoLink === true;
+     const ctxT = tr.foyerYard || tr.hardDress || hardLinkT || tr.hardHall ? { ...ctx, foyerYard: !!tr.foyerYard || ctx.foyerYard, hardDress: !!tr.hardDress, hardLink: hardLinkT, hardHall: !!tr.hardHall } : ctx;
++    tr._ctx = ctxT;
+     const evalFn = (sol, ew, ed) => {
+-      let s = scoreV2(sol, P, ew, ed, ctxT); if (s === null) return null;
++      globalThis.__curTag = tr.tag; let s = scoreV2(sol, P, ew, ed, ctxT); if (s === null) return null;
+       // (الجولة التاسعة) أنماط تضع المجلس في شريط ضيافة ضيق: حد 24 م² مخالفةٌ في البحث نفسه (لا يُبنى ثم يُرفض)
+       if (tr.hardMajlis) { const sh = majlisShort(sol, P); if (sh > 0) { s += 600 + 200 * sh; sol.viol = (sol.viol || 0) + 1; } }
+       // (الجولة التاسعة عشرة) إعادة حل قريب: عرض المجلسين الصافي ≥ 4.2 م بهامش 0.15 م (التقدير هنا على الكتلة؛ الحكم على المرسوم)
+@@ -2962,10 +3031,10 @@
+     if (globalThis.__v2dbg) globalThis.__v2dbg['ms:' + tr.tag] = Math.round(ms) + (best && !best.sol.viol ? '' : 'x');
+     if (!best || best.sol.viol) {
+       failN++; if (!best) failStats['no-fit'] = (failStats['no-fit'] || 0) + 1;
+-      else { const keep = globalThis.__v2dbg, o = {}; globalThis.__v2dbg = o; try { scoreV2(best.sol, P, best.ew, best.ed, ctx); } finally { globalThis.__v2dbg = keep; } for (const w of Object.keys(o)) failStats[w] = (failStats[w] || 0) + 1; }
++      else { const keep = globalThis.__v2dbg, o = {}; globalThis.__v2dbg = o; try { scoreV2(best.sol, P, best.ew, best.ed, tr._ctx || ctx); } finally { globalThis.__v2dbg = keep; } for (const w of Object.keys(o)) failStats[w] = (failStats[w] || 0) + 1; }
+       const d = globalThis.__v2dbg;
+-      if (d && tr.swaps) (d.localFail ||= []).push({ swaps: tr.swaps, best: !!best, viol: best ? (() => { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, ctx); globalThis.__v2dbg = d; return Object.keys(o).join(','); })() : null });
+-      if (d) { d['tree:' + tr.tag] = best ? best.sol.viol : -1; if (best) { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, ctx); globalThis.__v2dbg = d; d['why:' + tr.tag] = Object.keys(o).join(','); if (d.keepSol) d['sol:' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed }; } }
++      if (d && tr.swaps) (d.localFail ||= []).push({ swaps: tr.swaps, best: !!best, viol: best ? (() => { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, tr._ctx || ctx); globalThis.__v2dbg = d; return Object.keys(o).join(','); })() : null });
++      if (d) { d['tree:' + tr.tag] = best ? best.sol.viol : -1; if (best) { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, tr._ctx || ctx); globalThis.__v2dbg = d; d['why:' + tr.tag] = Object.keys(o).join(',') + (tr.hardMajlis ? ' | majlisShort=' + majlisShort(best.sol, P) : ''); if (d.keepSol) d['sol:' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed }; } }
+       continue;
+     }
+     const rp = rulePenalty(best.sol.placed, ruleCirc(best.sol.circ), best.ew, best.ed, rules, entry);
+@@ -3490,6 +3559,7 @@
+   const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = TIMED_OUT ? 'VILLA_TIME_LIMIT' : 'VILLA_BUILD_FAILED'; err.timedOut = TIMED_OUT; err.rejected = rejected; err.treeStats = cands.failStats || null; return err; };
+   // (الجولة 21 — مقترح) لا يُعلن الفشل قبل البحث الثاني المصمم لقلة البدائل — kit pipeline: «البحث الثاني دائمًا»
+   if (!built.length && (refDR || prefPat || globalThis.__v2noSecond || R14_OFF.has('r21second'))) throw buildFailed();
++  globalThis.__builtDocs = built;
+   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
+   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
+   // (الجولة الثانية عشرة) إعادة التوزيع بعد تعذّر التعديل الموضعي تحفظ ما يميّز المخطط المعروض: الحوش الداخلي وغرفة ملابس الرئيسية

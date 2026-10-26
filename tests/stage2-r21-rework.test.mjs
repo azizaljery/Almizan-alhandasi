@@ -102,3 +102,20 @@ test('خطوة الجدار 6.5 سم: التسوية تُزيل الخطوة (ا
   const done = flushRoomSteps(doc, 'غرفة نوم 2'); assert.ok(done.length === 1 && done[0].to > done[0].from);
   const after = m(doc); assert.ok(after.narrowing.s <= 0.004 && after.narrowing.l <= 0.004, JSON.stringify(after.narrowing)); assert.equal(after.clear.s, after.envelope.s);
 });
+
+// ── البندان 3 و6: بحوث إضافية (مستندات من evidence/r21-rework/regress) ──
+test('الدش: حمام 1.98×2.18 م بمرحاض ومغسلة على جدار واحد: إعادة التوزيع تُدخل دشًا صالحًا (قبل: بلا دش، بعد: بوابة ناجحة)', () => {
+  const d = read('../evidence/r21-rework/regress/R20-new-head-r31dfci_1dfcihg1.json');
+  const n0 = d.fixtures.filter(f => f.kind === 'shower').length, before = showerGate(d), r = completeShowers(d), after = showerGate(d);
+  assert.equal(before.pass, false); assert.ok(r.failed.length === 0, JSON.stringify(r.failed)); assert.equal(after.pass, true);
+  assert.equal(d.fixtures.filter(f => f.kind === 'shower').length, n0 + 1); assert.ok(r.notes.some(n => /توزيع تجهيزات/.test(n)));
+});
+test('R35: المطبخ «4×4» — البديلان القديمان يرسبان بأضيق موضع (3.94 و3.935) والبديل الجديد يطابق بلا درجة', () => {
+  const kit = d => analyzeDoc(d).levels[0].rooms.find(r => /^المطبخ/.test(r.name));
+  for (const f of ['R35-old-2bfcd9e-r3kxm57_kxm57vca', 'R35-old-2bfcd9e-r3wanst_wanstvp']) {
+    const m = measureClearDims(kit(read(`../evidence/r21-rework/regress/${f}.json`)), { s: 4, l: 4 }, 0.05);
+    assert.equal(m.ok, false, f); assert.ok(m.narrowing.s >= 0.06 || m.narrowing.l >= 0.06, 'خطوة 6.5 سم بين الصندوق والمستطيل الصافي');
+  }
+  const nw = measureClearDims(kit(read('../evidence/r21-rework/regress/R35-rework-wallmix-r3p043r_p043rvg1.json')), { s: 4, l: 4 }, 0.05);
+  assert.equal(nw.ok, true); assert.ok(nw.narrowing.s <= 0.004 && nw.narrowing.l <= 0.004, JSON.stringify(nw.narrowing));
+});
