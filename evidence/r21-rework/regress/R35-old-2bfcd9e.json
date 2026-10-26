@@ -1,0 +1,84 @@
+{
+ "id": "R35",
+ "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ 4×4، طعام",
+ "root": "/home/claude/wt-preview/",
+ "tol": 0.05,
+ "designs": [
+  {
+   "pat": "r3kxm57:kxm57vca",
+   "status": "ready",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.839100000000013,
+    "envelope": {
+     "s": 3.995,
+     "l": 4.005
+    },
+    "clear": {
+     "s": 3.995,
+     "l": 3.94,
+     "x0": 2.505,
+     "y0": 13.155,
+     "x1": 6.5,
+     "y1": 17.095,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": -0.005,
+      "l": 0.005
+     },
+     "clear": {
+      "s": -0.005,
+      "l": -0.06
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0.065
+    },
+    "envelopeOK": true,
+    "clearOK": false,
+    "ok": false
+   }
+  },
+  {
+   "pat": "r3wanst:wanstvp",
+   "status": "ready",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.834125,
+    "envelope": {
+     "s": 4,
+     "l": 4.015
+    },
+    "clear": {
+     "s": 3.935,
+     "l": 4.015,
+     "x0": 5.97,
+     "y0": 14.64,
+     "x1": 9.905,
+     "y1": 18.655,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": 0,
+      "l": 0.015
+     },
+     "clear": {
+      "s": -0.065,
+      "l": 0.015
+     }
+    },
+    "narrowing": {
+     "s": 0.065,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": false,
+    "ok": false
+   }
+  }
+ ]
+}

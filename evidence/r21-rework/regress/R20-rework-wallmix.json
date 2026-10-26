@@ -1,0 +1,122 @@
+{
+ "id": "R20",
+ "text": "فيلا دور واحد: 4 غرف نوم، مجلس، صالة، مطبخ 4×4، طعام",
+ "root": "/home/claude/wt-r21p/",
+ "tol": 0.05,
+ "designs": [
+  {
+   "pat": "courtyard:k1",
+   "status": "needs-edits",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.980000000000004,
+    "envelope": {
+     "s": 4,
+     "l": 3.995
+    },
+    "clear": {
+     "s": 4,
+     "l": 3.995,
+     "x0": 9.63,
+     "y0": 6.255,
+     "x1": 13.63,
+     "y1": 10.25,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": 0,
+      "l": -0.005
+     },
+     "clear": {
+      "s": 0,
+      "l": -0.005
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  },
+  {
+   "pat": "r38ldyp:8ldypvg1",
+   "status": "needs-edits",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.86,
+    "envelope": {
+     "s": 4,
+     "l": 3.965
+    },
+    "clear": {
+     "s": 4,
+     "l": 3.965,
+     "x0": 11.83,
+     "y0": 10.64,
+     "x1": 15.83,
+     "y1": 14.605,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": 0,
+      "l": -0.035
+     },
+     "clear": {
+      "s": 0,
+      "l": -0.035
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  },
+  {
+   "pat": "r31yu2i:1yu2ihg1",
+   "status": "needs-edits",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.799999999999997,
+    "envelope": {
+     "s": 3.95,
+     "l": 4
+    },
+    "clear": {
+     "s": 3.95,
+     "l": 4,
+     "x0": 6.695,
+     "y0": 17.04,
+     "x1": 10.645,
+     "y1": 21.04,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": -0.05,
+      "l": 0
+     },
+     "clear": {
+      "s": -0.05,
+      "l": 0
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  }
+ ]
+}

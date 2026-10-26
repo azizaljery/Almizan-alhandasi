@@ -83,7 +83,7 @@ export function relayoutBath(doc, levelId, roomId, notes) {
   // تجهيز على جدار: لكل دوران، يُحسب اتجاه الظهر ويُلصق بالجدار الأقرب
   const wallSpots = (kind, step = .1) => {
     const out = [], { w, d } = dims[kind];
-    for (const rot of kind === 'shower' ? [0] : [0, 90, 180, 270]) {
+    for (const rot of kind === 'shower' ? [0] : [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
       const probe = { x: 0, y: 0, w, d, rot }, back = fixtureRect({ ...probe, w: .001, d }).slice(0, 2), bx = (back[0].x + back[1].x) / 2, by = (back[0].y + back[1].y) / 2; // مركز الضلع الخلفي (y=-d/2 قبل الدوران)
       const ax = (a0, a1) => { const v = new Set(); for (const h of [w / 2, d / 2]) { v.add(+(a0 + h).toFixed(4)); v.add(+(a1 - h).toFixed(4)); } for (let t = a0; t <= a1 + 1e-9; t += step) v.add(+t.toFixed(4)); return [...v]; };
       for (const x of ax(B.x0, B.x1)) for (const y of ax(B.y0, B.y1)) {
@@ -96,7 +96,7 @@ export function relayoutBath(doc, levelId, roomId, notes) {
     }
     return out;
   };
-  const frontRect = (f, kind) => { const fr = front[kind]; if (!fr) return null; const loc = [[-f.w / 2, f.d / 2], [f.w / 2, f.d / 2], [f.w / 2, f.d / 2 + fr], [-f.w / 2, f.d / 2 + fr]]; const c = Math.cos(f.rot * Math.PI / 180), s = Math.sin(f.rot * Math.PI / 180); return loc.map(([a, b]) => ({ x: f.x + a * c - b * s, y: f.y + a * s + b * c })); };
+  const frontRect = (f, kind) => { const fr = front[kind]; if (!fr) return null; const loc = [[-f.w / 2, f.d / 2], [f.w / 2, f.d / 2], [f.w / 2, f.d / 2 + fr], [-f.w / 2, f.d / 2 + fr]]; const c = Math.cos(f.rot), s = Math.sin(f.rot); return loc.map(([a, b]) => ({ x: f.x + a * c - b * s, y: f.y + a * s + b * c })); };
   const polyOf = f => fixtureRect(f, -0.005), clash = (a, b) => penetration(a, b) > 0.005;
   const showers = wallSpots('shower'), wcs = wallSpots('wc'), basins = wallSpots('basin');
   const okZones = poly => !zones.some(z => penetration(poly, z) > 1e-6);

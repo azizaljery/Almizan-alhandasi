@@ -1,0 +1,46 @@
+{
+ "id": "R35",
+ "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ 4×4، طعام",
+ "root": "/home/claude/wt-r21p/",
+ "tol": 0.05,
+ "designs": [
+  {
+   "pat": "r3p043r:p043rvg1",
+   "status": "ready",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.999974999999992,
+    "envelope": {
+     "s": 3.995,
+     "l": 4.005
+    },
+    "clear": {
+     "s": 3.995,
+     "l": 4.005,
+     "x0": 5.605,
+     "y0": 12.59,
+     "x1": 9.6,
+     "y1": 16.595,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": -0.005,
+      "l": 0.005
+     },
+     "clear": {
+      "s": -0.005,
+      "l": 0.005
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+ "id": "R20",
+ "text": "فيلا دور واحد: 4 غرف نوم، مجلس، صالة، مطبخ 4×4، طعام",
+ "root": "/home/claude/wt-r21p/",
+ "tol": 0.05,
+ "designs": [
+  {
+   "pat": "courtyard:k1",
+   "status": "hidden",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.980000000000004,
+    "envelope": {
+     "s": 4,
+     "l": 3.995
+    },
+    "clear": {
+     "s": 4,
+     "l": 3.995,
+     "x0": 9.63,
+     "y0": 6.255,
+     "x1": 13.63,
+     "y1": 10.25,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": 0,
+      "l": -0.005
+     },
+     "clear": {
+      "s": 0,
+      "l": -0.005
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  },
+  {
+   "pat": "r31dfci:1dfcihg1",
+   "status": "hidden",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.819749999999999,
+    "envelope": {
+     "s": 4.005,
+     "l": 3.95
+    },
+    "clear": {
+     "s": 4.005,
+     "l": 3.95,
+     "x0": 9.655,
+     "y0": 5.005,
+     "x1": 13.66,
+     "y1": 8.955,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": 0.005,
+      "l": -0.05
+     },
+     "clear": {
+      "s": 0.005,
+      "l": -0.05
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  }
+ ]
+}
