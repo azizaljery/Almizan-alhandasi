@@ -1363,11 +1363,12 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
         if (ax != null) { const want = Math.abs(ot - t[0]) <= Math.abs(ot - t[1]) ? t[1] : t[0], other = want === t[1] ? t[0] : t[1], gap = d => (d < want - .9 ? want - .9 - d : d > want ? d - want : 0) ; ex = Math.max(0, Math.abs(ot - other) - tol) + Math.max(0, (ax < want ? want - ax : ax - want > .9 ? ax - want - .9 : 0) - tol); void gap; } }
       // داخل السماحية المعلنة = مقبول؛ خارجها مخالفة (المقاس الصريح إلزام، والسجل يقيسه من المستند بالسماحية نفسها)
       // (الجولة 21 — 02c-rework، البند 4) ضلع بعضه جدار خارجي (0.25) وبعضه داخلي (0.12): المستطيل الصافي يُقاس عند أضيق موضع فيأخذ سماكة الأثخن، والحساب أعلاه
-      //   يفترض الداخلي ما لم يكن الضلع كله خارجيًا فتخرج درجة 6.5 سم (R20 وR35). جعله مخالفة صلبة لكل المفاتيح أسقط H10 (95 شجرة بلا حل)، فهو مخالفة صلبة للمطبخ
-      //   والطعام وحدهما (R20 وR35 «مطبخ 4×4»)؛ والحكم النهائي بالمقاس الصافي المقيس (مفتاح الإيقاف r21wallmix)
+      //   يفترض الداخلي ما لم يكن الضلع كله خارجيًا فتخرج درجة 6.5 سم (R20 وR35). جعله مخالفة صلبة لكل المفاتيح أسقط H10 (95 شجرة بلا حل) وإضافة جزاء وزنه 3000
+      //   بجانب المخالفة أفسدت C6 (الصالة < المجلس)، فهو مخالفة صلبة بلا جزاء إضافي للمطبخ والطعام وحدهما (R20 وR35 «مطبخ 4×4»)؛
+      //   والحكم النهائي بالمقاس الصافي المقيس (مفتاح الإيقاف r21wallmix)
       if (!R14_OFF.has('r21wallmix') && (key === 'kitchen' || key === 'dining') && !q.block.guestWc) {
         const hN = sd => (expLen(q.r, solids, [sd]) > .05 ? EXT / 2 : INT / 2), wN = W_(q.r) - hN('x0') - hN('x1'), hhN = H_(q.r) - hN('y0') - hN('y1'), aN = [Math.min(wN, hhN), Math.max(wN, hhN)];
-        const exN = Math.max(0, Math.abs(aN[0] - t[0]) - tol) + Math.max(0, Math.abs(aN[1] - t[1]) - tol); pen += 3000 * exN; if (exN > .005) bad('dims-step:' + key, exN);
+        const exN = Math.max(0, Math.abs(aN[0] - t[0]) - tol) + Math.max(0, Math.abs(aN[1] - t[1]) - tol); if (exN > .005) bad('dims-step:' + key, exN);
       }
       pen += 400 * ex; if (ex > (R14_OFF.has('r21dimfix') ? .04 : .005)) bad('dims:' + key, ex);
       // (الجولة الخامسة عشرة) داخل السماحية: المطابق أفضل متى اتسع المكان (المجلس 5.76 م والمطلوب 6 م مقبول، و6 م أفضل)

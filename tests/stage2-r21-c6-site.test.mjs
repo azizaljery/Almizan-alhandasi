@@ -8,7 +8,7 @@ import { screenWindowPrivacy, planWindowScreen, windowExposure } from '../dist/p
 import { presentationStatus } from '../dist/presentation-status.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 
-const load = () => JSON.parse(readFileSync(new URL('../evidence/acceptance/c6-rework-a/C6/alt-1.json', import.meta.url), 'utf8'));
+const load = () => JSON.parse(readFileSync(new URL('../evidence/acceptance/c6-rework-final/C6/alt-1.json', import.meta.url), 'utf8'));
 const fenceOf = d => d.walls.find(w => w.kind === 'fence');
 const get = (rep, id) => rep.fences[0].checks.find(c => c.id === id);
 

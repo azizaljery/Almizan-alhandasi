@@ -1,5 +1,5 @@
 // الجولة 21 — 02c-rework، قرار المالك 2026-10-26 (21:04): اختبارات البنود الأربعة: الدش الإلزامي، الحالات الثلاث وMizan Score، خصوصية كل فراغ
-// وحركة المركبات، فتح النوافذ، وتسوية خطوة الجدار. المستند: evidence/acceptance/c6-rework-a/C6/alt-1.json (ناتج scripts/kit2-case.mjs).
+// وحركة المركبات، فتح النوافذ، وتسوية خطوة الجدار. المستند: evidence/acceptance/c6-rework-final/C6/alt-1.json (ناتج scripts/kit2-case.mjs).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -16,7 +16,7 @@ import { flushRoomSteps } from '../dist/wall-flush.mjs';
 import { measureClearDims } from '../dist/clear-dims.mjs';
 
 const read = p => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
-const load = () => read('../evidence/acceptance/c6-rework-a/C6/alt-1.json');
+const load = () => read('../evidence/acceptance/c6-rework-final/C6/alt-1.json');
 const bathOf = (d, name) => analyzeDoc(d).levels[0].rooms.find(r => r.name === name);
 
 // ── البند 3: الدش ──
@@ -116,6 +116,8 @@ test('R35: المطبخ «4×4» — البديلان القديمان يرسب�
     const m = measureClearDims(kit(read(`../evidence/r21-rework/regress/${f}.json`)), { s: 4, l: 4 }, 0.05);
     assert.equal(m.ok, false, f); assert.ok(m.narrowing.s >= 0.06 || m.narrowing.l >= 0.06, 'خطوة 6.5 سم بين الصندوق والمستطيل الصافي');
   }
-  const nw = measureClearDims(kit(read('../evidence/r21-rework/regress/R35-rework-wallmix-r3p043r_p043rvg1.json')), { s: 4, l: 4 }, 0.05);
-  assert.equal(nw.ok, true); assert.ok(nw.narrowing.s <= 0.004 && nw.narrowing.l <= 0.004, JSON.stringify(nw.narrowing));
+  for (const f of ['R35-rework-wallmix-cornerentry_e1', 'R35-rework-wallmix-r3wanst_wanstvp']) { // بعد: البديلان بلا درجة (r3wanst نفسه عاد مصحَّحًا)
+    const nw = measureClearDims(kit(read(`../evidence/r21-rework/regress/${f}.json`)), { s: 4, l: 4 }, 0.05);
+    assert.equal(nw.ok, true, f); assert.ok(nw.narrowing.s <= 0.004 && nw.narrowing.l <= 0.004, JSON.stringify(nw.narrowing));
+  }
 });

@@ -5,6 +5,44 @@
  "tol": 0.05,
  "designs": [
   {
+   "pat": "r31dfci:1dfcihg0",
+   "status": "ready",
+   "kitchen": {
+    "name": "المطبخ",
+    "net_area": 15.999975000000006,
+    "envelope": {
+     "s": 4.005,
+     "l": 3.995
+    },
+    "clear": {
+     "s": 4.005,
+     "l": 3.995,
+     "x0": 9.755,
+     "y0": 5.105,
+     "x1": 13.76,
+     "y1": 9.1,
+     "rotated": false
+    },
+    "deviation": {
+     "envelope": {
+      "s": 0.005,
+      "l": -0.005
+     },
+     "clear": {
+      "s": 0.005,
+      "l": -0.005
+     }
+    },
+    "narrowing": {
+     "s": 0,
+     "l": 0
+    },
+    "envelopeOK": true,
+    "clearOK": true,
+    "ok": true
+   }
+  },
+  {
    "pat": "courtyard:k1",
    "status": "needs-edits",
    "kitchen": {
@@ -43,11 +81,11 @@
    }
   },
   {
-   "pat": "r38ldyp:8ldypvg1",
+   "pat": "r312t1v:12t1vvg0",
    "status": "needs-edits",
    "kitchen": {
     "name": "المطبخ",
-    "net_area": 15.86,
+    "net_area": 15.859999999999957,
     "envelope": {
      "s": 4,
      "l": 3.965
@@ -55,10 +93,10 @@
     "clear": {
      "s": 4,
      "l": 3.965,
-     "x0": 11.83,
-     "y0": 10.64,
-     "x1": 15.83,
-     "y1": 14.605,
+     "x0": 14.88,
+     "y0": 11.255,
+     "x1": 18.88,
+     "y1": 15.22,
      "rotated": false
     },
     "deviation": {
@@ -69,44 +107,6 @@
      "clear": {
       "s": 0,
       "l": -0.035
-     }
-    },
-    "narrowing": {
-     "s": 0,
-     "l": 0
-    },
-    "envelopeOK": true,
-    "clearOK": true,
-    "ok": true
-   }
-  },
-  {
-   "pat": "r31yu2i:1yu2ihg1",
-   "status": "needs-edits",
-   "kitchen": {
-    "name": "المطبخ",
-    "net_area": 15.799999999999997,
-    "envelope": {
-     "s": 3.95,
-     "l": 4
-    },
-    "clear": {
-     "s": 3.95,
-     "l": 4,
-     "x0": 6.695,
-     "y0": 17.04,
-     "x1": 10.645,
-     "y1": 21.04,
-     "rotated": false
-    },
-    "deviation": {
-     "envelope": {
-      "s": -0.05,
-      "l": 0
-     },
-     "clear": {
-      "s": -0.05,
-      "l": 0
      }
     },
     "narrowing": {
