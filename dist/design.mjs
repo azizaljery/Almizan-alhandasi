@@ -134,7 +134,13 @@ function statusCard(d) {
     p.status === 'hidden' ? el('ul', { class: 'tick' }, p.hidden_ar.map(t => el('li', { class: 'bad' }, t))) : null,
     p.status === 'needs-edits' ? el('ul', { class: 'tick' }, p.edits_ar.map(t => el('li', { class: 'no' }, t))) : null,
     // (02c، قرار المالك 2026-10-26) ما لم يثبت نظاميًا (ساتر موقع) يظهر للعميل بوسم «تحتاج تحققًا نظاميًا» ولا يُعدّ معتمدًا
+    p.status !== 'hidden' && p.regulatoryTag_ar ? el('p', { class: 'sub', 'data-regulatory-tag': 'unverified', style: 'font-weight:700' }, p.regulatoryTag_ar) : null,
     p.status !== 'hidden' && p.regulatory_ar?.length ? el('ul', { class: 'tick', 'data-regulatory': 'unverified' }, p.regulatory_ar.map(t => el('li', { class: 'no' }, t))) : null,
+    // (قرار المالك 2026-10-26) ثلاث حالات منفصلة: التوزيع المعماري / اختبارات الخصوصية والحركة / التحقق النظامي
+    p.status !== 'hidden' && p.states ? el('ul', { class: 'tick', 'data-states': '3' },
+      el('li', {}, 'صلاحية التوزيع المعماري: ' + p.states.architectural.label_ar), 
+      el('li', {}, 'اختبارات الخصوصية والحركة: ' + (p.states.tests.passed === null ? 'لا تنطبق' : p.states.tests.passed ? 'نجحت' : 'لم تنجح')),
+      el('li', {}, 'التحقق النظامي: ' + p.states.regulatory.label_ar)) : null,
     // (الجولة الخامسة عشرة) التفضيلات الطفيفة ملاحظات معلنة مع البديل (لا تُخفى ولا تُعدّ متحققة)
     p.status !== 'hidden' && p.notes_ar?.length ? el('details', { class: 'notes' }, el('summary', {}, `ملاحظات للمراجعة (${p.notes_ar.length}) — تفضيلات افتراضية للميزان قابلة للتغيير`), el('ul', { class: 'tick' }, p.notes_ar.map(t => el('li', { class: 'no' }, t)))) : null,
     el('p', { class: 'sub' }, p.status === 'ready' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، ولا عيب جوهريًا فيه؛ الملاحظات المذكورة (إن وجدت) تفضيلات افتراضية للميزان لم تتحقق. يبقى مقترحًا مبدئيًا.' : p.status === 'needs-edits' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، لكن فيه ما يصلحه المعماري قبل العرض (مذكور أعلاه) — لا يُقدَّم على أنه جاهز.' : 'لا يُعرض بديلًا: يخالف بندًا إلزاميًا من طلبك أو رسب في المراجعة.'));

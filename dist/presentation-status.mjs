@@ -20,7 +20,7 @@ import { toClientAr, GATE_AR } from './client-language.mjs';
 import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
 import { evaluateSuiteBaths } from './bath-band.mjs';
 import { UNVERIFIED_LABEL } from './regulatory-checks.mjs';
-import { siteElementReport } from './site-element-check.mjs';
+import { planTests, planStates, REG_SHORT_AR, REG_TAG_AR } from './plan-states.mjs';
 export { GATE_AR };
 
 export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
@@ -100,15 +100,17 @@ export function presentationStatus(design, request = {}) {
   for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
   for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason = hiddenReasons[i].reason_ar = hidden[i];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
+  const archStatus = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
+  // (02c، قرار المالك 2026-10-26 ثانيًا) ثلاث حالات منفصلة: صلاحية التوزيع المعماري (أعلاه)، ونجاح اختبارات الخصوصية والحركة لكل فراغ، والتحقق النظامي.
+  // فشل الاختبارات يضيف عيبًا معماريًا (needs-edits)؛ و«غير متحقق» نظاميًا لا يحوّل الحالة ولا يصير ناجحًا — وسم ظاهر فقط.
+  let tests = null; try { tests = R14_OFF.has('r21tests') ? null : planTests(doc); } catch { tests = null; }
+  if (tests) for (const m of tests.failing_ar) edits.push(toClientAr(m));
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
-  // (02c، قرار المالك 2026-10-26) ساتر خارجي (عنصر موقع) لا يثبت نظاميًا: لا يُعرض معتمدًا؛ وسم ظاهر للعميل «تحتاج تحققًا نظاميًا» وبند مراجعة متخصصة،
-  // وتبقى الحالة كما حكمت الفاحصات الهندسية (الوسم لا يخفض حالة الفحص الهندسي ولا يرفعها إلى اعتماد).
-  let site = null; try { site = R14_OFF.has('r21site') ? null : siteElementReport(doc); } catch { site = null; }
-  const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join("، ")}): ${REG_VERIFY_AR} — ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
-  if (site && !site.geometryOk) for (const m of site.failures_ar) edits.push(toClientAr(m));
+  const states = planStates(archStatus, STATUS_AR, tests), site = tests?.regulatory || null;
+  const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join("، ")}): ${REG_SHORT_AR} — ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
   const specialist = [...items.filter(x => x.specialist).map(x => x.text_ar), ...regVerify];
-  return { status, label_ar: STATUS_AR[status] + (regVerify.length && status !== 'hidden' ? ' — ' + REG_VERIFY_AR : ''), needsRegulatoryVerification: regVerify.length > 0, regulatory_ar: regVerify, siteElements: site && site.fences.length ? { fences: site.fences, regulatory: site.regulatory, geometryOk: site.geometryOk } : null, hidden_ar: hidden, hiddenReasons, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
+  return { status, label_ar: STATUS_AR[status] + (regVerify.length && status !== 'hidden' ? ' · ' + REG_SHORT_AR : ''), regulatoryTag_ar: regVerify.length ? REG_TAG_AR : null, states, needsRegulatoryVerification: regVerify.length > 0, regulatory_ar: regVerify, siteElements: site && site.fences.length ? { fences: site.fences, regulatory: site.regulatory, geometryOk: site.geometryOk } : null, hidden_ar: hidden, hiddenReasons, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
 }
 /** (الجولة الخامسة عشرة) تفضيلات سعودية يعدّها المعماري عيبًا يُصلح قبل العرض (لا ملاحظة): القاعدة الموثقة أعلى الملف. */
 export const MAJOR_PREFS = Object.freeze(['MAJLIS_STREET_ENTRY', 'MAJLIS_LOBBY', 'BED_BATH', 'MAID_BATH']);
