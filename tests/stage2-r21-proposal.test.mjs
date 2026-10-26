@@ -25,17 +25,19 @@ test('01 العقد نفسه للمولّد والمراجع: النص والع�
   const near = r.brief.relations.find(x => x.kind === RELATIONS.NEAR);
   assert.ok(near && near.quote && near.source === 'client', JSON.stringify(r.brief.relations));
 });
-test('01 «قريب من المجلس» (NEAR) لا يفرض بابًا مباشرًا؛ «مقلط» و«المجلس يفتح على الطعام» يفرضانه — في المولّد والمراجع معًا', () => {
+// (01b، قرار المالك 2026-10-26: «المقلط وظيفة طعام مرتبطة بالمجلس، والباب المباشر من نص العميل أو قيد معتمد لا من افتراض لغوي») — كان «مقلط» يفرض بابًا
+test('01 «قريب من المجلس» (NEAR) لا يفرض بابًا مباشرًا، ولا «مقلط» (وظيفة طعام للضيوف، 01b)؛ «المجلس يفتح على الطعام» يفرضه — في المولّد والمراجع معًا', () => {
   const near = req('طعام قريب من المجلس'), door = req('المجلس يفتح على الطعام'), guest = req('مجلس رجال بمقلط');
-  assert.equal(briefMajlisDoor(near.brief), false); assert.equal(briefMajlisDoor(door.brief), true); assert.equal(briefMajlisDoor(guest.brief), true);
-  for (const [r, want] of [[near, false], [door, true], [guest, true]]) {
+  assert.equal(briefMajlisDoor(near.brief), false); assert.equal(briefMajlisDoor(door.brief), true); assert.equal(briefMajlisDoor(guest.brief), false);
+  assert.ok(guest.brief.relations.some(x => x.kind === RELATIONS.GUEST_ACCESS && x.directDoor === 'unspecified'));
+  for (const [r, want] of [[near, false], [door, true], [guest, false]]) {
     assert.equal(majlisDiningAsked(sharedReviewRequest(r, {}, {})), want, r.text);
     assert.equal(programV2({ bedrooms: 3, majlis: 1, kitchens: 1, halls: 1, dining: 1 }, r).majlisDining, want, r.text);
   }
   assert.ok(near.brief.relations.every(x => x.kind !== RELATIONS.DIRECT_DOOR));
 });
 test('01 الطلب بلا عقد (مستدعٍ قديم) يُبنى عقده من نصه وبنوده بالدالة نفسها', () => {
-  const b = briefOf({ text: 'ابي مقلط للضيوف' }); assert.equal(briefMajlisDoor(b), true);
+  const b = briefOf({ text: 'ابي مقلط للضيوف' }); assert.equal(briefMajlisDoor(b), false); assert.ok(b.relations.some(x => x.kind === RELATIONS.GUEST_ACCESS)); // (01b)
   assert.deepEqual(buildSharedBrief('', {}).relations, []);
 });
 
