@@ -103,7 +103,7 @@ function altsCard(d) {
       el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null, a.presentation ? el('small', { 'data-alt-status': a.presentation.status }, a.presentation.label_ar + (a.presentation.status === 'needs-edits' ? ` (${a.presentation.edits_ar.length})` : '')) : null))),
     info?.hidden?.length ? el('p', { class: 'sub', 'data-hidden': '' }, `حُجب ${info.hidden.length} ${info.hidden.length === 1 ? 'بديل' : 'بدائل'} لأنها تخالف بندًا إلزاميًا من طلبك: ${info.hidden.map(h => (h.reasons_ar || [])[0]).filter(Boolean).join('؛ ')}`) : null,
     // (الجولة العشرون) إشعار النقص بنص العميل نفسه الذي في الصور (shortfallNotice): العدد صريحًا وسببه وما يمكن تغييره، بلا لغة داخلية
-    (() => { const n = alts.length < want ? shortfallNotice({ requested: want, shown: alts.length, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
+    (() => { const nv = alts.filter(a => a.presentation?.status !== 'hidden').length, n = nv < want ? shortfallNotice({ requested: want, shown: nv, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
       return n ? el('div', { class: 'shortfall sub', role: 'note', 'data-shortfall': '' }, el('b', {}, n.title_ar), ...n.lines_ar.map(t => el('p', {}, t))) : null; })(),
     info?.rejected?.length ? el('details', { class: 'rejected' }, el('summary', {}, `المرشحون المرفوضون (${info.rejectedCount}) وأسبابهم`),
       el('ul', { class: 'tick' }, info.rejected.map(r => el('li', { class: 'bad' }, r.text + (r.count > 1 ? ` (${r.count})` : ''))))) : null);
