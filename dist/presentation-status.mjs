@@ -18,6 +18,7 @@ import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
 import { toClientAr, GATE_AR } from './client-language.mjs';
 import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
+import { evaluateSuiteBaths } from './bath-band.mjs';
 export { GATE_AR };
 
 export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
@@ -86,6 +87,9 @@ export function presentationStatus(design, request = {}) {
     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
     ...qualityNotes(doc, model, request).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
     ...toleranceNotes(design.ledger || []),
+    // (الجولة 21 — 02c، قرار المالك ثالثًا) حمام الجناح بالفاحصات الموجودة (bath-band.mjs): الأجهزة وفتح الباب والعرض الصافي — ملاحظة مقيسة لا
+    // بوابة (لم يُعاير حجبًا؛ قرار للمالك)، والسباكة «لم يُتحقق» والتهوية الميكانيكية ملاحظة BATH_NO_WINDOW القائمة
+    ...bathNotes(doc, model),
     // (الجولة العشرون) ملاحظات مقيسة لا تحجب ولا تُعدّ عيبًا: المدخلان متجاوران، والحمامات بلا نافذة (تهوية ميكانيكية)
     ...r20notes.map(g => ({ id: g.id, major: false, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')}` }))];
   // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
@@ -109,6 +113,10 @@ function isMajorPref(g, model) {
     return (g.value?.pairs || []).some(p => masters.has(p.bedroom));
   }
   return false;
+}
+function bathNotes(doc, model) {
+  let list = []; try { list = evaluateSuiteBaths(doc, model); } catch { return []; }
+  return list.filter(b => !b.preliminaryAccept).map(b => ({ id: 'BATH_FUNCTION', major: false, text_ar: `«${b.name}» ${b.w}×${b.l} م: ${[!b.fixturesFit ? `الأجهزة المرسومة ${[b.fixtures.wc && 'مرحاض', b.fixtures.basin && 'مغسلة', b.fixtures.shower && 'دش'].filter(Boolean).join(' و') || 'لا شيء'} — ينقصها ${[!b.fixtures.wc && 'المرحاض', !b.fixtures.basin && 'المغسلة', !b.fixtures.shower && 'الدش'].filter(Boolean).join(' و')}` : null, !b.doorClearance ? 'فتح الباب يعترضه جدار أو قطعة مثبتة' : null, !b.minWidthOk ? 'العرض الصافي أقل من 1.4 م (قيمة مرشحة غير متحققة نظاميًا)' : null].filter(Boolean).join('؛ ')} — يحتاج مراجعة توزيع الحمام` }));
 }
 /** بنود المقاس المتحققة ضمن السماح لا بالمطابقة (المجلس 5.76 م والمطلوب 6 م): ملاحظة صريحة لا تُخفى. */
 function toleranceNotes(ledger) {
