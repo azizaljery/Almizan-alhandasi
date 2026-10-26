@@ -29,7 +29,7 @@ if (out) {
       dims: (d.ledger || []).filter(x => x.kind === 'dims'), privacy: priv, acceptance: d.acceptance || null, rejections: d.rejections || null, notes: (d.notes || []).filter(n => /نافذة|جلسة|الخصوصية|حاجب/.test(n)) });
   });
   row.shortfall_ar = out.shortfall_ar || null; row.result = out.result || null; row.outcome = out.outcome || null;
-  row.notice_ar = CL.shortfallNotice({ requested: keep, shown: out.designs.filter(d => d.presentation?.status !== 'hidden').length, shortfall_ar: out.shortfall_client_ar || out.shortfall_ar || '', hidden: out.hidden || [] });
+  row.notice_ar = CL.shortfallNotice({ requested: keep, shown: out.designs.filter(d => d.presentation?.status !== 'hidden').length, shortfall_ar: out.shortfall_client_ar || out.shortfall_ar || '', hidden: [...(out.hidden || []), ...out.designs.filter(d => d.presentation?.status === 'hidden').map(d => ({ reasons_ar: d.presentation.hidden_ar }))] });
 } else {
   row.error = { code: err?.code || null, report_ar: err?.report_ar || null, result: err?.result || null, outcome: err?.outcome || null, message: String(err?.message || err).slice(0, 400) };
   row.notice_ar = CL.shortfallNotice({ requested: keep, shown: 0, report_ar: err?.report_ar || err?.message });
