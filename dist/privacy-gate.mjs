@@ -9,6 +9,7 @@ import { analyzeDoc } from './draw/digest.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
 import { measureR16 } from './privacy-defects.mjs';
 import { reviewDoc } from './draw/review.mjs';
+import { windowFootprint, inSwing } from './window-opening.mjs';
 
 /** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا): مستوى العين، وارتفاع الساتر، وأبعاده عن الجدار. */
 export const SCREEN_DEFAULTS = Object.freeze({ eyeHeight: 1.6, eyes: { outside: [1.2, 1.6], inside: [1.1, 1.6] }, screenHeight: 1.8, offsets: [0.9, 1.2, 0.75, 1.5], margin: 0.15, maxLength: 7, wallClear: 0.3, doorClear: 1.0, windowClear: 0.6, bayClear: 0.5, source: 'قيمة تصميمية افتراضية للميزان (ساتر خصوصية خارجي ارتفاعه 1.8 م > مستوى العين 1.6 م) — غير متحققة نظاميًا' });
@@ -138,15 +139,24 @@ function segSegDist(a, b, c, d) {
  * الرؤية الفعلية (كل نقاط المواقف ← نقاط النافذة) مع خطه وهامش. يُرفض إن خرج من الأرض، أو قطع موقفًا، أو اقترب من جدار المبنى (لا يغيّر
  * طوبولوجيا الجدران)، أو من مقدمة باب خارجي، أو زاد على الطول الأقصى. يعيد { a, b, offset } أو null. لا يعدّل المستند.
  */
-export function planWindowScreen(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) {
-  const out = side.outward, u = { x: -out.y, y: out.x }, t0 = (op.wall?.t || .2) / 2, hw = op.w / 2;
+export function planWindowScreen(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) { return planWindowScreens(doc, lv, op, side, bays, D)[0] || null; }
+/**
+ * كل مرشحات الساتر لنافذة (لكل بعد عن الجدار: الطول الكامل، ثم المقتطع الذي يتجنب منطقة نوافذ أخرى)، بالترتيب. يُحكم على كل مرشح بقياس
+ * خطوط الرؤية الفعلي (r16-polish) فلا يُقبل ساتر مقتطع لا يحجب كل الخطوط. قيود كل مرشح: داخل القطعة، لا يقطع موقفًا ولا ممر دخوله ولا يقترب
+ * منه أقل من bayClear، لا يقترب من جدار المبنى ولا من مقدمة باب خارجي، ولا يقترب من وجه أي نافذة خارجية (مستهدفة أو غيرها، بلا استثناء للممرات)
+ * أقل من windowClear ولا يدخل غلاف دوران ضلفتها (window-opening.mjs: أسوأ حالة حين لا يحدد المستند التشغيل).
+ */
+export function planWindowScreens(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) {
+  const out = side.outward, u = { x: -out.y, y: out.x }, t0 = (op.wall?.t || .2) / 2, hw = op.w / 2, res = [];
   const winPts = [-1, -.5, 0, .5, 1].map(k => ({ x: op.p.x + u.x * hw * k + out.x * t0, y: op.p.y + u.y * hw * k + out.y * t0 }));
   const parking = bays.flatMap(z => bayPoints(z.polygon));
   const plot = doc.plot?.polygon?.length >= 3 ? doc.plot.polygon : null;
   const walls = (doc.walls || []).filter(w => w.level === lv.level.id);
   const extDoors = lv.openings.filter(o => o.door && o.sides.some(s => s.other === 'outside')).map(o => { const s = o.sides.find(x => x.other === 'outside'); return { x: o.p.x + s.outward.x * ((o.wall?.t || .2) / 2 + .5), y: o.p.y + s.outward.y * ((o.wall?.t || .2) / 2 + .5) }; });
+  const prints = lv.openings.filter(o => o.window).map(o => { const s2 = o.sides.find(x => x.other === 'outside'); return s2 ? windowFootprint(o, s2) : null; }).filter(Boolean);
+  const r3 = v => Math.round(v * 1000) / 1000;
+  const pointOk = p => prints.every(fp => !inSwing(fp, p) && segDist(p, fp.face.a, fp.face.b) >= D.windowClear - 1e-9);
   for (const off of D.offsets) {
-    // خط الساتر: نقطة الأصل أمام النافذة على بعد off من الوجه الخارجي، واتجاهه u
     const o0 = { x: op.p.x + out.x * (t0 + off), y: op.p.y + out.y * (t0 + off) };
     let lo = Infinity, hi = -Infinity;
     for (const P of parking) {
@@ -154,21 +164,29 @@ export function planWindowScreen(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) {
       for (const W of winPts) { const k = off / dP, X = { x: W.x + (P.x - W.x) * k, y: W.y + (P.y - W.y) * k }, s = (X.x - o0.x) * u.x + (X.y - o0.y) * u.y; lo = Math.min(lo, s); hi = Math.max(hi, s); }
     }
     if (!(hi > lo)) continue;
-    lo -= D.margin; hi += D.margin;
+    const need = { lo, hi }; lo -= D.margin; hi += D.margin;
     if (hi - lo > D.maxLength) continue;
-    const a = { x: o0.x + u.x * lo, y: o0.y + u.y * lo }, b = { x: o0.x + u.x * hi, y: o0.y + u.y * hi }, r3 = v => Math.round(v * 1000) / 1000;
-    const seg = { a: { x: r3(a.x), y: r3(a.y) }, b: { x: r3(b.x), y: r3(b.y) } };
-    if (plot && ![seg.a, seg.b].every(p => pointInPolygon(p, plot, -.05))) continue;
-    if (bays.some(z => z.polygon.some((p, i) => segmentHit(seg.a, seg.b, p, z.polygon[(i + 1) % z.polygon.length])) || pointInPolygon(seg.a, z.polygon, 0) || pointInPolygon(seg.b, z.polygon, 0))) continue;
-    if (walls.some(w => segSegDist(seg.a, seg.b, w.a, w.b) < (w.t ?? .2) / 2 + D.wallClear)) continue;
-    if (extDoors.some(p => segDist(p, seg.a, seg.b) < D.doorClear)) continue;
-    // الساتر لا يقترب من وجه أي نافذة خارجية (مستهدفة أو غيرها) أقل من windowClear: يبقى للنافذة مجال فتح وضوء (قرار المالك 2026-10-26)
-    if (lv.openings.some(o => { if (!o.window) return false; const s2 = o.sides.find(x => x.other === 'outside'); if (!s2 || !(o.id === op.id || requiresLightOrAir(s2.room))) return false; const tt = (o.wall?.t || .2) / 2, h2 = o.w / 2, v = { x: -s2.outward.y, y: s2.outward.x };
-      return segSegDist(seg.a, seg.b, { x: o.p.x + s2.outward.x * tt - v.x * h2, y: o.p.y + s2.outward.y * tt - v.y * h2 }, { x: o.p.x + s2.outward.x * tt + v.x * h2, y: o.p.y + s2.outward.y * tt + v.y * h2 }) < D.windowClear; })) continue;
-    // ولا يقترب من الموقف ولا يقطع ممر دخوله إلى حد الأرض (حركة المركبات)
-    if (bays.some(z => { const ap = bayApproach(doc, z.polygon); return segPolyDist(seg.a, seg.b, z.polygon) < D.bayClear || (ap && segPolyDist(seg.a, seg.b, ap.polygon) <= 0); })) continue;
-    return { ...seg, offset: off, length: r3(hi - lo) };
+    const at = s => ({ x: o0.x + u.x * s, y: o0.y + u.y * s });
+    // الطول الكامل، ثم المقتطع إلى أكبر مقطع متصل مسموح يحوي منتصف الحاجة
+    const variants = [{ lo, hi, trimmed: false }];
+    const step = .01, ok = []; for (let s = lo; s <= hi + 1e-9; s += step) ok.push(pointOk(at(s)));
+    if (ok.some(v => !v)) {
+      const mid = Math.round(((need.lo + need.hi) / 2 - lo) / step); if (!ok[mid]) continue;
+      let i0 = mid, i1 = mid; while (i0 > 0 && ok[i0 - 1]) i0--; while (i1 < ok.length - 1 && ok[i1 + 1]) i1++;
+      variants.length = 0; variants.push({ lo: lo + i0 * step, hi: lo + i1 * step, trimmed: true, cutLo: r3(lo + i0 * step - lo), cutHi: r3(hi - (lo + i1 * step)) });
+    }
+    for (const v of variants) {
+      const a = at(v.lo), b = at(v.hi), seg = { a: { x: r3(a.x), y: r3(a.y) }, b: { x: r3(b.x), y: r3(b.y) } };
+      if (!(Math.hypot(seg.b.x - seg.a.x, seg.b.y - seg.a.y) > .3)) continue;
+      if (plot && ![seg.a, seg.b].every(p => pointInPolygon(p, plot, -.05))) continue;
+      if (bays.some(z => z.polygon.some((p, i) => segmentHit(seg.a, seg.b, p, z.polygon[(i + 1) % z.polygon.length])) || pointInPolygon(seg.a, z.polygon, 0) || pointInPolygon(seg.b, z.polygon, 0))) continue;
+      if (walls.some(w => segSegDist(seg.a, seg.b, w.a, w.b) < (w.t ?? .2) / 2 + D.wallClear)) continue;
+      if (extDoors.some(p => segDist(p, seg.a, seg.b) < D.doorClear)) continue;
+      if (bays.some(z => { const ap = bayApproach(doc, z.polygon); return segPolyDist(seg.a, seg.b, z.polygon) < D.bayClear || (ap && segPolyDist(seg.a, seg.b, ap.polygon) <= 0); })) continue;
+      const need2 = { lo: need.lo, hi: need.hi, coversNeed: v.lo <= need.lo + 1e-9 && v.hi >= need.hi - 1e-9 };
+      res.push({ ...seg, offset: off, length: r3(v.hi - v.lo), trimmed: v.trimmed, coversNeed: need2.coversNeed });
+    }
   }
-  return null;
+  return res;
 }
-export default { segmentHit, screenWindowPrivacy, bayPoints, interiorPoints, windowGeometry, windowExposure, acceptanceSnapshot, compareAcceptance, planWindowScreen, SCREEN_DEFAULTS };
+export default { segmentHit, screenWindowPrivacy, bayPoints, interiorPoints, windowGeometry, windowExposure, acceptanceSnapshot, compareAcceptance, planWindowScreen, planWindowScreens, SCREEN_DEFAULTS };

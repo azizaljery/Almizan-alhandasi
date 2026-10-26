@@ -8,7 +8,8 @@ import { wallRect } from './draw/review.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { unverifiedCheck, REGULATORY_STATUS } from './regulatory-checks.mjs';
-import { segmentHit, bayApproach, requiresLightOrAir } from './privacy-gate.mjs';
+import { segmentHit, bayApproach } from './privacy-gate.mjs';
+import { windowFootprint, segmentVsWindow, functionOf } from './window-opening.mjs';
 
 export const SITE_DEFAULTS = Object.freeze({
   bayClear: 0.5,        // أدنى هامش بين الساتر وحد الموقف (تصميمي؛ فتح باب السيارة غير متحقق)
@@ -72,16 +73,16 @@ export function siteElementReport(doc, { levelId } = {}) {
     }
     if (ext.length) put('DOOR_FRONT', worstDoor >= SITE_DEFAULTS.doorClear, r3(worstDoor), SITE_DEFAULTS.doorClear, 'm', worstDoor >= SITE_DEFAULTS.doorClear ? `أقرب باب خارجي يبعد ${r3(worstDoor)} م` : `الساتر يبعد ${r3(worstDoor)} م فقط عن باب خارجي`);
     if (Number.isFinite(worstPath)) put('ENTRY_PATH', worstPath >= SITE_DEFAULTS.entryHalfWidth, r3(worstPath), SITE_DEFAULTS.entryHalfWidth, 'm', worstPath >= SITE_DEFAULTS.entryHalfWidth ? `يبعد ${r3(worstPath)} م عن مسار الدخول من الباب الرئيسي إلى الشارع` : `يعترض مسار الدخول الرئيسي (${r3(worstPath)} م)`);
-    // 5) الإضاءة والتهوية: لكل نافذة أمام الساتر (تقابله على مسافة ≤ 3 م)
+    // 5) النوافذ المجاورة: خلوص الساتر من وجه كل نافذة خارجية بلا استثناء، وهندسة فتحها (أسوأ حالة حين لا يحدد المستند التشغيل) وغلاف ضلفتها،
+    //    ووظيفتها (إضاءة/تهوية/سلامة) وزاوية الحجب. لا استثناء عامًا للممرات: يُمنح استثناء الخلوص فقط بإثبات الأبعاد الثلاثة (غير ممكن للسلامة).
     const wins = [];
     for (const o of (lv?.openings || []).filter(o => o.window && o.sides.some(s => s.other === 'outside'))) {
-      const s = o.sides.find(x => x.other === 'outside'), t0 = (o.wall?.t || .2) / 2, hw = (o.w || 1) / 2, u = { x: -s.outward.y, y: s.outward.x };
-      const fa = { x: o.p.x + s.outward.x * t0 - u.x * hw, y: o.p.y + s.outward.y * t0 - u.y * hw }, fb = { x: o.p.x + s.outward.x * t0 + u.x * hw, y: o.p.y + s.outward.y * t0 + u.y * hw };
-      const d = segSeg(fa, fb, f.a, f.b); if (d > 3) continue; // أقرب مسافة بين وجه النافذة الخارجي والساتر
-      const sill = o.o?.sill ?? 0, head = sill + (o.o?.h ?? 1.2), mid = (sill + head) / 2, ang = Math.atan2(Math.max(0, (f.h ?? 0) - mid), Math.max(d, 1e-6)) * 180 / Math.PI;
-      wins.push({ opening: o.id, room: s.room.name, offset: r3(d), obstructionAngleDeg: Math.round(ang * 10) / 10, sill, head });
-      if (!requiresLightOrAir(s.room) && d < SITE_DEFAULTS.minWindowOffset) { checks.push({ id: 'WINDOW_OPERABLE:' + o.id, pass: true, noted: true, measured: r3(d), limit: SITE_DEFAULTS.minWindowOffset, unit: 'm', status: 'measured', basis: `نافذة «${s.room.name}» (غير مطلوبة للإضاءة/التهوية في فاحصات الميزان) أقرب من ${SITE_DEFAULTS.minWindowOffset} م إلى طرف الساتر (${r3(d)} م): أثر مسجّل لا حاجب` }); continue; }
-      put('WINDOW_OPERABLE:' + o.id, d >= SITE_DEFAULTS.minWindowOffset, r3(d), SITE_DEFAULTS.minWindowOffset, 'm', d >= SITE_DEFAULTS.minWindowOffset ? `نافذة «${s.room.name}» تبعد عن الساتر ${r3(d)} م فتبقى قابلة للفتح` : `نافذة «${s.room.name}» لا يبقى أمامها مجال للفتح (${r3(d)} م)`);
+      const s = o.sides.find(x => x.other === 'outside'), fp = windowFootprint(o, s), sv = segmentVsWindow(fp, f.a, f.b), d = sv.clearance;
+      if (d > 3) continue;
+      const fn = functionOf(o, s, lv), sill = o.o?.sill ?? 0, head = sill + (o.o?.h ?? 1.2), mid = (sill + head) / 2, ang = Math.atan2(Math.max(0, (f.h ?? 0) - mid), Math.max(d, 1e-6)) * 180 / Math.PI;
+      wins.push({ opening: o.id, room: s.room.name, clearance: d, swingConflict: sv.swingConflict, operation: fp.operation, function: fn, obstructionAngleDeg: Math.round(ang * 10) / 10, sill, head });
+      put('WINDOW_CLEARANCE:' + o.id, fn.exemptFromClearance || d >= SITE_DEFAULTS.minWindowOffset, r3(d), SITE_DEFAULTS.minWindowOffset, 'm', d >= SITE_DEFAULTS.minWindowOffset ? `نافذة «${s.room.name}» تبعد عن الساتر ${r3(d)} م` : `نافذة «${s.room.name}» لا يبقى أمامها الخلوص التصميمي (${r3(d)} م < ${SITE_DEFAULTS.minWindowOffset})؛ وظيفتها: إضاءة ${fn.light}، تهوية ${fn.ventilation}، سلامة ${fn.safety} (غير متحققة فلا استثناء)`);
+      put('WINDOW_SWING:' + o.id, !sv.swingConflict, sv.swingConflict ? 0 : r3(d), 0, 'm', sv.swingConflict ? `الساتر يدخل غلاف ضلفة نافذة «${s.room.name}» أثناء الفتح (${fp.assumption})` : `الساتر خارج غلاف دوران ضلفة نافذة «${s.room.name}» (${fp.assumption})`);
       checks.push({ id: 'DAYLIGHT_OBSTRUCTION:' + o.id, pass: null, measured: Math.round(ang * 10) / 10, limit: null, unit: 'deg', status: 'unverified', basis: `زاوية حجب الساتر لنافذة «${s.room.name}» ${Math.round(ang * 10) / 10}° من منتصف النافذة — النافذة نفسها لم تتغير مساحتها ولا موضعها؛ حد زاوية الحجب المقبول غير متحقق (لا مصدر)` });
     }
     out.fences.push({ id: f.id, height: f.h ?? null, a: f.a, b: f.b, length: r3(Math.hypot(f.b.x - f.a.x, f.b.y - f.a.y)), checks, windows: wins });
