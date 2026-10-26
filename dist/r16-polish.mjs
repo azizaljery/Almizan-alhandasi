@@ -12,6 +12,7 @@ import { applyCommand } from './draw/doc.mjs';
 import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defects.mjs';
 import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
+import { planWindowScreen, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
 const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
@@ -65,7 +66,7 @@ function exposedEdge(doc, G, room, e, wd) {
  * يصلح عيوب الخصوصية والحركة القابلة للإصلاح الموضعي على المستند (يعدّله في مكانه — مستند يملكه المولّد). يعيد { notes_ar[], changed }.
  */
 export function polishR16(doc) {
-  const notes = [], skip = new Set(); let changed = false;
+  const notes = [], skip = new Set(), screens = []; let changed = false;
   // 1) النوافذ المكشوفة
   for (let pass = 0; pass < 12; pass++) {
     const G = analyzeDoc(doc).levels[0]; if (!G) break;
@@ -95,6 +96,33 @@ export function polishR16(doc) {
     // (الجولة العشرون، المراجعة العمياء r19: C5-3) الصالة العائلية لا تُترك بنوافذ علوية وحدها: حل الخصوصية لا يُفقدها الإطلالة والضوء على
     // مستوى الجلوس — إن كانت هذه آخر نافذة عادية لها تبقى، ويبقى العيب مذكورًا (يُصلح بسور حاجب أو مشربية أو بتنظيم لا تطل فيه الصالة على الشارع)
     if (isFamilyHall(room) && !R14_OFF.has('r20hallsill') && !G.openings.some(op => op.window && op.id !== x.op.id && (op.o?.sill ?? 1) < 1.5 && op.sides.some(s => s.room.id === room.id))) {
+      // (الجولة 21 — 02c، قرار المالك: إصلاح تراجع C6 دون إفساد المقاسات) النافذة والمقاس كما هما، وساتر خصوصية خارجي قائم بذاته بين النافذة
+      // والمواقف (privacy-gate.mjs planWindowScreen): طوله من خطوط الرؤية الفعلية، ويُقبل فقط إن (1) حجب كل خطوط الرؤية بعينات متعددة من
+      // المواقف وداخل الصالة، (2) واجتاز قياس المشروع الأصلي WINDOW_PARKING لهذه النافذة، (3) ولم يُسقط أي فحص خصوصية أو ضوء أو تهوية أو حركة
+      // كان ناجحًا قبله (compareAcceptance). وإلا يُزال ويبقى العيب مذكورًا كما كان.
+      if (x.why === 'المواقف' && !R14_OFF.has('r21screen')) {
+        const bays = (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id), side = x.op.sides.find(s => s.room.id === room.id && s.other === 'outside');
+        const sc = side ? planWindowScreen(doc, G, x.op, side, bays) : null;
+        if (sc) {
+          const snap = JSON.stringify(doc), before = acceptanceSnapshot(doc), was = new Set(doc.walls.map(w => w.id));
+          let ok = false;
+          try {
+            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: sc.a, b: sc.b, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
+            const G2 = analyzeDoc(doc).levels[0], op2 = G2.openings.find(q => q.id === o.id), s2 = op2?.sides.find(s => s.room.name === room.name && s.other === 'outside');
+            const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
+            const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === o.id && !w.screened);
+            const cmp = compareAcceptance(before, acceptanceSnapshot(doc), { protect: ['privacy', 'daylight', 'ventilation', 'circulation'] });
+            ok = !sight.potentialExposure && projOk && cmp.pass;
+          } catch { ok = false; }
+          if (ok) {
+            const fid = doc.walls.find(w => !was.has(w.id))?.id;
+            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية).`);
+            if (fid) screens.push({ wall: fid, window: o.id, room: room.name, ...sc });
+            changed = true; skip.add(o.id); continue;
+          }
+          for (const k of Object.keys(doc)) delete doc[k]; Object.assign(doc, JSON.parse(snap));
+        }
+      }
       notes.push(`نافذة «${room.name}» المطلة على ${x.why} بقيت بجلستها: هي نافذتها العادية الوحيدة، ورفعها يُفقد الصالة الإطلالة والضوء — يُستحسن سور حاجب أو مشربية أمامها.`);
       skip.add(o.id); continue;
     }
@@ -223,7 +251,7 @@ export function polishR16(doc) {
       const done = carveBath(doc, lv, R); if (done) { notes.push(done); changed = true; break; }
     }
   }
-  return { notes_ar: notes, changed };
+  return { notes_ar: notes, changed, screens };
 }
 const bbox = poly => ({ x0: Math.min(...poly.map(p => p.x)), x1: Math.max(...poly.map(p => p.x)), y0: Math.min(...poly.map(p => p.y)), y1: Math.max(...poly.map(p => p.y)) });
 function carveBath(doc, lv, R) {

@@ -3753,8 +3753,11 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
         // يُقبل إن صارت الصالة ≥ المجلس، أو (الجولة التاسعة عشرة) زالت عيوب جوهرية مقيسة (الصالة الصغيرة/الممر) دون عيب جديد ولو بقيت أصغر
         const fewer = !R14_OFF.has('r19hall') && n.major.length < d.major.length;
         if (n.reject.length || n.fails > d.fails || !a1 || (a1.h < a1.m && !fewer) || n.major.some(x => !d.major.includes(x)) || n.major.length > d.major.length || n.quality > d.quality + 400) continue;
-        if (!gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
-        if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
+        const stop = why => { if (globalThis.__v2dbg) (globalThis.__v2dbg.hall ||= []).push({ pat: d.pat, margin, stop: why }); }; // (02c) سبب عدم القبول للتشخيص فقط
+        if (!gateReview(n, requirements, land, counts)) { stop('gate:' + (n.review?.failedGates || []).join(',')); continue; }
+        if (!heavyReview(n, requirements, land, counts)) { stop('heavy:' + (n.heavyFail || []).join(',')); continue; }
+        if (!noRegress(d, n, requirements, land)) { stop('regress'); continue; }
+        if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) { stop('not-distinct'); continue; }
         n.dr = n.dr || docRooms(n.doc);
         n.notes = [...n.notes, a1.h >= a1.m ? `كُبّرت «الصالة» إلى ${r2(a1.h)} م² فصارت لا تصغر عن «المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) بإعادة ضبط أبعاد التنظيم نفسه — هدف تصميمي افتراضي للميزان.` : `أُعيد ضبط أبعاد التنظيم نفسه: «الصالة» ${r2(a1.h)} م² و«المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) — زال ${d.major.filter(x => !n.major.includes(x)).join(' و')}، وما زالت الصالة أصغر من المجلس (هدف الميزان الافتراضي لم يتحقق على هذه الأرض الضيقة).`];
         built[i] = n; if (a1.h >= a1.m || R14_OFF.has('r20hall')) break;
