@@ -183,6 +183,12 @@ export function programV2(counts, req = {}) {
       if (b.kind === 'kitchen' && P.kitchenStrip?.length) b.noPantry = true; // المخزن مطلوب أصلًا شريطًا بجوار المطبخ
     }
   }
+  // (الجولة 21 — 02c، قرار المالك خامسًا) الصالة بمقاس صريح قيدٌ أثناء التوليد: الصالة ورقة حركة في الشجرة (C('hall')) لا كتلة برنامج، فيُحمل
+  // مقاسها كتلة افتراضية (P.hallDim) تُثبَّت بها ورقتها على محور قطعها في solve (fixExtOf) كما تُثبَّت ذوات المقاس، والمحور الآخر بجزاء
+  // التقييم (scoreV2 «dims:hall») وبحث الاتجاه (dimO)، والحكم بالقياس بعد التفصيل (سجل D-hall بالمستطيل الصافي). مفتاح القياس r21halldim.
+  { const dh = P.dims.hall;
+    if (dh && dh.w > 0 && dh.l > 0 && !R14_OFF.has('r21halldim') && !R14_OFF.has('r21dimfix')) { const tol = Number.isFinite(dh.tol) ? dh.tol : .05, s = Math.min(dh.w, dh.l), l = Math.max(dh.w, dh.l);
+      P.hallDim = { id: 'hall', kind: 'hall', name: 'الصالة', dimNet: { s, l, tol }, dimGross: { s: s + INT, l: l + INT }, area: (s + INT) * (l + INT) }; P.hallArea = r2(s * l); } }
   // (الجولة السابعة) المجلس الرئيسي (الرجال، أو الوحيد): صافيه ≥ 24 م² افتراضًا ما لم يحدد العميل مقاسه — بجزاء في
   // التقييم لا برفع مساحته المستهدفة (رفعها غيّر توزيع الأطوال في كل الأنماط وأسقط بدائل سليمة؛ الجزاء وحده بلغ 24 م²
   // في الحالات العشر)، ولا رفض: الأرض الصغيرة قد لا تتسع
@@ -434,12 +440,13 @@ function dimPlan(b, crossNet, ends, dir = null, runAxis = null, fit = false, alt
 }
 const dimRun = (b, crossNet, allowRun, dir = null, runAxis = null, plans = null, fit = false, alt = 0) => { const pl = dimPlan(b, crossNet, allowRun, dir, runAxis, fit, alt); if (pl && plans) plans.set(b, pl); return pl ? pl.run : 0; };
 /** سماحية ورقة بمقاس صريح (منطقة بكتلة واحدة، أو عقدة كل أبنائها اختيارية عداها). */
-function dimTolOf(c) { if (c.t === 'zone') return c.b.length === 1 ? c.b[0].dimNet?.tol || 0 : 0; if ((c.t === 'x' || c.t === 'y') && c.k) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? dimTolOf(solid[0]) : 0; } return 0; }
+function dimTolOf(c) { if (c.t === 'circ' && c.dimB) return c.dimB.dimNet?.tol || 0; if (c.t === 'zone') return c.b.length === 1 ? c.b[0].dimNet?.tol || 0 : 0; if ((c.t === 'x' || c.t === 'y') && c.k) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? dimTolOf(solid[0]) : 0; } return 0; }
 /** محور امتداد صف لمنطقة: العمودي على اتجاه بابها (باب على x0/x1 ⇐ الصف على y). */
 const runAxisOf = z => (z.door ? (isX(z.door) ? 'y' : 'x') : z.along);
 /** (الجولة 21) امتداد ثابت لعقدة على محور dir: منطقة بكتلة واحدة بمقاس صريح، أو عقدة متعامدة كل أبنائها فراغات اختيارية عدا واحد كذلك. */
 function fixExtOf(c, dir, crossNet, allow, plans = null) {
   if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir, runAxisOf(c), plans, false, c.dimO || 0) : 0;
+  if (c.t === 'circ' && c.dimB) return dimRun(c.dimB, crossNet, allow, dir, null, plans, false, c.dimO || 0); // (02c) الصالة بمقاس صريح
   if ((c.t === 'x' || c.t === 'y') && c.t !== dir && !c.at) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? fixExtOf(solid[0], dir, crossNet, allow, plans) : 0; }
   return 0;
 }
@@ -1455,7 +1462,7 @@ function* optimizeSteps(tree, site, evalFn, { iters = 140, seed = 'x', tol = 2 }
   // جهة المخزن المقتطع من مطبخ بمقاس صريح (جهة الحركة أو الجهة المقابلة) متغير بحث أيضًا
   const kz = []; (function walk(n) { if (n.t === 'zone' && n.b.some(b => (b.dimGross && b.kind === 'kitchen') || b.kind === 'maid')) kz.push(n); if (n.k) n.k.forEach(walk); })(tree);
   // (02b) اتجاه المقاس الصريح متغير بحث لكل منطقة فيها كتلة بمقاس (الاتجاهان يُجرَّبان)؛ لا مناطق كهذه ⇐ البحث كما كان حرفيًا
-  const dz = []; if (!R14_OFF.has('r21dimfix') && !R14_OFF.has('r21dimorient')) (function walk(n) { if (n.t === 'zone' && n.b.some(b => b.dimNet && b.dimNet.s !== b.dimNet.l)) dz.push(n); if (n.k) n.k.forEach(walk); })(tree);
+  const dz = []; if (!R14_OFF.has('r21dimfix') && !R14_OFF.has('r21dimorient')) (function walk(n) { if ((n.t === 'zone' && n.b.some(b => b.dimNet && b.dimNet.s !== b.dimNet.l)) || (n.t === 'circ' && n.dimB && n.dimB.dimNet.s !== n.dimB.dimNet.l)) dz.push(n); if (n.k) n.k.forEach(walk); })(tree);
   const snapW = () => ({ ws: nodes.map(n => [...n.w]), ord: zones.map(z => [...z.b]), ps: kz.map(z => z.pside || 0), dor: dz.map(z => z.dimO || 0) });
   const load = st => { nodes.forEach((n, i) => { n.w = [...st.ws[i]]; }); zones.forEach((z, i) => { z.b = [...st.ord[i]]; }); kz.forEach((z, i) => { z.pside = st.ps[i]; }); dz.forEach((z, i) => { z.dimO = st.dor[i]; }); };
   let best = null;
@@ -2883,6 +2890,8 @@ const BUILD_MAX = 18, BUILD_SPARE = 4, BUILD_MAX2 = 8, SCHED_EXTRA = 70, SECOND_
 function patOf(c) { return c.mode + ':' + c.tag; }
 
 /** يولّد المرشحين لكل نمط ويحل أبعادهم. */
+/** (02c) يربط مقاس الصالة الصريح بورقة الصالة في شجرة الأرضي (لا يدخل فرع العلوي في عقدة dual). */
+function tagHallDim(n, hd) { if (!n) return; if (n.t === 'circ' && n.id === 'hall') { n.dimB = hd; return; } if (n.t === 'dual') return tagHallDim(n.g, hd); if (n.k) n.k.forEach(c => tagHallDim(c, hd)); }
 function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 140, avoid = new Set(), exclude = new Set(), prefPat = null, minEnv = 0, minDepth = 0, backAfterStair = 0, trees = null, ruleK = RULE_K, extra = null, capSuite = 0, foyerYard = false } = {}) {
   const kitchenFront = rules.some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a)));
   // غرف النوم على الواجهة الأمامية بطلب العميل («غرفة النوم على الشارع»): لا جزاء
@@ -2891,6 +2900,7 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
   let topoNo = 0;
   for (const tr of trees || partiTrees(P, { stair, W: site.W, D: site.D, irregular: !!site.placeRects }).filter(t => !t.late)) {
     if (avoid.has(tr.mode) || exclude.has(tr.mode + ':' + tr.tag)) continue;
+    if (P.hallDim) tagHallDim(tr.tree, P.hallDim); // (02c) ورقة الصالة الأرضية تحمل مقاسها (لا العلوية: dual.u)
     let lastRp = null;
     // (الجولة 21 — مقترح 06) وصلة الضيافة قيدٌ في حل الأبعاد لكل مصادر الأشجار (المكتبة والمحرك الثالث والإعادة) متى أمكنت طوبولوجيًا في الشجرة؛
     // الشجرة التي لا يتلاصق فيها المجلس والطعام بأي مقاسات تُحل كما هي (قد يصل الضيف عبر دهليز الرجال) وتُعد في failStats — والحكم بعد التفصيل للأبواب
