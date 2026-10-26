@@ -8,7 +8,7 @@ import { screenWindowPrivacy, planWindowScreen, windowExposure } from '../dist/p
 import { presentationStatus } from '../dist/presentation-status.mjs';
 import { analyzeDoc } from '../dist/draw/digest.mjs';
 
-const load = () => JSON.parse(readFileSync(new URL('../evidence/acceptance/c6-after/C6/alt-1.json', import.meta.url), 'utf8'));
+const load = () => JSON.parse(readFileSync(new URL('../evidence/acceptance/c6-rework-a/C6/alt-1.json', import.meta.url), 'utf8'));
 const fenceOf = d => d.walls.find(w => w.kind === 'fence');
 const get = (rep, id) => rep.fences[0].checks.find(c => c.id === id);
 
@@ -33,12 +33,13 @@ test('ساتر خارج القطعة أو يقطع ممر الموقف أو يع
   d = load(); fenceOf(d).a = { x: 15, y: 0.3 }; fenceOf(d).b = { x: 16.5, y: 0.3 }; // أمام ممر الموقف إلى الشارع
   assert.equal(get(siteElementReport(d), 'BAY_APPROACH').pass, false);
 });
-test('ساتر قرب نافذة غرفة مأهولة بأقل من مجال الفتح يرسب، ونافذة ممر لا تحجب لكن أثرها مسجَّل', () => {
-  const d = load(), G = analyzeDoc(d).levels[0], op = G.openings.find(o => o.id === 'o22'), s = op.sides.find(x => x.other === 'outside');
+test('نوافذ الساتر: لا استثناء عام للممر؛ كل نافذة تُقاس بغلاف ضلفتها (WINDOW_CLEARANCE وWINDOW_SWING) وساتر قريب منها يرسب', () => {
+  const d = load(), G = analyzeDoc(d).levels[0], op = G.openings.find(o => o.id === 'o22');
   fenceOf(d).a = { x: op.p.x + 0.3, y: op.p.y - 1 }; fenceOf(d).b = { x: op.p.x + 0.3, y: op.p.y + 1 };
-  const r = siteElementReport(d); assert.equal(get(r, 'WINDOW_OPERABLE:o22').pass, false, s.room.name);
-  const ok = siteElementReport(load()), corridor = ok.fences[0].checks.find(c => c.id === 'WINDOW_OPERABLE:o23');
-  assert.ok(corridor && corridor.noted === true && corridor.pass === true && corridor.measured < SITE_DEFAULTS.minWindowOffset);
+  const r = siteElementReport(d); assert.equal(get(r, 'WINDOW_CLEARANCE:o22').pass, false); assert.equal(r.geometryOk, false);
+  const ok = siteElementReport(load()), c = ok.fences[0].checks.find(x => x.id === 'WINDOW_CLEARANCE:o23');
+  assert.ok(c && c.pass === true && c.measured >= SITE_DEFAULTS.minWindowOffset, 'نافذة الممر o23 تبلغ الخلوص نفسه بلا استثناء');
+  assert.ok(!ok.fences[0].checks.some(x => x.noted), 'لا بند «مذكور» يُعفي نافذة');
 });
 test('زاوية حجب الإضاءة تُقاس ولا تُحكم: حدها «غير متحقق»', () => {
   const c = get(siteElementReport(load()), 'DAYLIGHT_OBSTRUCTION:o22');
@@ -72,11 +73,12 @@ test('planWindowScreen لا يقبل ساترًا يلاصق موقفًا أو �
 import { SCREEN_DEFAULTS } from '../dist/privacy-gate.mjs';
 const planDefaults = () => SCREEN_DEFAULTS;
 
-test('العرض: «جاهز للعرض المبدئي» مع وسم «تحتاج تحققًا نظاميًا» ظاهر، ولا اعتماد نظامي', () => {
+test('العرض: الحالات الثلاث منفصلة والوسم الإلزامي ظاهر ولا اعتماد نظامي', () => {
   const doc = load(), p = presentationStatus({ doc, ledger: [] }, {});
-  assert.ok(p.needsRegulatoryVerification); assert.match(p.label_ar, /تحتاج تحققًا نظاميًا/); assert.ok(p.regulatory_ar.length === 1 && /لم يتم التحقق/.test(p.regulatory_ar[0]));
-  assert.ok(p.specialist_ar.some(t => /تحتاج تحققًا نظاميًا/.test(t))); assert.ok(p.siteElements.fences.length === 1);
-  if (p.status === 'hidden') assert.doesNotMatch(p.label_ar, /تحتاج تحققًا نظاميًا/);
+  assert.ok(p.needsRegulatoryVerification); assert.match(p.label_ar, /المطابقة النظامية لستارة الخصوصية لم تُتحقق بعد/); assert.match(p.regulatoryTag_ar, /^تصميم مبدئي — المطابقة النظامية لستارة الخصوصية لم تُتحقق بعد$/);
+  assert.ok(p.regulatory_ar.length === 1 && /لم يتم التحقق/.test(p.regulatory_ar[0])); assert.ok(p.siteElements.fences.length === 1);
+  assert.deepEqual(Object.keys(p.states).sort(), ['architectural', 'regulatory', 'tests']); assert.equal(p.states.regulatory.status, 'unverified');
+  if (p.status === 'hidden') assert.doesNotMatch(p.label_ar, /لم تُتحقق بعد/);
 });
 test('عرض بلا ساتر: لا وسم نظامي', () => {
   const doc = load(); doc.walls = doc.walls.filter(w => w.kind !== 'fence');
