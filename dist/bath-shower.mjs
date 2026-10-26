@@ -99,11 +99,11 @@ export function relayoutBath(doc, levelId, roomId, notes) {
   const frontRect = (f, kind) => { const fr = front[kind]; if (!fr) return null; const loc = [[-f.w / 2, f.d / 2], [f.w / 2, f.d / 2], [f.w / 2, f.d / 2 + fr], [-f.w / 2, f.d / 2 + fr]]; const c = Math.cos(f.rot), s = Math.sin(f.rot); return loc.map(([a, b]) => ({ x: f.x + a * c - b * s, y: f.y + a * s + b * c })); };
   const polyOf = f => fixtureRect(f, -0.005), clash = (a, b) => penetration(a, b) > 0.005;
   const showers = wallSpots('shower'), wcs = wallSpots('wc'), basins = wallSpots('basin');
-  const okZones = poly => !zones.some(z => penetration(poly, z) > 1e-6);
+  const okZones = f => { const poly = fixtureRect(f); return !zones.some(z => penetration(poly, z) > 1e-6); }; // مجسّم كامل لا مصغَّر: WC_DOOR_CLASH يقيس المجسّم نفسه
   const tries = [];
-  for (const sh of showers) { const sp = polyOf(sh); if (!okZones(sp)) continue;
-    for (const wc of wcs) { const wp = polyOf(wc); if (clash(wp, sp) || !okZones(wp)) continue; const wf = frontRect(wc, 'wc'); if (!inNet(wf.map((p, i, a) => p), net) || clash(wf, sp)) continue;
-      for (const ba of basins) { const bp = polyOf(ba); if (clash(bp, sp) || clash(bp, wp) || !okZones(bp)) continue; const bf = frontRect(ba, 'basin'); if (!inNet(bf, net) || clash(bf, sp) || clash(bf, wp)) continue;
+  for (const sh of showers) { const sp = polyOf(sh); if (!okZones(sh)) continue;
+    for (const wc of wcs) { const wp = polyOf(wc); if (clash(wp, sp) || !okZones(wc)) continue; const wf = frontRect(wc, 'wc'); if (!inNet(wf.map((p, i, a) => p), net) || clash(wf, sp)) continue;
+      for (const ba of basins) { const bp = polyOf(ba); if (clash(bp, sp) || clash(bp, wp) || !okZones(ba)) continue; const bf = frontRect(ba, 'basin'); if (!inNet(bf, net) || clash(bf, sp) || clash(bf, wp)) continue;
         tries.push([sh, wc, ba]); if (tries.length >= 60) break; } if (tries.length >= 60) break; } if (tries.length >= 60) break; }
   // الأقرب إلى الوضع الأصلي أولًا (أقل حركة للمرحاض/المغسلة)
   const move = ([, wc, ba]) => (wc0 ? Math.hypot(wc.x - wc0.x, wc.y - wc0.y) : 0) + (ba0 ? Math.hypot(ba.x - ba0.x, ba.y - ba0.y) : 0);

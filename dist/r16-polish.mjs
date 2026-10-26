@@ -14,6 +14,7 @@ import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
 import { siteElementReport } from './site-element-check.mjs';
 import { completeShowers } from './bath-shower.mjs';
+import { degreeOf } from './space-privacy.mjs';
 import { planWindowScreens, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
@@ -145,6 +146,24 @@ export function polishR16(doc) {
     live.sill = R16_LIMITS.highSill; live.h = h; live.w = Math.round(Math.max(live.w, wd) * 100) / 100;
     notes.push(`نافذة «${room.name}» المطلة على ${x.why} بجلسة عالية ${R16_LIMITS.highSill} م (لا جدار خارجي آخر للغرفة لا يطل عليه) — تفضيل قابل للتغيير: زجاج معتم بدلها إن أراد العميل.`);
     changed = true;
+  }
+  // 1-ج) (الجولة 21 — 02c-rework، البند 2) حكم الخصوصية لكل فراغ بدرجته (space-privacy.mjs): نافذة فراغ درجته A (الصالة العائلية وغرف النوم ومجلس النساء)
+  //      لها خط رؤية مكشوف من المواقف بنموذج العيون ⇒ ساتر خصوصية خارجي بالمعايير نفسها (حجب كل الخطوط، لا تراجع، فحص عنصر الموقع)؛ وإلا يبقى العيب
+  //      مذكورًا ويحكم عليه الاختبار (يحتاج تعديلات) — لا إخفاء ولا تخفيف.
+  if (!R14_OFF.has('r21spacepriv') && !R14_OFF.has('r21screen')) {
+    const tried = new Set();
+    for (let pass = 0; pass < 10; pass++) {
+      const G = analyzeDoc(doc).levels[0], bays = G ? (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id) : []; if (!G || !bays.length) break;
+      let hit = null;
+      for (const op of G.openings.filter(o => o.window && !tried.has(o.id) && (o.o.sill ?? 0) < SCREEN_DEFAULTS.eyeHeight)) {
+        const s = op.sides.find(x => x.other === 'outside'); if (!s || degreeOf(s.room) !== 'A') continue;
+        if (windowExposure(doc, G, op, s, bays).paths.length) { hit = { op, s }; break; }
+      }
+      if (!hit) break;
+      tried.add(hit.op.id);
+      if (placeScreenFor(doc, G, hit.op, hit.s, bays, hit.s.room, notes, screens)) changed = true;
+      else notes.push(`نافذة «${hit.s.room.name}» (درجة خصوصية عالية) لها خطوط رؤية مكشوفة من المواقف ولم يتسع ساتر يحجبها دون كسر شرط آخر — يبقى العيب ظاهرًا في اختبار الخصوصية.`);
+    }
   }
   // 1-ب) (الجولة الثامنة عشرة) نافذة غرفة نوم تواجه المواقف وبوابة السيارات عبر الارتداد (أبعد من مجال الرؤية القريب 3 م، حتى 8 م)
   //      — المراجع المستقل r17: C6 وC3-2 وC5-2. للغرفة نافذة أخرى لا تواجهها: تُرفع جلسة المواجهة إلى 1.6 م (ضوء بلا كشف)؛ وإلا تبقى
