@@ -36,13 +36,13 @@ export function showerUsability(doc, lv, room, model) {
   let best = null;
   for (const sh of wet) {
     const why = [], poly = fixtureRect(sh);
-    if (!inNet(poly, room.net)) why.push('الدش يخرج عن الوجوه الداخلية للغرفة');
+    if (!inNet(fixtureRect(sh, -0.003), room.net)) why.push('الدش يخرج عن الوجوه الداخلية للغرفة');
     for (const o of fxAll) if (o.id !== sh.id && o.h >= .1 && o.kind !== 'rug' && penetration(poly.map(p => p), fixtureRect(o, -0.01)) > 0.01) why.push(`الدش يتقاطع مع ${o.kind}`);
     for (const z of doorZones(lv, room)) if (penetration(poly, z.poly) > 1e-6) why.push(`الدش داخل منطقة فتح باب الحمام ${z.op}`);
     // مسقط الوصول: أحد جوانب الدش المفتوحة (0.7 م) داخل الغرفة بلا قطع ثابتة
     const B = bbox(poly), A = SHOWER_RULE.access, sides = [{ x0: B.x0, x1: B.x1, y0: B.y0 - A, y1: B.y0 }, { x0: B.x0, x1: B.x1, y0: B.y1, y1: B.y1 + A }, { x0: B.x0 - A, x1: B.x0, y0: B.y0, y1: B.y1 }, { x0: B.x1, x1: B.x1 + A, y0: B.y0, y1: B.y1 }];
     const solids = fxAll.filter(o => o.id !== sh.id && o.h >= .1 && o.kind !== 'rug').map(o => fixtureRect(o, 0.02));
-    const freeSide = sides.some(S => { const rp = rectPoly(S); return inNet(rp, room.net) && !solids.some(sp => penetration(rp, sp) > 0.005); });
+    const freeSide = sides.some(S => { const rp = rectPoly({ x0: S.x0 + .003, x1: S.x1 - .003, y0: S.y0 + .003, y1: S.y1 - .003 }); return inNet(rp, room.net) && !solids.some(sp => penetration(rp, sp) > 0.005); });
     if (!freeSide) why.push(`لا مسقط وصول حر ${A} م أمام الدش داخل الغرفة`);
     if (!why.length) return { ok: true, reasons: [], details: { ...details, shower: [sh.id] } };
     if (!best) best = why;
@@ -70,6 +70,52 @@ export function evaluateFullBaths(doc, model = analyzeDoc(doc)) {
 /** بوابة: الحمامات الكاملة المرفوضة (تمنع القبول). */
 export function showerGate(doc, model = analyzeDoc(doc)) { const baths = evaluateFullBaths(doc, model); return { baths, failing: baths.filter(b => !b.ok), pass: baths.every(b => b.ok) }; }
 
+/** إعادة توزيع تجهيزات حمام كامل (دش + مرحاض + مغسلة) على جدرانه حين لا يتسع الدش بين التجهيزات القائمة. يعدّل doc فقط عند نجاح الفحص الكامل، وإلا يستعيد. */
+export function relayoutBath(doc, levelId, roomId, notes) {
+  const snapAll = JSON.stringify(doc.fixtures); let model = analyzeDoc(doc);
+  const lv = model.levels.find(l => l.level.id === levelId), room = lv.rooms.find(r => r.id === roomId), net = room.net, B = bbox(net);
+  const inside = f => (doc.fixtures || []).filter(x => x.level === levelId && pointInPolygon({ x: x.x, y: x.y }, net, 1e-6));
+  const old = inside(), wc0 = old.find(f => f.kind === 'wc'), ba0 = old.find(f => f.kind === 'basin');
+  const keep = old.filter(f => !['wc', 'basin', 'shower', 'bathtub'].includes(f.kind));
+  const zones = doorZones(lv, room).map(z => z.poly);
+  const dims = { shower: { w: .9, d: .9 }, wc: { w: wc0?.w || .4, d: wc0?.d || .7 }, basin: { w: ba0?.w || .6, d: ba0?.d || .45 } };
+  const front = { shower: 0, wc: .55, basin: .5 };
+  // تجهيز على جدار: لكل دوران، يُحسب اتجاه الظهر ويُلصق بالجدار الأقرب
+  const wallSpots = (kind, step = .1) => {
+    const out = [], { w, d } = dims[kind];
+    for (const rot of kind === 'shower' ? [0] : [0, 90, 180, 270]) {
+      const probe = { x: 0, y: 0, w, d, rot }, back = fixtureRect({ ...probe, w: .001, d }).slice(0, 2), bx = (back[0].x + back[1].x) / 2, by = (back[0].y + back[1].y) / 2; // مركز الضلع الخلفي (y=-d/2 قبل الدوران)
+      const ax = (a0, a1) => { const v = new Set(); for (const h of [w / 2, d / 2]) { v.add(+(a0 + h).toFixed(4)); v.add(+(a1 - h).toFixed(4)); } for (let t = a0; t <= a1 + 1e-9; t += step) v.add(+t.toFixed(4)); return [...v]; };
+      for (const x of ax(B.x0, B.x1)) for (const y of ax(B.y0, B.y1)) {
+        if (kind === 'shower') { const f = { x, y, w, d, rot: 0 }; const poly = fixtureRect(f); if (!inNet(fixtureRect(f, -0.003), net)) continue; const pb = bbox(poly), t = [Math.abs(pb.x0 - B.x0) < .02, Math.abs(pb.x1 - B.x1) < .02, Math.abs(pb.y0 - B.y0) < .02, Math.abs(pb.y1 - B.y1) < .02].filter(Boolean).length; if (t >= 2) out.push({ ...f, front: null }); continue; }
+        const f = { x, y, w, d, rot }; if (!inNet(fixtureRect(f, -0.003), net)) continue;
+        const bp = { x: x + bx, y: y + by }, dist = [bp.x - B.x0, B.x1 - bp.x, bp.y - B.y0, B.y1 - bp.y];
+        if (Math.min(...dist) > .03) continue; // الظهر على جدار
+        out.push({ ...f });
+      }
+    }
+    return out;
+  };
+  const frontRect = (f, kind) => { const fr = front[kind]; if (!fr) return null; const loc = [[-f.w / 2, f.d / 2], [f.w / 2, f.d / 2], [f.w / 2, f.d / 2 + fr], [-f.w / 2, f.d / 2 + fr]]; const c = Math.cos(f.rot * Math.PI / 180), s = Math.sin(f.rot * Math.PI / 180); return loc.map(([a, b]) => ({ x: f.x + a * c - b * s, y: f.y + a * s + b * c })); };
+  const polyOf = f => fixtureRect(f, -0.005), clash = (a, b) => penetration(a, b) > 0.005;
+  const showers = wallSpots('shower'), wcs = wallSpots('wc'), basins = wallSpots('basin');
+  const okZones = poly => !zones.some(z => penetration(poly, z) > 1e-6);
+  const tries = [];
+  for (const sh of showers) { const sp = polyOf(sh); if (!okZones(sp)) continue;
+    for (const wc of wcs) { const wp = polyOf(wc); if (clash(wp, sp) || !okZones(wp)) continue; const wf = frontRect(wc, 'wc'); if (!inNet(wf.map((p, i, a) => p), net) || clash(wf, sp)) continue;
+      for (const ba of basins) { const bp = polyOf(ba); if (clash(bp, sp) || clash(bp, wp) || !okZones(bp)) continue; const bf = frontRect(ba, 'basin'); if (!inNet(bf, net) || clash(bf, sp) || clash(bf, wp)) continue;
+        tries.push([sh, wc, ba]); if (tries.length >= 60) break; } if (tries.length >= 60) break; } if (tries.length >= 60) break; }
+  // الأقرب إلى الوضع الأصلي أولًا (أقل حركة للمرحاض/المغسلة)
+  const move = ([, wc, ba]) => (wc0 ? Math.hypot(wc.x - wc0.x, wc.y - wc0.y) : 0) + (ba0 ? Math.hypot(ba.x - ba0.x, ba.y - ba0.y) : 0);
+  tries.sort((a, b) => move(a) - move(b));
+  for (const [sh, wc, ba] of tries) {
+    doc.fixtures = JSON.parse(snapAll).filter(f => !(f.level === levelId && ['wc', 'basin', 'shower', 'bathtub'].includes(f.kind) && pointInPolygon({ x: f.x, y: f.y }, net, 1e-6)));
+    try { for (const [k, f] of [['wc', wc], ['basin', ba], ['shower', sh]]) Object.assign(doc, applyCommand(doc, { type: 'add-fixture', level: levelId, kind: k, x: Math.round(f.x * 1000) / 1000, y: Math.round(f.y * 1000) / 1000, rot: f.rot }).doc); } catch { continue; }
+    const m2 = analyzeDoc(doc), lv2 = m2.levels.find(l => l.level.id === levelId), r2 = lv2.rooms.find(r => r.id === roomId);
+    if (r2 && evaluateFullBath(doc, lv2, r2, m2).ok) { notes.push(`أُعيد توزيع تجهيزات «${room.name}» (مرحاض/مغسلة/دش) لتسع دشًا صالحًا بعد فحص التقاطع ومسقط الوصول وفتح الباب (قيمة تصميمية افتراضية للميزان).`); return true; }
+  }
+  doc.fixtures = JSON.parse(snapAll); return false;
+}
 /** يضيف دشًا في الحمامات الكاملة الناقصة إن وُجد موضع صالح (يعدّل doc في مكانه). يعيد ملاحظات المواضع وما تعذّر. */
 export function completeShowers(doc) {
   const notes = [], failed = []; let model = analyzeDoc(doc);
@@ -96,6 +142,8 @@ export function completeShowers(doc) {
       if (r2 && evaluateFullBath(doc, lv2, r2, m2).ok) { notes.push(`أُضيف دش في «${room.name}» (${Math.round(c.x * 100) / 100}، ${Math.round(c.y * 100) / 100}) بعد فحص التقاطع ومسقط الوصول وفتح الباب والعرض الصافي (قيمة تصميمية افتراضية للميزان).`); placed = true; model = m2; break; }
       doc.fixtures = JSON.parse(snap); if (doc.fixtures.length !== n) doc.fixtures.length = n;
     }
+    if (!placed) placed = relayoutBath(doc, lv.level.id, room.id, notes);
+    if (placed) model = analyzeDoc(doc);
     if (!placed) { if (bad.length) { doc.fixtures = JSON.parse(before); model = analyzeDoc(doc); } failed.push({ room: room.name, why: 'لا موضع دش صالح (تقاطع/وصول/فتح الباب/العرض الصافي)' }); }
     else if (bad.length) notes[notes.length - 1] += ' (استُبدل دش مرسوم غير صالح)';
   }
