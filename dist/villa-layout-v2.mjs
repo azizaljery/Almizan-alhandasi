@@ -1336,7 +1336,8 @@ export function scoreV2(sol, P, W, D, ctx = {}) {
     const pick = key === 'majlis' ? placed.filter(q => q.block.kind === 'majlis' && (q.block.men || !P.men)).slice(0, 1) : key === 'kitchen' ? placed.filter(q => q.block.id === 'kitchen1') : key === 'dining' ? placed.filter(q => q.block.kind === 'dining') : key === 'master' ? placed.filter(q => q.block.master) : key === 'bedroom' ? placed.filter(q => q.block.kind === 'suite' && !q.block.master && (R14_OFF.has('r21dimfix') || (!q.block.elderly && !q.block.guest))) : key === 'hall' ? [{ block: {}, r: hall.r }] : [];
     for (const q of pick) {
       // الصافي كما يقيسه السجل: نصف سماكة الجدار من كل جهة (خارجي إن كانت الجهة كلها على الخارج، وإلا داخلي)
-      const half = s => (expLen(q.r, solids, [s]) >= sideLen(q.r, s) - .05 ? EXT / 2 : INT / 2);
+      // (02c) أضيق موضع صالح: أي جزء من الجهة على الخارج يجعل جدارها هناك خارجيًا (الوجه ينكسر درجة) — كما يقيس السجل المستطيل الصافي
+      const half = s => (R14_OFF.has('r21narrow') ? expLen(q.r, solids, [s]) >= sideLen(q.r, s) - .05 : expLen(q.r, solids, [s]) >= .05) ? EXT / 2 : INT / 2;
       let w = W_(q.r) - half('x0') - half('x1'), h = H_(q.r) - half('y0') - half('y1');
       // شريط ممر الضيوف ودورة مياههم: في مجلس الرجال على جهة x دائمًا (كما في التفصيل)، وفي غيره على جهة الباب
       if (q.block.kind === 'majlis' && q.block.guestWc) { if (q.block.men) { const m = menStrip(q.r, P); if (m.side === 'side') w -= T.guestStripW; else if (m.side === 'back') h -= MEN_LOBBY_D - half('y0') + INT / 2; } else { const d = bestDoorSide(q, circ, placed); if (isX(d)) w -= T.guestStripW; else h -= T.guestStripW; } }
@@ -1671,6 +1672,9 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
   /** حواف تطل على الضوء (خارج أو حوش)؛ withCourts=false: الخارج الحقيقي فقط (للمداخل والأبواب الخارجية). */
   const edges = (r, outsideOnly = false) => { const c = container(r), others = [...parents.filter(q => q !== c), ...(outsideOnly ? courtsR : [])]; return SIDES.flatMap(s => (c && Math.abs(r[s] - c[s]) > TOL ? [] : exposed(r, s, others))); };
   const isExtSide = (r, s) => edges(r).some(e => e.side === s && e.to - e.from >= sideLen(r, s) - .05);
+  // (02c) جهة فيها أي جزء على الخارج: جدارها هناك خارجي (EXT) فأضيق موضع صالح للغرفة يُحسب منه — للمقاس الصريح لا للتصميم العام
+  const anyExtSide = (r, s) => !R14_OFF.has('r21narrow') && edges(r).some(e => e.side === s && e.to - e.from >= .05);
+  const extForDims = (r, s) => isExtSide(r, s) || anyExtSide(r, s);
   const hallName = upper ? (P.upperHallName || 'الصالة العلوية') : (P.hall ? 'الصالة' : 'صالة الحركة');
   // ممر لا تُفتح عليه غرفة نوم (رواق حول حوش أو ممر يصل الصالة بالمدخل): «رواق» لا «ممر الغرف»
   const bedTouch = r => placed.some(q => q.block.kind === 'suite' && touch(q.r, r) >= 1.1);
@@ -1961,7 +1965,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
       };
       // (02b) جناح بمقاس صريح (p.dp من الحل): الغرفة تُقطع على ضلعيها الصافيين بين الوجوه الداخلية، والشريط (حمام ومدخل) يأخذ الباقي ضمن مداه
       const dpS = p.dp && (p.dp.v === 'deep' || p.dp.v === 'side') && !R14_OFF.has('r21dimsuite') && p.dp.runAxis === (isX(side) ? 'y' : 'x') ? p.dp : null;
-      const hw = sd => (isExtSide(r, sd) ? EXT / 2 : INT / 2), r1d = v => Math.round(v * 100) / 100;
+      const hw = sd => (extForDims(r, sd) ? EXT / 2 : INT / 2), r1d = v => Math.round(v * 100) / 100;
       if (suiteVariant(b, sideLen(r, side), sideLen(r, ss0), dpS).deep) {
         let td = grow(side, b.master ? 2.4 : 2.1);
         if (dpS) { const depthG = isX(side) ? W_(r) : H_(r), tdX = r1d(depthG - dpS.c - INT / 2 - hw(opp[side])), R = SUITE_TD_RANGE(b); if (tdX >= R[0] - 1e-6 && tdX <= R[1] + 1e-6) td = tdX; }
@@ -2065,7 +2069,7 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
       const L2 = sideLen(r, stripSide), restW = W_(r) - T.guestStripW;
       // (الجولة التاسعة عشرة، توجيه المالك رابعًا) مقاس المجلس الصريح: الشريط (الدهليز ودورة المياه) يأخذ الزائد فيبلغ المجلس الصافي مقاس
       // العميل ضلعًا ضلعًا (±0.05 م) — لا يُقبل «قريب بالمساحة»
-      const hf = z => (isExtSide(r, z) ? EXT / 2 : INT / 2), dmj = P.dims?.majlis && b === (P.men || P.blocks.find(x => x.kind === 'majlis')) ? [Math.min(P.dims.majlis.w, P.dims.majlis.l), Math.max(P.dims.majlis.w, P.dims.majlis.l)] : null;
+      const hf = z => (extForDims(r, z) ? EXT / 2 : INT / 2), dmj = P.dims?.majlis && b === (P.men || P.blocks.find(x => x.kind === 'majlis')) ? [Math.min(P.dims.majlis.w, P.dims.majlis.l), Math.max(P.dims.majlis.w, P.dims.majlis.l)] : null;
       const fitStrip = (span, other, base, lo, hi) => { if (!dmj) return base; const want = Math.abs(other - dmj[0]) <= Math.abs(other - dmj[1]) ? dmj[1] : dmj[0], d = span - want; return d >= lo - 1e-6 && d <= hi + 1e-6 ? Math.round(d * 1000) / 1000 : base; };
       if (front && b.guestWc && menStrip(r, P).side === 'side' && L2 >= T.guestWcL + 1.6 && restW >= 3.4) {
         const sw = fitStrip(W_(r) - hf(opp[stripSide]) - INT / 2, H_(r) - hf('y0') - hf('y1'), T.guestStripW, T.guestStripW, T.guestStripW + .9);
@@ -3826,7 +3830,7 @@ function reviewRequest(requirements, land, counts) {
  *  (تمريرها هناك فعّل بوابة الموضع على نص لم تكن تقرؤه فأسقط بدائل سليمة: تغيير معايرة غير مقصود، سُحب). */
 function measureRequest(requirements, land, counts) { return { ...reviewRequest(requirements, land, counts), rules: requirements?.rules || [] }; }
 function compactReview(rv) {
-  const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, reasons_ar: g.reasons_ar });
+  const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, threshold: g.threshold ?? null, source: g.source ?? null, tier: g.tier ?? null, reasons_ar: g.reasons_ar }); // (02c) الحد والمصدر لبيانات الحجب
   // بوابات المستند وحده في gates (كما يراجعها reviewDesign)، وبوابة المجموعة (DISTINCT) منفصلة في setGates
   return { version: rv.version, passed: rv.passed, failedGates: rv.failedGates, score: rv.score, rejectReasons_ar: rv.rejectReasons_ar,
     gates: rv.gates.filter(g => g.id !== 'DISTINCT').map(G), setGates: rv.gates.filter(g => g.id === 'DISTINCT').map(G),
