@@ -12,6 +12,7 @@ import { applyCommand } from './draw/doc.mjs';
 import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defects.mjs';
 import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
+import { siteElementReport } from './site-element-check.mjs';
 import { planWindowScreen, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
@@ -112,11 +113,12 @@ export function polishR16(doc) {
             const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
             const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === o.id && !w.screened);
             const cmp = compareAcceptance(before, acceptanceSnapshot(doc), { protect: ['privacy', 'daylight', 'ventilation', 'circulation'] });
-            ok = !sight.potentialExposure && projOk && cmp.pass;
+            const site = siteElementReport(doc, { levelId: G.level.id }); // (قرار المالك) عنصر موقع: حدود القطعة، المركبات، المداخل، الإضاءة والتهوية
+            ok = !sight.potentialExposure && projOk && cmp.pass && site.geometryOk;
           } catch { ok = false; }
           if (ok) {
             const fid = doc.walls.find(w => !was.has(w.id))?.id;
-            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية).`);
+            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية). تحتاج تحققًا نظاميًا: ارتفاع الساتر وإباحته في الموقع غير متحققين من اشتراطات البلدية.`);
             if (fid) screens.push({ wall: fid, window: o.id, room: room.name, ...sc });
             changed = true; skip.add(o.id); continue;
           }

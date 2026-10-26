@@ -133,6 +133,8 @@ function statusCard(d) {
     el('p', { class: 'score ' + cls }, p.label_ar + (p.status === 'needs-edits' ? ` — ${p.edits_ar.length} ${p.edits_ar.length === 1 ? 'ملاحظة' : 'ملاحظات'}` : '')),
     p.status === 'hidden' ? el('ul', { class: 'tick' }, p.hidden_ar.map(t => el('li', { class: 'bad' }, t))) : null,
     p.status === 'needs-edits' ? el('ul', { class: 'tick' }, p.edits_ar.map(t => el('li', { class: 'no' }, t))) : null,
+    // (02c، قرار المالك 2026-10-26) ما لم يثبت نظاميًا (ساتر موقع) يظهر للعميل بوسم «تحتاج تحققًا نظاميًا» ولا يُعدّ معتمدًا
+    p.status !== 'hidden' && p.regulatory_ar?.length ? el('ul', { class: 'tick', 'data-regulatory': 'unverified' }, p.regulatory_ar.map(t => el('li', { class: 'no' }, t))) : null,
     // (الجولة الخامسة عشرة) التفضيلات الطفيفة ملاحظات معلنة مع البديل (لا تُخفى ولا تُعدّ متحققة)
     p.status !== 'hidden' && p.notes_ar?.length ? el('details', { class: 'notes' }, el('summary', {}, `ملاحظات للمراجعة (${p.notes_ar.length}) — تفضيلات افتراضية للميزان قابلة للتغيير`), el('ul', { class: 'tick' }, p.notes_ar.map(t => el('li', { class: 'no' }, t)))) : null,
     el('p', { class: 'sub' }, p.status === 'ready' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، ولا عيب جوهريًا فيه؛ الملاحظات المذكورة (إن وجدت) تفضيلات افتراضية للميزان لم تتحقق. يبقى مقترحًا مبدئيًا.' : p.status === 'needs-edits' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، لكن فيه ما يصلحه المعماري قبل العرض (مذكور أعلاه) — لا يُقدَّم على أنه جاهز.' : 'لا يُعرض بديلًا: يخالف بندًا إلزاميًا من طلبك أو رسب في المراجعة.'));

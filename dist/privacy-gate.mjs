@@ -11,7 +11,7 @@ import { measureR16 } from './privacy-defects.mjs';
 import { reviewDoc } from './draw/review.mjs';
 
 /** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا): مستوى العين، وارتفاع الساتر، وأبعاده عن الجدار. */
-export const SCREEN_DEFAULTS = Object.freeze({ eyeHeight: 1.6, screenHeight: 1.8, offsets: [0.9, 1.2, 0.75, 1.5], margin: 0.15, maxLength: 7, wallClear: 0.3, doorClear: 1.0, source: 'قيمة تصميمية افتراضية للميزان (ساتر خصوصية خارجي ارتفاعه 1.8 م > مستوى العين 1.6 م) — غير متحققة نظاميًا' });
+export const SCREEN_DEFAULTS = Object.freeze({ eyeHeight: 1.6, eyes: { outside: [1.2, 1.6], inside: [1.1, 1.6] }, screenHeight: 1.8, offsets: [0.9, 1.2, 0.75, 1.5], margin: 0.15, maxLength: 7, wallClear: 0.3, doorClear: 1.0, windowClear: 0.6, bayClear: 0.5, source: 'قيمة تصميمية افتراضية للميزان (ساتر خصوصية خارجي ارتفاعه 1.8 م > مستوى العين 1.6 م) — غير متحققة نظاميًا' });
 
 export function segmentHit(a, b, c, d) {
   const rx = b.x - a.x, ry = b.y - a.y, sx = d.x - c.x, sy = d.y - c.y, den = rx * sy - ry * sx;
@@ -23,18 +23,27 @@ export function segmentHit(a, b, c, d) {
  * خطوط الرؤية من كل نقطة خارجية إلى كل نقطة داخلية تعبر قطعة النافذة؛ مكشوفة ما لم يحجبها ساتر أعلى من مستوى العين قبل النافذة،
  * أو جدار مبنى (blockers) قبلها، أو كانت جلسة النافذة فوق مستوى العين.
  */
-export function screenWindowPrivacy({ window, parkingPoints, interiorPoints, opaqueScreens = [], blockers = [], eyeHeight = SCREEN_DEFAULTS.eyeHeight }) {
+export function screenWindowPrivacy({ window, parkingPoints, interiorPoints, opaqueScreens = [], blockers = [], eyeHeight = SCREEN_DEFAULTS.eyeHeight, eyes = null }) {
   if (!window || !Array.isArray(parkingPoints) || !Array.isArray(interiorPoints)) throw Error('Missing geometry');
   const exposed = [];
-  const aboveEye = eyeHeight < window.sillHeight || eyeHeight > window.headHeight;
+  // (قرار المالك 2026-10-26) ارتفاعات العين: إن مُرّر eyes = { outside:[...], inside:[...] } فكل خط رؤية يُقاس بارتفاع عين الخارج (سائق جالس/واقف)
+  // وعين الداخل (جالس/واقف): ارتفاعه عند النافذة بالاستيفاء الخطي بين العينين، ويُكشف فقط إن وقع بين جلسة النافذة ورأسها؛ ويحجبه الساتر إن كان
+  // ارتفاعه ≥ ارتفاع الخط عند عبوره. بغير eyes يبقى السلوك القديم بمستوى عين واحد.
+  const pairs = eyes ? eyes.outside.flatMap(o => eyes.inside.map(i => [o, i])) : [[eyeHeight, eyeHeight]];
+  const aboveEyeLegacy = !eyes && (eyeHeight < window.sillHeight || eyeHeight > window.headHeight);
+  const seen = new Set();
   for (const outside of parkingPoints) for (const inside of interiorPoints) {
     const hit = segmentHit(outside, inside, window.a, window.b);
-    if (!hit || aboveEye) continue;
-    const screened = opaqueScreens.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t && (s.height ?? 0) >= eyeHeight; })
-      || blockers.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t - 1e-6; });
-    if (!screened) exposed.push({ outside, inside, windowHit: { x: hit.x, y: hit.y } });
+    if (!hit || aboveEyeLegacy) continue;
+    for (const [z0, z1] of pairs) {
+      const zAt = t => z0 + (z1 - z0) * t;
+      if (eyes && (zAt(hit.t) < window.sillHeight || zAt(hit.t) > window.headHeight)) continue;
+      const screened = opaqueScreens.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t && (s.height ?? 0) >= (eyes ? zAt(h.t) : eyeHeight); })
+        || blockers.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t - 1e-6; });
+      if (!screened) { const k = `${outside.x},${outside.y},${inside.x},${inside.y}`; if (!seen.has(k)) { seen.add(k); exposed.push({ outside, inside, windowHit: { x: hit.x, y: hit.y }, eyes: eyes ? [z0, z1] : [eyeHeight, eyeHeight], zAtWindow: Math.round(zAt(hit.t) * 100) / 100 }); } }
+    }
   }
-  return { potentialExposure: exposed.length > 0, paths: exposed, samples: parkingPoints.length * interiorPoints.length, limitations: 'فحص خطوط رؤية ثنائي الأبعاد فقط؛ الإضاءة والتهوية والسلامة والزوايا ثلاثية الأبعاد تُفحص منفصلة' };
+  return { potentialExposure: exposed.length > 0, paths: exposed, samples: parkingPoints.length * interiorPoints.length * pairs.length, eyes: eyes || { outside: [eyeHeight], inside: [eyeHeight] }, limitations: 'فحص خطوط رؤية بارتفاعات عين محدودة؛ الإضاءة والتهوية والسلامة والزوايا ثلاثية الأبعاد الكاملة تُفحص منفصلة' };
 }
 
 const centroidOf = poly => poly.reduce((a, p) => ({ x: a.x + p.x / poly.length, y: a.y + p.y / poly.length }), { x: 0, y: 0 });
@@ -64,7 +73,7 @@ export function windowGeometry(doc, lv, op) {
 /** فحص نافذة غرفة واحدة مقابل كل المواقف بعينات متعددة. */
 export function windowExposure(doc, lv, op, side, bays) {
   const g = windowGeometry(doc, lv, op), inward = { x: -side.outward.x, y: -side.outward.y };
-  return screenWindowPrivacy({ ...g, parkingPoints: bays.flatMap(z => bayPoints(z.polygon)), interiorPoints: interiorPoints(side.room, op, inward) });
+  return screenWindowPrivacy({ ...g, eyes: SCREEN_DEFAULTS.eyes, parkingPoints: bays.flatMap(z => bayPoints(z.polygon)), interiorPoints: interiorPoints(side.room, op, inward) });
 }
 
 /**
@@ -73,6 +82,7 @@ export function windowExposure(doc, lv, op, side, bays) {
  *  المراجعة NO_WINDOW؛ ventilation: لكل غرفة مأهولة نافذة تُفتح على الخارج، ودورات المياه بنوافذها (BATH_NO_WINDOW)؛ circulation: الوصول
  *  (UNREACHABLE_ROOM) ومقدمة كل باب خارجي خالية من الأسوار (1.0 م).
  */
+export const requiresLightOrAir = r => HABITABLE.has(r?.type) || /bath|wc|toilet/i.test(r?.type || '');
 const HABITABLE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen']);
 export function acceptanceSnapshot(doc, request = {}, model = analyzeDoc(doc)) {
   const checks = {};
@@ -110,6 +120,15 @@ function segDist(p, a, b) {
   const dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L)) : 0;
   return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
 }
+function segPolyDist(a, b, poly) { if (pointInPolygon(a, poly, 0) || pointInPolygon(b, poly, 0)) return 0; let m = Infinity; for (let i = 0; i < poly.length; i++) m = Math.min(m, segSegDist(a, b, poly[i], poly[(i + 1) % poly.length])); return m; }
+export function bayApproach(doc, poly) {
+  const plot = doc.plot?.polygon; if (!plot || plot.length < 3) return null;
+  const bb = q => ({ x0: Math.min(...q.map(p => p.x)), x1: Math.max(...q.map(p => p.x)), y0: Math.min(...q.map(p => p.y)), y1: Math.max(...q.map(p => p.y)) }), B = bb(poly), P = bb(plot);
+  const streets = (doc.streets?.length ? doc.streets : [doc.entry || 's']), gap = { s: B.y0 - P.y0, n: P.y1 - B.y1, e: P.x1 - B.x1, w: B.x0 - P.x0 };
+  const side = streets.filter(k => k in gap).sort((p, q) => gap[p] - gap[q])[0] || 's', E = { ...B };
+  if (side === 's') E.y0 = P.y0; else if (side === 'n') E.y1 = P.y1; else if (side === 'e') E.x1 = P.x1; else E.x0 = P.x0;
+  return { side, polygon: [{ x: E.x0, y: E.y0 }, { x: E.x1, y: E.y0 }, { x: E.x1, y: E.y1 }, { x: E.x0, y: E.y1 }] };
+}
 function segSegDist(a, b, c, d) {
   if (segmentHit(a, b, c, d)) return 0;
   return Math.min(segDist(a, c, d), segDist(b, c, d), segDist(c, a, b), segDist(d, a, b));
@@ -143,6 +162,11 @@ export function planWindowScreen(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) {
     if (bays.some(z => z.polygon.some((p, i) => segmentHit(seg.a, seg.b, p, z.polygon[(i + 1) % z.polygon.length])) || pointInPolygon(seg.a, z.polygon, 0) || pointInPolygon(seg.b, z.polygon, 0))) continue;
     if (walls.some(w => segSegDist(seg.a, seg.b, w.a, w.b) < (w.t ?? .2) / 2 + D.wallClear)) continue;
     if (extDoors.some(p => segDist(p, seg.a, seg.b) < D.doorClear)) continue;
+    // الساتر لا يقترب من وجه أي نافذة خارجية (مستهدفة أو غيرها) أقل من windowClear: يبقى للنافذة مجال فتح وضوء (قرار المالك 2026-10-26)
+    if (lv.openings.some(o => { if (!o.window) return false; const s2 = o.sides.find(x => x.other === 'outside'); if (!s2 || !(o.id === op.id || requiresLightOrAir(s2.room))) return false; const tt = (o.wall?.t || .2) / 2, h2 = o.w / 2, v = { x: -s2.outward.y, y: s2.outward.x };
+      return segSegDist(seg.a, seg.b, { x: o.p.x + s2.outward.x * tt - v.x * h2, y: o.p.y + s2.outward.y * tt - v.y * h2 }, { x: o.p.x + s2.outward.x * tt + v.x * h2, y: o.p.y + s2.outward.y * tt + v.y * h2 }) < D.windowClear; })) continue;
+    // ولا يقترب من الموقف ولا يقطع ممر دخوله إلى حد الأرض (حركة المركبات)
+    if (bays.some(z => { const ap = bayApproach(doc, z.polygon); return segPolyDist(seg.a, seg.b, z.polygon) < D.bayClear || (ap && segPolyDist(seg.a, seg.b, ap.polygon) <= 0); })) continue;
     return { ...seg, offset: off, length: r3(hi - lo) };
   }
   return null;
