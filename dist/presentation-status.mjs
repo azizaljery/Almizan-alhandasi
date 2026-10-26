@@ -17,6 +17,7 @@ import { analyzeDoc } from './draw/digest.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
 import { toClientAr, GATE_AR } from './client-language.mjs';
+import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
 export { GATE_AR };
 
 export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
@@ -70,12 +71,16 @@ export function presentationStatus(design, request = {}) {
   // (الجولة 21 — 02b، قرار المالك: «لا محجوب بحقول أسباب فارغة») سبب مُهيكل لكل حجب، بالترتيب نفسه لـ hidden_ar: المرشح، والمرحلة، والقاعدة
   // المسؤولة، والمقيس والحد (متى انطبقا)، ومصدر الشرط، ونص العميل. يُبنى من البنود نفسها التي حجبت، لا من تفسير مفترض.
   const candidate = design.pat || design.id || null;
+  // (02c، حزمة المالك review-evidence) الحقول الموحدة للحزمة (candidateId، stage، rule، source، reason، measured، limit، unit) بأرقام من الفاحص
+  // الحقيقي: بند السجل (ledgerEvidence)، وقيمة بوابة المراجعة نفسها (gateEvidence من design.review.gates)، وقيمة المخالفة الإلزامية حيث كانت رقمًا؛
+  // وغير الرقمي null مع measure_ar صريح. تُبقى الحقول القديمة (candidate، kind، limit كائنًا في المقاسات → limitDetail) للتوافق.
+  const gateOf = id => (rv?.gates || []).find(g => g.id === id) || { id, value: null, reasons_ar: [] };
   const hiddenReasons = [
-    ...ledgerFails.map(x => ({ candidate, stage: 'presentation', rule: x.id || ('LEDGER:' + (x.kind || 'item')), kind: x.kind || null, measured: x.failing ?? x.actual ?? null,
-      limit: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, source: 'client', quote: x.text || null })),
-    ...gateFails.map(g => ({ candidate, stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: null, limit: null, source: 'review' })),
-    ...mand.map(g => ({ candidate, stage: 'presentation', rule: g.id, kind: 'mandatory', measured: g.value ?? null, limit: null, source: MAND_TIER_AR })),
-  ].map((r, i) => ({ ...r, reason_ar: hidden[i] }));
+    ...ledgerFails.map(x => { const e = ledgerEvidence(x); return { candidate, candidateId: candidate || 'design', stage: x.kind === 'dims' ? 'dimensions' : 'presentation', rule: x.id || ('LEDGER:' + (x.kind || 'item')), kind: x.kind || null,
+      measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, ...(x.kind === 'dims' ? { measuredDetail: x.failing ?? x.actual ?? null, limitDetail: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, tol: x.tol ?? null } : {}), source: 'client', quote: x.text || null }; }),
+    ...gateFails.map(g => { const gg = gateOf(g), e = gateEvidence(gg); return { candidate, candidateId: candidate || 'design', stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, source: gg.tier || 'review', gateReasons_ar: gg.reasons_ar || [] }; }),
+    ...mand.map(g => ({ candidate, candidateId: candidate || 'design', stage: 'presentation', rule: g.id, kind: 'mandatory', measured: null, limit: null, unit: null, measuredDetail: g.value ?? null, measure_ar: `شرط أساسي غير رقمي (مسار/علاقة): ${(g.reasons_ar || [])[0] || g.ar}`, source: MAND_TIER_AR })),
+  ].map((r, i) => ({ ...r, reason_ar: hidden[i], reason: hidden[i] }));
   r16 = r16.filter(g => !mand.includes(g));
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
@@ -86,7 +91,7 @@ export function presentationStatus(design, request = {}) {
   // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
   for (const x of items) x.text_ar = toClientAr(x.text_ar);
   for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
-  for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason_ar = hidden[i];
+  for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason = hiddenReasons[i].reason_ar = hidden[i];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)

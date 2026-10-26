@@ -32,6 +32,7 @@ import { planParking, PARKING_RULE } from './site-parking.mjs';
 import { frontSetbackFor } from './regulations-sa.mjs';
 import { clientGlazing } from './glazing.mjs';
 import { presentationStatus, STATUS_AR, PROPOSAL_LABEL_AR, MAJOR_PREFS } from './presentation-status.mjs';
+import { classifyRun, candidateRejections } from './review-evidence.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
 import { guarded, invariants as guardInv, regressions as guardReg } from './change-guard.mjs';
@@ -3325,6 +3326,9 @@ function withPresentation(args, out) {
   const req = measureRequest(args.requirements || {}, args.land, args.counts);
   for (const d of out.designs) { try { d.presentation = presentationStatus(d, req); } catch (e) { d.presentation = { status: 'needs-edits', label_ar: STATUS_AR['needs-edits'], hidden_ar: [], edits_ar: ['تعذّر حساب حالة العرض لهذا البديل؛ يُراجع قبل اعتماده.'], hiddenReasons: [], diag: String(e?.message || e), prefs: [], proposal_ar: PROPOSAL_LABEL_AR }; } } // (02b) لا نص استثناء للعميل
   const hid = out.designs.filter(d => d.presentation.status === 'hidden'), vis = out.designs.filter(d => d.presentation.status !== 'hidden');
+  // (02c/01b، حزمة المالك review-evidence) الحالات الثلاث منفصلة: مرشح رُفض أثناء البحث (لكلٍّ سببه المُهيكل)، وبديل مكتمل حُجب، وبلا بديل صالح
+  for (const r of out.rejected || []) if (!r.rejections) r.rejections = candidateRejections(r);
+  out.run = classifyRun({ designs: [...vis, ...hid], rejected: out.rejected || [], failure: out.timedOut ? { status: 'SEARCH_INCOMPLETE', reason: 'TIME_LIMIT' } : null });
   if (vis.length && hid.length) {
     out.hidden = [...(out.hidden || []), ...hid.map(d => ({ pat: d.pat, reasons_ar: d.presentation.hidden_ar, pluralReading: !!d.pluralReading }))]; out.designs = vis;
     // (الجولة العشرون) المستندات المحجوبة تُحفظ تجارب بحثية (لا تُعرض للعميل) — خاصية غير معدودة لا تدخل JSON النتيجة
@@ -3453,7 +3457,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
       // يُعاد حل النمط نفسه والعرض مخالفة بهامش في البحث (hardWidth)؛ لا يُخفَّض الحد، وما لا يبلغه بعد إعادة الحل يبقى مرفوضًا
       if (d.reject.length && d.reject.every(nearMissWhy)) nearMiss.push(d);
       if (d.reject.length) { rejected.push({ pat: patOf(cand), why: [...d.reject, ...d.notes.filter(n => /لم تتسع|لم تجد|تعذّر/.test(n))], doc: d.doc }); continue; }
-      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', doc: d.doc }); continue; }
+      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', gateEv: failedGateEv(d.review), doc: d.doc }); continue; }
       built.push(d);
     } catch (e) { rejected.push({ pat: patOf(cand), why: [String(e.message || e)] }); }
   }
@@ -3506,7 +3510,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
         const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : false;
         const d = buildDesign(cand, P, site, land, { title, mirror, requirements, entry });
         if (d.reject.length) { if (d.reject.every(nearMissWhy)) near2.push(d); rejected.push({ pat: patOf(cand), why: d.reject, by: 'second-pass', doc: d.doc }); continue; }
-        if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', doc: d.doc }); continue; }
+        if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', gateEv: failedGateEv(d.review), doc: d.doc }); continue; }
         d.secondPass = true; built.push(d); done2.add(k2);
       } catch (e) { rejected.push({ pat: patOf(cand), why: [String(e.message || e)] }); }
     }
@@ -3828,8 +3832,10 @@ function reviewRequest(requirements, land, counts) {
 /** (الجولة التاسعة عشرة) طلب القياسات (privacy-defects) ومعه قواعد العميل المستخرجة (الرئيسية بعيدة عن الدرج…) — لا يُمرَّر إلى plan-review
  *  (تمريرها هناك فعّل بوابة الموضع على نص لم تكن تقرؤه فأسقط بدائل سليمة: تغيير معايرة غير مقصود، سُحب). */
 function measureRequest(requirements, land, counts) { return { ...reviewRequest(requirements, land, counts), rules: requirements?.rules || [] }; }
+/** (02c) بوابات المراجعة الراسبة بقيمها الفعلية — لأدلة رفض المرشح (review-evidence.mjs candidateRejections). */
+const failedGateEv = rv => (rv?.gates || []).filter(g => !g.ok && g.applicable !== false).map(g => ({ id: g.id, ar: g.ar, value: g.value, tier: g.tier, reasons_ar: g.reasons_ar }));
 function compactReview(rv) {
-  const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, reasons_ar: g.reasons_ar });
+  const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, threshold: g.threshold ?? null, tier: g.tier ?? null, reasons_ar: g.reasons_ar }); // (02c) الحد والطبقة لأدلة الحجب
   // بوابات المستند وحده في gates (كما يراجعها reviewDesign)، وبوابة المجموعة (DISTINCT) منفصلة في setGates
   return { version: rv.version, passed: rv.passed, failedGates: rv.failedGates, score: rv.score, rejectReasons_ar: rv.rejectReasons_ar,
     gates: rv.gates.filter(g => g.id !== 'DISTINCT').map(G), setGates: rv.gates.filter(g => g.id === 'DISTINCT').map(G),
@@ -4071,7 +4077,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
       // (الجولة التاسعة) اتساق التراكب مقيسًا من المرسوم: لا جدار علوي يمتد > 5 م بلا جدار تحته، ولا غرفة فوق فراغ أرضي
       const reject = [...hardGates(d.doc, allP), ...qualityGates(d.doc, null, { ...gateOpts(allP), narrow: site.W < NARROW_W }).filter(w => !d.qgates.includes(w)), ...d.qgates, ...stackingGates(d.doc)];
       if (reject.length) { rejected.push({ pat, why: reject }); if (globalThis.__v2keepRejDocs) (globalThis.__v2rejDocs ||= []).push({ pat, why: reject, doc: d.doc }); return; }
-      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat, why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review' }); if (globalThis.__v2keepRejDocs) (globalThis.__v2rejDocs ||= []).push({ pat, why: d.review.rejectReasons_ar, doc: d.doc }); return; }
+      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat, why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', gateEv: failedGateEv(d.review) }); if (globalThis.__v2keepRejDocs) (globalThis.__v2rejDocs ||= []).push({ pat, why: d.review.rejectReasons_ar, doc: d.doc }); return; }
       d.pat = pat; d.summary = summary; d.notes = [...new Set([...d.notes, ...ul.notes, note])];
       d.stacking = stackingReport(d.doc);
       // (الجولة الثامنة عشرة) حمامات علوية فوق المجلس أو الطعام أو المدخل: تُذكر مقيسة من المرسوم (تمديدات صرف فوق فراغ جاف — تحتاج تحققًا
