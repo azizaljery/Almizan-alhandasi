@@ -13,6 +13,7 @@ import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defec
 import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
 import { siteElementReport } from './site-element-check.mjs';
+import { completeShowers } from './bath-shower.mjs';
 import { planWindowScreens, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
@@ -268,6 +269,8 @@ export function polishR16(doc) {
       const done = carveBath(doc, lv, R); if (done) { notes.push(done); changed = true; break; }
     }
   }
+  // 4) (قرار المالك 2026-10-26 ثالثًا) حمام كامل بلا دش صالح: يُضاف/يُستبدل بفحص هندسي (التقاطع، مسقط الوصول، فتح الباب، العرض الصافي)؛ وإن تعذّر يحجبه بوابة العرض
+  if (!R14_OFF.has('r21shower')) { try { const r = completeShowers(doc); for (const n of r.notes) { notes.push(n); changed = true; } for (const f of r.failed) notes.push(`تعذّر وضع دش صالح في «${f.room}»: ${f.why}.`); } catch { /* */ } }
   return { notes_ar: notes, changed, screens };
 }
 const bbox = poly => ({ x0: Math.min(...poly.map(p => p.x)), x1: Math.max(...poly.map(p => p.x)), y0: Math.min(...poly.map(p => p.y)), y1: Math.max(...poly.map(p => p.y)) });

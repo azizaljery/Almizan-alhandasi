@@ -700,7 +700,7 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
       return `«${g.r.name}» ${reasons.join('، و')}، والسماحية ±${tol} م لكل ضلع`; };
     const c0 = view(g0);
     out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: r2d(c0.s), l: r2d(c0.l) }, envelope: { s: r2d(g0.m.envelope.s), l: r2d(g0.m.envelope.l) }, want: { s: want[0], l: want[1] }, tol,
-      deviation: g0.m.deviation || null, measure: 'clear-rectangle',
+      deviation: g0.m.deviation || null, measure: 'clear-rectangle', rooms: list.map(r => r.name),
       ...(bad ? { failing: { name: bad.r.name, s: r2d(view(bad).s), l: r2d(view(bad).l), envelope: { s: r2d(bad.m.envelope.s), l: r2d(bad.m.envelope.l) }, envelopeOK: bad.m.envelopeOK, clearOK: bad.m.clearOK } } : {}),
       why: (bad ? why1(bad) : `الفعلي ${got.map(g => { const c = view(g), e = g.m.envelope; return `${r2d(c.s)}×${r2d(c.l)}${Math.abs(e.s - c.s) > .005 || Math.abs(e.l - c.l) > .005 ? ` (أوسع موضع ${r2d(e.s)}×${r2d(e.l)})` : ''}`; }).join('، ')} م`) + ' (أضيق مستطيل صافٍ صالح داخل الجدران وصندوقه؛ كل ضلع على حدة لا المساحة).',
       ...(!bad && got.some(g => deviationAr(g.m)) ? { deviation_ar: got.map(g => deviationAr(g.m) && `«${g.r.name}»: ${deviationAr(g.m)}`).filter(Boolean).join('؛ ') } : {}) });

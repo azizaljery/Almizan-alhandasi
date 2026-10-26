@@ -20,6 +20,7 @@ import { toClientAr, GATE_AR } from './client-language.mjs';
 import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
 import { evaluateSuiteBaths } from './bath-band.mjs';
 import { UNVERIFIED_LABEL } from './regulatory-checks.mjs';
+import { showerGate } from './bath-shower.mjs';
 import { planTests, planStates, REG_SHORT_AR, REG_TAG_AR } from './plan-states.mjs';
 export { GATE_AR };
 
@@ -72,6 +73,9 @@ export function presentationStatus(design, request = {}) {
   // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
   for (const g of mand) hidden.push(`شرط أساسي غير متحقق — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
+  // (02c، قرار المالك 2026-10-26 ثالثًا) بوابة إلزامية: حمام كامل بلا تجهيز استحمام صالح (فحص هندسي: التقاطع ومسقط الوصول وفتح الباب والعرض الصافي) يُمنع قبوله
+  let showerFails = []; try { showerFails = R14_OFF.has('r21shower') ? [] : showerGate(doc, model).failing; } catch { showerFails = []; }
+  for (const b of showerFails) hidden.push(`شرط أساسي غير متحقق — حمام «${b.room}» بلا تجهيز استحمام صالح للاستخدام: ${b.reasons.join('؛ ')} (${MAND_TIER_AR})`);
   // (الجولة 21 — 02b، قرار المالك: «لا محجوب بحقول أسباب فارغة») سبب مُهيكل لكل حجب، بالترتيب نفسه لـ hidden_ar: المرشح، والمرحلة، والقاعدة
   // المسؤولة، والمقيس والحد (متى انطبقا)، ومصدر الشرط، ونص العميل. يُبنى من البنود نفسها التي حجبت، لا من تفسير مفترض.
   const candidate = design.pat || design.id || null;
@@ -84,6 +88,7 @@ export function presentationStatus(design, request = {}) {
       measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, ...(x.kind === 'dims' ? { measuredDetail: x.failing ?? x.actual ?? null, limitDetail: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, tol: x.tol ?? null } : {}), source: 'client', quote: x.text || null }; }),
     ...gateFails.map(g => { const gg = gateOf(g), e = gateEvidence(gg); return { candidate, candidateId: candidate || 'design', stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, source: gg.tier || 'review', gateReasons_ar: gg.reasons_ar || [] }; }),
     ...mand.map(g => ({ candidate, candidateId: candidate || 'design', stage: 'presentation', rule: g.id, kind: 'mandatory', measured: null, limit: null, unit: null, measuredDetail: g.value ?? null, measure_ar: `شرط أساسي غير رقمي (مسار/علاقة): ${(g.reasons_ar || [])[0] || g.ar}`, source: MAND_TIER_AR })),
+    ...showerFails.map(b => ({ candidate, candidateId: candidate || 'design', stage: 'presentation', rule: 'BATH_SHOWER', kind: 'mandatory', measured: null, limit: null, unit: null, measuredDetail: { room: b.room, widthM: b.widthM, minWidthM: b.minWidthM, shower: b.shower }, measure_ar: `شرط أساسي هندسي: ${b.reasons.join('؛ ')}`, source: MAND_TIER_AR })),
   ].map((r, i) => ({ ...r, reason_ar: hidden[i], reason: hidden[i] }));
   r16 = r16.filter(g => !mand.includes(g));
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),

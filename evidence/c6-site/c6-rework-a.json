@@ -1,0 +1,838 @@
+{
+ "stage": "c6-rework-a",
+ "case": "C6",
+ "root": "/home/claude/wt-r21p/",
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "pat": "sidecourt:sc0",
+   "status": "ready",
+   "dims": [
+    {
+     "id": "D-majlis",
+     "ok": true,
+     "actual": {
+      "s": 5.01,
+      "l": 6
+     },
+     "envelope": {
+      "s": 5.01,
+      "l": 6
+     },
+     "want": {
+      "s": 5,
+      "l": 6
+     },
+     "tol": 0.05,
+     "deviation": {
+      "envelope": {
+       "s": 0.015,
+       "l": 0
+      },
+      "clear": {
+       "s": 0.015,
+       "l": 0
+      }
+     }
+    },
+    {
+     "id": "D-kitchen",
+     "ok": true,
+     "actual": {
+      "s": 4,
+      "l": 5.01
+     },
+     "envelope": {
+      "s": 4,
+      "l": 5.01
+     },
+     "want": {
+      "s": 4,
+      "l": 5
+     },
+     "tol": 0.05,
+     "deviation": {
+      "envelope": {
+       "s": -0.005,
+       "l": 0.015
+      },
+      "clear": {
+       "s": -0.005,
+       "l": 0.015
+      }
+     }
+    }
+   ],
+   "privacy": {
+    "exposure": {
+     "withScreen": [
+      {
+       "opening": "o20",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 1,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o21",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 8,
+       "samples": 720,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o22",
+       "room": "الصالة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 864,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o23",
+       "room": "ممر الغرف",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 11,
+       "samples": 216,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o24",
+       "room": "ممر الغرف",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 216,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o25",
+       "room": "المجلس",
+       "sill": 0.8,
+       "head": 2.3,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o28",
+       "room": "صالة الطعام والمقلط",
+       "sill": 0.8,
+       "head": 2.3,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o29",
+       "room": "المطبخ",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 864,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o30",
+       "room": "المطبخ",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o31",
+       "room": "غرفة النوم الرئيسية",
+       "sill": 0.8,
+       "head": 2.3,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o32",
+       "room": "غرفة نوم 3",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 3,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o35",
+       "room": "غرفة نوم 2",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o36",
+       "room": "غرفة نوم 2",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      }
+     ],
+     "withoutScreen": [
+      {
+       "opening": "o20",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 59,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o21",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 8,
+       "samples": 720,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o22",
+       "room": "الصالة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 62,
+       "samples": 864,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o23",
+       "room": "ممر الغرف",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 14,
+       "samples": 216,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o32",
+       "room": "غرفة نوم 3",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 3,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      }
+     ]
+    },
+    "r16": [
+     {
+      "id": "WINDOW_PARKING",
+      "pass": true,
+      "applicable": true,
+      "reasons_ar": [],
+      "value": {
+       "windows": [
+        {
+         "room": "الصالة",
+         "opening": "o22",
+         "bay": "موقف سيارة",
+         "dist": 1.64,
+         "screened": "سور حاجب"
+        }
+       ]
+      }
+     },
+     {
+      "id": "HALL_STREET",
+      "pass": true,
+      "applicable": true,
+      "reasons_ar": [],
+      "value": {
+       "windows": []
+      }
+     },
+     {
+      "id": "BATH_NO_WINDOW",
+      "pass": false,
+      "applicable": true,
+      "reasons_ar": [
+       "2 من 5: دورة مياه، حمام الرئيسية — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+      ],
+      "value": {
+       "baths": [
+        "دورة مياه",
+        "حمام الرئيسية"
+       ]
+      }
+     }
+    ]
+   },
+   "acceptance": {
+    "privacy": {
+     "pass": 11,
+     "fail": 0,
+     "failed": []
+    },
+    "note": {
+     "pass": 0,
+     "fail": 1,
+     "failed": [
+      "note:ENTRANCES_TOGETHER — باب الرجال وباب العائلة على الواجهة نفسها بينهما 1.67 م"
+     ]
+    },
+    "ventilation": {
+     "pass": 7,
+     "fail": 1,
+     "failed": [
+      "ventilation:BATH_NO_WINDOW — 2 من 5: دورة مياه، حمام الرئيسية — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+     ]
+    },
+    "daylight": {
+     "pass": 8,
+     "fail": 0,
+     "failed": []
+    },
+    "circulation": {
+     "pass": 4,
+     "fail": 0,
+     "failed": []
+    }
+   },
+   "parking": {
+    "bays": 2,
+    "polygons": [
+     [
+      {
+       "x": 17.15,
+       "y": 0.1
+      },
+      {
+       "x": 19.85,
+       "y": 0.1
+      },
+      {
+       "x": 19.85,
+       "y": 5.6
+      },
+      {
+       "x": 17.15,
+       "y": 5.6
+      }
+     ],
+     [
+      {
+       "x": 14.45,
+       "y": 0.1
+      },
+      {
+       "x": 17.15,
+       "y": 0.1
+      },
+      {
+       "x": 17.15,
+       "y": 5.6
+      },
+      {
+       "x": 14.45,
+       "y": 5.6
+      }
+     ]
+    ]
+   },
+   "fences": [
+    {
+     "id": "w23",
+     "a": {
+      "x": 13.705,
+      "y": 2.647
+     },
+     "b": {
+      "x": 13.705,
+      "y": 7.247
+     },
+     "h": 1.8
+    }
+   ],
+   "site": {
+    "fences": [
+     {
+      "id": "w23",
+      "height": 1.8,
+      "a": {
+       "x": 13.705,
+       "y": 2.647
+      },
+      "b": {
+       "x": 13.705,
+       "y": 7.247
+      },
+      "length": 4.6,
+      "checks": [
+       {
+        "id": "PLOT_BOUNDARY",
+        "pass": true,
+        "measured": 2.647,
+        "limit": 0,
+        "unit": "m",
+        "basis": "داخل حدود القطعة (أقرب طرف يبعد 2.647 م عن الحد)",
+        "status": "measured"
+       },
+       {
+        "id": "BUILDING_SETBACK_LINE",
+        "pass": true,
+        "applicable": false,
+        "measured": null,
+        "limit": null,
+        "unit": "m",
+        "status": "not-applicable",
+        "basis": "عنصر موقع لا كتلة مبنى: لا يُقاس بخط ارتداد المبنى (ارتدادات المستند {\"s\":3,\"n\":1.5,\"e\":1.5,\"w\":1.5})؛ وإباحته داخل الارتداد نظاميًا غير متحققة (انظر الاشتراط النظامي)"
+       },
+       {
+        "id": "BAY_CLEARANCE",
+        "pass": true,
+        "measured": 0.745,
+        "limit": 0.5,
+        "unit": "m",
+        "basis": "الهامش بين الساتر وأقرب موقف 0.745 م",
+        "status": "measured"
+       },
+       {
+        "id": "BAY_APPROACH",
+        "pass": true,
+        "measured": 0.745,
+        "limit": 0,
+        "unit": "m",
+        "basis": "لا يقطع ممر دخول الموقف إلى حد الأرض",
+        "status": "measured"
+       },
+       {
+        "id": "CAR_DOOR_OPENING",
+        "pass": null,
+        "measured": 0.745,
+        "limit": null,
+        "unit": "m",
+        "status": "unverified",
+        "basis": "كفاية الهامش لفتح أبواب السيارة وسعة الانعطاف: غير متحقق (لا مصدر)"
+       },
+       {
+        "id": "DOOR_FRONT",
+        "pass": true,
+        "measured": 5.267,
+        "limit": 1,
+        "unit": "m",
+        "basis": "أقرب باب خارجي يبعد 5.267 م",
+        "status": "measured"
+       },
+       {
+        "id": "ENTRY_PATH",
+        "pass": true,
+        "measured": 5.267,
+        "limit": 0.9,
+        "unit": "m",
+        "basis": "يبعد 5.267 م عن مسار الدخول من الباب الرئيسي إلى الشارع",
+        "status": "measured"
+       },
+       {
+        "id": "WINDOW_CLEARANCE:o20",
+        "pass": true,
+        "measured": 0.9,
+        "limit": 0.6,
+        "unit": "m",
+        "basis": "نافذة «مدخل العائلة» تبعد عن الساتر 0.9 م",
+        "status": "measured"
+       },
+       {
+        "id": "WINDOW_SWING:o20",
+        "pass": true,
+        "measured": 0.9,
+        "limit": 0,
+        "unit": "m",
+        "basis": "الساتر خارج غلاف دوران ضلفة نافذة «مدخل العائلة» (نوع التشغيل غير محدد في المستند: فُحصت أسوأ حالة (ضلفات مفصلية إلى الخارج 90°))",
+        "status": "measured"
+       },
+       {
+        "id": "DAYLIGHT_OBSTRUCTION:o20",
+        "pass": null,
+        "measured": 12.5,
+        "limit": null,
+        "unit": "deg",
+        "status": "unverified",
+        "basis": "زاوية حجب الساتر لنافذة «مدخل العائلة» 12.5° من منتصف النافذة — النافذة نفسها لم تتغير مساحتها ولا موضعها؛ حد زاوية الحجب المقبول غير متحقق (لا مصدر)"
+       },
+       {
+        "id": "WINDOW_CLEARANCE:o21",
+        "pass": true,
+        "measured": 3,
+        "limit": 0.6,
+        "unit": "m",
+        "basis": "نافذة «مدخل العائلة» تبعد عن الساتر 3 م",
+        "status": "measured"
+       },
+       {
+        "id": "WINDOW_SWING:o21",
+        "pass": true,
+        "measured": 3,
+        "limit": 0,
+        "unit": "m",
+        "basis": "الساتر خارج غلاف دوران ضلفة نافذة «مدخل العائلة» (نوع التشغيل غير محدد في المستند: فُحصت أسوأ حالة (ضلفات مفصلية إلى الخارج 90°))",
+        "status": "measured"
+       },
+       {
+        "id": "DAYLIGHT_OBSTRUCTION:o21",
+        "pass": null,
+        "measured": 3.8,
+        "limit": null,
+        "unit": "deg",
+        "status": "unverified",
+        "basis": "زاوية حجب الساتر لنافذة «مدخل العائلة» 3.8° من منتصف النافذة — النافذة نفسها لم تتغير مساحتها ولا موضعها؛ حد زاوية الحجب المقبول غير متحقق (لا مصدر)"
+       },
+       {
+        "id": "WINDOW_CLEARANCE:o22",
+        "pass": true,
+        "measured": 0.9,
+        "limit": 0.6,
+        "unit": "m",
+        "basis": "نافذة «الصالة» تبعد عن الساتر 0.9 م",
+        "status": "measured"
+       },
+       {
+        "id": "WINDOW_SWING:o22",
+        "pass": true,
+        "measured": 0.9,
+        "limit": 0,
+        "unit": "m",
+        "basis": "الساتر خارج غلاف دوران ضلفة نافذة «الصالة» (نوع التشغيل غير محدد في المستند: فُحصت أسوأ حالة (ضلفات مفصلية إلى الخارج 90°))",
+        "status": "measured"
+       },
+       {
+        "id": "DAYLIGHT_OBSTRUCTION:o22",
+        "pass": null,
+        "measured": 12.5,
+        "limit": null,
+        "unit": "deg",
+        "status": "unverified",
+        "basis": "زاوية حجب الساتر لنافذة «الصالة» 12.5° من منتصف النافذة — النافذة نفسها لم تتغير مساحتها ولا موضعها؛ حد زاوية الحجب المقبول غير متحقق (لا مصدر)"
+       },
+       {
+        "id": "WINDOW_CLEARANCE:o23",
+        "pass": true,
+        "measured": 0.608,
+        "limit": 0.6,
+        "unit": "m",
+        "basis": "نافذة «ممر الغرف» تبعد عن الساتر 0.608 م",
+        "status": "measured"
+       },
+       {
+        "id": "WINDOW_SWING:o23",
+        "pass": true,
+        "measured": 0.608,
+        "limit": 0,
+        "unit": "m",
+        "basis": "الساتر خارج غلاف دوران ضلفة نافذة «ممر الغرف» (نوع التشغيل غير محدد في المستند: فُحصت أسوأ حالة (ضلفات مفصلية إلى الخارج 90°))",
+        "status": "measured"
+       },
+       {
+        "id": "DAYLIGHT_OBSTRUCTION:o23",
+        "pass": null,
+        "measured": 18.2,
+        "limit": null,
+        "unit": "deg",
+        "status": "unverified",
+        "basis": "زاوية حجب الساتر لنافذة «ممر الغرف» 18.2° من منتصف النافذة — النافذة نفسها لم تتغير مساحتها ولا موضعها؛ حد زاوية الحجب المقبول غير متحقق (لا مصدر)"
+       }
+      ],
+      "windows": [
+       {
+        "opening": "o20",
+        "room": "مدخل العائلة",
+        "clearance": 0.9,
+        "swingConflict": false,
+        "operation": "unspecified",
+        "function": {
+         "room": "مدخل العائلة",
+         "roomType": "entrance",
+         "light": "not-required (للغرفة نوافذ أخرى)",
+         "ventilation": "not-required-by-mizan",
+         "safety": "unverified",
+         "exemptFromClearance": false
+        },
+        "obstructionAngleDeg": 12.5,
+        "sill": 1,
+        "head": 2.2
+       },
+       {
+        "opening": "o21",
+        "room": "مدخل العائلة",
+        "clearance": 3,
+        "swingConflict": false,
+        "operation": "unspecified",
+        "function": {
+         "room": "مدخل العائلة",
+         "roomType": "entrance",
+         "light": "not-required (للغرفة نوافذ أخرى)",
+         "ventilation": "not-required-by-mizan",
+         "safety": "unverified",
+         "exemptFromClearance": false
+        },
+        "obstructionAngleDeg": 3.8,
+        "sill": 1,
+        "head": 2.2
+       },
+       {
+        "opening": "o22",
+        "room": "الصالة",
+        "clearance": 0.9,
+        "swingConflict": false,
+        "operation": "unspecified",
+        "function": {
+         "room": "الصالة",
+         "roomType": "living",
+         "light": "required",
+         "ventilation": "required",
+         "safety": "unverified",
+         "exemptFromClearance": false
+        },
+        "obstructionAngleDeg": 12.5,
+        "sill": 1,
+        "head": 2.2
+       },
+       {
+        "opening": "o23",
+        "room": "ممر الغرف",
+        "clearance": 0.608,
+        "swingConflict": false,
+        "operation": "unspecified",
+        "function": {
+         "room": "ممر الغرف",
+         "roomType": "corridor",
+         "light": "not-required (للغرفة نوافذ أخرى)",
+         "ventilation": "not-required-by-mizan",
+         "safety": "unverified",
+         "exemptFromClearance": false
+        },
+        "obstructionAngleDeg": 18.2,
+        "sill": 1,
+        "head": 2.2
+       }
+      ]
+     }
+    ],
+    "regulatory": [
+     {
+      "rule": "ارتفاع الساتر/السور المصمت وإباحته داخل الارتداد أو فناء المواقف",
+      "measuredLabel": "ارتفاع الساتر المرسوم",
+      "measuredValue": 1.8,
+      "unit": "m",
+      "status": "unverified",
+      "source": null,
+      "requiresLicensedSpecialist": true,
+      "verificationNote": "لا يوجد في مصادر الميزان (regulations-sa.mjs) اشتراط موثّق لارتفاع الأسوار/السواتر المصمتة أو لإباحتها داخل الارتداد؛ يُتحقق من اشتراطات البلدية والموقع ونوع العنصر وارتفاعه."
+     },
+     {
+      "rule": "نوع الساتر (مصمت قائم بذاته) وأثره على الجار والشارع والرؤية المرورية",
+      "measuredLabel": "عدد السواتر",
+      "measuredValue": 1,
+      "unit": "",
+      "status": "unverified",
+      "source": null,
+      "requiresLicensedSpecialist": true,
+      "verificationNote": "غير متحقق: يحتاج مراجعة جهة مرخّصة/البلدية."
+     }
+    ],
+    "pendingRegulatory": true,
+    "geometryOk": true,
+    "failures_ar": [],
+    "defaults": {
+     "bayClear": 0.5,
+     "entryHalfWidth": 0.9,
+     "doorClear": 1,
+     "minWindowOffset": 0.6,
+     "source": "قيم تصميمية افتراضية للميزان — غير نظامية وغير متحققة من اشتراطات البلدية"
+    }
+   },
+   "edits_ar": [],
+   "notes_ar": [
+    "باب خدمة (مقلط) بين مجلس الرجال والطعام في الدور الواحد، والطعام يُغلق على العائلة بباب: «صالة الطعام والمقلط» مفتوح على العائلة بفتحة بلا باب وهو على المجلس (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+    "«حمام الرئيسية» 2.28×3.08 م: الأجهزة المرسومة مرحاض ومغسلة — ينقصها الدش — يحتاج مراجعة توزيع الحمام",
+    "«حمام غرفة 3» 1.58×3.31 م: الأجهزة المرسومة مرحاض ومغسلة — ينقصها الدش — يحتاج مراجعة توزيع الحمام",
+    "مدخل الرجال ومدخل العائلة متجاوران على الواجهة نفسها: باب الرجال وباب العائلة على الواجهة نفسها بينهما 1.67 م",
+    "حمامات بلا نافذة خارجية (تحتاج تهوية ميكانيكية): 2 من 5: دورة مياه، حمام الرئيسية — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+   ],
+   "hidden_ar": [],
+   "label_ar": "جاهز للعرض المبدئي — تحتاج تحققًا نظاميًا",
+   "regulatory_ar": [
+    "ساتر خصوصية خارجي (w23): تحتاج تحققًا نظاميًا — ارتفاع الساتر/السور المصمت وإباحته داخل الارتداد أو فناء المواقف؛ نوع الساتر (مصمت قائم بذاته) وأثره على الجار والشارع والرؤية المرورية — لم يتم التحقق؛ ليس معتمدًا نظاميًا"
+   ]
+  }
+ ]
+}
