@@ -139,8 +139,10 @@ test('02b (10) لا بديل محجوب بلا سبب: كل محجوب يحمل 
   const st = presentationStatus({ pat: 'X1', doc: gen('beds', 'دور واحد، 3 غرف نوم كل غرفة 4×5، مجلس، صالة، مطبخ، طعام', C3, LAND(24, 30)).o.designs[0].doc, ledger: [{ id: 'D-bedroom', kind: 'dims', text: 'غرف الأبناء بأبعاد 4×5', ok: false, actual: { s: 4, l: 5 }, failing: { name: 'غرفة نوم 4', s: 3.93, l: 4.56 }, want: { s: 4, l: 5 }, tol: .3, why: 'فرق 0.44 م' }], review: { passed: true } }, { text: '' });
   assert.equal(st.status, 'hidden');
   const h = st.hiddenReasons[0];
-  assert.deepEqual([h.candidate, h.stage, h.rule, h.source], ['X1', 'presentation', 'D-bedroom', 'client']);
-  assert.deepEqual(h.measured, { name: 'غرفة نوم 4', s: 3.93, l: 4.56 }); assert.deepEqual(h.limit, { s: 4, l: 5, tol: .3 }); assert.ok(h.reason_ar.length > 20);
+  // (02c، حزمة المالك review-evidence) الحقول الموحدة: المرحلة «dimensions»، والمقيس والحد رقمان للضلع الأسوأ (الطول 4.56 من 5 هنا)، والتفصيل كما كان
+  assert.deepEqual([h.candidate, h.stage, h.rule, h.source], ['X1', 'dimensions', 'D-bedroom', 'client']);
+  assert.deepEqual([h.measured, h.limit, h.unit, h.tol], [4.56, 5, 'م', .3]);
+  assert.deepEqual(h.measuredDetail, { name: 'غرفة نوم 4', s: 3.93, l: 4.56 }); assert.deepEqual(h.limitDetail, { s: 4, l: 5, tol: .3 }); assert.ok(h.reason_ar.length > 20);
   // تكامل: كل البدائل المولدة في هذا الملف
   for (const { o } of memo.values()) for (const d of o.designs) {
     const p = d.presentation; if (p.status !== 'hidden') continue;
