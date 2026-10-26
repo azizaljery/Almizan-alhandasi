@@ -419,12 +419,18 @@ const ROOM_OF = {
   servicedoor: r => r.name === 'المطبخ',
 };
 /** غرف المستند بمستطيلاتها الصافية (حسب الدور)، وحدود المبنى. +x شرق و+y شمال. */
+// (02c) الأعمدة المرسومة في الدور (doc.columns: مربع بضلع size حول x,y؛ المستدير يُعامل بمربعه المحيط — محافظ) جزرٌ ممنوعة في المستطيل الصافي
+function colHoles(doc, level, xs, ys) {
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  return (doc.columns || []).filter(c => c.level === level).map(c => { const h = (c.size ?? .3) / 2; return [{ x: c.x - h, y: c.y - h }, { x: c.x + h, y: c.y - h }, { x: c.x + h, y: c.y + h }, { x: c.x - h, y: c.y + h }]; })
+    .filter(q => q[1].x > x0 && q[0].x < x1 && q[2].y > y0 && q[0].y < y1);
+}
 export function docRooms(doc, { net = false } = {}) {
   const A = analyzeDoc(doc), rooms = [];
   doc.levels.forEach((lv, i) => {
     const L = A.levelById.get(lv.id); if (!L) return;
     // (02c) net: الوجوه الداخلية والجزر كما يحسبها analyzeDoc — لقياس المستطيل الصافي (لا تُحمَّل في كل نسخة من التصميم)
-    for (const r of L.rooms) { if (r.unlabelled || !r.net?.length) continue; const xs = r.net.map(q => q.x), ys = r.net.map(q => q.y); rooms.push({ name: r.name, type: r.type, level: lv.id, li: i, area: r.area, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), ...(net ? { net: r.net, holes: r.space?.holes || [] } : {}) }); }
+    for (const r of L.rooms) { if (r.unlabelled || !r.net?.length) continue; const xs = r.net.map(q => q.x), ys = r.net.map(q => q.y); rooms.push({ name: r.name, type: r.type, level: lv.id, li: i, area: r.area, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), ...(net ? { net: r.net, holes: [...(r.space?.holes || []), ...colHoles(doc, lv.id, xs, ys)] } : {}) }); }
   });
   const ws = doc.walls.filter(w => w.level === doc.levels[0].id), bx = ws.flatMap(w => [w.a.x, w.b.x]), by = ws.flatMap(w => [w.a.y, w.b.y]);
   return { rooms, B: { x0: Math.min(...bx), x1: Math.max(...bx), y0: Math.min(...by), y1: Math.max(...by) } };
