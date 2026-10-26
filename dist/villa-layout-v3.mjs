@@ -97,6 +97,7 @@ export function unitsOf(P, { stair = false } = {}) {
     if (MAP[r.a] === 'S*' ? U.some(u => u.sleep) : has(MAP[r.a])) rel.push({ a: MAP[r.a], kind: r.side === 'back' ? 'back' : 'front', hard: true, client: true, ar: 'بند العميل: ' + (r.text || r.a) });
   return { units: U, rel };
 }
+const SYNTH_MIN_LAYOUTS = 8; // (01b) أدنى عدد توزيعات صالحة قبل توسيع الشبكات — قيمة بحث لا معيار قبول
 const R14_OFF_V3 = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 /** دورة المياه اليومية للعائلة (قيمة تصميمية افتراضية للميزان: dayWc) كتلة حقيقية في أشجار المحرك الثالث بجوار الصالة. */
 const DAY_WC = Object.freeze({ id: 'wcDay', kind: 'wc', rank: 2, area: 3.6, name: 'دورة مياه' });
@@ -104,12 +105,12 @@ const kitchenFront = P => (P.rules || []).some(r => r.kind === 'place' && r.side
 
 // ---------------------------------------------------------------------------------------------- (3) الشبكة وبحث القيود
 /** أبعاد الشبكة المرشحة من نسبة الأرض (أعمدة × صفوف). */
-export function gridShapes(W, D, nUnits) {
+export function gridShapes(W, D, nUnits, { all = false } = {}) {
   // كل شبكة تتسع للوحدات (ومعها حديقتان على الأكثر) وتتسع لها الأرض بأدنى عرض خلية (≈ 4 م عرضًا، 3.6 م عمقًا)، مرتبة بقرب خليتها من
   // المربع ثم بقرب عدد خلاياها من عدد الوحدات + 3 — الأرض الضيقة تأخذ عمودين وصفوفًا أكثر، والعريضة أعمدة أكثر
   const out = [], cMax = Math.max(2, Math.min(5, Math.floor(W / 4.0))), rMax = Math.max(2, Math.min(6, Math.floor(D / 3.6)));
   for (let nc = 2; nc <= cMax; nc++) for (let nr = 2; nr <= rMax; nr++) { const n = nc * nr; if (n < nUnits || n > nUnits + 6) continue; out.push({ nc, nr, k: Math.abs(Math.log((W / nc) / (D / nr))) + .06 * Math.abs(n - nUnits - 3) }); }
-  return out.sort((a, b) => a.k - b.k).slice(0, 4).map(o => [o.nc, o.nr]);
+  return out.sort((a, b) => a.k - b.k).slice(0, all ? 8 : 4).map(o => [o.nc, o.nr]);
 }
 const adjLen = (a, b) => { // طول الحافة المشتركة بين مستطيلي خلايا (بالخلايا)
   if (a.x1 === b.x0 || b.x1 === a.x0) return Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
@@ -442,9 +443,15 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
   unitMins(units, P);
   const log = { units: units.map(u => ({ key: u.key, zone: u.zone, area: Math.round(u.area) })), rel: rel.map(r => ({ ...r })), grids: [] };
   const all = [];
-  for (const [nc, nr] of gridShapes(W, D, units.filter(u => !u.optional).length)) {
+  // (الجولة 21 — 01b، قرار المالك: «عالج H3 من جهة البحث والتوليد لا بإضعاف البوابات») الشبكات الأربع الأولى كما كانت؛ وإن قلّت التوزيعات الصالحة
+  // فيها عن SYNTH_MIN_LAYOUTS (برنامج واسع: H3 بخمس غرف ومجلسين وجد 4 توزيعات في شبكة واحدة) تُجرَّب الشبكات التالية بترتيبها حتى ثلاث — بحث أوسع
+  // بالقيود الصلبة نفسها والميزانية نفسها لكل شبكة، حتمي، ولا يمس الحالات التي وجدت توزيعاتها. مفتاح القياس r21grids.
+  const shapes = gridShapes(W, D, units.filter(u => !u.optional).length, { all: !R14_OFF_V3.has('r21grids') });
+  for (let gi = 0; gi < shapes.length; gi++) {
+    if (gi >= 4 && all.length >= SYNTH_MIN_LAYOUTS) break;
+    const [nc, nr] = shapes[gi];
     const e = enumerateLayouts(units, rel, nc, nr, { W, D });
-    log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted });
+    log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted, ...(gi >= 4 ? { widened: true } : {}) });
     all.push(...e.layouts);
   }
   const gardenA = Math.max(24, Math.min(70, (sum(P.blocks.map(b => b.area)) + P.hallArea) * .14));
