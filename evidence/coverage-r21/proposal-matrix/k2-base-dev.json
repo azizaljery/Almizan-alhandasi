@@ -1,0 +1,4315 @@
+{
+ "label": "kx-k2-base",
+ "seed": "dev",
+ "seedValue": 2026102501,
+ "n": 40,
+ "engine": "v3",
+ "root": "/home/claude/wt-base21/",
+ "generator": "scripts/coverage-r21.mjs randomCase()",
+ "sound": 14,
+ "hiddenOnly": 7,
+ "provenInfeasible": 0,
+ "claimedInfeasible": 3,
+ "searchIncomplete": 16,
+ "rows": [
+  {
+   "id": "R1",
+   "land": {
+    "width": 27,
+    "length": 25,
+    "streets": [
+     "n"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام، غرفة خادمة",
+   "want": 3,
+   "floors": 1,
+   "ms": 116942,
+   "rssMB": 793,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:38",
+      "4x3:399",
+      "3x4:219",
+      "4x2:8"
+     ],
+     "distinct": 265,
+     "dimFit": 262,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 115,
+     "treesFailed": 76,
+     "topViolations": [
+      [
+       "circ-graph",
+       14
+      ],
+      [
+       "dining-strip",
+       11
+      ],
+      [
+       "foyer-big",
+       11
+      ],
+      [
+       "women-width",
+       9
+      ],
+      [
+       "dark:dining",
+       9
+      ],
+      [
+       "hall-aspect",
+       7
+      ]
+     ]
+    },
+    "validation": {
+     "built": 17,
+     "rejected": 30,
+     "topReasons": [
+      [
+       "family-wc-missing",
+       15
+      ],
+      [
+       "women-majlis-size",
+       12
+      ],
+      [
+       "no-window",
+       12
+      ],
+      [
+       "maid-unreachable",
+       11
+      ],
+      [
+       "other",
+       10
+      ],
+      [
+       "unreachable-room",
+       10
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready"
+   ],
+   "pats": [
+    "yoo:u0",
+    "r33y8wf:3y8wfvg0"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 3 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 3 طلبتها.",
+     "السبب: جرّبتُ 40 تنظيمًا مختلفًا، اجتاز الفحص منها 17؛ ورُفض 21 في فحوص الجودة والسلامة، و2 في المراجعة المعمارية؛ 1 مجلس النساء فيها أصغر من 20 م² (18.62 م²) والبرنامج يتسع لأكبر منه؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»، «شكل L»، «شكل U»)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 6 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 3 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان)؛ 1 لم تدخل مجموعة تحقق أدنى اختلاف مع كل البدائل المعروضة معًا. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R2",
+   "land": {
+    "width": 23,
+    "length": 32,
+    "streets": [
+     "e"
+    ],
+    "entries": [
+     "e"
+    ],
+    "floors": 1
+   },
+   "text": "4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 96203,
+   "rssMB": 795,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "4x3:54",
+      "4x2:0",
+      "5x2:46",
+      "3x3:10"
+     ],
+     "distinct": 46,
+     "dimFit": 45,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 120,
+     "treesFailed": 82,
+     "topViolations": [
+      [
+       "foyer-big",
+       11
+      ],
+      [
+       "dark:dining",
+       11
+      ],
+      [
+       "dining-strip",
+       10
+      ],
+      [
+       "women-width",
+       10
+      ],
+      [
+       "family-via-beds",
+       9
+      ],
+      [
+       "circ-graph",
+       9
+      ]
+     ]
+    },
+    "validation": {
+     "built": 26,
+     "rejected": 25,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       10
+      ],
+      [
+       "women-majlis-size",
+       10
+      ],
+      [
+       "no-window",
+       8
+      ],
+      [
+       "other",
+       6
+      ],
+      [
+       "family-wc-missing",
+       4
+      ],
+      [
+       "master-smaller",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready"
+   ],
+   "pats": [
+    "r31fo67:1fo67vCa",
+    "r318efg:18efghg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 42 تنظيمًا مختلفًا، اجتاز الفحص منها 26؛ ورُفض 16 في فحوص الجودة والسلامة؛ 2 تخالف بندًا صريحًا من الطلب (غرفة ملابس للغرفة الرئيسية)؛ 7 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 3 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»، «مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور»)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 8 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 3 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R3",
+   "land": {
+    "width": 30,
+    "length": 35,
+    "streets": [
+     "n",
+     "w"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم، مجلس رجال، مجلس نساء، صالة، مطبخ في الخلف، طعام قريب من المجلس، كل غرفة 4×4 تقريبًا",
+   "want": 4,
+   "floors": 1,
+   "ms": 100922,
+   "rssMB": 794,
+   "stages": {
+    "brief": {
+     "understood": 5,
+     "unclear": 0,
+     "rules": 2,
+     "dims": [
+      "bedroom"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x4:22",
+      "3x3:10",
+      "4x3:36",
+      "2x4:0"
+     ],
+     "distinct": 25,
+     "dimFit": 25,
+     "picked": 20,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 117,
+     "treesFailed": 87,
+     "topViolations": [
+      [
+       "dims:bedroom",
+       44
+      ],
+      [
+       "hall-via-beds",
+       15
+      ],
+      [
+       "circ-graph",
+       13
+      ],
+      [
+       "dining-strip",
+       11
+      ],
+      [
+       "family-via-beds",
+       11
+      ],
+      [
+       "master-big",
+       10
+      ]
+     ]
+    },
+    "validation": {
+     "built": 1,
+     "rejected": 32,
+     "topReasons": [
+      [
+       "women-majlis-size",
+       18
+      ],
+      [
+       "majlis-door-family",
+       8
+      ],
+      [
+       "family-wc-missing",
+       7
+      ],
+      [
+       "other",
+       7
+      ],
+      [
+       "men-majlis-size",
+       7
+      ],
+      [
+       "no-window",
+       4
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden"
+   ],
+   "pats": [
+    "yoo:u0r"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 32 تنظيمًا مختلفًا، اجتاز الفحص منها 1؛ ورُفض 6 في المراجعة المعمارية، و24 في فحوص الجودة والسلامة، و1 في المراجعة المعمارية. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R4",
+   "land": {
+    "width": 32,
+    "length": 35,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة خادمة، كل غرفة 4×5 تقريبًا",
+   "want": 3,
+   "floors": 1,
+   "ms": 79697,
+   "rssMB": 964,
+   "stages": {
+    "brief": {
+     "understood": 8,
+     "unclear": 0,
+     "rules": 2,
+     "dims": [
+      "bedroom"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x3:0",
+      "3x4:6",
+      "4x3:8",
+      "2x4:0"
+     ],
+     "distinct": 7,
+     "dimFit": 7,
+     "picked": 5,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 81,
+     "treesFailed": 66,
+     "topViolations": [
+      [
+       "dims:bedroom",
+       19
+      ],
+      [
+       "circ-graph",
+       15
+      ],
+      [
+       "master-big",
+       11
+      ],
+      [
+       "hall-via-beds",
+       10
+      ],
+      [
+       "dining-strip",
+       10
+      ],
+      [
+       "foyer-big",
+       10
+      ]
+     ]
+    },
+    "validation": {
+     "built": 2,
+     "rejected": 15,
+     "topReasons": [
+      [
+       "women-majlis-size",
+       8
+      ],
+      [
+       "family-wc-missing",
+       6
+      ],
+      [
+       "men-majlis-size",
+       6
+      ],
+      [
+       "maid-unreachable",
+       5
+      ],
+      [
+       "unreachable-room",
+       4
+      ],
+      [
+       "majlis-door-family",
+       3
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden"
+   ],
+   "pats": [
+    "r31dfeb:1dfebvg0"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 1 من 3 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 3 طلبتها.",
+     "السبب: جرّبتُ 17 تنظيمًا مختلفًا، اجتاز الفحص منها 2؛ ورُفض 12 في فحوص الجودة والسلامة، و3 في المراجعة المعمارية؛ 1 تخالف بندًا صريحًا من الطلب («الصالة» على الواجهة الخلفية، «الطعام» قرب «المجلس»، غرف الأبناء بأبعاد 4×5 م (كل ضلع ±0.3 م)). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R5",
+   "land": {
+    "width": 17,
+    "length": 25,
+    "streets": [
+     "n",
+     "e"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 5 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال 6×7، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام، وغرف النوم فوق",
+   "want": 3,
+   "floors": 2,
+   "ms": 2398,
+   "rssMB": 965,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 2,
+     "dims": [
+      "majlis"
+     ]
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 6,
+     "topViolations": [
+      [
+       "slab-span",
+       1
+      ],
+      [
+       "foyer-hall",
+       1
+      ],
+      [
+       "circ-graph",
+       1
+      ],
+      [
+       "hall-via-beds",
+       1
+      ],
+      [
+       "dining-strip",
+       1
+      ],
+      [
+       "env-small",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 15,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       14
+      ],
+      [
+       "tf:none",
+       14
+      ],
+      [
+       "no-ground",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو أرض أكبر، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R6",
+   "land": {
+    "width": 29,
+    "length": 29,
+    "streets": [
+     "e"
+    ],
+    "entries": [
+     "e"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام، غرفة سائق",
+   "want": 4,
+   "floors": 1,
+   "ms": 107982,
+   "rssMB": 1213,
+   "stages": {
+    "brief": {
+     "understood": 5,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:34",
+      "4x3:399",
+      "3x4:219",
+      "4x2:8"
+     ],
+     "distinct": 263,
+     "dimFit": 263,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 116,
+     "treesFailed": 80,
+     "topViolations": [
+      [
+       "circ-graph",
+       15
+      ],
+      [
+       "foyer-big",
+       11
+      ],
+      [
+       "family-via-beds",
+       11
+      ],
+      [
+       "dining-strip",
+       10
+      ],
+      [
+       "dark:dining",
+       9
+      ],
+      [
+       "hall-aspect",
+       8
+      ]
+     ]
+    },
+    "validation": {
+     "built": 21,
+     "rejected": 36,
+     "topReasons": [
+      [
+       "no-window",
+       17
+      ],
+      [
+       "women-majlis-size",
+       12
+      ],
+      [
+       "family-wc-missing",
+       7
+      ],
+      [
+       "other",
+       6
+      ],
+      [
+       "men-majlis-size",
+       4
+      ],
+      [
+       "unreachable-room",
+       2
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready"
+   ],
+   "pats": [
+    "r31fo67:1fo67vCa"
+   ],
+   "outcome": "sound",
+   "distinctValid": 1,
+   "validShown": 1,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 43 تنظيمًا مختلفًا، اجتاز الفحص منها 21؛ ورُفض 22 في فحوص الجودة والسلامة؛ 7 تخالف بندًا صريحًا من الطلب (غرفة ملابس للغرفة الرئيسية)؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»، «كتلتان»، «شكل L»، «مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور»)؛ 6 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 3 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R7",
+   "land": {
+    "width": 25,
+    "length": 26,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ 3.5×5 في الخلف، طعام، غرفة سائق",
+   "want": 4,
+   "floors": 1,
+   "ms": 65286,
+   "rssMB": 1210,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 1,
+     "rules": 1,
+     "dims": [
+      "kitchen"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "4x3:126",
+      "3x3:10",
+      "3x4:24",
+      "4x2:4"
+     ],
+     "distinct": 60,
+     "dimFit": 44,
+     "picked": 14,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 114,
+     "treesFailed": 109,
+     "topViolations": [
+      [
+       "dims:kitchen",
+       66
+      ],
+      [
+       "hall-big",
+       24
+      ],
+      [
+       "women-width",
+       23
+      ],
+      [
+       "hall-aspect",
+       21
+      ],
+      [
+       "bed-small",
+       15
+      ],
+      [
+       "dining-strip",
+       14
+      ]
+     ]
+    },
+    "validation": {
+     "built": 3,
+     "rejected": 6,
+     "topReasons": [
+      [
+       "no-window",
+       6
+      ],
+      [
+       "other",
+       4
+      ],
+      [
+       "family-wc-missing",
+       2
+      ],
+      [
+       "women-majlis-size",
+       2
+      ],
+      [
+       "unreachable-room",
+       2
+      ],
+      [
+       "men-majlis-size",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden",
+    "hidden"
+   ],
+   "pats": [
+    "r31kh7l:1kh7lhg1",
+    "centralhall:ch1"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 2 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 9 تنظيمات مختلفة، اجتاز الفحص منها 3؛ ورُفض 6 في فحوص الجودة والسلامة؛ 1 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R8",
+   "land": {
+    "width": 15,
+    "length": 20,
+    "streets": [
+     "e"
+    ],
+    "entries": [
+     "e"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم، مجلس 6×7، صالة كبيرة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 1,
+   "rssMB": 1210,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": [
+      "majlis"
+     ]
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 0,
+     "treesFailed": 0,
+     "topViolations": []
+    },
+    "validation": {
+     "built": null,
+     "rejected": 0,
+     "topReasons": []
+    },
+    "timeout": false
+   },
+   "code": "VILLA_INFEASIBLE",
+   "error": "لا يمكن تحقيق الطلب كما هو على هذه الأرض:\n— البرنامج المطلوب يحتاج نحو 228 م² في الدور الواحد (صافي الفراغات 199 م² مع الجدران والحركة — تقدير الميزان (غير نظامي))، والمتاح للبناء 171 م² (16.7 × 10.2 م بعد الارتدادات).\nالخيارات المتاحة: دوران بدل دور واحد (غرف النوم في الدور الأول)؛ تقليل عدد الغرف أو مساحاتها بنحو 57 م².\nلم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأع",
+   "contract": null,
+   "outcome": "claimed-infeasible",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لا يمكن تحقيق الطلب كما هو على هذه الأرض:",
+     "— البرنامج المطلوب يحتاج نحو 228 م² في الدور الواحد (صافي الفراغات 199 م² مع الجدران والحركة — تقدير الميزان (غير نظامي))، والمتاح للبناء 171 م² (16.7 × 10.2 م بعد الارتدادات).",
+     "الخيارات المتاحة: دوران بدل دور واحد (غرف النوم في الدور الأول)؛ تقليل عدد الغرف أو مساحاتها بنحو 57 م².",
+     "لم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأعيد التوليد.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R9",
+   "land": {
+    "width": 26,
+    "length": 29,
+    "streets": [
+     "n",
+     "e"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 90838,
+   "rssMB": 1209,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 1,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x3:10",
+      "3x4:124",
+      "4x3:166",
+      "2x4:4"
+     ],
+     "distinct": 114,
+     "dimFit": 113,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 122,
+     "treesFailed": 75,
+     "topViolations": [
+      [
+       "circ-graph",
+       16
+      ],
+      [
+       "hall-via-beds",
+       12
+      ],
+      [
+       "family-via-beds",
+       11
+      ],
+      [
+       "women-width",
+       9
+      ],
+      [
+       "dining-strip",
+       9
+      ],
+      [
+       "dark:dining",
+       8
+      ]
+     ]
+    },
+    "validation": {
+     "built": 16,
+     "rejected": 34,
+     "topReasons": [
+      [
+       "women-majlis-size",
+       15
+      ],
+      [
+       "no-window",
+       13
+      ],
+      [
+       "other",
+       12
+      ],
+      [
+       "family-wc-missing",
+       7
+      ],
+      [
+       "unreachable-room",
+       6
+      ],
+      [
+       "men-majlis-size",
+       6
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "needs-edits"
+   ],
+   "pats": [
+    "hallback:h0",
+    "r31fxxj:1fxxjvg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 32 تنظيمًا مختلفًا، اجتاز الفحص منها 16؛ ورُفض 16 في فحوص الجودة والسلامة؛ 1 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»، «شكل L»، «شكل L»، «شريط خدمة خلفي»)؛ 8 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R10",
+   "land": {
+    "width": 16,
+    "length": 25,
+    "streets": [
+     "s",
+     "e"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ في الخلف، طعام، غرفة خادمة، وغرف النوم فوق",
+   "want": 4,
+   "floors": 2,
+   "ms": 329,
+   "rssMB": 1210,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 3,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 6,
+     "topViolations": [
+      [
+       "stair-hub",
+       2
+      ],
+      [
+       "foyer-hall",
+       1
+      ],
+      [
+       "circ-graph",
+       1
+      ],
+      [
+       "hall-via-beds",
+       1
+      ],
+      [
+       "upper-right",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 6,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       5
+      ],
+      [
+       "tf:none",
+       5
+      ],
+      [
+       "no-ground",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو أرض أكبر، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R11",
+   "land": {
+    "width": 18,
+    "length": 33,
+    "streets": [
+     "s",
+     "e"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم، مجلس، صالة، مطبخ، طعام، غرفة خادمة، غرفة غسيل",
+   "want": 4,
+   "floors": 1,
+   "ms": 56930,
+   "rssMB": 1214,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "2x4:24",
+      "2x5:44",
+      "2x6:34",
+      "2x3:2"
+     ],
+     "distinct": 35,
+     "dimFit": 35,
+     "picked": 15,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 102,
+     "treesFailed": 89,
+     "topViolations": [
+      [
+       "circ-graph",
+       12
+      ],
+      [
+       "majlis-width",
+       12
+      ],
+      [
+       "bed-small",
+       6
+      ],
+      [
+       "hall-aspect",
+       6
+      ],
+      [
+       "dark:suite",
+       5
+      ],
+      [
+       "family-via-beds",
+       5
+      ]
+     ]
+    },
+    "validation": {
+     "built": 2,
+     "rejected": 15,
+     "topReasons": [
+      [
+       "no-window",
+       9
+      ],
+      [
+       "other",
+       8
+      ],
+      [
+       "maid-unreachable",
+       5
+      ],
+      [
+       "men-majlis-size",
+       5
+      ],
+      [
+       "family-wc-missing",
+       4
+      ],
+      [
+       "unreachable-room",
+       2
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "needs-edits"
+   ],
+   "pats": [
+    "r31crzn:1crznhca"
+   ],
+   "outcome": "sound",
+   "distinctValid": 1,
+   "validShown": 1,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 17 تنظيمًا مختلفًا، اجتاز الفحص منها 2؛ ورُفض 15 في فحوص الجودة والسلامة؛ 1 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («شكل U»). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R12",
+   "land": {
+    "width": 28,
+    "length": 22,
+    "streets": [
+     "w"
+    ],
+    "entries": [
+     "w"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال 6×7 بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام، كل غرفة 4×5 تقريبًا",
+   "want": 4,
+   "floors": 1,
+   "ms": 8463,
+   "rssMB": 1215,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 1,
+     "dims": [
+      "majlis",
+      "bedroom"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x4:22",
+      "3x3:4",
+      "2x4:0",
+      "4x3:26"
+     ],
+     "distinct": 19,
+     "dimFit": 18,
+     "picked": 13,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 100,
+     "treesFailed": 100,
+     "topViolations": [
+      [
+       "slab-span",
+       81
+      ],
+      [
+       "dims:bedroom",
+       78
+      ],
+      [
+       "small:suite",
+       63
+      ],
+      [
+       "dims:majlis",
+       63
+      ],
+      [
+       "hall-aspect",
+       25
+      ],
+      [
+       "dining-strip",
+       17
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 0,
+     "topReasons": []
+    },
+    "timeout": false
+   },
+   "code": "VILLA_NO_FIT",
+   "error": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (18.74 × 23.24 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 299 م².",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 3×4 (القيود الصلبة متحققة في 22 توزيعًا)، شبكة 3×3 (القيود الصلبة متحققة في 4 توزيعات)، شبكة 2×4 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 4×3 (القيود الصلبة متحققة في 26 توزيعًا)، واختير منها 13 تنظيمًا مختلفًا للأبعاد.",
+     "السبب من المولّد: لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (18.74 × 23.24 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 299 م².",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R13",
+   "land": {
+    "width": 26,
+    "length": 20,
+    "streets": [
+     "n",
+     "e"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم منها ماستر، مجلس، صالة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 61786,
+   "rssMB": 1230,
+   "stages": {
+    "brief": {
+     "understood": 2,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "4x2:6",
+      "3x2:0",
+      "5x2:94",
+      "4x3:188"
+     ],
+     "distinct": 113,
+     "dimFit": 11,
+     "picked": 5,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 114,
+     "treesFailed": 92,
+     "topViolations": [
+      [
+       "access:wc",
+       26
+      ],
+      [
+       "majlis-width",
+       13
+      ],
+      [
+       "dark:dining",
+       11
+      ],
+      [
+       "foyer-big",
+       9
+      ],
+      [
+       "hall-via-beds",
+       8
+      ],
+      [
+       "circ-graph",
+       8
+      ]
+     ]
+    },
+    "validation": {
+     "built": 27,
+     "rejected": 9,
+     "topReasons": [
+      [
+       "other",
+       5
+      ],
+      [
+       "no-window",
+       2
+      ],
+      [
+       "men-majlis-size",
+       2
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready"
+   ],
+   "pats": [
+    "cornerentry:e1",
+    "r3txjro:txjrovg0"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 32 تنظيمًا مختلفًا، اجتاز الفحص منها 27؛ ورُفض 5 في فحوص الجودة والسلامة؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة في الخلف على الحديقة»، «شكل L خلفي»، «شكل L»، «مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور»)؛ 6 لا تدخل السيارة موقفها عمليًا (موقف موازٍ في ارتداد ضحل أمام نافذة)؛ 12 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R14",
+   "land": {
+    "width": 23,
+    "length": 33,
+    "streets": [
+     "s",
+     "w"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 3 غرف نوم، مجلس، صالة، مطبخ، طعام قريب من المجلس، وغرف النوم فوق",
+   "want": 4,
+   "floors": 2,
+   "ms": 29359,
+   "rssMB": 1332,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 2,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 4,
+     "topViolations": [
+      [
+       "upper-right",
+       3
+      ],
+      [
+       "foyer-hall",
+       1
+      ],
+      [
+       "circ-graph",
+       1
+      ],
+      [
+       "stair-big",
+       1
+      ],
+      [
+       "hall-via-beds",
+       1
+      ],
+      [
+       "kitchen-street",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": 1,
+     "rejected": 21,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       20
+      ],
+      [
+       "tf:stack",
+       14
+      ],
+      [
+       "tf:ov",
+       4
+      ],
+      [
+       "tf:majlis-short",
+       1
+      ],
+      [
+       "tf:none",
+       1
+      ],
+      [
+       "other",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden"
+   ],
+   "pats": [
+    "rearstair:c0/ulounge"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 22 تنظيمًا مختلفًا، اجتاز الفحص منها 1؛ ورُفض 20 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي، و1 في المراجعة المعمارية. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R15",
+   "land": {
+    "width": 29,
+    "length": 29,
+    "streets": [
+     "w"
+    ],
+    "entries": [
+     "w"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 6 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ في الخلف، طعام، غرفة غسيل، كل غرفة 4×5 تقريبًا، وغرف النوم فوق",
+   "want": 4,
+   "floors": 2,
+   "ms": 17365,
+   "rssMB": 1331,
+   "stages": {
+    "brief": {
+     "understood": 8,
+     "unclear": 0,
+     "rules": 3,
+     "dims": [
+      "bedroom"
+     ]
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 6,
+     "topViolations": [
+      [
+       "env-small",
+       6
+      ],
+      [
+       "env-shallow",
+       6
+      ],
+      [
+       "stair-big",
+       3
+      ],
+      [
+       "aspect:majlis",
+       2
+      ],
+      [
+       "women-width",
+       2
+      ],
+      [
+       "majlis-big",
+       2
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 24,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       23
+      ],
+      [
+       "tf:stack",
+       23
+      ],
+      [
+       "tf:ov",
+       6
+      ],
+      [
+       "no-ground",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (23)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (23)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+     "ما يمكن تغييره: أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R16",
+   "land": {
+    "width": 28,
+    "length": 25,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "4 غرف نوم، مجلس، صالة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 69379,
+   "rssMB": 1342,
+   "stages": {
+    "brief": {
+     "understood": 1,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:44",
+      "4x3:110",
+      "3x2:0",
+      "4x2:6"
+     ],
+     "distinct": 59,
+     "dimFit": 59,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 115,
+     "treesFailed": 59,
+     "topViolations": [
+      [
+       "foyer-big",
+       15
+      ],
+      [
+       "majlis-width",
+       12
+      ],
+      [
+       "dining-strip",
+       12
+      ],
+      [
+       "big:dining",
+       11
+      ],
+      [
+       "dining-big",
+       11
+      ],
+      [
+       "circ-graph",
+       9
+      ]
+     ]
+    },
+    "validation": {
+     "built": 19,
+     "rejected": 19,
+     "topReasons": [
+      [
+       "other",
+       10
+      ],
+      [
+       "no-window",
+       8
+      ],
+      [
+       "men-majlis-size",
+       7
+      ],
+      [
+       "dining-narrow",
+       2
+      ],
+      [
+       "unreachable-room",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready",
+    "ready",
+    "needs-edits"
+   ],
+   "pats": [
+    "courtyard:k1",
+    "r3himb1:himb1hCa",
+    "hallback:h0",
+    "r3p60wz:p60wzvg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 4,
+   "validShown": 4,
+   "notice": null,
+   "leaks": []
+  },
+  {
+   "id": "R17",
+   "land": {
+    "width": 14,
+    "length": 34,
+    "streets": [
+     "n",
+     "e"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم، مجلس رجال 6×7، مجلس نساء، صالة كبيرة، مطبخ، طعام قريب من المجلس",
+   "want": 4,
+   "floors": 1,
+   "ms": 0,
+   "rssMB": 1342,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 1,
+     "dims": [
+      "majlis"
+     ]
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 0,
+     "treesFailed": 0,
+     "topViolations": []
+    },
+    "validation": {
+     "built": null,
+     "rejected": 0,
+     "topReasons": []
+    },
+    "timeout": false
+   },
+   "code": "VILLA_INFEASIBLE",
+   "error": "لا يمكن تحقيق الطلب كما هو على هذه الأرض:\n— البرنامج المطلوب يحتاج نحو 287 م² في الدور الواحد (صافي الفراغات 249 م² مع الجدران والحركة — تقدير الميزان (غير نظامي))، والمتاح للبناء 270 م² (9.2 × 29.2 م بعد الارتدادات).\nالخيارات المتاحة: دوران بدل دور واحد (غرف النوم في الدور الأول)؛ تقليل عدد الغرف أو مساحاتها بنحو 16 م².\nلم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأعي",
+   "contract": null,
+   "outcome": "claimed-infeasible",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لا يمكن تحقيق الطلب كما هو على هذه الأرض:",
+     "— البرنامج المطلوب يحتاج نحو 287 م² في الدور الواحد (صافي الفراغات 249 م² مع الجدران والحركة — تقدير الميزان (غير نظامي))، والمتاح للبناء 270 م² (9.2 × 29.2 م بعد الارتدادات).",
+     "الخيارات المتاحة: دوران بدل دور واحد (غرف النوم في الدور الأول)؛ تقليل عدد الغرف أو مساحاتها بنحو 16 م².",
+     "لم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأعيد التوليد.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R18",
+   "land": {
+    "width": 22,
+    "length": 20,
+    "streets": [
+     "n",
+     "e"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 4 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ في الخلف، طعام قريب من المجلس، وغرف النوم فوق",
+   "want": 4,
+   "floors": 2,
+   "ms": 24496,
+   "rssMB": 1334,
+   "stages": {
+    "brief": {
+     "understood": 6,
+     "unclear": 0,
+     "rules": 3,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 5,
+     "topViolations": [
+      [
+       "upper-right",
+       3
+      ],
+      [
+       "env-small",
+       1
+      ],
+      [
+       "foyer-hall",
+       1
+      ],
+      [
+       "circ-graph",
+       1
+      ],
+      [
+       "stair-big",
+       1
+      ],
+      [
+       "hall-via-beds",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 28,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       27
+      ],
+      [
+       "tf:stack",
+       21
+      ],
+      [
+       "tf:ov",
+       6
+      ],
+      [
+       "tf:majlis-short",
+       2
+      ],
+      [
+       "upper-wall-unsupported",
+       1
+      ],
+      [
+       "tf:none",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين. جُرّب 27 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (21)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين. جُرّب 27 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (21)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+     "ما يمكن تغييره: أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R19",
+   "land": {
+    "width": 19,
+    "length": 25,
+    "streets": [
+     "w"
+    ],
+    "entries": [
+     "w"
+    ],
+    "floors": 1
+   },
+   "text": "4 غرف نوم، مجلس رجال 5×7، مجلس نساء، صالة، مطبخ، طعام، غرفة سائق",
+   "want": 3,
+   "floors": 1,
+   "ms": 3545,
+   "rssMB": 1334,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": [
+      "majlis"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "4x3:42",
+      "4x2:8",
+      "3x3:4",
+      "5x2:46"
+     ],
+     "distinct": 44,
+     "dimFit": 0,
+     "picked": 0,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 72,
+     "treesFailed": 72,
+     "topViolations": []
+    },
+    "validation": {
+     "built": null,
+     "rejected": 0,
+     "topReasons": []
+    },
+    "timeout": false
+   },
+   "code": "VILLA_NO_FIT",
+   "error": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (21.74 × 14.24 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 257 م².",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 4×3 (القيود الصلبة متحققة في 42 توزيعًا)، شبكة 4×2 (القيود الصلبة متحققة في 8 توزيعات)، شبكة 3×3 (القيود الصلبة متحققة في 4 توزيعات)، شبكة 5×2 (القيود الصلبة متحققة في 46 توزيعًا)، واختير منها 0 تنظيمًا مختلفًا للأبعاد.",
+     "ملاحظات قبل التوليد: البرنامج يملأ معظم المساحة القابلة للبناء (294 من 310 م²): قد يقل عدد البدائل الممكنة، ولا حدائق داخل الكتلة تقريبًا.",
+     "السبب من المولّد: لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (21.74 × 14.24 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 257 م².",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R20",
+   "land": {
+    "width": 27,
+    "length": 28,
+    "streets": [
+     "e"
+    ],
+    "entries": [
+     "e"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم، مجلس، صالة، مطبخ 4×4، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 76935,
+   "rssMB": 1332,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": [
+      "kitchen"
+     ]
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:44",
+      "4x3:110",
+      "3x2:0",
+      "3x4:90"
+     ],
+     "distinct": 87,
+     "dimFit": 87,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 115,
+     "treesFailed": 110,
+     "topViolations": [
+      [
+       "dims:kitchen",
+       85
+      ],
+      [
+       "foyer-big",
+       15
+      ],
+      [
+       "dining-strip",
+       14
+      ],
+      [
+       "big:dining",
+       12
+      ],
+      [
+       "dining-big",
+       12
+      ],
+      [
+       "hall-via-beds",
+       11
+      ]
+     ]
+    },
+    "validation": {
+     "built": 7,
+     "rejected": 3,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       3
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "needs-edits"
+   ],
+   "pats": [
+    "r3aosfq:aosfqvg0",
+    "r3o32n0:o32n0vg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 10 تنظيمات مختلفة، اجتاز الفحص منها 7؛ ورُفض 3 في فحوص الجودة والسلامة؛ 1 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 3 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R21",
+   "land": {
+    "width": 28,
+    "length": 33,
+    "streets": [
+     "w"
+    ],
+    "entries": [
+     "w"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 95865,
+   "rssMB": 1334,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "4x3:54",
+      "3x3:10",
+      "4x2:0",
+      "3x4:38"
+     ],
+     "distinct": 37,
+     "dimFit": 37,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 116,
+     "treesFailed": 86,
+     "topViolations": [
+      [
+       "access:wc",
+       21
+      ],
+      [
+       "women-width",
+       15
+      ],
+      [
+       "foyer-big",
+       13
+      ],
+      [
+       "circ-graph",
+       13
+      ],
+      [
+       "dining-strip",
+       12
+      ],
+      [
+       "majlis-width",
+       11
+      ]
+     ]
+    },
+    "validation": {
+     "built": 29,
+     "rejected": 11,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       5
+      ],
+      [
+       "women-majlis-size",
+       4
+      ],
+      [
+       "no-window",
+       2
+      ],
+      [
+       "unreachable-room",
+       1
+      ],
+      [
+       "other",
+       1
+      ],
+      [
+       "baths-missing",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready"
+   ],
+   "pats": [
+    "r31fo67:1fo67vCa",
+    "r318efg:18efghg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 35 تنظيمًا مختلفًا، اجتاز الفحص منها 29؛ ورُفض 6 في فحوص الجودة والسلامة؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («حوش داخلي مكشوف تطل عليه الصالة والمطبخ، وغرف النوم خلفه على رواق»، «شكل L»، «حوشان بلا فرق مناسيب»)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 15 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 5 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R22",
+   "land": {
+    "width": 21,
+    "length": 34,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 59838,
+   "rssMB": 1335,
+   "stages": {
+    "brief": {
+     "understood": 2,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "2x4:4",
+      "2x3:2",
+      "3x4:146",
+      "2x5:28"
+     ],
+     "distinct": 61,
+     "dimFit": 61,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 116,
+     "treesFailed": 91,
+     "topViolations": [
+      [
+       "access:wc",
+       16
+      ],
+      [
+       "aspect:suite",
+       16
+      ],
+      [
+       "circ-graph",
+       15
+      ],
+      [
+       "master-big",
+       15
+      ],
+      [
+       "hall-via-beds",
+       10
+      ],
+      [
+       "majlis-width",
+       10
+      ]
+     ]
+    },
+    "validation": {
+     "built": 19,
+     "rejected": 5,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       4
+      ],
+      [
+       "other",
+       3
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready",
+    "ready"
+   ],
+   "pats": [
+    "r318z5g:18z5ghCb",
+    "r322nby:22nbyvg0",
+    "r31n5s9:1n5s9vg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 3,
+   "validShown": 3,
+   "notice": {
+    "title_ar": "عُرض 3 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك 3 تصاميم فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 24 تنظيمًا مختلفًا، اجتاز الفحص منها 19؛ ورُفض 5 في فحوص الجودة والسلامة؛ 5 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («شكل L»، «شكل U»، «شكل L خلفي»، «بيت الحوش الجانبي»، «مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور»)؛ 8 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 3 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R23",
+   "land": {
+    "width": 23,
+    "length": 33,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام",
+   "want": 3,
+   "floors": 1,
+   "ms": 111511,
+   "rssMB": 1332,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x4:192",
+      "3x3:10",
+      "2x4:4",
+      "2x5:6"
+     ],
+     "distinct": 82,
+     "dimFit": 82,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 116,
+     "treesFailed": 67,
+     "topViolations": [
+      [
+       "hall-via-beds",
+       16
+      ],
+      [
+       "circ-graph",
+       15
+      ],
+      [
+       "women-width",
+       12
+      ],
+      [
+       "dark:dining",
+       10
+      ],
+      [
+       "dining-strip",
+       9
+      ],
+      [
+       "foyer-big",
+       8
+      ]
+     ]
+    },
+    "validation": {
+     "built": 15,
+     "rejected": 32,
+     "topReasons": [
+      [
+       "no-window",
+       17
+      ],
+      [
+       "women-majlis-size",
+       14
+      ],
+      [
+       "men-majlis-size",
+       8
+      ],
+      [
+       "family-wc-missing",
+       6
+      ],
+      [
+       "other",
+       5
+      ],
+      [
+       "baths-missing",
+       3
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "needs-edits"
+   ],
+   "pats": [
+    "r37dqsu:7dqsuhg1",
+    "r3mbdks:mbdksvp"
+   ],
+   "outcome": "sound",
+   "distinctValid": 2,
+   "validShown": 2,
+   "notice": {
+    "title_ar": "عُرض 2 من 3 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمين فقط من 3 طلبتها.",
+     "السبب: جرّبتُ 32 تنظيمًا مختلفًا، اجتاز الفحص منها 15؛ ورُفض 17 في فحوص الجودة والسلامة؛ 1 مجلس النساء فيها أصغر من 20 م² (18.62 م²) والبرنامج يتسع لأكبر منه؛ 1 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 3 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («شكل L خلفي»، «كتلتان»)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 5 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 3 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R24",
+   "land": {
+    "width": 24,
+    "length": 32,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 5 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ 3.5×5، طعام قريب من المجلس",
+   "want": 4,
+   "floors": 1,
+   "ms": 28926,
+   "rssMB": 1333,
+   "stages": {
+    "brief": {
+     "understood": 6,
+     "unclear": 0,
+     "rules": 2,
+     "dims": [
+      "kitchen"
+     ]
+    },
+    "constraints": {
+     "units": 9,
+     "hard": 20,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x4:4",
+      "3x3:0",
+      "2x4:0",
+      "4x3:53"
+     ],
+     "distinct": 26,
+     "dimFit": 11,
+     "picked": 5,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 83,
+     "treesFailed": 81,
+     "topViolations": [
+      [
+       "dims:kitchen",
+       52
+      ],
+      [
+       "corr-long",
+       41
+      ],
+      [
+       "dining-strip",
+       16
+      ],
+      [
+       "hall-aspect",
+       15
+      ],
+      [
+       "hall-big",
+       15
+      ],
+      [
+       "foyer-big",
+       14
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 2,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       1
+      ],
+      [
+       "women-majlis-size",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 3×4 (القيود الصلبة متحققة في 4 توزيعات)، شبكة 3×3 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 2×4 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 4×3 (القيود الصلبة متحققة في 53 توزيعًا)، واختير منها 5 تنظيمات مختلفة للأبعاد.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R25",
+   "land": {
+    "width": 19,
+    "length": 32,
+    "streets": [
+     "s",
+     "e"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 5 غرف نوم، مجلس، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة خادمة بحمام، غرفة سائق",
+   "want": 4,
+   "floors": 1,
+   "ms": 12451,
+   "rssMB": 1333,
+   "stages": {
+    "brief": {
+     "understood": 6,
+     "unclear": 0,
+     "rules": 2,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "2x4:0",
+      "2x5:0",
+      "3x4:34",
+      "2x6:0"
+     ],
+     "distinct": 16,
+     "dimFit": 3,
+     "picked": 1,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 78,
+     "treesFailed": 77,
+     "topViolations": [
+      [
+       "hall-aspect",
+       13
+      ],
+      [
+       "corr-long",
+       12
+      ],
+      [
+       "suite-narrow",
+       10
+      ],
+      [
+       "hall-big",
+       8
+      ],
+      [
+       "master-smaller",
+       7
+      ],
+      [
+       "bed-small",
+       6
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 1,
+     "topReasons": [
+      [
+       "unreachable-room",
+       1
+      ],
+      [
+       "maid-unreachable",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 2×4 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 2×5 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 3×4 (القيود الصلبة متحققة في 34 توزيعًا)، شبكة 2×6 (القيود الصلبة متحققة في 0 توزيعًا)، واختير منها تنظيم واحد للأبعاد.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R26",
+   "land": {
+    "width": 28,
+    "length": 36,
+    "streets": [
+     "n",
+     "w"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال، مجلس نساء، صالة تطل على الحديقة، مطبخ 4×5، طعام، غرفة خادمة، وغرف النوم فوق",
+   "want": 4,
+   "floors": 2,
+   "ms": 30896,
+   "rssMB": 1331,
+   "stages": {
+    "brief": {
+     "understood": 8,
+     "unclear": 0,
+     "rules": 2,
+     "dims": [
+      "kitchen"
+     ]
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 5,
+     "topViolations": [
+      [
+       "dims:kitchen",
+       5
+      ],
+      [
+       "aspect:majlis",
+       4
+      ],
+      [
+       "majlis-big",
+       4
+      ],
+      [
+       "majlis-width",
+       3
+      ],
+      [
+       "big:majlis",
+       3
+      ],
+      [
+       "women-width",
+       3
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 12,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       11
+      ],
+      [
+       "tf:majlis-short",
+       2
+      ],
+      [
+       "tf:stack",
+       2
+      ],
+      [
+       "unreachable-room",
+       1
+      ],
+      [
+       "baths-missing",
+       1
+      ],
+      [
+       "upper-wall-unsupported",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين. جُرّب 11 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: المجلس أصغر من 24 م² (2)، جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (2).",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين. جُرّب 11 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: المجلس أصغر من 24 م² (2)، جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (2).",
+     "ما يمكن تغييره: أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R27",
+   "land": {
+    "width": 25,
+    "length": 28,
+    "streets": [
+     "s",
+     "e"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة كبيرة، مطبخ، طعام، غرفة خادمة بحمام، غرفة سائق، كل غرفة 4×4 تقريبًا",
+   "want": 4,
+   "floors": 1,
+   "ms": 23196,
+   "rssMB": 1330,
+   "stages": {
+    "brief": {
+     "understood": 5,
+     "unclear": 0,
+     "rules": 0,
+     "dims": [
+      "bedroom"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:4",
+      "3x4:44",
+      "4x3:80",
+      "2x4:0"
+     ],
+     "distinct": 47,
+     "dimFit": 12,
+     "picked": 6,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 79,
+     "treesFailed": 78,
+     "topViolations": [
+      [
+       "dims:bedroom",
+       40
+      ],
+      [
+       "women-width",
+       22
+      ],
+      [
+       "hall-aspect",
+       21
+      ],
+      [
+       "majlis-width",
+       20
+      ],
+      [
+       "circ-graph",
+       13
+      ],
+      [
+       "dining-strip",
+       13
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 1,
+     "topReasons": [
+      [
+       "no-window",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 3×3 (القيود الصلبة متحققة في 4 توزيعات)، شبكة 3×4 (القيود الصلبة متحققة في 44 توزيعًا)، شبكة 4×3 (القيود الصلبة متحققة في 80 توزيعًا)، شبكة 2×4 (القيود الصلبة متحققة في 0 توزيعًا)، واختير منها 6 تنظيمات مختلفة للأبعاد.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R28",
+   "land": {
+    "width": 22,
+    "length": 24,
+    "streets": [
+     "n"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "4 غرف نوم، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس",
+   "want": 4,
+   "floors": 1,
+   "ms": 68384,
+   "rssMB": 1330,
+   "stages": {
+    "brief": {
+     "understood": 3,
+     "unclear": 0,
+     "rules": 1,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:10",
+      "4x3:54",
+      "3x4:30",
+      "4x2:0"
+     ],
+     "distinct": 34,
+     "dimFit": 0,
+     "picked": 0,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 88,
+     "treesFailed": 72,
+     "topViolations": [
+      [
+       "access:wc",
+       17
+      ],
+      [
+       "circ-graph",
+       8
+      ],
+      [
+       "corr-long",
+       8
+      ],
+      [
+       "dark:dining",
+       8
+      ],
+      [
+       "bed-small",
+       7
+      ],
+      [
+       "dining-strip",
+       6
+      ]
+     ]
+    },
+    "validation": {
+     "built": 7,
+     "rejected": 11,
+     "topReasons": [
+      [
+       "women-majlis-size",
+       7
+      ],
+      [
+       "other",
+       6
+      ],
+      [
+       "men-majlis-size",
+       5
+      ],
+      [
+       "unreachable-room",
+       3
+      ],
+      [
+       "baths-missing",
+       3
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden"
+   ],
+   "pats": [
+    "r3z8yoz:z8yozvg0"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 18 تنظيمًا مختلفًا، اجتاز الفحص منها 7؛ ورُفض 11 في فحوص الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («الطعام» قرب «المجلس»)؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 2 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R29",
+   "land": {
+    "width": 19,
+    "length": 28,
+    "streets": [
+     "n",
+     "w"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس رجال بمدخل مستقل، مجلس نساء، صالة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة سائق",
+   "want": 3,
+   "floors": 1,
+   "ms": 3680,
+   "rssMB": 1330,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 2,
+     "dims": []
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 18,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x4:0",
+      "2x4:0",
+      "2x5:0",
+      "3x3:0"
+     ],
+     "distinct": 0,
+     "dimFit": 0,
+     "picked": 0,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 77,
+     "treesFailed": 76,
+     "topViolations": [
+      [
+       "hall-aspect",
+       8
+      ],
+      [
+       "small:majlis",
+       6
+      ],
+      [
+       "majlis-wc",
+       4
+      ],
+      [
+       "corr-long",
+       4
+      ],
+      [
+       "bed-small",
+       3
+      ],
+      [
+       "aspect:suite",
+       2
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 1,
+     "topReasons": [
+      [
+       "no-window",
+       1
+      ],
+      [
+       "men-majlis-size",
+       1
+      ],
+      [
+       "family-wc-missing",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 3×4 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 2×4 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 2×5 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 3×3 (القيود الصلبة متحققة في 0 توزيعًا)، واختير منها 0 تنظيمًا مختلفًا للأبعاد.",
+     "لا توزيع يحقق القيود الصلبة معًا على هذه الأرض: بند العميل: «الصالة» على الواجهة الخلفية",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم من الأنماط المرشحة.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R30",
+   "land": {
+    "width": 22,
+    "length": 21,
+    "streets": [
+     "w"
+    ],
+    "entries": [
+     "w"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم منها ماستر، مجلس، صالة كبيرة، مطبخ، طعام، غرفة خادمة",
+   "want": 4,
+   "floors": 1,
+   "ms": 20483,
+   "rssMB": 1332,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:52",
+      "4x3:208",
+      "3x4:112",
+      "3x2:0"
+     ],
+     "distinct": 131,
+     "dimFit": 0,
+     "picked": 0,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 71,
+     "treesFailed": 70,
+     "topViolations": [
+      [
+       "access:wc",
+       7
+      ],
+      [
+       "majlis-width",
+       5
+      ],
+      [
+       "dark:dining",
+       5
+      ],
+      [
+       "hall-dark",
+       4
+      ],
+      [
+       "foyer-hall",
+       4
+      ],
+      [
+       "foyer-big",
+       4
+      ]
+     ]
+    },
+    "validation": {
+     "built": 1,
+     "rejected": 1,
+     "topReasons": [
+      [
+       "unreachable-room",
+       1
+      ],
+      [
+       "men-majlis-size",
+       1
+      ],
+      [
+       "other",
+       1
+      ],
+      [
+       "maid-unreachable",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden"
+   ],
+   "pats": [
+    "sidecourt:sc0"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 2 تنظيمًا مختلفًا، اجتاز الفحص منها 1؛ ورُفض 1 في فحوص الجودة والسلامة. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R31",
+   "land": {
+    "width": 29,
+    "length": 28,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "3 غرف نوم، مجلس، صالة كبيرة، مطبخ 4×4، طعام",
+   "want": 3,
+   "floors": 1,
+   "ms": 51404,
+   "rssMB": 1330,
+   "stages": {
+    "brief": {
+     "understood": 2,
+     "unclear": 0,
+     "rules": 0,
+     "dims": [
+      "kitchen"
+     ]
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x3:44",
+      "4x3:220",
+      "3x2:0",
+      "3x4:146"
+     ],
+     "distinct": 145,
+     "dimFit": 145,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 115,
+     "treesFailed": 113,
+     "topViolations": [
+      [
+       "dims:kitchen",
+       92
+      ],
+      [
+       "access:wc",
+       28
+      ],
+      [
+       "majlis-width",
+       17
+      ],
+      [
+       "circ-graph",
+       16
+      ],
+      [
+       "foyer-big",
+       12
+      ],
+      [
+       "dark:dining",
+       10
+      ]
+     ]
+    },
+    "validation": {
+     "built": 2,
+     "rejected": 2,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       2
+      ],
+      [
+       "unreachable-room",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready"
+   ],
+   "pats": [
+    "r3pt77c:pt77cvg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 1,
+   "validShown": 1,
+   "notice": {
+    "title_ar": "عُرض 1 من 3 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 3 طلبتها.",
+     "السبب: جرّبتُ 4 تنظيمات مختلفة، اجتاز الفحص منها 2؛ ورُفض 2 في فحوص الجودة والسلامة؛ 1 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R32",
+   "land": {
+    "width": 25,
+    "length": 28,
+    "streets": [
+     "n"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 4 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام، وغرف النوم فوق",
+   "want": 3,
+   "floors": 2,
+   "ms": 37894,
+   "rssMB": 1356,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 1,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 4,
+     "topViolations": [
+      [
+       "women-width",
+       2
+      ],
+      [
+       "majlis-big",
+       2
+      ],
+      [
+       "majlis-width",
+       1
+      ],
+      [
+       "dining-strip",
+       1
+      ],
+      [
+       "aspect:majlis",
+       1
+      ],
+      [
+       "foyer-hall",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 25,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       23
+      ],
+      [
+       "tf:stack",
+       15
+      ],
+      [
+       "tf:ov",
+       6
+      ],
+      [
+       "tf:majlis-short",
+       3
+      ],
+      [
+       "upper-wall-unsupported",
+       2
+      ],
+      [
+       "men-majlis-size",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (15)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (15)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+     "ما يمكن تغييره: أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R33",
+   "land": {
+    "width": 20,
+    "length": 24,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم، مجلس، صالة كبيرة تطل على الحديقة، مطبخ، طعام قريب من المجلس، غرفة خادمة بحمام، غرفة غسيل",
+   "want": 3,
+   "floors": 1,
+   "ms": 36405,
+   "rssMB": 1365,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 2,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 16,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x3:16",
+      "4x3:46",
+      "3x4:38",
+      "3x2:0"
+     ],
+     "distinct": 46,
+     "dimFit": 0,
+     "picked": 0,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 77,
+     "treesFailed": 65,
+     "topViolations": [
+      [
+       "circ-graph",
+       9
+      ],
+      [
+       "dark:dining",
+       8
+      ],
+      [
+       "bed-small",
+       8
+      ],
+      [
+       "hall-aspect",
+       7
+      ],
+      [
+       "suite-narrow",
+       6
+      ],
+      [
+       "corr-long",
+       5
+      ]
+     ]
+    },
+    "validation": {
+     "built": 2,
+     "rejected": 12,
+     "topReasons": [
+      [
+       "men-majlis-size",
+       9
+      ],
+      [
+       "no-window",
+       4
+      ],
+      [
+       "family-wc-missing",
+       4
+      ],
+      [
+       "other",
+       4
+      ],
+      [
+       "majlis-door-family",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "hidden"
+   ],
+   "pats": [
+    "yoo:u0r"
+   ],
+   "outcome": "hidden-only",
+   "distinctValid": 0,
+   "validShown": 0,
+   "notice": {
+    "title_ar": "عُرض 1 من 3 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 3 طلبتها.",
+     "السبب: جرّبتُ 14 تنظيمًا مختلفًا، اجتاز الفحص منها 2؛ ورُفض 11 في فحوص الجودة والسلامة، و1 في المراجعة المعمارية؛ 1 تخالف بندًا صريحًا من الطلب («الصالة» على الواجهة الخلفية، «الطعام» قرب «المجلس»، صالة واسعة (35 م² صافية أو أكثر)). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R34",
+   "land": {
+    "width": 15,
+    "length": 21,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ، طعام قريب من المجلس",
+   "want": 4,
+   "floors": 1,
+   "ms": 0,
+   "rssMB": 1365,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 1,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 0,
+     "treesFailed": 0,
+     "topViolations": []
+    },
+    "validation": {
+     "built": null,
+     "rejected": 0,
+     "topReasons": []
+    },
+    "timeout": false
+   },
+   "code": "VILLA_INFEASIBLE",
+   "error": "لا يمكن تحقيق الطلب كما هو على هذه الأرض:\n— البرنامج المطلوب يحتاج نحو 235 م² في الدور الواحد (صافي الفراغات 205 م² مع الجدران والحركة — تقدير الميزان (غير نظامي))، والمتاح للبناء 191 م² (11.7 × 16.2 م بعد الارتدادات).\nالخيارات المتاحة: دوران بدل دور واحد (غرف النوم في الدور الأول)؛ تقليل عدد الغرف أو مساحاتها بنحو 45 م².\nلم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأع",
+   "contract": null,
+   "outcome": "claimed-infeasible",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لا يمكن تحقيق الطلب كما هو على هذه الأرض:",
+     "— البرنامج المطلوب يحتاج نحو 235 م² في الدور الواحد (صافي الفراغات 205 م² مع الجدران والحركة — تقدير الميزان (غير نظامي))، والمتاح للبناء 191 م² (11.7 × 16.2 م بعد الارتدادات).",
+     "الخيارات المتاحة: دوران بدل دور واحد (غرف النوم في الدور الأول)؛ تقليل عدد الغرف أو مساحاتها بنحو 45 م².",
+     "لم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأعيد التوليد.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R35",
+   "land": {
+    "width": 31,
+    "length": 26,
+    "streets": [
+     "s",
+     "e"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 3 غرف نوم منها ماستر، مجلس رجال، مجلس نساء، صالة، مطبخ 4×4، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 74873,
+   "rssMB": 1358,
+   "stages": {
+    "brief": {
+     "understood": 4,
+     "unclear": 0,
+     "rules": 0,
+     "dims": [
+      "kitchen"
+     ]
+    },
+    "constraints": {
+     "units": 8,
+     "hard": 17,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "4x3:244",
+      "3x3:10",
+      "4x2:8",
+      "3x4:192"
+     ],
+     "distinct": 162,
+     "dimFit": 162,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 115,
+     "treesFailed": 107,
+     "topViolations": [
+      [
+       "dims:kitchen",
+       84
+      ],
+      [
+       "circ-graph",
+       18
+      ],
+      [
+       "majlis-width",
+       13
+      ],
+      [
+       "dining-strip",
+       13
+      ],
+      [
+       "women-width",
+       13
+      ],
+      [
+       "foyer-big",
+       10
+      ]
+     ]
+    },
+    "validation": {
+     "built": 6,
+     "rejected": 10,
+     "topReasons": [
+      [
+       "women-majlis-size",
+       4
+      ],
+      [
+       "no-window",
+       3
+      ],
+      [
+       "family-wc-missing",
+       3
+      ],
+      [
+       "men-majlis-size",
+       3
+      ],
+      [
+       "other",
+       3
+      ],
+      [
+       "unreachable-room",
+       2
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready"
+   ],
+   "pats": [
+    "cornerentry:e1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 1,
+   "validShown": 1,
+   "notice": {
+    "title_ar": "عُرض 1 من 4 تصاميم طلبتها",
+    "lines_ar": [
+     "أعرض لك تصميمًا واحدًا فقط من 4 طلبتها.",
+     "السبب: جرّبتُ 15 تنظيمًا مختلفًا، اجتاز الفحص منها 6؛ ورُفض 9 في فحوص الجودة والسلامة؛ 3 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («الصالة المركزية الموزِّعة»)؛ 1 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا.",
+     "لم أُكمل العدد بنسخ مكررة أو معكوسة أو بتصاميم تخالف شرطًا من طلبك. يمكنك طلب تصميم آخر بعد تعديل بند، أو العمل على المعروض في المرسم."
+    ]
+   },
+   "leaks": []
+  },
+  {
+   "id": "R36",
+   "land": {
+    "width": 20,
+    "length": 31,
+    "streets": [
+     "w"
+    ],
+    "entries": [
+     "w"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال بمدخل مستقل، مجلس نساء، صالة، مطبخ، طعام، غرفة سائق، وغرف النوم فوق",
+   "want": 3,
+   "floors": 2,
+   "ms": 32048,
+   "rssMB": 1392,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 1,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 4,
+     "topViolations": [
+      [
+       "aspect:majlis",
+       3
+      ],
+      [
+       "women-width",
+       3
+      ],
+      [
+       "majlis-big",
+       3
+      ],
+      [
+       "big:majlis",
+       2
+      ],
+      [
+       "majlis-width",
+       1
+      ],
+      [
+       "dining-strip",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 25,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       23
+      ],
+      [
+       "tf:stack",
+       16
+      ],
+      [
+       "tf:majlis-short",
+       3
+      ],
+      [
+       "tf:none",
+       3
+      ],
+      [
+       "upper-wall-unsupported",
+       2
+      ],
+      [
+       "no-window",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (16)، المجلس أصغر من 24 م² (3).",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (16)، المجلس أصغر من 24 م² (3).",
+     "ما يمكن تغييره: أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R37",
+   "land": {
+    "width": 17,
+    "length": 23,
+    "streets": [
+     "n"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 1
+   },
+   "text": "فيلا دور واحد: 4 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة، مطبخ في الخلف، طعام قريب من المجلس",
+   "want": 4,
+   "floors": 1,
+   "ms": 2091,
+   "rssMB": 1393,
+   "stages": {
+    "brief": {
+     "understood": 6,
+     "unclear": 0,
+     "rules": 2,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 16,
+     "clientHard": 1
+    },
+    "topology": {
+     "grids": [
+      "3x3:14",
+      "3x4:0",
+      "2x3:2",
+      "2x4:0"
+     ],
+     "distinct": 7,
+     "dimFit": 0,
+     "picked": 0,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 76,
+     "treesFailed": 76,
+     "topViolations": [
+      [
+       "small:majlis",
+       1
+      ],
+      [
+       "hall-dark",
+       1
+      ],
+      [
+       "foyer-big",
+       1
+      ],
+      [
+       "bed-small",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 0,
+     "topReasons": []
+    },
+    "timeout": false
+   },
+   "code": "VILLA_NO_FIT",
+   "error": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (13.74 × 15.34 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 198 م².",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "جُرّبت شبكة 3×3 (القيود الصلبة متحققة في 14 توزيعًا)، شبكة 3×4 (القيود الصلبة متحققة في 0 توزيعًا)، شبكة 2×3 (القيود الصلبة متحققة في 2 توزيعًا)، شبكة 2×4 (القيود الصلبة متحققة في 0 توزيعًا)، واختير منها 0 تنظيمًا مختلفًا للأبعاد.",
+     "السبب من المولّد: لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (13.74 × 15.34 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 198 م².",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R38",
+   "land": {
+    "width": 26,
+    "length": 35,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 1
+   },
+   "text": "4 غرف نوم، مجلس، صالة، مطبخ، طعام",
+   "want": 4,
+   "floors": 1,
+   "ms": 70236,
+   "rssMB": 1375,
+   "stages": {
+    "brief": {
+     "understood": 1,
+     "unclear": 0,
+     "rules": 0,
+     "dims": []
+    },
+    "constraints": {
+     "units": 7,
+     "hard": 15,
+     "clientHard": 0
+    },
+    "topology": {
+     "grids": [
+      "3x4:90",
+      "3x3:44",
+      "2x3:2",
+      "2x4:4"
+     ],
+     "distinct": 53,
+     "dimFit": 53,
+     "picked": 28,
+     "twoFloors": null
+    },
+    "allocation": {
+     "treesTried": 115,
+     "treesFailed": 70,
+     "topViolations": [
+      [
+       "foyer-big",
+       19
+      ],
+      [
+       "dining-strip",
+       18
+      ],
+      [
+       "majlis-width",
+       16
+      ],
+      [
+       "big:dining",
+       12
+      ],
+      [
+       "dining-big",
+       12
+      ],
+      [
+       "kitchen-street",
+       11
+      ]
+     ]
+    },
+    "validation": {
+     "built": 23,
+     "rejected": 11,
+     "topReasons": [
+      [
+       "no-window",
+       4
+      ],
+      [
+       "men-majlis-size",
+       4
+      ],
+      [
+       "other",
+       3
+      ],
+      [
+       "unreachable-room",
+       2
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "statuses": [
+    "ready",
+    "ready",
+    "ready",
+    "needs-edits"
+   ],
+   "pats": [
+    "yoo:u0",
+    "r31t259:1t259vg1",
+    "r34nk7y:4nk7yvg1",
+    "r31sodw:1sodwvg1"
+   ],
+   "outcome": "sound",
+   "distinctValid": 4,
+   "validShown": 4,
+   "notice": null,
+   "leaks": []
+  },
+  {
+   "id": "R39",
+   "land": {
+    "width": 22,
+    "length": 26,
+    "streets": [
+     "n",
+     "w"
+    ],
+    "entries": [
+     "n"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 5 غرف نوم منها ماستر بغرفة ملابس، مجلس، صالة، مطبخ، طعام، غرفة خادمة، غرفة سائق، وغرف النوم فوق",
+   "want": 4,
+   "floors": 2,
+   "ms": 25907,
+   "rssMB": 1374,
+   "stages": {
+    "brief": {
+     "understood": 7,
+     "unclear": 0,
+     "rules": 1,
+     "dims": []
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 6,
+     "topViolations": [
+      [
+       "env-shallow",
+       3
+      ],
+      [
+       "upper-right",
+       2
+      ],
+      [
+       "aspect:majlis",
+       1
+      ],
+      [
+       "majlis-big",
+       1
+      ],
+      [
+       "stair-hub",
+       1
+      ],
+      [
+       "stair-big",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 31,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       30
+      ],
+      [
+       "tf:stack",
+       25
+      ],
+      [
+       "tf:ov",
+       10
+      ],
+      [
+       "tf:majlis-short",
+       3
+      ],
+      [
+       "no-ground",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين. جُرّب 30 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (25)، غرفة علوية فوق فراغ غير مبني في الأرضي (10).",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين. جُرّب 30 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (25)، غرفة علوية فوق فراغ غير مبني في الأرضي (10).",
+     "ما يمكن تغييره: أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  },
+  {
+   "id": "R40",
+   "land": {
+    "width": 15,
+    "length": 22,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ],
+    "floors": 2
+   },
+   "text": "دورين: 5 غرف نوم منها ماستر بغرفة ملابس، مجلس رجال 5×7 بمدخل مستقل، مجلس نساء، صالة، مطبخ في الخلف، طعام، وغرف النوم فوق",
+   "want": 3,
+   "floors": 2,
+   "ms": 120,
+   "rssMB": 1374,
+   "stages": {
+    "brief": {
+     "understood": 8,
+     "unclear": 0,
+     "rules": 2,
+     "dims": [
+      "majlis"
+     ]
+    },
+    "constraints": null,
+    "topology": null,
+    "allocation": {
+     "treesTried": 6,
+     "treesFailed": 6,
+     "topViolations": [
+      [
+       "dims:majlis",
+       2
+      ],
+      [
+       "env-shallow",
+       2
+      ],
+      [
+       "upper-right",
+       2
+      ],
+      [
+       "slab-span",
+       1
+      ],
+      [
+       "dining-strip",
+       1
+      ],
+      [
+       "env-small",
+       1
+      ]
+     ]
+    },
+    "validation": {
+     "built": null,
+     "rejected": 15,
+     "topReasons": [
+      [
+       "no-upper-fits",
+       14
+      ],
+      [
+       "tf:none",
+       14
+      ],
+      [
+       "no-ground",
+       1
+      ]
+     ]
+    },
+    "timeout": false
+   },
+   "code": "VILLA_BUILD_FAILED",
+   "error": "تعذّر بناء أي بديل سليم لدورين.",
+   "contract": null,
+   "outcome": "search-incomplete",
+   "notice": {
+    "title_ar": "لم أُعدّ مخططًا لطلبك على هذه الأرض",
+    "lines_ar": [
+     "لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.",
+     "السبب من المولّد: تعذّر بناء أي بديل سليم لدورين.",
+     "ما يمكن تغييره: تقليل عدد الغرف أو مساحاتها، أو أرض أكبر، أو تخفيف بند موضع صريح.",
+     "لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث."
+    ]
+   },
+   "distinctValid": 0,
+   "validShown": 0,
+   "leaks": []
+  }
+ ]
+}

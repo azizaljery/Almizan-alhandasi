@@ -1,0 +1,4101 @@
+{
+ "generated": "scripts/kit2-matrix.mjs",
+ "configs": [
+  {
+   "label": "k2-base",
+   "ar": "الأساس-3b212e7",
+   "n": 20,
+   "cases": {
+    "withPlan": 13,
+    "visible": 21,
+    "ready": 15,
+    "mandatoryShown": 0,
+    "hiddenOnly": 4,
+    "failed": 3,
+    "hidden": 4,
+    "hiddenComplete": 0,
+    "sec": 1605,
+    "peakMB": 806
+   },
+   "dev": {
+    "n": 40,
+    "sound": 14,
+    "hiddenOnly": 7,
+    "incomplete": 16,
+    "claimed": 3,
+    "proven": 0,
+    "validShown": 29,
+    "ready": 23,
+    "distinct": 29,
+    "leaks": 0,
+    "sec": 1795,
+    "peakMB": 1393,
+    "rows": [
+     {
+      "id": "R1",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R2",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R3",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R4",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R5",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R6",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R7",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden",
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R8",
+      "outcome": "claimed-infeasible",
+      "statuses": "VILLA_INFEASIBLE",
+      "distinct": 0
+     },
+     {
+      "id": "R9",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R10",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R11",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R12",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R13",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R14",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R15",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R16",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R17",
+      "outcome": "claimed-infeasible",
+      "statuses": "VILLA_INFEASIBLE",
+      "distinct": 0
+     },
+     {
+      "id": "R18",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R19",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R20",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R21",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R22",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R23",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R24",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R25",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R26",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R27",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R28",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R29",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R30",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R31",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R32",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R33",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R34",
+      "outcome": "claimed-infeasible",
+      "statuses": "VILLA_INFEASIBLE",
+      "distinct": 0
+     },
+     {
+      "id": "R35",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R36",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R37",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R38",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R39",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R40",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     }
+    ]
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 59359,
+     "rss": 532,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 79,
+     "trees": 84
+    },
+    {
+     "id": "C2",
+     "ms": 94951,
+     "rss": 493,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ],
+     "treesNoSol": 107,
+     "trees": 115
+    },
+    {
+     "id": "C3",
+     "ms": 105999,
+     "rss": 806,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ],
+     "treesNoSol": 79,
+     "trees": 113
+    },
+    {
+     "id": "C4",
+     "ms": 29823,
+     "rss": 281,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ],
+     "treesNoSol": 22,
+     "trees": 31
+    },
+    {
+     "id": "C5",
+     "ms": 120697,
+     "rss": 797,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ],
+     "treesNoSol": 100,
+     "trees": 151
+    },
+    {
+     "id": "C6",
+     "ms": 77591,
+     "rss": 563,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ],
+     "treesNoSol": 121,
+     "trees": 121
+    },
+    {
+     "id": "C7",
+     "ms": 201074,
+     "rss": 412,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "C8",
+     "ms": 100521,
+     "rss": 502,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ],
+     "treesNoSol": 70,
+     "trees": 116
+    },
+    {
+     "id": "C9",
+     "ms": 81820,
+     "rss": 512,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "r3o32n0:o32n0vg0:ready",
+      "r31sodw:1sodwvg0:ready"
+     ],
+     "treesNoSol": 75,
+     "trees": 116
+    },
+    {
+     "id": "C10",
+     "ms": 101088,
+     "rss": 561,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 67,
+     "trees": 88
+    },
+    {
+     "id": "H1",
+     "ms": 67065,
+     "rss": 513,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ],
+     "treesNoSol": 93,
+     "trees": 119
+    },
+    {
+     "id": "H2",
+     "ms": 50563,
+     "rss": 342,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ],
+     "treesNoSol": 25,
+     "trees": 32
+    },
+    {
+     "id": "H3",
+     "ms": 61558,
+     "rss": 594,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "centralhall:ch2:hidden"
+     ],
+     "treesNoSol": 82,
+     "trees": 83
+    },
+    {
+     "id": "H4",
+     "ms": 40762,
+     "rss": 244,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 4,
+     "trees": 6
+    },
+    {
+     "id": "H5",
+     "ms": 73382,
+     "rss": 625,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "split:s0r:hidden"
+     ],
+     "treesNoSol": 114,
+     "trees": 115
+    },
+    {
+     "id": "H6",
+     "ms": 54371,
+     "rss": 506,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 87,
+     "trees": 102
+    },
+    {
+     "id": "H7",
+     "ms": 84162,
+     "rss": 491,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ],
+     "treesNoSol": 90,
+     "trees": 114
+    },
+    {
+     "id": "H8",
+     "ms": 166407,
+     "rss": 336,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "H9",
+     "ms": 18517,
+     "rss": 264,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ],
+     "treesNoSol": 26,
+     "trees": 29
+    },
+    {
+     "id": "H10",
+     "ms": 15648,
+     "rss": 273,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_NO_FIT",
+     "pat": [],
+     "treesNoSol": 95,
+     "trees": 95
+    }
+   ]
+  },
+  {
+   "label": "k2-h2b",
+   "ar": "2bfcd9e",
+   "n": 20,
+   "cases": {
+    "withPlan": 16,
+    "visible": 27,
+    "ready": 21,
+    "mandatoryShown": 0,
+    "hiddenOnly": 2,
+    "failed": 2,
+    "hidden": 2,
+    "hiddenComplete": 0,
+    "sec": 1834,
+    "peakMB": 851
+   },
+   "dev": {
+    "n": 40,
+    "sound": 17,
+    "hiddenOnly": 5,
+    "incomplete": 18,
+    "claimed": 0,
+    "proven": 0,
+    "validShown": 34,
+    "ready": 29,
+    "distinct": 34,
+    "leaks": 0,
+    "sec": 2060,
+    "peakMB": 1421,
+    "rows": [
+     {
+      "id": "R1",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R2",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R3",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R4",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R5",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R6",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R7",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R8",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R9",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R10",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R11",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R12",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R13",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R14",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R15",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R16",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R17",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R18",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R19",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R20",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R21",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R22",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R23",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R24",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R25",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R26",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R27",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R28",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R29",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R30",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R31",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R32",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R33",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R34",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R35",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R36",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R37",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R38",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R39",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R40",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     }
+    ]
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 65113,
+     "rss": 525,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 79,
+     "trees": 84
+    },
+    {
+     "id": "C2",
+     "ms": 101724,
+     "rss": 519,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ],
+     "treesNoSol": 107,
+     "trees": 115
+    },
+    {
+     "id": "C3",
+     "ms": 112653,
+     "rss": 489,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ],
+     "treesNoSol": 79,
+     "trees": 113
+    },
+    {
+     "id": "C4",
+     "ms": 31304,
+     "rss": 299,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ],
+     "treesNoSol": 22,
+     "trees": 31
+    },
+    {
+     "id": "C5",
+     "ms": 135188,
+     "rss": 851,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 151
+    },
+    {
+     "id": "C6",
+     "ms": 60359,
+     "rss": 477,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ],
+     "treesNoSol": 105,
+     "trees": 108
+    },
+    {
+     "id": "C7",
+     "ms": 204039,
+     "rss": 432,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "C8",
+     "ms": 105629,
+     "rss": 532,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ],
+     "treesNoSol": 71,
+     "trees": 116
+    },
+    {
+     "id": "C9",
+     "ms": 84864,
+     "rss": 490,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ],
+     "treesNoSol": 78,
+     "trees": 116
+    },
+    {
+     "id": "C10",
+     "ms": 107987,
+     "rss": 581,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 67,
+     "trees": 88
+    },
+    {
+     "id": "H1",
+     "ms": 71002,
+     "rss": 512,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ],
+     "treesNoSol": 95,
+     "trees": 119
+    },
+    {
+     "id": "H2",
+     "ms": 81698,
+     "rss": 662,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ],
+     "treesNoSol": 25,
+     "trees": 32
+    },
+    {
+     "id": "H3",
+     "ms": 74876,
+     "rss": 591,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 81,
+     "trees": 83
+    },
+    {
+     "id": "H4",
+     "ms": 39452,
+     "rss": 223,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 4,
+     "trees": 6
+    },
+    {
+     "id": "H5",
+     "ms": 85071,
+     "rss": 772,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ],
+     "treesNoSol": 111,
+     "trees": 115
+    },
+    {
+     "id": "H6",
+     "ms": 109684,
+     "rss": 846,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ],
+     "treesNoSol": 94,
+     "trees": 115
+    },
+    {
+     "id": "H7",
+     "ms": 84486,
+     "rss": 542,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ],
+     "treesNoSol": 90,
+     "trees": 114
+    },
+    {
+     "id": "H8",
+     "ms": 176968,
+     "rss": 324,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "H9",
+     "ms": 22737,
+     "rss": 260,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ],
+     "treesNoSol": 26,
+     "trees": 29
+    },
+    {
+     "id": "H10",
+     "ms": 78829,
+     "rss": 793,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ],
+     "treesNoSol": 112,
+     "trees": 114
+    }
+   ]
+  },
+  {
+   "label": "k2-a02c",
+   "ar": "02c-وحده",
+   "n": 20,
+   "cases": {
+    "withPlan": 16,
+    "visible": 27,
+    "ready": 22,
+    "mandatoryShown": 0,
+    "hiddenOnly": 2,
+    "failed": 2,
+    "hidden": 2,
+    "hiddenComplete": 2,
+    "sec": 1847,
+    "peakMB": 754
+   },
+   "dev": {
+    "n": 40,
+    "sound": 17,
+    "hiddenOnly": 5,
+    "incomplete": 18,
+    "claimed": 0,
+    "proven": 0,
+    "validShown": 34,
+    "ready": 29,
+    "distinct": 34,
+    "leaks": 0,
+    "sec": 2032,
+    "peakMB": 1477,
+    "rows": [
+     {
+      "id": "R1",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R2",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R3",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R4",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R5",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R6",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R7",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R8",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R9",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R10",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R11",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R12",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R13",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R14",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R15",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R16",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R17",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R18",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R19",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R20",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R21",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R22",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R23",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R24",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R25",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R26",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R27",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R28",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R29",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R30",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R31",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R32",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R33",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R34",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R35",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R36",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R37",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R38",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R39",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R40",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     }
+    ]
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 70545,
+     "rss": 499,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 79,
+     "trees": 84
+    },
+    {
+     "id": "C2",
+     "ms": 104163,
+     "rss": 504,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ],
+     "treesNoSol": 107,
+     "trees": 115
+    },
+    {
+     "id": "C3",
+     "ms": 113284,
+     "rss": 513,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ],
+     "treesNoSol": 79,
+     "trees": 113
+    },
+    {
+     "id": "C4",
+     "ms": 34477,
+     "rss": 280,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ],
+     "treesNoSol": 22,
+     "trees": 31
+    },
+    {
+     "id": "C5",
+     "ms": 130186,
+     "rss": 492,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 151
+    },
+    {
+     "id": "C6",
+     "ms": 55101,
+     "rss": 391,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 108
+    },
+    {
+     "id": "C7",
+     "ms": 219153,
+     "rss": 430,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "C8",
+     "ms": 109991,
+     "rss": 505,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ],
+     "treesNoSol": 71,
+     "trees": 116
+    },
+    {
+     "id": "C9",
+     "ms": 90460,
+     "rss": 498,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ],
+     "treesNoSol": 78,
+     "trees": 116
+    },
+    {
+     "id": "C10",
+     "ms": 114515,
+     "rss": 754,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 67,
+     "trees": 88
+    },
+    {
+     "id": "H1",
+     "ms": 79811,
+     "rss": 539,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ],
+     "treesNoSol": 95,
+     "trees": 119
+    },
+    {
+     "id": "H2",
+     "ms": 87919,
+     "rss": 546,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ],
+     "treesNoSol": 25,
+     "trees": 32
+    },
+    {
+     "id": "H3",
+     "ms": 70655,
+     "rss": 576,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 81,
+     "trees": 83
+    },
+    {
+     "id": "H4",
+     "ms": 41525,
+     "rss": 280,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 4,
+     "trees": 6
+    },
+    {
+     "id": "H5",
+     "ms": 75107,
+     "rss": 500,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ],
+     "treesNoSol": 111,
+     "trees": 115
+    },
+    {
+     "id": "H6",
+     "ms": 110647,
+     "rss": 542,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ],
+     "treesNoSol": 94,
+     "trees": 115
+    },
+    {
+     "id": "H7",
+     "ms": 89208,
+     "rss": 571,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ],
+     "treesNoSol": 90,
+     "trees": 114
+    },
+    {
+     "id": "H8",
+     "ms": 158548,
+     "rss": 299,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "H9",
+     "ms": 22944,
+     "rss": 249,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ],
+     "treesNoSol": 26,
+     "trees": 29
+    },
+    {
+     "id": "H10",
+     "ms": 68589,
+     "rss": 548,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ],
+     "treesNoSol": 112,
+     "trees": 114
+    }
+   ]
+  },
+  {
+   "label": "k2-a01b",
+   "ar": "01b-وحده",
+   "n": 20,
+   "cases": {
+    "withPlan": 16,
+    "visible": 27,
+    "ready": 21,
+    "mandatoryShown": 0,
+    "hiddenOnly": 3,
+    "failed": 1,
+    "hidden": 3,
+    "hiddenComplete": 0,
+    "sec": 1848,
+    "peakMB": 887
+   },
+   "dev": {
+    "n": 40,
+    "sound": 17,
+    "hiddenOnly": 5,
+    "incomplete": 18,
+    "claimed": 0,
+    "proven": 0,
+    "validShown": 34,
+    "ready": 29,
+    "distinct": 34,
+    "leaks": 0,
+    "sec": 2005,
+    "peakMB": 1502,
+    "rows": [
+     {
+      "id": "R1",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R2",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R3",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R4",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R5",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R6",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R7",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R8",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R9",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R10",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R11",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R12",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R13",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R14",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R15",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R16",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R17",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R18",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R19",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R20",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R21",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R22",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R23",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R24",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R25",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R26",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R27",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R28",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R29",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R30",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R31",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R32",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R33",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R34",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R35",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R36",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R37",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R38",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R39",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R40",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     }
+    ]
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 70026,
+     "rss": 516,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 79,
+     "trees": 84
+    },
+    {
+     "id": "C2",
+     "ms": 106767,
+     "rss": 501,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ],
+     "treesNoSol": 107,
+     "trees": 115
+    },
+    {
+     "id": "C3",
+     "ms": 113804,
+     "rss": 478,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ],
+     "treesNoSol": 79,
+     "trees": 113
+    },
+    {
+     "id": "C4",
+     "ms": 34103,
+     "rss": 231,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ],
+     "treesNoSol": 22,
+     "trees": 31
+    },
+    {
+     "id": "C5",
+     "ms": 135318,
+     "rss": 887,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 151
+    },
+    {
+     "id": "C6",
+     "ms": 57797,
+     "rss": 511,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:needs-edits"
+     ],
+     "treesNoSol": 105,
+     "trees": 108
+    },
+    {
+     "id": "C7",
+     "ms": 218261,
+     "rss": 457,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "C8",
+     "ms": 109131,
+     "rss": 714,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ],
+     "treesNoSol": 71,
+     "trees": 116
+    },
+    {
+     "id": "C9",
+     "ms": 88950,
+     "rss": 524,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ],
+     "treesNoSol": 78,
+     "trees": 116
+    },
+    {
+     "id": "C10",
+     "ms": 114673,
+     "rss": 578,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 67,
+     "trees": 88
+    },
+    {
+     "id": "H1",
+     "ms": 78287,
+     "rss": 514,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ],
+     "treesNoSol": 95,
+     "trees": 119
+    },
+    {
+     "id": "H2",
+     "ms": 84967,
+     "rss": 548,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ],
+     "treesNoSol": 25,
+     "trees": 32
+    },
+    {
+     "id": "H3",
+     "ms": 78289,
+     "rss": 584,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "centralhall:ch2:hidden"
+     ],
+     "treesNoSol": 84,
+     "trees": 85
+    },
+    {
+     "id": "H4",
+     "ms": 43647,
+     "rss": 265,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 4,
+     "trees": 6
+    },
+    {
+     "id": "H5",
+     "ms": 71147,
+     "rss": 491,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ],
+     "treesNoSol": 111,
+     "trees": 115
+    },
+    {
+     "id": "H6",
+     "ms": 109427,
+     "rss": 537,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ],
+     "treesNoSol": 94,
+     "trees": 115
+    },
+    {
+     "id": "H7",
+     "ms": 86507,
+     "rss": 532,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ],
+     "treesNoSol": 90,
+     "trees": 114
+    },
+    {
+     "id": "H8",
+     "ms": 159588,
+     "rss": 363,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "H9",
+     "ms": 22328,
+     "rss": 269,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ],
+     "treesNoSol": 26,
+     "trees": 29
+    },
+    {
+     "id": "H10",
+     "ms": 65368,
+     "rss": 546,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ],
+     "treesNoSol": 112,
+     "trees": 114
+    }
+   ]
+  },
+  {
+   "label": "k2-c02c01b",
+   "ar": "02c+01b",
+   "n": 20,
+   "cases": {
+    "withPlan": 16,
+    "visible": 27,
+    "ready": 22,
+    "mandatoryShown": 0,
+    "hiddenOnly": 3,
+    "failed": 1,
+    "hidden": 3,
+    "hiddenComplete": 3,
+    "sec": 1649,
+    "peakMB": 1064
+   },
+   "dev": {
+    "n": 40,
+    "sound": 17,
+    "hiddenOnly": 5,
+    "incomplete": 18,
+    "claimed": 0,
+    "proven": 0,
+    "validShown": 34,
+    "ready": 29,
+    "distinct": 34,
+    "leaks": 0,
+    "sec": 1996,
+    "peakMB": 1447,
+    "rows": [
+     {
+      "id": "R1",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R2",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R3",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R4",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R5",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R6",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R7",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R8",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R9",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R10",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R11",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R12",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R13",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R14",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R15",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R16",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R17",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R18",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R19",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R20",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R21",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R22",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R23",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R24",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R25",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R26",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R27",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R28",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R29",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R30",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R31",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R32",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R33",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R34",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R35",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R36",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R37",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R38",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R39",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R40",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     }
+    ]
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 64197,
+     "rss": 546,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 79,
+     "trees": 84
+    },
+    {
+     "id": "C2",
+     "ms": 101620,
+     "rss": 496,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ],
+     "treesNoSol": 107,
+     "trees": 115
+    },
+    {
+     "id": "C3",
+     "ms": 99547,
+     "rss": 497,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ],
+     "treesNoSol": 79,
+     "trees": 113
+    },
+    {
+     "id": "C4",
+     "ms": 27444,
+     "rss": 269,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ],
+     "treesNoSol": 22,
+     "trees": 31
+    },
+    {
+     "id": "C5",
+     "ms": 115255,
+     "rss": 1064,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 151
+    },
+    {
+     "id": "C6",
+     "ms": 49649,
+     "rss": 373,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 108
+    },
+    {
+     "id": "C7",
+     "ms": 178129,
+     "rss": 481,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "C8",
+     "ms": 88708,
+     "rss": 536,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ],
+     "treesNoSol": 71,
+     "trees": 116
+    },
+    {
+     "id": "C9",
+     "ms": 75366,
+     "rss": 507,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ],
+     "treesNoSol": 78,
+     "trees": 116
+    },
+    {
+     "id": "C10",
+     "ms": 99795,
+     "rss": 588,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 67,
+     "trees": 88
+    },
+    {
+     "id": "H1",
+     "ms": 67560,
+     "rss": 508,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ],
+     "treesNoSol": 95,
+     "trees": 119
+    },
+    {
+     "id": "H2",
+     "ms": 77240,
+     "rss": 500,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ],
+     "treesNoSol": 25,
+     "trees": 32
+    },
+    {
+     "id": "H3",
+     "ms": 68707,
+     "rss": 601,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "centralhall:ch2:hidden"
+     ],
+     "treesNoSol": 82,
+     "trees": 83
+    },
+    {
+     "id": "H4",
+     "ms": 38590,
+     "rss": 288,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 4,
+     "trees": 6
+    },
+    {
+     "id": "H5",
+     "ms": 78407,
+     "rss": 796,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ],
+     "treesNoSol": 111,
+     "trees": 115
+    },
+    {
+     "id": "H6",
+     "ms": 103670,
+     "rss": 551,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ],
+     "treesNoSol": 94,
+     "trees": 115
+    },
+    {
+     "id": "H7",
+     "ms": 81832,
+     "rss": 531,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ],
+     "treesNoSol": 90,
+     "trees": 114
+    },
+    {
+     "id": "H8",
+     "ms": 149727,
+     "rss": 341,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "H9",
+     "ms": 20771,
+     "rss": 255,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ],
+     "treesNoSol": 26,
+     "trees": 29
+    },
+    {
+     "id": "H10",
+     "ms": 62495,
+     "rss": 794,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ],
+     "treesNoSol": 112,
+     "trees": 114
+    }
+   ]
+  },
+  {
+   "label": "k2-all",
+   "ar": "الكل",
+   "n": 20,
+   "cases": {
+    "withPlan": 16,
+    "visible": 27,
+    "ready": 22,
+    "mandatoryShown": 0,
+    "hiddenOnly": 3,
+    "failed": 1,
+    "hidden": 3,
+    "hiddenComplete": 3,
+    "sec": 1656,
+    "peakMB": 1062
+   },
+   "dev": {
+    "n": 40,
+    "sound": 17,
+    "hiddenOnly": 5,
+    "incomplete": 18,
+    "claimed": 0,
+    "proven": 0,
+    "validShown": 34,
+    "ready": 29,
+    "distinct": 34,
+    "leaks": 0,
+    "sec": 1975,
+    "peakMB": 1432,
+    "rows": [
+     {
+      "id": "R1",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R2",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R3",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R4",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R5",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R6",
+      "outcome": "sound",
+      "statuses": [
+       "ready"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R7",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R8",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R9",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R10",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R11",
+      "outcome": "sound",
+      "statuses": [
+       "needs-edits"
+      ],
+      "distinct": 1
+     },
+     {
+      "id": "R12",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R13",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R14",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R15",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R16",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R17",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R18",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R19",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R20",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R21",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R22",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 3
+     },
+     {
+      "id": "R23",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R24",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R25",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R26",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R27",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R28",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R29",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R30",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R31",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R32",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R33",
+      "outcome": "hidden-only",
+      "statuses": [
+       "hidden"
+      ],
+      "distinct": 0
+     },
+     {
+      "id": "R34",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R35",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "needs-edits"
+      ],
+      "distinct": 2
+     },
+     {
+      "id": "R36",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R37",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_NO_FIT",
+      "distinct": 0
+     },
+     {
+      "id": "R38",
+      "outcome": "sound",
+      "statuses": [
+       "ready",
+       "ready",
+       "ready",
+       "ready"
+      ],
+      "distinct": 4
+     },
+     {
+      "id": "R39",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     },
+     {
+      "id": "R40",
+      "outcome": "search-incomplete",
+      "statuses": "VILLA_BUILD_FAILED",
+      "distinct": 0
+     }
+    ]
+   },
+   "perCase": [
+    {
+     "id": "C1",
+     "ms": 63484,
+     "rss": 519,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 79,
+     "trees": 84
+    },
+    {
+     "id": "C2",
+     "ms": 100125,
+     "rss": 506,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "hplan:hh2:ready"
+     ],
+     "treesNoSol": 107,
+     "trees": 115
+    },
+    {
+     "id": "C3",
+     "ms": 98732,
+     "rss": 485,
+     "visible": 3,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31t5kd:1t5kdvp:ready",
+      "ell:l0:ready",
+      "r31qgzd:1qgzdhCa:needs-edits"
+     ],
+     "treesNoSol": 79,
+     "trees": 113
+    },
+    {
+     "id": "C4",
+     "ms": 28522,
+     "rss": 266,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "tcore:n7w:needs-edits"
+     ],
+     "treesNoSol": 22,
+     "trees": 31
+    },
+    {
+     "id": "C5",
+     "ms": 115612,
+     "rss": 1062,
+     "visible": 3,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "cornerentry:e0t:ready",
+      "split:s0rt:ready",
+      "hallback:h0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 151
+    },
+    {
+     "id": "C6",
+     "ms": 50108,
+     "rss": 504,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 105,
+     "trees": 108
+    },
+    {
+     "id": "C7",
+     "ms": 180300,
+     "rss": 427,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg3/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "C8",
+     "ms": 88931,
+     "rss": 519,
+     "visible": 4,
+     "ready": 3,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready",
+      "r3aosfq:aosfqvg1:ready",
+      "r34nk7y:4nk7yvg1:ready",
+      "r31sodw:1sodwvg1:needs-edits"
+     ],
+     "treesNoSol": 71,
+     "trees": 116
+    },
+    {
+     "id": "C9",
+     "ms": 76851,
+     "rss": 530,
+     "visible": 4,
+     "ready": 4,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3aosfq:aosfqvg0:ready",
+      "hallback:h0:ready",
+      "r31sodw:1sodwvg0:ready",
+      "r34nk7y:4nk7yvg1:ready"
+     ],
+     "treesNoSol": 78,
+     "trees": 116
+    },
+    {
+     "id": "C10",
+     "ms": 101218,
+     "rss": 561,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "sidecourt:sc0:ready"
+     ],
+     "treesNoSol": 67,
+     "trees": 88
+    },
+    {
+     "id": "H1",
+     "ms": 69674,
+     "rss": 841,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31fo67:1fo67vCa:ready"
+     ],
+     "treesNoSol": 95,
+     "trees": 119
+    },
+    {
+     "id": "H2",
+     "ms": 78186,
+     "rss": 519,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "ell:n10:hidden"
+     ],
+     "treesNoSol": 25,
+     "trees": 32
+    },
+    {
+     "id": "H3",
+     "ms": 74071,
+     "rss": 860,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "centralhall:ch2:hidden"
+     ],
+     "treesNoSol": 84,
+     "trees": 85
+    },
+    {
+     "id": "H4",
+     "ms": 42101,
+     "rss": 264,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": "VILLA_BUILD_FAILED",
+     "pat": [],
+     "treesNoSol": 4,
+     "trees": 6
+    },
+    {
+     "id": "H5",
+     "ms": 73258,
+     "rss": 800,
+     "visible": 2,
+     "ready": 2,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "courtyard:k1:ready",
+      "r3od28p:od28phg1:ready"
+     ],
+     "treesNoSol": 111,
+     "trees": 115
+    },
+    {
+     "id": "H6",
+     "ms": 99453,
+     "rss": 549,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31yrge:1yrgevg1:ready"
+     ],
+     "treesNoSol": 94,
+     "trees": 115
+    },
+    {
+     "id": "H7",
+     "ms": 84824,
+     "rss": 709,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r3o32n0:o32n0vg0:ready"
+     ],
+     "treesNoSol": 90,
+     "trees": 114
+    },
+    {
+     "id": "H8",
+     "ms": 149592,
+     "rss": 312,
+     "visible": 1,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "frontstair:fsg2/uspine:needs-edits"
+     ],
+     "treesNoSol": 11,
+     "trees": 16
+    },
+    {
+     "id": "H9",
+     "ms": 20604,
+     "rss": 278,
+     "visible": 0,
+     "ready": 0,
+     "mandatoryShown": 0,
+     "hiddenOnly": true,
+     "hidden": 1,
+     "hiddenComplete": 1,
+     "error": null,
+     "pat": [
+      "r31c8zy:1c8zyhCa:hidden"
+     ],
+     "treesNoSol": 26,
+     "trees": 29
+    },
+    {
+     "id": "H10",
+     "ms": 59901,
+     "rss": 798,
+     "visible": 1,
+     "ready": 1,
+     "mandatoryShown": 0,
+     "hiddenOnly": false,
+     "hidden": 0,
+     "hiddenComplete": 0,
+     "error": null,
+     "pat": [
+      "r31bqbu:1bqbuhg1:ready"
+     ],
+     "treesNoSol": 112,
+     "trees": 114
+    }
+   ]
+  }
+ ]
+}

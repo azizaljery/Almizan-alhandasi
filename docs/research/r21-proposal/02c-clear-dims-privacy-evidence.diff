@@ -1,0 +1,1191 @@
+diff --git a/dist/bath-band.mjs b/dist/bath-band.mjs
+new file mode 100644
+index 0000000..66df083
+--- /dev/null
++++ b/dist/bath-band.mjs
+@@ -0,0 +1,46 @@
++// (الجولة 21 — 02c، قرار المالك 2026-10-26 ثالثًا) عمق شريط حمام الجناح: نطاقات بحث أولية لا شروط. مكيَّف من حزمة المالك
++// docs/owner/kit-r21-02b-01/src/bath-band.mjs على المستند: نجاح الحمام لا يُقاس بعمقه وحده بل بفاحصات المشروع الموجودة —
++//   الأجهزة تتسع (مرحاض ومغسلة مرسومان داخل الوجوه الداخلية للحمام، والدش/الحوض إن رُسم)، وفتح الباب (swingBlockers في dist/draw/review.mjs:
++//   لا جدار ولا باب ولا قطعة سباكة مثبتة في مسار فتح باب الحمام)، والعرض الصافي (MIN_CLEAR_WIDTH في plan-review.mjs: حمام 1.4 م، دورة مياه
++//   1.0 م — قيمة مرشحة «يُراجع» غير متحققة نظاميًا)، والتهوية (نافذة على الخارج، وإلا «تهوية ميكانيكية» ملاحظة BATH_NO_WINDOW)؛ ومسار السباكة لا
++//   يمثله المستند ⇐ «لم يُتحقق» لا «متحقق». لا شيء هنا اعتماد صحي أو إنشائي.
++import { analyzeDoc } from './draw/digest.mjs';
++import { pointInPolygon } from './draw/geom.mjs';
++import { swingBlockers } from './draw/review.mjs';
++import { MIN_CLEAR_WIDTH, FIXED_FIXTURES } from './plan-review.mjs';
++
++/** نطاقات البحث (= SUITE_TD_RANGE/SUITE_T_RANGE في villa-layout-v2.mjs لغرف الأبناء؛ الرئيسية أوسع هناك: 2.2–3.2 و1.9–2.8). */
++export const BATH_DEPTH_PREFERENCES = Object.freeze({ deep: { min: 1.95, max: 2.9 }, side: { min: 1.5, max: 2.4 }, source: 'تفضيل بحث للميزان (قرار المالك 2026-10-26) — ليس مقاسًا نظاميًا للحمام' });
++
++/** (الحزمة) تقييم عمق مع وظائف معلومة: المفضّل نطاقًا لا يكفي، والقبول المبدئي بالوظائف وطلب العميل. */
++export function evaluateBath({ type, depth, fixturesFit = false, doorClearance = false, ventilation = false, clientRange = null }) {
++  if (!(type in BATH_DEPTH_PREFERENCES) || type === 'source' || !Number.isFinite(depth) || depth <= 0) throw Error('Invalid bath');
++  const { min, max } = BATH_DEPTH_PREFERENCES[type];
++  const preferred = depth >= min && depth <= max, clientOK = !clientRange || (depth >= clientRange.min && depth <= clientRange.max);
++  return { preferred, clientOK, functional: fixturesFit && doorClearance && ventilation, preliminaryAccept: clientOK && fixturesFit && doorClearance && ventilation, disclaimer: 'تحقق من الاشتراطات المنطبقة ومن مراجعة متخصصة' };
++}
++
++/**
++ * حمامات المستند الملحقة بالأجنحة (حمام الرئيسية/حمام غرفة …): لكل منها قياسات المشروع الفعلية.
++ * يعيد [{ name, w, l, fixtures:{wc,basin,shower}, fixturesFit, doorClearance, minWidthOk, ventilation:'window'|'mechanical', plumbing:'unverified', preliminaryAccept }]. (نطاق العمق تفضيل بحث في المولّد؛ لا يدخل القبول.)
++ */
++export function evaluateSuiteBaths(doc, model = analyzeDoc(doc)) {
++  const out = [];
++  for (const lv of model.levels) for (const r of lv.rooms) {
++    if (!/^حمام (الرئيسية|غرفة)/.test(r.name || '')) continue;
++    const fx = (doc.fixtures || []).filter(f => f.level === lv.level.id && r.net && pointInPolygon({ x: f.x, y: f.y }, r.net, 1e-6));
++    const has = k => fx.some(f => f.kind === k);
++    const w = Math.min(r.rect.w, r.rect.l), l = Math.max(r.rect.w, r.rect.l);
++    const doors = lv.openings.filter(op => op.door && op.sides.some(s => s.room.id === r.id));
++    let doorClearance = doors.length > 0;
++    for (const op of doors) { const bl = swingBlockers(model, lv, op); if (bl.some(b => b.kind !== 'fixture' || FIXED_FIXTURES.includes((doc.fixtures || []).find(f => f.id === b.id)?.kind))) doorClearance = false; }
++    const win = lv.openings.some(op => op.window && op.sides.some(s => s.room.id === r.id && s.other === 'outside'));
++    const minWidthOk = w >= MIN_CLEAR_WIDTH.bath.min - 1e-6;
++    // حمام الجناح وظيفته الاستحمام: مرحاض ومغسلة ودش أو حوض استحمام داخل وجوهه (التوزيع الاحتياطي في المولّد قد يُسقط الدش حين يصطدم بمنطقة الباب)
++    const fixturesFit = has('wc') && has('basin') && (has('shower') || has('bathtub'));
++    out.push({ name: r.name, w: Math.round(w * 100) / 100, l: Math.round(l * 100) / 100, fixtures: { wc: has('wc'), basin: has('basin'), shower: has('shower') || has('bathtub') }, fixturesFit, doorClearance, minWidthOk,
++      ventilation: win ? 'window' : 'mechanical', plumbing: 'unverified', preliminaryAccept: fixturesFit && doorClearance && minWidthOk });
++  }
++  return out;
++}
++export default { BATH_DEPTH_PREFERENCES, evaluateBath, evaluateSuiteBaths };
+diff --git a/dist/clear-dims.mjs b/dist/clear-dims.mjs
+new file mode 100644
+index 0000000..74edc8a
+--- /dev/null
++++ b/dist/clear-dims.mjs
+@@ -0,0 +1,143 @@
++// (الجولة 21 — 02c، قرار المالك 2026-10-26 «القياس عند أضيق موضع صالح للاستخدام») فحص الأبعاد الصافية بوابةً بعد التفصيل:
++// مكيَّف من حزمة المالك docs/owner/kit-r21-02b-01/src/clear-dimensions.mjs على مستند المشروع الحقيقي، لا نسخة منها.
++//
++// مرجع الإحداثيات (مثبت من الشيفرة، لا افتراض):
++//   - جدران المستند (doc.walls) محاور: كل جدار { a, b, t } خطه المركزي وسماكته t.
++//   - فراغ كل غرفة في analyzeDoc (dist/draw/topology.mjs، الخطوة 6) = `insetPolygon(poly, t/2)` لكل ضلع بسماكة جداره الفعلي، أي
++//     **الوجوه الداخلية المنتهية**، والجزر الداخلية (أعمدة/فتحات رأسية مرسومة جدرانًا مغلقة) `holes` بعد تكبيرها نصف سماكتها.
++//   لذلك هذا الفحص يأخذ `net` و`holes` كما هما ولا يخصم نصف سماكة مرة ثانية. `clearSpanFromCentrelines` للمحاور فقط
++//   (امتداد القطع في شجرة المولّد قبل الرسم) ولا يُستدعى على `net` أبدًا.
++//
++// الشرطان معًا (القرار): (أ) أبعاد الصندوق المحيط بالصافي ضمن السماحية، و(ب) مستطيل صافٍ قابل للاستخدام داخل المضلع (خارج الجزر)
++// يحقق الطول والعرض المطلوبين ضمن السماحية — فتُرفض غرفة L ودرجة السماكة (حتى 6.5 سم = (0.25−0.12)/2) التي يمررها الصندوق وحده.
++// التدوير مسموح فقط حين لا يُلزم الطلب باتجاه (allowRotation). هندسة غير متعامدة: الفحص لا يُطبَّق (`applicable: false`) — ليس استحالة.
++// السماحيات سياسة تشغيل قابلة للضبط والتفسير (DIM_TOL أدناه، يعيد تصديره requirements.mjs) لا معيار هندسي ولا اشتراط نظامي.
++// المصدر الواحد للسماحيات (كان في requirements.mjs؛ نُقل هنا بلا تغيير في القيم ليُستورد بلا حلقة استيراد، ويُعاد تصديره من هناك)
++export const DIM_TOL = Object.freeze({ exact: .03, default: .05, approx: .3 });
++
++const EPS = 1e-6;
++const finite = p => p && Number.isFinite(p.x) && Number.isFinite(p.y);
++const r2 = v => Math.round(v * 100) / 100;
++const r3 = v => Math.round(v * 1000) / 1000;
++
++/** سياسة السماحية: القيم من DIM_TOL (المصدر الواحد)، ويجوز تجاوزها بسياسة صريحة مُتحقق منها. */
++export const TOLERANCE_POLICY = Object.freeze({
++  values: DIM_TOL,
++  source: 'سياسة تشغيل للميزان (قرار المالك 2026-10-26): «بالضبط» ±0.03 م، بلا وصف ±0.05 م، «تقريبًا» ±0.30 م — قابلة للضبط، ليست اشتراطًا نظاميًا',
++});
++export function toleranceFor(qualifier = 'default', policy = {}) {
++  const q = qualifier === 'unspecified' ? 'default' : qualifier === 'approximate' ? 'approx' : qualifier;
++  if (!(q in DIM_TOL)) throw Error('Unknown qualifier');
++  const v = policy[q] ?? DIM_TOL[q];
++  if (!Number.isFinite(v) || v < 0) throw Error('Invalid tolerance');
++  return v;
++}
++
++/** ينظف حلقة: يزيل النقاط المكررة والمتتالية على استقامة واحدة (insetPolygon يُبقي نقطة الدرجة). */
++export function cleanRing(ring) {
++  let pts = (ring || []).filter(finite).map(p => ({ x: p.x, y: p.y }));
++  for (let changed = true; changed && pts.length > 2;) {
++    changed = false;
++    for (let i = 0; i < pts.length; i++) {
++      const a = pts[(i + pts.length - 1) % pts.length], b = pts[i], c = pts[(i + 1) % pts.length];
++      const dup = Math.abs(a.x - b.x) < EPS && Math.abs(a.y - b.y) < EPS;
++      const col = Math.abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) < EPS * 10;
++      if (dup || col) { pts.splice(i, 1); changed = true; break; }
++    }
++  }
++  return pts;
++}
++/** كل ضلع أفقي أو رأسي (مضلع متعامد موازٍ للمحاور). */
++export function isOrthogonal(ring) {
++  return Array.isArray(ring) && ring.length >= 4 && ring.every(finite) && ring.every((p, i) => { const q = ring[(i + 1) % ring.length]; return (Math.abs(p.x - q.x) < EPS) !== (Math.abs(p.y - q.y) < EPS); });
++}
++function pointIn(p, ring) {
++  let inside = false;
++  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
++    const a = ring[i], b = ring[j];
++    if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
++  }
++  return inside;
++}
++const uniq = a => [...new Set(a.map(v => Math.round(v / EPS) * EPS))].sort((x, y) => x - y);
++
++/**
++ * كل المستطيلات الصافية القصوى على شبكة إحداثيات المضلع والجزر (الخلايا بين خطوط الرؤوس): خلية حرة = داخل المضلع خارج كل جزيرة.
++ * يعيد المستطيلات الحرة كلها (لا الأكبر مساحة وحده)؛ الحجم صغير (غرف بعشرات الرؤوس على الأكثر).
++ */
++export function clearRectangles(outer, holes = []) {
++  const rings = [outer, ...holes], xs = uniq(rings.flatMap(r => r.map(p => p.x))), ys = uniq(rings.flatMap(r => r.map(p => p.y)));
++  const nx = xs.length - 1, ny = ys.length - 1;
++  const ps = Array.from({ length: nx + 1 }, () => new Float64Array(ny + 1));
++  for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
++    const c = { x: (xs[i] + xs[i + 1]) / 2, y: (ys[j] + ys[j + 1]) / 2 };
++    const blocked = !(pointIn(c, outer) && !holes.some(h => pointIn(c, h)));
++    ps[i + 1][j + 1] = (blocked ? 1 : 0) + ps[i][j + 1] + ps[i + 1][j] - ps[i][j];
++  }
++  const out = [];
++  for (let i = 0; i < nx; i++) for (let k = i + 1; k <= nx; k++) for (let j = 0; j < ny; j++) for (let l = j + 1; l <= ny; l++) {
++    if (ps[k][l] - ps[i][l] - ps[k][j] + ps[i][j] > 0) break; // أي توسيع أعلى يشمل الخلية المحجوبة نفسها
++    out.push({ x0: xs[i], y0: ys[j], x1: xs[k], y1: ys[l], w: xs[k] - xs[i], h: ys[l] - ys[j] });
++  }
++  return out;
++}
++
++/**
++ * القياس الصافي لغرفة مقابل مقاس مطلوب.
++ *  room: { net: [{x,y}…] الوجوه الداخلية، holes?: [[{x,y}…]] }؛ want: { s, l } (أو { w, l }) بالمتر؛ tol بالمتر.
++ *  allowRotation: الطلب بلا اتجاه (المحلل الحالي لا يقرأ اتجاهًا) ⇐ true؛ وإن أُلزم: want.w على محور x وwant.l على y.
++ * يعيد { applicable, ok, envelope{s,l}, clear{s,l,x0,y0,x1,y1} (أفضل مستطيل صافٍ للمقاس = عند أضيق موضع صالح), envelopeOK, clearOK,
++ *        deviation{ envelope:{s,l}, clear:{s,l} } (المرسوم − المطلوب، بإشارة), narrowing (فرق الصندوق عن المستطيل الصافي في كل ضلع), reason_ar? }.
++ */
++export function measureClearDims(room, want, tol, { allowRotation = true } = {}) {
++  const w0 = want.s ?? want.w, ws = Math.min(w0, want.l), wl = Math.max(w0, want.l);
++  if (!(ws > 0) || !(wl > 0) || !Number.isFinite(tol) || tol < 0) throw Error('Invalid target dimensions');
++  const outer = cleanRing(room?.net), holes = (room?.holes || []).map(cleanRing).filter(h => h.length >= 3);
++  const xs = outer.map(p => p.x), ys = outer.map(p => p.y);
++  const env = outer.length ? { w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) } : { w: 0, h: 0 };
++  const envelope = { s: r3(Math.min(env.w, env.h)), l: r3(Math.max(env.w, env.h)) };
++  if (!isOrthogonal(outer) || !holes.every(isOrthogonal)) {
++    return { applicable: false, ok: null, envelope, clear: null, reason_ar: 'حدود الغرفة غير متعامدة (ضلع مائل أو منحنٍ)؛ فحص المستطيل الصافي لا ينطبق عليها — يُراجع يدويًا، وليس دليل استحالة.' };
++  }
++  // الاتجاهات الممكنة للمقاس: [عرض على x، طول على y]
++  // بلا تدوير: الاتجاه كما أُلزم (want.w على x وwant.l على y)؛ ومع التدوير: الاتجاهان
++  const orient = allowRotation ? [{ ax: ws, ay: wl, rotated: false }, ...(Math.abs(ws - wl) > EPS ? [{ ax: wl, ay: ws, rotated: true }] : [])]
++    : [{ ax: want.w ?? want.s, ay: want.l, rotated: false }];
++  const rects = clearRectangles(outer, holes);
++  if (!rects.length) return { applicable: true, ok: false, envelope, clear: null, envelopeOK: false, clearOK: false, reason_ar: 'لا مستطيل صافٍ داخل حدود الغرفة.' };
++  // لكل اتجاه: أفضل مستطيل يعظّم أسوأ نسبة (ضلعه ÷ المطلوب) — القياس عند أضيق موضع للضلع الأضعف — والصندوق على المحورين نفسيهما
++  const evals = orient.map(o => {
++    let best = null;
++    for (const r of rects) { const fit = Math.min(r.w / o.ax, r.h / o.ay); if (!best || fit > best.fit + 1e-9 || (Math.abs(fit - best.fit) <= 1e-9 && r.w * r.h > best.r.w * best.r.h)) best = { fit, r }; }
++    const sx = o.ax <= o.ay; // الضلع المطلوب الأقصر على x؟
++    const cS = sx ? best.r.w : best.r.h, cL = sx ? best.r.h : best.r.w, eS = sx ? env.w : env.h, eL = sx ? env.h : env.w;
++    const envelopeOK = Math.abs(eS - ws) <= tol + EPS && Math.abs(eL - wl) <= tol + EPS, clearOK = cS >= ws - tol - EPS && cL >= wl - tol - EPS;
++    return { o, r: best.r, fit: best.fit, cS, cL, eS, eL, envelopeOK, clearOK, ok: envelopeOK && clearOK };
++  }).sort((a, b) => (b.ok - a.ok) || (b.envelopeOK - a.envelopeOK) || (b.fit - a.fit));
++  const { o, r, cS, cL, eS, eL, envelopeOK, clearOK } = evals[0];
++  const clear = { s: r3(cS), l: r3(cL), x0: r3(r.x0), y0: r3(r.y0), x1: r3(r.x1), y1: r3(r.y1), rotated: o.rotated };
++  return {
++    applicable: true, ok: envelopeOK && clearOK, envelope: { s: r3(eS), l: r3(eL) }, clear, envelopeOK, clearOK, tol, want: { s: ws, l: wl },
++    deviation: { envelope: { s: r3(eS - ws), l: r3(eL - wl) }, clear: { s: r3(cS - ws), l: r3(cL - wl) } },
++    narrowing: { s: r3(eS - cS), l: r3(eL - cL) }, rects: rects.length,
++  };
++}
++
++/** نص قصير للعميل عن الانحراف الفعلي (يُعرض مع البديل: «يرى العميل أي انحراف فعلي عن المقاس الصريح»). */
++export function deviationAr(m) {
++  if (!m?.applicable || !m.clear) return '';
++  const parts = [];
++  for (const [k, ar] of [['s', 'العرض'], ['l', 'الطول']]) {
++    const d = m.deviation.clear[k], e = m.deviation.envelope[k];
++    if (Math.abs(d) > .005 || Math.abs(e) > .005) parts.push(`${ar} الصافي ${r2(m.clear[k])} م${Math.abs(e - d) > .005 ? ` (وأوسع موضع ${r2(m.envelope[k])} م)` : ''} من ${m.want[k]} م`);
++  }
++  return parts.join('، ');
++}
++
++/** للمحاور فقط (امتداد القطع في شجرة المولّد): الصافي بين الوجهين = المسافة بين المحورين − نصفا سماكتي الجدارين. */
++export function clearSpanFromCentrelines(span, wallA, wallB) {
++  if (![span, wallA, wallB].every(v => Number.isFinite(v) && v >= 0)) throw Error('Invalid centreline span');
++  return span - wallA / 2 - wallB / 2;
++}
++
++export default { measureClearDims, clearRectangles, isOrthogonal, cleanRing, toleranceFor, TOLERANCE_POLICY, deviationAr, clearSpanFromCentrelines };
+diff --git a/dist/plan-review.mjs b/dist/plan-review.mjs
+index e708f54..f582228 100644
+--- a/dist/plan-review.mjs
++++ b/dist/plan-review.mjs
+@@ -405,12 +405,14 @@ function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = fa
+     else {
+       const tol = DESIGN_THRESHOLDS.setbackTolerance.value;
+       const pts = [];
+-      for (const w of doc.walls) for (const p of wallRect(w)) pts.push({ p, what: `الجدار ${w.id}` });
++      // (الجولة 21 — 02c) السور/الساتر الخارجي (kind 'fence') عنصر موقع لا مبنى: يُقاس داخل حدود الأرض (ارتداد صفر) لا داخل خط ارتداد المبنى —
++      // كما تعامله site-parking.mjs. لا يمس أي جدار مبنى (kind 'wall'/'parapet')؛ ولم يكن المولّد يرسم أسوارًا قبل 02c.
++      for (const w of doc.walls) for (const p of wallRect(w)) pts.push({ p, what: `الجدار ${w.id}`, site: w.kind === 'fence' });
+       for (const { room } of real) for (const p of room.net) pts.push({ p, what: roomName(room) });
+       const hits = new Map();
+-      for (const { p, what } of pts) {
++      for (const { p, what, site } of pts) {
+         let over = pointInPolygon(p, frame.poly, 1e-9) ? 0 : Infinity;
+-        for (const e of frame.edges) { const inside = -dot(sub(p, e.a), e.out); over = Math.max(over, e.setback - inside); }
++        if (!site) for (const e of frame.edges) { const inside = -dot(sub(p, e.a), e.out); over = Math.max(over, e.setback - inside); }
+         if (over > tol) { worst = Math.max(worst, over); if (!hits.has(what)) hits.set(what, over); }
+       }
+       for (const [what, over] of hits) bad.push(Number.isFinite(over) ? `${what} يتجاوز خط الارتداد بـ ${r2(over)} م` : `${what} خارج حدود الأرض`);
+@@ -425,7 +427,7 @@ function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = fa
+     const frame = plotFrame(doc), bad = [], notes = [], sides = {};
+     if (frame) {
+       const streets = new Set(doc.streets || [doc.entry || 's']), entry = doc.entry || 's';
+-      const pts = []; for (const w of doc.walls) for (const p of wallRect(w)) pts.push(p);
++      const pts = []; for (const w of doc.walls) if (w.kind !== 'fence') for (const p of wallRect(w)) pts.push(p); // (02c) السور عنصر موقع لا مبنى
+       const front = frontSetbackFor(doc.plot?.streetWidth);
+       for (const e of frame.edges) {
+         let clear = Infinity; for (const p of pts) clear = Math.min(clear, -dot(sub(p, e.a), e.out));
+diff --git a/dist/presentation-status.mjs b/dist/presentation-status.mjs
+index 45562ab..a0c9761 100644
+--- a/dist/presentation-status.mjs
++++ b/dist/presentation-status.mjs
+@@ -17,6 +17,8 @@ import { analyzeDoc } from './draw/digest.mjs';
+ import { measureSaudiProgram } from './saudi-program.mjs';
+ import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
+ import { toClientAr, GATE_AR } from './client-language.mjs';
++import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
++import { evaluateSuiteBaths } from './bath-band.mjs';
+ export { GATE_AR };
+ 
+ export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
+@@ -70,23 +72,30 @@ export function presentationStatus(design, request = {}) {
+   // (الجولة 21 — 02b، قرار المالك: «لا محجوب بحقول أسباب فارغة») سبب مُهيكل لكل حجب، بالترتيب نفسه لـ hidden_ar: المرشح، والمرحلة، والقاعدة
+   // المسؤولة، والمقيس والحد (متى انطبقا)، ومصدر الشرط، ونص العميل. يُبنى من البنود نفسها التي حجبت، لا من تفسير مفترض.
+   const candidate = design.pat || design.id || null;
++  // (02c، حزمة المالك review-evidence) الحقول الموحدة للحزمة (candidateId، stage، rule، source، reason، measured، limit، unit) بأرقام من الفاحص
++  // الحقيقي: بند السجل (ledgerEvidence)، وقيمة بوابة المراجعة نفسها (gateEvidence من design.review.gates)، وقيمة المخالفة الإلزامية حيث كانت رقمًا؛
++  // وغير الرقمي null مع measure_ar صريح. تُبقى الحقول القديمة (candidate، kind، limit كائنًا في المقاسات → limitDetail) للتوافق.
++  const gateOf = id => (rv?.gates || []).find(g => g.id === id) || { id, value: null, reasons_ar: [] };
+   const hiddenReasons = [
+-    ...ledgerFails.map(x => ({ candidate, stage: 'presentation', rule: x.id || ('LEDGER:' + (x.kind || 'item')), kind: x.kind || null, measured: x.failing ?? x.actual ?? null,
+-      limit: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, source: 'client', quote: x.text || null })),
+-    ...gateFails.map(g => ({ candidate, stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: null, limit: null, source: 'review' })),
+-    ...mand.map(g => ({ candidate, stage: 'presentation', rule: g.id, kind: 'mandatory', measured: g.value ?? null, limit: null, source: MAND_TIER_AR })),
+-  ].map((r, i) => ({ ...r, reason_ar: hidden[i] }));
++    ...ledgerFails.map(x => { const e = ledgerEvidence(x); return { candidate, candidateId: candidate || 'design', stage: x.kind === 'dims' ? 'dimensions' : 'presentation', rule: x.id || ('LEDGER:' + (x.kind || 'item')), kind: x.kind || null,
++      measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, ...(x.kind === 'dims' ? { measuredDetail: x.failing ?? x.actual ?? null, limitDetail: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, tol: x.tol ?? null } : {}), source: 'client', quote: x.text || null }; }),
++    ...gateFails.map(g => { const gg = gateOf(g), e = gateEvidence(gg); return { candidate, candidateId: candidate || 'design', stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, source: gg.tier || 'review', gateReasons_ar: gg.reasons_ar || [] }; }),
++    ...mand.map(g => ({ candidate, candidateId: candidate || 'design', stage: 'presentation', rule: g.id, kind: 'mandatory', measured: null, limit: null, unit: null, measuredDetail: g.value ?? null, measure_ar: `شرط أساسي غير رقمي (مسار/علاقة): ${(g.reasons_ar || [])[0] || g.ar}`, source: MAND_TIER_AR })),
++  ].map((r, i) => ({ ...r, reason_ar: hidden[i], reason: hidden[i] }));
+   r16 = r16.filter(g => !mand.includes(g));
+   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
+     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
+     ...qualityNotes(doc, model, request).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
+     ...toleranceNotes(design.ledger || []),
++    // (الجولة 21 — 02c، قرار المالك ثالثًا) حمام الجناح بالفاحصات الموجودة (bath-band.mjs): الأجهزة وفتح الباب والعرض الصافي — ملاحظة مقيسة لا
++    // بوابة (لم يُعاير حجبًا؛ قرار للمالك)، والسباكة «لم يُتحقق» والتهوية الميكانيكية ملاحظة BATH_NO_WINDOW القائمة
++    ...bathNotes(doc, model),
+     // (الجولة العشرون) ملاحظات مقيسة لا تحجب ولا تُعدّ عيبًا: المدخلان متجاوران، والحمامات بلا نافذة (تهوية ميكانيكية)
+     ...r20notes.map(g => ({ id: g.id, major: false, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')}` }))];
+   // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
+   for (const x of items) x.text_ar = toClientAr(x.text_ar);
+   for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
+-  for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason_ar = hidden[i];
++  for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason = hiddenReasons[i].reason_ar = hidden[i];
+   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
+   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
+   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
+@@ -105,6 +114,10 @@ function isMajorPref(g, model) {
+   }
+   return false;
+ }
++function bathNotes(doc, model) {
++  let list = []; try { list = evaluateSuiteBaths(doc, model); } catch { return []; }
++  return list.filter(b => !b.preliminaryAccept).map(b => ({ id: 'BATH_FUNCTION', major: false, text_ar: `«${b.name}» ${b.w}×${b.l} م: ${[!b.fixturesFit ? `الأجهزة المرسومة ${[b.fixtures.wc && 'مرحاض', b.fixtures.basin && 'مغسلة', b.fixtures.shower && 'دش'].filter(Boolean).join(' و') || 'لا شيء'} — ينقصها ${[!b.fixtures.wc && 'المرحاض', !b.fixtures.basin && 'المغسلة', !b.fixtures.shower && 'الدش'].filter(Boolean).join(' و')}` : null, !b.doorClearance ? 'فتح الباب يعترضه جدار أو قطعة مثبتة' : null, !b.minWidthOk ? 'العرض الصافي أقل من 1.4 م (قيمة مرشحة غير متحققة نظاميًا)' : null].filter(Boolean).join('؛ ')} — يحتاج مراجعة توزيع الحمام` }));
++}
+ /** بنود المقاس المتحققة ضمن السماح لا بالمطابقة (المجلس 5.76 م والمطلوب 6 م): ملاحظة صريحة لا تُخفى. */
+ function toleranceNotes(ledger) {
+   const out = [];
+diff --git a/dist/privacy-gate.mjs b/dist/privacy-gate.mjs
+new file mode 100644
+index 0000000..3ba5263
+--- /dev/null
++++ b/dist/privacy-gate.mjs
+@@ -0,0 +1,150 @@
++// (الجولة 21 — 02c، قرار المالك 2026-10-26 «لا نحل المقاسات على حساب الخصوصية») فحص خطوط الرؤية لنافذة تطل على المواقف، وبوابة
++// «لا تراجع» قبل/بعد أي تعديل يحرّك النوافذ. مكيَّف من حزمة المالك docs/owner/kit-r21-02b-01/src/privacy-gate.mjs (segmentHit،
++// screenWindowPrivacy، compareAcceptance) على مستند المشروع: النقاط من مضلعات المواقف الفعلية (أركانها ومنتصفات أضلاعها ومركزها)،
++// ومن داخل الغرفة (أعماق وانحرافات أمام النافذة داخل وجوهها الداخلية)، والحواجب من جدران «سور» المرسومة بارتفاعها، وجدران المبنى تحجب.
++// حدود صريحة: فحص ثنائي الأبعاد محافظ بمستوى عين واحد؛ لا يحسب التضاريس ولا منسوب الوقوف ولا الزوايا ثلاثية الأبعاد ولا الإضاءة ولا
++// التهوية — تلك تُفحص بفاحصات المشروع الأصلية (acceptanceSnapshot أدناه يجمعها)، ولا يُعد أي منها اعتمادًا معماريًا أو إنشائيًا.
++// لا عتبة مسافة عامة هنا (لا «1.64 م»): الحكم بخطوط الرؤية الحقيقية.
++import { analyzeDoc } from './draw/digest.mjs';
++import { pointInPolygon } from './draw/geom.mjs';
++import { measureR16 } from './privacy-defects.mjs';
++import { reviewDoc } from './draw/review.mjs';
++
++/** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا): مستوى العين، وارتفاع الساتر، وأبعاده عن الجدار. */
++export const SCREEN_DEFAULTS = Object.freeze({ eyeHeight: 1.6, screenHeight: 1.8, offsets: [0.9, 1.2, 0.75, 1.5], margin: 0.15, maxLength: 7, wallClear: 0.3, doorClear: 1.0, source: 'قيمة تصميمية افتراضية للميزان (ساتر خصوصية خارجي ارتفاعه 1.8 م > مستوى العين 1.6 م) — غير متحققة نظاميًا' });
++
++export function segmentHit(a, b, c, d) {
++  const rx = b.x - a.x, ry = b.y - a.y, sx = d.x - c.x, sy = d.y - c.y, den = rx * sy - ry * sx;
++  if (Math.abs(den) < 1e-12) return null;
++  const t = ((c.x - a.x) * sy - (c.y - a.y) * sx) / den, u = ((c.x - a.x) * ry - (c.y - a.y) * rx) / den;
++  return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? { t, u, x: a.x + t * rx, y: a.y + t * ry } : null;
++}
++/**
++ * خطوط الرؤية من كل نقطة خارجية إلى كل نقطة داخلية تعبر قطعة النافذة؛ مكشوفة ما لم يحجبها ساتر أعلى من مستوى العين قبل النافذة،
++ * أو جدار مبنى (blockers) قبلها، أو كانت جلسة النافذة فوق مستوى العين.
++ */
++export function screenWindowPrivacy({ window, parkingPoints, interiorPoints, opaqueScreens = [], blockers = [], eyeHeight = SCREEN_DEFAULTS.eyeHeight }) {
++  if (!window || !Array.isArray(parkingPoints) || !Array.isArray(interiorPoints)) throw Error('Missing geometry');
++  const exposed = [];
++  const aboveEye = eyeHeight < window.sillHeight || eyeHeight > window.headHeight;
++  for (const outside of parkingPoints) for (const inside of interiorPoints) {
++    const hit = segmentHit(outside, inside, window.a, window.b);
++    if (!hit || aboveEye) continue;
++    const screened = opaqueScreens.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t && (s.height ?? 0) >= eyeHeight; })
++      || blockers.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t - 1e-6; });
++    if (!screened) exposed.push({ outside, inside, windowHit: { x: hit.x, y: hit.y } });
++  }
++  return { potentialExposure: exposed.length > 0, paths: exposed, samples: parkingPoints.length * interiorPoints.length, limitations: 'فحص خطوط رؤية ثنائي الأبعاد فقط؛ الإضاءة والتهوية والسلامة والزوايا ثلاثية الأبعاد تُفحص منفصلة' };
++}
++
++const centroidOf = poly => poly.reduce((a, p) => ({ x: a.x + p.x / poly.length, y: a.y + p.y / poly.length }), { x: 0, y: 0 });
++/** نقاط عينة لمضلع موقف: الأركان ومنتصفات الأضلاع والمركز. */
++export function bayPoints(poly) {
++  const mids = poly.map((p, i) => { const q = poly[(i + 1) % poly.length]; return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 }; });
++  return [...poly.map(p => ({ x: p.x, y: p.y })), ...mids, centroidOf(poly)];
++}
++/** نقاط داخل الغرفة أمام النافذة: أعماق 0.6 و1.5 و3 م وانحرافات 0 و±1 و±2 م، داخل وجوهها الداخلية فقط. */
++export function interiorPoints(room, op, inward) {
++  const u = { x: -inward.y, y: inward.x }, out = [];
++  for (const d of [0.6, 1.5, 3]) for (const s of [0, -1, 1, -2, 2]) {
++    const p = { x: op.p.x + inward.x * (d + (op.wall?.t || .2) / 2) + u.x * s, y: op.p.y + inward.y * (d + (op.wall?.t || .2) / 2) + u.y * s };
++    if (room.net && pointInPolygon(p, room.net, 1e-6)) out.push(p);
++  }
++  return out;
++}
++/** هندسة فحص نافذة على المستند: قطعة النافذة على محور جدارها، والحواجب (أسوار مرسومة)، وجدران المبنى الأخرى. */
++export function windowGeometry(doc, lv, op) {
++  const u = op.u, hw = op.w / 2, sill = op.o?.sill ?? 0, head = sill + (op.o?.h ?? op.h ?? 1.2);
++  const win = { a: { x: op.p.x - u.x * hw, y: op.p.y - u.y * hw }, b: { x: op.p.x + u.x * hw, y: op.p.y + u.y * hw }, sillHeight: sill, headHeight: head };
++  const walls = (doc.walls || []).filter(w => w.level === lv.level.id);
++  const opaqueScreens = walls.filter(w => w.kind === 'fence').map(w => ({ a: w.a, b: w.b, height: w.h ?? 0 }));
++  const blockers = walls.filter(w => (w.kind || 'wall') === 'wall' && w.id !== op.wall.id).map(w => ({ a: w.a, b: w.b }));
++  return { window: win, opaqueScreens, blockers };
++}
++/** فحص نافذة غرفة واحدة مقابل كل المواقف بعينات متعددة. */
++export function windowExposure(doc, lv, op, side, bays) {
++  const g = windowGeometry(doc, lv, op), inward = { x: -side.outward.x, y: -side.outward.y };
++  return screenWindowPrivacy({ ...g, parkingPoints: bays.flatMap(z => bayPoints(z.polygon)), interiorPoints: interiorPoints(side.room, op, inward) });
++}
++
++/**
++ * صورة القبول قبل/بعد (فاحصات المشروع الأصلية، لا فاحص جديد): لكل فحص { passed, category }.
++ *  privacy: كل عيوب الخصوصية في privacy-defects.mjs (measureR16) المنطبقة؛ daylight: لكل غرفة مأهولة نافذة على الخارج أو حوش، وتقرير
++ *  المراجعة NO_WINDOW؛ ventilation: لكل غرفة مأهولة نافذة تُفتح على الخارج، ودورات المياه بنوافذها (BATH_NO_WINDOW)؛ circulation: الوصول
++ *  (UNREACHABLE_ROOM) ومقدمة كل باب خارجي خالية من الأسوار (1.0 م).
++ */
++const HABITABLE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen']);
++export function acceptanceSnapshot(doc, request = {}, model = analyzeDoc(doc)) {
++  const checks = {};
++  const put = (cat, id, passed, why = '') => { checks[`${cat}:${id}`] = { category: cat, passed: !!passed, why }; };
++  try { for (const g of measureR16(doc, request, model)) if (g.applicable && !g.clientAsked) put(g.id === 'BATH_NO_WINDOW' ? 'ventilation' : g.tier === 'note' ? 'note' : 'privacy', g.id, g.pass, (g.reasons_ar || [])[0] || ''); } catch { /* */ }
++  for (const lv of model.levels) {
++    const fences = (doc.walls || []).filter(w => w.level === lv.level.id && w.kind === 'fence');
++    for (const r of lv.rooms) {
++      if (!HABITABLE.has(r.type)) continue;
++      const wins = lv.openings.filter(op => op.window && op.sides.some(s => s.room.id === r.id && (s.other === 'outside' || lv.roomsById.get(s.other)?.type === 'courtyard')));
++      put('daylight', r.name, wins.length > 0, wins.length ? '' : `«${r.name}» بلا نافذة على الخارج`);
++      put('ventilation', r.name, wins.some(op => op.kind !== 'fixed'), '');
++    }
++    for (const op of lv.openings.filter(o => o.door && o.sides.some(s => s.other === 'outside'))) {
++      const s = op.sides.find(x => x.other === 'outside'), ap = { x: op.p.x + s.outward.x * ((op.wall?.t || .2) / 2 + .5), y: op.p.y + s.outward.y * ((op.wall?.t || .2) / 2 + .5) };
++      const near = fences.some(w => segDist(ap, w.a, w.b) < SCREEN_DEFAULTS.doorClear);
++      put('circulation', 'door:' + op.id, !near, near ? 'سور قرب باب خارجي' : '');
++    }
++  }
++  try { const rv = reviewDoc(doc); put('circulation', 'reach', !rv.some(i => i.code === 'UNREACHABLE_ROOM')); put('daylight', 'review', !rv.some(i => i.code === 'NO_WINDOW')); } catch { /* */ }
++  return { checks };
++}
++/** (الحزمة) لا تراجع: الإلزامي يجب أن ينجح بعد التعديل، وكل فحص محمي (بفئته أو معرفه) نجح قبله يجب أن ينجح بعده. */
++export function compareAcceptance(before, after, { mandatory = [], protect = [] } = {}) {
++  const violations = [], prot = new Set(protect);
++  for (const rule of mandatory) if (!after?.checks?.[rule]?.passed) violations.push({ rule, type: 'mandatory' });
++  for (const [rule, b] of Object.entries(before?.checks || {})) {
++    if (!(prot.has(rule) || prot.has(b.category))) continue;
++    if (b.passed && after?.checks?.[rule] && !after.checks[rule].passed) violations.push({ rule, type: 'regression', why: after.checks[rule].why || '' });
++  }
++  return { pass: violations.length === 0, violations };
++}
++
++function segDist(p, a, b) {
++  const dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L)) : 0;
++  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
++}
++function segSegDist(a, b, c, d) {
++  if (segmentHit(a, b, c, d)) return 0;
++  return Math.min(segDist(a, c, d), segDist(b, c, d), segDist(c, a, b), segDist(d, a, b));
++}
++/**
++ * ساتر خصوصية خارجي لنافذة مكشوفة على المواقف (سور قائم بذاته موازٍ للجدار): يُبحث على مسافات من الوجه الخارجي، وطوله من تقاطعات خطوط
++ * الرؤية الفعلية (كل نقاط المواقف ← نقاط النافذة) مع خطه وهامش. يُرفض إن خرج من الأرض، أو قطع موقفًا، أو اقترب من جدار المبنى (لا يغيّر
++ * طوبولوجيا الجدران)، أو من مقدمة باب خارجي، أو زاد على الطول الأقصى. يعيد { a, b, offset } أو null. لا يعدّل المستند.
++ */
++export function planWindowScreen(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) {
++  const out = side.outward, u = { x: -out.y, y: out.x }, t0 = (op.wall?.t || .2) / 2, hw = op.w / 2;
++  const winPts = [-1, -.5, 0, .5, 1].map(k => ({ x: op.p.x + u.x * hw * k + out.x * t0, y: op.p.y + u.y * hw * k + out.y * t0 }));
++  const parking = bays.flatMap(z => bayPoints(z.polygon));
++  const plot = doc.plot?.polygon?.length >= 3 ? doc.plot.polygon : null;
++  const walls = (doc.walls || []).filter(w => w.level === lv.level.id);
++  const extDoors = lv.openings.filter(o => o.door && o.sides.some(s => s.other === 'outside')).map(o => { const s = o.sides.find(x => x.other === 'outside'); return { x: o.p.x + s.outward.x * ((o.wall?.t || .2) / 2 + .5), y: o.p.y + s.outward.y * ((o.wall?.t || .2) / 2 + .5) }; });
++  for (const off of D.offsets) {
++    // خط الساتر: نقطة الأصل أمام النافذة على بعد off من الوجه الخارجي، واتجاهه u
++    const o0 = { x: op.p.x + out.x * (t0 + off), y: op.p.y + out.y * (t0 + off) };
++    let lo = Infinity, hi = -Infinity;
++    for (const P of parking) {
++      const dP = (P.x - op.p.x) * out.x + (P.y - op.p.y) * out.y - t0; if (dP <= off + 1e-6) continue; // الموقف أمام خط الساتر فقط
++      for (const W of winPts) { const k = off / dP, X = { x: W.x + (P.x - W.x) * k, y: W.y + (P.y - W.y) * k }, s = (X.x - o0.x) * u.x + (X.y - o0.y) * u.y; lo = Math.min(lo, s); hi = Math.max(hi, s); }
++    }
++    if (!(hi > lo)) continue;
++    lo -= D.margin; hi += D.margin;
++    if (hi - lo > D.maxLength) continue;
++    const a = { x: o0.x + u.x * lo, y: o0.y + u.y * lo }, b = { x: o0.x + u.x * hi, y: o0.y + u.y * hi }, r3 = v => Math.round(v * 1000) / 1000;
++    const seg = { a: { x: r3(a.x), y: r3(a.y) }, b: { x: r3(b.x), y: r3(b.y) } };
++    if (plot && ![seg.a, seg.b].every(p => pointInPolygon(p, plot, -.05))) continue;
++    if (bays.some(z => z.polygon.some((p, i) => segmentHit(seg.a, seg.b, p, z.polygon[(i + 1) % z.polygon.length])) || pointInPolygon(seg.a, z.polygon, 0) || pointInPolygon(seg.b, z.polygon, 0))) continue;
++    if (walls.some(w => segSegDist(seg.a, seg.b, w.a, w.b) < (w.t ?? .2) / 2 + D.wallClear)) continue;
++    if (extDoors.some(p => segDist(p, seg.a, seg.b) < D.doorClear)) continue;
++    return { ...seg, offset: off, length: r3(hi - lo) };
++  }
++  return null;
++}
++export default { segmentHit, screenWindowPrivacy, bayPoints, interiorPoints, windowGeometry, windowExposure, acceptanceSnapshot, compareAcceptance, planWindowScreen, SCREEN_DEFAULTS };
+diff --git a/dist/r16-polish.mjs b/dist/r16-polish.mjs
+index 27ce489..cf0d13c 100644
+--- a/dist/r16-polish.mjs
++++ b/dist/r16-polish.mjs
+@@ -12,6 +12,7 @@ import { applyCommand } from './draw/doc.mjs';
+ import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defects.mjs';
+ import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
+ import { measureR14 } from './saudi-program.mjs';
++import { planWindowScreen, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
+ 
+ const r2 = v => Math.round(v * 100) / 100;
+ const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
+@@ -65,7 +66,7 @@ function exposedEdge(doc, G, room, e, wd) {
+  * يصلح عيوب الخصوصية والحركة القابلة للإصلاح الموضعي على المستند (يعدّله في مكانه — مستند يملكه المولّد). يعيد { notes_ar[], changed }.
+  */
+ export function polishR16(doc) {
+-  const notes = [], skip = new Set(); let changed = false;
++  const notes = [], skip = new Set(), screens = []; let changed = false;
+   // 1) النوافذ المكشوفة
+   for (let pass = 0; pass < 12; pass++) {
+     const G = analyzeDoc(doc).levels[0]; if (!G) break;
+@@ -95,6 +96,33 @@ export function polishR16(doc) {
+     // (الجولة العشرون، المراجعة العمياء r19: C5-3) الصالة العائلية لا تُترك بنوافذ علوية وحدها: حل الخصوصية لا يُفقدها الإطلالة والضوء على
+     // مستوى الجلوس — إن كانت هذه آخر نافذة عادية لها تبقى، ويبقى العيب مذكورًا (يُصلح بسور حاجب أو مشربية أو بتنظيم لا تطل فيه الصالة على الشارع)
+     if (isFamilyHall(room) && !R14_OFF.has('r20hallsill') && !G.openings.some(op => op.window && op.id !== x.op.id && (op.o?.sill ?? 1) < 1.5 && op.sides.some(s => s.room.id === room.id))) {
++      // (الجولة 21 — 02c، قرار المالك: إصلاح تراجع C6 دون إفساد المقاسات) النافذة والمقاس كما هما، وساتر خصوصية خارجي قائم بذاته بين النافذة
++      // والمواقف (privacy-gate.mjs planWindowScreen): طوله من خطوط الرؤية الفعلية، ويُقبل فقط إن (1) حجب كل خطوط الرؤية بعينات متعددة من
++      // المواقف وداخل الصالة، (2) واجتاز قياس المشروع الأصلي WINDOW_PARKING لهذه النافذة، (3) ولم يُسقط أي فحص خصوصية أو ضوء أو تهوية أو حركة
++      // كان ناجحًا قبله (compareAcceptance). وإلا يُزال ويبقى العيب مذكورًا كما كان.
++      if (x.why === 'المواقف' && !R14_OFF.has('r21screen')) {
++        const bays = (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id), side = x.op.sides.find(s => s.room.id === room.id && s.other === 'outside');
++        const sc = side ? planWindowScreen(doc, G, x.op, side, bays) : null;
++        if (sc) {
++          const snap = JSON.stringify(doc), before = acceptanceSnapshot(doc), was = new Set(doc.walls.map(w => w.id));
++          let ok = false;
++          try {
++            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: sc.a, b: sc.b, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
++            const G2 = analyzeDoc(doc).levels[0], op2 = G2.openings.find(q => q.id === o.id), s2 = op2?.sides.find(s => s.room.name === room.name && s.other === 'outside');
++            const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
++            const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === o.id && !w.screened);
++            const cmp = compareAcceptance(before, acceptanceSnapshot(doc), { protect: ['privacy', 'daylight', 'ventilation', 'circulation'] });
++            ok = !sight.potentialExposure && projOk && cmp.pass;
++          } catch { ok = false; }
++          if (ok) {
++            const fid = doc.walls.find(w => !was.has(w.id))?.id;
++            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية).`);
++            if (fid) screens.push({ wall: fid, window: o.id, room: room.name, ...sc });
++            changed = true; skip.add(o.id); continue;
++          }
++          for (const k of Object.keys(doc)) delete doc[k]; Object.assign(doc, JSON.parse(snap));
++        }
++      }
+       notes.push(`نافذة «${room.name}» المطلة على ${x.why} بقيت بجلستها: هي نافذتها العادية الوحيدة، ورفعها يُفقد الصالة الإطلالة والضوء — يُستحسن سور حاجب أو مشربية أمامها.`);
+       skip.add(o.id); continue;
+     }
+@@ -223,7 +251,7 @@ export function polishR16(doc) {
+       const done = carveBath(doc, lv, R); if (done) { notes.push(done); changed = true; break; }
+     }
+   }
+-  return { notes_ar: notes, changed };
++  return { notes_ar: notes, changed, screens };
+ }
+ const bbox = poly => ({ x0: Math.min(...poly.map(p => p.x)), x1: Math.max(...poly.map(p => p.x)), y0: Math.min(...poly.map(p => p.y)), y1: Math.max(...poly.map(p => p.y)) });
+ function carveBath(doc, lv, R) {
+diff --git a/dist/requirements.mjs b/dist/requirements.mjs
+index 1751983..215c603 100644
+--- a/dist/requirements.mjs
++++ b/dist/requirements.mjs
+@@ -53,7 +53,8 @@ function origMapper(text) {
+ // (الجولة التاسعة عشرة، توجيه المالك رابعًا) سماحية المقاس الصريح لكل ضلع على حدة (لا المساحة): ±0.05 م افتراضًا و«بالضبط» — تفاوت
+ // اللياسة والتشطيب على وجهي الجدار، لا تقريب تصميمي؛ و«بالضبط» ±0.03 م؛ و±0.30 م فقط حين يقول العميل «تقريبًا/حوالي». (كانت ±0.3 افتراضًا: مطبخ 3.86×4.96
+ // اعتُدّ مطابقًا لطلب 4×5 — المالك لا يقبل ذلك.) RULES_DIM_TOL مصدر واحد لها في الشيفرة والتقارير ونص العميل.
+-export const DIM_TOL = Object.freeze({ exact: .03, default: .05, approx: .3 });
++import { DIM_TOL } from './clear-dims.mjs'; // (02c) القيم نفسها، المصدر الواحد نُقل بلا تغيير ليستعمله فاحص المستطيل الصافي بلا حلقة استيراد
++export { DIM_TOL };
+ const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ? DIM_TOL.exact : /تقريبا|حوالي|تقريبي|نحو|approx(?:imately)?|about|around/.test(s) ? DIM_TOL.approx : DIM_TOL.default;
+ 
+ /**
+diff --git a/dist/review-evidence.mjs b/dist/review-evidence.mjs
+new file mode 100644
+index 0000000..9fa5619
+--- /dev/null
++++ b/dist/review-evidence.mjs
+@@ -0,0 +1,103 @@
++// (الجولة 21 — 02c/01b، قرار المالك 2026-10-26) أدلة الرفض والحجب وصدق النتيجة. مكيَّف من حزمة المالك
++// docs/owner/kit-r21-02b-01/src/review-evidence.mjs (rejection، assertBlocked، classifyRun، clientNotice) على عقد النتائج القائم من الإصلاح 03
++// (villa-layout-v3.mjs classifyFailure: SOLVED / PROVEN_INFEASIBLE / SEARCH_INCOMPLETE) — لا عقد ثانٍ: «PROVEN_CONFLICT» في الحزمة هو
++// PROVEN_INFEASIBLE عندنا (بشهادة يقبلها المدقق المستقل certificates.mjs وحده).
++//
++// ثلاث حالات منفصلة (القرار، 01 ثانيًا):
++//   CANDIDATE_REJECTED  — مرشح داخلي رُفض أثناء البحث (بوابات الجودة أو المراجعة قبل الحوض): يُسجَّل سببه في السجل الداخلي ولا يُعرض.
++//   ALTERNATIVE_HIDDEN  — بديل مكتمل الهندسة حُجب في بوابة القبول لمخالفة إلزامية: لا يُعرض صالحًا أبدًا، ولكل حجب سبب مُهيكل.
++//   NO_VALID_ALTERNATIVE — انتهى البحث بلا بديل صالح (لا معروض غير محجوب): «بحث غير مكتمل» ما لم تثبت شهادة الاستحالة؛ لا يُقال للعميل «مستحيل».
++// القيم المقيسة والحدود من فاحصات المشروع الحقيقية (قيمة البوابة value وحدها threshold، أو بند السجل)، وفي البوابات غير الرقمية null مع سبب
++// صريح — لا رقم مختلق.
++import { DESIGN_THRESHOLDS } from './plan-review.mjs';
++import { COVERAGE_MAX } from './regulations-sa.mjs';
++
++export const STAGES = Object.freeze(['brief', 'constraints', 'organization', 'dimensions', 'geometry', 'review', 'presentation', 'search']);
++const STAGE_SET = new Set(STAGES);
++const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
++
++/** (الحزمة) سبب رفض/حجب مُهيكل؛ يرمي إن نقص حقل أو كان المقيس/الحد غير رقمي. */
++export function rejection({ candidateId, stage, rule, source, reason, measured = null, limit = null, unit = null, ...extra }) {
++  if (!candidateId || !STAGE_SET.has(stage) || !rule || !source || !reason) throw Error('Incomplete rejection evidence');
++  if (measured !== null && !Number.isFinite(measured)) throw Error('Invalid measured value');
++  if (limit !== null && !Number.isFinite(limit)) throw Error('Invalid limit');
++  return Object.freeze({ candidateId: String(candidateId), stage, rule, source, reason, measured, limit, unit, ...extra });
++}
++/** (الحزمة) بديل محجوب بلا دليل خطأ — يُستعمل في الاختبارات والأدوات (لا في مسار العرض كي لا يقلب الحجب إلى عرض). */
++export function assertBlocked(candidate) {
++  const st = candidate.status ?? candidate.presentation?.status;
++  if (st !== 'blocked' && st !== 'hidden') return true;
++  const list = candidate.rejections ?? candidate.presentation?.hiddenReasons;
++  if (!Array.isArray(list) || list.length === 0) throw Error('Blocked candidate without evidence');
++  for (const r of list) rejection(r);
++  return true;
++}
++
++/**
++ * المقيس والحد والوحدة لبوابة مراجعة من قيمتها الفعلية (plan-review.mjs gateResult: value/threshold). البوابة التي لا رقم لها: null وسبب صريح.
++ * g: { id, value, threshold?, reasons_ar }.
++ */
++export function gateEvidence(g) {
++  const v = g?.value || {}, id = g?.id;
++  const ev = (measured, limit, unit, measure_ar) => ({ measured: num(measured), limit: num(limit), unit: num(measured) !== null ? unit : null, measure_ar });
++  switch (id) {
++    case 'PARKING': {
++      // العدد اشتراط نظامي متحقق: المرسوم مقابل المطلوب؛ وإن رسبت لموقف خارج الأرض أو داخل المبنى (لا عدد) فلا رقم
++      if (num(v.bays) !== null && num(v.required) !== null && v.bays < v.required) return ev(v.bays, v.required, 'موقف', `${v.bays} موقف مرسوم من ${v.required} مطلوب نظاميًا`);
++      return ev(null, null, null, `بوابة غير رقمية هنا: ${(g.reasons_ar || [])[0] || 'موقف خارج الأرض أو يتداخل مع المبنى'}`);
++    }
++    case 'REACH': return ev(v.unreachable, 0, 'غرفة', 'غرف لا يُوصل إليها من المدخل');
++    case 'DAYLIGHT': return ev(v.withoutWindow, 0, 'غرفة', 'غرف معيشية بلا نافذة خارجية');
++    case 'MIN_WIDTH': return v.tightest ? ev(v.tightest.width, v.tightest.min, 'م', `أضيق غرفة عن حدها (${v.tightest.type})`) : ev(v.violations, 0, 'غرفة', 'غرف أضيق من حدها');
++    case 'HALL_ASPECT': return ev(v.worst, DESIGN_THRESHOLDS.hallAspectMax.value, 'نسبة', 'نسبة طول الصالة إلى عرضها');
++    case 'WET_DOOR': case 'BED_MAJLIS': case 'INTEGRITY': return ev(v.violations, 0, 'مخالفة', g.ar || id);
++    case 'DOOR_SWING': return ev(v.blocked, 0, 'باب', 'أبواب يعترض فتحها شيء');
++    case 'PLOT': return ev(num(v.maxOverrun), DESIGN_THRESHOLDS.setbackTolerance.value, 'م', num(v.maxOverrun) === null ? 'عنصر خارج حدود الأرض' : 'أكبر تجاوز لخط الارتداد');
++    case 'COVERAGE': return ev(v.ratioPct, COVERAGE_MAX.value, '٪', 'نسبة البناء في الدور الأرضي');
++    case 'WINDOW_SIZE': return ev(Number.isFinite(v.worst) ? Math.round(v.worst * 1000) / 10 : null, DESIGN_THRESHOLDS.windowToFloorMin.value * 100, '٪', 'أقل نسبة زجاج إلى أرضية');
++    case 'PROGRAM': {
++      const req = v.requested || {}, got = v.drawn || {}, k = Object.keys(req).find(x => (got[x] ?? 0) < req[x]);
++      return k ? ev(got[k] ?? 0, req[k], 'غرفة', `عدد «${k}» المرسوم مقابل المطلوب`) : ev(null, null, null, 'بوابة غير رقمية: أعداد البرنامج');
++    }
++    default: return ev(null, null, null, `بوابة غير رقمية (منطق وظيفي أو موضع أو مسار): ${(g?.reasons_ar || [])[0] || g?.ar || id}`);
++  }
++}
++/** المقيس والحد لبند سجل راسب (dims: الضلع الأسوأ انحرافًا عند أضيق موضع؛ area: المساحة الصافية؛ count: العدد). */
++export function ledgerEvidence(x) {
++  if (x.kind === 'dims' && x.want) {
++    const f = x.failing || x.actual; if (!f) return { measured: null, limit: null, unit: null, measure_ar: x.why || 'الفراغ غير موجود' };
++    const dS = Math.abs(f.s - x.want.s), dL = Math.abs(f.l - x.want.l), side = dL > dS ? 'l' : 's';
++    return { measured: num(f[side]), limit: num(x.want[side]), unit: 'م', tol: num(x.tol), side: side === 's' ? 'العرض' : 'الطول', envelope: f.envelope || x.envelope || null, measure_ar: `${side === 's' ? 'العرض' : 'الطول'} الصافي عند أضيق موضع صالح، والسماحية ±${x.tol} م` };
++  }
++  const m = /([\d.]+) م²/.exec(x.why || ''), a = /([\d.]+) م²/.exec(x.text || '');
++  if (x.kind === 'area' && m && a) return { measured: +m[1], limit: +a[1], unit: 'م²', measure_ar: 'المساحة الصافية مقابل المطلوبة' };
++  return { measured: null, limit: null, unit: null, measure_ar: `بند غير رقمي: ${x.why || x.text || x.id}` };
++}
++
++/**
++ * تصنيف التشغيل بالحالات الثلاث مع عقد النتائج القائم. designs: المعروض بحالة عرضه؛ rejected: مرشحو البحث المرفوضون؛ failure: نتيجة الفشل
++ * (e.result من classifyFailure) إن لم يُنتج بديل.
++ */
++export function classifyRun({ designs = [], rejected = [], failure = null } = {}) {
++  const visible = designs.filter(d => d.presentation?.status !== 'hidden'), hidden = designs.filter(d => d.presentation?.status === 'hidden');
++  const base = { candidatesRejected: rejected.length, hiddenAlternatives: hidden.map(d => ({ candidateId: d.pat || d.id || null, rejections: d.presentation?.hiddenReasons || [] })), validShown: visible.length };
++  if (visible.length) return { ...base, status: 'SOLVED', outcome: 'VALID_ALTERNATIVES' };
++  if (failure?.status === 'PROVEN_INFEASIBLE') return { ...base, status: 'PROVEN_INFEASIBLE', outcome: 'NO_VALID_ALTERNATIVE' };
++  return { ...base, status: 'SEARCH_INCOMPLETE', reason: failure?.reason || (hidden.length ? 'ONLY_HIDDEN_ALTERNATIVES' : 'SEARCH_EXHAUSTED_WITHOUT_PROOF'), outcome: hidden.length ? 'ALTERNATIVE_HIDDEN' : 'NO_VALID_ALTERNATIVE' };
++}
++/** (الحزمة) رسالة العميل بلا مصطلحات بحث: العدد، ومعنى «لم يُعثر» (لا يثبت الاستحالة)، وسبب الحجب بلغته. */
++export function clientNotice(result, { requested, shown } = {}) {
++  const count = Number.isInteger(requested) && requested > 0 && Number.isInteger(shown) && shown >= 0 ? `عُرض ${shown} من ${requested} ${requested === 1 ? 'تصميم' : 'تصاميم'} طلبتها. ` : '';
++  if (result.status === 'SOLVED') return count + 'المخططات اجتازت الفحص الأولي، وتحتاج مراجعة هندسية قبل التنفيذ.';
++  if (result.status === 'PROVEN_INFEASIBLE') return count + 'هناك تعارض مثبت بين متطلبين في طلبك؛ نحتاج توضيح أيهما تفضّل.';
++  if (result.outcome === 'ALTERNATIVE_HIDDEN') return count + 'أقرب التصاميم التي وصلتُ إليها تخالف شرطًا أساسيًا في طلبك، فلم أعرضها. هذا لا يثبت أن طلبك مستحيل.';
++  return count + 'لم أصل إلى مخطط صالح لطلبك في هذه المحاولة. هذا لا يثبت أن طلبك مستحيل.';
++}
++/** أسباب رفض مرشح أثناء البحث (CANDIDATE_REJECTED) مُهيكلة من سجل الرفض الموجود (why/gates/gateEv). */
++export function candidateRejections(r) {
++  const id = r.pat || '*';
++  if (Array.isArray(r.gateEv) && r.gateEv.length) return r.gateEv.map(g => ({ candidateId: id, stage: 'review', rule: 'GATE:' + g.id, source: g.tier || 'review', reason: (g.reasons_ar || [])[0] || g.ar || g.id, ...gateEvidence(g) }));
++  const why = (r.why || []).map(String);
++  return (why.length ? why : ['سبب غير مسجل']).slice(0, 6).map(w => ({ candidateId: id, stage: r.by === 'plan-review' ? 'review' : /لا دور علوي|لا ترتيب|Error|TypeError/.test(w) ? 'search' : 'geometry', rule: r.by === 'plan-review' ? 'REVIEW' : 'QUALITY_GATE', source: 'mizan-default', reason: w, measured: null, limit: null, unit: null, measure_ar: 'نص فحص الجودة كما سُجّل (لا قيمة رقمية مخزنة)' }));
++}
++export default { STAGES, rejection, assertBlocked, gateEvidence, ledgerEvidence, classifyRun, clientNotice, candidateRejections };
+diff --git a/dist/rules.mjs b/dist/rules.mjs
+index 7b4608c..957a6f0 100644
+--- a/dist/rules.mjs
++++ b/dist/rules.mjs
+@@ -4,6 +4,8 @@
+ // verifyRules (تحقق هندسي من المستند الناتج: نُفّذ/لم يُنفَّذ مع السبب). نقي: لا DOM ولا شبكة.
+ import { analyzeDoc } from './draw/digest.mjs';
+ import { stairLayout } from './draw/stairs3d.mjs';
++import { measureClearDims, deviationAr } from './clear-dims.mjs';
++const R14_OFF_RULES = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean)); // (02c) مفتاح القياس فقط
+ 
+ const AR = '\\u0600-\\u06FF';
+ const PRE = `(?<![${AR}])(?:[وفبك]?(?:ال|لل)|[وفبكل])?`; // أدوات ملتصقة: و، ب، ل، ال، بال، لل...
+@@ -417,11 +419,18 @@ const ROOM_OF = {
+   servicedoor: r => r.name === 'المطبخ',
+ };
+ /** غرف المستند بمستطيلاتها الصافية (حسب الدور)، وحدود المبنى. +x شرق و+y شمال. */
+-export function docRooms(doc) {
++// (02c) الأعمدة المرسومة في الدور (doc.columns: مربع بضلع size حول x,y؛ المستدير يُعامل بمربعه المحيط — محافظ) جزرٌ ممنوعة في المستطيل الصافي
++function colHoles(doc, level, xs, ys) {
++  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
++  return (doc.columns || []).filter(c => c.level === level).map(c => { const h = (c.size ?? .3) / 2; return [{ x: c.x - h, y: c.y - h }, { x: c.x + h, y: c.y - h }, { x: c.x + h, y: c.y + h }, { x: c.x - h, y: c.y + h }]; })
++    .filter(q => q[1].x > x0 && q[0].x < x1 && q[2].y > y0 && q[0].y < y1);
++}
++export function docRooms(doc, { net = false } = {}) {
+   const A = analyzeDoc(doc), rooms = [];
+   doc.levels.forEach((lv, i) => {
+     const L = A.levelById.get(lv.id); if (!L) return;
+-    for (const r of L.rooms) { if (r.unlabelled || !r.net?.length) continue; const xs = r.net.map(q => q.x), ys = r.net.map(q => q.y); rooms.push({ name: r.name, type: r.type, level: lv.id, li: i, area: r.area, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }); }
++    // (02c) net: الوجوه الداخلية والجزر كما يحسبها analyzeDoc — لقياس المستطيل الصافي (لا تُحمَّل في كل نسخة من التصميم)
++    for (const r of L.rooms) { if (r.unlabelled || !r.net?.length) continue; const xs = r.net.map(q => q.x), ys = r.net.map(q => q.y); rooms.push({ name: r.name, type: r.type, level: lv.id, li: i, area: r.area, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), ...(net ? { net: r.net, holes: [...(r.space?.holes || []), ...colHoles(doc, lv.id, xs, ys)] } : {}) }); }
+   });
+   const ws = doc.walls.filter(w => w.level === doc.levels[0].id), bx = ws.flatMap(w => [w.a.x, w.b.x]), by = ws.flatMap(w => [w.a.y, w.b.y]);
+   return { rooms, B: { x0: Math.min(...bx), x1: Math.max(...bx), y0: Math.min(...by), y1: Math.max(...by) } };
+@@ -664,18 +673,37 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
+     else out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: !open.length, why: open.length ? `المطبخ مفتوح على «${open[0]}» بفتحة بلا باب.` : `فتحات المطبخ الداخلية كلها أبواب (${ops.length}).` });
+   }
+   // الأبعاد الصريحة («4×5»): مقيسة من المستطيل الصافي للفراغ مع السماحية المعلنة
+-  const r2d = v => Math.round(v * 100) / 100;
++  // (الجولة 21 — 02c، قرار المالك 2026-10-26) القياس عند أضيق موضع صالح: الشرطان معًا — صندوق الصافي ضمن السماحية، ومستطيل صافٍ داخل
++  // حدود الغرفة الفعلية (الوجوه الداخلية، خارج الجزر) يبلغ الطول والعرض المطلوبين (dist/clear-dims.mjs). المقيس في السجل هو المستطيل الصافي
++  // (أضيق موضع)، ومعه الصندوق والانحراف بإشارته. حدود غير متعامدة: «لم يُتحقق» (لا استحالة). R14_OFF=r21clear: الصندوق وحده كما في 02b (للقياس)
++  const r2d = v => Math.round(v * 100) / 100, clearOff = R14_OFF_RULES.has('r21clear');
++  const roomsN = Object.keys(req.dims || {}).length && !clearOff ? docRooms(doc, { net: true }).rooms : null, selN = id => roomsN.filter(r => ROOM_OF[id]?.(r));
+   for (const [k, d] of Object.entries(req.dims || {})) {
+     const sid = AREA_SUBJ[k]; if (!sid || !d || !(d.w > 0) || !(d.l > 0)) continue;
+-    let list = sel(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); } if (sid === 'majlis') list = list.slice(0, 1);
++    let list = (roomsN ? selN : sel)(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); } if (sid === 'majlis') list = list.slice(0, 1);
+     const tol = Number.isFinite(d.tol) ? d.tol : .05, want = [Math.min(d.w, d.l), Math.max(d.w, d.l)];
+     const text = `${list.length === 1 ? `«${list[0].name}»` : subjAr(sid)} بأبعاد ${want[0]}×${want[1]} م (كل ضلع ±${tol} م)`;
+     if (!list.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, why: 'الفراغ غير موجود في هذا التصميم.' }); continue; }
+-    const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
+-    const bad = got.find(g => !g.ok);
+-    const g0 = got[0]; // (الجولة الخامسة عشرة) المرسوم والمطلوب لملاحظة «ضمن السماح لا مطابق»
+-    // (الجولة 21 — 02b) القيمة المقيسة للفراغ الراسب نفسه (لا الأول دائمًا) والسماحية: يحملها سبب الحجب المُهيكل
+-    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, tol, ...(bad ? { failing: { name: bad.r.name, s: r2d(bad.s[0]), l: r2d(bad.s[1]) } } : {}), why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
++    if (clearOff) {
++      const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
++      const bad = got.find(g => !g.ok), g0 = got[0];
++      out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: r2d(g0.s[0]), l: r2d(g0.s[1]) }, want: { s: want[0], l: want[1] }, tol, ...(bad ? { failing: { name: bad.r.name, s: r2d(bad.s[0]), l: r2d(bad.s[1]) } } : {}), why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
++      continue;
++    }
++    const got = list.map(r => ({ r, m: measureClearDims(r, { s: want[0], l: want[1] }, tol) }));
++    const skipped = got.filter(g => !g.m.applicable);
++    if (skipped.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, status: 'unverified', want: { s: want[0], l: want[1] }, tol, why: `«${skipped[0].r.name}»: ${skipped[0].m.reason_ar}` }); continue; }
++    const bad = got.find(g => !g.m.ok), g0 = got[0], view = g => g.m.clear || g.m.envelope;
++    const why1 = g => { const m = g.m, c = view(g), e = m.envelope;
++      const reasons = [...(m.envelopeOK ? [] : [`الصندوق الصافي ${r2d(e.s)}×${r2d(e.l)} م خارج السماحية (فرق ${r2d(Math.abs(e.s - want[0]))} و${r2d(Math.abs(e.l - want[1]))} م)`]),
++        ...(m.clearOK ? [] : [`أضيق موضع صالح للاستخدام ${r2d(c.s)}×${r2d(c.l)} م (أقل من ${want[0]}×${want[1]} م بأكثر من السماحية${m.narrowing && (m.narrowing.s > .005 || m.narrowing.l > .005) ? `؛ الضيق عن الصندوق ${r2d(m.narrowing.s)} و${r2d(m.narrowing.l)} م من بروز أو تجويف أو درجة في سماكة الجدار` : ''})`])];
++      return `«${g.r.name}» ${reasons.join('، و')}، والسماحية ±${tol} م لكل ضلع`; };
++    const c0 = view(g0);
++    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: r2d(c0.s), l: r2d(c0.l) }, envelope: { s: r2d(g0.m.envelope.s), l: r2d(g0.m.envelope.l) }, want: { s: want[0], l: want[1] }, tol,
++      deviation: g0.m.deviation || null, measure: 'clear-rectangle',
++      ...(bad ? { failing: { name: bad.r.name, s: r2d(view(bad).s), l: r2d(view(bad).l), envelope: { s: r2d(bad.m.envelope.s), l: r2d(bad.m.envelope.l) }, envelopeOK: bad.m.envelopeOK, clearOK: bad.m.clearOK } } : {}),
++      why: (bad ? why1(bad) : `الفعلي ${got.map(g => { const c = view(g), e = g.m.envelope; return `${r2d(c.s)}×${r2d(c.l)}${Math.abs(e.s - c.s) > .005 || Math.abs(e.l - c.l) > .005 ? ` (أوسع موضع ${r2d(e.s)}×${r2d(e.l)})` : ''}`; }).join('، ')} م`) + ' (أضيق مستطيل صافٍ صالح داخل الجدران وصندوقه؛ كل ضلع على حدة لا المساحة).',
++      ...(!bad && got.some(g => deviationAr(g.m)) ? { deviation_ar: got.map(g => deviationAr(g.m) && `«${g.r.name}»: ${deviationAr(g.m)}`).filter(Boolean).join('؛ ') } : {}) });
+   }
+   // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
+   if (req.site?.irregular) out.push(verifySite(doc, req.site, entry));
+diff --git a/dist/villa-layout-v2.mjs b/dist/villa-layout-v2.mjs
+index f68ee97..59f7d39 100644
+--- a/dist/villa-layout-v2.mjs
++++ b/dist/villa-layout-v2.mjs
+@@ -32,6 +32,7 @@ import { planParking, PARKING_RULE } from './site-parking.mjs';
+ import { frontSetbackFor } from './regulations-sa.mjs';
+ import { clientGlazing } from './glazing.mjs';
+ import { presentationStatus, STATUS_AR, PROPOSAL_LABEL_AR, MAJOR_PREFS } from './presentation-status.mjs';
++import { classifyRun, candidateRejections } from './review-evidence.mjs';
+ import { measureSaudiProgram } from './saudi-program.mjs';
+ import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
+ import { guarded, invariants as guardInv, regressions as guardReg } from './change-guard.mjs';
+@@ -182,6 +183,12 @@ export function programV2(counts, req = {}) {
+       if (b.kind === 'kitchen' && P.kitchenStrip?.length) b.noPantry = true; // المخزن مطلوب أصلًا شريطًا بجوار المطبخ
+     }
+   }
++  // (الجولة 21 — 02c، قرار المالك خامسًا) الصالة بمقاس صريح قيدٌ أثناء التوليد: الصالة ورقة حركة في الشجرة (C('hall')) لا كتلة برنامج، فيُحمل
++  // مقاسها كتلة افتراضية (P.hallDim) تُثبَّت بها ورقتها على محور قطعها في solve (fixExtOf) كما تُثبَّت ذوات المقاس، والمحور الآخر بجزاء
++  // التقييم (scoreV2 «dims:hall») وبحث الاتجاه (dimO)، والحكم بالقياس بعد التفصيل (سجل D-hall بالمستطيل الصافي). مفتاح القياس r21halldim.
++  { const dh = P.dims.hall;
++    if (dh && dh.w > 0 && dh.l > 0 && !R14_OFF.has('r21halldim') && !R14_OFF.has('r21dimfix')) { const tol = Number.isFinite(dh.tol) ? dh.tol : .05, s = Math.min(dh.w, dh.l), l = Math.max(dh.w, dh.l);
++      P.hallDim = { id: 'hall', kind: 'hall', name: 'الصالة', dimNet: { s, l, tol }, dimGross: { s: s + INT, l: l + INT }, area: (s + INT) * (l + INT) }; P.hallArea = r2(s * l); } }
+   // (الجولة السابعة) المجلس الرئيسي (الرجال، أو الوحيد): صافيه ≥ 24 م² افتراضًا ما لم يحدد العميل مقاسه — بجزاء في
+   // التقييم لا برفع مساحته المستهدفة (رفعها غيّر توزيع الأطوال في كل الأنماط وأسقط بدائل سليمة؛ الجزاء وحده بلغ 24 م²
+   // في الحالات العشر)، ولا رفض: الأرض الصغيرة قد لا تتسع
+@@ -433,12 +440,13 @@ function dimPlan(b, crossNet, ends, dir = null, runAxis = null, fit = false, alt
+ }
+ const dimRun = (b, crossNet, allowRun, dir = null, runAxis = null, plans = null, fit = false, alt = 0) => { const pl = dimPlan(b, crossNet, allowRun, dir, runAxis, fit, alt); if (pl && plans) plans.set(b, pl); return pl ? pl.run : 0; };
+ /** سماحية ورقة بمقاس صريح (منطقة بكتلة واحدة، أو عقدة كل أبنائها اختيارية عداها). */
+-function dimTolOf(c) { if (c.t === 'zone') return c.b.length === 1 ? c.b[0].dimNet?.tol || 0 : 0; if ((c.t === 'x' || c.t === 'y') && c.k) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? dimTolOf(solid[0]) : 0; } return 0; }
++function dimTolOf(c) { if (c.t === 'circ' && c.dimB) return c.dimB.dimNet?.tol || 0; if (c.t === 'zone') return c.b.length === 1 ? c.b[0].dimNet?.tol || 0 : 0; if ((c.t === 'x' || c.t === 'y') && c.k) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? dimTolOf(solid[0]) : 0; } return 0; }
+ /** محور امتداد صف لمنطقة: العمودي على اتجاه بابها (باب على x0/x1 ⇐ الصف على y). */
+ const runAxisOf = z => (z.door ? (isX(z.door) ? 'y' : 'x') : z.along);
+ /** (الجولة 21) امتداد ثابت لعقدة على محور dir: منطقة بكتلة واحدة بمقاس صريح، أو عقدة متعامدة كل أبنائها فراغات اختيارية عدا واحد كذلك. */
+ function fixExtOf(c, dir, crossNet, allow, plans = null) {
+   if (c.t === 'zone') return c.b.length === 1 ? dimRun(c.b[0], crossNet, allow, dir, runAxisOf(c), plans, false, c.dimO || 0) : 0;
++  if (c.t === 'circ' && c.dimB) return dimRun(c.dimB, crossNet, allow, dir, null, plans, false, c.dimO || 0); // (02c) الصالة بمقاس صريح
+   if ((c.t === 'x' || c.t === 'y') && c.t !== dir && !c.at) { const solid = c.k.filter(q => !q.opt); return solid.length === 1 ? fixExtOf(solid[0], dir, crossNet, allow, plans) : 0; }
+   return 0;
+ }
+@@ -1454,7 +1462,7 @@ function* optimizeSteps(tree, site, evalFn, { iters = 140, seed = 'x', tol = 2 }
+   // جهة المخزن المقتطع من مطبخ بمقاس صريح (جهة الحركة أو الجهة المقابلة) متغير بحث أيضًا
+   const kz = []; (function walk(n) { if (n.t === 'zone' && n.b.some(b => (b.dimGross && b.kind === 'kitchen') || b.kind === 'maid')) kz.push(n); if (n.k) n.k.forEach(walk); })(tree);
+   // (02b) اتجاه المقاس الصريح متغير بحث لكل منطقة فيها كتلة بمقاس (الاتجاهان يُجرَّبان)؛ لا مناطق كهذه ⇐ البحث كما كان حرفيًا
+-  const dz = []; if (!R14_OFF.has('r21dimfix') && !R14_OFF.has('r21dimorient')) (function walk(n) { if (n.t === 'zone' && n.b.some(b => b.dimNet && b.dimNet.s !== b.dimNet.l)) dz.push(n); if (n.k) n.k.forEach(walk); })(tree);
++  const dz = []; if (!R14_OFF.has('r21dimfix') && !R14_OFF.has('r21dimorient')) (function walk(n) { if ((n.t === 'zone' && n.b.some(b => b.dimNet && b.dimNet.s !== b.dimNet.l)) || (n.t === 'circ' && n.dimB && n.dimB.dimNet.s !== n.dimB.dimNet.l)) dz.push(n); if (n.k) n.k.forEach(walk); })(tree);
+   const snapW = () => ({ ws: nodes.map(n => [...n.w]), ord: zones.map(z => [...z.b]), ps: kz.map(z => z.pside || 0), dor: dz.map(z => z.dimO || 0) });
+   const load = st => { nodes.forEach((n, i) => { n.w = [...st.ws[i]]; }); zones.forEach((z, i) => { z.b = [...st.ord[i]]; }); kz.forEach((z, i) => { z.pside = st.ps[i]; }); dz.forEach((z, i) => { z.dimO = st.dor[i]; }); };
+   let best = null;
+@@ -2882,6 +2890,8 @@ const BUILD_MAX = 18, BUILD_SPARE = 4, BUILD_MAX2 = 8, SCHED_EXTRA = 70, SECOND_
+ function patOf(c) { return c.mode + ':' + c.tag; }
+ 
+ /** يولّد المرشحين لكل نمط ويحل أبعادهم. */
++/** (02c) يربط مقاس الصالة الصريح بورقة الصالة في شجرة الأرضي (لا يدخل فرع العلوي في عقدة dual). */
++function tagHallDim(n, hd) { if (!n) return; if (n.t === 'circ' && n.id === 'hall') { n.dimB = hd; return; } if (n.t === 'dual') return tagHallDim(n.g, hd); if (n.k) n.k.forEach(c => tagHallDim(c, hd)); }
+ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 140, avoid = new Set(), exclude = new Set(), prefPat = null, minEnv = 0, minDepth = 0, backAfterStair = 0, trees = null, ruleK = RULE_K, extra = null, capSuite = 0, foyerYard = false } = {}) {
+   const kitchenFront = rules.some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a)));
+   // غرف النوم على الواجهة الأمامية بطلب العميل («غرفة النوم على الشارع»): لا جزاء
+@@ -2890,6 +2900,7 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
+   let topoNo = 0;
+   for (const tr of trees || partiTrees(P, { stair, W: site.W, D: site.D, irregular: !!site.placeRects }).filter(t => !t.late)) {
+     if (avoid.has(tr.mode) || exclude.has(tr.mode + ':' + tr.tag)) continue;
++    if (P.hallDim) tagHallDim(tr.tree, P.hallDim); // (02c) ورقة الصالة الأرضية تحمل مقاسها (لا العلوية: dual.u)
+     let lastRp = null;
+     // (الجولة 21 — مقترح 06) وصلة الضيافة قيدٌ في حل الأبعاد لكل مصادر الأشجار (المكتبة والمحرك الثالث والإعادة) متى أمكنت طوبولوجيًا في الشجرة؛
+     // الشجرة التي لا يتلاصق فيها المجلس والطعام بأي مقاسات تُحل كما هي (قد يصل الضيف عبر دهليز الرجال) وتُعد في failStats — والحكم بعد التفصيل للأبواب
+@@ -3325,6 +3336,9 @@ function withPresentation(args, out) {
+   const req = measureRequest(args.requirements || {}, args.land, args.counts);
+   for (const d of out.designs) { try { d.presentation = presentationStatus(d, req); } catch (e) { d.presentation = { status: 'needs-edits', label_ar: STATUS_AR['needs-edits'], hidden_ar: [], edits_ar: ['تعذّر حساب حالة العرض لهذا البديل؛ يُراجع قبل اعتماده.'], hiddenReasons: [], diag: String(e?.message || e), prefs: [], proposal_ar: PROPOSAL_LABEL_AR }; } } // (02b) لا نص استثناء للعميل
+   const hid = out.designs.filter(d => d.presentation.status === 'hidden'), vis = out.designs.filter(d => d.presentation.status !== 'hidden');
++  // (02c/01b، حزمة المالك review-evidence) الحالات الثلاث منفصلة: مرشح رُفض أثناء البحث (لكلٍّ سببه المُهيكل)، وبديل مكتمل حُجب، وبلا بديل صالح
++  for (const r of out.rejected || []) if (!r.rejections) r.rejections = candidateRejections(r);
++  out.run = classifyRun({ designs: [...vis, ...hid], rejected: out.rejected || [], failure: out.timedOut ? { status: 'SEARCH_INCOMPLETE', reason: 'TIME_LIMIT' } : null });
+   if (vis.length && hid.length) {
+     out.hidden = [...(out.hidden || []), ...hid.map(d => ({ pat: d.pat, reasons_ar: d.presentation.hidden_ar, pluralReading: !!d.pluralReading }))]; out.designs = vis;
+     // (الجولة العشرون) المستندات المحجوبة تُحفظ تجارب بحثية (لا تُعرض للعميل) — خاصية غير معدودة لا تدخل JSON النتيجة
+@@ -3453,7 +3467,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+       // يُعاد حل النمط نفسه والعرض مخالفة بهامش في البحث (hardWidth)؛ لا يُخفَّض الحد، وما لا يبلغه بعد إعادة الحل يبقى مرفوضًا
+       if (d.reject.length && d.reject.every(nearMissWhy)) nearMiss.push(d);
+       if (d.reject.length) { rejected.push({ pat: patOf(cand), why: [...d.reject, ...d.notes.filter(n => /لم تتسع|لم تجد|تعذّر/.test(n))], doc: d.doc }); continue; }
+-      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', doc: d.doc }); continue; }
++      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', gateEv: failedGateEv(d.review), doc: d.doc }); continue; }
+       built.push(d);
+     } catch (e) { rejected.push({ pat: patOf(cand), why: [String(e.message || e)] }); }
+   }
+@@ -3506,7 +3520,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+         const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : false;
+         const d = buildDesign(cand, P, site, land, { title, mirror, requirements, entry });
+         if (d.reject.length) { if (d.reject.every(nearMissWhy)) near2.push(d); rejected.push({ pat: patOf(cand), why: d.reject, by: 'second-pass', doc: d.doc }); continue; }
+-        if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', doc: d.doc }); continue; }
++        if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat: patOf(cand), why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', gateEv: failedGateEv(d.review), doc: d.doc }); continue; }
+         d.secondPass = true; built.push(d); done2.add(k2);
+       } catch (e) { rejected.push({ pat: patOf(cand), why: [String(e.message || e)] }); }
+     }
+@@ -3753,8 +3767,11 @@ function refineHall(built, P, site, land, { title, requirements, entry, counts }
+         // يُقبل إن صارت الصالة ≥ المجلس، أو (الجولة التاسعة عشرة) زالت عيوب جوهرية مقيسة (الصالة الصغيرة/الممر) دون عيب جديد ولو بقيت أصغر
+         const fewer = !R14_OFF.has('r19hall') && n.major.length < d.major.length;
+         if (n.reject.length || n.fails > d.fails || !a1 || (a1.h < a1.m && !fewer) || n.major.some(x => !d.major.includes(x)) || n.major.length > d.major.length || n.quality > d.quality + 400) continue;
+-        if (!gateReview(n, requirements, land, counts) || !heavyReview(n, requirements, land, counts) || !noRegress(d, n, requirements, land)) continue;
+-        if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) continue;
++        const stop = why => { if (globalThis.__v2dbg) (globalThis.__v2dbg.hall ||= []).push({ pat: d.pat, margin, stop: why }); }; // (02c) سبب عدم القبول للتشخيص فقط
++        if (!gateReview(n, requirements, land, counts)) { stop('gate:' + (n.review?.failedGates || []).join(',')); continue; }
++        if (!heavyReview(n, requirements, land, counts)) { stop('heavy:' + (n.heavyFail || []).join(',')); continue; }
++        if (!noRegress(d, n, requirements, land)) { stop('regress'); continue; }
++        if (built.some((o, j) => j !== i && archDifferenceV2(o.sig2 ||= archSignatureV2(o.doc), n.sig2 ||= archSignatureV2(n.doc)).verdict !== 'distinct')) { stop('not-distinct'); continue; }
+         n.dr = n.dr || docRooms(n.doc);
+         n.notes = [...n.notes, a1.h >= a1.m ? `كُبّرت «الصالة» إلى ${r2(a1.h)} م² فصارت لا تصغر عن «المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) بإعادة ضبط أبعاد التنظيم نفسه — هدف تصميمي افتراضي للميزان.` : `أُعيد ضبط أبعاد التنظيم نفسه: «الصالة» ${r2(a1.h)} م² و«المجلس» ${r2(a1.m)} م² (كانت ${r2(a0.h)} م² مقابل ${r2(a0.m)} م²) — زال ${d.major.filter(x => !n.major.includes(x)).join(' و')}، وما زالت الصالة أصغر من المجلس (هدف الميزان الافتراضي لم يتحقق على هذه الأرض الضيقة).`];
+         built[i] = n; if (a1.h >= a1.m || R14_OFF.has('r20hall')) break;
+@@ -3825,8 +3842,10 @@ function reviewRequest(requirements, land, counts) {
+ /** (الجولة التاسعة عشرة) طلب القياسات (privacy-defects) ومعه قواعد العميل المستخرجة (الرئيسية بعيدة عن الدرج…) — لا يُمرَّر إلى plan-review
+  *  (تمريرها هناك فعّل بوابة الموضع على نص لم تكن تقرؤه فأسقط بدائل سليمة: تغيير معايرة غير مقصود، سُحب). */
+ function measureRequest(requirements, land, counts) { return { ...reviewRequest(requirements, land, counts), rules: requirements?.rules || [] }; }
++/** (02c) بوابات المراجعة الراسبة بقيمها الفعلية — لأدلة رفض المرشح (review-evidence.mjs candidateRejections). */
++const failedGateEv = rv => (rv?.gates || []).filter(g => !g.ok && g.applicable !== false).map(g => ({ id: g.id, ar: g.ar, value: g.value, tier: g.tier, reasons_ar: g.reasons_ar }));
+ function compactReview(rv) {
+-  const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, reasons_ar: g.reasons_ar });
++  const G = g => ({ id: g.id, ar: g.ar, ok: g.ok, applicable: g.applicable !== false, value: g.value, threshold: g.threshold ?? null, tier: g.tier ?? null, reasons_ar: g.reasons_ar }); // (02c) الحد والطبقة لأدلة الحجب
+   // بوابات المستند وحده في gates (كما يراجعها reviewDesign)، وبوابة المجموعة (DISTINCT) منفصلة في setGates
+   return { version: rv.version, passed: rv.passed, failedGates: rv.failedGates, score: rv.score, rejectReasons_ar: rv.rejectReasons_ar,
+     gates: rv.gates.filter(g => g.id !== 'DISTINCT').map(G), setGates: rv.gates.filter(g => g.id === 'DISTINCT').map(G),
+@@ -4068,7 +4087,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
+       // (الجولة التاسعة) اتساق التراكب مقيسًا من المرسوم: لا جدار علوي يمتد > 5 م بلا جدار تحته، ولا غرفة فوق فراغ أرضي
+       const reject = [...hardGates(d.doc, allP), ...qualityGates(d.doc, null, { ...gateOpts(allP), narrow: site.W < NARROW_W }).filter(w => !d.qgates.includes(w)), ...d.qgates, ...stackingGates(d.doc)];
+       if (reject.length) { rejected.push({ pat, why: reject }); if (globalThis.__v2keepRejDocs) (globalThis.__v2rejDocs ||= []).push({ pat, why: reject, doc: d.doc }); return; }
+-      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat, why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review' }); if (globalThis.__v2keepRejDocs) (globalThis.__v2rejDocs ||= []).push({ pat, why: d.review.rejectReasons_ar, doc: d.doc }); return; }
++      if (!gateReview(d, requirements, land, counts)) { rejected.push({ pat, why: d.review.rejectReasons_ar, gates: d.review.failedGates, by: 'plan-review', gateEv: failedGateEv(d.review) }); if (globalThis.__v2keepRejDocs) (globalThis.__v2rejDocs ||= []).push({ pat, why: d.review.rejectReasons_ar, doc: d.doc }); return; }
+       d.pat = pat; d.summary = summary; d.notes = [...new Set([...d.notes, ...ul.notes, note])];
+       d.stacking = stackingReport(d.doc);
+       // (الجولة الثامنة عشرة) حمامات علوية فوق المجلس أو الطعام أو المدخل: تُذكر مقيسة من المرسوم (تمديدات صرف فوق فراغ جاف — تحتاج تحققًا
+diff --git a/dist/villa-layout-v3.mjs b/dist/villa-layout-v3.mjs
+index f2efc77..ff4fad3 100644
+--- a/dist/villa-layout-v3.mjs
++++ b/dist/villa-layout-v3.mjs
+@@ -22,6 +22,7 @@ import { verifyCertificate } from './certificates.mjs';
+ import { analyzeFeasibility } from './feasibility.mjs';
+ import { explainFailure } from './infeasibility-report.mjs';
+ import { toClientAr } from './client-language.mjs';
++import { candidateRejections } from './review-evidence.mjs';
+ import { diversifyTopologies, layoutFingerprint } from './diversity-r21.mjs';
+ 
+ export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
+@@ -646,7 +647,10 @@ function attach(out, feas, log, args = {}) {
+   for (const d of out.designs || []) { if (d.summary) d.summary = toClientAr(d.summary); if (Array.isArray(d.notes)) d.notes = d.notes.map(toClientAr).filter(Boolean); }
+   if (out.shortfall_ar) out.shortfall_client_ar = toClientAr(out.shortfall_ar);
+   const requested = args.keep || 4, warnings = [...(feas?.warnings || []).map(w => ({ id: w.id, ar: toClientAr(w.ar), items: w.items || null })), ...(out.timedOut ? [{ id: 'TIME_LIMIT', ar: 'انتهى وقت البحث قبل أن يُكمل كل التنظيمات؛ قد توجد تصاميم أخرى.' }] : [])];
+-  out.result = { status: 'SOLVED', requestedCount: requested, shownCount: (out.designs || []).length, warnings };
++  // (02c/01b) «SOLVED» فقط ببديل صالح معروض؛ بدائل مكتملة كلها محجوبة = «بحث غير مكتمل» (ONLY_HIDDEN_ALTERNATIVES) لا نجاح — والحالات الثلاث في outcome
++  const run = out.run || null, ok = !run || run.status === 'SOLVED';
++  out.result = { status: ok ? 'SOLVED' : run.status, ...(ok ? {} : { reason: run.reason, diagnosticId: diagId(args, 'HIDDEN'), retryable: run.reason === 'TIME_LIMIT' }), outcome: run?.outcome || 'VALID_ALTERNATIVES',
++    requestedCount: requested, shownCount: (out.designs || []).filter(d => d.presentation?.status !== 'hidden').length, candidatesRejected: run?.candidatesRejected ?? null, hiddenAlternatives: run?.hiddenAlternatives?.length ?? 0, warnings };
+   return out;
+ }
+ // ---------------------------------------------------------------------------------------------- (الجولة 21) عقد نتائج التوليد
+@@ -689,6 +693,8 @@ function counterfactual(gen, args) {
+ function fail(e, feas, log, args, gen, two) {
+   e.feasibility = feas; e.search = log;
+   e.result = classifyFailure(e, feas, args);
++  e.result.outcome = 'NO_VALID_ALTERNATIVE'; e.result.candidatesRejected = (e.rejected || []).length; // (02c/01b) الحالة الثالثة: لا بديل مكتمل
++  for (const r of e.rejected || []) if (!r.rejections) r.rejections = candidateRejections(r);
+   const cf = !args._cf && e.result.status === 'SEARCH_INCOMPLETE' && e.result.reason === 'SEARCH_EXHAUSTED_WITHOUT_PROOF' && !globalThis.process?.env?.R14_OFF?.includes('r21cf') ? counterfactual(gen, args) : [];
+   e.counterfactual = cf;
+   e.report = explainFailure({ error: e, feasibility: feas, counterfactual: cf, twoFloors: two, land: args.land, status: e.result });
+diff --git a/scripts/kit2-case.mjs b/scripts/kit2-case.mjs
+new file mode 100644
+index 0000000..a47a17c
+--- /dev/null
++++ b/scripts/kit2-case.mjs
+@@ -0,0 +1,40 @@
++// (الجولة 21 — 02c/01b، أداة قياس وأدلة غير سلوكية) تشغيل حالة واحدة على نسخة محرك وحفظ مستنداتها لرسمها بـ scripts/acceptance-render.mjs:
++//   node scripts/kit2-case.mjs <set> <id> --stage <اسم> [--root <نسخة المستودع>]
++// يكتب evidence/acceptance/<stage>/<id>/alt-N.json (المعروض، والمحجوب إن وُجد: hidden-N.json لا يُرسم للعميل) وresult.json: حالة العرض،
++// والأسباب المُهيكلة، وبنود المقاس من السجل (المقيس والصندوق والانحراف)، وفحوص الخصوصية/الضوء/التهوية، والإشعار. لا يشغّل H11–H15 ولا بذرة التقييم.
++import { mkdirSync, writeFileSync } from 'node:fs';
++const argv = process.argv.slice(2), opt = k => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : null; };
++const [set, id] = argv.filter((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
++if (set === 'heldout3' || /^H1[1-5]$/.test(id || '')) throw Error('H11–H15 مختومة');
++const here = new URL('../', import.meta.url).pathname, root = (opt('root') || here).replace(/\/$/, '') + '/', stage = opt('stage') || 'kit2';
++const SETS = { main: ['scripts/acceptance-cases.mjs', 'CASES'], heldout: ['scripts/heldout-cases.mjs', 'HELDOUT'], heldout2: ['scripts/heldout2-cases.mjs', 'HELDOUT2'] };
++const C = (await import(here + SETS[set][0]))[SETS[set][1]].find(c => c.id === id);
++const { extractRequirements } = await import(root + 'dist/requirements.mjs');
++const V3 = await import(root + 'dist/villa-layout-v3.mjs');
++const { serialize } = await import(root + 'dist/draw/doc.mjs');
++const CL = await import(root + 'dist/client-text.mjs');
++let R16 = null; try { R16 = await import(root + 'dist/privacy-defects.mjs'); } catch { R16 = null; }
++const req = extractRequirements(C.text, { counts: C.counts }); req.counts = { ...req.counts, ...C.counts };
++const land = { floors: 1, ...C.land }, two = land.floors >= 2 || req.prefs?.floors === 2, keep = C.want || req.want || 4;
++const dir = here + `evidence/acceptance/${stage}/${id}/`; mkdirSync(dir, { recursive: true });
++let out = null, err = null; const t0 = Date.now();
++try { out = (two ? V3.generateVillaTwoFloors : V3.generateVillaDesigns)({ land, counts: req.counts, requirements: req, keep, _cf: true }); } catch (e) { err = e; }
++const row = { case: id, root, ms: Date.now() - t0, text: C.text, land, keep, understood: req.understood, unclear: req.unclear, designs: [] };
++if (out) {
++  out.designs.forEach((d, i) => {
++    const name = d.presentation?.status === 'hidden' ? `hidden-${i + 1}.json` : `alt-${i + 1}.json`;
++    writeFileSync(dir + name, serialize(d.doc));
++    let priv = null; try { priv = R16 ? R16.measureR16(d.doc, { text: C.text, counts: req.counts, rules: req.rules || [] }).filter(g => /WINDOW|HALL_STREET/.test(g.id)).map(g => ({ id: g.id, pass: g.pass, applicable: g.applicable, value: g.value, reasons_ar: g.reasons_ar })) : null; } catch { priv = null; }
++    row.designs.push({ file: name, pat: d.pat, status: d.presentation?.status, hidden_ar: d.presentation?.hidden_ar, hiddenReasons: d.presentation?.hiddenReasons, edits_ar: d.presentation?.edits_ar, notes_ar: d.presentation?.notes_ar,
++      dims: (d.ledger || []).filter(x => x.kind === 'dims'), privacy: priv, acceptance: d.acceptance || null, rejections: d.rejections || null, notes: (d.notes || []).filter(n => /نافذة|جلسة|الخصوصية|حاجب/.test(n)) });
++  });
++  row.shortfall_ar = out.shortfall_ar || null; row.result = out.result || null; row.outcome = out.outcome || null;
++  row.notice_ar = CL.shortfallNotice({ requested: keep, shown: out.designs.filter(d => d.presentation?.status !== 'hidden').length, shortfall_ar: out.shortfall_client_ar || out.shortfall_ar || '', hidden: out.hidden || [] });
++} else {
++  row.error = { code: err?.code || null, report_ar: err?.report_ar || null, result: err?.result || null, outcome: err?.outcome || null, message: String(err?.message || err).slice(0, 400) };
++  row.notice_ar = CL.shortfallNotice({ requested: keep, shown: 0, report_ar: err?.report_ar || err?.message });
++}
++// إشعار العميل كصورة (acceptance-render يرسم notice.png من result.json)
++if (row.notice_ar) row.notice = row.notice_ar;
++writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));
++console.log(JSON.stringify({ id, ms: row.ms, designs: row.designs.map(d => `${d.pat}:${d.status}`), error: row.error?.code || null, dims: row.designs.flatMap(d => d.dims.map(x => `${x.id}:${x.ok ? 'ok' : 'X'}:${x.actual ? x.actual.s + '×' + x.actual.l : ''}${x.envelope ? '/' + x.envelope.s + '×' + x.envelope.l : ''}`)) }));
+diff --git a/tests/stage2-r21-02b.test.mjs b/tests/stage2-r21-02b.test.mjs
+index b74e46b..a3e4c13 100644
+--- a/tests/stage2-r21-02b.test.mjs
++++ b/tests/stage2-r21-02b.test.mjs
+@@ -139,8 +139,10 @@ test('02b (10) لا بديل محجوب بلا سبب: كل محجوب يحمل
+   const st = presentationStatus({ pat: 'X1', doc: gen('beds', 'دور واحد، 3 غرف نوم كل غرفة 4×5، مجلس، صالة، مطبخ، طعام', C3, LAND(24, 30)).o.designs[0].doc, ledger: [{ id: 'D-bedroom', kind: 'dims', text: 'غرف الأبناء بأبعاد 4×5', ok: false, actual: { s: 4, l: 5 }, failing: { name: 'غرفة نوم 4', s: 3.93, l: 4.56 }, want: { s: 4, l: 5 }, tol: .3, why: 'فرق 0.44 م' }], review: { passed: true } }, { text: '' });
+   assert.equal(st.status, 'hidden');
+   const h = st.hiddenReasons[0];
+-  assert.deepEqual([h.candidate, h.stage, h.rule, h.source], ['X1', 'presentation', 'D-bedroom', 'client']);
+-  assert.deepEqual(h.measured, { name: 'غرفة نوم 4', s: 3.93, l: 4.56 }); assert.deepEqual(h.limit, { s: 4, l: 5, tol: .3 }); assert.ok(h.reason_ar.length > 20);
++  // (02c، حزمة المالك review-evidence) الحقول الموحدة: المرحلة «dimensions»، والمقيس والحد رقمان للضلع الأسوأ (الطول 4.56 من 5 هنا)، والتفصيل كما كان
++  assert.deepEqual([h.candidate, h.stage, h.rule, h.source], ['X1', 'dimensions', 'D-bedroom', 'client']);
++  assert.deepEqual([h.measured, h.limit, h.unit, h.tol], [4.56, 5, 'م', .3]);
++  assert.deepEqual(h.measuredDetail, { name: 'غرفة نوم 4', s: 3.93, l: 4.56 }); assert.deepEqual(h.limitDetail, { s: 4, l: 5, tol: .3 }); assert.ok(h.reason_ar.length > 20);
+   // تكامل: كل البدائل المولدة في هذا الملف
+   for (const { o } of memo.values()) for (const d of o.designs) {
+     const p = d.presentation; if (p.status !== 'hidden') continue;
+diff --git a/tests/stage2-r21-02c-01b.test.mjs b/tests/stage2-r21-02c-01b.test.mjs
+new file mode 100644
+index 0000000..37870fd
+--- /dev/null
++++ b/tests/stage2-r21-02c-01b.test.mjs
+@@ -0,0 +1,245 @@
++// الجولة 21 — 02c (استكمال 02b) و01b (تعديل 01): حزمة المالك الثانية docs/owner/kit-r21-02b-01 مكيَّفة على دوال المستودع، وقرار المالك
++// docs/owner/decision-r21-02b-01-2026-10-26.md. اختبارات عقد الحزمة (test/patches.test.mjs) منقولة على وحداتنا، واختبارات القرار الثالث.
++// غير معتمد؛ فرع dev/stage2-r21-proposal. فحوص الخصوصية والحمامات والجدران ليست اعتمادًا معماريًا ولا إنشائيًا.
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { measureClearDims, clearSpanFromCentrelines, toleranceFor, isOrthogonal, DIM_TOL } from '../dist/clear-dims.mjs';
++import { segmentHit, screenWindowPrivacy, compareAcceptance, acceptanceSnapshot, windowExposure } from '../dist/privacy-gate.mjs';
++import { rejection, assertBlocked, classifyRun, clientNotice, gateEvidence } from '../dist/review-evidence.mjs';
++import { evaluateBath, evaluateSuiteBaths, BATH_DEPTH_PREFERENCES } from '../dist/bath-band.mjs';
++import { canonicalBrief, assertSharedBrief, briefMajlisDoor, briefGuestDining, briefOf, sharedReviewRequest, RELATIONS } from '../dist/shared-brief.mjs';
++import { extractRequirements } from '../dist/requirements.mjs';
++import { verifyRequest } from '../dist/rules.mjs';
++import { clientAsks } from '../dist/saudi-program.mjs';
++import { programV2, TREE_KIT, DIMS_KIT } from '../dist/villa-layout-v2.mjs';
++import * as V3 from '../dist/villa-layout-v3.mjs';
++import { createDoc, applyCommand } from '../dist/draw/doc.mjs';
++import { analyzeDoc } from '../dist/draw/digest.mjs';
++import { measureR16 } from '../dist/privacy-defects.mjs';
++import { shortfallNotice, internalLeaks } from '../dist/client-text.mjs';
++import { lintClientText } from '../dist/client-language.mjs';
++import { CASES } from '../scripts/acceptance-cases.mjs';
++import { HELDOUT } from '../scripts/heldout-cases.mjs';
++import { HELDOUT2 } from '../scripts/heldout2-cases.mjs';
++
++const rect = (w, h, x = 0, y = 0) => [{ x, y }, { x: x + w, y }, { x: x + w, y: y + h }, { x, y: y + h }];
++const M = (net, want, tol, o = {}) => measureClearDims({ net, holes: o.holes || [] }, want, tol, o);
++const req = (text, counts) => { const r = extractRequirements(text, { counts }); r.counts = { ...r.counts, ...counts }; return r; };
++const memo = new Map();
++const genCase = (set, id) => {
++  const k = set + id; if (memo.has(k)) return memo.get(k);
++  const C = { main: CASES, heldout: HELDOUT, heldout2: HELDOUT2 }[set].find(c => c.id === id), r = req(C.text, C.counts), land = { floors: 1, ...C.land };
++  let o = null, e = null; try { o = V3.generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: C.want || r.want || 4 }); } catch (x) { e = x; }
++  const v = { C, r, land, o, e }; memo.set(k, v); return v;
++};
++const shown = o => (o?.designs || []).filter(d => d.presentation?.status !== 'hidden');
++
++// ------------------------------------------------------------------ (أ) عقد الحزمة: clear-dimensions
++test('02c الحزمة: 4×5 «بالضبط» ينجح، وناقص 4 سم يرسب بالضبط وينجح بلا وصف، و«تقريبًا» ±0.30', () => {
++  assert.deepEqual({ ...DIM_TOL }, { exact: .03, default: .05, approx: .3 });
++  assert.equal(M(rect(4, 5), { s: 4, l: 5 }, toleranceFor('exact')).ok, true);
++  assert.equal(M(rect(3.96, 5), { s: 4, l: 5 }, toleranceFor('exact')).ok, false);
++  assert.equal(M(rect(3.96, 5), { s: 4, l: 5 }, toleranceFor('unspecified')).ok, true);
++  assert.equal(M(rect(3.8, 5), { s: 4, l: 5 }, toleranceFor('approximate')).ok, true);
++  assert.equal(M(rect(3.69, 5), { s: 4, l: 5 }, toleranceFor('approximate')).ok, false);
++  assert.throws(() => toleranceFor('exact', { exact: -1 })); assert.throws(() => toleranceFor('other'));
++});
++test('02c الحزمة: التدوير مسموح حين لا يُلزم الاتجاه، ومرفوض حين يُلزم', () => {
++  const r = M(rect(5, 4), { s: 4, l: 5 }, .05); assert.equal(r.ok, true); assert.equal(r.clear.rotated, true);
++  assert.equal(M(rect(5, 4), { w: 4, l: 5 }, .05, { allowRotation: false }).ok, false);
++});
++test('02c الحزمة: غرفة L بصندوق 4×5 لا تنجح، والمستطيل الصحيح قد يكون أصغر من الأكبر مساحة، وجزيرة فتحة رأسية تُسقط المستطيل', () => {
++  const L = [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 4.5 }, { x: 3.5, y: 4.5 }, { x: 3.5, y: 5 }, { x: 0, y: 5 }];
++  const m = M(L, { s: 4, l: 5 }, .05); assert.equal(m.ok, false); assert.equal(m.envelopeOK, true); assert.equal(m.clearOK, false);
++  assert.equal(M([{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 6, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 5 }, { x: 0, y: 5 }], { s: 3, l: 5 }, .05).ok, false); // الصندوق 6×5
++  assert.equal(M(rect(4, 5), { s: 4, l: 5 }, .05, { holes: [rect(.3, .3, 1, 1)] }).ok, false);
++});
++test('02c الحزمة: ضيق 6.5 سم (درجة سماكة الجدار 0.25/0.12) عند أضيق موضع يُرسب «بالضبط» و«بلا وصف» ويمر «تقريبًا» — الصندوق وحده كان يمرره', () => {
++  const notch = [{ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 4, y: 2 }, { x: 3.935, y: 2 }, { x: 3.935, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 5 }, { x: 0, y: 5 }];
++  for (const [tol, ok] of [[.03, false], [.05, false], [.3, true]]) { const m = M(notch, { s: 4, l: 5 }, tol); assert.equal(m.ok, ok, String(tol)); assert.equal(m.envelope.s, 4); assert.equal(m.clear.s, 3.935); assert.equal(m.narrowing.s, .065); }
++});
++test('02c الحزمة: المحاور فقط تُخصم منها أنصاف السماكتين المختلفتين، والهندسة غير المتعامدة لا تُفحص (ليست استحالة)', () => {
++  assert.ok(Math.abs(clearSpanFromCentrelines(4.185, .25, .12) - 4) < 1e-9);
++  const d = M([{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 2 }, { x: -1, y: 1 }], { s: 1, l: 1 }, .05);
++  assert.equal(d.applicable, false); assert.equal(d.ok, null); assert.match(d.reason_ar, /ليس دليل استحالة/);
++  assert.equal(isOrthogonal(rect(2, 3)), true);
++});
++
++// ------------------------------------------------------------------ (ب) على المستند الحقيقي: أضيق موضع، وسماكات متغيرة، والأعمدة
++/** غرفة «المطبخ» محاورها 4.25×5.185: جهتها الشمالية نصفها خارجي (0.25) ونصفها على غرفة داخلية (0.12) ⇐ درجة 6.5 سم في الوجه الصافي. */
++function steppedDoc({ column = null } = {}) {
++  let d = createDoc({ title: 't' });
++  d = applyCommand(d, { type: 'set-plot', polygon: rect(20, 20, -5, -5), north: 0, entry: 's' }).doc;
++  d = applyCommand(d, { type: 'add-walls', level: 'L1', points: [{ x: 0, y: 0 }, { x: 4.25, y: 0 }, { x: 4.25, y: 8 }, { x: 2, y: 8 }, { x: 2, y: 5.185 }, { x: 0, y: 5.185 }], closed: true, t: .25 }).doc;
++  d = applyCommand(d, { type: 'add-wall', level: 'L1', a: { x: 2, y: 5.185 }, b: { x: 4.25, y: 5.185 }, t: .12 }).doc;
++  d = applyCommand(d, { type: 'add-label', level: 'L1', name: 'المطبخ', roomType: 'kitchen', seed: { x: 1, y: 1 } }).doc;
++  d = applyCommand(d, { type: 'add-label', level: 'L1', name: 'المخزن', roomType: 'storage', seed: { x: 3, y: 7 } }).doc;
++  if (column) d = applyCommand(d, { type: 'add-column', level: 'L1', x: column.x, y: column.y, size: .3 }).doc;
++  return d;
++}
++test('02c القرار: المطبخ المرسوم بدرجة سماكة يُقاس عند أضيق موضع صالح — السجل يحمل المستطيل الصافي والصندوق والانحراف، ويحجب بسببه', () => {
++  const doc = steppedDoc(), k = analyzeDoc(doc).levels[0].rooms.find(r => r.name === 'المطبخ');
++  assert.ok(k.net.length > 4, 'الوجه الصافي درجة لا مستطيل');
++  const x = verifyRequest(doc, { dims: { kitchen: { w: 4, l: 5, tol: .05 } } }).find(i => i.id === 'D-kitchen');
++  assert.equal(x.ok, false, x.why); assert.equal(x.measure, 'clear-rectangle');
++  assert.deepEqual(x.envelope, { s: 4, l: 5 }); assert.ok(Math.abs(x.actual.l - 4.935) < .006, String(x.actual.l)); // 5.185 − 0.125 − 0.125 = 4.935 عند الجزء الخارجي
++  assert.match(x.why, /أضيق موضع صالح/);
++  const ok = verifyRequest(doc, { dims: { kitchen: { w: 4, l: 5, tol: .3 } } }).find(i => i.id === 'D-kitchen');
++  assert.equal(ok.ok, true); assert.match(ok.deviation_ar || '', /أوسع موضع 5 م/); // يرى العميل الانحراف الفعلي
++});
++test('02c القرار: عمود مرسوم داخل الغرفة جزيرة تُسقط المستطيل الصافي (الصندوق لا يتغير)', () => {
++  const doc = steppedDoc({ column: { x: 2, y: 2.5 } });
++  const x = verifyRequest(doc, { dims: { kitchen: { w: 4, l: 5, tol: .3 } } }).find(i => i.id === 'D-kitchen');
++  assert.equal(x.ok, false, x.why); assert.deepEqual(x.envelope, { s: 4, l: 5 });
++});
++test('02c القرار: مقاس مدوَّر (5×4 مرسوم لطلب 4×5 بلا اتجاه) يتحقق', () => {
++  let d = createDoc({ title: 't' }); d = applyCommand(d, { type: 'set-plot', polygon: rect(20, 20, -5, -5), north: 0, entry: 's' }).doc;
++  d = applyCommand(d, { type: 'add-walls', level: 'L1', points: rect(5.25, 4.25), closed: true, t: .25 }).doc;
++  d = applyCommand(d, { type: 'add-label', level: 'L1', name: 'المطبخ', roomType: 'kitchen', seed: { x: 1, y: 1 } }).doc;
++  const x = verifyRequest(d, { dims: { kitchen: { w: 4, l: 5, tol: .03 } } }).find(i => i.id === 'D-kitchen');
++  assert.equal(x.ok, true, x.why); assert.deepEqual(x.actual, { s: 4, l: 5 });
++});
++
++// ------------------------------------------------------------------ (ج) الصالة بمقاس صريح قيد توليد، والرئيسية وغرف النوم
++test('02c القرار خامسًا: مقاس الصالة يُحمل كتلة افتراضية وتُثبَّت به ورقة الصالة على محور قطعها في solve (الصافي + جداران)', () => {
++  const r = req('دور واحد، 3 غرف نوم، مجلس، صالة 6×5، مطبخ، طعام', { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 });
++  const P = programV2(r.counts, r); assert.deepEqual(P.hallDim.dimNet, { s: 5, l: 6, tol: .05 });
++  const { Y, Z, C, solve } = TREE_KIT, { INT } = DIMS_KIT, k = P.blocks.find(b => b.id === 'kitchen1');
++  const hall = C('hall', { area: 30 }); hall.dimB = P.hallDim;
++  const sol = solve(Y(Z([k], 'y1', 'x'), hall, Z([P.dining[0]], 'y0', 'x')), 6.5, 16);
++  assert.ok(sol); const h = sol.circ.find(c => c.id === 'hall').r, dy = Math.round((h.y1 - h.y0) * 100) / 100;
++  assert.ok([5 + INT, 6 + INT].includes(dy), `امتداد الصالة ${dy}`);
++});
++test('02c: الصالة بمقاس صريح في مخطط مولَّد مقيسة بالمستطيل الصافي ضمن السماحية؛ والرئيسية بمقاس صريح لا تُعرض صالحة إلا بمقاسها (وإلا تُحجب بالمقيس)', { timeout: 900000 }, () => {
++  const counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 };
++  const r = req('دور واحد، 3 غرف نوم، مجلس، صالة 6×5، مطبخ، طعام', counts);
++  const o = V3.generateVillaDesigns({ land, counts: r.counts, requirements: r, keep: 2 });
++  const ok = shown(o); assert.ok(ok.length >= 1, JSON.stringify(o.designs.map(d => d.presentation?.hidden_ar)));
++  for (const d of ok) { const x = verifyRequest(d.doc, r).find(i => i.id === 'D-hall'); assert.equal(x.ok, true, x.why); assert.equal(x.measure, 'clear-rectangle'); assert.ok(x.actual.s <= x.envelope.s + 1e-9 && x.actual.l <= x.envelope.l + 1e-9); }
++  const r2 = req('دور واحد، 3 غرف نوم، مجلس، صالة، غرفة النوم الرئيسية 4.5×5، مطبخ، طعام', counts);
++  const o2 = V3.generateVillaDesigns({ land, counts: r2.counts, requirements: r2, keep: 2 });
++  for (const d of o2.designs) {
++    const x = verifyRequest(d.doc, r2).find(i => i.id === 'D-master'); assert.ok(x);
++    if (d.presentation.status !== 'hidden') assert.equal(x.ok, true, x.why);
++    else if (!x.ok) { const h = d.presentation.hiddenReasons.find(q => q.rule === 'D-master'); assert.ok(h && Number.isFinite(h.measured) && h.limit > 0 && h.stage === 'dimensions'); }
++  }
++});
++test('02c H10: العدد المطلوب 3، والمقاسات الصافية (المجلس والمطبخ وغرف النوم) عند أضيق موضع ضمن السماحية في المعروض', { timeout: 900000 }, () => {
++  const { r, o } = genCase('heldout2', 'H10');
++  assert.equal(r.want, 3); assert.match(o.shortfall_ar || '', /من 3/);
++  const ok = shown(o); assert.ok(ok.length >= 1);
++  const ds = verifyRequest(ok[0].doc, r, { entry: 'e' }).filter(i => i.kind === 'dims');
++  assert.deepEqual(ds.map(x => x.id).sort(), ['D-bedroom', 'D-kitchen', 'D-majlis']);
++  for (const x of ds) { assert.equal(x.ok, true, x.text + ' ' + x.why); assert.equal(x.measure, 'clear-rectangle'); }
++});
++
++// ------------------------------------------------------------------ (د) C6: الخصوصية والضوء والتهوية دون إفساد المقاسات
++test('02c الحزمة: خط الرؤية، والجلسة العالية، والساتر قبل النافذة، وجدار المبنى يحجب', () => {
++  const win = { a: { x: 2, y: -1 }, b: { x: 2, y: 1 }, sillHeight: .8, headHeight: 2.2 }, P = [{ x: 0, y: 0 }], I = [{ x: 4, y: 0 }];
++  assert.ok(segmentHit({ x: 0, y: 0 }, { x: 4, y: 0 }, { x: 2, y: -1 }, { x: 2, y: 1 }));
++  assert.equal(screenWindowPrivacy({ window: win, parkingPoints: P, interiorPoints: I }).potentialExposure, true);
++  assert.equal(screenWindowPrivacy({ window: { ...win, sillHeight: 1.8, headHeight: 2.4 }, parkingPoints: P, interiorPoints: I }).potentialExposure, false);
++  assert.equal(screenWindowPrivacy({ window: win, parkingPoints: P, interiorPoints: I, opaqueScreens: [{ a: { x: 1, y: -1 }, b: { x: 1, y: 1 }, height: 2 }] }).potentialExposure, false);
++  assert.equal(screenWindowPrivacy({ window: win, parkingPoints: P, interiorPoints: I, opaqueScreens: [{ a: { x: 1, y: -1 }, b: { x: 1, y: 1 }, height: 1.2 }] }).potentialExposure, true); // أوطأ من العين
++  assert.equal(screenWindowPrivacy({ window: win, parkingPoints: P, interiorPoints: I, blockers: [{ a: { x: 1, y: -1 }, b: { x: 1, y: 1 } }] }).potentialExposure, false);
++  assert.equal(compareAcceptance({ checks: { 'privacy:X': { category: 'privacy', passed: true } } }, { checks: { 'privacy:X': { category: 'privacy', passed: false } } }, { protect: ['privacy'] }).pass, false);
++  assert.equal(compareAcceptance({ checks: { 'privacy:X': { category: 'privacy', passed: true } } }, { checks: { 'privacy:X': { category: 'privacy', passed: true }, dims: { passed: true } } }, { mandatory: ['dims'], protect: ['privacy'] }).pass, true);
++});
++test('02c C6: نافذة الصالة الوحيدة بجلستها وساتر خصوصية خارجي — خطوط الرؤية من المواقف محجوبة بعينات متعددة، وWINDOW_PARKING الأصلي ناجح، والضوء والتهوية والحركة بلا تراجع، والمقاسات محققة', { timeout: 900000 }, () => {
++  const { r, o } = genCase('main', 'C6');
++  const d = shown(o)[0]; assert.ok(d, 'بديل معروض');
++  assert.notEqual(d.presentation.status, 'hidden');
++  assert.ok(!(d.presentation.edits_ar || []).some(t => /نافذة «الصالة»[^]*المواقف|ساحة المواقف/.test(t)), JSON.stringify(d.presentation.edits_ar));
++  for (const x of verifyRequest(d.doc, r).filter(i => i.kind === 'dims')) assert.equal(x.ok, true, x.text + ' ' + x.why);
++  const doc = d.doc, G = analyzeDoc(doc).levels[0], bays = doc.zones.filter(z => z.type === 'garage');
++  const fences = doc.walls.filter(w => w.kind === 'fence'); assert.ok(fences.length >= 1, 'ساتر مرسوم');
++  assert.ok(fences.every(w => (w.h ?? 0) >= 1.6));
++  const hall = G.rooms.find(x => x.name === 'الصالة'), wins = G.openings.filter(op => op.window && op.sides.some(s => s.room.id === hall.id && s.other === 'outside'));
++  assert.ok(wins.some(op => (op.o.sill ?? 0) < 1.5), 'نافذة الصالة عادية (لا علوية فقط)');
++  for (const op of wins) assert.equal(windowExposure(doc, G, op, op.sides.find(s => s.room.id === hall.id), bays).potentialExposure, false);
++  assert.equal(measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING').pass, true);
++  // قبل/بعد: المستند نفسه بلا الساتر يرسب في الخصوصية، ومعه لا تراجع في الضوء والتهوية والحركة
++  const bare = { ...doc, walls: doc.walls.filter(w => w.kind !== 'fence') };
++  assert.equal(measureR16(bare, {}).find(g => g.id === 'WINDOW_PARKING').pass, false);
++  const cmp = compareAcceptance(acceptanceSnapshot(bare), acceptanceSnapshot(doc), { protect: ['privacy', 'daylight', 'ventilation', 'circulation'] });
++  assert.equal(cmp.pass, true, JSON.stringify(cmp.violations));
++});
++
++// ------------------------------------------------------------------ (هـ) حمام الجناح
++test('02c الحزمة: عمق الحمام تفضيل بحث لا يكفي وحده، وخارجه قد يصح وظيفيًا', () => {
++  assert.deepEqual([BATH_DEPTH_PREFERENCES.deep.min, BATH_DEPTH_PREFERENCES.deep.max, BATH_DEPTH_PREFERENCES.side.min, BATH_DEPTH_PREFERENCES.side.max], [1.95, 2.9, 1.5, 2.4]);
++  const a = evaluateBath({ type: 'deep', depth: 2.2 }); assert.equal(a.preferred, true); assert.equal(a.preliminaryAccept, false);
++  const b = evaluateBath({ type: 'side', depth: 2.5, fixturesFit: true, doorClearance: true, ventilation: true }); assert.equal(b.preferred, false); assert.equal(b.preliminaryAccept, true);
++});
++test('02c: حمامات الأجنحة في C6 بفاحصات المشروع — الأجهزة وفتح الباب والعرض الصافي، والسباكة «لم يُتحقق»، وما لم يتسع ملاحظة صريحة', { timeout: 900000 }, () => {
++  const d = shown(genCase('main', 'C6').o)[0], baths = evaluateSuiteBaths(d.doc);
++  assert.ok(baths.length >= 2);
++  for (const b of baths) { assert.equal(b.plumbing, 'unverified'); assert.ok(['window', 'mechanical'].includes(b.ventilation)); assert.equal(typeof b.doorClearance, 'boolean'); }
++  for (const b of baths.filter(x => !x.preliminaryAccept)) assert.ok((d.presentation.notes_ar || []).some(t => t.includes(b.name)), b.name);
++});
++
++// ------------------------------------------------------------------ (و) أدلة الحجب والحالات الثلاث
++test('02c الحزمة: لا محجوب بلا دليل، ولا رقم مختلق، والتصنيف والرسالة بلا مصطلحات بحث', () => {
++  assert.throws(() => assertBlocked({ status: 'blocked', rejections: [] }));
++  const r = rejection({ candidateId: 'X', stage: 'review', rule: 'GATE:PARKING', source: 'regulation', reason: 'x', measured: 1, limit: 2, unit: 'موقف' });
++  assert.equal(assertBlocked({ status: 'blocked', rejections: [r] }), true);
++  assert.throws(() => rejection({ candidateId: 'a', stage: 'review', rule: 'r', source: 's', reason: 'x', measured: NaN }));
++  assert.equal(classifyRun({ designs: [] }).status, 'SEARCH_INCOMPLETE'); assert.equal(classifyRun({ designs: [] }).outcome, 'NO_VALID_ALTERNATIVE');
++  assert.equal(classifyRun({ designs: [{ presentation: { status: 'hidden', hiddenReasons: [r] } }] }).outcome, 'ALTERNATIVE_HIDDEN');
++  assert.equal(classifyRun({ designs: [{ presentation: { status: 'ready' } }], rejected: [{}, {}] }).candidatesRejected, 2);
++  assert.equal(classifyRun({ failure: { status: 'PROVEN_INFEASIBLE' } }).status, 'PROVEN_INFEASIBLE');
++  const s = clientNotice(classifyRun({}), { requested: 3, shown: 1 }); assert.match(s, /1 من 3/); assert.doesNotMatch(s, /شبكة|القيود الصلبة/); assert.match(s, /لا يثبت/);
++  assert.deepEqual(gateEvidence({ id: 'GUEST_ROUTE', value: { routes: [] }, reasons_ar: ['س'] }).measured, null);
++});
++test('02c H2: البديل المحجوب يحمل سبب بوابة المواقف بالمقيس والحد من الفاحص الحقيقي (المرسوم مقابل المطلوب نظاميًا)، والنتيجة «بديل محجوب» لا نجاح', { timeout: 900000 }, () => {
++  const { o } = genCase('heldout', 'H2');
++  assert.ok(o, 'بديل مكتمل'); const hid = o.designs.filter(d => d.presentation?.status === 'hidden');
++  assert.ok(hid.length >= 1 && !shown(o).length);
++  for (const d of hid) assertBlocked(d);
++  const pk = hid.flatMap(d => d.presentation.hiddenReasons).find(h => h.rule === 'GATE:PARKING'); assert.ok(pk);
++  const g = hid[0].review.gates.find(x => x.id === 'PARKING');
++  assert.equal(pk.measured, g.value.bays); assert.equal(pk.limit, g.value.required); assert.equal(pk.unit, 'موقف'); assert.ok(pk.measured < pk.limit);
++  assert.equal(o.result.status, 'SEARCH_INCOMPLETE'); assert.equal(o.result.outcome, 'ALTERNATIVE_HIDDEN'); assert.equal(o.result.shownCount, 0);
++  for (const r of o.rejected) assert.ok(r.rejections?.length > 0, 'سبب رفض المرشح مسجل');
++  const n = shortfallNotice({ requested: 4, shown: 0, shortfall_ar: o.shortfall_ar, hidden: hid.map(d => ({ reasons_ar: d.presentation.hidden_ar })) });
++  assert.doesNotMatch(n.lines_ar.join(' '), /عُرض 1 من 4/); assert.match(n.lines_ar.join(' '), /لا يثبت أن طلبك مستحيل/);
++  assert.deepEqual(internalLeaks(JSON.stringify(n)), []);
++});
++test('02c: كل محجوب في كل الحالات المولدة هنا يحمل الحقول الموحدة، والمقيس رقم أو null مع سبب صريح', { timeout: 900000 }, () => {
++  for (const { o } of memo.values()) for (const d of o?.designs || []) {
++    if (d.presentation?.status !== 'hidden') continue;
++    assertBlocked(d);
++    for (const h of d.presentation.hiddenReasons) { assert.ok(h.measured === null || Number.isFinite(h.measured)); if (h.measured === null) assert.ok(h.measure_ar && h.measure_ar.length > 5, h.rule); }
++  }
++});
++
++// ------------------------------------------------------------------ (ز) 01b: المقلط والعقد الواحد والحالات الثلاث في H3
++test('01b: «مجلس رجال بمقلط» مفهوم في المحلل (لا unclear) وظيفة طعام للضيوف مرتبطة بالمجلس بلا باب مفروض؛ «قريب» ليس بابًا؛ والباب من نص صريح', () => {
++  const a = extractRequirements('5 غرف نوم، مجلس رجال بمقلط، مجلس نساء');
++  assert.deepEqual(a.unclear, []); assert.ok(a.understood.some(t => /مقلط/.test(t)));
++  const g = a.relations.find(x => x.kind === RELATIONS.GUEST_ACCESS); assert.equal(g.directDoor, 'unspecified'); assert.equal(g.separateRoom, 'unspecified'); assert.equal(g.source, 'client'); assert.equal(g.quote, 'مقلط');
++  assert.equal(briefGuestDining(a.brief), true); assert.equal(briefMajlisDoor(a.brief), false);
++  assert.equal(clientAsks({ text: a.text, brief: a.brief }).MAJLIS_DINING, false); assert.equal(clientAsks({ text: a.text, brief: a.brief }).SERVE_ROUTE, false);
++  const n = extractRequirements('مجلس رجال، طعام قريب من المجلس'); assert.equal(briefMajlisDoor(n.brief), false); assert.equal(briefGuestDining(n.brief), false);
++  const dd = extractRequirements('مجلس، المجلس يفتح على الطعام'); assert.equal(briefMajlisDoor(dd.brief), true); assert.equal(clientAsks({ text: dd.text, brief: dd.brief }).MAJLIS_DINING, true);
++});
++test('01b الحزمة: العقد الواحد للمولّد والمراجع — الكائن نفسه، والقيود المهيكلة محفوظة، ومستدعٍ قديم بلا عقد يأخذ عقدًا واحدًا لكل طلب', () => {
++  const r = extractRequirements('مجلس رجال بمقلط، 3 غرف'); r.counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 };
++  const P = programV2(r.counts, r), rv = sharedReviewRequest(r, {}, r.counts);
++  assert.equal(assertSharedBrief(P.brief, rv.brief), true); assert.equal(canonicalBrief(r), P.brief);
++  assert.throws(() => assertSharedBrief(P.brief, { ...P.brief }));
++  const legacy = { text: 'مجلس رجال بمقلط', rules: [] }; assert.equal(briefOf(legacy), briefOf(legacy));
++  assert.ok(Object.isFrozen(P.brief.relations[0]));
++});
++test('01b H3: بلا مخطط صالح — البديل المكتمل الذي يخالف شرطًا أساسيًا محجوب بأسبابه (لا يُعرض صالحًا)، والنتيجة «بديل محجوب» لا «مستحيل»، ونص العميل صادق بلا مصطلحات', { timeout: 900000 }, () => {
++  const { o, e } = genCase('heldout', 'H3');
++  const designs = o?.designs || [];
++  assert.equal(shown(o).length, 0, 'لا بديل صالح معروض');
++  const result = o ? o.result : e.result;
++  assert.notEqual(result.status, 'PROVEN_INFEASIBLE'); assert.equal(result.status, 'SEARCH_INCOMPLETE');
++  assert.ok(['ALTERNATIVE_HIDDEN', 'NO_VALID_ALTERNATIVE'].includes(result.outcome));
++  for (const d of designs) { assertBlocked(d); assert.ok(d.presentation.hiddenReasons.some(h => ['GUEST_DINING', 'MAJLIS_ISOLATED'].includes(h.rule) || /^GATE:|^R\d/.test(h.rule))); }
++  const n = shortfallNotice(o ? { requested: 4, shown: 0, shortfall_ar: o.shortfall_ar, hidden: designs.map(d => ({ reasons_ar: d.presentation.hidden_ar })) } : { requested: 4, shown: 0, report_ar: e.report_ar });
++  const txt = n.lines_ar.join(' '); assert.match(txt, /لا يثبت أن طلبك مستحيل|لا يعني/); for (const l of n.lines_ar) if (/مستحيل/.test(l)) assert.match(l, /لا يثبت|لا يعني/, l);
++  assert.deepEqual(internalLeaks(JSON.stringify(n)), []); assert.deepEqual(lintClientText(txt), []);
++});
