@@ -22,6 +22,7 @@ import { verifyCertificate } from './certificates.mjs';
 import { analyzeFeasibility } from './feasibility.mjs';
 import { explainFailure } from './infeasibility-report.mjs';
 import { toClientAr } from './client-language.mjs';
+import { candidateRejections } from './review-evidence.mjs';
 import { diversifyTopologies, layoutFingerprint } from './diversity-r21.mjs';
 
 export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
@@ -646,7 +647,10 @@ function attach(out, feas, log, args = {}) {
   for (const d of out.designs || []) { if (d.summary) d.summary = toClientAr(d.summary); if (Array.isArray(d.notes)) d.notes = d.notes.map(toClientAr).filter(Boolean); }
   if (out.shortfall_ar) out.shortfall_client_ar = toClientAr(out.shortfall_ar);
   const requested = args.keep || 4, warnings = [...(feas?.warnings || []).map(w => ({ id: w.id, ar: toClientAr(w.ar), items: w.items || null })), ...(out.timedOut ? [{ id: 'TIME_LIMIT', ar: 'انتهى وقت البحث قبل أن يُكمل كل التنظيمات؛ قد توجد تصاميم أخرى.' }] : [])];
-  out.result = { status: 'SOLVED', requestedCount: requested, shownCount: (out.designs || []).length, warnings };
+  // (02c/01b) «SOLVED» فقط ببديل صالح معروض؛ بدائل مكتملة كلها محجوبة = «بحث غير مكتمل» (ONLY_HIDDEN_ALTERNATIVES) لا نجاح — والحالات الثلاث في outcome
+  const run = out.run || null, ok = !run || run.status === 'SOLVED';
+  out.result = { status: ok ? 'SOLVED' : run.status, ...(ok ? {} : { reason: run.reason, diagnosticId: diagId(args, 'HIDDEN'), retryable: run.reason === 'TIME_LIMIT' }), outcome: run?.outcome || 'VALID_ALTERNATIVES',
+    requestedCount: requested, shownCount: (out.designs || []).filter(d => d.presentation?.status !== 'hidden').length, candidatesRejected: run?.candidatesRejected ?? null, hiddenAlternatives: run?.hiddenAlternatives?.length ?? 0, warnings };
   return out;
 }
 // ---------------------------------------------------------------------------------------------- (الجولة 21) عقد نتائج التوليد
@@ -689,6 +693,8 @@ function counterfactual(gen, args) {
 function fail(e, feas, log, args, gen, two) {
   e.feasibility = feas; e.search = log;
   e.result = classifyFailure(e, feas, args);
+  e.result.outcome = 'NO_VALID_ALTERNATIVE'; e.result.candidatesRejected = (e.rejected || []).length; // (02c/01b) الحالة الثالثة: لا بديل مكتمل
+  for (const r of e.rejected || []) if (!r.rejections) r.rejections = candidateRejections(r);
   const cf = !args._cf && e.result.status === 'SEARCH_INCOMPLETE' && e.result.reason === 'SEARCH_EXHAUSTED_WITHOUT_PROOF' && !globalThis.process?.env?.R14_OFF?.includes('r21cf') ? counterfactual(gen, args) : [];
   e.counterfactual = cf;
   e.report = explainFailure({ error: e, feasibility: feas, counterfactual: cf, twoFloors: two, land: args.land, status: e.result });
