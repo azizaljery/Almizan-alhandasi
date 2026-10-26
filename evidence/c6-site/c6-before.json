@@ -1,0 +1,514 @@
+{
+ "stage": "c6-before",
+ "case": "C6",
+ "root": "/home/claude/wt-preview/",
+ "designs": [
+  {
+   "file": "alt-1.json",
+   "pat": "sidecourt:sc0",
+   "status": "needs-edits",
+   "dims": [
+    {
+     "id": "D-majlis",
+     "ok": true,
+     "actual": {
+      "s": 5.01,
+      "l": 6
+     },
+     "want": {
+      "s": 5,
+      "l": 6
+     },
+     "tol": 0.05
+    },
+    {
+     "id": "D-kitchen",
+     "ok": true,
+     "actual": {
+      "s": 4,
+      "l": 5.01
+     },
+     "want": {
+      "s": 4,
+      "l": 5
+     },
+     "tol": 0.05
+    }
+   ],
+   "privacy": {
+    "exposure": {
+     "withScreen": [
+      {
+       "opening": "o20",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 59,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o21",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 8,
+       "samples": 720,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o22",
+       "room": "الصالة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 62,
+       "samples": 864,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o23",
+       "room": "ممر الغرف",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 14,
+       "samples": 216,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o24",
+       "room": "ممر الغرف",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 216,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o25",
+       "room": "المجلس",
+       "sill": 0.8,
+       "head": 2.3,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o28",
+       "room": "صالة الطعام والمقلط",
+       "sill": 0.8,
+       "head": 2.3,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o29",
+       "room": "المطبخ",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 864,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o30",
+       "room": "المطبخ",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o31",
+       "room": "غرفة النوم الرئيسية",
+       "sill": 0.8,
+       "head": 2.3,
+       "exposedLines": 0,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o32",
+       "room": "غرفة نوم 3",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 3,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o35",
+       "room": "غرفة نوم 2",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o36",
+       "room": "غرفة نوم 2",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 0,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      }
+     ],
+     "withoutScreen": [
+      {
+       "opening": "o20",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 59,
+       "samples": 648,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o21",
+       "room": "مدخل العائلة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 8,
+       "samples": 720,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o22",
+       "room": "الصالة",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 62,
+       "samples": 864,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o23",
+       "room": "ممر الغرف",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 14,
+       "samples": 216,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      },
+      {
+       "opening": "o32",
+       "room": "غرفة نوم 3",
+       "sill": 1,
+       "head": 2.2,
+       "exposedLines": 3,
+       "samples": 1080,
+       "eyes": {
+        "outside": [
+         1.2,
+         1.6
+        ],
+        "inside": [
+         1.1,
+         1.6
+        ]
+       }
+      }
+     ]
+    },
+    "r16": [
+     {
+      "id": "WINDOW_PARKING",
+      "pass": false,
+      "applicable": true,
+      "reasons_ar": [
+       "نافذة «الصالة» على الجهة e تطل على «موقف سيارة» من 1.64 م بلا حجب"
+      ],
+      "value": {
+       "windows": [
+        {
+         "room": "الصالة",
+         "opening": "o22",
+         "bay": "موقف سيارة",
+         "dist": 1.64,
+         "screened": null
+        }
+       ]
+      }
+     },
+     {
+      "id": "HALL_STREET",
+      "pass": true,
+      "applicable": true,
+      "reasons_ar": [],
+      "value": {
+       "windows": []
+      }
+     },
+     {
+      "id": "BATH_NO_WINDOW",
+      "pass": false,
+      "applicable": true,
+      "reasons_ar": [
+       "2 من 5: دورة مياه، حمام الرئيسية — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+      ],
+      "value": {
+       "baths": [
+        "دورة مياه",
+        "حمام الرئيسية"
+       ]
+      }
+     }
+    ]
+   },
+   "acceptance": {
+    "privacy": {
+     "pass": 10,
+     "fail": 1,
+     "failed": [
+      "privacy:WINDOW_PARKING — نافذة «الصالة» على الجهة e تطل على «موقف سيارة» من 1.64 م بلا حجب"
+     ]
+    },
+    "note": {
+     "pass": 0,
+     "fail": 1,
+     "failed": [
+      "note:ENTRANCES_TOGETHER — باب الرجال وباب العائلة على الواجهة نفسها بينهما 1.67 م"
+     ]
+    },
+    "ventilation": {
+     "pass": 7,
+     "fail": 1,
+     "failed": [
+      "ventilation:BATH_NO_WINDOW — 2 من 5: دورة مياه، حمام الرئيسية — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+     ]
+    },
+    "daylight": {
+     "pass": 8,
+     "fail": 0,
+     "failed": []
+    },
+    "circulation": {
+     "pass": 4,
+     "fail": 0,
+     "failed": []
+    }
+   },
+   "parking": {
+    "bays": 2,
+    "polygons": [
+     [
+      {
+       "x": 17.15,
+       "y": 0.1
+      },
+      {
+       "x": 19.85,
+       "y": 0.1
+      },
+      {
+       "x": 19.85,
+       "y": 5.6
+      },
+      {
+       "x": 17.15,
+       "y": 5.6
+      }
+     ],
+     [
+      {
+       "x": 14.45,
+       "y": 0.1
+      },
+      {
+       "x": 17.15,
+       "y": 0.1
+      },
+      {
+       "x": 17.15,
+       "y": 5.6
+      },
+      {
+       "x": 14.45,
+       "y": 5.6
+      }
+     ]
+    ]
+   },
+   "fences": [],
+   "site": {
+    "fences": [],
+    "regulatory": [],
+    "pendingRegulatory": false,
+    "geometryOk": true,
+    "failures_ar": [],
+    "defaults": {
+     "bayClear": 0.5,
+     "entryHalfWidth": 0.9,
+     "doorClear": 1,
+     "minWindowOffset": 0.6,
+     "source": "قيم تصميمية افتراضية للميزان — غير نظامية وغير متحققة من اشتراطات البلدية"
+    }
+   },
+   "edits_ar": [
+    "نافذة غرفة خاصة تطل على ساحة المواقف أو البوابة (أقل من 3 م) بلا حجب: نافذة «الصالة» على الجهة e تطل على «موقف سيارة» من 1.64 م بلا حجب (عيب معماري — قيمة تصميمية افتراضية للميزان)"
+   ],
+   "notes_ar": [
+    "باب خدمة (مقلط) بين مجلس الرجال والطعام في الدور الواحد، والطعام يُغلق على العائلة بباب: «صالة الطعام والمقلط» مفتوح على العائلة بفتحة بلا باب وهو على المجلس (تفضيل سعودي افتراضي للميزان (قابل للتغيير))",
+    "مدخل الرجال ومدخل العائلة متجاوران على الواجهة نفسها: باب الرجال وباب العائلة على الواجهة نفسها بينهما 1.67 م",
+    "حمامات بلا نافذة خارجية (تحتاج تهوية ميكانيكية): 2 من 5: دورة مياه، حمام الرئيسية — تهوية ميكانيكية (مروحة شفط ومجرى إلى السطح)"
+   ],
+   "hidden_ar": []
+  }
+ ]
+}

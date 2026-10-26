@@ -104,7 +104,7 @@ export function presentationStatus(design, request = {}) {
   // (02c، قرار المالك 2026-10-26) ساتر خارجي (عنصر موقع) لا يثبت نظاميًا: لا يُعرض معتمدًا؛ وسم ظاهر للعميل «تحتاج تحققًا نظاميًا» وبند مراجعة متخصصة،
   // وتبقى الحالة كما حكمت الفاحصات الهندسية (الوسم لا يخفض حالة الفحص الهندسي ولا يرفعها إلى اعتماد).
   let site = null; try { site = R14_OFF.has('r21site') ? null : siteElementReport(doc); } catch { site = null; }
-  const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join('، ')}) ${REG_VERIFY_AR}: ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
+  const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join("، ")}): ${REG_VERIFY_AR} — ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
   if (site && !site.geometryOk) for (const m of site.failures_ar) edits.push(toClientAr(m));
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
   const specialist = [...items.filter(x => x.specialist).map(x => x.text_ar), ...regVerify];

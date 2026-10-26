@@ -25,7 +25,7 @@ if (out) {
     const name = d.presentation?.status === 'hidden' ? `hidden-${i + 1}.json` : `alt-${i + 1}.json`;
     writeFileSync(dir + name, serialize(d.doc));
     let priv = null; try { priv = R16 ? R16.measureR16(d.doc, { text: C.text, counts: req.counts, rules: req.rules || [] }).filter(g => /WINDOW|HALL_STREET/.test(g.id)).map(g => ({ id: g.id, pass: g.pass, applicable: g.applicable, value: g.value, reasons_ar: g.reasons_ar })) : null; } catch { priv = null; }
-    row.designs.push({ file: name, pat: d.pat, status: d.presentation?.status, hidden_ar: d.presentation?.hidden_ar, hiddenReasons: d.presentation?.hiddenReasons, edits_ar: d.presentation?.edits_ar, notes_ar: d.presentation?.notes_ar,
+    row.designs.push({ file: name, pat: d.pat, status: d.presentation?.status, label_ar: d.presentation?.label_ar, regulatory_ar: d.presentation?.regulatory_ar, hidden_ar: d.presentation?.hidden_ar, hiddenReasons: d.presentation?.hiddenReasons, edits_ar: d.presentation?.edits_ar, notes_ar: d.presentation?.notes_ar,
       dims: (d.ledger || []).filter(x => x.kind === 'dims'), privacy: priv, acceptance: d.acceptance || null, rejections: d.rejections || null, notes: (d.notes || []).filter(n => /نافذة|جلسة|الخصوصية|حاجب/.test(n)) });
   });
   row.shortfall_ar = out.shortfall_ar || null; row.result = out.result || null; row.outcome = out.outcome || null;
