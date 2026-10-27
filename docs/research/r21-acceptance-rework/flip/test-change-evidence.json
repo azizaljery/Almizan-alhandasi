@@ -1,0 +1,378 @@
+{
+ "r15": {
+  "withShowerGate": {
+   "status": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "WINDOW_PARKING",
+    "FAMILY_WC"
+   ]
+  },
+  "skipShower": {
+   "status": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "WINDOW_PARKING",
+    "FAMILY_WC"
+   ]
+  },
+  "shower": [
+   {
+    "room": "حمام غرفة 2",
+    "ok": false,
+    "reasons": [
+     "لا دش ولا حوض استحمام في الحمام"
+    ],
+    "shower": [],
+    "widthM": 1.98,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "mechanical (مجرى الشفط غير ممثل: غير متحقق)",
+    "plumbing": "unverified"
+   },
+   {
+    "room": "حمام غرفة 3",
+    "ok": false,
+    "reasons": [
+     "لا دش ولا حوض استحمام في الحمام"
+    ],
+    "shower": [],
+    "widthM": 1.98,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "mechanical (مجرى الشفط غير ممثل: غير متحقق)",
+    "plumbing": "unverified"
+   },
+   {
+    "room": "حمام الرئيسية",
+    "ok": false,
+    "reasons": [
+     "لا دش ولا حوض استحمام في الحمام"
+    ],
+    "shower": [],
+    "widthM": 1.82,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "window",
+    "plumbing": "unverified"
+   }
+  ]
+ },
+ "r19_c7": {
+  "status": "needs-edits",
+  "mandatory": [],
+  "major": [
+   "WET_STACK",
+   "MASTER_STAIR_DOOR"
+  ],
+  "shower": [
+   {
+    "room": "حمام غرفة كبار السن",
+    "ok": false,
+    "reasons": [
+     "الدش يخرج عن الوجوه الداخلية للغرفة",
+     "لا مسقط وصول حر 0.7 م أمام الدش داخل الغرفة"
+    ],
+    "shower": [
+     "f21"
+    ],
+    "widthM": 1.58,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "window",
+    "plumbing": "unverified"
+   },
+   {
+    "room": "حمام غرفة 3",
+    "ok": false,
+    "reasons": [
+     "لا دش ولا حوض استحمام في الحمام"
+    ],
+    "shower": [],
+    "widthM": 1.51,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "window",
+    "plumbing": "unverified"
+   },
+   {
+    "room": "حمام غرفة 2",
+    "ok": false,
+    "reasons": [
+     "الدش يخرج عن الوجوه الداخلية للغرفة",
+     "لا مسقط وصول حر 0.7 م أمام الدش داخل الغرفة"
+    ],
+    "shower": [
+     "f36"
+    ],
+    "widthM": 1.58,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "window",
+    "plumbing": "unverified"
+   },
+   {
+    "room": "حمام الرئيسية",
+    "ok": false,
+    "reasons": [
+     "الدش يخرج عن الوجوه الداخلية للغرفة",
+     "لا مسقط وصول حر 0.7 م أمام الدش داخل الغرفة"
+    ],
+    "shower": [
+     "f51"
+    ],
+    "widthM": 2.18,
+    "minWidthM": 1.4,
+    "doorClear": true,
+    "ventilation": "window",
+    "plumbing": "unverified"
+   }
+  ]
+ },
+ "r19_all": [
+  {
+   "case": "C2",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "FAMILY_WC"
+   ],
+   "showerFails": [
+    "حمام غرفة 3 1.98",
+    "حمام غرفة 4 1.98",
+    "حمام غرفة 5 1.98",
+    "حمام الرئيسية 1.91",
+    "حمام غرفة كبار السن 1.52"
+   ],
+   "planTestsFailing": [
+    "خصوصية «غرفة نوم 3»: درجة عالية: 1 خط رؤية مكشوف من المواقف (أقرب 3.97 م)"
+   ]
+  },
+  {
+   "case": "C3",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [],
+   "showerFails": [
+    "حمام غرفة 3 1.98",
+    "حمام غرفة 2 1.98",
+    "حمام الرئيسية 1.92"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 69 خط رؤية مكشوف من المواقف (أقرب 8.01 م)",
+    "خصوصية «غرفة النوم الرئيسية»: درجة عالية: 96 خط رؤية مكشوف من المواقف (أقرب 9.57 م)"
+   ]
+  },
+  {
+   "case": "C4",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "HALL_LT_MAJLIS"
+   ],
+   "showerFails": [
+    "حمام غرفة 3 1.98",
+    "حمام غرفة 2 1.98",
+    "حمام الرئيسية 1.92"
+   ],
+   "planTestsFailing": []
+  },
+  {
+   "case": "C5",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [],
+   "showerFails": [
+    "حمام الرئيسية 1.91",
+    "حمام غرفة 2 1.98",
+    "حمام غرفة 3 1.98"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 20 خط رؤية مكشوف من المواقف (أقرب 3.42 م)",
+    "خصوصية «غرفة النوم الرئيسية»: درجة عالية: 1 خط رؤية مكشوف من المواقف (أقرب 11.59 م)"
+   ]
+  },
+  {
+   "case": "C5",
+   "n": 2,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [],
+   "showerFails": [
+    "حمام الرئيسية 2.63",
+    "حمام غرفة 2 1.58",
+    "حمام غرفة 3 1.58"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 32 خط رؤية مكشوف من المواقف (أقرب 5.04 م)",
+    "خصوصية «غرفة النوم الرئيسية»: درجة عالية: 108 خط رؤية مكشوف من المواقف (أقرب 13.38 م)"
+   ]
+  },
+  {
+   "case": "C5",
+   "n": 3,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "FAMILY_WC",
+    "HALL_DAYLIGHT"
+   ],
+   "showerFails": [
+    "حمام غرفة 2 1.98",
+    "حمام غرفة 3 1.52"
+   ],
+   "planTestsFailing": []
+  },
+  {
+   "case": "C6",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "HALL_LT_MAJLIS"
+   ],
+   "showerFails": [
+    "حمام الرئيسية 2.28",
+    "حمام غرفة 2 1.58",
+    "حمام غرفة 3 1.58"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 62 خط رؤية مكشوف من المواقف (أقرب 3.07 م)",
+    "خصوصية «غرفة نوم 2»: درجة عالية: 1 خط رؤية مكشوف من المواقف (أقرب 5.12 م)"
+   ]
+  },
+  {
+   "case": "C8",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "FAMILY_WC"
+   ],
+   "showerFails": [
+    "حمام الرئيسية 2.28",
+    "حمام غرفة 3 1.98",
+    "حمام غرفة 4 1.98",
+    "حمام غرفة 2 1.98"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 69 خط رؤية مكشوف من المواقف (أقرب 3.92 م)"
+   ]
+  },
+  {
+   "case": "C8",
+   "n": 3,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [],
+   "showerFails": [
+    "حمام الرئيسية 2.02",
+    "حمام غرفة 4 1.98",
+    "حمام غرفة 2 1.98",
+    "حمام غرفة 3 1.98"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 43 خط رؤية مكشوف من المواقف (أقرب 4.72 م)",
+    "خصوصية «غرفة النوم الرئيسية»: درجة عالية: 121 خط رؤية مكشوف من المواقف (أقرب 14.98 م)"
+   ]
+  },
+  {
+   "case": "C9",
+   "n": 1,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [],
+   "showerFails": [
+    "حمام الرئيسية 2.02",
+    "حمام غرفة 3 1.98",
+    "حمام غرفة 2 1.98"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 6 خط رؤية مكشوف من المواقف (أقرب 4.73 م)",
+    "خصوصية «غرفة النوم الرئيسية»: درجة عالية: 5 خط رؤية مكشوف من المواقف (أقرب 9.36 م)"
+   ]
+  },
+  {
+   "case": "C9",
+   "n": 2,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "FAMILY_WC"
+   ],
+   "showerFails": [
+    "حمام غرفة 3 1.98",
+    "حمام غرفة 2 1.98",
+    "حمام الرئيسية 2.02"
+   ],
+   "planTestsFailing": [
+    "خصوصية «غرفة نوم 3»: درجة عالية: 3 خط رؤية مكشوف من المواقف (أقرب 3.77 م)"
+   ]
+  },
+  {
+   "case": "C9",
+   "n": 3,
+   "saved": "ready",
+   "measured": "needs-edits",
+   "withoutShowerGate": "needs-edits",
+   "mandatory": [],
+   "major": [
+    "FAMILY_WC"
+   ],
+   "showerFails": [
+    "حمام الرئيسية 2.07",
+    "حمام غرفة 2 1.58",
+    "حمام غرفة 3 1.58"
+   ],
+   "planTestsFailing": []
+  },
+  {
+   "case": "C9",
+   "n": 4,
+   "saved": "needs-edits",
+   "measured": "hidden",
+   "withoutShowerGate": "hidden",
+   "mandatory": [
+    "COURT_OVERLOOK"
+   ],
+   "major": [
+    "HALL_SMALL",
+    "HALL_LT_MAJLIS"
+   ],
+   "showerFails": [
+    "حمام الرئيسية 2.08",
+    "حمام غرفة 3 1.58",
+    "حمام غرفة 2 1.58"
+   ],
+   "planTestsFailing": [
+    "خصوصية «الصالة»: درجة عالية: 25 خط رؤية مكشوف من المواقف (أقرب 6.07 م)"
+   ]
+  }
+ ]
+}

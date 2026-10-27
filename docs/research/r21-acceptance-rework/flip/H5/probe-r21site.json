@@ -1,0 +1,28 @@
+{
+ "id": "H5",
+ "text": "دور واحد، 4 غرف نوم، مجلس 5×7، المطبخ 3.5×5، وصالة كبيرة",
+ "land": {
+  "floors": 1,
+  "width": 22,
+  "length": 30,
+  "streets": [
+   "s"
+  ],
+  "entries": [
+   "s"
+  ]
+ },
+ "root": "/home/claude/wt-r21p/",
+ "rows": [
+  {
+   "file": "probe-r21site-1-courtyard:k1.json",
+   "pat": "courtyard:k1",
+   "status": "ready",
+   "edits_ar": [],
+   "hidden_ar": [],
+   "notes_ar": [
+    "«المطبخ» بأبعاد 3.5×5 م (كل ضلع ±0.05 م): المرسوم 3.5×4.95 م — ضمن السماحية المعلنة لا مطابق حرفيًا (أكبر فرق 0.05 م)"
+   ]
+  }
+ ]
+}
