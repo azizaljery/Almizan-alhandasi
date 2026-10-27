@@ -178,7 +178,7 @@ async function understandWithAI(text, accessCode) {
   const map = { bedrooms: 'bedroom', majlis: 'majlis', baths: 'bath', kitchens: 'kitchen', halls: 'living', dining: 'dining' };
   const counts = {}; for (const [k, t] of Object.entries(map)) if (tally[t] !== undefined) counts[k] = tally[t];
   try { if (accessCode) sessionStorage.setItem('mizan.ai.code', accessCode); } catch { /* التخزين غير متاح */ }
-  return { text, counts, requirements: brief.requirements || null, assumptions: [...(brief.requirements ? ['فهمتُ كلامك عبر Claude، وطابقته مع الفهم المحلي.'] : []), ...(brief.assumptions || [])], questions: [...(brief.questions || []), ...(brief.unhandled || [])] };
+  return { text, counts, requirements: brief.requirements || null, assumptions: [brief.requirements ? 'فهمتُ كلامك عبر Claude، وطابقته مع الفهم المحلي.' : 'فهمتُ كلامك عبر Claude (بلا متطلبات منظّمة إضافية).', ...(brief.assumptions || [])], questions: [...(brief.questions || []), ...(brief.unhandled || [])] };
 }
 
 // ------------------------------------------------------------------------------------------------ التوليد والتسليم للمرسم
