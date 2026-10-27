@@ -176,18 +176,18 @@ export class SharaFlow {
   followUp(text) {
     const raw = String(text || '').trim(); if (raw.length < 3) throw Error('اكتب الطلب.');
     const n = normalizeImperatives(raw), req = extractRequirements(n.text, { clauses: false });
-    const before = new Set(B.spaceKeys ? [] : []);
     const res = B.applyExtraction(this.brief, req, n.text, { originalText: raw });
-    this.brief = this.#regulatory(raw) && res.brief; this.brief = this.#regulatory(raw);
-    this.brief = res.brief; this.brief = this.#regulatory(raw);
-    const added = res.added.filter(a => /^(relation|placement|floor|space|feature)/.test(a));
+    this.brief = res.brief;
+    const reg = extractRegulatoryAsks(raw), hasReg = Object.keys(reg).length > 0;
+    if (hasReg) this.brief = this.#regulatory(raw);
+    const added = res.added.filter(a => /^(relation|placement|floor|feature)/.test(a));
     const out = [];
-    if (!added.length && !Object.keys(extractRegulatoryAsks(raw)).length) {
+    if (!added.length && !hasReg) {
       this.brief = { ...this.brief, interaction: { ...this.brief.interaction, unclear: [...new Set([...(this.brief.interaction.unclear || []), raw])] } };
       out.push(msg('لم أفهم هذا الطلب بدقة فلم أغيّر شيئًا في ملفك. أعد كتابته مثل «الماستر بعيدة عن الدرج».', { kind: 'list', items: ['«' + raw + '»'] }));
-    } else out.push(msg('أضفت هذا الطلب إلى ملف احتياجاتك نفسه (نصه الأصلي محفوظ). أكّد درجته لأعتمده:', { kind: 'list', items: res.added.map(refText(this.brief)).filter(Boolean) }), ...this.#next());
-    this.phase = 'ask'; this.reviewed = false;
-    return this.#push(out).concat([]) && { messages: out, added: res.added, imperatives: n.changed, readiness: this.readiness(), engineInput: this.engineInput(), regeneration: 'غير متحقق: إعادة التوليد بعد التعديل خارج حدود هذه الوحدة (الملف والاختبار عند حد المحوّل فقط).' };
+    } else out.push(msg('أضفت هذا الطلب إلى ملف احتياجاتك نفسه (نصه الأصلي محفوظ). أكّد درجته لأعتمده:', { kind: 'list', items: added.map(refText(this.brief)).filter(Boolean) }), ...this.#next());
+    this.phase = 'ask'; this.reviewed = false; this.#push(out);
+    return { messages: out, added, imperatives: n.changed, readiness: this.readiness(), engineInput: this.engineInput(), regeneration: 'غير متحقق: إعادة التوليد بعد التعديل خارج حدود هذه الوحدة (الملف والمحوّل فقط).' };
   }
 
   // ---------------------------------------------------------------------------------------- الأعداد
