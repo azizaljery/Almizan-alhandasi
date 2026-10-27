@@ -1,0 +1,60 @@
+name: Deploy Staging Preview
+
+# نشر staging مستقل للميزان الهندسي (وركر باسم مختلف + قاعدة D1 مختلفة + أسرار مختلفة).
+# يعمل فقط عند الدفع إلى الفرع staging-preview. لا علاقة له بالفرع deploy ولا ببيئة production،
+# ولا يستعمل أسماء أسرار الإنتاج (CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID) إطلاقًا، فلا رجوع صامت إليها.
+on:
+  push:
+    branches: [staging-preview]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Guard — never touch production
+        run: |
+          set -e
+          test -f wrangler.staging.toml
+          grep -q '^name = "almizan-handasi-staging"' wrangler.staging.toml
+          ! grep -q '993f60e1-c187-42ca-bf4c-f0a5a4b9c44f' wrangler.staging.toml
+          ! grep -qE '^\s*(routes?|route)\s*=' wrangler.staging.toml
+          ! grep -q 'TRUST_SITES_HEADER' wrangler.staging.toml
+          test -n "$STAGING_CF_API_TOKEN"
+        env:
+          STAGING_CF_API_TOKEN: ${{ secrets.STAGING_CF_API_TOKEN }}
+      - run: npm ci
+      - name: Build validation
+        run: node scripts/build.mjs
+      - name: Deploy staging worker
+        # معرّف الحساب اختياري: التوكن مقيّد بحساب واحد (ويملك Memberships:Read) فيستنتجه wrangler إن لم يُضبط STAGING_CF_ACCOUNT_ID
+        run: |
+          if [ -n "$STAGING_CF_ACCOUNT_ID" ]; then export CLOUDFLARE_ACCOUNT_ID="$STAGING_CF_ACCOUNT_ID"; fi
+          npx --yes wrangler@4 deploy -c wrangler.staging.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.STAGING_CF_API_TOKEN }}
+          STAGING_CF_ACCOUNT_ID: ${{ secrets.STAGING_CF_ACCOUNT_ID }}
+      - name: Set staging secrets (only if provided; new values, never production's)
+        # بدون هذين السرين يبقى المساعد الذكي معطّلًا في staging (الفهم المحلي يعمل)، وهو مقبول للتجربة
+        run: |
+          if [ -n "$STAGING_CF_ACCOUNT_ID" ]; then export CLOUDFLARE_ACCOUNT_ID="$STAGING_CF_ACCOUNT_ID"; fi
+          if [ -n "$STAGING_MIZAN_ACCESS_CODE" ]; then printf '%s' "$STAGING_MIZAN_ACCESS_CODE" | npx --yes wrangler@4 secret put MIZAN_ACCESS_CODE -c wrangler.staging.toml; fi
+          if [ -n "$STAGING_ANTHROPIC_API_KEY" ]; then printf '%s' "$STAGING_ANTHROPIC_API_KEY" | npx --yes wrangler@4 secret put ANTHROPIC_API_KEY -c wrangler.staging.toml; fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.STAGING_CF_API_TOKEN }}
+          STAGING_CF_ACCOUNT_ID: ${{ secrets.STAGING_CF_ACCOUNT_ID }}
+          STAGING_MIZAN_ACCESS_CODE: ${{ secrets.STAGING_MIZAN_ACCESS_CODE }}
+          STAGING_ANTHROPIC_API_KEY: ${{ secrets.STAGING_ANTHROPIC_API_KEY }}
