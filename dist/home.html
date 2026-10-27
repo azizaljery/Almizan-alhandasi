@@ -58,11 +58,14 @@
 
   <section id="stageShara" class="stage panel-stage" hidden aria-labelledby="sharaTitle">
     <header class="bar"><span class="mini"><svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M60 5 76 19H44z"/><path d="M60 19v59"/><path d="M14 33h92"/><path d="M14 33 5 62M14 33l9 29M106 33l-9 29M106 33l9 29"/><path d="M3 62q11 13 22 0M95 62q11 13 22 0"/><path d="M40 80h40"/></svg>الميزان الهندسي</span><span class="steps" aria-label="الخطوة 2 من 3">٢ / ٣</span></header>
+    <aside id="landBar" class="landbar" aria-label="أرضك المختارة"></aside>
     <div class="card chat-card">
       <h2 id="sharaTitle" class="sr">محادثة مع شرعاء</h2>
+      <div id="pathSwitch" class="pathswitch" role="group" aria-label="مسار الحوار"></div>
       <div id="chat" class="chat" role="log" aria-live="polite" aria-relevant="additions"></div>
       <p class="error" id="chatError" role="alert" hidden></p>
     </div>
+    <aside id="liveProfile" class="profile" aria-label="ملف احتياجات المنزل" aria-live="polite"></aside>
   </section>
 
   <section id="stageBuild" class="stage panel-stage" hidden aria-labelledby="buildTitle">

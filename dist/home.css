@@ -93,3 +93,22 @@ legend{padding:0;font-weight:600;margin-bottom:4px}
 @media(max-width:560px){.two{grid-template-columns:1fr}.pick,.counts,.free{padding-inline-start:0}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.scene canvas{opacity:1}}
 .bubble ul.understood{margin:6px 0 0;padding-inline-start:20px;line-height:1.8}.bubble ul.understood li::marker{color:var(--mz-brass,#b08d4f)}
+
+/* ---- شرعاء V2: شريط الأرض والملف الحي (RTL؛ اللون الداكن هو الأساس في هذه الصفحة) */
+.landbar{width:100%;max-width:760px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-bottom:14px}
+.lb-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.lb-head strong{color:var(--gold)}.lb-sub{color:var(--muted);font-size:.85rem;flex:1}
+.lb-rows{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0 0;font-size:.9rem}
+.lb-rows dt{color:var(--muted)}.lb-rows dd{margin:0}
+.cta.small{padding:6px 16px;font-size:.85rem}
+.pathswitch{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.profile{width:100%;max-width:760px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;margin-top:14px}
+.profile h3{margin:0 0 4px;color:var(--gold)}.profile h4{margin:10px 0 4px;font-size:.95rem}
+.profile ul{margin:0;padding-inline-start:20px}.profile li{margin:2px 0;font-size:.9rem}
+.prof-sec.conf h4{color:var(--ok)}.prof-sec.wait h4{color:var(--gold)}.prof-sec.uns h4,.prof-sec.bad h4{color:var(--bad)}
+.ready{font-weight:600}.ready-READY_TO_GENERATE{color:var(--ok)}.ready-CONFLICT_REQUIRES_DECISION{color:var(--bad)}.ready-NEEDS_CLARIFICATION,.ready-LIMITED_SUPPORT{color:var(--gold)}
+.confirm .citem,.review,.report .alt{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+.review h4{margin:10px 0 2px;color:var(--gold)}
+.report .alt p{margin:2px 0}
+.out-PROVEN_INFEASIBLE,.out-REGULATORY_VIOLATION{color:var(--bad)}.out-SEARCH_INCOMPLETE,.out-ALL_HIDDEN{color:var(--gold)}
+@media (prefers-color-scheme:light){:root{color-scheme:dark}}

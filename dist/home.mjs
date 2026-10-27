@@ -2,9 +2,12 @@
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { createSession, saveSession } from './design-session.mjs';
-import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { normalizeLand, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
 import { requestBrief, assistantOpen } from './assistant.mjs';
+import { SharaFlow, landBar, liveProfile, READINESS_AR } from './sharaa/flow.mjs';
+import { classifyOutcome, buildAlternatives, retryWith, OUTCOME } from './sharaa/alternatives.mjs';
+import { supportLabel } from './sharaa/ui-text.mjs';
 
 const $ = id => document.getElementById(id);
 const home = $('home');
@@ -102,7 +105,8 @@ function render(messages) {
       const wrap = document.createElement('div'); wrap.className = 'pick';
       for (const o of m.options) {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = o.label;
-        b.addEventListener('click', () => { clearControls(); bubble(o.label, 'me'); step(m.id, o.id); });
+        b.addEventListener('click', () => { clearControls(); bubble(o.label, 'me'); const [i, v] = payload(m, o.id, o); step(i, v); refreshPanels(); });
+        if (o.hint) b.title = o.hint;
         wrap.append(b);
       }
       control(wrap);
@@ -116,7 +120,7 @@ function render(messages) {
       const go = document.createElement('button'); go.type = 'button'; go.className = 'cta'; go.textContent = 'متابعة';
       go.addEventListener('click', () => {
         const labels = m.options.filter(o => chosen.has(o.id)).map(o => o.label);
-        clearControls(); bubble(labels.length ? labels.join('، ') : 'لا شيء محدد', 'me'); step(m.id, [...chosen]);
+        clearControls(); bubble(labels.length ? labels.join('، ') : 'لا شيء محدد', 'me'); const [i, v] = payload(m, [...chosen]); step(i, v); refreshPanels();
       });
       wrap.append(go); control(wrap);
     } else if (m.kind === 'counts') {
@@ -132,9 +136,18 @@ function render(messages) {
         e.preventDefault();
         const values = Object.fromEntries(m.fields.map(f => [f.id, form.elements[f.id].valueAsNumber]));
         const summary = m.fields.map(f => `${f.label}: ${values[f.id]}`).join('، ');
-        try { const next = session.answer(m.id, values); clearControls(); bubble(summary, 'me'); render(next); } catch (err) { fail(err); }
+        try { const next = session.answer(m.id, values); clearControls(); bubble(summary, 'me'); render(next); refreshPanels(); } catch (err) { fail(err); }
       });
       control(form);
+    } else if (m.kind === 'text' && m.key) {
+      const form = document.createElement('form'); form.className = 'free'; form.innerHTML = '<input type="text" aria-label="إجابتك" maxlength="300">';
+      const go = el('button', 'cta', 'متابعة'); go.type = 'submit'; form.append(go);
+      form.addEventListener('submit', e => { e.preventDefault(); const t = form.querySelector('input').value; clearControls(); bubble(t || 'تخطّي', 'me'); step('ask', { key: m.key, value: t }); refreshPanels(); });
+      control(form);
+    } else if (m.kind === 'household') { renderHousehold(m);
+    } else if (m.kind === 'budget') { renderBudget(m);
+    } else if (m.kind === 'confirm_items') { renderConfirmItems(m);
+    } else if (m.kind === 'review') { renderReview(m);
     } else if (m.kind === 'text') {
       const form = document.createElement('form'); form.className = 'free';
       form.innerHTML = '<textarea aria-label="حدّثني عن بيتك" placeholder="مثال: ثلاث غرف نوم ومجلس ومطبخ، وأريد الخصوصية لغرف النوم"></textarea>'
@@ -165,9 +178,76 @@ function render(messages) {
     }
   }
 }
+const el0 = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+function payload(m, value, o) {
+  if (m.id === 'conflict') return ['conflict', { conflictId: o.conflictId, optionId: o.id }];
+  if (m.id === 'ask') return ['ask', { key: m.key, value }];
+  if (m.id === 'ready') return [o.id, undefined];
+  return [m.id, value];
+}
 function step(id, value) { try { render(session.answer(id, value)); } catch (err) { fail(err); } }
 function beginChat() {
-  chat.replaceChildren(); session = new SharaSession(); render(session.start());
+  chat.replaceChildren(); session = new SharaFlow({ land: confirmedLand }); render(session.start()); refreshPanels(); buildPathSwitch();
+}
+function buildPathSwitch() {
+  const box = $('pathSwitch'); box.replaceChildren();
+  for (const [id, label] of [['free', 'أشرح فكرتي'], ['guided', 'أسئلة موجهة'], ['decide', 'ساعدني أقرر']]) {
+    const b = el0('button', 'chip', label); b.type = 'button'; b.addEventListener('click', () => { clearControls(); step('mode', id); refreshPanels(); }); box.append(b);
+  }
+}
+// ---- شريط الأرض والملف الحي (من الملف نفسه؛ لا تُسأل الأرض)
+function refreshPanels() {
+  if (!session) return;
+  const lb = landBar(session.brief), box = $('landBar'); box.replaceChildren();
+  const head = el0('div', 'lb-head'); head.append(el0('strong', '', lb.title), el0('span', 'lb-sub', lb.subtitle + ' · المراجعة ' + lb.revision));
+  const edit = el0('button', 'cta ghost small', 'تعديل الأرض'); edit.type = 'button'; edit.addEventListener('click', () => show('Land')); head.append(edit);
+  const dl = el0('dl', 'lb-rows'); for (const r of lb.rows) { dl.append(el0('dt', '', r.k), el0('dd', '', r.v)); }
+  box.append(head, dl);
+  const P = liveProfile(session.brief), R = session.readiness(), pf = $('liveProfile'); pf.replaceChildren();
+  pf.append(el0('h3', '', 'ملف احتياجات المنزل'), el0('p', 'hint', P.note_ar), el0('p', `ready ready-${R.state}`, 'الحالة: ' + READINESS_AR[R.state]));
+  const sec = (title, rows, cls) => { if (!rows.length) return; const d = el0('div', 'prof-sec ' + cls); d.append(el0('h4', '', title)); const ul = el0('ul'); for (const r of rows) { const li = el0('li', '', r.label + (r.priority ? ' — ' + ({ mandatory: 'لازم', preferred: 'تفضيل', flexible: 'قابل للتنازل' })[r.priority] : '') + (r.support && r.support !== 'supported' ? ' · ' + supportLabel(r.support) : '')); li.title = r.source; ul.append(li); } d.append(ul); pf.append(d); };
+  sec('ما أكدته', P.confirmed, 'conf'); sec('ينتظر تأكيدك', P.awaiting, 'wait'); sec('غير مدعوم (مسجّل ولن يُطبَّق)', P.unsupported, 'uns');
+  if (P.conflicts.length) { const d = el0('div', 'prof-sec bad'); d.append(el0('h4', '', 'تعارضات تحتاج قرارك')); const ul = el0('ul'); for (const c of P.conflicts) ul.append(el0('li', '', c.reason)); d.append(ul); pf.append(d); }
+  if (P.missingTopics.length) pf.append(el0('p', 'hint', 'لم نتطرق بعد إلى: ' + P.missingTopics.join('، ')));
+}
+function renderHousehold(m) {
+  const form = el0('form', 'counts'); form.noValidate = true;
+  for (const [id, label, ph] of [['currentMembers', 'عدد أفراد الأسرة الحاليين', ''], ['futureMembers', 'العدد المتوقع مستقبلًا (اختياري)', '']]) { const l = el0('label', '', label); const i = document.createElement('input'); i.type = 'number'; i.min = 1; i.max = 40; i.name = id; l.append(i); form.append(l); }
+  const wrap = el0('div', 'pick'); const chosen = new Set();
+  for (const o of m.options) { const b = el0('button', 'chip', o.label); b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { const on = !chosen.has(o.id); on ? chosen.add(o.id) : chosen.delete(o.id); b.setAttribute('aria-pressed', String(on)); }); wrap.append(b); }
+  const go = el0('button', 'cta', 'متابعة'); go.type = 'submit'; form.append(wrap, go);
+  form.addEventListener('submit', e => { e.preventDefault(); const v = { currentMembers: form.elements.currentMembers.valueAsNumber, futureMembers: form.elements.futureMembers.valueAsNumber, picked: [...chosen] }; try { const next = session.answer('ask', { key: 'household', value: v }); clearControls(); bubble(`الأسرة: ${v.currentMembers}`, 'me'); render(next); refreshPanels(); } catch (err) { fail(err); } });
+  control(form);
+}
+function renderBudget(m) {
+  const form = el0('form', 'counts'); form.noValidate = true;
+  for (const [id, label] of [['min', 'من (ريال)'], ['max', 'إلى (ريال)']]) { const l = el0('label', '', label); const i = document.createElement('input'); i.type = 'number'; i.min = 0; i.name = id; l.append(i); form.append(l); }
+  const go = el0('button', 'cta', 'تسجيل'); go.type = 'submit'; form.append(go);
+  form.addEventListener('submit', e => { e.preventDefault(); const v = { min: form.elements.min.valueAsNumber, max: form.elements.max.valueAsNumber }; clearControls(); bubble('الميزانية مسجّلة (لا يستعملها المحرك)', 'me'); step('ask', { key: 'budget', value: v }); refreshPanels(); });
+  control(form);
+}
+function renderConfirmItems(m) {
+  const box = el0('div', 'confirm'); const dec = {};
+  for (const it of m.items) {
+    const row = el0('div', 'citem'); row.append(el0('p', '', it.text + (it.support && it.support !== 'supported' ? ' · ' + supportLabel(it.support) : '')));
+    if (it.quote) row.append(el0('small', '', 'كلامك: «' + it.quote + '»'));
+    const g = el0('div', 'pick'); dec[it.ref] = it.suggested || 'preferred';
+    for (const [pid, label] of [['mandatory', 'لازم'], ['preferred', 'تفضيل'], ['flexible', 'قابل للتنازل'], ['drop', 'احذفه']]) { const b = el0('button', 'chip', label); b.type = 'button'; b.setAttribute('aria-pressed', String(dec[it.ref] === pid)); b.addEventListener('click', () => { dec[it.ref] = pid; g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }); g.append(b); }
+    row.append(g); box.append(row);
+  }
+  const go = el0('button', 'cta', 'اعتمد'); go.type = 'button'; go.addEventListener('click', () => { clearControls(); bubble('اعتمدت درجات البنود', 'me'); step('ask', { key: 'confirm', value: { decisions: dec } }); refreshPanels(); });
+  const allPref = el0('button', 'cta ghost', 'كلها تفضيلات'); allPref.type = 'button'; allPref.addEventListener('click', () => { for (const k of Object.keys(dec)) dec[k] = 'preferred'; clearControls(); bubble('كلها تفضيلات', 'me'); step('ask', { key: 'confirm', value: { decisions: dec } }); refreshPanels(); });
+  box.append(go, allPref); control(box);
+}
+function renderReview(m) {
+  const r = m.review, box = el0('div', 'review');
+  box.append(el0('h3', '', 'مراجعة قبل التصميم'));
+  const L = [['الأرض', [r.land.rows.map(x => x.k + ': ' + x.v).join(' — ')]], ['الغرف', r.rooms], ['العلاقات', r.relations], ['الشروط الإلزامية', r.mandatory], ['التفضيلات', r.preferences], ['افتراضات تحتاج موافقتك', r.assumptions.map(a => a.text_ar)], ['قيود الدعم', r.limits], ['أُرسل تفضيلًا لأنه غير مؤكد', r.softened]];
+  for (const [t, items] of L) { if (!items.length) continue; box.append(el0('h4', '', t)); const ul = el0('ul'); for (const x of items) ul.append(el0('li', '', x)); box.append(ul); }
+  const go = el0('button', 'cta', r.readiness.needsAck ? 'أفهم القيود وأبدأ التصميم' : 'أؤكد وأبدأ التصميم'); go.type = 'button'; go.disabled = !r.readiness.canGenerate;
+  go.addEventListener('click', () => { clearControls(); bubble('ابدأ التصميم', 'me'); step('go'); refreshPanels(); });
+  const back = el0('button', 'cta ghost', 'رجوع للتعديل'); back.type = 'button'; back.addEventListener('click', () => { clearControls(); step('more'); });
+  box.append(go, back); control(box);
 }
 
 // الذكاء المتصل اختياري، ويحتاج رمز دخول الموقع. استدعاؤه الحي غير متحقق منه في هذا التسليم.
@@ -187,7 +267,8 @@ const m1 = v => (Math.round(v * 100) / 100).toString();
 function row(table, cells, head) { const tr = el('tr'); for (const c of cells) { const td = el(head ? 'th' : 'td'); if (c instanceof Node) td.append(c); else td.textContent = c; tr.append(td); } table.append(tr); return tr; }
 
 function applyOption(o) {
-  session.counts = { ...o.counts }; confirmedLand = o.land;
+  try { session.answer('counts', { bedrooms: o.counts.bedrooms, majlis: o.counts.majlis, baths: o.counts.baths, kitchens: o.counts.kitchens, halls: o.counts.halls, dining: o.counts.dining }); } catch { /* يبقى ما في الملف */ }
+  confirmedLand = o.land; try { session.changeLand(o.land); } catch { /* يبقى */ }
   $('landLength').value = o.land.length; $('landWidth').value = o.land.width; if ($('landStreetWidth')) $('landStreetWidth').value = o.land.streetWidth > 0 ? o.land.streetWidth : '';
   land.entries = new Set(o.land.entries);
   grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
@@ -227,16 +308,20 @@ function renderReport({ facts: f, options }, err) {
 
 async function build() {
   show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
-  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements };
+  const eng = session.engineInput(), input = { land: eng.land, rooms: eng.rooms, discovery: eng.discovery, idea: eng.idea, counts: eng.counts, requirements: eng.requirements };
+  session.counts = eng.counts; session.requirements = eng.requirements; session.idea = eng.idea;
   try {
     const out = await generateInitialDesign(input);
+    const oc = classifyOutcome(out, session.brief);
+    if (oc.kind !== OUTCOME.SOLVED) { $('buildText').textContent = ''; return showOutcome(oc, null); }
     // التصميم الأولي يُعرض على العميل أولًا (اعتماد / تصميم آخر / تعديل في المرسم)
     const ds = createSession({ land: confirmedLand, counts: session.counts, requirements: session.requirements, discovery: input.discovery, idea: input.idea, result: out });
     if (!saveSession(localStorage, ds)) { writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' '), dna: out.dna, alternatives: out.alternatives }); location.href = './studio.html'; return; }
     $('buildText').textContent = 'جاهز. أعرض عليك التصميم…';
     location.href = './design.html';
   } catch (err) {
-    setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
+    setError($('buildError'), ''); $('buildRetry').hidden = false;
+    const oc = classifyOutcome(err, session.brief); $('buildText').textContent = ''; showOutcome(oc, err); if (oc.kind !== OUTCOME.INCOMPLETE || err?.report_ar || err?.feasibility) return;
     $('buildText').textContent = 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…';
     // (الجولة العشرون) تقرير المحرك الثالث يكفي (التعارض والخيارات من كشف الاستحالة والبحث نفسه) — لا تجارب إضافية بطيئة
     if (err?.report_ar || err?.feasibility) { $('buildText').textContent = ''; return; }
@@ -245,3 +330,22 @@ async function build() {
   }
 }
 $('buildRetry').addEventListener('click', () => show('Shara'));
+
+// ---- نتيجة العجز: ثلاث رسائل متمايزة + اقتراحات بديلة بأزرار (لا يُنفَّذ شيء دون ضغطك)
+const OUT_TITLE = { [OUTCOME.INFEASIBLE]: 'مستحيل هندسيًا — المحرك أثبت ذلك', [OUTCOME.REGULATORY]: 'يخالف اشتراطًا نظاميًا', [OUTCOME.INCOMPLETE]: 'لم يجد المحرك حلًا بعد — وهذا لا يعني أنه مستحيل', [OUTCOME.ALL_HIDDEN]: 'وُجدت تصاميم لكنها حُجبت لمخالفتها بندًا إلزاميًا' };
+function showOutcome(oc, err) {
+  const box = $('buildReport'); box.replaceChildren(); box.hidden = false; box.dataset.outcome = oc.kind;
+  box.append(el('h3', 'out-' + oc.kind, OUT_TITLE[oc.kind] || oc.title_ar));
+  for (const t of oc.detail_ar || []) box.append(el('p', 'hint', t));
+  if (oc.note_ar) box.append(el('p', 'hint', oc.note_ar));
+  const alts = buildAlternatives(session.brief, { ...oc, counterfactual: err?.counterfactual || oc.counterfactual || [] });
+  const run = (o, consent) => async () => { box.querySelectorAll('button').forEach(b => b.disabled = true); $('buildText').textContent = 'أطبّق اختيارك وأعيد المحاولة…';
+    const r = await retryWith(session.brief, alts, o.id, x => generateInitialDesign({ land: x.land, rooms: x.rooms, discovery: x.discovery, idea: x.idea, counts: x.counts, requirements: x.requirements }), { consent });
+    session.brief = r.brief; if (r.outcome.kind === OUTCOME.SOLVED) { const eng = session.engineInput(); const ds = createSession({ land: eng.land, counts: eng.counts, requirements: eng.requirements, discovery: eng.discovery, idea: '', result: r.result }); if (saveSession(localStorage, ds)) { location.href = './design.html'; return; } }
+    $('buildText').textContent = ''; showOutcome(r.outcome, r.error || null); refreshPanels(); };
+  const list = (title, items, consent) => { if (!items.length) return; box.append(el('h4', '', title)); for (const o of items) { const row = el('div', 'alt'); row.append(el('strong', '', o.label), el('p', '', 'يتغير: ' + o.changes_ar), el('p', '', 'يُفقد: ' + o.loses_ar)); if (o.engineVerified !== undefined && o.engineVerified !== null) row.append(el('small', '', o.engineVerified ? 'جرّبه المحرك فنجح' : 'جرّبه المحرك فلم ينجح وحده')); if (o.apply || o.id === 'follow_regulation') { const b = el('button', 'cta ghost', consent ? 'أوافق على هذا التنازل وأعد المحاولة' : 'طبّق هذا الاقتراح'); b.type = 'button'; b.addEventListener('click', run(o, consent)); row.append(b); } else row.append(el('small', '', 'لا يُنفَّذ من هنا')); box.append(row); } };
+  list('اقتراحات بديلة (لا يتغير شيء إلا بضغطك)', alts.auto, false);
+  list('تمس شرطًا إلزاميًا — تحتاج موافقتك الصريحة', alts.needsConsent, true);
+  list('معلومات', alts.info, false);
+  if (oc.retryable) { const b = el('button', 'cta', 'أعد المحاولة'); b.type = 'button'; b.addEventListener('click', () => build()); box.append(b); }
+}

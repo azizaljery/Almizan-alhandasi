@@ -20,7 +20,8 @@ export function preflight(brief) {
 export function classifyOutcome(result, brief) {
   const pre = brief && preflight(brief); if (pre) return pre;
   if (result && !(result instanceof Error) && !result.status) {
-    const shown = (result.alternatives || []).length, hidden = result.hidden || result.alternativesInfo?.hidden || [];
+    const alts = result.alternatives || [], vis = alts.filter(x => x.presentation?.status !== 'hidden');
+    const hidden = [...(result.hidden || result.alternativesInfo?.hidden || []).map(h => ({ reasons_ar: h.reasons_ar || [] })), ...alts.filter(x => x.presentation?.status === 'hidden').map(x => ({ reasons_ar: x.presentation.hidden_ar || [] }))], shown = vis.length;
     if (shown > 0) return { kind: OUTCOME.SOLVED, title_ar: 'وُجد تصميم', shown, hiddenCount: hidden.length };
     if (hidden.length) return { kind: OUTCOME.ALL_HIDDEN, title_ar: 'وُجدت تصاميم لكنها حُجبت', detail_ar: hidden.map(h => (h.reasons_ar || [])[0]).filter(Boolean), reasons: hidden.flatMap(h => h.reasons_ar || []), note_ar: 'لم يُثبت المحرك استحالة؛ كل تصميم وُجد خالف بندًا إلزاميًا من طلبك أو رسب في بوابة مراجعة، فلم يُعرض.', retryable: false };
     return { kind: OUTCOME.INCOMPLETE, title_ar: 'لم يجد المحرك حلًا بعد', reason: 'SEARCH_EXHAUSTED_WITHOUT_PROOF', detail_ar: [REASON_AR.SEARCH_EXHAUSTED_WITHOUT_PROOF], retryable: false };
