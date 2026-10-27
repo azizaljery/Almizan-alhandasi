@@ -43,3 +43,15 @@ test('العميل: بلا رمز وبلا openAccess يطلب الرمز دون
 test('assistantOpen: أي فشل في الحالة = مغلق', async () => {
   assert.equal(await assistantOpen({ fetcher: async () => { throw new Error('x'); } }), false);
 });
+
+test('حمولة الصفحة الرئيسية والتصميم تجتاز تحقق الخادم (كانت ترجع 400 فيسقط الذكاء إلى الفهم المحلي)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { normalizeLand } = await import('../dist/home-flow.mjs');
+  const { validateInput } = await import('../worker/server.mjs');
+  const { plot } = normalizeLand({ length: 25, width: 12.5, streets: ['n'], entries: ['n'] });
+  for (const f of ['home.mjs', 'design.mjs']) {
+    const src = readFileSync(new URL('../dist/' + f, import.meta.url), 'utf8');
+    assert.equal(/previous: \{ summary: '[^']*', rooms: \[\] \}/.test(src), false, f + ' يرسل previous غير صالح');
+  }
+  assert.doesNotThrow(() => validateInput({ prompt: 'بيت دور واحد ثلاث غرف نوم ومجلس ومطبخ', plot, previous: null }));
+});

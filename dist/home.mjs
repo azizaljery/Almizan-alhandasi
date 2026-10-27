@@ -173,7 +173,7 @@ function beginChat() {
 // الذكاء المتصل اختياري، ويحتاج رمز دخول الموقع. استدعاؤه الحي غير متحقق منه في هذا التسليم.
 async function understandWithAI(text, accessCode) {
   const { plot } = normalizeLand(confirmedLand);
-  const { brief } = await requestBrief({ prompt: text, plot, previous: { summary: 'ابدأ من برنامج فارغ، واستخرج ما ذكره العميل فقط.', rooms: [] } }, { accessCode, openAccess: !accessCode });
+  const { brief } = await requestBrief({ prompt: text, plot, previous: null }, { accessCode, openAccess: !accessCode });
   const tally = {}; for (const r of brief.rooms || []) tally[r.type] = (tally[r.type] || 0) + 1;
   const map = { bedrooms: 'bedroom', majlis: 'majlis', baths: 'bath', kitchens: 'kitchen', halls: 'living', dining: 'dining' };
   const counts = {}; for (const [k, t] of Object.entries(map)) if (tally[t] !== undefined) counts[k] = tally[t];
