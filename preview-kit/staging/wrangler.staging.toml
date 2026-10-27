@@ -14,7 +14,7 @@ run_worker_first = ["/", "/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "almizan-archive-staging"   # قاعدة جديدة؛ ليست almizan-archive الإنتاجية
-database_id = "ضع-معرّف-قاعدة-staging-الجديدة-هنا"
+database_id = "f61a87bd-8178-48bf-b7b2-42dc7663dacf"
 
 [observability]
 enabled = true
