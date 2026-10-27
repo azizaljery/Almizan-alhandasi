@@ -6,6 +6,7 @@
 import { ROOM_TYPES } from './draw/catalog.mjs';
 import { pointInPolygon, ccw, sub, dot, norm } from './draw/geom.mjs';
 import { PARKING_RULE, requiredParking, plotArea } from './site-parking.mjs';
+import { briefOf, briefMajlisDoor } from './shared-brief.mjs';
 
 export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للميزان';
 export const SAUDI_GATES = Object.freeze([
@@ -30,6 +31,7 @@ export const SAUDI_GATES = Object.freeze([
 /** (الجولة الرابعة عشرة) البنود التي يعاملها المولّد «قيمة افتراضية قوية»: لا يُعرض بديل يخالفها إلا بطلب العميل أو إن لم يتسع غيره (ويُذكر). */
 export const STRONG_DEFAULTS = Object.freeze(['MAID_BATH', 'BED_BATH', 'SERVE_ROUTE', 'MAJLIS_BED_WALL', 'MAJLIS_STREET_ENTRY', 'DAY_WC', 'REAR_YARD', 'PARKING_LAYOUT']);
 const AR = Object.fromEntries(SAUDI_GATES.map(g => [g.id, g.ar]));
+const R14_OFF_SP = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 const r2 = v => Math.round(v * 100) / 100;
 const nAr = t => String(t || '').replace(/[ةه]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي');
 
@@ -39,7 +41,8 @@ export function clientAsks(request = {}) {
   return {
     FAMILY_ENTRY_SCREEN: /مدخل (?:العائله |عائلي )?منكسر|ساتر|حاجز (?:بصري|نظر)|ما (?:ينكشف|يبين) (?:الداخل|البيت|الصاله)|خصوصيه المدخل/.test(t),
     MAJLIS_LOBBY: /دهليز|مقدمه (?:لل)?مجلس|ممر (?:لل)?مجلس|مدخل (?:لل)?مجلس (?:ب)?(?:دهليز|مقدمه)/.test(t),
-    MAJLIS_DINING: !!request.majlisDining || /مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)/.test(t),
+    // (01b) الباب بين المجلس والطعام «طلب العميل» فقط بنص صريح (العقد الموحد DIRECT_DOOR) أو تعديل صريح — لا «مقلط» (وظيفة) ولا «جنب» (قرب)
+    MAJLIS_DINING: R14_OFF_SP.has('r21maqlat') ? (!!request.majlisDining || /مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)/.test(t)) : (!!request.majlisDining || briefMajlisDoor(briefOf(request))),
     DAY_WC: /دوره مياه (?:يوميه|للصاله|للضيوف|للعائله)|حمام (?:ضيوف|للصاله|يومي)/.test(t),
     MAID_BATH: /(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:ب|مع|لها) ?(?:حمام|دوره مياه)/.test(t) && !/(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:بدون|بلا|من غير) ?(?:حمام|دوره مياه)/.test(t),
     MAID_NO_BATH: /(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:بدون|بلا|من غير) ?(?:حمام|دوره مياه)/.test(t),
@@ -49,7 +52,7 @@ export function clientAsks(request = {}) {
     NO_MAJLIS_DINING: /مجلس[^،.]{0,20}(?:بعيد|منفصل|مستقل) (?:عن|من) (?:ال)?(?:طعام|سفره)/.test(t),
     BED_BATH: /(?:حمام|دوره مياه) (?:لكل|في كل) غرف|كل غرفه (?:ب|فيها |لها )?(?:حمام|دوره مياه)/.test(t),
     NO_BED_BATH: /(?:بعض |)غرف[^،.]{0,15}(?:بدون|بلا|من غير) (?:حمام|دورات? مياه)/.test(t),
-    SERVE_ROUTE: /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس|مقلط/.test(t),
+    SERVE_ROUTE: R14_OFF_SP.has('r21maqlat') ? /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس|مقلط/.test(t) : /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس/.test(t), // (01b) مسار التقديم بنص صريح لا من «مقلط»
     MAJLIS_BED_WALL: /المجلس[^،.]{0,20}(?:بعيد|منفصل) (?:عن|من) (?:ال)?(?:غرف|نوم)|عزل (?:المجلس|صوت)/.test(t),
     MAJLIS_STREET_ENTRY: /(?:باب|مدخل) (?:ال)?مجلس[^،.]{0,15}(?:علي|من) (?:ال)?شارع|مجلس (?:رجال )?علي (?:ال)?شارع/.test(t),
     MAJLIS_SIDE_OK: /(?:باب|مدخل) (?:ال)?مجلس[^،.]{0,15}(?:من )?(?:ال)?(?:جنب|جانب|ارتداد)/.test(t),

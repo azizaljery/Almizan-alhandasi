@@ -34,8 +34,17 @@ export function shortfallNotice({ requested = 1, shown = 0, shortfall_ar = null,
   const clean = t => toClientAr(String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, (_, a, b) => `جرّبتُ ${a} ${+a >= 3 && +a <= 10 ? 'تنظيمات مختلفة' : 'تنظيمًا مختلفًا'}، اجتاز الفحص منها ${b}`)
     .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').replace(/\s+([.،؛])/g, '$1').trim());
   if (!shown) {
-    const lines = String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean);
-    return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.'] };
+    // (01b، قرار المالك: الحالات الثلاث منفصلة) بديل مكتمل حُجب لمخالفة إلزامية ≠ لا بديل مكتمل؛ وكلاهما «لا يثبت أن طلبك مستحيل» ما لم يثبت تعارض.
+    // سطر «عُرض N من M» من المولّد لا يُنقل حين لا يُعرض شيء (كان يقول «عُرض 1 من 4» والمعروض صفر)
+    const closing = 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.';
+    if (hidden?.length && !report_ar) {
+      const why = clean(shortfall_ar).replace(/^عُرض \d+ من \d+ مطلوبة؛ ?/, '');
+      return { title_ar: 'لم أعرض مخططًا صالحًا لطلبك', lines_ar: [`وصلتُ إلى ${hidden.length === 1 ? 'تصميم مكتمل' : hidden.length + ' تصاميم مكتملة'} لكنه يخالف شرطًا أساسيًا فلم أعرضه: ${[...new Set(hidden.flatMap(h => h.reasons_ar || []))].slice(0, 2).map(clean).join('؛ ')}.`,
+        why ? 'ما جرّبته: ' + why : null, 'هذا لا يثبت أن طلبك مستحيل؛ قد يوجد تنظيم صالح لم يصل إليه البحث.', closing].filter(Boolean) };
+    }
+    const lines = [...new Set(String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean))].filter(l => !closing.startsWith(l));
+    if (!lines.some(l => /مستحيل|لا يعني أن|لا يثبت/.test(l)) && !/ثبت|تعارض/.test(report_ar || '')) lines.push('هذا لا يثبت أن طلبك مستحيل؛ قد يوجد تنظيم صالح لم يصل إليه البحث.');
+    return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, closing] };
   }
   const why = clean(shortfall_ar).replace(/^عُرض \d+ من \d+ مطلوبة؛ ?/, '');
   return { title_ar: `عُرض ${shown} من ${requested} ${requested === 1 ? 'تصميم' : 'تصاميم'} طلبتها`,

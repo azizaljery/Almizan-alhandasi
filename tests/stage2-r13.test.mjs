@@ -102,7 +102,7 @@ test('الزجاج (قرار المالك): نسبة الزجاج اختيار �
   // المراجع: C1 alt-1 (after-12) صالتها 3.9%: البوابة ناجحة (≥ 3%)، النسبة معلومة بلا طلب (requested null)، والمرجع النظامي 8% مذكور بمستواه لا كبوابة
   const C1 = CASES.find(c => c.id === 'C1'), rv = reviewDesign(EV('C1', 'alt-1.json'), req(C1), { external: false, heavy: false }), g = rv.gates.find(x => x.id === 'WINDOW_SIZE');
   assert.ok(g.ok && rv.passed); assert.equal(g.tier, 'mizan-default'); assert.equal(g.value.requestedRooms, 0); assert.deepEqual(g.notes_ar, []);
-  const hall = g.value.ratios.find(x => /الصالة/.test(x.name)); assert.equal(hall.requested, null); assert.equal(hall.pct, 3.92); assert.equal(hall.facing, 'street');
+  const hall = g.value.ratios.find(x => /الصالة/.test(x.name)); assert.equal(hall.requested, null); assert.equal(hall.pct, 3.93); // (02b) كانت 3.92 على وجه صافٍ مائل عند تغير سماكة الجدار (geom.mjs insetPolygon)؛ الوجه الآن درجة كما في المجسم: مساحة الصالة 42.74 م² لا 42.85 assert.equal(hall.facing, 'street');
   assert.equal(rv.regulatoryNotes_ar[0].id, 'GLAZING_REF'); assert.match(rv.regulatoryNotes_ar[0].text_ar, /ليس بوابة/); assert.match(rv.regulatoryNotes_ar[0].text_ar, /المستوى ب/); assert.match(rv.regulatoryNotes_ar[0].text_ar, /اختيار العميل/);
   // بطلب العميل: المطلوب بجانب المحقق، وملاحظة (لا رسوب) إن لم يتحقق
   const rv2 = reviewDesign(EV('C1', 'alt-1.json'), { ...req(C1), text: C1.text + '، الصالة زجاج 12٪' }, { external: false, heavy: false }), g2 = rv2.gates.find(x => x.id === 'WINDOW_SIZE');

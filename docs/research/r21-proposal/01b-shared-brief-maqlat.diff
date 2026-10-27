@@ -1,0 +1,282 @@
+diff --git a/dist/client-text.mjs b/dist/client-text.mjs
+index ff38cf5..1fadfd4 100644
+--- a/dist/client-text.mjs
++++ b/dist/client-text.mjs
+@@ -34,8 +34,17 @@ export function shortfallNotice({ requested = 1, shown = 0, shortfall_ar = null,
+   const clean = t => toClientAr(String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, (_, a, b) => `جرّبتُ ${a} ${+a >= 3 && +a <= 10 ? 'تنظيمات مختلفة' : 'تنظيمًا مختلفًا'}، اجتاز الفحص منها ${b}`)
+     .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').replace(/\s+([.،؛])/g, '$1').trim());
+   if (!shown) {
+-    const lines = String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean);
+-    return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.'] };
++    // (01b، قرار المالك: الحالات الثلاث منفصلة) بديل مكتمل حُجب لمخالفة إلزامية ≠ لا بديل مكتمل؛ وكلاهما «لا يثبت أن طلبك مستحيل» ما لم يثبت تعارض.
++    // سطر «عُرض N من M» من المولّد لا يُنقل حين لا يُعرض شيء (كان يقول «عُرض 1 من 4» والمعروض صفر)
++    const closing = 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.';
++    if (hidden?.length && !report_ar) {
++      const why = clean(shortfall_ar).replace(/^عُرض \d+ من \d+ مطلوبة؛ ?/, '');
++      return { title_ar: 'لم أعرض مخططًا صالحًا لطلبك', lines_ar: [`وصلتُ إلى ${hidden.length === 1 ? 'تصميم مكتمل' : hidden.length + ' تصاميم مكتملة'} لكنه يخالف شرطًا أساسيًا فلم أعرضه: ${[...new Set(hidden.flatMap(h => h.reasons_ar || []))].slice(0, 2).map(clean).join('؛ ')}.`,
++        why ? 'ما جرّبته: ' + why : null, 'هذا لا يثبت أن طلبك مستحيل؛ قد يوجد تنظيم صالح لم يصل إليه البحث.', closing].filter(Boolean) };
++    }
++    const lines = [...new Set(String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean))].filter(l => !closing.startsWith(l));
++    if (!lines.some(l => /مستحيل|لا يعني أن|لا يثبت/.test(l)) && !/ثبت|تعارض/.test(report_ar || '')) lines.push('هذا لا يثبت أن طلبك مستحيل؛ قد يوجد تنظيم صالح لم يصل إليه البحث.');
++    return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, closing] };
+   }
+   const why = clean(shortfall_ar).replace(/^عُرض \d+ من \d+ مطلوبة؛ ?/, '');
+   return { title_ar: `عُرض ${shown} من ${requested} ${requested === 1 ? 'تصميم' : 'تصاميم'} طلبتها`,
+diff --git a/dist/design.mjs b/dist/design.mjs
+index c38210c..0d72154 100644
+--- a/dist/design.mjs
++++ b/dist/design.mjs
+@@ -103,7 +103,7 @@ function altsCard(d) {
+       el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null, a.presentation ? el('small', { 'data-alt-status': a.presentation.status }, a.presentation.label_ar + (a.presentation.status === 'needs-edits' ? ` (${a.presentation.edits_ar.length})` : '')) : null))),
+     info?.hidden?.length ? el('p', { class: 'sub', 'data-hidden': '' }, `حُجب ${info.hidden.length} ${info.hidden.length === 1 ? 'بديل' : 'بدائل'} لأنها تخالف بندًا إلزاميًا من طلبك: ${info.hidden.map(h => (h.reasons_ar || [])[0]).filter(Boolean).join('؛ ')}`) : null,
+     // (الجولة العشرون) إشعار النقص بنص العميل نفسه الذي في الصور (shortfallNotice): العدد صريحًا وسببه وما يمكن تغييره، بلا لغة داخلية
+-    (() => { const n = alts.length < want ? shortfallNotice({ requested: want, shown: alts.length, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
++    (() => { const nv = alts.filter(a => a.presentation?.status !== 'hidden').length, n = nv < want ? shortfallNotice({ requested: want, shown: nv, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
+       return n ? el('div', { class: 'shortfall sub', role: 'note', 'data-shortfall': '' }, el('b', {}, n.title_ar), ...n.lines_ar.map(t => el('p', {}, t))) : null; })(),
+     info?.rejected?.length ? el('details', { class: 'rejected' }, el('summary', {}, `المرشحون المرفوضون (${info.rejectedCount}) وأسبابهم`),
+       el('ul', { class: 'tick' }, info.rejected.map(r => el('li', { class: 'bad' }, r.text + (r.count > 1 ? ` (${r.count})` : ''))))) : null);
+diff --git a/dist/requirements.mjs b/dist/requirements.mjs
+index 1751983..7d16b4c 100644
+--- a/dist/requirements.mjs
++++ b/dist/requirements.mjs
+@@ -3,7 +3,7 @@
+ // والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
+ // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
+ 
+-import { buildSharedBrief, parseRequestedCount } from './shared-brief.mjs';
++import { buildSharedBrief, parseRequestedCount, readGuestRelations, RELATIONS } from './shared-brief.mjs';
+ import { extractRules, mergeRules, ruleText, subjectAr, SIDE_LABELS, OPPOSITE_SIDE } from './rules.mjs';
+ 
+ const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
+@@ -61,9 +61,9 @@ const tolOf = s => /بالضبط|تماما|بالظبط|exact(?:ly)?/.test(s) ?
+  * يعيد { counts, extras:{maid,driver,office,prayer,storage,laundry}, prefs, areas, understood[], unsupported[] }.
+  */
+ /** (الجولة 21 — مقترح) نص العميل والعقد الموحد (shared-brief.mjs) وعدد التصاميم المطلوب نصًا: يحملها الطلب نفسه فيقرؤها المولّد والمراجع معًا. */
+-function sharedOf(text, rules, dims) {
++function sharedOf(text, rules, dims, relations) {
+   if (R21_OFF.has('r21brief')) return {};
+-  const brief = buildSharedBrief(String(text || ''), { rules, dims });
++  const brief = buildSharedBrief(String(text || ''), { rules, dims, relations });
+   return { text: String(text || ''), brief, ...(brief.requestedCount ? { want: brief.requestedCount } : {}) };
+ }
+ const R21_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
+@@ -313,13 +313,17 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
+     if (any) prefs.glazing = glazing; }
+   // (الجولة 21 — مقترح) عدد التصاميم الذي طلبه العميل نصًا (يقرؤه العقد الموحد parseRequestedCount؛ هنا سطر «فهمت» فقط)
+   { const n = parseRequestedCount(text); if (n) understood.push(`${n} ${n === 1 ? 'تصميم' : n === 2 ? 'تصميمان' : 'تصاميم'} مطلوبة (طلب العميل)`); }
++  // (الجولة 21 — 01b) علاقة المجلس بالطعام: قراءة واحدة (shared-brief.mjs readGuestRelations) تُحفظ قيودًا مهيكلة بمصدرها واقتباسها في الطلب،
++  // ويُبنى منها العقد الموحد — «مجلس رجال بمقلط» صار مفهومًا (كان في unclear) وظيفة طعام للضيوف لا بابًا
++  const relations = R21_OFF.has('r21maqlat') ? null : readGuestRelations(text);
++  for (const r of relations || []) understood.push(r.kind === RELATIONS.GUEST_ACCESS ? 'مقلط: طعام للضيوف مرتبط بمجلس الرجال، يصله الضيف دون المرور بمنطقة العائلة (الباب المباشر لا يُفرض ما لم تطلبه)' : 'باب مباشر بين المجلس والطعام (طلب العميل)');
+   const uc = clauses ? unclearClauses(text) : [];
+   const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
+   return {
+     counts: c, extras, prefs, areas, dims, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear,
+     textCounts, givenCounts: { ...counts }, absent: [...new Set([...absentKeys, ...drop])], orphans: orphanQuotes, ...(site ? { site } : {}), ...(keepLayout ? { keepLayout: true } : {}),
+     ...(corrected ? { countCorrection: { bedrooms: corrected } } : {}), ...(countFixes.length ? { countFixes } : {}), ...(ambiguous.length ? { ambiguous } : {}),
+-    ...sharedOf(text, rules, dims),
++    ...(relations ? { relations } : {}), ...sharedOf(text, rules, dims, relations || undefined),
+   };
+ }
+ 
+diff --git a/dist/saudi-program.mjs b/dist/saudi-program.mjs
+index b169c17..77bb290 100644
+--- a/dist/saudi-program.mjs
++++ b/dist/saudi-program.mjs
+@@ -6,6 +6,7 @@
+ import { ROOM_TYPES } from './draw/catalog.mjs';
+ import { pointInPolygon, ccw, sub, dot, norm } from './draw/geom.mjs';
+ import { PARKING_RULE, requiredParking, plotArea } from './site-parking.mjs';
++import { briefOf, briefMajlisDoor } from './shared-brief.mjs';
+ 
+ export const MIZAN_DEFAULT_AR = 'قيمة تصميمية افتراضية للميزان';
+ export const SAUDI_GATES = Object.freeze([
+@@ -30,6 +31,7 @@ export const SAUDI_GATES = Object.freeze([
+ /** (الجولة الرابعة عشرة) البنود التي يعاملها المولّد «قيمة افتراضية قوية»: لا يُعرض بديل يخالفها إلا بطلب العميل أو إن لم يتسع غيره (ويُذكر). */
+ export const STRONG_DEFAULTS = Object.freeze(['MAID_BATH', 'BED_BATH', 'SERVE_ROUTE', 'MAJLIS_BED_WALL', 'MAJLIS_STREET_ENTRY', 'DAY_WC', 'REAR_YARD', 'PARKING_LAYOUT']);
+ const AR = Object.fromEntries(SAUDI_GATES.map(g => [g.id, g.ar]));
++const R14_OFF_SP = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
+ const r2 = v => Math.round(v * 100) / 100;
+ const nAr = t => String(t || '').replace(/[ةه]/g, 'ه').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي');
+ 
+@@ -39,7 +41,8 @@ export function clientAsks(request = {}) {
+   return {
+     FAMILY_ENTRY_SCREEN: /مدخل (?:العائله |عائلي )?منكسر|ساتر|حاجز (?:بصري|نظر)|ما (?:ينكشف|يبين) (?:الداخل|البيت|الصاله)|خصوصيه المدخل/.test(t),
+     MAJLIS_LOBBY: /دهليز|مقدمه (?:لل)?مجلس|ممر (?:لل)?مجلس|مدخل (?:لل)?مجلس (?:ب)?(?:دهليز|مقدمه)/.test(t),
+-    MAJLIS_DINING: !!request.majlisDining || /مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)/.test(t),
++    // (01b) الباب بين المجلس والطعام «طلب العميل» فقط بنص صريح (العقد الموحد DIRECT_DOOR) أو تعديل صريح — لا «مقلط» (وظيفة) ولا «جنب» (قرب)
++    MAJLIS_DINING: R14_OFF_SP.has('r21maqlat') ? (!!request.majlisDining || /مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)/.test(t)) : (!!request.majlisDining || briefMajlisDoor(briefOf(request))),
+     DAY_WC: /دوره مياه (?:يوميه|للصاله|للضيوف|للعائله)|حمام (?:ضيوف|للصاله|يومي)/.test(t),
+     MAID_BATH: /(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:ب|مع|لها) ?(?:حمام|دوره مياه)/.test(t) && !/(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:بدون|بلا|من غير) ?(?:حمام|دوره مياه)/.test(t),
+     MAID_NO_BATH: /(?:خادمه|خدامه|عامله|شغاله)[^،.]{0,20}(?:بدون|بلا|من غير) ?(?:حمام|دوره مياه)/.test(t),
+@@ -49,7 +52,7 @@ export function clientAsks(request = {}) {
+     NO_MAJLIS_DINING: /مجلس[^،.]{0,20}(?:بعيد|منفصل|مستقل) (?:عن|من) (?:ال)?(?:طعام|سفره)/.test(t),
+     BED_BATH: /(?:حمام|دوره مياه) (?:لكل|في كل) غرف|كل غرفه (?:ب|فيها |لها )?(?:حمام|دوره مياه)/.test(t),
+     NO_BED_BATH: /(?:بعض |)غرف[^،.]{0,15}(?:بدون|بلا|من غير) (?:حمام|دورات? مياه)/.test(t),
+-    SERVE_ROUTE: /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس|مقلط/.test(t),
++    SERVE_ROUTE: R14_OFF_SP.has('r21maqlat') ? /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس|مقلط/.test(t) : /(?:تقديم|خدمه) (?:لل)?مجلس|باب (?:خدمه|تقديم) (?:لل|علي ال)?مجلس/.test(t), // (01b) مسار التقديم بنص صريح لا من «مقلط»
+     MAJLIS_BED_WALL: /المجلس[^،.]{0,20}(?:بعيد|منفصل) (?:عن|من) (?:ال)?(?:غرف|نوم)|عزل (?:المجلس|صوت)/.test(t),
+     MAJLIS_STREET_ENTRY: /(?:باب|مدخل) (?:ال)?مجلس[^،.]{0,15}(?:علي|من) (?:ال)?شارع|مجلس (?:رجال )?علي (?:ال)?شارع/.test(t),
+     MAJLIS_SIDE_OK: /(?:باب|مدخل) (?:ال)?مجلس[^،.]{0,15}(?:من )?(?:ال)?(?:جنب|جانب|ارتداد)/.test(t),
+diff --git a/dist/shared-brief.mjs b/dist/shared-brief.mjs
+index 3952c91..370119c 100644
+--- a/dist/shared-brief.mjs
++++ b/dist/shared-brief.mjs
+@@ -3,14 +3,14 @@
+ // بابًا مباشرًا بين المجلس والطعام، وقرأ المراجع النص الفارغ فعدّ الباب «طعامًا عائليًا» ورفض. الحل: قراءة واحدة بمعانٍ منفصلة ومصدر لكل قيد:
+ //   NEAR        — قرب أو تجاور («قريب من»، «جنب»، «بجانب»، «بجوار») — لا يفرض بابًا.
+ //   DIRECT_DOOR — باب مباشر صريح («المجلس يفتح على الطعام»، «باب بين المجلس والطعام»، «متصل بـ»، «المجلس على الطعام»).
+-//   GUEST_ACCESS— طعام للضيوف يصله الضيف دون عبور العائلة («مقلط»، «طعام الضيوف»، «سفرة الضيوف»).
++//   GUEST_ACCESS— وظيفة طعام للضيوف مرتبطة بالمجلس يصلها الضيف دون عبور العائلة («مقلط»، «طعام الضيوف»، «سفرة الضيوف») — لا تفرض بابًا (01b).
+ //   FAR         — بعد أو فصل («بعيد عن»، «منفصل عن»).
+ // كل علاقة: { id, kind, from, to, level: HARD|SOFT, source: 'client'|'rule', quote }. لا تُستبدل أي قراءة أخرى في extractRequirements.
+ // وحدة نقية بلا أرقام حالات.
+ 
+ export const RELATIONS = Object.freeze({ NEAR: 'NEAR', DIRECT_DOOR: 'DIRECT_DOOR', GUEST_ACCESS: 'GUEST_ACCESS', FAR: 'FAR' });
+ export const LEVELS = Object.freeze({ HARD: 'HARD', SOFT: 'SOFT', ADVISORY: 'ADVISORY' });
+-export const SHARED_BRIEF_VERSION = 'mizan-shared-brief/r21.1';
++export const SHARED_BRIEF_VERSION = 'mizan-shared-brief/r21.2'; // (01b) «مقلط» وظيفة لا باب، والعلاقات من المحلل
+ 
+ const norm = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[ً-ٰٟـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ');
+ 
+@@ -30,15 +30,28 @@ const DOOR_RE = /(?:المجلس|مجلس الرجال) (?:يفتح علي|يف
+ const quoteOf = (text, re) => { const m = re.exec(norm(text)); return m ? m[0] : null; };
+ 
+ /**
+- * يبني العقد الموحد من نص العميل ومن قراءة extractRequirements (البنود والمقاسات) دون حذف أي منها.
++ * (الجولة 21 — 01b، قرار المالك 2026-10-26: «وحّد تفسير مجلس رجال بمقلط») القراءة الوحيدة لعلاقة المجلس بالطعام من نص العميل — يستدعيها
++ * محلل المتطلبات (requirements.mjs) فتُحفظ قيودًا مهيكلة بمصدرها في الطلب، ويبني منها العقد، ولا يعيد المولّد أو المراجع تفسير النص:
++ *   «مقلط/طعام الضيوف/سفرة الضيوف» ⇐ GUEST_ACCESS: **وظيفة طعام للضيوف مرتبطة بالمجلس** يصلها الضيف دون عبور العائلة؛ الباب المباشر والغرفة
++ *     المنفصلة «غير محددين» (unspecified) — لا يُفرضان لفظًا (كانت «مقلط» تُقرأ بابًا مباشرًا في المراجع: H3).
++ *   «المجلس يفتح على الطعام/باب بين المجلس والطعام/متصل بـ» ⇐ DIRECT_DOOR: باب مباشر صريح.
++ *   «قريب من المجلس» ⇐ NEAR (من بنود القرب في المحلل) — ليس بابًا.
++ */
++export function readGuestRelations(text = '') {
++  const t = norm(text), out = [];
++  if (GUEST_RE.test(t)) out.push({ id: 'guest-dining-client', kind: RELATIONS.GUEST_ACCESS, from: 'majlis', to: 'dining', level: LEVELS.HARD, source: 'client', quote: quoteOf(text, GUEST_RE), function: 'guest_dining', directDoor: 'unspecified', separateRoom: 'unspecified' });
++  if (DOOR_RE.test(t)) out.push({ id: 'majlis-dining-door-client', kind: RELATIONS.DIRECT_DOOR, from: 'majlis', to: 'dining', level: LEVELS.HARD, source: 'client', quote: quoteOf(text, DOOR_RE), directDoor: 'required' });
++  return out;
++}
++/**
++ * يبني العقد الموحد من نص العميل ومن قراءة extractRequirements (البنود والمقاسات وعلاقات المجلس بالطعام) دون حذف أي منها.
+  * المقاسات: { room, width, length, tolerance, quote, source } — السماحية كما قرأها المحلل (لا تُصفَّر).
+  */
+ export function buildSharedBrief(text = '', extracted = {}) {
+   const relations = [];
+   const add = r => relations.push({ id: r.id || `rel-${relations.length + 1}`, level: LEVELS.SOFT, source: 'client', quote: null, ...r });
+-  const t = norm(text);
+-  if (GUEST_RE.test(t)) add({ kind: RELATIONS.GUEST_ACCESS, from: 'majlis', to: 'dining', level: LEVELS.HARD, quote: quoteOf(text, GUEST_RE) });
+-  if (DOOR_RE.test(t)) add({ kind: RELATIONS.DIRECT_DOOR, from: 'majlis', to: 'dining', level: LEVELS.HARD, quote: quoteOf(text, DOOR_RE) });
++  // (01b) القيود المهيكلة من المحلل إن وُجدت (القراءة الوحيدة)، وإلا الدالة نفسها على النص (مستدعٍ قديم بلا محلل)
++  for (const r of Array.isArray(extracted.relations) ? extracted.relations : readGuestRelations(text)) add(r);
+   for (const r of extracted.rules || []) {
+     if (r.negated || r.mode === 'avoid') continue;
+     const kind = r.kind === 'near' || r.kind === 'adjacent' ? RELATIONS.NEAR : r.kind === 'far' || r.kind === 'apart' ? RELATIONS.FAR : null;
+@@ -47,17 +60,29 @@ export function buildSharedBrief(text = '', extracted = {}) {
+   }
+   const dimensions = Object.entries(extracted.dims || {}).filter(([, d]) => d && d.w > 0 && d.l > 0)
+     .map(([room, d]) => ({ room, width: Math.min(d.w, d.l), length: Math.max(d.w, d.l), tolerance: Number.isFinite(d.tol) ? d.tol : .05, quote: d.quote || null, source: 'client' }));
+-  return Object.freeze({ version: SHARED_BRIEF_VERSION, text: String(text || ''), relations: Object.freeze(relations), dimensions: Object.freeze(dimensions), requestedCount: parseRequestedCount(text) });
++  return Object.freeze({ version: SHARED_BRIEF_VERSION, text: String(text || ''), relations: Object.freeze(relations.map(r => Object.freeze(r))), dimensions: Object.freeze(dimensions), requestedCount: parseRequestedCount(text) });
+ }
+-/** العقد الموحد لطلب: المحفوظ فيه، أو يُبنى من نصه وبنوده (للمستدعين القدامى). المولّد والمراجع يقرآن هذه الدالة نفسها. */
+-export const briefOf = req => req?.brief?.version === SHARED_BRIEF_VERSION ? req.brief : buildSharedBrief(req?.text || req?.idea || '', req || {});
++/** العقد الموحد لطلب: المحفوظ فيه، أو يُبنى من نصه وبنوده (للمستدعين القدامى) مرة واحدة لكل طلب. المولّد والمراجع يقرآن هذه الدالة نفسها. */
++const BRIEF_MEMO = new WeakMap();
++export const briefOf = req => {
++  if (req?.brief?.version === SHARED_BRIEF_VERSION) return req.brief;
++  if (req && typeof req === 'object') { if (!BRIEF_MEMO.has(req)) BRIEF_MEMO.set(req, buildSharedBrief(req.text || req.idea || '', req)); return BRIEF_MEMO.get(req); }
++  return buildSharedBrief('', {});
++};
++/** (حزمة المالك shared-brief.mjs canonicalBrief/assertSharedBrief، مكيَّفتان) العقد الواحد للمولّد والمراجع، والتحقق أنهما الكائن نفسه. */
++export const canonicalBrief = req => briefOf(req);
++export function assertSharedBrief(generatorBrief, reviewerBrief) { if (!generatorBrief || generatorBrief !== reviewerBrief) throw Error('Generator/reviewer briefs differ'); return true; }
+ const isMajlis = x => /^majlis/.test(String(x || '')), isDining = x => String(x || '') === 'dining';
+ const pairMD = r => (isMajlis(r.from) && isDining(r.to)) || (isDining(r.from) && isMajlis(r.to));
+ /** هل طلب العميل بابًا مباشرًا أو طعامًا للضيوف بين المجلس والطعام؟ (NEAR وحده لا يكفي) */
+-export const briefMajlisDoor = brief => (brief?.relations || []).some(r => (r.kind === RELATIONS.DIRECT_DOOR || r.kind === RELATIONS.GUEST_ACCESS) && pairMD(r));
++// (01b) الباب المباشر من نص صريح فقط (DIRECT_DOOR)؛ «مقلط» (GUEST_ACCESS) وظيفة طعام للضيوف لا باب — وكان يُعدّ بابًا هنا
++const OFF_01B = String(globalThis.process?.env?.R14_OFF || '').split(',').includes('r21maqlat'); // مفتاح القياس فقط: سلوك 01
++export const briefMajlisDoor = brief => (brief?.relations || []).some(r => (r.kind === RELATIONS.DIRECT_DOOR || (OFF_01B && r.kind === RELATIONS.GUEST_ACCESS)) && pairMD(r));
++/** (01b) هل طلب العميل وظيفة طعام للضيوف مرتبطة بالمجلس («مقلط»)؟ تُقاس بوصول الضيف دون عبور العائلة (GUEST_DINING) لا بباب. */
++export const briefGuestDining = brief => (brief?.relations || []).some(r => r.kind === RELATIONS.GUEST_ACCESS && pairMD(r));
+ /** طلب المراجعة من العقد نفسه (kit sharedReviewRequest): النص والعقد معًا، فلا يعيد المراجع تفسير الطلب بقراءة أخرى. */
+ export function sharedReviewRequest(requirements, land, counts) {
+   const brief = briefOf(requirements);
+   return { text: brief.text, brief, counts: { ...(counts || {}), ...(requirements?.counts || {}) }, land: land || {}, prefs: requirements?.prefs || {} };
+ }
+-export default { RELATIONS, LEVELS, SHARED_BRIEF_VERSION, parseRequestedCount, buildSharedBrief, briefOf, briefMajlisDoor, sharedReviewRequest };
++export default { RELATIONS, LEVELS, SHARED_BRIEF_VERSION, parseRequestedCount, readGuestRelations, buildSharedBrief, briefOf, canonicalBrief, assertSharedBrief, briefMajlisDoor, briefGuestDining, sharedReviewRequest };
+diff --git a/dist/villa-layout-v3.mjs b/dist/villa-layout-v3.mjs
+index f2efc77..427476e 100644
+--- a/dist/villa-layout-v3.mjs
++++ b/dist/villa-layout-v3.mjs
+@@ -96,6 +96,7 @@ export function unitsOf(P, { stair = false } = {}) {
+     if (MAP[r.a] === 'S*' ? U.some(u => u.sleep) : has(MAP[r.a])) rel.push({ a: MAP[r.a], kind: r.side === 'back' ? 'back' : 'front', hard: true, client: true, ar: 'بند العميل: ' + (r.text || r.a) });
+   return { units: U, rel };
+ }
++const SYNTH_MIN_LAYOUTS = 8; // (01b) أدنى عدد توزيعات صالحة قبل توسيع الشبكات — قيمة بحث لا معيار قبول
+ const R14_OFF_V3 = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
+ /** دورة المياه اليومية للعائلة (قيمة تصميمية افتراضية للميزان: dayWc) كتلة حقيقية في أشجار المحرك الثالث بجوار الصالة. */
+ const DAY_WC = Object.freeze({ id: 'wcDay', kind: 'wc', rank: 2, area: 3.6, name: 'دورة مياه' });
+@@ -103,12 +104,12 @@ const kitchenFront = P => (P.rules || []).some(r => r.kind === 'place' && r.side
+ 
+ // ---------------------------------------------------------------------------------------------- (3) الشبكة وبحث القيود
+ /** أبعاد الشبكة المرشحة من نسبة الأرض (أعمدة × صفوف). */
+-export function gridShapes(W, D, nUnits) {
++export function gridShapes(W, D, nUnits, { all = false } = {}) {
+   // كل شبكة تتسع للوحدات (ومعها حديقتان على الأكثر) وتتسع لها الأرض بأدنى عرض خلية (≈ 4 م عرضًا، 3.6 م عمقًا)، مرتبة بقرب خليتها من
+   // المربع ثم بقرب عدد خلاياها من عدد الوحدات + 3 — الأرض الضيقة تأخذ عمودين وصفوفًا أكثر، والعريضة أعمدة أكثر
+   const out = [], cMax = Math.max(2, Math.min(5, Math.floor(W / 4.0))), rMax = Math.max(2, Math.min(6, Math.floor(D / 3.6)));
+   for (let nc = 2; nc <= cMax; nc++) for (let nr = 2; nr <= rMax; nr++) { const n = nc * nr; if (n < nUnits || n > nUnits + 6) continue; out.push({ nc, nr, k: Math.abs(Math.log((W / nc) / (D / nr))) + .06 * Math.abs(n - nUnits - 3) }); }
+-  return out.sort((a, b) => a.k - b.k).slice(0, 4).map(o => [o.nc, o.nr]);
++  return out.sort((a, b) => a.k - b.k).slice(0, all ? 8 : 4).map(o => [o.nc, o.nr]);
+ }
+ const adjLen = (a, b) => { // طول الحافة المشتركة بين مستطيلي خلايا (بالخلايا)
+   if (a.x1 === b.x0 || b.x1 === a.x0) return Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+@@ -441,9 +442,15 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
+   unitMins(units, P);
+   const log = { units: units.map(u => ({ key: u.key, zone: u.zone, area: Math.round(u.area) })), rel: rel.map(r => ({ ...r })), grids: [] };
+   const all = [];
+-  for (const [nc, nr] of gridShapes(W, D, units.filter(u => !u.optional).length)) {
++  // (الجولة 21 — 01b، قرار المالك: «عالج H3 من جهة البحث والتوليد لا بإضعاف البوابات») الشبكات الأربع الأولى كما كانت؛ وإن قلّت التوزيعات الصالحة
++  // فيها عن SYNTH_MIN_LAYOUTS (برنامج واسع: H3 بخمس غرف ومجلسين وجد 4 توزيعات في شبكة واحدة) تُجرَّب الشبكات التالية بترتيبها حتى ثلاث — بحث أوسع
++  // بالقيود الصلبة نفسها والميزانية نفسها لكل شبكة، حتمي، ولا يمس الحالات التي وجدت توزيعاتها. مفتاح القياس r21grids.
++  const shapes = gridShapes(W, D, units.filter(u => !u.optional).length, { all: !R14_OFF_V3.has('r21grids') });
++  for (let gi = 0; gi < shapes.length; gi++) {
++    if (gi >= 4 && all.length >= SYNTH_MIN_LAYOUTS) break;
++    const [nc, nr] = shapes[gi];
+     const e = enumerateLayouts(units, rel, nc, nr, { W, D });
+-    log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted });
++    log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted, ...(gi >= 4 ? { widened: true } : {}) });
+     all.push(...e.layouts);
+   }
+   const gardenA = Math.max(24, Math.min(70, (sum(P.blocks.map(b => b.area)) + P.hallArea) * .14));
+diff --git a/tests/stage2-r21-proposal.test.mjs b/tests/stage2-r21-proposal.test.mjs
+index d8ee960..2719139 100644
+--- a/tests/stage2-r21-proposal.test.mjs
++++ b/tests/stage2-r21-proposal.test.mjs
+@@ -25,17 +25,19 @@ test('01 العقد نفسه للمولّد والمراجع: النص والع
+   const near = r.brief.relations.find(x => x.kind === RELATIONS.NEAR);
+   assert.ok(near && near.quote && near.source === 'client', JSON.stringify(r.brief.relations));
+ });
+-test('01 «قريب من المجلس» (NEAR) لا يفرض بابًا مباشرًا؛ «مقلط» و«المجلس يفتح على الطعام» يفرضانه — في المولّد والمراجع معًا', () => {
++// (01b، قرار المالك 2026-10-26: «المقلط وظيفة طعام مرتبطة بالمجلس، والباب المباشر من نص العميل أو قيد معتمد لا من افتراض لغوي») — كان «مقلط» يفرض بابًا
++test('01 «قريب من المجلس» (NEAR) لا يفرض بابًا مباشرًا، ولا «مقلط» (وظيفة طعام للضيوف، 01b)؛ «المجلس يفتح على الطعام» يفرضه — في المولّد والمراجع معًا', () => {
+   const near = req('طعام قريب من المجلس'), door = req('المجلس يفتح على الطعام'), guest = req('مجلس رجال بمقلط');
+-  assert.equal(briefMajlisDoor(near.brief), false); assert.equal(briefMajlisDoor(door.brief), true); assert.equal(briefMajlisDoor(guest.brief), true);
+-  for (const [r, want] of [[near, false], [door, true], [guest, true]]) {
++  assert.equal(briefMajlisDoor(near.brief), false); assert.equal(briefMajlisDoor(door.brief), true); assert.equal(briefMajlisDoor(guest.brief), false);
++  assert.ok(guest.brief.relations.some(x => x.kind === RELATIONS.GUEST_ACCESS && x.directDoor === 'unspecified'));
++  for (const [r, want] of [[near, false], [door, true], [guest, false]]) {
+     assert.equal(majlisDiningAsked(sharedReviewRequest(r, {}, {})), want, r.text);
+     assert.equal(programV2({ bedrooms: 3, majlis: 1, kitchens: 1, halls: 1, dining: 1 }, r).majlisDining, want, r.text);
+   }
+   assert.ok(near.brief.relations.every(x => x.kind !== RELATIONS.DIRECT_DOOR));
+ });
+ test('01 الطلب بلا عقد (مستدعٍ قديم) يُبنى عقده من نصه وبنوده بالدالة نفسها', () => {
+-  const b = briefOf({ text: 'ابي مقلط للضيوف' }); assert.equal(briefMajlisDoor(b), true);
++  const b = briefOf({ text: 'ابي مقلط للضيوف' }); assert.equal(briefMajlisDoor(b), false); assert.ok(b.relations.some(x => x.kind === RELATIONS.GUEST_ACCESS)); // (01b)
+   assert.deepEqual(buildSharedBrief('', {}).relations, []);
+ });
+ 

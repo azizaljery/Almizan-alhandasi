@@ -5,6 +5,7 @@
 // والمراجعة) ← الاختيار والعرض ← المهلة. غير سلوكي: يقرأ خطافات التشخيص الموجودة في المحرك (__v2dbg، __v2rej، __v2pool، سجل البحث).
 // لا يُشغَّل على H11–H15 (المجموعة المختومة): يرفضها صراحة.
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { reportName, reportPath } from './_report-name.mjs';
 
 const argv = process.argv.slice(2), opt = k => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : null; };
 const [set, id] = argv.filter((a, i) => !a.startsWith('--') && !argv[i - 1]?.startsWith('--'));
@@ -37,18 +38,18 @@ const poolGuest = pool.map(p => ({ pat: p.pat, defects: guest(p.doc) }));
 // تنوع الحوض بالمعيار المجمّد: أكبر مجموعة «مختلفة معماريًا» جشعًا
 const distinct = []; for (const p of pool) { try { const d = typeof p.doc === 'string' ? parseDoc(p.doc) : p.doc; if (distinct.every(q => sameOrDifferent(q.d, d).different)) distinct.push({ pat: p.pat, d }); } catch { /* */ } }
 const rep = {
-  case: { set, id, land, text: C.text, keep }, engineRoot: root, ms,
+  case: { set, id, land, text: C.text, keep }, engineRoot: root, ms, maxRssMB: Math.round(process.resourceUsage().maxRSS / 1024),
   command: `node scripts/diagnose-r21.mjs ${set} ${id}${opt('root') ? ' --root ' + opt('root') : ''}`,
   stage1_brief: { understood: req.understood, unclear: req.unclear, rules: (req.rules || []).map(r => `${r.kind}:${r.a}${r.b ? '/' + r.b : ''}${r.side ? ':' + r.side : ''} «${r.quote || r.text}»`), dims: req.dims, prefs: req.prefs },
   stage2_constraints: search.units ? { units: search.units, hard: (search.rel || []).filter(r => r.hard).map(r => r.ar), soft: (search.rel || []).filter(r => !r.hard).map(r => r.ar) } : null,
   stage3_topology: { grids: search.grids || null, distinctTopologies: search.distinctTopologies ?? null, dimFit: search.dimFit ?? null, dimFail: search.dimFail ?? null, picked: search.picked ?? null, synthTrees: search.synth ?? search.trees ?? null, libraryTrees: search.library ?? null, twoFloors: search.twoFloors || null, groundStair: search.groundStair ? { grids: search.groundStair.grids, picked: search.groundStair.picked } : null },
   stage4_allocation: { treesOptimized: trees.length, treesWithoutSolution: trees.filter(([, v]) => v.endsWith('x')).length, topViolations: top(treeWhy, 14), treeStats: err?.treeStats || null },
   stage5_validation: { rejected: rej.length, topReasons: top(rejWhy, 14), twoFloorWhy: err?.twoFloorWhy || null, pool: (out?.pool || []).length || pool.length, poolGuestDefects: poolGuest, poolDistinctByFrozenCriterion: distinct.map(x => x.pat) },
-  stage6_selection: out ? { shown: out.designs.map(d => ({ pat: d.pat, status: d.presentation?.status, mandatory: d.presentation?.mandatory || [], r16: d.r16 || [] })), shortfall_ar: out.shortfall_ar || null, hidden: (out.hidden || []).length } : null,
+  stage6_selection: out ? { shown: out.designs.map(d => ({ pat: d.pat, status: d.presentation?.status, mandatory: d.presentation?.mandatory || [], r16: d.r16 || [], hidden_ar: d.presentation?.hidden_ar || [], hiddenReasons: d.presentation?.hiddenReasons || [] })), shortfall_ar: out.shortfall_ar || null, hidden: (out.hidden || []).length } : null,
   stage7_timeout: { timedOut: !!(err?.timedOut || out?.timedOut), note: 'المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs' },
   error: err ? { code: err.code || null, message: String(err.message || err), report_ar: err.report_ar || null, result: err.result || null } : null,
   result: out?.result || null,
 };
-const dir = here + `evidence/diagnosis-r21/${label}/`; mkdirSync(dir, { recursive: true });
-writeFileSync(dir + `${set}-${id}.json`, JSON.stringify(rep, null, 1));
+const dir = here + `evidence/diagnosis-r21/${reportName(label)}/`; mkdirSync(dir, { recursive: true });
+writeFileSync(reportPath(dir, [set, id]), JSON.stringify(rep, null, 1));
 console.log(JSON.stringify({ id, ms, outcome: out ? out.designs.map(d => d.pat + ':' + d.presentation?.status) : err.code, grids: rep.stage3_topology.grids, trees: rep.stage4_allocation.treesOptimized, noSol: rep.stage4_allocation.treesWithoutSolution, topViol: rep.stage4_allocation.topViolations.slice(0, 5), rejected: rep.stage5_validation.rejected, topRej: rep.stage5_validation.topReasons.slice(0, 5), poolDistinct: rep.stage5_validation.poolDistinctByFrozenCriterion.length, pool: rep.stage5_validation.pool }, null, 0));

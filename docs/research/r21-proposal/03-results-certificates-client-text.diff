@@ -1,0 +1,988 @@
+diff --git a/dist/certificates.mjs b/dist/certificates.mjs
+new file mode 100644
+index 0000000..d88c08e
+--- /dev/null
++++ b/dist/certificates.mjs
+@@ -0,0 +1,93 @@
++// (الجولة 21 — مقترح، مكيَّف من kit-r21/src/results.mjs verifyLogicalContradiction) شهادات الاستحالة ومدققها المستقل.
++// قاعدة المالك: لا «PROVEN_INFEASIBLE» إلا بشهادة يتحقق منها مدقق مستقل يعيد الحساب من الطلب والأرض نفسيهما (لا يثق بما قاله المنتج)،
++// ومدقق الحدود (المساحة والعرض والمقاس) مختبر على كل حالة معروف لها حل فلا يصنفها مستحيلة (tests/stage2-r21-proposal.test.mjs §03).
++// أنواع الشهادات:
++//  AREA_LOWER_BOUND   — مجموع أصغر المقاسات المعتمدة في الميزان لفراغات البرنامج (بلا جدران ولا حركة) أكبر من المتاح للبناء. «مستحيل» هنا نسبةً
++//                       إلى حدود الميزان الدنيا المعلنة (MIN_NET) لا مطلقًا — ويُقال ذلك للعميل.
++//  DIMENSION_BOUND    — مقاس صريح (صافٍ + جداران داخليان على الأقل) أطول من بُعد البناء المقابل.
++//  WIDTH_BOUND        — العرض القابل للبناء أضيق من أدنى عرض لمجلس بجلستين (المجلس ≥ 4.2 م في الاتجاهين).
++//  LOGICAL_CONTRADICTION — بندان إلزاميان من العميل لا يجتمعان منطقيًا (الفراغ نفسه أمامًا وخلفًا، قريب وبعيد للزوج نفسه، دور أرضي وعلوي، دور
++//                       واحد مع غرف في العلوي). يُتحقق من وجود البندين في الطلب بنصهما ومعناهما.
++// وحدة نقية بلا أرقام حالات.
++import { programV2, siteOf, landWithSite } from './villa-layout-v2.mjs';
++
++/** أصغر المقاسات الصافية المعتمدة في الميزان (قيم تصميمية للميزان، غير نظامية) — الجدول نفسه يُستعمل في المنتج والمدقق ويُتحقق منه في الشهادة. */
++export const MIN_NET = Object.freeze({ suite: 12, master: 16, bath: 3.5, majlis: 24, women: 20, dining: 12, kitchen: 10, maid: 7.8, maidBath: 2.5, driver: 7, wc: 2.5, office: 8, prayer: 6, family: 12, store: 1.5, hall: 4.2 * 4.2, foyer: 2.4 * 2.4 });
++export const MIN_INNER_WALL = .12, MIN_MAJLIS_W = 4.2;
++/** أدنى صافٍ لكتلة من البرنامج (منفصل عن أي تقدير للمساحة المعتادة). */
++export function minNetOf(b) {
++  if (b.fixedArea) return b.dimNet ? b.dimNet.s * b.dimNet.l : b.area * .9;
++  if (b.kind === 'suite') return (b.master ? MIN_NET.master : MIN_NET.suite) + (b.bath ? MIN_NET.bath : 0);
++  if (b.kind === 'majlis') return b.men || b.primary ? MIN_NET.majlis : MIN_NET.women;
++  if (b.kind === 'maid') return MIN_NET.maid + (b.bath ? MIN_NET.maidBath : 0);
++  return Math.min(b.area, MIN_NET[b.kind] ?? b.area * .8);
++}
++const availableOf = (land, requirements) => {
++  const site = siteOf(landWithSite(land, requirements));
++  const plotA = (Number(land.width) || 0) * (Number(land.length) || 0) || (site.W + 3) * (site.D + 4.5);
++  const cover = plotA * (site.plot?.coverage ?? .75), box = site.W * site.D;
++  return { site, available: Math.min(cover, box), cover, box };
++};
++const UPPER = new Set(['suite', 'family']);
++
++/** المنتج: شهادة المساحة إن ثبتت، وإلا null. floors: 1 أو 2 (الدور الأكبر). */
++export function areaCertificate({ land = {}, counts = {}, requirements = {}, floors = 1 } = {}) {
++  const P = programV2(counts, requirements), { available } = availableOf(land, requirements);
++  const items = P.blocks.map(b => ({ id: b.id, kind: b.kind, upper: floors === 2 && UPPER.has(b.kind) && !b.elderly, minNet: Math.round(minNetOf(b) * 100) / 100 }));
++  const fixed = MIN_NET.hall + MIN_NET.foyer, stair = 3.6 * 2.6;
++  const g = items.filter(i => !i.upper).reduce((a, i) => a + i.minNet, 0) + fixed + (floors === 2 ? stair : 0);
++  const u = floors === 2 ? items.filter(i => i.upper).reduce((a, i) => a + i.minNet, 0) + MIN_NET.hall + stair : 0;
++  const lowerBound = Math.max(g, u);
++  return lowerBound > available + 1e-6 ? { type: 'AREA_LOWER_BOUND', floors, lowerBound: Math.round(lowerBound * 100) / 100, available: Math.round(available * 100) / 100, items, table: MIN_NET } : null;
++}
++/** المنتج: شهادة المقاس الصريح لكل مقاس أطول من بُعد البناء. */
++export function dimensionCertificates({ land = {}, requirements = {} } = {}) {
++  const { site } = availableOf(land, requirements), out = [];
++  for (const [key, dm] of Object.entries(requirements.dims || {})) {
++    if (!dm || !(dm.w > 0 && dm.l > 0)) continue;
++    const s = Math.min(dm.w, dm.l), l = Math.max(dm.w, dm.l), tol = Number.isFinite(dm.tol) ? dm.tol : .05, bS = Math.min(site.W, site.D), bL = Math.max(site.W, site.D);
++    if (s - tol + MIN_INNER_WALL > bS + 1e-6 || l - tol + MIN_INNER_WALL > bL + 1e-6) out.push({ type: 'DIMENSION_BOUND', key, s, l, tol, wall: MIN_INNER_WALL, buildable: { W: site.W, D: site.D } });
++  }
++  return out;
++}
++export function widthCertificate({ land = {}, requirements = {}, counts = {} } = {}) {
++  const P = programV2(counts, requirements); if (!P.men && !P.blocks.some(b => b.kind === 'majlis')) return null;
++  const { site } = availableOf(land, requirements);
++  return Math.min(site.W, site.D) < MIN_MAJLIS_W + MIN_INNER_WALL - 1e-6 ? { type: 'WIDTH_BOUND', minWidth: MIN_MAJLIS_W + MIN_INNER_WALL, W: site.W, D: site.D } : null;
++}
++const OPP = { front: 'back', back: 'front' };
++const close = r => r.kind === 'near' || r.kind === 'adjacent', far = r => r.kind === 'far' || r.kind === 'apart';
++const samePair = (a, b) => (a.a === b.a && a.b === b.b) || (a.a === b.b && a.b === b.a);
++/** المنتج: شهادة تعارض منطقي بين بندين من بنود العميل، أو null. */
++export function logicalCertificate(type, idA, idB) { return idA && idB ? { type: 'LOGICAL_CONTRADICTION', conflict: type, a: idA, b: idB } : null; }
++
++/**
++ * المدقق المستقل: يعيد الحساب من الطلب والأرض (لا يقرأ الأرقام من الشهادة إلا ليقارنها). يعيد { valid, why }.
++ */
++export function verifyCertificate(cert, { land = {}, counts = {}, requirements = {} } = {}) {
++  try {
++    if (!cert || typeof cert !== 'object') return { valid: false, why: 'no-certificate' };
++    if (cert.type === 'AREA_LOWER_BOUND') {
++      if (JSON.stringify(cert.table) !== JSON.stringify(MIN_NET)) return { valid: false, why: 'table-mismatch' };
++      const re = areaCertificate({ land, counts, requirements, floors: cert.floors || 1 });
++      if (!re) return { valid: false, why: 'recomputed-bound-fits' };
++      return Math.abs(re.lowerBound - cert.lowerBound) < .05 && Math.abs(re.available - cert.available) < .05 ? { valid: true } : { valid: false, why: 'numbers-mismatch' };
++    }
++    if (cert.type === 'DIMENSION_BOUND') {
++      const re = dimensionCertificates({ land, requirements }).find(c => c.key === cert.key);
++      return re && re.s === cert.s && re.l === cert.l ? { valid: true } : { valid: false, why: 'dimension-fits' };
++    }
++    if (cert.type === 'WIDTH_BOUND') return widthCertificate({ land, requirements, counts }) ? { valid: true } : { valid: false, why: 'width-fits' };
++    if (cert.type === 'LOGICAL_CONTRADICTION') {
++      const R = requirements.rules || [], A = R.find(r => r.id === cert.a), B = R.find(r => r.id === cert.b);
++      if (!A || !B || A === B) return { valid: false, why: 'rules-missing' };
++      if ([A, B].some(r => r.level && r.level !== 'must')) return { valid: false, why: 'not-mandatory' };
++      if (cert.conflict === 'place-opposite') return A.kind === 'place' && B.kind === 'place' && A.a === B.a && A.mode !== 'avoid' && B.mode !== 'avoid' && OPP[A.side] === B.side ? { valid: true } : { valid: false, why: 'not-opposite' };
++      if (cert.conflict === 'relation-contradiction') return samePair(A, B) && ((close(A) && far(B)) || (far(A) && close(B))) && !A.negated && !B.negated ? { valid: true } : { valid: false, why: 'not-contradictory' };
++      if (cert.conflict === 'floor-both') return A.kind === 'floor' && B.kind === 'floor' && A.a === B.a && A.floor !== B.floor ? { valid: true } : { valid: false, why: 'not-both-floors' };
++      return { valid: false, why: 'unsupported-conflict-type' };
++    }
++    return { valid: false, why: 'unknown-type' };
++  } catch (e) { return { valid: false, why: 'checker-error' }; }
++}
++export default { MIN_NET, minNetOf, areaCertificate, dimensionCertificates, widthCertificate, logicalCertificate, verifyCertificate };
+diff --git a/dist/client-language.mjs b/dist/client-language.mjs
+new file mode 100644
+index 0000000..0741122
+--- /dev/null
++++ b/dist/client-language.mjs
+@@ -0,0 +1,86 @@
++// (الجولة 21 — المراجعة العمياء r20: «لغة داخلية في الإشعارات»: «المقياس الوظيفي v2»، «بعد جوهري»، «شكل U/L/H»، «مخالفة إلزامية في الميزان»،
++// «يُعفى منه بطلب صريح»، «شبكة 4×3»، «القيود الصلبة»، «المولّد») كل نص يراه العميل يمر بهذا المحوّل: يُعاد صوغ العبارات الداخلية
++// المعروفة بعربية واضحة، وتُحذف الرموز الداخلية. وقائمة المصطلحات الممنوعة (BANNED_CLIENT_TERMS) يفحص بها اختبار كل نص عميل.
++// وحدة نقية بلا DOM ولا اعتماد على حالات بعينها.
++
++/** المصطلحات الممنوعة في نص العميل بعد التحويل: [نمط، سبب]. */
++export const BANNED_CLIENT_TERMS = Object.freeze([
++  [/المقياس الوظيفي|\bv[123]\b/, 'اسم مقياس أو إصدار داخلي'],
++  [/بعد(?:ان)? جوهري|بعدان جوهريان|أبعاد جوهرية/, 'مصطلح مقياس الاختلاف الداخلي'],
++  [/شكل\s*[«"]?[ULHT]\b|«شكل [A-Z]/, 'اسم نمط داخلي بحرف لاتيني'],
++  [/مخالفة إلزامية في الميزان|شرط إلزامي في الميزان/, 'تسمية طبقة تقييم داخلية'],
++  [/يُعفى منه|يعفى منه/, 'لغة إعفاء داخلية'],
++  [/شبكة\s*\d+\s*[×x]\s*\d+|القيود الصلبة|القيد الصلب/, 'مصطلح بحث القيود الداخلي'],
++  [/المولّد|المولد\b|التلدين|الشجرة المقصلية|أشجار التقسيم/, 'اسم مكوّن برمجي'],
++  [/البوابات الثقيلة|بوابات الجودة|بوابة المراجعة|رسب في بوابة/, 'اسم فحص داخلي'],
++  [/قرار المالك|توجيه المالك/, 'إشارة إلى قرارات داخلية'],
++  [/نسخة معدّلة|نسخ معدّلة|تبادل موضعي|النمط ذاته|الأنماط المرشحة|أنماط تنظيمية|المرشحون المبنيون/, 'مصطلح اختيار داخلي'],
++  [/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/, 'رمز قياس داخلي'],
++  [/\b(?:alt|opt)-\w+|\.(?:json|mjs|png)\b/i, 'معرّف ملف'],
++  [/\b[a-z]{3,}:[a-z]{1,5}\d[a-z0-9]*\b/i, 'معرّف تنظيم داخلي'],
++  // (مقترح — kit results.mjs lintClientText) مصطلحات المحرك والاستثناءات
++  [/\b(?:CSP|hardLink|R14_OFF|TypeError|ReferenceError|VILLA_[A-Z_]+|__v2\w*)\b/, 'مصطلح أو استثناء برمجي'],
++  [/شجرة تقسيم|خطأ داخلي|رمز الاستثناء|Cannot read|undefined|null\b/i, 'نص استثناء داخلي'],
++]);
++/** (kit lintClientText) بالإضافة إلى قائمة المصطلحات الموجودة لا بدلًا منها. */
++export const lintClientText = text => clientLint(text).map(x => x.match);
++
++/** (الجولة 21) أسماء فحوص المراجعة بعربية العميل (كان يظهر الرمز الداخلي: «رسب في بوابة المراجعة PARKING»). */
++export const GATE_AR = Object.freeze({ BED_MAJLIS: 'فصل غرف النوم عن المجلس', COVERAGE: 'نسبة البناء', DAYLIGHT: 'الإضاءة الطبيعية', DOOR_SWING: 'حركة فتح الأبواب', GUEST_ROUTE: 'مسار الضيف',
++  HALL_ASPECT: 'تناسب الصالة', INTEGRITY: 'سلامة الرسم', MAJLIS_PRIVACY: 'خصوصية المجلس', MIN_WIDTH: 'أدنى عرض للفراغات', PLACEMENT: 'مواضع الفراغات المطلوبة', PLOT: 'حدود الأرض',
++  PROGRAM: 'اكتمال البرنامج', REACH: 'الوصول إلى كل الفراغات', SETBACK_REG: 'الارتدادات النظامية', STAIRS: 'الدرج', STAIR_GEOMETRY: 'أبعاد الدرج', WET_DOOR: 'أبواب دورات المياه', WINDOW_SIZE: 'مساحة النوافذ',
++  PARKING: 'مواقف السيارات', STRUCTURAL: 'المراجعة الإنشائية المبدئية', CIRCULATION: 'الحركة الفعلية مع الأثاث', CONSISTENCY_2D3D: 'تطابق المسقط والمجسم' });
++// إعادة الصوغ: الأطول أولًا (العبارات الكاملة قبل أجزائها)
++const REWRITE = [
++  // أسباب النقص (shortfallReason)
++  [/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/g, (_, a, b) => `جرّبتُ ${a} ${+a >= 3 && +a <= 10 ? 'تنظيمات مختلفة' : 'تنظيمًا مختلفًا'} للبيت، اجتاز الفحص منها ${b}`],
++  [/(\d+) نسخة معدّلة من بديل معروض \(لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط\)/g, (_, n) => `${n} ${+n === 1 ? 'تصميم يكاد يطابق تصميمًا معروضًا' : 'تصاميم تكاد تطابق تصاميم معروضة'} (يختلف في موضع الدرج أو حدود المبنى أو المقاسات فقط)`],
++  [/(\d+) اختلافها عن بديل معروض جزئي \(بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان\)/g, (_, n) => `${n} ${+n === 1 ? 'تصميم يختلف' : 'تصاميم تختلف'} عن المعروض في جانب واحد فقط (توزيع الوظائف أو الحركة أو الخصوصية)، وأعرض فقط ما يختلف في جانبين على الأقل`],
++  [/(\d+) تنويع على تنظيم معروض نفسه \(النمط ذاته بتبادل موضعي\)/g, (_, n) => `${n} ${+n === 1 ? 'تصميم هو التصميم المعروض نفسه' : 'تصاميم هي التصاميم المعروضة نفسها'} مع تبديل موضع غرفتين`],
++  [/(\d+) رسبت في البوابات الثقيلة \(([^)]*)\)/g, (_, n, w) => `${n} لم ${+n === 1 ? 'يجتز' : 'تجتز'} فحص ${w.replace(/\s*\d+/g, '').replace(/،\s*/g, ' و')}`],
++  [/ورُفض (\d+) في بوابات الجودة والسلامة/g, (_, n) => `ولم ${+n === 1 ? 'يجتز تصميم واحد' : `يجتز ${n}`} فحوص الجودة والسلامة`],
++  [/رُفض (\d+) في المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, (_, n) => `لم ${+n === 1 ? 'يجتز تصميم واحد' : `يجتز ${n}`} المراجعة المعمارية`],
++  [/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية'],
++  [/لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا \(قرار المالك\)\.?/g, 'لم أُكمل العدد بنسخ معكوسة أو متشابهة ولا بتصميم يخالف شرطًا أساسيًا.'],
++  [/(\d+) لم تدخل مجموعة تحقق أدنى اختلاف مع كل البدائل المعروضة معًا/g, (_, n) => `${n} لا ${+n === 1 ? 'يختلف' : 'تختلف'} بما يكفي عن كل التصاميم المعروضة معًا`],
++  // طبقات التقييم
++  [/مخالفة إلزامية في الميزان\s*—\s*/g, 'شرط أساسي غير متحقق: '],
++  [/مخالفة إلزامية في الميزان/g, 'شرط أساسي غير متحقق'],
++  [/\(شرط إلزامي في الميزان(?: \([^)]*\))?\s*—\s*يُعفى منه بطلب صريح[^)]*\)/g, '(شرط أساسي في تصميم البيت السعودي، ويمكنك طلب غيره صراحةً)'],
++  [/شرط إلزامي في الميزان(?: \([^)]*\))?/g, 'شرط أساسي في تصميم البيت السعودي'],
++  [/يُعفى منه بطلب صريح[^،.)]*/g, 'ويمكنك طلب غيره صراحةً'],
++  // أسماء الأنماط بحرف لاتيني
++  [/«?شكل ([ULHT])(?: خلفي)?»?\s*:\s*/g, ''],
++  [/\(«شكل [A-Z][^»]*»(?:، «[^»]*»)*\)/g, ''],
++  [/«شكل [A-Z][^»]*»/g, 'هذا التنظيم'],
++  // بحث القيود الداخلي
++  [/جُرّبت شبكة[^.\n]*\./g, ''],
++  [/السبب من المولّد:\s*/g, ''],
++  [/من الأنماط المرشحة/g, 'ضمن التنظيمات التي جرّبتها'],
++  [/البوابات الثقيلة \(([^)]*)\)/g, 'الفحوص المفصّلة ($1)'],
++  [/البوابات الثقيلة/g, 'الفحوص المفصّلة'],
++  [/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة'],
++  [/رسب في بوابة المراجعة\s+([A-Z_0-9]+)/g, (_, g) => `لم يجتز فحص «${GATE_AR[g] || 'المراجعة المعمارية'}»`],
++  [/\(قرار المالك\)/g, ''],
++  [/المولّد|المولد\b/g, 'المحرك'],
++  [/القيود الصلبة/g, 'الشروط الأساسية'],
++  [/المقياس الوظيفي v2/g, 'مقياس الاختلاف الوظيفي'],
++  [/التطابق 2D\/3D/g, 'تطابق المسقط والمجسم'],
++];
++
++/** يحوّل نصًا داخليًا إلى عربية العميل (لا يغيّر الأرقام ولا الأسماء العربية). */
++export function toClientAr(text) {
++  if (text == null) return text;
++  let s = String(text);
++  for (const [re, rep] of REWRITE) s = s.replace(re, rep);
++  // الرموز الداخلية الباقية (MAJLIS_ISOLATED…) تُحذف بأقواسها إن كانت وحدها بين قوسين
++  s = s.replace(/\s*\((?:[A-Z][A-Z0-9]*_[A-Z0-9_]+[،, ]*)+\)/g, '').replace(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/g, '');
++  return s.replace(/[ \t]{2,}/g, ' ').replace(/\s+([.،؛])/g, '$1').replace(/؛\s*؛/g, '؛').replace(/^\s*[؛،]\s*/, '').trim();
++}
++/** المصطلحات الممنوعة الباقية في نص (بعد التحويل أو قبله): [{ match, why }]. */
++export function clientLint(text) {
++  const s = String(text ?? ''), out = [];
++  for (const [re, why] of BANNED_CLIENT_TERMS) { const m = re.exec(s); if (m) out.push({ match: m[0], why }); }
++  return out;
++}
++export default { BANNED_CLIENT_TERMS, GATE_AR, toClientAr, clientLint };
+diff --git a/dist/client-text.mjs b/dist/client-text.mjs
+index 385af05..ff38cf5 100644
+--- a/dist/client-text.mjs
++++ b/dist/client-text.mjs
+@@ -2,6 +2,7 @@
+ // ومعرّفات حالات الاختبار (C8)، وأسماء الأنماط الداخلية (centralhall:ch1)، وعبارات الاختبار («محاكاة اختبار القبول»).
+ // المراجع المستقل r17 وجد أسماء ملفات و«محاكاة اختبار القبول» في صور الفرق المعروضة للعميل.
+ // وحدة نقية بلا DOM: تُستعمل في الاختبارات وفي رسم صور الأدلة.
++import { toClientAr, clientLint } from './client-language.mjs';
+ 
+ /** أنماط اللغة الداخلية الممنوعة في نص العميل. */
+ export const INTERNAL_PATTERNS = Object.freeze([
+@@ -30,8 +31,8 @@ export const designName = i => `التصميم ${i}`;
+  */
+ export function shortfallNotice({ requested = 1, shown = 0, shortfall_ar = null, hidden = [], report_ar = null } = {}) {
+   if (shown >= requested && !report_ar) return null;
+-  const clean = t => String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, (_, a, b) => `جرّبتُ ${a} ${+a >= 3 && +a <= 10 ? 'تنظيمات مختلفة' : 'تنظيمًا مختلفًا'}، اجتاز الفحص منها ${b}`)
+-    .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').replace(/\s+([.،؛])/g, '$1').trim();
++  const clean = t => toClientAr(String(t || '').replace(/\(قرار المالك\)/g, '').replace(/المرشحون المبنيون من أنماط تنظيمية مختلفة (\d+)، اجتاز البوابات منهم (\d+)/, (_, a, b) => `جرّبتُ ${a} ${+a >= 3 && +a <= 10 ? 'تنظيمات مختلفة' : 'تنظيمًا مختلفًا'}، اجتاز الفحص منها ${b}`)
++    .replace(/بوابات الجودة والسلامة/g, 'فحوص الجودة والسلامة').replace(/المراجعة المعمارية المستقلة \([A-Z_،, ]+\)/g, 'المراجعة المعمارية').replace(/\s+/g, ' ').replace(/\s+([.،؛])/g, '$1').trim());
+   if (!shown) {
+     const lines = String(report_ar || shortfall_ar || 'لم يتسع أي تنظيم سليم لهذا الطلب على هذه الأرض.').split('\n').map(clean).filter(Boolean);
+     return { title_ar: 'لم أُعدّ مخططًا لطلبك على هذه الأرض', lines_ar: [...lines, 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا. عدّل أحد البنود أعلاه وسأعيد البحث.'] };
+diff --git a/dist/design.mjs b/dist/design.mjs
+index 432757a..f9a950a 100644
+--- a/dist/design.mjs
++++ b/dist/design.mjs
+@@ -11,6 +11,7 @@ import { normalizeLand } from './home-flow.mjs';
+ import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
+ import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
+ import { shortfallNotice } from './client-text.mjs';
++import { toClientAr } from './client-language.mjs';
+ 
+ const $ = id => document.getElementById(id);
+ const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
+@@ -65,7 +66,7 @@ function show(index) {
+     (session.siteQuestions || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'عن الموقع (اختياري):'), el('ul', { class: 'tick' }, session.siteQuestions.map(c => el('li', { class: 'no', 'data-site-question': c.type }, c.question_ar)))) : null,
+     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
+     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
+-  const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
++  const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, toClientAr(t)))),
+     d.feedback ? el('p', { class: 'sub' }, 'عدّلتُ هذا التصميم بناءً على: ' + d.feedback.changes.join('، ')) : null);
+   const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
+     el('tbody', {}, S.rooms.filter(r => r.area >= 2).map(r => el('tr', {}, el('td', {}, el('span', { class: 'z', style: `background:${ZONES[r.zone].color}` }), r.name), doc.levels.length > 1 ? el('td', {}, r.level) : null, el('td', { class: 'num' }, `${fmt(r.l)} × ${fmt(r.w)}`), el('td', { class: 'num' }, fmt(r.area)), el('td', {}, ZONES[r.zone].label)))),
+diff --git a/dist/feasibility.mjs b/dist/feasibility.mjs
+index 08f3ffb..0b5fdae 100644
+--- a/dist/feasibility.mjs
++++ b/dist/feasibility.mjs
+@@ -5,6 +5,9 @@
+ // العروض قيم تقديرية للميزان (غير نظامية) — تُذكر كذلك. الحكم «مستحيل» يُطلق فقط حين يتجاوز المطلوبُ المتاحَ بلا شك؛ ما دون ذلك «تنبيه».
+ import { programV2, siteOf, landWithSite } from './villa-layout-v2.mjs';
+ import { SUBJECTS } from './rules.mjs';
++import { detectConflicts } from './requirements.mjs';
++import { MIN_NET, minNetOf, areaCertificate, dimensionCertificates, widthCertificate, logicalCertificate } from './certificates.mjs';
++export { MIN_NET };
+ const SUBJECT_AR = Object.fromEntries(SUBJECTS.map(s => [s.id, s.ar]));
+ 
+ export const FEAS_LIMITS = Object.freeze({ grossFactor: 1.15, warnFactor: .92, minMajlisW: 4.2, minFoyerW: 2.4, wall: .25, tier: 'تقدير الميزان (غير نظامي)' });
+@@ -16,7 +19,10 @@ const AR_DIM = { majlis: 'المجلس', kitchen: 'المطبخ', dining: 'ال
+  * analyzeFeasibility({ land, counts, requirements }) → { feasible, hard:[{id, ar}], warnings:[{id, ar}], options_ar:[...], numbers, report_ar }
+  * hard: تعارض مؤكد يمنع التوليد. warnings: ما قد يقلل البدائل أو يحتاج قرار العميل (يُذكر ولا يمنع).
+  */
+-export function analyzeFeasibility({ land = {}, counts = {}, requirements = {} } = {}) {
++// (الجولة 21 — مقترح) الحدود الدنيا وشهاداتها ومدققها المستقل في certificates.mjs (الجدول نفسه للمنتج والمدقق)
++/** أنواع تعارض بنود العميل المنطقية: لا يوجد مخطط يحققها معًا (دليل منطقي)، فلا يُرسم حتى يختار العميل. */
++export const LOGICAL_CONFLICTS = Object.freeze(['place-opposite', 'relation-contradiction', 'floor-both']); // ما له شهادة يتحقق منها المدقق؛ وسائر أنواع التعارض أسئلة للعميل لا استحالة
++export function analyzeFeasibility({ land = {}, counts = {}, requirements = {}, provisional = false } = {}) {
+   const hard = [], warn = [], options = new Set();
+   let site, P;
+   try { site = siteOf(landWithSite(land, requirements)); P = programV2(counts, requirements); }
+@@ -28,23 +34,28 @@ export function analyzeFeasibility({ land = {}, counts = {}, requirements = {} }
+   const upperKinds = new Set(['suite', 'family']);
+   const upNet = floors === 2 ? sum(P.blocks.filter(b => upperKinds.has(b.kind) && !b.elderly).map(b => b.area)) + 22 + 17 : 0, gNet = net - upNet + (floors === 2 ? 17 : 0);
+   const gross = (floors === 2 ? Math.max(gNet, upNet) : net) * FEAS_LIMITS.grossFactor;
+-  const numbers = { buildableW: r1(site.W), buildableD: r1(site.D), buildableArea: Math.round(boxA), coverageArea: Math.round(coverA), programNet: Math.round(net), neededGrossPerFloor: Math.round(gross), floors };
+-  // (1) المساحة
+-  if (gross > availA) {
+-    hard.push({ id: 'AREA', ar: `البرنامج المطلوب يحتاج نحو ${Math.round(gross)} م² ${floors === 2 ? 'في الدور الأكبر' : 'في الدور الواحد'} (صافي الفراغات ${Math.round(net)} م² مع الجدران والحركة — ${FEAS_LIMITS.tier})، والمتاح للبناء ${Math.round(availA)} م² (${r1(site.W)} × ${r1(site.D)} م بعد الارتدادات${coverA < boxA ? '، ونسبة البناء 75٪ — اشتراط نظامي' : ''}).` });
++  // (الجولة 21) الحد الأدنى المثبت: أصغر المقاسات المعتمدة بلا جدران ولا حركة — دليل استحالة إن زاد على المتاح
++  const lowAll = P.blocks.map(b => ({ b, a: minNetOf(b) })), lowSum = a => sum(a.map(x => x.a));
++  const lowNet = lowSum(lowAll) + MIN_NET.hall + MIN_NET.foyer;
++  const lowUp = floors === 2 ? lowSum(lowAll.filter(x => upperKinds.has(x.b.kind) && !x.b.elderly)) + MIN_NET.hall + 3.6 * 2.6 : 0, lowG = floors === 2 ? lowNet - lowUp + 3.6 * 2.6 + MIN_NET.hall : lowNet;
++  const lower = floors === 2 ? Math.max(lowG, lowUp) : lowNet;
++  const numbers = { buildableW: r1(site.W), buildableD: r1(site.D), buildableArea: Math.round(boxA), coverageArea: Math.round(coverA), available: Math.round(availA), programNet: Math.round(floors === 2 ? Math.max(gNet, upNet) : net), programNetTotal: Math.round(net), neededGrossPerFloor: Math.round(gross), lowerBoundPerFloor: Math.round(lower), floors };
++  // (1) المساحة: «مستحيل» بالدليل فقط (الحد الأدنى > المتاح)؛ وما بين الحد الأدنى والتقدير المعتاد «ضيق» يُبحث فيه ولا يُرفض
++  const areaCert = areaCertificate({ land, counts, requirements, floors });
++  if (areaCert) {
++    hard.push({ id: 'AREA', proof: 'area-lower-bound', certificate: areaCert, ar: `حتى بأصغر المقاسات المعتمدة في الميزان يحتاج البرنامج ${Math.round(lower)} م² صافيًا ${floors === 2 ? 'في الدور الأكبر' : ''} بلا جدران ولا حركة، والمتاح للبناء ${Math.round(availA)} م² (${r1(site.W)} × ${r1(site.D)} م بعد الارتدادات${coverA < boxA ? '، ونسبة البناء 75٪ — اشتراط نظامي' : ''}). بالمقاسات المعتادة يحتاج نحو ${Math.round(gross)} م² مع الجدران والحركة.`.replace(/\s+بلا/, ' بلا') });
+     if (floors === 1) options.add('دوران بدل دور واحد (غرف النوم في الدور الأول)');
+     options.add(`تقليل عدد الغرف أو مساحاتها بنحو ${Math.round(gross - availA)} م²`);
+-  } else if (gross > availA * FEAS_LIMITS.warnFactor) warn.push({ id: 'AREA_TIGHT', ar: `البرنامج يملأ معظم المساحة القابلة للبناء (${Math.round(gross)} من ${Math.round(availA)} م²): قد يقل عدد البدائل الممكنة، ولا حدائق داخل الكتلة تقريبًا.` });
++  } else if (gross > availA) warn.push({ id: 'AREA_TIGHT', ar: `المساحة ضيقة على البرنامج: بالمقاسات المعتادة يحتاج نحو ${Math.round(gross)} م² والمتاح ${Math.round(availA)} م²؛ قد يتسع بمقاسات أصغر.` });
++  else if (gross > availA * FEAS_LIMITS.warnFactor) warn.push({ id: 'AREA_TIGHT', ar: `البرنامج يملأ معظم المساحة القابلة للبناء (${Math.round(gross)} من ${Math.round(availA)} م²): قد يقل عدد البدائل الممكنة، ولا حدائق داخل الكتلة تقريبًا.` });
+   // (2) المقاسات الصريحة: الضلع الأطول لا يتجاوز أطول بعد قابل للبناء، والأقصر لا يتجاوز الأقصر
+-  for (const [k, dm] of Object.entries(P.dims || {})) {
+-    if (!dm || !(dm.w > 0 && dm.l > 0)) continue;
+-    const s = Math.min(dm.w, dm.l) + FEAS_LIMITS.wall, l = Math.max(dm.w, dm.l) + FEAS_LIMITS.wall, bS = Math.min(site.W, site.D), bL = Math.max(site.W, site.D);
+-    if (l > bL || s > bS) { hard.push({ id: 'DIM_' + k.toUpperCase(), ar: `مقاس «${AR_DIM[k] || k}» ${dm.w}×${dm.l} م لا يتسع في الأرض القابلة للبناء (${r1(site.W)} × ${r1(site.D)} م).` }); options.add(`تصغير مقاس «${AR_DIM[k] || k}» أو قبوله «تقريبًا»`); }
+-  }
++  for (const cert of dimensionCertificates({ land, requirements })) { const dm = P.dims[cert.key] || {}, k = cert.key;
++    hard.push({ id: 'DIM_' + k.toUpperCase(), proof: 'dimension-bound', certificate: cert, ar: `مقاس «${AR_DIM[k] || k}» ${dm.w}×${dm.l} م لا يتسع في الأرض القابلة للبناء (${r1(site.W)} × ${r1(site.D)} م).` }); options.add(`تصغير مقاس «${AR_DIM[k] || k}» أو قبوله «تقريبًا»`); }
+   // (3) العرض الأدنى للواجهة: مجلس الرجال (4.2 م صافيًا) ومدخل العائلة (2.4 م) — إن لم يتسعا أمامًا معًا فالمجلس على واجهة جانبية
+   const frontNeed = (P.men ? FEAS_LIMITS.minMajlisW + .4 : 0) + FEAS_LIMITS.minFoyerW + .3;
+   if (site.W < frontNeed) {
+-    if (site.W < FEAS_LIMITS.minMajlisW + .4) { hard.push({ id: 'WIDTH', ar: `العرض القابل للبناء ${r1(site.W)} م أضيق من مجلس بجلستين متقابلتين (${FEAS_LIMITS.minMajlisW} م صافيًا).` }); options.add('أرض أعرض أو مجلس بمقاس أصغر يحدده العميل'); }
++    const wCert = widthCertificate({ land, requirements, counts });
++    if (wCert) { hard.push({ id: 'WIDTH', proof: 'width-bound', certificate: wCert, ar: `العرض القابل للبناء ${r1(site.W)} م أضيق من مجلس بجلستين متقابلتين (${FEAS_LIMITS.minMajlisW} م صافيًا).` }); options.add('أرض أعرض أو مجلس بمقاس أصغر يحدده العميل'); }
+     else warn.push({ id: 'WIDTH_TIGHT', ar: `الواجهة القابلة للبناء ${r1(site.W)} م لا تتسع للمجلس ومدخل العائلة متجاورين؛ يُبحث عن مجلس بمدخل جانبي.` });
+   }
+   // (4) بنود الموضع المتعارضة: الفراغ نفسه في الأمام وفي الخلف معًا
+@@ -54,9 +65,19 @@ export function analyzeFeasibility({ land = {}, counts = {}, requirements = {} }
+   for (const a of new Set(place.map(r => r.a))) { const sides = new Set(place.filter(r => r.a === a).map(r => r.side)); if (sides.has('front') && sides.has('back')) warn.push({ id: 'PLACE_CONFLICT', ar: `بندان متعارضان في طلبك: «${SUBJECT_AR[a] || 'الفراغ نفسه'}» في الأمام وفي الخلف معًا — سأسألك أيهما تريد، والتصميم الأول مؤقت حتى تجيب.` }); }
+   // (5) الدوران بلا غرف نوم للعلوي
+   if (floors === 2 && !P.blocks.some(b => b.kind === 'suite' && !b.elderly)) warn.push({ id: 'NO_UPPER', ar: 'دوران مطلوبان ولا غرف نوم للدور الأول؛ دور واحد يكفي هذا البرنامج.' });
++  // (6) (الجولة 21) تعارض منطقي بين بنود العميل (الموضع نفسه أمامًا وخلفًا، قريب وبعيد معًا، دور واحد وغرف فوق…): لا مخطط يحققها معًا —
++  // استحالة مثبتة بالمنطق، يُسمّى البندان. في الحوار (provisional) يُرسم تصميم مؤقت ويُسأل العميل، كما في r20.
++  let conflicts = []; try { conflicts = detectConflicts(requirements, land).filter(c => LOGICAL_CONFLICTS.includes(c.type) && !(requirements.answers || {})[c.type]); } catch { conflicts = []; }
++  for (let c of conflicts) {
++    const qs = (c.quotes || []).filter(Boolean).map(q => String(q).replace(/^\s*و(?=ال|[^ ]{3})/, '').trim()); c = { ...c, quotes: qs };
++    const ruleIds = (c.items || []).filter(x => /^R\d+$/.test(x)), cert = ruleIds.length === 2 ? logicalCertificate(c.type, ruleIds[0], ruleIds[1]) : null;
++    if (!cert) { warn.push({ id: 'CLIENT_CONFLICT', type: c.type, ar: `بندان في طلبك يحتاجان توضيحًا: ${qs.map(q => `«${q}»`).join(' و')}.`, question_ar: c.question_ar }); continue; }
++    const item = { id: 'CONFLICT', type: c.type, items: c.items || [], quotes: qs, proof: 'logical-contradiction', certificate: cert, ar: `بندان في طلبك لا يجتمعان في أي مخطط: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' و') || 'بندان متقابلان'}.`, question_ar: c.question_ar };
++    if (provisional) warn.push({ ...item, id: 'CLIENT_CONFLICT' }); else { hard.push(item); options.add(`اختيار أحد البندين: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' أو ')}`); }
++  }
+   const feasible = hard.length === 0;
+   const report_ar = feasible ? (warn.length ? 'الطلب ممكن على هذه الأرض، مع ملاحظات: ' + warn.map(w => w.ar).join('؛ ') : 'الطلب ممكن على هذه الأرض.')
+     : ['لا يمكن تحقيق الطلب كما هو على هذه الأرض:', ...hard.map(h => '— ' + h.ar), 'الخيارات المتاحة: ' + [...options].join('؛ ') + '.', 'لم يُرسم مخطط حتى لا يُعرض عليك تصميم يخالف طلبك؛ عدّل أحد البنود أعلاه وسأعيد التوليد.'].join('\n');
+-  return { feasible, hard, warnings: warn, options_ar: [...options], numbers, report_ar };
++  return { feasible, hard, warnings: warn, options_ar: [...options], numbers, report_ar, conflictingConstraintIds: hard.flatMap(h => h.items?.length ? h.items : [h.id]), proofReference: hard.map(h => h.proof).filter(Boolean), certificates: hard.map(h => h.certificate || null) };
+ }
+ export default { analyzeFeasibility, FEAS_LIMITS };
+diff --git a/dist/home-flow.mjs b/dist/home-flow.mjs
+index 0113429..7fe8583 100644
+--- a/dist/home-flow.mjs
++++ b/dist/home-flow.mjs
+@@ -1,5 +1,6 @@
+ // منطق الصفحة الرئيسية: الأرض (طول وعرض وشوارع ومداخل) ← شرعاء ← تصميم أولي داخل المرسم.
+ // وحدة نقية بلا DOM: كل ما فيها قابل للاختبار بـ node. الواجهة في home.mjs.
++import { clientLint } from './client-language.mjs';
+ import { validatePlot, defaultRooms } from './planner.mjs';
+ import { footprintDiagnostics } from './claude/planner.mjs';
+ import { rankByDNA, geometryFingerprint } from './design-dna.mjs';
+@@ -253,7 +254,7 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
+ /** المولّد المهني لدور واحد: البدائل مستندات مرسم مباشرة؛ بصمة التصميم تُحسب من نماذجها المصدّرة. */
+ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements, exclude = [], prefer = null, engine = 'auto' }) {
+   const villaEngine = villaEngineOf(engine);
+-  const out = VILLA[villaEngine].one({ land, counts, requirements, keep: 4, exclude, prefer });
++  const out = VILLA[villaEngine].one({ land, counts, requirements, keep: requirements?.want || 4, exclude, prefer, provisional: true });
+   const best = out.designs[0], notes = [...new Set(best.notes)];
+   let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror, presentation: d.presentation || null }));
+   try {
+@@ -262,7 +263,7 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
+     dna.geometryFingerprint = geometryFingerprint(best.doc);
+     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
+   } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
+-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
++  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, requirements?.want || 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
+ }
+ 
+ /**
+@@ -280,7 +281,7 @@ export function alternativesInfo(out, requested) {
+ /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
+ function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, engine = 'auto' }) {
+   const villaEngine = villaEngineOf(engine);
+-  const out = VILLA[villaEngine].two({ land, counts, requirements, keep: villaEngine === 'v1' ? 3 : 4, exclude, prefer });
++  const out = VILLA[villaEngine].two({ land, counts, requirements, keep: villaEngine === 'v1' ? 3 : requirements?.want || 4, exclude, prefer, provisional: true });
+   const best = out.designs[0];
+   return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, review: d.review || null, ledger: d.ledger || null, mirror: !!d.mirror, presentation: d.presentation || null })), alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, villaEngine === 'v1' ? 3 : 4), selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
+ }
+@@ -355,6 +356,8 @@ export function friendlyBuildError(err) {
+   // (الجولة العشرون) المحرك الثالث يرفق تقريرًا عربيًا (التعارض والخيارات وما يُغيَّر في الطلب)
+   if (err?.report_ar) return err.report_ar;
+   const raw = String(err?.message || err || '');
++  // (الجولة 21 — مقترح، kit errorToResult) لا يُعرض نص استثناء داخلي على العميل
++  if (clientLint(raw).length || /[A-Za-z]{4,}/.test(raw.replace(/\b[A-Z]\d\b/g, ''))) return 'تعذّر إكمال معالجة طلبك هذه المرة (لم يثبت أنه مستحيل). يمكنك إعادة المحاولة أو تعديل أحد البنود.';
+   if (err instanceof MultiFloorError) return raw;
+   if (/No candidate passed|لم يجد محرك/.test(raw)) return 'لم أجد توزيعًا يتسع لهذا البرنامج في دور واحد على هذه الأرض، دون حذف أو تصغير أي غرفة.';
+   return raw || 'تعذّر توليد التصميم.';
+diff --git a/dist/infeasibility-report.mjs b/dist/infeasibility-report.mjs
+new file mode 100644
+index 0000000..50a289f
+--- /dev/null
++++ b/dist/infeasibility-report.mjs
+@@ -0,0 +1,152 @@
++// (الجولة 21 — المراجعة العمياء r20: إشعار H6 عام مليء بالمصطلحات الداخلية ويقترح تقليل الغرف أو دورًا ثانيًا لبرنامج عادي على أرض 24×28،
++// وإشعار H10 متناقض: المتاح للبناء نحو 541 م² والبرنامج يحتاج نحو 265 م² ثم يقترح تقليل الغرف؛ وإشعار H4 يوحي بأن الأرض لا تكفي
++// والعجز في المحرك) تقرير التعذّر للعميل: صحيح ومحدد وبلا مصطلحات داخلية، ومتسق مع نفسه:
++//  (1) الأرقام الحقيقية: الأرض، والمساحة القابلة للبناء بعد الارتدادات ونسبة البناء، وأدنى مساحة للبرنامج — ومنها الحكم: هل الأرض تكفي؟
++//  (2) كل مقاس صريح مقابل أبعاد البناء.
++//  (3) ما منع التنظيمات فعلًا مقيسًا (عددًا من المجرّب)، بعبارة العميل.
++//  (4) البنود التي إن خُففت وجد المحرك حلًا — مقيسة بإعادة البحث دونها (لا تخمين)، أو «لم يكفِ تخفيف أي بند وحده».
++//  (5) خيارات محددة. لا يُقال «الأرض صغيرة» ولا يُقترح تقليل الغرف أو دور ثانٍ ما دامت المساحة تكفي: يُقال «لم يجد المحرك حلًا ضمن …».
++// وحدة نقية بلا أرقام حالات ولا أسمائها.
++import { toClientAr } from './client-language.mjs';
++
++const r1 = v => Math.round(v * 10) / 10;
++const cnt = (n, one, two, few, many) => (n === 1 ? one : n === 2 ? two : n >= 3 && n <= 10 ? `${n} ${few}` : `${n} ${many}`);
++
++/** أسباب فشل البحث في الأبعاد (رموز التقييم) بعبارة العميل، وما يمكنه تخفيفه. */
++export const TREE_WHY_AR = Object.freeze({
++  'dims:kitchen': ['مقاس المطبخ الذي حددته لا يجتمع مع بقية الفراغات في صف واحد', 'قبول مقاس المطبخ تقريبيًا (±30 سم)'],
++  'dims:majlis': ['مقاس المجلس الذي حددته لا يجتمع مع بقية الفراغات في صف واحد', 'قبول مقاس المجلس تقريبيًا (±30 سم)'],
++  'dims:bedroom': ['مقاس غرف النوم الذي حددته', 'قبول مقاس غرف النوم تقريبيًا'],
++  'dims:master': ['مقاس غرفة النوم الرئيسية الذي حددته', 'قبول مقاس الرئيسية تقريبيًا'],
++  'dims:dining': ['مقاس الطعام الذي حددته', 'قبول مقاس الطعام تقريبيًا'],
++  'dims:hall': ['مقاس الصالة الذي حددته', 'قبول مقاس الصالة تقريبيًا'],
++  'small:suite': ['غرف النوم أصغر من الحد المعتاد', null],
++  'corr-long': ['ممر غرف النوم أطول من 12.5 م', null],
++  'hall-aspect': ['الصالة تصير ممرًا طويلًا', null],
++  'slab-span': ['بحر سقف أطول من 6 م دون جدار', null],
++  'foyer-big': ['المدخل أكبر من حاجته', null],
++  'small:majlis': ['المجلس أصغر من الحد المعتاد', 'قبول مجلس أصغر'],
++  'majlis-width': ['المجلس أضيق من 4.2 م للجلسة المتقابلة', null],
++  'women-width': ['مجلس النساء أضيق من 4.2 م', 'قبول مجلس نساء أصغر'],
++  'kitchen-dining': ['المطبخ لا يلاصق الطعام', null],
++  'guest-link': ['المجلس لا يلاصق الطعام (طريق الضيف إلى الطعام)', 'قبول تقديم الضيافة من خارج المجلس'],
++  'kitchen-street': ['المطبخ على واجهة الشارع', null],
++  'master-smaller': ['غرفة النوم الرئيسية أصغر من غيرها', null],
++  'no-fit': ['لا يتسع التنظيم بأدنى مقاساته', null],
++});
++/** أسباب رفض التصاميم المبنية (نصوص الفحص) مجمّعة بعبارة العميل. */
++const BUILT_WHY = [
++  [/«مجلس النساء» عرضه الصافي|مجلس النساء[^.]*أصغر من/, 'مجلس النساء أضيق أو أصغر من الحد المعتاد (4.2 م للجلسة المتقابلة)', 'قبول مجلس نساء أصغر'],
++  [/«(?:مجلس الرجال|المجلس)» عرضه الصافي|«(?:مجلس الرجال|المجلس)» [\d.]+ م² أصغر من/, 'مجلس الرجال أصغر من الحد المعتاد (24 م² وعرض 4.2 م)', 'قبول مجلس رجال أصغر'],
++  [/الرئيسية [\d.]+ م² أصغر من/, 'غرفة النوم الرئيسية أصغر من غرفة نوم أخرى', 'قبول غرف نوم متساوية تقريبًا'],
++  [/وصل «maid»|الخادمة[^.]*(?:لا يصل|لم تتسع|بالحركة)/, 'غرفة الخادمة لا يصلها باب من المطبخ أو الحركة', 'غرفة الخادمة بمدخل من الخارج'],
++  [/دورة مياه يومية/, 'دورة مياه للعائلة قرب الصالة لم تتسع', null],
++  [/دورات المياه المرسومة|دورة مياه إضافية|دورة مياه الرجال لم تتسع/, 'لم تتسع كل دورات المياه المطلوبة', 'دورة مياه أقل'],
++  [/الطعام عرضه الصافي|الطعام[^.]*أصغر من/, 'الطعام أضيق من 3.3 م', null],
++  [/بلا نافذة/, 'فراغ يحتاج نافذة لم يجد واجهة خارجية', null],
++  [/يفتح مباشرة على/, 'باب المجلس يفتح على فراغ عائلي', null],
++  [/الحركة الفعلية/, 'الحركة مع الأثاث لا تتسع في بعض الفراغات', null],
++  [/الإنشائية|التراكب|بلا جدار أرضي|فوق فراغ/, 'جدران الدور الأول لا تقع فوق جدران الأرضي', 'غرفة نوم في الأرضي أو أعمدة وجسور بتصميم إنشائي مستقل'],
++  [/بند من طلبك|تخالف بندًا|لم يتحقق: «/, 'تصاميم لا تحقق بندًا من طلبك', null],
++  [/لا يمكن الوصول|لا يصلها|لا يوجد باب/, 'فراغ لا يصله باب', null],
++];
++const TWO_WHY_AR = { stack: ['جدار في الدور الأول أطول من 5 م لا يقع تحته جدار في الأرضي', 'غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو أعمدة وجسور تحمل جدران الدور الأول بتصميم إنشائي مستقل'], ov: ['غرفة في الدور الأول فوق فراغ غير مبني في الأرضي', null], 'majlis-short': ['المجلس أصغر من 24 م²', 'قبول مجلس أصغر'], 'majlis-w': ['المجلس أضيق من 4.2 م', null], lost: ['غرفة في الدور الأول لا يصلها باب', null], 'master-smaller-real': ['الرئيسية أصغر من غرفة نوم أخرى', null], 'far-stair': ['الرئيسية قريبة من الدرج خلاف طلبك', null] };
++
++/** يجمع أسباب الرفض من خطأ المحرك: [{ ar, n, option }] مرتبة بالأكثر. */
++export function failureCauses(e) {
++  const out = new Map(), add = (ar, n, option) => { const o = out.get(ar) || { ar, n: 0, option }; o.n += n; out.set(ar, o); };
++  const tree = e?.treeStats?.why || {};
++  for (const [k, n] of Object.entries(tree)) { const m = TREE_WHY_AR[k]; if (m) add(m[0], n, m[1]); }
++  for (const [k, n] of Object.entries(e?.twoFloorWhy || {})) { const m = TWO_WHY_AR[k]; if (m) add(m[0], n, m[1]); }
++  const seen = new Map();
++  for (const r of e?.rejected || []) { const hit = new Set(); for (const w of r.why || []) for (const [re, ar, opt] of BUILT_WHY) if (re.test(String(w)) && !hit.has(ar)) { hit.add(ar); add(ar, 1, opt); } void seen; }
++  return [...out.values()].sort((a, b) => b.n - a.n);
++}
++
++/**
++ * explainFailure({ error, feasibility, counterfactual:[{ item_ar, ok, how_ar }], twoFloors }) → { title_ar, lines_ar, options_ar, report_ar, cause, numbers }
++ * cause: 'area' (الأرض لا تكفي فعلًا) | 'dims' (مقاس أكبر من البناء) | 'engine' (المساحة تكفي ولم يجد المحرك حلًا).
++ */
++export function explainFailure({ error = null, feasibility = null, counterfactual = [], twoFloors = false, land = null, status = null } = {}) {
++  const N = feasibility?.numbers || null, lines = [], options = [];
++  const hard = feasibility?.hard || [];
++  const avail = N ? Math.min(N.coverageArea, N.buildableArea) : null;
++  const areaShort = hard.some(h => h.id === 'AREA'), dimShort = hard.filter(h => /^DIM_/.test(h.id)), widthShort = hard.some(h => h.id === 'WIDTH');
++  const conflicts = hard.filter(h => h.id === 'CONFLICT');
++  const timeUp = status?.reason === 'TIME_LIMIT', unsupported = status?.reason === 'UNSUPPORTED_CASE';
++  const cause = conflicts.length ? 'conflict' : areaShort ? 'area' : dimShort.length || widthShort ? 'dims' : timeUp ? 'time' : unsupported ? 'unsupported' : 'engine';
++  if (N) {
++    const plot = land && Number(land.width) && Number(land.length) ? `الأرض ${Number(land.width)}×${Number(land.length)} م (${Math.round(land.width * land.length)} م²). ` : '';
++    lines.push(`${plot}بعد الارتدادات يبقى للبناء ${N.buildableW}×${N.buildableD} م (${N.buildableArea} م²)، ونسبة البناء المسموحة 75٪ = ${N.coverageArea} م²؛ فالمتاح للبناء ${avail} م²${N.floors === 2 ? ' في كل دور' : ''}.`);
++    lines.push(`برنامجك يحتاج نحو ${N.neededGrossPerFloor} م²${N.floors === 2 ? ' في الدور الأكبر' : ''} (صافي فراغاته ${N.programNet} م²، ومعها الجدران والحركة — تقدير الميزان).`);
++    const lowB = N.lowerBoundPerFloor ?? null;
++    if (cause === 'area') lines.push(`المساحة لا تكفي: حتى بأصغر المقاسات المعتمدة يحتاج البرنامج ${lowB ?? N.neededGrossPerFloor} م² صافيًا والمتاح ${avail} م².`);
++    else if (N.neededGrossPerFloor > avail) lines.push(`المساحة ضيقة: بالمقاسات المعتادة يحتاج البرنامج نحو ${N.neededGrossPerFloor} م² والمتاح ${avail} م²، وبأصغر المقاسات المعتمدة نحو ${lowB} م² — فقد يتسع بمقاسات أصغر.`);
++    else lines.push(`المساحة تكفي البرنامج (يبقى نحو ${Math.max(0, avail - N.neededGrossPerFloor)} م²)${cause === 'engine' ? '؛ فالعائق ليس صغر الأرض بل ترتيب الفراغات بالشروط المطلوبة معًا' : ''}.`);
++  }
++  for (const h of hard) if (h.id !== 'AREA') lines.push(h.ar);
++  if (cause === 'conflict') {
++    lines.unshift('في طلبك بندان لا يجتمعان في أي مخطط، فلم أرسم حتى تختار أحدهما.');
++    for (const o of feasibility?.options_ar || []) options.push(o);
++  } else if (cause === 'time') {
++    lines.unshift('انتهى وقت البحث قبل أن أجد تصميمًا سليمًا. هذا لا يعني أن طلبك مستحيل: لم يُكمل المحرك البحث.');
++    options.push('أن تعيد المحاولة (يُكمل البحث من البداية بوقت أطول)');
++  } else if (cause === 'unsupported') {
++    lines.unshift('هذا النوع من الطلبات لا يدعمه المحرك بعد (ليس حكمًا على طلبك).');
++  } else if (cause === 'area') {
++    lines.unshift('برنامجك أكبر مما تتسع له هذه الأرض.');
++    for (const o of feasibility?.options_ar || []) options.push(o);
++  } else if (cause === 'dims') {
++    lines.unshift('أحد المقاسات التي حددتها لا يتسع في هذه الأرض.');
++    for (const o of feasibility?.options_ar || []) options.push(o);
++  } else {
++    lines.unshift('لم يجد المحرك مخططًا سليمًا لطلبك على هذه الأرض ضمن التنظيمات التي جرّبها، مع أن المساحة تكفي.');
++    const causes = failureCauses(error).slice(0, 4), tried = error?.treeStats?.tried || null;
++    if (causes.length) lines.push('أكثر ما منع التنظيمات التي جرّبتها: ' + causes.map(c => `${c.ar} (${cnt(c.n, 'مرة واحدة', 'مرتين', 'مرات', 'مرة')})`).join('؛ ') + (tried ? ` — من ${cnt(tried, 'تنظيم واحد', 'تنظيمين', 'تنظيمات', 'تنظيمًا')} جُرّبت.` : '.'));
++    const ok = counterfactual.filter(c => c.ok), no = counterfactual.filter(c => !c.ok);
++    for (const c of ok) { lines.push(`جرّبتُ إعادة البحث ${c.how_ar}: فوجدتُ ${cnt(c.found || 1, 'تصميمًا سليمًا', 'تصميمين سليمين', 'تصاميم سليمة', 'تصميمًا سليمًا')}.`); options.push(c.option_ar || `${c.how_ar.replace(/^(?:دون|مع) /, m => m)} `); }
++    if (counterfactual.length && !ok.length) lines.push(`جرّبتُ إعادة البحث ${no.map(c => c.how_ar).join('، ثم ')}، ولم يكفِ تخفيف أي بند وحده.`);
++    for (const c of causes) if (c.option && !options.includes(c.option)) options.push(c.option);
++    if (twoFloors && !options.some(o => /الأرضي/.test(o))) options.push('غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)');
++    if (N && N.neededGrossPerFloor > avail) options.push('مساحات أصغر لبعض الغرف أو غرفة أقل (المساحة ضيقة بالمقاسات المعتادة)');
++    options.push('أن تطلب مني تصميمًا آخر بعد تخفيف أحد البنود أعلاه، أو أن تبدأ من المرسم بتوزيع تقترحه أنت.');
++  }
++  const opts = [...new Set(options.map(o => toClientAr(String(o).trim())).filter(Boolean))];
++  const title_ar = { conflict: 'بندان متعارضان في طلبك', area: 'برنامجك أكبر من الأرض', dims: 'مقاس لا يتسع في الأرض', time: 'انتهى وقت البحث', unsupported: 'طلب لا يدعمه المحرك بعد' }[cause] || 'لم أجد تصميمًا سليمًا ضمن ما جرّبته';
++  const lines_ar = [...lines.map(toClientAr).filter(Boolean), opts.length ? 'ما يمكنك تغييره: ' + opts.map(o => o.replace(/[.،؛\s]+$/, '')).join('؛ ') + '.' : null, 'لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا.'].filter(Boolean);
++  return { title_ar, lines_ar, options_ar: opts, report_ar: lines_ar.join('\n'), cause, numbers: N ? { ...N, available: avail } : null };
++}
++
++/**
++ * فحص الاتساق الذاتي لتقرير (للاختبار): الأرقام لا يناقض بعضها بعضًا. يعيد قائمة التناقضات (فارغة = متسق).
++ * - «المساحة تكفي» مع اقتراح تقليل الغرف أو دور ثانٍ أو أرض أكبر/أعمق = تناقض.
++ * - «المساحة لا تكفي» والمطلوب ≤ المتاح = تناقض.
++ */
++export function reportContradictions(rep) {
++  const out = [], t = (rep.lines_ar || []).join('\n'), N = rep.numbers;
++  const suff = /المساحة تكفي/.test(t), insuff = /المساحة لا تكفي|أكبر مما تتسع له/.test(t), tight = /المساحة ضيقة/.test(t);
++  if (/(?<!يعني أن طلبك )مستحيل|لا يمكن تحقيق/.test(t) && rep.cause !== 'area' && rep.cause !== 'dims' && rep.cause !== 'conflict') out.push('يصف الطلب بالمستحيل بلا دليل');
++  if (rep.cause === 'time' && /لا يتسع|أكبر من الأرض/.test(t)) out.push('انتهاء الوقت يُقدَّم كأنه قيد في الأرض');
++  if (!tight && !insuff && /غرفة أقل|تقليل عدد الغرف/.test(t)) out.push('يقترح تقليل الغرف والمساحة غير ضيقة');
++  if (suff && insuff) out.push('يقول إن المساحة تكفي ولا تكفي معًا');
++  if (suff && /تقليل عدد الغرف|دوران بدل|دور ثانٍ|أرض أكبر|أرض أعمق|أرض أعرض/.test(t)) out.push('المساحة تكفي ويقترح تصغير البرنامج أو أرضًا أكبر');
++  if (N && insuff && N.neededGrossPerFloor <= N.available) out.push(`يقول إن المساحة لا تكفي والمطلوب ${N.neededGrossPerFloor} ≤ المتاح ${N.available}`);
++  if (N && suff && N.neededGrossPerFloor > N.available) out.push(`يقول إن المساحة تكفي والمطلوب ${N.neededGrossPerFloor} > المتاح ${N.available}`);
++  return out;
++}
++/**
++ * فحص اتساق أي نص يراه العميل (لا تقارير هذا الملف وحدها — ومنها إشعارات الجولات السابقة): إن ذكر مساحة متاحة (W × D م أو «المتاح … م²»)
++ * ومساحة يحتاجها البرنامج أصغر منها، فلا يجوز أن يقترح تقليل الغرف أو دورًا ثانيًا أو أرضًا أكبر، ولا أن يصف الطلب بالمستحيل.
++ */
++export function textContradictions(text) {
++  const t = String(text || ''), out = [], num = s => Number(String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
++  const avail = []; for (const m of t.matchAll(/\(?(\d+(?:\.\d+)?)\s*[×x]\s*(\d+(?:\.\d+)?)\s*م\)?/g)) avail.push(num(m[1]) * num(m[2]));
++  for (const m of t.matchAll(/(?:المتاح(?: للبناء)?|يبقى للبناء[^0-9]*\()\s*(\d+)\s*م²/g)) avail.push(num(m[1]));
++  const need = [...t.matchAll(/يحتاج(?: البرنامج)? نحو (\d+) م²/g)].map(m => num(m[1]));
++  const A = avail.length ? Math.max(...avail) : null, Nd = need.length ? Math.min(...need) : null;
++  if (A && Nd && Nd < A * .92 && /تقليل عدد الغرف|دور ثانٍ|دوران بدل|أرض أكبر|أرض أعمق|أرض أعرض/.test(t) && !/المساحة ضيقة/.test(t)) out.push(`المتاح ${Math.round(A)} م² والمطلوب ${Nd} م² ويقترح تصغير البرنامج أو أرضًا أكبر`);
++  if (A && Nd && Nd < A * .92 && /(?<!يعني أن طلبك )مستحيل|لا يمكن تحقيق الطلب/.test(t)) out.push('يصف الطلب بالمستحيل والمساحة تكفي');
++  if (/تقليل عدد الغرف|دور ثانٍ|دوران بدل/.test(t) && !/المساحة لا تكفي|المساحة ضيقة|أكبر مما تتسع|يزيد عن المتاح|لا يتسع/.test(t)) out.push('يقترح تصغير البرنامج أو دورًا ثانيًا بلا قياس يثبت ضيق المساحة');
++  return out;
++}
++export default { textContradictions, explainFailure, failureCauses, reportContradictions, TREE_WHY_AR };
+diff --git a/dist/presentation-status.mjs b/dist/presentation-status.mjs
+index b0658eb..d59055b 100644
+--- a/dist/presentation-status.mjs
++++ b/dist/presentation-status.mjs
+@@ -16,12 +16,14 @@
+ import { analyzeDoc } from './draw/digest.mjs';
+ import { measureSaudiProgram } from './saudi-program.mjs';
+ import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
++import { toClientAr, GATE_AR } from './client-language.mjs';
++export { GATE_AR };
+ 
+ export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
+ export const STATUS_AR = Object.freeze({ ready: 'جاهز للعرض المبدئي', 'needs-edits': 'يحتاج تعديلات', hidden: 'محجوب' });
+ const PREF_TIER_AR = 'تفضيل سعودي افتراضي للميزان (قابل للتغيير)';
+ const R16_TIER_AR = 'عيب معماري — قيمة تصميمية افتراضية للميزان';
+-const MAND_TIER_AR = 'شرط إلزامي في الميزان (خصوصية/وظيفة) — يُعفى منه بطلب صريح من العميل';
++const MAND_TIER_AR = 'شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً';
+ const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
+ 
+ /** عيوب عرض/جودة قيست من المستند (المراجع المستقل r13) غير البرنامج السعودي: غرفة ملابس رمزية لرئيسية كبيرة، مجلس بلا أثاث. */
+@@ -54,7 +56,7 @@ export function presentationStatus(design, request = {}) {
+   const rv = design.review || null, gateFails = rv && rv.passed === false ? (rv.failedGates || []) : [];
+   // (الجولة السادسة عشرة) قراءة واحدة لـ«في الخلف» في السجل وحالة العرض ورد التعديل: ما لم يتحقق حرفيًا وتحققت قراءته النسبية
+   // «متحقق جزئيًا» — يبقى بندًا إلزاميًا غير متحقق (محجوب، لا «جاهز»)، ويُذكر أنه جزئي بالنص نفسه الذي يقرؤه السجل الصارم
+-  const hidden = [...ledgerFails.map(x => x.partial ? `بند من طلبك متحقق جزئيًا فقط: «${x.text}» — ${x.partial.text_ar}؛ لا حرفيًا: ${x.partial.literal_ar || x.why}` : `بند من طلبك لم يتحقق: «${x.text}»${x.why ? ` — ${x.why}` : ''}`), ...gateFails.map(g => `رسب في بوابة المراجعة ${g}`)];
++  const hidden = [...ledgerFails.map(x => x.partial ? `بند من طلبك متحقق جزئيًا فقط: «${x.text}» — ${x.partial.text_ar}؛ لا حرفيًا: ${x.partial.literal_ar || x.why}` : `بند من طلبك لم يتحقق: «${x.text}»${x.why ? ` — ${x.why}` : ''}`), ...gateFails.map(g => `لم يجتز فحص «${GATE_AR[g] || 'المراجعة المعمارية'}»`)];
+   let prefs = [];
+   try { prefs = measureSaudiProgram(doc, request, model).filter(g => g.applicable && !g.pass && !g.clientAsked && !g.regulation && g.id !== 'SHADING'); } catch { prefs = []; }
+   // المقلط ومسار التقديم بند واحد عند العميل: إن غاب المسار يُذكر مرة واحدة (SERVE_ROUTE)، ويبقى بند المقلط إن كان سببه انفتاح الطعام على العائلة
+@@ -64,7 +66,7 @@ export function presentationStatus(design, request = {}) {
+   // (الجولة التاسعة عشرة، توجيه المالك أولًا) المخالفة الإلزامية في الميزان (MANDATORY_R16: ضيف يعبر العائلة إلى الطعام، موقف لا تدخله السيارة)
+   // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
+   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
+-  for (const g of mand) hidden.push(`مخالفة إلزامية في الميزان — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
++  for (const g of mand) hidden.push(`شرط أساسي غير متحقق — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
+   r16 = r16.filter(g => !mand.includes(g));
+   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
+     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
+@@ -72,6 +74,9 @@ export function presentationStatus(design, request = {}) {
+     ...toleranceNotes(design.ledger || []),
+     // (الجولة العشرون) ملاحظات مقيسة لا تحجب ولا تُعدّ عيبًا: المدخلان متجاوران، والحمامات بلا نافذة (تهوية ميكانيكية)
+     ...r20notes.map(g => ({ id: g.id, major: false, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')}` }))];
++  // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
++  for (const x of items) x.text_ar = toClientAr(x.text_ar);
++  for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
+   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
+   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
+   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
+diff --git a/dist/requirements.mjs b/dist/requirements.mjs
+index 0f67691..1751983 100644
+--- a/dist/requirements.mjs
++++ b/dist/requirements.mjs
+@@ -3,7 +3,7 @@
+ // والقواعد المكانية (أمام/خلف/جهات/بجوار/قرب/بعيد/الدور) من rules.mjs، ثم يُتحقق منها هندسيًا بعد التوليد.
+ // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
+ 
+-import { buildSharedBrief } from './shared-brief.mjs';
++import { buildSharedBrief, parseRequestedCount } from './shared-brief.mjs';
+ import { extractRules, mergeRules, ruleText, subjectAr, SIDE_LABELS, OPPOSITE_SIDE } from './rules.mjs';
+ 
+ const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
+@@ -311,6 +311,8 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
+       else if (glazing.all === undefined) { glazing.all = pct; understood.push(`زجاج الغرف ${how} من أرضيتها (طلب العميل)`); any = true; }
+     }
+     if (any) prefs.glazing = glazing; }
++  // (الجولة 21 — مقترح) عدد التصاميم الذي طلبه العميل نصًا (يقرؤه العقد الموحد parseRequestedCount؛ هنا سطر «فهمت» فقط)
++  { const n = parseRequestedCount(text); if (n) understood.push(`${n} ${n === 1 ? 'تصميم' : n === 2 ? 'تصميمان' : 'تصاميم'} مطلوبة (طلب العميل)`); }
+   const uc = clauses ? unclearClauses(text) : [];
+   const unclear = clauses ? [...new Set([...uc, ...orphanQuotes.filter(o => !uc.some(u => u.includes(o)))])] : [];
+   return {
+diff --git a/dist/villa-layout-v2.mjs b/dist/villa-layout-v2.mjs
+index 6129ca5..e61a9ee 100644
+--- a/dist/villa-layout-v2.mjs
++++ b/dist/villa-layout-v2.mjs
+@@ -44,6 +44,10 @@ const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(','
+ // (withTreeSource، تنفيذ متزامن) تُطلب الأشجار منه بدل partiTrees/tfTrees، وتبقى كل خطوات الأبعاد والتفصيل والبوابات والاختيار كما هي.
+ // غير مضبوط = سلوك المحرك الثاني نفسه حرفيًا.
+ let TREE_SOURCE = null;
++// (الجولة 21 — عقد النتائج) حد زمني اختياري للبحث: انتهاؤه «بحث غير مكتمل» (TIME_LIMIT) لا استحالة أبدًا
++let DEADLINE = null, TIMED_OUT = false;
++export function withDeadline(ms, fn) { const prev = DEADLINE, pt = TIMED_OUT; DEADLINE = Number.isFinite(ms) && ms > 0 ? now() + ms : null; TIMED_OUT = false; try { return fn(); } catch (e) { if (TIMED_OUT && e && typeof e === 'object') e.timedOut = true; throw e; } finally { DEADLINE = prev; TIMED_OUT = pt; } }
++const timeUp = () => { if (DEADLINE !== null && now() > DEADLINE) { TIMED_OUT = true; return true; } return false; };
+ export function withTreeSource(src, fn) { const prev = TREE_SOURCE; TREE_SOURCE = src; try { return fn(); } finally { TREE_SOURCE = prev; } }
+ const DYN_AR = new Map(); // وصف عربي للتنظيمات المركّبة (المحرك الثالث)
+ const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, TOL = 1e-3;
+@@ -2824,9 +2828,13 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
+     if (!open.length) break;
+     step(open[0]); finish();
+   }
++  // (الجولة 21) إحصاء ما منع التنظيمات التي لم يتسع لها حل (لتقرير التعذّر للعميل بأسبابه المقيسة لا بجملة عامة)
++  const failStats = {}; let failN = 0;
+   for (const { tr, best, ms } of jobs) {
+     if (globalThis.__v2dbg) globalThis.__v2dbg['ms:' + tr.tag] = Math.round(ms) + (best && !best.sol.viol ? '' : 'x');
+     if (!best || best.sol.viol) {
++      failN++; if (!best) failStats['no-fit'] = (failStats['no-fit'] || 0) + 1;
++      else { const keep = globalThis.__v2dbg, o = {}; globalThis.__v2dbg = o; try { scoreV2(best.sol, P, best.ew, best.ed, ctx); } finally { globalThis.__v2dbg = keep; } for (const w of Object.keys(o)) failStats[w] = (failStats[w] || 0) + 1; }
+       const d = globalThis.__v2dbg;
+       if (d && tr.swaps) (d.localFail ||= []).push({ swaps: tr.swaps, best: !!best, viol: best ? (() => { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, ctx); globalThis.__v2dbg = d; return Object.keys(o).join(','); })() : null });
+       if (d) { d['tree:' + tr.tag] = best ? best.sol.viol : -1; if (best) { const o = {}; globalThis.__v2dbg = o; scoreV2(best.sol, P, best.ew, best.ed, ctx); globalThis.__v2dbg = d; d['why:' + tr.tag] = Object.keys(o).join(','); if (d.keepSol) d['sol:' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed }; } }
+@@ -2836,7 +2844,9 @@ function candidates(P, site, { stair = false, rules = [], entry = 's', iters = 1
+     if (globalThis.__v2dbg?.keepSol) globalThis.__v2dbg['sol:' + tr.tag] = { sol: best.sol, ew: best.ew, ed: best.ed, ok: true };
+     out.push({ mode: tr.mode, tag: tr.tag, tree: tr.tree, late: !!tr.late, stepped: !!tr.stepped, sol: best.sol, ew: best.ew, ed: best.ed, pen: best.p - (prefPat && patOf(tr) === prefPat ? PREFER_BONUS : 0), rp, swaps: tr.swaps || null });
+   }
+-  return out.sort((a, b) => a.pen - b.pen);
++  out.sort((a, b) => a.pen - b.pen);
++  Object.defineProperty(out, 'failStats', { value: { tried: jobs.length, failed: failN, why: failStats }, enumerable: false });
++  return out;
+ }
+ 
+ /**
+@@ -3076,7 +3086,7 @@ function cacheKey(args) {
+   return canon(args, true);
+ }
+ function cached(kind, args, fn) {
+-  const hook = globalThis.__mizanGenCache; if (!hook) return fn(args);
++  const hook = globalThis.__mizanGenCache; if (!hook || DEADLINE !== null) return fn(args);
+   let key; try { key = VILLA_V2_ENGINE_VERSION + (TREE_SOURCE ? '|' + TREE_SOURCE.tag : '') + '|' + kind + '|' + cacheKey(args); } catch { return fn(args); }
+   const hit = hook.get(key);
+   if (hit) { const P = programV2(args.counts, args.requirements || {}); P.entry = hit.program?.entry; hit.program = P; return hit; }
+@@ -3298,7 +3308,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+   if (!cands.length) {
+     const need = sum(P.blocks.map(b => b.area)) + DESIGN_TARGETS.foyer + P.hallArea;
+     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(site.W)} × ${r2(site.D)} م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
+-    err.code = ex.size ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; err.need = need; err.available = site.W * site.D; throw err;
++    err.code = ex.size ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; err.need = need; err.available = site.W * site.D; err.treeStats = cands.failStats || null; throw err;
+   }
+   const built = [], rejected = [], softMajlis = [], nearMiss = []; let tried = 0;
+   // ترتيب البناء بالتناوب بين الأنماط (أفضل كل نمط أولًا، ثم ثاني كل نمط…): ميزانية البناء الثابتة تصل إلى
+@@ -3313,6 +3323,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+     // (يُكمل حتى 14 ث ما لم يوجد ثلاثة بدائل تنفّذ كل البنود — البدائل المخالفة لبند صريح لا تُعرض لسد العدد)
+     // حتمي: ميزانية بعدد المرشحين المبنيين لا بالزمن (الطلب نفسه = البدائل نفسها مهما كان حمل الجهاز)
+     // (أرض غير منتظمة: مرشحون إضافيون لتظهر النسخ المتدرجة التي تتبع شكل الأرض)
++    if (timeUp()) break;
+     if (tried >= (TREE_SOURCE?.buildMax || BUILD_MAX) || built.filter(d => d.fails === 0).length >= keep + BUILD_SPARE + (site.rectW ? 3 : 0) + (TREE_SOURCE?.spare || 0)) break;
+     tried++;
+     try {
+@@ -3344,8 +3355,8 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+     const sub = built.filter(d => d.cand && (d.r16 || []).includes('FAMILY_WC') && !(d.r16 || []).some(id => MANDATORY_R16.includes(id)) && !d.reject?.length).sort((a, b) => a.quality - b.quality).slice(0, 4);
+     if (sub.length) { const idx = sub.map(d => built.indexOf(d)); refineDayWc(sub, P, site, land, { title, requirements, entry, counts, pool: true }); sub.forEach((n, k) => { built[idx[k]] = n; }); }
+   }
+-  const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = 'VILLA_BUILD_FAILED'; err.rejected = rejected; return err; };
+-  // (الجولة 21 — مقترح) لا يُعلن الفشل قبل البحث الثاني المصمم لقلة البدائل (كان يُرمى هنا فلا يُجرَّب) — kit pipeline: «البحث الثاني دائمًا»
++  const buildFailed = () => { const err = Error('تعذّر بناء أي بديل سليم من الأنماط المرشحة.'); err.code = TIMED_OUT ? 'VILLA_TIME_LIMIT' : 'VILLA_BUILD_FAILED'; err.timedOut = TIMED_OUT; err.rejected = rejected; err.treeStats = cands.failStats || null; return err; };
++  // (الجولة 21 — مقترح) لا يُعلن الفشل قبل البحث الثاني المصمم لقلة البدائل — kit pipeline: «البحث الثاني دائمًا»
+   if (!built.length && (refDR || prefPat || globalThis.__v2noSecond || R14_OFF.has('r21second'))) throw buildFailed();
+   if (globalThis.__v2dbg) { globalThis.__v2dbg.built = built.map(d => ({ pat: d.pat, quality: d.quality, fails: d.fails })); globalThis.__v2pool = built.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, streetBeds: d.streetBeds, r16: d.r16, prefFails: d.prefFails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = built.map(d => ({ pat: d.pat, doc: d.doc })); globalThis.__v2rej = rejected; }
+   if (!refDR) refineWomen(built, P, site, land, { title, requirements, entry, counts });
+@@ -3370,6 +3381,7 @@ function generateVillaDesigns0({ land, counts, requirements = {}, keep = 4, titl
+     const done2 = new Set(), near2 = [];
+     let c2 = []; try { c2 = trees2.length ? candidates(P, site, { rules: P.rules, entry, trees: trees2, avoid, exclude: ex }) : []; } catch { c2 = []; }
+     for (const cand of c2) {
++      if (timeUp()) break;
+       const k2 = cand.late ? cand.mode + ':' + cand.tag : cand.mode;
+       if (done2.has(k2)) continue; // تنظيم واحد من كل نمط (والتنظيم الجديد بوسمه)
+       try {
+@@ -3946,7 +3958,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
+   };
+   if (!cands.length) rejected.push({ pat: '*', why: ['لا ترتيب أرضي ناجح'] });
+   for (const g of cands) {
+-    if (designs.length >= keep + 3 || ++gTried > BUILD_MAX2) break; // حتمي: بعدد الترتيبات الأرضية لا بالزمن
++    if (designs.length >= keep + 3 || ++gTried > BUILD_MAX2 || timeUp()) break; // حتمي: بعدد الترتيبات الأرضية لا بالزمن
+     const ups = upperFor(g, U, site, rules2, entry);
+     if (globalThis.__v2dbg) { const st = g.sol.circ.find(c => c.id === 'stair').r; globalThis.__v2dbg['g:' + patOf(g)] = [g.ew, g.ed, st.x0, st.x1, st.y0, st.y1, ups.map(u => u.tag).join('/'), 'voids=' + JSON.stringify(g.sol.voids.map(v => [v.x0, v.x1, v.y0, v.y1].map(x => Math.round(x * 10) / 10)))].join(' '); }
+     if (!ups.length) { rejected.push({ pat: patOf(g), why: ['لا دور علوي يتسع على هذا الغلاف'] }); continue; }
+@@ -3957,6 +3969,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
+   { const avoidM = new Set(tw.avoidModes || []), ctxG = { narrow: site.W < NARROW_W, dinRealized: true, bigOK: U.suites.length >= 5, maxBuilt: site.maxBuilt, kitchenFront: rules2.some(r => r.kind === 'place' && r.side === 'front' && /kitchen|مطبخ/.test(String(r.a))), capSuite: P.suites.some(b => b.master && uBlocks.includes(b)) ? DESIGN_TARGETS.master - 1 : 0, bedFront: false };
+     const doneModes = new Set();
+     for (const tr of tfTrees(G, U, site)) {
++      if (timeUp()) break;
+       if (avoidM.has(tr.mode) || doneModes.has(tr.mode)) continue;
+       let r = null; try { r = tfJoint(tr, G, U, site, rules2, entry, { ...ctxG, foyerYard: !!tr.foyerYard }); } catch { r = null; }
+       if (!r) { rejected.push({ pat: tr.mode + ':' + tr.tag, why: ['لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم'], tfWhy: tr._why || [] }); continue; }
+@@ -3969,7 +3982,7 @@ function generateVillaTwoFloors0({ land, counts, requirements = {}, keep = 3, ti
+     const TFW_AR = { stack: 'جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي)', ov: 'غرفة علوية فوق فراغ غير مبني في الأرضي', 'majlis-short': 'المجلس أصغر من 24 م²', 'majlis-w': 'عرض المجلس الصافي أقل من 4.2 م', lost: 'غرفة علوية لا يصلها باب', 'master-smaller-real': 'الرئيسية أصغر من غرفة نوم أخرى', 'far-stair': 'الرئيسية قريبة من الدرج خلاف طلبك', 'din-big': 'الطعام متضخم' };
+     const cnt = {}; for (const r of rejected) for (const w of r.tfWhy || []) if (TFW_AR[w]) cnt[w] = (cnt[w] || 0) + 1;
+     const top = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 2), n = rejected.filter(r => r.tfWhy).length;
+-    const e = Error('تعذّر بناء أي بديل سليم لدورين.' + (top.length ? ` جُرّب ${n} ${n >= 3 && n <= 10 ? 'تنظيمات مشتركة' : 'تنظيمًا مشتركًا'} للدورين، وأكثر ما منعها: ${top.map(([w, c]) => `${TFW_AR[w]} (${c})`).join('، ')}.` : '')); e.code = 'VILLA_BUILD_FAILED'; e.rejected = rejected; e.twoFloorWhy = cnt; throw e; }
++    const e = Error('تعذّر بناء أي بديل سليم لدورين.' + (top.length ? ` جُرّب ${n} ${n >= 3 && n <= 10 ? 'تنظيمات مشتركة' : 'تنظيمًا مشتركًا'} للدورين، وأكثر ما منعها: ${top.map(([w, c]) => `${TFW_AR[w]} (${c})`).join('، ')}.` : '')); e.code = TIMED_OUT ? 'VILLA_TIME_LIMIT' : 'VILLA_BUILD_FAILED'; e.timedOut = TIMED_OUT; e.rejected = rejected; e.twoFloorWhy = cnt; throw e; }
+   for (const d of designs) d.dr = docRooms(d.doc);
+   if (globalThis.__v2dbg) { globalThis.__v2pool = designs.map(d => ({ pat: d.pat, dr: d.dr, quality: d.quality, fails: d.fails, failed: d.ledger.filter(x => !x.ok).map(x => x.text + ': ' + x.why) })); if (globalThis.__v2keepDocs) globalThis.__v2poolDocs = designs.map(d => ({ pat: d.pat, doc: d.doc })); }
+   const out = pickReviewed(designs, keep, requirements, land, counts);
+diff --git a/dist/villa-layout-v3.mjs b/dist/villa-layout-v3.mjs
+index 1c3bf60..3d700ab 100644
+--- a/dist/villa-layout-v3.mjs
++++ b/dist/villa-layout-v3.mjs
+@@ -18,7 +18,10 @@
+ //
+ // المحركان الأول والثاني باقيان كما هما وقابلان للاختيار (engine: 'v1' | 'v2' | 'v3').
+ import * as V2 from './villa-layout-v2.mjs';
++import { verifyCertificate } from './certificates.mjs';
+ import { analyzeFeasibility } from './feasibility.mjs';
++import { explainFailure } from './infeasibility-report.mjs';
++import { toClientAr } from './client-language.mjs';
+ 
+ export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
+ const K = V2.TREE_KIT;
+@@ -619,38 +622,89 @@ function source(log) {
+     },
+   };
+ }
+-function attach(out, feas, log) {
++function attach(out, feas, log, args = {}) {
+   if (!out) return out;
+   out.engine3 = { version: VILLA_V3_ENGINE_VERSION, feasibility: feas, search: log };
++  // (الجولة 21) نص العميل بعربية واضحة: الملاحظات والوصف وسبب النقص (النص الداخلي باقٍ في shortfall_ar للأدلة)
++  for (const d of out.designs || []) { if (d.summary) d.summary = toClientAr(d.summary); if (Array.isArray(d.notes)) d.notes = d.notes.map(toClientAr).filter(Boolean); }
++  if (out.shortfall_ar) out.shortfall_client_ar = toClientAr(out.shortfall_ar);
++  const requested = args.keep || 4, warnings = [...(feas?.warnings || []).map(w => ({ id: w.id, ar: toClientAr(w.ar), items: w.items || null })), ...(out.timedOut ? [{ id: 'TIME_LIMIT', ar: 'انتهى وقت البحث قبل أن يُكمل كل التنظيمات؛ قد توجد تصاميم أخرى.' }] : [])];
++  out.result = { status: 'SOLVED', requestedCount: requested, shownCount: (out.designs || []).length, warnings };
+   return out;
+ }
+-/** دور واحد. يكشف الاستحالة أولًا؛ ثم يولّد بالمصدر المركّب. أي فشل يُعاد خطأً يحمل تقريرًا عربيًا (لا نتيجة فارغة بلا تفسير). */
++// ---------------------------------------------------------------------------------------------- (الجولة 21) عقد نتائج التوليد
++/** رمز تشخيصي حتمي للطلب (لا بيانات شخصية): يربط تقرير العميل بسجل البحث. */
++const diagId = (args, code) => 'D' + ESC(JSON.stringify([args?.land?.width, args?.land?.length, args?.land?.streets, args?.land?.floors, args?.counts, (args?.requirements?.rules || []).map(r => r.text), Object.keys(args?.requirements?.dims || {}), code]));
++/**
++ * يصنّف الفشل (توجيه المالك r21، الموجز التقني، الحل 1):
++ *  PROVEN_INFEASIBLE — بدليل صالح فقط: حد أدنى للمساحة أكبر من المتاح، أو مقاس صريح أطول من البناء، أو عرض أضيق من المجلس، أو تعارض منطقي
++ *                       بين بندين؛ ومعه البنود المتعارضة ومرجع الدليل.
++ *  SEARCH_INCOMPLETE — كل ما سواه: انتهاء الوقت (TIME_LIMIT)، أو استنفاد ما جرّبه البحث بلا دليل (SEARCH_EXHAUSTED_WITHOUT_PROOF)، أو خطأ
++ *                       برمجي (SOLVER_ERROR)، أو حالة لا يدعمها المحرك (UNSUPPORTED_CASE). لا يُسمّى أي منها «مستحيلًا».
++ */
++/** كل سبب استحالة في كشف الاستحالة يحمل شهادة يقبلها المدقق المستقل. */
++export const certified = (feas, args) => (feas?.hard || []).length > 0 && feas.hard.every(h => h.certificate && verifyCertificate(h.certificate, { land: args.land || {}, counts: args.counts || {}, requirements: args.requirements || {} }).valid);
++export function classifyFailure(e, feas, args = {}) {
++  // (مقترح — kit results.mjs) «مستحيل» بشهادة يتحقق منها المدقق المستقل (certificates.mjs) لكل سبب، وإلا فليس مثبتًا
++  if (e?.code === 'VILLA_INFEASIBLE' && feas && !feas.feasible && certified(feas, args))
++    return { status: 'PROVEN_INFEASIBLE', conflictingConstraintIds: feas.conflictingConstraintIds || [], proofReference: feas.proofReference || [], certificates: feas.certificates || [], suggestions: feas.options_ar || [] };
++  const reason = e?.timedOut || e?.code === 'VILLA_TIME_LIMIT' ? 'TIME_LIMIT' : e?.code === 'VILLA_UNSUPPORTED' ? 'UNSUPPORTED_CASE'
++    : ['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_REVIEW_FAILED', 'VILLA_EXHAUSTED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(e?.code) ? 'SEARCH_EXHAUSTED_WITHOUT_PROOF' : 'SOLVER_ERROR';
++  return { status: 'SEARCH_INCOMPLETE', reason, diagnosticId: diagId(args, e?.code || 'ERR'), retryable: reason === 'TIME_LIMIT' || reason === 'SOLVER_ERROR' };
++}
++/** بنود العميل القابلة للتخفيف (للبحث المضاد): بنود الموضع والقرب، والمقاسات الصريحة (تُقبل تقريبية). */
++function relaxableItems(req = {}) {
++  const out = [];
++  for (const r of req.rules || []) if (['place', 'near', 'adjacent', 'far', 'apart'].includes(r.kind) && r.mode !== 'avoid') out.push({ kind: 'rule', id: r.id, ar: r.quote || r.text, how_ar: `دون بند «${r.quote || r.text}»`, option_ar: `تخفيف بند «${r.quote || r.text}»`, apply: q => ({ ...q, rules: (q.rules || []).filter(x => x.id !== r.id) }) });
++  for (const [k, dm] of Object.entries(req.dims || {})) if (dm && (dm.tol ?? .05) < .3) out.push({ kind: 'dims', id: 'dims.' + k, ar: dm.quote, how_ar: `مع قبول «${dm.quote}» تقريبيًا (±30 سم)`, option_ar: `قبول «${dm.quote}» تقريبيًا (±30 سم)`, apply: q => ({ ...q, dims: { ...q.dims, [k]: { ...dm, tol: .3 } } }) });
++  return out.slice(0, 3);
++}
++/** البحث المضاد: يعيد التوليد بتخفيف كل بند وحده (مقيس، لا تخمين) — يُطلق في الفشل وحده، ولا يتكرر داخل نفسه. */
++function counterfactual(gen, args) {
++  const out = [];
++  for (const it of relaxableItems(args.requirements || {})) {
++    let ok = false, found = 0;
++    try { const o = gen({ ...args, keep: 1, requirements: it.apply(args.requirements), _cf: true }); found = (o.designs || []).filter(d => d.presentation?.status !== 'hidden').length; ok = found > 0; } catch { ok = false; }
++    out.push({ id: it.id, item_ar: it.ar, how_ar: it.how_ar, option_ar: it.option_ar, ok, found });
++  }
++  return out;
++}
++function fail(e, feas, log, args, gen, two) {
++  e.feasibility = feas; e.search = log;
++  e.result = classifyFailure(e, feas, args);
++  const cf = !args._cf && e.result.status === 'SEARCH_INCOMPLETE' && e.result.reason === 'SEARCH_EXHAUSTED_WITHOUT_PROOF' && !globalThis.process?.env?.R14_OFF?.includes('r21cf') ? counterfactual(gen, args) : [];
++  e.counterfactual = cf;
++  e.report = explainFailure({ error: e, feasibility: feas, counterfactual: cf, twoFloors: two, land: args.land, status: e.result });
++  e.report_ar = e.report.report_ar;
++  if (e.result.status === 'SEARCH_INCOMPLETE') e.result.suggestions = e.report.options_ar;
++  return e;
++}
++/** دور واحد. يكشف الاستحالة أولًا؛ ثم يولّد بالمصدر المركّب. أي فشل يُعاد خطأً يحمل تقريرًا عربيًا وحالة العقد (e.result). */
+ export function generateVillaDesigns(args) {
+   const feas = analyzeFeasibility(args);
+-  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; e.feasibility = feas; throw e; }
++  // شهادة لا يقبلها المدقق ⇐ لا رفض: يُبحث، ويُذكر التنبيه
++  if (!feas.feasible) { if (certified(feas, args.floors === 2 || false ? { ...args, land: { ...args.land, floors: 2 } } : args)) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, false); } feas.warnings = [...(feas.warnings || []), ...feas.hard.map(h => ({ id: 'UNCERTIFIED_' + h.id, ar: h.ar }))]; feas.hard = []; feas.feasible = true; }
+   const log = {};
+   try {
+-    const out = V2.withTreeSource(source(log), () => V2.generateVillaDesigns(args));
+-    return attach(out, feas, log);
+-  } catch (e) { e.feasibility = feas; e.search = log; e.report_ar = failureReport(e, feas, log); throw e; }
++    const out = V2.withDeadline(args.timeLimitMs, () => V2.withTreeSource(source(log), () => V2.generateVillaDesigns(args)));
++    return attach(out, feas, log, args);
++  } catch (e) { throw fail(e, feas, log, args, generateVillaDesigns, false); }
+ }
+ export function generateVillaTwoFloors(args) {
++  if (Number(args?.land?.floors) > 2) { const e = Error('المحرك يدعم دورًا أو دورين فقط.'); e.code = 'VILLA_UNSUPPORTED'; throw fail(e, null, {}, args, null, true); }
+   const feas = analyzeFeasibility({ ...args, land: { ...args.land, floors: 2 } });
+-  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; e.feasibility = feas; throw e; }
++  // شهادة لا يقبلها المدقق ⇐ لا رفض: يُبحث، ويُذكر التنبيه
++  if (!feas.feasible) { if (certified(feas, args.floors === 2 || true ? { ...args, land: { ...args.land, floors: 2 } } : args)) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, true); } feas.warnings = [...(feas.warnings || []), ...feas.hard.map(h => ({ id: 'UNCERTIFIED_' + h.id, ar: h.ar }))]; feas.hard = []; feas.feasible = true; }
+   const log = {};
+-  try { return attach(V2.withTreeSource(source(log), () => V2.generateVillaTwoFloors(args)), feas, log); }
+-  catch (e) { e.feasibility = feas; e.search = log; e.report_ar = failureReport(e, feas, log); throw e; }
++  try { return attach(V2.withDeadline(args.timeLimitMs, () => V2.withTreeSource(source(log), () => V2.generateVillaTwoFloors(args))), feas, log, args); }
++  catch (e) { throw fail(e, feas, log, args, generateVillaTwoFloors, true); }
+ }
+-/** تقرير عربي حين لا يُنتج أي بديل: ما الذي جُرّب، وما الذي تعارض، وما الذي يمكن تغييره. */
+-export function failureReport(e, feas, log) {
+-  const lines = ['لم يُنتج المحرك أي بديل سليم لهذا الطلب على هذه الأرض.'];
+-  const cntAr = (n, one, few, many) => (n === 1 ? one : n >= 3 && n <= 10 ? `${n} ${few}` : `${n} ${many}`);
+-  if (log?.grids?.length) lines.push(`جُرّبت ${log.grids.map(g => `شبكة ${g.nc}×${g.nr} (القيود الصلبة متحققة في ${cntAr(g.valid, 'توزيع واحد', 'توزيعات', 'توزيعًا')})`).join('، ')}، واختير منها ${cntAr(log.picked || 0, 'تنظيم واحد', 'تنظيمات مختلفة', 'تنظيمًا مختلفًا')} للأبعاد.`);
+-  if (log?.grids?.length && log.grids.every(g => !g.valid)) lines.push('لا توزيع يحقق القيود الصلبة معًا على هذه الأرض: ' + (log.rel || []).filter(r => r.hard && r.client).map(r => r.ar).join('، ') || '');
+-  if (feas?.warnings?.length) lines.push('ملاحظات قبل التوليد: ' + feas.warnings.map(w => w.ar).join('؛ '));
+-  lines.push('السبب من المولّد: ' + String(e.message || e));
+-  const two = (feas?.numbers?.floors || 1) >= 2 || /لدورين/.test(String(e.message || ''));
+-  lines.push('ما يمكن تغييره: ' + (feas?.options_ar?.length ? feas.options_ar.join('؛ ') : two ? (/التراكب الإنشائي/.test(String(e.message)) ? 'أرض أعمق أو أعرض قليلًا، أو غرفة نوم أقل في العلوي، أو غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو قبول أعمدة أو جسور تحمل جدران العلوي بتصميم إنشائي مستقل.' : 'تقليل عدد الغرف أو مساحاتها، أو أرض أكبر، أو تخفيف بند موضع صريح.') : 'تقليل عدد الغرف أو مساحاتها، أو دور ثانٍ، أو تخفيف بند موضع صريح.'));
+-  return lines.join('\n');
++/** (الجولة 21) واجهة بلا استثناء: تعيد عقد النتيجة نفسه { status, ... } مع البدائل أو التقرير. */
++export function generate(args) {
++  const two = Number(args?.land?.floors) >= 2 || args?.requirements?.prefs?.floors === 2;
++  try { const out = (two ? generateVillaTwoFloors : generateVillaDesigns)(args); return { ...out.result, alternatives: out.designs, out }; }
++  catch (e) { return { ...(e.result || { status: 'SEARCH_INCOMPLETE', reason: 'SOLVER_ERROR', diagnosticId: diagId(args, 'ERR'), retryable: true }), report: e.report || null, report_ar: e.report_ar || String(e.message || e), error: e }; }
+ }
+-export default { generateVillaDesigns, generateVillaTwoFloors, synthTrees, unitsOf, enumerateLayouts, guillotine, VILLA_V3_ENGINE_VERSION };
++/** تقرير عربي حين لا يُنتج أي بديل (يبقى للتوافق؛ صار يمر بمحرك الشرح نفسه). */
++export function failureReport(e, feas, log) { return explainFailure({ error: e, feasibility: feas }).report_ar; }
++export default { generate, classifyFailure, generateVillaDesigns, generateVillaTwoFloors, synthTrees, unitsOf, enumerateLayouts, guillotine, VILLA_V3_ENGINE_VERSION };
+diff --git a/scripts/acceptance-run.mjs b/scripts/acceptance-run.mjs
+index 80b85e5..b938dc9 100644
+--- a/scripts/acceptance-run.mjs
++++ b/scripts/acceptance-run.mjs
+@@ -87,7 +87,7 @@ for (const C of CASES) {
+   let out;
+   try {
+     const fn = (land.floors >= 2 || req.prefs?.floors === 2) ? generateVillaTwoFloors : generateVillaDesigns;
+-    out = fn({ land, counts: req.counts, requirements: req, keep: C.want || 4 });
++    out = fn({ land, counts: req.counts, requirements: req, keep: (C.want || req.want || 4) });
+   } catch (e) { row.error = e.message; row.errorCode = e.code || null; if (e.report_ar) row.report_ar = e.report_ar; if (e.feasibility) row.feasibility = e.feasibility; if (e.search) row.search = e.search; }
+   if (out?.engine3) { row.feasibility = out.engine3.feasibility; row.search = out.engine3.search; }
+   row.ms = Math.round(performance.now() - t0);
+@@ -103,7 +103,7 @@ for (const C of CASES) {
+         hd.forEach((h, i) => writeFileSync(rdir + `experiment-${i + 1}.json`, serialize(h.doc)));
+         writeFileSync(rdir + 'experiments.json', JSON.stringify(hd.map((h, i) => ({ file: `experiment-${i + 1}.json`, pattern: h.pat, summary: h.summary, why_not_shown_ar: h.reasons_ar, status_ar: 'تجربة بحثية — لا تُعرض للعميل' })), null, 1)); } }
+     out.designs.forEach((d, i) => { writeFileSync(dir + `alt-${i + 1}.json`, serialize(d.doc)); row.designs.push({ file: `alt-${i + 1}.json`, mode: d.mode, pat: d.pat || null, presentation: d.presentation || null, prefFails: d.prefFails || null, summary: d.summary, review: rv(d), ...metrics(d.doc, req, entry) }); });
+-    row.requestedAlternatives = C.want || 4; row.producedAlternatives = out.designs.length; row.hidden = out.hidden || []; row.presentation = out.presentation || null; row.proposalLabel_ar = out.presentation?.label_ar || null;
++    row.requestedAlternatives = (C.want || req.want || 4); row.producedAlternatives = out.designs.length; row.hidden = out.hidden || []; row.presentation = out.presentation || null; row.proposalLabel_ar = out.presentation?.label_ar || null;
+     row.diversity = out.designs.map((a, i) => out.designs.map((b, j) => (i === j ? 0 : difference(a.doc, b.doc))));
+     row.modes = [...new Set(out.designs.map(d => d.mode))];
+     const pairs = row.diversity.flatMap((r, i) => r.filter((_, j) => j > i));
+@@ -118,7 +118,7 @@ for (const C of CASES) {
+     row.archV2 = { thresholds: SUBSTANTIVE_V2, pairs: pairs2, allDistinct: pairs2.every(p => p.verdict === 'distinct'), minSubstantive: pairs2.length ? Math.min(...pairs2.map(p => p.substantive.length)) : null, minTotal: pairs2.length ? Math.min(...pairs2.map(p => p.total)) : null };
+     row.heavyRejected = (out.rejected || []).filter(r => r.by === 'heavy-gates');
+     // سبب النقص عن العدد المطلوب (نص عربي من المولّد نفسه: ما بُني وما رُفض ولماذا)
+-    if (out.designs.length < (C.want || 4)) row.shortfallReason = out.shortfall_ar || 'لم يذكر المولّد سببًا.';
++    if (out.designs.length < ((C.want || req.want || 4))) row.shortfallReason = out.shortfall_ar || 'لم يذكر المولّد سببًا.';
+   }
+   if (C.edit && out) {
+     try {
+@@ -166,7 +166,7 @@ for (const C of CASES) {
+     }
+   }
+   // (الجولة العشرون) إشعار العميل كما يُعرض له حين يقل العدد أو لا يُنتج مخطط (يُرسم صورة notice.png)
+-  row.notice = shortfallNotice({ requested: C.want || 4, shown: row.designs.length, shortfall_ar: row.shortfallReason || null, hidden: row.hidden || [], report_ar: row.error ? (row.report_ar || row.error) : null });
++  row.notice = shortfallNotice({ requested: (C.want || req.want || 4), shown: row.designs.length, shortfall_ar: row.shortfallReason || null, hidden: row.hidden || [], report_ar: row.error ? (row.report_ar || row.error) : null });
+   writeFileSync(dir + 'result.json', JSON.stringify(row, null, 1));
+   summary.push(row);
+   const best = row.designs[0];
+diff --git a/tests/stage2-r21-proposal.test.mjs b/tests/stage2-r21-proposal.test.mjs
+index 21be766..9a19808 100644
+--- a/tests/stage2-r21-proposal.test.mjs
++++ b/tests/stage2-r21-proposal.test.mjs
+@@ -53,3 +53,56 @@ test('02 مطبخ 4×4 ومجلس 5×6 على أرض تتسع: يُرسمان ب
+   const L = verifyRequest(d.doc, r, { entry: 's' }).filter(x => x.kind === 'dims'); assert.equal(L.length, 2);
+   for (const x of L) { assert.equal(x.ok, true, x.text + ' ' + JSON.stringify(x.actual)); assert.ok(Math.abs(x.actual.s - x.want.s) <= .05 && Math.abs(x.actual.l - x.want.l) <= .05); }
+ });
++
++// ------------------------------------------------------------------------------------------------ 03 عقد النتائج والشهادات ورسائل العميل
++import { readFileSync, existsSync } from 'node:fs';
++import { analyzeFeasibility } from '../dist/feasibility.mjs';
++import { verifyCertificate, areaCertificate, logicalCertificate } from '../dist/certificates.mjs';
++import { explainFailure, reportContradictions, textContradictions } from '../dist/infeasibility-report.mjs';
++import { clientLint, lintClientText, toClientAr } from '../dist/client-language.mjs';
++import { shortfallNotice } from '../dist/client-text.mjs';
++import { CASES } from '../scripts/acceptance-cases.mjs';
++import { HELDOUT } from '../scripts/heldout-cases.mjs';
++import { HELDOUT2 } from '../scripts/heldout2-cases.mjs';
++const root = new URL('../', import.meta.url).pathname;
++test('03 انتهاء المهلة «بحث غير مكتمل» قابل للإعادة، لا استحالة (kit: time limit is not infeasibility)', { timeout: 600000 }, () => {
++  const counts = { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 };
++  const r = V3.generate({ land: { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts, requirements: req('4 غرف نوم ومجلس رجال ومجلس نساء', counts), keep: 3, timeLimitMs: 1, _cf: true });
++  assert.notEqual(r.status, 'PROVEN_INFEASIBLE');
++  if (r.status !== 'SOLVED') { assert.equal(r.reason, 'TIME_LIMIT'); assert.equal(r.retryable, true); assert.deepEqual(reportContradictions(r.report), []); }
++});
++test('03 الشهادة غير المتحقق منها مرفوضة؛ والتعارض المنطقي بين بندين إلزاميين يُقبل بشهادته (kit: unverified infeasibility is refused)', () => {
++  const land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 };
++  const r = req('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف', counts), f = analyzeFeasibility({ land, counts, requirements: r });
++  assert.equal(f.feasible, false); const h = f.hard.find(x => x.id === 'CONFLICT'); assert.ok(h.certificate);
++  assert.equal(verifyCertificate(h.certificate, { land, counts, requirements: r }).valid, true);
++  assert.equal(verifyCertificate({ ...h.certificate, b: 'R99' }, { land, counts, requirements: r }).valid, false, 'بند غير موجود');
++  assert.equal(verifyCertificate(logicalCertificate('place-opposite', 'R1', 'R1'), { land, counts, requirements: r }).valid, false);
++  assert.equal(verifyCertificate({ type: 'AREA_LOWER_BOUND', floors: 1, lowerBound: 999, available: 10, table: {} }, { land, counts, requirements: r }).valid, false, 'جدول مختلف');
++  assert.equal(V3.classifyFailure(Object.assign(Error('x'), { code: 'VILLA_INFEASIBLE' }), f, { land, counts, requirements: r }).status, 'PROVEN_INFEASIBLE');
++  const forged = { ...f, hard: [{ id: 'AREA', proof: 'area-lower-bound', certificate: { type: 'AREA_LOWER_BOUND', floors: 1, lowerBound: 999, available: 1, table: {} } }] };
++  assert.equal(V3.classifyFailure(Object.assign(Error('x'), { code: 'VILLA_INFEASIBLE' }), forged, { land, counts, requirements: r }).status, 'SEARCH_INCOMPLETE', 'شهادة مزوّرة لا تُثبت');
++});
++test('03 مدقق الشهادات لا يصنّف أي حالة معروف لها حل مستحيلةً (C1–C10، H1–H10، وحالات بذرة التطوير التي أنتج لها الأساس مخططًا)', () => {
++  const known = [...CASES, ...HELDOUT, ...HELDOUT2].map(c => ({ land: { floors: 1, ...c.land }, text: c.text, counts: c.counts }));
++  const f = `${root}evidence/coverage-r21/baseline-3b212e7-dev.json`;
++  if (existsSync(f)) for (const r of JSON.parse(readFileSync(f, 'utf8')).rows.filter(x => x.outcome === 'sound')) known.push({ land: r.land, text: r.text, counts: {} });
++  assert.ok(known.length >= 30);
++  for (const c of known) {
++    const r = req(c.text, c.counts), counts = { ...r.counts }, fe = analyzeFeasibility({ land: c.land, counts, requirements: r });
++    assert.equal(fe.hard.filter(h => h.certificate && verifyCertificate(h.certificate, { land: c.land, counts, requirements: r }).valid).length, 0, c.text);
++    assert.equal(areaCertificate({ land: c.land, counts, requirements: r, floors: c.land.floors >= 2 ? 2 : 1 }), null, c.text);
++  }
++});
++test('03 رسائل العميل: «1 من 5» بالعدد الحقيقي، وبلا مصطلحات ولا نص استثناء، والكاشف يلتقط إشعاري r20 المضللين', () => {
++  const n = shortfallNotice({ requested: 5, shown: 1, shortfall_ar: 'عُرض 1 من 5 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 9، اجتاز البوابات منهم 3' });
++  assert.match(n.title_ar, /عُرض 1 من 5/); assert.deepEqual(clientLint(n.lines_ar.join(' ')), []);
++  assert.ok(lintClientText('VILLA_NO_FIT: TypeError hardLink').length >= 1); assert.equal(lintClientText(toClientAr('السبب من المولّد: تعذّر')).length, 0);
++  const ev = id => `${root}evidence/acceptance/after-20-heldout2/${id}/result.json`;
++  if (existsSync(ev('H10'))) { assert.ok(textContradictions(JSON.parse(readFileSync(ev('H10'), 'utf8')).notice.lines_ar.join('\n')).length >= 1); assert.ok(textContradictions(JSON.parse(readFileSync(ev('H6'), 'utf8')).notice.lines_ar.join('\n')).length >= 1); }
++  const land = { width: 25, length: 30, streets: ['e'], entries: ['e'], floors: 1 }, counts = { bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 };
++  const fe = analyzeFeasibility({ land, counts, requirements: req('4 غرف نوم ومجلس', counts) });
++  for (const rep of [explainFailure({ feasibility: fe, land, error: Object.assign(Error('VILLA_NO_FIT internal'), { code: 'VILLA_NO_FIT', treeStats: { tried: 30, why: { 'dims:kitchen': 20 } } }) }), explainFailure({ feasibility: fe, land, status: { reason: 'TIME_LIMIT' } })]) {
++    assert.deepEqual(reportContradictions(rep), []); assert.deepEqual(textContradictions(rep.report_ar), []); assert.deepEqual(clientLint(rep.report_ar), []); assert.doesNotMatch(rep.report_ar, /VILLA_|internal/);
++  }
++});
+diff --git a/dist/feasibility.mjs b/dist/feasibility.mjs
+index 0b5fdae..3d83f7c 100644
+--- a/dist/feasibility.mjs
++++ b/dist/feasibility.mjs
+@@ -22,7 +22,7 @@ const AR_DIM = { majlis: 'المجلس', kitchen: 'المطبخ', dining: 'ال
+ // (الجولة 21 — مقترح) الحدود الدنيا وشهاداتها ومدققها المستقل في certificates.mjs (الجدول نفسه للمنتج والمدقق)
+ /** أنواع تعارض بنود العميل المنطقية: لا يوجد مخطط يحققها معًا (دليل منطقي)، فلا يُرسم حتى يختار العميل. */
+ export const LOGICAL_CONFLICTS = Object.freeze(['place-opposite', 'relation-contradiction', 'floor-both']); // ما له شهادة يتحقق منها المدقق؛ وسائر أنواع التعارض أسئلة للعميل لا استحالة
+-export function analyzeFeasibility({ land = {}, counts = {}, requirements = {}, provisional = false } = {}) {
++export function analyzeFeasibility({ land = {}, counts = {}, requirements = {}, provisional = false, logicalHard = false } = {}) {
+   const hard = [], warn = [], options = new Set();
+   let site, P;
+   try { site = siteOf(landWithSite(land, requirements)); P = programV2(counts, requirements); }
+@@ -73,7 +73,9 @@ export function analyzeFeasibility({ land = {}, counts = {}, requirements = {},
+     const ruleIds = (c.items || []).filter(x => /^R\d+$/.test(x)), cert = ruleIds.length === 2 ? logicalCertificate(c.type, ruleIds[0], ruleIds[1]) : null;
+     if (!cert) { warn.push({ id: 'CLIENT_CONFLICT', type: c.type, ar: `بندان في طلبك يحتاجان توضيحًا: ${qs.map(q => `«${q}»`).join(' و')}.`, question_ar: c.question_ar }); continue; }
+     const item = { id: 'CONFLICT', type: c.type, items: c.items || [], quotes: qs, proof: 'logical-contradiction', certificate: cert, ar: `بندان في طلبك لا يجتمعان في أي مخطط: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' و') || 'بندان متقابلان'}.`, question_ar: c.question_ar };
+-    if (provisional) warn.push({ ...item, id: 'CLIENT_CONFLICT' }); else { hard.push(item); options.add(`اختيار أحد البندين: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' أو ')}`); }
++    // (بعد npm test: tests/stage2-r20.test.mjs) عقد r20 باقٍ افتراضيًا: تعارض بندين من العميل ملاحظة وسؤال لا استحالة، والشهادة مرفقة بالملاحظة
++    // ليتحقق منها من شاء. «استحالة مثبتة» بها فقط بطلب صريح (logicalHard) — قرار للمالك (docs/research/r21-proposal/PROPOSAL.md §03)
++    if (provisional || !logicalHard) warn.push({ ...item, id: 'CLIENT_CONFLICT' }); else { hard.push(item); options.add(`اختيار أحد البندين: ${(c.quotes || []).filter(Boolean).map(q => `«${q}»`).join(' أو ')}`); }
+   }
+   const feasible = hard.length === 0;
+   const report_ar = feasible ? (warn.length ? 'الطلب ممكن على هذه الأرض، مع ملاحظات: ' + warn.map(w => w.ar).join('؛ ') : 'الطلب ممكن على هذه الأرض.')
+diff --git a/tests/stage2-r14.test.mjs b/tests/stage2-r14.test.mjs
+index 953bfca..3c930ee 100644
+--- a/tests/stage2-r14.test.mjs
++++ b/tests/stage2-r14.test.mjs
+@@ -31,7 +31,7 @@ test('حالة العرض: بند عميل غير منفذ أو بوابة را
+   const e = presentationStatus({ doc, ledger: [], review: { passed: true } }, { text: C.text });
+   // (الجولة التاسعة عشرة، توجيه المالك أولًا) في هذا المستند (بعد-13) ضيف يعبر العائلة وموقف موازٍ ضحل: مخالفتان إلزاميتان ⇐ محجوب، والتفضيلات تبقى مقيسة
+   // (الجولة العشرون) وفيه أيضًا المجلس بلا باب داخلي إلى البيت (MAJLIS_ISOLATED، مخالفة إلزامية أضيفت بعد المراجعة العمياء r19: H1-1 وH5-1)
+-  assert.equal(e.status, 'hidden'); assert.deepEqual(e.mandatory, ['GUEST_DINING', 'PARKING_SHALLOW', 'MAJLIS_ISOLATED']); assert.ok(e.hidden_ar.every(t => /مخالفة إلزامية/.test(t)));
++  assert.equal(e.status, 'hidden'); assert.deepEqual(e.mandatory, ['GUEST_DINING', 'PARKING_SHALLOW', 'MAJLIS_ISOLATED']); assert.ok(e.hidden_ar.every(t => /^شرط أساسي غير متحقق — /.test(t))); // (الجولة 21 — مقترح 03) الصياغة نفسها بلغة العميل: «مخالفة إلزامية في الميزان» تسمية داخلية رصدتها المراجعة العمياء r20 (dist/client-language.mjs)؛ الحكم (محجوب والقائمة الثلاثية) لم يتغير
+   assert.ok(e.prefs.includes('MAID_BATH'), 'C10-1 بعد-13: الخادمة بلا حمام');
+   assert.ok(e.edits_ar.every(t => typeof t === 'string' && t.length > 10));
+ });
+diff --git a/tests/stage2-r21-proposal.test.mjs b/tests/stage2-r21-proposal.test.mjs
+index fd8cbe0..d8ee960 100644
+--- a/tests/stage2-r21-proposal.test.mjs
++++ b/tests/stage2-r21-proposal.test.mjs
+@@ -73,7 +73,10 @@ test('03 انتهاء المهلة «بحث غير مكتمل» قابل للإ
+ });
+ test('03 الشهادة غير المتحقق منها مرفوضة؛ والتعارض المنطقي بين بندين إلزاميين يُقبل بشهادته (kit: unverified infeasibility is refused)', () => {
+   const land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 }, counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 };
+-  const r = req('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف', counts), f = analyzeFeasibility({ land, counts, requirements: r });
++  const r = req('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف', counts);
++  const soft = analyzeFeasibility({ land, counts, requirements: r }); // عقد r20 الافتراضي: ملاحظة وسؤال، والشهادة مرفقة
++  assert.equal(soft.feasible, true); const sw = soft.warnings.find(x => x.id === 'CLIENT_CONFLICT'); assert.ok(sw?.certificate); assert.equal(verifyCertificate(sw.certificate, { land, counts, requirements: r }).valid, true);
++  const f = analyzeFeasibility({ land, counts, requirements: r, logicalHard: true });
+   assert.equal(f.feasible, false); const h = f.hard.find(x => x.id === 'CONFLICT'); assert.ok(h.certificate);
+   assert.equal(verifyCertificate(h.certificate, { land, counts, requirements: r }).valid, true);
+   assert.equal(verifyCertificate({ ...h.certificate, b: 'R99' }, { land, counts, requirements: r }).valid, false, 'بند غير موجود');

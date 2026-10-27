@@ -31,7 +31,7 @@ test('حالة العرض: بند عميل غير منفذ أو بوابة را�
   const e = presentationStatus({ doc, ledger: [], review: { passed: true } }, { text: C.text });
   // (الجولة التاسعة عشرة، توجيه المالك أولًا) في هذا المستند (بعد-13) ضيف يعبر العائلة وموقف موازٍ ضحل: مخالفتان إلزاميتان ⇐ محجوب، والتفضيلات تبقى مقيسة
   // (الجولة العشرون) وفيه أيضًا المجلس بلا باب داخلي إلى البيت (MAJLIS_ISOLATED، مخالفة إلزامية أضيفت بعد المراجعة العمياء r19: H1-1 وH5-1)
-  assert.equal(e.status, 'hidden'); assert.deepEqual(e.mandatory, ['GUEST_DINING', 'PARKING_SHALLOW', 'MAJLIS_ISOLATED']); assert.ok(e.hidden_ar.every(t => /مخالفة إلزامية/.test(t)));
+  assert.equal(e.status, 'hidden'); assert.deepEqual(e.mandatory, ['GUEST_DINING', 'PARKING_SHALLOW', 'MAJLIS_ISOLATED']); assert.ok(e.hidden_ar.every(t => /^شرط أساسي غير متحقق — /.test(t))); // (الجولة 21 — مقترح 03) الصياغة نفسها بلغة العميل: «مخالفة إلزامية في الميزان» تسمية داخلية رصدتها المراجعة العمياء r20 (dist/client-language.mjs)؛ الحكم (محجوب والقائمة الثلاثية) لم يتغير
   assert.ok(e.prefs.includes('MAID_BATH'), 'C10-1 بعد-13: الخادمة بلا حمام');
   assert.ok(e.edits_ar.every(t => typeof t === 'string' && t.length > 10));
 });

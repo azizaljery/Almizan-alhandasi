@@ -12,6 +12,8 @@ import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 import { shortfallNotice } from './client-text.mjs';
 import { toClientAr } from './client-language.mjs';
+// (الجولة 21 — مقترح 08) لا نص استثناء للعميل: رسالة المحرك العربية المعروفة (VILLA_*) بلغة العميل، وإلا نص ثابت
+const clientErr = (e, fallback) => (/^VILLA_/.test(String(e?.code || '')) && /[\u0600-\u06FF]/.test(String(e?.message || '')) ? toClientAr(e.message) : fallback);
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -101,7 +103,7 @@ function altsCard(d) {
       el('b', {}, 'البديل ' + (i + 1)), a.summary ? el('span', {}, a.summary) : null, verdict(a) ? el('small', {}, verdict(a)) : null, a.presentation ? el('small', { 'data-alt-status': a.presentation.status }, a.presentation.label_ar + (a.presentation.status === 'needs-edits' ? ` (${a.presentation.edits_ar.length})` : '')) : null))),
     info?.hidden?.length ? el('p', { class: 'sub', 'data-hidden': '' }, `حُجب ${info.hidden.length} ${info.hidden.length === 1 ? 'بديل' : 'بدائل'} لأنها تخالف بندًا إلزاميًا من طلبك: ${info.hidden.map(h => (h.reasons_ar || [])[0]).filter(Boolean).join('؛ ')}`) : null,
     // (الجولة العشرون) إشعار النقص بنص العميل نفسه الذي في الصور (shortfallNotice): العدد صريحًا وسببه وما يمكن تغييره، بلا لغة داخلية
-    (() => { const n = alts.length < want ? shortfallNotice({ requested: want, shown: alts.length, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
+    (() => { const nv = alts.filter(a => a.presentation?.status !== 'hidden').length, n = nv < want ? shortfallNotice({ requested: want, shown: nv, shortfall_ar: info?.shortfall_ar, hidden: info?.hidden || [] }) : null;
       return n ? el('div', { class: 'shortfall sub', role: 'note', 'data-shortfall': '' }, el('b', {}, n.title_ar), ...n.lines_ar.map(t => el('p', {}, t))) : null; })(),
     info?.rejected?.length ? el('details', { class: 'rejected' }, el('summary', {}, `المرشحون المرفوضون (${info.rejectedCount}) وأسبابهم`),
       el('ul', { class: 'tick' }, info.rejected.map(r => el('li', { class: 'bad' }, r.text + (r.count > 1 ? ` (${r.count})` : ''))))) : null);
@@ -131,6 +133,14 @@ function statusCard(d) {
     el('p', { class: 'score ' + cls }, p.label_ar + (p.status === 'needs-edits' ? ` — ${p.edits_ar.length} ${p.edits_ar.length === 1 ? 'ملاحظة' : 'ملاحظات'}` : '')),
     p.status === 'hidden' ? el('ul', { class: 'tick' }, p.hidden_ar.map(t => el('li', { class: 'bad' }, t))) : null,
     p.status === 'needs-edits' ? el('ul', { class: 'tick' }, p.edits_ar.map(t => el('li', { class: 'no' }, t))) : null,
+    // (02c، قرار المالك 2026-10-26) ما لم يثبت نظاميًا (ساتر موقع) يظهر للعميل بوسم «تحتاج تحققًا نظاميًا» ولا يُعدّ معتمدًا
+    p.status !== 'hidden' && p.regulatoryTag_ar ? el('p', { class: 'sub', 'data-regulatory-tag': 'unverified', style: 'font-weight:700' }, p.regulatoryTag_ar) : null,
+    p.status !== 'hidden' && p.regulatory_ar?.length ? el('ul', { class: 'tick', 'data-regulatory': 'unverified' }, p.regulatory_ar.map(t => el('li', { class: 'no' }, t))) : null,
+    // (قرار المالك 2026-10-26) ثلاث حالات منفصلة: التوزيع المعماري / اختبارات الخصوصية والحركة / التحقق النظامي
+    p.status !== 'hidden' && p.states ? el('ul', { class: 'tick', 'data-states': '3' },
+      el('li', {}, 'صلاحية التوزيع المعماري: ' + p.states.architectural.label_ar), 
+      el('li', {}, 'اختبارات الخصوصية والحركة: ' + (p.states.tests.passed === null ? 'لا تنطبق' : p.states.tests.passed ? 'نجحت' : 'لم تنجح')),
+      el('li', {}, 'التحقق النظامي: ' + p.states.regulatory.label_ar)) : null,
     // (الجولة الخامسة عشرة) التفضيلات الطفيفة ملاحظات معلنة مع البديل (لا تُخفى ولا تُعدّ متحققة)
     p.status !== 'hidden' && p.notes_ar?.length ? el('details', { class: 'notes' }, el('summary', {}, `ملاحظات للمراجعة (${p.notes_ar.length}) — تفضيلات افتراضية للميزان قابلة للتغيير`), el('ul', { class: 'tick' }, p.notes_ar.map(t => el('li', { class: 'no' }, t)))) : null,
     el('p', { class: 'sub' }, p.status === 'ready' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، ولا عيب جوهريًا فيه؛ الملاحظات المذكورة (إن وجدت) تفضيلات افتراضية للميزان لم تتحقق. يبقى مقترحًا مبدئيًا.' : p.status === 'needs-edits' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، لكن فيه ما يصلحه المعماري قبل العرض (مذكور أعلاه) — لا يُقدَّم على أنه جاهز.' : 'لا يُعرض بديلًا: يخالف بندًا إلزاميًا من طلبك أو رسب في المراجعة.'));
@@ -336,8 +346,8 @@ $('fbGo').addEventListener('click', async () => {
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (err) { $('fbStatus').textContent = err.message || 'تعذّر تصميم بديل.'; $('fbGo').disabled = false; }
+  } catch (err) { $('fbStatus').textContent = clientErr(err, 'تعذّر تصميم بديل.'); $('fbGo').disabled = false; }
 });
 
-try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, e.message), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
+try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, clientErr(e, 'حدث خطأ أثناء تحميل الجلسة؛ أعد المحاولة أو ابدأ من الصفحة الرئيسية.')), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
 globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية

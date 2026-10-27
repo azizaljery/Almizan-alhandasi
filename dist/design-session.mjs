@@ -8,6 +8,7 @@ export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
 import { parseEdit, applyEdits, replayIntents, compareDocs, describeChanges, inspect, measureIntents, FACADE_RENDER } from './plan-edit.mjs';
 import { reviewDesign } from './plan-review.mjs';
+import { applySafeEdit } from './change-guard.mjs';
 import { presentationStatus } from './presentation-status.mjs';
 import { fingerprint, diffFingerprint, compactDiff, touchedKeys, countAr } from './plan-fingerprint.mjs';
 import { zoneDiff, matchShown, roomsHash, sideOccupants } from './edit-truth.mjs';
@@ -365,9 +366,10 @@ async function redesign0(session, { picks = [], text = '', ai = null } = {}, { g
       const mineTexts = new Set(mine.map(x => x.text));
       const achieves = d => { try { if (intents.length) { const mm = measureIntents(curD, d, intents, { entry: entryDir }); return mm.length > 0 && mm.every(x => x.ok); } const L = verifyRequest(d, req, { entry: entryDir }).filter(x => mineTexts.has(x.text)); return L.length > 0 && L.every(x => x.ok); } catch { return false; } };
       const curH = roomsHash(curD);
-      // (الجولة 21) المرشح «معروض أصلًا» فقط إن كان البديل المعروض المشابه يحقق الطلب نفسه؛ وإلا فهو تصميم جديد لهذا الطلب (يضيف ما طلبه
-      // العميل على تنظيم قريب من بديل معروض) — كان يُسقَط فلا يبقى للعميل إلا «أبقِ المخطط» (تراجع جلسة التصميم في r20)
-      const shownThatAchieves = m => { if (!m || m.identical) return m; const sd = (s.alternatives || []).find(a => a.index === m.index); try { return sd && achieves(parseDoc(sd.doc)) ? m : null; } catch { return m; } };
+      // (الجولة 21 — مقترح 08، مكيَّف من fb31100 بقرار المالك «مراجعة مشروطة») المرشح «معروض أصلًا» فقط إن كان البديل المعروض المطابق له يحقق
+      // الطلب نفسه مقيسًا عليه هو (لا على المرشح) — وإلا فهو تصميم جديد لهذا الطلب. وتعذّر القياس لا يُعد تحققًا (كان fb31100 يعيد m عند الخطأ)،
+      // والمطابق حرفيًا يُقاس أيضًا: لا يُقال للعميل «البديل N المعروض يحقق طلبك» إلا بقياس
+      const shownThatAchieves = m => { if (!m || String(globalThis.process?.env?.R14_OFF || '').includes('r21shown')) return m; const sd = (s.alternatives || []).find(a => a.index === m.index); try { return sd && achieves(parseDoc(sd.doc)) ? m : null; } catch { return null; } };
       const shown = (s.alternatives || []).map(a => ({ index: a.index, doc: parseDoc(a.doc) })).filter(a => roomsHash(a.doc) !== curH);
       const pool = [], seenH = new Set([curH]);
       for (const c of [{ ...out }, ...(out.alternatives || []).slice(1).map(a => ({ ...out, doc: a.doc, pat: a.pat || null, summary: a.summary || out.summary, notes: a.notes || [], review: a.review || null, ledger: a.ledger || null, mirror: a.mirror ?? null }))]) {
@@ -518,6 +520,17 @@ function localTurn(s, req, parsed, { text, picks, changes, more, original, conse
   }
   if (res.status === 'fallback') return { fallback: { why_ar: res.why_ar, intents: parsed.unhandled?.length ? null : parsed.intents, failed: res.results.filter(r => !r.ok) } };
   if (res.status !== 'local') return { fallback: { why_ar: 'لا حل موضعي' } };
+  // (الجولة 21 — مقترح 08، kit applySafeEdit) المعاملة: لا يُحفظ تعديل موضعي يُسقط شرطًا كان متحققًا — شروط النظام كلها وبنود العميل المقيسة
+  // (المقاسات والمواضع والقرب) وعلاقات العقد الصلبة (الباب المباشر ووصول الضيف). ما طلبه العميل في هذا الدور نفسه يُعفى بنوعه، والموافقة الصريحة
+  // تُعفي كما في حارس التعديل. الرجوع إلى نسخة سابقة لا يمر هنا (النسخة نفسها اعتُمدت حين عُرضت).
+  if (!restored && !consent && !String(globalThis.process?.env?.R14_OFF || '').includes('r21safe') && res.doc !== doc0) {
+    const ops = new Set(parsed.intents.map(i => i.op)), exempt = [];
+    const L0 = (() => { try { return verifyRequest(doc0, reqE, { entry: entryDir }); } catch { return []; } })();
+    for (const x of L0) if ((ops.has('resize') && (x.kind === 'dims' || x.kind === 'area')) || ((ops.has('delete') || ops.has('add') || ops.has('bedCount')) && x.kind === 'count') || (ops.has('rule') && ['place', 'far', 'near'].includes(x.kind))) exempt.push(x.id);
+    if (ops.has('delete') || ops.has('add') || ops.has('bedCount')) exempt.push(...['BEDROOM', 'MASTER', 'MAJLIS', 'LIVING', 'DINING', 'KITCHEN', 'BATH', 'SERVICE'].map(t => 'COUNT_' + t));
+    const safe = applySafeEdit(doc0, res.doc, reqE, { entry: entryDir, exempt });
+    if (!safe.accepted) return { fallback: { why_ar: 'لم أعتمد التعديل الموضعي لأنه يُفسد ما كان متحققًا في المخطط: ' + safe.violations.map(v => v.ar).join('؛ ') + '.', guard: safe.violations, intents: parsed.intents, failed: [] } };
+  }
   // نطاق الطلب: الغرف التي ذكرها العميل والغرف المضافة؛ ما تغيّر غيرها يُعلن «لازمًا للتعديل»
   const I0 = inspect(doc0), I1 = inspect(res.doc), scope = new Set();
   for (const r of res.results) { const it = r.intent || {}; if (SCOPE_OPS.has(it.op) && it.id) scope.add(it.id); }

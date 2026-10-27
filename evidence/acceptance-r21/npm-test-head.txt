@@ -1,0 +1,9 @@
+# npm test على 4161910 — ملخص TAP (شُغّل مع مصفوفة القياس على النواتين؛ المدة غير قابلة للمقارنة)
+# tests 1517
+# suites 0
+# pass 1517
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5526215.755879

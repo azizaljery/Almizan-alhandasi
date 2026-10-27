@@ -115,7 +115,12 @@ export function insetPolygon(poly, dists, { grow = false } = {}) {
   for (let i = 0; i < n; i++) {
     const a = lines[(i + n - 1) % n], b = lines[i];
     const hit = lineIntersection(a.p, a.dir, b.p, b.dir);
-    out.push(hit && dist(hit, poly[i]) < 50 ? hit : add(b.p, mul(b.dir, 0)));
+    if (hit && dist(hit, poly[i]) < 50) { out.push(hit); continue; }
+    // (الجولة 21 — 02b) ضلعان متتاليان على استقامة واحدة بإزاحتين مختلفتين (تتغير سماكة الجدار عند وصلة T على ضلع مستقيم): الوجه الصافي
+    // درجة لا خط مائل — نقطة نهاية الأول على إزاحته ثم بداية الثاني على إزاحته (كان يُكتفى بالثانية فيُرسم وجه مائل يخالف المجسم)
+    const aEnd = add(poly[i], mul(perp(a.dir), d[(i + n - 1) % n]));
+    if (dist(aEnd, b.p) > 1e-9) out.push(aEnd);
+    out.push(add(b.p, mul(b.dir, 0)));
   }
   const result = out.map(pt);
   const before = signedArea(poly), after = signedArea(result);

@@ -1,0 +1,604 @@
+{
+ "A": "base-3b212e7",
+ "B": "proposal-head",
+ "rows": [
+  {
+   "id": "C1",
+   "a": {
+    "ms": 33055,
+    "maxRssMB": 504,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 4,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 40431,
+    "maxRssMB": 513,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 3,
+    "pool": 3,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C2",
+   "a": {
+    "ms": 57075,
+    "maxRssMB": 1061,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 4,
+    "pool": 8,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 56356,
+    "maxRssMB": 483,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 2,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C3",
+   "a": {
+    "ms": 51008,
+    "maxRssMB": 483,
+    "shown": 3,
+    "visible": 3,
+    "ready": 2,
+    "mandatory": 0,
+    "distinctPool": 4,
+    "pool": 20,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 55011,
+    "maxRssMB": 502,
+    "shown": 3,
+    "visible": 3,
+    "ready": 2,
+    "mandatory": 0,
+    "distinctPool": 4,
+    "pool": 20,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C4",
+   "a": {
+    "ms": 14985,
+    "maxRssMB": 264,
+    "shown": 1,
+    "visible": 1,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 6,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 16431,
+    "maxRssMB": 234,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 7,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C5",
+   "a": {
+    "ms": 58406,
+    "maxRssMB": 506,
+    "shown": 3,
+    "visible": 3,
+    "ready": 3,
+    "mandatory": 0,
+    "distinctPool": 3,
+    "pool": 21,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 70367,
+    "maxRssMB": 528,
+    "shown": 2,
+    "visible": 2,
+    "ready": 2,
+    "mandatory": 0,
+    "distinctPool": 4,
+    "pool": 22,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C6",
+   "a": {
+    "ms": 33447,
+    "maxRssMB": 549,
+    "shown": 1,
+    "visible": 1,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 2,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 25680,
+    "maxRssMB": 501,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 2,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C7",
+   "a": {
+    "ms": 92301,
+    "maxRssMB": 445,
+    "shown": 1,
+    "visible": 1,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 106326,
+    "maxRssMB": 414,
+    "shown": 1,
+    "visible": 1,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C8",
+   "a": {
+    "ms": 42771,
+    "maxRssMB": 540,
+    "shown": 3,
+    "visible": 3,
+    "ready": 2,
+    "mandatory": 0,
+    "distinctPool": 3,
+    "pool": 27,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 54543,
+    "maxRssMB": 555,
+    "shown": 4,
+    "visible": 4,
+    "ready": 3,
+    "mandatory": 0,
+    "distinctPool": 3,
+    "pool": 28,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C9",
+   "a": {
+    "ms": 33338,
+    "maxRssMB": 533,
+    "shown": 3,
+    "visible": 3,
+    "ready": 3,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 20,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 43151,
+    "maxRssMB": 457,
+    "shown": 4,
+    "visible": 4,
+    "ready": 4,
+    "mandatory": 0,
+    "distinctPool": 3,
+    "pool": 21,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "C10",
+   "a": {
+    "ms": 46608,
+    "maxRssMB": 594,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 4,
+    "pool": 12,
+    "error": null,
+    "result": null,
+    "keep": 5
+   },
+   "b": {
+    "ms": 61282,
+    "maxRssMB": 609,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 4,
+    "pool": 12,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 5
+   }
+  },
+  {
+   "id": "H1",
+   "a": {
+    "ms": 32480,
+    "maxRssMB": 525,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 17,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 38536,
+    "maxRssMB": 537,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 14,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "H2",
+   "a": {
+    "ms": 25743,
+    "maxRssMB": 359,
+    "shown": 1,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 42244,
+    "maxRssMB": 485,
+    "shown": 0,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 0,
+    "pool": 0,
+    "error": "VILLA_BUILD_FAILED",
+    "result": null,
+    "keep": 4
+   }
+  },
+  {
+   "id": "H3",
+   "a": {
+    "ms": 29876,
+    "maxRssMB": 581,
+    "shown": 1,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 1,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 35449,
+    "maxRssMB": 584,
+    "shown": 0,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 0,
+    "pool": 0,
+    "error": "VILLA_BUILD_FAILED",
+    "result": null,
+    "keep": 4
+   }
+  },
+  {
+   "id": "H4",
+   "a": {
+    "ms": 19032,
+    "maxRssMB": 283,
+    "shown": 0,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 0,
+    "pool": 0,
+    "error": "VILLA_BUILD_FAILED",
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 22538,
+    "maxRssMB": 216,
+    "shown": 0,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 0,
+    "pool": 0,
+    "error": "VILLA_BUILD_FAILED",
+    "result": null,
+    "keep": 4
+   }
+  },
+  {
+   "id": "H5",
+   "a": {
+    "ms": 34509,
+    "maxRssMB": 627,
+    "shown": 1,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 33190,
+    "maxRssMB": 505,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 3,
+    "pool": 7,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "H6",
+   "a": {
+    "ms": 22119,
+    "maxRssMB": 526,
+    "shown": 0,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 0,
+    "pool": 0,
+    "error": "VILLA_BUILD_FAILED",
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 55322,
+    "maxRssMB": 541,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 8,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "H7",
+   "a": {
+    "ms": 36899,
+    "maxRssMB": 520,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 5,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 45135,
+    "maxRssMB": 521,
+    "shown": 1,
+    "visible": 1,
+    "ready": 1,
+    "mandatory": 0,
+    "distinctPool": 2,
+    "pool": 5,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "H8",
+   "a": {
+    "ms": 82713,
+    "maxRssMB": 343,
+    "shown": 1,
+    "visible": 1,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 55819,
+    "maxRssMB": 325,
+    "shown": 1,
+    "visible": 1,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "H9",
+   "a": {
+    "ms": 9187,
+    "maxRssMB": 251,
+    "shown": 1,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 1,
+    "distinctPool": 1,
+    "pool": 2,
+    "error": null,
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 11408,
+    "maxRssMB": 242,
+    "shown": 1,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 1,
+    "distinctPool": 1,
+    "pool": 2,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 4
+   }
+  },
+  {
+   "id": "H10",
+   "a": {
+    "ms": 7046,
+    "maxRssMB": 276,
+    "shown": 0,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 0,
+    "pool": 0,
+    "error": "VILLA_NO_FIT",
+    "result": null,
+    "keep": 4
+   },
+   "b": {
+    "ms": 26026,
+    "maxRssMB": 492,
+    "shown": 1,
+    "visible": 0,
+    "ready": 0,
+    "mandatory": 0,
+    "distinctPool": 1,
+    "pool": 1,
+    "error": null,
+    "result": "SOLVED",
+    "keep": 3
+   }
+  }
+ ],
+ "totals": {
+  "a": {
+   "ms": 762598,
+   "visible": 21,
+   "ready": 15,
+   "withVisible": 13
+  },
+  "b": {
+   "ms": 895245,
+   "visible": 24,
+   "ready": 20,
+   "withVisible": 15
+  },
+  "peakRssMB": {
+   "a": 1061,
+   "b": 609
+  }
+ }
+}

@@ -17,9 +17,15 @@ import { analyzeDoc } from './draw/digest.mjs';
 import { measureSaudiProgram } from './saudi-program.mjs';
 import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
 import { toClientAr, GATE_AR } from './client-language.mjs';
+import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
+import { evaluateSuiteBaths } from './bath-band.mjs';
+import { UNVERIFIED_LABEL } from './regulatory-checks.mjs';
+import { planTests, planStates, REG_SHORT_AR, REG_TAG_AR } from './plan-states.mjs';
+import { showerGate } from './bath-shower.mjs';
 export { GATE_AR };
 
 export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
+export const REG_VERIFY_AR = 'تحتاج تحققًا نظاميًا';
 export const STATUS_AR = Object.freeze({ ready: 'جاهز للعرض المبدئي', 'needs-edits': 'يحتاج تعديلات', hidden: 'محجوب' });
 const PREF_TIER_AR = 'تفضيل سعودي افتراضي للميزان (قابل للتغيير)';
 const R16_TIER_AR = 'عيب معماري — قيمة تصميمية افتراضية للميزان';
@@ -67,21 +73,52 @@ export function presentationStatus(design, request = {}) {
   // تحجب البديل كالبند الصريح غير المتحقق — لا يُعرض صالحًا أيًّا كانت درجته
   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
   for (const g of mand) hidden.push(`شرط أساسي غير متحقق — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
+  // (02c، قرار المالك 2026-10-26 ثالثًا) بوابة إلزامية: حمام كامل بلا تجهيز استحمام صالح (فحص هندسي: التقاطع ومسقط الوصول وفتح الباب والعرض الصافي) يُمنع قبوله
+  let showerFails = []; try { showerFails = R14_OFF.has('r21shower') ? [] : showerGate(doc, model).failing; } catch { showerFails = []; }
+  for (const b of showerFails) hidden.push(`شرط أساسي غير متحقق — حمام «${b.room}» بلا تجهيز استحمام صالح للاستخدام: ${b.reasons.join('؛ ')} (${MAND_TIER_AR})`);
+  // (الجولة 21 — 02b، قرار المالك: «لا محجوب بحقول أسباب فارغة») سبب مُهيكل لكل حجب، بالترتيب نفسه لـ hidden_ar: المرشح، والمرحلة، والقاعدة
+  // المسؤولة، والمقيس والحد (متى انطبقا)، ومصدر الشرط، ونص العميل. يُبنى من البنود نفسها التي حجبت، لا من تفسير مفترض.
+  const candidate = design.pat || design.id || null;
+  // (02c، حزمة المالك review-evidence) الحقول الموحدة للحزمة (candidateId، stage، rule، source، reason، measured، limit، unit) بأرقام من الفاحص
+  // الحقيقي: بند السجل (ledgerEvidence)، وقيمة بوابة المراجعة نفسها (gateEvidence من design.review.gates)، وقيمة المخالفة الإلزامية حيث كانت رقمًا؛
+  // وغير الرقمي null مع measure_ar صريح. تُبقى الحقول القديمة (candidate، kind، limit كائنًا في المقاسات → limitDetail) للتوافق.
+  const gateOf = id => (rv?.gates || []).find(g => g.id === id) || { id, value: null, reasons_ar: [] };
+  const hiddenReasons = [
+    ...ledgerFails.map(x => { const e = ledgerEvidence(x); return { candidate, candidateId: candidate || 'design', stage: x.kind === 'dims' ? 'dimensions' : 'presentation', rule: x.id || ('LEDGER:' + (x.kind || 'item')), kind: x.kind || null,
+      measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, ...(x.kind === 'dims' ? { measuredDetail: x.failing ?? x.actual ?? null, limitDetail: x.want ? { ...x.want, ...(Number.isFinite(x.tol) ? { tol: x.tol } : {}) } : null, tol: x.tol ?? null } : {}), source: 'client', quote: x.text || null }; }),
+    ...gateFails.map(g => { const gg = gateOf(g), e = gateEvidence(gg); return { candidate, candidateId: candidate || 'design', stage: 'review', rule: 'GATE:' + g, kind: 'gate', measured: e.measured, limit: e.limit, unit: e.unit, measure_ar: e.measure_ar, source: gg.tier || 'review', gateReasons_ar: gg.reasons_ar || [] }; }),
+    ...mand.map(g => ({ candidate, candidateId: candidate || 'design', stage: 'presentation', rule: g.id, kind: 'mandatory', measured: null, limit: null, unit: null, measuredDetail: g.value ?? null, measure_ar: `شرط أساسي غير رقمي (مسار/علاقة): ${(g.reasons_ar || [])[0] || g.ar}`, source: MAND_TIER_AR })),
+    ...showerFails.map(b => ({ candidate, candidateId: candidate || 'design', stage: 'presentation', rule: 'BATH_SHOWER', kind: 'mandatory', measured: null, limit: null, unit: null, measuredDetail: { room: b.room, widthM: b.widthM, minWidthM: b.minWidthM, shower: b.shower }, measure_ar: `شرط أساسي هندسي: ${b.reasons.join('؛ ')}`, source: MAND_TIER_AR })),
+  ].map((r, i) => ({ ...r, reason_ar: hidden[i], reason: hidden[i] }));
   r16 = r16.filter(g => !mand.includes(g));
   const items = [...prefs.map(g => ({ id: g.id, major: isMajorPref(g, model), text_ar: `${g.ar}: ${(g.reasons_ar || [])[0] || 'لم يتحقق'} (${PREF_TIER_AR})` })),
     ...r16.map(g => ({ id: g.id, major: true, specialist: !!g.specialist, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')} (${g.tier === 'saudi-preference' ? PREF_TIER_AR : R16_TIER_AR})` })),
     ...qualityNotes(doc, model, request).map(q => ({ id: q.id, major: MAJOR_QUALITY.has(q.id), text_ar: q.text_ar })),
     ...toleranceNotes(design.ledger || []),
+    // (الجولة 21 — 02c، قرار المالك ثالثًا) حمام الجناح بالفاحصات الموجودة (bath-band.mjs): الأجهزة وفتح الباب والعرض الصافي — ملاحظة مقيسة لا
+    // بوابة (لم يُعاير حجبًا؛ قرار للمالك)، والسباكة «لم يُتحقق» والتهوية الميكانيكية ملاحظة BATH_NO_WINDOW القائمة
+    ...bathNotes(doc, model),
     // (الجولة العشرون) ملاحظات مقيسة لا تحجب ولا تُعدّ عيبًا: المدخلان متجاوران، والحمامات بلا نافذة (تهوية ميكانيكية)
     ...r20notes.map(g => ({ id: g.id, major: false, text_ar: `${g.ar}: ${g.reasons_ar.join('؛ ')}` }))];
   // (الجولة 21) كل نص يراه العميل بعربية واضحة بلا مصطلحات داخلية
   for (const x of items) x.text_ar = toClientAr(x.text_ar);
   for (let i = 0; i < hidden.length; i++) hidden[i] = toClientAr(hidden[i]);
+  for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason = hiddenReasons[i].reason_ar = hidden[i];
   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
+  const archStatus = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
+  // (02c، قرار المالك 2026-10-26 ثانيًا) ثلاث حالات منفصلة: صلاحية التوزيع المعماري (أعلاه)، ونجاح اختبارات الخصوصية والحركة لكل فراغ، والتحقق النظامي.
+  // فشل الاختبارات يضيف عيبًا معماريًا (needs-edits)؛ و«غير متحقق» نظاميًا لا يحوّل الحالة ولا يصير ناجحًا — وسم ظاهر فقط.
+  let tests = null; try { tests = R14_OFF.has('r21tests') ? null : planTests(doc); } catch { tests = null; }
+  // (قرار المالك 2026-10-27 — إطلاق تجريبي) اختبار الخصوصية لكل فراغ (الدرجة A للصالة) نتيجته ظاهرة دائمًا في حالة «الاختبارات» (states.tests.passed=false) وفي ملاحظة،
+  // لكنه لا يخفّض الحالة إلى «يحتاج تعديلات» ما لم يُفعَّل صراحةً (R21_PRIVACY_EDITS=1): تخفيضه سبّب تراجع الجاهز في C3/C5/C8/H5/H7/H10 (قياس x-B) وقراره بيد المالك. الحركة والموقع تبقى عيوبًا.
+  const PRIV_EDITS = globalThis.process?.env?.R21_PRIVACY_EDITS === '1';
+  if (tests) for (const m of tests.failing_ar) { if (/^خصوصية /.test(m) && !PRIV_EDITS) notes.push(toClientAr('اختبار الخصوصية لكل فراغ لم يتحقق (ملاحظة ظاهرة؛ لا يخفّض الحالة بانتظار قرار المالك): ' + m)); else edits.push(toClientAr(m)); }
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
+  const states = planStates(archStatus, STATUS_AR, tests), site = tests?.regulatory || null;
+  const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join("، ")}): ${REG_SHORT_AR} — ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
-  const specialist = items.filter(x => x.specialist).map(x => x.text_ar);
-  return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
+  const specialist = [...items.filter(x => x.specialist).map(x => x.text_ar), ...regVerify];
+  return { status, label_ar: STATUS_AR[status] + (regVerify.length && status !== 'hidden' ? ' · ' + REG_SHORT_AR : ''), regulatoryTag_ar: regVerify.length ? REG_TAG_AR : null, states, needsRegulatoryVerification: regVerify.length > 0, regulatory_ar: regVerify, siteElements: site && site.fences.length ? { fences: site.fences, regulatory: site.regulatory, geometryOk: site.geometryOk } : null, hidden_ar: hidden, hiddenReasons, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
 }
 /** (الجولة الخامسة عشرة) تفضيلات سعودية يعدّها المعماري عيبًا يُصلح قبل العرض (لا ملاحظة): القاعدة الموثقة أعلى الملف. */
 export const MAJOR_PREFS = Object.freeze(['MAJLIS_STREET_ENTRY', 'MAJLIS_LOBBY', 'BED_BATH', 'MAID_BATH']);
@@ -94,6 +131,10 @@ function isMajorPref(g, model) {
     return (g.value?.pairs || []).some(p => masters.has(p.bedroom));
   }
   return false;
+}
+function bathNotes(doc, model) {
+  let list = []; try { list = evaluateSuiteBaths(doc, model); } catch { return []; }
+  return list.filter(b => !b.preliminaryAccept).map(b => ({ id: 'BATH_FUNCTION', major: false, text_ar: `«${b.name}» ${b.w}×${b.l} م: ${[!b.fixturesFit ? `الأجهزة المرسومة ${[b.fixtures.wc && 'مرحاض', b.fixtures.basin && 'مغسلة', b.fixtures.shower && 'دش'].filter(Boolean).join(' و') || 'لا شيء'} — ينقصها ${[!b.fixtures.wc && 'المرحاض', !b.fixtures.basin && 'المغسلة', !b.fixtures.shower && 'الدش'].filter(Boolean).join(' و')}` : null, !b.doorClearance ? 'فتح الباب يعترضه جدار أو قطعة مثبتة' : null, !b.minWidthOk ? 'العرض الصافي أقل من 1.4 م (قيمة مرشحة غير متحققة نظاميًا)' : null].filter(Boolean).join('؛ ')} — يحتاج مراجعة توزيع الحمام` }));
 }
 /** بنود المقاس المتحققة ضمن السماح لا بالمطابقة (المجلس 5.76 م والمطلوب 6 م): ملاحظة صريحة لا تُخفى. */
 function toleranceNotes(ledger) {

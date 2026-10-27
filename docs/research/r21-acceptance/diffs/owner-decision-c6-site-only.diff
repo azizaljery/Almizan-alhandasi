@@ -1,0 +1,414 @@
+diff --git a/dist/design.mjs b/dist/design.mjs
+index 0d72154..b00b407 100644
+--- a/dist/design.mjs
++++ b/dist/design.mjs
+@@ -133,6 +133,8 @@ function statusCard(d) {
+     el('p', { class: 'score ' + cls }, p.label_ar + (p.status === 'needs-edits' ? ` — ${p.edits_ar.length} ${p.edits_ar.length === 1 ? 'ملاحظة' : 'ملاحظات'}` : '')),
+     p.status === 'hidden' ? el('ul', { class: 'tick' }, p.hidden_ar.map(t => el('li', { class: 'bad' }, t))) : null,
+     p.status === 'needs-edits' ? el('ul', { class: 'tick' }, p.edits_ar.map(t => el('li', { class: 'no' }, t))) : null,
++    // (02c، قرار المالك 2026-10-26) ما لم يثبت نظاميًا (ساتر موقع) يظهر للعميل بوسم «تحتاج تحققًا نظاميًا» ولا يُعدّ معتمدًا
++    p.status !== 'hidden' && p.regulatory_ar?.length ? el('ul', { class: 'tick', 'data-regulatory': 'unverified' }, p.regulatory_ar.map(t => el('li', { class: 'no' }, t))) : null,
+     // (الجولة الخامسة عشرة) التفضيلات الطفيفة ملاحظات معلنة مع البديل (لا تُخفى ولا تُعدّ متحققة)
+     p.status !== 'hidden' && p.notes_ar?.length ? el('details', { class: 'notes' }, el('summary', {}, `ملاحظات للمراجعة (${p.notes_ar.length}) — تفضيلات افتراضية للميزان قابلة للتغيير`), el('ul', { class: 'tick' }, p.notes_ar.map(t => el('li', { class: 'no' }, t)))) : null,
+     el('p', { class: 'sub' }, p.status === 'ready' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، ولا عيب جوهريًا فيه؛ الملاحظات المذكورة (إن وجدت) تفضيلات افتراضية للميزان لم تتحقق. يبقى مقترحًا مبدئيًا.' : p.status === 'needs-edits' ? 'اجتاز المراجعة ونُفّذت بنود طلبك، لكن فيه ما يصلحه المعماري قبل العرض (مذكور أعلاه) — لا يُقدَّم على أنه جاهز.' : 'لا يُعرض بديلًا: يخالف بندًا إلزاميًا من طلبك أو رسب في المراجعة.'));
+diff --git a/dist/presentation-status.mjs b/dist/presentation-status.mjs
+index a0c9761..9eadb8c 100644
+--- a/dist/presentation-status.mjs
++++ b/dist/presentation-status.mjs
+@@ -19,9 +19,12 @@ import { measureR16, MANDATORY_R16 } from './privacy-defects.mjs';
+ import { toClientAr, GATE_AR } from './client-language.mjs';
+ import { ledgerEvidence, gateEvidence } from './review-evidence.mjs';
+ import { evaluateSuiteBaths } from './bath-band.mjs';
++import { UNVERIFIED_LABEL } from './regulatory-checks.mjs';
++import { siteElementReport } from './site-element-check.mjs';
+ export { GATE_AR };
+ 
+ export const PROPOSAL_LABEL_AR = 'مقترح معماري مبدئي — ليس مخططًا تنفيذيًا معتمدًا، ويحتاج تحققًا إنشائيًا مستقلًا';
++export const REG_VERIFY_AR = 'تحتاج تحققًا نظاميًا';
+ export const STATUS_AR = Object.freeze({ ready: 'جاهز للعرض المبدئي', 'needs-edits': 'يحتاج تعديلات', hidden: 'محجوب' });
+ const PREF_TIER_AR = 'تفضيل سعودي افتراضي للميزان (قابل للتغيير)';
+ const R16_TIER_AR = 'عيب معماري — قيمة تصميمية افتراضية للميزان';
+@@ -98,9 +101,14 @@ export function presentationStatus(design, request = {}) {
+   for (let i = 0; i < hiddenReasons.length; i++) hiddenReasons[i].reason = hiddenReasons[i].reason_ar = hidden[i];
+   const edits = items.filter(x => x.major).map(x => x.text_ar), notes = items.filter(x => !x.major).map(x => x.text_ar);
+   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
++  // (02c، قرار المالك 2026-10-26) ساتر خارجي (عنصر موقع) لا يثبت نظاميًا: لا يُعرض معتمدًا؛ وسم ظاهر للعميل «تحتاج تحققًا نظاميًا» وبند مراجعة متخصصة،
++  // وتبقى الحالة كما حكمت الفاحصات الهندسية (الوسم لا يخفض حالة الفحص الهندسي ولا يرفعها إلى اعتماد).
++  let site = null; try { site = R14_OFF.has('r21site') ? null : siteElementReport(doc); } catch { site = null; }
++  const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join("، ")}): ${REG_VERIFY_AR} — ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
++  if (site && !site.geometryOk) for (const m of site.failures_ar) edits.push(toClientAr(m));
+   // (الجولة التاسعة عشرة، توجيه المالك ثالثًا) فصل صريح: مخالفة إلزامية (hidden_ar) / عيب معماري (edits_ar) / ما يحتاج مراجعة متخصصة (specialist_ar)
+-  const specialist = items.filter(x => x.specialist).map(x => x.text_ar);
+-  return { status, label_ar: STATUS_AR[status], hidden_ar: hidden, hiddenReasons, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
++  const specialist = [...items.filter(x => x.specialist).map(x => x.text_ar), ...regVerify];
++  return { status, label_ar: STATUS_AR[status] + (regVerify.length && status !== 'hidden' ? ' — ' + REG_VERIFY_AR : ''), needsRegulatoryVerification: regVerify.length > 0, regulatory_ar: regVerify, siteElements: site && site.fences.length ? { fences: site.fences, regulatory: site.regulatory, geometryOk: site.geometryOk } : null, hidden_ar: hidden, hiddenReasons, edits_ar: edits, notes_ar: notes, specialist_ar: specialist, categories: { mandatory: hidden.length, architectural: edits.length, specialist: specialist.length, notes: notes.length }, mandatory: mand.map(g => g.id), prefs: prefs.map(g => g.id), major: items.filter(x => x.major).map(x => x.id), r16: [...mand, ...r16].map(g => g.id), proposal_ar: PROPOSAL_LABEL_AR };
+ }
+ /** (الجولة الخامسة عشرة) تفضيلات سعودية يعدّها المعماري عيبًا يُصلح قبل العرض (لا ملاحظة): القاعدة الموثقة أعلى الملف. */
+ export const MAJOR_PREFS = Object.freeze(['MAJLIS_STREET_ENTRY', 'MAJLIS_LOBBY', 'BED_BATH', 'MAID_BATH']);
+diff --git a/dist/privacy-gate.mjs b/dist/privacy-gate.mjs
+index 3ba5263..e5b4300 100644
+--- a/dist/privacy-gate.mjs
++++ b/dist/privacy-gate.mjs
+@@ -11,7 +11,7 @@ import { measureR16 } from './privacy-defects.mjs';
+ import { reviewDoc } from './draw/review.mjs';
+ 
+ /** قيم تصميمية افتراضية للميزان (غير متحققة نظاميًا): مستوى العين، وارتفاع الساتر، وأبعاده عن الجدار. */
+-export const SCREEN_DEFAULTS = Object.freeze({ eyeHeight: 1.6, screenHeight: 1.8, offsets: [0.9, 1.2, 0.75, 1.5], margin: 0.15, maxLength: 7, wallClear: 0.3, doorClear: 1.0, source: 'قيمة تصميمية افتراضية للميزان (ساتر خصوصية خارجي ارتفاعه 1.8 م > مستوى العين 1.6 م) — غير متحققة نظاميًا' });
++export const SCREEN_DEFAULTS = Object.freeze({ eyeHeight: 1.6, eyes: { outside: [1.2, 1.6], inside: [1.1, 1.6] }, screenHeight: 1.8, offsets: [0.9, 1.2, 0.75, 1.5], margin: 0.15, maxLength: 7, wallClear: 0.3, doorClear: 1.0, windowClear: 0.6, bayClear: 0.5, source: 'قيمة تصميمية افتراضية للميزان (ساتر خصوصية خارجي ارتفاعه 1.8 م > مستوى العين 1.6 م) — غير متحققة نظاميًا' });
+ 
+ export function segmentHit(a, b, c, d) {
+   const rx = b.x - a.x, ry = b.y - a.y, sx = d.x - c.x, sy = d.y - c.y, den = rx * sy - ry * sx;
+@@ -23,18 +23,27 @@ export function segmentHit(a, b, c, d) {
+  * خطوط الرؤية من كل نقطة خارجية إلى كل نقطة داخلية تعبر قطعة النافذة؛ مكشوفة ما لم يحجبها ساتر أعلى من مستوى العين قبل النافذة،
+  * أو جدار مبنى (blockers) قبلها، أو كانت جلسة النافذة فوق مستوى العين.
+  */
+-export function screenWindowPrivacy({ window, parkingPoints, interiorPoints, opaqueScreens = [], blockers = [], eyeHeight = SCREEN_DEFAULTS.eyeHeight }) {
++export function screenWindowPrivacy({ window, parkingPoints, interiorPoints, opaqueScreens = [], blockers = [], eyeHeight = SCREEN_DEFAULTS.eyeHeight, eyes = null }) {
+   if (!window || !Array.isArray(parkingPoints) || !Array.isArray(interiorPoints)) throw Error('Missing geometry');
+   const exposed = [];
+-  const aboveEye = eyeHeight < window.sillHeight || eyeHeight > window.headHeight;
++  // (قرار المالك 2026-10-26) ارتفاعات العين: إن مُرّر eyes = { outside:[...], inside:[...] } فكل خط رؤية يُقاس بارتفاع عين الخارج (سائق جالس/واقف)
++  // وعين الداخل (جالس/واقف): ارتفاعه عند النافذة بالاستيفاء الخطي بين العينين، ويُكشف فقط إن وقع بين جلسة النافذة ورأسها؛ ويحجبه الساتر إن كان
++  // ارتفاعه ≥ ارتفاع الخط عند عبوره. بغير eyes يبقى السلوك القديم بمستوى عين واحد.
++  const pairs = eyes ? eyes.outside.flatMap(o => eyes.inside.map(i => [o, i])) : [[eyeHeight, eyeHeight]];
++  const aboveEyeLegacy = !eyes && (eyeHeight < window.sillHeight || eyeHeight > window.headHeight);
++  const seen = new Set();
+   for (const outside of parkingPoints) for (const inside of interiorPoints) {
+     const hit = segmentHit(outside, inside, window.a, window.b);
+-    if (!hit || aboveEye) continue;
+-    const screened = opaqueScreens.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t && (s.height ?? 0) >= eyeHeight; })
+-      || blockers.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t - 1e-6; });
+-    if (!screened) exposed.push({ outside, inside, windowHit: { x: hit.x, y: hit.y } });
++    if (!hit || aboveEyeLegacy) continue;
++    for (const [z0, z1] of pairs) {
++      const zAt = t => z0 + (z1 - z0) * t;
++      if (eyes && (zAt(hit.t) < window.sillHeight || zAt(hit.t) > window.headHeight)) continue;
++      const screened = opaqueScreens.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t && (s.height ?? 0) >= (eyes ? zAt(h.t) : eyeHeight); })
++        || blockers.some(s => { const h = segmentHit(outside, inside, s.a, s.b); return h && h.t < hit.t - 1e-6; });
++      if (!screened) { const k = `${outside.x},${outside.y},${inside.x},${inside.y}`; if (!seen.has(k)) { seen.add(k); exposed.push({ outside, inside, windowHit: { x: hit.x, y: hit.y }, eyes: eyes ? [z0, z1] : [eyeHeight, eyeHeight], zAtWindow: Math.round(zAt(hit.t) * 100) / 100 }); } }
++    }
+   }
+-  return { potentialExposure: exposed.length > 0, paths: exposed, samples: parkingPoints.length * interiorPoints.length, limitations: 'فحص خطوط رؤية ثنائي الأبعاد فقط؛ الإضاءة والتهوية والسلامة والزوايا ثلاثية الأبعاد تُفحص منفصلة' };
++  return { potentialExposure: exposed.length > 0, paths: exposed, samples: parkingPoints.length * interiorPoints.length * pairs.length, eyes: eyes || { outside: [eyeHeight], inside: [eyeHeight] }, limitations: 'فحص خطوط رؤية بارتفاعات عين محدودة؛ الإضاءة والتهوية والسلامة والزوايا ثلاثية الأبعاد الكاملة تُفحص منفصلة' };
+ }
+ 
+ const centroidOf = poly => poly.reduce((a, p) => ({ x: a.x + p.x / poly.length, y: a.y + p.y / poly.length }), { x: 0, y: 0 });
+@@ -64,7 +73,7 @@ export function windowGeometry(doc, lv, op) {
+ /** فحص نافذة غرفة واحدة مقابل كل المواقف بعينات متعددة. */
+ export function windowExposure(doc, lv, op, side, bays) {
+   const g = windowGeometry(doc, lv, op), inward = { x: -side.outward.x, y: -side.outward.y };
+-  return screenWindowPrivacy({ ...g, parkingPoints: bays.flatMap(z => bayPoints(z.polygon)), interiorPoints: interiorPoints(side.room, op, inward) });
++  return screenWindowPrivacy({ ...g, eyes: SCREEN_DEFAULTS.eyes, parkingPoints: bays.flatMap(z => bayPoints(z.polygon)), interiorPoints: interiorPoints(side.room, op, inward) });
+ }
+ 
+ /**
+@@ -73,6 +82,7 @@ export function windowExposure(doc, lv, op, side, bays) {
+  *  المراجعة NO_WINDOW؛ ventilation: لكل غرفة مأهولة نافذة تُفتح على الخارج، ودورات المياه بنوافذها (BATH_NO_WINDOW)؛ circulation: الوصول
+  *  (UNREACHABLE_ROOM) ومقدمة كل باب خارجي خالية من الأسوار (1.0 م).
+  */
++export const requiresLightOrAir = r => HABITABLE.has(r?.type) || /bath|wc|toilet/i.test(r?.type || '');
+ const HABITABLE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen']);
+ export function acceptanceSnapshot(doc, request = {}, model = analyzeDoc(doc)) {
+   const checks = {};
+@@ -110,6 +120,15 @@ function segDist(p, a, b) {
+   const dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L)) : 0;
+   return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+ }
++function segPolyDist(a, b, poly) { if (pointInPolygon(a, poly, 0) || pointInPolygon(b, poly, 0)) return 0; let m = Infinity; for (let i = 0; i < poly.length; i++) m = Math.min(m, segSegDist(a, b, poly[i], poly[(i + 1) % poly.length])); return m; }
++export function bayApproach(doc, poly) {
++  const plot = doc.plot?.polygon; if (!plot || plot.length < 3) return null;
++  const bb = q => ({ x0: Math.min(...q.map(p => p.x)), x1: Math.max(...q.map(p => p.x)), y0: Math.min(...q.map(p => p.y)), y1: Math.max(...q.map(p => p.y)) }), B = bb(poly), P = bb(plot);
++  const streets = (doc.streets?.length ? doc.streets : [doc.entry || 's']), gap = { s: B.y0 - P.y0, n: P.y1 - B.y1, e: P.x1 - B.x1, w: B.x0 - P.x0 };
++  const side = streets.filter(k => k in gap).sort((p, q) => gap[p] - gap[q])[0] || 's', E = { ...B };
++  if (side === 's') E.y0 = P.y0; else if (side === 'n') E.y1 = P.y1; else if (side === 'e') E.x1 = P.x1; else E.x0 = P.x0;
++  return { side, polygon: [{ x: E.x0, y: E.y0 }, { x: E.x1, y: E.y0 }, { x: E.x1, y: E.y1 }, { x: E.x0, y: E.y1 }] };
++}
+ function segSegDist(a, b, c, d) {
+   if (segmentHit(a, b, c, d)) return 0;
+   return Math.min(segDist(a, c, d), segDist(b, c, d), segDist(c, a, b), segDist(d, a, b));
+@@ -143,6 +162,11 @@ export function planWindowScreen(doc, lv, op, side, bays, D = SCREEN_DEFAULTS) {
+     if (bays.some(z => z.polygon.some((p, i) => segmentHit(seg.a, seg.b, p, z.polygon[(i + 1) % z.polygon.length])) || pointInPolygon(seg.a, z.polygon, 0) || pointInPolygon(seg.b, z.polygon, 0))) continue;
+     if (walls.some(w => segSegDist(seg.a, seg.b, w.a, w.b) < (w.t ?? .2) / 2 + D.wallClear)) continue;
+     if (extDoors.some(p => segDist(p, seg.a, seg.b) < D.doorClear)) continue;
++    // الساتر لا يقترب من وجه أي نافذة خارجية (مستهدفة أو غيرها) أقل من windowClear: يبقى للنافذة مجال فتح وضوء (قرار المالك 2026-10-26)
++    if (lv.openings.some(o => { if (!o.window) return false; const s2 = o.sides.find(x => x.other === 'outside'); if (!s2 || !(o.id === op.id || requiresLightOrAir(s2.room))) return false; const tt = (o.wall?.t || .2) / 2, h2 = o.w / 2, v = { x: -s2.outward.y, y: s2.outward.x };
++      return segSegDist(seg.a, seg.b, { x: o.p.x + s2.outward.x * tt - v.x * h2, y: o.p.y + s2.outward.y * tt - v.y * h2 }, { x: o.p.x + s2.outward.x * tt + v.x * h2, y: o.p.y + s2.outward.y * tt + v.y * h2 }) < D.windowClear; })) continue;
++    // ولا يقترب من الموقف ولا يقطع ممر دخوله إلى حد الأرض (حركة المركبات)
++    if (bays.some(z => { const ap = bayApproach(doc, z.polygon); return segPolyDist(seg.a, seg.b, z.polygon) < D.bayClear || (ap && segPolyDist(seg.a, seg.b, ap.polygon) <= 0); })) continue;
+     return { ...seg, offset: off, length: r3(hi - lo) };
+   }
+   return null;
+diff --git a/dist/r16-polish.mjs b/dist/r16-polish.mjs
+index cf0d13c..705b8ed 100644
+--- a/dist/r16-polish.mjs
++++ b/dist/r16-polish.mjs
+@@ -12,6 +12,7 @@ import { applyCommand } from './draw/doc.mjs';
+ import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defects.mjs';
+ import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
+ import { measureR14 } from './saudi-program.mjs';
++import { siteElementReport } from './site-element-check.mjs';
+ import { planWindowScreen, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
+ 
+ const r2 = v => Math.round(v * 100) / 100;
+@@ -112,11 +113,12 @@ export function polishR16(doc) {
+             const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
+             const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === o.id && !w.screened);
+             const cmp = compareAcceptance(before, acceptanceSnapshot(doc), { protect: ['privacy', 'daylight', 'ventilation', 'circulation'] });
+-            ok = !sight.potentialExposure && projOk && cmp.pass;
++            const site = siteElementReport(doc, { levelId: G.level.id }); // (قرار المالك) عنصر موقع: حدود القطعة، المركبات، المداخل، الإضاءة والتهوية
++            ok = !sight.potentialExposure && projOk && cmp.pass && site.geometryOk;
+           } catch { ok = false; }
+           if (ok) {
+             const fid = doc.walls.find(w => !was.has(w.id))?.id;
+-            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية).`);
++            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية). تحتاج تحققًا نظاميًا: ارتفاع الساتر وإباحته في الموقع غير متحققين من اشتراطات البلدية.`);
+             if (fid) screens.push({ wall: fid, window: o.id, room: room.name, ...sc });
+             changed = true; skip.add(o.id); continue;
+           }
+diff --git a/dist/site-element-check.mjs b/dist/site-element-check.mjs
+new file mode 100644
+index 0000000..38c5b55
+--- /dev/null
++++ b/dist/site-element-check.mjs
+@@ -0,0 +1,98 @@
++// (الجولة 21 — 02c، قرار المالك 2026-10-26 على ساتر الخصوصية C6) فحص «عنصر الموقع» (kind 'fence'): ساتر خارجي قائم بذاته ليس جزءًا من كتلة المبنى.
++// يفصل بين: (1) حدود القطعة (يجب أن يقع داخلها كليًا)، (2) خط ارتداد المبنى (لا ينطبق على عنصر الموقع، ويُذكر البعد عنه معلومةً فقط)،
++// (3) حركة المركبات (لا يقطع الموقف ولا ممر دخوله إلى حد الأرض ويبقى بينه وبين الموقف هامش)، (4) المداخل (باب خارجي وممر الدخول إلى الشارع)،
++// (5) الإضاءة والتهوية (زاوية الحجب أمام النافذة وبعد الساتر عن الجدار لتبقى النافذة قابلة للفتح)، (6) الاشتراط النظامي: لا مصدر موثّق في
++// regulations-sa.mjs لارتفاع السور/الساتر المصمت أو موضعه داخل الارتداد أو في فناء المواقف، فيُسجَّل «لم يتم التحقق» عبر regulatory-checks.mjs
++// ولا يُعرض الساتر معتمدًا نظاميًا. القيم الرقمية هنا تصميمية افتراضية للميزان (مصرَّح بها)، لا حدود نظامية. ليس اعتمادًا معماريًا ولا إنشائيًا.
++import { wallRect } from './draw/review.mjs';
++import { pointInPolygon } from './draw/geom.mjs';
++import { analyzeDoc } from './draw/digest.mjs';
++import { unverifiedCheck, REGULATORY_STATUS } from './regulatory-checks.mjs';
++import { segmentHit, bayApproach, requiresLightOrAir } from './privacy-gate.mjs';
++
++export const SITE_DEFAULTS = Object.freeze({
++  bayClear: 0.5,        // أدنى هامش بين الساتر وحد الموقف (تصميمي؛ فتح باب السيارة غير متحقق)
++  entryHalfWidth: 0.9,  // نصف عرض ممر دخول الأشخاص أمام الباب الرئيسي
++  doorClear: 1.0,       // مقدمة أي باب خارجي
++  minWindowOffset: 0.6, // أدنى بعد عن الجدار ليبقى مجال فتح النافذة
++  source: 'قيم تصميمية افتراضية للميزان — غير نظامية وغير متحققة من اشتراطات البلدية',
++});
++const r3 = v => Math.round(v * 1000) / 1000;
++const OUT = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
++function segDist(p, a, b) { const dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L)) : 0; return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy); }
++function segSeg(a, b, c, d) { return segmentHit(a, b, c, d) ? 0 : Math.min(segDist(a, c, d), segDist(b, c, d), segDist(c, a, b), segDist(d, a, b)); }
++function segPoly(a, b, poly) { let m = Infinity; for (let i = 0; i < poly.length; i++) m = Math.min(m, segSeg(a, b, poly[i], poly[(i + 1) % poly.length])); return pointInPolygon(a, poly, 0) || pointInPolygon(b, poly, 0) ? 0 : m; }
++function distToBoundary(p, poly) { let m = Infinity; for (let i = 0; i < poly.length; i++) m = Math.min(m, segDist(p, poly[i], poly[(i + 1) % poly.length])); return m; }
++
++function rayToPlot(doc, from, dir) {
++  const plot = doc.plot.polygon, far = { x: from.x + dir.x * 200, y: from.y + dir.y * 200 }; let best = null;
++  for (let i = 0; i < plot.length; i++) { const h = segmentHit(from, far, plot[i], plot[(i + 1) % plot.length]); if (h && (!best || h.t > best.t)) best = h; }
++  return best ? { x: best.x, y: best.y } : far;
++}
++
++/**
++ * يقيس كل «سور» في المستند. لا يعدّل المستند. يعيد { fences:[...], regulatory:[...], pendingRegulatory, geometryOk, failures_ar[] }.
++ * كل فحص: { id, pass, measured, limit, unit, basis, status } حيث status 'measured' (قيمة تصميمية افتراضية) أو 'unverified' (لا مصدر).
++ */
++export function siteElementReport(doc, { levelId } = {}) {
++  const fences = (doc.walls || []).filter(w => w.kind === 'fence' && (!levelId || w.level === levelId));
++  const out = { fences: [], regulatory: [], pendingRegulatory: false, geometryOk: true, failures_ar: [], defaults: SITE_DEFAULTS };
++  if (!fences.length) return out;
++  const plot = doc.plot?.polygon?.length >= 3 ? doc.plot.polygon : null, model = analyzeDoc(doc);
++  for (const f of fences) {
++    const rect = wallRect(f), checks = [], put = (id, pass, measured, limit, unit, basis, status = 'measured') => { checks.push({ id, pass, measured, limit, unit, basis, status }); if (!pass) { out.geometryOk = false; out.failures_ar.push(`الساتر ${f.id}: ${basis}`); } };
++    // 1) حدود القطعة (لا خط الارتداد)
++    if (plot) {
++      const inside = rect.every(p => pointInPolygon(p, plot, 1e-9));
++      const edge = Math.min(...[f.a, f.b].map(p => distToBoundary(p, plot)));
++      put('PLOT_BOUNDARY', inside, r3(edge), 0, 'm', inside ? `داخل حدود القطعة (أقرب طرف يبعد ${r3(edge)} م عن الحد)` : 'يخرج عن حدود القطعة');
++    } else put('PLOT_BOUNDARY', true, null, null, 'm', 'لا مضلع أرض في المستند — غير متحقق', 'unverified');
++    // 2) خط ارتداد المبنى: لا ينطبق على عنصر الموقع؛ المسافة للمعلومة
++    const sb = doc.plot?.setbacks;
++    checks.push({ id: 'BUILDING_SETBACK_LINE', pass: true, applicable: false, measured: null, limit: null, unit: 'm', status: 'not-applicable', basis: `عنصر موقع لا كتلة مبنى: لا يُقاس بخط ارتداد المبنى${sb ? ' (ارتدادات المستند ' + JSON.stringify(sb) + ')' : ''}؛ وإباحته داخل الارتداد نظاميًا غير متحققة (انظر الاشتراط النظامي)` });
++    // 3) المركبات: الموقف + ممر دخوله
++    const bays = (doc.zones || []).filter(z => z.type === 'garage' && z.level === f.level);
++    let worstBay = Infinity, worstAp = Infinity;
++    for (const z of bays) {
++      worstBay = Math.min(worstBay, segPoly(f.a, f.b, z.polygon));
++      const ap = bayApproach(doc, z.polygon); if (ap) worstAp = Math.min(worstAp, segPoly(f.a, f.b, ap.polygon));
++    }
++    if (bays.length) {
++      put('BAY_CLEARANCE', worstBay >= SITE_DEFAULTS.bayClear, r3(worstBay), SITE_DEFAULTS.bayClear, 'm', worstBay >= SITE_DEFAULTS.bayClear ? `الهامش بين الساتر وأقرب موقف ${r3(worstBay)} م` : `الساتر يبعد ${r3(worstBay)} م فقط عن الموقف (الحد التصميمي ${SITE_DEFAULTS.bayClear} م)`);
++      put('BAY_APPROACH', worstAp > 0, r3(worstAp), 0, 'm', worstAp > 0 ? 'لا يقطع ممر دخول الموقف إلى حد الأرض' : 'يقطع ممر دخول الموقف إلى الشارع');
++      checks.push({ id: 'CAR_DOOR_OPENING', pass: null, measured: r3(worstBay), limit: null, unit: 'm', status: 'unverified', basis: 'كفاية الهامش لفتح أبواب السيارة وسعة الانعطاف: غير متحقق (لا مصدر)' });
++    }
++    // 4) المداخل: أبواب خارجية + ممر الدخول الرئيسي إلى الشارع
++    const lv = model.levels.find(l => l.level.id === f.level), ext = (lv?.openings || []).filter(o => o.door && o.sides.some(s => s.other === 'outside'));
++    let worstDoor = Infinity, worstPath = Infinity;
++    for (const o of ext) {
++      const s = o.sides.find(x => x.other === 'outside'), ap = { x: o.p.x + s.outward.x * ((o.wall?.t || .2) / 2 + .5), y: o.p.y + s.outward.y * ((o.wall?.t || .2) / 2 + .5) };
++      worstDoor = Math.min(worstDoor, segDist(ap, f.a, f.b));
++      if (plot && o.o?.entry) { const dir = OUT[doc.entry || 's'] || s.outward, end = rayToPlot(doc, ap, dir); worstPath = Math.min(worstPath, segSeg(ap, end, f.a, f.b)); }
++    }
++    if (ext.length) put('DOOR_FRONT', worstDoor >= SITE_DEFAULTS.doorClear, r3(worstDoor), SITE_DEFAULTS.doorClear, 'm', worstDoor >= SITE_DEFAULTS.doorClear ? `أقرب باب خارجي يبعد ${r3(worstDoor)} م` : `الساتر يبعد ${r3(worstDoor)} م فقط عن باب خارجي`);
++    if (Number.isFinite(worstPath)) put('ENTRY_PATH', worstPath >= SITE_DEFAULTS.entryHalfWidth, r3(worstPath), SITE_DEFAULTS.entryHalfWidth, 'm', worstPath >= SITE_DEFAULTS.entryHalfWidth ? `يبعد ${r3(worstPath)} م عن مسار الدخول من الباب الرئيسي إلى الشارع` : `يعترض مسار الدخول الرئيسي (${r3(worstPath)} م)`);
++    // 5) الإضاءة والتهوية: لكل نافذة أمام الساتر (تقابله على مسافة ≤ 3 م)
++    const wins = [];
++    for (const o of (lv?.openings || []).filter(o => o.window && o.sides.some(s => s.other === 'outside'))) {
++      const s = o.sides.find(x => x.other === 'outside'), t0 = (o.wall?.t || .2) / 2, hw = (o.w || 1) / 2, u = { x: -s.outward.y, y: s.outward.x };
++      const fa = { x: o.p.x + s.outward.x * t0 - u.x * hw, y: o.p.y + s.outward.y * t0 - u.y * hw }, fb = { x: o.p.x + s.outward.x * t0 + u.x * hw, y: o.p.y + s.outward.y * t0 + u.y * hw };
++      const d = segSeg(fa, fb, f.a, f.b); if (d > 3) continue; // أقرب مسافة بين وجه النافذة الخارجي والساتر
++      const sill = o.o?.sill ?? 0, head = sill + (o.o?.h ?? 1.2), mid = (sill + head) / 2, ang = Math.atan2(Math.max(0, (f.h ?? 0) - mid), Math.max(d, 1e-6)) * 180 / Math.PI;
++      wins.push({ opening: o.id, room: s.room.name, offset: r3(d), obstructionAngleDeg: Math.round(ang * 10) / 10, sill, head });
++      if (!requiresLightOrAir(s.room) && d < SITE_DEFAULTS.minWindowOffset) { checks.push({ id: 'WINDOW_OPERABLE:' + o.id, pass: true, noted: true, measured: r3(d), limit: SITE_DEFAULTS.minWindowOffset, unit: 'm', status: 'measured', basis: `نافذة «${s.room.name}» (غير مطلوبة للإضاءة/التهوية في فاحصات الميزان) أقرب من ${SITE_DEFAULTS.minWindowOffset} م إلى طرف الساتر (${r3(d)} م): أثر مسجّل لا حاجب` }); continue; }
++      put('WINDOW_OPERABLE:' + o.id, d >= SITE_DEFAULTS.minWindowOffset, r3(d), SITE_DEFAULTS.minWindowOffset, 'm', d >= SITE_DEFAULTS.minWindowOffset ? `نافذة «${s.room.name}» تبعد عن الساتر ${r3(d)} م فتبقى قابلة للفتح` : `نافذة «${s.room.name}» لا يبقى أمامها مجال للفتح (${r3(d)} م)`);
++      checks.push({ id: 'DAYLIGHT_OBSTRUCTION:' + o.id, pass: null, measured: Math.round(ang * 10) / 10, limit: null, unit: 'deg', status: 'unverified', basis: `زاوية حجب الساتر لنافذة «${s.room.name}» ${Math.round(ang * 10) / 10}° من منتصف النافذة — النافذة نفسها لم تتغير مساحتها ولا موضعها؛ حد زاوية الحجب المقبول غير متحقق (لا مصدر)` });
++    }
++    out.fences.push({ id: f.id, height: f.h ?? null, a: f.a, b: f.b, length: r3(Math.hypot(f.b.x - f.a.x, f.b.y - f.a.y)), checks, windows: wins });
++  }
++  // 6) الاشتراط النظامي: غير متحقق (لا مصدر في regulations-sa.mjs)
++  const h = Math.max(...fences.map(f => f.h ?? 0));
++  out.regulatory = [
++    unverifiedCheck({ rule: 'ارتفاع الساتر/السور المصمت وإباحته داخل الارتداد أو فناء المواقف', measuredLabel: 'ارتفاع الساتر المرسوم', measuredValue: h, unit: 'm', verificationNote: 'لا يوجد في مصادر الميزان (regulations-sa.mjs) اشتراط موثّق لارتفاع الأسوار/السواتر المصمتة أو لإباحتها داخل الارتداد؛ يُتحقق من اشتراطات البلدية والموقع ونوع العنصر وارتفاعه.' }),
++    unverifiedCheck({ rule: 'نوع الساتر (مصمت قائم بذاته) وأثره على الجار والشارع والرؤية المرورية', measuredLabel: 'عدد السواتر', measuredValue: fences.length, unit: '', verificationNote: 'غير متحقق: يحتاج مراجعة جهة مرخّصة/البلدية.' }),
++  ];
++  out.pendingRegulatory = out.regulatory.some(c => c.status === REGULATORY_STATUS.UNVERIFIED);
++  return out;
++}
++export default { siteElementReport, SITE_DEFAULTS };
+diff --git a/scripts/c6-site-measure.mjs b/scripts/c6-site-measure.mjs
+new file mode 100644
+index 0000000..ab55311
+--- /dev/null
++++ b/scripts/c6-site-measure.mjs
+@@ -0,0 +1,34 @@
++// (الجولة 21 — 02c، قرار المالك 2026-10-26) قياس C6 قبل/بعد على مستندات ناتجة من scripts/kit2-case.mjs: المقاسات، الخصوصية (خطوط الرؤية بارتفاعات
++// العين، مع الساتر وبدونه)، الإضاءة، التهوية، حركة المواقف والمداخل، وفحص عنصر الموقع. لا يعدّل شيئًا ولا يشغّل بذرة التقييم.
++//   node scripts/c6-site-measure.mjs <stage> [<stage>...]   → evidence/c6-site/<stage>.json
++import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
++import { analyzeDoc } from '../dist/draw/digest.mjs';
++import { windowExposure, acceptanceSnapshot } from '../dist/privacy-gate.mjs';
++import { siteElementReport } from '../dist/site-element-check.mjs';
++import { measureR16 } from '../dist/privacy-defects.mjs';
++const here = new URL('../', import.meta.url).pathname;
++mkdirSync(here + 'evidence/c6-site', { recursive: true });
++for (const stage of process.argv.slice(2)) {
++  const dir = here + `evidence/acceptance/${stage}/C6/`, res = JSON.parse(readFileSync(dir + 'result.json', 'utf8')), out = { stage, case: 'C6', root: res.root, designs: [] };
++  for (const d of res.designs) {
++    const doc = JSON.parse(readFileSync(dir + d.file, 'utf8')), bare = JSON.parse(JSON.stringify(doc)); bare.walls = bare.walls.filter(w => w.kind !== 'fence');
++    const exposure = {};
++    for (const [label, dd] of [['withScreen', doc], ['withoutScreen', bare]]) {
++      const G = analyzeDoc(dd).levels[0], bays = (dd.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id), rows = [];
++      for (const op of G.openings.filter(o => o.window)) {
++        const side = op.sides.find(s => s.other === 'outside'); if (!side || (op.o?.sill ?? 0) >= 1.6) continue;
++        const e = windowExposure(dd, G, op, side, bays);
++        if (e.paths.length || label === 'withScreen') rows.push({ opening: op.id, room: side.room.name, sill: op.o?.sill ?? 0, head: (op.o?.sill ?? 0) + (op.o?.h ?? 1.2), exposedLines: e.paths.length, samples: e.samples, eyes: e.eyes });
++      }
++      exposure[label] = rows.filter(r => r.exposedLines > 0 || label === 'withScreen').map(r => r);
++    }
++    const snap = acceptanceSnapshot(doc), by = {};
++    for (const [k, c] of Object.entries(snap.checks)) { const g = by[c.category] ||= { pass: 0, fail: 0, failed: [] }; if (c.passed) g.pass++; else { g.fail++; g.failed.push(k + (c.why ? ' — ' + c.why : '')); } }
++    let r16 = []; try { r16 = measureR16(doc, { text: res.text, counts: {}, rules: [] }).filter(g => /WINDOW_PARKING|HALL_STREET|BATH_NO_WINDOW/.test(g.id)).map(g => ({ id: g.id, pass: g.pass, applicable: g.applicable, reasons_ar: g.reasons_ar, value: g.value })); } catch { /* */ }
++    const G = analyzeDoc(doc).levels[0], bays = (doc.zones || []).filter(z => z.type === 'garage');
++    out.designs.push({ file: d.file, pat: d.pat, status: d.status, dims: d.dims.map(x => ({ id: x.id, ok: x.ok, actual: x.actual, envelope: x.envelope, want: x.want, tol: x.tol, deviation: x.deviation })),
++      privacy: { exposure, r16 }, acceptance: by, parking: { bays: bays.length, polygons: bays.map(z => z.polygon) }, fences: (doc.walls || []).filter(w => w.kind === 'fence').map(w => ({ id: w.id, a: w.a, b: w.b, h: w.h })),
++      site: siteElementReport(doc), edits_ar: d.edits_ar, notes_ar: d.notes_ar, hidden_ar: d.hidden_ar, label_ar: d.label_ar ?? null, regulatory_ar: d.regulatory_ar ?? null });
++  }
++  writeFileSync(here + `evidence/c6-site/${stage}.json`, JSON.stringify(out, null, 1)); console.log(stage, out.designs.map(x => `${x.status} bays=${x.parking.bays} fences=${x.fences.length}`).join(' | '));
++}
+diff --git a/scripts/kit2-case.mjs b/scripts/kit2-case.mjs
+index 4cdf055..47324e1 100644
+--- a/scripts/kit2-case.mjs
++++ b/scripts/kit2-case.mjs
+@@ -25,7 +25,7 @@ if (out) {
+     const name = d.presentation?.status === 'hidden' ? `hidden-${i + 1}.json` : `alt-${i + 1}.json`;
+     writeFileSync(dir + name, serialize(d.doc));
+     let priv = null; try { priv = R16 ? R16.measureR16(d.doc, { text: C.text, counts: req.counts, rules: req.rules || [] }).filter(g => /WINDOW|HALL_STREET/.test(g.id)).map(g => ({ id: g.id, pass: g.pass, applicable: g.applicable, value: g.value, reasons_ar: g.reasons_ar })) : null; } catch { priv = null; }
+-    row.designs.push({ file: name, pat: d.pat, status: d.presentation?.status, hidden_ar: d.presentation?.hidden_ar, hiddenReasons: d.presentation?.hiddenReasons, edits_ar: d.presentation?.edits_ar, notes_ar: d.presentation?.notes_ar,
++    row.designs.push({ file: name, pat: d.pat, status: d.presentation?.status, label_ar: d.presentation?.label_ar, regulatory_ar: d.presentation?.regulatory_ar, hidden_ar: d.presentation?.hidden_ar, hiddenReasons: d.presentation?.hiddenReasons, edits_ar: d.presentation?.edits_ar, notes_ar: d.presentation?.notes_ar,
+       dims: (d.ledger || []).filter(x => x.kind === 'dims'), privacy: priv, acceptance: d.acceptance || null, rejections: d.rejections || null, notes: (d.notes || []).filter(n => /نافذة|جلسة|الخصوصية|حاجب/.test(n)) });
+   });
+   row.shortfall_ar = out.shortfall_ar || null; row.result = out.result || null; row.outcome = out.outcome || null;
+diff --git a/tests/stage2-r21-c6-site.test.mjs b/tests/stage2-r21-c6-site.test.mjs
+new file mode 100644
+index 0000000..bdd6ae5
+--- /dev/null
++++ b/tests/stage2-r21-c6-site.test.mjs
+@@ -0,0 +1,84 @@
++// الجولة 21 — 02c، قرار المالك 2026-10-26: ساتر الخصوصية C6 عنصر موقع. فحص حدود القطعة لا خط الارتداد، خطوط الرؤية بارتفاعات العين، حركة
++// المركبات والمداخل والإضاءة والتهوية، والوسم «تحتاج تحققًا نظاميًا» (لا اعتماد نظامي). المستند من evidence/acceptance/c6-after (ناتج scripts/kit2-case.mjs).
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++import { siteElementReport, SITE_DEFAULTS } from '../dist/site-element-check.mjs';
++import { screenWindowPrivacy, planWindowScreen, windowExposure } from '../dist/privacy-gate.mjs';
++import { presentationStatus } from '../dist/presentation-status.mjs';
++import { analyzeDoc } from '../dist/draw/digest.mjs';
++
++const load = () => JSON.parse(readFileSync(new URL('../evidence/acceptance/c6-after/C6/alt-1.json', import.meta.url), 'utf8'));
++const fenceOf = d => d.walls.find(w => w.kind === 'fence');
++const get = (rep, id) => rep.fences[0].checks.find(c => c.id === id);
++
++test('C6: الساتر داخل القطعة ولا ينطبق عليه خط ارتداد المبنى، وكل فحوصه الهندسية ناجحة', () => {
++  const r = siteElementReport(load());
++  assert.equal(r.fences.length, 1); assert.equal(r.geometryOk, true, r.failures_ar.join('|'));
++  assert.equal(get(r, 'PLOT_BOUNDARY').pass, true);
++  assert.equal(get(r, 'BUILDING_SETBACK_LINE').applicable, false);
++  for (const id of ['BAY_CLEARANCE', 'BAY_APPROACH', 'DOOR_FRONT', 'ENTRY_PATH']) assert.equal(get(r, id).pass, true, id);
++  assert.ok(get(r, 'BAY_CLEARANCE').measured >= SITE_DEFAULTS.bayClear);
++});
++test('الاشتراط النظامي للساتر «لم يتم التحقق» ولا pass أبدًا (لا مصدر في regulations-sa)', () => {
++  const r = siteElementReport(load());
++  assert.equal(r.pendingRegulatory, true);
++  assert.ok(r.regulatory.length >= 2 && r.regulatory.every(c => c.status === 'unverified' && c.source === null));
++});
++test('ساتر خارج القطعة أو يقطع ممر الموقف أو يعترض مدخلًا: يرسب بقياسه', () => {
++  let d = load(); fenceOf(d).a = { x: -1, y: 3 }; fenceOf(d).b = { x: -1, y: 6 };
++  assert.equal(get(siteElementReport(d), 'PLOT_BOUNDARY').pass, false);
++  d = load(); const z = d.zones.find(q => q.type === 'garage'), x = (z.polygon[0].x + z.polygon[1].x) / 2; fenceOf(d).a = { x, y: 2 }; fenceOf(d).b = { x, y: 3 };
++  const r = siteElementReport(d); assert.equal(get(r, 'BAY_CLEARANCE').pass, false); assert.equal(r.geometryOk, false);
++  d = load(); fenceOf(d).a = { x: 15, y: 0.3 }; fenceOf(d).b = { x: 16.5, y: 0.3 }; // أمام ممر الموقف إلى الشارع
++  assert.equal(get(siteElementReport(d), 'BAY_APPROACH').pass, false);
++});
++test('ساتر قرب نافذة غرفة مأهولة بأقل من مجال الفتح يرسب، ونافذة ممر لا تحجب لكن أثرها مسجَّل', () => {
++  const d = load(), G = analyzeDoc(d).levels[0], op = G.openings.find(o => o.id === 'o22'), s = op.sides.find(x => x.other === 'outside');
++  fenceOf(d).a = { x: op.p.x + 0.3, y: op.p.y - 1 }; fenceOf(d).b = { x: op.p.x + 0.3, y: op.p.y + 1 };
++  const r = siteElementReport(d); assert.equal(get(r, 'WINDOW_OPERABLE:o22').pass, false, s.room.name);
++  const ok = siteElementReport(load()), corridor = ok.fences[0].checks.find(c => c.id === 'WINDOW_OPERABLE:o23');
++  assert.ok(corridor && corridor.noted === true && corridor.pass === true && corridor.measured < SITE_DEFAULTS.minWindowOffset);
++});
++test('زاوية حجب الإضاءة تُقاس ولا تُحكم: حدها «غير متحقق»', () => {
++  const c = get(siteElementReport(load()), 'DAYLIGHT_OBSTRUCTION:o22');
++  assert.equal(c.status, 'unverified'); assert.equal(c.pass, null); assert.ok(c.measured > 0 && c.measured < 90);
++});
++test('خطوط الرؤية بارتفاعات العين: ساتر 1.0 م لا يحجب عين السائق الجالس 1.2 م ولا الواقف، و1.8 م يحجبهما', () => {
++  const win = { a: { x: 0, y: -1 }, b: { x: 0, y: 1 }, sillHeight: 0.5, headHeight: 2.2 }, eyes = { outside: [1.2, 1.6], inside: [1.1, 1.6] };
++  const base = { window: win, parkingPoints: [{ x: 5, y: 0 }], interiorPoints: [{ x: -3, y: 0 }], eyes };
++  const low = screenWindowPrivacy({ ...base, opaqueScreens: [{ a: { x: 2, y: -2 }, b: { x: 2, y: 2 }, height: 1.0 }] });
++  const hi = screenWindowPrivacy({ ...base, opaqueScreens: [{ a: { x: 2, y: -2 }, b: { x: 2, y: 2 }, height: 1.8 }] });
++  assert.equal(low.potentialExposure, true); assert.equal(hi.potentialExposure, false);
++  assert.ok(low.paths.every(p => Array.isArray(p.eyes) && Number.isFinite(p.zAtWindow)));
++});
++test('خط رؤية يعبر النافذة فوق رأسها أو تحت جلستها لا يُكشف (ارتفاع الخط عند النافذة لا مستوى عين واحد)', () => {
++  const eyes = { outside: [1.2], inside: [1.1] };
++  const win = { a: { x: 0, y: -1 }, b: { x: 0, y: 1 }, sillHeight: 1.6, headHeight: 2.2 };
++  assert.equal(screenWindowPrivacy({ window: win, parkingPoints: [{ x: 5, y: 0 }], interiorPoints: [{ x: -3, y: 0 }], eyes }).potentialExposure, false);
++  assert.equal(screenWindowPrivacy({ window: { ...win, sillHeight: 0.9 }, parkingPoints: [{ x: 5, y: 0 }], interiorPoints: [{ x: -3, y: 0 }], eyes }).potentialExposure, true);
++});
++test('C6: الساتر يحجب كل خطوط الرؤية إلى نافذة الصالة بالارتفاعات الأربعة ولم يكن الأمر كذلك قبله', () => {
++  const d = load(), bare = load(); bare.walls = bare.walls.filter(w => w.kind !== 'fence');
++  const exp = dd => { const G = analyzeDoc(dd).levels[0], op = G.openings.find(o => o.id === 'o22'), side = op.sides.find(x => x.other === 'outside'); return windowExposure(dd, G, op, side, dd.zones.filter(z => z.type === 'garage')); };
++  assert.equal(exp(d).potentialExposure, false); assert.ok(exp(bare).paths.length > 0);
++});
++test('planWindowScreen لا يقبل ساترًا يلاصق موقفًا أو ممر دخوله ولا نافذة مأهولة', () => {
++  const d = load(); d.walls = d.walls.filter(w => w.kind !== 'fence');
++  const G = analyzeDoc(d).levels[0], op = G.openings.find(o => o.id === 'o22'), side = op.sides.find(x => x.other === 'outside'), bays = d.zones.filter(z => z.type === 'garage');
++  const ok = planWindowScreen(d, G, op, side, bays); assert.ok(ok);
++  assert.equal(planWindowScreen(d, G, op, side, bays, { ...planDefaults(), bayClear: 5 }), null);
++});
++import { SCREEN_DEFAULTS } from '../dist/privacy-gate.mjs';
++const planDefaults = () => SCREEN_DEFAULTS;
++
++test('العرض: «جاهز للعرض المبدئي» مع وسم «تحتاج تحققًا نظاميًا» ظاهر، ولا اعتماد نظامي', () => {
++  const doc = load(), p = presentationStatus({ doc, ledger: [] }, {});
++  assert.ok(p.needsRegulatoryVerification); assert.match(p.label_ar, /تحتاج تحققًا نظاميًا/); assert.ok(p.regulatory_ar.length === 1 && /لم يتم التحقق/.test(p.regulatory_ar[0]));
++  assert.ok(p.specialist_ar.some(t => /تحتاج تحققًا نظاميًا/.test(t))); assert.ok(p.siteElements.fences.length === 1);
++  if (p.status === 'hidden') assert.doesNotMatch(p.label_ar, /تحتاج تحققًا نظاميًا/);
++});
++test('عرض بلا ساتر: لا وسم نظامي', () => {
++  const doc = load(); doc.walls = doc.walls.filter(w => w.kind !== 'fence');
++  const p = presentationStatus({ doc, ledger: [] }, {}); assert.equal(p.needsRegulatoryVerification, false); assert.equal(p.regulatory_ar.length, 0); assert.doesNotMatch(p.label_ar, /نظاميًا/);
++});

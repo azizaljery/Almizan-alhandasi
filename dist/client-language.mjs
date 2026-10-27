@@ -18,7 +18,12 @@ export const BANNED_CLIENT_TERMS = Object.freeze([
   [/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/, 'رمز قياس داخلي'],
   [/\b(?:alt|opt)-\w+|\.(?:json|mjs|png)\b/i, 'معرّف ملف'],
   [/\b[a-z]{3,}:[a-z]{1,5}\d[a-z0-9]*\b/i, 'معرّف تنظيم داخلي'],
+  // (مقترح — kit results.mjs lintClientText) مصطلحات المحرك والاستثناءات
+  [/\b(?:CSP|hardLink|R14_OFF|TypeError|ReferenceError|VILLA_[A-Z_]+|__v2\w*)\b/, 'مصطلح أو استثناء برمجي'],
+  [/شجرة تقسيم|خطأ داخلي|رمز الاستثناء|Cannot read|undefined|null\b/i, 'نص استثناء داخلي'],
 ]);
+/** (kit lintClientText) بالإضافة إلى قائمة المصطلحات الموجودة لا بدلًا منها. */
+export const lintClientText = text => clientLint(text).map(x => x.match);
 
 /** (الجولة 21) أسماء فحوص المراجعة بعربية العميل (كان يظهر الرمز الداخلي: «رسب في بوابة المراجعة PARKING»). */
 export const GATE_AR = Object.freeze({ BED_MAJLIS: 'فصل غرف النوم عن المجلس', COVERAGE: 'نسبة البناء', DAYLIGHT: 'الإضاءة الطبيعية', DOOR_SWING: 'حركة فتح الأبواب', GUEST_ROUTE: 'مسار الضيف',

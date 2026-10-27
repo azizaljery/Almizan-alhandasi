@@ -570,7 +570,7 @@ function choose(before, cands, { scope, request, check, strict = false }) {
   if (prior.length) { try { const v = verifyRules(before, prior, { entry: request.entry || 's' }); okBefore = prior.filter((_, i) => v[i]?.ok); } catch { okBefore = []; } }
   for (const c of cands) {
     if (!c || !c.doc) continue;
-    let cmp; try { cmp = compareDocs(before, c.doc, { scope, request, Ib }); } catch (e) { tried.push({ desc: c.desc, why: [e.message] }); continue; }
+    let cmp; try { cmp = compareDocs(before, c.doc, { scope, request, Ib }); } catch { tried.push({ desc: c.desc, why: ['تعذّرت مقارنة هذا المرشح بالمعروض'] }); continue; } // (الجولة 21) لا نص استثناء
     if (!cmp.ok) { tried.push({ desc: c.desc, why: cmp.why }); continue; }
     if (okBefore.length) { let broke = null; try { const v = verifyRules(c.doc, okBefore, { entry: request.entry || 's' }); broke = okBefore.find((_, i) => !v[i]?.ok) || null; } catch { broke = null; } if (broke) { tried.push({ desc: c.desc, why: [`يكسر بندًا سابقًا من طلبك (${broke.text || broke.kind})`] }); continue; } }
     const got = check ? check(cmp.I, c) : { ok: true };
@@ -1555,7 +1555,7 @@ export function applyEdits(doc0, parsed, { req = null, history = [] } = {}) {
       else if (it.op === 'revertRoom') { r = doRevertRoom(doc, it, req, history); if (!r.ok && r.restore) restore = { index: r.restore.index, keepIds: [], dropRoom: it.id, room: it.name }; }
       else if (it.op === 'none') r = { ok: it.ok !== false, already: true, doc, why_ar: it.why_ar };
       else r = { ok: false, why_ar: 'نية غير معروفة' };
-    } catch (e) { r = { ok: false, why_ar: 'خطأ داخلي في التعديل الموضعي: ' + e.message }; }
+    } catch (e) { r = { ok: false, why_ar: 'تعذّر تنفيذ هذا التعديل موضعيًا على المخطط المعروض.', diag: String(e?.message || e) }; } // (الجولة 21) لا نص استثناء في رسالة العميل
     if (r.ok && r.doc && !r.deferred) doc = r.doc;
     if (!r.ok && r.fallback) fallback = { why_ar: r.why_ar };
     results.push({ op: it.op, text_ar: it.text_ar, ok: !!r.ok, ask: r.ask || null, question: !!r.question, already: !!r.already, how_ar: r.how_ar || null, why_ar: r.why_ar || null, measured: r.measured || null, restore: !!(restore && (it.op === 'revertRoom' || it.op === 'bedCount') && !r.ok) || !!r.deferred, intent: it, removedOpenings: r.removedOpenings || [], envelope: !!r.envelope, subjectDoor: r.subjectDoor || null });
@@ -1598,7 +1598,7 @@ export function measureIntents(before, after, intents, { entry = 's' } = {}) {
       if (it.op === 'extDoor') { const I = inspect(after), R = roomList(I).find(r => r.name === it.name); const L = R && I.model.levelById.get(R.level); return res(!!L && L.openings.some(op => op.door && op.sides.some(x => x.room.id === R.id && x.other === 'outside')), ''); }
       if (it.op === 'none' || it.op === 'facade') return res(true, '');
       if (it.op === 'door' && it.action === 'add') { const Ia = inspect(after), a = roomList(Ia).find(r => r.name === it.aName), b = roomList(Ia).find(r => r.name === it.bName); return res(!!a && !!b && openingsBetween(Ia, a.id, b.id).length > 0, ''); }
-    } catch (e) { return res(false, e.message); }
+    } catch { return res(false, 'تعذّر قياس هذا البند على المخطط الجديد.'); } // (الجولة 21) لا نص استثناء
     return res(false, 'غير مقيس');
   });
 }

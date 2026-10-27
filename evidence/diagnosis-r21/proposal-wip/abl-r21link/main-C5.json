@@ -1,0 +1,434 @@
+{
+ "case": {
+  "set": "main",
+  "id": "C5",
+  "land": {
+   "floors": 1,
+   "width": 20,
+   "length": 30,
+   "streets": [
+    "s"
+   ],
+   "entries": [
+    "s"
+   ],
+   "polygon": [
+    {
+     "x": 3,
+     "y": 0
+    },
+    {
+     "x": 21,
+     "y": 0
+    },
+    {
+     "x": 24,
+     "y": 30
+    },
+    {
+     "x": 0,
+     "y": 30
+    }
+   ]
+  },
+  "text": "أرض شكلها شبه منحرف: الواجهة 18 م والخلف 24 م وعمقها 30 م؛ 3 غرف ومجلس وصالة ومطبخ",
+  "keep": 4
+ },
+ "engineRoot": "/home/claude/wt-r21p/",
+ "ms": 61541,
+ "maxRssMB": 505,
+ "command": "node scripts/diagnose-r21.mjs main C5",
+ "stage1_brief": {
+  "understood": [
+   "3 غرف نوم"
+  ],
+  "unclear": [],
+  "rules": [],
+  "dims": {},
+  "prefs": {}
+ },
+ "stage2_constraints": {
+  "units": [
+   {
+    "key": "M",
+    "zone": "guest",
+    "area": 33
+   },
+   {
+    "key": "DN",
+    "zone": "guest",
+    "area": 15
+   },
+   {
+    "key": "KS",
+    "zone": "service",
+    "area": 16
+   },
+   {
+    "key": "F",
+    "zone": "circ",
+    "area": 9
+   },
+   {
+    "key": "H",
+    "zone": "family",
+    "area": 30
+   },
+   {
+    "key": "LK",
+    "zone": "circ",
+    "area": 8
+   },
+   {
+    "key": "S1",
+    "zone": "sleep",
+    "area": 73
+   }
+  ],
+  "hard": [
+   "مدخل العائلة على الشارع",
+   "الصالة تلامس مدخل العائلة (أو رواقًا منه)",
+   "رواق الوصل من مدخل العائلة",
+   "رواق الوصل إلى الصالة",
+   "مجلس الرجال على الشارع أو على واجهة جانبية (مدخل مستقل)",
+   "الطعام يلامس المطبخ",
+   "الطعام يُبلغ من العائلة (الصالة أو المدخل)",
+   "وصلة الضيافة: مجلس الرجال يلامس الطعام (مقلط) فلا يعبر الضيف العائلة",
+   "المطبخ لا يطل على الشارع",
+   "جناح النوم يلامس الصالة (ممره منها)",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش"
+  ],
+  "soft": [
+   "غرف النوم لا تطل على الشارع",
+   "المجلس لا يلاصق غرف النوم",
+   "الصالة تطل على حديقة أو حوش",
+   "الصالة لا تطل على الشارع",
+   "الطعام لا يفتح على مدخل العائلة (ممر عبور)"
+  ]
+ },
+ "stage3_topology": {
+  "grids": [
+   {
+    "nc": 3,
+    "nr": 3,
+    "valid": 44,
+    "nodes": 55953,
+    "exhausted": true
+   },
+   {
+    "nc": 3,
+    "nr": 4,
+    "valid": 90,
+    "nodes": 171589,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 3,
+    "valid": 2,
+    "nodes": 884,
+    "exhausted": true
+   },
+   {
+    "nc": 4,
+    "nr": 3,
+    "valid": 110,
+    "nodes": 161948,
+    "exhausted": true
+   }
+  ],
+  "distinctTopologies": 88,
+  "dimFit": 88,
+  "dimFail": 0,
+  "picked": 28,
+  "synthTrees": 54,
+  "libraryTrees": 106,
+  "twoFloors": null,
+  "groundStair": null
+ },
+ "stage4_allocation": {
+  "treesOptimized": 151,
+  "treesWithoutSolution": 105,
+  "topViolations": [
+   [
+    "circ-graph",
+    23
+   ],
+   [
+    "kitchen-street",
+    20
+   ],
+   [
+    "majlis-width",
+    20
+   ],
+   [
+    "aspect:suite",
+    17
+   ],
+   [
+    "dark:dining",
+    17
+   ],
+   [
+    "dining-strip",
+    17
+   ],
+   [
+    "foyer-big",
+    15
+   ],
+   [
+    "hall-via-beds",
+    14
+   ],
+   [
+    "master-big",
+    13
+   ],
+   [
+    "big:dining",
+    11
+   ],
+   [
+    "dining-big",
+    11
+   ],
+   [
+    "corr-long",
+    10
+   ],
+   [
+    "foyer-hall",
+    10
+   ],
+   [
+    "hall-dark",
+    7
+   ]
+  ],
+  "treeStats": null
+ },
+ "stage5_validation": {
+  "rejected": 18,
+  "topReasons": [
+   [
+    "لم يتسع إلا 1 من 2 موقف مطلوب نظاميًا داخل الأرض خارج المبنى وممرات ال",
+    10
+   ],
+   [
+    "«غرفة النوم الرئيسية» (غرفة نوم رئيسية) بلا نافذة على الخارج، والكتالو",
+    5
+   ],
+   [
+    "«غرفة النوم الرئيسية» بلا نافذة.",
+    5
+   ],
+   [
+    "لم يتسع إلا 0 من 2 موقف مطلوب نظاميًا داخل الأرض خارج المبنى وممرات ال",
+    2
+   ],
+   [
+    "«خزانة» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا يوجد باب أو فتح",
+    2
+   ],
+   [
+    "لم تتسع دورة مياه يومية تُدخل من الصالة أو البهو في هذا البديل (قيمة ت",
+    2
+   ],
+   [
+    "«المجلس» 23.82 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«المجلس» 22.14 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«غرفة نوم 2» تفتح على الصالة العائلية مباشرة (بلا ممر ولا مدخل جناح) ف",
+    1
+   ],
+   [
+    "تعذّر وصل «kitchen1-lobby» بالحركة.",
+    1
+   ],
+   [
+    "«المجلس» 18.83 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«غرفة النوم الرئيسية» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا ي",
+    1
+   ],
+   [
+    "«ممر الغرف» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا يوجد باب أو",
+    1
+   ],
+   [
+    "«غرفة نوم 2» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا يوجد باب أ",
+    1
+   ]
+  ],
+  "twoFloorWhy": null,
+  "pool": 22,
+  "poolGuestDefects": [
+   {
+    "pat": "r31j2bu:1j2buvg0",
+    "defects": [
+     "HALL_LT_MAJLIS",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "yoo:u0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "cornerentry:e1",
+    "defects": [
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "cornerentry:e0t",
+    "defects": [
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "hallback:h0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r3o32n0:o32n0hg0",
+    "defects": [
+     "FAMILY_WC",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r3f586y:f586yhCa",
+    "defects": [
+     "FAMILY_WC",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "ell:l0r",
+    "defects": [
+     "GUEST_DINING",
+     "MAJLIS_ISOLATED",
+     "FAMILY_WC",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "gardenl:gl0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "sidemajlis:j0",
+    "defects": [
+     "GUEST_DINING",
+     "FAMILY_WC",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "split:s0rt",
+    "defects": [
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r31pwed:1pwedvg1",
+    "defects": []
+   },
+   {
+    "pat": "wings:w0",
+    "defects": [
+     "GUEST_DINING",
+     "MAJLIS_ISOLATED",
+     "FAMILY_WC",
+     "ENTRANCES_TOGETHER"
+    ]
+   },
+   {
+    "pat": "r318xdg:18xdghg1",
+    "defects": [
+     "FAMILY_WC"
+    ]
+   },
+   {
+    "pat": "sidemajlis:j0t",
+    "defects": [
+     "GUEST_DINING",
+     "FAMILY_WC",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "gardenl:gl0t",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   }
+  ],
+  "poolDistinctByFrozenCriterion": [
+   "r31j2bu:1j2buvg0",
+   "hallback:h0",
+   "ell:l0r"
+  ]
+ },
+ "stage6_selection": {
+  "shown": [
+   {
+    "pat": "cornerentry:e0t",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   },
+   {
+    "pat": "split:s0rt",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   },
+   {
+    "pat": "hallback:h0",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   }
+  ],
+  "shortfall_ar": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 36، اجتاز البوابات منهم 22؛ ورُفض 14 في بوابات الجودة والسلامة؛ 2 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 4 لا يصل فيها ضيف الرجال إلى الطعام إلا عبر منطقة العائلة — المجلس والطعام في طرفين من البيت في هذا التنظيم على هذه الأرض («شكل L»، «مجلس الرجال على الواجهة الجانبية بمدخل مستقل من الارتداد الجانبي، والمدخل العائلي في المحور»، «جناحا نوم منفصلان (الأبناء / الرئيسية) حول حديقة خلفية، والصالة بينهما»)؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 11 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "hidden": 0
+ },
+ "stage7_timeout": {
+  "timedOut": false,
+  "note": "المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs"
+ },
+ "error": null,
+ "result": {
+  "status": "SOLVED",
+  "requestedCount": 4,
+  "shownCount": 3,
+  "warnings": []
+ }
+}
