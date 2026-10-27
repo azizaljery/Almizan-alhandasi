@@ -1,0 +1,56 @@
+<title>معاينة الميزان الهندسي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: بطاقة تشغيل واحدة لنسخة معاينة تجريبية — زر الدخول أولًا، ثم ما فيها وما ينقصها */
+:root{--bg:#f5f3ee;--panel:#fffdf9;--fg:#1b1a17;--muted:#6a645a;--line:#e2dccf;--gold:#9a7a3a;--ok:#2f6b4f;--warn:#9a4a22;
+--f-body:"IBM Plex Sans Arabic",system-ui,sans-serif;--f-code:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121110;--panel:#1b1a17;--fg:#ece7dc;--muted:#a59e90;--line:#34302a;--gold:#d2ad66;--ok:#7cc4a0;--warn:#e59a72;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121110;--panel:#1b1a17;--fg:#ece7dc;--muted:#a59e90;--line:#34302a;--gold:#d2ad66;--ok:#7cc4a0;--warn:#e59a72;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.75}
+.wrap{max-width:960px;margin:0 auto;padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+.tag{display:inline-block;font-size:.8rem;font-weight:600;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:1px 8px}
+h1{font-size:1.9rem;margin:6px 0 0;text-wrap:balance} h2{font-size:1.1rem;margin:0 0 8px}
+.lede{color:var(--muted);max-width:65ch;margin:4px 0 0}
+.go{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+#open{display:inline-block;background:var(--gold);color:#fff;text-decoration:none;font-weight:700;padding:12px 26px;border-radius:6px}
+#open:hover,#open:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.meta{font-family:var(--f-code);font-size:.85rem;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;min-width:0}
+ul{margin:0;padding-inline-start:20px;display:grid;gap:4px}
+.ok h2{color:var(--ok)} .no h2{color:var(--warn)}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:12px}
+code{font-family:var(--f-code);font-size:.85em}
+</style>
+<div class="wrap" dir="rtl">
+<header>
+<span class="tag">نسخة معاينة تجريبية — ليست الموقع الرئيسي — القبول الهندسي غير مكتمل</span>
+<h1>الميزان الهندسي: معاينة آخر ما بُني</h1>
+<p class="lede">نسخة خاصة لمراجعتك. الموقع الرئيسي لم يُمسّ ولا قاعدة بياناته ولا أسراره. كل ما تحفظه هنا يبقى في متصفحك فقط. ما يظهر هو اقتراح معماري مبدئي آلي، وليس اعتمادًا معماريًا ولا إنشائيًا ولا نظاميًا.</p>
+</header>
+<div class="go"><a id="open" href="./home.html">ابدأ رحلة التصميم</a><span class="meta">الإيداع {{COMMIT}} · فرع {{BRANCH}} · المحرك الثالث المبني على القيود</span></div>
+<div class="grid">
+<div class="card ok"><h2>ما يعمل في هذه المعاينة</h2><ul>
+<li>إدخال الأرض والطلب الحر بالعربية، والفهم المحلي.</li>
+<li>بدائل مختلفة معماريًا بالمحرك الثالث، مع حجب أي بديل يخالف شرطًا إلزاميًا.</li>
+<li>المسقط 2D والعرض 3D والواجهة، وجدول المراجعة وسجل «هل نُفّذ طلبك؟».</li>
+<li>رسالة صادقة حين يُعرض أقل مما طلبت أو لا يوجد بديل صالح.</li>
+<li>التعديلات الموضعية والرجوع إلى نسخة سابقة.</li>
+</ul></div>
+<div class="card no"><h2>غير مكتمل أو غير متحقق (تفاصيله في الشريط أعلى كل صفحة)</h2><ul>
+<li>H3: لا يوجد مخطط صالح بعد (SEARCH_INCOMPLETE).</li>
+<li>أربعة اختبارات قبول معلّقة تفشل: دوران H4، وتنوع C10، ومسار الضيف، ووصول المركبة.</li>
+<li>المقاسات الصريحة: إصلاح جزئي.</li>
+<li>الخصوصية لكل فراغ: مراجعة التراجعات لم تُحسم، وتغيّر توقع C9 بانتظار قرار المالك.</li>
+<li>ستارة C6: المطابقة النظامية لم تُتحقق، بلا درجة امتثال.</li>
+</ul></div>
+</div>
+<div class="card no"><h2>غير متاح في المعاينة</h2><ul>
+<li>الفهم بالذكاء الاصطناعي برمز الدخول، وأرشيف التصاميم، وتسجيل الدخول: تحتاج خادم الموقع.</li>
+<li>تنزيل الملفات والطباعة: يمنعها إطار المعاينة.</li>
+<li>الدوران: ضعيف، وكثير من طلبات الدورين لا يُنتج لها مخطط سليم.</li>
+</ul></div>
+<footer>معاينة مؤقتة تُحذف بطلبك، ولا علاقة لها بفرعي الإنتاج. لا تُدخل بيانات عملاء حقيقيين. النشر على الموقع الرئيسي ممنوع دون موافقة المالك الصريحة والمستقلة.</footer>
+</div>
