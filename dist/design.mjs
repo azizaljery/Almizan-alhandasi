@@ -318,7 +318,7 @@ $('fbGo').addEventListener('click', async () => {
     let ai = null, code = ''; try { code = sessionStorage.getItem('mizan.ai.code') || ''; } catch { /* لا تخزين */ }
     if ((code || await assistantOpen()) && text.length >= 8) {
       $('fbStatus').textContent = 'أفهم ملاحظتك عبر Claude…';
-      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: { summary: 'ملاحظة تعديل على تصميم معروض؛ استخرج ما تطلبه الملاحظة فقط.', rooms: [] } }, { accessCode: code, openAccess: !code, signal: AbortSignal.timeout?.(45000) })).brief.requirements || null; }
+      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: null }, { accessCode: code, openAccess: !code, signal: AbortSignal.timeout?.(45000) })).brief.requirements || null; }
       catch { ai = null; }
       $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
     }

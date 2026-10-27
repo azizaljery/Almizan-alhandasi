@@ -173,12 +173,12 @@ function beginChat() {
 // الذكاء المتصل اختياري، ويحتاج رمز دخول الموقع. استدعاؤه الحي غير متحقق منه في هذا التسليم.
 async function understandWithAI(text, accessCode) {
   const { plot } = normalizeLand(confirmedLand);
-  const { brief } = await requestBrief({ prompt: text, plot, previous: { summary: 'ابدأ من برنامج فارغ، واستخرج ما ذكره العميل فقط.', rooms: [] } }, { accessCode, openAccess: !accessCode });
+  const { brief } = await requestBrief({ prompt: text, plot, previous: null }, { accessCode, openAccess: !accessCode });
   const tally = {}; for (const r of brief.rooms || []) tally[r.type] = (tally[r.type] || 0) + 1;
   const map = { bedrooms: 'bedroom', majlis: 'majlis', baths: 'bath', kitchens: 'kitchen', halls: 'living', dining: 'dining' };
   const counts = {}; for (const [k, t] of Object.entries(map)) if (tally[t] !== undefined) counts[k] = tally[t];
   try { if (accessCode) sessionStorage.setItem('mizan.ai.code', accessCode); } catch { /* التخزين غير متاح */ }
-  return { text, counts, requirements: brief.requirements || null, assumptions: [...(brief.requirements ? ['فهمتُ كلامك عبر Claude، وطابقته مع الفهم المحلي.'] : []), ...(brief.assumptions || [])], questions: [...(brief.questions || []), ...(brief.unhandled || [])] };
+  return { text, counts, requirements: brief.requirements || null, assumptions: [brief.requirements ? 'فهمتُ كلامك عبر Claude، وطابقته مع الفهم المحلي.' : 'فهمتُ كلامك عبر Claude (بلا متطلبات منظّمة إضافية).', ...(brief.assumptions || [])], questions: [...(brief.questions || []), ...(brief.unhandled || [])] };
 }
 
 // ------------------------------------------------------------------------------------------------ التوليد والتسليم للمرسم
