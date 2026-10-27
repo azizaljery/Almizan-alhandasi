@@ -109,7 +109,10 @@ export function presentationStatus(design, request = {}) {
   // (02c، قرار المالك 2026-10-26 ثانيًا) ثلاث حالات منفصلة: صلاحية التوزيع المعماري (أعلاه)، ونجاح اختبارات الخصوصية والحركة لكل فراغ، والتحقق النظامي.
   // فشل الاختبارات يضيف عيبًا معماريًا (needs-edits)؛ و«غير متحقق» نظاميًا لا يحوّل الحالة ولا يصير ناجحًا — وسم ظاهر فقط.
   let tests = null; try { tests = R14_OFF.has('r21tests') ? null : planTests(doc); } catch { tests = null; }
-  if (tests) for (const m of tests.failing_ar) edits.push(toClientAr(m));
+  // (قرار المالك 2026-10-27 — إطلاق تجريبي) اختبار الخصوصية لكل فراغ (الدرجة A للصالة) نتيجته ظاهرة دائمًا في حالة «الاختبارات» (states.tests.passed=false) وفي ملاحظة،
+  // لكنه لا يخفّض الحالة إلى «يحتاج تعديلات» ما لم يُفعَّل صراحةً (R21_PRIVACY_EDITS=1): تخفيضه سبّب تراجع الجاهز في C3/C5/C8/H5/H7/H10 (قياس x-B) وقراره بيد المالك. الحركة والموقع تبقى عيوبًا.
+  const PRIV_EDITS = globalThis.process?.env?.R21_PRIVACY_EDITS === '1';
+  if (tests) for (const m of tests.failing_ar) { if (/^خصوصية /.test(m) && !PRIV_EDITS) notes.push(toClientAr('اختبار الخصوصية لكل فراغ لم يتحقق (ملاحظة ظاهرة؛ لا يخفّض الحالة بانتظار قرار المالك): ' + m)); else edits.push(toClientAr(m)); }
   const status = hidden.length ? 'hidden' : edits.length ? 'needs-edits' : 'ready';
   const states = planStates(archStatus, STATUS_AR, tests), site = tests?.regulatory || null;
   const regVerify = site?.pendingRegulatory ? [`ساتر خصوصية خارجي (${site.fences.map(f => f.id).join("، ")}): ${REG_SHORT_AR} — ${site.regulatory.map(c => c.rule).join('؛ ')} — ${UNVERIFIED_LABEL}؛ ليس معتمدًا نظاميًا`] : [];
