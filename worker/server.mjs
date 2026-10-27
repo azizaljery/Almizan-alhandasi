@@ -122,6 +122,19 @@ const DRAWING_INSTRUCTIONS = `${SHARA_PERSONA}
 5. استعمل في الأوامر معرّفات وإحداثيات موجودة في الملخص فقط (معرّف الجدار wall من exteriorWalls، ومعرّفات الأبواب id، ومعرّف الدور level، ومراكز الغرف centroid، ونقاط الثغرات at وto). لا تخترع معرّفًا. إن لم يمكن التعبير عن الاقتراح بأمر آمن فاترك commands فارغة واشرح الاقتراح بالكلام.
 6. suggestions أسئلة أو خطوات قصيرة (حتى ست) يمكن للمستخدم اتباعها، وقد تكون فارغة.
 7. سلّم الجواب دائمًا باستدعاء الأداة ${ANSWER_TOOL} مرة واحدة فقط، دون أي نص خارجها.`;
+// بوابة الوصول: إن وُجد رمز في الأسرار فهو إلزامي كما كان (الإنتاج لا يتغير).
+// وإن لم يوجد رمز وفُعّل OPEN_ASSISTANT=1 (نسخة المعاينة فقط) يتكلم المستخدم مباشرة دون رمز؛
+// وتبقى الحماية: قائمة النطاقات المسموحة، وحدّ الطلبات لكل عنوان، وحجم الطلب. وبدونهما معًا يُرفض الطلب.
+const codeConfigured = env => typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim();
+const openAccess = env => !codeConfigured(env) && String(env.OPEN_ASSISTANT || '').trim() === '1';
+async function accessGate(request, env, cors) {
+  if (codeConfigured(env)) {
+    if (!await secureEqual(request.headers.get('X-Mizan-Access-Code') || '', env.MIZAN_ACCESS_CODE.trim())) return json({ error: 'رمز دخول الذكاء غير صحيح.' }, 401, cors);
+    return null;
+  }
+  if (openAccess(env)) return null;
+  return json({ error: 'حماية خدمة الذكاء غير مهيأة بعد.', code: 'ACCESS_NOT_CONFIGURED' }, 503, cors);
+}
 const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
 const json = (body, status = 200, extraHeaders = {}) => new Response(JSON.stringify(body), { status, headers: { ...headers, ...extraHeaders } });
 // ALLOWED_ORIGIN قائمة مفصولة بفواصل؛ الافتراضي موقع كلودفلير الجديد والموقع القديم أثناء الانتقال.
@@ -181,7 +194,7 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
       if (origin && !originAllowed(origin, env)) return json({ error: 'طلب غير مسموح.' }, 403);
       return json({
         configured: typeof env.ANTHROPIC_API_KEY === 'string' && !!env.ANTHROPIC_API_KEY.trim(), verified: false,
-        accessConfigured: typeof env.MIZAN_ACCESS_CODE === 'string' && !!env.MIZAN_ACCESS_CODE.trim(),
+        accessConfigured: codeConfigured(env), openAccess: openAccess(env),
         scope: 'requirements_only',
         message: typeof env.ANTHROPIC_API_KEY === 'string' && env.ANTHROPIC_API_KEY.trim() ? 'مفتاح الخدمة مهيأ؛ هذه الحالة لا تختبر الاتصال. يلزم تحليل ناجح للتحقق منه.' : 'الذكاء الاصطناعي غير مفعّل بعد. يلزم إعداد مفتاح الخدمة الآمن.',
       }, 200, origin ? corsHeaders(origin) : {});
@@ -196,8 +209,7 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
       if (!originAllowed(origin, env)) return json({ error: 'طلب غير مسموح.' }, 403);
       const cors = corsHeaders(origin);
       if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return json({ error: 'نوع البيانات غير مدعوم؛ استخدم JSON.' }, 415, cors);
-      if (typeof env.MIZAN_ACCESS_CODE !== 'string' || !env.MIZAN_ACCESS_CODE.trim()) return json({ error: 'حماية خدمة الذكاء غير مهيأة بعد.', code: 'ACCESS_NOT_CONFIGURED' }, 503, cors);
-      if (!await secureEqual(request.headers.get('X-Mizan-Access-Code') || '', env.MIZAN_ACCESS_CODE.trim())) return json({ error: 'رمز دخول الذكاء غير صحيح.' }, 401, cors);
+      { const denied = await accessGate(request, env, cors); if (denied) return denied; }
       let input;
       try { input = validateInput(await readLimited(request)); }
       catch (error) {
@@ -243,8 +255,7 @@ export function createWorker(assets = {}, providerFetch = fetch, { now = Date.no
       if (!originAllowed(origin, env)) return json({ error: 'طلب غير مسموح.' }, 403);
       const cors = corsHeaders(origin);
       if (request.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return json({ error: 'نوع البيانات غير مدعوم؛ استخدم JSON.' }, 415, cors);
-      if (typeof env.MIZAN_ACCESS_CODE !== 'string' || !env.MIZAN_ACCESS_CODE.trim()) return json({ error: 'حماية خدمة الذكاء غير مهيأة بعد.', code: 'ACCESS_NOT_CONFIGURED' }, 503, cors);
-      if (!await secureEqual(request.headers.get('X-Mizan-Access-Code') || '', env.MIZAN_ACCESS_CODE.trim())) return json({ error: 'رمز دخول الذكاء غير صحيح.' }, 401, cors);
+      { const denied = await accessGate(request, env, cors); if (denied) return denied; }
       let input;
       try { input = validateDrawingInput(await readLimited(request, DRAWING_MAX_BODY_BYTES)); }
       catch (error) {

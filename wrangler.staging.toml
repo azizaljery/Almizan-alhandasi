@@ -21,7 +21,8 @@ enabled = true
 
 [vars]
 # بعد أول نشر ضع أصل staging الفعلي (مفصولًا بفواصل إن تعدد)، ثم أعد النشر:
-ALLOWED_ORIGIN = ""
+ALLOWED_ORIGIN = "https://almizan-handasi-staging.aljeryabod.workers.dev"
+OPEN_ASSISTANT = "1"
 # تسجيل الدخول عبر Cloudflare Access لتطبيق staging نفسه (من لوحة Zero Trust):
 ACCESS_TEAM_DOMAIN = ""                 # مثل  yourteam.cloudflareaccess.com
 ACCESS_AUD = ""                         # وسم الجمهور (AUD) لتطبيق Access الخاص بـstaging

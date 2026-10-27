@@ -9,7 +9,7 @@ import { interpretAr } from './assistant-local.mjs';
 import { applyCommand, DrawError } from './doc.mjs';
 import { validateDrawingAnswer, LIMITS } from './assistant-schema.mjs';
 
-export const DRAWING_ENDPOINT = 'https://almizan-handasi.aljeryabod.workers.dev/api/assistant/drawing';
+export const DRAWING_ENDPOINT = (typeof location !== 'undefined' && /^almizan-handasi-staging\./.test(location.hostname || '')) ? '/api/assistant/drawing' : 'https://almizan-handasi.aljeryabod.workers.dev/api/assistant/drawing';
 
 const TYPE_AR = { 'set-meta': 'تغيير المواد والواجهة', 'add-opening': 'إضافة فتحة', 'add-fixture': 'إضافة قطعة', update: 'تعديل عنصر', 'flip-opening': 'عكس اتجاه باب', 'add-label': 'تسمية غرفة', 'add-level': 'إضافة دور', 'close-gap': 'سدّ ثغرة', delete: 'حذف', translate: 'تحريك' };
 const r2 = v => Math.round(v * 100) / 100;
@@ -81,7 +81,7 @@ function offline(doc, local, why) {
  *  -> { source:'local'|'claude', answer, suggestions[], proposals:[{ label, commands[], preview:{ beforeAreas, afterAreas, summary } }], limitations[],
  *       intent, needsConfirm, ambiguities[], referencedIds[], model?, offline? }
  */
-export async function askDrawingAssistant(doc, question, { accessCode = '', endpoint = DRAWING_ENDPOINT, fetcher = globalThis.fetch, signal, selection = null, forceRemote = false } = {}) {
+export async function askDrawingAssistant(doc, question, { accessCode = '', openAccess = false, endpoint = DRAWING_ENDPOINT, fetcher = globalThis.fetch, signal, selection = null, forceRemote = false } = {}) {
   const text = String(question ?? '').trim();
   if (!text) return { source: 'local', intent: 'unknown', answer: 'اكتب سؤالك عن المخطط أولًا.', suggestions: [], proposals: [], limitations: [], needsConfirm: false, ambiguities: [], referencedIds: [] };
   if (text.length > LIMITS.question) return { source: 'local', intent: 'unknown', answer: `السؤال أطول من ${LIMITS.question} حرفًا؛ اختصره.`, suggestions: [], proposals: [], limitations: [], needsConfirm: false, ambiguities: [], referencedIds: [] };
@@ -89,7 +89,8 @@ export async function askDrawingAssistant(doc, question, { accessCode = '', endp
   try { local = interpretAr(text, doc, { selection }); } catch { local = null; }
   if (!forceRemote && local && local.intent !== 'unknown' && !local.ambiguities.length) return fromLocal(doc, local);
 
-  if (typeof accessCode !== 'string' || !accessCode.trim()) return offline(doc, local, 'لم يُدخل رمز دخول الذكاء، فلم يُرسل شيء إلى الخدمة.');
+  const code = typeof accessCode === 'string' ? accessCode.trim() : '';
+  if (!code && !openAccess) return offline(doc, local, 'لم يُدخل رمز دخول الذكاء، فلم يُرسل شيء إلى الخدمة.');
   if (typeof fetcher !== 'function') return offline(doc, local, 'الاتصال بخدمة الذكاء غير متاح هنا.');
   const digest = digestDoc(doc, { compact: true });
   const issues = reviewDoc(doc, { digest }).slice(0, 20).map(i => ({ code: i.code, severity: i.severity, message: i.message.slice(0, 380), targetIds: i.targetIds.slice(0, 8) }));
@@ -97,7 +98,7 @@ export async function askDrawingAssistant(doc, question, { accessCode = '', endp
   if (new TextEncoder().encode(JSON.stringify(digest)).length > LIMITS.digestBytes) return offline(doc, local, 'ملخص المخطط أكبر من أن يُرسل إلى خدمة الذكاء.');
 
   let response;
-  try { response = await fetcher(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Mizan-Access-Code': accessCode.trim() }, body, signal, credentials: 'omit', cache: 'no-store' }); }
+  try { response = await fetcher(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(code ? { 'X-Mizan-Access-Code': code } : {}) }, body, signal, credentials: 'omit', cache: 'no-store' }); }
   catch (error) {
     if (error?.name === 'AbortError') throw error;
     return offline(doc, local, error?.name === 'TimeoutError' ? 'لم يصل رد من خدمة الذكاء في الوقت المحدد.' : 'تعذّر الاتصال بخدمة الذكاء الآن.');

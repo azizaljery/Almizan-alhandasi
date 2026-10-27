@@ -6,7 +6,7 @@ import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
 import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
 import { serialize, parseDoc } from './draw/doc.mjs';
-import { requestBrief } from './assistant.mjs';
+import { requestBrief, assistantOpen } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
 import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
@@ -316,9 +316,9 @@ $('fbGo').addEventListener('click', async () => {
   try {
     // رمز الدخول (إن أُدخل في المحادثة): Claude يفهم الملاحظة أيضًا، ويُدمج فهمه مع الفهم المحلي
     let ai = null, code = ''; try { code = sessionStorage.getItem('mizan.ai.code') || ''; } catch { /* لا تخزين */ }
-    if (code && text.length >= 8) {
+    if ((code || await assistantOpen()) && text.length >= 8) {
       $('fbStatus').textContent = 'أفهم ملاحظتك عبر Claude…';
-      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: { summary: 'ملاحظة تعديل على تصميم معروض؛ استخرج ما تطلبه الملاحظة فقط.', rooms: [] } }, { accessCode: code, signal: AbortSignal.timeout?.(45000) })).brief.requirements || null; }
+      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: { summary: 'ملاحظة تعديل على تصميم معروض؛ استخرج ما تطلبه الملاحظة فقط.', rooms: [] } }, { accessCode: code, openAccess: !code, signal: AbortSignal.timeout?.(45000) })).brief.requirements || null; }
       catch { ai = null; }
       $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
     }

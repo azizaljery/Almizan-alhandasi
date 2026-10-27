@@ -14,6 +14,7 @@ import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { digestDoc, describeDigestAr } from './draw/digest.mjs';
 import { askDrawingAssistant } from './draw/assistant-client.mjs';
+import { assistantOpen } from './assistant.mjs';
 import { wallRect, fixtureRect } from './draw/review.mjs';
 import { downloadManifest } from './export-manifest.mjs';
 import { toDxf } from './draw/dxf.mjs';
@@ -350,7 +351,7 @@ $('askForm').addEventListener('submit', async e => {
   busy = true; $('askBtn').disabled = true; addMsg('me', q); $('askText').value = ''; const wait = addMsg('bot', 'أفحص الرسم…');
   try {
     const sel = [...editor.selection];
-    const res = await askDrawingAssistant(editor.doc, q, { accessCode: $('aiCode').value, selection: sel, signal: AbortSignal.timeout(60000) });
+    const res = await askDrawingAssistant(editor.doc, q, { accessCode: $('aiCode').value, openAccess: await assistantOpen(), selection: sel, signal: AbortSignal.timeout(60000) });
     wait.remove();
     const m = addMsg('bot', res.answer || '—');
     if (res.limitations?.length) m.append(el('small', {}, res.limitations.join(' · ')));
