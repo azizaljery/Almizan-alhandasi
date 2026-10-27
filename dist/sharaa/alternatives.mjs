@@ -88,6 +88,10 @@ export function buildAlternatives(brief, outcome) {
     const touchesMand = o.touches.some(t => isMandatory(brief, t));
     (touchesMand && !o.preConsented ? needs : auto).push({ ...o, group: touchesMand && !o.preConsented ? 'mandatory' : 'auto', touchesMandatory: touchesMand });
   }
+  if (outcome.kind === OUTCOME.ALL_HIDDEN && info.some(i => /no-lever/.test(i.id))) {
+    const cav = 'تنبيه: هذا الخيار لا يعالج سبب الحجب المذكور مباشرة، وقد لا يغيّر النتيجة (قيس على أرض 25×12.5 و30×12.5 فبقيت التصاميم محجوبة).';
+    for (const o of auto) if (!/majlis/.test(o.id)) o.caveat_ar = cav;
+  }
   needs.push(...relaxOptions(brief, outcome).map(o => ({ ...o, touchesMandatory: true })));
   return { auto, needsConsent: needs, info };
 }
