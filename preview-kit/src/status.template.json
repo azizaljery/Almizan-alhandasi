@@ -1,0 +1,16 @@
+{
+  "preview": true,
+  "releaseApproved": false,
+  "allowedHosts": [],
+  "sourceBaseCommit": "VERIFY_AT_INTEGRATION",
+  "deployedCommit": null,
+  "independentTests": { "state": "pending", "exitCode": null, "evidence": null },
+  "issues": [
+    { "id": "H3", "title": "H3: لا يوجد مخطط صالح يحقق جميع المتطلبات", "state": "open" },
+    { "id": "PENDING_4", "title": "أربعة اختبارات قبول معلّقة: H4، C10، مسار الضيف، وصول السيارة", "state": "open" },
+    { "id": "DIMENSIONS", "title": "الأبعاد الصافية: إصلاح جزئي يحتاج تحققًا", "state": "unverified" },
+    { "id": "PRIVACY_C9", "title": "الخصوصية وتغيّر حكم C9: المراجعة لم تُحسم", "state": "unverified" },
+    { "id": "C6_REGULATIONS", "title": "ستارة الخصوصية C6: المطابقة النظامية غير متحققة", "state": "unverified" },
+    { "id": "INDEPENDENT_TESTS", "title": "الاختبارات المستقلة: بانتظار نتيجة نهائية موثقة ورمز خروج", "state": "pending" }
+  ]
+}

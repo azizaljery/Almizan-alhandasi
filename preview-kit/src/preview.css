@@ -1,0 +1,20 @@
+#mizan-preview-banner.mizan-preview {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 9999;
+  direction: rtl;
+  text-align: right;
+  width: 100%;
+  background: #fef8e8;
+  color: #503700;
+  border-bottom: 2px solid #ba8532;
+  padding: 12px 18px;
+  font: 14px/1.7 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+#mizan-preview-banner .mizan-preview__header { display: flex; gap: 6px 18px; flex-wrap: wrap; align-items: baseline; }
+#mizan-preview-banner .mizan-preview__header strong { font-size: 15px; }
+#mizan-preview-banner details { margin-top: 6px; }
+#mizan-preview-banner summary { cursor: pointer; font-weight: 600; }
+#mizan-preview-banner li { margin: 4px 0; }
+@media (prefers-color-scheme: dark) { #mizan-preview-banner.mizan-preview { background: #2b2412; color: #f1dfb0; border-bottom-color: #d2ad66; } }
+@media (max-width: 640px) { #mizan-preview-banner.mizan-preview { padding: 10px 12px; font-size: 13px; } }

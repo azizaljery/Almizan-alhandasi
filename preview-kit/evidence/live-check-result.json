@@ -1,0 +1,83 @@
+{
+ "allowed/launcher.html": {
+  "banner": true,
+  "info": {
+   "dir": "rtl",
+   "items": 7,
+   "head": "نسخة تجريبية — القبول الهندسي غير مكتمل",
+   "top": 8,
+   "h": 81,
+   "w": 1264,
+   "vw": 1280,
+   "scrollW": 1280
+  },
+  "errs": []
+ },
+ "allowed/home.html": {
+  "banner": true,
+  "info": {
+   "dir": "rtl",
+   "items": 7,
+   "head": "نسخة تجريبية — القبول الهندسي غير مكتمل",
+   "top": 0,
+   "h": 81,
+   "w": 1280,
+   "vw": 1280,
+   "scrollW": 1280
+  },
+  "errs": []
+ },
+ "allowed/studio.html": {
+  "banner": true,
+  "info": {
+   "dir": "rtl",
+   "items": 7,
+   "head": "نسخة تجريبية — القبول الهندسي غير مكتمل",
+   "top": 0,
+   "h": 81,
+   "w": 1280,
+   "vw": 1280,
+   "scrollW": 1357
+  },
+  "errs": []
+ },
+ "allowed/view3d.html": {
+  "banner": true,
+  "info": {
+   "dir": "rtl",
+   "items": 7,
+   "head": "نسخة تجريبية — القبول الهندسي غير مكتمل",
+   "top": 0,
+   "h": 81,
+   "w": 1280,
+   "vw": 1280,
+   "scrollW": 1280
+  },
+  "errs": []
+ },
+ "other-host/launcher.html": {
+  "banner": false,
+  "info": null,
+  "errs": []
+ },
+ "other-host/home.html": {
+  "banner": false,
+  "info": null,
+  "errs": []
+ },
+ "other-host/studio.html": {
+  "banner": false,
+  "info": null,
+  "errs": []
+ },
+ "other-host/view3d.html": {
+  "banner": false,
+  "info": null,
+  "errs": []
+ },
+ "mobile": {
+  "banner": true,
+  "scrollW": 390,
+  "vw": 390
+ }
+}

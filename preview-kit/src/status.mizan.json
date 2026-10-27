@@ -1,0 +1,17 @@
+{
+  "preview": true,
+  "releaseApproved": false,
+  "allowedHosts": [],
+  "sourceBaseCommit": "VERIFY_AT_INTEGRATION",
+  "deployedCommit": null,
+  "independentTests": { "state": "pending", "exitCode": null, "evidence": null },
+  "issues": [
+    { "id": "H3", "title": "H3: لا يوجد مخطط صالح يحقق كل المتطلبات (SEARCH_INCOMPLETE وليست استحالة مثبتة)", "state": "open" },
+    { "id": "PENDING_4", "title": "أربعة اختبارات قبول معلّقة تفشل كما هو متوقع: دوران H4، وتنوع C10، ومسار الضيف عند التوبولوجيا، وإثبات وصول المركبة", "state": "open" },
+    { "id": "DIMENSIONS", "title": "المقاسات الصريحة: إصلاح جزئي (المطبخ والطعام فقط)، وغرف النوم ضمن «تقريبًا»، وحالة 4.92 م لم يُعد إنتاجها", "state": "unverified" },
+    { "id": "PRIVACY_REVIEW", "title": "الخصوصية لكل فراغ: انخفض «الجاهز» في C3 وC5 وH5 وR22، والمراجعة لم تُحسم هل هو كشف عيب سابق أم إفراط في الصرامة", "state": "unverified" },
+    { "id": "C9_CRITERION", "title": "C9: تغيّر توقع الاختبار (جاهز إلى «جاهز أو يحتاج تعديلات بسبب خصوصية الصالة وحدها») وتغيير معيار القبول بانتظار قرار المالك", "state": "unverified" },
+    { "id": "C6_REGULATIONS", "title": "تصميم مبدئي — المطابقة النظامية لستارة الخصوصية لم تُتحقق بعد (الامتثال NOT_EVALUATED بلا درجة)", "state": "unverified" },
+    { "id": "INDEPENDENT_TESTS", "title": "الاختبارات المستقلة: بانتظار نتيجة نهائية موثقة برمز خروج", "state": "pending" }
+  ]
+}
