@@ -23,7 +23,6 @@ import { analyzeFeasibility } from './feasibility.mjs';
 import { explainFailure } from './infeasibility-report.mjs';
 import { toClientAr } from './client-language.mjs';
 import { candidateRejections } from './review-evidence.mjs';
-import { diversifyTopologies, layoutFingerprint } from './diversity-r21.mjs';
 
 export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
 const K = V2.TREE_KIT;
@@ -471,22 +470,8 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
   for (const S of scored.slice(160)) S.rank = -Infinity;
   const out = []; let nL = 0;
   scored.sort((a, b) => b.rank - a.rank);
-  // القاعدة السابقة (التفضيل وبعد جاكارد ≥ 0.15) كما هي
-  const ranked = scored.filter(S => S.rank !== -Infinity), base = [];
-  for (const S of ranked) { if (base.length >= nFirst + nLate) break; if (base.every(o => jaccard(o.L.sig, S.L.sig) >= .15)) base.push(S); }
-  // (الجولة 21 — مقترح 07، kit diversifyTopologies) التنوع قبل الهندسة: الأشجار الأولى (البحث الأول) كما كانت تمامًا، والمتأخرة (البحث الثاني المصمم
-  // لقلة البدائل المختلفة) تبدأ بأفضل توزيع من كل بصمة وظيفية لم تظهر في الأولى (النطاقات والعلاقات، dist/diversity-r21.mjs)، ثم بقية القائمة
-  // السابقة بترتيبها — العدد نفسه. (جُرّب أولًا: البصمات الجديدة في الأولى — أزاح شجرة حل مقاسين صريحين على 22×30 إلى المتأخرة فسقط الحل؛ سُحب.)
-  // الحكم بعد البناء للمعيار المجمّد r19 وحده
-  let chosen = base;
-  if (!R14_OFF_V3.has('r21div')) {
-    const fp = S => (S._fp ||= layoutFingerprint(S.L));
-    chosen = base.slice(0, nFirst);
-    const seenFp = new Set(chosen.map(fp));
-    const fresh = diversifyTopologies(ranked.filter(S => !chosen.includes(S) && !seenFp.has(fp(S))), nLate, fp);
-    for (const S of fresh) if (chosen.every(o => jaccard(o.L.sig, S.L.sig) >= .15)) chosen.push(S);
-    for (const S of base) { if (chosen.length >= nFirst + nLate) break; if (!chosen.includes(S)) chosen.push(S); }
-  }
+  const chosen = [];
+  for (const S of scored) { if (S.rank === -Infinity || chosen.length >= nFirst + nLate) break; if (chosen.every(o => jaccard(o.L.sig, S.L.sig) >= .15)) chosen.push(S); }
   for (const { L, ts: ts0 } of chosen) {
     if (nL >= nFirst + nLate) break;
     const ts = ts0;
