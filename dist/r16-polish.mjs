@@ -14,6 +14,7 @@ import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
 import { siteElementReport } from './site-element-check.mjs';
 import { planWindowScreens, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
+import { completeShowers } from './bath-shower.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
 const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
@@ -72,7 +73,7 @@ function placeScreenFor(doc, G, opD, side, bays, room, notes, screens) {
           const snap = JSON.stringify(doc), before = acceptanceSnapshot(doc), was = new Set(doc.walls.map(w => w.id));
           let ok = false;
           try {
-            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: sc.a, b: sc.b, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
+            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: { x: Math.round(sc.a.x * 100) / 100, y: Math.round(sc.a.y * 100) / 100 }, b: { x: Math.round(sc.b.x * 100) / 100, y: Math.round(sc.b.y * 100) / 100 }, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
             const G2 = analyzeDoc(doc).levels[0], op2 = G2.openings.find(q => q.id === opD.id), s2 = op2?.sides.find(s => s.room.name === room.name && s.other === 'outside');
             const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
             const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === opD.o.id && !w.screened);
@@ -268,6 +269,8 @@ export function polishR16(doc) {
       const done = carveBath(doc, lv, R); if (done) { notes.push(done); changed = true; break; }
     }
   }
+  // 4) (قرار المالك 2026-10-26 ثالثًا) حمام كامل بلا دش صالح: يُضاف/يُستبدل بفحص هندسي (التقاطع، مسقط الوصول، فتح الباب، العرض الصافي)؛ وإن تعذّر يحجبه بوابة العرض
+  if (!R14_OFF.has('r21shower')) { try { const r = completeShowers(doc); for (const n of r.notes) { notes.push(n); changed = true; } for (const f of r.failed) notes.push(`تعذّر وضع دش صالح في «${f.room}»: ${f.why}.`); } catch { /* */ } }
   return { notes_ar: notes, changed, screens };
 }
 const bbox = poly => ({ x0: Math.min(...poly.map(p => p.x)), x1: Math.max(...poly.map(p => p.x)), y0: Math.min(...poly.map(p => p.y)), y1: Math.max(...poly.map(p => p.y)) });
