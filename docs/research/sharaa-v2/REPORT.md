@@ -50,3 +50,11 @@
 4. هل يُضاف إلى المستخرج التقاط «باب مباشر بين…» (تعديل في requirements.mjs خارج نطاقي)؟
 
 ## نتيجة npm test الكامل
+
+**لم يكتمل `npm test` الكامل، وهذا غير متحقق كحكم شامل.** السبب: القرص ممتلئ (نحو 160 م.ب حرة)، فاستعملتُ نسخة عمل مجزأة (sparse) بلا مجلد evidence/. شغّلتُ `npm test` فيها حتى الاختبار رقم 876 تقريبًا ثم أوقفتُه بنفسي (السجل ينتهي بـ EXIT=143، وهو إيقاف مني لا فشل حزمة). ظهر فشل في 7 ملفات اختبار فقط: plan-edit، plan-edit-local2، functional-diff، arch-difference، consistency-2d3d، circulation-proof، ops-rollback. الأخطاء المقروءة ENOENT لملفات evidence/dialog/… أو «Cannot read properties of undefined (reading 'doc')»، أي من غياب بيانات النسخة المجزأة. لا واحد منها يستورد home.mjs أو home.html أو home.css أو dist/sharaa/*، ولم أغيّر أي ملف مشترك سواها. لكني لم أقارنها بتشغيل الخط الأساسي 3ef1752 في البيئة نفسها، فلا أجزم أنها كلها فشل بيئي.
+
+اختبارات الملفات التي تمسها تعديلاتي مباشرة (worker-index، home-page، assistant-open-access، sharaa-brief، sharaa-v2-acceptance): 46 نجاح، 0 فشل، EXIT=0.
+
+المطلوب قبل الدمج: تشغيل `npm test` كاملًا على نسخة كاملة بقرص كافٍ ومقارنته بالخط الأساسي (الفشل المعروف: stage2-r14 «حالة العرض…»، stage2-r20 «كشف الاستحالة قبل التوليد…»، دورانات H4).
+
+</div>
