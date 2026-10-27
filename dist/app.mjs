@@ -906,7 +906,7 @@ async function askAI(operation = null) {
     const engineText = `سياق محرك القرار الهندسي المنظم (مرجع تحليلي، لا تتجاهل عدم اليقين): ${JSON.stringify(engineeringContext)}`;
     const prompt = [clientContext, discovery, engineText, $('idea').value.trim()].filter(Boolean).join('\n\n');
     const context = buildClientContext({ plot: rawPlot(), discovery: state.discovery, rooms: state.program, prompt });
-    const result = await requestBrief({ prompt, context, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, signal: studioAbort ? AbortSignal.any([studioAbort.signal, AbortSignal.timeout(45000)]) : AbortSignal.timeout(45000) });
+    const result = await requestBrief({ prompt, context, plot: rawPlot(), previous: { summary: 'برنامج الغرف الحالي للمراجعة. رتّب الأولويات واستخرج ما فهمته من العميل، واذكر التعارضات والأسئلة قبل اقتراح الغرف.', assumptions: [], questions: [], unhandled: [], rooms: publicRooms(state.program) } }, { accessCode: $('aiAccessCode').value, openAccess: 'auto', signal: studioAbort ? AbortSignal.any([studioAbort.signal, AbortSignal.timeout(45000)]) : AbortSignal.timeout(45000) });
     assertStudioOperation(operation?.sessionId ? operation : null);
     if (startEpoch !== modelEpoch || sourceFingerprint !== requestFingerprint(requestInput())) throw Error('تغيّرت المدخلات أثناء التحليل؛ لم يُطبق الرد القديم. أعد التحليل لطلبك الحالي.');
     const rooms = bindRequestedDimensions(result.brief.rooms, localConstraints.rooms);

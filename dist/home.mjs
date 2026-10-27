@@ -4,7 +4,7 @@ import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { createSession, saveSession } from './design-session.mjs';
 import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
-import { requestBrief } from './assistant.mjs';
+import { requestBrief, assistantOpen } from './assistant.mjs';
 
 const $ = id => document.getElementById(id);
 const home = $('home');
@@ -138,7 +138,7 @@ function render(messages) {
     } else if (m.kind === 'text') {
       const form = document.createElement('form'); form.className = 'free';
       form.innerHTML = '<textarea aria-label="حدّثني عن بيتك" placeholder="مثال: ثلاث غرف نوم ومجلس ومطبخ، وأريد الخصوصية لغرف النوم"></textarea>'
-        + '<details><summary>رمز دخول الذكاء (اختياري)</summary><input type="password" autocomplete="off" aria-label="رمز دخول الذكاء" placeholder="بدونه أفهم كلامك محليًا بلا شبكة"></details>';
+        + '<details><summary>رمز دخول الذكاء (اختياري)</summary><input type="password" autocomplete="off" aria-label="رمز دخول الذكاء" placeholder="بدونه أفهم كلامك محليًا، أو عبر الذكاء إن كان مفتوحًا في هذه النسخة"></details>';
       const go = document.createElement('button'); go.type = 'submit'; go.className = 'cta'; go.textContent = 'إرسال'; form.append(go);
       form.addEventListener('submit', async e => {
         e.preventDefault();
@@ -147,7 +147,7 @@ function render(messages) {
         go.disabled = true;
         try {
           let understood = null, note = '';
-          if (code) {
+          if (code || await assistantOpen()) {
             try { understood = await understandWithAI(text, code); }
             catch (err) { note = `تعذّر الذكاء المتصل (${err.message}) فاستخدمت الفهم المحلي.`; }
           }
@@ -173,11 +173,11 @@ function beginChat() {
 // الذكاء المتصل اختياري، ويحتاج رمز دخول الموقع. استدعاؤه الحي غير متحقق منه في هذا التسليم.
 async function understandWithAI(text, accessCode) {
   const { plot } = normalizeLand(confirmedLand);
-  const { brief } = await requestBrief({ prompt: text, plot, previous: { summary: 'ابدأ من برنامج فارغ، واستخرج ما ذكره العميل فقط.', rooms: [] } }, { accessCode });
+  const { brief } = await requestBrief({ prompt: text, plot, previous: { summary: 'ابدأ من برنامج فارغ، واستخرج ما ذكره العميل فقط.', rooms: [] } }, { accessCode, openAccess: !accessCode });
   const tally = {}; for (const r of brief.rooms || []) tally[r.type] = (tally[r.type] || 0) + 1;
   const map = { bedrooms: 'bedroom', majlis: 'majlis', baths: 'bath', kitchens: 'kitchen', halls: 'living', dining: 'dining' };
   const counts = {}; for (const [k, t] of Object.entries(map)) if (tally[t] !== undefined) counts[k] = tally[t];
-  try { sessionStorage.setItem('mizan.ai.code', accessCode); } catch { /* التخزين غير متاح */ }
+  try { if (accessCode) sessionStorage.setItem('mizan.ai.code', accessCode); } catch { /* التخزين غير متاح */ }
   return { text, counts, requirements: brief.requirements || null, assumptions: [...(brief.requirements ? ['فهمتُ كلامك عبر Claude، وطابقته مع الفهم المحلي.'] : []), ...(brief.assumptions || [])], questions: [...(brief.questions || []), ...(brief.unhandled || [])] };
 }
 

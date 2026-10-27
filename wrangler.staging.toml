@@ -1,0 +1,29 @@
+# قالب بيئة staging مستقلة للميزان الهندسي — لا يُستعمل مع وركر الإنتاج ولا قاعدة بياناته.
+# يُنسخ إلى جذر المستودع باسم wrangler.staging.toml، ثم يُملأ database_id بعد إنشاء قاعدة staging جديدة.
+# الأسرار لا تُكتب هنا أبدًا: تُضبط بـ  wrangler secret put … -c wrangler.staging.toml
+name = "almizan-handasi-staging"        # اسم مختلف عن الإنتاج (almizan-handasi)
+main = "worker/index.mjs"
+compatibility_date = "2026-09-19"
+workers_dev = true                      # عنوان workers.dev فقط؛ لا routes ولا نطاق مخصص
+
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
+run_worker_first = ["/", "/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "almizan-archive-staging"   # قاعدة جديدة؛ ليست almizan-archive الإنتاجية
+database_id = "f61a87bd-8178-48bf-b7b2-42dc7663dacf"
+
+[observability]
+enabled = true
+
+[vars]
+# بعد أول نشر ضع أصل staging الفعلي (مفصولًا بفواصل إن تعدد)، ثم أعد النشر:
+ALLOWED_ORIGIN = "https://almizan-handasi-staging.aljeryabod.workers.dev"
+OPEN_ASSISTANT = "1"
+# تسجيل الدخول عبر Cloudflare Access لتطبيق staging نفسه (من لوحة Zero Trust):
+ACCESS_TEAM_DOMAIN = ""                 # مثل  yourteam.cloudflareaccess.com
+ACCESS_AUD = ""                         # وسم الجمهور (AUD) لتطبيق Access الخاص بـstaging
+# لا تضبط TRUST_SITES_HEADER إطلاقًا في staging.
