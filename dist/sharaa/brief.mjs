@@ -1,7 +1,7 @@
 // شرعاء V2 — ArchitecturalBrief: مصدر الحقيقة الواحد لاحتياجات العميل (حديث حر وأسئلة وقرارات).
 // وحدة نقية بلا DOM ولا شبكة. لا تغيّر عقد أي محرك؛ المحوّل إلى المحرك في adapter.mjs.
 // المخطط مطابق لمواصفة المالك (انظر brief.d.ts) مع إضافات معلنة: provenance وlog وrecheck وplacements وfeatures.
-import { frontSetbackFor, SETBACK_NEIGHBOUR, COVERAGE_MAX } from '../regulations-sa.mjs';
+import { frontSetbackFor, SETBACK_NEIGHBOUR, COVERAGE_MAX, REG_NOTE_AR } from '../regulations-sa.mjs';
 import { normalizeAr } from '../requirements.mjs';
 
 export const BRIEF_VERSION = 'sharaa-2.0';
@@ -79,6 +79,7 @@ export const ENGINE_SUPPORT = Object.freeze({
   'pref.womenSeparate': { status: 'partial', ar: 'فصل مجلس النساء: تحقق بعد التوليد فقط', ev: 'rules.mjs:625' },
   'pref.noCorridors': { status: 'partial', ar: 'أقل ما يمكن من الممرات: تحقق بعد التوليد فقط', ev: 'rules.mjs:622' },
   'pref.parking': { status: 'partial', ar: 'المواقف: العدد نظامي ولا يتحكم فيه العميل', ev: 'site-parking.mjs' },
+  'pref.avoids': { status: 'partial', ar: 'ما يتجنبه العميل: يُستعمل في ترتيب البدائل (بصمة التصميم) لا في التوليد', ev: 'home-flow.mjs:242; client-brief.mjs' },
   'pref.privacy': { status: 'unsupported', ar: 'درجة الخصوصية العامة', ev: 'لا مستهلك' },
   'pref.naturalLight': { status: 'unsupported', ar: 'توجيه الإضاءة الطبيعية والإطلالة', ev: 'client-brief.mjs:34' },
   'pref.budget': { status: 'unsupported', ar: 'الميزانية ومستوى التشطيب', ev: 'لا حقل' },
@@ -237,6 +238,14 @@ export const countOf = (brief, id) => spaceOf(brief, id)?.count ?? null;
 export function decide(brief, ref, { priority, confirm = true, originalText } = {}) {
   return mutate(brief, d => {
     const [kind, ...rest] = String(ref).split(':'), id = rest.join(':');
+    if (kind === 'feature' || kind === 'field') {
+      const path = kind === 'feature' ? 'preferences.features.' + id : id, pm = d.provenance[path]; if (!pm) throw Error('حقل غير موجود: ' + ref);
+      if (pm.verification === 'unsupported') return;
+      (pm.history ||= []).push({ source: pm.source, priority: pm.priority });
+      if (priority) pm.priority = priority; if (confirm) { pm.verification = 'confirmed'; pm.source = 'client_confirmed'; }
+      d.decisions.push({ id: 'd' + (d.decisions.length + 1), description: `قرار العميل: «${path}» ${priority ? ({ mandatory: 'شرط لازم', preferred: 'تفضيل', flexible: 'قابل للتنازل' })[priority] : 'مؤكد'}`, status: 'confirmed' });
+      pushLog(d, { op: 'decided', ref, source: 'client_confirmed', originalText }); return;
+    }
     const list = kind === 'space' ? d.spaces : kind === 'relation' ? d.relations : kind === 'placement' ? d.placements : null;
     const it = list?.find(x => x.id === id); if (!it) throw Error('بند غير موجود: ' + ref);
     if (it.verification === 'unsupported') { pushLog(d, { op: 'decide_unsupported_ignored', ref }); return; }
@@ -258,6 +267,18 @@ function labelOf(d, kind, it) {
 export const SIDE_AR = Object.freeze({ front: 'الأمام (الشارع)', back: 'الخلف', n: 'الشمال', s: 'الجنوب', e: 'الشرق', w: 'الغرب', left: 'يسار الداخل', right: 'يمين الداخل', center: 'الوسط' });
 export const describeRelation = r => `${nameOf(r.from)} ${({ near: 'قريب من', direct_access: 'بباب مباشر على', separate: r.detail === 'far' ? 'بعيد عن' : 'غير ملاصق لـ', avoid_visibility: 'لا ينكشف على', same_floor: 'في الدور نفسه مع', different_floor: 'في دور مختلف عن' })[r.relation]} ${nameOf(r.to)}`;
 export const describePlacement = p => `${nameOf(p.space)} ${p.mode === 'avoid' ? 'لا يطل على' : 'في'} ${SIDE_AR[p.side] || p.side}`;
+
+/** يسحب العميل بندًا: علاقة/جهة تُعطَّل وتبقى محفوظة بنصها، وميزة تُحذف، ومقاس/دور فراغ يُزال. لا يحذف الإجابات الأخرى. */
+export function dropItem(brief, ref, { originalText } = {}) {
+  return mutate(brief, d => {
+    const [kind, ...rest] = String(ref).split(':'), id = rest.join(':');
+    if (kind === 'relation' || kind === 'placement') { const it = (kind === 'relation' ? d.relations : d.placements).find(x => x.id === id); if (it) { it.resolvedOut = true; (it.history ||= []).push({ priority: it.priority, source: it.source, ...(it.originalText ? { originalText: it.originalText } : {}) }); } }
+    else if (kind === 'feature') { delete d.preferences.features[id]; delete d.provenance['preferences.features.' + id]; }
+    else if (kind === 'space') { const s = d.spaces.find(x => x.id === id.split('#')[0]); if (s) { if (id.endsWith('#dims')) { delete s.minClearWidthM; delete s.minClearDepthM; delete s.dimTolerance; if (s.attr) delete s.attr.dims; } else if (id.endsWith('#floor')) { s.floorPreference = null; if (s.attr) delete s.attr.floor; } } }
+    d.decisions.push({ id: 'd' + (d.decisions.length + 1), description: `سحب العميل بندًا: ${ref}`, status: 'confirmed' });
+    pushLog(d, { op: 'dropped', ref, source: 'client_answer', originalText });
+  });
+}
 
 // ------------------------------------------------------------------------------------------ العلاقات والجهات
 /** «قريب» ≠ «باب مباشر» ≠ «ملاصق»: كل علاقة تحفظ نوعها كما قاله العميل ولا يُحوَّل نوع إلى آخر. */
@@ -340,6 +361,14 @@ export function deriveConflicts(d) {
   for (const s of d.spaces || []) if (s.count > 0 && s.floorPreference === 1 && floors === 1)
     add({ id: `c:floor:${s.id}`, type: 'single-floor-two-floor-features', reason: `«${nameOf(s.type)}» مطلوب في الدور العلوي وأرضك المختارة بدور واحد.`, affectedRequirements: ['space:' + s.id, 'land.floors'], mandatory: s.priority === 'mandatory',
       options: [{ id: 'ground:' + s.id, ar: `ضع «${nameOf(s.type)}» في الدور الأرضي` }, { id: 'edit_land', ar: 'عدّل الأرض إلى دورين (من مرحلة الأرض)', needsLandStep: true }] });
+  // طلب يخالف اشتراطًا نظاميًا متحققًا (المستوى أ في regulations-sa): ليست استحالة هندسية ولا فشل بحث؛ لا يُنفَّذ ولا يُتنازل عنه تلقائيًا
+  const Fx = d.preferences?.features || {}, regNote = ' (اشتراط نظامي متحقق؛ ' + REG_NOTE_AR + ')';
+  if (Number(Fx.requestedCoveragePct) > COVERAGE_MAX.value) add({ id: 'c:reg:coverage', type: 'regulatory-violation', regulation: COVERAGE_MAX.item, reason: `طلبك نسبة بناء ${Fx.requestedCoveragePct}٪ يخالف الحد النظامي: لا تزيد نسبة البناء في الدور الأرضي عن ${COVERAGE_MAX.value}٪ من مساحة الأرض${regNote}.`, affectedRequirements: ['preferences.features.requestedCoveragePct'], mandatory: true, options: [{ id: 'follow_regulation', ar: `التزم بالحد النظامي (${COVERAGE_MAX.value}٪)` }] });
+  const rs = Fx.requestedSetback;
+  if (rs && Number.isFinite(rs.m)) {
+    const front = frontSetbackFor(d.land?.engineLand?.streetWidth), need = rs.side === 'front' ? (front.known ? front.value : 3) : SETBACK_NEIGHBOUR.value;
+    if (rs.m < need) add({ id: 'c:reg:setback', type: 'regulatory-violation', regulation: rs.side === 'front' ? 'setback.front' : SETBACK_NEIGHBOUR.item, reason: `طلبك ارتدادًا ${rs.m} م ${rs.side === 'front' ? 'أماميًا' : rs.side === 'neighbour' ? 'عن الجار' : ''} يخالف الحد النظامي: لا يقل الارتداد ${rs.side === 'front' ? 'الأمامي' : 'عن الجار'} عن ${need} م${regNote}.`, affectedRequirements: ['preferences.features.requestedSetback'], mandatory: true, options: [{ id: 'follow_regulation', ar: `التزم بالحد النظامي (${need} م)` }] });
+  }
   const said = d.preferences?.features?.floorsSaid;
   if (said && said !== floors) add({ id: 'c:floors', type: 'floors-mismatch', reason: `بيانات الأرض ${floors === 2 ? 'دورين' : 'دور واحد'} وكلامك يقول ${said === 2 ? 'دورين' : 'دور واحد'}.`, affectedRequirements: ['land.floors', 'preferences.features.floorsSaid'], mandatory: true,
     options: [{ id: 'follow_land', ar: `اتبع بيانات الأرض (${floors === 2 ? 'دورين' : 'دور واحد'})` }, { id: 'edit_land', ar: 'عدّل عدد الأدوار من مرحلة الأرض', needsLandStep: true }] });
@@ -354,7 +383,8 @@ export function resolveConflict(brief, conflictId, optionId, { originalText } = 
     const [kind, ...rest] = optionId.split(':'), id = rest.join(':');
     if (kind === 'keep') {
       for (const ref of c.affectedRequirements) { const [k, i] = [ref.split(':')[0], ref.split(':').slice(1).join(':')]; if (i === id) continue; const list = k === 'relation' ? d.relations : d.placements; const idx = list.findIndex(x => x.id === i); if (idx >= 0) { list[idx].resolvedOut = true; } }
-    } else if (kind === 'follow_land') { delete d.preferences.features.floorsSaid; delete d.provenance['preferences.features.floorsSaid']; }
+    } else if (kind === 'follow_regulation') { for (const k of ['requestedCoveragePct', 'requestedSetback']) if (c.affectedRequirements.includes('preferences.features.' + k)) { delete d.preferences.features[k]; delete d.provenance['preferences.features.' + k]; } }
+    else if (kind === 'follow_land') { delete d.preferences.features.floorsSaid; delete d.provenance['preferences.features.floorsSaid']; }
     else if (kind === 'ground') { const s = d.spaces.find(x => x.id === id); if (s) { (s.history ||= []).push({ floorPreference: s.floorPreference, source: s.source }); s.floorPreference = 0; s.source = 'client_confirmed'; s.verification = 'confirmed'; } }
     d.decisions.push({ id: 'd' + (d.decisions.length + 1), description: `حسم تعارض: ${opt.ar}`, status: 'confirmed', conflictId });
     pushLog(d, { op: 'conflict_resolved', conflictId, optionId, source: 'client_confirmed', originalText });
@@ -383,10 +413,10 @@ export function priorityOfRule(r, clause = '') {
  * يدمج ناتج extractRequirements(text) في الملف بمصدره (حديث حر ← needs_confirmation). لا يُنشئ إلزامًا مؤكدًا من الاستخراج.
  * source: 'client_free_text' (الافتراضي) أو 'ai_inference' لناتج الذكاء. يعيد { brief, unsupported[], unclear[], added[] }.
  */
-export function applyExtraction(brief, req, text, { source = 'client_free_text' } = {}) {
+export function applyExtraction(brief, req, text, { source = 'client_free_text', originalText = null } = {}) {
   let b = brief; const added = [], unsupported = [...(req.unsupported || [])];
-  const quote = q => (q && String(q).trim()) || String(text || '').slice(0, 200);
-  const sp = (type, count, extra = {}) => { b = upsertSpace(b, { type, count, source, priority: extra.priority || 'preferred', originalText: extra.originalText || String(text).slice(0, 200), ...extra }); added.push('space:' + type); };
+  const quote = q => originalText || (q && String(q).trim()) || String(text || '').slice(0, 200);
+  const sp = (type, count, extra = {}) => { b = upsertSpace(b, { type, count, source, priority: extra.priority || 'preferred', originalText: extra.originalText || quote(null), ...extra }); added.push('space:' + type); };
   const c = req.counts || {};
   // أعداد: ما قاله العميل في كلامه عددًا صريحًا يُحسب إلزاميًا بعد التأكيد؛ ما لم يُذكر لا يُخمَّن
   const tc = req.textCounts || {};
@@ -422,15 +452,15 @@ export function applyExtraction(brief, req, text, { source = 'client_free_text' 
   }
   // تفضيلات منطقية
   const P = req.prefs || {};
-  const flag = (k, v = true) => { b = setField(b, 'features.' + k, v, { source, priority: 'preferred', originalText: String(text).slice(0, 200) }); added.push('feature:' + k); };
+  const flag = (k, v = true) => { b = setField(b, 'features.' + k, v, { source, priority: 'preferred', originalText: quote(null) }); added.push('feature:' + k); };
   for (const k of ['allEnsuite', 'sharedBaths', 'masterDressing', 'familyEntrance', 'guestEntrance', 'womenSeparate', 'bathsOffHall', 'noCorridors', 'elderlyRoom']) if (P[k]) flag(k);
   if (P.glazing) flag('glazing', P.glazing);
-  if (P.openKitchen === true) { b = setField(b, 'preferences.kitchenStyle', 'open', { source, priority: 'preferred', originalText: String(text).slice(0, 200) }); }
-  else if (P.openKitchen === false) { b = setField(b, 'preferences.kitchenStyle', 'closed', { source, priority: 'preferred', originalText: String(text).slice(0, 200) }); }
-  if (P.kitchenOpenHall) b = setField(b, 'preferences.kitchenStyle', 'open_to_hall', { source, priority: 'preferred', originalText: String(text).slice(0, 200) });
-  if (P.parking) b = setField(b, 'preferences.parkingCount', 1, { source, priority: 'flexible', originalText: String(text).slice(0, 200) });
-  if (P.floors) { /* عدد الأدوار من الأرض؛ كلام العميل المخالف يظهر تعارضًا في المراجعة لا تغييرًا للأرض */ b = setField(b, 'features.floorsSaid', P.floors, { source, priority: 'preferred', originalText: String(text).slice(0, 200) }); }
-  if (req.tweaks && Object.keys(req.tweaks).length) b = setField(b, 'features.tweaks', req.tweaks, { source, priority: 'flexible', originalText: String(text).slice(0, 200) });
+  if (P.openKitchen === true) { b = setField(b, 'preferences.kitchenStyle', 'open', { source, priority: 'preferred', originalText: quote(null) }); }
+  else if (P.openKitchen === false) { b = setField(b, 'preferences.kitchenStyle', 'closed', { source, priority: 'preferred', originalText: quote(null) }); }
+  if (P.kitchenOpenHall) b = setField(b, 'preferences.kitchenStyle', 'open_to_hall', { source, priority: 'preferred', originalText: quote(null) });
+  if (P.parking) b = setField(b, 'preferences.parkingCount', 1, { source, priority: 'flexible', originalText: quote(null) });
+  if (P.floors) { /* عدد الأدوار من الأرض؛ كلام العميل المخالف يظهر تعارضًا في المراجعة لا تغييرًا للأرض */ b = setField(b, 'features.floorsSaid', P.floors, { source, priority: 'preferred', originalText: quote(null) }); }
+  if (req.tweaks && Object.keys(req.tweaks).length) b = setField(b, 'features.tweaks', req.tweaks, { source, priority: 'flexible', originalText: quote(null) });
   if (req.site?.irregular) unsupported.push(`شكل الأرض (${req.site.shapeAr}): المحرك يقبل أرضًا مستطيلة فقط`);
   return { brief: b, unsupported, unclear: req.unclear || [], added };
 }
