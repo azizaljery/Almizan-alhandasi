@@ -74,7 +74,7 @@ export function presentationStatus(design, request = {}) {
   const mand = R14_OFF.has('r19mand') ? [] : r16.filter(g => MANDATORY_R16.includes(g.id));
   for (const g of mand) hidden.push(`شرط أساسي غير متحقق — ${g.ar}: ${g.reasons_ar.join('؛ ')} (${MAND_TIER_AR})`);
   // (02c، قرار المالك 2026-10-26 ثالثًا) بوابة إلزامية: حمام كامل بلا تجهيز استحمام صالح (فحص هندسي: التقاطع ومسقط الوصول وفتح الباب والعرض الصافي) يُمنع قبوله
-  let showerFails = []; try { showerFails = R14_OFF.has('r21shower') ? [] : showerGate(doc, model).failing; } catch { showerFails = []; }
+  let showerFails = []; try { showerFails = (R14_OFF.has('r21shower') || rq?.skipShower) ? [] : showerGate(doc, model).failing; } catch { showerFails = []; }
   for (const b of showerFails) hidden.push(`شرط أساسي غير متحقق — حمام «${b.room}» بلا تجهيز استحمام صالح للاستخدام: ${b.reasons.join('؛ ')} (${MAND_TIER_AR})`);
   // (الجولة 21 — 02b، قرار المالك: «لا محجوب بحقول أسباب فارغة») سبب مُهيكل لكل حجب، بالترتيب نفسه لـ hidden_ar: المرشح، والمرحلة، والقاعدة
   // المسؤولة، والمقيس والحد (متى انطبقا)، ومصدر الشرط، ونص العميل. يُبنى من البنود نفسها التي حجبت، لا من تفسير مفترض.

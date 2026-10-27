@@ -50,7 +50,7 @@ test('معايرة حالة العرض: عيوب جوهرية محددة، وا�
   const C6 = CASES.find(c => c.id === 'C6');
   // C6-alt1 بعد-14: دورة مياه يومية ملاحظة لا عيب؛ (الجولة السادسة عشرة) لكن نافذة غرفة نوم 2 فوق المواقف (أثبتها المراجع r15) ⇐
   // يحتاج تعديلات بهذا العيب وحده، والملاحظة تبقى ملاحظة
-  const a = presentationStatus({ doc: EV14('C6', 'alt-1.json'), ledger: [], review: { passed: true } }, { text: C6.text });
+  const a = presentationStatus({ doc: EV14('C6', 'alt-1.json'), ledger: [], review: { passed: true } }, { text: C6.text, skipShower: true }); // (الجولة 21) مستند محفوظ قبل بوابة الدش: لا نحكم عليه بها هنا (تغطيها stage2-r21-rework)
   // (الجولة العشرون) ولا دورة مياه للعائلة من الصالة أو المدخل (FAMILY_WC، عيب معماري أضيف بعد r19 — أشد من المراجع، موثق في
   // docs/research/system-vs-reviewer-r15-r19.md القسم 3)
   assert.equal(a.status, 'needs-edits'); assert.ok(a.notes_ar.length >= 1); assert.deepEqual(a.major, ['WINDOW_PARKING', 'FAMILY_WC']);

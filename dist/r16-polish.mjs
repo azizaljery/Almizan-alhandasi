@@ -74,7 +74,7 @@ function placeScreenFor(doc, G, opD, side, bays, room, notes, screens) {
           const snap = JSON.stringify(doc), before = acceptanceSnapshot(doc), was = new Set(doc.walls.map(w => w.id));
           let ok = false;
           try {
-            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: sc.a, b: sc.b, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
+            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: { x: r2(sc.a.x), y: r2(sc.a.y) }, b: { x: r2(sc.b.x), y: r2(sc.b.y) }, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
             const G2 = analyzeDoc(doc).levels[0], op2 = G2.openings.find(q => q.id === opD.id), s2 = op2?.sides.find(s => s.room.name === room.name && s.other === 'outside');
             const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
             const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === opD.o.id && !w.screened);

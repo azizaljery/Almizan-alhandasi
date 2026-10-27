@@ -57,6 +57,8 @@ test('المولّد (C1، C9): غرفة الملابس المطلوبة ≥ 4.5
   for (const d of o1.designs) { const dr = analyzeDoc(d.doc).levels[0].rooms.find(r => /^غرفة (?:ال)?ملابس$/.test(r.name)); assert.ok(dr, d.pat); assert.ok(dr.area >= 4.4 || d.notes.some(n => /غرفة الملابس المطلوبة/.test(n)), `${d.pat}: ${dr.area}`); }
   const c9 = caseReq('C9'), o9 = generateVillaDesigns({ land: c9.land, counts: c9.r.counts, requirements: c9.r, keep: 4 });
   const gb = o9.designs.find(d => d.pat.startsWith('guestblock')); assert.ok(gb, 'جناح الضيافة معروض');
-  assert.equal(gb.presentation.status, 'ready');
+  // (الجولة 21) حكم الخصوصية لكل فراغ بدرجته: نافذة الصالة (درجة A) مكشوفة من المواقف ولم يتسع ساتر ⇒ «يحتاج تعديلات» بهذا السبب وحده، لا محجوب ولا بند إلزامي
+  assert.ok(['ready', 'needs-edits'].includes(gb.presentation.status)); assert.deepEqual(gb.presentation.mandatory, []);
+  if (gb.presentation.status !== 'ready') assert.ok(gb.presentation.edits_ar.every(e => /خصوصية «الصالة»/.test(e)), gb.presentation.edits_ar.join('|'));
   assert.ok(!measureR16(gb.doc).some(g => g.id === 'GUEST_DINING' && g.applicable && !g.pass));
 });

@@ -11,6 +11,7 @@ import { pointInPolygon } from '../dist/draw/geom.mjs';
 import { measureR16, MANDATORY_R16 } from '../dist/privacy-defects.mjs';
 import { R20_MANDATORY, R20_MAJOR } from '../dist/r20-checks.mjs';
 import { presentationStatus } from '../dist/presentation-status.mjs';
+import { planTests } from '../dist/plan-states.mjs';
 import { extractRequirements, applyLiteralReadings, DIM_TOL } from '../dist/requirements.mjs';
 import { verifyRequest } from '../dist/rules.mjs';
 import { CASES } from '../scripts/acceptance-cases.mjs';
@@ -34,9 +35,9 @@ test('اتساق الحكم في كل الحالات: لا بديل معروض (
       if (mand.length || client.length || d.review?.passed === false) assert.equal(d.presentation.status, 'hidden', `${C.id}-${i + 1}: ${[...mand.map(g => g.id), ...client.map(x => x.text)].join('، ')}`);
       // (الجولة العشرون) قياسات r20 (بعد المراجعة العمياء r19) تُعيد الحكم على أدلة r19 المحفوظة: الفرق مسموح فقط إن كان كله من معرفات r20
       // (FAMILY_WC، HALL_LT_MAJLIS، HALL_DAYLIGHT عيوبًا، وMAJLIS_ISOLATED، COURT_OVERLOOK إلزاميتين) — أي فرق آخر يرسب كما كان
-      if (st.status !== d.presentation.status) {
-        const R20 = new Set([...R20_MANDATORY, ...R20_MAJOR]), newMand = st.mandatory.filter(x => !R20.has(x)), newMajor = st.major.filter(x => !R20.has(x));
-        const explained = d.presentation.status === 'ready' ? (st.status === 'needs-edits' ? !st.mandatory.length && st.major.length > 0 && !newMajor.length : st.status === 'hidden' && st.mandatory.length > 0 && !newMand.length && !newMajor.length)
+      if (st.status !== d.presentation.status) { // (الجولة 21) BATH_SHOWER: بوابة الدش الإلزامية الجديدة تعيد الحكم على أدلة محفوظة سابقة لها — فرق مفسَّر بمعرّف واحد معلن
+        const R20 = new Set([...R20_MANDATORY, ...R20_MAJOR, 'BATH_SHOWER']), newMand = st.mandatory.filter(x => !R20.has(x)), newMajor = st.major.filter(x => !R20.has(x));
+        const explained = d.presentation.status === 'ready' ? (st.status === 'needs-edits' ? !st.mandatory.length && (st.major.length > 0 || planTests(doc).failing_ar.length > 0) && !newMajor.length /* (الجولة 21) اختبارات الخصوصية/الحركة لكل فراغ عيب معماري جديد يفسّر الفرق */ : st.status === 'hidden' && st.mandatory.length > 0 && !newMand.length && !newMajor.length)
           : d.presentation.status === 'needs-edits' && st.status === 'hidden' && st.mandatory.length > 0 && !newMand.length;
         assert.ok(explained, `${C.id}-${i + 1}: الحالة المحفوظة ${d.presentation.status} والمقيسة ${st.status} (${[...st.mandatory, ...st.major]}) — فرق لا تفسره قياسات r20`);
       }
@@ -66,7 +67,7 @@ test('قياسا الدور العلوي على C7-1 (after-18): تراكب ال
   assert.ok(!one.some(g => ['WET_STACK', 'MASTER_STAIR_DOOR'].includes(g.id)));
   // الحالة تفصل: العيب المعماري في edits_ar، والمراجعة المتخصصة في specialist_ar
   const st = presentationStatus({ doc: ev('after-18', 'C7', 'alt-1.json'), ledger: [] }, rq);
-  assert.ok(st.specialist_ar.length >= 1); assert.equal(st.categories.mandatory, 0);
+  assert.ok(st.specialist_ar.length >= 1); assert.deepEqual(st.mandatory.filter(x => x !== 'BATH_SHOWER'), []); // (الجولة 21) بوابة الدش الجديدة لا شأن لها بهذا القياس
 });
 
 test('C7 (after-19): باب الرئيسية لا يُفتح على فراغ الدرج المفتوح', { skip: !have }, () => {
