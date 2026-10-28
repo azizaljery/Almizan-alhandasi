@@ -78,6 +78,8 @@ export const ENGINE_SUPPORT = Object.freeze({
   'pref.guestEntrance': { status: 'partial', ar: 'مدخل مستقل للضيوف: يتحقق منه التحقق بعد التوليد، والمجلس على الشارع أو جانبه', ev: 'rules.mjs:645; villa-layout-v3.mjs:71' },
   'pref.womenSeparate': { status: 'partial', ar: 'فصل مجلس النساء: تحقق بعد التوليد فقط', ev: 'rules.mjs:625' },
   'pref.noCorridors': { status: 'partial', ar: 'أقل ما يمكن من الممرات: تحقق بعد التوليد فقط', ev: 'rules.mjs:622' },
+  'pref.parkingParallel': { status: 'partial', ar: 'قبول موقف موازٍ للشارع: مفتاح نصي في المحرك (عبارة «موقف موازي» في requirements.text)، لا خيار مكتوب النوع', ev: 'villa-layout-v2.mjs:3856' },
+  'pref.guestLinkSeparate': { status: 'partial', ar: 'فصل المجلس عن الطعام (إعفاء وصلة الضيافة): مفتاح نصي في المحرك (عبارة «مجلس منفصل عن الطعام»)، لا خيار مكتوب النوع', ev: 'villa-layout-v2.mjs:229' },
   'pref.parking': { status: 'partial', ar: 'المواقف: العدد نظامي ولا يتحكم فيه العميل', ev: 'site-parking.mjs' },
   'pref.avoids': { status: 'partial', ar: 'ما يتجنبه العميل: يُستعمل في ترتيب البدائل (بصمة التصميم) لا في التوليد', ev: 'home-flow.mjs:242; client-brief.mjs' },
   'pref.privacy': { status: 'unsupported', ar: 'درجة الخصوصية العامة', ev: 'لا مستهلك' },

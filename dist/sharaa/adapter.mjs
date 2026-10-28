@@ -30,7 +30,7 @@ export function toEngineInput(brief) {
   const blockers = [];
   const S = id => brief.spaces.find(s => s.id === id && s.count !== undefined) || null;
   const n = id => (S(id)?.count > 0 ? S(id).count : 0);
-  const approve = k => { if (!report.assumptions.some(a => a.id === ENGINE_MEASURES[k].id)) report.assumptions.push({ ...ENGINE_MEASURES[k], source: 'design_default', needsApproval: true }); };
+  const approve = k => { if (!report.assumptions.some(a => a.id === ENGINE_MEASURES[k].id)) report.assumptions.push({ ...ENGINE_MEASURES[k], source: 'design_default', verification: 'needs_confirmation', needsApproval: true }); };
 
   // ---- الأعداد
   const counts = { bedrooms: Math.max(n('bedroom'), S('master')?.count > 0 || S('elderly')?.count > 0 ? 1 : 0), majlis: 0, baths: n('bath'), kitchens: n('kitchen'), halls: n('living'), dining: n('dining') + (n('guest_dining') > 0 ? n('guest_dining') : 0) };
@@ -73,6 +73,14 @@ export function toEngineInput(brief) {
   }
   if (F.elderlyRoom || n('elderly') > 0) { prefs.elderlyRoom = true; report.sent.push({ id: 'feature:elderlyRoom', as: 'pref', text_ar: ENGINE_SUPPORT['pref.elderlyRoom'].ar }); }
   if (F.glazing) { prefs.glazing = F.glazing; report.sent.push({ id: 'feature:glazing', as: 'pref', text_ar: ENGINE_SUPPORT['pref.glazing'].ar }); }
+  // مفاتيح المحرك النصية (ليست خيارات مكتوبة النوع): لا تُرسل إلا بتأكيد العميل لأنها تُعفي بوابة في المحرك.
+  const hooks = [];
+  for (const [k, phrase, sid] of [['parkingParallel', 'موقف موازي', 'pref.parkingParallel'], ['guestLinkSeparate', 'مجلس منفصل عن الطعام', 'pref.guestLinkSeparate']]) if (F[k]) {
+    const meta = brief.provenance['preferences.features.' + k];
+    if (meta?.verification === 'confirmed') { hooks.push(phrase); report.sent.push({ id: 'feature:' + k, as: 'engine-text-hook', text_ar: ENGINE_SUPPORT[sid].ar }); report.limited.push({ id: 'feature:' + k, text_ar: ENGINE_SUPPORT[sid].ar, ev: ENGINE_SUPPORT[sid].ev }); }
+    else report.withheld.push({ id: 'feature:' + k, text_ar: `«${ENGINE_SUPPORT[sid].ar}» لم يؤكده العميل فلم يُرسل.` });
+  }
+  const hookText = hooks.join('، ');
   const ks = brief.preferences.kitchenStyle;
   if (ks === 'open') prefs.openKitchen = true; else if (ks === 'closed') prefs.openKitchen = false; else if (ks === 'open_to_hall') prefs.kitchenOpenHall = true;
   if (ks) report.sent.push({ id: 'pref:kitchenStyle', as: 'pref', text_ar: `المطبخ ${{ open: 'مفتوح على الطعام', closed: 'مغلق', open_to_hall: 'مفتوح على الصالة' }[ks]}` });
@@ -133,8 +141,8 @@ export function toEngineInput(brief) {
   const avoids = (hh.avoids || []).filter(a => AVOIDS.includes(a));
   const discovery = normalizeDiscovery({ likes: [], rejects: [], avoids, life });
   const understood = report.sent.map(x => x.text_ar);
-  const requirements = { counts: { ...counts }, extras, prefs, areas, dims, rules, tweaks: F.tweaks || {}, understood, unsupported: report.unsupported.map(u => u.text_ar), unclear: [], textCounts: {}, givenCounts: { ...counts }, absent: [...new Set(absent)], orphans: [] };
-  return { land: clone(L), counts, rooms: defaultRooms(counts), discovery, idea: '', requirements, report, blockers };
+  const requirements = { text: hookText, idea: hookText, counts: { ...counts }, extras, prefs, areas, dims, rules, tweaks: F.tweaks || {}, understood, unsupported: report.unsupported.map(u => u.text_ar), unclear: [], textCounts: {}, givenCounts: { ...counts }, absent: [...new Set(absent)], orphans: [] };
+  return { land: clone(L), counts, rooms: defaultRooms(counts), discovery, idea: hookText, requirements, report, blockers };
 }
 const clone = o => JSON.parse(JSON.stringify(o));
 

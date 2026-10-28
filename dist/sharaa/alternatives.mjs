@@ -43,7 +43,7 @@ function catalogue(b) {
   if (ct(b, 'bath') > 1) L.push({ id: 'fewer_baths', label: `تقليل دورات المياه إلى ${ct(b, 'bath') - 1}`, changes_ar: `دورات المياه ${ct(b, 'bath')} ← ${ct(b, 'bath') - 1}.`, loses_ar: 'دورة مياه أقل (قد تُشارَك بين الغرف).', touches: ['space:bath'], apply: d => B.upsertSpace(d, { type: 'bath', count: ct(d, 'bath') - 1, ...C, priority: 'mandatory', originalText: 'قبول دورة مياه أقل' }) });
   if (ct(b, 'living') > 0) L.push({ id: 'smaller_hall', label: 'تقليل مساحة الصالة نحو 20٪', changes_ar: 'الصالة 80٪ من مقاسها التصميمي.', loses_ar: 'صالة أضيق.', touches: B.spaceOf(b, 'living')?.minClearWidthM ? ['space:living'] : [], apply: d => B.setField(d, 'features.tweaks', { ...(d.preferences.features.tweaks || {}), hallScale: .8 }, { ...C, priority: 'flexible', originalText: 'قبول صالة أصغر' }) });
   if (ct(b, 'female_majlis') > 0) L.push({ id: 'one_majlis', label: 'الاكتفاء بمجلس واحد', changes_ar: 'حذف مجلس النساء.', loses_ar: 'لا مجلس مستقل للنساء.', touches: ['space:female_majlis'], apply: d => B.upsertSpace(d, { type: 'female_majlis', count: 0, ...C, priority: 'mandatory', originalText: 'قبول مجلس واحد' }) });
-  else if (ct(b, 'male_majlis') > 0) L.push({ id: 'drop_majlis', label: 'حذف المجلس (الاستقبال في الصالة)', changes_ar: 'المجالس 1 ← 0.', loses_ar: 'لا مجلس منفصل للضيوف.', touches: ['space:male_majlis'], apply: d => B.upsertSpace(d, { type: 'male_majlis', count: 0, ...C, priority: 'mandatory', originalText: 'قبول بلا مجلس' }) });
+  else if (ct(b, 'male_majlis') > 0) L.push({ id: 'drop_majlis', requiresConsent: true, recommended: false, confirmQ_ar: 'هل ترغب بالاستغناء عن المجلس مقابل حل الحجب؟', label: 'حذف المجلس (الاستقبال في الصالة)', changes_ar: 'المجالس 1 ← 0.', loses_ar: 'لا مجلس منفصل للضيوف.', touches: ['space:male_majlis'], apply: d => B.upsertSpace(d, { type: 'male_majlis', count: 0, ...C, priority: 'mandatory', originalText: 'قبول بلا مجلس' }) });
   if (ct(b, 'dining') > 0) L.push({ id: 'drop_dining', label: 'حذف غرفة الطعام المنفصلة', changes_ar: 'الطعام ← يُؤكل في الصالة.', loses_ar: 'لا غرفة طعام مستقلة.', touches: ['space:dining'], apply: d => B.upsertSpace(d, { type: 'dining', count: 0, ...C, priority: 'mandatory', originalText: 'قبول بلا غرفة طعام' }) });
   const extras = ['maid', 'driver', 'office', 'prayer', 'laundry', 'storage', 'guest_room'].filter(x => ct(b, x) > 0);
   if (extras.length) L.push({ id: 'drop_extras', label: 'حذف الفراغات الإضافية', changes_ar: 'حذف: ' + extras.map(B.nameOf).join('، ') + '.', loses_ar: 'لا ' + extras.map(B.nameOf).join(' ولا ') + '.', touches: extras.map(x => 'space:' + x), apply: d => extras.reduce((a, x) => B.upsertSpace(a, { type: x, count: 0, ...C, priority: 'mandatory', originalText: 'قبول بلا ' + B.nameOf(x) }), d) });
@@ -51,6 +51,8 @@ function catalogue(b) {
   else if (b.land.floors === 1) L.push({ id: 'to_upper', label: 'نقل غرف إلى الدور الأول', changes_ar: 'يلزم دوران.', loses_ar: 'أرضك المختارة بدور واحد: يتغير ذلك من مرحلة الأرض لا من شرعاء.', touches: [], needsLandStep: true, apply: null });
   if (B.fieldValue(b, 'preferences.parkingCount') > 0) L.push({ id: 'drop_parking_ask', label: 'إلغاء طلب المواقف', changes_ar: 'يُحذف طلب المواقف من ملفك.', loses_ar: 'المحرك قد يبقي افتراضه الخاص للمواقف؛ التحكم فيه غير مدعوم.', touches: [], apply: d => B.setField(d, 'preferences.parkingCount', 0, { ...C, priority: 'flexible', originalText: 'سحب طلب المواقف' }) });
   if (b.preferences.features.guestEntrance) L.push({ id: 'drop_guest_entrance', label: 'التخلي عن المدخل المستقل لمجلس الرجال', changes_ar: 'يدخل الضيوف من مدخل العائلة أو الجانب بحسب المحرك.', loses_ar: 'خصوصية أقل بين الضيوف والعائلة.', touches: b.provenance['preferences.features.guestEntrance']?.priority === 'mandatory' ? ['feature:guestEntrance'] : [], apply: d => B.dropItem(d, 'feature:guestEntrance') });
+  L.push({ id: 'accept_parallel_parking', hiddenOnly: 'parking', requiresConsent: true, label: 'قبول موقف موازٍ للشارع في الارتداد', changes_ar: 'يُسمح للميزان بموقف موازٍ للشارع بدل العمودي (5.5 م) حين لا يتسع العمودي، فتُرسل عبارة «موقف موازي» التي يقرؤها المحرك.', loses_ar: 'قد تقف السيارة أمام نافذة (خصوصية وإطلالة أقل)، ويبقى العدد نظاميًا لا يتحكم فيه العميل.', touches: [], apply: d => B.setField(d, 'features.parkingParallel', true, { source: 'client_confirmed', priority: 'preferred', originalText: 'قبول موقف موازٍ للشارع' }) });
+  if (ct(b, 'male_majlis') > 0) L.push({ id: 'majlis_separate_dining', hiddenOnly: 'door', requiresConsent: true, label: 'فصل المجلس عن غرفة الطعام (لا يلزم تلاصقهما)', changes_ar: 'يُعفى شرط وصلة الضيافة بين المجلس والطعام، فتُرسل عبارة «مجلس منفصل عن الطعام» التي يقرؤها المحرك.', loses_ar: 'قد لا يلامس الطعام المجلس بباب خدمة، فتُقدَّم الضيافة من مسار آخر.', touches: [], apply: d => B.setField(d, 'features.guestLinkSeparate', true, { source: 'client_confirmed', priority: 'preferred', originalText: 'فصل المجلس عن الطعام' }) });
   return L;
 }
 /** خيارات تخفيف بنود الملف الصلبة (إلزامي ← تفضيل): دائمًا تمس إلزاميًا، وتُوسم «ينجح بتجربة المحرك» إن ثبت بالبحث المضاد. */
@@ -75,23 +77,24 @@ export function buildAlternatives(brief, outcome) {
   let all = catalogue(brief).map(o => ({ ...o, group: 'auto', preConsented: waive.has(MAP[o.id]) }));
   // ALL_HIDDEN: ربط الأسباب بالمفاتيح التي يملكها العميل فقط؛ ما لا مفتاح له يُعلن «غير مدعوم»
   const info = [];
-  if (outcome.kind === OUTCOME.ALL_HIDDEN) {
-    const text = (outcome.reasons || []).join(' ');
-    if (/موقف/.test(text) && !(B.fieldValue(brief, 'preferences.parkingCount') > 0)) info.push({ id: 'parking-no-lever', label: 'سبب الحجب مواقف السيارات', changes_ar: 'المواقف افتراض داخلي للميزان وليس في طلبك.', loses_ar: 'لا مفتاح لتغييرها في هذا الإصدار (غير مدعوم) — يمكن تقليل المساحات لعلها تفسح الارتداد.' });
-    if (/باب داخلي|بلا باب/.test(text)) info.push({ id: 'door-no-lever', label: 'سبب الحجب باب داخلي للمجلس', changes_ar: 'ربط المجلس بباب داخلي بالبيت قرار تصميمي في المحرك.', loses_ar: 'لا مفتاح مباشر له في ملف الاحتياجات (غير مدعوم)؛ المتاح التخلي عن المدخل المستقل للمجلس إن كنت طلبته.' });
-  }
+  const text = outcome.kind === OUTCOME.ALL_HIDDEN ? (outcome.reasons || []).join(' ') : '';
+  const flags = { parking: /موقف/.test(text), door: /باب داخلي|بلا باب/.test(text) };
+  all = all.filter(o => !o.hiddenOnly || (outcome.kind === OUTCOME.ALL_HIDDEN && flags[o.hiddenOnly]));
+  if (flags.parking && brief.preferences.features.parkingParallel !== true) info.push({ id: 'parking-note', label: 'سبب الحجب مواقف السيارات', changes_ar: 'المحرك يضع الموقف الموازي أمام نافذة حين لا يتسع العمودي؛ لا خيار لتحديد مكانه.', loses_ar: 'المتاح فقط قبول الموقف الموازي (في قائمة الموافقة) أو تغيير الأرض.', touches: [], apply: null });
+  if (flags.door && brief.preferences.features.guestLinkSeparate !== true) info.push({ id: 'door-note', label: 'سبب الحجب باب داخلي للمجلس', changes_ar: 'المحرك لا يقبل مجلسًا لا يتصل بفراغ داخلي؛ لا مفتاح لباب داخلي مباشرة.', loses_ar: 'المتاح فقط فصل المجلس عن الطعام (في قائمة الموافقة) أو حذف المجلس.', touches: [], apply: null });
   const rank = o => (o.preConsented ? order.indexOf(MAP[o.id]) : 1000);
   all.sort((x, y) => rank(x) - rank(y));
   const auto = [], needs = [];
   for (const o of all) {
     if (o.needsLandStep) { info.push(o); continue; }
-    const touchesMand = o.touches.some(t => isMandatory(brief, t));
-    (touchesMand && !o.preConsented ? needs : auto).push({ ...o, group: touchesMand && !o.preConsented ? 'mandatory' : 'auto', touchesMandatory: touchesMand });
+    const touchesMand = o.touches.some(t => isMandatory(brief, t)) || !!o.requiresConsent, hold = touchesMand && !o.preConsented;
+    (hold ? needs : auto).push({ ...o, group: hold ? 'mandatory' : 'auto', touchesMandatory: touchesMand });
   }
-  if (outcome.kind === OUTCOME.ALL_HIDDEN && info.some(i => /no-lever/.test(i.id))) {
+  if (flags.parking || flags.door) {
     const cav = 'تنبيه: هذا الخيار لا يعالج سبب الحجب المذكور مباشرة، وقد لا يغيّر النتيجة (قيس على أرض 25×12.5 و30×12.5 فبقيت التصاميم محجوبة).';
-    for (const o of auto) if (!/majlis/.test(o.id)) o.caveat_ar = cav;
+    for (const o of auto) if (!/majlis|parallel/.test(o.id)) o.caveat_ar = cav;
   }
+  needs.sort((x, y) => (x.recommended === false) - (y.recommended === false));
   needs.push(...relaxOptions(brief, outcome).map(o => ({ ...o, touchesMandatory: true })));
   return { auto, needsConsent: needs, info };
 }
@@ -104,12 +107,13 @@ function isMandatory(b, ref) {
   return false;
 }
 /** ينفّذ خيارًا واحدًا بضغط العميل ويسجّل قرارًا بما يتغير وما يُفقد. consent مطلوب صراحة لخيارات المجموعة الإلزامية. */
-export function applyAlternative(brief, alts, optionId, { consent = false } = {}) {
+export function applyAlternative(brief, alts, optionId, { consent = false, confirmed = false } = {}) {
   const o = [...alts.auto, ...alts.needsConsent, ...alts.info].find(x => x.id === optionId);
   if (!o) throw Error('خيار غير موجود.');
   if (o.id === 'follow_regulation') { let b = brief; for (const c of brief.conflicts.filter(x => x.type === 'regulatory-violation')) b = B.resolveConflict(b, c.id, 'follow_regulation'); return b; }
   if (!o.apply) throw Error('هذا الخيار لا يُنفَّذ من هنا.');
   if (o.touchesMandatory && !o.preConsented && !consent) throw Error('الخيار يمس شرطًا إلزاميًا ويحتاج موافقتك الصريحة.');
+  if (o.confirmQ_ar && confirmed !== true) throw Error('يلزم جوابك بنعم على: ' + o.confirmQ_ar);
   let b = o.apply(brief);
   b = structuredClone(b); b.decisions.push({ id: 'd' + (b.decisions.length + 1), description: `قبل العميل: ${o.label} — يتغير: ${o.changes_ar} — يُفقد: ${o.loses_ar}`, status: 'confirmed', alternativeId: o.id }); b.log.push({ seq: b.log.length + 1, op: 'alternative_applied', id: o.id, source: 'client_confirmed' });
   return b;

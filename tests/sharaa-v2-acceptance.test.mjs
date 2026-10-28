@@ -126,3 +126,36 @@ test('14 طلب لاحق «أبعد الماستر عن الدرج» يعود إ
   assert.ok(f.brief.relations.some(x => x.relation === 'separate' && /master/.test(x.from + x.to)));
   assert.match(r.regeneration, /غير متحقق/);
 });
+
+// ---- قرارات المالك (الجولة الثانية)
+const hiddenCase = () => {
+  const f = flow({ entries: ['n'], streets: ['n'] }, 'guided'); f.answer('counts', { bedrooms: 3, majlis: 1, baths: 3, kitchens: 1, halls: 1, dining: 0 });
+  const oc = classifyOutcome({ alternatives: [], hidden: [{ reasons_ar: ['موقف موازٍ للشارع في ارتداد 3.13 م أمام نافذة «المجلس»', 'مجلس الرجال بلا باب داخلي إلى البيت'] }] }, f.brief);
+  return { f, oc, alts: buildAlternatives(f.brief, oc) };
+};
+test('15 الموقف الموازي وفصل المجلس عن الطعام: خياران بموافقة صريحة، ولا يُرسل مفتاح المحرك قبل الضغط', async () => {
+  const { f, alts } = hiddenCase();
+  assert.equal(f.engineInput().idea, '', 'قبل الضغط لا عبارة مفتاحية');
+  const ids = alts.needsConsent.map(o => o.id); assert.ok(ids.includes('accept_parallel_parking') && ids.includes('majlis_separate_dining'));
+  await assert.rejects(() => retryWith(f.brief, alts, 'accept_parallel_parking', async () => ({})), /موافقتك/);
+  let seen; const gen = async e => { seen = e; return { alternatives: [{ presentation: { status: 'ok' } }] }; };
+  let r = await retryWith(f.brief, alts, 'accept_parallel_parking', gen, { consent: true });
+  r = await retryWith(r.brief, buildAlternatives(r.brief, classifyOutcome({ alternatives: [], hidden: [{ reasons_ar: ['بلا باب داخلي'] }] }, r.brief)), 'majlis_separate_dining', gen, { consent: true });
+  assert.equal(seen.idea, 'موقف موازي، مجلس منفصل عن الطعام'); assert.equal(seen.requirements.text, seen.idea);
+  assert.ok(seen.report.limited.some(x => /مفتاح نصي/.test(x.text_ar)), 'يُعلن أنه مفتاح نصي لا خيار مكتوب');
+});
+test('16 حذف المجلس يُعرض بين الخيارات لا توصية، ولا يُنفَّذ إلا بجواب نعم على السؤال الصريح', async () => {
+  const { f, alts } = hiddenCase(); const o = alts.needsConsent.find(x => x.id === 'drop_majlis');
+  assert.ok(o && o.recommended === false); assert.equal(o.confirmQ_ar, 'هل ترغب بالاستغناء عن المجلس مقابل حل الحجب؟');
+  assert.equal(alts.needsConsent.findIndex(x => x.id === 'drop_majlis') >= alts.needsConsent.findIndex(x => x.id === 'accept_parallel_parking'), true);
+  await assert.rejects(() => retryWith(f.brief, alts, 'drop_majlis', async () => ({}), { consent: true }), /بنعم/);
+  const r = await retryWith(f.brief, alts, 'drop_majlis', async () => ({ alternatives: [{ presentation: { status: 'ok' } }] }), { consent: true, confirmed: true });
+  assert.equal(B.countOf(r.brief, 'male_majlis'), 0);
+});
+test('17 «قريب/بعيد»: افتراض معلن بحالة needs_confirmation من مقاييس المحرك، ولا تُسأل بالأمتار', () => {
+  const t = 'أبي المقلط قريب من المجلس'; const b = B.applyExtraction(B.createBrief({ land: mkLand() }), extractRequirements(t, { counts: {} }), t).brief;
+  const a = toEngineInput(b).report.assumptions.find(x => x.id === 'near-measure');
+  assert.ok(a && a.verification === 'needs_confirmation' && /0\.8/.test(a.text_ar));
+  const f = flow(); f.answer('free', t); assert.ok(f.profile().assumptions.some(x => x.ref === 'near-measure' && x.verification === 'needs_confirmation'));
+  assert.doesNotMatch(texts(f.log), /بالأمتار|كم متر/);
+});
