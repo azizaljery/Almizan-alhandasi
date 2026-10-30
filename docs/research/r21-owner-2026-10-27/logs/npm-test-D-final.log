@@ -1,0 +1,931 @@
+
+> test
+> node scripts/run-tests.mjs
+
+TAP version 13
+# Subtest: مفردات Claude هي مفردات الفهم المحلي نفسها (لا فراغ يفهمه أحدهما دون الآخر)
+ok 1 - مفردات Claude هي مفردات الفهم المحلي نفسها (لا فراغ يفهمه أحدهما دون الآخر)
+  ---
+  duration_ms: 1.435517
+  type: 'test'
+  ...
+# Subtest: التنقيح يُسقط ما خرج عن المفردات ولا يرفض الجواب كله
+ok 2 - التنقيح يُسقط ما خرج عن المفردات ولا يرفض الجواب كله
+  ---
+  duration_ms: 1.356074
+  type: 'test'
+  ...
+# Subtest: الدمج: المحلي يتقدم عند التعارض، وما فات المحلي يُضاف من Claude، و«لم أفهم» حكم Claude
+ok 3 - الدمج: المحلي يتقدم عند التعارض، وما فات المحلي يُضاف من Claude، و«لم أفهم» حكم Claude
+  ---
+  duration_ms: 83.318297
+  type: 'test'
+  ...
+# Subtest: الوكيل يرسل تعليمات requirements ويعيدها منقّحة (مزوّد محاكى)
+ok 4 - الوكيل يرسل تعليمات requirements ويعيدها منقّحة (مزوّد محاكى)
+  ---
+  duration_ms: 66.669239
+  type: 'test'
+  ...
+# Subtest: من محادثة شرعاء إلى المخطط: ما فهمه Claude يُنفَّذ ويظهر في السجل
+ok 5 - من محادثة شرعاء إلى المخطط: ما فهمه Claude يُنفَّذ ويظهر في السجل
+  ---
+  duration_ms: 2710.808138
+  type: 'test'
+  ...
+# Subtest: المعيار مجمّد بالأبعاد الأربعة والعتبات وبُعدين جوهريين
+ok 6 - المعيار مجمّد بالأبعاد الأربعة والعتبات وبُعدين جوهريين
+  ---
+  duration_ms: 1.798652
+  type: 'test'
+  ...
+# Subtest: الإزاحة والتكبير والتصغير والانعكاس للتنظيم نفسه: «نفسه» لا «مختلف» ولا «جزئي»
+ok 7 - الإزاحة والتكبير والتصغير والانعكاس للتنظيم نفسه: «نفسه» لا «مختلف» ولا «جزئي»
+  ---
+  duration_ms: 283.630343
+  type: 'test'
+  ...
+# Subtest: ضبط مقابل: تنظيمان مختلفان في الحالة نفسها (C9-1 جناح ضيافة أمامي، C9-4 حوشان) «مختلف معماريًا»
+ok 8 - ضبط مقابل: تنظيمان مختلفان في الحالة نفسها (C9-1 جناح ضيافة أمامي، C9-4 حوشان) «مختلف معماريًا»
+  ---
+  duration_ms: 11.785277
+  type: 'test'
+  ...
+# Subtest: الخوارزمية المجرية: تعيين بأقل كلفة
+ok 9 - الخوارزمية المجرية: تعيين بأقل كلفة
+  ---
+  duration_ms: 1.579911
+  type: 'test'
+  ...
+# Subtest: الأوزان معلنة ومجموعها 1، والعتبات مرتّبة
+ok 10 - الأوزان معلنة ومجموعها 1، والعتبات مرتّبة
+  ---
+  duration_ms: 0.31855
+  type: 'test'
+  ...
+# Subtest: المستند مع نفسه = 0، والمعكوس يمينًا ويسارًا ≈ 0 لكل بدائل after-4
+ok 11 - المستند مع نفسه = 0، والمعكوس يمينًا ويسارًا ≈ 0 لكل بدائل after-4
+  ---
+  duration_ms: 1203.322234
+  type: 'test'
+  ...
+# Subtest: تماثل ومدى: d(a,b) = d(b,a) و 0 ≤ d ≤ 1
+ok 12 - تماثل ومدى: d(a,b) = d(b,a) و 0 ≤ d ≤ 1
+  ---
+  duration_ms: 566.925731
+  type: 'test'
+  ...
+# Subtest: تبديل أسماء الغرف لا يغيّر شيئًا؛ حذف باب يغيّر التجاور والحركة
+ok 13 - تبديل أسماء الغرف لا يغيّر شيئًا؛ حذف باب يغيّر التجاور والحركة
+  ---
+  duration_ms: 13.514514
+  type: 'test'
+  ...
+# Subtest: معايرة بشرية: الأزواج «نفس التنظيم» شكلية، والأزواج المختلفة ليست شكلية
+ok 14 - معايرة بشرية: الأزواج «نفس التنظيم» شكلية، والأزواج المختلفة ليست شكلية
+  ---
+  duration_ms: 114.658254
+  type: 'test'
+  ...
+# Subtest: مصفوفة C10 (after-4): لا زوج شكلي بين البدائل الخمسة، وأقلها فوق عتبة الشكلي
+ok 15 - مصفوفة C10 (after-4): لا زوج شكلي بين البدائل الخمسة، وأقلها فوق عتبة الشكلي
+  ---
+  duration_ms: 129.740662
+  type: 'test'
+  ...
+# Subtest: التوقيع: عقدة الخارج موصولة بالمداخل، وتسلسلات الحركة لكل نطاق
+ok 16 - التوقيع: عقدة الخارج موصولة بالمداخل، وتسلسلات الحركة لكل نطاق
+  ---
+  duration_ms: 9.887454
+  type: 'test'
+  ...
+# Subtest: دليل المعايرة مكتوب ويتفق مع الأحكام البشرية
+ok 17 - دليل المعايرة مكتوب ويتفق مع الأحكام البشرية
+  ---
+  duration_ms: 15.078008
+  type: 'test'
+  ...
+# Subtest: wood floor has restrained grain contrast and deterministic neutral modulation
+ok 18 - wood floor has restrained grain contrast and deterministic neutral modulation
+  ---
+  duration_ms: 151.079936
+  type: 'test'
+  ...
+# Subtest: finish scale follows metre coordinates instead of changing with room size
+ok 19 - finish scale follows metre coordinates instead of changing with room size
+  ---
+  duration_ms: 0.73211
+  type: 'test'
+  ...
+# Subtest: geometry fingerprint ignores display names and canonicalizes rotations and reflections
+ok 20 - geometry fingerprint ignores display names and canonicalizes rotations and reflections
+  ---
+  duration_ms: 309.696435
+  type: 'test'
+  ...
+# Subtest: geometry fingerprint changes with room type, topology, or millimetre geometry
+ok 21 - geometry fingerprint changes with room type, topology, or millimetre geometry
+  ---
+  duration_ms: 110.115464
+  type: 'test'
+  ...
+# Subtest: canonical representation is deterministic and rounds coordinates to one millimetre
+ok 22 - canonical representation is deterministic and rounds coordinates to one millimetre
+  ---
+  duration_ms: 63.792439
+  type: 'test'
+  ...
+# Subtest: archive retry signature binds the URL, action, target, expected version, and full save payload
+ok 23 - archive retry signature binds the URL, action, target, expected version, and full save payload
+  ---
+  duration_ms: 1.18889
+  type: 'test'
+  ...
+# Subtest: lost-response retry reuses the same key only for the exact same save operation
+ok 24 - lost-response retry reuses the same key only for the exact same save operation
+  ---
+  duration_ms: 0.406391
+  type: 'test'
+  ...
+# Subtest: بلا رمز مهيأ وبلا OPEN_ASSISTANT: يُرفض (503) كما كان
+ok 25 - بلا رمز مهيأ وبلا OPEN_ASSISTANT: يُرفض (503) كما كان
+  ---
+  duration_ms: 34.878429
+  type: 'test'
+  ...
+# Subtest: رمز مهيأ: يبقى إلزاميًا حتى لو OPEN_ASSISTANT=1، والرمز الخاطئ 401
+ok 26 - رمز مهيأ: يبقى إلزاميًا حتى لو OPEN_ASSISTANT=1، والرمز الخاطئ 401
+  ---
+  duration_ms: 9.59467
+  type: 'test'
+  ...
+# Subtest: OPEN_ASSISTANT=1 بلا رمز: يتجاوز البوابة (لا 401 ولا 503 للحماية)
+ok 27 - OPEN_ASSISTANT=1 بلا رمز: يتجاوز البوابة (لا 401 ولا 503 للحماية)
+  ---
+  duration_ms: 3.096269
+  type: 'test'
+  ...
+# Subtest: النطاق غير المسموح يُرفض حتى في الوضع المفتوح
+ok 28 - النطاق غير المسموح يُرفض حتى في الوضع المفتوح
+  ---
+  duration_ms: 1.03743
+  type: 'test'
+  ...
+# Subtest: الحالة تعلن openAccess فقط عند عدم وجود رمز وتفعيل العلم ووجود المفتاح
+ok 29 - الحالة تعلن openAccess فقط عند عدم وجود رمز وتفعيل العلم ووجود المفتاح
+  ---
+  duration_ms: 1.843905
+  type: 'test'
+  ...
+# Subtest: العميل: بلا رمز وبلا openAccess يطلب الرمز دون أي اتصال؛ ومع openAccess يرسل بلا ترويسة رمز
+ok 30 - العميل: بلا رمز وبلا openAccess يطلب الرمز دون أي اتصال؛ ومع openAccess يرسل بلا ترويسة رمز
+  ---
+  duration_ms: 1.778487
+  type: 'test'
+  ...
+# Subtest: assistantOpen: أي فشل في الحالة = مغلق
+ok 31 - assistantOpen: أي فشل في الحالة = مغلق
+  ---
+  duration_ms: 0.325703
+  type: 'test'
+  ...
+# Subtest: same id, different content, ONE engine: every member rejected, independent of order
+ok 32 - same id, different content, ONE engine: every member rejected, independent of order
+  ---
+  duration_ms: 5.232164
+  type: 'test'
+  ...
+# Subtest: same id, different content, ONE engine, plus a unique candidate: only the unique one continues
+ok 33 - same id, different content, ONE engine, plus a unique candidate: only the unique one continues
+  ---
+  duration_ms: 35.883531
+  type: 'test'
+  ...
+# Subtest: same engine: identical twin + a different member under one id => all rejected (any order)
+ok 34 - same engine: identical twin + a different member under one id => all rejected (any order)
+  ---
+  duration_ms: 3.124119
+  type: 'test'
+  ...
+# Subtest: different engines, different content: every member rejected, independent of order (regression)
+ok 35 - different engines, different content: every member rejected, independent of order (regression)
+  ---
+  duration_ms: 9.255249
+  type: 'test'
+  ...
+# Subtest: three engines colliding on one id: all rejected; unique candidate survives alone (regression)
+ok 36 - three engines colliding on one id: all rejected; unique candidate survives alone (regression)
+  ---
+  duration_ms: 20.31618
+  type: 'test'
+  ...
+# Subtest: collision is detected BEFORE the confidence filter: a low-confidence peer cannot let the other member through
+ok 37 - collision is detected BEFORE the confidence filter: a low-confidence peer cannot let the other member through
+  ---
+  duration_ms: 0.750858
+  type: 'test'
+  ...
+# Subtest: a low-confidence candidate with a UNIQUE id is still rejected by confidence (behaviour preserved)
+ok 38 - a low-confidence candidate with a UNIQUE id is still rejected by confidence (behaviour preserved)
+  ---
+  duration_ms: 0.764824
+  type: 'test'
+  ...
+# Subtest: pre-existing policy kept: identical content under one id across engines is rejected as before
+ok 39 - pre-existing policy kept: identical content under one id across engines is rejected as before
+  ---
+  duration_ms: 0.582526
+  type: 'test'
+  ...
+# Subtest: pre-existing policy kept: identical twin inside ONE engine collapses to a single candidate as before
+ok 40 - pre-existing policy kept: identical twin inside ONE engine collapses to a single candidate as before
+  ---
+  duration_ms: 4.265767
+  type: 'test'
+  ...
+# Subtest: control: no collision keeps the previous behaviour and is order independent
+ok 41 - control: no collision keeps the previous behaviour and is order independent
+  ---
+  duration_ms: 30.422618
+  type: 'test'
+  ...
+# Subtest: different ids with identical design still dedupe order-independently (regression)
+ok 42 - different ids with identical design still dedupe order-independently (regression)
+  ---
+  duration_ms: 11.024021
+  type: 'test'
+  ...
+# Subtest: explicit Arabic bedroom count and exact room dimensions are extracted
+ok 43 - explicit Arabic bedroom count and exact room dimensions are extracted
+  ---
+  duration_ms: 12.163661
+  type: 'test'
+  ...
+# Subtest: valid explicit villa requirements pass without inventing additional rooms
+ok 44 - valid explicit villa requirements pass without inventing additional rooms
+  ---
+  duration_ms: 1.992611
+  type: 'test'
+  ...
+# Subtest: an explicit bedroom count is exact unless the user says minimum
+ok 45 - an explicit bedroom count is exact unless the user says minimum
+  ---
+  duration_ms: 1.687635
+  type: 'test'
+  ...
+# Subtest: same-area room with different exact dimensions is blocked
+ok 46 - same-area room with different exact dimensions is blocked
+  ---
+  duration_ms: 0.451933
+  type: 'test'
+  ...
+# Subtest: exact dimensions allow a quarter-turn and cannot be replaced by area alone
+ok 47 - exact dimensions allow a quarter-turn and cannot be replaced by area alone
+  ---
+  duration_ms: 0.459605
+  type: 'test'
+  ...
+# Subtest: connected suggestions regain only user-requested exact dimensions when a whole same-type group agrees
+ok 48 - connected suggestions regain only user-requested exact dimensions when a whole same-type group agrees
+  ---
+  duration_ms: 1.356426
+  type: 'test'
+  ...
+# Subtest: different same-type dimensions bind only through a unique room identity and matching area
+ok 49 - different same-type dimensions bind only through a unique room identity and matching area
+  ---
+  duration_ms: 2.649566
+  type: 'test'
+  ...
+# Subtest: an iterative modify retains prior exact dimensions and changes only the explicitly revised room
+ok 50 - an iterative modify retains prior exact dimensions and changes only the explicitly revised room
+  ---
+  duration_ms: 5.251474
+  type: 'test'
+  ...
+# Subtest: local modify parser flags a dimension edit when multiple same-type rooms make identity ambiguous
+ok 51 - local modify parser flags a dimension edit when multiple same-type rooms make identity ambiguous
+  ---
+  duration_ms: 7.131053
+  type: 'test'
+  ...
+# Subtest: exact-dimension binding fails closed on missing rooms, wrong area, and contradictory AI rectangles
+ok 52 - exact-dimension binding fails closed on missing rooms, wrong area, and contradictory AI rectangles
+  ---
+  duration_ms: 0.726343
+  type: 'test'
+  ...
+# Subtest: single hard dimension among indistinguishable same-type rooms requires clarification, never greedy mapping
+ok 53 - single hard dimension among indistinguishable same-type rooms requires clarification, never greedy mapping
+  ---
+  duration_ms: 1.82032
+  type: 'test'
+  ...
+# Subtest: Arabic numerals and English bedroom count are recognized
+ok 54 - Arabic numerals and English bedroom count are recognized
+  ---
+  duration_ms: 0.312441
+  type: 'test'
+  ...
+# Subtest: Arabic dual bedroom wording is treated as an exact count of two
+ok 55 - Arabic dual bedroom wording is treated as an exact count of two
+  ---
+  duration_ms: 0.576231
+  type: 'test'
+  ...
+# Subtest: negated bedroom counts are exclusions, not positive room requirements
+ok 56 - negated bedroom counts are exclusions, not positive room requirements
+  ---
+  duration_ms: 0.907587
+  type: 'test'
+  ...
+# Subtest: positive bedroom requirements survive unrelated negative count clauses
+ok 57 - positive bedroom requirements survive unrelated negative count clauses
+  ---
+  duration_ms: 0.355245
+  type: 'test'
+  ...
+# Subtest: negated room dimensions are rejected when present and require evidence when unknown
+ok 58 - negated room dimensions are rejected when present and require evidence when unknown
+  ---
+  duration_ms: 0.46367
+  type: 'test'
+  ...
+# Subtest: latest room dimension revision overrides the original dimension
+ok 59 - latest room dimension revision overrides the original dimension
+  ---
+  duration_ms: 0.338172
+  type: 'test'
+  ...
+# Subtest: positive room dimensions survive a separate excluded-dimension clause
+ok 60 - positive room dimensions survive a separate excluded-dimension clause
+  ---
+  duration_ms: 0.329116
+  type: 'test'
+  ...
+# Subtest: explicit land dimensions are read from the client brief without confusing room sizes
+ok 61 - explicit land dimensions are read from the client brief without confusing room sizes
+  ---
+  duration_ms: 0.632069
+  type: 'test'
+  ...
+# Subtest: browser SHA-256 preserves Node audit hashes across UTF-8 and block boundaries
+ok 62 - browser SHA-256 preserves Node audit hashes across UTF-8 and block boundaries
+  ---
+  duration_ms: 22.132324
+  type: 'test'
+  ...
+# Subtest: browser schema modules preserve original contracts exactly
+ok 63 - browser schema modules preserve original contracts exactly
+  ---
+  duration_ms: 3.820509
+  type: 'test'
+  ...
+# Subtest: complete app import graph uses existing browser JavaScript modules only
+ok 64 - complete app import graph uses existing browser JavaScript modules only
+  ---
+  duration_ms: 97.167327
+  type: 'test'
+  ...
+# Subtest: CAD, colored plan and 3D switch presentation without replacing the authoritative model
+ok 65 - CAD, colored plan and 3D switch presentation without replacing the authoritative model
+  ---
+  duration_ms: 3.008262
+  type: 'test'
+  ...
+# Subtest: a new application session starts in CAD before colored and 3D presentation
+ok 66 - a new application session starts in CAD before colored and 3D presentation
+  ---
+  duration_ms: 2.707056
+  type: 'test'
+  ...
+# Subtest: engineering mode retains measured geometry and distinguishes schematic door swing
+ok 67 - engineering mode retains measured geometry and distinguishes schematic door swing
+  ---
+  duration_ms: 77.411442
+  type: 'test'
+  ...
+# Subtest: legacy SVG remains color by default; modes preserve same room selections
+ok 68 - legacy SVG remains color by default; modes preserve same room selections
+  ---
+  duration_ms: 49.800398
+  type: 'test'
+  ...
+# Subtest: mode switch changes only SVG mode and leaves model/editor/selection/pan references intact
+ok 69 - mode switch changes only SVG mode and leaves model/editor/selection/pan references intact
+  ---
+  duration_ms: 57.437495
+  type: 'test'
+  ...
+# Subtest: CAD dimensions use wall faces and the view includes dimension and scale annotations
+ok 70 - CAD dimensions use wall faces and the view includes dimension and scale annotations
+  ---
+  duration_ms: 31.739836
+  type: 'test'
+  ...
+# Subtest: SVG identifies graphical metre scale and never asserts fixed paper scale or surveyed north
+ok 71 - SVG identifies graphical metre scale and never asserts fixed paper scale or surveyed north
+  ---
+  duration_ms: 44.067591
+  type: 'test'
+  ...
+# Subtest: colored plan uses three restrained functional fills with restrained architectural furniture symbols
+ok 72 - colored plan uses three restrained functional fills with restrained architectural furniture symbols
+  ---
+  duration_ms: 17.397564
+  type: 'test'
+  ...
+# Subtest: مسار فعلي: مدخل ← باب داخلي ← صالة؛ الطول قريب من المسافة الهندسية والخلاصة قابلة للحفظ
+ok 73 - مسار فعلي: مدخل ← باب داخلي ← صالة؛ الطول قريب من المسافة الهندسية والخلاصة قابلة للحفظ
+  ---
+  duration_ms: 200.08276
+  type: 'test'
+  ...
+# Subtest: باب 0.7 م = تنبيه عرض، وغرفة لا تُبلغ إلا عبر غرفة نوم = جسيم، والأثاث أمام الباب يُسمّى
+ok 74 - باب 0.7 م = تنبيه عرض، وغرفة لا تُبلغ إلا عبر غرفة نوم = جسيم، والأثاث أمام الباب يُسمّى
+  ---
+  duration_ms: 104.606361
+  type: 'test'
+  ...
+# Subtest: مجموعة المخططات المعيبة: غرفة بلا باب، ومجلس الرجال عبر جناح العائلة، ولا مدخل، وباب يصطدم فتحه
+ok 75 - مجموعة المخططات المعيبة: غرفة بلا باب، ومجلس الرجال عبر جناح العائلة، ولا مدخل، وباب يصطدم فتحه
+  ---
+  duration_ms: 3053.736548
+  type: 'test'
+  ...
+# Subtest: بدائل C7 (الجولة التاسعة): الدرج في البديل الأول مسدود البداية والوصول، والثالث يُصعد إليه ويصل كل الأدوار
+ok 76 - بدائل C7 (الجولة التاسعة): الدرج في البديل الأول مسدود البداية والوصول، والثالث يُصعد إليه ويصل كل الأدوار
+  ---
+  duration_ms: 1720.926226
+  type: 'test'
+  ...
+# Subtest: deployed Claude sources match the acceptance-tested vendor sources byte for byte
+ok 77 - deployed Claude sources match the acceptance-tested vendor sources byte for byte
+  ---
+  duration_ms: 11.258847
+  type: 'test'
+  ...
+# Subtest: live generation path includes Claude without losing legacy alternatives or room areas
+ok 78 - live generation path includes Claude without losing legacy alternatives or room areas
+  ---
+  duration_ms: 418.884312
+  type: 'test'
+  ...
+# Subtest: Claude enforces site built-area cap in generation and validation
+ok 79 - Claude enforces site built-area cap in generation and validation
+  ---
+  duration_ms: 25.792348
+  type: 'test'
+  ...
+# Subtest: Claude projects round-trip with their strategy, geometry and quantity totals
+ok 80 - Claude projects round-trip with their strategy, geometry and quantity totals
+  ---
+  duration_ms: 38.153599
+  type: 'test'
+  ...
+# Subtest: Claude output reaches 2D, Gemini and the existing home decision engine
+ok 81 - Claude output reaches 2D, Gemini and the existing home decision engine
+  ---
+  duration_ms: 38.149957
+  type: 'test'
+  ...
+# Subtest: Gemini engineering review declares statutory compliance unevaluated and exposes regulatory/heuristic arrays
+ok 82 - Gemini engineering review declares statutory compliance unevaluated and exposes regulatory/heuristic arrays
+  ---
+  duration_ms: 1.756922
+  type: 'test'
+  ...
+# Subtest: a real statutory-rule violation fired by the live Gemini coordination pipeline is surfaced as an unverified citation, not a certified pass/fail
+ok 83 - a real statutory-rule violation fired by the live Gemini coordination pipeline is surfaced as an unverified citation, not a certified pass/fail
+  ---
+  duration_ms: 2.40286
+  type: 'test'
+  ...
+# Subtest: engineering provenance disclosure separates statutory-cited rules from internal heuristics and never certifies them
+ok 84 - engineering provenance disclosure separates statutory-cited rules from internal heuristics and never certifies them
+  ---
+  duration_ms: 0.446475
+  type: 'test'
+  ...
+# Subtest: reviewed preferences affect the actual planner input without changing areas or sides
+ok 85 - reviewed preferences affect the actual planner input without changing areas or sides
+  ---
+  duration_ms: 78.14825
+  type: 'test'
+  ...
+# Subtest: only selected changes apply and stale reviews reject
+ok 86 - only selected changes apply and stale reviews reject
+  ---
+  duration_ms: 0.927324
+  type: 'test'
+  ...
+# Subtest: discovery round-trips and legacy projects still load with empty preferences
+ok 87 - discovery round-trips and legacy projects still load with empty preferences
+  ---
+  duration_ms: 7.149636
+  type: 'test'
+  ...
+# Subtest: invalid and contradictory saved choices reject; courtyard is explicitly unsupported
+ok 88 - invalid and contradictory saved choices reject; courtyard is explicitly unsupported
+  ---
+  duration_ms: 0.270499
+  type: 'test'
+  ...
+# Subtest: new Arabic request starts only from explicitly named spaces and keeps the caller untouched
+ok 89 - new Arabic request starts only from explicitly named spaces and keeps the caller untouched
+  ---
+  duration_ms: 14.911897
+  type: 'test'
+  ...
+# Subtest: modification mode preserves unmentioned rooms and applies targeted area and negation
+ok 90 - modification mode preserves unmentioned rooms and applies targeted area and negation
+  ---
+  duration_ms: 4.041171
+  type: 'test'
+  ...
+# Subtest: conflicting shapes and vague areas need clarification rather than silent preference
+ok 91 - conflicting shapes and vague areas need clarification rather than silent preference
+  ---
+  duration_ms: 0.875216
+  type: 'test'
+  ...
+# Subtest: negated shape is explicitly excluded; closed courtyard and extra floors are retained as unsupported
+ok 92 - negated shape is explicitly excluded; closed courtyard and extra floors are retained as unsupported
+  ---
+  duration_ms: 1.232211
+  type: 'test'
+  ...
+# Subtest: independent guest entry, elderly access and swimming pool never count as implemented
+ok 93 - independent guest entry, elderly access and swimming pool never count as implemented
+  ---
+  duration_ms: 1.191176
+  type: 'test'
+  ...
+# Subtest: plural bedroom request without a count asks for a count
+ok 94 - plural bedroom request without a count asks for a count
+  ---
+  duration_ms: 0.490224
+  type: 'test'
+  ...
+# Subtest: invalid plot is a review question and oversize room requests are rejected without clamping
+ok 95 - invalid plot is a review question and oversize room requests are rejected without clamping
+  ---
+  duration_ms: 0.99057
+  type: 'test'
+  ...
+# Subtest: Arabic dimensions are explicit constraints on the requested room rectangles
+ok 96 - Arabic dimensions are explicit constraints on the requested room rectangles
+  ---
+  duration_ms: 4.276901
+  type: 'test'
+  ...
+# Subtest: office is a generated room type and a later-room correction preserves the stated count
+ok 97 - office is a generated room type and a later-room correction preserves the stated count
+  ---
+  duration_ms: 0.667911
+  type: 'test'
+  ...
+# Subtest: sequential room edits preserve earlier additions and exact dimensions
+ok 98 - sequential room edits preserve earlier additions and exact dimensions
+  ---
+  duration_ms: 1.103508
+  type: 'test'
+  ...
+# Subtest: negated additions preserve existing rooms while without majlis removes only majlis
+ok 99 - negated additions preserve existing rooms while without majlis removes only majlis
+  ---
+  duration_ms: 0.38549
+  type: 'test'
+  ...
+# Subtest: conflicting dimensions and area or a requested facade direction stop application
+ok 100 - conflicting dimensions and area or a requested facade direction stop application
+  ---
+  duration_ms: 0.577881
+  type: 'test'
+  ...
+# Subtest: bedroom and majlis positions parse while entry separation and privacy remain explicitly pending
+ok 101 - bedroom and majlis positions parse while entry separation and privacy remain explicitly pending
+  ---
+  duration_ms: 0.423873
+  type: 'test'
+  ...
+# Subtest: staggered wings require an explicit supported count of exactly two
+ok 102 - staggered wings require an explicit supported count of exactly two
+  ---
+  duration_ms: 4.623749
+  type: 'test'
+  ...
+# Subtest: wing-count corrections follow text order and unresolved count conflicts block generation
+ok 103 - wing-count corrections follow text order and unresolved count conflicts block generation
+  ---
+  duration_ms: 25.32238
+  type: 'test'
+  ...
+# Subtest: proposal fingerprint detects prompt, plot, program, shape and mode edits
+ok 104 - proposal fingerprint detects prompt, plot, program, shape and mode edits
+  ---
+  duration_ms: 0.332356
+  type: 'test'
+  ...
+# Subtest: result audit reports measured preferences and names unsupported desires
+ok 105 - result audit reports measured preferences and names unsupported desires
+  ---
+  duration_ms: 79.955219
+  type: 'test'
+  ...
+# Subtest: comparison needs two alternatives and starts from the shown one against a different one
+ok 106 - comparison needs two alternatives and starts from the shown one against a different one
+  ---
+  duration_ms: 1.586933
+  type: 'test'
+  ...
+# Subtest: after the alternatives change, picks follow the same models, and a removed pick falls back to a valid pair
+ok 107 - after the alternatives change, picks follow the same models, and a removed pick falls back to a valid pair
+  ---
+  duration_ms: 0.306076
+  type: 'test'
+  ...
+# Subtest: the compare card is wired, read-only, and cannot change the chosen alternative
+ok 108 - the compare card is wired, read-only, and cannot change the chosen alternative
+  ---
+  duration_ms: 3.677831
+  type: 'test'
+  ...
+# [mizan 3D] openings not built: o15: it overlaps opening o4 after sliding
+# [mizan 3D] openings not built: o8: it overlaps opening o23 after sliding
+# Subtest: مستند بسيط بدورين: المجسّم يطابق المسقط تمامًا (جدران، فتحات، أرضيات، أدوار)
+ok 109 - مستند بسيط بدورين: المجسّم يطابق المسقط تمامًا (جدران، فتحات، أرضيات، أدوار)
+  ---
+  duration_ms: 145.055194
+  type: 'test'
+  ...
+# Subtest: ضوابط سلبية: فرق متعمد بين المسقط والمجسّم يُكشف بنوعه
+ok 110 - ضوابط سلبية: فرق متعمد بين المسقط والمجسّم يُكشف بنوعه
+  ---
+  duration_ms: 145.39045
+  type: 'test'
+  ...
+# Subtest: C7 البديل الأول (الجولة التاسعة): كل شيء متطابق إلا النافذة o15 التي تعبر تقاطع جدار فيُسقطها المجسّم
+ok 111 - C7 البديل الأول (الجولة التاسعة): كل شيء متطابق إلا النافذة o15 التي تعبر تقاطع جدار فيُسقطها المجسّم
+  ---
+  duration_ms: 906.949719
+  type: 'test'
+  ...
+# Subtest: C7 البديل الثاني: باب مدخل الرجال o8 مفقود في المجسّم لأن نافذة o23 العابرة لتقاطع أُزيحت فوقه
+ok 112 - C7 البديل الثاني: باب مدخل الرجال o8 مفقود في المجسّم لأن نافذة o23 العابرة لتقاطع أُزيحت فوقه
+  ---
+  duration_ms: 771.110998
+  type: 'test'
+  ...
+# Subtest: المتصفح: القياس نفسه داخل صفحة view3d.html الحقيقية يعطي النتيجة نفسها (يُتخطى مع MIZAN_NO_BROWSER=1 أو بلا Chromium)
+ok 113 - المتصفح: القياس نفسه داخل صفحة view3d.html الحقيقية يعطي النتيجة نفسها (يُتخطى مع MIZAN_NO_BROWSER=1 أو بلا Chromium)
+  ---
+  duration_ms: 13333.336315
+  type: 'test'
+  ...
+# Subtest: explicit requests without a courtyard exclude the U shape
+ok 114 - explicit requests without a courtyard exclude the U shape
+  ---
+  duration_ms: 3.044872
+  type: 'test'
+  ...
+# Subtest: current planner honors no-courtyard intent while preserving non-U alternatives
+ok 115 - current planner honors no-courtyard intent while preserving non-U alternatives
+  ---
+  duration_ms: 1.192934
+  type: 'test'
+  ...
+# Subtest: a positive U request and a no-courtyard request conflict instead of silently falling back
+ok 116 - a positive U request and a no-courtyard request conflict instead of silently falling back
+  ---
+  duration_ms: 2.587605
+  type: 'test'
+  ...
+# Subtest: a later explicit courtyard request supersedes the earlier no-courtyard request
+ok 117 - a later explicit courtyard request supersedes the earlier no-courtyard request
+  ---
+  duration_ms: 0.579854
+  type: 'test'
+  ...
+# Subtest: actual geometry verification fails closed on unverifiable or courtyard geometry
+ok 118 - actual geometry verification fails closed on unverifiable or courtyard geometry
+  ---
+  duration_ms: 0.41065
+  type: 'test'
+  ...
+# Subtest: changing the living-room position cannot authorize an unrelated bedroom deletion
+ok 119 - changing the living-room position cannot authorize an unrelated bedroom deletion
+  ---
+  duration_ms: 4.713868
+  type: 'test'
+  ...
+# Subtest: rename wording alone never authorizes treating a deleted room as a rename
+ok 120 - rename wording alone never authorizes treating a deleted room as a rename
+  ---
+  duration_ms: 5.620299
+  type: 'test'
+  ...
+# Subtest: a named requested deletion is allowed, but one category mention cannot remove multiple rooms
+ok 121 - a named requested deletion is allowed, but one category mention cannot remove multiple rooms
+  ---
+  duration_ms: 4.546161
+  type: 'test'
+  ...
+# Subtest: Arabic and English negative removal requests never authorize deletion
+ok 122 - Arabic and English negative removal requests never authorize deletion
+  ---
+  duration_ms: 0.82207
+  type: 'test'
+  ...
+# Subtest: a room-area request is scoped to its named room
+ok 123 - a room-area request is scoped to its named room
+  ---
+  duration_ms: 1.498538
+  type: 'test'
+  ...
+# Subtest: naming one of several same-type rooms cannot authorize area edits to its sibling
+ok 124 - naming one of several same-type rooms cannot authorize area edits to its sibling
+  ---
+  duration_ms: 0.498481
+  type: 'test'
+  ...
+# Subtest: Arabic and English negative resize requests never authorize area changes
+ok 125 - Arabic and English negative resize requests never authorize area changes
+  ---
+  duration_ms: 0.573861
+  type: 'test'
+  ...
+# Subtest: distance and adjacency requests cannot authorize an unrelated room-area change
+ok 126 - distance and adjacency requests cannot authorize an unrelated room-area change
+  ---
+  duration_ms: 0.470062
+  type: 'test'
+  ...
+# Subtest: revision prompts retain original requirements while making the current change explicit
+ok 127 - revision prompts retain original requirements while making the current change explicit
+  ---
+  duration_ms: 0.55435
+  type: 'test'
+  ...
+# Subtest: pending proposal approval is bound to the visible text and plot values
+ok 128 - pending proposal approval is bound to the visible text and plot values
+  ---
+  duration_ms: 0.480406
+  type: 'test'
+  ...
+# Subtest: an unchanged or read-only room program is blocked before the redraw call
+ok 129 - an unchanged or read-only room program is blocked before the redraw call
+  ---
+  duration_ms: 0.738142
+  type: 'test'
+  ...
+# Subtest: returning from results only reopens the composer and preserves draft, transcript, and model
+ok 130 - returning from results only reopens the composer and preserves draft, transcript, and model
+  ---
+  duration_ms: 0.889179
+  type: 'test'
+  ...
+# Subtest: بصمة بلا إجابات: كل المحاور «افتراضي» ولا ينسب المحرك شيئًا للعميل
+ok 131 - بصمة بلا إجابات: كل المحاور «افتراضي» ولا ينسب المحرك شيئًا للعميل
+  ---
+  duration_ms: 2.754316
+  type: 'test'
+  ...
+# Subtest: إجابات العميل تحرّك المحاور المقابلة وتسجّل سببها
+ok 132 - إجابات العميل تحرّك المحاور المقابلة وتسجّل سببها
+  ---
+  duration_ms: 0.870189
+  type: 'test'
+  ...
+# Subtest: نص «بدون فناء» يخفض الانفتاح ويُنسب لنص العميل
+ok 133 - نص «بدون فناء» يخفض الانفتاح ويُنسب لنص العميل
+  ---
+  duration_ms: 0.386963
+  type: 'test'
+  ...
+# Subtest: الأوزان مجموعها 1، والمحور الأعلى يرفع وزن مقياسه عن الافتراضي
+ok 134 - الأوزان مجموعها 1، والمحور الأعلى يرفع وزن مقياسه عن الافتراضي
+  ---
+  duration_ms: 0.884358
+  type: 'test'
+  ...
+# Subtest: التوليد يعيد بصمة وبدائل محوّلة وبصمة هندسة تطابق المستند
+ok 135 - التوليد يعيد بصمة وبدائل محوّلة وبصمة هندسة تطابق المستند
+  ---
+  duration_ms: 1168.029956
+  type: 'test'
+  ...
+# Subtest: إجابات مختلفة تعطي بصمة ميزان مختلفة وأوزانًا مختلفة (البصمة مؤثرة لا شكلية)
+ok 136 - إجابات مختلفة تعطي بصمة ميزان مختلفة وأوزانًا مختلفة (البصمة مؤثرة لا شكلية)
+  ---
+  duration_ms: 1773.5186
+  type: 'test'
+  ...
+# Subtest: بصمة الهندسة: ثابتة لترتيب العناصر والعنوان، وتتغير بتحريك جدار أو إضافة فتحة
+ok 137 - بصمة الهندسة: ثابتة لترتيب العناصر والعنوان، وتتغير بتحريك جدار أو إضافة فتحة
+  ---
+  duration_ms: 473.202218
+  type: 'test'
+  ...
+# Subtest: fingerprint ثابتة وحساسة للتغيير الطفيف
+ok 138 - fingerprint ثابتة وحساسة للتغيير الطفيف
+  ---
+  duration_ms: 0.26564
+  type: 'test'
+  ...
+# Subtest: التسليم يحمل البصمة والبدائل ويحفظها للمرسم، ويرفض البديل التالف
+ok 139 - التسليم يحمل البصمة والبدائل ويحفظها للمرسم، ويرفض البديل التالف
+  ---
+  duration_ms: 958.934122
+  type: 'test'
+  ...
+# Subtest: بدائل ضخمة تُهمل ولا تكسر التسليم
+ok 140 - بدائل ضخمة تُهمل ولا تكسر التسليم
+  ---
+  duration_ms: 823.949709
+  type: 'test'
+  ...
+# Subtest: displayed ideas differ structurally and a new batch excludes previous ideas
+ok 141 - displayed ideas differ structurally and a new batch excludes previous ideas
+  ---
+  duration_ms: 415.732677
+  type: 'test'
+  ...
+# Subtest: labels, translation, reflection, rotation and equal-room swaps cannot earn novelty
+ok 142 - labels, translation, reflection, rotation and equal-room swaps cannot earn novelty
+  ---
+  duration_ms: 27.562559
+  type: 'test'
+  ...
+# Subtest: L exploration retains explicit side requests rather than silently dropping them
+ok 143 - L exploration retains explicit side requests rather than silently dropping them
+  ---
+  duration_ms: 12.177075
+  type: 'test'
+  ...
+# Subtest: tight plot does not pad alternatives with duplicates or shrink rooms
+ok 144 - tight plot does not pad alternatives with duplicates or shrink rooms
+  ---
+  duration_ms: 5.891818
+  type: 'test'
+  ...
+# Subtest: exhausted search reports no new ideas without mutating the existing designs
+ok 145 - exhausted search reports no new ideas without mutating the existing designs
+  ---
+  duration_ms: 223.103449
+  type: 'test'
+  ...
+# Subtest: new-idea search accepts previous designs from legacy project imports
+ok 146 - new-idea search accepts previous designs from legacy project imports
+  ---
+  duration_ms: 151.870453
+  type: 'test'
+  ...
+# Subtest: priority orders eligible layouts without bypassing pairwise or history diversity
+ok 147 - priority orders eligible layouts without bypassing pairwise or history diversity
+  ---
+  duration_ms: 54.403901
+  type: 'test'
+  ...
+# Subtest: route-priority real generation applies one diversity gate across seed batches
+ok 148 - route-priority real generation applies one diversity gate across seed batches
+  ---
+  duration_ms: 294.90851
+  type: 'test'
+  ...
+# Subtest: diversity evidence accounts for actual pool, history, batch rejection and display limit
+ok 149 - diversity evidence accounts for actual pool, history, batch rejection and display limit
+  ---
+  duration_ms: 78.145346
+  type: 'test'
+  ...
+# Subtest: design insight scores are bounded and derived without external data
+ok 150 - design insight scores are bounded and derived without external data
+  ---
+  duration_ms: 25.942949
+  type: 'test'
+  ...
+# Subtest: adapted algorithms reject invalid acoustic transmission and bound scores
+ok 151 - adapted algorithms reject invalid acoustic transmission and bound scores
+  ---
+  duration_ms: 2.295307
+  type: 'test'
+  ...
+# Subtest: جلسة التصميم: الأول يُعرض، و«تصميم آخر» يختلف ويطبّق الملاحظات، والسجل محفوظ
+ok 152 - جلسة التصميم: الأول يُعرض، و«تصميم آخر» يختلف ويطبّق الملاحظات، والسجل محفوظ
+  ---
+  duration_ms: 2871.915399
+  type: 'test'
+  ...
+# Subtest: ملخص العرض: مواصفات وجدول فراغات بالمناطق من المستند نفسه
+ok 153 - ملخص العرض: مواصفات وجدول فراغات بالمناطق من المستند نفسه
+  ---
+  duration_ms: 461.016772
+  type: 'test'
+  ...
+# Subtest: الشمس: ظهر الانقلاب الصيفي في الرياض شبه عمودي، والشتاء ~42°، والصباح شرقًا والعصر غربًا
+ok 154 - الشمس: ظهر الانقلاب الصيفي في الرياض شبه عمودي، والشتاء ~42°، والصباح شرقًا والعصر غربًا
+  ---
+  duration_ms: 0.307697
+  type: 'test'
+  ...
