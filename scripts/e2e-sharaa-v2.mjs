@@ -48,8 +48,21 @@ console.log('PROFILE:', (await T('#liveProfile')).slice(0, 700));
 await page.screenshot({ path: shots + '/sharaa-2-profile.png', fullPage: true });
 const go = await page.$('#chat button:has-text("أؤكد وأبدأ"), #chat button:has-text("أفهم القيود")');
 console.log('REVIEW:', (await T('#chat')).slice(-700));
-if (go) { await go.click(); } else console.log('NO-GENERATE-BUTTON');
-await Promise.race([page.waitForURL(/design|studio/, { timeout: 600000 }), page.waitForSelector('#buildReport:not([hidden])', { timeout: 600000 })]).catch(() => console.log('NO-OUTCOME-IN-600s'));
+// الرحلة بخطوتين متعمَّدتين: «أؤكد وأبدأ» تثبّت الملف وتعرض زر «توليد التصميم»، والتوليد يبدأ بضغطه (home.mjs: kind==='generate').
+// (كان هذا السكربت يتوقف بعد الخطوة الأولى وينتظر نتيجة لا تُطلَق أبدًا — وهذا هو «التعليق» الذي ورد في التقرير السابق.)
+const OUTCOME_MS = Number(process.env.MIZAN_E2E_OUTCOME_MS) || 180000;   // مهلة معقولة للنتيجة: 3 دقائق (القياس الفعلي ≈ 9 ث)
+let failed = null; const t0 = Date.now();
+if (go) { await go.click(); } else { console.log('NO-GENERATE-BUTTON'); failed = 'NO-GENERATE-BUTTON'; }
+if (!failed) {
+  const gen2 = await page.waitForSelector('#chat button:has-text("توليد التصميم")', { timeout: 15000 }).catch(() => null);
+  if (!gen2) { failed = 'NO-GENERATE-STEP-AFTER-CONFIRM'; console.log(failed, '| CHAT-TAIL:', (await T('#chat')).slice(-300)); }
+  else { console.log('CONFIRM-OK: زر «توليد التصميم» ظهر بعد', Date.now() - t0, 'ms'); await gen2.click(); }
+}
+if (!failed) {
+  await Promise.race([page.waitForURL(/design|studio/, { timeout: OUTCOME_MS }), page.waitForSelector('#buildReport:not([hidden])', { timeout: OUTCOME_MS })])
+    .catch(() => { failed = 'NO-OUTCOME-IN-' + Math.round(OUTCOME_MS / 1000) + 's'; console.log(failed, '| BUILD-TEXT:', ''); });
+  console.log('OUTCOME-MS:', Date.now() - t0);
+}
 console.log('URL:', page.url());
 console.log('BUILD-REPORT:', (await T('#buildReport')).slice(0, 1800));
 console.log('BUTTONS:', JSON.stringify(await page.$$eval('#buildReport button', bs => bs.map(b => b.innerText.trim()))));
@@ -66,3 +79,4 @@ for (const name of ['قبول موقف موازٍ', 'فصل المجلس عن غ
 }
 if (/design/.test(page.url())) { await page.waitForTimeout(3000); console.log('DESIGN-TEXT:', (await T('body')).slice(0, 500)); await page.screenshot({ path: shots + '/sharaa-4-design.png' }); }
 await browser.close(); srv.close();
+if (failed) { console.log('E2E-FAILED:', failed); process.exitCode = 1; } else console.log('E2E-OK');
