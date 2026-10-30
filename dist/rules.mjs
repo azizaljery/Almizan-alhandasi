@@ -4,6 +4,8 @@
 // verifyRules (تحقق هندسي من المستند الناتج: نُفّذ/لم يُنفَّذ مع السبب). نقي: لا DOM ولا شبكة.
 import { analyzeDoc } from './draw/digest.mjs';
 import { stairLayout } from './draw/stairs3d.mjs';
+import { swingBlockers } from './draw/review.mjs';
+import { DIRECT_DOOR_MIN_SPAN, DIRECT_DOOR_W_MIN } from './direct-door.mjs';
 
 const AR = '\\u0600-\\u06FF';
 const PRE = `(?<![${AR}])(?:[وفبك]?(?:ال|لل)|[وفبكل])?`; // أدوات ملتصقة: و، ب، ل، ال، بال، لل...
@@ -136,7 +138,10 @@ export function extractRules(t) {
   const seen = new Set();
   let made = null;
   const push = (r, span, neg = false) => {
-    const k = [r.kind, r.a, r.b, r.side, r.floor].join('|'); if (seen.has(k) || (r.b && r.a === r.b)) return; seen.add(k);
+    const k = [r.kind, r.a, r.b, r.side, r.floor].join('|');
+    // «ملاصق» ثم «بباب مباشر» لنفس الطرفين: تبقى قاعدة واحدة ويُرفع عليها علم الباب (المحرك يركّب بابًا لا ملاصقة فقط)
+    if (seen.has(k) && r.door) { const old = rules.find(x => [x.kind, x.a, x.b, x.side, x.floor].join('|') === k); if (old && !old.door) { old.door = true; old.text = ruleText(old); } return; }
+    if (seen.has(k) || (r.b && r.a === r.b)) return; seen.add(k);
     const rule = { id: 'R' + (rules.length + 1), ...r, text: ruleText(r) };
     if (made && span) made.push({ rule, span, neg });
     rules.push(rule);
@@ -161,7 +166,7 @@ export function extractRules(t) {
   const SOFT = new RegExp(`(?<![${AR}])(?:و|ف)?(?:مو|مب|ليس|غير|مش) ?(?:شرط(?:ا)?|ضروري|لازم)(?![${AR}])|(?<![a-z])not (?:required|necessary|a must)(?![a-z])`, 'g');
   const TOGETHER = new RegExp(`(?<![${AR}])(?:جنب|بجنب|بجانب|بجوار|ورا|مع|قرب|قريب(?:ه|ين)? من) بعض(?:ها|هم)?(?![${AR}])|(?<![${AR}])(?:متجاور(?:ه|ين)|متلاصق(?:ه|ين)|مع بعض)(?![${AR}])|(?<![a-z])(?:next to each other|together|adjacent to each other)(?![a-z])`, 'g');
   const BETWEEN = new RegExp(`(?<![${AR}])(?:بين|وسط ما بين)(?![${AR}])|(?<![a-z])between(?![a-z])`, 'g');
-  const DIRECT_BETWEEN = new RegExp(`(?<![${AR}])باب (?:داخلي )?مباشر (?:بين|ما بين)(?![${AR}])`, 'g');
+  const DIRECT_BETWEEN = new RegExp(`(?<![${AR}])و?باب (?:داخلي )?مباشر (?:بين|ما بين)(?![${AR}])`, 'g');
   const SPLIT = /[،,.؛;\n!?؟]+/g;
   const pieces = []; { let last = 0, m; SPLIT.lastIndex = 0; while ((m = SPLIT.exec(t))) { pieces.push([last, m.index]); last = m.index + m[0].length; } pieces.push([last, t.length]); }
   for (const [p0, p1] of pieces) {
@@ -187,8 +192,10 @@ export function extractRules(t) {
     for (const m of find(DIRECT_BETWEEN, c)) {
       const two = subs.filter(x => x.start >= m.end && x.start - m.end <= 30).slice(0, 2);
       if (two.length !== 2 || two[0].id === two[1].id) continue;
+      // «لا تحط باب مباشر بين …»: منع الباب لا يُقرأ ملاصقة؛ يُعرض على العميل بدل أن يُنفَّذ عكسه
+      if (negated(m.start, m.start)) { orphan(m, 'relation'); used.push({ start: m.start, end: two[1].end }); continue; }
       used.push({ start: m.start, end: two[1].end });
-      push({ kind: 'adjacent', a: two[0].id, b: two[1].id }, [m.start, two[1].end]);
+      push({ kind: 'adjacent', door: true, a: two[0].id, b: two[1].id }, [m.start, two[1].end]);
     }
     // «بين A و B»
     for (const m of find(BETWEEN, c)) {
@@ -223,7 +230,8 @@ export function extractRules(t) {
       const neg = m.kind !== 'far' && negated(firstStart(A, m.start), m.start);
       const kind = neg ? 'apart' : m.kind;
       const co = coordinated(after.end), end = co.length ? co[co.length - 1].end : after.end;
-      for (const b of [after, ...co]) for (const a of A) push({ kind, a, b: b.id }, [aStart, end], neg || negFar);
+      const viaDoor = kind === 'adjacent' && /(?:^|\s)باب(?:\s|$)/.test(m.text); // «بباب مباشر على» (الباء سابقة) أو «باب داخلي مباشر»
+      for (const b of [after, ...co]) for (const a of A) push({ kind, ...(viaDoor || (kind === 'adjacent' && /باب/.test(m.text)) ? { door: true } : {}), a, b: b.id }, [aStart, end], neg || negFar);
     }
     const consumed = new Set();
     for (const p of PLACES) for (const m of find(p.rx, c)) {
@@ -277,6 +285,7 @@ export function ruleText(r) {
   if (r.kind === 'place' && r.mode === 'avoid') return `${A} لا يطل على ${r.side === 'front' ? 'الشارع' : r.side === 'back' ? 'الواجهة الخلفية' : 'جهة ' + (COMPASS_AR[r.side] || r.side)}`;
   if (r.kind === 'place') return `${A} ${r.mode === 'touch' ? (r.side === 'front' ? 'على الشارع (الواجهة الأمامية)' : r.side === 'back' ? 'على الواجهة الخلفية' : SIDE_AR[r.side]) : SIDE_AR[r.side]}`;
   if (r.kind === 'floor') return `${A} في الدور ${r.floor === 'upper' ? 'العلوي' : 'الأرضي'}`;
+  if (r.kind === 'adjacent' && r.door) return `${A} بباب مباشر على «${subjAr(r.b)}»`;
   return `${A} ${{ adjacent: 'بجوار', near: 'قرب', far: 'بعيدًا عن' }[r.kind]} «${subjAr(r.b)}»`;
 }
 // ------------------------------------------------------------------------------------------ التقييم في الإطار القانوني
@@ -312,6 +321,8 @@ const contact = (a, b) => {
   const ox = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), oy = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
   if (Math.abs(ox) < .3 && oy > 0) return oy; if (Math.abs(oy) < .3 && ox > 0) return ox; return 0;
 };
+// ملاصقة «باب مباشر»: لا تكفي ملاصقة 1 م؛ الحد المشترك يتسع لباب 0.8 م بأبعاده (≥ 1.22 م) مع هامش للتسوية
+const adjMin = r => (r.door ? DIRECT_DOOR_MIN_SPAN + .08 : 1);
 // «قرب»: لفراغ واحد ≤ 2 م (ممر أو باب)، ولمجموعة غرف (غرف الأبناء قرب الماستر) ≤ 4.2 م (عرض صالة أو غرفة بينهما)
 const nearGap = r => (S[r.a]?.plural ? 4.2 : 2.0);
 const ctr = r => ({ x: (r.x0 + r.x1) / 2, y: (r.y0 + r.y1) / 2 });
@@ -399,9 +410,9 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
     if (r.kind === 'cluster') { for (const a of A) if (A.length > 1 && !A.some(b => b !== a && contact(a, b) >= 1.0)) base += 45; return; }
     const Bs = rectsOf(r.b, placed, circ); if (!Bs.length) return;
     if (r.kind === 'apart') { for (const a of A) for (const b of Bs) if (a !== b && contact(a, b) > .3) base += 60; return; }
-    if (any) { const ok = A.some(a => Bs.some(b => r.kind === 'adjacent' ? contact(a, b) >= 1 : r.kind === 'near' ? contact(a, b) >= .8 || gapOf(a, b) <= 1.8 : contact(a, b) <= .3)); if (!ok) base += 55; return; }
+    if (any) { const ok = A.some(a => Bs.some(b => r.kind === 'adjacent' ? contact(a, b) >= adjMin(r) : r.kind === 'near' ? contact(a, b) >= .8 || gapOf(a, b) <= 1.8 : contact(a, b) <= .3)); if (!ok) base += 55; return; }
     for (const a of A) {
-      const best = Math.min(...Bs.map(b => r.kind === 'adjacent' ? (contact(a, b) >= 1.0 ? 0 : 1 + gapOf(a, b)) : r.kind === 'near' ? (contact(a, b) >= .8 || gapOf(a, b) <= nearGap(r) - .2 ? 0 : gapOf(a, b) - nearGap(r) + 1.2) : 0));
+      const best = Math.min(...Bs.map(b => r.kind === 'adjacent' ? (contact(a, b) >= adjMin(r) ? 0 : 1 + gapOf(a, b)) : r.kind === 'near' ? (contact(a, b) >= .8 || gapOf(a, b) <= nearGap(r) - .2 ? 0 : gapOf(a, b) - nearGap(r) + 1.2) : 0));
       if (r.kind === 'far') { const need = Math.max(7, diag * .4); for (const b of Bs) { const dd = Math.hypot(ctr(a).x - ctr(b).x, ctr(a).y - ctr(b).y); if (contact(a, b) > .3) base += 55; if (dd < need) base += 30 + 20 * (need - dd); } continue; } // عتبة التحقق نفسها: أي نقص عنها = بند غير منفّذ
       if (best > 0) base += 50 + 14 * best;
     }
@@ -425,6 +436,8 @@ const ROOM_OF = {
   onebed: r => (r.type === 'bedroom' || r.type === 'master') && r.name !== 'غرفة الضيوف', guest: r => r.name === 'غرفة الضيوف', guestwc: r => /^دورة مياه (الضيوف|الرجال)$/.test(r.name),
   servicedoor: r => r.name === 'المطبخ',
 };
+/** غرف (أي كائنات { name, type }) التي ينطبق عليها موضوع قاعدة؛ للمحرك قبل رسم المستند وللتحقق بعده بالمعيار نفسه. */
+export const subjectRooms = (id, rooms) => rooms.filter(r => ROOM_OF[id]?.(r));
 /** غرف المستند بمستطيلاتها الصافية (حسب الدور)، وحدود المبنى. +x شرق و+y شمال. */
 export function docRooms(doc) {
   const A = analyzeDoc(doc), rooms = [];
@@ -512,6 +525,24 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
   const sel = id => id === 'stairs' ? stairs : rooms.filter(r => ROOM_OF[id]?.(r));
   // الصالة: الرئيسية أولًا
   const pickHall = list => { const main = list.filter(r => r.name === 'الصالة'); return main.length ? main : list.slice(0, 1); };
+  // «باب مباشر» (علاقة direct_access): ملاصقة الفراغين لا تكفي؛ يلزم باب حقيقي (door/door2 — لا قوس ولا منزلق) على الجدار المشترك،
+  // بعرض صافٍ ≥ 0.8 م، ومسار فتحه غير معترض (جدار/قطعة أثاث/باب آخر). يُحسب لكل زوج مرة واحدة ولا يُحسب إلا لقاعدة تطلب الباب.
+  let model = null; const doorMemo = new Map();
+  const doorState = (a, b) => {
+    const key = a.level + '|' + a.name + '|' + b.name; if (doorMemo.has(key)) return doorMemo.get(key);
+    model ||= analyzeDoc(doc);
+    const lv = model.levelById.get(a.level), between = (lv?.openings || []).filter(op => op.door && op.left && op.right && ((op.left.name === a.name && op.right.name === b.name) || (op.left.name === b.name && op.right.name === a.name)));
+    const real = between.filter(op => ['door', 'door2'].includes(op.kind));
+    let st;
+    if (!real.length) st = { ok: false, code: between.length ? 'open_passage_instead' : 'no_door', why: between.length ? `بين «${a.name}» و«${b.name}» فتحة مفتوحة (قوس أو منزلق) لا باب.` : `«${a.name}» و«${b.name}» متلاصقان لكن لا باب بينهما.` };
+    else {
+      const usable = real.filter(op => op.o.w >= DIRECT_DOOR_W_MIN - 1e-6), blocked = usable.filter(op => swingBlockers(model, lv, op).length);
+      if (!usable.length) st = { ok: false, code: 'narrow', why: `الباب بين «${a.name}» و«${b.name}» أضيق من ${DIRECT_DOOR_W_MIN} م.` };
+      else if (blocked.length === usable.length) st = { ok: false, code: 'swing_blocked', why: `مسار فتح الباب بين «${a.name}» و«${b.name}» تعترضه جدران أو قطع أو أبواب أخرى.` };
+      else st = { ok: true, code: 'door' };
+    }
+    doorMemo.set(key, st); return st;
+  };
   for (const r of rules) {
     let A = sel(r.a); if (r.a === 'hall') A = pickHall(A);
     const res = { id: r.id, text: r.text, kind: r.kind, level: r.level || 'must', ok: true, why: '' };
@@ -567,7 +598,7 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
     if (!Bs.length) { res.ok = false; res.why = `لا يوجد «${subjAr(r.b)}» في هذا التصميم.`; out.push(res); continue; }
     if (r.kind === 'apart') { for (const a of A) { const t = Bs.find(b => b !== a && same(a, b) && contact(a, b) > .3); if (t) { res.ok = false; res.why = `«${a.name}» ملاصق لـ«${t.name}».`; break; } } out.push(res); continue; }
     if (r.b === 'servicedoor') { const D = doorInfo(doc), k = A.find(a => D.extDoors(a.name) > 0); if (!k) { res.ok = false; res.why = 'المطبخ بلا باب خدمة خارجي في هذا التصميم.'; } out.push(res); continue; }
-    if (S[r.a]?.any) { const ok = A.some(a => Bs.some(b => b !== a && same(a, b) && (r.kind === 'adjacent' ? contact(a, b) >= .8 : r.kind === 'near' ? contact(a, b) >= .6 || gapOf(a, b) <= 2 : contact(a, b) <= .3))); if (!ok) { res.ok = false; res.why = `لا توجد «${subjAr(r.a)}» تحقق ذلك.`; } out.push(res); continue; }
+    if (S[r.a]?.any) { const adj = (a, b) => b !== a && same(a, b) && (r.kind === 'adjacent' ? contact(a, b) >= .8 : r.kind === 'near' ? contact(a, b) >= .6 || gapOf(a, b) <= 2 : contact(a, b) <= .3); const wantDoor = r.kind === 'adjacent' && r.door; const ok = A.some(a => Bs.some(b => adj(a, b) && (!wantDoor || doorState(a, b).ok))); if (!ok) { res.ok = false; res.why = wantDoor && A.some(a => Bs.some(b => adj(a, b))) ? (A.flatMap(a => Bs.filter(b => adj(a, b)).map(b => doorState(a, b)))[0]?.why || `لا توجد «${subjAr(r.a)}» تحقق ذلك.`) : `لا توجد «${subjAr(r.a)}» تحقق ذلك.`; } out.push(res); continue; }
     for (const a of A) {
       const cands = Bs.filter(b => same(a, b) && b !== a);
       if (r.kind === 'far') {
@@ -586,6 +617,7 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
       if (!cands.length) { res.ok = false; res.why = `«${a.name}» و«${subjAr(r.b)}» في دورين مختلفين.`; break; }
       const okOne = b => r.kind === 'adjacent' ? contact(a, b) >= .8 : contact(a, b) >= .6 || gapOf(a, b) <= nearGap(r);
       if (!cands.some(okOne)) { const g = Math.min(...cands.map(b => gapOf(a, b))); res.ok = false; res.why = `«${a.name}» ${r.kind === 'adjacent' ? 'لا يلاصق' : 'بعيد عن'} «${cands[0].name}»${g > .3 ? ` (بينهما ${r1(g)} م)` : ''}.`; break; }
+      if (r.kind === 'adjacent' && r.door) { const sts = cands.filter(okOne).map(b => doorState(a, b)); if (!sts.some(x => x.ok)) { res.ok = false; res.why = sts[0].why; break; } }
     }
     out.push(res);
   }

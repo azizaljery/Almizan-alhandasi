@@ -17,7 +17,8 @@ import { FIXTURES } from './draw/catalog.mjs';
 import { circulationProof, CIRC_GATE_LIMITS } from './circulation-proof.mjs';
 import { footprint, validatePlot } from './planner.mjs';
 import { buildProgram, checkDoc, relaxFixtures, quality, DESIGN_TARGETS, canonicalSide } from './villa-layout.mjs';
-import { rulePenalty, verifyRequest, docRooms, blocksFor, stairPathTo } from './rules.mjs';
+import { rulePenalty, verifyRequest, docRooms, blocksFor, stairPathTo, subjectRooms } from './rules.mjs';
+import { planDirectDoor } from './direct-door.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { norm, sub, dot, pointInPolygon } from './draw/geom.mjs';
@@ -1772,6 +1773,23 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
   // (الجولة الثانية عشرة) مدخل العائلة منكسر (قيمة تصميمية افتراضية للميزان): لا خط رؤية مستقيم من الباب الخارجي إلى الصالة —
   // الباب والفتحة المقابلة له في طرفين متقابلين من البهو (كسرة)، وإن لم يتسع البهو لذلك تصير الفتحة بابًا يُغلق (حاجز بصري)
   if (foyer && !upper) screenEntry();
+  // (شرعاء V2) «باب مباشر» (علاقة direct_access): لكل قاعدة ملاصقة بعلم الباب يُركَّب باب حقيقي على الجدار المشترك الفعلي
+  // (planDirectDoor: طول كافٍ، لا تزاحم مع أبواب أخرى، لا قوس بدل الباب). إن تعذّر تبقى ملاحظة بالسبب، والتحقق من المستند
+  // (verifyRules) يرفض اعتبار القاعدة محققة — لا ملاصقة تُحسب بابًا.
+  for (const r of (P.rules || []).filter(x => x.kind === 'adjacent' && x.door && x.b && x.level !== 'forbid')) {
+    const As = subjectRooms(r.a, rooms).filter(x => !x.open), Bs = subjectRooms(r.b, rooms).filter(x => !x.open);
+    if (!As.length || !Bs.length) continue;                // لا فراغ بهذا الموضوع في هذا الدور: يُحكم عليه في التحقق (غياب الفراغ)
+    let done = null, why = null;
+    const prio = { not_adjacent: 0, different_levels: 0, same_room: 0, open_passage_instead: 2, wall_too_short: 3, no_clear_span: 4 };
+    for (const a of As) for (const b of Bs) {
+      if (a === b || done) continue;
+      const pl = planDirectDoor({ a, b, doors });
+      if (pl.ok) { done = { a, b, pl }; break; }
+      if (!why || (prio[pl.code] ?? 0) > (prio[why.pl.code] ?? 0)) why = { a, b, pl };
+    }
+    if (done) { if (done.pl.via === 'new') doors.push(done.pl.door); notes.push(`باب مباشر بين «${done.a.name}» و«${done.b.name}»${done.pl.via === 'new' ? ` بعرض ${r2(done.pl.door.w)} م على الجدار المشترك` : ' (موجود)'}.`); }
+    else if (why) notes.push(`باب مباشر بين «${why.a.name}» و«${why.b.name}» لم يُركَّب في هذا البديل: ${why.pl.why_ar}`);
+  }
   // تثبيت نهائي: كل باب داخلي على الحد المشترك الفعلي بين غرفتيه بعد كل الاقتطاعات (وإلا يُحذف)
   const byId = new Map(rooms.map(r => [r.id, r]));
   for (let i = doors.length - 1; i >= 0; i--) {

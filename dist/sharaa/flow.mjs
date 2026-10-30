@@ -336,7 +336,7 @@ export class SharaFlow {
     }
     if (key === 'guest_link') {
       if (v === 'separate') b = B.setField(b, 'features.guestLinkSeparate', true, m('preferred'));
-      if (v === 'near' || v === 'direct') { const to = B.spaceOf(b, 'guest_dining') ? 'guest_dining' : 'dining'; b = B.addRelation(b, { from: to, to: 'male_majlis', relation: v === 'near' ? 'near' : 'direct_access', ...m(), originalText: 'اختيار العميل: ' + (v === 'near' ? 'قريبة من المجلس' : 'ببابٍ مباشر على المجلس') }); }
+      if (v === 'near' || v === 'direct') { const to = B.spaceOf(b, 'guest_dining') ? 'guest_dining' : 'dining'; b = B.addRelation(b, { from: to, to: 'male_majlis', relation: v === 'near' ? 'near' : 'direct_access', ...(v === 'direct' ? { detail: 'door' } : {}), ...m(), originalText: 'اختيار العميل: ' + (v === 'near' ? 'قريبة من المجلس' : 'ببابٍ مباشر على المجلس') }); }
       return done();
     }
     if (key === 'guest_entrance') { if (v === 'must' || v === 'prefer') b = B.setField(b, 'features.guestEntrance', true, m(v === 'must' ? 'mandatory' : 'preferred')); else b = B.setField(b, 'features.guestEntrance', false, m('flexible')); if (v === 'no') b = B.dropItem(b, 'feature:guestEntrance'); return done(); }

@@ -118,7 +118,7 @@ export function toEngineInput(brief) {
     approve(r.relation === 'near' ? 'near' : r.relation === 'direct_access' ? 'adjacent' : kind);
     if (r.relation === 'near' || r.relation === 'direct_access') report.limited.push({ id: ref, text_ar: ENGINE_SUPPORT['relation.' + r.relation].ar, ev: ENGINE_SUPPORT['relation.' + r.relation].ev });
     if (r.relation === 'separate' && r.detail === undefined) report.assumptions.push({ id: 'separate-kind:' + r.id, text_ar: `«${describeRelation(r)}»: لم تُحدَّد درجة الفصل؛ سأعدّه «غير ملاصق» (الأخف) ما لم تطلب «بعيد».`, source: 'design_default', needsApproval: true });
-    push(ref, r, { kind, a, b });
+    push(ref, r, { kind, ...(r.relation === 'direct_access' && r.detail === 'door' ? { door: true } : {}), a, b });   // «باب مباشر» صريحًا (detail=door): المحرك يركّب بابًا حقيقيًا؛ «ملاصق» وحدها تبقى ملاصقة
   }
   for (const s of brief.spaces) if (s.count > 0 && s.floorPreference != null) {
     const a = engineSubject(s.type); if (!a) continue;
