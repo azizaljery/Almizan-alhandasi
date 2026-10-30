@@ -49,7 +49,10 @@ await page.screenshot({ path: shots + '/sharaa-2-profile.png', fullPage: true })
 const go = await page.$('#chat button:has-text("أؤكد وأبدأ"), #chat button:has-text("أفهم القيود")');
 console.log('REVIEW:', (await T('#chat')).slice(-700));
 if (go) { await go.click(); } else console.log('NO-GENERATE-BUTTON');
-await Promise.race([page.waitForURL(/design|studio/, { timeout: 600000 }), page.waitForSelector('#buildReport:not([hidden])', { timeout: 600000 })]).catch(() => console.log('NO-OUTCOME-IN-600s'));
+await page.waitForSelector('#chat button:has-text("توليد التصميم")', { timeout: 10000 }).then(b => { console.log('GENERATE-BUTTON-SHOWN'); return b.click(); }).catch(() => console.log('NO-GENERATE-STEP'));
+const T0 = Date.now(); const log0 = console.log; console.log = (...a) => log0(`[+${((Date.now() - T0) / 1000).toFixed(1)}s]`, ...a);
+await Promise.race([page.waitForURL(/design|studio/, { timeout: 120000 }), page.waitForFunction(() => document.querySelector('#buildReport') && !document.querySelector('#buildReport').hidden && document.querySelector('#buildReport').children.length > 0, null, { timeout: 120000 })]).catch(() => console.log('NO-OUTCOME-IN-120s'));
+console.log('ELAPSED-S:', (Date.now() - T0) / 1000);
 console.log('URL:', page.url());
 console.log('BUILD-REPORT:', (await T('#buildReport')).slice(0, 1800));
 console.log('BUTTONS:', JSON.stringify(await page.$$eval('#buildReport button', bs => bs.map(b => b.innerText.trim()))));
