@@ -3,6 +3,9 @@
 // خيار يمسّ بندًا إلزاميًا غير مُتنازَل عنه مسبقًا لا يُعرض كخيار تلقائي بل في مجموعة منفصلة تحتاج موافقة صريحة.
 import * as B from './brief.mjs';
 import { toEngineInput } from './adapter.mjs';
+import { toClientAr, clientLint } from '../client-language.mjs';
+// (تكامل R21) قاعدة R21 (مقترح 08): لا نص استثناء داخلي للعميل — رسالة المحرك العربية المعروفة (VILLA_*) بلغة العميل، وإلا لا شيء (كما clientErr في design.mjs)
+const clientMsg = e => { const m = String(e?.message || ''); if (!/^VILLA_/.test(String(e?.code || '')) || !/[\u0600-\u06FF]/.test(m)) return ''; const t = toClientAr(m); return clientLint(t).length || /[A-Za-z]{4,}/.test(t) ? '' : t.slice(0, 160); };
 
 export const OUTCOME = Object.freeze({ SOLVED: 'SOLVED', INFEASIBLE: 'PROVEN_INFEASIBLE', REGULATORY: 'REGULATORY_VIOLATION', INCOMPLETE: 'SEARCH_INCOMPLETE', ALL_HIDDEN: 'ALL_HIDDEN' });
 const REASON_AR = { TIME_LIMIT: 'انتهى وقت البحث', SEARCH_EXHAUSTED_WITHOUT_PROOF: 'استنفد المحرك ما جرّبه دون أن يجد حلًا ودون أن يثبت استحالته', SOLVER_ERROR: 'تعثّر المحرك داخليًا', UNSUPPORTED_CASE: 'حالة لا يدعمها المحرك' };
@@ -29,7 +32,7 @@ export function classifyOutcome(result, brief) {
   const r = result?.result || result; // خطأ بـ.result أو ناتج generate() نفسه
   if (r?.status === 'PROVEN_INFEASIBLE') return { kind: OUTCOME.INFEASIBLE, title_ar: 'مستحيل هندسيًا (بدليل من المحرك)', detail_ar: [result.report_ar || result.message || ''].filter(Boolean), proof: r.proofReference || [], conflictingConstraintIds: r.conflictingConstraintIds || [], retryable: false, engineOptions: r.suggestions || [] };
   if (r?.status === 'SEARCH_INCOMPLETE') return { kind: OUTCOME.INCOMPLETE, title_ar: 'لم يجد المحرك حلًا بعد', reason: r.reason, detail_ar: [(REASON_AR[r.reason] || r.reason) + '. هذا لا يعني أن الطلب مستحيل.'], retryable: !!r.retryable, diagnosticId: r.diagnosticId, counterfactual: result.counterfactual || [] };
-  return { kind: OUTCOME.INCOMPLETE, title_ar: 'لم يجد المحرك حلًا بعد', reason: 'SOLVER_ERROR', detail_ar: ['خطأ غير مصنّف من المحرك؛ لا يُعدّ استحالة. ' + String(result?.message || '').slice(0, 160)], retryable: true };
+  return { kind: OUTCOME.INCOMPLETE, title_ar: 'لم يجد المحرك حلًا بعد', reason: 'SOLVER_ERROR', detail_ar: [('خطأ غير مصنّف من المحرك؛ لا يُعدّ استحالة. ' + clientMsg(result)).trim()], retryable: true };
 }
 
 // ------------------------------------------------------------------------------------------ كتالوج التنازلات
