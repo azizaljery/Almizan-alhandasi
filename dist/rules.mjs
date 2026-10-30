@@ -4,6 +4,7 @@
 // verifyRules (تحقق هندسي من المستند الناتج: نُفّذ/لم يُنفَّذ مع السبب). نقي: لا DOM ولا شبكة.
 import { analyzeDoc } from './draw/digest.mjs';
 import { stairLayout } from './draw/stairs3d.mjs';
+import { swingBlockers } from './draw/review.mjs';
 
 const AR = '\\u0600-\\u06FF';
 const PRE = `(?<![${AR}])(?:[وفبك]?(?:ال|لل)|[وفبكل])?`; // أدوات ملتصقة: و، ب، ل، ال، بال، لل...
@@ -136,7 +137,9 @@ export function extractRules(t) {
   const seen = new Set();
   let made = null;
   const push = (r, span, neg = false) => {
-    const k = [r.kind, r.a, r.b, r.side, r.floor].join('|'); if (seen.has(k) || (r.b && r.a === r.b)) return; seen.add(k);
+    const k = [r.kind, r.a, r.b, r.side, r.floor].join('|'); if (r.b && r.a === r.b) return;
+    if (seen.has(k)) { if (r.door) { const old = rules.find(q => [q.kind, q.a, q.b, q.side, q.floor].join('|') === k); if (old && !old.door) { old.door = true; old.text = ruleText(old); } } return; }
+    seen.add(k);
     const rule = { id: 'R' + (rules.length + 1), ...r, text: ruleText(r) };
     if (made && span) made.push({ rule, span, neg });
     rules.push(rule);
@@ -188,7 +191,7 @@ export function extractRules(t) {
       const two = subs.filter(x => x.start >= m.end && x.start - m.end <= 30).slice(0, 2);
       if (two.length !== 2 || two[0].id === two[1].id) continue;
       used.push({ start: m.start, end: two[1].end });
-      push({ kind: 'adjacent', a: two[0].id, b: two[1].id }, [m.start, two[1].end]);
+      push({ kind: 'adjacent', a: two[0].id, b: two[1].id, door: true }, [m.start, two[1].end]);
     }
     // «بين A و B»
     for (const m of find(BETWEEN, c)) {
@@ -223,7 +226,8 @@ export function extractRules(t) {
       const neg = m.kind !== 'far' && negated(firstStart(A, m.start), m.start);
       const kind = neg ? 'apart' : m.kind;
       const co = coordinated(after.end), end = co.length ? co[co.length - 1].end : after.end;
-      for (const b of [after, ...co]) for (const a of A) push({ kind, a, b: b.id }, [aStart, end], neg || negFar);
+      const doorRel = kind === 'adjacent' && !neg && /باب/.test(m.text);
+      for (const b of [after, ...co]) for (const a of A) push({ kind, a, b: b.id, ...(doorRel ? { door: true } : {}) }, [aStart, end], neg || negFar);
     }
     const consumed = new Set();
     for (const p of PLACES) for (const m of find(p.rx, c)) {
@@ -277,6 +281,7 @@ export function ruleText(r) {
   if (r.kind === 'place' && r.mode === 'avoid') return `${A} لا يطل على ${r.side === 'front' ? 'الشارع' : r.side === 'back' ? 'الواجهة الخلفية' : 'جهة ' + (COMPASS_AR[r.side] || r.side)}`;
   if (r.kind === 'place') return `${A} ${r.mode === 'touch' ? (r.side === 'front' ? 'على الشارع (الواجهة الأمامية)' : r.side === 'back' ? 'على الواجهة الخلفية' : SIDE_AR[r.side]) : SIDE_AR[r.side]}`;
   if (r.kind === 'floor') return `${A} في الدور ${r.floor === 'upper' ? 'العلوي' : 'الأرضي'}`;
+  if (r.kind === 'adjacent' && r.door) return `${A} بباب مباشر على «${subjAr(r.b)}»`;
   return `${A} ${{ adjacent: 'بجوار', near: 'قرب', far: 'بعيدًا عن' }[r.kind]} «${subjAr(r.b)}»`;
 }
 // ------------------------------------------------------------------------------------------ التقييم في الإطار القانوني
@@ -401,7 +406,7 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
     if (r.kind === 'apart') { for (const a of A) for (const b of Bs) if (a !== b && contact(a, b) > .3) base += 60; return; }
     if (any) { const ok = A.some(a => Bs.some(b => r.kind === 'adjacent' ? contact(a, b) >= 1 : r.kind === 'near' ? contact(a, b) >= .8 || gapOf(a, b) <= 1.8 : contact(a, b) <= .3)); if (!ok) base += 55; return; }
     for (const a of A) {
-      const best = Math.min(...Bs.map(b => r.kind === 'adjacent' ? (contact(a, b) >= 1.0 ? 0 : 1 + gapOf(a, b)) : r.kind === 'near' ? (contact(a, b) >= .8 || gapOf(a, b) <= nearGap(r) - .2 ? 0 : gapOf(a, b) - nearGap(r) + 1.2) : 0));
+      const best = Math.min(...Bs.map(b => r.kind === 'adjacent' ? (contact(a, b) >= (r.door ? DIRECT_DOOR_MIN_EDGE : 1.0) ? 0 : 1 + gapOf(a, b)) : r.kind === 'near' ? (contact(a, b) >= .8 || gapOf(a, b) <= nearGap(r) - .2 ? 0 : gapOf(a, b) - nearGap(r) + 1.2) : 0));
       if (r.kind === 'far') { const need = Math.max(7, diag * .4); for (const b of Bs) { const dd = Math.hypot(ctr(a).x - ctr(b).x, ctr(a).y - ctr(b).y); if (contact(a, b) > .3) base += 55; if (dd < need) base += 30 + 20 * (need - dd); } continue; } // عتبة التحقق نفسها: أي نقص عنها = بند غير منفّذ
       if (best > 0) base += 50 + 14 * best;
     }
@@ -503,6 +508,37 @@ export function stairPathTo(doc, room) {
   }
   return null;
 }
+/** (الجولة 21، direct_access) الحد الأدنى للجدار المشترك بين فراغين ليُركَّب بينهما باب مباشر: يطابق DOOR_TOUCH في المولّد (1.3 م). */
+export const DIRECT_DOOR_MIN_EDGE = 1.3;
+export const DIRECT_DOOR_MIN_W = 0.8;
+/**
+ * هل بين فراغ من A وفراغ من B باب فعلي (ورقة باب لا فتحة مفتوحة) على جدار مشترك طوله ≥ 1.3 م، عرضه ≥ 0.8 م، ولا يعترض فتحه جدار أو باب أو عمود؟
+ * وحدة المجلس: المجلس ودهليزه المتصل به بفتحة مفتوحة (الدهليز جزء منه عند المحرك). يُرجع { ok, why, evidence }.
+ */
+export function directDoorCheck(doc, As, Bs) {
+  const model = analyzeDoc(doc), fails = [];
+  for (const a of As) for (const b of Bs) {
+    if (a === b || a.level !== b.level) continue;
+    const L = model.levelById.get(a.level); if (!L) continue;
+    const idsOf = r => { const ids = new Set(L.rooms.filter(x => x.name === r.name).map(x => x.id));
+      if (r.type === 'majlis') for (const op of L.openings) if (op.kind === 'arch' && op.left && op.right) { if (ids.has(op.left.id)) ids.add(op.right.id); else if (ids.has(op.right.id)) ids.add(op.left.id); }
+      return ids; };
+    const ua = idsOf(a), ub = idsOf(b), ops = L.openings.filter(op => op.door && op.left && op.right && ((ua.has(op.left.id) && ub.has(op.right.id)) || (ub.has(op.left.id) && ua.has(op.right.id))));
+    const leaf = ops.filter(op => ['door', 'door2', 'slider'].includes(op.kind));
+    if (!ops.length) { fails.push(`لا باب بين «${a.name}» و«${b.name}»${contact(a, b) >= DIRECT_DOOR_MIN_EDGE ? ' رغم أن بينهما جدارًا مشتركًا ' + r1(contact(a, b)) + ' م' : ' (الجدار المشترك ' + r1(contact(a, b)) + ' م أقل من ' + DIRECT_DOOR_MIN_EDGE + ' م اللازمة لتركيب باب)'}.`); continue; }
+    if (!leaf.length) { fails.push(`بين «${a.name}» و«${b.name}» فتحة مفتوحة (قوس) لا باب.`); continue; }
+    const good = [];
+    for (const op of leaf) {
+      if (op.w < DIRECT_DOOR_MIN_W - 1e-6) { fails.push(`عرض الباب بين «${a.name}» و«${b.name}» ${r1(op.w)} م أقل من ${DIRECT_DOOR_MIN_W} م.`); continue; }
+      const bl = swingBlockers(model, L, op).filter(x => ['wall', 'door', 'column'].includes(x.kind));
+      if (bl.length) { fails.push(`فتح الباب بين «${a.name}» و«${b.name}» يصطدم بـ ${bl.map(x => x.kind + ' ' + x.id).join('، ')}.`); continue; }
+      const bb = q => { const xs = (q.net || []).map(z => z.x), ys = (q.net || []).map(z => z.y); return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }; };
+      good.push({ id: op.id, kind: op.kind, width: r1(op.w), between: [op.left.name, op.right.name], requested: [a.name, b.name], sharedWall_m: r1(contact(bb(op.left), bb(op.right))) });
+    }
+    if (good.length) return { ok: true, why: `باب مباشر ${good[0].kind} عرضه ${good[0].width} م بين «${good[0].between[0]}» و«${good[0].between[1]}»${good[0].between.includes(a.name) && good[0].between.includes(b.name) ? '' : ` (دهليز ${a.type === 'majlis' ? a.name : b.name})`} على جدار مشترك ${good[0].sharedWall_m} م، وفتحه حر.`, evidence: good[0] };
+  }
+  return { ok: false, why: fails[0] || 'لا زوج من الفراغين المطلوبين يصلح لباب مباشر.' };
+}
 /**
  * يتحقق من كل قاعدة على المستند. يعيد [{ id, text, ok, why }] — ok=false مع سبب مقيس.
  */
@@ -561,7 +597,7 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
       else if (r.mode === 'touch') { const far = A.find(a => placeDeficit(a, side, 'touch', B) > .45); if (far) res.why = `«${far.name}» يرتد ${r1(placeDeficit(far, side, 'touch', B))} م عن حد المبنى ويطل على ${where} بلا فراغ مبني أمامه (حديقة أو فناء مفتوح).`; }
       out.push(res); continue;
     }
-    const same = (a, b) => a.level === b.level;
+    const same = (a, b) => a.level === b.level; // eslint-disable-line
     if (r.kind === 'cluster') { const lone = A.find(a => A.length > 1 && !A.some(b => b !== a && same(a, b) && contact(a, b) >= .8)); if (lone) { res.ok = false; res.why = `«${lone.name}» لا تلاصق أيًّا من بقية المجموعة.`; } out.push(res); continue; }
     let Bs = sel(r.b); if (r.b === 'hall') Bs = pickHall(Bs);
     if (!Bs.length) { res.ok = false; res.why = `لا يوجد «${subjAr(r.b)}» في هذا التصميم.`; out.push(res); continue; }
@@ -584,9 +620,10 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
         continue;
       }
       if (!cands.length) { res.ok = false; res.why = `«${a.name}» و«${subjAr(r.b)}» في دورين مختلفين.`; break; }
-      const okOne = b => r.kind === 'adjacent' ? contact(a, b) >= .8 : contact(a, b) >= .6 || gapOf(a, b) <= nearGap(r);
+      const okOne = b => r.kind === 'adjacent' ? (r.door ? true : contact(a, b) >= .8) : contact(a, b) >= .6 || gapOf(a, b) <= nearGap(r);
       if (!cands.some(okOne)) { const g = Math.min(...cands.map(b => gapOf(a, b))); res.ok = false; res.why = `«${a.name}» ${r.kind === 'adjacent' ? 'لا يلاصق' : 'بعيد عن'} «${cands[0].name}»${g > .3 ? ` (بينهما ${r1(g)} م)` : ''}.`; break; }
     }
+    if (res.ok && r.kind === 'adjacent' && r.door) { const dd = directDoorCheck(doc, A, Bs, rooms); res.ok = dd.ok; res.why = dd.why; if (dd.evidence) res.evidence = dd.evidence; }
     out.push(res);
   }
   return withStatus(out);

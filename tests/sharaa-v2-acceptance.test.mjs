@@ -159,3 +159,10 @@ test('17 «قريب/بعيد»: افتراض معلن بحالة needs_confirmat
   const f = flow(); f.answer('free', t); assert.ok(f.profile().assumptions.some(x => x.ref === 'near-measure' && x.verification === 'needs_confirmation'));
   assert.doesNotMatch(texts(f.log), /بالأمتار|كم متر/);
 });
+
+test('18 «باب مباشر بين المقلط والمجلس» يصير علاقة direct_access في الملف ثم قاعدة adjacent في المحوّل (دون الظهور كـ«قريب»)', () => {
+  const t = 'لازم باب مباشر بين المقلط والمجلس'; const b = B.applyExtraction(B.createBrief({ land: mkLand() }), extractRequirements(t, { counts: {} }), t).brief;
+  const r = b.relations.find(x => x.relation === 'direct_access'); assert.ok(r, 'علاقة direct_access'); assert.equal(r.priority, 'mandatory');
+  assert.ok(!b.relations.some(x => x.relation === 'near'));
+  assert.ok(r.verification !== 'confirmed', 'لا يُرسل صلبًا قبل تأكيد العميل');
+});
