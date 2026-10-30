@@ -82,7 +82,7 @@ const FLOORS = [
 // العلاقات بالترتيب: النفي أولًا (لأن «مو قريب» يحوي «قريب»)
 const RELS = [
   { kind: 'far', re: `(?:مو|مب|ما|لا|ليس|مش) ?(?:تكون|يكون|تصير|يصير)? ?(?:قريب(?:ه)?|جنب|بجنب|بجانب|ملاصق(?:ه)?|لاصق(?:ه)?|مجاور(?:ه)?) ?(?:من|عن|ل|لل)?|بعيد(?:ه)? (?:عن|من)|ابعد (?:ما يكون )?(?:عن|من)|منفصل(?:ه)? عن|معزول(?:ه)? عن|${EN("(?:far (?:away )?from|away from|not (?:be )?(?:near|close to|next to|adjacent to)|separated? from)")}` },
-  { kind: 'adjacent', re: `بجانب|بجنب|جنب|جمب|ملاصق(?:ه)?(?: ل| لل)?|لاصق(?:ه)?|مجاور(?:ه)?(?: ل| لل)?|بجوار|جوار|لصق|مفتوح(?:ه)? (?:ع|على|علي)|يفتح (?:ع|على|علي)|تفتح (?:ع|على|علي)|متصل(?:ه)? (?:ب|مع)|يتصل (?:ب|مع)|تتصل (?:ب|مع)|${EN('next to|adjacent to|beside|opens? (?:on)?to|open to|connected to|attached to')}` },
+  { kind: 'adjacent', re: `بجانب|بجنب|جنب|جمب|ملاصق(?:ه)?(?: ل| لل)?|لاصق(?:ه)?|مجاور(?:ه)?(?: ل| لل)?|بجوار|جوار|لصق|(?:ب|ل[هـ]? |لها )?باب (?:داخلي )?مباشر (?:على|علي|ع|الي|الى|مع|ل|لل)|مفتوح(?:ه)? (?:ع|على|علي)|يفتح (?:ع|على|علي)|تفتح (?:ع|على|علي)|متصل(?:ه)? (?:ب|مع)|يتصل (?:ب|مع)|تتصل (?:ب|مع)|${EN('next to|adjacent to|beside|opens? (?:on)?to|open to|connected to|attached to')}` },
   { kind: 'near', re: `قريب(?:ه)? (?:من|م|ل|لل)|قريب(?:ه)?|بالقرب من|قرب|عند|${EN('near(?: to)?|close to')}` },
 ].map(p => ({ ...p, rx: new RegExp(`(?<![${AR}])و?(?:${p.re})${END}`, 'g') }));
 const NEG = new RegExp(`(?<![${AR}])و?(?:بدون|بلا|من غير|ما ابي|ما ابغي|لا ابي|لا ابغي|ما ابا|ما بي|ما نبي|ما نبغي|لا اريد|لا نريد|ما اريد|ما احتاج|لا احتاج|ما نحتاج|لا نحتاج|مافي|ما فيه|ما يحتاج|لا داعي ل|ما له داعي)(?: (?:ال)?(?:غرفه|صاله))? ((?:ال)?(?:مجلس|مجالس|طعام|سفره|ممرات|ممر|مكتب|مصلي|خادمه|سائق))`, 'g');
@@ -161,6 +161,7 @@ export function extractRules(t) {
   const SOFT = new RegExp(`(?<![${AR}])(?:و|ف)?(?:مو|مب|ليس|غير|مش) ?(?:شرط(?:ا)?|ضروري|لازم)(?![${AR}])|(?<![a-z])not (?:required|necessary|a must)(?![a-z])`, 'g');
   const TOGETHER = new RegExp(`(?<![${AR}])(?:جنب|بجنب|بجانب|بجوار|ورا|مع|قرب|قريب(?:ه|ين)? من) بعض(?:ها|هم)?(?![${AR}])|(?<![${AR}])(?:متجاور(?:ه|ين)|متلاصق(?:ه|ين)|مع بعض)(?![${AR}])|(?<![a-z])(?:next to each other|together|adjacent to each other)(?![a-z])`, 'g');
   const BETWEEN = new RegExp(`(?<![${AR}])(?:بين|وسط ما بين)(?![${AR}])|(?<![a-z])between(?![a-z])`, 'g');
+  const DIRECT_BETWEEN = new RegExp(`(?<![${AR}])باب (?:داخلي )?مباشر (?:بين|ما بين)(?![${AR}])`, 'g');
   const SPLIT = /[،,.؛;\n!?؟]+/g;
   const pieces = []; { let last = 0, m; SPLIT.lastIndex = 0; while ((m = SPLIT.exec(t))) { pieces.push([last, m.index]); last = m.index + m[0].length; } pieces.push([last, t.length]); }
   for (const [p0, p1] of pieces) {
@@ -182,8 +183,16 @@ export function extractRules(t) {
       out.push(nx); at = nx.end; } return out; };
     const tailOf = end => { const m = c.slice(end).match(/^\s*(?:[^\s]+\s*){0,2}/); let s = m ? m[0] : ''; const cut = s.search(/\sو/); if (cut >= 0) s = s.slice(0, cut); return s.trimEnd(); };
     const orphan = (m, kind) => orphans.push({ kind, quote: (c.slice(m.start, m.end) + tailOf(m.end)).trim(), at: [off + m.start, off + m.end + tailOf(m.end).length] });
+    // «باب مباشر بين A و B»: علاقة ملاصقة بين الطرفين دون فاعل قبل العبارة
+    for (const m of find(DIRECT_BETWEEN, c)) {
+      const two = subs.filter(x => x.start >= m.end && x.start - m.end <= 30).slice(0, 2);
+      if (two.length !== 2 || two[0].id === two[1].id) continue;
+      used.push({ start: m.start, end: two[1].end });
+      push({ kind: 'adjacent', a: two[0].id, b: two[1].id }, [m.start, two[1].end]);
+    }
     // «بين A و B»
     for (const m of find(BETWEEN, c)) {
+      if (overlapsUsed(m)) continue;
       const A = subjectsBefore(subs, m.start, c), after = subs.filter(x => x.start >= m.end && x.start - m.end <= 30).slice(0, 2);
       if (A.length !== 1 || after.length !== 2) { orphan(m, 'between'); continue; }
       used.push({ start: m.start, end: after[1].end });
