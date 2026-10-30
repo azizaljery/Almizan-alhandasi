@@ -9,6 +9,7 @@
 //
 // كل الهندسة من analyzeDoc (dist/draw/digest.mjs): الغرف، والفتحات بجانبيها، ورسم الحركة عبر الأبواب،
 // والوصول من المدخل أو من السلم. لا قيمة نظامية تُدّعى بلا مصدر محقق: كل عتبة تحمل `source` و`verified`.
+import { briefMajlisDoor } from './shared-brief.mjs';
 import { analyzeDoc, isWindowKind } from './draw/digest.mjs';
 import { ROOM_TYPES } from './draw/catalog.mjs';
 import { reviewDoc, wallRect, swingBlockers, GUIDELINES } from './draw/review.mjs';
@@ -241,6 +242,8 @@ function requestRules(request) {
 /** هل طلب العميل أن يفتح المجلس على الطعام (مقلط/طعام الضيوف/الطعام بجانب المجلس)؟ حينها يغلب طلبه الافتراضي. */
 export function majlisDiningAsked(request = {}) {
   if (request.majlisDining) return true; // تعديل صريح من العميل («افتح باب بين المجلس والطعام»)
+  // (الجولة 21 — مقترح) العقد الموحد: الباب المباشر أو طعام الضيوف وحدهما يطلبان الباب؛ «قريب/جنب» (NEAR) لا يفرض بابًا. المولّد يقرأ الدالة نفسها
+  if (request.brief?.version) return briefMajlisDoor(request.brief);
   const t = norm_ar(request.text);
   if (/مقلط|مقالط|طعام (?:ال)?ضيوف|سفره (?:ال)?ضيوف|المجلس (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?(?:طعام|سفره)|(?:الطعام|السفره) (?:علي|يفتح علي|متصل ب|جنب|بجانب|بجوار) ?(?:ال)?مجلس/.test(t)) return true;
   return requestRules(request).some(r => ['adjacent', 'near'].includes(r.kind) && !r.negated && r.mode !== 'avoid' && ((r.a === 'dining' && /^majlis/.test(r.b || '')) || (r.b === 'dining' && /^majlis/.test(r.a || ''))));
@@ -402,12 +405,14 @@ function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = fa
     else {
       const tol = DESIGN_THRESHOLDS.setbackTolerance.value;
       const pts = [];
-      for (const w of doc.walls) for (const p of wallRect(w)) pts.push({ p, what: `الجدار ${w.id}` });
+      // (الجولة 21 — 02c) السور/الساتر الخارجي (kind 'fence') عنصر موقع لا مبنى: يُقاس داخل حدود الأرض (ارتداد صفر) لا داخل خط ارتداد المبنى —
+      // كما تعامله site-parking.mjs. لا يمس أي جدار مبنى (kind 'wall'/'parapet')؛ ولم يكن المولّد يرسم أسوارًا قبل 02c.
+      for (const w of doc.walls) for (const p of wallRect(w)) pts.push({ p, what: `الجدار ${w.id}`, site: w.kind === 'fence' });
       for (const { room } of real) for (const p of room.net) pts.push({ p, what: roomName(room) });
       const hits = new Map();
-      for (const { p, what } of pts) {
+      for (const { p, what, site } of pts) {
         let over = pointInPolygon(p, frame.poly, 1e-9) ? 0 : Infinity;
-        for (const e of frame.edges) { const inside = -dot(sub(p, e.a), e.out); over = Math.max(over, e.setback - inside); }
+        if (!site) for (const e of frame.edges) { const inside = -dot(sub(p, e.a), e.out); over = Math.max(over, e.setback - inside); }
         if (over > tol) { worst = Math.max(worst, over); if (!hits.has(what)) hits.set(what, over); }
       }
       for (const [what, over] of hits) bad.push(Number.isFinite(over) ? `${what} يتجاوز خط الارتداد بـ ${r2(over)} م` : `${what} خارج حدود الأرض`);
@@ -422,7 +427,7 @@ function evaluateGates0(doc, request = {}, model = analyzeDoc(doc), { heavy = fa
     const frame = plotFrame(doc), bad = [], notes = [], sides = {};
     if (frame) {
       const streets = new Set(doc.streets || [doc.entry || 's']), entry = doc.entry || 's';
-      const pts = []; for (const w of doc.walls) for (const p of wallRect(w)) pts.push(p);
+      const pts = []; for (const w of doc.walls) if (w.kind !== 'fence') for (const p of wallRect(w)) pts.push(p); // (02c) السور عنصر موقع لا مبنى
       const front = frontSetbackFor(doc.plot?.streetWidth);
       for (const e of frame.edges) {
         let clear = Infinity; for (const p of pts) clear = Math.min(clear, -dot(sub(p, e.a), e.out));

@@ -1,5 +1,6 @@
 // منطق الصفحة الرئيسية: الأرض (طول وعرض وشوارع ومداخل) ← شرعاء ← تصميم أولي داخل المرسم.
 // وحدة نقية بلا DOM: كل ما فيها قابل للاختبار بـ node. الواجهة في home.mjs.
+import { clientLint } from './client-language.mjs';
 import { validatePlot, defaultRooms } from './planner.mjs';
 import { footprintDiagnostics } from './claude/planner.mjs';
 import { rankByDNA, geometryFingerprint } from './design-dna.mjs';
@@ -221,14 +222,14 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
     const c2 = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
     const req2 = requirements || extractRequirements(idea || '', { counts: c2, discovery: disc });
     try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, engine }); }
-    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || villaEngineOf(engine) === 'v3') throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
+    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || villaEngineOf(engine) === 'v3') throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms: rooms?.length ? rooms : programFromCounts(c2), discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين يجتاز الفحوص؛ استُخدم المحرك السابق.'); return out; }
   }
   // المولّد المهني أولًا (أجنحة نوم بحماماتها، صالة محورية، مجلس بممر ضيوف ودورة مياه)؛ المحرك السابق احتياط فقط
   const villaCounts = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
   let villaFail = null;
   const req = requirements || extractRequirements(idea || '', { counts: villaCounts, discovery: disc });
   if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, engine }); }
-  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || villaEngineOf(engine) === 'v3') throw err; villaFail = err.message; }
+  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || villaEngineOf(engine) === 'v3') throw err; villaFail = err.code === 'VILLA_NO_FIT' ? 'البرنامج أكبر مما تتسع له الأرض بتوزيعاته' : 'لم يجتز أي توزيع الفحوص'; } // (الجولة 21) لا نص استثناء
   const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
   const notes = [];
@@ -246,7 +247,7 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
     dna.geometryFingerprint = geometryFingerprint(doc);
     // مقارنة ثانوية تراعي الفتحات (AZ-06): للعرض فقط، لا تغيّر selectedIndex ولا ترتيب البدائل.
     try { dna.openingAware = compareOpeningAware({ models: result.models, selectedIndex: result.selectedIndex }); } catch { dna.openingAware = null; }
-  } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
+  } catch { notes.push('تعذّر حساب بصمة التصميم لهذا البديل.'); } // (الجولة 21) لا نص استثناء
   return { doc, report, notes, dna, alternatives, alternativesCount: result.models.length, selectedIndex: result.selectedIndex, strategy: result.selectedModel.strategy };
 }
 
@@ -261,7 +262,7 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
     dna = rankByDNA({ plot, rooms, discovery, idea, counts, models, selectedIndex: 0 });
     dna.geometryFingerprint = geometryFingerprint(best.doc);
     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
-  } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
+  } catch { notes.push('تعذّر حساب بصمة التصميم لهذا البديل.'); } // (الجولة 21) لا نص استثناء
   return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, alternativesInfo: alternativesInfo(out, requirements?.want || 4), selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, villaEngine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], review: best.review || null, same: !!best.same, mirror: !!best.mirror, presentation: best.presentation || null, presentationSummary: out.presentation || null, hidden: out.hidden || [] };
 }
 
@@ -355,6 +356,8 @@ export function friendlyBuildError(err) {
   // (الجولة العشرون) المحرك الثالث يرفق تقريرًا عربيًا (التعارض والخيارات وما يُغيَّر في الطلب)
   if (err?.report_ar) return err.report_ar;
   const raw = String(err?.message || err || '');
+  // (الجولة 21 — مقترح، kit errorToResult) لا يُعرض نص استثناء داخلي على العميل
+  if (clientLint(raw).length || /[A-Za-z]{4,}/.test(raw.replace(/\b[A-Z]\d\b/g, ''))) return 'تعذّر إكمال معالجة طلبك هذه المرة (لم يثبت أنه مستحيل). يمكنك إعادة المحاولة أو تعديل أحد البنود.';
   if (err instanceof MultiFloorError) return raw;
   if (/No candidate passed|لم يجد محرك/.test(raw)) return 'لم أجد توزيعًا يتسع لهذا البرنامج في دور واحد على هذه الأرض، دون حذف أو تصغير أي غرفة.';
   return raw || 'تعذّر توليد التصميم.';

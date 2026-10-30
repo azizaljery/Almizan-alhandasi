@@ -1,0 +1,11 @@
+{
+  "name": "mizan-r21-review-patch-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "example": "node examples/run.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

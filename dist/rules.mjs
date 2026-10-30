@@ -5,6 +5,8 @@
 import { analyzeDoc } from './draw/digest.mjs';
 import { stairLayout } from './draw/stairs3d.mjs';
 import { swingBlockers } from './draw/review.mjs';
+import { measureClearDims, deviationAr } from './clear-dims.mjs';
+const R14_OFF_RULES = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean)); // (02c) مفتاح القياس فقط
 
 const AR = '\\u0600-\\u06FF';
 const PRE = `(?<![${AR}])(?:[وفبك]?(?:ال|لل)|[وفبكل])?`; // أدوات ملتصقة: و، ب، ل، ال، بال، لل...
@@ -431,11 +433,18 @@ const ROOM_OF = {
   servicedoor: r => r.name === 'المطبخ',
 };
 /** غرف المستند بمستطيلاتها الصافية (حسب الدور)، وحدود المبنى. +x شرق و+y شمال. */
-export function docRooms(doc) {
+// (02c) الأعمدة المرسومة في الدور (doc.columns: مربع بضلع size حول x,y؛ المستدير يُعامل بمربعه المحيط — محافظ) جزرٌ ممنوعة في المستطيل الصافي
+function colHoles(doc, level, xs, ys) {
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  return (doc.columns || []).filter(c => c.level === level).map(c => { const h = (c.size ?? .3) / 2; return [{ x: c.x - h, y: c.y - h }, { x: c.x + h, y: c.y - h }, { x: c.x + h, y: c.y + h }, { x: c.x - h, y: c.y + h }]; })
+    .filter(q => q[1].x > x0 && q[0].x < x1 && q[2].y > y0 && q[0].y < y1);
+}
+export function docRooms(doc, { net = false } = {}) {
   const A = analyzeDoc(doc), rooms = [];
   doc.levels.forEach((lv, i) => {
     const L = A.levelById.get(lv.id); if (!L) return;
-    for (const r of L.rooms) { if (r.unlabelled || !r.net?.length) continue; const xs = r.net.map(q => q.x), ys = r.net.map(q => q.y); rooms.push({ name: r.name, type: r.type, level: lv.id, li: i, area: r.area, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }); }
+    // (02c) net: الوجوه الداخلية والجزر كما يحسبها analyzeDoc — لقياس المستطيل الصافي (لا تُحمَّل في كل نسخة من التصميم)
+    for (const r of L.rooms) { if (r.unlabelled || !r.net?.length) continue; const xs = r.net.map(q => q.x), ys = r.net.map(q => q.y); rooms.push({ name: r.name, type: r.type, level: lv.id, li: i, area: r.area, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), ...(net ? { net: r.net, holes: [...(r.space?.holes || []), ...colHoles(doc, lv.id, xs, ys)] } : {}) }); }
   });
   const ws = doc.walls.filter(w => w.level === doc.levels[0].id), bx = ws.flatMap(w => [w.a.x, w.b.x]), by = ws.flatMap(w => [w.a.y, w.b.y]);
   return { rooms, B: { x0: Math.min(...bx), x1: Math.max(...bx), y0: Math.min(...by), y1: Math.max(...by) } };
@@ -710,17 +719,37 @@ export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
     else out.push({ id: 'P-kclosed', kind: 'pref', text: 'مطبخ مغلق بباب', ok: !open.length, why: open.length ? `المطبخ مفتوح على «${open[0]}» بفتحة بلا باب.` : `فتحات المطبخ الداخلية كلها أبواب (${ops.length}).` });
   }
   // الأبعاد الصريحة («4×5»): مقيسة من المستطيل الصافي للفراغ مع السماحية المعلنة
-  const r2d = v => Math.round(v * 100) / 100;
+  // (الجولة 21 — 02c، قرار المالك 2026-10-26) القياس عند أضيق موضع صالح: الشرطان معًا — صندوق الصافي ضمن السماحية، ومستطيل صافٍ داخل
+  // حدود الغرفة الفعلية (الوجوه الداخلية، خارج الجزر) يبلغ الطول والعرض المطلوبين (dist/clear-dims.mjs). المقيس في السجل هو المستطيل الصافي
+  // (أضيق موضع)، ومعه الصندوق والانحراف بإشارته. حدود غير متعامدة: «لم يُتحقق» (لا استحالة). R14_OFF=r21clear: الصندوق وحده كما في 02b (للقياس)
+  const r2d = v => Math.round(v * 100) / 100, clearOff = R14_OFF_RULES.has('r21clear');
+  const roomsN = Object.keys(req.dims || {}).length && !clearOff ? docRooms(doc, { net: true }).rooms : null, selN = id => roomsN.filter(r => ROOM_OF[id]?.(r));
   for (const [k, d] of Object.entries(req.dims || {})) {
     const sid = AREA_SUBJ[k]; if (!sid || !d || !(d.w > 0) || !(d.l > 0)) continue;
-    let list = sel(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); } if (sid === 'majlis') list = list.slice(0, 1);
+    let list = (roomsN ? selN : sel)(sid); if (sid === 'hall') { const m = list.filter(r => r.name === 'الصالة'); list = m.length ? m : list.slice(0, 1); } if (sid === 'majlis') list = list.slice(0, 1);
     const tol = Number.isFinite(d.tol) ? d.tol : .05, want = [Math.min(d.w, d.l), Math.max(d.w, d.l)];
     const text = `${list.length === 1 ? `«${list[0].name}»` : subjAr(sid)} بأبعاد ${want[0]}×${want[1]} م (كل ضلع ±${tol} م)`;
     if (!list.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, why: 'الفراغ غير موجود في هذا التصميم.' }); continue; }
-    const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
-    const bad = got.find(g => !g.ok);
-    const g0 = got[0]; // (الجولة الخامسة عشرة) المرسوم والمطلوب لملاحظة «ضمن السماح لا مطابق»
-    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: Math.round(g0.s[0] * 100) / 100, l: Math.round(g0.s[1] * 100) / 100 }, want: { s: want[0], l: want[1] }, why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
+    if (clearOff) {
+      const got = list.map(r => { const s = [r.x1 - r.x0, r.y1 - r.y0].sort((a, b) => a - b); return { r, s, ok: Math.abs(s[0] - want[0]) <= tol && Math.abs(s[1] - want[1]) <= tol }; });
+      const bad = got.find(g => !g.ok), g0 = got[0];
+      out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: r2d(g0.s[0]), l: r2d(g0.s[1]) }, want: { s: want[0], l: want[1] }, tol, ...(bad ? { failing: { name: bad.r.name, s: r2d(bad.s[0]), l: r2d(bad.s[1]) } } : {}), why: (bad ? `«${bad.r.name}» ${r2d(bad.s[0])}×${r2d(bad.s[1])} م — العرض ${r2d(bad.s[0])} من ${want[0]} (فرق ${r2d(Math.abs(bad.s[0] - want[0]))} م) والطول ${r2d(bad.s[1])} من ${want[1]} (فرق ${r2d(Math.abs(bad.s[1] - want[1]))} م)، والسماحية ±${tol} م لكل ضلع` : `الفعلي ${got.map(g => `${r2d(g.s[0])}×${r2d(g.s[1])}`).join('، ')} م`) + ' (المستطيل الصافي داخل الجدران؛ كل ضلع على حدة لا المساحة).' });
+      continue;
+    }
+    const got = list.map(r => ({ r, m: measureClearDims(r, { s: want[0], l: want[1] }, tol) }));
+    const skipped = got.filter(g => !g.m.applicable);
+    if (skipped.length) { out.push({ id: 'D-' + k, kind: 'dims', text, ok: false, status: 'unverified', want: { s: want[0], l: want[1] }, tol, why: `«${skipped[0].r.name}»: ${skipped[0].m.reason_ar}` }); continue; }
+    const bad = got.find(g => !g.m.ok), g0 = got[0], view = g => g.m.clear || g.m.envelope;
+    const why1 = g => { const m = g.m, c = view(g), e = m.envelope;
+      const reasons = [...(m.envelopeOK ? [] : [`الصندوق الصافي ${r2d(e.s)}×${r2d(e.l)} م خارج السماحية (فرق ${r2d(Math.abs(e.s - want[0]))} و${r2d(Math.abs(e.l - want[1]))} م)`]),
+        ...(m.clearOK ? [] : [`أضيق موضع صالح للاستخدام ${r2d(c.s)}×${r2d(c.l)} م (أقل من ${want[0]}×${want[1]} م بأكثر من السماحية${m.narrowing && (m.narrowing.s > .005 || m.narrowing.l > .005) ? `؛ الضيق عن الصندوق ${r2d(m.narrowing.s)} و${r2d(m.narrowing.l)} م من بروز أو تجويف أو درجة في سماكة الجدار` : ''})`])];
+      return `«${g.r.name}» ${reasons.join('، و')}، والسماحية ±${tol} م لكل ضلع`; };
+    const c0 = view(g0);
+    out.push({ id: 'D-' + k, kind: 'dims', text, ok: !bad, actual: { s: r2d(c0.s), l: r2d(c0.l) }, envelope: { s: r2d(g0.m.envelope.s), l: r2d(g0.m.envelope.l) }, want: { s: want[0], l: want[1] }, tol,
+      deviation: g0.m.deviation || null, measure: 'clear-rectangle',
+      ...(bad ? { failing: { name: bad.r.name, s: r2d(view(bad).s), l: r2d(view(bad).l), envelope: { s: r2d(bad.m.envelope.s), l: r2d(bad.m.envelope.l) }, envelopeOK: bad.m.envelopeOK, clearOK: bad.m.clearOK } } : {}),
+      why: (bad ? why1(bad) : `الفعلي ${got.map(g => { const c = view(g), e = g.m.envelope; return `${r2d(c.s)}×${r2d(c.l)}${Math.abs(e.s - c.s) > .005 || Math.abs(e.l - c.l) > .005 ? ` (أوسع موضع ${r2d(e.s)}×${r2d(e.l)})` : ''}`; }).join('، ')} م`) + ' (أضيق مستطيل صافٍ صالح داخل الجدران وصندوقه؛ كل ضلع على حدة لا المساحة).',
+      ...(!bad && got.some(g => deviationAr(g.m)) ? { deviation_ar: got.map(g => deviationAr(g.m) && `«${g.r.name}»: ${deviationAr(g.m)}`).filter(Boolean).join('؛ ') } : {}) });
   }
   // ما لا يمثّله المولّد: يُسجَّل بصدق «لم يُتحقق» أو «بانتظار العرض»، ولا يُعد منفّذًا أبدًا
   if (req.site?.irregular) out.push(verifySite(doc, req.site, entry));

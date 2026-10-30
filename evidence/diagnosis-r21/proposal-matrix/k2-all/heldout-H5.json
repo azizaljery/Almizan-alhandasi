@@ -1,0 +1,297 @@
+{
+ "case": {
+  "set": "heldout",
+  "id": "H5",
+  "land": {
+   "floors": 1,
+   "width": 22,
+   "length": 30,
+   "streets": [
+    "s"
+   ],
+   "entries": [
+    "s"
+   ]
+  },
+  "text": "دور واحد، 4 غرف نوم، مجلس 5×7، المطبخ 3.5×5، وصالة كبيرة",
+  "keep": 4
+ },
+ "engineRoot": "/home/claude/wt-k2-all/",
+ "ms": 73258,
+ "maxRssMB": 800,
+ "command": "node scripts/diagnose-r21.mjs heldout H5 --root /home/claude/wt-k2-all",
+ "stage1_brief": {
+  "understood": [
+   "4 غرف نوم",
+   "المجلس 5×7 م (35 م²)",
+   "المطبخ 3.5×5 م (17.5 م²)",
+   "الصالة واسعة",
+   "دور واحد"
+  ],
+  "unclear": [],
+  "rules": [],
+  "dims": {
+   "majlis": {
+    "w": 5,
+    "l": 7,
+    "tol": 0.05,
+    "quote": "مجلس 5×7"
+   },
+   "kitchen": {
+    "w": 3.5,
+    "l": 5,
+    "tol": 0.05,
+    "quote": "المطبخ 3.5×5"
+   }
+  },
+  "prefs": {
+   "big_hall": true,
+   "floors": 1
+  }
+ },
+ "stage2_constraints": {
+  "units": [
+   {
+    "key": "M",
+    "zone": "guest",
+    "area": 48
+   },
+   {
+    "key": "DN",
+    "zone": "guest",
+    "area": 15
+   },
+   {
+    "key": "KS",
+    "zone": "service",
+    "area": 19
+   },
+   {
+    "key": "F",
+    "zone": "circ",
+    "area": 9
+   },
+   {
+    "key": "H",
+    "zone": "family",
+    "area": 41
+   },
+   {
+    "key": "LK",
+    "zone": "circ",
+    "area": 8
+   },
+   {
+    "key": "S1",
+    "zone": "sleep",
+    "area": 95
+   }
+  ],
+  "hard": [
+   "مدخل العائلة على الشارع",
+   "الصالة تلامس مدخل العائلة (أو رواقًا منه)",
+   "رواق الوصل من مدخل العائلة",
+   "رواق الوصل إلى الصالة",
+   "مجلس الرجال على الشارع أو على واجهة جانبية (مدخل مستقل)",
+   "الطعام يلامس المطبخ",
+   "الطعام يُبلغ من العائلة (الصالة أو المدخل)",
+   "وصلة الضيافة: مجلس الرجال يلامس الطعام (مقلط) فلا يعبر الضيف العائلة",
+   "المطبخ لا يطل على الشارع",
+   "جناح النوم يلامس الصالة (ممره منها)",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش"
+  ],
+  "soft": [
+   "غرف النوم لا تطل على الشارع",
+   "المجلس لا يلاصق غرف النوم",
+   "الصالة تطل على حديقة أو حوش",
+   "الصالة لا تطل على الشارع",
+   "الطعام لا يفتح على مدخل العائلة (ممر عبور)"
+  ]
+ },
+ "stage3_topology": {
+  "grids": [
+   {
+    "nc": 3,
+    "nr": 3,
+    "valid": 44,
+    "nodes": 55953,
+    "exhausted": true
+   },
+   {
+    "nc": 3,
+    "nr": 4,
+    "valid": 90,
+    "nodes": 171589,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 3,
+    "valid": 2,
+    "nodes": 884,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 4,
+    "valid": 4,
+    "nodes": 15646,
+    "exhausted": true
+   }
+  ],
+  "distinctTopologies": 53,
+  "dimFit": 53,
+  "dimFail": 0,
+  "picked": 28,
+  "synthTrees": 55,
+  "libraryTrees": 70,
+  "twoFloors": null,
+  "groundStair": null
+ },
+ "stage4_allocation": {
+  "treesOptimized": 115,
+  "treesWithoutSolution": 111,
+  "topViolations": [
+   [
+    "dims:majlis",
+    64
+   ],
+   [
+    "dims:kitchen",
+    40
+   ],
+   [
+    "slab-span",
+    27
+   ],
+   [
+    "hall-aspect",
+    24
+   ],
+   [
+    "foyer-big",
+    23
+   ],
+   [
+    "bed-small",
+    13
+   ],
+   [
+    "big:dining",
+    11
+   ],
+   [
+    "dining-big",
+    11
+   ],
+   [
+    "circ-graph",
+    11
+   ],
+   [
+    "dining-strip",
+    10
+   ],
+   [
+    "corr-long",
+    8
+   ],
+   [
+    "dark:dining",
+    7
+   ],
+   [
+    "hall-via-beds",
+    5
+   ],
+   [
+    "small:majlis",
+    5
+   ]
+  ],
+  "treeStats": null
+ },
+ "stage5_validation": {
+  "rejected": 0,
+  "topReasons": [],
+  "twoFloorWhy": null,
+  "pool": 8,
+  "poolGuestDefects": [
+   {
+    "pat": "courtyard:k1",
+    "defects": []
+   },
+   {
+    "pat": "r31j2bu:1j2buvg0",
+    "defects": [
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r3aosfq:aosfqvg0",
+    "defects": [
+     "PARKING_SHALLOW",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r31sodw:1sodwvg0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "yoo:u0",
+    "defects": [
+     "HALL_LT_MAJLIS",
+     "BATH_NO_WINDOW"
+    ]
+   }
+  ],
+  "poolDistinctByFrozenCriterion": [
+   "courtyard:k1",
+   "r3aosfq:aosfqvg0"
+  ]
+ },
+ "stage6_selection": {
+  "shown": [
+   {
+    "pat": "courtyard:k1",
+    "status": "ready",
+    "mandatory": [],
+    "r16": [],
+    "hidden_ar": [],
+    "hiddenReasons": []
+   },
+   {
+    "pat": "r3od28p:od28phg1",
+    "status": "ready",
+    "mandatory": [],
+    "r16": [],
+    "hidden_ar": [],
+    "hiddenReasons": []
+   }
+  ],
+  "shortfall_ar": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 8، اجتاز البوابات منهم 8؛ 4 تخالف بندًا صريحًا من الطلب («المطبخ» بأبعاد 3.5×5 م (كل ضلع ±0.05 م)، صالة واسعة (35 م² صافية أو أكثر)، «المجلس» بأبعاد 5×7 م (كل ضلع ±0.05 م))؛ 1 لا تدخل السيارة موقفها عمليًا (موقف موازٍ في ارتداد ضحل أمام نافذة)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "hidden": 0
+ },
+ "stage7_timeout": {
+  "timedOut": false,
+  "note": "المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs"
+ },
+ "error": null,
+ "result": {
+  "status": "SOLVED",
+  "outcome": "VALID_ALTERNATIVES",
+  "requestedCount": 4,
+  "shownCount": 2,
+  "candidatesRejected": 0,
+  "hiddenAlternatives": 0,
+  "warnings": []
+ }
+}

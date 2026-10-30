@@ -1,0 +1,207 @@
+{
+ "case": {
+  "set": "main",
+  "id": "C7",
+  "land": {
+   "floors": 2,
+   "width": 18,
+   "length": 25,
+   "streets": [
+    "s"
+   ],
+   "entries": [
+    "s"
+   ]
+  },
+  "text": "دورين: المجالس والطعام والمطبخ تحت، و5 غرف نوم فوق، والماستر في الدور العلوي بعيدة عن الدرج، وغرفة لأمي في الأرضي",
+  "keep": 4
+ },
+ "engineRoot": "/home/claude/wt-r21p/",
+ "ms": 97685,
+ "maxRssMB": 470,
+ "command": "node scripts/diagnose-r21.mjs main C7 --root /home/claude/wt-r21p",
+ "stage1_brief": {
+  "understood": [
+   "5 غرف نوم",
+   "غرفة نوم رئيسية (ماستر)",
+   "غرفة نوم قريبة من الصالة لكبار السن",
+   "دوران (أرضي وأول)",
+   "«المجلس» في الدور الأرضي",
+   "«الطعام» في الدور الأرضي",
+   "«المطبخ» في الدور الأرضي",
+   "«غرف النوم» في الدور العلوي",
+   "«غرفة النوم الرئيسية» بعيدًا عن «الدرج»",
+   "«غرفة النوم الرئيسية» في الدور العلوي",
+   "«غرفة كبار السن» في الدور الأرضي"
+  ],
+  "unclear": [],
+  "rules": [
+   "floor:majlis «المجالس والطعام والمطبخ تحت»",
+   "floor:dining «المجالس والطعام والمطبخ تحت»",
+   "floor:kitchen «المجالس والطعام والمطبخ تحت»",
+   "floor:bedrooms «غرف نوم فوق»",
+   "far:master/stairs «والماستر في الدور العلوي بعيدة عن الدرج»",
+   "floor:master «والماستر في الدور العلوي»",
+   "floor:elderly «وغرفة لأمي في الأرضي»"
+  ],
+  "dims": {},
+  "prefs": {
+   "elderlyRoom": true,
+   "floors": 2
+  }
+ },
+ "stage2_constraints": null,
+ "stage3_topology": {
+  "grids": null,
+  "distinctTopologies": null,
+  "dimFit": null,
+  "dimFail": null,
+  "picked": null,
+  "synthTrees": null,
+  "libraryTrees": null,
+  "twoFloors": {
+   "grids": [
+    {
+     "nc": 3,
+     "nr": 4,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 3,
+     "nr": 3,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 4,
+     "ground": 0,
+     "joint": 0
+    },
+    {
+     "nc": 2,
+     "nr": 5,
+     "ground": 0,
+     "joint": 0
+    }
+   ]
+  },
+  "groundStair": null
+ },
+ "stage4_allocation": {
+  "treesOptimized": 16,
+  "treesWithoutSolution": 11,
+  "topViolations": [
+   [
+    "env-shallow",
+    8
+   ],
+   [
+    "upper-right",
+    5
+   ],
+   [
+    "stair-big",
+    3
+   ],
+   [
+    "env-small",
+    3
+   ],
+   [
+    "foyer-big",
+    2
+   ],
+   [
+    "hall-dark",
+    2
+   ],
+   [
+    "slab-span",
+    1
+   ],
+   [
+    "dining-strip",
+    1
+   ]
+  ],
+  "treeStats": null
+ },
+ "stage5_validation": {
+  "rejected": 35,
+  "topReasons": [
+   [
+    "لا دور علوي يتسع فوق مسقطه الأرضي بهذا التنظيم",
+    31
+   ],
+   [
+    "tf:stack",
+    16
+   ],
+   [
+    "tf:none",
+    7
+   ],
+   [
+    "tf:far-stair",
+    7
+   ],
+   [
+    "tf:ov",
+    6
+   ],
+   [
+    "لا دور علوي يتسع على هذا الغلاف",
+    4
+   ],
+   [
+    "tf:majlis-short",
+    3
+   ]
+  ],
+  "twoFloorWhy": null,
+  "pool": 1,
+  "poolGuestDefects": [
+   {
+    "pat": "frontstair:fsg3/uspine",
+    "defects": [
+     "WET_STACK",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   }
+  ],
+  "poolDistinctByFrozenCriterion": [
+   "frontstair:fsg3/uspine"
+  ]
+ },
+ "stage6_selection": {
+  "shown": [
+   {
+    "pat": "frontstair:fsg3/uspine",
+    "status": "needs-edits",
+    "mandatory": [],
+    "r16": [
+     "WET_STACK",
+     "MASTER_STAIR_DOOR"
+    ],
+    "hidden_ar": [],
+    "hiddenReasons": []
+   }
+  ],
+  "shortfall_ar": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 36، اجتاز البوابات منهم 1؛ ورُفض 35 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك). قراءة «المجالس» بمجلس واحد لم تُعرض: البديل الذي اتسع بها فيه مخالفة إلزامية (شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة (شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً)؛ شرط أساسي غير متحقق — مجلس الرجال بلا باب داخلي إلى البيت: الضيافة تُقدَّم من الخارج: «المجلس» ودهليزه لا يتصلان بأي فراغ داخلي (طعام أو مطبخ أو مقلط) — الضيافة من الخارج (شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً))؛ عُرضت قراءة المجلسين وحدها، والسؤال قائم: مجلس رجال ومجلس نساء، أم مجلس واحد؟",
+  "hidden": 1
+ },
+ "stage7_timeout": {
+  "timedOut": false,
+  "note": "المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs"
+ },
+ "error": null,
+ "result": {
+  "status": "SOLVED",
+  "requestedCount": 4,
+  "shownCount": 1,
+  "warnings": []
+ }
+}

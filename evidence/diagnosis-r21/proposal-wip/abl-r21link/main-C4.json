@@ -1,0 +1,271 @@
+{
+ "case": {
+  "set": "main",
+  "id": "C4",
+  "land": {
+   "floors": 1,
+   "width": 12,
+   "length": 36,
+   "streets": [
+    "s"
+   ],
+   "entries": [
+    "s"
+   ]
+  },
+  "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام، والغرف في الخلف بعيدة عن الشارع",
+  "keep": 4
+ },
+ "engineRoot": "/home/claude/wt-r21p/",
+ "ms": 20876,
+ "maxRssMB": 225,
+ "command": "node scripts/diagnose-r21.mjs main C4",
+ "stage1_brief": {
+  "understood": [
+   "3 غرف نوم",
+   "«غرف النوم» في الخلف"
+  ],
+  "unclear": [],
+  "rules": [
+   "place:bedrooms:back «والغرف في الخلف بعيدة عن الشارع»"
+  ],
+  "dims": {},
+  "prefs": {}
+ },
+ "stage2_constraints": {
+  "units": [
+   {
+    "key": "M",
+    "zone": "guest",
+    "area": 33
+   },
+   {
+    "key": "DN",
+    "zone": "guest",
+    "area": 15
+   },
+   {
+    "key": "KS",
+    "zone": "service",
+    "area": 16
+   },
+   {
+    "key": "F",
+    "zone": "circ",
+    "area": 9
+   },
+   {
+    "key": "H",
+    "zone": "family",
+    "area": 30
+   },
+   {
+    "key": "LK",
+    "zone": "circ",
+    "area": 8
+   },
+   {
+    "key": "S1",
+    "zone": "sleep",
+    "area": 73
+   }
+  ],
+  "hard": [
+   "مدخل العائلة على الشارع",
+   "الصالة تلامس مدخل العائلة (أو رواقًا منه)",
+   "رواق الوصل من مدخل العائلة",
+   "رواق الوصل إلى الصالة",
+   "مجلس الرجال على الشارع أو على واجهة جانبية (مدخل مستقل)",
+   "الطعام يلامس المطبخ",
+   "الطعام يُبلغ من العائلة (الصالة أو المدخل)",
+   "وصلة الضيافة: مجلس الرجال يلامس الطعام (مقلط) فلا يعبر الضيف العائلة",
+   "المطبخ لا يطل على الشارع",
+   "جناح النوم يلامس الصالة (ممره منها)",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "بند العميل: «غرف النوم» في الخلف"
+  ],
+  "soft": [
+   "غرف النوم لا تطل على الشارع",
+   "المجلس لا يلاصق غرف النوم",
+   "الصالة تطل على حديقة أو حوش",
+   "الصالة لا تطل على الشارع",
+   "الطعام لا يفتح على مدخل العائلة (ممر عبور)"
+  ]
+ },
+ "stage3_topology": {
+  "grids": [
+   {
+    "nc": 2,
+    "nr": 6,
+    "valid": 16,
+    "nodes": 72507,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 5,
+    "valid": 20,
+    "nodes": 81603,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 4,
+    "valid": 4,
+    "nodes": 12440,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 3,
+    "valid": 2,
+    "nodes": 650,
+    "exhausted": true
+   }
+  ],
+  "distinctTopologies": 16,
+  "dimFit": 12,
+  "dimFail": 4,
+  "picked": 3,
+  "synthTrees": 6,
+  "libraryTrees": 25,
+  "twoFloors": null,
+  "groundStair": null
+ },
+ "stage4_allocation": {
+  "treesOptimized": 31,
+  "treesWithoutSolution": 22,
+  "topViolations": [
+   [
+    "circ-graph",
+    2
+   ],
+   [
+    "foyer-big",
+    1
+   ],
+   [
+    "hall-via-beds",
+    1
+   ],
+   [
+    "hall-aspect",
+    1
+   ],
+   [
+    "hall-big",
+    1
+   ],
+   [
+    "corr-long",
+    1
+   ]
+  ],
+  "treeStats": null
+ },
+ "stage5_validation": {
+  "rejected": 3,
+  "topReasons": [
+   [
+    "«صالة الطعام والمقلط» 11.71 م² أصغر من 12 م².",
+    1
+   ],
+   [
+    "«المجلس» 19.03 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«صالة الطعام والمقلط» 11.87 م² أصغر من 12 م².",
+    1
+   ],
+   [
+    "«المجلس» 19.12 م² أصغر من 24 م².",
+    1
+   ]
+  ],
+  "twoFloorWhy": null,
+  "pool": 6,
+  "poolGuestDefects": [
+   {
+    "pat": "tcore:n7w",
+    "defects": [
+     "HALL_SMALL",
+     "HALL_THROUGH",
+     "HALL_LT_MAJLIS",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "split:s2",
+    "defects": [
+     "HALL_THROUGH",
+     "HALL_LT_MAJLIS",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "sidehall:n8",
+    "defects": [
+     "HALL_THROUGH",
+     "HALL_LT_MAJLIS",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r31uy1q:1uy1qvp",
+    "defects": []
+   },
+   {
+    "pat": "sidehall:n0",
+    "defects": [
+     "HALL_THROUGH",
+     "HALL_LT_MAJLIS",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r31uy1q:1uy1qvCa",
+    "defects": [
+     "HALL_LT_MAJLIS",
+     "BATH_NO_WINDOW"
+    ]
+   }
+  ],
+  "poolDistinctByFrozenCriterion": [
+   "tcore:n7w"
+  ]
+ },
+ "stage6_selection": {
+  "shown": [
+   {
+    "pat": "tcore:n7w",
+    "status": "needs-edits",
+    "mandatory": [],
+    "r16": [
+     "HALL_LT_MAJLIS"
+    ]
+   }
+  ],
+  "shortfall_ar": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 9، اجتاز البوابات منهم 6؛ ورُفض 3 في بوابات الجودة والسلامة؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي)؛ 5 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "hidden": 0
+ },
+ "stage7_timeout": {
+  "timedOut": false,
+  "note": "المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs"
+ },
+ "error": null,
+ "result": {
+  "status": "SOLVED",
+  "requestedCount": 4,
+  "shownCount": 1,
+  "warnings": []
+ }
+}

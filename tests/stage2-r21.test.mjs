@@ -41,7 +41,7 @@ test('العقد: فشل البحث بلا دليل يُصنَّف SEARCH_EXHAUS
   for (const code of ['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_REVIEW_FAILED']) { const e = Object.assign(Error('x'), { code }); assert.deepEqual([V3.classifyFailure(e, { feasible: true, hard: [] }).status, V3.classifyFailure(e, { feasible: true, hard: [] }).reason], ['SEARCH_INCOMPLETE', 'SEARCH_EXHAUSTED_WITHOUT_PROOF'], code); }
   const big = analyzeFeasibility({ land: { width: 12, length: 18, streets: ['s'], entries: ['s'], floors: 1 }, counts: { bedrooms: 6, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 }, requirements: req('6 غرف نوم ومجلسين', { bedrooms: 6, majlis: 2 }) });
   assert.equal(big.feasible, false); assert.ok(big.hard.every(h => h.proof), 'كل سبب استحالة يحمل دليله');
-  const c = V3.classifyFailure(Object.assign(Error(big.report_ar), { code: 'VILLA_INFEASIBLE' }), big); assert.equal(c.status, 'PROVEN_INFEASIBLE'); assert.ok(c.proofReference.includes('area-lower-bound'));
+  const c = V3.classifyFailure(Object.assign(Error(big.report_ar), { code: 'VILLA_INFEASIBLE' }), big, { land: { width: 12, length: 18, streets: ['s'], entries: ['s'], floors: 1 }, counts: { bedrooms: 6, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 }, requirements: req('6 غرف نوم ومجلسين', { bedrooms: 6, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 }) }); // (D) المقترح 03: «مستحيل» بشهادة يتحقق منها المدقق، فيلزم تمرير args assert.equal(c.status, 'PROVEN_INFEASIBLE'); assert.ok(c.proofReference.includes('area-lower-bound'));
   // المساحة بين الحد الأدنى المثبت والتقدير المعتاد ليست استحالة: «ضيقة» ويُبحث فيها
   const tight = analyzeFeasibility({ land: { width: 15, length: 21, streets: ['s'], entries: ['s'], floors: 1 }, counts: { bedrooms: 3, majlis: 2, baths: 5, kitchens: 1, halls: 1, dining: 1 }, requirements: req('3 غرف نوم ومجلس رجال ومجلس نساء', { bedrooms: 3, majlis: 2 }) });
   if (tight.numbers.lowerBoundPerFloor <= tight.numbers.available) assert.equal(tight.feasible, true, tight.report_ar);
@@ -49,7 +49,8 @@ test('العقد: فشل البحث بلا دليل يُصنَّف SEARCH_EXHAUS
 test('العقد: بندان متعارضان منطقيًا (المطبخ أمامًا وخلفًا) استحالة مثبتة تسمّي البندين ولا ترسم؛ وفي الحوار (provisional) ملاحظة يُسأل عنها', () => {
   const counts = { bedrooms: 3, majlis: 1, baths: 4, kitchens: 1, halls: 1, dining: 1 }, land = { width: 22, length: 30, streets: ['s'], entries: ['s'], floors: 1 };
   const r = req('3 غرف ومجلس، المطبخ في الأمام، والمطبخ في الخلف', counts);
-  const f = analyzeFeasibility({ land, counts, requirements: r });
+  assert.equal(analyzeFeasibility({ land, counts, requirements: r }).feasible, true, '(D) المقترح 03: تعارض بندين ملاحظة وسؤال افتراضيًا (عقد r20)');
+  const f = analyzeFeasibility({ land, counts, requirements: r, logicalHard: true }); // استحالة مثبتة بطلب صريح فقط
   assert.equal(f.feasible, false); const h = f.hard.find(x => x.id === 'CONFLICT'); assert.ok(h && h.proof === 'logical-contradiction');
   assert.deepEqual(h.quotes, ['المطبخ في الأمام', 'المطبخ في الخلف']);
   const rep = explainFailure({ feasibility: f, land }); assert.equal(rep.cause, 'conflict'); assert.match(rep.report_ar, /«المطبخ في الأمام» و«المطبخ في الخلف»/); assert.deepEqual(reportContradictions(rep), []);

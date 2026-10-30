@@ -4,6 +4,8 @@
 import { analyzeDoc } from './draw/digest.mjs';
 import { measureR16 } from './privacy-defects.mjs';
 import { reviewDoc } from './draw/review.mjs';
+import { verifyRequest } from './rules.mjs';
+import { briefOf, RELATIONS } from './shared-brief.mjs';
 
 const PROG_TYPES = ['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen', 'bath', 'service'];
 const HABITABLE = new Set(['bedroom', 'master', 'majlis', 'living', 'dining', 'kitchen']);
@@ -48,4 +50,49 @@ export function guarded(doc, fn, request = {}) {
   if (reg.length) { for (const k of Object.keys(doc)) delete doc[k]; Object.assign(doc, snap); return { applied: false, result, regressions: reg }; }
   return { applied: true, result, regressions: [] };
 }
-export default { invariants, regressions, guardChange, guarded };
+
+// ------------------------------------------------------------------------------------------------ (الجولة 21 — مقترح 08) التعديل الآمن
+// مكيَّف من kit-r21/src/constraints.mjs applySafeEdit، في طبقة المعاملة (design-session) قبل حفظ أي تعديل موضعي. المدقق موسَّع بكل قواعد النظام
+// الحالية لا بقواعد الحزمة وحدها: (1) invariants أعلاه (المخالفات الإلزامية والعيوب والأعداد والضوء والوصول)، (2) سجل بنود العميل verifyRequest
+// (المقاسات الصريحة مقيسة من المرسوم، والمواضع، والقرب والبعد، والأعداد، والتفضيلات)، (3) علاقات العقد الموحد الصلبة: DIRECT_DOOR باب فعلي بين
+// المجلس والطعام، وGUEST_ACCESS (GUEST_DINING مقيسًا بالأبواب الفعلية ولو طلبه العميل نصًا).
+// الفرق المقصود عن الحزمة: الرفض لما **يسقطه التعديل** (شرط كان متحققًا فصار راسبًا) لا لكل رسوب قائم قبله — وإلا رُفض كل تعديل على مخطط فيه
+// عيب واحد ولو كان التعديل يصلح غيره. وما يغيّره العميل نفسه في الدور (exempt: معرّفات بنود السجل أو أنواع invariants) لا يُعد سقوطًا.
+const ledgerOk = x => (x.status ? x.status === 'done' || x.status === 'pending-render' : !!x.ok);
+function directDoorOk(doc, model) {
+  for (const lv of model.levels) for (const op of lv.openings) {
+    if (!op.door) continue;
+    const rs = op.sides.map(sd => (sd.room ? sd.room : null)).filter(Boolean), ot = op.sides.map(sd => (sd.other && sd.other !== 'outside' ? lv.roomsById.get(sd.other) : null)).filter(Boolean);
+    const all = [...rs, ...ot];
+    if (all.some(r => r.type === 'majlis' && !/النساء/.test(r.name || '')) && all.some(r => r.type === 'dining')) return true;
+  }
+  return false;
+}
+/** صورة تحقق كاملة لمستند: { inv, client: [{ id, text, ok }], brief: [{ id, kind, ok }], hard: [ما رسب] }. */
+export function validateEdit(doc, request = {}, { entry = 's' } = {}) {
+  const inv = invariants(doc, request), model = analyzeDoc(doc);
+  let client = []; try { client = verifyRequest(doc, request, { entry }).map(x => ({ id: x.id, kind: x.kind, text: x.text, ok: ledgerOk(x) })); } catch { client = []; }
+  const brief = [], B = briefOf(request);
+  for (const r of B.relations || []) {
+    if (r.level !== 'HARD') continue;
+    if (r.kind === RELATIONS.DIRECT_DOOR) brief.push({ id: 'BRIEF:' + r.id, kind: r.kind, quote: r.quote, ok: directDoorOk(doc, model) });
+    if (r.kind === RELATIONS.GUEST_ACCESS) { let ok = true; try { const g = measureR16(doc, request, model).find(x => x.id === 'GUEST_DINING'); ok = !g || !g.applicable || g.pass; } catch { ok = true; } brief.push({ id: 'BRIEF:' + r.id, kind: r.kind, quote: r.quote, ok }); }
+  }
+  return { inv, client, brief, hard: [...Object.entries(inv.checks).filter(([, c]) => !c.pass).map(([id]) => id), ...client.filter(c => !c.ok).map(c => c.id), ...brief.filter(b => !b.ok).map(b => b.id)] };
+}
+/**
+ * المعاملة: edit دالة تعدّل نسخة من المستند أو المستند بعد التعديل نفسه. يعيد { accepted, doc, before, after, violations, reason }.
+ * المستند الأصلي لا يُمس أبدًا؛ المقبول نسخة مستقلة.
+ */
+export function applySafeEdit(original, edit, request = {}, { entry = 's', exempt = [] } = {}) {
+  const ex = new Set(exempt), before = validateEdit(original, request, { entry });
+  let doc;
+  if (typeof edit === 'function') { doc = JSON.parse(JSON.stringify(original)); const r = edit(doc); if (r && typeof r === 'object' && r.levels) doc = r; }
+  else doc = edit;
+  const after = validateEdit(doc, request, { entry });
+  const violations = regressions(before.inv, after.inv).filter(x => !ex.has(x.id));
+  for (const c of after.client) { const b = before.client.find(y => y.id === c.id); if (b && b.ok && !c.ok && !ex.has(c.id)) violations.push({ id: c.id, ar: `بند من طلبك لم يعد متحققًا: «${c.text}»` }); }
+  for (const c of after.brief) { const b = before.brief.find(y => y.id === c.id); if (b && b.ok && !c.ok && !ex.has(c.id)) violations.push({ id: c.id, ar: c.kind === RELATIONS.DIRECT_DOOR ? 'الباب المباشر بين المجلس والطعام الذي طلبته لم يعد موجودًا' : 'ضيف الرجال لم يعد يصل إلى الطعام دون عبور العائلة' }); }
+  return violations.length ? { accepted: false, doc: original, before, after, violations, reason: 'HARD_CONSTRAINT_VIOLATION' } : { accepted: true, doc, before, after, violations: [], reason: null };
+}
+export default { invariants, regressions, guardChange, guarded, validateEdit, applySafeEdit };

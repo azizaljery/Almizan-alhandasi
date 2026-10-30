@@ -12,6 +12,9 @@ import { applyCommand } from './draw/doc.mjs';
 import { measureR16, viewQuad, R16_LIMITS, isPrivateRoom } from './privacy-defects.mjs';
 import { pointInPolygon, segmentIntersection } from './draw/geom.mjs';
 import { measureR14 } from './saudi-program.mjs';
+import { siteElementReport } from './site-element-check.mjs';
+import { planWindowScreens, windowExposure, acceptanceSnapshot, compareAcceptance, SCREEN_DEFAULTS } from './privacy-gate.mjs';
+import { completeShowers } from './bath-shower.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
 const R14_OFF = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
@@ -61,11 +64,39 @@ function exposedEdge(doc, G, room, e, wd) {
   return false;
 }
 
+/** يضع ساتر خصوصية خارجي لنافذة (digest op) أمام المواقف إن وُجد مرشح يحجب كل خطوط الرؤية ويجتاز لا-تراجع وفحص عنصر الموقع؛ يعدّل doc في مكانه. */
+function placeScreenFor(doc, G, opD, side, bays, room, notes, screens) {
+  const o = opD.o;
+  const cands = side ? planWindowScreens(doc, G, opD, side, bays) : [];
+        let placed = false;
+        for (const sc of cands) {
+          const snap = JSON.stringify(doc), before = acceptanceSnapshot(doc), was = new Set(doc.walls.map(w => w.id));
+          let ok = false;
+          try {
+            Object.assign(doc, applyCommand(doc, { type: 'add-wall', level: G.level.id, a: { x: Math.round(sc.a.x * 100) / 100, y: Math.round(sc.a.y * 100) / 100 }, b: { x: Math.round(sc.b.x * 100) / 100, y: Math.round(sc.b.y * 100) / 100 }, t: .2, h: SCREEN_DEFAULTS.screenHeight, kind: 'fence' }).doc);
+            const G2 = analyzeDoc(doc).levels[0], op2 = G2.openings.find(q => q.id === opD.id), s2 = op2?.sides.find(s => s.room.name === room.name && s.other === 'outside');
+            const sight = op2 && s2 ? windowExposure(doc, G2, op2, s2, bays) : { potentialExposure: true };
+            const proj = measureR16(doc, {}).find(g => g.id === 'WINDOW_PARKING'), projOk = !(proj?.value?.windows || []).some(w => w.opening === opD.o.id && !w.screened);
+            const cmp = compareAcceptance(before, acceptanceSnapshot(doc), { protect: ['privacy', 'daylight', 'ventilation', 'circulation'] });
+            const site = siteElementReport(doc, { levelId: G.level.id }); // (قرار المالك) عنصر موقع: حدود القطعة، المركبات، المداخل، الإضاءة والتهوية وهندسة فتح النوافذ
+            ok = !sight.potentialExposure && projOk && cmp.pass && site.geometryOk;
+          } catch { ok = false; }
+          if (ok) {
+            const fid = doc.walls.find(w => !was.has(w.id))?.id;
+            notes.push(`ساتر خصوصية خارجي (سور ${SCREEN_DEFAULTS.screenHeight} م بطول ${r2(sc.length)} م على بعد ${sc.offset} م من الجدار${sc.trimmed ? '، مقتطع عن طول الحجب الكامل ليتجنب غلاف فتح نافذة مجاورة وبقي حاجبًا لكل خطوط الرؤية المقيسة' : ''}) بين نافذة «${room.name}» والمواقف: النافذة باقية بجلستها وإطلالتها وضوئها، والساتر يحجب خطوط الرؤية من المواقف (قيمة تصميمية افتراضية للميزان؛ لا يحل محل مراجعة معمارية). المطابقة النظامية لستارة الخصوصية لم تُتحقق بعد: ارتفاعها وإباحتها في الموقع غير متحققين من اشتراطات البلدية.`);
+            if (fid) screens.push({ wall: fid, window: o.id, room: room.name, ...sc });
+            placed = true; break;
+          }
+          for (const k of Object.keys(doc)) delete doc[k]; Object.assign(doc, JSON.parse(snap));
+        }
+  return placed;
+}
+
 /**
  * يصلح عيوب الخصوصية والحركة القابلة للإصلاح الموضعي على المستند (يعدّله في مكانه — مستند يملكه المولّد). يعيد { notes_ar[], changed }.
  */
 export function polishR16(doc) {
-  const notes = [], skip = new Set(); let changed = false;
+  const notes = [], skip = new Set(), screens = []; let changed = false;
   // 1) النوافذ المكشوفة
   for (let pass = 0; pass < 12; pass++) {
     const G = analyzeDoc(doc).levels[0]; if (!G) break;
@@ -95,6 +126,14 @@ export function polishR16(doc) {
     // (الجولة العشرون، المراجعة العمياء r19: C5-3) الصالة العائلية لا تُترك بنوافذ علوية وحدها: حل الخصوصية لا يُفقدها الإطلالة والضوء على
     // مستوى الجلوس — إن كانت هذه آخر نافذة عادية لها تبقى، ويبقى العيب مذكورًا (يُصلح بسور حاجب أو مشربية أو بتنظيم لا تطل فيه الصالة على الشارع)
     if (isFamilyHall(room) && !R14_OFF.has('r20hallsill') && !G.openings.some(op => op.window && op.id !== x.op.id && (op.o?.sill ?? 1) < 1.5 && op.sides.some(s => s.room.id === room.id))) {
+      // (الجولة 21 — 02c، قرار المالك: إصلاح تراجع C6 دون إفساد المقاسات) النافذة والمقاس كما هما، وساتر خصوصية خارجي قائم بذاته بين النافذة
+      // والمواقف (privacy-gate.mjs planWindowScreen): طوله من خطوط الرؤية الفعلية، ويُقبل فقط إن (1) حجب كل خطوط الرؤية بعينات متعددة من
+      // المواقف وداخل الصالة، (2) واجتاز قياس المشروع الأصلي WINDOW_PARKING لهذه النافذة، (3) ولم يُسقط أي فحص خصوصية أو ضوء أو تهوية أو حركة
+      // كان ناجحًا قبله (compareAcceptance). وإلا يُزال ويبقى العيب مذكورًا كما كان.
+      if (x.why === 'المواقف' && !R14_OFF.has('r21screen')) {
+        const bays = (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id), side = x.op.sides.find(s => s.room.id === room.id && s.other === 'outside');
+        if (side && placeScreenFor(doc, G, x.op, side, bays, room, notes, screens)) { changed = true; skip.add(o.id); continue; }
+      }
       notes.push(`نافذة «${room.name}» المطلة على ${x.why} بقيت بجلستها: هي نافذتها العادية الوحيدة، ورفعها يُفقد الصالة الإطلالة والضوء — يُستحسن سور حاجب أو مشربية أمامها.`);
       skip.add(o.id); continue;
     }
@@ -116,7 +155,11 @@ export function polishR16(doc) {
     for (const op of G && bays.length ? G.openings.filter(o => o.window && (o.o.sill ?? 0) < R16_LIMITS.highSill - 1e-6) : []) {
       const s = op.sides.find(x => x.exterior && x.other === 'outside' && ['bedroom', 'master'].includes(x.room.type)); if (!s || !faces(op, s.outward)) continue;
       const room = s.room, others = G.openings.filter(q => q.window && q.id !== op.id && q.sides.some(x => x.room.id === room.id && x.exterior && x.other === 'outside' && !faces(q, x.outward)));
-      if (!others.length) { notes.push(`نافذة «${room.name}» تواجه المواقف عبر الارتداد ولا جدار خارجي آخر للغرفة؛ بقيت (يُستحسن زجاج معتم أو سور حاجب).`); continue; }
+      if (!others.length) {
+        // (قرار المالك 2026-10-26: الحكم لكل فراغ بدرجته) غرفة النوم وحيدة النافذة وتواجه المواقف: ساتر خصوصية خارجي بالمعايير نفسها (حجب كل خطوط الرؤية، لا تراجع، فحص عنصر الموقع)
+        if (!R14_OFF.has('r21screen') && !R14_OFF.has('r21bedscreen') && placeScreenFor(doc, G, op, s, bays, room, notes, screens)) { changed = true; continue; }
+        notes.push(`نافذة «${room.name}» تواجه المواقف عبر الارتداد ولا جدار خارجي آخر للغرفة؛ بقيت (يُستحسن زجاج معتم أو سور حاجب).`); continue;
+      }
       const live = doc.openings.find(q => q.id === op.o.id); if (!live) continue;
       live.sill = R16_LIMITS.highSill; live.h = .9;
       notes.push(`نافذة «${room.name}» المواجهة للمواقف وبوابة السيارات صارت علوية بجلسة ${R16_LIMITS.highSill} م، وللغرفة نافذتها الأخرى (خصوصية النوم — قيمة تصميمية افتراضية للميزان).`);
@@ -130,10 +173,13 @@ export function polishR16(doc) {
   if (!R14_OFF.has('r19sill')) {
     const G = analyzeDoc(doc).levels[0], bays = G ? (doc.zones || []).filter(z => z.type === 'garage' && z.level === G.level.id) : [];
     const streets = [...new Set([doc.entry || 's', ...(doc.streets || [])])].filter(st => OUT_DIR[st]);
-    const target = r => r.type === 'dining' || (r.type === 'majlis' && /النساء/.test(r.name || ''));
+    const target = r => r.type === 'dining' || (r.type === 'majlis' && /النساء/.test(r.name || '')) || (!R14_OFF.has('r21bedhigh') && ['bedroom', 'master'].includes(r.type)); // (قرار المالك 2026-10-26) غرفة النوم وحيدة النافذة المواجهة للمواقف بعد تعذر الساتر: جلسة عالية بشرط بقاء زجاجها ≥ 5٪ من أرضيتها
     const faces = (op, out) => streets.some(st => out.x * OUT_DIR[st].x + out.y * OUT_DIR[st].y > .7) || bays.some(z => touch(viewQuad({ p: op.p, w: op.w, wall: op.wall }, out, BED_GATE_DEPTH, R16_LIMITS.viewSide), z.polygon));
     for (const op of G ? G.openings.filter(o => o.window && (o.o.sill ?? 0) < R16_LIMITS.highSill - 1e-6) : []) {
-      const sd = op.sides.find(x => x.exterior && x.other === 'outside' && target(x.room)); if (!sd || !faces(op, sd.outward)) continue;
+      const sd = op.sides.find(x => x.exterior && x.other === 'outside' && target(x.room)); if (!sd) continue;
+      // الكشف: مجال الرؤية القريب (الأصلي) أو — لغرف النوم — أي خط رؤية مقيس من المواقف (privacy-gate.windowExposure؛ يلتقط الزوايا الضحلة البعيدة)
+      const sightHit = !R14_OFF.has('r21bedhigh') && ['bedroom', 'master'].includes(sd.room.type) && bays.length && windowExposure(doc, G, op, sd, bays).potentialExposure;
+      if (!faces(op, sd.outward) && !sightHit) continue;
       const room = sd.room, live = doc.openings.find(q => q.id === op.o.id); if (!live) continue;
       const glassOf = () => doc.openings.filter(q => (q.kind || '').startsWith('window') && G.openings.some(o2 => o2.id === q.id && o2.sides.some(x => x.room.id === room.id && x.exterior))).reduce((t, q) => t + q.w * (q.h ?? 1.2), 0);
       const old = { sill: live.sill, h: live.h, w: live.w, at: live.at };
@@ -223,7 +269,9 @@ export function polishR16(doc) {
       const done = carveBath(doc, lv, R); if (done) { notes.push(done); changed = true; break; }
     }
   }
-  return { notes_ar: notes, changed };
+  // 4) (قرار المالك 2026-10-26 ثالثًا) حمام كامل بلا دش صالح: يُضاف/يُستبدل بفحص هندسي (التقاطع، مسقط الوصول، فتح الباب، العرض الصافي)؛ وإن تعذّر يحجبه بوابة العرض
+  if (!R14_OFF.has('r21shower')) { try { const r = completeShowers(doc); for (const n of r.notes) { notes.push(n); changed = true; } for (const f of r.failed) notes.push(`تعذّر وضع دش صالح في «${f.room}»: ${f.why}.`); } catch { /* */ } }
+  return { notes_ar: notes, changed, screens };
 }
 const bbox = poly => ({ x0: Math.min(...poly.map(p => p.x)), x1: Math.max(...poly.map(p => p.x)), y0: Math.min(...poly.map(p => p.y)), y1: Math.max(...poly.map(p => p.y)) });
 function carveBath(doc, lv, R) {

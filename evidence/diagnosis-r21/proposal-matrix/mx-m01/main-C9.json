@@ -1,0 +1,384 @@
+{
+ "case": {
+  "set": "main",
+  "id": "C9",
+  "land": {
+   "floors": 1,
+   "width": 20,
+   "length": 30,
+   "streets": [
+    "s"
+   ],
+   "entries": [
+    "s"
+   ]
+  },
+  "text": "3 غرف نوم ومجلس وصالة ومطبخ وطعام",
+  "keep": 4
+ },
+ "engineRoot": "/home/claude/mx-m01/",
+ "ms": 47994,
+ "maxRssMB": 449,
+ "command": "node scripts/diagnose-r21.mjs main C9 --root /home/claude/mx-m01",
+ "stage1_brief": {
+  "understood": [
+   "3 غرف نوم"
+  ],
+  "unclear": [],
+  "rules": [],
+  "dims": {},
+  "prefs": {}
+ },
+ "stage2_constraints": {
+  "units": [
+   {
+    "key": "M",
+    "zone": "guest",
+    "area": 33
+   },
+   {
+    "key": "DN",
+    "zone": "guest",
+    "area": 15
+   },
+   {
+    "key": "KS",
+    "zone": "service",
+    "area": 16
+   },
+   {
+    "key": "F",
+    "zone": "circ",
+    "area": 9
+   },
+   {
+    "key": "H",
+    "zone": "family",
+    "area": 30
+   },
+   {
+    "key": "LK",
+    "zone": "circ",
+    "area": 8
+   },
+   {
+    "key": "S1",
+    "zone": "sleep",
+    "area": 73
+   }
+  ],
+  "hard": [
+   "مدخل العائلة على الشارع",
+   "الصالة تلامس مدخل العائلة (أو رواقًا منه)",
+   "رواق الوصل من مدخل العائلة",
+   "رواق الوصل إلى الصالة",
+   "مجلس الرجال على الشارع أو على واجهة جانبية (مدخل مستقل)",
+   "الطعام يلامس المطبخ",
+   "الطعام يُبلغ من العائلة (الصالة أو المدخل)",
+   "وصلة الضيافة: مجلس الرجال يلامس الطعام (مقلط) فلا يعبر الضيف العائلة",
+   "المطبخ لا يطل على الشارع",
+   "جناح النوم يلامس الصالة (ممره منها)",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش",
+   "ضوء طبيعي من الخارج أو من حديقة/حوش"
+  ],
+  "soft": [
+   "غرف النوم لا تطل على الشارع",
+   "المجلس لا يلاصق غرف النوم",
+   "الصالة تطل على حديقة أو حوش",
+   "الصالة لا تطل على الشارع",
+   "الطعام لا يفتح على مدخل العائلة (ممر عبور)"
+  ]
+ },
+ "stage3_topology": {
+  "grids": [
+   {
+    "nc": 2,
+    "nr": 3,
+    "valid": 2,
+    "nodes": 884,
+    "exhausted": true
+   },
+   {
+    "nc": 3,
+    "nr": 4,
+    "valid": 90,
+    "nodes": 171589,
+    "exhausted": true
+   },
+   {
+    "nc": 2,
+    "nr": 4,
+    "valid": 4,
+    "nodes": 15646,
+    "exhausted": true
+   },
+   {
+    "nc": 3,
+    "nr": 3,
+    "valid": 44,
+    "nodes": 55953,
+    "exhausted": true
+   }
+  ],
+  "distinctTopologies": 53,
+  "dimFit": 53,
+  "dimFail": 0,
+  "picked": 28,
+  "synthTrees": 54,
+  "libraryTrees": 71,
+  "twoFloors": null,
+  "groundStair": null
+ },
+ "stage4_allocation": {
+  "treesOptimized": 116,
+  "treesWithoutSolution": 78,
+  "topViolations": [
+   [
+    "circ-graph",
+    12
+   ],
+   [
+    "hall-aspect",
+    11
+   ],
+   [
+    "majlis-width",
+    11
+   ],
+   [
+    "aspect:suite",
+    10
+   ],
+   [
+    "kitchen-street",
+    9
+   ],
+   [
+    "dark:dining",
+    9
+   ],
+   [
+    "master-big",
+    8
+   ],
+   [
+    "dining-strip",
+    8
+   ],
+   [
+    "hall-via-beds",
+    8
+   ],
+   [
+    "big:kitchen",
+    7
+   ],
+   [
+    "bed-small",
+    7
+   ],
+   [
+    "big:dining",
+    7
+   ],
+   [
+    "dining-big",
+    7
+   ],
+   [
+    "corr-long",
+    6
+   ]
+  ],
+  "treeStats": null
+ },
+ "stage5_validation": {
+  "rejected": 12,
+  "topReasons": [
+   [
+    "«المجلس» 23.55 م² أصغر من 24 م².",
+    3
+   ],
+   [
+    "«صالة الطعام والمقلط» لا يُبلغ من المدخل إلا عبر ممر غرف النوم.",
+    2
+   ],
+   [
+    "«المطبخ» لا يُبلغ من المدخل إلا عبر ممر غرف النوم.",
+    2
+   ],
+   [
+    "«غرفة النوم الرئيسية» (غرفة نوم رئيسية) بلا نافذة على الخارج، والكتالو",
+    2
+   ],
+   [
+    "«غرفة النوم الرئيسية» بلا نافذة.",
+    2
+   ],
+   [
+    "«غرفة نوم 3» تفتح على الصالة العائلية مباشرة (بلا ممر ولا مدخل جناح) ف",
+    1
+   ],
+   [
+    "تعذّر وصل «kitchen1-lobby» بالحركة.",
+    1
+   ],
+   [
+    "«خزانة» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا يوجد باب أو فتح",
+    1
+   ],
+   [
+    "«المجلس» 23.94 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«المجلس» 18.82 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«المجلس» 18.19 م² أصغر من 24 م².",
+    1
+   ],
+   [
+    "«غرفة النوم الرئيسية» 26.81 م² متضخمة (> 24 م² صافية دون الحمام والملا",
+    1
+   ],
+   [
+    "«غرفة النوم الرئيسية» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا ي",
+    1
+   ],
+   [
+    "«ممر الغرف» لا يمكن الوصول إليها عبر الأبواب من المدخل؛ لا يوجد باب أو",
+    1
+   ]
+  ],
+  "twoFloorWhy": null,
+  "pool": 21,
+  "poolGuestDefects": [
+   {
+    "pat": "r31j2bu:1j2buvg0",
+    "defects": [
+     "HALL_LT_MAJLIS",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r3aosfq:aosfqvg0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "sidecourt:sc0",
+    "defects": [
+     "WINDOW_PARKING",
+     "ENTRANCES_TOGETHER",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "hallback:h0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r3o32n0:o32n0vg0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "yoo:u0r",
+    "defects": [
+     "GUEST_DINING",
+     "MAJLIS_ISOLATED",
+     "FAMILY_WC",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r31sodw:1sodwvg0",
+    "defects": [
+     "HALL_LT_MAJLIS",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "r318xdg:18xdghg1",
+    "defects": []
+   },
+   {
+    "pat": "gardenl:gl0",
+    "defects": [
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "sidemajlis:j0",
+    "defects": [
+     "GUEST_DINING",
+     "FAMILY_WC",
+     "BATH_NO_WINDOW"
+    ]
+   },
+   {
+    "pat": "ell:l0r",
+    "defects": [
+     "GUEST_DINING",
+     "MAJLIS_ISOLATED",
+     "BATH_NO_WINDOW"
+    ]
+   }
+  ],
+  "poolDistinctByFrozenCriterion": [
+   "r31j2bu:1j2buvg0",
+   "r3aosfq:aosfqvg0"
+  ]
+ },
+ "stage6_selection": {
+  "shown": [
+   {
+    "pat": "r3aosfq:aosfqvg0",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   },
+   {
+    "pat": "hallback:h0",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   },
+   {
+    "pat": "r31sodw:1sodwvg0",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   },
+   {
+    "pat": "r34nk7y:4nk7yvg1",
+    "status": "ready",
+    "mandatory": [],
+    "r16": []
+   }
+  ],
+  "shortfall_ar": null,
+  "hidden": 0
+ },
+ "stage7_timeout": {
+  "timedOut": false,
+  "note": "المحرك يعمل بميزانيات حتمية بعدد المحاولات لا بالزمن؛ لا مهلة زمنية ما لم يُطلب timeLimitMs"
+ },
+ "error": null,
+ "result": {
+  "status": "SOLVED",
+  "requestedCount": 4,
+  "shownCount": 4,
+  "warnings": []
+ }
+}

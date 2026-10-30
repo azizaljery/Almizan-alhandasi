@@ -18,9 +18,11 @@
 //
 // المحركان الأول والثاني باقيان كما هما وقابلان للاختيار (engine: 'v1' | 'v2' | 'v3').
 import * as V2 from './villa-layout-v2.mjs';
+import { verifyCertificate } from './certificates.mjs';
 import { analyzeFeasibility } from './feasibility.mjs';
 import { explainFailure } from './infeasibility-report.mjs';
 import { toClientAr } from './client-language.mjs';
+import { candidateRejections } from './review-evidence.mjs';
 
 export const VILLA_V3_ENGINE_VERSION = 'villa-v3-relations-1';
 const K = V2.TREE_KIT;
@@ -28,8 +30,8 @@ const { Z, C, X, Y, OV, VOID, COURT, D2 } = K;
 const T = K.DESIGN_TARGETS;
 const sum = a => a.reduce((s, v) => s + v, 0);
 const OPP = { x0: 'x1', x1: 'x0', y0: 'y1', y1: 'y0' };
-/** (الجولة 21) مفتاح جناح نوم (S1، S2) — لا «ST» الدرج (كان يُعدّ جناح نوم فيتعطل الأرضي بالسلم). */
-const isSleepKey = k => /^S\d$/.test(k);
+/** (الجولة 21 — مقترح، kit upper.mjs extractSleepKeys) مفتاح جناح نوم S1، S2… — لا «ST» الدرج (كان يُعدّ جناح نوم في الأرضي بالسلم وفي قيود «النوم»). */
+export const isSleepKey = k => /^S\d+$/.test(k);
 
 // ---------------------------------------------------------------------------------------------- (2) الوحدات والعلاقات
 /**
@@ -101,6 +103,7 @@ export function unitsOf(P, { stair = false } = {}) {
   }
   return { units: U, rel };
 }
+const SYNTH_MIN_LAYOUTS = 8; // (01b) أدنى عدد توزيعات صالحة قبل توسيع الشبكات — قيمة بحث لا معيار قبول
 const R14_OFF_V3 = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
 /** دورة المياه اليومية للعائلة (قيمة تصميمية افتراضية للميزان: dayWc) كتلة حقيقية في أشجار المحرك الثالث بجوار الصالة. */
 const DAY_WC = Object.freeze({ id: 'wcDay', kind: 'wc', rank: 2, area: 3.6, name: 'دورة مياه' });
@@ -108,15 +111,12 @@ const kitchenFront = P => (P.rules || []).some(r => r.kind === 'place' && r.side
 
 // ---------------------------------------------------------------------------------------------- (3) الشبكة وبحث القيود
 /** أبعاد الشبكة المرشحة من نسبة الأرض (أعمدة × صفوف). */
-export function gridShapes(W, D, nUnits) {
+export function gridShapes(W, D, nUnits, { all = false } = {}) {
   // كل شبكة تتسع للوحدات (ومعها حديقتان على الأكثر) وتتسع لها الأرض بأدنى عرض خلية (≈ 4 م عرضًا، 3.6 م عمقًا)، مرتبة بقرب خليتها من
   // المربع ثم بقرب عدد خلاياها من عدد الوحدات + 3 — الأرض الضيقة تأخذ عمودين وصفوفًا أكثر، والعريضة أعمدة أكثر
-  // (الجولة 21) دقة الشبكة: خلية بعرض 3.2 م (لا 4 م) — على الأرض الضيقة (≈ 12 م) كانت الشبكة عمودين فقط فلا يتسع حول المدخل المجلس والصالة
-  // والدرج ومجلس النساء معًا (لا توزيع صالح أصلًا)؛ والتقليم بأدنى الأبعاد (dimsOK) يرفض ما لا يتسع
-  const cw = R14_OFF_V3.has('r21grid') ? 4.0 : 3.2, ch = R14_OFF_V3.has('r21grid') ? 3.6 : 3.2;
-  const out = [], cMax = Math.max(2, Math.min(5, Math.floor(W / cw))), rMax = Math.max(2, Math.min(6, Math.floor(D / ch)));
+  const out = [], cMax = Math.max(2, Math.min(5, Math.floor(W / 4.0))), rMax = Math.max(2, Math.min(6, Math.floor(D / 3.6)));
   for (let nc = 2; nc <= cMax; nc++) for (let nr = 2; nr <= rMax; nr++) { const n = nc * nr; if (n < nUnits || n > nUnits + 6) continue; out.push({ nc, nr, k: Math.abs(Math.log((W / nc) / (D / nr))) + .06 * Math.abs(n - nUnits - 3) }); }
-  return out.sort((a, b) => a.k - b.k).slice(0, R14_OFF_V3.has('r21grid') ? 4 : 5).map(o => [o.nc, o.nr]);
+  return out.sort((a, b) => a.k - b.k).slice(0, all ? 8 : 4).map(o => [o.nc, o.nr]);
 }
 const adjLen = (a, b) => { // طول الحافة المشتركة بين مستطيلي خلايا (بالخلايا)
   if (a.x1 === b.x0 || b.x1 === a.x0) return Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
@@ -449,9 +449,15 @@ export function synthTrees(P, { W, D, stair = false, nFirst = 14, nLate = 14 } =
   unitMins(units, P);
   const log = { units: units.map(u => ({ key: u.key, zone: u.zone, area: Math.round(u.area) })), rel: rel.map(r => ({ ...r })), grids: [] };
   const all = [];
-  for (const [nc, nr] of gridShapes(W, D, units.filter(u => !u.optional).length)) {
+  // (الجولة 21 — 01b، قرار المالك: «عالج H3 من جهة البحث والتوليد لا بإضعاف البوابات») الشبكات الأربع الأولى كما كانت؛ وإن قلّت التوزيعات الصالحة
+  // فيها عن SYNTH_MIN_LAYOUTS (برنامج واسع: H3 بخمس غرف ومجلسين وجد 4 توزيعات في شبكة واحدة) تُجرَّب الشبكات التالية بترتيبها حتى ثلاث — بحث أوسع
+  // بالقيود الصلبة نفسها والميزانية نفسها لكل شبكة، حتمي، ولا يمس الحالات التي وجدت توزيعاتها. مفتاح القياس r21grids.
+  const shapes = gridShapes(W, D, units.filter(u => !u.optional).length, { all: !R14_OFF_V3.has('r21grids') });
+  for (let gi = 0; gi < shapes.length; gi++) {
+    if (gi >= 4 && all.length >= SYNTH_MIN_LAYOUTS) break;
+    const [nc, nr] = shapes[gi];
     const e = enumerateLayouts(units, rel, nc, nr, { W, D });
-    log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted });
+    log.grids.push({ nc, nr, valid: e.layouts.length, nodes: e.nodes, exhausted: e.exhausted, ...(gi >= 4 ? { widened: true } : {}) });
     all.push(...e.layouts);
   }
   const gardenA = Math.max(24, Math.min(70, (sum(P.blocks.map(b => b.area)) + P.hallArea) * .14));
@@ -514,9 +520,7 @@ export function synthTwoFloors(G, U, site, { nOut = 12 } = {}) {
       // ترتيب العلوي بتراكب الجدران: أجنحة النوم فوق وحدات أرضية مقسّمة (الخدمة، الطعام، المجلسان) أو فوق جناح نوم أرضي، والصالة العلوية فوق
       // الصالة الأرضية أو المدخل — جدران العلوي على جدران الأرضي ما أمكن (التراكب يُقاس بعدها على المفصّل)
       const under = (r, ks) => { let n = 0, t = 0; for (let y = r.y0; y < r.y1; y++) for (let x = r.x0; x < r.x1; x++) { t++; const g = Object.entries(L.R).find(([, q]) => x >= q.x0 && x < q.x1 && y >= q.y0 && y < q.y1)?.[0] || ''; if (ks.some(k => g.startsWith(k))) n++; } return t ? n / t : 0; };
-      // (الجولة 21) مجلس الرجال فراغ واسع بلا جدران داخلية: غرف النوم فوقه تحمل جدرانًا طويلة بلا حامل (H4 في r20) — تحته الصالة العلوية أو سطح،
-      // وغرف النوم فوق الخدمة والطعام ومجلس النساء وجناح النوم الأرضي (جدران أكثر تحتها)
-      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (isSleepKey(k) ? under(r, R14_OFF_V3.has('r21stack') ? ['KS', 'DN', 'S', 'W', 'M'] : ['KS', 'DN', 'S', 'W']) - (R14_OFF_V3.has('r21stack') ? 0 : under(r, ['M', 'H'])) : k === 'UH' ? under(r, R14_OFF_V3.has('r21stack') ? ['H', 'F', 'LK'] : ['H', 'F', 'LK', 'M']) : k[0] === 'T' && !R14_OFF_V3.has('r21stack') ? .8 * under(r, ['M', 'W', 'H']) : 0), 0);
+      for (const Lu of ups) Lu.align = Object.entries(Lu.R).reduce((a, [k, r]) => a + (isSleepKey(k) ? under(r, ['KS', 'DN', 'S', 'W', 'M']) : k === 'UH' ? under(r, ['H', 'F', 'LK']) : 0), 0);
       ups.sort((a, b) => b.align - a.align);
       for (const Lu of ups.slice(0, 6)) {
         const tr = jointTree(L, Lu, gU.units, uUnits, G, U, gardenA, site); if (!tr) { log.noTree = (log.noTree || 0) + 1; continue; }
@@ -559,8 +563,7 @@ function upperLayouts(L, uUnits) {
       if (!free(x0, y0, w, h)) continue; const r = { x0, y0, x1: x0 + w, y1: y0 + h };
       fill(x0, y0, w, h, 1); place.set(u.key, r); rec(); place.delete(u.key); fill(x0, y0, w, h, -1);
     }
-    // (الجولة 21) السطح المكشوف فوق الفراغات الأرضية الواسعة (المجالس) خلية خلية: كان حده 3 فتُجبر غرف النوم فوق المجلس على الأرض العريضة
-    if (tUsed < (R14_OFF_V3.has('r21stack') ? 3 : 6)) { const r = { x0, y0, x1: x0 + 1, y1: y0 + 1 }; fill(x0, y0, 1, 1, 2); place.set('T' + tUsed, r); tUsed++; rec(); tUsed--; place.delete('T' + (tUsed)); fill(x0, y0, 1, 1, -1); }
+    if (tUsed < 3) { const r = { x0, y0, x1: x0 + 1, y1: y0 + 1 }; fill(x0, y0, 1, 1, 2); place.set('T' + tUsed, r); tUsed++; rec(); tUsed--; place.delete('T' + (tUsed)); fill(x0, y0, 1, 1, -1); }
   };
   rec();
   return out;
@@ -592,13 +595,7 @@ function jointTree(L, Lu, gUnits, uUnits, G, U, gardenA, site = { W: 20, D: 20 }
     const lit = [...bnd(r, nc, nr)];
     const vs = sleepVariants(u.blocks, c, lit.length ? lit : ['x0', 'x1', 'y0', 'y1'], k === 'S1' ? 'U' : 'V');
     // أنسب الأنواع لأبعاد الخلية التقريبية (لا الأول دائمًا)
-    const cw = (r.x1 - r.x0) * cellW, ch = (r.y1 - r.y0) * cellH;
-    // (الجولة 21) التراكب قبل الهندسة: جدار الممر الطويل وفواصل الغرف أطول من 5 م فوق فراغ أرضي واسع لا يحمله شيء — يُقدَّم النوع الذي
-    // تقع جدرانه الطويلة على البعد الأقصر للخلية (الممر عموديًا على الحد الأطول)، ثم الأنسب أبعادًا
-    const fit = t => Math.max(K.minExt(t.tree, 'x') / cw, K.minExt(t.tree, 'y') / ch);
-    const longAx = t => { const ax = c[0] === 'y' ? 'y' : 'x', par = ax === 'y' ? 'x' : 'y', k = t.tag[0].toLowerCase(); return k === 'g' ? par : k === 'd' ? ax : ax; };
-    const excess = t => { if (R14_OFF_V3.has('r21stack')) return 0; const a = longAx(t), lw = a === 'x' ? cw : ch, cr = a === 'x' ? ch : cw; return Math.max(0, lw - 5) + Math.max(0, cr - 1.5 - 5); };
-    const v = vs.filter(t => fit(t) <= 1.02).sort((a, b) => excess(a) - excess(b) || fit(a) - fit(b))[0] || vs.sort((a, b) => fit(a) - fit(b))[0];
+    const cw = (r.x1 - r.x0) * cellW, ch = (r.y1 - r.y0) * cellH, v = vs.sort((a, b) => Math.max(K.minExt(a.tree, 'x') / cw, K.minExt(a.tree, 'y') / ch) - Math.max(K.minExt(b.tree, 'x') / cw, K.minExt(b.tree, 'y') / ch))[0];
     return v ? v.tree : Z(u.blocks, c, c[0] === 'y' ? 'x' : 'y');
   };
   const inR = (rs, reg) => rs.filter(({ r }) => r.x0 >= reg.x0 && r.x1 <= reg.x1 && r.y0 >= reg.y0 && r.y1 <= reg.y1);
@@ -629,11 +626,10 @@ function source(log) {
     },
     trees: (P, opts) => {
       const { stair, W, D } = opts;
-      // (الجولة 21) الأرضي بالسلم للدورين: يُركَّب من العلاقات أيضًا (والدرج وحدة) ويُضم إلى المكتبة — فيُسقَط عليه العلوي من جدرانه
-      if (stair && R14_OFF_V3.has('r21gstair')) return null;
-      const k = `${stair ? 'S' : ''}${W.toFixed(2)}x${D.toFixed(2)}|${P.blocks.map(b => b.id + ':' + Math.round(b.area)).join(',')}`;
+      if (stair) return null; // الدوران: أشجار المحرك الثاني (tfTrees/الأرضي بالسلم) في هذا الإصدار
+      const k = `${W.toFixed(2)}x${D.toFixed(2)}|${P.blocks.map(b => b.id + ':' + Math.round(b.area)).join(',')}`;
       if (!memo.has(k)) {
-        const r = synthTrees(P, { W, D, stair: !!stair }); if (stair) log.groundStair = r.log; else Object.assign(log, r.log);
+        const r = synthTrees(P, { W, D }); Object.assign(log, r.log);
         // فضاء البحث = التنظيمات المركّبة من العلاقات ∪ مكتبة الخبرة (أنماط المحرك الثاني) — كلها تمر بالقيود والبوابات نفسها
         const lib = V2.withTreeSource(null, () => V2.partiTrees(P, opts));
         log.library = lib.length; log.synth = r.trees.length;
@@ -650,7 +646,10 @@ function attach(out, feas, log, args = {}) {
   for (const d of out.designs || []) { if (d.summary) d.summary = toClientAr(d.summary); if (Array.isArray(d.notes)) d.notes = d.notes.map(toClientAr).filter(Boolean); }
   if (out.shortfall_ar) out.shortfall_client_ar = toClientAr(out.shortfall_ar);
   const requested = args.keep || 4, warnings = [...(feas?.warnings || []).map(w => ({ id: w.id, ar: toClientAr(w.ar), items: w.items || null })), ...(out.timedOut ? [{ id: 'TIME_LIMIT', ar: 'انتهى وقت البحث قبل أن يُكمل كل التنظيمات؛ قد توجد تصاميم أخرى.' }] : [])];
-  out.result = { status: 'SOLVED', requestedCount: requested, shownCount: (out.designs || []).length, warnings };
+  // (02c/01b) «SOLVED» فقط ببديل صالح معروض؛ بدائل مكتملة كلها محجوبة = «بحث غير مكتمل» (ONLY_HIDDEN_ALTERNATIVES) لا نجاح — والحالات الثلاث في outcome
+  const run = out.run || null, ok = !run || run.status === 'SOLVED';
+  out.result = { status: ok ? 'SOLVED' : run.status, ...(ok ? {} : { reason: run.reason, diagnosticId: diagId(args, 'HIDDEN'), retryable: run.reason === 'TIME_LIMIT' }), outcome: run?.outcome || 'VALID_ALTERNATIVES',
+    requestedCount: requested, shownCount: (out.designs || []).filter(d => d.presentation?.status !== 'hidden').length, candidatesRejected: run?.candidatesRejected ?? null, hiddenAlternatives: run?.hiddenAlternatives?.length ?? 0, warnings };
   return out;
 }
 // ---------------------------------------------------------------------------------------------- (الجولة 21) عقد نتائج التوليد
@@ -663,9 +662,12 @@ const diagId = (args, code) => 'D' + ESC(JSON.stringify([args?.land?.width, args
  *  SEARCH_INCOMPLETE — كل ما سواه: انتهاء الوقت (TIME_LIMIT)، أو استنفاد ما جرّبه البحث بلا دليل (SEARCH_EXHAUSTED_WITHOUT_PROOF)، أو خطأ
  *                       برمجي (SOLVER_ERROR)، أو حالة لا يدعمها المحرك (UNSUPPORTED_CASE). لا يُسمّى أي منها «مستحيلًا».
  */
+/** كل سبب استحالة في كشف الاستحالة يحمل شهادة يقبلها المدقق المستقل. */
+export const certified = (feas, args) => (feas?.hard || []).length > 0 && feas.hard.every(h => h.certificate && verifyCertificate(h.certificate, { land: args.land || {}, counts: args.counts || {}, requirements: args.requirements || {} }).valid);
 export function classifyFailure(e, feas, args = {}) {
-  if (e?.code === 'VILLA_INFEASIBLE' && feas && !feas.feasible && (feas.hard || []).every(h => h.proof))
-    return { status: 'PROVEN_INFEASIBLE', conflictingConstraintIds: feas.conflictingConstraintIds || [], proofReference: feas.proofReference || [], suggestions: feas.options_ar || [] };
+  // (مقترح — kit results.mjs) «مستحيل» بشهادة يتحقق منها المدقق المستقل (certificates.mjs) لكل سبب، وإلا فليس مثبتًا
+  if (e?.code === 'VILLA_INFEASIBLE' && feas && !feas.feasible && certified(feas, args))
+    return { status: 'PROVEN_INFEASIBLE', conflictingConstraintIds: feas.conflictingConstraintIds || [], proofReference: feas.proofReference || [], certificates: feas.certificates || [], suggestions: feas.options_ar || [] };
   const reason = e?.timedOut || e?.code === 'VILLA_TIME_LIMIT' ? 'TIME_LIMIT' : e?.code === 'VILLA_UNSUPPORTED' ? 'UNSUPPORTED_CASE'
     : ['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_REVIEW_FAILED', 'VILLA_EXHAUSTED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(e?.code) ? 'SEARCH_EXHAUSTED_WITHOUT_PROOF' : 'SOLVER_ERROR';
   return { status: 'SEARCH_INCOMPLETE', reason, diagnosticId: diagId(args, e?.code || 'ERR'), retryable: reason === 'TIME_LIMIT' || reason === 'SOLVER_ERROR' };
@@ -690,6 +692,8 @@ function counterfactual(gen, args) {
 function fail(e, feas, log, args, gen, two) {
   e.feasibility = feas; e.search = log;
   e.result = classifyFailure(e, feas, args);
+  e.result.outcome = 'NO_VALID_ALTERNATIVE'; e.result.candidatesRejected = (e.rejected || []).length; // (02c/01b) الحالة الثالثة: لا بديل مكتمل
+  for (const r of e.rejected || []) if (!r.rejections) r.rejections = candidateRejections(r);
   const cf = !args._cf && e.result.status === 'SEARCH_INCOMPLETE' && e.result.reason === 'SEARCH_EXHAUSTED_WITHOUT_PROOF' && !globalThis.process?.env?.R14_OFF?.includes('r21cf') ? counterfactual(gen, args) : [];
   e.counterfactual = cf;
   e.report = explainFailure({ error: e, feasibility: feas, counterfactual: cf, twoFloors: two, land: args.land, status: e.result });
@@ -700,7 +704,8 @@ function fail(e, feas, log, args, gen, two) {
 /** دور واحد. يكشف الاستحالة أولًا؛ ثم يولّد بالمصدر المركّب. أي فشل يُعاد خطأً يحمل تقريرًا عربيًا وحالة العقد (e.result). */
 export function generateVillaDesigns(args) {
   const feas = analyzeFeasibility(args);
-  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, false); }
+  // شهادة لا يقبلها المدقق ⇐ لا رفض: يُبحث، ويُذكر التنبيه
+  if (!feas.feasible) { if (certified(feas, args.floors === 2 || false ? { ...args, land: { ...args.land, floors: 2 } } : args)) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, false); } feas.warnings = [...(feas.warnings || []), ...feas.hard.map(h => ({ id: 'UNCERTIFIED_' + h.id, ar: h.ar }))]; feas.hard = []; feas.feasible = true; }
   const log = {};
   try {
     const out = V2.withDeadline(args.timeLimitMs, () => V2.withTreeSource(source(log), () => V2.generateVillaDesigns(args)));
@@ -710,7 +715,8 @@ export function generateVillaDesigns(args) {
 export function generateVillaTwoFloors(args) {
   if (Number(args?.land?.floors) > 2) { const e = Error('المحرك يدعم دورًا أو دورين فقط.'); e.code = 'VILLA_UNSUPPORTED'; throw fail(e, null, {}, args, null, true); }
   const feas = analyzeFeasibility({ ...args, land: { ...args.land, floors: 2 } });
-  if (!feas.feasible) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, true); }
+  // شهادة لا يقبلها المدقق ⇐ لا رفض: يُبحث، ويُذكر التنبيه
+  if (!feas.feasible) { if (certified(feas, args.floors === 2 || true ? { ...args, land: { ...args.land, floors: 2 } } : args)) { const e = Error(feas.report_ar); e.code = 'VILLA_INFEASIBLE'; throw fail(e, feas, {}, args, null, true); } feas.warnings = [...(feas.warnings || []), ...feas.hard.map(h => ({ id: 'UNCERTIFIED_' + h.id, ar: h.ar }))]; feas.hard = []; feas.feasible = true; }
   const log = {};
   try { return attach(V2.withDeadline(args.timeLimitMs, () => V2.withTreeSource(source(log), () => V2.generateVillaTwoFloors(args))), feas, log, args); }
   catch (e) { throw fail(e, feas, log, args, generateVillaTwoFloors, true); }
