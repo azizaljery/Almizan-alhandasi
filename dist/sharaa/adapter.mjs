@@ -15,6 +15,7 @@ const engineSubject = id => ANCHORS[id]?.engine ?? SPACE_TYPES[id]?.engine ?? nu
 /** افتراضات تصميمية مصدرها معايير المحرك الداخلية الموجودة فعلًا (لا أرقام جديدة)؛ تُعرض للعميل ليوافق. */
 export const ENGINE_MEASURES = Object.freeze({
   near: { id: 'near-measure', text_ar: '«قريب» يقيسه المحرك: ملامسة ≥ 0.8 م أو فاصل ≤ 2 م بين الفراغين (للمجموعات ≤ 4.2 م).', ev: 'rules.mjs:307,578' },
+  door: { id: 'door-measure', text_ar: '«باب مباشر» يركّبه المحرك بابًا فعليًا على جدار مشترك طوله ≥ 1.3 م وعرضه 0.9 م، ويتحقق من عرضه (≥ 0.8 م) وحرية فتحه؛ إن تعذّر فالتصميم يُحجب بسببه الصريح ولا يُخفَّف الطلب.', ev: 'villa-layout-v2.mjs:r21directdoor، rules.mjs:directDoorCheck' },
   adjacent: { id: 'adjacent-measure', text_ar: '«باب مباشر/ملاصق» يضمنه المحرك كملامسة جدار ≥ 0.8 م؛ لا يضمن وجود باب بين الفراغين.', ev: 'rules.mjs:578' },
   far: { id: 'far-measure', text_ar: '«بعيد» يقيسه المحرك: لا ملامسة ومسافة بين المراكز ≥ max(7 م، 40% من قطر المبنى)، وللدرج مسار مشي ≥ 6 م.', ev: 'rules.mjs:565,570' },
   apart: { id: 'apart-measure', text_ar: '«غير ملاصق» يعني عند المحرك ألا يتلامس الجداران (≤ 0.3 م).', ev: 'rules.mjs:559' },
@@ -115,10 +116,11 @@ export function toEngineInput(brief) {
     if (!a || !b) { report.withheld.push({ id: ref, text_ar: `${describeRelation(r)}: أحد الطرفين لا يعرفه المحرك موضوع قاعدة.` }); continue; }
     if (r.relation === 'same_floor' || r.relation === 'different_floor') { report.withheld.push({ id: ref, text_ar: `${describeRelation(r)}: يُطبَّق عبر دور كل فراغ على حدة (حدّد دور أحدهما).` }); report.limited.push({ id: ref, text_ar: ENGINE_SUPPORT['relation.' + r.relation].ar, ev: ENGINE_SUPPORT['relation.' + r.relation].ev }); continue; }
     const kind = r.relation === 'near' ? 'near' : r.relation === 'direct_access' ? 'adjacent' : (r.detail === 'far' ? 'far' : 'apart');
-    approve(r.relation === 'near' ? 'near' : r.relation === 'direct_access' ? 'adjacent' : kind);
-    if (r.relation === 'near' || r.relation === 'direct_access') report.limited.push({ id: ref, text_ar: ENGINE_SUPPORT['relation.' + r.relation].ar, ev: ENGINE_SUPPORT['relation.' + r.relation].ev });
+    const isDoor = r.relation === 'direct_access' && r.detail === 'door'; // باب حقيقي (r21directdoor)؛ غير ذلك ملاصقة جدار فقط
+    approve(r.relation === 'near' ? 'near' : isDoor ? 'door' : r.relation === 'direct_access' ? 'adjacent' : kind);
+    if (r.relation === 'near' || r.relation === 'direct_access') { const sid = isDoor ? 'relation.direct_door' : 'relation.' + r.relation; report.limited.push({ id: ref, text_ar: ENGINE_SUPPORT[sid].ar, ev: ENGINE_SUPPORT[sid].ev }); }
     if (r.relation === 'separate' && r.detail === undefined) report.assumptions.push({ id: 'separate-kind:' + r.id, text_ar: `«${describeRelation(r)}»: لم تُحدَّد درجة الفصل؛ سأعدّه «غير ملاصق» (الأخف) ما لم تطلب «بعيد».`, source: 'design_default', needsApproval: true });
-    push(ref, r, { kind, a, b });
+    push(ref, r, { kind, a, b, ...(isDoor ? { door: true } : {}) });
   }
   for (const s of brief.spaces) if (s.count > 0 && s.floorPreference != null) {
     const a = engineSubject(s.type); if (!a) continue;

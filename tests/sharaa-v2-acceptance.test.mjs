@@ -166,3 +166,12 @@ test('18 «باب مباشر بين المقلط والمجلس» يصير عل�
   assert.ok(!b.relations.some(x => x.relation === 'near'));
   assert.ok(r.verification !== 'confirmed', 'لا يُرسل صلبًا قبل تأكيد العميل');
 });
+test('19 direct_access بباب حقيقي يصل المحرك كقاعدة adjacent بعلامة door، و«ملاصق» وحدها لا تحمل العلامة', () => {
+  const t = 'لازم باب مباشر بين المقلط والمجلس'; let b = B.applyExtraction(B.createBrief({ land: mkLand() }), extractRequirements(t, { counts: {} }), t).brief;
+  assert.equal(b.relations.find(x => x.relation === 'direct_access').detail, 'door');
+  let rule = toEngineInput(b).requirements.rules.find(x => x.kind === 'adjacent'); assert.equal(rule.door, true); assert.equal(rule.level, 'prefer', 'غير مؤكد: تفضيل لا إلزام');
+  b = B.decide(b, 'relation:' + b.relations.find(x => x.relation === 'direct_access').id, { priority: 'mandatory' });
+  rule = toEngineInput(b).requirements.rules.find(x => x.kind === 'adjacent'); assert.equal(rule.level, 'must'); assert.equal(rule.door, true);
+  const t2 = 'ابي المقلط ملاصق للمجلس'; const b2 = B.applyExtraction(B.createBrief({ land: mkLand() }), extractRequirements(t2, { counts: {} }), t2).brief;
+  assert.equal(b2.relations.find(x => x.relation === 'direct_access').detail, 'wall_contact'); assert.equal(toEngineInput(b2).requirements.rules.find(x => x.kind === 'adjacent').door, undefined);
+});

@@ -62,6 +62,7 @@ export const ENGINE_SUPPORT = Object.freeze({
   'placement.frontback': { status: 'supported', ar: 'الفراغ في الأمام أو الخلف', ev: 'villa-layout-v3.mjs:90-94' },
   'placement.other': { status: 'partial', ar: 'جهة بوصلة أو يمين/يسار أو الوسط (عقوبة وتحقق لا قيد صلب)', ev: 'rules.mjs:371,500' },
   'relation.near': { status: 'partial', ar: 'قريب: يقيسه المحرك بملامسة ≥ 0.8 م أو فاصل ≤ 2 م', ev: 'rules.mjs:307,578' },
+  'relation.direct_door': { status: 'partial', ar: 'باب مباشر حقيقي بين فراغين: يُركَّب على جدار مشترك ≥ 1.3 م ويُتحقق من عرضه وفتحه؛ يُحجب التصميم بسبب صريح إن تعذّر أو عارض شرطًا آخر', ev: 'villa-layout-v2.mjs:r21directdoor' },
   'relation.direct_access': { status: 'partial', ar: 'باب مباشر: المحرك يضمن الملاصقة (≥ 0.8 م) لا الباب', ev: 'rules.mjs:578' },
   'relation.separate': { status: 'supported', ar: 'غير ملاصق أو بعيد', ev: 'rules.mjs:559,564' },
   'relation.avoid_visibility': { status: 'unsupported', ar: 'تجنب الانكشاف البصري', ev: 'لا نوع قاعدة' },
@@ -449,7 +450,7 @@ export function applyExtraction(brief, req, text, { source = 'client_free_text',
     try {
       if (r.kind === 'place') { if (!SIDES.includes(r.side)) continue; b = addPlacement(b, { space: a, side: r.side, mode: r.mode === 'avoid' ? 'avoid' : r.mode === 'touch' ? 'touch' : r.mode === 'center' ? 'center' : 'zone', ...meta }); added.push(`placement:${a}@${r.side}`); }
       else if (r.kind === 'floor') { b = upsertSpace(b, { type: a, count: spaceOf(b, a)?.count ?? 1, floorPreference: r.floor === 'upper' ? 1 : 0, source, priority: meta.priority, originalText: meta.originalText }); added.push(`floor:${a}`); }
-      else if (RULE_REL[r.kind] && bb) { b = addRelation(b, { from: a, to: bb, relation: RULE_REL[r.kind], detail: r.kind === 'far' ? 'far' : r.kind === 'apart' ? 'apart' : r.kind === 'adjacent' ? 'adjacent' : undefined, ...meta }); added.push(`relation:${a}|${bb}`); }
+      else if (RULE_REL[r.kind] && bb) { b = addRelation(b, { from: a, to: bb, relation: RULE_REL[r.kind], detail: r.kind === 'far' ? 'far' : r.kind === 'apart' ? 'apart' : r.kind === 'adjacent' ? (r.door ? 'door' : 'wall_contact') : undefined, ...meta }); added.push(`relation:${a}|${bb}`); }
     } catch (e) { unsupported.push('تعذّر تسجيل بند: ' + (r.text || r.kind)); }
   }
   // تفضيلات منطقية
