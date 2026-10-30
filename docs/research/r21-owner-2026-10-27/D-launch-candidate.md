@@ -100,3 +100,4 @@ H3=SEARCH_INCOMPLETE · DIMENSION_FIX=PARTIAL · PENDING_TESTS=4 · CURTAIN_COMP
 - ملاحظة B2: فشل خصوصية الفراغ ملاحظة ظاهرة لا تخفّض الحالة إلا بـ `R21_PRIVACY_EDITS=1`.
 
 ## 6. الإيداعات
+- النتيجة النهائية لـ `npm test` (`logs/npm-test-D-final.log`): 1549 اختبارًا، نجح 1546، رسب 3 (1133، 1150، 1152: بوابة الدش مع أدلة r15/r19 التاريخية)، `EXIT=1`. المعلّقة الأربعة راسبة ظاهرة `EXIT=1`.
