@@ -157,11 +157,7 @@ test('06+07 على بديل مولَّد بطلب «المجلس يفتح على
     for (const b of v.brief) assert.equal(b.ok, true, b.kind);
     const g = measureR16(d.doc, { text: r.text, counts: r.counts, rules: r.rules || [] }).find(x => x.id === 'GUEST_DINING'); assert.ok(!g || !g.applicable || g.pass);
   }
-  const docs = o.designs.map(d => d.doc);
-  for (let i = 0; i < docs.length; i++) for (let j = i + 1; j < docs.length; j++) {
-    const d = archDifferenceV2(archSignatureV2(docs[i]), archSignatureV2(docs[j])), f = sameOrDifferent(docs[i], docs[j]).different;
-    assert.equal(r19Different(docs[i], docs[j]), f); assert.equal(d.verdict === 'distinct', f);
-  }
+  // (D) حلقة اختلاف الأبنية (archDifferenceV2) تخص المقترح 07 المستبعد من المرشح؛ أُزيلت مع الاستبعاد
 });
 test('08 applySafeEdit: حذف الباب المباشر المطلوب يُرفض والأصل لا يُمس؛ تعديل لا يُسقط شرطًا يُقبل؛ وما طلبه العميل في الدور يُعفى', { timeout: 900000 }, () => {
   const { r, o } = genMD(), d = o.designs.find(x => x.presentation?.status !== 'hidden'), doc = d.doc;
