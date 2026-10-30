@@ -1697,6 +1697,28 @@ export function realizeV2(cand, P, { secondEntry = null, upper = false, below = 
     if (host) { const e = shared(m, host); doors.push({ a: m.id, b: host.id, edge: e, pos: (e.from + e.to) / 2, kind: 'door', w: .9 }); host.guestDoor = true; notes.push(`مجلس الرجال بمدخل خارجي مستقل${m.noWc ? '' : ' ودورة مياه خاصة'}، ولا يمر الضيف بالعائلة؛ له باب خدمة إلى «${host.name}» للضيافة.`); }
     else notes.push(`مجلس الرجال بمدخل خارجي مستقل${m.noWc ? '' : ' ودورة مياه خاصة'}، ومنفصل تمامًا عن العائلة (بلا باب داخلي).${P.majlisDiningDefault ? ' المقلط (باب الضيافة إلى الطعام، قيمة تصميمية افتراضية للميزان) لم يتحقق: الطعام لا يجاور المجلس في هذا البديل.' : ''}`);
   }
+  // (الجولة 21، استثناء المالك لـ direct_access) باب مباشر حقيقي بين فراغين حدّدهما العميل (rule.door): جدار مشترك ≥ DOOR_TOUCH، والباب لا يتراكب مع باب آخر على الحد نفسه.
+  // التعطيل: R14_OFF=r21directdoor. لا أثر إطلاقًا ما لم يحمل البرنامج قاعدة adjacent بعلامة door.
+  if (!R14_OFF.has('r21directdoor')) for (const r of (P.rules || []).filter(q => q.kind === 'adjacent' && q.door && q.b)) {
+    const roomsOf = id => id === 'hall' ? circRooms.filter(c => c.id === 'hall') : blocksFor(id, P.blocks || []).flatMap(b => rooms.filter(x => x.id === b.id));
+    const unitOf = x => [x, ...rooms.filter(y => y.id === x.id + '-lobby')];
+    const RA = roomsOf(r.a), RB = roomsOf(r.b); if (!RA.length || !RB.length) continue;
+    const hasLeaf = (x, y) => doors.some(d => ['door', 'door2', 'slider'].includes(d.kind) && ((d.a === x.id && d.b === y.id) || (d.a === y.id && d.b === x.id)));
+    if (RA.some(x => RB.some(y => unitOf(x).some(u => unitOf(y).some(v => hasLeaf(u, v)))))) continue;
+    let best = null;
+    for (const x of RA) for (const y of RB) for (const u of unitOf(x)) for (const v of unitOf(y)) {
+      if (u === v) continue; const e = shared(u, v); if (!e) continue; const len = e.to - e.from; if (len >= DOOR_TOUCH && (!best || len > best.len)) best = { u, v, e, len };
+    }
+    if (!best) { notes.push(`باب مباشر مطلوب بين «${r.a}» و«${r.b}»: لم يوجد جدار مشترك بطول ${DOOR_TOUCH} م على الأقل في هذا البديل.`); continue; }
+    const { u, v, e } = best, w = Math.min(.9, e.to - e.from - .4), busy = doors.filter(d => d.edge && d.edge.axis === e.axis && Math.abs(d.edge.at - e.at) < .05 && d.pos !== undefined);
+    const cand = [(e.from + e.to) / 2, ...[.25, .75, .35, .65].map(f => e.from + (e.to - e.from) * f)];
+    const pos = cand.find(c => c - w / 2 >= e.from + .15 && c + w / 2 <= e.to - .15 && busy.every(d => Math.abs(d.pos - c) >= (d.w || .9) / 2 + w / 2 + .15));
+    if (pos === undefined) { notes.push(`باب مباشر مطلوب بين «${r.a}» و«${r.b}»: لا موضع حر على الجدار المشترك لتركيب الباب.`); continue; }
+    // الفتحة المفتوحة (قوس) القائمة بين الفراغين تُستبدل بباب فعلي
+    for (let i = doors.length - 1; i >= 0; i--) { const d = doors[i]; if (d.kind === 'arch' && ((d.a === u.id && d.b === v.id) || (d.a === v.id && d.b === u.id))) doors.splice(i, 1); }
+    doors.push({ a: u.id, b: v.id, edge: e, pos, kind: 'door', w, directAccess: true });
+    notes.push(`باب مباشر بين «${u.name}» و«${v.name}» بطلب العميل (جدار مشترك ${Math.round(best.len * 10) / 10} م).`);
+  }
   // الطعام الذي يخدم الضيوف: بابه إلى الصالة باب يُغلق (لا فتحة) حتى لا ينكشف القسم العائلي
   for (const d of doors) { const r = rooms.find(x => x.id === d.a); if (r && r.guestDoor && d.b && d.kind === 'arch' && circRooms.some(c => c.id === d.b)) { d.kind = 'door'; d.w = Math.min(1.2, d.w); } }
   if (pendingGuestWc && !(foyer && foyerWc(pendingGuestWc))) { extraBaths++; notes.push('دورة مياه الضيوف لم تتسع بجوار المجلس فوُضعت مع دورات المياه العامة.'); }

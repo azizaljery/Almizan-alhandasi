@@ -92,6 +92,13 @@ export function unitsOf(P, { stair = false } = {}) {
   const both = new Set(Object.keys(MAP).filter(a => ['front', 'back'].every(sd => (P.rules || []).some(r => r.kind === 'place' && r.a === a && r.side === sd && r.mode !== 'avoid'))));
   for (const r of P.rules || []) if (r.kind === 'place' && MAP[r.a] && !both.has(r.a) && (r.side === 'back' || r.side === 'front') && r.mode !== 'avoid' && r.level !== 'prefer')
     if (MAP[r.a] === 'S*' ? U.some(u => u.sleep) : has(MAP[r.a])) rel.push({ a: MAP[r.a], kind: r.side === 'back' ? 'back' : 'front', hard: true, client: true, ar: 'بند العميل: ' + (r.text || r.a) });
+  // (الجولة 21، استثناء المالك لـ direct_access) باب مباشر بين فراغين حدّدهما العميل: قيد صلب بالتلامس بين وحدتيهما (المجلس M، الطعام DN، الصالة H، المطبخ KS)
+  // ثم يركّب realizeV2 بابًا حقيقيًا على الجدار المشترك. لا أثر ما لم تحمل القواعد adjacent بعلامة door. التعطيل: R14_OFF=r21directdoor.
+  if (!String(globalThis.process?.env?.R14_OFF || '').split(',').includes('r21directdoor')) {
+    const DD = { majlis: 'M', majlis_m: 'M', majlis_w: 'W', hall: 'H', dining: 'DN', kitchen: 'KS' };
+    for (const r of P.rules || []) if (r.kind === 'adjacent' && r.door && r.level !== 'prefer' && DD[r.a] && DD[r.b] && DD[r.a] !== DD[r.b] && has(DD[r.a]) && has(DD[r.b]) && !rel.some(q => q.a === DD[r.a] && q.b === DD[r.b] && q.kind === 'touch'))
+      rel.push({ a: DD[r.a], b: DD[r.b], kind: 'touch', hard: true, client: true, ar: 'باب مباشر بطلب العميل: ' + (r.text || r.a + '-' + r.b) });
+  }
   return { units: U, rel };
 }
 const R14_OFF_V3 = new Set(String(globalThis.process?.env?.R14_OFF || '').split(',').filter(Boolean));
