@@ -1,0 +1,3 @@
+Arabic app, browser imports, D1 migration and separately bundled archive Worker verified.
+Browser import graph verified: 156 modules.
+EXIT=0

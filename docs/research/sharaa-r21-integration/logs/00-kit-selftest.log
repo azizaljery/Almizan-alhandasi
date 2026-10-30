@@ -1,0 +1,101 @@
+TAP version 13
+# Subtest: passes isolated staging with both flags
+ok 1 - passes isolated staging with both flags
+  ---
+  duration_ms: 47.941166
+  type: 'test'
+  ...
+# Subtest: blocks missing flag
+ok 2 - blocks missing flag
+  ---
+  duration_ms: 46.477813
+  type: 'test'
+  ...
+# Subtest: blocks protected branch
+ok 3 - blocks protected branch
+  ---
+  duration_ms: 49.60665
+  type: 'test'
+  ...
+# Subtest: blocks wrong event in CI
+ok 4 - blocks wrong event in CI
+  ---
+  duration_ms: 45.546107
+  type: 'test'
+  ...
+# Subtest: blocks production D1 reuse
+ok 5 - blocks production D1 reuse
+  ---
+  duration_ms: 49.802858
+  type: 'test'
+  ...
+# Subtest: blocks custom routes
+ok 6 - blocks custom routes
+  ---
+  duration_ms: 45.51323
+  type: 'test'
+  ...
+# Subtest: blocks .env in client
+ok 7 - blocks .env in client
+  ---
+  duration_ms: 57.129888
+  type: 'test'
+  ...
+# Subtest: blocks sealed samples
+ok 8 - blocks sealed samples
+  ---
+  duration_ms: 45.269525
+  type: 'test'
+  ...
+# Subtest: blocks private key strings
+ok 9 - blocks private key strings
+  ---
+  duration_ms: 45.270601
+  type: 'test'
+  ...
+# Subtest: blocks missing Sharaa asset
+ok 10 - blocks missing Sharaa asset
+  ---
+  duration_ms: 36.700457
+  type: 'test'
+  ...
+# Subtest: dry run leaves workflow untouched
+ok 11 - dry run leaves workflow untouched
+  ---
+  duration_ms: 86.871287
+  type: 'test'
+  ...
+# Subtest: apply adds guard after build and before deploy
+ok 12 - apply adds guard after build and before deploy
+  ---
+  duration_ms: 51.497944
+  type: 'test'
+  ...
+# Subtest: apply is idempotent
+ok 13 - apply is idempotent
+  ---
+  duration_ms: 140.921142
+  type: 'test'
+  ...
+# Subtest: main branch blocked
+ok 14 - main branch blocked
+  ---
+  duration_ms: 43.469407
+  type: 'test'
+  ...
+# Subtest: staging-preview branch blocked from installer
+ok 15 - staging-preview branch blocked from installer
+  ---
+  duration_ms: 48.757879
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 985.418816
+EXIT=0

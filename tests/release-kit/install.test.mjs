@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+const here=dirname(fileURLToPath(import.meta.url)), script=join(here,'../../scripts/release-kit/install.mjs');
+const workflow=`name: Deploy Staging Preview\non:\n  push:\n    branches: [staging-preview]\njobs:\n  deploy:\n    steps:\n      - name: Build validation\n        run: node scripts/build.mjs\n      - name: Deploy staging worker\n        run: npx wrangler deploy -c wrangler.staging.toml\n`;
+const setup = branch => { const d=mkdtempSync(join(tmpdir(),'mizan-install-')); mkdirSync(join(d,'scripts/release-kit'),{recursive:true}); mkdirSync(join(d,'.github/workflows'),{recursive:true}); copyFileSync(script,join(d,'scripts/release-kit/install.mjs')); writeFileSync(join(d,'package.json'),'{"type":"module"}'); writeFileSync(join(d,'.github/workflows/deploy-staging.yml'),workflow); const git=spawnSync('git',['init','-q','-b',branch],{cwd:d,encoding:'utf8'}); assert.equal(git.status,0,git.stderr); return d; };
+const run=(d,apply=false)=>spawnSync(process.execPath,[join(d,'scripts/release-kit/install.mjs'),...(apply?['--apply']:[])],{cwd:d,encoding:'utf8'});
+test('dry run leaves workflow untouched',()=>{const d=setup('dev/test');assert.equal(run(d).status,0);assert.equal(readFileSync(join(d,'.github/workflows/deploy-staging.yml'),'utf8'),workflow);});
+test('apply adds guard after build and before deploy',()=>{const d=setup('dev/test');assert.equal(run(d,true).status,0);const s=readFileSync(join(d,'.github/workflows/deploy-staging.yml'),'utf8');assert.ok(s.indexOf('run: node scripts/build.mjs')<s.indexOf('run: node scripts/release-kit/guard.mjs'));assert.ok(s.indexOf('run: node scripts/release-kit/guard.mjs')<s.indexOf('name: Deploy staging worker'));});
+test('apply is idempotent',()=>{const d=setup('dev/test');assert.equal(run(d,true).status,0);assert.equal(run(d,true).status,0);const s=readFileSync(join(d,'.github/workflows/deploy-staging.yml'),'utf8');assert.equal(s.match(/run: node scripts\/release-kit\/guard\.mjs/g).length,1);});
+test('main branch blocked',()=>{const d=setup('main');assert.equal(run(d,true).status,1);});
+test('staging-preview branch blocked from installer',()=>{const d=setup('staging-preview');assert.equal(run(d,true).status,1);});

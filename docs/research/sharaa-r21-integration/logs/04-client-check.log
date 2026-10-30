@@ -1,0 +1,38 @@
+== guard كما هو (بلا متغيرات، الفرع dev/sharaa-r21-integration):
+STAGING_BLOCKED
+- علمَا النشر المستقل غير موجودين أو غير صحيحين
+- يجب تشغيل فحص النشر من فرع staging-preview فقط
+- المعاينة يجب أن تستخدم workers.dev
+EXIT=1
+
+== guard بمتغيرات مزوّرة للتشخيص فقط (GITHUB_REF_NAME=staging-preview MIZAN_PREVIEW_DEPLOY=1 MIZAN_DEPLOY_TARGET=staging) لفحص بقية البنود — ليس إذن نشر:
+STAGING_BLOCKED
+- المعاينة يجب أن تستخدم workers.dev
+EXIT=1
+
+== فحوص يدوية لـ dist/client:
+OK home.html
+OK home.mjs
+OK sharaa/flow.mjs
+OK sharaa/brief.mjs
+OK sharaa/adapter.mjs
+OK sharaa/alternatives.mjs
+OK home-flow.mjs
+OK requirements.mjs
+OK shared-brief.mjs
+OK clear-dims.mjs
+OK privacy-gate.mjs
+OK rules.mjs
+OK villa-layout-v2.mjs
+OK villa-layout-v3.mjs
+OK design.html
+OK design.mjs
+symlinks: 0
+sealed-name files: 0
+secret-like strings: 0
+evidence/tests/scripts copied: 36
+r21directdoor in client v2/v3: dist/client/villa-layout-v2.mjs:2 dist/client/villa-layout-v3.mjs:2 
+
+ملاحظة التشخيص: البند المتبقي «المعاينة يجب أن تستخدم workers.dev» إنذار كاذب من نمط الحارس: السطر في wrangler.staging.toml هو
+'workers_dev = true   # تعليق' والنمط /^\s*workers_dev\s*=\s*true\s*$/m لا يقبل التعليق في آخر السطر. الملف نفسه (من 3ef1752، لم يغيّره أي من الفرعين) workers_dev=true.
+المسارات الـ36 المطابقة لـ evidence|tests/|scripts/ هي وحدات باسم *-evidence.mjs وحزمة integration/gemini الموروثة — ليست evidence/ ولا عينات مختومة.

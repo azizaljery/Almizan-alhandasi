@@ -1,0 +1,24 @@
+{
+  "kit": "mizan-sharaa-r21-native-release-kit",
+  "repository": "azizaljery/almizan-alhandasi",
+  "references": {
+    "sharaa": { "branch": "dev/sharaa-v2", "commit": "429098a" },
+    "r21": { "branch": "dev/r21-launch-candidate", "commit": "f6d22c7", "remoteHeadVerified": false }
+  },
+  "decisions": {
+    "guestRoute06": "keep_in_combined_candidate_with_regression_evidence",
+    "showerExpectations": "do_not_modify_without_separate_approval",
+    "sharaaStaging": "owner_authorized_staging_preview_only",
+    "productionMerge": "not_authorized",
+    "productionDeploy": "not_authorized"
+  },
+  "unresolved": [
+    "sharaa_after_direct_door_browser_retest",
+    "real_staging_assistant_key_test",
+    "R21_three_shower_test_failures",
+    "R21_four_pending_tests",
+    "H3_SEARCH_INCOMPLETE",
+    "dimension_fix_partial",
+    "curtain_compliance_not_evaluated"
+  ]
+}

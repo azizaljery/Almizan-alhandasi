@@ -1,0 +1,7 @@
+{
+  "name": "mizan-sharaa-r21-native-release-kit",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/release-kit/*.test.mjs" },
+  "engines": { "node": ">=22" }
+}
