@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +14,7 @@ const setup = () => {
   mkdirSync(join(dir, 'scripts/release-kit'), { recursive: true });
   mkdirSync(join(dir, 'dist/client/sharaa'), { recursive: true });
   copyFileSync(script, join(dir, 'scripts/release-kit/guard.mjs'));
+  copyFileSync(join(here, '../../scripts/release-kit/guard-toml.mjs'), join(dir, 'scripts/release-kit/guard-toml.mjs'));
   writeFileSync(join(dir, 'package.json'), '{"type":"module"}');
   writeFileSync(join(dir, 'wrangler.toml'), prod);
   writeFileSync(join(dir, 'wrangler.staging.toml'), stage);
@@ -31,3 +32,20 @@ test('blocks .env in client', () => { const d=setup(); writeFileSync(join(d,'dis
 test('blocks sealed samples', () => { const d=setup(); writeFileSync(join(d,'dist/client/SAMPLE.json'),'{}'); assert.equal(run(d).status,1); });
 test('blocks private key strings', () => { const d=setup(); writeFileSync(join(d,'dist/client/home.mjs'),'const s="sk-proj-'+ 'x'.repeat(32)+'";'); assert.equal(run(d).status,1); });
 test('blocks missing Sharaa asset', () => { const d=setup(); rmSync(join(d,'dist/client/sharaa/flow.mjs')); assert.equal(run(d).status,1); });
+
+// (تصحيح 2026-10-31، قرار المالك ثالثًا) الإعداد الحقيقي بتعليقاته يمر، وكل إعداد غير آمن يُرفض عمدًا — ولو تخفّى خلف تعليق
+const repo = join(here, '../..'), real = f => readFileSync(join(repo, f), 'utf8');
+const withReal = (stageText = real('wrangler.staging.toml'), prodText = real('wrangler.toml')) => { const d = setup(); writeFileSync(join(d, 'wrangler.staging.toml'), stageText); writeFileSync(join(d, 'wrangler.toml'), prodText); return d; };
+test('real repo staging config (with TOML comments) passes', () => { const r = run(withReal()); assert.equal(r.status, 0, r.stderr); assert.match(r.stdout, /STAGING_PREFLIGHT_PASS_ONLY/); });
+test('commented-out workers_dev only is rejected', () => { const s = real('wrangler.staging.toml').replace(/^workers_dev = true.*$/m, '# workers_dev = true'); assert.equal(run(withReal(s)).status, 1); });
+test('workers_dev = false (with comment) is rejected', () => { const s = real('wrangler.staging.toml').replace(/^workers_dev = true/m, 'workers_dev = false'); assert.equal(run(withReal(s)).status, 1); });
+test('route with trailing comment is rejected', () => { assert.equal(run(withReal(real('wrangler.staging.toml') + '\nroute = "almizan.example/*"   # mistake\n')).status, 1); });
+test('routes array inside [env.production] is rejected', () => { assert.equal(run(withReal(real('wrangler.staging.toml') + '\n[env.production]\nroutes = [{ pattern = "x.example/*", zone_name = "x.example" }]\n')).status, 1); });
+test('any [env.*] table is rejected', () => { assert.equal(run(withReal(real('wrangler.staging.toml') + '\n[env.staging]\nname = "almizan-handasi"\n')).status, 1); });
+test('production D1 id reused (commented as staging) is rejected', () => { const s = real('wrangler.staging.toml').replace(/database_id = "[^"]+"/, 'database_id = "993f60e1-c187-42ca-bf4c-f0a5a4b9c44f"  # staging'); assert.equal(run(withReal(s)).status, 1); });
+test('production D1 name reused is rejected', () => { const s = real('wrangler.staging.toml').replace(/database_name = "[^"]+"/, 'database_name = "almizan-archive"'); assert.equal(run(withReal(s)).status, 1); });
+test('production worker name is rejected even with staging in a comment', () => { const s = real('wrangler.staging.toml').replace(/^name = "[^"]+"/m, 'name = "almizan-handasi"  # staging'); assert.equal(run(withReal(s)).status, 1); });
+test('TRUST_SITES_HEADER set in [vars] is rejected; mention in a comment is fine', () => { const base = real('wrangler.staging.toml'); assert.match(base, /# .*TRUST_SITES_HEADER/); assert.equal(run(withReal(base.replace('[vars]', '[vars]\nTRUST_SITES_HEADER = "1"  # no'))).status, 1); });
+test('ALLOWED_ORIGIN on production worker host is rejected', () => { const s = real('wrangler.staging.toml').replace(/ALLOWED_ORIGIN = "[^"]+"/, 'ALLOWED_ORIGIN = "https://almizan-handasi.aljeryabod.workers.dev"'); assert.equal(run(withReal(s)).status, 1); });
+test('a "#" inside a quoted value is not treated as a comment', () => { const s = real('wrangler.staging.toml').replace(/^name = "[^"]+"/m, 'name = "almizan-handasi-staging#1"  # comment'); const r = run(withReal(s)); assert.equal(r.status, 0, r.stderr); });
+test('assets directory other than dist/client is rejected', () => { const s = real('wrangler.staging.toml').replace('directory = "./dist/client"', 'directory = "./dist"   # all'); assert.equal(run(withReal(s)).status, 1); });

@@ -1,0 +1,281 @@
+[
+ {
+  "id": "door-majlis-dining",
+  "text": "لازم باب مباشر بين المجلس والطعام",
+  "secs": 38.962,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "want": null,
+  "contract": [
+   "NEAR:HARD"
+  ],
+  "sbOrigin": null,
+  "rules": [
+   "adjacent:majlis-dining:door:must"
+  ],
+  "err": null,
+  "alts": 4,
+  "shown": 4,
+  "ready": 4,
+  "requested": 4,
+  "shortfall": null,
+  "door": [
+   [
+    true
+   ],
+   [
+    true
+   ],
+   [
+    true
+   ],
+   [
+    true
+   ]
+  ],
+  "outcome": "SOLVED",
+  "outcomeDetail": [],
+  "hidden": []
+ },
+ {
+  "id": "door-opens",
+  "text": "لازم المجلس يفتح على الطعام بباب مباشر",
+  "secs": 35.197,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "want": null,
+  "contract": [
+   "NEAR:HARD"
+  ],
+  "sbOrigin": null,
+  "rules": [
+   "adjacent:majlis-dining:must"
+  ],
+  "err": null,
+  "alts": 2,
+  "shown": 2,
+  "ready": 2,
+  "requested": 4,
+  "shortfall": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 37، اجتاز البوابات منهم 27؛ ورُفض 10 في بوابات الجودة والسلامة؛ 11 تخالف بندًا صريحًا من الطلب («المجلس» بجوار «الطعام»)؛ 1 فيها غرفة نوم على واجهة الشارع (لم يطلبها العميل)؛ 7 نسخة معدّلة من بديل معروض (لا بعد جوهري في المقياس الوظيفي v2: موضع السلم أو الغلاف أو مقاسات فقط)؛ 6 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "door": [
+   [],
+   []
+  ],
+  "outcome": "SOLVED",
+  "outcomeDetail": [],
+  "hidden": []
+ },
+ {
+  "id": "door-majlis-hall",
+  "text": "لازم المجلس بباب مباشر على الصالة",
+  "secs": 26.654,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "want": null,
+  "contract": [
+   "NEAR:HARD"
+  ],
+  "sbOrigin": null,
+  "rules": [
+   "adjacent:majlis-hall:door:must"
+  ],
+  "err": null,
+  "alts": 1,
+  "shown": 0,
+  "ready": 0,
+  "requested": 4,
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 19، اجتاز البوابات منهم 5؛ ورُفض 10 في بوابات الجودة والسلامة، و4 في المراجعة المعمارية المستقلة (MAJLIS_PRIVACY)؛ 3 تخالف بندًا صريحًا من الطلب («المجلس» بباب مباشر على «الصالة»)؛ 1 اختلافها عن بديل معروض جزئي (بعد جوهري واحد فقط من توزيع الوظائف والحركة والخصوصية والعلاقات؛ المطلوب بعدان). لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "door": [],
+  "outcome": "ALL_HIDDEN",
+  "outcomeDetail": [
+   "شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: من «المجلس» إلى «صالة الطعام» يعبر الضيف «مدخل الرجال» ثم «الصالة» (شرط أساسي في تصميم البي"
+  ],
+  "hidden": [
+   "شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: من «المجلس» إلى «صالة الطعام» يعبر الضيف «مدخل الرجال» ثم «الصالة» (شرط"
+  ]
+ },
+ {
+  "id": "maqlat-near",
+  "text": "أبي مقلط قريب من المجلس",
+  "secs": 27.837,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 2
+  },
+  "want": null,
+  "contract": [
+   "NEAR:SOFT"
+  ],
+  "sbOrigin": null,
+  "rules": [
+   "near:dining-majlis:prefer"
+  ],
+  "err": null,
+  "alts": 1,
+  "shown": 0,
+  "ready": 0,
+  "requested": 4,
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 5، اجتاز البوابات منهم 1؛ ورُفض 4 في بوابات الجودة والسلامة. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "door": [],
+  "outcome": "ALL_HIDDEN",
+  "outcomeDetail": [
+   "بند من طلبك لم يتحقق: ««الطعام» قرب «المجلس»» — «صالة طعام 1» بعيد عن «المجلس» (بينهما 4.3 م)."
+  ],
+  "hidden": [
+   "بند من طلبك لم يتحقق: ««الطعام» قرب «المجلس»» — «صالة طعام 1» بعيد عن «المجلس» (بينهما 4.3 م)."
+  ]
+ },
+ {
+  "id": "maqlat-only",
+  "text": "أبي مجلس رجال بمقلط",
+  "secs": 30.776,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "want": null,
+  "contract": [],
+  "sbOrigin": null,
+  "rules": [],
+  "err": null,
+  "alts": 4,
+  "shown": 4,
+  "ready": 4,
+  "requested": 4,
+  "shortfall": null,
+  "door": [
+   [],
+   [],
+   [],
+   []
+  ],
+  "outcome": "SOLVED",
+  "outcomeDetail": [],
+  "hidden": []
+ },
+ {
+  "id": "maqlat-door",
+  "text": "لازم المقلط بباب مباشر على المجلس",
+  "secs": 29.076,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 2
+  },
+  "want": null,
+  "contract": [
+   "NEAR:HARD"
+  ],
+  "sbOrigin": null,
+  "rules": [
+   "adjacent:dining-majlis:door:must"
+  ],
+  "err": null,
+  "alts": 1,
+  "shown": 0,
+  "ready": 0,
+  "requested": 4,
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 5، اجتاز البوابات منهم 1؛ ورُفض 4 في بوابات الجودة والسلامة. لا يُكمَّل العدد بنسخ معكوسة أو شكلية ولا ببديل يخالف شرطًا إلزاميًا (قرار المالك).",
+  "door": [],
+  "outcome": "ALL_HIDDEN",
+  "outcomeDetail": [
+   "بند من طلبك لم يتحقق: ««الطعام» بباب مباشر على «المجلس»» — لا باب بين «صالة طعام 1» و«المجلس» (الجدار المشترك 0 م أقل من 1.3 م اللازمة لتركيب باب)."
+  ],
+  "hidden": [
+   "بند من طلبك لم يتحقق: ««الطعام» بباب مباشر على «المجلس»» — لا باب بين «صالة طعام 1» و«المجلس» (الجدار المشترك 0 م أقل من 1.3 م اللازمة لتركي"
+  ]
+ },
+ {
+  "id": "count-6",
+  "text": "أبي ستة تصاميم، ومجلس رجال",
+  "secs": 29.966,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "want": null,
+  "contract": [],
+  "sbOrigin": null,
+  "rules": [],
+  "err": null,
+  "alts": 4,
+  "shown": 4,
+  "ready": 4,
+  "requested": 4,
+  "shortfall": null,
+  "door": [
+   [],
+   [],
+   [],
+   []
+  ],
+  "outcome": "SOLVED",
+  "outcomeDetail": [],
+  "hidden": []
+ },
+ {
+  "id": "count-2",
+  "text": "أبي تصميمين فقط",
+  "secs": 30.649,
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "want": null,
+  "contract": [],
+  "sbOrigin": null,
+  "rules": [],
+  "err": null,
+  "alts": 4,
+  "shown": 4,
+  "ready": 4,
+  "requested": 4,
+  "shortfall": null,
+  "door": [
+   [],
+   [],
+   [],
+   []
+  ],
+  "outcome": "SOLVED",
+  "outcomeDetail": [],
+  "hidden": []
+ }
+]

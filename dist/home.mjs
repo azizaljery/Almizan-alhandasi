@@ -4,6 +4,7 @@ import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { createSession, saveSession } from './design-session.mjs';
 import { normalizeLand, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
+import { generateOffThread } from './generation-client.mjs'; // (قرار المالك 2026-10-31) التوليد خارج خيط الواجهة
 import { requestBrief, assistantOpen } from './assistant.mjs';
 import { SharaFlow, landBar, liveProfile, READINESS_AR } from './sharaa/flow.mjs';
 import { classifyOutcome, buildAlternatives, retryWith, OUTCOME } from './sharaa/alternatives.mjs';
@@ -311,7 +312,7 @@ async function build() {
   const eng = session.engineInput(), input = { land: eng.land, rooms: eng.rooms, discovery: eng.discovery, idea: eng.idea, counts: eng.counts, requirements: eng.requirements };
   session.counts = eng.counts; session.requirements = eng.requirements; session.idea = eng.idea;
   try {
-    const out = await generateInitialDesign(input);
+    const out = await generateOffThread(input);
     const oc = classifyOutcome(out, session.brief);
     if (oc.kind !== OUTCOME.SOLVED) { $('buildText').textContent = ''; return showOutcome(oc, null); }
     // التصميم الأولي يُعرض على العميل أولًا (اعتماد / تصميم آخر / تعديل في المرسم)
@@ -340,7 +341,7 @@ function showOutcome(oc, err) {
   if (oc.note_ar) box.append(el('p', 'hint', oc.note_ar));
   const alts = buildAlternatives(session.brief, { ...oc, counterfactual: err?.counterfactual || oc.counterfactual || [] });
   const run = (o, consent, confirmed) => async () => { box.querySelectorAll('button').forEach(b => b.disabled = true); $('buildText').textContent = 'أطبّق اختيارك وأعيد المحاولة…';
-    const r = await retryWith(session.brief, alts, o.id, x => generateInitialDesign({ land: x.land, rooms: x.rooms, discovery: x.discovery, idea: x.idea, counts: x.counts, requirements: x.requirements }), { consent, confirmed });
+    const r = await retryWith(session.brief, alts, o.id, x => generateOffThread({ land: x.land, rooms: x.rooms, discovery: x.discovery, idea: x.idea, counts: x.counts, requirements: x.requirements }), { consent, confirmed });
     session.brief = r.brief; if (r.outcome.kind === OUTCOME.SOLVED) { const eng = session.engineInput(); const ds = createSession({ land: eng.land, counts: eng.counts, requirements: eng.requirements, discovery: eng.discovery, idea: '', result: r.result }); if (saveSession(localStorage, ds)) { location.href = './design.html'; return; } }
     $('buildText').textContent = ''; showOutcome(r.outcome, r.error || null); refreshPanels(); };
   const list = (title, items, consent) => { if (!items.length) return; box.append(el('h4', '', title)); for (const o of items) { const row = el('div', 'alt'); row.append(el('strong', '', o.label), el('p', '', 'يتغير: ' + o.changes_ar), el('p', '', 'يُفقد: ' + o.loses_ar)); if (o.caveat_ar) row.append(el('small', 'caveat', o.caveat_ar)); if (o.engineVerified !== undefined && o.engineVerified !== null) row.append(el('small', '', o.engineVerified ? 'جرّبه المحرك فنجح' : 'جرّبه المحرك فلم ينجح وحده')); if (o.apply || o.id === 'follow_regulation') { const b = el('button', 'cta ghost', consent ? 'أوافق على هذا التنازل وأعد المحاولة' : 'طبّق هذا الاقتراح'); b.type = 'button'; if (o.confirmQ_ar) { b.addEventListener('click', () => { b.hidden = true; const q = el('div', 'confirmq', o.confirmQ_ar); const yes = el('button', 'cta', 'نعم'); const no = el('button', 'cta ghost', 'لا'); yes.type = no.type = 'button'; yes.addEventListener('click', run(o, true, true)); no.addEventListener('click', () => { q.remove(); b.hidden = false; }); q.append(yes, no); row.append(q); }); } else b.addEventListener('click', run(o, consent, false)); row.append(b); } else row.append(el('small', '', 'لا يُنفَّذ من هنا')); box.append(row); } };

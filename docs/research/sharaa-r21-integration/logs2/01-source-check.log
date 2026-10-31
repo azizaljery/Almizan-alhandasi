@@ -1,0 +1,13 @@
+== f6d22c7 (R21 وحده) --r21:
+SOURCE_CHECK_PASS — فحص توافق بنيوي وعقود صغيرة فقط؛ لا يغني عن الاختبارات الفعلية
+EXIT=0
+== فرع التكامل --combined:
+SOURCE_CHECK_PASS — فحص توافق بنيوي وعقود صغيرة فقط؛ لا يغني عن الاختبارات الفعلية
+EXIT=0
+== فرع التكامل --r21:
+SOURCE_CHECK_PASS — فحص توافق بنيوي وعقود صغيرة فقط؛ لا يغني عن الاختبارات الفعلية
+EXIT=0
+== سلبي مقصود R14_OFF=r21directdoor --combined:
+SOURCE_CHECK_BLOCKED
+- villa-layout-v3.mjs: direct door is a hard touch constraint (switchable by R14_OFF=r21directdoor): disabled by R14_OFF=r21directdoor
+EXIT=1

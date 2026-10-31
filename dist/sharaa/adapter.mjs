@@ -3,6 +3,7 @@
 // المبادئ: (1) غير المؤكد لا يُرسل إلزاميًا أبدًا (يُرسل تفضيلًا أو يُحجب)؛ (2) غير المدعوم لا يُرسل ولا يُوعَد به؛
 // (3) «قريب» ≠ «باب مباشر»؛ (4) لا حدود رقمية مخترعة: معايير المحرك الداخلية تُعلَن افتراضًا للموافقة؛ (5) لا تغيير لأي شرط إلزامي لتسهيل التوليد.
 import { ruleText } from '../rules.mjs';
+import { buildSharedBrief, RELATIONS, LEVELS } from '../shared-brief.mjs';
 import { normalizeDiscovery, AVOIDS, LIFE } from '../client-brief.mjs';
 import { defaultRooms } from '../planner.mjs';
 import { SPACE_TYPES, ANCHORS, attrMetaOf, nameOf, supportOf, ENGINE_SUPPORT, describeRelation, describePlacement } from './brief.mjs';
@@ -34,7 +35,7 @@ export function toEngineInput(brief) {
   const approve = k => { if (!report.assumptions.some(a => a.id === ENGINE_MEASURES[k].id)) report.assumptions.push({ ...ENGINE_MEASURES[k], source: 'design_default', verification: 'needs_confirmation', needsApproval: true }); };
 
   // ---- الأعداد
-  const counts = { bedrooms: Math.max(n('bedroom'), S('master')?.count > 0 || S('elderly')?.count > 0 ? 1 : 0), majlis: 0, baths: n('bath'), kitchens: n('kitchen'), halls: n('living'), dining: n('dining') + (n('guest_dining') > 0 ? n('guest_dining') : 0) };
+  const counts = { bedrooms: Math.max(n('bedroom'), S('master')?.count > 0 || S('elderly')?.count > 0 ? 1 : 0), majlis: 0, baths: n('bath'), kitchens: n('kitchen'), halls: n('living'), dining: n('dining') + (n('guest_dining') > 0 && (n('dining') === 0 || S('guest_dining').options?.separateRoom === 'required') ? n('guest_dining') : 0) }; // (تكامل R21، قرار المالك 01b و2026-10-31) «المقلط» وظيفة طعام للضيوف مرتبطة بالمجلس: غرفة طعام إضافية فقط بطلب غرفة منفصلة صريح؛ وإلا يؤدي وظيفته الطعامُ نفسه، وإن لم يوجد طعام فهو غرفة الطعام
   if (n('male_majlis') > 0) counts.majlis = 1 + (n('female_majlis') > 0 ? 1 : 0);
   else if (n('female_majlis') > 0) { counts.majlis = 1; report.limited.push({ id: 'space:female_majlis', text_ar: 'مجلس نساء بلا مجلس رجال: يعد المحرك المجلس الأول للرجال؛ سيُرسم مجلس واحد.', ev: 'villa-layout.mjs:63' }); }
   if (S('guest_dining')) report.limited.push({ id: 'space:guest_dining', text_ar: ENGINE_SUPPORT['space.guest_dining'].ar, ev: ENGINE_SUPPORT['space.guest_dining'].ev });
@@ -144,6 +145,26 @@ export function toEngineInput(brief) {
   const discovery = normalizeDiscovery({ likes: [], rejects: [], avoids, life });
   const understood = report.sent.map(x => x.text_ar);
   const requirements = { text: hookText, idea: hookText, counts: { ...counts }, extras, prefs, areas, dims, rules, tweaks: F.tweaks || {}, understood, unsupported: report.unsupported.map(u => u.text_ar), unclear: [], textCounts: {}, givenCounts: { ...counts }, absent: [...new Set(absent)], orphans: [] };
+  // (تكامل R21، قرار المالك 2026-10-31) عقد R21 الموحد يُبنى من هذا الملف نفسه (لا مصدر حقيقة ثانٍ)، فيقرأ المولّد والمراجع ومدقق التعديل الآمن الكائن نفسه:
+  //  direct_access بباب، إلزامي مؤكد ⇐ DIRECT_DOOR HARD (غير المؤكد يبقى قاعدة تفضيل بلا علاقة صلبة — لا يُرسل إلزامًا قبل التأكيد)؛
+  //  المقلط guest_dining ⇐ GUEST_ACCESS (وظيفة طعام للضيوف مرتبطة بالمجلس؛ الباب «required» فقط إن طلبه العميل بابًا مباشرًا مؤكدًا، وإلا «unspecified»)؛
+  //  عدد التصاميم المطلوب نصًا ⇐ want (يقرؤه المحرك keep والعرض «عُرض X من Y» وسبب النقص) — لا تُختلق بدائل.
+  const relations = [], sideOf = id => engineSubject(id);
+  for (const r of rules) if (r.kind === 'adjacent' && r.door && r.level === 'must') {
+    const [kind, ...rest] = r.briefRef.split(':'), it = kind === 'relation' ? brief.relations.find(x => x.id === rest.join(':')) : null;
+    relations.push({ id: 'sharaa-door-' + relations.length, kind: RELATIONS.DIRECT_DOOR, from: r.a, to: r.b, level: LEVELS.HARD, source: 'client', quote: r.quote || r.text, directDoor: 'required', briefRef: r.briefRef, ...(it ? { sharaaSource: it.source, verification: it.verification } : {}) });
+  }
+  const gd = S('guest_dining');
+  if (gd && gd.count > 0) {
+    const doorHard = relations.some(x => [x.from, x.to].includes('dining') && [x.from, x.to].some(y => /^majlis/.test(y)));
+    relations.push({ id: 'sharaa-guest-dining', kind: RELATIONS.GUEST_ACCESS, from: 'majlis', to: 'dining', level: isHard(gd) ? LEVELS.HARD : LEVELS.SOFT, source: 'client', quote: gd.originalText || 'المقلط', function: 'guest_dining', directDoor: doorHard ? 'required' : 'unspecified', separateRoom: gd.options?.separateRoom || 'unspecified', briefRef: 'space:' + gd.id, sharaaSource: gd.source, verification: gd.verification });
+    report.sent.push({ id: 'space:' + gd.id, as: 'shared-brief', text_ar: 'المقلط: طعام للضيوف مرتبط بالمجلس' + (doorHard ? ' بباب مباشر' : ' (الباب المباشر غير مفروض)') });
+  }
+  const wantN = Number.isInteger(brief.preferences.requestedDesignCount) && brief.preferences.requestedDesignCount > 0 ? brief.preferences.requestedDesignCount : null;
+  if (wantN) { requirements.want = wantN; report.sent.push({ id: 'pref:requestedDesignCount', as: 'want', text_ar: `${wantN} تصاميم مطلوبة (يُعرض العدد الفعلي وسبب أي نقص)` }); }
+  requirements.relations = relations;
+  const sb = buildSharedBrief(hookText, { rules, dims, relations });
+  requirements.brief = Object.freeze({ ...sb, requestedCount: wantN, origin: 'sharaa-brief', sharaaRevision: brief.land?.revision ?? null });
   return { land: clone(L), counts, rooms: defaultRooms(counts), discovery, idea: hookText, requirements, report, blockers };
 }
 const clone = o => JSON.parse(JSON.stringify(o));

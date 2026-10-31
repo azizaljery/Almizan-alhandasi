@@ -453,6 +453,24 @@ export function applyExtraction(brief, req, text, { source = 'client_free_text',
       else if (RULE_REL[r.kind] && bb) { b = addRelation(b, { from: a, to: bb, relation: RULE_REL[r.kind], detail: r.kind === 'far' ? 'far' : r.kind === 'apart' ? 'apart' : r.kind === 'adjacent' ? (r.door ? 'door' : 'wall_contact') : undefined, ...meta }); added.push(`relation:${a}|${bb}`); }
     } catch (e) { unsupported.push('تعذّر تسجيل بند: ' + (r.text || r.kind)); }
   }
+  // (تكامل R21، قرار المالك 2026-10-31) قراءة R21 الموحدة لعلاقة المجلس بالطعام (requirements.relations من shared-brief.readGuestRelations)
+  // تُسجَّل في هذا الملف نفسه بمصدرها واقتباسها — لا مصدر حقيقة ثانٍ: المحوّل يبني منها عقد R21 لاحقًا.
+  //  GUEST_ACCESS («مقلط/طعام الضيوف») ⇐ فراغ المقلط guest_dining (وظيفة طعام للضيوف مرتبطة بالمجلس؛ لا يفرض بابًا)
+  //  DIRECT_DOOR («المجلس يفتح على الطعام/باب بين المجلس والطعام») ⇐ علاقة direct_access بتفصيل door (إن لم تُسجَّل من القواعد)
+  const clauseWith = q => { const t = normalizeAr(text), n = normalizeAr(q || ''); return t.split(/[،,.؛;\n!?؟]/).find(c => n && c.includes(n)) || n; };
+  for (const g of req.relations || []) {
+    if (g.kind === 'GUEST_ACCESS' && !spaceOf(b, 'guest_dining')) { b = upsertSpace(b, { type: 'guest_dining', count: 1, implied: true, options: { separateRoom: 'unspecified' }, source, priority: priorityOfRule({ quote: g.quote }, clauseWith(g.quote)), originalText: quote(g.quote) }); added.push('space:guest_dining'); }
+    if (g.kind === 'DIRECT_DOOR') {
+      const isMD = r => r.relation === 'direct_access' && [r.from, r.to].some(x => x === 'male_majlis') && [r.from, r.to].some(x => x === 'dining' || x === 'guest_dining');
+      const ex = b.relations.find(isMD); if (ex?.detail === 'door') continue;
+      const to = ex ? (ex.from === 'male_majlis' ? ex.to : ex.from) : spaceOf(b, 'guest_dining') ? 'guest_dining' : 'dining';
+      for (const x of ['male_majlis', to]) if (!spaceOf(b, x)) { b = upsertSpace(b, { type: x, count: 1, implied: true, source, priority: 'preferred', originalText: quote(g.quote) }); added.push('space:' + x); }
+      try { b = addRelation(b, { from: 'male_majlis', to, relation: 'direct_access', detail: 'door', source, priority: ex?.priority === 'mandatory' ? 'mandatory' : priorityOfRule({ quote: g.quote }, clauseWith(g.quote)), originalText: quote(g.quote) }); added.push('relation:direct_access'); }
+      catch { unsupported.push('تعذّر تسجيل بند: باب مباشر بين المجلس والطعام'); }
+    }
+  }
+  // (تكامل R21) عدد التصاميم المطلوب نصًا (requirements.want من parseRequestedCount في العقد الموحد): تفضيل للعميل لا قيد على التصميم
+  if (Number.isInteger(req.want) && req.want > 0) { b = setField(b, 'preferences.requestedDesignCount', req.want, { source, priority: 'preferred', originalText: quote(null) }); added.push('pref:requestedDesignCount'); }
   // تفضيلات منطقية
   const P = req.prefs || {};
   const flag = (k, v = true) => { b = setField(b, 'features.' + k, v, { source, priority: 'preferred', originalText: quote(null) }); added.push('feature:' + k); };

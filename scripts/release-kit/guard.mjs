@@ -8,7 +8,9 @@ const root = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const errors = [];
 const fail = (message) => errors.push(message);
 const read = p => readFileSync(join(root, p), 'utf8');
-const key = (text, k) => (text.match(new RegExp(`^\\s*${k}\\s*=\\s*"([^"]*)"`, 'm')) || [])[1];
+import { parseToml } from './guard-toml.mjs'; // (تصحيح 2026-10-31) قراءة TOML فعلية — انظر guard-toml.mjs
+const allKeys = t => [t.root, ...t.tables.map(x => x.keys)].flatMap(k => Object.keys(k));
+const tablesNamed = (t, n) => t.tables.filter(x => x.name === n);
 const branch = () => process.env.GITHUB_REF_NAME || (() => { try { return execFileSync('git', ['branch', '--show-current'], { cwd: root, encoding: 'utf8' }).trim(); } catch { return ''; } })();
 if (process.env.MIZAN_PREVIEW_DEPLOY !== '1' || process.env.MIZAN_DEPLOY_TARGET !== 'staging') fail('علمَا النشر المستقل غير موجودين أو غير صحيحين');
 if (branch() !== 'staging-preview') fail('يجب تشغيل فحص النشر من فرع staging-preview فقط');
@@ -16,20 +18,23 @@ if (process.env.GITHUB_ACTIONS === 'true' && process.env.GITHUB_EVENT_NAME !== '
 const stageFile = 'wrangler.staging.toml', prodFile = 'wrangler.toml';
 if (!existsSync(join(root, stageFile)) || !existsSync(join(root, prodFile))) fail('ملفا Wrangler للإنتاج والمعاينة مطلوبان للمقارنة');
 else {
-  const stage = read(stageFile), prod = read(prodFile);
-  const stageName = key(stage, 'name'), prodName = key(prod, 'name');
-  const stageDb = key(stage, 'database_id'), prodDb = key(prod, 'database_id');
-  const stageDbName = key(stage, 'database_name'), prodDbName = key(prod, 'database_name');
-  if (!stageName || stageName === prodName || !/staging/i.test(stageName)) fail('اسم Worker المعاينة غير مستقل');
-  if (!stageDb || stageDb === prodDb || !stageDbName || stageDbName === prodDbName) fail('قاعدة D1 للمعاينة ليست مستقلة');
-  if (!/^\s*workers_dev\s*=\s*true\s*$/m.test(stage)) fail('المعاينة يجب أن تستخدم workers.dev');
-  if (/^\s*(?:route|routes|zone_id|zone_name)\s*=/m.test(stage)) fail('مسارات أو نطاقات إنتاج محظورة');
-  if (/^\s*TRUST_SITES_HEADER\s*=/m.test(stage)) fail('TRUST_SITES_HEADER محظور في المعاينة');
-  if (!/^\s*directory\s*=\s*"\.\/dist\/client"/m.test(stage)) fail('مسار ملفات المتصفح يجب أن يكون dist/client');
-  if (!/^\s*main\s*=\s*"worker\/index\.mjs"/m.test(stage)) fail('مدخل Worker غير مطابق لبنية المشروع');
-  const origin = key(stage, 'ALLOWED_ORIGIN') || '';
+  const S = parseToml(read(stageFile)), P = parseToml(read(prodFile));
+  if (S.invalid?.length) fail('أسطر TOML غير مفهومة في إعداد المعاينة: ' + S.invalid.slice(0, 2).join(' | '));
+  const stageName = S.root.name, prodName = P.root.name;
+  const dbs = t => tablesNamed(t, 'd1_databases').map(x => x.keys), sDb = dbs(S), pDb = dbs(P);
+  if (typeof stageName !== 'string' || !stageName || stageName === prodName || !/staging/i.test(stageName)) fail('اسم Worker المعاينة غير مستقل');
+  if (!sDb.length || sDb.some(d => !d.database_id || !d.database_name || pDb.some(p => p.database_id === d.database_id || p.database_name === d.database_name))) fail('قاعدة D1 للمعاينة ليست مستقلة');
+  if (S.root.workers_dev !== true) fail('المعاينة يجب أن تستخدم workers.dev');
+  // أي مسار أو نطاق أو نطاق مخصص في أي جدول (ومنه [env.*]) محظور؛ وكذلك أي جدول بيئة يعيد تعريف الاسم أو القاعدة
+  if (allKeys(S).some(k => /^(?:route|routes|zone_id|zone_name|custom_domain|custom_domains)$/.test(k)) || S.tables.some(x => /^(?:route|routes)$/.test(x.name))) fail('مسارات أو نطاقات إنتاج محظورة');
+  if (S.tables.some(x => /^env\./.test(x.name))) fail('جداول [env.*] محظورة في إعداد المعاينة (قد تعيد التوجيه إلى الإنتاج)');
+  if (allKeys(S).includes('TRUST_SITES_HEADER')) fail('TRUST_SITES_HEADER محظور في المعاينة');
+  const assets = tablesNamed(S, 'assets')[0]?.keys || {};
+  if (!/^\.?\/?dist\/client\/?$/.test(String(assets.directory || '')) ) fail('مسار ملفات المتصفح يجب أن يكون dist/client');
+  if (S.root.main !== 'worker/index.mjs') fail('مدخل Worker غير مطابق لبنية المشروع');
+  const origin = String(tablesNamed(S, 'vars')[0]?.keys.ALLOWED_ORIGIN || '');
   if (!/^https:\/\/[a-z0-9.-]+\.workers\.dev(?:,https:\/\/[a-z0-9.-]+\.workers\.dev)*$/i.test(origin)) fail('ALLOWED_ORIGIN ليس أصل معاينة workers.dev صالحًا');
-  if (origin.includes(prodName + '.')) fail('أصل المعاينة يطابق اسم Worker الإنتاج');
+  if (prodName && (origin.includes(prodName + '.') || origin.split(',').some(o => { try { return new URL(o).hostname.split('.')[0] === prodName; } catch { return true; } }))) fail('أصل المعاينة يطابق اسم Worker الإنتاج');
 }
 const client = join(root, 'dist/client');
 if (!existsSync(client) || !statSync(client).isDirectory()) fail('dist/client غير موجود: شغّل node scripts/build.mjs أولًا');

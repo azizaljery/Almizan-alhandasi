@@ -52,14 +52,15 @@ test('I4 (أسباب الحجب) نتيجة R21 كل بدائلها محجوبة
   assert.match(oc.note_ar, /لم يُثبت المحرك استحالة/);
 });
 
-test('I5 (عقد المحوّل ↔ العقد الموحد R21) قاعدة الباب من شرعاء تصل المحرك door:true، والعقد الموحد يقرؤها NEAR (فجوة معلنة في التقرير لا تُخفى)', () => {
+test('I5 (عقد المحوّل ↔ العقد الموحد R21، بعد إصلاح 2026-10-31) الباب المؤكد الإلزامي يصل DIRECT_DOOR صلبًا، وغير المؤكد لا يصل صلبًا', () => {
   const land = normalizeLand({ length: 30, width: 18, streets: ['n'], entries: ['n'], floors: 1 }).land, t = 'لازم باب مباشر بين المجلس والطعام';
   let b = B.applyExtraction(B.createBrief({ land }), extractRequirements(t, { counts: {} }), t).brief;
-  const rel = b.relations.find(x => x.relation === 'direct_access'); b = B.decide(b, 'relation:' + rel.id, { priority: 'mandatory' });
+  const rel = b.relations.find(x => x.relation === 'direct_access');
+  assert.ok(!briefOf(toEngineInput(b).requirements).relations.some(r => r.kind === RELATIONS.DIRECT_DOOR && r.level === 'HARD'), 'غير مؤكد: لا علاقة صلبة');
+  b = B.decide(b, 'relation:' + rel.id, { priority: 'mandatory' });
   const req = toEngineInput(b).requirements, rule = req.rules.find(r => r.kind === 'adjacent');
   assert.equal(rule.door, true); assert.equal(rule.level, 'must');
-  const kinds = briefOf(req).relations.map(r => r.kind);
-  assert.ok(!kinds.includes(RELATIONS.DIRECT_DOOR), 'إن صار المحوّل يغذي DIRECT_DOOR فحدّث التقرير والاختبار');
+  assert.ok(briefOf(req).relations.some(r => r.kind === RELATIONS.DIRECT_DOOR && r.level === 'HARD' && r.briefRef === rule.briefRef));
 });
 
 test('I6 (المحرك الفعلي بعد الجمع) باب مباشر مؤكد عبر محوّل شرعاء: كل بديل ظاهر فيه باب حقيقي محقق وحركته سليمة', { timeout: 900000 }, async () => {
