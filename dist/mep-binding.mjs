@@ -384,3 +384,5 @@ export function createSystemsAgent(readProject) {
 }
 export { comparePackages, hash };
 export default { SYSTEMS_SCHEMA, STORE_KEY, DISCIPLINES, DISCIPLINE_INFO, DEVICE_GROUPS, listSources, bindArchitecture, computeSystems, freshness, buildExport, loadStore, entityFor, saveEntity, addDevice, moveDevice, removeDevice, updateDevice, linkElectricalLoad, locate, calcRows, issuesOf, levelLayers, svgFrame, structuralObstacles, suggestDomains, createSystemsAgent, PRELIMINARY_AR, NO_CLASH_AR };
+/** نقطة داخلية فعلية في الغرفة (تعمل للمضلعات المقعرة والثقوب). */
+export { interiorPoint as interiorOf } from './engineering-systems/src/geometry.mjs';
