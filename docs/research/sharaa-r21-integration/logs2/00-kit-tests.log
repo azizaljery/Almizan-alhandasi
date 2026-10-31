@@ -1,0 +1,209 @@
+TAP version 13
+# Subtest: passes isolated staging with both flags
+ok 1 - passes isolated staging with both flags
+  ---
+  duration_ms: 39.778897
+  type: 'test'
+  ...
+# Subtest: blocks missing flag
+ok 2 - blocks missing flag
+  ---
+  duration_ms: 39.923635
+  type: 'test'
+  ...
+# Subtest: blocks protected branch
+ok 3 - blocks protected branch
+  ---
+  duration_ms: 43.992962
+  type: 'test'
+  ...
+# Subtest: blocks wrong event in CI
+ok 4 - blocks wrong event in CI
+  ---
+  duration_ms: 40.054733
+  type: 'test'
+  ...
+# Subtest: blocks production D1 reuse
+ok 5 - blocks production D1 reuse
+  ---
+  duration_ms: 37.359947
+  type: 'test'
+  ...
+# Subtest: blocks custom routes
+ok 6 - blocks custom routes
+  ---
+  duration_ms: 38.555384
+  type: 'test'
+  ...
+# Subtest: blocks .env in client
+ok 7 - blocks .env in client
+  ---
+  duration_ms: 37.352206
+  type: 'test'
+  ...
+# Subtest: blocks sealed samples
+ok 8 - blocks sealed samples
+  ---
+  duration_ms: 36.475179
+  type: 'test'
+  ...
+# Subtest: blocks private key strings
+ok 9 - blocks private key strings
+  ---
+  duration_ms: 37.279366
+  type: 'test'
+  ...
+# Subtest: blocks missing Sharaa asset
+ok 10 - blocks missing Sharaa asset
+  ---
+  duration_ms: 45.768625
+  type: 'test'
+  ...
+# Subtest: real repo staging config (with TOML comments) passes
+ok 11 - real repo staging config (with TOML comments) passes
+  ---
+  duration_ms: 36.244869
+  type: 'test'
+  ...
+# Subtest: commented-out workers_dev only is rejected
+ok 12 - commented-out workers_dev only is rejected
+  ---
+  duration_ms: 34.911268
+  type: 'test'
+  ...
+# Subtest: workers_dev = false (with comment) is rejected
+ok 13 - workers_dev = false (with comment) is rejected
+  ---
+  duration_ms: 35.280205
+  type: 'test'
+  ...
+# Subtest: route with trailing comment is rejected
+ok 14 - route with trailing comment is rejected
+  ---
+  duration_ms: 35.214732
+  type: 'test'
+  ...
+# Subtest: routes array inside [env.production] is rejected
+ok 15 - routes array inside [env.production] is rejected
+  ---
+  duration_ms: 35.626452
+  type: 'test'
+  ...
+# Subtest: any [env.*] table is rejected
+ok 16 - any [env.*] table is rejected
+  ---
+  duration_ms: 34.607543
+  type: 'test'
+  ...
+# Subtest: production D1 id reused (commented as staging) is rejected
+ok 17 - production D1 id reused (commented as staging) is rejected
+  ---
+  duration_ms: 37.770753
+  type: 'test'
+  ...
+# Subtest: production D1 name reused is rejected
+ok 18 - production D1 name reused is rejected
+  ---
+  duration_ms: 38.306106
+  type: 'test'
+  ...
+# Subtest: production worker name is rejected even with staging in a comment
+ok 19 - production worker name is rejected even with staging in a comment
+  ---
+  duration_ms: 40.310865
+  type: 'test'
+  ...
+# Subtest: TRUST_SITES_HEADER set in [vars] is rejected; mention in a comment is fine
+ok 20 - TRUST_SITES_HEADER set in [vars] is rejected; mention in a comment is fine
+  ---
+  duration_ms: 41.238836
+  type: 'test'
+  ...
+# Subtest: ALLOWED_ORIGIN on production worker host is rejected
+ok 21 - ALLOWED_ORIGIN on production worker host is rejected
+  ---
+  duration_ms: 42.333137
+  type: 'test'
+  ...
+# Subtest: a "\#" inside a quoted value is not treated as a comment
+ok 22 - a "\#" inside a quoted value is not treated as a comment
+  ---
+  duration_ms: 38.055565
+  type: 'test'
+  ...
+# Subtest: assets directory other than dist/client is rejected
+ok 23 - assets directory other than dist/client is rejected
+  ---
+  duration_ms: 40.771891
+  type: 'test'
+  ...
+# Subtest: dry run leaves workflow untouched
+ok 24 - dry run leaves workflow untouched
+  ---
+  duration_ms: 53.823408
+  type: 'test'
+  ...
+# Subtest: apply adds guard after build and before deploy
+ok 25 - apply adds guard after build and before deploy
+  ---
+  duration_ms: 50.797821
+  type: 'test'
+  ...
+# Subtest: apply is idempotent
+ok 26 - apply is idempotent
+  ---
+  duration_ms: 85.867903
+  type: 'test'
+  ...
+# Subtest: main branch blocked
+ok 27 - main branch blocked
+  ---
+  duration_ms: 44.429553
+  type: 'test'
+  ...
+# Subtest: staging-preview branch blocked from installer
+ok 28 - staging-preview branch blocked from installer
+  ---
+  duration_ms: 47.931262
+  type: 'test'
+  ...
+# Subtest: passes on the real combined source (--combined and --r21)
+ok 29 - passes on the real combined source (--combined and --r21)
+  ---
+  duration_ms: 464.578709
+  type: 'test'
+  ...
+# Subtest: fails when the owner switch disables the direct door (R14_OFF=r21directdoor)
+ok 30 - fails when the owner switch disables the direct door (R14_OFF=r21directdoor)
+  ---
+  duration_ms: 234.64726
+  type: 'test'
+  ...
+# Subtest: fails when the shower gate contract is broken (showerGate no longer used by presentation-status)
+ok 31 - fails when the shower gate contract is broken (showerGate no longer used by presentation-status)
+  ---
+  duration_ms: 209.651873
+  type: 'test'
+  ...
+# Subtest: fails when Sharaa stops being wired into home.mjs
+ok 32 - fails when Sharaa stops being wired into home.mjs
+  ---
+  duration_ms: 223.41128
+  type: 'test'
+  ...
+# Subtest: fails when the staging workflow is not restricted to staging-preview
+ok 33 - fails when the staging workflow is not restricted to staging-preview
+  ---
+  duration_ms: 155.037466
+  type: 'test'
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2631.582327
+EXIT=0
