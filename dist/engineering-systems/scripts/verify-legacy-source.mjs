@@ -1,0 +1,16 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
+import { fromPlannerGeometry, createEngineeringPackage, hash } from '../src/index.mjs';
+const file = process.argv[2], output = process.argv[3];
+if (!file) throw new Error('Usage: node scripts/verify-legacy-source.mjs /path/to/dist/claude/planner.mjs [new-report.json]');
+const { generateModel, validateModel } = await import(pathToFileURL(resolve(file)).href);
+const model = generateModel({ width: 20, length: 30, floors: 1, entry: 's', streets: { s: true } }, [{ name: 'مجلس', type: 'majlis', area: 28, position: 'front', side: 'any' }, { name: 'غرفة', type: 'bedroom', area: 20, position: 'back', side: 'any' }]);
+const before = await hash(model);
+const project = await fromPlannerGeometry(model, { projectId: 'LEGACY-TEST', sourceRevision: 'FILE_HASH_RECORDED_BELOW', validateModel, level: { id: 'L1', elevationM: 0, heightM: 3.2 } });
+const result = await createEngineeringPackage(project);
+if (await hash(model) !== before || validateModel(model).length || result.constructionApproved !== false) throw new Error('Native legacy invariant failed');
+const report = { status: 'PASS', scope: 'Legacy PlannerOutputContract/2 generated geometry only, not current villa v2/v3 engines', sourceFileSha256: createHash('sha256').update(await readFile(resolve(file))).digest('hex'), roomsAndCorridors: project.architecture.rooms.length, unchangedSource: true, codeCompliance: result.codeCompliance };
+if (output) await writeFile(output, JSON.stringify(report, null, 2), { flag: 'wx' });
+console.log(JSON.stringify(report, null, 2));

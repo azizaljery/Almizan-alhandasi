@@ -1,0 +1,16 @@
+{
+  "repository": "azizaljery/Almizan-alhandasi",
+  "branchObserved": "dev/sharaa-v2",
+  "commitObserved": "429098abd38f0da24bbcf084dd25d4a37779b9c5",
+  "observedAt": "2026-10-31",
+  "access": "READ_ONLY_SELECTED_FILES",
+  "sourceFilesSha256": {
+    "draw/doc.mjs": "470d660a1ebfce929bdb60553305b1b66cd2fed5bb3fb57d1bc1c2b478e590c5",
+    "draw/digest.mjs": "cc8563fb12b269af3ccc2511d496416bd9dc5c46ea0b74d727a3f6da5279d9d3",
+    "draw/topology.mjs": "a34d2dbb9b56993e75b715d400a3d71c1e54699d58703d8fe2d94c9117081aed",
+    "draw/geom.mjs": "69c4ab836f865608e1ea297b772e78b75f30de1d2fb36000c7d981e2969ced52",
+    "draw/catalog.mjs": "ea5f696ee92b43b3c3af15246dcc9191612f057002646468ae59d4485465eb25",
+    "draw/samples.mjs": "b276cc7f5d0ce1635cd3913f2855905b619f2fe59a6d769121b26bc30ab693e1"
+  },
+  "notPerformed": ["repository writes", "complete repository test run", "live app browser test", "production deployment", "engineering code approval"]
+}

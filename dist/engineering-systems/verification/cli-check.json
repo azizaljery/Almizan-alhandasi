@@ -1,0 +1,10 @@
+{
+  "firstRun": {
+    "status": "PRELIMINARY_REVIEW_REQUIRED",
+    "constructionApproved": false,
+    "files": 20,
+    "inputHash": "8729b1acae5987bc5c1736bdb146a8115a18ed0661bc5e08ec37cec311fc23c8"
+  },
+  "firstExitCode": 0,
+  "overwriteRejected": true
+}

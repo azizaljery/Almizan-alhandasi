@@ -1,0 +1,16 @@
+{
+  "name": "@mizan/engineering-systems",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Editable preliminary engineering systems linked to Mizan architecture",
+  "exports": { ".": { "types": "./src/index.d.mts", "import": "./src/index.mjs" } },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "demo": "node examples/run-demo.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

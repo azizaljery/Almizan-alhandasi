@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { area, polygon, interiorPoint, inRoom, segmentBox, segmentWithin, distributePoints } from '../src/geometry.mjs';
+import { routeOrthogonal } from '../src/index.mjs';
+const square = (x, y, s) => [{ x, y }, { x: x + s, y }, { x: x + s, y: y + s }, { x, y: y + s }];
+const options = () => ({ start: { x: 1, y: 5, z: 1 }, end: { x: 9, y: 5, z: 1 }, zM: 1, domain: { polygon: square(0, 0, 10), holes: [] }, obstacles: [], widthM: .1, heightM: .1, clearanceM: .05, stepM: .25 });
+test('polygon area remains stable far from origin', () => assert.equal(area(square(1e8, 1e8, 4)), 16));
+test('self intersecting polygon is rejected', () => assert.throws(() => polygon([{ x: 0, y: 0 }, { x: 4, y: 4 }, { x: 0, y: 4 }, { x: 4, y: 0 }], 'poly')));
+test('interior placement avoids courtyard hole', () => { const r = { id: 'R', polygon: square(0, 0, 10), holes: [square(2, 2, 6)] }; assert.ok(inRoom(interiorPoint(r), r)); assert.ok(distributePoints(r, 20).every(p => inRoom(p, r))); });
+test('straight route length and endpoints are exact', () => { const r = routeOrthogonal(options()); assert.equal(r.status, 'PROPOSED'); assert.equal(r.lengthM, 8); assert.deepEqual(r.points[0], options().start); assert.deepEqual(r.points.at(-1), options().end); });
+test('routing detours around 3D obstacle', () => { const p = options(); const box = { min: { x: 4, y: 3, z: 0 }, max: { x: 6, y: 7, z: 2 } }; p.obstacles.push(box); const r = routeOrthogonal(p); assert.equal(r.status, 'PROPOSED'); assert.ok(r.lengthM > 8); assert.ok(r.points.slice(1).every((b, i) => !segmentBox(r.points[i], b, box, .1))); });
+test('closed barrier yields blocked, no fabricated straight connection', () => { const p = options(); p.obstacles = [{ min: { x: 4, y: -1, z: 0 }, max: { x: 6, y: 11, z: 2 } }]; const r = routeOrthogonal(p); assert.equal(r.status, 'BLOCKED'); assert.deepEqual(r.points, []); assert.equal(r.lengthM, null); });
+test('thin obstacle is detected between grid nodes', () => { const p = options(); p.obstacles = [{ min: { x: 4.11, y: -1, z: 0 }, max: { x: 4.12, y: 11, z: 2 } }]; assert.equal(routeOrthogonal(p).status, 'BLOCKED'); });
+test('obstacle below another route elevation does not create an XY-only collision', () => { const p = options(); p.start.z = p.end.z = p.zM = 3; p.obstacles = [{ min: { x: 4, y: -1, z: 0 }, max: { x: 6, y: 11, z: 2 } }]; assert.equal(routeOrthogonal(p).status, 'PROPOSED'); });
+test('courtyard hole is excluded from all routed segments', () => { const p = options(); p.domain.holes = [square(4, 4, 2)]; const r = routeOrthogonal(p); assert.equal(r.status, 'PROPOSED'); assert.ok(r.points.slice(1).every((b, i) => segmentWithin(r.points[i], b, p.domain))); });
+test('segment crossing a concave notch fails despite endpoints being inside', () => { const p = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 7, y: 10 }, { x: 7, y: 3 }, { x: 3, y: 3 }, { x: 3, y: 10 }, { x: 0, y: 10 }]; assert.equal(segmentWithin({ x: 1, y: 8 }, { x: 9, y: 8 }, { polygon: p }), false); });
+test('missing route dimensions are not assigned defaults', () => { const p = options(); delete p.widthM; assert.throws(() => routeOrthogonal(p)); });
+test('oversized grid fails with an explicit resource error', () => { const p = options(); p.obstacles = [{ min: { x: 4, y: 3, z: 0 }, max: { x: 6, y: 7, z: 2 } }]; p.stepM = .001; assert.throws(() => routeOrthogonal(p), { code: 'ROUTING_RESOURCE_LIMIT' }); });
