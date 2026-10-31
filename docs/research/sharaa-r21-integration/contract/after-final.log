@@ -1,0 +1,9 @@
+{"id":"door-majlis-dining","contract":["DIRECT_DOOR:HARD:required","NEAR:HARD"],"counts":1,"want":null,"alts":2,"shown":2,"ready":2,"requested":4,"door":[[true],[true]],"outcome":"SOLVED","secs":37.15}
+{"id":"door-opens","contract":["DIRECT_DOOR:HARD:required","NEAR:HARD"],"counts":1,"want":null,"alts":2,"shown":2,"ready":2,"requested":4,"door":[[true],[true]],"outcome":"SOLVED","secs":30.85}
+{"id":"door-majlis-hall","contract":["DIRECT_DOOR:HARD:required","NEAR:HARD"],"counts":1,"want":null,"alts":1,"shown":0,"ready":0,"requested":4,"door":[],"outcome":"ALL_HIDDEN","secs":21.514}
+{"id":"maqlat-near","contract":["GUEST_ACCESS:SOFT:unspecified","NEAR:SOFT"],"counts":1,"want":null,"alts":4,"shown":4,"ready":4,"requested":4,"door":[[],[],[],[]],"outcome":"SOLVED","secs":35.473}
+{"id":"maqlat-only","contract":["GUEST_ACCESS:SOFT:unspecified"],"counts":1,"want":null,"alts":4,"shown":4,"ready":4,"requested":4,"door":[[],[],[],[]],"outcome":"SOLVED","secs":27.718}
+{"id":"maqlat-door","contract":["DIRECT_DOOR:HARD:required","GUEST_ACCESS:SOFT:required","NEAR:HARD"],"counts":1,"want":null,"alts":2,"shown":2,"ready":2,"requested":4,"door":[[true],[true]],"outcome":"SOLVED","secs":29.826}
+{"id":"count-6","contract":[],"counts":1,"want":6,"alts":4,"shown":4,"ready":4,"requested":6,"door":[[],[],[],[]],"outcome":"SOLVED","secs":29.133}
+{"id":"count-2","contract":[],"counts":1,"want":2,"alts":2,"shown":2,"ready":2,"requested":2,"door":[[],[]],"outcome":"SOLVED","secs":12.416}
+EXIT=0
