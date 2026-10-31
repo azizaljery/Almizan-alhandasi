@@ -12,6 +12,7 @@
 //   - التراجع: من سجل الجلسة (تصميم سابق) مع إعادة تطبيق التعديلات المحلية المطلوب إبقاؤها.
 // بعد كل تعديل: بوابات plan-review (لا بوابة كانت ناجحة ترسب)، وثبات كل غرفة أخرى مقيسًا (مساحة/مركز/فتحات).
 // إن رسب المرشح يُجرَّب التالي؛ وإن لم يوجد حل موضعي يُقال ذلك صراحة (status:'fallback') ولا يُدّعى شيء.
+import { RENDERED_STYLE_OF } from './facade-choice.mjs';
 import { invariants, regressions } from './change-guard.mjs';
 const R20_GUARD_OFF = String(globalThis.process?.env?.R14_OFF || '').includes('r20guard');
 import { analyzeDoc } from './draw/digest.mjs';
@@ -1470,7 +1471,7 @@ function doFacade(doc, it) {
   const where = scope === 'front' ? 'على الواجهة الأمامية (المطلة على الشارع) فقط' : scope === 'all+fence' ? 'على كل الواجهات الظاهرة والدروة والسور' : 'على كل الواجهات الظاهرة والدروة (الافتراضي)';
   const ask = it.material && !it.scope ? ' — الواجهة الأمامية فقط أم كل الواجهات والدروة والسور؟ قل لي إن أردت غير الافتراضي' : '';
   if (it.material && !base) pending.push({ text: `الواجهة: ${it.materialAr}`, why: `حُفظت المادة «${it.materialAr}» في المستند، والمجسّم لا يملك خامة «${it.materialAr}» بعد فيعرض اللياسة حتى تُضاف.` });
-  if (it.style) pending.push({ text: `طراز الواجهة: ${it.styleAr}`, why: `حُفظ الطراز «${it.styleAr}» في المستند؛ تفاصيل الطراز (الزخارف والفتحات) لا تُرسم في المجسّم بعد.` });
+  if (it.style && !RENDERED_STYLE_OF[it.style]) pending.push({ text: `طراز الواجهة: ${it.styleAr}`, why: `حُفظ الطراز «${it.styleAr}» في المستند؛ تفاصيل الطراز (الزخارف والفتحات) لا تُرسم في المجسّم بعد.` });
   return { ok: true, doc: d, geometryIdentical: true, rendered, pending, how_ar: `${rendered ? `صارت واجهة المجسّم ${it.materialAr} ${where}` : 'حُفظ طلب الواجهة في المستند'}، والمخطط نفسه حرفيًا (لم يتحرك جدار)${rendered ? ask : ''}` };
 }
 

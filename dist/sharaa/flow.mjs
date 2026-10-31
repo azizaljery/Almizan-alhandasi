@@ -8,6 +8,7 @@ import { AVOIDS, LIFE } from '../client-brief.mjs';
 import * as B from './brief.mjs';
 import { toEngineInput, supportRows } from './adapter.mjs';
 import { normalizeImperatives, extractRegulatoryAsks } from './phrases.mjs';
+import { FACADE_CHOICES, FACADE_CHOICE_AR } from '../facade-choice.mjs';
 
 export const SHARA_V2_WELCOME = 'أهلًا بك، خلّنا نصمم بيتًا يناسب حياتك.';
 export const SHARA_V2_LAND_NOTE = 'عرفت بيانات أرضك من الخطوة السابقة. الآن أبي أفهم كيف تحب يكون منزلك، وأرتب احتياجاتك هندسيًا قبل ما نبدأ الرسم.';
@@ -235,6 +236,8 @@ export class SharaFlow {
     if (countsDone) add('services', 4, 'services', 3, () => msg('هل تحتاج فراغات خدمة؟ اختر ما تريد (غير المختار لا أضيفه).', { kind: 'multi', id: 'ask', key: 'services', why: 'الخدمات تغيّر التوزيع', options: [['maid', 'غرفة خادمة'], ['driver', 'غرفة سائق'], ['laundry', 'غرفة غسيل'], ['storage', 'مخزن'], ['office', 'مكتب'], ['prayer', 'مصلى'], ['guest_room', 'غرفة ضيوف للنوم']].filter(([id]) => !known(id)).map(([id, label]) => ({ id, label })) }));
     if (has('kitchen') && countsDone) add('kitchen_style', 4, 'services', 4, () => msg('المطبخ: مغلق أم مفتوح؟', { kind: 'choice', id: 'ask', key: 'kitchen_style', why: 'يغيّر علاقة المطبخ بالطعام والصالة', options: [{ id: 'closed', label: 'مغلق بباب' }, { id: 'open', label: 'مفتوح على الطعام' }, { id: 'open_to_hall', label: 'مفتوح على الصالة' }, { id: 'any', label: 'لا يهم' }] }));
     if (b.household.seniors || b.household.life?.seniors) add('elderly', 4, 'wings', 5, () => msg('غرفة كبار السن: قريبة من الصالة؟', { kind: 'choice', id: 'ask', key: 'elderly', why: 'احتياج كبار السن', options: [{ id: 'yes', label: 'نعم، قريبة من الصالة' }, { id: 'any', label: 'لا يهم' }] }));
+    // (طلب المالك 2026-10-31) سؤال واحد عن طراز الواجهة — لا يحجب التصميم («اختر لي» متاح) ويُبدَّل لاحقًا من صفحة التصميم دون إعادة توليد
+    if (countsDone && b.preferences.facadeStyle === undefined) add('facade_style', 4, 'environment', 7, () => msg('أي طراز تحب لواجهة بيتك؟ (لا يغيّر توزيع الغرف، وتقدر تبدّله من صفحة التصميم وتشوفه فورًا)', { kind: 'choice', id: 'ask', key: 'facade_style', why: 'طراز الواجهة الخارجية', options: [{ id: 'classic', label: 'كلاسيكي' }, { id: 'neoclassic', label: 'نيوكلاسيكي' }, { id: 'modern', label: 'حديث' }, { id: 'auto', label: 'اختر لي' }] }));
     if (countsDone) add('parking', 4, 'parking', 6, () => msg('كم سيارة تحتاج مواقف لها؟', { kind: 'choice', id: 'ask', key: 'parking', why: 'المواقف', note: 'عدد المواقف نظامي ويحدده المحرك؛ اختيارك يُسجَّل ولا يتحكم في العدد.', options: [{ id: '1', label: 'سيارة واحدة' }, { id: '2', label: 'سيارتان' }, { id: '3', label: 'ثلاث فأكثر' }, { id: '0', label: 'لا أحتاج' }] }));
     if (!tight.tight && countsDone) add('priorities', 4, 'priorities', 9, () => msg('لو ضاقت المساحة عند التوليد، ما الذي تقبل التنازل عنه؟ لن أتنازل عن شيء دون ضغطك.', { kind: 'multi', id: 'ask', key: 'priorities', why: 'للبدائل عند تعذّر الحل', options: waivableOptions(b) }));
     // (5) تجميلي/تسجيلي (غير مدعوم في التوليد): في المسارات الموجهة أو عند الطلب فقط
@@ -353,6 +356,7 @@ export class SharaFlow {
       this.#topicDone('services'); return done();
     }
     if (key === 'kitchen_style') { if (v !== 'any') b = B.setField(b, 'preferences.kitchenStyle', v, m()); return done(); }
+    if (key === 'facade_style') { if (!FACADE_CHOICES.includes(v)) throw Error('اختيار غير معروف.'); b = B.setField(b, 'preferences.facadeStyle', v, { ...m('flexible'), originalText: 'اختيار العميل: طراز الواجهة ' + FACADE_CHOICE_AR[v] }); return done(); }
     if (key === 'elderly') { if (v === 'yes') b = B.setField(b, 'features.elderlyRoom', true, m()); return done(); }
     if (key === 'parking') { const n = Number(v); if (!Number.isInteger(n) || n < 0 || n > 3) throw Error('اختيار غير معروف.'); b = B.setField(b, 'preferences.parkingCount', n, m('flexible')); this.#topicDone('parking'); return done(); }
     if (key === 'avoids') { const arr = (Array.isArray(v) ? v : []).map(Number); if (arr.some(i => !AVOIDS[i])) throw Error('اختيار غير معروف.'); b = B.setField(b, 'household.avoids', arr.map(i => AVOIDS[i]), m('flexible')); return done(); }

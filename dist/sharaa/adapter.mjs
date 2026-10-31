@@ -165,7 +165,10 @@ export function toEngineInput(brief) {
   requirements.relations = relations;
   const sb = buildSharedBrief(hookText, { rules, dims, relations });
   requirements.brief = Object.freeze({ ...sb, requestedCount: wantN, origin: 'sharaa-brief', sharaaRevision: brief.land?.revision ?? null });
-  return { land: clone(L), counts, rooms: defaultRooms(counts), discovery, idea: hookText, requirements, report, blockers };
+  // (طلب المالك 2026-10-31) طراز الواجهة يُحمل بجانب مدخلات المحرك لا داخلها (requirements لا تتغير): يقرؤه createSession وحده
+  const fsv = brief.preferences.facadeStyle, fsm = brief.provenance['preferences.facadeStyle'];
+  const facade = fsv ? { style: fsv, ornament: 'medium', source: fsm?.source || 'client_answer', priority: 'flexible', ...(fsm?.originalText ? { originalText: fsm.originalText } : {}), history: (fsm?.history || []).map(h => ({ style: h.value, source: h.source })) } : null;
+  return { land: clone(L), counts, rooms: defaultRooms(counts), discovery, idea: hookText, requirements, report, blockers, facade };
 }
 const clone = o => JSON.parse(JSON.stringify(o));
 
