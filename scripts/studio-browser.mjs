@@ -19,7 +19,7 @@ await new Promise(r => server.listen(0, '127.0.0.1', r));
 const base = `http://127.0.0.1:${server.address().port}`;
 const { chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs');
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'] });
-const page = await browser.newPage({ viewport: { width: 1440, height: 860 } });
+const page = await browser.newPage({ viewport: { width: 1440, height: 860 } }); await page.addInitScript(() => { try { localStorage.setItem('mizan.studio.mode', 'advanced'); } catch { /* */ } }); // (ملاحظات المعاينة 2026-10-31) المرسم يفتح بالوضع البسيط افتراضيًا؛ هذا الفحص يختبر الأدوات المتقدمة فيبدأ بها
 const logs = [];
 page.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED/.test(m.text())) logs.push('console: ' + m.text()); });
 page.on('pageerror', e => logs.push('pageerror: ' + e.message));

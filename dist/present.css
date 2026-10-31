@@ -136,3 +136,4 @@ table.gates .why{display:block;color:#6b6a5f;font-size:12.5px}
 ul.tick li .lvl{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;margin-inline-end:4px;vertical-align:1px}
 ul.tick li .lvl-must{background:#efe2c4;color:#5b4210}ul.tick li .lvl-prefer{background:#e8ece9;color:#41524a}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
+.spec b:has(bdi){font-size:clamp(13px,1.6vw,18px)}.spec:has(bdi){min-width:0;overflow:hidden}

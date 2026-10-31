@@ -91,6 +91,7 @@ test('F5 «هل نُفّذ طلبك؟»: كل طلب صريح ظاهر بحال�
   const V = ledgerVerdict(allOk, { status: 'hidden' });
   assert.notEqual(V.cls, 'full'); assert.match(V.text, /مرفوض/);
   assert.equal(ledgerVerdict(allOk, { status: 'ready' }).cls, 'full');
+  assert.equal(ledgerVerdict(allOk, { status: 'needs-edits' }).cls, 'part');
 });
 
 test('F6 أبعاد الغرفة موجّهة (أفقي × رأسي) ومطابقة بين صفحة التصميم والمرسم — لا «طويل × قصير» مرة و«قصير × طويل» مرة', async () => {
@@ -132,4 +133,12 @@ test('F9 (حارس) تسليم التصميم إلى المرسم لا يحوّ�
   const sig = d => { const L = analyzeDoc(d).levels[0]; return { plot: d.plot, entry: d.entry, north: d.north || 0, rooms: L.rooms.map(r => [r.name, Math.round(r.area * 100), Math.round(r.rect.w * 100), Math.round(r.rect.l * 100), Math.round(r.centroid.x * 100), Math.round(r.centroid.y * 100)]), S: summarizeDoc(d).specs }; };
   assert.deepEqual(sig(got.doc), sig(doc)); assert.equal(serialize(got.doc), serialize(doc));
   assert.equal(serialize(parseDoc(ls.getItem(STUDIO_KEY))), serialize(doc), 'المحفوظ للمرسم بعد إعادة التحميل هو المستند نفسه');
+});
+
+test('F10 خطوة الأرض وشريط شرعاء يقولان الواجهة على شارع المدخل والعمق صراحةً (الطول/العرض محاور بوصلة لا «أطول/أقصر»)', async () => {
+  const { landFaceText } = await import('../dist/home-flow.mjs');
+  assert.match(landFaceText({ length: 18, width: 30, entries: ['n'] }), /واجهة الأرض على شارع المدخل \(شمال\): 30 م، وعمقها من الشارع: 18 م/);
+  assert.match(landFaceText({ length: 18, width: 30, entries: ['e'] }), /\(شرق\): 18 م، وعمقها من الشارع: 30 م/);
+  const f = new SharaFlow({ land: LAND });
+  assert.ok(f.landBar().rows.some(r => r.k === 'الواجهة والعمق' && /واجهة 30 م على شارع شمال، وعمق 18 م/.test(r.v)));
 });

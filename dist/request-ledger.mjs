@@ -71,7 +71,8 @@ export function ledgerVerdict(items, presentation = null) {
   if (open) parts.push(`${open} لم يُتحقق ${open === 1 ? 'منه' : 'منها'} آليًا`);
   if (unsup) parts.push(`${unsup} غير مدعوم`);
   if (parts.length) text += ' — ' + parts.join('، ');
-  if (hidden) { cls = 'bad'; text += '. لكن التصميم مرفوض للعرض: يخالف شرطًا أساسيًا (مذكور أعلى الصفحة)'; }
+  if (hidden) { cls = 'bad'; text = 'مسودة مرفوضة: تخالف شرطًا أساسيًا (مذكورًا أعلى الصفحة) — ' + text.replace(/^نُفّذت كل بنود طلبك \((\d+)\)/, 'بنود طلبك منفّذة كلها ($1)'); }
+  else if (presentation?.status === 'needs-edits') { if (cls === 'full') cls = 'part'; text += '. والتصميم يحتاج تعديلات معمارية قبل اعتماده (مذكورة أعلى الصفحة)'; }
   else if (cls === 'full' && (prefUnmet || open)) cls = 'part';
   return { cls, text, hidden, done, missing, prefUnmet, open, unsup };
 }

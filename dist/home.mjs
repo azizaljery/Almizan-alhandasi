@@ -2,7 +2,7 @@
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { createSession, saveSession } from './design-session.mjs';
-import { normalizeLand, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { normalizeLand, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS, landFaceText } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
 import { generateOffThread } from './generation-client.mjs'; // (قرار المالك 2026-10-31) التوليد خارج خيط الواجهة
 import { requestBrief, assistantOpen } from './assistant.mjs';
@@ -60,7 +60,9 @@ function refreshLand() {
     if (!onStreet) { entry.checked = false; land.entries.delete(key); }
   }
   $('landPreview').innerHTML = landPreviewSvg(readLand());
+  $('landFace').textContent = landFaceText(readLand());
 }
+$('landSwap').addEventListener('click', () => { const a = $('landLength').value; $('landLength').value = $('landWidth').value; $('landWidth').value = a; refreshLand(); });
 grid.addEventListener('change', e => {
   const input = e.target; if (!(input instanceof HTMLInputElement)) return;
   const set = input.dataset.kind === 'street' ? land.streets : land.entries;

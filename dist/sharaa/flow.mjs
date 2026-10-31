@@ -29,7 +29,9 @@ export function landBar(brief) {
   const L = brief.land, rows = [
     { k: 'الأبعاد', v: `العرض ${L.widthM} م (شرق/غرب) × الطول ${L.depthM} م (شمال/جنوب)` }, { k: 'المساحة', v: `${L.areaM2} م²` },
     { k: 'الشوارع', v: L.streets.map(s => SIDE_LABEL[s.side] + (s.widthM ? ` (${s.widthM} م)` : '')).join('، ') || 'غير محدد' },
-    { k: 'المدخل', v: L.entries.map(s => SIDE_LABEL[s]).join('، ') || 'غير محدد' }, { k: 'الأدوار', v: L.floors === 2 ? 'دوران' : 'دور واحد' },
+    { k: 'المدخل', v: L.entries.map(s => SIDE_LABEL[s]).join('، ') || 'غير محدد' },
+    // (ملاحظات المعاينة 2026-10-31) الواجهة على شارع المدخل والعمق منه صراحةً، حتى يُلاحظ العميل إن أدخل الطول والعرض معكوسين
+    ...(L.entries[0] ? [{ k: 'الواجهة والعمق', v: `واجهة ${['n', 's'].includes(L.entries[0]) ? L.widthM : L.depthM} م على شارع ${SIDE_LABEL[L.entries[0]]}، وعمق ${['n', 's'].includes(L.entries[0]) ? L.depthM : L.widthM} م` }] : []), { k: 'الأدوار', v: L.floors === 2 ? 'دوران' : 'دور واحد' },
   ];
   if (L.setbacks) rows.push({ k: 'الارتدادات', v: `أمامي ${L.setbacks.front} م، خلفي ${L.setbacks.rear} م، جانبيان ${L.setbacks.left}/${L.setbacks.right} م` + (L.setbacks.verified ? ' (نظامية متحققة)' : ' (الأمامي قيمة تصميمية افتراضية حتى يُعرف عرض الشارع)') });
   return { title: 'أرضك المختارة', subtitle: 'من المرحلة السابقة', revision: L.revision, rows, editable: true };
