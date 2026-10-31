@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "scope": "mizan-draw/1 actual source topology sample; not full app, v2/v3 generation, browser, or production",
+  "sourceMatchesPinnedFiles": false,
+  "sourceRevision": "LOCAL_UNPINNED_SNAPSHOT",
+  "sourceFilesSha256": {
+    "draw/doc.mjs": "989209ccca0356216736765f55b0893247d80cdb7a7ad58cf7263328062b6169",
+    "draw/digest.mjs": "08f9fe3826007086f8c69aef3e6648e493f2fc80b2fcd0c201b223c85c4456bd",
+    "draw/topology.mjs": "d6ece2a9f57ec1a6f983ecdbd8beab4a49e52eff724714ef7e9e3ff16899bf25",
+    "draw/geom.mjs": "5d4034a97dc38b8fc5dc0ce3ae77405b8aba9a583c0d5cfa08f3d47e8f37b851",
+    "draw/catalog.mjs": "df8814df70c19f3559ff296ba021caec699b6f72c91c2470f7f958defebee02d",
+    "draw/samples.mjs": "6c362c5755ba352a1ea38a584b01d2569df1a0c902ba85a3fff3106c5cc1ece6"
+  },
+  "sourceDocumentHash": "26538154ec2f49ef73b04df261fa828190279b14e24befc76bcf574499d753a0",
+  "architectureHash": "fe8373575b63835dd05e17638dffb04f2009a314daabad2e8dc69740892d0386",
+  "rooms": 9,
+  "unchangedSourceDocument": true,
+  "codeCompliance": "NOT_EVALUATED"
+}
