@@ -39,6 +39,11 @@ jobs:
       - run: npm ci
       - name: Build validation
         run: node scripts/build.mjs
+      - name: Mizan native staging guard
+        env:
+          MIZAN_PREVIEW_DEPLOY: '1'
+          MIZAN_DEPLOY_TARGET: staging
+        run: node scripts/release-kit/guard.mjs
       - name: Deploy staging worker
         # معرّف الحساب اختياري: التوكن مقيّد بحساب واحد (ويملك Memberships:Read) فيستنتجه wrangler إن لم يُضبط STAGING_CF_ACCOUNT_ID
         run: |
