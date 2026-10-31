@@ -29,9 +29,12 @@ test('الواجهة حجر: حقل في المستند والهندسة نفس�
   assert.equal(r.status, 'local'); assert.equal(geom(r.doc), geom(d), 'لا جدار ولا فتحة ولا تسمية تغيّرت');
   assert.equal(r.doc.finish.facade.base, 'stone'); assert.equal(r.doc.finish.facade.material, 'stone');
   assert.ok(r.geometryIdentical);
-  // طراز بلا خامة في المجسّم: محفوظ ومعلَن «بانتظار العرض»
+  // (2026-10-31، dev/facade-styles) الطراز النجدي صار يُرسم (facade-styles.mjs، مقترح) فلا يبقى «بانتظار العرض»؛
+  // الطراز الذي لا يُرسم بعد (الحجازي) يبقى محفوظًا ومعلَنًا «بانتظار العرض» كما كان
   const s = edit(d, 'خل الواجهة نجدي').r;
-  assert.equal(s.doc.finish.facade.style, 'najdi'); assert.equal(s.pending.length, 1); assert.equal(geom(s.doc), geom(d));
+  assert.equal(s.doc.finish.facade.style, 'najdi'); assert.equal(s.pending.length, 0); assert.equal(geom(s.doc), geom(d));
+  const h = edit(d, 'خل الواجهة حجازي').r;
+  assert.equal(h.doc.finish.facade.style, 'hijazi'); assert.equal(h.pending.length, 1); assert.equal(geom(h.doc), geom(d));
 });
 
 test('«المجلس أصغر»: أصغر فعلًا (الاتجاه مقيس)، ولا غرفة أخرى تتغير، ولا بوابة جديدة راسبة', () => {
