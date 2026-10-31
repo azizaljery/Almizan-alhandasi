@@ -1,0 +1,113 @@
+
+> test:pending
+> node --test --test-concurrency=1 tests-pending/r21-pending.test.mjs
+
+TAP version 13
+# Subtest: §3 الدوران على أرض عريضة (H4 معروفة): مخطط واحد على الأقل غير محجوب، وكل جدار علوي محمول (≤ 5 م بلا جدار تحته)
+not ok 1 - §3 الدوران على أرض عريضة (H4 معروفة): مخطط واحد على الأقل غير محجوب، وكل جدار علوي محمول (≤ 5 م بلا جدار تحته)
+  ---
+  duration_ms: 23429.214749
+  type: 'test'
+  location: '/home/claude/wt-int/tests-pending/r21-pending.test.mjs:17:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    لم يجد المحرك مخططًا سليمًا لطلبك على هذه الأرض ضمن التنظيمات التي جرّبها، مع أن المساحة تكفي.
+    الأرض 20×25 م (500 م²). بعد الارتدادات يبقى للبناء 21.7×15.2 م (331 م²)، ونسبة البناء المسموحة 75٪ = 375 م²؛ فالمتاح للبناء 331 م² في كل دور.
+    برنامجك يحتاج نحو 154 م² في الدور الأكبر (صافي فراغاته 134 م²، ومعها الجدران والحركة — تقدير الميزان).
+    المساحة تكفي البرنامج (يبقى نحو 177 م²)؛ فالعائق ليس صغر الأرض بل ترتيب الفراغات بالشروط المطلوبة معًا.
+    أكثر ما منع التنظيمات التي جرّبتها: جدار في الدور الأول أطول من 5 م لا يقع تحته جدار في الأرضي (18 مرة)؛ غرفة في الدور الأول فوق فراغ غير مبني في الأرضي (5 مرات)؛ المجلس أصغر من 24 م² (3 مرات)؛ مجلس الرجال أصغر من الحد المعتاد (24 م² وعرض 4.2 م) (مرة واحدة).
+    ما يمكنك تغييره: غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو أعمدة وجسور تحمل جدران الدور الأول بتصميم إنشائي مستقل؛ قبول مجلس أصغر؛ قبول مجلس رجال أصغر؛ أن تطلب مني تصميمًا آخر بعد تخفيف أحد البنود أعلاه، أو أن تبدأ من المرسم بتوزيع تقترحه أنت.
+    لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا.
+    + actual - expected
+    
+    + 'SEARCH_INCOMPLETE'
+    - 'SOLVED'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'SOLVED'
+  actual: 'SEARCH_INCOMPLETE'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/wt-int/tests-pending/r21-pending.test.mjs:19:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: §6 التنوع: خمسة بدائل مطلوبة (C10) ← ثلاثة على الأقل «مختلفة معماريًا» بالمعيار المجمّد r19 وغير محجوبة
+not ok 2 - §6 التنوع: خمسة بدائل مطلوبة (C10) ← ثلاثة على الأقل «مختلفة معماريًا» بالمعيار المجمّد r19 وغير محجوبة
+  ---
+  duration_ms: 169576.741185
+  type: 'test'
+  location: '/home/claude/wt-int/tests-pending/r21-pending.test.mjs:21:1'
+  failureType: 'testCodeFailure'
+  error: 'مختلفة 1'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/wt-int/tests-pending/r21-pending.test.mjs:24:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: §5 مسار الضيف بالرسم البياني في مرحلة التنظيم: كل مرشح يدخل البناء يحقق مسار الضيف الداخلي (لا GUEST_DINING ولا MAJLIS_ISOLATED في الحوض)
+not ok 3 - §5 مسار الضيف بالرسم البياني في مرحلة التنظيم: كل مرشح يدخل البناء يحقق مسار الضيف الداخلي (لا GUEST_DINING ولا MAJLIS_ISOLATED في الحوض)
+  ---
+  duration_ms: 64443.275452
+  type: 'test'
+  location: '/home/claude/wt-int/tests-pending/r21-pending.test.mjs:26:1'
+  failureType: 'testCodeFailure'
+  error: 'centralhall:ch2'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/wt-int/tests-pending/r21-pending.test.mjs:31:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: §7 المواقف: وحدة إثبات وصول السيارة (مسار دخول وخروج ونموذج دوران محافظ) موجودة وتُستعمل في التصنيف
+not ok 4 - §7 المواقف: وحدة إثبات وصول السيارة (مسار دخول وخروج ونموذج دوران محافظ) موجودة وتُستعمل في التصنيف
+  ---
+  duration_ms: 0.260625
+  type: 'test'
+  location: '/home/claude/wt-int/tests-pending/r21-pending.test.mjs:33:1'
+  failureType: 'testCodeFailure'
+  error: 'لم يُنفَّذ بعد'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/claude/wt-int/tests-pending/r21-pending.test.mjs:34:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 0
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 257727.448401
+EXIT=1

@@ -1,0 +1,148 @@
+### case=door tree=merged path=direct
+DIRECT rules [{"k":"adjacent","a":"majlis","b":"dining","door":true,"level":"must"}] relations ["DIRECT_DOOR"]
+SECONDS 44.8 alts 2 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام» و«المجلس» على جدار مشترك 3.8 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام» و«المجلس» على جدار مشترك 4.5 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=door tree=merged path=sharaa
+ADAPTER rules [{"k":"adjacent","a":"majlis","b":"dining","door":true,"level":"must"}] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 48.7 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام والمقلط» و«المجلس» على جدار مشترك 3.3 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «مدخل الرجال» و«صالة الطعام والمقلط» (دهليز المجلس) على جدار مشترك 2.4 م، وفتحه حر."]] hidden=[]
+ alt3 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام والمقلط» و«المجلس» على جدار مشترك 4.5 م، وفتحه حر."]] hidden=[]
+ alt4 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «مدخل الرجال» و«صالة الطعام والمقلط» (دهليز المجلس) على جدار مشترك 2.4 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=door tree=sharaa-429098a path=direct
+DIRECT rules [{"k":"adjacent","a":"majlis","b":"dining","door":true,"level":"must"}] relations []
+SECONDS 44.0 alts 2 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام» و«المجلس» على جدار مشترك 3.8 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام» و«المجلس» على جدار مشترك 4.5 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=door tree=sharaa-429098a path=sharaa
+ADAPTER rules [{"k":"adjacent","a":"majlis","b":"dining","door":true,"level":"must"}] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 46.8 alts 2 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام» و«المجلس» على جدار مشترك 3.8 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المجلس» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «صالة الطعام» و«المجلس» على جدار مشترك 4.5 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=door tree=r21-f6d22c7 path=direct
+DIRECT rules [] relations ["DIRECT_DOOR"]
+SECONDS 42.0 alts 2 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[] hidden=[]
+ alt2 status=ready gates=[] door=[] hidden=[]
+EXIT=0
+### case=kdoor tree=merged path=direct
+DIRECT rules [{"k":"adjacent","a":"kitchen","b":"dining","door":true,"level":"must"}] relations []
+SECONDS 39.4 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.3 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 1.2 م، وفتحه حر."]] hidden=[]
+ alt3 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 4.1 م، وفتحه حر."]] hidden=[]
+ alt4 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.4 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=kdoor tree=merged path=sharaa
+ADAPTER rules [{"k":"adjacent","a":"kitchen","b":"dining","door":true,"level":"must"}] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 32.9 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.3 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 1.2 م، وفتحه حر."]] hidden=[]
+ alt3 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 4.1 م، وفتحه حر."]] hidden=[]
+ alt4 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.4 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=kdoor tree=sharaa-429098a path=direct
+DIRECT rules [{"k":"adjacent","a":"kitchen","b":"dining","door":true,"level":"must"}] relations []
+SECONDS 35.7 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.6 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 1.2 م، وفتحه حر."]] hidden=[]
+ alt3 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 4.1 م، وفتحه حر."]] hidden=[]
+ alt4 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.4 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=kdoor tree=sharaa-429098a path=sharaa
+ADAPTER rules [{"k":"adjacent","a":"kitchen","b":"dining","door":true,"level":"must"}] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 32.7 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.6 م، وفتحه حر."]] hidden=[]
+ alt2 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 1.2 م، وفتحه حر."]] hidden=[]
+ alt3 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 4.1 م، وفتحه حر."]] hidden=[]
+ alt4 status=ready gates=[] door=[["«المطبخ» بباب مباشر على «الطعام»",true,"باب مباشر door عرضه 0.9 م بين «المطبخ» و«صالة الطعام والمقلط» على جدار مشترك 3.4 م، وفتحه حر."]] hidden=[]
+EXIT=0
+### case=kdoor tree=r21-f6d22c7 path=direct
+DIRECT rules [] relations []
+SECONDS 32.6 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[] hidden=[]
+ alt2 status=ready gates=[] door=[] hidden=[]
+ alt3 status=ready gates=[] door=[] hidden=[]
+ alt4 status=ready gates=[] door=[] hidden=[]
+EXIT=0
+### case=hall tree=merged path=direct
+DIRECT rules [{"k":"adjacent","a":"majlis","b":"hall","door":true,"level":"must"}] relations []
+SECONDS 28.7 alts 1 hiddenList 0 outcome null
+ alt1 status=hidden gates=[] door=[["«المجلس» بباب مباشر على «الصالة»",true,"باب مباشر door عرضه 0.9 م بين «الصالة» و«مدخل الرجال» (دهليز المجلس) على جدار مشترك 1.6 م، وفتحه حر."]] hidden=["شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: من «المجلس» إلى «صالة الطعام» يعبر الضيف «مدخل الرجال» ثم «الصالة» (شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً)"]
+EXIT=0
+### case=hall tree=merged path=sharaa
+ADAPTER rules [{"k":"adjacent","a":"majlis","b":"hall","door":true,"level":"must"}] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 29.4 alts 1 hiddenList 0 outcome null
+ alt1 status=hidden gates=[] door=[["«المجلس» بباب مباشر على «الصالة»",true,"باب مباشر door عرضه 0.9 م بين «الصالة» و«مدخل الرجال» (دهليز المجلس) على جدار مشترك 1.6 م، وفتحه حر."],["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=["شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: من «المجلس» إلى «صالة الطعام» يعبر الضيف «مدخل الرجال» ثم «الصالة» (شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً)"]
+EXIT=0
+### case=hall tree=sharaa-429098a path=direct
+DIRECT rules [{"k":"adjacent","a":"majlis","b":"hall","door":true,"level":"must"}] relations []
+SECONDS 26.2 alts 1 hiddenList 0 outcome null
+ alt1 status=hidden gates=[] door=[["«المجلس» بباب مباشر على «الصالة»",true,"باب مباشر door عرضه 0.9 م بين «الصالة» و«مدخل الرجال» (دهليز المجلس) على جدار مشترك 1.6 م، وفتحه حر."]] hidden=["شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: من «المجلس» إلى «صالة الطعام» يعبر الضيف «مدخل الرجال» ثم «الصالة» (شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً)"]
+EXIT=0
+### case=hall tree=sharaa-429098a path=sharaa
+ADAPTER rules [{"k":"adjacent","a":"majlis","b":"hall","door":true,"level":"must"}] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 26.1 alts 1 hiddenList 0 outcome null
+ alt1 status=hidden gates=[] door=[["«المجلس» بباب مباشر على «الصالة»",true,"باب مباشر door عرضه 0.9 م بين «الصالة» و«مدخل الرجال» (دهليز المجلس) على جدار مشترك 1.6 م، وفتحه حر."],["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=["شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: من «المجلس» إلى «صالة الطعام» يعبر الضيف «مدخل الرجال» ثم «الصالة» (شرط أساسي في تصميم البيت السعودي (خصوصية/وظيفة)، ويمكنك طلب غيره صراحةً)"]
+EXIT=0
+### case=hall tree=r21-f6d22c7 path=direct
+DIRECT rules [] relations []
+SECONDS 32.7 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[] hidden=[]
+ alt2 status=ready gates=[] door=[] hidden=[]
+ alt3 status=ready gates=[] door=[] hidden=[]
+ alt4 status=ready gates=[] door=[] hidden=[]
+EXIT=0
+### case=maqlat tree=merged path=direct
+DIRECT rules [] relations ["GUEST_ACCESS"]
+SECONDS 33.5 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[] hidden=[]
+ alt2 status=ready gates=[] door=[] hidden=[]
+ alt3 status=ready gates=[] door=[] hidden=[]
+ alt4 status=ready gates=[] door=[] hidden=[]
+EXIT=0
+### case=maqlat tree=merged path=sharaa
+ADAPTER rules [] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 32.5 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+ alt2 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+ alt3 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+ alt4 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+EXIT=0
+### case=maqlat tree=sharaa-429098a path=direct
+DIRECT rules [] relations []
+SECONDS 31.6 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[] hidden=[]
+ alt2 status=ready gates=[] door=[] hidden=[]
+ alt3 status=ready gates=[] door=[] hidden=[]
+ alt4 status=ready gates=[] door=[] hidden=[]
+EXIT=0
+### case=maqlat tree=sharaa-429098a path=sharaa
+ADAPTER rules [] blockers ["NO_BEDROOM","UNCONFIRMED_COUNT"]
+ADAPTER has brief/relations/text: false false ""
+SECONDS 31.8 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+ alt2 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+ alt3 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+ alt4 status=ready gates=[] door=[["بدون غرفة طعام",false,"توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا."]] hidden=[]
+EXIT=0
+### case=maqlat tree=r21-f6d22c7 path=direct
+DIRECT rules [] relations ["GUEST_ACCESS"]
+SECONDS 31.6 alts 4 hiddenList 0 outcome null
+ alt1 status=ready gates=[] door=[] hidden=[]
+ alt2 status=ready gates=[] door=[] hidden=[]
+ alt3 status=ready gates=[] door=[] hidden=[]
+ alt4 status=ready gates=[] door=[] hidden=[]
+EXIT=0

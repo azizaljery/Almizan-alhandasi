@@ -1,0 +1,746 @@
+[
+ {
+  "id": "C1",
+  "secs": 37.088,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 7، اجتاز البوابات منهم 4؛ ورُفض 3 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («المطب",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "10dbb0b31742cd8dde3d73c0c7d0c926a9c8e846e47dd2c15515bd163886e098"
+ },
+ {
+  "id": "C2",
+  "secs": 52.047,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 11، اجتاز البوابات منهم 8؛ ورُفض 3 في بوابات الجودة والسلامة؛ 6 تخالف بندًا صريحًا من الطلب («غرف ",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "c0c68a3773dd9eca51b66a059cb2e9e7144a7540c9461d19c0236f56b990aae3"
+ },
+ {
+  "id": "C3",
+  "secs": 51.651,
+  "err": null,
+  "alts": 3,
+  "visible": 3,
+  "ready": 2,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 37، اجتاز البوابات منهم 20؛ ورُفض 17 في بوابات الجودة والسلامة؛ 6 تخالف بندًا صريحًا من الطلب («ال",
+  "outcome": null,
+  "mandFail": [
+   [],
+   [],
+   []
+  ],
+  "dims": [
+   [],
+   [],
+   []
+  ],
+  "doors": [
+   [],
+   [],
+   []
+  ],
+  "doorRules": 0,
+  "sha": "aa18dbb4bc8b96bc948a7198377543a2b2053c3f70a376bb7e4e64c2bd4bef80"
+ },
+ {
+  "id": "C4",
+  "secs": 9.458,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 0,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 9، اجتاز البوابات منهم 6؛ ورُفض 3 في بوابات الجودة والسلامة؛ 1 تنويع على تنظيم معروض نفسه (النمط ذ",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "b293818a904b1e030a60f3a729ab5464ad58df5b92cb941a50181bd4f71e9c6d"
+ },
+ {
+  "id": "C5",
+  "secs": 58.243,
+  "err": null,
+  "alts": 3,
+  "visible": 3,
+  "ready": 3,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 32، اجتاز البوابات منهم 18؛ ورُفض 14 في بوابات الجودة والسلامة؛ 4 لا يصل فيها ضيف الرجال إلى الطعا",
+  "outcome": null,
+  "mandFail": [
+   [],
+   [],
+   []
+  ],
+  "dims": [
+   [],
+   [],
+   []
+  ],
+  "doors": [
+   [],
+   [],
+   []
+  ],
+  "doorRules": 0,
+  "sha": "05dc7691f3fe307942c3799f7e22370ececfcb9240ef9d71bd1796fefe133833"
+ },
+ {
+  "id": "C6",
+  "secs": 18.658,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 0,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 1، اجتاز البوابات منهم 1؛ 1 تنويع على تنظيم معروض نفسه (النمط ذاته بتبادل موضعي). لا يُكمَّل العدد",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   [
+    "D-majlis:ok",
+    "D-kitchen:ok"
+   ]
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "4918ce38ff334cc4edf3e3835e99f993b02b8e8d844fd750ec64e6c85d12fcab"
+ },
+ {
+  "id": "C7",
+  "secs": 193.146,
+  "err": null,
+  "alts": 1,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 1,
+  "hiddenReason": [
+   "شرط أساسي غير متحقق — ضيف الرجال يعبر منطقة العائلة ليصل إلى الطعام: لا مسار للضيف من «المجلس» إلى «صالة الطعام» إلا عبر منطقة العائلة (شرط "
+  ],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 36، اجتاز البوابات منهم 1؛ ورُفض 35 لأن الدور العلوي لا يتسع فوق مسقطه الأرضي. لا يُكمَّل العدد بن",
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "a2400d42f419acefe87353c7f735c5bd771cab45d6d25d8584203a154bb46b5d"
+ },
+ {
+  "id": "C8",
+  "secs": 50.392,
+  "err": null,
+  "alts": 3,
+  "visible": 3,
+  "ready": 2,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 34، اجتاز البوابات منهم 27؛ ورُفض 7 في بوابات الجودة والسلامة؛ 1 لا يصل فيها ضيف الرجال إلى الطعام",
+  "outcome": null,
+  "mandFail": [
+   [],
+   [],
+   []
+  ],
+  "dims": [
+   [],
+   [],
+   []
+  ],
+  "doors": [
+   [],
+   [],
+   []
+  ],
+  "doorRules": 0,
+  "sha": "f4502a215a7b67e07d377511af5fe3e63f9121880a45910f7a6d8ce33a3c494f"
+ },
+ {
+  "id": "C9",
+  "secs": 39.588,
+  "err": null,
+  "alts": 3,
+  "visible": 3,
+  "ready": 3,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 3 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 31، اجتاز البوابات منهم 19؛ ورُفض 12 في بوابات الجودة والسلامة؛ 2 لا يصل فيها ضيف الرجال إلى الطعا",
+  "outcome": null,
+  "mandFail": [
+   [],
+   [],
+   []
+  ],
+  "dims": [
+   [],
+   [],
+   []
+  ],
+  "doors": [
+   [],
+   [],
+   []
+  ],
+  "doorRules": 0,
+  "sha": "31939de01c3030fac055449ef0e47ffff274654e82647abe2f4840cc6750512d"
+ },
+ {
+  "id": "C10",
+  "secs": 54.934,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 22، اجتاز البوابات منهم 12؛ ورُفض 9 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة (",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "cc036ca07b07b1b4fc0b1d25d39647cd008f3bcb3b8b3acc500bae81fe0f0435"
+ },
+ {
+  "id": "H1",
+  "secs": 37.272,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 27، اجتاز البوابات منهم 13؛ ورُفض 13 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة ",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "a8fa8efc9542cafbac85e969b0394806a5c375f8036f39b53703a75179d2b040"
+ },
+ {
+  "id": "H2",
+  "secs": 46.056,
+  "err": null,
+  "alts": 1,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 1,
+  "hiddenReason": [
+   "لم يجتز فحص «مواقف السيارات»"
+  ],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 9، اجتاز البوابات منهم 1؛ ورُفض 7 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة (PR",
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "fcd9c18d47f395dc59ca8d17777704d8cb472ee9a86350fa8a54756d4dc04746"
+ },
+ {
+  "id": "H3",
+  "secs": 39.302,
+  "err": null,
+  "alts": 1,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 1,
+  "hiddenReason": [
+   "بند من طلبك لم يتحقق: ««الصالة» على الواجهة الخلفية» — «الصالة» لا يلامس جدار الخلف (يبعد 4.8 م)."
+  ],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 2، اجتاز البوابات منهم 1؛ ورُفض 1 في بوابات الجودة والسلامة. لا يُكمَّل العدد بنسخ معكوسة أو شكلية",
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "6bdee437d5bb33d5c227284fa7199140b42ec526a2207e2c70079a6be36081a7"
+ },
+ {
+  "id": "H4",
+  "secs": 47.791,
+  "err": {
+   "code": "VILLA_BUILD_FAILED",
+   "status": "SEARCH_INCOMPLETE",
+   "reason": "SEARCH_EXHAUSTED_WITHOUT_PROOF",
+   "msg": "تعذّر بناء أي بديل سليم لدورين. جُرّب 23 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (15)، غرفة علوية فوق فراغ غير مبني في الأرضي (4).",
+   "hasReport": true
+  },
+  "alts": 0,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": null,
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "0a0e4e843ff76651323a9af9c90c39c9d9895f1f97373a194491101d41e70af8"
+ },
+ {
+  "id": "H5",
+  "secs": 29.864,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 4، اجتاز البوابات منهم 2؛ ورُفض 2 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب (صالة و",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   [
+    "D-majlis:ok",
+    "D-kitchen:ok"
+   ]
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "47fb281e2b0b3e162c5db8b37c5072222aba2a63618ccf84caaebba2a9d19d79"
+ },
+ {
+  "id": "H6",
+  "secs": 47.37,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 0,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 24، اجتاز البوابات منهم 10؛ ورُفض 14 في بوابات الجودة والسلامة؛ 7 فيها غرفة نوم على واجهة الشارع (",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "938f645025783db8d24bd44e5df5a07c58c10649b9c2d5f7d1c5c52c52f987ed"
+ },
+ {
+  "id": "H7",
+  "secs": 40.544,
+  "err": null,
+  "alts": 2,
+  "visible": 2,
+  "ready": 2,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 30، اجتاز البوابات منهم 7؛ ورُفض 8 في المراجعة المعمارية المستقلة (DOOR_SWING)، و15 في بوابات الجو",
+  "outcome": null,
+  "mandFail": [
+   [],
+   []
+  ],
+  "dims": [
+   [],
+   []
+  ],
+  "doors": [
+   [],
+   []
+  ],
+  "doorRules": 0,
+  "sha": "85e0af9cbf9ea07bdca0860bf6204919dfd24c143fd5fb43b2b5dfacdaaeedec"
+ },
+ {
+  "id": "H8",
+  "secs": 132.099,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 24، اجتاز البوابات منهم 1؛ ورُفض 11 في بوابات الجودة والسلامة، و1 في المراجعة المعمارية المستقلة (",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "871f4deae57273b525d53d042c85db48af071d798ab0ee429d9bb0bb533691fe"
+ },
+ {
+  "id": "H9",
+  "secs": 13.678,
+  "err": null,
+  "alts": 1,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 1,
+  "hiddenReason": [
+   "شرط أساسي غير متحقق — موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة: «موقف سيارة» موازٍ للشارع في ارتداد 3.13 م أمام نافذة «المجلس» — "
+  ],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 6، اجتاز البوابات منهم 3؛ ورُفض 3 في بوابات الجودة والسلامة؛ 2 نسخة معدّلة من بديل معروض (لا بعد ج",
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "e70cf39143f6e58822efdac5afea445022e247823e9214c8be34d80c3d7f2ad2"
+ },
+ {
+  "id": "H10",
+  "secs": 17.726,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 3 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 5، اجتاز البوابات منهم 4؛ ورُفض 1 في المراجعة المعمارية المستقلة (DOOR_SWING)؛ 3 نسخة معدّلة من بد",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   [
+    "D-majlis:ok",
+    "D-kitchen:ok",
+    "D-bedroom:ok"
+   ]
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "bcb97a29389a5397ae60b4d92bd72232bfc1ce50c711eda1724883ac43e13a69"
+ },
+ {
+  "id": "D1",
+  "secs": 41.196,
+  "err": null,
+  "alts": 2,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 2,
+  "hiddenReason": [
+   "شرط أساسي غير متحقق — موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة: «موقف سيارة» موازٍ للشارع في ارتداد 3.13 م أمام نافذة «مدخل الجنا",
+   "شرط أساسي غير متحقق — موقف موازٍ للشارع في ارتداد أقل من 5.5 م أمام نافذة: «موقف سيارة» موازٍ للشارع في ارتداد 3.13 م أمام نافذة «غرفة النوم"
+  ],
+  "shortfall": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 17، اجتاز البوابات منهم 9؛ ورُفض 8 في بوابات الجودة والسلامة؛ 2 تنويع على تنظيم معروض نفسه (النمط ",
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "2bdd56fc3188d360d8b1832351186eb69a5ddff67c49462609ae45ea689cc6f8"
+ },
+ {
+  "id": "D2",
+  "secs": 53.717,
+  "err": {
+   "code": "VILLA_REVIEW_FAILED",
+   "status": "SEARCH_INCOMPLETE",
+   "reason": "SEARCH_EXHAUSTED_WITHOUT_PROOF",
+   "msg": "لم يجتز أي بديل مبني (2) البوابات الثقيلة (المراجعة الإنشائية المبدئية، والحركة الفعلية مع الأثاث، والتطابق 2D/3D): الحركة الفعلية: «غرفة السائق» متصلة بالأبواب لكن لا مسار إليها حتى بخلوص 0.3 م. [منط",
+   "hasReport": true
+  },
+  "alts": 0,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": null,
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "e9e3a4a041f7c8f597b6b8e78187426445d7f2cd819fd079ae5b813fd99b799f"
+ },
+ {
+  "id": "D3",
+  "secs": 49.069,
+  "err": null,
+  "alts": 2,
+  "visible": 2,
+  "ready": 1,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 2 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 32، اجتاز البوابات منهم 21؛ ورُفض 11 في بوابات الجودة والسلامة؛ 7 فيها غرفة نوم على واجهة الشارع (",
+  "outcome": null,
+  "mandFail": [
+   [],
+   []
+  ],
+  "dims": [
+   [],
+   []
+  ],
+  "doors": [
+   [],
+   []
+  ],
+  "doorRules": 0,
+  "sha": "8a67098659e5655ba29135d537d159923ebe0ee0fca479d1f52f16d8110ed7bc"
+ },
+ {
+  "id": "D4",
+  "secs": 57.317,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 39، اجتاز البوابات منهم 20؛ ورُفض 19 في بوابات الجودة والسلامة؛ 7 تخالف بندًا صريحًا من الطلب («ال",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "623f764f97bf797835a64e83e227e77f50f05f274b14ecb7cb134f1190e9a4ac"
+ },
+ {
+  "id": "D5",
+  "secs": 21.112,
+  "err": {
+   "code": "VILLA_BUILD_FAILED",
+   "status": "SEARCH_INCOMPLETE",
+   "reason": "SEARCH_EXHAUSTED_WITHOUT_PROOF",
+   "msg": "تعذّر بناء أي بديل سليم لدورين. جُرّب 27 تنظيمًا مشتركًا للدورين، وأكثر ما منعها: جدار علوي أطول من 5 م بلا جدار أرضي تحته (التراكب الإنشائي) (17)، غرفة علوية فوق فراغ غير مبني في الأرضي (6).",
+   "hasReport": true
+  },
+  "alts": 0,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": null,
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "0a0e4e843ff76651323a9af9c90c39c9d9895f1f97373a194491101d41e70af8"
+ },
+ {
+  "id": "D6",
+  "secs": 51.695,
+  "err": {
+   "code": "VILLA_REVIEW_FAILED",
+   "status": "SEARCH_INCOMPLETE",
+   "reason": "SEARCH_EXHAUSTED_WITHOUT_PROOF",
+   "msg": "لم يجتز أي بديل مبني (1) البوابات الثقيلة (المراجعة الإنشائية المبدئية، والحركة الفعلية مع الأثاث، والتطابق 2D/3D): الحركة الفعلية: «غرفة السائق» متصلة بالأبواب لكن لا مسار إليها حتى بخلوص 0.3 م. [منط",
+   "hasReport": true
+  },
+  "alts": 0,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": null,
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "e9e3a4a041f7c8f597b6b8e78187426445d7f2cd819fd079ae5b813fd99b799f"
+ },
+ {
+  "id": "D7",
+  "secs": 34.091,
+  "err": {
+   "code": "VILLA_NO_FIT",
+   "status": "SEARCH_INCOMPLETE",
+   "reason": "SEARCH_EXHAUSTED_WITHOUT_PROOF",
+   "msg": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (12.74 × 22.34 م)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 206 م².",
+   "hasReport": true
+  },
+  "alts": 0,
+  "visible": 0,
+  "ready": 0,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": null,
+  "outcome": null,
+  "mandFail": [],
+  "dims": [],
+  "doors": [],
+  "doorRules": 0,
+  "sha": "a5075ea290f995dd0f8253004d03655c2f261daf6ce5a30f02b20769399087e2"
+ },
+ {
+  "id": "D8",
+  "secs": 283.613,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 0,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 28، اجتاز البوابات منهم 3؛ ورُفض 16 في بوابات الجودة والسلامة، و9 لأن الدور العلوي لا يتسع فوق مسق",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "31a84d543433efa2c84910f1e0294e42806d0c17644ded525cd91432f5303d7d"
+ },
+ {
+  "id": "D9",
+  "secs": 52.582,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 0,
+  "needsEdits": 1,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 10، اجتاز البوابات منهم 6؛ ورُفض 4 في بوابات الجودة والسلامة؛ 2 لا يصل فيها ضيف الرجال إلى الطعام ",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   []
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "ffc9526b7ab4095faa490cd80014fa3100459f6f3c061fea12626ed83db8e20b"
+ },
+ {
+  "id": "D10",
+  "secs": 31.074,
+  "err": null,
+  "alts": 1,
+  "visible": 1,
+  "ready": 1,
+  "needsEdits": 0,
+  "hiddenAlts": 0,
+  "hiddenReason": [],
+  "shortfall": "عُرض 1 من 4 مطلوبة؛ المرشحون المبنيون من أنماط تنظيمية مختلفة 11، اجتاز البوابات منهم 9؛ ورُفض 2 في بوابات الجودة والسلامة؛ 1 تخالف بندًا صريحًا من الطلب («المج",
+  "outcome": null,
+  "mandFail": [
+   []
+  ],
+  "dims": [
+   [
+    "D-majlis:ok",
+    "D-kitchen:ok"
+   ]
+  ],
+  "doors": [
+   []
+  ],
+  "doorRules": 0,
+  "sha": "89760188ce1c891216d2a902a4cfdfa1e060278d45e7188381794b93809145ec"
+ }
+]
