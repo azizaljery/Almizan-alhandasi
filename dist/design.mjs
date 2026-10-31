@@ -12,12 +12,16 @@ import { diffFingerprint, diffCaption } from './plan-fingerprint.mjs';
 import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 import { shortfallNotice } from './client-text.mjs';
 import { toClientAr } from './client-language.mjs';
+import { completeLedger, ledgerVerdict, LEVEL_AR } from './request-ledger.mjs';
 // (الجولة 21 — مقترح 08) لا نص استثناء للعميل: رسالة المحرك العربية المعروفة (VILLA_*) بلغة العميل، وإلا نص ثابت
 const clientErr = (e, fallback) => (/^VILLA_/.test(String(e?.code || '')) && /[\u0600-\u06FF]/.test(String(e?.message || '')) ? toClientAr(e.message) : fallback);
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
 const fmt = v => Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 });
+// (ملاحظات المعاينة 2026-10-31) أزواج الأبعاد بترتيب ثابت من اليسار (أفقي × رأسي) في كل الصفحات، فلا تنقلب في سياق RTL
+const ltr = t => el('bdi', { dir: 'ltr' }, t);
+const landDims = d => { const P = d.plot?.polygon; if (!P?.length) return '—'; const xs = P.map(p => p.x), ys = P.map(p => p.y); return `${fmt(Math.max(...xs) - Math.min(...xs))} × ${fmt(Math.max(...ys) - Math.min(...ys))} م`; };
 const toast = t => { const n = el('div', { class: 'toast', role: 'status' }, t); document.body.append(n); setTimeout(() => n.remove(), 3200); };
 
 let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null;
@@ -36,42 +40,52 @@ function show(index) {
   session.current = index; saveSession(localStorage, session);
   doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null;
   const d = session.designs[index], S = summarizeDoc(doc), req = session.input.requirements || {};
+  const pres = presentationOf(d), rejected = pres?.status === 'hidden'; // (ملاحظات المعاينة 2026-10-31) مسودة مرفوضة
   const specs = [
     ['غرف النوم', S.specs.bedrooms], ['دورات المياه', S.specs.baths], ['المجالس', S.specs.majlis], ['الأدوار', S.specs.floors],
-    ['مسطح البناء', fmt(S.specs.built) + ' م²'], ['أبعاد المبنى', `${fmt(S.specs.width)} × ${fmt(S.specs.depth)} م`], ['المداخل', S.specs.entries],
+    ['مسطح البناء', fmt(S.specs.built) + ' م²'], ['أبعاد المبنى (عرض × عمق)', ltr(`${fmt(S.specs.width)} × ${fmt(S.specs.depth)} م`)], ['الأرض (عرض × طول)', ltr(landDims(doc))], ['المداخل', S.specs.entries],
   ];
   const levels = doc.levels.length > 1 ? el('div', { class: 'seg', role: 'tablist' }, doc.levels.map(l => el('button', { 'data-level': l.id, class: l.id === levelId ? 'on' : '', onclick: () => { levelId = l.id; view = null; goal = null; inertia = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === levelId)); paint(); } }, l.name))) : null;
   const zoneToggle = el('label', {}, el('input', { type: 'checkbox', id: 'zonesOn', checked: zonesOn, onchange: e => { zonesOn = e.target.checked; paint(); legend(); } }), 'تلوين المناطق');
   diffInfo = null;
   if (index > 0 && d.feedback) { try { const D = diffFingerprint(parseDoc(session.designs[index - 1].doc), doc); if (!D.identical) diffInfo = { now: [...D.changed, ...D.added].filter(e => e.kind !== 'fixture' && e.box), gone: D.removed.filter(e => e.kind !== 'fixture' && e.box), summary: diffCaption(D).client_ar, detail: D.summary_ar, from: session.designs[index - 1].version ?? index }; } catch { diffInfo = null; } }
   const diffToggle = diffInfo ? el('label', { 'data-diff': '' }, el('input', { type: 'checkbox', id: 'diffOn', checked: diffOn, onchange: e => { diffOn = e.target.checked; paint(); } }), 'أظهر ما تغيّر عن النسخة ' + diffInfo.from) : null;
-  const plan = el('div', { class: 'card plancard' },
+  const plan = el('div', { class: 'card plancard' + (rejected ? ' rejected' : ''), ...(rejected ? { 'data-rejected': '' } : {}) },
+    rejected ? el('div', { class: 'rejected-badge', role: 'note' }, 'مسودة مرفوضة — لا تُعتمد') : null,
     el('div', { class: 'planbar' }, levels, zoneToggle, diffToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
     el('div', { class: 'planwrap', id: 'planWrap' }, el('canvas', { id: 'plan', 'aria-label': 'مسقط التصميم' })),
     el('div', { class: 'legend', id: 'legend' }),
     diffInfo ? el('p', { class: 'sub', 'data-diff-summary': '', title: diffInfo.detail }, diffInfo.summary + ' — المظلل بالأحمر ما تغيّر أو أضيف، والمتقطع ما أزيل.') : null);
   // «لم يُتحقق» و«بانتظار العرض» ليست منفّذة ولا مخفقة: تُعرض وحدها بسببها
-  const ledger = ledgerFor(session, doc), open = ledger.filter(x => x.status === 'unverified' || x.status === 'pending-render'), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok && !open.includes(x));
+  // (ملاحظات المعاينة 2026-10-31) كل طلب صريح بحالته الحقيقية (لازم/تفضيل)، وحكم لا يناقض حالة العرض
+  const items = completeLedger(ledgerFor(session, doc), req, { doc, review: d.review || null, entry: session.input.land?.entries?.[0] || doc.plot?.entry || 's' });
+  const V = ledgerVerdict(items, pres), by = st => items.filter(x => x.state === st);
+  const tag = x => el('small', { class: 'lvl lvl-' + x.level, 'data-level': x.level }, LEVEL_AR[x.level] || '');
+  const li = (cls, x, note = '') => el('li', { class: cls, 'data-rule': x.id, 'data-state': x.state }, tag(x), ' ', cls === 'good' ? x.text : el('b', {}, x.text + note), x.why ? el('span', { class: 'why' }, x.why) : null);
+  const prevOk = session.designs.map((x, i) => ({ x, i })).filter(({ x, i }) => i !== index && presentationOf(x)?.status !== 'hidden').pop();
   const side = el('div', { class: 'actions card' },
-    el('h2', {}, 'ما رأيك في هذا التصميم؟'),
-    el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واعرضه ثلاثي الأبعاد ←'),
+    el('h2', {}, rejected ? 'هذه مسودة مرفوضة' : 'ما رأيك في هذا التصميم؟'),
+    rejected ? el('p', { class: 'sub', 'data-rejected-note': '' }, 'لا تُعتمد لأنها تخالف شرطًا أساسيًا (مذكورًا أعلى الصفحة). اختر: ' + (prevOk ? 'الرجوع إلى تصميم سابق، أو ' : '') + 'طلب تصميم آخر، أو تعديلها بيدك في المرسم ثم مراجعتها.') : null,
+    rejected && prevOk ? el('button', { class: 'btn gold', id: 'btnBack', onclick: () => show(prevOk.i) }, `ارجع إلى التصميم ${prevOk.i + 1}`) : null,
+    el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove, disabled: rejected, title: rejected ? 'مسودة مرفوضة لا تُعتمد' : null }, rejected ? 'لا يُعتمد — مسودة مرفوضة' : 'أعجبني — اعتمده واعرضه ثلاثي الأبعاد ←'),
     el('button', { class: 'btn primary', id: 'btnAnother', onclick: openShara }, 'اطلب تصميمًا آخر'),
     el('button', { class: 'btn', id: 'btnStudio', onclick: onStudio }, 'عدّل عليه بيدك في المرسم'),
     el('small', {}, 'الاعتماد يفتح العرض ثلاثي الأبعاد في صفحة مستقلة، ومنه المخرجات (الإنشائي والكميات والتكلفة وكتاب المشروع).'));
   // سجل التنفيذ: كل بند من طلبك مقيس من المخطط نفسه، لا من نية المولّد
   const reqCard = el('div', { class: 'card ledger', id: 'ledger' }, el('h2', {}, 'هل نُفّذ طلبك؟'),
-    ledger.length ? el('p', { class: 'score ' + (miss.length ? 'part' : 'full') }, miss.length ? `نُفّذ ${done.length} من ${ledger.length} بنود، وبقي ${miss.length}` : `نُفّذت كل البنود (${ledger.length})`) : el('p', { class: 'sub' }, 'لم تذكر طلبات مكانية أو مقاسات؛ طُبّقت الأعداد التي حددتها.'),
-    miss.length ? el('ul', { class: 'tick' }, miss.map(x => el('li', { class: 'bad', 'data-rule': x.id }, el('b', {}, x.text), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
-    done.length ? el('ul', { class: 'tick' }, done.map(x => el('li', { class: 'good', 'data-rule': x.id }, x.text, x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
-    open.length ? el('ul', { class: 'tick' }, open.map(x => el('li', { class: 'no', 'data-rule': x.id, 'data-status': x.status }, el('b', {}, x.text + (x.status === 'pending-render' ? ' — بانتظار العرض' : ' — لم يُتحقق منه آليًا')), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
+    el('p', { class: 'score ' + V.cls, id: 'ledgerVerdict', 'data-hidden': V.hidden ? '1' : '0' }, V.text),
+    by('missing').length ? el('ul', { class: 'tick' }, by('missing').map(x => li('bad', x, ' — لم يتحقق'))) : null,
+    by('pref-unmet').length ? el('ul', { class: 'tick' }, by('pref-unmet').map(x => li('no', x, ' — تفضيل لم يتحقق'))) : null,
+    by('done').length ? el('ul', { class: 'tick' }, by('done').map(x => li('good', x))) : null,
+    [...by('unverified'), ...by('pending-render')].length ? el('ul', { class: 'tick' }, [...by('unverified'), ...by('pending-render')].map(x => li('no', x, x.state === 'pending-render' ? ' — بانتظار العرض' : ' — لم يُتحقق منه آليًا'))) : null,
+    by('unsupported').length ? el('ul', { class: 'tick' }, by('unsupported').map(x => li('no', x, ' — غير مدعوم'))) : null,
     (session.conflicts || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'في طلبك نقاط تحتاج توضيح:'), el('ul', { class: 'tick' }, session.conflicts.map(c => el('li', { class: 'no', 'data-conflict': c.type }, c.question_ar)))) : null,
     (session.siteQuestions || []).length ? el('div', { class: 'conflicts' }, el('p', { class: 'sub' }, 'عن الموقع (اختياري):'), el('ul', { class: 'tick' }, session.siteQuestions.map(c => el('li', { class: 'no', 'data-site-question': c.type }, c.question_ar)))) : null,
-    miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
-    (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
+    V.missing || V.prefUnmet ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null);
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, toClientAr(t)))),
     d.feedback ? el('p', { class: 'sub' }, 'عدّلتُ هذا التصميم بناءً على: ' + d.feedback.changes.join('، ')) : null);
-  const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
-    el('tbody', {}, S.rooms.filter(r => r.area >= 2).map(r => el('tr', {}, el('td', {}, el('span', { class: 'z', style: `background:${ZONES[r.zone].color}` }), r.name), doc.levels.length > 1 ? el('td', {}, r.level) : null, el('td', { class: 'num' }, `${fmt(r.l)} × ${fmt(r.w)}`), el('td', { class: 'num' }, fmt(r.area)), el('td', {}, ZONES[r.zone].label)))),
+  const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (أفقي × رأسي، م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
+    el('tbody', {}, S.rooms.filter(r => r.area >= 2).map(r => el('tr', {}, el('td', {}, el('span', { class: 'z', style: `background:${ZONES[r.zone].color}` }), r.name), doc.levels.length > 1 ? el('td', {}, r.level) : null, el('td', { class: 'num' }, ltr(r.aligned ? `${fmt(r.x)} × ${fmt(r.y)}` : `${fmt(r.l)} × ${fmt(r.w)}`)), el('td', { class: 'num' }, fmt(r.area)), el('td', {}, ZONES[r.zone].label)))),
     el('tfoot', {}, el('tr', {}, el('th', {}, 'إجمالي المساحات الصافية'), doc.levels.length > 1 ? el('th', {}) : null, el('th', {}), el('th', { class: 'num' }, fmt(S.specs.net)), el('th', {}))));
   const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم السابقة' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', onclick: () => show(i) }, 'التصميم ' + (i + 1)))) : null;
   const replyCard = sharaReply(d.feedback);
@@ -125,12 +139,13 @@ function showAlternative(i) {
  * (الجولة الرابعة عشرة) حالة العرض: «جاهز للعرض المبدئي» / «يحتاج تعديلات» (بقائمتها) / «محجوب» (بسببه) — لا يُعرض بديل يحتاج
  * تعديلات على أنه جاهز. التصميم المعدَّل يدويًا أو في الجلسة بلا حالة محسوبة يُقال عنه ذلك صراحة.
  */
+const presentationOf = d => d.presentation || (d.alt != null ? session.alternatives?.[d.alt]?.presentation : null) || null;
 function statusCard(d) {
-  const p = d.presentation || (d.alt != null ? session.alternatives?.[d.alt]?.presentation : null);
+  const p = presentationOf(d);
   if (!p) return el('section', { class: 'card status', 'data-status': 'unknown' }, el('p', { class: 'sub' }, 'حالة العرض لم تُحسب لهذه النسخة (عُدّلت بعد التوليد)؛ راجع «هل نُفّذ طلبك؟» والمراجعة المعمارية أدناه.'));
   const cls = p.status === 'ready' ? 'full' : 'part';
   return el('section', { class: 'card status', id: 'presentationStatus', 'data-status': p.status, 'aria-label': 'حالة العرض' },
-    el('p', { class: 'score ' + cls }, p.label_ar + (p.status === 'needs-edits' ? ` — ${p.edits_ar.length} ${p.edits_ar.length === 1 ? 'ملاحظة' : 'ملاحظات'}` : '')),
+    el('p', { class: 'score ' + (p.status === 'hidden' ? 'bad' : cls) }, p.status === 'hidden' ? 'مسودة مرفوضة — لا تُعرض تصميمًا مقبولًا ولا تُعتمد' : p.label_ar + (p.status === 'needs-edits' ? ` — ${p.edits_ar.length} ${p.edits_ar.length === 1 ? 'ملاحظة' : 'ملاحظات'}` : '')),
     p.status === 'hidden' ? el('ul', { class: 'tick' }, p.hidden_ar.map(t => el('li', { class: 'bad' }, t))) : null,
     p.status === 'needs-edits' ? el('ul', { class: 'tick' }, p.edits_ar.map(t => el('li', { class: 'no' }, t))) : null,
     // (02c، قرار المالك 2026-10-26) ما لم يثبت نظاميًا (ساتر موقع) يظهر للعميل بوسم «تحتاج تحققًا نظاميًا» ولا يُعدّ معتمدًا
@@ -308,7 +323,7 @@ function paint() {
 
 // ------------------------------------------------------------------------------------------ الأفعال
 function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(doc)); } catch { /* التخزين غير متاح */ } }
-function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); location.href = './view3d.html'; }
+function onApprove() { if (presentationOf(session.designs[session.current])?.status === 'hidden') { toast('مسودة مرفوضة لا تُعتمد؛ ارجع إلى تصميم سابق أو اطلب تصميمًا آخر.'); return; } session = approve(session); saveSession(localStorage, session); storeForStudio(); location.href = './view3d.html'; }
 function onStudio() {
   const alternatives = (session.alternatives || []).map(a => { try { return { index: a.index, strategy: a.strategy, doc: JSON.parse(a.doc) }; } catch { return null; } }).filter(Boolean);
   try { writeHandoff(sessionStorage, doc, { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }

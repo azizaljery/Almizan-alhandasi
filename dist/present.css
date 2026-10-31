@@ -128,3 +128,11 @@ table.gates .why{display:block;color:#6b6a5f;font-size:12.5px}
 /* (الجولة الثامنة) الجوال: الترويسة لا تلتصق (كانت تغطي ثلث الشاشة في العرض ثلاثي الأبعاد بزرّيها)، والمجسّم قبل لوحة التحكم */
 @media(max-width:600px){.ph{position:static}.ph .btn{padding:7px 12px;font-size:13px}}
 @media(max-width:860px){.v3{grid-template-rows:60vh auto}.v3 .stage{order:-1}}
+/* (ملاحظات المعاينة 2026-10-31) المسودة المرفوضة لا تُعرض كأنها مقبولة، ودرجة كل بند (لازم/تفضيل) ظاهرة */
+.ledger .score.bad,.status .score.bad{background:#b3412e;color:#fff}
+.status[data-status="hidden"]{border:2px solid #b3412e}
+.plancard.rejected .planwrap{outline:3px dashed #b3412e;outline-offset:-3px}
+.rejected-badge{position:absolute;z-index:3;top:56px;inset-inline-start:12px;background:#b3412e;color:#fff;font-weight:700;font-size:14px;padding:6px 12px;border-radius:8px;pointer-events:none}
+ul.tick li .lvl{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;margin-inline-end:4px;vertical-align:1px}
+ul.tick li .lvl-must{background:#efe2c4;color:#5b4210}ul.tick li .lvl-prefer{background:#e8ece9;color:#41524a}
+.btn[disabled]{opacity:.55;cursor:not-allowed}

@@ -19,6 +19,8 @@ const COUNT_FIELDS = Object.freeze([
   { id: 'kitchens', label: 'المطابخ', min: 0, max: 2 }, { id: 'halls', label: 'الصالات', min: 0, max: 3 }, { id: 'dining', label: 'غرف الطعام', min: 0, max: 2 },
 ]);
 const msg = (text, extra = {}) => ({ from: 'shara', text, ...extra });
+// الفراغات التي يؤكد عددَها نموذجُ الأعداد نفسه (#counts)
+const COUNT_FORM_TYPES = new Set(['bedroom', 'male_majlis', 'female_majlis', 'bath', 'kitchen', 'living', 'dining']);
 const PRI_AR = { mandatory: 'لازم', preferred: 'تفضيل', flexible: 'قابل للتنازل' };
 
 // ------------------------------------------------------------------------------------------ الأرض في الخلفية
@@ -254,6 +256,9 @@ export class SharaFlow {
       if (s.count > 0 && s.attr?.dims && s.attr.dims.verification === 'needs_confirmation' && s.minClearWidthM) out.push({ ref: 'space:' + s.id + '#dims', text: `مقاس ${B.nameOf(s.type)} ${s.minClearWidthM}×${s.minClearDepthM} م`, priority: s.attr.dims.priority, quote: s.attr.dims.originalText, support: 'partial' });
       if (s.count > 0 && s.attr?.floor && s.attr.floor.verification === 'needs_confirmation') out.push({ ref: 'space:' + s.id + '#floor', text: `${B.nameOf(s.type)} في الدور ${s.floorPreference === 1 ? 'العلوي' : 'الأرضي'}`, priority: s.attr.floor.priority, quote: s.attr.floor.originalText, support: 'supported' });
     }
+    // (ملاحظات المعاينة 2026-10-31) فراغ معدود ذُكر في الكلام ولا يغطيه نموذج الأعداد (المقلط مثلًا): يُسأل عنه هنا، وإلا بقي الملف
+    // عالقًا عند «ما زال ينقصني قرار: عدد «المقلط» لم يؤكده العميل» بلا أي سؤال يُجاب
+    for (const s of b.spaces) if (s.count > 0 && s.verification === 'needs_confirmation' && B.SPACE_TYPES[s.type]?.counts && !COUNT_FORM_TYPES.has(s.type)) out.push({ ref: 'space:' + s.id, text: `${B.nameOf(s.type)}${s.count > 1 ? ' × ' + s.count : ''}`, priority: s.priority, quote: s.originalText, support: s.type === 'guest_dining' ? 'partial' : 'supported' });
     for (const [path, m] of Object.entries(b.provenance)) if (path.startsWith('preferences.features.') && m.verification === 'needs_confirmation' && !/requested|floorsSaid|tweaks/.test(path)) out.push({ ref: 'feature:' + path.slice('preferences.features.'.length), text: featureText(path.split('.').pop()), priority: m.priority, quote: m.originalText, support: B.supportOf('pref.' + path.split('.').pop()) });
     if (b.provenance['preferences.kitchenStyle']?.verification === 'needs_confirmation') out.push({ ref: 'field:preferences.kitchenStyle', text: 'المطبخ ' + ({ open: 'مفتوح على الطعام', closed: 'مغلق', open_to_hall: 'مفتوح على الصالة' })[b.preferences.kitchenStyle], priority: b.provenance['preferences.kitchenStyle'].priority, quote: b.provenance['preferences.kitchenStyle'].originalText, support: 'partial' });
     return out;
@@ -305,7 +310,8 @@ export class SharaFlow {
     if (key === 'confirm') {
       const dec = v?.decisions || {};
       for (const [ref, p] of Object.entries(dec)) {
-        if (p === 'drop') b = B.dropItem(b, ref);
+        if (p === 'drop' && /^space:[^#]+$/.test(ref)) { const sp = B.spaceOf(b, ref.slice(6)); if (sp) b = B.upsertSpace(b, { type: sp.type, count: 0, source: 'client_answer', priority: 'mandatory', originalText: 'سحبه العميل عند تأكيد البنود' }); }
+        else if (p === 'drop') b = B.dropItem(b, ref);
         else if (ref.includes('#')) { const [sid, attr] = ref.slice('space:'.length).split('#'); const s = B.spaceOf(b, sid); if (s?.attr?.[attr === 'dims' ? 'dims' : 'floor']) { b = B.decide(b, 'space:' + sid, { priority: p }); } }
         else b = B.decide(b, ref, { priority: p });
       }
