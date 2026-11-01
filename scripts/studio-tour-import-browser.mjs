@@ -37,6 +37,7 @@ await writeFile(files.notjson, '{ not json');
 const { chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs');
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'] });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 860 }, acceptDownloads: true });
+await ctx.addInitScript(() => { try { localStorage.setItem('mizan.studio.mode', 'advanced'); } catch { /* */ } }); // (ملاحظات المعاينة 2026-10-31) المرسم يفتح بالوضع البسيط افتراضيًا؛ هذا الفحص يختبر الأدوات المتقدمة فيبدأ بها
 const page = await ctx.newPage();
 const logs = [];
 page.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED/.test(m.text())) logs.push('console: ' + m.text()); });
@@ -177,7 +178,8 @@ try {
 ok('frames at the start, middle and end are all different (the camera really moved)', moved);
 
 // ================================================================================================ 3. mobile layout
-const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); const mp = await phone.newPage();
+const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); await phone.addInitScript(() => { try { localStorage.setItem('mizan.studio.mode', 'advanced'); } catch { /* */ } }); // (ملاحظات المعاينة 2026-10-31) المرسم يفتح بالوضع البسيط افتراضيًا؛ هذا الفحص يختبر الأدوات المتقدمة فيبدأ بها
+const mp = await phone.newPage();
 mp.on('pageerror', e => logs.push('mobile pageerror: ' + e.message)); await mp.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
 await mp.goto(base + '/studio.html'); await mp.waitForFunction(() => window.__mizanStudio);
 await mp.setInputFiles('#fileInput', files.bare); // the header overflows a 390 px screen in the existing layout; not part of this change

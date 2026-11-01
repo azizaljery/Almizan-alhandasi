@@ -637,7 +637,7 @@ function facadeStatus(x, doc, req) {
 export default { SESSION_KEY, FEEDBACK, createSession, redesign, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules };
 
 // ------------------------------------------------------------------------------------------ العرض
-import { analyzeDoc } from './draw/digest.mjs';
+import { analyzeDoc, roomSpan } from './draw/digest.mjs';
 /** المناطق كما تُعرض للعميل: الرجال، النساء، العائلة، الخدمة. */
 export const ZONES = Object.freeze({
   men: { label: 'منطقة الرجال', color: '#e7d2a6' },
@@ -666,7 +666,7 @@ export function summarizeDoc(doc) {
     const L = model.levelById.get(lv.id); if (!L) continue;
     const xs = doc.walls.filter(w => w.level === lv.id).flatMap(w => [w.a.x, w.b.x]), ys = doc.walls.filter(w => w.level === lv.id).flatMap(w => [w.a.y, w.b.y]);
     if (xs.length) built += (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys));
-    for (const r of L.rooms) { if (r.unlabelled) continue; net += r.area; rooms.push({ name: r.name, type: r.type, level: lv.name, levelId: lv.id, area: r2(r.area), l: r2(r.rect?.l || 0), w: r2(r.rect?.w || 0), zone: zoneOf(r.label) }); }
+    for (const r of L.rooms) { if (r.unlabelled) continue; net += r.area; const sp = roomSpan(r); rooms.push({ name: r.name, type: r.type, level: lv.name, levelId: lv.id, area: r2(r.area), l: r2(r.rect?.l || 0), w: r2(r.rect?.w || 0), x: r2(sp?.x || 0), y: r2(sp?.y || 0), aligned: !!sp?.aligned, zone: zoneOf(r.label) }); }
   }
   const count = types => rooms.filter(r => types.includes(r.type)).length;
   const first = doc.levels[0], wx = doc.walls.filter(w => w.level === first.id).flatMap(w => [w.a.x, w.b.x]), wy = doc.walls.filter(w => w.level === first.id).flatMap(w => [w.a.y, w.b.y]);

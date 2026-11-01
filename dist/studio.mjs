@@ -12,13 +12,14 @@ import { applyCommand } from './draw/doc.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
-import { digestDoc, describeDigestAr } from './draw/digest.mjs';
+import { digestDoc, describeDigestAr, roomSpan } from './draw/digest.mjs';
 import { askDrawingAssistant } from './draw/assistant-client.mjs';
 import { assistantOpen } from './assistant.mjs';
 import { wallRect, fixtureRect } from './draw/review.mjs';
 import { downloadManifest } from './export-manifest.mjs';
 import { toDxf } from './draw/dxf.mjs';
 import { openExportStudio } from './draw/export-studio-ui.mjs';
+import { placeMenu } from './draw/menu-place.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c != null) n.append(c.nodeType ? c : document.createTextNode(String(c))); return n; };
@@ -33,6 +34,17 @@ try { if (!initial) { const saved = store.get(KEY); if (saved) initial = parseDo
 const startedEmpty = !initial;
 const editor = new Editor($('planCanvas'), { doc: initial || createDoc({ title: 'مشروع جديد' }), onEvent: onEditorEvent });
 globalThis.__mizanStudio = editor; // للاختبارات الحية
+// (ملاحظات المعاينة 2026-10-31) الوضع البسيط افتراضيًا: الأدوات الأساسية فقط، والباقي خلف «أدوات متقدمة» (إخفاء بالأنماط؛ لا تُحذف ميزة)
+const MODE_KEY = 'mizan.studio.mode';
+function setMode(mode, persist = true) {
+  const adv = mode === 'advanced'; $('app').dataset.mode = adv ? 'advanced' : 'simple';
+  const t = $('modeToggle'); if (t) { t.setAttribute('aria-pressed', String(adv)); t.querySelector('span').textContent = adv ? 'وضع بسيط' : 'أدوات متقدمة'; }
+  if (persist) store.set(MODE_KEY, adv ? 'advanced' : 'simple');
+  // أداة أو تبويب مخفي كان مفعّلًا: يُعاد إلى الأساسي حتى لا يبقى المستخدم في أداة لا يرى زرها
+  if (!adv) { if (document.querySelector(`#rail [data-tool="${editor.tool}"][data-adv]`)) editor.setTool('select'); const on = document.querySelector('.tabs [data-tab].on[data-adv]'); if (on) setTab('props'); }
+}
+setMode(store.get(MODE_KEY) === 'advanced' ? 'advanced' : 'simple', false);
+$('modeToggle')?.addEventListener('click', () => setMode($('app').dataset.mode === 'simple' ? 'advanced' : 'simple'));
 $('docTitle').value = editor.doc.title;
 
 // ------------------------------------------------------------------------------------------------ helpers
@@ -80,7 +92,8 @@ function onEditorEvent(ev) {
 }
 async function roomDialog(label, room = null) {
   const cur = label || room?.label;
-  const r = await ask('اسم الغرفة ونوعها', [{ key: 'name', label: 'الاسم', value: cur?.name || '' }, { key: 'type', label: 'النوع', type: 'select', value: cur?.type || room?.type || 'other', options: Object.entries(ROOM_TYPES).map(([k, v]) => [k, v.ar]) }]);
+  room ||= [...(editor.lv?.rooms || [])].find(x => x.label?.id === cur?.id) || null;
+  const r = await ask('اسم الغرفة ونوعها' + (room ? ` — ${num(room.area, 2)} م²، ${spanText(room)} (أفقي × رأسي)` : ''), [{ key: 'name', label: 'الاسم', value: cur?.name || '' }, { key: 'type', label: 'النوع', type: 'select', value: cur?.type || room?.type || 'other', options: Object.entries(ROOM_TYPES).map(([k, v]) => [k, v.ar]) }]);
   if (!r) return;
   const name = r.name.trim() || roomTypeName(r.type);
   if (cur) editor.exec({ type: 'update', id: cur.id, patch: { name, type: r.type } }, 'اسم الغرفة');
@@ -188,7 +201,7 @@ function renderProps() {
     const lvl = editor.level();
     box.append(el('div', { class: 'sec' }, el('h4', {}, 'الدور'), field('الاسم', 'text', lvl.name, v => upd(lvl.id, { name: v })), field('ارتفاع الدور', 'number', lvl.height, v => upd(lvl.id, { height: v }), { step: '.05', unit: 'م', min: 2, max: 8 })));
     const b = docBounds(doc, editor.levelId), s = editor.stats();
-    box.append(el('div', { class: 'sec' }, el('h4', {}, 'ملخص الدور'), el('div', { class: 'kv' }, 'الجدران', el('b', {}, s.walls), 'الغرف المغلقة', el('b', {}, s.rooms), 'المساحة الصافية', el('b', {}, num(s.area, 1) + ' م²'), 'أبعاد البناء', el('b', {}, s.walls ? `${num(b.x1 - b.x0, 2)} × ${num(b.y1 - b.y0, 2)} م` : '—'))));
+    box.append(el('div', { class: 'sec' }, el('h4', {}, 'ملخص الدور'), el('div', { class: 'kv' }, 'الجدران', el('b', {}, s.walls), 'الغرف المغلقة', el('b', {}, s.rooms), 'المساحة الصافية', el('b', {}, num(s.area, 1) + ' م²'), 'أبعاد المبنى (عرض × عمق، بين محاور الجدران)', el('b', { dir: 'ltr' }, s.walls ? axisDims() : '—'))));
     const plot = doc.plot?.polygon, pb = plot ? { w: Math.max(...plot.map(p => p.x)) - Math.min(...plot.map(p => p.x)), l: Math.max(...plot.map(p => p.y)) - Math.min(...plot.map(p => p.y)) } : { w: 20, l: 25 };
     let pw = pb.w, pl = pb.l;
     box.append(el('div', { class: 'sec' }, el('h4', {}, 'الأرض والاتجاه'),
@@ -237,7 +250,7 @@ function renderProps() {
   } else if (collection === 'labels') {
     const room = [...(editor.lv?.rooms || [])].find(r => r.label?.id === it.id);
     sec.append(el('h4', {}, 'غرفة'), field('الاسم', 'text', it.name, v => upd(it.id, { name: v || roomTypeName(it.type) }, 'اسم الغرفة')), field('النوع', 'select', it.type, v => upd(it.id, { type: v, ...(it.name === roomTypeName(it.type) ? { name: roomTypeName(v) } : {}) }, 'نوع الغرفة'), { options: Object.entries(ROOM_TYPES).map(([k, v]) => [k, v.ar]) }));
-    if (room) sec.append(el('div', { class: 'kv' }, 'المساحة الصافية', el('b', {}, num(room.area, 2) + ' م²'), 'الأبعاد', el('b', {}, `${num(room.rect.w, 2)} × ${num(room.rect.l, 2)} م`), 'المحيط', el('b', {}, num(room.perimeter, 2) + ' م')));
+    if (room) sec.append(el('div', { class: 'kv' }, 'المساحة الصافية', el('b', {}, num(room.area, 2) + ' م²'), 'الأبعاد (أفقي × رأسي)', el('b', { dir: 'ltr' }, spanText(room)), 'المحيط', el('b', {}, num(room.perimeter, 2) + ' م')));
     else sec.append(el('p', { class: 'muted' }, 'هذا الاسم خارج أي غرفة مغلقة — حرّكه إلى داخل غرفة.'));
     sec.append(el('div', { class: 'acts' }, el('button', { class: 'danger', onclick: () => editor.deleteSelection() }, 'حذف الاسم')));
   } else if (collection === 'columns') {
@@ -256,11 +269,16 @@ function renderRooms() {
   if (!rooms.length) { box.append(el('p', { class: 'muted' }, 'لا توجد غرف مغلقة بعد. ارسم جدرانًا تُغلق على نفسها فتظهر الغرفة وتُحسب مساحتها تلقائيًا.')); return; }
   for (const r of rooms) {
     const t = ROOM_TYPES[r.type] || ROOM_TYPES.other;
-    box.append(el('div', { class: 'room' + (r.unlabelled ? ' warn' : ''), onclick: () => { if (r.label) editor.select([r.label.id]); focusPoint(r.centroid); }, ondblclick: () => roomDialog(null, r) }, el('i', { class: 'sw', style: `background:${r.unlabelled ? '#ddd' : t.color}` }), el('b', {}, r.name), el('small', {}, num(r.area, 2) + ' م²'), r.unlabelled ? el('small', {}, 'بلا اسم') : null));
+    // (ملاحظات المعاينة 2026-10-31) زر «تعديل» بلمسة واحدة (النقرة المزدوجة لا تعمل بثبات على iPad)
+    box.append(el('div', { class: 'room' + (r.unlabelled ? ' warn' : ''), onclick: () => { if (r.label) editor.select([r.label.id]); focusPoint(r.centroid); }, ondblclick: () => roomDialog(null, r) }, el('i', { class: 'sw', style: `background:${r.unlabelled ? '#ddd' : t.color}` }), el('b', {}, r.name), el('small', {}, num(r.area, 2) + ' م²'), r.unlabelled ? el('small', {}, 'بلا اسم') : null,
+      el('button', { class: 'edit', type: 'button', 'data-edit-room': r.id, title: 'تعديل اسم الغرفة ونوعها', 'aria-label': 'تعديل ' + r.name, onclick: e => { e.stopPropagation(); roomDialog(r.label || null, r); } }, 'تعديل')));
   }
   const total = rooms.reduce((s, r) => s + r.area, 0);
   box.append(el('div', { class: 'kv', style: 'margin-top:10px' }, 'إجمالي المساحة الصافية', el('b', {}, num(total, 2) + ' م²')), el('p', { class: 'muted' }, 'المساحات صافية داخل الجدران، وتتحدث فورًا عند تعديل أي جدار.'));
 }
+// (ملاحظات المعاينة 2026-10-31) نفس مقاييس صفحة التصميم: أبعاد المبنى بين محاور جدران الدور (لا صندوق الرسم كله)، وأبعاد الغرفة أفقي × رأسي
+function axisDims() { const W = editor.doc.walls.filter(w => w.level === editor.levelId), xs = W.flatMap(w => [w.a.x, w.b.x]), ys = W.flatMap(w => [w.a.y, w.b.y]); return xs.length ? `${num(Math.max(...xs) - Math.min(...xs), 2)} × ${num(Math.max(...ys) - Math.min(...ys), 2)} م` : '—'; }
+function spanText(room) { const sp = roomSpan(room); return sp ? `${num(sp.x, 2)} × ${num(sp.y, 2)} م` : `${num(room.rect.l, 2)} × ${num(room.rect.w, 2)} م`; }
 function focusPoint(p) { editor.view.cx = p.x; editor.view.cy = p.y; editor.markDirty(); }
 
 // ------------------------------------------------------------------------------------------------ tabs
@@ -470,8 +488,16 @@ async function importLegacy(raw) {
 }
 const saveJson = () => download((editor.doc.title || 'mizan').replace(/[\\/:*?"<>|]/g, '_') + '.mizan.json', new Blob([serialize(editor.doc)], { type: 'application/json' }));
 $('btnSave').addEventListener('click', () => { saveJson(); toast('حُفظ الملف على جهازك'); });
-$('btnExport').addEventListener('click', e => { e.stopPropagation(); $('exportMenu').hidden = !$('exportMenu').hidden; });
-document.addEventListener('click', () => { $('exportMenu').hidden = true; });
+// (ملاحظات المعاينة 2026-10-31) القائمة بموضع ثابت محسوب من الزر ومقيّدة بنافذة العرض: كانت inset-inline-start:0 في RTL تمدّها يسارًا خارج الشاشة
+function openExportMenu(open) {
+  const m = $('exportMenu'), b = $('btnExport'); m.hidden = !open; b.setAttribute('aria-expanded', String(open)); if (!open) return;
+  m.style.left = '0px'; m.style.top = '0px'; m.style.width = ''; m.style.maxHeight = '';
+  const r = b.getBoundingClientRect(), mw = Math.max(m.scrollWidth, 220), mh = m.scrollHeight, p = placeMenu(r, { w: mw, h: mh }, document.documentElement.clientWidth, innerHeight);
+  Object.assign(m.style, { left: p.left + 'px', top: p.top + 'px', width: p.width + 'px', maxHeight: p.maxHeight + 'px' });
+}
+$('btnExport').addEventListener('click', e => { e.stopPropagation(); openExportMenu($('exportMenu').hidden); });
+document.addEventListener('click', () => openExportMenu(false));
+addEventListener('resize', () => { if (!$('exportMenu').hidden) openExportMenu(true); });
 $('exportMenu').addEventListener('click', async e => {
   const kind = e.target.dataset.export; if (!kind) return;
   if (kind === 'json') saveJson();

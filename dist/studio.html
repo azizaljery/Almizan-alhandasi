@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="./studio-brand.css">
 </head>
 <body>
-<div class="app" id="app" data-view="split">
+<div class="app" id="app" data-view="split" data-mode="simple">
   <header class="top">
     <a class="brand mz-logo" href="./" title="العودة إلى الصفحة الرئيسية"><img src="./assets/mizan-logo.svg" alt="" width="30" height="30"><span><b>مرسم الميزان</b><small>AL MIZAN STUDIO</small></span></a>
     <input class="title" id="docTitle" maxlength="80" aria-label="اسم المشروع" value="مشروع جديد">
@@ -26,13 +26,13 @@
     </div>
     <div class="grow"></div>
     <div class="group">
-      <button class="btn" id="btnNew">جديد</button>
-      <button class="btn" id="btnExample">مثال جاهز</button>
-      <button class="btn" id="btnOpen" title="فتح ملف مشروع من المرسم، أو مخططًا مولّدًا من النظام القديم (ملف المشروع .json)">فتح</button>
+      <button class="btn" id="btnNew" data-adv title="مشروع جديد فارغ (المشروع الحالي يُحفظ نسخة احتياطية)">جديد</button>
+      <button class="btn" id="btnExample" data-adv title="افتح مخططًا مثالًا لتجربة الأدوات">مثال جاهز</button>
+      <button class="btn" id="btnOpen" data-adv title="فتح ملف مشروع من المرسم، أو مخططًا مولّدًا من النظام القديم (ملف المشروع .json)">فتح</button>
       <button class="btn primary" id="btnSave">حفظ</button>
       <button class="btn primary" id="btnFinal" title="اعتمد التصميم وانتقل إلى العرض ثلاثي الأبعاد ثم المخرجات">اعتمد ← العرض ثلاثي الأبعاد</button>
-      <div class="menu"><button class="btn" id="btnExport" aria-haspopup="true">تصدير ▾</button>
-        <div class="menu-list" id="exportMenu" hidden>
+      <div class="menu"><button class="btn" id="btnExport" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenu" title="تنزيل المخطط صورةً أو ملف CAD أو ملف المشروع">تصدير ▾</button>
+        <div class="menu-list" id="exportMenu" role="menu" hidden>
           <button data-export="png">صورة المخطط (PNG)</button><button data-export="png3d">صورة المجسم (PNG)</button><button data-export="dxf">ملف CAD (DXF)</button><button data-export="bundle">استوديو التصدير (حزمة)</button><button data-export="json">ملف المشروع (JSON)</button>
         </div></div>
       <input type="file" id="fileInput" accept=".json,application/json" hidden>
@@ -40,21 +40,23 @@
   </header>
 
   <aside class="rail" id="rail" aria-label="أدوات الرسم">
-    <button data-tool="select" class="on" title="تحديد وتحريك (V)"><svg viewBox="0 0 24 24"><path d="m5 3 14 8-6 2-2 6z"/></svg><span>تحديد</span></button>
-    <button data-tool="pan" title="تحريك الشاشة (H) — أو اسحب بالزر الأوسط"><svg viewBox="0 0 24 24"><path d="M8 12V6a1.5 1.5 0 0 1 3 0v5m0-6.5a1.5 1.5 0 0 1 3 0V11m0-4.5a1.5 1.5 0 0 1 3 0V14c0 4-2 7-6 7-3 0-4-1.5-6-4l-2-3a1.6 1.6 0 0 1 2.5-2L8 14"/></svg><span>تحريك</span></button>
+    <button data-tool="select" class="on" title="تحديد: المس عنصرًا لتعديله أو اسحبه لنقله (V)" aria-label="تحديد"><svg viewBox="0 0 24 24"><path d="m5 3 14 8-6 2-2 6z"/></svg><span>تحديد</span></button>
+    <button data-tool="pan" title="تحريك اللوحة: اسحب بإصبع لتحريك المخطط، وبإصبعين للتكبير (H)" aria-label="تحريك اللوحة"><svg viewBox="0 0 24 24"><path d="M8 12V6a1.5 1.5 0 0 1 3 0v5m0-6.5a1.5 1.5 0 0 1 3 0V11m0-4.5a1.5 1.5 0 0 1 3 0V14c0 4-2 7-6 7-3 0-4-1.5-6-4l-2-3a1.6 1.6 0 0 1 2.5-2L8 14"/></svg><span>تحريك</span></button>
     <i></i>
-    <button data-tool="wall" title="جدار (W) — اكتب الطول بالأرقام ثم Enter"><svg viewBox="0 0 24 24"><path d="M3 20 21 4M3 20l3-1M21 4l-1 3"/><rect x="3" y="17" width="4" height="4"/></svg><span>جدار</span></button>
-    <button data-tool="rect" title="غرفة مستطيلة"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12"/><path d="M4 12h6M14 12h6" stroke-dasharray="1 2"/></svg><span>غرفة</span></button>
-    <button data-tool="opening" title="باب / نافذة (D)"><svg viewBox="0 0 24 24"><path d="M3 18h6M15 18h6M9 18V6a9 9 0 0 1 6 12"/></svg><span>فتحة</span></button>
-    <button data-tool="room" title="تسمية الغرفة ونوعها"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 10h8M8 14h5"/></svg><span>تسمية</span></button>
-    <button data-tool="fixture" title="أثاث وتجهيزات"><svg viewBox="0 0 24 24"><path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M3 12h18v5H3zM6 17v2M18 17v2"/></svg><span>أثاث</span></button>
-    <button data-tool="stair" title="سلم"><svg viewBox="0 0 24 24"><path d="M3 20h5v-4h5v-4h5V8h3"/></svg><span>سلم</span></button>
-    <button data-tool="column" title="عمود"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" fill="currentColor"/></svg><span>عمود</span></button>
+    <button data-tool="wall" title="جدار: المس نقطة البداية ثم كل ركن (W)" aria-label="جدار"><svg viewBox="0 0 24 24"><path d="M3 20 21 4M3 20l3-1M21 4l-1 3"/><rect x="3" y="17" width="4" height="4"/></svg><span>جدار</span></button>
+    <button data-tool="rect" title="غرفة: المس ركنًا ثم الركن المقابل فتُرسم أربعة جدران" aria-label="غرفة مستطيلة"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12"/><path d="M4 12h6M14 12h6" stroke-dasharray="1 2"/></svg><span>غرفة</span></button>
+    <button data-tool="opening" title="فتحة: باب أو نافذة — المس الجدار في موضعها (D)" aria-label="باب أو نافذة"><svg viewBox="0 0 24 24"><path d="M3 18h6M15 18h6M9 18V6a9 9 0 0 1 6 12"/></svg><span>فتحة</span></button>
+    <button data-tool="room" data-adv title="تسمية الغرفة ونوعها"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 10h8M8 14h5"/></svg><span>تسمية</span></button>
+    <button data-tool="fixture" data-adv title="أثاث وتجهيزات"><svg viewBox="0 0 24 24"><path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M3 12h18v5H3zM6 17v2M18 17v2"/></svg><span>أثاث</span></button>
+    <button data-tool="stair" data-adv title="سلم"><svg viewBox="0 0 24 24"><path d="M3 20h5v-4h5v-4h5V8h3"/></svg><span>سلم</span></button>
+    <button data-tool="column" data-adv title="عمود"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" fill="currentColor"/></svg><span>عمود</span></button>
     <i></i>
-    <button data-tool="dimension" title="قياس يبقى على المخطط"><svg viewBox="0 0 24 24"><path d="M3 8v8M21 8v8M3 12h18M6 10l-3 2 3 2M18 10l3 2-3 2"/></svg><span>قياس</span></button>
-    <button data-tool="measure" title="مسطرة (M) — لا تُحفظ"><svg viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20zM8 12l2 2M11 9l1.5 1.5M14 6l2 2"/></svg><span>مسطرة</span></button>
-    <button data-tool="text" title="نص (T)"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg><span>نص</span></button>
-    <button data-tool="erase" title="ممحاة (E)"><svg viewBox="0 0 24 24"><path d="m7 21-4-4a2 2 0 0 1 0-3L14 3a2 2 0 0 1 3 0l4 4a2 2 0 0 1 0 3L11 21zM9 9l7 7"/></svg><span>ممحاة</span></button>
+    <button data-tool="dimension" title="قياس: المس نقطتين فيبقى خط القياس على المخطط" aria-label="قياس"><svg viewBox="0 0 24 24"><path d="M3 8v8M21 8v8M3 12h18M6 10l-3 2 3 2M18 10l3 2-3 2"/></svg><span>قياس</span></button>
+    <button data-tool="measure" data-adv title="مسطرة (M) — لا تُحفظ"><svg viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20zM8 12l2 2M11 9l1.5 1.5M14 6l2 2"/></svg><span>مسطرة</span></button>
+    <button data-tool="text" data-adv title="نص (T)"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg><span>نص</span></button>
+    <button data-tool="erase" data-adv title="ممحاة (E)"><svg viewBox="0 0 24 24"><path d="m7 21-4-4a2 2 0 0 1 0-3L14 3a2 2 0 0 1 3 0l4 4a2 2 0 0 1 0 3L11 21zM9 9l7 7"/></svg><span>ممحاة</span></button>
+    <i></i>
+    <button id="modeToggle" class="mode-toggle" type="button" aria-pressed="false" title="أظهر بقية الأدوات والتبويبات (التسمية، الأثاث، السلم، العمود، المسطرة، النص، الممحاة، الواجهات، الكميات، الإنشاء، البصمة)"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>أدوات متقدمة</span></button>
   </aside>
 
   <section class="stage">
@@ -96,7 +98,7 @@
   </section>
 
   <aside class="side" id="side">
-    <nav class="tabs" role="tablist"><button data-tab="props" class="on">الخصائص</button><button data-tab="rooms">الغرف</button><button data-tab="finish">الواجهات والمواد</button><button data-tab="review">المراجعة <em id="reviewCount" hidden>0</em></button><button data-tab="qty">الكميات</button><button data-tab="str">الإنشاء <em id="strCount" hidden>0</em></button><button data-tab="dna">البصمة</button><button data-tab="ai">المساعد</button></nav>
+    <nav class="tabs" role="tablist"><button data-tab="props" class="on">الخصائص</button><button data-tab="rooms">الغرف</button><button data-adv data-tab="finish">الواجهات والمواد</button><button data-tab="review">المراجعة <em id="reviewCount" hidden>0</em></button><button data-adv data-tab="qty">الكميات</button><button data-adv data-tab="str">الإنشاء <em id="strCount" hidden>0</em></button><button data-adv data-tab="dna">البصمة</button><button data-tab="ai">المساعد</button></nav>
     <div class="tabpane on" id="tab-props"></div>
     <div class="tabpane" id="tab-rooms"></div>
     <div class="tabpane" id="tab-finish"></div>

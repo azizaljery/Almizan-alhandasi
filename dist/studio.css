@@ -80,3 +80,17 @@ dialog{border:0;border-radius:14px;padding:20px;box-shadow:0 20px 70px #0006;fon
 .three.touring .three-bar>*:not(.tour){pointer-events:none;opacity:.45}
 dialog .pick{display:flex;flex-direction:column;gap:7px;margin:12px 0}dialog .pick .btn,dialog .row .btn{background:#fff;border:1px solid var(--line);color:var(--ink);text-align:start}dialog .pick .btn:hover,dialog .row .btn:hover{background:#f7f3ea}
 dialog .pick small{display:block;color:var(--soft);margin-top:2px}dialog h3{margin:0 0 6px}dialog .row{display:flex;justify-content:flex-end;gap:8px}
+/* (ملاحظات المعاينة 2026-10-31) الوضع البسيط افتراضيًا، ولمس ≥ 44 بكسل، ولا فيض أفقي، وقائمة تصدير داخل النافذة — الإخفاء بالأنماط فقط */
+.app[data-mode="simple"] [data-adv]{display:none!important}
+.mode-toggle{margin-top:auto}
+.app:not([data-mode="simple"]) .mode-toggle{background:#f4efe3}
+.rail button{min-height:48px}
+.top .btn,.top .ib{min-height:44px;min-width:44px}
+.tabs{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;flex:none}.tabs button{flex:1 0 auto;min-height:44px;white-space:nowrap}
+.side,.stage{min-width:0}
+.floaters .fl{min-width:44px;min-height:44px}
+.room{min-height:44px;align-items:center}.room .edit{margin-inline-start:auto;min-height:36px;min-width:44px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:12.5px}
+.menu-list{position:fixed;inset:auto;max-width:calc(100vw - 16px);max-height:calc(100dvh - 80px);overflow:auto}
+.menu-list button{min-height:44px}
+@media (max-width:980px){.app{grid-template-rows:auto 64px minmax(0,1fr) minmax(0,36dvh)}.top{flex-wrap:wrap;row-gap:6px;padding:6px 10px}.rail{min-height:64px}.mode-toggle{margin-top:0;margin-inline-start:auto}}
+@media (max-width:600px){.top .grow{display:none}.top .title{flex:1 1 120px;width:auto;min-width:0}.top .seg button{padding-inline:8px}}

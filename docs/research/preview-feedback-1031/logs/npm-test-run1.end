@@ -1,0 +1,1 @@
+KILLED at background limit (2h) 2026-11-01T02:25:43+03:00; concurrent npm test runs from two other worktrees caused OOM kills
