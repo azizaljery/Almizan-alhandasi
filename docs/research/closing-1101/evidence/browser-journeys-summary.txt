@@ -1,0 +1,7 @@
+journey 390x844: pass=9 FAILS 0 exit=0
+journey 1024x1366: pass=9 FAILS 0 exit=0
+journey 1366x900: pass=9 FAILS 0 exit=0
+facade: ERRORS 0  OK 6  exit=0
+mep-guided: PASS لا تمرير أفقي للصفحة (desktop/coordination) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+mep-persist: 
+ALLDONE

@@ -1,0 +1,8 @@
+{"id":"C1","style":"classic","ms":75,"svgStyle":"classic","side":"s","seed":"236469843","openingsDrawn":8,"pressed":["classic"],"stored":{"style":"classic","source":"client_confirmed"},"planSame":true,"handed":{"style":"classic","seed":236469843,"source":"client_confirmed"}}
+{"id":"C1","style":"neoclassic","ms":60,"svgStyle":"neoclassic","side":"s","seed":"236469843","openingsDrawn":8,"pressed":["neoclassic"],"stored":{"style":"neoclassic","source":"client_confirmed"},"planSame":true,"handed":{"style":"neoclassic","seed":236469843,"source":"client_confirmed"}}
+{"id":"C1","style":"modern","ms":53,"svgStyle":"modern","side":"s","seed":"236469843","openingsDrawn":8,"pressed":["modern"],"stored":{"style":"modern","source":"client_confirmed"},"planSame":true,"handed":{"style":"modern","seed":236469843,"source":"client_confirmed"}}
+{"id":"C7","style":"classic","ms":60,"svgStyle":"classic","side":"s","seed":"536918289","openingsDrawn":7,"pressed":["classic"],"stored":{"style":"classic","source":"client_confirmed"},"planSame":true,"handed":{"style":"classic","seed":536918289,"source":"client_confirmed"}}
+{"id":"C7","style":"neoclassic","ms":69,"svgStyle":"neoclassic","side":"s","seed":"536918289","openingsDrawn":7,"pressed":["neoclassic"],"stored":{"style":"neoclassic","source":"client_confirmed"},"planSame":true,"handed":{"style":"neoclassic","seed":536918289,"source":"client_confirmed"}}
+{"id":"C7","style":"modern","ms":56,"svgStyle":"modern","side":"s","seed":"536918289","openingsDrawn":7,"pressed":["modern"],"stored":{"style":"modern","source":"client_confirmed"},"planSame":true,"handed":{"style":"modern","seed":536918289,"source":"client_confirmed"}}
+ERRORS 0 
+OK 6
