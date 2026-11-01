@@ -9,6 +9,7 @@ const p = await ctx.newPage(); await p.route(/workers\.dev|googleapis|gstatic/, 
 let fails = 0; const out = {}; const check = (ok, m) => { if (!ok) fails++; console.log(ok ? 'PASS' : 'FAIL', m); };
 await p.goto(S.ORIGIN + '/studio.html'); await p.waitForTimeout(1500);
 async function hitAll(label) {
+  await p.evaluate(() => window.scrollTo(0, 0)); // الفحص عند أول الصفحة (على الجوال تتمرر الصفحة في «مقسوم»)
   const r = await p.evaluate(() => {
     const sels = ['#rail button', '#zoomIn', '#zoomOut', '#zoomFit', '#tgSnap', '#tgGrid', '#tgDims', '#modeToggle', '#btnExport', '#btnSave', '#undo', '#redo'];
     const res = []; for (const s of sels) for (const e of document.querySelectorAll(s)) {
@@ -34,6 +35,17 @@ async function hitAll(label) {
 await p.screenshot({ path: shots + '/01-initial.png' });
 const wel = await p.evaluate(() => { const e = document.getElementById('welcome'); return e && !e.hidden ? Object.assign({}, e.getBoundingClientRect().toJSON()) : null; }); out.welcome = wel; console.log('welcome', JSON.stringify(wel));
 await hitAll('simple');
+// (1101) عرض «مقسوم» على الجوال: لوحة الرسم بحجم عملي، وشريط المجسّم لا يتراكب ولا يُغطّى، وكل أزراره تُنقر
+if (w < 700) {
+  const sp = await p.evaluate(() => { const bars = [...document.querySelectorAll('#threeBar > *')].filter(e => e.offsetParent).map(e => { e.scrollIntoView({ block: 'nearest' }); const q = e.getBoundingClientRect(); const t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return { id: e.id || e.className, ok: t === e || e.contains(t) }; }); return { bars: bars.map(x => x.id + ':' + x.ok).join(','), badHit: bars.filter(x => !x.ok).length, nb: bars.length }; });
+  const doc = await p.evaluate(() => { window.scrollTo(0, 0); const A = e => { const q = e.getBoundingClientRect(); return { l: q.left, r: q.right, t: q.top + scrollY, b: q.bottom + scrollY }; }; const X = (a, b) => a.l < b.r - .5 && a.r > b.l + .5 && a.t < b.b - .5 && a.b > b.t + .5;
+    const P = A(document.getElementById('planCanvas')), H = A(document.getElementById('threeHost')); const bars = [...document.querySelectorAll('#threeBar > *')].filter(e => e.offsetParent).map(A); return { planH: P.b - P.t, ovHost: bars.filter(q => X(q, H)).length, ovPlan: bars.filter(q => X(q, P)).length, n: bars.length }; });
+  console.log('SPLIT', JSON.stringify(sp), JSON.stringify(doc)); out.split = { sp, doc };
+  check(doc.planH >= 320, 'عرض «مقسوم»: لوحة الرسم بحجم عملي (' + Math.round(doc.planH) + ' ≥ 320)');
+  check(doc.n >= 4 && doc.ovHost === 0 && doc.ovPlan === 0, 'شريط المجسّم لا يتقاطع مع لوحة المجسّم ولا الرسم (' + doc.n + ' عناصر، تقاطع ' + doc.ovHost + '/' + doc.ovPlan + ')');
+  check(sp.badHit === 0 && sp.nb >= 4, 'elementFromPoint لكل أزرار شريط المجسّم يرجع الزر نفسه (' + sp.bars + ')');
+  await p.evaluate(() => window.scrollTo(0, 0));
+}
 // رسم غرفة بالمس/الفأرة
 const tap = async (x, y) => { if (w < 700) await p.touchscreen.tap(x, y); else await p.mouse.click(x, y); };
 const wb = await p.$('#welcome:not([hidden]) [data-start=rect], #welcome:not([hidden]) [data-start=wall]'); if (wb) { const bx = await wb.boundingBox(); await tap(bx.x + bx.width / 2, bx.y + bx.height / 2); await p.waitForTimeout(300); }
@@ -60,5 +72,10 @@ await p.screenshot({ path: shots + '/04-advanced.png' }); await hitAll('advanced
 const mtc2 = await p.evaluate(() => { document.getElementById('modeToggle').scrollIntoView({ inline: 'nearest' }); const r = document.getElementById('modeToggle').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
 await tap(mtc2[0], mtc2[1]); await p.waitForTimeout(400); const mode2 = await p.evaluate(() => document.getElementById('app').dataset.mode); check(mode2 === 'simple', 'العودة إلى البسيط (' + mode2 + ')');
 await p.screenshot({ path: shots + '/05-back-simple.png' }); await hitAll('simple-again');
+// (1101) صفحة المخرجات بلا فيض أفقي (كان 431 بدل 390): نفس المستند المرسوم في التخزين
+await p.goto(S.ORIGIN + '/final.html'); await p.waitForTimeout(2000);
+const fin = await p.evaluate(() => ({ sw: document.documentElement.scrollWidth, secs: document.querySelectorAll('.sec').length })); console.log('FINAL', JSON.stringify(fin));
+check(fin.secs >= 3 && fin.sw <= w, 'final.html: scrollWidth ' + fin.sw + ' ≤ ' + w + ' (' + fin.secs + ' أقسام)');
+await p.screenshot({ path: shots + '/06-final.png', fullPage: true });
 require('node:fs').writeFileSync(shots + '/measure.json', JSON.stringify(out, null, 1));
 await b.close(); S.close(); console.log('FAILS', fails); process.exit(fails ? 1 : 0);

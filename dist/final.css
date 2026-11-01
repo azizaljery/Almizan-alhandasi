@@ -19,3 +19,10 @@ input.rate,input.pct{width:110px;padding:4px 8px;border:1px solid var(--line);bo
 ul{margin:4px 0;padding-inline-start:22px}.empty{text-align:center;padding:60px 10px}.empty .btn{display:inline-block;margin-top:10px}
 @media print{.fh,.fact{display:none}.sec{break-inside:avoid;border:0}body{background:#fff}}
 @media(max-width:640px){.fh{padding:8px 12px}.sec{padding:14px}}
+/* (إصلاح الجوال 2026-11-01) الجداول العريضة تتمرر داخل حاويتها بدل أن توسّع الصفحة (431 بدل 390). الجوال فقط؛ سطح المكتب لا يتأثر. */
+@media(max-width:640px){
+  .fmain,.sec{min-width:0;max-width:100%}
+  .sec table,.fmain table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .sec pre,.sec code{max-width:100%;overflow-x:auto;overflow-wrap:anywhere}
+  .fh{max-width:100vw}
+}

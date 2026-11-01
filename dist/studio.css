@@ -115,3 +115,24 @@ dialog .pick small{display:block;color:var(--soft);margin-top:2px}dialog h3{marg
   .welcome .row{gap:6px}.welcome .row .btn{padding:4px 10px;font-size:12px;min-height:36px}
 }
 .mep-sec table{width:100%;border-collapse:collapse;font-size:12px}.mep-sec th,.mep-sec td{border-bottom:1px solid #0002;padding:3px 5px;text-align:start;vertical-align:top}.mep-sec h3{font-size:13px;margin:8px 0 4px}.mep-sec code{font-size:11px}
+
+/* (إصلاح الجوال 2026-11-01 — ب) سطح المكتب الضيّق (≥981): زر الوضع المتقدم لاصق أسفل الشريط فيبقى مرئيًا دون تمرير الشريط. لا أثر حين يتسع الشريط للمحتوى. */
+@media (min-width:981px){
+  .rail{scroll-padding-block-end:60px}
+  .mode-toggle{position:sticky;bottom:0;z-index:2;background:#fff;box-shadow:0 -6px 8px -4px #0002}
+  .app:not([data-mode="simple"]) .mode-toggle{background:#f4efe3}
+}
+/* (إصلاح الجوال 2026-11-01 — أ) 390×844 عرض «مقسوم»: تمرير الصفحة بدل ضغط اللوحتين؛ لوحة الرسم ≥ 340px، وشريط المجسّم في تدفق الصفحة فوق المجسّم (لا تراكب). */
+@media (max-width:600px){
+  .app[data-view="split"]{height:auto;min-height:100dvh;grid-template-rows:auto 60px auto auto}
+  .app[data-view="split"] .stage{min-height:0}
+  .app[data-view="split"] .panes{flex:none}
+  .app[data-view="split"] .plan{flex:none;height:max(340px,46dvh)}
+  .app[data-view="split"] .three{flex:none;display:flex;flex-direction:column}
+  .app[data-view="split"] .three-bar{order:-1;position:static;inset:auto;padding:6px 8px;flex:none;background:#e9edf0}
+  .app[data-view="split"] .three-host{position:relative;inset:auto;flex:none;height:260px}
+  .app[data-view="split"] .side{min-height:320px}
+}
+/* رسالة «WebGL غير متاح» نص فقط: لا تلتقط النقر ولا تغطي شريط المجسّم (أبقى الأزرار قابلة للنقر) */
+.three-msg{pointer-events:none}.three-bar{z-index:3}
+@media (max-width:600px){.app[data-view="split"] .three-msg{inset:auto 0 0 0;height:260px}}
