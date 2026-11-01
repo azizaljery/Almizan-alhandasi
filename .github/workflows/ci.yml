@@ -44,7 +44,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Chromium for browser tests
-        run: npx --yes playwright@1 install --with-deps chromium || true
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.0
+          npx playwright install --with-deps chromium
       - name: Full test suite (npm test)
         run: |
           set -o pipefail
