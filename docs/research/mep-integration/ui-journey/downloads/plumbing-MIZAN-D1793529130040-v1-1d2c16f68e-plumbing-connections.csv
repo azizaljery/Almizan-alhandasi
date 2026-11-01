@@ -1,0 +1,2 @@
+﻿"id","system","fromId","toId","flowM3S","equivalentDiameterM","selectedDiameterMm","lengthM","horizontalLengthM","slope","fallM","endInvertM","routeStatus"
+"PC1","sanitary","WC1","MH1","0.001","0.03989422804014327",,"9.462892010817832","9.460999999999999","0.02","0.18921999999999997","-0.48922","BLOCKED"

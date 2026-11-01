@@ -1,0 +1,1791 @@
+{
+  "architecture": {
+    "levels": [
+      {
+        "elevationM": 0,
+        "heightM": 3.2,
+        "id": "L1"
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "STR-L1-P1",
+        "kind": "column-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 21.995,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 21.745,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P2",
+        "kind": "column-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 2.545,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 2.295,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P3",
+        "kind": "column-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 21.995,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 21.745,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P4",
+        "kind": "column-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 2.545,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 2.295,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P5",
+        "kind": "column-precheck",
+        "max": {
+          "x": 6.895,
+          "y": 11.745,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.645,
+          "y": 11.495,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P6",
+        "kind": "column-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 16.795,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 16.545,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P7",
+        "kind": "column-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 6.295,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 6.045,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P8",
+        "kind": "column-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 16.795,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 16.545,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P9",
+        "kind": "column-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 7.995,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 7.745,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P10",
+        "kind": "column-precheck",
+        "max": {
+          "x": 5.895,
+          "y": 18.695,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.645,
+          "y": 18.445,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P11",
+        "kind": "column-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 11.745,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 11.495,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P12",
+        "kind": "column-precheck",
+        "max": {
+          "x": 6.895,
+          "y": 6.295,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.645,
+          "y": 6.045,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P13",
+        "kind": "column-precheck",
+        "max": {
+          "x": 5.895,
+          "y": 21.995,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.645,
+          "y": 21.745,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P14",
+        "kind": "column-precheck",
+        "max": {
+          "x": 5.895,
+          "y": 16.795,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.645,
+          "y": 16.545,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P15",
+        "kind": "column-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 11.745,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 11.495,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P16",
+        "kind": "column-precheck",
+        "max": {
+          "x": 6.37,
+          "y": 2.545,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.12,
+          "y": 2.295,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-B1",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 21.87,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 16.67,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B2",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 5.77,
+          "y": 21.995,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.77,
+          "y": 21.745,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B3",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 6.17,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 2.42,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B4",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.245,
+          "y": 2.545,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.77,
+          "y": 2.295,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B5",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.72,
+          "y": 2.545,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.245,
+          "y": 2.295,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B6",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 21.87,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 16.67,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B7",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.72,
+          "y": 21.995,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.77,
+          "y": 21.745,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B8",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 7.87,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 2.42,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B9",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.87,
+          "y": 11.62,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.67,
+          "y": 6.17,
+          "z": 2.85
+        }
+      },
+      {
+        "id": "STR-L1-B10",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.72,
+          "y": 11.72,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.77,
+          "y": 11.52,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B11",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.77,
+          "y": 11.72,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.77,
+          "y": 11.52,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B12",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 16.67,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 11.62,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B13",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 5.77,
+          "y": 16.77,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.77,
+          "y": 16.57,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B14",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 1.895,
+          "y": 11.62,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.645,
+          "y": 6.17,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B15",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.77,
+          "y": 6.27,
+          "z": 3.2
+        },
+        "min": {
+          "x": 1.77,
+          "y": 6.07,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B16",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 16.67,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 11.62,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B17",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.72,
+          "y": 16.77,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.77,
+          "y": 16.57,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B18",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.845,
+          "y": 11.62,
+          "z": 3.2
+        },
+        "min": {
+          "x": 10.595,
+          "y": 7.87,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B19",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.72,
+          "y": 7.97,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.77,
+          "y": 7.77,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B20",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 5.87,
+          "y": 21.87,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.67,
+          "y": 18.57,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B21",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 5.87,
+          "y": 18.57,
+          "z": 3.2
+        },
+        "min": {
+          "x": 5.67,
+          "y": 16.67,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B22",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 5.77,
+          "y": 18.67,
+          "z": 3.2
+        },
+        "min": {
+          "x": 4.17,
+          "y": 18.47,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B23",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 10.72,
+          "y": 6.27,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.77,
+          "y": 6.07,
+          "z": 2.9
+        }
+      }
+    ],
+    "openings": [
+      {
+        "atM": 7.46,
+        "heightM": 2.1,
+        "id": "o1",
+        "kind": "door2",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w9",
+        "widthM": 1.4
+      },
+      {
+        "atM": 8.1,
+        "heightM": 2.1,
+        "id": "o2",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w10",
+        "widthM": 1
+      },
+      {
+        "atM": 4.7,
+        "heightM": 2.3,
+        "id": "o3",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w11",
+        "widthM": 1.05
+      },
+      {
+        "atM": 5.75,
+        "heightM": 2.1,
+        "id": "o4",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w9",
+        "widthM": 1.1
+      },
+      {
+        "atM": 1.2,
+        "heightM": 2.3,
+        "id": "o5",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w7",
+        "widthM": 1.4
+      },
+      {
+        "atM": 0.8,
+        "heightM": 2.1,
+        "id": "o6",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w13",
+        "widthM": 0.8
+      },
+      {
+        "atM": 2.525,
+        "heightM": 2.1,
+        "id": "o7",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w3",
+        "widthM": 0.95
+      },
+      {
+        "atM": 9.55,
+        "heightM": 2.1,
+        "id": "o8",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w6",
+        "widthM": 0.9
+      },
+      {
+        "atM": 0.685,
+        "heightM": 2.1,
+        "id": "o9",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w4",
+        "widthM": 0.95
+      },
+      {
+        "atM": 4.6,
+        "heightM": 2.1,
+        "id": "o10",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w4",
+        "widthM": 0.8
+      },
+      {
+        "atM": 2.725,
+        "heightM": 2.1,
+        "id": "o11",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w5",
+        "widthM": 0.95
+      },
+      {
+        "atM": 4.635,
+        "heightM": 2.1,
+        "id": "o12",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w12",
+        "widthM": 0.95
+      },
+      {
+        "atM": 0.61,
+        "heightM": 2.1,
+        "id": "o13",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w8",
+        "widthM": 0.8
+      },
+      {
+        "atM": 2.6,
+        "heightM": 1.2,
+        "id": "o14",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w2",
+        "widthM": 1.2
+      },
+      {
+        "atM": 7.725,
+        "heightM": 1.5,
+        "id": "o15",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w2",
+        "widthM": 2.2
+      },
+      {
+        "atM": 2.6,
+        "heightM": 1.5,
+        "id": "o16",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w6",
+        "widthM": 2.2
+      },
+      {
+        "atM": 2.475,
+        "heightM": 1.5,
+        "id": "o17",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w9",
+        "widthM": 2.2
+      },
+      {
+        "atM": 7.725,
+        "heightM": 1.2,
+        "id": "o18",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w6",
+        "widthM": 1.4
+      },
+      {
+        "atM": 12.125,
+        "heightM": 1.2,
+        "id": "o19",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w6",
+        "widthM": 1.4
+      },
+      {
+        "atM": 14.85,
+        "heightM": 0.6,
+        "id": "o20",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w6",
+        "widthM": 0.6
+      },
+      {
+        "atM": 12.975,
+        "heightM": 1.2,
+        "id": "o21",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w2",
+        "widthM": 1.4
+      },
+      {
+        "atM": 17.575,
+        "heightM": 1.5,
+        "id": "o22",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w2",
+        "widthM": 2.2
+      },
+      {
+        "atM": 3.986,
+        "heightM": 1.5,
+        "id": "o23",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w15",
+        "widthM": 2.2
+      },
+      {
+        "atM": 7.114,
+        "heightM": 1.5,
+        "id": "o24",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w15",
+        "widthM": 2.2
+      },
+      {
+        "atM": 17.575,
+        "heightM": 0.6,
+        "id": "o25",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w6",
+        "widthM": 0.6
+      },
+      {
+        "atM": 1.075,
+        "heightM": 0.6,
+        "id": "o26",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w15",
+        "widthM": 0.6
+      }
+    ],
+    "rooms": [
+      {
+        "areaM2": 4.610200000000002,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r5",
+        "levelId": "L1",
+        "name": "مدخل الرجال",
+        "polygon": [
+          {
+            "x": 4.23,
+            "y": 21.745
+          },
+          {
+            "x": 4.23,
+            "y": 18.63
+          },
+          {
+            "x": 5.71,
+            "y": 18.63
+          },
+          {
+            "x": 5.71,
+            "y": 21.745
+          }
+        ],
+        "type": "corridor"
+      },
+      {
+        "areaM2": 11.108225000000003,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r1",
+        "levelId": "L1",
+        "name": "مدخل العائلة (معدّل)",
+        "polygon": [
+          {
+            "x": 4.11,
+            "y": 18.57
+          },
+          {
+            "x": 4.11,
+            "y": 21.745
+          },
+          {
+            "x": 1.895,
+            "y": 21.745
+          },
+          {
+            "x": 1.895,
+            "y": 16.73
+          },
+          {
+            "x": 4.11,
+            "y": 16.73
+          }
+        ],
+        "type": "entrance"
+      },
+      {
+        "areaM2": 2.6344000000000007,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r6",
+        "levelId": "L1",
+        "name": "دورة مياه الرجال",
+        "polygon": [
+          {
+            "x": 4.23,
+            "y": 18.51
+          },
+          {
+            "x": 4.23,
+            "y": 16.73
+          },
+          {
+            "x": 5.71,
+            "y": 16.73
+          },
+          {
+            "x": 5.71,
+            "y": 18.51
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 25.463449999999995,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r2",
+        "levelId": "L1",
+        "name": "الصالة",
+        "polygon": [
+          {
+            "x": 1.895,
+            "y": 16.61
+          },
+          {
+            "x": 1.895,
+            "y": 11.68
+          },
+          {
+            "x": 5.27,
+            "y": 11.68
+          },
+          {
+            "x": 6.77,
+            "y": 11.68
+          },
+          {
+            "x": 7.06,
+            "y": 11.68
+          },
+          {
+            "x": 7.06,
+            "y": 16.61
+          },
+          {
+            "x": 5.77,
+            "y": 16.61
+          },
+          {
+            "x": 4.17,
+            "y": 16.61
+          }
+        ],
+        "type": "living"
+      },
+      {
+        "areaM2": 17.66895,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r10",
+        "levelId": "L1",
+        "name": "غرفة نوم 3",
+        "polygon": [
+          {
+            "x": 1.895,
+            "y": 11.56
+          },
+          {
+            "x": 1.895,
+            "y": 6.23
+          },
+          {
+            "x": 5.21,
+            "y": 6.23
+          },
+          {
+            "x": 5.21,
+            "y": 11.56
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 23.582475000000002,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r11",
+        "levelId": "L1",
+        "name": "غرفة النوم الرئيسية",
+        "polygon": [
+          {
+            "x": 1.895,
+            "y": 6.11
+          },
+          {
+            "x": 1.895,
+            "y": 2.545
+          },
+          {
+            "x": 8.51,
+            "y": 2.545
+          },
+          {
+            "x": 8.51,
+            "y": 6.11
+          },
+          {
+            "x": 6.77,
+            "y": 6.11
+          },
+          {
+            "x": 5.27,
+            "y": 6.11
+          }
+        ],
+        "type": "master"
+      },
+      {
+        "areaM2": 16.835950000000004,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r7",
+        "levelId": "L1",
+        "name": "المطبخ",
+        "polygon": [
+          {
+            "x": 7.18,
+            "y": 16.61
+          },
+          {
+            "x": 7.18,
+            "y": 11.68
+          },
+          {
+            "x": 10.595,
+            "y": 11.68
+          },
+          {
+            "x": 10.595,
+            "y": 16.61
+          }
+        ],
+        "type": "kitchen"
+      },
+      {
+        "areaM2": 13.666950000000005,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r8",
+        "levelId": "L1",
+        "name": "غرفة نوم 2",
+        "polygon": [
+          {
+            "x": 6.83,
+            "y": 11.56
+          },
+          {
+            "x": 6.83,
+            "y": 7.93
+          },
+          {
+            "x": 10.595,
+            "y": 7.93
+          },
+          {
+            "x": 10.595,
+            "y": 11.56
+          },
+          {
+            "x": 7.12,
+            "y": 11.56
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 7.3553999999999995,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r3",
+        "levelId": "L1",
+        "name": "ممر الغرف",
+        "polygon": [
+          {
+            "x": 6.71,
+            "y": 7.87
+          },
+          {
+            "x": 6.71,
+            "y": 11.56
+          },
+          {
+            "x": 5.33,
+            "y": 11.56
+          },
+          {
+            "x": 5.33,
+            "y": 6.23
+          },
+          {
+            "x": 6.71,
+            "y": 6.23
+          }
+        ],
+        "type": "corridor"
+      },
+      {
+        "areaM2": 5.948699999999998,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r9",
+        "levelId": "L1",
+        "name": "دورة مياه مشتركة",
+        "polygon": [
+          {
+            "x": 6.83,
+            "y": 7.81
+          },
+          {
+            "x": 6.83,
+            "y": 6.23
+          },
+          {
+            "x": 8.57,
+            "y": 6.23
+          },
+          {
+            "x": 10.595,
+            "y": 6.23
+          },
+          {
+            "x": 10.595,
+            "y": 7.81
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 23.896475000000006,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r4",
+        "levelId": "L1",
+        "name": "المجلس",
+        "polygon": [
+          {
+            "x": 10.595,
+            "y": 16.73
+          },
+          {
+            "x": 10.595,
+            "y": 21.745
+          },
+          {
+            "x": 5.83,
+            "y": 21.745
+          },
+          {
+            "x": 5.83,
+            "y": 18.57
+          },
+          {
+            "x": 5.83,
+            "y": 16.73
+          },
+          {
+            "x": 7.12,
+            "y": 16.73
+          }
+        ],
+        "type": "majlis"
+      },
+      {
+        "areaM2": 7.005225,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r12",
+        "levelId": "L1",
+        "name": "حمام الرئيسية",
+        "polygon": [
+          {
+            "x": 10.595,
+            "y": 2.545
+          },
+          {
+            "x": 10.595,
+            "y": 6.11
+          },
+          {
+            "x": 8.63,
+            "y": 6.11
+          },
+          {
+            "x": 8.63,
+            "y": 2.545
+          }
+        ],
+        "type": "bath"
+      }
+    ],
+    "source": {
+      "kind": "mizan-draw/1",
+      "revision": "design-session:v1:villa-v2-partis-17",
+      "sha256": "79ebab302ea16b124362cb7a23f417ad2e9d9d43617fea723c6ad75d038dc34f",
+      "warnings": []
+    },
+    "walls": [
+      {
+        "a": {
+          "x": 4.17,
+          "y": 21.87
+        },
+        "b": {
+          "x": 4.17,
+          "y": 16.67
+        },
+        "heightM": 3.2,
+        "id": "w1",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 1.77,
+          "y": 21.87
+        },
+        "b": {
+          "x": 1.77,
+          "y": 2.42
+        },
+        "heightM": 3.2,
+        "id": "w2",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 7.12,
+          "y": 16.67
+        },
+        "b": {
+          "x": 7.12,
+          "y": 11.62
+        },
+        "heightM": 3.2,
+        "id": "w3",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 6.77,
+          "y": 11.62
+        },
+        "b": {
+          "x": 6.77,
+          "y": 6.17
+        },
+        "heightM": 3.2,
+        "id": "w4",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 5.27,
+          "y": 11.62
+        },
+        "b": {
+          "x": 5.27,
+          "y": 6.17
+        },
+        "heightM": 3.2,
+        "id": "w5",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 21.87
+        },
+        "b": {
+          "x": 10.72,
+          "y": 2.42
+        },
+        "heightM": 3.2,
+        "id": "w6",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 5.77,
+          "y": 21.87
+        },
+        "b": {
+          "x": 5.77,
+          "y": 16.67
+        },
+        "heightM": 3.2,
+        "id": "w7",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 8.57,
+          "y": 6.17
+        },
+        "b": {
+          "x": 8.57,
+          "y": 2.42
+        },
+        "heightM": 3.2,
+        "id": "w8",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 21.87
+        },
+        "b": {
+          "x": 1.77,
+          "y": 21.87
+        },
+        "heightM": 3.2,
+        "id": "w9",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 16.67
+        },
+        "b": {
+          "x": 1.77,
+          "y": 16.67
+        },
+        "heightM": 3.2,
+        "id": "w10",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 11.62
+        },
+        "b": {
+          "x": 1.77,
+          "y": 11.62
+        },
+        "heightM": 3.2,
+        "id": "w11",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 6.17
+        },
+        "b": {
+          "x": 1.77,
+          "y": 6.17
+        },
+        "heightM": 3.2,
+        "id": "w12",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 5.77,
+          "y": 18.57
+        },
+        "b": {
+          "x": 4.17,
+          "y": 18.57
+        },
+        "heightM": 3.2,
+        "id": "w13",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 7.87
+        },
+        "b": {
+          "x": 6.77,
+          "y": 7.87
+        },
+        "heightM": 3.2,
+        "id": "w14",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 10.72,
+          "y": 2.42
+        },
+        "b": {
+          "x": 1.77,
+          "y": 2.42
+        },
+        "heightM": 3.2,
+        "id": "w15",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      }
+    ]
+  },
+  "frame": "X_EAST_Y_NORTH_Z_UP",
+  "projectId": "MIZAN-D1793529130040-v1",
+  "rules": {
+    "provenance": [
+      {
+        "authority": "ALMIZAN_BINDING",
+        "classification": "PROJECT_ASSUMPTION",
+        "id": "MIZAN-ROUTING-DOMAIN",
+        "noteAr": "حيز التمرير محيط المبنى (أو حدود الأرض) ناقص الأفنية ودقة الشبكة 0.25 م ما لم تُعدَّل؛ افتراض قابل للتعديل وليس اشتراطًا.",
+        "verifiedCodeClause": null
+      },
+      {
+        "authority": "ALMIZAN_STRUCTURAL_PRECHECK",
+        "classification": "PROJECT_ASSUMPTION",
+        "id": "MIZAN-STRUCTURAL-PRECHECK",
+        "noteAr": "الأعمدة والكمرات من الفحص الإنشائي المبدئي (تقدير بافتراضات معلنة)، وليست نموذجًا إنشائيًا معتمدًا؛ البلاطات والفتحات والقواعد غير ممثلة.",
+        "verifiedCodeClause": null
+      },
+      {
+        "authority": "EXAMPLE_ONLY",
+        "classification": "PROJECT_ASSUMPTION",
+        "id": "KIT-DEMO-ASSUMPTIONS",
+        "noteAr": "قيم المثال التوضيحية للحزمة (كابل، حماية، مناخ، غلاف…) أُدخلت بطلب المستخدم؛ افتراضات قابلة للتعديل وليست اشتراطات سعودية أو اختيار مصنّع.",
+        "verifiedCodeClause": null
+      }
+    ],
+    "rates": {},
+    "routingByLevel": {
+      "L1": {
+        "holes": [],
+        "polygon": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 12.5,
+            "y": 0
+          },
+          {
+            "x": 12.5,
+            "y": 25
+          },
+          {
+            "x": 0,
+            "y": 25
+          }
+        ],
+        "stepM": 0.25
+      }
+    },
+    "structuralModelComplete": false
+  },
+  "schema": "MIZAN-MEP-INPUT/1",
+  "services": {
+    "electrical": {
+      "circuits": [
+        {
+          "cable": {
+            "reactanceOhmPerKm": 0.08,
+            "resistanceOhmPerKm": 8,
+            "sizeMm2": 2.5
+          },
+          "id": "C1",
+          "loadIds": [
+            "SO1",
+            "SO2"
+          ],
+          "panelId": "DB1",
+          "phase": "L1",
+          "phases": 1,
+          "protection": {
+            "correctedAmpacityA": 18,
+            "ratedA": 16,
+            "source": "DEMO ONLY: engineer must replace with verified cable installation data and project limit",
+            "voltageDropLimitPercent": 3
+          },
+          "routing": {
+            "clearanceM": 0.03,
+            "heightM": 0.03,
+            "routeHeightM": 2.85,
+            "widthM": 0.03
+          },
+          "voltageV": 230
+        }
+      ],
+      "lightingByRoom": {
+        "r4": {
+          "demandFactor": 1,
+          "lumensPerFixture": 1600,
+          "maintenanceFactor": 0.8,
+          "mountHeightM": 2.9,
+          "powerFactor": 0.95,
+          "targetLux": 150,
+          "utilizationFactor": 0.6,
+          "wattsPerFixture": 14
+        }
+      },
+      "loads": [
+        {
+          "demandFactor": 0.5,
+          "id": "SO1",
+          "kind": "SOCKET",
+          "levelId": "L1",
+          "position": {
+            "x": 8.198,
+            "y": 17.653,
+            "z": 0.4
+          },
+          "powerW": 1000,
+          "roomId": "r4"
+        },
+        {
+          "demandFactor": 0.5,
+          "id": "SO2",
+          "kind": "SOCKET",
+          "levelId": "L1",
+          "position": {
+            "x": 4.472,
+            "y": 14.15,
+            "z": 0.4
+          },
+          "powerFactor": 0.95,
+          "powerW": 800,
+          "roomId": "r2"
+        },
+        {
+          "id": "AC1-LOAD",
+          "kind": "EQUIPMENT_LOAD",
+          "levelId": "L1",
+          "position": {
+            "x": 8.61,
+            "y": 17.653,
+            "z": 2.7
+          },
+          "powerW": 1800,
+          "roomId": "r4",
+          "sourceEquipmentId": "AC1"
+        }
+      ],
+      "panels": [
+        {
+          "id": "DB1",
+          "kind": "PANEL",
+          "levelId": "L1",
+          "position": {
+            "x": 8.472,
+            "y": 13.959,
+            "z": 0.4
+          },
+          "roomId": "r7"
+        }
+      ]
+    },
+    "fire": {
+      "connections": [
+        {
+          "fromId": "FACP1",
+          "id": "FC1",
+          "routing": {
+            "clearanceM": 0.02,
+            "heightM": 0.02,
+            "routeHeightM": 2.6,
+            "widthM": 0.02
+          },
+          "toId": "SD1"
+        }
+      ],
+      "devices": [
+        {
+          "id": "FACP1",
+          "kind": "FIRE_ALARM_PANEL",
+          "levelId": "L1",
+          "position": {
+            "x": 9.176,
+            "y": 14.46,
+            "z": 1.4
+          },
+          "roomId": "r7"
+        },
+        {
+          "id": "SD1",
+          "kind": "SMOKE_DETECTOR",
+          "levelId": "L1",
+          "position": {
+            "x": 4.764,
+            "y": 14.46,
+            "z": 3
+          },
+          "roomId": "r2"
+        }
+      ]
+    },
+    "hvac": {
+      "equipment": [
+        {
+          "id": "AC1",
+          "kind": "AIR_EQUIPMENT",
+          "levelId": "L1",
+          "position": {
+            "x": 8.61,
+            "y": 17.653,
+            "z": 2.7
+          },
+          "ratedInputW": 1800,
+          "roomId": "r4"
+        }
+      ],
+      "zones": [
+        {
+          "ductVelocityMS": 4,
+          "equipmentId": "AC1",
+          "id": "Z1",
+          "roomId": "r4",
+          "routing": {
+            "clearanceM": 0.05,
+            "heightM": 0.25,
+            "routeHeightM": 2.8,
+            "widthM": 0.3
+          },
+          "supplyDeltaK": 12,
+          "terminalHeightM": 2.8,
+          "thermal": {
+            "cpJkgK": 1006,
+            "densityKgM3": 1.2,
+            "indoorC": 24,
+            "indoorHumidityRatio": 0.009,
+            "infiltrationM3S": 0.003,
+            "internalLatentW": 150,
+            "internalSensibleW": 300,
+            "latentHeatJkg": 2450000,
+            "outdoorAirM3S": 0.01,
+            "outdoorC": 44,
+            "outdoorHumidityRatio": 0.012,
+            "solarW": 500,
+            "surfaces": [
+              {
+                "areaM2": 22,
+                "uWm2K": 0.45
+              },
+              {
+                "areaM2": 23.9,
+                "uWm2K": 0.25
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "low_current": {
+      "connections": [
+        {
+          "fromId": "RACK1",
+          "id": "LC1",
+          "routing": {
+            "clearanceM": 0.02,
+            "heightM": 0.02,
+            "routeHeightM": 2.6,
+            "widthM": 0.02
+          },
+          "toId": "DO1"
+        }
+      ],
+      "devices": [
+        {
+          "id": "RACK1",
+          "kind": "DATA_RACK",
+          "levelId": "L1",
+          "position": {
+            "x": 9.176,
+            "y": 14.46,
+            "z": 1.4
+          },
+          "roomId": "r7"
+        },
+        {
+          "id": "DO1",
+          "kind": "DATA_OUTLET",
+          "levelId": "L1",
+          "position": {
+            "x": 4.764,
+            "y": 14.46,
+            "z": 0.4
+          },
+          "roomId": "r2"
+        }
+      ]
+    },
+    "plumbing": {
+      "connections": [
+        {
+          "endInvertM": -0.95,
+          "flowM3S": 0.001,
+          "fromId": "WC1",
+          "id": "PC1",
+          "routing": {
+            "clearanceM": 0.01,
+            "heightM": 0.11,
+            "widthM": 0.11
+          },
+          "slope": 0.02,
+          "startInvertM": -0.3,
+          "system": "sanitary",
+          "toId": "MH1",
+          "velocityMS": 0.8
+        }
+      ],
+      "equipment": [
+        {
+          "id": "MH1",
+          "kind": "MANHOLE",
+          "levelId": "L1",
+          "position": {
+            "x": 0.986,
+            "y": 12.159,
+            "z": -0.6
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "id": "WC1",
+          "kind": "WC",
+          "levelId": "L1",
+          "position": {
+            "x": 4.97,
+            "y": 17.636,
+            "z": 0
+          },
+          "roomId": "r6"
+        }
+      ]
+    },
+    "solar": {
+      "capacity": {
+        "panelCount": 2,
+        "wattsPerPanel": 450
+      },
+      "connections": [
+        {
+          "fromId": "INV1",
+          "id": "SC1",
+          "routing": {
+            "clearanceM": 0.02,
+            "heightM": 0.02,
+            "routeHeightM": 2.6,
+            "widthM": 0.02
+          },
+          "toId": "PV1"
+        }
+      ],
+      "devices": [
+        {
+          "id": "INV1",
+          "kind": "INVERTER",
+          "levelId": "L1",
+          "position": {
+            "x": 9.176,
+            "y": 14.46,
+            "z": 1.4
+          },
+          "roomId": "r7"
+        },
+        {
+          "id": "PV1",
+          "kind": "PV_MODULE",
+          "levelId": "L1",
+          "position": {
+            "x": 4.764,
+            "y": 14.46,
+            "z": 0.4
+          },
+          "roomId": "r2"
+        }
+      ]
+    }
+  },
+  "units": "m"
+}

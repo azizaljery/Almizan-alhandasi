@@ -44,6 +44,7 @@ async function context(vp) {
   const ctx = await browser.newContext({ viewport: vp, isMobile: vp.width < 500, hasTouch: vp.width < 500, deviceScaleFactor: vp.width < 500 ? 2 : 1, locale: 'ar-SA', acceptDownloads: true });
   await ctx.route('**/*', route => { const u = new URL(route.request().url()); if (u.hostname === '127.0.0.1' || ['data:', 'blob:'].includes(u.protocol)) return route.continue(); log.blocked.push(u.host); return route.abort(); });
   const page = await ctx.newPage(); page.setDefaultTimeout(240000);
+  await page.addInitScript(() => { window.__toasts = []; new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.classList?.contains('toast')) window.__toasts.push(n.textContent); }).observe(document, { childList: true, subtree: true }); });
   page.on('pageerror', e => log.errors.push(`[${vp.width}] pageerror: ${e.message}`));
   page.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|ERR_BLOCKED/.test(m.text())) log.errors.push(`[${vp.width}] console: ${m.text()}`); });
   page.on('dialog', d => d.accept());
@@ -273,7 +274,13 @@ for (const t of ['electrical', 'plumbing', 'coordination']) {
   const btns = await page.locator('[data-export]').evaluateAll(b => b.map(x => x.dataset.export));
   for (const key of btns) {
     await waitFresh(page);
-    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 120000 }), page.click(`[data-export="${key}"]`)]);
+    let dl, lastErr = '';
+    for (let attempt = 1; attempt <= 2 && !dl; attempt++) {
+      await page.evaluate(() => { window.__toasts = []; });
+      try { [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.click(`[data-export="${key}"]`, { timeout: 30000 })]); }
+      catch (e) { const tx = await page.evaluate(() => window.__toasts).catch(() => []); lastErr = `${String(e.message).split('\n')[0]} | toasts: ${tx.join(' / ')}`; log.downloads.push({ tab: t, key, ok: false, attempt, error: lastErr }); await waitFresh(page).catch(() => {}); }
+    }
+    if (!dl) { check(`تنزيل ${t}/${key}`, false, 'لم يبدأ التنزيل: ' + lastErr); continue; }
     const path = join(OUT, 'downloads', `${t}-${dl.suggestedFilename()}`); await mkdir(dirname(path), { recursive: true }); await dl.saveAs(path);
     const text = await readFile(path, 'utf8'), kind = key.split(':')[0];
     let ok = text.length > 0, why = `${text.length} بايت`;

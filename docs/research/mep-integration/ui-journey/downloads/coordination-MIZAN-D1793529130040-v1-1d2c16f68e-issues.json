@@ -1,0 +1,195 @@
+[
+  {
+    "code": "CALCULATION_INPUT_REQUIRED",
+    "details": {
+      "error": "INVALID_NUMBER",
+      "id": "E-P-SO1",
+      "path": "powerFactor"
+    },
+    "discipline": "electrical",
+    "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+    "severity": "pending"
+  },
+  {
+    "code": "CALCULATION_INPUT_REQUIRED",
+    "details": {
+      "error": "INVALID_NUMBER",
+      "id": "E-P-AC1-LOAD",
+      "path": "powerFactor"
+    },
+    "discipline": "electrical",
+    "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+    "severity": "pending"
+  },
+  {
+    "code": "CALCULATION_INPUT_REQUIRED",
+    "details": {
+      "error": "INVALID_NUMBER",
+      "id": "E-I-C1",
+      "path": "powerW"
+    },
+    "discipline": "electrical",
+    "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+    "severity": "pending"
+  },
+  {
+    "code": "CALCULATION_INPUT_REQUIRED",
+    "details": {
+      "error": "INVALID_NUMBER",
+      "id": "E-VD-C1",
+      "path": "currentA"
+    },
+    "discipline": "electrical",
+    "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+    "severity": "pending"
+  },
+  {
+    "code": "UNASSIGNED_LOAD",
+    "details": {
+      "loadId": "AC1-LOAD"
+    },
+    "discipline": "electrical",
+    "messageAr": "الحمل لم يُربط بدائرة.",
+    "severity": "pending"
+  },
+  {
+    "code": "UNASSIGNED_LOAD",
+    "details": {
+      "loadId": "EL-r4-1"
+    },
+    "discipline": "electrical",
+    "messageAr": "الحمل لم يُربط بدائرة.",
+    "severity": "pending"
+  },
+  {
+    "code": "UNASSIGNED_LOAD",
+    "details": {
+      "loadId": "EL-r4-2"
+    },
+    "discipline": "electrical",
+    "messageAr": "الحمل لم يُربط بدائرة.",
+    "severity": "pending"
+  },
+  {
+    "code": "UNASSIGNED_LOAD",
+    "details": {
+      "loadId": "EL-r4-3"
+    },
+    "discipline": "electrical",
+    "messageAr": "الحمل لم يُربط بدائرة.",
+    "severity": "pending"
+  },
+  {
+    "code": "UNASSIGNED_LOAD",
+    "details": {
+      "loadId": "EL-r4-4"
+    },
+    "discipline": "electrical",
+    "messageAr": "الحمل لم يُربط بدائرة.",
+    "severity": "pending"
+  },
+  {
+    "code": "UNASSIGNED_LOAD",
+    "details": {
+      "loadId": "EL-r4-5"
+    },
+    "discipline": "electrical",
+    "messageAr": "الحمل لم يُربط بدائرة.",
+    "severity": "pending"
+  },
+  {
+    "code": "PHASE_BALANCE_NOT_EVALUATED",
+    "details": {},
+    "discipline": "electrical",
+    "messageAr": "توزيع أطوار اللوحة DB1 غير مكتمل؛ لا يمكن الحكم على اتزانها.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "electrical",
+    "messageAr": "يلزم تحقق مستقل للتأريض والقصر والفصل الانتقائي والحماية من الصعق والمواقع الرطبة والإنارة الفعلية بملفات فوتومترية.",
+    "severity": "pending"
+  },
+  {
+    "code": "CALCULATION_INPUT_REQUIRED",
+    "details": {
+      "error": "INVALID_NUMBER",
+      "id": "M-OA-Z1",
+      "path": "persons"
+    },
+    "discipline": "hvac",
+    "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "hvac",
+    "messageAr": "يلزم نموذج أحمال تصميم معتمد، ومراجعة انطباق طريقة التهوية على نوع المبنى، وضغط الدكت والضوضاء والتوزيع والراجع والتكاثف وكفاءة الجهاز عند ظروف التصميم.",
+    "severity": "pending"
+  },
+  {
+    "code": "OUTFALL_INVERT_MISMATCH",
+    "details": {
+      "actualEndInvertM": -0.48922,
+      "id": "PC1",
+      "obstacleId": null,
+      "requestedEndInvertM": -0.95
+    },
+    "discipline": "plumbing",
+    "messageAr": "الميل والطول لا يصلان إلى منسوب القاع المطلوب؛ لم يُفترض اتصال رأسي لإخفاء الفرق.",
+    "severity": "error"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "plumbing",
+    "messageAr": "يلزم تحديد التدفق التصميمي من جدول وحدات الأجهزة المعتمد، ثم تحقق الضغط والأقطار والتهوية والمصائد والتنظيف ومنع الرجوع والمطر والربط الخارجي.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "fire",
+    "messageAr": "مراجعة تصميم وإنذار وإطفاء وإخلاء متخصصة مطلوبة؛ التغطية ومقاومة الحريق والتدفق والضغط وسعة المضخة والخزان غير محسوبة.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "low_current",
+    "messageAr": "يلزم تحقق نوع الكابل وحدود القناة والوصلات والفصل والتأريض وتغطية الشبكات والكاميرات ومتطلبات الخصوصية.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "solar",
+    "messageAr": "يلزم تحقق الإشعاع والتظليل والإنفرتر والحماية والأحمال الإنشائية على السقف؛ لم يُحسب الإنتاج السنوي.",
+    "severity": "pending"
+  },
+  {
+    "discipline": "coordination",
+    "code": "STRUCTURAL_MODEL_INCOMPLETE",
+    "severity": "pending",
+    "messageAr": "نموذج الأعمدة والكمرات والبلاطات والخلوصات غير مكتمل؛ غياب التعارض المكتشف لا يثبت سلامة التمديد.",
+    "details": {}
+  },
+  {
+    "discipline": "coordination",
+    "code": "CLASHES_REQUIRE_REVIEW",
+    "severity": "pending",
+    "messageAr": "توجد تعارضات أو اختراقات محتملة تحتاج مراجعة.",
+    "details": {
+      "count": 30
+    }
+  },
+  {
+    "discipline": "project",
+    "code": "CODE_RULES_NOT_VERIFIED",
+    "severity": "pending",
+    "messageAr": "الحزمة لا تطبق جدول اشتراطات نظامية موثّقًا؛ مراجعة الكود والإصدار والبنود المنطبقة مطلوبة.",
+    "details": {}
+  }
+]
