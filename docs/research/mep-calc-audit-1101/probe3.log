@@ -1,0 +1,26 @@
+
+=== S4b صرف بميل صحيح (endInvert = -0.342) ===
+P-D-DR1 | CIRCULAR_AREA_EQUIVALENT_ONLY | CALCULATED | 0.03989422804014327 m 
+P-FALL-DR1 | DRAINAGE_FALL | CALCULATED | 0.041999999999999996 m 
+[{"endInvertM":-0.34199999999999997,"equivalentDiameterM":0.03989422804014327,"fallM":0.041999999999999996,"flowM3S":0.001,"fromId":"WC1","horizontalLengthM":2.0999999999999996,"id":"DR1","lengthM":2.100419958008397,"routeStatus":"PROPOSED","selectedDiameterMm":110,"slope":0.02,"system":"sanitary","toId":"MAN1"}]
+
+=== S6 تصدير وواجهة: مخرجات الدوال التي تستدعيها systems.mjs ===
+freshness true FRESH
+json-result MIZAN-AUDIT-e16e33985d-engineering-result.json 32772 bytes | calculations in JSON: E-LUX-r4,E-P-EL-r4-1,E-P-EL-r4-2,E-P-EL-r4-3,E-P-EL-r4-4,E-P-EL-r4-5,E-P-EL-r4-6,E-I-EC-L-r4,E-VD-EC-L-r4
+csv electrical-circuits 
+"id","panelId","loadCount","connectedW","demandW","currentA","oneWayLengthM","voltageDropPercent","cableSizeMm2","breakerA","protectionCheck"
+"EC-L-r4","DB1","6","84","84","0.3844393592677345","12.126562499999999","0.03091052790953904","2.5","16","WITHIN_SUPPLIED_AMPACITY"
+csv electrical-panels 
+"id","demandW","demandVar","vectorApparentVA","phaseL1VA","phaseL2VA","phaseL3VA"
+"DB1","84","27.609464835024504","88.42105263157895","88.42105263157895","0","0"
+csv quantities 
+"key","discipline","kind","layer","unit","quantity","rate","amount"
+"electrical:PANEL:E-POWER:each","electrical","PANEL","E-POWER","each","1",,
+"electrical:LUMINAIRE:E-LIGHT:each","electrical","LUMINAIRE","E-LIGHT","each","6",,
+"electrical:CONCEPT_HOME_RUN:E-CABLE:0.03:0.03:m","electrical","CONCEPT_HOME_RUN (0.03x0.03m envelope)","E-CABLE","m","60.44812499999999",,
+svg MIZAN-AUDIT-e16e33985d-L1-electrical.svg 25016 bytes | E-LIGHT layer in svg: true | LUMINAIRE glyph circles: 6
+dxf MIZAN-AUDIT-e16e33985d-L1-electrical.dxf 14629 bytes | E-LIGHT: true
+artifact keys engineering-result.json, engineering-input.json, drawings/L1-combined.svg, drawings/L1-combined.dxf, drawings/L1-electrical.svg, drawings/L1-hvac.svg, drawings/L1-plumbing.svg, drawings/L1-fire.svg, drawings/L1-low_current.svg, drawings/L1-solar.svg, schedules/electrical-circuits.csv, schedules/electrical-panels.csv, schedules/hvac-zones.csv, schedules/plumbing-connections.csv, schedules/fire-devices.csv, schedules/low_current-devices.csv, schedules/solar-devices.csv, schedules/quantities.csv, issues.json, drawing-register.json
+layers [{"layer":"E-POWER","devices":1,"routes":0,"blocked":0,"ar":"لوحات وأحمال","color":"#ba7419"},{"layer":"E-LIGHT","devices":6,"routes":0,"blocked":0,"ar":"وحدات إنارة مقترحة","color":"#ba7419"},{"layer":"E-CABLE","devices":0,"routes":6,"blocked":0,"ar":"مسارات كابلات مقترحة","color":"#ba7419"}]
+after editing lux: fresh false INPUTS_CHANGED
+export refused: STALE_RESULT

@@ -1,0 +1,9 @@
+## grep: فوتومتري/وهج/تجانس/ies/ugr/illuminance في src (الشيفرة فقط)
+dist/engineering-systems/src/disciplines/electrical.mjs:90:  out.limitations.push('Lumen count and suggested locations do not verify uniformity, glare or point illuminance.', 'Home runs are schematic 
+## grep: قصر/short-circuit/fault/selectivity/earthing في src
+## grep: sbc في src
+## grep: ضغط شبكة/hazen/pump/sprinkler/detector coverage في src
+dist/engineering-systems/src/disciplines/networks.mjs:3:/** Explicitly positioned systems; this does not invent detector coverage or hydraulic fire design. */
+dist/engineering-systems/src/disciplines/networks.mjs:21:    out.limitations.push('Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code comp
+## verifiedClauses
+4

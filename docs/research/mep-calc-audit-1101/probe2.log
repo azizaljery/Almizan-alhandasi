@@ -1,0 +1,42 @@
+
+=== S3 تكييف/تهوية/شفط (مدخلات اختبارية = قيم مثال الحزمة الافتراضية التوضيحية) ===
+M-Q-Z4 | STEADY_STATE_HEAT_GAIN_NOT_DESIGN_LOAD | CALCULATED | {"airLatentW":114.66000000000004,"airSensibleW":313.872,"conductionW":348.45,"latentW":264.66,"sensibleW":1462.3220000000001,"totalW":1726.9820000000002} W 
+M-AIR-Z4 | SENSIBLE_AIRFLOW | CALCULATED | 0.10094447205654959 m3/s 
+M-OA-Z4 | SUPPLIED_ZONE_VENTILATION_RATES | CALCULATED | 0.024027 m3/s 
+M-D-Z4 | CIRCULAR_AREA_EQUIVALENT_ONLY | CALCULATED | 0.17925295928157822 m 
+M-EX-EF1 | ACH_VOLUME_FLOW | CALCULATED | 0.02294328888888888 m3/s 
+يدوي: conduction 348.45 airSens 313.87 airLat 114.66 sens 1462.32 | supply m3/s 0.10094 | OA m3/s 0.02403 | EF m3/s 0.02294
+schedule hvac-zones
+{"areaEquivalentDuctM":0.17925295928157822,"equipmentId":"AC1","id":"Z4","latentGainW":264.66,"outdoorAirM3S":0.024027,"roomId":"r4","selectedCapacityW":null,"sensibleGainW":1462.3220000000001,"supplyM3S":0.10094447205654959,"totalGainW":1726.9820000000002}
+routes MR-Z4:BLOCKED/NO_PATH_AT_CONFIGURED_GRID:0.00 ; MX-EF1:PROPOSED/GEOMETRIC_PROPOSAL_ONLY:1.50
+issues error:ROUTE_BLOCKED ; pending:SPECIALIST_REVIEW_REQUIRED
+
+=== S3b تكييف بمدخل ناقص (بلا cpJkgK) — NOT_CALCULATED ينتشر ===
+M-Q-Z4 | STEADY_STATE_HEAT_GAIN_NOT_DESIGN_LOAD | NOT_CALCULATED | null W | بيانات الحساب ناقصة أو غير صالحة. (cpJkgK INVALID_NUMBER)
+M-AIR-Z4 | SENSIBLE_AIRFLOW | NOT_CALCULATED | null m3/s | بيانات الحساب ناقصة أو غير صالحة. (sensibleW INVALID_NUMBER)
+M-OA-Z4 | SUPPLIED_ZONE_VENTILATION_RATES | NOT_CALCULATED | null m3/s | بيانات الحساب ناقصة أو غير صالحة. (persons INVALID_NUMBER)
+M-D-Z4 | CIRCULAR_AREA_EQUIVALENT_ONLY | NOT_CALCULATED | null m | بيانات الحساب ناقصة أو غير صالحة. (flowM3S INVALID_NUMBER)
+[{"areaEquivalentDuctM":null,"equipmentId":null,"id":"Z4","latentGainW":null,"outdoorAirM3S":null,"roomId":"r4","selectedCapacityW":null,"sensibleGainW":null,"supplyM3S":null,"totalGainW":null}]
+
+=== S4 سباكة: ماء بارد + صرف بميل + خزان + مطر + تسخين + Darcy ===
+P-D-CW1 | CIRCULAR_AREA_EQUIVALENT_ONLY | CALCULATED | 0.013029400317411198 m 
+P-H-CW1 | DARCY_WEISBACH_SUPPLIED_FRICTION | CALCULATED | {"frictionHeadM":0.034095221713807994,"minorLossHeadM":0.06199131220692354,"totalHeadM":13.096086533920731,"velocityMS":0.6366197723675814} m_HEAD 
+P-D-DR1 | CIRCULAR_AREA_EQUIVALENT_ONLY | CALCULATED | 0.03989422804014327 m 
+P-FALL-DR1 | DRAINAGE_FALL | CALCULATED | 0.041999999999999996 m 
+P-TANK | PROJECT_AUTONOMY_VOLUME | CALCULATED | 2400 L 
+P-RAIN-ROOF1 | RATIONAL_RUNOFF_FLOW | CALCULATED | 0.0042 m3/s 
+P-HEAT | INSTANTANEOUS_WATER_HEATING | CALCULATED | 13905.466666666667 W 
+يدوي: D(CW1)= 0.01303 tank L 2400 rain m3/s 0.004200 heater W 13905.5
+schedule plumbing-connections
+{"endInvertM":null,"equivalentDiameterM":0.013029400317411198,"fallM":null,"flowM3S":0.0002,"fromId":"MAN1","horizontalLengthM":null,"id":"CW1","lengthM":1.1000000000000014,"routeStatus":"PROPOSED","selectedDiameterMm":20,"slope":null,"system":"cold_water","toId":"BASIN1"}
+{"endInvertM":-0.34199999999999997,"equivalentDiameterM":0.03989422804014327,"fallM":0.041999999999999996,"flowM3S":0.001,"fromId":"WC1","horizontalLengthM":2.0999999999999996,"id":"DR1","lengthM":2.100419958008397,"routeStatus":"BLOCKED","selectedDiameterMm":110,"slope":0.02,"system":"sanitary","toId":"MAN1"}
+issues error:OUTFALL_INVERT_MISMATCH ; pending:SPECIALIST_REVIEW_REQUIRED
+
+=== S5 حريق/تيار خفيف/شمسي ===
+-- fire
+devices 2 routes fire-R-F1:PROPOSED:11.60 issues SPECIALIST_REVIEW_REQUIRED | limitations: Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code compliance are NOT_EVALUATED.
+-- low_current
+devices 2 routes low_current-R-T1:PROPOSED:14.07 issues SPECIALIST_REVIEW_REQUIRED | limitations: Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code compliance are NOT_EVALUATED.
+-- solar
+S-DC | NAMEPLATE_DC_CAPACITY | CALCULATED | 900 Wp 
+devices 0 routes  issues SYSTEM_INPUT_REQUIRED,SPECIALIST_REVIEW_REQUIRED | limitations: Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code compliance are NOT_EVALUATED.
