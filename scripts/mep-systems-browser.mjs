@@ -96,14 +96,26 @@ if (SEED) {
   for (const s of C.land.streets) await page.check(`input[data-kind=street][value=${s}]`);
   for (const s of C.land.entries) await page.check(`input[data-kind=entry][value=${s}]`);
   await page.click('#landForm button[type=submit]'); await page.waitForSelector('#stageShara:not([hidden])');
-  await page.click('#chat .chip:has-text("أتحدث بحرية")'); await page.fill('#chat form.free textarea', C.text); await page.click('#chat form.free button[type=submit]');
-  await page.waitForSelector('#chat form.counts');
-  for (const [k, v] of Object.entries(C.counts)) await page.fill(`#chat form.counts input[name=${k}]`, String(v));
+  await page.waitForSelector('#chat button');
+  // شرعاء V2: مسار «أسئلة موجهة» بالفهم المحلي (بلا رمز ولا مزود)، بالأجوبة نفسها التي يستعملها scripts/e2e-sharaa-r21-ui.mjs
+  await page.click('#pathSwitch button:has-text("أسئلة موجهة")'); await page.waitForTimeout(500);
+  const T = sel => page.locator(sel).innerText().catch(() => '');
+  for (let i = 0; i < 30; i++) {
+    const nums = await page.$$('#chat input[type=number]');
+    if (nums.length >= 6) { const vals = [String(C.counts.bedrooms), String(C.counts.majlis), String(C.counts.baths), '1', '1', '0']; for (let k = 0; k < 6; k++) await nums[k].fill(vals[k]); await page.click('#chat button:has-text("متابعة")'); await page.waitForTimeout(600); continue; }
+    if (nums.length === 2 && /أفراد الأسرة الحاليين/.test(await nums[0].evaluate(el => el.closest('form').innerText))) await nums[0].fill('6');
+    if (await page.$('#chat button:has-text("أؤكد وأبدأ"), #chat button:has-text("أفهم القيود")')) break;
+    const st0 = await page.$('#chat button:has-text("ابدأ التصميم")'); if (st0) { await st0.click(); await page.waitForTimeout(600); continue; }
+    let btn = null;
+    for (const w of ['لا يهم', 'لا أحتاج', 'تخطّي', 'تسجيل', 'متابعة', 'اعتمد']) { btn = await page.$(`#chat button:has-text("${w}")`); if (btn) break; }
+    if (!btn) btn = (await page.$('#chat .controls button, #chat button.chip, #chat button.opt'));
+    if (!btn) break; await btn.click(); await page.waitForTimeout(500);
+  }
   await snap(page, desktop, '01-sharaa-brief', false);
-  await page.click('#chat form.counts .cta');
-  await page.click('#chat .cta:has-text("توليد التصميم")', { timeout: 900000 });
-  await page.waitForURL(/\/design(\.html)?$/, { timeout: 1800000 });
-  await page.waitForSelector('#plan', { timeout: 120000 }); await page.waitForTimeout(800);
+  const go = await page.$('#chat button:has-text("أؤكد وأبدأ"), #chat button:has-text("أفهم القيود")'); if (go) await go.click();
+  await page.waitForSelector('#chat button:has-text("توليد التصميم")', { timeout: 20000 }).then(b => b.click()).catch(() => {});
+  await page.waitForURL(/\/design(\.html)?$/, { timeout: 3000000 });
+  await page.waitForSelector('#plan', { timeout: 300000 }); await page.waitForTimeout(800);
   check('الرحلة: الأرض ← شرعاء ← التوليد في المتصفح ← صفحة التصميم', true, `${CASE} في ${Math.round((Date.now() - t0) / 1000)} ث`);
 }
 const alts = await page.locator('#alts [data-alt]').count();

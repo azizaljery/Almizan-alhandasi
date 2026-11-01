@@ -1,0 +1,4109 @@
+{
+  "architecture": {
+    "levels": [
+      {
+        "elevationM": 0,
+        "heightM": 3.2,
+        "id": "L1"
+      },
+      {
+        "elevationM": 3.2,
+        "heightM": 3.2,
+        "id": "L2"
+      }
+    ],
+    "obstacles": [
+      {
+        "id": "STR-L1-P1",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 6.505,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P2",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 21.205,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P3",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 6.505,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P4",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 21.205,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P5",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 13.555,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.405,
+          "y": 13.305,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P6",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 14.655,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 14.405,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P7",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.755,
+          "y": 21.205,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P8",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.755,
+          "y": 6.505,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P9",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 14.655,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.755,
+          "y": 14.405,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P10",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 15.805,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 15.555,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P11",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 17.505,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.405,
+          "y": 17.255,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P12",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 9.155,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.405,
+          "y": 8.905,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P13",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 18.155,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 17.905,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P14",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.405,
+          "y": 6.505,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P15",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.405,
+          "y": 21.205,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P16",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 18.155,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.755,
+          "y": 17.905,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P17",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 10.705,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 10.455,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P18",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 11.28,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 11.03,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-P19",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 10.705,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.755,
+          "y": 10.455,
+          "z": 0
+        }
+      },
+      {
+        "id": "STR-L1-B1",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 10.58,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 6.63,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B2",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 14.53,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 10.58,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B3",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.13,
+          "y": 6.505,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B4",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 21.33,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 18.03,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B5",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.13,
+          "y": 21.205,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B6",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 11.155,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 6.63,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B7",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 15.68,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 11.155,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B8",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.53,
+          "y": 6.505,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B9",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 21.33,
+          "z": 3.2
+        },
+        "min": {
+          "x": 15.755,
+          "y": 15.68,
+          "z": 2.85
+        }
+      },
+      {
+        "id": "STR-L1-B10",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.53,
+          "y": 21.205,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B11",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 13.43,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.43,
+          "y": 9.03,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B12",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 17.38,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.43,
+          "y": 13.43,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B13",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 13.53,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.88,
+          "y": 13.33,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B14",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 18.03,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.005,
+          "y": 14.53,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B15",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 14.63,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.13,
+          "y": 14.43,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B16",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 21.33,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.78,
+          "y": 18.03,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B17",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 21.455,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.88,
+          "y": 21.205,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B18",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 10.58,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.78,
+          "y": 6.63,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B19",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 14.53,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.78,
+          "y": 10.58,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B20",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 6.755,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.88,
+          "y": 6.505,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B21",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 18.03,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.78,
+          "y": 14.53,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B22",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 15.78,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.53,
+          "y": 15.58,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B23",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 21.33,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.43,
+          "y": 17.38,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B24",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 17.48,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.53,
+          "y": 17.28,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B25",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 9.03,
+          "z": 3.2
+        },
+        "min": {
+          "x": 11.43,
+          "y": 6.63,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B26",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 9.13,
+          "z": 3.2
+        },
+        "min": {
+          "x": 6.88,
+          "y": 8.93,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L1-B27",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 18.13,
+          "z": 3.2
+        },
+        "min": {
+          "x": 2.13,
+          "y": 17.93,
+          "z": 2.9
+        }
+      },
+      {
+        "id": "STR-L2-P1",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 6.505,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P2",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 21.205,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P3",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 6.505,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P4",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 21.205,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P5",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 13.555,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.405,
+          "y": 13.305,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P6",
+        "kind": "column-precheck",
+        "max": {
+          "x": 4.755,
+          "y": 14.855,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.505,
+          "y": 14.605,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P7",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.405,
+          "y": 21.205,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P8",
+        "kind": "column-precheck",
+        "max": {
+          "x": 8.375,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 8.125,
+          "y": 6.505,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P9",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 15.155,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 14.905,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P10",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 19.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.755,
+          "y": 19.505,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P11",
+        "kind": "column-precheck",
+        "max": {
+          "x": 4.755,
+          "y": 8.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.505,
+          "y": 8.205,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P12",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 11.655,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 11.405,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P13",
+        "kind": "column-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 16.555,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 16.305,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P14",
+        "kind": "column-precheck",
+        "max": {
+          "x": 4.755,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.505,
+          "y": 6.505,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P15",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.755,
+          "y": 21.205,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P16",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.405,
+          "y": 6.505,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P17",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 15.005,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.755,
+          "y": 14.755,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P18",
+        "kind": "column-precheck",
+        "max": {
+          "x": 7.005,
+          "y": 11.655,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.755,
+          "y": 11.405,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P19",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 10.955,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 10.705,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P20",
+        "kind": "column-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 18.305,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 18.055,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P21",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 10.155,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.405,
+          "y": 9.905,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-P22",
+        "kind": "column-precheck",
+        "max": {
+          "x": 11.655,
+          "y": 17.505,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.405,
+          "y": 17.255,
+          "z": 3.2
+        }
+      },
+      {
+        "id": "STR-L2-B1",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 11.53,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 6.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B2",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 4.63,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 6.505,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B3",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 21.33,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 16.43,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B4",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 21.205,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B5",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 10.83,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 6.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B6",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 15.03,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 10.83,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B7",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.53,
+          "y": 6.505,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B8",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 21.33,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 18.18,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B9",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 16.005,
+          "y": 18.18,
+          "z": 6.4
+        },
+        "min": {
+          "x": 15.755,
+          "y": 15.03,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B10",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.53,
+          "y": 21.205,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B11",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 13.43,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.43,
+          "y": 10.03,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B12",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 10.03,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.43,
+          "y": 6.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B13",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 17.38,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.43,
+          "y": 13.43,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B14",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.63,
+          "y": 21.33,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.43,
+          "y": 17.38,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B15",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 13.53,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.88,
+          "y": 13.33,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B16",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 4.73,
+          "y": 16.43,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.53,
+          "y": 14.73,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B17",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 4.63,
+          "y": 14.83,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 14.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B18",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 14.83,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.63,
+          "y": 14.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B19",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 21.455,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.88,
+          "y": 21.205,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B20",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 8.25,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.63,
+          "y": 6.505,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B21",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 6.755,
+          "z": 6.4
+        },
+        "min": {
+          "x": 8.25,
+          "y": 6.505,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B22",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 8.35,
+          "y": 9.03,
+          "z": 6.4
+        },
+        "min": {
+          "x": 8.15,
+          "y": 6.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B23",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 15.88,
+          "y": 15.13,
+          "z": 6.4
+        },
+        "min": {
+          "x": 11.53,
+          "y": 14.93,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B24",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 19.63,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.78,
+          "y": 14.88,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B25",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 21.33,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.78,
+          "y": 19.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B26",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 19.73,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 19.53,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B27",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 4.73,
+          "y": 8.33,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.53,
+          "y": 6.63,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B28",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 4.63,
+          "y": 8.43,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 8.23,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B29",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 8.43,
+          "z": 6.4
+        },
+        "min": {
+          "x": 4.63,
+          "y": 8.23,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B30",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 2.255,
+          "y": 16.43,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.005,
+          "y": 11.53,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B31",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 11.63,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 11.43,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B32",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.88,
+          "y": 16.53,
+          "z": 6.4
+        },
+        "min": {
+          "x": 2.13,
+          "y": 16.33,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B33",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 14.88,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.78,
+          "y": 11.53,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B34",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 11.53,
+          "y": 14.98,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.88,
+          "y": 14.78,
+          "z": 6.1
+        }
+      },
+      {
+        "id": "STR-L2-B35",
+        "kind": "beam-precheck",
+        "max": {
+          "x": 6.98,
+          "y": 11.53,
+          "z": 6.4
+        },
+        "min": {
+          "x": 6.78,
+          "y": 6.63,
+          "z": 6.1
+        }
+      }
+    ],
+    "openings": [
+      {
+        "atM": 5.66,
+        "heightM": 2.1,
+        "id": "o1",
+        "kind": "door2",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w8",
+        "widthM": 1.4
+      },
+      {
+        "atM": 3.74,
+        "heightM": 2.3,
+        "id": "o2",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w9",
+        "widthM": 1.4
+      },
+      {
+        "atM": 2.325,
+        "heightM": 2.3,
+        "id": "o3",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w10",
+        "widthM": 2.6
+      },
+      {
+        "atM": 3.99,
+        "heightM": 2.1,
+        "id": "o4",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w8",
+        "widthM": 1.1
+      },
+      {
+        "atM": 2.81,
+        "heightM": 2.3,
+        "id": "o5",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w12",
+        "widthM": 1.4
+      },
+      {
+        "atM": 0.75,
+        "heightM": 2.1,
+        "id": "o6",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w4",
+        "widthM": 0.8
+      },
+      {
+        "atM": 9.65,
+        "heightM": 2.1,
+        "id": "o7",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w1",
+        "widthM": 1.2
+      },
+      {
+        "atM": 13.05,
+        "heightM": 2.1,
+        "id": "o8",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w1",
+        "widthM": 0.95
+      },
+      {
+        "atM": 4.05,
+        "heightM": 2.1,
+        "id": "o9",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w11",
+        "widthM": 0.9
+      },
+      {
+        "atM": 1.2,
+        "heightM": 2.1,
+        "id": "o10",
+        "kind": "door2",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w2",
+        "widthM": 1.4
+      },
+      {
+        "atM": 1.225,
+        "heightM": 2.3,
+        "id": "o11",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w15",
+        "widthM": 1.4
+      },
+      {
+        "atM": 0.75,
+        "heightM": 2.1,
+        "id": "o12",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w6",
+        "widthM": 0.8
+      },
+      {
+        "atM": 11.435,
+        "heightM": 2.1,
+        "id": "o13",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w2",
+        "widthM": 0.95
+      },
+      {
+        "atM": 2.46,
+        "heightM": 2.1,
+        "id": "o14",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w17",
+        "widthM": 0.8
+      },
+      {
+        "atM": 0.925,
+        "heightM": 2.3,
+        "id": "o15",
+        "kind": "arch",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w17",
+        "widthM": 1.2
+      },
+      {
+        "atM": 2.375,
+        "heightM": 2.1,
+        "id": "o16",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w13",
+        "widthM": 0.9
+      },
+      {
+        "atM": 2.375,
+        "heightM": 2.1,
+        "id": "o17",
+        "kind": "door",
+        "levelId": "L1",
+        "sillM": 0,
+        "wallId": "w14",
+        "widthM": 0.95
+      },
+      {
+        "atM": 7.11,
+        "heightM": 1.2,
+        "id": "o18",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w8",
+        "widthM": 1.2
+      },
+      {
+        "atM": 7.075,
+        "heightM": 1.5,
+        "id": "o19",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w11",
+        "widthM": 2.2
+      },
+      {
+        "atM": 4.7,
+        "heightM": 1.5,
+        "id": "o20",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w3",
+        "widthM": 2.2
+      },
+      {
+        "atM": 0.75,
+        "heightM": 0.6,
+        "id": "o21",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w3",
+        "widthM": 0.6
+      },
+      {
+        "atM": 0.95,
+        "heightM": 0.6,
+        "id": "o22",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w8",
+        "widthM": 0.6
+      },
+      {
+        "atM": 9.65,
+        "heightM": 1.5,
+        "id": "o23",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w3",
+        "widthM": 2.2
+      },
+      {
+        "atM": 13.05,
+        "heightM": 1.2,
+        "id": "o24",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w3",
+        "widthM": 1.4
+      },
+      {
+        "atM": 2.375,
+        "heightM": 1.2,
+        "id": "o25",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w11",
+        "widthM": 1.4
+      },
+      {
+        "atM": 2.039,
+        "heightM": 1.5,
+        "id": "o26",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w5",
+        "widthM": 2.2
+      },
+      {
+        "atM": 5.512,
+        "heightM": 1.5,
+        "id": "o27",
+        "kind": "window2",
+        "levelId": "L1",
+        "sillM": 0.8,
+        "wallId": "w5",
+        "widthM": 2.2
+      },
+      {
+        "atM": 8.3,
+        "heightM": 0.6,
+        "id": "o29",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w5",
+        "widthM": 0.6
+      },
+      {
+        "atM": 12.725,
+        "heightM": 1.2,
+        "id": "o30",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w5",
+        "widthM": 1.4
+      },
+      {
+        "atM": 11.575,
+        "heightM": 1.2,
+        "id": "o31",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1,
+        "wallId": "w11",
+        "widthM": 1.4
+      },
+      {
+        "atM": 9.9,
+        "heightM": 0.6,
+        "id": "o32",
+        "kind": "window",
+        "levelId": "L1",
+        "sillM": 1.7,
+        "wallId": "w5",
+        "widthM": 0.6
+      },
+      {
+        "atM": 2.325,
+        "heightM": 2.3,
+        "id": "o33",
+        "kind": "arch",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w27",
+        "widthM": 1.4
+      },
+      {
+        "atM": 2.325,
+        "heightM": 2.3,
+        "id": "o34",
+        "kind": "arch",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w28",
+        "widthM": 1.4
+      },
+      {
+        "atM": 2.325,
+        "heightM": 2.1,
+        "id": "o35",
+        "kind": "door2",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w29",
+        "widthM": 1.4
+      },
+      {
+        "atM": 3.085,
+        "heightM": 2.1,
+        "id": "o36",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w18",
+        "widthM": 0.95
+      },
+      {
+        "atM": 1.89,
+        "heightM": 2.1,
+        "id": "o37",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w31",
+        "widthM": 0.8
+      },
+      {
+        "atM": 3.625,
+        "heightM": 2.3,
+        "id": "o38",
+        "kind": "arch",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w31",
+        "widthM": 1.2
+      },
+      {
+        "atM": 7.45,
+        "heightM": 2.1,
+        "id": "o39",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w18",
+        "widthM": 0.8500000000000001
+      },
+      {
+        "atM": 1.89,
+        "heightM": 2.1,
+        "id": "o40",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w33",
+        "widthM": 0.8
+      },
+      {
+        "atM": 3.625,
+        "heightM": 2.3,
+        "id": "o41",
+        "kind": "arch",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w33",
+        "widthM": 1.2
+      },
+      {
+        "atM": 10.485,
+        "heightM": 2.1,
+        "id": "o42",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w18",
+        "widthM": 0.95
+      },
+      {
+        "atM": 13.85,
+        "heightM": 2.1,
+        "id": "o43",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w18",
+        "widthM": 0.8
+      },
+      {
+        "atM": 1.125,
+        "heightM": 2.3,
+        "id": "o44",
+        "kind": "arch",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w35",
+        "widthM": 1.2
+      },
+      {
+        "atM": 1.2,
+        "heightM": 2.1,
+        "id": "o45",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w19",
+        "widthM": 0.95
+      },
+      {
+        "atM": 13.88,
+        "heightM": 2.1,
+        "id": "o46",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w19",
+        "widthM": 0.95
+      },
+      {
+        "atM": 2.11,
+        "heightM": 2.1,
+        "id": "o47",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w37",
+        "widthM": 0.8
+      },
+      {
+        "atM": 0.75,
+        "heightM": 2.1,
+        "id": "o48",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w37",
+        "widthM": 1.05
+      },
+      {
+        "atM": 7.075,
+        "heightM": 1.2,
+        "id": "o49",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1,
+        "wallId": "w26",
+        "widthM": 1.2
+      },
+      {
+        "atM": 7.075,
+        "heightM": 1.5,
+        "id": "o50",
+        "kind": "window2",
+        "levelId": "L2",
+        "sillM": 0.8,
+        "wallId": "w30",
+        "widthM": 2.2
+      },
+      {
+        "atM": 3.3,
+        "heightM": 1.2,
+        "id": "o51",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1,
+        "wallId": "w20",
+        "widthM": 1.4
+      },
+      {
+        "atM": 0.85,
+        "heightM": 0.6,
+        "id": "o52",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1.7,
+        "wallId": "w20",
+        "widthM": 0.6
+      },
+      {
+        "atM": 1.25,
+        "heightM": 0.6,
+        "id": "o53",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1.7,
+        "wallId": "w26",
+        "widthM": 0.6
+      },
+      {
+        "atM": 6.5,
+        "heightM": 1.2,
+        "id": "o54",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1,
+        "wallId": "w20",
+        "widthM": 1.4
+      },
+      {
+        "atM": 8.95,
+        "heightM": 0.6,
+        "id": "o55",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1.7,
+        "wallId": "w20",
+        "widthM": 0.6
+      },
+      {
+        "atM": 11.4,
+        "heightM": 1.2,
+        "id": "o56",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1,
+        "wallId": "w20",
+        "widthM": 1.4
+      },
+      {
+        "atM": 3.5,
+        "heightM": 0.6,
+        "id": "o57",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1.7,
+        "wallId": "w30",
+        "widthM": 0.6
+      },
+      {
+        "atM": 3.05,
+        "heightM": 1.2,
+        "id": "o58",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1,
+        "wallId": "w24",
+        "widthM": 1.4
+      },
+      {
+        "atM": 11.575,
+        "heightM": 1.2,
+        "id": "o59",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1,
+        "wallId": "w26",
+        "widthM": 1.4
+      },
+      {
+        "atM": 11.55,
+        "heightM": 1.5,
+        "id": "o60",
+        "kind": "window2",
+        "levelId": "L2",
+        "sillM": 0.8,
+        "wallId": "w24",
+        "widthM": 2.2
+      },
+      {
+        "atM": 11.575,
+        "heightM": 1.5,
+        "id": "o61",
+        "kind": "window2",
+        "levelId": "L2",
+        "sillM": 0.8,
+        "wallId": "w30",
+        "widthM": 2.2
+      },
+      {
+        "atM": 7.25,
+        "heightM": 0.6,
+        "id": "o62",
+        "kind": "window",
+        "levelId": "L2",
+        "sillM": 1.7,
+        "wallId": "w24",
+        "widthM": 0.6
+      },
+      {
+        "atM": 1.2,
+        "heightM": 2.1,
+        "id": "o63",
+        "kind": "door",
+        "levelId": "L2",
+        "sillM": 0,
+        "wallId": "w38",
+        "widthM": 0.8
+      }
+    ],
+    "rooms": [
+      {
+        "areaM2": 3.5899500000000018,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r5",
+        "levelId": "L1",
+        "name": "مدخل الرجال",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 6.755
+          },
+          {
+            "x": 6.82,
+            "y": 8.07
+          },
+          {
+            "x": 4.09,
+            "y": 8.07
+          },
+          {
+            "x": 4.09,
+            "y": 6.755
+          }
+        ],
+        "type": "corridor"
+      },
+      {
+        "areaM2": 10.033950000000004,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r1",
+        "levelId": "L1",
+        "name": "مدخل العائلة (معدّل)",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 8.13
+          },
+          {
+            "x": 6.94,
+            "y": 6.755
+          },
+          {
+            "x": 11.47,
+            "y": 6.755
+          },
+          {
+            "x": 11.47,
+            "y": 8.97
+          },
+          {
+            "x": 6.94,
+            "y": 8.97
+          }
+        ],
+        "type": "entrance"
+      },
+      {
+        "areaM2": 28.668200000000006,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r4",
+        "levelId": "L1",
+        "name": "مجلس الرجال",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 8.19
+          },
+          {
+            "x": 6.82,
+            "y": 9.03
+          },
+          {
+            "x": 6.82,
+            "y": 13.43
+          },
+          {
+            "x": 6.82,
+            "y": 14.47
+          },
+          {
+            "x": 2.255,
+            "y": 14.47
+          },
+          {
+            "x": 2.255,
+            "y": 8.19
+          },
+          {
+            "x": 4.03,
+            "y": 8.19
+          }
+        ],
+        "type": "majlis"
+      },
+      {
+        "areaM2": 19.388399999999997,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r2",
+        "levelId": "L1",
+        "name": "الدرج",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 13.37
+          },
+          {
+            "x": 6.94,
+            "y": 9.09
+          },
+          {
+            "x": 11.47,
+            "y": 9.09
+          },
+          {
+            "x": 11.47,
+            "y": 13.37
+          }
+        ],
+        "type": "stairs"
+      },
+      {
+        "areaM2": 34.948949999999996,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r3",
+        "levelId": "L1",
+        "name": "الصالة",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 14.53
+          },
+          {
+            "x": 6.94,
+            "y": 13.49
+          },
+          {
+            "x": 11.47,
+            "y": 13.49
+          },
+          {
+            "x": 11.47,
+            "y": 14.18
+          },
+          {
+            "x": 11.47,
+            "y": 15.68
+          },
+          {
+            "x": 11.47,
+            "y": 17.38
+          },
+          {
+            "x": 11.47,
+            "y": 21.205
+          },
+          {
+            "x": 6.94,
+            "y": 21.205
+          },
+          {
+            "x": 6.94,
+            "y": 18.03
+          }
+        ],
+        "type": "living"
+      },
+      {
+        "areaM2": 15.429699999999997,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r7",
+        "levelId": "L1",
+        "name": "صالة الطعام والمقلط",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 14.59
+          },
+          {
+            "x": 6.82,
+            "y": 17.97
+          },
+          {
+            "x": 2.255,
+            "y": 17.97
+          },
+          {
+            "x": 2.255,
+            "y": 14.59
+          }
+        ],
+        "type": "dining"
+      },
+      {
+        "areaM2": 14.219974999999994,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r8",
+        "levelId": "L1",
+        "name": "المطبخ",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 18.09
+          },
+          {
+            "x": 6.82,
+            "y": 21.205
+          },
+          {
+            "x": 2.255,
+            "y": 21.205
+          },
+          {
+            "x": 2.255,
+            "y": 18.09
+          }
+        ],
+        "type": "kitchen"
+      },
+      {
+        "areaM2": 30.675225000000005,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r9",
+        "levelId": "L1",
+        "name": "مجلس النساء",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 9.03
+          },
+          {
+            "x": 11.59,
+            "y": 6.755
+          },
+          {
+            "x": 15.755,
+            "y": 6.755
+          },
+          {
+            "x": 15.755,
+            "y": 14.12
+          },
+          {
+            "x": 13.98,
+            "y": 14.12
+          },
+          {
+            "x": 11.59,
+            "y": 14.12
+          },
+          {
+            "x": 11.59,
+            "y": 13.43
+          }
+        ],
+        "type": "majlis"
+      },
+      {
+        "areaM2": 3.2153999999999976,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r11",
+        "levelId": "L1",
+        "name": "مغاسل",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 15.62
+          },
+          {
+            "x": 11.59,
+            "y": 14.24
+          },
+          {
+            "x": 13.92,
+            "y": 14.24
+          },
+          {
+            "x": 13.92,
+            "y": 15.62
+          },
+          {
+            "x": 13.38,
+            "y": 15.62
+          }
+        ],
+        "type": "corridor"
+      },
+      {
+        "areaM2": 2.733400000000001,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r14",
+        "levelId": "L1",
+        "name": "خزانة ملابس",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 17.32
+          },
+          {
+            "x": 11.59,
+            "y": 15.74
+          },
+          {
+            "x": 13.32,
+            "y": 15.74
+          },
+          {
+            "x": 13.32,
+            "y": 17.32
+          }
+        ],
+        "type": "storage"
+      },
+      {
+        "areaM2": 15.68122499999999,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r12",
+        "levelId": "L1",
+        "name": "غرفة كبار السن",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 21.205
+          },
+          {
+            "x": 11.59,
+            "y": 17.44
+          },
+          {
+            "x": 13.38,
+            "y": 17.44
+          },
+          {
+            "x": 15.755,
+            "y": 17.44
+          },
+          {
+            "x": 15.755,
+            "y": 21.205
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 2.255225000000001,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r6",
+        "levelId": "L1",
+        "name": "دورة مياه الرجال",
+        "polygon": [
+          {
+            "x": 2.255,
+            "y": 8.07
+          },
+          {
+            "x": 2.255,
+            "y": 6.755
+          },
+          {
+            "x": 3.97,
+            "y": 6.755
+          },
+          {
+            "x": 3.97,
+            "y": 8.07
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 2.3667000000000007,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r10",
+        "levelId": "L1",
+        "name": "دورة مياه النساء",
+        "polygon": [
+          {
+            "x": 15.755,
+            "y": 14.24
+          },
+          {
+            "x": 15.755,
+            "y": 15.62
+          },
+          {
+            "x": 14.04,
+            "y": 15.62
+          },
+          {
+            "x": 14.04,
+            "y": 14.24
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 3.6577000000000024,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r13",
+        "levelId": "L1",
+        "name": "حمام غرفة كبار السن",
+        "polygon": [
+          {
+            "x": 15.755,
+            "y": 15.74
+          },
+          {
+            "x": 15.755,
+            "y": 17.32
+          },
+          {
+            "x": 13.44,
+            "y": 17.32
+          },
+          {
+            "x": 13.44,
+            "y": 15.74
+          },
+          {
+            "x": 13.98,
+            "y": 15.74
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 3.226949999999999,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r21",
+        "levelId": "L2",
+        "name": "خزانة ملابس",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 6.755
+          },
+          {
+            "x": 6.82,
+            "y": 8.27
+          },
+          {
+            "x": 4.69,
+            "y": 8.27
+          },
+          {
+            "x": 4.69,
+            "y": 6.755
+          }
+        ],
+        "type": "storage"
+      },
+      {
+        "areaM2": 2.768749999999999,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r32",
+        "levelId": "L2",
+        "name": "دورة مياه مشتركة",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 8.33
+          },
+          {
+            "x": 6.94,
+            "y": 6.755
+          },
+          {
+            "x": 8.19,
+            "y": 6.755
+          },
+          {
+            "x": 8.19,
+            "y": 8.97
+          },
+          {
+            "x": 6.94,
+            "y": 8.97
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 14.060200000000002,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r19",
+        "levelId": "L2",
+        "name": "غرفة نوم 3",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 8.39
+          },
+          {
+            "x": 6.82,
+            "y": 9.03
+          },
+          {
+            "x": 6.82,
+            "y": 11.47
+          },
+          {
+            "x": 2.255,
+            "y": 11.47
+          },
+          {
+            "x": 2.255,
+            "y": 8.39
+          },
+          {
+            "x": 4.63,
+            "y": 8.39
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 19.388399999999997,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r16",
+        "levelId": "L2",
+        "name": "الدرج",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 11.53
+          },
+          {
+            "x": 6.94,
+            "y": 9.09
+          },
+          {
+            "x": 8.25,
+            "y": 9.09
+          },
+          {
+            "x": 11.47,
+            "y": 9.09
+          },
+          {
+            "x": 11.47,
+            "y": 12.73
+          },
+          {
+            "x": 11.47,
+            "y": 13.37
+          },
+          {
+            "x": 6.94,
+            "y": 13.37
+          }
+        ],
+        "type": "stairs"
+      },
+      {
+        "areaM2": 14.060200000000002,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r22",
+        "levelId": "L2",
+        "name": "غرفة نوم 2",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 11.59
+          },
+          {
+            "x": 6.82,
+            "y": 13.43
+          },
+          {
+            "x": 6.82,
+            "y": 14.67
+          },
+          {
+            "x": 4.63,
+            "y": 14.67
+          },
+          {
+            "x": 2.255,
+            "y": 14.67
+          },
+          {
+            "x": 2.255,
+            "y": 11.59
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 6.0249000000000015,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r17",
+        "levelId": "L2",
+        "name": "ممر الغرف",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 14.73
+          },
+          {
+            "x": 6.94,
+            "y": 13.49
+          },
+          {
+            "x": 11.47,
+            "y": 13.49
+          },
+          {
+            "x": 11.47,
+            "y": 14.82
+          },
+          {
+            "x": 6.94,
+            "y": 14.82
+          }
+        ],
+        "type": "corridor"
+      },
+      {
+        "areaM2": 3.3654000000000037,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r24",
+        "levelId": "L2",
+        "name": "خزانة ملابس",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 14.79
+          },
+          {
+            "x": 6.82,
+            "y": 14.88
+          },
+          {
+            "x": 6.82,
+            "y": 16.37
+          },
+          {
+            "x": 4.69,
+            "y": 16.37
+          },
+          {
+            "x": 4.69,
+            "y": 14.79
+          }
+        ],
+        "type": "storage"
+      },
+      {
+        "areaM2": 28.380449999999996,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r18",
+        "levelId": "L2",
+        "name": "الصالة العلوية",
+        "polygon": [
+          {
+            "x": 6.94,
+            "y": 16.43
+          },
+          {
+            "x": 6.94,
+            "y": 14.94
+          },
+          {
+            "x": 11.47,
+            "y": 14.94
+          },
+          {
+            "x": 11.47,
+            "y": 15.03
+          },
+          {
+            "x": 11.47,
+            "y": 21.205
+          },
+          {
+            "x": 6.94,
+            "y": 21.205
+          },
+          {
+            "x": 6.94,
+            "y": 19.63
+          }
+        ],
+        "type": "living"
+      },
+      {
+        "areaM2": 14.060200000000009,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r25",
+        "levelId": "L2",
+        "name": "غرفة نوم 4",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 16.49
+          },
+          {
+            "x": 6.82,
+            "y": 19.57
+          },
+          {
+            "x": 4.38,
+            "y": 19.57
+          },
+          {
+            "x": 2.255,
+            "y": 19.57
+          },
+          {
+            "x": 2.255,
+            "y": 16.49
+          },
+          {
+            "x": 4.63,
+            "y": 16.49
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 3.6056999999999926,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r26",
+        "levelId": "L2",
+        "name": "دورة مياه مشتركة",
+        "polygon": [
+          {
+            "x": 6.82,
+            "y": 19.69
+          },
+          {
+            "x": 6.82,
+            "y": 21.205
+          },
+          {
+            "x": 4.44,
+            "y": 21.205
+          },
+          {
+            "x": 4.44,
+            "y": 19.69
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 6.999400000000002,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r15",
+        "levelId": "L2",
+        "name": "ممر الغرف",
+        "polygon": [
+          {
+            "x": 11.47,
+            "y": 6.755
+          },
+          {
+            "x": 11.47,
+            "y": 8.97
+          },
+          {
+            "x": 8.31,
+            "y": 8.97
+          },
+          {
+            "x": 8.31,
+            "y": 6.755
+          }
+        ],
+        "type": "corridor"
+      },
+      {
+        "areaM2": 24.635975000000006,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r28",
+        "levelId": "L2",
+        "name": "غرفة نوم 5",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 9.03
+          },
+          {
+            "x": 11.59,
+            "y": 6.755
+          },
+          {
+            "x": 15.755,
+            "y": 6.755
+          },
+          {
+            "x": 15.755,
+            "y": 12.67
+          },
+          {
+            "x": 13.03,
+            "y": 12.67
+          },
+          {
+            "x": 11.59,
+            "y": 12.67
+          }
+        ],
+        "type": "bedroom"
+      },
+      {
+        "areaM2": 3.008400000000004,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r31",
+        "levelId": "L2",
+        "name": "خزانة ملابس الرئيسية",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 13.43
+          },
+          {
+            "x": 11.59,
+            "y": 12.79
+          },
+          {
+            "x": 12.97,
+            "y": 12.79
+          },
+          {
+            "x": 12.97,
+            "y": 14.97
+          },
+          {
+            "x": 11.59,
+            "y": 14.97
+          },
+          {
+            "x": 11.59,
+            "y": 14.88
+          }
+        ],
+        "type": "storage"
+      },
+      {
+        "areaM2": 25.468975,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r29",
+        "levelId": "L2",
+        "name": "غرفة النوم الرئيسية",
+        "polygon": [
+          {
+            "x": 11.59,
+            "y": 21.205
+          },
+          {
+            "x": 11.59,
+            "y": 15.09
+          },
+          {
+            "x": 13.03,
+            "y": 15.09
+          },
+          {
+            "x": 15.755,
+            "y": 15.09
+          },
+          {
+            "x": 15.755,
+            "y": 21.205
+          }
+        ],
+        "type": "master"
+      },
+      {
+        "areaM2": 3.507225,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r20",
+        "levelId": "L2",
+        "name": "حمام غرفة 3",
+        "polygon": [
+          {
+            "x": 2.255,
+            "y": 8.27
+          },
+          {
+            "x": 2.255,
+            "y": 6.755
+          },
+          {
+            "x": 4.57,
+            "y": 6.755
+          },
+          {
+            "x": 4.57,
+            "y": 8.27
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 3.657700000000005,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r23",
+        "levelId": "L2",
+        "name": "حمام غرفة 2",
+        "polygon": [
+          {
+            "x": 2.255,
+            "y": 16.37
+          },
+          {
+            "x": 2.255,
+            "y": 14.79
+          },
+          {
+            "x": 4.57,
+            "y": 14.79
+          },
+          {
+            "x": 4.57,
+            "y": 16.37
+          }
+        ],
+        "type": "bath"
+      },
+      {
+        "areaM2": 3.1284749999999946,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r27",
+        "levelId": "L2",
+        "name": "خزانة ملابس",
+        "polygon": [
+          {
+            "x": 2.255,
+            "y": 21.205
+          },
+          {
+            "x": 2.255,
+            "y": 19.69
+          },
+          {
+            "x": 4.32,
+            "y": 19.69
+          },
+          {
+            "x": 4.32,
+            "y": 21.205
+          }
+        ],
+        "type": "storage"
+      },
+      {
+        "areaM2": 5.809700000000006,
+        "heightM": 3.2,
+        "holes": [],
+        "id": "r30",
+        "levelId": "L2",
+        "name": "حمام الرئيسية",
+        "polygon": [
+          {
+            "x": 15.755,
+            "y": 12.79
+          },
+          {
+            "x": 15.755,
+            "y": 14.97
+          },
+          {
+            "x": 13.09,
+            "y": 14.97
+          },
+          {
+            "x": 13.09,
+            "y": 12.79
+          }
+        ],
+        "type": "bath"
+      }
+    ],
+    "source": {
+      "kind": "mizan-draw/1",
+      "revision": "design-session:v1:v3",
+      "sha256": "05a39d8359036955870ac0e33e623c6d2a4317773c7b28b0ed389e0021088db3",
+      "warnings": []
+    },
+    "walls": [
+      {
+        "a": {
+          "x": 6.88,
+          "y": 6.63
+        },
+        "b": {
+          "x": 6.88,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w1",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 6.63
+        },
+        "b": {
+          "x": 11.53,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w2",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 6.63
+        },
+        "b": {
+          "x": 2.13,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w3",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 4.03,
+          "y": 6.63
+        },
+        "b": {
+          "x": 4.03,
+          "y": 8.13
+        },
+        "heightM": 3.2,
+        "id": "w4",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 15.88,
+          "y": 6.63
+        },
+        "b": {
+          "x": 15.88,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w5",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 13.98,
+          "y": 14.18
+        },
+        "b": {
+          "x": 13.98,
+          "y": 15.68
+        },
+        "heightM": 3.2,
+        "id": "w6",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 13.38,
+          "y": 15.68
+        },
+        "b": {
+          "x": 13.38,
+          "y": 17.38
+        },
+        "heightM": 3.2,
+        "id": "w7",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 6.63
+        },
+        "b": {
+          "x": 15.88,
+          "y": 6.63
+        },
+        "heightM": 3.2,
+        "id": "w8",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 6.88,
+          "y": 9.03
+        },
+        "b": {
+          "x": 11.53,
+          "y": 9.03
+        },
+        "heightM": 3.2,
+        "id": "w9",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 6.88,
+          "y": 13.43
+        },
+        "b": {
+          "x": 11.53,
+          "y": 13.43
+        },
+        "heightM": 3.2,
+        "id": "w10",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 21.33
+        },
+        "b": {
+          "x": 15.88,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w11",
+        "levelId": "L1",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 8.13
+        },
+        "b": {
+          "x": 6.88,
+          "y": 8.13
+        },
+        "heightM": 3.2,
+        "id": "w12",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 14.53
+        },
+        "b": {
+          "x": 6.88,
+          "y": 14.53
+        },
+        "heightM": 3.2,
+        "id": "w13",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 18.03
+        },
+        "b": {
+          "x": 6.88,
+          "y": 18.03
+        },
+        "heightM": 3.2,
+        "id": "w14",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 14.18
+        },
+        "b": {
+          "x": 15.88,
+          "y": 14.18
+        },
+        "heightM": 3.2,
+        "id": "w15",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 15.68
+        },
+        "b": {
+          "x": 15.88,
+          "y": 15.68
+        },
+        "heightM": 3.2,
+        "id": "w16",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 17.38
+        },
+        "b": {
+          "x": 15.88,
+          "y": 17.38
+        },
+        "heightM": 3.2,
+        "id": "w17",
+        "levelId": "L1",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 6.88,
+          "y": 6.63
+        },
+        "b": {
+          "x": 6.88,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w18",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 6.63
+        },
+        "b": {
+          "x": 11.53,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w19",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 6.63
+        },
+        "b": {
+          "x": 2.13,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w20",
+        "levelId": "L2",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 4.63,
+          "y": 6.63
+        },
+        "b": {
+          "x": 4.63,
+          "y": 8.33
+        },
+        "heightM": 3.2,
+        "id": "w21",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 4.63,
+          "y": 14.73
+        },
+        "b": {
+          "x": 4.63,
+          "y": 16.43
+        },
+        "heightM": 3.2,
+        "id": "w22",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 4.38,
+          "y": 19.63
+        },
+        "b": {
+          "x": 4.38,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w23",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 15.88,
+          "y": 6.63
+        },
+        "b": {
+          "x": 15.88,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w24",
+        "levelId": "L2",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 13.03,
+          "y": 12.73
+        },
+        "b": {
+          "x": 13.03,
+          "y": 15.03
+        },
+        "heightM": 3.2,
+        "id": "w25",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 6.63
+        },
+        "b": {
+          "x": 15.88,
+          "y": 6.63
+        },
+        "heightM": 3.2,
+        "id": "w26",
+        "levelId": "L2",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 6.88,
+          "y": 9.03
+        },
+        "b": {
+          "x": 11.53,
+          "y": 9.03
+        },
+        "heightM": 3.2,
+        "id": "w27",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 6.88,
+          "y": 13.43
+        },
+        "b": {
+          "x": 11.53,
+          "y": 13.43
+        },
+        "heightM": 3.2,
+        "id": "w28",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 6.88,
+          "y": 14.88
+        },
+        "b": {
+          "x": 11.53,
+          "y": 14.88
+        },
+        "heightM": 3.2,
+        "id": "w29",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 21.33
+        },
+        "b": {
+          "x": 15.88,
+          "y": 21.33
+        },
+        "heightM": 3.2,
+        "id": "w30",
+        "levelId": "L2",
+        "thicknessM": 0.25
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 8.33
+        },
+        "b": {
+          "x": 6.88,
+          "y": 8.33
+        },
+        "heightM": 3.2,
+        "id": "w31",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 11.53
+        },
+        "b": {
+          "x": 6.88,
+          "y": 11.53
+        },
+        "heightM": 3.2,
+        "id": "w32",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 14.73
+        },
+        "b": {
+          "x": 6.88,
+          "y": 14.73
+        },
+        "heightM": 3.2,
+        "id": "w33",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 16.43
+        },
+        "b": {
+          "x": 6.88,
+          "y": 16.43
+        },
+        "heightM": 3.2,
+        "id": "w34",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 2.13,
+          "y": 19.63
+        },
+        "b": {
+          "x": 6.88,
+          "y": 19.63
+        },
+        "heightM": 3.2,
+        "id": "w35",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 12.73
+        },
+        "b": {
+          "x": 15.88,
+          "y": 12.73
+        },
+        "heightM": 3.2,
+        "id": "w36",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 11.53,
+          "y": 15.03
+        },
+        "b": {
+          "x": 15.88,
+          "y": 15.03
+        },
+        "heightM": 3.2,
+        "id": "w37",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      },
+      {
+        "a": {
+          "x": 8.25,
+          "y": 6.63
+        },
+        "b": {
+          "x": 8.25,
+          "y": 9.03
+        },
+        "heightM": 3.2,
+        "id": "w38",
+        "levelId": "L2",
+        "thicknessM": 0.12
+      }
+    ]
+  },
+  "frame": "X_EAST_Y_NORTH_Z_UP",
+  "projectId": "MIZAN-D1-v1",
+  "rules": {
+    "provenance": [
+      {
+        "authority": "ALMIZAN_BINDING",
+        "classification": "PROJECT_ASSUMPTION",
+        "id": "MIZAN-ROUTING-DOMAIN",
+        "noteAr": "حيز التمرير محيط المبنى (أو حدود الأرض) ناقص الأفنية ودقة الشبكة 0.25 م ما لم تُعدَّل؛ افتراض قابل للتعديل وليس اشتراطًا.",
+        "verifiedCodeClause": null
+      },
+      {
+        "authority": "ALMIZAN_STRUCTURAL_PRECHECK",
+        "classification": "PROJECT_ASSUMPTION",
+        "id": "MIZAN-STRUCTURAL-PRECHECK",
+        "noteAr": "الأعمدة والكمرات من الفحص الإنشائي المبدئي (تقدير بافتراضات معلنة)، وليست نموذجًا إنشائيًا معتمدًا؛ البلاطات والفتحات والقواعد غير ممثلة.",
+        "verifiedCodeClause": null
+      },
+      {
+        "authority": "EXAMPLE_ONLY",
+        "classification": "PROJECT_ASSUMPTION",
+        "id": "KIT-DEMO-ASSUMPTIONS",
+        "noteAr": "قيم المثال التوضيحية للحزمة (كابل، حماية، مناخ، غلاف…) أُدخلت بطلب المستخدم؛ افتراضات قابلة للتعديل وليست اشتراطات سعودية أو اختيار مصنّع.",
+        "verifiedCodeClause": null
+      }
+    ],
+    "rates": {},
+    "routingByLevel": {
+      "L1": {
+        "holes": [],
+        "polygon": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 18,
+            "y": 0
+          },
+          {
+            "x": 18,
+            "y": 25
+          },
+          {
+            "x": 0,
+            "y": 25
+          }
+        ],
+        "stepM": 0.25
+      },
+      "L2": {
+        "holes": [],
+        "polygon": [
+          {
+            "x": 4.63,
+            "y": 6.505
+          },
+          {
+            "x": 6.88,
+            "y": 6.505
+          },
+          {
+            "x": 8.25,
+            "y": 6.505
+          },
+          {
+            "x": 11.53,
+            "y": 6.505
+          },
+          {
+            "x": 16.005,
+            "y": 6.505
+          },
+          {
+            "x": 16.005,
+            "y": 12.73
+          },
+          {
+            "x": 16.005,
+            "y": 15.03
+          },
+          {
+            "x": 16.005,
+            "y": 21.455
+          },
+          {
+            "x": 11.53,
+            "y": 21.455
+          },
+          {
+            "x": 6.88,
+            "y": 21.455
+          },
+          {
+            "x": 4.38,
+            "y": 21.455
+          },
+          {
+            "x": 2.005,
+            "y": 21.455
+          },
+          {
+            "x": 2.005,
+            "y": 19.63
+          },
+          {
+            "x": 2.005,
+            "y": 16.43
+          },
+          {
+            "x": 2.005,
+            "y": 14.73
+          },
+          {
+            "x": 2.005,
+            "y": 11.53
+          },
+          {
+            "x": 2.005,
+            "y": 8.33
+          },
+          {
+            "x": 2.005,
+            "y": 6.505
+          }
+        ],
+        "stepM": 0.25
+      }
+    },
+    "structuralModelComplete": false
+  },
+  "schema": "MIZAN-MEP-INPUT/1",
+  "services": {
+    "electrical": {
+      "circuits": [
+        {
+          "cable": {
+            "reactanceOhmPerKm": 0.08,
+            "resistanceOhmPerKm": 8,
+            "sizeMm2": 2.5
+          },
+          "id": "C1",
+          "loadIds": [
+            "SO1",
+            "SO2"
+          ],
+          "panelId": "DB1",
+          "phase": "L1",
+          "phases": 1,
+          "protection": {
+            "correctedAmpacityA": 18,
+            "ratedA": 16,
+            "source": "DEMO ONLY: engineer must replace with verified cable installation data and project limit",
+            "voltageDropLimitPercent": 3
+          },
+          "routing": {
+            "clearanceM": 0.03,
+            "heightM": 0.03,
+            "routeHeightM": 2.85,
+            "widthM": 0.03
+          },
+          "voltageV": 230
+        }
+      ],
+      "lightingByRoom": {
+        "r4": {
+          "demandFactor": 1,
+          "lumensPerFixture": 1600,
+          "maintenanceFactor": 0.8,
+          "mountHeightM": 2.9,
+          "powerFactor": 0.95,
+          "targetLux": 150,
+          "utilizationFactor": 0.6,
+          "wattsPerFixture": 14
+        }
+      },
+      "loads": [
+        {
+          "demandFactor": 0.5,
+          "id": "SO1",
+          "kind": "SOCKET",
+          "levelId": "L1",
+          "position": {
+            "x": 4.532,
+            "y": 8.619,
+            "z": 0.4
+          },
+          "powerW": 1000,
+          "roomId": "r4"
+        },
+        {
+          "demandFactor": 0.5,
+          "id": "SO2",
+          "kind": "SOCKET",
+          "levelId": "L1",
+          "position": {
+            "x": 9.198,
+            "y": 13.851,
+            "z": 0.4
+          },
+          "powerFactor": 0.95,
+          "powerW": 800,
+          "roomId": "r3"
+        },
+        {
+          "id": "AC1-LOAD",
+          "kind": "EQUIPMENT_LOAD",
+          "levelId": "L1",
+          "position": {
+            "x": 4.917,
+            "y": 8.619,
+            "z": 2.7
+          },
+          "powerW": 1800,
+          "roomId": "r4",
+          "sourceEquipmentId": "AC1"
+        }
+      ],
+      "panels": [
+        {
+          "id": "DB1",
+          "kind": "PANEL",
+          "levelId": "L1",
+          "position": {
+            "x": 4.124,
+            "y": 19.465,
+            "z": 0.4
+          },
+          "roomId": "r8"
+        }
+      ]
+    },
+    "fire": {
+      "connections": [
+        {
+          "fromId": "FACP1",
+          "id": "FC1",
+          "routing": {
+            "clearanceM": 0.02,
+            "heightM": 0.02,
+            "routeHeightM": 2.6,
+            "widthM": 0.02
+          },
+          "toId": "SD1"
+        }
+      ],
+      "devices": [
+        {
+          "id": "FACP1",
+          "kind": "FIRE_ALARM_PANEL",
+          "levelId": "L1",
+          "position": {
+            "x": 4.826,
+            "y": 19.967,
+            "z": 1.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "id": "SD1",
+          "kind": "SMOKE_DETECTOR",
+          "levelId": "L1",
+          "position": {
+            "x": 9.492,
+            "y": 14.146,
+            "z": 3
+          },
+          "roomId": "r3"
+        }
+      ]
+    },
+    "hvac": {
+      "equipment": [
+        {
+          "id": "AC1",
+          "kind": "AIR_EQUIPMENT",
+          "levelId": "L1",
+          "position": {
+            "x": 4.917,
+            "y": 8.619,
+            "z": 2.7
+          },
+          "ratedInputW": 1800,
+          "roomId": "r4"
+        }
+      ],
+      "zones": [
+        {
+          "ductVelocityMS": 4,
+          "equipmentId": "AC1",
+          "id": "Z1",
+          "roomId": "r4",
+          "routing": {
+            "clearanceM": 0.05,
+            "heightM": 0.25,
+            "routeHeightM": 2.8,
+            "widthM": 0.3
+          },
+          "supplyDeltaK": 12,
+          "terminalHeightM": 2.8,
+          "thermal": {
+            "cpJkgK": 1006,
+            "densityKgM3": 1.2,
+            "indoorC": 24,
+            "indoorHumidityRatio": 0.009,
+            "infiltrationM3S": 0.003,
+            "internalLatentW": 150,
+            "internalSensibleW": 300,
+            "latentHeatJkg": 2450000,
+            "outdoorAirM3S": 0.01,
+            "outdoorC": 44,
+            "outdoorHumidityRatio": 0.012,
+            "solarW": 500,
+            "surfaces": [
+              {
+                "areaM2": 22,
+                "uWm2K": 0.45
+              },
+              {
+                "areaM2": 28.67,
+                "uWm2K": 0.25
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "low_current": {
+      "connections": [
+        {
+          "fromId": "RACK1",
+          "id": "LC1",
+          "routing": {
+            "clearanceM": 0.02,
+            "heightM": 0.02,
+            "routeHeightM": 2.6,
+            "widthM": 0.02
+          },
+          "toId": "DO1"
+        }
+      ],
+      "devices": [
+        {
+          "id": "RACK1",
+          "kind": "DATA_RACK",
+          "levelId": "L1",
+          "position": {
+            "x": 4.826,
+            "y": 19.967,
+            "z": 1.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "id": "DO1",
+          "kind": "DATA_OUTLET",
+          "levelId": "L1",
+          "position": {
+            "x": 9.492,
+            "y": 14.146,
+            "z": 0.4
+          },
+          "roomId": "r3"
+        }
+      ]
+    },
+    "plumbing": {
+      "connections": [
+        {
+          "endInvertM": -0.95,
+          "flowM3S": 0.001,
+          "fromId": "WC1",
+          "id": "PC1",
+          "routing": {
+            "clearanceM": 0.01,
+            "heightM": 0.11,
+            "widthM": 0.11
+          },
+          "slope": 0.02,
+          "startInvertM": -0.3,
+          "system": "sanitary",
+          "toId": "MH1",
+          "velocityMS": 0.8
+        }
+      ],
+      "equipment": [
+        {
+          "id": "MH1",
+          "kind": "MANHOLE",
+          "levelId": "L1",
+          "position": {
+            "x": 1.338,
+            "y": 13.987,
+            "z": -0.6
+          }
+        },
+        {
+          "id": "RN1",
+          "kind": "RISER_NODE",
+          "levelId": "L2",
+          "position": {
+            "x": 3.105,
+            "y": 7.418,
+            "z": 3.2
+          },
+          "roomId": "r20"
+        }
+      ],
+      "fixtures": [
+        {
+          "id": "WC1",
+          "kind": "WC",
+          "levelId": "L1",
+          "position": {
+            "x": 3.105,
+            "y": 7.418,
+            "z": 0
+          },
+          "roomId": "r6"
+        }
+      ]
+    },
+    "risers": [
+      {
+        "clearanceM": 0.03,
+        "discipline": "plumbing",
+        "fromId": "WC1",
+        "heightM": 0.06,
+        "id": "RS1",
+        "kind": "VERTICAL_RISER",
+        "layer": "P-RISER",
+        "systemId": "plumbing-riser",
+        "toId": "RN1",
+        "widthM": 0.06
+      }
+    ],
+    "solar": {
+      "capacity": {
+        "panelCount": 2,
+        "wattsPerPanel": 450
+      },
+      "connections": [
+        {
+          "fromId": "INV1",
+          "id": "SC1",
+          "routing": {
+            "clearanceM": 0.02,
+            "heightM": 0.02,
+            "routeHeightM": 2.6,
+            "widthM": 0.02
+          },
+          "toId": "PV1"
+        }
+      ],
+      "devices": [
+        {
+          "id": "INV1",
+          "kind": "INVERTER",
+          "levelId": "L1",
+          "position": {
+            "x": 4.826,
+            "y": 19.967,
+            "z": 1.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "id": "PV1",
+          "kind": "PV_MODULE",
+          "levelId": "L1",
+          "position": {
+            "x": 9.492,
+            "y": 14.146,
+            "z": 0.4
+          },
+          "roomId": "r3"
+        }
+      ]
+    }
+  },
+  "units": "m"
+}
