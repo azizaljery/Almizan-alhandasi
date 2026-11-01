@@ -3,6 +3,7 @@
 // المخطط مطابق لمواصفة المالك (انظر brief.d.ts) مع إضافات معلنة: provenance وlog وrecheck وplacements وfeatures.
 import { frontSetbackFor, SETBACK_NEIGHBOUR, COVERAGE_MAX, REG_NOTE_AR } from '../regulations-sa.mjs';
 import { normalizeAr } from '../requirements.mjs';
+import { FACADE_CHOICES, facadeStyleFromText } from '../facade-choice.mjs';
 
 export const BRIEF_VERSION = 'sharaa-2.0';
 export const SOURCES = Object.freeze(['land_step', 'client_free_text', 'client_answer', 'client_confirmed', 'ai_inference', 'design_default', 'verified_regulation']);
@@ -320,7 +321,7 @@ function refreshActive(d) {
 
 // ------------------------------------------------------------------------------------------ الأسرة والتفضيلات
 const PREF_SUPPORT = { privacy: 'pref.privacy', naturalLight: 'pref.naturalLight', budgetRange: 'pref.budget', parkingCount: 'pref.parking', kitchenStyle: 'pref.kitchenStyle' };
-const PREF_VALUES = { kitchenStyle: ['open', 'closed', 'open_to_hall'] };
+const PREF_VALUES = { kitchenStyle: ['open', 'closed', 'open_to_hall'], facadeStyle: FACADE_CHOICES }; // (2026-10-31) طراز الواجهة: لا يُرسل للمحرك
 /** يضبط حقلًا في household أو preferences أو preferences.features مع مصدره. المسار مثل 'household.currentMembers'. */
 export function setField(brief, path, value, meta) {
   const m = makeMeta(meta), [root, key] = path.split('.');
@@ -484,6 +485,8 @@ export function applyExtraction(brief, req, text, { source = 'client_free_text',
   if (P.parking) b = setField(b, 'preferences.parkingCount', 1, { source, priority: 'flexible', originalText: quote(null) });
   if (P.floors) { /* عدد الأدوار من الأرض؛ كلام العميل المخالف يظهر تعارضًا في المراجعة لا تغييرًا للأرض */ b = setField(b, 'features.floorsSaid', P.floors, { source, priority: 'preferred', originalText: quote(null) }); }
   if (req.tweaks && Object.keys(req.tweaks).length) b = setField(b, 'features.tweaks', req.tweaks, { source, priority: 'flexible', originalText: quote(null) });
+  // (طلب المالك 2026-10-31) طراز الواجهة من كلام العميل (الكلاسيكي/النيوكلاسيكي/الحديث/النجدي) — تفضيل مرن لا يمس المسقط ولا المحرك
+  { const fs = facadeStyleFromText(text); if (fs) { b = setField(b, 'preferences.facadeStyle', fs.style, { source, priority: 'flexible', originalText: originalText || fs.quote }); added.push('pref:facadeStyle'); } }
   if (req.site?.irregular) unsupported.push(`شكل الأرض (${req.site.shapeAr}): المحرك يقبل أرضًا مستطيلة فقط`);
   return { brief: b, unsupported, unclear: req.unclear || [], added };
 }

@@ -16,6 +16,8 @@ import { buildFixture, fixtureMatrix } from './fixtures3d.mjs';
 import { stairLayout, emitStair, stairHeightAt } from './stairs3d.mjs';
 import { emitOpening, archProfile } from './openings3d.mjs';
 import { buildSite } from './site3d.mjs';
+import { facadeStyle3D } from '../facade-styles.mjs';
+import { emitFacadeDetails } from './facade3d.mjs';
 
 export { stairLayout, stairHeightAt };
 
@@ -37,21 +39,24 @@ const sign = v => v < 0 ? -1 : 1;
 
 export function buildBuildingScene(doc, THREE, options = {}) {
   const fin = doc.finish || {}, fac = fin.facade || {};
-  const opt = { ...DEFAULTS, ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...(fac.base === 'stone' && fac.scope === 'front' ? { stoneAccent: 'front' } : {}), ...options };
+  // (طلب المالك 2026-10-31) طراز الواجهة: FS = null بلا طراز ← كل ما يلي كما كان حرفيًا. اختيارات العميل الصريحة تتقدم على ألوان الطراز.
+  const FS = fac.style ? facadeStyle3D(doc) : null, facBase = fac.base ?? FS?.base;
+  const opt = { ...DEFAULTS, ...(FS ? { stoneAccent: FS.stoneAccent } : {}), ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...(facBase === 'stone' && fac.scope === 'front' ? { stoneAccent: 'front' } : {}), ...options };
   const ownLib = !opt.materials;
   const lib = opt.materials || createMaterialLibrary(THREE, { textures: opt.textures, maxAnisotropy: opt.maxAnisotropy, quality: opt.quality });
   const group = new THREE.Group(); group.name = 'mizan-building';
   if (ownLib) { // façade / material choices of the project
     const m = lib.m, paint = (mat, c) => { if (mat && c) mat.color.set(c); };
+    if (FS) { const C = FS.colors; paint(m.render, C.render); paint(m.accent, C.accent); paint(m.plinth, C.plinth); paint(m.coping, C.coping); paint(m.aluminium, C.aluminium); paint(m.doorEntry, C.entryDoor); paint(m.fence, C.render); paint(m.fenceStone, C.render); paint(m.trim, C.trim); paint(m.cap, C.trim); paint(m.sillStone, C.trim); }
     paint(m.render, fac.color); paint(m.accent, fac.accentColor); paint(m.plinth, fac.plinthColor || fac.accentColor); paint(m.coping, fac.copingColor || fin.roof);
     paint(m.aluminium, fin.aluminium); paint(m.doorEntry, fin.entryDoor); paint(m.fence, fin.fence);
     // (Round 18) façade scope: 'front' = the street façade only (stone accent on the segments facing the entry street); 'all' (default) =
     // every exterior wall and the parapet; 'all+fence' = and the plot fence too — the independent reviewer r17 saw parapet and fence left
     // in plaster after «غيّر الواجهة إلى حجر»
-    const scope = fac.base === 'stone' ? (fac.scope || 'all') : null;
-    if (fac.base === 'stone' && scope !== 'front') { m.render.map = m.accent.map; m.render.bumpMap = m.accent.bumpMap; m.render.bumpScale = m.accent.bumpScale; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
+    const scope = facBase === 'stone' ? (fac.scope || 'all') : null;
+    if (facBase === 'stone' && scope !== 'front') { m.render.map = m.accent.map; m.render.bumpMap = m.accent.bumpMap; m.render.bumpScale = m.accent.bumpScale; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
     if (scope === 'all+fence') { m.fence.map = m.accent.map; m.fence.bumpMap = m.accent.bumpMap; m.fence.bumpScale = m.accent.bumpScale; m.fence.color.copy(m.accent.color); m.fence.needsUpdate = true; }
-    if (fac.base === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
+    if (facBase === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
   }
   const T = opt.slab, PL = opt.plinth;
   const result = { group, rooms: new Map(), levels: [], site: null, stats: {}, lib, options: opt, doc };
@@ -179,7 +184,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
             const accent = accentSegs.has(seg.id) && !fence;
             const colorAt = opt.ao ? (u, z) => { const zz = z + (ground ? PL : 0); const a = zz < .5 ? .84 + .16 * smooth(zz / .5) : 1; return [a, a, a]; } : () => WHITE;
             if (accent) faceGrid('accent', A, Bp, nrm, z0, z1, uOff, colorAt, [], [0, .5, 1, 1.5, 2, 2.5, 3]);
-            else if (z0 < plinthTop && !fence && fac.plinth !== false) {
+            else if (z0 < plinthTop && !fence && (fac.plinth ?? (FS ? FS.plinth : undefined)) !== false) {
               faceGrid('plinth', A, Bp, nrm, z0, Math.min(z1, plinthTop), uOff, colorAt, [], [0]);
               if (z1 > plinthTop) faceGrid('render', A, Bp, nrm, plinthTop, z1, uOff, colorAt, [], []);
             } else faceGrid('render', A, Bp, nrm, z0, z1, uOff, colorAt, [], []);
@@ -235,13 +240,15 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       for (const [A, Bp, nrm] of [[c.aL, c.bL, seg.left], [c.aR, c.bR, mul(seg.left, -1)]]) {
         const len = dist(A, Bp), ux = (Bp.x - A.x) / len, uy = (Bp.y - A.y) / len, n3 = [nrm.x, 0, -nrm.y];
         const pt = (u, y) => [A.x + ux * u, E + y, -(A.y + uy * u)];
-        PA.quad(fac.base === 'stone' && ['all', 'all+fence'].includes(fac.scope || 'all') ? 'fenceStone' : 'fence', pt(0, H), pt(len, H), pt(len, H + parapetH), pt(0, H + parapetH), n3, [[0, H], [len, H], [len, H + parapetH], [0, H + parapetH]]);
+        PA.quad(facBase === 'stone' && ['all', 'all+fence'].includes(fac.scope || 'all') ? 'fenceStone' : 'fence', pt(0, H), pt(len, H), pt(len, H + parapetH), pt(0, H + parapetH), n3, [[0, H], [len, H], [len, H + parapetH], [0, H + parapetH]]);
       }
       // (Round 14) projecting cornice band at roof level on the outer face (a classic stone cornice under the parapet)
-      if (opt.cornice !== false) { const outerL = !seg.sideL, A0 = outerL ? c.aL : c.aR, B0 = outerL ? c.bL : c.bR, nn = outerL ? seg.left : mul(seg.left, -1), dd = norm(sub(B0, A0));
-        const a0 = sub(A0, mul(dd, .16)), b0 = add(B0, mul(dd, .16)); PA.prism({ top: 'cap', side: 'cap', bottom: 'cap' }, [a0, b0, add(b0, mul(nn, .16)), add(a0, mul(nn, .16))], E + H - .04, E + H + .2); }
+      if (opt.cornice !== false && (!FS || FS.roofCornice)) { const outerL = !seg.sideL, A0 = outerL ? c.aL : c.aR, B0 = outerL ? c.bL : c.bR, nn = outerL ? seg.left : mul(seg.left, -1), dd = norm(sub(B0, A0));
+        const cp = FS ? FS.roofCornice.proj : .16, ch = FS ? FS.roofCornice.h : .2;
+        const a0 = sub(A0, mul(dd, cp)), b0 = add(B0, mul(dd, cp)); PA.prism({ top: 'cap', side: 'cap', bottom: 'cap' }, [a0, b0, add(b0, mul(nn, cp)), add(a0, mul(nn, cp))], E + H - .04, E + H + ch); }
       parapetWalls.push({ id: seg.wallId + '#' + seg.id, level: L.id, a: seg.a, b: seg.b, t: seg.t + .1, h: .07, kind: 'wall' });
     }
+    if (FS) (result.facadeDetails ||= []).push({ level: L.id, ...emitFacadeDetails(PA, L, FS, { E, H, PL, isTop, ground, parapetH }) });
     if (parapetWalls.length) {
       const cop = buildWallSolids(parapetWalls, [], { levelHeight: .07 });
       for (const s of cop.segments) PA.prism({ top: 'cap', side: 'cap', bottom: 'none' }, s.quad, E + H + parapetH, E + H + parapetH + .07);
@@ -344,11 +351,13 @@ export function buildBuildingScene(doc, THREE, options = {}) {
           O.prism({ top: 'stairTread', side: 'stairRiser', bottom: 'none' }, [p0, p1, p2, p3], E - PL, E + top);
           d0 = d1;
         });
-        // canopy
+        // canopy (بطراز: الكلاسيكي رواق بأعمدة في facade3d، والنجدي إطار خشبي بلا مظلة)
+        if (!FS || FS.canopy) {
         const proj = 1.55, cw = o.w + 1.7, cz = o.z1 + .52, ch = .16;
         const q0 = add(add(o.center, mul(out, face - .02)), mul(side, -cw / 2)), q1 = add(add(o.center, mul(out, face - .02)), mul(side, cw / 2));
         const q2 = add(q1, mul(out, proj)), q3 = add(q0, mul(out, proj));
         O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [q0, q1, q2, q3], E + cz, E + cz + ch);
+        }
         result.entry = { levelId: L.id, point: o.center, normal: out, width: o.w, wallId: seg.wallId, opening: o.id, steps: 1.25 + .64 };
       }
     }
@@ -369,9 +378,9 @@ export function buildBuildingScene(doc, THREE, options = {}) {
           const hot = compass === 's' || compass === 'w';
           const proj = hot ? (o.w >= 2 ? .95 : .8) : o.w >= 2 ? .6 : .45, ow = o.w + (hot ? .5 : .3), z = o.z1 + .1;
           const q0 = add(add(o.center, mul(out, face - .01)), mul(side, -ow / 2)), q1 = add(add(o.center, mul(out, face - .01)), mul(side, ow / 2));
-          O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [q0, q1, add(q1, mul(out, proj)), add(q0, mul(out, proj))], E + z, E + z + .1);
+          if (!FS || FS.overhang) O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [q0, q1, add(q1, mul(out, proj)), add(q0, mul(out, proj))], E + z, E + z + .1);
           // (Round 14) stone surround around every exterior window (head, jambs, sill band) — reads as cut-stone framing
-          { const fz0 = E + (o.z0 ?? o.z1 - (o.h || 1.2)) - .12, fz1 = E + o.z1 + .02, fw = .12, fo = .05;
+          if (!FS || FS.surround) { const fz0 = E + (o.z0 ?? o.z1 - (o.h || 1.2)) - .12, fz1 = E + o.z1 + .02, fw = FS ? FS.surround.w : .12, fo = FS ? FS.surround.proj : .05;
             for (const sg of [-1, 1]) { const j0 = add(add(o.center, mul(out, face - .01)), mul(side, sg * (o.w / 2))), j1 = add(j0, mul(side, sg * fw)); O.prism({ top: 'sillStone', side: 'sillStone', bottom: 'sillStone' }, [j0, j1, add(j1, mul(out, fo)), add(j0, mul(out, fo))], fz0, fz1); }
             const h0 = add(add(o.center, mul(out, face - .01)), mul(side, -(o.w / 2 + fw))), h1 = add(add(o.center, mul(out, face - .01)), mul(side, o.w / 2 + fw));
             O.prism({ top: 'sillStone', side: 'sillStone', bottom: 'sillStone' }, [h0, h1, add(h1, mul(out, fo + .02)), add(h0, mul(out, fo + .02))], fz0 - .06, fz0 + .06); }
@@ -387,7 +396,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
             for (let zz = z0 + .3; zz < z1 - .15; zz += .16) O.prism({ top: 'wood', side: 'wood', bottom: 'wood' }, [at(-hw, .005), at(hw, .005), at(hw, .04), at(-hw, .04)], zz, zz + .025);
             (result.privacyScreens ||= []).push({ level: L.id, opening: o.id, room: inner.name, compass });
           }
-          if (eastWest) for (const sg of [-1, 1]) {
+          if (eastWest && (!FS || FS.fins)) for (const sg of [-1, 1]) {
             const c0 = add(add(o.center, mul(out, face - .01)), mul(side, sg * (o.w / 2 + .1))), c1 = add(c0, mul(side, sg * .06)), fp = Math.min(proj, .35);
             O.prism({ top: 'cap', side: 'trim', bottom: 'trim' }, [c0, c1, add(c1, mul(out, fp)), add(c0, mul(out, fp))], E + (o.z0 ?? o.z1 - (o.h || 1.2)), E + z);
           }
