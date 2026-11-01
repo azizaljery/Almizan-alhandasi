@@ -1,0 +1,216 @@
+{
+ "purpose": "بصمة SHA-256 لكامل ناتج generateInitialDesign (دون حقول الزمن) — f8e1844 مقابل dev/facade-styles",
+ "script": "scripts/sharaa-r21-integration-matrix.mjs",
+ "rows": [
+  {
+   "id": "C1",
+   "base": "2d979197ee307254d68491ee759e2236bb1d3773d54781a20e62322d64ce0e0e",
+   "after": "2d979197ee307254d68491ee759e2236bb1d3773d54781a20e62322d64ce0e0e",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "C2",
+   "base": "231fb3bd6b0acfd84b2e20970363c63e77fea1439bb6f238b08cbaafd623d282",
+   "after": "231fb3bd6b0acfd84b2e20970363c63e77fea1439bb6f238b08cbaafd623d282",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "C3",
+   "base": "55ea039c10be509bb91daf6ab8f611ad464bbf6bbaa4d0b39dfdeee5c10f4f18",
+   "after": "55ea039c10be509bb91daf6ab8f611ad464bbf6bbaa4d0b39dfdeee5c10f4f18",
+   "identical": true,
+   "outcome": "visible=3 ready=2"
+  },
+  {
+   "id": "C4",
+   "base": "16e831d566b085750e4c5cf7b07a0761fa28ae5d857f045db21a1bd174f8da0e",
+   "after": "16e831d566b085750e4c5cf7b07a0761fa28ae5d857f045db21a1bd174f8da0e",
+   "identical": true,
+   "outcome": "visible=1 ready=0"
+  },
+  {
+   "id": "C5",
+   "base": "04aa4011e50b9c0bcd8b9d252a7c9be25472c281a92a6adf5f3dc833afc0291d",
+   "after": "04aa4011e50b9c0bcd8b9d252a7c9be25472c281a92a6adf5f3dc833afc0291d",
+   "identical": true,
+   "outcome": "visible=3 ready=3"
+  },
+  {
+   "id": "C6",
+   "base": "baa88284aa7bf1462ed6b32e2e4c25112c26efcc1dd9d93d9ab1ed9fe39fec14",
+   "after": "baa88284aa7bf1462ed6b32e2e4c25112c26efcc1dd9d93d9ab1ed9fe39fec14",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "C7",
+   "base": "66feef3b870479b39a3e9558e81e47676eae032193cbfe0ae7e51278a8ee64f0",
+   "after": "66feef3b870479b39a3e9558e81e47676eae032193cbfe0ae7e51278a8ee64f0",
+   "identical": true,
+   "outcome": "visible=1 ready=0"
+  },
+  {
+   "id": "C8",
+   "base": "a5c2553dd4f7744c29c00b7be7f2c677c81904c95f645ae034de117bbe54d08a",
+   "after": "a5c2553dd4f7744c29c00b7be7f2c677c81904c95f645ae034de117bbe54d08a",
+   "identical": true,
+   "outcome": "visible=3 ready=2"
+  },
+  {
+   "id": "C9",
+   "base": "2fb95ad088fcad2f69c174ee8c9bb6a277462862173f9dad33b64ee6d44907ff",
+   "after": "2fb95ad088fcad2f69c174ee8c9bb6a277462862173f9dad33b64ee6d44907ff",
+   "identical": true,
+   "outcome": "visible=3 ready=3"
+  },
+  {
+   "id": "C10",
+   "base": "af622509611e2d53718d4bd18a6feffb4a0f4abbd2327dfa340b7d4971edceed",
+   "after": "af622509611e2d53718d4bd18a6feffb4a0f4abbd2327dfa340b7d4971edceed",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "H1",
+   "base": "e4f8cabaa1b2d178a3d7e686813f0d2fd3b7f86b05c138671fe46c175026247e",
+   "after": "e4f8cabaa1b2d178a3d7e686813f0d2fd3b7f86b05c138671fe46c175026247e",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "H2",
+   "base": "71acceda4763677f698c8fa612134098d859f4bd55f049635fbc08755040bf98",
+   "after": "71acceda4763677f698c8fa612134098d859f4bd55f049635fbc08755040bf98",
+   "identical": true,
+   "outcome": "visible=0 ready=0"
+  },
+  {
+   "id": "H3",
+   "base": "3c61d7cde8332f16e5379efa60b090f2525e82d2502ebf7f9a3073a6b9ce880f",
+   "after": "3c61d7cde8332f16e5379efa60b090f2525e82d2502ebf7f9a3073a6b9ce880f",
+   "identical": true,
+   "outcome": "visible=0 ready=0"
+  },
+  {
+   "id": "H4",
+   "base": "0a0e4e843ff76651323a9af9c90c39c9d9895f1f97373a194491101d41e70af8",
+   "after": "0a0e4e843ff76651323a9af9c90c39c9d9895f1f97373a194491101d41e70af8",
+   "identical": true,
+   "outcome": "ERR VILLA_BUILD_FAILED"
+  },
+  {
+   "id": "H5",
+   "base": "c5f126e3e928c70c505af48c65f407c48cfdec8c15559679ecf60a3df9583d02",
+   "after": "c5f126e3e928c70c505af48c65f407c48cfdec8c15559679ecf60a3df9583d02",
+   "identical": true,
+   "outcome": "visible=2 ready=2"
+  },
+  {
+   "id": "H6",
+   "base": "9bc653e1816c60f83b9522c3a9f6c2e64ade5f0fd12c76d7ce4c4d175ab4632a",
+   "after": "9bc653e1816c60f83b9522c3a9f6c2e64ade5f0fd12c76d7ce4c4d175ab4632a",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "H7",
+   "base": "9c3cb67e34fafc3c4646ad8d87147140401bfa6b8cfaeb2a77dd1515158f61fe",
+   "after": "9c3cb67e34fafc3c4646ad8d87147140401bfa6b8cfaeb2a77dd1515158f61fe",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "H8",
+   "base": "007a79b8168b562265910ec1a5c4d5671f7e0799a207157323e1dbe239a2e6a2",
+   "after": "007a79b8168b562265910ec1a5c4d5671f7e0799a207157323e1dbe239a2e6a2",
+   "identical": true,
+   "outcome": "visible=1 ready=0"
+  },
+  {
+   "id": "H9",
+   "base": "15b2aaf9eeb86d447e221407582d326d0b3a139987280931616dc2d4e76ea64b",
+   "after": "15b2aaf9eeb86d447e221407582d326d0b3a139987280931616dc2d4e76ea64b",
+   "identical": true,
+   "outcome": "visible=0 ready=0"
+  },
+  {
+   "id": "H10",
+   "base": "1a7d65b5862740a4d81e139a37ed4f5955a5e5c0d945ba5da8ac75176be83e8c",
+   "after": "1a7d65b5862740a4d81e139a37ed4f5955a5e5c0d945ba5da8ac75176be83e8c",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "D1",
+   "base": "b827225fb3dd62d064c6390b295288f4f049b91244c28c90a93c2317171da730",
+   "after": "b827225fb3dd62d064c6390b295288f4f049b91244c28c90a93c2317171da730",
+   "identical": true,
+   "outcome": "visible=0 ready=0"
+  },
+  {
+   "id": "D2",
+   "base": "e9e3a4a041f7c8f597b6b8e78187426445d7f2cd819fd079ae5b813fd99b799f",
+   "after": "e9e3a4a041f7c8f597b6b8e78187426445d7f2cd819fd079ae5b813fd99b799f",
+   "identical": true,
+   "outcome": "ERR VILLA_REVIEW_FAILED"
+  },
+  {
+   "id": "D3",
+   "base": "d0301d276a5248f4740473ddce29bdd023afcb23a85994e5fcde7ad13b4f6080",
+   "after": "d0301d276a5248f4740473ddce29bdd023afcb23a85994e5fcde7ad13b4f6080",
+   "identical": true,
+   "outcome": "visible=2 ready=1"
+  },
+  {
+   "id": "D4",
+   "base": "a039d5cceae37668d6391b3eadff003c39d31c7cbf8547d0c8f0182149950728",
+   "after": "a039d5cceae37668d6391b3eadff003c39d31c7cbf8547d0c8f0182149950728",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "D5",
+   "base": "0a0e4e843ff76651323a9af9c90c39c9d9895f1f97373a194491101d41e70af8",
+   "after": "0a0e4e843ff76651323a9af9c90c39c9d9895f1f97373a194491101d41e70af8",
+   "identical": true,
+   "outcome": "ERR VILLA_BUILD_FAILED"
+  },
+  {
+   "id": "D6",
+   "base": "e9e3a4a041f7c8f597b6b8e78187426445d7f2cd819fd079ae5b813fd99b799f",
+   "after": "e9e3a4a041f7c8f597b6b8e78187426445d7f2cd819fd079ae5b813fd99b799f",
+   "identical": true,
+   "outcome": "ERR VILLA_REVIEW_FAILED"
+  },
+  {
+   "id": "D7",
+   "base": "a5075ea290f995dd0f8253004d03655c2f261daf6ce5a30f02b20769399087e2",
+   "after": "a5075ea290f995dd0f8253004d03655c2f261daf6ce5a30f02b20769399087e2",
+   "identical": true,
+   "outcome": "ERR VILLA_NO_FIT"
+  },
+  {
+   "id": "D8",
+   "base": "a49aa3bd54a1dc94eccb1112c2d0d85a798bfe378c15b86505903decb265c49c",
+   "after": "a49aa3bd54a1dc94eccb1112c2d0d85a798bfe378c15b86505903decb265c49c",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  },
+  {
+   "id": "D9",
+   "base": "1c4dd72c5bd41d6936294b7dc02b67e39b0fad1e3a9109e481d74bca2ceeab7f",
+   "after": "1c4dd72c5bd41d6936294b7dc02b67e39b0fad1e3a9109e481d74bca2ceeab7f",
+   "identical": true,
+   "outcome": "visible=1 ready=0"
+  },
+  {
+   "id": "D10",
+   "base": "9ebcbbbfa721a231c72127b964932c0a2daf60354ca4ed48a1aa547afa52eeb2",
+   "after": "9ebcbbbfa721a231c72127b964932c0a2daf60354ca4ed48a1aa547afa52eeb2",
+   "identical": true,
+   "outcome": "visible=1 ready=1"
+  }
+ ]
+}

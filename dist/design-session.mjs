@@ -1,5 +1,6 @@
 // جلسة التصميم: التصميم الأولي يُعرض على العميل، ويطلب بديلًا بعد أن تسأله شرعاء عمّا لم يعجبه،
 // ثم يعتمده فينتقل إلى العرض ثلاثي الأبعاد. وحدة نقية بلا DOM؛ التخزين يُمرَّر (localStorage أو بديل في الاختبار).
+import { RENDERED_STYLE_OF } from './facade-choice.mjs';
 import { generateInitialDesign } from './home-flow.mjs';
 import { extractRequirements, detectConflicts, normalizeAr, parseReadingAnswer } from './requirements.mjs';
 import { verifyRequest, verifyRules, mergeRules } from './rules.mjs';
@@ -52,14 +53,14 @@ export const FEEDBACK = Object.freeze([
 const clone = v => JSON.parse(JSON.stringify(v));
 
 /** يبدأ جلسة من نتيجة التوليد الأولى. */
-export function createSession({ land, counts, requirements, discovery, idea = '', result, engine = null }) {
+export function createSession({ land, counts, requirements, discovery, idea = '', result, engine = null, facade = null }) {
   const req = clone(requirements || extractRequirements(idea || '', { counts: counts || {}, discovery }));
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
   // التعارضات في الطلب: تُرفق بالجلسة مع سؤال للعميل (لا رمي ولا تعديل للطلب)
   let conflicts = []; try { conflicts = detectConflicts(req, land || {}); } catch { conflicts = []; }
   return {
     // المولّد: الثاني افتراضيًا؛ engine:'v1' يبقي المولّد الأول (احتياط) لكل إعادة تصميم في الجلسة
-    v: 1, input: { land, discovery, idea, requirements: req, engine: engine || (result?.villaEngine === 'v1' ? 'v1' : null) },
+    v: 1, input: { land, discovery, idea, requirements: req, engine: engine || (result?.villaEngine === 'v1' ? 'v1' : null), ...(facade ? { facade: clone(facade) } : {}) }, // (2026-10-31) طراز الواجهة من ملف الاحتياجات بمصدره
     conflicts, reply: conflicts.length ? { conflicts, questions: conflicts.map(c => c.question_ar) } : null,
     // (الجولة الثالثة عشرة) أسئلة الموقع الناعمة (لا تعارض في الطلب): عرض شارع المدخل إن جُهل — الارتداد الأمامي مرسوم 3 م افتراضًا
     siteQuestions: [streetWidthQuestion(land || {})].filter(Boolean),
@@ -628,9 +629,9 @@ function facadeStatus(x, doc, req) {
   if (x.id !== 'F-facade') return x;
   const fac = req.tweaks?.facade || {}, f = doc.finish?.facade || {};
   const matOk = !fac.material || (f.material === fac.material && FACADE_RENDER[fac.material] && f.base === FACADE_RENDER[fac.material]);
-  const styleOk = !fac.style; // الطراز يُحفظ ولا يُرسم بعد
+  const styleOk = !fac.style || !!RENDERED_STYLE_OF[fac.style]; // (2026-10-31) الكلاسيكي/النيوكلاسيكي/الحديث/النجدي(والسلماني) تُرسم في الواجهات والمجسّم؛ غيرها يُحفظ ولا يُرسم
   if (matOk && styleOk && (fac.material || fac.style)) return { ...x, ok: true, status: 'done', why: `مادة الواجهة في المستند (${f.base}) ويعرضها المجسّم.` };
-  if (f.material === fac.material || f.style === fac.style) return { ...x, why: `حُفظ طلب الواجهة في المستند${fac.material && !FACADE_RENDER[fac.material] ? `؛ لا خامة «${fac.materialAr}» في المجسّم بعد` : ''}${fac.style ? `؛ الطراز «${fac.styleAr}» لا يُرسم بعد` : ''}.` };
+  if (f.material === fac.material || f.style === fac.style) return { ...x, why: `حُفظ طلب الواجهة في المستند${fac.material && !FACADE_RENDER[fac.material] ? `؛ لا خامة «${fac.materialAr}» في المجسّم بعد` : ''}${fac.style && !RENDERED_STYLE_OF[fac.style] ? `؛ الطراز «${fac.styleAr}» لا يُرسم بعد` : ''}.` };
   return x;
 }
 

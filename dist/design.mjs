@@ -13,6 +13,7 @@ import { PROPOSAL_LABEL_AR } from './presentation-status.mjs';
 import { shortfallNotice } from './client-text.mjs';
 import { toClientAr } from './client-language.mjs';
 import { completeLedger, ledgerVerdict, LEVEL_AR } from './request-ledger.mjs';
+import { facadeCard, docWithFacade } from './facade-ui.mjs'; // (2026-10-31) واجهات بطراز العميل
 // (الجولة 21 — مقترح 08) لا نص استثناء للعميل: رسالة المحرك العربية المعروفة (VILLA_*) بلغة العميل، وإلا نص ثابت
 const clientErr = (e, fallback) => (/^VILLA_/.test(String(e?.code || '')) && /[\u0600-\u06FF]/.test(String(e?.message || '')) ? toClientAr(e.message) : fallback);
 
@@ -96,6 +97,7 @@ function show(index) {
     statusCard(d),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, reqCard)),
+    (() => { try { return facadeCard({ session, doc, save: s => saveSession(localStorage, s) }); } catch { return null; } })(), // (2026-10-31) واجهات التصميم
     altsCard(d),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), el('div', { class: 'actions', style: 'gap:16px' }, reviewCard(d), notes))].filter(Boolean));
   legend(); bindPlan(); paint();
@@ -322,11 +324,11 @@ function paint() {
 }
 
 // ------------------------------------------------------------------------------------------ الأفعال
-function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(doc)); } catch { /* التخزين غير متاح */ } }
+function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(docWithFacade(doc, session))); } catch { /* التخزين غير متاح */ } }
 function onApprove() { if (presentationOf(session.designs[session.current])?.status === 'hidden') { toast('مسودة مرفوضة لا تُعتمد؛ ارجع إلى تصميم سابق أو اطلب تصميمًا آخر.'); return; } session = approve(session); saveSession(localStorage, session); storeForStudio(); location.href = './view3d.html'; }
 function onStudio() {
   const alternatives = (session.alternatives || []).map(a => { try { return { index: a.index, strategy: a.strategy, doc: JSON.parse(a.doc) }; } catch { return null; } }).filter(Boolean);
-  try { writeHandoff(sessionStorage, doc, { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }
+  try { writeHandoff(sessionStorage, docWithFacade(doc, session), { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }
   location.href = './studio.html';
 }
 function openShara() {
