@@ -53,7 +53,11 @@ if (/design/.test(p.url())) {
   const dd = await p.evaluate(() => { const d = globalThis.__mizanDesign.doc; return JSON.stringify(d); });
   await p.click('#btnStudio'); await p.waitForURL(/studio/); await p.waitForTimeout(2500);
   const sd = await p.evaluate(() => JSON.stringify(globalThis.__mizanStudio.doc));
-  check(dd === sd, 'المرسم يفتح المستند نفسه حرفيًا (الأبعاد والأسماء والمواقع والشمال والشارع)');
+  // (دمج 2026-11-01) فرع الواجهات يضيف finish.facade وحده (اختيار الطراز) للمرسم والمجسّم؛ المخطط يبقى حرفيًا،
+  // ولا يُقبل أي فرق آخر: يُنزع finish.facade من نسخة المرسم فقط ثم تُقارن النصوص كاملة.
+  const sdo = JSON.parse(sd), ddo = JSON.parse(dd); const hadFacade = !!sdo.finish?.facade && !ddo.finish?.facade;
+  if (hadFacade) { delete sdo.finish.facade; if (!Object.keys(sdo.finish).length && !('finish' in ddo)) delete sdo.finish; }
+  check(dd === JSON.stringify(sdo), 'المرسم يفتح المستند نفسه حرفيًا (الأبعاد والأسماء والمواقع والشمال والشارع)' + (hadFacade ? ' — والفرق الوحيد finish.facade (طراز الواجهة)' : ''));
   await p.screenshot({ path: shots + '/7-studio.png' });
   await p.click('#btnExport'); await p.waitForTimeout(300); await p.screenshot({ path: shots + '/8-export-menu.png' });
   const m = await p.evaluate(() => { const r = document.getElementById('exportMenu').getBoundingClientRect(); return [r.left, r.right, innerWidth]; }); check(m[0] >= 0 && m[1] <= m[2], 'قائمة التصدير داخل النافذة ' + JSON.stringify(m));
