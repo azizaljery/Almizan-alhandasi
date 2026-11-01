@@ -1,0 +1,561 @@
+{
+ "welcome": {
+  "x": 19.5,
+  "y": 178.59375,
+  "width": 351,
+  "height": 291.5625,
+  "top": 178.59375,
+  "right": 370.5,
+  "bottom": 470.15625,
+  "left": 19.5
+ },
+ "simple": {
+  "res": [
+   {
+    "id": "select",
+    "x": 330,
+    "r": 384,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "pan",
+    "x": 273,
+    "r": 327,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "wall",
+    "x": 205,
+    "r": 259,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "rect",
+    "x": 148,
+    "r": 202,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "opening",
+    "x": 91,
+    "r": 145,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "dimension",
+    "x": 23,
+    "r": 77,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "modeToggle",
+    "x": -45,
+    "r": 9,
+    "w": 54,
+    "h": 62,
+    "inView": false,
+    "hit": false
+   },
+   {
+    "id": "zoomIn",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "zoomOut",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "zoomFit",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "tgSnap",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "tgGrid",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "tgDims",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "modeToggle",
+    "x": 0,
+    "r": 54,
+    "w": 54,
+    "h": 62,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "btnExport",
+    "x": 56,
+    "r": 128,
+    "w": 72,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "btnSave",
+    "x": 325,
+    "r": 380,
+    "w": 55,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "undo",
+    "x": 336,
+    "r": 380,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "redo",
+    "x": 286,
+    "r": 330,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   }
+  ],
+  "sw": 390,
+  "bw": 390,
+  "iw": 390
+ },
+ "menu": {
+  "l": 56,
+  "r": 276,
+  "t": 144,
+  "b": 376,
+  "iw": 390,
+  "ih": 844,
+  "bs": [
+   [
+    63,
+    269,
+    151,
+    195
+   ],
+   [
+    63,
+    269,
+    195,
+    239
+   ],
+   [
+    63,
+    269,
+    239,
+    283
+   ],
+   [
+    63,
+    269,
+    283,
+    327
+   ],
+   [
+    63,
+    269,
+    327,
+    371
+   ]
+  ],
+  "sh": 232,
+  "ch": 230
+ },
+ "advanced": {
+  "res": [
+   {
+    "id": "select",
+    "x": 375,
+    "r": 429,
+    "w": 54,
+    "h": 48,
+    "inView": false,
+    "hit": true
+   },
+   {
+    "id": "pan",
+    "x": 279,
+    "r": 333,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "wall",
+    "x": 211,
+    "r": 265,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "rect",
+    "x": 154,
+    "r": 208,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "opening",
+    "x": 97,
+    "r": 151,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "dimension",
+    "x": 29,
+    "r": 83,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "modeToggle",
+    "x": -39,
+    "r": 15,
+    "w": 54,
+    "h": 62,
+    "inView": false,
+    "hit": false
+   },
+   {
+    "id": "zoomIn",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "zoomOut",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "zoomFit",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "tgSnap",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "tgGrid",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "tgDims",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "modeToggle",
+    "x": 0,
+    "r": 54,
+    "w": 54,
+    "h": 62,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "btnExport",
+    "x": 56,
+    "r": 128,
+    "w": 72,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "btnSave",
+    "x": 325,
+    "r": 380,
+    "w": 55,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "undo",
+    "x": 336,
+    "r": 380,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "redo",
+    "x": 286,
+    "r": 330,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   }
+  ],
+  "sw": 390,
+  "bw": 390,
+  "iw": 390
+ },
+ "simple-again": {
+  "res": [
+   {
+    "id": "select",
+    "x": 375,
+    "r": 429,
+    "w": 54,
+    "h": 48,
+    "inView": false,
+    "hit": true
+   },
+   {
+    "id": "pan",
+    "x": 279,
+    "r": 333,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "wall",
+    "x": 211,
+    "r": 265,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "rect",
+    "x": 154,
+    "r": 208,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "opening",
+    "x": 97,
+    "r": 151,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "dimension",
+    "x": 29,
+    "r": 83,
+    "w": 54,
+    "h": 48,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "modeToggle",
+    "x": -39,
+    "r": 15,
+    "w": 54,
+    "h": 62,
+    "inView": false,
+    "hit": false
+   },
+   {
+    "id": "zoomIn",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "zoomOut",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "zoomFit",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "tgSnap",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "tgGrid",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "tgDims",
+    "x": 12,
+    "r": 56,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "modeToggle",
+    "x": 0,
+    "r": 54,
+    "w": 54,
+    "h": 62,
+    "inView": true,
+    "hit": false
+   },
+   {
+    "id": "btnExport",
+    "x": 56,
+    "r": 128,
+    "w": 72,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "btnSave",
+    "x": 325,
+    "r": 380,
+    "w": 55,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "undo",
+    "x": 336,
+    "r": 380,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   },
+   {
+    "id": "redo",
+    "x": 286,
+    "r": 330,
+    "w": 44,
+    "h": 44,
+    "inView": true,
+    "hit": true
+   }
+  ],
+  "sw": 390,
+  "bw": 390,
+  "iw": 390
+ }
+}
