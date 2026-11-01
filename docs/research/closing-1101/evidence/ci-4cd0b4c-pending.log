@@ -1,0 +1,391 @@
+﻿2026-11-01T18:18:31.3861426Z Current runner version: '2.338.2'
+2026-11-01T18:18:31.3896021Z ##[group]Runner Image Provisioner
+2026-11-01T18:18:31.3897377Z Hosted Compute Agent
+2026-11-01T18:18:31.3898461Z Version: 20261021.618
+2026-11-01T18:18:31.3899460Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-11-01T18:18:31.3900810Z Build Date: 2026-10-21T00:45:21Z
+2026-11-01T18:18:31.3901984Z Worker ID: {ffd900dd-e44a-43a2-a391-872007245385}
+2026-11-01T18:18:31.3903458Z Region: eastus
+2026-11-01T18:18:31.3904512Z Cloud: Azure
+2026-11-01T18:18:31.3905416Z ##[endgroup]
+2026-11-01T18:18:31.3907714Z ##[group]Operating System
+2026-11-01T18:18:31.3908845Z Ubuntu
+2026-11-01T18:18:31.3909661Z 24.04.5
+2026-11-01T18:18:31.3910568Z LTS
+2026-11-01T18:18:31.3911439Z ##[endgroup]
+2026-11-01T18:18:31.3912472Z ##[group]Runner Image
+2026-11-01T18:18:31.3913763Z Image: ubuntu-24.04
+2026-11-01T18:18:31.3914732Z Version: 20261025.353.1
+2026-11-01T18:18:31.3916895Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+2026-11-01T18:18:31.3920207Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+2026-11-01T18:18:31.3922082Z ##[endgroup]
+2026-11-01T18:18:31.3924264Z ##[group]GITHUB_TOKEN Permissions
+2026-11-01T18:18:31.3927142Z Contents: read
+2026-11-01T18:18:31.3928115Z Metadata: read
+2026-11-01T18:18:31.3929178Z ##[endgroup]
+2026-11-01T18:18:31.3932122Z Secret source: Actions
+2026-11-01T18:18:31.3934017Z Cache mode: write
+2026-11-01T18:18:31.3935491Z Prepare workflow directory
+2026-11-01T18:18:31.4327756Z Prepare all required actions
+2026-11-01T18:18:31.4376085Z Getting action download info
+2026-11-01T18:18:31.6063509Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-01T18:18:31.7227978Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-01T18:18:31.8052104Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-01T18:18:32.0240414Z Complete job name: pending
+2026-11-01T18:18:32.1112232Z ##[group]Run actions/checkout@v4
+2026-11-01T18:18:32.1113365Z with:
+2026-11-01T18:18:32.1113845Z   repository: azizaljery/Almizan-alhandasi
+2026-11-01T18:18:32.1117733Z   token: ***
+2026-11-01T18:18:32.1118173Z   ssh-strict: true
+2026-11-01T18:18:32.1118616Z   ssh-user: git
+2026-11-01T18:18:32.1119061Z   persist-credentials: true
+2026-11-01T18:18:32.1119555Z   clean: true
+2026-11-01T18:18:32.1120000Z   sparse-checkout-cone-mode: true
+2026-11-01T18:18:32.1120529Z   fetch-depth: 1
+2026-11-01T18:18:32.1120957Z   fetch-tags: false
+2026-11-01T18:18:32.1121396Z   show-progress: true
+2026-11-01T18:18:32.1121852Z   lfs: false
+2026-11-01T18:18:32.1122261Z   submodules: false
+2026-11-01T18:18:32.1122866Z   set-safe-directory: true
+2026-11-01T18:18:32.1123376Z   allow-unsafe-pr-checkout: false
+2026-11-01T18:18:32.1124152Z ##[endgroup]
+2026-11-01T18:18:32.3771500Z Syncing repository: azizaljery/Almizan-alhandasi
+2026-11-01T18:18:32.3774681Z ##[group]Getting Git version info
+2026-11-01T18:18:32.3776227Z Working directory is '/home/runner/work/Almizan-alhandasi/Almizan-alhandasi'
+2026-11-01T18:18:32.3778351Z [command]/usr/bin/git version
+2026-11-01T18:18:32.3913704Z git version 2.56.0
+2026-11-01T18:18:32.3939877Z ##[endgroup]
+2026-11-01T18:18:32.3968081Z Temporarily overriding HOME='/home/runner/work/_temp/6e7153ac-4646-4f73-8192-6cb925560990' before making global git config changes
+2026-11-01T18:18:32.3971305Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T18:18:32.3977476Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Almizan-alhandasi/Almizan-alhandasi
+2026-11-01T18:18:32.4057243Z Deleting the contents of '/home/runner/work/Almizan-alhandasi/Almizan-alhandasi'
+2026-11-01T18:18:32.4073719Z ##[group]Initializing the repository
+2026-11-01T18:18:32.4089085Z [command]/usr/bin/git init /home/runner/work/Almizan-alhandasi/Almizan-alhandasi
+2026-11-01T18:18:32.4216619Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-01T18:18:32.4218051Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-01T18:18:32.4219803Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-01T18:18:32.4221439Z hint: call:
+2026-11-01T18:18:32.4222030Z hint:
+2026-11-01T18:18:32.4223318Z hint: 	git config --global init.defaultBranch <name>
+2026-11-01T18:18:32.4224142Z hint:
+2026-11-01T18:18:32.4224789Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-01T18:18:32.4226739Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-01T18:18:32.4228467Z hint:
+2026-11-01T18:18:32.4229250Z hint: 	git branch -m <name>
+2026-11-01T18:18:32.4230068Z hint:
+2026-11-01T18:18:32.4230782Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-01T18:18:32.4237368Z Initialized empty Git repository in /home/runner/work/Almizan-alhandasi/Almizan-alhandasi/.git/
+2026-11-01T18:18:32.4254293Z [command]/usr/bin/git remote add origin https://github.com/azizaljery/Almizan-alhandasi
+2026-11-01T18:18:32.4306834Z ##[endgroup]
+2026-11-01T18:18:32.4308763Z ##[group]Disabling automatic garbage collection
+2026-11-01T18:18:32.4312873Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-01T18:18:32.4365067Z ##[endgroup]
+2026-11-01T18:18:32.4367014Z ##[group]Setting up auth
+2026-11-01T18:18:32.4368710Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T18:18:32.4411907Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T18:18:32.4951919Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T18:18:32.5006985Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T18:18:32.5258380Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T18:18:32.5305920Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T18:18:32.5557523Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-01T18:18:32.5607440Z ##[endgroup]
+2026-11-01T18:18:32.5608314Z ##[group]Fetching the repository
+2026-11-01T18:18:32.5622431Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +4cd0b4ce5572aef97e79f93ffe09a40eb67bc002:refs/remotes/origin/dev/preview-feedback-facades-mep
+2026-11-01T18:18:45.7694154Z From https://github.com/azizaljery/Almizan-alhandasi
+2026-11-01T18:18:45.7694941Z  * [new ref]         4cd0b4ce5572aef97e79f93ffe09a40eb67bc002 -> origin/dev/preview-feedback-facades-mep
+2026-11-01T18:18:45.7698653Z ##[endgroup]
+2026-11-01T18:18:45.7699251Z ##[group]Determining the checkout info
+2026-11-01T18:18:45.7701421Z ##[endgroup]
+2026-11-01T18:18:45.7708082Z [command]/usr/bin/git sparse-checkout disable
+2026-11-01T18:18:45.7768980Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-01T18:18:45.7812500Z ##[group]Checking out the ref
+2026-11-01T18:18:45.7815089Z [command]/usr/bin/git checkout --progress --force -B dev/preview-feedback-facades-mep refs/remotes/origin/dev/preview-feedback-facades-mep
+2026-11-01T18:18:46.7989278Z Updating files:  24% (2528/10138)
+2026-11-01T18:18:46.8490069Z Updating files:  25% (2535/10138)
+2026-11-01T18:18:46.8888496Z Updating files:  26% (2636/10138)
+2026-11-01T18:18:46.9374241Z Updating files:  27% (2738/10138)
+2026-11-01T18:18:46.9880555Z Updating files:  28% (2839/10138)
+2026-11-01T18:18:47.0347859Z Updating files:  29% (2941/10138)
+2026-11-01T18:18:47.0835657Z Updating files:  30% (3042/10138)
+2026-11-01T18:18:47.1327127Z Updating files:  31% (3143/10138)
+2026-11-01T18:18:47.1857674Z Updating files:  32% (3245/10138)
+2026-11-01T18:18:47.2328427Z Updating files:  33% (3346/10138)
+2026-11-01T18:18:47.2794153Z Updating files:  34% (3447/10138)
+2026-11-01T18:18:47.3267581Z Updating files:  35% (3549/10138)
+2026-11-01T18:18:47.3720429Z Updating files:  36% (3650/10138)
+2026-11-01T18:18:47.3993059Z Updating files:  37% (3752/10138)
+2026-11-01T18:18:47.4425751Z Updating files:  38% (3853/10138)
+2026-11-01T18:18:47.4679216Z Updating files:  39% (3954/10138)
+2026-11-01T18:18:47.4843492Z Updating files:  40% (4056/10138)
+2026-11-01T18:18:47.5077019Z Updating files:  41% (4157/10138)
+2026-11-01T18:18:47.5338451Z Updating files:  42% (4258/10138)
+2026-11-01T18:18:47.5407709Z Updating files:  43% (4360/10138)
+2026-11-01T18:18:47.5467811Z Updating files:  44% (4461/10138)
+2026-11-01T18:18:47.5588619Z Updating files:  45% (4563/10138)
+2026-11-01T18:18:47.5925896Z Updating files:  46% (4664/10138)
+2026-11-01T18:18:47.5974644Z Updating files:  47% (4765/10138)
+2026-11-01T18:18:47.6017859Z Updating files:  48% (4867/10138)
+2026-11-01T18:18:47.6060637Z Updating files:  49% (4968/10138)
+2026-11-01T18:18:47.6098105Z Updating files:  50% (5069/10138)
+2026-11-01T18:18:47.6135744Z Updating files:  51% (5171/10138)
+2026-11-01T18:18:47.6183321Z Updating files:  52% (5272/10138)
+2026-11-01T18:18:47.6391262Z Updating files:  53% (5374/10138)
+2026-11-01T18:18:47.6685626Z Updating files:  54% (5475/10138)
+2026-11-01T18:18:47.6929362Z Updating files:  55% (5576/10138)
+2026-11-01T18:18:47.7285802Z Updating files:  56% (5678/10138)
+2026-11-01T18:18:47.7559907Z Updating files:  57% (5779/10138)
+2026-11-01T18:18:47.7914440Z Updating files:  58% (5881/10138)
+2026-11-01T18:18:47.7943099Z Updating files:  59% (5982/10138)
+2026-11-01T18:18:47.8207813Z Updating files:  59% (5993/10138)
+2026-11-01T18:18:47.8562195Z Updating files:  60% (6083/10138)
+2026-11-01T18:18:47.8863019Z Updating files:  61% (6185/10138)
+2026-11-01T18:18:47.9157941Z Updating files:  62% (6286/10138)
+2026-11-01T18:18:47.9456163Z Updating files:  63% (6387/10138)
+2026-11-01T18:18:47.9769563Z Updating files:  64% (6489/10138)
+2026-11-01T18:18:48.0140133Z Updating files:  65% (6590/10138)
+2026-11-01T18:18:48.0466708Z Updating files:  66% (6692/10138)
+2026-11-01T18:18:48.0812853Z Updating files:  67% (6793/10138)
+2026-11-01T18:18:48.1112505Z Updating files:  68% (6894/10138)
+2026-11-01T18:18:48.1485804Z Updating files:  69% (6996/10138)
+2026-11-01T18:18:48.1764927Z Updating files:  70% (7097/10138)
+2026-11-01T18:18:48.2149179Z Updating files:  71% (7198/10138)
+2026-11-01T18:18:48.2346217Z Updating files:  72% (7300/10138)
+2026-11-01T18:18:48.2430074Z Updating files:  73% (7401/10138)
+2026-11-01T18:18:48.2709783Z Updating files:  74% (7503/10138)
+2026-11-01T18:18:48.3001785Z Updating files:  75% (7604/10138)
+2026-11-01T18:18:48.3292389Z Updating files:  76% (7705/10138)
+2026-11-01T18:18:48.3552473Z Updating files:  77% (7807/10138)
+2026-11-01T18:18:48.3840711Z Updating files:  78% (7908/10138)
+2026-11-01T18:18:48.4101630Z Updating files:  79% (8010/10138)
+2026-11-01T18:18:48.4371008Z Updating files:  80% (8111/10138)
+2026-11-01T18:18:48.5012986Z Updating files:  81% (8212/10138)
+2026-11-01T18:18:48.5865268Z Updating files:  82% (8314/10138)
+2026-11-01T18:18:48.6773220Z Updating files:  83% (8415/10138)
+2026-11-01T18:18:48.7705190Z Updating files:  84% (8516/10138)
+2026-11-01T18:18:48.7985515Z Updating files:  85% (8618/10138)
+2026-11-01T18:18:48.8595257Z Updating files:  85% (8648/10138)
+2026-11-01T18:18:48.9512214Z Updating files:  86% (8719/10138)
+2026-11-01T18:18:49.0483029Z Updating files:  87% (8821/10138)
+2026-11-01T18:18:49.1409103Z Updating files:  88% (8922/10138)
+2026-11-01T18:18:49.2431323Z Updating files:  89% (9023/10138)
+2026-11-01T18:18:49.3367350Z Updating files:  90% (9125/10138)
+2026-11-01T18:18:49.4180608Z Updating files:  91% (9226/10138)
+2026-11-01T18:18:49.4773340Z Updating files:  92% (9327/10138)
+2026-11-01T18:18:49.5076867Z Updating files:  93% (9429/10138)
+2026-11-01T18:18:49.5271824Z Updating files:  94% (9530/10138)
+2026-11-01T18:18:49.5483093Z Updating files:  95% (9632/10138)
+2026-11-01T18:18:49.5572318Z Updating files:  96% (9733/10138)
+2026-11-01T18:18:49.5635800Z Updating files:  97% (9834/10138)
+2026-11-01T18:18:49.5709201Z Updating files:  98% (9936/10138)
+2026-11-01T18:18:49.5781026Z Updating files:  99% (10037/10138)
+2026-11-01T18:18:49.5781872Z Updating files: 100% (10138/10138)
+2026-11-01T18:18:49.5782276Z Updating files: 100% (10138/10138), done.
+2026-11-01T18:18:49.5883168Z Switched to a new branch 'dev/preview-feedback-facades-mep'
+2026-11-01T18:18:49.5891071Z branch 'dev/preview-feedback-facades-mep' set up to track 'origin/dev/preview-feedback-facades-mep'.
+2026-11-01T18:18:49.6058537Z ##[endgroup]
+2026-11-01T18:18:49.6119801Z [command]/usr/bin/git log -1 --format=%H
+2026-11-01T18:18:49.6158000Z 4cd0b4ce5572aef97e79f93ffe09a40eb67bc002
+2026-11-01T18:18:49.6520989Z ##[group]Run actions/setup-node@v4
+2026-11-01T18:18:49.6521287Z with:
+2026-11-01T18:18:49.6521478Z   node-version: 22
+2026-11-01T18:18:49.6521681Z   cache: npm
+2026-11-01T18:18:49.6521873Z   always-auth: false
+2026-11-01T18:18:49.6522092Z   check-latest: false
+2026-11-01T18:18:49.6524889Z   token: ***
+2026-11-01T18:18:49.6525092Z ##[endgroup]
+2026-11-01T18:18:49.8047028Z (node:2359) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T18:18:49.8047985Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T18:18:49.8050355Z Found in cache @ /opt/hostedtoolcache/node/22.23.4/x64
+2026-11-01T18:18:49.8053351Z ##[group]Environment details
+2026-11-01T18:18:50.2527459Z node: v22.23.4
+2026-11-01T18:18:50.2527727Z npm: 10.9.9
+2026-11-01T18:18:50.2527918Z yarn: 1.22.22
+2026-11-01T18:18:50.2528953Z ##[endgroup]
+2026-11-01T18:18:50.2549303Z [command]/opt/hostedtoolcache/node/22.23.4/x64/bin/npm config get cache
+2026-11-01T18:18:50.3678134Z /home/runner/.npm
+2026-11-01T18:18:50.4620560Z Cache hit for: node-cache-Linux-x64-npm-6bd5be3b0760b4ed00df24fa0ae4c9134c14cbb90cc56ec966d3338a2f439e41
+2026-11-01T18:18:50.4736395Z (node:2359) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-01T18:18:50.7521608Z Received 17115355 of 17115355 (100.0%), 69.8 MBs/sec
+2026-11-01T18:18:50.7522860Z Cache Size: ~16 MB (17115355 B)
+2026-11-01T18:18:50.7551624Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d9296399-8ec9-48c3-b896-5a529f97f41b/cache.tzst -P -C /home/runner/work/Almizan-alhandasi/Almizan-alhandasi --use-compress-program unzstd
+2026-11-01T18:18:50.7965855Z Cache restored successfully
+2026-11-01T18:18:50.7977256Z Cache restored from key: node-cache-Linux-x64-npm-6bd5be3b0760b4ed00df24fa0ae4c9134c14cbb90cc56ec966d3338a2f439e41
+2026-11-01T18:18:50.8165350Z ##[group]Run npm ci
+2026-11-01T18:18:50.8165639Z [36;1mnpm ci[0m
+2026-11-01T18:18:50.8200097Z shell: /usr/bin/bash -e {0}
+2026-11-01T18:18:50.8200381Z ##[endgroup]
+2026-11-01T18:18:51.7570142Z npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.hirok.io
+2026-11-01T18:18:51.7609642Z npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.hirok.io
+2026-11-01T18:18:52.6735326Z 
+2026-11-01T18:18:52.6736268Z added 17 packages, and audited 18 packages in 2s
+2026-11-01T18:18:52.6736765Z 
+2026-11-01T18:18:52.6742786Z 2 packages are looking for funding
+2026-11-01T18:18:52.6743469Z   run `npm fund` for details
+2026-11-01T18:18:52.6849509Z 
+2026-11-01T18:18:52.6849975Z 4 moderate severity vulnerabilities
+2026-11-01T18:18:52.6850212Z 
+2026-11-01T18:18:52.6850697Z To address all issues (including breaking changes), run:
+2026-11-01T18:18:52.6851300Z   npm audit fix --force
+2026-11-01T18:18:52.6851564Z 
+2026-11-01T18:18:52.6851877Z Run `npm audit` for details.
+2026-11-01T18:18:52.7359385Z ##[group]Run set -o pipefail
+2026-11-01T18:18:52.7359912Z [36;1mset -o pipefail[0m
+2026-11-01T18:18:52.7360218Z [36;1mnpm run test:pending 2>&1 | tee pending.log[0m
+2026-11-01T18:18:52.7383096Z shell: /usr/bin/bash -e {0}
+2026-11-01T18:18:52.7383372Z ##[endgroup]
+2026-11-01T18:18:52.8351452Z 
+2026-11-01T18:18:52.8351960Z > test:pending
+2026-11-01T18:18:52.8352906Z > node --test --test-concurrency=1 tests-pending/r21-pending.test.mjs
+2026-11-01T18:18:52.8353435Z 
+2026-11-01T18:18:52.8822925Z TAP version 13
+2026-11-01T18:22:05.6907740Z # Subtest: §3 الدوران على أرض عريضة (H4 معروفة): مخطط واحد على الأقل غير محجوب، وكل جدار علوي محمول (≤ 5 م بلا جدار تحته)
+2026-11-01T18:22:05.6917137Z not ok 1 - §3 الدوران على أرض عريضة (H4 معروفة): مخطط واحد على الأقل غير محجوب، وكل جدار علوي محمول (≤ 5 م بلا جدار تحته)
+2026-11-01T18:22:05.6918559Z   ---
+2026-11-01T18:22:05.6919048Z   duration_ms: 15751.154073
+2026-11-01T18:22:05.6919530Z   type: 'test'
+2026-11-01T18:22:05.6920660Z   location: '/home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:17:1'
+2026-11-01T18:22:05.6921803Z   failureType: 'testCodeFailure'
+2026-11-01T18:22:05.6922328Z   error: |-
+2026-11-01T18:22:05.6923510Z     لم يجد المحرك مخططًا سليمًا لطلبك على هذه الأرض ضمن التنظيمات التي جرّبها، مع أن المساحة تكفي.
+2026-11-01T18:22:05.6925055Z     الأرض 20×25 م (500 م²). بعد الارتدادات يبقى للبناء 21.7×15.2 م (331 م²)، ونسبة البناء المسموحة 75٪ = 375 م²؛ فالمتاح للبناء 331 م² في كل دور.
+2026-11-01T18:22:05.6926545Z     برنامجك يحتاج نحو 154 م² في الدور الأكبر (صافي فراغاته 134 م²، ومعها الجدران والحركة — تقدير الميزان).
+2026-11-01T18:22:05.6927864Z     المساحة تكفي البرنامج (يبقى نحو 177 م²)؛ فالعائق ليس صغر الأرض بل ترتيب الفراغات بالشروط المطلوبة معًا.
+2026-11-01T18:22:05.6930087Z     أكثر ما منع التنظيمات التي جرّبتها: جدار في الدور الأول أطول من 5 م لا يقع تحته جدار في الأرضي (18 مرة)؛ غرفة في الدور الأول فوق فراغ غير مبني في الأرضي (5 مرات)؛ المجلس أصغر من 24 م² (3 مرات)؛ مجلس الرجال أصغر من الحد المعتاد (24 م² وعرض 4.2 م) (مرة واحدة).
+2026-11-01T18:22:05.6933170Z     ما يمكنك تغييره: غرفة نوم في الأرضي (يقل ما يُحمل فوق المجلس والصالة)، أو أعمدة وجسور تحمل جدران الدور الأول بتصميم إنشائي مستقل؛ قبول مجلس أصغر؛ قبول مجلس رجال أصغر؛ أن تطلب مني تصميمًا آخر بعد تخفيف أحد البنود أعلاه، أو أن تبدأ من المرسم بتوزيع تقترحه أنت.
+2026-11-01T18:22:05.6934824Z     لم أعرض مخططًا يخالف طلبك أو يفتقد شرطًا أساسيًا.
+2026-11-01T18:22:05.6935442Z     + actual - expected
+2026-11-01T18:22:05.6935875Z     
+2026-11-01T18:22:05.6936272Z     + 'SEARCH_INCOMPLETE'
+2026-11-01T18:22:05.6936749Z     - 'SOLVED'
+2026-11-01T18:22:05.6937138Z     
+2026-11-01T18:22:05.6937518Z   code: 'ERR_ASSERTION'
+2026-11-01T18:22:05.6938048Z   name: 'AssertionError'
+2026-11-01T18:22:05.6938491Z   expected: 'SOLVED'
+2026-11-01T18:22:05.6938924Z   actual: 'SEARCH_INCOMPLETE'
+2026-11-01T18:22:05.6939446Z   operator: 'strictEqual'
+2026-11-01T18:22:05.6939915Z   stack: |-
+2026-11-01T18:22:05.6941093Z     TestContext.<anonymous> (file:///home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:19:10)
+2026-11-01T18:22:05.6942416Z     Test.runInAsyncScope (node:async_hooks:214:14)
+2026-11-01T18:22:05.6943443Z     Test.run (node:internal/test_runner/test:1047:25)
+2026-11-01T18:22:05.6944208Z     Test.start (node:internal/test_runner/test:944:17)
+2026-11-01T18:22:05.6945109Z     startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+2026-11-01T18:22:05.6945888Z   ...
+2026-11-01T18:22:05.6947113Z # Subtest: §6 التنوع: خمسة بدائل مطلوبة (C10) ← ثلاثة على الأقل «مختلفة معماريًا» بالمعيار المجمّد r19 وغير محجوبة
+2026-11-01T18:22:05.6948715Z not ok 2 - §6 التنوع: خمسة بدائل مطلوبة (C10) ← ثلاثة على الأقل «مختلفة معماريًا» بالمعيار المجمّد r19 وغير محجوبة
+2026-11-01T18:22:05.6949511Z   ---
+2026-11-01T18:22:05.6949873Z   duration_ms: 129542.456271
+2026-11-01T18:22:05.6950151Z   type: 'test'
+2026-11-01T18:22:05.6951034Z   location: '/home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:21:1'
+2026-11-01T18:22:05.6951647Z   failureType: 'testCodeFailure'
+2026-11-01T18:22:05.6952162Z   error: 'مختلفة 1'
+2026-11-01T18:22:05.6952412Z   code: 'ERR_ASSERTION'
+2026-11-01T18:22:05.6952985Z   name: 'AssertionError'
+2026-11-01T18:22:05.6953243Z   expected: true
+2026-11-01T18:22:05.6953480Z   actual: false
+2026-11-01T18:22:05.6953691Z   operator: '=='
+2026-11-01T18:22:05.6953899Z   stack: |-
+2026-11-01T18:22:05.6954535Z     TestContext.<anonymous> (file:///home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:24:10)
+2026-11-01T18:22:05.6955223Z     Test.runInAsyncScope (node:async_hooks:214:14)
+2026-11-01T18:22:05.6955618Z     Test.run (node:internal/test_runner/test:1047:25)
+2026-11-01T18:22:05.6956090Z     Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+2026-11-01T18:22:05.6956566Z     Test.postRun (node:internal/test_runner/test:1173:19)
+2026-11-01T18:22:05.6956963Z     Test.run (node:internal/test_runner/test:1101:12)
+2026-11-01T18:22:05.6957464Z     async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+2026-11-01T18:22:05.6957875Z   ...
+2026-11-01T18:22:05.6958596Z # Subtest: §5 مسار الضيف بالرسم البياني في مرحلة التنظيم: كل مرشح يدخل البناء يحقق مسار الضيف الداخلي (لا GUEST_DINING ولا MAJLIS_ISOLATED في الحوض)
+2026-11-01T18:22:05.6959576Z not ok 3 - §5 مسار الضيف بالرسم البياني في مرحلة التنظيم: كل مرشح يدخل البناء يحقق مسار الضيف الداخلي (لا GUEST_DINING ولا MAJLIS_ISOLATED في الحوض)
+2026-11-01T18:22:05.6960051Z   ---
+2026-11-01T18:22:05.6960253Z   duration_ms: 47409.286582
+2026-11-01T18:22:05.6960498Z   type: 'test'
+2026-11-01T18:22:05.6961021Z   location: '/home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:26:1'
+2026-11-01T18:22:05.6961579Z   failureType: 'testCodeFailure'
+2026-11-01T18:22:05.6961856Z   error: 'centralhall:ch2'
+2026-11-01T18:22:05.6962098Z   code: 'ERR_ASSERTION'
+2026-11-01T18:22:05.6962353Z   name: 'AssertionError'
+2026-11-01T18:22:05.6962792Z   expected: true
+2026-11-01T18:22:05.6963066Z   actual: false
+2026-11-01T18:22:05.6963393Z   operator: '=='
+2026-11-01T18:22:05.6963598Z   stack: |-
+2026-11-01T18:22:05.6964210Z     TestContext.<anonymous> (file:///home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:31:32)
+2026-11-01T18:22:05.6964904Z     Test.runInAsyncScope (node:async_hooks:214:14)
+2026-11-01T18:22:05.6965295Z     Test.run (node:internal/test_runner/test:1047:25)
+2026-11-01T18:22:05.6965755Z     Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+2026-11-01T18:22:05.6966236Z     Test.postRun (node:internal/test_runner/test:1173:19)
+2026-11-01T18:22:05.6966624Z     Test.run (node:internal/test_runner/test:1101:12)
+2026-11-01T18:22:05.6967090Z     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+2026-11-01T18:22:05.6967482Z   ...
+2026-11-01T18:22:05.6968056Z # Subtest: §7 المواقف: وحدة إثبات وصول السيارة (مسار دخول وخروج ونموذج دوران محافظ) موجودة وتُستعمل في التصنيف
+2026-11-01T18:22:05.6969023Z not ok 4 - §7 المواقف: وحدة إثبات وصول السيارة (مسار دخول وخروج ونموذج دوران محافظ) موجودة وتُستعمل في التصنيف
+2026-11-01T18:22:05.6969548Z   ---
+2026-11-01T18:22:05.6969747Z   duration_ms: 0.343358
+2026-11-01T18:22:05.6969989Z   type: 'test'
+2026-11-01T18:22:05.6970512Z   location: '/home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:33:1'
+2026-11-01T18:22:05.6971063Z   failureType: 'testCodeFailure'
+2026-11-01T18:22:05.6971380Z   error: 'لم يُنفَّذ بعد'
+2026-11-01T18:22:05.6971621Z   code: 'ERR_ASSERTION'
+2026-11-01T18:22:05.6971853Z   name: 'AssertionError'
+2026-11-01T18:22:05.6972082Z   expected: true
+2026-11-01T18:22:05.6972298Z   actual: false
+2026-11-01T18:22:05.6972506Z   operator: '=='
+2026-11-01T18:22:05.6972867Z   stack: |-
+2026-11-01T18:22:05.6973475Z     TestContext.<anonymous> (file:///home/runner/work/Almizan-alhandasi/Almizan-alhandasi/tests-pending/r21-pending.test.mjs:34:10)
+2026-11-01T18:22:05.6974155Z     Test.runInAsyncScope (node:async_hooks:214:14)
+2026-11-01T18:22:05.6974536Z     Test.run (node:internal/test_runner/test:1047:25)
+2026-11-01T18:22:05.6975010Z     Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+2026-11-01T18:22:05.6975478Z     Test.postRun (node:internal/test_runner/test:1173:19)
+2026-11-01T18:22:05.6975865Z     Test.run (node:internal/test_runner/test:1101:12)
+2026-11-01T18:22:05.6976341Z     async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+2026-11-01T18:22:05.6976729Z   ...
+2026-11-01T18:22:05.7880521Z 1..4
+2026-11-01T18:22:05.7881171Z # tests 4
+2026-11-01T18:22:05.7881944Z # suites 0
+2026-11-01T18:22:05.7882729Z # pass 0
+2026-11-01T18:22:05.7883524Z # fail 4
+2026-11-01T18:22:05.7884045Z # cancelled 0
+2026-11-01T18:22:05.7884603Z # skipped 0
+2026-11-01T18:22:05.7885324Z # todo 0
+2026-11-01T18:22:05.7885879Z # duration_ms 192918.957198
+2026-11-01T18:22:05.8017143Z ##[error]Process completed with exit code 1.
+2026-11-01T18:22:05.8071718Z ##[group]Run { echo '### test:pending'; grep -E '^# (tests|pass|fail|cancelled|skipped|todo)' pending.log || true; echo; grep -E '^not ok' pending.log || echo none; } >> "$GITHUB_STEP_SUMMARY"
+2026-11-01T18:22:05.8073301Z [36;1m{ echo '### test:pending'; grep -E '^# (tests|pass|fail|cancelled|skipped|todo)' pending.log || true; echo; grep -E '^not ok' pending.log || echo none; } >> "$GITHUB_STEP_SUMMARY"[0m
+2026-11-01T18:22:05.8094550Z shell: /usr/bin/bash -e {0}
+2026-11-01T18:22:05.8094810Z ##[endgroup]
+2026-11-01T18:22:05.8257804Z ##[group]Run actions/upload-artifact@v4
+2026-11-01T18:22:05.8258123Z with:
+2026-11-01T18:22:05.8258327Z   name: pending-log
+2026-11-01T18:22:05.8258552Z   path: pending.log
+2026-11-01T18:22:05.8258778Z   if-no-files-found: warn
+2026-11-01T18:22:05.8259025Z   compression-level: 6
+2026-11-01T18:22:05.8259249Z   overwrite: false
+2026-11-01T18:22:05.8259470Z   include-hidden-files: false
+2026-11-01T18:22:05.8259733Z ##[endgroup]
+2026-11-01T18:22:06.0028869Z (node:2564) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-01T18:22:06.0029712Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-01T18:22:06.0076133Z With the provided path, there will be 1 file uploaded
+2026-11-01T18:22:06.0082410Z Artifact name is valid!
+2026-11-01T18:22:06.0083609Z Root directory input is valid!
+2026-11-01T18:22:06.1949477Z Beginning upload of artifact content to blob storage
+2026-11-01T18:22:06.2178855Z (node:2564) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-01T18:22:06.2469569Z Uploaded bytes 2062
+2026-11-01T18:22:06.2629840Z Finished uploading artifact content to blob storage!
+2026-11-01T18:22:06.2631303Z SHA256 digest of uploaded artifact zip is e001b0f52fccb049d300d0cab7aa07a12e62dfc30ce804ae31125b674bef5beb
+2026-11-01T18:22:06.2633175Z Finalizing artifact upload
+2026-11-01T18:22:06.6489589Z Artifact pending-log.zip successfully finalized. Artifact ID 13094958134
+2026-11-01T18:22:06.6491740Z Artifact pending-log has been successfully uploaded! Final size is 2062 bytes. Artifact ID is 13094958134
+2026-11-01T18:22:06.6498963Z Artifact download URL: https://github.com/azizaljery/Almizan-alhandasi/actions/runs/41335937052/artifacts/13094958134
+2026-11-01T18:22:06.6726099Z Post job cleanup.
+2026-11-01T18:22:06.7600222Z [command]/usr/bin/git version
+2026-11-01T18:22:06.7644766Z git version 2.56.0
+2026-11-01T18:22:06.7685924Z Temporarily overriding HOME='/home/runner/work/_temp/47ce3b88-5a62-4957-aad8-dee50009d9b2' before making global git config changes
+2026-11-01T18:22:06.7687542Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-01T18:22:06.7693537Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Almizan-alhandasi/Almizan-alhandasi
+2026-11-01T18:22:06.7735502Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-01T18:22:06.7811069Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-01T18:22:06.8095683Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-01T18:22:06.8126596Z http.https://github.com/.extraheader
+2026-11-01T18:22:06.8138855Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-01T18:22:06.8178418Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-01T18:22:06.8494854Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-01T18:22:06.8541755Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-01T18:22:06.8980841Z Cleaning up orphan processes
+2026-11-01T18:22:06.9386437Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
