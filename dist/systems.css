@@ -80,3 +80,8 @@ details.ed .body{padding:0 10px 10px}
 .kv{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px}
 .kv b{font-weight:600}
 @media (max-width:560px){.sh h1{font-size:15px}.sh-nav{margin-inline-start:0}.src{grid-template-columns:minmax(0,1fr)}input[type=number]{width:6em}}
+
+#tablesBox .stale-note{display:none}
+#tablesBox[data-stale] > :not(h2):not(.stale-note){display:none}
+#tablesBox[data-stale] .stale-note{display:block}
+.note.warn{background:#fff5e0;border-color:#e3b865;color:#6b4b00}

@@ -317,3 +317,47 @@ test('svgFrame يطابق رسم الحزمة (لتحويل نقرة المست�
   const back = f.toPlan(q); assert.ok(Math.abs(back.x - r.disciplines[0].devices[0].position.x) < 1e-9);
   assert.ok(InputError);
 });
+
+// ——— الإنارة بطريقة اللومن عبر الربط (dist/mep-binding.mjs) على بديل C6-v3 الفعلي ———
+const lightIn = (spec, rooms = { r4: 150, r2: 150, r8: 300, r16: 100 }) => { const i = B.emptyInputs(); i.structure = { usePrecheck: false }; i.services.electrical = { lightingByRoom: Object.fromEntries(Object.entries(rooms).map(([id, lux]) => [id, { targetLux: lux, lumensPerFixture: 1600, utilizationFactor: 0.6, maintenanceFactor: 0.8, wattsPerFixture: 18, powerFactor: 0.9, demandFactor: 1, mountHeightM: 2.8, ...spec }])) }; return i; };
+const luxCalc = (r, id) => r.disciplines.find(d => d.id === 'electrical').calculations.find(c => c.id === 'E-LUX-' + id);
+const lights = (r, id) => r.disciplines.find(d => d.id === 'electrical').devices.filter(d => d.layer === 'E-LIGHT' && d.roomId === id);
+
+test('الإنارة: 150 لوكس وΦ=1600 وUF=0.6 وMF=0.8 ⇒ r4=6 وr2=8 وr8(300)=8 وr16(100)=1 ويطابق ceil(E·A/(Φ·UF·MF)) من مساحة الغرفة نفسها', async () => {
+  const doc = docOf('C6-v3'), b = await bind(doc, lightIn({})), r = await B.computeSystems(b.project);
+  const want = { r4: 6, r2: 8, r8: 8, r16: 1 }, lux = { r4: 150, r2: 150, r8: 300, r16: 100 };
+  for (const [id, n] of Object.entries(want)) {
+    const room = b.project.architecture.rooms.find(x => x.id === id), manual = Math.ceil(lux[id] * room.areaM2 / (1600 * 0.6 * 0.8)), c = luxCalc(r, id);
+    assert.equal(c.status, 'CALCULATED', id); assert.equal(c.value, manual, `${id}: ${room.areaM2} م²`); assert.equal(manual, n, id);
+    assert.equal(lights(r, id).length, n, `وحدات ${id}`);
+    assert.ok(lights(r, id).every(d => inRoom(d.position, room)), 'كل وحدة داخل غرفتها');
+  }
+  assert.ok(r.quantities.rows.some(q => q.layer === 'E-LIGHT' && q.quantity === 6 + 8 + 8 + 1));
+});
+
+test('الإنارة بلا معامل الاستفادة UF: E-LUX NOT_CALCULATED وقيمتها null ولا وحدات E-LIGHT', async () => {
+  const i = lightIn({}); for (const s of Object.values(i.services.electrical.lightingByRoom)) delete s.utilizationFactor;
+  const b = await bind(docOf('C6-v3'), i), r = await B.computeSystems(b.project);
+  for (const id of ['r4', 'r2', 'r8', 'r16']) { const c = luxCalc(r, id); assert.equal(c.status, 'NOT_CALCULATED'); assert.equal(c.value, null); assert.equal(lights(r, id).length, 0); }
+  assert.equal(r.disciplines.find(d => d.id === 'electrical').devices.filter(d => d.layer === 'E-LIGHT').length, 0);
+  assert.ok(!r.quantities.rows.some(q => q.layer === 'E-LIGHT'));
+  const calcs = B.calcRows(r, 'electrical').filter(c => c.id.startsWith('E-LUX-')); assert.ok(calcs.length === 4 && calcs.every(c => c.value === null && c.reason));
+});
+
+test('الإنارة: طلب أكثر من 160 وحدة ⇒ LAYOUT_RESOURCE_LIMIT ولا رسم لوحدات الغرفة', async () => {
+  const b = await bind(docOf('C6-v3'), lightIn({ lumensPerFixture: 10 }, { r4: 150 })), r = await B.computeSystems(b.project);
+  const room = b.project.architecture.rooms.find(x => x.id === 'r4'), need = Math.ceil(150 * room.areaM2 / (10 * 0.6 * 0.8)); assert.ok(need > 160);
+  const iss = r.disciplines.find(d => d.id === 'electrical').issues.find(x => x.code === 'LAYOUT_RESOURCE_LIMIT');
+  assert.ok(iss && iss.severity === 'error' && iss.details.roomId === 'r4' && iss.details.requested === need);
+  assert.equal(lights(r, 'r4').length, 0); assert.equal(r.status, 'BLOCKED_PRELIMINARY');
+});
+
+test('تعديل شدة الإنارة يجعل النتيجة قديمة (INPUTS_CHANGED) ويمنع التصدير حتى إعادة الحساب', async () => {
+  const doc = docOf('C6-v3'), b1 = await bind(doc, lightIn({}, { r4: 150 })), r1 = await B.computeSystems(b1.project);
+  assert.equal((await B.freshness(r1, b1.project, b1.sourceHash)).fresh, true);
+  const i2 = lightIn({}, { r4: 300 }), b2 = await bind(doc, i2), f = await B.freshness(r1, b2.project, b2.sourceHash);
+  assert.equal(f.fresh, false); assert.equal(f.reason, 'INPUTS_CHANGED');
+  await assert.rejects(B.buildExport('csv', { project: b2.project, result: r1, sourceHash: b2.sourceHash, scheduleId: 'quantities' }), e => e.code === 'STALE_RESULT');
+  const r2 = await B.computeSystems(b2.project); assert.equal(luxCalc(r2, 'r4').value, 12); assert.equal((await B.freshness(r2, b2.project, b2.sourceHash)).fresh, true);
+  assert.ok((await B.buildExport('csv', { project: b2.project, result: r2, sourceHash: b2.sourceHash, scheduleId: 'quantities' })).text.includes('E-LIGHT'));
+});

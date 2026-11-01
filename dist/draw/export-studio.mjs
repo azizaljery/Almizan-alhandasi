@@ -10,6 +10,7 @@ import { computeDocQuantities, GRADES } from './quantities-doc.mjs';
 import { geometryFingerprint } from '../design-dna.mjs';
 import { computeStructure } from './structure.mjs';
 import { structureSheetSvg, structureCsv } from './structure-sheet.mjs';
+import { emptySection, sectionCsvRows, sectionJson } from '../mep-quantities.mjs';
 
 export const BUNDLE_SCHEMA = 'mizan-export-bundle/1';
 const enc = new TextEncoder();
@@ -45,9 +46,10 @@ export function planSvg(doc, level) {
 
 const csvCell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 /** جدول الكميات CSV: كل صف يحمل «الدرجة»؛ الصفوف «غير قابل للحساب» تبقى بقيمة فارغة ولا تُحذف. */
-export function quantitiesCsv(res) {
+export function quantitiesCsv(res, systems = null) {
   const rows = [['البند', 'القيمة', 'الوحدة', 'الدرجة', 'الأساس']];
   for (const r of res.rows) rows.push([r.label, r.value === null ? '' : r.value, r.unit, GRADES[r.grade] || r.grade, r.basis]);
+  if (systems) rows.push(...sectionCsvRows(systems)); // قسم «كميات الأنظمة الهندسية — أولية» بعد كميات العمارة، بترويسته الخاصة
   return '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
 }
 
@@ -55,14 +57,15 @@ export function quantitiesCsv(res) {
  * يبني الحزمة. يعيد { files:[{name,mime,bytes:Uint8Array,sha256,size}], manifest }، وmanifest نفسه أول عنصر لا يُحسب له sha256 (لا يمكن أن يحتوي بصمة نفسه).
  * options: { now: Date, app: {commit, builtAt} }
  */
-export async function buildExportBundle(doc, { now = new Date(), app = null } = {}) {
+export async function buildExportBundle(doc, { now = new Date(), app = null, systems = null } = {}) {
+  const sys = systems || emptySection('NOT_CALCULATED'); // القسم حاضر دائمًا: بلا حساب أنظمة يقول ذلك ولا يختلق أرقامًا
   const base = slug(doc.title), parts = [];
   const add = (name, mime, text, kind) => parts.push({ name, mime, kind, bytes: enc.encode(text) });
   for (const lv of doc.levels) add(`plan-${slug(lv.id)}.svg`, 'image/svg+xml', planSvg(doc, lv), 'plan-svg');
   add('plan.dxf', 'application/dxf', toDxf(doc), 'dxf');
   add(`${base}.mizan.json`, 'application/json', serialize(doc), 'document-json');
   let res = null, qtyError = null; try { res = computeDocQuantities(doc); } catch (e) { qtyError = e.message; }
-  if (res) add('quantities.csv', 'text/csv;charset=utf-8', quantitiesCsv(res), 'quantities-csv');
+  if (res) add('quantities.csv', 'text/csv;charset=utf-8', quantitiesCsv(res, sys), 'quantities-csv');
   // المخطط الإنشائي المبدئي لكل دور له جدران، وجدول الأعمدة والجسور؛ يُولَّد من الرسم نفسه فيطابق ما يُعرض في المرسم
   let structNote = null;
   try {
@@ -80,6 +83,7 @@ export async function buildExportBundle(doc, { now = new Date(), app = null } = 
     geometryFingerprint: geometryFingerprint(doc),
     app: { commit: app?.commit ?? null, builtAt: app?.builtAt ?? null },
     files: files.map(f => ({ name: f.name, kind: f.kind, mime: f.mime, bytes: f.size, sha256: f.sha256 })),
+    systemsQuantities: sectionJson(sys),
     notes: [...(qtyError ? ['تعذّر حساب الكميات: ' + qtyError] : []), ...(structNote ? [structNote] : []), 'المخطط الإنشائي تحجيم أولي لا تصميم إنشائي معتمد.'],
   };
   const mbytes = enc.encode(JSON.stringify(manifest, null, 2) + '\n');

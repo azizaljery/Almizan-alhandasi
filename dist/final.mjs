@@ -4,6 +4,7 @@ import { STUDIO_KEY, loadSavedDNA } from './draw/handoff.mjs';
 import { buildFinalData, projectBookHtml, designReasons, NEXT_STAGES } from './final-outputs.mjs';
 import { GRADES } from './draw/quantities-doc.mjs';
 import { structureCsv } from './draw/structure-sheet.mjs';
+import { resolveSystemsSection, sectionBodyHtml, SECTION_TITLE_AR } from './mep-quantities.mjs';
 
 const RATES_KEY = 'mizan.final.rates.v1', SNAP_KEY = 'mizan.studio.snap3d.v1';
 const $ = id => document.getElementById(id);
@@ -11,7 +12,10 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const fmt = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }));
 const get = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const set = (k, v) => { try { localStorage.setItem(k, v); } catch { /* التخزين غير متاح */ } };
-let state = { rates: {}, reservePct: '', vatPct: '' }, doc = null, dna = null, data = null;
+let state = { rates: {}, reservePct: '', vatPct: '' }, doc = null, dna = null, data = null, systems = null;
+const SESSION_KEY = 'mizan.design.session.v1', STORE_KEY = 'mizan.mep.systems.v1';
+const readSession = () => { try { const s = JSON.parse(get(SESSION_KEY) || 'null'); return s && Array.isArray(s.designs) ? s : null; } catch { return null; } };
+const loadSystems = () => resolveSystemsSection({ doc, session: readSession(), studioRaw: get(STUDIO_KEY), store: localStorage });
 try { Object.assign(state, JSON.parse(get(RATES_KEY) || '{}')); } catch { /* ... */ }
 
 function load() {
@@ -24,7 +28,7 @@ const table = (head, rows) => `<table><thead><tr>${head.map(h => `<th>${esc(h)}<
 
 function compute() {
   let snap = null; try { snap = get(SNAP_KEY); } catch { /* ... */ }
-  data = buildFinalData(doc, { dna, rates: state.rates, reservePct: state.reservePct, vatPct: state.vatPct, snapshot3d: snap });
+  data = buildFinalData(doc, { dna, rates: state.rates, reservePct: state.reservePct, vatPct: state.vatPct, snapshot3d: snap, systems });
 }
 function renderCost() {
   const c = data.cost;
@@ -49,6 +53,7 @@ function render() {
   parts.push(sec('view3d', 'العرض ثلاثي الأبعاد', d.snapshot3d ? `<div class="shot"><img alt="لقطة ثلاثية الأبعاد من المرسم" src="${esc(d.snapshot3d)}"></div><p class="muted">اللقطة من المجسم المبني من المخطط نفسه. للتجوّل والشمس والجولة افتح <a href="./studio.html">المرسم</a>.</p>` : `<p>لا توجد لقطة محفوظة بعد. افتح <a href="./studio.html">المرسم</a> ثم اضغط «اعتمد وأخرج المخرجات» من العرض ثلاثي الأبعاد لتُحفظ اللقطة.</p>`));
   d.levels.forEach((l, i) => l.structure && parts.push(sec('str' + i, 'المخطط الإنشائي المبدئي — ' + l.name, `<div class="svgbox">${l.structure}</div><p class="muted">تحجيم أولي بجداول ACI 318؛ مطابقة الكود السعودي SBC 304 غير متحققة. ليس تصميمًا إنشائيًا معتمدًا ويراجعه مهندس إنشائي.</p>`)));
   parts.push(sec('qty', 'جداول الكميات والتكلفة', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], d.quantities.rows.map(r => `<tr><td>${esc(r.label)}</td><td class="num">${r.value === null ? '—' : fmt(r.value) + ' ' + esc(r.unit)}</td><td>${esc(GRADES[r.grade])}</td><td>${esc(r.basis)}</td></tr>`)) + '<h3>التكلفة بأسعارك</h3>' + renderCost()));
+  parts.push(sec('mep', SECTION_TITLE_AR, sectionBodyHtml(d.systems, esc)));
   parts.push(sec('why', 'لماذا هذا التصميم', (d.score ? `<p>${esc(d.score.grade)}${d.score.score !== null ? ` — الدرجة ${d.score.score} من ١٠٠٠ (${esc(d.scoreLevel)})` : ''}</p>` : '<p>الدرجة غير متاحة لهذا المخطط.</p>')
     + (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '')
     + (R.improvements.length ? `<h3>ما يحتاج تحسينًا</h3><ul>${R.improvements.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '')
@@ -57,7 +62,7 @@ function render() {
     + (d.dnaAxes ? '<h3>بصمتك التصميمية</h3>' + table(['المحور', 'القيمة'], d.dnaAxes.map(a => `<tr><td>${esc(a.label)}</td><td class="num">${Math.round(a.value * 100)}%</td></tr>`)) : '')));
   parts.push(sec('next', 'ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => `<tr><td>${esc(s.title)}</td><td><span class="pill ${s.status === 'available' ? '' : 'plan'}">${s.status === 'available' ? 'متاح' : 'قادم'}</span></td><td>${esc(s.note)}</td></tr>`))));
   $('fmain').innerHTML = parts.join('');
-  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ['view3d', '3D'], ['str0', 'الإنشائي'], ['qty', 'الكميات والتكلفة'], ['why', 'الأسباب'], ['next', 'التالي']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
+  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ['view3d', '3D'], ['str0', 'الإنشائي'], ['qty', 'الكميات والتكلفة'], ['mep', 'كميات الأنظمة'], ['why', 'الأسباب'], ['next', 'التالي']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));
   $('resPct').addEventListener('input', e => { state.reservePct = e.target.value; update(); });
@@ -72,15 +77,23 @@ function update() {
 function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 async function bookCss() { try { return await (await fetch('./final.css')).text(); } catch { return ''; } }
 
-function init() {
+async function init() {
   doc = load();
   if (!doc || !doc.walls.length) {
     $('fmain').innerHTML = `<div class="sec empty"><h2>لا يوجد تصميم لعرض مخرجاته</h2><p>ارسم مخططًا أو ولّده من الصفحة الرئيسية، ثم عُد إلى هنا.</p><a class="btn primary" href="./studio.html">فتح المرسم</a> <a class="btn" href="./home.html">ابدأ رحلة التصميم</a></div>`;
     $('btnBook').disabled = $('btnPrint').disabled = true; return;
   }
   dna = loadSavedDNA(localStorage);
+  systems = await loadSystems();
   compute(); render();
   $('btnPrint').addEventListener('click', () => window.print());
   $('btnBook').addEventListener('click', async () => { compute(); download('mizan-project-book-' + data.fingerprint.slice(0, 8).replace(/[^a-z0-9]/gi, '') + '.html', projectBookHtml(data, { css: await bookCss() }), 'text/html;charset=utf-8'); });
 }
-try { init(); } catch (e) { $('fmain').innerHTML = `<div class="sec empty"><h2>تعذّر تجهيز المخرجات</h2><p>${esc(e.message)}</p><a class="btn" href="./studio.html">العودة إلى المرسم</a></div>`; }
+const fail = e => { $('fmain').innerHTML = `<div class="sec empty"><h2>تعذّر تجهيز المخرجات</h2><p>${esc(e.message)}</p><a class="btn" href="./studio.html">العودة إلى المرسم</a></div>`; };
+init().catch(fail);
+// تغيّر المخطط (المرسم) في نافذة أخرى: تُعاد قراءة الصفحة؛ تغيّر الأنظمة أو الجلسة: يُعاد حلّ قسم الأنظمة وحده
+addEventListener('storage', async e => {
+  if (e.key === STUDIO_KEY) { location.reload(); return; }
+  if (e.key !== STORE_KEY && e.key !== SESSION_KEY) return;
+  try { systems = await loadSystems(); compute(); const m = document.querySelector('#mep'); if (m) m.innerHTML = '<h2>' + esc(SECTION_TITLE_AR) + '</h2>' + sectionBodyHtml(data.systems, esc); } catch { /* ... */ }
+});

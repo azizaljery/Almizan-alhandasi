@@ -6,6 +6,7 @@ import { consumeHandoff, loadSavedDNA, STUDIO_KEY } from './draw/handoff.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
 import { AXIS_LABELS as OA_LABELS } from './opening-aware.mjs';
 import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
+import { resolveSystemsSection, sectionBodyHtml, SECTION_TITLE_AR } from './mep-quantities.mjs';
 import { computeStructure, DEFAULT_ASSUMPTIONS } from './draw/structure.mjs';
 import { structureSheetSvg } from './draw/structure-sheet.mjs';
 import { applyCommand } from './draw/doc.mjs';
@@ -503,11 +504,18 @@ $('exportMenu').addEventListener('click', async e => {
   if (kind === 'json') saveJson();
   else if (kind === 'png') { editor.canvas.toBlob(b => b && exportWithManifest((editor.doc.title || 'mizan') + '-plan.png', b, 'studio-plan-png')); }
   else if (kind === 'png3d') { const v = await ensureViewer(); if (!v?.built) await rebuild3D(); try { exportWithManifest((editor.doc.title || 'mizan') + '-3d.png', await viewer.capturePNG(2), 'studio-3d-png'); } catch { toast('اعرض المجسم أولًا ثم أعد المحاولة', true); } }
-  else if (kind === 'bundle') openExportStudio({ doc: editor.doc, download });
+  else if (kind === 'bundle') openExportStudio({ doc: editor.doc, download, systems: await systemsSectionNow() });
   else if (kind === 'dxf') exportWithManifest((editor.doc.title || 'mizan') + '.dxf', new Blob([toDxf(editor.doc)], { type: 'application/dxf' }), 'studio-dxf');
 });
 
 // ------------------------------------------------------------------------------------------------ الكميات والتحقق (AR-02)
+// قسم الأنظمة الهندسية في الكميات والتصدير: يُحلّ من تخزين صفحة الأنظمة على المخطط الحالي في المرسم (حتى غير المحفوظ بعد)؛
+// نتيجة لا تطابق المخطط تظهر «قديمة» بلا أرقام. لا يعدّل شيئًا ولا يحسب الأنظمة.
+const readDesignSession = () => { try { const x = JSON.parse(localStorage.getItem('mizan.design.session.v1') || 'null'); return x && Array.isArray(x.designs) ? x : null; } catch { return null; } };
+async function systemsSectionNow() {
+  try { const raw = serialize(editor.doc); return await resolveSystemsSection({ doc: parseDoc(raw), session: readDesignSession(), studioRaw: raw, store: localStorage }); } catch { return null; }
+}
+let mepToken = 0;
 let qtyTimer = null;
 function scheduleQty() { clearTimeout(qtyTimer); qtyTimer = setTimeout(renderQty, 250); }
 function renderQty() {
@@ -532,6 +540,9 @@ function renderQty() {
     if (l.score) chk.append(el('p', { class: 'muted' }, 'درجة الميزان: ' + (l.score.score ?? 'غير مُقيَّمة') + ' — ' + l.score.grade));
   }
   box.append(chk);
+  const mep = el('div', { class: 'sec mep-sec', id: 'mepQty' }, el('h4', {}, SECTION_TITLE_AR), el('p', { class: 'muted' }, 'جارٍ قراءة حالة الأنظمة الهندسية…')); box.append(mep);
+  const tok = ++mepToken;
+  systemsSectionNow().then(sec => { if (tok !== mepToken || !sec || !mep.isConnected) return; mep.innerHTML = '<h4></h4>' + sectionBodyHtml(sec); mep.firstChild.textContent = SECTION_TITLE_AR; mep.dataset.mepStatus = sec.status; });
 }
 
 // ------------------------------------------------------------------------------------------------ الإنشاء: أعمدة وجسور (تحجيم أولي)

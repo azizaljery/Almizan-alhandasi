@@ -24,7 +24,7 @@ const SEV_AR = { error: 'خطأ/متعذر', warning: 'تحذير', pending: 'ي
 let S = {
   sources: [], source: null, doc: null, sourceHash: null, bind: null, store: null, entity: null, inputs: B.emptyInputs(), result: null, resultProject: null,
   fresh: { fresh: false, reason: 'NO_RESULT', messageAr: 'لم تُحسب الأنظمة بعد.' }, busy: false, auto: true,
-  tab: 'electrical', levelId: null, mode: 'view', group: 0, kind: null, zRel: 1.2, outside: false, selected: null, layer: '', timer: null, docText: null,
+  archNotice: null, withheld: null, tab: 'electrical', levelId: null, mode: 'view', group: 0, kind: null, zRel: 1.2, outside: false, selected: null, layer: '', timer: null, docText: null,
 };
 
 // ——— قراءة المصادر وربطها ———
@@ -38,17 +38,35 @@ function pickDefault() {
   const cur = sess ? S.sources.find(s => s.kind === 'design' && s.label.includes('(المعروض)')) : null;
   return (cur || S.sources[0])?.id || null;
 }
+const ctxOf = src => ({ sessionKey: src.sessionKey, kind: src.kind });
 async function selectSource(id) {
-  S.source = S.sources.find(s => s.id === id) || null; S.result = null; S.resultProject = null; S.selected = null;
+  S.source = S.sources.find(s => s.id === id) || null; S.result = null; S.resultProject = null; S.selected = null; S.archNotice = null; S.withheld = null;
+  S.fresh = { fresh: false, reason: 'NO_RESULT', messageAr: 'لم تُحسب الأنظمة بعد.' };
   if (!S.source) return render();
   try { S.doc = parseDoc(S.source.docText); } catch (e) { S.doc = null; S.bind = { ok: false, error: { code: e.code || 'PARSE', messageAr: 'تعذرت قراءة مستند البديل: ' + String(e.message).slice(0, 120) } }; return render(); }
   S.docText = S.source.docText;
-  S.store = B.loadStore(localStorage); S.entity = B.entityFor(S.store, id); S.inputs = S.entity.inputs || B.emptyInputs();
+  // المفتاح: الجلسة + معرّف البديل (داخل المعرّف) ثم بصمة المستند عند التقييم؛ كيان من جلسة أخرى أو ببديل آخر يُرفض فلا تختلط الأنظمة
+  S.store = B.loadStore(localStorage); S.entity = B.entityFor(S.store, id, ctxOf(S.source)); S.inputs = S.entity.inputs || B.emptyInputs();
+  if (S.entity.restore?.rejected) S.archNotice = { kind: 'REJECTED', messageAr: 'وُجد كيان محفوظ لا يخص هذا البديل أو هذه الجلسة (' + S.entity.restore.rejected + ')؛ لم يُحمَّل.' };
   await rebind();
-  if (S.bind?.ok && S.entity.result) {
-    S.result = S.entity.result; S.fresh = await B.freshness(S.result, S.bind.project, S.sourceHash);
-    if (S.fresh.fresh) S.resultProject = S.bind.project;
-    render(); if (!S.fresh.fresh && S.auto) await recompute(); return;
+  const kept = B.deviceRefs(S.inputs);
+  if (!S.bind?.ok) { // العمارة الحالية لا تُربط (مثلًا جدار حُرّك فانفتح فراغ): تبقى المدخلات محفوظة والنتيجة القديمة لا تُعرض
+    if (S.entity.result) { S.fresh = { fresh: false, reason: 'ARCHITECTURE_CHANGED', messageAr: 'تغيّر المخطط المعماري بعد آخر حساب وتعذر ربطه؛ النتيجة السابقة لا تُستخدم.' }; S.result = null; }
+    if (S.entity.result && kept.length) S.archNotice = { kind: 'UNBOUND', devices: kept.length, orphans: [], messageAr: `تغيّر المخطط المعماري وتعذر ربطه بالأنظمة. حُفظت مدخلاتك (${kept.length} جهازًا/عنصرًا) ولم تُحذف؛ صحّح المخطط في المرسم ثم أعد الحساب.` };
+    return render();
+  }
+  if (S.entity.result) {
+    const a = await B.assessEntity(S.entity, { project: S.bind.project, sourceHash: S.sourceHash });
+    if (a.foreign) { // مدخلات محفوظة لا يوافقها أي دور أو غرفة في هذا المخطط: لا تُحمَّل (تبقى في الكيان تحت withheld) لئلا تُخلَط مع مخطط آخر
+      S.withheld = { inputs: S.entity.inputs, sourceHash: S.entity.sourceHash, devices: a.deviceCount };
+      S.entity = { ...S.entity, withheld: S.withheld }; S.inputs = B.emptyInputs(); S.result = null; await rebind();
+      S.archNotice = { kind: 'FOREIGN', devices: a.deviceCount, orphans: [], messageAr: `المدخلات المحفوظة (${a.deviceCount} جهازًا/عنصرًا) لا يوافقها أي دور أو غرفة في هذا المخطط؛ يبدو أنها لمخطط آخر فلم تُحمَّل ولم تُحذف.` };
+      if (S.bind?.ok && S.auto) await recompute(); else render(); return;
+    }
+    S.result = S.entity.result; S.fresh = { fresh: a.fresh, reason: a.reason, messageAr: a.messageAr };
+    if (a.fresh) S.resultProject = S.bind.project;
+    else if (a.archChanged && a.deviceCount) S.archNotice = { kind: 'ARCH_CHANGED', devices: a.deviceCount, orphans: a.orphans, messageAr: `تغيّر المخطط المعماري بعد آخر حساب. حُفظت مدخلاتك (${a.deviceCount} جهازًا/عنصرًا)؛ راجع مواقعها في المخطط الجديد` + (a.orphans.length ? ` — ${a.orphans.length} منها فقد غرفته أو دوره: ${a.orphans.map(o => o.id).join('، ')}` : '') + '.' };
+    render(); if (!a.fresh && S.auto) await recompute(); return;
   }
   if (S.bind?.ok && S.auto) await recompute(); else render();
 }
@@ -64,8 +82,8 @@ async function recompute() {
     await rebind(); if (!S.bind.ok) { S.result = null; return; }
     S.result = await B.computeSystems(S.bind.project); S.resultProject = S.bind.project;
     S.fresh = await B.freshness(S.result, S.bind.project, S.sourceHash);
-    const saved = B.saveEntity(localStorage, S.store, { ...S.entity, sourceHash: S.sourceHash, inputs: S.inputs, result: S.result });
-    S.store = saved.data; S.entity = B.entityFor(S.store, S.source.id);
+    const saved = B.saveEntity(localStorage, S.store, { ...S.entity, sessionKey: S.source.sessionKey, kind: S.source.kind, revision: S.source.revision, sourceHash: S.sourceHash, inputs: S.inputs, result: S.result });
+    S.store = saved.data; S.entity = B.entityFor(S.store, S.source.id, ctxOf(S.source));
     if (!saved.ok) toast('تعذر حفظ مدخلات الأنظمة في المتصفح؛ ستبقى في هذه الصفحة فقط.', true);
   } catch (e) { S.result = null; S.fresh = { fresh: false, reason: 'COMPUTE_FAILED', messageAr: 'تعذر الحساب: ' + String(e.message || e).slice(0, 160) }; }
   finally { S.busy = false; render(); }
@@ -73,8 +91,8 @@ async function recompute() {
 /** كل تعديل: النتيجة قديمة فورًا (يُمنع التصدير)، ثم إعادة حساب مؤجلة إن كانت تلقائية. */
 function changed(inputs) {
   S.inputs = inputs; S.fresh = { fresh: false, reason: 'INPUTS_CHANGED', messageAr: 'تغيّرت المدخلات بعد الحساب؛ النتيجة المعروضة قديمة ولا تُصدَّر.' };
-  try { B.saveEntity(localStorage, S.store, { ...S.entity, inputs: S.inputs }); S.store = B.loadStore(localStorage); } catch { /* التخزين غير متاح */ }
-  renderStatus(); renderPlanVeil(); renderExports();
+  try { B.saveEntity(localStorage, S.store, { ...S.entity, sessionKey: S.source.sessionKey, kind: S.source.kind, inputs: S.inputs }); S.store = B.loadStore(localStorage); } catch { /* التخزين غير متاح */ }
+  renderStatus(); renderPlanVeil(); renderExports(); renderTablesStale();
   clearTimeout(S.timer); if (S.auto) S.timer = setTimeout(recompute, 450);
 }
 /** المخطط تغيّر في المرسم أو جلسة التصميم (نافذة أخرى): يُقرأ المصدر من جديد وتُعلَّم النتيجة قديمة. */
@@ -84,8 +102,10 @@ async function checkSourceChanged() {
   if (!now || now.docText === S.docText) return false;
   S.source = now; try { S.doc = parseDoc(now.docText); } catch { return false; }
   S.docText = now.docText; S.fresh = { fresh: false, reason: 'ARCHITECTURE_CHANGED', messageAr: 'تغيّر المخطط المعماري؛ النتيجة السابقة لا تُستخدم مع المخطط الجديد.' };
-  toast('تغيّر المخطط المعماري — يُعاد الربط والحساب.'); renderStatus(); renderPlanVeil(); renderExports();
-  if (S.auto) await recompute(); else { await rebind(); render(); }
+  const kept = B.deviceRefs(S.inputs);
+  if (kept.length) S.archNotice = { kind: 'ARCH_CHANGED', devices: kept.length, orphans: [], messageAr: `تغيّر المخطط المعماري بعد آخر حساب. حُفظت مدخلاتك (${kept.length} جهازًا/عنصرًا)؛ راجع مواقعها في المخطط الجديد.` };
+  toast('تغيّر المخطط المعماري — النتيجة قديمة ولا تُصدَّر حتى يُعاد الحساب.'); renderStatus(); renderPlanVeil(); renderExports(); renderTablesStale();
+  if (S.auto) await recompute(); else { await rebind(); if (S.bind?.ok && kept.length) { const o = B.orphanDevices(S.inputs, S.bind.project.architecture); if (o.length && S.archNotice) S.archNotice.orphans = o; } render(); }
   return true;
 }
 addEventListener('storage', e => { if (e.key === STUDIO_KEY || e.key === SESSION_KEY) checkSourceChanged(); });
@@ -109,7 +129,7 @@ function sourceCard() {
       el('div', { class: 'meta' }, el('span', {}, 'هوية البديل: ', el('code', { 'data-alt-id': '' }, S.source?.id || '—')), el('span', {}, 'بصمة المصدر: ', el('code', { 'data-source-hash': S.sourceHash || '' }, short(S.sourceHash))),
         p ? el('span', {}, `الأدوار: ${p.architecture.levels.length} · الغرف: ${p.architecture.rooms.length} · العوائق الإنشائية المبدئية: ${p.architecture.obstacles.length}`) : null,
         S.result ? el('span', {}, 'بصمة المدخل: ', el('code', {}, short(S.result.inputHash))) : null),
-      el('p', { class: 'sub' }, 'الأنظمة تقرأ المخطط ولا تعدّله. تعديل المعماري يتم في المرسم ثم يُعاد الربط والحساب تلقائيًا.')),
+      el('p', { class: 'sub' }, 'الأنظمة تقرأ المخطط ولا تعدّله. تعديل المعماري يتم في المرسم؛ بعده تُعدّ النتيجة قديمة (لا تصدير ولا كميات) حتى يُعاد الحساب، وتبقى مدخلاتك محفوظة.')),
     el('div', {}, el('label', { class: 'sub' }, el('input', { type: 'checkbox', id: 'autoCalc', checked: S.auto, onchange: e => { S.auto = e.target.checked; if (S.auto && !S.fresh.fresh) recompute(); } }), ' إعادة الحساب تلقائيًا'), ' ',
       el('button', { class: 'btn primary', id: 'btnRecalc', onclick: () => recompute() }, 'أعد الحساب الآن')));
 }
@@ -120,6 +140,7 @@ function renderStatus() {
   const pill = S.busy ? el('span', { class: 'pill busy', 'data-state': 'busy' }, 'يُعاد الحساب…') : S.bind && !S.bind.ok ? el('span', { class: 'pill fail', 'data-state': 'unbound' }, 'غير مربوط') : S.fresh.fresh ? el('span', { class: 'pill fresh', 'data-state': 'fresh' }, 'النتيجة محدّثة') : el('span', { class: 'pill stale', 'data-state': 'stale' }, 'النتيجة قديمة — لا تُصدَّر');
   parts.unshift(el('div', { class: 'card', style: 'display:flex;gap:10px;align-items:center;flex-wrap:wrap' }, pill, el('span', { class: 'sub', id: 'freshMsg' }, S.busy ? 'نعيد ربط المخطط وحساب كل التخصصات والتنسيق.' : S.fresh.messageAr),
     S.result ? el('span', { class: 'sub' }, `الحالة: ${S.result.status === 'BLOCKED_PRELIMINARY' ? 'أولي فيه بنود متعذرة' : 'أولي يحتاج مراجعة'} · اعتماد التنفيذ: لا · مطابقة الكود: غير مقيّمة`) : null));
+  if (S.archNotice) parts.push(el('div', { class: 'note warn', role: 'alert', 'data-arch-notice': S.archNotice.kind }, el('b', {}, 'تنبيه: '), S.archNotice.messageAr, ' ', el('button', { class: 'btn small', type: 'button', onclick: () => { S.archNotice = null; renderStatus(); } }, 'إخفاء')));
   for (const n of S.bind?.notes || []) parts.push(el('div', { class: 'note' }, n.messageAr));
   box.replaceChildren(...parts);
 }
@@ -406,8 +427,10 @@ function tablesCard() {
   out.push(el('h3', {}, 'الكميات الأولية'), el('div', { class: 'tw' }, el('table', { 'data-quantities': '' }, el('thead', {}, el('tr', {}, ['البند', 'الطبقة', 'الوحدة', 'الكمية', 'سعر الوحدة (تدخله)', 'المبلغ'].map(h => el('th', {}, h)))),
     el('tbody', {}, qrows.length ? qrows.map(r => el('tr', {}, el('td', {}, r.kind), el('td', {}, r.layer), el('td', {}, r.unit), el('td', { class: 'num' }, fmtN(r.quantity)), el('td', {}, rateIn(r)), r.amount === null ? el('td', {}, NA('غير مسعّر')) : el('td', { class: 'num' }, fmtN(r.amount)))) : el('tr', {}, el('td', { colspan: 6, class: 'sub' }, 'لا كميات بعد.'))))),
     el('p', { class: 'sub' }, !q.rows.length ? 'لا كميات بعد؛ لا يُعرض إجمالي.' : q.total === null ? `الإجمالي غير مكتمل: ${q.unpricedCount} بند غير مسعّر (المسعّر ${fmtN(q.pricedSubtotal)}). لا هالك ولا وصلات ولا ضريبة.` : `الإجمالي المسعّر: ${fmtN(q.total)} (بلا هالك ولا وصلات ولا ضريبة).`));
-  return el('div', { class: 'card', 'data-tables': S.tab }, el('h2', {}, 'الجداول والكميات'), ...out);
+  return el('div', { class: 'card', id: 'tablesBox', 'data-tables': S.tab, ...(S.fresh.fresh ? {} : { 'data-stale': '' }) }, el('h2', {}, 'الجداول والكميات'), el('p', { class: 'bad stale-note', 'data-stale-note': '' }, 'النتيجة قديمة: الجداول والكميات مخفية حتى يُعاد الحساب (لا تُعرض أرقام قديمة كأنها حالية).'), ...out);
 }
+/** الجداول والكميات مخفية ما دامت النتيجة قديمة؛ يُستدعى فور أي تغيير دون إعادة بناء الصفحة. */
+function renderTablesStale() { const b = $('tablesBox'); if (b) b.toggleAttribute('data-stale', !S.fresh.fresh); }
 
 // ——— أفعال الوكيل: مربوطة ببصمة المخطط، بلا مزود ولا شبكة ———
 globalThis.mizanSystemsAgent = B.createSystemsAgent(async () => { await checkSourceChanged(); const b = await B.bindArchitecture(S.doc, { alternativeId: S.source.id, revision: S.source.revision, inputs: S.inputs }); return b.ok ? b.project : null; });
