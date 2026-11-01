@@ -1,0 +1,84 @@
+name: CI (build and tests — no deploy)
+
+# تحقق فقط: لا أسرار ولا بيئات ولا نشر ولا Cloudflare. يعمل على فروع dev/** ويدويًا.
+# البناء بالإصدارات المقفلة (npm ci) كما في deploy-site/deploy-staging، دون خطوة نشر.
+on:
+  push:
+    branches: ['dev/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Locked versions
+        run: |
+          node -v
+          npx esbuild --version
+          echo "esbuild=$(npx esbuild --version)  sha=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Build
+        run: node scripts/build.mjs
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Chromium for browser tests
+        run: npx --yes playwright@1 install --with-deps chromium || true
+      - name: Full test suite (npm test)
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee test.log
+      - name: Summary
+        if: always()
+        run: |
+          { echo '### npm test'; grep -E '^# (tests|pass|fail|cancelled|skipped|todo)' test.log || true; echo; echo '#### not ok'; grep -E '^not ok' test.log || echo none; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-log
+          path: test.log
+
+  pending:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Pending tests (test:pending)
+        run: |
+          set -o pipefail
+          npm run test:pending 2>&1 | tee pending.log
+      - name: Summary
+        if: always()
+        run: |
+          { echo '### test:pending'; grep -E '^# (tests|pass|fail|cancelled|skipped|todo)' pending.log || true; echo; grep -E '^not ok' pending.log || echo none; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pending-log
+          path: pending.log
