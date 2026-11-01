@@ -57,6 +57,15 @@ export function normalizeLand(raw = {}) {
   return { plot, land: { length, width, streets, entries, floors, ...(polygon ? { polygon } : {}), ...(sw ? { streetWidth: sw } : {}) } };
 }
 
+// (ملاحظات المعاينة 2026-10-31 «يعكس الأطوال») الطول هنا شمال↔جنوب والعرض شرق↔غرب (محاور البوصلة لا «الأطول والأقصر»)؛
+// فيُقال للعميل صراحة كم واجهة أرضه على شارع المدخل وكم عمقها، مع زر تبديل — حتى لا تُرسم الأرض معكوسة دون أن يلاحظ
+export function landFaceText(L) {
+  const e = (L.entries || [])[0], len = L.length, wid = L.width; if (!(len > 0 && wid > 0)) return '';
+  if (!e) return `الأرض: ${wid} م شرق↔غرب × ${len} م شمال↔جنوب. اختر جهة المدخل لأبيّن لك الواجهة والعمق.`;
+  const face = e === 'n' || e === 's' ? wid : len, depth = e === 'n' || e === 's' ? len : wid;
+  return `واجهة الأرض على شارع المدخل (${SIDE_LABELS[e]}): ${face} م، وعمقها من الشارع: ${depth} م. إن كان العكس فاضغط «بدّل الطول والعرض».`;
+}
+
 // ------------------------------------------------------------------------------------------------ شرعاء
 const COUNT_FIELDS = Object.freeze([
   { id: 'bedrooms', label: 'غرف النوم', min: 1, max: 10 },

@@ -6,6 +6,7 @@ import { dist, sub, add, mul, norm, perp, rotate, len } from '../geom.mjs';
 import { stairBox } from './hit.mjs';
 import { stairLayout } from '../stairs3d.mjs';
 import { gridStep } from './snap.mjs';
+import { roomSpan } from '../room-span.mjs';
 
 export const THEME = {
   paper: '#fbf9f4', grid: 'rgba(110,100,80,.10)', gridMajor: 'rgba(110,100,80,.22)', wall: '#2a2a2e', wallExt: '#1b1b1f', ink: '#3a3631', inkSoft: '#8b8577',
@@ -237,8 +238,9 @@ export function renderPlan(ctx, st) {
     if (showName) lines.forEach((l, i) => halo(l, top + i * lh, `600 ${big}px ${FONT}`, r.unlabelled ? THEME.inkSoft : THEME.ink));
     if (flags.roomDims && r.rect && r.rect.w > .5 && showName) {
       // عرض العرض (للمخططات المعروضة على العميل): الأبعاد ثم المساحة، كما في صفحات المخططات المهنية
-      const dims = `${r.rect.l.toFixed(2)} × ${r.rect.w.toFixed(2)}`, fs = Math.max(8.5, big * .72);
-      halo(dims, c.y + big * .6, `500 ${fs}px ${FONT}`, THEME.ink);
+      // (ملاحظات المعاينة 2026-10-31) الأبعاد موجّهة «أفقي × رأسي» بترتيب ثابت من اليسار (ltr) كما في المرسم وجدول الفراغات
+      const sp = roomSpan(r), dims = sp ? `${sp.x.toFixed(2)} × ${sp.y.toFixed(2)}` : `${r.rect.l.toFixed(2)} × ${r.rect.w.toFixed(2)}`, fs = Math.max(8.5, big * .72);
+      const dir0 = ctx.direction; try { ctx.direction = 'ltr'; } catch { /* قديم */ } halo(dims, c.y + big * .6, `500 ${fs}px ${FONT}`, THEME.ink); try { ctx.direction = dir0; } catch { /* قديم */ }
       halo(fmtArea(r.area), c.y + big * .6 + fs * 1.25, `400 ${fs}px ${FONT}`, THEME.inkSoft);
     } else halo(fmtArea(r.area), showName ? c.y + big * .65 : c.y, `400 ${Math.max(9, big * .8)}px ${FONT}`, THEME.inkSoft);
     if (r.label && sel.has(r.label.id)) { ctx.strokeStyle = THEME.select; ctx.lineWidth = 1.5; const w = Math.min(maxW, ctx.measureText(r.name).width + 16); ctx.strokeRect(c.x - w / 2, c.y - big * 1.3, w, big * 2.6); }

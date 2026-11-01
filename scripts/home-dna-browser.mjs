@@ -12,7 +12,7 @@ await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = `http://1
 const { chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs');
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox'] });
 const results = []; const check = (n, ok, d = '') => { results.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
-const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); const errs = [];
+const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage(); const errs = []; await p.addInitScript(() => { try { localStorage.setItem('mizan.studio.mode', 'advanced'); } catch { /* */ } }); // (ملاحظات المعاينة 2026-10-31) المرسم يفتح بالوضع البسيط افتراضيًا؛ هذا الفحص يختبر الأدوات المتقدمة فيبدأ بها
 p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::/.test(m.text())) errs.push(m.text()); }); p.on('pageerror', e => errs.push(e.message));
 p.on('dialog', d => d.accept());
 await p.goto(base + '/home.html'); await p.click('#start');

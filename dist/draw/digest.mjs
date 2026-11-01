@@ -49,6 +49,8 @@ export function minRect(poly) {
   return best ? { w: best.w, l: best.l, angle: best.angle } : { w: 0, l: 0, angle: 0 };
 }
 
+export { roomSpan } from './room-span.mjs';
+
 /** 'rectangle' | 'L' | 'irregular' for a clear room polygon (holes make it irregular). */
 export function shapeOf(poly, holes = []) {
   if (holes.length) return 'irregular';

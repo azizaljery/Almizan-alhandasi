@@ -1,0 +1,24 @@
+FAIL 390: لا فيض أفقي (scrollWidth 736 / 390)
+FAIL 390: القائمة داخل النافذة (-129..71 من 390)
+FAIL 390: البنود الخمسة ظاهرة كاملة ولمسها ≥ 44 (35,35,35,35,35)
+PASS 390: تصدير png ← [["download",23305,"png"],["download",839,"json:mizan-export-manifest/1"]]
+PASS 390: تصدير png3d ← [["download",91481,"png"],["download",835,"json:mizan-export-manifest/1"]]
+PASS 390: تصدير dxf ← [["download",20147,"dxf"],["download",835,"json:mizan-export-manifest/1"]]
+PASS 390: تصدير json ← [["download",15860,"json:mizan-draw/1"]]
+PASS 390: تصدير bundle ← [["download",116283,"zip"]]
+PASS 820: لا فيض أفقي (scrollWidth 820 / 820)
+FAIL 820: القائمة داخل النافذة (-116..84 من 820)
+FAIL 820: البنود الخمسة ظاهرة كاملة ولمسها ≥ 44 (35,35,35,35,35)
+FAIL 1024: لا فيض أفقي (scrollWidth 1101 / 1024)
+FAIL 1024: القائمة داخل النافذة (-116..84 من 1024)
+FAIL 1024: البنود الخمسة ظاهرة كاملة ولمسها ≥ 44 (35,35,35,35,35)
+FAIL 1366: لا فيض أفقي (scrollWidth 1443 / 1366)
+FAIL 1366: القائمة داخل النافذة (-116..84 من 1366)
+FAIL 1366: البنود الخمسة ظاهرة كاملة ولمسها ≥ 44 (35,35,35,35,35)
+PASS 1366: تصدير png ← [["download",99914,"png"],["download",839,"json:mizan-export-manifest/1"]]
+PASS 1366: تصدير png3d ← [["download",995973,"png"],["download",836,"json:mizan-export-manifest/1"]]
+PASS 1366: تصدير dxf ← [["download",20147,"dxf"],["download",835,"json:mizan-export-manifest/1"]]
+PASS 1366: تصدير json ← [["download",15860,"json:mizan-draw/1"]]
+PASS 1366: تصدير bundle ← [["download",116283,"zip"]]
+FAILS 11
+1

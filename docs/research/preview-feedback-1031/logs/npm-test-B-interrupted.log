@@ -1,0 +1,4576 @@
+TAP version 13
+# Subtest: explicit sample request becomes a reviewable relationship contract in the understanding step
+ok 1 - explicit sample request becomes a reviewable relationship contract in the understanding step
+  ---
+  duration_ms: 29.489281
+  type: 'test'
+  ...
+# Subtest: bathroom to dining preference is parsed into an actual route-search preference without changing rooms
+ok 2 - bathroom to dining preference is parsed into an actual route-search preference without changing rooms
+  ---
+  duration_ms: 36.487203
+  type: 'test'
+  ...
+# Subtest: guest-bath to dining preference improves the best measured route in the bounded search
+ok 3 - guest-bath to dining preference improves the best measured route in the bounded search
+  ---
+  duration_ms: 80.867736
+  type: 'test'
+  ...
+# Subtest: open-plan is met while unsupported privacy and external guest requirements still reject the full brief
+ok 4 - open-plan is met while unsupported privacy and external guest requirements still reject the full brief
+  ---
+  duration_ms: 1200.598603
+  type: 'test'
+  ...
+# Subtest: open living-kitchen request creates a measured no-leaf portal and survives an unrelated edit
+ok 5 - open living-kitchen request creates a measured no-leaf portal and survives an unrelated edit
+  ---
+  duration_ms: 230.676027
+  type: 'test'
+  ...
+# Subtest: حياد التشخيص: السجل مطفأ افتراضيًا، والنتيجة بسجل التشخيص وبدونه متطابقة حرفيًا (بصمة المخططات والنتيجة دون الزمن)
+ok 6 - حياد التشخيص: السجل مطفأ افتراضيًا، والنتيجة بسجل التشخيص وبدونه متطابقة حرفيًا (بصمة المخططات والنتيجة دون الزمن)
+  ---
+  duration_ms: 131955.296633
+  type: 'test'
+  ...
+# Subtest: أسماء التقارير: المقاطع الصالحة تُضم، وundefined/null/فارغ/NaN (قيمًا أو نصًا) وفواصل المسار تُرفض
+ok 7 - أسماء التقارير: المقاطع الصالحة تُضم، وundefined/null/فارغ/NaN (قيمًا أو نصًا) وفواصل المسار تُرفض
+  ---
+  duration_ms: 22.675695
+  type: 'test'
+  ...
+# Subtest: coverage-report-r21 بلا اسم قياس يرفض ولا يكتب «undefined-report.json»
+ok 8 - coverage-report-r21 بلا اسم قياس يرفض ولا يكتب «undefined-report.json»
+  ---
+  duration_ms: 580.664064
+  type: 'test'
+  ...
+# Subtest: كل بند مربوط موجود في ملف البحث بالقيمة والمستوى نفسيهما، وبوابات الرسوب من المستوى «أ» فقط
+ok 9 - كل بند مربوط موجود في ملف البحث بالقيمة والمستوى نفسيهما، وبوابات الرسوب من المستوى «أ» فقط
+  ---
+  duration_ms: 1.023102
+  type: 'test'
+  ...
+# Subtest: الارتداد الأمامي: خُمس عرض الشارع ولا يقل عن 3 م، و6 م لشوارع ≥ 30 م؛ والمجهول 3 م افتراضًا
+ok 10 - الارتداد الأمامي: خُمس عرض الشارع ولا يقل عن 3 م، و6 م لشوارع ≥ 30 م؛ والمجهول 3 م افتراضًا
+  ---
+  duration_ms: 15.185196
+  type: 'test'
+  ...
+# Subtest: سؤال عرض الشارع يُطرح حين يُجهل فقط، وجوابه يُقرأ بصيغ مختلفة
+ok 11 - سؤال عرض الشارع يُطرح حين يُجهل فقط، وجوابه يُقرأ بصيغ مختلفة
+  ---
+  duration_ms: 0.678885
+  type: 'test'
+  ...
+# Subtest: a regulatory check cannot be constructed as pass/fail without a complete, real source
+ok 12 - a regulatory check cannot be constructed as pass/fail without a complete, real source
+  ---
+  duration_ms: 1.460014
+  type: 'test'
+  ...
+# Subtest: required fields and sane measured values are enforced
+ok 13 - required fields and sane measured values are enforced
+  ---
+  duration_ms: 0.238634
+  type: 'test'
+  ...
+# Subtest: unverifiedCheck is the honest default: no source, UNVERIFIED status, a stated verification requirement
+ok 14 - unverifiedCheck is the honest default: no source, UNVERIFIED status, a stated verification requirement
+  ---
+  duration_ms: 0.223461
+  type: 'test'
+  ...
+# Subtest: describeRegulatoryCheck keeps the computed fact textually separate from the regulatory verdict
+ok 15 - describeRegulatoryCheck keeps the computed fact textually separate from the regulatory verdict
+  ---
+  duration_ms: 1.952081
+  type: 'test'
+  ...
+# Subtest: toEvidenceRow maps check status onto the requirement-evidence row shape without ever producing a false pass
+ok 16 - toEvidenceRow maps check status onto the requirement-evidence row shape without ever producing a false pass
+  ---
+  duration_ms: 53.063226
+  type: 'test'
+  ...
+# Subtest: two same-program organizations survive real review and AZIZ with physical relationship evidence
+ok 17 - two same-program organizations survive real review and AZIZ with physical relationship evidence
+  ---
+  duration_ms: 3235.017276
+  type: 'test'
+  ...
+# Subtest: recognized near and far requests reach native search before geometry selection
+ok 18 - recognized near and far requests reach native search before geometry selection
+  ---
+  duration_ms: 714.989827
+  type: 'test'
+  ...
+# Subtest: public alternatives expose reviewed organizations through the same diversity gate
+ok 19 - public alternatives expose reviewed organizations through the same diversity gate
+  ---
+  duration_ms: 58.440433
+  type: 'test'
+  ...
+# Subtest: selected alternatives retain a validated short-hall organization for two independent programs
+ok 20 - selected alternatives retain a validated short-hall organization for two independent programs
+  ---
+  duration_ms: 108.809579
+  type: 'test'
+  ...
+# Subtest: bounded native row search creates different physical access groups for same inputs
+ok 21 - bounded native row search creates different physical access groups for same inputs
+  ---
+  duration_ms: 265.932447
+  type: 'test'
+  ...
+# Subtest: relationship request changes packing choice and measured physical door route
+ok 22 - relationship request changes packing choice and measured physical door route
+  ---
+  duration_ms: 190.343427
+  type: 'test'
+  ...
+# Subtest: search rejects out-of-bound variants and unsupported relationships without silent fallback
+ok 23 - search rejects out-of-bound variants and unsupported relationships without silent fallback
+  ---
+  duration_ms: 5.051126
+  type: 'test'
+  ...
+# Subtest: entry-aware locked dimensions preserve flag and orientation across search variants
+ok 24 - entry-aware locked dimensions preserve flag and orientation across search variants
+  ---
+  duration_ms: 32.077547
+  type: 'test'
+  ...
+# Subtest: native planner copies stay identical
+ok 25 - native planner copies stay identical
+  ---
+  duration_ms: 0.782334
+  type: 'test'
+  ...
+# Subtest: supported dining-to-both-majlis relationship affects real access branches and route lengths
+ok 26 - supported dining-to-both-majlis relationship affects real access branches and route lengths
+  ---
+  duration_ms: 295.742155
+  type: 'test'
+  ...
+# Subtest: no-search legacy geometry remains byte-equivalent to first-stage baseline in every entry direction
+ok 27 - no-search legacy geometry remains byte-equivalent to first-stage baseline in every entry direction
+  ---
+  duration_ms: 345.787282
+  type: 'test'
+  ...
+# Subtest: native locked dimensions also remain locked without opt-in search
+ok 28 - native locked dimensions also remain locked without opt-in search
+  ---
+  duration_ms: 15.235757
+  type: 'test'
+  ...
+# Subtest: decision-selected model is the exact reviewed source consumed by 2D, 3D geometry and BOQ
+ok 29 - decision-selected model is the exact reviewed source consumed by 2D, 3D geometry and BOQ
+  ---
+  duration_ms: 49.136346
+  type: 'test'
+  ...
+# Subtest: البصمة الحية: كل الملفات الحرجة موجودة وsha256 سداسي صالح
+ok 30 - البصمة الحية: كل الملفات الحرجة موجودة وsha256 سداسي صالح
+  ---
+  duration_ms: 387.466118
+  type: 'test'
+  ...
+# Subtest: لا أخطاء عند عدم تغيّر شيء أو تعديل/إضافة ملف
+ok 31 - لا أخطاء عند عدم تغيّر شيء أو تعديل/إضافة ملف
+  ---
+  duration_ms: 0.356681
+  type: 'test'
+  ...
+# Subtest: رفض: حذف ملف حرج
+ok 32 - رفض: حذف ملف حرج
+  ---
+  duration_ms: 0.239319
+  type: 'test'
+  ...
+# Subtest: حذف ملف غير حرج لا يُرفض لكنه يُسجَّل
+ok 33 - حذف ملف غير حرج لا يُرفض لكنه يُسجَّل
+  ---
+  duration_ms: 0.113645
+  type: 'test'
+  ...
+# Subtest: رفض: نقص عدد الاختبارات (المُصرَّح والمُشغَّل)
+ok 34 - رفض: نقص عدد الاختبارات (المُصرَّح والمُشغَّل)
+  ---
+  duration_ms: 0.252106
+  type: 'test'
+  ...
+# Subtest: successful initial setup explicitly announces ready without changing model or approval
+ok 35 - successful initial setup explicitly announces ready without changing model or approval
+  ---
+  duration_ms: 13.142078
+  type: 'test'
+  ...
+# Subtest: nonretry refresh during context loss retains current model but never claims ready
+ok 36 - nonretry refresh during context loss retains current model but never claims ready
+  ---
+  duration_ms: 1.004011
+  type: 'test'
+  ...
+# Subtest: retry replaces lost viewer and preserves interior roof choice true
+ok 37 - retry replaces lost viewer and preserves interior roof choice true
+  ---
+  duration_ms: 13.227941
+  type: 'test'
+  ...
+# Subtest: retry replaces lost viewer and preserves interior roof choice false
+ok 38 - retry replaces lost viewer and preserves interior roof choice false
+  ---
+  duration_ms: 1.44669
+  type: 'test'
+  ...
+# Subtest: ordinary refresh from interior preserves the explicit roof choice
+ok 39 - ordinary refresh from interior preserves the explicit roof choice
+  ---
+  duration_ms: 0.871682
+  type: 'test'
+  ...
+# Subtest: stale runtime load cannot replace scene after model changed
+ok 40 - stale runtime load cannot replace scene after model changed
+  ---
+  duration_ms: 0.976244
+  type: 'test'
+  ...
+# Subtest: stale runtime load cannot replace scene after epoch changed
+ok 41 - stale runtime load cannot replace scene after epoch changed
+  ---
+  duration_ms: 9.088337
+  type: 'test'
+  ...
+# Subtest: stale failed load cannot overwrite a newer rendering message
+ok 42 - stale failed load cannot overwrite a newer rendering message
+  ---
+  duration_ms: 2.044682
+  type: 'test'
+  ...
+# Subtest: restored context retains top UI camera designation
+ok 43 - restored context retains top UI camera designation
+  ---
+  duration_ms: 13.842223
+  type: 'test'
+  ...
+# Subtest: restored context retains front UI camera designation
+ok 44 - restored context retains front UI camera designation
+  ---
+  duration_ms: 1.417109
+  type: 'test'
+  ...
+# Subtest: solar UI does not coerce a missing latitude into a real site
+ok 45 - solar UI does not coerce a missing latitude into a real site
+  ---
+  duration_ms: 2.337141
+  type: 'test'
+  ...
+# Subtest: invalid solar input clears old 2D shadow and 3D sunlight instead of retaining stale time
+ok 46 - invalid solar input clears old 2D shadow and 3D sunlight instead of retaining stale time
+  ---
+  duration_ms: 13.129072
+  type: 'test'
+  ...
+# Subtest: context loss communicates preserved 2D without mutating model or approval
+ok 47 - context loss communicates preserved 2D without mutating model or approval
+  ---
+  duration_ms: 9.901011
+  type: 'test'
+  ...
+# Subtest: context restoration preserves the actual camera preset in labels
+ok 48 - context restoration preserves the actual camera preset in labels
+  ---
+  duration_ms: 0.930565
+  type: 'test'
+  ...
+# Subtest: evidence binds to all integrated RECT/L/U candidates and preserves AZIZ identities
+ok 49 - evidence binds to all integrated RECT/L/U candidates and preserves AZIZ identities
+  ---
+  duration_ms: 323.631659
+  type: 'test'
+  ...
+# Subtest: evidence uses real geometry, preserves caller model, and checks exact room program
+ok 50 - evidence uses real geometry, preserves caller model, and checks exact room program
+  ---
+  duration_ms: 26.442764
+  type: 'test'
+  ...
+# Subtest: a missing room or changed measured area is NOT_MET, not a silent pass
+ok 51 - a missing room or changed measured area is NOT_MET, not a silent pass
+  ---
+  duration_ms: 18.333397
+  type: 'test'
+  ...
+# Subtest: missing generation-time program stays UNVERIFIED instead of comparing current editor state
+ok 52 - missing generation-time program stays UNVERIFIED instead of comparing current editor state
+  ---
+  duration_ms: 1.860999
+  type: 'test'
+  ...
+# Subtest: exact room dimensions are checked even when the requested area still matches
+ok 53 - exact room dimensions are checked even when the requested area still matches
+  ---
+  duration_ms: 2.850356
+  type: 'test'
+  ...
+# Subtest: explicit built-area cap is measured against footprint and rejects an exceeded limit
+ok 54 - explicit built-area cap is measured against footprint and rejects an exceeded limit
+  ---
+  duration_ms: 2.676123
+  type: 'test'
+  ...
+# Subtest: room-to-room distance never claims direct adjacency or treats a missing path as zero
+ok 55 - room-to-room distance never claims direct adjacency or treats a missing path as zero
+  ---
+  duration_ms: 1.669311
+  type: 'test'
+  ...
+# Subtest: guest-family privacy and daylight never claim compliance without proof
+ok 56 - guest-family privacy and daylight never claim compliance without proof
+  ---
+  duration_ms: 3.60893
+  type: 'test'
+  ...
+# Subtest: unsupported extra floors and acoustics are disclosed rather than counted as completed
+ok 57 - unsupported extra floors and acoustics are disclosed rather than counted as completed
+  ---
+  duration_ms: 1.911242
+  type: 'test'
+  ...
+# Subtest: explicit no-courtyard request is checked against geometry, not decorative labels
+ok 58 - explicit no-courtyard request is checked against geometry, not decorative labels
+  ---
+  duration_ms: 4.88081
+  type: 'test'
+  ...
+# Subtest: unhandled free-text requirements stay UNVERIFIED and are never counted as enforced
+ok 59 - unhandled free-text requirements stay UNVERIFIED and are never counted as enforced
+  ---
+  duration_ms: 3.161681
+  type: 'test'
+  ...
+# Subtest: regulatory checks (jurisdiction, setbacks, coverage) are always disclosed as unverified facts, never a false pass/fail
+ok 60 - regulatory checks (jurisdiction, setbacks, coverage) are always disclosed as unverified facts, never a false pass/fail
+  ---
+  duration_ms: 1.664514
+  type: 'test'
+  ...
+# Subtest: regulatory setback checks report an unmeasurable fact as "—", not a fabricated zero
+ok 61 - regulatory setback checks report an unmeasurable fact as "—", not a fabricated zero
+  ---
+  duration_ms: 1.583451
+  type: 'test'
+  ...
+# Subtest: declaring the Riyadh jurisdiction attaches a real sourced verdict to neighbor setback and coverage, but street setback stays honestly unverified
+ok 62 - declaring the Riyadh jurisdiction attaches a real sourced verdict to neighbor setback and coverage, but street setback stays honestly unverified
+  ---
+  duration_ms: 4.458391
+  type: 'test'
+  ...
+# Subtest: declaring the Riyadh jurisdiction fails a setback or coverage that genuinely violates the cited minimum
+ok 63 - declaring the Riyadh jurisdiction fails a setback or coverage that genuinely violates the cited minimum
+  ---
+  duration_ms: 1.611153
+  type: 'test'
+  ...
+# Subtest: declaring the Wadi Hanifah T4.1 jurisdiction attaches its own real sourced verdict, distinct from the Riyadh ministerial one, and fails the default plot's neighbor setback against T4.1's stricter 2m minimum
+ok 64 - declaring the Wadi Hanifah T4.1 jurisdiction attaches its own real sourced verdict, distinct from the Riyadh ministerial one, and fails the default plot's neighbor setback against T4.1's stricter 2m minimum
+  ---
+  duration_ms: 1.455344
+  type: 'test'
+  ...
+# Subtest: declaring the Wadi Hanifah T4.1 jurisdiction passes a neighbor setback that actually meets its 2m minimum
+ok 65 - declaring the Wadi Hanifah T4.1 jurisdiction passes a neighbor setback that actually meets its 2m minimum
+  ---
+  duration_ms: 1.481702
+  type: 'test'
+  ...
+# Subtest: Wadi Hanifah and Riyadh jurisdictions are distinct and never both verified from the same declared jurisdiction
+ok 66 - Wadi Hanifah and Riyadh jurisdictions are distinct and never both verified from the same declared jurisdiction
+  ---
+  duration_ms: 3.356102
+  type: 'test'
+  ...
+# Subtest: omitting the jurisdiction keeps every regulatory row exactly as unverified as before, even though the real source now exists in code
+ok 67 - omitting the jurisdiction keeps every regulatory row exactly as unverified as before, even though the real source now exists in code
+  ---
+  duration_ms: 1.377865
+  type: 'test'
+  ...
+# Subtest: HTML evidence escapes user-supplied room names and displays the state
+ok 68 - HTML evidence escapes user-supplied room names and displays the state
+  ---
+  duration_ms: 2.420394
+  type: 'test'
+  ...
+# Subtest: evidence panel is integrated with the existing design flow, not a separate generator
+ok 69 - evidence panel is integrated with the existing design flow, not a separate generator
+  ---
+  duration_ms: 1.437033
+  type: 'test'
+  ...
+# Subtest: the three tiers and three outcomes carry the exact client-facing Arabic labels
+ok 70 - the three tiers and three outcomes carry the exact client-facing Arabic labels
+  ---
+  duration_ms: 26.392434
+  type: 'test'
+  ...
+# Subtest: only a direct ENFORCED status is ever a met condition; a measurement without a verdict is unprovable
+ok 71 - only a direct ENFORCED status is ever a met condition; a measurement without a verdict is unprovable
+  ---
+  duration_ms: 0.491521
+  type: 'test'
+  ...
+# Subtest: explicit obligation wording makes a clause mandatory; plain wishes are important preferences
+ok 72 - explicit obligation wording makes a clause mandatory; plain wishes are important preferences
+  ---
+  duration_ms: 26.496521
+  type: 'test'
+  ...
+# Subtest: a negated obligation ("not necessary") and the ambiguous word "المطلوب" never promote a wish to mandatory
+ok 73 - a negated obligation ("not necessary") and the ambiguous word "المطلوب" never promote a wish to mandatory
+  ---
+  duration_ms: 0.254714
+  type: 'test'
+  ...
+# Subtest: purely visual remarks are cosmetic, but anything touching function stays an important preference
+ok 74 - purely visual remarks are cosmetic, but anything touching function stays an important preference
+  ---
+  duration_ms: 0.466265
+  type: 'test'
+  ...
+# Subtest: topic tier: explicit obligation wins over a list choice, a choice is important, silence is null
+ok 75 - topic tier: explicit obligation wins over a list choice, a choice is important, silence is null
+  ---
+  duration_ms: 0.276178
+  type: 'test'
+  ...
+# Subtest: free text is split into clauses and only wish-bearing clauses count as conditions
+ok 76 - free text is split into clauses and only wish-bearing clauses count as conditions
+  ---
+  duration_ms: 0.491251
+  type: 'test'
+  ...
+# Subtest: hard form inputs are mandatory conditions with a declared basis, never a guessed tier
+ok 77 - hard form inputs are mandatory conditions with a declared basis, never a guessed tier
+  ---
+  duration_ms: 847.885006
+  type: 'test'
+  ...
+# Subtest: the brief example: "لا أريد مرور الضيوف على غرف النوم" is classified, with its basis, and is never reported as met
+ok 78 - the brief example: "لا أريد مرور الضيوف على غرف النوم" is classified, with its basis, and is never reported as met
+  ---
+  duration_ms: 78.732781
+  type: 'test'
+  ...
+# Subtest: a privacy request stated in free text alone (no matching "what I avoid" pick) is still tiered, not dropped into the untiered engine group
+ok 79 - a privacy request stated in free text alone (no matching "what I avoid" pick) is still tiered, not dropped into the untiered engine group
+  ---
+  duration_ms: 15.670987
+  type: 'test'
+  ...
+# Subtest: a privacy-route check nobody asked for stays an untiered engine check, not a client condition
+ok 80 - a privacy-route check nobody asked for stays an untiered engine check, not a client condition
+  ---
+  duration_ms: 11.485036
+  type: 'test'
+  ...
+# Subtest: every "what I avoid" choice becomes its own tiered row; measurements stay unprovable without a threshold
+ok 81 - every "what I avoid" choice becomes its own tiered row; measurements stay unprovable without a threshold
+  ---
+  duration_ms: 18.022313
+  type: 'test'
+  ...
+# Subtest: shape picks are cosmetic; a liked shape that was not drawn is not met and an unsupported one is unprovable
+ok 82 - shape picks are cosmetic; a liked shape that was not drawn is not met and an unsupported one is unprovable
+  ---
+  duration_ms: 49.473893
+  type: 'test'
+  ...
+# Subtest: shape rows follow the real shape of each integrated candidate, not a label
+ok 83 - shape rows follow the real shape of each integrated candidate, not a label
+  ---
+  duration_ms: 75.848675
+  type: 'test'
+  ...
+# Subtest: lifestyle choices the model cannot measure are shown as important and unprovable, not silently dropped
+ok 84 - lifestyle choices the model cannot measure are shown as important and unprovable, not silently dropped
+  ---
+  duration_ms: 20.46466
+  type: 'test'
+  ...
+# Subtest: free-text wishes and brief constraints are itemized, classified once, and deduplicated against dedicated rows
+ok 85 - free-text wishes and brief constraints are itemized, classified once, and deduplicated against dedicated rows
+  ---
+  duration_ms: 2.265972
+  type: 'test'
+  ...
+# Subtest: a room-count clause is covered by the mandatory program row, and a room list is never mistaken for a privacy request
+ok 86 - a room-count clause is covered by the mandatory program row, and a room list is never mistaken for a privacy request
+  ---
+  duration_ms: 7.664711
+  type: 'test'
+  ...
+# Subtest: a chosen avoid with no row to measure it is still shown as its own unprovable condition, never dropped
+ok 87 - a chosen avoid with no row to measure it is still shown as its own unprovable condition, never dropped
+  ---
+  duration_ms: 2.277528
+  type: 'test'
+  ...
+# Subtest: summary counts add up and match the rows; untiered checks are counted apart
+ok 88 - summary counts add up and match the rows; untiered checks are counted apart
+  ---
+  duration_ms: 24.163941
+  type: 'test'
+  ...
+# Subtest: no tiered row is ever "met" unless the evidence status is ENFORCED
+ok 89 - no tiered row is ever "met" unless the evidence status is ENFORCED
+  ---
+  duration_ms: 2.525197
+  type: 'test'
+  ...
+# Subtest: the evidence panel groups rows by tier, shows the summary table, the declared rules and each row's basis (RTL)
+ok 90 - the evidence panel groups rows by tier, shows the summary table, the declared rules and each row's basis (RTL)
+  ---
+  duration_ms: 22.526191
+  type: 'test'
+  ...
+# Subtest: rows within a tier list unmet first, then unprovable, then met
+ok 91 - rows within a tier list unmet first, then unprovable, then met
+  ---
+  duration_ms: 2.301923
+  type: 'test'
+  ...
+# Subtest: client wording and basis are HTML-escaped in the tiered view
+ok 92 - client wording and basis are HTML-escaped in the tiered view
+  ---
+  duration_ms: 6.266057
+  type: 'test'
+  ...
+# Subtest: rows without a tier (the regulatory panel) keep the original flat layout with no tier chrome
+ok 93 - rows without a tier (the regulatory panel) keep the original flat layout with no tier chrome
+  ---
+  duration_ms: 0.158433
+  type: 'test'
+  ...
+# Subtest: auditing never mutates the model or the discovery/brief inputs
+ok 94 - auditing never mutates the model or the discovery/brief inputs
+  ---
+  duration_ms: 1.69823
+  type: 'test'
+  ...
+# Subtest: the tier layer is wired through the existing module graph without touching protected or in-flight files
+ok 95 - the tier layer is wired through the existing module graph without touching protected or in-flight files
+  ---
+  duration_ms: 9.832734
+  type: 'test'
+  ...
+# Subtest: a plain refusal stays an important preference but is flagged and explained as equivalent to mandatory
+ok 96 - a plain refusal stays an important preference but is flagged and explained as equivalent to mandatory
+  ---
+  duration_ms: 0.23946
+  type: 'test'
+  ...
+# Subtest: the refusal flag reaches the evidence rows and the rendered HTML with its label and rule
+ok 97 - the refusal flag reaches the evidence rows and the rendered HTML with its label and rule
+  ---
+  duration_ms: 8.024953
+  type: 'test'
+  ...
+# Subtest: a conjunction letter glued to the obligation word does not hide it ("ويجب", "فلازم")
+ok 98 - a conjunction letter glued to the obligation word does not hide it ("ويجب", "فلازم")
+  ---
+  duration_ms: 0.1804
+  type: 'test'
+  ...
+# Subtest: "بدون" and "تجنّب" are refusals treated as equivalent to mandatory, and keep every other rule
+ok 99 - "بدون" and "تجنّب" are refusals treated as equivalent to mandatory, and keep every other rule
+  ---
+  duration_ms: 0.124353
+  type: 'test'
+  ...
+# Subtest: «باب مباشر بين X وY» يُلتقط كملاصقة بين الطرفين
+ok 100 - «باب مباشر بين X وY» يُلتقط كملاصقة بين الطرفين
+  ---
+  duration_ms: 270.680636
+  type: 'test'
+  ...
+# Subtest: «X له/بباب مباشر على Y» يُلتقط
+ok 101 - «X له/بباب مباشر على Y» يُلتقط
+  ---
+  duration_ms: 16.609452
+  type: 'test'
+  ...
+# Subtest: العبارات الحالية لا يتغير سلوكها
+ok 102 - العبارات الحالية لا يتغير سلوكها
+  ---
+  duration_ms: 12.389354
+  type: 'test'
+  ...
+# Subtest: «باب مباشر» بلا طرفين معروفين لا يختلق علاقة
+ok 103 - «باب مباشر» بلا طرفين معروفين لا يختلق علاقة
+  ---
+  duration_ms: 1.202856
+  type: 'test'
+  ...
+# Subtest: builds a bounded bilingual client context without secrets
+ok 104 - builds a bounded bilingual client context without secrets
+  ---
+  duration_ms: 1.474444
+  type: 'test'
+  ...
+# Subtest: derives priorities, relationships, conflicts and clarifying questions
+ok 105 - derives priorities, relationships, conflicts and clarifying questions
+  ---
+  duration_ms: 19.714826
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: لازم المطبخ يكون في الخلف
+ok 106 - درجة الطلب: لازم المطبخ يكون في الخلف
+  ---
+  duration_ms: 80.756682
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ضروري المجلس على الشارع
+ok 107 - درجة الطلب: ضروري المجلس على الشارع
+  ---
+  duration_ms: 0.830247
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ابي الماستر في الدور العلوي
+ok 108 - درجة الطلب: ابي الماستر في الدور العلوي
+  ---
+  duration_ms: 0.565121
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ابغى غرفة الخادمة قريبة من المطبخ
+ok 109 - درجة الطلب: ابغى غرفة الخادمة قريبة من المطبخ
+  ---
+  duration_ms: 0.771654
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: يجب أن يكون المطبخ بجانب الطعام
+ok 110 - درجة الطلب: يجب أن يكون المطبخ بجانب الطعام
+  ---
+  duration_ms: 0.566946
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: The kitchen must be at the back
+ok 111 - درجة الطلب: The kitchen must be at the back
+  ---
+  duration_ms: 30.318016
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: المطبخ في الخلف
+ok 112 - درجة الطلب: المطبخ في الخلف
+  ---
+  duration_ms: 0.418779
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: يفضل المطبخ يكون في الخلف
+ok 113 - درجة الطلب: يفضل المطبخ يكون في الخلف
+  ---
+  duration_ms: 0.294841
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: يفضّل المجلس على الشارع
+ok 114 - درجة الطلب: يفضّل المجلس على الشارع
+  ---
+  duration_ms: 0.466235
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: لو أمكن الماستر بعيدة عن المجلس
+ok 115 - درجة الطلب: لو أمكن الماستر بعيدة عن المجلس
+  ---
+  duration_ms: 0.672619
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ياليت غرف العيال جنب بعض
+ok 116 - درجة الطلب: ياليت غرف العيال جنب بعض
+  ---
+  duration_ms: 0.689782
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: المطبخ في الخلف إذا أمكن
+ok 117 - درجة الطلب: المطبخ في الخلف إذا أمكن
+  ---
+  duration_ms: 0.322298
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: مو شرط بس المكتب قرب المدخل
+ok 118 - درجة الطلب: مو شرط بس المكتب قرب المدخل
+  ---
+  duration_ms: 0.280248
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: I prefer the dining room next to the kitchen
+ok 119 - درجة الطلب: I prefer the dining room next to the kitchen
+  ---
+  duration_ms: 0.159691
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ideally the master bedroom upstairs
+ok 120 - درجة الطلب: ideally the master bedroom upstairs
+  ---
+  duration_ms: 8.479911
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: لا تخلي المجلس جنب المطبخ
+ok 121 - درجة الطلب: لا تخلي المجلس جنب المطبخ
+  ---
+  duration_ms: 0.595039
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ما ابي غرف النوم على الشارع
+ok 122 - درجة الطلب: ما ابي غرف النوم على الشارع
+  ---
+  duration_ms: 0.317297
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: ممنوع غرف النوم على الشارع
+ok 123 - درجة الطلب: ممنوع غرف النوم على الشارع
+  ---
+  duration_ms: 0.31796
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: الماستر ما تكون قريبة من المجلس
+ok 124 - درجة الطلب: الماستر ما تكون قريبة من المجلس
+  ---
+  duration_ms: 0.318028
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: المطبخ ما يكون في الخلف
+ok 125 - درجة الطلب: المطبخ ما يكون في الخلف
+  ---
+  duration_ms: 0.202056
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: don't put the majlis next to the kitchen
+ok 126 - درجة الطلب: don't put the majlis next to the kitchen
+  ---
+  duration_ms: 0.311537
+  type: 'test'
+  ...
+# Subtest: درجة الطلب: the majlis should not be next to the kitchen
+ok 127 - درجة الطلب: the majlis should not be next to the kitchen
+  ---
+  duration_ms: 0.453782
+  type: 'test'
+  ...
+# Subtest: الدرجة لكل قاعدة من نافذتها: «ابي المطبخ في الخلف ويفضل المجلس على الشارع»
+ok 128 - الدرجة لكل قاعدة من نافذتها: «ابي المطبخ في الخلف ويفضل المجلس على الشارع»
+  ---
+  duration_ms: 16.625375
+  type: 'test'
+  ...
+# Subtest: وزن العقوبة بالدرجة: التفضيل أخف، والإلزام والمنع كما كانا (توافق رجعي)
+ok 129 - وزن العقوبة بالدرجة: التفضيل أخف، والإلزام والمنع كما كانا (توافق رجعي)
+  ---
+  duration_ms: 1.021024
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ 4×5
+ok 130 - أبعاد: المطبخ 4×5
+  ---
+  duration_ms: 329.111516
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ 4 في 5
+ok 131 - أبعاد: المطبخ 4 في 5
+  ---
+  duration_ms: 1.76258
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ ٤×٥
+ok 132 - أبعاد: المطبخ ٤×٥
+  ---
+  duration_ms: 5.273128
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ 4x5 م
+ok 133 - أبعاد: المطبخ 4x5 م
+  ---
+  duration_ms: 5.198638
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ 4 م × 5 م
+ok 134 - أبعاد: المطبخ 4 م × 5 م
+  ---
+  duration_ms: 1.017142
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ عرض 4 وطول 5
+ok 135 - أبعاد: المطبخ عرض 4 وطول 5
+  ---
+  duration_ms: 0.767574
+  type: 'test'
+  ...
+# Subtest: أبعاد: المطبخ بطول 5 وعرض 4
+ok 136 - أبعاد: المطبخ بطول 5 وعرض 4
+  ---
+  duration_ms: 0.687
+  type: 'test'
+  ...
+# Subtest: أبعاد: مجلس 6×5
+ok 137 - أبعاد: مجلس 6×5
+  ---
+  duration_ms: 1.646659
+  type: 'test'
+  ...
+# Subtest: أبعاد: الماستر 5*6
+ok 138 - أبعاد: الماستر 5*6
+  ---
+  duration_ms: 0.660333
+  type: 'test'
+  ...
+# Subtest: أبعاد: kitchen 4 by 5
+ok 139 - أبعاد: kitchen 4 by 5
+  ---
+  duration_ms: 5.669211
+  type: 'test'
+  ...
+# Subtest: أبعاد: صالة ٦ في ٧
+ok 140 - أبعاد: صالة ٦ في ٧
+  ---
+  duration_ms: 7.505826
+  type: 'test'
+  ...
+# Subtest: سماحية الأبعاد: «بالضبط» أضيق و«تقريبًا» أوسع، ولا تنتقل من عبارة مجاورة
+ok 141 - سماحية الأبعاد: «بالضبط» أضيق و«تقريبًا» أوسع، ولا تنتقل من عبارة مجاورة
+  ---
+  duration_ms: 2.121617
+  type: 'test'
+  ...
+# Subtest: حرف x في الكلمات الإنجليزية لا يتحول إلى ×
+ok 142 - حرف x في الكلمات الإنجليزية لا يتحول إلى ×
+  ---
+  duration_ms: 0.148466
+  type: 'test'
+  ...
+# Subtest: الدرج فراغ معروف في الفهم المحلي ومفردات Claude
+ok 143 - الدرج فراغ معروف في الفهم المحلي ومفردات Claude
+  ---
+  duration_ms: 0.589522
+  type: 'test'
+  ...
+# Subtest: C7: «بعيدة عن الدرج» لا تختفي، و«المجالس والطعام والمطبخ تحت» كلها في الأرضي
+ok 144 - C7: «بعيدة عن الدرج» لا تختفي، و«المجالس والطعام والمطبخ تحت» كلها في الأرضي
+  ---
+  duration_ms: 7.92208
+  type: 'test'
+  ...
+# Subtest: علاقة بلا طرف معروف تُعرض «غير مفهومة» باقتباسها بدل أن تسقط
+ok 145 - علاقة بلا طرف معروف تُعرض «غير مفهومة» باقتباسها بدل أن تسقط
+  ---
+  duration_ms: 13.743306
+  type: 'test'
+  ...
+# Subtest: التغطية: لا عبارة ساقطة في نصوص حالات القبول العشر (والتعديلات)
+ok 146 - التغطية: لا عبارة ساقطة في نصوص حالات القبول العشر (والتعديلات)
+  ---
+  duration_ms: 121.957171
+  type: 'test'
+  ...
+# Subtest: حالات قبل التطوير كانت «غير مفهومة» خطأً: C6 «بالضبط» و C10 «منها ماستر» و C5 شكل الأرض
+ok 147 - حالات قبل التطوير كانت «غير مفهومة» خطأً: C6 «بالضبط» و C10 «منها ماستر» و C5 شكل الأرض
+  ---
+  duration_ms: 17.315648
+  type: 'test'
+  ...
+# Subtest: ما كان يُفهم سابقًا يبقى غير مفهوم حين لا يحمل طلبًا معروفًا
+ok 148 - ما كان يُفهم سابقًا يبقى غير مفهوم حين لا يحمل طلبًا معروفًا
+  ---
+  duration_ms: 2.632221
+  type: 'test'
+  ...
+# Subtest: دمج Claude: عبارة علاقة ساقطة محليًا لا تختفي إلا إن غطّتها قاعدة من Claude
+ok 149 - دمج Claude: عبارة علاقة ساقطة محليًا لا تختفي إلا إن غطّتها قاعدة من Claude
+  ---
+  duration_ms: 5.892718
+  type: 'test'
+  ...
+# Subtest: تعارض: نفس الفراغ في الأمام والخلف
+ok 150 - تعارض: نفس الفراغ في الأمام والخلف
+  ---
+  duration_ms: 1.69428
+  type: 'test'
+  ...
+# Subtest: تعارض: جنب وبعيد لنفس الزوج
+ok 151 - تعارض: جنب وبعيد لنفس الزوج
+  ---
+  duration_ms: 17.088366
+  type: 'test'
+  ...
+# Subtest: تعارض: دور واحد مع طلبات تحتاج دورين (C7 على أرض بدور واحد)
+ok 152 - تعارض: دور واحد مع طلبات تحتاج دورين (C7 على أرض بدور واحد)
+  ---
+  duration_ms: 9.539707
+  type: 'test'
+  ...
+# Subtest: تعارض: غرف النوم فوق وغرفة الوالدة في الأرضي (هل هي منها؟) — C7
+ok 153 - تعارض: غرف النوم فوق وغرفة الوالدة في الأرضي (هل هي منها؟) — C7
+  ---
+  duration_ms: 6.844636
+  type: 'test'
+  ...
+# Subtest: تعارض: نفس الفراغ في الأرضي والعلوي، و«بدون مجلس» مع مكان المجلس
+ok 154 - تعارض: نفس الفراغ في الأرضي والعلوي، و«بدون مجلس» مع مكان المجلس
+  ---
+  duration_ms: 2.610483
+  type: 'test'
+  ...
+# Subtest: تعارض: المساحات أكبر من الأرض، والبُعد أكبر من الأرض
+ok 155 - تعارض: المساحات أكبر من الأرض، والبُعد أكبر من الأرض
+  ---
+  duration_ms: 3.851245
+  type: 'test'
+  ...
+# Subtest: تعارض: العدد في الكلام غير العدد في النموذج
+ok 156 - تعارض: العدد في الكلام غير العدد في النموذج
+  ---
+  duration_ms: 3.886924
+  type: 'test'
+  ...
+# Subtest: لا تعارضات وهمية في حالات القبول عدا ما يستحق السؤال
+ok 157 - لا تعارضات وهمية في حالات القبول عدا ما يستحق السؤال
+  ---
+  duration_ms: 23.914368
+  type: 'test'
+  ...
+# Subtest: الجلسة: تعارض عند الإنشاء يُرفق بسؤال، وتعارض في الملاحظة يرد بسؤال بلا رمي وبلا تصميم جديد
+ok 158 - الجلسة: تعارض عند الإنشاء يُرفق بسؤال، وتعارض في الملاحظة يرد بسؤال بلا رمي وبلا تصميم جديد
+  ---
+  duration_ms: 1409.447758
+  type: 'test'
+  ...
+# Subtest: C8: «انقل المطبخ بجوار الطعام وخل المطبخ في الخلف» — قاعدتان باقتباسهما، على التوزيع نفسه
+ok 159 - C8: «انقل المطبخ بجوار الطعام وخل المطبخ في الخلف» — قاعدتان باقتباسهما، على التوزيع نفسه
+  ---
+  duration_ms: 2241.711221
+  type: 'test'
+  ...
+# Subtest: C9: «احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر» — facade {material:stone} وkeepLayout، والهندسة نفسها حرفيًا، والمادة في المستند ويعرضها المجسّم (plan-edit)
+ok 160 - C9: «احتفظ بهذا التوزيع وغيّر الواجهة إلى حجر» — facade {material:stone} وkeepLayout، والهندسة نفسها حرفيًا، والمادة في المستند ويعرضها المجسّم (plan-edit)
+  ---
+  duration_ms: 1881.111883
+  type: 'test'
+  ...
+# Subtest: الواجهة: الواجهة رخام
+ok 161 - الواجهة: الواجهة رخام
+  ---
+  duration_ms: 0.999967
+  type: 'test'
+  ...
+# Subtest: الواجهة: ابي واجهة حجرية
+ok 162 - الواجهة: ابي واجهة حجرية
+  ---
+  duration_ms: 0.480733
+  type: 'test'
+  ...
+# Subtest: الواجهة: خل الواجهه خشب وزجاج
+ok 163 - الواجهة: خل الواجهه خشب وزجاج
+  ---
+  duration_ms: 0.903182
+  type: 'test'
+  ...
+# Subtest: الواجهة: stone facade please
+ok 164 - الواجهة: stone facade please
+  ---
+  duration_ms: 1.178553
+  type: 'test'
+  ...
+# Subtest: الواجهة: facade in brick
+ok 165 - الواجهة: facade in brick
+  ---
+  duration_ms: 0.638176
+  type: 'test'
+  ...
+# Subtest: طراز الواجهة وحده (نجدي) يُحمل، و«تصميم عصري» بلا ذكر للواجهة لا يُفهم واجهة
+ok 166 - طراز الواجهة وحده (نجدي) يُحمل، و«تصميم عصري» بلا ذكر للواجهة لا يُفهم واجهة
+  ---
+  duration_ms: 1.06051
+  type: 'test'
+  ...
+# Subtest: ملاحظة تذكر «الماستر» لا تُنزل عدد غرف النوم إلى واحدة
+ok 167 - ملاحظة تذكر «الماستر» لا تُنزل عدد غرف النوم إلى واحدة
+  ---
+  duration_ms: 733597.212928
+  type: 'test'
+  ...
+# Subtest: السجل: مدخل النساء وشكل الأرض «لم يُتحقق» بسبب، لا «نُفّذ»؛ وكل بند له حالة
+ok 168 - السجل: مدخل النساء وشكل الأرض «لم يُتحقق» بسبب، لا «نُفّذ»؛ وكل بند له حالة
+  ---
+  duration_ms: 563276.782649
+  type: 'test'
+  ...
+# Subtest: السجل: الأبعاد مقيسة من المستطيل الصافي، والدرج مقيس من سلالم المستند
+ok 169 - السجل: الأبعاد مقيسة من المستطيل الصافي، والدرج مقيس من سلالم المستند
+  ---
+  duration_ms: 457825.058551
+  type: 'test'
+  ...
+# Subtest: untouched project: identity survives restore unchanged and is not flagged
+ok 170 - untouched project: identity survives restore unchanged and is not flagged
+  ---
+  duration_ms: 46.777518
+  type: 'test'
+  ...
+# Subtest: tampered door position: restored identity is invalidated and flagged for review
+ok 171 - tampered door position: restored identity is invalidated and flagged for review
+  ---
+  duration_ms: 50.991506
+  type: 'test'
+  ...
+# Subtest: tampered room size is rejected earlier by the existing validateModel gate (defence in depth, unchanged)
+ok 172 - tampered room size is rejected earlier by the existing validateModel gate (defence in depth, unchanged)
+  ---
+  duration_ms: 1.958161
+  type: 'test'
+  ...
+# Subtest: tampered window (passes every earlier validator) is caught by the identity check
+ok 173 - tampered window (passes every earlier validator) is caught by the identity check
+  ---
+  duration_ms: 60.682512
+  type: 'test'
+  ...
+# Subtest: forged geometryHash value is detected (hash edited instead of geometry)
+ok 174 - forged geometryHash value is detected (hash edited instead of geometry)
+  ---
+  duration_ms: 13.51781
+  type: 'test'
+  ...
+# Subtest: the file is still readable after a mismatch (no rejection) and the flag survives re-save/re-open
+ok 175 - the file is still readable after a mismatch (no rejection) and the flag survives re-save/re-open
+  ---
+  duration_ms: 41.264993
+  type: 'test'
+  ...
+# Subtest: legacy models without integration are untouched
+ok 176 - legacy models without integration are untouched
+  ---
+  duration_ms: 13.415501
+  type: 'test'
+  ...
+# Subtest: المجموعة: ≥ 40 مستندًا معيبًا، كل نوع عيب مطبَّق ومعه بوابته المتوقعة
+ok 177 - المجموعة: ≥ 40 مستندًا معيبًا، كل نوع عيب مطبَّق ومعه بوابته المتوقعة
+  ---
+  duration_ms: 6.622568
+  type: 'test'
+  ...
+# Subtest: كل مستند معيب مرفوض (passed=false) بالبوابة المتوقعة نفسها — لا مجرد درجة أقل
+ok 178 - كل مستند معيب مرفوض (passed=false) بالبوابة المتوقعة نفسها — لا مجرد درجة أقل
+  ---
+  duration_ms: 0.655175
+  type: 'test'
+  ...
+# Subtest: لا رفض كاذب: كل البدائل السليمة في المرحلة الأحدث تجتاز البوابات
+ok 179 - لا رفض كاذب: كل البدائل السليمة في المرحلة الأحدث تجتاز البوابات
+  ---
+  duration_ms: 0.170677
+  type: 'test'
+  ...
+# Subtest: الدرجة وحدها لا تكفي: معيبون كثيرون بدرجة أعلى من أدنى سليم، ومع ذلك كلهم مرفوضون
+ok 180 - الدرجة وحدها لا تكفي: معيبون كثيرون بدرجة أعلى من أدنى سليم، ومع ذلك كلهم مرفوضون
+  ---
+  duration_ms: 0.146371
+  type: 'test'
+  ...
+# Subtest: العيوب التي كان المراجع 1.0.0 يمرّرها صارت تُرفض: نافذة صغيرة، فتح باب، تراكب، موضع، نسخة معكوسة
+ok 181 - العيوب التي كان المراجع 1.0.0 يمرّرها صارت تُرفض: نافذة صغيرة، فتح باب، تراكب، موضع، نسخة معكوسة
+  ---
+  duration_ms: 0.143633
+  type: 'test'
+  ...
+# Subtest: WINDOW_SIZE: نافذة 0.5×0.5 في غرفة نوم ترسب، والبديل السليم ينجح
+ok 182 - WINDOW_SIZE: نافذة 0.5×0.5 في غرفة نوم ترسب، والبديل السليم ينجح
+  ---
+  duration_ms: 7.224299
+  type: 'test'
+  ...
+# Subtest: DOOR_SWING: الجدار أو الباب في مسار الفتح يرسب؛ قطعة السباكة ملاحظة إلا في strict
+ok 183 - DOOR_SWING: الجدار أو الباب في مسار الفتح يرسب؛ قطعة السباكة ملاحظة إلا في strict
+  ---
+  duration_ms: 6.129846
+  type: 'test'
+  ...
+# Subtest: INTEGRITY: غرفتان على فراغ واحد أو فراغ مغلق بلا تسمية يرسب
+ok 184 - INTEGRITY: غرفتان على فراغ واحد أو فراغ مغلق بلا تسمية يرسب
+  ---
+  duration_ms: 2.401738
+  type: 'test'
+  ...
+# Subtest: PLACEMENT: «المطبخ في الخلف» يُقاس من المستند؛ و«تطل على الحوش الخلفي» بجدار خارجي يواجه الخلف
+ok 185 - PLACEMENT: «المطبخ في الخلف» يُقاس من المستند؛ و«تطل على الحوش الخلفي» بجدار خارجي يواجه الخلف
+  ---
+  duration_ms: 17.511918
+  type: 'test'
+  ...
+# Subtest: DISTINCT: النسخة المعكوسة من بديل تُرفض في reviewDesigns({distinct}) ولا تُرفض بدونه
+ok 186 - DISTINCT: النسخة المعكوسة من بديل تُرفض في reviewDesigns({distinct}) ولا تُرفض بدونه
+  ---
+  duration_ms: 121.704814
+  type: 'test'
+  ...
+# Subtest: البدائل الأصلية: المقياس المعماري يكشف الأزواج الشكلية في after-4 (C1 و C2 و C6 و C7 و C8) ولا يرى في البقية زوجًا شكليًا؛ وبدائل المرحلة الأحدث بلا نسخ شكلية
+ok 187 - البدائل الأصلية: المقياس المعماري يكشف الأزواج الشكلية في after-4 (C1 و C2 و C6 و C7 و C8) ولا يرى في البقية زوجًا شكليًا؛ وبدائل المرحلة الأحدث بلا نسخ شكلية
+  ---
+  duration_ms: 918.386577
+  type: 'test'
+  ...
+# Subtest: STAIR_GEOMETRY وMAJLIS_PRIVACY: السلم القصير أو الضيق والمجلس على الطعام العائلي مرفوضة بالبوابة نفسها، وطبقتها «قيمة تصميمية افتراضية للميزان»
+ok 188 - STAIR_GEOMETRY وMAJLIS_PRIVACY: السلم القصير أو الضيق والمجلس على الطعام العائلي مرفوضة بالبوابة نفسها، وطبقتها «قيمة تصميمية افتراضية للميزان»
+  ---
+  duration_ms: 6.839367
+  type: 'test'
+  ...
+# Subtest: طلب الحالة يُقرأ من acceptance-cases (لا قيم مخترعة)
+ok 189 - طلب الحالة يُقرأ من acceptance-cases (لا قيم مخترعة)
+  ---
+  duration_ms: 0.436677
+  type: 'test'
+  ...
+# Subtest: tests/rules.test.mjs
+not ok 19 - tests/rules.test.mjs
+  ---
+  duration_ms: 1146157.240705
+  type: 'test'
+  location: '/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/rules.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: ~
+  signal: 'SIGKILL'
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: accepts the new streets contract and sanitizes the optional legacy counts
+ok 191 - accepts the new streets contract and sanitizes the optional legacy counts
+  ---
+  duration_ms: 14.610096
+  type: 'test'
+  ...
+# Subtest: validates plot, prompt, previous brief and typed street fields
+ok 192 - validates plot, prompt, previous brief and typed street fields
+  ---
+  duration_ms: 1.119811
+  type: 'test'
+  ...
+# Subtest: accepts a bounded client requirements context and rejects malformed context
+ok 193 - accepts a bounded client requirements context and rejects malformed context
+  ---
+  duration_ms: 0.341772
+  type: 'test'
+  ...
+# Subtest: room validation supports corridor and bounded areas; clarification does not invent rooms
+ok 194 - room validation supports corridor and bounded areas; clarification does not invent rooms
+  ---
+  duration_ms: 0.556106
+  type: 'test'
+  ...
+# Subtest: missing access code and foreign origins cannot use the paid endpoint
+ok 195 - missing access code and foreign origins cannot use the paid endpoint
+  ---
+  duration_ms: 92.978264
+  type: 'test'
+  ...
+# Subtest: configuration status never claims live verification or a working manual engine
+ok 196 - configuration status never claims live verification or a working manual engine
+  ---
+  duration_ms: 18.876195
+  type: 'test'
+  ...
+# Subtest: rejects unsupported media, broken JSON and oversized UTF-8 bodies before calling a provider
+ok 197 - rejects unsupported media, broken JSON and oversized UTF-8 bodies before calling a provider
+  ---
+  duration_ms: 19.897958
+  type: 'test'
+  ...
+# Subtest: constructs a structured Messages request and returns only a validated reviewable brief
+ok 198 - constructs a structured Messages request and returns only a validated reviewable brief
+  ---
+  duration_ms: 10.971185
+  type: 'test'
+  ...
+# Subtest: multi-floor limitations never delete an unhandled user requirement
+ok 199 - multi-floor limitations never delete an unhandled user requirement
+  ---
+  duration_ms: 6.107629
+  type: 'test'
+  ...
+# Subtest: limits per client address across requests and expires at the minute boundary
+ok 200 - limits per client address across requests and expires at the minute boundary
+  ---
+  duration_ms: 16.594716
+  type: 'test'
+  ...
+# Subtest: provider failures, refusals and invalid outputs fail closed without leaking provider bodies
+ok 201 - provider failures, refusals and invalid outputs fail closed without leaking provider bodies
+  ---
+  duration_ms: 26.226443
+  type: 'test'
+  ...
+# Subtest: preserves embedded Site assets and exports a Fetch-standard API handler
+ok 202 - preserves embedded Site assets and exports a Fetch-standard API handler
+  ---
+  duration_ms: 1.182584
+  type: 'test'
+  ...
+# Subtest: tests/shara-dialog.test.mjs
+not ok 21 - tests/shara-dialog.test.mjs
+  ---
+  duration_ms: 1102147.435303
+  type: 'test'
+  location: '/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/shara-dialog.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: ~
+  signal: 'SIGKILL'
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: شرعاء: الشخصية في تعليمات مسار الفهم، والقواعد الأصلية والمخطط كما هي
+ok 204 - شرعاء: الشخصية في تعليمات مسار الفهم، والقواعد الأصلية والمخطط كما هي
+  ---
+  duration_ms: 86.022073
+  type: 'test'
+  ...
+# Subtest: شرعاء: الشخصية نفسها في مسار فهم الرسم، وقواعده كما هي
+ok 205 - شرعاء: الشخصية نفسها في مسار فهم الرسم، وقواعده كما هي
+  ---
+  duration_ms: 81.937428
+  type: 'test'
+  ...
+# Subtest: شرعاء: نص الشخصية لا يحوي أسرارًا ولا ادعاءات نظامية
+ok 206 - شرعاء: نص الشخصية لا يحوي أسرارًا ولا ادعاءات نظامية
+  ---
+  duration_ms: 0.45324
+  type: 'test'
+  ...
+# Subtest: الأرض: الطول شمال/جنوب = depthM والعرض شرق/غرب = widthM، والارتدادات من اللائحة فقط
+ok 207 - الأرض: الطول شمال/جنوب = depthM والعرض شرق/غرب = widthM، والارتدادات من اللائحة فقط
+  ---
+  duration_ms: 10.168535
+  type: 'test'
+  ...
+# Subtest: makeMeta: استنتاج الذكاء والافتراض لا يصيران إلزاميين ولا مؤكدين
+ok 208 - makeMeta: استنتاج الذكاء والافتراض لا يصيران إلزاميين ولا مؤكدين
+  ---
+  duration_ms: 0.372336
+  type: 'test'
+  ...
+# Subtest: تأكيد العميل وحده يرفع الاستنتاج؛ مصدر أدنى لا يستبدل أعلى
+ok 209 - تأكيد العميل وحده يرفع الاستنتاج؛ مصدر أدنى لا يستبدل أعلى
+  ---
+  duration_ms: 1.910457
+  type: 'test'
+  ...
+# Subtest: «قريب» لا يتحول إلى «باب مباشر» (استخراج المواصفة: المقلط قريب من المجلس)
+ok 210 - «قريب» لا يتحول إلى «باب مباشر» (استخراج المواصفة: المقلط قريب من المجلس)
+  ---
+  duration_ms: 149.855755
+  type: 'test'
+  ...
+# Subtest: «باب مباشر» علاقة مستقلة وتُعلن محدودة الدعم
+ok 211 - «باب مباشر» علاقة مستقلة وتُعلن محدودة الدعم
+  ---
+  duration_ms: 1.191473
+  type: 'test'
+  ...
+# Subtest: تجنب الانكشاف غير مدعوم: يُسجَّل ولا يُرسل
+ok 212 - تجنب الانكشاف غير مدعوم: يُسجَّل ولا يُرسل
+  ---
+  duration_ms: 5.659311
+  type: 'test'
+  ...
+# Subtest: إلزامي غير مؤكد لا يُرسل صلبًا أبدًا (يُرسل تفضيلًا ويمنع الجاهزية)
+ok 213 - إلزامي غير مؤكد لا يُرسل صلبًا أبدًا (يُرسل تفضيلًا ويمنع الجاهزية)
+  ---
+  duration_ms: 9.780108
+  type: 'test'
+  ...
+# Subtest: تغيير الإجابة يحفظ التاريخ والنص الأصلي ويسجل القرار ويعطّل العلاقات المتأثرة ولا يحذفها
+ok 214 - تغيير الإجابة يحفظ التاريخ والنص الأصلي ويسجل القرار ويعطّل العلاقات المتأثرة ولا يحذفها
+  ---
+  duration_ms: 0.903376
+  type: 'test'
+  ...
+# Subtest: تعارض أمام/خلف وقريب/منفصل يُكشف ولا يُحسم تلقائيًا؛ الحسم قرار العميل
+ok 215 - تعارض أمام/خلف وقريب/منفصل يُكشف ولا يُحسم تلقائيًا؛ الحسم قرار العميل
+  ---
+  duration_ms: 5.804248
+  type: 'test'
+  ...
+# Subtest: دور علوي على أرض بدور واحد تعارض؛ خياراه: أرضي أو تعديل الأرض من مرحلتها
+ok 216 - دور علوي على أرض بدور واحد تعارض؛ خياراه: أرضي أو تعديل الأرض من مرحلتها
+  ---
+  duration_ms: 0.777476
+  type: 'test'
+  ...
+# Subtest: تغيّر الأرض: تزداد المراجعة وتُراجع القيود المتأثرة وتبقى الإجابات
+ok 217 - تغيّر الأرض: تزداد المراجعة وتُراجع القيود المتأثرة وتبقى الإجابات
+  ---
+  duration_ms: 1.137793
+  type: 'test'
+  ...
+# Subtest: المحوّل: الأعداد والإضافات والمقاسات المؤكدة فقط
+ok 218 - المحوّل: الأعداد والإضافات والمقاسات المؤكدة فقط
+  ---
+  duration_ms: 6.122389
+  type: 'test'
+  ...
+# Subtest: غير المدعوم: الميزانية والخصوصية والإضاءة تُسجَّل وتُعلن ولا تُرسل
+ok 219 - غير المدعوم: الميزانية والخصوصية والإضاءة تُسجَّل وتُعلن ولا تُرسل
+  ---
+  duration_ms: 0.783762
+  type: 'test'
+  ...
+# Subtest: engineReadiness: التصنيف ثلاثي ويطابق جدول الدعم
+ok 220 - engineReadiness: التصنيف ثلاثي ويطابق جدول الدعم
+  ---
+  duration_ms: 0.133461
+  type: 'test'
+  ...
+# Subtest: K1 المولّد والمراجع ومدقق التعديل الآمن يقرؤون العقد نفسه (الكائن ذاته) المبني من ملف شرعاء
+ok 221 - K1 المولّد والمراجع ومدقق التعديل الآمن يقرؤون العقد نفسه (الكائن ذاته) المبني من ملف شرعاء
+  ---
+  duration_ms: 247.065735
+  type: 'test'
+  ...
+# Subtest: K2 باب مباشر موجود ومثبت (رحلة شرعاء، المحرك الفعلي): كل بديل ظاهر بباب حقيقي، ومدقق التعديل الآمن يراه في العقد
+ok 222 - K2 باب مباشر موجود ومثبت (رحلة شرعاء، المحرك الفعلي): كل بديل ظاهر بباب حقيقي، ومدقق التعديل الآمن يراه في العقد
+  ---
+  duration_ms: 129022.526776
+  type: 'test'
+  ...
+# Subtest: K3 باب مباشر متعذر (المجلس على الصالة): لا بديل ظاهر بلا الباب، وسبب الحجب صريح للعميل، ولا تنازل صامت
+ok 223 - K3 باب مباشر متعذر (المجلس على الصالة): لا بديل ظاهر بلا الباب، وسبب الحجب صريح للعميل، ولا تنازل صامت
+  ---
+  duration_ms: 58964.886004
+  type: 'test'
+  ...
+# Subtest: K4 مقلط قريب من المجلس دون باب: GUEST_ACCESS بلا DIRECT_DOOR، ولا غرفة طعام ثانية، والتوليد ينجح
+ok 224 - K4 مقلط قريب من المجلس دون باب: GUEST_ACCESS بلا DIRECT_DOOR، ولا غرفة طعام ثانية، والتوليد ينجح
+  ---
+  duration_ms: 125132.475977
+  type: 'test'
+  ...
+# Subtest: K5 مقلط بباب مباشر بطلب صريح: DIRECT_DOOR + GUEST_ACCESS(required)، وكل بديل ظاهر بباب حقيقي محقق
+ok 225 - K5 مقلط بباب مباشر بطلب صريح: DIRECT_DOOR + GUEST_ACCESS(required)، وكل بديل ظاهر بباب حقيقي محقق
+  ---
+  duration_ms: 105881.536059
+  type: 'test'
+  ...
+# Subtest: K6 عدد تصاميم أكبر من الممكن: want يصل المحرك، ويُعرض العدد الفعلي بصدق مع سبب النقص، بلا بدائل مكررة
+ok 226 - K6 عدد تصاميم أكبر من الممكن: want يصل المحرك، ويُعرض العدد الفعلي بصدق مع سبب النقص، بلا بدائل مكررة
+  ---
+  duration_ms: 217314.504762
+  type: 'test'
+  ...
+# Subtest: K7 التبديل بين الحديث الحر والأسئلة الموجهة لا يضيّع أي متطلب (الباب، المقلط، العدد) ويصل المحوّل كما هو
+ok 227 - K7 التبديل بين الحديث الحر والأسئلة الموجهة لا يضيّع أي متطلب (الباب، المقلط، العدد) ويصل المحوّل كما هو
+  ---
+  duration_ms: 80.296509
+  type: 'test'
+  ...
+# Subtest: K8 عدد التصاميم بصيغة المثنى («تصميمين») يُقرأ 2 ويصل want من ملف شرعاء بمصدره
+ok 228 - K8 عدد التصاميم بصيغة المثنى («تصميمين») يُقرأ 2 ويصل want من ملف شرعاء بمصدره
+  ---
+  duration_ms: 27.315674
+  type: 'test'
+  ...
+# Subtest: I1 (تعارض rules.mjs) الاستيرادان معًا: الباب المباشر (swingBlockers) والمستطيل الصافي (measureClearDims) يعملان في verifyRequest نفسها
+ok 229 - I1 (تعارض rules.mjs) الاستيرادان معًا: الباب المباشر (swingBlockers) والمستطيل الصافي (measureClearDims) يعملان في verifyRequest نفسها
+  ---
+  duration_ms: 362.049773
+  type: 'test'
+  ...
+# Subtest: I2 (عقد النتائج R21 ← شرعاء) فشل SEARCH_INCOMPLETE من classifyFailure يُعرض «لم يجد حلًا بعد» لا «مستحيل»، بسبب مقروء
+ok 230 - I2 (عقد النتائج R21 ← شرعاء) فشل SEARCH_INCOMPLETE من classifyFailure يُعرض «لم يجد حلًا بعد» لا «مستحيل»، بسبب مقروء
+  ---
+  duration_ms: 0.831314
+  type: 'test'
+  ...
+# Subtest: I3 (قاعدة R21 «لا نص استثناء للعميل» في مسار شرعاء) خطأ برمجي غير مصنّف لا يظهر نصه الداخلي للعميل
+ok 231 - I3 (قاعدة R21 «لا نص استثناء للعميل» في مسار شرعاء) خطأ برمجي غير مصنّف لا يظهر نصه الداخلي للعميل
+  ---
+  duration_ms: 17.926535
+  type: 'test'
+  ...
+# Subtest: I4 (أسباب الحجب) نتيجة R21 كل بدائلها محجوبة ← ALL_HIDDEN بأسباب ظاهرة، لا «مستحيل» ولا شاشة فارغة
+ok 232 - I4 (أسباب الحجب) نتيجة R21 كل بدائلها محجوبة ← ALL_HIDDEN بأسباب ظاهرة، لا «مستحيل» ولا شاشة فارغة
+  ---
+  duration_ms: 0.35516
+  type: 'test'
+  ...
+# Subtest: I5 (عقد المحوّل ↔ العقد الموحد R21، بعد إصلاح 2026-10-31) الباب المؤكد الإلزامي يصل DIRECT_DOOR صلبًا، وغير المؤكد لا يصل صلبًا
+ok 233 - I5 (عقد المحوّل ↔ العقد الموحد R21، بعد إصلاح 2026-10-31) الباب المؤكد الإلزامي يصل DIRECT_DOOR صلبًا، وغير المؤكد لا يصل صلبًا
+  ---
+  duration_ms: 162.400017
+  type: 'test'
+  ...
+# Subtest: I6 (المحرك الفعلي بعد الجمع) باب مباشر مؤكد عبر محوّل شرعاء: كل بديل ظاهر فيه باب حقيقي محقق وحركته سليمة
+ok 234 - I6 (المحرك الفعلي بعد الجمع) باب مباشر مؤكد عبر محوّل شرعاء: كل بديل ظاهر فيه باب حقيقي محقق وحركته سليمة
+  ---
+  duration_ms: 158046.914191
+  type: 'test'
+  ...
+# Subtest: 1 لا يسأل عن الأرض إن وُجدت بياناتها
+ok 235 - 1 لا يسأل عن الأرض إن وُجدت بياناتها
+  ---
+  duration_ms: 6.695851
+  type: 'test'
+  ...
+# Subtest: 2 لا يكرر سؤالًا أُجيب عنه
+ok 236 - 2 لا يكرر سؤالًا أُجيب عنه
+  ---
+  duration_ms: 0.430023
+  type: 'test'
+  ...
+# Subtest: 3 التنقل بين المسارات لا يفقد بيانات
+ok 237 - 3 التنقل بين المسارات لا يفقد بيانات
+  ---
+  duration_ms: 620.850702
+  type: 'test'
+  ...
+# Subtest: 4 يميّز «قريب» عن «باب مباشر» ولا يحوّل الأول إلى الثاني
+ok 238 - 4 يميّز «قريب» عن «باب مباشر» ولا يحوّل الأول إلى الثاني
+  ---
+  duration_ms: 12.619872
+  type: 'test'
+  ...
+# Subtest: 5 استنتاج الذكاء لا يصير إلزاميًا دون تأكيد، ولا يُرسل صلبًا
+ok 239 - 5 استنتاج الذكاء لا يصير إلزاميًا دون تأكيد، ولا يُرسل صلبًا
+  ---
+  duration_ms: 0.872815
+  type: 'test'
+  ...
+# Subtest: 6 لا يغيّر شرطًا إلزاميًا ليسهّل التوليد
+ok 240 - 6 لا يغيّر شرطًا إلزاميًا ليسهّل التوليد
+  ---
+  duration_ms: 22.680295
+  type: 'test'
+  ...
+# Subtest: 7 لا يعد بما لا يدعمه المحرك: غير المدعوم يُسجَّل ولا يُرسل
+ok 241 - 7 لا يعد بما لا يدعمه المحرك: غير المدعوم يُسجَّل ولا يُرسل
+  ---
+  duration_ms: 1.959561
+  type: 'test'
+  ...
+# Subtest: 8 تغيير الأرض يزيد المراجعة ويعيد فحص القيود دون حذف الإجابات
+ok 242 - 8 تغيير الأرض يزيد المراجعة ويعيد فحص القيود دون حذف الإجابات
+  ---
+  duration_ms: 8.583812
+  type: 'test'
+  ...
+# Subtest: 9 يحفظ مصدر كل معلومة
+ok 243 - 9 يحفظ مصدر كل معلومة
+  ---
+  duration_ms: 130.879383
+  type: 'test'
+  ...
+# Subtest: 10 يعرض أسباب التعارض وبدائله قبل أي تنازل
+ok 244 - 10 يعرض أسباب التعارض وبدائله قبل أي تنازل
+  ---
+  duration_ms: 32.266383
+  type: 'test'
+  ...
+# Subtest: 11 حالة «محجوب»: التصاميم محجوبة بسبب موقف المجلس وباب المجلس → أزرار لا لافتة مغلقة، ولا تنازل دون ضغط
+ok 245 - 11 حالة «محجوب»: التصاميم محجوبة بسبب موقف المجلس وباب المجلس → أزرار لا لافتة مغلقة، ولا تنازل دون ضغط
+  ---
+  duration_ms: 20.416838
+  type: 'test'
+  ...
+# Subtest: 12 ثلاث نتائج متمايزة: مستحيل مثبت / مخالف نظاميًا / بحث غير مكتمل
+ok 246 - 12 ثلاث نتائج متمايزة: مستحيل مثبت / مخالف نظاميًا / بحث غير مكتمل
+  ---
+  duration_ms: 21.491606
+  type: 'test'
+  ...
+# Subtest: 13 الاقتراح الذي يمس إلزاميًا يرفض التنفيذ دون موافقة صريحة
+ok 247 - 13 الاقتراح الذي يمس إلزاميًا يرفض التنفيذ دون موافقة صريحة
+  ---
+  duration_ms: 1.976327
+  type: 'test'
+  ...
+# Subtest: 14 طلب لاحق «أبعد الماستر عن الدرج» يعود إلى الملف نفسه
+ok 248 - 14 طلب لاحق «أبعد الماستر عن الدرج» يعود إلى الملف نفسه
+  ---
+  duration_ms: 47.869348
+  type: 'test'
+  ...
+# Subtest: 15 الموقف الموازي وفصل المجلس عن الطعام: خياران بموافقة صريحة، ولا يُرسل مفتاح المحرك قبل الضغط
+ok 249 - 15 الموقف الموازي وفصل المجلس عن الطعام: خياران بموافقة صريحة، ولا يُرسل مفتاح المحرك قبل الضغط
+  ---
+  duration_ms: 7.426524
+  type: 'test'
+  ...
+# Subtest: 16 حذف المجلس يُعرض بين الخيارات لا توصية، ولا يُنفَّذ إلا بجواب نعم على السؤال الصريح
+ok 250 - 16 حذف المجلس يُعرض بين الخيارات لا توصية، ولا يُنفَّذ إلا بجواب نعم على السؤال الصريح
+  ---
+  duration_ms: 6.117551
+  type: 'test'
+  ...
+# Subtest: 17 «قريب/بعيد»: افتراض معلن بحالة needs_confirmation من مقاييس المحرك، ولا تُسأل بالأمتار
+ok 251 - 17 «قريب/بعيد»: افتراض معلن بحالة needs_confirmation من مقاييس المحرك، ولا تُسأل بالأمتار
+  ---
+  duration_ms: 14.495094
+  type: 'test'
+  ...
+# Subtest: 18 «باب مباشر بين المقلط والمجلس» يصير علاقة direct_access في الملف ثم قاعدة adjacent في المحوّل (دون الظهور كـ«قريب»)
+ok 252 - 18 «باب مباشر بين المقلط والمجلس» يصير علاقة direct_access في الملف ثم قاعدة adjacent في المحوّل (دون الظهور كـ«قريب»)
+  ---
+  duration_ms: 10.411848
+  type: 'test'
+  ...
+# Subtest: 19 direct_access بباب حقيقي يصل المحرك كقاعدة adjacent بعلامة door، و«ملاصق» وحدها لا تحمل العلامة
+ok 253 - 19 direct_access بباب حقيقي يصل المحرك كقاعدة adjacent بعلامة door، و«ملاصق» وحدها لا تحمل العلامة
+  ---
+  duration_ms: 12.729691
+  type: 'test'
+  ...
+# (node:5424) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: default API uses the Sites forwarded user ID, ignores client ownership, and rejects missing identity
+ok 254 - default API uses the Sites forwarded user ID, ignores client ownership, and rejects missing identity
+  ---
+  duration_ms: 385.516457
+  type: 'test'
+  ...
+# Subtest: session, sign-in, same-origin writes, and D1 failure fail closed
+ok 255 - session, sign-in, same-origin writes, and D1 failure fail closed
+  ---
+  duration_ms: 433.426285
+  type: 'test'
+  ...
+# Subtest: create, idempotent replay, exact saved model, versions, optimistic update, and ownership isolation
+ok 256 - create, idempotent replay, exact saved model, versions, optimistic update, and ownership isolation
+  ---
+  duration_ms: 1534.907914
+  type: 'test'
+  ...
+# Subtest: idempotency records bind owner, operation, target design, expected version, and payload
+ok 257 - idempotency records bind owner, operation, target design, expected version, and payload
+  ---
+  duration_ms: 1091.417142
+  type: 'test'
+  ...
+# Subtest: global novelty fingerprint claims hide the other owner and record id
+ok 258 - global novelty fingerprint claims hide the other owner and record id
+  ---
+  duration_ms: 59.49157
+  type: 'test'
+  ...
+# Subtest: delete is owner-scoped and leaves geometry-only tombstones that permanently reserve prior versions
+ok 259 - delete is owner-scoped and leaves geometry-only tombstones that permanently reserve prior versions
+  ---
+  duration_ms: 303.500263
+  type: 'test'
+  ...
+# Subtest: integrated P1 staggered polygon survives archive, reopening, quantities, openings, and server export
+ok 260 - integrated P1 staggered polygon survives archive, reopening, quantities, openings, and server export
+  ---
+  duration_ms: 291.135709
+  type: 'test'
+  ...
+# Subtest: self-intersecting or missing integrated footprint polygons reject without saving
+ok 261 - self-intersecting or missing integrated footprint polygons reject without saving
+  ---
+  duration_ms: 30.563398
+  type: 'test'
+  ...
+# Subtest: archive rejects new versions at its bounded local storage ceiling
+ok 262 - archive rejects new versions at its bounded local storage ceiling
+  ---
+  duration_ms: 227.654366
+  type: 'test'
+  ...
+# Subtest: a same-geometry PUT at the 500-version cap refuses without mutating the design
+ok 263 - a same-geometry PUT at the 500-version cap refuses without mutating the design
+  ---
+  duration_ms: 190.660273
+  type: 'test'
+  ...
+# Subtest: a competing archive write that reaches the 500-version cap blocks an in-flight same-geometry PUT atomically
+ok 264 - a competing archive write that reaches the 500-version cap blocks an in-flight same-geometry PUT atomically
+  ---
+  duration_ms: 90.471108
+  type: 'test'
+  ...
+# Subtest: archive session does not report ready before all migration tables exist
+ok 265 - archive session does not report ready before all migration tables exist
+  ---
+  duration_ms: 2.79812
+  type: 'test'
+  ...
+# Subtest: edited non-integrated geometry survives archive save/open with 22 to 21 openings
+ok 266 - edited non-integrated geometry survives archive save/open with 22 to 21 openings
+  ---
+  duration_ms: 72.833238
+  type: 'test'
+  ...
+# Subtest: archive sanitizer retains topology and explicit built area for both courtyard families
+ok 267 - archive sanitizer retains topology and explicit built area for both courtyard families
+  ---
+  duration_ms: 224.226843
+  type: 'test'
+  ...
+# Subtest: archive retains atomic editor revision and exact committed partition geometry
+ok 268 - archive retains atomic editor revision and exact committed partition geometry
+  ---
+  duration_ms: 90.722712
+  type: 'test'
+  ...
+# Subtest: archive retains site solar metadata and legacy-unverified association through exact project roundtrip
+ok 269 - archive retains site solar metadata and legacy-unverified association through exact project roundtrip
+  ---
+  duration_ms: 162.524521
+  type: 'test'
+  ...
+# Subtest: documented independent SPA implementation benchmark: eleven synthetic geometric directions
+ok 270 - documented independent SPA implementation benchmark: eleven synthetic geometric directions
+  ---
+  duration_ms: 12.289691
+  type: 'test'
+  ...
+# Subtest: independent published NREL SPA example: geometric elevation and navigator azimuth
+ok 271 - independent published NREL SPA example: geometric elevation and navigator azimuth
+  ---
+  duration_ms: 17.410672
+  type: 'test'
+  ...
+# Subtest: explicit offset and equivalent UTC instant produce identical physical values
+ok 272 - explicit offset and equivalent UTC instant produce identical physical values
+  ---
+  duration_ms: 1.098554
+  type: 'test'
+  ...
+# Subtest: coordinates zero are valid and missing/nonfinite values never default
+ok 273 - coordinates zero are valid and missing/nonfinite values never default
+  ---
+  duration_ms: 0.463724
+  type: 'test'
+  ...
+# Subtest: strict ISO parser rejects unknown offset, impossible calendars and local time
+ok 274 - strict ISO parser rejects unknown offset, impossible calendars and local time
+  ---
+  duration_ms: 0.360133
+  type: 'test'
+  ...
+# Subtest: clockwise surveyed north rotation is applied once to actual ENU
+ok 275 - clockwise surveyed north rotation is applied once to actual ENU
+  ---
+  duration_ms: 5.424179
+  type: 'test'
+  ...
+# Subtest: vertical sun is valid with null azimuth, finite direction and near-zero shadow
+ok 276 - vertical sun is valid with null azimuth, finite direction and near-zero shadow
+  ---
+  duration_ms: 0.464109
+  type: 'test'
+  ...
+# Subtest: night and polar winter turn off direct sun; polar summer remains valid
+ok 277 - night and polar winter turn off direct sun; polar summer remains valid
+  ---
+  duration_ms: 0.232085
+  type: 'test'
+  ...
+# Subtest: low positive elevation retains unrounded direction and very long shadow
+ok 278 - low positive elevation retains unrounded direction and very long shadow
+  ---
+  duration_ms: 0.140259
+  type: 'test'
+  ...
+# Subtest: input remains unchanged and caller provenance is never a verification claim
+ok 279 - input remains unchanged and caller provenance is never a verification claim
+  ---
+  duration_ms: 0.305524
+  type: 'test'
+  ...
+# Subtest: method regression preserves NOAA/Meeus sample values (not an independent oracle)
+ok 280 - method regression preserves NOAA/Meeus sample values (not an independent oracle)
+  ---
+  duration_ms: 0.330734
+  type: 'test'
+  ...
+# Subtest: explicit 180 degree north rotation preserves true ENU and maps plan axes
+ok 281 - explicit 180 degree north rotation preserves true ENU and maps plan axes
+  ---
+  duration_ms: 0.230541
+  type: 'test'
+  ...
+# Subtest: explicit 270 degree north rotation preserves true ENU and maps plan axes
+ok 282 - explicit 270 degree north rotation preserves true ENU and maps plan axes
+  ---
+  duration_ms: 0.073639
+  type: 'test'
+  ...
+# Subtest: near-polar latitudes remain finite across winter/summer with honest night visibility
+ok 283 - near-polar latitudes remain finite across winter/summer with honest night visibility
+  ---
+  duration_ms: 9.621492
+  type: 'test'
+  ...
+# Subtest: both valid UTC range endpoints are included, with millisecond precision
+ok 284 - both valid UTC range endpoints are included, with millisecond precision
+  ---
+  duration_ms: 0.243277
+  type: 'test'
+  ...
+# Subtest: missing location never silently assumes Riyadh
+ok 285 - missing location never silently assumes Riyadh
+  ---
+  duration_ms: 0.86554
+  type: 'test'
+  ...
+# Subtest: latitude/month/solar hour is explicitly an approximate example, not verified site time
+ok 286 - latitude/month/solar hour is explicitly an approximate example, not verified site time
+  ---
+  duration_ms: 8.59299
+  type: 'test'
+  ...
+# Subtest: known-site request is explicitly unimplemented even when metadata is provided
+ok 287 - known-site request is explicitly unimplemented even when metadata is provided
+  ---
+  duration_ms: 0.18393
+  type: 'test'
+  ...
+# Subtest: sunrise precision and shadow length are not rounded or clamped
+ok 288 - sunrise precision and shadow length are not rounded or clamped
+  ---
+  duration_ms: 7.480949
+  type: 'test'
+  ...
+# Subtest: cardinal sun vectors and ground shadows share explicit north/east coordinates
+ok 289 - cardinal sun vectors and ground shadows share explicit north/east coordinates
+  ---
+  duration_ms: 0.44299
+  type: 'test'
+  ...
+# Subtest: night/horizon produce no ground shadow and north offset rotates consistently
+ok 290 - night/horizon produce no ground shadow and north offset rotates consistently
+  ---
+  duration_ms: 0.172553
+  type: 'test'
+  ...
+# Subtest: complete explicit inputs compute; every missing mandatory input fails closed with no clock or location fallback
+ok 291 - complete explicit inputs compute; every missing mandatory input fails closed with no clock or location fallback
+  ---
+  duration_ms: 38.748222
+  type: 'test'
+  ...
+# Subtest: site vector adapter retains exact rotated world and plan shadow including vertical undefined azimuth
+ok 292 - site vector adapter retains exact rotated world and plan shadow including vertical undefined azimuth
+  ---
+  duration_ms: 1.022553
+  type: 'test'
+  ...
+# Subtest: project preserves explicit context/history and does not promote legacy survey association on resave
+ok 293 - project preserves explicit context/history and does not promote legacy survey association on resave
+  ---
+  duration_ms: 414.455064
+  type: 'test'
+  ...
+# Subtest: context allowlist preserves uncomputed input drafts and excludes extra metadata
+ok 294 - context allowlist preserves uncomputed input drafts and excludes extra metadata
+  ---
+  duration_ms: 0.516282
+  type: 'test'
+  ...
+# Subtest: survey source uses associated boundary point only, validates binding, ignores map center and unrelated draft
+ok 295 - survey source uses associated boundary point only, validates binding, ignores map center and unrelated draft
+  ---
+  duration_ms: 23.85547
+  type: 'test'
+  ...
+# Subtest: selecting an existing alternative preserves its model survey despite a different draft survey
+ok 296 - selecting an existing alternative preserves its model survey despite a different draft survey
+  ---
+  duration_ms: 14.066772
+  type: 'test'
+  ...
+# Subtest: changed model survey invalidates north confirmation; same survey survives alternative selection
+ok 297 - changed model survey invalidates north confirmation; same survey survives alternative selection
+  ---
+  duration_ms: 4.791163
+  type: 'test'
+  ...
+# Subtest: malformed association flags cannot promote imported survey provenance
+ok 298 - malformed association flags cannot promote imported survey provenance
+  ---
+  duration_ms: 70.950267
+  type: 'test'
+  ...
+# Subtest: invalid historical solar drafts never prevent corrected current geometry from being saved
+ok 299 - invalid historical solar drafts never prevent corrected current geometry from being saved
+  ---
+  duration_ms: 11.46591
+  type: 'test'
+  ...
+# Subtest: solar preview gives a finite daytime position and wall shadow
+ok 300 - solar preview gives a finite daytime position and wall shadow
+  ---
+  duration_ms: 14.40531
+  type: 'test'
+  ...
+# Subtest: solar preview reports the sun below the horizon instead of inventing a shadow
+ok 301 - solar preview reports the sun below the horizon instead of inventing a shadow
+  ---
+  duration_ms: 0.560279
+  type: 'test'
+  ...
+# Subtest: actual showSolar projects north sun opposite in SVG / world z=-north
+ok 302 - actual showSolar projects north sun opposite in SVG / world z=-north
+  ---
+  duration_ms: 11.408965
+  type: 'test'
+  ...
+# Subtest: actual showSolar projects south sun opposite in SVG / world z=-north
+ok 303 - actual showSolar projects south sun opposite in SVG / world z=-north
+  ---
+  duration_ms: 0.658254
+  type: 'test'
+  ...
+# Subtest: actual showSolar projects east sun opposite in SVG / world z=-north
+ok 304 - actual showSolar projects east sun opposite in SVG / world z=-north
+  ---
+  duration_ms: 0.41474
+  type: 'test'
+  ...
+# Subtest: actual showSolar projects west sun opposite in SVG / world z=-north
+ok 305 - actual showSolar projects west sun opposite in SVG / world z=-north
+  ---
+  duration_ms: 0.25322
+  type: 'test'
+  ...
+# Subtest: prism silhouette is convex, includes base and translated roof, and has correct area
+ok 306 - prism silhouette is convex, includes base and translated roof, and has correct area
+  ---
+  duration_ms: 5.565885
+  type: 'test'
+  ...
+# Subtest: shadow paints above opaque paper and below building
+ok 307 - shadow paints above opaque paper and below building
+  ---
+  duration_ms: 0.617619
+  type: 'test'
+  ...
+# Subtest: low altitude retains full physical length and explicitly labels viewport clipping
+ok 308 - low altitude retains full physical length and explicitly labels viewport clipping
+  ---
+  duration_ms: 0.573227
+  type: 'test'
+  ...
+# Subtest: night and hidden preview remove shadows and labels
+ok 309 - night and hidden preview remove shadows and labels
+  ---
+  duration_ms: 0.55954
+  type: 'test'
+  ...
+# Subtest: generated SVG places the solar layer after paper and before building paint
+ok 310 - generated SVG places the solar layer after paper and before building paint
+  ---
+  duration_ms: 80.71187
+  type: 'test'
+  ...
+# Subtest: separate massing prisms remain separate and overlapping shadows use group opacity
+ok 311 - separate massing prisms remain separate and overlapping shadows use group opacity
+  ---
+  duration_ms: 0.875585
+  type: 'test'
+  ...
+# Subtest: clipping notice follows actual viewport changes without changing geometry
+ok 312 - clipping notice follows actual viewport changes without changing geometry
+  ---
+  duration_ms: 1.103419
+  type: 'test'
+  ...
+# Subtest: preview length and direction equal the shared 3D world projection for actual solar output
+ok 313 - preview length and direction equal the shared 3D world projection for actual solar output
+  ---
+  duration_ms: 0.53901
+  type: 'test'
+  ...
+# Subtest: Arabic solar label anchors inside the right viewport edge and follows panning
+ok 314 - Arabic solar label anchors inside the right viewport edge and follows panning
+  ---
+  duration_ms: 0.207445
+  type: 'test'
+  ...
+# Subtest: compass indicates plan +Y until confirmed site north, and rotates independently of shadow visibility or night
+ok 315 - compass indicates plan +Y until confirmed site north, and rotates independently of shadow visibility or night
+  ---
+  duration_ms: 0.142471
+  type: 'test'
+  ...
+# Subtest: native generated rectangle has verified actual shared-wall and rooted access evidence
+ok 316 - native generated rectangle has verified actual shared-wall and rooted access evidence
+  ---
+  duration_ms: 98.800341
+  type: 'test'
+  ...
+# Subtest: full geometric transforms, consistent ID renaming, and input ordering cannot earn novelty
+ok 317 - full geometric transforms, consistent ID renaming, and input ordering cannot earn novelty
+  ---
+  duration_ms: 27.898338
+  type: 'test'
+  ...
+# Subtest: forged access through a remote hosted door is rejected and earns no novelty
+ok 318 - forged access through a remote hosted door is rejected and earns no novelty
+  ---
+  duration_ms: 43.643628
+  type: 'test'
+  ...
+# Subtest: disconnected corridor metadata cannot create a physical branch
+ok 319 - disconnected corridor metadata cannot create a physical branch
+  ---
+  duration_ms: 25.486028
+  type: 'test'
+  ...
+# Subtest: malformed or incomplete evidence cannot earn novelty
+ok 320 - malformed or incomplete evidence cannot earn novelty
+  ---
+  duration_ms: 107.477802
+  type: 'test'
+  ...
+# Subtest: missing solid wall and invalid corridor rectangles cannot gain relationship novelty
+ok 321 - missing solid wall and invalid corridor rectangles cannot gain relationship novelty
+  ---
+  duration_ms: 19.407677
+  type: 'test'
+  ...
+# Subtest: cosmetic corridor segmentation cannot earn access novelty
+ok 322 - cosmetic corridor segmentation cannot earn access novelty
+  ---
+  duration_ms: 12.097621
+  type: 'test'
+  ...
+# Subtest: actual native packing variants differ through physical adjacency or access branching
+ok 323 - actual native packing variants differ through physical adjacency or access branching
+  ---
+  duration_ms: 85.872576
+  type: 'test'
+  ...
+# Subtest: splitting a physical wall into collinear segments does not create diversity
+ok 324 - splitting a physical wall into collinear segments does not create diversity
+  ---
+  duration_ms: 31.108424
+  type: 'test'
+  ...
+# Subtest: opening claims cannot join corridors across a solid wall
+ok 325 - opening claims cannot join corridors across a solid wall
+  ---
+  duration_ms: 23.868033
+  type: 'test'
+  ...
+# Subtest: ambiguous fine corridor tessellation is unsupported evidence and cannot earn novelty
+ok 326 - ambiguous fine corridor tessellation is unsupported evidence and cannot earn novelty
+  ---
+  duration_ms: 12.844426
+  type: 'test'
+  ...
+# Subtest: native rect, L and U remain supported including overlapping bridge corridors
+ok 327 - native rect, L and U remain supported including overlapping bridge corridors
+  ---
+  duration_ms: 294.66438
+  type: 'test'
+  ...
+# Subtest: C6: المقاسات الصريحة (مجلس 5×6، مطبخ 4×5) داخل السماحية في البديل الأول، والزائد عن المطبخ مخزن حقيقي لا مطبخ ممطوط
+ok 328 - C6: المقاسات الصريحة (مجلس 5×6، مطبخ 4×5) داخل السماحية في البديل الأول، والزائد عن المطبخ مخزن حقيقي لا مطبخ ممطوط
+  ---
+  duration_ms: 649.612259
+  type: 'test'
+  ...
+# Subtest: C5: الأرض شبه منحرف في المستند، والبند مقيس «نُفّذ»، وبديل واحد على الأقل يتبع شكلها (أعرض من أي مستطيل يتسع فيها)
+ok 329 - C5: الأرض شبه منحرف في المستند، والبند مقيس «نُفّذ»، وبديل واحد على الأقل يتبع شكلها (أعرض من أي مستطيل يتسع فيها)
+  ---
+  duration_ms: 2284.358224
+  type: 'test'
+  ...
+# Subtest: C7: دوران — الماستر بعيدة عن الدرج المرسوم (مقيسة من سلالم المستند) في كل بديل، وبديلان على الأقل كلها ناجحة في المراجعة
+ok 330 - C7: دوران — الماستر بعيدة عن الدرج المرسوم (مقيسة من سلالم المستند) في كل بديل، وبديلان على الأقل كلها ناجحة في المراجعة
+  ---
+  duration_ms: 7793.815908
+  type: 'test'
+  ...
+# Subtest: البدائل: لا انعكاسات لسد العدد، ولا بديلان متقاربان (اختلاف ≥ 0.12)، وكلها تجتاز البوابات المستقلة
+ok 331 - البدائل: لا انعكاسات لسد العدد، ولا بديلان متقاربان (اختلاف ≥ 0.12)، وكلها تجتاز البوابات المستقلة
+  ---
+  duration_ms: 955.675994
+  type: 'test'
+  ...
+# Subtest: المراجعة بوابة نهائية: البديل الراسب يُرفض بسبب من plan-review ولا يُعرض
+ok 332 - المراجعة بوابة نهائية: البديل الراسب يُرفض بسبب من plan-review ولا يُعرض
+  ---
+  duration_ms: 313.899075
+  type: 'test'
+  ...
+# Subtest: مسار البيت والجلسة: الثالث افتراضيًا، والأول احتياط بـ engine:'v1' طوال الجلسة
+ok 333 - مسار البيت والجلسة: الثالث افتراضيًا، والأول احتياط بـ engine:'v1' طوال الجلسة
+  ---
+  duration_ms: 3124.353934
+  type: 'test'
+  ...
+# Subtest: C8: تعديل المطبخ يُنفَّذ فعلًا (بجوار الطعام وفي الخلف) مع بقاء غرف البرنامج، وتغيّر النمط يُقال صراحة
+ok 334 - C8: تعديل المطبخ يُنفَّذ فعلًا (بجوار الطعام وفي الخلف) مع بقاء غرف البرنامج، وتغيّر النمط يُقال صراحة
+  ---
+  duration_ms: 1811.736154
+  type: 'test'
+  ...
+# Subtest: قواعد السلم: قائمة ≤ 18 سم ونائمة ≥ 28 سم وعرض ≥ 1.0 م «قيمة تصميمية افتراضية للميزان»، والعدد من ارتفاع الدور
+ok 335 - قواعد السلم: قائمة ≤ 18 سم ونائمة ≥ 28 سم وعرض ≥ 1.0 م «قيمة تصميمية افتراضية للميزان»، والعدد من ارتفاع الدور
+  ---
+  duration_ms: 30.385101
+  type: 'test'
+  ...
+# Subtest: بعد-9: سلالم C7 الثلاثة ترسب في STAIR_GEOMETRY (نائمة 27 سم، وبدء على جدار، ووصول على الفراغ المزدوج، وقطع مسار العائلة)
+ok 336 - بعد-9: سلالم C7 الثلاثة ترسب في STAIR_GEOMETRY (نائمة 27 سم، وبدء على جدار، ووصول على الفراغ المزدوج، وقطع مسار العائلة)
+  ---
+  duration_ms: 324.724975
+  type: 'test'
+  ...
+# Subtest: المولّد: سلم كل بديل بدورين يجتاز STAIR_GEOMETRY، ونوعه مما يتسع في غرفته، وعدد قوائمه من ارتفاع الدور، والرسم والمجسّم من التخطيط نفسه
+ok 337 - المولّد: سلم كل بديل بدورين يجتاز STAIR_GEOMETRY، ونوعه مما يتسع في غرفته، وعدد قوائمه من ارتفاع الدور، والرسم والمجسّم من التخطيط نفسه
+  ---
+  duration_ms: 21564.550976
+  type: 'test'
+  ...
+# Subtest: خصوصية المجلس: بعد-9 C7-3 يفتح المجلس على الطعام العائلي فيرسب؛ و«مقلط» أو «المجلس على الطعام» يجعل الطعام مقبولًا
+ok 338 - خصوصية المجلس: بعد-9 C7-3 يفتح المجلس على الطعام العائلي فيرسب؛ و«مقلط» أو «المجلس على الطعام» يجعل الطعام مقبولًا
+  ---
+  duration_ms: 695.011251
+  type: 'test'
+  ...
+# Subtest: المولّد: لا مجلس يفتح على الطعام العائلي أو الصالة أو المطبخ ما لم يطلبه العميل (C4 وC9)
+ok 339 - المولّد: لا مجلس يفتح على الطعام العائلي أو الصالة أو المطبخ ما لم يطلبه العميل (C4 وC9)
+  ---
+  duration_ms: 853.074501
+  type: 'test'
+  ...
+# Subtest: حدود الفراغات الافتراضية على المرسوم (ما لم يطلب العميل غيرها): المجلس عرضًا وسقفًا، والطعام، وحمام الرئيسية، والرئيسية العلوية
+ok 340 - حدود الفراغات الافتراضية على المرسوم (ما لم يطلب العميل غيرها): المجلس عرضًا وسقفًا، والطعام، وحمام الرئيسية، والرئيسية العلوية
+  ---
+  duration_ms: 78.458089
+  type: 'test'
+  ...
+# Subtest: طبقة كل بوابة في مخرج المراجع: شرط العميل / قيمة افتراضية للميزان / منطق وظيفي — ولا شيء «نظامي» بلا مصدر متحقق
+ok 341 - طبقة كل بوابة في مخرج المراجع: شرط العميل / قيمة افتراضية للميزان / منطق وظيفي — ولا شيء «نظامي» بلا مصدر متحقق
+  ---
+  duration_ms: 4.848536
+  type: 'test'
+  ...
+# [mizan 3D] openings not built: o16: it overlaps opening o4 after sliding
+# Subtest: wall-geometry: فتحة على تقاطع جدار داخلي لا تُحذف بصمت — تُعلن، وstrict يرمي، والإصلاح يزلقها إلى موضع سليم
+ok 342 - wall-geometry: فتحة على تقاطع جدار داخلي لا تُحذف بصمت — تُعلن، وstrict يرمي، والإصلاح يزلقها إلى موضع سليم
+  ---
+  duration_ms: 35.079198
+  type: 'test'
+  ...
+# Subtest: plan-review: البوابات الثقيلة الثلاث بطبقاتها، وCONSISTENCY_2D3D ترسب للفتحة على التقاطع
+ok 343 - plan-review: البوابات الثقيلة الثلاث بطبقاتها، وCONSISTENCY_2D3D ترسب للفتحة على التقاطع
+  ---
+  duration_ms: 27.020725
+  type: 'test'
+  ...
+# Subtest: الحركة الفعلية: المرحاض في منطقة فتح باب دورة المياه، وكنبة أمام الباب، وباب دورة مياه الضيوف 0.75 م — رسوب بطبقته
+ok 344 - الحركة الفعلية: المرحاض في منطقة فتح باب دورة المياه، وكنبة أمام الباب، وباب دورة مياه الضيوف 0.75 م — رسوب بطبقته
+  ---
+  duration_ms: 474.014998
+  type: 'test'
+  ...
+# Subtest: DISTINCT v2: النسخة المعكوسة «نسخة معدّلة» ترسب، والرسوب يذكر الأبعاد الجوهرية ويرفق الشرح العربي
+ok 345 - DISTINCT v2: النسخة المعكوسة «نسخة معدّلة» ترسب، والرسوب يذكر الأبعاد الجوهرية ويرفق الشرح العربي
+  ---
+  duration_ms: 569.975165
+  type: 'test'
+  ...
+# Subtest: المولّد (C1، C10): كل بديل معروض يجتاز البوابات الثقيلة، وكل زوج «مختلف معماريًا» بالمقياس v2، والنقص مسبَّب
+ok 346 - المولّد (C1، C10): كل بديل معروض يجتاز البوابات الثقيلة، وكل زوج «مختلف معماريًا» بالمقياس v2، والنقص مسبَّب
+  ---
+  duration_ms: 2080.234761
+  type: 'test'
+  ...
+# Subtest: المولّد: أبواب دورات مياه الضيوف ≥ 0.8 م والمرحاض خارج منطقة فتحها، ومجلس النساء عرضه الصافي ≥ 4.2 م (افتراضي الميزان)
+ok 347 - المولّد: أبواب دورات مياه الضيوف ≥ 0.8 م والمرحاض خارج منطقة فتحها، ومجلس النساء عرضه الصافي ≥ 4.2 م (افتراضي الميزان)
+  ---
+  duration_ms: 2246.705811
+  type: 'test'
+  ...
+# Subtest: المجسّم: درابزين فتحة السلم العلوية ينتمي إلى الدور العلوي (عزل الأرضي لا يُظهره معلّقًا)
+ok 348 - المجسّم: درابزين فتحة السلم العلوية ينتمي إلى الدور العلوي (عزل الأرضي لا يُظهره معلّقًا)
+  ---
+  duration_ms: 3766.709183
+  type: 'test'
+  ...
+# Subtest: طلب طويل متعارض K1: يُسأل عن place-opposite وrelation-contradiction، والجواب يحسمه في الطلب ويرفع السؤال
+ok 349 - طلب طويل متعارض K1: يُسأل عن place-opposite وrelation-contradiction، والجواب يحسمه في الطلب ويرفع السؤال
+  ---
+  duration_ms: 1820.156443
+  type: 'test'
+  ...
+# Subtest: طلب طويل متعارض K2: يُسأل عن place-opposite، والجواب يحسمه في الطلب ويرفع السؤال
+ok 350 - طلب طويل متعارض K2: يُسأل عن place-opposite، والجواب يحسمه في الطلب ويرفع السؤال
+  ---
+  duration_ms: 947148.126723
+  type: 'test'
+  ...
+# Subtest: تعارضان في طلب واحد: جواب أحدهما يحسمه وحده، والتعارض الآخر يبقى سؤالًا (لا يُدمج بصمت)
+ok 351 - تعارضان في طلب واحد: جواب أحدهما يحسمه وحده، والتعارض الآخر يبقى سؤالًا (لا يُدمج بصمت)
+  ---
+  duration_ms: 9.697527
+  type: 'test'
+  ...
+# Subtest: الحركة الفعلية: غرفة لا تبلغها أبواب مدخل العائلة (سائق بباب خارجي خاص) تُقاس من بابها هي لا تُرسب
+ok 352 - الحركة الفعلية: غرفة لا تبلغها أبواب مدخل العائلة (سائق بباب خارجي خاص) تُقاس من بابها هي لا تُرسب
+  ---
+  duration_ms: 60.83826
+  type: 'test'
+  ...
+# Subtest: المولّد: غرفة الغسيل التي طلبها العميل تتسع بجوار المطبخ (مع غرفة سائق بحمام)
+ok 353 - المولّد: غرفة الغسيل التي طلبها العميل تتسع بجوار المطبخ (مع غرفة سائق بحمام)
+  ---
+  duration_ms: 483908.745554
+  type: 'test'
+  ...
+# Subtest: C7: التعارض غير المجاب يُرسم بالقراءة الحرفية (5 فوق + غرفة الأم تحت = 6) والسؤال باقٍ ويذكر ما رُسم
+ok 354 - C7: التعارض غير المجاب يُرسم بالقراءة الحرفية (5 فوق + غرفة الأم تحت = 6) والسؤال باقٍ ويذكر ما رُسم
+  ---
+  duration_ms: 137.523251
+  type: 'test'
+  ...
+# Subtest: «المجالس» بالجمع بلا تحديد: سؤال (مجلس أم مجلسان؟) بافتراض معلن — مجلس رجال واحد ما لم يحدد النموذج
+ok 355 - «المجالس» بالجمع بلا تحديد: سؤال (مجلس أم مجلسان؟) بافتراض معلن — مجلس رجال واحد ما لم يحدد النموذج
+  ---
+  duration_ms: 3.112264
+  type: 'test'
+  ...
+# Subtest: جواب القراءة: «من ضمنها» / «زيادة» / «مجلسين» / «مجلس واحد» — ولا يُعدّ ما لا يطابق جوابًا
+ok 356 - جواب القراءة: «من ضمنها» / «زيادة» / «مجلسين» / «مجلس واحد» — ولا يُعدّ ما لا يطابق جوابًا
+  ---
+  duration_ms: 5.798594
+  type: 'test'
+  ...
+# Subtest: C7 مولَّدًا: خمس غرف نوم في العلوي وغرفة الأم في الأرضي، والرئيسية بعيدة عن الدرج — مقيسًا من المستند
+ok 357 - C7 مولَّدًا: خمس غرف نوم في العلوي وغرفة الأم في الأرضي، والرئيسية بعيدة عن الدرج — مقيسًا من المستند
+  ---
+  duration_ms: 8737.683417
+  type: 'test'
+  ...
+# Subtest: الجلسة: جواب «من ضمنها» يعيد التوليد ببرنامج 5 غرف، و«زيادة عليها» يسجَّل بلا تغيير، والأسئلة تُرفع بجوابها
+ok 358 - الجلسة: جواب «من ضمنها» يعيد التوليد ببرنامج 5 غرف، و«زيادة عليها» يسجَّل بلا تغيير، والأسئلة تُرفع بجوابها
+  ---
+  duration_ms: 14039.97715
+  type: 'test'
+  ...
+# Subtest: البرنامج السعودي الافتراضي: علامات البرنامج معلنة ومطبخ ≥ 15.6 م² هدفًا، والمقلط افتراضي في الدور الواحد والدورين (الجولة 17) ولا يُفرض مع اعتراض العميل
+ok 359 - البرنامج السعودي الافتراضي: علامات البرنامج معلنة ومطبخ ≥ 15.6 م² هدفًا، والمقلط افتراضي في الدور الواحد والدورين (الجولة 17) ولا يُفرض مع اعتراض العميل
+  ---
+  duration_ms: 85.728467
+  type: 'test'
+  ...
+# Subtest: C1 وC9 مولَّدين: مدخل العائلة منكسر، ودهليز للمجلس، ومطبخ ≥ 14 م² بباب خدمة، وموقف مرسوم داخل الأرض، وحمام الخادمة (طلبه العميل في C1)
+ok 360 - C1 وC9 مولَّدين: مدخل العائلة منكسر، ودهليز للمجلس، ومطبخ ≥ 14 م² بباب خدمة، وموقف مرسوم داخل الأرض، وحمام الخادمة (طلبه العميل في C1)
+  ---
+  duration_ms: 1041.385477
+  type: 'test'
+  ...
+# Subtest: المراجعة المستقلة: بند البرنامج السعودي بوابة إن طلبه العميل، وملاحظة معلنة إن كان قيمة افتراضية للميزان، والمواقف اشتراط نظامي بمصدره
+ok 361 - المراجعة المستقلة: بند البرنامج السعودي بوابة إن طلبه العميل، وملاحظة معلنة إن كان قيمة افتراضية للميزان، والمواقف اشتراط نظامي بمصدره
+  ---
+  duration_ms: 1678.52405
+  type: 'test'
+  ...
+# Subtest: الموقع: لا كتلة «شريط ضيق» على أرض عريضة (C5، C9)، والمنور في الأرض الضيقة العميقة (C4)
+ok 362 - الموقع: لا كتلة «شريط ضيق» على أرض عريضة (C5، C9)، والمنور في الأرض الضيقة العميقة (C4)
+  ---
+  duration_ms: 1771.021875
+  type: 'test'
+  ...
+# Subtest: المواقف: العدد النظامي مرسوم داخل الأرض وخارج المبنى وممرات الأبواب، والمبنى يُزاح إلى الخلف إن لم يتسع أمامه
+ok 363 - المواقف: العدد النظامي مرسوم داخل الأرض وخارج المبنى وممرات الأبواب، والمبنى يُزاح إلى الخلف إن لم يتسع أمامه
+  ---
+  duration_ms: 1806.311958
+  type: 'test'
+  ...
+# Subtest: المجسّم: تظليل النوافذ الخارجية (بروز أفقي، وزعانف على الشرق والغرب)، والشارعان في أرض الزاوية، والسيارة على الموقف المرسوم
+ok 364 - المجسّم: تظليل النوافذ الخارجية (بروز أفقي، وزعانف على الشرق والغرب)، والشارعان في أرض الزاوية، والسيارة على الموقف المرسوم
+  ---
+  duration_ms: 296621.174913
+  type: 'test'
+  ...
+# Subtest: تعديل الواجهة (C9): المادة في المستند حجر والتوزيع حرفيًا كما هو، وبند الواجهة «نُفّذ» مقيسًا من المستند
+ok 365 - تعديل الواجهة (C9): المادة في المستند حجر والتوزيع حرفيًا كما هو، وبند الواجهة «نُفّذ» مقيسًا من المستند
+  ---
+  duration_ms: 169270.365819
+  type: 'test'
+  ...
+# Subtest: المواقف النظامية على أرض 15×30 (450 م²): لا يتسع موقفان ولا بالحجز — يُعرض البديل ونقصه النظامي معلن وبوابته راسبة ظاهرة
+ok 366 - المواقف النظامية على أرض 15×30 (450 م²): لا يتسع موقفان ولا بالحجز — يُعرض البديل ونقصه النظامي معلن وبوابته راسبة ظاهرة
+  ---
+  duration_ms: 100086.345999
+  type: 'test'
+  ...
+# Subtest: siteOf: عرض الشارع يحدد الارتداد الأمامي النظامي (25 م ← 5 م، 30 م ← 6 م)، والمجهول 3 م افتراضًا؛ ارتداد الجار 1.5 م
+ok 367 - siteOf: عرض الشارع يحدد الارتداد الأمامي النظامي (25 م ← 5 م، 30 م ← 6 م)، والمجهول 3 م افتراضًا؛ ارتداد الجار 1.5 م
+  ---
+  duration_ms: 11.749727
+  type: 'test'
+  ...
+# Subtest: المراجع: بوابتا SETBACK_REG وCOVERAGE بطبقة «اشتراط نظامي متحقق» بمصدرهما على بدائل after-12، ومرجع الزجاج 8% لا يُرسب
+ok 368 - المراجع: بوابتا SETBACK_REG وCOVERAGE بطبقة «اشتراط نظامي متحقق» بمصدرهما على بدائل after-12، ومرجع الزجاج 8% لا يُرسب
+  ---
+  duration_ms: 1023.32519
+  type: 'test'
+  ...
+# Subtest: التوليد بعرض شارع 25 م: المبنى خلف ارتداد 5 م، والمستند يحمل عرض الشارع، وبوابة الارتداد النظامية ناجحة بطبقتها
+ok 369 - التوليد بعرض شارع 25 م: المبنى خلف ارتداد 5 م، والمستند يحمل عرض الشارع، وبوابة الارتداد النظامية ناجحة بطبقتها
+  ---
+  duration_ms: 84248.459998
+  type: 'test'
+  ...
+# Subtest: الحوار: عرض الشارع مجهول ← سؤال ناعم (لا تعارض)؛ الجواب «الشارع 15 م» يسجَّل بلا تغيير، و«الشارع 25 م» يعيد التوليد بارتداد 5 م
+ok 370 - الحوار: عرض الشارع مجهول ← سؤال ناعم (لا تعارض)؛ الجواب «الشارع 15 م» يسجَّل بلا تغيير، و«الشارع 25 م» يعيد التوليد بارتداد 5 م
+  ---
+  duration_ms: 186472.419901
+  type: 'test'
+  ...
+# Subtest: الزجاج (قرار المالك): نسبة الزجاج اختيار العميل — تُقرأ من كلامه عامةً أو لغرفة، ولا نطاق افتراضي؛ المراجع يعرض المحقق وبجانبه المطلوب معلومةً؛ بوابة 3% باقية؛ 8% الوزارة مرجع بمستواه
+ok 371 - الزجاج (قرار المالك): نسبة الزجاج اختيار العميل — تُقرأ من كلامه عامةً أو لغرفة، ولا نطاق افتراضي؛ المراجع يعرض المحقق وبجانبه المطلوب معلومةً؛ بوابة 3% باقية؛ 8% الوزارة مرجع بمستواه
+  ---
+  duration_ms: 115.026213
+  type: 'test'
+  ...
+# Subtest: المولّد يبلغ نسبة الزجاج التي طلبها العميل حيث يتسع الجدار (C9: «المجلس زجاج 20٪»)، وبلا طلب لا يتغيّر شيء؛ والمطبخ المفرط يُقتطع منه غسيل (C7 ≤ 24 م²)، ودورة مياه الصالة في C4
+ok 372 - المولّد يبلغ نسبة الزجاج التي طلبها العميل حيث يتسع الجدار (C9: «المجلس زجاج 20٪»)، وبلا طلب لا يتغيّر شيء؛ والمطبخ المفرط يُقتطع منه غسيل (C7 ≤ 24 م²)، ودورة مياه الصالة في C4
+  ---
+  duration_ms: 326404.709701
+  type: 'test'
+  ...
+# Subtest: وسم المقترح ونصوص حالة العرض ثابتة كما طلب المالك
+ok 373 - وسم المقترح ونصوص حالة العرض ثابتة كما طلب المالك
+  ---
+  duration_ms: 2.838803
+  type: 'test'
+  ...
+# Subtest: حالة العرض: بند عميل غير منفذ أو بوابة راسبة ⇐ محجوب؛ تفضيل سعودي غير متحقق ⇐ يحتاج تعديلات بقائمته
+ok 374 - حالة العرض: بند عميل غير منفذ أو بوابة راسبة ⇐ محجوب؛ تفضيل سعودي غير متحقق ⇐ يحتاج تعديلات بقائمته
+  ---
+  duration_ms: 876.746114
+  type: 'test'
+  ...
+# Subtest: بنود المراجع المستقل r13 مقيسة من المستند: حمام الخادمة، الحمام لكل غرفة، مسار التقديم، فاصل المجلس، مدخل المجلس، الحوش الخلفي، المواقف
+ok 375 - بنود المراجع المستقل r13 مقيسة من المستند: حمام الخادمة، الحمام لكل غرفة، مسار التقديم، فاصل المجلس، مدخل المجلس، الحوش الخلفي، المواقف
+  ---
+  duration_ms: 175.958661
+  type: 'test'
+  ...
+# Subtest: المولّد: كل بديل بحالة عرض، ولا محجوب بين المعروض متى وُجد غيره، والجاهز قبل ما يحتاج تعديلات؛ وحمام الخادمة في C10
+ok 376 - المولّد: كل بديل بحالة عرض، ولا محجوب بين المعروض متى وُجد غيره، والجاهز قبل ما يحتاج تعديلات؛ وحمام الخادمة في C10
+  ---
+  duration_ms: 1013.059038
+  type: 'test'
+  ...
+# Subtest: المواقف: عمودية بعمق 5.5 م في الحالات المستطيلة (التفضيل) ولا في تجويف
+ok 377 - المواقف: عمودية بعمق 5.5 م في الحالات المستطيلة (التفضيل) ولا في تجويف
+  ---
+  duration_ms: 1610.703067
+  type: 'test'
+  ...
+# Subtest: الحوش الخلفي في الأرض غير المنتظمة (C5): لا مبنى مدفوع إلى الخلف بفناء أمامي ميت
+ok 378 - الحوش الخلفي في الأرض غير المنتظمة (C5): لا مبنى مدفوع إلى الخلف بفناء أمامي ميت
+  ---
+  duration_ms: 1515.356927
+  type: 'test'
+  ...
+# Subtest: البصمة بالمناطق: مخطط مطابق لبديل معروض يُكشف حرفيًا، والمناطق المتغيرة تُعد
+ok 379 - البصمة بالمناطق: مخطط مطابق لبديل معروض يُكشف حرفيًا، والمناطق المتغيرة تُعد
+  ---
+  duration_ms: 63.137759
+  type: 'test'
+  ...
+# Subtest: صدق التعديل (C8 البديل 1): لا يُعاد بديل معروض، تُعرض الخيارات بالسبب الهندسي، و«1» يبقي المخطط حرفيًا، واختيار البديل المعروض يُعلن أنه ليس تعديلًا
+ok 380 - صدق التعديل (C8 البديل 1): لا يُعاد بديل معروض، تُعرض الخيارات بالسبب الهندسي، و«1» يبقي المخطط حرفيًا، واختيار البديل المعروض يُعلن أنه ليس تعديلًا
+  ---
+  duration_ms: 831599.2533
+  type: 'test'
+  ...
+# Subtest: الدوران (C7): ترقيم غرف النوم متتالٍ في كل دور، ومنور سماوي فوق الدرج، والقراءة بمجلسين تُجرَّب وتُذكر
+ok 381 - الدوران (C7): ترقيم غرف النوم متتالٍ في كل دور، ومنور سماوي فوق الدرج، والقراءة بمجلسين تُجرَّب وتُذكر
+  ---
+  duration_ms: 10861.395948
+  type: 'test'
+  ...
+# Subtest: الواجهة: سترة السطح 1.8 م افتراضًا للميزان في مستندات المولّد
+ok 382 - الواجهة: سترة السطح 1.8 م افتراضًا للميزان في مستندات المولّد
+  ---
+  duration_ms: 190.228736
+  type: 'test'
+  ...
+# Subtest: «المطبخ في الخلف» في C8-alt1 بعد-14: غير متحقق حرفيًا ومتحقق نسبيًا (خلف الطعام والمجلس) — بالنص نفسه في السجل
+ok 383 - «المطبخ في الخلف» في C8-alt1 بعد-14: غير متحقق حرفيًا ومتحقق نسبيًا (خلف الطعام والمجلس) — بالنص نفسه في السجل
+  ---
+  duration_ms: 292.6961
+  type: 'test'
+  ...
+# Subtest: رد التعديل: «الشرط متحقق جزئيًا» يذكر المتحقق حرفيًا والنسبي، ولا شيء إن تحقق الطلب كله
+ok 384 - رد التعديل: «الشرط متحقق جزئيًا» يذكر المتحقق حرفيًا والنسبي، ولا شيء إن تحقق الطلب كله
+  ---
+  duration_ms: 63.967744
+  type: 'test'
+  ...
+# Subtest: «بعيدة عن الدرج» بمسار المشي: C7 بعد-14 باب الرئيسية على 5.8 م من وصول الدرج (< 6 م) فلا تحقق
+ok 385 - «بعيدة عن الدرج» بمسار المشي: C7 بعد-14 باب الرئيسية على 5.8 م من وصول الدرج (< 6 م) فلا تحقق
+  ---
+  duration_ms: 64.027811
+  type: 'test'
+  ...
+# Subtest: معايرة حالة العرض: عيوب جوهرية محددة، والطفيفة ملاحظات لا تجعل البديل «يحتاج تعديلات»، والمحجوب لا يُرفع
+not ok 386 - معايرة حالة العرض: عيوب جوهرية محددة، والطفيفة ملاحظات لا تجعل البديل «يحتاج تعديلات»، والمحجوب لا يُرفع
+  ---
+  duration_ms: 1262.186082
+  type: 'test'
+  location: '/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r15.test.mjs:48:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'hidden'
+    - 'needs-edits'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'needs-edits'
+  actual: 'hidden'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r15.test.mjs:56:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: ثلاثة تنظيمات جديدة موصوفة، وإصدار المولّد partis-11 أو أحدث
+ok 387 - ثلاثة تنظيمات جديدة موصوفة، وإصدار المولّد partis-11 أو أحدث
+  ---
+  duration_ms: 0.315633
+  type: 'test'
+  ...
+# Subtest: HALL_SMALL وHALL_THROUGH: C9-2 (after-16) يُكشف فيه العيبان كما سجّلهما المراجع r16، وC1-1 وC2-1 وC8-1 سليمة
+ok 388 - HALL_SMALL وHALL_THROUGH: C9-2 (after-16) يُكشف فيه العيبان كما سجّلهما المراجع r16، وC1-1 وC2-1 وC8-1 سليمة
+  ---
+  duration_ms: 834.554944
+  type: 'test'
+  ...
+# Subtest: المقهوي: يُقتطع من ركن المطبخ الملاصق للمجلس ببابين، والمجلس يُفتح عليه دون أن ترسب خصوصيته
+ok 389 - المقهوي: يُقتطع من ركن المطبخ الملاصق للمجلس ببابين، والمجلس يُفتح عليه دون أن ترسب خصوصيته
+  ---
+  duration_ms: 26.952442
+  type: 'test'
+  ...
+# Subtest: خيارات التعديل بلغة العميل: «نعم/لا» لكل بند والموضع بكلمات، ووسوم مطبخ/طعام/مجلس للمصغّرات
+ok 390 - خيارات التعديل بلغة العميل: «نعم/لا» لكل بند والموضع بكلمات، ووسوم مطبخ/طعام/مجلس للمصغّرات
+  ---
+  duration_ms: 30.410916
+  type: 'test'
+  ...
+# Subtest: المولّد (C1، C9): غرفة الملابس المطلوبة ≥ 4.5 م²، وفي C9 بديل جاهز يلاصق فيه المجلس المقلط والمطبخ خلفه
+ok 391 - المولّد (C1، C9): غرفة الملابس المطلوبة ≥ 4.5 م²، وفي C9 بديل جاهز يلاصق فيه المجلس المقلط والمطبخ خلفه
+  ---
+  duration_ms: 2547.692132
+  type: 'test'
+  ...
+# Subtest: العنوان الفرعي لصورة الفرق من البصمة: توزيع جديد حين انتقلت الغرف (C8 الخيار 3 في r17)، ولا «الغرف نفسها في أماكنها»
+ok 392 - العنوان الفرعي لصورة الفرق من البصمة: توزيع جديد حين انتقلت الغرف (C8 الخيار 3 في r17)، ولا «الغرف نفسها في أماكنها»
+  ---
+  duration_ms: 157.459021
+  type: 'test'
+  ...
+# Subtest: تعديل الواجهة وحدها (C9 في r17): «لم يتغيّر المخطط — تغيّرت مادة الواجهة فقط»، لا «تغيّرت جدران أو أبواب أو نوافذ»
+ok 393 - تعديل الواجهة وحدها (C9 في r17): «لم يتغيّر المخطط — تغيّرت مادة الواجهة فقط»، لا «تغيّرت جدران أو أبواب أو نوافذ»
+  ---
+  duration_ms: 213.650781
+  type: 'test'
+  ...
+# Subtest: تعديل باب وحده: «تغيّرت أبواب أو نوافذ؛ الغرف نفسها في أماكنها» — والعبارة لا تُقال إلا حين لم تتغيّر غرفة
+ok 394 - تعديل باب وحده: «تغيّرت أبواب أو نوافذ؛ الغرف نفسها في أماكنها» — والعبارة لا تُقال إلا حين لم تتغيّر غرفة
+  ---
+  duration_ms: 66.631148
+  type: 'test'
+  ...
+# Subtest: لغة داخلية في نص العميل تُكشف: معرّفات الملفات والبدائل والحالات وعبارة المحاكاة
+ok 395 - لغة داخلية في نص العميل تُكشف: معرّفات الملفات والبدائل والحالات وعبارة المحاكاة
+  ---
+  duration_ms: 25.866939
+  type: 'test'
+  ...
+# Subtest: صور after-18: كل عنوان فرعي لصورة فرق مطابق للبصمة المعادة حسابها، وبلا لغة داخلية، ولا يناقض حركة الغرف
+ok 396 - صور after-18: كل عنوان فرعي لصورة فرق مطابق للبصمة المعادة حسابها، وبلا لغة داخلية، ولا يناقض حركة الغرف
+  ---
+  duration_ms: 296.309554
+  type: 'test'
+  ...
+# Subtest: نص العميل في after-18 (خيارات التعديل وأسئلتها وردودها) بلا لغة داخلية
+ok 397 - نص العميل في after-18 (خيارات التعديل وأسئلتها وردودها) بلا لغة داخلية
+  ---
+  duration_ms: 14.916046
+  type: 'test'
+  ...
+# Subtest: قياس مسار الضيف: طعام C8-2 (r17) يصله الضيف من «مدخل الرجال» لكنه مفتوح بقوس على «مدخل العائلة» — يُكشف، ويُصلح ببابٍ يُغلق
+ok 398 - قياس مسار الضيف: طعام C8-2 (r17) يصله الضيف من «مدخل الرجال» لكنه مفتوح بقوس على «مدخل العائلة» — يُكشف، ويُصلح ببابٍ يُغلق
+  ---
+  duration_ms: 16320.540911
+  type: 'test'
+  ...
+# Subtest: مقابل أحكام المراجع r17 على مستندات after-17 نفسها: الاتفاق 19 ← 20 من 22، ودقة «جاهز» 11/11، ولا «جاهز» كاذب
+ok 399 - مقابل أحكام المراجع r17 على مستندات after-17 نفسها: الاتفاق 19 ← 20 من 22، ودقة «جاهز» 11/11، ولا «جاهز» كاذب
+  ---
+  duration_ms: 2.943115
+  type: 'test'
+  ...
+# Subtest: after-18: لا يُعرض بديل يعبر فيه ضيف الرجال العائلة إلى الطعام ما دام في الحالة بديل لا يعبرها (C7: قراءتا «المجالس» مستقلتان)
+ok 400 - after-18: لا يُعرض بديل يعبر فيه ضيف الرجال العائلة إلى الطعام ما دام في الحالة بديل لا يعبرها (C7: قراءتا «المجالس» مستقلتان)
+  ---
+  duration_ms: 9.647288
+  type: 'test'
+  ...
+# Subtest: after-18: «غرفة الملابس» التي يُمشى عبرها صافيها ≥ 1.6 م (وإلا تُسمّى مدخل الجناح)
+ok 401 - after-18: «غرفة الملابس» التي يُمشى عبرها صافيها ≥ 1.6 م (وإلا تُسمّى مدخل الجناح)
+  ---
+  duration_ms: 167.15833
+  type: 'test'
+  ...
+# Subtest: نطاق تعديل الواجهة: «الأمامية فقط» / «والسور» / غير محدد ← الافتراضي كل الواجهات والدروة موسومًا ومعه السؤال
+ok 402 - نطاق تعديل الواجهة: «الأمامية فقط» / «والسور» / غير محدد ← الافتراضي كل الواجهات والدروة موسومًا ومعه السؤال
+  ---
+  duration_ms: 329.3785
+  type: 'test'
+  ...
+# Subtest: اتساق الحكم في كل الحالات: لا بديل معروض (غير محجوب) فيه مخالفة إلزامية — بند صريح، أو بوابة، أو مخالفة الميزان الإلزامية
+not ok 403 - اتساق الحكم في كل الحالات: لا بديل معروض (غير محجوب) فيه مخالفة إلزامية — بند صريح، أو بوابة، أو مخالفة الميزان الإلزامية
+  ---
+  duration_ms: 1197.182617
+  type: 'test'
+  location: '/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r19.test.mjs:25:1'
+  failureType: 'testCodeFailure'
+  error: 'C1-1: الحالة المحفوظة ready والمقيسة hidden () — فرق لا تفسره قياسات r20'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    file:///tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r19.test.mjs:41:16
+    Array.forEach (<anonymous>)
+    TestContext.<anonymous> (file:///tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r19.test.mjs:29:17)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: C7: لا يُعرض بديل يعبر فيه الضيف العائلة؛ وقراءة «المجالس» غير المعروضة تُقال للعميل مع السؤال
+ok 404 - C7: لا يُعرض بديل يعبر فيه الضيف العائلة؛ وقراءة «المجالس» غير المعروضة تُقال للعميل مع السؤال
+  ---
+  duration_ms: 0.689865
+  type: 'test'
+  ...
+# Subtest: قياسا الدور العلوي على C7-1 (after-18): تراكب الحمامات فوق الجاف، وباب الرئيسية على فراغ الدرج المفتوح — ومعهما «مراجعة متخصصة»
+not ok 405 - قياسا الدور العلوي على C7-1 (after-18): تراكب الحمامات فوق الجاف، وباب الرئيسية على فراغ الدرج المفتوح — ومعهما «مراجعة متخصصة»
+  ---
+  duration_ms: 469.726635
+  type: 'test'
+  location: '/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r19.test.mjs:58:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    4 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 4
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/wt-fb/tests/stage2-r19.test.mjs:69:51)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: C7 (after-19): باب الرئيسية لا يُفتح على فراغ الدرج المفتوح
+ok 406 - C7 (after-19): باب الرئيسية لا يُفتح على فراغ الدرج المفتوح
+  ---
+  duration_ms: 95.54625
+  type: 'test'
+  ...
+# Subtest: المقاس الصريح ضلعًا ضلعًا: 3.86×4.96 لا يطابق 4×5 (السماحية ±0.05 م معلنة)، وC6 في after-19 يطابق المطبخ والمجلس
+ok 407 - المقاس الصريح ضلعًا ضلعًا: 3.86×4.96 لا يطابق 4×5 (السماحية ±0.05 م معلنة)، وC6 في after-19 يطابق المطبخ والمجلس
+  ---
+  duration_ms: 86.190099
+  type: 'test'
+  ...
+# Subtest: الخصوصية المتكاملة: النافذة العلوية لمجلس النساء/الطعام لا تُدفع من الإضاءة (زجاج الغرفة ≥ 5٪) ولا الحركة والسلامة (بوابات المراجعة ناجحة)
+ok 408 - الخصوصية المتكاملة: النافذة العلوية لمجلس النساء/الطعام لا تُدفع من الإضاءة (زجاج الغرفة ≥ 5٪) ولا الحركة والسلامة (بوابات المراجعة ناجحة)
+  ---
+  duration_ms: 200.752298
+  type: 'test'
+  ...
+# Subtest: لا خط أبعاد يقطع موقف سيارة في أي مستند معروض
+ok 409 - لا خط أبعاد يقطع موقف سيارة في أي مستند معروض
+  ---
+  duration_ms: 53.468858
+  type: 'test'
+  ...
+# Subtest: خيارات التعديل: لا بطاقة خيار بلا مخطط («لم أجد توزيعًا جديدًا» جملة لا بطاقة)
+ok 410 - خيارات التعديل: لا بطاقة خيار بلا مخطط («لم أجد توزيعًا جديدًا» جملة لا بطاقة)
+  ---
+  duration_ms: 2.182121
+  type: 'test'
+  ...
+# Subtest: C3: المدخل الثاني من الشارع الشرقي إلى دهليز الرجال لا إلى المجلس مباشرة
+ok 411 - C3: المدخل الثاني من الشارع الشرقي إلى دهليز الرجال لا إلى المجلس مباشرة
+  ---
+  duration_ms: 2.365481
+  type: 'test'
+  ...
+# Subtest: التعميم: شيفرة المحرك الثالث وكشف الاستحالة والقياسات الجديدة لا تذكر معرّفات الحالات ولا أسماءها ولا أبعاد أراضيها
+ok 412 - التعميم: شيفرة المحرك الثالث وكشف الاستحالة والقياسات الجديدة لا تذكر معرّفات الحالات ولا أسماءها ولا أبعاد أراضيها
+  ---
+  duration_ms: 3.63467
+  type: 'test'
+  ...
+# Subtest: كشف الاستحالة قبل التوليد: البرنامج أكبر من الأرض، ومقاس أطول من الأرض، وبندان متعارضان — تقرير عربي بالتعارض والخيارات؛ والطلب الممكن يمر
+ok 413 - كشف الاستحالة قبل التوليد: البرنامج أكبر من الأرض، ومقاس أطول من الأرض، وبندان متعارضان — تقرير عربي بالتعارض والخيارات؛ والطلب الممكن يمر
+  ---
+  duration_ms: 171.226715
+  type: 'test'
+  ...
+# Subtest: المحرك الثالث لا يعيد نتيجة فارغة بلا تفسير: الطلب المستحيل خطأ بتقرير عربي (VILLA_INFEASIBLE) قبل أي رسم
+ok 414 - المحرك الثالث لا يعيد نتيجة فارغة بلا تفسير: الطلب المستحيل خطأ بتقرير عربي (VILLA_INFEASIBLE) قبل أي رسم
+  ---
+  duration_ms: 4.195543
+  type: 'test'
+  ...
+# Subtest: بحث القيود على الشبكة: كل توزيع ناتج يحقق القيود الصلبة (المدخل على الشارع، الصالة تلامسه أو رواقًا منه، الطعام يلامس المطبخ والمجلس، النوم يلامس الصالة، الضوء، المطبخ لا يطل على الشارع)، ومقصلي
+ok 415 - بحث القيود على الشبكة: كل توزيع ناتج يحقق القيود الصلبة (المدخل على الشارع، الصالة تلامسه أو رواقًا منه، الطعام يلامس المطبخ والمجلس، النوم يلامس الصالة، الضوء، المطبخ لا يطل على الشارع)، ومقصلي
+  ---
+  duration_ms: 2396.092615
+  type: 'test'
+  ...
+# Subtest: اختبار خواص (60 برنامجًا وأرضًا عشوائية): الأشجار المركّبة تضم كل فراغ من البرنامج مرة واحدة ولا شيئًا من خارجه، وتتسع بأدنى أبعادها في الأرض
+ok 416 - اختبار خواص (60 برنامجًا وأرضًا عشوائية): الأشجار المركّبة تضم كل فراغ من البرنامج مرة واحدة ولا شيئًا من خارجه، وتتسع بأدنى أبعادها في الأرض
+  ---
+  duration_ms: 1072412.81566
+  type: 'test'
+  ...
+# Subtest: اختبار خواص بالتوليد الكامل (أراضٍ عشوائية بشوارع شمالية وشرقية وغربية وجنوبية وزاوية، ودور ودوران): بديل أو أكثر، أو خطأ يحمل تقريرًا عربيًا — لا نتيجة صامتة، ولا بديل «جاهز» فيه مخالفة إلزامية
+ok 417 - اختبار خواص بالتوليد الكامل (أراضٍ عشوائية بشوارع شمالية وشرقية وغربية وجنوبية وزاوية، ودور ودوران): بديل أو أكثر، أو خطأ يحمل تقريرًا عربيًا — لا نتيجة صامتة، ولا بديل «جاهز» فيه مخالفة إلزامية
+  ---
+  duration_ms: 655267.275071
+  type: 'test'
+  ...
+# Subtest: قياسات r20 على مستندات after-19 كما رآها المراجع الأعمى: C9-4 نافذة المجلس على حوش العائلة (إلزامي)، وC6 وC4 الصالة أصغر من المجلس، وC5-3 نوافذ الصالة علوية وحدها، وC9-3 بلا دورة مياه للعائلة
+ok 418 - قياسات r20 على مستندات after-19 كما رآها المراجع الأعمى: C9-4 نافذة المجلس على حوش العائلة (إلزامي)، وC6 وC4 الصالة أصغر من المجلس، وC5-3 نوافذ الصالة علوية وحدها، وC9-3 بلا دورة مياه للعائلة
+  ---
+  duration_ms: 287.765138
+  type: 'test'
+  ...
+# Subtest: المجلس المعزول (المراجع r19: H1 وH5 بلا باب داخلي) مخالفة إلزامية تحجب البديل
+ok 419 - المجلس المعزول (المراجع r19: H1 وH5 بلا باب داخلي) مخالفة إلزامية تحجب البديل
+  ---
+  duration_ms: 2424.29872
+  type: 'test'
+  ...
+# Subtest: حارس التغيير: إصلاح الخصوصية لا يُفقد الصالة ضوءها — نافذة الصالة العادية الوحيدة لا تصير علوية بالصقل
+ok 420 - حارس التغيير: إصلاح الخصوصية لا يُفقد الصالة ضوءها — نافذة الصالة العادية الوحيدة لا تصير علوية بالصقل
+  ---
+  duration_ms: 1691.953846
+  type: 'test'
+  ...
+# Subtest: حارس التغيير: تغيير يُسقط شرطًا كان متحققًا يُرفض ويعود المستند كما كان (الصالة تصغر عن المجلس، دورة مياه العائلة تُحذف، غرفة تفقد نافذتها)
+ok 421 - حارس التغيير: تغيير يُسقط شرطًا كان متحققًا يُرفض ويعود المستند كما كان (الصالة تصغر عن المجلس، دورة مياه العائلة تُحذف، غرفة تفقد نافذتها)
+  ---
+  duration_ms: 374.602454
+  type: 'test'
+  ...
+# Subtest: حارس التغيير على تعديلات العميل (مطبخ أكبر، نوافذ المجلس عالية، مطبخ أكبر بكثير): لا شرط متحقق يسقط في نتيجة «local»
+ok 422 - حارس التغيير على تعديلات العميل (مطبخ أكبر، نوافذ المجلس عالية، مطبخ أكبر بكثير): لا شرط متحقق يسقط في نتيجة «local»
+  ---
+  duration_ms: 8891.574873
+  type: 'test'
+  ...
+# Subtest: لا بديل «جاهز» بلا دورة مياه للعائلة ولا بصالة أصغر من المجلس (حالة العرض)
+ok 423 - لا بديل «جاهز» بلا دورة مياه للعائلة ولا بصالة أصغر من المجلس (حالة العرض)
+  ---
+  duration_ms: 512.834646
+  type: 'test'
+  ...
+# Subtest: إشعار العميل: العدد صريحًا وسببه حين يقل المعروض، وتقرير حين لا يُنتج مخطط — بلا لغة داخلية
+ok 424 - إشعار العميل: العدد صريحًا وسببه حين يقل المعروض، وتقرير حين لا يُنتج مخطط — بلا لغة داخلية
+  ---
+  duration_ms: 1.934722
+  type: 'test'
+  ...
+# Subtest: 02b (1) «بالضبط» و«تقريبًا» وبلا وصف: السماحية من تفسير الطلب الموثق (DIM_TOL)، ومقاس «بالضبط» يُرسم ضمن ±0.03 م لكل ضلع
+ok 425 - 02b (1) «بالضبط» و«تقريبًا» وبلا وصف: السماحية من تفسير الطلب الموثق (DIM_TOL)، ومقاس «بالضبط» يُرسم ضمن ±0.03 م لكل ضلع
+  ---
+  duration_ms: 116324.18016
+  type: 'test'
+  ...
+# Subtest: 02b (2) غرف نوم بمقاسات صريحة: كل غرفة نوم (بالمعنى نفسه في السجل) مقيسة بعد التفصيل طولًا وعرضًا ضمن ±0.05 م
+ok 426 - 02b (2) غرف نوم بمقاسات صريحة: كل غرفة نوم (بالمعنى نفسه في السجل) مقيسة بعد التفصيل طولًا وعرضًا ضمن ±0.05 م
+  ---
+  duration_ms: 99845.417449
+  type: 'test'
+  ...
+# Subtest: 02b (3) الجدار الخارجي والداخلي والمشترك: كل طرف نصف سماكة جداره الفعلي (لا 0.2 م ولا جداران بلا تمييز)، والامتداد = الصافي + الطرفان
+ok 427 - 02b (3) الجدار الخارجي والداخلي والمشترك: كل طرف نصف سماكة جداره الفعلي (لا 0.2 م ولا جداران بلا تمييز)، والامتداد = الصافي + الطرفان
+  ---
+  duration_ms: 1.42533
+  type: 'test'
+  ...
+# Subtest: 02b (4) مجلس الرجال بدهليزه: الدهليز (1.5 م) يُضاف على محوره فقط، والضلع الآخر صافٍ، والاتجاه بقابلية التحقيق
+ok 428 - 02b (4) مجلس الرجال بدهليزه: الدهليز (1.5 م) يُضاف على محوره فقط، والضلع الآخر صافٍ، والاتجاه بقابلية التحقيق
+  ---
+  duration_ms: 0.922829
+  type: 'test'
+  ...
+# Subtest: 02b (5) المطبخ مع المخزن: الزائد في العمود مخزن حقيقي، والمطبخ يُقطع على صافيه بجداريه (لا يُمطّ)
+ok 429 - 02b (5) المطبخ مع المخزن: الزائد في العمود مخزن حقيقي، والمطبخ يُقطع على صافيه بجداريه (لا يُمطّ)
+  ---
+  duration_ms: 9.17985
+  type: 'test'
+  ...
+# Subtest: 02b (6) مساحة لا تستوعب المقاس المطلوب: رسالة صادقة بلا مصطلحات، ولا مخطط يخالف المقاس
+ok 430 - 02b (6) مساحة لا تستوعب المقاس المطلوب: رسالة صادقة بلا مصطلحات، ولا مخطط يخالف المقاس
+  ---
+  duration_ms: 8.756129
+  type: 'test'
+  ...
+# Subtest: 02b (7) تدوير الغرفة وتبديل اتجاهها: الضلع العرضي يُختار بأقرب مطابقة للعرض المتاح (لا عتبة 0.30)، والمربع اتجاه واحد
+ok 431 - 02b (7) تدوير الغرفة وتبديل اتجاهها: الضلع العرضي يُختار بأقرب مطابقة للعرض المتاح (لا عتبة 0.30)، والمربع اتجاه واحد
+  ---
+  duration_ms: 1.15047
+  type: 'test'
+  ...
+# Subtest: 02b (8) شبكة 1 سم مقابل 5 سم: كل إحداثيات طلب المقاس على 1 سم، والغرف ذات المقاس لا تنحرف عن قطوعها، والأبواب والنوافذ داخل جدار واحد عند الوصلات
+ok 432 - 02b (8) شبكة 1 سم مقابل 5 سم: كل إحداثيات طلب المقاس على 1 سم، والغرف ذات المقاس لا تنحرف عن قطوعها، والأبواب والنوافذ داخل جدار واحد عند الوصلات
+  ---
+  duration_ms: 123029.893251
+  type: 'test'
+  ...
+# Subtest: 02b (9) تطابق 2D و3D: المجسم يُبنى من جدران المستند نفسها؛ كل وجه داخلي لكل غرفة في المسقط هو وجه جدار في المجسم (1 سم داخله حر، و1 سم خارجه داخل الجدار)
+ok 433 - 02b (9) تطابق 2D و3D: المجسم يُبنى من جدران المستند نفسها؛ كل وجه داخلي لكل غرفة في المسقط هو وجه جدار في المجسم (1 سم داخله حر، و1 سم خارجه داخل الجدار)
+  ---
+  duration_ms: 35.792296
+  type: 'test'
+  ...
+# Subtest: 02b (10) لا بديل محجوب بلا سبب: كل محجوب يحمل المرشح والمرحلة والقاعدة ومصدر الشرط ونص العميل، والمقيس والحد لبنود المقاس
+ok 434 - 02b (10) لا بديل محجوب بلا سبب: كل محجوب يحمل المرشح والمرحلة والقاعدة ومصدر الشرط ونص العميل، والمقيس والحد لبنود المقاس
+  ---
+  duration_ms: 207.847068
+  type: 'test'
+  ...
+# Subtest: 02b H10 (معروفة): العدد المطلوب 3 من المصدر الموحد، وبديل غير محجوب بمقاساته الثلاثة (المجلس والمطبخ وغرف النوم) مقيسة بعد التفصيل
+ok 435 - 02b H10 (معروفة): العدد المطلوب 3 من المصدر الموحد، وبديل غير محجوب بمقاساته الثلاثة (المجلس والمطبخ وغرف النوم) مقيسة بعد التفصيل
+  ---
+  duration_ms: 64279.290743
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: 4×5 «بالضبط» ينجح، وناقص 4 سم يرسب بالضبط وينجح بلا وصف، و«تقريبًا» ±0.30
+ok 436 - 02c الحزمة: 4×5 «بالضبط» ينجح، وناقص 4 سم يرسب بالضبط وينجح بلا وصف، و«تقريبًا» ±0.30
+  ---
+  duration_ms: 7.577848
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: التدوير مسموح حين لا يُلزم الاتجاه، ومرفوض حين يُلزم
+ok 437 - 02c الحزمة: التدوير مسموح حين لا يُلزم الاتجاه، ومرفوض حين يُلزم
+  ---
+  duration_ms: 0.282922
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: غرفة L بصندوق 4×5 لا تنجح، والمستطيل الصحيح قد يكون أصغر من الأكبر مساحة، وجزيرة فتحة رأسية تُسقط المستطيل
+ok 438 - 02c الحزمة: غرفة L بصندوق 4×5 لا تنجح، والمستطيل الصحيح قد يكون أصغر من الأكبر مساحة، وجزيرة فتحة رأسية تُسقط المستطيل
+  ---
+  duration_ms: 0.577509
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: ضيق 6.5 سم (درجة سماكة الجدار 0.25/0.12) عند أضيق موضع يُرسب «بالضبط» و«بلا وصف» ويمر «تقريبًا» — الصندوق وحده كان يمرره
+ok 439 - 02c الحزمة: ضيق 6.5 سم (درجة سماكة الجدار 0.25/0.12) عند أضيق موضع يُرسب «بالضبط» و«بلا وصف» ويمر «تقريبًا» — الصندوق وحده كان يمرره
+  ---
+  duration_ms: 0.258914
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: المحاور فقط تُخصم منها أنصاف السماكتين المختلفتين، والهندسة غير المتعامدة لا تُفحص (ليست استحالة)
+ok 440 - 02c الحزمة: المحاور فقط تُخصم منها أنصاف السماكتين المختلفتين، والهندسة غير المتعامدة لا تُفحص (ليست استحالة)
+  ---
+  duration_ms: 12.679349
+  type: 'test'
+  ...
+# Subtest: 02c القرار: المطبخ المرسوم بدرجة سماكة يُقاس عند أضيق موضع صالح — السجل يحمل المستطيل الصافي والصندوق والانحراف، ويحجب بسببه
+ok 441 - 02c القرار: المطبخ المرسوم بدرجة سماكة يُقاس عند أضيق موضع صالح — السجل يحمل المستطيل الصافي والصندوق والانحراف، ويحجب بسببه
+  ---
+  duration_ms: 273.032891
+  type: 'test'
+  ...
+# Subtest: 02c القرار: عمود مرسوم داخل الغرفة جزيرة تُسقط المستطيل الصافي (الصندوق لا يتغير)
+ok 442 - 02c القرار: عمود مرسوم داخل الغرفة جزيرة تُسقط المستطيل الصافي (الصندوق لا يتغير)
+  ---
+  duration_ms: 8.771051
+  type: 'test'
+  ...
+# Subtest: 02c القرار: مقاس مدوَّر (5×4 مرسوم لطلب 4×5 بلا اتجاه) يتحقق
+ok 443 - 02c القرار: مقاس مدوَّر (5×4 مرسوم لطلب 4×5 بلا اتجاه) يتحقق
+  ---
+  duration_ms: 1.666143
+  type: 'test'
+  ...
+# Subtest: 02c القرار خامسًا: مقاس الصالة يُحمل كتلة افتراضية وتُثبَّت به ورقة الصالة على محور قطعها في solve (الصافي + جداران)
+ok 444 - 02c القرار خامسًا: مقاس الصالة يُحمل كتلة افتراضية وتُثبَّت به ورقة الصالة على محور قطعها في solve (الصافي + جداران)
+  ---
+  duration_ms: 358.873538
+  type: 'test'
+  ...
+# Subtest: 02c: الصالة بمقاس صريح في مخطط مولَّد مقيسة بالمستطيل الصافي ضمن السماحية؛ والرئيسية بمقاس صريح لا تُعرض صالحة إلا بمقاسها (وإلا تُحجب بالمقيس)
+ok 445 - 02c: الصالة بمقاس صريح في مخطط مولَّد مقيسة بالمستطيل الصافي ضمن السماحية؛ والرئيسية بمقاس صريح لا تُعرض صالحة إلا بمقاسها (وإلا تُحجب بالمقيس)
+  ---
+  duration_ms: 496791.401897
+  type: 'test'
+  ...
+# Subtest: 02c H10: العدد المطلوب 3، والمقاسات الصافية (المجلس والمطبخ وغرف النوم) عند أضيق موضع ضمن السماحية في المعروض
+ok 446 - 02c H10: العدد المطلوب 3، والمقاسات الصافية (المجلس والمطبخ وغرف النوم) عند أضيق موضع ضمن السماحية في المعروض
+  ---
+  duration_ms: 106431.66226
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: خط الرؤية، والجلسة العالية، والساتر قبل النافذة، وجدار المبنى يحجب
+ok 447 - 02c الحزمة: خط الرؤية، والجلسة العالية، والساتر قبل النافذة، وجدار المبنى يحجب
+  ---
+  duration_ms: 0.460588
+  type: 'test'
+  ...
+# Subtest: 02c C6: نافذة الصالة الوحيدة بجلستها وساتر خصوصية خارجي — خطوط الرؤية من المواقف محجوبة بعينات متعددة، وWINDOW_PARKING الأصلي ناجح، والضوء والتهوية والحركة بلا تراجع، والمقاسات محققة
+ok 448 - 02c C6: نافذة الصالة الوحيدة بجلستها وساتر خصوصية خارجي — خطوط الرؤية من المواقف محجوبة بعينات متعددة، وWINDOW_PARKING الأصلي ناجح، والضوء والتهوية والحركة بلا تراجع، والمقاسات محققة
+  ---
+  duration_ms: 119375.460128
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: عمق الحمام تفضيل بحث لا يكفي وحده، وخارجه قد يصح وظيفيًا
+ok 449 - 02c الحزمة: عمق الحمام تفضيل بحث لا يكفي وحده، وخارجه قد يصح وظيفيًا
+  ---
+  duration_ms: 0.494738
+  type: 'test'
+  ...
+# Subtest: 02c: حمامات الأجنحة في C6 بفاحصات المشروع — الأجهزة وفتح الباب والعرض الصافي، والسباكة «لم يُتحقق»، وما لم يتسع ملاحظة صريحة
+ok 450 - 02c: حمامات الأجنحة في C6 بفاحصات المشروع — الأجهزة وفتح الباب والعرض الصافي، والسباكة «لم يُتحقق»، وما لم يتسع ملاحظة صريحة
+  ---
+  duration_ms: 5.479697
+  type: 'test'
+  ...
+# Subtest: 02c الحزمة: لا محجوب بلا دليل، ولا رقم مختلق، والتصنيف والرسالة بلا مصطلحات بحث
+ok 451 - 02c الحزمة: لا محجوب بلا دليل، ولا رقم مختلق، والتصنيف والرسالة بلا مصطلحات بحث
+  ---
+  duration_ms: 1.317893
+  type: 'test'
+  ...
+# Subtest: 02c H2: البديل المحجوب يحمل سبب بوابة المواقف بالمقيس والحد من الفاحص الحقيقي (المرسوم مقابل المطلوب نظاميًا)، والنتيجة «بديل محجوب» لا نجاح
+ok 452 - 02c H2: البديل المحجوب يحمل سبب بوابة المواقف بالمقيس والحد من الفاحص الحقيقي (المرسوم مقابل المطلوب نظاميًا)، والنتيجة «بديل محجوب» لا نجاح
+  ---
+  duration_ms: 197081.613733
+  type: 'test'
+  ...
+# Subtest: 02c: كل محجوب في كل الحالات المولدة هنا يحمل الحقول الموحدة، والمقيس رقم أو null مع سبب صريح
+ok 453 - 02c: كل محجوب في كل الحالات المولدة هنا يحمل الحقول الموحدة، والمقيس رقم أو null مع سبب صريح
+  ---
+  duration_ms: 4.602664
+  type: 'test'
+  ...
+# Subtest: 01b: «مجلس رجال بمقلط» مفهوم في المحلل (لا unclear) وظيفة طعام للضيوف مرتبطة بالمجلس بلا باب مفروض؛ «قريب» ليس بابًا؛ والباب من نص صريح
+ok 454 - 01b: «مجلس رجال بمقلط» مفهوم في المحلل (لا unclear) وظيفة طعام للضيوف مرتبطة بالمجلس بلا باب مفروض؛ «قريب» ليس بابًا؛ والباب من نص صريح
+  ---
+  duration_ms: 13.440073
+  type: 'test'
+  ...
+# Subtest: 01b الحزمة: العقد الواحد للمولّد والمراجع — الكائن نفسه، والقيود المهيكلة محفوظة، ومستدعٍ قديم بلا عقد يأخذ عقدًا واحدًا لكل طلب
+ok 455 - 01b الحزمة: العقد الواحد للمولّد والمراجع — الكائن نفسه، والقيود المهيكلة محفوظة، ومستدعٍ قديم بلا عقد يأخذ عقدًا واحدًا لكل طلب
+  ---
+  duration_ms: 1.158567
+  type: 'test'
+  ...
+# Subtest: 01b H3: بلا مخطط صالح — البديل المكتمل الذي يخالف شرطًا أساسيًا محجوب بأسبابه (لا يُعرض صالحًا)، والنتيجة «بديل محجوب» لا «مستحيل»، ونص العميل صادق بلا مصطلحات
+ok 456 - 01b H3: بلا مخطط صالح — البديل المكتمل الذي يخالف شرطًا أساسيًا محجوب بأسبابه (لا يُعرض صالحًا)، والنتيجة «بديل محجوب» لا «مستحيل»، ونص العميل صادق بلا مصطلحات
+  ---
+  duration_ms: 122647.667884
+  type: 'test'
+  ...
+# Subtest: C6: الساتر داخل القطعة ولا ينطبق عليه خط ارتداد المبنى، وكل فحوصه الهندسية ناجحة
+ok 457 - C6: الساتر داخل القطعة ولا ينطبق عليه خط ارتداد المبنى، وكل فحوصه الهندسية ناجحة
+  ---
+  duration_ms: 64.48928
+  type: 'test'
+  ...
+# Subtest: الاشتراط النظامي للساتر «لم يتم التحقق» ولا pass أبدًا (لا مصدر في regulations-sa)
+ok 458 - الاشتراط النظامي للساتر «لم يتم التحقق» ولا pass أبدًا (لا مصدر في regulations-sa)
+  ---
+  duration_ms: 42.587739
+  type: 'test'
+  ...
+# Subtest: ساتر خارج القطعة أو يقطع ممر الموقف أو يعترض مدخلًا: يرسب بقياسه
+ok 459 - ساتر خارج القطعة أو يقطع ممر الموقف أو يعترض مدخلًا: يرسب بقياسه
+  ---
+  duration_ms: 33.528369
+  type: 'test'
+  ...
+# Subtest: نوافذ الساتر: لا استثناء عام للممر؛ كل نافذة تُقاس بغلاف ضلفتها (WINDOW_CLEARANCE وWINDOW_SWING) وساتر قريب منها يرسب
+ok 460 - نوافذ الساتر: لا استثناء عام للممر؛ كل نافذة تُقاس بغلاف ضلفتها (WINDOW_CLEARANCE وWINDOW_SWING) وساتر قريب منها يرسب
+  ---
+  duration_ms: 34.082594
+  type: 'test'
+  ...
+# Subtest: زاوية حجب الإضاءة تُقاس ولا تُحكم: حدها «غير متحقق»
+ok 461 - زاوية حجب الإضاءة تُقاس ولا تُحكم: حدها «غير متحقق»
+  ---
+  duration_ms: 6.866493
+  type: 'test'
+  ...
+# Subtest: خطوط الرؤية بارتفاعات العين: ساتر 1.0 م لا يحجب عين السائق الجالس 1.2 م ولا الواقف، و1.8 م يحجبهما
+ok 462 - خطوط الرؤية بارتفاعات العين: ساتر 1.0 م لا يحجب عين السائق الجالس 1.2 م ولا الواقف، و1.8 م يحجبهما
+  ---
+  duration_ms: 0.885988
+  type: 'test'
+  ...
+# Subtest: خط رؤية يعبر النافذة فوق رأسها أو تحت جلستها لا يُكشف (ارتفاع الخط عند النافذة لا مستوى عين واحد)
+ok 463 - خط رؤية يعبر النافذة فوق رأسها أو تحت جلستها لا يُكشف (ارتفاع الخط عند النافذة لا مستوى عين واحد)
+  ---
+  duration_ms: 0.238406
+  type: 'test'
+  ...
+# Subtest: C6: الساتر يحجب كل خطوط الرؤية إلى نافذة الصالة بالارتفاعات الأربعة ولم يكن الأمر كذلك قبله
+ok 464 - C6: الساتر يحجب كل خطوط الرؤية إلى نافذة الصالة بالارتفاعات الأربعة ولم يكن الأمر كذلك قبله
+  ---
+  duration_ms: 17.443491
+  type: 'test'
+  ...
+# Subtest: planWindowScreen لا يقبل ساترًا يلاصق موقفًا أو ممر دخوله ولا نافذة مأهولة
+ok 465 - planWindowScreen لا يقبل ساترًا يلاصق موقفًا أو ممر دخوله ولا نافذة مأهولة
+  ---
+  duration_ms: 53.130641
+  type: 'test'
+  ...
+# Subtest: العرض: الحالات الثلاث منفصلة والوسم الإلزامي ظاهر ولا اعتماد نظامي
+ok 466 - العرض: الحالات الثلاث منفصلة والوسم الإلزامي ظاهر ولا اعتماد نظامي
+  ---
+  duration_ms: 468.025532
+  type: 'test'
+  ...
+# Subtest: عرض بلا ساتر: لا وسم نظامي
+ok 467 - عرض بلا ساتر: لا وسم نظامي
+  ---
+  duration_ms: 1166.166878
+  type: 'test'
+  ...
+# Subtest: 01 عدد التصاميم المطلوب بالأرقام والكلمات (kit: Arabic requested count)
+ok 468 - 01 عدد التصاميم المطلوب بالأرقام والكلمات (kit: Arabic requested count)
+  ---
+  duration_ms: 128.570761
+  type: 'test'
+  ...
+# Subtest: 01 العقد نفسه للمولّد والمراجع: النص والعلاقات بمصدرها واقتباسها (kit: shared brief is identical)
+ok 469 - 01 العقد نفسه للمولّد والمراجع: النص والعلاقات بمصدرها واقتباسها (kit: shared brief is identical)
+  ---
+  duration_ms: 29.886602
+  type: 'test'
+  ...
+# Subtest: 01 «قريب من المجلس» (NEAR) لا يفرض بابًا مباشرًا، ولا «مقلط» (وظيفة طعام للضيوف، 01b)؛ «المجلس يفتح على الطعام» يفرضه — في المولّد والمراجع معًا
+ok 470 - 01 «قريب من المجلس» (NEAR) لا يفرض بابًا مباشرًا، ولا «مقلط» (وظيفة طعام للضيوف، 01b)؛ «المجلس يفتح على الطعام» يفرضه — في المولّد والمراجع معًا
+  ---
+  duration_ms: 3.78834
+  type: 'test'
+  ...
+# Subtest: 01 الطلب بلا عقد (مستدعٍ قديم) يُبنى عقده من نصه وبنوده بالدالة نفسها
+ok 471 - 01 الطلب بلا عقد (مستدعٍ قديم) يُبنى عقده من نصه وبنوده بالدالة نفسها
+  ---
+  duration_ms: 9.789237
+  type: 'test'
+  ...
+# Subtest: 02 المقاس الصريح صافيه وسماحيته كما قالهما العميل (لا 0.2 م جدارًا ثابتًا ولا سماحية مصفّرة)
+ok 472 - 02 المقاس الصريح صافيه وسماحيته كما قالهما العميل (لا 0.2 م جدارًا ثابتًا ولا سماحية مصفّرة)
+  ---
+  duration_ms: 2.130473
+  type: 'test'
+  ...
+# Subtest: 02 مطبخ 4×4 ومجلس 5×6 على أرض تتسع: يُرسمان بمقاسيهما طولًا وعرضًا (يُعاد القياس من المرسوم بعد التفصيل)
+ok 473 - 02 مطبخ 4×4 ومجلس 5×6 على أرض تتسع: يُرسمان بمقاسيهما طولًا وعرضًا (يُعاد القياس من المرسوم بعد التفصيل)
+  ---
+  duration_ms: 110541.488673
+  type: 'test'
+  ...
+# Subtest: 03 انتهاء المهلة «بحث غير مكتمل» قابل للإعادة، لا استحالة (kit: time limit is not infeasibility)
+ok 474 - 03 انتهاء المهلة «بحث غير مكتمل» قابل للإعادة، لا استحالة (kit: time limit is not infeasibility)
+  ---
+  duration_ms: 62513.953916
+  type: 'test'
+  ...
+# Subtest: 03 الشهادة غير المتحقق منها مرفوضة؛ والتعارض المنطقي بين بندين إلزاميين يُقبل بشهادته (kit: unverified infeasibility is refused)
+ok 475 - 03 الشهادة غير المتحقق منها مرفوضة؛ والتعارض المنطقي بين بندين إلزاميين يُقبل بشهادته (kit: unverified infeasibility is refused)
+  ---
+  duration_ms: 63.889262
+  type: 'test'
+  ...
+# Subtest: 03 مدقق الشهادات لا يصنّف أي حالة معروف لها حل مستحيلةً (C1–C10، H1–H10، وحالات بذرة التطوير التي أنتج لها الأساس مخططًا)
+ok 476 - 03 مدقق الشهادات لا يصنّف أي حالة معروف لها حل مستحيلةً (C1–C10، H1–H10، وحالات بذرة التطوير التي أنتج لها الأساس مخططًا)
+  ---
+  duration_ms: 154.515222
+  type: 'test'
+  ...
+# Subtest: 03 رسائل العميل: «1 من 5» بالعدد الحقيقي، وبلا مصطلحات ولا نص استثناء، والكاشف يلتقط إشعاري r20 المضللين
+ok 477 - 03 رسائل العميل: «1 من 5» بالعدد الحقيقي، وبلا مصطلحات ولا نص استثناء، والكاشف يلتقط إشعاري r20 المضللين
+  ---
+  duration_ms: 16.725354
+  type: 'test'
+  ...
+# Subtest: 04 الدرج «ST» ليس جناح نوم (kit: ST stair not classified as sleeping room)، والتحويل إلى شجرة لا يتعطل بتوزيع أرضي فيه الدرج
+ok 478 - 04 الدرج «ST» ليس جناح نوم (kit: ST stair not classified as sleeping room)، والتحويل إلى شجرة لا يتعطل بتوزيع أرضي فيه الدرج
+  ---
+  duration_ms: 6.132908
+  type: 'test'
+  ...
+# Subtest: 06 الفحص الطوبولوجي قبل حل الأبعاد (kit topologyGuestRoute): متجاوران ممكن، ويفصلهما صف لا، والقطري متفائل، والغائب null
+ok 479 - 06 الفحص الطوبولوجي قبل حل الأبعاد (kit topologyGuestRoute): متجاوران ممكن، ويفصلهما صف لا، والقطري متفائل، والغائب null
+  ---
+  duration_ms: 0.722161
+  type: 'test'
+  ...
+# Subtest: 06+07 على بديل مولَّد بطلب «المجلس يفتح على الطعام»: كل معروض غير محجوب فيه باب فعلي بين المجلس والطعام ومسار ضيف بلا عبور العائلة (بعد التفصيل)، وحكم «مختلف» بالمحوّل = المعيار المجمّد
+ok 480 - 06+07 على بديل مولَّد بطلب «المجلس يفتح على الطعام»: كل معروض غير محجوب فيه باب فعلي بين المجلس والطعام ومسار ضيف بلا عبور العائلة (بعد التفصيل)، وحكم «مختلف» بالمحوّل = المعيار المجمّد
+  ---
+  duration_ms: 232582.272663
+  type: 'test'
+  ...
+# Subtest: 08 applySafeEdit: حذف الباب المباشر المطلوب يُرفض والأصل لا يُمس؛ تعديل لا يُسقط شرطًا يُقبل؛ وما طلبه العميل في الدور يُعفى
+ok 481 - 08 applySafeEdit: حذف الباب المباشر المطلوب يُرفض والأصل لا يُمس؛ تعديل لا يُسقط شرطًا يُقبل؛ وما طلبه العميل في الدور يُعفى
+  ---
+  duration_ms: 266.359057
+  type: 'test'
+  ...
+# Subtest: 08 طبقة المعاملة نفسها (design-session): مع تعطيل حارس التعديل القديم يرفض applySafeEdit سد الباب المطلوب ويبقى الباب؛ ومع تعطيله أيضًا يُعتمد السد (الطبقة هي التي ترفض)
+ok 482 - 08 طبقة المعاملة نفسها (design-session): مع تعطيل حارس التعديل القديم يرفض applySafeEdit سد الباب المطلوب ويبقى الباب؛ ومع تعطيله أيضًا يُعتمد السد (الطبقة هي التي ترفض)
+  ---
+  duration_ms: 212078.87139
+  type: 'test'
+  ...
+# Subtest: الدش: كل حمام كامل في C6 له دش صالح (ايجابي)، ودورة المياه معفاة
+ok 483 - الدش: كل حمام كامل في C6 له دش صالح (ايجابي)، ودورة المياه معفاة
+  ---
+  duration_ms: 48.318384
+  type: 'test'
+  ...
+# Subtest: الدش: حذف الدش من حمام كامل يرسب (سلبي)، وإعادته تُصلح
+ok 484 - الدش: حذف الدش من حمام كامل يرسب (سلبي)، وإعادته تُصلح
+  ---
+  duration_ms: 394.980697
+  type: 'test'
+  ...
+# Subtest: الدش: دش يخرج عن الغرفة أو يتقاطع مع مرحاض أو يقع في فتحة الباب يرسب
+ok 485 - الدش: دش يخرج عن الغرفة أو يتقاطع مع مرحاض أو يقع في فتحة الباب يرسب
+  ---
+  duration_ms: 27.137922
+  type: 'test'
+  ...
+# Subtest: الدش: دش بلا مسقط وصول حر يرسب
+ok 486 - الدش: دش بلا مسقط وصول حر يرسب
+  ---
+  duration_ms: 2.450142
+  type: 'test'
+  ...
+# Subtest: الدش: حمام 1.98×2.18 م بمرحاض ومغسلة على جدار واحد: إعادة التوزيع تُدخل دشًا صالحًا (قبل: بلا دش، بعد: بوابة ناجحة)
+ok 487 - الدش: حمام 1.98×2.18 م بمرحاض ومغسلة على جدار واحد: إعادة التوزيع تُدخل دشًا صالحًا (قبل: بلا دش، بعد: بوابة ناجحة)
+  ---
+  duration_ms: 2206.856133
+  type: 'test'
+  ...
+# Subtest: ثلاث حالات منفصلة: معماري، اختبارات، نظامي — والنظامي «غير متحقق» ولا يتحول نجاحًا
+ok 488 - ثلاث حالات منفصلة: معماري، اختبارات، نظامي — والنظامي «غير متحقق» ولا يتحول نجاحًا
+  ---
+  duration_ms: 630.890333
+  type: 'test'
+  ...
+# Subtest: Mizan Score: محور المطابقة غير متاح ولا يُحتسب «غير متحقق» نجاحًا، والدرجة لا تتغير بإضافة الساتر
+ok 489 - Mizan Score: محور المطابقة غير متاح ولا يُحتسب «غير متحقق» نجاحًا، والدرجة لا تتغير بإضافة الساتر
+  ---
+  duration_ms: 146.34998
+  type: 'test'
+  ...
+# Subtest: خصوصية كل فراغ بدرجته المطلوبة: الصالة (عالية) تنجح بلا خط مكشوف، المدخل والممر (منخفضة) مذكوران لا يرسّبان
+ok 490 - خصوصية كل فراغ بدرجته المطلوبة: الصالة (عالية) تنجح بلا خط مكشوف، المدخل والممر (منخفضة) مذكوران لا يرسّبان
+  ---
+  duration_ms: 6.901819
+  type: 'test'
+  ...
+# Subtest: خصوصية: إزالة الساتر تكشف الصالة (الفحص يفرّق، لا يمرّر دائمًا)
+ok 491 - خصوصية: إزالة الساتر تكشف الصالة (الفحص يفرّق، لا يمرّر دائمًا)
+  ---
+  duration_ms: 8.693004
+  type: 'test'
+  ...
+# Subtest: حركة المركبات: بابا المركبة المرجعية يُفتحان بإسقاط ≥ 0.8 م، والمرجعية «غير متحققة المصدر»
+ok 492 - حركة المركبات: بابا المركبة المرجعية يُفتحان بإسقاط ≥ 0.8 م، والمرجعية «غير متحققة المصدر»
+  ---
+  duration_ms: 66.85113
+  type: 'test'
+  ...
+# Subtest: حركة المركبات: ساتر يلاصق باب السيارة يرسب بقياس الفتح لا بالمسافة 0.745 م وحدها
+ok 493 - حركة المركبات: ساتر يلاصق باب السيارة يرسب بقياس الفتح لا بالمسافة 0.745 م وحدها
+  ---
+  duration_ms: 78.50033
+  type: 'test'
+  ...
+# Subtest: فتح النوافذ: غلاف الضلفة يُحسب لكل نافذة ويُكشف التصادم مع الساتر ولا إعفاء (exemptFromClearance=false دائمًا)
+ok 494 - فتح النوافذ: غلاف الضلفة يُحسب لكل نافذة ويُكشف التصادم مع الساتر ولا إعفاء (exemptFromClearance=false دائمًا)
+  ---
+  duration_ms: 2.651645
+  type: 'test'
+  ...
+# Subtest: الستارة: كل إحداثيات أسوار الخصوصية المضافة (kind=fence) على شبكة 1 سم في C6
+ok 495 - الستارة: كل إحداثيات أسوار الخصوصية المضافة (kind=fence) على شبكة 1 سم في C6
+  ---
+  duration_ms: 81103.199867
+  type: 'test'
+  ...
+# Subtest: العقد: انتهاء المهلة «بحث غير مكتمل» (TIME_LIMIT) قابل للإعادة — لا «استحالة» أبدًا
+ok 496 - العقد: انتهاء المهلة «بحث غير مكتمل» (TIME_LIMIT) قابل للإعادة — لا «استحالة» أبدًا
+  ---
+  duration_ms: 73712.405371
+  type: 'test'
+  ...
+# Subtest: العقد: فشل البحث بلا دليل يُصنَّف SEARCH_EXHAUSTED_WITHOUT_PROOF؛ و«مستحيل» بدليل فقط (حد أدنى للمساحة، مقاس أطول من البناء، تعارض منطقي)
+ok 497 - العقد: فشل البحث بلا دليل يُصنَّف SEARCH_EXHAUSTED_WITHOUT_PROOF؛ و«مستحيل» بدليل فقط (حد أدنى للمساحة، مقاس أطول من البناء، تعارض منطقي)
+  ---
+  duration_ms: 86.631077
+  type: 'test'
+  ...
+# Subtest: العقد: بندان متعارضان منطقيًا (المطبخ أمامًا وخلفًا) استحالة مثبتة تسمّي البندين ولا ترسم؛ وفي الحوار (provisional) ملاحظة يُسأل عنها
+ok 498 - العقد: بندان متعارضان منطقيًا (المطبخ أمامًا وخلفًا) استحالة مثبتة تسمّي البندين ولا ترسم؛ وفي الحوار (provisional) ملاحظة يُسأل عنها
+  ---
+  duration_ms: 10.526681
+  type: 'test'
+  ...
+# Subtest: رسائل العميل: كاشف التناقض يلتقط إشعاري r20 المضللين (H10: المتاح 541 والمطلوب 265 ثم «قلّل الغرف»، وH6: اقتراح بلا قياس)
+ok 499 - رسائل العميل: كاشف التناقض يلتقط إشعاري r20 المضللين (H10: المتاح 541 والمطلوب 265 ثم «قلّل الغرف»، وH6: اقتراح بلا قياس)
+  ---
+  duration_ms: 6.553728
+  type: 'test'
+  ...
+# Subtest: رسائل العميل: تقارير محرك الشرح متسقة ولا مصطلحات فيها، في الأسباب كلها (مساحة، مقاس، تعارض، مهلة، فشل بحث)
+ok 500 - رسائل العميل: تقارير محرك الشرح متسقة ولا مصطلحات فيها، في الأسباب كلها (مساحة، مقاس، تعارض، مهلة، فشل بحث)
+  ---
+  duration_ms: 7.774771
+  type: 'test'
+  ...
+# Subtest: لغة العميل: كل نصوص العميل في أدلة r20 بعد التحويل خالية من المصطلحات الممنوعة
+ok 501 - لغة العميل: كل نصوص العميل في أدلة r20 بعد التحويل خالية من المصطلحات الممنوعة
+  ---
+  duration_ms: 67.435244
+  type: 'test'
+  ...
+# Subtest: مسار الضيف: المجلس المعزول والضيف الذي يعبر العائلة مخالفة إلزامية تحجب البديل (H3-1 في r20)، والبديل السليم لا يُنذَر
+ok 502 - مسار الضيف: المجلس المعزول والضيف الذي يعبر العائلة مخالفة إلزامية تحجب البديل (H3-1 في r20)، والبديل السليم لا يُنذَر
+  ---
+  duration_ms: 712.091403
+  type: 'test'
+  ...
+# Subtest: لا يُعتمد مخطط فيه مخالفة إلزامية: «جاهز» لا يجتمع مع مخالفة إلزامية في أي بديل معروض في أدلة r20
+ok 503 - لا يُعتمد مخطط فيه مخالفة إلزامية: «جاهز» لا يجتمع مع مخالفة إلزامية في أي بديل معروض في أدلة r20
+  ---
+  duration_ms: 10.24723
+  type: 'test'
+  ...
+# Subtest: التعديل الآمن: حذف غرفة مطلوبة أو باب دورة مياه العائلة يُرفض بسببه (حارس التغيير)
+ok 504 - التعديل الآمن: حذف غرفة مطلوبة أو باب دورة مياه العائلة يُرفض بسببه (حارس التغيير)
+  ---
+  duration_ms: 162.711185
+  type: 'test'
+  ...
+# Subtest: المقاسات: السجل يطابق الطول والعرض معًا (مجلس 5×7 مرسوم 4.97×7.02 يتحقق؛ 5×9 لا، و3×7 لا)
+ok 505 - المقاسات: السجل يطابق الطول والعرض معًا (مجلس 5×7 مرسوم 4.97×7.02 يتحقق؛ 5×9 لا، و3×7 لا)
+  ---
+  duration_ms: 84.462066
+  type: 'test'
+  ...
+# Subtest: المواقف: الموقف الموازي في ارتداد ضحل أمام نافذة مخالفة إلزامية (H2-1 في r20 محجوب)
+ok 506 - المواقف: الموقف الموازي في ارتداد ضحل أمام نافذة مخالفة إلزامية (H2-1 في r20 محجوب)
+  ---
+  duration_ms: 16.982539
+  type: 'test'
+  ...
+# Subtest: التكرار: النسخة المعكوسة من بديل ليست «مختلفة معماريًا» بالمعيار المجمّد r19
+ok 507 - التكرار: النسخة المعكوسة من بديل ليست «مختلفة معماريًا» بالمعيار المجمّد r19
+  ---
+  duration_ms: 143.506095
+  type: 'test'
+  ...
+# Subtest: التعميم: الشيفرة الجديدة لا تذكر معرّفات الحالات ولا أسماءها ولا أبعاد أراضيها، وعينة التغطية مولّدة من بذرة لا من الحالات
+ok 508 - التعميم: الشيفرة الجديدة لا تذكر معرّفات الحالات ولا أسماءها ولا أبعاد أراضيها، وعينة التغطية مولّدة من بذرة لا من الحالات
+  ---
+  duration_ms: 3.769791
+  type: 'test'
+  ...
+# Subtest: حياد التشخيص: السجل مطفأ افتراضيًا، والنتيجة بسجل التشخيص وبدونه متطابقة حرفيًا (بصمة المخططات والنتيجة دون الزمن)
+ok 509 - حياد التشخيص: السجل مطفأ افتراضيًا، والنتيجة بسجل التشخيص وبدونه متطابقة حرفيًا (بصمة المخططات والنتيجة دون الزمن)
+  ---
+  duration_ms: 63919.128177
+  type: 'test'
+  ...
+# Subtest: بوابات الجودة على المرسوم: الرئيسية لا تصغر، المطبخ ≥ 3 م ويجاور الطعام بباب، الطعام غير شريطي، ولا وصول للأسرة عبر ممر النوم
+ok 510 - بوابات الجودة على المرسوم: الرئيسية لا تصغر، المطبخ ≥ 3 م ويجاور الطعام بباب، الطعام غير شريطي، ولا وصول للأسرة عبر ممر النوم
+  ---
+  duration_ms: 1770.848457
+  type: 'test'
+  ...
+# Subtest: بوابة الجودة ترفض فعلًا: إن صارت الرئيسية أصغر غرف النوم يُذكر ذلك سببًا للرفض
+ok 511 - بوابة الجودة ترفض فعلًا: إن صارت الرئيسية أصغر غرف النوم يُذكر ذلك سببًا للرفض
+  ---
+  duration_ms: 999.411468
+  type: 'test'
+  ...
+# Subtest: C8: التعديل على كل بديل يحفظ النمط والغرف بفرق صغير، وإن تحقق الطلب أصلًا لا يتغير المخطط
+ok 512 - C8: التعديل على كل بديل يحفظ النمط والغرف بفرق صغير، وإن تحقق الطلب أصلًا لا يتغير المخطط
+  ---
+  duration_ms: 373026.577188
+  type: 'test'
+  ...
+# Subtest: خيارات التقييم الجاهزة تبقى إعادة توليد (لا تعديلًا موضعيًا): «الممرات كثيرة» تستبعد أنماط الرواق والحوش
+ok 513 - خيارات التقييم الجاهزة تبقى إعادة توليد (لا تعديلًا موضعيًا): «الممرات كثيرة» تستبعد أنماط الرواق والحوش
+  ---
+  duration_ms: 7.316231
+  type: 'test'
+  ...
+# Subtest: الحركة: متوسط نسبة المداخل والممرات في بدائل C8 وC10 ≤ 19% (كانت 20–21% في «بعد-2»)، ولا بديل فوق 22%
+ok 514 - الحركة: متوسط نسبة المداخل والممرات في بدائل C8 وC10 ≤ 19% (كانت 20–21% في «بعد-2»)، ولا بديل فوق 22%
+  ---
+  duration_ms: 740.653983
+  type: 'test'
+  ...
+# Subtest: C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وتنظيمان مختلفان للعلوي على الأقل (أجنحة على المحور / رواق خلفي)
+ok 515 - C7 دوران: فراغ السلم بمقاس سلم (≤ 18 م²)، وتنظيمان مختلفان للعلوي على الأقل (أجنحة على المحور / رواق خلفي)
+  ---
+  duration_ms: 6359.674528
+  type: 'test'
+  ...
+# Subtest: الفهم: «في الخلف/ورا/في الأمام/الشرقي» = zone (الافتراضي)، «بعيد عن الشارع» = half، «يطل على الحوش الخلفي» = touch
+ok 516 - الفهم: «في الخلف/ورا/في الأمام/الشرقي» = zone (الافتراضي)، «بعيد عن الشارع» = half، «يطل على الحوش الخلفي» = touch
+  ---
+  duration_ms: 59.918448
+  type: 'test'
+  ...
+# Subtest: إيجابي: المطبخ يلامس الواجهة الخلفية = في الخلف
+ok 517 - إيجابي: المطبخ يلامس الواجهة الخلفية = في الخلف
+  ---
+  duration_ms: 30.317421
+  type: 'test'
+  ...
+# Subtest: إيجابي: المطبخ في الثلث الخلفي وخلفه مخزن (خدمة لا سكن) = في الخلف ولو لم يلامس الواجهة
+ok 518 - إيجابي: المطبخ في الثلث الخلفي وخلفه مخزن (خدمة لا سكن) = في الخلف ولو لم يلامس الواجهة
+  ---
+  duration_ms: 17.530995
+  type: 'test'
+  ...
+# Subtest: سلبي: المطبخ في النصف الخلفي لكن غرفة نوم بينه وبين الواجهة الخلفية = ليس في الخلف (و«بعيد عن الشارع» المتساهل يتحقق)
+ok 519 - سلبي: المطبخ في النصف الخلفي لكن غرفة نوم بينه وبين الواجهة الخلفية = ليس في الخلف (و«بعيد عن الشارع» المتساهل يتحقق)
+  ---
+  duration_ms: 7.659664
+  type: 'test'
+  ...
+# Subtest: سلبي من الأدلة: مستند C8 «بعد-3» (المطبخ وسط اليسار وجناح النوم خلفه) لا يُحسب «المطبخ في الخلف»
+ok 520 - سلبي من الأدلة: مستند C8 «بعد-3» (المطبخ وسط اليسار وجناح النوم خلفه) لا يُحسب «المطبخ في الخلف»
+  ---
+  duration_ms: 240.326852
+  type: 'test'
+  ...
+# Subtest: الجهات الأخرى بالمعيار نفسه: الأمام والشرق
+ok 521 - الجهات الأخرى بالمعيار نفسه: الأمام والشرق
+  ---
+  duration_ms: 10.5606
+  type: 'test'
+  ...
+# Subtest: C1 وC6: كل بديل معروض يحقق «المطبخ في الخلف» بالاختبار الصارم وبقية البنود
+ok 522 - C1 وC6: كل بديل معروض يحقق «المطبخ في الخلف» بالاختبار الصارم وبقية البنود
+  ---
+  duration_ms: 3750.065445
+  type: 'test'
+  ...
+# Subtest: C2: غرفة كبار السن ملاصقة للصالة في كل بديل، والصالة غير شريطية (≤ 2.0) ومساحتها بقدر البرنامج
+ok 523 - C2: غرفة كبار السن ملاصقة للصالة في كل بديل، والصالة غير شريطية (≤ 2.0) ومساحتها بقدر البرنامج
+  ---
+  duration_ms: 310892.819615
+  type: 'test'
+  ...
+# Subtest: C7: «الماستر بعيدة عن الدرج» متحقق في كل بديل معروض (لا يُعرض بديل يخالفه لسد العدد)
+ok 524 - C7: «الماستر بعيدة عن الدرج» متحقق في كل بديل معروض (لا يُعرض بديل يخالفه لسد العدد)
+  ---
+  duration_ms: 7182.743436
+  type: 'test'
+  ...
+# Subtest: أنماط «الخدمة في الخلف» تُولَّد فقط حين يطلبها العميل
+ok 525 - أنماط «الخدمة في الخلف» تُولَّد فقط حين يطلبها العميل
+  ---
+  duration_ms: 1411.129795
+  type: 'test'
+  ...
+# Subtest: C1: المطبخ في الخلف، والطعام بجواره، وغرفة الخادمة نفسها (لا حمامها) على بعد ≤ 2 م من المطبخ في كل بديل
+ok 526 - C1: المطبخ في الخلف، والطعام بجواره، وغرفة الخادمة نفسها (لا حمامها) على بعد ≤ 2 م من المطبخ في كل بديل
+  ---
+  duration_ms: 700.511138
+  type: 'test'
+  ...
+# Subtest: C6: كل بديل ينفّذ «المطبخ في الخلف» والمقاسات، ولا مخزن متضخم ولا صالة-ممر
+ok 527 - C6: كل بديل ينفّذ «المطبخ في الخلف» والمقاسات، ولا مخزن متضخم ولا صالة-ممر
+  ---
+  duration_ms: 323.612018
+  type: 'test'
+  ...
+# Subtest: C7: أرضي مختلف لكل بديل، والماستر بعيدة عن الدرج المرسوم في كل بديل
+ok 528 - C7: أرضي مختلف لكل بديل، والماستر بعيدة عن الدرج المرسوم في كل بديل
+  ---
+  duration_ms: 6556.540636
+  type: 'test'
+  ...
+# Subtest: الحتمية: الطلب نفسه مرتين = البدائل نفسها حرفيًا (لا ميزانية زمنية)
+ok 529 - الحتمية: الطلب نفسه مرتين = البدائل نفسها حرفيًا (لا ميزانية زمنية)
+  ---
+  duration_ms: 134524.511671
+  type: 'test'
+  ...
+# Subtest: C1: كل زوج من البدائل المعروضة مختلف معماريًا (≥ 0.18)، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة
+ok 530 - C1: كل زوج من البدائل المعروضة مختلف معماريًا (≥ 0.18)، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة
+  ---
+  duration_ms: 2150.427663
+  type: 'test'
+  ...
+# Subtest: C8: كل زوج من البدائل المعروضة مختلف معماريًا (≥ 0.18)، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة
+ok 531 - C8: كل زوج من البدائل المعروضة مختلف معماريًا (≥ 0.18)، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة
+  ---
+  duration_ms: 3681.484323
+  type: 'test'
+  ...
+# Subtest: C10: كل زوج من البدائل المعروضة مختلف معماريًا (≥ 0.18)، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة
+ok 532 - C10: كل زوج من البدائل المعروضة مختلف معماريًا (≥ 0.18)، والمراجعة النهائية ببوابة DISTINCT ناجحة، والحدود المهنية محققة
+  ---
+  duration_ms: 3219.784381
+  type: 'test'
+  ...
+# Subtest: C2 (خمس غرف ودور واحد): لا ممر غرف أطول من 12.5 م، وكبار السن على الصالة، والصالة على الخلف
+ok 533 - C2 (خمس غرف ودور واحد): لا ممر غرف أطول من 12.5 م، وكبار السن على الصالة، والصالة على الخلف
+  ---
+  duration_ms: 172.736998
+  type: 'test'
+  ...
+# Subtest: C7 (دوران): العلوي لا يبرز فوق فراغ أرضي، وبديلان مختلفان معماريًا بأرضي مختلف وعلوي مختلف ما أمكن
+ok 534 - C7 (دوران): العلوي لا يبرز فوق فراغ أرضي، وبديلان مختلفان معماريًا بأرضي مختلف وعلوي مختلف ما أمكن
+  ---
+  duration_ms: 6208.929087
+  type: 'test'
+  ...
+# Subtest: بوابة الجودة على المخطط المرسوم ترفض حوش «بعد-6» الشقي (3.35 × 9.3 م في C2 البديل الأول)
+ok 535 - بوابة الجودة على المخطط المرسوم ترفض حوش «بعد-6» الشقي (3.35 × 9.3 م في C2 البديل الأول)
+  ---
+  duration_ms: 1223.104535
+  type: 'test'
+  ...
+# Subtest: بوابة الجودة ترفض غرفة خادمة أضيق من 2.7 م وطعامًا أضيق من 3.3 م (C10 بعد-6: خادمة 2.52 م، وطعام 2.98 م)
+ok 536 - بوابة الجودة ترفض غرفة خادمة أضيق من 2.7 م وطعامًا أضيق من 3.3 م (C10 بعد-6: خادمة 2.52 م، وطعام 2.98 م)
+  ---
+  duration_ms: 177.610506
+  type: 'test'
+  ...
+# Subtest: C6: لا حوش شقي، ولا غرفة نوم على الشارع في أي بديل، والطعام والخادمة بعرض مهني، والمجلس ≥ 24 م²
+ok 537 - C6: لا حوش شقي، ولا غرفة نوم على الشارع في أي بديل، والطعام والخادمة بعرض مهني، والمجلس ≥ 24 م²
+  ---
+  duration_ms: 523.271384
+  type: 'test'
+  ...
+# Subtest: C8: لا حوش شقي، ولا غرفة نوم على الشارع في أي بديل، والطعام والخادمة بعرض مهني، والمجلس ≥ 24 م²
+ok 538 - C8: لا حوش شقي، ولا غرفة نوم على الشارع في أي بديل، والطعام والخادمة بعرض مهني، والمجلس ≥ 24 م²
+  ---
+  duration_ms: 1585.267449
+  type: 'test'
+  ...
+# Subtest: C10: لا حوش شقي، ولا غرفة نوم على الشارع في أي بديل، والطعام والخادمة بعرض مهني، والمجلس ≥ 24 م²
+ok 539 - C10: لا حوش شقي، ولا غرفة نوم على الشارع في أي بديل، والطعام والخادمة بعرض مهني، والمجلس ≥ 24 م²
+  ---
+  duration_ms: 134.370375
+  type: 'test'
+  ...
+# Subtest: غرفة نوم على الشارع بطلب العميل لا تُجازى: «غرف النوم على الشارع» تبقى ممكنة
+ok 540 - غرفة نوم على الشارع بطلب العميل لا تُجازى: «غرف النوم على الشارع» تبقى ممكنة
+  ---
+  duration_ms: 152172.826186
+  type: 'test'
+  ...
+# Subtest: بوابة الجودة ترفض: مجلسًا رئيسيًا < 24 م²، وطعامًا < 12 م²، ورئيسية علوية > 26 م² (من أدلة بعد-6 وبعد-7)
+ok 541 - بوابة الجودة ترفض: مجلسًا رئيسيًا < 24 م²، وطعامًا < 12 م²، ورئيسية علوية > 26 م² (من أدلة بعد-6 وبعد-7)
+  ---
+  duration_ms: 181.283879
+  type: 'test'
+  ...
+# Subtest: الحالات العشر: كل بديل معروض يحقق الحدود الأربعة (ومجلس النساء ≥ 20 م² حيث وُجد)
+ok 542 - الحالات العشر: كل بديل معروض يحقق الحدود الأربعة (ومجلس النساء ≥ 20 م² حيث وُجد)
+  ---
+  duration_ms: 8194.968525
+  type: 'test'
+  ...
+# Subtest: حد المجلس يتراجع فقط أمام بند صريح: غرفة ضيوف قرب المجلس على 20×30 — بديل واحد ينفّذ البند ومجلسه أقل مع ملاحظة
+ok 543 - حد المجلس يتراجع فقط أمام بند صريح: غرفة ضيوف قرب المجلس على 20×30 — بديل واحد ينفّذ البند ومجلسه أقل مع ملاحظة
+  ---
+  duration_ms: 86741.915637
+  type: 'test'
+  ...
+# Subtest: الواجهة: البدائل وعددها المطلوب وسبب النقص وأسباب الرفض تصل إلى جلسة التصميم
+ok 544 - الواجهة: البدائل وعددها المطلوب وسبب النقص وأسباب الرفض تصل إلى جلسة التصميم
+  ---
+  duration_ms: 5221.927718
+  type: 'test'
+  ...
+# Subtest: جلسة تعديل: «احذف المكتب» بلا مكتب لا يُقال «نُفّذ»، و«رجّع مثل أول» يرجع للتصميم الأول حرفيًا مع الواجهة
+ok 545 - جلسة تعديل: «احذف المكتب» بلا مكتب لا يُقال «نُفّذ»، و«رجّع مثل أول» يرجع للتصميم الأول حرفيًا مع الواجهة
+  ---
+  duration_ms: 5654.179842
+  type: 'test'
+  ...
+# Subtest: التراكب مقيسًا من المرسوم: بعد-8 C7 متسق (أطول جدار علوي بلا ركيزة 5 م)، وجدار علوي يعبر المجلس بلا جدار تحته يُرفض
+ok 546 - التراكب مقيسًا من المرسوم: بعد-8 C7 متسق (أطول جدار علوي بلا ركيزة 5 م)، وجدار علوي يعبر المجلس بلا جدار تحته يُرفض
+  ---
+  duration_ms: 149.29632
+  type: 'test'
+  ...
+# Subtest: C7 دوران: كل بديل معروض متسق التراكب وينفّذ «الماستر بعيدة عن الدرج»، والبدائل مختلفة تنظيميًا لا بموضع السلم وحده، والنقص مذكور بسببه
+ok 547 - C7 دوران: كل بديل معروض متسق التراكب وينفّذ «الماستر بعيدة عن الدرج»، والبدائل مختلفة تنظيميًا لا بموضع السلم وحده، والنقص مذكور بسببه
+  ---
+  duration_ms: 7210.218809
+  type: 'test'
+  ...
+# Subtest: البهو المزدوج الارتفاع: فراغ «void» في العلوي فوق مدخل العائلة، يحده درابزين نحو الحركة فقط، ولا يُعد غرفة معزولة
+ok 548 - البهو المزدوج الارتفاع: فراغ «void» في العلوي فوق مدخل العائلة، يحده درابزين نحو الحركة فقط، ولا يُعد غرفة معزولة
+  ---
+  duration_ms: 5540.741087
+  type: 'test'
+  ...
+# Subtest: دور واحد: الرئيسية ≤ 24 م² صافية ما لم تُطلب كبيرة (بوابة على المرسوم)، وفي كل بدائل الحالات العشر
+ok 549 - دور واحد: الرئيسية ≤ 24 م² صافية ما لم تُطلب كبيرة (بوابة على المرسوم)، وفي كل بدائل الحالات العشر
+  ---
+  duration_ms: 3896.323887
+  type: 'test'
+  ...
+# Subtest: غرف النوم على الصالة العائلية: مرفوضة خارج «الصالة الموزِّعة»، وفيها بباب في طرف الجدار (≤ 1.4 م)
+ok 550 - غرف النوم على الصالة العائلية: مرفوضة خارج «الصالة الموزِّعة»، وفيها بباب في طرف الجدار (≤ 1.4 م)
+  ---
+  duration_ms: 990.882234
+  type: 'test'
+  ...
+# Subtest: الأرض الضيقة (C4): بيت بكتلتين وحديقة جانبية ورواق بديل مختلف عن الكتلة المصمتة
+ok 551 - الأرض الضيقة (C4): بيت بكتلتين وحديقة جانبية ورواق بديل مختلف عن الكتلة المصمتة
+  ---
+  duration_ms: 145.75112
+  type: 'test'
+  ...
+# Subtest: C2: الصالة الكبيرة على الحديقة الخلفية وغرف الأبناء متجاورة وكبار السن قرب الصالة في البديل المعروض
+ok 552 - C2: الصالة الكبيرة على الحديقة الخلفية وغرف الأبناء متجاورة وكبار السن قرب الصالة في البديل المعروض
+  ---
+  duration_ms: 223.344489
+  type: 'test'
+  ...
+# Subtest: كل مخرج يحمل التنبيه، ولا يصف أي تصميم بالأمان أو الجاهزية للتنفيذ
+ok 553 - كل مخرج يحمل التنبيه، ولا يصف أي تصميم بالأمان أو الجاهزية للتنفيذ
+  ---
+  duration_ms: 157.759225
+  type: 'test'
+  ...
+# Subtest: بحر صافٍ 7 م = جسيم، وجدار علوي يعبر الفراغ 7 م بلا ركيزة = جسيم، ولا درج بين دورين = جسيم
+ok 554 - بحر صافٍ 7 م = جسيم، وجدار علوي يعبر الفراغ 7 م بلا ركيزة = جسيم، ولا درج بين دورين = جسيم
+  ---
+  duration_ms: 22.336101
+  type: 'test'
+  ...
+# Subtest: فتحة 3.5 م تحت جدار علوي = تنبيه عتب، ودوران متطابقان بلا ملاحظات استمرارية
+ok 555 - فتحة 3.5 م تحت جدار علوي = تنبيه عتب، ودوران متطابقان بلا ملاحظات استمرارية
+  ---
+  duration_ms: 10.470068
+  type: 'test'
+  ...
+# Subtest: بروز الدور العلوي 2 م = تنبيه كابولي، والجدار فوق الفراغ = جسيم؛ وجدار مُزاح 40 سم = تنبيه
+ok 556 - بروز الدور العلوي 2 م = تنبيه كابولي، والجدار فوق الفراغ = جسيم؛ وجدار مُزاح 40 سم = تنبيه
+  ---
+  duration_ms: 29.120734
+  type: 'test'
+  ...
+# Subtest: حمام علوي فوق غرفة نوم = تنبيه صرف، وفوق حمام = متراكب
+ok 557 - حمام علوي فوق غرفة نوم = تنبيه صرف، وفوق حمام = متراكب
+  ---
+  duration_ms: 15.808797
+  type: 'test'
+  ...
+# Subtest: شبكة الأعمدة المقترحة: زوايا المحيط دائمًا، وتباعد ≤ 6 م على كل خط، والبحر الصافي = الضلع الأقصر
+ok 558 - شبكة الأعمدة المقترحة: زوايا المحيط دائمًا، وتباعد ≤ 6 م على كل خط، والبحر الصافي = الضلع الأقصر
+  ---
+  duration_ms: 3.015186
+  type: 'test'
+  ...
+# Subtest: بدائل C7 الحقيقية (الجولة التاسعة): نافذة تعبر تقاطع جدار، وفتحة الدرج داخل غرفة الدرج، وكل بديل < 2 ث
+ok 559 - بدائل C7 الحقيقية (الجولة التاسعة): نافذة تعبر تقاطع جدار، وفتحة الدرج داخل غرفة الدرج، وكل بديل < 2 ث
+  ---
+  duration_ms: 196.256396
+  type: 'test'
+  ...
+# Subtest: عيوب الدرج من مجموعة المخططات المعيبة تُكشف
+ok 560 - عيوب الدرج من مجموعة المخططات المعيبة تُكشف
+  ---
+  duration_ms: 131.402247
+  type: 'test'
+  ...
+# Subtest: اللوحة: SVG سليم يحمل الجداول والمحاور والتنبيه ولا NaN
+ok 561 - اللوحة: SVG سليم يحمل الجداول والمحاور والتنبيه ولا NaN
+  ---
+  duration_ms: 180.528617
+  type: 'test'
+  ...
+# Subtest: اللوحة: عدد الأنواع والعناصر في الجداول يطابق الحساب
+ok 562 - اللوحة: عدد الأنواع والعناصر في الجداول يطابق الحساب
+  ---
+  duration_ms: 199.364594
+  type: 'test'
+  ...
+# Subtest: اللوحة: التعديل يغيّر اللوحة (عمود رسمه المستخدم يظهر بحلقة ذهبية)
+ok 563 - اللوحة: التعديل يغيّر اللوحة (عمود رسمه المستخدم يظهر بحلقة ذهبية)
+  ---
+  duration_ms: 400.53159
+  type: 'test'
+  ...
+# Subtest: اللوحة: دور بلا أعمدة يعرض رسالة لا أرقامًا؛ وCSV يحمل الدرجة والمصدر
+ok 564 - اللوحة: دور بلا أعمدة يعرض رسالة لا أرقامًا؛ وCSV يحمل الدرجة والمصدر
+  ---
+  duration_ms: 205.53303
+  type: 'test'
+  ...
+# Subtest: اللوحة: كل الاستراتيجيات تنتج لوحة صالحة
+ok 565 - اللوحة: كل الاستراتيجيات تنتج لوحة صالحة
+  ---
+  duration_ms: 922.573794
+  type: 'test'
+  ...
+# Subtest: conversation relocates the one live plan subtree and restores original location without cloning
+ok 566 - conversation relocates the one live plan subtree and restores original location without cloning
+  ---
+  duration_ms: 1.209608
+  type: 'test'
+  ...
+# Subtest: requirements card retains every unsupported/unmet row instead of truncating mandatory evidence
+ok 567 - requirements card retains every unsupported/unmet row instead of truncating mandatory evidence
+  ---
+  duration_ms: 9.550039
+  type: 'test'
+  ...
+# Subtest: restored accepted requirements are not described as measured geometry
+ok 568 - restored accepted requirements are not described as measured geometry
+  ---
+  duration_ms: 0.520416
+  type: 'test'
+  ...
+# Subtest: prompt uses persisted accepted customer sources, excluding suggestions and rejected requests
+ok 569 - prompt uses persisted accepted customer sources, excluding suggestions and rejected requests
+  ---
+  duration_ms: 0.70134
+  type: 'test'
+  ...
+# Subtest: HTML defines one original plan and viewer and separate understanding/plan approval actions
+ok 570 - HTML defines one original plan and viewer and separate understanding/plan approval actions
+  ---
+  duration_ms: 7.281514
+  type: 'test'
+  ...
+# Subtest: full conversation (253) rejects style and plot requests before mutation
+ok 571 - full conversation (253) rejects style and plot requests before mutation
+  ---
+  duration_ms: 21.992006
+  type: 'test'
+  ...
+# Subtest: full conversation (255) rejects style and plot requests before mutation
+ok 572 - full conversation (255) rejects style and plot requests before mutation
+  ---
+  duration_ms: 8.71949
+  type: 'test'
+  ...
+# Subtest: full conversation (256) rejects style and plot requests before mutation
+ok 573 - full conversation (256) rejects style and plot requests before mutation
+  ---
+  duration_ms: 9.337759
+  type: 'test'
+  ...
+# Subtest: ai draw cannot claim an unrelated replacement when its generation installs nothing
+ok 574 - ai draw cannot claim an unrelated replacement when its generation installs nothing
+  ---
+  duration_ms: 15.221813
+  type: 'test'
+  ...
+# Subtest: local draw cannot claim an unrelated replacement when its generation installs nothing
+ok 575 - local draw cannot claim an unrelated replacement when its generation installs nothing
+  ---
+  duration_ms: 1.219122
+  type: 'test'
+  ...
+# (node:6468) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: session extension is versioned and round-trips draft without duplicating geometry
+ok 576 - session extension is versioned and round-trips draft without duplicating geometry
+  ---
+  duration_ms: 86.215845
+  type: 'test'
+  ...
+# Subtest: old project without session becomes explicit deterministic legacy state
+ok 577 - old project without session becomes explicit deterministic legacy state
+  ---
+  duration_ms: 46.675085
+  type: 'test'
+  ...
+# Subtest: unknown credential and geometry fields are excluded from persisted session
+ok 578 - unknown credential and geometry fields are excluded from persisted session
+  ---
+  duration_ms: 27.873926
+  type: 'test'
+  ...
+# Subtest: unsupported session version fails visibly and does not mutate caller
+ok 579 - unsupported session version fails visibly and does not mutate caller
+  ---
+  duration_ms: 18.608225
+  type: 'test'
+  ...
+# Subtest: local archive preserves vetted session on reopen and idempotent save
+ok 580 - local archive preserves vetted session on reopen and idempotent save
+  ---
+  duration_ms: 665.993222
+  type: 'test'
+  ...
+# Subtest: approval and reviewed identity survive only with matching saved geometry
+ok 581 - approval and reviewed identity survive only with matching saved geometry
+  ---
+  duration_ms: 38.740242
+  type: 'test'
+  ...
+# Subtest: tampered actual opening position cannot keep the session approval on import
+ok 582 - tampered actual opening position cannot keep the session approval on import
+  ---
+  duration_ms: 23.107862
+  type: 'test'
+  ...
+# Subtest: archive sanitizer preserves matching approval references and transcript
+ok 583 - archive sanitizer preserves matching approval references and transcript
+  ---
+  duration_ms: 223.084861
+  type: 'test'
+  ...
+# Subtest: integrated candidate and review references remain unchanged through session persistence
+ok 584 - integrated candidate and review references remain unchanged through session persistence
+  ---
+  duration_ms: 71.258425
+  type: 'test'
+  ...
+# Subtest: incidental editor counter does not revoke an approval for identical geometry and review
+ok 585 - incidental editor counter does not revoke an approval for identical geometry and review
+  ---
+  duration_ms: 19.011911
+  type: 'test'
+  ...
+# Subtest: rejected proposals persist as rejected rather than becoming accepted constraints
+ok 586 - rejected proposals persist as rejected rather than becoming accepted constraints
+  ---
+  duration_ms: 15.094557
+  type: 'test'
+  ...
+# Subtest: understanding is separate from explicit plan approval and history survives edits
+ok 587 - understanding is separate from explicit plan approval and history survives edits
+  ---
+  duration_ms: 14.069191
+  type: 'test'
+  ...
+# Subtest: operation tokens reject cancellation, supersession, geometry change and foreign sessions
+ok 588 - operation tokens reject cancellation, supersession, geometry change and foreign sessions
+  ---
+  duration_ms: 12.209047
+  type: 'test'
+  ...
+# Subtest: actual walls/opening position bind approval; incidental revision does not
+ok 589 - actual walls/opening position bind approval; incidental revision does not
+  ---
+  duration_ms: 7.446384
+  type: 'test'
+  ...
+# Subtest: review mismatch clears current approval but not historical evidence
+ok 590 - review mismatch clears current approval but not historical evidence
+  ---
+  duration_ms: 9.114732
+  type: 'test'
+  ...
+# Subtest: normalization deterministic, drops active work, preserves exact approval
+ok 591 - normalization deterministic, drops active work, preserves exact approval
+  ---
+  duration_ms: 2.924037
+  type: 'test'
+  ...
+# Subtest: sanitization retains prose, redacts obvious credentials and strips transport fields
+ok 592 - sanitization retains prose, redacts obvious credentials and strips transport fields
+  ---
+  duration_ms: 0.249635
+  type: 'test'
+  ...
+# Subtest: assumptions and rejected constraints cannot become accepted customer facts
+ok 593 - assumptions and rejected constraints cannot become accepted customer facts
+  ---
+  duration_ms: 4.825664
+  type: 'test'
+  ...
+# Subtest: tampered selected reference cannot be silently rebound into current approval
+ok 594 - tampered selected reference cannot be silently rebound into current approval
+  ---
+  duration_ms: 0.640027
+  type: 'test'
+  ...
+# Subtest: invalid acceptance is atomic and payload mutation cannot alter evidence
+ok 595 - invalid acceptance is atomic and payload mutation cannot alter evidence
+  ---
+  duration_ms: 0.941164
+  type: 'test'
+  ...
+# Subtest: history and text limits fail visibly without silently erasing evidence
+ok 596 - history and text limits fail visibly without silently erasing evidence
+  ---
+  duration_ms: 1.183534
+  type: 'test'
+  ...
+# Subtest: restored counters cannot resurrect an external operation token (ABA)
+ok 597 - restored counters cannot resurrect an external operation token (ABA)
+  ---
+  duration_ms: 4.211963
+  type: 'test'
+  ...
+# Subtest: generate: late A reject cannot overwrite B success feedback
+ok 598 - generate: late A reject cannot overwrite B success feedback
+  ---
+  duration_ms: 15.381125
+  type: 'test'
+  ...
+# Subtest: generate: late A resolve cannot overwrite B success feedback
+ok 599 - generate: late A resolve cannot overwrite B success feedback
+  ---
+  duration_ms: 7.416413
+  type: 'test'
+  ...
+# Subtest: understandRequest: late A reject cannot overwrite B success feedback
+ok 600 - understandRequest: late A reject cannot overwrite B success feedback
+  ---
+  duration_ms: 4.384185
+  type: 'test'
+  ...
+# Subtest: understandRequest: late A resolve cannot overwrite B success feedback
+ok 601 - understandRequest: late A resolve cannot overwrite B success feedback
+  ---
+  duration_ms: 6.37424
+  type: 'test'
+  ...
+# Subtest: askAI: late A reject cannot overwrite B success feedback
+ok 602 - askAI: late A reject cannot overwrite B success feedback
+  ---
+  duration_ms: 2.347979
+  type: 'test'
+  ...
+# Subtest: askAI: late A resolve cannot overwrite B success feedback
+ok 603 - askAI: late A resolve cannot overwrite B success feedback
+  ---
+  duration_ms: 5.78166
+  type: 'test'
+  ...
+# Subtest: living edit cannot mutate unrelated kitchen position
+ok 604 - living edit cannot mutate unrelated kitchen position
+  ---
+  duration_ms: 5.76827
+  type: 'test'
+  ...
+# Subtest: living edit cannot mutate unrelated kitchen side
+ok 605 - living edit cannot mutate unrelated kitchen side
+  ---
+  duration_ms: 0.810905
+  type: 'test'
+  ...
+# Subtest: living edit cannot mutate unrelated kitchen dimensions
+ok 606 - living edit cannot mutate unrelated kitchen dimensions
+  ---
+  duration_ms: 0.354641
+  type: 'test'
+  ...
+# Subtest: named target location edit and explicit initial program stay allowed
+ok 607 - named target location edit and explicit initial program stay allowed
+  ---
+  duration_ms: 4.844382
+  type: 'test'
+  ...
+# Subtest: ambiguous same-type target does not authorize sibling bedroom changes
+ok 608 - ambiguous same-type target does not authorize sibling bedroom changes
+  ---
+  duration_ms: 0.282547
+  type: 'test'
+  ...
+# Subtest: conversation headings cannot turn neutral dining relationship into a must
+ok 609 - conversation headings cannot turn neutral dining relationship into a must
+  ---
+  duration_ms: 7.114853
+  type: 'test'
+  ...
+# Subtest: history headings are separated and actual mandatory text stays mandatory
+ok 610 - history headings are separated and actual mandatory text stays mandatory
+  ---
+  duration_ms: 1.05549
+  type: 'test'
+  ...
+# Subtest: conversation preserves every accepted turn without slicing old or long constraints
+ok 611 - conversation preserves every accepted turn without slicing old or long constraints
+  ---
+  duration_ms: 0.214928
+  type: 'test'
+  ...
+# Subtest: conversation exceeding transport bound fails visibly instead of dropping constraints
+ok 612 - conversation exceeding transport bound fails visibly instead of dropping constraints
+  ---
+  duration_ms: 0.653847
+  type: 'test'
+  ...
+# Subtest: mentioning a protected room does not authorize changing it
+ok 613 - mentioning a protected room does not authorize changing it
+  ---
+  duration_ms: 0.948427
+  type: 'test'
+  ...
+# Subtest: unrequested additions fail while explicit positive bath additions remain allowed
+ok 614 - unrequested additions fail while explicit positive bath additions remain allowed
+  ---
+  duration_ms: 7.627121
+  type: 'test'
+  ...
+# Subtest: advanced room edits survive cancellation and a late draw completion
+ok 615 - advanced room edits survive cancellation and a late draw completion
+  ---
+  duration_ms: 17.181684
+  type: 'test'
+  ...
+# Subtest: advanced plot edits survive cancellation and a late draw completion
+ok 616 - advanced plot edits survive cancellation and a late draw completion
+  ---
+  duration_ms: 9.787495
+  type: 'test'
+  ...
+# Subtest: advanced palette edits survive cancellation and a late draw completion
+ok 617 - advanced palette edits survive cancellation and a late draw completion
+  ---
+  duration_ms: 1.682724
+  type: 'test'
+  ...
+# Subtest: newer room draft survives failed draw even before a rendering callback
+ok 618 - newer room draft survives failed draw even before a rendering callback
+  ---
+  duration_ms: 6.113665
+  type: 'test'
+  ...
+# Subtest: newer plot draft survives failed draw even before a rendering callback
+ok 619 - newer plot draft survives failed draw even before a rendering callback
+  ---
+  duration_ms: 1.738383
+  type: 'test'
+  ...
+# Subtest: direct cancel never rolls back a newer draft before markDirty runs
+ok 620 - direct cancel never rolls back a newer draft before markDirty runs
+  ---
+  duration_ms: 5.887558
+  type: 'test'
+  ...
+# Subtest: failed local draw restores palette, desires, edit status and draft when no newer edit exists
+ok 621 - failed local draw restores palette, desires, edit status and draft when no newer edit exists
+  ---
+  duration_ms: 1.733298
+  type: 'test'
+  ...
+# Subtest: delayed local import cannot overwrite a new studio draft
+ok 622 - delayed local import cannot overwrite a new studio draft
+  ---
+  duration_ms: 21.35829
+  type: 'test'
+  ...
+# Subtest: delayed local import cannot overwrite a new studio message
+ok 623 - delayed local import cannot overwrite a new studio message
+  ---
+  duration_ms: 2.066821
+  type: 'test'
+  ...
+# Subtest: delayed local import cannot overwrite a new studio epoch
+ok 624 - delayed local import cannot overwrite a new studio epoch
+  ---
+  duration_ms: 1.871607
+  type: 'test'
+  ...
+# Subtest: delayed local import cannot overwrite a new studio revision
+ok 625 - delayed local import cannot overwrite a new studio revision
+  ---
+  duration_ms: 4.40802
+  type: 'test'
+  ...
+# Subtest: local import still applies after its worker resolves if the session did not change
+ok 626 - local import still applies after its worker resolves if the session did not change
+  ---
+  duration_ms: 3.960973
+  type: 'test'
+  ...
+# Subtest: message entered while local file bytes are still loading prevents replacement
+ok 627 - message entered while local file bytes are still loading prevents replacement
+  ---
+  duration_ms: 7.613609
+  type: 'test'
+  ...
+# Subtest: instant parts round-trip and bad input is rejected
+ok 628 - instant parts round-trip and bad input is rejected
+  ---
+  duration_ms: 2.125427
+  type: 'test'
+  ...
+# Subtest: Riyadh summer solstice: sun up roughly 05:30 to 18:40 local, peak near 89 degrees, due south at noon is not guessed
+ok 629 - Riyadh summer solstice: sun up roughly 05:30 to 18:40 local, peak near 89 degrees, due south at noon is not guessed
+  ---
+  duration_ms: 6.166617
+  type: 'test'
+  ...
+# Subtest: winter day is shorter and the sun stays lower
+ok 630 - winter day is shorter and the sun stays lower
+  ---
+  duration_ms: 6.43991
+  type: 'test'
+  ...
+# Subtest: bearing and compass names follow the confirmed north angle
+ok 631 - bearing and compass names follow the confirmed north angle
+  ---
+  duration_ms: 0.276926
+  type: 'test'
+  ...
+# Subtest: every window gets an outward normal pointing away from its room
+ok 632 - every window gets an outward normal pointing away from its room
+  ---
+  duration_ms: 92.226844
+  type: 'test'
+  ...
+# Subtest: room exposure: a room is never sunnier than the daylight day, windowless rooms get zero, and rotating north changes the answer
+ok 633 - room exposure: a room is never sunnier than the daylight day, windowless rooms get zero, and rotating north changes the answer
+  ---
+  duration_ms: 102.991916
+  type: 'test'
+  ...
+# Subtest: a south-facing window at the winter solstice gets more sun than a north-facing one in Riyadh
+ok 634 - a south-facing window at the winter solstice gets more sun than a north-facing one in Riyadh
+  ---
+  duration_ms: 1.237233
+  type: 'test'
+  ...
+# Subtest: the sun-day panel, its stylesheet and its wiring exist, and it never invents a location
+ok 635 - the sun-day panel, its stylesheet and its wiring exist, and it never invents a location
+  ---
+  duration_ms: 18.753711
+  type: 'test'
+  ...
+# Subtest: the plan is one exterior orbit then the rooms in tour order, capped and clamped
+ok 636 - the plan is one exterior orbit then the rooms in tour order, capped and clamped
+  ---
+  duration_ms: 10.210353
+  type: 'test'
+  ...
+# Subtest: the flythrough makes a full turn outside, then sweeps the view in each room, and finishes
+ok 637 - the flythrough makes a full turn outside, then sweeps the view in each room, and finishes
+  ---
+  duration_ms: 3.309439
+  type: 'test'
+  ...
+# Subtest: an unreachable room is skipped without crashing, and abort/destroyed stop the run
+ok 638 - an unreachable room is skipped without crashing, and abort/destroyed stop the run
+  ---
+  duration_ms: 0.590549
+  type: 'test'
+  ...
+# Subtest: recording is local-only: no network call and no upload anywhere in the module
+ok 639 - recording is local-only: no network call and no upload anywhere in the module
+  ---
+  duration_ms: 1.061584
+  type: 'test'
+  ...
+# Subtest: the auto-tour controls and the honest report placeholder are in the page and wired in the app
+ok 640 - the auto-tour controls and the honest report placeholder are in the page and wired in the app
+  ---
+  duration_ms: 6.470624
+  type: 'test'
+  ...
+# Subtest: normalizeTransparency fills every one of the six required fields with honest defaults
+ok 641 - normalizeTransparency fills every one of the six required fields with honest defaults
+  ---
+  duration_ms: 1.557688
+  type: 'test'
+  ...
+# Subtest: normalizeTransparency accepts plain-string and object input rows alike
+ok 642 - normalizeTransparency accepts plain-string and object input rows alike
+  ---
+  duration_ms: 4.867911
+  type: 'test'
+  ...
+# Subtest: renderTransparencyPanel renders all six fields and never fabricates a result
+ok 643 - renderTransparencyPanel renders all six fields and never fabricates a result
+  ---
+  duration_ms: 1.006488
+  type: 'test'
+  ...
+# Subtest: renderTransparencyPanel shows an explicit empty message instead of fabricating missing sections
+ok 644 - renderTransparencyPanel shows an explicit empty message instead of fabricating missing sections
+  ---
+  duration_ms: 0.387573
+  type: 'test'
+  ...
+# Subtest: renderTransparencyPanel escapes HTML in every field to stay XSS-safe
+ok 645 - renderTransparencyPanel escapes HTML in every field to stay XSS-safe
+  ---
+  duration_ms: 0.192651
+  type: 'test'
+  ...
+# Subtest: escapeHTML neutralizes the five HTML-sensitive characters
+ok 646 - escapeHTML neutralizes the five HTML-sensitive characters
+  ---
+  duration_ms: 0.140247
+  type: 'test'
+  ...
+# Subtest: compact primary markup places accepted summary then plan then composer
+ok 647 - compact primary markup places accepted summary then plan then composer
+  ---
+  duration_ms: 4.927969
+  type: 'test'
+  ...
+# Subtest: secondary details and comparison dialog start closed
+ok 648 - secondary details and comparison dialog start closed
+  ---
+  duration_ms: 0.637876
+  type: 'test'
+  ...
+# Subtest: original viewport identities stay unique
+ok 649 - original viewport identities stay unique
+  ---
+  duration_ms: 4.605073
+  type: 'test'
+  ...
+# Subtest: explicit textual shape is a bound constraint independent of local or connected AI UI
+ok 650 - explicit textual shape is a bound constraint independent of local or connected AI UI
+  ---
+  duration_ms: 923.757534
+  type: 'test'
+  ...
+# Subtest: negated textual shape never reappears in allowed shapes
+ok 651 - negated textual shape never reappears in allowed shapes
+  ---
+  duration_ms: 1.512727
+  type: 'test'
+  ...
+# Subtest: an explicit text shape remains binding while a style card stays a soft preference
+ok 652 - an explicit text shape remains binding while a style card stays a soft preference
+  ---
+  duration_ms: 6.473532
+  type: 'test'
+  ...
+# Subtest: a liked template does not narrow generation to a forced L or U
+ok 653 - a liked template does not narrow generation to a forced L or U
+  ---
+  duration_ms: 2154.476132
+  type: 'test'
+  ...
+# Subtest: new brief context invalidates the generation snapshot and AI proposals bind inputs
+ok 654 - new brief context invalidates the generation snapshot and AI proposals bind inputs
+  ---
+  duration_ms: 1.55908
+  type: 'test'
+  ...
+# Subtest: new-ideas exclusion includes displayed alternatives even after selected shape changes
+ok 655 - new-ideas exclusion includes displayed alternatives even after selected shape changes
+  ---
+  duration_ms: 0.932973
+  type: 'test'
+  ...
+# Subtest: studio distinguishes current work from an explicitly downloaded or archived conversation
+ok 656 - studio distinguishes current work from an explicitly downloaded or archived conversation
+  ---
+  duration_ms: 5.754443
+  type: 'test'
+  ...
+# Subtest: minimum scope: 3 غرف نوم على الأقل
+ok 657 - minimum scope: 3 غرف نوم على الأقل
+  ---
+  duration_ms: 13.313078
+  type: 'test'
+  ...
+# Subtest: minimum scope: بحد أدنى 3 غرف نوم
+ok 658 - minimum scope: بحد أدنى 3 غرف نوم
+  ---
+  duration_ms: 0.845826
+  type: 'test'
+  ...
+# Subtest: minimum scope: 3 bedrooms minimum
+ok 659 - minimum scope: 3 bedrooms minimum
+  ---
+  duration_ms: 9.246595
+  type: 'test'
+  ...
+# Subtest: minimum scope: على الأقل ثلاث غرف نوم
+ok 660 - minimum scope: على الأقل ثلاث غرف نوم
+  ---
+  duration_ms: 0.325355
+  type: 'test'
+  ...
+# Subtest: exact count: Three bedrooms
+ok 661 - exact count: Three bedrooms
+  ---
+  duration_ms: 0.353373
+  type: 'test'
+  ...
+# Subtest: exact count: ٣ غرف نوم
+ok 662 - exact count: ٣ غرف نوم
+  ---
+  duration_ms: 0.17588
+  type: 'test'
+  ...
+# Subtest: exact count: ۳ غرف نوم
+ok 663 - exact count: ۳ غرف نوم
+  ---
+  duration_ms: 2.511286
+  type: 'test'
+  ...
+# Subtest: exact count: ثلاث غرف نوم
+ok 664 - exact count: ثلاث غرف نوم
+  ---
+  duration_ms: 0.1368
+  type: 'test'
+  ...
+# Subtest: unrelated minimum does not relax bedroom count
+ok 665 - unrelated minimum does not relax bedroom count
+  ---
+  duration_ms: 0.311575
+  type: 'test'
+  ...
+# Subtest: explicit large numeric count and zero are not silently dropped
+ok 666 - explicit large numeric count and zero are not silently dropped
+  ---
+  duration_ms: 0.424832
+  type: 'test'
+  ...
+# Subtest: rotation policy: kitchen 8x6, no rotation
+ok 667 - rotation policy: kitchen 8x6, no rotation
+  ---
+  duration_ms: 0.829274
+  type: 'test'
+  ...
+# Subtest: rotation policy: مطبخ 8×6، بدون تدوير
+ok 668 - rotation policy: مطبخ 8×6، بدون تدوير
+  ---
+  duration_ms: 0.292334
+  type: 'test'
+  ...
+# Subtest: binding retains explicit orientation without overwriting conflicts
+ok 669 - binding retains explicit orientation without overwriting conflicts
+  ---
+  duration_ms: 0.897811
+  type: 'test'
+  ...
+# Subtest: actual geometry cannot inherit truth from requested metadata or equal area
+ok 670 - actual geometry cannot inherit truth from requested metadata or equal area
+  ---
+  duration_ms: 4.754387
+  type: 'test'
+  ...
+# Subtest: negative count and dimension clauses retain V51 exclusion semantics
+ok 671 - negative count and dimension clauses retain V51 exclusion semantics
+  ---
+  duration_ms: 0.981181
+  type: 'test'
+  ...
+# Subtest: actual geometry uses engineering tolerance, not program metadata rounding
+ok 672 - actual geometry uses engineering tolerance, not program metadata rounding
+  ---
+  duration_ms: 0.205794
+  type: 'test'
+  ...
+# Subtest: binding never drops a stricter orientation in a same-type group
+ok 673 - binding never drops a stricter orientation in a same-type group
+  ---
+  duration_ms: 0.929858
+  type: 'test'
+  ...
+# Subtest: adjacent bathroom count cannot overwrite the bedroom requirement
+ok 674 - adjacent bathroom count cannot overwrite the bedroom requirement
+  ---
+  duration_ms: 0.169845
+  type: 'test'
+  ...
+# Subtest: conflicting supplied rectangle is rejected without mutating either program
+ok 675 - conflicting supplied rectangle is rejected without mutating either program
+  ---
+  duration_ms: 0.320277
+  type: 'test'
+  ...
+# Subtest: dimension units preserve rotation prohibition: kitchen 8x6 m, no rotation
+ok 676 - dimension units preserve rotation prohibition: kitchen 8x6 m, no rotation
+  ---
+  duration_ms: 0.189338
+  type: 'test'
+  ...
+# Subtest: dimension units preserve rotation prohibition: مطبخ 8×6 م، بدون تدوير
+ok 677 - dimension units preserve rotation prohibition: مطبخ 8×6 م، بدون تدوير
+  ---
+  duration_ms: 0.123168
+  type: 'test'
+  ...
+# Subtest: dimension units preserve rotation prohibition: kitchen 8x6 metres; without rotation
+ok 678 - dimension units preserve rotation prohibition: kitchen 8x6 metres; without rotation
+  ---
+  duration_ms: 0.084377
+  type: 'test'
+  ...
+# Subtest: dimension units preserve rotation prohibition: مطبخ 8×6 متر بدون دوران
+ok 679 - dimension units preserve rotation prohibition: مطبخ 8×6 متر بدون دوران
+  ---
+  duration_ms: 0.082213
+  type: 'test'
+  ...
+# Subtest: Arabic clause targets bind deletion: احذف الصالة وانقل المطبخ
+ok 680 - Arabic clause targets bind deletion: احذف الصالة وانقل المطبخ
+  ---
+  duration_ms: 13.789466
+  type: 'test'
+  ...
+# Subtest: Arabic clause targets bind deletion: انقل المطبخ واحذف الصالة
+ok 681 - Arabic clause targets bind deletion: انقل المطبخ واحذف الصالة
+  ---
+  duration_ms: 1.012059
+  type: 'test'
+  ...
+# Subtest: English deletion cannot borrow the moved room target
+ok 682 - English deletion cannot borrow the moved room target
+  ---
+  duration_ms: 0.791921
+  type: 'test'
+  ...
+# Subtest: negation is retained: without any other substantial changes please delete kitchen
+ok 683 - negation is retained: without any other substantial changes please delete kitchen
+  ---
+  duration_ms: 5.769694
+  type: 'test'
+  ...
+# Subtest: negation is retained: no other substantial changes please delete kitchen
+ok 684 - negation is retained: no other substantial changes please delete kitchen
+  ---
+  duration_ms: 0.195498
+  type: 'test'
+  ...
+# Subtest: negation is retained: without ... delete kitchen
+ok 685 - negation is retained: without ... delete kitchen
+  ---
+  duration_ms: 0.128826
+  type: 'test'
+  ...
+# Subtest: negation is retained: no ... delete kitchen
+ok 686 - negation is retained: no ... delete kitchen
+  ---
+  duration_ms: 0.164645
+  type: 'test'
+  ...
+# Subtest: negation is retained: do not delete kitchen
+ok 687 - negation is retained: do not delete kitchen
+  ---
+  duration_ms: 0.105547
+  type: 'test'
+  ...
+# Subtest: negation is retained: Do not, under any circumstances, delete the kitchen
+ok 688 - negation is retained: Do not, under any circumstances, delete the kitchen
+  ---
+  duration_ms: 0.284045
+  type: 'test'
+  ...
+# Subtest: negation is retained: without, any changes, delete the kitchen
+ok 689 - negation is retained: without, any changes, delete the kitchen
+  ---
+  duration_ms: 0.481297
+  type: 'test'
+  ...
+# Subtest: negation is retained: no, other changes, delete the kitchen
+ok 690 - negation is retained: no, other changes, delete the kitchen
+  ---
+  duration_ms: 0.23013
+  type: 'test'
+  ...
+# Subtest: negation is retained: don't delete kitchen
+ok 691 - negation is retained: don't delete kitchen
+  ---
+  duration_ms: 0.096898
+  type: 'test'
+  ...
+# Subtest: negation is retained: لا تحذف المطبخ
+ok 692 - negation is retained: لا تحذف المطبخ
+  ---
+  duration_ms: 0.079427
+  type: 'test'
+  ...
+# Subtest: explicit scoped all-of-type remains supported: احذف كل غرف النوم
+ok 693 - explicit scoped all-of-type remains supported: احذف كل غرف النوم
+  ---
+  duration_ms: 4.819494
+  type: 'test'
+  ...
+# Subtest: explicit scoped all-of-type remains supported: احذف جميع غرف النوم
+ok 694 - explicit scoped all-of-type remains supported: احذف جميع غرف النوم
+  ---
+  duration_ms: 0.236987
+  type: 'test'
+  ...
+# Subtest: explicit scoped all-of-type remains supported: delete all bedrooms
+ok 695 - explicit scoped all-of-type remains supported: delete all bedrooms
+  ---
+  duration_ms: 0.22617
+  type: 'test'
+  ...
+# Subtest: all in another action cannot authorize all room deletion
+ok 696 - all in another action cannot authorize all room deletion
+  ---
+  duration_ms: 0.219743
+  type: 'test'
+  ...
+# Subtest: generic rooms cannot be interpreted as explicit bedroom authorization
+ok 697 - generic rooms cannot be interpreted as explicit bedroom authorization
+  ---
+  duration_ms: 3.362544
+  type: 'test'
+  ...
+# Subtest: qualified room names do not authorize shorter different room names
+ok 698 - qualified room names do not authorize shorter different room names
+  ---
+  duration_ms: 0.194207
+  type: 'test'
+  ...
+# Subtest: duplicate identity is preserved and ambiguous names are rejected
+ok 699 - duplicate identity is preserved and ambiguous names are rejected
+  ---
+  duration_ms: 0.601022
+  type: 'test'
+  ...
+# Subtest: legacy duplicate records remain matched without IDs
+ok 700 - legacy duplicate records remain matched without IDs
+  ---
+  duration_ms: 0.178371
+  type: 'test'
+  ...
+# Subtest: equal-area geometry changes are visible and snapshots survive caller mutation
+ok 701 - equal-area geometry changes are visible and snapshots survive caller mutation
+  ---
+  duration_ms: 0.602613
+  type: 'test'
+  ...
+# Subtest: production room-scoped area permission and negation remain intact
+ok 702 - production room-scoped area permission and negation remain intact
+  ---
+  duration_ms: 1.445952
+  type: 'test'
+  ...
+# Subtest: all-of-type still requires a specific type rather than generic rooms
+ok 703 - all-of-type still requires a specific type rather than generic rooms
+  ---
+  duration_ms: 4.408298
+  type: 'test'
+  ...
+# Subtest: preserve explicit legacy command: الغ المطبخ
+ok 704 - preserve explicit legacy command: الغ المطبخ
+  ---
+  duration_ms: 0.270264
+  type: 'test'
+  ...
+# Subtest: preserve explicit legacy command: أريد حذف المطبخ
+ok 705 - preserve explicit legacy command: أريد حذف المطبخ
+  ---
+  duration_ms: 0.114294
+  type: 'test'
+  ...
+# Subtest: preserve explicit legacy command: استغن عن المطبخ
+ok 706 - preserve explicit legacy command: استغن عن المطبخ
+  ---
+  duration_ms: 0.0784
+  type: 'test'
+  ...
+# Subtest: preserve explicitly coordinated targets: احذف المطبخ والصالة
+ok 707 - preserve explicitly coordinated targets: احذف المطبخ والصالة
+  ---
+  duration_ms: 0.220601
+  type: 'test'
+  ...
+# Subtest: preserve explicitly coordinated targets: delete kitchen and living room
+ok 708 - preserve explicitly coordinated targets: delete kitchen and living room
+  ---
+  duration_ms: 0.255871
+  type: 'test'
+  ...
+# Subtest: V51 central request refuses originalText count and missing dimensions bypass
+ok 709 - V51 central request refuses originalText count and missing dimensions bypass
+  ---
+  duration_ms: 13.085842
+  type: 'test'
+  ...
+# Subtest: V51 central request refuses same-area kitchen without explicit dimensions
+ok 710 - V51 central request refuses same-area kitchen without explicit dimensions
+  ---
+  duration_ms: 4.88322
+  type: 'test'
+  ...
+# Subtest: V51 direct pipeline refuses text count bypass independently
+ok 711 - V51 direct pipeline refuses text count bypass independently
+  ---
+  duration_ms: 19.648711
+  type: 'test'
+  ...
+# Subtest: V51 direct pipeline refuses text dimension bypass independently
+ok 712 - V51 direct pipeline refuses text dimension bypass independently
+  ---
+  duration_ms: 5.439731
+  type: 'test'
+  ...
+# Subtest: V51 preserves shape and wing constraints and preference request evidence
+ok 713 - V51 preserves shape and wing constraints and preference request evidence
+  ---
+  duration_ms: 6.893774
+  type: 'test'
+  ...
+# Subtest: V51 preserves exploration descriptors and preference evaluations for legacy programs
+ok 714 - V51 preserves exploration descriptors and preference evaluations for legacy programs
+  ---
+  duration_ms: 1076.361357
+  type: 'test'
+  ...
+# Subtest: V51 reviewed candidate cannot satisfy forbidden rotation with area or requested metadata
+ok 715 - V51 reviewed candidate cannot satisfy forbidden rotation with area or requested metadata
+  ---
+  duration_ms: 52.798712
+  type: 'test'
+  ...
+# Subtest: V51 request retains explicit room rotation policy without changing schema
+ok 716 - V51 request retains explicit room rotation policy without changing schema
+  ---
+  duration_ms: 1.344013
+  type: 'test'
+  ...
+# Subtest: normalization and public request preserve explicit no-rotation metadata
+ok 717 - normalization and public request preserve explicit no-rotation metadata
+  ---
+  duration_ms: 23.885282
+  type: 'test'
+  ...
+# Subtest: public design never selects swapped geometry after a no-rotation request
+ok 718 - public design never selects swapped geometry after a no-rotation request
+  ---
+  duration_ms: 1264.038078
+  type: 'test'
+  ...
+# Subtest: north entrance on south-only land prompts clarification without adding a street
+ok 719 - north entrance on south-only land prompts clarification without adding a street
+  ---
+  duration_ms: 16.223416
+  type: 'test'
+  ...
+# Subtest: entrance changes preserve corner/multiple street envelopes and explicit setbacks
+ok 720 - entrance changes preserve corner/multiple street envelopes and explicit setbacks
+  ---
+  duration_ms: 6.32006
+  type: 'test'
+  ...
+# Subtest: street edits invalidate the approved studio snapshot without changing legacy empty snapshots
+ok 721 - street edits invalidate the approved studio snapshot without changing legacy empty snapshots
+  ---
+  duration_ms: 7.263162
+  type: 'test'
+  ...
+# Subtest: a point at the look-at target projects to the exact centre of the frame
+ok 722 - a point at the look-at target projects to the exact centre of the frame
+  ---
+  duration_ms: 0.859845
+  type: 'test'
+  ...
+# Subtest: a point to the world +x side of the target lands on the positive (right) side of the frame
+ok 723 - a point to the world +x side of the target lands on the positive (right) side of the frame
+  ---
+  duration_ms: 0.216678
+  type: 'test'
+  ...
+# Subtest: a point above the target lands on the positive (up) side, which maps to a smaller pixel top
+ok 724 - a point above the target lands on the positive (up) side, which maps to a smaller pixel top
+  ---
+  duration_ms: 0.195257
+  type: 'test'
+  ...
+# Subtest: a point behind the eye (opposite the view direction) is never visible
+ok 725 - a point behind the eye (opposite the view direction) is never visible
+  ---
+  duration_ms: 0.37204
+  type: 'test'
+  ...
+# Subtest: a point in front of the camera but far outside the horizontal field of view is not visible
+ok 726 - a point in front of the camera but far outside the horizontal field of view is not visible
+  ---
+  duration_ms: 0.221007
+  type: 'test'
+  ...
+# Subtest: a near-vertical top-down camera (the roof-off top view, never perfectly vertical) keeps mirrored points symmetric
+ok 727 - a near-vertical top-down camera (the roof-off top view, never perfectly vertical) keeps mirrored points symmetric
+  ---
+  duration_ms: 0.131958
+  type: 'test'
+  ...
+# Subtest: invalid camera parameters are rejected rather than producing silent NaNs
+ok 728 - invalid camera parameters are rejected rather than producing silent NaNs
+  ---
+  duration_ms: 0.258257
+  type: 'test'
+  ...
+# Subtest: ndcToPixels maps the full [-1,1] range to exact viewport corners and centre
+ok 729 - ndcToPixels maps the full [-1,1] range to exact viewport corners and centre
+  ---
+  duration_ms: 0.696568
+  type: 'test'
+  ...
+# Subtest: Claude model renders through the existing 3D geometry controller
+ok 730 - Claude model renders through the existing 3D geometry controller
+  ---
+  duration_ms: 120.221043
+  type: 'test'
+  ...
+# Subtest: 3D reuses one renderer, builds wall pieces with real openings, and disposes prior geometry
+ok 731 - 3D reuses one renderer, builds wall pieces with real openings, and disposes prior geometry
+  ---
+  duration_ms: 22.899084
+  type: 'test'
+  ...
+# Subtest: room entry uses eye-level camera, roof is hidden, and wall collision permits a door passage
+ok 732 - room entry uses eye-level camera, roof is hidden, and wall collision permits a door passage
+  ---
+  duration_ms: 3.152839
+  type: 'test'
+  ...
+# Subtest: roof choice survives camera presets and sun lighting updates for day and night
+ok 733 - roof choice survives camera presets and sun lighting updates for day and night
+  ---
+  duration_ms: 1.103003
+  type: 'test'
+  ...
+# Subtest: hidden 3D does not render and resize reuses the same canvas
+ok 734 - hidden 3D does not render and resize reuses the same canvas
+  ---
+  duration_ms: 10.803022
+  type: 'test'
+  ...
+# Subtest: missing Three and unavailable WebGL fail with actionable messages
+ok 735 - missing Three and unavailable WebGL fail with actionable messages
+  ---
+  duration_ms: 0.556242
+  type: 'test'
+  ...
+# Subtest: low sun keeps its true altitude and below-horizon light is disabled
+ok 736 - low sun keeps its true altitude and below-horizon light is disabled
+  ---
+  duration_ms: 3.932778
+  type: 'test'
+  ...
+# Subtest: context loss stops rendering and restoration retains exact model and renderer
+ok 737 - context loss stops rendering and restoration retains exact model and renderer
+  ---
+  duration_ms: 1.111511
+  type: 'test'
+  ...
+# Subtest: inside hides roof temporarily and exterior restores the explicit roof choice
+ok 738 - inside hides roof temporarily and exterior restores the explicit roof choice
+  ---
+  duration_ms: 0.946132
+  type: 'test'
+  ...
+# Subtest: roof uses modeled footprints without invented overhangs and silhouette ornaments
+ok 739 - roof uses modeled footprints without invented overhangs and silhouette ornaments
+  ---
+  duration_ms: 7.598237
+  type: 'test'
+  ...
+# Subtest: orbit presets animate on demand, cancel on model replacement, and respect reduced motion
+ok 740 - orbit presets animate on demand, cancel on model replacement, and respect reduced motion
+  ---
+  duration_ms: 21.155386
+  type: 'test'
+  ...
+# Subtest: destroy releases shared textures, materials, shadows and renderer lists exactly once
+ok 741 - destroy releases shared textures, materials, shadows and renderer lists exactly once
+  ---
+  duration_ms: 0.894692
+  type: 'test'
+  ...
+# Subtest: failed restoration reports unavailable, preserves model and remains render-suspended
+ok 742 - failed restoration reports unavailable, preserves model and remains render-suspended
+  ---
+  duration_ms: 10.55323
+  type: 'test'
+  ...
+# Subtest: inside entry and hidden viewer cancel exterior camera frames without flying through walls
+ok 743 - inside entry and hidden viewer cancel exterior camera frames without flying through walls
+  ---
+  duration_ms: 1.283007
+  type: 'test'
+  ...
+# Subtest: measured sustained cost lowers quality once; isolated slow frames and hardware guesses do not
+ok 744 - measured sustained cost lowers quality once; isolated slow frames and hardware guesses do not
+  ---
+  duration_ms: 1.931689
+  type: 'test'
+  ...
+# Subtest: no directional sun is invented before an explicit calculated solar preview
+ok 745 - no directional sun is invented before an explicit calculated solar preview
+  ---
+  duration_ms: 10.069828
+  type: 'test'
+  ...
+# Subtest: changing reduced-motion preference finishes active transition and removes future animation frames
+ok 746 - changing reduced-motion preference finishes active transition and removes future animation frames
+  ---
+  duration_ms: 0.850694
+  type: 'test'
+  ...
+# Subtest: openings contribute only glazing at exact window bounds, without invented frames or door lintels
+ok 747 - openings contribute only glazing at exact window bounds, without invented frames or door lintels
+  ---
+  duration_ms: 1.18811
+  type: 'test'
+  ...
+# Subtest: neutral preview lighting remains legible for missing latitude and night without inventing sun
+ok 748 - neutral preview lighting remains legible for missing latitude and night without inventing sun
+  ---
+  duration_ms: 13.316545
+  type: 'test'
+  ...
+# Subtest: without a real document, the analytics overlay stays inert and every other test above is unaffected
+ok 749 - without a real document, the analytics overlay stays inert and every other test above is unaffected
+  ---
+  duration_ms: 1.244323
+  type: 'test'
+  ...
+# Subtest: analytics overlay builds one label per room from model area/width/height, and only shows in orbit mode
+ok 750 - analytics overlay builds one label per room from model area/width/height, and only shows in orbit mode
+  ---
+  duration_ms: 10.55121
+  type: 'test'
+  ...

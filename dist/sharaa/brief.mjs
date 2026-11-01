@@ -264,11 +264,12 @@ export function decide(brief, ref, { priority, confirm = true, originalText } = 
 }
 function labelOf(d, kind, it) {
   if (kind === 'space') return nameOf(it.type);
-  if (kind === 'relation') return `${nameOf(it.from)} ${({ near: 'قريب من', direct_access: 'بباب مباشر على', separate: 'منفصل عن', avoid_visibility: 'لا يكشف', same_floor: 'في دور واحد مع', different_floor: 'في دور مختلف عن' })[it.relation]} ${nameOf(it.to)}`;
+  if (kind === 'relation') return `${nameOf(it.from)} ${({ near: 'قريب من', direct_access: it.detail && it.detail !== 'door' ? 'ملاصق ومفتوح على' : 'بباب مباشر على', separate: 'منفصل عن', avoid_visibility: 'لا يكشف', same_floor: 'في دور واحد مع', different_floor: 'في دور مختلف عن' })[it.relation]} ${nameOf(it.to)}`;
   return `${nameOf(it.space)} ${it.mode === 'avoid' ? 'لا يطل على' : 'في'} ${SIDE_AR[it.side] || it.side}`;
 }
 export const SIDE_AR = Object.freeze({ front: 'الأمام (الشارع)', back: 'الخلف', n: 'الشمال', s: 'الجنوب', e: 'الشرق', w: 'الغرب', left: 'يسار الداخل', right: 'يمين الداخل', center: 'الوسط' });
-export const describeRelation = r => `${nameOf(r.from)} ${({ near: 'قريب من', direct_access: 'بباب مباشر على', separate: r.detail === 'far' ? 'بعيد عن' : 'غير ملاصق لـ', avoid_visibility: 'لا ينكشف على', same_floor: 'في الدور نفسه مع', different_floor: 'في دور مختلف عن' })[r.relation]} ${nameOf(r.to)}`;
+// (ملاحظات المعاينة 2026-10-31) direct_access بلا باب (wall_contact) ملاصقة جدار فقط: لا يُوصف «بباب مباشر» (كان «مطبخ مفتوح على الصالة» يُعرض «بباب مباشر»)
+export const describeRelation = r => `${nameOf(r.from)} ${({ near: 'قريب من', direct_access: r.detail && r.detail !== 'door' ? 'ملاصق ومفتوح على' : 'بباب مباشر على', separate: r.detail === 'far' ? 'بعيد عن' : 'غير ملاصق لـ', avoid_visibility: 'لا ينكشف على', same_floor: 'في الدور نفسه مع', different_floor: 'في دور مختلف عن' })[r.relation]} ${nameOf(r.to)}`;
 export const describePlacement = p => `${nameOf(p.space)} ${p.mode === 'avoid' ? 'لا يطل على' : 'في'} ${SIDE_AR[p.side] || p.side}`;
 
 /** يسحب العميل بندًا: علاقة/جهة تُعطَّل وتبقى محفوظة بنصها، وميزة تُحذف، ومقاس/دور فراغ يُزال. لا يحذف الإجابات الأخرى. */
@@ -398,7 +399,8 @@ const SUBJ_TO_SPACE = { majlis: 'male_majlis', majlis_w: 'female_majlis', kitche
 const normQ = t => String(t || '').replace(/[ةه]/g, 'ه').replace(/[أإآ]/g, 'ا');
 const RULE_REL = { adjacent: 'direct_access', near: 'near', far: 'separate', apart: 'separate' };
 // قرائن اللزوم الصريحة فقط: «أبي/أريد» وحدها رغبة لا شرط (المواصفة §4: «قريب» يبقى تفضيلًا يحتاج توضيحًا)
-const STRONG = /(?<![\u0600-\u06FF])(?:لازم|ضروري|ضروريا|يجب|يلزم|لا ?بد|اكيد|الزامي|شرط|بالضبط)(?![\u0600-\u06FF])|(?<![a-z])(?:must|required|mandatory|exactly)(?![a-z])/;
+// (ملاحظات المعاينة 2026-10-31) «ولازم/فلازم/وضروري…»: واو العطف أو الفاء الملتصقة لا تُسقط قرينة اللزوم (كانت «ولازم» تُقرأ تفضيلًا)
+const STRONG = /(?<![\u0600-\u06FF])[وف]?(?:لازم|ضروري|ضروريا|يجب|يلزم|لا ?بد|اكيد|الزامي|شرط|بالضبط)(?![\u0600-\u06FF])|(?<![a-z])(?:must|required|mandatory|exactly)(?![a-z])/;
 const WEAK = /(?:مو|مب|ليس|غير|مش) ?(?:شرط|ضروري|لازم)|اختياري|لو امكن|اذا امكن|ان امكن|قدر الامكان|optional|if possible/;
 /** عبارة العميل (المطبَّعة) التي وردت فيها القاعدة: من الفاصل السابق إلى اللاحق. */
 function clauseOf(text, r) {

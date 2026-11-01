@@ -172,7 +172,8 @@ const clone = o => JSON.parse(JSON.stringify(o));
 /** الصفوف التي يعرضها الملف الحي: كل بند مع صنف دعمه. */
 export function supportRows(brief) {
   const rows = [];
-  for (const s of brief.spaces) rows.push({ ref: 'space:' + s.id, label: `${nameOf(s.type)}${s.count !== 1 ? ' × ' + s.count : ''}`, source: s.source, priority: s.priority, verification: s.verification, support: s.type === 'guest_dining' ? 'partial' : (s.minClearWidthM ? 'partial' : 'supported') });
+  // (ملاحظات المعاينة 2026-10-31) العدد صفر يُقرأ «بدون …» لا «× 0»
+  for (const s of brief.spaces) rows.push({ ref: 'space:' + s.id, label: s.count === 0 ? `بدون ${nameOf(s.type)}` : `${nameOf(s.type)}${s.count !== 1 ? ' × ' + s.count : ''}`, source: s.source, priority: s.priority, verification: s.verification, support: s.type === 'guest_dining' ? 'partial' : (s.minClearWidthM ? 'partial' : 'supported') });
   for (const r of brief.relations) rows.push({ ref: 'relation:' + r.id, label: describeRelation(r), source: r.source, priority: r.priority, verification: r.verification, support: supportOf('relation.' + r.relation), inactive: r.active === false });
   for (const p of brief.placements) rows.push({ ref: 'placement:' + p.id, label: describePlacement(p), source: p.source, priority: p.priority, verification: p.verification, support: (p.side === 'front' || p.side === 'back') ? 'supported' : 'partial', inactive: p.active === false });
   return rows;
