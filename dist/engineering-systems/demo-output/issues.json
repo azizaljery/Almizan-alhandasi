@@ -1,0 +1,67 @@
+[
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "electrical",
+    "messageAr": "يلزم تحقق مستقل للتأريض والقصر والفصل الانتقائي والحماية من الصعق والمواقع الرطبة والإنارة الفعلية بملفات فوتومترية.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "hvac",
+    "messageAr": "يلزم نموذج أحمال تصميم معتمد، ومراجعة انطباق طريقة التهوية على نوع المبنى، وضغط الدكت والضوضاء والتوزيع والراجع والتكاثف وكفاءة الجهاز عند ظروف التصميم.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "plumbing",
+    "messageAr": "يلزم تحديد التدفق التصميمي من جدول وحدات الأجهزة المعتمد، ثم تحقق الضغط والأقطار والتهوية والمصائد والتنظيف ومنع الرجوع والمطر والربط الخارجي.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "fire",
+    "messageAr": "مراجعة تصميم وإنذار وإطفاء وإخلاء متخصصة مطلوبة؛ التغطية ومقاومة الحريق والتدفق والضغط وسعة المضخة والخزان غير محسوبة.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "low_current",
+    "messageAr": "يلزم تحقق نوع الكابل وحدود القناة والوصلات والفصل والتأريض وتغطية الشبكات والكاميرات ومتطلبات الخصوصية.",
+    "severity": "pending"
+  },
+  {
+    "code": "SPECIALIST_REVIEW_REQUIRED",
+    "details": {},
+    "discipline": "solar",
+    "messageAr": "يلزم تحقق الإشعاع والتظليل والإنفرتر والحماية والأحمال الإنشائية على السقف؛ لم يُحسب الإنتاج السنوي.",
+    "severity": "pending"
+  },
+  {
+    "discipline": "coordination",
+    "code": "STRUCTURAL_MODEL_INCOMPLETE",
+    "severity": "pending",
+    "messageAr": "نموذج الأعمدة والكمرات والبلاطات والخلوصات غير مكتمل؛ غياب التعارض المكتشف لا يثبت سلامة التمديد.",
+    "details": {}
+  },
+  {
+    "discipline": "coordination",
+    "code": "CLASHES_REQUIRE_REVIEW",
+    "severity": "pending",
+    "messageAr": "توجد تعارضات أو اختراقات محتملة تحتاج مراجعة.",
+    "details": {
+      "count": 3692
+    }
+  },
+  {
+    "discipline": "project",
+    "code": "CODE_RULES_NOT_VERIFIED",
+    "severity": "pending",
+    "messageAr": "الحزمة لا تطبق جدول اشتراطات نظامية موثّقًا؛ مراجعة الكود والإصدار والبنود المنطبقة مطلوبة.",
+    "details": {}
+  }
+]

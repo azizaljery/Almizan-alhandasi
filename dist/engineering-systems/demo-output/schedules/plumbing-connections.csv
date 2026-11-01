@@ -1,0 +1,3 @@
+﻿"id","system","fromId","toId","flowM3S","equivalentDiameterM","selectedDiameterMm","lengthM","horizontalLengthM","slope","fallM","endInvertM","routeStatus"
+"CW1","cold_water","MAN1","BASIN1","0.0002","0.013029400317411198","20","3.5",,,,,"PROPOSED"
+"DR1","sanitary","WC1","MH1","0.001","0.03989422804014327","110","2.1004199580083975","2.0999999999999996","0.02","0.041999999999999996","-0.34199999999999997","PROPOSED"

@@ -1,0 +1,12 @@
+{
+  "status": "CATALOG_SCOPE_REVIEW_ONLY",
+  "reviewedAt": "2026-10-31",
+  "normativeRulesImplemented": [],
+  "projectEditionAndApplicabilityMustBeVerified": true,
+  "documents": [
+    { "code": "SBC 401", "discipline": "electrical", "editionLink": "2024", "url": "https://sbc.gov.sa/en/BC/Pages/BuildingCode/BCDetails.aspx?codeId=401&year=2024", "verifiedClauses": [] },
+    { "code": "SBC 501", "discipline": "hvac", "editionLink": "2024", "url": "https://sbc.gov.sa/En/BC/Pages/BuildingCode/BCDetails.aspx?codeId=501&year=2024", "verifiedClauses": [] },
+    { "code": "SBC 701", "discipline": "plumbing", "editionLink": "2024", "url": "https://sbc.gov.sa/ar/BC/Pages/BuildingCode/BCDetails.aspx?codeId=701&year=2024", "verifiedClauses": [] },
+    { "code": "SBC 801", "discipline": "fire", "editionLink": "2024", "url": "https://www.sbc.gov.sa/ar/BC/Pages/BuildingCode/BCDetails.aspx?codeId=801&year=2024", "verifiedClauses": [] }
+  ]
+}

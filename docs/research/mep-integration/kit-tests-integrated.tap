@@ -1,0 +1,406 @@
+TAP version 13
+# Subtest: agent action snapshots and enforces the selected architectural revision
+ok 1 - agent action snapshots and enforces the selected architectural revision
+  ---
+  duration_ms: 48.606436
+  type: 'test'
+  ...
+# Subtest: agent render rereads services and rejects a stale calculation
+ok 2 - agent render rereads services and rejects a stale calculation
+  ---
+  duration_ms: 199.884265
+  type: 'test'
+  ...
+# Subtest: a serialized unchanged result passes its independent result digest check
+ok 3 - a serialized unchanged result passes its independent result digest check
+  ---
+  duration_ms: 169.390949
+  type: 'test'
+  ...
+# Subtest: an undrawn floor is explicitly empty rather than an invalid or fabricated plan
+ok 4 - an undrawn floor is explicitly empty rather than an invalid or fabricated plan
+  ---
+  duration_ms: 687.088779
+  type: 'test'
+  ...
+# Subtest: complete demo is deterministic, immutable and bound to its input
+ok 5 - complete demo is deterministic, immutable and bound to its input
+  ---
+  duration_ms: 699.085241
+  type: 'test'
+  ...
+# Subtest: missing calculation inputs stay null and create a missing-input issue
+ok 6 - missing calculation inputs stay null and create a missing-input issue
+  ---
+  duration_ms: 1672.397272
+  type: 'test'
+  ...
+# Subtest: empty system never produces a code-compliant or construction-ready design
+ok 7 - empty system never produces a code-compliant or construction-ready design
+  ---
+  duration_ms: 12.89293
+  type: 'test'
+  ...
+# Subtest: duplicate circuit assignment is rejected without double-counting
+ok 8 - duplicate circuit assignment is rejected without double-counting
+  ---
+  duration_ms: 116.050497
+  type: 'test'
+  ...
+# Subtest: unassigned loads are explicitly identified
+ok 9 - unassigned loads are explicitly identified
+  ---
+  duration_ms: 340.137262
+  type: 'test'
+  ...
+# Subtest: unknown phase assignment yields null phase totals
+ok 10 - unknown phase assignment yields null phase totals
+  ---
+  duration_ms: 292.628507
+  type: 'test'
+  ...
+# Subtest: electrical and cooling quantities cannot be substituted at an interface
+ok 11 - electrical and cooling quantities cannot be substituted at an interface
+  ---
+  duration_ms: 164.272335
+  type: 'test'
+  ...
+# Subtest: wrong drainage end invert is blocked and excluded from quantities
+ok 12 - wrong drainage end invert is blocked and excluded from quantities
+  ---
+  duration_ms: 11.868296
+  type: 'test'
+  ...
+# Subtest: drainage elevations descend by horizontal distance times slope
+ok 13 - drainage elevations descend by horizontal distance times slope
+  ---
+  duration_ms: 11.98387
+  type: 'test'
+  ...
+# Subtest: sloped drainage is rechecked at the final elevation
+ok 14 - sloped drainage is rechecked at the final elevation
+  ---
+  duration_ms: 13.876097
+  type: 'test'
+  ...
+# Subtest: unpriced quantities remain unpriced and total is null
+ok 15 - unpriced quantities remain unpriced and total is null
+  ---
+  duration_ms: 144.569337
+  type: 'test'
+  ...
+# Subtest: result does not stay bound after architectural or service edits
+ok 16 - result does not stay bound after architectural or service edits
+  ---
+  duration_ms: 670.629901
+  type: 'test'
+  ...
+# Subtest: async run snapshots inputs before callers can edit them
+ok 17 - async run snapshots inputs before callers can edit them
+  ---
+  duration_ms: 195.610019
+  type: 'test'
+  ...
+# Subtest: change comparison tracks moved devices
+ok 18 - change comparison tracks moved devices
+  ---
+  duration_ms: 299.559085
+  type: 'test'
+  ...
+# Subtest: plugin cannot elevate the package or its discipline to construction approval
+ok 19 - plugin cannot elevate the package or its discipline to construction approval
+  ---
+  duration_ms: 8.720254
+  type: 'test'
+  ...
+# Subtest: unknown and duplicate discipline names fail explicitly
+ok 20 - unknown and duplicate discipline names fail explicitly
+  ---
+  duration_ms: 16.996756
+  type: 'test'
+  ...
+# Subtest: bad units, duplicate room IDs, and nonfinite coordinates are rejected
+ok 21 - bad units, duplicate room IDs, and nonfinite coordinates are rejected
+  ---
+  duration_ms: 7.88675
+  type: 'test'
+  ...
+# Subtest: hash refuses accessors and cycles instead of silently normalizing them
+ok 22 - hash refuses accessors and cycles instead of silently normalizing them
+  ---
+  duration_ms: 0.336243
+  type: 'test'
+  ...
+# Subtest: clash detection uses absolute z rather than only floor or XY
+ok 23 - clash detection uses absolute z rather than only floor or XY
+  ---
+  duration_ms: 0.732834
+  type: 'test'
+  ...
+# Subtest: explicit aligned riser retains true elevations and both visible levels
+ok 24 - explicit aligned riser retains true elevations and both visible levels
+  ---
+  duration_ms: 20.991919
+  type: 'test'
+  ...
+# Subtest: single-phase current uses electrical input and PF
+ok 25 - single-phase current uses electrical input and PF
+  ---
+  duration_ms: 1.168308
+  type: 'test'
+  ...
+# Subtest: balanced three-phase current uses line voltage
+ok 26 - balanced three-phase current uses line voltage
+  ---
+  duration_ms: 0.216146
+  type: 'test'
+  ...
+# Subtest: zero PF and unspecified phase count are rejected
+ok 27 - zero PF and unspecified phase count are rejected
+  ---
+  duration_ms: 0.281908
+  type: 'test'
+  ...
+# Subtest: single-phase voltage drop uses one-way metres converted to kilometres
+ok 28 - single-phase voltage drop uses one-way metres converted to kilometres
+  ---
+  duration_ms: 0.161035
+  type: 'test'
+  ...
+# Subtest: voltage drop includes reactive impedance and three-phase factor
+ok 29 - voltage drop includes reactive impedance and three-phase factor
+  ---
+  duration_ms: 0.259306
+  type: 'test'
+  ...
+# Subtest: lumen-method fixture count rounds upward
+ok 30 - lumen-method fixture count rounds upward
+  ---
+  duration_ms: 0.161484
+  type: 'test'
+  ...
+# Subtest: maintenance factor cannot be zero or greater than one
+ok 31 - maintenance factor cannot be zero or greater than one
+  ---
+  duration_ms: 0.207058
+  type: 'test'
+  ...
+# Subtest: electrical P/Q and demand components preserve units
+ok 32 - electrical P/Q and demand components preserve units
+  ---
+  duration_ms: 0.13505
+  type: 'test'
+  ...
+# Subtest: static sensible and latent components match independently computed balance
+ok 33 - static sensible and latent components match independently computed balance
+  ---
+  duration_ms: 0.486211
+  type: 'test'
+  ...
+# Subtest: absent humidity is not silently treated as zero
+ok 34 - absent humidity is not silently treated as zero
+  ---
+  duration_ms: 0.399957
+  type: 'test'
+  ...
+# Subtest: cooling-gain function does not invent negative cooling in cold weather
+ok 35 - cooling-gain function does not invent negative cooling in cold weather
+  ---
+  duration_ms: 0.225014
+  type: 'test'
+  ...
+# Subtest: sensible airflow uses positive supply temperature difference
+ok 36 - sensible airflow uses positive supply temperature difference
+  ---
+  duration_ms: 0.131109
+  type: 'test'
+  ...
+# Subtest: supplied zone ventilation rates convert L/s to m3/s
+ok 37 - supplied zone ventilation rates convert L/s to m3/s
+  ---
+  duration_ms: 0.080957
+  type: 'test'
+  ...
+# Subtest: ACH conversion uses seconds per hour
+ok 38 - ACH conversion uses seconds per hour
+  ---
+  duration_ms: 0.055467
+  type: 'test'
+  ...
+# Subtest: circular area diameter is a physical diameter, not a nominal pipe size
+ok 39 - circular area diameter is a physical diameter, not a nominal pipe size
+  ---
+  duration_ms: 0.069562
+  type: 'test'
+  ...
+# Subtest: drain fall and tank volume use explicit design inputs
+ok 40 - drain fall and tank volume use explicit design inputs
+  ---
+  duration_ms: 0.14387
+  type: 'test'
+  ...
+# Subtest: rain conversion from mm/hour to cubic metres/second
+ok 41 - rain conversion from mm/hour to cubic metres/second
+  ---
+  duration_ms: 0.079111
+  type: 'test'
+  ...
+# Subtest: water heating distinguishes thermal output and electrical input
+ok 42 - water heating distinguishes thermal output and electrical input
+  ---
+  duration_ms: 0.076343
+  type: 'test'
+  ...
+# Subtest: Darcy head includes elevation, residual, friction and fittings
+ok 43 - Darcy head includes elevation, residual, friction and fittings
+  ---
+  duration_ms: 0.156795
+  type: 'test'
+  ...
+# Subtest: nonfinite and negative physical quantities fail
+ok 44 - nonfinite and negative physical quantities fail
+  ---
+  duration_ms: 0.10366
+  type: 'test'
+  ...
+# Subtest: export includes per-discipline drawings, schedules and honest register
+ok 45 - export includes per-discipline drawings, schedules and honest register
+  ---
+  duration_ms: 856.119256
+  type: 'test'
+  ...
+# Subtest: SVG quotes user labels and retains input binding
+ok 46 - SVG quotes user labels and retains input binding
+  ---
+  duration_ms: 219.162515
+  type: 'test'
+  ...
+# Subtest: DXF records metre units and true subfloor drain elevations
+ok 47 - DXF records metre units and true subfloor drain elevations
+  ---
+  duration_ms: 340.472769
+  type: 'test'
+  ...
+# Subtest: stale drawing export is rejected
+ok 48 - stale drawing export is rejected
+  ---
+  duration_ms: 127.915363
+  type: 'test'
+  ...
+# Subtest: modified serialized output cannot be silently exported with an old result hash
+ok 49 - modified serialized output cannot be silently exported with an old result hash
+  ---
+  duration_ms: 209.42354
+  type: 'test'
+  ...
+# Subtest: CSV preserves blanks and quotes while preventing formula injection
+ok 50 - CSV preserves blanks and quotes while preventing formula injection
+  ---
+  duration_ms: 1.429471
+  type: 'test'
+  ...
+# Subtest: draw adapter requires actual upstream topology and validator functions
+ok 51 - draw adapter requires actual upstream topology and validator functions
+  ---
+  duration_ms: 1.40151
+  type: 'test'
+  ...
+# Subtest: draw adapter rejects a nonzero north angle until a frame transform is provided
+ok 52 - draw adapter rejects a nonzero north angle until a frame transform is provided
+  ---
+  duration_ms: 2.8013
+  type: 'test'
+  ...
+# Subtest: legacy adapter cannot silently validate without the native validator
+ok 53 - legacy adapter cannot silently validate without the native validator
+  ---
+  duration_ms: 0.594439
+  type: 'test'
+  ...
+# Subtest: IR adapter requires existing envelope and request verification
+ok 54 - IR adapter requires existing envelope and request verification
+  ---
+  duration_ms: 0.576509
+  type: 'test'
+  ...
+# Subtest: polygon area remains stable far from origin
+ok 55 - polygon area remains stable far from origin
+  ---
+  duration_ms: 1.051206
+  type: 'test'
+  ...
+# Subtest: self intersecting polygon is rejected
+ok 56 - self intersecting polygon is rejected
+  ---
+  duration_ms: 0.568404
+  type: 'test'
+  ...
+# Subtest: interior placement avoids courtyard hole
+ok 57 - interior placement avoids courtyard hole
+  ---
+  duration_ms: 2.535902
+  type: 'test'
+  ...
+# Subtest: straight route length and endpoints are exact
+ok 58 - straight route length and endpoints are exact
+  ---
+  duration_ms: 1.730966
+  type: 'test'
+  ...
+# Subtest: routing detours around 3D obstacle
+ok 59 - routing detours around 3D obstacle
+  ---
+  duration_ms: 39.288125
+  type: 'test'
+  ...
+# Subtest: closed barrier yields blocked, no fabricated straight connection
+ok 60 - closed barrier yields blocked, no fabricated straight connection
+  ---
+  duration_ms: 8.138302
+  type: 'test'
+  ...
+# Subtest: thin obstacle is detected between grid nodes
+ok 61 - thin obstacle is detected between grid nodes
+  ---
+  duration_ms: 3.961221
+  type: 'test'
+  ...
+# Subtest: obstacle below another route elevation does not create an XY-only collision
+ok 62 - obstacle below another route elevation does not create an XY-only collision
+  ---
+  duration_ms: 0.277005
+  type: 'test'
+  ...
+# Subtest: courtyard hole is excluded from all routed segments
+ok 63 - courtyard hole is excluded from all routed segments
+  ---
+  duration_ms: 33.717338
+  type: 'test'
+  ...
+# Subtest: segment crossing a concave notch fails despite endpoints being inside
+ok 64 - segment crossing a concave notch fails despite endpoints being inside
+  ---
+  duration_ms: 0.543998
+  type: 'test'
+  ...
+# Subtest: missing route dimensions are not assigned defaults
+ok 65 - missing route dimensions are not assigned defaults
+  ---
+  duration_ms: 0.273814
+  type: 'test'
+  ...
+# Subtest: oversized grid fails with an explicit resource error
+ok 66 - oversized grid fails with an explicit resource error
+  ---
+  duration_ms: 0.476032
+  type: 'test'
+  ...
+1..66
+# tests 66
+# suites 0
+# pass 66
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8440.671508

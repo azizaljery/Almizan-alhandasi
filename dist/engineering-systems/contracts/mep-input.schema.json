@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mizan:mep-input:1",
+  "title": "MIZAN-MEP-INPUT/1 — structural contract; geometry and source binding need runtime validation",
+  "type": "object",
+  "required": ["schema", "projectId", "units", "frame", "architecture", "services", "rules"],
+  "properties": {
+    "schema": { "const": "MIZAN-MEP-INPUT/1" },
+    "projectId": { "$ref": "#/$defs/id" },
+    "units": { "const": "m" },
+    "frame": { "const": "X_EAST_Y_NORTH_Z_UP" },
+    "architecture": {
+      "type": "object",
+      "required": ["source", "levels", "rooms", "walls", "openings", "obstacles"],
+      "properties": {
+        "source": { "type": "object", "required": ["kind", "revision", "sha256", "warnings"], "properties": { "kind": { "type": "string" }, "revision": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "warnings": { "type": "array" } } },
+        "levels": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "elevationM", "heightM"], "properties": { "id": { "$ref": "#/$defs/id" }, "elevationM": { "type": "number" }, "heightM": { "type": "number", "exclusiveMinimum": 0 } } } },
+        "rooms": { "type": "array", "minItems": 1, "maxItems": 500, "items": { "type": "object", "required": ["id", "levelId", "polygon", "holes", "heightM"], "properties": { "id": { "$ref": "#/$defs/id" }, "levelId": { "$ref": "#/$defs/id" }, "polygon": { "$ref": "#/$defs/polygon" }, "holes": { "type": "array", "items": { "$ref": "#/$defs/polygon" } }, "heightM": { "type": "number", "exclusiveMinimum": 0 } } } },
+        "walls": { "type": "array", "items": { "type": "object", "required": ["id", "levelId", "a", "b", "thicknessM", "heightM"], "properties": { "id": { "$ref": "#/$defs/id" }, "levelId": { "$ref": "#/$defs/id" }, "a": { "$ref": "#/$defs/point" }, "b": { "$ref": "#/$defs/point" }, "thicknessM": { "type": "number", "exclusiveMinimum": 0 }, "heightM": { "type": "number", "exclusiveMinimum": 0 } } } },
+        "openings": { "type": "array", "items": { "type": "object", "required": ["id", "wallId", "levelId", "atM", "widthM", "heightM", "sillM"] } },
+        "obstacles": { "type": "array", "maxItems": 2000, "items": { "type": "object", "required": ["id", "min", "max"], "properties": { "id": { "$ref": "#/$defs/id" }, "min": { "$ref": "#/$defs/point3" }, "max": { "$ref": "#/$defs/point3" } } } }
+      }
+    },
+    "services": { "type": "object" },
+    "rules": { "type": "object" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,95}$" },
+    "point": { "type": "object", "required": ["x", "y"], "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+    "point3": { "type": "object", "required": ["x", "y", "z"], "properties": { "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } } },
+    "polygon": { "type": "array", "minItems": 3, "maxItems": 1000, "items": { "$ref": "#/$defs/point" } }
+  }
+}
