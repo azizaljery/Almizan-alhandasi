@@ -98,15 +98,15 @@ export function listSources({ session = null, studioRaw = null } = {}) {
   const engine = session?.input?.engine || 'v3';
   (session?.designs || []).forEach((d, i) => {
     const v = d.version ?? i + 1;
-    out.push({ id: `D${tag}-v${v}`, kind: 'design', label: `التصميم ${v}` + (session.approved === i ? ' (المعتمد)' : session.current === i ? ' (المعروض)' : ''), docText: d.doc, revision: `design-session:v${v}:${d.engine || engine}` });
+    out.push({ id: `D${tag}-v${v}`, kind: 'design', label: `التصميم ${v}` + (session.approved === i ? ' (المعتمد)' : session.current === i ? ' (المعروض)' : ''), docText: d.doc, revision: `design-session:v${v}:${d.engine || engine}`, sessionKey: tag });
   });
   (session?.alternatives || []).forEach(a => {
-    out.push({ id: `A${tag}-${a.index}`, kind: 'alternative', label: `البديل ${a.index + 1} كما عُرض`, docText: a.doc, revision: `alternative:${a.index}:${a.strategy || ''}` });
+    out.push({ id: `A${tag}-${a.index}`, kind: 'alternative', label: `البديل ${a.index + 1} كما عُرض`, docText: a.doc, revision: `alternative:${a.index}:${a.strategy || ''}`, sessionKey: tag });
   });
   if (studioRaw) {
     const ap = session && Number.isInteger(session.approved) ? session.designs[session.approved] : null;
     const link = ap ? `D${tag}-v${ap.version ?? session.approved + 1}` : 'unlinked';
-    out.unshift({ id: `STUDIO-${link}`, kind: 'studio', label: ap ? `المخطط المعتمد في المرسم (من التصميم ${ap.version ?? session.approved + 1}، بتعديلاته)` : 'مخطط المرسم الحالي', docText: studioRaw, revision: `studio:${link}` });
+    out.unshift({ id: `STUDIO-${link}`, kind: 'studio', label: ap ? `المخطط المعتمد في المرسم (من التصميم ${ap.version ?? session.approved + 1}، بتعديلاته)` : 'مخطط المرسم الحالي', docText: studioRaw, revision: `studio:${link}`, sessionKey: tag });
   }
   return out;
 }
@@ -250,9 +250,18 @@ export async function buildExport(kind, { project, result, sourceHash, levelId =
 
 // ——— الكيان المحفوظ: مدخلات الأنظمة ونتيجتها لكل بديل على حدة (لا تختلط أجهزة بديلين) ———
 export function loadStore(store) { try { const s = JSON.parse(store.getItem(STORE_KEY) || 'null'); return s && s.schema === SYSTEMS_SCHEMA && s.entities && typeof s.entities === 'object' ? s : { schema: SYSTEMS_SCHEMA, entities: {} }; } catch { return { schema: SYSTEMS_SCHEMA, entities: {} }; } }
-export function entityFor(storeData, alternativeId) {
+/**
+ * كيان البديل من التخزين. المفتاح = معرّف البديل (يتضمن مفتاح الجلسة createdAt)، ويُتحقق عند القراءة من ثلاثة أمور:
+ * تطابق alternativeId المخزّن، وتطابق sessionKey، وبصمة المستند تُقارَن لاحقًا بـassessEntity (لا تُعرض نتيجة لمخطط آخر).
+ * ctx: { sessionKey, kind } من listSources. كيان مرفوض يُعاد فارغًا مع restore.rejected ولا يُمحى من التخزين.
+ */
+export function entityFor(storeData, alternativeId, ctx = {}) {
   const e = storeData.entities[alternativeId];
-  return e ? clone(e) : { schema: SYSTEMS_SCHEMA, alternativeId, sourceHash: null, inputs: emptyInputs(), result: null, updatedAt: null };
+  const blank = extra => ({ schema: SYSTEMS_SCHEMA, alternativeId, sessionKey: ctx.sessionKey ?? null, kind: ctx.kind ?? null, sourceHash: null, inputs: emptyInputs(), result: null, updatedAt: null, ...extra });
+  if (!e) return blank();
+  if (e.alternativeId !== undefined && e.alternativeId !== alternativeId) return blank({ restore: { rejected: 'ALTERNATIVE_MISMATCH', stored: e.alternativeId } });
+  if (ctx.sessionKey != null && e.sessionKey != null && String(e.sessionKey) !== String(ctx.sessionKey)) return blank({ restore: { rejected: 'SESSION_MISMATCH', stored: e.sessionKey } });
+  return clone(e);
 }
 export function saveEntity(store, storeData, entity) {
   const next = { ...storeData, entities: { ...storeData.entities, [entity.alternativeId]: { ...clone(entity), schema: SYSTEMS_SCHEMA, updatedAt: Date.now() } } };
@@ -339,6 +348,33 @@ export function linkElectricalLoad(inputs0, equipmentId) {
   return { inputs, id, updated: false };
 }
 
+
+// ——— الإبطال بعد تعديل العمارة: حالة الكيان المحفوظ مقابل المخطط الحالي ———
+/** كل أجهزة المدخلات بمراجعها (دور وغرفة) لمعرفة ما يفقد مرجعه بعد تعديل المخطط. */
+export function deviceRefs(inputs) {
+  const out = [], S = inputs?.services || {};
+  for (const [discipline, groups] of Object.entries(DEVICE_GROUPS)) for (const g of groups) { let o = S; for (const k of g.path) o = o?.[k]; for (const d of o || []) out.push({ id: d.id, discipline, kind: d.kind, levelId: d.levelId ?? null, roomId: d.roomId ?? null }); }
+  return out;
+}
+/** أجهزة فقدت دورها أو غرفتها في العمارة الحالية (تُحفظ ولا تُحذف، وتُعرض للمراجعة). */
+export function orphanDevices(inputs, architecture) {
+  const levels = new Set(architecture.levels.map(l => l.id)), rooms = new Set(architecture.rooms.map(r => r.levelId + '\u0000' + r.id));
+  return deviceRefs(inputs).filter(d => !levels.has(d.levelId) || (d.roomId && !rooms.has(d.levelId + '\u0000' + d.roomId)));
+}
+/**
+ * حالة الكيان المحفوظ مقابل المخطط الحالي (project من bindArchitecture بمدخلات الكيان، وsourceHash بصمة المستند الحالي).
+ * state: NONE (لا نتيجة ولا أجهزة) | INPUTS_ONLY (أجهزة بلا نتيجة) | CURRENT | STALE.
+ * foreign: كل أجهزة المدخلات بلا مرجع في المخطط الحالي بعد تغيّره، فالأرجح أنه مستند آخر (لا تُحمَّل المدخلات تلقائيًا).
+ */
+export async function assessEntity(entity, { project, sourceHash }) {
+  const refs = deviceRefs(entity.inputs), orphans = project ? orphanDevices(entity.inputs, project.architecture) : [];
+  if (!entity.result) return { state: refs.length ? 'INPUTS_ONLY' : 'NONE', reason: 'NO_RESULT', messageAr: 'لم تُحسب الأنظمة بعد.', fresh: false, archChanged: false, deviceCount: refs.length, orphans, foreign: false };
+  const f = await freshness(entity.result, project, sourceHash);
+  const archChanged = entity.result.source?.sha256 !== sourceHash || (!!entity.sourceHash && entity.sourceHash !== sourceHash);
+  const foreign = archChanged && refs.length > 0 && orphans.length === refs.length;
+  return { state: f.fresh ? 'CURRENT' : 'STALE', reason: f.reason, messageAr: f.messageAr, fresh: f.fresh, archChanged, deviceCount: refs.length, orphans, foreign };
+}
+
 // ——— قراءة النتيجة للعرض ———
 /** قيمة الحساب للعرض: الناقص يبقى null مع سببه من رسائل التخصص (لا يُعرض صفر مكان الناقص). */
 export function calcRows(result, discipline) {
@@ -383,6 +419,6 @@ export function createSystemsAgent(readProject) {
   return createAgentActions({ getProject: async () => { const p = await readProject(); if (!p) throw Object.assign(Error('لا يوجد مخطط مربوط'), { code: 'NO_PROJECT' }); return p; } });
 }
 export { comparePackages, hash };
-export default { SYSTEMS_SCHEMA, STORE_KEY, DISCIPLINES, DISCIPLINE_INFO, DEVICE_GROUPS, listSources, bindArchitecture, computeSystems, freshness, buildExport, loadStore, entityFor, saveEntity, addDevice, moveDevice, removeDevice, updateDevice, linkElectricalLoad, locate, calcRows, issuesOf, levelLayers, svgFrame, structuralObstacles, suggestDomains, createSystemsAgent, PRELIMINARY_AR, NO_CLASH_AR };
+export default { SYSTEMS_SCHEMA, STORE_KEY, DISCIPLINES, DISCIPLINE_INFO, DEVICE_GROUPS, listSources, bindArchitecture, computeSystems, freshness, buildExport, loadStore, entityFor, saveEntity, addDevice, moveDevice, removeDevice, updateDevice, linkElectricalLoad, locate, deviceRefs, orphanDevices, assessEntity, calcRows, issuesOf, levelLayers, svgFrame, structuralObstacles, suggestDomains, createSystemsAgent, PRELIMINARY_AR, NO_CLASH_AR };
 /** نقطة داخلية فعلية في الغرفة (تعمل للمضلعات المقعرة والثقوب). */
 export { interiorPoint as interiorOf } from './engineering-systems/src/geometry.mjs';

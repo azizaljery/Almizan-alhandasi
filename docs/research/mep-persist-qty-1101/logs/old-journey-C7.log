@@ -1,0 +1,58 @@
+PASS بذرة: صفحة التصميم من مستند محرك فعلي — tests/fixtures/mep/C7-v3.json
+PASS رابط الأنظمة ظاهر في صفحة التصميم
+PASS صفحة الأنظمة مربوطة بالتصميم المعروض نفسه — D1-v1
+PASS وسم «تصميم أولي يحتاج مراجعة مهندس مختص» ظاهر
+PASS اختيار الدور يعرض أدوار المستند الفعلية — 2 دور
+PASS إضافة لوحة ومقبسين بالنقر على المسقط داخل غرفها — {"panels":[{"id":"DB1","kind":"PANEL","levelId":"L1","position":{"x":4.532,"y":19.65,"z":1.6},"roomId":"r8"}],"loads":[{"id":"SO1","kind":"SOCKET","levelId":"L1","position":{"x":4.532,"y":8.619,"z":0.
+PASS PF ناقص للمقبس SO1: «غير محسوب» لا صفر — ["E-P-SO1","NOT_CALCULATED","غير محسوب"]
+PASS الإنارة محسوبة بطريقة اللومن من مدخلات صريحة
+PASS مكاسب حرارية محسوبة من مدخلات المناخ والغلاف المعلنة افتراضًا — [["M-Q-Z1","CALCULATED"],["M-AIR-Z1","CALCULATED"],["M-OA-Z1","NOT_CALCULATED"],["M-D-Z1","CALCULATED"]]
+PASS النقر خارج الغرف دون «خارج الغرف» يُرفض برسالة ولا يُضاف جهاز — {"rejected":"DEVICE_OUTSIDE_ROOMS","op":{"x":632.757568359375,"y":438.3082580566406},"hint":"الموقع خارج غرف هذا الدور؛ لم يُربط الجهاز بغرفة. اختر «خارج الغرف» صراحة إن كان الجهاز خارجيًا (منهل، وحدة خارجية…)."}
+PASS صرف لا يصل منسوب المنهل يظهر «متعذر BLOCKED» مع رسالة فرق المناسيب — PC1 sanitary WC1 MH1 0.001 0.04 غير محسوب 8.338 8.336 0.02 0.167 -0.467 متعذر BLOCKED
+PASS fire: عنصران ومسار معروض في الطبقة والجدول — 1
+PASS low_current: عنصران ومسار معروض في الطبقة والجدول — 1
+PASS solar: عنصران ومسار معروض في الطبقة والجدول — 1
+PASS عقدة مقابلة في الدور الثاني ورايزر بمناسيب فعلية (أو رفض موثق إن لم تقع النقطة في غرفة علوية) — رايزر مضاف
+PASS ربط حمل التكييف بالكهرباء: MATCHED_SUPPLIED_INPUT — AC1 AC1-LOAD MATCHED_SUPPLIED_INPUT
+PASS رسالة «عدم اكتشاف تعارض لا يعني اكتمال المراجعة» ظاهرة
+PASS نقل جهاز يجعل النتيجة قديمة فورًا ويُعطّل كل أزرار التصدير — {"fresh":false,"reason":"INPUTS_CHANGED","messageAr":"تغيّرت المدخلات بعد الحساب؛ النتيجة المعروضة قديمة ولا تُصدَّر."}
+PASS إعادة الحساب تعطي بصمة مدخل جديدة وتعيد التصدير — ["e3921dea88","86c048472a"]
+PASS تعديل الغرفة في المخطط يغيّر بصمة المصدر ويعيد الحساب قبل أي تصدير — ["500d65d1cb","05a39d8359"]
+PASS تنزيل electrical/svg — 20976 بايت XML صالح
+PASS تنزيل electrical/dxf — 14736 بايت أقسام DXF
+PASS تنزيل electrical/csv:electrical-circuits — 185 بايت BOM+ترويسة
+PASS تنزيل electrical/csv:electrical-panels — 97 بايت BOM+ترويسة
+PASS تنزيل electrical/csv:quantities — 2065 بايت BOM+ترويسة
+PASS تنزيل electrical/json-result — 63695 بايت JSON
+PASS تنزيل electrical/json-input — 79046 بايت JSON
+PASS تنزيل electrical/json-issues — 5817 بايت JSON
+PASS تنزيل plumbing/svg — 18672 بايت XML صالح
+PASS تنزيل plumbing/dxf — 14736 بايت أقسام DXF
+PASS تنزيل plumbing/csv:plumbing-connections — 285 بايت BOM+ترويسة
+PASS تنزيل plumbing/csv:quantities — 2065 بايت BOM+ترويسة
+PASS تنزيل plumbing/json-result — 63695 بايت JSON
+PASS تنزيل plumbing/json-input — 79046 بايت JSON
+PASS تنزيل plumbing/json-issues — 5817 بايت JSON
+PASS تنزيل coordination/svg — 26588 بايت XML صالح
+PASS تنزيل coordination/dxf — 14736 بايت أقسام DXF
+PASS تنزيل coordination/csv:quantities — 2065 بايت BOM+ترويسة
+PASS تنزيل coordination/json-result — 63695 بايت JSON
+PASS تنزيل coordination/json-input — 79046 بايت JSON
+PASS تنزيل coordination/json-issues — 5817 بايت JSON
+PASS RTL عربي (mobile) — {"dir":"rtl","computed":"rtl"}
+PASS لا تمرير أفقي للصفحة (mobile/electrical) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS لا تمرير أفقي للصفحة (mobile/hvac) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS لا تمرير أفقي للصفحة (mobile/plumbing) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS لا تمرير أفقي للصفحة (mobile/fire) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS لا تمرير أفقي للصفحة (mobile/low_current) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS لا تمرير أفقي للصفحة (mobile/solar) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS لا تمرير أفقي للصفحة (mobile/coordination) — {"ok":true,"w":390,"innerWidth":390,"off":[]}
+PASS RTL عربي (desktop) — {"dir":"rtl","computed":"rtl"}
+PASS لا تمرير أفقي للصفحة (desktop/electrical) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+PASS لا تمرير أفقي للصفحة (desktop/hvac) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+PASS لا تمرير أفقي للصفحة (desktop/plumbing) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+PASS لا تمرير أفقي للصفحة (desktop/fire) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+PASS لا تمرير أفقي للصفحة (desktop/low_current) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+PASS لا تمرير أفقي للصفحة (desktop/solar) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+PASS لا تمرير أفقي للصفحة (desktop/coordination) — {"ok":true,"w":1366,"innerWidth":1366,"off":[]}
+{"pass":57,"fail":0,"errors":0,"blockedExternal":["fonts.googleapis.com"]}

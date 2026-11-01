@@ -1,0 +1,344 @@
+{
+  "startedAt": "2026-11-01T16:30:39.465Z",
+  "base": "http://127.0.0.1:45699",
+  "case": "PERSIST",
+  "seed": null,
+  "checks": [
+    {
+      "name": "desktop: البديل 1 حُفظ بجهازه",
+      "ok": true,
+      "detail": [
+        "SD1"
+      ]
+    },
+    {
+      "name": "desktop: التبديل إلى البديل 2: لا يحمل أجهزة البديل 1",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "desktop: البديل 2 حُفظ بجهازه",
+      "ok": true,
+      "detail": [
+        "DB1"
+      ]
+    },
+    {
+      "name": "desktop: الرجوع إلى البديل 1 يعيد كاشف الدخان وحده",
+      "ok": true,
+      "detail": [
+        "SD1"
+      ]
+    },
+    {
+      "name": "desktop: إعادة تحميل الصفحة تستعيد البديل 1 بنتيجة حديثة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: إعادة التحميل على البديل 2 تستعيد لوحته وبصمة مصدر مختلفة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: جلسة جديدة بالمستند نفسه: لا أجهزة موروثة",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "desktop: صفحة المخرجات: القسم حديث بعنوانه وتصنيفه وبند الحريق «غير مسعّر»",
+      "ok": true,
+      "detail": "كميات الأنظمة الهندسية — أولية\n\nكميات أولية — غير معتمدة للتنفيذ\n\nمحسوبة على المخطط ومدخلات الأنظمة الحالية.\n\nالتخصص\tالبند\tالطبقة\tالكمية\tالوحدة\tسعر الوحدة\tالمبلغ\nحريق\tكاشف دخان\tعناصر حريق\t1\tعدد\tغير مس"
+    },
+    {
+      "name": "desktop: كتاب المشروع المنزَّل يحمل القسم الحديث",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: تبويب الكميات في المرسم: قسم الأنظمة حديث",
+      "ok": true,
+      "detail": "كميات الأنظمة الهندسية — أولية\n\nكميات أولية — غير معتمدة للتنفيذ\n\nمحسوبة على المخطط ومدخلات الأنظمة الحالية.\n\nالتخصص\tالب"
+    },
+    {
+      "name": "desktop: quantities.csv: BOM + جدول العمارة + قسم الأنظمة بكاشف الدخان وغير مسعّر",
+      "ok": true,
+      "detail": "مالي البنود المسعّرة,غير مسعّر\r\nالإجمالي,لا إجمالي: 1 من 1 بندًا غير مسعّر\r\nتخصصات بلا عناصر في الحصر,كهرباء، تكييف، صحي، تيار خفيف، شمسية\r\nأساس الحصر,عدّ العناصر التي أدخلها المصمم وأطوال المسارات المقترحة (خطوط مركزية)؛ لا تشمل الوصلات ولا الهدر ولا الضريبة ولا الاحتياط. المسارات المتعذرة لا تدخل الحصر وتُذكر أدناه بسببها.\r\nتنبيه,تصميم أولي يحتاج مراجعة مهندس مختص — ليس مخططًا تنفيذيًا معتمدًا\r\n"
+    },
+    {
+      "name": "desktop: manifest.json يحمل systemsQuantities حديثًا غير معتمد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: بعد تعديل الجدار: قسم المخرجات قديم بلا بنود ولا جدول",
+      "ok": true,
+      "detail": "كميات الأنظمة الهندسية — أولية\n\nكميات أولية — غير معتمدة للتنفيذ\n\nقديمة — تغيّر المخطط المعماري أو مدخلات الأنظمة بعد آخر حساب؛ لا تُدرج كميات قديمة حتى يُعاد الحساب من صفحة الأنظمة. تغيّر المخطط المع"
+    },
+    {
+      "name": "desktop: كتاب المشروع بعد التعديل: القسم قديم بلا كاشف دخان",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: تبويب كميات المرسم بعد التعديل: قديمة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: quantities.csv بعد التعديل: القسم قديم بلا كاشف دخان",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: manifest.json بعد التعديل: STALE وبلا صفوف",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: صفحة الأنظمة على المخطط المعدّل: أُعيد الحساب بمدخلات محفوظة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: تعديل مدخل بلا إعادة حساب: قديمة، التصدير معطل، الجداول والكميات مخفية",
+      "ok": true,
+      "detail": {
+        "fresh": {
+          "fresh": false,
+          "reason": "INPUTS_CHANGED",
+          "messageAr": "تغيّرت المدخلات بعد الحساب؛ النتيجة المعروضة قديمة ولا تُصدَّر."
+        },
+        "disabled": true,
+        "noteVis": true,
+        "tblVis": false,
+        "ids": [
+          "HD1"
+        ]
+      }
+    },
+    {
+      "name": "desktop: إعادة الحساب تعيد الحالة محدّثة والجداول ظاهرة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: قسم الأنظمة في المخرجات داخل عرض الشاشة (الجداول تمرَّر داخل حاويتها)",
+      "ok": true,
+      "detail": {
+        "sw": 1366,
+        "summaryRight": 1217,
+        "mepTableOverflow": [],
+        "mepRight": 1217,
+        "headerOverflow": false,
+        "widest": []
+      }
+    },
+    {
+      "name": "mobile: البديل 1 حُفظ بجهازه",
+      "ok": true,
+      "detail": [
+        "SD1"
+      ]
+    },
+    {
+      "name": "mobile: التبديل إلى البديل 2: لا يحمل أجهزة البديل 1",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "mobile: البديل 2 حُفظ بجهازه",
+      "ok": true,
+      "detail": [
+        "DB1"
+      ]
+    },
+    {
+      "name": "mobile: الرجوع إلى البديل 1 يعيد كاشف الدخان وحده",
+      "ok": true,
+      "detail": [
+        "SD1"
+      ]
+    },
+    {
+      "name": "mobile: إعادة تحميل الصفحة تستعيد البديل 1 بنتيجة حديثة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: إعادة التحميل على البديل 2 تستعيد لوحته وبصمة مصدر مختلفة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: جلسة جديدة بالمستند نفسه: لا أجهزة موروثة",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "mobile: صفحة المخرجات: القسم حديث بعنوانه وتصنيفه وبند الحريق «غير مسعّر»",
+      "ok": true,
+      "detail": "كميات الأنظمة الهندسية — أولية\n\nكميات أولية — غير معتمدة للتنفيذ\n\nمحسوبة على المخطط ومدخلات الأنظمة الحالية.\n\nالتخصص\tالبند\tالطبقة\tالكمية\tالوحدة\tسعر الوحدة\tالمبلغ\nحريق\tكاشف دخان\tعناصر حريق\t1\tعدد\tغير مس"
+    },
+    {
+      "name": "mobile: كتاب المشروع المنزَّل يحمل القسم الحديث",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: تبويب الكميات في المرسم: قسم الأنظمة حديث",
+      "ok": true,
+      "detail": "كميات الأنظمة الهندسية — أولية\n\nكميات أولية — غير معتمدة للتنفيذ\n\nمحسوبة على المخطط ومدخلات الأنظمة الحالية.\n\nالتخصص\tالب"
+    },
+    {
+      "name": "mobile: quantities.csv: BOM + جدول العمارة + قسم الأنظمة بكاشف الدخان وغير مسعّر",
+      "ok": true,
+      "detail": "مالي البنود المسعّرة,غير مسعّر\r\nالإجمالي,لا إجمالي: 1 من 1 بندًا غير مسعّر\r\nتخصصات بلا عناصر في الحصر,كهرباء، تكييف، صحي، تيار خفيف، شمسية\r\nأساس الحصر,عدّ العناصر التي أدخلها المصمم وأطوال المسارات المقترحة (خطوط مركزية)؛ لا تشمل الوصلات ولا الهدر ولا الضريبة ولا الاحتياط. المسارات المتعذرة لا تدخل الحصر وتُذكر أدناه بسببها.\r\nتنبيه,تصميم أولي يحتاج مراجعة مهندس مختص — ليس مخططًا تنفيذيًا معتمدًا\r\n"
+    },
+    {
+      "name": "mobile: manifest.json يحمل systemsQuantities حديثًا غير معتمد",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: بعد تعديل الجدار: قسم المخرجات قديم بلا بنود ولا جدول",
+      "ok": true,
+      "detail": "كميات الأنظمة الهندسية — أولية\n\nكميات أولية — غير معتمدة للتنفيذ\n\nقديمة — تغيّر المخطط المعماري أو مدخلات الأنظمة بعد آخر حساب؛ لا تُدرج كميات قديمة حتى يُعاد الحساب من صفحة الأنظمة. تغيّر المخطط المع"
+    },
+    {
+      "name": "mobile: كتاب المشروع بعد التعديل: القسم قديم بلا كاشف دخان",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: تبويب كميات المرسم بعد التعديل: قديمة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: quantities.csv بعد التعديل: القسم قديم بلا كاشف دخان",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: manifest.json بعد التعديل: STALE وبلا صفوف",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: صفحة الأنظمة على المخطط المعدّل: أُعيد الحساب بمدخلات محفوظة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: تعديل مدخل بلا إعادة حساب: قديمة، التصدير معطل، الجداول والكميات مخفية",
+      "ok": true,
+      "detail": {
+        "fresh": {
+          "fresh": false,
+          "reason": "INPUTS_CHANGED",
+          "messageAr": "تغيّرت المدخلات بعد الحساب؛ النتيجة المعروضة قديمة ولا تُصدَّر."
+        },
+        "disabled": true,
+        "noteVis": true,
+        "tblVis": false,
+        "ids": [
+          "HD1"
+        ]
+      }
+    },
+    {
+      "name": "mobile: إعادة الحساب تعيد الحالة محدّثة والجداول ظاهرة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: قسم الأنظمة في المخرجات داخل عرض الشاشة (الجداول تمرَّر داخل حاويتها)",
+      "ok": true,
+      "detail": {
+        "sw": 431,
+        "summaryRight": 414,
+        "mepTableOverflow": [],
+        "mepRight": 414,
+        "headerOverflow": true,
+        "widest": [
+          "SECTION.sec/summary 414",
+          "SECTION.sec/plan0 414",
+          "SECTION.sec/view3d 414",
+          "SECTION.sec/str0 414"
+        ]
+      }
+    }
+  ],
+  "shots": [
+    "docs/research/mep-persist-qty-1101/ui/desktop-10-systems-two-alternatives.png",
+    "docs/research/mep-persist-qty-1101/ui/desktop-20-final-current.png",
+    "docs/research/mep-persist-qty-1101/ui/desktop-30-studio-qty-current.png",
+    "docs/research/mep-persist-qty-1101/ui/desktop-40-final-stale.png",
+    "docs/research/mep-persist-qty-1101/ui/desktop-50-studio-qty-stale.png",
+    "docs/research/mep-persist-qty-1101/ui/desktop-60-systems-after-edit.png",
+    "docs/research/mep-persist-qty-1101/ui/desktop-70-systems-stale-hidden-tables.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-10-systems-two-alternatives.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-20-final-current.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-30-studio-qty-current.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-40-final-stale.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-50-studio-qty-stale.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-60-systems-after-edit.png",
+    "docs/research/mep-persist-qty-1101/ui/mobile-70-systems-stale-hidden-tables.png"
+  ],
+  "downloads": [
+    {
+      "vp": "desktop",
+      "files": [
+        "plan-L1.svg",
+        "plan.dxf",
+        "download",
+        "quantities.csv",
+        "structure-L1.svg",
+        "structure.csv",
+        "manifest.json"
+      ]
+    },
+    {
+      "vp": "mobile",
+      "files": [
+        "plan-L1.svg",
+        "plan.dxf",
+        "download",
+        "quantities.csv",
+        "structure-L1.svg",
+        "structure.csv",
+        "manifest.json"
+      ]
+    }
+  ],
+  "errors": [],
+  "blocked": [
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com"
+  ],
+  "notes": [
+    "mobile: تمرير أفقي سابق الوجود في final.html (scrollWidth=431) يشمل أقسامه كلها (summary وplan0…) ولم يُغيَّر؛ قسم الأنظمة بعرض بقية الأقسام نفسه"
+  ],
+  "finishedAt": "2026-11-01T16:31:35.068Z"
+}

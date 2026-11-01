@@ -7,6 +7,7 @@ import { structureSheetSvg } from './draw/structure-sheet.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
 import { roomTypeName } from './draw/catalog.mjs';
+import { emptySection, sectionBodyHtml, SECTION_TITLE_AR } from './mep-quantities.mjs';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const r2 = v => Math.round(v * 100) / 100;
@@ -38,7 +39,7 @@ export function computeCost(rows, rates = {}, { reservePct = null, vatPct = null
 }
 
 /** كل ما تعرضه صفحة المخرجات وكتاب المشروع، من مستند واحد. */
-export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null, vatPct = null, snapshot3d = null, now = new Date(), levelFilter = null } = {}) {
+export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null, vatPct = null, snapshot3d = null, now = new Date(), levelFilter = null, systems = null } = {}) {
   const day = (now instanceof Date ? now : new Date(now)).toISOString().slice(0, 10);
   const fingerprint = geometryFingerprint(doc);
   const quantities = computeDocQuantities(doc), structure = computeStructure(doc);
@@ -63,6 +64,7 @@ export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null,
       plot: doc.plot?.polygon?.length ? plotSize(doc.plot.polygon) : null,
     },
     levels, rooms, quantities, structure, cost: computeCost(quantities.rows, rates, { reservePct, vatPct }),
+    systems: systems || emptySection('NOT_CALCULATED'),
     score, scoreLevel, validation, review, dnaAxes, dnaFingerprint: dna?.dna?.fingerprint || null, snapshot3d,
   };
 }
@@ -106,6 +108,7 @@ export function projectBookHtml(data, { css = '' } = {}) {
   data.levels.filter(l => l.structure).forEach(l => parts.push(sec('المخطط الإنشائي المبدئي — ' + l.name, `<div class="pb-svg">${l.structure}</div><p class="muted">تحجيم أولي لا تصميم إنشائي معتمد؛ يراجعه مهندس إنشائي.</p>`)));
   parts.push(sec('الكميات', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], data.quantities.rows.map(r => [r.label, r.value === null ? '—' : `${fmt(r.value)} ${r.unit}`, GRADES[r.grade], r.basis]))));
   parts.push(sec('التكلفة بأسعارك', table(['البند', 'الكمية', 'سعر الوحدة', 'التكلفة'], c.items.map(i => [i.label, i.qty === null ? '—' : `${fmt(i.qty)} ${i.unit}`, i.rate === null ? 'غير مسعّر' : fmt(i.rate), i.cost === null ? 'غير مسعّر' : fmt(i.cost)])) + `<p>المجموع الجزئي (${c.pricedCount} من ${c.totalCount} بندًا مسعّرًا): <b>${fmt(c.subtotal)}</b>${c.reserve !== null ? ` · احتياط ${c.reservePct}%: ${fmt(c.reserve)}` : ''}${c.vat !== null ? ` · ضريبة ${c.vatPct}%: ${fmt(c.vat)}` : ''} · الإجمالي: <b>${fmt(c.total)}</b> ${c.complete ? '' : '(جزئي: يخص البنود المسعّرة فقط)'}</p><p class="muted">لا توجد أسعار سوق افتراضية؛ الأسعار أسعارك.</p>`));
+  parts.push(sec(SECTION_TITLE_AR, sectionBodyHtml(data.systems, esc)));
   parts.push(sec('لماذا هذا التصميم', (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.improvements.length ? `<h3>ما يحتاج تحسينًا</h3><ul>${R.improvements.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.unmeasured.length ? `<p class="muted">غير مُقيَّم: ${esc(R.unmeasured.join('، '))}</p>` : '') + (R.notes.length ? `<h3>ملاحظات المراجعة</h3><ul>${R.notes.map(n => `<li>${esc(n.message)}</li>`).join('')}</ul>` : '') + (data.score ? `<p class="muted">${esc(data.score.grade)}. ${esc(data.score.note || '')}</p>` : '<p class="muted">الدرجة غير متاحة لهذا المخطط.</p>')));
   parts.push(sec('ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => [s.title, s.status === 'available' ? 'متاح' : 'قادم', s.note]))));
   return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كتاب المشروع — ${esc(data.title)}</title><style>${css}</style></head><body class="pb"><header class="pb-head"><h1>كتاب المشروع</h1><p>${esc(data.title)} · الميزان الهندسي · نحو منزلك</p></header>${parts.join('')}<footer class="pb-foot">أُعدّ بواسطة الميزان الهندسي. الكميات والتكلفة والتحجيم الإنشائي تقديرية بافتراضات معلنة وتُراجَع من مختصين قبل التنفيذ.</footer></body></html>`;

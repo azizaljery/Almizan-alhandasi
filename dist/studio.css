@@ -114,3 +114,4 @@ dialog .pick small{display:block;color:var(--soft);margin-top:2px}dialog h3{marg
   .welcome h2{font-size:16px;margin:0 0 4px}.welcome p{font-size:12px;line-height:1.6;margin:0 0 8px}.welcome small{display:none}
   .welcome .row{gap:6px}.welcome .row .btn{padding:4px 10px;font-size:12px;min-height:36px}
 }
+.mep-sec table{width:100%;border-collapse:collapse;font-size:12px}.mep-sec th,.mep-sec td{border-bottom:1px solid #0002;padding:3px 5px;text-align:start;vertical-align:top}.mep-sec h3{font-size:13px;margin:8px 0 4px}.mep-sec code{font-size:11px}
