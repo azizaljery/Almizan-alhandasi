@@ -57,7 +57,7 @@ const st = page => page.evaluate(() => globalThis.__mizanSystems.state);
 const tab = async (page, id) => { await page.click(`[data-tab="${id}"]`); await page.waitForTimeout(150); };
 const level = async (page, id) => { await page.click(`[data-level="${id}"]`); await page.waitForTimeout(150); };
 async function placeAt(page, { group = 0, kind, x, y, z = 1.2, outside = false }) {
-  await page.click('[data-mode=add]');
+  await page.click('[data-mode=add]'); await page.waitForTimeout(300);
   await page.selectOption('#grpSel', String(group)); await page.selectOption('#kindSel', kind);
   await page.fill('#zRel', String(z)); await page.dispatchEvent('#zRel', 'change');
   if (outside !== await page.isChecked('#outsideChk')) await page.click('#outsideChk');
@@ -89,7 +89,9 @@ if (SEED) {
   await page.goto(BASE + '/design.html'); await page.waitForSelector('#plan', { timeout: 60000 });
   check('بذرة: صفحة التصميم من مستند محرك فعلي', true, SEED);
 } else {
-  const { CASES } = await import('./acceptance-cases.mjs'); const C = CASES.find(c => c.id === CASE);
+  const { CASES } = await import('./acceptance-cases.mjs');
+  // GUIDED: الأرض والأعداد نفسها التي يستعملها scripts/e2e-sharaa-r21-ui.mjs (25×12.5، شارع ومدخل شمالي، 3 غرف ومجلس و3 دورات)
+  const C = CASE === 'GUIDED' ? { id: 'GUIDED', land: { length: 25, width: 12.5, streets: ['n'], entries: ['n'] }, counts: { bedrooms: 3, majlis: 1, baths: 3 } } : CASES.find(c => c.id === CASE);
   await page.goto(BASE + '/'); await page.waitForSelector('#start'); await page.click('#start');
   await page.fill('#landLength', String(C.land.length)); await page.fill('#landWidth', String(C.land.width));
   if ((C.land.floors || 1) > 1) await page.selectOption('#landFloors', String(C.land.floors));
@@ -114,7 +116,19 @@ if (SEED) {
   await snap(page, desktop, '01-sharaa-brief', false);
   const go = await page.$('#chat button:has-text("أؤكد وأبدأ"), #chat button:has-text("أفهم القيود")'); if (go) await go.click();
   await page.waitForSelector('#chat button:has-text("توليد التصميم")', { timeout: 20000 }).then(b => b.click()).catch(() => {});
-  await page.waitForURL(/\/design(\.html)?$/, { timeout: 3000000 });
+  await snap(page, desktop, '01b-after-confirm', false);
+  let outcome = await Promise.race([page.waitForURL(/\/design(\.html)?$/, { timeout: 3000000 }).then(() => 'design'), page.waitForFunction(() => { const r = document.querySelector('#buildReport'); return r && !r.hidden && r.children.length > 0; }, null, { timeout: 3000000 }).then(() => 'report')]);
+  // المحرك حجب كل التصاميم وعرض خيارات صريحة؛ «العميل» يوافق صراحة في الواجهة على تنازلين محددين بالترتيب (لا تغيير صامت)
+  for (const [k, title] of [['parking', 'قبول موقف موازٍ للشارع'], ['majlis', 'فصل المجلس عن غرفة الطعام']].entries()) {
+    if (outcome !== 'report') break;
+    await snap(page, desktop, `01c-build-report-${k}`, true);
+    const card = page.locator('#buildReport div').filter({ hasText: title[1] }).filter({ has: page.locator('button') }).last();
+    if (!(await card.count())) continue;
+    await card.locator('button').first().click();
+    check(`بعد حجب التصاميم: موافقة صريحة على «${title[1]}» من بطاقة الخيارات`, true);
+    outcome = await page.waitForURL(/\/design(\.html)?$/, { timeout: 1500000 }).then(() => 'design').catch(() => 'report');
+  }
+  if (outcome !== 'design') { await snap(page, desktop, '01d-build-report', true); check('التوليد انتهى بصفحة التصميم', false, await page.locator('#buildReport').innerText().catch(() => '')); throw Error('NO_DESIGN'); }
   await page.waitForSelector('#plan', { timeout: 300000 }); await page.waitForTimeout(800);
   check('الرحلة: الأرض ← شرعاء ← التوليد في المتصفح ← صفحة التصميم', true, `${CASE} في ${Math.round((Date.now() - t0) / 1000)} ث`);
 }
@@ -226,6 +240,7 @@ await page.uncheck('#autoCalc');
 const fresh0 = await st(page);
 await page.click('[data-mode=move]');
 const db = fresh0.inputs.services.electrical.panels[0].position;
+await page.waitForTimeout(400); await page.locator('#plan').scrollIntoViewIfNeeded(); await page.waitForTimeout(200);
 const p1 = await page.evaluate(([X, Y]) => globalThis.__mizanSystems.screenPoint(X, Y), [db.x, db.y]); await page.mouse.click(p1.x, p1.y);
 const p2 = await page.evaluate(([X, Y]) => globalThis.__mizanSystems.screenPoint(X, Y), [kitchen.c.x - 0.4, kitchen.c.y - 0.2]); await page.mouse.click(p2.x, p2.y);
 await page.waitForTimeout(300);
@@ -257,7 +272,8 @@ for (const t of ['electrical', 'plumbing', 'coordination']) {
   await tab(page, t);
   const btns = await page.locator('[data-export]').evaluateAll(b => b.map(x => x.dataset.export));
   for (const key of btns) {
-    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.click(`[data-export="${key}"]`)]);
+    await waitFresh(page);
+    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 120000 }), page.click(`[data-export="${key}"]`)]);
     const path = join(OUT, 'downloads', `${t}-${dl.suggestedFilename()}`); await mkdir(dirname(path), { recursive: true }); await dl.saveAs(path);
     const text = await readFile(path, 'utf8'), kind = key.split(':')[0];
     let ok = text.length > 0, why = `${text.length} بايت`;
