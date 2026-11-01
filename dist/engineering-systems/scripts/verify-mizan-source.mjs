@@ -1,0 +1,25 @@
+// Read-only integration check. No network, no git mutation, no deployment.
+import { readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createHash } from 'node:crypto';
+import { fromDrawDoc, fromPlannerGeometry, createEngineeringPackage, hash } from '../src/index.mjs';
+import { demoConfig } from '../examples/config.mjs';
+const sourceDir = process.argv[2], output = process.argv[3];
+if (!sourceDir) throw new Error('Usage: node scripts/verify-mizan-source.mjs /path/to/repo/dist [new-report.json]');
+const provenance = JSON.parse(await readFile(new URL('../verification/source-provenance.json', import.meta.url), 'utf8'));
+const hashes = {};
+for (const path of Object.keys(provenance.sourceFilesSha256)) hashes[path] = createHash('sha256').update(await readFile(resolve(sourceDir, path))).digest('hex');
+const sourceMatchesPinnedFiles = Object.keys(hashes).every(path => hashes[path] === provenance.sourceFilesSha256[path]);
+const sourceRevision = sourceMatchesPinnedFiles ? provenance.commitObserved : 'LOCAL_UNPINNED_SNAPSHOT';
+const load = p => import(pathToFileURL(resolve(sourceDir, p)).href);
+const [{ analyzeDoc }, { validateDoc }, { sampleVilla }] = await Promise.all([load('draw/digest.mjs'), load('draw/doc.mjs'), load('draw/samples.mjs')]);
+const doc = sampleVilla(), before = await hash(doc);
+const bare = await fromDrawDoc(doc, { analyzeDoc, validateDoc, projectId: 'MEP-DEMO', sourceRevision });
+const config = demoConfig(bare.architecture.rooms);
+const project = await fromDrawDoc(doc, { analyzeDoc, validateDoc, projectId: 'MEP-DEMO', sourceRevision, ...config });
+const result = await createEngineeringPackage(project);
+if (await hash(doc) !== before || !project.architecture.rooms.length || result.constructionApproved !== false) throw new Error('Native integration invariant failed');
+const report = { status: 'PASS', scope: 'mizan-draw/1 actual source topology sample; not full app, v2/v3 generation, browser, or production', sourceMatchesPinnedFiles, sourceRevision, sourceFilesSha256: hashes, sourceDocumentHash: before, architectureHash: result.architectureHash, rooms: project.architecture.rooms.length, unchangedSourceDocument: true, codeCompliance: 'NOT_EVALUATED' };
+if (output) await writeFile(output, JSON.stringify(report, null, 2), { flag: 'wx' });
+console.log(JSON.stringify(report, null, 2));

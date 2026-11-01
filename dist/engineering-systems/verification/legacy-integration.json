@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "scope": "Legacy PlannerOutputContract/2 generated geometry only, not current villa v2/v3 engines",
+  "sourceFileSha256": "abfd5b6476630a00d524fc2ee24134e57b568c675cb3b56db0a1a8083b1b57d1",
+  "roomsAndCorridors": 3,
+  "unchangedSource": true,
+  "codeCompliance": "NOT_EVALUATED"
+}

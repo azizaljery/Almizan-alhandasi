@@ -1,0 +1,628 @@
+{
+  "startedAt": "2026-11-01T10:06:40.703Z",
+  "base": "http://127.0.0.1:38515",
+  "case": "GUIDED",
+  "seed": null,
+  "checks": [
+    {
+      "name": "بعد حجب التصاميم: موافقة صريحة على «قبول موقف موازٍ للشارع» من بطاقة الخيارات",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "بعد حجب التصاميم: موافقة صريحة على «فصل المجلس عن غرفة الطعام» من بطاقة الخيارات",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "الرحلة: الأرض ← شرعاء ← التوليد في المتصفح ← صفحة التصميم",
+      "ok": true,
+      "detail": "GUIDED في 1531 ث"
+    },
+    {
+      "name": "رابط الأنظمة ظاهر في صفحة التصميم",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "صفحة الأنظمة مربوطة بالتصميم المعروض نفسه",
+      "ok": true,
+      "detail": "D1793529130040-v1"
+    },
+    {
+      "name": "وسم «تصميم أولي يحتاج مراجعة مهندس مختص» ظاهر",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "اختيار الدور يعرض أدوار المستند الفعلية",
+      "ok": true,
+      "detail": "1 دور"
+    },
+    {
+      "name": "إضافة لوحة ومقبسين بالنقر على المسقط داخل غرفها",
+      "ok": true,
+      "detail": "{\"panels\":[{\"id\":\"DB1\",\"kind\":\"PANEL\",\"levelId\":\"L1\",\"position\":{\"x\":8.885,\"y\":14.15,\"z\":1.6},\"roomId\":\"r7\"}],\"loads\":[{\"id\":\"SO1\",\"kind\":\"SOCKET\",\"levelId\":\"L1\",\"position\":{\"x\":8.198,\"y\":17.653,\"z\":0"
+    },
+    {
+      "name": "PF ناقص للمقبس SO1: «غير محسوب» لا صفر",
+      "ok": true,
+      "detail": [
+        "E-P-SO1",
+        "NOT_CALCULATED",
+        "غير محسوب"
+      ]
+    },
+    {
+      "name": "الإنارة محسوبة بطريقة اللومن من مدخلات صريحة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "مكاسب حرارية محسوبة من مدخلات المناخ والغلاف المعلنة افتراضًا",
+      "ok": true,
+      "detail": [
+        [
+          "M-Q-Z1",
+          "CALCULATED"
+        ],
+        [
+          "M-AIR-Z1",
+          "CALCULATED"
+        ],
+        [
+          "M-OA-Z1",
+          "NOT_CALCULATED"
+        ],
+        [
+          "M-D-Z1",
+          "CALCULATED"
+        ]
+      ]
+    },
+    {
+      "name": "النقر خارج الغرف دون «خارج الغرف» يُرفض برسالة ولا يُضاف جهاز",
+      "ok": true,
+      "detail": {
+        "rejected": "DEVICE_OUTSIDE_ROOMS",
+        "op": {
+          "x": 664.5172119140625,
+          "y": 712.7947998046875
+        },
+        "hint": "الموقع خارج غرف هذا الدور؛ لم يُربط الجهاز بغرفة. اختر «خارج الغرف» صراحة إن كان الجهاز خارجيًا (منهل، وحدة خارجية…)."
+      }
+    },
+    {
+      "name": "صرف لا يصل منسوب المنهل يظهر «متعذر BLOCKED» مع رسالة فرق المناسيب",
+      "ok": true,
+      "detail": "PC1 sanitary WC1 MH1 0.001 0.04 غير محسوب 9.463 9.461 0.02 0.189 -0.489 متعذر BLOCKED"
+    },
+    {
+      "name": "fire: عنصران ومسار معروض في الطبقة والجدول",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "name": "low_current: عنصران ومسار معروض في الطبقة والجدول",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "name": "solar: عنصران ومسار معروض في الطبقة والجدول",
+      "ok": true,
+      "detail": 1
+    },
+    {
+      "name": "ربط حمل التكييف بالكهرباء: MATCHED_SUPPLIED_INPUT",
+      "ok": true,
+      "detail": "AC1 AC1-LOAD MATCHED_SUPPLIED_INPUT"
+    },
+    {
+      "name": "رسالة «عدم اكتشاف تعارض لا يعني اكتمال المراجعة» ظاهرة",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "نقل جهاز يجعل النتيجة قديمة فورًا ويُعطّل كل أزرار التصدير",
+      "ok": true,
+      "detail": {
+        "fresh": false,
+        "reason": "INPUTS_CHANGED",
+        "messageAr": "تغيّرت المدخلات بعد الحساب؛ النتيجة المعروضة قديمة ولا تُصدَّر."
+      }
+    },
+    {
+      "name": "إعادة الحساب تعطي بصمة مدخل جديدة وتعيد التصدير",
+      "ok": true,
+      "detail": [
+        "00c06afa14",
+        "b1979dced0"
+      ]
+    },
+    {
+      "name": "تعديل الغرفة في المخطط يغيّر بصمة المصدر ويعيد الحساب قبل أي تصدير",
+      "ok": true,
+      "detail": [
+        "6503bba166",
+        "79ebab302e"
+      ]
+    },
+    {
+      "name": "تنزيل electrical/svg",
+      "ok": true,
+      "detail": "18645 بايت XML صالح"
+    },
+    {
+      "name": "تنزيل electrical/dxf",
+      "ok": true,
+      "detail": "13247 بايت أقسام DXF"
+    },
+    {
+      "name": "تنزيل electrical/csv:electrical-circuits",
+      "ok": true,
+      "detail": "196 بايت BOM+ترويسة"
+    },
+    {
+      "name": "تنزيل electrical/csv:electrical-panels",
+      "ok": true,
+      "detail": "97 بايت BOM+ترويسة"
+    },
+    {
+      "name": "تنزيل electrical/csv:quantities",
+      "ok": true,
+      "detail": "1868 بايت BOM+ترويسة"
+    },
+    {
+      "name": "تنزيل electrical/json-result",
+      "ok": true,
+      "detail": "57607 بايت JSON"
+    },
+    {
+      "name": "تنزيل electrical/json-input",
+      "ok": true,
+      "detail": "35321 بايت JSON"
+    },
+    {
+      "name": "تنزيل electrical/json-issues",
+      "ok": true,
+      "detail": "5349 بايت JSON"
+    },
+    {
+      "name": "تنزيل plumbing/svg",
+      "ok": true,
+      "detail": "16411 بايت XML صالح"
+    },
+    {
+      "name": "تنزيل plumbing/dxf",
+      "ok": true,
+      "detail": "13247 بايت أقسام DXF"
+    },
+    {
+      "name": "تنزيل plumbing/csv:plumbing-connections",
+      "ok": true,
+      "detail": "309 بايت BOM+ترويسة"
+    },
+    {
+      "name": "تنزيل plumbing/csv:quantities",
+      "ok": true,
+      "detail": "1868 بايت BOM+ترويسة"
+    },
+    {
+      "name": "تنزيل plumbing/json-result",
+      "ok": true,
+      "detail": "57607 بايت JSON"
+    },
+    {
+      "name": "تنزيل plumbing/json-input",
+      "ok": true,
+      "detail": "35321 بايت JSON"
+    },
+    {
+      "name": "تنزيل plumbing/json-issues",
+      "ok": true,
+      "detail": "5349 بايت JSON"
+    },
+    {
+      "name": "تنزيل coordination/svg",
+      "ok": true,
+      "detail": "24173 بايت XML صالح"
+    },
+    {
+      "name": "تنزيل coordination/dxf",
+      "ok": true,
+      "detail": "13247 بايت أقسام DXF"
+    },
+    {
+      "name": "تنزيل coordination/csv:quantities",
+      "ok": true,
+      "detail": "1868 بايت BOM+ترويسة"
+    },
+    {
+      "name": "تنزيل coordination/json-result",
+      "ok": true,
+      "detail": "57607 بايت JSON"
+    },
+    {
+      "name": "تنزيل coordination/json-input",
+      "ok": true,
+      "detail": "35321 بايت JSON"
+    },
+    {
+      "name": "تنزيل coordination/json-issues",
+      "ok": true,
+      "detail": "5349 بايت JSON"
+    },
+    {
+      "name": "RTL عربي (mobile)",
+      "ok": true,
+      "detail": {
+        "dir": "rtl",
+        "computed": "rtl"
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/electrical)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/hvac)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/plumbing)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/fire)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/low_current)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/solar)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (mobile/coordination)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 390,
+        "innerWidth": 390,
+        "off": []
+      }
+    },
+    {
+      "name": "RTL عربي (desktop)",
+      "ok": true,
+      "detail": {
+        "dir": "rtl",
+        "computed": "rtl"
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/electrical)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/hvac)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/plumbing)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/fire)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/low_current)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/solar)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    },
+    {
+      "name": "لا تمرير أفقي للصفحة (desktop/coordination)",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "w": 1366,
+        "innerWidth": 1366,
+        "off": []
+      }
+    }
+  ],
+  "shots": [
+    "docs/research/mep-integration/ui-journey/desktop-01-sharaa-brief.png",
+    "docs/research/mep-integration/ui-journey/desktop-01b-after-confirm.png",
+    "docs/research/mep-integration/ui-journey/desktop-01c-build-report-0.png",
+    "docs/research/mep-integration/ui-journey/desktop-01c-build-report-1.png",
+    "docs/research/mep-integration/ui-journey/desktop-02-design-alternatives.png",
+    "docs/research/mep-integration/ui-journey/desktop-03-systems-bound.png",
+    "docs/research/mep-integration/ui-journey/desktop-10-electrical-layer.png",
+    "docs/research/mep-integration/ui-journey/desktop-11-electrical-tables.png",
+    "docs/research/mep-integration/ui-journey/desktop-20-hvac-layer.png",
+    "docs/research/mep-integration/ui-journey/desktop-21-hvac-tables.png",
+    "docs/research/mep-integration/ui-journey/desktop-30-outside-rejected.png",
+    "docs/research/mep-integration/ui-journey/desktop-40-plumbing-layer-blocked.png",
+    "docs/research/mep-integration/ui-journey/desktop-41-plumbing-tables.png",
+    "docs/research/mep-integration/ui-journey/desktop-50-fire-layer.png",
+    "docs/research/mep-integration/ui-journey/desktop-50-low_current-layer.png",
+    "docs/research/mep-integration/ui-journey/desktop-50-solar-layer.png",
+    "docs/research/mep-integration/ui-journey/desktop-70-coordination-combined.png",
+    "docs/research/mep-integration/ui-journey/desktop-71-coordination-tables.png",
+    "docs/research/mep-integration/ui-journey/desktop-80-stale-export-blocked.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-electrical-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-electrical-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-electrical-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-hvac-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-hvac-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-hvac-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-plumbing-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-plumbing-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-plumbing-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-fire-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-fire-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-fire-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-low_current-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-low_current-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-low_current-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-solar-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-solar-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-solar-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-coordination-layer.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-coordination-tables.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-coordination-issues.png",
+    "docs/research/mep-integration/ui-journey/mobile-m-full-page.png"
+  ],
+  "downloads": [
+    {
+      "tab": "electrical",
+      "key": "svg",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-L1-electrical.svg",
+      "bytes": 18645,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "dxf",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-L1-combined.dxf",
+      "bytes": 13247,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "csv:electrical-circuits",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-electrical-circuits.csv",
+      "bytes": 196,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "csv:electrical-panels",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-electrical-panels.csv",
+      "bytes": 97,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "csv:quantities",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-quantities.csv",
+      "bytes": 1868,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "json-result",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-engineering-result.json",
+      "bytes": 57607,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "json-input",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-engineering-input.json",
+      "bytes": 35321,
+      "ok": true
+    },
+    {
+      "tab": "electrical",
+      "key": "json-issues",
+      "file": "docs/research/mep-integration/ui-journey/downloads/electrical-MIZAN-D1793529130040-v1-1d2c16f68e-issues.json",
+      "bytes": 5349,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "svg",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-L1-plumbing.svg",
+      "bytes": 16411,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "dxf",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-L1-combined.dxf",
+      "bytes": 13247,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "csv:plumbing-connections",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-plumbing-connections.csv",
+      "bytes": 309,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "csv:quantities",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-quantities.csv",
+      "bytes": 1868,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "json-result",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-engineering-result.json",
+      "bytes": 57607,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "json-input",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-engineering-input.json",
+      "bytes": 35321,
+      "ok": true
+    },
+    {
+      "tab": "plumbing",
+      "key": "json-issues",
+      "file": "docs/research/mep-integration/ui-journey/downloads/plumbing-MIZAN-D1793529130040-v1-1d2c16f68e-issues.json",
+      "bytes": 5349,
+      "ok": true
+    },
+    {
+      "tab": "coordination",
+      "key": "svg",
+      "file": "docs/research/mep-integration/ui-journey/downloads/coordination-MIZAN-D1793529130040-v1-1d2c16f68e-L1-combined.svg",
+      "bytes": 24173,
+      "ok": true
+    },
+    {
+      "tab": "coordination",
+      "key": "dxf",
+      "file": "docs/research/mep-integration/ui-journey/downloads/coordination-MIZAN-D1793529130040-v1-1d2c16f68e-L1-combined.dxf",
+      "bytes": 13247,
+      "ok": true
+    },
+    {
+      "tab": "coordination",
+      "key": "csv:quantities",
+      "file": "docs/research/mep-integration/ui-journey/downloads/coordination-MIZAN-D1793529130040-v1-1d2c16f68e-quantities.csv",
+      "bytes": 1868,
+      "ok": true
+    },
+    {
+      "tab": "coordination",
+      "key": "json-result",
+      "file": "docs/research/mep-integration/ui-journey/downloads/coordination-MIZAN-D1793529130040-v1-1d2c16f68e-engineering-result.json",
+      "bytes": 57607,
+      "ok": true
+    },
+    {
+      "tab": "coordination",
+      "key": "json-input",
+      "file": "docs/research/mep-integration/ui-journey/downloads/coordination-MIZAN-D1793529130040-v1-1d2c16f68e-engineering-input.json",
+      "bytes": 35321,
+      "ok": true
+    },
+    {
+      "tab": "coordination",
+      "key": "json-issues",
+      "ok": false,
+      "attempt": 1,
+      "error": "page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\" | toasts: نُزّل MIZAN-D1793529130040-v1-1d2c16f68e-issues.json"
+    },
+    {
+      "tab": "coordination",
+      "key": "json-issues",
+      "file": "docs/research/mep-integration/ui-journey/downloads/coordination-MIZAN-D1793529130040-v1-1d2c16f68e-issues.json",
+      "bytes": 5349,
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "blocked": [
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.googleapis.com"
+  ],
+  "finishedAt": "2026-11-01T10:33:51.071Z",
+  "seconds": 1630,
+  "summary": {
+    "pass": 58,
+    "fail": 0,
+    "errors": 0,
+    "blockedExternal": [
+      "fonts.googleapis.com"
+    ]
+  }
+}

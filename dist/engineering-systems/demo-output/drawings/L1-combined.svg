@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="909" height="1140" viewBox="0 0 909 1140" data-input-hash="8729b1acae5987bc5c1736bdb146a8115a18ed0661bc5e08ec37cec311fc23c8"><title>MEP-DEMO L1 — PRELIMINARY</title><rect width="100%" height="100%" fill="#faf9f5"/><g font-family="DejaVu Sans,Arial,sans-serif"><text x="874" y="38" text-anchor="start" font-size="23" fill="#1c3540" direction="rtl">الميزان الهندسي — مخططات الأنظمة</text><text x="35" y="69" font-size="13" fill="#546872">MEP-DEMO / L1 / combined</text><text x="874" y="68" text-anchor="start" direction="rtl" font-size="13" fill="#b24a31">تصور أولي — يحتاج مراجعة هندسية</text>
+<path d="M82.58928571428571,952.4107142857143 L435.64285714285717,952.4107142857143 L435.64285714285717,660.0714285714286 L82.58928571428571,660.0714285714286 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="259.11607142857144" y="824.2410714285714" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">مجلس الرجال</text>
+<path d="M442.9285714285714,952.4107142857143 L795.9821428571429,952.4107142857143 L795.9821428571429,660.0714285714286 L530.3571428571429,660.0714285714286 L442.9285714285714,660.0714285714286 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="619.4553571428571" y="824.2410714285714" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">المدخل</text>
+<path d="M795.9821428571429,652.7857142857143 L795.9821428571429,477.9285714285714 L670,477.9285714285714 L534,477.9285714285714 L534,652.7857142857143 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="664.9910714285714" y="583.3571428571429" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">صالة المعيشة</text>
+<path d="M795.9821428571429,470.6428571428571 L795.9821428571429,295.78571428571433 L673.6428571428571,295.78571428571433 L673.6428571428571,470.6428571428571 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="734.8125" y="401.2142857142857" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">دورة مياه</text>
+<path d="M795.9821428571429,288.5 L795.9821428571429,117.58928571428571 L673.6428571428571,117.58928571428571 L673.6428571428571,288.5 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="734.8125" y="221.04464285714278" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">غسيل</text>
+<path d="M666.3571428571429,117.58928571428571 L534,117.58928571428571 L534,383.2142857142857 L534,470.6428571428571 L666.3571428571429,470.6428571428571 L666.3571428571429,292.1428571428571 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="600.1785714285714" y="444.9285714285714" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">المطبخ</text>
+<path d="M526.7142857142858,117.58928571428571 L309.3571428571429,117.58928571428571 L309.3571428571429,379.57142857142856 L526.7142857142858,379.57142857142856 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="418.03571428571433" y="266.5803571428571" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">غرفة نوم 2</text>
+<path d="M302.07142857142856,117.58928571428571 L82.58928571428571,117.58928571428571 L82.58928571428571,379.57142857142856 L302.07142857142856,379.57142857142856 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="192.33035714285717" y="266.5803571428571" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">غرفة نوم رئيسية</text>
+<path d="M82.58928571428571,386.8571428571429 L82.58928571428571,652.7857142857143 L439.2857142857143,652.7857142857143 L526.7142857142858,652.7857142857143 L526.7142857142858,474.2857142857143 L526.7142857142858,386.8571428571429 L305.71428571428567,386.8571428571429 Z" fill="#ecefea" fill-rule="evenodd" stroke="#cbd3cc" stroke-width=".6"/>
+<text x="304.6517857142857" y="581.5357142857143" text-anchor="middle" direction="rtl" font-size="11" fill="#68736c">ممر</text>
+<line x1="75" y1="960" x2="803.5714285714286" y2="960" stroke="#62706a" stroke-width="15.178571428571429"/>
+<line x1="803.5714285714286" y1="960" x2="803.5714285714286" y2="110" stroke="#62706a" stroke-width="15.178571428571429"/>
+<line x1="803.5714285714286" y1="110" x2="75" y2="110" stroke="#62706a" stroke-width="15.178571428571429"/>
+<line x1="75" y1="110" x2="75" y2="960" stroke="#62706a" stroke-width="15.178571428571429"/>
+<line x1="75" y1="656.4285714285714" x2="803.5714285714286" y2="656.4285714285714" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="439.2857142857143" y1="960" x2="439.2857142857143" y2="656.4285714285714" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="530.3571428571429" y1="656.4285714285714" x2="530.3571428571429" y2="110" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="75" y1="383.2142857142857" x2="530.3571428571429" y2="383.2142857142857" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="305.71428571428567" y1="383.2142857142857" x2="305.71428571428567" y2="110" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="530.3571428571429" y1="474.2857142857143" x2="803.5714285714286" y2="474.2857142857143" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="670" y1="474.2857142857143" x2="670" y2="110" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="670" y1="292.1428571428571" x2="803.5714285714286" y2="292.1428571428571" stroke="#62706a" stroke-width="7.285714285714286"/>
+<line x1="575.8928571428571" y1="960" x2="666.9642857142858" y2="960" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="575.8928571428571" y1="960" x2="666.9642857142858" y2="960" stroke="#8aa49e" stroke-width="1"/>
+<line x1="190.35714285714283" y1="960" x2="323.92857142857144" y2="960" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="190.35714285714283" y1="960" x2="323.92857142857144" y2="960" stroke="#8aa49e" stroke-width="1"/>
+<line x1="439.2857142857143" y1="856.7857142857143" x2="439.2857142857143" y2="759.6428571428571" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="439.2857142857143" y1="856.7857142857143" x2="439.2857142857143" y2="759.6428571428571" stroke="#8aa49e" stroke-width="1"/>
+<line x1="387.6785714285714" y1="656.4285714285714" x2="442.32142857142856" y2="656.4285714285714" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="387.6785714285714" y1="656.4285714285714" x2="442.32142857142856" y2="656.4285714285714" stroke="#8aa49e" stroke-width="1"/>
+<line x1="594.1071428571429" y1="656.4285714285714" x2="648.7500000000001" y2="656.4285714285714" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="594.1071428571429" y1="656.4285714285714" x2="648.7500000000001" y2="656.4285714285714" stroke="#8aa49e" stroke-width="1"/>
+<line x1="530.3571428571429" y1="531.9642857142858" x2="530.3571428571429" y2="477.32142857142856" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="530.3571428571429" y1="531.9642857142858" x2="530.3571428571429" y2="477.32142857142856" stroke="#8aa49e" stroke-width="1"/>
+<line x1="803.5714285714286" y1="820.3571428571428" x2="803.5714285714286" y2="735.3571428571429" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="803.5714285714286" y1="820.3571428571428" x2="803.5714285714286" y2="735.3571428571429" stroke="#8aa49e" stroke-width="1"/>
+<line x1="803.5714285714286" y1="632.1428571428571" x2="803.5714285714286" y2="498.57142857142856" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="803.5714285714286" y1="632.1428571428571" x2="803.5714285714286" y2="498.57142857142856" stroke="#8aa49e" stroke-width="1"/>
+<line x1="803.5714285714286" y1="425.71428571428567" x2="803.5714285714286" y2="340.71428571428567" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="803.5714285714286" y1="425.71428571428567" x2="803.5714285714286" y2="340.71428571428567" stroke="#8aa49e" stroke-width="1"/>
+<line x1="803.5714285714286" y1="243.57142857142853" x2="803.5714285714286" y2="158.5714285714285" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="803.5714285714286" y1="243.57142857142853" x2="803.5714285714286" y2="158.5714285714285" stroke="#8aa49e" stroke-width="1"/>
+<line x1="75" y1="219.28571428571433" x2="75" y2="304.28571428571433" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="75" y1="219.28571428571433" x2="75" y2="304.28571428571433" stroke="#8aa49e" stroke-width="1"/>
+<line x1="75" y1="492.5" x2="75" y2="577.5" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="75" y1="492.5" x2="75" y2="577.5" stroke="#8aa49e" stroke-width="1"/>
+<line x1="263.21428571428567" y1="110" x2="129.6428571428571" y2="110" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="263.21428571428567" y1="110" x2="129.6428571428571" y2="110" stroke="#8aa49e" stroke-width="1"/>
+<line x1="451.42857142857144" y1="110" x2="366.4285714285715" y2="110" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="451.42857142857144" y1="110" x2="366.4285714285715" y2="110" stroke="#8aa49e" stroke-width="1"/>
+<line x1="645.7142857142858" y1="110" x2="560.7142857142858" y2="110" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="645.7142857142858" y1="110" x2="560.7142857142858" y2="110" stroke="#8aa49e" stroke-width="1"/>
+<line x1="785.3571428571428" y1="110" x2="700.3571428571428" y2="110" stroke="#faf9f5" stroke-width="16.17857142857143"/><line x1="785.3571428571428" y1="110" x2="700.3571428571428" y2="110" stroke="#8aa49e" stroke-width="1"/>
+<line x1="272.32142857142856" y1="383.2142857142857" x2="326.9642857142858" y2="383.2142857142857" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="272.32142857142856" y1="383.2142857142857" x2="326.9642857142858" y2="383.2142857142857" stroke="#8aa49e" stroke-width="1"/>
+<line x1="387.6785714285714" y1="383.2142857142857" x2="442.32142857142856" y2="383.2142857142857" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="387.6785714285714" y1="383.2142857142857" x2="442.32142857142856" y2="383.2142857142857" stroke="#8aa49e" stroke-width="1"/>
+<line x1="715.5357142857143" y1="474.2857142857143" x2="770.1785714285716" y2="474.2857142857143" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="715.5357142857143" y1="474.2857142857143" x2="770.1785714285716" y2="474.2857142857143" stroke="#8aa49e" stroke-width="1"/>
+<line x1="670" y1="410.5357142857142" x2="670" y2="355.8928571428571" stroke="#faf9f5" stroke-width="8.285714285714285"/><line x1="670" y1="410.5357142857142" x2="670" y2="355.8928571428571" stroke="#8aa49e" stroke-width="1"/>
+<polyline points="742.857,899.286 742.857,899.286 378.571,899.286 378.571,899.286" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-C-SOCKET-SO1 | PROPOSED | z=1.600,2.850,2.850,0.400</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 712.500,899.286 712.500,717.143 712.500,717.143" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-C-AC-AC1-LOAD | PROPOSED | z=1.600,2.850,2.850,2.850,2.700</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 237.050,899.286 237.050,824.512 237.050,824.512" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r1-EL-r1-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 413.577,899.286 413.577,678.343 413.577,678.343" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r1-EL-r1-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 413.577,899.286 413.577,934.140 413.577,934.140" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r1-EL-r1-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 104.655,899.286 104.655,678.343 104.655,678.343" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r1-EL-r1-4 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 104.655,899.286 104.655,934.140 104.655,934.140" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r1-EL-r1-5 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 237.050,899.286 237.050,678.343 237.050,678.343" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r1-EL-r1-6 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 597.390,899.286 597.390,824.512 597.390,824.512" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r2-EL-r2-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 773.916,899.286 773.916,678.343 773.916,678.343" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r2-EL-r2-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 773.916,899.286 773.916,934.140 773.916,934.140" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r2-EL-r2-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 464.994,899.286 464.994,678.343 464.994,678.343" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r2-EL-r2-4 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 464.994,899.286 464.994,934.140 464.994,934.140" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r2-EL-r2-5 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 641.521,899.286 641.521,678.343 641.521,678.343" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r2-EL-r2-6 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 276.894,899.286 276.894,569.683 276.894,569.683" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 742.857,403.478 498.956,403.478 498.956,403.478" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 110.347,899.286 110.347,403.478 110.347,403.478" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 498.956,899.286 498.956,636.165 498.956,636.165" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-4 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 110.347,899.286 110.347,636.165 110.347,636.165" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-5 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 332.410,899.286 332.410,403.478 332.410,403.478" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-6 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 221.378,899.286 221.378,436.719 221.378,436.719" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r3-EL-r3-7 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 643.159,899.286 643.159,579.929 643.159,579.929" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r4-EL-r4-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 774.150,899.286 774.150,492.500 774.150,492.500" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r4-EL-r4-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 774.150,899.286 774.150,638.214 774.150,638.214" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r4-EL-r4-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 600.179,899.286 600.179,445.425 600.179,445.425" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r5-EL-r5-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 543.454,899.286 543.454,142.807 543.454,142.807" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r5-EL-r5-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 656.903,899.286 656.903,294.116 656.903,294.116" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r5-EL-r5-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 543.454,899.286 543.454,344.552 543.454,344.552" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r5-EL-r5-4 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 656.903,899.286 656.903,142.807 656.903,142.807" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r5-EL-r5-5 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 734.813,899.286 734.813,383.214 734.813,383.214" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r6-EL-r6-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 685.877,899.286 685.877,453.157 685.877,453.157" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r6-EL-r6-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 734.813,899.286 734.813,203.045 734.813,203.045" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r7-EL-r7-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 685.877,899.286 685.877,271.409 685.877,271.409" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r7-EL-r7-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 174.040,899.286 174.040,226.749 174.040,226.749" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r8-EL-r8-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 283.781,899.286 283.781,357.740 283.781,357.740" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r8-EL-r8-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 100.879,899.286 100.879,357.740 100.879,357.740" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r8-EL-r8-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 283.781,899.286 283.781,139.421 283.781,139.421" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r8-EL-r8-4 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 436.149,899.286 436.149,226.749 436.149,226.749" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r9-EL-r9-1 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 327.470,899.286 327.470,357.740 327.470,357.740" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r9-EL-r9-2 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 508.601,899.286 508.601,357.740 508.601,357.740" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r9-EL-r9-3 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="742.857,899.286 742.857,899.286 327.470,899.286 327.470,139.421 327.470,139.421" fill="none" stroke="#ba7419" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>ER-EC-L-r9-EL-r9-4 | PROPOSED | z=1.600,2.850,2.850,2.850,2.900</title></polyline>
+<polyline points="712.500,717.143 712.500,717.143 259.116,717.143 259.116,806.241" fill="none" stroke="#167e87" stroke-width="6" stroke-dasharray="none"><title>MR-Z1 | PROPOSED | z=2.700,2.800,2.800,2.800</title></polyline>
+<polyline points="712.500,717.143 712.500,717.143 664.991,717.143 664.991,565.357" fill="none" stroke="#167e87" stroke-width="6" stroke-dasharray="none"><title>MR-Z4 | PROPOSED | z=2.700,2.800,2.800,2.800</title></polyline>
+<polyline points="724.643,383.214 833.929,383.214" fill="none" stroke="#167e87" stroke-width="6" stroke-dasharray="none"><title>MX-EF1 | PROPOSED | z=2.600,2.600</title></polyline>
+<polyline points="767.143,213.214 767.143,213.214 761.071,213.214 761.071,389.286 761.071,389.286" fill="none" stroke="#286ec4" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>PR-CW1 | PROPOSED | z=0.300,0.400,0.400,0.400,0.800</title></polyline>
+<polyline points="706.429,413.571 833.929,413.571" fill="none" stroke="#286ec4" stroke-width="6" stroke-dasharray="none"><title>PR-DR1 | PROPOSED | z=-0.300,-0.342</title></polyline>
+<polyline points="682.143,868.929 682.143,868.929 196.429,868.929 196.429,838.571 196.429,838.571" fill="none" stroke="#c84b55" stroke-width="1.7" stroke-dasharray="none"><title>fire-R-F1 | PROPOSED | z=1.400,2.650,2.650,2.650,3.000</title></polyline>
+<polyline points="712.500,838.571 712.500,838.571 742.857,838.571 742.857,595.714 742.857,595.714" fill="none" stroke="#557346" stroke-width="1.8214285714285714" stroke-dasharray="none"><title>low_current-R-T1 | PROPOSED | z=1.200,2.450,2.450,2.450,0.400</title></polyline>
+<rect x="738.3571428571429" y="894.7857142857143" width="9" height="9" rx="1" fill="white" stroke="#ba7419" stroke-width="1.7"/>
+<text x="749.8571428571429" y="893.2857142857143" font-size="7.5" fill="#ba7419">DB1</text>
+<rect x="374.07142857142856" y="894.7857142857143" width="9" height="9" rx="1" fill="white" stroke="#ba7419" stroke-width="1.7"/>
+<text x="385.57142857142856" y="893.2857142857143" font-size="7.5" fill="#ba7419">SO1</text>
+<rect x="708" y="712.6428571428571" width="9" height="9" rx="1" fill="white" stroke="#ba7419" stroke-width="1.7"/>
+<text x="719.5" y="711.1428571428571" font-size="7.5" fill="#ba7419">AC1-LOAD</text>
+<circle cx="237.05022321428575" cy="824.5122767857142" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M234.05022321428575,821.5122767857142l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="244.05022321428575" y="818.5122767857142" font-size="7.5" fill="#ba7419">EL-r1-1</text>
+<circle cx="413.57700892857144" cy="678.3426339285713" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M410.57700892857144,675.3426339285713l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="420.57700892857144" y="672.3426339285713" font-size="7.5" fill="#ba7419">EL-r1-2</text>
+<circle cx="413.57700892857144" cy="934.1395089285714" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M410.57700892857144,931.1395089285714l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="420.57700892857144" y="928.1395089285714" font-size="7.5" fill="#ba7419">EL-r1-3</text>
+<circle cx="104.65513392857143" cy="678.3426339285713" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M101.65513392857143,675.3426339285713l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="111.65513392857143" y="672.3426339285713" font-size="7.5" fill="#ba7419">EL-r1-4</text>
+<circle cx="104.65513392857143" cy="934.1395089285714" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M101.65513392857143,931.1395089285714l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="111.65513392857143" y="928.1395089285714" font-size="7.5" fill="#ba7419">EL-r1-5</text>
+<circle cx="237.05022321428575" cy="678.3426339285713" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M234.05022321428575,675.3426339285713l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="244.05022321428575" y="672.3426339285713" font-size="7.5" fill="#ba7419">EL-r1-6</text>
+<circle cx="597.3895089285714" cy="824.5122767857142" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M594.3895089285714,821.5122767857142l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="604.3895089285714" y="818.5122767857142" font-size="7.5" fill="#ba7419">EL-r2-1</text>
+<circle cx="773.9162946428571" cy="678.3426339285713" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M770.9162946428571,675.3426339285713l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="780.9162946428571" y="672.3426339285713" font-size="7.5" fill="#ba7419">EL-r2-2</text>
+<circle cx="773.9162946428571" cy="934.1395089285714" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M770.9162946428571,931.1395089285714l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="780.9162946428571" y="928.1395089285714" font-size="7.5" fill="#ba7419">EL-r2-3</text>
+<circle cx="464.9944196428571" cy="678.3426339285713" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M461.9944196428571,675.3426339285713l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="471.9944196428571" y="672.3426339285713" font-size="7.5" fill="#ba7419">EL-r2-4</text>
+<circle cx="464.9944196428571" cy="934.1395089285714" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M461.9944196428571,931.1395089285714l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="471.9944196428571" y="928.1395089285714" font-size="7.5" fill="#ba7419">EL-r2-5</text>
+<circle cx="641.5212053571428" cy="678.3426339285713" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M638.5212053571428,675.3426339285713l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="648.5212053571428" y="672.3426339285713" font-size="7.5" fill="#ba7419">EL-r2-6</text>
+<circle cx="276.8939732142858" cy="569.6830357142858" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M273.8939732142858,566.6830357142858l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="283.8939732142858" y="563.6830357142858" font-size="7.5" fill="#ba7419">EL-r3-1</text>
+<circle cx="498.9564732142858" cy="403.4776785714286" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M495.9564732142858,400.4776785714286l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="505.9564732142858" y="397.4776785714286" font-size="7.5" fill="#ba7419">EL-r3-2</text>
+<circle cx="110.34709821428572" cy="403.4776785714286" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M107.34709821428572,400.4776785714286l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="117.34709821428572" y="397.4776785714286" font-size="7.5" fill="#ba7419">EL-r3-3</text>
+<circle cx="498.9564732142858" cy="636.1651785714287" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M495.9564732142858,633.1651785714287l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="505.9564732142858" y="630.1651785714287" font-size="7.5" fill="#ba7419">EL-r3-4</text>
+<circle cx="110.34709821428572" cy="636.1651785714287" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M107.34709821428572,633.1651785714287l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="117.34709821428572" y="630.1651785714287" font-size="7.5" fill="#ba7419">EL-r3-5</text>
+<circle cx="332.4095982142857" cy="403.4776785714286" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M329.4095982142857,400.4776785714286l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="339.4095982142857" y="397.4776785714286" font-size="7.5" fill="#ba7419">EL-r3-6</text>
+<circle cx="221.37834821428572" cy="436.7187500000001" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M218.37834821428572,433.7187500000001l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="228.37834821428572" y="430.7187500000001" font-size="7.5" fill="#ba7419">EL-r3-7</text>
+<circle cx="643.1592261904761" cy="579.9285714285714" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M640.1592261904761,576.9285714285714l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="650.1592261904761" y="573.9285714285714" font-size="7.5" fill="#ba7419">EL-r4-1</text>
+<circle cx="774.1502976190476" cy="492.5" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M771.1502976190476,489.5l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="781.1502976190476" y="486.5" font-size="7.5" fill="#ba7419">EL-r4-2</text>
+<circle cx="774.1502976190476" cy="638.2142857142857" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M771.1502976190476,635.2142857142857l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="781.1502976190476" y="632.2142857142857" font-size="7.5" fill="#ba7419">EL-r4-3</text>
+<circle cx="600.1785714285714" cy="445.42474489795916" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M597.1785714285714,442.42474489795916l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="607.1785714285714" y="439.42474489795916" font-size="7.5" fill="#ba7419">EL-r5-1</text>
+<circle cx="543.454081632653" cy="142.8073979591837" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M540.454081632653,139.8073979591837l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="550.454081632653" y="136.8073979591837" font-size="7.5" fill="#ba7419">EL-r5-2</text>
+<circle cx="656.9030612244899" cy="294.11607142857133" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M653.9030612244899,291.11607142857133l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="663.9030612244899" y="288.11607142857133" font-size="7.5" fill="#ba7419">EL-r5-3</text>
+<circle cx="543.454081632653" cy="344.55229591836735" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M540.454081632653,341.55229591836735l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="550.454081632653" y="338.55229591836735" font-size="7.5" fill="#ba7419">EL-r5-4</text>
+<circle cx="656.9030612244899" cy="142.8073979591837" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M653.9030612244899,139.8073979591837l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="663.9030612244899" y="136.8073979591837" font-size="7.5" fill="#ba7419">EL-r5-5</text>
+<circle cx="734.8125" cy="383.2142857142857" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M731.8125,380.2142857142857l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="741.8125" y="377.2142857142857" font-size="7.5" fill="#ba7419">EL-r6-1</text>
+<circle cx="685.8767857142857" cy="453.15714285714284" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M682.8767857142857,450.15714285714284l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="692.8767857142857" y="447.15714285714284" font-size="7.5" fill="#ba7419">EL-r6-2</text>
+<circle cx="734.8125" cy="203.04464285714278" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M731.8125,200.04464285714278l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="741.8125" y="197.04464285714278" font-size="7.5" fill="#ba7419">EL-r7-1</text>
+<circle cx="685.8767857142857" cy="271.4089285714286" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M682.8767857142857,268.4089285714286l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="692.8767857142857" y="265.4089285714286" font-size="7.5" fill="#ba7419">EL-r7-2</text>
+<circle cx="174.0401785714286" cy="226.74851190476187" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M171.0401785714286,223.74851190476187l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="181.0401785714286" y="220.74851190476187" font-size="7.5" fill="#ba7419">EL-r8-1</text>
+<circle cx="283.78125" cy="357.7395833333333" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M280.78125,354.7395833333333l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="290.78125" y="351.7395833333333" font-size="7.5" fill="#ba7419">EL-r8-2</text>
+<circle cx="100.87946428571429" cy="357.7395833333333" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M97.87946428571429,354.7395833333333l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="107.87946428571429" y="351.7395833333333" font-size="7.5" fill="#ba7419">EL-r8-3</text>
+<circle cx="283.78125" cy="139.42113095238093" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M280.78125,136.42113095238093l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="290.78125" y="133.42113095238093" font-size="7.5" fill="#ba7419">EL-r8-4</text>
+<circle cx="436.1488095238095" cy="226.74851190476187" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M433.1488095238095,223.74851190476187l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="443.1488095238095" y="220.74851190476187" font-size="7.5" fill="#ba7419">EL-r9-1</text>
+<circle cx="327.4702380952381" cy="357.7395833333333" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M324.4702380952381,354.7395833333333l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="334.4702380952381" y="351.7395833333333" font-size="7.5" fill="#ba7419">EL-r9-2</text>
+<circle cx="508.6011904761905" cy="357.7395833333333" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M505.6011904761905,354.7395833333333l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="515.6011904761905" y="351.7395833333333" font-size="7.5" fill="#ba7419">EL-r9-3</text>
+<circle cx="327.4702380952381" cy="139.42113095238093" r="5" fill="#fff8df" stroke="#ba7419" stroke-width="1.4"/><path d="M324.4702380952381,136.42113095238093l6,6m-6,0l6,-6" stroke="#ba7419"/>
+<text x="334.4702380952381" y="133.42113095238093" font-size="7.5" fill="#ba7419">EL-r9-4</text>
+<rect x="708" y="712.6428571428571" width="9" height="9" rx="1" fill="white" stroke="#167e87" stroke-width="1.7"/>
+<text x="719.5" y="711.1428571428571" font-size="7.5" fill="#167e87">AC1</text>
+<rect x="254.61607142857144" y="801.7410714285714" width="9" height="9" rx="1" fill="white" stroke="#167e87" stroke-width="1.7"/>
+<text x="266.11607142857144" y="800.2410714285714" font-size="7.5" fill="#167e87">MT-Z1</text>
+<rect x="660.4910714285714" y="560.8571428571429" width="9" height="9" rx="1" fill="white" stroke="#167e87" stroke-width="1.7"/>
+<text x="671.9910714285714" y="559.3571428571429" font-size="7.5" fill="#167e87">MT-Z4</text>
+<rect x="720.1428571428571" y="378.7142857142857" width="9" height="9" rx="1" fill="white" stroke="#167e87" stroke-width="1.7"/>
+<text x="731.6428571428571" y="377.2142857142857" font-size="7.5" fill="#167e87">EF1</text>
+<rect x="829.4285714285714" y="378.7142857142857" width="9" height="9" rx="1" fill="white" stroke="#167e87" stroke-width="1.7"/>
+<text x="840.9285714285714" y="377.2142857142857" font-size="7.5" fill="#167e87">EX1</text>
+<rect x="701.9285714285714" y="409.07142857142856" width="9" height="9" rx="1" fill="white" stroke="#286ec4" stroke-width="1.7"/>
+<text x="713.4285714285714" y="407.57142857142856" font-size="7.5" fill="#286ec4">WC1</text>
+<rect x="756.5714285714287" y="384.7857142857143" width="9" height="9" rx="1" fill="white" stroke="#286ec4" stroke-width="1.7"/>
+<text x="768.0714285714287" y="383.2857142857143" font-size="7.5" fill="#286ec4">BASIN1</text>
+<rect x="762.6428571428572" y="208.71428571428567" width="9" height="9" rx="1" fill="white" stroke="#286ec4" stroke-width="1.7"/>
+<text x="774.1428571428572" y="207.21428571428567" font-size="7.5" fill="#286ec4">MAN1</text>
+<rect x="829.4285714285714" y="409.07142857142856" width="9" height="9" rx="1" fill="white" stroke="#286ec4" stroke-width="1.7"/>
+<text x="840.9285714285714" y="407.57142857142856" font-size="7.5" fill="#286ec4">MH1</text>
+<rect x="191.92857142857144" y="834.0714285714286" width="9" height="9" rx="1" fill="white" stroke="#c84b55" stroke-width="1.7"/>
+<text x="203.42857142857144" y="832.5714285714286" font-size="7.5" fill="#c84b55">SD1</text>
+<rect x="677.6428571428571" y="864.4285714285714" width="9" height="9" rx="1" fill="white" stroke="#c84b55" stroke-width="1.7"/>
+<text x="689.1428571428571" y="862.9285714285714" font-size="7.5" fill="#c84b55">FACP1</text>
+<rect x="708" y="834.0714285714286" width="9" height="9" rx="1" fill="white" stroke="#557346" stroke-width="1.7"/>
+<text x="719.5" y="832.5714285714286" font-size="7.5" fill="#557346">LAN1</text>
+<rect x="738.3571428571429" y="591.2142857142858" width="9" height="9" rx="1" fill="white" stroke="#557346" stroke-width="1.7"/>
+<text x="749.8571428571429" y="589.7142857142858" font-size="7.5" fill="#557346">DATA1</text>
+<rect x="252.6428571428571" y="591.2142857142858" width="9" height="9" rx="1" fill="white" stroke="#8259a8" stroke-width="1.7"/>
+<text x="264.1428571428571" y="589.7142857142858" font-size="7.5" fill="#8259a8">PV1</text>
+<rect x="374.07142857142856" y="591.2142857142858" width="9" height="9" rx="1" fill="white" stroke="#8259a8" stroke-width="1.7"/>
+<text x="385.57142857142856" y="589.7142857142858" font-size="7.5" fill="#8259a8">PV2</text>
+<line x1="35" y1="994" x2="52" y2="994" stroke="#ba7419" stroke-width="3"/><text x="57" y="998" font-size="10" fill="#42565a">E-POWER</text>
+<line x1="244.75" y1="994" x2="261.75" y2="994" stroke="#ba7419" stroke-width="3"/><text x="266.75" y="998" font-size="10" fill="#42565a">E-SOCKET</text>
+<line x1="454.5" y1="994" x2="471.5" y2="994" stroke="#ba7419" stroke-width="3"/><text x="476.5" y="998" font-size="10" fill="#42565a">E-LIGHT</text>
+<line x1="664.25" y1="994" x2="681.25" y2="994" stroke="#167e87" stroke-width="3"/><text x="686.25" y="998" font-size="10" fill="#42565a">M-EQUIP</text>
+<line x1="35" y1="1012" x2="52" y2="1012" stroke="#167e87" stroke-width="3"/><text x="57" y="1016" font-size="10" fill="#42565a">M-AIR</text>
+<line x1="244.75" y1="1012" x2="261.75" y2="1012" stroke="#167e87" stroke-width="3"/><text x="266.75" y="1016" font-size="10" fill="#42565a">M-EXHAUST</text>
+<line x1="454.5" y1="1012" x2="471.5" y2="1012" stroke="#286ec4" stroke-width="3"/><text x="476.5" y="1016" font-size="10" fill="#42565a">P-FIXTURE</text>
+<line x1="664.25" y1="1012" x2="681.25" y2="1012" stroke="#c84b55" stroke-width="3"/><text x="686.25" y="1016" font-size="10" fill="#42565a">F-DEVICE</text>
+<line x1="35" y1="1030" x2="52" y2="1030" stroke="#557346" stroke-width="3"/><text x="57" y="1034" font-size="10" fill="#42565a">T-DEVICE</text>
+<line x1="244.75" y1="1030" x2="261.75" y2="1030" stroke="#8259a8" stroke-width="3"/><text x="266.75" y="1034" font-size="10" fill="#42565a">S-DEVICE</text>
+<line x1="454.5" y1="1030" x2="471.5" y2="1030" stroke="#ba7419" stroke-width="3"/><text x="476.5" y="1034" font-size="10" fill="#42565a">E-CABLE</text>
+<line x1="664.25" y1="1030" x2="681.25" y2="1030" stroke="#167e87" stroke-width="3"/><text x="686.25" y="1034" font-size="10" fill="#42565a">M-DUCT</text>
+<line x1="35" y1="1048" x2="52" y2="1048" stroke="#286ec4" stroke-width="3"/><text x="57" y="1052" font-size="10" fill="#42565a">P-COLD</text>
+<line x1="244.75" y1="1048" x2="261.75" y2="1048" stroke="#286ec4" stroke-width="3"/><text x="266.75" y="1052" font-size="10" fill="#42565a">P-DRAIN</text>
+<line x1="454.5" y1="1048" x2="471.5" y2="1048" stroke="#c84b55" stroke-width="3"/><text x="476.5" y="1052" font-size="10" fill="#42565a">F-PATH</text>
+<line x1="664.25" y1="1048" x2="681.25" y2="1048" stroke="#557346" stroke-width="3"/><text x="686.25" y="1052" font-size="10" fill="#42565a">T-PATH</text>
+<text x="35" y="1092" font-size="10" fill="#647476">Units: m | X east / Y north | z in JSON/DXF | 57 devices / 48 routes</text><text x="35" y="1111" font-size="9" fill="#8a5550">0 errors | 9 review/input items | code compliance: NOT_EVALUATED</text><text x="35" y="1127" font-size="7.5" fill="#88918b">Input SHA-256: 8729b1acae5987bc5c1736bdb146a8115a18ed0661bc5e08ec37cec311fc23c8</text></g></svg>

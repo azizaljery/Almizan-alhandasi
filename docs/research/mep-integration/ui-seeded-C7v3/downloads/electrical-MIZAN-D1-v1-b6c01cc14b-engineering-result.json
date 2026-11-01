@@ -1,0 +1,2320 @@
+{
+  "schema": "MIZAN-MEP-RESULT/1",
+  "version": "0.1.0",
+  "projectId": "MIZAN-D1-v1",
+  "inputHash": "b6c01cc14b9756e195ca7096b44ba1219f836c9f624ec3a1e0e20f1dd07aec99",
+  "architectureHash": "e7e6d83c31d390b54ff916b98a4e8085e769b4036bbd7f0b1f5583ee3c3020e1",
+  "source": {
+    "kind": "mizan-draw/1",
+    "revision": "design-session:v1:v3",
+    "sha256": "05a39d8359036955870ac0e33e623c6d2a4317773c7b28b0ed389e0021088db3",
+    "warnings": []
+  },
+  "stage": "PRELIMINARY",
+  "constructionApproved": false,
+  "codeCompliance": "NOT_EVALUATED",
+  "status": "BLOCKED_PRELIMINARY",
+  "disciplines": [
+    {
+      "calculations": [
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-LUX-r4",
+          "inputs": {
+            "areaM2": 28.668200000000006,
+            "lumensPerFixture": 1600,
+            "maintenanceFactor": 0.8,
+            "targetLux": 150,
+            "utilizationFactor": 0.6
+          },
+          "method": "LUMEN_METHOD_COUNT",
+          "sourceRefs": [
+            "LIGHTING-MANUAL"
+          ],
+          "status": "CALCULATED",
+          "unit": "fixtures",
+          "value": 6
+        },
+        {
+          "basis": "INCOMPLETE_INPUTS",
+          "id": "E-P-SO1",
+          "inputs": {
+            "demandFactor": 0.5,
+            "powerW": 1000
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "NOT_CALCULATED",
+          "unit": "W_VAR",
+          "value": null
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-SO2",
+          "inputs": {
+            "demandFactor": 0.5,
+            "powerFactor": 0.95,
+            "powerW": 800
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 262.94728414309054,
+            "connectedW": 800,
+            "demandVar": 131.47364207154527,
+            "demandW": 400
+          }
+        },
+        {
+          "basis": "INCOMPLETE_INPUTS",
+          "id": "E-P-AC1-LOAD",
+          "inputs": {
+            "powerW": 1800
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "NOT_CALCULATED",
+          "unit": "W_VAR",
+          "value": null
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-EL-r4-1",
+          "inputs": {
+            "demandFactor": 1,
+            "powerFactor": 0.95,
+            "powerW": 14
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 4.6015774725040846,
+            "connectedW": 14,
+            "demandVar": 4.6015774725040846,
+            "demandW": 14
+          }
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-EL-r4-2",
+          "inputs": {
+            "demandFactor": 1,
+            "powerFactor": 0.95,
+            "powerW": 14
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 4.6015774725040846,
+            "connectedW": 14,
+            "demandVar": 4.6015774725040846,
+            "demandW": 14
+          }
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-EL-r4-3",
+          "inputs": {
+            "demandFactor": 1,
+            "powerFactor": 0.95,
+            "powerW": 14
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 4.6015774725040846,
+            "connectedW": 14,
+            "demandVar": 4.6015774725040846,
+            "demandW": 14
+          }
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-EL-r4-4",
+          "inputs": {
+            "demandFactor": 1,
+            "powerFactor": 0.95,
+            "powerW": 14
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 4.6015774725040846,
+            "connectedW": 14,
+            "demandVar": 4.6015774725040846,
+            "demandW": 14
+          }
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-EL-r4-5",
+          "inputs": {
+            "demandFactor": 1,
+            "powerFactor": 0.95,
+            "powerW": 14
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 4.6015774725040846,
+            "connectedW": 14,
+            "demandVar": 4.6015774725040846,
+            "demandW": 14
+          }
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "E-P-EL-r4-6",
+          "inputs": {
+            "demandFactor": 1,
+            "powerFactor": 0.95,
+            "powerW": 14
+          },
+          "method": "POWER_COMPONENTS",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "CALCULATED",
+          "unit": "W_VAR",
+          "value": {
+            "connectedVar": 4.6015774725040846,
+            "connectedW": 14,
+            "demandVar": 4.6015774725040846,
+            "demandW": 14
+          }
+        },
+        {
+          "basis": "INCOMPLETE_INPUTS",
+          "id": "E-I-C1",
+          "inputs": {
+            "phases": 1,
+            "powerFactor": null,
+            "powerW": null,
+            "voltageV": 230
+          },
+          "method": "I_P_OVER_V_PF",
+          "sourceRefs": [
+            "SCHNEIDER-POWER"
+          ],
+          "status": "NOT_CALCULATED",
+          "unit": "A",
+          "value": null
+        },
+        {
+          "basis": "INCOMPLETE_INPUTS",
+          "id": "E-VD-C1",
+          "inputs": {
+            "currentA": null,
+            "lengthM": 16.154,
+            "phases": 1,
+            "powerFactor": null,
+            "reactanceOhmPerKm": 0.08,
+            "resistanceOhmPerKm": 8,
+            "voltageV": 230
+          },
+          "method": "AC_VOLTAGE_DROP_FURTHEST_FULL_LOAD",
+          "sourceRefs": [
+            "SCHNEIDER-VOLTAGE-DROP"
+          ],
+          "status": "NOT_CALCULATED",
+          "unit": "V_PERCENT",
+          "value": null
+        }
+      ],
+      "codeCompliance": "NOT_EVALUATED",
+      "constructionApproved": false,
+      "devices": [
+        {
+          "discipline": "electrical",
+          "id": "DB1",
+          "kind": "PANEL",
+          "layer": "E-POWER",
+          "levelId": "L1",
+          "position": {
+            "x": 4.124,
+            "y": 19.465,
+            "z": 0.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "demandFactor": 0.5,
+          "discipline": "electrical",
+          "id": "SO1",
+          "kind": "SOCKET",
+          "layer": "E-SOCKET",
+          "levelId": "L1",
+          "position": {
+            "x": 4.532,
+            "y": 8.619,
+            "z": 0.4
+          },
+          "powerW": 1000,
+          "roomId": "r4"
+        },
+        {
+          "demandFactor": 0.5,
+          "discipline": "electrical",
+          "id": "SO2",
+          "kind": "SOCKET",
+          "layer": "E-SOCKET",
+          "levelId": "L1",
+          "position": {
+            "x": 9.198,
+            "y": 13.851,
+            "z": 0.4
+          },
+          "powerFactor": 0.95,
+          "powerW": 800,
+          "roomId": "r3"
+        },
+        {
+          "discipline": "electrical",
+          "id": "AC1-LOAD",
+          "kind": "EQUIPMENT_LOAD",
+          "layer": "E-POWER",
+          "levelId": "L1",
+          "position": {
+            "x": 4.917,
+            "y": 8.619,
+            "z": 2.7
+          },
+          "powerW": 1800,
+          "roomId": "r4",
+          "sourceEquipmentId": "AC1"
+        },
+        {
+          "calculationId": "E-LUX-r4",
+          "demandFactor": 1,
+          "discipline": "electrical",
+          "id": "EL-r4-1",
+          "kind": "LUMINAIRE",
+          "layer": "E-LIGHT",
+          "levelId": "L1",
+          "position": {
+            "x": 4.2521875,
+            "y": 8.5825,
+            "z": 2.9
+          },
+          "powerFactor": 0.95,
+          "powerW": 14,
+          "roomId": "r4"
+        },
+        {
+          "calculationId": "E-LUX-r4",
+          "demandFactor": 1,
+          "discipline": "electrical",
+          "id": "EL-r4-2",
+          "kind": "LUMINAIRE",
+          "layer": "E-LIGHT",
+          "levelId": "L1",
+          "position": {
+            "x": 6.5346875,
+            "y": 14.0775,
+            "z": 2.9
+          },
+          "powerFactor": 0.95,
+          "powerW": 14,
+          "roomId": "r4"
+        },
+        {
+          "calculationId": "E-LUX-r4",
+          "demandFactor": 1,
+          "discipline": "electrical",
+          "id": "EL-r4-3",
+          "kind": "LUMINAIRE",
+          "layer": "E-LIGHT",
+          "levelId": "L1",
+          "position": {
+            "x": 2.5403124999999998,
+            "y": 12.5075,
+            "z": 2.9
+          },
+          "powerFactor": 0.95,
+          "powerW": 14,
+          "roomId": "r4"
+        },
+        {
+          "calculationId": "E-LUX-r4",
+          "demandFactor": 1,
+          "discipline": "electrical",
+          "id": "EL-r4-4",
+          "kind": "LUMINAIRE",
+          "layer": "E-LIGHT",
+          "levelId": "L1",
+          "position": {
+            "x": 6.5346875,
+            "y": 10.9375,
+            "z": 2.9
+          },
+          "powerFactor": 0.95,
+          "powerW": 14,
+          "roomId": "r4"
+        },
+        {
+          "calculationId": "E-LUX-r4",
+          "demandFactor": 1,
+          "discipline": "electrical",
+          "id": "EL-r4-5",
+          "kind": "LUMINAIRE",
+          "layer": "E-LIGHT",
+          "levelId": "L1",
+          "position": {
+            "x": 2.5403124999999998,
+            "y": 10.1525,
+            "z": 2.9
+          },
+          "powerFactor": 0.95,
+          "powerW": 14,
+          "roomId": "r4"
+        },
+        {
+          "calculationId": "E-LUX-r4",
+          "demandFactor": 1,
+          "discipline": "electrical",
+          "id": "EL-r4-6",
+          "kind": "LUMINAIRE",
+          "layer": "E-LIGHT",
+          "levelId": "L1",
+          "position": {
+            "x": 6.5346875,
+            "y": 8.5825,
+            "z": 2.9
+          },
+          "powerFactor": 0.95,
+          "powerW": 14,
+          "roomId": "r4"
+        }
+      ],
+      "id": "electrical",
+      "issues": [
+        {
+          "code": "CALCULATION_INPUT_REQUIRED",
+          "details": {
+            "error": "INVALID_NUMBER",
+            "id": "E-P-SO1",
+            "path": "powerFactor"
+          },
+          "discipline": "electrical",
+          "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+          "severity": "pending"
+        },
+        {
+          "code": "CALCULATION_INPUT_REQUIRED",
+          "details": {
+            "error": "INVALID_NUMBER",
+            "id": "E-P-AC1-LOAD",
+            "path": "powerFactor"
+          },
+          "discipline": "electrical",
+          "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+          "severity": "pending"
+        },
+        {
+          "code": "CALCULATION_INPUT_REQUIRED",
+          "details": {
+            "error": "INVALID_NUMBER",
+            "id": "E-I-C1",
+            "path": "powerW"
+          },
+          "discipline": "electrical",
+          "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+          "severity": "pending"
+        },
+        {
+          "code": "CALCULATION_INPUT_REQUIRED",
+          "details": {
+            "error": "INVALID_NUMBER",
+            "id": "E-VD-C1",
+            "path": "currentA"
+          },
+          "discipline": "electrical",
+          "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "AC1-LOAD"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "EL-r4-1"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "EL-r4-2"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "EL-r4-3"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "EL-r4-4"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "EL-r4-5"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "UNASSIGNED_LOAD",
+          "details": {
+            "loadId": "EL-r4-6"
+          },
+          "discipline": "electrical",
+          "messageAr": "الحمل لم يُربط بدائرة.",
+          "severity": "pending"
+        },
+        {
+          "code": "PHASE_BALANCE_NOT_EVALUATED",
+          "details": {},
+          "discipline": "electrical",
+          "messageAr": "توزيع أطوار اللوحة DB1 غير مكتمل؛ لا يمكن الحكم على اتزانها.",
+          "severity": "pending"
+        },
+        {
+          "code": "SPECIALIST_REVIEW_REQUIRED",
+          "details": {},
+          "discipline": "electrical",
+          "messageAr": "يلزم تحقق مستقل للتأريض والقصر والفصل الانتقائي والحماية من الصعق والمواقع الرطبة والإنارة الفعلية بملفات فوتومترية.",
+          "severity": "pending"
+        }
+      ],
+      "limitations": [
+        "Lumen count and suggested locations do not verify uniformity, glare or point illuminance.",
+        "Home runs are schematic pathway proposals. Voltage drop conservatively assigns total circuit load to the longest complete path; it is not a solved branching network.",
+        "P and Q aggregation assumes lagging linear loads; harmonics, capacitive loads and neutral currents are not solved."
+      ],
+      "routes": [
+        {
+          "clearanceM": 0.03,
+          "discipline": "electrical",
+          "fromId": "DB1",
+          "heightM": 0.03,
+          "id": "ER-C1-SO1",
+          "kind": "CONCEPT_HOME_RUN",
+          "layer": "E-CABLE",
+          "lengthM": 16.154,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 4.124,
+              "y": 19.465,
+              "z": 0.4
+            },
+            {
+              "x": 4.124,
+              "y": 19.465,
+              "z": 2.85
+            },
+            {
+              "x": 4.532,
+              "y": 19.465,
+              "z": 2.85
+            },
+            {
+              "x": 4.532,
+              "y": 8.619,
+              "z": 2.85
+            },
+            {
+              "x": 4.532,
+              "y": 8.619,
+              "z": 0.4
+            }
+          ],
+          "reason": "GEOMETRIC_PROPOSAL_ONLY",
+          "routeHeightM": 2.85,
+          "status": "PROPOSED",
+          "systemId": "C1",
+          "toId": "SO1",
+          "widthM": 0.03
+        },
+        {
+          "clearanceM": 0.03,
+          "discipline": "electrical",
+          "fromId": "DB1",
+          "heightM": 0.03,
+          "id": "ER-C1-SO2",
+          "kind": "CONCEPT_HOME_RUN",
+          "layer": "E-CABLE",
+          "lengthM": 15.588000000000001,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 4.124,
+              "y": 19.465,
+              "z": 0.4
+            },
+            {
+              "x": 4.124,
+              "y": 19.465,
+              "z": 2.85
+            },
+            {
+              "x": 9.198,
+              "y": 19.465,
+              "z": 2.85
+            },
+            {
+              "x": 9.198,
+              "y": 13.851,
+              "z": 2.85
+            },
+            {
+              "x": 9.198,
+              "y": 13.851,
+              "z": 0.4
+            }
+          ],
+          "reason": "GEOMETRIC_PROPOSAL_ONLY",
+          "routeHeightM": 2.85,
+          "status": "PROPOSED",
+          "systemId": "C1",
+          "toId": "SO2",
+          "widthM": 0.03
+        }
+      ],
+      "schedules": [
+        {
+          "columns": [
+            "id",
+            "panelId",
+            "loadCount",
+            "connectedW",
+            "demandW",
+            "currentA",
+            "oneWayLengthM",
+            "voltageDropPercent",
+            "cableSizeMm2",
+            "breakerA",
+            "protectionCheck"
+          ],
+          "id": "electrical-circuits",
+          "rows": [
+            {
+              "breakerA": 16,
+              "cableSizeMm2": 2.5,
+              "connectedW": null,
+              "currentA": null,
+              "demandW": null,
+              "id": "C1",
+              "loadCount": 2,
+              "oneWayLengthM": 16.154,
+              "panelId": "DB1",
+              "protectionCheck": null,
+              "voltageDropPercent": null
+            }
+          ]
+        },
+        {
+          "columns": [
+            "id",
+            "demandW",
+            "demandVar",
+            "vectorApparentVA",
+            "phaseL1VA",
+            "phaseL2VA",
+            "phaseL3VA"
+          ],
+          "id": "electrical-panels",
+          "rows": [
+            {
+              "demandVar": null,
+              "demandW": null,
+              "id": "DB1",
+              "phaseL1VA": null,
+              "phaseL2VA": null,
+              "phaseL3VA": null,
+              "vectorApparentVA": null
+            }
+          ]
+        }
+      ],
+      "stage": "PRELIMINARY"
+    },
+    {
+      "calculations": [
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "M-Q-Z1",
+          "inputs": {
+            "cpJkgK": 1006,
+            "densityKgM3": 1.2,
+            "indoorC": 24,
+            "indoorHumidityRatio": 0.009,
+            "infiltrationM3S": 0.003,
+            "internalLatentW": 150,
+            "internalSensibleW": 300,
+            "latentHeatJkg": 2450000,
+            "outdoorAirM3S": 0.01,
+            "outdoorC": 44,
+            "outdoorHumidityRatio": 0.012,
+            "solarW": 500,
+            "surfaces": [
+              {
+                "areaM2": 22,
+                "uWm2K": 0.45
+              },
+              {
+                "areaM2": 28.67,
+                "uWm2K": 0.25
+              }
+            ]
+          },
+          "method": "STEADY_STATE_HEAT_GAIN_NOT_DESIGN_LOAD",
+          "sourceRefs": [
+            "ENERGYPLUS-HEAT-BALANCE"
+          ],
+          "status": "CALCULATED",
+          "unit": "W",
+          "value": {
+            "airLatentW": 114.66000000000004,
+            "airSensibleW": 313.872,
+            "conductionW": 341.35,
+            "latentW": 264.66,
+            "sensibleW": 1455.222,
+            "totalW": 1719.882
+          }
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "M-AIR-Z1",
+          "inputs": {
+            "cpJkgK": 1006,
+            "densityKgM3": 1.2,
+            "sensibleW": 1455.222,
+            "supplyDeltaK": 12
+          },
+          "method": "SENSIBLE_AIRFLOW",
+          "sourceRefs": [
+            "ENERGYPLUS-HEAT-BALANCE"
+          ],
+          "status": "CALCULATED",
+          "unit": "m3/s",
+          "value": 0.10045435719019218
+        },
+        {
+          "basis": "INCOMPLETE_INPUTS",
+          "id": "M-OA-Z1",
+          "inputs": {
+            "areaM2": 28.668200000000006
+          },
+          "method": "SUPPLIED_ZONE_VENTILATION_RATES",
+          "sourceRefs": [
+            "ASHRAE-ZONE-OA"
+          ],
+          "status": "NOT_CALCULATED",
+          "unit": "m3/s",
+          "value": null
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "M-D-Z1",
+          "inputs": {
+            "flowM3S": 0.10045435719019218,
+            "velocityMS": 4
+          },
+          "method": "CIRCULAR_AREA_EQUIVALENT_ONLY",
+          "sourceRefs": [],
+          "status": "CALCULATED",
+          "unit": "m",
+          "value": 0.17881726707417248
+        }
+      ],
+      "codeCompliance": "NOT_EVALUATED",
+      "constructionApproved": false,
+      "devices": [
+        {
+          "discipline": "hvac",
+          "id": "AC1",
+          "kind": "AIR_EQUIPMENT",
+          "layer": "M-EQUIP",
+          "levelId": "L1",
+          "position": {
+            "x": 4.917,
+            "y": 8.619,
+            "z": 2.7
+          },
+          "ratedInputW": 1800,
+          "roomId": "r4"
+        },
+        {
+          "discipline": "hvac",
+          "id": "MT-Z1",
+          "kind": "SUPPLY_TERMINAL",
+          "layer": "M-AIR",
+          "levelId": "L1",
+          "position": {
+            "x": 4.5375,
+            "y": 8.61,
+            "z": 2.8
+          },
+          "roomId": "r4",
+          "supplyM3S": 0.10045435719019218,
+          "zoneId": "Z1"
+        }
+      ],
+      "id": "hvac",
+      "issues": [
+        {
+          "code": "CALCULATION_INPUT_REQUIRED",
+          "details": {
+            "error": "INVALID_NUMBER",
+            "id": "M-OA-Z1",
+            "path": "persons"
+          },
+          "discipline": "hvac",
+          "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+          "severity": "pending"
+        },
+        {
+          "code": "SPECIALIST_REVIEW_REQUIRED",
+          "details": {},
+          "discipline": "hvac",
+          "messageAr": "يلزم نموذج أحمال تصميم معتمد، ومراجعة انطباق طريقة التهوية على نوع المبنى، وضغط الدكت والضوضاء والتوزيع والراجع والتكاثف وكفاءة الجهاز عند ظروف التصميم.",
+          "severity": "pending"
+        }
+      ],
+      "limitations": [
+        "Static heat gains are not an ASHRAE heat-balance or radiant-time-series simulation and are not equipment selection.",
+        "Outdoor-air rates and effectiveness are explicit project inputs. No ASHRAE 62.1 values are assigned to residential rooms.",
+        "Area-equivalent duct diameter excludes pressure loss, fittings, aspect ratio, insulation and acoustic design.",
+        "Equipment electrical input is not inferred from cooling watts."
+      ],
+      "routes": [
+        {
+          "clearanceM": 0.05,
+          "discipline": "hvac",
+          "fromId": "AC1",
+          "heightM": 0.25,
+          "id": "MR-Z1",
+          "kind": "SUPPLY_DUCT_PROPOSAL",
+          "layer": "M-DUCT",
+          "lengthM": 0.48850000000000016,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 4.917,
+              "y": 8.619,
+              "z": 2.7
+            },
+            {
+              "x": 4.917,
+              "y": 8.619,
+              "z": 2.8
+            },
+            {
+              "x": 4.5375,
+              "y": 8.619,
+              "z": 2.8
+            },
+            {
+              "x": 4.5375,
+              "y": 8.61,
+              "z": 2.8
+            }
+          ],
+          "reason": "GEOMETRIC_PROPOSAL_ONLY",
+          "routeHeightM": 2.8,
+          "status": "PROPOSED",
+          "systemId": "AC1",
+          "toId": "MT-Z1",
+          "widthM": 0.3
+        }
+      ],
+      "schedules": [
+        {
+          "columns": [
+            "id",
+            "roomId",
+            "sensibleGainW",
+            "latentGainW",
+            "totalGainW",
+            "supplyM3S",
+            "outdoorAirM3S",
+            "areaEquivalentDuctM",
+            "equipmentId",
+            "selectedCapacityW"
+          ],
+          "id": "hvac-zones",
+          "rows": [
+            {
+              "areaEquivalentDuctM": 0.17881726707417248,
+              "equipmentId": "AC1",
+              "id": "Z1",
+              "latentGainW": 264.66,
+              "outdoorAirM3S": null,
+              "roomId": "r4",
+              "selectedCapacityW": null,
+              "sensibleGainW": 1455.222,
+              "supplyM3S": 0.10045435719019218,
+              "totalGainW": 1719.882
+            }
+          ]
+        }
+      ],
+      "stage": "PRELIMINARY"
+    },
+    {
+      "calculations": [
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "P-D-PC1",
+          "inputs": {
+            "flowM3S": 0.001,
+            "velocityMS": 0.8
+          },
+          "method": "CIRCULAR_AREA_EQUIVALENT_ONLY",
+          "sourceRefs": [],
+          "status": "CALCULATED",
+          "unit": "m",
+          "value": 0.03989422804014327
+        },
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "P-FALL-PC1",
+          "inputs": {
+            "horizontalLengthM": 8.336,
+            "slope": 0.02
+          },
+          "method": "DRAINAGE_FALL",
+          "sourceRefs": [],
+          "status": "CALCULATED",
+          "unit": "m",
+          "value": 0.16672
+        }
+      ],
+      "codeCompliance": "NOT_EVALUATED",
+      "constructionApproved": false,
+      "devices": [
+        {
+          "discipline": "plumbing",
+          "id": "WC1",
+          "kind": "WC",
+          "layer": "P-FIXTURE",
+          "levelId": "L1",
+          "position": {
+            "x": 3.105,
+            "y": 7.418,
+            "z": 0
+          },
+          "roomId": "r6"
+        },
+        {
+          "discipline": "plumbing",
+          "id": "MH1",
+          "kind": "MANHOLE",
+          "layer": "P-FIXTURE",
+          "levelId": "L1",
+          "position": {
+            "x": 1.338,
+            "y": 13.987,
+            "z": -0.6
+          }
+        },
+        {
+          "discipline": "plumbing",
+          "id": "RN1",
+          "kind": "RISER_NODE",
+          "layer": "P-FIXTURE",
+          "levelId": "L2",
+          "position": {
+            "x": 3.105,
+            "y": 7.418,
+            "z": 3.2
+          },
+          "roomId": "r20"
+        }
+      ],
+      "id": "plumbing",
+      "issues": [
+        {
+          "code": "OUTFALL_INVERT_MISMATCH",
+          "details": {
+            "actualEndInvertM": -0.46672,
+            "id": "PC1",
+            "obstacleId": null,
+            "requestedEndInvertM": -0.95
+          },
+          "discipline": "plumbing",
+          "messageAr": "الميل والطول لا يصلان إلى منسوب القاع المطلوب؛ لم يُفترض اتصال رأسي لإخفاء الفرق.",
+          "severity": "error"
+        },
+        {
+          "code": "SPECIALIST_REVIEW_REQUIRED",
+          "details": {},
+          "discipline": "plumbing",
+          "messageAr": "يلزم تحديد التدفق التصميمي من جدول وحدات الأجهزة المعتمد، ثم تحقق الضغط والأقطار والتهوية والمصائد والتنظيف ومنع الرجوع والمطر والربط الخارجي.",
+          "severity": "pending"
+        },
+        {
+          "code": "SLAB_PENETRATION_REVIEW",
+          "details": {
+            "id": "RS1",
+            "obstacleId": null
+          },
+          "discipline": "plumbing",
+          "messageAr": "الرايزر محدد هندسيًا؛ فتحات البلاطات والعزل والحماية والخلوص تحتاج اعتمادًا مستقلًا.",
+          "severity": "pending"
+        }
+      ],
+      "limitations": [
+        "Flow and friction factors are supplied project inputs; no fixture-unit demand curve is fabricated.",
+        "Velocity-area diameter is not sanitary drainage capacity, a commercial nominal pipe size or a complete pressure-network solution.",
+        "Drain invert elevations are relative to the stated level. Sloped pipes are rechecked at their actual 3D elevations."
+      ],
+      "routes": [
+        {
+          "clearanceM": 0.01,
+          "discipline": "plumbing",
+          "endInvertM": -0.46672,
+          "fallM": 0.16672,
+          "fromId": "WC1",
+          "heightM": 0.11,
+          "horizontalLengthM": 8.336,
+          "id": "PR-PC1",
+          "kind": "sanitary",
+          "layer": "P-DRAIN",
+          "lengthM": 8.337667033313334,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 3.105,
+              "y": 7.418,
+              "z": -0.3
+            },
+            {
+              "x": 1.338,
+              "y": 7.418,
+              "z": -0.33533999999999997
+            },
+            {
+              "x": 1.338,
+              "y": 13.987,
+              "z": -0.46672
+            }
+          ],
+          "reason": "OUTFALL_INVERT_MISMATCH",
+          "routeHeightM": -0.3,
+          "status": "BLOCKED",
+          "systemId": "sanitary",
+          "toId": "MH1",
+          "widthM": 0.11
+        },
+        {
+          "clearanceM": 0.03,
+          "discipline": "plumbing",
+          "fromId": "WC1",
+          "heightM": 0.06,
+          "id": "RS1",
+          "kind": "VERTICAL_RISER",
+          "layer": "P-RISER",
+          "lengthM": 3.2,
+          "levelId": "L1",
+          "levelIds": [
+            "L1",
+            "L2"
+          ],
+          "points": [
+            {
+              "x": 3.105,
+              "y": 7.418,
+              "z": 0
+            },
+            {
+              "x": 3.105,
+              "y": 7.418,
+              "z": 3.2
+            }
+          ],
+          "reason": "EXPLICIT_ENDPOINTS",
+          "status": "PROPOSED",
+          "systemId": "plumbing-riser",
+          "toId": "RN1",
+          "widthM": 0.06
+        }
+      ],
+      "schedules": [
+        {
+          "columns": [
+            "id",
+            "system",
+            "fromId",
+            "toId",
+            "flowM3S",
+            "equivalentDiameterM",
+            "selectedDiameterMm",
+            "lengthM",
+            "horizontalLengthM",
+            "slope",
+            "fallM",
+            "endInvertM",
+            "routeStatus"
+          ],
+          "id": "plumbing-connections",
+          "rows": [
+            {
+              "endInvertM": -0.46672,
+              "equivalentDiameterM": 0.03989422804014327,
+              "fallM": 0.16672,
+              "flowM3S": 0.001,
+              "fromId": "WC1",
+              "horizontalLengthM": 8.336,
+              "id": "PC1",
+              "lengthM": 8.337667033313334,
+              "routeStatus": "BLOCKED",
+              "selectedDiameterMm": null,
+              "slope": 0.02,
+              "system": "sanitary",
+              "toId": "MH1"
+            }
+          ]
+        }
+      ],
+      "stage": "PRELIMINARY"
+    },
+    {
+      "calculations": [],
+      "codeCompliance": "NOT_EVALUATED",
+      "constructionApproved": false,
+      "devices": [
+        {
+          "discipline": "fire",
+          "id": "FACP1",
+          "kind": "FIRE_ALARM_PANEL",
+          "layer": "F-DEVICE",
+          "levelId": "L1",
+          "position": {
+            "x": 4.826,
+            "y": 19.967,
+            "z": 1.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "discipline": "fire",
+          "id": "SD1",
+          "kind": "SMOKE_DETECTOR",
+          "layer": "F-DEVICE",
+          "levelId": "L1",
+          "position": {
+            "x": 9.492,
+            "y": 14.146,
+            "z": 3
+          },
+          "roomId": "r3"
+        }
+      ],
+      "id": "fire",
+      "issues": [
+        {
+          "code": "SPECIALIST_REVIEW_REQUIRED",
+          "details": {},
+          "discipline": "fire",
+          "messageAr": "مراجعة تصميم وإنذار وإطفاء وإخلاء متخصصة مطلوبة؛ التغطية ومقاومة الحريق والتدفق والضغط وسعة المضخة والخزان غير محسوبة.",
+          "severity": "pending"
+        }
+      ],
+      "limitations": [
+        "Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code compliance are NOT_EVALUATED."
+      ],
+      "routes": [
+        {
+          "clearanceM": 0.02,
+          "discipline": "fire",
+          "fromId": "FACP1",
+          "heightM": 0.02,
+          "id": "fire-R-FC1",
+          "kind": "PATHWAY_PROPOSAL",
+          "layer": "F-PATH",
+          "lengthM": 12.087,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 4.826,
+              "y": 19.967,
+              "z": 1.4
+            },
+            {
+              "x": 4.826,
+              "y": 19.967,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 19.967,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 14.146,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 14.146,
+              "z": 3
+            }
+          ],
+          "reason": "GEOMETRIC_PROPOSAL_ONLY",
+          "routeHeightM": 2.6,
+          "status": "PROPOSED",
+          "systemId": "fire",
+          "toId": "SD1",
+          "widthM": 0.02
+        }
+      ],
+      "schedules": [
+        {
+          "columns": [
+            "id",
+            "kind",
+            "levelId",
+            "roomId"
+          ],
+          "id": "fire-devices",
+          "rows": [
+            {
+              "id": "FACP1",
+              "kind": "FIRE_ALARM_PANEL",
+              "levelId": "L1",
+              "roomId": "r8"
+            },
+            {
+              "id": "SD1",
+              "kind": "SMOKE_DETECTOR",
+              "levelId": "L1",
+              "roomId": "r3"
+            }
+          ]
+        }
+      ],
+      "stage": "PRELIMINARY"
+    },
+    {
+      "calculations": [],
+      "codeCompliance": "NOT_EVALUATED",
+      "constructionApproved": false,
+      "devices": [
+        {
+          "discipline": "low_current",
+          "id": "RACK1",
+          "kind": "DATA_RACK",
+          "layer": "T-DEVICE",
+          "levelId": "L1",
+          "position": {
+            "x": 4.826,
+            "y": 19.967,
+            "z": 1.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "discipline": "low_current",
+          "id": "DO1",
+          "kind": "DATA_OUTLET",
+          "layer": "T-DEVICE",
+          "levelId": "L1",
+          "position": {
+            "x": 9.492,
+            "y": 14.146,
+            "z": 0.4
+          },
+          "roomId": "r3"
+        }
+      ],
+      "id": "low_current",
+      "issues": [
+        {
+          "code": "SPECIALIST_REVIEW_REQUIRED",
+          "details": {},
+          "discipline": "low_current",
+          "messageAr": "يلزم تحقق نوع الكابل وحدود القناة والوصلات والفصل والتأريض وتغطية الشبكات والكاميرات ومتطلبات الخصوصية.",
+          "severity": "pending"
+        }
+      ],
+      "limitations": [
+        "Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code compliance are NOT_EVALUATED."
+      ],
+      "routes": [
+        {
+          "clearanceM": 0.02,
+          "discipline": "low_current",
+          "fromId": "RACK1",
+          "heightM": 0.02,
+          "id": "low_current-R-LC1",
+          "kind": "PATHWAY_PROPOSAL",
+          "layer": "T-PATH",
+          "lengthM": 13.887,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 4.826,
+              "y": 19.967,
+              "z": 1.4
+            },
+            {
+              "x": 4.826,
+              "y": 19.967,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 19.967,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 14.146,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 14.146,
+              "z": 0.4
+            }
+          ],
+          "reason": "GEOMETRIC_PROPOSAL_ONLY",
+          "routeHeightM": 2.6,
+          "status": "PROPOSED",
+          "systemId": "low_current",
+          "toId": "DO1",
+          "widthM": 0.02
+        }
+      ],
+      "schedules": [
+        {
+          "columns": [
+            "id",
+            "kind",
+            "levelId",
+            "roomId"
+          ],
+          "id": "low_current-devices",
+          "rows": [
+            {
+              "id": "RACK1",
+              "kind": "DATA_RACK",
+              "levelId": "L1",
+              "roomId": "r8"
+            },
+            {
+              "id": "DO1",
+              "kind": "DATA_OUTLET",
+              "levelId": "L1",
+              "roomId": "r3"
+            }
+          ]
+        }
+      ],
+      "stage": "PRELIMINARY"
+    },
+    {
+      "calculations": [
+        {
+          "basis": "SUPPLIED_INPUTS",
+          "id": "S-DC",
+          "inputs": {
+            "panelCount": 2,
+            "wattsPerPanel": 450
+          },
+          "method": "NAMEPLATE_DC_CAPACITY",
+          "sourceRefs": [],
+          "status": "CALCULATED",
+          "unit": "Wp",
+          "value": 900
+        }
+      ],
+      "codeCompliance": "NOT_EVALUATED",
+      "constructionApproved": false,
+      "devices": [
+        {
+          "discipline": "solar",
+          "id": "INV1",
+          "kind": "INVERTER",
+          "layer": "S-DEVICE",
+          "levelId": "L1",
+          "position": {
+            "x": 4.826,
+            "y": 19.967,
+            "z": 1.4
+          },
+          "roomId": "r8"
+        },
+        {
+          "discipline": "solar",
+          "id": "PV1",
+          "kind": "PV_MODULE",
+          "layer": "S-DEVICE",
+          "levelId": "L1",
+          "position": {
+            "x": 9.492,
+            "y": 14.146,
+            "z": 0.4
+          },
+          "roomId": "r3"
+        }
+      ],
+      "id": "solar",
+      "issues": [
+        {
+          "code": "SPECIALIST_REVIEW_REQUIRED",
+          "details": {},
+          "discipline": "solar",
+          "messageAr": "يلزم تحقق الإشعاع والتظليل والإنفرتر والحماية والأحمال الإنشائية على السقف؛ لم يُحسب الإنتاج السنوي.",
+          "severity": "pending"
+        }
+      ],
+      "limitations": [
+        "Explicit placements and geometric pathways only. Device coverage, equipment ratings, system performance and code compliance are NOT_EVALUATED."
+      ],
+      "routes": [
+        {
+          "clearanceM": 0.02,
+          "discipline": "solar",
+          "fromId": "INV1",
+          "heightM": 0.02,
+          "id": "solar-R-SC1",
+          "kind": "PATHWAY_PROPOSAL",
+          "layer": "S-PATH",
+          "lengthM": 13.887,
+          "levelId": "L1",
+          "points": [
+            {
+              "x": 4.826,
+              "y": 19.967,
+              "z": 1.4
+            },
+            {
+              "x": 4.826,
+              "y": 19.967,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 19.967,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 14.146,
+              "z": 2.6
+            },
+            {
+              "x": 9.492,
+              "y": 14.146,
+              "z": 0.4
+            }
+          ],
+          "reason": "GEOMETRIC_PROPOSAL_ONLY",
+          "routeHeightM": 2.6,
+          "status": "PROPOSED",
+          "systemId": "solar",
+          "toId": "PV1",
+          "widthM": 0.02
+        }
+      ],
+      "schedules": [
+        {
+          "columns": [
+            "id",
+            "kind",
+            "levelId",
+            "roomId"
+          ],
+          "id": "solar-devices",
+          "rows": [
+            {
+              "id": "INV1",
+              "kind": "INVERTER",
+              "levelId": "L1",
+              "roomId": "r8"
+            },
+            {
+              "id": "PV1",
+              "kind": "PV_MODULE",
+              "levelId": "L1",
+              "roomId": "r3"
+            }
+          ]
+        }
+      ],
+      "stage": "PRELIMINARY"
+    }
+  ],
+  "coordination": {
+    "status": "CHECKED_SUPPLIED_GEOMETRY",
+    "method": "CONSERVATIVE_3D_ENVELOPES",
+    "checksCodeCompliance": false,
+    "clashes": [
+      {
+        "kind": "PENETRATION_REVIEW",
+        "routeId": "ER-C1-SO1",
+        "segment": 2,
+        "wallId": "w13",
+        "outcome": "POTENTIAL_INTERSECTION",
+        "note": "Openings, fire rating, sleeves and exact wall solids require review; no permission to cut is issued."
+      },
+      {
+        "kind": "PENETRATION_REVIEW",
+        "routeId": "ER-C1-SO1",
+        "segment": 2,
+        "wallId": "w14",
+        "outcome": "POTENTIAL_INTERSECTION",
+        "note": "Openings, fire rating, sleeves and exact wall solids require review; no permission to cut is issued."
+      },
+      {
+        "kind": "PENETRATION_REVIEW",
+        "routeId": "ER-C1-SO2",
+        "segment": 1,
+        "wallId": "w1",
+        "outcome": "POTENTIAL_INTERSECTION",
+        "note": "Openings, fire rating, sleeves and exact wall solids require review; no permission to cut is issued."
+      },
+      {
+        "kind": "PENETRATION_REVIEW",
+        "routeId": "fire-R-FC1",
+        "segment": 1,
+        "wallId": "w1",
+        "outcome": "POTENTIAL_INTERSECTION",
+        "note": "Openings, fire rating, sleeves and exact wall solids require review; no permission to cut is issued."
+      },
+      {
+        "kind": "PENETRATION_REVIEW",
+        "routeId": "low_current-R-LC1",
+        "segment": 1,
+        "wallId": "w1",
+        "outcome": "POTENTIAL_INTERSECTION",
+        "note": "Openings, fire rating, sleeves and exact wall solids require review; no permission to cut is issued."
+      },
+      {
+        "kind": "PENETRATION_REVIEW",
+        "routeId": "solar-R-SC1",
+        "segment": 1,
+        "wallId": "w1",
+        "outcome": "POTENTIAL_INTERSECTION",
+        "note": "Openings, fire rating, sleeves and exact wall solids require review; no permission to cut is issued."
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "ER-C1-SO1",
+        "otherRouteId": "MR-Z1",
+        "segment": 2,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "ER-C1-SO1",
+        "otherRouteId": "MR-Z1",
+        "segment": 2,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "ER-C1-SO1",
+        "otherRouteId": "MR-Z1",
+        "segment": 3,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "ER-C1-SO1",
+        "otherRouteId": "MR-Z1",
+        "segment": 3,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 0,
+        "otherSegment": 0,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 0,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 0,
+        "otherSegment": 0,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 0,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 1,
+        "otherSegment": 0,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 1,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 1,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 1,
+        "otherSegment": 0,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 1,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 1,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 2,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 2,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 2,
+        "otherSegment": 3,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 2,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 2,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 2,
+        "otherSegment": 3,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 3,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "low_current-R-LC1",
+        "segment": 3,
+        "otherSegment": 3,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 3,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "fire-R-FC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 3,
+        "otherSegment": 3,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 0,
+        "otherSegment": 0,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 0,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 1,
+        "otherSegment": 0,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 1,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 1,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 2,
+        "otherSegment": 1,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 2,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 2,
+        "otherSegment": 3,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 3,
+        "otherSegment": 2,
+        "outcome": "POTENTIAL_INTERSECTION"
+      },
+      {
+        "kind": "SERVICE_SERVICE",
+        "routeId": "low_current-R-LC1",
+        "otherRouteId": "solar-R-SC1",
+        "segment": 3,
+        "otherSegment": 3,
+        "outcome": "POTENTIAL_INTERSECTION"
+      }
+    ],
+    "interfaces": [
+      {
+        "equipmentId": "AC1",
+        "electricalLoadId": "AC1-LOAD",
+        "outcome": "MATCHED_SUPPLIED_INPUT"
+      }
+    ],
+    "issues": [
+      {
+        "discipline": "coordination",
+        "code": "STRUCTURAL_MODEL_INCOMPLETE",
+        "severity": "pending",
+        "messageAr": "نموذج الأعمدة والكمرات والبلاطات والخلوصات غير مكتمل؛ غياب التعارض المكتشف لا يثبت سلامة التمديد.",
+        "details": {}
+      },
+      {
+        "discipline": "coordination",
+        "code": "CLASHES_REQUIRE_REVIEW",
+        "severity": "pending",
+        "messageAr": "توجد تعارضات أو اختراقات محتملة تحتاج مراجعة.",
+        "details": {
+          "count": 40
+        }
+      }
+    ],
+    "limitations": [
+      "Conservative envelopes can over-report diagonal and corner contacts.",
+      "Same-system pathway sharing is not checked for capacity or fittings.",
+      "Wall penetrations are flagged conservatively even near door/window openings.",
+      "Devices without ratedInputW have no electrical interface check."
+    ]
+  },
+  "quantities": {
+    "basis": "PRELIMINARY_POINT_COUNTS_AND_PROPOSED_CENTRELINES",
+    "rows": [
+      {
+        "key": "electrical:PANEL:E-POWER:each",
+        "discipline": "electrical",
+        "kind": "PANEL",
+        "layer": "E-POWER",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "electrical:SOCKET:E-SOCKET:each",
+        "discipline": "electrical",
+        "kind": "SOCKET",
+        "layer": "E-SOCKET",
+        "unit": "each",
+        "quantity": 2,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "electrical:EQUIPMENT_LOAD:E-POWER:each",
+        "discipline": "electrical",
+        "kind": "EQUIPMENT_LOAD",
+        "layer": "E-POWER",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "electrical:LUMINAIRE:E-LIGHT:each",
+        "discipline": "electrical",
+        "kind": "LUMINAIRE",
+        "layer": "E-LIGHT",
+        "unit": "each",
+        "quantity": 6,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "electrical:CONCEPT_HOME_RUN:E-CABLE:0.03:0.03:m",
+        "discipline": "electrical",
+        "kind": "CONCEPT_HOME_RUN (0.03x0.03m envelope)",
+        "layer": "E-CABLE",
+        "unit": "m",
+        "quantity": 31.742,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "hvac:AIR_EQUIPMENT:M-EQUIP:each",
+        "discipline": "hvac",
+        "kind": "AIR_EQUIPMENT",
+        "layer": "M-EQUIP",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "hvac:SUPPLY_TERMINAL:M-AIR:each",
+        "discipline": "hvac",
+        "kind": "SUPPLY_TERMINAL",
+        "layer": "M-AIR",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "hvac:SUPPLY_DUCT_PROPOSAL:M-DUCT:0.3:0.25:m",
+        "discipline": "hvac",
+        "kind": "SUPPLY_DUCT_PROPOSAL (0.3x0.25m envelope)",
+        "layer": "M-DUCT",
+        "unit": "m",
+        "quantity": 0.48850000000000016,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "plumbing:WC:P-FIXTURE:each",
+        "discipline": "plumbing",
+        "kind": "WC",
+        "layer": "P-FIXTURE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "plumbing:MANHOLE:P-FIXTURE:each",
+        "discipline": "plumbing",
+        "kind": "MANHOLE",
+        "layer": "P-FIXTURE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "plumbing:RISER_NODE:P-FIXTURE:each",
+        "discipline": "plumbing",
+        "kind": "RISER_NODE",
+        "layer": "P-FIXTURE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "plumbing:VERTICAL_RISER:P-RISER:0.06:0.06:m",
+        "discipline": "plumbing",
+        "kind": "VERTICAL_RISER (0.06x0.06m envelope)",
+        "layer": "P-RISER",
+        "unit": "m",
+        "quantity": 3.2,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "fire:FIRE_ALARM_PANEL:F-DEVICE:each",
+        "discipline": "fire",
+        "kind": "FIRE_ALARM_PANEL",
+        "layer": "F-DEVICE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "fire:SMOKE_DETECTOR:F-DEVICE:each",
+        "discipline": "fire",
+        "kind": "SMOKE_DETECTOR",
+        "layer": "F-DEVICE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "fire:PATHWAY_PROPOSAL:F-PATH:0.02:0.02:m",
+        "discipline": "fire",
+        "kind": "PATHWAY_PROPOSAL (0.02x0.02m envelope)",
+        "layer": "F-PATH",
+        "unit": "m",
+        "quantity": 12.087,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "low_current:DATA_RACK:T-DEVICE:each",
+        "discipline": "low_current",
+        "kind": "DATA_RACK",
+        "layer": "T-DEVICE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "low_current:DATA_OUTLET:T-DEVICE:each",
+        "discipline": "low_current",
+        "kind": "DATA_OUTLET",
+        "layer": "T-DEVICE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "low_current:PATHWAY_PROPOSAL:T-PATH:0.02:0.02:m",
+        "discipline": "low_current",
+        "kind": "PATHWAY_PROPOSAL (0.02x0.02m envelope)",
+        "layer": "T-PATH",
+        "unit": "m",
+        "quantity": 13.887,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "solar:INVERTER:S-DEVICE:each",
+        "discipline": "solar",
+        "kind": "INVERTER",
+        "layer": "S-DEVICE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "solar:PV_MODULE:S-DEVICE:each",
+        "discipline": "solar",
+        "kind": "PV_MODULE",
+        "layer": "S-DEVICE",
+        "unit": "each",
+        "quantity": 1,
+        "rate": null,
+        "amount": null
+      },
+      {
+        "key": "solar:PATHWAY_PROPOSAL:S-PATH:0.02:0.02:m",
+        "discipline": "solar",
+        "kind": "PATHWAY_PROPOSAL (0.02x0.02m envelope)",
+        "layer": "S-PATH",
+        "unit": "m",
+        "quantity": 13.887,
+        "rate": null,
+        "amount": null
+      }
+    ],
+    "pricedSubtotal": 0,
+    "unpricedCount": 21,
+    "total": null,
+    "includesFittingsWasteTaxOrContingency": false
+  },
+  "issues": [
+    {
+      "code": "CALCULATION_INPUT_REQUIRED",
+      "details": {
+        "error": "INVALID_NUMBER",
+        "id": "E-P-SO1",
+        "path": "powerFactor"
+      },
+      "discipline": "electrical",
+      "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+      "severity": "pending"
+    },
+    {
+      "code": "CALCULATION_INPUT_REQUIRED",
+      "details": {
+        "error": "INVALID_NUMBER",
+        "id": "E-P-AC1-LOAD",
+        "path": "powerFactor"
+      },
+      "discipline": "electrical",
+      "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+      "severity": "pending"
+    },
+    {
+      "code": "CALCULATION_INPUT_REQUIRED",
+      "details": {
+        "error": "INVALID_NUMBER",
+        "id": "E-I-C1",
+        "path": "powerW"
+      },
+      "discipline": "electrical",
+      "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+      "severity": "pending"
+    },
+    {
+      "code": "CALCULATION_INPUT_REQUIRED",
+      "details": {
+        "error": "INVALID_NUMBER",
+        "id": "E-VD-C1",
+        "path": "currentA"
+      },
+      "discipline": "electrical",
+      "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "AC1-LOAD"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "EL-r4-1"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "EL-r4-2"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "EL-r4-3"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "EL-r4-4"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "EL-r4-5"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "UNASSIGNED_LOAD",
+      "details": {
+        "loadId": "EL-r4-6"
+      },
+      "discipline": "electrical",
+      "messageAr": "الحمل لم يُربط بدائرة.",
+      "severity": "pending"
+    },
+    {
+      "code": "PHASE_BALANCE_NOT_EVALUATED",
+      "details": {},
+      "discipline": "electrical",
+      "messageAr": "توزيع أطوار اللوحة DB1 غير مكتمل؛ لا يمكن الحكم على اتزانها.",
+      "severity": "pending"
+    },
+    {
+      "code": "SPECIALIST_REVIEW_REQUIRED",
+      "details": {},
+      "discipline": "electrical",
+      "messageAr": "يلزم تحقق مستقل للتأريض والقصر والفصل الانتقائي والحماية من الصعق والمواقع الرطبة والإنارة الفعلية بملفات فوتومترية.",
+      "severity": "pending"
+    },
+    {
+      "code": "CALCULATION_INPUT_REQUIRED",
+      "details": {
+        "error": "INVALID_NUMBER",
+        "id": "M-OA-Z1",
+        "path": "persons"
+      },
+      "discipline": "hvac",
+      "messageAr": "بيانات الحساب ناقصة أو غير صالحة.",
+      "severity": "pending"
+    },
+    {
+      "code": "SPECIALIST_REVIEW_REQUIRED",
+      "details": {},
+      "discipline": "hvac",
+      "messageAr": "يلزم نموذج أحمال تصميم معتمد، ومراجعة انطباق طريقة التهوية على نوع المبنى، وضغط الدكت والضوضاء والتوزيع والراجع والتكاثف وكفاءة الجهاز عند ظروف التصميم.",
+      "severity": "pending"
+    },
+    {
+      "code": "OUTFALL_INVERT_MISMATCH",
+      "details": {
+        "actualEndInvertM": -0.46672,
+        "id": "PC1",
+        "obstacleId": null,
+        "requestedEndInvertM": -0.95
+      },
+      "discipline": "plumbing",
+      "messageAr": "الميل والطول لا يصلان إلى منسوب القاع المطلوب؛ لم يُفترض اتصال رأسي لإخفاء الفرق.",
+      "severity": "error"
+    },
+    {
+      "code": "SPECIALIST_REVIEW_REQUIRED",
+      "details": {},
+      "discipline": "plumbing",
+      "messageAr": "يلزم تحديد التدفق التصميمي من جدول وحدات الأجهزة المعتمد، ثم تحقق الضغط والأقطار والتهوية والمصائد والتنظيف ومنع الرجوع والمطر والربط الخارجي.",
+      "severity": "pending"
+    },
+    {
+      "code": "SLAB_PENETRATION_REVIEW",
+      "details": {
+        "id": "RS1",
+        "obstacleId": null
+      },
+      "discipline": "plumbing",
+      "messageAr": "الرايزر محدد هندسيًا؛ فتحات البلاطات والعزل والحماية والخلوص تحتاج اعتمادًا مستقلًا.",
+      "severity": "pending"
+    },
+    {
+      "code": "SPECIALIST_REVIEW_REQUIRED",
+      "details": {},
+      "discipline": "fire",
+      "messageAr": "مراجعة تصميم وإنذار وإطفاء وإخلاء متخصصة مطلوبة؛ التغطية ومقاومة الحريق والتدفق والضغط وسعة المضخة والخزان غير محسوبة.",
+      "severity": "pending"
+    },
+    {
+      "code": "SPECIALIST_REVIEW_REQUIRED",
+      "details": {},
+      "discipline": "low_current",
+      "messageAr": "يلزم تحقق نوع الكابل وحدود القناة والوصلات والفصل والتأريض وتغطية الشبكات والكاميرات ومتطلبات الخصوصية.",
+      "severity": "pending"
+    },
+    {
+      "code": "SPECIALIST_REVIEW_REQUIRED",
+      "details": {},
+      "discipline": "solar",
+      "messageAr": "يلزم تحقق الإشعاع والتظليل والإنفرتر والحماية والأحمال الإنشائية على السقف؛ لم يُحسب الإنتاج السنوي.",
+      "severity": "pending"
+    },
+    {
+      "discipline": "coordination",
+      "code": "STRUCTURAL_MODEL_INCOMPLETE",
+      "severity": "pending",
+      "messageAr": "نموذج الأعمدة والكمرات والبلاطات والخلوصات غير مكتمل؛ غياب التعارض المكتشف لا يثبت سلامة التمديد.",
+      "details": {}
+    },
+    {
+      "discipline": "coordination",
+      "code": "CLASHES_REQUIRE_REVIEW",
+      "severity": "pending",
+      "messageAr": "توجد تعارضات أو اختراقات محتملة تحتاج مراجعة.",
+      "details": {
+        "count": 40
+      }
+    },
+    {
+      "discipline": "project",
+      "code": "CODE_RULES_NOT_VERIFIED",
+      "severity": "pending",
+      "messageAr": "الحزمة لا تطبق جدول اشتراطات نظامية موثّقًا؛ مراجعة الكود والإصدار والبنود المنطبقة مطلوبة.",
+      "details": {}
+    }
+  ],
+  "ruleProvenance": [
+    {
+      "authority": "ALMIZAN_BINDING",
+      "classification": "PROJECT_ASSUMPTION",
+      "id": "MIZAN-ROUTING-DOMAIN",
+      "noteAr": "حيز التمرير محيط المبنى (أو حدود الأرض) ناقص الأفنية ودقة الشبكة 0.25 م ما لم تُعدَّل؛ افتراض قابل للتعديل وليس اشتراطًا.",
+      "verifiedCodeClause": null
+    },
+    {
+      "authority": "ALMIZAN_STRUCTURAL_PRECHECK",
+      "classification": "PROJECT_ASSUMPTION",
+      "id": "MIZAN-STRUCTURAL-PRECHECK",
+      "noteAr": "الأعمدة والكمرات من الفحص الإنشائي المبدئي (تقدير بافتراضات معلنة)، وليست نموذجًا إنشائيًا معتمدًا؛ البلاطات والفتحات والقواعد غير ممثلة.",
+      "verifiedCodeClause": null
+    },
+    {
+      "authority": "EXAMPLE_ONLY",
+      "classification": "PROJECT_ASSUMPTION",
+      "id": "KIT-DEMO-ASSUMPTIONS",
+      "noteAr": "قيم المثال التوضيحية للحزمة (كابل، حماية، مناخ، غلاف…) أُدخلت بطلب المستخدم؛ افتراضات قابلة للتعديل وليست اشتراطات سعودية أو اختيار مصنّع.",
+      "verifiedCodeClause": null
+    }
+  ],
+  "omittedDisciplines": [],
+  "resultHash": "09fd77f5046f5a26ec785f0c7db445135434f5b3cbbec518d3656a8cf1b02343"
+}

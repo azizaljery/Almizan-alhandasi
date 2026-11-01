@@ -1,0 +1,10 @@
+{
+  "version": "MIZAN-MEP-AGENT-ACTIONS/1",
+  "provider": "NONE_REQUIRED",
+  "publishesOrCallsAI": false,
+  "actions": [
+    { "name": "snapshot", "purpose": "Read project and architecture revision for a subsequent explicit action", "input": { "type": "object", "additionalProperties": false } },
+    { "name": "generate", "purpose": "Calculate a preliminary systems package linked to current architecture", "input": { "type": "object", "required": ["expectedArchitectureHash"], "properties": { "expectedArchitectureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "disciplines": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } } }, "additionalProperties": false } },
+    { "name": "render", "purpose": "Export a bound and unchanged preliminary result", "input": { "type": "object", "required": ["expectedArchitectureHash", "result", "format"], "properties": { "expectedArchitectureHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "result": { "type": "object" }, "format": { "enum": ["svg", "dxf"] }, "levelId": { "type": "string" }, "discipline": { "type": "string" } }, "additionalProperties": false } }
+  ]
+}

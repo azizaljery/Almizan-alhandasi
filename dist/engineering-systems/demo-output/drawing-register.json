@@ -1,0 +1,16 @@
+{
+  "inputHash": "8729b1acae5987bc5c1736bdb146a8115a18ed0661bc5e08ec37cec311fc23c8",
+  "status": "PRELIMINARY_REVIEW_REQUIRED",
+  "constructionApproved": false,
+  "drawings": [
+    "drawings/L1-combined.svg",
+    "drawings/L1-combined.dxf",
+    "drawings/L1-electrical.svg",
+    "drawings/L1-hvac.svg",
+    "drawings/L1-plumbing.svg",
+    "drawings/L1-fire.svg",
+    "drawings/L1-low_current.svg",
+    "drawings/L1-solar.svg"
+  ],
+  "omittedDisciplines": []
+}

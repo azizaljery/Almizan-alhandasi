@@ -1,0 +1,10 @@
+{
+  "parser": "ezdxf",
+  "parserVersion": "1.4.4",
+  "dxfVersion": "AC1027",
+  "INSUNITS": 6,
+  "entities": 382,
+  "auditErrors": 0,
+  "auditFixes": 0,
+  "autoCADOrRevitImportTested": false
+}

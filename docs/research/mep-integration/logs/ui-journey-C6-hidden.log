@@ -1,0 +1,13 @@
+FAIL التوليد انتهى بصفحة التصميم — وُجدت تصاميم لكنها حُجبت لمخالفتها بندًا إلزاميًا
+
+شرط أساسي غير متحقق — مجلس الرجال بلا باب داخلي إلى البيت: الضيافة تُقدَّم من الخارج: «المجلس» ودهليزه لا يتصلان بأي فراغ داخلي (طعام أو مطبخ أو مقلط) — الضيافة من الخارج (شرط أساسي في تصمي
+file:///home/claude/wt-mep/scripts/mep-systems-browser.mjs:119
+  if (outcome !== 'design') { await snap(page, desktop, '01c-build-report', true); check('التوليد انتهى بصفحة التصميم', false, await page.locator('#buildReport').innerText().catch(() => '')); throw Error('NO_DESIGN'); }
+                                                                                                                                                                                                      ^
+
+Error: NO_DESIGN
+    at file:///home/claude/wt-mep/scripts/mep-systems-browser.mjs:119:199
+
+Node.js v22.22.0
+exit=1
+done

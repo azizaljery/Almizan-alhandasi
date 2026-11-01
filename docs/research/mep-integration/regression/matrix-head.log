@@ -1,0 +1,4 @@
+C6 vis=1 ready=1 hid=0 mandFail=[[]] 27.758s
+H1 vis=1 ready=1 hid=0 mandFail=[[]] 128.393s
+D1 vis=0 ready=0 hid=2 mandFail=[] 140.429s
+head=0

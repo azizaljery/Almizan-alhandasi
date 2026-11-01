@@ -1,0 +1,80 @@
+/** ESM declarations for index.mjs; compile with NodeNext or equivalent ESM resolution. */
+export type Point = { x: number; y: number };
+export type Point3 = Point & { z: number };
+export type Polygon = Point[];
+export type JsonObject = Record<string, unknown>;
+export type Level = { id: string; elevationM: number; heightM: number };
+export type Room = { id: string; levelId: string; type: string; name: string; polygon: Polygon; holes: Polygon[]; heightM: number; areaM2?: number };
+export type Wall = { id: string; levelId: string; a: Point; b: Point; thicknessM: number; heightM: number };
+export type Opening = { id: string; wallId: string; levelId: string; kind: string; atM: number; widthM: number; heightM: number; sillM: number };
+export type Obstacle = { id: string; kind?: string; min: Point3; max: Point3 };
+export type Source = { kind: string; revision: string; sha256: string; warnings: unknown[]; upstreamGeometryHash?: unknown };
+export type Architecture = { source: Source; levels: Level[]; rooms: Room[]; walls: Wall[]; openings: Opening[]; obstacles: Obstacle[] };
+export type Routing = { routeHeightM: number; widthM: number; heightM: number; clearanceM: number };
+export type DeviceInput = { id: string; kind?: string; levelId: string; roomId?: string; position: Point3; ratedInputW?: number; [key: string]: unknown };
+export type Cable = { sizeMm2?: number; resistanceOhmPerKm: number; reactanceOhmPerKm: number };
+export type Protection = { ratedA: number; correctedAmpacityA: number; source: string; voltageDropLimitPercent?: number };
+export type ElectricalLoad = DeviceInput & { powerW: number; powerFactor: number; demandFactor: number; sourceEquipmentId?: string };
+export type Circuit = { id: string; panelId: string; loadIds: string[]; voltageV: number; phases: 1 | 3; phase?: 'L1'|'L2'|'L3'; balanced?: boolean; routing?: Routing; cable?: Cable; protection?: Protection };
+export type LightingSpec = { targetLux: number; lumensPerFixture: number; utilizationFactor: number; maintenanceFactor: number; wattsPerFixture: number; powerFactor: number; demandFactor: number; mountHeightM: number; panelId?: string; phase?: 'L1'|'L2'|'L3'; voltageV?: number; routing?: Routing; cable?: Cable; protection?: Protection };
+export type ElectricalConfig = { panels?: DeviceInput[]; loads?: ElectricalLoad[]; circuits?: Circuit[]; lightingByRoom?: Record<string, LightingSpec> };
+export type ThermalInput = { outdoorC: number; indoorC: number; surfaces: { areaM2: number; uWm2K: number }[]; solarW: number; internalSensibleW: number; internalLatentW: number; infiltrationM3S: number; outdoorAirM3S: number; outdoorHumidityRatio: number; indoorHumidityRatio: number; densityKgM3: number; cpJkgK: number; latentHeatJkg: number };
+export type VentilationInput = { persons: number; areaM2: number; lSPerPerson: number; lSPerM2: number; distributionEffectiveness: number };
+export type HvacZone = { id: string; roomId: string; equipmentId?: string; thermal: ThermalInput; ventilation?: Omit<VentilationInput,'areaM2'>; supplyDeltaK: number; terminalHeightM?: number; ductVelocityMS?: number; routing?: Routing };
+export type HvacConfig = { equipment?: DeviceInput[]; zones?: HvacZone[]; exhaust?: JsonObject[] };
+export type PipeConnection = { id: string; system: 'cold_water'|'hot_water'|'sanitary'|'vent'|'storm'|'condensate'; fromId: string; toId: string; systemId?: string; flowM3S?: number; velocityMS?: number; selectedDiameterMm?: number; startInvertM?: number; endInvertM?: number; slope?: number; routing?: Routing; hydraulics?: JsonObject };
+export type PlumbingConfig = { fixtures?: DeviceInput[]; equipment?: DeviceInput[]; connections?: PipeConnection[]; tank?: { persons: number; litresPerPersonDay: number; autonomyDays: number }; roofDrainage?: { id: string; intensityMmH: number; areaM2: number; runoffCoefficient: number }[]; hotWater?: JsonObject };
+export type NetworkConfig = { devices?: DeviceInput[]; connections?: { id: string; fromId: string; toId: string; systemId?: string; kind?: string; routing: Routing; projectLengthLimitM?: number }[]; capacity?: { panelCount: number; wattsPerPanel: number } };
+export type RiserInput = { id: string; discipline: string; fromId: string; toId: string; layer: string; kind?: string; systemId?: string; widthM: number; heightM: number; clearanceM: number };
+export type Services = { electrical?: ElectricalConfig; hvac?: HvacConfig; plumbing?: PlumbingConfig; fire?: NetworkConfig; low_current?: NetworkConfig; solar?: NetworkConfig; risers?: RiserInput[]; [discipline: string]: unknown };
+export type Rules = { routingByLevel?: Record<string, { polygon: Polygon; holes?: Polygon[]; stepM: number }>; structuralModelComplete?: boolean; rates?: Record<string, number>; provenance?: JsonObject[] };
+export interface Project { schema: 'MIZAN-MEP-INPUT/1'; projectId: string; units: 'm'; frame: 'X_EAST_Y_NORTH_Z_UP'; architecture: Architecture; services: Services; rules: Rules }
+export type Issue = { discipline: string; code: string; severity: 'pending'|'warning'|'error'; messageAr: string; details: JsonObject };
+export type Device = DeviceInput & { discipline: string; layer: string; kind: string };
+export type Route = Routing & { id: string; discipline: string; systemId: string; kind: string; layer: string; levelId: string; levelIds?: string[]; fromId: string; toId: string; points: Point3[]; lengthM: number|null; status: 'PROPOSED'|'BLOCKED'; reason: string };
+export type Calculation = { id: string; method: string; inputs: JsonObject; value: unknown; unit: string; status: 'CALCULATED'|'NOT_CALCULATED'; basis: string; sourceRefs: string[] };
+export type Schedule = { id: string; columns: string[]; rows: JsonObject[] };
+export interface DisciplineResult { id: string; stage: 'PRELIMINARY'; constructionApproved: false; codeCompliance: 'NOT_EVALUATED'; devices: Device[]; routes: Route[]; calculations: Calculation[]; schedules: Schedule[]; issues: Issue[]; limitations: string[] }
+export interface Result { schema: 'MIZAN-MEP-RESULT/1'; version: string; projectId: string; inputHash: string; architectureHash: string; resultHash: string; source: Source; stage: 'PRELIMINARY'; constructionApproved: false; codeCompliance: 'NOT_EVALUATED'; status: 'PRELIMINARY_REVIEW_REQUIRED'|'BLOCKED_PRELIMINARY'; disciplines: DisciplineResult[]; issues: Issue[]; coordination: { status: string; clashes: JsonObject[]; interfaces: JsonObject[]; issues: Issue[]; limitations: string[]; [key: string]: unknown }; quantities: { rows: JsonObject[]; pricedSubtotal: number; unpricedCount: number; total: number|null; [key: string]: unknown }; omittedDisciplines: string[]; ruleProvenance: JsonObject[] }
+export interface Plugin { id: string; run(ctx: Readonly<{ project: Readonly<Project>; version: string; inputHash: string }>): DisciplineResult|Promise<DisciplineResult> }
+export type AdapterOptions = { projectId: string; sourceRevision?: string; services?: Services; rules?: Rules; obstacles?: Obstacle[] };
+export declare function fromDrawDoc(raw: unknown, options: AdapterOptions & { analyzeDoc: (raw: any) => any; validateDoc: (raw: any) => unknown[] }): Promise<Project>;
+export declare function fromPlannerGeometry(raw: unknown, options: AdapterOptions & { validateModel: (raw: any) => string[]; level: Level }): Promise<Project>;
+export declare function fromCandidateIR(candidate: unknown, request: unknown, options: AdapterOptions & { adaptCandidateEnvelope: (candidate: any, request: any) => Promise<any>; validateNativeModel: (raw: any) => string[]; level: Level }): Promise<Project>;
+export declare function createEngineeringPackage(raw: Project, options?: { disciplines?: string[]; plugins?: Plugin[] }): Promise<Result>;
+export declare function validateProject(raw: unknown): Project;
+export declare function verifyBinding(result: Result, project: Project): Promise<boolean>;
+export declare function verifyResult(result: unknown): Promise<boolean>;
+export declare function comparePackages(before: Result, after: Result): { architectureChanged: boolean; added: string[]; removed: string[]; changed: string[] };
+export declare function hash(value: unknown): Promise<string>;
+export declare function emptyDiscipline(id: string): DisciplineResult;
+export declare function issue(discipline: string, code: string, messageAr: string, details?: JsonObject, severity?: Issue['severity']): Issue;
+export declare function calculation(id: string, method: string, inputs: JsonObject, fn: (inputs: any) => unknown, unit: string, issues: Issue[], discipline: string, sourceRefs?: string[]): Calculation;
+export declare function networkDiscipline(id: string, prefix: string, reviewAr: string): Plugin;
+export declare function toSvg(project: Project, result: Result, options?: { levelId?: string; discipline?: string; layer?: string }): Promise<string>;
+export declare function toDxf(project: Project, result: Result, options?: { levelId?: string; discipline?: string; layer?: string }): Promise<string>;
+export declare function exportArtifacts(project: Project, result: Result): Promise<Map<string, string>>;
+export declare function csv(columns: string[], rows: JsonObject[]): string;
+export declare function routeOrthogonal(options: { start: Point3; end: Point3; zM: number; domain: { polygon: Polygon; holes?: Polygon[] }; obstacles?: Obstacle[]; widthM: number; heightM: number; clearanceM: number; stepM: number; maxCells?: number }): { status: 'PROPOSED'|'BLOCKED'; points: Point3[]; lengthM: number|null; reason: string };
+export declare function createAgentActions(options: { getProject: () => Project|Promise<Project>; plugins?: Plugin[] }): { snapshot(): Promise<{ projectId: string; architectureHash: string; source: Source }>; generate(options: { expectedArchitectureHash: string; disciplines?: string[] }): Promise<Result>; render(options: { expectedArchitectureHash: string; result: Result; format: 'svg'|'dxf'; levelId?: string; discipline?: string }): Promise<string> };
+export declare class InputError extends Error { code: string; path: string; constructor(code: string, path: string, message?: string) }
+export declare const VERSION: string;
+export declare const BUILT_INS: readonly Plugin[];
+export declare const INPUT_SCHEMA: 'MIZAN-MEP-INPUT/1';
+export declare const FRAME: 'X_EAST_Y_NORTH_Z_UP';
+export declare const equations: {
+  electricalCurrent(p: { powerW: number; voltageV: number; powerFactor: number; phases: 1|3 }): number;
+  voltageDrop(p: { currentA: number; lengthM: number; resistanceOhmPerKm: number; reactanceOhmPerKm: number; powerFactor: number; phases: 1|3; voltageV: number }): { volts: number; percent: number };
+  lightingCount(p: { targetLux: number; areaM2: number; lumensPerFixture: number; utilizationFactor: number; maintenanceFactor: number }): number;
+  powerComponents(p: { powerW: number; powerFactor: number; demandFactor: number }): { connectedW: number; connectedVar: number; demandW: number; demandVar: number };
+  steadyStateHeatGain(p: ThermalInput): { conductionW: number; airSensibleW: number; airLatentW: number; sensibleW: number; latentW: number; totalW: number };
+  sensibleAirflow(p: { sensibleW: number; densityKgM3: number; cpJkgK: number; supplyDeltaK: number }): number;
+  zoneOutdoorAir(p: VentilationInput): number;
+  achAirflow(p: { volumeM3: number; airChangesPerHour: number }): number;
+  circularDiameter(p: { flowM3S: number; velocityMS: number }): number;
+  drainageFall(p: { horizontalLengthM: number; slope: number }): number;
+  tankVolume(p: { persons: number; litresPerPersonDay: number; autonomyDays: number }): number;
+  rainfallFlow(p: { intensityMmH: number; areaM2: number; runoffCoefficient: number }): number;
+  waterHeatingPower(p: { flowM3S: number; deltaK: number; densityKgM3: number; cpJkgK: number; efficiency: number }): number;
+  hydraulicHead(p: { flowM3S: number; diameterM: number; lengthM: number; darcyFrictionFactor: number; minorLossK: number; elevationRiseM: number; requiredResidualHeadM: number; gravityMS2: number }): { velocityMS: number; frictionHeadM: number; minorLossHeadM: number; totalHeadM: number };
+};
