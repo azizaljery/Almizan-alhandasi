@@ -1,0 +1,104 @@
+{
+  "fixture": "tests/fixtures/facade/C1.json",
+  "side": "s",
+  "entry": "s",
+  "variants": {
+    "A": {
+      "ar": "حجر جيري أبيض كامل",
+      "summary": "الكسوة كلها حجر أبيض؛ إطارات داكنة داخل تجويف عميق؛ كرنيش حجري بارز؛ مدخل بإطار حجري بارز؛ بلا مظلة.",
+      "layers": 36,
+      "planLayers": 10,
+      "proposedLayers": 26,
+      "fingerprint": {
+        "stone": 0.913,
+        "render": 0,
+        "metal": 0.063,
+        "timber": 0,
+        "glass": 0.024,
+        "none": 0
+      },
+      "checks": {
+        "variant": "A",
+        "openingsInPlan": 8,
+        "openingsDocFront": 8,
+        "openingsDrawnOnce": true,
+        "sizeErrors": [],
+        "fakeHoles": 0,
+        "frameHoles": 0,
+        "untaggedNonPlan": [],
+        "planLayersNotWallOrOpening": []
+      }
+    },
+    "B": {
+      "ar": "رندر بيج بقاعدة حجرية ومظلة معدنية",
+      "summary": "رندر على الجدار؛ قاعدة حجرية بيج وحواف حجرية رأسية؛ مظلة معدنية فوق كل باب؛ كاسرات أفقية فوق النوافذ؛ باب زجاجي بإطار داكن.",
+      "layers": 36,
+      "planLayers": 10,
+      "proposedLayers": 26,
+      "fingerprint": {
+        "stone": 0.121,
+        "render": 0.787,
+        "metal": 0.017,
+        "timber": 0,
+        "glass": 0.074,
+        "none": 0
+      },
+      "checks": {
+        "variant": "B",
+        "openingsInPlan": 8,
+        "openingsDocFront": 8,
+        "openingsDrawnOnce": true,
+        "sizeErrors": [],
+        "fakeHoles": 0,
+        "frameHoles": 0,
+        "untaggedNonPlan": [],
+        "planLayersNotWallOrOpening": []
+      }
+    },
+    "C": {
+      "ar": "رندر فاتح مع فاسيا خشب مشابه وحجر على المدخل",
+      "summary": "رندر على الجدار؛ قاعدة حجرية بيج؛ لوح خشب مشابه أعلى الدور الأرضي؛ عتبات حجرية؛ قبّة حجرية فوق المدخل بارزة؛ إطارات خشبية مشابهة في تجويف عميق؛ باب خشبي مشابه.",
+      "layers": 36,
+      "planLayers": 10,
+      "proposedLayers": 26,
+      "fingerprint": {
+        "stone": 0.098,
+        "render": 0.714,
+        "metal": 0,
+        "timber": 0.169,
+        "glass": 0.019,
+        "none": 0
+      },
+      "checks": {
+        "variant": "C",
+        "openingsInPlan": 8,
+        "openingsDocFront": 8,
+        "openingsDrawnOnce": true,
+        "sizeErrors": [],
+        "fakeHoles": 0,
+        "frameHoles": 0,
+        "untaggedNonPlan": [],
+        "planLayersNotWallOrOpening": []
+      }
+    }
+  },
+  "pairs": [
+    {
+      "pair": "AB",
+      "distance": 1.675
+    },
+    {
+      "pair": "AC",
+      "distance": 1.766
+    },
+    {
+      "pair": "BC",
+      "distance": 0.337
+    }
+  ],
+  "reference": {
+    "file": "elevation-reference-composeElevation.svg",
+    "style": "classic",
+    "note": "المرجع الحالي من composeElevation، دون تغيير"
+  }
+}
