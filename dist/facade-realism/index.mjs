@@ -1,9 +1,9 @@
 // (طلب المالك 2026-11-02) واجهة أمامية ثنائية البعد لكل بديل، من طبقات النموذج نفسها (model.mjs) لا من رسم منفصل.
 // يبقى composeElevation في dist/facade-styles.mjs مرجعًا كما هو. هذه الوحدة نقية: بلا DOM ولا THREE ولا شبكة.
-import { buildVariant, VARIANTS, MATERIALS, CLASSES, CLASS_AR, TAG, SIDE } from './model.mjs';
-export { buildVariant, VARIANTS, MATERIALS, CLASSES, CLASS_AR, TAG, SIDE };
+import { buildVariant, buildAllSides, VARIANTS, MATERIALS, CLASSES, CLASS_AR, TAG, SIDE, SIDES_ALL, SIDE_NAME, planPoint, projectionReport } from './model.mjs';
+export { buildVariant, buildAllSides, VARIANTS, MATERIALS, CLASSES, CLASS_AR, TAG, SIDE, SIDES_ALL, SIDE_NAME, projectionReport };
 
-const FILL = Object.freeze({ limestoneWhite: '#ece6d8', limestoneBeige: '#d6bf97', render: '#e9e0cc', aluminium: '#3a3d41', glass: '#a9c2cd', timberLook: '#8a6240' });
+const FILL = Object.freeze({ limestoneWhite: '#ece6d8', limestoneBeige: '#d6bf97', render: '#e9e0cc', aluminium: '#3a3d41', glass: '#a9c2cd', timberLook: '#8a6240', interior: '#2b2e31' });
 const inPoly = (p, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi) * (p[1] - yi) / (yj - yi) + xi) c = !c; } return c; };
 const cover = (L, p) => inPoly(p, L.outer) && !L.holes.some(h => inPoly(p, h));
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -11,15 +11,15 @@ const r3 = v => Math.round(v * 1000) / 1000;
 
 /** الأسطح الظاهرة من الأمام: لكل نقطة في شبكة 5 سم، الطبقة الأمامية (أكبر C + o1) تفوز. */
 export function rasterFront(layers, F, step = .05) {
-  const zMax = Math.max(...F.pieces.map(p => p.zTop)), cells = [];
+  const zMax = Math.max(...F.pieces.map(p => p.zTop)), cells = [], depth = [];
   const nu = Math.round(F.width / step), nz = Math.round(zMax / step);
   for (let iu = 0; iu < nu; iu++) for (let iz = 0; iz < nz; iz++) {
     const p = [(iu + .5) * step, (iz + .5) * step];
     let best = null, bf = -Infinity;
     for (const L of layers) if (cover(L, p)) { const f = L.C + L.o1; if (f > bf) { bf = f; best = L; } }
-    cells.push(best ? best.cls : 'none');
+    cells.push(best ? best.cls : 'none'); depth.push(best ? r3(bf) : null);
   }
-  return { cells, total: cells.length, step };
+  return { cells, depth, total: cells.length, step };
 }
 /** توزيع الكسوات الظاهرة (نسب من السطح الأمامي المرسوم). */
 export function fingerprint(raster) {
@@ -28,9 +28,23 @@ export function fingerprint(raster) {
   return Object.fromEntries(Object.entries(c).map(([k, v]) => [k, r3(v / raster.total)]));
 }
 export function distance(a, b) { return r3(CLASSES.reduce((s, k) => s + Math.abs((a[k] || 0) - (b[k] || 0)), 0)); }
+/**
+ * بعد الشكل بلا لون: نسبة الخلايا (5 سم) التي يختلف فيها عمق السطح الظاهر بمقدار 2 سم أو أكثر بين بديلين.
+ * هذا ما يبقى مرئيًا حين تُلوَّن الكسوات بلون رمادي واحد (الظلال من البروزات والتجاويف والتأطير).
+ */
+export function shapeDistance(ra, rb, eps = .02) {
+  let n = 0, d = 0;
+  for (let i = 0; i < ra.depth.length; i++) {
+    const a = ra.depth[i], b = rb.depth[i];
+    if (a == null && b == null) continue;
+    n++;
+    if (a == null || b == null || Math.abs(a - b) >= eps) d++;
+  }
+  return n ? r3(d / n) : 0;
+}
 
-/** فحوص آلية على المسقط: كل فتحة أمامية في المخطط مرة واحدة بمقاساتها، ولا ثقب بلا فتحة، وكل طبقة خارج المخطط موسومة. */
-export function checkVariant(doc, id, built = buildVariant(doc, id)) {
+/** فحوص آلية لجهة واحدة: كل فتحة في المخطط مرة واحدة بمقاساتها، ولا ثقب بلا فتحة، وكل طبقة خارج المخطط موسومة. */
+export function checkVariant(doc, id, built) {
   const docOpen = new Map((doc.openings || []).map(o => [o.id, o]));
   const planOpen = built.F.pieces.flatMap(p => p.openings);
   const eq = (a, b) => Math.abs(a - b) < 1e-6;
@@ -50,6 +64,7 @@ export function checkVariant(doc, id, built = buildVariant(doc, id)) {
   const frameHoles = frames.filter(f => !openPolys.includes(JSON.stringify(f.outer))).length;
   return {
     variant: id,
+    side: built.side,
     openingsInPlan: planOpen.length,
     openingsDocFront: built.F.openingIds.length,
     openingsDrawnOnce: planOpen.every(o => countById[o.id] === 1),
@@ -61,11 +76,61 @@ export function checkVariant(doc, id, built = buildVariant(doc, id)) {
   };
 }
 
-/** لوحة الواجهة الأمامية ثنائية البعد (SVG) للبديل. مرسوم من الطبقات: الكسوة بتعبئة، والتعديلات المقترحة بخط متقطع. */
+/**
+ * تطابق المسقط: كل فتحة في الجهة تقع على جدارها الفعلي في المسقط (المسافة من مركزها إلى خط الجدار ≈ 0 وضمن طوله).
+ * يُحوَّل المركز بالتحويل نفسه المستخدم في المشهد، لا بحساب منفصل.
+ */
+export function planMatch(doc, built) {
+  const byId = new Map((doc.walls || []).map(w => [w.id, w])), bad = [], checked = [];
+  for (const pc of built.F.pieces) for (const o of pc.openings) {
+    const d = (doc.openings || []).find(x => x.id === o.id), w = d && byId.get(d.wall);
+    if (!w) { bad.push(o.id + ': لا جدار في المسقط'); continue; }
+    const cu = (o.u0 + o.u1) / 2, p = planPoint(built.side, built.off, cu, pc.C);
+    // المسافة من النقطة إلى قطعة الجدار في المسقط
+    const ax = w.a.x, ay = w.a.y, bx = w.b.x, by = w.b.y, dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy;
+    const t = Math.max(0, Math.min(1, ((p.x - ax) * dx + (p.y - ay) * dy) / L2));
+    const dist = Math.hypot(p.x - (ax + t * dx), p.y - (ay + t * dy));
+    checked.push({ id: o.id, wall: d.wall, x: p.x, y: p.y, dist: r3(dist) });
+    if (dist > .02) bad.push(`${o.id}: يبعد ${r3(dist)} م عن جداره ${d.wall}`);
+  }
+  return { side: built.side, checked: checked.length, mismatches: bad };
+}
+
+/** العينة كاملة: البدائل الثلاثة (الجهة الأمامية) مع الفحوص والبصمات والمسافات بينها، والبعد الشكلي بلا لون. */
+export function buildSample(doc) {
+  const variants = {}, raster = {};
+  for (const id of Object.keys(VARIANTS)) {
+    const built = buildVariant(doc, id), r = rasterFront(built.layers, built.F), fp = fingerprint(r);
+    raster[id] = r;
+    variants[id] = { built, fingerprint: fp, checks: checkVariant(doc, id, built) };
+  }
+  const ids = Object.keys(variants), pairs = [], shape = [];
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+    pairs.push({ pair: ids[i] + ids[j], distance: distance(variants[ids[i]].fingerprint, variants[ids[j]].fingerprint) });
+    shape.push({ pair: ids[i] + ids[j], shapeDistance: shapeDistance(raster[ids[i]], raster[ids[j]]) });
+  }
+  return { variants, pairs, shape };
+}
+
+/** الخلفية والجوانب: كل جهة لكل بديل مع الفحوص وتطابق المسقط والبروزات. */
+export function buildAll(doc) {
+  const out = {};
+  for (const id of Object.keys(VARIANTS)) {
+    const all = buildAllSides(doc, id);
+    out[id] = {};
+    for (const s of SIDES_ALL) {
+      const b = all[s];
+      out[id][s] = { built: b, checks: checkVariant(doc, id, b), plan: planMatch(doc, b), projections: projectionReport(doc, b) };
+    }
+  }
+  return out;
+}
+
+/** لوحة الواجهة (SVG) لجهة واحدة للبديل. مرسوم من الطبقات: الكسوة بتعبئة، والتعديلات المقترحة بخط متقطع. */
 export function elevationSvgVariant(built, { title = '' } = {}) {
   const F = built.F, zMax = Math.max(...F.pieces.map(p => p.zTop)), W = F.width, pad = 1.4, px = 60;
-  const X = u => r3(u), Y = z => r3(zMax + 1 - z);
-  const path = pts => 'M' + pts.map(([u, z]) => `${X(u)},${Y(z)}`).join('L') + 'Z';
+  const Y = z => r3(zMax + 1 - z);
+  const path = pts => 'M' + pts.map(([u, z]) => `${r3(u)},${Y(z)}`).join('L') + 'Z';
   const d = L => [path(L.outer), ...L.holes.map(path)].join(' ');
   const out = [];
   for (const L of built.layers) {
@@ -77,20 +142,9 @@ export function elevationSvgVariant(built, { title = '' } = {}) {
   const ground = `<line x1="${-pad}" y1="${Y(0)}" x2="${W + pad}" y2="${Y(0)}" stroke="#4a463f" stroke-width=".04"/>`;
   const dim = `<text x="${W / 2}" y="${Y(-.55)}" font-size=".38" text-anchor="middle" fill="#4a463f">${W.toFixed(2)} م</text>`;
   const legend = `<text x="${W + pad - .2}" y="${Y(-1.25)}" font-size=".3" text-anchor="end" fill="#b5562b">خط متقطع = تعديل مقترح يحتاج مراجعة مهندس مختص (ليس في المخطط الأصلي)</text>`;
-  const head = `<text x="${W + pad - .2}" y="${Y(zMax + .7)}" font-size=".42" font-weight="700" text-anchor="end" fill="#1f3b33">الواجهة الأمامية — البديل ${built.variant.id}: ${esc(built.variant.ar)}</text>`;
+  const head = `<text x="${W + pad - .2}" y="${Y(zMax + .7)}" font-size=".42" font-weight="700" text-anchor="end" fill="#1f3b33">${esc(SIDE_NAME[built.side])} — البديل ${built.variant.id}: ${esc(built.variant.ar)}</text>`;
   const svgW = Math.round((W + 2 * pad) * px), svgH = Math.round((zMax + 3.2) * px);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-pad} ${-.1 + 0} ${r3(W + 2 * pad)} ${r3(zMax + 2.6)}" width="${svgW}" height="${svgH}" direction="rtl" role="img" aria-label="${esc(title || built.variant.ar)}" data-variant="${built.variant.id}" data-side="${SIDE}"><rect x="${-pad}" y="${-.1}" width="${r3(W + 2 * pad)}" height="${r3(zMax + 2.6)}" fill="#fbf8f2"/>${out.join('')}${ground}${dim}${head}${legend}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-pad} ${-.1} ${r3(W + 2 * pad)} ${r3(zMax + 2.6)}" width="${svgW}" height="${svgH}" direction="rtl" role="img" aria-label="${esc(title || built.variant.ar)}" data-variant="${built.variant.id}" data-side="${built.side}"><rect x="${-pad}" y="${-.1}" width="${r3(W + 2 * pad)}" height="${r3(zMax + 2.6)}" fill="#fbf8f2"/>${out.join('')}${ground}${dim}${head}${legend}</svg>`;
 }
 
-/** العينة كاملة: البدائل الثلاثة مع الفحوص والبصمات والمسافات بينها. */
-export function buildSample(doc) {
-  const variants = {};
-  for (const id of Object.keys(VARIANTS)) {
-    const built = buildVariant(doc, id), raster = rasterFront(built.layers, built.F), fp = fingerprint(raster);
-    variants[id] = { built, fingerprint: fp, checks: checkVariant(doc, id, built) };
-  }
-  const ids = Object.keys(variants), pairs = [];
-  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) pairs.push({ pair: ids[i] + ids[j], distance: distance(variants[ids[i]].fingerprint, variants[ids[j]].fingerprint) });
-  return { variants, pairs };
-}
-export default { buildSample, buildVariant, checkVariant, rasterFront, fingerprint, distance, elevationSvgVariant, MATERIALS };
+export default { buildSample, buildAll, buildVariant, checkVariant, planMatch, rasterFront, fingerprint, distance, shapeDistance, elevationSvgVariant, projectionReport, MATERIALS };

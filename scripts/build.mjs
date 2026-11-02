@@ -30,10 +30,13 @@ assert.ok(!assistant.includes('OPENAI_API_KEY') && !assistant.includes('ANTHROPI
 // Server code and deployment metadata must never be served as browser assets.
 if (existsSync('dist/client')) rmSync('dist/client', { recursive: true, force: true });
 mkdirSync('dist/client', { recursive: true });
+// عينة الواجهات الواقعية للفحص أثناء التطوير فقط: تبقى في dist/ ولا تدخل حزمة العميل (tests/facade-realism-exclusion.test.mjs).
+const DEV_ONLY = new Set(['facade-realism.html', 'facade-realism']);
 for (const entry of readdirSync('dist', { withFileTypes: true })) {
-  if (['client', 'server', '.openai'].includes(entry.name) || entry.name.startsWith('.')) continue;
+  if (['client', 'server', '.openai'].includes(entry.name) || entry.name.startsWith('.') || DEV_ONLY.has(entry.name)) continue;
   cpSync(`dist/${entry.name}`, `dist/client/${entry.name}`, { recursive: true });
 }
+for (const name of DEV_ONLY) assert.ok(!existsSync('dist/client/' + name), 'Development-only page leaked into the client bundle: ' + name);
 // رقم الإصدار المنشور: يسمح بالتحقق من أن ما يعمل على الموقع هو نفس هذا الالتزام فعلًا.
 let commit = 'unknown';
 try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(); } catch {}

@@ -23,16 +23,18 @@ function blotch(ctx, S, n, r, rMin, rMax, colors, alpha) {
   }
 }
 
-/** حجر جيري: مداميك 30 سم، كتل بعرض 35 إلى 90 سم بإزاحة لكل مدماك، فواصل 1.2 سم، تباين لوني طفيف لكل كتلة. */
+/** حجر جيري: مداميك بارتفاع 22 إلى 38 سم، كتل بعرض 35 إلى 90 سم بإزاحة لكل مدماك، فواصل 1.2 سم، تباين لوني طفيف لكل كتلة. */
 export function limestone(tone = 'white', S = 1024) {
-  const TILE = 1.5, COURSE = .3, px = S / TILE, r = rng(tone === 'white' ? 71 : 73);
+  const TILE = 1.5, px = S / TILE, r = rng(tone === 'white' ? 71 : 73);
   const base = tone === 'white' ? [236, 230, 216] : [214, 192, 152];
   const c = makeCanvas(S), x = c.getContext('2d'), b = makeCanvas(S), bx = b.getContext('2d');
   x.fillStyle = `rgb(${base.map(v => v * .8 | 0)})`; x.fillRect(0, 0, S, S); // لون الفواصل
   bx.fillStyle = '#2a2a2a'; bx.fillRect(0, 0, S, S);
   const J = .012;
-  for (let k = 0; k < Math.round(TILE / COURSE); k++) {
-    const y0 = k * COURSE, shift = r() * TILE; const widths = []; let acc = 0;
+  // مداميك بارتفاعات متفاوتة (0.22 إلى 0.38 م) تُكمل الارتفاع 1.5 م بالضبط ليتكرر النسيج دون فواصل أفقية منتظمة
+  const rows = []; for (let acc = 0; acc < TILE - .01;) { let h = .22 + r() * .16; if (TILE - acc - h < .2) h = TILE - acc; rows.push({ y0: acc, h }); acc += h; }
+  for (const { y0, h: COURSE } of rows) {
+    const shift = r() * TILE; const widths = []; let acc = 0;
     while (acc < TILE - .01) { let w = .35 + r() * .55; if (TILE - acc - w < .3) w = TILE - acc; widths.push(w); acc += w; }
     let xm = 0;
     for (const w of widths) {

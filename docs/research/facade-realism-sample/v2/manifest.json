@@ -1,0 +1,238 @@
+{
+  "fixture": "tests/fixtures/facade/C1.json",
+  "entry_side": "s",
+  "side_names": {
+    "s": "الأمامية — الجنوبية (جهة المدخل)",
+    "n": "الشمالية",
+    "e": "الشرقية",
+    "w": "الغربية"
+  },
+  "variants": {
+    "A": {
+      "ar": "حجر جيري أبيض كامل",
+      "summary": "كسوة حجر أبيض كاملة مع قاعدة بارزة 4 سم، شريط حجري أفقي عند 3.20 م، مدخل بإطار حجري وجملون صغير، تأطير حجري للنوافذ، كرنيش حجري.",
+      "fingerprint_front": {
+        "stone": 0.913,
+        "render": 0,
+        "metal": 0.063,
+        "timber": 0,
+        "glass": 0.024,
+        "none": 0
+      },
+      "sides": {
+        "s": {
+          "openings": 8,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 8,
+          "projections": 30,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "n": {
+          "openings": 9,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 9,
+          "projections": 4,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "e": {
+          "openings": 5,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 5,
+          "projections": 6,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "w": {
+          "openings": 6,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 6,
+          "projections": 2,
+          "projection_violations": [],
+          "projections_unverified": []
+        }
+      }
+    },
+    "B": {
+      "ar": "رندر بيج بقاعدة حجرية بارزة ومظلات وكاسرات معدنية",
+      "summary": "رندر فاتح؛ قاعدة حجر بيج بارزة 10 سم؛ حواف رأسية حجرية؛ مظلة معدنية فوق كل مدخل؛ كاسرات أفقية فوق النوافذ؛ باب زجاجي بإطار داكن.",
+      "fingerprint_front": {
+        "stone": 0.123,
+        "render": 0.785,
+        "metal": 0.017,
+        "timber": 0,
+        "glass": 0.074,
+        "none": 0
+      },
+      "sides": {
+        "s": {
+          "openings": 8,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 8,
+          "projections": 24,
+          "projection_violations": [],
+          "projections_unverified": [
+            {
+              "id": "P1/o4.canopy",
+              "protrusion": 0.9,
+              "dist": 5.605
+            },
+            {
+              "id": "P1/o1.canopy",
+              "protrusion": 0.9,
+              "dist": 5.605
+            }
+          ]
+        },
+        "n": {
+          "openings": 9,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 9,
+          "projections": 4,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "e": {
+          "openings": 5,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 5,
+          "projections": 6,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "w": {
+          "openings": 6,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 6,
+          "projections": 2,
+          "projection_violations": [],
+          "projections_unverified": []
+        }
+      }
+    },
+    "C": {
+      "ar": "رندر فاتح بفاسيا خشب مشابه وسقف مسنّن وعتبة حجرية للمدخل",
+      "summary": "رندر فاتح؛ قاعدة حجر بيج ملتصقة؛ فاسيا خشب مشابه أعلى الدور؛ صف أسنان حجرية تحت الدروة؛ هود حجري فوق كل مدخل؛ باب خشبي مشابه؛ نوافذ بإطار داكن.",
+      "fingerprint_front": {
+        "stone": 0.105,
+        "render": 0.706,
+        "metal": 0.011,
+        "timber": 0.159,
+        "glass": 0.019,
+        "none": 0
+      },
+      "sides": {
+        "s": {
+          "openings": 8,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 8,
+          "projections": 86,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "n": {
+          "openings": 9,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 9,
+          "projections": 6,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "e": {
+          "openings": 5,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 5,
+          "projections": 9,
+          "projection_violations": [],
+          "projections_unverified": []
+        },
+        "w": {
+          "openings": 6,
+          "size_errors": [],
+          "fake_holes": 0,
+          "frame_holes": 0,
+          "untagged_non_plan": 0,
+          "plan_mismatches": [],
+          "plan_checked": 6,
+          "projections": 3,
+          "projection_violations": [],
+          "projections_unverified": []
+        }
+      }
+    }
+  },
+  "pairs_front_fingerprint": [
+    {
+      "pair": "AB",
+      "distance": 1.671
+    },
+    {
+      "pair": "AC",
+      "distance": 1.73
+    },
+    {
+      "pair": "BC",
+      "distance": 0.317
+    }
+  ],
+  "pairs_front_shape_2cm": [
+    {
+      "pair": "AB",
+      "shapeDistance": 0.925
+    },
+    {
+      "pair": "AC",
+      "shapeDistance": 0.882
+    },
+    {
+      "pair": "BC",
+      "shapeDistance": 0.248
+    }
+  ],
+  "reference": "elevation-reference-composeElevation.svg"
+}
