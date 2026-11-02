@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عينة الواجهات الواقعية</title>
+<style>
+  :root { --bg: #f4f1ea; --ink: #1f2a26; --muted: #5a5f5b; --line: #d8d2c4; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #1b1e1c; --ink: #e8e6e0; --muted: #a9aca6; --line: #3a3f3b; } }
+  :root[data-theme="dark"] { --bg: #1b1e1c; --ink: #e8e6e0; --muted: #a9aca6; --line: #3a3f3b; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, "DejaVu Sans", sans-serif; }
+  #stage { padding: 16px; }
+  #msg { padding: 16px; color: var(--muted); }
+  canvas { display: block; max-width: 100%; height: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: right; }
+  th { background: rgba(0,0,0,.05); }
+  .sw { width: 96px; height: 64px; display: block; border-radius: 4px; }
+  .tag { color: #b5562b; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="msg">جارٍ التحميل…</div></div>
+<script type="module">
+import { loadThreeRuntime } from './three-runtime.mjs';
+import { parseDoc } from './draw/doc.mjs';
+import { buildVariant, MATERIALS, TAG } from './facade-realism/model.mjs';
+import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
+import { buildFrontScene } from './facade-realism/scene.mjs';
+
+const q = new URLSearchParams(location.search);
+const mode = q.get('mode') || 'variant', id = (q.get('v') || 'A').toUpperCase();
+const stage = document.getElementById('stage');
+const done = (info) => { window.__FR = { ready: true, ...info }; };
+const fail = (e) => { stage.innerHTML = ''; const m = document.createElement('div'); m.id = 'msg'; m.textContent = 'تعذّر العرض: ' + (e?.message || e); stage.appendChild(m); window.__FR = { ready: true, error: String(e?.message || e) }; };
+
+function canvasOf(cv, w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(cv, 0, 0, w, h); return c; }
+
+async function boardMode() {
+  const rows = [];
+  const samples = { limestoneWhite: limestone('white', 512).color, limestoneBeige: limestone('beige', 512).color, render: render(512).color, timberLook: timberLook(512).color };
+  for (const [key, m] of Object.entries(MATERIALS)) {
+    const sw = document.createElement('canvas'); sw.className = 'sw'; sw.width = 192; sw.height = 128;
+    const cx = sw.getContext('2d');
+    if (samples[key]) cx.drawImage(samples[key], 0, 0, 192, 128);
+    else if (key === 'aluminium') { cx.fillStyle = '#3a3d41'; cx.fillRect(0, 0, 192, 128); cx.fillStyle = '#4a4e53'; cx.fillRect(12, 12, 168, 104); }
+    else { cx.fillStyle = '#a9c2cd'; cx.fillRect(0, 0, 192, 128); cx.strokeStyle = 'rgba(255,255,255,.7)'; cx.lineWidth = 6; cx.beginPath(); cx.moveTo(0, 110); cx.lineTo(120, 0); cx.stroke(); }
+    const where = m.where, ref = m.ref, ver = m.verified;
+    rows.push(`<tr><td></td><td>${m.ar}</td><td>${m.en}</td><td>${m.cls}</td><td>${where}</td><td>${ref}</td><td class="${/غير متحقق/.test(ver) ? 'tag' : ''}">${ver}</td></tr>`);
+    rows[rows.length - 1] = rows[rows.length - 1].replace('<td></td>', `<td data-swatch="${key}"></td>`);
+    window.__swatches = (window.__swatches || []).concat([[key, sw]]);
+  }
+  stage.innerHTML = `<table dir="rtl"><thead><tr><th>عينة</th><th>الاسم العربي</th><th>الاسم الإنجليزي</th><th>الفئة</th><th>مكان الاستخدام في الواجهة</th><th>المرجع</th><th>حالة التحقق</th></tr></thead><tbody>${rows.join('')}</tbody></table><p class="tag">${TAG}: لكل طبقة خارج المخطط في البدائل.</p>`;
+  for (const [key, sw] of window.__swatches) { const td = stage.querySelector(`td[data-swatch="${key}"]`); td.appendChild(sw); }
+  done({ rows: rows.length });
+}
+
+async function variantMode() {
+  const THREE = await loadThreeRuntime();
+  const res = await fetch(q.get('doc') || './facade-realism/C1.json');
+  if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')');
+  const doc = parseDoc(await res.text());
+  const built = buildVariant(doc, id);
+  const lib = createRealismMaterials(THREE);
+  const W = 1280, H = 800;
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; canvas.id = 'fr';
+  stage.innerHTML = ''; stage.appendChild(canvas);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene(); scene.background = new THREE.Color('#d9e3e9');
+  const eq = document.createElement('canvas'); eq.width = 512; eq.height = 256; const ex = eq.getContext('2d');
+  const sky = ex.createLinearGradient(0, 0, 0, 256); sky.addColorStop(0, '#bfd8ea'); sky.addColorStop(.55, '#f3efe6'); sky.addColorStop(1, '#a89878'); ex.fillStyle = sky; ex.fillRect(0, 0, 512, 256);
+  const env = new THREE.CanvasTexture(eq); env.mapping = THREE.EquirectangularReflectionMapping; env.colorSpace = THREE.SRGBColorSpace; scene.environment = env;
+  scene.add(new THREE.HemisphereLight('#e6eef5', '#8b7a5c', .55));
+  const sun = new THREE.DirectionalLight('#ffe6c4', 2.4);
+  sun.position.set(-30, 34, 26); sun.target.position.set(0, 2.5, -6); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -18; sun.shadow.camera.right = 18; sun.shadow.camera.top = 16; sun.shadow.camera.bottom = -12; sun.shadow.camera.near = 1; sun.shadow.camera.far = 120; sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+  scene.add(sun, sun.target);
+  const S = buildFrontScene(THREE, built, lib); scene.add(S.group);
+  const cam = new THREE.PerspectiveCamera(30, W / H, .1, 400);
+  cam.position.set(8.5, 6.4, 19.5); cam.lookAt(0.6, 2.5, -6.3);
+  renderer.render(scene, cam);
+  const gl = renderer.getContext();
+  done({ variant: id, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: built.layers.length, glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1' });
+}
+
+(async () => {
+  try { if (mode === 'board') await boardMode(); else await variantMode(); }
+  catch (e) { fail(e); }
+})();
+</script>
+</body>
+</html>
