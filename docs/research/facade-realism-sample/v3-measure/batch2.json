@@ -1,0 +1,5 @@
+[
+ {"name":"final-stone","q":{"shot":"stone"}},
+ {"name":"final-window","q":{"shot":"window"}},
+ {"name":"final-door","q":{"shot":"door"}}
+]

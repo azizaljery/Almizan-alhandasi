@@ -1,0 +1,18 @@
+# قياسات بكسلية - عينة الواجهات، البديل A، 960x600
+## (أ) bumpScale للحجر، منطقة 0..500 × 40..280 (مجموع الفروق المطلقة، 0..255)
+{"a":"stone-bump1.4.png","b":"stone-bump0.png","roi":[0,40,500,280],"pixels":120000,"meanAbsDiff":0.168,"pixelsDiffOver20":0,"meanLumA":221.7,"meanLumB":221.75}
+{"a":"stone-bump3.png","b":"stone-bump0.png","roi":[0,40,500,280],"pixels":120000,"meanAbsDiff":0.351,"pixelsDiffOver20":531,"meanLumA":221.57,"meanLumB":221.75}
+{"a":"stone-bump1.4.png","b":"stone-bump3.png","roi":[0,40,500,280],"pixels":120000,"meanAbsDiff":0.184,"pixelsDiffOver20":98,"meanLumA":221.7,"meanLumB":221.57}
+## (ب) الزجاج، منطقة الزجاج 359..612 × 135..469
+{"a":"window-base.png","b":"window-env6.png","roi":[359,135,612,469],"pixels":84502,"meanAbsDiff":17.604,"pixelsDiffOver20":31,"meanLumA":112.48,"meanLumB":130.08}
+{"a":"window-base.png","b":"window-env12.png","roi":[359,135,612,469],"pixels":84502,"meanAbsDiff":20.331,"pixelsDiffOver20":76593,"meanLumA":112.48,"meanLumB":132.81}
+{"a":"window-env6.png","b":"window-env6-rough.3.png","roi":[359,135,612,469],"pixels":84502,"meanAbsDiff":0.005,"pixelsDiffOver20":0,"meanLumA":130.08,"meanLumB":130.08}
+{"f":"window-base.png","topThirdMidThirdBottomThird":[113.6,112.2,111.6]}
+{"f":"window-env6.png","topThirdMidThirdBottomThird":[131.8,130.6,127.8]}
+{"f":"window-base.png","topThirdMidThirdBottomThird":[113.6,112.2,111.6]}
+{"f":"window-env12.png","topThirdMidThirdBottomThird":[134.6,133.5,130.3]}
+## (ج) الظل: الإطار (376..588 × 116..520) والزجاج (405..572 × 133..489)
+{"a":"slot-shadow-on.png","b":"slot-shadow-off.png","roi":[376,116,588,520],"pixels":85648,"meanAbsDiff":7.633,"pixelsDiffOver20":104,"meanLumA":144.95,"meanLumB":152.58}
+{"a":"slot-shadow-on.png","b":"slot-shadow-off.png","roi":[405,133,572,489],"pixels":59452,"meanAbsDiff":6.841,"pixelsDiffOver20":34,"meanLumA":139.64,"meanLumB":146.48}
+slot-shadow-on.png y=300 x370..420 210 210 210 209 210 210 209 208 207 207 208 60 60 60 60 60 59 59 59 53 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 111 111 132 192 198 204 204 204 204 205 205 205
+slot-shadow-off.png y=300 x370..420 210 210 210 209 210 210 216 208 207 207 208 66 66 65 65 65 65 65 65 56 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 116 116 137 197 202 209 210 210 210 210 210 210

@@ -1,0 +1,433 @@
+[
+ {
+  "name": "stone-bump1.4",
+  "q": {
+   "shot": "stone",
+   "bump": "1.4"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/stone-bump1.4.png",
+  "secs": 4,
+  "errs": [],
+  "ready": true,
+  "shot": "stone",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 1090,
+    "y0": 244,
+    "x1": 960,
+    "y1": 353
+   },
+   "frame": {
+    "x0": 1083,
+    "y0": 238,
+    "x1": 960,
+    "y1": 360
+   },
+   "target": [
+    6.639999973773956,
+    2.9974998950958254,
+    -6.46999979019165
+   ],
+   "cam": [
+    7.089999973773956,
+    3.2474998950958254,
+    -4.46999979019165
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "stone-bump0",
+  "q": {
+   "shot": "stone",
+   "bump": "0"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/stone-bump0.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "stone",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 1090,
+    "y0": 244,
+    "x1": 960,
+    "y1": 353
+   },
+   "frame": {
+    "x0": 1083,
+    "y0": 238,
+    "x1": 960,
+    "y1": 360
+   },
+   "target": [
+    6.639999973773956,
+    2.9974998950958254,
+    -6.46999979019165
+   ],
+   "cam": [
+    7.089999973773956,
+    3.2474998950958254,
+    -4.46999979019165
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 0,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "stone-bump3",
+  "q": {
+   "shot": "stone",
+   "bump": "3"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/stone-bump3.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "stone",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 1090,
+    "y0": 244,
+    "x1": 960,
+    "y1": 353
+   },
+   "frame": {
+    "x0": 1083,
+    "y0": 238,
+    "x1": 960,
+    "y1": 360
+   },
+   "target": [
+    6.639999973773956,
+    2.9974998950958254,
+    -6.46999979019165
+   ],
+   "cam": [
+    7.089999973773956,
+    3.2474998950958254,
+    -4.46999979019165
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 3,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "window-base",
+  "q": {
+   "shot": "window"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/window-base.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "window",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 359,
+    "y0": 135,
+    "x1": 612,
+    "y1": 469
+   },
+   "frame": {
+    "x0": 332,
+    "y0": 113,
+    "x1": 631,
+    "y1": 496
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    12.605000114440918,
+    2.3999999523162843,
+    -12.564999961853028
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "window-env6",
+  "q": {
+   "shot": "window",
+   "env": "6"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/window-env6.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "window",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 359,
+    "y0": 135,
+    "x1": 612,
+    "y1": 469
+   },
+   "frame": {
+    "x0": 332,
+    "y0": 113,
+    "x1": 631,
+    "y1": 496
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    12.605000114440918,
+    2.3999999523162843,
+    -12.564999961853028
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 6,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "window-env12",
+  "q": {
+   "shot": "window",
+   "env": "12"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/window-env12.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "window",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 359,
+    "y0": 135,
+    "x1": 612,
+    "y1": 469
+   },
+   "frame": {
+    "x0": 332,
+    "y0": 113,
+    "x1": 631,
+    "y1": 496
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    12.605000114440918,
+    2.3999999523162843,
+    -12.564999961853028
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 12,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "window-env6-rough.3",
+  "q": {
+   "shot": "window",
+   "env": "6",
+   "rough": "0.3"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/window-env6-rough.3.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "window",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 359,
+    "y0": 135,
+    "x1": 612,
+    "y1": 469
+   },
+   "frame": {
+    "x0": 332,
+    "y0": 113,
+    "x1": 631,
+    "y1": 496
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    12.605000114440918,
+    2.3999999523162843,
+    -12.564999961853028
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 6,
+   "roughness": 0.3,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "slot-shadow-on",
+  "q": {
+   "shot": "slot"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/slot-shadow-on.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "slot",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 405,
+    "y0": 133,
+    "x1": 572,
+    "y1": 489
+   },
+   "frame": {
+    "x0": 376,
+    "y0": 116,
+    "x1": 588,
+    "y1": 520
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    14.105000114440918,
+    2.849999952316284,
+    -13.664999961853027
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "slot-shadow-off",
+  "q": {
+   "shot": "slot",
+   "noshadow": "1"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out1/slot-shadow-off.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "slot",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 405,
+    "y0": 133,
+    "x1": 572,
+    "y1": 489
+   },
+   "frame": {
+    "x0": 376,
+    "y0": 116,
+    "x1": 588,
+    "y1": 520
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    14.105000114440918,
+    2.849999952316284,
+    -13.664999961853027
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ }
+]

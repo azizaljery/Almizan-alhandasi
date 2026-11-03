@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>measure</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><div id="stage"></div>
+<script type="module">
+// أداة قياس فقط (خارج المستودع): تحمّل وحدات dist كما هي، وتعدّل معاملات الخامة بعد إنشائها عبر الرابط.
+import { loadThreeRuntime } from './three-runtime.mjs';
+import { parseDoc } from './draw/doc.mjs';
+import { buildAllSides } from './facade-realism/model.mjs';
+import { createRealismMaterials } from './facade-realism/materials.mjs';
+import { buildBuildingScene } from './facade-realism/scene.mjs';
+
+const q = new URLSearchParams(location.search);
+const num = k => (q.has(k) && q.get(k) !== '') ? Number(q.get(k)) : null;
+const shot = q.get('shot') || 'stone';
+const W = 960, H = 600;
+const out = info => { window.__FR = { ready: true, ...info }; };
+const fail = e => { window.__FR = { ready: true, error: String(e?.stack || e) }; };
+
+try {
+  const THREE = await loadThreeRuntime();
+  const doc = parseDoc(await (await fetch('./facade-realism/C1.json')).text());
+  const built = buildAllSides(doc, 'A');
+  const lib = createRealismMaterials(THREE);
+  // تجربة معاملات فقط: تُطبَّق على كائنات المادة بعد الإنشاء، ولا تُكتب في الوحدات.
+  if (num('bump') !== null) { lib.mats.limestoneWhite.bumpScale = num('bump'); }
+  if (num('env') !== null) lib.mats.glass.envMapIntensity = num('env');
+  if (num('rough') !== null) lib.mats.glass.roughness = num('rough');
+  if (num('glassop') !== null) { lib.mats.glass.opacity = num('glassop'); lib.mats.glass.transparent = true; }
+  const noshadow = q.get('noshadow') === '1';
+
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; canvas.id = 'fr';
+  document.getElementById('stage').appendChild(canvas);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+  renderer.shadowMap.enabled = !noshadow; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene(); scene.background = new THREE.Color('#d9e3e9');
+  const eq = document.createElement('canvas'); eq.width = 512; eq.height = 256; const ex = eq.getContext('2d');
+  const sky = ex.createLinearGradient(0, 0, 0, 256); sky.addColorStop(0, '#bfd8ea'); sky.addColorStop(.55, '#f3efe6'); sky.addColorStop(1, '#a89878'); ex.fillStyle = sky; ex.fillRect(0, 0, 512, 256);
+  const env = new THREE.CanvasTexture(eq); env.mapping = THREE.EquirectangularReflectionMapping; env.colorSpace = THREE.SRGBColorSpace; scene.environment = env;
+  scene.add(new THREE.HemisphereLight('#e6eef5', '#8b7a5c', .55));
+  const sun = new THREE.DirectionalLight('#ffe6c4', 2.4);
+  sun.position.set(-16, 34, 14); sun.target.position.set(10, 2, -16); sun.castShadow = !noshadow;
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -22; sun.shadow.camera.right = 22; sun.shadow.camera.top = 22; sun.shadow.camera.bottom = -22; sun.shadow.camera.near = 1; sun.shadow.camera.far = 120; sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+  scene.add(sun, sun.target);
+  const S = buildBuildingScene(THREE, built, lib, {});
+  scene.add(S.group);
+
+  // نقاط الاستهداف من هندسة الواجهة الأمامية (جهة s) نفسها
+  const front = S.meshes.filter(m => m.userData.side === 's');
+  const bboxOf = m => new THREE.Box3().setFromObject(m);
+  const glazing = front.filter(m => m.userData.role === 'glazing');
+  const frames = front.filter(m => m.userData.role === 'frame');
+  const stoneWalls = front.filter(m => m.userData.role === 'wall' && m.material.name === 'limestoneWhite');
+  const pick = (list, idx = 0) => list[idx];
+  const gl = pick(glazing, num('gi') ?? 0);
+  const gbox = bboxOf(gl); const gc = gbox.getCenter(new THREE.Vector3());
+  const fr = frames.find(f => f.userData.opening === gl.userData.opening);
+  let target, cam;
+  const ray = new THREE.Raycaster();
+  if (shot === 'stone') {
+    // نقطة على الجدار الحجري: شعاع من أمام الجدار نحو الداخل من مركز صندوق الجدار (أكبر جدار حجري)
+    const wall = stoneWalls.sort((a, b) => bboxOf(b).getSize(new THREE.Vector3()).x * bboxOf(b).getSize(new THREE.Vector3()).y - bboxOf(a).getSize(new THREE.Vector3()).x * bboxOf(a).getSize(new THREE.Vector3()).y)[0];
+    const wb = bboxOf(wall);
+    const frac = [num('fx') ?? .30, num('fy') ?? .55];
+    const px = wb.min.x + (wb.max.x - wb.min.x) * frac[0], py = wb.min.y + (wb.max.y - wb.min.y) * frac[1];
+    ray.set(new THREE.Vector3(px, py, wb.max.z + 5), new THREE.Vector3(0, 0, -1));
+    const hit = ray.intersectObjects(front, false)[0];
+    target = hit ? hit.point.clone() : new THREE.Vector3(px, py, wb.max.z);
+    cam = target.clone().add(new THREE.Vector3(.45, .25, 2.0));
+  } else if (shot === 'window') {
+    target = gc.clone();
+    cam = target.clone().add(new THREE.Vector3(1.1, .35, 3.1));
+  } else if (shot === 'slot') {
+    target = gc.clone();
+    cam = target.clone().add(new THREE.Vector3(2.6, .8, 2.0));
+  } else if (shot === 'door') {
+    // مدخل: الباب (إطار بفتحة باب) إن وُجد
+    const door = front.filter(m => m.userData.role === 'door')[0] || gl;
+    target = bboxOf(door).getCenter(new THREE.Vector3());
+    cam = target.clone().add(new THREE.Vector3(1.4, .3, 3.6));
+  }
+  const camera = new THREE.PerspectiveCamera(34, W / H, .05, 400);
+  camera.position.copy(cam); camera.lookAt(target);
+  camera.updateMatrixWorld(true);
+  renderer.render(scene, camera);
+
+  // مستطيلات الشاشة للقياس: الزجاج، والإطار، ومحيط الفتحة (الارتداد)
+  const toScreen = box => {
+    const pts = [];
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+      const v = new THREE.Vector3(x, y, z).project(camera); pts.push([(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]);
+    }
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    return { x0: Math.max(0, Math.floor(Math.min(...xs))), y0: Math.max(0, Math.floor(Math.min(...ys))), x1: Math.min(W, Math.ceil(Math.max(...xs))), y1: Math.min(H, Math.ceil(Math.max(...ys))) };
+  };
+  const gl2 = gl.geometry; gl2.computeBoundingBox();
+  const roi = { glass: toScreen(gbox), frame: fr ? toScreen(bboxOf(fr)) : null, target: [target.x, target.y, target.z], cam: [cam.x, cam.y, cam.z] };
+  const gx = renderer.getContext();
+  out({ shot, W, H, roi, glError: gx.getError(), glassMat: { envMapIntensity: lib.mats.glass.envMapIntensity, roughness: lib.mats.glass.roughness, opacity: lib.mats.glass.opacity }, stoneBump: lib.mats.limestoneWhite.bumpScale, stoneWallsFound: stoneWalls.length, glazingFound: glazing.length, meshes: S.meshes.length });
+} catch (e) { fail(e); }
+</script>
+</body></html>

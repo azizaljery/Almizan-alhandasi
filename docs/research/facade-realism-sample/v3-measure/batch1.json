@@ -1,0 +1,11 @@
+[
+ {"name":"stone-bump1.4","q":{"shot":"stone","bump":"1.4"}},
+ {"name":"stone-bump0","q":{"shot":"stone","bump":"0"}},
+ {"name":"stone-bump3","q":{"shot":"stone","bump":"3"}},
+ {"name":"window-base","q":{"shot":"window"}},
+ {"name":"window-env6","q":{"shot":"window","env":"6"}},
+ {"name":"window-env12","q":{"shot":"window","env":"12"}},
+ {"name":"window-env6-rough.3","q":{"shot":"window","env":"6","rough":"0.3"}},
+ {"name":"slot-shadow-on","q":{"shot":"slot"}},
+ {"name":"slot-shadow-off","q":{"shot":"slot","noshadow":"1"}}
+]

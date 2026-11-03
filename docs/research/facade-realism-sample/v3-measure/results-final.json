@@ -1,0 +1,143 @@
+[
+ {
+  "name": "final-stone",
+  "q": {
+   "shot": "stone"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out2/final-stone.png",
+  "secs": 4,
+  "errs": [],
+  "ready": true,
+  "shot": "stone",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 1090,
+    "y0": 244,
+    "x1": 960,
+    "y1": 353
+   },
+   "frame": {
+    "x0": 1083,
+    "y0": 238,
+    "x1": 960,
+    "y1": 360
+   },
+   "target": [
+    6.639999973773956,
+    2.9974998950958254,
+    -6.46999979019165
+   ],
+   "cam": [
+    7.089999973773956,
+    3.2474998950958254,
+    -4.46999979019165
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "final-window",
+  "q": {
+   "shot": "window"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out2/final-window.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "window",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 359,
+    "y0": 135,
+    "x1": 612,
+    "y1": 469
+   },
+   "frame": {
+    "x0": 332,
+    "y0": 113,
+    "x1": 631,
+    "y1": 496
+   },
+   "target": [
+    11.505000114440918,
+    2.049999952316284,
+    -15.664999961853027
+   ],
+   "cam": [
+    12.605000114440918,
+    2.3999999523162843,
+    -12.564999961853028
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ },
+ {
+  "name": "final-door",
+  "q": {
+   "shot": "door"
+  },
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/measure/out2/final-door.png",
+  "secs": 3,
+  "errs": [],
+  "ready": true,
+  "shot": "door",
+  "W": 960,
+  "H": 600,
+  "roi": {
+   "glass": {
+    "x0": 1283,
+    "y0": 145,
+    "x1": 960,
+    "y1": 253
+   },
+   "frame": {
+    "x0": 1276,
+    "y0": 138,
+    "x1": 960,
+    "y1": 259
+   },
+   "target": [
+    5.520000219345093,
+    1.5,
+    -6.545000076293945
+   ],
+   "cam": [
+    6.920000219345093,
+    1.8,
+    -2.9450000762939452
+   ]
+  },
+  "glError": 0,
+  "glassMat": {
+   "envMapIntensity": 1.3,
+   "roughness": 0.04,
+   "opacity": 0.42
+  },
+  "stoneBump": 1.4,
+  "stoneWallsFound": 2,
+  "glazingFound": 6,
+  "meshes": 131
+ }
+]
