@@ -1,11 +1,11 @@
 import { copy, freeze, number, fail } from './core.mjs';
 import { layerMask, bounds, intersectRect, multiArea, difference, union, EPS } from './polygons.mjs';
-export const STONE_DEFAULTS = freeze({ widthM: .6, heightM: .3, jointM: .008, recessM: .012, bevelM: .0015, rowOffset: .5, maxTiles: 12000, originU: 0, originZ: 0, seed: 71, toneVariation: .035 });
+export const STONE_DEFAULTS = freeze({ widthM: .6, heightM: .3, jointM: .008, recessM: .012, bevelM: .0015, rowOffset: .5, veneerM: .06, capCourse: true, maxTiles: 12000, originU: 0, originZ: 0, seed: 71, toneVariation: .06 });
 export function stoneConfig(raw = {}) {
   const c = { ...STONE_DEFAULTS, ...copy(raw) };
   number(c.widthM,'widthM',.02,4); number(c.heightM,'heightM',.02,4); number(c.jointM,'jointM',0,Math.min(c.widthM,c.heightM)/4);
   number(c.recessM,'recessM',0,.2); number(c.bevelM,'bevelM',0,Math.min(c.widthM,c.heightM)/10); number(c.rowOffset,'rowOffset',0,1);
-  number(c.originU,'originU'); number(c.originZ,'originZ'); number(c.toneVariation,'toneVariation',0,.2); number(c.seed,'seed',0,2147483647);
+  number(c.veneerM,'veneerM',.01,.3); number(c.originU,'originU'); number(c.originZ,'originZ'); number(c.toneVariation,'toneVariation',0,.2); number(c.seed,'seed',0,2147483647);
   if (!Number.isInteger(c.maxTiles) || c.maxTiles < 1 || c.maxTiles > 40000) fail('RESOURCE_LIMIT','maxTiles'); return c;
 }
 export function tileRandom(seed, row, col, channel = 0) { let x = (seed ^ Math.imul(row, 374761393) ^ Math.imul(col, 668265263) ^ Math.imul(channel + 1, 1274126177)) >>> 0; x = Math.imul(x ^ x >>> 13,1274126177); return ((x ^ x >>> 16) >>> 0) / 4294967296; }
@@ -23,9 +23,10 @@ export function cutStoneLayer(layer, rawConfig = {}) {
   for(let row=r0;row<r1;row++) {
     const z=config.originZ+row*config.heightM, offset=((row%2)+2)%2*config.rowOffset*config.widthM;
     const c0=Math.floor((b.u0-config.originU-offset)/config.widthM), c1=Math.ceil((b.u1-config.originU-offset)/config.widthM);
-    for(let col=c0;col<c1;col++) {
+    const capRow=config.capCourse&&z+config.heightM>=b.z1-1e-6&&z<b.z1-1e-6; // مدماك علوي متصل (كرنيش/غطاء): بلا فواصل رأسية
+    for(let col=capRow?0:c0;col<(capRow?1:c1);col++) {
       const u=config.originU+offset+col*config.widthM, j=config.jointM/2;
-      const cut=intersectRect(mask,{u0:u+j,u1:u+config.widthM-j,z0:z+j,z1:z+config.heightM-j});
+      const cut=capRow?intersectRect(mask,{u0:b.u0-1,u1:b.u1+1,z0:z+j,z1:z+config.heightM-j}):intersectRect(mask,{u0:u+j,u1:u+config.widthM-j,z0:z+j,z1:z+config.heightM-j});
       if (!cut.length || multiArea(cut)<EPS) continue;
       if(tiles.length>=config.maxTiles) fail('STONE_RESOURCE_LIMIT',layer.id);
       const areaM2=multiArea(cut), variation=(tileRandom(config.seed,row,col)-.5)*2*config.toneVariation;

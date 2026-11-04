@@ -5,10 +5,10 @@ import {RGBELoader} from '../vendor/RGBELoader.mjs';
 export function analyticSky(THREE,{width=512,height=256}={}){
   const data=new Float32Array(width*height*4),sun=new THREE.Vector3(-.55,.7,.45).normalize();
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
-    const theta=(y+.5)/height*Math.PI,phi=(x+.5)/width*Math.PI*2;
+    const theta=(1-(y+.5)/height)*Math.PI,phi=(x+.5)/width*Math.PI*2;
     const dir=new THREE.Vector3(-Math.sin(theta)*Math.cos(phi),Math.cos(theta),Math.sin(theta)*Math.sin(phi));
     const h=Math.max(0,dir.y),below=dir.y<0,glow=Math.pow(Math.max(0,dir.dot(sun)),180)*7;
-    const base=below?[.20,.18,.145]:[.62-h*.35,.72-h*.25,.88-h*.12];const i=(y*width+x)*4;
+    const base=below?[.50,.46,.38]:[.68-h*.18,.72-h*.13,.80-h*.05];const i=(y*width+x)*4;
     data.set([base[0]+glow,base[1]+glow*.91,base[2]+glow*.72,1],i);
   }
   const t=new THREE.DataTexture(data,width,height,THREE.RGBAFormat,THREE.FloatType);t.mapping=THREE.EquirectangularReflectionMapping;t.colorSpace=THREE.LinearSRGBColorSpace;t.needsUpdate=true;return t;

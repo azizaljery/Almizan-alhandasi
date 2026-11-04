@@ -14,7 +14,8 @@ export async function buildFacadeScene(THREE,packet,library,{stoneMode='cut',mon
   for(const side of SIDES){const rows=packet.transforms[side],M=new THREE.Matrix4().set(...rows[0],...rows[1],...rows[2],0,0,0,1);
     for(const L of packet.built[side].layers){const data={side,id:L.id,role:L.role,sourceOpeningId:L.opening||null,proposal:L.id.includes(':kit:')};const cut=packet.cuts[side+':'+L.id];
       if(cut&&stoneMode==='cut'){
-        const backing=extrudePolygons(THREE,cut.mask,L.C+L.o0,L.C+cut.backingFrontM);add(mergeGeometry(THREE,backing,{matrix:M}),library.get('joint'),side+':'+L.id+':bed',data);
+        const core=extrudePolygons(THREE,cut.mask,L.C+L.o0,L.C+cut.backingFrontM-.001);add(mergeGeometry(THREE,core,{matrix:M}),library.get('core'),side+':'+L.id+':core',data);
+        if(cut.backing.length){const bed=extrudePolygons(THREE,cut.backing,L.C+cut.backingFrontM-.001,L.C+cut.backingFrontM);add(mergeGeometry(THREE,bed,{matrix:M}),library.get('joint'),side+':'+L.id+':bed',data);}
         const pieces=stoneGeometries(THREE,cut,L.C);add(mergeGeometry(THREE,pieces,{matrix:M}),library.get(L.mat),side+':'+L.id+':stones',{...data,tileCount:cut.tiles.length});
       }else{const geos=extrudePolygons(THREE,layerMask(L),L.C+L.o0,L.C+L.o1);add(mergeGeometry(THREE,geos,{matrix:M}),library.get(L.mat),side+':'+L.id,data);}
       if(L.role==='glazing'){

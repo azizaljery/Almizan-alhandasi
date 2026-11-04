@@ -39,7 +39,7 @@ async function run() {
     }
     const b = projectionBudgets(doc);
     $('#rules').innerHTML = `<p class="n">جهة المدخل: ${frontSideOf(doc)} · ${$('#exp').checked?'<b>بروزات تجريبية للمقارنة فقط — لا تُعتمد للمشروع؛ سياسة المشروع بلا بروزات جديدة.</b>':'البروزات الجديدة متوقفة في الجهات الأربع (الصفر ليس حدًا نظاميًا).'} مرجع هندسي معلوماتي غير مستعمل (م): جنوب ${b.s}، شمال ${b.n}، شرق ${b.e}، غرب ${b.w}.</p><table><tr><th>البديل</th><th>خلايا الحجر</th><th>المثلثات</th><th>سلامة</th><th>حديثة</th><th>ملاحظات</th></tr>${ev.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('')}</table>`;
-    $('#st').textContent = 'اكتمل.'; window.__KS = { ready: true, ev };
+    $('#st').textContent = 'اكتمل.'; window.__KV = viewers; window.__KS = { ready: true, ev };
   } catch (e) { $('#st').textContent = 'تعذّر: ' + e.message; window.__KS = { ready: true, error: String(e.message) }; }
 }
 $('#side').onchange = $('#exp').onchange = $('#mono').onchange = run; await run();

@@ -27,12 +27,14 @@ export function createMaterialLibrary(THREE,{surfaceAssets={},maxAnisotropy=1,gl
     if(!map){map=textureCanvas(THREE,{tint,seed:key==='stone'?71:73});textures.push(map);evidence.push({material:key,status:'AUTHOR_CREATED_PROCEDURAL',representsVerifiedProduct:false});}
     else evidence.push({material:key,status:asset.completeness,manifest:asset.manifest,evidence:asset.evidence});
     if(!maps?.normal&&!bumpMap){bumpMap=textureCanvas(THREE,{data:true,amplitude:6,seed:13});textures.push(bumpMap);}
-    return make(key,{color:'#ffffff',map,bumpMap:bumpMap||null,bumpScale:.0007,normalMap:maps?.normal||null,roughnessMap:maps?.roughness||null,roughness:.79,vertexColors:true});
+    return make(key,{color:'#ffffff',map,bumpMap:bumpMap||null,bumpScale:.0011,normalMap:maps?.normal||null,roughnessMap:maps?.roughness||null,roughness:.84,vertexColors:true});
   };
   const mats={stone:surface('stone',[226,219,204]),beigeStone:surface('beigeStone',[200,181,150])};
   mats.joint=make('recessed-joint',{color:'#a39783',roughness:.97});
+  mats.core=make('stone-core',{color:'#d3cdbe',roughness:.93}); // قلب الجدار: سطح موحّد للوجه الداخلي والأعلى، بلا شبكة مداميك
   const renderBump=textureCanvas(THREE,{data:true,seed:8,amplitude:3,repeatM:1});textures.push(renderBump);
-  mats.render=make('render',{color:'#dedbd2',roughness:.92,bumpMap:renderBump,bumpScale:.0003});
+  const renderMap=textureCanvas(THREE,{tint:[226,223,214],seed:29,amplitude:11,repeatM:2});textures.push(renderMap);
+  mats.render=make('render',{color:'#ffffff',map:renderMap,roughness:.92,bumpMap:renderBump,bumpScale:.0006});
   mats.darkRender=make('darkRender',{color:'#5a5b57',roughness:.86});
   mats.metal=make('metal',{color:'#363c40',metalness:1,roughness:.32});
   mats.bronze=make('bronze',{color:'#6b5438',metalness:.9,roughness:.4});
@@ -41,7 +43,7 @@ export function createMaterialLibrary(THREE,{surfaceAssets={},maxAnisotropy=1,gl
   // Reflective preview is deliberately labelled. Transmission requires a closed/thick glazing model.
   mats.glass=new THREE.MeshPhysicalMaterial({name:'glass',color:'#1d2c33',metalness:0,roughness:.04,ior:1.5,envMapIntensity:1.5,transmission:glassMode==='transmission-preview'?.7:0,thickness:.008});materials.push(mats.glass);
   mats.interior=make('interior',{color:'#272a29',roughness:1});
-  mats.ground=make('ground',{color:'#b4ac99',roughness:1});mats.roof=make('roof',{color:'#c8c4b7',roughness:.92});
+  mats.ground=make('ground',{color:'#b4ac99',roughness:1,envMapIntensity:.45});mats.roof=make('roof',{color:'#c8c4b7',roughness:.92});
   for(const t of textures)t.anisotropy=maxAnisotropy;
   return {mats,evidence,glassMode,get(key){const aliases={limestoneWhite:'stone',limestoneBeige:'beigeStone',aluminium:'metal',timberLook:'wood'};return mats[aliases[key]||key]||mats.render;},dispose(){textures.forEach(t=>t.dispose());materials.forEach(m=>m.dispose());}};
 }

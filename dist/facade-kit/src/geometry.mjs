@@ -29,9 +29,10 @@ export function mergeGeometry(THREE,geometries,{matrix=null}={}) {
   const out=new THREE.BufferGeometry();for(const [k,size]of Object.entries({position:3,normal:3,uv:2,color:3}))out.setAttribute(k,new THREE.Float32BufferAttribute(arrays[k],size));out.computeBoundingBox();out.computeBoundingSphere();return out;
 }
 export function stoneGeometries(THREE,cut,C=0) {
+  const veneer=cut.config.veneerM;
   const all=[];
   for(const tile of cut.tiles)for(const poly of tile.polygons){const rect=rectangleOf(poly);
-    const list=rect?[beveledRectangle(THREE,rect,C+tile.backM,C+tile.frontM,cut.config.bevelM)]:extrudePolygons(THREE,[poly],C+tile.backM,C+tile.frontM);
+    const back=Math.max(tile.backM,tile.frontM-veneer),list=rect?[beveledRectangle(THREE,rect,C+back,C+tile.frontM,cut.config.bevelM)]:extrudePolygons(THREE,[poly],C+back,C+tile.frontM);
     for(const g of list){const p=g.attributes.position,n=g.attributes.normal,uv=g.attributes.uv,colors=new Float32Array(p.count*3);
       for(let i=0;i<p.count;i++){if(Math.abs(n.getZ(i))>.8){uv.setXY(i,p.getX(i)+tile.uvOffset[0],p.getY(i)+tile.uvOffset[1]);}const t=1+tile.variation;colors.set([t,t*.998,t*.992],i*3);}g.setAttribute('color',new THREE.BufferAttribute(colors,3));all.push(g);}
   }

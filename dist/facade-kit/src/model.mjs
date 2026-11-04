@@ -48,12 +48,12 @@ function decorateSide(B,style,side,budget,frontSide) {
         add(wall,rect(o.u1,o.z0,o.u1+.30,o.z1+.30),'entry-right-'+o.id,'stone',m(.16),'entry-pier');
         add(wall,rect(o.u0-.30,o.z1,o.u1+.30,o.z1+.30),'entry-head-'+o.id,'stone',m(.16),'entry-head');
       }
-    } else if(style==='B') { // حديث مظلّل: بياض مع قاعدة بيج، تأطير معدني عميق للنوافذ، بوابة مدخل غائرة داكنة بمظلة
+    } else if(style==='B') {
+      add(wall,rect(bb.u0-.0,bb.z1-.10,bb.u1,bb.z1),'roof-slab','render',m(.28),'roof-edge'); // حديث مظلّل: بياض مع قاعدة بيج، تأطير معدني عميق للنوافذ، بوابة مدخل غائرة داكنة بمظلة
       add(wall,rect(bb.u0,bb.z0,bb.u1,Math.min(bb.z0+.5,bb.z1)),'beige-base','beigeStone',m(.08),'stone-cladding');
       for(const o of windows){
-        add(wall,rect(o.u0-.10,o.z1,o.u1+.10,o.z1+.10),'win-head-'+o.id,'metal',m(.24),'shade');
-        add(wall,rect(o.u0-.10,o.z0-.10,o.u0,o.z1+.10),'win-jamb-l-'+o.id,'darkRender',m(.08),'reveal');
-        add(wall,rect(o.u1,o.z0-.10,o.u1+.10,o.z1+.10),'win-jamb-r-'+o.id,'darkRender',m(.08),'reveal');
+        add(wall,rect(o.u0-.11,o.z0-.11,o.u1+.11,o.z1+.11),'win-frame-'+o.id,'darkRender',m(.06),'reveal');
+        add(wall,rect(o.u0-.11,o.z1+.11,o.u1+.11,o.z1+.17),'win-shade-'+o.id,'metal',m(.26),'shade');
       }
       for(const o of entries) {
         add(wall,rect(o.u0-.45,o.z0,o.u0-.04,o.z1+.38),'portal-left-'+o.id,'darkRender',m(.34),'entry-pier');
@@ -64,6 +64,8 @@ function decorateSide(B,style,side,budget,frontSide) {
       const za=bb.z0+height*.68, zb=Math.min(bb.z1,za+.22);
       const stepped=[[bb.u0,za],[bb.u0+span*.40,za],[bb.u0+span*.40,za-.18],[bb.u1,za-.18],[bb.u1,zb],[bb.u0,zb],[bb.u0,za]];
       add(wall,stepped,'stepped-band','wood',m(.22),'stepped-fascia');
+      add(wall,rect(bb.u0,bb.z0,bb.u0+.45,bb.z1),'post-left','darkRender',m(.10),'corner-post');
+      add(wall,rect(bb.u1-.45,bb.z0,bb.u1,bb.z1),'post-right','darkRender',m(.10),'corner-post');
       for(const o of windows){
         add(wall,rect(o.u0-.05,o.z1+.04,o.u1+.05,o.z1+.09),'win-hood-'+o.id,'wood',m(.30),'hood');
         for(let n=0;n<3;n++){const u=o.u0+(o.u1-o.u0)*(n+.5)/3-.02;add(wall,rect(u,o.z0+.1,u+.04,o.z1-.1),'win-fin-'+o.id+'-'+n,'wood',m(.08),'vertical-fin');}
