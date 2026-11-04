@@ -95,7 +95,7 @@ export function createRealismMaterials(THREE, { maxAnisotropy = 4 } = {}) {
   for (const t of ['limestoneWhite', 'limestoneBeige']) {
     const f = tex[t + 'Face'];
     mats[t + 'Face'] = std(t + 'Face', { map: f.map, bumpMap: f.bump, bumpScale: 1, roughness: .86, color: '#ffffff' });
-    mats[t + 'Joint'] = std(t + 'Joint', { map: f.map, bumpMap: f.bump, bumpScale: 1, roughness: .92, color: '#8f887c' });
+    mats[t + 'Joint'] = std(t + 'Joint', { map: f.map, bumpMap: f.bump, bumpScale: 1, roughness: .92, color: '#d2ccbf' });
   }
   mats.render = std('render', { map: tex.render.map, bumpMap: tex.render.bump, bumpScale: .4, roughness: .95, color: '#f1e9da' });
   mats.timberLook = std('timberLook', { map: tex.timberLook.map, bumpMap: tex.timberLook.bump, bumpScale: .5, roughness: .7, color: '#ffffff' });
