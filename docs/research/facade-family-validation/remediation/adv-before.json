@@ -1,0 +1,102 @@
+[
+  {
+    "id": "ADV-01",
+    "status": "AS_INTENDED",
+    "note": "اللوحة وحدها = صفر. تبديل النغمات: مرفوض (تباعد 0)."
+  },
+  {
+    "id": "ADV-02",
+    "status": "AS_INTENDED",
+    "note": "لا تعديل صغير قُبل."
+  },
+  {
+    "id": "ADV-03",
+    "status": "DEFECT",
+    "note": "2 حالة تغيير محور واحد قُبلت كتصميم جديد (الأبعاد تتلوّث ببعضها: محور واحد حرّك 6 أبعاد)."
+  },
+  {
+    "id": "ADV-04",
+    "status": "AS_INTENDED",
+    "note": "تباعد 0.007؛ الخلايا المختلفة 0.0975"
+  },
+  {
+    "id": "ADV-05",
+    "status": "INFO",
+    "note": "مسافة الذات 0؛ عدد أزواج الاختلاف الهندسي المتجاهَل 0/15. (المسافات بين مبنيين مختلفين ليست دليل تفرد.)"
+  },
+  {
+    "id": "ADV-06",
+    "status": "AS_INTENDED",
+    "note": "حواف 0، تباعد 0"
+  },
+  {
+    "id": "ADV-07",
+    "status": "AS_INTENDED",
+    "note": "تباعد 0؛ فرق القيمة الرمادية 0.0921"
+  },
+  {
+    "id": "ADV-08",
+    "status": "DEFECT",
+    "note": "بوابة المعقولية رفضت الحالة لأسباب أخرى (coverage,entry-contrast) وليس لفقد وضوح الفتحات (فتحات منخفضة التباين 8/8؛ لا فحص قراءة للنوافذ في المولّد). مرشحون مولّدون يخفون فتحة: 56/144."
+  },
+  {
+    "id": "ADV-09",
+    "status": "AS_INTENDED",
+    "note": "غطاء النافذة: سقط كما يجب. المصدر المعدّل: رُفض (SOURCE_IDENTITY_UNDECLARED: مصدر غير مختوم ولا بصمة مرجعية؛ يُرفض مغلقًا)."
+  },
+  {
+    "id": "ADV-10",
+    "status": "ERROR",
+    "error": "TypeError: Cannot read properties of null (reading 'ids')\n    at Object.run (file:///workspace/scratch/8f4c8c15be8c/family-validation/tests/adversarial/fixtures.mjs:67:74)\n    at async file:///workspace/scratch/8f4c8c15be8c/[eval1]:1:147"
+  },
+  {
+    "id": "ADV-11",
+    "status": "ERROR",
+    "error": "TypeError: Cannot read properties of null (reading 'ids')\n    at Object.run (file:///workspace/scratch/8f4c8c15be8c/family-validation/tests/adversarial/fixtures.mjs:74:31)\n    at async file:///workspace/scratch/8f4c8c15be8c/[eval1]:1:147"
+  },
+  {
+    "id": "ADV-12",
+    "status": "INFO",
+    "note": "120/2088 زوجًا تختلف وصفاته في ≥5 محاور بينما ناتجه المحقق قريب. هذه الأزواج لا تدخل في الاختيار إلا إن قبلها التوقيع."
+  },
+  {
+    "id": "ADV-13",
+    "status": "ERROR",
+    "error": "TypeError: Cannot read properties of null (reading 'ids')\n    at Object.run (file:///workspace/scratch/8f4c8c15be8c/family-validation/tests/adversarial/fixtures.mjs:80:87)\n    at async file:///workspace/scratch/8f4c8c15be8c/[eval1]:1:147"
+  },
+  {
+    "id": "ADV-14",
+    "status": "ERROR",
+    "error": "Error: UNAUTHORISED_CANDIDATE_COUNT\n    at generate (file:///workspace/scratch/8f4c8c15be8c/family-validation/dist/facade-kit/concepts/generate.mjs:78:56)\n    at Object.run (file:///workspace/scratch/8f4c8c15be8c/family-validation/tests/adversarial/fixtures.mjs:86:152)\n    at async file:///workspace/scratch/8f4c8c15be8c/[eval1]:1:147"
+  },
+  {
+    "id": "ADV-15",
+    "status": "ERROR",
+    "error": "Error: UNAUTHORISED_CANDIDATE_COUNT\n    at generate (file:///workspace/scratch/8f4c8c15be8c/family-validation/dist/facade-kit/concepts/generate.mjs:78:56)\n    at Object.run (file:///workspace/scratch/8f4c8c15be8c/family-validation/tests/adversarial/fixtures.mjs:89:97)\n    at async file:///workspace/scratch/8f4c8c15be8c/[eval1]:1:147"
+  },
+  {
+    "id": "ADV-16",
+    "status": "ERROR",
+    "error": "TypeError: Cannot read properties of null (reading 'ids')\n    at Object.run (file:///workspace/scratch/8f4c8c15be8c/family-validation/tests/adversarial/fixtures.mjs:93:138)\n    at async file:///workspace/scratch/8f4c8c15be8c/[eval1]:1:147"
+  },
+  {
+    "id": "ADV-17",
+    "status": "AS_INTENDED",
+    "note": "0/3 أزواج مقياس قُبلت. أعلى تباعد 0.322"
+  },
+  {
+    "id": "ADV-18",
+    "status": "AS_INTENDED",
+    "note": "0/2 حالة تقسيم مواد قُبلت كتصميم جديد."
+  },
+  {
+    "id": "ADV-19",
+    "status": "AS_INTENDED",
+    "note": "تفرد 0.289، بوابة المعقولية رفضتها (الفحوص الفاشلة: coverage,supported)؛ المختبِر يرى 4/14 عنصرًا عائمًا بلا مرجع. ملاحظة: لا يوجد في المولّد فحص «اتصال بمرجع معماري»؛ الرفض جاء من فحوص أخرى."
+  },
+  {
+    "id": "ADV-20",
+    "status": "AS_INTENDED",
+    "note": "المصدر لم يتغير بعد كل التشغيل؛ طبقات المسقط في الحزم مطابقة للمصدر. (لكن انظر ADV-09: لا حارس ضد مصدر معدّل مُدخَل.)"
+  }
+]

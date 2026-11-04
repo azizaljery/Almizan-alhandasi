@@ -23,7 +23,7 @@ export function compsOf(a,built,side,zones,{order=true}={}){
 }
 export const sigOf=(a,comps)=>signature(a,comps);
 export const emptySig=a=>signature(a,[]);
-export function judge(sa,sb){ const c=compareSignatures(sa,sb), v=verdict(c); return {novelty:c.novelty,differentDims:c.differentDims,movedDims:c.movedDims,edgeZone:c.edgeZone,edgeAll:c.edgeAll,accepted:v.accepted,verdictAr:v.overall,dims:Object.fromEntries(c.dims.map(d=>[d.key,d.distance]))}; }
+export function judge(sa,sb){ const c=compareSignatures(sa,sb), v=verdict(c); return {novelty:c.novelty,differentDims:c.differentDims,movedDims:c.movedDims,edgeZone:c.edgeZone,edgeAll:c.edgeAll,accepted:v.accepted,zone:v.zone,verdictAr:v.overall,dims:Object.fromEntries(c.dims.map(d=>[d.key,d.distance]))}; }
 /** محور القيادة المحقق: البُعد الأعلى مساهمةً مقارنةً بواجهة بلا مناطق (مقياس المختبِر المستقل، لا وسوم المولد) */
 export function leadAxis(a,sig){ const d=dimensionDistances(sig,emptySig(a)); const e=Object.entries(d).sort((x,y)=>y[1]-x[1]); return {lead:e[0][0],profile:Object.fromEntries(e.map(([k,v])=>[k,+v.toFixed(3)]))}; }
 /** اختلاف الشبكة المصنفة (نسبة الخلايا المختلفة) ومتوسط فرق القيمة الرمادية: «الحقيقة البصرية» التقريبية */
@@ -45,3 +45,7 @@ export function buildScaled(doc){ let built; for(const v of ['B','A','C']){ try{
 
 /** تعديل صغير متفرّق: كل حافة تُزاح باحتمال p بمقدار ≤ d (يحافظ على صلاحية البوابات غالبًا) */
 export function jitterSparse(zones,rng,d,p=.2){ return zones.map(z=>z.box?{...z,ring:null,box:{u0:z.box.u0+(rng()<p?(rng()*2-1)*d:0),u1:z.box.u1+(rng()<p?(rng()*2-1)*d:0),z0:z.box.z0+(rng()<p?(rng()*2-1)*d:0),z1:z.box.z1+(rng()<p?(rng()*2-1)*d:0)}}:z); }
+
+// Compatibility only: inspect the actual offered set; this never marks it accepted.
+export const offered=s=>s.offered||s.selected||{ids:[]};
+export async function generationProbe(source,side,options){try{return {...await GEN.generate(source,side,options),blocked:false,requestedCount:options.count};}catch(e){if(!String(e.message).startsWith('UNAUTHORISED_CANDIDATE_COUNT'))throw e;return {candidates:[],blocked:true,requestedCount:options.count,reason:e.message};}}
