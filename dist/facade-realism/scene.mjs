@@ -60,7 +60,7 @@ export function closeupCamera(THREE, S, shot, { W = 1280, H = 800, fov = 34, ind
   const gl = glazing[index] || glazing[0];
   const gbox = bbox(gl), gc = gbox.getCenter(new THREE.Vector3());
   const frame = front.find(f => f.userData.role === 'frame' && f.userData.opening === gl.userData.opening) || null;
-  const walls = front.filter(m => m.userData.role === 'wall' && /^limestone/.test(m.material.name));
+  const walls = front.filter(m => (m.userData.role === 'wall' || m.userData.role === 'cladding') && /^limestone/.test(m.material.name)); // الحجر في الجدار (A) أو في الكسوة (B، C): القاعدة نفسها لكل البدائل
   let target, cam;
   if (shot === 'stone') {
     if (!walls.length) throw new Error('لا جدار حجري في الجهة الأمامية');

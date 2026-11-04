@@ -1,0 +1,278 @@
+[
+ {
+  "shot": "stone",
+  "variant": "A",
+  "file": "stone-A.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 326,
+    "x1": 1280,
+    "y1": 470
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 318,
+    "x1": 1280,
+    "y1": 480
+   }
+  },
+  "glError": 0,
+  "meshes": 131,
+  "triangles": 2918,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "B",
+  "file": "stone-B.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 108
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 115
+   }
+  },
+  "glError": 0,
+  "meshes": 125,
+  "triangles": 2582,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "C",
+  "file": "stone-C.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 103
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 114
+   }
+  },
+  "glError": 0,
+  "meshes": 193,
+  "triangles": 3398,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "window",
+  "variant": "A",
+  "file": "window-A.png",
+  "roi": {
+   "glass": {
+    "x0": 479,
+    "y0": 180,
+    "x1": 816,
+    "y1": 626
+   },
+   "frame": {
+    "x0": 442,
+    "y0": 150,
+    "x1": 842,
+    "y1": 662
+   }
+  },
+  "glError": 0,
+  "meshes": 131,
+  "triangles": 2918,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "window",
+  "variant": "B",
+  "file": "window-B.png",
+  "roi": {
+   "glass": {
+    "x0": 475,
+    "y0": 175,
+    "x1": 820,
+    "y1": 630
+   },
+   "frame": {
+    "x0": 442,
+    "y0": 150,
+    "x1": 842,
+    "y1": 662
+   }
+  },
+  "glError": 0,
+  "meshes": 125,
+  "triangles": 2582,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "window",
+  "variant": "C",
+  "file": "window-C.png",
+  "roi": {
+   "glass": {
+    "x0": 486,
+    "y0": 188,
+    "x1": 807,
+    "y1": 617
+   },
+   "frame": {
+    "x0": 443,
+    "y0": 151,
+    "x1": 842,
+    "y1": 661
+   }
+  },
+  "glError": 0,
+  "meshes": 193,
+  "triangles": 3398,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "slot",
+  "variant": "A",
+  "file": "slot-A.png",
+  "roi": {
+   "glass": {
+    "x0": 540,
+    "y0": 178,
+    "x1": 763,
+    "y1": 652
+   },
+   "frame": {
+    "x0": 501,
+    "y0": 155,
+    "x1": 784,
+    "y1": 694
+   }
+  },
+  "glError": 0,
+  "meshes": 131,
+  "triangles": 2918,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "slot",
+  "variant": "B",
+  "file": "slot-B.png",
+  "roi": {
+   "glass": {
+    "x0": 538,
+    "y0": 174,
+    "x1": 766,
+    "y1": 657
+   },
+   "frame": {
+    "x0": 501,
+    "y0": 155,
+    "x1": 784,
+    "y1": 694
+   }
+  },
+  "glError": 0,
+  "meshes": 125,
+  "triangles": 2582,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "slot",
+  "variant": "C",
+  "file": "slot-C.png",
+  "roi": {
+   "glass": {
+    "x0": 544,
+    "y0": 186,
+    "x1": 757,
+    "y1": 642
+   },
+   "frame": {
+    "x0": 503,
+    "y0": 155,
+    "x1": 785,
+    "y1": 693
+   }
+  },
+  "glError": 0,
+  "meshes": 193,
+  "triangles": 3398,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "door",
+  "variant": "A",
+  "file": "door-A.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 194,
+    "x1": 1280,
+    "y1": 337
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 184,
+    "x1": 1280,
+    "y1": 345
+   }
+  },
+  "glError": 0,
+  "meshes": 131,
+  "triangles": 2918,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "door",
+  "variant": "B",
+  "file": "door-B.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 192,
+    "x1": 1280,
+    "y1": 338
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 184,
+    "x1": 1280,
+    "y1": 345
+   }
+  },
+  "glError": 0,
+  "meshes": 125,
+  "triangles": 2582,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "door",
+  "variant": "C",
+  "file": "door-C.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 196,
+    "x1": 1280,
+    "y1": 334
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 184,
+    "x1": 1280,
+    "y1": 345
+   }
+  },
+  "glError": 0,
+  "meshes": 193,
+  "triangles": 3398,
+  "renderer": "webgl2"
+ }
+]
