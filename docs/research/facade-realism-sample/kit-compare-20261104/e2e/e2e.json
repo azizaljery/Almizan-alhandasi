@@ -1,0 +1,31 @@
+{
+ "desktop": {
+  "panel": true,
+  "A": "تراضات عرض.البديل Aالبديل Bالبديل Cتنزيل PNGتنزيل GLBمعاينة غير معتمدة بصريًا أو تنفيذيًا.",
+  "B": "تراضات عرض.البديل Aالبديل Bالبديل Cتنزيل PNGتنزيل GLBمعاينة غير معتمدة بصريًا أو تنفيذيًا.",
+  "C": "تراضات عرض.البديل Aالبديل Bالبديل Cتنزيل PNGتنزيل GLBمعاينة غير معتمدة بصريًا أو تنفيذيًا.",
+  "hScroll": false
+ },
+ "png": {
+  "name": "facade.png",
+  "bytes": 188458
+ },
+ "glb": {
+  "name": "facade.glb",
+  "bytes": 8274560,
+  "magic": "glTF",
+  "version": 2,
+  "declaredLength": 8274560
+ },
+ "mobile": {
+  "panel": true,
+  "A": "تراضات عرض.البديل Aالبديل Bالبديل Cتنزيل PNGتنزيل GLBمعاينة غير معتمدة بصريًا أو تنفيذيًا.",
+  "B": "تراضات عرض.البديل Aالبديل Bالبديل Cتنزيل PNGتنزيل GLBمعاينة غير معتمدة بصريًا أو تنفيذيًا.",
+  "C": "تراضات عرض.البديل Aالبديل Bالبديل Cتنزيل PNGتنزيل GLBمعاينة غير معتمدة بصريًا أو تنفيذيًا.",
+  "hScroll": false
+ },
+ "errors": [
+  "desktop console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+  "mobile console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+ ]
+}

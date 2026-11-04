@@ -5,10 +5,19 @@ function textureCanvas(THREE,{size=512,tint=[222,213,194],seed=17,amplitude=7,re
   const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
     const i=(y*size+x)*4;const wave=Math.sin(x*.031+Math.sin(y*.019)*2)*1.7+Math.sin(x*.083+y*.047)*.8;
-    const n=kind==='wood'?Math.sin(x*.19+Math.sin(y*.025)*2)*15+(random()-.5)*5:wave+(random()-.5)*amplitude;
+    const n=kind==='wood'?0:wave+(random()-.5)*amplitude;
     for(let k=0;k<3;k++)im.data[i+k]=Math.max(0,Math.min(255,(data?128:tint[k])+n));im.data[i+3]=255;
   }
-  ctx.putImageData(im,0,0);const t=new THREE.CanvasTexture(canvas);t.colorSpace=data?THREE.NoColorSpace:THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1/repeatM,1/repeatM);return t;
+  ctx.putImageData(im,0,0);
+  if(kind==='wood')paintBoards(ctx,size,tint,random,repeatM);
+  const t=new THREE.CanvasTexture(canvas);t.colorSpace=data?THREE.NoColorSpace:THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1/repeatM,1/repeatM);return t;
+}
+/** ألواح خشب مستقيمة بعرض 15 سم: درجة لون لكل لوح، عروق طولية دقيقة، وفواصل داكنة ضيقة؛ لا موجات. خامة تجريبية لا تمثل منتجًا محددًا. */
+function paintBoards(ctx,size,tint,random,repeatM){
+  const boards=Math.max(1,Math.round(repeatM/.15)),bw=size/boards;
+  for(let k=0;k<boards;k++){const x0=k*bw,tone=.9+random()*.2;ctx.fillStyle=`rgb(${tint.map(v=>Math.min(255,v*tone)|0).join(',')})`;ctx.fillRect(x0+1,0,bw-2,size);
+    for(let i=0;i<22;i++){const gx=x0+2+random()*(bw-4);ctx.strokeStyle=`rgba(${random()>.5?'70,44,24':'205,165,115'},${.06+random()*.09})`;ctx.lineWidth=.5+random()*1.1;ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx+(random()-.5)*2,size);ctx.stroke();}
+    ctx.fillStyle='rgba(40,26,14,.55)';ctx.fillRect(x0,0,1.5,size);}
 }
 export function createMaterialLibrary(THREE,{surfaceAssets={},maxAnisotropy=1,glassMode='reflective-preview'}={}) {
   const textures=[],materials=[];const evidence=[];
@@ -26,10 +35,11 @@ export function createMaterialLibrary(THREE,{surfaceAssets={},maxAnisotropy=1,gl
   mats.render=make('render',{color:'#dedbd2',roughness:.92,bumpMap:renderBump,bumpScale:.0003});
   mats.darkRender=make('darkRender',{color:'#5a5b57',roughness:.86});
   mats.metal=make('metal',{color:'#363c40',metalness:1,roughness:.32});
+  mats.bronze=make('bronze',{color:'#6b5438',metalness:.9,roughness:.4});
   const wood=textureCanvas(THREE,{kind:'wood',tint:[150,105,65],repeatM:1.2});textures.push(wood);
   mats.wood=make('wood',{color:'#ffffff',map:wood,roughness:.62});
   // Reflective preview is deliberately labelled. Transmission requires a closed/thick glazing model.
-  mats.glass=new THREE.MeshPhysicalMaterial({name:'glass',color:'#a7b7bf',metalness:0,roughness:.08,ior:1.5,envMapIntensity:1.15,transmission:glassMode==='transmission-preview'?.7:0,thickness:.008});materials.push(mats.glass);
+  mats.glass=new THREE.MeshPhysicalMaterial({name:'glass',color:'#1d2c33',metalness:0,roughness:.04,ior:1.5,envMapIntensity:1.5,transmission:glassMode==='transmission-preview'?.7:0,thickness:.008});materials.push(mats.glass);
   mats.interior=make('interior',{color:'#272a29',roughness:1});
   mats.ground=make('ground',{color:'#b4ac99',roughness:1});mats.roof=make('roof',{color:'#c8c4b7',roughness:.92});
   for(const t of textures)t.anisotropy=maxAnisotropy;

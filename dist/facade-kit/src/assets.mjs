@@ -34,3 +34,19 @@ export async function loadSurfaceMaps(THREE,raw,options={}) {
   }}catch(e){Object.values(maps).forEach(t=>t.dispose());throw e;}
   return {manifest,maps,evidence,completeness:maps.color&&maps.normal&&maps.roughness?'PBR_MAPS_SUPPLIED':'PARTIAL_MAPS',dispose(){Object.values(maps).forEach(t=>t.dispose());}};
 }
+/** تحميل خامة سطح من ملفات محلية يختارها المستخدم (File)، مع سجل المصدر والترخيص والبصمة. لا شبكة ولا نسخ خارج المتصفح. */
+export async function loadSurfaceMapsFromFiles(THREE,fields,files,{maxAnisotropy=1,maxBytes=33554432}={}) {
+  const maps={};for(const k of Object.keys(files||{}))if(files[k])maps[k]={url:'local-file:'+(files[k].name||k)};
+  if(!maps.color)fail('ASSET_COLOR_MAP_REQUIRED',fields?.id||'asset');
+  const manifest=validateAssetManifest({type:'surface',...fields,maps}),out={},evidence=[];
+  try{for(const[k,file]of Object.entries(files)){if(!file)continue;
+    if(file.size>maxBytes)fail('ASSET_SIZE',file.name);if(!/^image\/(png|jpeg|webp)$/.test(file.type))fail('ASSET_TYPE',file.name+':'+file.type);
+    const bytes=new Uint8Array(await file.arrayBuffer()),sha256=await digestHex(bytes),url=URL.createObjectURL(new Blob([bytes],{type:file.type}));let texture;
+    try{texture=await new THREE.TextureLoader().loadAsync(url);}finally{URL.revokeObjectURL(url);}
+    if(texture.image.width*texture.image.height>16777216){texture.dispose();fail('ASSET_PIXEL_LIMIT',file.name);}
+    texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(1/manifest.tileWidthM,1/manifest.tileHeightM);
+    texture.colorSpace=k==='color'?THREE.SRGBColorSpace:THREE.NoColorSpace;texture.anisotropy=maxAnisotropy;
+    out[k]=texture;evidence.push({map:k,fileName:file.name,bytes:file.size,sha256,width:texture.image.width,height:texture.image.height});}
+  }catch(e){Object.values(out).forEach(t=>t.dispose());throw e;}
+  return {manifest:{...manifest,maps:Object.fromEntries(Object.entries(manifest.maps).map(([k,v])=>[k,{...v,sha256:evidence.find(e=>e.map===k)?.sha256}]))},maps:out,evidence,completeness:out.color&&out.normal&&out.roughness?'PBR_MAPS_SUPPLIED':'PARTIAL_MAPS',dispose(){Object.values(out).forEach(t=>t.dispose());}};
+}

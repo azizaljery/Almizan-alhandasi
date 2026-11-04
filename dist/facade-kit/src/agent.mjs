@@ -1,5 +1,5 @@
 import {copy,freeze,hash,fail} from './core.mjs';
-import {fromMizanDraw,verifyFacadePackage} from './model.mjs';
+import {fromMizanDraw,verifyFacadePackage,EXPERIMENT_PRESET} from './model.mjs';
 export const AGENT_ACTIONS=freeze({
   'facade.generate':{descriptionAr:'توليد بديل دون تعديل العمارة',required:['expectedDocumentHash','style']},
   'facade.edit':{descriptionAr:'إعادة التوليد بعد تعديل خصائص الكسوة فقط',required:['resultId','expectedDocumentHash','patch']},
@@ -15,11 +15,12 @@ export function createFacadeAgentActions({getDocument,buildAllSides,sideTransfor
   const lookup=(id)=>{const r=results.get(id);if(!r)fail('RESULT_NOT_FOUND',String(id));return r;};
   const generate=async(params,overrides={})=>{const {doc,documentHash}=await current();if(params.expectedDocumentHash!==documentHash)fail('STALE_DOCUMENT','expectedDocumentHash');
     const options=copy(await getOptions(doc));
-    const envelope=await fromMizanDraw(doc,{...options,...overrides,style:params.style||overrides.style||'A',buildAllSides,sideTransform,validateDoc});
+    const exp=(params.experiment===true||overrides.experiment===true)?{experiment:copy(EXPERIMENT_PRESET)}:{};
+    const envelope=await fromMizanDraw(doc,{...options,...overrides,...exp,style:params.style||overrides.style||'A',buildAllSides,sideTransform,validateDoc});
     if((await current()).documentHash!==documentHash)fail('DOCUMENT_CHANGED_DURING_GENERATION','doc');
     const optionHash=await hash(options);
     if(optionHash!==await hash(copy(await getOptions(doc))))fail('OPTIONS_CHANGED_DURING_GENERATION','options');
-    return remember({...envelope,requestDocumentHash:documentHash,optionHash,options:{...options,...overrides,style:params.style||overrides.style||'A'}});
+    return remember({...envelope,requestDocumentHash:documentHash,optionHash,options:{...options,...overrides,...exp,style:params.style||overrides.style||'A'}});
   };
   return {
     schemas:AGENT_ACTIONS,
@@ -35,8 +36,8 @@ export function createFacadeAgentActions({getDocument,buildAllSides,sideTransfor
       const patch=copy(params.patch);if(!patch||Array.isArray(patch)||Object.keys(patch).some(k=>!['style','stone'].includes(k)))fail('EDIT_SCOPE','patch');
       if(patch.stone&&Object.keys(patch.stone).some(k=>!['widthM','heightM','jointM','recessM','bevelM','rowOffset','seed','toneVariation','originU','originZ','maxTiles'].includes(k)))fail('EDIT_SCOPE','patch.stone');
       // Re-read current engineering options on every edit; never replay obsolete projection/roof rules.
-      const overrides={style:patch.style||found.result.style.id,stone:{...found.result.stone,...patch.stone}};
-      return generate({...params,style:overrides.style},overrides);
+      const overrides={experiment:!!found.result.experiment?.enabled,style:patch.style||found.result.style.id,stone:{...found.result.stone,...patch.stone}};
+      return generate({...params,style:overrides.style,experiment:overrides.experiment},overrides);
     },clear(){results.clear();}
   };
 }

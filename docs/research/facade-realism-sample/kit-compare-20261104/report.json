@@ -23,9 +23,34 @@
     ],
     "side": "s"
    },
-   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "resultHash": "46525c94ab7217f951fad15f3820716683d359043fbf8fababce67ab022b90cf",
    "bytes": 756535,
    "glError": 0
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "A",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "377dbc32e85ea0e5861a90060e7542de9be2d752d6c220e887779d34ef027c78",
+   "bytes": 768738,
+   "glError": 1282
   },
   {
    "implementation": "sample",
@@ -48,7 +73,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "resultHash": "46525c94ab7217f951fad15f3820716683d359043fbf8fababce67ab022b90cf",
    "bytes": 975996,
    "glError": 1282
   },
@@ -73,8 +98,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
-   "bytes": 793884,
+   "resultHash": "46525c94ab7217f951fad15f3820716683d359043fbf8fababce67ab022b90cf",
+   "bytes": 797910,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "A",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "377dbc32e85ea0e5861a90060e7542de9be2d752d6c220e887779d34ef027c78",
+   "bytes": 805696,
    "glError": 1282
   },
   {
@@ -98,7 +148,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "resultHash": "46525c94ab7217f951fad15f3820716683d359043fbf8fababce67ab022b90cf",
    "bytes": 857310,
    "glError": 1282
   },
@@ -123,8 +173,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
-   "bytes": 712502,
+   "resultHash": "46525c94ab7217f951fad15f3820716683d359043fbf8fababce67ab022b90cf",
+   "bytes": 708245,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "A",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "377dbc32e85ea0e5861a90060e7542de9be2d752d6c220e887779d34ef027c78",
+   "bytes": 698405,
    "glError": 1282
   },
   {
@@ -148,7 +223,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "resultHash": "46525c94ab7217f951fad15f3820716683d359043fbf8fababce67ab022b90cf",
    "bytes": 787826,
    "glError": 1282
   },
@@ -173,8 +248,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "resultHash": "e4584e94d8dffde04524f949b906025f97b588bdf72f2d127b56ca4f71ab1789",
    "bytes": 51358,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "B",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "b8bae6f023a92ab0e477ba253132c3800ca01b601eceec441f59bafd433761db",
+   "bytes": 297521,
    "glError": 1282
   },
   {
@@ -198,7 +298,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "resultHash": "e4584e94d8dffde04524f949b906025f97b588bdf72f2d127b56ca4f71ab1789",
    "bytes": 857109,
    "glError": 1282
   },
@@ -223,8 +323,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
-   "bytes": 56858,
+   "resultHash": "e4584e94d8dffde04524f949b906025f97b588bdf72f2d127b56ca4f71ab1789",
+   "bytes": 60998,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "B",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "b8bae6f023a92ab0e477ba253132c3800ca01b601eceec441f59bafd433761db",
+   "bytes": 57065,
    "glError": 1282
   },
   {
@@ -248,7 +373,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "resultHash": "e4584e94d8dffde04524f949b906025f97b588bdf72f2d127b56ca4f71ab1789",
    "bytes": 826295,
    "glError": 1282
   },
@@ -273,8 +398,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
-   "bytes": 56941,
+   "resultHash": "e4584e94d8dffde04524f949b906025f97b588bdf72f2d127b56ca4f71ab1789",
+   "bytes": 51574,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "B",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "b8bae6f023a92ab0e477ba253132c3800ca01b601eceec441f59bafd433761db",
+   "bytes": 207311,
    "glError": 1282
   },
   {
@@ -298,7 +448,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "resultHash": "e4584e94d8dffde04524f949b906025f97b588bdf72f2d127b56ca4f71ab1789",
    "bytes": 858121,
    "glError": 1282
   },
@@ -323,7 +473,32 @@
     ],
     "side": "s"
    },
-   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "resultHash": "b214336e123377ad9cac9b0364da4b0815351c4f286f02b1cbdb617020e5b7e5",
+   "bytes": 51358,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "C",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "e94d1fb0428dd36cc5686ef128d2c44802a6186d05984088707a9180e2feff1b",
    "bytes": 51358,
    "glError": 1282
   },
@@ -348,7 +523,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "resultHash": "b214336e123377ad9cac9b0364da4b0815351c4f286f02b1cbdb617020e5b7e5",
    "bytes": 780368,
    "glError": 1282
   },
@@ -373,8 +548,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
-   "bytes": 56858,
+   "resultHash": "b214336e123377ad9cac9b0364da4b0815351c4f286f02b1cbdb617020e5b7e5",
+   "bytes": 60597,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "C",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "e94d1fb0428dd36cc5686ef128d2c44802a6186d05984088707a9180e2feff1b",
+   "bytes": 78257,
    "glError": 1282
   },
   {
@@ -398,7 +598,7 @@
     ],
     "side": "s"
    },
-   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "resultHash": "b214336e123377ad9cac9b0364da4b0815351c4f286f02b1cbdb617020e5b7e5",
    "bytes": 859248,
    "glError": 1282
   },
@@ -423,8 +623,33 @@
     ],
     "side": "s"
    },
-   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
-   "bytes": 255898,
+   "resultHash": "b214336e123377ad9cac9b0364da4b0815351c4f286f02b1cbdb617020e5b7e5",
+   "bytes": 105093,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit-exp",
+   "style": "C",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "e94d1fb0428dd36cc5686ef128d2c44802a6186d05984088707a9180e2feff1b",
+   "bytes": 343993,
    "glError": 1282
   },
   {
@@ -448,13 +673,13 @@
     ],
     "side": "s"
    },
-   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "resultHash": "b214336e123377ad9cac9b0364da4b0815351c4f286f02b1cbdb617020e5b7e5",
    "bytes": 1094642,
    "glError": 1282
   }
  ],
  "errors": [],
- "expected": 18,
- "elapsedMs": 113713,
+ "expected": 27,
+ "elapsedMs": 99794,
  "pageErrors": []
 }

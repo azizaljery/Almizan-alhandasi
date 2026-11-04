@@ -9,7 +9,7 @@ table{border-collapse:collapse;font-size:13px}th,td{border:1px solid var(--line)
 </style></head><body><main>
 <h1 style="font-size:22px">واجهات المبنى ثلاثية الأبعاد (فرع التطوير)</h1>
 <p class="n">مربوطة بمستند التصميم نفسه: جهة المدخل وحدّ البروز مشتقان منه. الخامات تجريبية — لا تمثل منتجًا محددًا. لا اعتماد بصري ولا إنشائي.</p>
-<div class="bar"><label>الجهة <select id="side"><option value="">الأمامية (المدخل)</option><option value="s">جنوب</option><option value="n">شمال</option><option value="e">شرق</option><option value="w">غرب</option></select></label><span id="src" class="n"></span><span id="st" class="n"></span></div>
+<div class="bar"><label>الجهة <select id="side"><option value="">الأمامية (المدخل)</option><option value="s">جنوب</option><option value="n">شمال</option><option value="e">شرق</option><option value="w">غرب</option></select></label><label><input type="checkbox" id="exp"> بروز تجريبي للمقارنة فقط (لا يُعتمد للمشروع)</label> <label><input type="checkbox" id="mono"> رمادي</label><span id="src" class="n"></span><span id="st" class="n"></span></div>
 <div class="grid" id="g"></div>
 <details open><summary>القواعد المشتقة من المستند وحالة التحقق</summary><div id="rules"></div></details>
 <script type="module">
@@ -30,17 +30,17 @@ async function run() {
   const hash = await actions.documentHash();
   try {
     for (const style of ['A', 'B', 'C']) {
-      const env = await actions.call('facade.generate', { expectedDocumentHash: hash, style }); const cur = await actions.call('facade.get', { resultId: env.resultId }); results[style] = cur;
-      const art = document.createElement('article'), cv = document.createElement('canvas'), t = document.createElement('h2'), bar = document.createElement('div'); t.textContent = 'البديل ' + style; bar.className = 'bar';
+      const env = await actions.call('facade.generate', { expectedDocumentHash: hash, style, experiment: $('#exp').checked }); const cur = await actions.call('facade.get', { resultId: env.resultId }); results[style] = cur;
+      const art = document.createElement('article'), cv = document.createElement('canvas'), t = document.createElement('h2'), bar = document.createElement('div'); t.textContent = 'البديل ' + style + (cur.result.experiment?.enabled ? ' — تجريبي للمقارنة فقط' : ''); bar.className = 'bar';
       art.append(t, cv, bar); $('#g').append(art);
-      const v = await createFacadeViewer(THREE, cv, cur.result, { side: side || cur.result.frontSide }); viewers.push(v);
+      const v = await createFacadeViewer(THREE, cv, cur.result, { side: side || cur.result.frontSide, monochrome: $('#mono').checked }); viewers.push(v);
       for (const [lab, fn] of [['PNG', async () => downloadBlob(await v.toBlob(), `facade-${style}.png`)], ['GLB', async () => downloadBlob(await exportFacadeGLB(v.model), `facade-${style}.glb`)]]) { const b = document.createElement('button'); b.textContent = lab; b.onclick = fn; bar.append(b); }
       const val = await actions.call('facade.validate', { resultId: env.resultId }); ev.push([style, cur.result.stats?.stoneTiles ?? v.stats.stoneTiles, Math.round(v.stats.triangles), val.integrity, val.fresh, val.issues.map(i => i.code || i).join(', ') || '—']);
     }
     const b = projectionBudgets(doc);
-    $('#rules').innerHTML = `<p class="n">جهة المدخل: ${frontSideOf(doc)} · البروزات الجديدة متوقفة في الجهات الأربع (الصفر ليس حدًا نظاميًا). مرجع هندسي معلوماتي غير مستعمل (م): جنوب ${b.s}، شمال ${b.n}، شرق ${b.e}، غرب ${b.w}.</p><table><tr><th>البديل</th><th>خلايا الحجر</th><th>المثلثات</th><th>سلامة</th><th>حديثة</th><th>ملاحظات</th></tr>${ev.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('')}</table>`;
+    $('#rules').innerHTML = `<p class="n">جهة المدخل: ${frontSideOf(doc)} · ${$('#exp').checked?'<b>بروزات تجريبية للمقارنة فقط — لا تُعتمد للمشروع؛ سياسة المشروع بلا بروزات جديدة.</b>':'البروزات الجديدة متوقفة في الجهات الأربع (الصفر ليس حدًا نظاميًا).'} مرجع هندسي معلوماتي غير مستعمل (م): جنوب ${b.s}، شمال ${b.n}، شرق ${b.e}، غرب ${b.w}.</p><table><tr><th>البديل</th><th>خلايا الحجر</th><th>المثلثات</th><th>سلامة</th><th>حديثة</th><th>ملاحظات</th></tr>${ev.map(r => '<tr>' + r.map(x => '<td>' + x + '</td>').join('') + '</tr>').join('')}</table>`;
     $('#st').textContent = 'اكتمل.'; window.__KS = { ready: true, ev };
   } catch (e) { $('#st').textContent = 'تعذّر: ' + e.message; window.__KS = { ready: true, error: String(e.message) }; }
 }
-$('#side').onchange = run; await run();
+$('#side').onchange = $('#exp').onchange = $('#mono').onchange = run; await run();
 </script></main></body></html>

@@ -9,3 +9,15 @@ test('project usage requires project and product evidence',()=>{const p=copy(pol
 test('design-session binding follows active alternative, including identical documents',async()=>{const session={createdAt:100,current:0,designs:[{version:1,doc:JSON.stringify(doc)},{version:2,doc:JSON.stringify(doc)}]};const agent=bindDesignSession({getSession:()=>session,parseDoc:JSON.parse,projectId:'p',getPolicy:()=>policy,getBuildInfo:()=>BUILD_INFO,buildAllSides:()=>copy(built),sideTransform:s=>transforms[s],validateDoc:()=>[]});const r=await agent.call('facade.generate',{expectedDocumentHash:await agent.documentHash(),style:'B'});assert.equal(r.result.projectBinding.designId,'100:0:1:base');session.current=1;assert.equal((await agent.call('facade.validate',{resultId:r.resultId})).fresh,false);});
 test('studio binding follows live Editor.doc and project changes',async()=>{const editor={doc:copy(doc)};let project='first';const agent=bindStudioEditor({editor,getProjectId:()=>project,getPolicy:()=>policy,getBuildInfo:()=>BUILD_INFO,buildAllSides:()=>copy(built),sideTransform:s=>transforms[s],validateDoc:()=>[]});const r=await agent.call('facade.generate',{expectedDocumentHash:await agent.documentHash(),style:'C'});project='second';assert.equal((await agent.call('facade.validate',{resultId:r.resultId})).fresh,false);const ref=await agent.reference();assert.equal(ref.projectId,'second');assert.equal(ref.hashAlgorithm,'SHA-256/sorted-JSON-v1');});
 test('comparison anchors come once from source geometry and cover three shots',()=>{const shots=closeupPlan(built,transforms);assert.deepEqual(shots.map(s=>s.shot),['stone','glass','entrance']);for(const s of shots){assert.equal(s.fov,34);assert.equal(s.width,960);assert.ok(s.position.every(Number.isFinite));}assert.deepEqual(shots,closeupPlan(built,transforms));});
+import {EXPERIMENT_PRESET} from '../src/model.mjs';
+test('experimental projections: labelled, separate from project policy, rejected for project usage',async()=>{
+  const base=resolve(),p=await createFacadePackage(built,{...base,transforms,style:'B',experiment:EXPERIMENT_PRESET});
+  assert.equal(p.experiment.enabled,true);assert.ok(p.issues.some(i=>i.code==='EXPERIMENTAL_PROJECTIONS'));assert.ok(p.built.s.layers.some(l=>l.id.includes(':kit:')));
+  assert.deepEqual(p.maxProjectionM,{s:0,n:0,e:0,w:0});
+  await assert.rejects(createFacadePackage(built,{...base,projectEvidence:{...base.projectEvidence,usage:'project'},transforms,style:'B',experiment:EXPERIMENT_PRESET}),/EXPERIMENT_NOT_ALLOWED_IN_PROJECT/);
+  const q=await createFacadePackage(built,{...base,transforms,style:'B'});assert.equal(q.experiment,null);assert.ok(!q.built.s.layers.some(l=>l.id.includes(':kit:')));
+});
+test('three styles differ structurally in experiment mode (not colour only)',async()=>{
+  const sig=async st=>{const p=await createFacadePackage(built,{...resolve(),transforms,style:st,experiment:EXPERIMENT_PRESET});return p.built.s.layers.filter(l=>l.id.includes(':kit:')).map(l=>l.role).sort().join(',');};
+  const a=await sig('A'),b=await sig('B'),c=await sig('C');assert.notEqual(a,b);assert.notEqual(b,c);assert.notEqual(a,c);
+});
