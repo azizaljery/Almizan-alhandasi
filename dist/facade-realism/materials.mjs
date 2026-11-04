@@ -24,16 +24,17 @@ function blotch(ctx, S, n, r, rMin, rMax, colors, alpha) {
 }
 
 /** حجر جيري: مداميك بارتفاع 22 إلى 38 سم، كتل بعرض 35 إلى 90 سم بإزاحة لكل مدماك، فواصل 1.2 سم، تباين لوني طفيف لكل كتلة. */
-export function limestone(tone = 'white', S = 1024) {
+/** joints=false: سطح الخامة وحده (ملمس وتبقّع دون رسم فواصل)، لأن الفواصل صارت هندسة منفصلة في scene.mjs. */
+export function limestone(tone = 'white', S = 1024, { joints = true } = {}) {
   const TILE = 1.5, px = S / TILE, r = rng(tone === 'white' ? 71 : 73);
   const base = tone === 'white' ? [236, 230, 216] : [214, 192, 152];
   const c = makeCanvas(S), x = c.getContext('2d'), b = makeCanvas(S), bx = b.getContext('2d');
-  x.fillStyle = `rgb(${base.map(v => v * .8 | 0)})`; x.fillRect(0, 0, S, S); // لون الفواصل
-  bx.fillStyle = '#2a2a2a'; bx.fillRect(0, 0, S, S);
+  x.fillStyle = joints ? `rgb(${base.map(v => v * .8 | 0)})` : `rgb(${base.join(',')})`; x.fillRect(0, 0, S, S); // لون الفواصل (أو سطح الخامة)
+  bx.fillStyle = joints ? '#2a2a2a' : '#7a7a7a'; bx.fillRect(0, 0, S, S);
   const J = .012;
   // مداميك بارتفاعات متفاوتة (0.22 إلى 0.38 م) تُكمل الارتفاع 1.5 م بالضبط ليتكرر النسيج دون فواصل أفقية منتظمة
   const rows = []; for (let acc = 0; acc < TILE - .01;) { let h = .22 + r() * .16; if (TILE - acc - h < .2) h = TILE - acc; rows.push({ y0: acc, h }); acc += h; }
-  for (const { y0, h: COURSE } of rows) {
+  for (const { y0, h: COURSE } of joints ? rows : []) {
     const shift = r() * TILE; const widths = []; let acc = 0;
     while (acc < TILE - .01) { let w = .35 + r() * .55; if (TILE - acc - w < .3) w = TILE - acc; widths.push(w); acc += w; }
     let xm = 0;
@@ -51,9 +52,9 @@ export function limestone(tone = 'white', S = 1024) {
       xm += w;
     }
   }
-  blotch(x, S, 60, r, 14, 60, ['rgba(160,140,110,A)', 'rgba(255,252,244,A)'], .08);
+  blotch(x, S, joints ? 60 : 120, r, joints ? 14 : 30, joints ? 60 : 150, ['rgba(160,140,110,A)', 'rgba(255,252,244,A)'], .08);
   noiseCanvas(x, S, 12, r);
-  noiseCanvas(bx, S, 40, r, 128 - 40);
+  noiseCanvas(bx, S, joints ? 40 : 30, r, 128 - (joints ? 40 : 30));
   return { color: c, bump: b };
 }
 /** رندر (بياض ملون): نسيج ناعم بتبقّعات خفيفة. */
@@ -79,8 +80,8 @@ export function timberLook(S = 512) {
   for (let k = 0; k < boards; k++) { bx.fillStyle = '#303030'; bx.fillRect(k * .15 * px - 1, 0, 3, S); }
   return { color: c, bump: b };
 }
-export const PAINT_KEYS = Object.freeze({ limestoneWhite: () => limestone('white'), limestoneBeige: () => limestone('beige'), render: () => render(), timberLook: () => timberLook() });
-export const TILE_M = Object.freeze({ limestoneWhite: 1.5, limestoneBeige: 1.5, render: 2, timberLook: 1.2 });
+export const PAINT_KEYS = Object.freeze({ limestoneWhite: () => limestone('white'), limestoneBeige: () => limestone('beige'), limestoneWhiteFace: () => limestone('white', 1024, { joints: false }), limestoneBeigeFace: () => limestone('beige', 1024, { joints: false }), render: () => render(), timberLook: () => timberLook() });
+export const TILE_M = Object.freeze({ limestoneWhite: 1.5, limestoneBeige: 1.5, limestoneWhiteFace: 1.5, limestoneBeigeFace: 1.5, render: 2, timberLook: 1.2 });
 
 /** مكتبة الخامات للمشهد: نسيج لكل خامة مرسومة، ولون مسطح للألمنيوم والزجاج. */
 export function createRealismMaterials(THREE, { maxAnisotropy = 4 } = {}) {
@@ -88,8 +89,14 @@ export function createRealismMaterials(THREE, { maxAnisotropy = 4 } = {}) {
   const T = (canvas, tile, srgb = true) => { const t = new THREE.CanvasTexture(canvas); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / tile, 1 / tile); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAnisotropy; return t; };
   for (const [k, make] of Object.entries(PAINT_KEYS)) { const p = make(); tex[k] = { map: T(p.color, TILE_M[k]), bump: T(p.bump, TILE_M[k], false) }; }
   const std = (name, o) => { const m = new THREE.MeshStandardMaterial(o); m.name = name; return m; };
-  mats.limestoneWhite = std('limestoneWhite', { map: tex.limestoneWhite.map, bumpMap: tex.limestoneWhite.bump, bumpScale: 6, roughness: .86, color: '#ffffff' });
-  mats.limestoneBeige = std('limestoneBeige', { map: tex.limestoneBeige.map, bumpMap: tex.limestoneBeige.bump, bumpScale: 6, roughness: .86, color: '#ffffff' });
+  mats.limestoneWhite = std('limestoneWhite', { map: tex.limestoneWhite.map, bumpMap: tex.limestoneWhite.bump, bumpScale: 1.4, roughness: .86, color: '#ffffff' });
+  mats.limestoneBeige = std('limestoneBeige', { map: tex.limestoneBeige.map, bumpMap: tex.limestoneBeige.bump, bumpScale: 1.4, roughness: .86, color: '#ffffff' });
+  // (v3) سطح الكسوة بلا فواصل مرسومة: وجه البلاطة (Face) وعمق الفاصل الخلفي (Joint) بالخريطة نفسها وظل أغمق.
+  for (const t of ['limestoneWhite', 'limestoneBeige']) {
+    const f = tex[t + 'Face'];
+    mats[t + 'Face'] = std(t + 'Face', { map: f.map, bumpMap: f.bump, bumpScale: 1, roughness: .86, color: '#ffffff' });
+    mats[t + 'Joint'] = std(t + 'Joint', { map: f.map, bumpMap: f.bump, bumpScale: 1, roughness: .92, color: '#8f887c' });
+  }
   mats.render = std('render', { map: tex.render.map, bumpMap: tex.render.bump, bumpScale: .4, roughness: .95, color: '#f1e9da' });
   mats.timberLook = std('timberLook', { map: tex.timberLook.map, bumpMap: tex.timberLook.bump, bumpScale: .5, roughness: .7, color: '#ffffff' });
   mats.aluminium = std('aluminium', { color: '#3a3d41', metalness: .65, roughness: .38 });

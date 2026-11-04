@@ -30,7 +30,7 @@ import { buildBuildingScene, closeupCamera } from './facade-realism/scene.mjs';
 
 const q = new URLSearchParams(location.search);
 const mode = q.get('mode') || 'view', id = (q.get('v') || 'A').toUpperCase();
-const cam = q.get('cam') || 'oblique', grey = q.get('grey') === '1', shot = q.get('shot') || '';
+const cam = q.get('cam') || 'oblique', grey = q.get('grey') === '1', shot = q.get('shot') || '', geo = q.get('geo') || 'block';
 const stage = document.getElementById('stage');
 const done = (info) => { window.__FR = { ready: true, ...info }; };
 const fail = (e) => { stage.innerHTML = ''; const m = document.createElement('div'); m.id = 'msg'; m.textContent = 'تعذّر العرض: ' + (e?.message || e); stage.appendChild(m); window.__FR = { ready: true, error: String(e?.message || e) }; };
@@ -97,7 +97,7 @@ async function variantMode() {
   sun.position.set(-16, 34, 14); sun.target.position.set(10, 2, -16); sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048); sun.shadow.camera.left = -22; sun.shadow.camera.right = 22; sun.shadow.camera.top = 22; sun.shadow.camera.bottom = -22; sun.shadow.camera.near = 1; sun.shadow.camera.far = 120; sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
   scene.add(sun, sun.target);
-  const S = buildBuildingScene(THREE, built, lib, { grey: greyMats });
+  const S = buildBuildingScene(THREE, built, lib, { grey: greyMats, geo });
   scene.add(S.group);
   let camera, roi = null;
   if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
@@ -109,7 +109,7 @@ async function variantMode() {
   }
   renderer.render(scene, camera);
   const gl = renderer.getContext();
-  done({ variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, roi });
+  done({ variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi });
 }
 
 (async () => {

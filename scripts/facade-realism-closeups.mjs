@@ -1,5 +1,6 @@
 // (عينة الواقعية، v3) لقطات مقرّبة لكل بديل: حجر، نافذة، عمق الفتحة، مدخل — بالكاميرا نفسها والإضاءة نفسها لكل بديل.
-// الاستخدام:  node scripts/facade-realism-closeups.mjs [مجلد-الإخراج]
+// الاستخدام:  node scripts/facade-realism-closeups.mjs [مجلد-الإخراج] [أوضاع-الهندسة] [اللقطات]
+//   أوضاع الهندسة: old,flatface,block (الافتراضي block). اللقطات: stone,window,slot,door (الافتراضي الكل).
 // الصور تُلتقط من صفحة العينة dist/facade-realism.html نفسها عبر ?v=<A|B|C>&shot=<stone|window|slot|door>، لا من كود قياس منفصل.
 // لا يُعدَّل شيء في المسقط أو الفتحات أو الإضاءة بين البدائل. يُكتب results.json بالأرقام الخام (roi بالبكسل) للمراجعة.
 import { createServer } from 'node:http';
@@ -26,24 +27,25 @@ const srv = createServer((req, res) => {
   else { res.writeHead(404); res.end(); }
 });
 
-const SHOTS = ['stone', 'window', 'slot', 'door'];
+const GEOS = (process.argv[3] || 'block').split(',').filter(Boolean);
+const SHOTS = (process.argv[4] || 'stone,window,slot,door').split(',').filter(Boolean);
 const VARIANTS = ['A', 'B', 'C'];
 await new Promise(r => srv.listen(PORT, r));
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
 const results = [], errors = [];
 try {
-  for (const shot of SHOTS) for (const v of VARIANTS) {
-    const file = join(out, `${shot}-${v}.png`);
+  for (const geo of GEOS) for (const shot of SHOTS) for (const v of VARIANTS) {
+    const tag = `${shot}-${v}-${geo}`, file = join(out, `${tag}.png`);
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
     page.on('pageerror', e => errors.push(`${shot}-${v}: ${e.message}`));
     page.on('console', m => { if (m.type() === 'error') errors.push(`${shot}-${v} console: ${m.text()}`); });
-    await page.goto(`${ORIGIN}/facade-realism.html?v=${v}&shot=${shot}`);
+    await page.goto(`${ORIGIN}/facade-realism.html?v=${v}&shot=${shot}&geo=${geo}`);
     await page.waitForFunction(() => globalThis.__FR?.ready === true, null, { timeout: 900000 });
     const info = await page.evaluate(() => globalThis.__FR);
     if (info.error) { errors.push(`${shot}-${v}: ${info.error}`); await page.close(); continue; }
     await (await page.$('#fr')).screenshot({ path: file });
-    results.push({ shot, variant: v, file, roi: info.roi, glError: info.glError, meshes: info.meshes, triangles: info.triangles, renderer: info.renderer });
-    console.log(`OK ${shot}-${v} glError=${info.glError}`);
+    results.push({ shot, variant: v, geo, file, roi: info.roi, glError: info.glError, meshes: info.meshes, triangles: info.triangles, renderer: info.renderer });
+    console.log(`OK ${tag} glError=${info.glError}`);
     await page.close();
   }
 } finally {
@@ -51,5 +53,5 @@ try {
 }
 writeFileSync(join(out, 'results.json'), JSON.stringify(results, null, 1));
 console.log('ERRORS', errors.length, errors.slice(0, 5).join(' | '));
-if (errors.length || results.length !== SHOTS.length * VARIANTS.length) { console.log('FAIL'); process.exit(1); }
+if (errors.length || results.length !== GEOS.length * SHOTS.length * VARIANTS.length) { console.log('FAIL'); process.exit(1); }
 console.log('OK', results.length);

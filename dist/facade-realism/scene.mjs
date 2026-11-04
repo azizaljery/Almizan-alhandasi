@@ -9,30 +9,107 @@ function matrixFor(THREE, side, off) {
   return new THREE.Matrix4().set(R[0][0], R[0][1], R[0][2], R[0][3], R[1][0], R[1][1], R[1][2], R[1][3], R[2][0], R[2][1], R[2][2], R[2][3], 0, 0, 0, 1);
 }
 
+/** أبعاد الكسوة بالمتر. أرقام تصورية للعرض (افتراضات تصوير)، وليست مواصفة منتج موثّقة. */
+export const BLOCK = Object.freeze({ w: .60, h: .30, joint: .012, bevel: .004, recess: .02 });
+
+const inPoly = (p, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi) * (p[1] - yi) / (yj - yi) + xi) c = !c; } return c; };
+const insideLayer = (L, u, z) => inPoly([u, z], L.outer) && !L.holes.some(h => inPoly([u, z], h));
+
+/** شبكة البلاطات (مداميك بإزاحة نصف بلاطة لكل مدماك زوجي، بمحاذاة عامة للجدار) الداخلة كليًا في الطبقة. */
+export function blockGrid(L) {
+  const us = L.outer.map(p => p[0]), zs = L.outer.map(p => p[1]);
+  const minU = Math.min(...us), maxU = Math.max(...us), minZ = Math.min(...zs), maxZ = Math.max(...zs);
+  const j = BLOCK.joint / 2, out = [];
+  for (let k = Math.floor(minZ / BLOCK.h) - 1; k <= Math.ceil(maxZ / BLOCK.h); k++) {
+    const z0 = k * BLOCK.h, z1 = z0 + BLOCK.h, off = ((k % 2) + 2) % 2 * BLOCK.w / 2;
+    for (let i = Math.floor((minU - off) / BLOCK.w) - 1; i <= Math.ceil((maxU - off) / BLOCK.w); i++) {
+      const u0 = i * BLOCK.w + off + j, u1 = (i + 1) * BLOCK.w + off - j, a0 = z0 + j, a1 = z1 - j;
+      const probes = [[u0, a0], [u1, a0], [u1, a1], [u0, a1], [(u0 + u1) / 2, (a0 + a1) / 2]];
+      if (probes.every(([u, z]) => insideLayer(L, u, z))) out.push({ u0, u1, z0: a0, z1: a1 });
+    }
+  }
+  return out;
+}
+
+/** دمج هندسات غير مفهرسة في هندسة واحدة (ExtrudeGeometry غير مفهرسة). */
+function mergeGeometries(THREE, geos) {
+  if (!geos.length) return null;
+  const n = geos.reduce((t, g) => t + g.attributes.position.count, 0);
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2);
+  let o = 0;
+  for (const g of geos) {
+    const c = g.attributes.position.count;
+    pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); uv.set(g.attributes.uv.array, o * 2);
+    o += c; g.dispose();
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  out.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  out.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  return out;
+}
+
+/**
+ * هندسة الفواصل: كل بلاطة مكعب مستقل بحواف مشطوبة (BLOCK.bevel) داخل غلاف الكسوة نفسه:
+ * من عمق الطبقة الخلفية (o0) إلى وجهها (o1)، فلا يتجاوز البروز حدود الكسوة الأصلية.
+ */
+function blockGeometry(THREE, L) {
+  const bv = BLOCK.bevel, depth = (L.o1 - L.o0) - 2 * bv;
+  if (depth <= .001) return null;
+  const geos = [];
+  for (const b of blockGrid(L)) {
+    const shape = new THREE.Shape([
+      new THREE.Vector2(b.u0 + bv, b.z0 + bv), new THREE.Vector2(b.u1 - bv, b.z0 + bv),
+      new THREE.Vector2(b.u1 - bv, b.z1 - bv), new THREE.Vector2(b.u0 + bv, b.z1 - bv)]);
+    const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bv, bevelSize: bv, bevelSegments: 1, curveSegments: 1 });
+    g.translate(0, 0, L.C + L.o0 + bv);
+    geos.push(g);
+  }
+  return mergeGeometries(THREE, geos);
+}
+
 /**
  * يبني المشهد لبديل واحد على الجهات الأربع.
  * built: مخرجات buildAllSides(doc, id) — مفتاحها الجهة وقيمتها buildVariant.
  * lib: createRealismMaterials. grey: إن كان true تُستبدل كل الخامات بلون رمادي موحّد (للمقارنة الشكلية).
+ * geo (للمقارنة المعزولة فقط):
+ *   'old'      الكسوة كما كانت: سطح مرسوم فيه الفواصل بالخريطة (بلا هندسة).
+ *   'flatface' الكسوة بسطح بلا فواصل وبلا هندسة (تعزل أثر الخامة).
+ *   'block'    (الافتراضي) الفواصل هندسة: لوح خلفي أعمق بـBLOCK.recess، وبلاطات مستقلة بحواف مشطوبة.
  */
-export function buildBuildingScene(THREE, built, lib, { grey = null } = {}) {
+export function buildBuildingScene(THREE, built, lib, { grey = null, geo = 'block' } = {}) {
   const group = new THREE.Group(); group.name = 'facade-realism-' + built.s.variant.id;
   const meshes = [];
   const mat = key => {
     if (!grey) return lib.get(key);
     return key === 'interior' ? grey.dark : key === 'ground' ? grey.ground : grey.body;
   };
+  const add = (geoObj, material, name, userData) => {
+    const mesh = new THREE.Mesh(geoObj, material);
+    mesh.castShadow = true; mesh.receiveShadow = true; mesh.name = name; mesh.userData = userData;
+    group.add(mesh); meshes.push(mesh); return mesh;
+  };
   for (const side of SIDES_ALL) {
     const B = built[side], M = matrixFor(THREE, side, B.off);
     for (const L of B.layers) {
-      const shape = new THREE.Shape(L.outer.map(([u, z]) => new THREE.Vector2(u, z)));
-      for (const h of L.holes) shape.holes.push(new THREE.Path(h.map(([u, z]) => new THREE.Vector2(u, z))));
-      const geo = new THREE.ExtrudeGeometry(shape, { depth: L.o1 - L.o0, bevelEnabled: false, curveSegments: 16 });
-      geo.translate(0, 0, L.C + L.o0);
-      geo.applyMatrix4(M);
-      const mesh = new THREE.Mesh(geo, mat(L.mat));
-      mesh.castShadow = true; mesh.receiveShadow = true; mesh.name = side + ':' + L.id;
-      mesh.userData = { side, role: L.role, plan: L.plan, tag: L.tag, opening: L.opening || null, mat: L.mat };
-      group.add(mesh); meshes.push(mesh);
+      const stone = /^limestone/.test(L.mat), cladding = L.role === 'cladding' && stone;
+      const ud = (part) => ({ side, role: L.role, plan: L.plan, tag: L.tag, opening: L.opening || null, mat: L.mat, part });
+      const plateGeo = (layer, mm) => {
+        const shape = new THREE.Shape(layer.outer.map(([u, z]) => new THREE.Vector2(u, z)));
+        for (const h of layer.holes) shape.holes.push(new THREE.Path(h.map(([u, z]) => new THREE.Vector2(u, z))));
+        const g = new THREE.ExtrudeGeometry(shape, { depth: layer.o1 - layer.o0, bevelEnabled: false, curveSegments: 16 });
+        g.translate(0, 0, layer.C + layer.o0); g.applyMatrix4(mm); return g;
+      };
+      if (cladding && geo === 'block') {
+        // اللوح الخلفي للفواصل: أعمق بـBLOCK.recess، والفواصل تظهر كتجويف بظل
+        const plate = { ...L, o1: L.o1 - BLOCK.recess };
+        add(plateGeo(plate, M), mat(L.mat + 'Joint'), side + ':' + L.id + '.plate', ud('plate'));
+        const bg = blockGeometry(THREE, L);
+        if (bg) { bg.applyMatrix4(M); add(bg, mat(L.mat + 'Face'), side + ':' + L.id + '.blocks', ud('blocks')); }
+      } else {
+        const key = cladding && geo === 'flatface' ? L.mat + 'Face' : L.mat;
+        add(plateGeo(L, M), mat(key), side + ':' + L.id, ud(L.role));
+      }
       if (L.role === 'glazing') { // مجال داخلي داكن خلف الزجاج (8 سم داخل الجدار)
         const inner = { ...L, o0: L.o0 - .08, o1: L.o0 - .07, role: 'interior', mat: 'interior', plan: false };
         const sh2 = new THREE.Shape(L.outer.map(([u, z]) => new THREE.Vector2(u, z)));
