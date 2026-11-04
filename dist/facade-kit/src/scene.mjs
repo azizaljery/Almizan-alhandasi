@@ -10,9 +10,9 @@ export async function buildFacadeScene(THREE,packet,library,{stoneMode='cut',mon
   group.userData={schema:packet.schema,sourceHash:packet.sourceHash,resultHash:packet.resultHash,visualApproval:'NOT_REVIEWED',constructionApproved:false};
   const meshes=[],extraMaterials=[],geometries=[];
   const grey=new THREE.MeshStandardMaterial({color:'#a8a8a8',roughness:.8,vertexColors:false});if(monochrome)extraMaterials.push(grey);else grey.dispose();
-  const add=(g,material,name,data)=>{if(!g.attributes.position.count){g.dispose();return;}const mesh=new THREE.Mesh(g,monochrome?grey:material);mesh.name=name;mesh.userData=data;mesh.castShadow=data.role!=='glazing';mesh.receiveShadow=true;group.add(mesh);meshes.push(mesh);geometries.push(g);};
+  const add=(g,material,name,data)=>{if(!g.attributes.position.count){g.dispose();return;}if(data.role==='concept-zone'&&!monochrome){material=material.clone();material.polygonOffset=true;material.polygonOffsetFactor=-2;material.polygonOffsetUnits=-2;extraMaterials.push(material);}const mesh=new THREE.Mesh(g,monochrome?grey:material);mesh.name=name;mesh.userData=data;mesh.castShadow=data.role!=='glazing';mesh.receiveShadow=true;group.add(mesh);meshes.push(mesh);geometries.push(g);};
   for(const side of SIDES){const rows=packet.transforms[side],M=new THREE.Matrix4().set(...rows[0],...rows[1],...rows[2],0,0,0,1);
-    for(const L of packet.built[side].layers){const data={side,id:L.id,role:L.role,sourceOpeningId:L.opening||null,proposal:L.id.includes(':kit:')};const cut=packet.cuts[side+':'+L.id];
+    for(const L of packet.built[side].layers){const data={side,id:L.id,role:L.role,tone:L.tone||null,sourceOpeningId:L.opening||null,proposal:L.id.includes(':kit:')};const cut=packet.cuts[side+':'+L.id];
       if(cut&&stoneMode==='cut'){
         const core=extrudePolygons(THREE,cut.mask,L.C+L.o0,L.C+cut.backingFrontM-.001);add(mergeGeometry(THREE,core,{matrix:M}),library.get('core'),side+':'+L.id+':core',data);
         if(cut.backing.length){const bed=extrudePolygons(THREE,cut.backing,L.C+cut.backingFrontM-.001,L.C+cut.backingFrontM);add(mergeGeometry(THREE,bed,{matrix:M}),library.get('joint'),side+':'+L.id+':bed',data);}

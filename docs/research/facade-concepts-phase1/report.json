@@ -1,0 +1,2491 @@
+{
+ "rule": {
+  "minNovelty": 0.35,
+  "minDifferentDims": 4,
+  "minEdge": 0.35
+ },
+ "buildings": {
+  "C1": {
+   "pieces": 2,
+   "windows": 6,
+   "entries": 2,
+   "voidRatio": 0.089,
+   "pool": 12,
+   "tries": 39,
+   "rejectedBeforePool": 27,
+   "rejectReasons": {
+    "restraint": 23,
+    "no-sliver": 9,
+    "coverage": 8
+   },
+   "nearDuplicatesInPool": 7,
+   "selected": {
+    "ids": [
+     "K03",
+     "K08",
+     "K11"
+    ],
+    "score": 0.782,
+    "minNovelty": 0.719,
+    "meanNovelty": 0.768,
+    "meanRealism": 0.93,
+    "minEdge": 0.74,
+    "concepts": [
+     {
+      "id": "K03",
+      "params": {
+       "entrance": "canopy-band",
+       "grouping": "ribbon",
+       "emphasis": "horizontal-courses",
+       "zoning": "monolithic",
+       "roof": "thin-cap",
+       "corner": "none",
+       "palette": "P1",
+       "seed": {
+        "base": 0.6,
+        "side": 0
+       }
+      },
+      "label": "شريط عتب عريض · شرائط أفقية · كتلة واحدة · غطاء رفيع · بلا",
+      "realism": {
+       "score": 0.975,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 0.875,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.14 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.147"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=8، نغمات=1"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K08",
+      "params": {
+       "entrance": "side-block",
+       "grouping": "ribbon",
+       "emphasis": "horizontal-courses",
+       "zoning": "side-split",
+       "roof": "stepped",
+       "corner": "none",
+       "palette": "P1",
+       "seed": {
+        "base": 0.9,
+        "side": 0
+       }
+      },
+      "label": "كتلة جانبية تحتضن المدخل · شرائط أفقية · انقسام جانبي · حزام متدرج · بلا",
+      "realism": {
+       "score": 0.856,
+       "parts": {
+        "restraint": 1,
+        "balance": 0.567,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.714
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.3 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.637"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=7، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K11",
+      "params": {
+       "entrance": "tower-shaft",
+       "grouping": "rings",
+       "emphasis": "none",
+       "zoning": "monolithic",
+       "roof": "none",
+       "corner": "post-one",
+       "palette": "P1",
+       "seed": {
+        "base": 0.6,
+        "side": 0
+       }
+      },
+      "label": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · بلا معالجة · عمود طرفي واحد",
+      "realism": {
+       "score": 0.96,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.8
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.5 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.24"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=10، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "a": "K03",
+     "b": "K08",
+     "novelty": 0.719,
+     "differentDims": 7,
+     "edgeZone": 0.74,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.464,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.478,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.849,
+       "level": "different"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.686,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.553,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K03",
+     "b": "K11",
+     "novelty": 0.787,
+     "differentDims": 6,
+     "edgeZone": 0.782,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.994,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.636,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.246,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.636,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K08",
+     "b": "K11",
+     "novelty": 0.799,
+     "differentDims": 7,
+     "edgeZone": 0.923,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.983,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.628,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.694,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.612,
+       "level": "different"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.675,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 1,
+       "level": "different"
+      }
+     ]
+    }
+   ],
+   "baselineABC": {
+    "novelty": 0,
+    "note": "A/B/C بلا بروز: لا مناطق مضافة ⇒ التباعد المعماري 0"
+   }
+  },
+  "C4": {
+   "pieces": 1,
+   "windows": 1,
+   "entries": 2,
+   "voidRatio": 0.125,
+   "pool": 12,
+   "tries": 40,
+   "rejectedBeforePool": 28,
+   "rejectReasons": {
+    "restraint": 4,
+    "no-sliver": 16,
+    "coverage": 17,
+    "entry-legible": 1
+   },
+   "nearDuplicatesInPool": 9,
+   "selected": {
+    "ids": [
+     "K01",
+     "K02",
+     "K07"
+    ],
+    "score": 0.684,
+    "minNovelty": 0.563,
+    "meanNovelty": 0.62,
+    "meanRealism": 0.883,
+    "minEdge": 0.781,
+    "concepts": [
+     {
+      "id": "K01",
+      "params": {
+       "entrance": "plain",
+       "grouping": "panel",
+       "emphasis": "none",
+       "zoning": "base",
+       "roof": "none",
+       "corner": "none",
+       "palette": "P3",
+       "seed": {
+        "base": 1.1,
+        "side": 0
+       }
+      },
+      "label": "مدخل بسيط · لوحات مجمّعة · قاعدة · بلا معالجة · بلا",
+      "realism": {
+       "score": 1,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.22 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.245"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=6، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K02",
+      "params": {
+       "entrance": "side-block",
+       "grouping": "rings",
+       "emphasis": "none",
+       "zoning": "side-split",
+       "roof": "none",
+       "corner": "post-one",
+       "palette": "P3",
+       "seed": {
+        "base": 0.9,
+        "side": 0
+       }
+      },
+      "label": "كتلة جانبية تحتضن المدخل · أطر فردية · انقسام جانبي · بلا معالجة · عمود طرفي واحد",
+      "realism": {
+       "score": 0.796,
+       "parts": {
+        "restraint": 1,
+        "balance": 0.315,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.667
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.5 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.687"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=3، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K07",
+      "params": {
+       "entrance": "canopy-band",
+       "grouping": "ribbon",
+       "emphasis": "vertical-rhythm",
+       "zoning": "tripartite",
+       "roof": "thin-cap",
+       "corner": "post-one",
+       "palette": "P2",
+       "seed": {
+        "base": 0.6,
+        "side": 1
+       }
+      },
+      "label": "شريط عتب عريض · شرائط أفقية · ثلاثي (قاعدة/وسط/علوي) · غطاء رفيع · عمود طرفي واحد",
+      "realism": {
+       "score": 0.853,
+       "parts": {
+        "restraint": 1,
+        "balance": 0.315,
+        "cohesion": 1,
+        "delicacy": 0.95,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.14 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.687"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=10، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "a": "K01",
+     "b": "K02",
+     "novelty": 0.716,
+     "differentDims": 6,
+     "edgeZone": 0.919,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.948,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.466,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.63,
+       "level": "different"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.971,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K01",
+     "b": "K07",
+     "novelty": 0.582,
+     "differentDims": 4,
+     "edgeZone": 0.851,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.328,
+       "level": "moderate"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.227,
+       "level": "moderate"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.662,
+       "level": "different"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.95,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.908,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K02",
+     "b": "K07",
+     "novelty": 0.563,
+     "differentDims": 4,
+     "edgeZone": 0.781,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.697,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.693,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.173,
+       "level": "same"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.939,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.438,
+       "level": "moderate"
+      }
+     ]
+    }
+   ],
+   "baselineABC": {
+    "novelty": 0,
+    "note": "A/B/C بلا بروز: لا مناطق مضافة ⇒ التباعد المعماري 0"
+   }
+  },
+  "C7": {
+   "pieces": 2,
+   "windows": 5,
+   "entries": 2,
+   "voidRatio": 0.089,
+   "pool": 12,
+   "tries": 92,
+   "rejectedBeforePool": 80,
+   "rejectReasons": {
+    "no-sliver": 55,
+    "restraint": 56,
+    "coverage": 18
+   },
+   "nearDuplicatesInPool": 8,
+   "selected": {
+    "ids": [
+     "K05",
+     "K07",
+     "K12"
+    ],
+    "score": 0.705,
+    "minNovelty": 0.603,
+    "meanNovelty": 0.671,
+    "meanRealism": 0.936,
+    "minEdge": 0.662,
+    "concepts": [
+     {
+      "id": "K05",
+      "params": {
+       "entrance": "tower-shaft",
+       "grouping": "rings",
+       "emphasis": "none",
+       "zoning": "monolithic",
+       "roof": "deep-fascia",
+       "corner": "none",
+       "palette": "P3",
+       "seed": {
+        "base": 1.1,
+        "side": 1
+       }
+      },
+      "label": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · حزام عريض · بلا",
+      "realism": {
+       "score": 0.96,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.8
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.7 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.258"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=10، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K07",
+      "params": {
+       "entrance": "side-block",
+       "grouping": "rings",
+       "emphasis": "vertical-rhythm",
+       "zoning": "monolithic",
+       "roof": "none",
+       "corner": "none",
+       "palette": "P2",
+       "seed": {
+        "base": 0.6,
+        "side": 0
+       }
+      },
+      "label": "كتلة جانبية تحتضن المدخل · أطر فردية · كتلة واحدة · بلا معالجة · بلا",
+      "realism": {
+       "score": 1,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.16 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.377"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=9، نغمات=1"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K12",
+      "params": {
+       "entrance": "tower-shaft",
+       "grouping": "vertical-strips",
+       "emphasis": "none",
+       "zoning": "attic",
+       "roof": "none",
+       "corner": "posts-both",
+       "palette": "P3",
+       "seed": {
+        "base": 1.1,
+        "side": 0
+       }
+      },
+      "label": "عمود مدخل بارتفاع كامل · أعمدة رأسية · منطقة علوية · بلا معالجة · عمودان طرفيان",
+      "realism": {
+       "score": 0.848,
+       "parts": {
+        "restraint": 0.5,
+        "balance": 0.942,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.8
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.35 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.562"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=15، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "a": "K05",
+     "b": "K07",
+     "novelty": 0.702,
+     "differentDims": 6,
+     "edgeZone": 0.662,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.982,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.453,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.654,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.188,
+       "level": "same"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.95,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.688,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K05",
+     "b": "K12",
+     "novelty": 0.708,
+     "differentDims": 5,
+     "edgeZone": 0.689,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.975,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.655,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.403,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.923,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K07",
+     "b": "K12",
+     "novelty": 0.603,
+     "differentDims": 5,
+     "edgeZone": 0.703,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.982,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.522,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.003,
+       "level": "same"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.337,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.748,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.631,
+       "level": "different"
+      }
+     ]
+    }
+   ],
+   "baselineABC": {
+    "novelty": 0,
+    "note": "A/B/C بلا بروز: لا مناطق مضافة ⇒ التباعد المعماري 0"
+   }
+  },
+  "RECT": {
+   "pieces": 1,
+   "windows": 2,
+   "entries": 1,
+   "voidRatio": 0.082,
+   "pool": 12,
+   "tries": 33,
+   "rejectedBeforePool": 21,
+   "rejectReasons": {
+    "entry-legible": 5,
+    "no-sliver": 12,
+    "restraint": 11,
+    "coverage": 5
+   },
+   "nearDuplicatesInPool": 8,
+   "selected": {
+    "ids": [
+     "K04",
+     "K05",
+     "K09"
+    ],
+    "score": 0.703,
+    "minNovelty": 0.586,
+    "meanNovelty": 0.654,
+    "meanRealism": 0.855,
+    "minEdge": 0.848,
+    "concepts": [
+     {
+      "id": "K04",
+      "params": {
+       "entrance": "canopy-band",
+       "grouping": "vertical-strips",
+       "emphasis": "vertical-rhythm",
+       "zoning": "base",
+       "roof": "none",
+       "corner": "post-one",
+       "palette": "P1",
+       "seed": {
+        "base": 0.9,
+        "side": 1
+       }
+      },
+      "label": "شريط عتب عريض · أعمدة رأسية · قاعدة · بلا معالجة · عمود طرفي واحد",
+      "realism": {
+       "score": 0.836,
+       "parts": {
+        "restraint": 0.3,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.882
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.32 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.513"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=17، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K05",
+      "params": {
+       "entrance": "portal-panel",
+       "grouping": "ribbon",
+       "emphasis": "horizontal-courses",
+       "zoning": "monolithic",
+       "roof": "none",
+       "corner": "quoins",
+       "palette": "P1",
+       "seed": {
+        "base": 0.9,
+        "side": 1
+       }
+      },
+      "label": "لوحة مدخل مسطحة · شرائط أفقية · كتلة واحدة · بلا معالجة · حجارة زاوية",
+      "realism": {
+       "score": 0.887,
+       "parts": {
+        "restraint": 0.5,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.933
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.3 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.126"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=15، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K09",
+      "params": {
+       "entrance": "side-block",
+       "grouping": "panel",
+       "emphasis": "none",
+       "zoning": "monolithic",
+       "roof": "raised-entry",
+       "corner": "none",
+       "palette": "P1",
+       "seed": {
+        "base": 0.9,
+        "side": 0
+       }
+      },
+      "label": "كتلة جانبية تحتضن المدخل · لوحات مجمّعة · كتلة واحدة · ارتفاع فوق المدخل · بلا",
+      "realism": {
+       "score": 0.843,
+       "parts": {
+        "restraint": 1,
+        "balance": 0.381,
+        "cohesion": 1,
+        "delicacy": 0.833,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.14 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.674"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=3، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "a": "K04",
+     "b": "K05",
+     "novelty": 0.586,
+     "differentDims": 4,
+     "edgeZone": 0.848,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.146,
+       "level": "same"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.425,
+       "level": "moderate"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.528,
+       "level": "different"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 1,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K04",
+     "b": "K09",
+     "novelty": 0.681,
+     "differentDims": 5,
+     "edgeZone": 0.86,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.565,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.357,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.847,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 1,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K05",
+     "b": "K09",
+     "novelty": 0.695,
+     "differentDims": 5,
+     "edgeZone": 0.909,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.183,
+       "level": "same"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.754,
+       "level": "different"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.925,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 1,
+       "level": "different"
+      }
+     ]
+    }
+   ],
+   "baselineABC": {
+    "novelty": 0,
+    "note": "A/B/C بلا بروز: لا مناطق مضافة ⇒ التباعد المعماري 0"
+   }
+  },
+  "L": {
+   "pieces": 2,
+   "windows": 3,
+   "entries": 1,
+   "voidRatio": 0.099,
+   "pool": 12,
+   "tries": 44,
+   "rejectedBeforePool": 32,
+   "rejectReasons": {
+    "coverage": 21,
+    "restraint": 22,
+    "no-sliver": 12,
+    "entry-legible": 1
+   },
+   "nearDuplicatesInPool": 8,
+   "selected": {
+    "ids": [
+     "K03",
+     "K07",
+     "K08"
+    ],
+    "score": 0.691,
+    "minNovelty": 0.562,
+    "meanNovelty": 0.603,
+    "meanRealism": 0.951,
+    "minEdge": 0.731,
+    "concepts": [
+     {
+      "id": "K03",
+      "params": {
+       "entrance": "plain",
+       "grouping": "rings",
+       "emphasis": "horizontal-courses",
+       "zoning": "attic",
+       "roof": "raised-entry",
+       "corner": "none",
+       "palette": "P2",
+       "seed": {
+        "base": 0.9,
+        "side": 1
+       }
+      },
+      "label": "مدخل بسيط · أطر فردية · منطقة علوية · ارتفاع فوق المدخل · بلا",
+      "realism": {
+       "score": 0.898,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 0.6,
+        "delicacy": 0.889,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.14 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.514"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=9، نغمات=4"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K07",
+      "params": {
+       "entrance": "plain",
+       "grouping": "vertical-strips",
+       "emphasis": "vertical-rhythm",
+       "zoning": "monolithic",
+       "roof": "none",
+       "corner": "none",
+       "palette": "P2",
+       "seed": {
+        "base": 0.9,
+        "side": 1
+       }
+      },
+      "label": "مدخل بسيط · أعمدة رأسية · كتلة واحدة · بلا معالجة · بلا",
+      "realism": {
+       "score": 0.978,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.889
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.32 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.473"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=9، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K08",
+      "params": {
+       "entrance": "side-block",
+       "grouping": "panel",
+       "emphasis": "none",
+       "zoning": "monolithic",
+       "roof": "stepped",
+       "corner": "posts-both",
+       "palette": "P2",
+       "seed": {
+        "base": 0.6,
+        "side": 1
+       }
+      },
+      "label": "كتلة جانبية تحتضن المدخل · لوحات مجمّعة · كتلة واحدة · حزام متدرج · عمودان طرفيان",
+      "realism": {
+       "score": 0.978,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.889
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.3 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.536"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=9، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "a": "K03",
+     "b": "K07",
+     "novelty": 0.562,
+     "differentDims": 4,
+     "edgeZone": 0.731,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.223,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.708,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K03",
+     "b": "K08",
+     "novelty": 0.625,
+     "differentDims": 5,
+     "edgeZone": 0.769,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.778,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.911,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.65,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.134,
+       "level": "same"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.446,
+       "level": "moderate"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.453,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K07",
+     "b": "K08",
+     "novelty": 0.621,
+     "differentDims": 5,
+     "edgeZone": 0.77,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.778,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0.911,
+       "level": "different"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.692,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.138,
+       "level": "same"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 0.304,
+       "level": "moderate"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.523,
+       "level": "different"
+      }
+     ]
+    }
+   ],
+   "baselineABC": {
+    "novelty": 0,
+    "note": "A/B/C بلا بروز: لا مناطق مضافة ⇒ التباعد المعماري 0"
+   }
+  },
+  "U": {
+   "pieces": 3,
+   "windows": 2,
+   "entries": 1,
+   "voidRatio": 0.076,
+   "pool": 12,
+   "tries": 39,
+   "rejectedBeforePool": 27,
+   "rejectReasons": {
+    "no-sliver": 9,
+    "coverage": 11,
+    "restraint": 19,
+    "entry-legible": 1
+   },
+   "nearDuplicatesInPool": 9,
+   "selected": {
+    "ids": [
+     "K03",
+     "K05",
+     "K07"
+    ],
+    "score": 0.659,
+    "minNovelty": 0.548,
+    "meanNovelty": 0.563,
+    "meanRealism": 0.908,
+    "minEdge": 0.676,
+    "concepts": [
+     {
+      "id": "K03",
+      "params": {
+       "entrance": "plain",
+       "grouping": "panel",
+       "emphasis": "vertical-rhythm",
+       "zoning": "monolithic",
+       "roof": "deep-fascia",
+       "corner": "posts-both",
+       "palette": "P2",
+       "seed": {
+        "base": 1.1,
+        "side": 0
+       }
+      },
+      "label": "مدخل بسيط · لوحات مجمّعة · كتلة واحدة · حزام عريض · عمودان طرفيان",
+      "realism": {
+       "score": 0.84,
+       "parts": {
+        "restraint": 0.2,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.185 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.503"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=18، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K05",
+      "params": {
+       "entrance": "plain",
+       "grouping": "panel",
+       "emphasis": "none",
+       "zoning": "base",
+       "roof": "thin-cap",
+       "corner": "post-one",
+       "palette": "P3",
+       "seed": {
+        "base": 0.9,
+        "side": 1
+       }
+      },
+      "label": "مدخل بسيط · لوحات مجمّعة · قاعدة · غطاء رفيع · عمود طرفي واحد",
+      "realism": {
+       "score": 0.917,
+       "parts": {
+        "restraint": 0.7,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 0.885,
+        "proportion": 1
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.14 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.366"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=13، نغمات=2"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     },
+     {
+      "id": "K07",
+      "params": {
+       "entrance": "portal-panel",
+       "grouping": "rings",
+       "emphasis": "none",
+       "zoning": "monolithic",
+       "roof": "deep-fascia",
+       "corner": "none",
+       "palette": "P3",
+       "seed": {
+        "base": 1.1,
+        "side": 0
+       }
+      },
+      "label": "لوحة مدخل مسطحة · أطر فردية · كتلة واحدة · حزام عريض · بلا",
+      "realism": {
+       "score": 0.967,
+       "parts": {
+        "restraint": 1,
+        "balance": 1,
+        "cohesion": 1,
+        "delicacy": 1,
+        "proportion": 0.833
+       }
+      },
+      "checks": [
+       {
+        "id": "openings-clear",
+        "ok": true,
+        "detail": "مساحة التداخل=0 م²"
+       },
+       {
+        "id": "inside-wall",
+        "ok": true,
+        "detail": "خارج الحدود: 0"
+       },
+       {
+        "id": "flush-zero-projection",
+        "ok": true,
+        "detail": "مبني على o1 = wall.o1 (يُتحقق لاحقًا من حزمة النواة)"
+       },
+       {
+        "id": "min-feature",
+        "ok": true,
+        "detail": "الأصغر=0.7 م"
+       },
+       {
+        "id": "no-sliver",
+        "ok": true,
+        "detail": "شرائح: 0"
+       },
+       {
+        "id": "coverage",
+        "ok": true,
+        "detail": "التغطية=0.227"
+       },
+       {
+        "id": "restraint",
+        "ok": true,
+        "detail": "مناطق=6، نغمات=3"
+       },
+       {
+        "id": "entry-legible",
+        "ok": true,
+        "detail": ""
+       },
+       {
+        "id": "entry-contrast",
+        "ok": true,
+        "detail": "كتل مبتلعة: 0"
+       }
+      ]
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "a": "K03",
+     "b": "K05",
+     "novelty": 0.587,
+     "differentDims": 4,
+     "edgeZone": 0.676,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.532,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.239,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.953,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.385,
+       "level": "moderate"
+      }
+     ]
+    },
+    {
+     "a": "K03",
+     "b": "K07",
+     "novelty": 0.554,
+     "differentDims": 4,
+     "edgeZone": 0.797,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 0.149,
+       "level": "same"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.705,
+       "level": "different"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.368,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.9,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.759,
+       "level": "different"
+      }
+     ]
+    },
+    {
+     "a": "K05",
+     "b": "K07",
+     "novelty": 0.548,
+     "differentDims": 4,
+     "edgeZone": 0.898,
+     "verdict": "جيد",
+     "dims": [
+      {
+       "key": "entrance",
+       "ar": "استراتيجية المدخل",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "rhythm",
+       "ar": "إيقاع الفتحات وتجميعها",
+       "distance": 0,
+       "level": "same"
+      },
+      {
+       "key": "emphasis",
+       "ar": "الاتجاه الأفقي/الرأسي",
+       "distance": 0.173,
+       "level": "same"
+      },
+      {
+       "key": "zoning",
+       "ar": "توزيع المناطق (المواد كمناطق)",
+       "distance": 0.235,
+       "level": "moderate"
+      },
+      {
+       "key": "blocks",
+       "ar": "تقسيم الواجهة إلى كتل",
+       "distance": 0.85,
+       "level": "different"
+      },
+      {
+       "key": "roof",
+       "ar": "معالجة السقف",
+       "distance": 1,
+       "level": "different"
+      },
+      {
+       "key": "corners",
+       "ar": "معالجة الزوايا",
+       "distance": 0.578,
+       "level": "different"
+      }
+     ]
+    }
+   ],
+   "baselineABC": {
+    "novelty": 0,
+    "note": "A/B/C بلا بروز: لا مناطق مضافة ⇒ التباعد المعماري 0"
+   }
+  }
+ }
+}

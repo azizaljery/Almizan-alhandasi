@@ -1,11 +1,13 @@
 import { copy, freeze, hash, number, id, fail, unique, issue } from './core.mjs';
-import { layerMask, bounds, intersectRect, intersection, multiArea, rect } from './polygons.mjs';
+import { layerMask, bounds, intersectRect, intersection, multiArea, rect, openRing, closeRing } from './polygons.mjs';
 import { stoneConfig, cutStoneLayer } from './stone.mjs';
 export const VERSION='0.3.0';
 /** إعداد تجريبي للمقارنة فقط (ليس حدًّا نظاميًا ولا موافقة). منفصل تمامًا عن سياسة المشروع. */
 export const EXPERIMENT_PRESET=freeze({labelAr:'تجريبي للمقارنة فقط — لا يُعتمد للمشروع',maxProjectionM:{s:.7,n:.3,e:.3,w:.3}});
 export const SIDES=['s','n','e','w'];
-export const STYLES=freeze({ A:{id:'A',nameAr:'حجر فاتح ومدخل مؤطّر',materialFamily:'stone'}, B:{id:'B',nameAr:'بوابة مدخل عميقة وتظليل معدني',materialFamily:'shade'}, C:{id:'C',nameAr:'حواف متدرجة وكاسرات رأسية',materialFamily:'vertical'} });
+export const CONCEPT_MATS=['stone','beigeStone','render','darkRender','wood','metal','bronze'];
+export const CONCEPT_TONES=['light','mid','dark','accent'];
+export const STYLES=freeze({ A:{id:'A',nameAr:'حجر فاتح ومدخل مؤطّر',materialFamily:'stone'}, B:{id:'B',nameAr:'بوابة مدخل عميقة وتظليل معدني',materialFamily:'shade'}, C:{id:'C',nameAr:'حواف متدرجة وكاسرات رأسية',materialFamily:'vertical'}, X:{id:'X',nameAr:'مفهوم معماري مولَّد (تجريبي، مناطق مسطحة بلا بروز)',materialFamily:'concept'} });
 export function validateBuilt(raw) {
   const built=copy(raw);
   for(const side of SIDES) {
@@ -19,7 +21,7 @@ export function planSignature(built) {
   // Material/style descriptions are excluded; all supplied source plan geometry is preserved.
   return Object.fromEntries(SIDES.map(s=>[s,{pieces:built[s].F?.pieces||null,layers:built[s].layers.filter(l=>l.plan===true||l.role==='frame').map(l=>({id:l.id,role:l.role,opening:l.opening||null,C:l.C,o0:l.o0,o1:l.o1,outer:l.outer,holes:l.holes}))}]));
 }
-function decorateSide(B,style,side,budget,frontSide) {
+function decorateSide(B,style,side,budget,frontSide,concept=null) {
   const layers=B.layers.filter(L=>L.plan===true||L.role==='frame').map(L=>({...copy(L),mat:L.role==='wall'?(style==='A'?'stone':'render'):L.role==='frame'?(style==='C'?'bronze':'metal'):L.role==='glazing'?'glass':L.role==='door'?(style==='C'?'wood':'metal'):L.mat}));
   const add=(wall,ring,name,material,depth,role='proposal')=>{
     if(depth===0)return; // Explicit zero is a no-new-projections policy, not a generation error.
@@ -78,6 +80,15 @@ function decorateSide(B,style,side,budget,frontSide) {
       }
     }
   }
+  if(style==='X'&&side===frontSide&&concept) for(const z of concept.zones) {
+    // مناطق مسطحة: وجهها الأمامي يطابق وجه الجدار تمامًا (o1 = wall.o1) فلا بروز أبدًا؛ تُقصّ بقناع الجدار فلا تغطي أي فتحة.
+    const wall=layers.find(L=>L.role==='wall'&&L.piece===z.piece); if(!wall) fail('CONCEPT_PIECE_UNKNOWN',z.name);
+    const clipped=intersection(layerMask(wall),[[z.ring,...(z.holes||[])]]);
+    for(let k=0;k<clipped.length;k++) {
+      if(multiArea([clipped[k]])<1e-8) continue;
+      layers.push({id:`${wall.id}:kit:X:${z.name}:${k}`,role:'concept-zone',mat:z.mat,tone:z.tone,plan:false,tag:'مفهوم واجهة تجريبي يحتاج مراجعة',C:wall.C,o0:wall.o1-.02,o1:wall.o1,outer:clipped[k][0],holes:clipped[k].slice(1),piece:wall.piece??null});
+    }
+  }
   return {...copy(B),layers};
 }
 export async function createFacadePackage(raw,options) {
@@ -92,12 +103,18 @@ export async function createFacadePackage(raw,options) {
   }
   const experiment=options.experiment?copy(options.experiment):null;
   if(experiment){if(options.projectEvidence?.usage==='project')fail('EXPERIMENT_NOT_ALLOWED_IN_PROJECT','experiment');for(const s of SIDES)number(experiment.maxProjectionM?.[s],'experiment.maxProjectionM.'+s,0,2);}
+  const concept=options.concept?copy(options.concept):null;
+  if(style==='X'&&!concept) fail('CONCEPT_REQUIRED','concept'); if(concept&&style!=='X') fail('CONCEPT_REQUIRES_STYLE_X','concept');
+  if(concept){ if(!Array.isArray(concept.zones)||concept.zones.length>200) fail('CONCEPT_ZONES','concept.zones'); id(concept.id,'concept.id'); const seen=new Set();
+    for(const z of concept.zones){ id(z.name,'concept.zone'); if(seen.has(z.piece+':'+z.name)) fail('CONCEPT_ZONE_DUPLICATE',z.name); seen.add(z.piece+':'+z.name); number(z.piece,z.name+'.piece',0,50);
+      if(!CONCEPT_MATS.includes(z.mat)) fail('CONCEPT_MATERIAL',z.name); if(!CONCEPT_TONES.includes(z.tone)) fail('CONCEPT_TONE',z.name); z.ring=closeRing(openRing(z.ring,z.name)); z.holes=(z.holes||[]).map((h,i)=>closeRing(openRing(h,z.name+'.h'+i))); } }
   const budgets=experiment?experiment.maxProjectionM:projections;
-  const built=Object.fromEntries(SIDES.map(s=>[s,decorateSide(source[s],style,s,budgets[s],frontSide)]));
+  const built=Object.fromEntries(SIDES.map(s=>[s,decorateSide(source[s],style,s,budgets[s],frontSide,concept)]));
   if(await hash(planSignature(built))!==sourceGeometryHash) fail('PLAN_GEOMETRY_CHANGED','built');
   const cuts={},issues=[issue('PROPOSALS_REQUIRE_REVIEW','البروزات ميزانية تصميم مدخلة، ولم تُتحقق اشتراطات الارتدادات أو الإنشاء تلقائيًا.')];
   if(experiment)issues.push(issue('EXPERIMENTAL_PROJECTIONS','بروزات تجريبية للمقارنة البصرية فقط؛ لا تُعتمد للمشروع أو التنفيذ، وسياسة المشروع تبقى دون بروزات جديدة.',{maxProjectionM:experiment.maxProjectionM},'warning'));
   else if(projections[frontSide]===0)issues.push(issue('NEW_PROJECTIONS_DISABLED','البروزات الجديدة متوقفة؛ هذا ليس إثباتًا بأن الحد النظامي صفر، وقد يقل التمايز الهندسي.'));
+  if(concept)issues.push(issue('CONCEPT_FLUSH_ZONES','مفهوم تجريبي: مناطق مسطحة بلا أي بروز (وجهها = وجه الجدار)؛ التنوع هنا في التكوين لا في العمق، ولا يُعتمد قبل مراجعة بصرية.',{conceptId:concept.id,zones:concept.zones.length}));
   if(options.projectEvidence?.stone.status==='VISUAL_ASSUMPTION')issues.push(issue('STONE_VISUAL_ASSUMPTION','مقاسات الحجر والفاصل وعمقه افتراضات عرض وليست مواصفة منتج.'));
   const config=stoneConfig(options.stone||{});
   for(const side of SIDES)for(const L of built[side].layers)if(L.role==='stone-cladding'||L.role==='wall'&&L.mat==='stone') {
@@ -110,7 +127,7 @@ export async function createFacadePackage(raw,options) {
   for(const roof of roofSurfaces){number(roof.bottomM,roof.id+'.bottomM');number(roof.topM,roof.id+'.topM');if(roof.topM<=roof.bottomM)fail('ROOF_THICKNESS',roof.id);layerMask({id:roof.id,outer:roof.polygon,holes:roof.holes||[]});if(!roof.sourceNote)fail('ROOF_PROVENANCE_REQUIRED',roof.id);}
   if(!roofSurfaces.length)issues.push(issue('ROOF_NOT_SUPPLIED','لا سطح مسقوف مخمّن؛ قد يظهر باطن النموذج من الكاميرا المرتفعة.'));
   const result={schema:'MIZAN-FACADE-KIT/1',version:VERSION,sourceRevision:options.sourceRevision||'UNSPECIFIED',sourceHash,sourceGeometryHash,style:copy(STYLES[style]),frontSide,transforms,built,cuts,stone:config,maxProjectionM:copy(projections),experiment:experiment?{enabled:true,labelAr:'تجريبي للمقارنة فقط — لا يُعتمد للمشروع',maxProjectionM:copy(experiment.maxProjectionM)}:null,roofSurfaces,assets:copy(options.assets||{}),issues,visualApproval:'NOT_REVIEWED',codeCompliance:'NOT_EVALUATED',constructionApproved:false};
-  result.projectBinding=copy(options.projectBinding||null);result.projectEvidence=copy(options.projectEvidence||null);
+  result.concept=concept?{id:concept.id,labelAr:concept.labelAr||null,zones:concept.zones.length}:null;result.projectBinding=copy(options.projectBinding||null);result.projectEvidence=copy(options.projectEvidence||null);
   result.resultHash=await hash(result);return freeze(result);
 }
 export async function verifyFacadePackage(raw){const r=copy(raw),expected=r.resultHash;delete r.resultHash;return r.schema==='MIZAN-FACADE-KIT/1'&&r.constructionApproved===false&&r.codeCompliance==='NOT_EVALUATED'&&expected===await hash(r);}
