@@ -1,0 +1,40 @@
+{
+ "shot": "window",
+ "variant": "A",
+ "geo": "block",
+ "size": [
+  640,
+  400
+ ],
+ "raster": {
+  "triangles": 19214,
+  "meshes": 133
+ },
+ "pathtrace": {
+  "ready": true,
+  "variant": "A",
+  "shot": "window",
+  "geo": "block",
+  "spp": 24,
+  "W": 640,
+  "H": 400,
+  "bounces": 5,
+  "radius": 10,
+  "triangles": 11145,
+  "nodes": 8191,
+  "width": 640,
+  "height": 400,
+  "timings": {
+   "sceneMs": 923,
+   "extractMs": 10,
+   "bvhMs": 32,
+   "firstPassMs": 16202,
+   "totalMs": 385561,
+   "passMsAvg": 16027
+  },
+  "glError": 0,
+  "renderer": "webgl2",
+  "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+ },
+ "note": "الأداء مقاس على SwiftShader (معالج) داخل Chromium، وليس على جهاز عميل فعلي."
+}
