@@ -47,4 +47,49 @@ export function buildBuildingScene(THREE, built, lib, { grey = null } = {}) {
   ground.rotation.x = -Math.PI / 2; ground.position.set(10, -.001, -15); ground.receiveShadow = true; ground.name = 'ground'; group.add(ground); meshes.push(ground);
   return { group, meshes, tris: meshes.reduce((n, m) => n + (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3, 0) };
 }
-export default { buildBuildingScene };
+/**
+ * كاميرا لقطة مقرّبة من الجهة الأمامية (s) بمنطق ثابت لكل بديل: الهدف والإزاحة من هندسة المشهد نفسه، لا من إحداثيات يدوية.
+ * shot: stone (جدار حجري أكبر)، window (أول زجاج)، slot (زاوية مائلة على فتحة لإظهار عمقها)، door (الباب إن وُجد).
+ * يُعيد الكاميرا وإطارات الشاشة للقياس (roi) بالبكسل لحجم الصورة W×H.
+ */
+export function closeupCamera(THREE, S, shot, { W = 1280, H = 800, fov = 34, index = 0 } = {}) {
+  const front = S.meshes.filter(m => m.userData.side === 's');
+  const bbox = m => new THREE.Box3().setFromObject(m);
+  const size = b => b.getSize(new THREE.Vector3());
+  const glazing = front.filter(m => m.userData.role === 'glazing');
+  const gl = glazing[index] || glazing[0];
+  const gbox = bbox(gl), gc = gbox.getCenter(new THREE.Vector3());
+  const frame = front.find(f => f.userData.role === 'frame' && f.userData.opening === gl.userData.opening) || null;
+  const walls = front.filter(m => m.userData.role === 'wall' && /^limestone/.test(m.material.name));
+  let target, cam;
+  if (shot === 'stone') {
+    if (!walls.length) throw new Error('لا جدار حجري في الجهة الأمامية');
+    const wall = walls.slice().sort((a, b) => { const A = size(bbox(a)), B = size(bbox(b)); return B.x * B.y - A.x * A.y; })[0];
+    const wb = bbox(wall);
+    const px = wb.min.x + (wb.max.x - wb.min.x) * .30, py = wb.min.y + (wb.max.y - wb.min.y) * .55;
+    const ray = new THREE.Raycaster(new THREE.Vector3(px, py, wb.max.z + 5), new THREE.Vector3(0, 0, -1));
+    const hit = ray.intersectObjects(front, false)[0];
+    target = hit ? hit.point.clone() : new THREE.Vector3(px, py, wb.max.z);
+    cam = target.clone().add(new THREE.Vector3(.45, .25, 2.0));
+  } else if (shot === 'window') {
+    target = gc.clone(); cam = target.clone().add(new THREE.Vector3(1.1, .35, 3.1));
+  } else if (shot === 'slot') {
+    target = gc.clone(); cam = target.clone().add(new THREE.Vector3(2.6, .8, 2.0));
+  } else if (shot === 'door') {
+    const door = front.find(m => m.userData.role === 'door') || gl;
+    target = bbox(door).getCenter(new THREE.Vector3()); cam = target.clone().add(new THREE.Vector3(1.4, .3, 3.6));
+  } else throw new Error('لقطة غير معروفة: ' + shot);
+  const camera = new THREE.PerspectiveCamera(fov, W / H, .05, 400);
+  camera.position.copy(cam); camera.lookAt(target); camera.updateMatrixWorld(true);
+  const toScreen = box => {
+    const pts = [];
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+      const v = new THREE.Vector3(x, y, z).project(camera); pts.push([(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]);
+    }
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const cl = (v, m) => Math.max(0, Math.min(m, v));
+    return { x0: cl(Math.floor(Math.min(...xs)), W), y0: cl(Math.floor(Math.min(...ys)), H), x1: cl(Math.ceil(Math.max(...xs)), W), y1: cl(Math.ceil(Math.max(...ys)), H) };
+  };
+  return { camera, roi: { glass: toScreen(gbox), frame: frame ? toScreen(bbox(frame)) : null }, target: target.toArray(), cam: cam.toArray() };
+}
+export default { buildBuildingScene, closeupCamera };

@@ -88,12 +88,14 @@ export function createRealismMaterials(THREE, { maxAnisotropy = 4 } = {}) {
   const T = (canvas, tile, srgb = true) => { const t = new THREE.CanvasTexture(canvas); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / tile, 1 / tile); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAnisotropy; return t; };
   for (const [k, make] of Object.entries(PAINT_KEYS)) { const p = make(); tex[k] = { map: T(p.color, TILE_M[k]), bump: T(p.bump, TILE_M[k], false) }; }
   const std = (name, o) => { const m = new THREE.MeshStandardMaterial(o); m.name = name; return m; };
-  mats.limestoneWhite = std('limestoneWhite', { map: tex.limestoneWhite.map, bumpMap: tex.limestoneWhite.bump, bumpScale: 1.4, roughness: .86, color: '#ffffff' });
-  mats.limestoneBeige = std('limestoneBeige', { map: tex.limestoneBeige.map, bumpMap: tex.limestoneBeige.bump, bumpScale: 1.4, roughness: .86, color: '#ffffff' });
+  mats.limestoneWhite = std('limestoneWhite', { map: tex.limestoneWhite.map, bumpMap: tex.limestoneWhite.bump, bumpScale: 6, roughness: .86, color: '#ffffff' });
+  mats.limestoneBeige = std('limestoneBeige', { map: tex.limestoneBeige.map, bumpMap: tex.limestoneBeige.bump, bumpScale: 6, roughness: .86, color: '#ffffff' });
   mats.render = std('render', { map: tex.render.map, bumpMap: tex.render.bump, bumpScale: .4, roughness: .95, color: '#f1e9da' });
   mats.timberLook = std('timberLook', { map: tex.timberLook.map, bumpMap: tex.timberLook.bump, bumpScale: .5, roughness: .7, color: '#ffffff' });
   mats.aluminium = std('aluminium', { color: '#3a3d41', metalness: .65, roughness: .38 });
-  mats.glass = std('glass', { color: '#9fb8c4', metalness: .1, roughness: .04, transparent: true, opacity: .42, envMapIntensity: 1.3, depthWrite: false });
+  // زجاج معتم بانعكاس فعلي: الشفافية 0.42 كانت تُخفّف الانعكاس مع الخلفية، فصار الزجاج مادة معتمة بمعامل انكسار 1.5 (Fresnel) وخشونة منخفضة.
+  mats.glass = new THREE.MeshPhysicalMaterial({ color: '#23323a', metalness: 0, roughness: .05, ior: 1.5, specularIntensity: 1, envMapIntensity: 1.6 });
+  mats.glass.name = 'glass';
   mats.interior = std('interior', { color: '#2b2e31', roughness: 1 });
   mats.ground = std('ground', { color: '#cdbf9f', roughness: 1 });
   for (const k of Object.keys(MATERIALS)) if (!mats[k]) throw new Error('خامة بلا مادة مشهد: ' + k);

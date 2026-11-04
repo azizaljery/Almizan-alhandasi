@@ -26,11 +26,11 @@ import { loadThreeRuntime } from './three-runtime.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model.mjs';
 import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
-import { buildBuildingScene } from './facade-realism/scene.mjs';
+import { buildBuildingScene, closeupCamera } from './facade-realism/scene.mjs';
 
 const q = new URLSearchParams(location.search);
 const mode = q.get('mode') || 'view', id = (q.get('v') || 'A').toUpperCase();
-const cam = q.get('cam') || 'oblique', grey = q.get('grey') === '1';
+const cam = q.get('cam') || 'oblique', grey = q.get('grey') === '1', shot = q.get('shot') || '';
 const stage = document.getElementById('stage');
 const done = (info) => { window.__FR = { ready: true, ...info }; };
 const fail = (e) => { stage.innerHTML = ''; const m = document.createElement('div'); m.id = 'msg'; m.textContent = 'تعذّر العرض: ' + (e?.message || e); stage.appendChild(m); window.__FR = { ready: true, error: String(e?.message || e) }; };
@@ -82,9 +82,16 @@ async function variantMode() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene(); scene.background = new THREE.Color(grey ? '#e4e4e4' : '#d9e3e9');
-  const eq = document.createElement('canvas'); eq.width = 512; eq.height = 256; const ex = eq.getContext('2d');
-  const sky = ex.createLinearGradient(0, 0, 0, 256); sky.addColorStop(0, '#bfd8ea'); sky.addColorStop(.55, '#f3efe6'); sky.addColorStop(1, '#a89878'); ex.fillStyle = sky; ex.fillRect(0, 0, 512, 256);
-  const env = new THREE.CanvasTexture(eq); env.mapping = THREE.EquirectangularReflectionMapping; env.colorSpace = THREE.SRGBColorSpace; scene.environment = env;
+  // بيئة انعكاس: سماء زرقاء فاتحة، أفق دافئ، أرض ومباني داكنة أسفل الأفق، وبقعة شمس تُعطي انعكاسًا مرئيًا على الزجاج.
+  // تُعالَج مسبقًا بـPMREM حتى تكون الخشونة المنخفضة للزجاج انعكاسًا حادًا لا تدرجًا عامًا.
+  const eq = document.createElement('canvas'); eq.width = 1024; eq.height = 512; const ex = eq.getContext('2d');
+  const sky = ex.createLinearGradient(0, 0, 0, 512); sky.addColorStop(0, '#4f86b8'); sky.addColorStop(.42, '#bcd7ea'); sky.addColorStop(.5, '#e9e2d2'); sky.addColorStop(.52, '#5b5246'); sky.addColorStop(1, '#2c2620');
+  ex.fillStyle = sky; ex.fillRect(0, 0, 1024, 512);
+  const sunX = 1024 * .30, sunY = 512 * .22, sg = ex.createRadialGradient(sunX, sunY, 0, sunX, sunY, 60);
+  sg.addColorStop(0, 'rgba(255,246,222,1)'); sg.addColorStop(1, 'rgba(255,246,222,0)'); ex.fillStyle = sg; ex.fillRect(sunX - 60, sunY - 60, 120, 120);
+  const raw = new THREE.CanvasTexture(eq); raw.mapping = THREE.EquirectangularReflectionMapping; raw.colorSpace = THREE.SRGBColorSpace;
+  const pmrem = new THREE.PMREMGenerator(renderer); pmrem.compileEquirectangularShader();
+  const env = pmrem.fromEquirectangular(raw).texture; raw.dispose(); pmrem.dispose(); scene.environment = env;
   scene.add(new THREE.HemisphereLight('#e6eef5', '#8b7a5c', .55));
   const sun = new THREE.DirectionalLight('#ffe6c4', 2.4);
   sun.position.set(-16, 34, 14); sun.target.position.set(10, 2, -16); sun.castShadow = true;
@@ -92,12 +99,17 @@ async function variantMode() {
   scene.add(sun, sun.target);
   const S = buildBuildingScene(THREE, built, lib, { grey: greyMats });
   scene.add(S.group);
-  const C = CAMS[cam] || CAMS.oblique;
-  const camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
-  camera.position.set(...C.pos); camera.lookAt(...C.look);
+  let camera, roi = null;
+  if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
+    const cu = closeupCamera(THREE, S, shot, { W, H }); camera = cu.camera; roi = cu.roi;
+  } else {
+    const C = CAMS[cam] || CAMS.oblique;
+    camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
+    camera.position.set(...C.pos); camera.lookAt(...C.look);
+  }
   renderer.render(scene, camera);
   const gl = renderer.getContext();
-  done({ variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1' });
+  done({ variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, roi });
 }
 
 (async () => {
