@@ -1,0 +1,67 @@
+// Frozen owner decisions; invalidate automatically on source or pool changes.
+export const HUMAN_LIMITS=[
+  {
+    "sourceHash": "07b76d29bdf2ced0dedef758bc8bf58215c42ac55108d12a60a34c341df95683",
+    "keys": [
+      "portal-panel|panel|horizontal-courses|attic|stepped|none|0.9|1",
+      "portal-panel|panel|horizontal-courses|side-split|raised-entry|post-one|0.9|0",
+      "portal-panel|panel|horizontal-courses|side-split|stepped|none|1.1|0",
+      "portal-panel|panel|none|attic|stepped|posts-both|0.6|0",
+      "portal-panel|panel|none|side-split|thin-cap|none|0.6|0",
+      "portal-panel|rings|horizontal-courses|base|thin-cap|none|0.6|1",
+      "side-block|rings|none|attic|stepped|none|0.6|0",
+      "side-block|rings|none|base|deep-fascia|none|0.9|0",
+      "side-block|vertical-strips|none|side-split|raised-entry|posts-both|1.1|0",
+      "tower-shaft|panel|none|tripartite|stepped|none|0.9|1",
+      "tower-shaft|rings|horizontal-courses|attic|thin-cap|none|0.6|0",
+      "tower-shaft|rings|none|base|stepped|post-one|0.6|1"
+    ],
+    "maxConcepts": 2,
+    "evidence": "Owner C7 decision: 2 credible families, no 3-family PASS",
+    "scope": "C7 exact source and candidate recipe pool only"
+  },
+  {
+    "sourceHash": "07b76d29bdf2ced0dedef758bc8bf58215c42ac55108d12a60a34c341df95683",
+    "keys": [
+      "portal-panel|panel|horizontal-courses|attic|stepped|none|0.9|1",
+      "portal-panel|panel|horizontal-courses|monolithic|thin-cap|none|1.1|1",
+      "portal-panel|panel|horizontal-courses|side-split|raised-entry|post-one|0.9|0",
+      "portal-panel|panel|horizontal-courses|side-split|stepped|none|1.1|0",
+      "portal-panel|panel|horizontal-courses|tripartite|thin-cap|post-one|0.6|1",
+      "portal-panel|panel|none|attic|stepped|posts-both|0.6|0",
+      "portal-panel|panel|none|monolithic|deep-fascia|none|1.1|1",
+      "portal-panel|panel|none|side-split|thin-cap|none|0.6|0",
+      "portal-panel|panel|none|tripartite|none|post-one|0.6|1",
+      "portal-panel|rings|horizontal-courses|base|thin-cap|none|0.6|1",
+      "portal-panel|rings|horizontal-courses|monolithic|deep-fascia|post-one|1.1|0",
+      "portal-panel|rings|horizontal-courses|side-split|stepped|post-one|1.1|0",
+      "portal-panel|rings|none|attic|deep-fascia|none|1.1|1",
+      "portal-panel|rings|none|base|raised-entry|none|1.1|1",
+      "portal-panel|rings|none|monolithic|none|posts-both|1.1|0",
+      "portal-panel|rings|none|tripartite|stepped|post-one|0.9|1",
+      "portal-panel|rings|vertical-rhythm|monolithic|none|post-one|0.9|0",
+      "side-block|panel|horizontal-courses|attic|stepped|post-one|0.6|1",
+      "side-block|panel|none|base|none|post-one|1.1|0",
+      "side-block|rings|none|attic|stepped|none|0.6|0",
+      "side-block|rings|none|attic|stepped|post-one|0.6|0",
+      "side-block|rings|none|base|deep-fascia|none|0.9|0",
+      "side-block|rings|vertical-rhythm|monolithic|stepped|posts-both|0.6|0",
+      "side-block|rings|vertical-rhythm|side-split|raised-entry|posts-both|0.6|0",
+      "side-block|vertical-strips|none|side-split|raised-entry|posts-both|1.1|0",
+      "tower-shaft|panel|horizontal-courses|monolithic|thin-cap|none|1.1|1",
+      "tower-shaft|panel|none|attic|none|none|0.6|0",
+      "tower-shaft|panel|none|base|none|posts-both|0.6|1",
+      "tower-shaft|panel|none|monolithic|deep-fascia|none|0.6|0",
+      "tower-shaft|panel|none|tripartite|stepped|none|0.9|1",
+      "tower-shaft|rings|horizontal-courses|attic|thin-cap|none|0.6|0",
+      "tower-shaft|rings|horizontal-courses|attic|thin-cap|post-one|0.9|0",
+      "tower-shaft|rings|horizontal-courses|base|stepped|post-one|0.9|1",
+      "tower-shaft|rings|horizontal-courses|tripartite|deep-fascia|post-one|0.9|1",
+      "tower-shaft|rings|horizontal-courses|tripartite|thin-cap|none|1.1|1",
+      "tower-shaft|rings|none|base|stepped|post-one|0.6|1"
+    ],
+    "maxConcepts": 2,
+    "evidence": "Owner C7 decision: 2 credible families, no 3-family PASS",
+    "scope": "C7 exact source and candidate recipe pool only"
+  }
+];
