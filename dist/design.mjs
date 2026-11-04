@@ -384,4 +384,3 @@ $('fbGo').addEventListener('click', async () => {
 
 try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, clientErr(e, 'حدث خطأ أثناء تحميل الجلسة؛ أعد المحاولة أو ابدأ من الصفحة الرئيسية.')), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
 globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية
-

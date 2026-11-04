@@ -3,5 +3,5 @@
   "target": "dist/design.mjs",
   "replacement": "integration/design.mjs.updated",
   "enableQuery": "facade-kit=1",
-  "expectedFileSha256": "2f166a8e3ffb66f4897c0ac654eb1ac6c06d59b9a4f2b580e3ff1b70ce5b30f2"
+  "expectedFileSha256": "45585d33a3c0238cadb4c30d9b25f3dc6f8d85963ccd94e67f103eb4f48674ba"
 }
