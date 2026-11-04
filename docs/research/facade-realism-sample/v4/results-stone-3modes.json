@@ -1,0 +1,218 @@
+[
+ {
+  "shot": "stone",
+  "variant": "A",
+  "geo": "old",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-A-old.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 326,
+    "x1": 1280,
+    "y1": 470
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 318,
+    "x1": 1280,
+    "y1": 480
+   }
+  },
+  "glError": 0,
+  "meshes": 131,
+  "triangles": 2918,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "B",
+  "geo": "old",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-B-old.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 108
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 115
+   }
+  },
+  "glError": 0,
+  "meshes": 125,
+  "triangles": 2582,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "C",
+  "geo": "old",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-C-old.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 103
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 114
+   }
+  },
+  "glError": 0,
+  "meshes": 193,
+  "triangles": 3398,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "A",
+  "geo": "flatface",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-A-flatface.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 326,
+    "x1": 1280,
+    "y1": 470
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 318,
+    "x1": 1280,
+    "y1": 480
+   }
+  },
+  "glError": 0,
+  "meshes": 131,
+  "triangles": 2918,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "B",
+  "geo": "flatface",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-B-flatface.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 108
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 115
+   }
+  },
+  "glError": 0,
+  "meshes": 125,
+  "triangles": 2582,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "C",
+  "geo": "flatface",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-C-flatface.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 103
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 114
+   }
+  },
+  "glError": 0,
+  "meshes": 193,
+  "triangles": 3398,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "A",
+  "geo": "block",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-A-block.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 326,
+    "x1": 1280,
+    "y1": 471
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 318,
+    "x1": 1280,
+    "y1": 481
+   }
+  },
+  "glError": 0,
+  "meshes": 133,
+  "triangles": 19214,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "B",
+  "geo": "block",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-B-block.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 108
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 115
+   }
+  },
+  "glError": 0,
+  "meshes": 127,
+  "triangles": 3646,
+  "renderer": "webgl2"
+ },
+ {
+  "shot": "stone",
+  "variant": "C",
+  "geo": "block",
+  "file": "/tmp/claude-0/-home-claude/cc220171-1914-572f-b744-f8e0d2357b91/scratchpad/v4b/stone-C-block.png",
+  "roi": {
+   "glass": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 103
+   },
+   "frame": {
+    "x0": 1280,
+    "y0": 0,
+    "x1": 1280,
+    "y1": 114
+   }
+  },
+  "glError": 0,
+  "meshes": 195,
+  "triangles": 4462,
+  "renderer": "webgl2"
+ }
+]
