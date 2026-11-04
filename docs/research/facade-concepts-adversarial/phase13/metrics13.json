@@ -1,0 +1,838 @@
+{
+ "r6": {
+  "singleCauseAcceptedBefore": 18,
+  "singleCauseAcceptedAfter": 1,
+  "rows": [
+   {
+    "n": "C1",
+    "cause": "entrance:side-block",
+    "differentDims": 6,
+    "novelty": 0.668,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C1",
+    "cause": "zoning:tripartite",
+    "differentDims": 5,
+    "novelty": 0.688,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C4",
+    "cause": "entrance:tower-shaft",
+    "differentDims": 4,
+    "novelty": 0.495,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C4",
+    "cause": "entrance:side-block",
+    "differentDims": 5,
+    "novelty": 0.599,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C4",
+    "cause": "zoning:tripartite",
+    "differentDims": 6,
+    "novelty": 0.764,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C4",
+    "cause": "zoning:attic",
+    "differentDims": 5,
+    "novelty": 0.571,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C7",
+    "cause": "grouping:vertical-strips",
+    "differentDims": 4,
+    "novelty": 0.495,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C7",
+    "cause": "grouping:head-line",
+    "differentDims": 4,
+    "novelty": 0.537,
+    "independentCauses": 2,
+    "regions": [
+     "mass",
+     "windows"
+    ],
+    "stillAccepted": true
+   },
+   {
+    "n": "C7",
+    "cause": "zoning:base",
+    "differentDims": 5,
+    "novelty": 0.523,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "C7",
+    "cause": "zoning:tripartite",
+    "differentDims": 7,
+    "novelty": 0.797,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "RECT",
+    "cause": "entrance:side-block",
+    "differentDims": 5,
+    "novelty": 0.615,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "RECT",
+    "cause": "zoning:tripartite",
+    "differentDims": 6,
+    "novelty": 0.797,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "L",
+    "cause": "grouping:vertical-strips",
+    "differentDims": 4,
+    "novelty": 0.436,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "L",
+    "cause": "zoning:tripartite",
+    "differentDims": 6,
+    "novelty": 0.801,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "U",
+    "cause": "zoning:tripartite",
+    "differentDims": 6,
+    "novelty": 0.793,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "U",
+    "cause": "zoning:side-split",
+    "differentDims": 4,
+    "novelty": 0.429,
+    "independentCauses": 1,
+    "regions": [
+     "ends"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "U",
+    "cause": "zoning:attic",
+    "differentDims": 5,
+    "novelty": 0.545,
+    "independentCauses": 1,
+    "regions": [
+     "mass"
+    ],
+    "stillAccepted": false
+   },
+   {
+    "n": "U",
+    "cause": "corner:posts-both",
+    "differentDims": 4,
+    "novelty": 0.48,
+    "independentCauses": 1,
+    "regions": [
+     "ends"
+    ],
+    "stillAccepted": false
+   }
+  ]
+ },
+ "buildings": {
+  "C1": {
+   "pool12": {
+    "status": "OK",
+    "offered": [
+     "K06",
+     "K08",
+     "K02"
+    ],
+    "families": [
+     "OPENING_RHYTHM",
+     "MASS_ZONED",
+     "HORIZONTAL_BANDED"
+    ],
+    "familiesFound": [
+     "ENTRANCE_DOMINANT",
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 41,
+    "uncertain": 8,
+    "recommendation": null
+   },
+   "pool36": {
+    "status": "OK",
+    "offered": [
+     "K13",
+     "K21",
+     "K30"
+    ],
+    "families": [
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME",
+     "MASS_ZONED"
+    ],
+    "familiesFound": [
+     "ENTRANCE_DOMINANT",
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 252,
+    "uncertain": 93,
+    "recommendation": null
+   }
+  },
+  "C4": {
+   "pool12": {
+    "status": "OK",
+    "offered": [
+     "K07",
+     "K08",
+     "K02"
+    ],
+    "families": [
+     "MASS_ZONED",
+     "VERTICAL_FRAME",
+     "ENTRANCE_DOMINANT"
+    ],
+    "familiesFound": [
+     "ENTRANCE_DOMINANT",
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 6,
+    "uncertain": 8,
+    "recommendation": null
+   },
+   "pool36": {
+    "status": "OK",
+    "offered": [
+     "K22",
+     "K06",
+     "K13"
+    ],
+    "families": [
+     "MASS_ZONED",
+     "HORIZONTAL_BANDED",
+     "ENTRANCE_DOMINANT"
+    ],
+    "familiesFound": [
+     "ENTRANCE_DOMINANT",
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 91,
+    "uncertain": 120,
+    "recommendation": null
+   }
+  },
+  "C7": {
+   "pool12": {
+    "status": "DESIGN_SPACE_EXHAUSTED",
+    "offered": [
+     "K10",
+     "K06"
+    ],
+    "families": [
+     "MASS_ZONED",
+     "HORIZONTAL_BANDED"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM"
+    ],
+    "singleCauseBlocked": 15,
+    "uncertain": 25,
+    "recommendation": "اعرض 2 مفهومين مختلفين فعلًا بدل ثلاثة يكون بعضها إعادة صياغة"
+   },
+   "pool36": {
+    "status": "OK",
+    "offered": [
+     "K04",
+     "K10",
+     "K21"
+    ],
+    "families": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 104,
+    "uncertain": 212,
+    "recommendation": null
+   }
+  },
+  "RECT": {
+   "pool12": {
+    "status": "DESIGN_SPACE_EXHAUSTED",
+    "offered": [
+     "K03",
+     "K05"
+    ],
+    "families": [
+     "HORIZONTAL_BANDED",
+     "VERTICAL_FRAME"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 12,
+    "uncertain": 27,
+    "recommendation": "اعرض 2 مفهومين مختلفين فعلًا بدل ثلاثة يكون بعضها إعادة صياغة"
+   },
+   "pool36": {
+    "status": "OK",
+    "offered": [
+     "K03",
+     "K34",
+     "K22"
+    ],
+    "families": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 128,
+    "uncertain": 156,
+    "recommendation": null
+   }
+  },
+  "L": {
+   "pool12": {
+    "status": "DESIGN_SPACE_EXHAUSTED",
+    "offered": [
+     "K05",
+     "K12"
+    ],
+    "families": [
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "familiesFound": [
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 18,
+    "uncertain": 11,
+    "recommendation": "اعرض 2 مفهومين مختلفين فعلًا بدل ثلاثة يكون بعضها إعادة صياغة"
+   },
+   "pool36": {
+    "status": "OK",
+    "offered": [
+     "K01",
+     "K16",
+     "K03"
+    ],
+    "families": [
+     "VERTICAL_FRAME",
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "OPENING_RHYTHM",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 154,
+    "uncertain": 175,
+    "recommendation": null
+   }
+  },
+  "U": {
+   "pool12": {
+    "status": "OK",
+    "offered": [
+     "K04",
+     "K09",
+     "K06"
+    ],
+    "families": [
+     "MASS_ZONED",
+     "HORIZONTAL_BANDED",
+     "VERTICAL_FRAME"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 0,
+    "uncertain": 27,
+    "recommendation": null
+   },
+   "pool36": {
+    "status": "OK",
+    "offered": [
+     "K04",
+     "K18",
+     "K14"
+    ],
+    "families": [
+     "MASS_ZONED",
+     "HORIZONTAL_BANDED",
+     "VERTICAL_FRAME"
+    ],
+    "familiesFound": [
+     "HORIZONTAL_BANDED",
+     "MASS_ZONED",
+     "VERTICAL_FRAME"
+    ],
+    "singleCauseBlocked": 20,
+    "uncertain": 250,
+    "recommendation": null
+   }
+  }
+ },
+ "surface": [
+  {
+   "n": "C1",
+   "pool": 12,
+   "a": "K06",
+   "b": "K08",
+   "noveltyNormal": 0.584,
+   "edgeZone": 0.652,
+   "cellsDifferNormal": 0.7081,
+   "cellsDifferToneMerged": 0.5258,
+   "toneOnlyShare": 0.257,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C1",
+   "pool": 12,
+   "a": "K06",
+   "b": "K02",
+   "noveltyNormal": 0.571,
+   "edgeZone": 0.493,
+   "cellsDifferNormal": 0.6032,
+   "cellsDifferToneMerged": 0.5303,
+   "toneOnlyShare": 0.121,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C1",
+   "pool": 12,
+   "a": "K08",
+   "b": "K02",
+   "noveltyNormal": 0.431,
+   "edgeZone": 0.553,
+   "cellsDifferNormal": 0.4653,
+   "cellsDifferToneMerged": 0.3439,
+   "toneOnlyShare": 0.261,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C1",
+   "pool": 36,
+   "a": "K13",
+   "b": "K21",
+   "noveltyNormal": 0.669,
+   "edgeZone": 0.786,
+   "cellsDifferNormal": 0.2176,
+   "cellsDifferToneMerged": 0.2133,
+   "toneOnlyShare": 0.02,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C1",
+   "pool": 36,
+   "a": "K13",
+   "b": "K30",
+   "noveltyNormal": 0.674,
+   "edgeZone": 0.928,
+   "cellsDifferNormal": 0.6132,
+   "cellsDifferToneMerged": 0.5763,
+   "toneOnlyShare": 0.06,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C1",
+   "pool": 36,
+   "a": "K21",
+   "b": "K30",
+   "noveltyNormal": 0.801,
+   "edgeZone": 0.755,
+   "cellsDifferNormal": 0.5574,
+   "cellsDifferToneMerged": 0.5496,
+   "toneOnlyShare": 0.014,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C4",
+   "pool": 12,
+   "a": "K07",
+   "b": "K08",
+   "noveltyNormal": 0.619,
+   "edgeZone": 0.742,
+   "cellsDifferNormal": 0.2963,
+   "cellsDifferToneMerged": 0.205,
+   "toneOnlyShare": 0.308,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C4",
+   "pool": 12,
+   "a": "K07",
+   "b": "K02",
+   "noveltyNormal": 0.721,
+   "edgeZone": 0.809,
+   "cellsDifferNormal": 0.6311,
+   "cellsDifferToneMerged": 0.4903,
+   "toneOnlyShare": 0.223,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C4",
+   "pool": 12,
+   "a": "K08",
+   "b": "K02",
+   "noveltyNormal": 0.615,
+   "edgeZone": 0.872,
+   "cellsDifferNormal": 0.5925,
+   "cellsDifferToneMerged": 0.5067,
+   "toneOnlyShare": 0.145,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C4",
+   "pool": 36,
+   "a": "K22",
+   "b": "K06",
+   "noveltyNormal": 0.651,
+   "edgeZone": 0.816,
+   "cellsDifferNormal": 0.6021,
+   "cellsDifferToneMerged": 0.5725,
+   "toneOnlyShare": 0.049,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C4",
+   "pool": 36,
+   "a": "K22",
+   "b": "K13",
+   "noveltyNormal": 0.665,
+   "edgeZone": 0.886,
+   "cellsDifferNormal": 0.7321,
+   "cellsDifferToneMerged": 0.3808,
+   "toneOnlyShare": 0.48,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C4",
+   "pool": 36,
+   "a": "K06",
+   "b": "K13",
+   "noveltyNormal": 0.737,
+   "edgeZone": 0.902,
+   "cellsDifferNormal": 0.4783,
+   "cellsDifferToneMerged": 0.4033,
+   "toneOnlyShare": 0.157,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C7",
+   "pool": 12,
+   "a": "K10",
+   "b": "K06",
+   "noveltyNormal": 0.749,
+   "edgeZone": 0.615,
+   "cellsDifferNormal": 0.534,
+   "cellsDifferToneMerged": 0.42,
+   "toneOnlyShare": 0.213,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C7",
+   "pool": 36,
+   "a": "K04",
+   "b": "K10",
+   "noveltyNormal": 0.614,
+   "edgeZone": 0.665,
+   "cellsDifferNormal": 0.3403,
+   "cellsDifferToneMerged": 0.254,
+   "toneOnlyShare": 0.254,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C7",
+   "pool": 36,
+   "a": "K04",
+   "b": "K21",
+   "noveltyNormal": 0.664,
+   "edgeZone": 0.829,
+   "cellsDifferNormal": 0.7042,
+   "cellsDifferToneMerged": 0.5446,
+   "toneOnlyShare": 0.227,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "C7",
+   "pool": 36,
+   "a": "K10",
+   "b": "K21",
+   "noveltyNormal": 0.647,
+   "edgeZone": 0.817,
+   "cellsDifferNormal": 0.5428,
+   "cellsDifferToneMerged": 0.4144,
+   "toneOnlyShare": 0.237,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "RECT",
+   "pool": 12,
+   "a": "K03",
+   "b": "K05",
+   "noveltyNormal": 0.731,
+   "edgeZone": 0.666,
+   "cellsDifferNormal": 0.3211,
+   "cellsDifferToneMerged": 0.2914,
+   "toneOnlyShare": 0.092,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "RECT",
+   "pool": 36,
+   "a": "K03",
+   "b": "K34",
+   "noveltyNormal": 0.681,
+   "edgeZone": 0.662,
+   "cellsDifferNormal": 0.5811,
+   "cellsDifferToneMerged": 0.4531,
+   "toneOnlyShare": 0.22,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "RECT",
+   "pool": 36,
+   "a": "K03",
+   "b": "K22",
+   "noveltyNormal": 0.709,
+   "edgeZone": 0.733,
+   "cellsDifferNormal": 0.4922,
+   "cellsDifferToneMerged": 0.3347,
+   "toneOnlyShare": 0.32,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "RECT",
+   "pool": 36,
+   "a": "K34",
+   "b": "K22",
+   "noveltyNormal": 0.671,
+   "edgeZone": 0.846,
+   "cellsDifferNormal": 0.6783,
+   "cellsDifferToneMerged": 0.5069,
+   "toneOnlyShare": 0.253,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "L",
+   "pool": 12,
+   "a": "K05",
+   "b": "K12",
+   "noveltyNormal": 0.776,
+   "edgeZone": 0.78,
+   "cellsDifferNormal": 0.6364,
+   "cellsDifferToneMerged": 0.3987,
+   "toneOnlyShare": 0.374,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "L",
+   "pool": 36,
+   "a": "K01",
+   "b": "K16",
+   "noveltyNormal": 0.766,
+   "edgeZone": 0.832,
+   "cellsDifferNormal": 0.6478,
+   "cellsDifferToneMerged": 0.4313,
+   "toneOnlyShare": 0.334,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "L",
+   "pool": 36,
+   "a": "K01",
+   "b": "K03",
+   "noveltyNormal": 0.618,
+   "edgeZone": 0.907,
+   "cellsDifferNormal": 0.6693,
+   "cellsDifferToneMerged": 0.5919,
+   "toneOnlyShare": 0.116,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "L",
+   "pool": 36,
+   "a": "K16",
+   "b": "K03",
+   "noveltyNormal": 0.712,
+   "edgeZone": 0.864,
+   "cellsDifferNormal": 0.4654,
+   "cellsDifferToneMerged": 0.3688,
+   "toneOnlyShare": 0.208,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "U",
+   "pool": 12,
+   "a": "K04",
+   "b": "K09",
+   "noveltyNormal": 0.46,
+   "edgeZone": 0.64,
+   "cellsDifferNormal": 0.3494,
+   "cellsDifferToneMerged": 0.2415,
+   "toneOnlyShare": 0.309,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "U",
+   "pool": 12,
+   "a": "K04",
+   "b": "K06",
+   "noveltyNormal": 0.667,
+   "edgeZone": 0.635,
+   "cellsDifferNormal": 0.6,
+   "cellsDifferToneMerged": 0.4474,
+   "toneOnlyShare": 0.254,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "U",
+   "pool": 12,
+   "a": "K09",
+   "b": "K06",
+   "noveltyNormal": 0.567,
+   "edgeZone": 0.671,
+   "cellsDifferNormal": 0.5232,
+   "cellsDifferToneMerged": 0.3894,
+   "toneOnlyShare": 0.256,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "U",
+   "pool": 36,
+   "a": "K04",
+   "b": "K18",
+   "noveltyNormal": 0.652,
+   "edgeZone": 0.762,
+   "cellsDifferNormal": 0.5243,
+   "cellsDifferToneMerged": 0.4728,
+   "toneOnlyShare": 0.098,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "U",
+   "pool": 36,
+   "a": "K04",
+   "b": "K14",
+   "noveltyNormal": 0.588,
+   "edgeZone": 0.685,
+   "cellsDifferNormal": 0.6782,
+   "cellsDifferToneMerged": 0.4254,
+   "toneOnlyShare": 0.373,
+   "uniformGreyDifference": 0
+  },
+  {
+   "n": "U",
+   "pool": 36,
+   "a": "K18",
+   "b": "K14",
+   "noveltyNormal": 0.59,
+   "edgeZone": 0.681,
+   "cellsDifferNormal": 0.3653,
+   "cellsDifferToneMerged": 0.2521,
+   "toneOnlyShare": 0.31,
+   "uniformGreyDifference": 0
+  }
+ ]
+}

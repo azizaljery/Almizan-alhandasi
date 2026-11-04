@@ -8,6 +8,8 @@ import { signature, compareSignatures, verdict, NOVELTY_RULE, DIMENSIONS } from 
 import { assertSourceIdentity, verifyOutputBinding, SourceIdentityError } from './identity.mjs';
 import { classifyOpenings, unsupported } from './gates12.mjs';
 import { realisedProfile, coversDistinctRegions } from './coverage.mjs';
+import { independentCauses } from './causal.mjs';
+import { classifyFamily } from './families.mjs';
 const r3=v=>Math.round(v*1000)/1000;
 function mulberry(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 export const fingerprint=analysis=>hash({p:analysis.pieces.map(p=>({bb:p.bb,ops:p.ops.map(o=>[o.u0,o.u1,o.z0,o.z1,o.entry])}))});
@@ -76,31 +78,38 @@ export async function generate(source, side, {count=12,seed=1,maxTries=600,expec
     const comps=realize(analysis,source,side,p); if(!comps.length){ rejected.push({key,reason:'لا مناطق'}); continue; }
     const a=assess(analysis,comps); if(!a.fidelity.pass||!a.plausibility.pass){ rejected.push({key,reason:[...a.fidelity.checks,...a.plausibility.checks].filter(c=>!c.ok).map(c=>c.id).join(',')}); continue; }
     const sig=signature(analysis,comps);
-    cands.push({id:'K'+String(cands.length+1).padStart(2,'0'),key,params:p,comps,assess:a,sig,profile:realisedProfile(analysis,comps,sig),sourceHash:srcHash}); }
+    cands.push({id:'K'+String(cands.length+1).padStart(2,'0'),key,params:p,comps,assess:a,sig,profile:realisedProfile(analysis,comps,sig),family:classifyFamily(analysis,sig),sourceHash:srcHash,_analysis:analysis}); }
   // R1: لم يتغير المصدر أثناء المسار
   if(await assertSourceIdentity(source,{expectedSourceHash:srcHash})!==srcHash) throw new SourceIdentityError('SOURCE_MUTATED_DURING_PATH','');
   return {analysis,fingerprint:fp,sourceHash:srcHash,candidates:cands,rejected,tries};
 }
 /** بوابة التفرد داخل الدفعة + الاختيار: أفضل ثلاثة مجموع (واقعية + تباعد) بشرط قبول كل زوج. */
 export function gateAndSelect(candsIn, rule=NOVELTY_RULE){
-  // R5: ترتيب قانوني للمرشحين (بمفتاح الوصفة) فلا يتأثر القرار بترتيب الإدخال؛ والتعادل يُحسم بالمفتاح
+  // R5: ترتيب قانوني؛ R6: سببان مستقلان على الأقل؛ R7: عائلات أساسية مختلفة؛ R8: «حتى ثلاثة» واستنفاد صادق
   const kOf=c=>c.key||archKey(c.params), cands=[...candsIn].sort((a,b)=>kOf(a)<kOf(b)?-1:kOf(a)>kOf(b)?1:0);
   if(new Set(cands.map(c=>c.sourceHash).filter(Boolean)).size>1) throw new SourceIdentityError('MIXED_SOURCES','مرشحون من مصادر مختلفة');
   const pair=new Map(), key=(a,b)=>a<b?a+'|'+b:b+'|'+a;
-  for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++){ const c=compareSignatures(cands[i].sig,cands[j].sig); pair.set(key(cands[i].id,cands[j].id),{...c,verdict:verdict(c,rule)}); }
-  const P=(a,b)=>pair.get(key(a.id,b.id));
+  for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++){ const A=cands[i],B=cands[j], c=compareSignatures(A.sig,B.sig), v=verdict(c,rule); const an=A._analysis||B._analysis;
+    const causes=an?independentCauses(an,A.sig,B.sig,c):null; const accepted=v.accepted&&(!causes||causes.ok);
+    pair.set(key(A.id,B.id),{...c,causes,verdict:{...v,accepted,singleCause:v.accepted&&causes&&!causes.ok}}); }
+  const P=(a,b)=>pair.get(key(a.id,b.id)), fam=c=>c.family?.primary;
   const dupOf={}; const sorted=[...cands].sort((a,b)=>b.assess.realism.score-a.assess.realism.score||(kOf(a)<kOf(b)?-1:1)), kept=[];
   for(const c of sorted){ const clash=kept.find(k=>P(c,k).verdict.zone==='NEAR_DUPLICATE'); if(clash) dupOf[c.id]=clash.id; else kept.push(c); }
-  let best=null, pairwiseTriples=0, coverageRejected=0;
-  for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++)for(let k=j+1;k<cands.length;k++){ const t=[cands[i],cands[j],cands[k]]; const ps=[P(t[0],t[1]),P(t[0],t[2]),P(t[1],t[2])]; if(!ps.every(p=>p.verdict.accepted)) continue; pairwiseTriples++;
-    // R3: التغطية على الناتج المتحقق
-    if(t.every(c=>c.profile)&&!coversDistinctRegions(t.map(c=>c.profile))){ coverageRejected++; continue; }
-    const minN=Math.min(...ps.map(p=>p.novelty)), meanN=ps.reduce((s,p)=>s+p.novelty,0)/3, q=t.reduce((s,c)=>s+c.assess.realism.score,0)/3, minEdge=Math.min(...ps.map(p=>p.edgeZone));
-    const score=.45*minN+.15*meanN+.25*q+.15*minEdge; const ids=t.map(c=>c.id), tie=t.map(kOf).join('~');
-    if(!best||score>best.score+1e-9||(Math.abs(score-best.score)<=1e-9&&tie<best.tie)) best={ids,tie,score:r3(score),minNovelty:r3(minN),meanNovelty:r3(meanN),meanRealism:r3(q),minEdge:r3(minEdge),regions:t.map(c=>c.profile?.region),dominant:t.map(c=>c.profile?.dominant)}; }
-  const uncertainPairs=[...pair.values()].filter(p=>p.verdict.zone==='UNCERTAIN').length, nearDup=[...pair.values()].filter(p=>p.verdict.zone==='NEAR_DUPLICATE').length;
-  const status=best?'OK':(pairwiseTriples?'INSUFFICIENT_DESIGN_SPACE_COVERAGE':'NO_DISTINCT_TRIPLE');
-  return {pair,dupOf,selected:best,status,stats:{candidates:cands.length,pairwiseTriples,coverageRejected,uncertainPairs,nearDuplicatePairs:nearDup,families:[...new Set(cands.map(c=>c.profile?.dominant))]}};
+  const scoreOf=t=>{ const ps=[]; for(let i=0;i<t.length;i++)for(let j=i+1;j<t.length;j++) ps.push(P(t[i],t[j])); const minN=Math.min(...ps.map(p=>p.novelty)), meanN=ps.reduce((s,p)=>s+p.novelty,0)/ps.length, q=t.reduce((s,c)=>s+c.assess.realism.score,0)/t.length, minEdge=Math.min(...ps.map(p=>p.edgeZone)); return {score:.45*minN+.15*meanN+.25*q+.15*minEdge,minN,meanN,q,minEdge}; };
+  const valid=t=>{ for(let i=0;i<t.length;i++)for(let j=i+1;j<t.length;j++) if(!P(t[i],t[j]).verdict.accepted) return false; return true; };
+  const distinctFam=t=>!t.every(c=>c.family)||new Set(t.map(fam)).size===t.length;
+  let best=null, pairwiseTriples=0, familyRejected=0;
+  const consider=t=>{ const s=scoreOf(t), tie=t.map(kOf).join('~'); if(!best||s.score>best.score+1e-9||(Math.abs(s.score-best.score)<=1e-9&&tie<best.tie)) best={ids:t.map(c=>c.id),tie,score:r3(s.score),minNovelty:r3(s.minN),meanNovelty:r3(s.meanN),meanRealism:r3(s.q),minEdge:r3(s.minEdge),families:t.map(fam),regions:t.map(c=>c.profile?.region),dominant:t.map(c=>c.profile?.dominant)}; };
+  for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++)for(let k=j+1;k<cands.length;k++){ const t=[cands[i],cands[j],cands[k]]; if(!valid(t)) continue; pairwiseTriples++; if(!distinctFam(t)){ familyRejected++; continue; } consider(t); }
+  let size=3;
+  if(!best){ size=2; for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++){ const t=[cands[i],cands[j]]; if(valid(t)&&distinctFam(t)) consider(t); } }
+  if(!best&&cands.length){ size=1; consider([sorted[0]]); }
+  // العائلات المتحققة الصالحة: عائلة أساسية لها مرشح واحد على الأقل يدخل زوجًا مقبولًا مع عائلة أخرى
+  const famFound=new Set(); for(const [,p] of pair) void p; for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++) if(P(cands[i],cands[j]).verdict.accepted&&fam(cands[i])!==fam(cands[j])){ famFound.add(fam(cands[i])); famFound.add(fam(cands[j])); }
+  const vals=[...pair.values()], uncertainPairs=vals.filter(p=>p.verdict.zone==='UNCERTAIN').length, nearDup=vals.filter(p=>p.verdict.zone==='NEAR_DUPLICATE').length, singleCause=vals.filter(p=>p.verdict.singleCause).length;
+  const status=size===3?'OK':'DESIGN_SPACE_EXHAUSTED';
+  const recommendation=size===3?null:`اعرض ${size} ${size===2?'مفهومين مختلفين فعلًا':'مفهومًا واحدًا'} بدل ثلاثة يكون بعضها إعادة صياغة`;
+  return {pair,dupOf,selected:size===3?best:null,offered:best,offeredCount:best?best.ids.length:0,status,recommendation,stats:{candidates:cands.length,pairwiseTriples,familyRejected,uncertainPairs,nearDuplicatePairs:nearDup,singleCausePairsBlocked:singleCause,familiesFound:[...famFound].sort(),familiesInPool:[...new Set(cands.map(fam))].sort()}};
 }
 /** تعبئة مفهوم عبر النواة (نمط X) — يرمي إن تغيّرت هندسة المسقط. */
 export async function packageConcept(source, transforms, side, cand, {palette=null,roofSurfaces=[]}={}){
@@ -117,8 +126,8 @@ export const ZON_AR={'base':'قاعدة','tripartite':'ثلاثي (قاعدة/و
 export const ROOF_AR={'thin-cap':'غطاء رفيع','deep-fascia':'حزام عريض','stepped':'حزام متدرج','none':'بلا معالجة','raised-entry':'ارتفاع فوق المدخل'};
 export const COR_AR={'posts-both':'عمودان طرفيان','post-one':'عمود طرفي واحد','quoins':'حجارة زاوية','none':'بلا'};
 export const conceptLabel=p=>`${ENT_AR[p.entrance]} · ${GRP_AR[p.grouping]} · ${ZON_AR[p.zoning]} · ${ROOF_AR[p.roof]} · ${COR_AR[p.corner]}`;
-/** تصعيد البحث دون خفض أي عتبة: 12 ثم 36 ثم 96 مرشحًا. فشل الأخير ⇒ DESIGN_SPACE_EXHAUSTED (نتيجة صحيحة لا عيب). */
-export async function exploreDesignSpace(source, side, {stages=[12,36,96],seed=1,expectedSourceHash=null}={}){
+/** R8: تصعيد واحد فقط (12 ثم 36) دون خفض أي عتبة. فشله ⇒ DESIGN_SPACE_EXHAUSTED مع عرض «حتى ثلاثة» الصادقة. */
+export async function exploreDesignSpace(source, side, {stages=[12,36],seed=1,expectedSourceHash=null}={}){
   const history=[]; let last=null;
   for(const count of stages){ const gen=await generate(source,side,{count,seed,maxTries:count*60,expectedSourceHash}); const sel=gateAndSelect(gen.candidates);
     history.push({count,pool:gen.candidates.length,status:sel.status,stats:sel.stats}); last={gen,sel}; if(sel.selected) return {status:count===stages[0]?'OK':'OK_AFTER_ESCALATION',stage:count,...last,history}; }
