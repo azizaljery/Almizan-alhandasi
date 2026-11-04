@@ -29,6 +29,8 @@ const srv = createServer((req, res) => {
 
 const GEOS = (process.argv[3] || 'block').split(',').filter(Boolean);
 const SHOTS = (process.argv[4] || 'stone,window,slot,door').split(',').filter(Boolean);
+// حجم اختياري للمراجعة المكبّرة: 1920x1200 مثلاً (الافتراضي 1280×800)
+const SIZE = process.argv[5] ? process.argv[5].split('x').map(Number) : null;
 const VARIANTS = ['A', 'B', 'C'];
 await new Promise(r => srv.listen(PORT, r));
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
@@ -36,10 +38,10 @@ const results = [], errors = [];
 try {
   for (const geo of GEOS) for (const shot of SHOTS) for (const v of VARIANTS) {
     const tag = `${shot}-${v}-${geo}`, file = join(out, `${tag}.png`);
-    const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
+    const page = await browser.newPage({ viewport: { width: SIZE ? SIZE[0] : 1280, height: SIZE ? SIZE[1] : 800 }, deviceScaleFactor: 1 });
     page.on('pageerror', e => errors.push(`${shot}-${v}: ${e.message}`));
     page.on('console', m => { if (m.type() === 'error') errors.push(`${shot}-${v} console: ${m.text()}`); });
-    await page.goto(`${ORIGIN}/facade-realism.html?v=${v}&shot=${shot}&geo=${geo}`);
+    await page.goto(`${ORIGIN}/facade-realism.html?v=${v}&shot=${shot}&geo=${geo}${SIZE ? `&w=${SIZE[0]}&h=${SIZE[1]}` : ''}`);
     await page.waitForFunction(() => globalThis.__FR?.ready === true, null, { timeout: 900000 });
     const info = await page.evaluate(() => globalThis.__FR);
     if (info.error) { errors.push(`${shot}-${v}: ${info.error}`); await page.close(); continue; }

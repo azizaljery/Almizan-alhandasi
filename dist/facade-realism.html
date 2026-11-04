@@ -73,7 +73,9 @@ async function variantMode() {
     dark: new THREE.MeshStandardMaterial({ color: '#4a4a4a', roughness: 1 }),
     ground: new THREE.MeshStandardMaterial({ color: '#d2d2d2', roughness: 1 }),
   } : null;
-  const W = 1280, H = 800;
+  // الحجم قابل للضبط للمراجعة المكبّرة (w,h بين 320 و3840)، والافتراضي 1280×800 كما كان.
+  const clampDim = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 320 && n <= 3840 ? Math.round(n) : d; };
+  const W = clampDim(q.get('w'), 1280), H = clampDim(q.get('h'), 800);
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; canvas.id = 'fr';
   stage.innerHTML = ''; stage.appendChild(canvas);
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
