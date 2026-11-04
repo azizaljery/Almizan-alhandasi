@@ -1,0 +1,213 @@
+{
+ "buildings": {
+  "C1": {
+   "pool": 12,
+   "selected": [
+    "K03",
+    "K08",
+    "K11"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    null,
+    null,
+    null
+   ]
+  },
+  "C4": {
+   "pool": 12,
+   "selected": [
+    "K01",
+    "K02",
+    "K07"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "entrance",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 2,
+   "declaredDominant": [
+    null,
+    null,
+    null
+   ]
+  },
+  "C7": {
+   "pool": 12,
+   "selected": [
+    "K05",
+    "K07",
+    "K12"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    null,
+    null,
+    null
+   ]
+  },
+  "RECT": {
+   "pool": 12,
+   "selected": [
+    "K04",
+    "K05",
+    "K09"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "entrance",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 2,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    null,
+    null,
+    null
+   ]
+  },
+  "L": {
+   "pool": 12,
+   "selected": [
+    "K03",
+    "K07",
+    "K08"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    null,
+    null,
+    null
+   ]
+  },
+  "U": {
+   "pool": 12,
+   "selected": [
+    "K03",
+    "K05",
+    "K07"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    null,
+    null,
+    null
+   ]
+  }
+ },
+ "scen": {
+  "escapes": [
+   {
+    "scenario": "مصدر معدّل غير مختوم يُشغَّل بلا بصمة",
+    "escaped": true
+   },
+   {
+    "scenario": "مصدر معدّل مع بصمة مرجعية للأصل",
+    "escaped": true
+   },
+   {
+    "scenario": "تعديل المصدر بين التوليد والتعبئة",
+    "escaped": true
+   }
+  ],
+  "escapedCount": 3,
+  "of": 3
+ },
+ "perm": {
+  "rows": {
+   "C1": {
+    "vocabReversePoolOverlap": "1/12",
+    "vocabReverseSelectionChanged": true,
+    "candidateShuffleChanged": "0/10"
+   },
+   "C4": {
+    "vocabReversePoolOverlap": "0/12",
+    "vocabReverseSelectionChanged": true,
+    "candidateShuffleChanged": "0/10"
+   },
+   "C7": {
+    "vocabReversePoolOverlap": "0/12",
+    "vocabReverseSelectionChanged": true,
+    "candidateShuffleChanged": "0/10"
+   }
+  },
+  "unstable": 3,
+  "checks": 6
+ },
+ "totals": {
+  "candidates": 72,
+  "hiddenOpeningLegacy": 31,
+  "occludedOpeningRaster": 4,
+  "floatingDirectDatum": 12,
+  "pairs": 396,
+  "uncertainPairsInBand": 89,
+  "pairsNotAccepted": 198,
+  "nearDuplicatePairsBelowBand": 30,
+  "band": {
+   "lower": 0.271,
+   "upper": 0.429
+  }
+ }
+}

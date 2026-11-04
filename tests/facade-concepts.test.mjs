@@ -1,17 +1,22 @@
 // اختبارات المرحلة الأولى: مولّد المفاهيم المعزول (dist/facade-kit/concepts). لا نشر ولا ربط بالإنتاج.
 import test from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs';
 import { runBuilding } from '../dist/facade-kit/concepts/run.mjs';
-import { realize, assess, packageConcept, generate, gateAndSelect } from '../dist/facade-kit/concepts/generate.mjs';
+import { realize, assess, packageConcept, generate, gateAndSelect, exploreDesignSpace } from '../dist/facade-kit/concepts/generate.mjs';
+import { sealSource, SourceIdentityError, sourceHash } from '../dist/facade-kit/concepts/identity.mjs';
+import { classifyOpenings, unsupported } from '../dist/facade-kit/concepts/gates12.mjs';
+import { coversDistinctRegions } from '../dist/facade-kit/concepts/coverage.mjs';
+import { zoneOf } from '../dist/facade-kit/concepts/signature.mjs';
+import { AXES } from '../dist/facade-kit/concepts/vocabulary.mjs';
 import { signature, compareSignatures, verdict, labelGrid } from '../dist/facade-kit/concepts/signature.mjs';
 import { analyzeFacade } from '../dist/facade-kit/concepts/analyze.mjs';
 import { createFacadePackage, STYLES } from '../dist/facade-kit/src/model.mjs'; import { hash } from '../dist/facade-kit/src/core.mjs';
 import { buildAllSides, sideTransform } from '../dist/facade-realism/model.mjs';
 import { intersection, multiArea, layerMask } from '../dist/facade-kit/src/polygons.mjs';
 const BUILDINGS=['C1','C4','C7','RECT','L','U'];
-const R={}; for(const n of BUILDINGS) R[n]=await runBuilding(n);
+const R={}; for(const n of BUILDINGS){ R[n]=await runBuilding(n); if(!R[n].sel.selected){ const e=await exploreDesignSpace(R[n].built,R[n].front); R[n]={...R[n],gen:e.gen,sel:e.sel,escalated:e.status}; } }
 const ZERO={s:0,n:0,e:0,w:0};
 test('كل مبنى (RECT/L/U وC1/C4/C7): 12 مفهومًا تجتاز بوابتي الأمانة والمعقولية',()=>{
-  for(const n of BUILDINGS){ const c=R[n].gen.candidates; assert.equal(c.length,12,n); for(const k of c){ assert.ok(k.assess.fidelity.pass,n+k.id); assert.ok(k.assess.plausibility.pass,n+k.id); } }
+  for(const n of BUILDINGS){ const c=R[n].gen.candidates; assert.ok(c.length>=12,n); for(const k of c){ assert.ok(k.assess.fidelity.pass,n+k.id); assert.ok(k.assess.plausibility.pass,n+k.id); } }
 });
 test('لكل مبنى ثلاثة مفاهيم مختارة كل زوج منها مقبول في بوابة التفرد (4 أبعاد مختلفة من 7 وحافة)',()=>{
   for(const n of BUILDINGS){ const sel=R[n].sel.selected; assert.ok(sel,n+' لا ثلاثية'); assert.equal(sel.ids.length,3);
@@ -65,4 +70,35 @@ test('النواة: النمط X يتطلب مفهومًا، والمفهوم ي
 });
 test('الأنماط المعتمدة A/B/C لم تُمسّ: تجاهل المفهوم لا يغيّر طبقاتها (صفر مناطق concept-zone)',async()=>{
   const r=R.C1; for(const v of ['A','B','C']){ const p=await createFacadePackage(buildAllSides(r.doc,v),{style:v,frontSide:'s',maxProjectionM:ZERO,transforms:r.transforms,roofSurfaces:[]}); assert.equal(Object.values(p.built).flatMap(b=>b.layers).filter(l=>l.role==='concept-zone').length,0); }
+});
+
+// ===== المرحلة 1.2: معالجة العيوب العدائية =====
+test('R1: مصدر غير مختوم يُرفض مغلقًا؛ مصدر معدّل بعد الختم يُرفض؛ تعديل بين التوليد والتعبئة يُرفض',async()=>{
+  const r=R.C1; const clone=structuredClone(r.built);
+  await assert.rejects(generate(clone,r.front,{count:3}),e=>e.code==='SOURCE_IDENTITY_UNDECLARED');
+  const h=await sourceHash(r.built); const t=structuredClone(r.built); t[r.front].F.pieces[1].openings[0].u0+=.6;
+  await assert.rejects(generate(t,r.front,{count:3,expectedSourceHash:h}),e=>e.code==='SOURCE_IDENTITY_MISMATCH');
+  const m=structuredClone(r.built); await sealSource(m); const g=await generate(m,r.front,{count:3,maxTries:200}); m[r.front].F.pieces[1].openings[0].u1+=.3;
+  await assert.rejects(packageConcept(m,r.transforms,r.front,g.candidates[0]),e=>e.code==='SOURCE_IDENTITY_MISMATCH');
+});
+test('R2: إطار رقيق مسموح، حجب بمنطقة عريضة مرفوض، عنصر عائم يُكشف',()=>{
+  const r=R.C1, a=analyzeFacade(r.built,r.front); const pc=a.pieces[1], w=pc.windows[0];
+  const mk=(box,tone,name)=>{ const poly=[[[box.u0,box.z0],[box.u1,box.z0],[box.u1,box.z1],[box.u0,box.z1],[box.u0,box.z0]]]; return {name,piece:pc.piece,tone,group:'opening',poly,mp:[poly],bb:box,area:(box.u1-box.u0)*(box.z1-box.z0)}; };
+  const thin=mk({u0:w.u0-.15,u1:w.u0,z0:w.z0,z1:w.z1},'dark','f1');
+  assert.notEqual(classifyOpenings(a,[thin]).find(o=>o.id===w.id).cls,'OCCLUSION');
+  const wide=[mk({u0:w.u0-1.2,u1:w.u0,z0:w.z0-.6,z1:w.z1+.6},'dark','wl'),mk({u0:w.u1,u1:w.u1+1.2,z0:w.z0-.6,z1:w.z1+.6},'dark','wr'),mk({u0:w.u0,u1:w.u1,z0:w.z1,z1:w.z1+1},'dark','wt'),mk({u0:w.u0,u1:w.u1,z0:w.z0-1,z1:w.z0},'dark','wb')];
+  assert.equal(classifyOpenings(a,wide).find(o=>o.id===w.id).cls,'OCCLUSION');
+  const b=pc.bb; let best=null; for(const pcs of a.pieces){ for(const g of pcs.gapsU){ if(!best||g[1]-g[0]>best.w) best={w:g[1]-g[0],c:(g[0]+g[1])/2,pc:pcs}; } } assert.ok(best&&best.w>1.6,'فجوة كافية'); const fl={...mk({u0:best.c-.4,u1:best.c+.4,z0:(best.pc.bb.z0+best.pc.bb.z1)/2-.2,z1:(best.pc.bb.z0+best.pc.bb.z1)/2+.2},'mid','float'),piece:best.pc.piece}; assert.deepEqual(unsupported(a,[fl]),['float']);
+});
+test('R3: ثلاثية بالعائلة السائدة نفسها لا تغطي مناطق مختلفة؛ الاختيار يذكر الاستراتيجية المتحققة',()=>{
+  assert.equal(coversDistinctRegions([{dominant:'entrance'},{dominant:'entrance'},{dominant:'edges'}]),false);
+  assert.equal(coversDistinctRegions([{dominant:'entrance'},{dominant:'opening-rhythm'},{dominant:'edges'}]),true);
+  for(const n of BUILDINGS){ const d=R[n].sel.selected.dominant; assert.equal(new Set(d).size,3,n); }
+});
+test('R4: ثلاث مناطق: التكرار القريب/غير المحسوم/المتميز',()=>{
+  const band={lower:.30,upper:.40}; assert.equal(zoneOf(.29,band),'NEAR_DUPLICATE'); assert.equal(zoneOf(.35,band),'UNCERTAIN'); assert.equal(zoneOf(.40,band),'DISTINCT');
+});
+test('R5: عكس ترتيب المفردات لا يغيّر فضاء المرشحين ولا الثلاثية المختارة',async()=>{
+  const r=R.RECT, key=g=>g.candidates.map(c=>c.key).join(';'); const base=await generate(r.built,r.front,{count:12}); const sb=gateAndSelect(base.candidates).selected.tie;
+  const saved={}; for(const a of Object.keys(AXES)) saved[a]=[...AXES[a]]; try{ for(const a of Object.keys(AXES)) AXES[a].reverse(); const g=await generate(r.built,r.front,{count:12}); assert.equal(key(g),key(base)); assert.equal(gateAndSelect(g.candidates).selected.tie,sb); const sh=[...g.candidates].reverse(); assert.equal(gateAndSelect(sh).selected.tie,sb); } finally{ for(const a of Object.keys(AXES)){ AXES[a].length=0; AXES[a].push(...saved[a]); } }
 });

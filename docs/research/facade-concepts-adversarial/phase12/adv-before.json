@@ -1,0 +1,4235 @@
+{
+ "frozenFixturesCommit": "3bdd43621cdde8e2947a99463a634fb569b0654d",
+ "rule": "EXPERIMENTAL_THRESHOLD",
+ "confusion": {
+  "TruthSame_GenSame": 169,
+  "TruthSame_GenDifferent_FALSE_NOVELTY": 2,
+  "TruthDifferent_GenSame_MISSED_NOVELTY": 0,
+  "TruthDifferent_GenDifferent": 1
+ },
+ "falseNoveltyByCase": {
+  "ADV-03": 2
+ },
+ "control": {
+  "novelty": 0.908,
+  "differentDims": 7,
+  "movedDims": 7,
+  "edgeZone": 0.823,
+  "edgeAll": 0.567,
+  "accepted": true,
+  "verdictAr": "جيد",
+  "dims": {
+   "entrance": 0.451,
+   "rhythm": 1,
+   "emphasis": 1,
+   "zoning": 0.904,
+   "blocks": 1,
+   "roof": 1,
+   "corners": 1
+  }
+ },
+ "results": [
+  {
+   "id": "ADV-01",
+   "title": "Palette Cheat",
+   "intentAr": "نفس المفهوم بألوان/خامات/إضاءة مختلفة ⇒ تباعد التوقيع ≈ 0 والحكم: رفض كتكرار. وأي تبديل لقيمة النغمات وحدها يُسجَّل للمراجعة.",
+   "expected": "novelty≈0 && accepted=false",
+   "observed": [
+    {
+     "palette": "P2",
+     "novelty": 0,
+     "accepted": false
+    },
+    {
+     "palette": "P3",
+     "novelty": 0,
+     "accepted": false
+    },
+    {
+     "toneSwap": true,
+     "novelty": 0,
+     "accepted": false,
+     "edgeZone": 0
+    }
+   ],
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     }
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     }
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "note": "تبديل قيمة النغمات مع بقاء الهندسة"
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "اللوحة وحدها = صفر. تبديل النغمات: مرفوض (تباعد 0).",
+   "vizCount": 3,
+   "ms": 1514
+  },
+  {
+   "id": "ADV-02",
+   "title": "Micro-Change Gaming",
+   "intentAr": "عشرات التعديلات الصغيرة (±5–15 سم) لا تتجاوز العتبة 0.35 ولا تُقبل كمفهوم جديد.",
+   "expected": "accepted=false for all micro variants",
+   "observed": {
+    "variants": 120,
+    "rejectedByGates": 227,
+    "maxNovelty": 0.174,
+    "acceptedAsNew": 0,
+    "overThreshold": 0,
+    "cumulativeWalkMax": 0.188,
+    "walkSteps": 30
+   },
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.006,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.016,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.113,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.028,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.011,
+      "emphasis": 0.004,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.054,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.022,
+      "zoning": 0.024,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.007,
+     "differentDims": 0,
+     "edgeZone": 0.024,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.002,
+      "zoning": 0.01,
+      "blocks": 0,
+      "roof": 0.033,
+      "corners": 0.003
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.004,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.017,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.007,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.006,
+     "differentDims": 0,
+     "edgeZone": 0.031,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.017,
+      "zoning": 0.008,
+      "blocks": 0.005,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.169,
+     "differentDims": 1,
+     "edgeZone": 0.088,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.14,
+      "emphasis": 0.004,
+      "zoning": 0.023,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.011
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.02,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.02,
+     "differentDims": 0,
+     "edgeZone": 0.02,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.017,
+      "zoning": 0.006,
+      "blocks": 0.001,
+      "roof": 0.113,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.002,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.001,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.058,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.023,
+      "zoning": 0.025,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.004,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.001,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.003,
+     "differentDims": 0,
+     "edgeZone": 0.017,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.011,
+      "emphasis": 0.004,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.006,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.055,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.021,
+      "zoning": 0.023,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.171,
+     "differentDims": 1,
+     "edgeZone": 0.071,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.008,
+      "zoning": 0.024,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.026,
+     "differentDims": 0,
+     "edgeZone": 0.041,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.005,
+      "zoning": 0.006,
+      "blocks": 0.001,
+      "roof": 0.113,
+      "corners": 0.06
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.019,
+     "differentDims": 0,
+     "edgeZone": 0.026,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.128,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.042,
+     "differentDims": 0,
+     "edgeZone": 0.06,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.14,
+      "emphasis": 0.029,
+      "zoning": 0.01,
+      "blocks": 0.001,
+      "roof": 0.113,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.019,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.014,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.01,
+      "zoning": 0.001,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.004,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.001,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.058,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.023,
+      "zoning": 0.025,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.003,
+     "differentDims": 0,
+     "edgeZone": 0.014,
+     "dims": {
+      "entrance": 0.008,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.009,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.001,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.025,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.009,
+      "zoning": 0.007,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.013,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.002,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.025,
+     "differentDims": 0,
+     "edgeZone": 0.024,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.023,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.02,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.002,
+      "zoning": 0.008,
+      "blocks": 0.005,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.015,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.011,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.05
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.161,
+     "differentDims": 1,
+     "edgeZone": 0.083,
+     "dims": {
+      "entrance": 0.041,
+      "rhythm": 0.017,
+      "emphasis": 0.029,
+      "zoning": 0.023,
+      "blocks": 0.006,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.026,
+     "differentDims": 0,
+     "edgeZone": 0.058,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.006,
+      "zoning": 0.003,
+      "blocks": 0.001,
+      "roof": 0.113,
+      "corners": 0.06
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.043,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.01,
+      "zoning": 0.005,
+      "blocks": 0.005,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.004,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.001,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.079,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.033,
+      "zoning": 0.014,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.037,
+     "differentDims": 0,
+     "edgeZone": 0.046,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.135,
+      "emphasis": 0.003,
+      "zoning": 0.006,
+      "blocks": 0,
+      "roof": 0.063,
+      "corners": 0.05
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.072,
+     "differentDims": 0,
+     "edgeZone": 0.083,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.022,
+      "zoning": 0.02,
+      "blocks": 0.005,
+      "roof": 0.233,
+      "corners": 0.227
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.034,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.002,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.054,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.022,
+      "zoning": 0.024,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.033,
+     "differentDims": 0,
+     "edgeZone": 0.079,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.029,
+      "zoning": 0.014,
+      "blocks": 0.006,
+      "roof": 0.113,
+      "corners": 0.071
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.009,
+     "differentDims": 0,
+     "edgeZone": 0.039,
+     "dims": {
+      "entrance": 0.008,
+      "rhythm": 0.017,
+      "emphasis": 0.006,
+      "zoning": 0.009,
+      "blocks": 0.011,
+      "roof": 0,
+      "corners": 0.014
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.025,
+     "differentDims": 0,
+     "edgeZone": 0.064,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0.108,
+      "corners": 0.056
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.011,
+     "differentDims": 0,
+     "edgeZone": 0.078,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.017,
+      "zoning": 0.007,
+      "blocks": 0.005,
+      "roof": 0.033,
+      "corners": 0.013
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.022,
+     "differentDims": 0,
+     "edgeZone": 0.048,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.012,
+      "zoning": 0.013,
+      "blocks": 0.005,
+      "roof": 0.063,
+      "corners": 0.061
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.006,
+     "differentDims": 0,
+     "edgeZone": 0.029,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.017,
+      "zoning": 0.006,
+      "blocks": 0.005,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.035,
+     "differentDims": 0,
+     "edgeZone": 0.09,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.011,
+      "emphasis": 0.036,
+      "zoning": 0.012,
+      "blocks": 0.006,
+      "roof": 0.067,
+      "corners": 0.113
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.155,
+     "differentDims": 1,
+     "edgeZone": 0.191,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.054,
+      "zoning": 0.019,
+      "blocks": 0.01,
+      "roof": 1,
+      "corners": 0.002
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.053,
+     "differentDims": 0,
+     "edgeZone": 0.074,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.023,
+      "zoning": 0.006,
+      "blocks": 0.001,
+      "roof": 0.113,
+      "corners": 0.081
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.152,
+     "differentDims": 1,
+     "edgeZone": 0.054,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.022,
+      "zoning": 0.024,
+      "blocks": 0.005,
+      "roof": 1,
+      "corners": 0.013
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.007,
+     "differentDims": 0,
+     "edgeZone": 0.055,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.02,
+      "zoning": 0.014,
+      "blocks": 0.006,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.006,
+     "dims": {
+      "entrance": 0.008,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.157,
+     "differentDims": 1,
+     "edgeZone": 0.09,
+     "dims": {
+      "entrance": 0.037,
+      "rhythm": 0,
+      "emphasis": 0.029,
+      "zoning": 0.018,
+      "blocks": 0.006,
+      "roof": 1,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.009,
+     "differentDims": 0,
+     "edgeZone": 0.036,
+     "dims": {
+      "entrance": 0.041,
+      "rhythm": 0.017,
+      "emphasis": 0.002,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.039,
+     "differentDims": 0,
+     "edgeZone": 0.101,
+     "dims": {
+      "entrance": 0.04,
+      "rhythm": 0,
+      "emphasis": 0.019,
+      "zoning": 0.012,
+      "blocks": 0.013,
+      "roof": 0.113,
+      "corners": 0.074
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.025,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.006,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.034,
+     "differentDims": 0,
+     "edgeZone": 0.101,
+     "dims": {
+      "entrance": 0.037,
+      "rhythm": 0,
+      "emphasis": 0.008,
+      "zoning": 0.012,
+      "blocks": 0.007,
+      "roof": 0.108,
+      "corners": 0.064
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.008,
+     "differentDims": 0,
+     "edgeZone": 0.03,
+     "dims": {
+      "entrance": 0.041,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.007,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.009,
+     "differentDims": 0,
+     "edgeZone": 0.075,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.007,
+      "zoning": 0.007,
+      "blocks": 0.005,
+      "roof": 0.029,
+      "corners": 0.015
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.023,
+     "differentDims": 0,
+     "edgeZone": 0.016,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.014,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.02,
+     "differentDims": 0,
+     "edgeZone": 0.068,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.019,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0.063,
+      "corners": 0.05
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.024,
+     "differentDims": 0,
+     "edgeZone": 0.04,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.016,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.025,
+     "differentDims": 0,
+     "edgeZone": 0.056,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.009,
+      "zoning": 0.007,
+      "blocks": 0.005,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.009,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.013,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.017,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.029,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.108,
+     "differentDims": 1,
+     "edgeZone": 0.011,
+     "dims": {
+      "entrance": 0.01,
+      "rhythm": 0.017,
+      "emphasis": 0.011,
+      "zoning": 0.006,
+      "blocks": 0,
+      "roof": 0.712,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.006,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.001,
+      "blocks": 0.01,
+      "roof": 0,
+      "corners": 0.014
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.003,
+     "differentDims": 0,
+     "edgeZone": 0.008,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.009,
+     "differentDims": 0,
+     "edgeZone": 0.047,
+     "dims": {
+      "entrance": 0.039,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.004,
+      "blocks": 0.006,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.006,
+     "differentDims": 0,
+     "edgeZone": 0.026,
+     "dims": {
+      "entrance": 0.002,
+      "rhythm": 0.017,
+      "emphasis": 0.021,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.003,
+     "differentDims": 0,
+     "edgeZone": 0.037,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.006,
+      "zoning": 0.009,
+      "blocks": 0.001,
+      "roof": 0.004,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.007,
+     "differentDims": 0,
+     "edgeZone": 0.035,
+     "dims": {
+      "entrance": 0.038,
+      "rhythm": 0,
+      "emphasis": 0.005,
+      "zoning": 0.002,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.169,
+     "differentDims": 1,
+     "edgeZone": 0.103,
+     "dims": {
+      "entrance": 0.002,
+      "rhythm": 0.074,
+      "emphasis": 0.028,
+      "zoning": 0.047,
+      "blocks": 0.01,
+      "roof": 1,
+      "corners": 0.025
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.101,
+     "differentDims": 1,
+     "edgeZone": 0.036,
+     "dims": {
+      "entrance": 0.041,
+      "rhythm": 0.01,
+      "emphasis": 0.008,
+      "zoning": 0.006,
+      "blocks": 0.001,
+      "roof": 0.642,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.007,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.164,
+     "differentDims": 1,
+     "edgeZone": 0.125,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.045,
+      "zoning": 0.027,
+      "blocks": 0.006,
+      "roof": 1,
+      "corners": 0.071
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.019,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.002,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.003,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.001,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.005,
+     "differentDims": 0,
+     "edgeZone": 0.037,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.008,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.005,
+     "differentDims": 0,
+     "edgeZone": 0.033,
+     "dims": {
+      "entrance": 0.008,
+      "rhythm": 0.017,
+      "emphasis": 0.005,
+      "zoning": 0.006,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.006,
+     "differentDims": 0,
+     "edgeZone": 0.057,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.005,
+      "zoning": 0.008,
+      "blocks": 0.01,
+      "roof": 0,
+      "corners": 0.019
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.009,
+     "differentDims": 0,
+     "edgeZone": 0.066,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.011,
+      "emphasis": 0.004,
+      "zoning": 0.008,
+      "blocks": 0,
+      "roof": 0.038,
+      "corners": 0.003
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.005,
+     "differentDims": 0,
+     "edgeZone": 0.053,
+     "dims": {
+      "entrance": 0.002,
+      "rhythm": 0,
+      "emphasis": 0.02,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0.004,
+      "corners": 0.004
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.098,
+     "differentDims": 1,
+     "edgeZone": 0.156,
+     "dims": {
+      "entrance": 0.038,
+      "rhythm": 0,
+      "emphasis": 0.013,
+      "zoning": 0.014,
+      "blocks": 0.017,
+      "roof": 0.592,
+      "corners": 0.013
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.025,
+     "differentDims": 0,
+     "edgeZone": 0.042,
+     "dims": {
+      "entrance": 0.037,
+      "rhythm": 0,
+      "emphasis": 0.125,
+      "zoning": 0.009,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.023,
+     "differentDims": 0,
+     "edgeZone": 0.015,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.015,
+      "zoning": 0.003,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.025,
+     "differentDims": 0,
+     "edgeZone": 0.035,
+     "dims": {
+      "entrance": 0.037,
+      "rhythm": 0.017,
+      "emphasis": 0.113,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.125,
+     "differentDims": 1,
+     "edgeZone": 0.075,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.009,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0.65,
+      "corners": 0.062
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.025,
+     "differentDims": 0,
+     "edgeZone": 0.064,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.003,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0.108,
+      "corners": 0.056
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.003,
+     "differentDims": 0,
+     "edgeZone": 0.019,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.011,
+      "emphasis": 0.003,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.002
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.011,
+     "differentDims": 0,
+     "edgeZone": 0.102,
+     "dims": {
+      "entrance": 0.039,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.018,
+      "blocks": 0.006,
+      "roof": 0,
+      "corners": 0.013
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.017,
+     "differentDims": 0,
+     "edgeZone": 0.06,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.02,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0.063,
+      "corners": 0.029
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.014,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.005,
+      "zoning": 0.002,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.001,
+     "differentDims": 0,
+     "edgeZone": 0.012,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.003,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.011,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.003,
+      "blocks": 0,
+      "roof": 0.004,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.007,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.003,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.02,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.003,
+      "blocks": 0,
+      "roof": 0.004,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.014,
+     "differentDims": 0,
+     "edgeZone": 0.033,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.002,
+      "zoning": 0.014,
+      "blocks": 0.005,
+      "roof": 0.063,
+      "corners": 0.011
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.007,
+     "differentDims": 0,
+     "edgeZone": 0.04,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.022,
+      "zoning": 0.014,
+      "blocks": 0.005,
+      "roof": 0,
+      "corners": 0.011
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.004,
+     "differentDims": 0,
+     "edgeZone": 0.011,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0.001,
+      "blocks": 0.01,
+      "roof": 0,
+      "corners": 0.014
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.114,
+     "differentDims": 1,
+     "edgeZone": 0.083,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.017,
+      "emphasis": 0.136,
+      "zoning": 0.006,
+      "blocks": 0.002,
+      "roof": 0.579,
+      "corners": 0.06
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.012,
+     "differentDims": 0,
+     "edgeZone": 0.109,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.032,
+      "zoning": 0.02,
+      "blocks": 0.01,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.021,
+     "differentDims": 0,
+     "edgeZone": 0.032,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.017,
+      "emphasis": 0.014,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0.063,
+      "corners": 0.05
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.002,
+     "differentDims": 0,
+     "edgeZone": 0.009,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.008,
+      "zoning": 0.004,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.174,
+     "differentDims": 1,
+     "edgeZone": 0.15,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.074,
+      "emphasis": 0.038,
+      "zoning": 0.057,
+      "blocks": 0.014,
+      "roof": 1,
+      "corners": 0.037
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.041,
+     "differentDims": 0,
+     "edgeZone": 0.15,
+     "dims": {
+      "entrance": 0.002,
+      "rhythm": 0.074,
+      "emphasis": 0.01,
+      "zoning": 0.02,
+      "blocks": 0.011,
+      "roof": 0.146,
+      "corners": 0.025
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.027,
+     "differentDims": 0,
+     "edgeZone": 0.051,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.018,
+      "zoning": 0.005,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0.021
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.024,
+     "differentDims": 0,
+     "edgeZone": 0.02,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.146,
+      "emphasis": 0.014,
+      "zoning": 0.005,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "d": 0.15
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.036,
+     "differentDims": 0,
+     "edgeZone": 0.093,
+     "dims": {
+      "entrance": 0.057,
+      "rhythm": 0.146,
+      "emphasis": 0.037,
+      "zoning": 0.011,
+      "blocks": 0.001,
+      "roof": 0,
+      "corners": 0.003
+     },
+     "d": 0.15
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "لا تعديل صغير قُبل.",
+   "vizCount": 0,
+   "ms": 4788
+  },
+  {
+   "id": "ADV-03",
+   "title": "One-Axis Explosion",
+   "intentAr": "تغيير محور واحد جذريًا لا يُقبل وحده: يجب ألا يقل عدد الأبعاد المختلفة المطلوبة (≥4 من 7) استقلالًا عن الدرجة الكلية.",
+   "expected": "accepted=false; differentDims small",
+   "observed": {
+    "variants": 22,
+    "acceptedAsNew": 2,
+    "maxDifferentDims": 6,
+    "maxNovelty": 0.688,
+    "aboveThresholdButFewDims": 5,
+    "rows": [
+     {
+      "axis": "entrance",
+      "option": "portal-panel",
+      "novelty": 0.041,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "novelty": 0.361,
+      "differentDims": 2,
+      "accepted": false
+     },
+     {
+      "axis": "entrance",
+      "option": "pilasters",
+      "novelty": 0.049,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "entrance",
+      "option": "canopy-band",
+      "novelty": 0.231,
+      "differentDims": 3,
+      "accepted": false
+     },
+     {
+      "axis": "entrance",
+      "option": "side-block",
+      "novelty": 0.668,
+      "differentDims": 6,
+      "accepted": true
+     },
+     {
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "novelty": 0.483,
+      "differentDims": 3,
+      "accepted": false
+     },
+     {
+      "axis": "grouping",
+      "option": "ribbon",
+      "novelty": 0.095,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "grouping",
+      "option": "panel",
+      "novelty": 0.119,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "grouping",
+      "option": "head-line",
+      "novelty": 0.303,
+      "differentDims": 2,
+      "accepted": false
+     },
+     {
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "novelty": 0,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "novelty": 0.35,
+      "differentDims": 2,
+      "accepted": false
+     },
+     {
+      "axis": "zoning",
+      "option": "base",
+      "novelty": 0.253,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "zoning",
+      "option": "tripartite",
+      "novelty": 0.688,
+      "differentDims": 5,
+      "accepted": true
+     },
+     {
+      "axis": "zoning",
+      "option": "side-split",
+      "novelty": 0.638,
+      "differentDims": 6,
+      "accepted": false
+     },
+     {
+      "axis": "zoning",
+      "option": "attic",
+      "novelty": 0.545,
+      "differentDims": 5,
+      "accepted": false
+     },
+     {
+      "axis": "roof",
+      "option": "thin-cap",
+      "novelty": 0.161,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "axis": "roof",
+      "option": "deep-fascia",
+      "novelty": 0.287,
+      "differentDims": 2,
+      "accepted": false
+     },
+     {
+      "axis": "roof",
+      "option": "stepped",
+      "novelty": 0.274,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "axis": "roof",
+      "option": "raised-entry",
+      "novelty": 0.268,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "axis": "corner",
+      "option": "posts-both",
+      "novelty": 0.42,
+      "differentDims": 3,
+      "accepted": false
+     },
+     {
+      "axis": "corner",
+      "option": "post-one",
+      "novelty": 0.355,
+      "differentDims": 2,
+      "accepted": false
+     },
+     {
+      "axis": "corner",
+      "option": "quoins",
+      "novelty": 0.143,
+      "differentDims": 1,
+      "accepted": false
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.041,
+     "differentDims": 0,
+     "edgeZone": 0.491,
+     "dims": {
+      "entrance": 0.141,
+      "rhythm": 0,
+      "emphasis": 0.026,
+      "zoning": 0.123,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "axis": "entrance",
+     "option": "portal-panel"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.361,
+     "differentDims": 2,
+     "edgeZone": 0.557,
+     "dims": {
+      "entrance": 0.365,
+      "rhythm": 0,
+      "emphasis": 0.262,
+      "zoning": 0.302,
+      "blocks": 0.6,
+      "roof": 1,
+      "corners": 0
+     },
+     "axis": "entrance",
+     "option": "tower-shaft"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.049,
+     "differentDims": 0,
+     "edgeZone": 0.298,
+     "dims": {
+      "entrance": 0.111,
+      "rhythm": 0,
+      "emphasis": 0.185,
+      "zoning": 0.045,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "axis": "entrance",
+     "option": "pilasters"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.231,
+     "differentDims": 3,
+     "edgeZone": 0.4,
+     "dims": {
+      "entrance": 0.499,
+      "rhythm": 0.548,
+      "emphasis": 0.543,
+      "zoning": 0.029,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "axis": "entrance",
+     "option": "canopy-band"
+    },
+    {
+     "label": "SAME",
+     "accepted": true,
+     "novelty": 0.668,
+     "differentDims": 6,
+     "edgeZone": 0.661,
+     "dims": {
+      "entrance": 1,
+      "rhythm": 0.502,
+      "emphasis": 0.2,
+      "zoning": 0.748,
+      "blocks": 0.525,
+      "roof": 1,
+      "corners": 0.698
+     },
+     "axis": "entrance",
+     "option": "side-block"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.483,
+     "differentDims": 3,
+     "edgeZone": 0.663,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.386,
+      "emphasis": 0.433,
+      "zoning": 0.582,
+      "blocks": 0.75,
+      "roof": 1,
+      "corners": 0.229
+     },
+     "axis": "grouping",
+     "option": "vertical-strips"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.095,
+     "differentDims": 0,
+     "edgeZone": 0.465,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.327,
+      "emphasis": 0.194,
+      "zoning": 0.101,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.042
+     },
+     "axis": "grouping",
+     "option": "ribbon"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.119,
+     "differentDims": 0,
+     "edgeZone": 0.568,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.306,
+      "emphasis": 0.221,
+      "zoning": 0.143,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.161
+     },
+     "axis": "grouping",
+     "option": "panel"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.303,
+     "differentDims": 2,
+     "edgeZone": 0.625,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 1,
+      "emphasis": 0.503,
+      "zoning": 0.01,
+      "blocks": 0.4,
+      "roof": 0,
+      "corners": 0.208
+     },
+     "axis": "grouping",
+     "option": "head-line"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "axis": "emphasis",
+     "option": "horizontal-courses"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.35,
+     "differentDims": 2,
+     "edgeZone": 0.524,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.315,
+      "emphasis": 0.355,
+      "zoning": 0.127,
+      "blocks": 0.525,
+      "roof": 1,
+      "corners": 0.125
+     },
+     "axis": "emphasis",
+     "option": "vertical-rhythm"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.253,
+     "differentDims": 0,
+     "edgeZone": 0.227,
+     "dims": {
+      "entrance": 0.346,
+      "rhythm": 0,
+      "emphasis": 0.418,
+      "zoning": 0.209,
+      "blocks": 0.4,
+      "roof": 0,
+      "corners": 0.396
+     },
+     "axis": "zoning",
+     "option": "base"
+    },
+    {
+     "label": "SAME",
+     "accepted": true,
+     "novelty": 0.688,
+     "differentDims": 5,
+     "edgeZone": 0.386,
+     "dims": {
+      "entrance": 0.346,
+      "rhythm": 0,
+      "emphasis": 0.65,
+      "zoning": 0.818,
+      "blocks": 1,
+      "roof": 1,
+      "corners": 1
+     },
+     "axis": "zoning",
+     "option": "tripartite"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.638,
+     "differentDims": 6,
+     "edgeZone": 0.274,
+     "dims": {
+      "entrance": 0.842,
+      "rhythm": 0.479,
+      "emphasis": 0.128,
+      "zoning": 0.647,
+      "blocks": 0.675,
+      "roof": 1,
+      "corners": 0.698
+     },
+     "axis": "zoning",
+     "option": "side-split"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.545,
+     "differentDims": 5,
+     "edgeZone": 0.251,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.594,
+      "zoning": 0.609,
+      "blocks": 0.925,
+      "roof": 1,
+      "corners": 0.688
+     },
+     "axis": "zoning",
+     "option": "attic"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.161,
+     "differentDims": 0,
+     "edgeZone": 0.272,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.307,
+      "zoning": 0.051,
+      "blocks": 0.4,
+      "roof": 0.138,
+      "corners": 0.229
+     },
+     "axis": "roof",
+     "option": "thin-cap"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.287,
+     "differentDims": 2,
+     "edgeZone": 0.272,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.496,
+      "zoning": 0.203,
+      "blocks": 0.4,
+      "roof": 0.554,
+      "corners": 0.354
+     },
+     "axis": "roof",
+     "option": "deep-fascia"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.274,
+     "differentDims": 1,
+     "edgeZone": 0.289,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.436,
+      "zoning": 0.138,
+      "blocks": 0.4,
+      "roof": 0.654,
+      "corners": 0.292
+     },
+     "axis": "roof",
+     "option": "stepped"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.268,
+     "differentDims": 1,
+     "edgeZone": 0.351,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.433,
+      "zoning": 0.109,
+      "blocks": 0.4,
+      "roof": 0.708,
+      "corners": 0.229
+     },
+     "axis": "roof",
+     "option": "raised-entry"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.42,
+     "differentDims": 3,
+     "edgeZone": 0.372,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.373,
+      "zoning": 0.107,
+      "blocks": 0.525,
+      "roof": 1,
+      "corners": 0.938
+     },
+     "axis": "corner",
+     "option": "posts-both"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.355,
+     "differentDims": 2,
+     "edgeZone": 0.312,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.349,
+      "zoning": 0.092,
+      "blocks": 0.45,
+      "roof": 1,
+      "corners": 0.594
+     },
+     "axis": "corner",
+     "option": "post-one"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.143,
+     "differentDims": 1,
+     "edgeZone": 0.236,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0.091,
+      "zoning": 0.029,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.881
+     },
+     "axis": "corner",
+     "option": "quoins"
+    }
+   ],
+   "status": "DEFECT",
+   "defectClass": "signature",
+   "note": "2 حالة تغيير محور واحد قُبلت كتصميم جديد (الأبعاد تتلوّث ببعضها: محور واحد حرّك 6 أبعاد).",
+   "vizCount": 0,
+   "ms": 364
+  },
+  {
+   "id": "ADV-04",
+   "title": "Different Recipe, Same Result",
+   "intentAr": "وصفتان باسماء/مجموعات/ترتيب/تقسيم داخلي مختلف تنتجان الهندسة النهائية نفسها ⇒ رفض.",
+   "expected": "novelty≈0 && accepted=false",
+   "observed": {
+    "novelty": 0.007,
+    "differentDims": 0,
+    "movedDims": 0,
+    "edgeZone": 0.319,
+    "edgeAll": 0.154,
+    "accepted": false,
+    "verdictAr": "قريب جدًا (مرفوض كتكرار)",
+    "dims": {
+     "entrance": 0.043,
+     "rhythm": 0,
+     "emphasis": 0.004,
+     "zoning": 0,
+     "blocks": 0,
+     "roof": 0,
+     "corners": 0
+    },
+    "gridDiff": {
+     "cellsDiffer": 0.0975,
+     "valueMAD": 0.0605
+    }
+   },
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.007,
+     "differentDims": 0,
+     "edgeZone": 0.319,
+     "dims": {
+      "entrance": 0.043,
+      "rhythm": 0,
+      "emphasis": 0.004,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     }
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "تباعد 0.007؛ الخلايا المختلفة 0.0975",
+   "vizCount": 1,
+   "ms": 35
+  },
+  {
+   "id": "ADV-05",
+   "title": "Same Recipe, Different Geometry",
+   "intentAr": "الوصفة نفسها على C1/C4/C7 (+RECT/L/U): التوقيع يعكس الناتج المحقق على كل مبنى، لا اسم الوصفة. ويكون التوقيع صفر المسافة لنفس الوصفة على نفس المبنى.",
+   "expected": "cross-building signatures differ where realized grids differ; same building twice = 0",
+   "observed": {
+    "selfDistance": 0,
+    "pairs": [
+     {
+      "a": "C1",
+      "b": "C4",
+      "novelty": 0.334,
+      "cellsDiffer": 0.5057
+     },
+     {
+      "a": "C1",
+      "b": "C7",
+      "novelty": 0.379,
+      "cellsDiffer": 0.545
+     },
+     {
+      "a": "C1",
+      "b": "RECT",
+      "novelty": 0.2,
+      "cellsDiffer": 0.415
+     },
+     {
+      "a": "C1",
+      "b": "L",
+      "novelty": 0.194,
+      "cellsDiffer": 0.47
+     },
+     {
+      "a": "C1",
+      "b": "U",
+      "novelty": 0.36,
+      "cellsDiffer": 0.4536
+     },
+     {
+      "a": "C4",
+      "b": "C7",
+      "novelty": 0.247,
+      "cellsDiffer": 0.6347
+     },
+     {
+      "a": "C4",
+      "b": "RECT",
+      "novelty": 0.207,
+      "cellsDiffer": 0.435
+     },
+     {
+      "a": "C4",
+      "b": "L",
+      "novelty": 0.443,
+      "cellsDiffer": 0.4314
+     },
+     {
+      "a": "C4",
+      "b": "U",
+      "novelty": 0.395,
+      "cellsDiffer": 0.4453
+     },
+     {
+      "a": "C7",
+      "b": "RECT",
+      "novelty": 0.307,
+      "cellsDiffer": 0.5601
+     },
+     {
+      "a": "C7",
+      "b": "L",
+      "novelty": 0.5,
+      "cellsDiffer": 0.6001
+     },
+     {
+      "a": "C7",
+      "b": "U",
+      "novelty": 0.409,
+      "cellsDiffer": 0.5869
+     },
+     {
+      "a": "RECT",
+      "b": "L",
+      "novelty": 0.267,
+      "cellsDiffer": 0.4194
+     },
+     {
+      "a": "RECT",
+      "b": "U",
+      "novelty": 0.227,
+      "cellsDiffer": 0.2913
+     },
+     {
+      "a": "L",
+      "b": "U",
+      "novelty": 0.295,
+      "cellsDiffer": 0.3908
+     }
+    ],
+    "missedGeometryDifference": 0,
+    "of": 15
+   },
+   "pairs": [],
+   "status": "INFO",
+   "defectClass": null,
+   "note": "مسافة الذات 0؛ عدد أزواج الاختلاف الهندسي المتجاهَل 0/15. (المسافات بين مبنيين مختلفين ليست دليل تفرد.)",
+   "vizCount": 0,
+   "ms": 2827
+  },
+  {
+   "id": "ADV-06",
+   "title": "Edge Doppelgänger",
+   "intentAr": "مفهومان بتقسيم مواد/قيم مختلف جدًا وحدود متطابقة ⇒ تنوع بنيوي منخفض ورفض.",
+   "expected": "edge≈0 && accepted=false",
+   "observed": {
+    "novelty": 0,
+    "differentDims": 0,
+    "movedDims": 0,
+    "edgeZone": 0,
+    "edgeAll": 0,
+    "accepted": false,
+    "verdictAr": "قريب جدًا (مرفوض كتكرار)",
+    "dims": {
+     "entrance": 0,
+     "rhythm": 0,
+     "emphasis": 0,
+     "zoning": 0,
+     "blocks": 0,
+     "roof": 0,
+     "corners": 0
+    }
+   },
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     }
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "حواف 0، تباعد 0",
+   "vizCount": 1,
+   "ms": 37
+  },
+  {
+   "id": "ADV-07",
+   "title": "Grey Collapse",
+   "intentAr": "مفهومان يختلفان باللون/الخامة وينهاران إلى الشكل نفسه في Value-grey ⇒ لا يُعتبر اختلافهما المعماري قويًا. (الرمادي الموحّد تشخيصي.)",
+   "expected": "accepted=false when value-grey composition equal",
+   "observed": {
+    "novelty": 0,
+    "differentDims": 0,
+    "movedDims": 0,
+    "edgeZone": 0,
+    "edgeAll": 0,
+    "accepted": false,
+    "verdictAr": "قريب جدًا (مرفوض كتكرار)",
+    "dims": {
+     "entrance": 0,
+     "rhythm": 0,
+     "emphasis": 0,
+     "zoning": 0,
+     "blocks": 0,
+     "roof": 0,
+     "corners": 0
+    },
+    "valueGridDiff": {
+     "cellsDiffer": 0.5754,
+     "valueMAD": 0.0921
+    }
+   },
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     }
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "تباعد 0؛ فرق القيمة الرمادية 0.0921",
+   "vizCount": 1,
+   "ms": 71
+  },
+  {
+   "id": "ADV-08",
+   "title": "Opening Camouflage",
+   "intentAr": "منطقة بصرية تلاصق الفتحة وتخفيها (تباين قيمة منخفض مع الزجاج/الباب). الهندسة الأساسية يجب أن تبقى كما هي (شرط 1) وقراءة الفتحة بصريًا محفوظة (شرط 2): الفشل في الثاني يجب أن تلتقطه المعقولية.",
+   "expected": "geometry unchanged=true; legibility gate FAILS for camouflaged concept",
+   "observed": {
+    "geometryUnchanged": true,
+    "darkRing": {
+     "plausibilityPass": false,
+     "failedChecks": [
+      "coverage",
+      "entry-contrast"
+     ],
+     "legibility": {
+      "worstContrast": 0.05,
+      "lowContrastOpenings": 8,
+      "openings": 8
+     }
+    },
+    "lightRing": {
+     "plausibilityPass": false,
+     "legibility": {
+      "worstContrast": 0.67,
+      "lowContrastOpenings": 0,
+      "openings": 8
+     }
+    },
+    "generatedCandidatesWithHiddenOpening": 31,
+    "generatedCandidatesWithFloatingElements": 12,
+    "of": 72
+   },
+   "pairs": [],
+   "status": "DEFECT",
+   "defectClass": "generator",
+   "note": "بوابة المعقولية رفضت الحالة لأسباب أخرى (coverage,entry-contrast) وليس لفقد وضوح الفتحات (فتحات منخفضة التباين 8/8؛ لا فحص قراءة للنوافذ في المولّد). مرشحون مولّدون يخفون فتحة: 31/72.",
+   "vizCount": 1,
+   "ms": 9
+  },
+  {
+   "id": "ADV-09",
+   "title": "Fidelity vs Novelty Attack",
+   "intentAr": "مفهوم يحتاج تحريك نافذة أو تغيير جدار: يسقط فورًا (Fidelity FAIL) ويُتجاهل التفرد. كما يجب ألا يقبل المسار مصدرًا معدّلًا سرًا.",
+   "expected": "fidelity=FAIL; tampered source detected",
+   "observed": {
+    "coverFidelity": "FAIL",
+    "tamperedRunProduced": true,
+    "tamperError": null,
+    "fingerprintOriginal": "3e35ee34b5",
+    "fingerprintTampered": "d20ec787d6",
+    "pipelineRaisedMismatch": false
+   },
+   "pairs": [],
+   "status": "DEFECT",
+   "defectClass": "generator",
+   "note": "غطاء النافذة: سقط كما يجب. المصدر المعدّل: شُغّل المسار وأنتج مفاهيم دون أي إنذار ببصمة الهندسة المعتمدة.",
+   "vizCount": 0,
+   "ms": 140
+  },
+  {
+   "id": "ADV-10",
+   "title": "C7 Hard-Case Attack",
+   "intentAr": "C7 إلزامي: 12 مفهومًا ثم أفضل ثلاثة؛ إن لم توجد ثلاثة متنوعة فعلًا (بمقياس المختبِر المستقل لمحور القيادة المحقق) فالنتيجة INSUFFICIENT DESIGN-SPACE COVERAGE دون خفض العتبة.",
+   "expected": "3 distinct realized lead axes, else INSUFFICIENT",
+   "observed": {
+    "selected": [
+     "K05",
+     "K07",
+     "K12"
+    ],
+    "leads": [
+     {
+      "id": "K05",
+      "lead": "entrance",
+      "profile": {
+       "entrance": 0.659,
+       "corners": 0.584,
+       "emphasis": 0.529,
+       "blocks": 0.5,
+       "rhythm": 0.4,
+       "roof": 0.346,
+       "zoning": 0.343
+      }
+     },
+     {
+      "id": "K07",
+      "lead": "entrance",
+      "profile": {
+       "entrance": 1,
+       "roof": 1,
+       "rhythm": 0.533,
+       "corners": 0.5,
+       "zoning": 0.487,
+       "blocks": 0.45,
+       "emphasis": 0.189
+      }
+     },
+     {
+      "id": "K12",
+      "lead": "blocks",
+      "profile": {
+       "blocks": 1,
+       "roof": 1,
+       "corners": 1,
+       "zoning": 0.746,
+       "entrance": 0.659,
+       "rhythm": 0.575,
+       "emphasis": 0.192
+      }
+     }
+    ],
+    "distinctLeadAxes": 2,
+    "pairwiseAccepted": true,
+    "flood36": {
+     "selected": [
+      "K10",
+      "K28",
+      "K35"
+     ],
+     "leads": [
+      "roof",
+      "entrance",
+      "corners"
+     ]
+    }
+   },
+   "pairs": [],
+   "status": "LIMITATION",
+   "defectClass": "design-space",
+   "note": "RESULT = INSUFFICIENT DESIGN-SPACE COVERAGE: محاور القيادة المحققة entrance/entrance/blocks (مختلف 2/3)، مع أن كل الأزواج مقبولة .",
+   "vizCount": 1,
+   "ms": 3312
+  },
+  {
+   "id": "ADV-11",
+   "title": "Triplet Clustering",
+   "intentAr": "ثلاثية كل أزواجها مقبولة لكنها من العائلة نفسها يجب أن يكشفها Diversity Coverage (غير موجودة في النموذج). نقيس كم ثلاثية تمر زوجيًا وهي من عائلة واحدة بمقياس المختبِر.",
+   "expected": "generator should reject same-family triples (Coverage); current prototype lacks Coverage",
+   "observed": {
+    "C1": {
+     "pairwisePassingTriples": 32,
+     "ofWhichSameFamily": 25,
+     "selectedLeadAxes": [
+      "entrance",
+      "entrance",
+      "roof"
+     ],
+     "selectedDistinctLeads": 2
+    },
+    "C4": {
+     "pairwisePassingTriples": 17,
+     "ofWhichSameFamily": 17,
+     "selectedLeadAxes": [
+      "entrance",
+      "entrance",
+      "blocks"
+     ],
+     "selectedDistinctLeads": 2
+    },
+    "C7": {
+     "pairwisePassingTriples": 49,
+     "ofWhichSameFamily": 38,
+     "selectedLeadAxes": [
+      "entrance",
+      "entrance",
+      "blocks"
+     ],
+     "selectedDistinctLeads": 2
+    },
+    "RECT": {
+     "pairwisePassingTriples": 52,
+     "ofWhichSameFamily": 32,
+     "selectedLeadAxes": [
+      "blocks",
+      "corners",
+      "entrance"
+     ],
+     "selectedDistinctLeads": 3
+    },
+    "L": {
+     "pairwisePassingTriples": 27,
+     "ofWhichSameFamily": 14,
+     "selectedLeadAxes": [
+      "roof",
+      "blocks",
+      "entrance"
+     ],
+     "selectedDistinctLeads": 3
+    },
+    "U": {
+     "pairwisePassingTriples": 14,
+     "ofWhichSameFamily": 5,
+     "selectedLeadAxes": [
+      "blocks",
+      "entrance",
+      "roof"
+     ],
+     "selectedDistinctLeads": 3
+    }
+   },
+   "pairs": [],
+   "status": "DEFECT",
+   "defectClass": "generator",
+   "note": "Diversity Coverage غير منفَّذ في الاختيار؛ قياس المختبِر في الجدول.",
+   "vizCount": 0,
+   "ms": 573
+  },
+  {
+   "id": "ADV-12",
+   "title": "Fake Coverage",
+   "intentAr": "الوسوم (primitive labels) لا تُحتسب تغطية: ثلاثة مفاهيم بوصفات مختلفة الوسوم والناتج المحقق متقارب ⇒ يجب كشفها. نقيس تباين الوسوم مقابل الناتج.",
+   "expected": "label-different but realized-near pairs are rejected",
+   "observed": {
+    "pairsChecked": 396,
+    "labelDiffersButRealizedNear": 33,
+    "examples": [
+     {
+      "n": "C1",
+      "a": "K01",
+      "b": "K05",
+      "labelAxesDiffer": 5,
+      "differentDims": 1,
+      "edgeZone": 0.573,
+      "acceptedByGen": false
+     },
+     {
+      "n": "C1",
+      "a": "K01",
+      "b": "K12",
+      "labelAxesDiffer": 5,
+      "differentDims": 2,
+      "edgeZone": 0.551,
+      "acceptedByGen": false
+     },
+     {
+      "n": "C1",
+      "a": "K06",
+      "b": "K10",
+      "labelAxesDiffer": 5,
+      "differentDims": 2,
+      "edgeZone": 0.712,
+      "acceptedByGen": false
+     },
+     {
+      "n": "C1",
+      "a": "K10",
+      "b": "K11",
+      "labelAxesDiffer": 5,
+      "differentDims": 2,
+      "edgeZone": 0.67,
+      "acceptedByGen": false
+     },
+     {
+      "n": "C4",
+      "a": "K02",
+      "b": "K06",
+      "labelAxesDiffer": 5,
+      "differentDims": 2,
+      "edgeZone": 0.804,
+      "acceptedByGen": false
+     },
+     {
+      "n": "C4",
+      "a": "K02",
+      "b": "K10",
+      "labelAxesDiffer": 6,
+      "differentDims": 2,
+      "edgeZone": 0.744,
+      "acceptedByGen": false
+     }
+    ]
+   },
+   "pairs": [],
+   "status": "INFO",
+   "defectClass": null,
+   "note": "33/396 زوجًا تختلف وصفاته في ≥5 محاور بينما ناتجه المحقق قريب. هذه الأزواج لا تدخل في الاختيار إلا إن قبلها التوقيع.",
+   "vizCount": 0,
+   "ms": 383
+  },
+  {
+   "id": "ADV-13",
+   "title": "Permutation Attack",
+   "intentAr": "ترتيب المفردات الداخلية أو ترتيب المرشحين لا يغيّر الناتج المحقق للمدخل نفسه.",
+   "expected": "selection invariant to candidate order; pool invariant to vocabulary order",
+   "observed": {
+    "candidateOrderChangedSelection": "0/10",
+    "vocabularyOrderChangedSelection": true,
+    "poolOverlapAfterVocabReverse": "0/12"
+   },
+   "pairs": [],
+   "status": "DEFECT",
+   "defectClass": "generator",
+   "note": "ترتيب المرشحين غيّر الاختيار في 0/10؛ عكس ترتيب المفردات غيّر الاختيار (تقاطع المجموعة 0/12).",
+   "vizCount": 0,
+   "ms": 1397
+  },
+  {
+   "id": "ADV-14",
+   "title": "Candidate Flood",
+   "intentAr": "100 مفهوم متقارب (عنقود معماري واحد) لا يُنتج بالصدفة ثلاثية تتجاوز العتبة.",
+   "expected": "no accepted triple from one cluster (selected=null)",
+   "observed": {
+    "clusterCandidates": 100,
+    "selected": null,
+    "selectedLeads": null,
+    "randomPool": {
+     "size": 100,
+     "selected": [
+      "K05",
+      "K09",
+      "K63"
+     ],
+     "minNovelty": 0.73
+    }
+   },
+   "pairs": [],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "لا ثلاثية من العنقود.",
+   "vizCount": 0,
+   "ms": 17930
+  },
+  {
+   "id": "ADV-15",
+   "title": "Threshold Boundary",
+   "intentAr": "حالات حول 0.349/0.350/0.351: فرق عددي ضئيل لا يصير حقيقة معمارية مطلقة؛ تُسجَّل الحدودية للمراجعة.",
+   "expected": "boundary pairs listed; sensitivity reported",
+   "observed": {
+    "boundaryPairs": 116,
+    "below035": 54,
+    "atOrAbove035": 62,
+    "decidedByThresholdAlone": 1,
+    "sample": [
+     {
+      "n": "C1",
+      "a": "K02",
+      "b": "K13",
+      "novelty": 0.342,
+      "differentDims": 2,
+      "edgeZone": 0.377,
+      "accepted": false,
+      "dims": {
+       "entrance": 0.365,
+       "rhythm": 0,
+       "emphasis": 0.06,
+       "zoning": 0.282,
+       "blocks": 0.227,
+       "roof": 1,
+       "corners": 0.459
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K04",
+      "b": "K19",
+      "novelty": 0.344,
+      "differentDims": 2,
+      "edgeZone": 0.572,
+      "accepted": false,
+      "dims": {
+       "entrance": 0.141,
+       "rhythm": 0.193,
+       "emphasis": 0.101,
+       "zoning": 0.088,
+       "blocks": 0.649,
+       "roof": 1,
+       "corners": 0.239
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K04",
+      "b": "K54",
+      "novelty": 0.345,
+      "differentDims": 3,
+      "edgeZone": 0.535,
+      "accepted": false,
+      "dims": {
+       "entrance": 0,
+       "rhythm": 0.188,
+       "emphasis": 0.114,
+       "zoning": 0.115,
+       "blocks": 0.556,
+       "roof": 0.842,
+       "corners": 0.6
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K05",
+      "b": "K17",
+      "novelty": 0.346,
+      "differentDims": 2,
+      "edgeZone": 0.809,
+      "accepted": false,
+      "dims": {
+       "entrance": 1,
+       "rhythm": 0.446,
+       "emphasis": 0.111,
+       "zoning": 0.092,
+       "blocks": 0.232,
+       "roof": 0.517,
+       "corners": 0.021
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K06",
+      "b": "K27",
+      "novelty": 0.346,
+      "differentDims": 2,
+      "edgeZone": 0.518,
+      "accepted": false,
+      "dims": {
+       "entrance": 0.584,
+       "rhythm": 0.152,
+       "emphasis": 0.094,
+       "zoning": 0.368,
+       "blocks": 0.551,
+       "roof": 0.246,
+       "corners": 0.429
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K06",
+      "b": "K56",
+      "novelty": 0.353,
+      "differentDims": 2,
+      "edgeZone": 0.453,
+      "accepted": false,
+      "dims": {
+       "entrance": 0.254,
+       "rhythm": 0.373,
+       "emphasis": 0.284,
+       "zoning": 0.299,
+       "blocks": 0.543,
+       "roof": 0.246,
+       "corners": 0.471
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K07",
+      "b": "K17",
+      "novelty": 0.345,
+      "differentDims": 3,
+      "edgeZone": 0.563,
+      "accepted": false,
+      "dims": {
+       "entrance": 0.224,
+       "rhythm": 0.246,
+       "emphasis": 0.6,
+       "zoning": 0.111,
+       "blocks": 0.491,
+       "roof": 0.725,
+       "corners": 0.021
+      }
+     },
+     {
+      "n": "C1",
+      "a": "K08",
+      "b": "K22",
+      "novelty": 0.35,
+      "differentDims": 3,
+      "edgeZone": 0.479,
+      "accepted": false,
+      "dims": {
+       "entrance": 0.328,
+       "rhythm": 0,
+       "emphasis": 0.187,
+       "zoning": 0.154,
+       "blocks": 0.46,
+       "roof": 0.692,
+       "corners": 0.626
+      }
+     }
+    ]
+   },
+   "pairs": [],
+   "status": "DEFECT",
+   "defectClass": "threshold",
+   "note": "116 زوجًا حدوديًا (0.34–0.36)؛ 1 منها قرارها يعتمد على العتبة وحدها. القطع ثنائي بلا نطاق عدم يقين.",
+   "vizCount": 0,
+   "ms": 9641
+  },
+  {
+   "id": "ADV-16",
+   "title": "Mirror / Symmetry Cheat",
+   "intentAr": "انعكاس التكوين أفقيًا لا يصنع «اختراعًا جديدًا»: يجب وصفه Variant of same architectural family لا Genuinely distinct.",
+   "expected": "accepted=false (or labelled same family)",
+   "observed": {
+    "tested": 18,
+    "acceptedAsDistinct": 0,
+    "maxNovelty": 0.198,
+    "rows": [
+     {
+      "n": "C1",
+      "id": "K03",
+      "novelty": 0.02,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "C1",
+      "id": "K08",
+      "novelty": 0.172,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "C1",
+      "id": "K11",
+      "novelty": 0.169,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "C4",
+      "id": "K01",
+      "novelty": 0.013,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "C4",
+      "id": "K02",
+      "novelty": 0.035,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "C4",
+      "id": "K07",
+      "novelty": 0.17,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "C7",
+      "id": "K05",
+      "novelty": 0.003,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "C7",
+      "id": "K07",
+      "novelty": 0.193,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "C7",
+      "id": "K12",
+      "novelty": 0.026,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "RECT",
+      "id": "K04",
+      "novelty": 0.123,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "RECT",
+      "id": "K05",
+      "novelty": 0,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "RECT",
+      "id": "K09",
+      "novelty": 0.198,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "L",
+      "id": "K03",
+      "novelty": 0.108,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "L",
+      "id": "K07",
+      "novelty": 0.157,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "L",
+      "id": "K08",
+      "novelty": 0.089,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "U",
+      "id": "K03",
+      "novelty": 0.037,
+      "differentDims": 0,
+      "accepted": false
+     },
+     {
+      "n": "U",
+      "id": "K05",
+      "novelty": 0.186,
+      "differentDims": 1,
+      "accepted": false
+     },
+     {
+      "n": "U",
+      "id": "K07",
+      "novelty": 0,
+      "differentDims": 0,
+      "accepted": false
+     }
+    ]
+   },
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.02,
+     "differentDims": 0,
+     "edgeZone": 0.604,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.015,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.125
+     },
+     "n": "C1",
+     "id": "K03"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.172,
+     "differentDims": 1,
+     "edgeZone": 1,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.131,
+      "blocks": 0.076,
+      "roof": 0,
+      "corners": 1
+     },
+     "n": "C1",
+     "id": "K08"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.169,
+     "differentDims": 1,
+     "edgeZone": 0.803,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.051,
+      "blocks": 0.13,
+      "roof": 0,
+      "corners": 1
+     },
+     "n": "C1",
+     "id": "K11"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.013,
+     "differentDims": 0,
+     "edgeZone": 0.864,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.034,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0.059
+     },
+     "n": "C4",
+     "id": "K01"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.035,
+     "differentDims": 0,
+     "edgeZone": 1,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.157,
+      "blocks": 0.088,
+      "roof": 0,
+      "corners": 0
+     },
+     "n": "C4",
+     "id": "K02"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.17,
+     "differentDims": 1,
+     "edgeZone": 0.539,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.017,
+      "blocks": 0.3,
+      "roof": 0,
+      "corners": 0.875
+     },
+     "n": "C4",
+     "id": "K07"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.003,
+     "differentDims": 0,
+     "edgeZone": 0.464,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.018,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "n": "C7",
+     "id": "K05"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.193,
+     "differentDims": 1,
+     "edgeZone": 0.612,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.049,
+      "blocks": 0.3,
+      "roof": 0,
+      "corners": 1
+     },
+     "n": "C7",
+     "id": "K07"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.026,
+     "differentDims": 0,
+     "edgeZone": 0.65,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.041,
+      "blocks": 0.035,
+      "roof": 0,
+      "corners": 0.105
+     },
+     "n": "C7",
+     "id": "K12"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.123,
+     "differentDims": 1,
+     "edgeZone": 0.122,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.021,
+      "blocks": 0.008,
+      "roof": 0,
+      "corners": 0.832
+     },
+     "n": "RECT",
+     "id": "K04"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "n": "RECT",
+     "id": "K05"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.198,
+     "differentDims": 1,
+     "edgeZone": 1,
+     "dims": {
+      "entrance": 0.01,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.206,
+      "blocks": 0.17,
+      "roof": 0,
+      "corners": 1
+     },
+     "n": "RECT",
+     "id": "K09"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.108,
+     "differentDims": 0,
+     "edgeZone": 0.522,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.016,
+      "blocks": 0.3,
+      "roof": 0,
+      "corners": 0.437
+     },
+     "n": "L",
+     "id": "K03"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.157,
+     "differentDims": 1,
+     "edgeZone": 0.826,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.048,
+      "blocks": 0.048,
+      "roof": 0,
+      "corners": 1
+     },
+     "n": "L",
+     "id": "K07"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.089,
+     "differentDims": 0,
+     "edgeZone": 0.73,
+     "dims": {
+      "entrance": 0.021,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.054,
+      "blocks": 0.233,
+      "roof": 0,
+      "corners": 0.318
+     },
+     "n": "L",
+     "id": "K08"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.037,
+     "differentDims": 0,
+     "edgeZone": 0.463,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.006,
+      "blocks": 0.036,
+      "roof": 0,
+      "corners": 0.217
+     },
+     "n": "U",
+     "id": "K03"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.186,
+     "differentDims": 1,
+     "edgeZone": 0.667,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0.015,
+      "blocks": 0.3,
+      "roof": 0,
+      "corners": 0.988
+     },
+     "n": "U",
+     "id": "K05"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0.663,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "n": "U",
+     "id": "K07"
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "0/18 انعكاسًا قُبل كتصميم مختلف. لا مفهوم «عائلة» في التوقيع.",
+   "vizCount": 1,
+   "ms": 319
+  },
+  {
+   "id": "ADV-17",
+   "title": "Scale Cheat",
+   "intentAr": "نفس التركيب على واجهة أعرض/أضيق لا يُعدّ تنوعًا: مسافة التوقيع بعد التطبيع ضئيلة.",
+   "expected": "novelty<0.35 across scale 0.7/1.0/1.5",
+   "observed": [
+    {
+     "a": 0.7,
+     "b": 1,
+     "novelty": 0.21,
+     "differentDims": 1,
+     "accepted": false
+    },
+    {
+     "a": 1,
+     "b": 1.5,
+     "novelty": 0.177,
+     "differentDims": 1,
+     "accepted": false
+    },
+    {
+     "a": 0.7,
+     "b": 1.5,
+     "novelty": 0.322,
+     "differentDims": 2,
+     "accepted": false
+    }
+   ],
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.21,
+     "differentDims": 1,
+     "edgeZone": 0.223,
+     "dims": {
+      "entrance": 0.055,
+      "rhythm": 0,
+      "emphasis": 0.121,
+      "zoning": 0.124,
+      "blocks": 0.005,
+      "roof": 0.817,
+      "corners": 0.35
+     },
+     "a": 0.7,
+     "b": 1
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.177,
+     "differentDims": 1,
+     "edgeZone": 0.188,
+     "dims": {
+      "entrance": 0.029,
+      "rhythm": 0,
+      "emphasis": 0.125,
+      "zoning": 0.079,
+      "blocks": 0.002,
+      "roof": 0.638,
+      "corners": 0.363
+     },
+     "a": 1,
+     "b": 1.5
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.322,
+     "differentDims": 2,
+     "edgeZone": 0.377,
+     "dims": {
+      "entrance": 0.084,
+      "rhythm": 0,
+      "emphasis": 0.245,
+      "zoning": 0.202,
+      "blocks": 0.007,
+      "roof": 1,
+      "corners": 0.713
+     },
+     "a": 0.7,
+     "b": 1.5
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "0/3 أزواج مقياس قُبلت. أعلى تباعد 0.322",
+   "vizCount": 0,
+   "ms": 62
+  },
+  {
+   "id": "ADV-18",
+   "title": "Material-Zoning Cheat",
+   "intentAr": "تقسيم المواد إلى مناطق كثيرة مع بقاء الكتل/المدخل/الفتحات/الإيقاع/السقف نفسها لا يمر كتصميم مختلف جذريًا.",
+   "expected": "accepted=false",
+   "observed": [
+    {
+     "nm": "شرائح عمودية",
+     "novelty": 0,
+     "differentDims": 0,
+     "accepted": false,
+     "gates": false
+    },
+    {
+     "nm": "فسيفساء",
+     "novelty": 0.214,
+     "differentDims": 2,
+     "accepted": false,
+     "gates": false
+    }
+   ],
+   "pairs": [
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0,
+     "differentDims": 0,
+     "edgeZone": 0,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0,
+      "emphasis": 0,
+      "zoning": 0,
+      "blocks": 0,
+      "roof": 0,
+      "corners": 0
+     },
+     "nm": "شرائح عمودية"
+    },
+    {
+     "label": "SAME",
+     "accepted": false,
+     "novelty": 0.214,
+     "differentDims": 2,
+     "edgeZone": 0.24,
+     "dims": {
+      "entrance": 0,
+      "rhythm": 0.037,
+      "emphasis": 0.054,
+      "zoning": 0.243,
+      "blocks": 0.557,
+      "roof": 0.537,
+      "corners": 0.073
+     },
+     "nm": "فسيفساء"
+    }
+   ],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "0/2 حالة تقسيم مواد قُبلت كتصميم جديد.",
+   "vizCount": 2,
+   "ms": 169
+  },
+  {
+   "id": "ADV-19",
+   "title": "Plausibility Attack",
+   "intentAr": "مفهوم جديد جدًا بمعالجات غير مقنعة (ملصقات عائمة، شريط ينتهي بلا مرجع، قطع بلا ارتباط بخط سقف/أرض/فتحة) ⇒ Novelty عالٍ لكن Plausibility FAIL ⇒ REJECT.",
+   "expected": "plausibility gate FAILS; final reject",
+   "observed": {
+    "novelty": 0.289,
+    "plausibilityPass": false,
+    "fidelityPass": true,
+    "failedChecks": [
+     "coverage"
+    ],
+    "floatingByTester": 4,
+    "of": 14
+   },
+   "pairs": [],
+   "status": "AS_INTENDED",
+   "defectClass": "generator",
+   "note": "تفرد 0.289، بوابة المعقولية رفضتها (الفحوص الفاشلة: coverage)؛ المختبِر يرى 4/14 عنصرًا عائمًا بلا مرجع. ملاحظة: لا يوجد في المولّد فحص «اتصال بمرجع معماري»؛ الرفض جاء من فحوص أخرى.",
+   "vizCount": 1,
+   "ms": 39
+  },
+  {
+   "id": "ADV-20",
+   "title": "Fidelity Preservation",
+   "intentAr": "لا هجوم يعدّل المصدر سرًا: الجدران والفتحات والأدوار والأبعاد وبصمة هندسة المصدر تبقى مطابقة للعقد المعتمد قبل/بعد كل التشغيل.",
+   "expected": "all hashes identical; packaged plan layers identical to source",
+   "observed": {
+    "C1": {
+     "sourceUnchangedAfterRuns": true,
+     "packagedPlanLayersIdentical": true,
+     "packages": 4,
+     "fingerprint": "3e35ee34b5"
+    },
+    "C4": {
+     "sourceUnchangedAfterRuns": true,
+     "packagedPlanLayersIdentical": true,
+     "packages": 4,
+     "fingerprint": "2a6853a455"
+    },
+    "C7": {
+     "sourceUnchangedAfterRuns": true,
+     "packagedPlanLayersIdentical": true,
+     "packages": 4,
+     "fingerprint": "42c0605578"
+    },
+    "RECT": {
+     "sourceUnchangedAfterRuns": true,
+     "packagedPlanLayersIdentical": true,
+     "packages": 4,
+     "fingerprint": "fc70912510"
+    },
+    "L": {
+     "sourceUnchangedAfterRuns": true,
+     "packagedPlanLayersIdentical": true,
+     "packages": 4,
+     "fingerprint": "9f386a00aa"
+    },
+    "U": {
+     "sourceUnchangedAfterRuns": true,
+     "packagedPlanLayersIdentical": true,
+     "packages": 4,
+     "fingerprint": "0d7b396b04"
+    }
+   },
+   "pairs": [],
+   "status": "AS_INTENDED",
+   "defectClass": null,
+   "note": "المصدر لم يتغير بعد كل التشغيل؛ طبقات المسقط في الحزم مطابقة للمصدر. (لكن انظر ADV-09: لا حارس ضد مصدر معدّل مُدخَل.)",
+   "vizCount": 0,
+   "ms": 576
+  }
+ ],
+ "images": [
+  {
+   "case": "ADV-01",
+   "file": "img/ADV-01-0.png"
+  },
+  {
+   "case": "ADV-01",
+   "file": "img/ADV-01-1.png"
+  },
+  {
+   "case": "ADV-01",
+   "file": "img/ADV-01-2.png"
+  },
+  {
+   "case": "ADV-04",
+   "file": "img/ADV-04-0.png"
+  },
+  {
+   "case": "ADV-06",
+   "file": "img/ADV-06-0.png"
+  },
+  {
+   "case": "ADV-07",
+   "file": "img/ADV-07-0.png"
+  },
+  {
+   "case": "ADV-08",
+   "file": "img/ADV-08-0.png"
+  },
+  {
+   "case": "ADV-10",
+   "file": "img/ADV-10-0.png"
+  },
+  {
+   "case": "ADV-16",
+   "file": "img/ADV-16-0.png"
+  },
+  {
+   "case": "ADV-18",
+   "file": "img/ADV-18-0.png"
+  },
+  {
+   "case": "ADV-18",
+   "file": "img/ADV-18-1.png"
+  },
+  {
+   "case": "ADV-19",
+   "file": "img/ADV-19-0.png"
+  }
+ ]
+}

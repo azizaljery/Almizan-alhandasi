@@ -104,5 +104,8 @@ export function compareSignatures(A,B){
   const edge=r3(edgeDistance(A._grid,B._grid,{zoneOnly:true}));
   return {dims,novelty,differentDims,movedDims,edgeZone:edge,edgeAll:r3(edgeDistance(A._grid,B._grid,{zoneOnly:false}))};
 }
+import { UNCERTAINTY_BAND } from './calibration.mjs';
 export const NOVELTY_RULE={minNovelty:.35,minDifferentDims:4,minEdge:.35}; // معايرة أولية — موثقة في التقرير
-export function verdict(cmp,rule=NOVELTY_RULE){ const ok=cmp.novelty>=rule.minNovelty&&cmp.differentDims>=rule.minDifferentDims&&cmp.edgeZone>=rule.minEdge; return {accepted:ok, overall:ok?(cmp.novelty>=.45?'جيد':'مقبول'):'قريب جدًا (مرفوض كتكرار)'}; }
+/** R4: ثلاث مناطق. NEAR_DUPLICATE < lower ≤ UNCERTAIN < upper ≤ DISTINCT. زوج UNCERTAIN لا يثبت التفرد وحده. */
+export function zoneOf(novelty,band=UNCERTAINTY_BAND){ return novelty<band.lower?'NEAR_DUPLICATE':novelty<band.upper?'UNCERTAIN':'DISTINCT'; }
+export function verdict(cmp,rule=NOVELTY_RULE,band=UNCERTAINTY_BAND){ const zone=zoneOf(cmp.novelty,band), ok=zone==='DISTINCT'&&cmp.novelty>=rule.minNovelty&&cmp.differentDims>=rule.minDifferentDims&&cmp.edgeZone>=rule.minEdge; return {accepted:ok, zone, overall:ok?(cmp.novelty>=.45?'جيد':'مقبول'):zone==='UNCERTAIN'?'غير محسوم (لا يثبت التفرد)':'قريب جدًا (مرفوض كتكرار)'}; }

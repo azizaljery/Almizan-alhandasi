@@ -5,12 +5,17 @@ import { hash } from '../src/core.mjs';
 import { analyzeFacade } from './analyze.mjs';
 import { AXES, PALETTES, GROUP_ORDER, moves } from './vocabulary.mjs';
 import { signature, compareSignatures, verdict, NOVELTY_RULE, DIMENSIONS } from './signature.mjs';
+import { assertSourceIdentity, verifyOutputBinding, SourceIdentityError } from './identity.mjs';
+import { classifyOpenings, unsupported } from './gates12.mjs';
+import { realisedProfile, coversDistinctRegions } from './coverage.mjs';
 const r3=v=>Math.round(v*1000)/1000;
 function mulberry(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 export const fingerprint=analysis=>hash({p:analysis.pieces.map(p=>({bb:p.bb,ops:p.ops.map(o=>[o.u0,o.u1,o.z0,o.z1,o.entry])}))});
-function sampleParams(rng){
+/** R5: المفردات تُعدَّل قانونيًا (فرز المفاتيح والخيارات) قبل أي سحب؛ فلا يعتمد الفضاء على ترتيب التعداد. */
+function canonicalVocab(){ const ax=Object.fromEntries(Object.keys(AXES).sort().map(k=>[k,[...AXES[k]].sort()])); return {ax,palettes:Object.keys(PALETTES).sort()}; }
+function sampleParams(rng,V){
   const pick=a=>a[Math.floor(rng()*a.length)];
-  return {entrance:pick(AXES.entrance),grouping:pick(AXES.grouping),emphasis:pick(AXES.emphasis),zoning:pick(AXES.zoning),roof:pick(AXES.roof),corner:pick(AXES.corner),palette:pick(Object.keys(PALETTES)),seed:{base:pick([.6,.9,1.1]),side:rng()<.5?0:1}};
+  return {entrance:pick(V.ax.entrance),grouping:pick(V.ax.grouping),emphasis:pick(V.ax.emphasis),zoning:pick(V.ax.zoning),roof:pick(V.ax.roof),corner:pick(V.ax.corner),palette:pick(V.palettes),seed:{base:pick([.6,.9,1.1]),side:rng()<.5?0:1}};
 }
 const archKey=p=>[p.entrance,p.grouping,p.emphasis,p.zoning,p.roof,p.corner,p.seed.base,p.seed.side].join('|');
 /** يبني مناطق مسطحة غير متداخلة بالأولوية، مقصوصة بقناع الجدار. */
@@ -50,6 +55,11 @@ export function assess(analysis, comps){
   // وضوح الباب: لا منطقة داكنة عريضة تلاصق الباب (الباب داكن فيضيع عن العين). الأشرطة الأفقية الرفيعة (عتب/غطاء) مسموحة.
   let lost=0; for(const c of comps) if(c.tone==='dark') for(const e of analysis.pieces.filter(p=>p.piece===c.piece).flatMap(p=>p.entries)){ const touchU=c.bb.u1>=e.u0-.05&&c.bb.u0<=e.u1+.05, zov=Math.min(c.bb.z1,e.z1)-Math.max(c.bb.z0,e.z0); if(touchU&&zov>=.6*(e.z1-e.z0)&&(c.bb.u1-c.bb.u0)>.9) lost++; }
   ck(pla,'entry-contrast','الباب يبقى مقروءًا: لا كتلة داكنة عريضة تلاصقه',lost===0,`كتل مبتلعة: ${lost}`);
+  // R2: وضوح الفتحات (إطار/تمييز/معالجة مجاورة مسموحة؛ الحجب مرفوض) + عدم وجود معالجة عائمة بلا دعم
+  const cls=classifyOpenings(analysis,comps), occl=cls.filter(o=>o.cls==='OCCLUSION');
+  ck(pla,'opening-legible','الفتحات مقروءة: لا حجب بصري (الإطار والتمييز والمجاورة مسموحة)',occl.length===0,`محجوبة: ${occl.length}/${cls.length}`);
+  const floating=unsupported(analysis,comps);
+  ck(pla,'supported','لا معالجة عائمة: كل عنصر متصل بمرجع (أرض/سقف/طرف/فتحة) أو بعنصر مدعوم',floating.length===0,`عائمة: ${floating.length}`);
   // درجة الواقعية المعمارية
   const thin=comps.filter(c=>{const w=c.bb.u1-c.bb.u0,h=c.bb.z1-c.bb.z0;return Math.min(w,h)<.14;}).length;
   const bad=comps.filter(c=>{const w=c.bb.u1-c.bb.u0,h=c.bb.z1-c.bb.z0;return (w<h&&w>1.7)||(h<w&&h>1.2&&w>3.5&&false);}).length;
@@ -57,33 +67,48 @@ export function assess(analysis, comps){
   const score=r3(Object.values(parts).reduce((s,v)=>s+v,0)/Object.keys(parts).length);
   return {fidelity:{checks:fid,pass:fid.every(c=>c.ok)},plausibility:{checks:pla,pass:pla.every(c=>c.ok)},realism:{score,parts:Object.fromEntries(Object.entries(parts).map(([k,v])=>[k,r3(v)]))}};
 }
-export async function generate(source, side, {count=12,seed=1,maxTries=600}={}){
-  const analysis=analyzeFacade(source,side), fp=await fingerprint(analysis), rng=mulberry(parseInt(fp.slice(0,8),16)^(seed*2654435761));
+export async function generate(source, side, {count=12,seed=1,maxTries=600,expectedSourceHash=null}={}){
+  // R1: بصمة المصدر قبل أي توليد؛ فشل مغلق إن لم تُعلَن أو لم تطابق
+  const srcHash=await assertSourceIdentity(source,{expectedSourceHash});
+  const V=canonicalVocab(), analysis=analyzeFacade(source,side), fp=await fingerprint(analysis), rng=mulberry(parseInt(fp.slice(0,8),16)^(seed*2654435761));
   const seen=new Set(), cands=[], rejected=[]; let tries=0;
-  while(cands.length<count&&tries++<maxTries){ const p=sampleParams(rng), key=archKey(p); if(seen.has(key)) continue; seen.add(key);
+  while(cands.length<count&&tries++<maxTries){ const p=sampleParams(rng,V), key=archKey(p); if(seen.has(key)) continue; seen.add(key);
     const comps=realize(analysis,source,side,p); if(!comps.length){ rejected.push({key,reason:'لا مناطق'}); continue; }
     const a=assess(analysis,comps); if(!a.fidelity.pass||!a.plausibility.pass){ rejected.push({key,reason:[...a.fidelity.checks,...a.plausibility.checks].filter(c=>!c.ok).map(c=>c.id).join(',')}); continue; }
-    cands.push({id:'K'+String(cands.length+1).padStart(2,'0'),params:p,comps,assess:a,sig:signature(analysis,comps)}); }
-  return {analysis,fingerprint:fp,candidates:cands,rejected,tries};
+    const sig=signature(analysis,comps);
+    cands.push({id:'K'+String(cands.length+1).padStart(2,'0'),key,params:p,comps,assess:a,sig,profile:realisedProfile(analysis,comps,sig),sourceHash:srcHash}); }
+  // R1: لم يتغير المصدر أثناء المسار
+  if(await assertSourceIdentity(source,{expectedSourceHash:srcHash})!==srcHash) throw new SourceIdentityError('SOURCE_MUTATED_DURING_PATH','');
+  return {analysis,fingerprint:fp,sourceHash:srcHash,candidates:cands,rejected,tries};
 }
 /** بوابة التفرد داخل الدفعة + الاختيار: أفضل ثلاثة مجموع (واقعية + تباعد) بشرط قبول كل زوج. */
-export function gateAndSelect(cands, rule=NOVELTY_RULE){
+export function gateAndSelect(candsIn, rule=NOVELTY_RULE){
+  // R5: ترتيب قانوني للمرشحين (بمفتاح الوصفة) فلا يتأثر القرار بترتيب الإدخال؛ والتعادل يُحسم بالمفتاح
+  const kOf=c=>c.key||archKey(c.params), cands=[...candsIn].sort((a,b)=>kOf(a)<kOf(b)?-1:kOf(a)>kOf(b)?1:0);
+  if(new Set(cands.map(c=>c.sourceHash).filter(Boolean)).size>1) throw new SourceIdentityError('MIXED_SOURCES','مرشحون من مصادر مختلفة');
   const pair=new Map(), key=(a,b)=>a<b?a+'|'+b:b+'|'+a;
   for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++){ const c=compareSignatures(cands[i].sig,cands[j].sig); pair.set(key(cands[i].id,cands[j].id),{...c,verdict:verdict(c,rule)}); }
   const P=(a,b)=>pair.get(key(a.id,b.id));
-  const dupOf={}; const sorted=[...cands].sort((a,b)=>b.assess.realism.score-a.assess.realism.score), kept=[];
-  for(const c of sorted){ const clash=kept.find(k=>!P(c,k).verdict.accepted); if(clash) dupOf[c.id]=clash.id; else kept.push(c); }
-  let best=null;
-  for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++)for(let k=j+1;k<cands.length;k++){ const t=[cands[i],cands[j],cands[k]]; const ps=[P(t[0],t[1]),P(t[0],t[2]),P(t[1],t[2])]; if(!ps.every(p=>p.verdict.accepted)) continue;
+  const dupOf={}; const sorted=[...cands].sort((a,b)=>b.assess.realism.score-a.assess.realism.score||(kOf(a)<kOf(b)?-1:1)), kept=[];
+  for(const c of sorted){ const clash=kept.find(k=>P(c,k).verdict.zone==='NEAR_DUPLICATE'); if(clash) dupOf[c.id]=clash.id; else kept.push(c); }
+  let best=null, pairwiseTriples=0, coverageRejected=0;
+  for(let i=0;i<cands.length;i++)for(let j=i+1;j<cands.length;j++)for(let k=j+1;k<cands.length;k++){ const t=[cands[i],cands[j],cands[k]]; const ps=[P(t[0],t[1]),P(t[0],t[2]),P(t[1],t[2])]; if(!ps.every(p=>p.verdict.accepted)) continue; pairwiseTriples++;
+    // R3: التغطية على الناتج المتحقق
+    if(t.every(c=>c.profile)&&!coversDistinctRegions(t.map(c=>c.profile))){ coverageRejected++; continue; }
     const minN=Math.min(...ps.map(p=>p.novelty)), meanN=ps.reduce((s,p)=>s+p.novelty,0)/3, q=t.reduce((s,c)=>s+c.assess.realism.score,0)/3, minEdge=Math.min(...ps.map(p=>p.edgeZone));
-    const score=.45*minN+.15*meanN+.25*q+.15*minEdge; if(!best||score>best.score) best={ids:t.map(c=>c.id),score:r3(score),minNovelty:r3(minN),meanNovelty:r3(meanN),meanRealism:r3(q),minEdge:r3(minEdge)}; }
-  return {pair,dupOf,selected:best};
+    const score=.45*minN+.15*meanN+.25*q+.15*minEdge; const ids=t.map(c=>c.id), tie=t.map(kOf).join('~');
+    if(!best||score>best.score+1e-9||(Math.abs(score-best.score)<=1e-9&&tie<best.tie)) best={ids,tie,score:r3(score),minNovelty:r3(minN),meanNovelty:r3(meanN),meanRealism:r3(q),minEdge:r3(minEdge),regions:t.map(c=>c.profile?.region),dominant:t.map(c=>c.profile?.dominant)}; }
+  const uncertainPairs=[...pair.values()].filter(p=>p.verdict.zone==='UNCERTAIN').length, nearDup=[...pair.values()].filter(p=>p.verdict.zone==='NEAR_DUPLICATE').length;
+  const status=best?'OK':(pairwiseTriples?'INSUFFICIENT_DESIGN_SPACE_COVERAGE':'NO_DISTINCT_TRIPLE');
+  return {pair,dupOf,selected:best,status,stats:{candidates:cands.length,pairwiseTriples,coverageRejected,uncertainPairs,nearDuplicatePairs:nearDup,families:[...new Set(cands.map(c=>c.profile?.dominant))]}};
 }
 /** تعبئة مفهوم عبر النواة (نمط X) — يرمي إن تغيّرت هندسة المسقط. */
 export async function packageConcept(source, transforms, side, cand, {palette=null,roofSurfaces=[]}={}){
+  await assertSourceIdentity(source,{expectedSourceHash:cand.sourceHash||null}); // R1: ربط المخرج بالمصدر
   const pal=PALETTES[palette||cand.params.palette];
   const zones=cand.comps.map(c=>({name:c.name.replace(/[^A-Za-z0-9_.:-]/g,'_'),piece:c.piece,ring:c.poly[0].slice(0,-1),holes:c.poly.slice(1).map(h=>h.slice(0,-1)),mat:pal[c.tone],tone:c.tone}));
-  return createFacadePackage(source,{style:'X',frontSide:side,maxProjectionM:{s:0,n:0,e:0,w:0},transforms,roofSurfaces,sourceRevision:'concept-lab',concept:{id:cand.id,labelAr:conceptLabel(cand.params),zones}});
+  const pkg=await createFacadePackage(source,{style:'X',frontSide:side,maxProjectionM:{s:0,n:0,e:0,w:0},transforms,roofSurfaces,sourceRevision:'concept-lab',concept:{id:cand.id,labelAr:conceptLabel(cand.params),zones}});
+  await verifyOutputBinding(source,side,pkg); return pkg;
 }
 export const ENT_AR={'portal-panel':'لوحة مدخل مسطحة','tower-shaft':'عمود مدخل بارتفاع كامل','pilasters':'أكتاف وعتب','canopy-band':'شريط عتب عريض','plain':'مدخل بسيط','side-block':'كتلة جانبية تحتضن المدخل'};
 export const GRP_AR={'rings':'أطر فردية','vertical-strips':'أعمدة رأسية','ribbon':'شرائط أفقية','panel':'لوحات مجمّعة','head-line':'خط عتب'};
@@ -92,3 +117,10 @@ export const ZON_AR={'base':'قاعدة','tripartite':'ثلاثي (قاعدة/و
 export const ROOF_AR={'thin-cap':'غطاء رفيع','deep-fascia':'حزام عريض','stepped':'حزام متدرج','none':'بلا معالجة','raised-entry':'ارتفاع فوق المدخل'};
 export const COR_AR={'posts-both':'عمودان طرفيان','post-one':'عمود طرفي واحد','quoins':'حجارة زاوية','none':'بلا'};
 export const conceptLabel=p=>`${ENT_AR[p.entrance]} · ${GRP_AR[p.grouping]} · ${ZON_AR[p.zoning]} · ${ROOF_AR[p.roof]} · ${COR_AR[p.corner]}`;
+/** تصعيد البحث دون خفض أي عتبة: 12 ثم 36 ثم 96 مرشحًا. فشل الأخير ⇒ DESIGN_SPACE_EXHAUSTED (نتيجة صحيحة لا عيب). */
+export async function exploreDesignSpace(source, side, {stages=[12,36,96],seed=1,expectedSourceHash=null}={}){
+  const history=[]; let last=null;
+  for(const count of stages){ const gen=await generate(source,side,{count,seed,maxTries:count*60,expectedSourceHash}); const sel=gateAndSelect(gen.candidates);
+    history.push({count,pool:gen.candidates.length,status:sel.status,stats:sel.stats}); last={gen,sel}; if(sel.selected) return {status:count===stages[0]?'OK':'OK_AFTER_ESCALATION',stage:count,...last,history}; }
+  return {status:'DESIGN_SPACE_EXHAUSTED',stage:stages[stages.length-1],...last,history};
+}

@@ -1,0 +1,213 @@
+{
+ "buildings": {
+  "C1": {
+   "pool": 12,
+   "selected": [
+    "K07",
+    "K11",
+    "K12"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    "edges",
+    "entrance",
+    "opening-rhythm"
+   ]
+  },
+  "C4": {
+   "pool": 12,
+   "selected": null,
+   "status": "INSUFFICIENT_DESIGN_SPACE_COVERAGE",
+   "gridFamilies": null,
+   "gridFamilyDistinct": 0,
+   "edgeFamilies": null,
+   "edgeFamilyDistinct": 0,
+   "declaredDominant": null,
+   "escalation": {
+    "status": "OK_AFTER_ESCALATION",
+    "stage": 36
+   },
+   "escalatedGridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "escalatedGridFamilyDistinct": 1,
+   "escalatedEdgeFamilies": [
+    "mass-zoning",
+    "entrance",
+    "mass-zoning"
+   ],
+   "escalatedEdgeFamilyDistinct": 2
+  },
+  "C7": {
+   "pool": 12,
+   "selected": null,
+   "status": "INSUFFICIENT_DESIGN_SPACE_COVERAGE",
+   "gridFamilies": null,
+   "gridFamilyDistinct": 0,
+   "edgeFamilies": null,
+   "edgeFamilyDistinct": 0,
+   "declaredDominant": null,
+   "escalation": {
+    "status": "OK_AFTER_ESCALATION",
+    "stage": 36
+   },
+   "escalatedGridFamilies": [
+    "mass-zoning",
+    "entrance",
+    "mass-zoning"
+   ],
+   "escalatedGridFamilyDistinct": 2,
+   "escalatedEdgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "escalatedEdgeFamilyDistinct": 1
+  },
+  "RECT": {
+   "pool": 12,
+   "selected": [
+    "K03",
+    "K06",
+    "K02"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    "entrance",
+    "opening-rhythm",
+    "edges"
+   ]
+  },
+  "L": {
+   "pool": 12,
+   "selected": [
+    "K05",
+    "K01",
+    "K03"
+   ],
+   "status": "OK",
+   "gridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "gridFamilyDistinct": 1,
+   "edgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "edgeFamilyDistinct": 1,
+   "declaredDominant": [
+    "edges",
+    "opening-rhythm",
+    "entrance"
+   ]
+  },
+  "U": {
+   "pool": 12,
+   "selected": null,
+   "status": "INSUFFICIENT_DESIGN_SPACE_COVERAGE",
+   "gridFamilies": null,
+   "gridFamilyDistinct": 0,
+   "edgeFamilies": null,
+   "edgeFamilyDistinct": 0,
+   "declaredDominant": null,
+   "escalation": {
+    "status": "OK_AFTER_ESCALATION",
+    "stage": 36
+   },
+   "escalatedGridFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "escalatedGridFamilyDistinct": 1,
+   "escalatedEdgeFamilies": [
+    "mass-zoning",
+    "mass-zoning",
+    "mass-zoning"
+   ],
+   "escalatedEdgeFamilyDistinct": 1
+  }
+ },
+ "scen": {
+  "escapes": [
+   {
+    "scenario": "مصدر معدّل غير مختوم يُشغَّل بلا بصمة",
+    "escaped": false
+   },
+   {
+    "scenario": "مصدر معدّل مع بصمة مرجعية للأصل",
+    "escaped": false
+   },
+   {
+    "scenario": "تعديل المصدر بين التوليد والتعبئة",
+    "escaped": false
+   }
+  ],
+  "escapedCount": 0,
+  "of": 3
+ },
+ "perm": {
+  "rows": {
+   "C1": {
+    "vocabReversePoolOverlap": "12/12",
+    "vocabReverseSelectionChanged": false,
+    "candidateShuffleChanged": "0/10"
+   },
+   "C4": {
+    "vocabReversePoolOverlap": "12/12",
+    "vocabReverseSelectionChanged": false,
+    "candidateShuffleChanged": "0/10"
+   },
+   "C7": {
+    "vocabReversePoolOverlap": "12/12",
+    "vocabReverseSelectionChanged": false,
+    "candidateShuffleChanged": "0/10"
+   }
+  },
+  "unstable": 0,
+  "checks": 6
+ },
+ "totals": {
+  "candidates": 72,
+  "hiddenOpeningLegacy": 28,
+  "occludedOpeningRaster": 0,
+  "floatingDirectDatum": 0,
+  "pairs": 396,
+  "uncertainPairsInBand": 106,
+  "pairsNotAccepted": 194,
+  "nearDuplicatePairsBelowBand": 37,
+  "band": {
+   "lower": 0.271,
+   "upper": 0.429
+  }
+ }
+}

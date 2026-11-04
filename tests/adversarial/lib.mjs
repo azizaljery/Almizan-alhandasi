@@ -3,11 +3,12 @@ import { runBuilding } from '../../dist/facade-kit/concepts/run.mjs';
 import { analyzeFacade } from '../../dist/facade-kit/concepts/analyze.mjs';
 import { moves, GROUP_ORDER, TONE_GREY, AXES } from '../../dist/facade-kit/concepts/vocabulary.mjs';
 import { signature, compareSignatures, verdict, dimensionDistances, DIMENSIONS, GW, GH } from '../../dist/facade-kit/concepts/signature.mjs';
-import { realize, assess } from '../../dist/facade-kit/concepts/generate.mjs';
+import * as GEN from '../../dist/facade-kit/concepts/generate.mjs';
+const { realize, assess } = GEN;
 import { layerMask, intersection, difference, union, multiArea, bounds, rect } from '../../dist/facade-kit/src/polygons.mjs';
 export { signature, compareSignatures, verdict, dimensionDistances, DIMENSIONS, realize, assess, analyzeFacade, moves, TONE_GREY, AXES, GW, GH, runBuilding };
 const cache={};
-export async function ctx(name){ if(!cache[name]){ const r=await runBuilding(name); const a=analyzeFacade(r.built,r.front); cache[name]={name,r,a,built:r.built,front:r.front,doc:r.doc,transforms:r.transforms}; } return cache[name]; }
+export async function ctx(name){ if(!cache[name]){ let r=await runBuilding(name), esc=null; if(!r.sel.selected&&GEN.exploreDesignSpace){ const e=await GEN.exploreDesignSpace(r.built,r.front); esc={status:e.status,stage:e.stage,history:e.history}; r={...r,gen:e.gen,sel:e.sel}; } const a=analyzeFacade(r.built,r.front); cache[name]={name,esc,r,a,built:r.built,front:r.front,doc:r.doc,transforms:r.transforms}; } return cache[name]; }
 export function mulberry(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 /** مناطق الوصفة كصناديق قابلة للتعديل */
 export function zonesOf(a,p){ return moves(a,p).map(z=>({piece:z.piece,name:z.name,group:z.group,tone:z.tone,box:z.box||null,ring:z.ring})); }

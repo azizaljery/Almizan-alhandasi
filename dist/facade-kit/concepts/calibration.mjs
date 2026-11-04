@@ -1,0 +1,2 @@
+// مولَّد بـ scripts/facade-concepts-calibrate-band.mjs --write من بيانات تذبذب هندسي (إزاحة ≤ 0.1 م). لا يُضبط لينجح اختبار.
+export const UNCERTAINTY_BAND={lower:0.271,upper:0.429,derivedFrom:{"center":0.35,"jitterAmplitudeM":0.1,"sparseP":0.25,"reps":3,"pairsMeasured":1239,"samples":3717,"samplesNearCenter":1440,"halfWidthP95":0.079,"medianAbsDelta":0.009,"p99":0.117,"lower":0.271,"upper":0.429}};
