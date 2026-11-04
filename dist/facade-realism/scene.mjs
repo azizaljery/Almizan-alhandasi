@@ -10,7 +10,8 @@ function matrixFor(THREE, side, off) {
 }
 
 /** أبعاد الكسوة بالمتر. أرقام تصورية للعرض (افتراضات تصوير)، وليست مواصفة منتج موثّقة. */
-export const BLOCK = Object.freeze({ w: .60, h: .30, joint: .012, bevel: .004, recess: .02 });
+// الفاصل 10 مم وفق المواصفة المنشورة لحجر عادي (Tyndall Stone، Random Ashlar، 2017)، لا كإقرار بالمطابقة.
+export const BLOCK = Object.freeze({ w: .60, h: .30, joint: .010, bevel: .004, recess: .02 });
 
 const inPoly = (p, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi) * (p[1] - yi) / (yj - yi) + xi) c = !c; } return c; };
 const insideLayer = (L, u, z) => inPoly([u, z], L.outer) && !L.holes.some(h => inPoly([u, z], h));
