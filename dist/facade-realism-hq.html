@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عينة الواجهات الواقعية</title>
+<style>
+  :root { --bg: #f4f1ea; --ink: #1f2a26; --muted: #5a5f5b; --line: #d8d2c4; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #1b1e1c; --ink: #e8e6e0; --muted: #a9aca6; --line: #3a3f3b; } }
+  :root[data-theme="dark"] { --bg: #1b1e1c; --ink: #e8e6e0; --muted: #a9aca6; --line: #3a3f3b; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, "DejaVu Sans", sans-serif; }
+  #stage { padding: 16px; }
+  #msg { padding: 16px; color: var(--muted); }
+  canvas { display: block; max-width: 100%; height: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: right; }
+  th { background: rgba(0,0,0,.05); }
+  .sw { width: 96px; height: 64px; display: block; border-radius: 4px; }
+  .tag { color: #b5562b; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="msg">جارٍ التحميل…</div></div>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+<script type="module">
+import { loadThreeRuntime } from './three-runtime.mjs';
+import { RGBELoader } from './facade-kit/vendor/RGBELoader.mjs';
+import { enhanceScene } from './facade-realism/hq-env.mjs';
+import { parseDoc } from './draw/doc.mjs';
+import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model.mjs';
+import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
+import { buildBuildingScene, closeupCamera } from './facade-realism/scene-hq.mjs';
+
+const q = new URLSearchParams(location.search);
+const mode = q.get('mode') || 'view', id = (q.get('v') || 'A').toUpperCase();
+const cam = q.get('cam') || 'oblique', grey = q.get('grey') === '1', shot = q.get('shot') || '', geo = q.get('geo') || 'block';
+const stage = document.getElementById('stage');
+const done = (info) => { window.__FR = { ready: true, ...info }; };
+const fail = (e) => { stage.innerHTML = ''; const m = document.createElement('div'); m.id = 'msg'; m.textContent = 'تعذّر العرض: ' + (e?.message || e); stage.appendChild(m); window.__FR = { ready: true, error: String(e?.message || e) }; };
+
+async function boardMode() {
+  const rows = [];
+  const samples = { limestoneWhite: limestone('white', 512).color, limestoneBeige: limestone('beige', 512).color, render: render(512).color, timberLook: timberLook(512).color };
+  const swatches = [];
+  for (const [key, m] of Object.entries(MATERIALS)) {
+    const sw = document.createElement('canvas'); sw.className = 'sw'; sw.width = 192; sw.height = 128;
+    const cx = sw.getContext('2d');
+    if (samples[key]) cx.drawImage(samples[key], 0, 0, 192, 128);
+    else if (key === 'aluminium') { cx.fillStyle = '#3a3d41'; cx.fillRect(0, 0, 192, 128); cx.fillStyle = '#4a4e53'; cx.fillRect(12, 12, 168, 104); }
+    else { cx.fillStyle = '#a9c2cd'; cx.fillRect(0, 0, 192, 128); cx.strokeStyle = 'rgba(255,255,255,.7)'; cx.lineWidth = 6; cx.beginPath(); cx.moveTo(0, 110); cx.lineTo(120, 0); cx.stroke(); }
+    swatches.push([key, sw]);
+    const ver = m.verified;
+    rows.push(`<tr><td data-swatch="${key}"></td><td>${m.ar}</td><td>${m.en}</td><td>${m.cls}</td><td>${m.where}</td><td>${m.ref}</td><td class="${/غير متحقق/.test(ver) ? 'tag' : ''}">${ver}</td></tr>`);
+  }
+  stage.innerHTML = `<table dir="rtl"><thead><tr><th>عينة</th><th>الاسم العربي</th><th>الاسم الإنجليزي</th><th>الفئة</th><th>مكان الاستخدام في الواجهة</th><th>المرجع</th><th>حالة التحقق</th></tr></thead><tbody>${rows.join('')}</tbody></table><p class="tag">${TAG}: لكل طبقة خارج المخطط في البدائل.</p>`;
+  for (const [key, sw] of swatches) stage.querySelector(`td[data-swatch="${key}"]`).appendChild(sw);
+  done({ rows: rows.length });
+}
+
+const CAMS_HQ = {
+  // لقطة رئيسية بمستوى عين إنسان (1.6 م) من الجنوب الغربي، عدسة أطول قليلًا لتقليل التشوه
+  hero: { pos: [-3.2, 1.65, 11.0], look: [8.6, 2.7, -2.0], fov: 42 },
+};
+const CAMS = {
+  // أمامي جانبي من الجنوب الغربي: الواجهة الأمامية (الجنوبية) والجانب الغربي
+  oblique: { pos: [-8, 8.5, 17], look: [9.6, 2.3, -16.2], fov: 34 },
+  // الشمالية (الخلفية): الواجهة الشمالية وفتحاتها
+  north: { pos: [14, 7.5, -52], look: [9.6, 2.4, -16.6], fov: 34 },
+};
+
+async function variantMode() {
+  const THREE = await loadThreeRuntime();
+  const res = await fetch('./facade-realism/C1.json');
+  if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')');
+  const doc = parseDoc(await res.text());
+  const built = buildAllSides(doc, id);
+  const lib = createRealismMaterials(THREE);
+  const greyMats = grey ? {
+    body: new THREE.MeshStandardMaterial({ color: '#b4b4b4', roughness: .85 }),
+    dark: new THREE.MeshStandardMaterial({ color: '#4a4a4a', roughness: 1 }),
+    ground: new THREE.MeshStandardMaterial({ color: '#d2d2d2', roughness: 1 }),
+  } : null;
+  // الحجم قابل للضبط للمراجعة المكبّرة (w,h بين 320 و3840)، والافتراضي 1280×800 كما كان.
+  const clampDim = (v, d) => { const n = Number(v); return Number.isFinite(n) && n >= 320 && n <= 3840 ? Math.round(n) : d; };
+  const W = clampDim(q.get('w'), 1280), H = clampDim(q.get('h'), 800);
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; canvas.id = 'fr';
+  stage.innerHTML = ''; stage.appendChild(canvas);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+  renderer.shadowMap.enabled = q.get('shadows') !== '0'; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(grey ? '#e4e4e4' : '#d9e3e9');
+  // بيئة انعكاس: سماء زرقاء فاتحة، أفق دافئ، أرض ومباني داكنة أسفل الأفق، وبقعة شمس تُعطي انعكاسًا مرئيًا على الزجاج.
+  // تُعالَج مسبقًا بـPMREM حتى تكون الخشونة المنخفضة للزجاج انعكاسًا حادًا لا تدرجًا عامًا.
+  const eq = document.createElement('canvas'); eq.width = 1024; eq.height = 512; const ex = eq.getContext('2d');
+  const sky = ex.createLinearGradient(0, 0, 0, 512); sky.addColorStop(0, '#4f86b8'); sky.addColorStop(.42, '#bcd7ea'); sky.addColorStop(.5, '#e9e2d2'); sky.addColorStop(.52, '#5b5246'); sky.addColorStop(1, '#2c2620');
+  ex.fillStyle = sky; ex.fillRect(0, 0, 1024, 512);
+  const sunX = 1024 * .30, sunY = 512 * .22, sg = ex.createRadialGradient(sunX, sunY, 0, sunX, sunY, 60);
+  sg.addColorStop(0, 'rgba(255,246,222,1)'); sg.addColorStop(1, 'rgba(255,246,222,0)'); ex.fillStyle = sg; ex.fillRect(sunX - 60, sunY - 60, 120, 120);
+  const raw = new THREE.CanvasTexture(eq); raw.mapping = THREE.EquirectangularReflectionMapping; raw.colorSpace = THREE.SRGBColorSpace;
+  const pmrem = new THREE.PMREMGenerator(renderer); pmrem.compileEquirectangularShader();
+  const env = pmrem.fromEquirectangular(raw).texture; raw.dispose(); pmrem.dispose(); scene.environment = env;
+  scene.add(new THREE.HemisphereLight('#e6eef5', '#8b7a5c', .55));
+  const sun = new THREE.DirectionalLight('#ffe6c4', 2.4);
+  sun.position.set(-16, 34, 14); sun.target.position.set(10, 2, -16); sun.castShadow = true;
+  const SMS = Number(q.get('sms') || 2048), SF = Number(q.get('sfit') || 22); sun.shadow.mapSize.set(SMS, SMS); sun.shadow.camera.left = -SF; sun.shadow.camera.right = SF; sun.shadow.camera.top = SF; sun.shadow.camera.bottom = -SF; sun.shadow.camera.near = 1; sun.shadow.camera.far = 120; sun.shadow.bias = Number(q.get('sb') ?? -0.0004); sun.shadow.normalBias = Number(q.get('snb') ?? 0.02);
+  scene.add(sun, sun.target);
+  const S = buildBuildingScene(THREE, built, lib, { grey: greyMats, geo });
+  scene.add(S.group);
+  const HQ = q.get('hq') === '1';
+  if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader });
+  let camera, roi = null;
+  if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
+    const cu = closeupCamera(THREE, S, shot, { W, H }); camera = cu.camera; roi = cu.roi;
+  } else {
+    const C = (HQ && CAMS_HQ[cam]) || CAMS[cam] || CAMS.oblique;
+    camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
+    camera.position.set(...C.pos); camera.lookAt(...C.look);
+  }
+  renderer.render(scene, camera);
+  const gl = renderer.getContext();
+  done({ variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi });
+}
+
+(async () => {
+  try { if (mode === 'board') await boardMode(); else await variantMode(); }
+  catch (e) { fail(e); }
+})();
+</script>
+</body>
+</html>

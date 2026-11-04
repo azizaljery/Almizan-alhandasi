@@ -1,0 +1,80 @@
+// (عينة جودة العرض المعزولة HQ، C1) بيئة HDR موثقة، أرضية ومحيط، إعدادات ظل مضبوطة، وزجاج بانعكاس فعلي.
+// الأصل: quarry_01_1k.hdr من Poly Haven (ترخيص CC0) عبر مستودع three.js (examples/textures/equirectangular، الإيداع 7e26babb).
+// لا يغيّر أي طبقة من طبقات المبنى: يضيف فقط الإضاءة والمحيط ويستبدل خامات الزجاج/الداخل/الأرض في هذه العينة.
+export async function enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader }) {
+  const hdrName = q.get('hdr') || 'quarry_01_1k.hdr';
+  const hdr = await new RGBELoader().loadAsync('./facade-realism/assets/' + hdrName);
+  hdr.mapping = THREE.EquirectangularReflectionMapping;
+  const pmrem = new THREE.PMREMGenerator(renderer); const env = pmrem.fromEquirectangular(hdr).texture; pmrem.dispose();
+  scene.environment = env; scene.environmentIntensity = Number(q.get('envi') ?? .35);
+  // الخلفية: سماء متدرجة نظيفة (السماء في HDR الأصلي تحوي محجرًا وبحيرة لا تناسب السياق)؛ الإضاءة والانعكاس من HDR
+  scene.background = skyTexture(THREE);
+  renderer.toneMappingExposure = Number(q.get('exp') ?? .82);
+  // الإضاءة المحيطة القديمة (نصف كرة) تُطفأ: الضوء المحيط من HDR
+  scene.traverse(o => { if (o.isHemisphereLight) o.intensity = 0; });
+  // ظل: إطار ضيق حول المبنى (22×22 م)، خريطة 4096، وانحياز عادي أكبر — الاختبار أثبت أن الخطوط المائلة تخطيط ظل (تختفي بإطفاء الظل)
+  sun.intensity = Number(q.get('sun') ?? 4.2); sun.color.set('#fff1dc');
+  const az = Number(q.get('az') ?? 250), el = Number(q.get('el') ?? 35); // سمت الشمس من الشمال باتجاه عقارب الساعة، والارتفاع بالدرجات (افتراضي: عصرًا من الغرب-الجنوب الغربي، شمس مائلة تُظهر العمق)
+  const ar = az * Math.PI / 180, er = el * Math.PI / 180, T = new THREE.Vector3(9, 2, -12); sun.target.position.copy(T); sun.position.set(T.x + 40 * Math.cos(er) * Math.sin(ar), T.y + 40 * Math.sin(er), T.z - 40 * Math.cos(er) * Math.cos(ar)); sun.target.updateMatrixWorld();
+  if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } sun.shadow.mapSize.set(4096, 4096); const F = 15; Object.assign(sun.shadow.camera, { left: -F, right: F, top: F, bottom: -F, near: 1, far: 90 }); sun.shadow.camera.updateProjectionMatrix();
+  sun.shadow.bias = -0.0002; sun.shadow.normalBias = 0.04; sun.shadow.radius = 2;
+  // زجاج: انعكاس حاد من HDR، لون مائل للأخضر الرمادي كزجاج منخفض الانبعاث، ومجال داخلي غير أسود تمامًا
+  const glass = new THREE.MeshPhysicalMaterial({ color: '#4b5c60', metalness: 0, roughness: .03, ior: 1.52, reflectivity: .6, specularIntensity: 1, envMapIntensity: 1.35, clearcoat: .5, clearcoatRoughness: .02 }); glass.name = 'glass';
+  const interior = new THREE.MeshStandardMaterial({ color: '#3b3934', roughness: .9 }); interior.name = 'interior';
+  const door = doorMaterial(THREE, renderer), jointMat = new THREE.MeshStandardMaterial({ color: '#9d9586', roughness: .98 }); jointMat.name = 'joint';
+  const stoneFace = new Map();
+  for (const m of S.meshes) { const n = m.material?.name || '';
+    if (n === 'glass') m.material = glass; else if (n === 'interior') m.material = interior;
+    else if (m.userData?.role === 'door') { m.material = door.mat; fitDoorUV(THREE, m); }
+    else if (/Joint$/.test(n)) m.material = jointMat;
+    else if (m.userData?.part === 'blocks') { tintBlocks(THREE, m); if (!stoneFace.has(n)) { const c = m.material.clone(); c.vertexColors = true; stoneFace.set(n, c); } m.material = stoneFace.get(n); } }
+  // ستارة داخلية فاتحة خلف بعض الزجاج (عمق 30 سم) تعطي قراءة داخلية بدل الفراغ الأسود
+  // المحيط: أرض موقع مرصوفة (بلاطات 40×20 سم بمقياس صحيح) داخل القطعة، ورمل/حصى حولها
+  const pav = paverTexture(THREE, renderer); const sand = sandTexture(THREE, renderer);
+  const site = S.meshes.find(m => m.name === 'ground'); if (site) { site.material = new THREE.MeshStandardMaterial({ map: pav.map, bumpMap: pav.bump, bumpScale: .6, roughness: .92, color: '#ffffff' }); site.material.name = 'paving'; }
+  const outer = new THREE.Mesh(new THREE.PlaneGeometry(220, 220), new THREE.MeshStandardMaterial({ map: sand.map, roughness: 1, color: '#ffffff' })); outer.rotation.x = -Math.PI / 2; outer.position.set(10, -.02, -15); outer.receiveShadow = true; scene.add(outer);
+  // رصيف ونطاق شارع أمام القطعة (جنوبًا)
+  const curb = new THREE.Mesh(new THREE.BoxGeometry(60, .15, .3), new THREE.MeshStandardMaterial({ color: '#cfcac0', roughness: .9 })); curb.position.set(10, .075, 1.2); curb.castShadow = curb.receiveShadow = true; scene.add(curb);
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(60, 9), new THREE.MeshStandardMaterial({ color: '#3d3e40', roughness: .95 })); road.rotation.x = -Math.PI / 2; road.position.set(10, -.01, 5.9); road.receiveShadow = true; scene.add(road);
+  return { hdrName };
+}
+function cnv(S) { const c = document.createElement('canvas'); c.width = c.height = S; return [c, c.getContext('2d')]; }
+function rnd(seed) { let a = seed | 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+/** بلاطات رصف 40×20 سم بنمط متداخل؛ القماش يغطي 2×2 م ويُكرر بمقياس صحيح. */
+function paverTexture(THREE, renderer) {
+  const S = 1024, [c, x] = cnv(S), [b, y] = cnv(S), r = rnd(7), px = S / 2; // 1 م = 512 بكسل
+  x.fillStyle = '#b9ad97'; x.fillRect(0, 0, S, S); y.fillStyle = '#000'; y.fillRect(0, 0, S, S);
+  const w = .4 * px, h = .2 * px, j = 3;
+  for (let row = 0; row * h < S; row++) for (let i = -1; i * w < S; i++) { const ox = (row % 2) * w / 2, X = i * w + ox, Y = row * h; const v = 168 + Math.floor(r() * 26);
+    x.fillStyle = `rgb(${v + 22},${v + 12},${v - 6})`; x.fillRect(X + j, Y + j, w - 2 * j, h - 2 * j); y.fillStyle = '#fff'; y.fillRect(X + j, Y + j, w - 2 * j, h - 2 * j);
+    for (let k = 0; k < 40; k++) { x.fillStyle = `rgba(90,80,60,${r() * .08})`; x.fillRect(X + r() * w, Y + r() * h, 2, 2); } }
+  const T = (cv, srgb) => { const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(10, 15); t.anisotropy = renderer.capabilities.getMaxAnisotropy(); if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+  return { map: T(c, true), bump: T(b, false) };
+}
+function sandTexture(THREE, renderer) {
+  const S = 512, [c, x] = cnv(S), r = rnd(11); x.fillStyle = '#cbb894'; x.fillRect(0, 0, S, S);
+  for (let k = 0; k < 9000; k++) { const v = r(); x.fillStyle = v < .5 ? `rgba(150,130,95,${r() * .25})` : `rgba(235,222,195,${r() * .25})`; x.fillRect(r() * S, r() * S, 1 + r() * 2, 1 + r() * 2); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(70, 70); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return { map: t };
+}
+
+function skyTexture(THREE) { const [c, x] = cnv(512); const g = x.createLinearGradient(0, 0, 0, 512); g.addColorStop(0, '#5f95c4'); g.addColorStop(.55, '#a9c9e2'); g.addColorStop(.8, '#dfe6e6'); g.addColorStop(1, '#ece6da'); x.fillStyle = g; x.fillRect(0, 0, 512, 512); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
+/** تفاوت لوني طفيف لكل بلاطة (±4%) كحجر طبيعي من محجر واحد — لون رأسي لكل مثلثات البلاطة نفسها. */
+function tintBlocks(THREE, m) { const g = m.geometry, pos = g.attributes.position, n = pos.count, col = new Float32Array(n * 3), r = rnd(3); let k = 0;
+  // ExtrudeGeometry لكل بلاطة دُمجت متتالية: نقسم بالتقارب المكاني (مفتاح شبكي 0.6×0.3)
+  const v = new THREE.Vector3(), key = new Map();
+  for (let i = 0; i < n; i += 3) { v.fromBufferAttribute(pos, i); const kk = Math.round(v.x / .6 * 2) + ':' + Math.round(v.y / .3 * 2) + ':' + Math.round(v.z / .6 * 2); let t = key.get(kk); if (t === undefined) { t = .96 + r() * .08; key.set(kk, t); } const w = t, ww = t * (0.99 + r() * .0);
+    for (let j = 0; j < 3; j++) { col[(i + j) * 3] = w; col[(i + j) * 3 + 1] = ww * .995; col[(i + j) * 3 + 2] = ww * .985; } }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3)); }
+/** باب مصمت بإطار وألواح غائرة ومقبض (خامة مرسومة بمقياس الباب نفسه + خريطة نتوء) — لا يغيّر فتحة الباب. */
+function doorMaterial(THREE, renderer) { const W = 512, H = 1024, [c, x] = cnvWH(W, H), [b, y] = cnvWH(W, H);
+  x.fillStyle = '#3a2f26'; x.fillRect(0, 0, W, H); for (let i = 0; i < 260; i++) { x.strokeStyle = `rgba(${20 + Math.random() * 30},${14 + Math.random() * 20},10,.25)`; x.beginPath(); const X = Math.random() * W; x.moveTo(X, 0); x.bezierCurveTo(X + 8, H / 3, X - 8, 2 * H / 3, X + 4, H); x.stroke(); }
+  y.fillStyle = '#808080'; y.fillRect(0, 0, W, H);
+  const panel = (X, Y, w, h) => { x.strokeStyle = 'rgba(0,0,0,.55)'; x.lineWidth = 6; x.strokeRect(X, Y, w, h); x.strokeStyle = 'rgba(255,220,180,.12)'; x.lineWidth = 2; x.strokeRect(X + 5, Y + 5, w - 10, h - 10); y.fillStyle = '#5a5a5a'; y.fillRect(X, Y, w, h); y.fillStyle = '#707070'; y.fillRect(X + 10, Y + 10, w - 20, h - 20); };
+  panel(70, 80, W - 140, 380); panel(70, 540, W - 140, 400);
+  x.fillStyle = '#b8b2a6'; x.fillRect(W - 92, 470, 18, 120); x.fillStyle = '#d6d0c4'; x.fillRect(W - 120, 520, 46, 12); y.fillStyle = '#ffffff'; y.fillRect(W - 120, 470, 46, 120);
+  const T = (cv, srgb) => { const t = new THREE.CanvasTexture(cv); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
+  const mat = new THREE.MeshStandardMaterial({ map: T(c, true), bumpMap: T(b, false), bumpScale: 2, roughness: .62, metalness: .0 }); mat.name = 'door-hq'; return { mat }; }
+/** خرائط UV للباب: من صندوقه في مستوى الواجهة إلى [0,1] حتى تطابق الألواح أبعاد الباب الفعلية. */
+function fitDoorUV(THREE, m) { const g = m.geometry; g.computeBoundingBox(); const bb = g.boundingBox, pos = g.attributes.position, uv = g.attributes.uv, dx = bb.max.x - bb.min.x, dz = bb.max.z - bb.min.z, dy = bb.max.y - bb.min.y, alongX = dx >= dz;
+  for (let i = 0; i < pos.count; i++) { const a = alongX ? (pos.getX(i) - bb.min.x) / dx : (pos.getZ(i) - bb.min.z) / dz; uv.setXY(i, a, (pos.getY(i) - bb.min.y) / dy); } uv.needsUpdate = true; }
+function cnvWH(W, H) { const c = document.createElement('canvas'); c.width = W; c.height = H; return [c, c.getContext('2d')]; }
