@@ -1,0 +1,2460 @@
+{
+  "scope": "RECIPE_INTERVENTION_GUARD_ONLY_NOT_INDEPENDENT_VALIDATION",
+  "causalRule": {
+    "minShare": 0.08,
+    "minIndependentCauses": 2,
+    "version": "v0-experimental"
+  },
+  "total": 132,
+  "rawLeaks": 18,
+  "spatialLeaks": 1,
+  "guardedLeaks": 0,
+  "rows": [
+    {
+      "name": "C1",
+      "axis": "entrance",
+      "option": "portal-panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "entrance",
+      "option": "pilasters",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "entrance",
+      "option": "canopy-band",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 2,
+        "regions": [
+          "entrance",
+          "mass"
+        ],
+        "share": {
+          "mass": 0.577,
+          "entrance": 0.423
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "entrance",
+      "option": "side-block",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "grouping",
+      "option": "ribbon",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 0.127,
+          "entrance": 0.127,
+          "mass": 0.746
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "grouping",
+      "option": "panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "mass": 0.805,
+          "windows": 0.097,
+          "entrance": 0.097
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "grouping",
+      "option": "head-line",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 2,
+        "regions": [
+          "mass",
+          "windows"
+        ],
+        "share": {
+          "mass": 0.485,
+          "windows": 0.442,
+          "entrance": 0.073
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {},
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "zoning",
+      "option": "base",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "mass": 0.879,
+          "entrance": 0.121
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "zoning",
+      "option": "tripartite",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.969,
+          "entrance": 0.031
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "zoning",
+      "option": "side-split",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "zoning",
+      "option": "attic",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "roof",
+      "option": "thin-cap",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "roof",
+      "option": "deep-fascia",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "roof",
+      "option": "stepped",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "roof",
+      "option": "raised-entry",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "corner",
+      "option": "posts-both",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "corner",
+      "option": "post-one",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C1",
+      "axis": "corner",
+      "option": "quoins",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "windows": 0.087,
+          "ends": 0.913
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "entrance",
+      "option": "portal-panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "entrance"
+        ],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "entrance",
+      "option": "pilasters",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "entrance",
+      "option": "canopy-band",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "entrance"
+        ],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "entrance",
+      "option": "side-block",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "grouping",
+      "option": "ribbon",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "grouping",
+      "option": "panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "grouping",
+      "option": "head-line",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.816,
+          "windows": 0.184
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {},
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "zoning",
+      "option": "base",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "entrance"
+        ],
+        "share": {
+          "mass": 0.823,
+          "entrance": 0.177
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "zoning",
+      "option": "tripartite",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.964,
+          "entrance": 0.036
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "zoning",
+      "option": "side-split",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "zoning",
+      "option": "attic",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "roof",
+      "option": "thin-cap",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "roof",
+      "option": "deep-fascia",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "roof",
+      "option": "stepped",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "roof",
+      "option": "raised-entry",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "corner",
+      "option": "posts-both",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 0.5,
+          "entrance": 0.5
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "corner",
+      "option": "post-one",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C4",
+      "axis": "corner",
+      "option": "quoins",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 0.5,
+          "entrance": 0.5
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "entrance",
+      "option": "portal-panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "entrance"
+        ],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "entrance",
+      "option": "pilasters",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "entrance",
+      "option": "canopy-band",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.498,
+          "entrance": 0.502
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "entrance",
+      "option": "side-block",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "grouping",
+      "option": "ribbon",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 2,
+        "regions": [
+          "mass",
+          "windows"
+        ],
+        "share": {
+          "mass": 0.877,
+          "windows": 0.123
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "grouping",
+      "option": "panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "grouping",
+      "option": "head-line",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": true,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 2,
+        "regions": [
+          "mass",
+          "windows"
+        ],
+        "share": {
+          "mass": 0.705,
+          "windows": 0.217,
+          "entrance": 0.078
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "ends": 0.21,
+          "mass": 0.79
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "zoning",
+      "option": "base",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.991,
+          "entrance": 0.009
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "zoning",
+      "option": "tripartite",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.996,
+          "entrance": 0.004
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "zoning",
+      "option": "side-split",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "zoning",
+      "option": "attic",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "roof",
+      "option": "thin-cap",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "roof",
+      "option": "deep-fascia",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "roof",
+      "option": "stepped",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "roof",
+      "option": "raised-entry",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "corner",
+      "option": "posts-both",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "corner",
+      "option": "post-one",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "C7",
+      "axis": "corner",
+      "option": "quoins",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "entrance",
+      "option": "portal-panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "entrance",
+      "option": "pilasters",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "entrance",
+      "option": "canopy-band",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.6,
+          "entrance": 0.4
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "entrance",
+      "option": "side-block",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "grouping",
+      "option": "ribbon",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "grouping",
+      "option": "panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "grouping",
+      "option": "head-line",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 2,
+        "regions": [
+          "mass",
+          "windows"
+        ],
+        "share": {
+          "mass": 0.674,
+          "windows": 0.326
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {},
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "zoning",
+      "option": "base",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "zoning",
+      "option": "tripartite",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "zoning",
+      "option": "side-split",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "zoning",
+      "option": "attic",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "roof",
+      "option": "thin-cap",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "roof",
+      "option": "deep-fascia",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "roof",
+      "option": "stepped",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "roof",
+      "option": "raised-entry",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "corner",
+      "option": "posts-both",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "corner",
+      "option": "post-one",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "RECT",
+      "axis": "corner",
+      "option": "quoins",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "entrance",
+      "option": "portal-panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "entrance",
+      "option": "pilasters",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "entrance",
+      "option": "canopy-band",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "entrance",
+      "option": "side-block",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "grouping",
+      "option": "ribbon",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "windows"
+        ],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "grouping",
+      "option": "panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "windows"
+        ],
+        "share": {
+          "mass": 0.837,
+          "windows": 0.163
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "grouping",
+      "option": "head-line",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "windows"
+        ],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {},
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "zoning",
+      "option": "base",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "zoning",
+      "option": "tripartite",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "zoning",
+      "option": "side-split",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 2,
+        "regions": [
+          "ends",
+          "mass"
+        ],
+        "share": {
+          "mass": 0.782,
+          "ends": 0.218
+        },
+        "ok": true
+      }
+    },
+    {
+      "name": "L",
+      "axis": "zoning",
+      "option": "attic",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "roof",
+      "option": "thin-cap",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "roof",
+      "option": "deep-fascia",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "roof",
+      "option": "stepped",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "roof",
+      "option": "raised-entry",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "corner",
+      "option": "posts-both",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "corner",
+      "option": "post-one",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "L",
+      "axis": "corner",
+      "option": "quoins",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "entrance",
+      "option": "portal-panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "entrance",
+      "option": "tower-shaft",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "entrance",
+      "option": "pilasters",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "entrance",
+      "option": "canopy-band",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "entrance",
+      "option": "side-block",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "entrance"
+        ],
+        "share": {
+          "entrance": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "grouping",
+      "option": "vertical-strips",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "grouping",
+      "option": "ribbon",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "grouping",
+      "option": "panel",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "windows": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "grouping",
+      "option": "head-line",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.614,
+          "windows": 0.386
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "emphasis",
+      "option": "horizontal-courses",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {},
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "emphasis",
+      "option": "vertical-rhythm",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 0.824,
+          "entrance": 0.176
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "zoning",
+      "option": "base",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "zoning",
+      "option": "tripartite",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "zoning",
+      "option": "side-split",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "zoning",
+      "option": "attic",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "mass"
+        ],
+        "share": {
+          "mass": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "roof",
+      "option": "thin-cap",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 0,
+        "regions": [],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "roof",
+      "option": "deep-fascia",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "roof",
+      "option": "stepped",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "roof",
+      "option": "raised-entry",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "top"
+        ],
+        "share": {
+          "top": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "corner",
+      "option": "posts-both",
+      "rawSignatureAccepted": true,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "corner",
+      "option": "post-one",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    },
+    {
+      "name": "U",
+      "axis": "corner",
+      "option": "quoins",
+      "rawSignatureAccepted": false,
+      "spatialCausalAccepted": false,
+      "interventionCount": 1,
+      "guardedAccepted": false,
+      "causes": {
+        "count": 1,
+        "regions": [
+          "ends"
+        ],
+        "share": {
+          "ends": 1
+        },
+        "ok": false
+      }
+    }
+  ]
+}

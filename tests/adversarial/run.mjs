@@ -1,5 +1,5 @@
 // مشغّل الحزمة العدائية: يسجّل Baseline دون إصلاح. node tests/adversarial/run.mjs <outDir>
-import fs from 'node:fs'; import { createRequire } from 'node:module'; const rq=createRequire(import.meta.url); let sharp; try{sharp=rq('sharp');}catch{sharp=rq('/opt/npm-tools/node_modules/sharp');}
+import fs from 'node:fs'; import {createHash} from 'node:crypto'; import { createRequire } from 'node:module'; const rq=createRequire(import.meta.url); let sharp; try{sharp=rq('sharp');}catch{sharp=rq('/opt/npm-tools/node_modules/sharp');}
 import { CASES } from './fixtures.mjs'; import * as L from './lib.mjs'; import { elevationSVG } from '../../dist/facade-kit/concepts/render2d.mjs'; import { conceptLabel } from '../../dist/facade-kit/concepts/generate.mjs';
 const out=process.argv[2]||'docs/research/facade-concepts-adversarial'; fs.mkdirSync(out+'/img',{recursive:true});
 const results=[]; for(const cs of CASES){ const t=Date.now(); try{ const r=await cs.run(); results.push({id:cs.id,title:cs.title,intentAr:cs.intentAr,expected:cs.expected,...r,viz:undefined,vizCount:r.viz?.length||0,ms:Date.now()-t}); cs._viz=r.viz||[]; }catch(e){ results.push({id:cs.id,title:cs.title,intentAr:cs.intentAr,expected:cs.expected,status:'ERROR',note:String(e.stack||e).slice(0,300)}); cs._viz=[]; } console.log(cs.id,results.at(-1).status,(results.at(-1).note||'').slice(0,110)); }
@@ -12,5 +12,8 @@ const falseNovelty=all.filter(p=>p.label==='SAME'&&p.accepted).reduce((m,p)=>{ m
 // الصور
 const w=420,h=270; let imgIdx=0; const imgs=[];
 for(const cs of CASES){ for(const [k,v] of cs._viz.entries()){ const c=await L.ctx(v.ctx), sets=[v.a,v.b,...(v.c?[v.c]:[])]; const comps=[]; for(const [ri,m] of ['tone','edge'].entries()) for(const [ci,cm2] of sets.entries()) comps.push({input:await sharp(Buffer.from(elevationSVG(c.a,cm2,m,{w,h}))).png().toBuffer(),left:ci*(w+4),top:24+ri*(h+4)}); const W=sets.length*(w+4),H=24+2*(h+4); const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/><text x="${W-8}" y="17" text-anchor="start" direction="rtl" font-family="DejaVu Sans" font-size="14" font-weight="bold">${cs.id} — ${v.caption}</text></svg>`; const f=`img/${cs.id}-${k}.png`; await sharp({create:{width:W,height:H,channels:3,background:'#fff'}}).composite([{input:Buffer.from(svg),left:0,top:0},...comps]).png().toFile(out+'/'+f); imgs.push({case:cs.id,file:f}); } }
-fs.writeFileSync(out+'/results.json',JSON.stringify({frozenFixturesCommit:fs.readFileSync('/tmp/claude-0/frozen-sha.txt','utf8').trim(),rule:'EXPERIMENTAL_THRESHOLD',confusion:cm,falseNoveltyByCase:falseNovelty,control:ctrl,results,images:imgs},null,1));
+fs.writeFileSync(out+'/results.json',JSON.stringify({frozenFixturesCommit:process.env.ADV_FROZEN_FIXTURES_COMMIT||null,fixturesSha256:createHash('sha256').update(fs.readFileSync(new URL('./fixtures.mjs',import.meta.url))).digest('hex'),rule:'EXPERIMENTAL_THRESHOLD',confusion:cm,falseNoveltyByCase:falseNovelty,control:ctrl,results,images:imgs},null,1));
 console.log(JSON.stringify(cm),JSON.stringify(falseNovelty),'ctrl',ctrl.novelty,ctrl.accepted);
+
+
+if(results.some(r=>r.status==='ERROR'))process.exitCode=1;

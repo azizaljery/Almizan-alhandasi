@@ -1,0 +1,192 @@
+{
+  "schema": "MIZAN-BLIND-FAMILY-REVIEW/1",
+  "representation": "2D elevations; Normal is a schematic tone rendering, NOT photorealistic or 3D",
+  "pairs": [
+    {
+      "id": "P001",
+      "views": {
+        "Normal": [
+          "P001-0-Normal.svg",
+          "P001-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P001-0-Value-Grey.svg",
+          "P001-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P001-0-Edges.svg",
+          "P001-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P002",
+      "views": {
+        "Normal": [
+          "P002-0-Normal.svg",
+          "P002-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P002-0-Value-Grey.svg",
+          "P002-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P002-0-Edges.svg",
+          "P002-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P003",
+      "views": {
+        "Normal": [
+          "P003-0-Normal.svg",
+          "P003-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P003-0-Value-Grey.svg",
+          "P003-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P003-0-Edges.svg",
+          "P003-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P004",
+      "views": {
+        "Normal": [
+          "P004-0-Normal.svg",
+          "P004-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P004-0-Value-Grey.svg",
+          "P004-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P004-0-Edges.svg",
+          "P004-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P005",
+      "views": {
+        "Normal": [
+          "P005-0-Normal.svg",
+          "P005-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P005-0-Value-Grey.svg",
+          "P005-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P005-0-Edges.svg",
+          "P005-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P006",
+      "views": {
+        "Normal": [
+          "P006-0-Normal.svg",
+          "P006-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P006-0-Value-Grey.svg",
+          "P006-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P006-0-Edges.svg",
+          "P006-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P007",
+      "views": {
+        "Normal": [
+          "P007-0-Normal.svg",
+          "P007-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P007-0-Value-Grey.svg",
+          "P007-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P007-0-Edges.svg",
+          "P007-1-Edges.svg"
+        ]
+      }
+    },
+    {
+      "id": "P008",
+      "views": {
+        "Normal": [
+          "P008-0-Normal.svg",
+          "P008-1-Normal.svg"
+        ],
+        "Value Grey": [
+          "P008-0-Value-Grey.svg",
+          "P008-1-Value-Grey.svg"
+        ],
+        "Edges": [
+          "P008-0-Edges.svg",
+          "P008-1-Edges.svg"
+        ]
+      }
+    }
+  ],
+  "assetHashes": {
+    "P001-0-Normal.svg": "365aab81b9aa6fa3b8cef0821d89c07e2fefc58e6d8e71f66c4588b7cda9e792",
+    "P001-1-Normal.svg": "79be17477a26306a5aa4ab6685b1e3b3a97fbaec5415f3ea38181325d49b16f9",
+    "P001-0-Value-Grey.svg": "76e3645c7f7972349f7d2bf6b62091315f76e27c1b8c3da45961913247efb99d",
+    "P001-1-Value-Grey.svg": "8443a8c26d7ef0a3fae2f31b0b7503f8cb727594cbbc9904efab4734afe2bd53",
+    "P001-0-Edges.svg": "50752127c090069450b1477d8a9c5584a6d294b450527bc578fcc9598d89f398",
+    "P001-1-Edges.svg": "3e2268c899c5a86049118110967c686f25711a08a1cf12cc202df1ae586224ff",
+    "P002-0-Normal.svg": "365aab81b9aa6fa3b8cef0821d89c07e2fefc58e6d8e71f66c4588b7cda9e792",
+    "P002-1-Normal.svg": "210e01226ca871215cca14cd50363f7c0d0fa84a232dceba295fd0d4e9588a1d",
+    "P002-0-Value-Grey.svg": "76e3645c7f7972349f7d2bf6b62091315f76e27c1b8c3da45961913247efb99d",
+    "P002-1-Value-Grey.svg": "8610c5baa618d5746f457bd4097f18dc49fc5987534cd5c741aa2c586b388f70",
+    "P002-0-Edges.svg": "50752127c090069450b1477d8a9c5584a6d294b450527bc578fcc9598d89f398",
+    "P002-1-Edges.svg": "371722c5a5b3e266a1c3ba75051807e0900d00f0047522a1ad437c50eb487150",
+    "P003-0-Normal.svg": "79be17477a26306a5aa4ab6685b1e3b3a97fbaec5415f3ea38181325d49b16f9",
+    "P003-1-Normal.svg": "210e01226ca871215cca14cd50363f7c0d0fa84a232dceba295fd0d4e9588a1d",
+    "P003-0-Value-Grey.svg": "8443a8c26d7ef0a3fae2f31b0b7503f8cb727594cbbc9904efab4734afe2bd53",
+    "P003-1-Value-Grey.svg": "8610c5baa618d5746f457bd4097f18dc49fc5987534cd5c741aa2c586b388f70",
+    "P003-0-Edges.svg": "3e2268c899c5a86049118110967c686f25711a08a1cf12cc202df1ae586224ff",
+    "P003-1-Edges.svg": "371722c5a5b3e266a1c3ba75051807e0900d00f0047522a1ad437c50eb487150",
+    "P004-0-Normal.svg": "ebb9d889464f3af69a2c66575662868763b2eb4639ce4392229916de2a33a4d2",
+    "P004-1-Normal.svg": "82304bba83fa418eb85bd2b890dc8492972483a006ca2d54090f49300b66bcdd",
+    "P004-0-Value-Grey.svg": "386b555d88b1f510437ae3f4f419901c099a21e850f3eb07b1e1152ca60b1427",
+    "P004-1-Value-Grey.svg": "0ab4650d35fd8d042d257ed1088687725cf36c746d17596682219dc6311e902e",
+    "P004-0-Edges.svg": "364b1648769017dbf712e7f85f84bca85b9cb60879ebeb3501de8305c920e826",
+    "P004-1-Edges.svg": "f19429e7b936aa74ce12053b34bf492575e97a4993c7719559332f795cbff7f1",
+    "P005-0-Normal.svg": "8ef99a554af31c5950900bea73e98b416d79e0616d7a5237b09bf638688d80bf",
+    "P005-1-Normal.svg": "049729d259639d7e1118a0591bddf779e191441da8134ab9a4af356aafcada6d",
+    "P005-0-Value-Grey.svg": "0041714cc706ded6d520c4c24e92b9fe5295ae55c2a2b02215bfd28986e3f463",
+    "P005-1-Value-Grey.svg": "95959579f40ea5359e77c3799b701b8bcfa5835e9bedb710f7d45e64ec1a1716",
+    "P005-0-Edges.svg": "151802385e5f5b165247f19b2e10394f133f8cb46e141270865f0a05e921c1d2",
+    "P005-1-Edges.svg": "88aae179d298e2621c29f2ccc34d223a2c741035f8232a09325a72f4919476f7",
+    "P006-0-Normal.svg": "658cde6759c1ae39c85029bc33dd8b48842f2a2b7f0b4efd0edbe39171509e41",
+    "P006-1-Normal.svg": "1acbd2e5b183c77af25375b8aeeda31621583204f32c633e6767dcd223cf35e1",
+    "P006-0-Value-Grey.svg": "bbc9d6a8b4cf7b908073a244c8f3678fdd49d4007a2ed1d85235672cf5669084",
+    "P006-1-Value-Grey.svg": "a1a86c8fc141b085da884d6141b1edfada10bf748c03779091dbab27a80bccca",
+    "P006-0-Edges.svg": "8a72a125f41ec8c82aaf0ced564f0116c690a60cf45d6350a6ed86eddbf3c5f0",
+    "P006-1-Edges.svg": "f26072930a555a6bd1fab21e8b4c3c242885f178d1834c5d1451fbbb6af18397",
+    "P007-0-Normal.svg": "658cde6759c1ae39c85029bc33dd8b48842f2a2b7f0b4efd0edbe39171509e41",
+    "P007-1-Normal.svg": "2ed021aaeb82ec84283d892769d4e0c858ed097cf1e0e738666b0a92da80a5a3",
+    "P007-0-Value-Grey.svg": "bbc9d6a8b4cf7b908073a244c8f3678fdd49d4007a2ed1d85235672cf5669084",
+    "P007-1-Value-Grey.svg": "6d696f708678ff00cb761e53e186066449b05f592eec9075de7b6f650abae80c",
+    "P007-0-Edges.svg": "8a72a125f41ec8c82aaf0ced564f0116c690a60cf45d6350a6ed86eddbf3c5f0",
+    "P007-1-Edges.svg": "525b18dc8475fd1acd1861ea67674647a806b06c48aac7cad4c1dd633c85fd5e",
+    "P008-0-Normal.svg": "1acbd2e5b183c77af25375b8aeeda31621583204f32c633e6767dcd223cf35e1",
+    "P008-1-Normal.svg": "2ed021aaeb82ec84283d892769d4e0c858ed097cf1e0e738666b0a92da80a5a3",
+    "P008-0-Value-Grey.svg": "a1a86c8fc141b085da884d6141b1edfada10bf748c03779091dbab27a80bccca",
+    "P008-1-Value-Grey.svg": "6d696f708678ff00cb761e53e186066449b05f592eec9075de7b6f650abae80c",
+    "P008-0-Edges.svg": "f26072930a555a6bd1fab21e8b4c3c242885f178d1834c5d1451fbbb6af18397",
+    "P008-1-Edges.svg": "525b18dc8475fd1acd1861ea67674647a806b06c48aac7cad4c1dd633c85fd5e"
+  }
+}
