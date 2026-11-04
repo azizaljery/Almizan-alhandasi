@@ -26,6 +26,7 @@
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { RGBELoader } from './facade-kit/vendor/RGBELoader.mjs';
 import { enhanceScene } from './facade-realism/hq-env.mjs';
+import { Sky } from './facade-realism/vendor/Sky.js';
 import { parseDoc } from './draw/doc.mjs';
 import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model.mjs';
 import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
@@ -60,6 +61,7 @@ async function boardMode() {
 const CAMS_HQ = {
   // لقطة رئيسية بمستوى عين إنسان (1.6 م) من الجنوب الغربي، عدسة أطول قليلًا لتقليل التشوه
   hero: { pos: [-3.2, 1.65, 11.0], look: [8.6, 2.7, -2.0], fov: 42 },
+  roof: { pos: [4, 14, 6], look: [9, 5, -10], fov: 40 },
 };
 const CAMS = {
   // أمامي جانبي من الجنوب الغربي: الواجهة الأمامية (الجنوبية) والجانب الغربي
@@ -106,10 +108,10 @@ async function variantMode() {
   sun.position.set(-16, 34, 14); sun.target.position.set(10, 2, -16); sun.castShadow = true;
   const SMS = Number(q.get('sms') || 2048), SF = Number(q.get('sfit') || 22); sun.shadow.mapSize.set(SMS, SMS); sun.shadow.camera.left = -SF; sun.shadow.camera.right = SF; sun.shadow.camera.top = SF; sun.shadow.camera.bottom = -SF; sun.shadow.camera.near = 1; sun.shadow.camera.far = 120; sun.shadow.bias = Number(q.get('sb') ?? -0.0004); sun.shadow.normalBias = Number(q.get('snb') ?? 0.02);
   scene.add(sun, sun.target);
-  const S = buildBuildingScene(THREE, built, lib, { grey: greyMats, geo });
+  const S = buildBuildingScene(THREE, built, lib, { grey: greyMats, geo, skin: q.get('skin') !== '0' });
   scene.add(S.group);
   const HQ = q.get('hq') === '1';
-  if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader });
+  if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky });
   let camera, roi = null;
   if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
     const cu = closeupCamera(THREE, S, shot, { W, H }); camera = cu.camera; roi = cu.roi;

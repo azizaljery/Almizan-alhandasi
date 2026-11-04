@@ -58,8 +58,9 @@ function mergeGeometries(THREE, geos) {
  * هندسة الفواصل: كل بلاطة مكعب مستقل بحواف مشطوبة (BLOCK.bevel) داخل غلاف الكسوة نفسه:
  * من عمق الطبقة الخلفية (o0) إلى وجهها (o1)، فلا يتجاوز البروز حدود الكسوة الأصلية.
  */
-function blockGeometry(THREE, L) {
-  const bv = BLOCK.bevel, depth = (L.o1 - L.o0) - 2 * bv;
+function blockGeometry(THREE, L, skin = null) {
+  // skin: عمق قشرة الحجر من الوجه (للجدار الإنشائي في A: 3 سم)، فلا تتطابق الوجوه الخلفية مع اللوح (z-fighting على الوجه الداخلي للدروة)
+  const o0 = skin ? L.o1 - skin : L.o0, bv = BLOCK.bevel, depth = (L.o1 - o0) - 2 * bv;
   if (depth <= .001) return null;
   const geos = [];
   for (const b of blockGrid(L)) {
@@ -68,7 +69,7 @@ function blockGeometry(THREE, L) {
     const shrink = ([u, z]) => [u + Math.sign(cx - u) * bv, z + Math.sign(cz - z) * bv];
     const shape = new THREE.Shape(ring.map(shrink).map(([u, z]) => new THREE.Vector2(u, z)));
     const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bv, bevelSize: bv, bevelSegments: 1, curveSegments: 1 });
-    g.translate(0, 0, L.C + L.o0 + bv);
+    g.translate(0, 0, L.C + o0 + bv);
     geos.push(g);
   }
   return mergeGeometries(THREE, geos);
@@ -83,7 +84,7 @@ function blockGeometry(THREE, L) {
  *   'flatface' الكسوة بسطح بلا فواصل وبلا هندسة (تعزل أثر الخامة).
  *   'block'    (الافتراضي) الفواصل هندسة: لوح خلفي أعمق بـBLOCK.recess، وبلاطات مستقلة بحواف مشطوبة.
  */
-export function buildBuildingScene(THREE, built, lib, { grey = null, geo = 'block' } = {}) {
+export function buildBuildingScene(THREE, built, lib, { grey = null, geo = 'block', skin = true } = {}) {
   const group = new THREE.Group(); group.name = 'facade-realism-' + built.s.variant.id;
   const meshes = [];
   const mat = key => {
@@ -98,7 +99,7 @@ export function buildBuildingScene(THREE, built, lib, { grey = null, geo = 'bloc
   for (const side of SIDES_ALL) {
     const B = built[side], M = matrixFor(THREE, side, B.off);
     for (const L of B.layers) {
-      const stone = /^limestone/.test(L.mat), cladding = (L.role === 'cladding' || L.role === 'wall') && stone; // HQ: جدار البديل A الحجري يُبنى بلاطات أيضًا داخل غلافه
+      const stone = /^limestone/.test(L.mat), cladding = (L.role === 'cladding' || (L.role === 'wall' && skin)) && stone; // HQ: جدار البديل A الحجري يُبنى بلاطات أيضًا داخل غلافه
       const ud = (part) => ({ side, role: L.role, plan: L.plan, tag: L.tag, opening: L.opening || null, mat: L.mat, part });
       const plateGeo = (layer, mm) => {
         const shape = new THREE.Shape(layer.outer.map(([u, z]) => new THREE.Vector2(u, z)));
@@ -108,9 +109,10 @@ export function buildBuildingScene(THREE, built, lib, { grey = null, geo = 'bloc
       };
       if (cladding && geo === 'block') {
         // اللوح الخلفي للفواصل: أعمق بـBLOCK.recess، والفواصل تظهر كتجويف بظل
-        const plate = { ...L, o1: L.o1 - BLOCK.recess };
-        add(plateGeo(plate, M), mat(L.mat + 'Joint'), side + ':' + L.id + '.plate', ud('plate'));
-        const bg = blockGeometry(THREE, L);
+        const isWall = L.role === 'wall' && skin, plate = { ...L, o1: L.o1 - BLOCK.recess };
+        // HQ: الجدار الإنشائي لوح كامل بخامة لياسة (الوجه الداخلي للدروة لياسة لا حجر)، وفوقه قشرة حجر 3 سم
+        add(plateGeo(plate, M), isWall ? mat('render') : mat(L.mat + 'Joint'), side + ':' + L.id + '.plate', ud(isWall ? 'wallcore' : 'plate'));
+        const bg = blockGeometry(THREE, L, isWall ? .03 : null);
         if (bg) { bg.applyMatrix4(M); add(bg, mat(L.mat + 'Face'), side + ':' + L.id + '.blocks', ud('blocks')); }
       } else {
         const key = (cladding && geo === 'flatface') || (stone && geo === 'block') ? L.mat + 'Face' : L.mat; // HQ: الحليات الحجرية (أفاريز، أطر، جلسات) بسطح حجر بلا فواصل مرسومة، فلا تتعارض فواصل الخريطة مع فواصل البلاطات الهندسية

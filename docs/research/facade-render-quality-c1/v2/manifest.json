@@ -1,0 +1,64 @@
+{
+ "scene": "C1-RENDER-REFERENCE-v1",
+ "variant": "A",
+ "geometry_hash": "13eb6131e521af327ecb21f812232a3bae2379c7405f648fc3337099a19c791d",
+ "openings_hash": "1b481a11244de1c54f08783d8ba6ec31d58834cce7a0af98db586d2d0c623364",
+ "image": {
+  "width": 1280,
+  "height": 800,
+  "pixel_ratio": 1
+ },
+ "cameras": {
+  "hero": {
+   "pos": [
+    -3.2,
+    1.65,
+    11
+   ],
+   "target": [
+    8.6,
+    2.7,
+    -2
+   ],
+   "fov": 42,
+   "near": 0.1,
+   "far": 400
+  },
+  "full": {
+   "source": "CAMS.oblique في facade-realism.html (غير معدل)"
+  },
+  "closeups": "closeupCamera من scene-hq.mjs (المنطق نفسه في scene.mjs)"
+ },
+ "sun": {
+  "azimuth_deg": 250,
+  "elevation_deg": 35,
+  "intensity_B5": 5,
+  "intensity_A0": 5,
+  "colour": "#fff1dc"
+ },
+ "environment": {
+  "A0": {
+   "asset": "quarry_01_1k.hdr (Poly Haven CC0، عبر three.js @7e26babb)",
+   "intensity": 0.35
+  },
+  "B3_B5": {
+   "asset": "سماء تحليلية Preetham (three.js Sky.js MIT @7e26babb، معدّل بمعامل radianceScale)",
+   "turbidity": 3.2,
+   "rayleigh": 1.1,
+   "env_scale": 0.06,
+   "background_scale": 0.35,
+   "sun_direction": "نفس اتجاه الشمس"
+  }
+ },
+ "renderer": {
+  "name": "three.js WebGLRenderer + SwiftShader (Chromium headless)",
+  "version": "r160"
+ },
+ "ladder": {
+  "A0": "env=hdr&skin=0&handles=0",
+  "B3": "env=sky&skin=0&handles=0",
+  "B4": "env=sky&skin=1&handles=0",
+  "B5": "env=sky&skin=1&handles=1"
+ },
+ "B1_stone_pbr": "BLOCKED: تعذر تنزيل الأصل"
+}
