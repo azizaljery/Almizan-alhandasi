@@ -41,3 +41,6 @@ export function scaleDoc(doc,k){ const d=structuredClone(doc); const S=p=>({x:p.
 export function shuffle(arr,rng){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 import { buildAllSides as _bas, sideTransform as _st } from '../../dist/facade-realism/model.mjs';
 export function buildScaled(doc){ let built; for(const v of ['B','A','C']){ try{ built=_bas(doc,v); break; }catch{} } const transforms=Object.fromEntries(Object.keys(built).map(s=>[s,_st(s,built[s].off)])); return {built,transforms,front:doc.entry||'s'}; }
+
+/** تعديل صغير متفرّق: كل حافة تُزاح باحتمال p بمقدار ≤ d (يحافظ على صلاحية البوابات غالبًا) */
+export function jitterSparse(zones,rng,d,p=.2){ return zones.map(z=>z.box?{...z,ring:null,box:{u0:z.box.u0+(rng()<p?(rng()*2-1)*d:0),u1:z.box.u1+(rng()<p?(rng()*2-1)*d:0),z0:z.box.z0+(rng()<p?(rng()*2-1)*d:0),z1:z.box.z1+(rng()<p?(rng()*2-1)*d:0)}}:z); }

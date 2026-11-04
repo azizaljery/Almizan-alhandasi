@@ -1,0 +1,1085 @@
+{
+ "selected": [
+  {
+   "a": "K03",
+   "b": "K08",
+   "labelA": "شريط عتب عريض · شرائط أفقية · كتلة واحدة · غطاء رفيع · بلا",
+   "labelB": "كتلة جانبية تحتضن المدخل · شرائط أفقية · انقسام جانبي · حزام متدرج · بلا",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.464,
+     "level": "different"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.478,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.849,
+     "level": "different"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.553,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.686,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.719,
+   "edgeDistance": 0.74,
+   "differentDims": 7,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C1",
+   "coverageContribution": "entrance ↔ entrance"
+  },
+  {
+   "a": "K03",
+   "b": "K11",
+   "labelA": "شريط عتب عريض · شرائط أفقية · كتلة واحدة · غطاء رفيع · بلا",
+   "labelB": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · بلا معالجة · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.994,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.636,
+     "level": "different"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.246,
+     "level": "moderate"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.636,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 1,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.787,
+   "edgeDistance": 0.782,
+   "differentDims": 6,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C1",
+   "coverageContribution": "entrance ↔ roof"
+  },
+  {
+   "a": "K08",
+   "b": "K11",
+   "labelA": "كتلة جانبية تحتضن المدخل · شرائط أفقية · انقسام جانبي · حزام متدرج · بلا",
+   "labelB": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · بلا معالجة · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.983,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.628,
+     "level": "different"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.694,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.612,
+     "level": "different"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.675,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.799,
+   "edgeDistance": 0.923,
+   "differentDims": 7,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C1",
+   "coverageContribution": "entrance ↔ roof"
+  },
+  {
+   "a": "K01",
+   "b": "K02",
+   "labelA": "مدخل بسيط · لوحات مجمّعة · قاعدة · بلا معالجة · بلا",
+   "labelB": "كتلة جانبية تحتضن المدخل · أطر فردية · انقسام جانبي · بلا معالجة · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.948,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.466,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.63,
+     "level": "different"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.971,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 1,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.716,
+   "edgeDistance": 0.919,
+   "differentDims": 6,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C4",
+   "coverageContribution": "entrance ↔ entrance"
+  },
+  {
+   "a": "K01",
+   "b": "K07",
+   "labelA": "مدخل بسيط · لوحات مجمّعة · قاعدة · بلا معالجة · بلا",
+   "labelB": "شريط عتب عريض · شرائط أفقية · ثلاثي (قاعدة/وسط/علوي) · غطاء رفيع · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.328,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.227,
+     "level": "moderate"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.662,
+     "level": "different"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.908,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.95,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.582,
+   "edgeDistance": 0.851,
+   "differentDims": 4,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C4",
+   "coverageContribution": "entrance ↔ blocks"
+  },
+  {
+   "a": "K02",
+   "b": "K07",
+   "labelA": "كتلة جانبية تحتضن المدخل · أطر فردية · انقسام جانبي · بلا معالجة · عمود طرفي واحد",
+   "labelB": "شريط عتب عريض · شرائط أفقية · ثلاثي (قاعدة/وسط/علوي) · غطاء رفيع · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.697,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.693,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.173,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.438,
+     "level": "moderate"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.939,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.563,
+   "edgeDistance": 0.781,
+   "differentDims": 4,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C4",
+   "coverageContribution": "entrance ↔ blocks"
+  },
+  {
+   "a": "K05",
+   "b": "K07",
+   "labelA": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · حزام عريض · بلا",
+   "labelB": "كتلة جانبية تحتضن المدخل · أطر فردية · كتلة واحدة · بلا معالجة · بلا",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.982,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.453,
+     "level": "different"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.654,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.188,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.688,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.95,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.702,
+   "edgeDistance": 0.662,
+   "differentDims": 6,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C7",
+   "coverageContribution": "entrance ↔ entrance"
+  },
+  {
+   "a": "K05",
+   "b": "K12",
+   "labelA": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · حزام عريض · بلا",
+   "labelB": "عمود مدخل بارتفاع كامل · أعمدة رأسية · منطقة علوية · بلا معالجة · عمودان طرفيان",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.975,
+     "level": "different"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.655,
+     "level": "different"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.403,
+     "level": "moderate"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.923,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 1,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.708,
+   "edgeDistance": 0.689,
+   "differentDims": 5,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C7",
+   "coverageContribution": "entrance ↔ blocks"
+  },
+  {
+   "a": "K07",
+   "b": "K12",
+   "labelA": "كتلة جانبية تحتضن المدخل · أطر فردية · كتلة واحدة · بلا معالجة · بلا",
+   "labelB": "عمود مدخل بارتفاع كامل · أعمدة رأسية · منطقة علوية · بلا معالجة · عمودان طرفيان",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.982,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.522,
+     "level": "different"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.003,
+     "level": "same"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.337,
+     "level": "moderate"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.631,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.748,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.603,
+   "edgeDistance": 0.703,
+   "differentDims": 5,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "GENUINELY DISTINCT",
+   "reason": null,
+   "building": "C7",
+   "coverageContribution": "entrance ↔ blocks"
+  }
+ ],
+ "rejected": [
+  {
+   "a": "K07",
+   "b": "K11",
+   "labelA": "عمود مدخل بارتفاع كامل · لوحات مجمّعة · كتلة واحدة · بلا معالجة · عمودان طرفيان",
+   "labelB": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · بلا معالجة · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.44,
+     "level": "moderate"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.09,
+     "level": "same"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.139,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 0.125,
+     "level": "same"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.631,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.49,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.274,
+   "edgeDistance": 0.4,
+   "differentDims": 2,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 2 فقط من 7 (معالجة الزوايا، تنظيم الكتل).",
+   "building": "C1"
+  },
+  {
+   "a": "K10",
+   "b": "K11",
+   "labelA": "مدخل بسيط · شرائط أفقية · انقسام جانبي · بلا معالجة · عمودان طرفيان",
+   "labelB": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · بلا معالجة · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.437,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.327,
+     "level": "moderate"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.271,
+     "level": "moderate"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.357,
+     "level": "moderate"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 0.825,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.823,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.065,
+     "level": "same"
+    }
+   ],
+   "signatureDistance": 0.444,
+   "edgeDistance": 0.67,
+   "differentDims": 2,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 2 فقط من 7 (خط السقف، معالجة الزوايا).",
+   "building": "C1"
+  },
+  {
+   "a": "K09",
+   "b": "K11",
+   "labelA": "لوحة مدخل مسطحة · لوحات مجمّعة · كتلة واحدة · غطاء رفيع · عمودان طرفيان",
+   "labelB": "عمود مدخل بارتفاع كامل · أطر فردية · كتلة واحدة · بلا معالجة · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.224,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.432,
+     "level": "moderate"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.395,
+     "level": "moderate"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.095,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.632,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.829,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.515,
+   "edgeDistance": 0.572,
+   "differentDims": 3,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 3 فقط من 7 (خط السقف، معالجة الزوايا، تنظيم الكتل).",
+   "building": "C1"
+  },
+  {
+   "a": "K12",
+   "b": "K01",
+   "labelA": "شريط عتب عريض · أعمدة رأسية · قاعدة · بلا معالجة · عمودان طرفيان",
+   "labelB": "مدخل بسيط · لوحات مجمّعة · قاعدة · بلا معالجة · بلا",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.398,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.22,
+     "level": "moderate"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.258,
+     "level": "moderate"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.971,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.525,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.482,
+   "edgeDistance": 0.734,
+   "differentDims": 3,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 3 فقط من 7 (خط السقف، معالجة الزوايا، تنظيم الكتل).",
+   "building": "C4"
+  },
+  {
+   "a": "K05",
+   "b": "K01",
+   "labelA": "عمود مدخل بارتفاع كامل · شرائط أفقية · قاعدة · بلا معالجة · بلا",
+   "labelB": "مدخل بسيط · لوحات مجمّعة · قاعدة · بلا معالجة · بلا",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.781,
+     "level": "different"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.231,
+     "level": "moderate"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.427,
+     "level": "moderate"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.238,
+     "level": "moderate"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.525,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.457,
+   "edgeDistance": 0.846,
+   "differentDims": 3,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 3 فقط من 7 (استراتيجية المدخل، خط السقف، تنظيم الكتل).",
+   "building": "C4"
+  },
+  {
+   "a": "K11",
+   "b": "K01",
+   "labelA": "لوحة مدخل مسطحة · أطر فردية · كتلة واحدة · بلا معالجة · حجارة زاوية",
+   "labelB": "مدخل بسيط · لوحات مجمّعة · قاعدة · بلا معالجة · بلا",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.374,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.151,
+     "level": "same"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.114,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.4,
+     "level": "moderate"
+    }
+   ],
+   "signatureDistance": 0.291,
+   "edgeDistance": 0.897,
+   "differentDims": 1,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 1 فقط من 7 (معالجة الزوايا).",
+   "building": "C4"
+  },
+  {
+   "a": "K04",
+   "b": "K03",
+   "labelA": "كتلة جانبية تحتضن المدخل · لوحات مجمّعة · قاعدة · ارتفاع فوق المدخل · بلا",
+   "labelB": "كتلة جانبية تحتضن المدخل · أطر فردية · كتلة واحدة · غطاء رفيع · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0,
+     "level": "same"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.188,
+     "level": "same"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.098,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.754,
+     "level": "different"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.64,
+     "level": "different"
+    }
+   ],
+   "signatureDistance": 0.383,
+   "edgeDistance": 0.444,
+   "differentDims": 3,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 3 فقط من 7 (خط السقف، معالجة الزوايا، تنظيم الكتل).",
+   "building": "C7"
+  },
+  {
+   "a": "K01",
+   "b": "K03",
+   "labelA": "كتلة جانبية تحتضن المدخل · لوحات مجمّعة · انقسام جانبي · حزام متدرج · بلا",
+   "labelB": "كتلة جانبية تحتضن المدخل · أطر فردية · كتلة واحدة · غطاء رفيع · عمود طرفي واحد",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.268,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.352,
+     "level": "moderate"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.302,
+     "level": "moderate"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.147,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 1,
+     "level": "different"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.249,
+     "level": "moderate"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.29,
+     "level": "moderate"
+    }
+   ],
+   "signatureDistance": 0.373,
+   "edgeDistance": 0.55,
+   "differentDims": 1,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 1 فقط من 7 (خط السقف).",
+   "building": "C7"
+  },
+  {
+   "a": "K06",
+   "b": "K07",
+   "labelA": "كتلة جانبية تحتضن المدخل · أعمدة رأسية · كتلة واحدة · بلا معالجة · بلا",
+   "labelB": "كتلة جانبية تحتضن المدخل · أطر فردية · كتلة واحدة · بلا معالجة · بلا",
+   "dims": [
+    {
+     "key": "entrance",
+     "label": "استراتيجية المدخل",
+     "distance": 0.273,
+     "level": "moderate"
+    },
+    {
+     "key": "rhythm",
+     "label": "إيقاع الفتحات",
+     "distance": 0.2,
+     "level": "moderate"
+    },
+    {
+     "key": "emphasis",
+     "label": "التأكيد الرأسي",
+     "distance": 0.059,
+     "level": "same"
+    },
+    {
+     "key": "zoning",
+     "label": "تقسيم المواد",
+     "distance": 0.132,
+     "level": "same"
+    },
+    {
+     "key": "roof",
+     "label": "خط السقف",
+     "distance": 0.442,
+     "level": "moderate"
+    },
+    {
+     "key": "corners",
+     "label": "معالجة الزوايا",
+     "distance": 0.146,
+     "level": "same"
+    },
+    {
+     "key": "blocks",
+     "label": "تنظيم الكتل",
+     "distance": 0.268,
+     "level": "moderate"
+    }
+   ],
+   "signatureDistance": 0.217,
+   "edgeDistance": 0.64,
+   "differentDims": 0,
+   "fidelity": "PASS",
+   "plausibility": "PASS",
+   "verdict": "NEAR-DUPLICATE",
+   "reason": "أبعاد مختلفة 0 فقط من 7 (—).",
+   "building": "C7"
+  }
+ ],
+ "coverage": {
+  "C1": {
+   "leads": [
+    "entrance",
+    "entrance",
+    "roof"
+   ],
+   "distinct": 2
+  },
+  "C4": {
+   "leads": [
+    "entrance",
+    "entrance",
+    "blocks"
+   ],
+   "distinct": 2
+  },
+  "C7": {
+   "leads": [
+    "entrance",
+    "entrance",
+    "blocks"
+   ],
+   "distinct": 2
+  }
+ }
+}
