@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "1",
+  "tools": [
+    {
+      "name": "facade.generate",
+      "description": "توليد واجهة من المستند الحالي دون تعديل العمارة",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "expectedDocumentHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ]
+          }
+        },
+        "required": [
+          "expectedDocumentHash",
+          "style"
+        ]
+      }
+    },
+    {
+      "name": "facade.edit",
+      "description": "تعديل الكسوة والتكوين فقط ثم إعادة التوليد من المستند الحالي",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resultId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "expectedDocumentHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "patch": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "style": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "B",
+                  "C"
+                ]
+              },
+              "stone": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "widthM": {
+                    "type": "number"
+                  },
+                  "heightM": {
+                    "type": "number"
+                  },
+                  "jointM": {
+                    "type": "number"
+                  },
+                  "recessM": {
+                    "type": "number"
+                  },
+                  "bevelM": {
+                    "type": "number"
+                  },
+                  "rowOffset": {
+                    "type": "number"
+                  },
+                  "seed": {
+                    "type": "number"
+                  },
+                  "toneVariation": {
+                    "type": "number"
+                  },
+                  "originU": {
+                    "type": "number"
+                  },
+                  "originZ": {
+                    "type": "number"
+                  },
+                  "maxTiles": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 40000
+                  }
+                }
+              }
+            },
+            "minProperties": 1
+          }
+        },
+        "required": [
+          "resultId",
+          "expectedDocumentHash",
+          "patch"
+        ]
+      }
+    },
+    {
+      "name": "facade.validate",
+      "description": "فحص سلامة وحداثة النتيجة؛ ليس اعتمادًا بصريًا أو إنشائيًا",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resultId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "resultId"
+        ]
+      }
+    },
+    {
+      "name": "facade.get",
+      "description": "قراءة نتيجة حديثة سليمة من الذاكرة المحلية",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resultId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "resultId"
+        ]
+      }
+    }
+  ]
+}

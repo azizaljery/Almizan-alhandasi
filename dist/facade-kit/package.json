@@ -1,0 +1,10 @@
+{
+  "name": "@mizan/facade-kit",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": { ".": "./src/index.mjs" },
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test tests/*.test.mjs", "check": "node scripts/check.mjs", "example": "node scripts/describe-example.mjs" },
+  "dependencies": {}
+}
