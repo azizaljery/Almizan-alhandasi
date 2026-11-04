@@ -1,0 +1,460 @@
+{
+ "status": "CAPTURED_NOT_VISUALLY_APPROVED",
+ "sourceRevision": "2bbe9afc189161e8c845dee9944298411189e9f9",
+ "shots": [
+  {
+   "implementation": "kit",
+   "style": "A",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "bytes": 756535,
+   "glError": 0
+  },
+  {
+   "implementation": "sample",
+   "style": "A",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "bytes": 975996,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "A",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "bytes": 793884,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "A",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "bytes": 857310,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "A",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "bytes": 712502,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "A",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "1f1e6c1ad77544dffa44881a27d1cb55d72704065920af5bf414df0e8fa0df02",
+   "bytes": 787826,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "B",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "bytes": 51358,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "B",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "bytes": 857109,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "B",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "bytes": 56858,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "B",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "bytes": 826295,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "B",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "bytes": 56941,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "B",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "9f54aebc563cbd311e8458dce7e501123474b97f888b26a79bab7e4ea06d92c8",
+   "bytes": 858121,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "C",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "bytes": 51358,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "C",
+   "shot": "stone",
+   "camera": {
+    "shot": "stone",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     11.379999999999999,
+     0.5,
+     -13.555
+    ],
+    "target": [
+     11.030000000000001,
+     0.3,
+     -15.555
+    ],
+    "side": "s"
+   },
+   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "bytes": 780368,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "C",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "bytes": 56858,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "C",
+   "shot": "glass",
+   "camera": {
+    "shot": "glass",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     12.504999999999999,
+     2.4,
+     -12.46
+    ],
+    "target": [
+     11.504999999999999,
+     2.05,
+     -15.66
+    ],
+    "side": "s"
+   },
+   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "bytes": 859248,
+   "glError": 1282
+  },
+  {
+   "implementation": "kit",
+   "style": "C",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "bytes": 255898,
+   "glError": 1282
+  },
+  {
+   "implementation": "sample",
+   "style": "C",
+   "shot": "entrance",
+   "camera": {
+    "shot": "entrance",
+    "width": 960,
+    "height": 720,
+    "fov": 34,
+    "position": [
+     6.72,
+     1.85,
+     -2.3249999999999993
+    ],
+    "target": [
+     5.52,
+     1.5,
+     -6.5249999999999995
+    ],
+    "side": "s"
+   },
+   "resultHash": "e293ed0f786f4996ce89c6eccb22229f1e39969e9fff1e8adca303984af7e04f",
+   "bytes": 1094642,
+   "glError": 1282
+  }
+ ],
+ "errors": [],
+ "expected": 18,
+ "elapsedMs": 113713,
+ "pageErrors": []
+}

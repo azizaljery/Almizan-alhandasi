@@ -17,6 +17,10 @@ test('الربط بالموقع: جهة المدخل وحدود البروز م�
   assert.equal(frontSideOf(d), 's'); for (const k of ['s', 'n', 'e', 'w']) assert.ok(b[k] >= 0 && b[k] <= 2, k);
   assert.equal(frontSideOf({ ...d, entry: 'x' }), null);
 });
+test('الربط بالموقع: البروزات الجديدة صفر في كل الجهات', async () => {
+  const a = connectSiteFacade({ getDocument: C1 }), env = await a.call('facade.generate', { expectedDocumentHash: await a.documentHash(), style: 'B' });
+  for (const k of ['s', 'n', 'e', 'w']) assert.equal(env.result.maxProjectionM[k], 0, k);
+});
 test('الربط بالموقع: توليد A/B/C سليم وحديث، ويرفض بصمة قديمة وتعديل المستند', async () => {
   let d = C1(); const a = connectSiteFacade({ getDocument: () => d });
   const h = await a.documentHash(), env = await a.call('facade.generate', { expectedDocumentHash: h, style: 'B' });

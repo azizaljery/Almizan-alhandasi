@@ -6,7 +6,7 @@ import { connectMizanFacadeAgent } from './facade-kit/integration/mizan-adapter.
 export const SITE_REVISION = 'dev/facade-realism-sample@2bbe9af'; // يُحدَّث عند كل إيداع يُختبر
 export const MAX_PROJECTION_CAP_M = 2; // سقف الحزمة نفسها (number(..., 0, 2))
 
-/** حدّ البروز لكل جهة = المسافة بين وجه المبنى وخط القطعة ناقص الارتداد، ضمن [0، السقف]. اشتقاق هندسي من المستند، وليس حكمًا نظاميًا. */
+/** (معلوماتي فقط، لا يغذّي التوليد) حدّ البروز لكل جهة = المسافة بين وجه المبنى وخط القطعة ناقص الارتداد، ضمن [0، السقف]. اشتقاق هندسي من المستند، وليس حكمًا نظاميًا. */
 export function projectionBudgets(doc) {
   const B = planBounds(doc), S = B.setbacks || {}, pts = (doc.walls || []).filter(w => w.level === (doc.levels?.[0]?.id)).flatMap(w => [w.a, w.b]);
   if (!pts.length || !Number.isFinite(B.minX)) return { s: 0, n: 0, e: 0, w: 0, basis: 'لا جدران أو لا قطعة في المستند: صفر احتياطًا' };
@@ -24,8 +24,8 @@ export function connectSiteFacade({ getDocument }) {
     getDocument, buildAllSides, sideTransform, validateDoc,
     getFacadeOptions: doc => {
       const front = frontSideOf(doc); if (!front) throw new Error('FRONT_SIDE_UNKNOWN: doc.entry غير محدد');
-      const b = projectionBudgets(doc); const { basis, ...maxProjectionM } = b;
-      return { frontSide: front, maxProjectionM, roofSurfaces: [], sourceRevision: SITE_REVISION, stone: { widthM: .6, heightM: .3, jointM: .008, recessM: .012 } };
+      // (قرار المالك 2026-11-04) البروزات الجديدة متوقفة في الجهات الأربع: الصفر ليس حدًا نظاميًا، وprojectionBudgets مرجع معلوماتي فقط ولا يُستعمل في التوليد.
+      return { frontSide: front, maxProjectionM: { s: 0, n: 0, e: 0, w: 0 }, roofSurfaces: [], sourceRevision: SITE_REVISION, stone: { widthM: .6, heightM: .3, jointM: .008, recessM: .012 } };
     },
   });
 }
