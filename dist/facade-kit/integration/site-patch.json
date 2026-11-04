@@ -1,0 +1,7 @@
+{
+  "baseRevision": "2bbe9afc189161e8c845dee9944298411189e9f9",
+  "target": "dist/design.mjs",
+  "replacement": "integration/design.mjs.updated",
+  "enableQuery": "facade-kit=1",
+  "expectedFileSha256": "2f166a8e3ffb66f4897c0ac654eb1ac6c06d59b9a4f2b580e3ff1b70ce5b30f2"
+}

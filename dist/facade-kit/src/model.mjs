@@ -1,7 +1,7 @@
 import { copy, freeze, hash, number, id, fail, unique, issue } from './core.mjs';
 import { layerMask, bounds, intersectRect, intersection, multiArea, rect } from './polygons.mjs';
 import { stoneConfig, cutStoneLayer } from './stone.mjs';
-export const VERSION='0.1.0';
+export const VERSION='0.2.0';
 export const SIDES=['s','n','e','w'];
 export const STYLES=freeze({ A:{id:'A',nameAr:'حجر فاتح ومدخل مؤطّر',materialFamily:'stone'}, B:{id:'B',nameAr:'بوابة مدخل عميقة وتظليل معدني',materialFamily:'shade'}, C:{id:'C',nameAr:'حواف متدرجة وكاسرات رأسية',materialFamily:'vertical'} });
 export function validateBuilt(raw) {
@@ -20,6 +20,7 @@ export function planSignature(built) {
 function decorateSide(B,style,side,budget,frontSide) {
   const layers=B.layers.filter(L=>L.plan===true||L.role==='frame').map(L=>({...copy(L),mat:L.role==='wall'?(style==='A'?'stone':'render'):L.role==='frame'?'metal':L.role==='glazing'?'glass':L.role==='door'?(style==='C'?'wood':'metal'):L.mat}));
   const add=(wall,ring,name,material,depth,role='proposal')=>{
+    if(depth===0)return; // Explicit zero is a no-new-projections policy, not a generation error.
     if(depth<=0||depth>budget+1e-9) fail('PROJECTION_BUDGET',side+':'+name);
     const clipped=intersection(layerMask(wall),[ring]);
     for(let k=0;k<clipped.length;k++) {
@@ -72,6 +73,8 @@ export async function createFacadePackage(raw,options) {
   const built=Object.fromEntries(SIDES.map(s=>[s,decorateSide(source[s],style,s,projections[s],frontSide)]));
   if(await hash(planSignature(built))!==sourceGeometryHash) fail('PLAN_GEOMETRY_CHANGED','built');
   const cuts={},issues=[issue('PROPOSALS_REQUIRE_REVIEW','البروزات ميزانية تصميم مدخلة، ولم تُتحقق اشتراطات الارتدادات أو الإنشاء تلقائيًا.')];
+  if(projections[frontSide]===0)issues.push(issue('NEW_PROJECTIONS_DISABLED','البروزات الجديدة متوقفة؛ هذا ليس إثباتًا بأن الحد النظامي صفر، وقد يقل التمايز الهندسي.'));
+  if(options.projectEvidence?.stone.status==='VISUAL_ASSUMPTION')issues.push(issue('STONE_VISUAL_ASSUMPTION','مقاسات الحجر والفاصل وعمقه افتراضات عرض وليست مواصفة منتج.'));
   const config=stoneConfig(options.stone||{});
   for(const side of SIDES)for(const L of built[side].layers)if(L.role==='stone-cladding'||L.role==='wall'&&L.mat==='stone') {
     const thickness=L.o1-L.o0;
@@ -83,6 +86,7 @@ export async function createFacadePackage(raw,options) {
   for(const roof of roofSurfaces){number(roof.bottomM,roof.id+'.bottomM');number(roof.topM,roof.id+'.topM');if(roof.topM<=roof.bottomM)fail('ROOF_THICKNESS',roof.id);layerMask({id:roof.id,outer:roof.polygon,holes:roof.holes||[]});if(!roof.sourceNote)fail('ROOF_PROVENANCE_REQUIRED',roof.id);}
   if(!roofSurfaces.length)issues.push(issue('ROOF_NOT_SUPPLIED','لا سطح مسقوف مخمّن؛ قد يظهر باطن النموذج من الكاميرا المرتفعة.'));
   const result={schema:'MIZAN-FACADE-KIT/1',version:VERSION,sourceRevision:options.sourceRevision||'UNSPECIFIED',sourceHash,sourceGeometryHash,style:copy(STYLES[style]),frontSide,transforms,built,cuts,stone:config,maxProjectionM:copy(projections),roofSurfaces,assets:copy(options.assets||{}),issues,visualApproval:'NOT_REVIEWED',codeCompliance:'NOT_EVALUATED',constructionApproved:false};
+  result.projectBinding=copy(options.projectBinding||null);result.projectEvidence=copy(options.projectEvidence||null);
   result.resultHash=await hash(result);return freeze(result);
 }
 export async function verifyFacadePackage(raw){const r=copy(raw),expected=r.resultHash;delete r.resultHash;return r.schema==='MIZAN-FACADE-KIT/1'&&r.constructionApproved===false&&r.codeCompliance==='NOT_EVALUATED'&&expected===await hash(r);}
