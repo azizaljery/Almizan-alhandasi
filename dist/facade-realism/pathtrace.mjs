@@ -60,6 +60,7 @@ export function buildBVH(tri, leafSize = 4) {
 
 const FRAG = /* glsl */`
 precision highp float; precision highp int; precision highp sampler2D;
+layout(location = 0) out highp vec4 outColor;
 uniform sampler2D uTri, uNode, uPrev;
 uniform int uTriW, uNodeW, uBounces;
 uniform vec2 uRes;
@@ -185,15 +186,16 @@ void main(){
   vec3 s = radiance(uCamPos, rd);
   s = min(s, vec3(20.0));
   vec3 prev = texelFetch(uPrev, ivec2(px), 0).rgb;
-  gl_FragColor = vec4(mix(prev, s, 1.0 / (uN + 1.0)), 1.0);
+  outColor = vec4(mix(prev, s, 1.0 / (uN + 1.0)), 1.0);
 }`;
 
 const FRAG_SHOW = /* glsl */`
 precision highp float; precision highp sampler2D;
+layout(location = 0) out highp vec4 outColor;
 uniform sampler2D uAcc; uniform float uExposure;
 vec3 aces(vec3 x){ return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
 vec3 toSrgb(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-void main(){ vec3 c = texelFetch(uAcc, ivec2(gl_FragCoord.xy), 0).rgb * uExposure; gl_FragColor = vec4(toSrgb(aces(c)), 1.0); }`;
+void main(){ vec3 c = texelFetch(uAcc, ivec2(gl_FragCoord.xy), 0).rgb * uExposure; outColor = vec4(toSrgb(aces(c)), 1.0); }`;
 const VERT = `void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 
 const MAT_A = [[.80, .77, .70, 0], [.10, .13, .15, 1], [.16, .17, .19, 2], [.04, .04, .045, 0], [.82, .79, .72, 0], [.38, .22, .11, 0], [.70, .58, .40, 0], [.55, .50, .40, 0]];

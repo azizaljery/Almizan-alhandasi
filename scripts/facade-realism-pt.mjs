@@ -41,7 +41,7 @@ try {
 
   const p2 = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   p2.on('pageerror', e => errors.push('pt: ' + e.message));
-  p2.on('console', m => { if (m.type() === 'error') errors.push('pt console: ' + m.text()); });
+  p2.on('console', m => { if (m.type() === 'error') errors.push('pt console: ' + m.text().slice(0, 4000)); });
   await p2.goto(`${ORIGIN}/facade-realism-pt.html?v=${v}&shot=${shot}&geo=${geo}&w=${w}&h=${h}&spp=${spp}`);
   await p2.waitForFunction(() => globalThis.__PT?.ready === true, null, { timeout: 3000000, polling: 2000 });
   pt = await p2.evaluate(() => globalThis.__PT);
@@ -49,10 +49,11 @@ try {
   await (await p2.$('#pt')).screenshot({ path: join(out, 'pathtraced.png') });
   await p2.close();
 } finally { await browser.close(); srv.close(); }
-if (errors.length) console.log('ERRORS', errors.slice(0, 5).join(' | '));
+console.log('PT_INFO', JSON.stringify({ spp: pt.spp, tri: pt.triangles, nodes: pt.nodes, glError: pt.glError, gpu: pt.gpu, timings: pt.timings }));
+if (errors.length) console.log('ERRORS', errors.slice(0, 5).map(e => e.slice(0, 4500)).join(' | '));
 const lab = (t, i) => `<text x="${i * w + 16}" y="30" font-family="DejaVu Sans, sans-serif" font-size="22" fill="#222">${t}</text>`;
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w * 2}" height="42"><rect width="100%" height="100%" fill="#fff"/>${lab('Raster (WebGL)', 0)}${lab(`Path tracing ${pt.spp} spp`, 1)}</svg>`;
-await sharp({ create: { width: w * 2, height: h + 42, channels: 3, background: '#fff' } }).composite([{ input: Buffer.from(svg), top: 0, left: 0 }, { input: join(out, 'raster.png'), top: 42, left: 0 }, { input: join(out, 'pathtraced.png'), top: 42, left: w }]).png().toFile(join(out, 'compare.png'));
+await sharp({ create: { width: w * 2, height: h + 42, channels: 3, background: '#fff' } }).composite([{ input: Buffer.from(svg), top: 0, left: 0 }, { input: await sharp(join(out, 'raster.png')).resize(w, h, { fit: 'fill' }).toBuffer(), top: 42, left: 0 }, { input: await sharp(join(out, 'pathtraced.png')).resize(w, h, { fit: 'fill' }).toBuffer(), top: 42, left: w }]).png().toFile(join(out, 'compare.png'));
 writeFileSync(join(out, 'results.json'), JSON.stringify({ shot, variant: v, geo, size: [w, h], raster: { triangles: raster.triangles, meshes: raster.meshes }, pathtrace: pt, note: 'الأداء مقاس على SwiftShader (معالج) داخل Chromium، وليس على جهاز عميل فعلي.' }, null, 1));
 console.log(JSON.stringify({ spp: pt.spp, triangles: pt.triangles, nodes: pt.nodes, timings: pt.timings, glError: pt.glError, gpu: pt.gpu }));
 console.log(errors.length ? 'FAIL' : 'OK');
