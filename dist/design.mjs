@@ -26,6 +26,20 @@ const landDims = d => { const P = d.plot?.polygon; if (!P?.length) return '—';
 const toast = t => { const n = el('div', { class: 'toast', role: 'status' }, t); document.body.append(n); setTimeout(() => n.remove(), 3200); };
 
 let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null;
+// Optional facade-kit preview; no import in the normal customer route.
+let facadeKitPanel=null;
+function facadeKitCard(){
+  if(new URLSearchParams(location.search).get('facade-kit')!=='1')return null;
+  const host=el('section',{class:'card',id:'facade-kit-preview'},'جاري تجهيز أدوات الواجهة…');
+  import('./facade-kit/integration/design-panel.mjs').then(async({mountDesignFacadePanel})=>{
+    if(!host.isConnected)return;
+    const controller=await mountDesignFacadePanel(host,{getSession:()=>session,projectId:'design-session:'+session.createdAt,
+      loadThree:async()=>{const runtime=await import('./three-runtime.mjs');return runtime.loadThreeRuntime();}});
+    if(!host.isConnected){controller.dispose();return;}facadeKitPanel=controller;
+  }).catch(e=>{if(host.isConnected)host.textContent='تعذّر تجهيز الواجهة: '+e.message;});
+  return host;
+}
+
 // (الجولة الرابعة عشرة) فرق التعديل مرسومًا على المسقط: ما تغيّر عن النسخة السابقة (البصمة الهندسية) يُظلَّل، وما أزيل يُرسم متقطعًا
 let diffOn = true, diffInfo = null;
 
@@ -38,6 +52,7 @@ function init() {
 }
 
 function show(index) {
+  facadeKitPanel?.dispose(); facadeKitPanel=null;
   session.current = index; saveSession(localStorage, session);
   doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null;
   const d = session.designs[index], S = summarizeDoc(doc), req = session.input.requirements || {};
@@ -97,7 +112,8 @@ function show(index) {
     statusCard(d),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, reqCard)),
-    (() => { try { return facadeCard({ session, doc, save: s => saveSession(localStorage, s) }); } catch { return null; } })(), // (2026-10-31) واجهات التصميم
+    (() => { try { return facadeCard({ session, doc, save: s => saveSession(localStorage, s) }); } catch { return null; } })(),
+    facadeKitCard(), // (2026-10-31) واجهات التصميم
     altsCard(d),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), el('div', { class: 'actions', style: 'gap:16px' }, reviewCard(d), notes))].filter(Boolean));
   legend(); bindPlan(); paint();

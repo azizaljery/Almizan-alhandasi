@@ -8,3 +8,4 @@ export {validateAssetManifest,loadSurfaceMaps,checkedAssetUrl} from './assets.mj
 export {installEnvironment} from './environment.mjs';
 export {exportFacadeGLB,downloadBlob} from './export.mjs';
 export {hash,FacadeError} from './core.mjs';
+export {PROJECT_IDENTITY,projectOptions,integrationReference} from './project.mjs';

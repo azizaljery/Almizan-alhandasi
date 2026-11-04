@@ -16,16 +16,16 @@ export function fitCamera(THREE,camera,box,{side='s',aspect=1,padding=1.18,obliq
   }
   const diagonal=box.getSize(new THREE.Vector3()).length();camera.position.copy(center).addScaledVector(direction,distance);camera.near=Math.max(.01,distance-diagonal*1.5);camera.far=distance+diagonal*4+10;camera.lookAt(center);camera.updateProjectionMatrix();camera.updateMatrixWorld();return {target:center,distance};
 }
-export async function createFacadeViewer(THREE,canvas,packet,{surfaceAssets={},environmentAsset=null,assetOptions={},side=packet.frontSide,stoneMode='cut',monochrome=false,pixelRatio=Math.min(globalThis.devicePixelRatio||1,2),cameraState=null,frameBounds=null}={}){
+export async function createFacadeViewer(THREE,canvas,packet,{surfaceAssets={},environmentAsset=null,assetOptions={},side=packet.frontSide,stoneMode='cut',monochrome=false,pixelRatio=Math.min(globalThis.devicePixelRatio||1,2),cameraState=null,frameBounds=null,materialLibraryFactory=null,modelFactory=null}={}){
   if(!canvas?.getContext)fail('CANVAS_REQUIRED','canvas');let renderer;
   try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});}catch{fail('WEBGL_UNAVAILABLE','canvas');}
   renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1;renderer.setPixelRatio(Math.min(2,Math.max(.5,pixelRatio)));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  const scene=new THREE.Scene(),library=createMaterialLibrary(THREE,{surfaceAssets,maxAnisotropy:Math.min(8,renderer.capabilities.getMaxAnisotropy())});let model,environment,ground;
-  try{model=await buildFacadeScene(THREE,packet,library,{stoneMode,monochrome});scene.add(model.group);environment=await installEnvironment(THREE,renderer,scene,{asset:environmentAsset,assetOptions});
+  const scene=new THREE.Scene(),library=materialLibraryFactory?materialLibraryFactory(THREE):createMaterialLibrary(THREE,{surfaceAssets,maxAnisotropy:Math.min(8,renderer.capabilities.getMaxAnisotropy())});let model,environment,ground;
+  try{model=modelFactory?await modelFactory(THREE,packet,library):await buildFacadeScene(THREE,packet,library,{stoneMode,monochrome});scene.add(model.group);environment=await installEnvironment(THREE,renderer,scene,{asset:environmentAsset,assetOptions});
     const box=frameBounds||model.bounds,center=box.getCenter(new THREE.Vector3()),span=box.getSize(new THREE.Vector3()),extent=Math.max(span.x,span.z);
     ground=new THREE.Mesh(new THREE.PlaneGeometry(extent*7,extent*7),library.mats.ground);ground.rotation.x=-Math.PI/2;ground.position.set(center.x,box.min.y-.008,center.z);ground.receiveShadow=true;scene.add(ground);
     const sun=new THREE.DirectionalLight('#fff1dc',3);sun.position.copy(center).add(new THREE.Vector3(-extent*.7,extent*.95,extent*.6));sun.target.position.copy(center);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);const s=extent*.9;Object.assign(sun.shadow.camera,{left:-s,right:s,top:s,bottom:-s,near:.1,far:extent*4});sun.shadow.bias=-.00005;sun.shadow.normalBias=.015;sun.shadow.camera.updateProjectionMatrix();scene.add(sun,sun.target);
-    const camera=new THREE.PerspectiveCamera(38,1,.1,1000);let target,disposed=false,firstResize=true;
+    const camera=new THREE.PerspectiveCamera(cameraState?.fov??38,1,.1,1000);let target,disposed=false,firstResize=true;
     const render=()=>{if(!disposed)renderer.render(scene,camera);};
     const resize=()=>{const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;
       target=fitCamera(THREE,camera,box,{side,aspect:w/h}).target;if(firstResize&&cameraState){camera.position.fromArray(cameraState.position);target.fromArray(cameraState.target);camera.lookAt(target);camera.updateMatrixWorld();}firstResize=false;

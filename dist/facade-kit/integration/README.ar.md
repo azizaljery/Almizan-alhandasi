@@ -1,5 +1,7 @@
 # الربط مع وكيل موقع الميزان
 
+للنسخة 0.2.0: المحول الفعلي ومصادر الحالة وسياسات البروز وملف الإيداع في `../docs/INTEGRATION-020.ar.md`. المثال التالي يوضح الواجهة البرمجية العامة؛ أسماء `studio` و`facadeRules` فيه أمثلة، وليست الربط الجديد المنفذ.
+
 المحول يستدعي الدوال الموجودة في `dist/facade-realism/model.mjs` و`dist/draw/doc.mjs`. راجعت نسخها عند الإيداع `c8acdd3e4d14f30c59213d3abcca5625e9f0707e`؛ لا تستبدل الملفات الأصلية بالحزمة. تحقق من واجهات الدوال إذا تغير الفرع.
 
 ## توصيل الدوال
@@ -22,7 +24,7 @@ export function connectFacadePanel({studio,facadeRules,canvas}) {
       frontSide:facadeRules.frontSideFor(doc),
       maxProjectionM:facadeRules.maxProjectionFor(doc), // الأربع جهات، من المشروع
       roofSurfaces:facadeRules.roofSurfacesFor(doc), // [] إن لم تتوفر هندسة موثوقة
-      sourceRevision:'REPLACE_WITH_TESTED_SITE_COMMIT',
+      sourceRevision:'2bbe9afc189161e8c845dee9944298411189e9f9', // مصدر الدوال الذي فُحص
       stone:{widthM:.6,heightM:.3,jointM:.008,recessM:.012}
     })
   });

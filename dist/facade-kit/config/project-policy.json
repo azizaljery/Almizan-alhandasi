@@ -1,0 +1,19 @@
+{
+  "schema": "MIZAN-FACADE-POLICY/1",
+  "repository": "azizaljery/Almizan-alhandasi",
+  "projectName": "MIZAN-ALHANDASAH",
+  "packageName": "@mizan/facade-kit",
+  "usage": "preview",
+  "frontSide": "s",
+  "projection": {
+    "status": "UNVERIFIED",
+    "basis": "NO_NEW_PROJECTIONS_PENDING_PROJECT_RULES",
+    "source": "No parcel-specific approved projection schedule supplied",
+    "maxProjectionM": {"s": 0, "n": 0, "e": 0, "w": 0}
+  },
+  "stone": {
+    "status": "VISUAL_ASSUMPTION",
+    "source": "Package preview defaults, not a manufacturer specification",
+    "dimensions": {"widthM": 0.6, "heightM": 0.3, "jointM": 0.008, "recessM": 0.012, "bevelM": 0.0015}
+  }
+}
