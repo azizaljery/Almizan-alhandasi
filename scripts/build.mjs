@@ -31,7 +31,7 @@ assert.ok(!assistant.includes('OPENAI_API_KEY') && !assistant.includes('ANTHROPI
 if (existsSync('dist/client')) rmSync('dist/client', { recursive: true, force: true });
 mkdirSync('dist/client', { recursive: true });
 // عينة الواجهات الواقعية للفحص أثناء التطوير فقط: تبقى في dist/ ولا تدخل حزمة العميل (tests/facade-realism-exclusion.test.mjs).
-const DEV_ONLY = new Set(['facade-realism.html', 'facade-realism']);
+const DEV_ONLY = new Set(['facade-realism.html', 'facade-realism-pt.html', 'facade-realism']);
 for (const entry of readdirSync('dist', { withFileTypes: true })) {
   if (['client', 'server', '.openai'].includes(entry.name) || entry.name.startsWith('.') || DEV_ONLY.has(entry.name)) continue;
   cpSync(`dist/${entry.name}`, `dist/client/${entry.name}`, { recursive: true });

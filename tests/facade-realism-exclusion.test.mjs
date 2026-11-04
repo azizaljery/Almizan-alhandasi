@@ -8,6 +8,7 @@ import { join } from 'node:path';
 test('scripts/build.mjs لا ينسخ صفحة العينة ولا مجلدها إلى dist/client', () => {
   execFileSync(process.execPath, ['scripts/build.mjs'], { stdio: 'pipe', timeout: 600000 });
   assert.equal(existsSync('dist/client/facade-realism.html'), false);
+  assert.equal(existsSync('dist/client/facade-realism-pt.html'), false);
   assert.equal(existsSync('dist/client/facade-realism'), false);
   // الصفحة والمجلد ما زالا في dist/ للفحص أثناء التطوير
   assert.equal(existsSync('dist/facade-realism.html'), true);

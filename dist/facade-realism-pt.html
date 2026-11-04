@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اختبار جدوى تتبّع مسار الضوء (عينة الواجهات)</title>
+<style>
+  body { margin: 0; background: #1b1e1c; color: #e8e6e0; font-family: system-ui, "DejaVu Sans", sans-serif; }
+  #msg { padding: 16px; } canvas { display: block; max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="msg">جارٍ التحميل…</div></div>
+<script type="module">
+// صفحة فحص للتطوير فقط (تُستثنى من حزمة العميل). تُنشئ مشهد العينة نفسه (facade-realism/scene.mjs) ثم تصيّره بتتبّع مسار الضوء.
+// معاملات: v (A|B|C)، shot (window|stone|door|slot)، w،h، spp (عدد العينات)، bounces، radius (م)، geo (block|old|flatface).
+import { loadThreeRuntime } from './three-runtime.mjs';
+import { parseDoc } from './draw/doc.mjs';
+import { buildAllSides } from './facade-realism/model.mjs';
+import { createRealismMaterials } from './facade-realism/materials.mjs';
+import { buildBuildingScene, closeupCamera } from './facade-realism/scene.mjs';
+import { extractTriangles, buildBVH, createPathTracer } from './facade-realism/pathtrace.mjs';
+
+const q = new URLSearchParams(location.search), stage = document.getElementById('stage');
+const num = (k, d, lo, hi) => { const n = Number(q.get(k)); return Number.isFinite(n) && q.get(k) !== null && n >= lo && n <= hi ? n : d; };
+const id = (q.get('v') || 'A').toUpperCase(), shot = q.get('shot') || 'window', geo = q.get('geo') || 'block';
+const W = Math.round(num('w', 960, 160, 2400)), H = Math.round(num('h', 600, 100, 1600)), SPP = Math.round(num('spp', 32, 1, 2048)), BOUNCES = Math.round(num('bounces', 5, 1, 8)), RADIUS = num('radius', 10, 2, 60);
+const done = info => { window.__PT = { ready: true, ...info }; };
+(async () => {
+  try {
+    const t0 = performance.now(), T = {};
+    const THREE = await loadThreeRuntime();
+    const doc = parseDoc(await (await fetch('./facade-realism/C1.json')).text());
+    const built = buildAllSides(doc, id), lib = createRealismMaterials(THREE);
+    const S = buildBuildingScene(THREE, built, lib, { geo });
+    S.group.updateMatrixWorld(true);
+    const cu = closeupCamera(THREE, S, shot, { W, H });
+    T.sceneMs = Math.round(performance.now() - t0);
+
+    let t1 = performance.now();
+    const tris = extractTriangles(THREE, S.meshes, { center: cu.target, radius: RADIUS });
+    T.extractMs = Math.round(performance.now() - t1); t1 = performance.now();
+    const bvh = buildBVH(tris);
+    T.bvhMs = Math.round(performance.now() - t1);
+
+    const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; canvas.id = 'pt';
+    stage.innerHTML = ''; stage.appendChild(canvas);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+    const sun = [-26, 32, 30]; // الاتجاه نفسه المستعمل في الصفحة اللحظية (الشمس من الجنوب الغربي)
+    t1 = performance.now();
+    const pt = createPathTracer(THREE, renderer, { tris, bvh, camera: cu.camera, sunDir: sun, bounces: BOUNCES });
+    pt.pass(); pt.sync(); // أول مرور يشمل ترجمة المظلل
+    T.firstPassMs = Math.round(performance.now() - t1);
+    const passMs = []; let tp = performance.now();
+    for (let i = 1; i < SPP; i++) { pt.pass(); if (i % 4 === 0 || i === SPP - 1) { pt.sync(); const now = performance.now(); passMs.push((now - tp) / (i % 4 === 0 ? 4 : (i % 4 || 1))); tp = now; await new Promise(r => setTimeout(r)); } window.__PT_PROGRESS = i; }
+    pt.sync(); pt.show();
+    const gl = renderer.getContext();
+    T.totalMs = Math.round(performance.now() - t0);
+    T.passMsAvg = passMs.length ? Math.round(passMs.reduce((a, b) => a + b, 0) / passMs.length) : T.firstPassMs;
+    done({ variant: id, shot, geo, spp: pt.samples, W, H, bounces: BOUNCES, radius: RADIUS, ...pt.info, timings: T, glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', gpu: (() => { const e = gl.getExtension('WEBGL_debug_renderer_info'); return e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'غير متاح'; })() });
+  } catch (e) { stage.innerHTML = '<div id="msg">تعذّر: ' + (e?.message || e) + '</div>'; done({ error: String(e?.stack || e) }); }
+})();
+</script>
+</body>
+</html>
