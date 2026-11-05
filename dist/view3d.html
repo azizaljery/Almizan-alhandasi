@@ -33,11 +33,20 @@
     <div><h2>الأجواء</h2><div class="seg" id="styleSeg"><button data-style="day" class="on">نهار</button><button data-style="dusk">غروب</button></div></div>
     <div id="levelBox" hidden><h2>الأدوار</h2><div class="seg" id="levelSeg"></div></div>
     <div id="facadeBox"><h2>الواجهة الخارجية</h2>
-      <div class="seg" id="facadeSeg"><button data-f="model" class="on">المجسم</button><button data-f="J">معاصر (حجر وخشب وإطارات سوداء)</button></div>
+      <div class="seg" id="facadeSeg"><button data-f="model" class="on">المجسم</button></div>
       <div id="facadeOpts" hidden>
+        <label class="kv">نمط الواجهة<span class="muted" id="styleWhy"></span></label>
+        <label class="kv" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="autoStyle" checked> دع ميزان يقترح الأنسب</label>
+        <div class="seg" id="styleSel" role="group" aria-label="نمط الواجهة">
+          <button data-s="N">نجدي</button><button data-s="H">حجازي - جدة</button><button data-s="S">سلماني</button><button data-s="C">كلاسيكي</button><button data-s="M">معاصر خفيف</button><button data-s="J">معاصر حجري</button>
+        </div>
+        <div class="kv" style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap"><button class="btn" id="altBtn" type="button">بديل آخر</button><button class="btn" id="otherStyleBtn" type="button">جرّب طرازًا آخر</button></div>
+        <p class="muted" id="altCnt" aria-live="polite"></p>
+        <div class="seg" id="altChips" aria-label="بدائل مقترحة"></div>
         <label class="kv">عدد الأدوار<select id="facadeFloors"><option value="">حسب التصميم</option><option value="1">دور واحد</option><option value="2">دوران</option><option value="3">ثلاثة أدوار (مع ملحق)</option></select></label>
         <div class="seg" id="facadeTime"><button data-t="day" class="on">نهار</button><button data-t="night">ليل</button></div>
-        <p class="muted">عرض واقعي للواجهة من تصميمك المعتمد نفسه، بإطارات بارزة 20–25 سم. الأدوار العليا تكرر نوافذ الدور الأرضي ما لم تُرسم في المرسم؛ ليس مخططًا تنفيذيًا.</p>
+        <p class="muted" id="styleNote" hidden></p>
+        <p class="muted">عرض واقعي للواجهة من تصميمك المعتمد نفسه، بإطارات بارزة 20–25 سم. «بديل آخر» يغيّر التوزيع والتفاصيل دون تحريك أي جدار أو فتحة. الأدوار العليا تكرر نوافذ الدور الأرضي ما لم تُرسم في المرسم؛ ليس مخططًا تنفيذيًا.</p>
       </div></div>
     <button class="btn" id="shot">التقاط صورة</button>
   </aside>
@@ -45,19 +54,67 @@
 </div>
 <script type="module" src="./view3d.mjs"></script>
 <script type="module">
-// الواجهة الخارجية ضمن العرض ثلاثي الأبعاد: تُبنى من التصميم المعتمد (المفتاح نفسه الذي يقرؤه المجسم)
+// الواجهة الخارجية ضمن العرض ثلاثي الأبعاد. «بديل آخر» = فكرة معمارية جديدة ضمن الطراز نفسه (منطقة مختلفة، لا إعادة تلوين)؛
+// «جرّب طرازًا آخر» ينقل إلى طراز آخر. السجل في ذاكرة الجلسة فقط.
+import { rankStyles, STYLE_AR } from './facade-j/facade-realism/choose-style.mjs';
+import { createHistory, markShown, nextAlternative, proposeAlternatives } from './facade-j/facade-realism/alternatives.mjs';
+import { baseRegion, regionId, describeRegion, parseRegion } from './facade-j/facade-realism/variation.mjs';
 const $ = id => document.getElementById(id), fr = $('facadeFrame'), host = $('threeHost'), opts = $('facadeOpts');
-let mode = 'model', time = 'day';
+const safe = (f, d) => { try { return f(); } catch { return d; } };
+let on = false, time = 'day', style = '', note0 = '';
 const NIGHT = '&night=1&sun=0.05&skys=.01&bgs=.04&el=4&exp=1.6';
-function apply() {
-  const on = mode === 'J'; opts.hidden = !on; fr.hidden = !on; host.style.visibility = on ? 'hidden' : '';
+const doc = safe(() => JSON.parse(localStorage.getItem('mizan.studio.doc.v1') || 'null'), null);
+const wish = safe(() => new URLSearchParams(location.search).get('wish') || localStorage.getItem('mizan.facade.wish') || '', '');
+const hist = createHistory(), recent = [], tried = new Set(), region = {}; // region[style] = المنطقة الحالية
+const ranking = () => safe(() => rankStyles(doc, wish, { recent }), Object.keys(STYLE_AR).filter(id => id !== 'J').map(id => ({ id, reason: '' })));
+const floorsVal = () => +$('facadeFloors').value || undefined;
+style = ranking()[0].id;
+const cur = () => region[style] || (region[style] = safe(() => baseRegion(doc, floorsVal()), null));
+function note(t) { const n = $('styleNote'); n.hidden = !t; n.textContent = t || ''; }
+async function probe(id) { // هل تُحمَّل وحدة النمط؟ إن فشلت يظهر المجسم الأساسي مع تنبيه
+  let bad = false; try { const { STYLES } = await import('./facade-j/facade-realism/styles/index.mjs'); await STYLES[id].load(); } catch { bad = true; }
+  note(bad ? 'تعذّر تحميل نمط «' + (STYLE_AR[id] || id) + '»؛ تُعرض الواجهة الأساسية دون زخرفة النمط. جرّب نمطًا آخر.' : note0);
+}
+function chips() {
+  const box = $('altChips'); box.innerHTML = '';
+  const ps = safe(() => proposeAlternatives(doc, style, hist, { floors: floorsVal() }), []);
+  ps.forEach((r, i) => { const b = document.createElement('button'); b.textContent = 'فكرة ' + (i + 1); b.title = describeRegion(r); b.dataset.r = regionId(r); box.appendChild(b); });
+  $('altCnt').textContent = (note0 && note0.startsWith('لا يوجد') ? '' : '') + (ps.length ? 'بدائل مختلفة متاحة الآن: ' + ps.length + ' (الحد الأقصى 3).' : 'لا توجد بدائل مقترحة إضافية.');
+}
+function paint() {
+  const sel = $('autoStyle').checked; [...$('styleSel').children].forEach(b => b.classList.toggle('on', b.dataset.s === style));
+  const r = ranking().find(x => x.id === style), c = cur();
+  $('styleWhy').textContent = ' — ' + (r?.explicit ? 'اختيارك' : sel ? 'مقترح لتصميمك: ' + (r?.reason || '') : 'اخترته بنفسك') + (c ? ' · ' + describeRegion(c) : '');
+}
+async function apply() {
+  opts.hidden = !on; fr.hidden = !on; host.style.visibility = on ? 'hidden' : '';
+  [...$('facadeSeg').children].forEach(x => x.classList.toggle('on', (x.dataset.f === 'model') !== on));
   if (!on) return;
-  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&style=J&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (time === 'night' ? NIGHT : '');
+  const c = cur(); if (c) markShown(hist, style, c);
+  paint(); chips(); await probe(style);
+  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (time === 'night' ? NIGHT : '');
   if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
 }
-$('facadeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.f; [...$('facadeSeg').children].forEach(x => x.classList.toggle('on', x === b)); apply(); });
+const seg = $('facadeSeg'); const jb = document.createElement('button'); jb.dataset.f = 'J'; jb.textContent = 'واجهة واقعية'; seg.appendChild(jb);
+seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; on = b.dataset.f === 'J'; note0 = ''; apply(); });
+$('styleSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; style = b.dataset.s; $('autoStyle').checked = false; tried.add(style); recent.unshift(style); note0 = ''; apply(); });
+$('autoStyle').addEventListener('change', () => { if ($('autoStyle').checked) { style = ranking()[0].id; note0 = ''; apply(); } else paint(); });
+// بديل آخر: نفس الطراز دائمًا، منطقة معمارية مختلفة عمّا عُرض
+$('altBtn').addEventListener('click', () => {
+  const r = nextAlternative(doc, style, hist, { floors: floorsVal() });
+  if (r.status === 'NEW_ALTERNATIVE') { region[style] = r.region; note0 = ''; } else { note0 = r.message; }
+  apply(); if (r.status !== 'NEW_ALTERNATIVE') note(note0);
+});
+$('altChips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const r = parseRegion(b.dataset.r); if (!r) return; region[style] = r; note0 = ''; apply(); });
+// جرّب طرازًا آخر: ينتقل إلى أفضل طراز لم يُجرَّب بعد بحسب الترتيب (لا يغيّر منطقة الطراز الحالي)
+$('otherStyleBtn').addEventListener('click', () => {
+  tried.add(style); const rk = ranking().map(x => x.id).filter(id => id !== 'J' || wish);
+  const next = rk.find(id => !tried.has(id)) || rk.find(id => id !== style); if (!next || next === style) return;
+  style = next; recent.unshift(style); $('autoStyle').checked = false; note0 = ''; apply();
+});
 $('facadeTime').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; time = b.dataset.t; [...$('facadeTime').children].forEach(x => x.classList.toggle('on', x === b)); apply(); });
-$('facadeFloors').addEventListener('change', apply);
+$('facadeFloors').addEventListener('change', () => { for (const k of Object.keys(region)) delete region[k]; hist.shown.clear(); apply(); });
+paint();
 </script>
 </body>
 </html>

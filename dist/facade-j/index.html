@@ -29,7 +29,8 @@ import { loadThreeRuntime } from './three-runtime.mjs';
 import { RGBELoader } from './facade-kit/vendor/RGBELoader.mjs';
 import { enhanceScene } from './facade-realism/hq-env.mjs';
 import { Sky } from './facade-realism/vendor/Sky.js';
-import { applyStyleJ } from './facade-realism/style-j.mjs';
+import { applyStyle } from './facade-realism/styles/index.mjs';
+import { deriveParams } from './facade-realism/variation.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model.mjs';
 import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
@@ -83,6 +84,8 @@ async function variantMode() {
   if (!docRaw) { const res = await fetch('./facade-realism/C1.json'); if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')'); docRaw = await res.text(); }
   const doc = parseDoc(docRaw);
   if (!q.get('floors')) q.set('floors', String(Math.min(3, Math.max(1, (doc.levels || []).length || 1))));
+  // مظلة السطح المرتد في J تبرز أكثر من 250 مم (بوابة البروز)؛ فالارتداد في J اختياري صراحة (setback=1) ولا يُفعَّل افتراضيًا
+  if (q.get('style') === 'J' && !q.has('setback')) q.set('setback', '0');
   const FI = floorsInfo(q);
   const built = extrudeFloors(buildAllSides(doc, id), FI);
   const lib = createRealismMaterials(THREE);
@@ -122,8 +125,36 @@ async function variantMode() {
   const HQ = q.get('hq') === '1';
   if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky });
   globalThis.__FLOORS = FI.n > 1 ? { levels: bandLevels(FI) } : undefined; // خطاف style-j.mjs للأشرطة عند كل بلاطة
-  const J = HQ && q.get('style') === 'J' ? await applyStyleJ(THREE, { scene, renderer, S, q }) : null;
-  decorateFloors(THREE, { scene, S, q, info: FI, J });
+  const styleId = q.get('style') || '';
+  // بوابات الواجهة المستقلة (لا تثق بما يبلّغه النمط): هندسة الفتحات والجدران قبل/بعد، وأقصى بروز مقيس من الشبكات المضافة فعلًا
+  const LOCK = new Set(['glazing', 'door', 'frame', 'wall', 'cladding', 'plate', 'interior']);
+  const sig = m => { const b = new THREE.Box3().setFromObject(m); return [b.min.x, b.min.y, b.min.z, b.max.x, b.max.y, b.max.z].map(v => Math.round(v * 1000)).join(','); };
+  const lockedMeshes = S.meshes.filter(m => LOCK.has(m.userData?.role)), before = new Map(lockedMeshes.map(m => [m, sig(m)]));
+  const known = new Set(); scene.traverse(o => known.add(o));
+  const J = HQ && styleId ? await applyStyle(styleId, THREE, { scene, renderer, S, q, doc, FI, params: deriveParams(doc, q, styleId) }) : null;
+  decorateFloors(THREE, { scene, S, q, info: FI, J: styleId === 'J' ? J : null }); // مظلة وبرجولة الملحق من روح J فقط؛ الأنماط الأخرى تتولى زينتها بنفسها
+  let gates = null;
+  if (HQ && styleId) {
+    const moved = lockedMeshes.filter(m => before.get(m) !== sig(m)).map(m => m.name);
+    const planes = { s: [], n: [], e: [], w: [] }; // مستويات أوجه الجدران مع امتدادها الجانبي
+    for (const m of S.meshes) { const r = m.userData?.role, sd = m.userData?.side; if (!planes[sd] || !(r === 'wall' || r === 'cladding')) continue; const bb = new THREE.Box3().setFromObject(m);
+      const ns = sd === 's' || sd === 'n', p = sd === 's' ? bb.max.z : sd === 'n' ? bb.min.z : sd === 'e' ? bb.max.x : bb.min.x, a0 = ns ? bb.min.x : bb.min.z, a1 = ns ? bb.max.x : bb.max.z;
+      const k = planes[sd].find(q2 => Math.abs(q2.p - p) < .05); if (k) { k.a0 = Math.min(k.a0, a0); k.a1 = Math.max(k.a1, a1); } else planes[sd].push({ p, a0, a1 }); }
+    let maxProj = 0, groundProj = 0, worst = null, added = 0; const offenders = [];
+    scene.traverse(o => { if (!o.isMesh && !o.isInstancedMesh) return; if (known.has(o) || !o.visible) return; added++;
+      const bb = new THREE.Box3().setFromObject(o), c = bb.getCenter(new THREE.Vector3()); let reachMin = Infinity, side = '';
+      for (const [sd, ps] of Object.entries(planes)) for (const pl of ps) {
+        const ns = sd === 's' || sd === 'n', lat = ns ? c.x : c.z, nrm = sd === 's' ? c.z - pl.p : sd === 'n' ? pl.p - c.z : sd === 'e' ? c.x - pl.p : pl.p - c.x;
+        if (lat < pl.a0 + .15 || lat > pl.a1 - .15 || nrm < -.3 || nrm > 1.6) continue; // خارج امتداد هذا الوجه أو بعيد عنه
+        const reach = sd === 's' ? bb.max.z - pl.p : sd === 'n' ? pl.p - bb.min.z : sd === 'e' ? bb.max.x - pl.p : pl.p - bb.min.x;
+        if (reach < reachMin) { reachMin = reach; side = sd; } }
+      // العنصر يُنسب إلى أقرب وجه جدار يحمله (أصغر بروز): يمنع نسب عنصر على جدار آخر أو على مستوى خلفي (قاعدة الكتل) إلى وجه لا يحمله
+      if (!isFinite(reachMin)) return;
+      if (bb.min.y < .3) { if (reachMin > groundProj) groundProj = reachMin; return; } // أرضيات ورصف عند منسوب الأرض: تُسجَّل وحدها
+      offenders.push([Math.round(reachMin * 1000), side, 0, [bb.min, bb.max].map(v => [v.x, v.y, v.z].map(n => +n.toFixed(2)).join(' ')).join(' → '), o.name || '', o.material?.name || '']);
+      if (reachMin > maxProj) { maxProj = reachMin; worst = (o.name || o.type) + '@' + side + ' y' + bb.min.y.toFixed(2) + '-' + bb.max.y.toFixed(2) + ' ' + (o.material?.name || ''); } });
+    gates = { style: styleId, openingsWallsUnchanged: moved.length === 0, moved: moved.slice(0, 5), maxProjectionMm: Math.round(maxProj * 1000), groundLevelMm: Math.round(groundProj * 1000), projectionOk: maxProj <= .2501, worst, addedMeshes: added, offenders: offenders.filter(r => r[0] > 250).sort((a, b) => b[0] - a[0]).slice(0, 6) };
+  }
   let camera, roi = null;
   if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
     const cu = closeupCamera(THREE, S, shot, { W, H, index: +(q.get('gi') || 0) }); camera = cu.camera; roi = cu.roi;
@@ -140,7 +171,7 @@ async function variantMode() {
   }
   renderer.render(scene, camera);
   const gl = renderer.getContext();
-  done({ variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback });
+  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback });
 }
 
 (async () => {
