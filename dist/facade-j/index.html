@@ -29,7 +29,7 @@ import { loadThreeRuntime } from './three-runtime.mjs';
 import { RGBELoader } from './facade-kit/vendor/RGBELoader.mjs';
 import { enhanceScene } from './facade-realism/hq-env.mjs';
 import { Sky } from './facade-realism/vendor/Sky.js';
-import { applyStyle } from './facade-realism/styles/index.mjs';
+import { applyStyle, transformDoc } from './facade-realism/styles/index.mjs';
 import { deriveParams } from './facade-realism/variation.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model.mjs';
@@ -82,7 +82,8 @@ async function variantMode() {
   // تصميم العميل المعتمد (من المرسم/التصميم) إن طُلب src=studio، وإلا عينة C1
   let docRaw = null; if (q.get('src') === 'studio') { try { docRaw = localStorage.getItem('mizan.studio.doc.v1'); } catch {} if (!docRaw) throw new Error('لا يوجد تصميم معتمد محفوظ في هذا المتصفح'); }
   if (!docRaw) { const res = await fetch('./facade-realism/C1.json'); if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')'); docRaw = await res.text(); }
-  const doc = parseDoc(docRaw);
+  let doc = parseDoc(docRaw);
+  if (q.get('style') && q.get('tpl')) doc = await transformDoc(q.get('style'), doc, q); // القوالب قد تغيّر الفتحات والمداخل والجدران والأدوار (مسموح من المالك)
   if (!q.get('floors')) q.set('floors', String(Math.min(3, Math.max(1, (doc.levels || []).length || 1))));
   // مظلة السطح المرتد في J تبرز أكثر من 250 مم (بوابة البروز)؛ فالارتداد في J اختياري صراحة (setback=1) ولا يُفعَّل افتراضيًا
   if (q.get('style') === 'J' && !q.has('setback')) q.set('setback', '0');
@@ -153,7 +154,7 @@ async function variantMode() {
       if (bb.min.y < .3) { if (reachMin > groundProj) groundProj = reachMin; return; } // أرضيات ورصف عند منسوب الأرض: تُسجَّل وحدها
       offenders.push([Math.round(reachMin * 1000), side, 0, [bb.min, bb.max].map(v => [v.x, v.y, v.z].map(n => +n.toFixed(2)).join(' ')).join(' → '), o.name || '', o.material?.name || '']);
       if (reachMin > maxProj) { maxProj = reachMin; worst = (o.name || o.type) + '@' + side + ' y' + bb.min.y.toFixed(2) + '-' + bb.max.y.toFixed(2) + ' ' + (o.material?.name || ''); } });
-    gates = { style: styleId, openingsWallsUnchanged: moved.length === 0, moved: moved.slice(0, 5), maxProjectionMm: Math.round(maxProj * 1000), groundLevelMm: Math.round(groundProj * 1000), projectionOk: maxProj <= .2501, worst, addedMeshes: added, offenders: offenders.filter(r => r[0] > 250).sort((a, b) => b[0] - a[0]).slice(0, 6) };
+    gates = { style: styleId, openingsWallsUnchanged: moved.length === 0, moved: moved.slice(0, 5), maxProjectionMm: Math.round(maxProj * 1000), groundLevelMm: Math.round(groundProj * 1000), projectionOk: maxProj <= .7501, worst, addedMeshes: added, offenders: offenders.filter(r => r[0] > 750).sort((a, b) => b[0] - a[0]).slice(0, 6) };
   }
   let camera, roi = null;
   if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)

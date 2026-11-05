@@ -1,6 +1,8 @@
+import { resolveTemplate } from '../templates.mjs';
+import { genDoc, validateDoc as validatePlan } from './templates-hijazi/plan.mjs';
 // نمط H (حجازي جدة): واجهة مستلهمة من عمارة جدة التاريخية (الحجاز الساحلي) لا من اللون وحده. العنصر المهيمن: الفتحة + الشاشة الخشبية + الإيقاع الرأسي (عكس نجد: الكتلة).
 // الروشان مركّب من مكونات: فتحة ← غلاف خشبي خفيف (خدود + قاعدة + تاج مائل + كوابيل) ← تقسيمات شبك (درف متحركة + حزام علوي زخرفي) ← إطار وحشوات ← تظليل/خصوصية (الشبك نفسه + خلفية معتمة).
-// MAX_PROJECTION = 250 مم. HISTORICAL FEATURE REQUIRES GREATER PROJECTION — NOT IMPLEMENTED UNDER CURRENT CONSTRAINT (الروشان التاريخي عمقه ≥1 م؛ هنا قشرة 15–25 سم فقط).
+// MAX_PROJECTION = 750 مم (رفع المالك الحد من 250). الروشان الحقيقي (عمق 36/50/62 سم + تاج 6 سم) ينفَّذ في قوالب H01..H16؛ الوضع القديم (بلا tpl) يبقى بقشرة 15–25 سم كما كان.
 // المصادر (بحث ويب 2026-11-05) والعناصر المأخوذة منها:
 //  [1] Springer، «Rowshan in Hejaz» (cityterritoryarchitecture.springeropen.com/articles/10.1186/s40410-023-00204-6):
 //      الروشان بروز خشبي مشبّك: حزام سفلي مصمت (ارتفاعه 40–50 سم عن الأرضية)، وسط بدرف/ألواح متحركة بشبك (شيش/أباجورة)،
@@ -13,11 +15,8 @@
 //  [5] Gulf News 2026 (مشروع الطراز الحجازي الساحلي لجدة): ألوان لؤلؤية/رملية ودرجات المشربية، وإبراز عناصر خشبية أو بديل حديث.
 //  غير متحقق: (أ) نسب التاج المائل/الكوابيل المبسطة بالأبعاد المصغرة؛ (ب) أقواس مدببة/مستديرة فوق الأبواب والنوافذ كلازمة حجازية (شائعة في صور البلد التاريخية لكن لم أجد مصدرًا نصيًا يحدد أنواعها)؛
 //      (ج) حليات الأسنان (dentils) في الكورنيش؛ (د) تنوع اللوحات اللونية للخشب الأخضر/التيل/العنابي كتاريخية (المصدر [1] يقول إن الأخضر والأزرق متأخران).
-// القواعد: لا تُحرَّك فتحة ولا جدار ولا منسوب. كل الإضافات أمام وجه الجدار فقط (مدفونة 2.5 سم لالتحام). أقصى بروز للروشان 25 سم (حد المالك 15–25).
+// القواعد: لا تُحرَّك فتحة ولا جدار ولا منسوب داخل apply (docTransform وحدها تغيّر المسقط). كل الإضافات أمام وجه الجدار فقط (مدفونة 2.5 سم لالتحام). أقصى بروز ≈ 70 سم للروشان العميق.
 // التنوع: params.rnd(k) يغيّر لوحة الألوان، ارتفاع المرجان، كثافة الروشان وعمقه، نمط الشبك لكل روشان، نوع القوس، الدرف، نوع الباب، الكورنيش.
-export const meta = { id: 'H', ar: 'حجازي جدة', scope: 'Hijazi-Jeddah (جدة التاريخية/البلد) وليس كل الحجاز', maxProjectionMm: 250, sources: [
-  'springeropen.com/articles/10.1186/s40410-023-00204-6 (Rowshan in Hejaz)', 'archive.aramcoworld.com/issue/197105 (Jiddah balconies)',
-  'arabnews.pk/node/2457216 (Yanbu)', 'omrania.com/insights/8-features-vernacular-architecture-hejaz', 'gulfnews.com (Hejazi coastal design Jeddah)'] };
 
 const SIDES = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
 const CLASSIC = new Set(['projection', 'surround', 'cornice', 'sill', 'pediment']);
@@ -152,28 +151,87 @@ function archPts(a, h, kind, n = 14) { const pts = [];
   for (let i = 0; i <= n; i++) { const t = th * i / n; right.push([-(R - a) + R * Math.cos(t), R * Math.sin(t)]); }
   for (const [x, y] of right) pts.push([-x, y]); for (let i = right.length - 2; i >= 0; i--) pts.push(right[i]); return pts; }
 
+
+
+// ===================== القوالب (مكتبة 16 واجهة حجازية جدّاوية) =====================
+// كل مفتاح اختيار منفصل ومستقل (متعامد) فيصحّ أي دمج مفتاحًا بمفتاح بين قالبين.
+// مفاتيح المسقط/الكتلة (تُقرأ في docTransform):
+//  fl أدوار 1..3 (يُحترم floors في الرابط إن وُجد) | wf عرض المبنى 0 كامل،1 ≈72%،2 ≈55% | wt سماكة الجدار 0=25،1=35،2=50 سم
+//  fm كتلة الواجهة 0 مستوية،1 بروز مركزي 60 سم،2 ارتداد مركزي 1.2 م،3 جناح جانبي بارز،4 جناحان بارزان يحتضنان الوسط | ep موضع المدخل 0 وسط،1 يسار،2 يمين،3 زاوية يسار،4 زاوية يمين
+//  dk نوع الباب 0 مزدوج،1 مزدوج شاهق،2 مفرد | d2 باب ثانوي | grp نوافذ في المجموعة 1..3 | wsz حجم النافذة 0 رأسية ضيقة،1 وسط،2 عريضة،3 كبرى
+//  rg فسحة بين المجموعات 0..2 | sw نوافذ الجوانب 0 بلا،1 قليلة،2 منتظمة | pr ارتفاع الدروة 0..3
+// مفاتيح التفصيل (تُقرأ في apply):
+//  pal لوحة ألوان 0..5 | coral 0 قاعدة 1.0م،1 قاعدة 1.6م،2 الدور الأرضي مرجان،3 الواجهة كلها مرجان
+//  roshan 0 قشرة ضحلة (قديم)،1 روشان بعمق 36 سم،2 50 سم،3 62 سم،4 بلا روشان | rhood 0 تاج مائل،1 تاج مزدوج بشبك علوي،2 تاج مسطح بأسنان
+//  rcorb 0 كوابيل مثلثة،1 كوابيل مدرّجة،2 عارضة منقوشة وكوابيل | rlat 0..3 نمط الشبك | rpat 0 كل النوافذ،1 بالتناوب،2 واحد لكل دور (الأقرب للوسط)
+//  rlev 0 كل الأدوار،1 العليا فقط | arch 0 بلا،1 مدبّب،2 مستدير،3 قوس مقوّس | archfill 0 مروحة شبك،1 مروحة خشب مصمتة | shut 0/1 درف شيش مفتوحة
+//  screen 0/1 شاشة مشربية مسطحة على النوافذ | door 0 بوابة مدبّبة،1 بوابة مستديرة بدرجتين،2 عتب خشبي ومظلة على كوابيل،3 بوابة نصبية بأعمدة ومصاطب
+//  band 0 شريط مركّب،1 خيط رفيع،2 شريط ثقيل،3 حزام خشبي | crown 0 كورنيش مركّب،1 دروة بسيطة،2 سقيفة خشبية على كوابيل،3 شاشة شبك على الدروة،4 شرفات مدرّجة،5 كورنيش مزدوج ثقيل
+//  orn 0 بلا،1 إفريز خشبي،2 أسنان،3 كلاهما | pil 0 بلا،1 أكتاف زوايا،2 زوايا + أضلاع رأسية بين الفتحات | wrap 0 حلية خفيفة،1 إطار حجري عريض بسقيفة،2 عتب خشبي بكوابيل
+// غير متحقق تاريخيًا: شاشة الشبك على الدروة (3)، الشرفات المدرّجة (4)، المصاطب المنصوبة قرب الباب (3)، السقيفة الخشبية المستمرة (2)، الأسنان.
+const B = { fl: 2, wf: 0, wt: 1, fm: 0, ep: 0, dk: 0, d2: 0, grp: 1, wsz: 1, rg: 1, sw: 1, pr: 1, pal: 0, coral: 0, roshan: 2, rhood: 0, rcorb: 0, rlat: 0, rpat: 0, rlev: 0, arch: 0, archfill: 0, shut: 0, screen: 0, door: 0, band: 0, crown: 0, orn: 1, pil: 0, wrap: 0 };
+const T = (id, ar, note, o) => ({ id, ar, note, p: { ...B, ...o } });
+export const templates = [
+  T('H01', 'بيت البلد ذو الروشان الكبير', 'ثلاثة أدوار نحيفة بجدار مرجاني سميك، روشانات كبرى بعمق 62 سم على كوابيل مدرّجة وتاج مزدوج، مدخل بمظلة خشبية', { fl: 3, wf: 1, wt: 2, ep: 1, wsz: 3, rg: 1, sw: 1, pr: 1, pal: 0, coral: 2, roshan: 3, rhood: 1, rcorb: 1, rlat: 2, rlev: 1, door: 2, band: 2, crown: 2, orn: 1, pil: 1, wrap: 1 }),
+  T('H02', 'واجهة الروشان المتناوب', 'طابقان بنوافذ مزدوجة وروشانات بالتناوب كرقعة شطرنج، أقواس مدبّبة وشيش مفتوح على الباقي', { fl: 2, grp: 2, wsz: 1, rg: 0, pal: 1, coral: 0, roshan: 2, rpat: 1, rlat: 0, arch: 1, shut: 1, door: 0, band: 0, crown: 0, orn: 3, pil: 0 }),
+  T('H03', 'بيت المرجان الصلب', 'واجهة مرجانية كاملة بنوافذ رأسية ضيقة عميقة وشاشات مسطحة، بوابة نصبية بمصاطب وأضلاع رأسية', { fl: 2, wf: 1, wt: 2, ep: 2, dk: 1, wsz: 0, rg: 2, sw: 0, pr: 2, pal: 3, coral: 3, roshan: 4, arch: 2, archfill: 1, screen: 1, door: 3, band: 3, crown: 1, orn: 0, pil: 2, wrap: 2 }),
+  T('H04', 'المدخل المرتد بين الروشانين', 'ارتداد مركزي يحتضن المدخل بين جناحين بارزين، روشان واحد لكل دور بتاج مسطح بأسنان', { fl: 2, fm: 2, ep: 0, d2: 1, wsz: 2, rg: 1, sw: 1, pr: 1, pal: 2, coral: 1, roshan: 1, rhood: 2, rcorb: 2, rlat: 1, rpat: 2, arch: 3, archfill: 1, door: 1, band: 1, crown: 4, orn: 2, pil: 1, wrap: 1 }),
+  T('H05', 'الجناح البارز الجانبي', 'كتلة غير متماثلة: جناح جانبي يبرز 80 سم يحمل المدخل الركني والروشان الثقيل', { fl: 2, fm: 3, ep: 3, wsz: 1, rg: 2, sw: 1, pr: 2, pal: 4, coral: 1, roshan: 3, rhood: 0, rcorb: 1, rlat: 3, rpat: 0, rlev: 1, door: 0, band: 2, crown: 5, orn: 3, pil: 1, wrap: 0 }),
+  T('H06', 'الكتلة المركزية البارزة', 'ثلاثة أدوار بكتلة وسطى بارزة تحمل مدخلًا شاهقًا، وروشانات أعلاها فقط وجناحان هادئان', { fl: 3, fm: 1, ep: 0, dk: 1, wsz: 1, rg: 2, sw: 1, pr: 2, pal: 5, coral: 2, roshan: 2, rhood: 1, rcorb: 0, rlat: 2, rpat: 0, rlev: 1, arch: 1, door: 3, band: 0, crown: 0, orn: 1, pil: 2, wrap: 1 }),
+  T('H07', 'شاشة المشربية المسطحة', 'بلا روشان بارز: نوافذ ثلاثية ضيقة مغطاة بشاشات مشربية رقيقة وسقيفة شبك فوق الدروة', { fl: 2, grp: 3, wsz: 0, rg: 2, sw: 2, pr: 3, d2: 1, dk: 2, pal: 5, coral: 0, roshan: 4, rlat: 3, arch: 1, screen: 1, door: 0, band: 1, crown: 3, orn: 0, pil: 0, wrap: 0 }),
+  T('H08', 'بيت الشيش المغلق', 'نوافذ بدرف شيش خشبية وعتب خشبي بكوابيل وسقيفة خشبية بارزة على الواجهة كلها', { fl: 2, wf: 0, ep: 1, grp: 2, wsz: 1, rg: 1, sw: 2, pr: 1, pal: 0, coral: 0, roshan: 4, arch: 0, shut: 1, door: 2, band: 3, crown: 2, orn: 1, pil: 0, wrap: 2 }),
+  T('H09', 'الدار الممتدة ذات الطابق الواحد', 'طابق واحد عريض بروشانات عريضة متكررة، كورنيش مزدوج ثقيل وبوابة مستديرة', { fl: 1, wf: 0, wt: 1, ep: 0, wsz: 3, rg: 1, sw: 1, pr: 2, d2: 1, pal: 3, coral: 1, roshan: 3, rhood: 0, rcorb: 2, rlat: 1, rpat: 0, arch: 2, door: 1, band: 0, crown: 5, orn: 3, pil: 1, wrap: 1 }),
+  T('H10', 'الشق الرأسي الصامت', 'ثلاثة أدوار ضيقة كالشق بأعمدة رأسية وفتحات رأسية دقيقة، مدخل مفرد وأقواس مستديرة', { fl: 3, wf: 2, wt: 2, ep: 0, dk: 2, wsz: 0, rg: 2, sw: 0, pr: 0, pal: 4, coral: 1, roshan: 4, arch: 2, door: 0, band: 1, crown: 1, orn: 0, pil: 2, wrap: 1 }),
+  T('H11', 'الأقواس الثلاثية والشرفات', 'نوافذ ثلاثية متجاورة بأقواس مقوّسة وشرفات مدرّجة على السطح وروشان خفيف في الوسط', { fl: 2, grp: 3, wsz: 0, rg: 2, sw: 2, pr: 2, pal: 2, coral: 0, roshan: 1, rhood: 0, rcorb: 0, rlat: 0, rpat: 2, arch: 3, archfill: 0, door: 0, band: 2, crown: 4, orn: 2, pil: 1, wrap: 0 }),
+  T('H12', 'الروشان العريض والمدخل الركني', 'مدخل ركني بمظلة وكوابيل، نافذة كبرى واحدة لكل بلاطة بروشان عريض ثقيل بتاج مزدوج', { fl: 2, wf: 1, ep: 4, dk: 1, wsz: 3, rg: 2, sw: 1, pr: 1, pal: 1, coral: 2, roshan: 3, rhood: 1, rcorb: 2, rlat: 3, rpat: 2, rlev: 0, door: 2, band: 3, crown: 2, orn: 1, pil: 0, wrap: 2 }),
+  T('H13', 'الروشانات المتراصة على القاعدة المرجانية', 'روشانات تتراص رأسيًا (نفس العمود في كل دور) فوق قاعدة مرجانية، بأضلاع رأسية بين الأعمدة وتاج مسطح بأسنان', { fl: 3, wf: 1, wt: 2, ep: 2, wsz: 2, rg: 2, sw: 0, pr: 2, pal: 0, coral: 2, roshan: 2, rhood: 2, rcorb: 1, rlat: 2, rpat: 0, rlev: 1, door: 3, band: 2, crown: 0, orn: 2, pil: 2, wrap: 1 }),
+  T('H14', 'الواجهة الهادئة بالأقواس المدبّبة', 'واجهة لياسة بيضاء هادئة بأقواس مدبّبة وشيش وخيط رفيع وبلا روشان، مدخل مزدوج بباب ثانوي', { fl: 2, wf: 0, wt: 0, ep: 0, d2: 1, grp: 1, wsz: 2, rg: 2, sw: 2, pr: 0, pal: 3, coral: 0, roshan: 4, arch: 1, archfill: 0, shut: 1, door: 0, band: 1, crown: 1, orn: 0, pil: 1, wrap: 0 }),
+  T('H15', 'بيت التاجر ذو الدكة', 'جناحان بارزان يحتضنان مدخلًا بمصاطب، روشانات في الجناحين وسقيفة خشبية على كوابيل وتاج مسطح', { fl: 2, fm: 4, ep: 0, dk: 1, wsz: 2, rg: 1, sw: 1, pr: 1, pal: 0, coral: 1, roshan: 2, rhood: 2, rcorb: 2, rlat: 1, rpat: 0, rlev: 0, arch: 3, door: 3, band: 0, crown: 2, orn: 3, pil: 0, wrap: 1 }),
+  T('H16', 'روشان القشرة الرقيقة (كلاسيك جدة)', 'الصورة التقليدية القديمة: قشرة روشان رقيقة 18 سم بتاج مائل، مدخل مدبّب وكورنيش مركّب (مرجع القالب القديم)', { fl: 2, wf: 0, wt: 0, ep: 1, wsz: 1, rg: 1, sw: 1, pr: 1, pal: 0, coral: 1, roshan: 0, rhood: 0, rcorb: 0, rlat: 0, rpat: 0, arch: 1, shut: 1, door: 0, band: 0, crown: 0, orn: 3, pil: 0, wrap: 0 }),
+];
+export const meta = { id: 'H', ar: 'حجازي جدة', scope: 'Hijazi-Jeddah (جدة التاريخية/البلد) وليس كل الحجاز', maxProjectionMm: 750, templateCount: templates.length, sources: [
+  'springeropen.com/articles/10.1186/s40410-023-00204-6 (Rowshan in Hejaz)', 'archive.aramcoworld.com/issue/197105 (Jiddah balconies)',
+  'arabnews.pk/node/2457216 (Yanbu)', 'omrania.com/insights/8-features-vernacular-architecture-hejaz', 'gulfnews.com (Hejazi coastal design Jeddah)'] };
+
+/** خطاف تحويل المسقط: ينتج مستند رسم جديدًا من القالب (يغيّر الجدران والفتحات والمداخل والأدوار). لا يعدّل الأصل. */
+export function docTransform(doc, q) {
+  const T0 = resolveTemplate(templates, q); if (!T0) return doc;
+  const P = T0.p, out = genDoc(doc, P);
+  const bad = validatePlan(out, q?.get?.('floors') ? +q.get('floors') : P.fl); if (bad.length) { console.warn('[hijazi] مخطط القالب غير سليم:', bad.join(',')); return doc; }
+  if (q?.set) { if (!q.get('floors')) q.set('floors', String(P.fl)); q.set('setback', '0'); }
+  return out;
+}
+export { validatePlan as validateDoc };
+
 let _gate = { maxProjectionMm: null, openingsUnchanged: null, notImplemented: [], detail: {} };
 /** بوابات المطابقة: تُقرأ بعد apply(). maxProjectionMm = أقصى بروز فعلي (مم) لأي عنصر أضافه النمط أمام وجه الجدار. */
 export const gates = () => _gate;
+const RD = [.18, .36, .50, .62]; // عمق واجهة الروشان الأمامية (م)؛ التاج يزيد 6 سم، وهامش 3.5 سم لسماكة الكسوة فيبقى القياس المستقل ≤ 72 سم
+const ARCH = ['none', 'pointed', 'round', 'segmental'];
 
 export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   // التنوع: params.rnd(k) من variation.mjs (بذرة مشتقة من بصمة التصميم + seed)؛ احتياطي حتمي إن غاب.
+  const TPL = resolveTemplate(templates, q), tp = TPL?.p || null, leg = !tp; // leg: لا قالب = السلوك القديم كما كان
   const R = k => params?.rnd ? params.rnd(k) : (((Math.imul(k + 1, 2654435761) >>> 0) / 4294967296) * 7 % 1), night = q.get('night') === '1', BH = .30;
-  const palI = q.get('pal') != null ? Math.abs(+q.get('pal') | 0) % PAL.length : Math.floor(R(1) * PAL.length), pal = PAL[palI];
-  // عمق الروشان: حد المالك 15–25 سم. ما فوق 25 غير مطبّق (يُقصّ إلى 25) ويُسجَّل.
+  const palI = tp ? tp.pal % PAL.length : q.get('pal') != null ? Math.abs(+q.get('pal') | 0) % PAL.length : Math.floor(R(1) * PAL.length), pal = PAL[palI];
+  // عمق الروشان القديم (قشرة): 15–25 سم. القوالب بدءًا من H01 تستعمل روشانات حقيقية حتى 62 سم (حد المالك 75 سم).
   let PR = .15 + R(7) * .06; const reqD = q.get('rdepth'), notes = [];
-  if (reqD != null) { if (+reqD > .25) { PR = .21; notes.push('روشان أعمق من 25 سم غير مطبّق (حد المالك 15–25): نُفّذ بروز 25 سم بنقش ضحل'); console.warn('[hijazi] ' + notes[0]); } else PR = clamp(+reqD, .15, .21); }
-  const orn = q.get('orn') !== '0'; // orn=0: يخفي الزخرفة (أسنان الكورنيش، شريط الإفريز، نقش الباب، مسامير) ويُبقي الكتلة والروشان والأقواس
-  notes.push('HISTORICAL FEATURE REQUIRES GREATER PROJECTION — NOT IMPLEMENTED UNDER CURRENT CONSTRAINT: الروشان التاريخي عمقه ≥1 م وارتفاعه ~3 م؛ نُفّذ بروز '+(PR*100).toFixed(0)+' سم فقط');
-  const dens = .4 + R(3) * .6, coralFull = R(2) < .5, plinthH = 1.0 + R(4) * .6;
+  if (tp) PR = .18; else if (reqD != null) { if (+reqD > .25) { PR = .21; notes.push('rdepth>25 سم يُقصّ في الوضع القديم؛ استعمل tpl للروشان العميق'); } else PR = clamp(+reqD, .15, .21); }
+  const orn = tp ? tp.orn > 0 : q.get('orn') !== '0'; // orn=0: يخفي الزخرفة
+  if (leg) notes.push('الوضع القديم (بلا tpl): قشرة روشان 15–25 سم؛ استعمل tpl=H01..H16 للروشان الحقيقي حتى 62 سم');
+  const dens = .4 + R(3) * .6, coralFull = leg ? R(2) < .5 : false, plinthH = 1.0 + R(4) * .6;
   const archPref = ['pointed', 'round', 'segmental', 'pointed'][Math.floor(R(5) * 4)], doorArch = ['pointed', 'round', 'segmental'][Math.floor(R(8) * 3)];
-  const shutterP = .2 + R(6) * .6, dentil = orn && R(9) < .5, frieze = orn && R(12) < .55, latBase = Math.floor(R(10) * 4), corniceD = .14 + R(11) * .06, archFillSolid = R(13) < .5;
+  const shutterP = .2 + R(6) * .6, latBase = tp ? tp.rlat : Math.floor(R(10) * 4), corniceD = .14 + R(11) * .06, archFillSolid = tp ? !!tp.archfill : R(13) < .5;
+  const dentil = tp ? (tp.orn & 2) > 0 : orn && R(9) < .5, frieze = tp ? (tp.orn & 1) > 0 : orn && R(12) < .55;
+  const C = tp || {}; // اختصار لقيم القالب
   const LOCK = new Set(['glazing', 'door', 'frame', 'wall', 'cladding']);
   const snap = () => S.meshes.filter(m => LOCK.has(m.userData?.role)).map(m => { m.updateMatrixWorld(true); const b = new THREE.Box3().setFromObject(m); return [m.name, b.min.x, b.min.y, b.min.z, b.max.x, b.max.y, b.max.z, ...m.matrixWorld.elements].map(v => typeof v === 'number' ? Math.round(v * 1e5) / 1e5 : v).join(','); });
   const before = snap(), groups = [];
   for (const m of S.meshes) if (CLASSIC.has(m.userData?.role)) m.visible = false;
   const levels = bandLevels(), multi = levels.length > 1;
-  const Hb = coralFull && multi ? levels[0] + .02 : plinthH;
+  const HbOf = top0 => !tp ? (coralFull && multi ? levels[0] + .02 : plinthH) : ([1.0, 1.6, multi ? levels[0] + .02 : 2.4, Math.min(11.5, top0)][C.coral]);
+  // الهيئة تُبنى لكل جهة؛ نسيج الجدار يحتاج Hb قبل الحلقة: نقدّر القمة من levels (الدروة ≤ 1.7 م فوق آخر بلاطة)
+  const Hb = HbOf(levels[levels.length - 1] + 1.8);
   const wallMat = wallTexture(THREE, renderer, pal, Hb, 40 + palI * 7 + (params?.seed | 0));
   const grain = woodGrain(THREE, renderer, 5 + palI);
   const wmat = (color, rough = .62) => new THREE.MeshStandardMaterial({ map: grain, bumpMap: grain, bumpScale: .35, color, roughness: rough });
@@ -184,21 +242,30 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   const lanternM = new THREE.MeshStandardMaterial({ color: '#7a4f1c', emissive: '#ffd699', emissiveIntensity: night ? .95 : .35 });
   const latMat = tx => new THREE.MeshStandardMaterial({ map: tx, transparent: true, alphaTest: .03, depthWrite: false, roughness: .7, side: THREE.DoubleSide });
   const tileMats = [0, 1, 2, 3].map(k => latMat(tileLattice(THREE, renderer, k, pal.wood)));
+  const tileTex = [0, 1, 2, 3].map(k => tileLattice(THREE, renderer, k, pal.wood));
   const frameMat = wmat(pal.wood, .55);
   for (const m of S.meshes) { const p = m.userData?.part, r = m.userData?.role;
     if (p === 'wallcore' || p === 'plate') m.material = wallMat; if (p === 'blocks') m.visible = false; if (r === 'frame') m.material = frameMat; }
   const AO = aoTexture(THREE), aoMat = a => new THREE.MeshBasicMaterial({ color: '#000', alphaMap: AO, transparent: true, opacity: a * (night ? .5 : 1), depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   const box = m => new THREE.Box3().setFromObject(m), up = new THREE.Vector3(0, 1, 0), cache = new Map();
   const cached = (key, f) => { if (!cache.has(key)) cache.set(key, f()); return cache.get(key); };
+  // لوح شبك بمقاس بالأمتار (نسيج مكرّر يتناسب مع المساحة)
+  const latPlaneMat = (w, h, kind) => cached('lp' + w.toFixed(1) + 'x' + h.toFixed(2) + 'k' + kind + palI, () => { const t = tileTex[kind].clone(); t.needsUpdate = true; t.repeat.set(w / .3, h / .3); return latMat(t); });
   let south = null;
   for (const [si, [side, [nx, nz]]] of Object.entries(SIDES).map((e, i) => [i, e])) {
     const sm = S.meshes.filter(m => m.userData?.side === side && (m.visible || m.userData.part === 'blocks')); if (!sm.length) continue;
     const n = new THREE.Vector3(nx, 0, nz), t = new THREE.Vector3().crossVectors(up, n);
     const loc = b => { const us = [b.min.x * t.x + b.min.z * t.z, b.max.x * t.x + b.max.z * t.z], ds = [b.min.x * n.x + b.min.z * n.z, b.max.x * n.x + b.max.z * n.z];
       return { u0: Math.min(...us), u1: Math.max(...us), y0: b.min.y, y1: b.max.y, d0: Math.min(...ds), d1: Math.max(...ds) }; };
-    const walls = sm.filter(m => m.userData.role === 'wall' || m.userData.role === 'cladding').map(m => loc(box(m))); if (!walls.length) continue;
-    const wallD = Math.max(...walls.map(w => w.d1)), face = walls.filter(w => w.d1 > wallD - .1);
-    const X0 = Math.min(...face.map(w => w.u0)), X1 = Math.max(...face.map(w => w.u1)), top = Math.max(...face.map(w => w.y1));
+    const wl = sm.filter(m => m.userData.role === 'wall' || m.userData.role === 'cladding').map(m => ({ ...loc(box(m)), role: m.userData.role })); if (!wl.length) continue;
+    const walls = wl, wallD = Math.max(...walls.map(w => w.d1)), face = walls.filter(w => w.d1 > wallD - .1);
+    // مقاطع الواجهة: القالب قد يبرز/يرتدّ بأجزاء الجدار؛ لكل مقطع مستواه (العناصر الأفقية تتبع مستوى كل مقطع فلا تطفو)
+    let SEG;
+    if (leg) SEG = [{ a: Math.min(...face.map(w => w.u0)), b: Math.max(...face.map(w => w.u1)), d: wallD }];
+    else { const ws = wl.filter(w => w.role === 'wall').map(w => ({ a: w.u0, b: w.u1, d: Math.max(w.d1, ...wl.filter(c => c.role === 'cladding' && Math.min(c.u1, w.u1) - Math.max(c.u0, w.u0) > .05).map(c => c.d1)) })).sort((p, r) => p.a - r.a);
+      SEG = []; for (const s of ws) { const l = SEG[SEG.length - 1]; if (l && Math.abs(l.d - s.d) < .03 && s.a <= l.b + .06) l.b = Math.max(l.b, s.b); else SEG.push({ ...s }); }
+      if (!SEG.length) SEG = [{ a: Math.min(...face.map(w => w.u0)), b: Math.max(...face.map(w => w.u1)), d: wallD }]; }
+    const X0 = leg ? SEG[0].a : Math.min(...SEG.map(s => s.a)), X1 = leg ? SEG[0].b : Math.max(...SEG.map(s => s.b)), top = Math.max(...face.map(w => w.y1));
     const G = new THREE.Group(); G.matrix.makeBasis(t, up, n); G.matrix.decompose(G.position, G.quaternion, G.scale); scene.add(G);
     groups.push({ side, G, n, wallD });
     const sd = si * 100; // عزل بذور الجهات
@@ -212,10 +279,11 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
       const o = new THREE.Mesh(g, aoMat(alpha)); o.renderOrder = 2; scene.add(o); };
     const bands = levels.filter(y => y + BH < top - .05);
     const dOf = m => { const f = sm.find(x => x.userData.role === 'frame' && x.userData.opening === m.userData.opening); return loc(box(f || m)).d1; };
-    const gl = sm.filter(m => m.userData.role === 'glazing').map(m => ({ m, b: loc(box(m)), d: dOf(m) })).filter(g => wallD - g.d <= 1.9).sort((a, b) => a.b.u0 - b.b.u0); // فتحات جناح خلفي بعيد (أكثر من 1.9 م خلف الوجه) خارج مستوى الواجهة: لا تُعالَج
+    const gl = sm.filter(m => m.userData.role === 'glazing').map(m => ({ m, b: loc(box(m)), d: dOf(m) })).filter(g => wallD - g.d <= 1.9).sort((a, b) => a.b.u0 - b.b.u0); // فتحات بعيدة أكثر من 1.9 م خلف الوجه خارج مستوى الواجهة: لا تُعالَج
     const doors = sm.filter(m => m.userData.role === 'door').map(m => ({ m, b: loc(box(m)), d: dOf(m) })).filter(g => wallD - g.d <= 1.9);
-    // وجه الجدار لفتحة ما: عند الارتداد (الدور الأخير في الأمامية) نستعمل عمق إطارها الفعلي
     const wdOf = d => (wallD - d > .3 ? d : wallD);
+    // مستوى المقطع الحامل لموضع u (للعناصر الأفقية)
+    const segAt = u => SEG.find(s => u >= s.a - .01 && u <= s.b + .01) || SEG.reduce((p, s) => Math.abs((s.a + s.b) / 2 - u) < Math.abs((p.a + p.b) / 2 - u) ? s : p, SEG[0]);
     // ===== الإشغال: لا تتداخل الإضافات مع فتحة أو شريط أو بعضها
     const occ = []; for (const o of [...gl, ...doors]) occ.push({ u0: o.b.u0 - .05, u1: o.b.u1 + .05, y0: o.b.y0 - .05, y1: o.b.y1 + .05, id: o.m.id });
     for (const yb of bands) occ.push({ u0: -1e9, u1: 1e9, y0: yb - .02, y1: yb + BH + .02, id: 'band' });
@@ -223,20 +291,45 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
     const free = (u0, u1, y0, y1, self) => u0 >= X0 + .1 && u1 <= X1 - .1 && y0 >= .06 && occ.every(o => o.id === self || u1 <= o.u0 || u0 >= o.u1 || y1 <= o.y0 || y0 >= o.y1);
     const yLoLim = y => { let v = .08; for (const yb of bands) if (yb + BH + .02 <= y + .01) v = Math.max(v, yb + BH + .06); return v; };
     const yHiLim = y => { let v = Infinity; for (const yb of bands) if (yb >= y - .01) v = Math.min(v, yb - .04); return Number.isFinite(v) ? v : (y < top - .5 ? top - .5 : y + .6); };
-    // ===== خط المرجان والشرائح وكرانيش السقف
-    const L = X1 - X0, uc0 = (X0 + X1) / 2, WD0 = wallD - .03;
-    const segs = (y0, y1) => { let iv = [[X0 - .01, X1 + .01]]; for (const o of [...gl, ...doors]) if (o.b.y1 > y0 - .06 && o.b.y0 < y1 + .06) { const pad = o.m.userData.role === 'door' ? .18 : .13;
+    const lvlOf = y => bands.filter(yb => yb < y).length; // رقم الدور (0 أرضي)
+    // ===== خط المرجان والشرائح وكرانيش السقف (لكل مقطع بمستواه)
+    const L = X1 - X0, uc0 = (X0 + X1) / 2;
+    const segs = (y0, y1, ra, rb) => { let iv = [[ra - .01, rb + .01]]; for (const o of [...gl, ...doors]) if (o.b.y1 > y0 - .06 && o.b.y0 < y1 + .06) { const pad = o.m.userData.role === 'door' ? .18 : .13;
       iv = iv.flatMap(([a, b]) => o.b.u1 + pad <= a || o.b.u0 - pad >= b ? [[a, b]] : [[a, o.b.u0 - pad], [o.b.u1 + pad, b]].filter(([p, q]) => q - p > .04)); } return iv; };
-    const course = (yBase, items, mat = trim, cut = false) => { let y = yBase; for (const [h, d] of items) { for (const [a, b] of cut ? segs(y, y + h) : [[X0 - .01, X1 + .01]]) bx(b - a, h, WD0, wallD + d, mat, (a + b) / 2, y + h / 2); y += h; } };
-    if (!(coralFull && multi)) course(Hb - .03, [[.05, .05], [.08, .09]], trim, true);
-    for (const yb of bands) { course(yb + .01, [[.06, .04], [.13, .08], [.06, .12], [.04, .06]]);
-      ao([X0, yb, wallD + .003], [X1, yb, wallD + .003], [0, -.3, 0], .3); }
-    course(top - .30, [[.06, .04], [.10, .08], [.08, .12], [.06, corniceD]]);
-    bx(L + .02, .07, wallD - .30, wallD + .06, trim, uc0, top + .035);
-    if (frieze) bx(L, .10, WD0, wallD + .035, wood, uc0, top - .40);
-    if (dentil) { const nD = Math.floor(L / .13), inst = new THREE.InstancedMesh(new THREE.BoxGeometry(.07, .06, .08), trim, nD), M4 = new THREE.Matrix4();
-      for (let i = 0; i < nD; i++) { M4.makeTranslation(X0 + .1 + i * .13, top - (frieze ? .49 : .34), wallD + .04); inst.setMatrixAt(i, M4); } inst.castShadow = inst.receiveShadow = true; G.add(inst); }
-    ao([X0, .003, wallD], [X1, .003, wallD], [0, 0, .5], .5); ao([X0, 0, wallD + .003], [X1, 0, wallD + .003], [0, .4, 0], .3);
+    const eachSeg = f => { for (const s of SEG) f(s.a - (leg ? 0 : 0), s.b, s.d); };
+    const course = (yBase, items, mat = trim, cut = false) => { let y = yBase; for (const [h, d] of items) { eachSeg((a0, b0, wd) => { for (const [a, b] of cut ? segs(y, y + h, a0, b0) : [[a0 - .01, b0 + .01]]) bx(b - a, h, wd - .03, wd + d, mat, (a + b) / 2, y + h / 2); }); y += h; } };
+    const bandV = leg ? 0 : C.band;
+    if (HbOf(top) < top - 1 && !(leg && coralFull && multi) && !(tp && (C.coral === 3 || (C.coral === 2 && multi)))) course(HbOf(top) - .03, [[.05, .05], [.08, .09]], trim, true);
+    for (const yb of bands) {
+      if (bandV === 0) course(yb + .01, [[.06, .04], [.13, .08], [.06, .12], [.04, .06]]);
+      else if (bandV === 1) course(yb + .08, [[.05, .05], [.05, .08]]);
+      else if (bandV === 2) course(yb + .0, [[.05, .05], [.16, .10], [.07, .16], [.05, .09]]);
+      else { course(yb + .06, [[.04, .04]], trim); course(yb + .10, [[.20, .07]], wood); course(yb + .30 - .02, [[.04, .04]], trim); }
+      eachSeg((a, b, wd) => ao([a, yb, wd + .003], [b, yb, wd + .003], [0, -.3, 0], .3)); }
+    // ===== التاج (الدروة)
+    const crownV = leg ? 0 : C.crown;
+    if (crownV === 0 || crownV === 5) {
+      course(top - .30, [[.06, .04], [.10, .08], [.08, .12], [.06, leg ? corniceD : .16]]);
+      if (crownV === 5) course(top - .56, [[.05, .05], [.10, .10]], trimD);
+      eachSeg((a, b, wd) => bx(b - a + .02, .07, wd - .30, wd + .06, trim, (a + b) / 2, top + .035)); }
+    else if (crownV === 1) { course(top - .14, [[.08, .05], [.06, .09]]); eachSeg((a, b, wd) => bx(b - a + .02, .06, wd - .22, wd + .05, trim, (a + b) / 2, top + .03)); }
+    else if (crownV === 2) { // سقيفة خشبية مستمرة على كوابيل
+      course(top - .12, [[.12, .05]], trim);
+      eachSeg((a, b, wd) => { bx(b - a + .1, .07, wd - .03, wd + .52, woodD, (a + b) / 2, top - .02); bx(b - a + .1, .13, wd + .46, wd + .52, wood, (a + b) / 2, top - .075);
+        const nB = Math.max(1, Math.round((b - a) / 1.0)); for (let k = 0; k < nB; k++) { const u = a + (k + .5) * (b - a) / nB; add(prism(THREE, [[wd - .03, top - .055], [wd + .46, top - .055], [wd - .03, top - .5]], .08, -.04), woodD, u, 0, 0); } }); }
+    else if (crownV === 3) { // دروة بشاشة شبك خشبية فوق الحافة
+      course(top - .14, [[.1, .05]], trim);
+      eachSeg((a, b, wd) => { const h = .55, m0 = (a + b) / 2; bx(b - a + .02, .07, wd - .30, wd + .05, trim, m0, top + .035); bx(b - a, .06, wd - .12, wd - .02, wood, m0, top + .07 + .03); bx(b - a, .07, wd - .12, wd - .02, wood, m0, top + .07 + h - .035);
+        plane(b - a - .1, h - .13, latPlaneMat(b - a, h, 3), m0, top + .07 + h / 2, wd - .07);
+        const nP = Math.max(2, Math.round((b - a) / 1.2) + 1); for (let k = 0; k < nP; k++) bx(.07, h, wd - .12, wd - .02, woodD, a + .035 + k * (b - a - .07) / (nP - 1), top + .07 + h / 2); }); }
+    else { // شرفات مدرّجة (غير متحقق تاريخيًا)
+      course(top - .16, [[.08, .05], [.08, .09]]);
+      eachSeg((a, b, wd) => { bx(b - a + .02, .07, wd - .26, wd + .05, trim, (a + b) / 2, top + .035); const nM = Math.max(2, Math.floor((b - a) / .62)), pitch = (b - a) / nM;
+        for (let k = 0; k < nM; k++) { const u = a + (k + .5) * pitch; bx(.40, .22, wd - .2, wd - .02, trim, u, top + .07 + .11); bx(.26, .08, wd - .18, wd - .04, trim, u, top + .07 + .22 + .04); } }); }
+    if (frieze) eachSeg((a, b, wd) => bx(b - a, .10, wd - .03, wd + .035, wood, (a + b) / 2, top - (crownV === 0 || crownV === 5 ? .40 : .30)));
+    if (dentil) eachSeg((a, b, wd) => { const nD = Math.floor((b - a - .2) / .13), inst = new THREE.InstancedMesh(new THREE.BoxGeometry(.07, .06, .08), trim, Math.max(nD, 1)), M4 = new THREE.Matrix4();
+      for (let i = 0; i < nD; i++) { M4.makeTranslation(a + .1 + i * .13, top - (frieze ? .49 : (crownV === 0 || crownV === 5 ? .34 : .24)), wd + .04); inst.setMatrixAt(i, M4); } inst.count = Math.max(nD, 0); inst.castShadow = inst.receiveShadow = true; G.add(inst); });
+    eachSeg((a, b, wd) => { ao([a, .003, wd], [b, .003, wd], [0, 0, .5], .5); ao([a, 0, wd + .003], [b, 0, wd + .003], [0, .4, 0], .3); });
     // ===== قوس فوق فتحة: مرتكز yS وعرض داخلي wIn؛ ya الارتفاع المتاح. يعيد القمة أو null
     const archOver = (uc, wIn, yS, ya, pref, ringW, fill, wd, seed) => {
       const a = wIn / 2; let kind, h;
@@ -251,43 +344,100 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
       const inShape = new THREE.Shape(inner.map(v2));
       const fg = () => new THREE.ShapeGeometry(inShape); const fillAt = (mat, d) => { const o = new THREE.Mesh(fg(), mat); o.position.set(uc, yS, d); o.receiveShadow = true; G.add(o); return o; };
       fillAt(backing, wd + .008);
-      if (fill === 'lattice') { fillAt(night && R(sd + seed) < .6 ? glow : backing, wd + .01); const tm = tileMats[(latBase + seed) % 4]; fillAt(tm, wd + .028); }
+      if (fill === 'lattice') { fillAt(night && R(sd + seed) < .6 ? glow : backing, wd + .01); const tm = tileMats[(latBase + (tp ? 0 : seed)) % 4]; fillAt(tm, wd + .028); }
       else if (fill === 'solid') { const o = fillAt(wood, wd + .018); o.castShadow = false; }
       else fillAt(trimD, wd + .012);
-      // ترس القفل: كتلة صغيرة عند الذروة
-      bx(.1, .1, wd, wd + .09, trim, uc, yS + h + ringW * .98, true);
+      bx(.1, .1, wd, wd + .09, trim, uc, yS + h + ringW * .98, true); // ترس القفل
       return yS + h + ringW; };
-    // ===== أبواب: باب مزدوج منقوش + إطار حجري + قوس بمروحة شبك + عتبة + فوانيس
-    for (const { m, b, d } of doors) { const wd = wdOf(d), w = b.u1 - b.u0, h = b.y1 - b.y0, uc = (b.u0 + b.u1) / 2, k = sd + 900;
-      const dt = cached('door' + w.toFixed(2) + h.toFixed(2), () => new THREE.MeshStandardMaterial({ map: doorTex(THREE, renderer, w, h, pal, 3, orn), roughness: .55 }));
-      const dp = plane(w - .02, h, dt, uc, (b.y0 + b.y1) / 2, wd + .02);
-      const jw = .14; bx(jw, h + .14, wd - .02, wd + .09, trim, b.u0 - jw / 2 + .0, (b.y0 + b.y1 + .14) / 2); bx(jw, h + .14, wd - .02, wd + .09, trim, b.u1 + jw / 2, (b.y0 + b.y1 + .14) / 2); bx(w + 2 * jw, .14, wd - .02, wd + .09, trim, uc, b.y1 + .07);
-      const sh = Math.max(.04, b.y0 - .0); // درجات حجرية من الأرض حتى عتبة الباب (دكة المدخل)
-      bx(w + .36, sh, wd - .02, wd + .20, trimD, uc, sh / 2); // دكة مدخل بعمق 20 سم كحد أقصى (الدرجات الأعمق غير منفّذة تحت القيد)
-      const yS = b.y1 + .14, ya = yHiLim(b.y1) - yS, wIn = w + 2 * jw, topA = archOver(uc, wIn, yS, ya, doorArch, .11, 'lattice', wd, 1);
-      if (!topA) bx(w + 2 * jw + .3, .07, wd - .02, wd + .20, trim, uc, yS + .035); // لا مجال لقوس: كورنيش مظلة مسطح
-      occ.push({ u0: b.u0 - .35, u1: b.u1 + .35, y0: 0, y1: (topA ?? yS) + .1, id: 'doorx' + k }); void sd;
+    // مداميك درج: n درجة بعمق كلي S وارتفاع كلي sh أمام الباب
+    const steps = (uc, wdd, wsteps, sh, nS, S0) => { for (let j = 0; j < nS; j++) bx(wsteps + .06 * (nS - j), sh * (j + 1) / nS, wdd - .02, wdd + S0 * (nS - j) / nS, trimD, uc, sh * (j + 1) / nS / 2); };
+    // ===== أبواب
+    const dv = leg ? 0 : C.door;
+    for (const { m, b, d } of doors) { const wd = wdOf(d), w = b.u1 - b.u0, h = b.y1 - b.y0, uc = (b.u0 + b.u1) / 2, k = sd + 900, seg = segAt(uc);
+      const dt = cached('door' + w.toFixed(2) + h.toFixed(2) + palI + orn, () => new THREE.MeshStandardMaterial({ map: doorTex(THREE, renderer, w, h, pal, 3, orn), roughness: .55 }));
+      plane(w - .02, h, dt, uc, (b.y0 + b.y1) / 2, wd + .02);
+      const sh = Math.max(.04, b.y0 - .0);
+      const jw = [.14, .14, .12, .30][dv], jP = [.09, .09, .10, .18][dv], jm = dv === 2 ? wood : trim;
+      bx(jw, h + .14, wd - .02, wd + jP, jm, b.u0 - jw / 2, (b.y0 + b.y1 + .14) / 2); bx(jw, h + .14, wd - .02, wd + jP, jm, b.u1 + jw / 2, (b.y0 + b.y1 + .14) / 2);
+      if (dv !== 3) bx(w + 2 * jw, .14, wd - .02, wd + jP, jm, uc, b.y1 + .07);
+      if (dv === 0) steps(uc, wd, w + .3, sh, 1, .20); else if (dv === 1) steps(uc, wd, w + .5, sh, 2, .50); else if (dv === 2) steps(uc, wd, w + .5, sh, 2, .42); else steps(uc, wd, w + .9, sh, 3, .60);
+      const yS = b.y1 + .14, ya = yHiLim(b.y1) - yS, wIn = w + 2 * jw; let topA = null;
+      if (dv === 0) topA = archOver(uc, wIn, yS, ya, leg ? doorArch : 'pointed', .11, 'lattice', wd, 1);
+      else if (dv === 1) topA = archOver(uc, wIn, yS, ya, 'round', .11, 'solid', wd, 1);
+      else if (dv === 3) { const ta = archOver(uc, wIn, yS, ya - .26, 'pointed', .13, 'lattice', wd, 1) ?? yS; topA = ta; bx(wIn + .5, .2, wd - .02, wd + .26, trim, uc, ta + .12); bx(wIn + .36, .06, wd - .02, wd + .30, trimD, uc, ta + .25); topA = ta + .28; }
+      if (dv === 2) { // مظلة خشبية على كوابيل: تبرز 55 سم، متصلة بالجدار
+        const hy = b.y1 + .34, hw = w + 2 * (jw + .3);
+        add(prism(THREE, [[wd - .03, hy], [wd + .55, hy], [wd + .55, hy + .06], [wd - .03, hy + .3]], hw, -hw / 2), wood, uc, 0, 0); bx(hw, .08, wd + .5, wd + .55, woodD, uc, hy + .0);
+        for (const sx of [-1, 1]) add(prism(THREE, [[wd - .03, hy], [wd + .5, hy], [wd - .03, hy - .5]], .08, -.04), woodD, uc + sx * (w / 2 + jw + .15), 0, 0);
+        bx(w + 2 * jw + .12, .12, wd - .02, wd + .10, wood, uc, b.y1 + .2); topA = hy + .3; }
+      if (!topA) { bx(w + 2 * jw + .3, .07, wd - .02, wd + .20, trim, uc, yS + .035); topA = yS + .07; }
+      if (dv === 3) { // مصاطب (دكك) حجرية على جانبي المدخل: ارتفاع 45 سم وبروز 50 سم
+        const availL = b.u0 - jw - seg.a - .15, availR = seg.b - (b.u1 + jw) - .15;
+        for (const [sg, av] of [[-1, availL], [1, availR]]) { const bl = Math.min(1.4, av); if (bl > .5) { const c0 = sg < 0 ? b.u0 - jw - .05 - bl / 2 : b.u1 + jw + .05 + bl / 2; bx(bl, .45, wd - .02, wd + .50, trimD, c0, .225); bx(bl + .06, .05, wd - .02, wd + .53, trim, c0, .475); } } }
+      occ.push({ u0: b.u0 - .35 - (dv === 3 ? .2 : 0), u1: b.u1 + .35 + (dv === 3 ? .2 : 0), y0: 0, y1: (topA ?? yS) + .1, id: 'doorx' + k });
       for (const sx of [b.u0 - jw - .3, b.u1 + jw + .3]) { // فانوس جداري
         bx(.02, .02, wd, wd + .13, brassM, sx, 2.25, false); bx(.012, .06, wd + .125, wd + .135, brassM, sx, 2.22, false); add(new THREE.BoxGeometry(.11, .22, .11), lanternM, sx, 2.02, wd + .13, false); bx(.15, .025, wd + .06, wd + .20, brassM, sx, 1.895, false); add(new THREE.ConeGeometry(.12, .1, 4).rotateY(Math.PI / 4), brassM, sx, 2.19, wd + .13, false);
         if (night) { const Ls = new THREE.SpotLight('#ffd9a0', 6, 4, 1.1, .6, 2); Ls.position.set(sx, 2.0, wd + .16); Ls.target.position.set(sx, 0, wd + .35); G.add(Ls, Ls.target); } }
     }
+    // ===== أكتاف رأسية: زوايا المقاطع وأضلاع بين أعمدة الفتحات
+    if (!leg && C.pil > 0) {
+      const yb0 = C.coral === 3 ? .5 : Math.max(HbOf(top) - .02, .3), yt = top - .32;
+      SEG.forEach((s, k) => { const nl = SEG[k - 1], nr = SEG[k + 1]; for (const [u0, u1, nb] of [[s.a + .08, s.a + .38, nl], [s.b - .38, s.b - .08, nr]]) { if (nb && nb.d > s.d + .05) continue; /* لا أكتاف عند ارتداد المقطع عن جاره */ const wd = s.d; if (yt > yb0 + .5) bx(u1 - u0, yt - yb0, wd - .03, wd + .055, trimD, (u0 + u1) / 2, (yb0 + yt) / 2); } });
+      if (C.pil === 2) { // أضلاع بين أعمدة الفتحات الأرضية (الأدوار العليا تكرارها فتصطف الأضلاع)
+        const cols = [...gl, ...doors].filter(o => o.b.y0 < levels[0]).map(o => ({ a: o.b.u0, b: o.b.u1 })).sort((p, r) => p.a - r.a);
+        for (let i = 1; i < cols.length; i++) { const gap = cols[i].a - cols[i - 1].b; if (gap < 1.15) continue; const u = (cols[i].a + cols[i - 1].b) / 2, s = segAt(u); if (u < s.a + .5 || u > s.b - .5) continue; bx(.14, yt - yb0, s.d - .03, s.d + .06, trim, u, (yb0 + yt) / 2); } } }
     // ===== نوافذ
-    // عدد الروشان: الأوائل بترتيب عشوائي مبذور من النوافذ الصالحة (عرض ≥ 0.5 م)، بنسبة dens، وواحد على الأقل
-    const eligible = gl.map((g, i) => ({ i, w: g.b.u1 - g.b.u0, r: R(sd + 100 + i) })).filter(e => e.w >= .5).sort((a, b) => a.r - b.r);
-    const bayCount = side === 's' ? Math.ceil(eligible.length * dens) : Math.floor(eligible.length * dens * .8 + .5 * R(sd + 77));
-    const bayGeom = (b, id) => { const w = b.u1 - b.u0, uc = (b.u0 + b.u1) / 2, W = w + (w < .8 ? .2 : .24), lo = yLoLim(b.y0), hi = yHiLim(b.y1), crown = .22, below = clamp(b.y0 - lo, 0, .30), upE = clamp(hi - b.y1 - crown, 0, .28);
-      const yF0 = b.y0 - below, yF1 = b.y1 + upE; return below >= .18 && upE >= .16 && W < 3.2 && free(uc - W / 2 - .03, uc + W / 2 + .03, yF0 - .3, yF1 + crown, id) ? { W, lo, crown, yF0, yF1, Hm: yF1 - yF0, uc } : null; };
-    const bayIdx = new Set(); // حجز الروشان بالترتيب العشوائي مع التحقق من الإمكان (اختيار نافذة لا يتسع لها يُنتقل منه إلى التالية)
-    for (const e of eligible) { if (bayIdx.size >= bayCount) break; const g = gl[e.i], G0 = bayGeom(g.b, g.m.id); if (!G0) continue; bayIdx.add(e.i); occ.push({ u0: G0.uc - G0.W / 2 - .03, u1: G0.uc + G0.W / 2 + .03, y0: G0.yF0 - .3, y1: G0.yF1 + G0.crown, id: 'tent' + e.i }); }
-    gl.forEach(({ m, b, d }, i) => {  const wd = wdOf(d), w = b.u1 - b.u0, h = b.y1 - b.y0, uc = (b.u0 + b.u1) / 2, id = m.id, r1 = R(sd + 100 + i), r2 = R(sd + 200 + i), r3 = R(sd + 300 + i), r4 = R(sd + 400 + i);
-      const upper = multi && b.y0 > levels[0] - .1;
-      const kindL = (latBase + Math.floor(r2 * 4)) % 4;
-      // ملاحظة: زجاج الدور بإطاره الأصلي يبقى كما هو؛ الروشان يُركَّب أمامه
+    // الروشان: اختيار حتمي بحسب rpat في القوالب؛ عشوائي مبذور في الوضع القديم
+    const ROD = leg ? PR : (C.roshan >= 1 && C.roshan <= 3 ? RD[C.roshan] : PR), roshOn = leg || C.roshan <= 3, deepOn = !leg && C.roshan >= 1 && C.roshan <= 3;
+    const dOfLvl = lv => (deepOn && lv === 0 && multi) ? Math.min(ROD, .36) : ROD;
+    const crownOf = D => !deepOn ? .22 : (C.rhood === 0 ? .18 + D * .35 : C.rhood === 1 ? .44 + D * .15 : .24);
+    const eligible = gl.map((g, i) => ({ i, w: g.b.u1 - g.b.u0, lv: lvlOf(g.b.y0), u: (g.b.u0 + g.b.u1) / 2, r: R(sd + 100 + i) })).filter(e => e.w >= .5);
+    let pick = new Set();
+    if (leg) { const el = eligible.slice().sort((a, b) => a.r - b.r), cnt = side === 's' ? Math.ceil(el.length * dens) : Math.floor(el.length * dens * .8 + .5 * R(sd + 77)); el.slice(0, 1e9).forEach((e, k) => { if (k < 1e9) pick.add(e.i); }); pick = { order: el, count: cnt }; }
+    else if (roshOn) { const byL = new Map(); for (const e of eligible) { if (C.rlev === 1 && multi && e.lv === 0) continue; (byL.get(e.lv) || byL.set(e.lv, []).get(e.lv)).push(e); }
+      for (const [lv, arr] of byL) { arr.sort((a, b) => a.u - b.u);
+        if (C.rpat === 0) arr.forEach(e => pick.add(e.i)); else if (C.rpat === 1) arr.forEach((e, k) => { if ((k + lv) % 2 === 0) pick.add(e.i); });
+        else { const best = arr.slice().sort((a, b) => Math.abs(a.u - uc0) - Math.abs(b.u - uc0))[0]; if (best) pick.add(best.i); } } }
+    const bayGeom = (b, id, lvl) => { const w = b.u1 - b.u0, uc = (b.u0 + b.u1) / 2, D = leg ? PR : dOfLvl(lvl), W = w + (w < .8 ? .2 : .24), lo = yLoLim(b.y0), hi = yHiLim(b.y1), crown = leg ? .22 : crownOf(D), below = clamp(b.y0 - lo, 0, .30), upE = clamp(hi - b.y1 - crown, 0, leg ? .28 : .26);
+      const yF0 = b.y0 - below, yF1 = b.y1 + upE; return below >= (leg ? .18 : .12) && upE >= (leg ? .16 : .07) && W < (leg ? 3.2 : 4.2) && free(uc - W / 2 - .03, uc + W / 2 + .03, yF0 - .3, yF1 + crown, id) ? { W, lo, crown, yF0, yF1, Hm: yF1 - yF0, uc, D } : null; };
+    const bayIdx = new Set();
+    if (leg) { for (const e of pick.order) { if (bayIdx.size >= pick.count) break; const g = gl[e.i], G0 = bayGeom(g.b, g.m.id, 0); if (!G0) continue; bayIdx.add(e.i); occ.push({ u0: G0.uc - G0.W / 2 - .03, u1: G0.uc + G0.W / 2 + .03, y0: G0.yF0 - .3, y1: G0.yF1 + G0.crown, id: 'tent' + e.i }); } }
+    else for (const e of eligible.slice().sort((a, b) => a.u - b.u)) { if (!pick.has(e.i)) continue; const g = gl[e.i], G0 = bayGeom(g.b, g.m.id, e.lv); if (!G0) { console.info("HDBG geomfail", e.i, e.lv, g.b.u0.toFixed(2), g.b.u1.toFixed(2), g.b.y0.toFixed(2), g.b.y1.toFixed(2), JSON.stringify(occ.filter(o=>!(g.b.u1+.5<o.u0||g.b.u0-.5>o.u1)).map(o=>[o.id,o.y0.toFixed(1),o.y1.toFixed(1)]))); continue; } bayIdx.add(e.i); occ.push({ u0: G0.uc - G0.W / 2 - .03, u1: G0.uc + G0.W / 2 + .03, y0: G0.yF0 - .3, y1: G0.yF1 + G0.crown, id: 'tent' + e.i }); }
+    // ===== روشان حقيقي: لوح أمامي وجانبان من الشبك، أرضية وسقف، قوائم، تاج، كوابيل متصلة بالجدار
+    const deepBay = (G1, b, wd, i) => {
+      const { W, lo, yF0, yF1, Hm, uc, D } = G1, dF = wd + D, wb = wd - .03, ym = (yF0 + yF1) / 2, ap = b.y0 + .06 - yF0, upz = clamp(.36, .2, Hm * .26), kindL = C.rlat;
+      const tx = cached(['bay', W.toFixed(2), Hm.toFixed(2), ap.toFixed(2), kindL, palI].join('|'), () => latMat(bayFront(THREE, renderer, W, Hm, ap, upz, kindL, pal, 11 + i)));
+      const txS = cached(['bays', D.toFixed(2), Hm.toFixed(2), ap.toFixed(2), kindL, palI].join('|'), () => latMat(bayFront(THREE, renderer, D + .03, Hm, ap, upz, kindL, pal, 31 + i)));
+      bx(W - .06, Hm, wd + .004, wd + .014, backing, uc, ym, false);
+      plane(W, Hm, tx, uc, ym, dF - .005);
+      for (const sx of [-1, 1]) { const o = new THREE.Mesh(new THREE.PlaneGeometry(D + .03, Hm), txS); o.rotation.y = Math.PI / 2; o.position.set(uc + sx * (W / 2 - .03), ym, (wb + dF) / 2); o.receiveShadow = true; G.add(o);
+        bx(.07, Hm, dF - .07, dF + .005, woodD, uc + sx * (W / 2 - .035), ym); bx(.06, Hm, wb, wb + .08, wood, uc + sx * (W / 2 - .03), ym);
+        bx(.04, Hm, wb + D * .5 - .02, wb + D * .5 + .02, wood, uc + sx * (W / 2 - .03), ym); }
+      bx(W, .06, wb, dF + .02, woodD, uc, yF0 + .03); bx(W - .04, .04, wb, dF, woodD, uc, yF1 - .02); bx(W, .04, dF - .03, dF + .015, woodD, uc, yF0 + ap);
+      // التاج
+      const rise = .1 + D * .35;
+      if (C.rhood === 0) { const ch = .18 + D * .35; add(prism(THREE, [[wb, yF1], [dF + .06, yF1], [dF + .06, yF1 + .05], [wb, yF1 + ch]], W + .1, -(W + .1) / 2), wood, uc, 0, 0); bx(W + .1, .05, dF - .02, dF + .06, woodD, uc, yF1 + .025); }
+      else if (C.rhood === 1) { const r1 = .10 + D * .15; add(prism(THREE, [[wb, yF1], [dF + .06, yF1], [dF + .06, yF1 + .05], [wb, yF1 + r1]], W + .1, -(W + .1) / 2), wood, uc, 0, 0); bx(W + .1, .05, dF - .02, dF + .06, woodD, uc, yF1 + .025);
+        const bh = .22, bw = W - .12; bx(bw, .04, wb, wd + .12, woodD, uc, yF1 + r1 + .02); plane(bw, bh - .04, latPlaneMat(bw, bh, kindL), uc, yF1 + r1 + .04 + (bh - .04) / 2, wd + .03); bx(bw + .06, .06, wb, wd + .14, wood, uc, yF1 + r1 + bh + .03);
+        for (const sx of [-1, 1]) bx(.05, bh, wb, wd + .06, woodD, uc + sx * (bw / 2), yF1 + r1 + .04 + bh / 2); }
+      else { bx(W + .12, .09, wb, dF + .06, wood, uc, yF1 + .045); bx(W + .16, .05, wb, dF + .07, woodD, uc, yF1 + .115);
+        const nD = Math.max(3, Math.floor(W / .1)), inst = new THREE.InstancedMesh(new THREE.BoxGeometry(.05, .05, .06), woodD, nD), M4 = new THREE.Matrix4(); for (let k = 0; k < nD; k++) { M4.makeTranslation(uc - W / 2 + .05 + k * (W - .1) / (nD - 1), yF1 - .025, dF + .02); inst.setMatrixAt(k, M4); } inst.castShadow = true; G.add(inst); }
+      // الكوابيل
+      const room = yF0 - lo - .02; let cb = Math.min(.18 + D * .6, room);
+      const cus = W > 1.5 ? [-W / 2 + .13, 0, W / 2 - .13] : [-W / 2 + .1, W / 2 - .1];
+      if (C.rcorb === 0) { if (cb > .12) for (const cu of cus) add(prism(THREE, [[wb, yF0], [dF + .02, yF0], [wb, yF0 - cb]], .08, -.04), woodD, uc + cu, 0, 0); else cb = 0; }
+      else if (C.rcorb === 1) { cb = Math.min(cb, .36); if (cb > .14) { const s = cb / 3; for (const cu of cus) add(prism(THREE, [[wb, yF0], [dF + .02, yF0], [dF + .02, yF0 - .08], [wb + D * .62, yF0 - .08], [wb + D * .62, yF0 - .08 - s], [wb + D * .32, yF0 - .08 - s], [wb + D * .32, yF0 - cb], [wb, yF0 - cb]], .08, -.04), woodD, uc + cu, 0, 0); } else cb = 0; }
+      else { const bh = .12; bx(W + .04, bh, wb, dF + .03, woodD, uc, yF0 - bh / 2); const c2 = Math.min(.3, room - bh); cb = bh; if (c2 > .1) { cb = bh + c2; for (const cu of [-W / 2 + .1, -W / 6, W / 6, W / 2 - .1].filter((_, k) => W > 1.5 || k === 0 || k === 3)) add(prism(THREE, [[wb, yF0 - bh], [wb + D * .8, yF0 - bh], [wb, yF0 - bh - c2]], .07, -.035), wood, uc + cu, 0, 0); } }
+      ao([uc - W / 2, yF0 - cb, wd + .003], [uc + W / 2, yF0 - cb, wd + .003], [0, -.25, 0], .35);
+      occ.push({ u0: uc - W / 2 - .03, u1: uc + W / 2 + .03, y0: yF0 - cb, y1: yF1 + G1.crown, id: 'bay' + i }); };
+    gl.forEach(({ m, b, d }, i) => {  const wd = wdOf(d), w = b.u1 - b.u0, h = b.y1 - b.y0, uc = (b.u0 + b.u1) / 2, id = m.id, r1 = R(sd + 100 + i), r2 = R(sd + 200 + i), r3 = R(sd + 300 + i), r4 = R(sd + 400 + i), lv = lvlOf(b.y0);
+      const kindL = tp ? C.rlat : (latBase + Math.floor(r2 * 4)) % 4;
       let done = false;
-      if (bayIdx.has(i)) { // روشان
+      if (bayIdx.has(i)) {
         const k0 = occ.findIndex(o => o.id === 'tent' + i); if (k0 >= 0) occ.splice(k0, 1);
-        const G1 = bayGeom(b, id), { W, lo, crown, yF0, yF1, Hm } = G1 || {};
-        if (G1) {
+        const G1 = bayGeom(b, id, lv), { W, lo, crown, yF0, yF1, Hm } = G1 || {}; if (!G1) console.info("HDBG nofit", i, lv);
+        if (G1 && deepOn) { deepBay(G1, b, wd, i); done = true; }
+        else if (G1) { // قشرة ضحلة (الوضع القديم وroshan=0)
           const dF = wd + PR - .045, ap = b.y0 + .06 - yF0, upz = clamp(.36, .2, Hm * .26);
           const tx = cached(['bay', W.toFixed(2), Hm.toFixed(2), ap.toFixed(2), kindL, palI].join('|'), () => latMat(bayFront(THREE, renderer, W, Hm, ap, upz, kindL, pal, 11 + i)));
           bx(W - .06, Hm, wd + .004, wd + .014, R(sd + 500 + i) < .45 && night ? glow : backing, uc, (yF0 + yF1) / 2, false);
@@ -298,29 +448,31 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
           bx(W + .08, .035, dF - .02, dF + .045, woodD, uc, yF1 + .02);
           const cb = Math.min(.30, yF0 - lo - .02); if (cb > .12) for (const cu of W > 1.3 ? [-W / 2 + .12, 0, W / 2 - .12] : [-W / 2 + .1, W / 2 - .1]) add(prism(THREE, [[(wd - .03), yF0], [dF + .02, yF0], [(wd - .03), yF0 - cb]], .07, -.035), woodD, uc + cu, 0, 0);
           ao([uc - W / 2, yF0 - cb, wd + .003], [uc + W / 2, yF0 - cb, wd + .003], [0, -.25, 0], .35);
-          occ.push({ u0: uc - W / 2 - .03, u1: uc + W / 2 + .03, y0: yF0 - cb, y1: yF1 + crown, id: 'bay' + i }); done = true;
-        }
+          occ.push({ u0: uc - W / 2 - .03, u1: uc + W / 2 + .03, y0: yF0 - cb, y1: yF1 + crown, id: 'bay' + i }); done = true; }
       }
       if (!done) { // نافذة عادية بحلية وقوس ودرف شيش أو شبك ضحل
-        const tw = .10, ww = w + 2 * tw;
-        if (w < .7) { // شبك ضحل (طاقة مشبّكة) أمام الزجاج: بروز 5 سم
-          const tx = cached(['scr', w.toFixed(2), h.toFixed(2), kindL, palI].join('|'), () => latMat(bayFront(THREE, renderer, w + .06, h + .06, .06, .06, kindL, pal, 21 + i)));
+        const wr = leg ? 0 : C.wrap, tw = [.10, .17, .06][wr], ww = w + 2 * tw, headH = [.09, .15, .13][wr];
+        const scr = leg ? w < .7 : (C.screen === 1 && w <= 1.7) || w < .55;
+        if (scr) { const tx = cached(['scr', w.toFixed(2), h.toFixed(2), kindL, palI].join('|'), () => latMat(bayFront(THREE, renderer, w + .06, h + .06, .06, .06, kindL, pal, 21 + i)));
           bx(w + .06, h + .06, wd + .004, wd + .014, backing, uc, (b.y0 + b.y1) / 2, false); plane(w + .06, h + .06, tx, uc, (b.y0 + b.y1) / 2, wd + .045); }
-        else { // قواطع خشبية رقيقة داخل الفتحة
-          const nV = Math.ceil(w / .62) - 1, gd = b.d1 + .02; for (let k = 1; k <= nV; k++) bx(.035, h, gd - .02, gd + .02, frameMat, b.u0 + w * k / (nV + 1), (b.y0 + b.y1) / 2, false);
+        else { const nV = Math.ceil(w / .62) - 1, gd = b.d1 + .02; for (let k = 1; k <= nV; k++) bx(.035, h, gd - .02, gd + .02, frameMat, b.u0 + w * k / (nV + 1), (b.y0 + b.y1) / 2, false);
           if (h > 1.1) bx(w, .035, gd - .02, gd + .02, frameMat, uc, b.y1 - h * .28, false); }
-        bx(tw, h + .1, (wd - .03), wd + .05, trim, b.u0 - tw / 2, (b.y0 + b.y1) / 2); bx(tw, h + .1, (wd - .03), wd + .05, trim, b.u1 + tw / 2, (b.y0 + b.y1) / 2);
-        bx(ww, .09, (wd - .03), wd + .05, trim, uc, b.y1 + .045); bx(ww + .1, .06, (wd - .03), wd + .12, trim, uc, b.y0 - .03);
+        const jm = wr === 2 ? wood : trim, jp = wr === 1 ? .08 : .05;
+        bx(tw, h + .1, (wd - .03), wd + jp, jm, b.u0 - tw / 2, (b.y0 + b.y1) / 2); bx(tw, h + .1, (wd - .03), wd + jp, jm, b.u1 + tw / 2, (b.y0 + b.y1) / 2);
+        bx(ww, headH, (wd - .03), wd + jp, jm, uc, b.y1 + headH / 2);
+        if (wr === 1) { bx(ww + .16, .05, wd - .03, wd + .15, trim, uc, b.y1 + headH + .025); bx(ww + .2, .08, wd - .03, wd + .17, trim, uc, b.y0 - .04); for (const sx of [-1, 1]) add(prism(THREE, [[wd - .03, b.y0 - .08], [wd + .15, b.y0 - .08], [wd - .03, b.y0 - .26]], .07, -.035), trim, uc + sx * (w / 2 + tw - .05), 0, 0); }
+        else if (wr === 2) { bx(ww + .5, .13, wd - .03, wd + .10, wood, uc, b.y1 + headH / 2 + .065); for (const sx of [-1, 1]) add(prism(THREE, [[wd - .03, b.y1], [wd + .12, b.y1], [wd - .03, b.y1 - .2]], .07, -.035), woodD, uc + sx * (w / 2 + tw + .12), 0, 0); bx(ww + .2, .06, wd - .03, wd + .13, wood, uc, b.y0 - .03); }
+        else bx(ww + .1, .06, (wd - .03), wd + .12, trim, uc, b.y0 - .03);
         ao([b.u0 - tw, b.y0 - .06, wd + .003], [b.u1 + tw, b.y0 - .06, wd + .003], [0, -.22, 0], .28);
-        let topY = b.y1 + .09;
-        if (r3 < .62 && w >= .5) { const ya = yHiLim(b.y1) - (b.y1 + .09); const ex = archOver(uc, ww, b.y1 + .09, ya, archPref, .09, archFillSolid ? 'solid' : 'lattice', wd, 2 + i); if (ex) topY = ex; }
+        let topY = b.y1 + headH + (wr === 2 ? .065 : 0);
+        const wantArch = leg ? (r3 < .62 && w >= .5) : (C.arch > 0 && w >= .5), pref = leg ? archPref : ARCH[C.arch];
+        if (wantArch) { const ya = yHiLim(b.y1) - topY; const ex = archOver(uc, ww, topY, ya, pref, .09, archFillSolid ? 'solid' : 'lattice', wd, 2 + i); if (ex) topY = ex; }
         occ.push({ u0: b.u0 - tw - .02, u1: b.u1 + tw + .02, y0: b.y0 - .1, y1: topY + .05, id: 'trim' + i });
-        if (w >= .5 && r4 < shutterP) { const lw = clamp(w / 2, .25, .52), hh = h + .04, tx = cached('leaf' + lw.toFixed(2) + hh.toFixed(2) + palI, () => new THREE.MeshStandardMaterial({ map: leafTex(THREE, renderer, lw, hh, pal, 9), roughness: .6 }));
+        if (w >= .5 && (leg ? r4 < shutterP : C.shut === 1)) { const lw = clamp(w / 2, .25, .52), hh = h + .04, tx = cached('leaf' + lw.toFixed(2) + hh.toFixed(2) + palI, () => new THREE.MeshStandardMaterial({ map: leafTex(THREE, renderer, lw, hh, pal, 9), roughness: .6 }));
           for (const sg of [-1, 1]) { const u1c = sg < 0 ? b.u0 - tw - .03 - lw / 2 : b.u1 + tw + .03 + lw / 2;
             if (free(u1c - lw / 2, u1c + lw / 2, b.y0 - .04, b.y1 + .04, id)) { bx(lw, hh, wd, wd + .03, wood, u1c, (b.y0 + b.y1) / 2); plane(lw, hh, tx, u1c, (b.y0 + b.y1) / 2, wd + .032); occ.push({ u0: u1c - lw / 2, u1: u1c + lw / 2, y0: b.y0 - .04, y1: b.y1 + .04, id: 'leaf' + i + sg }); } } }
       }
     });
-    if (night) for (const [, y] of [[0, 0]]) { /* مصابيح السقف لا تُضاف: نمط حجازي يعتمد فوانيس الأبواب وتوهج الروشان */ }
     if (side === 's') south = { X0, X1, wallD };
   }
   if (!south) return {};
@@ -329,8 +481,8 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   for (const { side, G, n, wallD } of groups) { G.updateMatrixWorld(true); G.traverse(o => { if (!o.isMesh || !o.geometry) return; const b = new THREE.Box3().setFromObject(o); const ds = [b.min.x * n.x + b.min.z * n.z, b.max.x * n.x + b.max.z * n.z], p = (Math.max(...ds) - wallD) * 1000;
     if (p > maxP) { maxP = p; worst.length = 0; worst.push(side + ':' + (o.geometry.type) + ':' + p.toFixed(0)); } const dmin = Math.min(...ds); if (dmin > wallD + .02) attached++; }); }
   const after = snap(), same = before.length === after.length && before.every((v, i) => v === after[i]);
-  const niNotes = notes.filter(x => /HISTORICAL|غير/.test(x)); niNotes.push('درجات مدخل أعمق من 25 سم (دكة/سلالم تاريخية) غير منفّذة: اقتصرت على دكة 25 سم', 'الروشان التاريخي (عمق ≥1 م، ارتفاع ~3 م، كوابيل خشبية ثقيلة) غير منفّذ تحت القيد الحالي؛ نُفّذ قشرة ضحلة', 'فتحات الأجنحة المرتدة أكثر من 1.9 م خلف مستوى الواجهة لا تُعالَج بالنمط (تبقى كما صُمّمت)');
-  _gate = { maxProjectionMm: Math.round(maxP), openingsUnchanged: same, notImplemented: niNotes, detail: { worst, lockedMeshes: before.length, floatingByDesignAttached: attached, orn, palette: pal.n, roshanDepthMm: Math.round(PR * 1000) } };
+  const niNotes = notes.slice(); niNotes.push('فتحات الأجنحة المرتدة أكثر من 1.9 م خلف مستوى الواجهة لا تُعالَج بالنمط (تبقى كما صُمّمت)');
+  _gate = { maxProjectionMm: Math.round(maxP), openingsUnchanged: same, notImplemented: niNotes, detail: { worst, lockedMeshes: before.length, floatingByDesignAttached: attached, orn, palette: pal.n, template: TPL?.id || null, roshanDepthMm: Math.round((tp ? (C.roshan >= 1 && C.roshan <= 3 ? RD[C.roshan] : PR) : PR) * 1000) } };
   console.info('GATES ' + JSON.stringify({ p: _gate.maxProjectionMm, same, d: _gate.detail }));
   return { wallZ: south.wallD, X0: south.X0, X1: south.X1, notes };
 }

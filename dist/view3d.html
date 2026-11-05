@@ -43,6 +43,11 @@
         <div class="kv" style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap"><button class="btn" id="altBtn" type="button">بديل آخر</button><button class="btn" id="otherStyleBtn" type="button">جرّب طرازًا آخر</button></div>
         <p class="muted" id="altCnt" aria-live="polite"></p>
         <div class="seg" id="altChips" aria-label="بدائل مقترحة"></div>
+        <div id="tplBox" style="margin-top:10px"><label class="kv">قوالب هذا الطراز<span class="muted" id="tplCnt"></span></label>
+          <select id="tplA" aria-label="القالب"></select>
+          <div class="kv" style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap"><button class="btn" id="tplRnd" type="button">قالب آخر</button><button class="btn" id="tplMix" type="button">ادمج قالبين</button></div>
+          <div id="tplMixBox" hidden style="margin-top:6px"><select id="tplB" aria-label="القالب الثاني"></select><button class="btn" id="tplGo" type="button" style="margin-top:6px">ادمج</button></div>
+          <p class="muted" id="tplNote">القوالب تغيّر الفتحات والمداخل والجدران وعدد الأدوار وقد لا تطابق المسقط الداخلي.</p></div>
         <label class="kv">عدد الأدوار<select id="facadeFloors"><option value="">حسب التصميم</option><option value="1">دور واحد</option><option value="2">دوران</option><option value="3">ثلاثة أدوار (مع ملحق)</option></select></label>
         <div class="seg" id="facadeTime"><button data-t="day" class="on">نهار</button><button data-t="night">ليل</button></div>
         <p class="muted" id="styleNote" hidden></p>
@@ -61,7 +66,7 @@ import { createHistory, markShown, nextAlternative, proposeAlternatives } from '
 import { baseRegion, regionId, describeRegion, parseRegion } from './facade-j/facade-realism/variation.mjs';
 const $ = id => document.getElementById(id), fr = $('facadeFrame'), host = $('threeHost'), opts = $('facadeOpts');
 const safe = (f, d) => { try { return f(); } catch { return d; } };
-let on = false, time = 'day', style = '', note0 = '';
+let on = false, time = 'day', style = '', note0 = '', tpl = '', tplSeed = 1, TPLS = [];
 const NIGHT = '&night=1&sun=0.05&skys=.01&bgs=.04&el=4&exp=1.6';
 const doc = safe(() => JSON.parse(localStorage.getItem('mizan.studio.doc.v1') || 'null'), null);
 const wish = safe(() => new URLSearchParams(location.search).get('wish') || localStorage.getItem('mizan.facade.wish') || '', '');
@@ -91,13 +96,13 @@ async function apply() {
   [...$('facadeSeg').children].forEach(x => x.classList.toggle('on', (x.dataset.f === 'model') !== on));
   if (!on) return;
   const c = cur(); if (c) markShown(hist, style, c);
-  paint(); chips(); await probe(style);
-  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (time === 'night' ? NIGHT : '');
+  paint(); chips(); await probe(style); await loadTpls();
+  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed : '') + (time === 'night' ? NIGHT : '');
   if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
 }
 const seg = $('facadeSeg'); const jb = document.createElement('button'); jb.dataset.f = 'J'; jb.textContent = 'واجهة واقعية'; seg.appendChild(jb);
 seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; on = b.dataset.f === 'J'; note0 = ''; apply(); });
-$('styleSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; style = b.dataset.s; $('autoStyle').checked = false; tried.add(style); recent.unshift(style); note0 = ''; apply(); });
+$('styleSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; style = b.dataset.s; tpl = ''; $('autoStyle').checked = false; tried.add(style); recent.unshift(style); note0 = ''; apply(); });
 $('autoStyle').addEventListener('change', () => { if ($('autoStyle').checked) { style = ranking()[0].id; note0 = ''; apply(); } else paint(); });
 // بديل آخر: نفس الطراز دائمًا، منطقة معمارية مختلفة عمّا عُرض
 $('altBtn').addEventListener('click', () => {
@@ -110,10 +115,21 @@ $('altChips').addEventListener('click', e => { const b = e.target.closest('butto
 $('otherStyleBtn').addEventListener('click', () => {
   tried.add(style); const rk = ranking().map(x => x.id).filter(id => id !== 'J' || wish);
   const next = rk.find(id => !tried.has(id)) || rk.find(id => id !== style); if (!next || next === style) return;
-  style = next; recent.unshift(style); $('autoStyle').checked = false; note0 = ''; apply();
+  style = next; tpl = ''; recent.unshift(style); $('autoStyle').checked = false; note0 = ''; apply();
 });
 $('facadeTime').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; time = b.dataset.t; [...$('facadeTime').children].forEach(x => x.classList.toggle('on', x === b)); apply(); });
 $('facadeFloors').addEventListener('change', () => { for (const k of Object.keys(region)) delete region[k]; hist.shown.clear(); apply(); });
+
+async function loadTpls() { // قوالب الطراز الحالي (من وحدته)
+  let list = []; try { const { STYLES } = await import('./facade-j/facade-realism/styles/index.mjs'); const m = await STYLES[style].load(); list = m.templates || []; } catch {}
+  TPLS = list; const ok = id => TPLS.some(t => t.id === id); if (tpl && !tpl.split('+').every(ok)) tpl = '';
+  for (const id of ['tplA', 'tplB']) { const el = $(id); el.innerHTML = ''; if (id === 'tplA') el.add(new Option('الافتراضي (بلا قالب)', '')); TPLS.forEach(t => el.add(new Option(t.id + ' — ' + t.ar, t.id))); }
+  $('tplA').value = tpl.includes('+') ? '' : tpl; $('tplBox').hidden = !TPLS.length; $('tplCnt').textContent = TPLS.length ? ' — ' + TPLS.length + ' قالبًا' + (tpl.includes('+') ? ' · دمج: ' + tpl : '') : '';
+}
+$('tplA').addEventListener('change', () => { tpl = $('tplA').value; tplSeed = 1; apply(); });
+$('tplRnd').addEventListener('click', () => { if (!TPLS.length) return; const o = TPLS.filter(t => t.id !== tpl); tpl = o[Math.floor(Math.random() * o.length)].id; apply(); });
+$('tplMix').addEventListener('click', () => { $('tplMixBox').hidden = !$('tplMixBox').hidden; });
+$('tplGo').addEventListener('click', () => { const a = $('tplA').value || (TPLS[0] && TPLS[0].id), b = $('tplB').value; if (!a || !b || a === b) { $('tplNote').textContent = 'اختر قالبين مختلفين للدمج.'; return; } tpl = a + '+' + b; tplSeed = 1 + Math.floor(Math.random() * 99); apply(); });
 paint();
 </script>
 </body>
