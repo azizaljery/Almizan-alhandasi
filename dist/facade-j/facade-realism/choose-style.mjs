@@ -1,5 +1,6 @@
 // ترتيب أنماط الواجهة لتصميم معيّن. يحترم رغبة العميل الصريحة دائمًا، وإلا توزيع ثابت حسب بصمة التصميم.
 import { designHash, designFeatures } from './variation.mjs';
+import { analyzeSolar } from './solar.mjs';
 export const STYLE_AR = Object.freeze({ J: 'معاصر حجري', M: 'معاصر خفيف', N: 'نجدي', H: 'حجازي - جدة', S: 'سلماني', C: 'كلاسيكي' });
 const IDS = Object.keys(STYLE_AR);
 // الكلمات المفتاحية (الأطول أولًا حتى لا تُلتقط «معاصر» من «معاصر خفيف»)
@@ -23,6 +24,8 @@ export function rankStyles(doc, wishes, { recent = [] } = {}) {
   if (F.cover > .22) { add('M', .4, 'مساحة زجاج كبيرة'); add('H', .3, 'فتحات كثيرة تناسب الرواشين'); }
   if (F.cover < .12) { add('N', .5, 'فتحات قليلة وجدران صمّاء تناسب النجدي'); add('S', .3, 'كتلة مصمتة'); }
   if (F.width / F.depth > 1.3) add('S', .3, 'واجهة عريضة');
+  let so = null; try { so = analyzeSolar(doc); } catch {}
+  if (so && so.level >= 3) { const w = .2 + so.level * .1; add('H', w, 'واجهة تواجه ' + so.compass + ': الروشان يظلّل ذاتيًا'); add('N', w * .8, 'واجهة تواجه ' + so.compass + ': فتحات غائرة'); add('S', w * .6, 'واجهة تواجه ' + so.compass + ': ظل ذاتي'); add('M', -w * .3, 'زجاج كثير مع شمس ' + so.compass); }
   add('J', -2, 'لا يُقترح تلقائيًا إلا بطلب العميل'); recent.forEach((id, i) => { if (aff[id] !== undefined) add(id, -.6 / (1 + i), 'عُرض حديثًا في الجلسة'); });
   const out = IDS.map((id, i) => {
     const jitter = ((i - base + IDS.length) % IDS.length) === 0 ? 1.2 : ((i - base + IDS.length) % IDS.length) === 1 ? .55 : 0;

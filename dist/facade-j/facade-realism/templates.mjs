@@ -12,13 +12,27 @@ export function blendParams(a, b, seed = 1) {
   }
   return out;
 }
+// تطفير وراثي: كل مفتاح يُستبدل باحتمال = الشدة بقيمة مأخوذة من قالب آخر عشوائي من الطراز نفسه (قيمة صالحة بالتعريف)،
+// فتبقى كل الدموج والتركيبات ضمن التعدادات المعرّفة في وحدة الطراز.
+function rng(seed) { let s = (h32(String(seed)) || 123456789) >>> 0; return () => { s = (Math.imul(1664525, s) + 1013904223) >>> 0; return s / 4294967296; }; }
+export function mutateParams(templates, p, intensity = 0.35, seed = 1) {
+  const r = rng(seed), k = Math.min(.9, Math.max(.1, Number(intensity) || .35)), out = { ...p }, changed = [];
+  for (const key of Object.keys(p).sort()) {
+    if (r() >= k) continue;
+    const pool = templates.filter(t => key in t.p && t.p[key] !== p[key]); if (!pool.length) continue;
+    out[key] = pool[Math.floor(r() * pool.length)].p[key]; changed.push(key);
+  }
+  return { p: out, changed };
+}
 /** يحلّ قيمة tpl إلى {id, ar, p, parents} أو null (لا قالب = السلوك القديم). */
 export function resolveTemplate(templates, q) {
   const raw = q?.get ? q.get('tpl') : null; if (!raw || !templates?.length) return null;
   const seed = Number(q.get('tseed')) || 1, by = id => templates.find(t => t.id === id);
   const ids = raw.replace(/ /g, '+').split('+').map(s => s.trim()).filter(Boolean);
   const A = by(ids[0]); if (!A) return null;
-  if (ids.length === 1) return { id: A.id, ar: A.ar, p: { ...A.p }, parents: [A.id] };
-  const B = by(ids[1]); if (!B) return { id: A.id, ar: A.ar, p: { ...A.p }, parents: [A.id] };
-  return { id: A.id + '+' + B.id, ar: A.ar + ' × ' + B.ar, p: blendParams(A, B, seed), parents: [A.id, B.id] };
+  const mut = Number(q.get('mut')) || 0, ms = q.get('mseed') || seed, fin = r => {
+    if (!mut) return r; const m = mutateParams(templates, r.p, mut, ms); return { ...r, p: m.p, id: r.id + '*m' + ms, ar: r.ar + ' (مُطفَّر)', mutated: m.changed }; };
+  if (ids.length === 1) return fin({ id: A.id, ar: A.ar, p: { ...A.p }, parents: [A.id] });
+  const B = by(ids[1]); if (!B) return fin({ id: A.id, ar: A.ar, p: { ...A.p }, parents: [A.id] });
+  return fin({ id: A.id + '+' + B.id, ar: A.ar + ' × ' + B.ar, p: blendParams(A, B, seed), parents: [A.id, B.id] });
 }

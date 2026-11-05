@@ -9,7 +9,7 @@ import { validateDoc as drawValidate } from '../../draw/doc.mjs';
 import { facadeGeometry } from '../../facade-styles.mjs';
 
 export const ENUMS = Object.freeze({
-  mass: ['صندوق مستطيل', 'كتلة أمامية يمين', 'كتلة أمامية يسار', 'كتلة أمامية وسط', 'مدخل غائر وسط', 'واجهة مدرّجة (نصفان)', 'جناح أمامي يسار', 'ثلاث درجات'],
+  mass: ['صندوق مستطيل', 'كتلة أمامية يمين', 'كتلة أمامية يسار', 'كتلة أمامية وسط', 'مدخل غائر وسط', 'واجهة مدرّجة (نصفان)', 'جناح أمامي يسار', 'ثلاث درجات', 'مكعبان متداخلان'],
   entryPos: ['ثلث يسار', 'وسط', 'ثلث يمين', 'عند الكتلة الغائرة/الوسط'],
   entryType: ['باب مفرد', 'باب مزدوج', 'باب طويل محوري', 'باب زجاجي عريض'],
   winPattern: ['نوافذ منتظمة', 'شريط أفقي', 'ستارة زجاجية', 'شقوق رأسية', 'نافذة كبيرة + علوية', 'جدار صلد بنافذة صغيرة', 'نافذة بانورامية'],
@@ -24,12 +24,14 @@ const MASS = [
   [[0, .5, 1.2], [.5, 1, 0]],
   [[0, .4, 2.4], [.4, 1, 0]],
   [[0, .33, 2.0], [.33, .66, 1.0], [.66, 1, 0]],
+  [[0, .52, 0], [.52, 1, 2.2]],
 ];
 const GROUND_PLINTH = .45, CAP = 2.75; // أعلى (sill+h) مسموح لتبقى فتحات الأدوار العليا تحت شريط البلاطة
 const r2 = v => Math.round(v * 100) / 100, clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // عائلات القوالب. كل قالب p كامل (كل المفاتيح)، فيصلح الدمج. الأرقام موثقة أعلاه.
-const T = (id, ar, note, p) => ({ id, ar, note, p: { light: 1, accent: 0, plinth: 0, ...p } });
+const T = (id, ar, note, p, extra = {}) => ({ id, ar, note, p: { light: 1, accent: 0, plinth: 0, acscreen: 0, joint: 0, twoTone: 0, ...p }, ...extra });
+const AC = { acHeights: [1.8, 1.2], acNote: 'دروة متدرجة لحجب وحدات التكييف: قسم 1.8 م وقسم 1.2 م فوق حافة السطح، متصلة بالجدار' };
 export const templates = [
   T('J01', 'الصندوق الأسود الكلاسيكي', 'كتلة واحدة، إطارات سوداء بارزة، شريط رمادي، شرائح خشب على الدروة', { floors: 2, mass: 0, entryPos: 1, entryType: 1, winPattern: 0, wallT: 0, wallMat: 0, frame: 0, mull: 0, band: 0, cap: 0, crownZone: 0, portal: 0, pier: 0, accent: 1 }),
   T('J02', 'برج المدخل الحجري', 'كتلة مدخل بارزة بوسط الواجهة، حجر رملي، بوابة حجرية وزعانف حجرية على الدروة', { floors: 2, mass: 3, entryPos: 1, entryType: 2, winPattern: 4, wallT: 1, wallMat: 3, frame: 2, mull: 1, band: 2, cap: 2, crownZone: 2, portal: 3, pier: 0, plinth: 1 }),
@@ -48,6 +50,9 @@ export const templates = [
   T('J15', 'الحصن الحجري الصلد', 'ثلاثة أدوار بجدار شبه صلد، بازلت، شقوق ضيقة، مدخل عميق بخدين حجريين', { floors: 3, mass: 0, entryPos: 3, entryType: 2, winPattern: 5, wallT: 2, wallMat: 2, frame: 3, mull: 0, band: 0, cap: 2, crownZone: 2, portal: 1, pier: 1, plinth: 2, light: 2 }),
   T('J16', 'الواجهة المقسومة بالخشب', 'نصفان متدرجان، دفء الخشب، شرائح وقوائم، نوافذ منتظمة', { floors: 2, mass: 5, entryPos: 2, entryType: 1, winPattern: 0, wallT: 1, wallMat: 3, frame: 5, mull: 2, band: 2, cap: 0, crownZone: 1, portal: 4, pier: 3, accent: 1 }),
   T('J17', 'جناحان وفناء أمامي', 'ثلاث درجات، ستارة زجاجية على الدرجة الغائرة، ترافرتين ودروة LED', { floors: 3, mass: 7, entryPos: 3, entryType: 3, winPattern: 2, wallT: 1, wallMat: 1, frame: 4, mull: 3, band: 4, cap: 1, crownZone: 4, portal: 5, pier: 2, light: 2 }),
+  T('J18', 'الكتلة الحجرية الصلدة', 'كتل بازلت كبيرة بفواصل ظل غاطسة، تجاويف شبابيك عميقة منحوتة، شقوق ضيقة', { floors: 2, mass: 0, entryPos: 3, entryType: 2, winPattern: 5, wallT: 2, wallMat: 2, frame: 3, mull: 0, band: 3, cap: 2, crownZone: 2, portal: 1, pier: 0, plinth: 2, joint: 1, acscreen: 1 }, AC),
+  T('J19', 'المكعبات المتداخلة', 'مكعب حجري بيج أمامي ومكعب بازلت رمادي داكن متراجع بإزاحة حقيقية وظلال دراماتيكية', { floors: 2, mass: 8, entryPos: 2, entryType: 1, winPattern: 4, wallT: 2, wallMat: 3, frame: 3, mull: 1, band: 2, cap: 3, crownZone: 4, portal: 3, pier: 0, plinth: 1, twoTone: 1, joint: 1 }),
+  T('J20', 'الأفق الحجري المعلق', 'بلاطة حجرية ضخمة بكابولي 68 سم فوق واجهة زجاجية ممتدة بدعامات فولاذية واضحة', { floors: 2, mass: 0, entryPos: 0, entryType: 3, winPattern: 2, wallT: 1, wallMat: 1, frame: 1, mull: 2, band: 1, cap: 5, crownZone: 6, portal: 2, pier: 2, plinth: 2, light: 2, acscreen: 1 }, AC),
 ];
 export const meta = Object.freeze({ id: 'J', ar: 'معاصر', templateCount: templates.length });
 

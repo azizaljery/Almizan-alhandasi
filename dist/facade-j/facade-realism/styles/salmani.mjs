@@ -79,7 +79,7 @@ function bandLevels() { const L = globalThis.__FLOORS?.levels; if (!Array.isArra
 // مفاتيح الواجهة (يقرؤها apply): pal, layer, tower, rise, tsym, crown, tri, triPat, center, parapet, cap, frame, group, sill, hood, pilaster, band, plinth, entrance, lantern, screen, motif.
 export const ENUM = Object.freeze({
   floors: [1, 2, 3], entryPos: ['وسط', 'ثلث أيسر', 'ثلث أيمن', 'طرف أيسر', 'طرف أيمن'], entryKind: ['باب مزدوج 1.4', 'باب مفرد 1.1 عريض', 'باب كبير 1.8', 'باب ضيق طويل 1.2'],
-  winSize: ['شقّ ضيق عميق', 'قياسي', 'عريض', 'طويل', 'خليج زجاجي كبير'], winRhythm: ['منتظم مفرد', 'أزواج', 'ثلاثيات', 'شريط متصل', 'متباعد قليل'],
+  winSize: ['شقّ ضيق عميق', 'قياسي', 'عريض', 'طويل', 'خليج زجاجي كبير', 'شق طولي رشيق'], acscreen: ['بلا', 'دروة متدرجة بارتفاعين 1.8/1.2 م لحجب التكييف'], scrWood: ['مشربية برونزية', 'مشربية خشب طبيعي'], winRhythm: ['منتظم مفرد', 'أزواج', 'ثلاثيات', 'شريط متصل', 'متباعد قليل'],
   massing: ['مستوٍ', 'كتلة مدخل بارزة', 'رواق غائر', 'جناح بارز', 'كتلة وسطى بارزة', 'خليج جانبي بارز', 'تدرّج ثلاثي', 'جناحان متقدمان وفناء غائر'], thick: ['كما المسقط', 'سميك', 'سميك جدًا'],
   pal: ['رمل', 'بيج فاتح', 'أوكر حجري', 'بني حمامي'], layer: ['حجر + بياض متدرج', 'بياض كامل + حلي حجرية', 'حلي داكنة', 'حلي جيرية فاتحة'],
   tower: ['بلا أبراج', 'أبراج نحيلة', 'أبراج متوسطة', 'أبراج عريضة'], rise: ['منخفض', 'متوسط', 'مرتفع'], tsym: ['متماثل', 'ثقل يسار', 'ثقل يمين', 'عريضان'],
@@ -89,8 +89,8 @@ export const ENUM = Object.freeze({
   band: ['بلا', 'حزام عريض', 'حزام مزدوج رفيع', 'حزام بارز عميق', 'خطّان متباعدان'], plinth: ['بلا', 'قاعدة منخفضة', 'قاعدة عالية', 'قاعدة مدرّجة'],
   entrance: ['ركيزتان وعتبة', 'ركيزتان وعتبة خشبية', 'ركيزتان وغطاء', 'رواق عميق بمظلة', 'مدخل مقوّس', 'بوابة برجية مدرّجة'], lantern: ['بلا', 'فانوسان', 'فانوسان عاليان'], screen: ['بلا', 'مشربية يسار', 'مشربية يمين', 'مشربيتان'], motif: ['مثلثات', 'معينات', 'شقوق مربعة'],
 });
-const K = (floors, entryPos, entryKind, winSize, winRhythm, massing, thick, pal, layer, tower, rise, tsym, crown, tri, triPat, center, parapet, cap, frame, group, sill, hood, pilaster, band, plinth, entrance, lantern, screen, motif) =>
-  ({ floors, entryPos, entryKind, winSize, winRhythm, massing, thick, pal, layer, tower, rise, tsym, crown, tri, triPat, center, parapet, cap, frame, group, sill, hood, pilaster, band, plinth, entrance, lantern, screen, motif });
+const K = (floors, entryPos, entryKind, winSize, winRhythm, massing, thick, pal, layer, tower, rise, tsym, crown, tri, triPat, center, parapet, cap, frame, group, sill, hood, pilaster, band, plinth, entrance, lantern, screen, motif, acscreen = 0, scrWood = 0) =>
+  ({ floors, entryPos, entryKind, winSize, winRhythm, massing, thick, pal, layer, tower, rise, tsym, crown, tri, triPat, center, parapet, cap, frame, group, sill, hood, pilaster, band, plinth, entrance, lantern, screen, motif, acscreen, scrWood });
 //          fl eP eK wS wR ms th | pl ly tw rs ts cr tr tP ce pa cp fr gr sl hd pi bn pn en ln sc mo
 export const templates = [
   { id: 'S01', ar: 'الكتلة المدرّجة', note: 'كتلة مدخل بارزة بين برجين طرفيين مدرّجين وأكاليل مثلثية متبادلة', p: K(2, 0, 0, 1, 0, 1, 1, 0, 0, 2, 1, 0, 1, 2, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0) },
@@ -111,12 +111,14 @@ export const templates = [
   { id: 'S16', ar: 'التدرج الجانبي', note: 'ثقل غير متماثل: جناح بارز يسارًا ومدخل يمينًا وبرج واحد عريض وأكاليل بتركيز وسطي', p: K(2, 2, 3, 2, 4, 3, 1, 3, 0, 3, 2, 1, 1, 3, 2, 0, 1, 1, 1, 0, 0, 0, 1, 4, 3, 4, 2, 2, 2) },
   { id: 'S17', ar: 'الجدار المحمّل بالمشربيات', note: 'مشربيتان كبيرتان بزخرفة الشقوق المربعة وفتحات قليلة وكتلة مدخل ودروة مرتفعة', p: K(2, 0, 0, 0, 0, 4, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 2, 4, 0, 0, 1, 0, 2, 2, 2, 2, 3, 2) },
   { id: 'S18', ar: 'خليج المدخل الهادئ', note: 'مدخل بارز بين دعامتين مع بياض كامل وحلي حجرية، نوافذ طويلة وحاجب لكل نافذة', p: K(2, 0, 1, 3, 0, 6, 0, 2, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 2, 0, 1, 2, 1, 0, 0) },
+  { id: 'S19', ar: 'السلماني البيئي: مدرجات وادي حنيفة', note: 'كتل متدرجة تتراجع كالمدرجات مع مشربيات خشبية طبيعية وحزام عميق وثلاثة أدوار ودروة متدرجة لحجب التكييف (ربط وادي حنيفة غير متحقق)', p: K(3, 2, 0, 1, 1, 8, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 3, 3, 2, 1, 3, 2, 1, 1) },
+  { id: 'S20', ar: 'السلماني التجريدي بفتحات طولية رشيقة', note: 'شقوق طولية ضيقة مجمّعة ثلاثية وبياض كامل وإطارات لوحية ودروة بحشوات بلا مثلثات ولا أبراج ودروة متدرجة', p: K(2, 1, 3, 5, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 2, 1, 3, 2, 0, 0, 3, 2, 1, 0, 1, 0, 2, 1, 0) },
 ];
 meta.templateCount = templates.length;
 
 // ───────────────────────── تحويل المسقط (واجهة أمامية جنوبية: أصغر y) ─────────────────────────
 const ENT = [[1.4, 2.3, 'door2'], [1.1, 2.2, 'door'], [1.8, 2.5, 'door2'], [1.2, 2.6, 'door2']];
-const WIN = [[.7, 1.5, 1.1], [1.2, 1.4, .9], [1.6, 1.6, .8], [1.2, 2.2, .45], [2.0, 2.4, .25]];
+const WIN = [[.7, 1.5, 1.1], [1.2, 1.4, .9], [1.6, 1.6, .8], [1.2, 2.2, .45], [2.0, 2.4, .25], [.55, 2.0, .5]];
 const EPOS = [.5, .3, .7, .14, .86];
 const r2 = v => Math.round(v * 100) / 100;
 const deep = o => JSON.parse(JSON.stringify(o));
@@ -139,6 +141,7 @@ function massingSegs(W, ms, ec, ew, ent) {
   else if (ms === 2) cuts = [[ec - fw / 2, ec + fw / 2, -1.1]];
   else if (ms === 3) cuts = ec > W / 2 ? [[0, W * .32, .9]] : [[W * .68, W, .9]];
   else if (ms === 4) cuts = [[W * .24, W * .76, .7]];
+  else if (ms === 8) cuts = [[0, W * .3, 1.4], [W * .3, W * .62, .8]];
   else if (ms === 6) cuts = [[0, W * .34, .5], [W * .34, W * .67, 1.0]];
   else if (ms === 7) cuts = [[0, W * .27, .8], [W * .73, W, .8]];
   else if (ms === 5) cuts = ec > W / 2 ? [[W * .08, W * .08 + 2.6, .6]] : [[W * .92 - 2.6, W * .92, .6]];
@@ -147,7 +150,7 @@ function massingSegs(W, ms, ec, ew, ent) {
   const out = []; for (const s of segs) { const l = out[out.length - 1]; if (l && l.off === s.off) l.u1 = s.u1; else out.push({ ...s }); } return out;
 }
 function layoutFront(W, p) {
-  const [ew, eh, ekind] = ENT[p.entryKind % 4], [ww0, wh, wsill] = WIN[p.winSize % 5], rhythm = p.winRhythm % 5;
+  const [ew, eh, ekind] = ENT[p.entryKind % 4], [ww0, wh, wsill] = WIN[p.winSize % 6], rhythm = p.winRhythm % 5;
   const ec0 = Math.min(W - ew / 2 - 2.0, Math.max(ew / 2 + 2.0, EPOS[p.entryPos % 5] * W));
   let segs = massingSegs(W, p.massing, ec0, ew), ec = ec0;
   let es = segs.find(s => ec >= s.u0 + ew / 2 + .6 && ec <= s.u1 - ew / 2 - .6);
@@ -172,7 +175,7 @@ function layoutFront(W, p) {
 }
 /** يعيد نسخة جديدة من المستند بعد تطبيق القالب (مسقط الواجهة الأمامية: فتحات، مدخل، كتل، سماكة، أدوار). */
 export function docTransform(doc, q) {
-  const T = resolveTemplate(templates, q); if (!T) return doc; const p = T.p, d = deep(doc);
+  const T = resolveTemplate(templates, q); if (!T) return doc; const p = T.p, d = deep(doc); if (p.acscreen) d.roof = { ...(d.roof || {}), parapet: 1.2 };
   if (p.floors) q.set('floors', String(Math.max(1, Math.min(3, p.floors)))); q.set('setback', '0');
   const F = findFront(d); if (!F) return d;
   const W = r2(F.xb - F.xa), L = layoutFront(W, p);
@@ -260,7 +263,7 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   const renderMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(...pal0.base.map((v, i) => v / 255 * (E.layer === 1 ? [.97, .91, .80][i] : .93))), roughness: 1 });
   const jointMat = new THREE.MeshStandardMaterial({ color: pal.joint, roughness: .95 });
   const alphaT = motif === 2 ? screenAlpha2(THREE) : screenAlpha(THREE, renderer, motif); alphaT.repeat.set(1, 1);
-  const screenMat = new THREE.MeshStandardMaterial({ color: '#7b5236', metalness: .55, roughness: .5, alphaMap: alphaT, alphaTest: .5, side: THREE.DoubleSide });
+  const screenMat = new THREE.MeshStandardMaterial({ color: TPL?.p?.scrWood ? '#a8794a' : '#7b5236', metalness: TPL?.p?.scrWood ? 0 : .55, roughness: TPL?.p?.scrWood ? .85 : .5, alphaMap: alphaT, alphaTest: .5, side: THREE.DoubleSide });
   const bodyMat = E.layer === 1 ? renderMat : stone;
   for (const m of S.meshes) { const p = m.userData?.part; if (p === 'plate') m.material = jointMat; else if (p === 'blocks') m.material = bodyMat; else if (m.userData?.role === 'frame') m.material = bronze; else if (p === 'wallcore' || (m.userData?.role === 'wall' && p !== 'blocks' && /render|limestone/.test(m.material?.name || ''))) m.material = renderMat; }
   const AO = aoTexture(THREE), aoMat = a => new THREE.MeshBasicMaterial({ color: '#000', alphaMap: AO, transparent: true, opacity: a * (night ? .5 : 1), depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
@@ -369,6 +372,8 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
       if (E.cap === 1) add(len + .04, .1, .5, stoneJ, cxs, yTop + .05, SW - .12, { uo: sg.u0, vo: yTop });
       else if (E.cap === 2) { add(len + .02, .07, .42, accent, cxs, yTop + .035, SW - .08, { uo: sg.u0, vo: yTop }); add(len + .06, .06, .52, stoneJ, cxs, yTop + .1, SW - .13, { uo: sg.u0, vo: yTop }); }
       else add(len + .02, .06, .38, stoneJ, cxs, yTop + .03, SW - .12, { uo: sg.u0, vo: yTop });
+      if (TPL?.p?.acscreen) { const bw = 2.2, nb = Math.max(1, Math.round(len / bw)), w = len / nb; // دروة متدرجة: ارتفاع منخفض ~1.2 م (من المستند) وأجزاء مرتفعة +0.6 م = ~1.8 م
+        for (let i = 0; i < nb; i += 2) { const a = sg.u0 + i * w; add(w - .04, .6, .26, accent, a + w / 2, stop + .3, SW - .09, { uo: a, vo: stop }); add(w + .02, .06, .38, stoneJ, a + w / 2, stop + .63, SW - .12, { uo: a, vo: stop + .6 }); } }
       sg.yTop = yTop;
       // 6) ملامسة الأرض
       ao([sg.u0, .003, SW], [sg.u1, .003, SW], [0, 0, .5], .5); ao([sg.u0, 0, SW + .003], [sg.u1, 0, SW + .003], [0, .4, 0], .3); }

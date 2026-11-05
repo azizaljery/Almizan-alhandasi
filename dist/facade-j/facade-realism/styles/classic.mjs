@@ -108,7 +108,7 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
     finials: R(14) < .6,
     dentils: R(15) < .55,
     engaged: R(16) < .35, // أعمدة نصف دائرية عند المدخل بدل البيلاستر
-    ent: 0, giant: false, attic: false, bal: 0, shut: false, slim: false, modil: false,
+    ent: 0, mans: false, acscreen: false, giant: false, attic: false, bal: 0, shut: false, slim: false, modil: false,
   };
   // مستوى الزخرفة (cl=light|balanced|ornate، الافتراضي balanced): الترتيب والتناسب أولًا ثم الزخرفة؛ لا يتحول كل بيت إلى قصر
   const LEVEL = ['light', 'balanced', 'ornate'].includes(q.get('cl')) ? q.get('cl') : 'balanced'; CFG.level = LEVEL;
@@ -120,7 +120,7 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
       corners: ['quoin', 'pilaster', 'quoin'][P.corners], quoinsOn: P.corners !== 2, pilastersOn: P.bays > 0 || P.giant === 1, rhythm: [99, 2.7, 3.6, 4.8][P.bays],
       head: ['flat', 'segmental', 'round', 'mixed', 'tri', 'alt'][P.head], hood: !!P.hood, pediment: ['tri', 'seg', 'none'][P.ped], parapet: ['balustrade', 'panel', 'plain'][P.para],
       door: ['wood', 'iron', 'carved'][P.door], rustic: !!P.rust, apron: !!P.apron, frame: ['white', 'bronze'][P.frame], finials: !!P.fin, dentils: P.cor === 1, modil: P.cor === 2, slim: P.cor === 0,
-      engaged: P.ent === 1, ent: P.ent, giant: !!P.giant, attic: !!P.attic, bal: P.bal, shut: !!P.shut }); }
+      engaged: P.ent === 1, ent: P.ent, giant: !!P.giant, attic: !!P.attic, bal: P.bal, shut: !!P.shut, mans: !!P.mans, acscreen: !!P.acscreen }); }
   // تجاوز للاختبار فقط: cfg=door:iron,order:ionic,rustic:1,head:round (قيم منطقية 1/0)
   for (const kv of (q.get('cfg') || '').split(',')) { const [k, v] = kv.split(':'); if (k in CFG && v !== undefined) CFG[k] = typeof CFG[k] === 'boolean' ? v === '1' : (typeof CFG[k] === 'number' ? Number(v) : v); }
   globalThis.__CLASSIC_CFG = CFG; // للتشخيص والتقارير
@@ -135,6 +135,7 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   const glassD = new THREE.MeshStandardMaterial({ color: '#10181d', metalness: .3, roughness: .12, envMapIntensity: 1.2 }), glassL = new THREE.MeshStandardMaterial({ color: '#8aa0a6', metalness: .25, roughness: .12, envMapIntensity: 1.3 });
   const frameMat = new THREE.MeshStandardMaterial({ color: CFG.frame === 'white' ? '#f3f1ea' : '#3b2a1f', roughness: .5, metalness: CFG.frame === 'white' ? 0 : .35 });
   const shutMat = new THREE.MeshStandardMaterial({ color: CFG.frame === 'white' ? '#56664d' : '#5a3d2a', roughness: .6 }), shutDark = new THREE.MeshStandardMaterial({ color: CFG.frame === 'white' ? '#3b4934' : '#3e2a1d', roughness: .8 });
+  const slate = plasterMat(THREE, renderer, '#3a3f46', { rep: 1.2, blot: .05, grain: 16, rough: .7, seed: 21 }), slateD = new THREE.MeshStandardMaterial({ color: '#23262b', roughness: .9 });
   const led = new THREE.MeshStandardMaterial({ color: '#fff1d2', emissive: '#ffd890', emissiveIntensity: night ? 6 : 1.6 });
   const lampGlass = new THREE.MeshStandardMaterial({ color: '#fff2d6', emissive: '#ffd58a', emissiveIntensity: night ? 7 : 1.1, roughness: .3 });
   const AO = aoTexture(THREE), aoMat = a => new THREE.MeshBasicMaterial({ color: '#000', alphaMap: AO, transparent: true, opacity: a * (night ? .5 : 1), depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
@@ -380,7 +381,17 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
       if (heavy) B(led, a + .15, b - .15, yb - .004, yb + .008, dF + .075, dF + .088); };
     for (const yb of bands) cornice(yb, yb === topBand);
     // ---- الدروة العليا ----
-    if (topBand != null) { const yp0 = topBand + BH, H = g.y1 - yp0, [a, b] = g.span(yp0 + .1);
+    if (topBand != null && CFG.mans) { // سقف مانسارد: وجه شديد الانحدار بإكساء أردوازي يبدأ من كورنيش الدور الأخير (بروز 0.45 م عند القاعدة) ويرتفع فوق الدروة؛ دورمر مقوّس على المنحدر
+      const yb0 = topBand + BH, Hm = Math.max(g.y1 - yb0, 1.9), [a, b] = g.span(yb0 + .1), PB = .45, PT = .04, dep = y => PB - (PB - PT) * (y - yb0) / Hm;
+      G(slate, taper((a + b) / 2, yb0, yb0 + Hm, b - a + .04, b - a - .1, dF - .06, dF + PB, dF + PT));
+      B(trim, a - .02, b + .02, yb0 + Hm, yb0 + Hm + .07, dF - .06, dF + PT + .07); // حافة السطح العلوية
+      for (let y = yb0 + .35; y < yb0 + Hm - .1; y += .35) B(slateD, a, b, y, y + .012, dF + dep(y) - .004, dF + dep(y) + .012);
+      const nD = Math.max(1, Math.round((b - a) / 2.4)), wD = .9, yd = yb0 + Hm * .22, hD = .72;
+      for (let i = 0; i < nD; i++) { const uc = a + (b - a) * (i + .5) / nD; if (b - a < 2.4 && i > 0) break; const df = dF + dep(yd + hD / 2) + .12;
+        B(trim, uc - wD / 2, uc + wD / 2, yd, yd + hD, dF - .04, df); B(trim, uc - wD / 2 - .04, uc + wD / 2 + .04, yd - .04, yd, dF - .04, df + .03);
+        G(trim, tympG(uc, yd + hD, wD, .3, dF - .04, df)); G(glassD, tympG(uc, yd + hD, wD - .24, .22, df, df + .02)); B(glassD, uc - wD / 2 + .12, uc + wD / 2 - .12, yd + .1, yd + hD, df, df + .02);
+        B(frameMat, uc - .015, uc + .015, yd + .1, yd + hD, df + .02, df + .035); G(trim, ringG(uc, yd + hD, wD, .3, .07, df - .02, df + .05)); B(slate, uc - wD / 2 - .05, uc + wD / 2 + .05, yd + hD + .3, yd + hD + .35, dF - .04, df - .05); } }
+    else if (topBand != null) { const yp0 = topBand + BH, H = g.y1 - yp0, [a, b] = g.span(yp0 + .1);
       if (H > .55 && CFG.parapet !== 'plain') { const capT = .1, railH = .13, plH = .22, hb = H - capT - railH - plH;
         B(trim, a - .02, b + .02, g.y1 - capT + .02, g.y1 + .04, dF - .08, dF + .1);
         const nPier = Math.max(1, Math.round((b - a) / 2.6)), piers = []; for (let i = 0; i <= nPier; i++) piers.push(a + .2 + i * (b - a - .4) / nPier);
@@ -399,6 +410,9 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
           if (CFG.finials) { G(trim, sphereG(u, g.y1 + .17, dF + .02, .1)); B(trim, u - .08, u + .08, g.y1 + .04, g.y1 + .12, dF - .06, dF + .1); } }
       } else if (H > .05) { B(trim, a - .02, b + .02, g.y1 - .02, g.y1 + .035, dF - .08, dF + .09); if (CFG.parapet === 'plain') { B(trim, a, b, g.y1 - .2, g.y1 - .02, dF - .02, dF + .06); B(trim, a, b, yp0, yp0 + .08, dF - .02, dF + .05); } } }
     else B(trim, g.u0 - .02, g.u1 + .02, g.y1 - .02, g.y1 + .035, dF - .08, dF + .09);
+    // ---- دروة حاجبة للتكييف: مصمتة متدرجة (علوّان متناوبان: الأدنى كما هو والأعلى +0.6 م)، على قمة الجدار ----
+    if (CFG.acscreen && !CFG.mans && topBand != null) { const [a, b] = g.span(g.y1 - .1), nS = Math.max(2, Math.round((b - a) / 2.6)), w = (b - a) / nS;
+      for (let i = 0; i < nS; i++) { const x0 = a + i * w, x1 = x0 + w; if (i % 2) { B(trim, x0, x1, g.y1, g.y1 + .6, dF - .12, dF + .06); B(recess, x0 + .15, x1 - .15, g.y1 + .12, g.y1 + .48, dF + .055, dF + .068); B(trim, x0 - .02, x1 + .02, g.y1 + .6, g.y1 + .66, dF - .12, dF + .09); } else B(trim, x0, x1, g.y1, g.y1 + .05, dF - .12, dF + .09); } }
     // ---- عناصر رأسية لكل طابق ----
     storeys.forEach(st => { const H = st.yt - st.ya; if (H < 1.2) return; const [sa, sb] = g.span((st.ya + st.yt) / 2);
       if (CFG.rustic && st.ground) { const nC = Math.max(2, Math.round(H / .55)), ch = H / nC;

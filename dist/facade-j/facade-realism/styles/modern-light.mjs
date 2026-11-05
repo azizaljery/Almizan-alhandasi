@@ -125,6 +125,7 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
   const accH = ACC === 2 ? timberMat(THREE, renderer, true) : accV;
   const trim = new THREE.MeshStandardMaterial({ color: PAL.trim, metalness: PAL.trimW ? .25 : .55, roughness: PAL.trimW ? .45 : .36 }); trim.name = PAL.trimW ? 'frame-whiteM' : 'steel-blackJ';
   const alu = new THREE.MeshStandardMaterial({ color: PAL.trimW ? '#dcdcda' : '#8b8f93', metalness: .8, roughness: .32, envMapIntensity: 1 }); alu.name = 'aluminium-M';
+  const greenM = new THREE.MeshStandardMaterial({ color: '#4f7a3a', roughness: .95 }); greenM.name = 'foliageM';
   const AV = accV || alu, AH = accH || alu;
   const led = new THREE.MeshStandardMaterial({ color: '#fff4dc', emissive: '#ffe2b0', emissiveIntensity: night ? 6 : 2.2 });
   const paving = new THREE.MeshStandardMaterial({ color: PAL.warm ? '#9d9488' : '#8e9091', roughness: .8 });
@@ -214,7 +215,7 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
     for (const g of gl) { const { b, d } = g, w = b.u1 - b.u0; if (w >= .85) continue; const cx = (b.u0 + b.u1) / 2, key = rr(String(g.m.userData.opening) + side + seed); // نافذة صغيرة
       add(w + .1, .035, .1, slabM, cx, b.y0 - .02, d + .05); if (TP ? (WINM === 1 || WINM === 6) : key < .5 * [.5, 1, 1.4][ORN]) add(w + .2, .05, PROJ * .8, slabM, cx, b.y1 + .06, d + PROJ * .4); }
     // --- الأبواب: مظلة عميقة وجناحان وأرضية ---
-    const doorZones = [], wrapZ = []; let plStone = null, plDark = null;
+    const doorZones = [], wrapZ = []; let plStone = null, plDark = null, woodV = null;
     for (const { b, d } of (TP ? [] : doors)) { const w = b.u1 - b.u0, cx = (b.u0 + b.u1) / 2, ext = (rg.t === 0 ? .7 : .35) + R(12) * .3, cw = w + ext * 2, cdep = CD, yC = Math.min(b.y1 + .32, (bands[0] ?? 3.55) - .22);
       doorZones.push([cx - cw / 2 - .1, cx + cw / 2 + .1]);
       // مدخل ملاصق بلا بروز عميق: لوح مظلة رقيق 25 سم كحدّ أقصى + شق إنارة + أجنحة ملاصقة ≤ 24 سم + ظل تماس يوحي بالعمق
@@ -261,7 +262,7 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
       const ex = [...doorZones, ...gl.filter(g => g.b.y0 < ph + .05).map(g => [g.b.u0 - .1, g.b.u1 + .1]), ...pierZ].sort((a, b) => a[0] - b[0]); let cur = X0;
       for (const [a, b2] of [...ex, [X1 + 1, X1 + 2]]) { const e0 = cur, e1 = Math.min(a, X1); if (e1 - e0 > .3) { add(e1 - e0, ph, .05, pm, (e0 + e1) / 2, ph / 2, wallD + .025, true, { m: true }); add(e1 - e0 + .02, .03, .09, slabM, (e0 + e1) / 2, ph + .015, wallD + .045); } cur = Math.max(cur, b2); } }
     // --- لفافة شاشة (wrap) على آخر دور ---
-    if (TP && TP.wrap && isS) { const yB = bands.length ? bands[bands.length - 1] + BH + .04 : .45, yT = (sbk ? frontTop : topAll) - .38;
+    if (TP && TP.wrap && TP.wrap < 4 && isS) { const yB = bands.length ? bands[bands.length - 1] + BH + .04 : .45, yT = (sbk ? frontTop : topAll) - .38;
       if (yT - yB > 1.1) { const ex = (yB < 2.9 ? [...doorZones] : []).concat(pierZ).sort((a, b) => a[0] - b[0]), iv = []; let cur = X0 + .3;
         for (const [a, b2] of ex) { if (a - cur >= 1.2) iv.push([cur, a - .1]); cur = Math.max(cur, b2 + .1); } if (X1 - .3 - cur >= 1.2) iv.push([cur, X1 - .3]);
         if (iv.length) { iv.sort((p1, p2) => (p2[1] - p2[0]) - (p1[1] - p1[0])); const big2 = iv[0], Lw = big2[1] - big2[0]; let a0 = big2[0], a1 = big2[1];
@@ -274,6 +275,26 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
             for (let i = 0; i <= nL; i++) add(len, .02, .13, AH, cu, yB + .06 + i * .12, wallD + .30, true, { tilt: -.55 }); }
           else { for (let i = 0; i <= nT; i++) add(.05, yT - yB + .08, .14, AV, a0 + len * i / nT, ymd, wallD + .07); const nL = Math.floor((yT - yB) / .11);
             for (let i = 0; i <= nL; i++) add(len, .07, .05, AH, cu, yB + .04 + i * .11, wallD + .14); } } } }
+
+    // --- ستائر/لوفرات/ساتر تموجي (wrap 4..6): إطار حامل متصل بالجدار بدعامات كل 1.5 م ---
+    if (TP && TP.wrap >= 4 && isS) { const full = TP.wrap === 4, nb = bands.length, yB = full ? .32 : (nb >= 2 ? bands[nb - 2] + BH + .1 : .45), yT = full ? (sbk ? frontTop : topAll) - .38 : (nb >= 2 ? bands[nb - 1] : (sbk ? frontTop : topAll) - .38); // ساتر الدور الأخير أمام نوافذه لا في منطقة الدروة
+      if (yT - yB > 1.1) { const ex = (yB < 2.9 ? [...doorZones] : []).concat(pierZ).sort((a, b) => a[0] - b[0]), iv = []; let cur = X0 + .3;
+        for (const [a, b2] of ex) { if (a - cur >= 1.2) iv.push([cur, a - .1]); cur = Math.max(cur, b2 + .1); } if (X1 - .3 - cur >= 1.2) iv.push([cur, X1 - .3]);
+        const wV = TP.wrap === 6 ? AV : (woodV ||= timberMat(THREE, renderer, false)), SO = .30, ymd = (yB + yT) / 2;
+        for (const [a0, a1] of iv) { const len = a1 - a0, cu = (a0 + a1) / 2; wrapZ.push([a0 - .1, a1 + .1]);
+          add(len, .05, .08, TP.wrap === 6 ? AH : wV, cu, yT, wallD + SO); add(len, .05, .08, TP.wrap === 6 ? AH : wV, cu, yB, wallD + SO);
+          const nP = Math.max(1, Math.round(len / 1.5)); for (let i = 0; i <= nP; i++) for (const yy of [yT, yB]) add(.05, .05, SO, AV, a0 + len * i / nP, yy, wallD + SO / 2);
+          if (full) for (const yb of bands) if (yb + BH > yB + .5 && yb + BH < yT - .5) add(len, .04, .06, wV, cu, yb + BH + .02, wallD + SO);
+          if (TP.wrap === 4) { const st = .14, nF = Math.floor(len / st); for (let i = 0; i <= nF; i++) add(.045, yT - yB, .10, wV, a0 + (len - nF * st) / 2 + i * st, ymd, wallD + SO); }
+          else if (TP.wrap === 5) { const wd = .62, nF = Math.max(1, Math.floor(len / wd)), step = len / nF, hz = (yT - yB) / 2; // لوح معلّق بحبلين ويدور حول محور رأسي: زاوية تتغير بين اللوحات وبين نصفي الارتفاع
+            for (let i = 0; i < nF; i++) for (let k = 0; k < 2; k++) { const ang = [.0, .5, 1.05, .25, .85, 1.2, .6][(i * 3 + k * 2 + Math.round(a0 * 3)) % 7] * (k ? -1 : 1) * (i % 2 ? 1 : -1), o = add(wd - .04, hz - .04, .03, wV, a0 + step * (i + .5), yB + hz * (k + .5), wallD + SO, true);
+              o.rotateOnAxis(up, ang); }
+            for (let i = 0; i <= nF; i++) add(.03, yT - yB, .03, AV, a0 + step * i, ymd, wallD + SO - .06); }
+          else { const wmax = 2.4, nPan = Math.max(1, Math.ceil(len / wmax)), pw = len / nPan, ph = yT - yB - .1; // ألواح ألومنيوم قص ليزر فاتحة بسماكة 5 سم
+            for (let i = 0; i < nPan; i++) { const T6 = solarTessellation(pw - .04, ph, { u0: a0 + i * pw, v0: 0 }), cs = 14, [cv, cx2] = cnv(T6.nx * cs, T6.ny * cs); cx2.fillStyle = '#e9e7e1'; cx2.fillRect(0, 0, cv.width, cv.height); cx2.globalCompositeOperation = 'destination-out';
+              for (let jj = 0; jj < T6.ny; jj++) for (let ii = 0; ii < T6.nx; ii++) { cx2.beginPath(); cx2.arc((ii + .5) * cs, cv.height - (jj + .5) * cs, T6.hole(ii, jj) * cs, 0, 7); cx2.fill(); }
+              const tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace; const pm = new THREE.MeshStandardMaterial({ map: tx, alphaTest: .5, metalness: .55, roughness: .4, side: THREE.DoubleSide }); pm.name = 'laser-aluM';
+              add(pw - .04, ph, .05, pm, a0 + (i + .5) * pw, ymd, wallD + SO); } } } } }
     // --- حواف البلاطات (كابولي رقيق) ---
     const segs = []; // [u0,u1,proj]
     const slabAt = (yb, dFace, idx) => { const h = [.26, .22, .15, .08, .18][SLABMODE], dep0 = SLABMODE === 3 ? .04 : SLABMODE === 4 ? DEEPD : PROJ, yTop = yb + BH, yc = yTop - h / 2;
@@ -285,7 +306,11 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
       if (SLABMODE === 2) add(X1 - X0 - .04, .03, PROJ - .06, trim, (X0 + X1) / 2, yTop - h - .015, dFace + (PROJ - .06) / 2); // فاصل ظل داكن تحت الحافة
       add(X1 - X0 - .3, .014, .014, led, (X0 + X1) / 2, yTop - h - (SLABMODE === 2 ? .04 : SLABMODE === 4 ? .026 : .004), dFace + dep0 - .05, false); // شق الإنارة الخطي في الجانب السفلي
       ao([X0, yTop - h, dFace + .003], [X1, yTop - h, dFace + .003], [0, -.3, 0], .36); ao([X0, yTop, dFace + .003], [X1, yTop, dFace + .003], [0, .12, 0], .2); };
-    for (const yb of bands) slabAt(yb, dFor(yb + BH), 0);
+    for (const yb of bands) { slabAt(yb, dFor(yb + BH), 0);
+      if (TP && TP.plant && isS) { const dF = dFor(yb + BH), yTop = yb + BH, dp = SLABMODE === 4 ? Math.max(.46, DEEPD) : PROJ, pd = Math.min(.6, dp - .08), L2 = X1 - X0 - .6, zs = [...doorZones.map(z => [z[0] - .1, z[1] + .1]), ...pierZ];
+        let cur = X0 + .3; const segs2 = []; for (const [a, b2] of mergeZ(zs.filter(z => yb < 4))) { if (a - cur > .8) segs2.push([cur, a - .1]); cur = Math.max(cur, b2 + .1); } if (X1 - .3 - cur > .8) segs2.push([cur, X1 - .3]); void L2;
+        for (const [a, b2] of (yb < 4 ? segs2 : [[X0 + .3, X1 - .3]])) { const len = b2 - a, cu = (a + b2) / 2; add(len, .36, pd, slabM, cu, yTop + .18, dF + dp - pd / 2 - .02); add(len - .06, .02, pd - .06, paving, cu, yTop + .37, dF + dp - pd / 2 - .02, false);
+          const nB = Math.floor(len / .42); for (let i = 0; i < nB; i++) { const rr2 = .17 + hash01('g' + i + yb + seed) * .1; add(.34, rr2 * 2 * .8, rr2 * 2, greenM, a + (len - nB * .42) / 2 + (i + .5) * .42, yTop + .38 + rr2 * .8, dF + dp - pd / 2 - .02, false); } } } }
     // --- الدروة العلوية ---
     const parapet = (yTop, dFace, X0_, X1_, isUpper) => { const W = X1_ - X0_, c = (X0_ + X1_) / 2;
       if (PARAMODE === 0) { add(W + .02, .06, PROJ, trim, c, yTop + .03, dFace + PROJ / 2 - .02); } // غطاء معدني رفيع يبرز
@@ -300,6 +325,10 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
         add(W - .2, .014, .014, led, c, yTop - .006, dFace + .42, false); ao([X0_, yTop - .12, dFace + .003], [X1_, yTop - .12, dFace + .003], [0, -.3, 0], .3); }
       else { add(W + .02, .22, .06, slabM, c, yTop - .07, dFace + .03); add(W + .06, .035, PROJ, slabM, c, yTop + .02, dFace + PROJ / 2);
         if (TP ? PARAMODE === 6 : rg.c === 1) { const sw = W * (.3 + R(24) * .2), left = R(25) < .5; add(sw, .2, PROJ * .8, slabM, left ? X0_ + sw / 2 : X1_ - sw / 2, yTop + .13, dFace + PROJ * .4); } add(W, .012, .012, trim, c, yTop - .19, dFace + .06, false); } };
+    if (TP && TP.acscreen && isS) { const yTp = sbk ? FLtop + .25 : topAll, dA = wallD, Wd = X1 - X0 - .4, segsA = [[.0, .55, 1.8], [.55, 1.0, 1.2]]; // قسمان: 1.8 م ثم 1.2 م، ساتر متصل بالجدار فوق الدروة
+      for (const [f0, f1, hh2] of segsA) { const a = X0 + .2 + Wd * f0, b = X0 + .2 + Wd * f1, len = b - a, cu = (a + b) / 2; add(len, .06, .14, trim, cu, yTp + hh2 + .03, dA + .07); add(len, .08, .12, slabM, cu, yTp + .04, dA + .06);
+        const nS = Math.floor(hh2 / .13); for (let i = 0; i < nS; i++) add(len - .1, .07, .06, slabM, cu, yTp + .14 + i * .13, dA + .07, true, { tilt: .0 }); for (let i = 0; i <= Math.round(len / 1.4); i++) add(.08, hh2, .12, slabM, a + len * i / Math.max(1, Math.round(len / 1.4)), yTp + hh2 / 2, dA + .06); }
+      ao([X0, yTp, dA + .003], [X1, yTp, dA + .003], [0, .4, 0], .15); }
     const topBand = bands.length ? bands[bands.length - 1] + BH : 3.85;
     if (sbk) { parapet(frontTop, wallD, X0, X1, false); const lo = FLtop + .3; if (TOPY - lo > .2 && X1 - X0 > 2) parapet(TOPY, wallD - sbk, X0 + .1, X1 - .1, true); }
     else parapet(topAll, wallD, X0, X1, false);
@@ -324,6 +353,8 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
     for (const [pick, pos] of picks) { const fw = Math.min(pick[1] - pick[0], baseW), fu0 = pick[0] + (pick[1] - pick[0] - fw) * pos;
       const hTop = FEATFULL ? frontTop : Math.min(frontTop, south.bands[0] ?? frontTop), fp = TP ? [.08 + R(19) * .06, .36 + R(19) * .04, .64 + R(19) * .05][TP.featD] : Math.min(.14, .08 + R(19) * .06);
       add(fw, hTop - .08, fp, feat, fu0 + fw / 2, (hTop - .08) / 2 + .04, wallD + fp / 2, true, { m: true });
+      if (TP?.hug) { const th = .24, dh = Math.min(.7, fp + .2), x0 = fu0 - th, x1 = fu0 + fw + th, y1h = hTop - .08, ymx = y1h + .02; // إطار جص أبيض بارز يحضن الكتلة: عمودان وعتب علوي وعتبة سفلية
+        add(th, ymx, dh, slabM, x0 + th / 2, ymx / 2 + .04, wallD + dh / 2); add(th, ymx, dh, slabM, x1 - th / 2, ymx / 2 + .04, wallD + dh / 2); add(x1 - x0, th, dh, slabM, (x0 + x1) / 2, ymx - th / 2 + .04, wallD + dh / 2); add(x1 - x0, .18, dh, slabM, (x0 + x1) / 2, .13, wallD + dh / 2); }
       south.ao([fu0, .003, wallD + fp], [fu0 + fw, .003, wallD + fp], [0, 0, .45], .45);
       for (const yb of south.bands) if (yb < hTop) south.ao([fu0, yb, wallD + fp + .003], [fu0 + fw, yb, wallD + fp + .003], [0, -.25, 0], .3); }
   }
@@ -345,15 +376,15 @@ export async function apply(THREE, { scene, renderer, S, q, FI, params }) {
 //    para الدروة 0 غطاء 1 فاسيا 2 دروة جص 3 سقف سكين 70 سم 4 زعانف علوية 5 طبقات متدرجة 6 دروة بكتلة مرتفعة
 //    win معالجة النوافذ 0 عارية 1 حاجب رقيق 2 إطار جص 3 صندوق عميق 4 زعانف رأسية 5 بريسولاي مائل 6 حاجب عميق بخدّين
 //    grp تجميع النوافذ 0..2 · entr المدخل 0 مظلة 1 كابولي عميق 2 صندوق إطار 3 زعانف جانبية 4 برجولا بعمودين · scr شاشة النافذة الرئيسية 0/1 زعانف/2 بريسولاي
-//    wrap لفافة آخر دور 0 بلا 1 زعانف 2 بريسولاي 3 شرائح خشب · wrapAt 0 يسار 1 يمين 2 وسط 3 كامل · acc مادة الملحقات 0 ألمنيوم 1 فولاذ أسود 2 خشب 3 برونز
+//    wrap لفافة آخر دور 0 بلا 1 زعانف 2 بريسولاي 3 شرائح خشب 4 ستار خشبي رأسي كامل الارتفاع 5 لوفرات خشب مفتوحة بزوايا متفاوتة 6 ساتر تموجي مثقب (solarTessellation) · hug 1 إطار جص أبيض يحضن الجدار المميّز · acscreen 1 دروة سطح متدرجة 1.8/1.2 م · plant 1 أحواض زراعة على بلاطات الأدوار · wrapAt 0 يسار 1 يمين 2 وسط 3 كامل · acc مادة الملحقات 0 ألمنيوم 1 فولاذ أسود 2 خشب 3 برونز
 //    piers 0 بلا 1 عمودان طرفيان 2 إيقاعي · plinth 0 بلا 1 قاعدة ترافرتين 2 قاعدة خرسانة داكنة · led 0/1 · orn 0..2
 //  مخطط (docTransform):  fl الأدوار 1..3 (حين لا يحددها الرابط) · wt سماكة الجدار الخارجي 0 كما هو 1 30 سم 2 40 سم · fs تقدّم الواجهة الأمامية 0 / 1 (60 سم)
 //    sch فتحات الواجهة الأمامية 0 كما هي 1 شريط 2 ألواح بارتفاع كامل 3 شقوق رأسية 4 مربعات 5 جدار ستائري 6 علوية 7 أزواج طويلة 8 طويلة منفردة 9 مربعة كبيرة
 //    ssch فتحات الجهات الأخرى (0 كما هي 1..9 مثل sch · 10 صمّاء) · ent موضع الباب الرئيسي 0 كما هو 1 وسط 2 يسار 3 يمين
 //    ek نوع الباب 0 كما هو 1 مزدوج 1.6×2.4 2 كبير 2.0×2.7 3 مفرد 1.1×2.4 · sl نوافذ جانبية للباب 0/1
 export const DEFAULT_P = { pal: 0, feat: 0, e: 0, featD: 0, featH: 0, featW: 1, wing: 2, slab: 0, slabD: 1, para: 0, win: 1, grp: 0, entr: 0, scr: 0, wrap: 0, wrapAt: 3, acc: 0, piers: 0, plinth: 0, led: 1, orn: 1,
-  fl: 2, wt: 0, fs: 0, sch: 0, ssch: 0, ent: 0, ek: 0, sl: 0 };
-const T = (id, ar, note, p) => ({ id, ar, note, p: { ...DEFAULT_P, ...p } });
+  hug: 0, acscreen: 0, plant: 0, fl: 2, wt: 0, fs: 0, sch: 0, ssch: 0, ent: 0, ek: 0, sl: 0 };
+const T = (id, ar, note, p, extra = {}) => ({ id, ar, note, p: { ...DEFAULT_P, ...p }, ...extra });
 export const templates = [
   T('M01', 'أبيض صافٍ بشريط خيطي', 'جص أبيض بلا جدار مميّز، خيط بلاطة رقيق، نوافذ مربعة مثقوبة، بلا إنارة خطية.', { pal: 0, feat: 5, wing: 3, slab: 3, para: 0, win: 0, entr: 0, led: 0, sch: 4, ssch: 4, ek: 0 }),
   T('M02', 'بلاطات عميقة وزجاج ستائري', 'كابولي 70 سم وسقف سكين، جدار زجاجي كامل، باب كبير بمظلة عميقة.', { pal: 0, feat: 0, e: 1, wing: 3, slab: 4, slabD: 2, para: 3, win: 0, entr: 1, acc: 1, sch: 5, ssch: 2, ek: 2, ent: 1 }),
@@ -372,9 +403,28 @@ export const templates = [
   T('M15', 'تاج الزعانف', 'زعانف علوية فوق الدروة، عمودان طرفيان، قاعدة خرسانة داكنة وألواح زجاج بارتفاع كامل.', { pal: 0, feat: 0, e: 0, wing: 3, slab: 2, para: 4, win: 1, entr: 0, scr: 1, piers: 1, plinth: 2, sch: 2, ssch: 2, ek: 2, ent: 1 }),
   T('M16', 'طبقات متدرجة', 'دروة من ثلاث طبقات تزداد بروزًا، كابولي 58 سم، كتلة تيرازو عميقة وجدران سميكة.', { pal: 4, feat: 2, featD: 1, e: 0, wing: 3, slab: 4, slabD: 1, para: 5, win: 2, entr: 1, acc: 3, sch: 6, ssch: 6, ek: 3, ent: 3, wt: 2 }),
   T('M17', 'شاشة زعانف كاملة', 'شاشة زعانف رأسية بعرض الواجهة فوق المدخل، سقف سكين، برجولا فولاذية.', { pal: 2, feat: 5, wing: 3, slab: 0, para: 3, win: 0, entr: 4, wrap: 1, wrapAt: 3, acc: 1, sch: 5, ssch: 2, ek: 0, ent: 1 }),
+  T('M18', 'ستار خشبي كامل', 'شرائح خشب رأسية تلتف على كامل الواجهة من الأرض حتى الدروة بحامل متصل بالجدار، وتبقى الفتحات مقروءة خلفها.', { pal: 0, feat: 5, wing: 3, slab: 3, para: 0, win: 0, entr: 1, wrap: 4, acc: 2, sch: 9, ssch: 4, ek: 2, ent: 1, led: 1 }),
+  T('M19', 'لوفرات خشبية قابلة للطي', 'ألواح خشب معلّقة تدور حول محور رأسي فتُفتح بزوايا متفاوتة بين الأعلى والأسفل فتعطي إيقاعًا متغيرًا فوق نوافذ الدور الأخير.', { pal: 4, feat: 5, wing: 3, slab: 2, para: 2, win: 0, entr: 0, wrap: 5, acc: 2, sch: 7, ssch: 7, ek: 1, ent: 1, fl: 3 }),
+  T('M20', 'إطار أبيض يحضن كتلة خشبية', 'إطار جص أبيض بارز يحضن كتلة خشبية دافئة، ومدخل فندقي مهيب بمظلة كابولي عميقة وجناحين.', { pal: 0, feat: 3, featD: 1, featW: 2, e: 0, hug: 1, wing: 2, slab: 4, slabD: 1, para: 1, win: 2, entr: 1, acc: 2, sch: 9, ssch: 9, ek: 2, ent: 1, wt: 1 }),
+  T('M21', 'واجهة مزدوجة شمسية', 'ساتر ألومنيوم مثقب فاتح بفتحات موجية (أضيق في الثلث الأعلى وأوسع عند مستوى العين) أمام نوافذ الأدوار العليا مع دروة متدرجة للمكيّفات.', { pal: 2, feat: 5, wing: 3, slab: 3, para: 3, win: 0, entr: 1, wrap: 6, acscreen: 1, acc: 0, sch: 9, ssch: 9, ek: 2, ent: 1, fl: 3 }, { acHeights: [1.8, 1.2] }),
+  T('M22', 'دروة متدرجة للمكيّفات', 'دروة السطح بقسمين فعليين متصلين بالجدار (1.8 م و1.2 م) تحجب وحدات التكييف، فوق نوافذ أفقية وحواجب.', { pal: 1, feat: 4, featD: 1, e: 2, wing: 1, slab: 2, para: 0, win: 6, entr: 0, acscreen: 1, sch: 1, ssch: 1, ek: 1 }, { acHeights: [1.8, 1.2] }),
+  T('M23', 'المودرن الحيوي', 'بلاطات شرفات عميقة 70 سم بأحواض زراعة مدمجة وكتل خضراء إجرائية، وترافرتين رمادي فضي ودروة متدرجة. الارتداد الفعلي للدور العلوي غير منفَّذ.', { pal: 5, feat: 4, featD: 1, e: 1, wing: 2, slab: 4, slabD: 2, para: 2, win: 0, entr: 1, plant: 1, acscreen: 1, acc: 1, sch: 9, ssch: 4, ek: 2, ent: 1, fl: 3 }, { acHeights: [1.8, 1.2] }),
 ];
 
 // ===================================== تحويل المستند (الفتحات / المداخل / الجدران / الأدوار) =====================================
+/** التغطية التموجية الشمسية: دالة صافية. f=sin(ω1·u)·cos(ω2·v)؛ الثقوب أضيق في الثلث الأعلى وأوسع عند مستوى العين (30–60%).
+ *  تُرجع {nx,ny,ratio,bands:{top,mid,low},signature,hole(i,j)->نصف قطر الثقب كجزء من الخلية (0..0.5)}. */
+export function solarTessellation(widthM, heightM, opts = {}) {
+  const pitch = opts.pitch ?? .12, w1 = opts.w1 ?? 2 * Math.PI / 2.2, w2 = opts.w2 ?? 2 * Math.PI / 1.4, u0 = opts.u0 ?? 0, v0 = opts.v0 ?? 0;
+  const nx = Math.max(1, Math.round(widthM / pitch)), ny = Math.max(1, Math.round(heightM / pitch));
+  const env = vn => vn > 2 / 3 ? .42 : vn > .6 ? .42 + (2 / 3 - vn) / (2 / 3 - .6) * .58 : vn >= .3 ? 1 : .7 + vn / .3 * .3;
+  const hole = (i, j) => { const u = u0 + (i + .5) * pitch, v = v0 + (j + .5) * pitch, vn = (j + .5) / ny, f = Math.sin(w1 * u) * Math.cos(w2 * v); return .46 * env(vn) * (.45 + .55 * (f + 1) / 2); };
+  let tot = 0, top = 0, mid = 0, low = 0, nt = 0, nm = 0, nl = 0, h = 2166136261;
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const r = hole(i, j), a = Math.PI * r * r; tot += a; const vn = (j + .5) / ny; if (vn > 2 / 3) { top += a; nt++; } else if (vn >= .3) { mid += a; nm++; } else { low += a; nl++; }
+    h = Math.imul(h ^ Math.round(r * 1000), 16777619) >>> 0; }
+  const ratio = tot / (nx * ny);
+  return { nx, ny, ratio: +ratio.toFixed(4), bands: { top: +(top / Math.max(1, nt)).toFixed(4), mid: +(mid / Math.max(1, nm)).toFixed(4), low: +(low / Math.max(1, nl)).toFixed(4) }, signature: nx + 'x' + ny + ':' + (h >>> 0).toString(16), hole };
+}
 const clone = o => JSON.parse(JSON.stringify(o)), EPS_ = .03;
 const wlen = w => Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y);
 const wdir = w => { const L = wlen(w) || 1; return [(w.b.x - w.a.x) / L, (w.b.y - w.a.y) / L]; };

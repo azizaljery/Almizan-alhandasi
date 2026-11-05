@@ -14,7 +14,7 @@ import { templates as TEMPLATES, resolveJ } from './styles/j-templates.mjs';
 export const templates = TEMPLATES;
 export const meta = Object.freeze({ id: 'J', ar: 'معاصر', templateCount: TEMPLATES.length });
 // القيم الافتراضية = السلوك القديم تمامًا (بلا tpl). accent=1: عمود شرائح الخشب بجانب المدخل الأخير.
-const DEF = { wallMat: 0, frame: 0, mull: 0, band: 0, cap: 0, crownZone: 0, portal: 0, pier: 0, accent: 1, plinth: 0, light: 1 };
+const DEF = { wallMat: 0, frame: 0, mull: 0, band: 0, cap: 0, crownZone: 0, portal: 0, pier: 0, accent: 1, plinth: 0, light: 1, acscreen: 0, joint: 0, twoTone: 0 };
 export async function applyStyleJ(THREE, { scene, renderer, S, q }) {
   const TP = resolveJ(q), tpl = !!TP, p = { ...DEF, ...(TP?.p || {}) };
   if (tpl) for (const k of Object.keys(p)) if (q.has('j_' + k)) p[k] = Number(q.get('j_' + k)); // تجاوز مفتاح بعينه للفحص (j_cap=0 ...)
@@ -30,6 +30,8 @@ export async function applyStyleJ(THREE, { scene, renderer, S, q }) {
   for (const m of S.meshes) if (m.userData?.part === 'plate') m.material = jointJ;
   for (const m of S.meshes) if (m.userData?.part === 'blocks') m.material = marble;
   if (tpl) for (const m of S.meshes) if (m.userData?.role === 'wall' && m.userData?.part !== 'blocks' && m.userData?.part !== 'plate') m.material = marble;
+  if (tpl && p.twoTone) { const dk = wallSet(THREE, renderer, 2).wall; const sw = S.meshes.filter(m => m.userData?.side === 's' && (m.userData.role === 'wall' || m.userData.role === 'cladding')); const zf = Math.max(...sw.map(m => new THREE.Box3().setFromObject(m).max.z));
+    for (const m of sw) if (new THREE.Box3().setFromObject(m).max.z < zf - .5) m.material = dk; }
   const AO = aoTexture(THREE), aoMat = a => new THREE.MeshBasicMaterial({ color: '#000', alphaMap: AO, transparent: true, opacity: a * (night ? .5 : 1), depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   const box = m => new THREE.Box3().setFromObject(m), levels = bandLevels(), up = new THREE.Vector3(0, 1, 0);
   let south = null;
@@ -78,8 +80,16 @@ export async function applyStyleJ(THREE, { scene, renderer, S, q }) {
       else if (p.cap === 1) { add(w, .06, .7, black, mid, top + .03, wallD + .15); if (p.light === 2) add(w - .3, .012, .012, led, mid, top - .004, wallD + .46, false); }
       else if (p.cap === 2) add(w, .16, .5, grey, mid, top + .08, wallD);
       else if (p.cap === 3) add(w, .04, .3, black, mid, top + .02, wallD - .1);
-      else { add(w, .16, .95, grey, mid, top + .08, wallD + .2); if (Ld) add(w - .3, .012, .012, led, mid, top - .004, wallD + .66, false); }
+      else if (p.cap === 4) { add(w, .16, .95, grey, mid, top + .08, wallD + .2); if (Ld) add(w - .3, .012, .012, led, mid, top - .004, wallD + .66, false); }
+      else { const sy = top + .02; add(w, .38, .68, grey, mid, sy + .19, wallD + .34); if (Ld) add(w - .3, .012, .012, led, mid, sy - .004, wallD + .6, false);
+        const nP = Math.max(2, Math.round((X1 - X0) / 4.2) + 1); for (let i = 0; i < nP; i++) { const u = X0 + .1 + i * (X1 - X0 - .2) / (nP - 1); add(.14, sy - .02, .14, black, u, (sy - .02) / 2, wallD + .56); } }
+      if (p.acscreen && side === 's') { const hs = [1.8, 1.2], seg = (X1 - X0) / 2; for (let k = 0; k < 2; k++) { const u = X0 + seg * (k + .5), y0 = top + (p.cap === 5 ? .4 : .08);
+          add(seg - .02, hs[k], .12, backing, u, y0 + hs[k] / 2, wallD - .1); const ns = Math.floor((seg - .1) / .09); for (let i = 0; i < ns; i++) add(.05, hs[k] - .06, .05, black, X0 + seg * k + .07 + i * .09, y0 + hs[k] / 2, wallD - .02); } }
       ao([X0, .003, wallD], [X1, .003, wallD], [0, 0, .55], .5); ao([X0, 0, wallD + .003], [X1, 0, wallD + .003], [0, .4, 0], .32); }
+    if (tpl && p.joint) for (const F of faces) { const hF = Math.min(F.top, 9.5) - .4, nH = Math.floor(hF / 1.2), ops = [...gl, ...doors].map(o => o.b).filter(b => Math.abs(F.wallD - b.d1) < .6);
+      for (let i = 0; i < nH; i++) { const y = .45 + i * 1.2; let cuts = ops.filter(b => y > b.y0 - .3 && y < b.y1 + .3 && b.u1 > F.X0 && b.u0 < F.X1).map(b => [b.u0 - .3, b.u1 + .3]).sort((a, b) => a[0] - b[0]), cur = F.X0 + .02;
+        const sg = (a, b) => { if (b - a > .3) add(b - a, .018, .012, backing, (a + b) / 2, y, F.wallD + .006, false); };
+        for (const [a, b] of cuts) { if (a > cur) sg(cur, Math.min(a, F.X1 - .02)); cur = Math.max(cur, b); } if (cur < F.X1 - .02) sg(cur, F.X1 - .02); } }
     // ---- فتحات النوافذ
     const bigFrame = (b, d, w, h) => { let f;
       if (p.frame === 0) f = frameBox(b, PROJ, PROF, black, d);
