@@ -1,9 +1,6 @@
 // @mizan/facade-engine — نسخة مدمجة في الفرع الجانبي (side/apply-facade-styles).
-// المصدر: المرفق mizan-facade-engine.zip، بعد إصلاح خطأ النحو (facadeId) وإزالة أرقام بلا مصدر.
-// ما يبقى «قيمة تصميمية للميزان» لا «اشتراط»: الإطار 0.5م أُزيل من الافتراضي؛ البروز يُختار من {15، 20، 25} سم.
-// لا يستورد three.js: العرض الثلاثي الحي عند الدمج يكون عبر scene3d.mjs الموجود.
-
-export const PROJECTION_OPTIONS_CM = Object.freeze([15, 20, 25]);
+// المصدر: المرفق mizan-facade-engine.zip. الأرقام منقولة كما وردت (قرار المالك)، وأُصلح فقط الخطأ النحوي (facadeId).
+// لا يستورد three.js؛ العرض الثلاثي الحي عند الدمج يكون عبر scene3d.mjs الموجود.
 
 export const FACADE_STYLES = Object.freeze({
   MODERN_TRAVERTINE_MASHRABIYA: Object.freeze({
@@ -14,6 +11,9 @@ export const FACADE_STYLES = Object.freeze({
     }),
     screenPerforation: 0.45,
     screenDepthMm: 50,
+    frameProjectionMm: 500,
+    frameBorderWidthMm: 350,
+    cantileverCanopyMm: 1200,
     lightingK: 3000,
   }),
   MODERN_LINEAR_LIGHTING: Object.freeze({
@@ -24,53 +24,67 @@ export const FACADE_STYLES = Object.freeze({
     }),
     screenPerforation: null,
     screenDepthMm: null,
+    frameProjectionMm: 450,
+    frameBorderWidthMm: 300,
+    cantileverCanopyMm: 1500,
     lightingK: 3200,
   }),
 });
 
-const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const LIGHTING = Object.freeze({ colorTemperature: '3000K Warm White', lumensPerMeter: 900 });
 
 /**
- * يبني مواصفات الواجهة من عرض المبنى وعدد الأدوار.
- * options.projectionCm: واحد من 15/20/25 (يُحدد حسب الواجهة والموقع، لا ثابت).
+ * يبني مواصفات الواجهة من عرض المبنى.
+ * options.floors: 2 أو 3 (الافتراضي 2). options.projectionMm: يتجاوز بروز الطراز إن أُعطي.
  */
 export function generateFacade(model, styleKey = 'MODERN_TRAVERTINE_MASHRABIYA', options = {}) {
   const style = FACADE_STYLES[styleKey] || FACADE_STYLES.MODERN_TRAVERTINE_MASHRABIYA;
   const facadeWidthM = Number(model?.building?.w);
-  const floors = clamp(Number(options.floors ?? 2), 2, 3);
   if (!Number.isFinite(facadeWidthM) || facadeWidthM <= 0) throw new Error('invalid_facade_width');
-  const projectionCm = options.projectionCm ?? 20;
-  if (!PROJECTION_OPTIONS_CM.includes(projectionCm)) throw new Error('invalid_projection_cm');
+  const floors = Math.min(3, Math.max(2, Number(options.floors ?? 2)));
 
   const groundHeightM = 3.6;
-  const floorHeightM = 3.4;
-  const totalHeightM = groundHeightM + floorHeightM * (floors - 1) + 0.6;
+  const firstHeightM = 3.4;
   const frameWidthM = Math.min(facadeWidthM * 0.65, 11.0);
-  const frameHeightM = floorHeightM + 0.6;
+  const frameHeightM = firstHeightM + 0.6;
+  const projectionMm = options.projectionMm ?? style.frameProjectionMm;
+  const screenWidthM = frameWidthM - 0.9;
+  const screenHeightM = frameHeightM - 0.9;
 
   return {
     styleApplied: { id: style.id, name: style.name },
     floors,
-    metrics: { facadeWidthM, totalHeightM },
-    protrudingFrame: {
-      dimensions: { widthM: frameWidthM, heightM: frameHeightM, projectionM: projectionCm / 100 },
-      colorHex: style.palette.frame,
+    metrics: {
+      facadeWidthM,
+      totalHeightM: groundHeightM + firstHeightM + 1.8,
+      shadingEfficiencyPercent: 78,
     },
-    privacyScreen: style.screenPerforation === null ? null : {
-      dimensions: { widthM: frameWidthM - 0.9, heightM: frameHeightM - 0.9, depthMm: style.screenDepthMm },
-      perforation: style.screenPerforation,
-      colorHex: style.palette.screen,
+    protrudingFrame: {
+      type: 'BEIGE_TRAVERTINE_FRAME',
+      dimensions: { widthM: frameWidthM, heightM: frameHeightM, projectionDepthM: projectionMm / 1000 },
+      material: { colorHex: style.palette.frame },
+    },
+    privacyMashrabiya: style.screenPerforation === null ? null : {
+      pattern: 'DIAGONAL_ISLAMIC_DIAMOND',
+      dimensions: { widthM: screenWidthM, heightM: screenHeightM, thicknessMm: style.screenDepthMm },
+      perforationRatio: style.screenPerforation,
+      material: { colorHex: style.palette.screen },
     },
     entranceCanopy: {
-      dimensions: { widthM: 3.5, projectionM: 1.2 },
-      colorHex: style.palette.joinery,
+      dimensions: { widthM: 3.5, projectionM: style.cantileverCanopyMm / 1000, thicknessM: 0.25 },
+      material: { colorHex: style.palette.joinery },
+      spotsCount: 4,
     },
-    lighting: { colorTempK: style.lightingK },
-    parapet: { highSideM: 1.8, lowSideM: 1.2 },
+    linearLighting: {
+      colorTemperature: `${style.lightingK}K Warm White`,
+      lumensPerMeter: LIGHTING.lumensPerMeter,
+      placement: 'التجويف الداخلي للإطار الحجري البارز',
+    },
+    parapetSkyline: { leftSectionHeightM: 1.8, rightSectionHeightM: 1.2 },
   };
 }
 
-/** رسم واجهة أمامية SVG مبسّط من المواصفات (للمعاينة والصور المقارنة). */
+/** رسم واجهة أمامية SVG مبسّط من المواصفات (للمعاينة). */
 export function facadeSvg(spec) {
   const W = 640, H = 420, pad = 40;
   const scale = (W - pad * 2) / Math.max(spec.metrics.facadeWidthM, 1);
@@ -78,19 +92,19 @@ export function facadeSvg(spec) {
   const baseY = H - pad;
   const x0 = pad, wallW = spec.metrics.facadeWidthM * scale;
   const f = spec.protrudingFrame.dimensions;
-  const fx = x0 + (wallW - f.widthM * scale) / 2, fw = f.widthM * scale;
-  const fh = f.heightM * scale, fy = baseY - (3.6 + f.heightM - 3.6) * scale;
+  const fx = x0 + (wallW - f.widthM * scale) / 2, fw = f.widthM * scale, fh = f.heightM * scale;
+  const frameTop = baseY - 3.6 * scale - (fh - 3.6 * scale);
   const parts = [];
   parts.push(`<rect x="${x0}" y="${baseY - wallH}" width="${wallW}" height="${wallH}" fill="${spec.styleApplied.id.includes('LINEAR') ? '#FFFFFF' : '#F6F6F4'}" stroke="#777"/>`);
-  parts.push(`<rect x="${fx}" y="${baseY - 3.6 * scale - fh + 3.6 * scale}" width="${fw}" height="${fh}" fill="${spec.protrudingFrame.colorHex}"/>`);
-  if (spec.privacyScreen) {
-    const s = spec.privacyScreen.dimensions;
-    parts.push(`<rect x="${fx + 0.45 * scale}" y="${fy + 0.45 * scale}" width="${s.widthM * scale}" height="${s.heightM * scale}" fill="${spec.privacyScreen.colorHex}" fill-opacity="0.85" stroke="#999" stroke-dasharray="4 4"/>`);
+  parts.push(`<rect x="${fx}" y="${frameTop}" width="${fw}" height="${fh}" fill="${spec.protrudingFrame.material.colorHex}"/>`);
+  if (spec.privacyMashrabiya) {
+    const s = spec.privacyMashrabiya.dimensions;
+    parts.push(`<rect x="${fx + 0.45 * scale}" y="${frameTop + 0.45 * scale}" width="${s.widthM * scale}" height="${s.heightM * scale}" fill="${spec.privacyMashrabiya.material.colorHex}" fill-opacity="0.85" stroke="#999" stroke-dasharray="4 4"/>`);
   }
   const c = spec.entranceCanopy.dimensions;
-  parts.push(`<rect x="${x0 + wallW / 2 - c.widthM * scale / 2}" y="${baseY - 2.6 * scale}" width="${c.widthM * scale}" height="${0.25 * scale}" fill="${spec.entranceCanopy.colorHex}"/>`);
+  parts.push(`<rect x="${x0 + wallW / 2 - c.widthM * scale / 2}" y="${baseY - 2.6 * scale}" width="${c.widthM * scale}" height="${0.25 * scale}" fill="${spec.entranceCanopy.material.colorHex}"/>`);
   parts.push(`<line x1="${x0}" y1="${baseY}" x2="${x0 + wallW}" y2="${baseY}" stroke="#333"/>`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fafaf7"/>${parts.join('')}<text x="${pad}" y="${H - 10}" font-size="14" fill="#333">${spec.styleApplied.name} — بروز الإطار ${(spec.protrudingFrame.dimensions.projectionM * 100).toFixed(0)} سم</text></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fafaf7"/>${parts.join('')}<text x="${pad}" y="${H - 10}" font-size="14" fill="#333">${spec.styleApplied.name} — بروز الإطار ${Math.round(f.projectionDepthM * 1000)} مم</text></svg>`;
 }
 
-export default { PROJECTION_OPTIONS_CM, FACADE_STYLES, generateFacade, facadeSvg };
+export default { FACADE_STYLES, generateFacade, facadeSvg };

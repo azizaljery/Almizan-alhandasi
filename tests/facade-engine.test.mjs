@@ -1,37 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { generateFacade, facadeSvg, PROJECTION_OPTIONS_CM } from '../dist/facade-engine/facade-engine.mjs';
+import { generateFacade, facadeSvg } from '../dist/facade-engine/facade-engine.mjs';
 
 const model = { building: { w: 16, h: 14 } };
 
-test('المولّد يُحمَّل بلا خطأ نحوي ويعيد مواصفات كاملة', () => {
-  const f = generateFacade(model, 'MODERN_TRAVERTINE_MASHRABIYA', { projectionCm: 20, floors: 2 });
-  assert.equal(f.protrudingFrame.dimensions.projectionM, 0.2);
-  assert.equal(f.privacyScreen.perforation, 0.45);
+test('المولّد يُحمَّل بلا خطأ نحوي ويعيد القيم كما وردت', () => {
+  const f = generateFacade(model);
+  assert.equal(f.protrudingFrame.dimensions.projectionDepthM, 0.5);
+  assert.equal(f.privacyMashrabiya.perforationRatio, 0.45);
   assert.equal(f.entranceCanopy.dimensions.projectionM, 1.2);
+  assert.equal(f.metrics.shadingEfficiencyPercent, 78);
+  assert.equal(f.linearLighting.lumensPerMeter, 900);
+  assert.equal(f.linearLighting.colorTemperature, '3000K Warm White');
 });
 
-test('البروز يقبل فقط 15 أو 20 أو 25 سم، ولا قيمة ثابتة 50 سم', () => {
-  assert.deepEqual(PROJECTION_OPTIONS_CM, [15, 20, 25]);
-  for (const cm of [15, 20, 25]) assert.equal(generateFacade(model, undefined, { projectionCm: cm }).protrudingFrame.dimensions.projectionM, cm / 100);
-  assert.throws(() => generateFacade(model, undefined, { projectionCm: 50 }), /invalid_projection_cm/);
-});
-
-test('الأدوار 2 أو 3 فقط', () => {
+test('عرض الإطار مقيّد بـ 11 م، والأدوار 2 أو 3', () => {
+  assert.equal(generateFacade({ building: { w: 30, h: 14 } }).protrudingFrame.dimensions.widthM, 11);
   assert.equal(generateFacade(model, undefined, { floors: 9 }).floors, 3);
   assert.equal(generateFacade(model, undefined, { floors: 1 }).floors, 2);
 });
 
-test('لا توجد أرقام بلا مصدر في المخرجات (كفاءة التظليل، اللومن)', () => {
-  const s = JSON.stringify(generateFacade(model));
-  assert.ok(!/shadingEfficiency|lumensPerMeter|38/.test(s));
-});
-
-test('الإضاءة الخطية بلا مشربية', () => {
+test('الإضاءة الخطية بلا مشربية وبحرارة 3200K', () => {
   const f = generateFacade(model, 'MODERN_LINEAR_LIGHTING');
-  assert.equal(f.privacyScreen, null);
-  assert.equal(f.lighting.colorTempK, 3200);
+  assert.equal(f.privacyMashrabiya, null);
+  assert.equal(f.linearLighting.colorTemperature, '3200K Warm White');
+  assert.equal(f.protrudingFrame.dimensions.projectionDepthM, 0.45);
 });
 
 test('المولّد لا يستورد three.js ولا يتطلب DOM', () => {
@@ -40,12 +34,12 @@ test('المولّد لا يستورد three.js ولا يتطلب DOM', () => {
   assert.ok(!/document\./.test(src));
 });
 
-test('SVG المعاينة يحتوي على الإطار والمظلة ونص الطراز', () => {
-  const svg = facadeSvg(generateFacade(model, 'MODERN_TRAVERTINE_MASHRABIYA', { projectionCm: 25 }));
+test('SVG المعاينة يعرض الطراز وبروز الإطار', () => {
+  const svg = facadeSvg(generateFacade(model));
   assert.match(svg, /<svg/);
-  assert.match(svg, /بروز الإطار 25 سم/);
+  assert.match(svg, /بروز الإطار 500 مم/);
 });
 
-test('إدخال خاطئ يُرفض', () => {
+test('إدخال عرض خاطئ يُرفض', () => {
   assert.throws(() => generateFacade({ building: { w: 0 } }), /invalid_facade_width/);
 });
