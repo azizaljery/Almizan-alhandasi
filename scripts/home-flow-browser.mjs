@@ -31,6 +31,13 @@ async function newPage(viewport) {
   page.logs = logs; return page;
 }
 const visible = (page, sel) => page.locator(sel).isVisible();
+/** توليد ← صفحة التصميم الأولي ← «افتح في المرسم» ← المرسم بتصميم جاهز */
+async function toStudio(page) {
+  await Promise.all([page.waitForURL('**/design.html', { timeout: 90000 }), page.click('#chat .cta:has-text("توليد التصميم")')]);
+  await page.waitForSelector('#btnStudio', { timeout: 30000 });
+  await Promise.all([page.waitForURL('**/studio.html', { timeout: 30000 }), page.click('#btnStudio')]);
+  await page.waitForFunction(() => globalThis.__mizanStudio?.doc?.walls?.length > 0, null, { timeout: 30000 });
+}
 
 async function runLand(page) {
   await page.click('#start');
@@ -69,16 +76,25 @@ async function runLand(page) {
   check('خياران: حديث حر أو أسئلة محددة', modes.join('|') === 'أتحدث بحرية|اسألني أسئلة محددة', modes.join('|'));
   await page.click('text=اسألني أسئلة محددة');
   check('أول سؤال يوضح الهدف', (await page.locator('#chat .bubble').allInnerTexts()).some(t => t.includes('نمط حياتك')));
-  const household = await page.locator('#chat .pick .chip[aria-pressed]').allInnerTexts();
-  check('سؤال نمط الحياة اختيار متعدد', household.length === 4, household.join('|'));
-  await page.click('text=ضيوف متكررون'); await page.click('#chat .chip:has-text("أطفال")');
-  check('اختياران معًا مضغوطان', (await page.locator('#chat .chip[aria-pressed=true]').count()) === 2);
-  await page.waitForTimeout(700); await page.screenshot({ path: join(outDir, '2b-lifestyle.png') });
-  await page.click('#chat .pick .cta');
-  check('سؤال فرعي عن الأطفال يظهر فقط عند اختيارهم', await page.locator('#chat .bubble', { hasText: 'الأطفال' }).count() > 0);
-  await page.click('text=جناح هادئ');
-  await page.click('#chat .chip:has-text("الممرات الطويلة")'); await page.click('#chat .pick .cta');
-  check('الأسئلة الهندسية (أعداد الغرف)', (await page.locator('#chat .counts input').count()) === 6);
+  check('سؤال الأسرة أولًا ومعه سببه الهندسي', (await page.locator('#chat .ask[data-ask=g_family]').count()) === 1 && (await page.locator('#chat .bubble .why').last().innerText()).startsWith('أسأل'));
+  // كتابة حرة في خطوة إرشادية + خيار
+  await page.click('#chat .ask .chip:has-text("والدتي تسكن معنا")');
+  await page.fill('#chat .ask input[type=text]', '3 أولاد وبنتين صغار');
+  await page.waitForTimeout(500); await page.screenshot({ path: join(outDir, '2b-lifestyle.png') });
+  await page.click('#chat .ask .cta');
+  check('سؤال الضيوف ثانيًا', (await page.locator('#chat .ask[data-ask=g_guests]').count()) === 1);
+  await page.click('#chat .ask .chip:has-text("مجلس رجال ومجلس نساء")'); await page.click('#chat .ask .cta');
+  check('سؤال النوم ثالثًا', (await page.locator('#chat .ask[data-ask=g_sleep]').count()) === 1);
+  await page.click('#chat .ask .chip:has-text("كل غرفة بحمامها")'); await page.click('#chat .ask .cta');
+  check('سؤال المطبخ والخدمة رابعًا', (await page.locator('#chat .ask[data-ask=g_kitchen]').count()) === 1);
+  await page.click('#chat .ask .chip:has-text("مطبخ مغلق")'); await page.click('#chat .ask .chip:has-text("غرفة خادمة")'); await page.click('#chat .ask .cta');
+  check('سؤال الإضافات أخيرًا', (await page.locator('#chat .ask[data-ask=g_extras]').count()) === 1);
+  await page.click('#chat .ask .chip:has-text("مسبح")'); await page.click('#chat .ask .cta');
+  await page.waitForSelector('#program');
+  const prog = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#program [data-count]')].map(b => [b.dataset.count, Number(b.textContent)])));
+  check('الإرشادي ينتهي بجدول البرنامج (أولاد 2، بنات 1، الوالدة 1، مجلسان، خادمة)', prog.bedroom_boys === 2 && prog.bedroom_girls === 1 && prog.elderly_room === 1 && prog.majlis_men === 1 && prog.majlis_women === 1 && prog.maid === 1, JSON.stringify(prog));
+  check('المسبح يُقال بصدق أنه لا يُرسم', (await page.locator('#chat .bubble').allInnerTexts()).some(t => t.includes('المسبح')));
+  check('لا نموذج أعداد فارغة يعيد السؤال', (await page.locator('#chat .counts').count()) === 0);
   // مشروع محفوظ سابق في المرسم: يجب ألا يضيع
   await page.evaluate(async () => {
     const { createDoc, applyCommand, serialize } = await import('./draw/doc.mjs');
@@ -86,17 +102,19 @@ async function runLand(page) {
     d = applyCommand(d, { type: 'add-wall', level: 'L1', a: { x: 0, y: 0 }, b: { x: 5, y: 0 } }).doc;
     localStorage.setItem('mizan.studio.doc.v1', serialize(d));
   });
-  await page.fill('#chat .counts input[name=bedrooms]', '3'); await page.fill('#chat .counts input[name=majlis]', '1');
-  await page.click('#chat .counts .cta');
-  check('زر التوليد يظهر', await visible(page, '#chat .cta:has-text("توليد التصميم")'));
-  await Promise.all([page.waitForURL('**/studio.html', { timeout: 60000 }), page.click('#chat .cta:has-text("توليد التصميم")')]);
-  await page.waitForFunction(() => globalThis.__mizanStudio?.doc?.walls?.length > 0, null, { timeout: 30000 });
+  // تعديل في مكانه: إنقاص غرف الأولاد إلى 1 وحذف المقلط
+  await page.click('#program tr[data-row=bedroom_boys] .pm[aria-label^="أنقص"]');
+  await page.click('#program tr[data-row=dining] .pm.del');
+  const prog2 = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#program [data-count]')].map(b => [b.dataset.count, Number(b.textContent)])));
+  check('± والحذف يعملان في مكانهما', prog2.bedroom_boys === 1 && prog2.dining === undefined, JSON.stringify(prog2));
+  check('زر التوليد يظهر بلا حقل إلزامي', await visible(page, '#chat .cta:has-text("توليد التصميم")'));
+  await toStudio(page);
   const out = await page.evaluate(() => { const d = globalThis.__mizanStudio.doc; return { walls: d.walls.length, openings: d.openings.length, labels: d.labels.map(l => l.type), plot: !!d.plot, entry: d.entry, entries: d.entries, streets: d.streets, title: d.title, backup: !!localStorage.getItem('mizan.studio.doc.v1.before-home'), handoffLeft: !!sessionStorage.getItem('mizan.home.handoff.v1') }; });
   check('المرسم فتح تصميمًا جاهزًا لا لوحة فاضية', out.walls > 10 && out.openings > 0, `جدران ${out.walls}، فتحات ${out.openings}`);
   check('الأرض والمداخل والشوارع المتعددة في المستند', out.plot && out.entry === 's' && out.entries.join() === 's,e' && out.streets.join() === 's,e', JSON.stringify([out.entry, out.entries, out.streets]));
   check('المشروع القديم نُسخ احتياطيًا ولم يضع', out.backup);
   check('التسليم استُهلك مرة واحدة', !out.handoffLeft);
-  check('الغرف المطلوبة موجودة في الرسم (3 نوم)', out.labels.filter(t => t === 'bedroom').length === 3, out.labels.join());
+  check('الغرف المطلوبة موجودة في الرسم (4 نوم: الرئيسية والأولاد والبنات والوالدة)', out.labels.filter(t => t === 'bedroom' || t === 'master').length === 4 && out.labels.filter(t => t === 'majlis').length === 2, out.labels.join());
   const toast = await page.locator('#toast').innerText().catch(() => '');
   check('المرسم يخبر العميل أن التصميم من شرعاء', toast.includes('شرعاء'), toast);
   await page.screenshot({ path: join(outDir, '3-studio-after-generate.png') });
@@ -106,22 +124,45 @@ async function runLand(page) {
   check('لا أخطاء في المتصفح (مسار موجَّه)', page.logs.length === 0, page.logs.join(' | '));
 }
 
-// ------------------------------------------------------------------------------------------------ 2) الحديث الحر
+// ------------------------------------------------------------------------------------------------ 2) الحديث الحر: الجدول الكامل بلا إعادة سؤال
+{
+  const page = await newPage({ width: 1280, height: 900 });
+  await page.goto(base + '/home.html'); await runLand(page);
+  await page.click('text=أتحدث بحرية');
+  await page.fill('#chat textarea', 'أبغى مجلسين وصالتين وأربع غرف نوم ومطبخ مفتوح وغرفة خادمة');
+  await page.click('#chat .free .cta');
+  await page.waitForSelector('#program');
+  const prog = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#program [data-count]')].map(b => [b.dataset.count, Number(b.textContent)])));
+  check('الجدول يذكر المجلسين والصالتين والغرف الأربع والمطبخ والخادمة', prog.majlis_men === 1 && prog.majlis_women === 1 && prog.hall === 2 && prog.master + prog.bedroom === 4 && prog.kitchen === 1 && prog.maid === 1, JSON.stringify(prog));
+  const srcs = await page.locator('#program .src').allInnerTexts();
+  check('مصدر الفهم معلن في كل صف (قلتَ / افتراض عرفي)', srcs.includes('قلتَ') && srcs.includes('افتراض عرفي'), srcs.join('|'));
+  check('لا نموذج أعداد يعيد السؤال عمّا فُهم', (await page.locator('#chat .counts').count()) === 0);
+  const asks = await page.locator('#chat .ask').count();
+  check('سؤال واحد على الأكثر في الدور، ومعه سببه', asks <= 1 && (asks === 0 || (await page.locator('#chat .bubble .why').count()) >= 1), String(asks));
+  check('التوليد متاح فورًا بلا حقل إلزامي', await visible(page, '#chat .cta:has-text("توليد التصميم")'));
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: join(outDir, '3b-program-table.png'), fullPage: true });
+  await toStudio(page);
+  const labels = await page.evaluate(() => globalThis.__mizanStudio.doc.labels.map(l => l.type));
+  check('المرسم: مجلسان وصالتان وأربع غرف نوم وخادمة', labels.filter(t => t === 'majlis').length === 2 && labels.filter(t => t === 'living').length === 2 && labels.filter(t => t === 'bedroom' || t === 'master').length === 4 && labels.includes('service'), labels.join());
+  check('لا أخطاء في المتصفح (حديث حر)', page.logs.length === 0, page.logs.join(' | '));
+}
+
+// ------------------------------------------------------------------------------------------------ 2ب) جملة المالك: «أبغى اثنين مجلس واثنين صالة» إلى المرسم بلا أي حقل إلزامي
 {
   const page = await newPage({ width: 1280, height: 800 });
   await page.goto(base + '/home.html'); await runLand(page);
   await page.click('text=أتحدث بحرية');
-  await page.fill('#chat textarea', 'ابي 3 غرف نوم ومجلس واحد ومطبخ بدون فناء');
+  await page.fill('#chat textarea', 'أبغى اثنين مجلس واثنين صالة');
   await page.click('#chat .free .cta');
-  await page.waitForSelector('#chat .counts');
-  const vals = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#chat .counts input')].map(i => [i.name, i.valueAsNumber])));
-  check('النص الحر يملأ الأعداد المذكورة صراحة فقط', vals.bedrooms === 3 && vals.majlis === 1 && vals.kitchens === 1 && vals.baths === 3, JSON.stringify(vals));
-  await page.click('#chat .counts .cta');
-  await Promise.all([page.waitForURL('**/studio.html', { timeout: 60000 }), page.click('#chat .cta:has-text("توليد التصميم")')]);
-  await page.waitForFunction(() => globalThis.__mizanStudio?.doc?.walls?.length > 0, null, { timeout: 30000 });
+  await page.waitForSelector('#program');
+  const prog = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#program [data-count]')].map(b => [b.dataset.count, Number(b.textContent)])));
+  check('«اثنين مجلس واثنين صالة» = مجلس رجال ومجلس نساء وصالتان، ولا سؤال «كم صالة؟»', prog.majlis_men === 1 && prog.majlis_women === 1 && prog.hall === 2 && !(await page.locator('#chat .bubble').allInnerTexts()).some(t => /كم صالة|كم مجلس/.test(t)), JSON.stringify(prog));
+  check('غرفة النوم غير المذكورة افتراض معلن لا حقل مطلوب', prog.master === 1 && (await page.locator('#program tr[data-row=master] .src').innerText()) === 'افتراض عرفي');
+  await toStudio(page);
   const labels = await page.evaluate(() => globalThis.__mizanStudio.doc.labels.map(l => l.type));
-  check('«بدون فناء» في النص الحر: لا فناء في الرسم المولَّد', !labels.includes('courtyard'), labels.join());
-  check('لا أخطاء في المتصفح (حديث حر)', page.logs.length === 0, page.logs.join(' | '));
+  check('المرسم استلم مجلسين وصالتين', labels.filter(t => t === 'majlis').length === 2 && labels.filter(t => t === 'living').length === 2, labels.join());
+  check('لا أخطاء في المتصفح (جملة المالك)', page.logs.length === 0, page.logs.join(' | '));
 }
 
 // ------------------------------------------------------------------------------------------------ 3) الجوال
@@ -138,6 +179,11 @@ async function runLand(page) {
   await page.click('#landForm button[type=submit]');
   check('الجوال: لا تمرير أفقي في شرعاء', await noScroll());
   await page.screenshot({ path: join(outDir, '5-mobile-shara.png') });
+  await page.click('text=أتحدث بحرية');
+  await page.fill('#chat textarea', 'مجلسين وثلاث غرف نوم وغرفة خادمة'); await page.click('#chat .free .cta');
+  await page.waitForSelector('#program'); await page.waitForTimeout(400);
+  check('الجوال: جدول البرنامج بلا تمرير أفقي للصفحة (الجدول يتمرر داخل لوحته)', await noScroll());
+  await page.screenshot({ path: join(outDir, '5b-mobile-program.png') });
 }
 
 await browser.close(); server.close();

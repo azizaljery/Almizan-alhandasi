@@ -1,12 +1,15 @@
 // مخرجات التصميم النهائي (SHARA Final Design) من مستند المرسم: المخطط، الإنشائي، الكميات والتكلفة بأسعار العميل،
 // أسباب الاختيار، وكتاب المشروع. نقي: لا DOM ولا تخزين. لا يُذكر سعر بلا مصدر: السعر يدخله العميل، وما لم يُسعَّر يُعلَن.
 import { planSvg } from './draw/export-studio.mjs';
+import { planSheet } from './draw/plan-sheet.mjs';
 import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
 import { computeStructure } from './draw/structure.mjs';
 import { structureSheetSvg } from './draw/structure-sheet.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
 import { roomTypeName } from './draw/catalog.mjs';
+import { privacyIndex } from './intel/privacy-index.mjs';
+import { climateZoning } from './intel/climate-zoning.mjs';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const r2 = v => Math.round(v * 100) / 100;
@@ -38,13 +41,18 @@ export function computeCost(rows, rates = {}, { reservePct = null, vatPct = null
 }
 
 /** كل ما تعرضه صفحة المخرجات وكتاب المشروع، من مستند واحد. */
-export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null, vatPct = null, snapshot3d = null, now = new Date(), levelFilter = null } = {}) {
+/** مقاس لوحة المسقط الافتراضي في الكتاب (أفقية). قرار المالك: A3 افتراضًا، وA1 متاح بالخيار sheet. */
+export const DEFAULT_SHEET = 'A3';
+
+export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null, vatPct = null, snapshot3d = null, now = new Date(), levelFilter = null, sheet = DEFAULT_SHEET, owner = null, office = null } = {}) {
   const day = (now instanceof Date ? now : new Date(now)).toISOString().slice(0, 10);
   const fingerprint = geometryFingerprint(doc);
   const quantities = computeDocQuantities(doc), structure = computeStructure(doc);
   const levels = doc.levels.filter(l => !levelFilter || levelFilter.includes(l.id)).map((lv, i) => ({
     id: lv.id, name: lv.name,
-    plan: planSvg(doc, lv),
+    // لوحة المسقط المعماري (A3 افتراضًا) بأعمدة التحجيم الأولي إن وُجدت؛ والمسقط البسيط يبقى للتصدير فقط
+    ...planSheetOf(doc, lv, { sheet, date: day, fingerprint, sheetNo: 'A-' + String(i + 1).padStart(2, '0'), columns: structure.levels.find(x => x.id === lv.id)?.columns || null, owner, office }),
+    planSimple: planSvg(doc, lv),
     structure: structure.levels.find(x => x.id === lv.id)?.columns ? structureSheetSvg(doc, structure, { levelId: lv.id, fingerprint, date: day, sheetNo: 'S-' + String(i + 1).padStart(2, '0') }) : null,
   }));
   const scored = quantities.levels.find(l => l.score);
@@ -63,8 +71,14 @@ export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null,
       plot: doc.plot?.polygon?.length ? plotSize(doc.plot.polygon) : null,
     },
     levels, rooms, quantities, structure, cost: computeCost(quantities.rows, rates, { reservePct, vatPct }),
-    score, scoreLevel, validation, review, dnaAxes, dnaFingerprint: dna?.dna?.fingerprint || null, snapshot3d,
+    score, scoreLevel, validation, review, intel: intelOf(doc), dnaAxes, dnaFingerprint: dna?.dna?.fingerprint || null, snapshot3d,
   };
+}
+function intelOf(doc) { try { return { privacy: privacyIndex(doc), climate: climateZoning(doc) }; } catch { return null; } }
+/** لوحة المسقط مع بياناتها الوصفية؛ إن تعذّرت (مخطط بلا محيط مغلق مثلًا) يُعاد المسقط البسيط ويُعلن السبب. */
+function planSheetOf(doc, lv, opts) {
+  try { const r = planSheet(doc, { levelId: lv.id, ...opts }); return { plan: r.svg, sheet: { size: r.meta.sheet, scale: r.meta.scale, labelOverlaps: r.meta.labelOverlaps, dimTextOverlaps: r.meta.dimTextOverlaps, axes: { x: r.meta.axes.x.length, y: r.meta.axes.y.length, source: r.meta.axes.source }, columns: r.meta.columns } }; }
+  catch (e) { return { plan: planSvg(doc, lv), sheet: null, sheetError: e.message }; }
 }
 function plotSize(poly) { const xs = poly.map(p => p.x), ys = poly.map(p => p.y); return { width: r2(Math.max(...xs) - Math.min(...xs)), length: r2(Math.max(...ys) - Math.min(...ys)) }; }
 
@@ -92,6 +106,11 @@ export const NEXT_STAGES = Object.freeze([
 ]);
 
 const fmt = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }));
+/** سطر تحت لوحة المسقط: مقاسها ومقياسها، أو سبب الرجوع إلى المسقط البسيط. */
+export function sheetNote(l) {
+  if (l.sheet) return `<p class="muted">لوحة ${esc(l.sheet.size)} أفقية بمقياس 1:${l.sheet.scale} عند الطباعة على مقاسها؛ الأبعاد بالمتر. ${l.sheet.columns ? 'الأعمدة مقترحة من التحجيم الأولي.' : ''}</p>`;
+  return `<p class="muted">تعذّرت لوحة المسقط (${esc(l.sheetError || 'سبب غير معروف')})؛ عُرض المسقط البسيط.</p>`;
+}
 
 /** HTML مستقل (للقراءة والطباعة) من البيانات نفسها. css: نص الأنماط ليُضمَّن. */
 export function projectBookHtml(data, { css = '' } = {}) {
@@ -101,14 +120,16 @@ export function projectBookHtml(data, { css = '' } = {}) {
   const parts = [];
   parts.push(sec('نظرة عامة', `<p class="lead">${esc(data.title)} — ${S.rooms} فراغًا في ${S.levels} دور. مساحة المسقط ${fmt(S.builtArea)} م² ومساحة الغرف ${fmt(S.roomsArea)} م².${S.plot ? ` الأرض ${S.plot.width} × ${S.plot.length} م.` : ''}</p>` + table(['الفراغ', 'العدد'], S.byType.map(t => [t.name, t.count])) + `<p class="muted">بصمة الهندسة: <code>${esc(data.fingerprint)}</code>${data.dnaFingerprint ? ` · بصمة ميزانك: <code>${esc(data.dnaFingerprint)}</code>` : ''} · ${esc(data.date)}</p>`));
   if (data.dnaAxes) parts.push(sec('بصمتك التصميمية', table(['المحور', 'القيمة', 'مصدره'], data.dnaAxes.map(a => [a.label, Math.round(a.value * 100) + '%', (a.sources || []).join('، ')]))));
-  data.levels.forEach(l => parts.push(sec('المخطط — ' + l.name, `<div class="pb-svg">${l.plan}</div>`)));
+  data.levels.forEach(l => parts.push(sec('المخطط — ' + l.name, `<div class="pb-svg pb-sheet">${l.plan}</div>` + sheetNote(l))));
   if (data.snapshot3d) parts.push(sec('العرض ثلاثي الأبعاد', `<img class="pb-img" alt="لقطة ثلاثية الأبعاد" src="${esc(data.snapshot3d)}">`));
   data.levels.filter(l => l.structure).forEach(l => parts.push(sec('المخطط الإنشائي المبدئي — ' + l.name, `<div class="pb-svg">${l.structure}</div><p class="muted">تحجيم أولي لا تصميم إنشائي معتمد؛ يراجعه مهندس إنشائي.</p>`)));
   parts.push(sec('الكميات', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], data.quantities.rows.map(r => [r.label, r.value === null ? '—' : `${fmt(r.value)} ${r.unit}`, GRADES[r.grade], r.basis]))));
   parts.push(sec('التكلفة بأسعارك', table(['البند', 'الكمية', 'سعر الوحدة', 'التكلفة'], c.items.map(i => [i.label, i.qty === null ? '—' : `${fmt(i.qty)} ${i.unit}`, i.rate === null ? 'غير مسعّر' : fmt(i.rate), i.cost === null ? 'غير مسعّر' : fmt(i.cost)])) + `<p>المجموع الجزئي (${c.pricedCount} من ${c.totalCount} بندًا مسعّرًا): <b>${fmt(c.subtotal)}</b>${c.reserve !== null ? ` · احتياط ${c.reservePct}%: ${fmt(c.reserve)}` : ''}${c.vat !== null ? ` · ضريبة ${c.vatPct}%: ${fmt(c.vat)}` : ''} · الإجمالي: <b>${fmt(c.total)}</b> ${c.complete ? '' : '(جزئي: يخص البنود المسعّرة فقط)'}</p><p class="muted">لا توجد أسعار سوق افتراضية؛ الأسعار أسعارك.</p>`));
   parts.push(sec('لماذا هذا التصميم', (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.improvements.length ? `<h3>ما يحتاج تحسينًا</h3><ul>${R.improvements.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.unmeasured.length ? `<p class="muted">غير مُقيَّم: ${esc(R.unmeasured.join('، '))}</p>` : '') + (R.notes.length ? `<h3>ملاحظات المراجعة</h3><ul>${R.notes.map(n => `<li>${esc(n.message)}</li>`).join('')}</ul>` : '') + (data.score ? `<p class="muted">${esc(data.score.grade)}. ${esc(data.score.note || '')}</p>` : '<p class="muted">الدرجة غير متاحة لهذا المخطط.</p>')));
+  if (data.intel) { const { privacy: P, climate: C } = data.intel; const sc = v => (v === null || v === undefined ? '—' : v + ' / 100');
+    parts.push(sec('تقييم الخصوصية والمناخ', `<p>مؤشر الخصوصية السعودي: <b>${sc(P.score)}</b> · المنطقة المناخية: <b>${sc(C.score)}</b></p><p class="muted">${esc(P.note)} ${esc(C.note)}</p>` + (P.violations.length ? '<h3>المخالفات والإصلاح المقترح</h3>' + table(['المشكلة', 'أين', 'الإصلاح'], P.violations.map(v => [v.problem, v.where.join(' ← '), v.fix])) : '') + (C.recommendations.length ? `<h3>توصيات مناخية</h3><ul>${C.recommendations.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul>` : ''))); }
   parts.push(sec('ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => [s.title, s.status === 'available' ? 'متاح' : 'قادم', s.note]))));
   return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كتاب المشروع — ${esc(data.title)}</title><style>${css}</style></head><body class="pb"><header class="pb-head"><h1>كتاب المشروع</h1><p>${esc(data.title)} · الميزان الهندسي · نحو منزلك</p></header>${parts.join('')}<footer class="pb-foot">أُعدّ بواسطة الميزان الهندسي. الكميات والتكلفة والتحجيم الإنشائي تقديرية بافتراضات معلنة وتُراجَع من مختصين قبل التنفيذ.</footer></body></html>`;
 }
 
-export default { buildFinalData, computeCost, designReasons, projectBookHtml, NEXT_STAGES, BILLABLE };
+export default { buildFinalData, computeCost, designReasons, projectBookHtml, sheetNote, NEXT_STAGES, BILLABLE, DEFAULT_SHEET };

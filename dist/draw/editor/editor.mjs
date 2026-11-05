@@ -8,6 +8,7 @@ import { dist, sub, add, mul, norm, perp, closestOnSegment, rotate, clean } from
 import { snapPoint, nearestWall, gridStep } from './snap.mjs';
 import { hitItem, hitNode, itemsInBox, stairBox } from './hit.mjs';
 import { renderPlan, makeView, toScreen, toWorld, fitView, docBounds } from './render2d.mjs';
+import { computeStructure } from '../structure.mjs';
 
 export const TOOLS = ['select', 'pan', 'wall', 'rect', 'opening', 'room', 'fixture', 'stair', 'column', 'dimension', 'text', 'erase', 'measure'];
 const r3 = v => Math.round(v * 1000) / 1000;
@@ -18,7 +19,7 @@ export class Editor {
     this.history = createHistory(doc);
     this.levelId = doc.levels[0].id;
     this.tool = 'select';
-    this.opts = { thickness: doc.settings?.defaultThickness ?? WALL_DEFAULTS.thickness, wallKind: 'wall', openingKind: 'door', fixtureKind: 'sofa-3', roomType: 'bedroom', stairKind: 'straight', fixtureRot: 0, snap: true, ortho: true, grid: true, dims: true, areas: true, fixtures: true };
+    this.opts = { thickness: doc.settings?.defaultThickness ?? WALL_DEFAULTS.thickness, wallKind: 'wall', openingKind: 'door', fixtureKind: 'sofa-3', roomType: 'bedroom', stairKind: 'straight', fixtureRot: 0, snap: true, ortho: true, grid: true, dims: true, areas: true, fixtures: true, autoDims: true, axes: true, sheet: false };
     this.view = makeView(); this.W = 800; this.H = 600; this.dpr = 1;
     this.selection = new Set(); this.hover = null; this.cursor = null; this.snap = null; this.ghost = null; this.selBox = null; this.markers = [];
     this.draft = null;     // tool in progress
@@ -77,7 +78,8 @@ export class Editor {
     this.W = Math.max(50, r.width); this.H = Math.max(50, r.height); this.dpr = dpr;
     this.canvas.width = Math.round(this.W * dpr); this.canvas.height = Math.round(this.H * dpr); this.markDirty();
   }
-  fit(margin = 70) { this.view = fitView(docBounds(this.doc, this.levelId), this.W, this.H, margin); if (this.doc.plot?.polygon?.length && !this.doc.walls.some(w => w.level === this.levelId)) { const xs = this.doc.plot.polygon.map(p => p.x), ys = this.doc.plot.polygon.map(p => p.y); this.view = fitView({ x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }, this.W, this.H, margin); } this.markDirty(); this.emit({ type: 'view' }); }
+  /** هامش أوسع افتراضيًا لسلاسل الأبعاد والمحاور خارج المبنى. */
+  fit(margin = this.opts.autoDims || this.opts.axes ? 130 : 70) { this.view = fitView(docBounds(this.doc, this.levelId), this.W, this.H, margin); if (this.doc.plot?.polygon?.length && !this.doc.walls.some(w => w.level === this.levelId)) { const xs = this.doc.plot.polygon.map(p => p.x), ys = this.doc.plot.polygon.map(p => p.y); this.view = fitView({ x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }, this.W, this.H, margin); } this.markDirty(); this.emit({ type: 'view' }); }
   zoomAt(factor, sx, sy) {
     const before = toWorld(this.view, this.W, this.H, { x: sx, y: sy });
     this.view.scale = Math.max(4, Math.min(600, this.view.scale * factor));
@@ -93,12 +95,22 @@ export class Editor {
     if (!this.dirty) return; this.dirty = false;
     const ctx = this.ctx; ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     const doc = this.previewDoc || this.doc, lv = this.previewDoc ? this.previewLv : this.lv;
-    renderPlan(ctx, {
+    const st = {
       doc, levelId: this.levelId, analysis: lv ? { rooms: lv.rooms, gaps: lv.analysis.gaps, exteriorWallIds: this.previewDoc ? exteriorWallIds(lv.analysis) : this.extWalls } : null,
+      analysisRaw: lv ? lv.analysis : null, columns: this.opts.sheet && !this.previewDoc ? this.sheetColumns() : null,
       view: this.view, W: this.W, H: this.H, selection: this.selection, hover: this.hover, ghost: this.ghost, snap: this.snap, cursor: this.cursor,
-      overlay: this.overlay, selBox: this.selBox, markers: this.markers, flags: { grid: this.opts.grid, dims: this.opts.dims, areas: this.opts.areas, fixtures: this.opts.fixtures },
-    });
+      overlay: this.overlay, selBox: this.selBox, markers: this.markers, flags: { grid: this.opts.grid, dims: this.opts.dims, areas: this.opts.areas, fixtures: this.opts.fixtures, autoDims: this.opts.autoDims, axes: this.opts.axes, sheet: this.opts.sheet },
+    };
+    renderPlan(ctx, st);
+    this.lastLayout = st.labelLayout || null; // ترتيب التسميات الأخير (عدد التراكبات) للاختبارات الحية
   }
+  /** أعمدة التحجيم الأولي لوضع اللوحة (تُحسب مرة لكل نسخة من المستند). */
+  sheetColumns() {
+    if (this._colsDoc !== this.doc || this._colsLevel !== this.levelId) { this._colsDoc = this.doc; this._colsLevel = this.levelId; try { this._cols = computeStructure(this.doc).levels.find(l => l.id === this.levelId)?.columns || null; } catch { this._cols = null; } }
+    return this._cols;
+  }
+  /** وضع اللوحة: أسود على أبيض بمفتاح رموز (للمعاينة قبل الطباعة). */
+  toggleSheet() { this.setOpts({ sheet: !this.opts.sheet }); }
   setMarkers(m) { this.markers = m; this.markDirty(); }
 
   // ----------------------------------------------------------------------------------------------- input
@@ -245,6 +257,7 @@ export class Editor {
     if (k === 'Delete' || k === 'Backspace') { this.deleteSelection(); e.preventDefault(); return; }
     if (k === 'r' || k === 'R' || k === 'ق') { if (this.tool === 'fixture' || this.tool === 'stair') { this.opts.fixtureRot = ((this.opts.fixtureRot || 0) + Math.PI / 2) % (Math.PI * 2); this.opts.autoRot = false; this.markDirty(); } else this.rotateSelection(e.shiftKey ? -Math.PI / 2 : Math.PI / 2); e.preventDefault(); return; }
     if (k === 'f' || k === 'F') { this.fit(); return; }
+    if ((k === 'p' || k === 'P' || k === 'ح') && !ctrl) { this.toggleSheet(); return; }
     if (k === '+' || k === '=') { this.zoomAt(1.25, this.W / 2, this.H / 2); return; }
     if (k === '-') { this.zoomAt(.8, this.W / 2, this.H / 2); return; }
     if (k.startsWith('Arrow') && this.selection.size) { const step = e.shiftKey ? .5 : .05; const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[k]; this.exec({ type: 'translate', ids: [...this.selection], dx: d[0], dy: d[1] }, 'إزاحة', { key: 'nudge' }); e.preventDefault(); return; }

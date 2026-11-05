@@ -33,56 +33,78 @@ test('شرعاء: تفتح بالترحيب الحرفي ثم خياران فق�
   assert.equal(first[0].text, 'أهلاً بك، أنا شرعاء، مساعدك الذكي لفهم احتياجاتك في تصميم منزلك.'); assert.equal(first[0].text, SHARA_WELCOME);
   assert.deepEqual(first[1].options.map(o => o.id), ['free', 'guided']);
 });
-test('شرعاء الموجَّه: توضيح الهدف ثم نمط الحياة متعدد ثم الأسئلة الهندسية ثم التوليد', () => {
+test('شرعاء الإرشادي: أسئلة بترتيب الأثر (الأسرة ← الضيوف ← النوم ← المطبخ ← الإضافات) كل سؤال بسببه، والنتيجة جدول البرنامج', () => {
   const s = new SharaSession(); s.start();
   const a = s.answer('mode', 'guided');
-  assert.match(a[0].text, /نمط حياتك/); assert.equal(a[1].kind, 'multi'); assert.equal(a[1].id, 'household');
-  const b = s.answer('household', ['guests', 'children', 'seniors']);
-  assert.equal(b[0].id, 'children', 'سؤال فرعي لأن الأطفال اختيروا');
-  const c = s.answer('children', 'جناح هادئ'); assert.equal(c[0].id, 'avoids'); assert.equal(c[0].kind, 'multi');
-  const d = s.answer('avoids', ['0', '4']); assert.equal(d[0].kind, 'counts'); assert.equal(d[0].fields.length, ENGINEERING_FIELDS.length);
-  const e = s.answer('counts', { bedrooms: 3, majlis: 1, baths: 3, kitchens: 1, halls: 1, dining: 1 }); assert.equal(e[0].kind, 'generate');
-  assert.deepEqual(s.discovery().life, { guests: 'متكررة', seniors: 'موجودون', children: 'جناح هادئ' });
-  assert.equal(s.discovery().avoids.length, 2);
-  assert.equal(s.rooms().filter(r => r.type === 'bedroom').length, 3);
+  assert.match(a[0].text, /نمط حياتك/); assert.equal(a[1].kind, 'ask'); assert.equal(a[1].id, 'g_family'); assert.match(a[1].reason, /^أسأل/);
+  const b = s.answer('g_family', { picks: ['mother'], text: '3 أولاد وبنتين صغار' }); assert.equal(b[0].id, 'g_guests'); assert.ok(b[0].free, 'الكتابة الحرة متاحة في كل خطوة');
+  const c = s.answer('g_guests', ['both']); assert.equal(c[0].id, 'g_sleep');
+  const d = s.answer('g_sleep', ['ensuite']); assert.equal(d[0].id, 'g_kitchen');
+  const e = s.answer('g_kitchen', ['closed', 'maid']); assert.equal(e[0].id, 'g_extras');
+  const f = s.answer('g_extras', ['office', 'pool']);
+  assert.equal(f[0].kind, 'program', 'النتيجة جدول البرنامج نفسه');
+  const by = Object.fromEntries(f[0].rows.map(r => [r.id, r]));
+  assert.equal(by.majlis_men.count, 1); assert.equal(by.majlis_women.count, 1); assert.equal(by.bedroom_boys.count, 2); assert.equal(by.bedroom_girls.count, 1); assert.equal(by.elderly_room.count, 1); assert.equal(by.maid.count, 1); assert.equal(by.office.count, 1);
+  assert.equal(by.bedroom_boys.source, 'family'); assert.equal(by.master.source, 'custom');
+  assert.ok(f.some(m => m.id === 'unsupported' && m.items.some(t => /المسبح/.test(t))), 'المسبح يُقال بصدق أنه لا يُرسم');
+  assert.equal(f.at(-1).kind, 'generate');
+  assert.deepEqual(s.counts, { bedrooms: 5, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 });
+  assert.deepEqual(s.discovery().life, { seniors: 'موجودون', children: 'جناح هادئ' });
+  assert.equal(s.rooms().filter(r => r.type === 'bedroom').length, 5);
+  assert.equal(s.requirements.prefs.openKitchen, false); assert.equal(s.requirements.extras.maid.bath, true);
 });
-test('شرعاء: لا سؤال فرعي للأطفال إن لم يُختاروا، والاختيار الفارغ مقبول', () => {
+test('شرعاء الإرشادي: تخطّي كل الخطوات يعطي برنامجًا افتراضيًا معلنًا لا خطأ', () => {
   const s = new SharaSession(); s.start(); s.answer('mode', 'guided');
-  const next = s.answer('household', []);
-  assert.equal(next[0].id, 'avoids');
-  assert.deepEqual(s.discovery().life, {});
+  for (const id of ['g_family', 'g_guests', 'g_sleep', 'g_kitchen']) s.answer('skip', id);
+  const out = s.answer('skip', 'g_extras');
+  assert.equal(out[0].kind, 'program'); assert.ok(out[0].rows.every(r => r.source === 'custom'));
+  assert.equal(s.counts.bedrooms, 1);
 });
-test('شرعاء: ترفض الاختيارات المجهولة والأعداد خارج المدى والخطوات الخاطئة', () => {
+test('شرعاء: ترفض الاختيارات المجهولة والتعديلات خارج المدى والخطوات الخاطئة', () => {
   const s = new SharaSession(); s.start();
   assert.throws(() => s.answer('mode', 'x'), /غير معروف/);
-  s.answer('mode', 'guided');
-  assert.throws(() => s.answer('household', ['pets']), /غير معروف/);
-  s.answer('household', []);
-  assert.throws(() => s.answer('avoids', ['99']), /غير معروف/);
-  s.answer('avoids', []);
-  assert.throws(() => s.answer('counts', { bedrooms: 0, majlis: 1, baths: 1, kitchens: 1, halls: 1, dining: 1 }), /غرف النوم/);
-  assert.throws(() => s.answer('counts', { bedrooms: 2.5, majlis: 1, baths: 1, kitchens: 1, halls: 1, dining: 1 }), /غرف النوم/);
+  s.answer('mode', 'free');
+  assert.throws(() => s.answer('free', 'ab'), /وصفًا/);
+  s.answer('free', 'ثلاث غرف نوم ومجلس');
+  assert.throws(() => s.answer('program', { op: 'set', id: 'hall', count: 11 }), /بين 0 و10/);
+  assert.throws(() => s.answer('program', { op: 'zap', id: 'hall' }), /غير معروف/);
+  assert.throws(() => s.answer('counts', { bedrooms: 0 }), /غرف النوم/);
   assert.throws(() => s.answer('nope', 1), /خطوة غير معروفة/);
 });
-test('شرعاء: كل مخرجات الاكتشاف تقبلها normalizeDiscovery (نفس مفردات النظام)', () => {
-  const s = new SharaSession(); s.start(); s.answer('mode', 'guided');
-  s.answer('household', ['guests', 'children', 'seniors', 'future']); s.answer('children', 'قريبون من الصالة');
-  s.answer('avoids', ['0', '1', '2', '3', '4', '5']);
-  assert.doesNotThrow(() => normalizeDiscovery(s.discovery()));
-});
-test('شرعاء الحر: يملأ الأعداد المذكورة صراحة فقط ويترك الباقي فارغًا بلا افتراض', async () => {
+test('شرعاء: مخرجات الاكتشاف تقبلها normalizeDiscovery (نفس مفردات النظام) في كل المسارات', () => {
   const s = new SharaSession(); s.start(); s.answer('mode', 'free');
+  s.answer('free', 'عندي 4 عيال كبار وامي تسكن معنا وضيوفنا كثير، مجلسين ومقلط');
+  assert.doesNotThrow(() => normalizeDiscovery(s.discovery()));
+  assert.equal(s.discovery().life.guests, 'متكررة'); assert.equal(s.discovery().life.seniors, 'موجودون');
+  assert.doesNotThrow(() => normalizeDiscovery(new SharaSession().discovery()));
+});
+test('شرعاء الحر: الجدول يذكر كل ما قيل (المجلسان والصالتان والغرف الأربع) ولا يعيد سؤاله، والحقول غير المذكورة افتراض معلن', async () => {
+  const s = new SharaSession(); s.start(); s.answer('mode', 'free');
+  const next = s.answer('free', 'أبغى مجلسين وصالتين وأربع غرف نوم ومطبخ مفتوح وغرفة خادمة');
+  const table = next.find(m => m.kind === 'program');
+  assert.ok(table, 'جدول البرنامج يظهر');
+  assert.ok(!next.some(m => m.kind === 'counts'), 'لا نموذج أعداد يعيد السؤال');
+  const by = Object.fromEntries(table.rows.map(r => [r.id, r]));
+  assert.equal(by.majlis_men.count + by.majlis_women.count, 2); assert.equal(by.hall.count, 2); assert.equal(by.master.count + by.bedroom.count, 4); assert.equal(by.maid.count, 1);
+  assert.equal(by.hall.source, 'said'); assert.equal(by.dining.source, 'custom'); assert.match(by.dining.reason, /العرف/);
+  assert.deepEqual(s.counts, { bedrooms: 4, majlis: 2, baths: 7, kitchens: 1, halls: 2, dining: 1 });
+  assert.ok(!next.some(m => m.kind === 'ask' && /كم|عدد/.test(m.text)), 'لا سؤال عن أعداد فُهمت');
+  assert.equal(next.at(-1).kind, 'generate', 'التوليد متاح فورًا بلا حقل إلزامي');
+  assert.equal(s.idea, 'أبغى مجلسين وصالتين وأربع غرف نوم ومطبخ مفتوح وغرفة خادمة');
+  // المسار القديم interpretFree ما زال يعمل للذكاء المتصل
   const understood = await interpretFree('ابي 3 غرف نوم ومجلس واحد ومطبخ بدون فناء');
-  assert.equal(understood.counts.bedrooms, 3); assert.equal(understood.counts.majlis, 1); assert.equal(understood.counts.kitchens, 1);
-  assert.equal(understood.counts.baths, undefined, 'لم يُذكر فلا يُخمَّن');
-  const next = s.answer('free', understood);
-  const form = next.find(m => m.kind === 'counts');
-  assert.ok(form, 'نموذج الأعداد يظهر');
-  const byId = Object.fromEntries(form.fields.map(f => [f.id, f.value]));
-  assert.deepEqual([byId.bedrooms, byId.majlis, byId.kitchens, byId.baths], [3, 1, 1, '']);
-  assert.throws(() => s.answer('counts', { bedrooms: 3, majlis: 1, kitchens: 1 }), /دورات المياه/, 'العدد غير المذكور لا يمرّ بلا إدخال');
-  assert.equal(s.idea, 'ابي 3 غرف نوم ومجلس واحد ومطبخ بدون فناء');
-  assert.throws(() => s.answer('free', 'ab'), /وصفًا/);
+  assert.equal(understood.counts.bedrooms, 3); assert.equal(understood.counts.majlis, 1);
+});
+test('شرعاء: تعديل الجدول في مكانه (± وحذف وإضافة) ينعكس في الأعداد، والأعداد اليدوية القديمة تحكم بلا خطأ على الفراغ', () => {
+  const s = new SharaSession(); s.start(); s.answer('mode', 'free'); s.answer('free', 'مجلس وصالة وثلاث غرف نوم');
+  assert.equal(s.counts.bedrooms, 3);
+  let m = s.answer('program', { op: 'inc', id: 'bedroom' })[0]; assert.equal(m.kind, 'program'); assert.equal(s.counts.bedrooms, 4);
+  assert.equal(m.rows.find(r => r.id === 'bedroom').source, 'edit');
+  s.answer('program', { op: 'remove', id: 'dining' }); assert.equal(s.counts.dining, 0);
+  s.answer('program', { op: 'add', id: 'maid', count: 1 }); assert.ok(s.requirements.extras.maid);
+  s.answer('program', { op: 'dec', id: 'majlis_men' }); assert.equal(s.counts.majlis, 0);
+  const g = s.answer('counts', { bedrooms: 5, baths: NaN, majlis: '' }); assert.equal(g[0].kind, 'generate');
+  assert.equal(s.counts.bedrooms, 5); assert.equal(s.requirements.counts.bedrooms, 5); assert.equal(s.counts.baths, s.brief.counts.baths, 'الفارغ يبقى كما حُسب');
 });
 
 test('معاينة الأرض: شارعان ومدخلان، وبلا أخطاء مع مدخلات ناقصة', () => {
@@ -103,8 +125,7 @@ test('الوصلة: كل نماذج المحرك الفعلية (خرج runMulti
   }
 });
 test('التوليد: من الأرض والبرنامج إلى مستند، مع ملاحظة صريحة عن المدخل الثاني', async () => {
-  const s = new SharaSession(); s.start(); s.answer('mode', 'guided'); s.answer('household', ['guests']); s.answer('avoids', []);
-  s.answer('counts', { bedrooms: 3, majlis: 1, baths: 3, kitchens: 1, halls: 1, dining: 1 });
+  const s = new SharaSession(); s.start(); s.answer('mode', 'free'); s.answer('free', 'ثلاث غرف نوم ومجلس وصالة ومطبخ وثلاث حمامات ومقلط وضيوفنا كثير');
   const out = await generateInitialDesign({ land: land(), rooms: s.rooms(), discovery: s.discovery() });
   assert.equal(out.doc.labels.filter(l => l.type === 'bedroom' || l.type === 'master').length, 3);
   assert.ok(out.doc.plot && out.doc.plot.polygon.length === 4);

@@ -4,14 +4,16 @@ import { validatePlot, defaultRooms } from './planner.mjs';
 import { footprintDiagnostics } from './claude/planner.mjs';
 import { rankByDNA, geometryFingerprint } from './design-dna.mjs';
 import { compareOpeningAware } from './opening-aware.mjs';
-import { normalizeDiscovery, AVOIDS, LIFE } from './client-brief.mjs';
+import { normalizeDiscovery } from './client-brief.mjs';
 import { runMultiEngineDesign } from './multi-engine.mjs';
 import { requestLocalBrief } from './local-nlp.mjs';
 import { legacyToDoc } from './draw/import-legacy.mjs';
 import { applyCommand } from './draw/doc.mjs';
 import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H } from './multi-floor.mjs';
 import { generateVillaDesigns, generateVillaTwoFloors, countsFromRooms } from './villa-layout.mjs';
-import { extractRequirements, withAi } from './requirements.mjs';
+import { extractRequirements } from './requirements.mjs';
+import { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE } from './shara/brief-engine.mjs';
+import { SPACE } from './shara/lexicon.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
 
 export const SHARA_NAME = 'شرعاء';
@@ -55,26 +57,21 @@ const COUNT_FIELDS = Object.freeze([
   { id: 'dining', label: 'غرف الطعام', min: 0, max: 10 },
 ]);
 export const ENGINEERING_FIELDS = COUNT_FIELDS;
-
-// أسئلة نمط الحياة: القيم من قوائم client-brief نفسها حتى لا يرفضها normalizeDiscovery.
-const HOUSEHOLD = Object.freeze([
-  { id: 'guests', label: 'ضيوف متكررون' },
-  { id: 'children', label: 'أطفال' },
-  { id: 'seniors', label: 'كبار سن' },
-  { id: 'future', label: 'توسع مستقبلي مهم' },
-]);
 const msg = (text, extra = {}) => ({ from: 'shara', text, ...extra });
+export const MAX_QUESTIONS_PER_ROUND = 3;
 
 /**
- * جلسة حوار شرعاء. تعيد رسائل (خطوات) بسيطة تعرضها الواجهة.
- * التكيّف: الأسئلة الفرعية تظهر فقط عند اختيار ذي صلة، ويُتخطى ما أجاب عنه العميل بحديثه الحر.
- * لا فهم دلالي حرّ هنا؛ النص الحر يمرّ على الفهم المحلي (أو الذكاء إن أُدخل رمز الدخول).
+ * جلسة حوار شرعاء: مهندس معماري يستقبل العميل. تعيد رسائل بسيطة تعرضها الواجهة.
+ * المبدأ: بعد كلام العميل يُعرض «البرنامج المعماري كما فهمته» جدولًا كاملًا معلَّلًا (قلتَ / افتراض عرفي / استنتاج من الأسرة)
+ * قابلًا للتعديل في مكانه، ولا يُعاد سؤاله عمّا فُهم؛ تُسأل فقط الأسئلة التي تغيّر التصميم (ثلاثة في الدور كحد أقصى)
+ * وكل سؤال بسببه الهندسي، ويمكن التوليد في أي لحظة بلا حقل إلزامي. المنطق في shara/brief-engine.mjs.
  */
 export class SharaSession {
-  constructor() {
-    this.mode = null; this.phase = 'mode';
-    this.life = {}; this.avoids = []; this.counts = {}; // لا قيم مسبقة: كل عدد يُدخله العميل أو يُفهم من كلامه
-    this.idea = ''; this.freeRooms = null; this.followups = []; this.log = []; this.requirements = null;
+  constructor({ land = null } = {}) {
+    this.mode = null; this.phase = 'mode'; this.land = land;
+    this.texts = []; this.ai = null; this.edits = []; this.disabledCustoms = []; this.skipped = []; this.countOverrides = {};
+    this.brief = null; this.asked = 0; this.guidedStep = 0; this.log = []; this.rounds = 0;
+    this.counts = {}; this.requirements = null; this.idea = '';
   }
   start() {
     return this.#push([
@@ -83,94 +80,141 @@ export class SharaSession {
     ]);
   }
   #push(list) { this.log.push(...list); return list; }
-  #household() {
-    return msg('من سيعيش في البيت أو يزوره؟ يمكنك اختيار أكثر من إجابة.', { kind: 'multi', id: 'household', options: HOUSEHOLD });
+  /** يبني الموجز من كل ما قاله العميل حتى الآن ويحدّث ما يستهلكه المولّد. */
+  #rebuild() {
+    this.idea = this.texts.join('، ').slice(0, 4000);
+    const b = buildBrief(this.idea, { ai: this.ai, disabledCustoms: this.disabledCustoms, edits: this.edits, land: this.land, skipped: this.skipped });
+    // الأعداد النهائية التي يكتبها العميل بنفسه (المسار القديم) تحكم
+    const counts = { ...b.counts, ...this.countOverrides };
+    this.brief = b; this.counts = counts; this.requirements = { ...b.requirements, counts: { ...counts } };
+    return b;
   }
-  #avoids() {
-    return msg('ما الذي تريد تجنبه في بيتك؟ اختر ما يناسبك.', { kind: 'multi', id: 'avoids', options: AVOIDS.map((label, i) => ({ id: String(i), label })) });
+  #programMsg() {
+    const b = this.brief;
+    const rows = b.program.map(r => ({ id: r.id, label: r.label, count: r.count, floor: r.floor, floorLabel: FLOOR_AR[r.floor] || r.floor, area: r.area, areaLabel: r.area ? `≈ ${r.area * r.count} م²` : '—', source: r.source, sourceLabel: SOURCE_AR[r.source] || r.source, reason: r.reason, bath: !!r.bath }));
+    const addable = ADDABLE.filter(id => !rows.some(r => r.id === id)).map(id => ({ id, label: labelOf(id) }));
+    return msg('البرنامج المعماري كما فهمته. عدّل أي صف في مكانه (±، حذف، إضافة)؛ ما لم تذكره افترضته وقلتُ لماذا.', { kind: 'program', id: 'program', rows, totals: b.totals, counts: this.counts, customs: b.customs, addable, floors: b.floors });
   }
-  #counts() {
-    return msg('الآن أسئلة هندسية مباشرة: كم تحتاج من كل نوع؟', { kind: 'counts', id: 'counts', fields: COUNT_FIELDS.map(f => ({ ...f, value: this.counts[f.id] ?? '' })) });
-  }
-  #ready() {
+  #askMsg(q) { return msg(q.text, { kind: 'ask', id: q.id, reason: q.reason, options: q.options || [], multi: !!q.multi, free: q.free !== false, placeholder: q.placeholder || 'أو اكتب جوابك بحرية…' }); }
+  #generateMsg() {
     this.phase = 'ready';
-    return msg('تم تسجيل احتياجاتك. اضغط «توليد التصميم» لأفتح لك تصميمًا أوليًا داخل المرسم تعدّل عليه بيدك.', { kind: 'generate', id: 'generate' });
+    const left = this.brief.questions.filter(q => !this.skipped.includes(q.id)).length;
+    return msg(left ? 'يمكنك توليد التصميم الآن بهذا البرنامج، أو الإجابة عن السؤال أعلاه لتحسينه. لا حقل إلزامي.' : 'البرنامج مكتمل من جهتي. اضغط «توليد التصميم» لأفتح لك تصميمًا أوليًا داخل المرسم تعدّل عليه بيدك.', { kind: 'generate', id: 'generate' });
   }
-  #nextFollowup() {
-    const f = this.followups.shift();
-    return f ? msg('أين تفضّل أن يكون الأطفال؟', { kind: 'choice', id: 'children', options: LIFE.children.map(label => ({ id: label, label })) }) : null;
+  /** دور كامل بعد كلام جديد: الجدول، ثم ما فُهم من العلاقات، ثم ما لن يُطبَّق، ثم سؤال واحد (إن بقي)، ثم التوليد. */
+  #round() {
+    const b = this.#rebuild(); const out = [this.#programMsg()];
+    {
+      if (b.understood.length) out.push(msg('فهمت من كلامك وسأطبّقه في التصميم:', { kind: 'list', id: 'understood', items: b.understood }));
+      const notes = [...b.notes, ...(this.aiNotes || [])];
+      if (notes.length) out.push(msg(notes.join('\n'), { kind: 'note' }));
+      if (b.unsupported.length) out.push(msg('ما لن أطبّقه في هذا الإصدار (بصدق):', { kind: 'list', id: 'unsupported', items: b.unsupported }));
+      if (b.requirements.unclear?.length) out.push(msg('هذه العبارات لم أفهمها بدقة، فلن أطبّقها كما هي. أعد صياغتها مباشرة مثل: «المطبخ في الخلف»، «الماستر بعيدة عن المجلس».', { kind: 'list', id: 'unclear', items: b.requirements.unclear.map(x => '«' + x + '»') }));
+    }
+    this.rounds++;
+    const q = this.#nextQuestion();
+    if (q) out.push(this.#askMsg(q));
+    out.push(this.#generateMsg());
+    return out;
+  }
+  #nextQuestion() {
+    if (this.asked >= MAX_QUESTIONS_PER_ROUND) return null;
+    const q = this.brief.questions.find(q => !this.skipped.includes(q.id));
+    if (q) this.asked++;
+    return q || null;
+  }
+  #addText(value) {
+    const text = String(typeof value === 'string' ? value : value?.text || '').trim();
+    if (text.length < 3) throw Error('اكتب وصفًا قصيرًا على الأقل.');
+    this.texts.push(text.slice(0, 2000));
+    if (value && typeof value === 'object' && value.requirements && typeof value.requirements === 'object') this.ai = value.requirements;
+    // ملاحظات الذكاء المتصل (إن وُجد) تُعرض مرة واحدة ولا تُفسَّر برنامجًا
+    this.aiNotes = value && typeof value === 'object' ? [...(value.assumptions || []), ...(value.questions || [])].filter(x => typeof x === 'string' && x.trim()).slice(0, 4) : [];
+    return text;
   }
   /** answer(id, value): value حسب نوع السؤال. يعيد الرسائل التالية. */
   answer(id, value) {
-    const out = [];
     if (id === 'mode') {
       if (!['free', 'guided'].includes(value)) throw Error('اختيار غير معروف.');
       this.mode = value;
-      if (value === 'free') { this.phase = 'free'; return this.#push([msg('تحدّث معي بحرية عن بيتك وكيف تحب أن تعيش فيه.', { kind: 'text', id: 'free' })]); }
-      this.phase = 'household';
-      return this.#push([msg(SHARA_GOAL), this.#household()]);
+      if (value === 'free') { this.phase = 'free'; return this.#push([msg('تحدّث معي بحرية عن بيتك وأسرتك وكيف تحب أن تعيش فيه؛ سأحوّل كلامك إلى برنامج معماري كامل ولن أسألك عمّا فهمته.', { kind: 'text', id: 'free' })]); }
+      this.phase = 'guided'; this.guidedStep = 0;
+      return this.#push([msg(SHARA_GOAL), this.#askMsg(GUIDED_STEPS[0])]);
     }
-    if (id === 'free') {
-      const text = String(typeof value === 'string' ? value : value?.text || '').trim();
-      if (text.length < 3) throw Error('اكتب وصفًا قصيرًا على الأقل.');
-      this.idea = text.slice(0, 4000); this.phase = 'counts';
-      // ما يتجاوز الأعداد (حمام لكل غرفة، مطبخ مفتوح، خادمة، مدخل مستقل، مقاسات...) يُستخرج من النص نفسه ويصل للمولّد
-      // فهم Claude (إن أُدخل رمز الدخول) يُدمج مع الفهم المحلي؛ المحلي يتقدم عند التعارض
-      const req = withAi(extractRequirements(text, { counts: value?.counts && typeof value.counts === 'object' ? value.counts : {} }), value?.requirements || null);
-      this.requirements = req;
-      // أعداد مفهومة من النص تُعبّأ مسبقًا؛ ما لم يُفهم يبقى فارغًا ويُطلب من العميل.
-      const seen = req.counts;
-      for (const f of COUNT_FIELDS) if (Number.isInteger(seen[f.id]) && seen[f.id] >= f.min && seen[f.id] <= f.max) this.counts[f.id] = seen[f.id];
-      const notes = [...(value?.assumptions || []), ...(value?.questions || [])].filter(x => typeof x === 'string' && x.trim()).slice(0, 4);
-      const out = [];
-      if (req.understood.length) out.push(msg('فهمت من كلامك وسأطبّقه في التصميم:', { kind: 'list', items: req.understood }));
-      if (req.unsupported.length) out.push(msg('لن أطبّقه في هذا الإصدار:', { kind: 'list', items: req.unsupported }));
-      if (req.unclear?.length) out.push(msg('هذه العبارات لم أفهمها بدقة، فلن أطبّقها كما هي. أعد كتابتها بصيغة مباشرة مثل: «المطبخ في الخلف»، «الماستر بعيدة عن المجلس»، «غرفة 4×5»، «المجلس على يمين المدخل».', { kind: 'list', items: req.unclear.map(x => '«' + x + '»') }));
-      out.push(msg('راجع الأعداد التالية وعدّلها إن لزم.' + (notes.length ? '\n' + notes.join('\n') : '')));
-      return this.#push([...out, this.#counts()]);
+    if (id === 'free' || id === 'more') {
+      this.#addText(value); this.asked = 0; this.phase = 'program';
+      return this.#push(this.#round());
     }
-    if (id === 'household') {
-      const picked = Array.isArray(value) ? value : [];
-      const ids = HOUSEHOLD.map(h => h.id);
-      if (picked.some(p => !ids.includes(p))) throw Error('اختيار غير معروف.');
-      this.life = {};
-      if (picked.includes('guests')) this.life.guests = LIFE.guests[1];
-      if (picked.includes('seniors')) this.life.seniors = LIFE.seniors[0];
-      if (picked.includes('future')) this.life.future = LIFE.future[0];
-      if (picked.includes('children')) this.followups.push('children');
-      this.phase = 'avoids';
-      const follow = this.#nextFollowup();
-      return this.#push(follow ? [follow] : [this.#avoids()]);
+    const g = GUIDED_STEPS.findIndex(s => s.id === id);
+    if (g >= 0) {
+      const text = answerToText(GUIDED_STEPS[g], value);
+      if (text.trim()) this.texts.push(text.trim());
+      if (g + 1 < GUIDED_STEPS.length) { this.guidedStep = g + 1; return this.#push([this.#askMsg(GUIDED_STEPS[g + 1])]); }
+      this.asked = 0; this.phase = 'program';
+      if (!this.texts.length) this.texts.push('بيت لأسرة');
+      return this.#push(this.#round());
     }
-    if (id === 'children') {
-      if (!LIFE.children.includes(value)) throw Error('اختيار غير معروف.');
-      this.life.children = value;
-      return this.#push([this.#avoids()]);
+    if (id === 'skip') {
+      const qid = String(value || ''); if (!qid) throw Error('لا سؤال لتخطّيه.');
+      const gi = GUIDED_STEPS.findIndex(s => s.id === qid);
+      if (gi >= 0) return this.answer(qid, { picks: [], text: '' });
+      if (!this.skipped.includes(qid)) this.skipped.push(qid);
+      this.#rebuild(); const q = this.#nextQuestion(); const out = [];
+      if (q) out.push(this.#askMsg(q));
+      out.push(this.#generateMsg());
+      return this.#push(out);
     }
-    if (id === 'avoids') {
-      const picked = Array.isArray(value) ? value : [];
-      if (picked.some(p => !AVOIDS[Number(p)])) throw Error('اختيار غير معروف.');
-      this.avoids = picked.map(p => AVOIDS[Number(p)]);
-      this.phase = 'counts';
-      return this.#push([this.#counts()]);
+    const q = this.brief?.questions.find(q => q.id === id);
+    if (q) {
+      const text = answerToText(q, value);
+      if (!this.skipped.includes(id)) this.skipped.push(id); // لا يُعاد السؤال نفسه ولو لم يُفهم الجواب
+      if (text.trim()) this.texts.push(text.trim());
+      this.#rebuild(); const out = [this.#programMsg()];
+      const next = this.#nextQuestion(); if (next) out.push(this.#askMsg(next));
+      out.push(this.#generateMsg());
+      return this.#push(out);
+    }
+    if (id === 'program') {
+      const op = value?.op, rid = String(value?.id || ''), n = Number(value?.count);
+      if (!['inc', 'dec', 'set', 'remove', 'add'].includes(op) || !rid) throw Error('تعديل غير معروف.');
+      const cur = this.brief?.program.find(r => r.id === rid)?.count || 0;
+      const want = op === 'inc' ? cur + 1 : op === 'dec' ? cur - 1 : op === 'remove' ? 0 : op === 'add' ? (Number.isInteger(n) && n > 0 ? n : 1) : n;
+      if (!Number.isInteger(want) || want < 0 || want > 10) throw Error('العدد بين 0 و10.');
+      this.edits = this.edits.filter(e => e.id !== rid);
+      this.edits.push(want === 0 ? { op: 'remove', id: rid } : { op: 'set', id: rid, count: want });
+      this.#rebuild();
+      return this.#push([this.#programMsg()]);
+    }
+    if (id === 'custom') {
+      const cid = String(value?.id || ''), on = value?.on !== false;
+      if (!cid) throw Error('عرف غير معروف.');
+      this.disabledCustoms = this.disabledCustoms.filter(c => c !== cid); if (!on) this.disabledCustoms.push(cid);
+      this.#rebuild();
+      return this.#push([this.#programMsg()]);
     }
     if (id === 'counts') {
-      const next = {};
+      // المسار القديم: أعداد يكتبها العميل بنفسه تحكم الأعداد النهائية؛ الحقول الفارغة تبقى كما فُهمت (لا خطأ على الفراغ)
+      const next = { ...this.countOverrides };
       for (const f of COUNT_FIELDS) {
-        const v = Number(value?.[f.id]);
+        const raw = value?.[f.id]; if (raw === undefined || raw === null || raw === '' || (typeof raw === 'number' && Number.isNaN(raw))) continue;
+        const v = Number(raw);
         if (!Number.isInteger(v) || v < f.min || v > f.max) throw Error(`${f.label}: عدد صحيح بين ${f.min} و${f.max}.`);
         next[f.id] = v;
       }
-      this.counts = next;
-      // الأعداد النهائية من العميل تحكم؛ المتطلبات الأخرى تبقى كما فُهمت (وفي الإرشادي تُشتق من نمط الحياة)
-      this.requirements = { ...(this.requirements || extractRequirements('', { discovery: this.discovery() })), counts: next };
-      return this.#push([this.#ready()]);
+      this.countOverrides = next;
+      if (!this.brief) { this.texts.length || this.texts.push('بيت'); }
+      this.#rebuild();
+      return this.#push([this.#generateMsg()]);
     }
     throw Error('خطوة غير معروفة.');
   }
-  discovery() { return normalizeDiscovery({ likes: [], rejects: [], avoids: this.avoids, life: this.life }); }
+  /** ما يستهلكه المولّد من الاكتشاف (client-brief). */
+  discovery() { return this.brief ? this.brief.discovery : normalizeDiscovery(undefined); }
   rooms() { return defaultRooms(this.counts); }
+  /** جدول البرنامج الحالي (للاختبارات والواجهة). */
+  program() { return this.brief ? this.brief.program : []; }
 }
+function labelOf(id) { return SPACE[id]?.label || { guest_wc: 'دورة مياه الضيوف', bath_suite: 'حمامات غرف النوم', bath: 'دورة مياه' }[id] || id; }
 
 /**
  * يفهم نص العميل الحر محليًا (بلا شبكة) ويعيد أعداد الفراغات التي ذُكرت صراحة فقط.

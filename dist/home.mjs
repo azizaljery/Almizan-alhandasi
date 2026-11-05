@@ -91,6 +91,7 @@ function fail(err) { setError($('chatError'), err.message || String(err)); }
 function render(messages) {
   setError($('chatError'), '');
   for (const m of messages) {
+    if (m.kind === 'program') { renderProgram(m); continue; }
     const row = bubble(m.text);
     if (m.kind === 'list') {
       const ul = document.createElement('ul'); ul.className = 'understood';
@@ -98,6 +99,8 @@ function render(messages) {
       row.querySelector('.bubble').append(ul);
       continue;
     }
+    if (m.kind === 'note') { row.classList.add('note'); continue; }
+    if (m.kind === 'ask') { renderAsk(m, row); continue; }
     if (m.kind === 'choice') {
       const wrap = document.createElement('div'); wrap.className = 'pick';
       for (const o of m.options) {
@@ -120,54 +123,129 @@ function render(messages) {
       });
       wrap.append(go); control(wrap);
     } else if (m.kind === 'counts') {
+      // المسار القديم (أعداد مباشرة): الحقل الفارغ يبقى كما فُهم ولا يُرفض
       const form = document.createElement('form'); form.className = 'counts'; form.noValidate = true;
       for (const f of m.fields) {
         const l = document.createElement('label'); l.textContent = f.label;
-        const i = document.createElement('input'); i.type = 'number'; i.inputMode = 'numeric'; i.min = f.min; i.max = f.max; i.step = 1; i.value = f.value ?? ''; i.name = f.id; i.required = true;
+        const i = document.createElement('input'); i.type = 'number'; i.inputMode = 'numeric'; i.min = f.min; i.max = f.max; i.step = 1; i.value = f.value ?? ''; i.name = f.id;
         l.append(i); form.append(l);
       }
       const go = document.createElement('button'); go.type = 'submit'; go.className = 'cta'; go.textContent = 'متابعة';
       form.append(go);
       form.addEventListener('submit', e => {
         e.preventDefault();
-        const values = Object.fromEntries(m.fields.map(f => [f.id, form.elements[f.id].valueAsNumber]));
-        const summary = m.fields.map(f => `${f.label}: ${values[f.id]}`).join('، ');
+        const values = Object.fromEntries(m.fields.map(f => [f.id, form.elements[f.id].value === '' ? '' : form.elements[f.id].valueAsNumber]));
+        const summary = m.fields.filter(f => values[f.id] !== '').map(f => `${f.label}: ${values[f.id]}`).join('، ') || 'كما فهمتِ';
         try { const next = session.answer(m.id, values); clearControls(); bubble(summary, 'me'); render(next); } catch (err) { fail(err); }
       });
       control(form);
     } else if (m.kind === 'text') {
-      const form = document.createElement('form'); form.className = 'free';
-      form.innerHTML = '<textarea aria-label="حدّثني عن بيتك" placeholder="مثال: ثلاث غرف نوم ومجلس ومطبخ، وأريد الخصوصية لغرف النوم"></textarea>'
-        + '<details><summary>رمز دخول الذكاء (اختياري)</summary><input type="password" autocomplete="off" aria-label="رمز دخول الذكاء" placeholder="بدونه أفهم كلامك محليًا بلا شبكة"></details>';
-      const go = document.createElement('button'); go.type = 'submit'; go.className = 'cta'; go.textContent = 'إرسال'; form.append(go);
-      form.addEventListener('submit', async e => {
-        e.preventDefault();
-        const text = form.querySelector('textarea').value.trim(), code = form.querySelector('input').value.trim();
-        if (text.length < 3) return fail(Error('اكتب وصفًا قصيرًا على الأقل.'));
-        go.disabled = true;
-        try {
-          let understood = null, note = '';
-          if (code) {
-            try { understood = await understandWithAI(text, code); }
-            catch (err) { note = `تعذّر الذكاء المتصل (${err.message}) فاستخدمت الفهم المحلي.`; }
-          }
-          understood ||= await interpretFree(text);
-          if (note) understood.assumptions = [note, ...understood.assumptions];
-          clearControls(); bubble(text, 'me'); render(session.answer(m.id, understood));
-        } catch (err) { go.disabled = false; fail(err); }
-      });
-      control(form);
+      renderFree(m);
     } else if (m.kind === 'generate') {
       const go = document.createElement('button'); go.type = 'button'; go.className = 'cta'; go.textContent = 'توليد التصميم';
       const wrap = document.createElement('div'); wrap.className = 'pick'; wrap.append(go);
       go.addEventListener('click', () => { clearControls(); build(); });
+      const more = document.createElement('button'); more.type = 'button'; more.className = 'chip'; more.textContent = 'أضيف تفصيلًا بالكلام';
+      more.addEventListener('click', () => { more.remove(); const form = renderFree({ id: 'more' }); form.scrollIntoView?.({ block: 'nearest' }); });
+      wrap.append(more);
       control(wrap);
     }
   }
 }
+
+/** نموذج الحديث الحر (أول مرة، أو إضافة لاحقة «more»). الذكاء المتصل اختياري برمز دخول. */
+function renderFree(m) {
+  const form = document.createElement('form'); form.className = 'free';
+  form.innerHTML = '<textarea aria-label="حدّثني عن بيتك" placeholder="مثال: عندنا 3 أولاد وبنتين وأمي تسكن معنا، أبغى مجلسين ومقلط وصالة ومطبخ مغلق وغرفة خادمة"></textarea>'
+    + '<details><summary>رمز دخول الذكاء (اختياري)</summary><input type="password" autocomplete="off" aria-label="رمز دخول الذكاء" placeholder="بدونه أفهم كلامك محليًا بلا شبكة"></details>';
+  const go = document.createElement('button'); go.type = 'submit'; go.className = 'cta'; go.textContent = 'إرسال'; form.append(go);
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const text = form.querySelector('textarea').value.trim(), code = form.querySelector('input').value.trim();
+    if (text.length < 3) return fail(Error('اكتب وصفًا قصيرًا على الأقل.'));
+    go.disabled = true;
+    try {
+      let understood = null, note = '';
+      if (code) {
+        try { understood = await understandWithAI(text, code); }
+        catch (err) { note = `تعذّر الذكاء المتصل (${err.message}) فاستخدمت الفهم المحلي.`; }
+      }
+      understood ||= await interpretFree(text);
+      if (note) understood.assumptions = [note, ...understood.assumptions];
+      clearControls(); bubble(text, 'me'); render(session.answer(m.id, understood));
+    } catch (err) { go.disabled = false; fail(err); }
+  });
+  return control(form);
+}
+
+/** سؤال بسببه الهندسي: خيارات (مفردة أو متعددة) + كتابة حرة + تخطٍّ. */
+function renderAsk(m, row) {
+  const why = document.createElement('p'); why.className = 'why'; why.textContent = m.reason; row.querySelector('.bubble').append(why);
+  const wrap = document.createElement('div'); wrap.className = 'pick ask'; wrap.dataset.ask = m.id; const chosen = new Set();
+  const send = (picks, text) => {
+    const labels = m.options.filter(o => picks.includes(o.id)).map(o => o.label); if (text) labels.push(text);
+    clearControls(); bubble(labels.length ? labels.join('، ') : 'تخطَّيتُ السؤال', 'me');
+    step(m.id, { picks, text });
+  };
+  for (const o of m.options || []) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = o.label;
+    if (m.multi) { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { const on = !chosen.has(o.id); on ? chosen.add(o.id) : chosen.delete(o.id); b.setAttribute('aria-pressed', String(on)); }); }
+    else if (o.free) b.addEventListener('click', () => { input.focus(); input.placeholder = o.placeholder || input.placeholder; });
+    else b.addEventListener('click', () => send([o.id], ''));
+    wrap.append(b);
+  }
+  const line = document.createElement('div'); line.className = 'askline';
+  const input = document.createElement('input'); input.type = 'text'; input.placeholder = m.placeholder || 'أو اكتب جوابك بحرية…'; input.setAttribute('aria-label', m.text);
+  const go = document.createElement('button'); go.type = 'button'; go.className = 'cta'; go.textContent = m.multi ? 'متابعة' : 'إرسال';
+  go.addEventListener('click', () => send([...chosen], input.value.trim()));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go.click(); } });
+  const skip = document.createElement('button'); skip.type = 'button'; skip.className = 'chip ghost'; skip.textContent = 'تخطَّ';
+  skip.addEventListener('click', () => { clearControls(); bubble('تخطَّيتُ السؤال', 'me'); step('skip', m.id); });
+  line.append(input, go, skip); wrap.append(line);
+  control(wrap);
+}
+
+/** جدول «البرنامج المعماري كما فهمته»: يُحدَّث في مكانه، قابل للتعديل (± وحذف وإضافة) وأعرافه قابلة للتعطيل. */
+function renderProgram(m) {
+  let panel = chat.querySelector('#program');
+  if (!panel) { panel = el('section', 'program'); panel.id = 'program'; panel.setAttribute('aria-label', 'البرنامج المعماري كما فهمته'); chat.append(panel); }
+  panel.replaceChildren();
+  panel.append(el('h3', '', 'البرنامج المعماري كما فهمته'), el('p', 'hint', m.text));
+  const wrap = el('div', 'tscroll'); const table = el('table', 'rtable ptable');
+  row(table, ['الفراغ', 'العدد', 'الدور المقترح', 'المساحة', 'مصدر الفهم', 'ملاحظة', ''], true);
+  for (const r of m.rows) {
+    const num = el('span', 'num'); const dec = el('button', 'pm', '−'); dec.type = 'button'; dec.setAttribute('aria-label', `أنقص ${r.label}`); const inc = el('button', 'pm', '+'); inc.type = 'button'; inc.setAttribute('aria-label', `زد ${r.label}`);
+    const val = el('b', '', String(r.count)); val.dataset.count = r.id; num.append(dec, val, inc);
+    dec.addEventListener('click', () => edit({ op: 'dec', id: r.id })); inc.addEventListener('click', () => edit({ op: 'inc', id: r.id }));
+    const src = el('span', 'src src-' + r.source, r.sourceLabel);
+    const del = el('button', 'pm del', '×'); del.type = 'button'; del.setAttribute('aria-label', `احذف ${r.label}`); del.addEventListener('click', () => edit({ op: 'remove', id: r.id }));
+    const tr = row(table, [r.label, num, r.floorLabel, r.areaLabel, src, r.reason, del]); tr.dataset.row = r.id;
+  }
+  wrap.append(table); panel.append(wrap);
+  // إضافة صف
+  if (m.addable?.length) {
+    const addLine = el('div', 'addline'); const sel = el('select'); sel.setAttribute('aria-label', 'فراغ لإضافته');
+    for (const a of m.addable) { const o = el('option', '', a.label); o.value = a.id; sel.append(o); }
+    const add = el('button', 'chip', 'أضف فراغًا'); add.type = 'button'; add.addEventListener('click', () => edit({ op: 'add', id: sel.value, count: 1 }));
+    addLine.append(sel, add); panel.append(addLine);
+  }
+  const c = m.counts;
+  panel.append(el('p', 'totals', `ما يستلمه المولّد: ${c.bedrooms} نوم، ${c.majlis} مجلس، ${c.halls} صالة، ${c.dining} طعام، ${c.kitchens} مطبخ، ${c.baths} دورة مياه. المجموع ≈ ${m.totals.area} م² للفراغات، ≈ ${m.totals.builtArea} م² مبنى. ${m.totals.note}`));
+  if (m.customs?.length) {
+    const d = el('details', 'customs'); d.append(el('summary', '', `الافتراضات العرفية المطبّقة (${m.customs.filter(x => x.on).length} من ${m.customs.length}) — عطّل ما لا يناسبك`));
+    for (const cu of m.customs) {
+      const l = el('label', 'custom'); const cb = el('input'); cb.type = 'checkbox'; cb.checked = cu.on; cb.dataset.custom = cu.id;
+      cb.addEventListener('change', () => { try { render(session.answer('custom', { id: cu.id, on: cb.checked })); } catch (err) { fail(err); } });
+      l.append(cb, el('span', '', cu.label), el('small', '', cu.why)); d.append(l);
+    }
+    panel.append(d);
+  }
+  panel.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+}
+function edit(op) { try { render(session.answer('program', op)); } catch (err) { fail(err); } }
 function step(id, value) { try { render(session.answer(id, value)); } catch (err) { fail(err); } }
 function beginChat() {
-  chat.replaceChildren(); session = new SharaSession(); render(session.start());
+  chat.replaceChildren(); session = new SharaSession({ land: confirmedLand }); render(session.start());
 }
 
 // الذكاء المتصل اختياري، ويحتاج رمز دخول الموقع. استدعاؤه الحي غير متحقق منه في هذا التسليم.
@@ -187,7 +265,7 @@ const m1 = v => (Math.round(v * 100) / 100).toString();
 function row(table, cells, head) { const tr = el('tr'); for (const c of cells) { const td = el(head ? 'th' : 'td'); if (c instanceof Node) td.append(c); else td.textContent = c; tr.append(td); } table.append(tr); return tr; }
 
 function applyOption(o) {
-  session.counts = { ...o.counts }; confirmedLand = o.land;
+  session.countOverrides = { ...o.counts }; session.counts = { ...o.counts }; if (session.requirements) session.requirements = { ...session.requirements, counts: { ...o.counts } }; confirmedLand = o.land;
   $('landLength').value = o.land.length; $('landWidth').value = o.land.width;
   land.entries = new Set(o.land.entries);
   grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
