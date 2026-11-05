@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<script>if(!location.search)location.replace(location.pathname+"?v=A&hq=1&style=J&floors=3&cam=hero2");</script>
+<script>if(!location.search)location.replace(location.pathname+"?v=A&hq=1&style=J&src=studio&cam=auto");</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>عينة الواجهات الواقعية</title>
@@ -78,9 +78,11 @@ const CAMS = {
 
 async function variantMode() {
   const THREE = await loadThreeRuntime();
-  const res = await fetch('./facade-realism/C1.json');
-  if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')');
-  const doc = parseDoc(await res.text());
+  // تصميم العميل المعتمد (من المرسم/التصميم) إن طُلب src=studio، وإلا عينة C1
+  let docRaw = null; if (q.get('src') === 'studio') { try { docRaw = localStorage.getItem('mizan.studio.doc.v1'); } catch {} if (!docRaw) throw new Error('لا يوجد تصميم معتمد محفوظ في هذا المتصفح'); }
+  if (!docRaw) { const res = await fetch('./facade-realism/C1.json'); if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')'); docRaw = await res.text(); }
+  const doc = parseDoc(docRaw);
+  if (!q.get('floors')) q.set('floors', String(Math.min(3, Math.max(1, (doc.levels || []).length || 1))));
   const FI = floorsInfo(q);
   const built = extrudeFloors(buildAllSides(doc, id), FI);
   const lib = createRealismMaterials(THREE);
@@ -126,7 +128,13 @@ async function variantMode() {
   if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
     const cu = closeupCamera(THREE, S, shot, { W, H, index: +(q.get('gi') || 0) }); camera = cu.camera; roi = cu.roi;
   } else {
-    const C = (HQ && CAMS_HQ[cam]) || CAMS[cam] || CAMS.oblique;
+    let C = (HQ && CAMS_HQ[cam]) || CAMS[cam] || CAMS.oblique;
+    if (cam === 'auto') { // إطار تلقائي لأي تصميم عميل: الواجهة الجنوبية (z الأكبر) بزاوية مائلة تتسع للمبنى كله
+      const bb = new THREE.Box3(); S.meshes.forEach(m => { if (m.name !== 'ground' && m.visible) bb.expandByObject(m); });
+      const c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3()), fov = 46;
+      const need = Math.max(sz.y * 1.25 / (2 * Math.tan(fov * Math.PI / 360)), sz.x * 1.1 / (2 * Math.tan(fov * Math.PI / 360) * (W / H)));
+      C = { pos: [c.x - sz.x * .45, 1.65, bb.max.z + need * .95], look: [c.x + sz.x * .05, sz.y * .5, bb.max.z - sz.z * .3], fov };
+    }
     camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
     camera.position.set(...C.pos); camera.lookAt(...C.look);
   }

@@ -32,10 +32,32 @@
       <p class="muted">موضع الشمس محسوب بمعادلات فلكية تقريبية لخط عرض المدينة المختارة والشمال في المخطط؛ ليس دراسة إظلال معتمدة.</p></div>
     <div><h2>الأجواء</h2><div class="seg" id="styleSeg"><button data-style="day" class="on">نهار</button><button data-style="dusk">غروب</button></div></div>
     <div id="levelBox" hidden><h2>الأدوار</h2><div class="seg" id="levelSeg"></div></div>
+    <div id="facadeBox"><h2>الواجهة الخارجية</h2>
+      <div class="seg" id="facadeSeg"><button data-f="model" class="on">المجسم</button><button data-f="J">معاصر (حجر وخشب وإطارات سوداء)</button></div>
+      <div id="facadeOpts" hidden>
+        <label class="kv">عدد الأدوار<select id="facadeFloors"><option value="">حسب التصميم</option><option value="1">دور واحد</option><option value="2">دوران</option><option value="3">ثلاثة أدوار (مع ملحق)</option></select></label>
+        <div class="seg" id="facadeTime"><button data-t="day" class="on">نهار</button><button data-t="night">ليل</button></div>
+        <p class="muted">عرض واقعي للواجهة من تصميمك المعتمد نفسه، بإطارات بارزة 20–25 سم. الأدوار العليا تكرر نوافذ الدور الأرضي ما لم تُرسم في المرسم؛ ليس مخططًا تنفيذيًا.</p>
+      </div></div>
     <button class="btn" id="shot">التقاط صورة</button>
   </aside>
-  <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div></div>
+  <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div><iframe id="facadeFrame" title="الواجهة الخارجية" hidden style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f4f1ea"></iframe></div>
 </div>
 <script type="module" src="./view3d.mjs"></script>
+<script type="module">
+// الواجهة الخارجية ضمن العرض ثلاثي الأبعاد: تُبنى من التصميم المعتمد (المفتاح نفسه الذي يقرؤه المجسم)
+const $ = id => document.getElementById(id), fr = $('facadeFrame'), host = $('threeHost'), opts = $('facadeOpts');
+let mode = 'model', time = 'day';
+const NIGHT = '&night=1&sun=0.05&skys=.01&bgs=.04&el=4&exp=1.6';
+function apply() {
+  const on = mode === 'J'; opts.hidden = !on; fr.hidden = !on; host.style.visibility = on ? 'hidden' : '';
+  if (!on) return;
+  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&style=J&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (time === 'night' ? NIGHT : '');
+  if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
+}
+$('facadeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.f; [...$('facadeSeg').children].forEach(x => x.classList.toggle('on', x === b)); apply(); });
+$('facadeTime').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; time = b.dataset.t; [...$('facadeTime').children].forEach(x => x.classList.toggle('on', x === b)); apply(); });
+$('facadeFloors').addEventListener('change', apply);
+</script>
 </body>
 </html>
