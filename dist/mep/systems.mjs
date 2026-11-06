@@ -155,11 +155,11 @@ function summaryCard() {
   const n = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 1 }));
   const stat = (v, label) => el('div', { class: 'stat' }, el('b', {}, v), label);
   const stats = el('div', { class: 'stats' },
-    stat(n(Z.lights), 'وحدة إنارة'), stat(n(Z.sockets), 'مقبس'), stat(n(Z.circuits), 'دائرة كهربائية'), stat(n(Z.demandW / 1000) + ' kW', 'طلب كهربائي أقصى'), stat(n(Z.panels[0]?.kVA) + ' kVA', 'اللوحة الرئيسية'),
-    stat(n(Z.acSelectedTR) + ' TR', `سعات التكييف المختارة (${n(Z.ac.length)} وحدة)`), stat(n(Z.acTotalTR) + ' TR', 'الحمل الحراري الساكن المحسوب'), stat(n(Z.tankL) + ' L', 'خزان المياه (يومان)'), stat(n((Z.fixtures.WC || 0) + (Z.fixtures.BASIN || 0) + (Z.fixtures.SHOWER || 0) + (Z.fixtures.SINK || 0)), 'جهاز صحي'), stat(n(Z.fixtures.WATER_HEATER), 'سخان'),
-    stat(n(Z.fire), 'عنصر حريق'), stat(n(Z.lowCurrent), 'عنصر تيار خفيف'), Z.pv ? stat(n(Z.pv.kWp) + ' kWp', `ألواح شمسية (${Z.pv.panels})`) : null);
+    stat(n(Z.lights), 'وحدة إنارة'), stat(n(Z.sockets), 'مقبس'), stat(n(Z.circuits), 'دائرة كهربائية'), stat(n(Z.demandW / 1000), 'طلب كهربائي أقصى (كيلوواط)'), stat(n(Z.panels[0]?.kVA), 'اللوحة الرئيسية (كيلو فولت أمبير)'),
+    stat(n(Z.acSelectedTR), `طن تبريد مختار (${n(Z.ac.length)} وحدة)`), stat(n(Z.acTotalTR), 'طن تبريد: الحمل الحراري الساكن'), stat(n(Z.tankL), 'لتر: خزان المياه (يومان)'), stat(n((Z.fixtures.WC || 0) + (Z.fixtures.BASIN || 0) + (Z.fixtures.SHOWER || 0) + (Z.fixtures.SINK || 0)), 'جهاز صحي'), stat(n(Z.fixtures.WATER_HEATER), 'سخان'),
+    stat(n(Z.fire), 'عنصر حريق'), stat(n(Z.lowCurrent), 'عنصر تيار خفيف'), Z.pv ? stat(n(Z.pv.kWp), `كيلوواط ذروة: ألواح شمسية (${Z.pv.panels})`) : null);
   const acRows = Z.ac.slice().sort((a, b) => (b.gainW || 0) - (a.gainW || 0)).map(z => el('tr', {}, el('td', {}, z.room), el('td', { class: 'num' }, n(z.areaM2)), el('td', { class: 'num' }, n(z.gainW)), el('td', { class: 'num' }, n(z.btu)), el('td', { class: 'num' }, n(z.supplyLs))));
-  const acTable = el('details', {}, el('summary', {}, 'أحمال التبريد وسعات الوحدات المقترحة لكل فراغ'), el('table', { class: 'tbl' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), el('th', {}, 'م²'), el('th', {}, 'الحمل W'), el('th', {}, 'سبليت BTU/h'), el('th', {}, 'هواء ل/ث'))), el('tbody', {}, acRows)));
+  const acTable = el('details', {}, el('summary', {}, 'أحمال التبريد وسعات الوحدات المقترحة لكل فراغ'), el('table', { class: 'tbl' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'الحمل الحراري (واط)'), el('th', {}, 'سعة المكيف (وحدة حرارية بريطانية/ساعة)'), el('th', {}, 'هواء التغذية (لتر/ثانية)'))), el('tbody', {}, acRows)));
   return el('div', { class: 'card', id: 'summaryCard' }, el('h2', {}, 'الملخص بالأرقام'), stats, acTable,
     el('p', { class: 'sub' }, S.inputs?.auto ? AUTO_NOTE_AR + ' الافتراضات مكتوبة في «الرسائل والنواقص» وفي JSON المدخلات.' : 'الأرقام من مدخلاتك الحالية.'), el('p', { class: 'sub' }, PRELIMINARY_AR + '.'));
 }
