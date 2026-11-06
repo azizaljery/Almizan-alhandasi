@@ -5,6 +5,7 @@ import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY } from './draw/handoff.mjs';
 import * as B from './mep-binding.mjs';
 import { DISCIPLINE_INFO, COORDINATION_INFO, DEVICE_GROUPS, NO_CLASH_AR, PRELIMINARY_AR } from './mep-binding.mjs';
+import { autoInputs, autoSummary, AUTO_NOTE_AR, kindAr } from './auto-inputs.mjs';
 
 // مفتاح جلسة التصميم كما في design-session.mjs (SESSION_KEY)؛ يُقرأ مباشرة لتجنّب تحميل المولّد في هذه الصفحة
 const SESSION_KEY = 'mizan.design.session.v1';
@@ -68,7 +69,18 @@ async function selectSource(id) {
     else if (a.archChanged && a.deviceCount) S.archNotice = { kind: 'ARCH_CHANGED', devices: a.deviceCount, orphans: a.orphans, messageAr: `تغيّر المخطط المعماري بعد آخر حساب. حُفظت مدخلاتك (${a.deviceCount} جهازًا/عنصرًا)؛ راجع مواقعها في المخطط الجديد` + (a.orphans.length ? ` — ${a.orphans.length} منها فقد غرفته أو دوره: ${a.orphans.map(o => o.id).join('، ')}` : '') + '.' };
     render(); if (!a.fresh && S.auto) await recompute(); return;
   }
+  if (S.bind?.ok && !B.deviceRefs(S.inputs).length) { autoFill(false); }
   if (S.bind?.ok && S.auto) await recompute(); else render();
+}
+/** المولّد الأولي: يملأ المدخلات من المخطط (أول فتح أو بطلب)؛ لا يمس المخطط. */
+function autoFill(announce = true) {
+  if (!S.bind?.ok) return;
+  try {
+    const { inputs } = autoInputs(S.doc, S.bind.project);
+    S.inputs = inputs; S.fresh = { fresh: false, reason: 'INPUTS_CHANGED', messageAr: 'وُلّدت مدخلات أولية من المخطط؛ يُعاد الحساب.' };
+    try { B.saveEntity(localStorage, S.store, { ...S.entity, sessionKey: S.source.sessionKey, kind: S.source.kind, inputs: S.inputs }); S.store = B.loadStore(localStorage); } catch { /* التخزين غير متاح */ }
+    if (announce) { toast('وُلّدت المدخلات الأولية من المخطط بافتراضات معلنة.'); recompute(); }
+  } catch (e) { toast('تعذر التوليد الأولي: ' + String(e.message || e).slice(0, 140), true); }
 }
 async function rebind() {
   S.bind = await B.bindArchitecture(S.doc, { alternativeId: S.source.id, revision: S.source.revision, inputs: S.inputs });
@@ -118,7 +130,7 @@ function render() { if (renderQueued) return; renderQueued = true; setTimeout(()
 function renderNow() {
   const main = $('main');
   if (!S.sources.length) { main.replaceChildren(el('div', { class: 'card' }, el('h2', {}, 'لا يوجد تصميم معماري لربط الأنظمة به'), el('p', {}, 'ابدأ من الأرض ثم شرعاء، واختر تصميمًا، ثم افتح الأنظمة من صفحة التصميم.'), el('a', { class: 'btn primary', href: './home.html' }, 'ابدأ رحلة التصميم'))); return; }
-  main.replaceChildren(sourceCard(), el('div', { id: 'statusBox' }), body());
+  main.replaceChildren(sourceCard(), el('div', { id: 'statusBox' }), summaryCard(), body());
   renderStatus(); renderExports(); renderPlan();
 }
 function sourceCard() {
@@ -131,7 +143,23 @@ function sourceCard() {
         S.result ? el('span', {}, 'بصمة المدخل: ', el('code', {}, short(S.result.inputHash))) : null),
       el('p', { class: 'sub' }, 'الأنظمة تقرأ المخطط ولا تعدّله. تعديل المعماري يتم في المرسم؛ بعده تُعدّ النتيجة قديمة (لا تصدير ولا كميات) حتى يُعاد الحساب، وتبقى مدخلاتك محفوظة.')),
     el('div', {}, el('label', { class: 'sub' }, el('input', { type: 'checkbox', id: 'autoCalc', checked: S.auto, onchange: e => { S.auto = e.target.checked; if (S.auto && !S.fresh.fresh) recompute(); } }), ' إعادة الحساب تلقائيًا'), ' ',
-      el('button', { class: 'btn primary', id: 'btnRecalc', onclick: () => recompute() }, 'أعد الحساب الآن')));
+      el('button', { class: 'btn primary', id: 'btnRecalc', onclick: () => recompute() }, 'أعد الحساب الآن'), ' ',
+      el('button', { class: 'btn', id: 'btnAuto', title: 'يعيد توليد كل المدخلات من المخطط بالافتراضات المعلنة ويستبدل ما أدخلته', onclick: () => { if (B.deviceRefs(S.inputs).length && !confirm('سيُستبدل كل ما أدخلته بمدخلات أولية مولّدة من المخطط. متابعة؟')) return; autoFill(true); } }, 'ولّد المدخلات من المخطط')));
+}
+/** الملخص بالأرقام من النتيجة الحالية: ما يريد العميل رؤيته أولًا. */
+function summaryCard() {
+  if (!S.result || !S.resultProject) return el('div');
+  let Z; try { Z = autoSummary(S.result, S.inputs, S.resultProject); } catch { return el('div'); }
+  const n = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 1 }));
+  const stat = (v, label) => el('div', { class: 'stat' }, el('b', {}, v), label);
+  const stats = el('div', { class: 'stats' },
+    stat(n(Z.lights), 'وحدة إنارة'), stat(n(Z.sockets), 'مقبس'), stat(n(Z.circuits), 'دائرة كهربائية'), stat(n(Z.demandW / 1000) + ' kW', 'طلب كهربائي أقصى'), stat(n(Z.panels[0]?.kVA) + ' kVA', 'اللوحة الرئيسية'),
+    stat(n(Z.acSelectedTR) + ' TR', `سعات التكييف المختارة (${n(Z.ac.length)} وحدة)`), stat(n(Z.acTotalTR) + ' TR', 'الحمل الحراري الساكن المحسوب'), stat(n(Z.tankL) + ' L', 'خزان المياه (يومان)'), stat(n((Z.fixtures.WC || 0) + (Z.fixtures.BASIN || 0) + (Z.fixtures.SHOWER || 0) + (Z.fixtures.SINK || 0)), 'جهاز صحي'), stat(n(Z.fixtures.WATER_HEATER), 'سخان'),
+    stat(n(Z.fire), 'عنصر حريق'), stat(n(Z.lowCurrent), 'عنصر تيار خفيف'), Z.pv ? stat(n(Z.pv.kWp) + ' kWp', `ألواح شمسية (${Z.pv.panels})`) : null);
+  const acRows = Z.ac.slice().sort((a, b) => (b.gainW || 0) - (a.gainW || 0)).map(z => el('tr', {}, el('td', {}, z.room), el('td', { class: 'num' }, n(z.areaM2)), el('td', { class: 'num' }, n(z.gainW)), el('td', { class: 'num' }, n(z.btu)), el('td', { class: 'num' }, n(z.supplyLs))));
+  const acTable = el('details', {}, el('summary', {}, 'أحمال التبريد وسعات الوحدات المقترحة لكل فراغ'), el('table', { class: 'tbl' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), el('th', {}, 'م²'), el('th', {}, 'الحمل W'), el('th', {}, 'سبليت BTU/h'), el('th', {}, 'هواء ل/ث'))), el('tbody', {}, acRows)));
+  return el('div', { class: 'card', id: 'summaryCard' }, el('h2', {}, 'الملخص بالأرقام'), stats, acTable,
+    el('p', { class: 'sub' }, S.inputs?.auto ? AUTO_NOTE_AR + ' الافتراضات مكتوبة في «الرسائل والنواقص» وفي JSON المدخلات.' : 'الأرقام من مدخلاتك الحالية.'), el('p', { class: 'sub' }, PRELIMINARY_AR + '.'));
 }
 function renderStatus() {
   const box = $('statusBox'); if (!box) return;

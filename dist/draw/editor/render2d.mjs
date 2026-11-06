@@ -157,6 +157,18 @@ export function renderPlan(ctx, st) {
 
   // ------------------------------------------------------------------ stairs: treads, climb arrow and riser count
   const stairBoxes = [];
+  { const li = doc.levels.findIndex(l => l.id === levelId), below = li > 0 ? doc.levels[li - 1] : null;
+    if (below) for (const s of doc.stairs.filter(x => x.level === below.id)) {
+      // فتحة السلم القادم من الدور الأسفل: متقطع
+      const info = stairInfo(s, below.height || 3.2), all = [...info.treads, ...info.landings], pts = all.flatMap(t => t.poly);
+      ctx.save(); ctx.setLineDash([6, 4]); ctx.lineWidth = pen.thin; ctx.strokeStyle = T.fixtureLine;
+      for (const t of all.slice(-Math.min(6, all.length))) { tracePoly(t.poly.map(S)); ctx.stroke(); }
+      const xs = pts.map(p => p.x), ys = pts.map(p => p.y), p0 = S({ x: Math.min(...xs), y: Math.max(...ys) }), p1 = S({ x: Math.max(...xs), y: Math.min(...ys) });
+      ctx.strokeRect(Math.min(p0.x, p1.x), Math.min(p0.y, p1.y), Math.abs(p1.x - p0.x), Math.abs(p1.y - p0.y));
+      ctx.restore();
+      if (k > 14) { ctx.save(); ctx.fillStyle = T.ink; ctx.font = `600 ${Math.max(9, Math.min(12, k * .22))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(`فتحة السلم · هبوط ${info.N} قائمة`, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2); ctx.restore(); }
+      stairBoxes.push({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2, w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) });
+    } }
   for (const s of doc.stairs) {
     if (s.level !== levelId) continue;
     const info = stairInfo(s, (doc.levels.find(l => l.id === levelId) || {}).height || 3.2), picked = sel.has(s.id);

@@ -123,6 +123,19 @@ export function planSheet(doc, opts = {}) {
     const pts = [...info.treads, ...info.landings].flatMap(t => t.poly), xs = pts.map(p => p.x), ys = pts.map(p => p.y);
     stairBoxes.push({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2, w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) });
   }
+  // وصول السلم من الدور الأسفل: فتحة السلم بخط متقطع والدرجات العليا، وسهم الهبوط
+  { const li = doc.levels.findIndex(l => l.id === levelId), below = li > 0 ? doc.levels[li - 1] : null;
+    if (below) for (const s of doc.stairs.filter(x => x.level === below.id)) {
+      const info = stairInfo(s, below.height || 3.2), all = [...info.treads, ...info.landings], pts = all.flatMap(t => t.poly), xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+      const dash = `fill="none" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1.5))} ${n1(mm(.8))}"`;
+      for (const t of all.slice(-Math.min(6, all.length))) stairG.push(poly(t.poly, dash));
+      stairG.push(`<rect x="${n1(X(Math.min(...xs)))}" y="${n1(Y(Math.max(...ys)))}" width="${n1(X(Math.max(...xs)) - X(Math.min(...xs)))}" height="${n1(Y(Math.min(...ys)) - Y(Math.max(...ys)))}" ${dash}/>`);
+      const a = { x: X(info.arrow.to.x), y: Y(info.arrow.to.y) }, c = { x: X(info.arrow.from.x), y: Y(info.arrow.from.y) }, ang = Math.atan2(c.y - a.y, c.x - a.x);
+      stairG.push(line(a, c, `stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1.5))} ${n1(mm(.8))}"`), `<path d="M${n1(c.x)} ${n1(c.y)} L${n1(c.x - mm(2) * Math.cos(ang - .4))} ${n1(c.y - mm(2) * Math.sin(ang - .4))} L${n1(c.x - mm(2) * Math.cos(ang + .4))} ${n1(c.y - mm(2) * Math.sin(ang + .4))} Z" fill="#000"/>`);
+      const cx = (X(Math.min(...xs)) + X(Math.max(...xs))) / 2, cy = (Y(Math.min(...ys)) + Y(Math.max(...ys))) / 2;
+      stairG.push(txt(cx, cy + mm(1), `فتحة السلم · هبوط ${info.N} قائمة`, { size: mm(2), halo: true }));
+      stairBoxes.push({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2, w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) });
+    } }
   if (stairG.length) out.push(`<g class="stairs">${stairG.join('')}</g>`);
   // ------------------------------------------------------------------ الأثاث بخط رفيع
   const fixG = [], fixBoxes = [];

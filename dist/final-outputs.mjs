@@ -112,6 +112,17 @@ export function sheetNote(l) {
   return `<p class="muted">تعذّرت لوحة المسقط (${esc(l.sheetError || 'سبب غير معروف')})؛ عُرض المسقط البسيط.</p>`;
 }
 
+/** ملخص الأنظمة الهندسية بالأرقام (من autoSummary) للصفحة وكتاب المشروع. */
+export function mepSummaryHtml(M) {
+  if (!M) return '';
+  const n = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 1 }));
+  const stat = (v, l) => `<div class="stat"><b>${v}</b>${esc(l)}</div>`;
+  const fx = M.fixtures || {};
+  const stats = `<div class="stats">${stat(n(M.lights), 'وحدة إنارة')}${stat(n(M.sockets), 'مقبس')}${stat(n(M.circuits), 'دائرة كهربائية')}${stat(n(M.demandW / 1000) + ' kW', 'طلب كهربائي أقصى')}${stat(n(M.panels?.[0]?.kVA) + ' kVA', 'اللوحة الرئيسية')}${stat(n(M.acSelectedTR) + ' TR', `سعات التكييف (${n(M.ac?.length)} وحدة)`)}${stat(n(M.acTotalTR) + ' TR', 'الحمل الحراري الساكن')}${stat(n(M.tankL) + ' L', 'خزان المياه (يومان)')}${stat(n((fx.WC || 0) + (fx.BASIN || 0) + (fx.SHOWER || 0) + (fx.SINK || 0)), 'جهاز صحي')}${stat(n(fx.WATER_HEATER), 'سخان')}${stat(n(M.fire), 'عنصر حريق')}${stat(n(M.lowCurrent), 'عنصر تيار خفيف')}${M.pv ? stat(n(M.pv.kWp) + ' kWp', `ألواح شمسية (${M.pv.panels})`) : ''}</div>`;
+  const rows = (M.ac || []).slice().sort((a, b) => (b.btu || 0) - (a.btu || 0)).map(z => `<tr><td>${esc(z.room)}</td><td class="num">${n(z.areaM2)}</td><td class="num">${n(z.gainW)}</td><td class="num">${n(z.btu)}</td><td class="num">${n(z.inputW)}</td></tr>`).join('');
+  const ac = rows ? `<table class="pb-table"><thead><tr><th>الفراغ</th><th>م²</th><th>الحمل الساكن W</th><th>سبليت BTU/h</th><th>كهرباء الوحدة W</th></tr></thead><tbody>${rows}</tbody></table>` : '';
+  return stats + ac + `<p class="muted">أرقام أولية من مدخلات ولّدها الميزان من المخطط بافتراضات مشروع معلنة (الرياض صيفًا 46/24°C، غلاف معزول، 600 BTU/h لكل م² حدًا أدنى للاختيار، 250 ل/شخص/يوم)؛ ليست قيم كود ولا اعتمادًا للتنفيذ.</p>`;
+}
 /** HTML مستقل (للقراءة والطباعة) من البيانات نفسها. css: نص الأنماط ليُضمَّن. */
 export function projectBookHtml(data, { css = '' } = {}) {
   const R = designReasons(data), c = data.cost, S = data.summary;
@@ -126,6 +137,7 @@ export function projectBookHtml(data, { css = '' } = {}) {
   parts.push(sec('الكميات', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], data.quantities.rows.map(r => [r.label, r.value === null ? '—' : `${fmt(r.value)} ${r.unit}`, GRADES[r.grade], r.basis]))));
   parts.push(sec('التكلفة بأسعارك', table(['البند', 'الكمية', 'سعر الوحدة', 'التكلفة'], c.items.map(i => [i.label, i.qty === null ? '—' : `${fmt(i.qty)} ${i.unit}`, i.rate === null ? 'غير مسعّر' : fmt(i.rate), i.cost === null ? 'غير مسعّر' : fmt(i.cost)])) + `<p>المجموع الجزئي (${c.pricedCount} من ${c.totalCount} بندًا مسعّرًا): <b>${fmt(c.subtotal)}</b>${c.reserve !== null ? ` · احتياط ${c.reservePct}%: ${fmt(c.reserve)}` : ''}${c.vat !== null ? ` · ضريبة ${c.vatPct}%: ${fmt(c.vat)}` : ''} · الإجمالي: <b>${fmt(c.total)}</b> ${c.complete ? '' : '(جزئي: يخص البنود المسعّرة فقط)'}</p><p class="muted">لا توجد أسعار سوق افتراضية؛ الأسعار أسعارك.</p>`));
   parts.push(sec('لماذا هذا التصميم', (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.improvements.length ? `<h3>ما يحتاج تحسينًا</h3><ul>${R.improvements.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.unmeasured.length ? `<p class="muted">غير مُقيَّم: ${esc(R.unmeasured.join('، '))}</p>` : '') + (R.notes.length ? `<h3>ملاحظات المراجعة</h3><ul>${R.notes.map(n => `<li>${esc(n.message)}</li>`).join('')}</ul>` : '') + (data.score ? `<p class="muted">${esc(data.score.grade)}. ${esc(data.score.note || '')}</p>` : '<p class="muted">الدرجة غير متاحة لهذا المخطط.</p>')));
+  if (data.mep) parts.push(sec('الأنظمة الهندسية بالأرقام (أولي)', mepSummaryHtml(data.mep)));
   if (data.intel) { const { privacy: P, climate: C } = data.intel; const sc = v => (v === null || v === undefined ? '—' : v + ' / 100');
     parts.push(sec('تقييم الخصوصية والمناخ', `<p>مؤشر الخصوصية السعودي: <b>${sc(P.score)}</b> · المنطقة المناخية: <b>${sc(C.score)}</b></p><p class="muted">${esc(P.note)} ${esc(C.note)}</p>` + (P.violations.length ? '<h3>المخالفات والإصلاح المقترح</h3>' + table(['المشكلة', 'أين', 'الإصلاح'], P.violations.map(v => [v.problem, v.where.join(' ← '), v.fix])) : '') + (C.recommendations.length ? `<h3>توصيات مناخية</h3><ul>${C.recommendations.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul>` : ''))); }
   parts.push(sec('ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => [s.title, s.status === 'available' ? 'متاح' : 'قادم', s.note]))));

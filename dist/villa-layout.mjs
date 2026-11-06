@@ -149,11 +149,20 @@ const touch = (a, b) => {
 /** تقييم ترتيب كامل (كتل + فراغات حركة). أقل = أفضل. null = مرفوض. */
 function score(placed, circ, W, D, program = {}) {
   const dbg = globalThis.__villaDebug, no = why => { if (dbg) dbg[why] = (dbg[why] || 0) + 1; return null; };
+  // الفناء الداخلي (U): فراغ خارجي مفتوح، لا حركة؛ ملامسته تُحسب واجهة خارجية
+  const court = circ.find(c => c.id === 'court'); if (court) circ = circ.filter(c => c !== court);
   let pen = 0;
+  // حديقة طويلة ضيقة (أكثر من 2.2 أمثال عرضها) ليست حديقة بل ممر: تُرجَّح الأغلفة الأقل عمقًا
+  if (court) pen += 30 * Math.max(0, H_(court.r) / W_(court.r) - 2.2);
+  // لا كتلة خارج الغلاف: توزيع الحدود الدنيا قد يفيض عن العمق فتخرج الغرف عن المبنى
+  if (placed.some(p => p.r.x1 > W + .01 || p.r.y1 > D + .01 || p.r.x0 < -.01 || p.r.y0 < -.01)) return no('overflow');
   for (const p of placed) {
     const b = p.block, r = p.r, a = A_(r);
     const ratio = a / b.area;
     pen += 40 * Math.log(ratio) ** 2 * Math.max(1, b.area / 15) * (b.fixedArea ? 5 : 1);
+    // المجلس أصغر من 70٪ من مقاسه التصميمي لا يليق بالضيافة (ولا تتسع دورة مياهه): يُرفض
+    if (b.kind === 'majlis' && ratio < .7) return no('majlis-small');
+    if (b.kind === 'majlis' && ratio < .85) pen += 40;
     const md = MIN_SIDE[b.kind] || 2.4, s = Math.min(W_(r), H_(r));
     if (s < md) { if (s < md * .8) return no('min-side:' + b.kind); pen += 50 * (md - s); }
     if (b.kind === 'suite' || ((b.kind === 'maid' || b.kind === 'driver') && b.bath)) {
@@ -178,7 +187,7 @@ function score(placed, circ, W, D, program = {}) {
     // غرفة النوم تفتح على مدخل العائلة مباشرة: يضعف الخصوصية
     if (b.kind === 'suite' && !b.guest && Math.max(0, ...circ.filter(c => c.id !== 'foyer').map(c => touch(r, c.r))) < 1.3) pen += 35;
     // واجهة خارجية للفراغات المعيشية
-    const ext = (r.x0 < EPS ? H_(r) : 0) + (r.x1 > W - EPS ? H_(r) : 0) + (r.y0 < EPS ? W_(r) : 0) + (r.y1 > D - EPS ? W_(r) : 0);
+    const ext = (r.x0 < EPS ? H_(r) : 0) + (r.x1 > W - EPS ? H_(r) : 0) + (r.y0 < EPS ? W_(r) : 0) + (r.y1 > D - EPS ? W_(r) : 0) + (court ? touch(r, court.r) : 0);
     if (ext < 1.5) pen += b.kind === 'family' ? 15 : 60;
   }
   const find = id => placed.find(p => p.block.id === id);
@@ -210,7 +219,7 @@ function score(placed, circ, W, D, program = {}) {
   const circA = circ.reduce((a, c) => a + A_(c.r), 0), ratio = circA / (W * D);
   if (ratio > .2) pen += 160 * (ratio - .2);
   const hall = circ.find(c => c.id === 'hall');
-  if (hall) { const ha = A_(hall.r), ht = program.hallArea || DESIGN_TARGETS.hall; pen += 1.1 * Math.max(0, ha - ht * 1.3) + 2 * Math.max(0, ht * .5 - ha); if (program.hallFixed) pen += 6 * Math.max(0, Math.abs(ha - ht * 1.12) - ht * .12); const as = Math.max(W_(hall.r), H_(hall.r)) / Math.min(W_(hall.r), H_(hall.r)); if (as > 2.6) pen += 10 * (as - 2.6); }
+  if (hall) { const ha = A_(hall.r), ht = program.hallArea || DESIGN_TARGETS.hall; pen += (program.upperLounge ? 4.5 : 1.1) * Math.max(0, ha - ht * 1.3) + 2 * Math.max(0, ht * .5 - ha); if (program.hallFixed) pen += 6 * Math.max(0, Math.abs(ha - ht * 1.12) - ht * .12); const as = Math.max(W_(hall.r), H_(hall.r)) / Math.min(W_(hall.r), H_(hall.r)); if (as > 2.6) pen += 10 * (as - 2.6); }
   return pen;
 }
 
@@ -232,7 +241,10 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   if (upper) return searchUpper(program, W, D, upper, keep);
   const T = DESIGN_TARGETS, out = [];
   const blocks = program.blocks, suites = blocks.filter(b => b.kind === 'suite' && !b.guest).sort(byRank).reverse(); // الرئيسية أولًا
-  const push = (mode, placed, circ, meta) => { const s = score(placed, circ, W, D, program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s, rp, pen: s + rp.base + Math.min(...rp.p), ...meta }); };
+  const wantCourt = !!program.prefs?.courtyard;
+  // الفناء مطلوب: بقية الأنماط تتأخر كبدائل؛ غير مطلوب: نمط الفناء يبقى بديلًا مختلفًا جذريًا لا الخيار الأول
+  const bias = mode => (mode === 'court' ? (wantCourt ? -150 : 15) : wantCourt ? 250 : 0);
+  const push = (mode, placed, circ, meta) => { const s = score(placed, circ, W, D, program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
   const hubWidths = (stair ? [4.8, 5.2] : [3.6, 4.2, 4.8]).filter(h => W - h >= 7.2);
 
   // (1) صالة مركزية بين جناحين، و(2) شكل T: جناحان + ممر عرضي + صف خلفي
@@ -269,6 +281,27 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
           push(backSet.length ? 'tee' : 'center', pl, circ, { wh, wl, wr, ...(stair ? { stairRect: { x0: cx - 1.3, y0: g - stair.len - .1, x1: cx + 1.3, y1: g - .1 } } : {}) });
         }
       }
+    }
+  }
+  // (5) فناء/حديقة داخلية (مبنى على شكل U): جناحان بكامل العمق حول حديقة في المنتصف مفتوحة على الخلف،
+  // الردهة والصالة في مقدمة المحور، وممرا الفناء على جانبيه يصلان غرف الأجنحة الخلفية. الحديقة تُسوَّر من الخلف.
+  if (blocks.length <= 15) for (const wh of [7.6, 8.6, 9.6].filter(h => W - h >= 7.2)) for (const sp of [.5, .42, .58]) {
+    const wl = snap((W - wh) * sp), wr = W - wh - wl;
+    if (wl < 3.6 || wr < 3.6) continue;
+    const gw = T.galleryW;
+    for (const [L, R] of subsets(blocks)) {
+      if (!L.length || !R.length) continue;
+      if (sp === .5 && L[0].id > R[0].id) continue;
+      L.sort(byRank); R.sort(byRank);
+      const pl = [...stack(L, 0, wl, 0, D, 'x1'), ...stack(R, wl + wh, W, 0, D, 'x0')];
+      const f = foyerDepth(pl, wh);
+      const g = snap(f + Math.max(stair ? stair.len + 3.2 : 4.2, (program.hallArea || T.hall) / wh));
+      if (D - g < 5) continue; // الحديقة بعمق 5 م على الأقل
+      const court = { x0: wl + gw, y0: g, x1: wl + wh - gw, y1: D };
+      const circ = [{ id: 'foyer', r: { x0: wl, y0: 0, x1: wl + wh, y1: f } }, { id: 'hall', r: { x0: wl, y0: f, x1: wl + wh, y1: g } },
+        { id: 'gallery', r: { x0: wl, y0: g, x1: wl + gw, y1: D } }, { id: 'gallery2', r: { x0: wl + wh - gw, y0: g, x1: wl + wh, y1: D } }, { id: 'court', r: court }];
+      const cx = wl + wh / 2;
+      push('court', pl, circ, { wh, wl, wr, court, ...(stair ? { stairRect: { x0: cx - 1.3, y0: g - stair.len - .1, x1: cx + 1.3, y1: g - .1 } } : {}) });
     }
   }
   // (3) صفّان وممر بينهما (للأراضي العريضة قليلة العمق): أمامي عام، خلفي خاص، والصالة في الخلف مقابل الردهة
@@ -323,18 +356,40 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
 }
 /** الدور العلوي على هندسة الأرضي نفسها: المحور صالة علوية ينتهي بالسلم في الموضع ذاته، والأجنحة للنوم. */
 function searchUpper(program, W, D, up, keep) {
-  const out = [], sr = up.stairRect, blocks = program.blocks, hb = up.hub;
+  const out = [], sr = up.stairRect, blocks = program.blocks, hb = up.hub, T_ = DESIGN_TARGETS;
   const lounge = { id: 'hall', r: { x0: hb.x0, y0: 0, x1: hb.x1, y1: D } };
-  if (up.mode === 'side') {
-    const wx0 = up.sideAt === 'L' ? 0 : hb.x1, wx1 = up.sideAt === 'L' ? hb.x0 : W;
-    const pl = stack([...blocks].sort(byRank), wx0, wx1, 0, D, up.sideAt === 'L' ? 'x1' : 'x0');
-    const sc = score(pl, [lounge], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); out.push({ mode: 'side', placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
-  } else {
+  if (up.mode === 'court' && up.court) {
+    // الدور العلوي فوق U: صالة علوية فوق الردهة والصالة، وممرا الفناء حول فراغ الحديقة (مفتوح للسماء)
+    const c = up.court, lg = { id: 'hall', r: { x0: hb.x0, y0: 0, x1: hb.x1, y1: c.y0 } };
+    const circ = [lg, { id: 'gallery', r: { x0: hb.x0, y0: c.y0, x1: c.x0, y1: D } }, { id: 'gallery2', r: { x0: c.x1, y0: c.y0, x1: hb.x1, y1: D } }, { id: 'court', r: c }];
     for (const [L, R] of subsets(blocks)) {
       if (!L.length || !R.length) continue;
       L.sort(byRank); R.sort(byRank);
       const pl = [...stack(L, 0, hb.x0, 0, D, 'x1'), ...stack(R, hb.x1, W, 0, D, 'x0')];
-      const sc = score(pl, [lounge], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); out.push({ mode: up.mode, placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
+      const sc = score(pl, circ, W, D, program); if (sc !== null) { const rp = rulePenalty(pl, circ, W, D, program.rules, program.entry); out.push({ mode: 'court', placed: pl, circ: circ.filter(x => x.id !== 'court'), court: c, courtVoid: true, raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
+    }
+  } else if (up.mode === 'side') {
+    const wx0 = up.sideAt === 'L' ? 0 : hb.x1, wx1 = up.sideAt === 'L' ? hb.x0 : W;
+    const pl = stack([...blocks].sort(byRank), wx0, wx1, 0, D, up.sideAt === 'L' ? 'x1' : 'x0');
+    const sc = score(pl, [lounge], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); out.push({ mode: 'side', placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
+  } else {
+    // الصالة العلوية لا تمتد بطول المحور كله: مقدمة المحور (على الواجهة) قد تأخذ غرفة فلا تضيع المساحة في صالة طويلة
+    const hubW = hb.x1 - hb.x0, hubCands = [null, ...blocks.filter(b => !b.master && ['suite', 'office', 'prayer'].includes(b.kind)).filter((b, i, arr) => arr.findIndex(x => x.kind === b.kind && x.area === b.area && !!x.bath === !!b.bath) === i)];
+    for (const hb0 of hubCands) {
+      const rest = hb0 ? blocks.filter(b => b !== hb0) : blocks;
+      const fd = hb0 ? snap(Math.max(3.0, Math.min(5.2, hb0.area / hubW))) : 0;
+      if (hb0 && sr && sr.y0 - fd < 3.4) continue; // تبقى جلسة أمام السلم
+      if (hb0 && !sr && D - fd < 4.5) continue;
+      const lg = { id: 'hall', r: { x0: hb.x0, y0: fd, x1: hb.x1, y1: D } };
+      const front = hb0 ? [{ block: hb0, r: { x0: hb.x0, y0: 0, x1: hb.x1, y1: fd }, door: 'y1' }] : [];
+      for (const [L, R] of subsets(rest)) {
+        if (!L.length || !R.length) continue;
+        L.sort(byRank); R.sort(byRank);
+        const pl = [...stack(L, 0, hb.x0, 0, D, 'x1'), ...stack(R, hb.x1, W, 0, D, 'x0'), ...front];
+        // غرفة الجناح الأمامية تلامس الصالة (لا غرفة المقدمة فقط) بطول يكفي بابها بعد شريط الحمام
+        if (fd && pl.some(p => p.block !== hb0 && p.r.y0 < fd && p.r.y1 - Math.max(fd, p.block.bath ? (p.block.master ? T_.masterStripD : T_.stripD) : 0) < 1.5)) continue;
+        const sc = score(pl, [lg], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lg], W, D, program.rules, program.entry); out.push({ mode: up.mode, placed: pl, circ: [lg], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true, frontDepth: fd }); }
+      }
     }
   }
   return out.sort((a, b) => a.pen - b.pen).slice(0, keep);
@@ -386,14 +441,18 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
   const T = DESIGN_TARGETS, rooms = [], doors = [], notes = [];
   const add = (r, o) => { const x = { x0: snap(r.x0), y0: snap(r.y0), x1: snap(r.x1), y1: snap(r.y1), ...o }; rooms.push(x); return x; };
   const hallName = cand.upper ? (program.upperHallName || 'الصالة العلوية') : (program.hall ? 'الصالة' : 'صالة الحركة');
-  const circRooms = cand.circ.map(c => add(c.r, { id: c.id, circ: true, type: c.id === 'foyer' ? 'entrance' : c.id === 'hall' ? 'living' : 'corridor', name: c.id === 'foyer' ? (program.blocks.some(b => b.men) ? 'مدخل العائلة' : 'الردهة') : c.id === 'hall' ? hallName : 'ممر الغرف' }));
+  const courtRect = cand.court || null;
+  const courtRoom = cand.circ.some(c => c.id === 'court') ? add(cand.circ.find(c => c.id === 'court').r, { id: 'court', type: 'courtyard', name: 'الحديقة الداخلية', kind: 'court', open: 'y1' }) : null;
+  const circRooms = cand.circ.filter(c => c.id !== 'court').map(c => add(c.r, { id: c.id, circ: true, type: c.id === 'foyer' ? 'entrance' : c.id === 'hall' ? 'living' : 'corridor', name: c.id === 'foyer' ? (program.blocks.some(b => b.men) ? 'مدخل العائلة' : 'الردهة') : c.id === 'hall' ? hallName : c.id.startsWith('gallery') && courtRect ? 'ممر الحديقة' : 'ممر الغرف' }));
   const realFoyer = circRooms.find(c => c.id === 'foyer'), foyer = realFoyer || circRooms[0];
   if (cand.stairRect) { const h = circRooms.find(c => c.id === 'hall'); if (h) h.stairZone = cand.stairRect; }
   // الأبواب الثابتة للمحور
   if (realFoyer) doors.push({ a: 'foyer', edge: { axis: 'y', at: 0, from: foyer.x0, to: foyer.x1 }, kind: 'door2', w: 1.6, entry: true });
   if (realFoyer) for (const c of circRooms) if (c !== foyer) { const e = shared(foyer, c); if (e) doors.push({ a: 'foyer', b: c.id, edge: e, kind: 'arch', w: Math.min(2.4, e.to - e.from - .4) }); }
-  const hall = circRooms.find(c => c.id === 'hall'), gal = circRooms.find(c => c.id === 'gallery');
-  if (hall && gal) { const e = shared(hall, gal); if (e) doors.push({ a: 'hall', b: 'gallery', edge: e, kind: 'arch', w: Math.min(3.2, e.to - e.from - .4) }); }
+  const hall = circRooms.find(c => c.id === 'hall');
+  for (const gal of circRooms.filter(c => c.id.startsWith('gallery'))) if (hall) { const e = shared(hall, gal); if (e) doors.push({ a: 'hall', b: gal.id, edge: e, kind: 'arch', w: Math.min(3.2, e.to - e.from - .4) }); }
+  if (hall && courtRoom) { const e = shared(hall, courtRoom); if (e) { doors.push({ a: 'hall', b: 'court', edge: e, kind: 'door2', w: Math.min(2.4, e.to - e.from - .6) }); notes.push('مبنى على شكل U: حديقة داخلية في المنتصف مفتوحة على الحوش الخلفي بسور، تطل عليها الصالة بباب زجاجي مزدوج وغرف الجناحين بنوافذها، وممرا الحديقة يصلان الغرف الخلفية.'); } }
+  if (cand.courtVoid) notes.push('الدور العلوي يحيط بفراغ الحديقة (مفتوح للسماء) وتطل عليه الغرف.');
   // أزواج الحمامات: جهة الشريط لكل جناح نوم نحو جاره من الأجنحة
   const suites = cand.placed.filter(p => ['suite', 'maid'].includes(p.block.kind) && p.block.bath !== false);
   const stripSide = new Map();
@@ -401,6 +460,8 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
     const perp = isX(p.door) ? ['y0', 'y1'] : ['x0', 'x1'];
     const already = perp.find(s => suites.some(q => q !== p && stripSide.get(q) === opp[s] && Math.abs(p.r[s] - q.r[opp[s]]) < 1e-3 && (isX(s) ? Math.min(p.r.y1, q.r.y1) - Math.max(p.r.y0, q.r.y0) : Math.min(p.r.x1, q.r.x1) - Math.max(p.r.x0, q.r.x0)) > 1));
     if (already) { stripSide.set(p, already); continue; }
+    // مع غرفة في مقدمة المحور العلوي: شريط حمام الغرفة الأمامية نحو الواجهة ليبقى جزء النوم ملاصقًا للصالة
+    if (cand.frontDepth && p.r.y0 < EPS && perp.includes('y0')) { stripSide.set(p, 'y0'); continue; }
     const mate = perp.find(s => suites.some(q => q !== p && !stripSide.has(q) && Math.abs(p.r[s] - q.r[opp[s]]) < 1e-3));
     // بلا جار: الشريط نحو الجدار الداخلي (ليس الخارجي) ليبقى للغرفة جدار خارجي
     const interior = perp.find(s => !(s === 'x0' && p.r.x0 < EPS) && !(s === 'x1' && p.r.x1 > W - EPS) && !(s === 'y0' && p.r.y0 < EPS) && !(s === 'y1' && p.r.y1 > D - EPS));
@@ -458,8 +519,8 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
     }
     if (!done) notes.push('المدخل الثاني للأرض: لا يلامس فراغًا عامًا مناسبًا على تلك الجهة في هذا البديل؛ يمكن إضافته في المرسم.');
   }
-  if (program.prefs?.guestEntrance && !doors.some(d => d.guest)) notes.push('مدخل الضيوف المستقل: المجلس لا يلامس الواجهة الأمامية في هذا البديل.');
-  return { rooms, doors, notes, W, D, mode: cand.mode };
+  if (program.prefs?.guestEntrance && !doors.some(d => d.guest || d.men)) notes.push('مدخل الضيوف المستقل: المجلس لا يلامس الواجهة الأمامية في هذا البديل.');
+  return { rooms, doors, notes, W, D, mode: cand.mode, court: courtRect, courtOpen: !!courtRoom };
 
   function kitchenStrip(host, items) {
     // شريط على الجهة العمودية لباب المطبخ، بعيدًا عن الطعام؛ الغسيل في الطرف الخارجي (نافذة) والمخزن عند جهة الحركة
@@ -691,12 +752,14 @@ function frame(fp, entry, mirror, W, ox = 0, Wfull = W) {
     return { x: fp.x + y, y: fp.y + fp.h - xc };
   };
 }
-function exteriorEdges(r, W, D) {
+function exteriorEdges(r, W, D, court = null) {
   const out = [];
   if (r.y0 < EPS) out.push({ axis: 'y', at: 0, from: r.x0, to: r.x1, side: 'y0' });
   if (r.y1 > D - EPS) out.push({ axis: 'y', at: D, from: r.x0, to: r.x1, side: 'y1' });
   if (r.x0 < EPS) out.push({ axis: 'x', at: 0, from: r.y0, to: r.y1, side: 'x0' });
   if (r.x1 > W - EPS) out.push({ axis: 'x', at: W, from: r.y0, to: r.y1, side: 'x1' });
+  // الحدود المشتركة مع الحديقة الداخلية واجهات خارجية (نوافذ عليها)
+  if (court && r.id !== 'court') { const e = shared(r, court); if (e && e.to - e.from > 1e-3) out.push({ axis: e.axis, at: e.at, from: e.from, to: e.to, side: e.axis === 'x' ? (Math.abs(r.x0 - e.at) < 1e-3 ? 'x0' : 'x1') : (Math.abs(r.y0 - e.at) < 1e-3 ? 'y0' : 'y1'), court: true }); }
   return out;
 }
 
@@ -716,8 +779,10 @@ export function drawLevel(doc0, layout, { level, T }) {
   // الجدران: حواف المستطيلات مدمجة على الخطوط المتسامتة
   const segs = { x: new Map(), y: new Map() };
   const addSeg = (axis, at, a, b) => { const k = r2(at); if (!segs[axis].has(k)) segs[axis].set(k, []); segs[axis].get(k).push([a, b]); };
-  for (const r of rooms) { addSeg('y', r.y0, r.x0, r.x1); addSeg('y', r.y1, r.x0, r.x1); addSeg('x', r.x0, r.y0, r.y1); addSeg('x', r.x1, r.y0, r.y1); }
-  const isExt = (axis, at) => (axis === 'y' ? Math.abs(at) < EPS || Math.abs(at - D) < 1e-3 : Math.abs(at) < EPS || Math.abs(at - W) < 1e-3);
+  const court = layout.court || null;
+  for (const r of rooms) { addSeg('y', r.y0, r.x0, r.x1); if (!(r.kind === 'court' && r.open === 'y1')) addSeg('y', r.y1, r.x0, r.x1); addSeg('x', r.x0, r.y0, r.y1); addSeg('x', r.x1, r.y0, r.y1); }
+  const onCourt = (axis, at, a, b) => !!court && (axis === 'x' ? (Math.abs(at - court.x0) < 1e-3 || Math.abs(at - court.x1) < 1e-3) && Math.min(b, court.y1) - Math.max(a, court.y0) > 1e-3 : Math.abs(at - court.y0) < 1e-3 && Math.min(b, court.x1) - Math.max(a, court.x0) > 1e-3);
+  const isExt = (axis, at, a = 0, b = 0) => (axis === 'y' ? Math.abs(at) < EPS || Math.abs(at - D) < 1e-3 : Math.abs(at) < EPS || Math.abs(at - W) < 1e-3) || onCourt(axis, at, a, b);
   const walls = [];
   for (const axis of ['x', 'y']) for (const [at, list] of segs[axis]) {
     list.sort((p, q) => p[0] - q[0]);
@@ -725,7 +790,7 @@ export function drawLevel(doc0, layout, { level, T }) {
     for (const [a, b] of list) { const last = merged[merged.length - 1]; if (last && a <= last[1] + 1e-3) last[1] = Math.max(last[1], b); else merged.push([a, b]); }
     for (const [a, b] of merged) {
       const pa = axis === 'y' ? T(a, at) : T(at, a), pb = axis === 'y' ? T(b, at) : T(at, b);
-      const id = run({ type: 'add-wall', level: LVL, a: pa, b: pb, t: isExt(axis, at) ? EXT : INT })[0];
+      const id = run({ type: 'add-wall', level: LVL, a: pa, b: pb, t: isExt(axis, at, a, b) ? EXT : INT })[0];
       walls.push({ axis, at, a, b, id, pa });
     }
   }
@@ -734,6 +799,8 @@ export function drawLevel(doc0, layout, { level, T }) {
     const p = axis === 'y' ? T(pos, at) : T(at, pos);
     try { return run({ type: 'add-opening', wall: w.id, kind, at: Math.hypot(p.x - w.pa.x, p.y - w.pa.y), ...extra })[0]; } catch { return null; }
   };
+  // سور الحديقة الداخلية من جهة الحوش الخلفي (2.4 م) يغلق الفناء بلا سقف
+  if (court && layout.courtOpen) { const pa = T(court.x0, court.y1), pb = T(court.x1, court.y1); try { run({ type: 'add-wall', level: LVL, a: pa, b: pb, t: EXT, h: 2.4, kind: 'fence' }); } catch { /* سور اختياري */ } }
   const byId = new Map(rooms.map(r => [r.id, r]));
   const doorAt = []; // للأثاث: مواقع الأبواب القانونية
   for (const d of layout.doors) {
@@ -749,10 +816,11 @@ export function drawLevel(doc0, layout, { level, T }) {
   }
   // النوافذ على الجدران الخارجية
   for (const r of rooms) {
-    if (r.id === 'foyer' || r.kind === 'lobby' || r.type === 'storage') continue;
-    for (const e of exteriorEdges(r, W, D)) {
+    if (r.id === 'foyer' || r.kind === 'lobby' || r.type === 'storage' || r.kind === 'court') continue;
+    for (const e of exteriorEdges(r, W, D, court)) {
       const len = e.to - e.from, busy = doorAt.filter(d => d.axis === e.axis && Math.abs(d.at - e.at) < 1e-3 && d.pos > e.from && d.pos < e.to);
       if (r.type === 'bath') { if (len >= 1 && !busy.length) opening(e.axis, e.at, (e.from + e.to) / 2, 'window', { w: .6, h: .6, sill: 1.7 }); continue; }
+      if (r.type === 'corridor' && e.court) { const n = Math.max(1, Math.floor(len / 3.2)); for (let i = 0; i < n; i++) opening(e.axis, e.at, e.from + len * (i + .5) / n, 'window2', { w: Math.min(2.2, len / n - .6) }); continue; }
       if (r.type === 'corridor') { if (len < 2.5) opening(e.axis, e.at, (e.from + e.to) / 2, 'window', { w: .9 }); continue; }
       if (len < 1.6) continue;
       const big = ['majlis', 'living', 'dining', 'master'].includes(r.type) && len >= 3.4;
@@ -777,6 +845,8 @@ export function drawLevel(doc0, layout, { level, T }) {
   chain(rooms.filter(r => r.y0 < EPS).flatMap(r => [r.x0, r.x1]), x => ({ x, y: 0 }), { x: 0, y: -1 });
   chain(rooms.filter(r => r.x1 > W - 1e-3).flatMap(r => [r.y0, r.y1]), y => ({ x: W, y }), { x: 1, y: 0 });
   furnish(rooms, T, run, doorAt, W, D, LVL);
+  // أشجار الحديقة الداخلية
+  if (court && layout.courtOpen) { const cw = court.x1 - court.x0, cd = court.y1 - court.y0; for (const [fx, fy] of cd >= 7 ? [[.5, .3], [.5, .72]] : [[.5, .5]]) { const p = T(court.x0 + cw * fx, court.y0 + cd * fy); try { run({ type: 'add-fixture', level: LVL, kind: 'tree', x: p.x, y: p.y, rot: 0 }); } catch { /* شجرة اختيارية */ } } }
   return doc;
 
   function setSwing(id, pIn) {
@@ -916,12 +986,17 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
     addEnv(w, d); addEnv(w, d * 1.15);
   }
   addEnv(W, target / W); addEnv(W, target / W * 1.2);
+  // أغلفة أوسع لنمط الفناء (الحديقة تأخذ من المسطح): تُقاس بالمساحة الفعلية بعد خصم الحديقة
+  for (const rho of [1.1, 1.4, 1.75]) { let w = Math.sqrt(target * 1.35 / rho), d = rho * w; if (w > W) { w = W; d = target * 1.35 / w; } if (d > D) { d = D; w = target * 1.35 / d; } addEnv(w, d); }
+  addEnv(W, target * 1.35 / W); addEnv(W, target * 1.55 / W); addEnv(W, target * 1.8 / W);
+  for (const rho of [2.0, 2.4]) { let w = Math.sqrt(target * 1.45 / rho), d = rho * w; if (w > W) { w = W; d = target * 1.45 / w; } if (d > D) { d = D; w = target * 1.45 / d; } addEnv(w, d); }
   let cands = [];
   // prefer: نمط التصميم المعروض؛ تعديل العميل يُطبَّق عليه نفسه متى أمكن بدل توزيع جديد كليًا
-  for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3 })) cands.push({ ...c, env, pen: c.pen + 6 * Math.max(0, env.w * env.d / target - 1.25) * 10 - (prefPat && c.pat === prefPat ? 60 : 0) });
+  for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3 })) cands.push({ ...c, env, pen: c.pen + 6 * Math.max(0, (env.w * env.d - (c.court ? A_(c.court) : 0)) / target - 1.25) * 10 - (prefPat && c.pat === prefPat ? 60 : 0) });
   cands.sort((a, b) => a.pen - b.pen);
-  const seenSig = new Set(), ex = new Set(exclude), avoid = new Set([...(tw.avoidModes || []), ...(program.prefs?.noCorridors ? ['tee', 'rows'] : [])]);
+  const seenSig = new Set(), ex = new Set(exclude), avoid = new Set([...(tw.avoidModes || []), ...(program.prefs?.noCorridors && !program.prefs?.courtyard ? ['tee', 'rows', 'court'] : []), ...(program.prefs?.courtyard === false ? ['court'] : [])]);
   cands = cands.filter(c => { if (seenSig.has(c.sig) || ex.has(c.pat) || avoid.has(c.mode)) return false; seenSig.add(c.sig); return true; });
+  const diff = differentFrom(cands, exclude); cands = diff.list;
   if (!cands.length) {
     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م = ${Math.round(W * D)} م²)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
     err.code = 'VILLA_NO_FIT'; err.need = need; err.available = W * D; throw err;
@@ -929,30 +1004,32 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   const designs = [];
   const hasRules = program.rules.length > 0;
   for (const cand of cands) {
-    if (designs.length >= keep + (hasRules ? 4 : 2)) break;
-    if (hasRules && designs.filter(d => !d.fails).length >= keep) break;
+    if (designs.length >= keep * 3 + (hasRules ? 4 : 0)) break;
+    if (hasRules && designs.filter(d => !d.fails).length >= keep * 2) break;
     try {
       // المرآة: تحددها جهات العميل الجانبية (شرق/غرب) إن وُجدت، وإلا تنويع الاتجاه بين البدائل
       const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : prefPat && cand.pat === prefPat && prefMirror !== null ? prefMirror : designs.length % 2 === 1;
       const layout = realizeLayout(cand, program, cand.env.w, cand.env.d, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
       const doc = layoutToDoc(layout, { land, plot, fp, entry, mirror, title, ox: cand.env.ox, Wfull: W });
       const built = cand.env.w * cand.env.d;
-      layout.notes.push(`مسطح الدور ${Math.round(built)} م² (${r2(cand.env.w)} × ${r2(cand.env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`);
+      layout.notes.push(`مسطح الدور ${Math.round(built - (cand.court ? A_(cand.court) : 0))} م²${cand.court ? ` مع حديقة داخلية ${Math.round(A_(cand.court))} م²` : ''} (${r2(cand.env.w)} × ${r2(cand.env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`);
       const check = checkDoc(doc);
-      if (!check.ok) continue;
+      if (!check.ok) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: check.problems }); continue; }
       const relaxed = relaxFixtures(doc);
       const q = quality(relaxed);
-      if (q.reject) continue;
+      if (q.reject) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: q.issues, doc: relaxed }); continue; }
       const ledger = verifyRequest(relaxed, requirements, { entry });
-      designs.push({ doc: relaxed, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, ledger, fails: ledger.filter(x => !x.ok).length });
-    } catch { /* بديل لم يُبنَ: يُرفض */ }
+      // مجلس الرجال بلا دورة مياه خاصة: عيب ضيافة يُؤخّر البديل خلف كل بديل سليم
+      const wcMissing = layout.notes.some(n => /دورة مياه (?:الضيوف|الرجال) لم تتسع/.test(n)) ? 1 : 0;
+      designs.push({ doc: relaxed, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes], summary: describe(cand), rooms: layout.rooms, ledger, fails: ledger.filter(x => !x.ok).length + wcMissing });
+    } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: e.message }); }
   }
   if (!designs.length) { const err = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك لهذا البرنامج والأرض؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : 'تعذّر بناء أي بديل سليم من التوزيعات المرشحة.'); err.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_BUILD_FAILED'; throw err; }
   // تنفيذ طلب العميل أولًا، ثم الجودة
   designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality);
-  // تنويع الاتجاه: البدائل الزوجية تُعكس (مرآة) بعد الترتيب فلا يتكرر الشكل نفسه
-  designs.length = Math.min(designs.length, keep);
-  return { designs, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
+  const picked = diversify(designs, keep);
+  if (diff.relaxed) picked[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
+  return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
 }
 /**
  * دوران: الأرضي للضيافة والخدمة (مجالس، طعام، مطبخ، خادمة، مكتب، غرفة كبار السن) والسلم في نهاية الصالة؛
@@ -975,7 +1052,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const fam = uBlocks.find(b => b.kind === 'family'); if (fam) { uBlocks = uBlocks.filter(b => b !== fam); upperHallName = fam.name; }
   const gExtra = Math.min(1, program.extraBaths);
   const gProg = { ...program, blocks: gBlocks, extraBaths: gExtra };
-  const uProg = { ...program, blocks: uBlocks, extraBaths: program.extraBaths - gExtra, upperHallName, hall: true, guestWc: 0, kitchenStrip: [], prefs: {}, hallArea: 24 };
+  const uProg = { ...program, blocks: uBlocks, extraBaths: program.extraBaths - gExtra, upperHallName, hall: true, guestWc: 0, kitchenStrip: [], prefs: {}, hallArea: 24, upperLounge: true };
   const plot = validatePlot({ width: Number(land.width), length: Number(land.length), floors: 1, streets: Object.fromEntries((land.streets || []).map(x => [x, true])), entry: land.entries?.[0] || land.entry });
   const fp = footprint(plot), entry = plot.entry; gProg.entry = entry; uProg.entry = entry;
   const W = ['s', 'n'].includes(entry) ? fp.w : fp.h, D = ['s', 'n'].includes(entry) ? fp.h : fp.w;
@@ -984,18 +1061,22 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const envs = [];
   const addEnv = (w, d) => { w = snap(Math.min(W, w)); d = snap(Math.min(D, d)); if (w < 8.5 || d < 10) return; if (envs.some(e => Math.abs(e.w - w) < .6 && Math.abs(e.d - d) < .6)) return; envs.push({ w, d, ox: snap((W - w) / 2) }); };
   for (const rho of [.8, 1, 1.25, 1.55, 1.9]) { let w = Math.sqrt(target / rho), d = rho * w; if (w > W) { w = W; d = target / w; } if (d > D) { d = D; w = target / d; } addEnv(w, d); addEnv(w, d * 1.12); }
+  for (const rho of [1.1, 1.4, 1.75]) { let w = Math.sqrt(target * 1.35 / rho), d = rho * w; if (w > W) { w = W; d = target * 1.35 / w; } if (d > D) { d = D; w = target * 1.35 / d; } addEnv(w, d); }
+  addEnv(W, target * 1.35 / W); addEnv(W, target * 1.55 / W); addEnv(W, target * 1.8 / W);
+  for (const rho of [2.0, 2.4]) { let w = Math.sqrt(target * 1.45 / rho), d = rho * w; if (w > W) { w = W; d = target * 1.45 / w; } if (d > D) { d = D; w = target * 1.45 / d; } addEnv(w, d); }
   const pairs = [];
   for (const env of envs) for (const g of searchLayouts(gProg, env.w, env.d, { keep: 6, stair: STAIR })) {
     const hall = g.circ.find(c => c.id === 'hall').r;
-    const u = searchLayouts(uProg, env.w, env.d, { upper: { mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 } }, keep: 1 })[0];
+    const u = searchLayouts(uProg, env.w, env.d, { upper: { mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 }, court: g.court || null }, keep: 1 })[0];
     const pat = g.pat + '/' + (u && u.placed.map(p => p.block.kind[0] + ((p.r.x0 + p.r.x1) / 2 < env.w / 2 ? 'L' : 'R') + Math.round(p.r.y0 / 3)).sort().join(''));
-    if (u && !exSet.has(pat) && !(tw.avoidModes || []).includes(g.mode)) { const p0 = g.rp.p[0] + u.rp.p[0], p1 = g.rp.p[1] + u.rp.p[1]; pairs.push({ g, u, env, pen: g.raw + u.raw + g.rp.base + u.rp.base + Math.min(p0, p1) - (prefPat && pat === prefPat ? 60 : 0), mirrorPref: p0 !== p1 ? p1 < p0 : null, pat }); }
+    if (u && !exSet.has(pat) && !(tw.avoidModes || []).includes(g.mode) && !(g.mode === 'court' && program.prefs?.courtyard === false)) { const p0 = g.rp.p[0] + u.rp.p[0], p1 = g.rp.p[1] + u.rp.p[1]; pairs.push({ g, u, env, pen: g.raw + u.raw + g.rp.base + u.rp.base + Math.min(p0, p1) - (prefPat && pat === prefPat ? 60 : 0), mirrorPref: p0 !== p1 ? p1 < p0 : null, pat }); }
   }
   pairs.sort((a, b) => a.pen - b.pen);
+  const diff2 = differentFrom(pairs, exclude), pairs2 = diff2.list;
   if (!pairs.length) { const e = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : `لم أجد توزيعًا مهنيًا لدورين داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م).`); e.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; throw e; }
   const designs = [];
-  for (const pr of pairs) {
-    if (designs.length >= keep + (program.rules.length ? 3 : 1)) break;
+  for (const pr of pairs2) {
+    if (designs.length >= keep * 3 + (program.rules.length ? 3 : 0)) break;
     try {
       const mirror = pr.mirrorPref ?? (prefPat && pr.pat === prefPat && prefMirror !== null ? prefMirror : designs.length % 2 === 1), { env } = pr;
       const gl = realizeLayout(pr.g, gProg, env.w, env.d, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
@@ -1006,16 +1087,18 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
       doc = drawLevel(doc, ul, { level: L2, T });
       doc = addStair(doc, pr.g.stairRect, T, LV);
       { const sr = pr.g.stairRect, c = T((sr.x0 + sr.x1) / 2, (sr.y0 + sr.y1) / 2); try { doc = applyCommand(doc, { type: 'add-text', level: L2, at: c, text: 'فتحة السلم', size: .35 }).doc; } catch { /* نص اختياري */ } }
-      const check = checkDoc(doc); if (!check.ok) continue;
-      const relaxed = relaxFixtures(doc), q = quality(relaxed); if (q.reject) continue;
-      const notes = [...new Set([...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d)} م² (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
+      const check = checkDoc(doc); if (!check.ok) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: pr.pat, why: check.problems }); continue; }
+      const relaxed = relaxFixtures(doc), q = quality(relaxed); if (q.reject) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: pr.pat, why: q.issues, doc: relaxed }); continue; }
+      const notes = [...new Set([...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0))} م²${pr.g.court ? ` مع حديقة داخلية ${Math.round(A_(pr.g.court))} م²` : ''} (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
       const ledger = verifyRequest(relaxed, requirements, { entry });
       designs.push({ doc: relaxed, penalty: r2(pr.pen), quality: r2(pr.pen + q.cost), same: !!prefPat && pr.pat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, env, notes, pat: pr.pat, summary: describe(pr.g) + ' (دوران)', ledger, fails: ledger.filter(x => !x.ok).length });
-    } catch { /* زوج لم يُبنَ */ }
+    } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: pr.pat, why: e.message }); }
   }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; throw e; }
-  designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality); designs.length = Math.min(designs.length, keep);
-  return { designs, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2 };
+  designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality);
+  const picked2 = diversify(designs, keep);
+  if (diff2.relaxed) picked2[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
+  return { designs: picked2, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2 };
 }
 /** سلم U داخل غرفة السلم: يبدأ عند طرفها الأمامي ويصعد نحو الخلف. */
 function addStair(doc, sr, T, level) {
@@ -1034,8 +1117,43 @@ export function canonicalSide(entry, side, mirror = false) {
   if (c && mirror && c[0] === 'x') c = c === 'x0' ? 'x1' : 'x0';
   return c;
 }
-const MODE_AR = { center: 'صالة مركزية بين جناحين', tee: 'صالة مركزية وممر خلفي لأجنحة النوم (شكل T)', rows: 'صف أمامي للضيافة وصف خلفي للعائلة بينهما ممر', side: 'صالة جانبية بطول المبنى' };
+const MODE_AR = { court: 'مبنى على شكل U حول حديقة داخلية في المنتصف', center: 'صالة مركزية بين جناحين', tee: 'صالة مركزية وممر خلفي لأجنحة النوم (شكل T)', rows: 'صف أمامي للضيافة وصف خلفي للعائلة بينهما ممر', side: 'صالة جانبية بطول المبنى' };
 function describe(c) { return MODE_AR[c.mode] || c.mode; }
+/** رموز النمط: نوع الفراغ + الجهة + حزام العمق؛ منها تُقاس المسافة بين توزيعين. */
+const patTokens = pat => (String(pat || '').split('|')[1] || '').match(/[a-z][LR]\d+/g) || [];
+const patMode = pat => String(pat || '').split('|')[0];
+/** نسبة الفراغات التي بقيت في مكانها (الجهة والعمق) بين توزيعين: 1 = الشيء نفسه. */
+export function patOverlap(a, b) {
+  const A = patTokens(a), B = [...patTokens(b)]; if (!A.length || !B.length) return a === b ? 1 : 0;
+  let same = 0; for (const t of A) { const i = B.indexOf(t); if (i >= 0) { same++; B.splice(i, 1); } }
+  return same / Math.max(A.length, B.length);
+}
+/**
+ * «تصميم آخر» يعني توزيعًا مختلفًا جذريًا لا تبديل غرفتين: يُفضَّل نمط لم يُعرض، ويُرفض ما يشابه المعروض بأكثر من 60٪.
+ * إن لم يبقَ شيء بهذا الشرط يُرخَّى إلى استبعاد المطابق فقط (ويُقال ذلك في الملاحظات).
+ */
+function differentFrom(cands, shown, { get = c => c.pat, maxOverlap = .6 } = {}) {
+  if (!shown.length) return { list: cands, relaxed: false };
+  const modes = new Set(shown.map(patMode));
+  const strict = cands.filter(c => shown.every(p => patOverlap(get(c), p) <= maxOverlap));
+  const list = strict.length ? strict : cands;
+  for (const c of list) c.pen += modes.has(patMode(get(c))) ? 120 : 0;
+  list.sort((a, b) => a.pen - b.pen);
+  return { list, relaxed: !strict.length };
+}
+/** ترتيب البدائل بالتنويع: الأفضل أولًا، ثم ما يختلف عنه نمطًا أو توزيعًا، لا نسخًا متقاربة. */
+function diversify(designs, keep) {
+  // بدائل أقل لكن سليمة: لا يُعرض بديل أضعف بوضوح من الأفضل (الجودة أسوأ من الأفضل بأكثر من 60٪ أو 40 نقطة، أو بنود طلب أكثر إخفاقًا)
+  const best = designs[0];
+  const rest = best ? designs.filter(d => d.fails === best.fails && d.quality <= best.quality + Math.max(40, Math.abs(best.quality) * .6)) : [];
+  const out = [];
+  while (out.length < keep && rest.length) {
+    if (!out.length) { out.push(rest.shift()); continue; }
+    const scored = rest.map(d => { const ov = Math.max(...out.map(o => patOverlap(d.pat, o.pat))); const newMode = out.every(o => o.mode !== d.mode); return { d, k: d.fails * 1000 + d.quality + ov * 160 - (newMode ? 140 : 0) }; }).sort((a, b) => a.k - b.k);
+    out.push(scored[0].d); rest.splice(rest.indexOf(scored[0].d), 1);
+  }
+  return out;
+}
 
 const COST = { MIN_WIDTH: 40, MIN_AREA: 14, NO_WINDOW: 18, SWING_BLOCKED: 10, FIXTURE_OVERLAP: 8, FIXTURE_OUTSIDE: 8, UNREACHABLE_ROOM: 200, BATH_PRIVACY: 12, BEDROOM_FROM_ENTRY: 20, CORRIDOR_NARROW: 15, WINDOW_RATIO: 1, OPENING_NEAR_END: 2 };
 /** كلفة الجودة من مراجعة المرسم نفسها؛ رفض صريح لغرفة معيشية أضيق من حدها أو فراغ لا يُوصل إليه. */

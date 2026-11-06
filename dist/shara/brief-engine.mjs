@@ -132,7 +132,7 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   }
 
   // ---- 5) ما لا يُرسم في هذا الإصدار (بصدق)
-  for (const m of mentions) if (SPACE[m.id].unsupported && !m.negated && !unsupported.includes(SPACE[m.id].unsupported)) unsupported.push(SPACE[m.id].unsupported);
+  for (const m of mentions) if (SPACE[m.id].unsupported && !m.negated && !unsupported.includes(SPACE[m.id].unsupported) && !(m.id === 'yard' && base0.prefs.courtyard)) unsupported.push(SPACE[m.id].unsupported);
   if (saidCount('dressing')) notes.push('غرفة الملابس تُقتطع من جناح الغرفة الرئيسية ولا تظهر صفًا مستقلًا.');
   let floors = base0.prefs.floors || (land?.floors === 2 ? 2 : 1);
   if (THREE_FLOORS.test(t)) { unsupported.push('ثلاثة أدوار فأكثر غير مدعومة في المولّد حاليًا؛ سأصمم دورين (أرضي وأول) وما زاد يُضاف لاحقًا في المرسم.'); floors = 2; }

@@ -7,6 +7,7 @@ import { structureCsv } from './draw/structure-sheet.mjs';
 import { privacyIndex } from './intel/privacy-index.mjs';
 import { climateZoning } from './intel/climate-zoning.mjs';
 import { optimizeVariants } from './intel/variant-optimizer.mjs';
+import { mepSummaryHtml } from './final-outputs.mjs';
 import { serialize } from './draw/doc.mjs';
 
 const RATES_KEY = 'mizan.final.rates.v1', SNAP_KEY = 'mizan.studio.snap3d.v1';
@@ -62,6 +63,19 @@ function renderIntel() {
   const variants = '<h3>بدائل بالتحسين (أفضل ثلاثة)</h3><div id="intelVariants"><p class="muted">جارٍ البحث عن بدائل تحسّن الخصوصية والمناخ…</p></div>';
   return head + privacy + climate + variants;
 }
+/** الأنظمة الأولية بالأرقام: تُحسب بعد العرض (ربط + توليد مدخلات + حساب) ثم تدخل الصفحة وكتاب المشروع. */
+async function renderMep() {
+  const box = $('mepSummary'); if (!box) return;
+  try {
+    const [B, { autoInputs, autoSummary }] = await Promise.all([import('./mep/mep-binding.mjs'), import('./mep/auto-inputs.mjs')]);
+    let bind = await B.bindArchitecture(doc, { alternativeId: 'final' }); if (!bind.ok) throw Error(bind.error?.messageAr || 'تعذر ربط المخطط');
+    const { inputs } = autoInputs(doc, bind.project);
+    bind = await B.bindArchitecture(doc, { alternativeId: 'final', inputs }); if (!bind.ok) throw Error(bind.error?.messageAr || 'تعذر ربط المخطط');
+    const result = await B.computeSystems(bind.project);
+    data.mep = autoSummary(result, inputs, bind.project);
+    box.innerHTML = mepSummaryHtml(data.mep);
+  } catch (e) { box.innerHTML = `<p class="muted">تعذّر حساب الأنظمة الأولية: ${esc(e.message)}</p>`; }
+}
 function renderVariants() {
   const box = $('intelVariants'); if (!box) return;
   let R; try { R = optimizeVariants(doc); } catch (e) { box.innerHTML = `<p class="muted">تعذّر البحث عن بدائل: ${esc(e.message)}</p>`; return; }
@@ -82,7 +96,7 @@ function render() {
   d.levels.forEach((l, i) => parts.push(sec('plan' + i, 'المخطط — ' + l.name, `<div class="svgbox sheet">${l.plan}</div>` + sheetNote(l))));
   parts.push(sec('view3d', 'العرض ثلاثي الأبعاد', d.snapshot3d ? `<div class="shot"><img alt="لقطة ثلاثية الأبعاد من المرسم" src="${esc(d.snapshot3d)}"></div><p class="muted">اللقطة من المجسم المبني من المخطط نفسه. للتجوّل والشمس والجولة افتح <a href="./studio.html">المرسم</a>.</p>` : `<p>لا توجد لقطة محفوظة بعد. افتح <a href="./studio.html">المرسم</a> ثم اضغط «اعتمد وأخرج المخرجات» من العرض ثلاثي الأبعاد لتُحفظ اللقطة.</p>`));
   d.levels.forEach((l, i) => l.structure && parts.push(sec('str' + i, 'المخطط الإنشائي المبدئي — ' + l.name, `<div class="svgbox">${l.structure}</div><p class="muted">تحجيم أولي بجداول ACI 318؛ مطابقة الكود السعودي SBC 304 غير متحققة. ليس تصميمًا إنشائيًا معتمدًا ويراجعه مهندس إنشائي.</p>`)));
-  parts.push(sec('mep', 'الأنظمة الهندسية: الكهرباء والتكييف والسباكة والحريق', `<p>تأتي بعد المخطط الإنشائي، وتُبنى من التصميم المعتمد نفسه: مواقع الإنارة والمقابس واللوحات والدوائر، والتكييف والتهوية، والمياه والصرف والأمطار، والحريق والتيار الخفيف والطاقة الشمسية، مع تصدير SVG وDXF وجداول CSV.</p><p><a class="btn primary" href="./mep/systems.html">فتح المخططات الكهربائية والميكانيكية ←</a></p><p class="muted">تصميم أولي يحتاج مراجعة مهندس مختص، وليس مخططًا تنفيذيًا معتمدًا.</p>`));
+  parts.push(sec('mep', 'الأنظمة الهندسية: الكهرباء والتكييف والسباكة والحريق', `<div id="mepSummary">${data.mep ? mepSummaryHtml(data.mep) : '<p class="muted">جارٍ حساب الأنظمة الأولية من المخطط (الإنارة والمقابس والدوائر والتكييف والمياه)…</p>'}</div><p>تُبنى من التصميم المعتمد نفسه بافتراضات معلنة تعدّلها في صفحة الأنظمة: مواقع الإنارة والمقابس واللوحات والدوائر، والتكييف والتهوية، والمياه والصرف، والحريق والتيار الخفيف والطاقة الشمسية، مع تصدير SVG وDXF وجداول CSV.</p><p><a class="btn primary" href="./mep/systems.html">فتح المخططات الكهربائية والميكانيكية ←</a></p><p class="muted">تصميم أولي يحتاج مراجعة مهندس مختص، وليس مخططًا تنفيذيًا معتمدًا.</p>`));
   parts.push(sec('qty', 'جداول الكميات والتكلفة', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], d.quantities.rows.map(r => `<tr><td>${esc(r.label)}</td><td class="num">${r.value === null ? '—' : fmt(r.value) + ' ' + esc(r.unit)}</td><td>${esc(GRADES[r.grade])}</td><td>${esc(r.basis)}</td></tr>`)) + '<h3>التكلفة بأسعارك</h3>' + renderCost()));
   parts.push(sec('why', 'لماذا هذا التصميم', (d.score ? `<p>${esc(d.score.grade)}${d.score.score !== null ? ` — الدرجة ${d.score.score} من ١٠٠٠ (${esc(d.scoreLevel)})` : ''}</p>` : '<p>الدرجة غير متاحة لهذا المخطط.</p>')
     + (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '')
@@ -99,6 +113,7 @@ function render() {
   $('resPct').addEventListener('input', e => { state.reservePct = e.target.value; update(); });
   $('vatPct').addEventListener('input', e => { state.vatPct = e.target.value; update(); });
   setTimeout(renderVariants, 0);
+  if (!data.mep) setTimeout(renderMep, 0);
 }
 // تحديث التكلفة دون إعادة بناء الصفحة (يحفظ مكان الكتابة)
 function update() {

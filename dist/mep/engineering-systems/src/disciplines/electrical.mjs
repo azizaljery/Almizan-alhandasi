@@ -23,7 +23,7 @@ export const electrical = { id: 'electrical', run(ctx) {
       const d = device(ctx, out, { id: `EL-${roomId}-${i + 1}`, roomId, levelId: room.levelId, position: { ...p, z: floor.elevationM + spec.mountHeightM }, powerW: spec.wattsPerFixture, powerFactor: spec.powerFactor ?? null, demandFactor: spec.demandFactor ?? null, calculationId: calc.id }, 'E-LIGHT', 'LUMINAIRE');
       if (d) { loads.push(d); ids.push(d.id); }
     });
-    if (spec.panelId) circuits.push({ id: 'EC-L-' + roomId, panelId: spec.panelId, loadIds: ids, phases: 1, phase: spec.phase ?? null, voltageV: spec.voltageV ?? null, routing: spec.routing || null, ...(spec.cable ? { cable: spec.cable } : {}), ...(spec.protection ? { protection: spec.protection } : {}) });
+    if (spec.panelId) circuits.push({ id: 'EC-L-' + roomId, panelId: spec.panelId, loadIds: ids, phases: 1, phase: spec.phase ?? null, voltageV: spec.voltageV ?? null, routing: spec.routing || null, ...(spec.systemId ? { systemId: spec.systemId } : {}), ...(spec.cable ? { cable: spec.cable } : {}), ...(spec.protection ? { protection: spec.protection } : {}) });
   }
   const loadMap = new Map(loads.map(l => [l.id, l])), membership = new Map(), componentMap = new Map();
   for (const l of loads) {
@@ -46,7 +46,7 @@ export const electrical = { id: 'electrical', run(ctx) {
     const routed = [];
     for (const l of ds) {
       if (!c.routing) continue;
-      const r = makeRoute(ctx, out, { ...c.routing, id: 'ER-' + c.id + '-' + l.id, systemId: c.id, layer: 'E-CABLE', kind: 'CONCEPT_HOME_RUN', levelId: l.levelId, fromId: panel.id, toId: l.id, start: panel.position, end: l.position });
+      const r = makeRoute(ctx, out, { ...c.routing, id: 'ER-' + c.id + '-' + l.id, systemId: c.systemId || c.id, layer: 'E-CABLE', kind: 'CONCEPT_HOME_RUN', levelId: l.levelId, fromId: panel.id, toId: l.id, start: panel.position, end: l.position });
       if (r) routed.push(r);
     }
     if (!c.routing) requiredReview(out, 'تحتاج الدائرة ' + c.id + ' بيانات حيز ومسار تمديد.', 'CABLE_ROUTE_INPUT_REQUIRED');

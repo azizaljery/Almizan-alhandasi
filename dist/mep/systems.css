@@ -85,3 +85,6 @@ details.ed .body{padding:0 10px 10px}
 #tablesBox[data-stale] > :not(h2):not(.stale-note){display:none}
 #tablesBox[data-stale] .stale-note{display:block}
 .note.warn{background:#fff5e0;border-color:#e3b865;color:#6b4b00}
+/* الملخص بالأرقام */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}.stat{background:#f6f1e4;border-radius:10px;padding:10px 12px;font-size:12.5px}.stat b{display:block;font-size:20px;color:#1f3b2d;direction:ltr;text-align:right}
+#summaryCard details{margin-top:8px}#summaryCard summary{cursor:pointer;font-weight:700}#summaryCard td.num{direction:ltr;text-align:right}
