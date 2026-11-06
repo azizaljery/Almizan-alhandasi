@@ -32,7 +32,7 @@ export const SUBJECTS = Object.freeze([
   { id: 'entrance', ar: 'المدخل', re: `مدخل(?: (?:ال)?رئيسي)?|باب (?:ال)?(?:رئيسي|بيت)` },
 ]);
 const S = Object.fromEntries(SUBJECTS.map(s => [s.id, { ...s, rx: new RegExp(`${PRE}(?:${s.re})${END}`, 'g') }]));
-const subjAr = id => S[id]?.ar || id;
+const subjAr = id => S[id]?.ar || id || '—';
 
 const COMPASS_AR = { n: 'الشمال', s: 'الجنوب', e: 'الشرق', w: 'الغرب' };
 const SIDE_AR = { front: 'في الأمام', back: 'في الخلف', n: 'في جهة الشمال', s: 'في جهة الجنوب', e: 'في جهة الشرق', w: 'في جهة الغرب', right: 'على يمين الداخل من الشارع', left: 'على يسار الداخل من الشارع', center: 'في وسط البيت' };

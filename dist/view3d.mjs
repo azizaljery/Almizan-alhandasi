@@ -2,6 +2,7 @@
 import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY } from './draw/handoff.mjs';
 import { sunPosition, CITIES } from './sun.mjs';
+import { planSheetSvg } from './draw/plan-sheet.mjs';
 
 const $ = id => document.getElementById(id);
 const SNAP_KEY = 'mizan.studio.snap3d.v1';
@@ -9,6 +10,25 @@ let viewer = null, doc = null;
 
 function loadDoc() { try { const raw = localStorage.getItem(STUDIO_KEY); return raw ? parseDoc(raw) : null; } catch { return null; } }
 function say(t) { const m = $('threeMsg'); m.hidden = !t; m.textContent = t || ''; }
+// بلا WebGL لا يعمل المجسّم ولا الواجهة الواقعية (وهي تعتمد على المحرّك نفسه): نخفي أدواتهما ونعرض المسقط ثنائي الأبعاد الثابت بدلًا منهما.
+function fallbackWithoutWebGL(message) {
+  const hide = el => { if (el) el.style.display = 'none'; };
+  try {
+    // كل قسم أدوات يحوي عنصر التحكم: نخفي القسم كاملًا (عنوانه ومحتواه)
+    // القسم = الابن المباشر للوحة الجانبية الذي يحوي عنصر التحكم (closest('div') كان يعيد العنصر نفسه فيبقى العنوان ظاهرًا)
+    const section = el => { while (el && el.parentElement && el.parentElement.id !== 'threePane') el = el.parentElement; return el?.parentElement?.id === 'threePane' ? el : null; };
+    for (const sel of ['#modeSeg', '#styleSeg', '#city']) hide(section(document.querySelector(sel)));
+    document.querySelectorAll('.tourbox, #autoTourStatus, #levelBox, #facadeBox, #shot, #threeHost, #facadeFrame').forEach(hide);
+    const stage = document.querySelector('.stage');
+    if (stage) {
+      const wrap = document.createElement('div'); wrap.className = 'static2d'; wrap.style.cssText = 'position:absolute;inset:0;overflow:auto;padding:12px;background:#f4f1ea';
+      try { wrap.innerHTML = planSheetSvg(doc).replace('<svg', '<svg style="width:100%;height:auto;max-width:100%"'); } catch { wrap.textContent = 'تعذّر عرض المسقط الثابت.'; }
+      stage.prepend(wrap);
+    }
+  } catch { /* العرض الثابت اختياري؛ تبقى رسالة الخطأ ظاهرة */ }
+  say(message);
+}
+
 
 async function ensureViewer() {
   if (viewer) return viewer;
@@ -36,7 +56,7 @@ async function init() {
   if (!doc || !doc.walls.length) { say('لا يوجد تصميم معتمد بعد. ارجع إلى صفحة التصميم واعتمد تصميمًا.'); return; }
   say('جارٍ بناء المجسّم…');
   let v;
-  try { v = await ensureViewer(); } catch { say('تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط والمخرجات تعمل كاملة.'); return; }
+  try { v = await ensureViewer(); } catch { fallbackWithoutWebGL('تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط والمخرجات تعمل كاملة.'); return; }
   v.setDoc(doc); v.frameBuilding(); v.resize(); say('');
   applySun();
   if (doc.levels.length > 1) {

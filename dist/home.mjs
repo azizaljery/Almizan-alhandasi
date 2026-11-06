@@ -4,6 +4,7 @@ import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { createSession, saveSession } from './design-session.mjs';
 import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
+import { displayOr, landFieldErrors, hasLandErrors } from './field-guards.mjs';
 import { requestBrief } from './assistant.mjs';
 
 const $ = id => document.getElementById(id);
@@ -48,8 +49,17 @@ for (const key of ['n', 's', 'e', 'w']) {
     + `<label class="tog dis" data-entry-label="${key}"><input type="checkbox" data-kind="entry" value="${key}" disabled> مدخل</label>`;
   grid.append(box);
 }
+// أخطاء الحقول تظهر قرب كل حقل، وتُمسح عند تعديل أي حقل من الأرض
+const FIELD_ERR = { length: 'errLength', width: 'errWidth', streets: 'errStreets', entries: 'errEntries' };
+function showLandErrors(errors) {
+  for (const [key, id] of Object.entries(FIELD_ERR)) { const el = $(id); el.textContent = errors[key] || ''; el.hidden = !errors[key]; }
+  $('landLength').setAttribute('aria-invalid', String(Boolean(errors.length)));
+  $('landWidth').setAttribute('aria-invalid', String(Boolean(errors.width)));
+}
+function clearLandErrors() { showLandErrors({}); }
 function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1 }; }
 function refreshLand() {
+  clearLandErrors();
   for (const key of ['n', 's', 'e', 'w']) {
     const entry = grid.querySelector(`input[data-kind=entry][value=${key}]`), onStreet = land.streets.has(key);
     entry.disabled = !onStreet; entry.closest('.tog').classList.toggle('dis', !onStreet);
@@ -69,7 +79,11 @@ refreshLand();
 let confirmedLand = null;
 $('landForm').addEventListener('submit', e => {
   e.preventDefault();
-  try { const { land: ok } = normalizeLand(readLand()); confirmedLand = ok; setError($('landError'), ''); }
+  const raw = readLand(), fieldErrors = landFieldErrors(raw);
+  setError($('landError'), '');
+  showLandErrors(fieldErrors);
+  if (hasLandErrors(fieldErrors)) { (fieldErrors.length ? $('landLength') : fieldErrors.width ? $('landWidth') : $('sideGrid').querySelector('input')).focus(); return; }
+  try { const { land: ok } = normalizeLand(raw); confirmedLand = ok; setError($('landError'), ''); }
   catch (err) { setError($('landError'), err.message); return; }
   show('Shara'); beginChat();
 });
@@ -135,7 +149,7 @@ function render(messages) {
       form.addEventListener('submit', e => {
         e.preventDefault();
         const values = Object.fromEntries(m.fields.map(f => [f.id, form.elements[f.id].value === '' ? '' : form.elements[f.id].valueAsNumber]));
-        const summary = m.fields.filter(f => values[f.id] !== '').map(f => `${f.label}: ${values[f.id]}`).join('، ') || 'كما فهمتِ';
+        const summary = m.fields.filter(f => values[f.id] !== '').map(f => `${f.label}: ${displayOr(values[f.id])}`).join('، ') || 'كما فهمتِ';
         try { const next = session.answer(m.id, values); clearControls(); bubble(summary, 'me'); render(next); } catch (err) { fail(err); }
       });
       control(form);
@@ -215,7 +229,7 @@ function renderProgram(m) {
   row(table, ['الفراغ', 'العدد', 'الدور المقترح', 'المساحة', 'مصدر الفهم', 'ملاحظة', ''], true);
   for (const r of m.rows) {
     const num = el('span', 'num'); const dec = el('button', 'pm', '−'); dec.type = 'button'; dec.setAttribute('aria-label', `أنقص ${r.label}`); const inc = el('button', 'pm', '+'); inc.type = 'button'; inc.setAttribute('aria-label', `زد ${r.label}`);
-    const val = el('b', '', String(r.count)); val.dataset.count = r.id; num.append(dec, val, inc);
+    const val = el('b', '', displayOr(r.count)); val.dataset.count = r.id; num.append(dec, val, inc);
     dec.addEventListener('click', () => edit({ op: 'dec', id: r.id })); inc.addEventListener('click', () => edit({ op: 'inc', id: r.id }));
     const src = el('span', 'src src-' + r.source, r.sourceLabel);
     const del = el('button', 'pm del', '×'); del.type = 'button'; del.setAttribute('aria-label', `احذف ${r.label}`); del.addEventListener('click', () => edit({ op: 'remove', id: r.id }));
@@ -261,7 +275,7 @@ async function understandWithAI(text, accessCode) {
 
 // ------------------------------------------------------------------------------------------------ التوليد والتسليم للمرسم
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
-const m1 = v => (Math.round(v * 100) / 100).toString();
+const m1 = v => (Number.isFinite(v) ? (Math.round(v * 100) / 100).toString() : '—');
 function row(table, cells, head) { const tr = el('tr'); for (const c of cells) { const td = el(head ? 'th' : 'td'); if (c instanceof Node) td.append(c); else td.textContent = c; tr.append(td); } table.append(tr); return tr; }
 
 function applyOption(o) {
@@ -287,7 +301,7 @@ function renderReport({ facts: f, options }, err) {
   box.append(facts);
   const prog = el('table', 'rtable');
   row(prog, ['الفراغ', 'العدد', 'مساحة الواحد', 'المجموع'], true);
-  for (const t of f.perType) row(prog, [t.label, String(t.count), `${m1(t.unit)} م²`, `${m1(t.total)} م²`]);
+  for (const t of f.perType) row(prog, [t.label, displayOr(t.count), `${m1(t.unit)} م²`, `${m1(t.total)} م²`]);
   box.append(el('h3', '', 'برنامجك المطلوب'), prog);
 
   box.append(el('h3', '', 'خيارات جرّبتُها على المحرك فعلًا'));

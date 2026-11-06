@@ -34,9 +34,10 @@ function loadSources() { S.sources = B.listSources({ session: readSession(), stu
 function pickDefault() {
   const want = new URLSearchParams(location.search).get('source');
   if (want && S.sources.some(s => s.id === want)) return want;
-  const sess = readSession(), studio = S.sources.find(s => s.kind === 'studio');
-  if (studio && sess && Number.isInteger(sess.approved)) return studio.id;
-  const cur = sess ? S.sources.find(s => s.kind === 'design' && s.label.includes('(المعروض)')) : null;
+  // المخطط الافتراضي هو مخطط المرسم نفسه الذي تعرضه صفحة المخرجات، لتطابق الأرقام بين الصفحتين؛ التصميمات الأخرى بطلب صريح (?source=)
+  const studio = S.sources.find(s => s.kind === 'studio');
+  if (studio) return studio.id;
+  const sess = readSession(), cur = sess ? S.sources.find(s => s.kind === 'design' && s.label.includes('(المعروض)')) : null;
   return (cur || S.sources[0])?.id || null;
 }
 const ctxOf = src => ({ sessionKey: src.sessionKey, kind: src.kind });

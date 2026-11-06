@@ -8,9 +8,12 @@ import { structureSheetSvg } from './draw/structure-sheet.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { geometryFingerprint } from './design-dna.mjs';
 import { roomTypeName } from './draw/catalog.mjs';
+import { isCostUnpriced, UNPRICED_TOTAL_AR } from './field-guards.mjs';
 import { privacyIndex } from './intel/privacy-index.mjs';
 import { climateZoning } from './intel/climate-zoning.mjs';
 
+/** حالة الأنظمة قبل أي حساب: تُعلن صراحة ولا تُعرض كصفر صامت. */
+export const NOT_COMPUTED_AR = 'لم تُحسب الأنظمة الهندسية بعد لهذا المخطط';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const r2 = v => Math.round(v * 100) / 100;
 
@@ -112,16 +115,32 @@ export function sheetNote(l) {
   return `<p class="muted">تعذّرت لوحة المسقط (${esc(l.sheetError || 'سبب غير معروف')})؛ عُرض المسقط البسيط.</p>`;
 }
 
-/** ملخص الأنظمة الهندسية بالأرقام (من autoSummary) للصفحة وكتاب المشروع. */
+/** ملخص الأنظمة الهندسية بالأرقام للصفحة وكتاب المشروع. M: ناتج computeOutputsMep (يحمل المصدر) أو حالة «لم تُحسب». */
 export function mepSummaryHtml(M) {
-  if (!M) return '';
+  if (!M || M.notComputed) return `<p class="muted"><b>${esc(NOT_COMPUTED_AR)}</b>${M?.reasonAr ? ' — ' + esc(M.reasonAr) : ''}. لا تُعرض أصفار هنا لأن الحساب لم يجرِ بعد.</p>`;
   const n = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 1 }));
   const stat = (v, l) => `<div class="stat"><b>${v}</b>${esc(l)}</div>`;
   const fx = M.fixtures || {};
+  const origin = M.source?.origin === 'systems-edited' ? 'بمدخلات صفحة الأنظمة المعدّلة' : 'بمدخلات أولية مولّدة من هذا المخطط';
+  const head = M.source ? `<p><b>الأرقام من: ${esc(M.source.label)}</b> <span class="muted">(${origin})</span></p>` : '';
+  const others = (M.others || []).filter(o => o.lights !== null).map(o => `<p class="muted">ملاحظة: حُسبت الأنظمة أيضًا لـ «${esc(o.label)}» (غير معروض هنا): ${n(o.lights)} وحدة إنارة و${n(o.circuits)} دائرة.</p>`).join('');
   const stats = `<div class="stats">${stat(n(M.lights), 'وحدة إنارة')}${stat(n(M.sockets), 'مقبس')}${stat(n(M.circuits), 'دائرة كهربائية')}${stat(n(M.demandW / 1000) + ' kW', 'طلب كهربائي أقصى')}${stat(n(M.panels?.[0]?.kVA) + ' kVA', 'اللوحة الرئيسية')}${stat(n(M.acSelectedTR) + ' TR', `سعات التكييف (${n(M.ac?.length)} وحدة)`)}${stat(n(M.acTotalTR) + ' TR', 'الحمل الحراري الساكن')}${stat(n(M.tankL) + ' L', 'خزان المياه (يومان)')}${stat(n((fx.WC || 0) + (fx.BASIN || 0) + (fx.SHOWER || 0) + (fx.SINK || 0)), 'جهاز صحي')}${stat(n(fx.WATER_HEATER), 'سخان')}${stat(n(M.fire), 'عنصر حريق')}${stat(n(M.lowCurrent), 'عنصر تيار خفيف')}${M.pv ? stat(n(M.pv.kWp) + ' kWp', `ألواح شمسية (${M.pv.panels})`) : ''}</div>`;
   const rows = (M.ac || []).slice().sort((a, b) => (b.btu || 0) - (a.btu || 0)).map(z => `<tr><td>${esc(z.room)}</td><td class="num">${n(z.areaM2)}</td><td class="num">${n(z.gainW)}</td><td class="num">${n(z.btu)}</td><td class="num">${n(z.inputW)}</td></tr>`).join('');
   const ac = rows ? `<table class="pb-table"><thead><tr><th>الفراغ</th><th>م²</th><th>الحمل الساكن W</th><th>سبليت BTU/h</th><th>كهرباء الوحدة W</th></tr></thead><tbody>${rows}</tbody></table>` : '';
-  return stats + ac + `<p class="muted">أرقام أولية من مدخلات ولّدها الميزان من المخطط بافتراضات مشروع معلنة (الرياض صيفًا 46/24°C، غلاف معزول، 600 BTU/h لكل م² حدًا أدنى للاختيار، 250 ل/شخص/يوم)؛ ليست قيم كود ولا اعتمادًا للتنفيذ.</p>`;
+  return head + stats + ac + others + `<p class="muted">أرقام أولية من مدخلات ولّدها الميزان من المخطط بافتراضات مشروع معلنة (الرياض صيفًا 46/24°C، غلاف معزول، 600 BTU/h لكل م² حدًا أدنى للاختيار، 250 ل/شخص/يوم)؛ ليست قيم كود ولا اعتمادًا للتنفيذ.</p>`;
+}
+
+/** صف الكهرباء والسباكة والتكييف في جدول الكميات: من الأنظمة المحسوبة للمخطط المعروض، أو حالة «لم تُحسب» صريحة. */
+export const MEP_ROW_ID = 'mep';
+export function mepQuantityRow(M) {
+  const label = 'الكهرباء والسباكة والتكييف';
+  if (!M || M.notComputed) return { id: MEP_ROW_ID, label, value: null, unit: '', grade: 'unavailable', basis: NOT_COMPUTED_AR + ' (تُحسب تلقائيًا من مخطط المرسم المعروض)' };
+  const basis = `من الأنظمة المحسوبة لـ«${M.source?.label || 'المخطط المعروض'}»: ${M.lights} وحدة إنارة، ${M.sockets} مقبس، ${M.panels?.length || 0} لوحة، ${M.ac?.length || 0} وحدة تكييف؛ تقدير أولي بافتراضات معلنة`;
+  return { id: MEP_ROW_ID, label, value: M.circuits, unit: 'دائرة', grade: 'estimated', basis };
+}
+/** يستبدل صف الكهرباء في الكميات بصف الأنظمة المحسوبة (لا ينسخ المصفوفة الأصلية). */
+export function applyMepRow(rows, M) {
+  return rows.map(r => (r.id === MEP_ROW_ID ? mepQuantityRow(M) : r));
 }
 /** HTML مستقل (للقراءة والطباعة) من البيانات نفسها. css: نص الأنماط ليُضمَّن. */
 export function projectBookHtml(data, { css = '' } = {}) {
@@ -134,10 +153,10 @@ export function projectBookHtml(data, { css = '' } = {}) {
   data.levels.forEach(l => parts.push(sec('المخطط — ' + l.name, `<div class="pb-svg pb-sheet">${l.plan}</div>` + sheetNote(l))));
   if (data.snapshot3d) parts.push(sec('العرض ثلاثي الأبعاد', `<img class="pb-img" alt="لقطة ثلاثية الأبعاد" src="${esc(data.snapshot3d)}">`));
   data.levels.filter(l => l.structure).forEach(l => parts.push(sec('المخطط الإنشائي المبدئي — ' + l.name, `<div class="pb-svg">${l.structure}</div><p class="muted">تحجيم أولي لا تصميم إنشائي معتمد؛ يراجعه مهندس إنشائي.</p>`)));
-  parts.push(sec('الكميات', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], data.quantities.rows.map(r => [r.label, r.value === null ? '—' : `${fmt(r.value)} ${r.unit}`, GRADES[r.grade], r.basis]))));
-  parts.push(sec('التكلفة بأسعارك', table(['البند', 'الكمية', 'سعر الوحدة', 'التكلفة'], c.items.map(i => [i.label, i.qty === null ? '—' : `${fmt(i.qty)} ${i.unit}`, i.rate === null ? 'غير مسعّر' : fmt(i.rate), i.cost === null ? 'غير مسعّر' : fmt(i.cost)])) + `<p>المجموع الجزئي (${c.pricedCount} من ${c.totalCount} بندًا مسعّرًا): <b>${fmt(c.subtotal)}</b>${c.reserve !== null ? ` · احتياط ${c.reservePct}%: ${fmt(c.reserve)}` : ''}${c.vat !== null ? ` · ضريبة ${c.vatPct}%: ${fmt(c.vat)}` : ''} · الإجمالي: <b>${fmt(c.total)}</b> ${c.complete ? '' : '(جزئي: يخص البنود المسعّرة فقط)'}</p><p class="muted">لا توجد أسعار سوق افتراضية؛ الأسعار أسعارك.</p>`));
+  parts.push(sec('الكميات', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], applyMepRow(data.quantities.rows, data.mep).map(r => [r.label, r.value === null ? '—' : `${fmt(r.value)} ${r.unit}`, GRADES[r.grade], r.basis]))));
+  parts.push(sec('التكلفة بأسعارك', table(['البند', 'الكمية', 'سعر الوحدة', 'التكلفة'], c.items.map(i => [i.label, i.qty === null ? '—' : `${fmt(i.qty)} ${i.unit}`, i.rate === null ? 'غير مسعّر' : fmt(i.rate), i.cost === null ? 'غير مسعّر' : fmt(i.cost)])) + (isCostUnpriced(c) ? `<p><b>${UNPRICED_TOTAL_AR}</b></p>` : `<p>المجموع الجزئي (${c.pricedCount} من ${c.totalCount} بندًا مسعّرًا): <b>${fmt(c.subtotal)}</b>${c.reserve !== null ? ` · احتياط ${c.reservePct}%: ${fmt(c.reserve)}` : ''}${c.vat !== null ? ` · ضريبة ${c.vatPct}%: ${fmt(c.vat)}` : ''} · الإجمالي: <b>${fmt(c.total)}</b> ${c.complete ? '' : '(جزئي: يخص البنود المسعّرة فقط)'}</p>`) + `<p class="muted">لا توجد أسعار سوق افتراضية؛ الأسعار أسعارك.</p>`));
   parts.push(sec('لماذا هذا التصميم', (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.improvements.length ? `<h3>ما يحتاج تحسينًا</h3><ul>${R.improvements.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '') + (R.unmeasured.length ? `<p class="muted">غير مُقيَّم: ${esc(R.unmeasured.join('، '))}</p>` : '') + (R.notes.length ? `<h3>ملاحظات المراجعة</h3><ul>${R.notes.map(n => `<li>${esc(n.message)}</li>`).join('')}</ul>` : '') + (data.score ? `<p class="muted">${esc(data.score.grade)}. ${esc(data.score.note || '')}</p>` : '<p class="muted">الدرجة غير متاحة لهذا المخطط.</p>')));
-  if (data.mep) parts.push(sec('الأنظمة الهندسية بالأرقام (أولي)', mepSummaryHtml(data.mep)));
+  parts.push(sec('الأنظمة الهندسية بالأرقام (أولي)', mepSummaryHtml(data.mep)));
   if (data.intel) { const { privacy: P, climate: C } = data.intel; const sc = v => (v === null || v === undefined ? '—' : v + ' / 100');
     parts.push(sec('تقييم الخصوصية والمناخ', `<p>مؤشر الخصوصية السعودي: <b>${sc(P.score)}</b> · المنطقة المناخية: <b>${sc(C.score)}</b></p><p class="muted">${esc(P.note)} ${esc(C.note)}</p>` + (P.violations.length ? '<h3>المخالفات والإصلاح المقترح</h3>' + table(['المشكلة', 'أين', 'الإصلاح'], P.violations.map(v => [v.problem, v.where.join(' ← '), v.fix])) : '') + (C.recommendations.length ? `<h3>توصيات مناخية</h3><ul>${C.recommendations.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul>` : ''))); }
   parts.push(sec('ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => [s.title, s.status === 'available' ? 'متاح' : 'قادم', s.note]))));
