@@ -241,9 +241,9 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   if (upper) return searchUpper(program, W, D, upper, keep);
   const T = DESIGN_TARGETS, out = [];
   const blocks = program.blocks, suites = blocks.filter(b => b.kind === 'suite' && !b.guest).sort(byRank).reverse(); // الرئيسية أولًا
-  const wantCourt = !!program.prefs?.courtyard;
-  // الفناء مطلوب: بقية الأنماط تتأخر كبدائل؛ غير مطلوب: نمط الفناء يبقى بديلًا مختلفًا جذريًا لا الخيار الأول
-  const bias = mode => (mode === 'court' ? (wantCourt ? -150 : 15) : wantCourt ? 250 : 0);
+  // الشكل المطلوب يتقدم على غيره؛ بلا طلب: الفناء بديل مختلف جذريًا لا الخيار الأول
+  const wantShape = wantedShape(program);
+  const bias = mode => (wantShape ? (mode === wantShape ? -150 : 250) : mode === 'court' ? 15 : 0);
   const push = (mode, placed, circ, meta) => { const s = score(placed, circ, W, D, program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
   const hubWidths = (stair ? [4.8, 5.2] : [3.6, 4.2, 4.8]).filter(h => W - h >= 7.2);
 
@@ -302,6 +302,24 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
         { id: 'gallery', r: { x0: wl, y0: g, x1: wl + gw, y1: D } }, { id: 'gallery2', r: { x0: wl + wh - gw, y0: g, x1: wl + wh, y1: D } }, { id: 'court', r: court }];
       const cx = wl + wh / 2;
       push('court', pl, circ, { wh, wl, wr, court, ...(stair ? { stairRect: { x0: cx - 1.3, y0: g - stair.len - .1, x1: cx + 1.3, y1: g - .1 } } : {}) });
+    }
+  }
+  // (6) مبنى على شكل L: جناح أمامي بعرض المبنى (على يمين الردهة والصالة)، وذراع خلفي يمتد من الجانب الأيسر حتى a،
+  // وممر يمتد بعرض المبنى تحت الجناح الأمامي يصل الصالة بالذراع والجناح الأمامي معًا. الزاوية الباقية (أسفل يمين) ساحة خارجية. بلا سلم داخل المحور (لم يُدعم بعد).
+  if (blocks.length <= 12 && !stair) for (const a of [.55, .7].map(k => snap(W * k))) for (const wh of [3.8, 4.4]) {
+    if (a < 7.4 || W - a < 3.4 || W - wh < 7.2) continue;
+    const gw = T.galleryW;
+    for (const bd of [4.8, 5.6, 6.4]) {
+      const g = snap(D - gw - bd); if (g < 8.5) continue;
+      for (const [F, B] of subsets(blocks)) {
+        if (!F.length || !B.length || !B.some(b => b.kind === 'suite')) continue;
+        F.sort(byRank); B.sort(byRank);
+        const front = stack(F, wh, W, 0, g, 'x0');
+        const f = foyerDepth(front, wh); if (g - f < 3.2) continue;
+        const pl = [...front, ...row(B, 0, a, g + gw, D, 'y0')];
+        const circ = [{ id: 'foyer', r: { x0: 0, y0: 0, x1: wh, y1: f } }, { id: 'hall', r: { x0: 0, y0: f, x1: wh, y1: g } }, { id: 'gallery', r: { x0: 0, y0: g, x1: W, y1: g + gw } }];
+        push('L', pl, circ, { wh, wl: 0, wr: W - wh, armW: a });
+      }
     }
   }
   // (3) صفّان وممر بينهما (للأراضي العريضة قليلة العمق): أمامي عام، خلفي خاص، والصالة في الخلف مقابل الردهة
@@ -452,6 +470,7 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
   const hall = circRooms.find(c => c.id === 'hall');
   for (const gal of circRooms.filter(c => c.id.startsWith('gallery'))) if (hall) { const e = shared(hall, gal); if (e) doors.push({ a: 'hall', b: gal.id, edge: e, kind: 'arch', w: Math.min(3.2, e.to - e.from - .4) }); }
   if (hall && courtRoom) { const e = shared(hall, courtRoom); if (e) { doors.push({ a: 'hall', b: 'court', edge: e, kind: 'door2', w: Math.min(2.4, e.to - e.from - .6) }); notes.push('مبنى على شكل U: حديقة داخلية في المنتصف مفتوحة على الحوش الخلفي بسور، تطل عليها الصالة بباب زجاجي مزدوج وغرف الجناحين بنوافذها، وممرا الحديقة يصلان الغرف الخلفية.'); } }
+  if (cand.mode === 'L') notes.push('مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب، والزاوية الباقية ساحة خارجية؛ الممر الخلفي يصل الصالة بالذراع.');
   if (cand.courtVoid) notes.push('الدور العلوي يحيط بفراغ الحديقة (مفتوح للسماء) وتطل عليه الغرف.');
   // أزواج الحمامات: جهة الشريط لكل جناح نوم نحو جاره من الأجنحة
   const suites = cand.placed.filter(p => ['suite', 'maid'].includes(p.block.kind) && p.block.bath !== false);
@@ -996,6 +1015,9 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   cands.sort((a, b) => a.pen - b.pen);
   const seenSig = new Set(), ex = new Set(exclude), avoid = new Set([...(tw.avoidModes || []), ...(program.prefs?.noCorridors && !program.prefs?.courtyard ? ['tee', 'rows', 'court'] : []), ...(program.prefs?.courtyard === false ? ['court'] : [])]);
   cands = cands.filter(c => { if (seenSig.has(c.sig) || ex.has(c.pat) || avoid.has(c.mode)) return false; seenSig.add(c.sig); return true; });
+  // شكل طلبه العميل صراحةً (L أو T): لا يُعرض غيره إن اتسعت الأرض له؛ وإلا تُعرض البدائل الأخرى مع إعلان ذلك
+  const wantMode = program.prefs?.shape ? wantedShape(program) : null; let shapeFallback = false;
+  if (wantMode) { const only = cands.filter(c => c.mode === wantMode); if (only.length) cands = only; else shapeFallback = true; }
   const diff = differentFrom(cands, exclude); cands = diff.list;
   if (!cands.length) {
     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م = ${Math.round(W * D)} م²)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
@@ -1028,6 +1050,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   // تنفيذ طلب العميل أولًا، ثم الجودة
   designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality);
   const picked = diversify(designs, keep);
+  if (shapeFallback) picked[0]?.notes.push(`تعذّر توزيع «${MODE_AR[wantMode] || wantMode}» على هذه الأرض وهذا البرنامج؛ هذه أقرب البدائل الأخرى.`);
   if (diff.relaxed) picked[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
   return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
 }
@@ -1117,7 +1140,14 @@ export function canonicalSide(entry, side, mirror = false) {
   if (c && mirror && c[0] === 'x') c = c === 'x0' ? 'x1' : 'x0';
   return c;
 }
-const MODE_AR = { court: 'مبنى على شكل U حول حديقة داخلية في المنتصف', center: 'صالة مركزية بين جناحين', tee: 'صالة مركزية وممر خلفي لأجنحة النوم (شكل T)', rows: 'صف أمامي للضيافة وصف خلفي للعائلة بينهما ممر', side: 'صالة جانبية بطول المبنى' };
+const MODE_AR = { court: 'مبنى على شكل U حول حديقة داخلية في المنتصف', L: 'مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب، والزاوية الباقية ساحة', center: 'صالة مركزية بين جناحين', tee: 'صالة مركزية وممر خلفي لأجنحة النوم (شكل T)', rows: 'صف أمامي للضيافة وصف خلفي للعائلة بينهما ممر', side: 'صالة جانبية بطول المبنى' };
+/** النمط الذي طلبه العميل صراحةً (U بالفناء، أو L، أو T)؛ null إن لم يطلب شكلًا. */
+export function wantedShape(program) {
+  if (program?.prefs?.courtyard) return 'court';
+  if (program?.prefs?.shape === 'L') return 'L';
+  if (program?.prefs?.shape === 'T') return 'tee';
+  return null;
+}
 function describe(c) { return MODE_AR[c.mode] || c.mode; }
 /** رموز النمط: نوع الفراغ + الجهة + حزام العمق؛ منها تُقاس المسافة بين توزيعين. */
 const patTokens = pat => (String(pat || '').split('|')[1] || '').match(/[a-z][LR]\d+/g) || [];

@@ -54,6 +54,9 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   // «الماستر وثلاث غرف للعيال» = أربع غرف نوم
   const masterSaid = /ماستر|(?:غرفه (?:ال)?نوم |ال)رئيسيه/.test(t);
   const bedHits = [...t.matchAll(bedRe)].map(m => num(m[1]) + (m[2] && masterSaid ? 1 : 0)).filter(n => Number.isInteger(n) && n >= 1 && n <= 10);
+  // المثنى: «غرفتا نوم» أو «غرفتان نوم» = غرفتان؛ الرئيسية تُذكر وصفًا لإحداهما، ولا تضاف إلا مع عيال صريحين
+  const dualHits = [...t.matchAll(/(?:^|[^ء-ي]|و)غرفت(?:ا|ان|ين)(?= (?:ال)?نوم(?![ء-ي])| (?:لل|ل|ال)?(?:عيال|اولاد|اطفال|بنات|ابناء)(?![ء-ي]))/g)];
+  if (dualHits.length && !bedHits.length && !mm) bedHits.push(2 + (/ماستر/.test(t) && /للعيال|للاولاد|للاطفال|للبنات|لعيالي/.test(t) ? 1 : 0));
   if (bedHits.length === 1 && !mm) c.bedrooms = bedHits[0];
   if (has(/ماستر|الرئيسيه/) && !c.bedrooms) c.bedrooms = 1;
   // المطبخ
@@ -124,6 +127,9 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   const COURT = '(?:فناء(?! خارجي)|حوش داخلي|كورت ?يارد|حديقه داخليه|باحه داخليه|(?:شكل|حرف) ?(?:u|يو)(?![\u0600-\u06FF]))';
   if (has(new RegExp('(?:بدون|بلا|ما ابي|ما ابغي|ما ابغى|لا ابي|لا اريد|ما اريد|من غير|غير مطلوب|لا يوجد) ?(?:ال)?' + COURT, 'i')) || has(/no courtyard/i)) { prefs.courtyard = false; understood.push('بدون فناء داخلي'); }
   else if (has(new RegExp(COURT + '|(?:في|ب) ?(?:ال)?(?:منتصف|وسط|نص)[^،,.]{0,12}(?:حديقه|فناء|حوش)|(?:حديقه|فناء|حوش)[^،,.]{0,12}(?:في|ب) ?(?:ال)?(?:منتصف|وسط|نص)', 'i'))) { prefs.courtyard = true; understood.push('مبنى على شكل U حول حديقة داخلية في المنتصف'); }
+  // أشكال المسقط: L (جناح أمامي بعرض المبنى وذراع خلفي على جانب)، T (صالة مركزية وممر خلفي). U تُعالَج مع الفناء أعلاه.
+  if (!prefs.courtyard && has(/(?:شكل|حرف) ?l(?![ء-ي])|(?:شكل|حرف) ?ل(?![ء-ي])/i)) { prefs.shape = 'L'; understood.push('مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب'); }
+  else if (!prefs.courtyard && has(/(?:شكل|حرف) ?t(?![ء-ي])|(?:شكل|حرف) ?تي(?![ء-ي])/i)) { prefs.shape = 'T'; understood.push('مبنى على شكل T: صالة مركزية وممر خلفي لأجنحة النوم'); }
   if (has(/مسبح|حمام سباحه/)) unsupported.push('المسبح: خارج المبنى ولا يُرسم في هذا الإصدار.');
   if (has(/مصعد|اسانسير/)) unsupported.push('المصعد: غير مدعوم في هذا الإصدار.');
   if (has(/قبو|بدروم/)) unsupported.push('القبو: غير مدعوم في هذا الإصدار.');
