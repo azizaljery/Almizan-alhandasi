@@ -6,6 +6,7 @@
 // والتكييف «غير مقيَّمة»؛ وengineering.mjs دوال مؤشرات للمخطط. لا يُكرَّر أي منهما هنا: هذه الطبقة هي المسار الوحيد للأنظمة
 // على مستندات المرسم، والعوائق الإنشائية تؤخذ من الفحص الإنشائي المبدئي الموجود (draw/structure.mjs) لا من محرك جديد.
 // كل الحسابات أولية: constructionApproved=false وcodeCompliance=NOT_EVALUATED ثابتان من الحزمة ولا يغيّرهما هذا الملف.
+import { scheduleCsvAr } from './csv-ar.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { validateDoc } from './draw/doc.mjs';
 import { computeStructure } from './draw/structure.mjs';
@@ -241,7 +242,8 @@ export async function buildExport(kind, { project, result, sourceHash, levelId =
   if (kind === 'svg') return { name: `${base}-${FILE_SAFE(levelId || 'L')}-${FILE_SAFE(discipline || 'combined')}.svg`, mime: 'image/svg+xml', text: await toSvg(project, result, { levelId, ...(discipline ? { discipline } : {}) }) };
   if (kind === 'dxf') return { name: `${base}-${FILE_SAFE(levelId || 'all')}-${FILE_SAFE(discipline || 'combined')}.dxf`, mime: 'application/dxf', text: await toDxf(project, result, { ...(levelId ? { levelId } : {}), ...(discipline ? { discipline } : {}) }) };
   const art = await exportArtifacts(project, result);
-  if (kind === 'csv') { const key = `schedules/${scheduleId || 'quantities'}.csv`; if (!art.has(key)) throw Object.assign(Error('جدول غير موجود: ' + scheduleId), { code: 'UNKNOWN_SCHEDULE' }); return { name: `${base}-${FILE_SAFE(scheduleId || 'quantities')}.csv`, mime: 'text/csv;charset=utf-8', text: art.get(key) }; }
+  // الجداول بالعربية (رؤوس وقيم تصنيف)؛ ملف المحرك الأصلي يبقى كما هو في الحزمة
+  if (kind === 'csv') { const key = `schedules/${scheduleId || 'quantities'}.csv`; if (!art.has(key)) throw Object.assign(Error('جدول غير موجود: ' + scheduleId), { code: 'UNKNOWN_SCHEDULE' }); return { name: `${base}-${FILE_SAFE(scheduleId || 'quantities')}.csv`, mime: 'text/csv;charset=utf-8', text: scheduleCsvAr(result, scheduleId || 'quantities', project) ?? art.get(key) }; }
   if (kind === 'json-result') return { name: `${base}-engineering-result.json`, mime: 'application/json', text: art.get('engineering-result.json') };
   if (kind === 'json-input') return { name: `${base}-engineering-input.json`, mime: 'application/json', text: art.get('engineering-input.json') };
   if (kind === 'json-issues') return { name: `${base}-issues.json`, mime: 'application/json', text: art.get('issues.json') };

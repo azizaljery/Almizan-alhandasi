@@ -102,7 +102,7 @@ async function apply() {
   if (!on) return;
   const c = cur(); if (c) markShown(hist, style, c);
   paint(); chips(); await probe(style); await loadTpls(); info();
-  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
+  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&nav=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
   if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
 }
 const seg = $('facadeSeg'); const jb = document.createElement('button'); jb.dataset.f = 'J'; jb.textContent = 'واجهة واقعية'; seg.appendChild(jb);

@@ -7,7 +7,7 @@ import { structureCsv } from './draw/structure-sheet.mjs';
 import { privacyIndex } from './intel/privacy-index.mjs';
 import { climateZoning } from './intel/climate-zoning.mjs';
 import { optimizeVariants } from './intel/variant-optimizer.mjs';
-import { mepSummaryHtml, mepQuantityRow, applyMepRow, NOT_COMPUTED_AR } from './final-outputs.mjs';
+import { mepSummaryHtml, mepQuantityRow, applyMepRow, mepQuantitiesHtml, quantityTables, NOT_COMPUTED_AR } from './final-outputs.mjs';
 import { serialize } from './draw/doc.mjs';
 import { isCostUnpriced, UNPRICED_TOTAL_AR } from './field-guards.mjs';
 
@@ -75,8 +75,7 @@ async function renderMep() {
     mep = await computeOutputsMep({ session: readSession(), studioRaw: get(STUDIO_KEY), store: { getItem: k => get(k) } });
   } catch (e) { mep = { notComputed: true, reasonAr: 'تعذّر الحساب: ' + String(e.message || e).slice(0, 160) }; }
   if (data) data.mep = mep;
-  const box = $('mepSummary'); if (box) box.innerHTML = mepSummaryHtml(mep);
-  const tr = document.querySelector('tr[data-qty="mep"]'); if (tr) tr.outerHTML = qtyRow(mepQuantityRow(mep));
+  const box = $('mepQty'); if (box) box.innerHTML = mepQuantitiesHtml(mep);
 }
 function renderVariants() {
   const box = $('intelVariants'); if (!box) return;
@@ -98,8 +97,9 @@ function render() {
   d.levels.forEach((l, i) => parts.push(sec('plan' + i, 'المخطط — ' + l.name, `<div class="svgbox sheet">${l.plan}</div>` + sheetNote(l))));
   parts.push(sec('view3d', 'العرض ثلاثي الأبعاد', d.snapshot3d ? `<div class="shot"><img alt="لقطة ثلاثية الأبعاد من المرسم" src="${esc(d.snapshot3d)}"></div><p class="muted">اللقطة من المجسم المبني من المخطط نفسه. للتجوّل والشمس والجولة افتح <a href="./studio.html">المرسم</a>.</p>` : `<p>لا توجد لقطة محفوظة بعد. افتح <a href="./studio.html">المرسم</a> ثم اضغط «اعتمد وأخرج المخرجات» من العرض ثلاثي الأبعاد لتُحفظ اللقطة.</p>`));
   d.levels.forEach((l, i) => l.structure && parts.push(sec('str' + i, 'المخطط الإنشائي المبدئي — ' + l.name, `<div class="svgbox">${l.structure}</div><p class="muted">تحجيم أولي بجداول ACI 318؛ مطابقة الكود السعودي SBC 304 غير متحققة. ليس تصميمًا إنشائيًا معتمدًا ويراجعه مهندس إنشائي.</p>`)));
-  parts.push(sec('mep', 'الأنظمة الهندسية: الكهرباء والتكييف والسباكة والحريق', `<div id="mepSummary">${data.mep ? mepSummaryHtml(data.mep) : '<p class="muted">جارٍ حساب الأنظمة الأولية من المخطط (الإنارة والمقابس والدوائر والتكييف والمياه)…</p>'}</div><p>تُبنى من التصميم المعتمد نفسه بافتراضات معلنة تعدّلها في صفحة الأنظمة: مواقع الإنارة والمقابس واللوحات والدوائر، والتكييف والتهوية، والمياه والصرف، والحريق والتيار الخفيف والطاقة الشمسية، مع تصدير SVG وDXF وجداول CSV.</p><p><a class="btn primary" href="./mep/systems.html">فتح المخططات الكهربائية والميكانيكية ←</a></p><p class="muted">تصميم أولي يحتاج مراجعة مهندس مختص، وليس مخططًا تنفيذيًا معتمدًا.</p>`));
-  parts.push(sec('qty', 'جداول الكميات والتكلفة', table(['البند', 'القيمة', 'الدرجة', 'الأساس'], applyMepRow(d.quantities.rows, d.mep).map(qtyRow)) + '<h3>التكلفة بأسعارك</h3>' + renderCost()));
+  // الأنظمة الهندسية ضمن التصاميم: وصف ورابط المخططات فقط؛ أرقامها في «جداول الكميات» آخر الصفحة
+  parts.push(sec('mep', 'الأنظمة الهندسية: الكهرباء والتكييف والسباكة والحريق', `<p>تُبنى من التصميم المعتمد نفسه بافتراضات معلنة تعدّلها في صفحة الأنظمة: مواقع الإنارة والمقابس واللوحات والدوائر، والتكييف والتهوية، والمياه والصرف، والحريق والتيار الخفيف والطاقة الشمسية، مع تصدير SVG وDXF وجداول CSV.</p><p>كمياتها بالأرقام في <a href="#qty">جداول الكميات</a> آخر الصفحة.</p><p><a class="btn primary" href="./mep/systems.html">فتح المخططات الكهربائية والميكانيكية ←</a></p><p class="muted">تصميم أولي يحتاج مراجعة مهندس مختص، وليس مخططًا تنفيذيًا معتمدًا.</p>`));
+
   parts.push(sec('why', 'لماذا هذا التصميم', (d.score ? `<p>${esc(d.score.grade)}${d.score.score !== null ? ` — الدرجة ${d.score.score} من ١٠٠٠ (${esc(d.scoreLevel)})` : ''}</p>` : '<p>الدرجة غير متاحة لهذا المخطط.</p>')
     + (R.strengths.length ? `<h3>نقاط القوة</h3><ul>${R.strengths.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '')
     + (R.improvements.length ? `<h3>ما يحتاج تحسينًا</h3><ul>${R.improvements.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '')
@@ -108,8 +108,10 @@ function render() {
     + (d.dnaAxes ? '<h3>بصمتك التصميمية</h3>' + table(['المحور', 'القيمة'], d.dnaAxes.map(a => `<tr><td>${esc(a.label)}</td><td class="num">${Math.round(a.value * 100)}%</td></tr>`)) : '')));
   parts.push(sec('intel', 'تقييم الخصوصية والمناخ والبدائل', renderIntel()));
   parts.push(sec('next', 'ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => `<tr><td>${esc(s.title)}</td><td><span class="pill ${s.status === 'available' ? '' : 'plan'}">${s.status === 'available' ? 'متاح' : 'قادم'}</span></td><td>${esc(s.note)}</td></tr>`))));
+  // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم، بالعربية
+  parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
   $('fmain').innerHTML = parts.join('');
-  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ['view3d', '3D'], ['str0', 'الإنشائي'], ['mep', 'الكهرباء والميكانيك'], ['qty', 'الكميات والتكلفة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
+  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));
   $('resPct').addEventListener('input', e => { state.reservePct = e.target.value; update(); });

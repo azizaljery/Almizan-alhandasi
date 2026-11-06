@@ -32,7 +32,8 @@ test('دور واحد: مدخلات كاملة بلا أخطاء وأرقام ف
   // الواجهة الكهربائية للأجهزة: كل جهاز بسعة مدخلة له حمل كهربائي مطابق
   const bad = result.coordination.interfaces.filter(i => i.outcome !== 'MATCHED_SUPPLIED_INPUT');
   assert.equal(bad.length, 0, JSON.stringify(bad.slice(0, 3)));
-  const html = mepSummaryHtml(S); assert.ok(html.includes('وحدة إنارة') && html.includes('BTU/h'));
+  const html = mepSummaryHtml(S); assert.ok(html.includes('وحدة إنارة') && html.includes('وحدة حرارية بريطانية/ساعة') && html.includes('طن تبريد'));
+  assert.ok(!/BTU\/h|kVA|\bTR\b|\bkW\b|\bkWp\b/.test(html), 'الوحدات بالعربية لا بالإنجليزية');
 });
 
 test('دوران: لوحة لكل دور ودوائر لا تعبر الأدوار وأحمال تبريد في الدورين', async () => {

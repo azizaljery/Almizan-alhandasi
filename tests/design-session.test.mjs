@@ -12,19 +12,20 @@ const memStore = () => { const m = new Map(); return { getItem: k => m.get(k) ??
 test('جلسة التصميم: الأول يُعرض، و«تصميم آخر» يختلف ويطبّق الملاحظات، والسجل محفوظ', async () => {
   const first = await generateInitialDesign({ land, rooms: null, discovery, counts });
   let s = createSession({ land, counts, discovery, result: first });
-  assert.equal(s.designs.length, 1); assert.ok(currentDoc(s).walls.length > 10);
+  // حتى خمسة تصاميم من البداية (الأول + بدائل المولّد المهني)، والمعروض هو الأول
+  const n0 = s.designs.length; assert.ok(n0 >= 1 && n0 <= 5, 'عدد التصاميم الأولى: ' + n0); assert.equal(s.current, 0); assert.ok(currentDoc(s).walls.length > 10);
   const r1 = await redesign(s, { picks: ['rooms_small', 'corridors'] });
   s = r1.session;
-  assert.equal(s.designs.length, 2); assert.equal(s.current, 1);
-  assert.notEqual(s.designs[0].pat, s.designs[1].pat, 'توزيع مختلف');
+  assert.equal(s.designs.length, n0 + 1); assert.equal(s.current, n0);
+  assert.notEqual(s.designs[0].pat, s.designs[n0].pat, 'توزيع مختلف');
   assert.deepEqual(r1.changes, ['غرف النوم صغيرة', 'الممرات كثيرة']);
-  assert.ok(!['tee', 'rows'].includes(s.designs[1].pat.split('|')[0]), 'الممرات الكثيرة تستبعد أنماط الممر');
+  assert.ok(!['tee', 'rows'].includes(s.designs[n0].pat.split('|')[0]), 'الممرات الكثيرة تستبعد أنماط الممر');
   assert.ok(s.input.requirements.tweaks.bedroomScale > 1);
   const r2 = await redesign(s, { text: 'أريد المطبخ مفتوحا وغرفة خادمة' });
   assert.ok(r2.changes.some(c => /مطبخ مفتوح/.test(c)) && r2.changes.some(c => /خادمة/.test(c)));
   assert.ok(currentDoc(r2.session).labels.some(l => l.name === 'غرفة الخادمة'));
   const store = memStore(); assert.ok(saveSession(store, approve(r2.session)));
-  const back = loadSession(store); assert.equal(back.approved, back.current); assert.equal(back.designs.length, 3);
+  const back = loadSession(store); assert.equal(back.approved, back.current); assert.equal(back.designs.length, n0 + 2);
   await assert.rejects(redesign(s, { picks: ['nope'] }), /غير معروف/);
 });
 

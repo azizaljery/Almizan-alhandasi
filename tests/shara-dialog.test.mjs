@@ -54,13 +54,14 @@ test('التعديل يُطبَّق على التصميم المعروض نفس�
   const req = extractRequirements('3 غرف ومجلس', { counts: BASE });
   const first = await generateInitialDesign({ land: LAND(), counts: req.counts, requirements: req });
   const s0 = createSession({ land: LAND(), counts: req.counts, requirements: req, result: first });
+  const n0 = s0.designs.length; // حتى خمسة تصاميم من البداية؛ المعروض هو الأول
   const { session, reply } = await redesign(s0, { text: 'المطبخ بجانب الطعام' });
-  assert.equal(session.designs[1].pat, session.designs[0].pat, 'نفس التوزيع');
+  assert.equal(session.designs[n0].pat, session.designs[0].pat, 'نفس التوزيع');
   assert.deepEqual(reply.done, ['«المطبخ» بجوار «الطعام»']);
   assert.ok(reply.kept);
   // «توزيع مختلف» صراحة: نمط آخر
   const { session: s2 } = await redesign(session, { picks: ['layout'] });
-  assert.notEqual(s2.designs[2].pat, session.designs[1].pat);
+  assert.notEqual(s2.designs[n0 + 1].pat, session.designs[n0].pat);
 });
 test('ملاحظة غير مفهومة لا تولّد تصميمًا عشوائيًا بل تطلب إعادة الصياغة', async () => {
   const req = extractRequirements('3 غرف ومجلس', { counts: BASE });

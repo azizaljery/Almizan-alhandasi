@@ -171,8 +171,17 @@ async function variantMode() {
     camera.position.set(...C.pos); camera.lookAt(...C.look);
   }
   renderer.render(scene, camera);
+  // nav=1: واجهة يتنقل فيها العميل كالمجسم (دوران، تكبير، تحريك، تجوّل بمستوى العين)، لا صورة ثابتة.
+  // الظلال تُحسب مرة واحدة (الشمس والمبنى ثابتان) فيبقى التنقل سلسًا.
+  let nav = null;
+  if (q.get('nav') === '1' && !shot) {
+    renderer.shadowMap.autoUpdate = false;
+    document.body.style.overflow = 'hidden'; Object.assign(stage.style, { padding: '0', position: 'fixed', inset: '0' }); canvas.style.maxWidth = 'none';
+    const { enableNavigation } = await import('./facade-realism/nav.mjs');
+    nav = enableNavigation(THREE, { renderer, scene, camera, S, host: document.body });
+  }
   const gl = renderer.getContext();
-  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback });
+  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav });
 }
 
 (async () => {

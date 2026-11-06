@@ -108,3 +108,9 @@ table.rooms td .z{display:inline-block;width:10px;height:10px;border-radius:3px;
   .planwrap{height:64vh;min-height:360px}.planbar{padding:8px 10px}
   table.rooms{font-size:12.5px}table.rooms th,table.rooms td{padding:6px 4px}
 }
+
+/* دمج تصميمين: قائمة اختيار */
+.mg-list{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow:auto;margin:12px 0}
+.mg-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #ffffff33;border-radius:12px;cursor:pointer;line-height:1.6;color:#f6f2ea}
+.mg-item input{margin-top:5px;flex:none}
+.mg-item:has(input:checked){border-color:var(--mz-gold);background:#c9a45c26}

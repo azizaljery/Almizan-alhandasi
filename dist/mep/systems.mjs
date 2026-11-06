@@ -1,6 +1,7 @@
 // صفحة الأنظمة الهندسية: تربط البديل المعماري المختار (مستند المرسم) بحزمة الأنظمة عبر mep-binding.mjs،
 // وتعرض لكل تخصص ودور: الطبقات ومفتاح الرموز، محرر المدخلات والأجهزة، الجداول والكميات، الرسائل، والتصدير.
 // كل تعديل (مخطط أو جهاز أو مدخل) يجعل النتيجة قديمة فورًا ويمنع تصديرها حتى يُعاد الحساب.
+import { scheduleNameAr } from './csv-ar.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY } from './draw/handoff.mjs';
 import * as B from './mep-binding.mjs';
@@ -265,8 +266,8 @@ const EXPORT_LIST = () => {
   return [
     { kind: 'svg', ar: `SVG — ${d ? DISCIPLINE_INFO[d].short : 'التنسيق'} (${S.levelId})`, opts: { levelId: S.levelId, discipline: d } },
     { kind: 'dxf', ar: `DXF — الدور ${S.levelId} (كل التخصصات، بالمتر وZ حقيقي)`, opts: { levelId: S.levelId } },
-    ...sch.map(s => ({ kind: 'csv', ar: `CSV — ${s.id}`, opts: { scheduleId: s.id } })),
-    { kind: 'csv', ar: 'CSV — الكميات', opts: { scheduleId: 'quantities' } },
+    ...sch.map(s => ({ kind: 'csv', ar: `جدول (CSV) — ${scheduleNameAr(s.id)}`, opts: { scheduleId: s.id } })),
+    { kind: 'csv', ar: 'جدول (CSV) — كميات الأنظمة', opts: { scheduleId: 'quantities' } },
     { kind: 'json-result', ar: 'JSON — النتيجة', opts: {} }, { kind: 'json-input', ar: 'JSON — المدخلات', opts: {} }, { kind: 'json-issues', ar: 'JSON — الرسائل', opts: {} },
   ];
 };

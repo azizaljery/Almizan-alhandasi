@@ -98,3 +98,45 @@ test('مدخلات صفحة الأنظمة المحفوظة تُستعمل، و�
   assert.ok(html.includes('التصميم 2') && html.includes('غير معروض هنا'), 'الحساب الآخر مسمّى كملاحظة فقط');
   assert.ok(html.includes(`<b>${out.lights}</b>`), 'الأرقام المعروضة للنسخة الحالية لا للأخرى');
 });
+
+// جداول الكميات: مجمعة في قسم واحد آخر المخرجات وكتاب المشروع، منفصلة عن التصاميم، بالعربية
+import { quantityTables, mepQuantitiesHtml, projectBookHtml as __book } from '../dist/final-outputs.mjs';
+test('جداول الكميات كلها في آخر الكتاب بعد التصاميم، وبالعربية', async () => {
+  const { generateVillaDesigns } = await import('../dist/villa-layout.mjs');
+  const { buildFinalData } = await import('../dist/final-outputs.mjs');
+  const doc = generateVillaDesigns({ land: { width: 20, length: 30, floors: 1, streets: ['s'], entries: ['s'] }, counts: { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 }, requirements: {} }).designs[0].doc;
+  const { computeOutputsMep } = await import('../dist/mep/outputs-mep.mjs');
+  const { serialize } = await import('../dist/draw/doc.mjs');
+  const data = buildFinalData(doc); data.mep = await computeOutputsMep({ session: null, studioRaw: serialize(doc), store: { getItem: () => null } });
+  const html = __book(data);
+  const H = t => '<h2>' + t; const order = ['المخطط — ', 'لماذا هذا التصميم', 'ما بعد التصميم', 'جداول الكميات'].map(t => html.indexOf(H(t)));
+  assert.ok(order.every(i => i > 0), JSON.stringify(order));
+  assert.ok(order.every((v, i) => !i || v > order[i - 1]), 'الكميات بعد التصاميم وفي الآخر: ' + order);
+  const q = html.slice(html.indexOf('<h2>جداول الكميات'));
+  for (const t of ['الكميات المعمارية', 'الكميات الإنشائية', 'كميات الأنظمة الهندسية', 'جدول مساحات الفراغات', 'التكلفة بأسعارك', 'التكييف لكل فراغ']) assert.ok(q.includes(t), t);
+  const before = html.slice(0, html.indexOf('<h2>جداول الكميات'));
+  assert.ok(!before.includes('وحدات الإنارة') && !before.includes('حجم الجدران'), 'لا جداول كميات بين التصاميم');
+  const tablesText = q.replace(/<[^>]+>/g, ' ');
+  assert.ok(!/\b(?:BTU\/h|kVA|kW|kWp|TR|L)\b/.test(tablesText), 'لا وحدات إنجليزية في جداول الكميات: ' + (tablesText.match(/\b(?:BTU\/h|kVA|kW|kWp|TR|L)\b/) || []));
+  assert.ok(mepQuantitiesHtml(data.mep).includes('الطلب الكهربائي الأقصى'));
+  assert.ok(quantityTables(data, { costHtml: '<p>x</p>' }).includes('<p>x</p>'));
+});
+
+test('جداول الأنظمة المنزّلة (CSV) برؤوس وقيم عربية، والمعرّفات كما هي', async () => {
+  const { generateVillaDesigns } = await import('../dist/villa-layout.mjs');
+  const B = await import('../dist/mep/mep-binding.mjs');
+  const { autoInputs } = await import('../dist/mep/auto-inputs.mjs');
+  const { scheduleCsvAr, scheduleNameAr } = await import('../dist/mep/csv-ar.mjs');
+  const doc = generateVillaDesigns({ land: { width: 20, length: 30, floors: 1, streets: ['s'], entries: ['s'] }, counts: { bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 }, requirements: {} }).designs[0].doc;
+  let bind = await B.bindArchitecture(doc, { alternativeId: 't' }); const { inputs } = autoInputs(doc, bind.project);
+  bind = await B.bindArchitecture(doc, { alternativeId: 't', inputs }); const result = await B.computeSystems(bind.project);
+  const q = scheduleCsvAr(result, 'quantities', bind.project);
+  const head = q.split('\r\n')[0];
+  assert.ok(head.includes('التخصص') && head.includes('النوع') && head.includes('الكمية') && !/discipline|quantity|kind/.test(head), head);
+  assert.ok(q.includes('الكهرباء') && q.includes('مقبس') && q.includes('وحدة إنارة') && !/"electrical"|"SOCKET"|"each"/.test(q));
+  const hv = scheduleCsvAr(result, 'hvac-zones', bind.project);
+  assert.ok(hv.split('\r\n')[0].includes('اسم الفراغ') && hv.split('\r\n')[0].includes('الحمل الكلي (واط)'));
+  assert.equal(scheduleNameAr('electrical-circuits'), 'جدول الدوائر الكهربائية');
+  const f = await B.buildExport('csv', { project: bind.project, result, sourceHash: 'x', scheduleId: 'electrical-circuits' }).catch(e => e);
+  if (!(f instanceof Error)) assert.ok(f.text.split('\r\n')[0].includes('التيار (أمبير)'), 'التنزيل الفعلي بالعربية');
+});

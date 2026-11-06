@@ -1,6 +1,6 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
-import { loadSession, saveSession, redesign, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor } from './design-session.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor } from './design-session.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
@@ -44,6 +44,7 @@ function show(index) {
     el('h2', {}, 'ما رأيك في هذا التصميم؟'),
     el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واعرضه ثلاثي الأبعاد ←'),
     el('button', { class: 'btn primary', id: 'btnAnother', onclick: openShara }, 'اطلب تصميمًا آخر'),
+    session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnMerge', onclick: openMerge }, 'ادمج تصميمين في تصميم واحد') : null,
     el('button', { class: 'btn', id: 'btnStudio', onclick: onStudio }, 'عدّل عليه بيدك في المرسم'),
     el('small', {}, 'الاعتماد يفتح العرض ثلاثي الأبعاد في صفحة مستقلة، ومنه المخرجات (الإنشائي والكميات والتكلفة وكتاب المشروع).'));
   // سجل التنفيذ: كل بند من طلبك مقيس من المخطط نفسه، لا من نية المولّد
@@ -54,11 +55,11 @@ function show(index) {
     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
-    d.feedback ? el('p', { class: 'sub' }, 'عدّلتُ هذا التصميم بناءً على: ' + d.feedback.changes.join('، ')) : null);
+    d.feedback?.changes?.length ? el('p', { class: 'sub' }, (d.feedback.merge ? '' : 'عدّلتُ هذا التصميم بناءً على: ') + d.feedback.changes.join('، ')) : null);
   const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
     el('tbody', {}, S.rooms.filter(r => r.area >= 2).map(r => el('tr', {}, el('td', {}, el('span', { class: 'z', style: `background:${ZONES[r.zone].color}` }), r.name), doc.levels.length > 1 ? el('td', {}, r.level) : null, el('td', { class: 'num' }, `${fmt(r.l)} × ${fmt(r.w)}`), el('td', { class: 'num' }, fmt(r.area)), el('td', {}, ZONES[r.zone].label)))),
     el('tfoot', {}, el('tr', {}, el('th', {}, 'إجمالي المساحات الصافية'), doc.levels.length > 1 ? el('th', {}) : null, el('th', {}), el('th', { class: 'num' }, fmt(S.specs.net)), el('th', {}))));
-  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم السابقة' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', onclick: () => show(i) }, 'التصميم ' + (i + 1)))) : null;
+  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', title: x.summary || '', onclick: () => show(i) }, 'التصميم ' + (i + 1) + (x.feedback?.merge ? ' (دمج)' : '')))) : null;
   const replyCard = sharaReply(d.feedback);
   // replaceChildren يحوّل null إلى النص «null»؛ بطاقة الرد تُمرَّر فقط إن وُجدت
   $('main').replaceChildren(
@@ -73,7 +74,8 @@ function show(index) {
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
-  const head = r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
+  if (r.merge) return mergeReply(r);
+  const head = r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : r.altAsk || fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت، وليس تكرارًا لأي تصميم عرضته عليك.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
   return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
     el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), head)),
@@ -82,6 +84,35 @@ function sharaReply(fb) {
     r.unclear.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أفهم هذه العبارات فلم أطبّقها؛ اكتبها بصيغة مباشرة (مثل: «المطبخ في الخلف»):'), el('ul', { class: 'tick' }, r.unclear.map(t => li('no', '«' + t + '»')))) : null,
     r.unsupported.length ? el('ul', { class: 'tick' }, r.unsupported.map(t => li('no', t))) : null);
 }
+
+/** رد شرعاء على الدمج: ما بقي في موضعه من كل تصميم، مقيسًا من المخطط الناتج. */
+function mergeReply(r) {
+  const [a, b] = r.merge, list = (title, items) => items.length ? el('div', {}, el('p', { class: 'sub' }, title), el('ul', { class: 'tick' }, items.map(t => el('li', { class: 'good' }, t)))) : null;
+  return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
+    el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), `دمجت التصميم ${a} والتصميم ${b} في توزيع سليم جديد؛ يشبه الأول بنسبة ${r.simA}٪ والثاني بنسبة ${r.simB}٪.`)),
+    list(`من التصميم ${a} وحده (في موضعه هناك):`, r.fromA),
+    list(`من التصميم ${b} وحده (في موضعه هناك):`, r.fromB),
+    r.both.length ? el('p', { class: 'sub' }, `وبقي في موضعه المشترك بين التصميمين ${r.both.length} فراغًا.`) : null,
+    !r.fromA.length || !r.fromB.length ? el('p', { class: 'sub' }, `لم أجد توزيعًا سليمًا يأخذ من التصميم ${!r.fromA.length ? a : b} شيئًا لا يشترك فيه مع الآخر؛ أخذت منه مواضعه المشتركة.`) : null,
+    r.fresh.length ? el('p', { class: 'sub' }, 'فراغات في مواضع جديدة لتستقيم الحركة: ' + r.fresh.join('، ')) : null);
+}
+function openMerge() {
+  const box = $('mgList'); box.replaceChildren(...session.designs.map((x, i) => el('label', { class: 'mg-item' }, el('input', { type: 'checkbox', value: String(i), onchange: () => { const on = [...box.querySelectorAll('input:checked')]; if (on.length > 2) on.find(c => c.value !== String(i)).checked = false; $('mgGo').disabled = box.querySelectorAll('input:checked').length !== 2; } }),
+    el('span', {}, el('b', {}, 'التصميم ' + (i + 1)), ' — ', x.summary || 'تصميم'))));
+  const cur = box.querySelector(`input[value="${session.current}"]`); if (cur) cur.checked = true;
+  $('mgGo').disabled = true; $('mgStatus').textContent = ''; $('merge').hidden = false;
+}
+$('mgClose').addEventListener('click', () => { $('merge').hidden = true; });
+$('mgGo').addEventListener('click', async () => {
+  const [a, b] = [...document.querySelectorAll('#mgList input:checked')].map(c => Number(c.value));
+  $('mgGo').disabled = true; $('mgStatus').textContent = 'أدمج التصميمين…';
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    const out = await mergeDesigns(session, a, b);
+    session = out.session; saveSession(localStorage, session);
+    $('merge').hidden = true; show(session.current); toast('تم الدمج — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) { $('mgStatus').textContent = err.message || 'تعذّر الدمج.'; $('mgGo').disabled = false; }
+});
 
 function legend() {
   const box = $('legend'); if (!box) return;
