@@ -29,7 +29,8 @@ async function startScene() {
     const tick = now => {
       const elapsed = now - t0;
       scene.update(elapsed);
-      if (elapsed < 5200 && home.dataset.stage === 'welcome') frame = requestAnimationFrame(tick);
+      // يدور المشهد ببطء ما دامت الصفحة الأولى ظاهرة (ويتوقف حين تُخفى الصفحة لتوفير الطاقة)
+      if (home.dataset.stage === 'welcome' && scene) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     addEventListener('resize', () => { if (scene && home.dataset.stage === 'welcome') scene.update(6000); });
@@ -37,6 +38,10 @@ async function startScene() {
 }
 function stopScene() { cancelAnimationFrame(frame); scene?.dispose(); scene = null; }
 startScene();
+// الافتتاحية (رسم الميزان ثم الاسم ثم النقاط) مرة في الجلسة، ويمكن تخطيها
+(() => { const w = $('stageWelcome'), done = () => { w.classList.add('lx-done'); try { sessionStorage.setItem('mz-intro-seen', '1'); } catch {} };
+  try { if (sessionStorage.getItem('mz-intro-seen')) w.classList.add('lx-done'); } catch {}
+  $('lxSkip')?.addEventListener('click', done); setTimeout(() => { try { sessionStorage.setItem('mz-intro-seen', '1'); } catch {} }, 7000); })();
 $('start').addEventListener('click', () => { stopScene(); show('Land'); $('landLength').focus(); });
 
 // ------------------------------------------------------------------------------------------------ الأرض

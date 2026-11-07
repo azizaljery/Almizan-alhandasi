@@ -15,14 +15,15 @@ export function cinematicFrame(elapsedMs) {
 
 export function createArchitecturalScene(T, host) {
   const scene = new T.Scene();
-  scene.background = new T.Color('#1a342a');
-  scene.fog = new T.Fog('#1a342a', 58, 140);
+  // هوية العاج والبرونز: نهار عاجي دافئ (كان أخضر داكنًا)
+  scene.background = new T.Color('#efe6da');
+  scene.fog = new T.Fog('#efe6da', 62, 150);
   const camera = new T.PerspectiveCamera(37, 1, .1, 180);
   const renderer = new T.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' });
   renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = T.SRGBColorSpace;
   if (T.ACESFilmicToneMapping) renderer.toneMapping = T.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   const materials = new Set(), geometries = new Set();
@@ -31,8 +32,8 @@ export function createArchitecturalScene(T, host) {
     materials.add(m); return m;
   };
   const sandstone = material('#e2cfaa'), ivory = material('#f4ead6'), darkStone = material('#a9926d');
-  const roof = material('#9b7951'), glass = material('#557e7c', .23), metal = material('#ad8a4f', .38);
-  const grass = material('#294b3a');
+  const roof = material('#7a5136'), glass = material('#3f4a52', .2), metal = material('#a97142', .32);
+  const grass = material('#d6c6ae');
   const mesh = (w, h, d, x, y, z, mat, shadow = true) => {
     const geometry = new T.BoxGeometry(w, h, d); geometries.add(geometry);
     const object = new T.Mesh(geometry, mat); object.position.set(x, y, z);
@@ -95,7 +96,7 @@ export function createArchitecturalScene(T, host) {
   for (let i = 0; i < 6; i++) {
     mesh(5.2, .025, .08, 0, .31, 3.7 + i * .75, darkStone, false);
   }
-  const leaves = material('#315a45'), trunkMat = material('#967751');
+  const leaves = material('#6d7a55'), trunkMat = material('#8a6a4a');
   const tree = (x, z) => {
     const trunkGeometry = new T.CylinderGeometry(.13, .2, 2.3, 7); geometries.add(trunkGeometry);
     const trunk = new T.Mesh(trunkGeometry, trunkMat); trunk.position.set(x, 1.2, z);
@@ -107,7 +108,7 @@ export function createArchitecturalScene(T, host) {
   };
   tree(-11.4, 4.6); tree(11.6, 5.1);
   tree(-13.6, -2.8); tree(13.5, -3.7);
-  const hemi = new T.HemisphereLight(0xf7ead4, 0x345349, 2.1); scene.add(hemi);
+  const hemi = new T.HemisphereLight(0xfff4e2, 0xb8a58c, 2.0); scene.add(hemi);
   const sun = new T.DirectionalLight(0xffe0a4, 3.6);
   sun.position.set(-23, 33, 18); sun.target.position.set(0, 0, 0);
   sun.castShadow = true;
@@ -116,9 +117,9 @@ export function createArchitecturalScene(T, host) {
   sun.shadow.bias = -.00025;
   sun.shadow.camera.updateProjectionMatrix();
   scene.add(sun, sun.target);
-  const fill = new T.DirectionalLight(0xb2d4c5, .7); fill.position.set(17, 13, -15); scene.add(fill);
+  const fill = new T.DirectionalLight(0xffe6cc, .7); fill.position.set(17, 13, -15); scene.add(fill);
   const target = new T.Vector3(0, 1.7, .2);
-  const far = new T.Vector3(40, 26, 47), near = new T.Vector3(12.5, 8.4, 17.2);
+  const far = new T.Vector3(40, 26, 47), near = new T.Vector3(19.5, 11.5, 26.5);
   let width = 0, height = 0;
   const resize = () => {
     const w = Math.max(1, host.clientWidth), h = Math.max(1, host.clientHeight);
@@ -131,7 +132,19 @@ export function createArchitecturalScene(T, host) {
     const state = cinematicFrame(elapsed);
     camera.position.copy(far).lerp(near, state.approach);
     camera.position.x += Math.sin(elapsed * .00018) * (1 - state.approach) * .9;
-    camera.lookAt(target);
+    // بعد الاقتراب: تمايل بطيء حول المبنى يمينًا ويسارًا (طابع ثلاثي الأبعاد للصفحة الأولى)
+    const orbit = elapsed > CINEMATIC_TIMING.totalMs ? Math.sin((elapsed - CINEMATIC_TIMING.totalMs) * .00011) * .32 : 0; // تمايل هادئ يبقي المبنى في مكانه
+    if (orbit) { const dx = camera.position.x - target.x, dz = camera.position.z - target.z, c = Math.cos(orbit), s = Math.sin(orbit); camera.position.x = target.x + dx * c - dz * s; camera.position.z = target.z + dx * s + dz * c; }
+    // الشاشات العريضة: المبنى في النصف الأيسر والنص في الأيمن (العربية من اليمين)
+    const side = width > 760 ? Math.min(8.5, width / 170) : 0;
+    if (side) {
+      const dir = new T.Vector3().subVectors(target, camera.position).normalize(), right = new T.Vector3().crossVectors(dir, camera.up).normalize();
+      camera.position.addScaledVector(right, side); camera.lookAt(target.clone().addScaledVector(right, side));
+    } else {
+      // الجوال: المبنى كاملًا في أعلى الشاشة فوق النص
+      camera.position.sub(target).multiplyScalar(2.7).add(target);
+      camera.lookAt(target.x, target.y - 17, target.z);
+    }
     renderer.render(scene, camera);
     return state;
   };
