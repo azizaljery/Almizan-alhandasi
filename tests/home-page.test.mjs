@@ -8,7 +8,7 @@ test('الصفحة الرئيسية: عربية RTL بهوية «الميزان 
   assert.match(html, /<h1 id="brandName">الميزان الهندسي<\/h1>/);
   assert.match(html, /<p class="tagline">بوابتك لتصميم منزلك<\/p>/);
   const steps = [...html.matchAll(/<li><span class="n">(\d)<\/span><span><b>([^<]+)<\/b>/g)].map(m => m[2]);
-  assert.deepEqual(steps, ['نفهمك', 'نرسم مخططك باحترافية', 'نصممه ثلاثي الأبعاد', 'تشاهده فيديو وتعيش فيه', 'مخططاتك الهندسية', 'نشرح لك منزلك', 'نحلل رسوماتك', 'نسلّمك الكميات']);
+  assert.deepEqual(steps, ['نفهمك عبر شرعاء', 'نرسم مخططك', 'نصممه ثلاثي الأبعاد', 'تعيش فيه افتراضيًا', 'مخططاتك الهندسية', 'نشرح لك منزلك', 'نحلل رسوماتك', 'جداول الكميات']);
   assert.ok(html.includes('class="scale-intro"') && html.includes('id="lxSkip"'), 'افتتاحية الميزان وزر التخطي');
   assert.ok(html.includes('lux-theme.css'), 'هوية العاج والبرونز');
 });
