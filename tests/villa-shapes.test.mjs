@@ -18,7 +18,7 @@ test('النص الحر: «شكل L» و«شكل T» يُفهمان نمطين،
 });
 
 test('طلب L: التصاميم كلها L، سليمة وموصولة، وفيها ذراع خلفي والزاوية الباقية ساحة', () => {
-  const out = generateVillaDesigns({ land: L(20, 30), counts: C({ bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 }), requirements: { prefs: { shape: 'L' } } });
+  const out = generateVillaDesigns({ land: L(20, 30), counts: C({ bedrooms: 4, majlis: 1, baths: 5, kitchens: 1, halls: 1, dining: 1 }), requirements: { prefs: { shape: 'L' } } });
   assert.ok(out.designs.length >= 1);
   for (const d of out.designs) {
     assert.equal(d.mode, 'L');
@@ -26,6 +26,15 @@ test('طلب L: التصاميم كلها L، سليمة وموصولة، وفي
     assert.ok(d.notes.some(n => n.includes('شكل L')), 'ملاحظة الشكل');
     assert.ok(d.doc.labels.filter(l => ['bedroom', 'master'].includes(l.type)).length >= 4);
   }
+});
+
+// بمجلسين على 20×30 لم يخرج L إلا بغرفة نوم بلا نافذة أو بنسب أطول من 1:2.2 (تُرفض الآن)؛ فيُعلن التعذّر بالحد الأدنى رقمًا
+test('طلب L بمجلسين على 20×30: L سليم أو إعلان التعذّر بالحد الأدنى بالأرقام', () => {
+  const out = generateVillaDesigns({ land: L(20, 30), counts: C({ bedrooms: 4, majlis: 2, baths: 6, kitchens: 1, halls: 1, dining: 1 }), requirements: { prefs: { shape: 'L' } } });
+  assert.ok(out.designs.length >= 1);
+  for (const d of out.designs) sound(d.doc);
+  if (out.designs.every(d => d.mode === 'L')) return;
+  assert.ok(out.designs[0].notes.some(n => n.includes('تعذّر توزيع') && /\d+(?:\.\d+)? × \d+(?:\.\d+)? م على الأقل/.test(n)), 'إعلان التعذّر بالأرقام');
 });
 
 test('طلب T: التصاميم كلها T أو أقرب بديل معلن', () => {
