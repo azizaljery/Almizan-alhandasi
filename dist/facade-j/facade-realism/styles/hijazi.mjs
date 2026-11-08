@@ -189,6 +189,21 @@ export const templates = [
   T('H15', 'بيت التاجر ذو الدكة', 'جناحان بارزان يحتضنان مدخلًا بمصاطب، روشانات في الجناحين وسقيفة خشبية على كوابيل وتاج مسطح', { fl: 2, fm: 4, ep: 0, dk: 1, wsz: 2, rg: 1, sw: 1, pr: 1, pal: 0, coral: 1, roshan: 2, rhood: 2, rcorb: 2, rlat: 1, rpat: 0, rlev: 0, arch: 3, door: 3, band: 0, crown: 2, orn: 3, pil: 0, wrap: 1 }),
   T('H16', 'روشان القشرة الرقيقة (كلاسيك جدة)', 'الصورة التقليدية القديمة: قشرة روشان رقيقة 18 سم بتاج مائل، مدخل مدبّب وكورنيش مركّب (مرجع القالب القديم)', { fl: 2, wf: 0, wt: 0, ep: 1, wsz: 1, rg: 1, sw: 1, pr: 1, pal: 0, coral: 1, roshan: 0, rhood: 0, rcorb: 0, rlat: 0, rpat: 0, arch: 1, shut: 1, door: 0, band: 0, crown: 0, orn: 3, pil: 0, wrap: 0 }),
 ];
+// ── بدائل محور القوالب (2026-11-08): قالبان إضافيان مشتقان من قالبين قائمين؛ لكل منهما «ما الذي يختلف» في المدخل وإيقاع النوافذ وتوزيع الخامات.
+//    القيم كلها من تعدادات الطراز نفسه (فيصح الدمج والتطفير)؛ لا يُدّعى لها مرجع معماري خارجي.
+const variantH = (id, ar, base, differs, o) => { const b = templates.find(t => t.id === base); return { id, ar, note: differs.entrance + '؛ ' + differs.windows + '؛ ' + differs.materials, variantOf: base, differs, p: { ...b.p, ...o } }; };
+templates.push(
+  variantH('H17', 'الهادئة بمدخل مرتد وروشان وسطي', 'H14', {
+    entrance: 'ارتداد مركزي 1.2 م يحتضن بوابة مستديرة بدرجتين، بدل المدخل المسطح المزدوج في H14',
+    windows: 'روشان واحد بعمق 36 سم لكل دور في العمود الأقرب للوسط، وتبقى بقية النوافذ بالشيش والأقواس المدبّبة',
+    materials: 'قاعدة مرجانية بارتفاع 1.6 م تحت اللياسة البيضاء بدل الواجهة الجصية الكاملة' },
+    { fm: 2, ep: 0, roshan: 1, rpat: 2, coral: 1, door: 1 }),
+  variantH('H18', 'الجناح المرجاني بالروشان المتناوب', 'H09', {
+    entrance: 'مدخل في الزاوية اليسرى داخل جناح جانبي بارز، بدل البوابة الوسطى في H09',
+    windows: 'طابقان بنوافذ مزدوجة متوسطة وروشانات بعمق 50 سم بالتناوب، بدل الروشانات العريضة المتكررة في طابق واحد',
+    materials: 'الواجهة كلها مرجان مع سقيفة خشبية على كوابيل في الأعلى، بدل الكورنيش المزدوج على اللياسة' },
+    { fl: 2, fm: 3, ep: 3, grp: 2, wsz: 1, roshan: 2, rpat: 1, coral: 3, crown: 2, arch: 1 }),
+);
 export const meta = { id: 'H', ar: 'حجازي جدة', scope: 'Hijazi-Jeddah (جدة التاريخية/البلد) وليس كل الحجاز', maxProjectionMm: 750, templateCount: templates.length, sources: [
   'springeropen.com/articles/10.1186/s40410-023-00204-6 (Rowshan in Hejaz)', 'archive.aramcoworld.com/issue/197105 (Jiddah balconies)',
   'arabnews.pk/node/2457216 (Yanbu)', 'omrania.com/insights/8-features-vernacular-architecture-hejaz', 'gulfnews.com (Hejazi coastal design Jeddah)'] };

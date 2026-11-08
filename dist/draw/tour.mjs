@@ -7,7 +7,9 @@
 //   await runDrawTour({ viewer, plan, signal, onProgress, afterFrame });
 export { recordingSupported, startRecording } from '../tour-recorder.mjs';
 
-export const TOUR = Object.freeze({ orbitMs: 9000, approachMs: 1800, roomMs: 3200, maxRooms: 10, minRoomArea: 2.5, sweepDeg: 220 });
+export const TOUR = Object.freeze({ orbitMs: 9000, approachMs: 1800, roomMs: 3200, maxRooms: 10, minRoomArea: 2.5, sweepDeg: 220, gardenMs: 5000, cinematicSweepDeg: 70 });
+/** «story» order: the guest's path through a Saudi villa — entrance, majlis, dining (مقلط), family hall, then the private rooms. */
+export const STORY = Object.freeze(['entrance', 'majlis', 'dining', 'living', 'kitchen', 'master', 'bedroom']);
 const DEG = Math.PI / 180;
 const ease = t => t * t * (3 - 2 * t);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Number(v) || lo));
@@ -27,14 +29,18 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
  */
 export function planDrawTour(rooms, options = {}) {
   const orbitMs = clamp(options.orbitMs ?? TOUR.orbitMs, 2000, 30000), approachMs = clamp(options.approachMs ?? TOUR.approachMs, 500, 8000);
-  const roomMs = clamp(options.roomMs ?? TOUR.roomMs, 1000, 10000), sweepDeg = clamp(options.sweepDeg ?? TOUR.sweepDeg, 30, 330);
+  const roomMs = clamp(options.roomMs ?? TOUR.roomMs, 1000, 10000), sweepDeg = clamp(options.sweepDeg ?? (options.cinematic ? TOUR.cinematicSweepDeg : TOUR.sweepDeg), 30, 330);
   const maxRooms = Math.max(0, Math.min(24, Math.floor(Number(options.maxRooms ?? TOUR.maxRooms)) || 0));
   const minArea = Number(options.minRoomArea ?? TOUR.minRoomArea);
   const usable = [...(rooms || [])].filter(r => r && r.key && !r.open && Number.isFinite(r.area) && r.area >= minArea && r.inside && r.centroid);
   const chosen = usable.sort((p, q) => priorityOf(p.type) - priorityOf(q.type) || q.area - p.area || String(p.key).localeCompare(String(q.key))).slice(0, maxRooms);
   // route: lowest level first; inside a level, nearest neighbour starting from the entrance hall (or the best-ranked room)
-  const ordered = [];
-  for (const level of [...new Set(chosen.map(r => r.levelIndex ?? 0))].sort((a, b) => a - b)) {
+  let ordered = [];
+  if (options.story) { // one room per story type (the largest), in story order, ground floor first
+    const pool = usable.slice().sort((a, b) => (a.levelIndex ?? 0) - (b.levelIndex ?? 0) || b.area - a.area);
+    for (const type of STORY) { const r = pool.find(x => x.type === type && !ordered.includes(x)); if (r) ordered.push(r); }
+    ordered = ordered.slice(0, maxRooms);
+  } else for (const level of [...new Set(chosen.map(r => r.levelIndex ?? 0))].sort((a, b) => a - b)) {
     const pool = chosen.filter(r => (r.levelIndex ?? 0) === level);
     let cur = pool.find(r => r.type === 'entrance') || pool[0] || null;
     while (pool.length && cur) {
@@ -48,7 +54,8 @@ export function planDrawTour(rooms, options = {}) {
     const dx = r.centroid.x - r.inside.x, dy = r.centroid.y - r.inside.y, base = Math.hypot(dx, dy) > .3 ? Math.atan2(dx, dy) / DEG : 0;
     segments.push({ kind: 'room', key: r.key, name: r.name, ms: roomMs, heading0: base - sweepDeg / 2, sweepDeg });
   }
-  return { segments, totalMs: segments.reduce((s, x) => s + x.ms, 0), entryAzimuthDeg, rooms: ordered.length };
+  if (options.story) segments.push({ kind: 'garden', name: 'الحديقة', ms: clamp(options.gardenMs ?? TOUR.gardenMs, 1500, 15000), sweepDeg: 80 });
+  return { segments, totalMs: segments.reduce((s, x) => s + x.ms, 0), entryAzimuthDeg, rooms: ordered.length, cinematic: !!options.cinematic };
 }
 
 /**
@@ -85,12 +92,26 @@ export function runDrawTour({ viewer, plan, signal, onProgress, raf = globalThis
       if (seg.kind === 'orbit') {
         viewer.showLevel('all'); viewer.setMode('orbit', { animate: false }); viewer.frameBuilding();
         base = { el: 24, dist: viewer.orbit.dist * .82, target: viewer.orbit.target.clone() };
+      } else if (seg.kind === 'garden') {
+        // the closing shot: inside an open courtyard when the plan has one, otherwise a low pass over the back garden
+        const court = [...viewer.built.rooms.values()].filter(r => r.open && r.area >= 6).sort((a, b) => b.area - a.area)[0];
+        const v = court && viewer.roomView?.(court.key);
+        if (court && v) {
+          seg.mode = 'court'; seg.key = court.key; seg.heading0 = v.headingDeg - seg.sweepDeg / 2;
+          const from = viewer.currentPose?.() || null; viewer.walkToRoom(court.key, seg.heading0, { composed: true });
+          seg.blend = from?.pos && from.quat?.x !== undefined ? makeBlend(from, seg, false) : null;
+        } else {
+          seg.mode = 'yard'; viewer.setMode('orbit', { animate: false }); viewer.frameBuilding();
+          base = { el: 24, dist: viewer.orbit.dist * .82, target: viewer.orbit.target.clone() };
+        }
       } else if (seg.kind === 'room') {
         seg.skipped = !viewer.built.rooms.has(seg.key);
         if (!seg.skipped) {
           // glide from wherever the camera is now (outside at the door, or in the previous room) instead of cutting
           const from = viewer.currentPose?.() || null, afterApproach = plan.segments[index - 1]?.kind === 'approach';
-          viewer.walkToRoom(seg.key, seg.heading0);
+          const v = plan.cinematic ? viewer.roomView?.(seg.key) : null; // composed viewpoint: stand against a wall and pan across the room
+          if (v) seg.heading0 = v.headingDeg - seg.sweepDeg / 2;
+          viewer.walkToRoom(seg.key, seg.heading0, v ? { composed: true } : undefined);
           seg.blend = from?.pos && from.quat?.x !== undefined ? makeBlend(from, seg, afterApproach) : null;
         }
       }
@@ -101,6 +122,9 @@ export function runDrawTour({ viewer, plan, signal, onProgress, raf = globalThis
       } else if (seg.kind === 'approach') {
         const e = ease(p);
         viewer.orbitTo({ azimuthDeg: plan.entryAzimuthDeg, elevationDeg: base.el + (9 - base.el) * e, distance: base.dist * (1 - .5 * e), target: [base.target.x, base.target.y + (1.2 - base.target.y) * e, base.target.z] });
+      } else if (seg.kind === 'garden' && seg.mode === 'yard') {
+        const e = ease(p); // behind the house, low and slow, drifting across the garden
+        viewer.orbitTo({ azimuthDeg: plan.entryAzimuthDeg + 180 - 35 + 70 * e, elevationDeg: 11 + 8 * e, distance: base.dist * .62, target: [base.target.x, 1.4, base.target.z] });
       } else if (!seg.skipped) {
         // constant turning speed: no stop-and-go at the start and end of every room (the glide supplies the ease-in)
         viewer.walk.yaw = (seg.heading0 + seg.sweepDeg * p) * DEG; viewer.walk.pitch = -.04;

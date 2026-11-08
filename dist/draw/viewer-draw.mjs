@@ -18,10 +18,14 @@ export const STYLES = Object.freeze({
   day: {
     zenith: '#5d92cf', horizon: '#dfeaf3', ground: '#d8d0bd', sun: '#fff1da', sunIntensity: 3.4, hemiSky: '#cfe2f5', hemiGround: '#b8a888', hemi: .25,
     env: .6, exposure: .95, fog: '#dde7ee', sunAltitude: 52, glassGlow: 0, lamp: 0.25,
+    // walking inside: the eye adapts (exposure), sky light through the openings is approximated by a stronger hemisphere,
+    // and a warm ceiling-height fill follows the walker (no shadow; stands in for room lighting + bounce)
+    walkExposure: 1.22, walkHemi: 2.4, walkFill: 6, walkCeilGlow: .24,
   },
   dusk: {
     zenith: '#243257', horizon: '#f2a46b', ground: '#6b5560', sun: '#ff9d5c', sunIntensity: 2.3, hemiSky: '#8d9ad0', hemiGround: '#8a6c62', hemi: .62,
     env: .75, exposure: 1.12, fog: '#d9966b', sunAltitude: 11, glassGlow: .55, lamp: 1.2,
+    walkExposure: 1.3, walkHemi: 1.5, walkFill: 9, walkCeilGlow: .3,
   },
 });
 
@@ -49,7 +53,7 @@ export class DrawViewer {
     this.sun.shadow.bias = -.0004; this.sun.shadow.normalBias = .035; this.sun.shadow.radius = 3;
     this.scene.add(this.sun, this.sun.target);
     this.hemi = new T.HemisphereLight('#cfe2f5', '#b8a888', .55); this.scene.add(this.hemi);
-    this.lamp = new T.PointLight('#ffe1b0', 0, 9, 2); this.scene.add(this.lamp); // walk-mode "headlamp" fill, off by default
+    this.lamp = new T.PointLight('#ffe6c2', 0, 14, 1); this.scene.add(this.lamp); // walk-mode ceiling-height fill that follows the walker, off by default
     this.skyUniforms = { top: { value: new T.Color() }, horizon: { value: new T.Color() }, ground: { value: new T.Color() }, sunDir: { value: new T.Vector3(0, 1, 0) }, sunColor: { value: new T.Color() }, glow: { value: 1 } };
     this.sky = new T.Mesh(new T.SphereGeometry(1, 32, 16), this.makeSkyMaterial(false));
     this.sky.scale.setScalar(900); this.sky.renderOrder = -10; this.sky.frustumCulled = false; this.scene.add(this.sky);
@@ -110,6 +114,7 @@ export class DrawViewer {
     this.renderer.toneMappingExposure = S.exposure;
     this.updateSunVector();
     this.rebuildEnvironment();
+    this.applyWalkLighting();
     if (this.built) {
       const m = this.built.lib.m;
       for (const mat of Object.values({ ...m, ...this.built.lib.fixtures })) if (mat.isMeshStandardMaterial) { mat.envMapIntensity = (mat.userData.baseEnv ??= mat.envMapIntensity) * S.env; }
@@ -368,9 +373,19 @@ export class DrawViewer {
     if (!room && !(w.x || w.y)) room = [...b.rooms.values()].find(r => r.type === 'entrance') || [...b.rooms.values()][0];
     if (room) { w.x = room.inside.x; w.y = room.inside.y; w.level = room.levelIndex; w.floor = room.elevation; w.yaw = Math.atan2(room.centroid.x - w.x + .001, room.centroid.y - w.y + 1); w.pitch = 0; }
     this.installKeys();
-    this.lamp.intensity = 1.2;
+    this.walkLit = true; this.applyWalkLighting();
   }
-  leaveWalk() { this.removeKeys(); this.lamp.intensity = 0; }
+  leaveWalk() { this.removeKeys(); this.walkLit = false; this.applyWalkLighting(); }
+  /** Interior light while walking (see STYLES.walk*); restores the exterior values otherwise. */
+  applyWalkLighting() {
+    const S = STYLES[this.style] || STYLES.day, on = !!this.walkLit;
+    this.lamp.intensity = on ? S.walkFill : 0;
+    this.hemi.intensity = S.hemi * (on ? S.walkHemi : 1);
+    this.renderer.toneMappingExposure = on ? S.walkExposure : S.exposure;
+    const ceil = this.built?.lib?.m?.ceiling;
+    if (ceil) { ceil.emissive.set(on ? '#fff6e8' : '#000000'); ceil.emissiveIntensity = on ? S.walkCeilGlow : 0; }
+    this.requestRender?.();
+  }
 
   /** Teleport the walker: walkTo(x, y, { level, headingDeg, pitchDeg }) in plan metres; heading 0 looks along plan +y (north), clockwise positive. */
   walkTo(x, y, { level = null, headingDeg = null, pitchDeg = 0 } = {}) {
@@ -383,11 +398,58 @@ export class DrawViewer {
     if (this.mode !== 'walk') this.setMode('walk', { animate: false }); else { this.applyPose(this.walkPose()); this.requestRender(); }
     this.emit('walk');
   }
-  /** Walk into a room and look at its centre from the doorway side. */
-  walkToRoom(key, headingDeg = null) {
+  /** Walk into a room. Without a heading the walker stands at the room's best viewpoint (see roomView) and looks across it. */
+  walkToRoom(key, headingDeg = null, { composed = headingDeg === null } = {}) {
     const r = this.built?.rooms.get(key) || [...(this.built?.rooms.values() || [])].find(x => x.spaceId === key); if (!r) return;
-    this.walk.x = r.inside.x; this.walk.y = r.inside.y;
-    this.walkTo(r.inside.x, r.inside.y, { level: r.levelIndex, headingDeg });
+    const v = composed ? this.roomView(r.key) : null;
+    const at = v || { x: r.inside.x, y: r.inside.y };
+    this.walk.x = at.x; this.walk.y = at.y;
+    this.walkTo(at.x, at.y, { level: r.levelIndex, headingDeg: headingDeg ?? v?.headingDeg ?? null, pitchDeg: v ? -4 : 0 });
+  }
+  /**
+   * Composed interior viewpoint for a room: from the room centre (or its inside point) find the heading with the longest
+   * clear view, then back up against the opposite wall (keeping 0.55 m clearance and avoiding furniture), the way a
+   * photographer stands in a doorway corner. Returns { x, y, headingDeg, depth } in plan metres, or null.
+   */
+  roomView(key) {
+    const r = this.built?.rooms.get(key) || [...(this.built?.rooms.values() || [])].find(x => x.spaceId === key); if (!r?.polygon?.length) return null;
+    const rings = [r.polygon, ...(r.holes || [])];
+    const ray = (p, a) => { // distance from p along heading a (0 = +y, clockwise) to the first room edge
+      const dx = Math.sin(a), dy = Math.cos(a); let best = Infinity;
+      for (const ring of rings) for (let i = 0; i < ring.length; i++) {
+        const A = ring[i], B = ring[(i + 1) % ring.length], ex = B.x - A.x, ey = B.y - A.y, den = dx * ey - dy * ex; if (Math.abs(den) < 1e-9) continue;
+        const t = ((A.x - p.x) * ey - (A.y - p.y) * ex) / den, u = ((A.x - p.x) * dy - (A.y - p.y) * dx) / den;
+        if (t > 1e-6 && u >= -1e-6 && u <= 1 + 1e-6) best = Math.min(best, t);
+      }
+      return best;
+    };
+    const lvIndex = r.levelIndex ?? 0, prevLevel = this.walk.level; this.walk.level = lvIndex;
+    const free = (x, y) => pointInPolygon({ x, y }, r.polygon, 0) && !(r.holes || []).some(h => pointInPolygon({ x, y }, h, 0)) && !this.blocked(x, y);
+    // start points: centroid and inside point when free, else the free grid points (0.5 m) nearest to the centroid (beds, tables and rugs often sit on the centroid)
+    let starts = [r.centroid, r.inside].filter(p => p && free(p.x, p.y));
+    if (!starts.length) {
+      const b = r.bounds, grid = [];
+      for (let x = b.x0 + .3; x < b.x1 - .2; x += .5) for (let y = b.y0 + .3; y < b.y1 - .2; y += .5) if (free(x, y)) grid.push({ x, y });
+      starts = grid.sort((a, c) => Math.hypot(a.x - r.centroid.x, a.y - r.centroid.y) - Math.hypot(c.x - r.centroid.x, c.y - r.centroid.y)).slice(0, 6);
+    }
+    const lvId = this.built.levels[lvIndex]?.id, furniture = (this.built.fixtureBoxes || []).filter(f => f.level === lvId && pointInPolygon({ x: f.x, y: f.y }, r.polygon, 0)).map(f => ({ x: f.x, y: f.y, w: f.kind === 'rug' ? .3 : 1 }));
+    let best = null;
+    if (!starts.length) { this.walk.level = prevLevel; return null; }
+    for (const p of starts) for (let k = 0; k < 36; k++) {
+      const a = k * 10 * DEG, front = ray(p, a); if (!Number.isFinite(front)) continue;
+      // back up opposite to the view direction
+      const back = ray(p, a + Math.PI); let s = 0;
+      for (let d = .1; d <= Math.max(0, back - .55); d += .1) { const x = p.x - Math.sin(a) * d, y = p.y - Math.cos(a) * d; if (!free(x, y)) break; s = d; }
+      const x = p.x - Math.sin(a) * s, y = p.y - Math.cos(a) * s, depth = front + s;
+      // prefer long views that keep the room centre and its furniture in frame, and views square to the walls
+      const toC = Math.atan2(r.centroid.x - x, r.centroid.y - y), off = Math.abs(Math.atan2(Math.sin(toC - a), Math.cos(toC - a)));
+      let seen = 0; for (const f of furniture) { const fa = Math.atan2(f.x - x, f.y - y), d = Math.abs(Math.atan2(Math.sin(fa - a), Math.cos(fa - a))); if (d < 32 * DEG && Math.hypot(f.x - x, f.y - y) > .9) seen += f.w; }
+      const square = rings[0].some((A, i) => { const B = rings[0][(i + 1) % rings[0].length], e = Math.atan2(B.x - A.x, B.y - A.y); return Math.abs(Math.sin(e - a)) < .05 || Math.abs(Math.cos(e - a)) < .05; });
+      const score = Math.min(depth, 9) * .7 - off * .6 + Math.min(seen, 4) * .9 + (square ? .5 : 0);
+      if (!best || score > best.score) best = { x, y, headingDeg: a / DEG, depth, score };
+    }
+    this.walk.level = prevLevel;
+    return best ? { x: best.x, y: best.y, headingDeg: best.headingDeg, depth: best.depth } : null;
   }
   /** On-screen friendly movement: move('forward'|'back'|'left'|'right'|'turnLeft'|'turnRight', metres or degrees). */
   move(dir, amount = .6) {
@@ -541,6 +603,7 @@ export class DrawViewer {
 
   // ---------------------------------------------------------------------------------------------------------- loop / render
   resize() {
+    if (this.fixedSize) { this.requestRender(); return; } // a recording owns the drawing buffer size
     const w = Math.max(1, this.container.clientWidth), h = Math.max(1, this.container.clientHeight);
     this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, this.maxPixelRatio));
     this.renderer.setSize(w, h, false);
@@ -600,7 +663,7 @@ export class DrawViewer {
   renderNow() {
     if (this.lost || !this.renderer) return;
     this.sky.position.copy(this.camera.position);
-    if (this.mode === 'walk') this.lamp.position.copy(this.camera.position).add(new this.THREE.Vector3(0, -.3, 0));
+    if (this.mode === 'walk') { const lv = this.built?.levels[this.walk.level]; this.lamp.position.set(this.camera.position.x, (lv ? lv.elevation + lv.height - .55 : this.camera.position.y + 1), this.camera.position.z); }
     const t0 = performance.now();
     this.renderer.render(this.scene, this.camera);
     this.frameMs = performance.now() - t0;
@@ -628,6 +691,56 @@ export class DrawViewer {
         c.toBlob(blob => { r.setPixelRatio(pr); r.setSize(w, h, false); this.requestRender(); blob ? resolve(blob) : reject(new Error('capture failed')); }, 'image/png');
       } catch (err) { r.setPixelRatio(pr); r.setSize(w, h, false); reject(err); }
     });
+  }
+
+  /**
+   * Supersampled still («لقطة عالية الجودة»): renders at `scale × ss` the pane size with a 4096 shadow map (twice the
+   * interactive resolution over the same frustum), then box-filters down to `scale ×` (so edges, thin frames and texture detail are anti-aliased beyond MSAA).
+   * Resolves { blob, width, height, renderMs }. The interactive settings are restored afterwards.
+   */
+  async captureHQ({ scale = 2, ss = 2, shadowSize = 4096, maxSide = 6144 } = {}) {
+    const r = this.renderer, T = this.THREE, gl = r.getContext(), w = Math.max(1, this.container.clientWidth), h = Math.max(1, this.container.clientHeight);
+    const pr = r.getPixelRatio(), sh = this.sun.shadow, oldSize = sh.mapSize.x, oldRadius = sh.radius;
+    const limit = Math.min(maxSide, r.capabilities.maxTextureSize || 4096, gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) || 4096, ...(gl.getParameter(gl.MAX_VIEWPORT_DIMS) || [4096]));
+    const k = Math.max(1, Math.min(scale * ss, limit / Math.max(w, h))), outK = Math.min(scale, k);
+    const t0 = performance.now();
+    try {
+      if (this.shadowsOn && this.sun.castShadow) {
+        sh.mapSize.set(shadowSize, shadowSize); sh.radius = 4; if (sh.map) { sh.map.dispose(); sh.map = null; }
+        this._hqFrustum = true;
+      }
+      this.markShadowDirty();
+      r.setPixelRatio(k); r.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
+      this.sky.position.copy(this.camera.position);
+      r.render(this.scene, this.camera);
+      const out = document.createElement('canvas'); out.width = Math.round(w * outK); out.height = Math.round(h * outK);
+      const ctx = out.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+      // halve in steps (each step a 2×2 box filter) so the downsample really averages every rendered pixel
+      let src = this.canvas, sw = src.width, shh = src.height;
+      while (sw / 2 >= out.width * 1.01) { const c = document.createElement('canvas'); c.width = Math.round(sw / 2); c.height = Math.round(shh / 2); const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, sw, shh, 0, 0, c.width, c.height); src = c; sw = c.width; shh = c.height; }
+      ctx.drawImage(src, 0, 0, sw, shh, 0, 0, out.width, out.height);
+      const renderMs = performance.now() - t0;
+      const blob = await new Promise(res => out.toBlob(res, 'image/png'));
+      if (!blob) throw new Error('capture failed');
+      return { blob, width: out.width, height: out.height, renderMs };
+    } finally {
+      if (this._hqFrustum !== undefined) { sh.mapSize.set(oldSize, oldSize); sh.radius = oldRadius; if (sh.map) { sh.map.dispose(); sh.map = null; } this._hqFrustum = undefined; this.fitShadow(); }
+      r.setPixelRatio(pr); r.setSize(w, h, false); this.camera.aspect = w / h; this.camera.updateProjectionMatrix(); this.markShadowDirty(); this.requestRender();
+      void T;
+    }
+  }
+
+  /** Fix the drawing buffer (e.g. 1920×1080 for a recorded tour); the canvas keeps its on-screen box (object-fit: contain). null restores. */
+  setFixedSize(size) {
+    const r = this.renderer;
+    if (size) {
+      this.fixedSize = { w: size.w, h: size.h, pr: r.getPixelRatio() };
+      r.setPixelRatio(1); r.setSize(size.w, size.h, false); this.canvas.style.objectFit = 'contain'; this.canvas.style.background = '#000';
+      this.camera.aspect = size.w / size.h; this.camera.updateProjectionMatrix();
+    } else if (this.fixedSize) {
+      this.fixedSize = null; this.canvas.style.objectFit = ''; this.canvas.style.background = ''; this.resize();
+    }
+    this.requestRender();
   }
 
   dispose() {
