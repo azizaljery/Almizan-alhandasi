@@ -102,9 +102,9 @@ test('drawing: تصنيف الجدران خارجي/داخلي بسماكته ف
 
 test('drawing: الدرج يعطي عدد القوائم وسهم الصعود من أول قائمة إلى آخر درجة', () => {
   const info = stairInfo({ x: 0, y: 0, rot: 0, w: 1.1, run: 3.2, kind: 'straight' }, 3.2);
-  assert.equal(info.N, 16); assert.equal(info.riser, .2); assert.equal(info.text, 'صعود 16 قائمة');
+  assert.equal(info.N, 19); assert.ok(Math.abs(info.riser - 3.2 / 19) < 1e-3 && info.riser <= .175, 'القائمة ≤ 175 مم (SBC 201 §1011.5.2)'); assert.equal(info.text, 'صعود 19 قائمة');
   assert.ok(info.arrow.to.y > info.arrow.from.y, 'السهم نحو الأعلى في الإطار المحلي');
-  assert.equal(info.treads.length, 15);
+  assert.equal(info.treads.length, 18);
 });
 
 test('drawing: اختيار المقياس القياسي الأصغر الذي يُدخل المسقط في مساحة الرسم', () => {

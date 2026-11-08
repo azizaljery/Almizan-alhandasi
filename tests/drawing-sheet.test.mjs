@@ -60,7 +60,7 @@ test('sheet: الرموز: جدار خارجي مصمت وداخلي مهشّر�
   assert.match(svg, /<pattern id="ps\d+-hatch"/); assert.match(svg, /fill="url\(#ps\d+-hatch\)"/, 'الجدار الداخلي مهشّر');
   assert.match(svg, /class="walls">[^]*fill="#000"/, 'الجدار الخارجي مصمت');
   assert.match(svg, /<path d="M[\d., ]+A[\d. ]+ 0 0 [01] [\d.,]+" fill="none"/, 'قوس الباب');
-  assert.ok(svg.includes('صعود 16 قائمة')); assert.ok(svg.includes('المدخل الرئيسي  ±0.00'));
+  assert.ok(svg.includes('صعود 19 قائمة')); assert.ok(svg.includes('المدخل الرئيسي  ±0.00'));
   assert.ok(svg.includes('جدار خارجي 25 سم') && svg.includes('جدار داخلي (قاطع) 12 سم'));
   assert.ok(svg.includes('ش'), 'سهم الشمال'); assert.ok(/\d م<\/text>/.test(svg), 'المقياس الخطي');
 });

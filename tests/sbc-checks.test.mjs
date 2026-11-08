@@ -34,17 +34,18 @@ function stairDoc(rise = 3.2, w = 1.2, run = 4, kind = 'U') {
   return doc;
 }
 
-test('فحص الدرج: القائمة 200 مم (3.2 م ÷ 16) لا تحقق الحكم العام ≤ 175 مم، والنائمة والعرض والقلبة تحققه', () => {
+test('فحص الدرج: المولّد يقسم 3.2 م على 19 قائمة (≈168 مم ≤ 175 مم) فيحقق الحكم العام، والعرض الضيق يُرفض', () => {
   const doc = stairDoc();
   assert.ok(doc.stairs.length === 1 && doc.levels.length === 2, 'مستند بدرجين ودورين');
   const r = checkStairs(doc), s = r.stairs[0], by = Object.fromEntries(s.checks.map(c => [c.id, c]));
-  assert.equal(s.N, 16); assert.ok(Math.abs(s.riserM - .2) < 1e-9);
-  assert.equal(by['riser-max'].status, 'fail'); assert.equal(by['riser-min'].status, 'ok');
+  assert.equal(s.N, 19); assert.ok(Math.abs(s.riserM - 3.2 / 19) < 1e-9);
+  assert.equal(by['riser-max'].status, 'ok'); assert.equal(by['riser-min'].status, 'ok');
   assert.equal(by.tread.status, 'ok'); assert.equal(by.width.status, 'ok'); assert.equal(by['flight-rise'].status, 'ok');
   assert.equal(by.headroom.status, 'unverified', 'ارتفاع السقف لا يُدّعى');
-  assert.equal(r.ok, false); assert.equal(SBC201_STAIR.riserMaxM.value, .175); assert.equal(SBC201_STAIR.exceptions, 'غير متحقق');
-  assert.ok(stairCheckLines(r).some(l => l.includes('200 مم') && l.includes('لا يحقق الحكم العام') && l.includes('1011.5.2')));
-  const narrow = checkStairs(stairDoc(3.2, .9)).stairs[0].checks.find(c => c.id === 'width'); assert.equal(narrow.status, 'fail');
+  assert.equal(r.ok, true, 'كل ما قيس يحقق؛ ارتفاع السقف خارج الحكم'); assert.equal(SBC201_STAIR.riserMaxM.value, .175); assert.equal(SBC201_STAIR.exceptions, 'غير متحقق');
+  assert.ok(!stairCheckLines(r).some(l => l.includes('لا يحقق الحكم العام')), 'لا سطر رفض لدرج مطابق');
+  const nr = checkStairs(stairDoc(3.2, .9)), narrow = nr.stairs[0].checks.find(c => c.id === 'width'); assert.equal(narrow.status, 'fail'); assert.equal(nr.ok, false);
+  assert.ok(stairCheckLines(nr).some(l => l.includes('لا يحقق الحكم العام') && l.includes('1011')));
   const svg = sectionSheet(doc).svg; assert.ok(svg.includes('SBC 201'), 'نتيجة الفحص على لوحة القطاع');
   assert.equal(checkStairs(createDoc()).ok, null, 'بلا درج: لا حكم');
 });

@@ -5,7 +5,7 @@
 //   like fixtures), `w` is the clear width and `run` the length of the footprint along the climb.
 import { P3 } from './meshbuilder.mjs';
 
-const MAX_RISER = .2;
+const MAX_RISER = .175;
 
 export function stairLayout(stair, rise) {
   const w = stair.w ?? 1.1, run = stair.run ?? 3.2, kind = stair.kind || 'straight', r = stair.rot || 0;

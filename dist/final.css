@@ -22,3 +22,5 @@ input.rate,input.pct{width:110px;padding:4px 8px;border:1px solid var(--line);bo
 ul{margin:4px 0;padding-inline-start:22px}.empty{text-align:center;padding:60px 10px}.empty .btn{display:inline-block;margin-top:10px}
 @media print{.fh,.fact{display:none}.sec{break-inside:avoid;border:0}body{background:#fff}.fmain,.pb{max-width:none;padding:0;margin:0}.sec,.pb-sec{padding:0 4mm}.svgbox.sheet,.pb-sheet{border:0;border-radius:0;margin:0;padding:0;overflow:visible;break-before:page;break-after:page}.svgbox.sheet svg,.pb-sheet svg{min-width:0;width:420mm;height:297mm;display:block}}
 @media(max-width:640px){.fh{padding:8px 12px}.sec{padding:14px}}
+.dsheet{margin:0 0 18px}.dsheet figcaption{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px}.dsheet figcaption .btn{margin-inline-start:auto}
+@media print{.dsheet figcaption{display:none}}

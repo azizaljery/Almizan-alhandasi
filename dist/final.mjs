@@ -4,6 +4,8 @@ import { STUDIO_KEY, loadSavedDNA } from './draw/handoff.mjs';
 import { buildFinalData, projectBookHtml, designReasons, sheetNote, NEXT_STAGES } from './final-outputs.mjs';
 import { GRADES } from './draw/quantities-doc.mjs';
 import { structureCsv } from './draw/structure-sheet.mjs';
+import { drawingSetFiles } from './draw/drawing-set.mjs';
+import { stairCheckLines } from './draw/stair-check.mjs';
 import { privacyIndex } from './intel/privacy-index.mjs';
 import { climateZoning } from './intel/climate-zoning.mjs';
 import { optimizeVariants } from './intel/variant-optimizer.mjs';
@@ -95,6 +97,15 @@ function render() {
     + (S.byType.length ? table(['الفراغ', 'العدد'], S.byType.map(t => `<tr><td>${esc(t.name)}</td><td class="num">${t.count}</td></tr>`)) : '')
     + `<p class="muted">${S.plot ? `الأرض ${S.plot.width} × ${S.plot.length} م · ` : ''}بصمة الهندسة <code>${esc(d.fingerprint)}</code> · ${esc(d.date)}</p>`));
   d.levels.forEach((l, i) => parts.push(sec('plan' + i, 'المخطط — ' + l.name, `<div class="svgbox sheet">${l.plan}</div>` + sheetNote(l))));
+  // اللوحات المعمارية: الموقع العام والواجهات والقطاع وجدول الفتحات — من المخطط نفسه
+  const DS = d.drawings;
+  if (DS && DS.sheets?.length) {
+    const st = DS.stairCheck && !DS.stairCheck.error ? stairCheckLines(DS.stairCheck) : [];
+    parts.push(sec('sheets', 'اللوحات المعمارية: الموقع والواجهات والقطاع والفتحات', DS.sheets.map(x => `<figure class="dsheet" id="sheet-${esc(x.id)}"><figcaption><b>${esc(x.no)}</b> ${esc(x.title)} <button class="btn small" type="button" data-sheet="${esc(x.id)}">تنزيل SVG</button></figcaption><div class="svgbox sheet">${x.svg}</div></figure>`).join('')
+      + (st.length ? `<h3>فحص الدرج مقابل SBC 201</h3><ul>${st.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '')
+      + (DS.errors?.length ? `<p class="muted">تعذّر إنشاء بعض اللوحات: ${esc(DS.errors.join('، '))}</p>` : '')
+      + `<p class="muted">لوحات أولية للتصميم والتسعير بمناسيب افتراضية معلنة (الأرض الطبيعية −0.45، البلاطة 0.20 م)، وليست مخططات معتمدة للترخيص أو التنفيذ.</p>`));
+  }
   parts.push(sec('view3d', 'العرض ثلاثي الأبعاد', d.snapshot3d ? `<div class="shot"><img alt="لقطة ثلاثية الأبعاد من المرسم" src="${esc(d.snapshot3d)}"></div><p class="muted">اللقطة من المجسم المبني من المخطط نفسه. للتجوّل والشمس والجولة افتح <a href="./studio.html">المرسم</a>.</p>` : `<p>لا توجد لقطة محفوظة بعد. افتح <a href="./studio.html">المرسم</a> ثم اضغط «اعتمد وأخرج المخرجات» من العرض ثلاثي الأبعاد لتُحفظ اللقطة.</p>`));
   d.levels.forEach((l, i) => l.structure && parts.push(sec('str' + i, 'المخطط الإنشائي المبدئي — ' + l.name, `<div class="svgbox">${l.structure}</div><p class="muted">تحجيم أولي بجداول ACI 318؛ مطابقة الكود السعودي SBC 304 غير متحققة. ليس تصميمًا إنشائيًا معتمدًا ويراجعه مهندس إنشائي.</p>`)));
   // الأنظمة الهندسية ضمن التصاميم: وصف ورابط المخططات فقط؛ أرقامها في «جداول الكميات» آخر الصفحة
@@ -111,11 +122,12 @@ function render() {
   // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم، بالعربية
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
   $('fmain').innerHTML = parts.join('');
-  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
+  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));
   $('resPct').addEventListener('input', e => { state.reservePct = e.target.value; update(); });
   $('vatPct').addEventListener('input', e => { state.vatPct = e.target.value; update(); });
+  $('fmain').querySelectorAll('button[data-sheet]').forEach(b => b.addEventListener('click', () => { const f = drawingSetFiles(d.drawings).find(x => x.name.endsWith('-' + b.dataset.sheet + '.svg')); if (f) download(f.name, f.content, f.mime); }));
   setTimeout(renderVariants, 0);
   if (!mep) setTimeout(renderMep, 0);
 }
