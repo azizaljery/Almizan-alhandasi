@@ -411,6 +411,22 @@ export const templates = [
   T('M23', 'المودرن الحيوي', 'بلاطات شرفات عميقة 70 سم بأحواض زراعة مدمجة وكتل خضراء إجرائية، وترافرتين رمادي فضي ودروة متدرجة. الارتداد الفعلي للدور العلوي غير منفَّذ.', { pal: 5, feat: 4, featD: 1, e: 1, wing: 2, slab: 4, slabD: 2, para: 2, win: 0, entr: 1, plant: 1, acscreen: 1, acc: 1, sch: 9, ssch: 4, ek: 2, ent: 1, fl: 3 }, { acHeights: [1.8, 1.2] }),
 ];
 
+// ── بدائل محور القوالب (2026-11-08): قالبان إضافيان مشتقان من قالبين قائمين؛ لكل منهما «ما الذي يختلف» في المدخل وإيقاع النوافذ وتوزيع الخامات.
+//    القيم كلها من تعدادات الطراز نفسه (فيصح الدمج والتطفير)؛ لا يُدّعى لها مرجع معماري خارجي.
+const variantM = (id, ar, base, differs, o) => { const b = templates.find(t => t.id === base); return { id, ar, note: differs.entrance + '؛ ' + differs.windows + '؛ ' + differs.materials, variantOf: base, differs, p: { ...b.p, ...o } }; };
+templates.push(
+  variantM('M24', 'الصناديق العميقة والبرجولا', 'M04', {
+    entrance: 'الباب في الوسط تحت برجولا فولاذية بعمودين، بدل المدخل اليساري بإطار صندوقي في M04',
+    windows: 'أزواج نوافذ طويلة بدل الفتحات المربعة الكبيرة، وتبقى صناديق الجص العميقة حول كل نافذة',
+    materials: 'جدار مميّز خشبي على اليمين وقاعدة خرسانة داكنة بدل قاعدة الترافرتين' },
+    { ent: 1, entr: 4, sch: 7, feat: 3, e: 2, plinth: 2 }),
+  variantM('M25', 'التيرازو بالشقوق والبرونز', 'M13', {
+    entrance: 'باب كبير 2.0×2.7 م في الجهة اليسرى داخل صندوق إطار مع نافذتين جانبيتين، بدل المدخل المظلل في M13',
+    windows: 'شقوق رأسية بزعانف رأسية على الواجهة والجوانب بدل شرائط الزجاج بالحواجب',
+    materials: 'جداران برونزيان عند الطرفين بدل جدار التيرازو الأيمن' },
+    { ent: 2, ek: 2, sl: 1, entr: 2, sch: 3, ssch: 3, feat: 1, e: 3, win: 4 }),
+);
+
 // ===================================== تحويل المستند (الفتحات / المداخل / الجدران / الأدوار) =====================================
 /** التغطية التموجية الشمسية: دالة صافية. f=sin(ω1·u)·cos(ω2·v)؛ الثقوب أضيق في الثلث الأعلى وأوسع عند مستوى العين (30–60%).
  *  تُرجع {nx,ny,ratio,bands:{top,mid,low},signature,hole(i,j)->نصف قطر الثقب كجزء من الخلية (0..0.5)}. */
@@ -529,7 +545,9 @@ export function validateDoc(d, opt = {}) {
     if (o.sill < -1e-6 || o.sill + o.h > OPMAX + 1e-6 && fresh) E.push('opening ' + o.id + ' vertical range');
     if (!isWin_(o) && o.kind !== 'arch' && o.sill > 0) E.push('door ' + o.id + ' not on ground');
     if (fresh && ex && ex.side(w)) { for (const j of (function () { const z = []; for (const q2 of d.walls) { if (q2 === w) continue; for (const k of ['a', 'b']) if (onLine(w, q2[k], .08)) { const u = uOf(w, q2[k]); if (u > -.05 && u < L + .05) { const [dx, dy] = wdir(w), [ox, oy] = wdir(q2); if (Math.abs(dx * ox + dy * oy) < .98) z.push([u - q2.t / 2, u + q2.t / 2]); } } } return z; })()) if (o.at + o.w / 2 > j[0] + .02 && o.at - o.w / 2 < j[1] - .02) E.push('opening ' + o.id + ' hits partition'); } }
-  for (const [wid, arr] of Object.entries(per)) for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) { const a = arr[i], b = arr[j]; if (a.at + a.w / 2 > b.at - b.w / 2 - .04 && b.at + b.w / 2 > a.at - a.w / 2 - .04) E.push('overlap ' + a.id + '/' + b.id + ' on ' + wid); }
+  const om = new Map((opt.orig?.openings || []).map(o => [o.id, o])), inherited = o => { const p = om.get(o.id); return !!p && p.wall === o.wall && Math.abs(p.at - o.at) < 1e-6 && Math.abs(p.w - o.w) < 1e-6 && Math.abs((p.sill || 0) - (o.sill || 0)) < 1e-6 && Math.abs(p.h - o.h) < 1e-6; };
+  // تقارب فتحتين موروثتين كما هما من التصميم (مثل باب الفناء ونافذة بجانبه على الجدار الداخلي لشكل U) ليس خطأ القالب: لا يُسقط القالب كله
+  for (const [wid, arr] of Object.entries(per)) for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) { const a = arr[i], b = arr[j]; if (inherited(a) && inherited(b)) continue; if (a.at + a.w / 2 > b.at - b.w / 2 - .04 && b.at + b.w / 2 > a.at - a.w / 2 - .04) E.push('overlap ' + a.id + '/' + b.id + ' on ' + wid); }
   if (opt.frontSide && ex) { const fw = ex.W.filter(w => ex.side(w) === opt.frontSide).map(w => w.id); if (!d.openings.some(o => fw.includes(o.wall) && isEntryDoor(o))) E.push('no entry door on front'); }
   return E;
 }

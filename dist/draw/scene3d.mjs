@@ -45,7 +45,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     const m = lib.m, paint = (mat, c) => { if (mat && c) mat.color.set(c); };
     paint(m.render, fac.color); paint(m.accent, fac.accentColor); paint(m.plinth, fac.plinthColor || fac.accentColor); paint(m.coping, fac.copingColor || fin.roof);
     paint(m.aluminium, fin.aluminium); paint(m.doorEntry, fin.entryDoor); paint(m.fence, fin.fence);
-    if (fac.base === 'stone') { m.render.map = m.accent.map; m.render.bumpMap = m.accent.bumpMap; m.render.bumpScale = m.accent.bumpScale; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
+    if (fac.base === 'stone') { for (const k of ['map', 'bumpMap', 'normalMap', 'roughnessMap']) m.render[k] = m.accent[k]; m.render.bumpScale = m.accent.bumpScale; m.render.normalScale?.copy?.(m.accent.normalScale); m.render.roughness = m.accent.roughness; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
     if (fac.base === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
   }
   const T = opt.slab, PL = opt.plinth;

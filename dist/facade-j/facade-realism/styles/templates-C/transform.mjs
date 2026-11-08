@@ -82,10 +82,13 @@ export function validateDoc(doc, orig) {
   const err = [], W = new Map(doc.walls.map(w => [w.id, w])), len = w => Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y), by = new Map();
   if (doc.levels.length < 1) err.push('no levels');
   const ids = new Set();
+  // فتحة «موروثة» = موجودة في الأصل بالجدار والموضع والمقاس نفسه: حالتها مسؤولية التصميم لا القالب (باب داخلي قرب زاوية، أو نافذة ملاصقة لباب فناء في شكل U)
+  const om = new Map((orig?.openings || []).map(o => [o.id, o])), same = (a, b) => !!a && a.wall === b.wall && Math.abs(a.at - b.at) < 1e-6 && Math.abs(a.w - b.w) < 1e-6 && Math.abs((a.sill || 0) - (b.sill || 0)) < 1e-6 && Math.abs(a.h - b.h) < 1e-6;
+  const inherited = o => orig && same(om.get(o.id), o);
   for (const o of doc.openings) { if (ids.has(o.id)) err.push('dup id ' + o.id); ids.add(o.id); const w = W.get(o.wall); if (!w) { err.push('wall? ' + o.id); continue; }
-    if (o.at - o.w / 2 < EDGE - 1e-6 || o.at + o.w / 2 > len(w) - EDGE + 1e-6) err.push('edge ' + o.id); if (o.sill < 0 || o.sill + o.h > 2.8 + 1e-6) err.push('height ' + o.id);
+    if (!inherited(o) && (o.at - o.w / 2 < EDGE - 1e-6 || o.at + o.w / 2 > len(w) - EDGE + 1e-6)) err.push('edge ' + o.id); if (!inherited(o) && (o.sill < 0 || o.sill + o.h > 2.8 + 1e-6)) err.push('height ' + o.id);
     (by.get(o.wall) || by.set(o.wall, []).get(o.wall)).push(o); }
-  for (const [wid, L] of by) { L.sort((a, b) => a.at - b.at); for (let i = 1; i < L.length; i++) if (L[i].at - L[i].w / 2 < L[i - 1].at + L[i - 1].w / 2 + .1) err.push('overlap ' + L[i - 1].id + '/' + L[i].id); }
+  for (const [wid, L] of by) { L.sort((a, b) => a.at - b.at); for (let i = 1; i < L.length; i++) if (!(inherited(L[i]) && inherited(L[i - 1])) && L[i].at - L[i].w / 2 < L[i - 1].at + L[i - 1].w / 2 + .1) err.push('overlap ' + L[i - 1].id + '/' + L[i].id); }
   const info = frontInfo(doc); if (!info) err.push('no front'); else { const fids = new Set(info.fr.map(w => w.id)); if (!doc.openings.some(o => o.entry && /^door/.test(o.kind) && o.sill === 0 && (fids.has(o.wall) || o.id === 'cEnt'))) err.push('no front entry'); }
   const dang = d => { const E = []; for (const w of d.walls) for (const p of [w.a, w.b]) { const ok = d.walls.some(v => v !== w && (Math.hypot(v.a.x - p.x, v.a.y - p.y) < .06 || Math.hypot(v.b.x - p.x, v.b.y - p.y) < .06 || segDist(p, v) < .06)); if (!ok) E.push(w.id); } return E.length; };
   if (orig && dang(doc) > dang(orig)) err.push('dangling walls ' + dang(doc) + ' > ' + dang(orig));

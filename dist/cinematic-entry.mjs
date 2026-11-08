@@ -26,16 +26,50 @@ export function createArchitecturalScene(T, host) {
   renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
-  const materials = new Set(), geometries = new Set();
-  const material = (color, roughness = .82) => {
-    const m = new T.MeshStandardMaterial({ color, roughness, metalness: .03 });
+  const materials = new Set(), geometries = new Set(), textures = new Set();
+  // خامات إجرائية خفيفة (لا صور): خرائط إضاءة رمادية حول 1.0 تُضرب في لون الخامة فتبقى هوية العاج والبرونز كما هي،
+  // مع خرائط نتوء/خشونة صغيرة (≤ 512) لكتل الحجر وفواصلها وحبيبات اللياسة. بلا Canvas (اختبارات) تعود الخامات لونًا صافيًا.
+  const hasCanvas = typeof document !== 'undefined' && !!document.createElement;
+  const rnd = (seed => () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })(20261108);
+  const canvasTex = (S, metres, srgb, draw) => {
+    if (!hasCanvas) return null;
+    const c = document.createElement('canvas'); c.width = c.height = S; draw(c.getContext('2d'), S);
+    const t = new T.CanvasTexture(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(1 / metres, 1 / metres); t.anisotropy = 4;
+    if (srgb) t.colorSpace = T.SRGBColorSpace; textures.add(t); t.userData.canvas = c; return t;
+  };
+  const toNormal = (hTex, k) => { // تفاضل الارتفاع → خريطة عمودي مماسي (تلتف عند الحواف)
+    if (!hTex) return null; const c = hTex.userData.canvas, S = c.width, src = c.getContext('2d').getImageData(0, 0, S, S).data;
+    return canvasTex(S, 1 / hTex.repeat.x, false, (x) => { const img = x.createImageData(S, S), d = img.data, h = (i, j) => src[(((j + S) % S) * S + ((i + S) % S)) * 4] / 255;
+      for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) { const dx = (h(i + 1, j) - h(i - 1, j)) * k, dy = -(h(i, j + 1) - h(i, j - 1)) * k, l = Math.hypot(dx, dy, 1), o = (j * S + i) * 4; d[o] = (-dx / l * .5 + .5) * 255; d[o + 1] = (-dy / l * .5 + .5) * 255; d[o + 2] = (.5 / l + .5) * 255; d[o + 3] = 255; }
+      x.putImageData(img, 0, 0); });
+  };
+  const speck = (x, S, n, a) => { for (let i = 0; i < n; i++) { const v = rnd() > .5 ? 255 : 0; x.fillStyle = `rgba(${v},${v},${v},${a * rnd()})`; x.fillRect(rnd() * S, rnd() * S, 1 + rnd() * 2, 1 + rnd() * 2); } };
+  // حجر: مداميك 30 سم وكتل 40–90 سم، فاصل 1 سم أغمق وغائر، تفاوت لوني خفيف لكل كتلة
+  const blocks = (x, S, metres, mortar, face) => { const px = S / metres, rows = Math.round(metres / .3), rh = S / rows, j = Math.max(2, Math.round(.012 * px));
+    x.fillStyle = mortar; x.fillRect(0, 0, S, S);
+    for (let r = 0; r < rows; r++) { let u = -rnd() * px * .5; while (u < S) { const len = px * (.4 + rnd() * .5), v = face(); for (const off of [-S, 0, S]) { x.fillStyle = v; x.fillRect(u + off + j / 2, r * rh + j / 2, len - j, rh - j); } u += len; } } };
+  const stoneMap = canvasTex(512, 2.4, true, (x, S) => { blocks(x, S, 2.4, 'rgb(196,190,180)', () => { const v = 238 + Math.round(rnd() * 17); return `rgb(${v},${v - 2},${v - 6})`; }); speck(x, S, 2600, .12); });
+  const stoneH = canvasTex(512, 2.4, false, (x, S) => { blocks(x, S, 2.4, 'rgb(60,60,60)', () => { const v = 200 + Math.round(rnd() * 30); return `rgb(${v},${v},${v})`; }); speck(x, S, 3000, .25); });
+  const plasterMap = canvasTex(256, 2, true, (x, S) => { x.fillStyle = 'rgb(250,248,244)'; x.fillRect(0, 0, S, S); speck(x, S, 1500, .06); });
+  const plasterH = canvasTex(256, 2, false, (x, S) => { x.fillStyle = 'rgb(128,128,128)'; x.fillRect(0, 0, S, S); speck(x, S, 6000, .35); });
+  const stoneN = toNormal(stoneH, 4), plasterN = toNormal(plasterH, 1.2);
+  const material = (color, roughness = .82, extra = {}) => {
+    const m = new T.MeshStandardMaterial({ color, roughness, metalness: .03, envMapIntensity: .2, ...extra });
     materials.add(m); return m;
   };
-  const sandstone = material('#e2cfaa'), ivory = material('#f4ead6'), darkStone = material('#a9926d');
-  const roof = material('#7a5136'), glass = material('#3f4a52', .2), metal = material('#a97142', .32);
+  const NS = (k) => new T.Vector2(k, k);
+  const sandstone = material('#e2cfaa', .86, stoneMap ? { map: stoneMap, normalMap: stoneN, normalScale: NS(.9) } : {});
+  const ivory = material('#f4ead6', .9, plasterMap ? { map: plasterMap, normalMap: plasterN, normalScale: NS(.5) } : {});
+  const darkStone = material('#a9926d', .8, stoneMap ? { map: stoneMap, normalMap: stoneN, normalScale: NS(1) } : {});
+  // سقف وبرونز وزجاج: الزجاج يعكس سماء عاجية (بيئة PMREM) بدل لون رمادي مسطح؛ البرونز معدني فعلًا
+  const roof = material('#7a5136', .7), glass = material('#3f4a52', .08, { metalness: .2, envMapIntensity: .8 }), metal = material('#a97142', .32, { metalness: .6, envMapIntensity: .8 });
   const grass = material('#d6c6ae');
+  // UV بالمتر من موضع الصندوق في المشهد: تتصل الكتل والفواصل بين الصناديق المتجاورة ولا تتمدد مع حجم الوجه
+  const metreUV = (geometry, ox, oy, oz) => { const p = geometry.attributes.position, n = geometry.attributes.normal, uv = geometry.attributes.uv;
+    for (let i = 0; i < p.count; i++) { const X = p.getX(i) + ox, Y = p.getY(i) + oy, Z = p.getZ(i) + oz, ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i));
+      if (ay >= ax && ay >= az) uv.setXY(i, X, Z); else if (ax >= az) uv.setXY(i, Z, Y); else uv.setXY(i, X, Y); } uv.needsUpdate = true; };
   const mesh = (w, h, d, x, y, z, mat, shadow = true) => {
-    const geometry = new T.BoxGeometry(w, h, d); geometries.add(geometry);
+    const geometry = new T.BoxGeometry(w, h, d); geometries.add(geometry); if (mat.map) metreUV(geometry, x, y, z);
     const object = new T.Mesh(geometry, mat); object.position.set(x, y, z);
     object.castShadow = shadow; object.receiveShadow = true; scene.add(object); return object;
   };
@@ -108,11 +142,20 @@ export function createArchitecturalScene(T, host) {
   };
   tree(-11.4, 4.6); tree(11.6, 5.1);
   tree(-13.6, -2.8); tree(13.5, -3.7);
-  const hemi = new T.HemisphereLight(0xfff4e2, 0xb8a58c, 2.0); scene.add(hemi);
+  // بيئة انعكاس من سماء عاجية متدرجة (PMREM): تعطي الزجاج والبرونز انعكاسًا ناعمًا؛ ونصف الكرة يُخفَّض بقدر ما تضيفه البيئة
+  let envTarget = null;
+  try {
+    const pm = new T.PMREMGenerator(renderer), envScene = new T.Scene(), skyGeo = new T.SphereGeometry(40, 24, 12);
+    const skyMat = new T.ShaderMaterial({ side: T.BackSide, depthWrite: false, vertexShader: 'varying vec3 v; void main(){ v = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+      fragmentShader: 'varying vec3 v; void main(){ float h = v.y; vec3 top = vec3(.86,.89,.93), hor = vec3(1.0,.95,.88), gr = vec3(.55,.48,.38); vec3 c = h > 0.0 ? mix(hor, top, pow(h, .6)) : mix(hor, gr, clamp(-h * 3.0, 0.0, 1.0)); vec3 s = normalize(vec3(-.5,.62,.4)); c += vec3(1.0,.9,.7) * pow(max(dot(v, s), 0.0), 60.0) * 4.0; gl_FragColor = vec4(c, 1.0); }' });
+    envScene.add(new T.Mesh(skyGeo, skyMat)); envTarget = pm.fromScene(envScene, .02); scene.environment = envTarget.texture;
+    skyGeo.dispose(); skyMat.dispose(); pm.dispose();
+  } catch { envTarget = null; }
+  const hemi = new T.HemisphereLight(0xfff4e2, 0xb8a58c, envTarget ? 1.85 : 2.0); scene.add(hemi);
   const sun = new T.DirectionalLight(0xffe0a4, 3.6);
   sun.position.set(-23, 33, 18); sun.target.position.set(0, 0, 0);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.normalBias = .02;
   Object.assign(sun.shadow.camera, { left: -26, right: 26, top: 25, bottom: -25, near: 1, far: 95 });
   sun.shadow.bias = -.00025;
   sun.shadow.camera.updateProjectionMatrix();
@@ -153,6 +196,8 @@ export function createArchitecturalScene(T, host) {
     renderer.dispose();
     for (const m of materials) m.dispose();
     for (const g of geometries) g.dispose();
+    for (const t of textures) t.dispose();
+    envTarget?.dispose();
   };
   return { update, dispose };
 }

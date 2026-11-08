@@ -25,7 +25,7 @@ export function initDrawTourUI({ root, ensureViewer, getEntry = () => null, plan
     if (busy) return false;
     setBusy(true); link.hidden = true; say('تجهيز عرض 3D…');
     if (url) { URL.revokeObjectURL(url); url = null; }
-    let recorder = null, finished = false, viewer = null, locked = null;
+    let recorder = null, finished = false, viewer = null, locked = null, fixed = false;
     try {
       viewer = await ensureViewer({ record });
       if (!viewer?.built) { say('ارسم جدرانًا مغلقة أولًا لتبدأ الجولة التلقائية.'); return false; }
@@ -35,15 +35,17 @@ export function initDrawTourUI({ root, ensureViewer, getEntry = () => null, plan
         if (!recordingSupported(viewer.canvas)) { say('تعذّر التسجيل في هذا المتصفح؛ تعمل الجولة دون تسجيل.'); record = false; }
       }
       locked = viewer.canvas.style.pointerEvents; viewer.canvas.style.pointerEvents = 'none'; // no dragging while the camera is driven
+      // a recording is rendered at full HD whatever the pane size (the canvas is letterboxed on screen meanwhile)
+      if (record && typeof viewer.setFixedSize === 'function') { viewer.setFixedSize({ w: 1920, h: 1080 }); fixed = true; }
       abort = new AbortController();
       const t0 = performance.now();
       finished = await runDrawTour({
         viewer, plan, signal: abort.signal, afterFrame: () => {
           // The recorder starts only once the first picture is on the canvas: started earlier, its opening frame is the blank buffer (a black frame at 0:00).
-          if (record && !recorder) { recorder = startRecording(viewer.canvas); recorder.frame(); }
+          if (record && !recorder) { recorder = startRecording(viewer.canvas, { fps: 30, bitsPerSecond: fixed ? 12_000_000 : 4_000_000 }); recorder.frame(); }
           recorder?.frame();
         },
-        onProgress: p => { say(`${record ? '⏺ تسجيل · ' : ''}${p.segment.kind === 'orbit' ? 'دورة حول المبنى' : p.segment.kind === 'approach' ? 'الاقتراب من المدخل' : 'داخل ' + p.segment.name} · ${Math.min(100, Math.round(100 * p.elapsedMs / p.totalMs))}٪`); },
+        onProgress: p => { say(`${record ? '⏺ تسجيل' + (fixed ? ' 1080p' : '') + ' · ' : ''}${p.segment.kind === 'orbit' ? 'دورة حول المبنى' : p.segment.kind === 'approach' ? 'الاقتراب من المدخل' : p.segment.kind === 'garden' ? 'الحديقة' : 'داخل ' + p.segment.name} · ${Math.min(100, Math.round(100 * p.elapsedMs / p.totalMs))}٪`); },
       });
       if (recorder) {
         const raw = await recorder.stop(); recorder = null;
@@ -57,6 +59,7 @@ export function initDrawTourUI({ root, ensureViewer, getEntry = () => null, plan
     } catch (error) { say(error?.message || 'تعذّرت الجولة.'); }
     finally {
       if (recorder) await recorder.stop().catch(() => {});
+      if (fixed) viewer.setFixedSize(null);
       if (viewer?.canvas && locked !== null) viewer.canvas.style.pointerEvents = locked;
       if (viewer?.built) { viewer.setMode('orbit', { animate: false }); viewer.frameBuilding(); viewer.requestRender(); }
       abort = null; setBusy(false); onDone?.(finished);

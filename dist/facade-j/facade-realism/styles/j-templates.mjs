@@ -54,6 +54,21 @@ export const templates = [
   T('J19', 'المكعبات المتداخلة', 'مكعب حجري بيج أمامي ومكعب بازلت رمادي داكن متراجع بإزاحة حقيقية وظلال دراماتيكية', { floors: 2, mass: 8, entryPos: 2, entryType: 1, winPattern: 4, wallT: 2, wallMat: 3, frame: 3, mull: 1, band: 2, cap: 3, crownZone: 4, portal: 3, pier: 0, plinth: 1, twoTone: 1, joint: 1 }),
   T('J20', 'الأفق الحجري المعلق', 'بلاطة حجرية ضخمة بكابولي 68 سم فوق واجهة زجاجية ممتدة بدعامات فولاذية واضحة', { floors: 2, mass: 0, entryPos: 0, entryType: 3, winPattern: 2, wallT: 1, wallMat: 1, frame: 1, mull: 2, band: 1, cap: 5, crownZone: 6, portal: 2, pier: 2, plinth: 2, light: 2, acscreen: 1 }, AC),
 ];
+// ── بدائل محور القوالب (2026-11-08): قالبان إضافيان مشتقان من قالبين قائمين؛ لكل منهما «ما الذي يختلف» في المدخل وإيقاع النوافذ وتوزيع الخامات.
+//    القيم كلها من تعدادات الطراز نفسه (فيصح الدمج والتطفير)؛ لا يُدّعى لها مرجع معماري خارجي.
+const variantJ = (id, ar, base, differs, o) => { const b = templates.find(t => t.id === base); return { id, ar, note: differs.entrance + '؛ ' + differs.windows + '؛ ' + differs.materials, variantOf: base, differs, p: { ...b.p, ...o } }; };
+templates.push(
+  variantJ('J21', 'الغائر الزجاجي بالشقوق', 'J07', {
+    entrance: 'باب زجاجي عريض في الكتلة الغائرة الوسطى بدل الباب المزدوج في J07',
+    windows: 'شقوق رأسية بدل النوافذ المنتظمة على الجناحين البارزين',
+    materials: 'خامة جدار الترافرتين (كما في J04) بدل خامة J07، مع بقاء المظلات العلوية وزعانف الخشب' },
+    { entryType: 3, winPattern: 3, wallMat: 1 }),
+  variantJ('J22', 'الكتلة اليسرى والشريط', 'J13', {
+    entrance: 'كتلة أمامية يسارية والمدخل في الثلث الأيمن بعيدًا عنها، بدل الكتلة اليمينية والمدخل الأيسر في J13',
+    windows: 'شريط أفقي ممتد بدل النافذة البانورامية',
+    materials: 'بازلت داكن (كما في J06/J15) بدل الترافرتين' },
+    { mass: 2, entryPos: 2, winPattern: 1, wallMat: 2 }),
+);
 export const meta = Object.freeze({ id: 'J', ar: 'معاصر', templateCount: templates.length });
 
 // ------------------------------------------------------------------ توليد المسقط

@@ -23,3 +23,18 @@ export const templates = [
   mk('N15', 'الدروة الثقيلة', 'شرفات مدرّجة ثقيلة متلاصقة وشريط أسنان وباب خشبي مسمّر قرب الزاوية', { owin: 4, epos: 4, etyp: 3, wt: 2, flr: 2, crown: 0, merlon: 1, mH: 2, mPitch: 2, mGap: 0, cap: 1, frieze: 1, slab: 2, corner: 1, plinth: 2, win: 0, grille: 0, door: 3, leaf: 1, field: 3, ornament: 2, pal: 1, trim: 1 }),
   mk('N16', 'الواجهة الغنية', 'أقصى زخرفة منضبطة: بوابة سميكة ونوافذ زوجية ضيقة ومشبّك معين وكوّات رأسية', { owin: 3, epos: 1, etyp: 3, wt: 1, flr: 2, crown: 3, frieze: 0, slab: 2, strips: 2, corner: 1, plinth: 2, win: 0, grille: 1, door: 4, leaf: 0, field: 1, rows: 2, ornament: 3, spouts: 1, pal: 0, trim: 1 }),
 ];
+// ── بدائل محور القوالب (2026-11-08): قالبان إضافيان مشتقان من قالبين قائمين؛ لكل منهما «ما الذي يختلف» في المدخل وإيقاع النوافذ وتوزيع الخامات.
+//    القيم كلها من تعدادات الطراز نفسه (فيصح الدمج والتطفير)؛ لا يُدّعى لها مرجع معماري خارجي.
+const variant = (id, ar, base, differs, o) => { const b = templates.find(t => t.id === base); return { id, ar, note: differs.entrance + '؛ ' + differs.windows + '؛ ' + differs.materials, variantOf: base, differs, p: { ...b.p, ...o } }; };
+templates.push(
+  variant('N17', 'مجلس الضيافة بين الجناحين', 'N05', {
+    entrance: 'المدخل الرئيسي في الوسط بين جناحين بارزين (كتلة الأجنحة) مع إبقاء باب الضيوف الثاني، بدل الواجهة المستوية في N05',
+    windows: 'نظام نوافذ الأجنحة (نظام 3 كما في N04) بدل نوافذ المجلس العريضة',
+    materials: 'كورنيش مدرّج (كما في N07) بدل الشرفات، وقاعدة حجرية عالية (كما في N09) تحت لياسة N05' },
+    { bay: 3, epos: 1, owin: 3, crown: 5, plinth: 3 }),
+  variant('N18', 'النجدي الناعم بمدخل غائر', 'N12', {
+    entrance: 'مدخل غائر 1.3 م في وسط الواجهة ببوابة سميكة (كما في N05) بدل الباب المسطح في N12',
+    windows: 'نوافذ شريطية عالية (نظام 5 كما في N10/N11) بدل النوافذ العريضة',
+    materials: 'لياسة طينية خشنة (كما في N06) فوق قاعدة حجرية ظاهرة، بدل اللياسة الملساء' },
+    { bay: 2, epos: 1, etyp: 2, door: 4, owin: 5, finish: 2, stone: 1, plinth: 2 }),
+);
