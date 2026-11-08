@@ -30,6 +30,21 @@
     <div class="status" id="fbStatus" role="status" aria-live="polite"></div>
   </div>
 </div>
+<div class="compare" id="compare" hidden role="dialog" aria-labelledby="cmpHeadT">
+  <div class="cmp-panel">
+    <div class="cmp-top"><h2 id="cmpHeadT">مقارنة تصميمين</h2>
+      <label>التصميم <select id="cmpA"></select></label><label>مع <select id="cmpB"></select></label><label hidden>الدور <select id="cmpLevel"></select></label>
+      <button class="btn" id="cmpClose" type="button">إغلاق</button></div>
+    <p class="sub" id="cmpMsg"></p>
+    <div id="cmpBody">
+      <p class="sub" id="cmpSim"></p>
+      <ul class="cmp-head" id="cmpHead"></ul>
+      <div class="cmp-plans"><figure><figcaption id="cmpTitleA"></figcaption><canvas id="cmpCanA"></canvas></figure><figure><figcaption id="cmpTitleB"></figcaption><canvas id="cmpCanB"></canvas></figure></div>
+      <div class="cmp-table"><table class="rooms"><thead><tr><th>البند</th><th id="cmpThA">الأول</th><th id="cmpThB">الثاني</th><th>الفرق</th></tr></thead><tbody id="cmpRows"></tbody></table></div>
+      <div class="row"><button class="btn gold" id="cmpPick" type="button">اعرض التصميم الثاني</button></div>
+    </div>
+  </div>
+</div>
 <div class="shara" id="merge" hidden>
   <div class="panel" role="dialog" aria-labelledby="mergeQ">
     <div class="who"><div class="av" aria-hidden="true">ش</div><div class="bubble" id="mergeQ">اختر تصميمين وسأجمعهما في توزيع واحد سليم يأخذ من كلٍّ منهما، ولا يكون نسخة من أحدهما.</div></div>

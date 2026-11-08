@@ -34,3 +34,26 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  # فحص رحلة العميل الحديثة على الموقع المنشور فعليًا بعد كل نشر (قراءة فقط، بلا أسرار ولا صلاحيات إنتاج).
+  live-journey:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright (not saved to package.json)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Wait for the deployment to be served
+        run: sleep 25
+      - name: Live version matches this commit
+        run: node scripts/verify-live-version.mjs ${{ github.sha }}
+      - name: Client journey on the live site (desktop and mobile)
+        run: node scripts/home-journey-smoke.mjs
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
