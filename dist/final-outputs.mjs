@@ -11,6 +11,8 @@ import { roomTypeName } from './draw/catalog.mjs';
 import { isCostUnpriced, UNPRICED_TOTAL_AR } from './field-guards.mjs';
 import { privacyIndex } from './intel/privacy-index.mjs';
 import { climateZoning } from './intel/climate-zoning.mjs';
+// [axis-b] لوحات الموقع العام والواجهات والقطاع وجدول الفتحات (dist/draw/drawing-set.mjs)
+import { buildDrawingSet } from './draw/drawing-set.mjs';
 
 /** حالة الأنظمة قبل أي حساب: تُعلن صراحة ولا تُعرض كصفر صامت. */
 export const NOT_COMPUTED_AR = 'لم تُحسب الأنظمة الهندسية بعد لهذا المخطط';
@@ -75,6 +77,8 @@ export function buildFinalData(doc, { dna = null, rates = {}, reservePct = null,
     },
     levels, rooms, quantities, structure, cost: computeCost(quantities.rows, rates, { reservePct, vatPct }),
     score, scoreLevel, validation, review, intel: intelOf(doc), dnaAxes, dnaFingerprint: dna?.dna?.fingerprint || null, snapshot3d,
+    // [axis-b] { site, elevations[], section, schedule{tables, html}, sheets[{id,no,title,svg}], errors[] } — كل لوحة مستقلة
+    drawings: buildDrawingSet(doc, { sheet, date: day, fingerprint, owner, office }),
   };
 }
 function intelOf(doc) { try { return { privacy: privacyIndex(doc), climate: climateZoning(doc) }; } catch { return null; } }
