@@ -936,6 +936,38 @@ function exteriorEdges(r, W, D, court = null) {
 }
 
 /** يبني مستند المرسم من التخطيط. */
+/**
+ * النافذة لا تعبر ملتقى جدار داخلي بجدارها (تمر خلف القاطع في المسقط، وتنزاح في المجسم والواجهة فتغطي فتحة مجاورة).
+ * تُقاس على المستند النهائي: تُزاح داخل المقطع الحر بين ملتقيين، أو تُصغَّر (النافذة الكبيرة تصير عادية)، أو تُحذف إن لم تتسع
+ * أو صادمت فتحة أخرى. غرفة تفقد نافذتها الوحيدة يرفضها فحص الجودة بعد ذلك (لا تُعرض ناقصة).
+ */
+export function fixWindowJunctions(doc) {
+  const MIN = { window: .6, window2: 1.2 }, M = .15, cmds = [];
+  for (const o of doc.openings) {
+    if (!(o.kind in MIN)) continue;
+    const w = doc.walls.find(x => x.id === o.wall); if (!w) continue;
+    const len = Math.hypot(w.b.x - w.a.x, w.b.y - w.a.y); if (len < 1e-6) continue;
+    const ux = (w.b.x - w.a.x) / len, uy = (w.b.y - w.a.y) / len, tol = (w.t || .2) / 2 + .02;
+    const along = p => { const dx = p.x - w.a.x, dy = p.y - w.a.y; return { t: dx * ux + dy * uy, n: Math.abs(-dx * uy + dy * ux) }; };
+    const js = doc.walls.filter(v => v !== w && v.level === w.level && v.kind !== 'fence').flatMap(v => [v.a, v.b].map(along)).filter(q => q.n < tol && q.t > 1e-3 && q.t < len - 1e-3).map(q => q.t);
+    let s0 = o.at - o.w / 2, s1 = o.at + o.w / 2;
+    if (!js.some(t => t > s0 + .02 && t < s1 - .02)) continue;
+    const cuts = [0, ...js, len].sort((a, b) => a - b);
+    // المقطع الحر الأوسع تقاطعًا مع النافذة
+    let best = null; for (let k = 0; k + 1 < cuts.length; k++) { const lo = cuts[k], hi = cuts[k + 1], ov = Math.min(hi, s1) - Math.max(lo, s0); if (ov > 0 && (!best || ov > best.ov)) best = { lo, hi, ov }; }
+    if (!best) { cmds.push({ type: 'delete', ids: [o.id] }); continue; }
+    const room = best.hi - best.lo - 2 * M;
+    let kind = o.kind, wNew = Math.min(o.w, snap(room - .05));
+    if (kind === 'window2' && wNew < MIN.window2) kind = 'window';
+    if (wNew < MIN[kind]) { cmds.push({ type: 'delete', ids: [o.id] }); continue; }
+    const at = Math.min(best.hi - M - wNew / 2, Math.max(best.lo + M + wNew / 2, o.at));
+    s0 = at - wNew / 2; s1 = at + wNew / 2;
+    const clash = doc.openings.some(q => q !== o && q.wall === o.wall && Math.min(s1, q.at + q.w / 2) - Math.max(s0, q.at - q.w / 2) > -.1);
+    cmds.push(clash ? { type: 'delete', ids: [o.id] } : { type: 'update', id: o.id, patch: { at: +at.toFixed(3), w: +wNew.toFixed(3), ...(kind !== o.kind ? { kind } : {}) } });
+  }
+  for (const c of cmds) { try { doc = applyCommand(doc, c).doc; } catch { /* يبقى كما هو */ } }
+  return doc;
+}
 export function layoutToDoc(layout, { land, plot, fp, entry, mirror = false, title = 'تصميم شرعاء', ox = 0, Wfull }) {
   const T = frame(fp, entry, mirror, layout.W, ox, Wfull ?? layout.W);
   let doc = createDoc({ title });
@@ -968,8 +1000,24 @@ export function drawLevel(doc0, layout, { level, T }) {
   }
   const opening = (axis, at, pos, kind, extra = {}) => {
     const w = walls.find(x => x.axis === axis && Math.abs(x.at - at) < 1e-3 && pos >= x.a - 1e-3 && pos <= x.b + 1e-3); if (!w) return null;
-    const p = axis === 'y' ? T(pos, at) : T(at, pos);
-    try { return run({ type: 'add-opening', wall: w.id, kind, at: Math.hypot(p.x - w.pa.x, p.y - w.pa.y), ...extra })[0]; } catch { return null; }
+    const P = v => { const q = axis === 'y' ? T(v, at) : T(at, v); return Math.hypot(q.x - w.pa.x, q.y - w.pa.y); };
+    let atDoc = P(pos);
+    // النافذة: موضع خالٍ داخل مقطع غرفتها (بين ملتقيي الجدران الداخلية) بعيدًا عن الفتحات القائمة؛ وإلا انزلقت في
+    // المستند إلى «أقرب موضع خالٍ» عابرةً القاطع إلى الغرفة المجاورة. تُصغَّر عند الحاجة، وتُترك إن لم تتسع.
+    if (kind === 'window' || kind === 'window2') {
+      const js = walls.filter(v => v.axis !== axis && v.at > w.a + 1e-3 && v.at < w.b - 1e-3 && at >= v.a - 1e-3 && at <= v.b + 1e-3).map(v => v.at);
+      const cuts = [w.a, ...js, w.b].sort((a, b) => a - b); let lo = w.a, hi = w.b;
+      for (let i = 0; i + 1 < cuts.length; i++) if (pos >= cuts[i] - 1e-3 && pos <= cuts[i + 1] + 1e-3) { lo = cuts[i]; hi = cuts[i + 1]; break; }
+      const M = .15, g = .1, a0 = Math.min(P(lo), P(hi)) + M, a1 = Math.max(P(lo), P(hi)) - M;
+      const busyDoc = doc.openings.filter(o => o.wall === w.id).map(o => [o.at - o.w / 2 - g, o.at + o.w / 2 + g]).sort((x, y) => x[0] - y[0]);
+      const free = []; let c = a0; for (const [b0, b1] of busyDoc) { if (b0 > c) free.push([c, Math.min(b0, a1)]); c = Math.max(c, b1); } if (c < a1) free.push([c, a1]);
+      const minW = kind === 'window2' ? 1.2 : .6, want = extra.w ?? (kind === 'window2' ? 2.2 : 1.4);
+      const fits = free.filter(([x0, x1]) => x1 - x0 >= minW - 1e-6).sort((A, B) => Math.min(Math.abs(atDoc - A[0]), Math.abs(atDoc - A[1]), atDoc >= A[0] && atDoc <= A[1] ? 0 : 1e9) - Math.min(Math.abs(atDoc - B[0]), Math.abs(atDoc - B[1]), atDoc >= B[0] && atDoc <= B[1] ? 0 : 1e9));
+      if (!fits.length) return null;
+      const [x0, x1] = fits[0], ww = Math.min(want, snap(x1 - x0 - .02) || 0) >= minW ? Math.min(want, snap(x1 - x0 - .02)) : x1 - x0;
+      extra = { ...extra, w: ww }; atDoc = Math.min(x1 - ww / 2, Math.max(x0 + ww / 2, atDoc));
+    }
+    try { return run({ type: 'add-opening', wall: w.id, kind, at: atDoc, ...extra })[0]; } catch { return null; }
   };
   // سور الحديقة الداخلية من جهة الحوش الخلفي (2.4 م) يغلق الفناء بلا سقف
   if (court && layout.courtOpen) { const pa = T(court.x0, court.y1), pb = T(court.x1, court.y1); try { run({ type: 'add-wall', level: LVL, a: pa, b: pb, t: EXT, h: 2.4, kind: 'fence' }); } catch { /* سور اختياري */ } }
@@ -1019,6 +1067,7 @@ export function drawLevel(doc0, layout, { level, T }) {
   furnish(rooms, T, run, doorAt, W, D, LVL);
   // أشجار الحديقة الداخلية
   if (court && layout.courtOpen) { const cw = court.x1 - court.x0, cd = court.y1 - court.y0; for (const [fx, fy] of cd >= 7 ? [[.5, .3], [.5, .72]] : [[.5, .5]]) { const p = T(court.x0 + cw * fx, court.y0 + cd * fy); try { run({ type: 'add-fixture', level: LVL, kind: 'tree', x: p.x, y: p.y, rot: 0 }); } catch { /* شجرة اختيارية */ } } }
+  doc = fixWindowJunctions(doc); // حارس أخير: لا يغيّر شيئًا متى وُضعت النوافذ سليمة
   return doc;
 
   function setSwing(id, pIn) {
@@ -1203,7 +1252,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
         const ledger = verifyRequest(relaxed, requirements, { entry });
         // مجلس الرجال بلا دورة مياه خاصة: عيب ضيافة يُؤخّر البديل خلف كل بديل سليم
         const wcMissing = layout.notes.some(n => /دورة مياه (?:الضيوف|الرجال) لم تتسع/.test(n)) ? 1 : 0;
-        designs.push({ doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)], summary: describe(cand), rooms: layout.rooms, ledger, fails: ledger.filter(x => !x.ok).length + wcMissing });
+        designs.push({ doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)], summary: describe(cand), rooms: layout.rooms, ledger, fails: ledger.filter(x => !x.ok).length, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) });
       } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: e.message }); }
     }
   return designs;
@@ -1224,7 +1273,8 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   if (!designs.length) { const err = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك لهذا البرنامج والأرض؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : 'تعذّر بناء أي بديل سليم من التوزيعات المرشحة.'); err.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_BUILD_FAILED'; throw err; }
   if (!designs.length && blend) { const err = Error('لم أجد توزيعًا سليمًا يجمع بين التصميمين دون أن يكون نسخة من أحدهما؛ جرّب تصميمين آخرين.'); err.code = 'VILLA_NO_BLEND'; throw err; }
   // تنفيذ طلب العميل أولًا، ثم (عند الدمج) الأكثر جمعًا للتصميمين، ثم الجودة
-  designs.sort((a, b) => a.fails - b.fails || (blend ? b.blend - a.blend : 0) || a.quality - b.quality);
+  // عند التساوي في عدد البنود غير المنفّذة: يُقدَّم ما يحفظ أحدث طلبات العميل (يتعارض طلبان فيُضحّى بالأقدم لا بما طلبه الآن)
+  designs.sort((a, b) => a.fails - b.fails || (a.newestFail || 0) - (b.newestFail || 0) || (blend ? b.blend - a.blend : 0) || a.quality - b.quality);
   const picked = blend ? designs.slice(0, keep) : diversify(designs, keep);
   if (visRelaxed) picked[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا (يختلف بـ ' + Math.round((1 - (picked[0]?.visual || 0)) * 100) + '٪ على الأقل).');
   if (shapeFallback && shapeExhausted) picked[0]?.notes.push(`عُرضت عليك كل توزيعات «${MODE_AR[wantMode] || wantMode}» المختلفة لهذه الأرض؛ هذا بديل بنمط آخر.`);
@@ -1329,7 +1379,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
       const notes = [...new Set([...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0))} م²${pr.g.court ? ` مع حديقة داخلية ${Math.round(A_(pr.g.court))} م²` : ''} (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
       notes.push(...hallNotes(q.metrics, W, D));
       const ledger = verifyRequest(relaxed, requirements, { entry });
-      designs.push({ doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(pr.pen), quality: r2(pr.pen + q.cost), same: !!prefPat && pr.pat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, env, notes, pat: pr.pat, summary: describe(pr.g) + ' (دوران)', ledger, fails: ledger.filter(x => !x.ok).length });
+      designs.push({ doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(pr.pen), quality: r2(pr.pen + q.cost), same: !!prefPat && pr.pat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, env, notes, pat: pr.pat, summary: describe(pr.g) + ' (دوران)', ledger, fails: ledger.filter(x => !x.ok).length, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) });
     } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: pr.pat, why: e.message }); }
   }
   return designs;
@@ -1339,7 +1389,8 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   if (!designs.length && shown.length) { const e = Error(`عرضت عليك ${shown.length} ${shown.length > 2 ? 'تصاميم' : 'تصميمين'} ولم يبقَ لهذا البرنامج وهذه الأرض توزيع سليم لدورين يختلف عنها بوضوح؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو اطلب دمج تصميمين.`); e.code = 'VILLA_EXHAUSTED'; throw e; }
   if (!designs.length && blend) { const e = Error('لم أجد توزيعًا سليمًا لدورين يجمع بين التصميمين دون أن يكون نسخة من أحدهما؛ جرّب تصميمين آخرين.'); e.code = 'VILLA_NO_BLEND'; throw e; }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; throw e; }
-  designs.sort((a, b) => a.fails - b.fails || (blend ? b.blend - a.blend : 0) || a.quality - b.quality);
+  // عند التساوي في عدد البنود غير المنفّذة: يُقدَّم ما يحفظ أحدث طلبات العميل (يتعارض طلبان فيُضحّى بالأقدم لا بما طلبه الآن)
+  designs.sort((a, b) => a.fails - b.fails || (a.newestFail || 0) - (b.newestFail || 0) || (blend ? b.blend - a.blend : 0) || a.quality - b.quality);
   const picked2 = blend ? designs.slice(0, keep) : diversify(designs, keep);
   if (visRelaxed) picked2[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا.');
   if (diff2.relaxed) picked2[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');

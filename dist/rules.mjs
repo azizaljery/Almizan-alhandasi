@@ -384,7 +384,7 @@ export function attachWhere(items, doc, req = {}) {
     'P-corr': () => named(/^ممر/), 'P-ens': () => [...sel('bedrooms'), ...named(/^حمام (الرئيسية|غرفة)/)], 'P-sh': () => [...named(/^دورة مياه مشتركة$/), ...sel('kids')],
     'P-sep': () => named(/^(مجلس الرجال|مدخل الرجال|مجلس النساء|ممر النساء|المجلس)$/), 'P-bathhall': () => [...named(/^(حمام|دورة مياه)/), ...hall()],
     'P-dress': () => [...named(/^غرفة (ال)?ملابس$/), ...sel('master')], 'P-open': () => [...sel('kitchen'), ...sel('dining')], 'P-old': () => sel('elderly').length ? sel('elderly') : sel('master'),
-    'P-guest': () => named(/^(مدخل الرجال|مجلس الرجال|المجلس|مدخل الضيوف)$/), 'X-guest': () => named(/^(غرفة الضيوف|حمام غرفة الضيوف)$/),
+    'P-guest': () => named(/^(مدخل الرجال|مجلس الرجال|المجلس|مدخل الضيوف|دورة مياه الرجال)$/), 'X-guest': () => named(/^(غرفة الضيوف|حمام غرفة الضيوف)$/),
     'X-office-ext': () => sel('office'), 'X-maid-ext': () => sel('maid'), 'X-maid-bath': () => named(/^(غرفة الخادمة|حمام الخادمة)$/), 'X-driver-bath': () => named(/^(غرفة السائق|حمام السائق)$/),
   };
   for (const it of items) {

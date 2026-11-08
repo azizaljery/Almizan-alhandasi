@@ -21,7 +21,9 @@ test('كل بند في «هل نُفّذ طلبك؟» يحمل فراغاته ا
     assert.ok(Array.isArray(it.where) && it.where.length > 0, 'بند بلا موضع: ' + it.id + ' ' + it.text);
     for (const w of it.where) { assert.ok(names.has(w.name), `«${w.name}» غير موجود في المخطط (${it.id})`); assert.ok(doc.levels.some(l => l.id === w.level)); }
   }
-  const g = led.find(x => x.id === 'P-guest'); assert.ok(g.where.some(w => /مدخل الرجال/.test(w.name)) && g.where.some(w => /مجلس الرجال|المجلس/.test(w.name)), 'المدخل المستقل يضيء المدخل والمجلس');
+  // المدخل المستقل يضيء المجلس دائمًا، ومدخل الرجال متى وُجد فراغًا مستقلًا (في بعض التوزيعات يفتح المجلس على الخارج مباشرة)
+  const g = led.find(x => x.id === 'P-guest'); assert.ok(g.ok && g.where.some(w => /مجلس الرجال|المجلس/.test(w.name)), 'المدخل المستقل يضيء المجلس');
+  if (names.has('مدخل الرجال')) assert.ok(g.where.some(w => w.name === 'مدخل الرجال'), 'ويضيء مدخل الرجال إن وُجد');
   const open = led.find(x => x.id === 'P-open'); assert.deepEqual(new Set(open.where.map(w => w.name)), new Set(['المطبخ', 'صالة الطعام']));
 });
 
