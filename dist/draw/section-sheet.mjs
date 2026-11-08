@@ -7,6 +7,7 @@ import { sheetCanvas, titleStrip, levelMark, dimLine, fitScale, fmtLevel, mm, n1
 import { levelMarks } from './elevation-sheet.mjs';
 import { fmtDim, approxTextWidth } from './plan-annot.mjs';
 import { add, sub, mul, dot, cross, norm, pointInPolygon } from './geom.mjs';
+import { checkStairs, stairCheckLines } from './stair-check.mjs';
 
 const perpCCW = a => ({ x: -a.y, y: a.x });
 
@@ -237,12 +238,20 @@ export function sectionSheet(doc, opts = {}) {
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#e8edf0" stroke="#000" stroke-width="${LW.thin}"/>`, 'نافذة خلف مستوى القطع'],
       [`<path d="M${mm(3.5)} ${mm(2.6)} L${mm(1.9)} ${mm(.4)} L${mm(5.1)} ${mm(.4)} Z" fill="#000"/>`, 'منسوب بالمتر من ±0.00'],
     ],
-    notes: ['±0.00 = منسوب أرضية الدور الأرضي التشطيبية.', `سماكة البلاطات ${fmtDim(model.slab)} م والأرض الطبيعية ${fmtLevel(model.ground)} افتراضان (مطابقان للمجسم)، لا تصميم إنشائي.`, 'الأساسات والعزل وطبقات الأرضيات غير مرسومة في هذه المرحلة.', S.cut.through === 'stair' ? 'يمر القطع بقلبة الدرج الأولى موازيًا لاتجاه الصعود.' : 'لا يوجد درج؛ يمر القطع بالصالة من الأمام إلى الخلف.'],
+    notes: ['±0.00 = منسوب أرضية الدور الأرضي التشطيبية.', `سماكة البلاطات ${fmtDim(model.slab)} م والأرض الطبيعية ${fmtLevel(model.ground)} افتراضان (مطابقان للمجسم)، لا تصميم إنشائي.`, 'الأساسات والعزل وطبقات الأرضيات غير مرسومة في هذه المرحلة.', S.cut.through === 'stair' ? 'يمر القطع بقلبة الدرج الأولى موازيًا لاتجاه الصعود.' : 'لا يوجد درج؛ يمر القطع بالصالة من الأمام إلى الخلف.', ...stairNotes(doc)],
   });
   out.push('</svg>');
   meta.textOverlaps = 0;
   for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) { const p = boxes[i], q = boxes[j]; if (Math.abs(p.x - q.x) < (p.w + q.w) / 2 && Math.abs(p.y - q.y) < (p.h + q.h) / 2) meta.textOverlaps++; }
   return { svg: out.join('\n'), meta };
+}
+
+/** ملاحظات فحص الدرج (SBC 201 §1011) على لوحة القطاع. */
+function stairNotes(doc) {
+  if (!doc.stairs?.length) return [];
+  const r = checkStairs(doc), bad = stairCheckLines(r).filter(l => !l.includes('غير متحقق'));
+  const s0 = r.stairs[0];
+  return [`الدرج: ${s0.N} قائمة × ${Math.round(s0.riserM * 1000)} مم، نائمة ${Math.round(s0.treadM * 1000)} مم، عرض ${s0.widthM.toFixed(2)} م.`, ...(bad.length ? bad : ['أبعاد الدرج تحقق الأحكام العامة لـ SBC 201 §1011.']), 'استثناءات المساكن في SBC 201 غير متحقق منها؛ ارتفاع السقف فوق الدرج لم يُقس.'];
 }
 
 const dirAr = (v, toward) => { const ax = Math.abs(v.x) > Math.abs(v.y); const s = ax ? (v.x > 0 ? 'الشرق' : 'الغرب') : (v.y > 0 ? 'الشمال' : 'الجنوب'); if (!toward) return s; const opp = { 'الشرق': 'الغرب', 'الغرب': 'الشرق', 'الشمال': 'الجنوب', 'الجنوب': 'الشمال' }; return opp[s] + ' (محاور المخطط)'; };

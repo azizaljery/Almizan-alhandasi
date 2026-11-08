@@ -7,9 +7,14 @@ import { interiorPoint, distributePoints, inside, bounds } from './engineering-s
 import { steadyStateHeatGain } from './engineering-systems/src/calculations.mjs';
 import { analyzeDoc } from '../draw/digest.mjs';
 import { emptyInputs } from './mep-binding.mjs';
+import { envelopeFor, DEFAULT_ZONE, SBC602_SOURCE } from './sbc602-envelope.mjs';
 
 export const AUTO_VERSION = 'mep-auto/1';
 export const AUTO_NOTE_AR = 'مدخلات أولية ولّدها الميزان من المخطط بافتراضات مشروع معلنة (ليست قيم كود ولا قياسات موقع)؛ عدّلها ثم أعد الحساب.';
+
+/** افتراضات الغلاف السابقة (قبل ربطها بالكود)؛ تُستعمل فقط لقيمة لم يتحقق مصدرها، وتُعلَّم «غير متحقق». */
+export const LEGACY_ENVELOPE = Object.freeze({ wallU: .57, roofU: .4, glassU: 2.8 });
+const ENV0 = envelopeFor(DEFAULT_ZONE, LEGACY_ENVELOPE);
 
 /** الافتراضات المعلنة. كل قيمة هنا افتراض تصميمي أولي قابل للتعديل من العميل، وليست مرجعًا نظاميًا. */
 export const ASSUMPTIONS = Object.freeze({
@@ -22,8 +27,9 @@ export const ASSUMPTIONS = Object.freeze({
   socketW: 200, socketDemand: .4, socketHeightM: .4,
   kitchenLoads: [['فرن كهربائي', 3000], ['ثلاجة', 300], ['غسالة أطباق', 1800], ['ميكروويف', 1200]], laundryLoads: [['غسالة', 2000], ['نشافة', 2500]], applianceDemand: .8,
   waterHeaterW: 1500, acDemand: .9, acPowerPerKW: 330, // واط كهربائي لكل كيلوواط تبريد (COP ≈ 3)
-  // التكييف: الرياض صيفًا — افتراض 46°C خارج / 24°C داخل، جدار خارجي معزول U=0.57، زجاج U=2.8 وإشعاع 150 W/m² زجاج، سقف U=0.4 للدور الأعلى
-  outdoorC: 46, indoorC: 24, wallU: .57, glassU: 2.8, roofU: .4, solarWPerM2Glass: 150, personSensibleW: 75, personLatentW: 55, equipmentWPerM2: 8,
+  // التكييف: الرياض صيفًا — افتراض 46°C خارج / 24°C داخل وإشعاع 150 W/m² زجاج (افتراضان). معاملات الغلاف U من SBC 602-2018
+  // للمبنى السكني المكيف في المنطقة 1 (الرياض) — المصادر والتحقق في ./sbc602-envelope.mjs؛ ما لم يتحقق يبقى افتراضًا معلَّمًا.
+  outdoorC: 46, indoorC: 24, wallU: ENV0.wallU.value, glassU: ENV0.glassU.value, roofU: ENV0.roofU.value, climateZone: DEFAULT_ZONE, solarWPerM2Glass: 150, personSensibleW: 75, personLatentW: 55, equipmentWPerM2: 8,
   infiltrationACH: .5, outdoorHumidity: .012, indoorHumidity: .0093, densityKgM3: 1.15, cpJkgK: 1006, latentHeatJkg: 2450000, supplyDeltaK: 10, terminalHeightM: 2.6, ductVelocityMS: 5,
   persons: { majlis: 8, living: 5, dining: 6, kitchen: 2, bedroom: 2, master: 2, office: 2, other: 1 },
   acSizingMargin: 1.15, btuPerW: 3.412, splitSteps: [9000, 12000, 18000, 24000, 30000, 36000, 48000, 60000],
@@ -58,8 +64,9 @@ const splitBtu = (w, areaM2 = 0) => { const need = Math.max(w * ASSUMPTIONS.btuP
  * @param project ناتج bindArchitecture().project (الغرف والأدوار بالإحداثيات نفسها)
  * @returns { inputs, summary, assumptions, notes }
  */
-export function autoInputs(doc, project, { persons = null } = {}) {
-  const A = ASSUMPTIONS, inputs = emptyInputs(), notes = [];
+export function autoInputs(doc, project, { persons = null, climateZone = DEFAULT_ZONE } = {}) {
+  const env = envelopeFor(climateZone, LEGACY_ENVELOPE);
+  const A = { ...ASSUMPTIONS, wallU: env.wallU.value, roofU: env.roofU.value, glassU: env.glassU.value, climateZone: env.zone }, inputs = emptyInputs(), notes = [];
   const levels = project.architecture.levels, rooms = project.architecture.rooms;
   const an = analyzeDoc(doc);
   const digestRoom = (r) => { for (const lv of an.levels) { const d = lv.rooms.find(x => x.id === r.id || x.labelIds?.includes(r.id)); if (d) return { lv, d }; } return null; };
@@ -179,6 +186,8 @@ export function autoInputs(doc, project, { persons = null } = {}) {
   }
   inputs.services = { electrical: E, hvac: H, plumbing: P, fire: F, low_current: T, solar: S };
   inputs.rules.provenance = [
+    { id: 'SBC602-ENVELOPE-U', classification: env.wallU.status === 'verified' && env.roofU.status === 'verified' && env.glassU.status === 'verified' ? 'CODE_VALUE_SECONDARY_SOURCE' : 'PARTLY_UNVERIFIED', authority: SBC602_SOURCE.code, verifiedCodeClause: null,
+      noteAr: `معاملات الغلاف (${SBC602_SOURCE.path}، ${env.zoneAr}): جدار U=${A.wallU} [${env.wallU.status === 'verified' ? 'من الكود' : 'غير متحقق'}]، سقف U=${A.roofU} [${env.roofU.status === 'verified' ? 'من الكود' : 'غير متحقق'}]، نافذة U=${A.glassU} [${env.glassU.status === 'verified' ? 'من الكود' : 'غير متحقق'}]. المراجع: ${SBC602_SOURCE.refs.join('؛ ')}. تُراجع مع النسخة الرسمية.`, envelope: env },
     { id: 'MIZAN-AUTO-INPUTS', classification: 'PROJECT_ASSUMPTION', authority: 'ALMIZAN_AUTO_MEP', verifiedCodeClause: null, noteAr: AUTO_NOTE_AR + ' الإنارة: ' + JSON.stringify(A.lux) + ' لوكس بوحدة ' + A.lumensPerFixture + ' لومن/' + A.wattsPerFixture + ' واط؛ المقابس ' + A.socketW + ' واط بطلب ' + A.socketDemand + '؛ التكييف: خارج ' + A.outdoorC + '°C داخل ' + A.indoorC + '°C، U جدار ' + A.wallU + ' زجاج ' + A.glassU + ' سقف ' + A.roofU + '، إشعاع ' + A.solarWPerM2Glass + ' W/m² زجاج؛ المياه ' + A.litresPerPersonDay + ' ل/شخص/يوم × ' + A.autonomyDays + ' يوم لـ' + people + ' أشخاص.' },
   ];
   inputs.auto = { version: AUTO_VERSION, persons: people };

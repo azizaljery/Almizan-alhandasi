@@ -6,13 +6,14 @@ import { elevationSheets } from './elevation-sheet.mjs';
 import { sectionSheet } from './section-sheet.mjs';
 import { scheduleSheet, scheduleTables, scheduleHtml } from './schedules.mjs';
 import { siteSheet } from './site-sheet.mjs';
+import { checkStairs } from './stair-check.mjs';
 
 const safe = fn => { try { return fn(); } catch (e) { return { error: e?.message || String(e) }; } };
 
 /**
  * @param {object} doc مستند المرسم
  * @param {{ sheet?, date?, fingerprint?, owner?, office? }} [opts]
- * @returns {{ site, elevations: object[]|{error}, section, schedule, sheets: {id, no, title, svg}[], errors: string[] }}
+ * @returns {{ site, elevations: object[]|{error}, section, schedule, stairCheck, sheets: {id, no, title, svg}[], errors: string[] }}
  */
 export function buildDrawingSet(doc, opts = {}) {
   const base = { sheet: opts.sheet, date: opts.date, fingerprint: opts.fingerprint, owner: opts.owner, office: opts.office };
@@ -22,13 +23,14 @@ export function buildDrawingSet(doc, opts = {}) {
   const elevations = safe(() => elevationSheets(doc, { ...base, model }));
   const section = safe(() => sectionSheet(doc, { ...base, model, sheetNo: 'A-S1' }));
   const schedule = safe(() => { const s = scheduleSheet(doc, { ...base, sheetNo: 'A-D1' }); return { ...s, tables: scheduleTables(s.schedule), html: scheduleHtml(s.schedule) }; });
+  const stairCheck = safe(() => checkStairs(doc));
   const sheets = [];
   if (!site.error) sheets.push({ id: 'site', no: 'A-00', title: 'مخطط الموقع العام', svg: site.svg });
   if (Array.isArray(elevations)) elevations.forEach((e, i) => sheets.push({ id: 'elevations-' + (i + 1), no: 'A-E' + (i + 1), title: i ? 'الواجهتان اليمنى واليسرى' : 'الواجهتان الأمامية والخلفية', svg: e.svg }));
   if (!section.error) sheets.push({ id: 'section', no: 'A-S1', title: 'القطاع أ-أ', svg: section.svg });
   if (!schedule.error) sheets.push({ id: 'schedule', no: 'A-D1', title: 'جدول الأبواب والنوافذ', svg: schedule.svg });
   const errors = [site, elevations, section, schedule].filter(x => x && x.error).map(x => x.error);
-  return { site, elevations, section, schedule, sheets, errors };
+  return { site, elevations, section, schedule, stairCheck, sheets, errors };
 }
 
 /** ملفات SVG للتنزيل: اسم ملف لاتيني ثابت + المحتوى. */
