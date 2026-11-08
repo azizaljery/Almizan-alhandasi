@@ -120,3 +120,25 @@ table.rooms td .z{display:inline-block;width:10px;height:10px;border-radius:3px;
 .mg-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #ffffff33;border-radius:12px;cursor:pointer;line-height:1.6;color:#f6f2ea}
 .mg-item input{margin-top:5px;flex:none}
 .mg-item:has(input:checked){border-color:var(--mz-gold);background:#c9a45c26}
+
+/* «ورّني وين نفّذت طلبي»: البنود تُضغط فتضيء فراغاتها في المسقط */
+.ledger .hint{margin:4px 0 2px}
+.ledger li.locatable{cursor:pointer;border-radius:8px;padding-inline:6px;transition:background .15s}
+.ledger li.locatable:hover,.ledger li.locatable:focus-visible{background:#f3e7d8;outline:none}
+.ledger li.on{background:#ecd6bb}
+.focusbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#fbf3e8;border:1px solid #e6cfb0;border-radius:10px;padding:6px 10px;margin:6px 0;font-size:13.5px}
+.focusbar span{min-width:0;flex:1}
+
+/* مقارنة تصميمين جنبًا إلى جنب */
+.compare{position:fixed;inset:0;z-index:60;background:#1d1611b3;display:grid;place-items:center;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.cmp-panel{background:#fff;border-radius:16px;width:min(1180px,100%);max-height:100%;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 80px -30px #000a}
+.cmp-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.cmp-top h2{margin:0;margin-inline-end:auto;font-size:18px}
+.cmp-top select{padding:5px 8px;border:1px solid var(--mz-line);border-radius:8px;font:inherit}
+.cmp-head{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px;font-weight:600}
+.cmp-plans{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cmp-plans figure{margin:0;border:1px solid var(--mz-line);border-radius:12px;overflow:hidden;background:#fbfaf7}
+.cmp-plans figcaption{padding:6px 10px;font-weight:700;border-bottom:1px solid var(--mz-line)}
+.cmp-plans canvas{display:block;width:100%;height:min(46vh,420px)}
+.cmp-table{overflow-x:auto}.cmp-table td.up{color:#2f6b3a}.cmp-table td.down{color:#9a3b2b}
+@media(max-width:760px){.cmp-plans{grid-template-columns:1fr}.cmp-plans canvas{height:300px}}
+#cmpMsg:empty{display:none}

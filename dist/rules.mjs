@@ -367,6 +367,41 @@ const AREA_SUBJ = { master: 'master', majlis: 'majlis', hall: 'hall', dining: 'd
  * عدد الأدوار + الحمامات. كل بند { text, ok, why } مقيس من المستند نفسه، لا من نية المولّد.
  */
 export function verifyRequest(doc, req = {}, { entry = 's' } = {}) {
+  return attachWhere(verifyRequestItems(doc, req, { entry }), doc, req);
+}
+/**
+ * «ورّني وين نفّذت طلبي»: لكل بند الفراغات التي يخصها في المخطط (اسمها ودورها)، لإضاءتها عند الضغط على البند.
+ * تُشتق من موضوع البند نفسه (القاعدة أ/ب، أو الفراغ المطلوب، أو أطراف التفضيل)، لا من نصه.
+ */
+export function attachWhere(items, doc, req = {}) {
+  let rooms; try { rooms = docRooms(doc).rooms; } catch { return items; }
+  const sel = id => rooms.filter(r => ROOM_OF[id]?.(r)), named = re => rooms.filter(r => re.test(r.name));
+  const hall = () => { const l = sel('hall'), m = l.filter(r => r.name === 'الصالة'); return m.length ? m : l.slice(0, 1); };
+  const pick = id => (id === 'hall' ? hall() : sel(id));
+  const rule = id => (req.rules || []).find(r => r.id === id);
+  const BY = {
+    'C-bed': () => sel('bedrooms'), 'C-majlis': () => [...sel('majlis'), ...sel('majlis_w')], 'C-dining': () => sel('dining'), 'C-maj2': () => [...sel('majlis'), ...sel('majlis_w')],
+    'P-corr': () => named(/^ممر/), 'P-ens': () => [...sel('bedrooms'), ...named(/^حمام (الرئيسية|غرفة)/)], 'P-sh': () => [...named(/^دورة مياه مشتركة$/), ...sel('kids')],
+    'P-sep': () => named(/^(مجلس الرجال|مدخل الرجال|مجلس النساء|ممر النساء|المجلس)$/), 'P-bathhall': () => [...named(/^(حمام|دورة مياه)/), ...hall()],
+    'P-dress': () => [...named(/^غرفة (ال)?ملابس$/), ...sel('master')], 'P-open': () => [...sel('kitchen'), ...sel('dining')], 'P-old': () => sel('elderly').length ? sel('elderly') : sel('master'),
+    'P-guest': () => named(/^(مدخل الرجال|مجلس الرجال|المجلس|مدخل الضيوف)$/), 'X-guest': () => named(/^(غرفة الضيوف|حمام غرفة الضيوف)$/),
+    'X-office-ext': () => sel('office'), 'X-maid-ext': () => sel('maid'), 'X-maid-bath': () => named(/^(غرفة الخادمة|حمام الخادمة)$/), 'X-driver-bath': () => named(/^(غرفة السائق|حمام السائق)$/),
+  };
+  for (const it of items) {
+    let list = [];
+    try {
+      if (BY[it.id]) list = BY[it.id]();
+      else if (/^X-/.test(it.id)) { const k = it.id.slice(2), e = EXTRA_AR[k]; list = e ? sel(e[1]) : []; }
+      else if (/^A-/.test(it.id)) { const sid = AREA_SUBJ[it.id.slice(2)]; list = sid ? pick(sid) : []; if (sid === 'majlis') list = list.slice(0, 1); }
+      else if (/^B-/.test(it.id)) { const k = it.id.slice(2), sid = { majlis: 'majlis', hall: 'hall', kitchen: 'kitchen', master: 'master' }[k]; list = sid ? pick(sid).slice(0, 1) : []; }
+      else { const r = rule(it.id); if (r) list = [...pick(r.a), ...(ROOM_OF[r.b] || r.b === 'hall' ? pick(r.b) : [])]; }
+    } catch { list = []; }
+    const seen = new Set();
+    it.where = list.filter(r => { const k = r.level + '|' + r.name; if (seen.has(k)) return false; seen.add(k); return true; }).map(r => ({ name: r.name, level: r.level }));
+  }
+  return items;
+}
+function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
   const out = verifyRules(doc, req.rules || [], { entry });
   const { rooms } = docRooms(doc), sel = id => rooms.filter(r => ROOM_OF[id]?.(r));
   for (const [k, [ar, id]] of Object.entries(EXTRA_AR)) if (req.extras?.[k]) {
@@ -419,4 +454,4 @@ export function mergeRules(old = [], add = []) {
 }
 
 
-export default { mergeRules, extractRules, rulePenalty, verifyRules, verifyRequest, canonSide, SUBJECTS };
+export default { mergeRules, extractRules, rulePenalty, verifyRules, verifyRequest, attachWhere, canonSide, SUBJECTS };

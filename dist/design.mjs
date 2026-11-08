@@ -9,13 +9,15 @@ import { serialize } from './draw/doc.mjs';
 import { requestBrief } from './assistant.mjs';
 import { normalizeLand } from './home-flow.mjs';
 import { displayOr } from './field-guards.mjs';
+import { compareDesigns } from './compare-designs.mjs';
+import { parseDoc } from './draw/doc.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
 const fmt = v => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }));
 const toast = t => { const n = el('div', { class: 'toast', role: 'status' }, t); document.body.append(n); setTimeout(() => n.remove(), 3200); };
 
-let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null;
+let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null, focus = null;
 
 function init() {
   if (!session) {
@@ -27,7 +29,7 @@ function init() {
 
 function show(index) {
   session.current = index; saveSession(localStorage, session);
-  doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null;
+  doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null; focus = null;
   const d = session.designs[index], S = summarizeDoc(doc), req = session.input.requirements || {};
   const specs = [
     ['غرف النوم', displayOr(S.specs.bedrooms)], ['دورات المياه', displayOr(S.specs.baths)], ['المجالس', displayOr(S.specs.majlis)], ['الأدوار', displayOr(S.specs.floors)],
@@ -37,6 +39,7 @@ function show(index) {
   const zoneToggle = el('label', {}, el('input', { type: 'checkbox', id: 'zonesOn', checked: zonesOn, onchange: e => { zonesOn = e.target.checked; paint(); legend(); } }), 'تلوين المناطق');
   const plan = el('div', { class: 'card plancard' },
     el('div', { class: 'planbar' }, levels, zoneToggle, el('div', { class: 'tools' }, el('button', { title: 'تكبير', 'aria-label': 'تكبير', onclick: () => zoom(1.25) }, '+'), el('button', { title: 'تصغير', 'aria-label': 'تصغير', onclick: () => zoom(.8) }, '−'), el('button', { title: 'ملاءمة', 'aria-label': 'ملاءمة', onclick: () => { goal = null; inertia = null; view = null; paint(); } }, '⤢'))),
+    el('div', { class: 'focusbar', id: 'focusBar', hidden: true }, el('span', { id: 'focusText' }), el('button', { type: 'button', class: 'btn', onclick: () => setFocus(null) }, 'إلغاء الإضاءة')),
     el('div', { class: 'planwrap', id: 'planWrap' }, el('canvas', { id: 'plan', 'aria-label': 'مسقط التصميم' })),
     el('div', { class: 'legend', id: 'legend' }));
   const ledger = ledgerFor(session, doc), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok);
@@ -44,14 +47,16 @@ function show(index) {
     el('h2', {}, 'ما رأيك في هذا التصميم؟'),
     el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واعرضه ثلاثي الأبعاد ←'),
     el('button', { class: 'btn primary', id: 'btnAnother', onclick: openShara }, 'اطلب تصميمًا آخر'),
+    session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnCompare', onclick: openCompare }, 'قارن بين تصميمين جنبًا إلى جنب') : null,
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnMerge', onclick: openMerge }, 'ادمج تصميمين في تصميم واحد') : null,
     el('button', { class: 'btn', id: 'btnStudio', onclick: onStudio }, 'عدّل عليه بيدك في المرسم'),
     el('small', {}, 'الاعتماد يفتح العرض ثلاثي الأبعاد في صفحة مستقلة، ومنه المخرجات (الإنشائي والكميات والتكلفة وكتاب المشروع).'));
   // سجل التنفيذ: كل بند من طلبك مقيس من المخطط نفسه، لا من نية المولّد
   const reqCard = el('div', { class: 'card ledger', id: 'ledger' }, el('h2', {}, 'هل نُفّذ طلبك؟'),
     ledger.length ? el('p', { class: 'score ' + (miss.length ? 'part' : 'full') }, miss.length ? `نُفّذ ${done.length} من ${ledger.length} بنود، وبقي ${miss.length}` : `نُفّذت كل البنود (${ledger.length})`) : el('p', { class: 'sub' }, 'لم تذكر طلبات مكانية أو مقاسات؛ طُبّقت الأعداد التي حددتها.'),
-    miss.length ? el('ul', { class: 'tick' }, miss.map(x => el('li', { class: 'bad', 'data-rule': x.id }, el('b', {}, x.text), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
-    done.length ? el('ul', { class: 'tick' }, done.map(x => el('li', { class: 'good', 'data-rule': x.id }, x.text, x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
+    ledger.length ? el('p', { class: 'sub hint' }, 'اضغط أي بند لترى موضعه في المسقط.') : null,
+    miss.length ? el('ul', { class: 'tick' }, miss.map(x => el('li', ledgerAttrs(x, 'bad'), el('b', {}, x.text), x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
+    done.length ? el('ul', { class: 'tick' }, done.map(x => el('li', ledgerAttrs(x, 'good'), x.text, x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
@@ -113,6 +118,50 @@ $('mgGo').addEventListener('click', async () => {
     $('merge').hidden = true; show(session.current); toast('تم الدمج — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) { $('mgStatus').textContent = err.message || 'تعذّر الدمج.'; $('mgGo').disabled = false; }
 });
+
+/** مقارنة تصميمين جنبًا إلى جنب: المسقطان مع تظليل ما تغيّر موضعه، وأهم الفروق، وجدول المواصفات. */
+function openCompare() {
+  const opts = session.designs.map((x, i) => el('option', { value: String(i) }, 'التصميم ' + (i + 1)));
+  const sa = $('cmpA'), sb = $('cmpB');
+  sa.replaceChildren(...opts.map(o => o.cloneNode(true))); sb.replaceChildren(...opts.map(o => o.cloneNode(true)));
+  const cur = session.current, other = cur === 0 ? 1 : cur - 1;
+  sa.value = String(Math.min(cur, other)); sb.value = String(Math.max(cur, other));
+  $('compare').hidden = false; renderCompare();
+}
+const cmpCell = (v, u) => (typeof v === 'number' ? `${fmt(v)}${u ? ' ' + u : ''}` : `${v ?? '—'}${u && v ? ' ' + u : ''}`);
+function compareLevelOf(d) { return d.levels[0].id; }
+function drawMini(canvas, d, highlight) {
+  const r = canvas.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1), W = Math.max(10, r.width), H = Math.max(10, r.height);
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const lid = $('cmpLevel').value && d.levels.some(l => l.id === $('cmpLevel').value) ? $('cmpLevel').value : compareLevelOf(d);
+  const m = analyzeDoc(d), lv = m.levelById.get(lid), b = docBounds(d, lid);
+  renderPlan(ctx, { doc: d, levelId: lid, view: fitView({ x0: b.x0 - 1.5, y0: b.y0 - 1.5, x1: b.x1 + 1.5, y1: b.y1 + 1 }, W, H, 14), W, H,
+    analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
+    flags: { grid: false, dims: false, areas: true, fixtures: false, underlay: false, roomDims: false },
+    roomFill: rm => (highlight.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') });
+}
+function renderCompare() {
+  const ia = Number($('cmpA').value), ib = Number($('cmpB').value);
+  if (ia === ib) { $('cmpBody').hidden = true; $('cmpMsg').textContent = 'اختر تصميمين مختلفين.'; return; }
+  $('cmpBody').hidden = false; $('cmpMsg').textContent = '';
+  const A = parseDoc(session.designs[ia].doc), B = parseDoc(session.designs[ib].doc);
+  const mkLedger = i => { try { return ledgerFor({ ...session, current: i }, parseDoc(session.designs[i].doc)); } catch { return []; } };
+  const c = compareDesigns(A, B, { ledgerA: mkLedger(ia), ledgerB: mkLedger(ib), nameA: String(ia + 1), nameB: String(ib + 1) });
+  const lvSel = $('cmpLevel'), levels = A.levels.length > 1 || B.levels.length > 1 ? (A.levels.length >= B.levels.length ? A : B).levels : [];
+  if (levels.length) { if (!lvSel.options.length) lvSel.replaceChildren(...levels.map(l => el('option', { value: l.id }, l.name))); lvSel.parentElement.hidden = false; } else { lvSel.replaceChildren(); lvSel.parentElement.hidden = true; }
+  $('cmpTitleA').textContent = `التصميم ${ia + 1}`; $('cmpTitleB').textContent = `التصميم ${ib + 1}`;
+  $('cmpThA').textContent = `التصميم ${ia + 1}`; $('cmpThB').textContent = `التصميم ${ib + 1}`; $('cmpPick').textContent = `اعرض التصميم ${ib + 1}`;
+  $('cmpSim').textContent = `يتشابهان بنسبة ${c.sim}٪ في مواضع الفراغات. المظلل: ما تغيّر موضعه بين التصميمين.`;
+  $('cmpHead').replaceChildren(...c.headlines.map(t => el('li', {}, t)));
+  $('cmpRows').replaceChildren(...c.rows.map(r => el('tr', {}, el('td', {}, r.label), el('td', { class: 'num' }, cmpCell(r.a, r.unit)), el('td', { class: 'num' }, cmpCell(r.b, r.unit)),
+    el('td', { class: 'num ' + (r.diff > 0 ? 'up' : r.diff < 0 ? 'down' : '') }, r.diff === null || r.diff === 0 ? '—' : `${r.diff > 0 ? '+' : ''}${fmt(r.diff)}`))));
+  requestAnimationFrame(() => { drawMini($('cmpCanA'), A, new Set(c.moved.a)); drawMini($('cmpCanB'), B, new Set(c.moved.b)); });
+  $('cmpPick').onclick = () => { $('compare').hidden = true; show(ib); scrollTo({ top: 0, behavior: 'smooth' }); };
+}
+for (const id of ['cmpA', 'cmpB', 'cmpLevel']) $(id).addEventListener('change', renderCompare);
+$('cmpClose').addEventListener('click', () => { $('compare').hidden = true; });
+addEventListener('resize', () => { if (!$('compare').hidden) renderCompare(); });
 
 function legend() {
   const box = $('legend'); if (!box) return;
@@ -189,6 +238,24 @@ function bindPlan() {
   for (const g of ['gesturestart', 'gesturechange', 'gestureend']) c.addEventListener(g, e => e.preventDefault());
   new ResizeObserver(() => paint()).observe($('planWrap'));
 }
+/** «ورّني وين نفّذت طلبي»: يضيء فراغات البند في المسقط ويخفت البقية، وينتقل إلى دورها. */
+function ledgerAttrs(x, cls) {
+  const has = (x.where || []).length;
+  return { class: cls + (has ? ' locatable' : ''), 'data-rule': x.id, tabindex: has ? '0' : null, role: has ? 'button' : null, title: has ? 'اضغط لترى موضعه في المسقط' : null,
+    onclick: has ? () => setFocus(x) : null, onkeydown: has ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFocus(x); } } : null };
+}
+function setFocus(x) {
+  document.querySelectorAll('#ledger li.on').forEach(li => li.classList.remove('on'));
+  if (!x || (focus && focus.id === x.id)) { focus = null; $('focusBar').hidden = true; paint(); return; }
+  const names = new Set(x.where.map(w => w.name)), lv = x.where.find(w => w.level === levelId)?.level || x.where[0].level;
+  focus = { id: x.id, names };
+  document.querySelector(`#ledger li[data-rule="${CSS.escape(x.id)}"]`)?.classList.add('on');
+  if (lv && lv !== levelId) { levelId = lv; view = null; goal = null; inertia = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === levelId)); }
+  const other = x.where.filter(w => w.level !== levelId).length;
+  $('focusText').textContent = `«${x.text}»: ${[...new Set(x.where.filter(w => w.level === levelId).map(w => w.name))].join('، ')}${other ? ` (وفي الدور الآخر ${other})` : ''}`;
+  $('focusBar').hidden = false; paint();
+  if (matchMedia('(max-width: 900px)').matches) $('planWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 function zoom(f) { if (!view) return; const { W, H } = size(); goal = zoomAround(goal || view, f, W / 2, H / 2); run(); }
 function paint() {
   const c = $('plan'); if (!c) return;
@@ -200,7 +267,7 @@ function paint() {
   renderPlan(ctx, {
     doc, levelId, view, W, H, analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
     flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true },
-    roomFill: zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
+    roomFill: focus ? rm => (focus.names.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') : zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
   });
 }
 
