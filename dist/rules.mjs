@@ -433,6 +433,12 @@ function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
     if (od.lawn) { const n = fx('lawn').length; out.push({ id: 'G-lawn', kind: 'pref', text: 'حديقة بعشب', ok: n > 0, why: n ? '' : 'لا توجد مساحة حرّة تكفي لمسطح عشبي.' }); }
     if (od.planters) { const n = fx('planter').length; out.push({ id: 'G-planters', kind: 'pref', text: 'أحواض زراعة', ok: n > 0, why: n ? '' : 'لا يوجد طول حرّ على السور لأحواض الزراعة.' }); }
   }
+  if (pr.elevator) {
+    const el = (doc.labels || []).filter(l => l.type === 'elevator'), lv = new Set(el.map(l => l.level)), cars = (doc.fixtures || []).filter(f => f.kind === 'elevator-car');
+    const ok = doc.levels.length >= 2 && lv.size === doc.levels.length && el.length === doc.levels.length;
+    const aligned = ok && el.every(l => Math.hypot(l.seed.x - el[0].seed.x, l.seed.y - el[0].seed.y) < .05);
+    out.push({ id: 'E-elevator', kind: 'pref', text: 'مصعد يخدم كل الأدوار', ok: ok && aligned && cars.length === el.length, why: doc.levels.length < 2 ? 'المصعد يلزمه دوران فأكثر؛ التصميم دور واحد.' : !el.length ? 'المصعد لم يتسع في الصالة على الدورين معًا.' : !ok ? 'بئر المصعد لا يمر بكل الأدوار.' : !aligned ? 'بئر المصعد غير متراصّ بين الدورين.' : 'كابينة المصعد ناقصة.' });
+  }
   if (pr.floors) { const n = doc.levels.length; out.push({ id: 'P-floors', kind: 'pref', text: pr.floors === 2 ? 'دوران' : 'دور واحد', ok: n === pr.floors, why: n === pr.floors ? '' : `التصميم ${n === 2 ? 'بدورين' : 'بدور واحد'}.` }); }
   if (pr.noCorridors) { const n = rooms.filter(r => r.name === 'ممر الغرف').length; out.push({ id: 'P-corr', kind: 'pref', text: 'بلا ممرات طويلة (الحركة عبر الصالة)', ok: n === 0, why: n ? 'يوجد ممر للغرف.' : '' }); }
   if (pr.allEnsuite) { const beds = sel('bedrooms').length, own = rooms.filter(r => /^حمام (الرئيسية|غرفة)/.test(r.name)).length; out.push({ id: 'P-ens', kind: 'pref', text: 'حمام خاص لكل غرفة نوم', ok: own >= beds, why: own >= beds ? '' : `${own} حمامات خاصة لـ${beds} غرف؛ زد عدد دورات المياه.` }); }

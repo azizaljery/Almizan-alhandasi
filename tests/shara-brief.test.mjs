@@ -150,11 +150,12 @@ test('دورات المياه تُحسب من البرنامج وتُعلَّل�
   assert.equal(ex.requirements.prefs.allEnsuite, undefined, 'العدد الصريح لا يُرفع صامتًا');
 });
 
-test('ما لا يُرسم يُقال بصدق: ملحق وثلاثة أدوار ومصعد وحوش، ولا يُحسب فراغًا', () => {
+test('ما لا يُرسم يُقال بصدق: ملحق وثلاثة أدوار وحوش (والمصعد صار مدعومًا)، ولا يُحسب فراغًا', () => {
   const b = buildBrief('فيلا ثلاث ادوار مع مسبح وملحق خارجي ومصعد وحوش كبير وكراج وغرفة سطح، مجلس وثلاث غرف');
   const u = b.unsupported.join(' ');
   assert.ok(!/المسبح[^.]*لا يُرسم/.test(u), 'المسبح صار يُرسم'); assert.equal(b.requirements.prefs.outdoor.pool, true);
-  for (const w of ['الملحق', 'ثلاثة أدوار', 'المصعد', 'الحوش', 'الكراج', 'السطح']) assert.ok(u.includes(w), w);
+  for (const w of ['الملحق', 'ثلاثة أدوار', 'الحوش', 'الكراج', 'السطح']) assert.ok(u.includes(w), w);
+  assert.ok(!u.includes('المصعد') && b.requirements.prefs.elevator === true, 'المصعد يُرسم ولا يُقال غير مدعوم');
   assert.equal(b.requirements.prefs.floors, 2); assert.equal(b.floors, 2);
   assert.ok(!b.program.some(r => ['pool', 'annex', 'elevator', 'yard', 'garage', 'roof'].includes(r.id)));
   assert.equal(b.counts.majlis, 1); assert.equal(b.counts.bedrooms, 3);

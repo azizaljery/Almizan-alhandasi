@@ -27,6 +27,17 @@ function gardenRows(doc) {
   return rows;
 }
 
+/** المصعد: عدد الآبار وعدد التوقفات (الأدوار التي يخدمها) من تسميات البئر؛ أما الجهاز نفسه وتركيبه فلا سعر ولا مواصفة معتمدة له هنا. */
+function elevatorRows(doc) {
+  const lab = (doc.labels || []).filter(l => l.type === 'elevator'); if (!lab.length) return [];
+  const stops = new Set(lab.map(l => l.level)).size, shafts = Math.round(lab.length / Math.max(1, stops));
+  return [
+    { id: 'elevators', label: 'المصاعد (آبار)', value: shafts, unit: 'عدد', grade: 'measured', basis: 'بئر مسمّى «مصعد» متراصّ على الأدوار في الرسم' },
+    { id: 'elevatorStops', label: 'توقفات المصعد', value: stops, unit: 'عدد', grade: 'measured', basis: 'عدد الأدوار التي يوجد فيها البئر' },
+    { id: 'elevatorUnit', label: 'جهاز المصعد وتركيبه', value: null, unit: '', grade: 'unavailable', basis: 'يحتاج مواصفة ومورّدًا معتمدًا؛ أبعاد البئر في الرسم افتراض تصميمي غير متحقق' },
+  ];
+}
+
 export function computeDocQuantities(doc) {
   const levels = [];
   for (const lvl of doc.levels) {
@@ -57,6 +68,7 @@ export function computeDocQuantities(doc) {
       { id: 'concreteSlabs', label: 'خرسانة البلاطات (تحجيم أولي)', value: structure.totals.concrete.slabs, unit: 'م³', grade: 'estimated', basis: 'سماكة أسوأ لوح × مساحة محيط الدور' },
     ] : []),
     ...gardenRows(doc),
+    ...elevatorRows(doc),
     { id: 'rebar', label: 'حديد التسليح', value: null, unit: '', grade: 'unavailable', basis: 'يحتاج تصميمًا إنشائيًا تفصيليًا (قص وانحناء وتفاصيل) غير موجود في الرسم' },
     { id: 'mep', label: 'الكهرباء والسباكة والتكييف', value: null, unit: '', grade: 'unavailable', basis: 'لا توجد دوائر ولا نقاط في الرسم' },
     { id: 'cost', label: 'التكلفة', value: null, unit: '', grade: 'unavailable', basis: 'لا توجد أسعار معتمدة في النظام؛ لا يُقدَّر رقم بلا مصدر' },

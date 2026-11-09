@@ -229,6 +229,7 @@ export function fixtureSymbol(f) {
     case 'dining-table': for (const sx of [-.3, .3]) for (const sy of [-1, 1]) sym.rects.push(rectL(sx * w - .2, sy * (d / 2 + .22) - .2, sx * w + .2, sy * (d / 2 + .22) + .2)); break;
     case 'car': L(-w / 2 + .1, d * .28, w / 2 - .1, d * .28); L(-w / 2 + .1, -d * .18, w / 2 - .1, -d * .18); L(-w / 2 + .1, d * .28, -w / 2 + .1, -d * .18); L(w / 2 - .1, d * .28, w / 2 - .1, -d * .18); break;
     case 'tree': case 'plant': sym.ellipses.push({ c: loc(0, 0), rx: Math.min(w, d) * .5, ry: Math.min(w, d) * .5, rot: 0 }); sym.outline = null; break;
+    case 'elevator-car': sym.rects.push(rectL(-w / 2 + .06, -d / 2 + .06, w / 2 - .06, d / 2 - .06)); L(-w / 2 + .06, -d / 2 + .06, w / 2 - .06, d / 2 - .06); L(-w / 2 + .06, d / 2 - .06, w / 2 - .06, -d / 2 + .06); L(-w * .31, d / 2, w * .31, d / 2); break;
     case 'pool': {
       const cp = Math.min(.35, Math.min(w, d) * .08); sym.rects.push(rectL(-w / 2 + cp, -d / 2 + cp, w / 2 - cp, d / 2 - cp));
       for (let k = 1; k <= 3; k++) { const y = -d / 2 + cp + (d - 2 * cp) * k / 4; L(-w / 2 + cp + .3, y, w / 2 - cp - .3, y); } break; }

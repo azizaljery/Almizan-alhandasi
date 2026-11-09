@@ -12,6 +12,7 @@ import { analyzeWalls } from './draw/topology.mjs';
 import { footprint, validatePlot } from './planner.mjs';
 import { planGarden } from './garden-plan.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
+import { planElevator } from './elevator-plan.mjs';
 import { reviewDoc, swingSectors, sectorPoints, fixtureRect, penetration } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { rulePenalty, verifyRequest, blocksFor } from './rules.mjs';
@@ -1281,6 +1282,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   if (shapeFallback && shapeExhausted) picked[0]?.notes.push(`عُرضت عليك كل توزيعات «${MODE_AR[wantMode] || wantMode}» المختلفة لهذه الأرض؛ هذا بديل بنمط آخر.`);
   else if (shapeFallback) picked[0]?.notes.push(wantMode === 'L' ? lShapeNote(program, W, D, plot, entry) : `تعذّر توزيع «${MODE_AR[wantMode] || wantMode}» على هذه الأرض وهذا البرنامج؛ هذه أقرب البدائل الأخرى.`);
   if (diff.relaxed) picked[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
+  applyElevators(picked, requirements);
   applyGardens(picked, requirements);
   return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
 }
@@ -1396,8 +1398,30 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const picked2 = blend ? designs.slice(0, keep) : diversify(designs, keep);
   if (visRelaxed) picked2[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا.');
   if (diff2.relaxed) picked2[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
+  applyElevators(picked2, requirements);
   applyGardens(picked2, requirements);
   return { designs: picked2, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2 };
+}
+/**
+ * المصعد (requirements.prefs.elevator): بئر متراصّ في الصالة على الدورين بعد اختيار البدائل (فلا يؤثر في ترتيبها).
+ * يُقبل الموضع إن سلم checkDoc ولم تزد ملاحظات المراجعة عمّا كانت عليه، عدا إرشادات عرض/مساحة الصالة (يأكلها البئر بطبيعته).
+ */
+const ELEV_TOLERATED = new Set(['MIN_WIDTH', 'MIN_AREA']);
+function applyElevators(picked, requirements) {
+  if (!requirements?.prefs?.elevator) return;
+  const codes = doc => { const m = {}; for (const i of reviewDoc(doc)) if (!ELEV_TOLERATED.has(i.code)) m[i.code] = (m[i.code] || 0) + 1; return m; };
+  for (const d of picked) {
+    try {
+      const base = codes(d.doc);
+      const { doc, report } = planElevator(d.doc, { verify: c => { if (!checkDoc(c).ok) return false; const a = codes(c); return Object.keys(a).every(k => a[k] <= (base[k] || 0)); } });
+      d.doc = doc; d.elevator = report;
+      if (Array.isArray(d.ledger)) {
+        d.ledger = [...d.ledger.filter(x => !/^E-/.test(x.id)), ...verifyRequest(doc, { prefs: { elevator: true } }, { entry: 's' }).filter(x => /^E-/.test(x.id))];
+        d.fails = d.ledger.filter(x => !x.ok).length;
+      }
+      if (Array.isArray(d.notes)) d.notes.push(...report.notes);
+    } catch (e) { if (Array.isArray(d.notes)) d.notes.push('تعذّر تخطيط المصعد لهذا البديل: ' + e.message); }
+  }
 }
 /** مسبح/شلال/عشب/أحواض بحسب requirements.prefs.outdoor؛ بعد اختيار البدائل فلا تؤثر في ترتيبها ولا في بصمتها. */
 function applyGardens(picked, requirements) {

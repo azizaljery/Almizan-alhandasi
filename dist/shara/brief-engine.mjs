@@ -154,6 +154,9 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
     if (floors === 2) notes.push('طلبتَ بلا درج وبدورين معًا، وهذا لا يجتمع: الدور الثاني لا يُوصَل إلا بدرج. سأبقي الدرج، ويمكنك جعل البيت دورًا واحدًا إن كان المقصود ألا يصعد أحد، وإلا وضعتُ غرفة الوالدين في الدور الأرضي.');
     else { floors = 1; notes.push('بلا درج: صمّمت البيت دورًا واحدًا.'); }
   }
+  // المصعد يخدم دورين فأكثر: بدور واحد صريح = ملاحظة صادقة، وبلا ذكر للأدوار = سؤال
+  const liftWanted = !!base0.prefs.elevator, liftOneFloor = liftWanted && floors === 1;
+  if (liftOneFloor && base0.prefs.floors === 1) notes.push('طلبتَ مصعدًا ودورًا واحدًا معًا: المصعد يربط دورين فأكثر فلن يُرسم في دور واحد. اجعل البيت دورين أو اترك المصعد.');
   if (THREE_FLOORS.test(t)) { unsupported.push('ثلاثة أدوار فأكثر غير مدعومة في المولّد حاليًا؛ سأصمم دورين (أرضي وأول) وما زاد يُضاف لاحقًا في المرسم.'); floors = 2; }
 
   // ---- 6) التعديلات اليدوية على الجدول (تبقى على الصفوف بعد كل إعادة بناء)
@@ -251,6 +254,7 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   const OQ = [];
   if (outdoor.pool && !poolSize) OQ.push({ id: 'pool_size', text: 'المسبح عائلي (نحو 3.5 × 7 م) أم صغير (3 × 5 م)؟ وإن كان له مقاس محدد فاكتبه مثل «مسبح 4 × 8».', reason: 'أسأل لأن المسبح يأخذ من الحوش الخلفي، ومقاسه يقرر هل يتسع مع الشلال والعشب في أرضك.' });
   if ((outdoor.lawn || outdoor.pool) && !outdoor.waterfall && !skip.has('add_waterfall')) OQ.push({ id: 'add_waterfall', text: outdoor.pool ? 'تبي شلالًا بجانب المسبح؟' : 'تبي مسبحًا أو شلالًا ضمن الحديقة؟', reason: 'أسأل لأنهما يُخطَّطان مع الحوش من البداية، وإضافتهما بعد التوليد تغيّر توزيع الحديقة.' });
+  if (liftOneFloor && !base0.prefs.floors && !skip.has('elevator_floors')) OQ.push({ id: 'elevator_floors', text: 'المصعد يخدم دورين فأكثر؛ تبي البيت دورين مع المصعد، أم دور واحد بلا مصعد؟', reason: 'أسأل لأن المصعد لا معنى له في دور واحد، وعدد الأدوار يغيّر توزيع البيت كله.', options: [{ id: 'two', label: 'دورين مع المصعد', text: 'البيت دورين' }, { id: 'one', label: 'دور واحد بلا مصعد', text: 'دور واحد ولا ابي مصعد' }] });
   Q.splice(Q.length && Q[0].id === 'bedrooms' ? 1 : 0, 0, ...OQ);
   if (outdoor.pool && land?.width && land?.length && Math.min(land.width, land.length) < 14) notes.push('الأرض ضيقة نسبيًا: قد لا يتسع المسبح بحده الأدنى (2.5 × 4.5 م) بعد المبنى والارتدادات؛ سأخبرك بصدق إن لم يتسع بدل رسمه قسرًا.');
   for (const q of Q) if (!skip.has(q.id) && questions.length < 3) questions.push(q);

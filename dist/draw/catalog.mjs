@@ -18,6 +18,7 @@ export const ROOM_TYPES = Object.freeze({
   stairs:    { ar: 'سلم',           color: '#ddd6c8', floor: 'tile',   wet: false, habitable: false, minArea: 4,   minWidth: 1.0, windowRequired: false },
   balcony:   { ar: 'شرفة',          color: '#e4ebe0', floor: 'tile',   wet: false, habitable: false, minArea: 3,   minWidth: 1.2, windowRequired: false, open: true },
   courtyard: { ar: 'فناء داخلي',     color: '#d7e3cf', floor: 'grass',  wet: false, habitable: false, minArea: 6,   minWidth: 2.0, windowRequired: false, open: true },
+  elevator:  { ar: 'مصعد',          color: '#d5d9dc', floor: 'concrete', wet: false, habitable: false, minArea: 1.5, minWidth: 1.1, windowRequired: false },
   garage:    { ar: 'مواقف سيارات',   color: '#dcdcdc', floor: 'concrete', wet: false, habitable: false, minArea: 15, minWidth: 2.7, windowRequired: false },
   other:     { ar: 'غير محدد',       color: '#f1ede4', floor: 'tile',   wet: false, habitable: false, minArea: 0,   minWidth: 0,   windowRequired: false },
 });
@@ -62,6 +63,7 @@ export const FIXTURES = Object.freeze({
   'washing-machine': { ar: 'غسالة', w: .6,  d: .6,  h: .85, rooms: ['laundry', 'bath', 'kitchen'] },
   plant:        { ar: 'نبتة',       w: .4,  d: .4,  h: 1.1, rooms: [] },
   rug:          { ar: 'سجادة',      w: 2.4, d: 1.7, h: .02, rooms: [] },
+  'elevator-car': { ar: 'كابينة مصعد', w: 1.1, d: 1.4, h: 2.2, rooms: ['elevator'] },
   car:          { ar: 'سيارة',      w: 1.9, d: 4.6, h: 1.5, rooms: ['garage'] },
   tree:         { ar: 'شجرة',       w: 2.0, d: 2.0, h: 3.5, rooms: ['courtyard'] },
   pool:         { ar: 'مسبح',       w: 4.0, d: 8.0, h: 1.4, rooms: [], outdoor: true },
@@ -73,6 +75,12 @@ export const FIXTURES = Object.freeze({
 export const OUTDOOR_KINDS = Object.freeze(['pool', 'waterfall', 'lawn', 'planter', 'tree']);
 export const isOutdoorKind = kind => OUTDOOR_KINDS.includes(kind);
 export const fixtureName = kind => FIXTURES[kind]?.ar || kind;
+
+/**
+ * المصعد: أبعاد افتراضية تصميمية. لم أجد في مصدر موثق (كود البناء السعودي SBC 201/1101 أو دليل رخصة بلدي) رقمًا قاطعًا لبئر مصعد الفيلا،
+ * فكل القيم أدناه «غير متحقق» ويجب أن يعتمدها مورّد المصعد والمهندس المسؤول قبل التنفيذ (verified:false تظهر في ملاحظات التصميم).
+ */
+export const ELEVATOR_SPEC = Object.freeze({ shaftW: 1.7, shaftD: 1.9, wall: .2, cabW: 1.1, cabD: 1.4, cabH: 2.2, doorW: .9, doorH: 2.1, landing: 1.2, verified: false });
 
 export const STAIR_KINDS = Object.freeze({ straight: 'سلم مستقيم', L: 'سلم على شكل L', U: 'سلم على شكل U' });
 export const WALL_KINDS = Object.freeze({ wall: 'جدار', parapet: 'حاجز / سور سطح', fence: 'سور' });

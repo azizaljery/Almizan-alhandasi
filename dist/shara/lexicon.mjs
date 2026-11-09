@@ -56,7 +56,7 @@ export const SPACES = Object.freeze([
   { id: 'garden', label: 'حديقة خارجية', re: 'حديقه(?! داخليه)|حدائق|جنينه|نجيله|عشب|مسطح اخضر|مسطحات خضراء|زراعه|احواض زراعه|مزروعات', dual: null, unsupported: null, outdoor: 'garden', area: 0, floor: 'ground', zone: 'outside' },
   { id: 'yard', label: 'حوش / حديقة', re: 'حوش(?! داخلي)|فناء خارجي|ساحه', dual: null, unsupported: 'الحوش: ما يزيد عن المبنى يبقى ساحة خارجية في الارتدادات؛ المسبح والشلال والحديقة تُوزَّع فيه إن طلبتها.', area: 0, floor: 'ground', zone: 'outside' },
   { id: 'garage', label: 'مواقف / كراج', re: 'كراج|قراج|جراج|موقف|مواقف|مظله(?: سيارات)?|مظلات', dual: null, unsupported: 'مواقف السيارات (الكراج): تبقى في الارتداد الأمامي ولا تُرسم في هذا الإصدار.', area: 0, floor: 'ground', zone: 'outside' },
-  { id: 'elevator', label: 'مصعد', re: 'مصعد|اسانسير|ليفت', dual: null, unsupported: 'المصعد: غير مدعوم في هذا الإصدار.', area: 0, floor: 'any', zone: 'service' },
+  { id: 'elevator', label: 'مصعد', re: 'مصعد|مصاعد|اسانسير|اسنسير|ليفت', dual: null, unsupported: null, lift: true, area: 0, floor: 'any', zone: 'service' },
   { id: 'basement', label: 'قبو', re: 'قبو|بدروم', dual: null, unsupported: 'القبو: غير مدعوم في هذا الإصدار.', area: 0, floor: 'any', zone: 'service' },
   { id: 'roof', label: 'غرفة السطح', re: 'سطح|روف|غرفه (?:ال)?سطح|ملحق (?:ال)?سطح', dual: null, unsupported: 'السطح وغرفة السطح: لا تُرسم في هذا الإصدار.', area: 0, floor: 'any', zone: 'outside' },
   { id: 'mashab', label: 'مشب', re: 'مشب|مشبين|غرفه (?:ال)?مشب', dual: null, unsupported: 'المشب (مجلس الشتاء بموقده): لا يُرسم فراغًا مستقلًا في هذا الإصدار؛ يمكن إدراجه في المجلس أو إضافته في المرسم.', area: 0, floor: 'ground', zone: 'guest' },

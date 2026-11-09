@@ -180,7 +180,8 @@ test('الفهم: تطبيع عربي وأرقام هندية وصيغ «٣ غر
   const r2 = extractRequirements('مجلس ومكتب ومستودع وغسيل ومطبخ مغلق', {});
   assert.ok(r2.extras.office && r2.extras.storage && r2.extras.laundry && r2.prefs.openKitchen === false);
   assert.deepEqual(extractRequirements('', {}).understood, [], 'بلا كلام لا شيء يُفترض');
-  assert.ok(extractRequirements('ابي مصعد وقبو', {}).unsupported.length === 2);
+  const lq = extractRequirements('ابي مصعد وقبو', {}); // المصعد صار مدعومًا (elevator-plan)، والقبو وحده غير مدعوم
+  assert.ok(lq.prefs.elevator === true && lq.unsupported.length === 1 && /القبو/.test(lq.unsupported[0]));
 });
 
 test('الحدود الدنيا في الإعدادات التصميمية ليست أرقامًا نظامية مدّعاة', () => {

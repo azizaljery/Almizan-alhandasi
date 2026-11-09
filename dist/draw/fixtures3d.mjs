@@ -155,7 +155,17 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     'dining-table': diningTable, chair: () => chair(0, 0, 0, w, d, h),
     'kitchen-run': kitchenRun, fridge, stove, wc, basin, shower, bathtub, 'washing-machine': washingMachine,
     plant, rug, car, tree, palm, shrub, pool, waterfall, lawn, planter,
+    'elevator-car': elevatorCar,
   };
+
+  // كابينة المصعد: صندوق معدني، ولوح الباب المنزلق على الوجه الأمامي (+z)، وسقف داكن
+  function elevatorCar() {
+    box('steel', w, h, d, 0, 0, 0);
+    box('blackMetal', w - .04, .06, d - .04, 0, h - .06, 0);
+    box('lacquerGrey', w * .62, h * .88, .02, 0, .04, d / 2 + .004);
+    box('blackMetal', .02, h * .88, .03, 0, .04, d / 2 + .012);
+    box('screen', .12, .22, .02, w / 2 + .004, h * .55, d / 2 - .1);
+  }
 
   function bed(bw, bd, dbl) {
     const frameH = .26, matH = .24;

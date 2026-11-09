@@ -36,7 +36,7 @@ export const RULES = Object.freeze({
   NO_ENTRY: { severity: 'warning' }, ENTRY_UNFLAGGED: { severity: 'info' }, UNREACHABLE_ROOM: { severity: 'warning' },
   NO_WINDOW: { severity: 'warning' }, WINDOW_RATIO: { severity: 'info' }, MIN_AREA: { severity: 'warning' }, MIN_WIDTH: { severity: 'warning' },
   CORRIDOR_NARROW: { severity: 'warning' }, BATH_PRIVACY: { severity: 'warning' }, BEDROOM_FROM_ENTRY: { severity: 'info' },
-  SWING_BLOCKED: { severity: 'warning' }, FIXTURE_OVERLAP: { severity: 'warning' }, FIXTURE_OUTSIDE: { severity: 'warning' }, GARDEN_PLACEMENT: { severity: 'warning' },
+  SWING_BLOCKED: { severity: 'warning' }, FIXTURE_OVERLAP: { severity: 'warning' }, FIXTURE_OUTSIDE: { severity: 'warning' }, GARDEN_PLACEMENT: { severity: 'warning' }, ELEVATOR_ALIGN: { severity: 'warning' },
   STAIR_NARROW: { severity: 'warning' }, STAIR_STEPS: { severity: 'info' }, EXTERIOR_THIN: { severity: 'info' }, OPENING_NEAR_END: { severity: 'info' },
 });
 
@@ -355,6 +355,13 @@ export function reviewDoc(doc, options = {}) {
         push('OPENING_NEAR_END', `${OPENING_KINDS[op.kind]?.ar || 'فتحة'} ${op.id} قريبة جدًا (${n2(Math.max(0, Math.min(start, end)) * 100)} سم) من طرف جدارها؛ المسافة الإرشادية ${n2(c * 100)} سم.`, [op.id], Lw - op.w >= 2 * c ? { label: 'تحريكها بعيدًا عن الطرف', commands: [{ type: 'update', id: op.id, patch: { at: Math.round(newAt * 1000) / 1000 } }] } : null);
       }
     }
+  }
+  // المصعد: بئر واحد متراصّ يمر بكل الأدوار
+  const lifts = (doc.labels || []).filter(l => l.type === 'elevator');
+  if (lifts.length && doc.levels.length > 1) {
+    const lv = new Set(lifts.map(l => l.level)), miss = doc.levels.filter(l => !lv.has(l.id)), far = lifts.filter(l => Math.hypot(l.seed.x - lifts[0].seed.x, l.seed.y - lifts[0].seed.y) > .05);
+    if (miss.length) push('ELEVATOR_ALIGN', `المصعد لا يصل إلى ${miss.map(l => `«${l.name}»`).join('، ')}؛ بئره يجب أن يمر بكل الأدوار.`, lifts.map(l => l.id));
+    else if (far.length) push('ELEVATOR_ALIGN', 'بئر المصعد غير متراصّ بين الأدوار؛ يجب أن يقع في الموضع نفسه على كل دور.', lifts.map(l => l.id));
   }
   const order = { error: 0, warning: 1, info: 2 };
   return issues.sort((p, q) => order[p.severity] - order[q.severity]);
