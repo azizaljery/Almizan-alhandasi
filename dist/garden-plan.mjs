@@ -3,12 +3,14 @@
 // نقي: لا DOM. كل ما لا يتسع يُعلَن في report.notes بدل أن يُرسم قسرًا.
 import { applyCommand } from './draw/doc.mjs';
 import { fixtureRect } from './draw/review.mjs';
+import { CARPORT_STALL } from './draw/catalog.mjs';
 
 const ENTRY_VEC = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
 const GAP_BUILDING = 1.0;   // م بين المبنى وأقرب عنصر حديقة (ممر + رصيف)
 const GAP_BOUNDARY = .5;    // م من سور الأرض
 export const POOL_SIZE = Object.freeze({ w: 3.5, d: 7.0, minShort: 2.5, minLong: 4.5, depth: 1.4 });
 const r2 = v => Math.round(v * 100) / 100;
+const GARDEN_KEYS = ['carport', 'pool', 'waterfall', 'pergola', 'bbq', 'fountain', 'lawn', 'planters'];
 
 const bboxOf = pts => ({ x0: Math.min(...pts.map(p => p.x)), x1: Math.max(...pts.map(p => p.x)), y0: Math.min(...pts.map(p => p.y)), y1: Math.max(...pts.map(p => p.y)) });
 const rectsOverlap = (a, b, m = 0) => a.x0 < b.x1 + m && a.x1 > b.x0 - m && a.y0 < b.y1 + m && a.y1 > b.y0 - m;
@@ -55,10 +57,10 @@ function findSpot(strip, w, d, taken, { prefer = null, margin = .3, accept = nul
  */
 export function planGarden(doc0, want = {}) {
   const report = { placed: [], notes: [], missing: [] };
-  if (!want || !(want.pool || want.waterfall || want.lawn || want.planters)) return { doc: doc0, report };
+  if (!want || !GARDEN_KEYS.some(k => want[k])) return { doc: doc0, report };
   const { strips, building } = freeStrips(doc0);
   const L0 = doc0.levels[0]?.id;
-  if (!strips.length || !building) { for (const k of ['pool', 'waterfall', 'lawn', 'planters']) if (want[k]) report.missing.push(k); report.notes.push('لا يوجد حوش حرّ حول المبنى يتسع لعناصر الحديقة المطلوبة.'); return { doc: doc0, report }; }
+  if (!strips.length || !building) { for (const k of GARDEN_KEYS) if (want[k]) report.missing.push(k); report.notes.push('لا يوجد حوش حرّ حول المبنى يتسع لعناصر الحديقة المطلوبة.'); return { doc: doc0, report }; }
   let doc = doc0;
   const taken = doc.fixtures.filter(f => f.level === L0 && f.kind !== 'tree').map(boxOf);
   const put = (kind, x, y, w, d, rot = 0) => {
@@ -66,6 +68,28 @@ export function planGarden(doc0, want = {}) {
     taken.push({ x0: x - w / 2, x1: x + w / 2, y0: y - d / 2, y1: y + d / 2 });
     report.placed.push({ kind, id: r.ids[0], x: r2(x), y: r2(y), w: r2(w), d: r2(d), rot }); return r.ids[0];
   };
+  // مظلة سيارات: في الحوش الأمامي أقرب ما يمكن إلى الشارع، والمحور الطويل (طول الموقف) نحو الشارع
+  if (want.carport) {
+    const wantN = Math.min(4, Math.max(1, Math.round(Number(want.carport)) || 2)), ev = ENTRY_VEC[doc0.entry] || ENTRY_VEC.s;
+    const street = { x: (building.x0 + building.x1) / 2 + ev.x * 500, y: (building.y0 + building.y1) / 2 + ev.y * 500 };
+    const rotPref = Math.abs(ev.y) > .5 ? 0 : Math.PI / 2;
+    let placed = 0;
+    for (let n = wantN; n >= 1 && !placed; n--) {
+      const rank = { front: 0, side: 1, rear: 2 };
+      for (const s of [...strips].sort((a, b) => rank[a.role] - rank[b.role])) {
+        for (const rot of [rotPref, rotPref ? 0 : Math.PI / 2]) {
+          const quarter = rot !== 0, w = quarter ? CARPORT_STALL.d : n * CARPORT_STALL.w, d = quarter ? n * CARPORT_STALL.w : CARPORT_STALL.d;
+          const spot = findSpot(s, w, d, taken, { prefer: street }); if (!spot) continue;
+          put('carport', spot.x, spot.y, w, d, rot ? -Math.PI / 2 : 0); placed = n;
+          if (s.role !== 'front') report.notes.push('مظلة السيارات في الحوش الجانبي أو الخلفي لأن الأمامي لا يتسع لها؛ تأكد من مسار الدخول من الشارع.');
+          break;
+        }
+        if (placed) break;
+      }
+    }
+    if (!placed) { report.missing.push('carport'); report.notes.push(`لا تتسع مظلة سيارات (${CARPORT_STALL.w} × ${CARPORT_STALL.d} م للسيارة) في أي حوش حرّ حول المبنى.`); }
+    else if (placed < wantN) report.notes.push(`المظلة تتسع لـ${placed} من ${wantN} سيارات فقط في الحوش الحرّ.`);
+  }
   let poolRect = null;
   if (want.pool) {
     const wantW = want.poolW || POOL_SIZE.w, wantD = want.poolD || POOL_SIZE.d;
@@ -101,6 +125,39 @@ export function planGarden(doc0, want = {}) {
       put('waterfall', spot.x, spot.y, w, d, rot); done = true; break search;
     }
     if (!done) { report.missing.push('waterfall'); report.notes.push('لم أجد موضعًا حرًا يتسع للشلال (2.4 × 1.4 م) بعد المسبح.'); }
+  }
+  // برجولة (جلسة خارجية): قرب المسبح إن وُجد وإلا في أوسع حوش خلفي أو جانبي
+  let pergolaRect = null;
+  const sheltered = strips.filter((s, _, a) => s.role !== 'front' || a.length === 1);
+  if (want.pergola) {
+    const anchor = poolRect ? { x: poolRect.cx, y: poolRect.cy } : null, PG = { w: 3.5, d: 3.5 };
+    let done = false;
+    for (const s of (poolRect ? [poolRect.strip, ...sheltered.filter(q => q !== poolRect.strip)] : sheltered)) {
+      const spot = findSpot(s, PG.w, PG.d, taken, { prefer: anchor, margin: .4 }); if (!spot) continue;
+      put('pergola', spot.x, spot.y, PG.w, PG.d); pergolaRect = { cx: spot.x, cy: spot.y, strip: s }; done = true; break;
+    }
+    if (!done) { report.missing.push('pergola'); report.notes.push('لا يتسع حوش حرّ لبرجولة 3.5 × 3.5 م بعد العناصر الأخرى.'); }
+  }
+  // ركن شواء: بجوار البرجولة وملاصق لسور الأرض إن أمكن
+  if (want.bbq) {
+    const BQ = { w: 1.4, d: .7 }, anchor = pergolaRect ? { x: pergolaRect.cx, y: pergolaRect.cy } : null;
+    let done = false;
+    for (const s of (pergolaRect ? [pergolaRect.strip, ...sheltered.filter(q => q !== pergolaRect.strip)] : sheltered)) {
+      const near = b => Math.min(b.x0 - s.x0, s.x1 - b.x1, b.y0 - s.y0, s.y1 - b.y1) <= 1.0;
+      const spot = findSpot(s, BQ.w, BQ.d, taken, { prefer: anchor, margin: .15, accept: near }); if (!spot) continue;
+      put('bbq', spot.x, spot.y, BQ.w, BQ.d); done = true; break;
+    }
+    if (!done) { report.missing.push('bbq'); report.notes.push('لا يتسع حوش حرّ لركن شواء 1.4 × 0.7 م بجوار السور.'); }
+  }
+  // نافورة: عنصر واجهة في الحوش الأمامي ثم أي حوش حرّ
+  if (want.fountain) {
+    const FT = { w: 1.6, d: 1.6 }, rank = { front: 0, side: 1, rear: 2 };
+    let done = false;
+    for (const s of [...strips].sort((a, b) => rank[a.role] - rank[b.role])) {
+      const spot = findSpot(s, FT.w, FT.d, taken, { margin: .6 }); if (!spot) continue;
+      put('fountain', spot.x, spot.y, FT.w, FT.d); done = true; break;
+    }
+    if (!done) { report.missing.push('fountain'); report.notes.push('لا يتسع حوش حرّ لنافورة 1.6 × 1.6 م.'); }
   }
   if (want.planters) {
     let n = 0;

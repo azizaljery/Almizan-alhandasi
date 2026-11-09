@@ -145,12 +145,16 @@ export function buildSite(THREE, doc, lib, ctx) {
     B.addObject(grp, mat => lib.reverse(mat), m); placed.push({ kind, p });
   };
   // عناصر الحديقة من المستند: مسبح، شلال، عشب، أحواض (على أرض الحوش)
-  const gardenBoxes = [];
+  const gardenBoxes = []; let carportCars = 0;
   for (const fx of (doc.fixtures || [])) {
     const def = FIXTURES[fx.kind]; if (!def?.outdoor || fx.kind === 'tree') continue;
     const dims = { w: fx.w ?? def.w, d: fx.d ?? def.d, h: fx.h ?? def.h, seed: fx.x * 3.1 + fx.y };
     place(fx.kind, { x: fx.x, y: fx.y }, dims, fx.rot || 0);
     gardenBoxes.push({ x: fx.x, y: fx.y, hw: dims.w / 2, hd: dims.d / 2, rot: fx.rot || 0, kind: fx.kind });
+    if (fx.kind === 'carport') { // سيارة تحت كل موقف من المظلة
+      const n = Math.max(1, Math.round(dims.w / 2.7)), rot = fx.rot || 0, c = Math.cos(rot), sn = Math.sin(rot);
+      for (let k = 0; k < n; k++) { const lx = -dims.w / 2 + (k + .5) * dims.w / n; place('car', { x: fx.x + lx * c, y: fx.y + lx * sn }, { w: 1.9, d: 4.6, h: 1.5 }, rot); carportCars++; }
+    }
     out.garden = (out.garden || []).concat(fx.kind);
   }
   const inset = plot ? insetPolygon(plot, .9) : null;
@@ -174,7 +178,7 @@ export function buildSite(THREE, doc, lib, ctx) {
     }
   }
   // parked car: free rectangle nearest to the vehicle gate (or the pedestrian gate)
-  if (!ctx.skipCar && plot) {
+  if (!ctx.skipCar && plot && !carportCars) {
     const anchor = (out.gates[1] || out.gates[0])?.pos || { x: cx, y: cy };
     const cars = [];
     for (let x = bb.x0 + 1; x <= bb.x1 - 1; x += .4) for (let y = bb.y0 + 1; y <= bb.y1 - 1; y += .4) for (const heading of [0, Math.PI / 2]) {

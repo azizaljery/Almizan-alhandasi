@@ -5,7 +5,7 @@
 import { extractRequirements, withAi, normalizeAr } from '../requirements.mjs';
 import { mergeRules } from '../rules.mjs';
 import { normalizeDiscovery, AVOIDS } from '../client-brief.mjs';
-import { findSpaces, SPACE, SPACES } from './lexicon.mjs';
+import { findSpaces, SPACE, SPACES, toNumber } from './lexicon.mjs';
 import { parseFamily, inferFromFamily } from './family.mjs';
 import { applicableCustoms, CUSTOM } from './customs.mjs';
 
@@ -218,11 +218,20 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   // مسبح داخلي أو على السطح لا يُرسم: يُقال بصدق ولا يُحوَّل إلى مسبح في الحوش دون علم العميل
   if (outdoor.pool && /مسبح[^،.]{0,12}(?:داخل|مغلق|مسقوف|تحت الارض|بدروم)|(?:داخل|مغلق|مسقوف)[^،.]{0,8}مسبح/.test(t)) { delete outdoor.pool; unsupported.push('المسبح الداخلي أو المغلق: لا يُرسم في هذا الإصدار؛ أرسم المسبح في الحوش الخارجي فقط، فإن أردته خارجيًا قل «مسبح خارجي».'); }
   else if (outdoor.pool && /مسبح[^،.]{0,12}(?:سطح|روف|اعلي|فوق)|(?:على|علي|فوق) (?:ال)?سطح[^،.]{0,12}مسبح/.test(t)) { delete outdoor.pool; unsupported.push('المسبح على السطح: لا يُرسم في هذا الإصدار (يحتاج حسابًا إنشائيًا للأحمال)؛ أرسمه في الحوش إن أردت.'); }
+  // عدد السيارات للمظلة: «سيارتين/ثلاث سيارات/٣ سيارات»؛ بلا ذكر عدد يُفترض 2 ويُسأل العميل
+  let carsSaid = false;
+  if (outdoor.carport) {
+    const cm = /(?:^|[^\u0620-\u064A])[لب]?(سيارتين|سيارتان|(\d+|واحده|وحده|واحد|ثلاث|ثلاثه|اربع|اربعه|خمس|خمسه)\s*سيارات|سياره(?: واحده)?)(?![\u0620-\u064A])/.exec(t);
+    let n = 2;
+    if (cm) { carsSaid = true; n = /سيارتين|سيارتان/.test(cm[1]) ? 2 : cm[2] ? (toNumber(cm[2]) ?? 2) : 1; }
+    outdoor.carport = Math.min(4, Math.max(1, n));
+    if (/(?:كراج|قراج|جراج)[^،.]{0,12}(?:مغلق|مسقوف|مقفل|بباب|داخلي)|(?:مغلق|مقفل)[^،.]{0,8}(?:كراج|قراج|جراج)/.test(t)) unsupported.push('الكراج المغلق بباب: لا يُرسم في هذا الإصدار؛ أرسم مظلة سيارات مفتوحة بدلًا منه.');
+  }
   const poolSize = outdoor.pool ? parsePoolSize(t) : null;
   if (poolSize) Object.assign(outdoor, poolSize);
   if (Object.keys(outdoor).length) {
     req.prefs.outdoor = outdoor;
-    const parts = [outdoor.pool && (poolSize?.poolW ? `مسبح ${poolSize.poolW} × ${poolSize.poolD} م` : 'مسبح'), outdoor.waterfall && 'شلال', outdoor.lawn && 'حديقة بعشب وأحواض زراعة'].filter(Boolean);
+    const parts = [outdoor.pool && (poolSize?.poolW ? `مسبح ${poolSize.poolW} × ${poolSize.poolD} م` : 'مسبح'), outdoor.waterfall && 'شلال', outdoor.lawn && 'حديقة بعشب وأحواض زراعة', outdoor.carport && `مظلة سيارات لـ${outdoor.carport === 1 ? 'سيارة' : outdoor.carport === 2 ? 'سيارتين' : outdoor.carport + ' سيارات'}`, outdoor.pergola && 'برجولة', outdoor.bbq && 'ركن شواء', outdoor.fountain && 'نافورة'].filter(Boolean);
     understood.push(`في الحوش الخارجي: ${parts.join(' + ')} (تُخطَّط خلف الفيلا أو على جانبيها بحسب ما تتسع له الأرض)`); req.understood = understood;
   }
   req.unsupported = [...new Set([...(req.unsupported || []), ...unsupported])];
@@ -255,6 +264,7 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   if (outdoor.pool && !poolSize) OQ.push({ id: 'pool_size', text: 'المسبح عائلي (نحو 3.5 × 7 م) أم صغير (3 × 5 م)؟ وإن كان له مقاس محدد فاكتبه مثل «مسبح 4 × 8».', reason: 'أسأل لأن المسبح يأخذ من الحوش الخلفي، ومقاسه يقرر هل يتسع مع الشلال والعشب في أرضك.' });
   if ((outdoor.lawn || outdoor.pool) && !outdoor.waterfall && !skip.has('add_waterfall')) OQ.push({ id: 'add_waterfall', text: outdoor.pool ? 'تبي شلالًا بجانب المسبح؟' : 'تبي مسبحًا أو شلالًا ضمن الحديقة؟', reason: 'أسأل لأنهما يُخطَّطان مع الحوش من البداية، وإضافتهما بعد التوليد تغيّر توزيع الحديقة.' });
   if (liftOneFloor && !base0.prefs.floors && !skip.has('elevator_floors')) OQ.push({ id: 'elevator_floors', text: 'المصعد يخدم دورين فأكثر؛ تبي البيت دورين مع المصعد، أم دور واحد بلا مصعد؟', reason: 'أسأل لأن المصعد لا معنى له في دور واحد، وعدد الأدوار يغيّر توزيع البيت كله.', options: [{ id: 'two', label: 'دورين مع المصعد', text: 'البيت دورين' }, { id: 'one', label: 'دور واحد بلا مصعد', text: 'دور واحد ولا ابي مصعد' }] });
+  if (outdoor.carport && !carsSaid && !skip.has('cars')) OQ.push({ id: 'cars', text: 'كم سيارة تحتاج مظلتها؟', reason: 'أسأل لأن عرض المظلة يزيد بعدد السيارات (نحو 2.7 م للسيارة)، وهو يأخذ من الحوش الأمامي. بلا جواب أفترض سيارتين.', options: [1, 2, 3, 4].map(n => ({ id: String(n), label: n === 1 ? 'سيارة واحدة' : n === 2 ? 'سيارتان' : n + ' سيارات' })) });
   Q.splice(Q.length && Q[0].id === 'bedrooms' ? 1 : 0, 0, ...OQ);
   if (outdoor.pool && land?.width && land?.length && Math.min(land.width, land.length) < 14) notes.push('الأرض ضيقة نسبيًا: قد لا يتسع المسبح بحده الأدنى (2.5 × 4.5 م) بعد المبنى والارتدادات؛ سأخبرك بصدق إن لم يتسع بدل رسمه قسرًا.');
   for (const q of Q) if (!skip.has(q.id) && questions.length < 3) questions.push(q);

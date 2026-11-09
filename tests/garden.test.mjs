@@ -97,7 +97,7 @@ test('شرعاء: المقاس بصيغ مختلفة والنفي والمسبح
   assert.equal(buildBrief('ما ابي مسبح، ابي شلال').requirements.prefs.outdoor.waterfall, true);
   const inn = buildBrief('ابغى مسبح داخلي'); assert.equal(inn.requirements.prefs.outdoor, undefined); assert.ok(inn.unsupported.some(u => /الداخلي/.test(u)));
   const roof = buildBrief('مسبح على السطح'); assert.equal(roof.requirements.prefs.outdoor, undefined); assert.ok(roof.unsupported.some(u => /السطح/.test(u)));
-  const fo = buildBrief('ابي نافورة وعشب'); assert.ok(fo.unsupported.some(u => /النافورة/.test(u))); assert.equal(fo.requirements.prefs.outdoor.lawn, true);
+  const fo = buildBrief('ابي نافورة وعشب'); assert.ok(!fo.unsupported.some(u => /النافورة/.test(u))); assert.equal(fo.requirements.prefs.outdoor.fountain, true); assert.equal(fo.requirements.prefs.outdoor.lawn, true);
   assert.equal(buildBrief('حديقة داخلية').requirements.prefs.outdoor, undefined, 'الحديقة الداخلية فناء لا عشب خارجي');
 });
 

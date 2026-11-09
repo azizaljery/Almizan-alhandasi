@@ -70,9 +70,15 @@ export const FIXTURES = Object.freeze({
   waterfall:    { ar: 'شلال',       w: 2.4, d: 1.4, h: 2.2, rooms: [], outdoor: true },
   lawn:         { ar: 'مسطح عشبي',  w: 6.0, d: 5.0, h: .03, rooms: [], outdoor: true },
   planter:      { ar: 'حوض زراعة',  w: 3.0, d: .7,  h: .5,  rooms: [], outdoor: true },
+  carport:      { ar: 'مظلة سيارات', w: 5.4, d: 5.5, h: 2.6, rooms: [], outdoor: true },
+  pergola:      { ar: 'برجولة',     w: 3.5, d: 3.5, h: 2.7, rooms: [], outdoor: true },
+  bbq:          { ar: 'ركن شواء',   w: 1.4, d: .7,  h: 1.0, rooms: [], outdoor: true },
+  fountain:     { ar: 'نافورة',     w: 1.6, d: 1.6, h: 1.1, rooms: [], outdoor: true },
 });
 /** قطع الخارج: تُرسم على أرض الحوش لا على أرضية دور، ولا تُفحص كقطع أثاث داخل غرف. */
-export const OUTDOOR_KINDS = Object.freeze(['pool', 'waterfall', 'lawn', 'planter', 'tree']);
+/** أبعاد افتراضية تصميمية (غير متحقق منها نظاميًا): عرض موقف السيارة الواحدة تحت المظلة وطوله. */
+export const CARPORT_STALL = Object.freeze({ w: 2.7, d: 5.5 });
+export const OUTDOOR_KINDS = Object.freeze(['pool', 'waterfall', 'lawn', 'planter', 'carport', 'pergola', 'bbq', 'fountain', 'tree']);
 export const isOutdoorKind = kind => OUTDOOR_KINDS.includes(kind);
 export const fixtureName = kind => FIXTURES[kind]?.ar || kind;
 

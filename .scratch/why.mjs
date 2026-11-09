@@ -1,0 +1,10 @@
+import { generateVillaTwoFloors, checkDoc } from '../dist/villa-layout.mjs';
+import { elevatorCandidates } from '../dist/elevator-plan.mjs';
+import { planElevator } from '../dist/elevator-plan.mjs';
+import { reviewDoc } from '../dist/draw/review.mjs';
+const r = generateVillaTwoFloors({ land: { width: 20, length: 30, streets: ['s'], entries: ['s'] }, counts: { bedrooms: 4, majlis: 1, baths: 4, kitchens: 1 }, requirements: { floors: 2, prefs: {} }, keep: 1 });
+const d = r.designs[0].doc;
+const base = reviewDoc(d).map(i => i.code+':'+i.targetIds.join('+'));
+console.log('base', base.length, [...new Set(reviewDoc(d).map(i=>i.code))]);
+const seen = new Set();
+planElevator(d, { verify: doc => { const c = checkDoc(doc); const rv = reviewDoc(doc).filter(i => !base.includes(i.code+':'+i.targetIds.join('+'))); console.log('cand ok?', c.ok, c.problems.slice(0,2), rv.map(i => i.code+' '+i.message.slice(0,90))); return false; }, maxTry: 4 });

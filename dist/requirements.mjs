@@ -121,7 +121,6 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (R.noCorridors) { prefs.noCorridors = true; understood.push('أقل ما يمكن من الممرات (الحركة عبر الصالة)'); }
   if (R.floors) { prefs.floors = R.floors; understood.push(R.floors === 2 ? 'دوران (أرضي وأول)' : 'دور واحد'); }
   for (const r of rules) understood.push(r.text);
-  if (has(/كراج|قراج|جراج|موقف|مواقف|مظله سيار/)) unsupported.push('مواقف السيارات (الكراج): تبقى في الارتداد الأمامي ولا تُرسم في هذا الإصدار.');
   if (has(/(بيت|فيلا|منزل|مبني) (صغير|اقتصادي)|اقتصادي/) && !tweaks.envScale) { tweaks.envScale = .9; tweaks.bedroomScale = (tweaks.bedroomScale || 1) * .95; understood.push('مسطح أصغر (اقتصادي): المبنى أصغر بنحو 10٪ من المقاسات التصميمية المعتادة'); }
   if (has(/(?<![\u0600-\u06FF])(?<!(?:حمام|حمامها|بحمام|بحمامها|دوره مياه) (?:ال)?)(?:ال)?ملحق(?![\u0600-\u06FF])/)) unsupported.push('الملحق الخارجي: لا يُرسم في هذا الإصدار؛ يمكن إضافته في المرسم.');
   if (has(/(?<![\u0600-\u06FF])و?(?:ال)?(?:سطح|روف)(?![\u0600-\u06FF])/)) unsupported.push('السطح وغرفة السطح: لا تُرسم في هذا الإصدار.');
