@@ -169,7 +169,12 @@ export class SharaSession {
       const text = answerToText(q, value);
       if (!this.skipped.includes(id)) this.skipped.push(id); // لا يُعاد السؤال نفسه ولو لم يُفهم الجواب
       if (text.trim()) this.texts.push(text.trim());
+      const before = JSON.stringify(this.brief?.requirements?.prefs?.outdoor || null);
       this.#rebuild(); const out = [this.#programMsg()];
+      if (JSON.stringify(this.brief?.requirements?.prefs?.outdoor || null) !== before) {
+        const line = this.brief.understood.filter(u => /^في الحوش الخارجي/.test(u));
+        if (line.length) out.push(msg('حدّثتُ فهمي للحوش الخارجي:', { kind: 'list', id: 'understood', items: line }));
+      }
       const next = this.#nextQuestion(); if (next) out.push(this.#askMsg(next));
       out.push(this.#generateMsg());
       return this.#push(out);

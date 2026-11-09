@@ -10,6 +10,7 @@
 import { createDoc, applyCommand, validateDoc } from './draw/doc.mjs';
 import { analyzeWalls } from './draw/topology.mjs';
 import { footprint, validatePlot } from './planner.mjs';
+import { planGarden } from './garden-plan.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
 import { reviewDoc, swingSectors, sectorPoints, fixtureRect, penetration } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
@@ -1280,6 +1281,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   if (shapeFallback && shapeExhausted) picked[0]?.notes.push(`عُرضت عليك كل توزيعات «${MODE_AR[wantMode] || wantMode}» المختلفة لهذه الأرض؛ هذا بديل بنمط آخر.`);
   else if (shapeFallback) picked[0]?.notes.push(wantMode === 'L' ? lShapeNote(program, W, D, plot, entry) : `تعذّر توزيع «${MODE_AR[wantMode] || wantMode}» على هذه الأرض وهذا البرنامج؛ هذه أقرب البدائل الأخرى.`);
   if (diff.relaxed) picked[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
+  applyGardens(picked, requirements);
   return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
 }
 /** أصغر مسطح قابل للبناء يتسع له الشكل L بالبرنامج (بخطوة 0.5 م، بدءًا من المسطح الحالي): أولًا أقل عمق، ثم أقل عرض عنده. */
@@ -1394,7 +1396,19 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const picked2 = blend ? designs.slice(0, keep) : diversify(designs, keep);
   if (visRelaxed) picked2[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا.');
   if (diff2.relaxed) picked2[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
+  applyGardens(picked2, requirements);
   return { designs: picked2, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2 };
+}
+/** مسبح/شلال/عشب/أحواض بحسب requirements.prefs.outdoor؛ بعد اختيار البدائل فلا تؤثر في ترتيبها ولا في بصمتها. */
+function applyGardens(picked, requirements) {
+  const want = requirements?.prefs?.outdoor; if (!want) return;
+  for (const d of picked) {
+    try {
+      const { doc, report } = planGarden(d.doc, want);
+      d.doc = doc; d.garden = report;
+      if (Array.isArray(d.notes)) d.notes.push(...report.notes);
+    } catch (e) { if (Array.isArray(d.notes)) d.notes.push('تعذّر تخطيط الحديقة لهذا البديل: ' + e.message); }
+  }
 }
 /** سلم U داخل غرفة السلم: يبدأ عند طرفها الأمامي ويصعد نحو الخلف. */
 function addStair(doc, sr, T, level) {

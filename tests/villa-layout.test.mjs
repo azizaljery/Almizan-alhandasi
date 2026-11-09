@@ -180,7 +180,7 @@ test('الفهم: تطبيع عربي وأرقام هندية وصيغ «٣ غر
   const r2 = extractRequirements('مجلس ومكتب ومستودع وغسيل ومطبخ مغلق', {});
   assert.ok(r2.extras.office && r2.extras.storage && r2.extras.laundry && r2.prefs.openKitchen === false);
   assert.deepEqual(extractRequirements('', {}).understood, [], 'بلا كلام لا شيء يُفترض');
-  assert.ok(extractRequirements('ابي مسبح وقبو', {}).unsupported.length === 2);
+  assert.ok(extractRequirements('ابي مصعد وقبو', {}).unsupported.length === 2);
 });
 
 test('الحدود الدنيا في الإعدادات التصميمية ليست أرقامًا نظامية مدّعاة', () => {

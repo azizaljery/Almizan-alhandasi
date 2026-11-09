@@ -53,6 +53,12 @@ export const FIXTURE_MATERIAL_SPECS = Object.freeze({
   fglass:       { color: '#bfe0ee', roughness: .05, opacity: .26, transparent: true, depthWrite: false },
   mirror:       { color: '#d7e2ea', roughness: .03, metalness: 1 },
   water:        { color: '#e9eef0', roughness: .2 },
+  poolWater:    { color: '#38b6cf', roughness: .05, metalness: .1, opacity: .82, transparent: true, depthWrite: false },
+  poolTile:     { color: '#9fdbe6', roughness: .3 },
+  coping:       { color: '#e8e0cf', roughness: .75 },
+  rock:         { color: '#8a8173', roughness: .95 },
+  rockDark:     { color: '#6c6558', roughness: .95 },
+  lawn:         { color: '#5f9f45', roughness: 1 },
   fallback:     { color: '#cccccc', roughness: .8 },
 });
 
@@ -148,7 +154,7 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     'coffee-table': coffeeTable, 'tv-unit': tvUnit, 'majlis-sofa': majlisSofa,
     'dining-table': diningTable, chair: () => chair(0, 0, 0, w, d, h),
     'kitchen-run': kitchenRun, fridge, stove, wc, basin, shower, bathtub, 'washing-machine': washingMachine,
-    plant, rug, car, tree, palm, shrub,
+    plant, rug, car, tree, palm, shrub, pool, waterfall, lawn, planter,
   };
 
   function bed(bw, bd, dbl) {
@@ -464,6 +470,49 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
       add(frondGeometry(THREE, len, droop), 'frond', topX, trunkH + .06, 0, 0, a, 0);
     }
     for (let i = 0; i < 5; i++) { const a = i * 1.3; ell('trunk', .05, .1, .05, topX + Math.cos(a) * .12, trunkH - .05, Math.sin(a) * .12, 6, 4); }
+  }
+
+  // ---- الخارج: مسبح، شلال، عشب، حوض زراعة (الأصل عند منتصف القطعة وعلى مستوى الأرض) ----
+  function pool() {
+    const cp = Math.min(.35, Math.min(w, d) * .08), top = .06;
+    box('poolTile', w, .02, d, 0, 0, 0);
+    // إطار الحجر (coping) حول الحوض
+    box('coping', w, top, cp, 0, 0, -d / 2 + cp / 2); box('coping', w, top, cp, 0, 0, d / 2 - cp / 2);
+    box('coping', cp, top, d - 2 * cp, -w / 2 + cp / 2, 0, 0); box('coping', cp, top, d - 2 * cp, w / 2 - cp / 2, 0, 0);
+    box('poolWater', w - 2 * cp, .01, d - 2 * cp, 0, top - .03, 0);
+    // درج دخول في طرف الحوض
+    for (let i = 0; i < 3; i++) box('poolTile', Math.min(w - 2 * cp, 2.2), .012, .28, 0, .02 + (2 - i) * .004, d / 2 - cp - .14 - i * .28);
+  }
+
+  function waterfall() {
+    const R = rng(Math.round((dims.seed ?? 4) * 977) + 11), back = -d / 2;
+    // حوض أمامي + جدار صخري خلفي يتدفق منه الماء
+    const bw = w, bd = Math.max(.6, d - .45);
+    box('coping', bw, .12, .12, 0, 0, d / 2 - .06); box('coping', .12, .12, bd, -bw / 2 + .06, 0, d / 2 - .12 - bd / 2); box('coping', .12, .12, bd, bw / 2 - .06, 0, d / 2 - .12 - bd / 2);
+    box('poolWater', bw - .24, .01, bd - .12, 0, .09, d / 2 - .12 - (bd - .12) / 2);
+    const cols = Math.max(3, Math.round(w / .6)), rows = Math.max(3, Math.round(h / .45));
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const sx = w / cols * (1.05 + R() * .2), sy = h / rows * (.95 + R() * .2), x = -w / 2 + (c + .5) * w / cols + (R() - .5) * .1;
+      const y0 = r * h / rows * (1 - .15) ;
+      if (r === rows - 1 && c > 0 && c < cols - 1 && R() < .25) continue;
+      rbox((r + c) % 2 ? 'rock' : 'rockDark', sx, sy, .38 + R() * .12, .06, x, y0, back + .2 + R() * .06);
+    }
+    // ستارة الماء
+    box('poolWater', w * .55, h * .78, .04, 0, .1, back + .45);
+    box('poolWater', w * .6, .05, .22, 0, h * .78 + .02, back + .46);
+  }
+
+  function lawn() {
+    const t = Math.max(h, .03); box('lawn', w, t, d, 0, 0, 0);
+    // خطوط قص العشب بلونين + حافة حجرية رفيعة
+    const n = Math.max(3, Math.round(w / 1.2)); for (let i = 0; i < n; i += 2) box('leafB', w / n, .006, d - .1, -w / 2 + (i + .5) * w / n, t, 0);
+    box('coping', w, t * 1.4, .06, 0, 0, -d / 2 + .03); box('coping', w, t * 1.4, .06, 0, 0, d / 2 - .03);
+  }
+
+  function planter() {
+    box('coping', w, h, d, 0, 0, 0); box('soil', w - .1, .04, d - .1, 0, h, 0);
+    const R = rng(Math.round((dims.seed ?? 3) * 311) + 5), n = Math.max(2, Math.round(w / .8));
+    for (let i = 0; i < n; i++) { const s = .32 + R() * .12; ell(i % 2 ? 'leafA' : 'leafB', s, s * .8, s, -w / 2 + (i + .5) * w / n, h + s * .7, (R() - .5) * d * .3, 10, 7); }
   }
 
   function shrub() {

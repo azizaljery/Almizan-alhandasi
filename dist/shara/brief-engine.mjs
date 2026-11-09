@@ -34,6 +34,16 @@ const ROW_LABEL = id => SPACE[id]?.label || BATH_ROWS[id]?.label || id;
  *                      land: الأرض {entries,floors} لأسئلة الموقع، skipped: أسئلة تخطّاها العميل }
  * @returns { program: rows[], customs[], counts, requirements, discovery, idea, questions[], unsupported[], understood[], notes[], family, totals }
  */
+/** مقاس المسبح من كلام العميل: «مسبح 4×8» أو كلمة حجم (كبير/صغير/أطفال). */
+export function parsePoolSize(t) {
+  const PW = '(?:مسبح|سويمنج ?بول|بركه سباحه)';
+  const m = new RegExp(PW + '[^\\d]{0,14}(\\d+(?:\\.\\d+)?)\\s*(?:[x×*]|في|ب|علي|على)\\s*(\\d+(?:\\.\\d+)?)').exec(t) || new RegExp('(\\d+(?:\\.\\d+)?)\\s*(?:[x×*]|في)\\s*(\\d+(?:\\.\\d+)?)\\s*(?:م|متر)?\\s*' + PW).exec(t);
+  if (m) { const a = Number(m[1]), b = Number(m[2]); if (a >= 2 && b >= 2 && a <= 25 && b <= 25) return { poolW: Math.min(a, b), poolD: Math.max(a, b) }; }
+  if (/مسبح[^،.]{0,10}(?:كبير|ضخم|اولمبي)|(?:كبير|ضخم)[^،.]{0,6}مسبح/.test(t)) return { poolW: 4.5, poolD: 9 };
+  if (/مسبح[^،.]{0,10}(?:صغير|اطفال|عيال|بسيط|مصغر)|(?:صغير|بسيط)[^،.]{0,6}مسبح/.test(t)) return { poolW: 3, poolD: 5 };
+  if (/مسبح[^،.]{0,10}(?:عائلي|متوسط|عادي)/.test(t)) return { poolW: 3.5, poolD: 7 };
+  return null;
+}
 export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], land = null, skipped = [] } = {}) {
   const idea = String(text || '').trim();
   const t = normalizeAr(idea);
@@ -58,19 +68,22 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   const rows = [];
   const add = (id, count, source, reason, extra = {}) => { if (count > 0) rows.push({ id, label: ROW_LABEL(id), count, source, reason, area: ROW_AREA(id), floor: ROW_FLOOR(id), ...extra }); };
 
+  // «بس/فقط» بعد قائمة صريحة: لا أفترض ما لم يُذكر (المجلس والمقلط من الأعراف)
+  const exclusive = /(?<![؀-ۿ])(?:بس|فقط|لا غير)(?![؀-ۿ])/.test(t) && !saidCount('majlis_men') && !saidCount('majlis') && !saidCount('majlis_women') && rows.length === 0;
+  if (exclusive) notes.push('قلتَ «بس/فقط»: لم أفترض مجلسًا ولا مقلطًا؛ أضفهما من «أضف فراغًا» إن احتجتهما.');
   // المجالس: «مجلسين» = رجال ونساء؛ «مجلس رجال ومجلس نساء» صريح
   const genericMajlis = saidCount('majlis');
   let men = saidCount('majlis_men'), women = saidCount('majlis_women');
   if (!men && !women && genericMajlis) { men = 1; women = genericMajlis >= 2 ? 1 : 0; }
   const majlisNegated = negated('majlis') || (negated('majlis_men') && !women);
   if (men) add('majlis_men', men, 'said', S('majlis_men') ? `قلتَ «${S('majlis_men').texts[0]}»` : genericMajlis >= 2 ? `قلتَ ${genericMajlis === 2 ? 'مجلسين' : genericMajlis + ' مجالس'}: الأول للرجال` : 'قلتَ «مجلس»: مجلس الرجال بمدخله');
-  else if (!majlisNegated && !negated('majlis_men')) add('majlis_men', 1, 'custom', 'العرف: مجلس رجال لاستقبال الضيوف بمدخل مستقل؛ احذفه إن لم تحتجه');
+  else if (!majlisNegated && !negated('majlis_men') && !exclusive) add('majlis_men', 1, 'custom', 'العرف: مجلس رجال لاستقبال الضيوف بمدخل مستقل؛ احذفه إن لم تحتجه');
   if (women) add('majlis_women', women, 'said', S('majlis_women') ? `قلتَ «${S('majlis_women').texts[0]}»` : 'قلتَ مجلسين: الثاني للنساء');
   if (genericMajlis > 2) add('majlis', genericMajlis - 2, 'said', `قلتَ ${genericMajlis} مجالس: ما زاد عن مجلسي الرجال والنساء`);
   const majlisTotal = rows.filter(r => COUNT_KEY[r.id] === 'majlis').reduce((a, r) => a + r.count, 0);
   // المقلط
   if (saidCount('dining')) add('dining', saidCount('dining'), 'said', `قلتَ «${S('dining').texts[0]}»`);
-  else if (!negated('dining') && majlisTotal) add('dining', 1, 'custom', 'العرف: مقلط بجوار المجلس لضيافة الطعام؛ احذفه إن كنت تأكل في الصالة');
+  else if (!negated('dining') && majlisTotal && !exclusive) add('dining', 1, 'custom', 'العرف: مقلط بجوار المجلس لضيافة الطعام؛ احذفه إن كنت تأكل في الصالة');
   // الصالة العائلية
   if (saidCount('hall')) add('hall', saidCount('hall'), 'said', `قلتَ «${S('hall').texts[0]}»`);
   else if (!negated('hall')) add('hall', 1, 'custom', 'صالة عائلية واحدة قلب البيت تتفرع منها الغرف (بدل الممرات الطويلة)');
@@ -135,6 +148,12 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   for (const m of mentions) if (SPACE[m.id].unsupported && !m.negated && !unsupported.includes(SPACE[m.id].unsupported) && !(m.id === 'yard' && base0.prefs.courtyard)) unsupported.push(SPACE[m.id].unsupported);
   if (saidCount('dressing')) notes.push('غرفة الملابس تُقتطع من جناح الغرفة الرئيسية ولا تظهر صفًا مستقلًا.');
   let floors = base0.prefs.floors || (land?.floors === 2 ? 2 : 1);
+  // «ما ابي درج»: بدور واحد = توضيح؛ بدورين = الدرج لازم، وأضع من لا يصعد في الدور الأرضي
+  const noStairs = /(?:ما|لا|بدون|بلا|مو|ليس) ?(?:ابي|ابغى|ابغي|اريد|نبي|احتاج|يبون)? ?(?:ال)?(?:درج|سلم|ادراج|سلالم)/.test(t);
+  if (noStairs) {
+    if (floors === 2) notes.push('طلبتَ بلا درج وبدورين معًا، وهذا لا يجتمع: الدور الثاني لا يُوصَل إلا بدرج. سأبقي الدرج، ويمكنك جعل البيت دورًا واحدًا إن كان المقصود ألا يصعد أحد، وإلا وضعتُ غرفة الوالدين في الدور الأرضي.');
+    else { floors = 1; notes.push('بلا درج: صمّمت البيت دورًا واحدًا.'); }
+  }
   if (THREE_FLOORS.test(t)) { unsupported.push('ثلاثة أدوار فأكثر غير مدعومة في المولّد حاليًا؛ سأصمم دورين (أرضي وأول) وما زاد يُضاف لاحقًا في المرسم.'); floors = 2; }
 
   // ---- 6) التعديلات اليدوية على الجدول (تبقى على الصفوف بعد كل إعادة بناء)
@@ -189,9 +208,23 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   // ما فهمته من العلاقات والتفضيلات (الفراغات نفسها في الجدول فلا تُكرَّر)
   const understood = (req.understood || []).filter(u => !EXTRA_UNDERSTOOD.test(u) && !(u === 'بدون مجلس' && counts.majlis > 0) && !(u === 'بدون غرفة طعام' && counts.dining > 0));
   req.understood = understood;
+  // ---- الخارج: مسبح/شلال/حديقة تُوزَّع في الحوش (garden-plan) لا في برنامج الغرف
+  const outdoor = {};
+  for (const m of mentions) { const k = SPACE[m.id].outdoor; if (k && !m.negated && !negated(m.id)) outdoor[k] = true; }
+  if (outdoor.garden) { outdoor.lawn = true; outdoor.planters = true; delete outdoor.garden; }
+  // مسبح داخلي أو على السطح لا يُرسم: يُقال بصدق ولا يُحوَّل إلى مسبح في الحوش دون علم العميل
+  if (outdoor.pool && /مسبح[^،.]{0,12}(?:داخل|مغلق|مسقوف|تحت الارض|بدروم)|(?:داخل|مغلق|مسقوف)[^،.]{0,8}مسبح/.test(t)) { delete outdoor.pool; unsupported.push('المسبح الداخلي أو المغلق: لا يُرسم في هذا الإصدار؛ أرسم المسبح في الحوش الخارجي فقط، فإن أردته خارجيًا قل «مسبح خارجي».'); }
+  else if (outdoor.pool && /مسبح[^،.]{0,12}(?:سطح|روف|اعلي|فوق)|(?:على|علي|فوق) (?:ال)?سطح[^،.]{0,12}مسبح/.test(t)) { delete outdoor.pool; unsupported.push('المسبح على السطح: لا يُرسم في هذا الإصدار (يحتاج حسابًا إنشائيًا للأحمال)؛ أرسمه في الحوش إن أردت.'); }
+  const poolSize = outdoor.pool ? parsePoolSize(t) : null;
+  if (poolSize) Object.assign(outdoor, poolSize);
+  if (Object.keys(outdoor).length) {
+    req.prefs.outdoor = outdoor;
+    const parts = [outdoor.pool && (poolSize?.poolW ? `مسبح ${poolSize.poolW} × ${poolSize.poolD} م` : 'مسبح'), outdoor.waterfall && 'شلال', outdoor.lawn && 'حديقة بعشب وأحواض زراعة'].filter(Boolean);
+    understood.push(`في الحوش الخارجي: ${parts.join(' + ')} (تُخطَّط خلف الفيلا أو على جانبيها بحسب ما تتسع له الأرض)`); req.understood = understood;
+  }
   req.unsupported = [...new Set([...(req.unsupported || []), ...unsupported])];
   // ما لم يُفهم: يُستبعد منه ما فهمه المعجم أو قارئ الأسرة
-  req.unclear = (req.unclear || []).filter(c => { const f = parseFamily(c); return !findSpaces(c).length && !f.mentioned && !f.ages && !/^(?:كلهم|كلهن|الابناء|الأبناء)/.test(normalizeAr(c)); });
+  req.unclear = (req.unclear || []).filter(c => { if (noStairs && /(?:درج|سلم)/.test(normalizeAr(c))) return false; if (/^و?(?:دورين|دوران|دور واحد)$/.test(normalizeAr(c).trim())) return false; const f = parseFamily(c); return !findSpaces(c).length && !f.mentioned && !f.ages && !/^(?:كلهم|كلهن|الابناء|الأبناء)/.test(normalizeAr(c)); });
 
   // ---- 9) الاكتشاف (client-brief) من الأسرة والأعراف
   const avoids = [];
@@ -215,6 +248,11 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
     Q.push({ id: 'majlis_entry', text: 'على أي شارع يكون مجلس الرجال ومدخله؟', reason: 'أسأل لأن موقع مجلس الرجال يحدد مكان المدخل الثاني؛ والمولّد يوزّع بحسب المدخل الأول ويراعي الجهة التي تختارها كقاعدة مكانية.', options: land.entries.map(s => ({ id: s, label: `جهة ${AR_SIDE[s]}`, text: `المجلس في جهة ${AR_SIDE[s]}` })), free: true });
   }
   if (rows.some(r => r.id === 'kitchen') && !ctx.saidOpenKitchen && !ctx.saidKitchenClosed && !disabledCustoms.includes('kitchen_closed')) Q.push({ id: 'kitchen_style', text: 'المطبخ مغلق بباب أم مفتوح؟', reason: 'أسأل لأن المطبخ المفتوح يُلصق بالصالة أو الطعام ويغيّر شكل قلب البيت؛ المغلق يُعزل عن الضيوف. بلا جواب أبقيه مغلقًا (العرف).', options: [{ id: 'closed', label: 'مغلق', text: 'المطبخ مغلق' }, { id: 'hall', label: 'مفتوح على الصالة', text: 'المطبخ مفتوح على الصالة' }, { id: 'dining', label: 'مفتوح على الطعام', text: 'المطبخ مفتوح على الطعام' }], free: true });
+  const OQ = [];
+  if (outdoor.pool && !poolSize) OQ.push({ id: 'pool_size', text: 'المسبح عائلي (نحو 3.5 × 7 م) أم صغير (3 × 5 م)؟ وإن كان له مقاس محدد فاكتبه مثل «مسبح 4 × 8».', reason: 'أسأل لأن المسبح يأخذ من الحوش الخلفي، ومقاسه يقرر هل يتسع مع الشلال والعشب في أرضك.' });
+  if ((outdoor.lawn || outdoor.pool) && !outdoor.waterfall && !skip.has('add_waterfall')) OQ.push({ id: 'add_waterfall', text: outdoor.pool ? 'تبي شلالًا بجانب المسبح؟' : 'تبي مسبحًا أو شلالًا ضمن الحديقة؟', reason: 'أسأل لأنهما يُخطَّطان مع الحوش من البداية، وإضافتهما بعد التوليد تغيّر توزيع الحديقة.' });
+  Q.splice(Q.length && Q[0].id === 'bedrooms' ? 1 : 0, 0, ...OQ);
+  if (outdoor.pool && land?.width && land?.length && Math.min(land.width, land.length) < 14) notes.push('الأرض ضيقة نسبيًا: قد لا يتسع المسبح بحده الأدنى (2.5 × 4.5 م) بعد المبنى والارتدادات؛ سأخبرك بصدق إن لم يتسع بدل رسمه قسرًا.');
   for (const q of Q) if (!skip.has(q.id) && questions.length < 3) questions.push(q);
 
   const area = rows.reduce((a, r) => a + r.area * r.count, 0);
@@ -238,7 +276,7 @@ export const GUIDED_STEPS = Object.freeze([
   { id: 'g_guests', text: 'كيف تستقبل ضيوفك؟', reason: 'أسأل لأن المجلس ومدخله يحددان مكان المدخل الثاني وفصل الضيوف عن العائلة، والمقلط يتبع المجلس.', options: [{ id: 'men', label: 'مجلس رجال فقط', text: 'مجلس رجال' }, { id: 'both', label: 'مجلس رجال ومجلس نساء', text: 'مجلس رجال ومجلس نساء' }, { id: 'one', label: 'مجلس واحد للجميع', text: 'مجلس واحد' }, { id: 'none', label: 'بدون مجلس', text: 'بدون مجلس' }, { id: 'frequent', label: 'ضيوفنا كثير', text: 'وضيوفنا كثير' }], multi: true, free: true, placeholder: 'مثال: مجلس رجال كبير يتسع لعشرين شخص ومقلط' },
   { id: 'g_sleep', text: 'غرف النوم وحماماتها: كل غرفة بحمامها، أم تتشارك؟ ويمكنك تحديد العدد.', reason: 'أسأل لأن عدد الحمامات الملحقة يغيّر عرض جناح النوم ومسار الممرات، ولا يُستنتج من عدد الأفراد وحده.', options: [{ id: 'ensuite', label: 'كل غرفة بحمامها', text: 'كل غرفة نوم بحمامها' }, { id: 'shared', label: 'الرئيسية بحمامها والباقي يتشارك', text: 'الماستر بحمامها والباقي يتشاركون الحمام' }, { id: 'dressing', label: 'غرفة ملابس للرئيسية', text: 'وغرفة ملابس للماستر' }], multi: true, free: true, placeholder: 'مثال: 4 غرف نوم، الماستر كبيرة' },
   { id: 'g_kitchen', text: 'المطبخ والخدمة: ما الذي تحتاجه؟', reason: 'أسأل لأن المطبخ يحدد موقع المقلط وباب الخدمة، وغرفة الخادمة والسائق تحتاج أبوابًا خارجية.', options: [{ id: 'closed', label: 'مطبخ مغلق', text: 'المطبخ مغلق' }, { id: 'open', label: 'مطبخ مفتوح على الصالة', text: 'المطبخ مفتوح على الصالة' }, { id: 'prep', label: 'مطبخ تحضيري', text: 'ومطبخ تحضيري' }, { id: 'maid', label: 'غرفة خادمة', text: 'وغرفة خادمة' }, { id: 'driver', label: 'غرفة سائق', text: 'وغرفة سائق' }, { id: 'laundry', label: 'غرفة غسيل', text: 'وغرفة غسيل' }, { id: 'storage', label: 'مستودع', text: 'ومستودع' }], multi: true, free: true },
-  { id: 'g_extras', text: 'إضافات: اختر ما تريده، وسأخبرك بصدق بما لا يُرسم في هذا الإصدار.', reason: 'أسأل أخيرًا لأن الإضافات لا تغيّر هيكل البيت لكنها تحجز مكانًا (المكتب والمصلى قرب المجلس، وغرفة الضيوف بعيدًا عن العائلة).', options: [{ id: 'office', label: 'مكتب', text: 'ومكتب' }, { id: 'prayer', label: 'مصلى', text: 'ومصلى' }, { id: 'guest', label: 'غرفة نوم للضيوف', text: 'وغرفة نوم للضيوف' }, { id: 'two', label: 'دورين', text: 'البيت دورين' }, { id: 'pool', label: 'مسبح', text: 'ومسبح' }, { id: 'annex', label: 'ملحق خارجي', text: 'وملحق خارجي' }, { id: 'elevator', label: 'مصعد', text: 'ومصعد' }, { id: 'none', label: 'لا شيء', text: '' }], multi: true, free: true },
+  { id: 'g_extras', text: 'إضافات: اختر ما تريده، وسأخبرك بصدق بما لا يُرسم في هذا الإصدار.', reason: 'أسأل أخيرًا لأن الإضافات لا تغيّر هيكل البيت لكنها تحجز مكانًا (المكتب والمصلى قرب المجلس، وغرفة الضيوف بعيدًا عن العائلة).', options: [{ id: 'office', label: 'مكتب', text: 'ومكتب' }, { id: 'prayer', label: 'مصلى', text: 'ومصلى' }, { id: 'guest', label: 'غرفة نوم للضيوف', text: 'وغرفة نوم للضيوف' }, { id: 'two', label: 'دورين', text: 'البيت دورين' }, { id: 'pool', label: 'مسبح', text: 'ومسبح' }, { id: 'waterfall', label: 'شلال', text: 'وشلال' }, { id: 'garden', label: 'حديقة وعشب', text: 'وحديقة' }, { id: 'annex', label: 'ملحق خارجي', text: 'وملحق خارجي' }, { id: 'elevator', label: 'مصعد', text: 'ومصعد' }, { id: 'none', label: 'لا شيء', text: '' }], multi: true, free: true },
 ]);
 
 export default { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE };

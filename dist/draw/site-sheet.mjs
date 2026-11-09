@@ -3,7 +3,8 @@
 // المداخل (من الشارع وباب المبنى)، الأسوار، سهم الشمال، ومساحات الأرض والأثر ونسبة التغطية (معلومة لا حكم نظامي).
 import { buildingModel, SIDE_VECTORS } from './building-model.mjs';
 import { sheetCanvas, titleStrip, fitScale, fmtLevel, mm, n1, LW } from './sheet-frame.mjs';
-import { fmtDim } from './plan-annot.mjs';
+import { fmtDim, fixtureSymbol } from './plan-annot.mjs';
+import { FIXTURES, fixtureName } from './catalog.mjs';
 import { add, sub, mul, dot, norm, area, ccw, insetPolygon, dist } from './geom.mjs';
 import { compassOf } from './digest.mjs';
 
@@ -80,6 +81,17 @@ export function siteSheet(doc, opts = {}) {
   const L1 = model.levels[0];
   for (const o of L1.analysis.outlines) g.push(poly(o.polygon, `fill="#d9d9d9" stroke="#000" stroke-width="${LW.heavy}" class="footprint"`));
   for (const sp of L1.spaces.filter(s => s.open)) g.push(poly(sp.net, `fill="#fff" stroke="#000" stroke-width="${LW.medium}" class="open-space"`));
+  // الحديقة: مسبح، شلال، عشب، أحواض (قطع خارجية في المستند)
+  const garden = (doc.fixtures || []).filter(f => FIXTURES[f.kind]?.outdoor && f.kind !== 'tree');
+  for (const f of garden) {
+    const sym = fixtureSymbol(f), fill = f.kind === 'pool' || f.kind === 'waterfall' ? '#e6e6e6' : f.kind === 'lawn' ? '#f4f4f4' : '#fff';
+    g.push(`<g class="garden-item" data-kind="${f.kind}" data-id="${f.id}">`, poly(sym.outline, `fill="${fill}" stroke="#000" stroke-width="${LW.medium}"`));
+    for (const r of sym.rects) g.push(poly(r, `fill="none" stroke="#000" stroke-width="${LW.thin}"`));
+    for (const [a, b] of sym.lines) g.push(`<line x1="${n1(X(a.x))}" y1="${n1(Y(a.y))}" x2="${n1(X(b.x))}" y2="${n1(Y(b.y))}" stroke="#000" stroke-width="${LW.thin}"${f.kind === 'pool' ? ` stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.8))}"` : ''}/>`);
+    for (const e of sym.ellipses) g.push(`<ellipse cx="${n1(X(e.c.x))}" cy="${n1(Y(e.c.y))}" rx="${n1(e.rx * k)}" ry="${n1(e.ry * k)}" fill="none" stroke="#000" stroke-width="${LW.thin}"/>`);
+    g.push('</g>');
+    if (f.kind !== 'planter') g.push(txt(X(f.x), Y(f.y), `${fixtureName(f.kind)} ${fmtDim(Math.min(f.w, f.d))}×${fmtDim(Math.max(f.w, f.d))}`, { size: mm(2.2), halo: true }));
+  }
   for (const f of S.fences) g.push(poly(f.poly, `fill="#fff" stroke="#000" stroke-width="${LW.medium}" class="fence"`));
   for (const sp of L1.spaces.filter(s => s.open && s.area > 6)) g.push(txt(X(sp.inside.x), Y(sp.inside.y), sp.name, { size: mm(2.4), halo: true }));
   g.push('</g>');
@@ -135,6 +147,7 @@ export function siteSheet(doc, opts = {}) {
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="none" stroke="#000" stroke-width="${LW.medium}" stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.6))}"/>`, 'محيط الدور العلوي'],
       [`<line x1="0" y1="${mm(1.5)}" x2="${mm(7)}" y2="${mm(1.5)}" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1.5))} ${n1(mm(1))}"/>`, 'خط الارتداد المُدخل'],
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#f2f2f2"/>`, 'شارع'],
+      ...(garden.length ? [[`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#e6e6e6" stroke="#000" stroke-width="${LW.medium}"/>`, 'مسبح / شلال / عشب / أحواض زراعة']] : []),
       [`<line x1="0" y1="${mm(1.5)}" x2="${mm(5)}" y2="${mm(1.5)}" stroke="#000" stroke-width="${LW.thick}"/><path d="M${mm(7)} ${mm(1.5)} L${mm(5)} ${mm(.5)} L${mm(5)} ${mm(2.5)} Z" fill="#000"/>`, 'مدخل'],
     ],
     notes: ['الارتداد الفعلي مقيس من أقرب جدار في أي دور إلى حد الأرض.', 'الارتداد «المُدخل» هو ما أُدخل في المشروع، لا تحقق نظامي؛ اشتراطات البلدية تُراجع من مصدرها.', S.streetWidth ? 'عرض الشارع من المستند.' : 'عرض الشارع غير مُدخل؛ رسمه تخطيطي بلا بُعد.'],

@@ -46,7 +46,7 @@ test('شرعاء الإرشادي: أسئلة بترتيب الأثر (الأس�
   const by = Object.fromEntries(f[0].rows.map(r => [r.id, r]));
   assert.equal(by.majlis_men.count, 1); assert.equal(by.majlis_women.count, 1); assert.equal(by.bedroom_boys.count, 2); assert.equal(by.bedroom_girls.count, 1); assert.equal(by.elderly_room.count, 1); assert.equal(by.maid.count, 1); assert.equal(by.office.count, 1);
   assert.equal(by.bedroom_boys.source, 'family'); assert.equal(by.master.source, 'custom');
-  assert.ok(f.some(m => m.id === 'unsupported' && m.items.some(t => /المسبح/.test(t))), 'المسبح يُقال بصدق أنه لا يُرسم');
+  assert.ok(!f.some(m => m.id === 'unsupported' && m.items.some(t => /المسبح/.test(t))), 'المسبح صار يُرسم فلا يُعدّ غير مدعوم');
   assert.equal(f.at(-1).kind, 'generate');
   assert.deepEqual(s.counts, { bedrooms: 5, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 });
   assert.deepEqual(s.discovery().life, { seniors: 'موجودون', children: 'جناح هادئ' });

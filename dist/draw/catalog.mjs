@@ -64,7 +64,14 @@ export const FIXTURES = Object.freeze({
   rug:          { ar: 'سجادة',      w: 2.4, d: 1.7, h: .02, rooms: [] },
   car:          { ar: 'سيارة',      w: 1.9, d: 4.6, h: 1.5, rooms: ['garage'] },
   tree:         { ar: 'شجرة',       w: 2.0, d: 2.0, h: 3.5, rooms: ['courtyard'] },
+  pool:         { ar: 'مسبح',       w: 4.0, d: 8.0, h: 1.4, rooms: [], outdoor: true },
+  waterfall:    { ar: 'شلال',       w: 2.4, d: 1.4, h: 2.2, rooms: [], outdoor: true },
+  lawn:         { ar: 'مسطح عشبي',  w: 6.0, d: 5.0, h: .03, rooms: [], outdoor: true },
+  planter:      { ar: 'حوض زراعة',  w: 3.0, d: .7,  h: .5,  rooms: [], outdoor: true },
 });
+/** قطع الخارج: تُرسم على أرض الحوش لا على أرضية دور، ولا تُفحص كقطع أثاث داخل غرف. */
+export const OUTDOOR_KINDS = Object.freeze(['pool', 'waterfall', 'lawn', 'planter', 'tree']);
+export const isOutdoorKind = kind => OUTDOOR_KINDS.includes(kind);
 export const fixtureName = kind => FIXTURES[kind]?.ar || kind;
 
 export const STAIR_KINDS = Object.freeze({ straight: 'سلم مستقيم', L: 'سلم على شكل L', U: 'سلم على شكل U' });

@@ -188,7 +188,7 @@ export function renderPlan(ctx, st) {
   if (flags.fixtures) for (const f of doc.fixtures) {
     if (f.level !== levelId) continue;
     drawFixture(ctx, f, S, k, sel.has(f.id), st.hover?.id === f.id, T, pen);
-    if (!['rug', 'tree', 'plant'].includes(f.kind)) fixBoxes.push({ x: f.x, y: f.y, w: Math.max(f.w, f.d), h: Math.max(f.w, f.d), soft: true });
+    if (!['rug', 'tree', 'plant', 'pool', 'waterfall', 'lawn', 'planter'].includes(f.kind)) fixBoxes.push({ x: f.x, y: f.y, w: Math.max(f.w, f.d), h: Math.max(f.w, f.d), soft: true });
   }
   const colBoxes = [];
   const drawCol = (c, proposed) => { const s = S(c), r = (c.size || .3) * k / 2; ctx.fillStyle = T.wall; ctx.strokeStyle = sel.has(c.id) ? T.select : proposed ? T.accent2 : T.wall; ctx.lineWidth = pen.thick; ctx.beginPath(); if (c.round) ctx.arc(s.x, s.y, r, 0, 7); else ctx.rect(s.x - r, s.y - r, r * 2, r * 2); ctx.fill(); ctx.stroke(); colBoxes.push({ x: c.x, y: c.y, w: c.size || .3, h: c.size || .3 }); };
@@ -405,12 +405,12 @@ function drawFixture(ctx, f, S, k, picked, hover, T = THEME, pen = pens(k)) {
   ctx.save();
   const trace = q => { ctx.beginPath(); q.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); };
   ctx.strokeStyle = picked ? T.select : hover ? T.accent : T.fixtureLine; ctx.lineWidth = picked ? 2.4 : pen.thin;
-  if (sym.outline) { trace(sym.outline); ctx.fillStyle = f.kind === 'rug' ? 'rgba(160,110,90,.18)' : T.fixtureFill; ctx.fill(); ctx.stroke(); }
+  if (sym.outline) { trace(sym.outline); ctx.fillStyle = f.kind === 'rug' ? 'rgba(160,110,90,.18)' : f.kind === 'pool' || f.kind === 'waterfall' ? 'rgba(56,182,207,.30)' : f.kind === 'lawn' ? 'rgba(95,159,69,.22)' : T.fixtureFill; ctx.fill(); ctx.stroke(); }
   if (k > 14) {
     ctx.lineWidth = pen.thin;
     for (const r of sym.rects) { trace(r); ctx.stroke(); }
     for (const [a, b] of sym.lines) { const A = S(a), B = S(b); ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }
-    for (const e of sym.ellipses) { const c = S(e.c); if (f.kind === 'tree' || f.kind === 'plant') ctx.fillStyle = 'rgba(90,150,90,.35)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, e.rx * k, e.ry * k, -e.rot, 0, 7); if (f.kind === 'tree' || f.kind === 'plant') ctx.fill(); ctx.stroke(); }
+    for (const e of sym.ellipses) { const c = S(e.c); if (f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fillStyle = 'rgba(90,150,90,.35)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, e.rx * k, e.ry * k, -e.rot, 0, 7); if (f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fill(); ctx.stroke(); }
   }
   ctx.restore();
 }

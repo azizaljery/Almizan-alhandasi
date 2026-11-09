@@ -99,7 +99,8 @@ export function extractRules(t) {
   }
   if (/(?<![؀-ۿ])(?:ما|لا|بدون|مو) ?(?:ابي|ابغي|اريد|نبي)? ?ممرات|ممرات (?:قليله|اقل)|بلا ممرات|(?:ما|لا) (?:ابي|ابغي|اريد) ممر/.test(t)) noCorridors = true;
   // عدد الأدوار
-  if (/(?<![؀-ۿ])(?:دورين|دوران|طابقين|طابقان|دور ارضي و ?(?:دور )?(?:اول|علوي)|ارضي و ?(?:اول|علوي))/.test(t)) floors = 2;
+  if (/(?<![؀-ۿ])(?:ما|لا|ولا|بدون|بلا|مو|ليس) ?(?:ابي|ابغى|ابغي|اريد|نبي|ابا)? ?(?:دورين|دوران|طابقين|طابقان)/.test(t)) floors = 1;
+  else if (/(?<![؀-ۿ])و?(?:دورين|دوران|طابقين|طابقان|دور ارضي و ?(?:دور )?(?:اول|علوي)|ارضي و ?(?:اول|علوي))/.test(t)) floors = 2;
   else if (/(?<![؀-ۿ])(?:دور واحد|طابق واحد|دور ارضي فقط|ارضي فقط)/.test(t)) floors = 1;
   const NEGW = new RegExp(`(?<![${AR}])(?:لا|ما|مو|مب|ليس|مش|بلاش|غير|ابد)(?![${AR}])`);
   const TOGETHER = new RegExp(`(?<![${AR}])(?:جنب|بجنب|بجانب|بجوار|ورا|مع|قرب|قريب(?:ه|ين)? من) بعض(?:ها|هم)?(?![${AR}])|(?<![${AR}])(?:متجاور(?:ه|ين)|متلاصق(?:ه|ين)|مع بعض)(?![${AR}])`, 'g');
@@ -421,6 +422,17 @@ function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
   if (Number.isInteger(c.bedrooms) && c.bedrooms > 0) { const n = sel('bedrooms').length; out.push({ id: 'C-bed', kind: 'count', text: `${c.bedrooms} غرف نوم`, ok: n === c.bedrooms, why: n === c.bedrooms ? '' : `في التصميم ${n}.` }); }
   if (c.majlis >= 2) { const w = sel('majlis_w').length, m = sel('majlis').length; out.push({ id: 'C-maj2', kind: 'count', text: 'مجلس للرجال ومجلس للنساء', ok: w >= 1 && m >= 1, why: '' }); }
   const pr = req.prefs || {};
+  if (pr.outdoor) {
+    const fx = k => (doc.fixtures || []).filter(f => f.kind === k), od = pr.outdoor, f2 = v => String(Math.round(v * 100) / 100);
+    if (od.pool) {
+      const p = fx('pool')[0], want = od.poolW ? `${f2(od.poolW)} × ${f2(od.poolD)} م` : '';
+      const dims = p ? [Math.min(p.w, p.d), Math.max(p.w, p.d)] : null, small = !!(p && od.poolW && (dims[0] < od.poolW - .01 || dims[1] < od.poolD - .01));
+      out.push({ id: 'G-pool', kind: 'pref', text: `مسبح${want ? ' ' + want : ''}`, ok: !!p && !small, why: !p ? 'المسبح لم يتسع في الحوش بعد المبنى والارتدادات.' : small ? `المسبح ${f2(dims[0])} × ${f2(dims[1])} م بدل ${want} ليتسع في الحوش.` : '' });
+    }
+    if (od.waterfall) { const n = fx('waterfall').length; out.push({ id: 'G-waterfall', kind: 'pref', text: 'شلال', ok: n > 0, why: n ? '' : 'الشلال لم يجد موضعًا حرًا في الحوش.' }); }
+    if (od.lawn) { const n = fx('lawn').length; out.push({ id: 'G-lawn', kind: 'pref', text: 'حديقة بعشب', ok: n > 0, why: n ? '' : 'لا توجد مساحة حرّة تكفي لمسطح عشبي.' }); }
+    if (od.planters) { const n = fx('planter').length; out.push({ id: 'G-planters', kind: 'pref', text: 'أحواض زراعة', ok: n > 0, why: n ? '' : 'لا يوجد طول حرّ على السور لأحواض الزراعة.' }); }
+  }
   if (pr.floors) { const n = doc.levels.length; out.push({ id: 'P-floors', kind: 'pref', text: pr.floors === 2 ? 'دوران' : 'دور واحد', ok: n === pr.floors, why: n === pr.floors ? '' : `التصميم ${n === 2 ? 'بدورين' : 'بدور واحد'}.` }); }
   if (pr.noCorridors) { const n = rooms.filter(r => r.name === 'ممر الغرف').length; out.push({ id: 'P-corr', kind: 'pref', text: 'بلا ممرات طويلة (الحركة عبر الصالة)', ok: n === 0, why: n ? 'يوجد ممر للغرف.' : '' }); }
   if (pr.allEnsuite) { const beds = sel('bedrooms').length, own = rooms.filter(r => /^حمام (الرئيسية|غرفة)/.test(r.name)).length; out.push({ id: 'P-ens', kind: 'pref', text: 'حمام خاص لكل غرفة نوم', ok: own >= beds, why: own >= beds ? '' : `${own} حمامات خاصة لـ${beds} غرف؛ زد عدد دورات المياه.` }); }

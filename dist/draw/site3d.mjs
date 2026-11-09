@@ -1,6 +1,7 @@
 // The plot around the building: ground, paving, boundary wall with gates, street, trees, shrubs, a parked car.
 import { MeshBuilder, P3 } from './meshbuilder.mjs';
 import { buildFixture, fixtureMatrix } from './fixtures3d.mjs';
+import { FIXTURES } from './catalog.mjs';
 import { ccw, insetPolygon, bounds as boundsOf, pointInPolygon, signedArea, norm, sub, add, mul, dot, dist } from './geom.mjs';
 
 const ENTRY_VEC = { s: { x: 0, y: -1 }, n: { x: 0, y: 1 }, e: { x: 1, y: 0 }, w: { x: -1, y: 0 } };
@@ -134,7 +135,8 @@ export function buildSite(THREE, doc, lib, ctx) {
 
   // ---- trees, shrubs, car -------------------------------------------------------------------------------
   const keep = buildingPoly ? insetPolygon(buildingPoly, -.8, { grow: true }) : null;
-  const inside = p => pointInPolygon(p, plot, 0) && (!keep || !pointInPolygon(p, keep, 0));
+  const inGarden = p => gardenBoxes.some(b => { const c = Math.cos(b.rot), sn = Math.sin(b.rot), dx = p.x - b.x, dy = p.y - b.y, m = b.kind === 'lawn' ? .2 : .9; return Math.abs(dx * c + dy * sn) < b.hw + m && Math.abs(-dx * sn + dy * c) < b.hd + m; });
+  const inside = p => pointInPolygon(p, plot, 0) && (!keep || !pointInPolygon(p, keep, 0)) && !inGarden(p);
   const clearOfGates = p => out.gates.every(gt => dist(p, gt.pos) > 3.2) && !(ctx.entryPoint && dist(p, ctx.entryPoint) < 3.4);
   const placed = [];
   const place = (kind, p, dims, rotY = 0) => {
@@ -142,6 +144,15 @@ export function buildSite(THREE, doc, lib, ctx) {
     const m = fixtureMatrix(THREE, p.x, p.y, g0, rotY, kind);
     B.addObject(grp, mat => lib.reverse(mat), m); placed.push({ kind, p });
   };
+  // عناصر الحديقة من المستند: مسبح، شلال، عشب، أحواض (على أرض الحوش)
+  const gardenBoxes = [];
+  for (const fx of (doc.fixtures || [])) {
+    const def = FIXTURES[fx.kind]; if (!def?.outdoor || fx.kind === 'tree') continue;
+    const dims = { w: fx.w ?? def.w, d: fx.d ?? def.d, h: fx.h ?? def.h, seed: fx.x * 3.1 + fx.y };
+    place(fx.kind, { x: fx.x, y: fx.y }, dims, fx.rot || 0);
+    gardenBoxes.push({ x: fx.x, y: fx.y, hw: dims.w / 2, hd: dims.d / 2, rot: fx.rot || 0, kind: fx.kind });
+    out.garden = (out.garden || []).concat(fx.kind);
+  }
   const inset = plot ? insetPolygon(plot, .9) : null;
   if (inset) {
     // palms near two corners, shrubs along the walls
@@ -171,7 +182,7 @@ export function buildSite(THREE, doc, lib, ctx) {
       const corners = [{ x: x - hw, y: y - hh }, { x: x + hw, y: y - hh }, { x: x + hw, y: y + hh }, { x: x - hw, y: y + hh }];
       if (!corners.every(c => pointInPolygon(c, plot, 0))) continue;
       if (keep && (corners.some(c => pointInPolygon(c, keep, 0)) || pointInPolygon({ x, y }, keep, 0))) continue;
-      if (!insetOK(plot, corners)) continue;
+      if (!insetOK(plot, corners) || corners.some(inGarden) || inGarden({ x, y })) continue;
       if (placed.some(o => dist(o.p, { x, y }) < 1.9)) continue;
       cars.push({ x, y, heading, score: dist({ x, y }, anchor) });
     }

@@ -340,6 +340,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       const keyOf = mat => lib.reverse(mat);
       for (const fx of doc.fixtures.filter(f => f.level === L.id)) {
         const def = FIXTURES[fx.kind]; if (!def) continue;
+        if (def.outdoor && fx.kind !== 'tree') continue; // مسبح/شلال/عشب/أحواض: يرسمها site3d على أرض الحوش
         const dims = { w: fx.w ?? def.w, d: fx.d ?? def.d, h: fx.h ?? def.h, seed: fx.x * 3.1 + fx.y };
         const grp = buildFixture(THREE, fx.kind, dims, lib.fixtures);
         const m = fixtureMatrix(THREE, fx.x, fx.y, E, fx.rot || 0, fx.kind);

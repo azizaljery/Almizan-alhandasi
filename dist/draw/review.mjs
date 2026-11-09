@@ -36,7 +36,7 @@ export const RULES = Object.freeze({
   NO_ENTRY: { severity: 'warning' }, ENTRY_UNFLAGGED: { severity: 'info' }, UNREACHABLE_ROOM: { severity: 'warning' },
   NO_WINDOW: { severity: 'warning' }, WINDOW_RATIO: { severity: 'info' }, MIN_AREA: { severity: 'warning' }, MIN_WIDTH: { severity: 'warning' },
   CORRIDOR_NARROW: { severity: 'warning' }, BATH_PRIVACY: { severity: 'warning' }, BEDROOM_FROM_ENTRY: { severity: 'info' },
-  SWING_BLOCKED: { severity: 'warning' }, FIXTURE_OVERLAP: { severity: 'warning' }, FIXTURE_OUTSIDE: { severity: 'warning' },
+  SWING_BLOCKED: { severity: 'warning' }, FIXTURE_OVERLAP: { severity: 'warning' }, FIXTURE_OUTSIDE: { severity: 'warning' }, GARDEN_PLACEMENT: { severity: 'warning' },
   STAIR_NARROW: { severity: 'warning' }, STAIR_STEPS: { severity: 'info' }, EXTERIOR_THIN: { severity: 'info' }, OPENING_NEAR_END: { severity: 'info' },
 });
 
@@ -304,6 +304,16 @@ export function reviewDoc(doc, options = {}) {
     const fx = doc.fixtures.filter(f => f.level === L);
     for (let i = 0; i < fx.length; i++) {
       const f = fx[i];
+      if (FIXTURES[f.kind]?.outdoor) {
+        // عناصر الحديقة: يجب أن تقع داخل الأرض وخارج الغرف (يُفحص عند الدور الأرضي فقط)
+        if (f.kind !== 'tree' && L === doc.levels[0]?.id) {
+          const rect = fixtureRect(f), plotPoly = doc.plot?.polygon;
+          const inRoom = [...rect, { x: f.x, y: f.y }].some(p => lv.roomAt(p));
+          const outPlot = plotPoly?.length >= 3 && rect.some(p => !pointInPolygon(p, plotPoly, 0));
+          if (inRoom || outPlot) push('GARDEN_PLACEMENT', `${fixtureName(f.kind)} (${f.id}) ${inRoom ? 'يتداخل مع مبنى الفيلا' : 'يخرج عن حدود الأرض'}.`, [f.id]);
+        }
+        continue;
+      }
       if (!['car', 'tree', 'plant'].includes(f.kind) && !lv.roomAt({ x: f.x, y: f.y })) push('FIXTURE_OUTSIDE', `القطعة ${fixtureName(f.kind)} (${f.id}) تقع خارج أي غرفة.`, [f.id]);
       if (f.h < 0.1) continue;
       for (let j = i + 1; j < fx.length; j++) {

@@ -206,7 +206,7 @@ export function fixtureSymbol(f) {
   const rot = f.rot || 0, w = f.w, d = f.d, cs = Math.cos(rot), sn = Math.sin(rot);
   const loc = (x, y) => ({ x: f.x + x * cs - y * sn, y: f.y + x * sn + y * cs });
   const rectL = (x0, y0, x1, y1) => [loc(x0, y0), loc(x1, y0), loc(x1, y1), loc(x0, y1)];
-  const sym = { outline: rectL(-w / 2, -d / 2, w / 2, d / 2), lines: [], ellipses: [], rects: [], soft: f.kind === 'rug' || f.kind === 'tree' || f.kind === 'plant' };
+  const sym = { outline: rectL(-w / 2, -d / 2, w / 2, d / 2), lines: [], ellipses: [], rects: [], soft: f.kind === 'rug' || f.kind === 'tree' || f.kind === 'plant' || f.kind === 'lawn' };
   const L = (ax, ay, bx, by) => sym.lines.push([loc(ax, ay), loc(bx, by)]);
   switch (f.kind) {
     case 'bed-double': case 'bed-single': {
@@ -229,6 +229,12 @@ export function fixtureSymbol(f) {
     case 'dining-table': for (const sx of [-.3, .3]) for (const sy of [-1, 1]) sym.rects.push(rectL(sx * w - .2, sy * (d / 2 + .22) - .2, sx * w + .2, sy * (d / 2 + .22) + .2)); break;
     case 'car': L(-w / 2 + .1, d * .28, w / 2 - .1, d * .28); L(-w / 2 + .1, -d * .18, w / 2 - .1, -d * .18); L(-w / 2 + .1, d * .28, -w / 2 + .1, -d * .18); L(w / 2 - .1, d * .28, w / 2 - .1, -d * .18); break;
     case 'tree': case 'plant': sym.ellipses.push({ c: loc(0, 0), rx: Math.min(w, d) * .5, ry: Math.min(w, d) * .5, rot: 0 }); sym.outline = null; break;
+    case 'pool': {
+      const cp = Math.min(.35, Math.min(w, d) * .08); sym.rects.push(rectL(-w / 2 + cp, -d / 2 + cp, w / 2 - cp, d / 2 - cp));
+      for (let k = 1; k <= 3; k++) { const y = -d / 2 + cp + (d - 2 * cp) * k / 4; L(-w / 2 + cp + .3, y, w / 2 - cp - .3, y); } break; }
+    case 'waterfall': L(-w / 2, -d / 2 + .45, w / 2, -d / 2 + .45); L(-w * .3, -d / 2, -w * .3, -d / 2 + .45); L(w * .3, -d / 2, w * .3, -d / 2 + .45); sym.ellipses.push({ c: loc(0, d / 2 - .35), rx: w * .3, ry: .12, rot }); break;
+    case 'lawn': for (let k = -2; k <= 2; k++) L(-w / 2 + .2, k * d / 6, w / 2 - .2, k * d / 6); break;
+    case 'planter': sym.rects.push(rectL(-w / 2 + .08, -d / 2 + .08, w / 2 - .08, d / 2 - .08)); for (let k = 0; k < Math.max(2, Math.round(w / .8)); k++) sym.ellipses.push({ c: loc(-w / 2 + (k + .5) * w / Math.max(2, Math.round(w / .8)), 0), rx: .2, ry: .2, rot: 0 }); break;
     default: break;
   }
   return sym;
