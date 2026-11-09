@@ -32,3 +32,22 @@ test('الذوق: كل خيار في سؤال الذوق والطراز يُفه
   const b = buildBrief('3 غرف نوم ومجلس، ' + answerToText(TASTE_QUESTION, ['light', 'calm']));
   assert.ok(!b.questions.some(q => q.id === 'taste')); assert.deepEqual(b.requirements.prefs.taste, ['light', 'calm']);
 });
+
+// فصل الدرجات: شرط العميل يحجب، والعرف الافتراضي يؤخّر ويُعلن ولا يحجب
+import { splitFails, SOFT_FAIL_COST, generateVillaDesigns } from '../dist/villa-layout.mjs';
+import { SharaSession } from '../dist/home-flow.mjs';
+test('الدرجات: إخفاق قاعدة عرفية (custom) ليّن، وإخفاق ما قاله العميل صلب', () => {
+  const req = { rules: [{ id: 'R1', custom: true }, { id: 'R2' }] };
+  assert.deepEqual(splitFails([{ id: 'R1', ok: false }, { id: 'R2', ok: false }, { id: 'P-x', ok: false }, { id: 'R3', ok: true }], req), { hard: 2, soft: 1 });
+  assert.ok(SOFT_FAIL_COST > 0);
+});
+test('الدرجات: بديل لم يحقق عرفًا افتراضيًا لا يُحجب، ويبقى خلف من حققه، وسجله يعلن الإخفاق', () => {
+  const land = { length: 30, width: 20, streets: ['s'], entries: ['s'] };
+  const s = new SharaSession({ land }); s.start(); s.answer('mode', 'free'); s.answer('free', 'ابي فيلا دور واحد 4 غرف نوم ومجلس وصالة ومطبخ، احب الاضاءة الطبيعية والخصوصية');
+  const out = generateVillaDesigns({ land, counts: s.counts, requirements: s.requirements, keep: 5 });
+  assert.ok(out.designs.length >= 4, 'أربعة بدائل على الأقل: ' + out.designs.map(d => d.mode).join(','));
+  assert.ok(out.designs.every(d => d.fails === 0), 'لا بديل يخالف شرطًا قاله العميل');
+  assert.equal(out.designs[0].softFails, 0, 'الأول يحقق الأعراف كلها');
+  assert.equal(out.designs[0].mode, 'court', 'ذوق الإضاءة والخصوصية يقدّم الفناء');
+  for (const d of out.designs) assert.equal(d.ledger.filter(x => !x.ok).length, d.softFails, 'ما لم يتحقق من الأعراف ظاهر في السجل');
+});

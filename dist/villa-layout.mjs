@@ -1301,7 +1301,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
     const designs = [];
     // المرحلة الأولى بالترتيب كما كان؛ الثانية تكمّل الأنماط الغائبة (عدا الدمج والتعديل على نمط معروض)
     const plan = buildPlan(list0, { topUp: !blend && !prefPat, prefer: preferModes });
-    const stop1 = () => designs.length >= (blend ? 36 : keep * 3) + (hasRules ? 4 : 0) || (hasRules && designs.filter(d => !d.fails).length >= keep * 2);
+    const stop1 = () => designs.length >= (blend ? 36 : keep * 3) + (hasRules ? 4 : 0) || (hasRules && designs.filter(d => !d.fails && !d.softFails).length >= keep * 2);
     for (let cand; (cand = plan.next(designs, stop1));) {
       try {
         // المرآة: تحددها جهات العميل الجانبية (شرق/غرب) إن وُجدت، وإلا تنويع الاتجاه بين البدائل
@@ -1321,7 +1321,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
         const ledger = verifyRequest(relaxed, requirements, { entry });
         // مجلس الرجال بلا دورة مياه خاصة: عيب ضيافة يُؤخّر البديل خلف كل بديل سليم
         const wcMissing = layout.notes.some(n => /دورة مياه (?:الضيوف|الرجال) لم تتسع/.test(n)) ? 1 : 0;
-        designs.push({ maxBed: maxBedOf(q.metrics), area: cand.env.w * cand.env.d - (cand.court ? A_(cand.court) : 0), doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)], summary: describe(cand), rooms: layout.rooms, ledger, fails: ledger.filter(x => !x.ok).length, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) });
+        designs.push({ maxBed: maxBedOf(q.metrics), area: cand.env.w * cand.env.d - (cand.court ? A_(cand.court) : 0), doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, env: cand.env, pat: cand.pat, notes: [...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)], summary: describe(cand), rooms: layout.rooms, ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) });
       } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: e.message }); }
     }
   return designs;
@@ -1474,7 +1474,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
       const notes = [...new Set([...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0))} م²${pr.g.court ? ` مع حديقة داخلية ${Math.round(A_(pr.g.court))} م²` : ''} (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
       notes.push(...hallNotes(q.metrics, W, D));
       const ledger = verifyRequest(relaxed, requirements, { entry }), pen = pr.pen + (ui ? uCand.pen - pr.u.pen : 0);
-      designs.push({ maxBed: maxBedOf(q.metrics), area: env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0), doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(pen), quality: r2(pen + q.cost), same: !!prefPat && uPat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, env, notes, pat: uPat, summary: describe(pr.g) + ' (دوران)', ledger, fails: ledger.filter(x => !x.ok).length, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) });
+      designs.push({ maxBed: maxBedOf(q.metrics), area: env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0), doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(pen), quality: r2(pen + q.cost + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && uPat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, env, notes, pat: uPat, summary: describe(pr.g) + ' (دوران)', ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id)).map(x => +x.id.slice(1))) });
       break;
     } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: pr.pat, why: e.message }); }
   }
@@ -1510,7 +1510,7 @@ function applyElevators(picked, requirements) {
       d.doc = doc; d.elevator = report;
       if (Array.isArray(d.ledger)) {
         d.ledger = [...d.ledger.filter(x => !/^E-/.test(x.id)), ...verifyRequest(doc, { prefs: { elevator: true } }, { entry: 's' }).filter(x => /^E-/.test(x.id))];
-        d.fails = d.ledger.filter(x => !x.ok).length;
+        d.fails = splitFails(d.ledger, requirements).hard;
       }
       if (Array.isArray(d.notes)) d.notes.push(...report.notes);
     } catch (e) { if (Array.isArray(d.notes)) d.notes.push('تعذّر تخطيط المصعد لهذا البديل: ' + e.message); }
@@ -1526,7 +1526,7 @@ function applyGardens(picked, requirements) {
       // السجل حُسب قبل رسم الحوش فبنود G-* فيه قديمة (تقول «لم يتسع» والمسبح مرسوم): أعد حسابها على المستند الجديد
       if (Array.isArray(d.ledger)) {
         d.ledger = [...d.ledger.filter(x => !/^G-/.test(x.id)), ...verifyRequest(doc, { prefs: { outdoor: want } }, { entry: 's' }).filter(x => /^G-/.test(x.id))];
-        d.fails = d.ledger.filter(x => !x.ok).length;
+        d.fails = splitFails(d.ledger, requirements).hard;
       }
       if (Array.isArray(d.notes)) d.notes.push(...report.notes);
     } catch (e) { if (Array.isArray(d.notes)) d.notes.push('تعذّر تخطيط الحديقة لهذا البديل: ' + e.message); }
@@ -1687,6 +1687,17 @@ function buildPlan(list, { modeOf = c => c.mode, topUp = true, perMode = 2, tota
  * - لا أكثر من MODE_CAP بدائل بالنمط نفسه متى وُجد نمط آخر صالح؛ ولا حشو: ما لا يصلح لا يُعرض.
  * - prefer: أنماط يُقدَّمها ذوق العميل (requirements.tweaks.preferModes) عند التقارب، دون فرضها.
  */
+/** كلفة إخفاق قاعدة عرفية واحدة: تؤخّر البديل خلف من حققها، ولا تحجبه (افتراض تصميمي للميزان). */
+export const SOFT_FAIL_COST = 45;
+/**
+ * فصل الدرجات: «شرط العميل» (ما قاله أو اختاره) إخفاقه يحجب البديل متى وُجد من نفّذه؛ «العرف الافتراضي» القابل للتغيير
+ * (قاعدة مكانية custom أضافتها شرعاء من الأعراف، مثل «الطعام بجوار المجلس») إخفاقه يُعلن في السجل ويؤخّر البديل فقط.
+ */
+export function splitFails(ledger = [], requirements = {}) {
+  const custom = new Set((requirements.rules || []).filter(r => r.custom).map(r => r.id));
+  let hard = 0, soft = 0; for (const x of ledger) if (!x.ok) (custom.has(x.id) ? soft++ : hard++);
+  return { hard, soft };
+}
 function diversify(designs, keep, { prefer = [] } = {}) {
   const best = designs[0];
   if (!best) return [];
