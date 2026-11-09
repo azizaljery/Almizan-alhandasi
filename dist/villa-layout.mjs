@@ -1406,6 +1406,11 @@ function applyGardens(picked, requirements) {
     try {
       const { doc, report } = planGarden(d.doc, want);
       d.doc = doc; d.garden = report;
+      // السجل حُسب قبل رسم الحوش فبنود G-* فيه قديمة (تقول «لم يتسع» والمسبح مرسوم): أعد حسابها على المستند الجديد
+      if (Array.isArray(d.ledger)) {
+        d.ledger = [...d.ledger.filter(x => !/^G-/.test(x.id)), ...verifyRequest(doc, { prefs: { outdoor: want } }, { entry: 's' }).filter(x => /^G-/.test(x.id))];
+        d.fails = d.ledger.filter(x => !x.ok).length;
+      }
       if (Array.isArray(d.notes)) d.notes.push(...report.notes);
     } catch (e) { if (Array.isArray(d.notes)) d.notes.push('تعذّر تخطيط الحديقة لهذا البديل: ' + e.message); }
   }

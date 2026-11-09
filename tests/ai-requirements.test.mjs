@@ -73,3 +73,20 @@ test('من محادثة شرعاء إلى المخطط: ما فهمه Claude ي�
   const { reply } = await redesign(ds, { text: 'خل المكتب ورى', ai: sanitizeAiRequirements({ rules: [{ kind: 'place', a: 'office', side: 'back', mode: 'half', quote: 'المكتب ورى' }], extras: [{ kind: 'office' }], unclear: [] }) });
   assert.ok(reply.done.some(t => /المكتب/.test(t)), JSON.stringify(reply));
 });
+
+test('مسار Claude (مزوّد وهمي): المسبح والشلال والحديقة تصل إلى الخطة ولا تُعرض كغير مدعومة', async () => {
+  const ENV2 = { ANTHROPIC_API_KEY: 'unit-test-only', MIZAN_ACCESS_CODE: 'c', ALLOWED_ORIGIN: ORIGIN };
+  const worker = createWorker({}, async (url, init) => { assert.match(JSON.parse(init.body).system, /الحوش الخارجي/); return Response.json({ stop_reason: 'tool_use', model: 'm', content: [{ type: 'tool_use', id: 't', name: 'submit_home_brief', input: { summary: 's', assumptions: [], questions: [], unhandled: ['المسبح والشلال غير ممثلين في rooms'], rooms: [{ name: 'غرفة نوم', type: 'bedroom', area: 16, position: 'back', side: 'any' }], requirements: { rules: [], unclear: ['مسبح'] } } }] }); });
+  const text = 'ابي مسبح وشلال وحديقة';
+  const r = await worker.fetch(new Request('https://w/api/assistant', { method: 'POST', headers: { Origin: ORIGIN, 'Content-Type': 'application/json', 'X-Mizan-Access-Code': 'c' }, body: JSON.stringify({ prompt: text, plot: { width: 30, length: 40, floors: 1, streets: { s: true } } }) }), ENV2);
+  const { brief } = await r.json(); const land = { width: 30, length: 40, streets: ['s'], entries: ['s'], floors: 1 };
+  const s = new SharaSession({ land }); s.start(); s.answer('mode', 'free');
+  const msgs = s.answer('free', { text, counts: {}, requirements: brief.requirements, assumptions: brief.assumptions, questions: [...brief.questions, ...brief.unhandled] });
+  assert.deepEqual(s.brief.requirements.prefs.outdoor, { pool: true, waterfall: true, lawn: true, planters: true });
+  assert.deepEqual(s.brief.requirements.unclear, []);
+  assert.ok(!JSON.stringify(msgs).includes('غير ممثلين'), 'ضجيج الذكاء عن الحوش لا يُعرض');
+  s.answer('counts', BASE);
+  const out = await generateInitialDesign({ land, counts: s.counts, requirements: s.requirements });
+  const g = out.ledger.filter(x => /^G-/.test(x.id));
+  assert.equal(g.length, 4); assert.ok(g.every(x => x.ok), g.map(x => x.id + ' ' + x.why).join('؛ '));
+});

@@ -16,6 +16,8 @@ import { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE } 
 import { SPACE } from './shara/lexicon.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
 
+// الحوش الخارجي يفهمه المحلي ويرسمه؛ لا نعرض قول الذكاء إنه «غير ممثل/غير مدعوم» فيناقض ما رُسم
+const OUTDOOR_AI_NOISE = x => /مسبح|شلال|حديقة|عشب|احواض|أحواض/.test(x) && /غير (?:مدعوم|ممثل|منفذ|متاح|مطبق)|لا (?:يمكن|يدعم|يمثل|يُمثل)|خارج (?:برنامج|نطاق)/.test(x);
 export const SHARA_NAME = 'شرعاء';
 export const SHARA_WELCOME = 'أهلاً بك، أنا شرعاء، مساعدك الذكي لفهم احتياجاتك في تصميم منزلك.';
 export const SHARA_GOAL = 'سأسألك عن نمط حياتك لأفهمك، ثم أبني عليه تصميمًا دقيقًا يناسبك.';
@@ -129,7 +131,7 @@ export class SharaSession {
     this.texts.push(text.slice(0, 2000));
     if (value && typeof value === 'object' && value.requirements && typeof value.requirements === 'object') this.ai = value.requirements;
     // ملاحظات الذكاء المتصل (إن وُجد) تُعرض مرة واحدة ولا تُفسَّر برنامجًا
-    this.aiNotes = value && typeof value === 'object' ? [...(value.assumptions || []), ...(value.questions || [])].filter(x => typeof x === 'string' && x.trim()).slice(0, 4) : [];
+    this.aiNotes = value && typeof value === 'object' ? [...(value.assumptions || []), ...(value.questions || [])].filter(x => typeof x === 'string' && x.trim() && !OUTDOOR_AI_NOISE(x)).slice(0, 4) : [];
     return text;
   }
   /** answer(id, value): value حسب نوع السؤال. يعيد الرسائل التالية. */
