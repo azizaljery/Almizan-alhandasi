@@ -40,8 +40,10 @@ test('الأوزان مجموعها 1، والمحور الأعلى يرفع و�
   assert.ok(hi.circulation > lo.circulation);
 });
 
+// برنامج 4 غرف نوم: بدائله تختلف في مقاييس البصمة. ببرنامج 3 غرف صارت البدائل كلها متوازنة المقاسات (ROOM_CAPS) فتتساوى درجتها بالميزان المحايد وميزان العميل.
+const counts4 = { ...counts, bedrooms: 4, baths: 4 }, rooms4 = defaultRooms(counts4);
 test('التوليد يعيد بصمة وبدائل محوّلة وبصمة هندسة تطابق المستند', async () => {
-  const out = await generateInitialDesign({ land, rooms, discovery: rich, idea: '', counts });
+  const out = await generateInitialDesign({ land, rooms: rooms4, discovery: rich, idea: '', counts: counts4 });
   assert.ok(out.dna && out.dna.rows.length === out.alternativesCount);
   assert.equal(out.dna.selectedIndex, out.selectedIndex);
   assert.ok(Number.isInteger(out.dna.bestIndex));
@@ -52,8 +54,8 @@ test('التوليد يعيد بصمة وبدائل محوّلة وبصمة هن
 });
 
 test('إجابات مختلفة تعطي بصمة ميزان مختلفة وأوزانًا مختلفة (البصمة مؤثرة لا شكلية)', async () => {
-  const a = await generateInitialDesign({ land, rooms, discovery: empty, idea: '', counts });
-  const b = await generateInitialDesign({ land, rooms, discovery: rich, idea: '', counts });
+  const a = await generateInitialDesign({ land, rooms: rooms4, discovery: empty, idea: '', counts: counts4 });
+  const b = await generateInitialDesign({ land, rooms: rooms4, discovery: rich, idea: '', counts: counts4 });
   assert.notEqual(a.dna.fingerprint, b.dna.fingerprint);
   assert.notDeepEqual(a.dna.rows.map(r => r.score), b.dna.rows.map(r => r.score));
 });
