@@ -49,7 +49,7 @@ await step('الرحلة', async () => {
   await page.fill('#chat textarea', '4 غرف نوم ومجلس رجال بمدخل مستقل ومجلس نساء ومقلط ومطبخ مفتوح على الطعام وصالة، المطبخ في الخلف');
   await page.click('#chat .free .cta'); await page.waitForSelector('#program', { timeout: 30000 });
   check('شرعاء: البرنامج المعماري ظاهر', (await page.$$('#program tr')).length >= 4);
-  await Promise.all([page.waitForURL('**/design.html', { timeout: 120000 }), page.click('#chat .cta:has-text("توليد التصميم")')]);
+  await Promise.all([page.waitForURL(/\/design(\.html)?(\?.*)?$/, { timeout: 120000 }), page.click('#chat .cta:has-text("توليد التصميم")')]);
   await page.waitForSelector('#ledger', { timeout: 60000 }); await page.waitForTimeout(800);
   // 4) التصميم
   const t = await bodyText(page);
@@ -68,7 +68,7 @@ await step('الرحلة', async () => {
   await page.waitForFunction(n => document.querySelectorAll('.history button').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25, Math.max(1, nDesigns), { timeout: 90000 });
   check('«ابي تصميم بديل»: تصميم جديد', (await page.$$('.history button')).length > Math.max(1, nDesigns), await page.evaluate(() => document.querySelector('#fbStatus')?.textContent || ''));
   // 5) ثلاثي الأبعاد
-  await Promise.all([page.waitForURL('**/view3d.html', { timeout: 60000 }), page.click('#btnApprove')]); await page.waitForTimeout(4000);
+  await Promise.all([page.waitForURL(/\/view3d(\.html)?(\?.*)?$/, { timeout: 60000 }), page.click('#btnApprove')]); await page.waitForTimeout(4000);
   check('ثلاثي الأبعاد: مجسم أو مسقط بديل', await page.evaluate(() => !!document.querySelector('#stage canvas, .v3 canvas') || !!document.querySelector('#stage svg')));
   // 6) المخرجات
   await page.goto(`${BASE}/final.html`); await page.waitForTimeout(6000);
