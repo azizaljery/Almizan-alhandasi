@@ -233,6 +233,10 @@ export function fixtureSymbol(f) {
       const cp = Math.min(.35, Math.min(w, d) * .08); sym.rects.push(rectL(-w / 2 + cp, -d / 2 + cp, w / 2 - cp, d / 2 - cp));
       for (let k = 1; k <= 3; k++) { const y = -d / 2 + cp + (d - 2 * cp) * k / 4; L(-w / 2 + cp + .3, y, w / 2 - cp - .3, y); } break; }
     case 'waterfall': L(-w / 2, -d / 2 + .45, w / 2, -d / 2 + .45); L(-w * .3, -d / 2, -w * .3, -d / 2 + .45); L(w * .3, -d / 2, w * .3, -d / 2 + .45); sym.ellipses.push({ c: loc(0, d / 2 - .35), rx: w * .3, ry: .12, rot }); break;
+    case 'carport': { const n = Math.max(1, Math.round(w / 2.7)); for (let k = 0; k < n; k++) { const x0 = -w / 2 + k * w / n + .15, x1 = -w / 2 + (k + 1) * w / n - .15; sym.rects.push(rectL(x0, -d / 2 + .25, x1, d / 2 - .25)); L(x0, -d / 2 + .25, x1, d / 2 - .25); L(x0, d / 2 - .25, x1, -d / 2 + .25); } break; }
+    case 'pergola': for (const sx of [-1, 1]) for (const sy of [-1, 1]) sym.rects.push(rectL(sx * (w / 2 - .12) - .08, sy * (d / 2 - .12) - .08, sx * (w / 2 - .12) + .08, sy * (d / 2 - .12) + .08)); for (let k = 1; k < 6; k++) L(-w / 2 + k * w / 6, -d / 2, -w / 2 + k * w / 6, d / 2); break;
+    case 'bbq': sym.ellipses.push({ c: loc(-w * .18, 0), rx: Math.min(.2, d * .3), ry: Math.min(.2, d * .3), rot: 0 }); L(w * .15, -d / 2, w * .15, d / 2); break;
+    case 'fountain': sym.ellipses.push({ c: loc(0, 0), rx: w * .5, ry: w * .5, rot: 0 }, { c: loc(0, 0), rx: w * .3, ry: w * .3, rot: 0 }, { c: loc(0, 0), rx: w * .08, ry: w * .08, rot: 0 }); sym.outline = null; break;
     case 'lawn': for (let k = -2; k <= 2; k++) L(-w / 2 + .2, k * d / 6, w / 2 - .2, k * d / 6); break;
     case 'planter': sym.rects.push(rectL(-w / 2 + .08, -d / 2 + .08, w / 2 - .08, d / 2 - .08)); for (let k = 0; k < Math.max(2, Math.round(w / .8)); k++) sym.ellipses.push({ c: loc(-w / 2 + (k + .5) * w / Math.max(2, Math.round(w / .8)), 0), rx: .2, ry: .2, rot: 0 }); break;
     default: break;

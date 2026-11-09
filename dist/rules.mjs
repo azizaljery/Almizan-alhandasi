@@ -431,6 +431,13 @@ function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
     }
     if (od.waterfall) { const n = fx('waterfall').length; out.push({ id: 'G-waterfall', kind: 'pref', text: 'شلال', ok: n > 0, why: n ? '' : 'الشلال لم يجد موضعًا حرًا في الحوش.' }); }
     if (od.lawn) { const n = fx('lawn').length; out.push({ id: 'G-lawn', kind: 'pref', text: 'حديقة بعشب', ok: n > 0, why: n ? '' : 'لا توجد مساحة حرّة تكفي لمسطح عشبي.' }); }
+    if (od.carport) {
+      const cs = fx('carport'), cap = cs.reduce((a, f) => a + Math.max(1, Math.round(Math.max(f.w, f.d) / 2.7)), 0), need = Number(od.carport) || 2;
+      out.push({ id: 'G-carport', kind: 'pref', text: `مظلة سيارات لـ${need}`, ok: cap >= need, why: !cs.length ? 'مظلة السيارات لم تجد موضعًا حرًا في الحوش.' : cap < need ? `المظلة تتسع لـ${cap} من ${need} سيارات في الحوش الحرّ.` : '' });
+    }
+    if (od.pergola) { const n = fx('pergola').length; out.push({ id: 'G-pergola', kind: 'pref', text: 'برجولة / جلسة خارجية', ok: n > 0, why: n ? '' : 'لا يتسع حوش حرّ للبرجولة.' }); }
+    if (od.bbq) { const n = fx('bbq').length; out.push({ id: 'G-bbq', kind: 'pref', text: 'ركن شواء', ok: n > 0, why: n ? '' : 'لا يتسع حوش حرّ لركن الشواء.' }); }
+    if (od.fountain) { const n = fx('fountain').length; out.push({ id: 'G-fountain', kind: 'pref', text: 'نافورة', ok: n > 0, why: n ? '' : 'لا يتسع حوش حرّ للنافورة.' }); }
     if (od.planters) { const n = fx('planter').length; out.push({ id: 'G-planters', kind: 'pref', text: 'أحواض زراعة', ok: n > 0, why: n ? '' : 'لا يوجد طول حرّ على السور لأحواض الزراعة.' }); }
   }
   if (pr.floors) { const n = doc.levels.length; out.push({ id: 'P-floors', kind: 'pref', text: pr.floors === 2 ? 'دوران' : 'دور واحد', ok: n === pr.floors, why: n === pr.floors ? '' : `التصميم ${n === 2 ? 'بدورين' : 'بدور واحد'}.` }); }

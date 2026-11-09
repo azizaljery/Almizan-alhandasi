@@ -14,6 +14,7 @@ export const POOL_DEPTH_ASSUMED = 1.4;
 /** كميات الحديقة من القطع الخارجية: المساحات مقيسة من أبعادها، والحجم بعمق مفترض معلن. */
 function gardenRows(doc) {
   const by = k => (doc.fixtures || []).filter(f => f.kind === k);
+  const carports = by('carport'), pergolas = by('pergola'), bbqs = by('bbq'), fountains = by('fountain');
   const pools = by('pool'), falls = by('waterfall'), lawns = by('lawn'), planters = by('planter');
   const area = l => r2(l.reduce((a, f) => a + f.w * f.d, 0));
   const rows = [];
@@ -23,6 +24,10 @@ function gardenRows(doc) {
   }
   if (falls.length) rows.push({ id: 'waterfalls', label: 'الشلالات', value: falls.length, unit: 'عدد', grade: 'measured', basis: 'قطع الشلال في الرسم؛ المضخة والتدوير غير محسوبة' });
   if (lawns.length) rows.push({ id: 'lawnArea', label: 'مساحة العشب', value: area(lawns), unit: 'م²', grade: 'measured', basis: `${lawns.length} مسطح عشبي بأبعاده في الرسم` });
+  if (carports.length) rows.push({ id: 'carportArea', label: 'مساحة مظلة السيارات', value: area(carports), unit: 'م²', grade: 'measured', basis: `${carports.length} مظلة بأبعادها في الرسم؛ الهيكل والتسقيف غير محسوبين، وعرض الموقف 2.7 م افتراض تصميمي غير متحقق نظاميًا` });
+  if (pergolas.length) rows.push({ id: 'pergolaArea', label: 'مساحة البرجولة', value: area(pergolas), unit: 'م²', grade: 'measured', basis: `${pergolas.length} برجولة بأبعادها في الرسم؛ الهيكل غير محسوب` });
+  if (bbqs.length) rows.push({ id: 'bbqCount', label: 'أركان الشواء', value: bbqs.length, unit: 'عدد', grade: 'measured', basis: 'قطع في الرسم؛ التجهيزات غير محسوبة' });
+  if (fountains.length) rows.push({ id: 'fountainCount', label: 'النوافير', value: fountains.length, unit: 'عدد', grade: 'measured', basis: 'قطع في الرسم؛ المضخة والتدوير غير محسوبين' });
   if (planters.length) rows.push({ id: 'planterLength', label: 'أطوال أحواض الزراعة', value: r2(planters.reduce((a, f) => a + Math.max(f.w, f.d), 0)), unit: 'م', grade: 'measured', basis: `${planters.length} حوض` });
   return rows;
 }

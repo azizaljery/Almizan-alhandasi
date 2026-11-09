@@ -84,8 +84,8 @@ export function siteSheet(doc, opts = {}) {
   // الحديقة: مسبح، شلال، عشب، أحواض (قطع خارجية في المستند)
   const garden = (doc.fixtures || []).filter(f => FIXTURES[f.kind]?.outdoor && f.kind !== 'tree');
   for (const f of garden) {
-    const sym = fixtureSymbol(f), fill = f.kind === 'pool' || f.kind === 'waterfall' ? '#e6e6e6' : f.kind === 'lawn' ? '#f4f4f4' : '#fff';
-    g.push(`<g class="garden-item" data-kind="${f.kind}" data-id="${f.id}">`, poly(sym.outline, `fill="${fill}" stroke="#000" stroke-width="${LW.medium}"`));
+    const sym = fixtureSymbol(f), fill = f.kind === 'pool' || f.kind === 'waterfall' || f.kind === 'fountain' ? '#e6e6e6' : f.kind === 'lawn' ? '#f4f4f4' : '#fff';
+    g.push(`<g class="garden-item" data-kind="${f.kind}" data-id="${f.id}">`, sym.outline ? poly(sym.outline, `fill="${fill}" stroke="#000" stroke-width="${LW.medium}"`) : '');
     for (const r of sym.rects) g.push(poly(r, `fill="none" stroke="#000" stroke-width="${LW.thin}"`));
     for (const [a, b] of sym.lines) g.push(`<line x1="${n1(X(a.x))}" y1="${n1(Y(a.y))}" x2="${n1(X(b.x))}" y2="${n1(Y(b.y))}" stroke="#000" stroke-width="${LW.thin}"${f.kind === 'pool' ? ` stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.8))}"` : ''}/>`);
     for (const e of sym.ellipses) g.push(`<ellipse cx="${n1(X(e.c.x))}" cy="${n1(Y(e.c.y))}" rx="${n1(e.rx * k)}" ry="${n1(e.ry * k)}" fill="none" stroke="#000" stroke-width="${LW.thin}"/>`);

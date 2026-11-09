@@ -154,7 +154,7 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     'coffee-table': coffeeTable, 'tv-unit': tvUnit, 'majlis-sofa': majlisSofa,
     'dining-table': diningTable, chair: () => chair(0, 0, 0, w, d, h),
     'kitchen-run': kitchenRun, fridge, stove, wc, basin, shower, bathtub, 'washing-machine': washingMachine,
-    plant, rug, car, tree, palm, shrub, pool, waterfall, lawn, planter,
+    plant, rug, car, tree, palm, shrub, pool, waterfall, lawn, planter, carport, pergola, bbq, fountain,
   };
 
   function bed(bw, bd, dbl) {
@@ -513,6 +513,33 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     box('coping', w, h, d, 0, 0, 0); box('soil', w - .1, .04, d - .1, 0, h, 0);
     const R = rng(Math.round((dims.seed ?? 3) * 311) + 5), n = Math.max(2, Math.round(w / .8));
     for (let i = 0; i < n; i++) { const s = .32 + R() * .12; ell(i % 2 ? 'leafA' : 'leafB', s, s * .8, s, -w / 2 + (i + .5) * w / n, h + s * .7, (R() - .5) * d * .3, 10, 7); }
+  }
+
+  function carport() {
+    // مظلة سيارات مفتوحة: أعمدة فولاذ وسقف مسطح بحافة (الأبعاد تصميمية)
+    const px = .12, ph = h, inset = .15;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) box('blackMetal', px, ph, px, sx * (w / 2 - inset), 0, sz * (d / 2 - inset));
+    box('blackMetal', w, .12, d, 0, ph, 0); box('woodLight', w - .2, .05, d - .2, 0, ph + .12, 0);
+    box('potStone', w, .02, d, 0, 0, 0);
+  }
+
+  function pergola() {
+    const px = .14, ph = h;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) box('woodDark', px, ph, px, sx * (w / 2 - .12), 0, sz * (d / 2 - .12));
+    box('woodDark', w, .12, .12, 0, ph - .12, -d / 2 + .12); box('woodDark', w, .12, .12, 0, ph - .12, d / 2 - .12);
+    const n = Math.max(5, Math.round(w / .35)); for (let i = 0; i < n; i++) box('woodMid', .07, .08, d, -w / 2 + (i + .5) * w / n, ph, 0);
+    box('coping', w, .03, d, 0, 0, 0);
+  }
+
+  function bbq() {
+    box('rock', w, .75, d, 0, 0, 0); box('blackMetal', w - .12, .04, d - .12, 0, .75, 0); box('steel', w * .55, .01, d - .2, -w * .1, .79, 0);
+    box('rockDark', .4, h - .75 + .3, .35, w / 2 - .3, .75, -d / 2 + .25);
+  }
+
+  function fountain() {
+    const r = Math.min(w, d) / 2; cyl('coping', r, r, .35, 0, 0, 0, 24); cyl('poolWater', r - .1, r - .1, .02, 0, .33, 0, 24);
+    cyl('coping', .14, .18, h - .35, 0, .3, 0, 12); cyl('coping', r * .42, r * .42, .06, 0, h * .62, 0, 16); cyl('poolWater', r * .38, r * .38, .015, 0, h * .62 + .06, 0, 16);
+    cyl('poolWater', .03, .06, .35, 0, h * .62 + .06, 0, 8);
   }
 
   function shrub() {

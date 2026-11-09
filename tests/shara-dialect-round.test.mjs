@@ -34,8 +34,8 @@ test('«بس/فقط» بعد قائمة صريحة: لا مجلس ولا مقل�
   assert.ok(rowIds(buildBrief('بيت 3 غرف وصالة ومطبخ')).includes('majlis_men'));
 });
 
-test('جلسة خارجية وبرجولة وشواية تُقال بصدق ولا تُهمل', () => {
+test('جلسة خارجية وبرجولة وشواية صارت تُرسم ولا تُهمل', () => {
   const b = buildBrief('ابي مسبح وجلسة خارجية وبرجولة وكوفي شوب');
-  assert.ok(b.unsupported.some(u => /الجلسات الخارجية والبرجولة/.test(u)));
-  assert.equal(b.requirements.prefs.outdoor.pool, true);
+  assert.ok(!b.unsupported.some(u => /الجلسات الخارجية والبرجولة/.test(u)));
+  assert.equal(b.requirements.prefs.outdoor.pool, true); assert.equal(b.requirements.prefs.outdoor.pergola, true);
 });
