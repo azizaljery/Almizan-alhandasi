@@ -170,7 +170,8 @@ test('الأسئلة: ما ينقص فعلًا فقط، بترتيب الأثر�
   const b1 = buildBrief('مجلس وصالة، 4 غرف نوم');
   assert.ok(!qids(b1).includes('bedrooms')); assert.deepEqual(qids(b1), ['women_majlis', 'service', 'kitchen_style']);
   const b2 = buildBrief('مجلس وصالة، 4 غرف نوم', { skipped: ['women_majlis', 'service'] });
-  assert.deepEqual(qids(b2), ['kitchen_style']);
+  assert.deepEqual(qids(b2), ['kitchen_style', 'taste'], 'الذوق يُسأل آخرًا بعد ما يغيّر الهيكل');
+  assert.ok(!qids(buildBrief('مجلس وصالة، 4 غرف نوم، احب الخصوصية', { skipped: ['women_majlis', 'service'] })).includes('taste'), 'من ذكر ذوقه لا يُسأل عنه');
   const q = b1.questions.find(q => q.id === 'women_majlis');
   assert.equal(answerToText(q, 'no'), 'مجلس النساء غير مطلوب'); assert.equal(answerToText(q, { picks: ['yes'], text: '' }), 'ومجلس نساء');
   const b3 = buildBrief('مجلس وصالة، 4 غرف نوم، ' + answerToText(q, 'no'));
@@ -240,10 +241,10 @@ test('المعجم: الأعداد قبل الاسم وبعده وبالمثنى
   assert.ok(SPACES.length >= 30);
 });
 
-test('المسار الإرشادي: خمس خطوات بترتيب الأثر وكل خطوة بسببها وخيارات وكتابة حرة', () => {
-  assert.deepEqual(GUIDED_STEPS.map(s => s.id), ['g_family', 'g_guests', 'g_sleep', 'g_kitchen', 'g_extras']);
+test('المسار الإرشادي: سبع خطوات بترتيب الأثر (البرنامج ثم الذوق والطراز) وكل خطوة بسببها وخيارات وكتابة حرة', () => {
+  assert.deepEqual(GUIDED_STEPS.map(s => s.id), ['g_family', 'g_guests', 'g_sleep', 'g_kitchen', 'g_extras', 'g_taste', 'g_style']);
   for (const s of GUIDED_STEPS) { assert.match(s.reason, /^أسأل/); assert.ok(s.options.length >= 3); assert.equal(s.free, true); }
-  const text = GUIDED_STEPS.map((s, i) => answerToText(s, [['mother'], ['both', 'frequent'], ['ensuite'], ['closed', 'maid'], ['office']][i])).join('، ') + '، 3 اولاد وبنتين صغار';
+  const text = GUIDED_STEPS.map((s, i) => answerToText(s, [['mother'], ['both', 'frequent'], ['ensuite'], ['closed', 'maid'], ['office'], ['spacious'], ['modern']][i])).join('، ') + '، 3 اولاد وبنتين صغار';
   const b = buildBrief(text);
   assert.deepEqual(b.counts, { bedrooms: 5, majlis: 2, baths: 8, kitchens: 1, halls: 1, dining: 1 });
   assert.equal(b.questions.length, 0, 'بعد الإرشادي الكامل لا أسئلة متبقية');

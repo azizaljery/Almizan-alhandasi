@@ -273,7 +273,9 @@ function paint() {
 
 // ------------------------------------------------------------------------------------------ الأفعال
 function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(doc)); } catch { /* التخزين غير متاح */ } }
-function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); location.href = './view3d.html'; }
+// طراز العميل («مودرن»، «نجدي»...) يصل إلى اختيار الواجهة في العرض ثلاثي الأبعاد؛ بلا طراز يُمسح الاختيار السابق حتى لا يرث تصميمًا آخر
+function storeFacadeWish() { try { const w = session.input.requirements?.prefs?.styleWish; if (w) localStorage.setItem('mizan.facade.wish', w); else localStorage.removeItem('mizan.facade.wish'); } catch { /* التخزين غير متاح: يبقى اقتراح الميزان */ } }
+function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); storeFacadeWish(); location.href = './view3d.html'; }
 function onStudio() {
   const alternatives = (session.alternatives || []).map(a => { try { return { index: a.index, strategy: a.strategy, doc: JSON.parse(a.doc) }; } catch { return null; } }).filter(Boolean);
   try { writeHandoff(sessionStorage, doc, { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }

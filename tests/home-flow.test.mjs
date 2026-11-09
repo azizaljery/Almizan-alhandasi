@@ -41,7 +41,10 @@ test('شرعاء الإرشادي: أسئلة بترتيب الأثر (الأس�
   const c = s.answer('g_guests', ['both']); assert.equal(c[0].id, 'g_sleep');
   const d = s.answer('g_sleep', ['ensuite']); assert.equal(d[0].id, 'g_kitchen');
   const e = s.answer('g_kitchen', ['closed', 'maid']); assert.equal(e[0].id, 'g_extras');
-  const f = s.answer('g_extras', ['office', 'pool']);
+  const f0 = s.answer('g_extras', ['office', 'pool']); assert.equal(f0[0].id, 'g_taste', 'الذوق يُسأل بعد البرنامج');
+  const f1 = s.answer('g_taste', ['light', 'privacy']); assert.equal(f1[0].id, 'g_style');
+  const f = s.answer('g_style', ['najdi']);
+  assert.deepEqual(s.requirements.prefs.taste, ['light', 'privacy']); assert.equal(s.requirements.prefs.style, 'najdi'); assert.deepEqual(s.requirements.tweaks.preferModes, ['court', 'L', 'tee']);
   assert.equal(f[0].kind, 'program', 'النتيجة جدول البرنامج نفسه');
   const by = Object.fromEntries(f[0].rows.map(r => [r.id, r]));
   assert.equal(by.majlis_men.count, 1); assert.equal(by.majlis_women.count, 1); assert.equal(by.bedroom_boys.count, 2); assert.equal(by.bedroom_girls.count, 1); assert.equal(by.elderly_room.count, 1); assert.equal(by.maid.count, 1); assert.equal(by.office.count, 1);
@@ -55,8 +58,8 @@ test('شرعاء الإرشادي: أسئلة بترتيب الأثر (الأس�
 });
 test('شرعاء الإرشادي: تخطّي كل الخطوات يعطي برنامجًا افتراضيًا معلنًا لا خطأ', () => {
   const s = new SharaSession(); s.start(); s.answer('mode', 'guided');
-  for (const id of ['g_family', 'g_guests', 'g_sleep', 'g_kitchen']) s.answer('skip', id);
-  const out = s.answer('skip', 'g_extras');
+  for (const id of ['g_family', 'g_guests', 'g_sleep', 'g_kitchen', 'g_extras', 'g_taste']) s.answer('skip', id);
+  const out = s.answer('skip', 'g_style');
   assert.equal(out[0].kind, 'program'); assert.ok(out[0].rows.every(r => r.source === 'custom'));
   assert.equal(s.counts.bedrooms, 1);
 });

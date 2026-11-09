@@ -136,6 +136,9 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
   if (has(/(?<![\u0600-\u06FF])[وبل]?(?:ال)?(?:مصعد|مصاعد|اسانسير|اسنسير|ليفت)(?![\u0600-\u06FF])/) && !has(/(?:ما|لا|بدون|بلا|مو|ليس|من غير|غير) ?(?:ابي|ابغى|ابغي|اريد|نبي|احتاج|محتاج|يلزم|لازم|فيه|في)? ?(?:ال)?(?:مصعد|مصاعد|اسانسير|اسنسير|ليفت)/)) { prefs.elevator = true; understood.push('مصعد يخدم الدورين (بئر في الصالة بجوار الدرج)'); }
   if (has(/قبو|بدروم/)) unsupported.push('القبو: غير مدعوم في هذا الإصدار.');
 
+  // ذوق العميل: كلمات وصفية («مودرن»، «فخمة»، «إضاءة طبيعية»، «خصوصية»...) تتحول إلى روافع تصميم معلنة له؛ لا تُهمل ولا تُخمَّن منها أعداد.
+  applyTaste(t, { prefs, tweaks, understood });
+
   // حمام لكل غرفة يرفع عدد دورات المياه إلى ما يكفي
   if (prefs.allEnsuite && c.bedrooms) {
     const need = c.bedrooms + Math.min(2, c.majlis || 0) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
@@ -165,6 +168,44 @@ export function unclearClauses(text) {
   return out.slice(0, 6);
 }
 function label(key) { return { master: 'الغرفة الرئيسية', majlis: 'المجلس', hall: 'الصالة', dining: 'الطعام', kitchen: 'المطبخ', bedroom: 'غرفة النوم' }[key] || key; }
+
+// ------------------------------------------------------------------------------------------------ ذوق العميل
+// حروف فقط: الفاصلة العربية «،» ليست حرفًا فلا تمنع المطابقة
+const TL = '\u0620-\u064A\u066E-\u06D5', NB = `(?![${TL}])`, LB = `(?<![${TL}])`;
+/** أنماط الذوق: كل نمط له رافعة معلنة. الطراز يُحفظ للواجهة (wish بمفردات اختيار الواجهة). */
+export const TASTE = Object.freeze([
+  { id: 'spacious', re: new RegExp(`${LB}[وف]?(?:ال)?(?:واسع|واسعه|رحب|رحبه|فخم|فخمه|فاخر|فاخره|راقي|راقيه|فخامه|وسيع|وسيعه|لوكس)${NB}|luxur`, 'i') },
+  { id: 'light', re: new RegExp(`(?:اضاءه|اناره|انوار) (?:ال)?طبيعيه|(?:نور|ضوء|ضو) (?:ال)?طبيعي|(?:يدخل|تدخل)(?:ه|ها)? (?:ال)?(?:شمس|نور)|${LB}[وف]?(?:ال)?(?:مشمس|مشمسه|منور|منوره|شرح|شرحه)${NB}|تهويه`) },
+  { id: 'privacy', re: new RegExp(`${LB}[وفب]?(?:ال)?(?:خصوصيه|ستر|مستور|مستوره)${NB}`) },
+  { id: 'open', re: new RegExp(`(?:مساحات|فراغات|اماكن) (?:ال)?مفتوحه|مفتوح(?:ه)? علي بعض|${LB}[وف]?(?:ال)?اوبن${NB}(?! ?(?:kitchen|كيتشن))|open ?(?:plan|space)|بدون حواجز`, 'i') },
+  { id: 'calm', re: new RegExp(`${LB}[وف]?(?:ال)?(?:بسيط|بسيطه|هادي|هاديه|هادئ|هادئه|عملي|عمليه|مينيمال)${NB}`) },
+]);
+export const TASTE_STYLES = Object.freeze([
+  { id: 'modern', ar: 'حديث (مودرن)', wish: 'حديث معاصر', re: new RegExp(`${LB}[وفب]?(?:ال)?(?:مودرن|مودرين|عصري|عصريه|حديث|حديثه|معاصر|معاصره)${NB}|modern`, 'i') },
+  { id: 'classic', ar: 'كلاسيكي', wish: 'كلاسيكي', re: /كلاسيك|classic/i },
+  { id: 'najdi', ar: 'نجدي', wish: 'نجدي', re: new RegExp(`${LB}[وفب]?(?:ال)?(?:نجدي|نجديه|تراثي|تراثيه)${NB}`) },
+  { id: 'hijazi', ar: 'حجازي', wish: 'حجازي', re: /حجازي|رواشين|روشان/ },
+  { id: 'salmani', ar: 'سلماني', wish: 'سلماني', re: /سلماني/ },
+]);
+/** معامل «بيت أرحب»: افتراض تصميمي للميزان (ليس نظامًا)، معلن للعميل. */
+export const TASTE_SPACIOUS_SCALE = 1.12;
+function applyTaste(t, { prefs, tweaks, understood }) {
+  // «مجلس واسع» و«الصالة أكبر» أحجام فراغ بعينه عولجت أعلاه؛ لا تُحسب ذوقًا للبيت كله
+  const t2 = t.replace(/(?:مجلس|صاله|مطبخ|ماستر|الرئيسيه|غرف|غرفه|حمام|مدخل|حوش|حديقه|مسبح|مقلط)(?: [^ ،,.]+){0,2} (?:ال)?(?:واسع|واسعه|رحب|رحبه|فخم|فخمه|وسيع|وسيعه)/g, ' ');
+  const tags = TASTE.filter(x => x.re.test(x.id === 'spacious' ? t2 : t)).map(x => x.id);
+  const style = TASTE_STYLES.find(x => x.re.test(t));
+  if (!tags.length && !style) return;
+  const prefer = new Set(tweaks.preferModes || []);
+  if (tags.includes('spacious') && !tweaks.envScale) { tweaks.envScale = TASTE_SPACIOUS_SCALE; understood.push(`بيت أرحب: المقاسات التصميمية أكبر بنحو ${Math.round((TASTE_SPACIOUS_SCALE - 1) * 100)}٪ (ذوقك: واسع/فخم)`); }
+  if (tags.includes('light')) { for (const m of ['court', 'L', 'tee']) prefer.add(m); understood.push('إضاءة وتهوية طبيعية: أقدّم التوزيعات ذات الواجهات الأكثر (فناء داخلي أو أجنحة) ونافذة خارجية لكل غرفة'); }
+  if (tags.includes('privacy')) { for (const m of ['court', 'L']) prefer.add(m); understood.push('خصوصية: أقدّم التوزيعات التي تفصل جناح النوم عن الضيوف وتفتح على فناء داخلي متى اتسع'); }
+  if (tags.includes('open') && prefs.openKitchen === undefined && !prefs.kitchenOpenHall) { prefs.openKitchen = true; understood.push('مساحات مفتوحة: المطبخ مفتوح على الطعام وقلب البيت بلا حواجز (قل «المطبخ مغلق» إن أردته بباب)'); }
+  else if (tags.includes('open')) understood.push('مساحات مفتوحة: الحركة عبر الصالة بأقل حواجز');
+  if (tags.includes('calm') && !prefer.size) { for (const m of ['center', 'side']) prefer.add(m); understood.push('بسيط وهادئ: أقدّم التوزيعات المدمجة الواضحة بأقل ممرات'); }
+  if (prefer.size) tweaks.preferModes = [...prefer];
+  if (style) { prefs.style = style.id; prefs.styleWish = style.wish; understood.push(`الطراز ${style.ar}: يُطبَّق على الواجهة الخارجية في العرض ثلاثي الأبعاد (قوالب هذا الطراز تُقدَّم أولًا)`); }
+  if (tags.length) prefs.taste = tags;
+}
 
 export default { extractRequirements, normalizeAr };
 

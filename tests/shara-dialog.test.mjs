@@ -33,7 +33,7 @@ test('يمين ويسار الداخل، والوسط، و«جنب بعض»، و
 });
 test('ما لم يُفهم يُقال للعميل نصًا، وما فُهم لا يُعرض كغير مفهوم', () => {
   const r = extractRequirements('ابي فيلا فيها 4 غرف نوم ومجلس وصالة ومطبخ، والمطبخ في الخلف، وابي الاضاءة طبيعية في كل مكان، والدرج يكون عريض', {});
-  assert.deepEqual(r.unclear, ['ابي الاضاءة طبيعية في كل مكان', 'الدرج يكون عريض']);
+  assert.deepEqual(r.unclear, ['الدرج يكون عريض']); assert.deepEqual(r.prefs.taste, ['light'], 'الإضاءة الطبيعية ذوق مفهوم يقدّم توزيعات الفناء والأجنحة');
   assert.deepEqual(extractRequirements('ابي بيت دور واحد فيه اربع غرف نوم وحده منها ماستر بحمامها وغرفة ملابس والباقي يتشاركون حمامين', {}).unclear, []);
   const u = extractRequirements('ابي ملحق خارجي وسطح', {}); assert.equal(u.unsupported.length, 2);
 });
@@ -67,6 +67,7 @@ test('ملاحظة غير مفهومة لا تولّد تصميمًا عشوائ
   const req = extractRequirements('3 غرف ومجلس', { counts: BASE });
   const first = await generateInitialDesign({ land: LAND(), counts: req.counts, requirements: req });
   const s0 = createSession({ land: LAND(), counts: req.counts, requirements: req, result: first });
-  await assert.rejects(() => redesign(s0, { text: 'خل التصميم عصري ومريح' }), e => e.code === 'SHARA_UNCLEAR' && /عصري/.test(e.message));
+  await assert.rejects(() => redesign(s0, { text: 'خل التصميم مريح ومرتب' }), e => e.code === 'SHARA_UNCLEAR' && /مريح/.test(e.message));
+  assert.equal(extractRequirements('خل التصميم عصري', {}).prefs.style, 'modern', '«عصري» طراز مفهوم يصل إلى الواجهة');
   const led = ledgerFor(s0); assert.ok(Array.isArray(led));
 });

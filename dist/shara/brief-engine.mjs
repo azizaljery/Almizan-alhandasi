@@ -260,6 +260,8 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
     Q.push({ id: 'majlis_entry', text: 'على أي شارع يكون مجلس الرجال ومدخله؟', reason: 'أسأل لأن موقع مجلس الرجال يحدد مكان المدخل الثاني؛ والمولّد يوزّع بحسب المدخل الأول ويراعي الجهة التي تختارها كقاعدة مكانية.', options: land.entries.map(s => ({ id: s, label: `جهة ${AR_SIDE[s]}`, text: `المجلس في جهة ${AR_SIDE[s]}` })), free: true });
   }
   if (rows.some(r => r.id === 'kitchen') && !ctx.saidOpenKitchen && !ctx.saidKitchenClosed && !disabledCustoms.includes('kitchen_closed')) Q.push({ id: 'kitchen_style', text: 'المطبخ مغلق بباب أم مفتوح؟', reason: 'أسأل لأن المطبخ المفتوح يُلصق بالصالة أو الطعام ويغيّر شكل قلب البيت؛ المغلق يُعزل عن الضيوف. بلا جواب أبقيه مغلقًا (العرف).', options: [{ id: 'closed', label: 'مغلق', text: 'المطبخ مغلق' }, { id: 'hall', label: 'مفتوح على الصالة', text: 'المطبخ مفتوح على الصالة' }, { id: 'dining', label: 'مفتوح على الطعام', text: 'المطبخ مفتوح على الطعام' }], free: true });
+  // الذوق: يُسأل مرة واحدة إن لم يذكر العميل شيئًا عنه؛ جوابه يغيّر ترتيب التوزيعات ومقاس البيت وطراز الواجهة
+  if (!req.prefs.taste && !req.prefs.style) Q.push(TASTE_QUESTION);
   const OQ = [];
   if (outdoor.pool && !poolSize) OQ.push({ id: 'pool_size', text: 'المسبح عائلي (نحو 3.5 × 7 م) أم صغير (3 × 5 م)؟ وإن كان له مقاس محدد فاكتبه مثل «مسبح 4 × 8».', reason: 'أسأل لأن المسبح يأخذ من الحوش الخلفي، ومقاسه يقرر هل يتسع مع الشلال والعشب في أرضك.' });
   if ((outdoor.lawn || outdoor.pool) && !outdoor.waterfall && !skip.has('add_waterfall')) OQ.push({ id: 'add_waterfall', text: outdoor.pool ? 'تبي شلالًا بجانب المسبح؟' : 'تبي مسبحًا أو شلالًا ضمن الحديقة؟', reason: 'أسأل لأنهما يُخطَّطان مع الحوش من البداية، وإضافتهما بعد التوليد تغيّر توزيع الحديقة.' });
@@ -284,6 +286,20 @@ export function answerToText(question, value) {
   return parts.join(' ');
 }
 
+/** سؤال الذوق: كل خيار جملة يفهمها مستخرج المتطلبات (applyTaste) فتتحول إلى رافعة معلنة. */
+export const TASTE_OPTIONS = Object.freeze([
+  { id: 'spacious', label: 'رحابة وفخامة', text: 'بيت واسع وفخم' },
+  { id: 'light', label: 'إضاءة طبيعية', text: 'احب الاضاءة الطبيعية' },
+  { id: 'privacy', label: 'خصوصية', text: 'تهمني الخصوصية' },
+  { id: 'open', label: 'مساحات مفتوحة', text: 'احب المساحات المفتوحة' },
+  { id: 'calm', label: 'بسيط وعملي', text: 'بيت بسيط وعملي' },
+]);
+export const STYLE_OPTIONS = Object.freeze([
+  { id: 'modern', label: 'حديث (مودرن)', text: 'طراز مودرن' }, { id: 'classic', label: 'كلاسيكي', text: 'طراز كلاسيكي' },
+  { id: 'najdi', label: 'نجدي', text: 'طراز نجدي' }, { id: 'hijazi', label: 'حجازي', text: 'طراز حجازي' }, { id: 'salmani', label: 'سلماني', text: 'طراز سلماني' },
+]);
+export const TASTE_QUESTION = Object.freeze({ id: 'taste', text: 'ما الذي يهمك أكثر في بيتك؟ اختر ما يعبّر عن ذوقك (يمكن أكثر من خيار)، أو اكتبه بكلامك.', reason: 'أسأل لأن ذوقك يغيّر التصميم نفسه: الرحابة تكبّر المقاسات، والإضاءة والخصوصية تقدّمان توزيعات الفناء والأجنحة، والمساحات المفتوحة تفتح المطبخ على قلب البيت. بلا جواب أعرض توزيعات متنوعة بلا ترجيح.', options: TASTE_OPTIONS, multi: true, free: true });
+
 /** خطوات المسار الإرشادي بترتيب أثرها على التصميم؛ كل خطوة سؤال بسببه، بخيارات وكتابة حرة. */
 export const GUIDED_STEPS = Object.freeze([
   { id: 'g_family', text: 'من يسكن البيت؟ اذكر الأبناء وأعمارهم تقريبًا، وهل يسكن معكم الوالدان.', reason: 'أسأل أولًا لأن تركيبة الأسرة تحدد عدد غرف النوم وتقسيمها (بنون/بنات/الوالدين) وهي أكبر مساحة في البيت.', options: [{ id: 'couple', label: 'زوجان بلا أبناء', text: 'انا وزوجتي بدون اطفال' }, { id: 'mother', label: 'والدتي تسكن معنا', text: 'وامي تسكن معنا' }, { id: 'father', label: 'والدي يسكن معنا', text: 'وابوي يسكن معنا' }], multi: true, free: true, placeholder: 'مثال: 3 أولاد وبنتين صغار' },
@@ -291,6 +307,8 @@ export const GUIDED_STEPS = Object.freeze([
   { id: 'g_sleep', text: 'غرف النوم وحماماتها: كل غرفة بحمامها، أم تتشارك؟ ويمكنك تحديد العدد.', reason: 'أسأل لأن عدد الحمامات الملحقة يغيّر عرض جناح النوم ومسار الممرات، ولا يُستنتج من عدد الأفراد وحده.', options: [{ id: 'ensuite', label: 'كل غرفة بحمامها', text: 'كل غرفة نوم بحمامها' }, { id: 'shared', label: 'الرئيسية بحمامها والباقي يتشارك', text: 'الماستر بحمامها والباقي يتشاركون الحمام' }, { id: 'dressing', label: 'غرفة ملابس للرئيسية', text: 'وغرفة ملابس للماستر' }], multi: true, free: true, placeholder: 'مثال: 4 غرف نوم، الماستر كبيرة' },
   { id: 'g_kitchen', text: 'المطبخ والخدمة: ما الذي تحتاجه؟', reason: 'أسأل لأن المطبخ يحدد موقع المقلط وباب الخدمة، وغرفة الخادمة والسائق تحتاج أبوابًا خارجية.', options: [{ id: 'closed', label: 'مطبخ مغلق', text: 'المطبخ مغلق' }, { id: 'open', label: 'مطبخ مفتوح على الصالة', text: 'المطبخ مفتوح على الصالة' }, { id: 'prep', label: 'مطبخ تحضيري', text: 'ومطبخ تحضيري' }, { id: 'maid', label: 'غرفة خادمة', text: 'وغرفة خادمة' }, { id: 'driver', label: 'غرفة سائق', text: 'وغرفة سائق' }, { id: 'laundry', label: 'غرفة غسيل', text: 'وغرفة غسيل' }, { id: 'storage', label: 'مستودع', text: 'ومستودع' }], multi: true, free: true },
   { id: 'g_extras', text: 'إضافات: اختر ما تريده، وسأخبرك بصدق بما لا يُرسم في هذا الإصدار.', reason: 'أسأل أخيرًا لأن الإضافات لا تغيّر هيكل البيت لكنها تحجز مكانًا (المكتب والمصلى قرب المجلس، وغرفة الضيوف بعيدًا عن العائلة).', options: [{ id: 'office', label: 'مكتب', text: 'ومكتب' }, { id: 'prayer', label: 'مصلى', text: 'ومصلى' }, { id: 'guest', label: 'غرفة نوم للضيوف', text: 'وغرفة نوم للضيوف' }, { id: 'two', label: 'دورين', text: 'البيت دورين' }, { id: 'pool', label: 'مسبح', text: 'ومسبح' }, { id: 'waterfall', label: 'شلال', text: 'وشلال' }, { id: 'garden', label: 'حديقة وعشب', text: 'وحديقة' }, { id: 'annex', label: 'ملحق خارجي', text: 'وملحق خارجي' }, { id: 'elevator', label: 'مصعد', text: 'ومصعد' }, { id: 'none', label: 'لا شيء', text: '' }], multi: true, free: true },
+  { id: 'g_taste', text: TASTE_QUESTION.text, reason: TASTE_QUESTION.reason, options: TASTE_OPTIONS, multi: true, free: true },
+  { id: 'g_style', text: 'أي طراز للواجهة يعجبك؟', reason: 'أسأل لأن الطراز يحدد قوالب الواجهة التي أقدّمها أولًا في العرض ثلاثي الأبعاد. بلا جواب يقترح الميزان الأنسب لتصميمك.', options: STYLE_OPTIONS, free: true },
 ]);
 
 export default { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE };
