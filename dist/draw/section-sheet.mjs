@@ -208,6 +208,8 @@ export function sectionSheet(doc, opts = {}) {
     let size = mm(2.6); const tw = approxTextWidth(r.name, size); if (tw > wpx) size = Math.max(mm(1.7), size * wpx / tw);
     if (approxTextWidth(r.name, size) > wpx) continue;
     const x = X((r.u0 + r.u1) / 2), y = Z(r.E + 1.55);
+    // اسم يتراكب مع اسم سبق رسمه (فراغان متداخلا المدى على خط القطع): يُترك حتى لا تتراكب النصوص
+    { const w0 = approxTextWidth(r.name, size); if (boxes.some(q => Math.abs(q.x - x) < (q.w + w0) / 2 && Math.abs(q.y - y) < (q.h + size) / 2)) continue; }
     out.push(txt(x, y, r.name, { size, weight: 700, halo: true, cls: 'room-name' }));
     if (r.clear) { const t = 'ارتفاع صافٍ ' + fmtDim(r.clear); const s2 = Math.min(mm(2), size * .85); if (approxTextWidth(t, s2) <= wpx) out.push(txt(x, y + s2 * 1.4, t, { size: s2, halo: true })); }
     boxes.push({ x, y, w: approxTextWidth(r.name, size), h: size });

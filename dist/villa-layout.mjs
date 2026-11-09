@@ -29,6 +29,12 @@ export const DESIGN_TARGETS = Object.freeze({
   bedroom: 14, master: 19, stripD: 1.7, masterStripD: 2.2, bathL: 2.5, masterBathL: 3.2,
   commonStripW: 1.6, commonBathL: 2.3, galleryW: 1.6,
 });
+/**
+ * سقوف تضخّم الفراغ عن مقاسه (افتراض تصميمي من الميزان، ليس اشتراطًا نظاميًا): الفائض من مسطح الدور لا يُصبّ في غرفة واحدة.
+ * soft: فوقه كلفة متصاعدة؛ hard: فوقه يُرفض الترتيب إن زادت الكتلة عن مقاسها بأكثر من slack م² (الكتل الصغيرة كالمطبخ لا تُرفض لبضعة أمتار). bedNet: أقصى صافي تقريبي لغرفة النوم بعد شريط حمامها (م²).
+ * المقاس الذي حدده العميل نفسه (fixedArea، أو «كبير») هو المرجع: السقف يُقاس عليه لا على افتراض التطبيق.
+ */
+export const ROOM_CAPS = Object.freeze({ soft: 1.3, hard: 1.7, bedNet: { master: 31, bedroom: 24 }, filler: { min: 11, max: 24, min2: 9, max2: 16 }, fillerHard: 1.45, fillerCost: 3, fillerStarve: .8, slack: 11, hall: 1.9 });
 const MIN_SIDE = { majlis: 3.6, dining: 3.0, kitchen: 2.6, family: 3.4, suite: 3.0, foyer: 2.4, hall: 3.4, maid: 2.6, driver: 2.6, office: 2.8, prayer: 2.4 };
 
 // ------------------------------------------------------------------------------------------ البرنامج
@@ -244,10 +250,17 @@ function score(placed, circ, W, D, program = {}) {
   if (court) pen += 30 * Math.max(0, H_(court.r) / W_(court.r) - 2.2);
   // لا كتلة خارج الغلاف: توزيع الحدود الدنيا قد يفيض عن العمق فتخرج الغرف عن المبنى
   if (placed.some(p => p.r.x1 > W + .01 || p.r.y1 > D + .01 || p.r.x0 < -.01 || p.r.y0 < -.01)) return no('overflow');
+  const hasFiller = placed.some(p => p.block.filler);
   for (const p of placed) {
     const b = p.block, r = p.r, a = A_(r);
     const ratio = a / b.area;
+    // فراغ فائض مع فراغ مطلوب منقوص تناقض: الفائض يُعطى للمطلوب أولًا
+    if (hasFiller && !b.filler && ratio < ROOM_CAPS.fillerStarve) return no('filler-starves:' + b.kind);
     pen += 40 * Math.log(ratio) ** 2 * Math.max(1, b.area / 15) * (b.fixedArea ? 5 : 1);
+    // فراغ الفائض ليس مطلوبًا: كلفته بمساحته ترجّح الغلاف الأصغر الذي لا يحتاجه (أو يحتاج أقل)
+    if (b.filler) pen += ROOM_CAPS.fillerCost * b.area;
+    // سقف التضخم: كتلة تتجاوز مقاسها كثيرًا (فائض صُبّ فيها) تُكلَّف ثم تُرفض؛ الصالات تُعالج بحدودها الخاصة
+    if (program.caps !== false) { if (ratio > (b.filler ? ROOM_CAPS.fillerHard : ROOM_CAPS.hard) && a - b.area > ROOM_CAPS.slack) return no('bloat:' + (b.filler ? 'filler' : b.kind)); if (ratio > ROOM_CAPS.soft) pen += 30 * (ratio - ROOM_CAPS.soft) * Math.max(1, b.area / 15); }
     // المجلس أصغر من 70٪ من مقاسه التصميمي لا يليق بالضيافة (ولا تتسع دورة مياهه): يُرفض
     if (b.kind === 'majlis' && ratio < .7) return no('majlis-small');
     if (b.kind === 'majlis' && ratio < .85) pen += 40;
@@ -266,11 +279,15 @@ function score(placed, circ, W, D, program = {}) {
       // غرفة ملابس مطلوبة للرئيسية: تحتاج عمقًا من الباب ≥ 3.9 م ليتسع الحمام والخزانة على الشريط
       if (b.master && b.bath && program.prefs?.masterDressing && dep < 3.9) pen += 70 + 40 * (3.9 - dep);
       pen += 25 * Math.log(bw * bdp / want) ** 2;
+      // صافي غرفة النوم بعد الشريط: سقف مطلق يتناسب مع ما طلبه العميل إن كبّر المقاس
+      if (program.caps !== false && b.kind === 'suite') { const strip0 = b.bath ? (b.master ? T.masterStripD * 5.2 : T.stripD * 4.4) : 0, grow = Math.max(1, (b.area - strip0) / want), cap = (b.master ? ROOM_CAPS.bedNet.master : ROOM_CAPS.bedNet.bedroom) * grow; if (bw * bdp > cap) return no('bed-bloat'); }
       // تناسب غرفة النوم بعد شريط الحمام: ≤ 1:1.5، وما فوق 1:2.2 شبه مرفوض (يُرفض بعد الرسم)
       if (b.kind === 'suite') { const br = Math.max(bw, bdp) / Math.max(.1, ms); pen += 50 * Math.max(0, br - PLAN_LIMITS.bedRatio) + (br > PLAN_LIMITS.rejectRatio ? 40 : 0); }
     }
     const asp = Math.max(W_(r), H_(r)) / s;
     if (asp > 2.1) pen += 18 * (asp - 2.1) * Math.max(1, b.area / 15);
+    // المطبخ وصالة الطعام والجلسة: الشريط الطويل الضيق (فوق 1:1.9) لا يُفرش جيدًا؛ كلفة أشد من بقية الكتل
+    if (program.caps !== false && ['kitchen', 'dining', 'family'].includes(b.kind) && asp > 1.9) pen += 15 * (asp - 1.9);
     // لا بد من تلامس مع فراغ حركة بطول باب
     const t = Math.max(0, ...circ.map(c => touch(r, c.r)));
     if (t < 1.1) return no('no-circ:' + b.kind);
@@ -314,7 +331,7 @@ function score(placed, circ, W, D, program = {}) {
   const circA = circ.reduce((a, c) => a + A_(c.r), 0), ratio = circA / (W * D);
   if (ratio > .2) pen += 160 * (ratio - .2);
   const hall = circ.find(c => c.id === 'hall');
-  if (hall) { const ha = A_(hall.r), ht = program.hallArea || DESIGN_TARGETS.hall; pen += (program.upperLounge ? 4.5 : 1.1) * Math.max(0, ha - ht * 1.3) + 2 * Math.max(0, ht * .5 - ha); if (program.hallFixed) pen += 6 * Math.max(0, Math.abs(ha - ht * 1.12) - ht * .12);
+  if (hall) { const ha = A_(hall.r), ht = program.hallArea || DESIGN_TARGETS.hall; if (program.caps !== false && !program.hallFixed) pen += 6 * Math.max(0, ha - ht * ROOM_CAPS.hall); pen += (program.upperLounge ? 4.5 : 1.1) * Math.max(0, ha - ht * 1.3) + 2 * Math.max(0, ht * .5 - ha); if (program.hallFixed) pen += 6 * Math.max(0, Math.abs(ha - ht * 1.12) - ht * .12);
     // تناسب الصالة بالصافي (محاور الجدران ناقص سماكة الجدار الداخلي): نسبة ≤ 1.6 وعرض ≥ 4.5 م
     const nw = Math.min(W_(hall.r), H_(hall.r)) - INT, nl = Math.max(W_(hall.r), H_(hall.r)) - INT;
     pen += 120 * Math.max(0, nl / nw - HALL_LIMITS.ratio) + 60 * Math.max(0, HALL_LIMITS.minNetW - nw) + 1.5 * Math.max(0, ht * .75 - ha);
@@ -322,6 +339,19 @@ function score(placed, circ, W, D, program = {}) {
   return pen;
 }
 
+/**
+ * فائض مسطح الدور في الدورين (أحد الدورين أصغر برنامجًا من الآخر والغلاف واحد): يُخصَّص له فراغ نافع مسمّى
+ * («جلسة عائلية») بدل أن يُصبّ في غرفة واحدة. يعيد قائمة الكتل مع كتلة الفائض إن بلغ الفائض حدًّا يستحق فراغًا.
+ * need: احتياج الدور من الكتل والحركة. الحدود من ROOM_CAPS.filler (افتراض تصميمي). كتلة الفائض تُعلن في ملاحظات البديل.
+ */
+function withFiller(blocks, area, need, upper) {
+  const F = ROOM_CAPS.filler, surplus = area - need * 1.12;
+  if (surplus < F.min || blocks.some(b => b.filler)) return blocks;
+  const out = [...blocks, { id: upper ? 'fillerU' : 'fillerG', kind: 'family', filler: true, rank: 2.5, area: Math.min(F.max, surplus), name: 'جلسة عائلية' }];
+  // فائض أكبر من جلسة واحدة: غرفة ثانية صغيرة متعددة الاستعمال (مكتب/دراسة/ألعاب) بدل جلسة متضخمة
+  if (surplus - F.max >= F.min2) out.push({ id: upper ? 'fillerU2' : 'fillerG2', kind: 'office', filler: true, rank: upper ? 2.6 : .85, area: Math.min(F.max2, surplus - F.max), name: 'غرفة متعددة الاستعمال' });
+  return out;
+}
 /** كل تقسيمات القائمة إلى قسمين، مع معاملة الكتل المتطابقة (غرف النوم العادية مثلًا) كعدد لا كهوية. */
 function* subsets(list) {
   const groups = new Map();
@@ -336,16 +366,20 @@ function* subsets(list) {
 }
 
 /** يولّد الترتيبات المرشحة لكل الأنماط ويرتبها. */
-export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = null, relaxL = false, only = null, perMode = 0 } = {}) {
+export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = null, relaxL = false, only = null, perMode = 0, noFiller = false } = {}) {
   if (upper) return searchUpper(program, W, D, upper, keep);
   const T = DESIGN_TARGETS, out = [];
-  const blocks = program.blocks, suites = blocks.filter(b => b.kind === 'suite' && !b.guest).sort(byRank).reverse(); // الرئيسية أولًا
+  // أرضي الدورين: الفائض عن احتياجه (حين يكون العلوي أكبر برنامجًا) يأخذ «جلسة عائلية»؛ الفناء يستوعب فائضه بحديقته فيبقى بلا إضافة
+  const blocks0 = program.blocks, blocks = program.twoFloor && stair && !noFiller ? withFiller(blocks0, W * D, blocks0.reduce((a, b) => a + b.area, 0) + T.foyer + (program.hallArea || T.hall) + 15, false) : blocks0;
+  const suites = blocks.filter(b => b.kind === 'suite' && !b.guest).sort(byRank).reverse(); // الرئيسية أولًا
   // الشكل المطلوب يتقدم على غيره؛ بلا طلب: الفناء بديل مختلف جذريًا لا الخيار الأول
   const wantShape = wantedShape(program);
   const bias = mode => (wantShape ? (mode === wantShape ? -150 : 250) : mode === 'court' ? 15 : 0);
   // only: نمط واحد أو قائمة أنماط يُقتصر البحث عليها (غلاف خُصّص لنمط بعينه)
   const allow = m => !only || (Array.isArray(only) ? only.includes(m) : only === m);
-  const push = (mode, placed, circ, meta) => { if (!allow(mode)) return; const s = score(placed, circ, W, D, program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
+  // الشكل الذي طلبه العميل صراحةً يتقدم على سقوف التضخم الافتراضية (طلب العميل فوق افتراض الميزان): يُعاد تقييمه بلا رفض التضخم
+  const progFree = { ...program, caps: false };
+  const push = (mode, placed, circ, meta) => { if (!allow(mode)) return; const s = score(placed, circ, W, D, wantShape && mode === wantShape ? progFree : program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
   // المحور الأعرض يعطي صالة بصافي ≥ 4.5 م؛ الأضيق يبقى للأراضي التي لا تتسع لغيره
   // العميل حدّد موضع الصالة (مثلًا «على الحوش الخلفي»): لا يُقسم المحور؛ طلبه يتقدم على التناسب الافتراضي، ويُعلن قصور الصالة بالأرقام
   const splitOk = !(program.rules || []).some(r => r.a === 'hall' || r.b === 'hall');
@@ -404,7 +438,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
     const wl = snap((W - wh) * sp), wr = W - wh - wl;
     if (wl < 3.6 || wr < 3.6) continue;
     const gw = T.galleryW;
-    for (const [L, R] of subsets(blocks)) {
+    for (const [L, R] of subsets(blocks0)) {
       if (!L.length || !R.length) continue;
       if (sp === .5 && L[0].id > R[0].id) continue;
       L.sort(byRank); R.sort(byRank);
@@ -517,11 +551,21 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
     else if (perMode && (byMode[c.mode] || 0) < perMode) { c.extra = true; res.push(c); byMode[c.mode] = (byMode[c.mode] || 0) + 1; }
     else if (!perMode) break;
   }
+  // مع كتلة الفائض قد لا تتسع الأجنحة: يُجرَّب البرنامج بلا إضافة أيضًا، والأقل كلفة يتقدم (التضخم مرفوض في الحالتين)
+  if (blocks !== blocks0) { const seenP = new Set(res.map(c => c.sig)); for (const c of searchLayouts(program, W, D, { keep, stair, relaxL, only, noFiller: true })) if (!seenP.has(c.sig)) res.push(c); res.sort((a, b) => a.pen - b.pen); return res.slice(0, keep); }
   return res;
 }
 /** الدور العلوي على هندسة الأرضي نفسها: المحور صالة علوية ينتهي بالسلم في الموضع ذاته، والأجنحة للنوم. */
 function searchUpper(program, W, D, up, keep) {
-  const out = [], sr = up.stairRect, blocks = program.blocks, hb = up.hub, T_ = DESIGN_TARGETS;
+  // فائض الدور العلوي (الأرضي أكبر برنامجًا): «جلسة عائلية» مستقلة بدل تضخيم غرفة نوم؛ ويُجرَّب بلا إضافة وبإضافة واحدة أيضًا
+  const filled = withFiller(program.blocks, W * D - (up.mode === 'court' && up.court ? A_(up.court) : 0), program.blocks.reduce((a, b) => a + b.area, 0) + (program.hallArea || 24) * 1.3 + 12, true);
+  const variants = [filled, ...(filled.filter(b => b.filler).length > 1 ? [filled.filter(b => b.id !== 'fillerU2')] : []), ...(filled !== program.blocks ? [program.blocks] : [])];
+  // فوق الفناء (U): الأجنحة بكامل العمق حول فراغ الحديقة، ومسطحه أوسع بطبيعته؛ يبقى تقييمه كما كان (بلا سقف تضخم) حتى لا يسقط الشكل
+  const all = up.mode === 'court' ? searchUpper0({ ...program, caps: false }, W, D, up, keep, program.blocks) : variants.flatMap(v => searchUpper0(program, W, D, up, keep, v));
+  return all.sort((a, b) => a.pen - b.pen).slice(0, keep);
+}
+function searchUpper0(program, W, D, up, keep, blocks) {
+  const out = [], sr = up.stairRect, hb = up.hub, T_ = DESIGN_TARGETS;
   const lounge = { id: 'hall', r: { x0: hb.x0, y0: 0, x1: hb.x1, y1: D } };
   if (up.mode === 'court' && up.court) {
     // الدور العلوي فوق U: صالة علوية فوق الردهة والصالة، وممرا الفناء حول فراغ الحديقة (مفتوح للسماء)
@@ -637,6 +681,7 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
   // ممر المحور بعد الصالة: فتحة من الصالة، وأخرى إلى الممر العرضي إن وُجد
   for (const sp of circRooms.filter(c => c.id === 'spine')) for (const o of circRooms.filter(c => c.id === 'hall' || c.id.startsWith('gallery'))) { const e = shared(sp, o); if (e && e.to - e.from >= 1.2) doors.push({ a: 'spine', b: o.id, edge: e, kind: 'arch', w: Math.min(1.4, e.to - e.from - .3) }); }
   if (hall && courtRoom) { const e = shared(hall, courtRoom); if (e) { doors.push({ a: 'hall', b: 'court', edge: e, kind: 'door2', w: Math.min(2.4, e.to - e.from - .6) }); notes.push('مبنى على شكل U: حديقة داخلية في المنتصف مفتوحة على الحوش الخلفي بسور، تطل عليها الصالة بباب زجاجي مزدوج وغرف الجناحين بنوافذها، وممرا الحديقة يصلان الغرف الخلفية.'); } }
+  if (cand.placed.some(p => p.block.filler)) notes.push(`${cand.upper ? 'الدور العلوي' : 'الدور الأرضي'} أوسع من برنامجه (الدوران بمسطح واحد): خُصّص الفائض ${cand.placed.filter(p => p.block.filler).map(p => '«' + p.block.name + '»').join(' و')} بدل تكبير غرفة واحدة؛ لم يطلبها العميل ويمكن تغيير استعمالها أو حذفها في المرسم.`);
   if (cand.mode === 'L') notes.push('مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب، والزاوية الباقية ساحة خارجية؛ الممر الخلفي يصل الصالة بالذراع.');
   if (cand.courtVoid) notes.push('الدور العلوي يحيط بفراغ الحديقة (مفتوح للسماء) وتطل عليه الغرف.');
   // أزواج الحمامات: جهة الشريط لكل جناح نوم نحو جاره من الأجنحة
@@ -1239,7 +1284,8 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   if (globalThis.__villaDebug) globalThis.__villaDebug.searchMs = Date.now() - __t0;
   const wantMode = program.prefs?.shape ? wantedShape(program) : null;
   // شكل L لم يتسع بالمقاسات الأولى على أي مسطح: نجرّب مقاسات الأرض الضيقة، وتُضاف منها كتل L فقط
-  if (wantMode === 'L' && !cands.some(c => c.mode === 'L' && !c.extra)) for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3, relaxL: true, only: 'L' })) cands.push(wrapCand(env, c));
+  // (تُضاف دائمًا عند طلب L: ترتيبات المقاسات الأولى قد تظهر ولا تُبنى سليمة، فلا تحجب مقاسات الأرض الضيقة)
+  if (wantMode === 'L') for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3, relaxL: true, only: 'L' })) cands.push(wrapCand(env, c));
   // الشكل الذي طلبه العميل: كل مرشحاته أصلية (لا تُؤجَّل إلى مرحلة التكميل)
   if (wantMode) for (const c of cands) if (c.mode === wantMode) delete c.extra;
   cands.sort((a, b) => a.pen - b.pen);
@@ -1307,6 +1353,17 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   applyElevators(picked, requirements);
   applyGardens(picked, requirements);
   return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
+}
+/**
+ * ترتيب البناء بالتناوب بين الأنماط (الأفضل من كل نمط أولًا، مع بقاء ترتيب الكلفة داخل النمط): حتى لا تمتلئ حصة البناء
+ * بتنويعات نمط واحد متقاربة مرئيًا فيبقى للعميل بديل واحد. الأفضل كلفةً يبقى الأول، والترتيب النهائي بالجودة كما هو.
+ */
+function interleaveModes(list) {
+  const by = new Map(); for (const c of list) { if (!by.has(c.mode)) by.set(c.mode, []); by.get(c.mode).push(c); }
+  if (by.size < 2) return list;
+  const qs = [...by.values()], out = [];
+  for (let i = 0; out.length < list.length; i++) for (const q of qs) if (i < q.length) out.push(q[i]);
+  return out;
 }
 /** أصغر مسطح قابل للبناء يتسع له الشكل L بالبرنامج (بخطوة 0.5 م، بدءًا من المسطح الحالي): أولًا أقل عمق، ثم أقل عرض عنده. */
 function lShapeMinimum(program, W, D) {
@@ -1633,7 +1690,7 @@ function buildPlan(list, { modeOf = c => c.mode, topUp = true, perMode = 2, tota
 function diversify(designs, keep, { prefer = [] } = {}) {
   const best = designs[0];
   if (!best) return [];
-  const window = best.quality + Math.max(70, Math.abs(best.quality) * .6), dBest = defectOf(best), dMax = Math.max(dBest + 30, dBest * 1.5);
+  const window = best.quality + Math.max(85, Math.abs(best.quality) * .6 + 40), dBest = defectOf(best), dMax = Math.max(dBest + 30, dBest * 1.5);
   // كلفة مطابقة المساحات (غرف أكبر أو أصغر كثيرًا من مقاسها التصميمي): يُتسامح فيها لنمط آخر حتى حد، وما فوقه تضخّم لا تنوّع
   const pMax = best.penalty + Math.max(120, Math.abs(best.penalty) * 1.5);
   const seenOther = {}, spare = [];
