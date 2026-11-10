@@ -553,8 +553,41 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
       }
     }
   }
+  // (7) شريطي عرضي للأراضي القليلة العمق (دور واحد): الردهة والصالة عمود بكامل العمق، على جانبه جناح عام مكدّس (مجلس، مطبخ…)
+  // وعلى الجانب الآخر صفّان من الغرف بينهما ممر يبدأ من الصالة، وقد تُختم نهايته بالغرفة الرئيسية بكامل العمق.
+  // المجلس والصالة العائلية لا يوضعان في الصفّين (عمق الصف دون عرضهما الأدنى).
+  if (allow('bar') && !stair && D < NARROW.barD && D >= NARROW.rowMinD - .01 && W >= (D < NARROW.barMinD ? 10 : NARROW.barW) && blocks.length <= 14) {
+    // العمق دون NARROW.barMinD: صف واحد على الواجهة وممره خلفه (لا يتسع صفّان)
+    const gw = T.galleryW, one = D < NARROW.barMinD - .01, rd = one ? snap(D - gw) : snap((D - gw) / 2), rowKind = b => ['suite', 'kitchen', 'dining', 'maid', 'driver', 'office', 'prayer'].includes(b.kind);
+    const runMin = (l, cross) => l.reduce((a, b) => a + Math.max(MIN_RUN[b.kind] || 2.4, b.kind === 'suite' && b.bath && cross < 3.2 + (b.master ? 2.2 : 1.7) ? 5.3 : 0), 0);
+    const frontRank = b => (b.kind === 'kitchen' ? 0 : b.kind === 'dining' ? 1 : b.kind === 'maid' ? 2 : b.kind === 'suite' ? 4 : 3);
+    for (const wh of [4.4, 5.0]) for (const [S, C] of subsets(blocks)) {
+      if (!C.length || C.some(b => !rowKind(b)) || S.some(b => b.kind === 'suite' && !b.guest && C.some(c => c.kind === 'suite') && !b.master)) continue;
+      if (!S.length && blocks.some(b => b.kind === 'majlis')) continue;
+      S.sort(byRank);
+      const wl = S.length ? snap(Math.max(3.8, Math.min(7.6, areaOf(S) / D))) : 0;
+      if (S.length && runMin(S, wl) > D + .01) continue;
+      const master = C.find(b => b.master) || null;
+      for (const capOn of master ? [true, false] : [false]) {
+        const R = C.filter(b => !(capOn && b === master)); if (!R.length) continue;
+        const capW = capOn ? snap(Math.max(3.6, Math.min(5.2, master.area / D))) : 0;
+        const cx0 = wl + wh, cx1 = W - capW, len = cx1 - cx0; if (len < 3.2) continue;
+        for (const [F, B] of subsets(R)) {
+          if (one ? B.length > 0 || !F.length : !F.length || !B.length) continue;
+          if (runMin(F, rd) > len + .01 || runMin(B, rd) > len + .01) continue;
+          const aF = areaOf(F), aB = areaOf(B); if (!one && Math.max(aF, aB) > 1.8 * Math.min(aF, aB) + 6) continue;
+          const kd = R.filter(b => b.kind === 'kitchen' || b.kind === 'dining'); if (kd.length > 1 && !(kd.every(b => F.includes(b)) || kd.every(b => B.includes(b)))) continue;
+          const fo = [...F].sort((a, b) => frontRank(a) - frontRank(b) || byRank(a, b)), bo = [...B].sort((a, b) => frontRank(a) - frontRank(b) || byRank(a, b));
+          const pl = [...stack(S, 0, wl, 0, D, 'x1'), ...row(fo, cx0, cx1, 0, rd, 'y1'), ...(one ? [] : row(bo, cx0, cx1, rd + gw, D, 'y0')), ...(capOn ? [{ block: master, r: { x0: cx1, y0: 0, x1: W, y1: D }, door: 'x0' }] : [])];
+          const f = Math.min(one ? Math.max(2.4, rd - 3.4) : rd, foyerDepth(pl.filter(p => p.r.x1 <= wl + .01), wh));
+          const circ = [{ id: 'foyer', r: { x0: wl, y0: 0, x1: wl + wh, y1: f } }, { id: 'hall', r: { x0: wl, y0: f, x1: wl + wh, y1: D } }, { id: 'gallery', r: { x0: cx0, y0: rd, x1: cx1, y1: rd + gw } }];
+          push('bar', pl, circ, { wh, wl, wr: W - wl - wh });
+        }
+      }
+    }
+  }
   // (4) صالة جانبية للأراضي الضيقة: جناح واحد والصالة على جدار خارجي
-  if (allow('side') && W < 13) for (const wh of [3.4, 3.8, 4.2].filter(h => W - h >= 4.4)) {
+  if (allow('side') && W < 13) for (const wh of (W < NARROW.w ? NARROW.sideHalls.filter(h => W - h >= NARROW.wing && (W < 7.8 || h !== 3.4 || W - h >= 4.4) && (W < 7.8 || h === 3.4 || stair)) : [3.4, 3.8, 4.2].filter(h => W - h >= 4.4))) {
     const L = [...blocks].sort(byRank);
     for (const side of ['L', 'R']) {
       const wx0 = side === 'L' ? 0 : wh, wx1 = side === 'L' ? W - wh : W, hx0 = side === 'L' ? W - wh : 0;
@@ -569,6 +602,17 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
       if (splitOk && D - f > HALL_LIMITS.ratio * (wh - INT) + INT) for (const v of sideSpine(L, wh, W, side === 'L' ? W - wh : 0, D, side === 'L' ? 'x1' : 'x0', stair, program.hallArea || T.hall)) {
         push('side', v.pl, v.circ, { wh, sideAt: side, spine: v.h, ...(stair ? { stairRect: { x0: sx0, y0: v.h - stair.len - .1, x1: sx1, y1: v.h - .1 } } : {}) });
       }
+    }
+  }
+  // (8) الأرض شديدة الضيق (لا تتسع صالة جانبية مع جناح): الردهة والصالة بعرض المبنى في المقدمة، وبعدهما ممر على جدار جانبي
+  // والغرف صف واحد بطول المبنى. بلا سلم؛ والمجلس لا يوضع فيه (مجلس الرجال يلزمه الواجهة).
+  if (allow('side') && !stair && W < NARROW.trainW && W >= NARROW.trainMinW && !blocks.some(b => b.kind === 'majlis')) {
+    const cw = T.galleryW, L = [...blocks].sort(byRank), f = 2.4, ht = program.hallArea || T.hall;
+    for (const hl of [...new Set([snap(Math.max(3.6, Math.min(5.6, ht / W))), 3.6])]) for (const side of ['L', 'R']) {
+      const h = snap(f + hl); if (D - h < 3.2) continue;
+      const pl = side === 'L' ? stack(L, 0, W - cw, h, D, 'x1') : stack(L, cw, W, h, D, 'x0'); if (!fitsRun(pl, D)) continue;
+      const sx0 = side === 'L' ? W - cw : 0;
+      push('side', pl, [{ id: 'foyer', r: { x0: 0, y0: 0, x1: W, y1: f } }, { id: 'hall', r: { x0: 0, y0: f, x1: W, y1: h } }, { id: 'spine', r: { x0: sx0, y0: h, x1: sx0 + cw, y1: D } }], { wh: W, sideAt: side, spine: h, train: true });
     }
   }
   out.sort((a, b) => a.pen - b.pen);
@@ -1323,9 +1367,11 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   // الغلاف: يُقاس على البرنامج لا على الأرض؛ ما يزيد يبقى ساحات (أمامية/خلفية)
   const target = (program.blocks.reduce((a, b) => a + b.area, 0) + DESIGN_TARGETS.foyer + (program.hall ? program.hallArea : 14)) * 1.18 * (tw.envScale || 1);
   const envelopes = [];
+  // الأرض الضيقة أو القليلة العمق: حدّ الغلاف الأدنى يتبع المسطح القابل للبناء نفسه (لا يُرفض التصميم لأن الأرض دون 8.5 × 9 م)
+  const minW = Math.min(ENV_MIN.w, snap(W)) - .01, minD = Math.min(ENV_MIN.d, snap(D)) - .01;
   const addEnv = (w, d, only = null) => {
     w = snap(Math.min(W, w)); d = snap(Math.min(D, d));
-    if (w < 8.5 || d < 9) return;
+    if (w < minW || d < minD) return;
     if (envelopes.some(e => Math.abs(e.w - w) < .6 && Math.abs(e.d - d) < .6)) return;
     envelopes.push({ w, d, ox: snap((W - w) / 2), ...(only ? { only } : {}) });
   };
@@ -1342,6 +1388,8 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   for (const rho of [2.0, 2.4]) { let w = Math.sqrt(target * 1.45 / rho), d = rho * w; if (w > W) { w = W; d = target * 1.45 / w; } if (d > D) { d = D; w = target * 1.45 / d; } addEnv(w, d); }
   // أغلفة بعرض ثابت لا يتبع عرض الأرض: الأرض العريضة كانت تعطي للفناء غلافًا عريضًا ضحلًا لا يتسع له، فلا يظهر إلا على أرض بعرض معيّن
   for (const wc of COURT_WIDTHS) if (wc <= W - .6) { addEnv(wc, target * 1.35 / wc, ['court']); addEnv(wc, target * 1.6 / wc, ['court']); }
+  // الأرض الضيقة أو القليلة العمق: أغلفة بكامل البعد الضيق (العرض أو العمق) بخطوات على البعد الآخر، فالمقاسات المشتقة من المساحة وحدها لا تكفيها
+  if (W < ENV_MIN.w || D < ENV_MIN.d) { const narrowW = W < ENV_MIN.w; for (const k of [1, .88, .76, .64, .52]) narrowW ? addEnv(W, D * k) : addEnv(W * k, D); }
   let cands = [];
   const wrapCand = (env, c) => ({ ...c, env, ...(env.only ? { extra: true } : {}), pen: c.pen + 6 * Math.max(0, (env.w * env.d - (c.court ? A_(c.court) : 0)) / target - 1.25) * 10 - (prefPat && c.pat === prefPat ? 60 : 0) - (preferModes.includes(c.mode) ? PREFER_MODE_BONUS : 0) });
   // prefer: نمط التصميم المعروض؛ تعديل العميل يُطبَّق عليه نفسه متى أمكن بدل توزيع جديد كليًا
@@ -1352,7 +1400,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   if (!blend && !program.prefs?.shape && program.prefs?.courtyard !== true) {
     const pb = { id: 'patio', kind: 'terrace', open: true, rank: 9, area: OPEN_CAPS.patio.area, name: 'جلسة خارجية', note: '«جلسة خارجية» محفورة في الكتلة (لم تطلبها): ركن خارجي تفتح عليه الصالة بباب منزلق زجاجي وتطل عليه الغرف المجاورة؛ لا تُحسب من المسطح المبني، ويمكن حذفها أو تسقيفها في المرسم.' };
     const progP = { ...program, blocks: [...program.blocks, pb] }, tP = target + pb.area * 1.1, envP = [];
-    const addP = (w, d) => { w = snap(Math.min(W, w)); d = snap(Math.min(D, d)); if (w < 8.5 || d < 9) return; if (envP.some(e => Math.abs(e.w - w) < .6 && Math.abs(e.d - d) < .6)) return; envP.push({ w, d, ox: snap((W - w) / 2), only: ['center', 'tee'] }); };
+    const addP = (w, d) => { w = snap(Math.min(W, w)); d = snap(Math.min(D, d)); if (w < minW || d < minD) return; if (envP.some(e => Math.abs(e.w - w) < .6 && Math.abs(e.d - d) < .6)) return; envP.push({ w, d, ox: snap((W - w) / 2), only: ['center', 'tee'] }); };
     for (const [rho, k] of [[1, 1], [1.4, 1], [1.2, 1.07]]) { let w = Math.sqrt(tP * k / rho), d = rho * w; if (w > W) { w = W; d = tP * k / w; } if (d > D) { d = D; w = tP * k / d; } addP(w, d); }
     // البحث يتضاعف مع كل كتلة: يُكتفى بثلاثة أغلفة، وبالبرامج التي لا تتجاوز 10 كتل
     if (program.blocks.length <= 10) for (const env of envP) for (const c of searchLayouts(progP, env.w, env.d, { keep: 3, perMode: 1, only: env.only })) cands.push(wrapCand(env, c));
@@ -1520,7 +1568,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const uProg = { ...program, blocks: split.u, extraBaths: program.extraBaths - gExtra, upperHallName, hall: true, guestWc: 0, kitchenStrip: [], prefs: {}, hallArea: 24, upperLounge: true, entry };
   const target = Math.max(needG(split.g), needU(split.u)) * 1.15 * (tw.envScale || 1);
   const envs = [];
-  const addEnv = (w, d, only = null) => { w = snap(Math.min(W, w)); d = snap(Math.min(D, d)); if (w < 8.5 || d < 10) return; if (envs.some(e => Math.abs(e.w - w) < .6 && Math.abs(e.d - d) < .6)) return; envs.push({ w, d, ox: snap((W - w) / 2), ...(only ? { only } : {}) }); };
+  const addEnv = (w, d, only = null) => { w = snap(Math.min(W, w)); d = snap(Math.min(D, d)); if (w < Math.min(ENV_MIN.w, snap(W)) - .01 || d < Math.min(ENV_MIN.d2, snap(D)) - .01) return; if (envs.some(e => Math.abs(e.w - w) < .6 && Math.abs(e.d - d) < .6)) return; envs.push({ w, d, ox: snap((W - w) / 2), ...(only ? { only } : {}) }); };
   for (const rho of [.8, 1, 1.25, 1.55, 1.9]) { let w = Math.sqrt(target / rho), d = rho * w; if (w > W) { w = W; d = target / w; } if (d > D) { d = D; w = target / d; } addEnv(w, d); addEnv(w, d * 1.12); }
   if (split.id === 'std') {
   for (const rho of [1.1, 1.4, 1.75]) { let w = Math.sqrt(target * 1.35 / rho), d = rho * w; if (w > W) { w = W; d = target * 1.35 / w; } if (d > D) { d = D; w = target * 1.35 / d; } addEnv(w, d); }
@@ -1670,7 +1718,7 @@ export function canonicalSide(entry, side, mirror = false) {
   if (c && mirror && c[0] === 'x') c = c === 'x0' ? 'x1' : 'x0';
   return c;
 }
-const MODE_AR = { court: 'مبنى على شكل U حول حديقة داخلية في المنتصف', L: 'مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب، والزاوية الباقية ساحة', center: 'صالة مركزية بين جناحين', tee: 'صالة مركزية وممر خلفي لأجنحة النوم (شكل T)', rows: 'صف أمامي للضيافة وصف خلفي للعائلة بينهما ممر', side: 'صالة جانبية بطول المبنى' };
+const MODE_AR = { court: 'مبنى على شكل U حول حديقة داخلية في المنتصف', L: 'مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب، والزاوية الباقية ساحة', center: 'صالة مركزية بين جناحين', tee: 'صالة مركزية وممر خلفي لأجنحة النوم (شكل T)', rows: 'صف أمامي للضيافة وصف خلفي للعائلة بينهما ممر', side: 'صالة جانبية بطول المبنى', bar: 'مبنى شريطي بعرض الأرض: صالة في الوسط، جناح ضيافة على جانب، وصفّا غرف بينهما ممر على الجانب الآخر' };
 /** النمط الذي طلبه العميل صراحةً (U بالفناء، أو L، أو T)؛ null إن لم يطلب شكلًا. */
 export function wantedShape(program) {
   if (program?.prefs?.courtyard) return 'court';
@@ -1701,6 +1749,7 @@ const IDEA_AR = Object.freeze({
   L: ['شكل L بساحة خارجية', 'جناح أمامي وذراع خلفي، والزاوية الباقية ساحة خارجية خاصة'],
   rows: ['صفّان: ضيافة أمامية وعائلة خلفية', 'صف أمامي للضيافة وصف خلفي للعائلة وبينهما ممر، للأراضي العريضة'],
   side: ['صالة جانبية بطول البيت', 'الصالة على جدار خارجي بطول المبنى والغرف جناح واحد، للأراضي الضيقة'],
+  bar: ['بيت شريطي بعرض الأرض', 'للأرض العريضة القليلة العمق: الصالة في الوسط، الضيافة على جانب، والغرف صفّان بينهما ممر على الجانب الآخر'],
 });
 const IDEA_PLUS = Object.freeze({
   bedDown: ['غرفة نوم أرضية', 'غرفة نوم في الدور الأرضي (تصلح لكبار السن أو الضيوف) فيتوازن الدوران ويصغر المسطح'],
@@ -1798,6 +1847,10 @@ function differentFrom(cands, shown, { get = c => c.pat, maxOverlap = .6 } = {})
 /** ترتيب البدائل بالتنويع: الأفضل أولًا، ثم ما يختلف عنه نمطًا أو توزيعًا، لا نسخًا متقاربة. */
 /** عدد ترتيبات الدور العلوي التي تُجرَّب لكل أرضي (الأول هو الأفضل؛ الباقي احتياط إن لم يُبنَ سليمًا). */
 const UPPER_TRIES = 2;
+/** أدنى غلاف مبنى في الأراضي المعتادة (افتراض تصميمي): w عرض، d عمق الدور الواحد، d2 عمق الدورين. الأرض الأضيق يتبع حدُّها مسطحَها. */
+export const ENV_MIN = Object.freeze({ w: 8.5, d: 9, d2: 10 });
+/** الأرض الضيقة (مسطحها دون NARROW.w عرضًا): صالة جانبية أضيق من المعتاد؛ والقليلة العمق (دون NARROW.d): صفّان أقل عمقًا. تُعلن في ملاحظات الصالة. */
+export const NARROW = Object.freeze({ w: 8.2, sideHalls: [3.4, 3.6], wing: 2.95, barD: 9, barMinD: 7.5, barW: 14, trainW: 6.35, trainMinW: 4.55, rowMinD: 5.9 });
 /** عروض أغلفة ثابتة تتسع للفناء الداخلي (محور ≥ 7.6 م وجناحان ≥ 3.6 م). */
 const COURT_WIDTHS = Object.freeze([15.5, 17, 18.5]);
 /** ما يُخصم من كلفة ترتيب مرشح نمطه من أنماط ذوق العميل (tweaks.preferModes): تقديم لا فرض. */
