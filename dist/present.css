@@ -142,3 +142,13 @@ table.rooms td .z{display:inline-block;width:10px;height:10px;border-radius:3px;
 .cmp-table{overflow-x:auto}.cmp-table td.up{color:#2f6b3a}.cmp-table td.down{color:#9a3b2b}
 @media(max-width:760px){.cmp-plans{grid-template-columns:1fr}.cmp-plans canvas{height:300px}}
 #cmpMsg:empty{display:none}
+
+/* مقترحات الإصلاح في مرحلة التصميم */
+.fixes .fixlist{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.fixes .fixlist li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 12px;border:1px solid #e6d9bd;border-inline-start:4px solid #c8922a;border-radius:10px;background:#fffdf8}
+.fixes .fixlist li.bad{border-inline-start-color:#b3412e}
+.fixes .fixlist li b{display:block;font-weight:600;font-size:14px;line-height:1.6}
+.fixes .fixlist li .why{display:block;font-size:12.5px;color:#6b6a5f}
+.fixes .fixlist li .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;background:#f3e6c9;color:#5a3a2c;margin-bottom:3px}
+.fixes .fixlist li .btn{flex:0 0 auto;padding:7px 16px}
+.fixes #fixAll{width:100%}

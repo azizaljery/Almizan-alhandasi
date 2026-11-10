@@ -11,6 +11,7 @@ import { normalizeLand } from './home-flow.mjs';
 import { displayOr } from './field-guards.mjs';
 import { compareDesigns } from './compare-designs.mjs';
 import { parseDoc } from './draw/doc.mjs';
+import { fixProposals, applyFix } from './design-fixes.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -59,6 +60,14 @@ function show(index) {
     done.length ? el('ul', { class: 'tick' }, done.map(x => el('li', ledgerAttrs(x, 'good'), x.text, x.why ? el('span', { class: 'why' }, x.why) : null))) : null,
     miss.length ? el('p', { class: 'sub' }, 'اطلب تصميمًا آخر وسأبحث عن توزيع ينفّذ البنود الباقية، أو اكتب تعديلك لشرعاء.') : null,
     (req.unsupported || []).length ? el('ul', { class: 'tick' }, req.unsupported.map(t => el('li', { class: 'no' }, t))) : null);
+  // مقترحات الإصلاح: كل ملاحظة بزر «نفّذ»؛ الموقع يعالجها بنفسه (ولو غيّر التوزيع كله) دون إسقاط رغبة للعميل، ويشرح ما تعذّر
+  const props = fixProposals(session, doc), KIND = { request: 'من طلبك', custom: 'عرف سعودي افتراضي', review: 'ملاحظة الفحص' };
+  const fixCard = props.length ? el('div', { class: 'card fixes', id: 'fixes' }, el('h2', {}, 'مقترحات لتحسين هذا التصميم'),
+    el('p', { class: 'sub' }, `وجدت ${props.length} ${props.length === 1 ? 'ملاحظة' : 'ملاحظات'} يمكن علاجها. اضغط «نفّذ» وسأعالجها بنفسي — في موضعها إن أمكن، أو بتوزيع آخر إن لزم — دون أن أُسقط شيئًا مما طلبته، وأخبرك بما تعذّر وسببه.`),
+    el('ul', { class: 'fixlist' }, props.map(p => el('li', { class: p.severity === 'error' ? 'bad' : 'warn' }, el('div', {}, el('span', { class: 'tag' }, KIND[p.kind]), el('b', {}, p.text), p.why ? el('span', { class: 'why' }, p.why) : null, el('span', { class: 'why' }, p.how === 'patch' ? 'يُعالَج في موضعه دون تغيير التوزيع.' : 'قد يحتاج توزيعًا آخر للغرف.')),
+      el('button', { type: 'button', class: 'btn', 'data-fix': p.id, onclick: () => runFix(p.id) }, 'نفّذ')))),
+    props.length > 1 ? el('button', { type: 'button', class: 'btn primary', id: 'fixAll', onclick: () => runFix('all') }, 'نفّذ كل المقترحات') : null,
+    el('p', { class: 'sub', id: 'fixStatus', 'aria-live': 'polite' })) : null;
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
     d.feedback?.changes?.length ? el('p', { class: 'sub' }, (d.feedback.merge ? '' : 'عدّلتُ هذا التصميم بناءً على: ') + d.feedback.changes.join('، ')) : null);
   const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
@@ -71,16 +80,29 @@ function show(index) {
     ...(replyCard ? [replyCard] : []),
     el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.')), history),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
-    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, reqCard)),
+    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(fixCard ? [fixCard] : []), reqCard)),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
   legend(); bindPlan(); paint();
+}
+
+/** تنفيذ مقترح إصلاح (أو كلها): النتيجة تصميم جديد يُعرض مع رد شرعاء بما عولج وما تعذّر وسببه. */
+async function runFix(id) {
+  const st = $('fixStatus'), btns = [...document.querySelectorAll('#fixes button')];
+  btns.forEach(b => { b.disabled = true; }); if (st) st.textContent = 'أعالج الملاحظات… قد أجرّب عدة توزيعات.';
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    const out = await applyFix(session, id);
+    if (!out.changed) { if (st) st.textContent = out.reply.failed.length ? 'لم أجد علاجًا: ' + out.reply.failed.map(f => `«${f.text}» — ${f.why}`).join(' ') : 'لا شيء يحتاج علاجًا.'; btns.forEach(b => { b.disabled = false; }); return; }
+    session = out.session; saveSession(localStorage, session); show(session.current);
+    toast(out.reply.failed.length ? `عالجت ${out.reply.fixed.length} وتعذّر ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'عالجت الملاحظات — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) { if (st) st.textContent = 'تعذّر تنفيذ المقترح: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; btns.forEach(b => { b.disabled = false; }); }
 }
 
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
   if (r.merge) return mergeReply(r);
-  const head = r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : r.altAsk || fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت، وليس تكرارًا لأي تصميم عرضته عليك.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
+  const head = r.fixRun ? (r.relayout ? 'غيّرت توزيع الغرف لأعالج الملاحظات، وأبقيت كل ما طلبته محققًا.' : 'عالجت الملاحظات على توزيعك نفسه دون تغييره.') : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : r.altAsk || fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت، وليس تكرارًا لأي تصميم عرضته عليك.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
   return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
     el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), head)),

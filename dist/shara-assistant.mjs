@@ -3,6 +3,7 @@
 // منطق خالص بلا واجهة: يُختبر في node، ولوحة shara-panel.mjs تعرضه وتنطقه.
 import { normalizeAr, extractRequirements } from './requirements.mjs';
 import { redesign as redesignSession, currentDoc, ledgerFor, summarizeDoc, wantsAlternative } from './design-session.mjs';
+import { fixProposals, applyFix } from './design-fixes.mjs';
 
 const r1 = v => Math.round(v * 10) / 10;
 const AR_LETTER = '\\u0620-\\u064A\\u066E-\\u06D5';
@@ -166,8 +167,21 @@ function where(doc, room, entry = 's') {
  * kind: 'answer' جواب، 'changed' نُفّذ تعديل (session الجديدة)، 'nav' روابط، 'help'، 'unclear' لم يُفهم.
  * exterior: دالة اختيارية applyExteriorText(session, text) → { session, understood[], changed } لتغيير الشكل الخارجي بالكلام.
  */
-export async function sharaTurn(session, text, { page = 'design', redesign = redesignSession, ai = null, exterior = null } = {}) {
+export async function sharaTurn(session, text, { page = 'design', redesign = redesignSession, ai = null, exterior = null, fix = applyFix } = {}) {
   const kind = classify(text), t = normalizeAr(text || '');
+  // الملاحظات ومقترحات الإصلاح: السؤال عنها يعدّدها، وطلب علاجها ينفّذها كلها (دون إسقاط رغبة للعميل)
+  if (session && /ملاحظات|مقترحات|اخطاء|اخطا|عيوب|مشاكل|مشكله/.test(t)) {
+    const P = fixProposals(session);
+    if (/عالج|صلح|اصلح|نفذ|عدل|حل(?:ي|ها)?(?![${'\u0620-\u064A'}])/.test(t)) {
+      if (!P.length) return { kind: 'answer', text: 'لا توجد ملاحظات تحتاج علاجًا في هذا التصميم.' };
+      const out = await fix(session, 'all'), r = out.reply, parts = [r.relayout ? 'غيّرت توزيع الغرف لأعالج الملاحظات، وأبقيت كل ما طلبته محققًا.' : out.changed ? 'عالجت الملاحظات على توزيعك نفسه.' : 'لم أجد علاجًا يحافظ على طلباتك، فأبقيت التصميم كما هو.'];
+      if (r.fixed.length) parts.push('عولج: ' + r.fixed.join('؛ ') + '.');
+      if (r.failed.length) parts.push('تعذّر: ' + r.failed.map(f => `«${f.text}» — ${f.why}`).join(' '));
+      const away = page !== 'design' && out.changed;
+      return { kind: out.changed ? 'changed' : 'answer', changed: out.changed, session: out.changed ? out.session : undefined, text: parts.join(' '), actions: away ? [{ label: 'عرض التصميم المعدّل', href: './design.html' }] : [] };
+    }
+    return { kind: 'answer', text: P.length ? `في هذا التصميم ${P.length} ${P.length === 1 ? 'ملاحظة' : 'ملاحظات'}: ` + P.map((p, i) => `${i + 1}) ${p.text}`).join(' ') + ' قل «عالجي الملاحظات» وأعالجها دون أن أُسقط شيئًا مما طلبته.' : 'لم أجد ملاحظات في الفحص الآلي لهذا التصميم. هذا لا يغني عن مراجعة مهندس.', actions: P.length ? [{ label: 'عالجي الملاحظات', say: 'عالجي الملاحظات' }] : [] };
+  }
   if (kind === 'help') return { kind, text: HELP };
   if (kind === 'nav') return navAnswer(t);
   if (!session) return { kind: 'unclear', text: 'لا يوجد تصميم مفتوح بعد. ابدأ من الأرض ثم حدّثني عن بيتك.', actions: [go('land')] };

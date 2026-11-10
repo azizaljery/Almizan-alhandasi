@@ -12,6 +12,7 @@ const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag)
 const icon = d => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true'); s.innerHTML = d; return s; };
 const IC = {
   chat: '<path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  down: '<path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
   close: '<path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
   send: '<path d="M20 4 3 11l7 2 2 7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
   mic: '<rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
@@ -76,7 +77,7 @@ const SUGGEST = { design: ['هل نفّذتِ طلبي؟', 'كم مساحة ال
 const sug = el('div', { class: 'shp-sug', 'aria-label': 'اقتراحات' }, (SUGGEST[page] || SUGGEST.design).map(t => el('button', { type: 'button', onclick: () => send(t) }, t)));
 const panel = el('section', { class: 'shp', id: 'sharaPanel', hidden: true, role: 'dialog', 'aria-label': 'شرعاء' },
   el('header', { class: 'shp-h' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء'), el('small', {}, 'تجيب من تصميمك وتنفّذ طلبك')),
-    el('div', { class: 'sp' }, btnVoice, el('button', { class: 'shp-b', type: 'button', title: 'إغلاق', 'aria-label': 'إغلاق نافذة شرعاء', onclick: () => open(false) }, icon(IC.close)))),
+    el('div', { class: 'sp' }, btnVoice, el('button', { class: 'shp-b', type: 'button', title: 'إخفاء في الأسفل', 'aria-label': 'إخفاء نافذة شرعاء في الأسفل', onclick: () => open(false) }, icon(IC.down)))),
   log, sug, note,
   el('div', { class: 'shp-f' }, input, btnMic, btnSend));
 const fab = el('button', { class: 'shp-fab', id: 'sharaFab', type: 'button', 'aria-controls': 'sharaPanel', 'aria-expanded': 'false', onclick: () => open(true) }, el('span', { class: 'av' }, 'ش'), el('span', { class: 't' }, 'اسأل شرعاء'));
@@ -92,7 +93,7 @@ function bubble(m) {
 }
 function say(text, actions = []) { const m = { who: 'she', text, actions }; chat.push(m); keep(); bubble(m); speak(text); }
 function open(on) {
-  panel.hidden = !on; fab.hidden = on; fab.setAttribute('aria-expanded', String(on)); put(OPEN_KEY, on ? '1' : '');
+  panel.hidden = !on; fab.hidden = on; if (!on && chat.length > 1) fab.querySelector('.t').textContent = 'شرعاء — أكمل المحادثة'; fab.setAttribute('aria-expanded', String(on)); put(OPEN_KEY, on ? '1' : '');
   if (on) {
     if (!log.childElementCount) { if (!chat.length) chat.push({ who: 'she', text: 'أهلًا، أنا شرعاء. اسألني عن تصميمك أو اطلب أي تعديل بكلامك، وأنا معك في كل صفحة.' }); chat.forEach(bubble); }
     setTimeout(() => input.focus(), 50);

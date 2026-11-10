@@ -56,3 +56,11 @@ test('النافذة الجانبية مضافة لصفحات المسار، و�
   for (const f of ['design.html', 'view3d.html', 'final.html']) { const h = readFileSync(new URL('../dist/' + f, import.meta.url), 'utf8'); assert.ok(h.includes('src="./shara-panel.mjs"'), f); assert.ok(h.includes('class="steps"'), f); }
   assert.deepEqual(STAGES.map(s => s.label), ['الأرض', 'شرعاء', 'التصميم', 'الشكل الخارجي', 'ثلاثي الأبعاد', 'المخططات', 'جدول الكميات']);
 });
+test('الملاحظات: السؤال عنها يعدّدها، وطلب علاجها ينفّذ كل المقترحات عبر مطبّق الإصلاح', async () => {
+  const a = await sharaTurn(S, 'وش الملاحظات على التصميم؟'); assert.equal(a.kind, 'answer'); assert.match(a.text, /ملاحظ/);
+  let called = 0; const fix = async (s, id) => { called++; assert.equal(id, 'all'); return { session: { ...s, tag: 2 }, changed: true, reply: { fixed: ['باب الحمام'], failed: [{ text: 'س', why: 'جرّبت 3 توزيعًا' }], relayout: true } }; };
+  const { fixProposals } = await import('../dist/design-fixes.mjs');
+  const b = await sharaTurn(S, 'عالجي الملاحظات', { page: 'view3d', fix });
+  if (fixProposals(S).length) { assert.equal(called, 1); assert.equal(b.kind, 'changed'); assert.match(b.text, /عولج: باب الحمام/); assert.match(b.text, /تعذّر/); assert.equal(b.actions[0].href, './design.html'); }
+  else assert.match(b.text, /لا توجد ملاحظات/);
+});
