@@ -3,7 +3,7 @@
 // (خارجي/داخلي). يُعاد كبيانات (لصفحة المخرجات وكتاب المشروع) وكلوحة SVG بإطار لوحة المسقط. نقي.
 import { OPENING_KINDS } from './catalog.mjs';
 import { analyzeDoc } from './digest.mjs';
-import { sheetCanvas, titleStrip, mm, n1, LW, esc } from './sheet-frame.mjs';
+import { sheetCanvas, titleStrip, mm, n1, LW, esc, inkify } from './sheet-frame.mjs';
 import { fmtDim } from './plan-annot.mjs';
 
 const r2 = v => Math.round(v * 100) / 100;
@@ -81,7 +81,7 @@ export function scheduleSheet(doc, opts = {}) {
       const list = sched.groups[g]; if (!list.length) continue;
       out.push(txt(x1, y + mm(4.5), SCHEDULE_GROUPS[g].title + ` (${sched.totals[g]})`, { size: mm(3.4), weight: 700, anchor: 'start' })); y += mm(7);
       // الرأس
-      let x = x1; out.push(`<rect x="${n1(x1 - tableW)}" y="${n1(y)}" width="${n1(tableW)}" height="${n1(mm(7))}" fill="#eee" stroke="#000" stroke-width="${LW.medium}"/>`);
+      let x = x1; out.push(`<rect x="${n1(x1 - tableW)}" y="${n1(y)}" width="${n1(tableW)}" height="${n1(mm(7))}" fill="#eadfce" stroke="#000" stroke-width="${LW.medium}"/>`);
       for (const [h, w] of COLS) { out.push(txt(x - mm(w) / 2, y + mm(4.6), h, { size: mm(2.1), weight: 700 })); x -= mm(w); out.push(`<line x1="${n1(x)}" y1="${n1(y)}" x2="${n1(x)}" y2="${n1(y + mm(7))}" stroke="#000" stroke-width="${LW.thin}"/>`); }
       y += mm(7);
       for (const t of list) {
@@ -96,7 +96,7 @@ export function scheduleSheet(doc, opts = {}) {
         });
         out.push('</g>'); y += rowH; rowsDrawn++;
       }
-      out.push(`<rect x="${n1(x1 - tableW)}" y="${n1(y)}" width="${n1(tableW)}" height="${n1(mm(7))}" fill="#f4f4f4" stroke="#000" stroke-width="${LW.medium}"/>`, txt(x1 - mm(COLS[0][1] + COLS[1][1] + COLS[2][1] / 2), y + mm(4.6), 'المجموع', { size: mm(2.3), weight: 700 }), txt(x1 - mm(COLS[0][1] + COLS[1][1] + COLS[2][1] + COLS[3][1] / 2), y + mm(4.6), String(sched.totals[g]), { size: mm(2.5), weight: 700 }));
+      out.push(`<rect x="${n1(x1 - tableW)}" y="${n1(y)}" width="${n1(tableW)}" height="${n1(mm(7))}" fill="#f4ede4" stroke="#000" stroke-width="${LW.medium}"/>`, txt(x1 - mm(COLS[0][1] + COLS[1][1] + COLS[2][1] / 2), y + mm(4.6), 'المجموع', { size: mm(2.3), weight: 700 }), txt(x1 - mm(COLS[0][1] + COLS[1][1] + COLS[2][1] + COLS[3][1] / 2), y + mm(4.6), String(sched.totals[g]), { size: mm(2.5), weight: 700 }));
       y += mm(7) + mm(7);
     }
   });
@@ -106,7 +106,7 @@ export function scheduleSheet(doc, opts = {}) {
     notes: ['الطراز = فتحات متطابقة في النوع والعرض والارتفاع والجلسة.', 'المقاسات صافي فتحة البناء بالمتر؛ الجلسة من أرضية الدور التشطيبية.', 'الموقع «خارجي» = فتحة في جدار يطل على الخارج أو على فناء مكشوف.', 'المواد والقطاعات والإكسسوارات تُحدد في مرحلة التصميم التفصيلي.'],
   });
   out.push('</svg>');
-  return { svg: out.join('\n'), meta: { types: sched.types.length, rows: rowsDrawn, totals: sched.totals }, schedule: sched };
+  return { svg: inkify(out.join('\n')), meta: { types: sched.types.length, rows: rowsDrawn, totals: sched.totals }, schedule: sched };
 }
 
 /** واجهة مصغرة للطراز بمقياس ثابت (1:50 مقيدًا بالخلية). */

@@ -3,7 +3,7 @@
 // وسطح المبنى وأعلى الدروة) وأبعاد إجمالية أفقية ورأسية. لوحتان A3: (الأمامية + الخلفية) و(اليمنى + اليسرى)
 // بمقياس قياسي واحد للواجهات الأربع. الإطار وجدول العنوان كلوحة المسقط.
 import { buildingModel, facadeSides, elevationGeometry } from './building-model.mjs';
-import { sheetCanvas, titleStrip, levelMark, dimLine, fitScale, fmtLevel, mm, n1, LW } from './sheet-frame.mjs';
+import { sheetCanvas, titleStrip, levelMark, dimLine, fitScale, fmtLevel, mm, n1, LW, inkify } from './sheet-frame.mjs';
 import { fmtDim, approxTextWidth } from './plan-annot.mjs';
 import { OPENING_KINDS } from './catalog.mjs';
 
@@ -54,7 +54,7 @@ export function elevationSheet(doc, opts = {}) {
     scaleText: `1:${scale}`, scaleK: k, sheetNo: opts.sheetNo || 'A-E1', date: opts.date, fingerprint: opts.fingerprint, owner: opts.owner, office: opts.office,
     legend: [
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#fff" stroke="#000" stroke-width="${LW.thick}"/>`, 'كتلة/جدار خارجي'],
-      [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#dfe5e8" stroke="#000" stroke-width="${LW.medium}"/><line x1="${mm(3.5)}" y1="0" x2="${mm(3.5)}" y2="${mm(3)}" stroke="#000" stroke-width="${LW.thin}"/>`, 'نافذة / زجاج'],
+      [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#d3e0e6" stroke="#000" stroke-width="${LW.medium}"/><line x1="${mm(3.5)}" y1="0" x2="${mm(3.5)}" y2="${mm(3)}" stroke="#000" stroke-width="${LW.thin}"/>`, 'نافذة / زجاج'],
       [`<rect x="${mm(1.5)}" y="0" width="${mm(4)}" height="${mm(3)}" fill="#fff" stroke="#000" stroke-width="${LW.medium}"/><circle cx="${mm(4.6)}" cy="${mm(1.6)}" r="${mm(.3)}" fill="#000"/>`, 'باب'],
       [`<rect x="${mm(1.5)}" y="0" width="${mm(4)}" height="${mm(3)}" fill="#555"/>`, 'فتحة مفتوحة بلا باب'],
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#fff" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1))} ${n1(mm(.6))}"/>`, 'سور'],
@@ -63,7 +63,7 @@ export function elevationSheet(doc, opts = {}) {
     notes: ['±0.00 = منسوب أرضية الدور الأرضي التشطيبية عند المدخل.', `الأرض الطبيعية ${fmtLevel(model.ground)} وسماكة البلاطة ${fmtDim(model.slab)} م افتراضان مطابقان للمجسم ثلاثي الأبعاد.`, 'الواجهة مسقطة عموديًا؛ الأقرب يحجب الأبعد. الفتحات بجلساتها وأعتابها من المستند.', 'المواد والألوان لا تظهر في هذه اللوحة الخطية.'],
   });
   out.push('</svg>');
-  return { svg: out.join('\n'), meta: { sheet: c.sheet, scale, elevations: metaEls, textOverlaps: overlapsOf(textBoxes) } };
+  return { svg: inkify(out.join('\n')), meta: { sheet: c.sheet, scale, elevations: metaEls, textOverlaps: overlapsOf(textBoxes) } };
 }
 const PXMM = 4;
 
@@ -82,7 +82,7 @@ function drawElevation(c, model, E, box) {
   // الوجوه من الأبعد إلى الأقرب
   for (const f of E.faces) {
     const fx0 = X(f.u0), fx1 = X(f.u1), fy0 = Z(f.z1), fy1 = Z(f.z0);
-    const attrs = f.kind === 'fence' ? `fill="#fff" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.6))}"` : `fill="#fff" stroke="#000" stroke-width="${LW.thick}"`;
+    const attrs = f.kind === 'fence' ? `fill="#fff" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.6))}"` : `fill="#f3eadb" stroke="#000" stroke-width="${LW.thick}"`; // كتلة الواجهة بتظليل جصّي هادئ (إخراج، لا مادة)
     g.push(`<g class="face" data-kind="${f.kind}" data-level="${f.level}" data-seg="${f.segId}">`);
     g.push(`<rect x="${n1(fx0)}" y="${n1(fy0)}" width="${n1(fx1 - fx0)}" height="${n1(fy1 - fy0)}" ${attrs}/>`);
     if (f.parapet) g.push(`<rect x="${n1(fx0 - mm(.4))}" y="${n1(fy0 - model.coping * k)}" width="${n1(fx1 - fx0 + mm(.8))}" height="${n1(model.coping * k)}" fill="#000"/>`); // غطاء الدروة
@@ -127,19 +127,19 @@ function openingSvg(o, X, Z, k, model) {
   const ln = (a, b, c2, d, sw = LW.thin) => `<line x1="${n1(a)}" y1="${n1(b)}" x2="${n1(c2)}" y2="${n1(d)}" stroke="#000" stroke-width="${sw}"/>`;
   const parts = [`<g class="opening" data-id="${o.id}" data-kind="${o.kind}">`];
   if (o.kind === 'window' || o.kind === 'window2') {
-    parts.push(r(x0, y0, w, h, `fill="#dfe5e8" stroke="#000" stroke-width="${LW.medium}"`));
+    parts.push(r(x0, y0, w, h, `fill="#d3e0e6" stroke="#000" stroke-width="${LW.medium}"`));
     const n = o.kind === 'window2' ? 3 : (o.u1 - o.u0 > 1.1 ? 2 : 1);
     for (let i = 1; i < n; i++) parts.push(ln(x0 + w * i / n, y0, x0 + w * i / n, y1));
     parts.push(r(x0 - mm(.6), y1, w + mm(1.2), Math.max(mm(.6), .04 * k), 'fill="#000"')); // الجلسة
   } else if (o.kind === 'arch') {
     parts.push(r(x0, y0, w, h, `fill="#555" stroke="#000" stroke-width="${LW.medium}"`));
   } else if (o.kind === 'garage') {
-    parts.push(r(x0, y0, w, h, `fill="#fff" stroke="#000" stroke-width="${LW.medium}"`));
+    parts.push(r(x0, y0, w, h, `fill="#dcc6a8" stroke="#000" stroke-width="${LW.medium}"`));
     for (let z = o.z0 + .3; z < o.z1 - .05; z += .3) parts.push(ln(x0, Z(z), x1, Z(z)));
   } else if (o.kind === 'slider') {
-    parts.push(r(x0, y0, w, h, `fill="#dfe5e8" stroke="#000" stroke-width="${LW.medium}"`), ln(x0 + w / 2, y0, x0 + w / 2, y1, LW.medium));
+    parts.push(r(x0, y0, w, h, `fill="#d3e0e6" stroke="#000" stroke-width="${LW.medium}"`), ln(x0 + w / 2, y0, x0 + w / 2, y1, LW.medium));
   } else { // door / door2
-    parts.push(r(x0, y0, w, h, `fill="#fff" stroke="#000" stroke-width="${LW.medium}"`));
+    parts.push(r(x0, y0, w, h, `fill="#dcc6a8" stroke="#000" stroke-width="${LW.medium}"`));
     const inset = Math.min(mm(1.2), w * .12);
     if (o.kind === 'door2') { parts.push(ln(x0 + w / 2, y0, x0 + w / 2, y1, LW.medium)); for (const xx of [x0 + w / 2 - mm(1), x0 + w / 2 + mm(1)]) parts.push(`<circle cx="${n1(xx)}" cy="${n1(Z(o.z0 + 1.05))}" r="${n1(mm(.35))}" fill="#000"/>`); }
     else { const hx = (o.hinge === 'right') !== o.flip ? x0 + inset * 1.6 : x1 - inset * 1.6; parts.push(`<circle cx="${n1(hx)}" cy="${n1(Z(o.z0 + 1.05))}" r="${n1(mm(.35))}" fill="#000"/>`); }

@@ -29,7 +29,7 @@ test('اللوحة: التعديل يغيّر اللوحة (عمود رسمه ا
   const doc = mk(), base = computeStructure(doc).levels[0], p = base.columns[0];
   const d2 = applyCommand(doc, { type: 'add-column', level: doc.levels[0].id, x: p.x, y: p.y, size: 0.4 }).doc;
   const a = structureSheetSvg(doc, computeStructure(doc), {}), b = structureSheetSvg(d2, computeStructure(d2), {});
-  assert.notEqual(a, b); assert.ok(b.includes('stroke="#d9ba79" stroke-width="2.2"'));
+  assert.notEqual(a, b); assert.ok(b.includes('stroke="#d4a77c" stroke-width="2.2"'));
 });
 
 test('اللوحة: دور بلا أعمدة يعرض رسالة لا أرقامًا؛ وCSV يحمل الدرجة والمصدر', () => {

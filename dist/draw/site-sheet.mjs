@@ -2,12 +2,13 @@
 // والفراغات المسقوفة) ومحيط الأدوار العليا، خطوط الارتداد المُدخلة، الارتدادات الفعلية مقيسة من المبنى إلى كل حد،
 // المداخل (من الشارع وباب المبنى)، الأسوار، سهم الشمال، ومساحات الأرض والأثر ونسبة التغطية (معلومة لا حكم نظامي).
 import { buildingModel, SIDE_VECTORS } from './building-model.mjs';
-import { sheetCanvas, titleStrip, fitScale, fmtLevel, mm, n1, LW } from './sheet-frame.mjs';
+import { sheetCanvas, titleStrip, fitScale, fmtLevel, mm, n1, LW, inkify } from './sheet-frame.mjs';
 import { fmtDim, fixtureSymbol } from './plan-annot.mjs';
 import { FIXTURES, fixtureName } from './catalog.mjs';
 import { add, sub, mul, dot, norm, area, ccw, insetPolygon, dist } from './geom.mjs';
 import { compassOf } from './digest.mjs';
 
+const GARDEN_FILL = { pool: '#cfe3ea', waterfall: '#cfe3ea', fountain: '#cfe3ea', lawn: '#dfe8cf', planter: '#d3e0c0' };
 const iso = v => '\u2066' + v + '\u2069'; // عزل اتجاه الأرقام ذات الإشارة داخل النص العربي
 const sideOfNormal = n => Object.entries(SIDE_VECTORS).sort((a, b) => dot(b[1], n) - dot(a[1], n))[0][0];
 const DOC_SIDE_AR = { n: 'الشمالية', s: 'الجنوبية', e: 'الشرقية', w: 'الغربية' };
@@ -62,7 +63,7 @@ export function siteSheet(doc, opts = {}) {
   // الشوارع
   for (const e of S.edges.filter(e => e.street)) {
     const q = [e.a, e.b, add(e.b, mul(e.out, sw)), add(e.a, mul(e.out, sw))];
-    g.push(poly(q, `fill="#f2f2f2" stroke="none" class="street" data-side="${e.side}"`), `<line x1="${n1(X(q[3].x))}" y1="${n1(Y(q[3].y))}" x2="${n1(X(q[2].x))}" y2="${n1(Y(q[2].y))}" stroke="#000" stroke-width="${LW.thin}"/>`);
+    g.push(poly(q, `fill="#e9e3d8" stroke="none" class="street" data-side="${e.side}"`), `<line x1="${n1(X(q[3].x))}" y1="${n1(Y(q[3].y))}" x2="${n1(X(q[2].x))}" y2="${n1(Y(q[2].y))}" stroke="#000" stroke-width="${LW.thin}"/>`);
     // موضع اسم الشارع: أبعد نقطة على الضلع عن أسهم المداخل
     const ens = S.entries.map(x => x.p), tBest = [.5, .3, .7, .2, .8].map(t => ({ t, d: Math.min(99, ...ens.map(p => dist(p, add(e.a, mul(sub(e.b, e.a), t))))) })).sort((p, q) => q.d - p.d || Math.abs(p.t - .5) - Math.abs(q.t - .5))[0].t;
     const u = norm(sub(e.b, e.a)); let deg = Math.atan2(-u.y, u.x) * 180 / Math.PI; if (deg > 90 || deg < -90) deg += 180;
@@ -70,6 +71,8 @@ export function siteSheet(doc, opts = {}) {
     g.push(`<line x1="${n1(X(add(e.a, mul(e.out, sw / 2)).x))}" y1="${n1(Y(add(e.a, mul(e.out, sw / 2)).y))}" x2="${n1(X(add(e.b, mul(e.out, sw / 2)).x))}" y2="${n1(Y(add(e.b, mul(e.out, sw / 2)).y))}" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(4))} ${n1(mm(3))}"/>`);
     g.push(txt(X(mid.x), Y(mid.y) - mm(1.2), `شارع — الجهة ${e.sideAr}`, { size: mm(3), weight: 700, rotate: deg, halo: true }), txt(X(m.x), Y(m.y) + mm(3.2), S.streetWidth ? `عرض الشارع ${fmtDim(S.streetWidth)} م` : 'عرض الشارع غير مُدخل (الرسم تخطيطي)', { size: mm(2.1), rotate: deg, halo: true }));
   }
+  // أرض الموقع: تظليل رملي هادئ تحت كل شيء
+  if (S.plot) g.push(poly(S.plot, `fill="#f6f0e3" stroke="none" class="plot-ground"`));
   // حدود الأرض
   if (S.plot) g.push(poly(S.plot, `fill="none" stroke="#000" stroke-width="${LW.heavy}" stroke-dasharray="${n1(mm(6))} ${n1(mm(1.2))} ${n1(mm(1))} ${n1(mm(1.2))}" class="plot"`));
   // خط الارتداد المُدخل
@@ -79,12 +82,12 @@ export function siteSheet(doc, opts = {}) {
   for (const L of model.levels.slice(1)) for (const o of L.analysis.outlines) g.push(poly(o.polygon, `fill="none" stroke="#000" stroke-width="${LW.medium}" stroke-dasharray="${n1(mm(2))} ${n1(mm(1))}" class="upper-outline" data-level="${L.id}"`));
   // الدور الأرضي: فراغات مسقوفة رمادية، المكشوفة بيضاء، الجدران سوداء، الأسوار بخط مزدوج
   const L1 = model.levels[0];
-  for (const o of L1.analysis.outlines) g.push(poly(o.polygon, `fill="#d9d9d9" stroke="#000" stroke-width="${LW.heavy}" class="footprint"`));
+  for (const o of L1.analysis.outlines) g.push(poly(o.polygon, `fill="#e6d8c2" stroke="#000" stroke-width="${LW.heavy}" class="footprint" filter="url(#sf-shadow)"`));
   for (const sp of L1.spaces.filter(s => s.open)) g.push(poly(sp.net, `fill="#fff" stroke="#000" stroke-width="${LW.medium}" class="open-space"`));
   // الحديقة: مسبح، شلال، عشب، أحواض (قطع خارجية في المستند)
   const garden = (doc.fixtures || []).filter(f => FIXTURES[f.kind]?.outdoor && f.kind !== 'tree');
   for (const f of garden) {
-    const sym = fixtureSymbol(f), fill = f.kind === 'pool' || f.kind === 'waterfall' || f.kind === 'fountain' ? '#e6e6e6' : f.kind === 'lawn' ? '#f4f4f4' : '#fff';
+    const sym = fixtureSymbol(f), fill = GARDEN_FILL[f.kind] || '#efe7da'; // ألوان إخراج هادئة: ماء، عشب، زراعة، منشآت خفيفة
     g.push(`<g class="garden-item" data-kind="${f.kind}" data-id="${f.id}">`, sym.outline ? poly(sym.outline, `fill="${fill}" stroke="#000" stroke-width="${LW.medium}"`) : '');
     for (const r of sym.rects) g.push(poly(r, `fill="none" stroke="#000" stroke-width="${LW.thin}"`));
     for (const [a, b] of sym.lines) g.push(`<line x1="${n1(X(a.x))}" y1="${n1(Y(a.y))}" x2="${n1(X(b.x))}" y2="${n1(Y(b.y))}" stroke="#000" stroke-width="${LW.thin}"${f.kind === 'pool' ? ` stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.8))}"` : ''}/>`);
@@ -143,17 +146,17 @@ export function siteSheet(doc, opts = {}) {
     rows: [['مساحة الأرض · أثر المبنى', `${S.areas.plot === null ? '—' : fmtDim(S.areas.plot)} م² · ${fmtDim(S.areas.footprint)} م²`], ['نسبة التغطية (معلومة)', pct(S.areas.coverage)], ['الشوارع · المداخل', `${S.edges.filter(e => e.street).map(e => e.sideAr).join('، ') || 'غير محددة'} · ${S.edges.filter(e => e.entry).map(e => e.sideAr).join('، ') || '—'}`]],
     legend: [
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="none" stroke="#000" stroke-width="${LW.heavy}" stroke-dasharray="${n1(mm(3))} ${n1(mm(.8))}"/>`, 'حد الأرض'],
-      [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#d9d9d9" stroke="#000" stroke-width="${LW.thick}"/>`, 'أثر الدور الأرضي (مسقوف)'],
+      [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#e6d8c2" stroke="#000" stroke-width="${LW.thick}"/>`, 'أثر الدور الأرضي (مسقوف)'],
       [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="none" stroke="#000" stroke-width="${LW.medium}" stroke-dasharray="${n1(mm(1.2))} ${n1(mm(.6))}"/>`, 'محيط الدور العلوي'],
       [`<line x1="0" y1="${mm(1.5)}" x2="${mm(7)}" y2="${mm(1.5)}" stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(1.5))} ${n1(mm(1))}"/>`, 'خط الارتداد المُدخل'],
-      [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#f2f2f2"/>`, 'شارع'],
-      ...(garden.length ? [[`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#e6e6e6" stroke="#000" stroke-width="${LW.medium}"/>`, 'مسبح / شلال / عشب / أحواض زراعة']] : []),
+      [`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#e9e3d8"/>`, 'شارع'],
+      ...(garden.length ? [[`<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#cfe3ea" stroke="#000" stroke-width="${LW.medium}"/>`, 'مسبح / شلال / عشب / أحواض زراعة']] : []),
       [`<line x1="0" y1="${mm(1.5)}" x2="${mm(5)}" y2="${mm(1.5)}" stroke="#000" stroke-width="${LW.thick}"/><path d="M${mm(7)} ${mm(1.5)} L${mm(5)} ${mm(.5)} L${mm(5)} ${mm(2.5)} Z" fill="#000"/>`, 'مدخل'],
     ],
     notes: ['الارتداد الفعلي مقيس من أقرب جدار في أي دور إلى حد الأرض.', 'الارتداد «المُدخل» هو ما أُدخل في المشروع، لا تحقق نظامي؛ اشتراطات البلدية تُراجع من مصدرها.', S.streetWidth ? 'عرض الشارع من المستند.' : 'عرض الشارع غير مُدخل؛ رسمه تخطيطي بلا بُعد.'],
   });
   out.push('</svg>');
-  return { svg: out.join('\n'), meta };
+  return { svg: inkify(out.join('\n')), meta };
 }
 
 export default { siteModel, siteSheet };

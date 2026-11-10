@@ -3,13 +3,14 @@
 // نقي: لا DOM. اتجاه النص من اليمين لليسار؛ الأرقام لاتينية لوضوح الأبعاد.
 import { wallRect } from './review.mjs';
 import { docBounds } from './editor/render2d.mjs';
+import { isOutdoorKind } from './catalog.mjs';
 
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const n1 = v => (Math.round(v * 10) / 10).toString();
 const n2 = v => (Math.round(v * 100) / 100).toFixed(2);
 const cm = m => Math.round(m * 100);
 const FONT = `Tahoma, 'Noto Naskh Arabic', 'Noto Sans Arabic', Arial, sans-serif`;
-const C = { paper: '#fbf9f4', ink: '#1d2a24', green: '#143428', green2: '#1f4a38', gold: '#d9ba79', brass: '#a8814a', ivory: '#f6f2ea', wall: '#d8d2c4', wallLine: '#b3ab9a', grid: '#8fa097', room: '#8b867a', warn: '#8a3b2a' };
+const C = { paper: '#fbf8f2', ink: '#2b211b', green: '#2b211b', green2: '#4a3a30', gold: '#d4a77c', brass: '#a97142', ivory: '#f6f2ea', wall: '#d8d2c4', wallLine: '#b3ab9a', grid: '#a89684', room: '#8b867a', warn: '#8a3b2a' };
 
 /** أنواع الأعمدة والجسور: كل مقطع مختلف نوع واحد (C1، C2… / B1، B2…) كما في اللوحات الإنشائية. */
 export function structureTypes(level) {
@@ -70,7 +71,7 @@ export function structureSheetSvg(doc, structure, opts = {}) {
 
   // ------------------------------------------------------------------ منطقة المسقط (يمين) ولوحة الجداول (يسار)
   const PX0 = 470, PX1 = W - 36, PY0 = 100, PY1 = 820, MARGIN = 92;
-  const b = docBounds(doc, level.id), bx0 = Math.min(b.x0, ...level.columns.map(c => c.x)), bx1 = Math.max(b.x1, ...level.columns.map(c => c.x));
+  const b = docBounds({ ...doc, fixtures: doc.fixtures.filter(f => !isOutdoorKind(f.kind)) }, level.id), bx0 = Math.min(b.x0, ...level.columns.map(c => c.x)), bx1 = Math.max(b.x1, ...level.columns.map(c => c.x));
   const by0 = Math.min(b.y0, ...level.columns.map(c => c.y)), by1 = Math.max(b.y1, ...level.columns.map(c => c.y));
   const s = Math.min((PX1 - PX0 - MARGIN * 2) / Math.max(1, bx1 - bx0), (PY1 - PY0 - MARGIN * 2) / Math.max(1, by1 - by0));
   const ox = PX0 + ((PX1 - PX0) - (bx1 - bx0) * s) / 2, oy = PY0 + ((PY1 - PY0) - (by1 - by0) * s) / 2;
@@ -177,7 +178,7 @@ export function structureSheetSvg(doc, structure, opts = {}) {
 
 function logo(x, y, size) {
   const k = size / 96;
-  return `<g transform="translate(${x} ${y}) scale(${k})"><rect x="3" y="3" width="90" height="90" rx="22" fill="#123629" stroke="#d9ba79" stroke-width="2.4"/><path d="M56.9 31.8Q52.9 27.7 47.2 27.7Q43.7 27.7 41.9 30.3L40.3 31.1L39.7 29.2Q39.3 27.7 39.3 26.3Q39.3 24.1 40.4 22.7Q41.4 21.3 43.4 20.8Q45.4 20.2 46.7 20.1Q48.1 20 50.1 20Q54.2 20 58 24.5Q61.9 29 64.2 34.9Q63.8 35.7 63 37.6Q62.2 39.6 61.6 40.8Q60 40.5 57.2 40Q54.4 39.4 51.8 39.1Q49.2 38.8 45.7 38.8Q41.6 38.8 39.7 40.8Q41.3 53.4 41.3 61.5Q41.3 66.6 39.4 70.7L37.9 74L37.2 70.5Q36.2 65.7 35 60.7Q33.9 55.7 33.5 53.7Q33 51.6 32.6 48.7Q32.1 45.8 31.8 42.3L31.9 42Q32.9 39.3 35.2 34.3L35.3 34.1Q38.6 31.2 45.2 31.2Q52.5 31.2 56.9 31.8Z" fill="#edce89"/></g>`;
+  return `<g transform="translate(${x} ${y}) scale(${k})"><rect x="3" y="3" width="90" height="90" rx="22" fill="#2b211b" stroke="#d4a77c" stroke-width="2.4"/><path d="M56.9 31.8Q52.9 27.7 47.2 27.7Q43.7 27.7 41.9 30.3L40.3 31.1L39.7 29.2Q39.3 27.7 39.3 26.3Q39.3 24.1 40.4 22.7Q41.4 21.3 43.4 20.8Q45.4 20.2 46.7 20.1Q48.1 20 50.1 20Q54.2 20 58 24.5Q61.9 29 64.2 34.9Q63.8 35.7 63 37.6Q62.2 39.6 61.6 40.8Q60 40.5 57.2 40Q54.4 39.4 51.8 39.1Q49.2 38.8 45.7 38.8Q41.6 38.8 39.7 40.8Q41.3 53.4 41.3 61.5Q41.3 66.6 39.4 70.7L37.9 74L37.2 70.5Q36.2 65.7 35 60.7Q33.9 55.7 33.5 53.7Q33 51.6 32.6 48.7Q32.1 45.8 31.8 42.3L31.9 42Q32.9 39.3 35.2 34.3L35.3 34.1Q38.6 31.2 45.2 31.2Q52.5 31.2 56.9 31.8Z" fill="#edce89"/></g>`;
 }
 
 /** جدول الأعمدة والجسور CSV (يُضاف لحزمة التصدير): كل صف عنصر فعلي بنوعه وحمله. */
