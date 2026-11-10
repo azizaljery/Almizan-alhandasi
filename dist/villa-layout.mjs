@@ -1661,7 +1661,8 @@ const maxBedOf = m => Math.max(0, ...(m?.levels || []).flatMap(l => l.rooms).fil
 /** حدود قبول بديل من نمط آخر خارج نافذة الجودة: مسطحه نسبةً إلى الأفضل، وأكبر غرفة نوم فيه (م² أو نسبةً إلى الأفضل). */
 export const OTHER_MODE_LIMITS = Object.freeze({ areaRatio: 1.7, bed: 32, bedRatio: 1.1 });
 /** كلفة عيوب المخطط المبني نفسه (ملاحظات المراجعة والتناسب والأثاث) بلا كلفة مطابقة المساحات للغلاف. */
-const defectOf = d => (d.quality || 0) - (d.penalty || 0);
+// عيوب المخطط المبني وحدها: بلا كلفة المطابقة وبلا كلفة العرف غير المتحقق (تلك تؤخّر الترتيب ولا تُعدّ عيبًا في الرسم)
+const defectOf = d => (d.quality || 0) - (d.penalty || 0) - SOFT_FAIL_COST * (d.softFails || 0);
 /** أقصى عدد من البدائل بالنمط التنظيمي نفسه متى وُجد نمط آخر صالح. */
 export const MODE_CAP = 2;
 /**
