@@ -11,6 +11,7 @@ import { normalizeLand } from './home-flow.mjs';
 import { displayOr } from './field-guards.mjs';
 import { compareDesigns } from './compare-designs.mjs';
 import { parseDoc } from './draw/doc.mjs';
+import { exteriorQuestions, answerLabel, describeExterior, setExterior, normalizeExterior, parseExteriorText, storeExterior } from './exterior-brief.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -25,7 +26,9 @@ function init() {
     return;
   }
   show(session.current);
+  if (location.hash === '#exterior') onApprove(); // رابط مرحلة «الشكل الخارجي»: يعتمد التصميم المعروض ويفتح حوار شرعاء
 }
+addEventListener('hashchange', () => { if (location.hash === '#exterior' && session && $('extShara').hidden) onApprove(); });
 
 function show(index) {
   session.current = index; saveSession(localStorage, session);
@@ -45,12 +48,12 @@ function show(index) {
   const ledger = ledgerFor(session, doc), done = ledger.filter(x => x.ok), miss = ledger.filter(x => !x.ok);
   const side = el('div', { class: 'actions card' },
     el('h2', {}, 'ما رأيك في هذا التصميم؟'),
-    el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واعرضه ثلاثي الأبعاد ←'),
+    el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واختر شكله الخارجي ←'),
     el('button', { class: 'btn primary', id: 'btnAnother', onclick: openShara }, 'اطلب تصميمًا آخر'),
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnCompare', onclick: openCompare }, 'قارن بين تصميمين جنبًا إلى جنب') : null,
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnMerge', onclick: openMerge }, 'ادمج تصميمين في تصميم واحد') : null,
     el('button', { class: 'btn', id: 'btnStudio', onclick: onStudio }, 'عدّل عليه بيدك في المرسم'),
-    el('small', {}, 'الاعتماد يفتح العرض ثلاثي الأبعاد في صفحة مستقلة، ومنه المخرجات (الإنشائي والكميات والتكلفة وكتاب المشروع).'));
+    el('small', {}, 'بعد الاعتماد تسألك شرعاء عن الشكل الخارجي الذي تحبه، ثم يفتح العرض ثلاثي الأبعاد على واجهة بيتك، ومنه المخرجات (الإنشائي والكميات والتكلفة وكتاب المشروع).'));
   // سجل التنفيذ: كل بند من طلبك مقيس من المخطط نفسه، لا من نية المولّد
   const reqCard = el('div', { class: 'card ledger', id: 'ledger' }, el('h2', {}, 'هل نُفّذ طلبك؟'),
     ledger.length ? el('p', { class: 'score ' + (miss.length ? 'part' : 'full') }, miss.length ? `نُفّذ ${done.length} من ${ledger.length} بنود، وبقي ${miss.length}` : `نُفّذت كل البنود (${ledger.length})`) : el('p', { class: 'sub' }, 'لم تذكر طلبات مكانية أو مقاسات؛ طُبّقت الأعداد التي حددتها.'),
@@ -275,7 +278,55 @@ function paint() {
 function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(doc)); } catch { /* التخزين غير متاح */ } }
 // طراز العميل («مودرن»، «نجدي»...) يصل إلى اختيار الواجهة في العرض ثلاثي الأبعاد؛ بلا طراز يُمسح الاختيار السابق حتى لا يرث تصميمًا آخر
 function storeFacadeWish() { try { const w = session.input.requirements?.prefs?.styleWish; if (w) localStorage.setItem('mizan.facade.wish', w); else localStorage.removeItem('mizan.facade.wish'); } catch { /* التخزين غير متاح: يبقى اقتراح الميزان */ } }
-function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); storeFacadeWish(); location.href = './view3d.html'; }
+// مرحلة «الشكل الخارجي»: بعد اعتماد المخطط تحاور شرعاء العميل بأسئلة موجّهة (كل سؤال يتبع ما سبقه)، ثم تولّد الواجهة وتعرضها ثلاثية الأبعاد.
+// الجواب يُحفظ في الجلسة (prefs.exterior) وتقرؤه صفحة العرض فتفتح على واجهة هذا المخطط وهذا الذوق. الرابط المباشر: design.html#exterior
+function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); openExterior(); }
+let extAns = {}, extDone = new Set(), extLog = [];
+const extPending = () => exteriorQuestions(extAns).filter(q => !extDone.has(q.id));
+function openExterior() {
+  extAns = {}; extDone = new Set(); extLog = [];
+  const known = { salmani: 'S', modern: 'modern', hijazi: 'H', najdi: 'N', classic: 'C' }[session.input.requirements?.prefs?.style];
+  if (known) { extAns.style = known; extDone.add('style'); extLog.push({ q: { text: 'ذكرتَ لي من قبل أنك تحب الطراز ال' + answerLabel('style', known) + '؛ سأبني عليه (تستطيع تغييره بالكتابة).', reason: '' } }); }
+  $('extShara').hidden = false; if (location.hash !== '#exterior') history.replaceState(null, '', '#exterior'); extPaint();
+}
+function extPaint() {
+  const pend = extPending(), q = pend[0], total = exteriorQuestions(extAns).length;
+  const bubbles = [el('div', { class: 'q' }, 'اعتمدتَ المخطط. قبل أن أريك بيتك ثلاثي الأبعاد أسألك بضعة أسئلة عن شكله من الخارج، وأبني الواجهة على أجوبتك.')];
+  for (const x of extLog) { if (x.q) bubbles.push(el('div', { class: 'q' }, x.q.text)); if (x.a) bubbles.push(el('div', { class: 'a' }, x.a)); }
+  if (q) bubbles.push(el('div', { class: 'q', id: 'extQ' }, q.text, el('small', {}, q.reason)));
+  else { const d = describeExterior(extAns); bubbles.push(el('div', { class: 'q', id: 'extQ' }, d.length ? 'فهمتُ ما تحب: ' + d.join('، ') + '. أولّد لك الآن واجهة تخص مخططك وهذا الذوق، وتستطيع تغيير أي شيء بعدها.' : 'تركتَ الاختيار لي: سأقترح الطراز والقالب الأنسب لمخططك، وتستطيع تغيير أي شيء بعدها.')); }
+  $('extThread').replaceChildren(...bubbles); $('extThread').scrollTop = $('extThread').scrollHeight;
+  $('extStep').textContent = q ? `السؤال ${total - pend.length + 1} من ${total}` : 'اكتملت الأسئلة';
+  $('extOpts').replaceChildren(...(q ? q.options.map(o => el('button', { type: 'button', class: 'chip' + (o.suggested ? ' sug' : ''), 'data-id': o.id, title: o.hint || null, onclick: () => extAnswer(q, o.id) }, o.label)) : []));
+  $('extOpts').dataset.q = q ? q.id : '';
+  $('extGo').hidden = !!q; $('extAll').hidden = !q; $('extBack').hidden = !extLog.some(x => x.id); $('extFree').hidden = false; $('extStatus').textContent = '';
+  $('extText').placeholder = q ? 'أو اكتب بكلماتك، مثل: أحب الهيبة، نجدي بحجر فاتح ومدخل غائر' : 'تريد تغيير شيء قبل التوليد؟ اكتبه هنا';
+}
+function extAnswer(q, id) { extAns[q.id] = id; extDone.add(q.id); extLog.push({ id: q.id, q, a: answerLabel(q.id, id) }); extPaint(); }
+function extSay() {
+  const text = $('extText').value.trim(); if (!text) return; const r = parseExteriorText(text);
+  if (!r.understood.length) { $('extStatus').textContent = 'لم أفهم من كلامك ما يخص الشكل الخارجي. اختر من الخيارات، أو اذكر ما يستهويك أو الطراز أو المواد أو الفتحات أو المدخل.'; return; }
+  Object.assign(extAns, r.found); for (const f of Object.keys(r.found)) extDone.add(f);
+  extAns.notes = [extAns.notes, text].filter(Boolean).join(' · ');
+  extLog.push({ id: Object.keys(r.found)[0], multi: Object.keys(r.found), a: text });
+  extLog.push({ q: { text: 'فهمت: ' + r.understood.join('، ') + '.' } }); $('extText').value = ''; extPaint();
+}
+function extBack() { // يعيد آخر جواب (خيارًا أو كتابة) ويسأل من جديد
+  let i = extLog.length - 1; while (i >= 0 && !extLog[i].id) i--; if (i < 0) return;
+  for (const f of extLog[i].multi || [extLog[i].id]) { delete extAns[f]; extDone.delete(f); }
+  extLog.length = i; extPaint();
+}
+function extGenerate() {
+  const ext = normalizeExterior(extAns);
+  session = setExterior(session, ext); saveSession(localStorage, session); storeExterior(localStorage, ext); storeFacadeWish();
+  $('extStatus').textContent = 'أولّد الشكل الخارجي…'; location.href = './view3d.html';
+}
+$('extSend').addEventListener('click', extSay);
+$('extText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); extSay(); } });
+$('extBack').addEventListener('click', extBack);
+$('extAll').addEventListener('click', () => { for (const q of extPending()) extDone.add(q.id); extPaint(); });
+$('extGo').addEventListener('click', extGenerate);
+$('extClose').addEventListener('click', () => { $('extShara').hidden = true; history.replaceState(null, '', location.pathname + location.search); });
 function onStudio() {
   const alternatives = (session.alternatives || []).map(a => { try { return { index: a.index, strategy: a.strategy, doc: JSON.parse(a.doc) }; } catch { return null; } }).filter(Boolean);
   try { writeHandoff(sessionStorage, doc, { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }
