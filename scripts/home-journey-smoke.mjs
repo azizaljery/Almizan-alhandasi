@@ -68,7 +68,14 @@ await step('الرحلة', async () => {
   await page.waitForFunction(n => document.querySelectorAll('.history button').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25, Math.max(1, nDesigns), { timeout: 90000 });
   check('«ابي تصميم بديل»: تصميم جديد', (await page.$$('.history button')).length > Math.max(1, nDesigns), await page.evaluate(() => document.querySelector('#fbStatus')?.textContent || ''));
   // 5) ثلاثي الأبعاد
-  await Promise.all([page.waitForURL(/\/view3d(\.html)?(\?.*)?$/, { timeout: 60000 }), page.click('#btnApprove')]); await page.waitForTimeout(4000);
+  await page.click('#btnApprove'); await page.waitForSelector('#extShara:not([hidden])', { timeout: 15000 });
+  check('الشكل الخارجي: شرعاء تبدأ بسؤال عمّا يستهوي العميل', await page.evaluate(() => document.getElementById('extOpts').dataset.q === 'feel' && document.querySelectorAll('#extOpts .chip').length >= 5));
+  await page.click('#extOpts .chip[data-id=heritage]');
+  check('الشكل الخارجي: سؤال الطراز يتبع الجواب (طرز تراثية مقترحة)', await page.evaluate(() => document.getElementById('extOpts').dataset.q === 'style' && document.querySelectorAll('#extOpts .chip.sug').length >= 2));
+  await page.click('#extOpts .chip[data-id=N]'); await page.click('#extAll');
+  await Promise.all([page.waitForURL(/\/view3d(\.html)?(\?.*)?$/, { timeout: 60000 }), page.click('#extGo')]);
+  await page.waitForFunction(() => globalThis.__mizanExterior?.on === true && !!document.getElementById('facadeFrame')?.dataset.src, null, { timeout: 30000 }).catch(() => {}); await page.waitForTimeout(1500);
+  check('ثلاثي الأبعاد: يفتح على واجهة واقعية بطراز العميل', await page.evaluate(() => globalThis.__mizanExterior?.on === true && globalThis.__mizanExterior.pick?.style === 'N' && /style=N/.test(document.getElementById('facadeFrame')?.dataset.src || '')));
   check('ثلاثي الأبعاد: مجسم أو مسقط بديل', await page.evaluate(() => !!document.querySelector('#stage canvas, .v3 canvas') || !!document.querySelector('#stage svg')));
   // 6) المخرجات
   await page.goto(`${BASE}/final.html`); await page.waitForTimeout(6000);

@@ -134,6 +134,7 @@ async function send(preset) {
     const session = loadSession(localStorage);
     let exterior = null; try { exterior = (await import('./exterior-brief.mjs')).applyExteriorText || null; } catch { exterior = null; }
     out = await sharaTurn(session, text, { page, exterior });
+    if (out.session && out.exteriorOnly) { try { const x = await import('./exterior-brief.mjs'); saveSession(localStorage, out.session); x.storeExterior(localStorage, x.readExterior(out.session)); globalThis.dispatchEvent(new CustomEvent(x.EXTERIOR_EVENT || 'mizan:exterior')); } catch { /* يُلتقط من التخزين عند فتح العرض */ } }
     if (out.session) { saveSession(localStorage, out.session); globalThis.dispatchEvent(new CustomEvent('mizan:session', { detail: { session: out.session, changed: !!out.changed, exteriorOnly: !!out.exteriorOnly } })); }
   } catch (e) { out = { text: 'تعذّر الرد: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر شيئًا.' }; }
   wait.remove(); busy = false; btnSend.disabled = false;

@@ -60,7 +60,7 @@ check('سجل التصاميم يسمح بالرجوع', await p.locator('.histo
 const led2 = await p.locator('#ledger').innerText();
 check('ملاحظة شرعاء المكانية نُفّذت في التصميم الثاني', /جهة الشرق/.test(led2) && /بعيدًا عن/.test(led2) && await p.locator('#ledger li.bad').count() === 0, led2.split('\n').slice(0, 5).join(' | '));
 await p.screenshot({ path: out + '/design-2.png', fullPage: false });
-await p.click('#btnApprove'); await p.waitForURL('**/view3d.html'); await p.waitForTimeout(3500);
+await p.click('#btnApprove'); await p.click('#extAll'); await p.click('#extGo'); await p.waitForURL('**/view3d.html'); await p.waitForTimeout(3500);
 check('العرض ثلاثي الأبعاد في صفحة مستقلة بعد الاعتماد', await p.evaluate(() => !!globalThis.__mizanViewer?.built));
 await p.fill('#hour', '9'); await p.dispatchEvent('#hour', 'input'); await p.waitForTimeout(400);
 check('الشمس من الوقت', /ارتفاع الشمس/.test(await p.locator('#sunTxt').innerText()));

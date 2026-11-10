@@ -71,6 +71,8 @@ import { analyzeSolar } from './facade-j/facade-realism/solar.mjs';
 import { designDna, shortDna, createDnaLog } from './facade-j/facade-realism/dna.mjs';
 import { designHash } from './facade-j/facade-realism/variation.mjs';
 import { baseRegion, regionId, describeRegion, parseRegion } from './facade-j/facade-realism/variation.mjs';
+import { chooseExterior, readExterior, loadExterior, applyExteriorText, describeExterior, storeExterior, isAutoExterior, EXTERIOR_EVENT, EXTERIOR_KEY } from './exterior-brief.mjs';
+import { loadSession, saveSession } from './design-session.mjs';
 const $ = id => document.getElementById(id), fr = $('facadeFrame'), host = $('threeHost'), opts = $('facadeOpts');
 const safe = (f, d) => { try { return f(); } catch { return d; } };
 let on = false, time = 'day', style = '', note0 = '', tpl = '', tplSeed = 1, TPLS = [], mut = 0, mseed = 1; const dnaLog = createDnaLog();
@@ -81,6 +83,38 @@ const hist = createHistory(), recent = [], tried = new Set(), region = {}; // re
 const ranking = () => safe(() => rankStyles(doc, wish, { recent }), Object.keys(STYLE_AR).filter(id => id !== 'J').map(id => ({ id, reason: '' })));
 const floorsVal = () => +$('facadeFloors').value || undefined;
 style = ranking()[0].id;
+// الشكل الخارجي الذي سألت عنه شرعاء بعد اعتماد المخطط: الصفحة تفتح على الواجهة الواقعية لهذا المخطط وهذا الذوق، و«المجسم» يبقى خيارًا.
+let ext = null, extPick = null;
+const sessionNow = () => safe(() => loadSession(localStorage), null);
+const loadTpl = async id => { const { STYLES } = await import('./facade-j/facade-realism/styles/index.mjs'); return (await STYLES[id].load()).templates || []; };
+async function chooseFromBrief() {
+  const ses = sessionNow(); ext = (ses && readExterior(ses)) || safe(() => loadExterior(localStorage), null);
+  extPick = await chooseExterior({ doc, exterior: ext || {}, prefs: ses?.input?.requirements?.prefs || {}, loadTemplates: loadTpl }).catch(() => null);
+  if (!extPick) return false;
+  style = extPick.style; tpl = extPick.tpl; tplSeed = extPick.tseed; mut = 0; $('autoStyle').checked = extPick.source === 'mizan'; return true;
+}
+function extCard() { // ملخص الشكل الخارجي + تغييره بالكلام (نفس الدالة التي تستعملها لوحة شرعاء)
+  let box = $('extBox'); if (!box) {
+    box = document.createElement('div'); box.id = 'extBox';
+    box.innerHTML = '<h2>شكل بيتك الخارجي</h2><p class="muted" id="extLine"></p><textarea id="extSay" rows="2" style="width:100%;box-sizing:border-box;border-radius:10px;padding:8px;font:inherit" placeholder="اكتب ما تريد تغييره، مثل: نجدي بحجر فاتح وفتحات أقل"></textarea><div class="kv" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn gold" id="extApply" type="button">طبّق على الواجهة</button><a class="btn" id="extRedo" href="./design.html#exterior">غيّر شيئًا مع شرعاء</a></div><p class="muted" id="extMsg" role="status" aria-live="polite"></p>';
+    $('threePane').prepend(box, $('facadeBox'));
+    $('extApply').addEventListener('click', async () => {
+      const text = $('extSay').value.trim(); if (!text) return; const ses = sessionNow();
+      if (!ses) { $('extMsg').textContent = 'لا توجد جلسة تصميم محفوظة في هذا المتصفح.'; return; }
+      const r = applyExteriorText(ses, text);
+      if (!r.understood.length) { $('extMsg').textContent = 'لم أفهم من كلامك ما يخص الشكل الخارجي. اذكر الطراز أو المواد أو الفتحات أو الطابع.'; return; }
+      if (!r.changed) { $('extMsg').textContent = 'هذا هو المطبَّق الآن: ' + r.understood.join('، ') + '.'; return; }
+      saveSession(localStorage, r.session); storeExterior(localStorage, readExterior(r.session)); $('extSay').value = '';
+      $('extMsg').textContent = 'فهمت: ' + r.understood.join('، ') + '. أعدت اختيار الواجهة.'; await refreshExterior();
+    });
+  }
+  const d = describeExterior(ext || {}), mine = extPick && style === extPick.style && tpl === extPick.tpl;
+  $('extLine').textContent = (d.length ? 'طلبك: ' + d.join('، ') + '. ' : 'لم تحدد شكلًا خارجيًا؛ هذا اقتراح الميزان لمخططك. ') + (extPick ? (mine ? 'المعروض: ' : 'اقتراح الميزان (غيّرتَه يدويًا): ') + extPick.styleAr + ' — ' + extPick.why + '.' : '');
+}
+async function refreshExterior() { for (const k of Object.keys(region)) delete region[k]; if (await chooseFromBrief()) { on = true; note0 = ''; await apply(); } extCard(); }
+globalThis.__mizanExterior = { refresh: refreshExterior, get pick() { return extPick; }, get on() { return on; } };
+addEventListener(EXTERIOR_EVENT, () => { refreshExterior(); });
+addEventListener('storage', e => { if (e.key === EXTERIOR_KEY) refreshExterior(); });
 const cur = () => region[style] || (region[style] = safe(() => baseRegion(doc, floorsVal()), null));
 function note(t) { const n = $('styleNote'); n.hidden = !t; n.textContent = t || ''; }
 async function probe(id) { // هل تُحمَّل وحدة النمط؟ إن فشلت يظهر المجسم الأساسي مع تنبيه
@@ -96,7 +130,9 @@ function chips() {
 function paint() {
   const sel = $('autoStyle').checked; [...$('styleSel').children].forEach(b => b.classList.toggle('on', b.dataset.s === style));
   const r = ranking().find(x => x.id === style), c = cur();
-  $('styleWhy').textContent = ' — ' + (r?.explicit ? 'اختيارك' : sel ? 'مقترح لتصميمك: ' + (r?.reason || '') : 'اخترته بنفسك') + (c ? ' · ' + describeRegion(c) : '');
+  const mine = extPick && style === extPick.style && tpl === extPick.tpl;
+  $('styleWhy').textContent = ' — ' + (mine ? extPick.reason : r?.explicit ? 'اختيارك' : sel ? 'مقترح لتصميمك: ' + (r?.reason || '') : 'اخترته بنفسك') + (c ? ' · ' + describeRegion(c) : '');
+  if ($('extBox')) extCard();
 }
 async function apply() {
   opts.hidden = !on; fr.hidden = !on; host.style.visibility = on ? 'hidden' : '';
@@ -104,11 +140,14 @@ async function apply() {
   if (!on) return;
   const c = cur(); if (c) markShown(hist, style, c);
   paint(); chips(); await probe(style); await loadTpls(); info();
-  const fl = $('facadeFloors').value, src = './facade-j/?v=A&hq=1&nav=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
+  // «حسب التصميم» = عدد أدوار المخطط المعتمد نفسه: القالب لا يغيّر عدد أدوار بيت العميل إلا إذا اختار هو عددًا آخر
+  const fl = $('facadeFloors').value || String(Math.min(3, Math.max(1, (doc?.levels || []).length || 1))), src = './facade-j/?v=A&hq=1&nav=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
   if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
 }
 const seg = $('facadeSeg'); const jb = document.createElement('button'); jb.dataset.f = 'J'; jb.textContent = 'واجهة واقعية'; seg.appendChild(jb);
 seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; on = b.dataset.f === 'J'; note0 = ''; apply(); });
+// أدوات المجسم (طريقة المشاهدة، الجولة، الشمس، الأجواء، الأدوار) تعمل على المجسم: استعمالها ينقل إليه تلقائيًا
+for (const id of ['modeSeg', 'autoTour', 'recordTour', 'city', 'day', 'hour', 'styleSeg', 'levelSeg']) { const n = $(id); if (n) for (const ev of ['click', 'input']) n.addEventListener(ev, () => { if (on) { on = false; apply(); } }, true); }
 $('styleSel').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; style = b.dataset.s; tpl = ''; $('autoStyle').checked = false; tried.add(style); recent.unshift(style); note0 = ''; apply(); });
 $('autoStyle').addEventListener('change', () => { if ($('autoStyle').checked) { style = ranking()[0].id; note0 = ''; apply(); } else paint(); });
 // بديل آخر: نفس الطراز دائمًا، منطقة معمارية مختلفة عمّا عُرض
@@ -145,8 +184,9 @@ function info() { // بصمة التصميم والاتجاه الشمسي
 }
 $('tplMut').addEventListener('click', () => { if (!TPLS.length) return; if (!tpl) tpl = TPLS[0].id; mut = +$('mutK').value; mseed = 1 + Math.floor(Math.random() * 9999); apply(); });
 paint();
+// الافتتاح: واجهة واقعية لهذا المخطط (إن وُجد تصميم معتمد وأمكن تحميل قوالب الطراز)، وإلا يبقى المجسم
+if (doc && new URLSearchParams(location.search).get('model') !== '1') chooseFromBrief().then(ok => { if (ok) { on = true; apply(); } extCard(); });
 </script>
-<script>addEventListener('mizan:session', e => { if (e.detail && e.detail.exteriorOnly) location.reload(); });</script>
 <script type="module" src="./shara-panel.mjs"></script>
 </body>
 </html>

@@ -152,3 +152,17 @@ table.rooms td .z{display:inline-block;width:10px;height:10px;border-radius:3px;
 .fixes .fixlist li .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;background:#f3e6c9;color:#5a3a2c;margin-bottom:3px}
 .fixes .fixlist li .btn{flex:0 0 auto;padding:7px 16px}
 .fixes #fixAll{width:100%}
+/* مرحلة الشكل الخارجي: حوار شرعاء بعد اعتماد المخطط */
+.shara.ext{inset:0;align-items:flex-end;background:#0006;pointer-events:auto}
+.shara.ext .panel{max-height:92vh;display:flex;flex-direction:column;gap:10px}
+.shara.ext .exthead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.shara.ext .exthead b{font-size:16px}.shara.ext .exthead span{opacity:.7;font-size:13px;margin-inline-end:auto}
+.shara.ext .extthread{overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:44vh;padding:2px}
+.shara.ext .extthread .q{align-self:flex-start;max-width:88%;background:#ffffff12;border:1px solid #ffffff22;border-radius:14px;padding:10px 14px;line-height:1.8}
+.shara.ext .extthread .q small{display:block;opacity:.72;font-size:12.5px;line-height:1.7;margin-top:2px}
+.shara.ext .extthread .a{align-self:flex-end;max-width:80%;background:var(--mz-gold);color:var(--mz-green-deep);border-radius:14px;padding:6px 14px;font-weight:600}
+.shara.ext .chips{margin:0}
+.shara.ext .chip.sug{border-color:var(--mz-gold)}
+.shara.ext .chip.sug::after{content:" · يناسبك";font-size:12px;opacity:.8}
+.shara.ext .extfree{display:flex;gap:8px;align-items:flex-end}
+.shara.ext .extfree textarea{flex:1;margin:0}
