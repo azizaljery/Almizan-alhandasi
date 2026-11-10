@@ -162,3 +162,27 @@ export function decorateFloors(THREE, { scene, S, q, info, J }) {
   }
 }
 export default { extrudeFloors, decorateFloors, bandLevels, floorsInfo, floorLevel, FLOOR, ASSUMPTION };
+
+/** الدور الأرضي وحده (جدرانه وفتحاته): أساس نموذج الواجهة. الأدوار العليا يضيفها extrudeFloors بعدد أدوار المخطط. لا يغيّر الأصل. */
+export function groundLevelOnly(doc) {
+  const L = doc?.levels || []; if (L.length < 2) return doc;
+  const g = L[0].id, on = x => (x?.level ?? g) === g, d = { ...doc, levels: [L[0]] };
+  d.walls = (doc.walls || []).filter(on); const ids = new Set(d.walls.map(w => w.id));
+  d.openings = (doc.openings || []).filter(o => ids.has(o.wall));
+  for (const k of ['labels', 'fixtures', 'stairs', 'slabs', 'rooms', 'columns', 'beams']) if (Array.isArray(doc[k])) d[k] = doc[k].filter(on);
+  return d;
+}
+/**
+ * مستند الواجهة وعدد أدوارها. القاعدة (المالك): عدد الأدوار في الواجهة يتبع المخطط أو طلب العميل الصريح، لا القالب.
+ * النموذج يُبنى من الدور الأرضي ثم يُمدّ رأسيًا إلى العدد المطلوب؛ كان مخطط الدورين يُبنى بدوريه ثم يُمدّ فوقهما دور ثالث،
+ * وكانت قوالب بعض الطرز تفرض عدد أدوارها على مخطط العميل.
+ * @param q URLSearchParams: يُضبط فيه floors النهائي (المطلوب صراحةً، وإلا عدد أدوار المخطط).
+ * @param transformDoc (styleId, doc, q) => doc  تحويل قالب الطراز (يُستدعى فقط مع style و tpl)
+ */
+export async function facadeDoc(doc, q, transformDoc) {
+  const planLevels = Math.min(3, Math.max(1, (doc?.levels || []).length || 1)), asked = q.get('floors');
+  let d = groundLevelOnly(doc);
+  if (q.get('style') && q.get('tpl') && transformDoc) d = groundLevelOnly(await transformDoc(q.get('style'), d, q));
+  q.set('floors', asked || String(planLevels));
+  return d;
+}

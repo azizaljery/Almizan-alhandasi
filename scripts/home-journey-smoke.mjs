@@ -76,6 +76,10 @@ await step('الرحلة', async () => {
   await Promise.all([page.waitForURL(/\/view3d(\.html)?(\?.*)?$/, { timeout: 60000 }), page.click('#extGo')]);
   await page.waitForFunction(() => globalThis.__mizanExterior?.on === true && !!document.getElementById('facadeFrame')?.dataset.src, null, { timeout: 30000 }).catch(() => {}); await page.waitForTimeout(1500);
   check('ثلاثي الأبعاد: يفتح على واجهة واقعية بطراز العميل', await page.evaluate(() => globalThis.__mizanExterior?.on === true && globalThis.__mizanExterior.pick?.style === 'N' && /style=N/.test(document.getElementById('facadeFrame')?.dataset.src || '')));
+  // عدد الأدوار الظاهرة في الواجهة المولَّدة = عدد أدوار المخطط المعتمد (مقيس من أعلى جدار في النموذج)
+  const fl = await page.waitForFunction(() => { const f = document.getElementById('facadeFrame')?.contentWindow?.__FR; return f?.ready ? f : null; }, null, { timeout: 60000 }).then(h => h.jsonValue()).catch(() => null);
+  const planLv = await page.evaluate(() => { try { return JSON.parse(localStorage.getItem('mizan.studio.doc.v1')).levels.length; } catch { return null; } });
+  check('الواجهة: عدد الأدوار الظاهرة يطابق المخطط', !!fl && !fl.error && fl.floors === planLv && Math.max(1, Math.round((fl.wallTop - 3.85) / 3.6) + 1) === planLv, fl ? `المخطط ${planLv}، الواجهة ${fl.floors}، أعلى جدار ${fl.wallTop} م${fl.error ? ' — ' + fl.error : ''}` : 'لم تُحمَّل الواجهة');
   check('ثلاثي الأبعاد: مجسم أو مسقط بديل', await page.evaluate(() => !!document.querySelector('#stage canvas, .v3 canvas') || !!document.querySelector('#stage svg')));
   // 6) المخرجات
   await page.goto(`${BASE}/final.html`); await page.waitForTimeout(6000);

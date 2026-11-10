@@ -35,7 +35,7 @@ import { parseDoc } from './draw/doc.mjs';
 import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model.mjs';
 import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
 import { buildBuildingScene, closeupCamera } from './facade-realism/scene-hq.mjs';
-import { extrudeFloors, decorateFloors, floorsInfo, bandLevels } from './facade-realism/floors.mjs';
+import { extrudeFloors, decorateFloors, floorsInfo, bandLevels, facadeDoc } from './facade-realism/floors.mjs';
 
 const q = new URLSearchParams(location.search);
 const mode = q.get('mode') || 'view', id = (q.get('v') || 'A').toUpperCase();
@@ -83,8 +83,9 @@ async function variantMode() {
   let docRaw = null; if (q.get('src') === 'studio') { try { docRaw = localStorage.getItem('mizan.studio.doc.v1'); } catch {} if (!docRaw) throw new Error('لا يوجد تصميم معتمد محفوظ في هذا المتصفح'); }
   if (!docRaw) { const res = await fetch('./facade-realism/C1.json'); if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')'); docRaw = await res.text(); }
   let doc = parseDoc(docRaw);
-  if (q.get('style') && q.get('tpl')) doc = await transformDoc(q.get('style'), doc, q); // القوالب قد تغيّر الفتحات والمداخل والجدران والأدوار (مسموح من المالك)
-  if (!q.get('floors')) q.set('floors', String(Math.min(3, Math.max(1, (doc.levels || []).length || 1))));
+  // عدد الأدوار في الواجهة يتبع المخطط/طلب العميل لا القالب: نموذج الواجهة يُبنى من الدور الأرضي ثم يُمدّ رأسيًا إلى العدد المطلوب (extrudeFloors).
+  // كان مخطط الدورين يُبنى بدوريه ثم يُمدّ فوقهما دور ثالث، وكانت قوالب بعض الطرز تفرض عدد أدوارها على مخطط العميل.
+  doc = await facadeDoc(doc, q, transformDoc); // القوالب تغيّر الفتحات والمداخل والجدران؛ عدد الأدوار يتبع المخطط أو طلب العميل الصريح
   // مظلة السطح المرتد في J تبرز أكثر من 250 مم (بوابة البروز)؛ فالارتداد في J اختياري صراحة (setback=1) ولا يُفعَّل افتراضيًا
   if (q.get('style') === 'J' && !q.has('setback')) q.set('setback', '0');
   const FI = floorsInfo(q);
@@ -181,7 +182,9 @@ async function variantMode() {
     nav = enableNavigation(THREE, { renderer, scene, camera, S, host: document.body });
   }
   const gl = renderer.getContext();
-  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav });
+  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav,
+    // قياس لا ادعاء: أعلى منسوب لجدران المبنى المبني فعلًا، ومنه عدد الأدوار الظاهرة (يُقارن بأدوار المخطط في الاختبارات)
+    wallTop: (() => { let y = 0; for (const m of S.meshes) { const r = m.userData?.role; if (r !== 'wall' && r !== 'cladding') continue; const b = new THREE.Box3().setFromObject(m); if (b.max.y > y) y = b.max.y; } return Math.round(y * 100) / 100; })() });
 }
 
 (async () => {
