@@ -21,10 +21,10 @@ const IC = {
 };
 
 const CSS = `
-.shp-fab{position:fixed;inset-block-end:18px;inset-inline-start:18px;z-index:90;display:flex;align-items:center;gap:8px;padding:11px 18px 11px 14px;border:1px solid #b08a4a;border-radius:99px;background:linear-gradient(180deg,#5a3a2c,#3d241b);color:#f6ecd8;font:600 15px/1 'IBM Plex Sans Arabic',system-ui,sans-serif;box-shadow:0 8px 24px #0005;cursor:pointer}
+.shp-fab{position:fixed;inset-block-end:18px;inset-inline-end:18px;z-index:90;display:flex;align-items:center;gap:8px;padding:11px 18px 11px 14px;border:1px solid #b08a4a;border-radius:99px;background:linear-gradient(180deg,#5a3a2c,#3d241b);color:#f6ecd8;font:600 15px/1 'IBM Plex Sans Arabic',system-ui,sans-serif;box-shadow:0 8px 24px #0005;cursor:pointer}
 .shp-fab svg,.shp-b svg{width:20px;height:20px}.shp-fab .av{width:26px;height:26px;border-radius:50%;background:#d9b877;color:#3d241b;display:grid;place-items:center;font-weight:700}
 .shp-fab:hover{filter:brightness(1.1)}.shp-fab:focus-visible,.shp-b:focus-visible,.shp-in:focus-visible{outline:2px solid #d9b877;outline-offset:2px}
-.shp{position:fixed;inset-block-end:18px;inset-inline-start:18px;z-index:95;width:min(390px,calc(100vw - 24px));height:min(600px,calc(100dvh - 90px));display:flex;flex-direction:column;background:#fbf7ee;color:#2c2018;border:1px solid #c9ae7a;border-radius:16px;box-shadow:0 18px 50px #0006;overflow:hidden;font:400 15px/1.7 'IBM Plex Sans Arabic',system-ui,sans-serif}
+.shp{position:fixed;inset-block-end:18px;inset-inline-end:18px;z-index:95;width:min(390px,calc(100vw - 24px));height:min(600px,calc(100dvh - 90px));display:flex;flex-direction:column;background:#fbf7ee;color:#2c2018;border:1px solid #c9ae7a;border-radius:16px;box-shadow:0 18px 50px #0006;overflow:hidden;font:400 15px/1.7 'IBM Plex Sans Arabic',system-ui,sans-serif}
 .shp[hidden],.shp-fab[hidden]{display:none}
 .shp-h{display:flex;align-items:center;gap:10px;padding:10px 12px;background:linear-gradient(180deg,#5a3a2c,#3d241b);color:#f6ecd8}
 .shp-h .av{width:34px;height:34px;border-radius:50%;background:#d9b877;color:#3d241b;display:grid;place-items:center;font-weight:700;font-size:17px}
@@ -144,11 +144,14 @@ input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) open(false); });
 if (get(OPEN_KEY) === '1' && page !== 'design') open(true);
 
-// شريط المراحل الموحّد: يعلّم موضع الصفحة ويجعل ما سبقها روابط رجوع
+// شريط المراحل الموحّد: يعلّم موضع الصفحة ويجعل ما سبقها روابط رجوع؛ وحوار الشكل الخارجي (داخل صفحة التصميم) مرحلة قائمة بذاتها
 const ORDER = { design: 'design', view3d: 'view3d', final: 'sheets' };
 const steps = document.querySelector('ol.steps');
-if (steps && ORDER[page]) {
-  const at = STAGES.findIndex(s => s.id === ORDER[page]);
+function paintSteps() {
+  if (!steps || !ORDER[page]) return;
+  const ext = document.getElementById('extShara'), id = page === 'design' && ext && !ext.hidden ? 'exterior' : ORDER[page], at = STAGES.findIndex(s => s.id === id);
   steps.replaceChildren(...STAGES.map((s, i) => { const li = el('li', { class: i < at ? 'done' : i === at ? 'on' : '', 'aria-current': i === at ? 'step' : null }); li.append(i < at ? el('a', { href: s.href }, s.label) : s.label); return li; }));
 }
+paintSteps();
+{ const ext = document.getElementById('extShara'); if (ext && globalThis.MutationObserver) new MutationObserver(paintSteps).observe(ext, { attributes: true, attributeFilter: ['hidden'] }); }
 globalThis.__sharaPanel = { open, send, get chat() { return chat; } }; // للاختبارات الحية
