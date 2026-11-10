@@ -306,5 +306,7 @@ $('fbGo').addEventListener('click', async () => {
   } catch (err) { $('fbStatus').textContent = err.message || 'تعذّر تصميم بديل.'; $('fbGo').disabled = false; }
 });
 
+// نافذة شرعاء الجانبية عدّلت الجلسة (طلب نُفّذ): تُعرض النتيجة هنا فورًا
+globalThis.addEventListener?.('mizan:session', e => { const s2 = e.detail?.session; if (!s2) return; session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } });
 try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, e.message), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
 globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية

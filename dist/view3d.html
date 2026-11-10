@@ -146,5 +146,7 @@ function info() { // بصمة التصميم والاتجاه الشمسي
 $('tplMut').addEventListener('click', () => { if (!TPLS.length) return; if (!tpl) tpl = TPLS[0].id; mut = +$('mutK').value; mseed = 1 + Math.floor(Math.random() * 9999); apply(); });
 paint();
 </script>
+<script>addEventListener('mizan:session', e => { if (e.detail && e.detail.exteriorOnly) location.reload(); });</script>
+<script type="module" src="./shara-panel.mjs"></script>
 </body>
 </html>
