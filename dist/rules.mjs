@@ -316,6 +316,7 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
   const sel = id => rooms.filter(r => ROOM_OF[id]?.(r));
   // الصالة: الرئيسية أولًا
   const pickHall = list => { const main = list.filter(r => r.name === 'الصالة'); return main.length ? main : list.slice(0, 1); };
+  let DI = null;
   for (const r of rules) {
     let A = sel(r.a); if (r.a === 'hall') A = pickHall(A);
     const res = { id: r.id, text: r.text, kind: r.kind, ok: true, why: '' };
@@ -352,7 +353,9 @@ export function verifyRules(doc, rules = [], { entry = 's' } = {}) {
         continue;
       }
       if (!cands.length) { res.ok = false; res.why = `«${a.name}» و«${subjAr(r.b)}» في دورين مختلفين.`; break; }
-      const okOne = b => r.kind === 'adjacent' ? contact(a, b) >= .8 : contact(a, b) >= .6 || gapOf(a, b) <= nearGap(r);
+      // «بجوار المجلس» عبر مغاسله: المغاسل جزء من جناح المجلس؛ يُحسب الجوار فقط إن لاصقت المغاسل الفراغين وفُتح بابها على الفراغ الآخر فعلًا
+      const viaWash = b => { const [mj, other] = a.type === 'majlis' ? [a, b] : b.type === 'majlis' ? [b, a] : [null, null]; if (!mj) return false; const w = rooms.find(x => x.name === 'مغاسل' && same(x, mj) && contact(x, mj) >= .8 && contact(x, other) >= .8); return !!w && (DI ||= doorInfo(doc)).neighbors('مغاسل').includes(other.name); };
+      const okOne = b => r.kind === 'adjacent' ? contact(a, b) >= .8 || viaWash(b) : contact(a, b) >= .6 || gapOf(a, b) <= nearGap(r);
       if (!cands.some(okOne)) { const g = Math.min(...cands.map(b => gapOf(a, b))); res.ok = false; res.why = `«${a.name}» ${r.kind === 'adjacent' ? 'لا يلاصق' : 'بعيد عن'} «${cands[0].name}»${g > .3 ? ` (بينهما ${r1(g)} م)` : ''}.`; break; }
     }
     out.push(res);
