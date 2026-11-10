@@ -58,7 +58,7 @@ test('sheet: الأعمدة المقترحة تُرسم وتظهر في المف
 test('sheet: الرموز: جدار خارجي مصمت وداخلي مهشّر، باب بقوس، نافذة بخط مزدوج، درج بعدد القوائم، منسوب المدخل ±0.00', () => {
   const svg = planSheetSvg(house(), {});
   assert.match(svg, /<pattern id="ps\d+-hatch"/); assert.match(svg, /fill="url\(#ps\d+-hatch\)"/, 'الجدار الداخلي مهشّر');
-  assert.match(svg, /class="walls">[^]*fill="#000"/, 'الجدار الخارجي مصمت');
+  assert.match(svg, /class="walls">[^]*fill="#2b211b"/, 'الجدار الخارجي مصمت بحبر اللوحة');
   assert.match(svg, /<path d="M[\d., ]+A[\d. ]+ 0 0 [01] [\d.,]+" fill="none"/, 'قوس الباب');
   assert.ok(svg.includes('صعود 19 قائمة')); assert.ok(svg.includes('المدخل الرئيسي  ±0.00'));
   assert.ok(svg.includes('جدار خارجي 25 سم') && svg.includes('جدار داخلي (قاطع) 12 سم'));

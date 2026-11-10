@@ -8,6 +8,8 @@ import { analyzeDoc } from './digest.mjs';
 import { exteriorWallIds } from './topology.mjs';
 import { docBounds } from './editor/render2d.mjs';
 import { sub, add, mul, norm, perp, dist } from './geom.mjs';
+import { isOutdoorKind } from './catalog.mjs';
+import { INK, PAPER, BRONZE, SOFT, roomTint, inkify, sheetDefs, frameSvg, brandStrip } from './sheet-style.mjs';
 import { LINE_MM, SHEETS, pickScale, wallClasses, gridAxes, dimensionChains, layoutLabels, stairInfo, fixtureSymbol, fmtDim, fmtAreaM2, approxTextWidth, countOverlaps } from './plan-annot.mjs';
 
 export const PX_PER_MM = 4;
@@ -40,7 +42,8 @@ export function planSheet(doc, opts = {}) {
   const P = { x0: F.x0 + GAP, y0: F.y0 + GAP, x1: R.x0 - GAP, y1: F.y1 - GAP }; // منطقة المسقط
   const DIM_OFF = [8, 15, 22], AXIS_OFF = 31;                     // مم من حد المبنى
   const margin = { top: mm(AXIS_OFF + 7), left: mm(AXIS_OFF + 7), bottom: mm(DIM_OFF[2] + 6), right: mm(DIM_OFF[2] + 6) };
-  const b = docBounds(doc, levelId), wM = Math.max(.5, b.x1 - b.x0), hM = Math.max(.5, b.y1 - b.y0);
+  // عناصر الحوش (مسبح، عشب، مظلة...) تُرسم في لوحة الموقع العام؛ هنا تُصغّر المسقط بلا فائدة فتُستبعد من الحدود والرسم
+  const b = docBounds({ ...doc, fixtures: doc.fixtures.filter(f => !isOutdoorKind(f.kind)) }, levelId), wM = Math.max(.5, b.x1 - b.x0), hM = Math.max(.5, b.y1 - b.y0);
   const availW = (P.x1 - P.x0 - margin.left - margin.right) / PX_PER_MM, availH = (P.y1 - P.y0 - margin.top - margin.bottom) / PX_PER_MM;
   const scale = opts.scale || pickScale(wM, hM, availW, availH);
   const k = mm(1000 / scale); // بكسل لكل متر
@@ -53,11 +56,13 @@ export function planSheet(doc, opts = {}) {
     `<text x="${n1(x)}" y="${n1(y)}" font-size="${n1(size)}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}"${halo ? ' stroke="#fff" stroke-width="3" paint-order="stroke"' : ''}${rotate ? ` transform="rotate(${rotate} ${n1(x)} ${n1(y)})"` : ''}>${esc(s)}</text>`;
   const out = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${S.w}mm" height="${S.h}mm" direction="rtl" font-family='${FONT}' class="plan-sheet" data-sheet="${sheet}" data-scale="${scale}">`,
     `<title>${esc(doc.title)} — ${esc(lvl.name)} — مسقط معماري 1:${scale}</title>`,
-    `<defs><pattern id="${id}-hatch" patternUnits="userSpaceOnUse" width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="${n1(mm(1.2))}" stroke="#000" stroke-width="${LW.thin}"/></pattern></defs>`,
-    `<rect width="${W}" height="${H}" fill="#fff"/>`,
-    `<rect x="${F.x0}" y="${F.y0}" width="${F.x1 - F.x0}" height="${F.y1 - F.y0}" fill="none" stroke="#000" stroke-width="${LW.heavy}"/>`,
-    `<rect x="${F.x0 + mm(1.5)}" y="${F.y0 + mm(1.5)}" width="${F.x1 - F.x0 - mm(3)}" height="${F.y1 - F.y0 - mm(3)}" fill="none" stroke="#000" stroke-width="${LW.thin}"/>`,
-    `<line x1="${R.x0}" y1="${F.y0}" x2="${R.x0}" y2="${F.y1}" stroke="#000" stroke-width="${LW.heavy}"/>`];
+    `<defs><pattern id="${id}-hatch" patternUnits="userSpaceOnUse" width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" patternTransform="rotate(45)"><rect width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" fill="#cbbba6"/><line x1="0" y1="0" x2="0" y2="${n1(mm(1.2))}" stroke="#000" stroke-width="${LW.thin}"/></pattern>${sheetDefs(id, mm)}</defs>`,
+    ...frameSvg({ W, H, F, R, mm, LW })];
+  // ------------------------------------------------------------------ ظل الكتلة وأرضيات الفراغات (تظليل هادئ حسب النوع؛ إخراج فقط)
+  const floorG = [];
+  for (const o of analysis?.outlines || []) if (o.polygon?.length >= 3) floorG.push(poly(o.polygon, `fill="${PAPER}" stroke="none" filter="url(#${id}-shadow)"`));
+  for (const r of rooms) if (r.net?.length >= 3) floorG.push(poly(r.net, `fill="${roomTint(r.type)}" stroke="none" data-room-type="${esc(r.type || '')}"`));
+  if (floorG.length) out.push(`<g class="floors">${floorG.join('')}</g>`);
 
   // ------------------------------------------------------------------ الجدران: الخارجي مصمت والداخلي مهشّر، بخط قطع ثقيل
   const levelWalls = doc.walls.filter(w => w.level === levelId);
@@ -140,9 +145,9 @@ export function planSheet(doc, opts = {}) {
   // ------------------------------------------------------------------ الأثاث بخط رفيع
   const fixG = [], fixBoxes = [];
   if (opts.withFixtures !== false) for (const f of doc.fixtures) {
-    if (f.level !== levelId) continue;
+    if (f.level !== levelId || isOutdoorKind(f.kind)) continue;
     const sym = fixtureSymbol(f), thin = `fill="none" stroke="#000" stroke-width="${LW.thin}"`;
-    if (sym.outline) fixG.push(poly(sym.outline, `fill="#fff" stroke="#000" stroke-width="${LW.thin}"`));
+    if (sym.outline) fixG.push(poly(sym.outline, `fill="#ffffff" fill-opacity=".55" stroke="#000" stroke-width="${LW.thin}"`));
     for (const r of sym.rects) fixG.push(poly(r, thin));
     for (const [a, c] of sym.lines) fixG.push(line({ x: X(a.x), y: Y(a.y) }, { x: X(c.x), y: Y(c.y) }, thin));
     for (const e of sym.ellipses) fixG.push(`<ellipse cx="${n1(X(e.c.x))}" cy="${n1(Y(e.c.y))}" rx="${n1(e.rx * k)}" ry="${n1(e.ry * k)}" transform="rotate(${n1(-e.rot * 180 / Math.PI)} ${n1(X(e.c.x))} ${n1(Y(e.c.y))})" ${thin}/>`);
@@ -193,7 +198,7 @@ export function planSheet(doc, opts = {}) {
       }
     }
   }
-  out.push(`<g class="dims">${dimG.join('')}</g>`);
+  out.push(`<g class="dims">${dimG.join('').replace(/#000/g, SOFT)}</g>`); // هرمية الخط: الأبعاد أخف من الجدران
   // ------------------------------------------------------------------ المحاور: خطوط نقطة-شرطة وفقاعات أعلى (أرقام) ويسار (حروف)
   const axG = [], rb = mm(3.2);
   const top = dimPx.find(d => d.side.side === 'n'), left = dimPx.find(d => d.side.side === 'w');
@@ -202,27 +207,10 @@ export function planSheet(doc, opts = {}) {
   const dash = `stroke="#000" stroke-width="${LW.thin}" stroke-dasharray="${n1(mm(4))} ${n1(mm(1))} ${n1(mm(.6))} ${n1(mm(1))}"`;
   for (const a of axes.x) axG.push(line({ x: X(a.pos), y: topY + rb }, { x: X(a.pos), y: bottomY }, dash), `<circle cx="${n1(X(a.pos))}" cy="${n1(topY)}" r="${n1(rb)}" fill="#fff" stroke="#000" stroke-width="${LW.medium}"/>`, txt(X(a.pos), topY + mm(1), a.label, { size: mm(2.8), weight: 700 }));
   for (const a of axes.y) axG.push(line({ x: leftX + rb, y: Y(a.pos) }, { x: rightX, y: Y(a.pos) }, dash), `<circle cx="${n1(leftX)}" cy="${n1(Y(a.pos))}" r="${n1(rb)}" fill="#fff" stroke="#000" stroke-width="${LW.medium}"/>`, txt(leftX, Y(a.pos) + mm(1), a.label, { size: mm(2.8), weight: 700 }));
-  out.push(`<g class="axes">${axG.join('')}</g>`);
+  out.push(`<g class="axes">${axG.join('').replace(/#000/g, '#8a5a33')}</g>`); // المحاور بلون الهوية البرونزي الداكن
 
-  // ------------------------------------------------------------------ الشريط الأيمن: جدول العنوان، المفتاح، الشمال، المقياس، ملاحظات
-  const sx0 = R.x0, sx1 = R.x1, cx = (sx0 + sx1) / 2; let y = F.y0 + mm(4);
-  const hr = () => { out.push(`<line x1="${sx0}" y1="${n1(y)}" x2="${sx1}" y2="${n1(y)}" stroke="#000" stroke-width="${LW.medium}"/>`); };
-  const row = (label, value, { big = false } = {}) => { out.push(txt(sx1 - mm(2), y + mm(2.6), label, { size: mm(2), anchor: 'start', fill: '#444' })); y += mm(2.8); out.push(txt(sx1 - mm(2), y + mm(3.2), value, { size: mm(big ? 3.4 : 2.7), weight: 600, anchor: 'start' })); y += mm(big ? 5.4 : 4.6); };
-  out.push(txt(cx, y + mm(5.5), 'الميزان الهندسي', { size: mm(5), weight: 700 }), txt(cx, y + mm(9.5), 'AL MIZAN AL HANDASI · نحو منزلك', { size: mm(2), fill: '#444' }));
-  y += mm(12); hr(); y += mm(1);
-  out.push(txt(cx, y + mm(4), 'مسقط معماري — ' + lvl.name, { size: mm(3.4), weight: 700 })); y += mm(6); hr(); y += mm(1);
-  const plot = doc.plot?.polygon?.length ? (() => { const xs = doc.plot.polygon.map(p => p.x), ys = doc.plot.polygon.map(p => p.y); return `${fmtDim(Math.max(...xs) - Math.min(...xs))} × ${fmtDim(Math.max(...ys) - Math.min(...ys))} م`; })() : 'غير محددة';
-  row('المشروع', doc.title || 'مشروع بلا اسم', { big: true });
-  row('المالك', opts.owner || 'غير مُدخل');
-  row('الأرض', plot);
-  row('الدور / المنسوب', `${lvl.name} · ${(lvl.elevation || 0) >= 0 ? '+' : ''}${(lvl.elevation || 0).toFixed(2)}`);
-  row('المقياس عند الطباعة على ' + sheet, `1:${scale}`);
-  row('رقم اللوحة · التاريخ', `${opts.sheetNo || 'A-01'} · ${opts.date || ''}`);
-  row('بصمة الهندسة', opts.fingerprint || '—');
-  row('إعداد', opts.office || 'الميزان الهندسي — تصميم أولي');
-  hr(); y += mm(1);
+  // ------------------------------------------------------------------ الشريط الأيمن: جدول العنوان الموحّد (sheet-style)
   // المفتاح
-  out.push(txt(sx1 - mm(2), y + mm(3.2), 'مفتاح الرموز', { size: mm(2.6), weight: 700, anchor: 'start' })); y += mm(5);
   const legendItems = [];
   for (const g of classes.legend) legendItems.push([g.kind === 'exterior' ? `<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#000"/>` : g.kind === 'interior' ? `<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="url(#${id}-hatch)" stroke="#000" stroke-width="${LW.thick}"/>` : `<rect x="0" y="0" width="${mm(7)}" height="${mm(3)}" fill="#777"/>`, g.label]);
   if (colG.length) legendItems.push([`<rect x="${mm(2)}" y="0" width="${mm(3)}" height="${mm(3)}" fill="#000"/>`, columns ? 'عمود خرساني (مقترح — تحجيم أولي)' : 'عمود مرسوم']);
@@ -230,23 +218,14 @@ export function planSheet(doc, opts = {}) {
   legendItems.push([`<line x1="0" y1="${mm(1)}" x2="${mm(7)}" y2="${mm(1)}" stroke="#000" stroke-width="${LW.thin}"/><line x1="0" y1="${mm(2.2)}" x2="${mm(7)}" y2="${mm(2.2)}" stroke="#000" stroke-width="${LW.thin}"/>`, 'نافذة (خط مزدوج)']);
   legendItems.push([`<circle cx="${mm(3.5)}" cy="${mm(1.6)}" r="${mm(1.5)}" fill="#fff" stroke="#000" stroke-width="${LW.medium}"/><text x="${mm(3.5)}" y="${mm(2.3)}" font-size="${mm(1.8)}" text-anchor="middle" font-weight="700">A</text>`, 'محور (من ' + (axes.source === 'columns' ? 'الأعمدة' : axes.source === 'outline' ? 'محيط المبنى' : 'أعمدتك') + ')']);
   legendItems.push([`<line x1="0" y1="${mm(1.6)}" x2="${mm(7)}" y2="${mm(1.6)}" stroke="#000" stroke-width="${LW.thin}"/><line x1="${mm(.5)}" y1="${mm(2.4)}" x2="${mm(1.5)}" y2="${mm(.8)}" stroke="#000" stroke-width="${LW.medium}"/><line x1="${mm(5.5)}" y1="${mm(2.4)}" x2="${mm(6.5)}" y2="${mm(.8)}" stroke="#000" stroke-width="${LW.medium}"/>`, 'بُعد بالمتر (الفتحات / الجدران / الإجمالي)']);
-  for (const [sym, label] of legendItems) { out.push(`<g transform="translate(${n1(sx1 - mm(10))} ${n1(y)})">${sym}</g>`, txt(sx1 - mm(12), y + mm(2.6), label, { size: mm(2), anchor: 'start' })); y += mm(4.6); }
-  hr(); y += mm(2);
-  // الشمال والمقياس الخطي
-  const nx = sx1 - mm(10), ny = y + mm(8);
-  out.push(`<g transform="rotate(${n1(doc.north || 0)} ${n1(nx)} ${n1(ny)})"><circle cx="${n1(nx)}" cy="${n1(ny)}" r="${n1(mm(6))}" fill="#fff" stroke="#000" stroke-width="${LW.medium}"/><path d="M${n1(nx)} ${n1(ny - mm(5))} L${n1(nx + mm(2))} ${n1(ny + mm(2))} L${n1(nx)} ${n1(ny + mm(.5))} L${n1(nx - mm(2))} ${n1(ny + mm(2))} Z" fill="#000"/></g>`, txt(nx, ny - mm(7), 'ش', { size: mm(2.6), weight: 700 }));
-  const sb = { x: sx0 + mm(3), y: y + mm(10), seg: k }, segs = Math.max(1, Math.min(5, Math.floor((sx1 - mm(22) - sb.x) / k)));
-  for (let i = 0; i < segs; i++) out.push(`<rect x="${n1(sb.x + i * k)}" y="${n1(sb.y)}" width="${n1(k)}" height="${n1(mm(1.5))}" fill="${i % 2 ? '#fff' : '#000'}" stroke="#000" stroke-width="${LW.thin}"/>`, txt(sb.x + i * k, sb.y - mm(1), String(i), { size: mm(1.8) }));
-  out.push(txt(sb.x + segs * k, sb.y - mm(1), segs + ' م', { size: mm(1.8) }));
-  y += mm(17); hr(); y += mm(1);
-  // ملاحظات
   const notes = ['الأبعاد بالمتر والمساحات صافية داخل الجدران.', 'تسلسل الأبعاد: فتحات، ثم محاور الجدران، ثم الإجمالي.',
     columns ? 'الأعمدة مقترحة من تحجيم أولي؛ النظام الإنشائي افتراض: هيكل خرساني وبلوك غير حامل.' : 'نوع الجدار (حامل/قاطع) افتراض: الجدران بلوك غير حامل.',
-    'مخطط أولي للتصميم والتسعير؛ ليس مخططًا معتمدًا للترخيص أو التنفيذ.'];
-  for (const n of notes) for (const w of wrap('• ' + n, 34)) { if (y > F.y1 - mm(4)) break; out.push(txt(sx1 - mm(2), y + mm(2.8), w, { size: mm(1.9), anchor: 'start' })); y += mm(3.1); }
+    'ألوان الأرضيات للتمييز بين أنواع الفراغات فقط.'];
+  brandStrip({ out, txt, F, R, mm, LW, sheet }, { doc, heading: 'مسقط معماري — ' + lvl.name, rows: [['الدور / المنسوب', `${lvl.name} · ${(lvl.elevation || 0) >= 0 ? '+' : ''}${(lvl.elevation || 0).toFixed(2)}`]],
+    legend: legendItems, notes, north: true, scaleK: k, sheetNo: opts.sheetNo || 'A-01', date: opts.date || '', fingerprint: opts.fingerprint, owner: opts.owner, office: opts.office, scaleText: `1:${scale}` });
   out.push('</svg>');
   const meta = { sheet, scale, pxPerMm: PX_PER_MM, axes, chains, labels: lay, labelOverlaps: lay.overlaps, dimTextOverlaps: countOverlaps(dimBoxes), columns: colG.length, rooms: rooms.length };
-  return { svg: out.join('\n'), meta };
+  return { svg: inkify(out.join('\n')), meta };
 }
 
 /** SVG فقط. */

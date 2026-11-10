@@ -3,7 +3,7 @@
 // والفتحات المقطوعة فيها، الدروة، الدرج المقطوع ودرابزينه، الجدران خلف مستوى القطع بفتحاتها (بخط رفيع)، أسماء
 // الفراغات وارتفاعاتها الصافية، المناسيب، والأبعاد الرأسية والأفقية، ومسقطًا مفتاحيًا يبيّن خط القطع.
 import { buildingModel } from './building-model.mjs';
-import { sheetCanvas, titleStrip, levelMark, dimLine, fitScale, fmtLevel, mm, n1, LW } from './sheet-frame.mjs';
+import { sheetCanvas, titleStrip, levelMark, dimLine, fitScale, fmtLevel, mm, n1, LW, inkify } from './sheet-frame.mjs';
 import { levelMarks } from './elevation-sheet.mjs';
 import { fmtDim, approxTextWidth } from './plan-annot.mjs';
 import { add, sub, mul, dot, cross, norm, pointInPolygon } from './geom.mjs';
@@ -170,7 +170,7 @@ export function sectionSheet(doc, opts = {}) {
   const R = (u0, z0, u1, z1, attrs) => `<rect x="${n1(X(Math.min(u0, u1)))}" y="${n1(Z(Math.max(z0, z1)))}" width="${n1(Math.abs(u1 - u0) * k)}" height="${n1(Math.abs(z1 - z0) * k)}" ${attrs}/>`;
   const thin = `fill="#fff" stroke="#000" stroke-width="${LW.thin}"`, cutFill = `fill="#000" stroke="#000" stroke-width="${LW.heavy}"`;
   const meta = { scale, through: S.cut.through, cutWalls: S.walls.length, slabs: S.slabs.map(s => ({ kind: s.kind, level: s.level, z0: s.z0, z1: s.z1, spans: s.iv.length })), stairSteps: S.stairCut.length, stairSeen: S.stairSeen.length, beyond: S.beyond.length, rooms: [], cutOpenings: S.walls.filter(w => w.opening).map(w => w.opening.id), marks: [] };
-  if (!ext) { out.push(txt((P.x0 + P.x1) / 2, (P.y0 + P.y1) / 2, 'خط القطع لا يمر بجدران.', { size: mm(3) })); out.push('</svg>'); return { svg: out.join('\n'), meta }; }
+  if (!ext) { out.push(txt((P.x0 + P.x1) / 2, (P.y0 + P.y1) / 2, 'خط القطع لا يمر بجدران.', { size: mm(3) })); out.push('</svg>'); return { svg: inkify(out.join('\n')), meta }; }
   const g = ['<g class="section">'];
   // الأرض الطبيعية وتهشيرها
   const gx0 = X(ext.u0) - mm(10), gx1 = X(ext.u1) + mm(10), gy = Z(model.ground);
@@ -245,7 +245,7 @@ export function sectionSheet(doc, opts = {}) {
   out.push('</svg>');
   meta.textOverlaps = 0;
   for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) { const p = boxes[i], q = boxes[j]; if (Math.abs(p.x - q.x) < (p.w + q.w) / 2 && Math.abs(p.y - q.y) < (p.h + q.h) / 2) meta.textOverlaps++; }
-  return { svg: out.join('\n'), meta };
+  return { svg: inkify(out.join('\n')), meta };
 }
 
 /** ملاحظات فحص الدرج (SBC 201 §1011) على لوحة القطاع. */

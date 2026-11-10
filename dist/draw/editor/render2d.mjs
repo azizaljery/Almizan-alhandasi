@@ -10,8 +10,8 @@ import { gridStep } from './snap.mjs';
 import { LINE_MM, wallClasses, gridAxes, dimensionChains, layoutLabels, stairInfo, fixtureSymbol, fmtDim, fmtAreaM2 } from '../plan-annot.mjs';
 
 export const THEME = {
-  paper: '#fbf9f4', grid: 'rgba(110,100,80,.10)', gridMajor: 'rgba(110,100,80,.22)', wall: '#2a2a2e', wallExt: '#1b1b1f', ink: '#3a3631', inkSoft: '#8b8577',
-  accent: '#1f6f6a', accent2: '#c6a15b', select: '#0e7fd6', danger: '#c0392b', warn: '#d68910', ok: '#2e8b57', fixtureFill: '#fffdf8', fixtureLine: '#6b6559', glass: '#7fb7d6',
+  paper: '#fbf8f2', grid: 'rgba(110,100,80,.10)', gridMajor: 'rgba(110,100,80,.22)', wall: '#3a2e27', wallExt: '#2b211b', ink: '#2b211b', inkSoft: '#8a7b6d',
+  accent: '#8a5a33', accent2: '#a97142', select: '#0e7fd6', danger: '#c0392b', warn: '#d68910', ok: '#2e8b57', fixtureFill: '#fffdf8', fixtureLine: '#6b6559', glass: '#7fb7d6',
 };
 /** ألوان وضع اللوحة: أسود على أبيض للطباعة. */
 export const SHEET_THEME = { ...THEME, paper: '#ffffff', wall: '#000', wallExt: '#000', ink: '#000', inkSoft: '#222', accent: '#000', accent2: '#555', fixtureFill: '#fff', fixtureLine: '#000', glass: '#000' };
