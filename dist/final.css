@@ -1,4 +1,4 @@
-:root{--bg:var(--mz-ivory,#f4f1ea);--ink:var(--mz-ink,#26231f);--line:var(--mz-line,#e1dccf);--gold:var(--mz-brass,#c6a15b);--green:var(--mz-green,#1f4d3a);--deep:var(--mz-green-deep,#143428);--soft:#6f6a5e;--font:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif}
+:root{--bg:var(--mz-ivory,#faf8f4);--ink:var(--mz-ink,#2b211b);--line:var(--mz-line,#e9e2d7);--gold:var(--mz-brass,#b8893f);--green:var(--mz-green,#2a1d16);--deep:var(--mz-green-deep,#2a1d16);--soft:#6b5c50;--font:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.7;direction:rtl}
 .fh{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 20px;background:var(--deep);color:#f6f2ea;border-bottom:2px solid var(--gold)}
 .brand{display:flex;gap:10px;align-items:center;color:inherit;text-decoration:none}.brand span{display:flex;flex-direction:column;line-height:1.2}.brand small{color:#edce89;font-size:11px}
@@ -28,3 +28,33 @@ ul{margin:4px 0;padding-inline-start:22px}.empty{text-align:center;padding:60px 
 .svgbox.sheet{background:#ece4d6;padding:14px;border-color:#dccfbb}.svgbox.sheet svg{box-shadow:0 1px 2px rgba(43,33,27,.18),0 18px 36px -18px rgba(43,33,27,.45);border-radius:2px}
 .dsheet figcaption b{background:#2b211b;color:#fbf8f2;border-radius:6px;padding:2px 10px;font-variant-numeric:tabular-nums;letter-spacing:.3px}
 @media print{.svgbox.sheet{background:none;padding:0}.svgbox.sheet svg{box-shadow:none;border-radius:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* جدول المساحات وصفوف المجاميع */
+.area-table tr.grp td{background:#2a1d16;color:#f1dfb8;font-weight:700;letter-spacing:.2px}
+.area-table td.num,.area-table th:first-child{white-space:nowrap}.area-table td:first-child{width:3.2em;color:var(--soft)}
+table tr.sum td,table tfoot td{font-weight:700;background:#f1e7d3}table tr.sum.sub td{background:#f7f1e4;font-weight:600}
+/* كتاب المشروع (ملف HTML مستقل يحمل هذا الملف وحده): غلاف بإطار ذهبي مزدوج ونجمة، وأقسام وجداول منسّقة */
+body.pb{max-width:1040px;margin:0 auto;padding:26px 20px 60px;background:#faf8f4}
+.pb-head{position:relative;text-align:center;color:#f6f2ea;padding:46px 24px 40px;margin:0 0 22px;border-radius:6px;border:1px solid #b8893f;outline:1px solid #b8893f;outline-offset:-9px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120' fill='none' stroke='%23e6cf9b' stroke-opacity='.11'%3E%3Cg transform='translate(60 60)'%3E%3Crect x='-20' y='-20' width='40' height='40'/%3E%3Crect x='-20' y='-20' width='40' height='40' transform='rotate(45)'/%3E%3Ccircle r='9'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(180deg,#3a2a20,#2a1d16 60%,#22170f)}
+.pb-mark{width:58px;height:58px;margin:0 auto 10px;border:2px solid #e6cf9b;border-radius:14px;display:grid;place-items:center;color:#e6cf9b;font-size:30px;font-weight:700;line-height:1}
+.pb-brand{margin:0;color:#e6cf9b;font-size:14px;letter-spacing:.4px}
+.pb-head h1{margin:8px 0 4px;font-family:"Aref Ruqaa","IBM Plex Sans Arabic",serif;font-size:46px;line-height:1.5;font-weight:700;background:linear-gradient(100deg,#c79a4e,#f3e2b6 48%,#c79a4e);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.pb-title{margin:0;font-size:19px;font-weight:600}.pb-meta{margin:8px 0 0;font-size:12.5px;color:#d9cdbb}.pb-meta code{color:#e6cf9b}
+.pb-stamp{display:inline-block;margin:16px 0 0;padding:5px 16px;border:1px dashed #e6cf9b;border-radius:8px;color:#f1dfb8;font-size:13px}
+.pb-sec{background:#fffdf8;border:1px solid #dfd0b8;border-radius:14px;padding:18px 20px;margin:0 0 18px}
+.pb-sec h2{margin:0 0 12px;font-size:20px;color:#6f4520;padding-bottom:6px;border-bottom:1px solid #dfd0b8;position:relative}
+.pb-sec h2::after{content:"";position:absolute;bottom:-1px;inset-inline-start:0;width:64px;height:2px;background:#b8893f}
+.pb-sec h3{font-size:15.5px;color:#6f4520;margin:18px 0 6px;padding-inline-start:10px;border-inline-start:3px solid #b8893f}.pb-sec h4{margin:14px 0 4px;font-size:14.5px}
+.pb-table{border:1px solid #dfd0b8;font-variant-numeric:tabular-nums}.pb-table th{background:#efe5d2;border-bottom:2px solid #b8893f;font-weight:700}
+.pb-table tbody tr:nth-child(even) td{background:#fbf6ec}
+.pb-svg{border:1px solid #dfd0b8;border-radius:8px;background:#fff;overflow:auto;margin:8px 0}.pb-svg svg{width:100%;height:auto;display:block}
+.pb-img{max-width:100%;border-radius:10px;border:1px solid #b8893f}
+.pb-foot{margin-top:26px;padding:14px 18px;border-top:2px solid #b8893f;color:var(--soft);font-size:13px;text-align:center}
+@media print{
+  body.pb{padding:0;background:#fff}
+  .pb-head{min-height:250mm;display:flex;flex-direction:column;justify-content:center;align-items:center;border-radius:0;margin:0;break-after:page}
+  .pb-head h1{font-size:64px}.pb-sec{border:0;border-radius:0;background:none;padding:0 4mm;margin:0 0 8mm}.pb-sec h2{break-after:avoid}
+  table{break-inside:auto}tr{break-inside:avoid}thead{display:table-header-group}h3,h4{break-after:avoid}
+  .sec>h2{break-after:avoid}
+}
+

@@ -3,7 +3,7 @@
 // تظليل أرضيات الفراغات حسب نوعها، وظل الكتلة. لا تغيّر أي رقم أو نص بيانات: الإخراج فقط.
 import { fmtDim } from './plan-annot.mjs';
 
-export const INK = '#2b211b', PAPER = '#fbf8f2', BRONZE = '#a97142', BRONZE_L = '#d4a77c', SOFT = '#6b5c50', HAIR = '#d9cdbb', TINT = '#f4ede4', WARM_GREY = '#8a7b6d';
+export const INK = '#2b211b', PAPER = '#fbf8f2', BRONZE = '#a97142', BRONZE_D = '#8a5a33', BRONZE_L = '#d4a77c', SOFT = '#6b5c50', HAIR = '#d9cdbb', TINT = '#f4ede4', WARM_GREY = '#8a7b6d';
 const WHITE = '#ffffff'; // أبيض حقيقي لا يمسّه inkify (الذي يحوّل ‎#fff‎ القصيرة إلى لون الورق)
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const n1 = v => (Math.round(v * 10) / 10).toString();
@@ -37,6 +37,9 @@ export function frameSvg({ W, H, F, R, mm, LW }) {
   const t = mm(4); // علامات الزوايا خارج الإطار (علامات قص هادئة)
   for (const [x, y, sx, sy] of [[F.x0, F.y0, -1, -1], [F.x1, F.y0, 1, -1], [F.x0, F.y1, -1, 1], [F.x1, F.y1, 1, 1]])
     o.push(`<path d="M${n1(x + sx * mm(2))} ${n1(y)} h${n1(sx * t)} M${n1(x)} ${n1(y + sy * mm(2))} v${n1(sy * t)}" stroke="${BRONZE}" stroke-width="${LW.thin}" fill="none"/>`);
+  // زخرفة الزوايا: نجمة ثمانية صغيرة (مربعان متراكبان) من هوية الميزان عند أركان منطقة الرسم داخل الإطار البرونزي
+  const r = mm(1.7), q = r * .7071, star = (cx, cy) => `<g class="corner-star" fill="${PAPER}" stroke="${BRONZE}" stroke-width="${LW.thin}"><rect x="${n1(cx - q)}" y="${n1(cy - q)}" width="${n1(2 * q)}" height="${n1(2 * q)}"/><rect x="${n1(cx - q)}" y="${n1(cy - q)}" width="${n1(2 * q)}" height="${n1(2 * q)}" transform="rotate(45 ${n1(cx)} ${n1(cy)})"/><circle cx="${n1(cx)}" cy="${n1(cy)}" r="${n1(r * .22)}" fill="${BRONZE}" stroke="none"/></g>`;
+  for (const [x, y] of [[F.x0 + mm(1.5), F.y0 + mm(1.5)], [F.x0 + mm(1.5), F.y1 - mm(1.5)], [R.x0 - mm(1.5), F.y0 + mm(1.5)], [R.x0 - mm(1.5), F.y1 - mm(1.5)]]) o.push(star(x, y));
   return o;
 }
 
@@ -85,12 +88,12 @@ export function brandStrip(c, { doc, heading, rows = [], legend = [], notes = []
   let y = F.y0 + hh + mm(3.5);
   const hr = (col = HAIR) => out.push(`<line x1="${n1(sx0 + pad)}" y1="${n1(y)}" x2="${n1(sx1 - pad)}" y2="${n1(y)}" stroke="${col}" stroke-width="${LW.thin}"/>`);
   // ---- عنوان اللوحة
-  out.push(txt(sx1 - pad, y + mm(1.6), 'عنوان اللوحة', { size: mm(1.8), anchor: 'start', fill: BRONZE, weight: 600 })); y += mm(3.2);
+  out.push(txt(sx1 - pad, y + mm(1.6), 'عنوان اللوحة', { size: mm(1.8), anchor: 'start', fill: BRONZE_D, weight: 600 })); y += mm(3.2);
   for (const h of wrap(heading, 24)) { out.push(txt(sx1 - pad, y + mm(4), h, { size: mm(3.7), weight: 700, anchor: 'start', fill: INK })); y += mm(5); }
   y += mm(.6); out.push(`<rect x="${n1(sx1 - pad - mm(14))}" y="${n1(y)}" width="${n1(mm(14))}" height="${n1(mm(.8))}" fill="${BRONZE}"/>`); y += mm(3.2);
   // ---- بيانات المشروع
   const row = (label, value, { big = false } = {}) => {
-    out.push(txt(sx1 - pad, y + mm(2.2), label, { size: mm(1.8), anchor: 'start', fill: BRONZE, weight: 600 })); y += mm(2.6);
+    out.push(txt(sx1 - pad, y + mm(2.2), label, { size: mm(1.8), anchor: 'start', fill: BRONZE_D, weight: 600 })); y += mm(2.6);
     out.push(txt(sx1 - pad, y + mm(3.1), value, { size: mm(big ? 3.3 : 2.6), weight: 600, anchor: 'start', fill: INK })); y += mm(big ? 5 : 4.2); hr(); y += mm(.5);
   };
   const plot = doc.plot?.polygon?.length ? (() => { const xs = doc.plot.polygon.map(p => p.x), ys = doc.plot.polygon.map(p => p.y); return `${fmtDim(Math.max(...xs) - Math.min(...xs))} × ${fmtDim(Math.max(...ys) - Math.min(...ys))} م`; })() : 'غير محددة';
@@ -125,7 +128,7 @@ export function brandStrip(c, { doc, heading, rows = [], legend = [], notes = []
     `<text x="${n1(sx1 - pad - mm(12))}" y="${n1(by + mm(16))}" font-size="${n1(mm(6.2))}" font-weight="700" fill="${PAPER}" text-anchor="middle" direction="ltr" class="sheet-no">${esc(sheetNo || '—')}</text>`,
     `<rect x="${n1(sx0 + pad)}" y="${n1(by + mm(3))}" width="${n1(sx1 - sx0 - pad * 3 - mm(24))}" height="${n1(mm(18))}" rx="${n1(mm(1.2))}" fill="none" stroke="${BRONZE}" stroke-width="${LW.medium}" stroke-dasharray="${n1(mm(1.6))} ${n1(mm(.8))}"/>`);
   const stx = sx0 + pad + (sx1 - sx0 - pad * 3 - mm(24)) / 2;
-  out.push(txt(stx, by + mm(9.6), 'مخطط مبدئي', { size: mm(3.2), weight: 700, fill: BRONZE }), txt(stx, by + mm(14), 'ليس للترخيص أو التنفيذ', { size: mm(2.1), fill: BRONZE }), txt(stx, by + mm(18.2), date || '', { size: mm(1.8), fill: SOFT }));
+  out.push(txt(stx, by + mm(9.6), 'مخطط مبدئي', { size: mm(3.2), weight: 700, fill: BRONZE_D }), txt(stx, by + mm(13.6), 'ليس للترخيص أو التنفيذ', { size: mm(2.1), fill: BRONZE_D }), txt(stx, by + mm(18), 'يلزم اعتماد مهندس مرخّص', { size: mm(1.9), weight: 600, fill: SOFT, cls: 'approval-note' }));
   // ---- الملاحظات (ما اتسع فوق الشارة)
   const all = [...notes, 'مخطط أولي للتصميم والتسعير؛ ليس مخططًا معتمدًا للترخيص أو التنفيذ.'];
   if (y < by - mm(8)) { hr(); y += mm(1.5); sectionHead('ملاحظات'); }

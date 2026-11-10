@@ -199,6 +199,24 @@ export function mepQuantityRow(M) {
 export function applyMepRow(rows, M) {
   return rows.map(r => (r.id === MEP_ROW_ID ? mepQuantityRow(M) : r));
 }
+/**
+ * جدول المساحات: كل فراغ بدوره ونوعه وأبعاده ومساحته الصافية، مع مجموع كل دور والإجمالي.
+ * عرض فقط: الأرقام من quantities.perRoom كما هي، والمجاميع جمع الصفوف المعروضة نفسها.
+ */
+export function areaSchedule(data, { cls = 'pb-table area-table' } = {}) {
+  const rooms = data.rooms || []; if (!rooms.length) return '';
+  const f2 = v => (Number.isFinite(v) ? v.toFixed(2) : '—'), levels = [...new Set(rooms.map(r => r.level))], many = levels.length > 1;
+  let body = '', total = 0, n = 0;
+  for (const lv of levels) {
+    const list = rooms.filter(r => r.level === lv), sub = list.reduce((a, r) => a + (Number.isFinite(r.area) ? r.area : 0), 0); total += sub;
+    if (many) body += `<tr class="grp"><td colspan="5">${esc(lv)}</td></tr>`;
+    for (const r of list) body += `<tr><td class="num">${++n}</td><td>${esc(r.name)}</td><td>${esc(roomTypeName(r.type) || r.type || '')}</td><td class="num">${Number.isFinite(r.w) && Number.isFinite(r.h) ? `${f2(Math.max(r.w, r.h))} × ${f2(Math.min(r.w, r.h))}` : '—'}</td><td class="num">${f2(r.area)}</td></tr>`;
+    if (many) body += `<tr class="sum sub"><td colspan="4">مجموع ${esc(lv)} (${list.length} فراغًا)</td><td class="num">${f2(sub)}</td></tr>`;
+  }
+  return `<table class="${cls}"><thead><tr><th>م</th><th>الفراغ</th><th>النوع</th><th>الأبعاد (م)</th><th>المساحة الصافية (م²)</th></tr></thead><tbody>${body}</tbody><tfoot><tr class="sum"><td colspan="4">إجمالي المساحات الصافية للفراغات (${rooms.length} فراغًا)</td><td class="num">${f2(total)}</td></tr></tfoot></table>`
+    + `<p class="muted">المساحات صافية داخل الجدران، والأبعاد أبعاد المستطيل المحيط بالفراغ. الإجمالي مجموع الصفوف أعلاه، ولا يشمل سماكات الجدران.</p>`;
+}
+
 /** HTML مستقل (للقراءة والطباعة) من البيانات نفسها. css: نص الأنماط ليُضمَّن. */
 export function projectBookHtml(data, { css = '' } = {}) {
   const R = designReasons(data), c = data.cost, S = data.summary;
@@ -206,6 +224,7 @@ export function projectBookHtml(data, { css = '' } = {}) {
   const table = (head, rows) => `<table class="pb-table"><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const parts = [];
   parts.push(sec('نظرة عامة', `<p class="lead">${esc(data.title)} — ${S.rooms} فراغًا في ${S.levels} دور. مساحة المسقط ${fmt(S.builtArea)} م² ومساحة الغرف ${fmt(S.roomsArea)} م².${S.plot ? ` الأرض ${S.plot.width} × ${S.plot.length} م.` : ''}</p>` + table(['الفراغ', 'العدد'], S.byType.map(t => [t.name, t.count])) + `<p class="muted">بصمة الهندسة: <code>${esc(data.fingerprint)}</code>${data.dnaFingerprint ? ` · بصمة ميزانك: <code>${esc(data.dnaFingerprint)}</code>` : ''} · ${esc(data.date)}</p>`));
+  { const a = areaSchedule(data); if (a) parts.push(sec('جدول المساحات', a)); }
   if (data.dnaAxes) parts.push(sec('بصمتك التصميمية', table(['المحور', 'القيمة', 'مصدره'], data.dnaAxes.map(a => [a.label, Math.round(a.value * 100) + '%', (a.sources || []).join('، ')]))));
   data.levels.forEach(l => parts.push(sec('المخطط — ' + l.name, `<div class="pb-svg pb-sheet">${l.plan}</div>` + sheetNote(l))));
   (data.drawings?.sheets || []).forEach(x => parts.push(sec(`${x.no} — ${x.title}`, `<div class="pb-svg pb-sheet">${x.svg}</div>`)));
@@ -219,7 +238,7 @@ export function projectBookHtml(data, { css = '' } = {}) {
   parts.push(sec('ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => [s.title, s.status === 'available' ? 'متاح' : 'قادم', s.note]))));
   // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم
   parts.push(sec('جداول الكميات', quantityTables(data, { costHtml: table(['البند', 'الكمية', 'سعر الوحدة', 'التكلفة'], c.items.map(i => [i.label, i.qty === null ? '—' : `${fmt(i.qty)} ${i.unit}`, i.rate === null ? 'غير مسعّر' : fmt(i.rate), i.cost === null ? 'غير مسعّر' : fmt(i.cost)])) + (isCostUnpriced(c) ? `<p><b>${UNPRICED_TOTAL_AR}</b></p>` : `<p>المجموع الجزئي (${c.pricedCount} من ${c.totalCount} بندًا مسعّرًا): <b>${fmt(c.subtotal)}</b>${c.reserve !== null ? ` · احتياط ${c.reservePct}%: ${fmt(c.reserve)}` : ''}${c.vat !== null ? ` · ضريبة ${c.vatPct}%: ${fmt(c.vat)}` : ''} · الإجمالي: <b>${fmt(c.total)}</b> ${c.complete ? '' : '(جزئي: يخص البنود المسعّرة فقط)'}</p>`) + `<p class="muted">لا توجد أسعار سوق افتراضية؛ الأسعار أسعارك.</p>` })));
-  return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كتاب المشروع — ${esc(data.title)}</title><style>${css}</style></head><body class="pb"><header class="pb-head"><h1>كتاب المشروع</h1><p>${esc(data.title)} · الميزان الهندسي · نحو منزلك</p></header>${parts.join('')}<footer class="pb-foot">أُعدّ بواسطة الميزان الهندسي. الكميات والتكلفة والتحجيم الإنشائي تقديرية بافتراضات معلنة وتُراجَع من مختصين قبل التنفيذ.</footer></body></html>`;
+  return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كتاب المشروع — ${esc(data.title)}</title><style>${css}</style></head><body class="pb"><header class="pb-head"><div class="pb-mark" aria-hidden="true">م</div><p class="pb-brand">الميزان الهندسي · نحو منزلك</p><h1>كتاب المشروع</h1><p class="pb-title">${esc(data.title)}</p><p class="pb-meta">${esc(data.date || '')}${data.fingerprint ? ` · بصمة الهندسة <code>${esc(data.fingerprint)}</code>` : ''}</p><p class="pb-stamp">مخطط مبدئي — ليس للترخيص أو التنفيذ، ويلزم اعتماده من مهندس مرخّص</p></header>${parts.join('')}<footer class="pb-foot">أُعدّ بواسطة الميزان الهندسي. الكميات والتكلفة والتحجيم الإنشائي تقديرية بافتراضات معلنة وتُراجَع من مختصين قبل التنفيذ.</footer></body></html>`;
 }
 
 export default { buildFinalData, computeCost, designReasons, projectBookHtml, sheetNote, NEXT_STAGES, BILLABLE, DEFAULT_SHEET };

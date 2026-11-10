@@ -169,8 +169,9 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
   const css = document.createElement('style');
   css.textContent = `.fn-ui{position:fixed;inset:auto 12px 12px 12px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none;font-family:system-ui,"IBM Plex Sans Arabic",sans-serif;z-index:5}
 .fn-row{display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto}
-.fn-ui button{border:1px solid #ffffff55;background:#1c3a32e6;color:#f6f2ea;border-radius:999px;padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;min-height:36px}
-.fn-ui button[aria-pressed=true]{background:#c9a45c;color:#1c2a24;border-color:#c9a45c}
+.fn-ui button{border:1px solid #e2c89066;background:#2b211be6;color:#f6f2ea;border-radius:999px;padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;min-height:36px}
+.fn-ui button[aria-pressed=true]{background:linear-gradient(180deg,#e2c890,#bf9a58);color:#2b1a14;border-color:#bf9a58;font-weight:600}
+.fn-ui button:focus-visible{outline:2px solid #e2c890;outline-offset:2px}
 .fn-hint{pointer-events:none;background:#000a;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;max-width:min(560px,100%)}
 .fn-walkpad{display:grid;grid-template-columns:repeat(3,44px);gap:6px;pointer-events:auto}
 .fn-walkpad[hidden]{display:none}

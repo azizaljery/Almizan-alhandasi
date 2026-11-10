@@ -2,7 +2,7 @@
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor } from './design-session.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
-import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
+import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
 import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
 import { serialize } from './draw/doc.mjs';
@@ -163,7 +163,7 @@ function drawMini(canvas, d, highlight) {
   const m = analyzeDoc(d), lv = m.levelById.get(lid), b = docBounds(d, lid);
   renderPlan(ctx, { doc: d, levelId: lid, view: fitView({ x0: b.x0 - 1.5, y0: b.y0 - 1.5, x1: b.x1 + 1.5, y1: b.y1 + 1 }, W, H, 14), W, H,
     analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
-    flags: { grid: false, dims: false, areas: true, fixtures: false, underlay: false, roomDims: false },
+    flags: { grid: false, dims: false, areas: true, fixtures: false, underlay: false, roomDims: false, compass: false, scaleBar: false, floors: false },
     roomFill: rm => (highlight.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') });
 }
 function renderCompare() {
@@ -282,16 +282,36 @@ function setFocus(x) {
   if (matchMedia('(max-width: 900px)').matches) $('planWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 function zoom(f) { if (!view) return; const { W, H } = size(); goal = zoomAround(goal || view, f, W / 2, H / 2); run(); }
+/** أول عرض: المسقط «يُرسم» — خطوط الجدران تُخطّ بالبرونز فوق اللوحة ثم يظهر الرسم الكامل. خفيف (SVG وCSS فقط) ويُتخطّى عند طلب تقليل الحركة. */
+let drewIn = false;
+function drawIn(W, H) {
+  const wrap = $('planWrap'), c = $('plan'); if (!wrap || !c || !view || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const walls = doc.walls.filter(w => w.level === levelId && w.kind !== 'fence'); if (!walls.length || walls.length > 400) return;
+  const ext = model.levelById.get(levelId) ? exteriorWallIds(model.levelById.get(levelId).analysis) : new Set();
+  const order = [...walls].sort((a, b) => (ext.has(b.id) ? 1 : 0) - (ext.has(a.id) ? 1 : 0)); // المحيط أولًا ثم الداخل
+  const lines = order.map((w, i) => { const a = toScreen(view, W, H, w.a), b = toScreen(view, W, H, w.b); return `<line pathLength="1" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" stroke-width="${Math.max(1.5, w.t * view.scale * .55).toFixed(1)}" style="animation-delay:${(i / order.length * .75).toFixed(2)}s"/>`; }).join('');
+  const svg = document.createElement('div'); svg.className = 'plan-drawin'; svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none">${lines}</svg>`;
+  wrap.append(svg); c.classList.add('drawing');
+  setTimeout(() => c.classList.remove('drawing'), 700); setTimeout(() => svg.classList.add('out'), 1150); setTimeout(() => svg.remove(), 1750);
+}
 function paint() {
   const c = $('plan'); if (!c) return;
-  const r = c.getBoundingClientRect(), dpr = Math.min(2.5, devicePixelRatio || 1), W = Math.max(10, r.width), H = Math.max(10, r.height);
+  const lv = model.levelById.get(levelId);
+  const r = c.getBoundingClientRect(), dpr = Math.min(2.5, devicePixelRatio || 1); let W = Math.max(10, r.width), H = Math.max(10, r.height);
+  if (!view) {
+    const b = docBounds(doc, levelId), narrow = W < 560, pad = narrow ? 1.5 : 2.4, box = { x0: b.x0 - pad, y0: b.y0 - pad, x1: b.x1 + pad, y1: b.y1 + (narrow ? .9 : 1) };
+    // على الجوال: ارتفاع اللوحة يتبع نسبة المسقط فلا يبقى فراغ أبيض فوقه وتحته، والمسقط يملأ العرض
+    if (narrow) { const want = Math.round(Math.max(300, Math.min(innerHeight * .72, (W - 12) * (box.y1 - box.y0) / (box.x1 - box.x0) + 44))); if (Math.abs(want - H) > 3) { $('planWrap').style.height = want + 'px'; $('planWrap').style.minHeight = '0'; H = want; } }
+    else if ($('planWrap').style.height) { $('planWrap').style.height = ''; $('planWrap').style.minHeight = ''; H = Math.max(10, c.getBoundingClientRect().height); }
+    view = fitView(box, W, H, narrow ? 6 : Math.min(40, W * .05));
+  }
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const lv = model.levelById.get(levelId);
-  if (!view) { const b = docBounds(doc, levelId); view = fitView({ x0: b.x0 - 2.4, y0: b.y0 - 2.4, x1: b.x1 + 2.4, y1: b.y1 + 1 }, W, H, Math.min(40, W * .05)); }
+  if (!drewIn) { drewIn = true; drawIn(W, H); }
   renderPlan(ctx, {
     doc, levelId, view, W, H, analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
-    flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true },
+    flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true, scaleBarRight: W < 560 },
     roomFill: focus ? rm => (focus.names.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') : zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
   });
 }

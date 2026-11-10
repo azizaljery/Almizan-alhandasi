@@ -127,7 +127,7 @@ test('drawing: بُعد المستند المطابق لسلسلة تلقائي�
 
 test('drawing: رمز الأثاث المشترك يتبع دوران القطعة', () => {
   const s = fixtureSymbol({ kind: 'bed-double', x: 2, y: 3, w: 1.8, d: 2, rot: Math.PI / 2 });
-  assert.equal(s.outline.length, 4); assert.equal(s.rects.length, 2); assert.equal(s.lines.length, 1);
+  assert.equal(s.outline.length, 4); assert.equal(s.rects.length, 2, 'وسادتان'); assert.ok(s.lines.length >= 3, 'لوح الرأس وطيّة الغطاء'); assert.ok(s.tints.length >= 3);
   const xs = s.outline.map(p => p.x), ys = s.outline.map(p => p.y);
   assert.ok(Math.abs((Math.max(...xs) - Math.min(...xs)) - 2) < 1e-9, 'بعد الدوران 90° يصبح العمق على المحور x');
   assert.ok(Math.abs((Math.max(...ys) - Math.min(...ys)) - 1.8) < 1e-9);

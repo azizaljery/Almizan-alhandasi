@@ -119,3 +119,120 @@ body:not(.app-body){background-color:var(--lx-ivory);background-image:var(--lx-i
   .scale-intro{display:none}#stageWelcome .brand>*,.journey-list li{animation:none!important;opacity:1!important}
   .spec,.stat,.btn,.cta{transition:none!important}
 }
+
+/* ===== 5) الهوية الملكية الموحّدة (مرجعها الفيديو التعريفي): نقش النجمة الهندسية، عناوين بتدرج ذهبي، إطارات مزدوجة بحواف ذهبية رفيعة، إيقاع طباعي منضبط ===== */
+:root,body,#home{
+  --lx-gold:#b8893f;--lx-gold-deep:#7c4f27;--lx-gold-hair:color-mix(in srgb,var(--lx-acc) 42%,var(--lx-line));
+  /* تدرج العناوين: درجات برونزية داكنة تبقى ≥ 3:1 على العاج للعناوين الكبيرة */
+  --lx-title:linear-gradient(100deg,#5e3a1b 0%,#a2702c 46%,#6f4520 100%);
+  /* نجمة ثمانية (مربعان متراكبان) ونجمة ستة عشر أصغر: SVG خفيف مضمَّن، يُرى نقشًا خافتًا فقط */
+  --lx-star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='132' viewBox='0 0 132 132' fill='none' stroke='%23a97142' stroke-opacity='.13' stroke-width='1'%3E%3Cg transform='translate(66 66)'%3E%3Crect x='-21' y='-21' width='42' height='42'/%3E%3Crect x='-21' y='-21' width='42' height='42' transform='rotate(45)'/%3E%3Ccircle r='9.5'/%3E%3Cpath d='M0-30V-48M0 30V48M-30 0H-48M30 0H48'/%3E%3C/g%3E%3Cg stroke-opacity='.09'%3E%3Cpath d='M0 0m-9 0l18 0M0-9v18M132 0m-9 0h18M132-9v18M0 132m-9 0h18M0 123v18M132 132m-9 0h18M132 123v18'/%3E%3Crect x='-7' y='-7' width='14' height='14' transform='rotate(45)'/%3E%3Crect x='-7' y='-7' width='14' height='14' transform='translate(132 0) rotate(45)'/%3E%3Crect x='-7' y='-7' width='14' height='14' transform='translate(0 132) rotate(45)'/%3E%3Crect x='-7' y='-7' width='14' height='14' transform='translate(132 132) rotate(45)'/%3E%3C/g%3E%3C/svg%3E");
+  --lx-corner:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='-11 -11 22 22' fill='%23fffdf8' stroke='%23a97142' stroke-width='1'%3E%3Crect x='-6.4' y='-6.4' width='12.8' height='12.8'/%3E%3Crect x='-6.4' y='-6.4' width='12.8' height='12.8' transform='rotate(45)'/%3E%3Ccircle r='1.6' fill='%23a97142' stroke='none'/%3E%3C/svg%3E");
+}
+/* النقش يتحرك مع الصفحة (لا fixed): بلاطة واحدة مخزّنة تُكرَّر، فلا يُعاد الرسم مع كل تمرير */
+body:not(.app-body){background-image:var(--lx-star);background-size:132px 132px;background-attachment:scroll}
+#home .panel-stage{background:var(--lx-star),radial-gradient(ellipse at 50% -10%,#ffffff 0%,var(--lx-tint) 62%)!important;background-size:132px 132px,auto!important}
+
+/* العناوين: تدرج ذهبي باعتدال (عنوان الصفحة وعناوين الأقسام فقط)، وخط احتفالي لعنوان الصفحة */
+.titlebar h1,#stageWelcome .brand h1,.fmain>.sec:first-child h2{font-family:"Aref Ruqaa","IBM Plex Sans Arabic",serif;letter-spacing:0}
+.titlebar h1,.sec>h2,.card>h2,.v3 aside h2,#stageWelcome .brand h1{background:var(--lx-title);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;text-shadow:none!important}
+@media (forced-colors:active){.titlebar h1,.sec>h2,.card>h2,.v3 aside h2,#stageWelcome .brand h1{-webkit-text-fill-color:currentColor;color:CanvasText!important;background:none}}
+.titlebar h1{font-size:clamp(26px,3vw,34px);line-height:1.5;padding-block-end:2px}
+.titlebar h1::after,.sec>h2::after{content:"";display:block;height:2px;width:64px;margin-top:6px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--lx-acc));}
+[dir=rtl] .titlebar h1::after,[dir=rtl] .sec>h2::after{background:linear-gradient(270deg,var(--lx-acc),transparent)}
+.sec>h2{border-inline-start:0!important;padding-inline-start:0!important;font-size:20px;line-height:1.6;margin-bottom:14px!important}
+.card>h2{font-size:17.5px;line-height:1.6}
+.titlebar .sub,.sub,.muted,.spec span,.stat,.actions small{color:var(--lx-soft)}
+
+/* البطاقات: حافة ذهبية رفيعة وخط علوي لامع؛ بطاقة المسقط بإطار مزدوج ونجمة في كل زاوية */
+.card,.sec,.spec,.stat,.side .card{border-color:var(--lx-gold-hair)!important;border-radius:16px}
+.spec,.stat{position:relative;overflow:hidden;border-radius:14px!important}
+.spec::before,.stat::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,transparent,var(--lx-accL),transparent)}
+.spec b,.stat b{color:var(--lx-ink)!important;font-weight:700}
+.plancard{position:relative;overflow:visible!important;outline:1px solid var(--lx-gold-hair);outline-offset:4px}
+.plancard{border-color:var(--lx-acc)!important;margin:5px}
+.plancard>.planbar{border-radius:15px 15px 0 0}.plancard>.legend{border-radius:0 0 15px 15px}.plancard>.planwrap:last-child,.plancard>.planwrap{overflow:hidden}
+.plancard::after{content:"";position:absolute;inset:-12px;pointer-events:none;z-index:2;background:var(--lx-corner) top left/22px no-repeat,var(--lx-corner) top right/22px no-repeat,var(--lx-corner) bottom left/22px no-repeat,var(--lx-corner) bottom right/22px no-repeat}
+.planbar{background:linear-gradient(180deg,#fffdf8,#f7f1e6)!important;border-bottom-color:var(--lx-gold-hair)!important}
+.planbar .tools button{border-color:var(--lx-gold-hair);border-radius:9px;transition:background .15s,border-color .15s,transform .12s}
+.planbar .tools button:hover{background:var(--lx-tint);border-color:var(--lx-acc)}
+.planbar .tools button:active{transform:translateY(1px)}
+.planwrap{background:#fbf8f2}
+.legend{background:linear-gradient(180deg,#fbf8f1,#fffdf8);border-top-color:var(--lx-gold-hair)!important;color:var(--lx-soft)}
+
+/* رسم المسقط عند أول عرض: خطوط الجدران تُخطّ بالبرونز ثم يظهر الرسم الكامل */
+.planwrap canvas{transition:opacity .6s ease}
+.planwrap canvas.drawing{opacity:0}
+.plan-drawin{position:absolute;inset:0;pointer-events:none;transition:opacity .5s ease}
+.plan-drawin.out{opacity:0}
+.plan-drawin line{stroke:var(--lx-acc);stroke-linecap:square;stroke-dasharray:1;stroke-dashoffset:1;animation:lxPlanDraw .55s cubic-bezier(.5,0,.2,1) forwards}
+@keyframes lxPlanDraw{to{stroke-dashoffset:0}}
+
+/* الأزرار: حواف ذهبية رفيعة، حالات hover/focus/active متقنة */
+.btn{border-color:var(--lx-gold-hair);border-radius:11px;transition:transform .12s ease,box-shadow .15s ease,border-color .15s ease,background-color .15s ease,filter .12s ease}
+.btn:not(.primary):not(.gold):not(.ghost):hover{border-color:var(--lx-acc);background:color-mix(in srgb,var(--lx-tint) 55%,#fff);box-shadow:0 6px 14px -10px color-mix(in srgb,var(--lx-deep) 70%,transparent)}
+.btn:not(.primary):not(.gold):not(.ghost):active{transform:translateY(1px);box-shadow:inset 0 2px 4px #0000001a}
+.btn.ghost:hover{background:#ffffff14;border-color:var(--lx-accL)}
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid var(--lx-acc);outline-offset:2px;border-radius:8px}
+.ph :focus-visible,.fh :focus-visible,.shara :focus-visible{outline-color:var(--lx-accL)}
+.fh .btn.primary{background:var(--lx-metal)!important;border-color:color-mix(in srgb,var(--lx-acc) 80%,#000)!important;color:var(--lx-on)!important;text-shadow:none;box-shadow:inset 0 1px 0 #ffffff80,inset 0 -2px 0 #0000001f,0 8px 18px -10px color-mix(in srgb,var(--lx-acc) 90%,#000)}
+.fh .btn:not(.primary){background:transparent;color:#f6f2ea;border-color:#ffffff45}
+.fh .btn:not(.primary):hover{background:#ffffff14!important;border-color:var(--lx-accL)!important;box-shadow:none!important}
+.history button{border-color:var(--lx-gold-hair);transition:background .15s,border-color .15s}
+.history button:not(.on):hover{border-color:var(--lx-acc);background:var(--lx-tint)}
+.steps li{transition:background .2s,color .2s}
+
+/* الجداول: رأس عاجي بحافة ذهبية، صفوف متناوبة، أرقام محاذاة ومتساوية العرض، وإجماليات واضحة */
+table.rooms th,.sec table th{background:linear-gradient(180deg,#f6eede,#efe5d2)!important;color:var(--lx-ink);font-weight:700;border-bottom:2px solid var(--lx-acc)!important}
+.sec table{border:1px solid var(--lx-gold-hair);border-radius:10px;border-collapse:separate;border-spacing:0;overflow:hidden;font-variant-numeric:tabular-nums}
+.sec table th,.sec table td{border:0;border-bottom:1px solid var(--lx-line);border-inline-start:1px solid var(--lx-line);padding:8px 11px}
+.sec table th:first-child,.sec table td:first-child{border-inline-start:0}
+.sec table tr:last-child td{border-bottom:0}
+.sec table tbody tr:nth-child(even) td,table.rooms tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--lx-tint) 38%,#fff)}
+.sec table tbody tr:hover td,table.rooms tbody tr:hover td{background:color-mix(in srgb,var(--lx-tint) 80%,#fff)}
+.sec table tfoot td,.sec table tr.sum td,table.rooms tfoot td,table.rooms tr.sum td{background:linear-gradient(180deg,#f3e9d6,#ecdfc6)!important;font-weight:700;color:var(--lx-ink);border-top:2px solid var(--lx-acc)}
+.sec h3{font-size:15.5px;color:var(--lx-gold-deep);margin:20px 0 6px;padding-inline-start:10px;border-inline-start:3px solid var(--lx-acc)}
+.total{border:1px solid var(--lx-acc);position:relative}
+.total b{font-variant-numeric:tabular-nums}
+.pill{background:color-mix(in srgb,var(--lx-tint) 70%,#fff);color:var(--lx-gold-deep);border:1px solid var(--lx-gold-hair)}
+.pill.plan{background:#f3ead8;color:#6b4a14}
+input.rate,input.pct{border-color:var(--lx-gold-hair);border-radius:8px;background:#fffdf8;transition:border-color .15s,box-shadow .15s}
+input.rate:focus,input.pct:focus{border-color:var(--lx-acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--lx-acc) 22%,transparent);outline:0}
+.svgbox{border-color:var(--lx-gold-hair)}
+.dsheet figcaption b{background:var(--lx-bar);border:1px solid var(--lx-acc);color:var(--lx-accL)}
+.shot img{border-color:var(--lx-acc);box-shadow:var(--lx-depth)}
+
+/* العرض ثلاثي الأبعاد: اللوحة الجانبية والأزرار بالهوية نفسها */
+.v3 aside{background:linear-gradient(180deg,#fffdf8,var(--lx-ivory))!important;border-inline-start:1px solid var(--lx-acc)!important;box-shadow:inset 1px 0 0 #fff,-10px 0 30px -24px color-mix(in srgb,var(--lx-deep) 60%,transparent)}
+.v3 aside>div{border-bottom-color:var(--lx-gold-hair)}
+.v3 .seg button,.v3 select,.v3 aside textarea{border-color:var(--lx-gold-hair);border-radius:10px;transition:background .15s,border-color .15s,box-shadow .15s}
+.v3 .seg button:not(.on):hover{border-color:var(--lx-acc);background:var(--lx-tint)}
+.v3 aside textarea{background:#fffdf8;border:1px solid var(--lx-gold-hair)}
+.v3 aside textarea:focus,.v3 select:focus{border-color:var(--lx-acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--lx-acc) 22%,transparent);outline:0}
+.v3 .muted,.v3 .kv{color:var(--lx-soft)}
+.v3 input[type=range]{accent-color:var(--lx-acc)}
+.v3 input[type=checkbox],.planbar input[type=checkbox]{accent-color:var(--lx-acc)}
+.v3 .stage{background:#e9e2d7}
+
+/* نصوص اللون المميّز في حوار شرعاء على الأبيض: درجة أغمق تحفظ تباين ≥ 4.5:1 (الأزرار المعدنية تبقى بلونها) */
+#home{--gold:color-mix(in srgb,var(--lx-acc) 58%,#2b211b)}
+
+/* دخول هادئ للصفحة */
+@keyframes lxRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.wrap>.titlebar,.wrap>.specs,.wrap>.grid,.wrap>.cols,.fmain>.sec:nth-child(-n+3){animation:lxRise .55s cubic-bezier(.2,.7,.2,1) backwards}
+.wrap>.specs{animation-delay:.06s}.wrap>.grid{animation-delay:.12s}.wrap>.cols{animation-delay:.18s}
+.fmain>.sec:nth-child(2){animation-delay:.06s}.fmain>.sec:nth-child(3){animation-delay:.12s}
+@media (prefers-reduced-motion: reduce){
+  .wrap>*,.fmain>.sec,.plan-drawin line{animation:none!important}
+  .planwrap canvas,.btn,.planbar .tools button{transition:none!important}.planwrap canvas.drawing{opacity:1}.plan-drawin{display:none}
+}
+@media(max-width:600px){
+  .plancard{outline-offset:3px;margin:4px}.plancard::after{inset:-10px;background-size:18px}
+  .titlebar h1{font-size:25px}.sec>h2{font-size:18px}
+  .sec table th,.sec table td{padding:6px 7px}
+}
+@media print{
+  body:not(.app-body){background-image:none!important}
+  .plancard{outline:0}.fmain>.sec{animation:none!important}
+  .sec>h2,.titlebar h1{-webkit-text-fill-color:currentColor;color:#2b211b!important;background:none}
+}

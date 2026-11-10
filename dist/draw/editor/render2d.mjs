@@ -10,8 +10,8 @@ import { gridStep } from './snap.mjs';
 import { LINE_MM, wallClasses, gridAxes, dimensionChains, layoutLabels, stairInfo, fixtureSymbol, fmtDim, fmtAreaM2 } from '../plan-annot.mjs';
 
 export const THEME = {
-  paper: '#fbf8f2', grid: 'rgba(110,100,80,.10)', gridMajor: 'rgba(110,100,80,.22)', wall: '#3a2e27', wallExt: '#2b211b', ink: '#2b211b', inkSoft: '#8a7b6d',
-  accent: '#8a5a33', accent2: '#a97142', select: '#0e7fd6', danger: '#c0392b', warn: '#d68910', ok: '#2e8b57', fixtureFill: '#fffdf8', fixtureLine: '#6b6559', glass: '#7fb7d6',
+  paper: '#fbf8f2', grid: 'rgba(110,100,80,.10)', gridMajor: 'rgba(110,100,80,.22)', wall: '#3a2e27', wallExt: '#2b211b', ink: '#2b211b', inkSoft: '#62544a',
+  accent: '#8a5a33', accent2: '#a97142', select: '#0e7fd6', danger: '#c0392b', warn: '#d68910', ok: '#2e8b57', fixtureFill: '#fffdf8', fixtureLine: '#5d5348', glass: '#7fb7d6', gold: '#a97142', goldDeep: '#7c4f27',
 };
 /** ألوان وضع اللوحة: أسود على أبيض للطباعة. */
 export const SHEET_THEME = { ...THEME, paper: '#ffffff', wall: '#000', wallExt: '#000', ink: '#000', inkSoft: '#222', accent: '#000', accent2: '#555', fixtureFill: '#fff', fixtureLine: '#000', glass: '#000' };
@@ -92,12 +92,25 @@ export function renderPlan(ctx, st) {
 
   // ------------------------------------------------------------------ rooms
   const rooms = st.analysis?.rooms || [];
+  const levelWalls0 = doc.walls.filter(w => w.level === levelId);
+  // ظل خفيف للكتلة تحت المسقط (طبقتان بلا تمويه: أرخص من shadowBlur) — يرفع المبنى عن الورقة
+  if (!sheet && flags.shadow !== false && rooms.length && k >= 8) {
+    ctx.save(); ctx.fillStyle = 'rgba(43,33,27,.055)';
+    for (const off of [3, 7]) {
+      ctx.beginPath();
+      for (const r of rooms) { r.net.forEach((p, i) => { const q = S(p); i ? ctx.lineTo(q.x + off, q.y + off * 1.2) : ctx.moveTo(q.x + off, q.y + off * 1.2); }); ctx.closePath(); }
+      for (const w of levelWalls0) { if (w.kind === 'fence') continue; wallRect(w).map(S).forEach((q, i) => i ? ctx.lineTo(q.x + off, q.y + off * 1.2) : ctx.moveTo(q.x + off, q.y + off * 1.2)); ctx.closePath(); }
+      ctx.fill('nonzero');
+    }
+    ctx.restore();
+  }
   for (const r of rooms) {
     const type = ROOM_TYPES[r.type] || ROOM_TYPES.other, hover = st.hover?.roomId === r.id, picked = sel.has(r.id);
     ctx.beginPath();
     for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); }
     if (!sheet) { ctx.fillStyle = r.unlabelled ? 'rgba(160,160,160,.12)' : (typeof st.roomFill === 'function' && st.roomFill(r)) || type.color; ctx.fill('evenodd'); }
-    if (hover || picked) { ctx.fillStyle = picked ? 'rgba(14,127,214,.18)' : 'rgba(14,127,214,.09)'; ctx.fill('evenodd'); }
+    if (!sheet && flags.floors !== false && k >= 18 && !r.unlabelled) floorPattern(ctx, r, type.floor, S, k);
+    if (hover || picked) { ctx.beginPath(); for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); } ctx.fillStyle = picked ? 'rgba(14,127,214,.18)' : 'rgba(14,127,214,.09)'; ctx.fill('evenodd'); }
   }
 
   // ------------------------------------------------------------------ walls: exterior solid, interior hatched in sheet mode; heavy cut line
@@ -120,7 +133,7 @@ export function renderPlan(ctx, st) {
   }
   // openings: cut the wall, then draw the symbol
   const wallById = new Map(levelWalls.map(w => [w.id, w]));
-  let entrySeen = false;
+  let entrySeen = false; const entryMarks = []; st.entryMarks = entryMarks; // للاختبارات: مواضع علامات المداخل
   for (const o of doc.openings) {
     if (o.level !== levelId) continue;
     const w = wallById.get(o.wall); if (!w) continue;
@@ -132,8 +145,10 @@ export function renderPlan(ctx, st) {
     const seg = (a, b, width, color = col, dash = null) => { const A = S(a), B = S(b); ctx.save(); if (dash) ctx.setLineDash(dash); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); ctx.restore(); };
     for (const p of [p0, p1]) seg(add(p, mul(n, hw)), sub(p, mul(n, hw)), pen.medium); // الأكتاف
     if (isWin) { // نافذة: خط مزدوج (الزجاج) بين الكتفين
-      if (!sheet) { const g = [add(p0, mul(n, hw * .35)), add(p1, mul(n, hw * .35)), sub(p1, mul(n, hw * .35)), sub(p0, mul(n, hw * .35))].map(S); tracePoly(g); ctx.fillStyle = 'rgba(127,183,214,.35)'; ctx.fill(); }
-      for (const f of [-.35, .35]) seg(add(p0, mul(n, hw * f)), add(p1, mul(n, hw * f)), pen.thin, picked ? T.select : T.ink);
+      // الرمز المعماري للنافذة: إطاران عند وجهي الجدار، ولوح زجاج مزدوج في المنتصف بلون هادئ
+      if (!sheet) { const g = [add(p0, mul(n, hw * .35)), add(p1, mul(n, hw * .35)), sub(p1, mul(n, hw * .35)), sub(p0, mul(n, hw * .35))].map(S); tracePoly(g); ctx.fillStyle = 'rgba(96,160,196,.5)'; ctx.fill(); }
+      for (const f of [-1, 1]) seg(add(p0, mul(n, hw * f)), add(p1, mul(n, hw * f)), pen.thin, picked ? T.select : T.ink);
+      for (const f of [-.35, .35]) seg(add(p0, mul(n, hw * f)), add(p1, mul(n, hw * f)), sheet ? pen.thin : pen.medium, picked ? T.select : T.ink);
     } else {
       const secs = swingSectors({ o, wall: w });
       for (const sec of secs) { // الضلفة بخط متوسط والقوس بخط رفيع
@@ -141,6 +156,7 @@ export function renderPlan(ctx, st) {
         ctx.strokeStyle = col; ctx.lineWidth = pen.medium; ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(leaf.x, leaf.y); ctx.stroke();
         const a0 = Math.atan2(c0.y - h.y, c0.x - h.x), a1 = Math.atan2(leaf.y - h.y, leaf.x - h.x), R = sec.r * k;
         let d = a1 - a0; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+        if (!sheet) { ctx.save(); ctx.fillStyle = 'rgba(169,113,66,.07)'; ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.arc(h.x, h.y, R, a0, a0 + d, d < 0); ctx.closePath(); ctx.fill(); ctx.restore(); }
         ctx.save(); ctx.strokeStyle = picked ? T.select : T.inkSoft; ctx.lineWidth = pen.thin; ctx.beginPath(); ctx.arc(h.x, h.y, R, a0, a0 + d, d < 0); ctx.stroke(); ctx.restore();
       }
       if (!secs.length) {
@@ -149,9 +165,17 @@ export function renderPlan(ctx, st) {
       }
     }
     if (o.entry) {
-      const t = S(add(add(w.a, mul(u, o.at)), mul(n, o.swing === 'out' ? -(w.t / 2 + .75) : w.t / 2 + .75)));
-      ctx.fillStyle = T.accent; ctx.font = `700 ${Math.max(11, k * .28)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(entrySeen ? 'مدخل' : 'مدخل ±0.00', t.x, t.y); entrySeen = true; // منسوب أرضية الدور عند المدخل الرئيسي
+      // علامة المدخل: مثلث مصمت صغير خارج المبنى يشير إلى الباب (بين الجدار وأول سلسلة أبعاد)، والتسمية في الداخل بعد قوس الفتح فلا تتراكب معه
+      const mid = add(w.a, mul(u, o.at)), probe = add(mid, mul(n, w.t / 2 + .45));
+      const out = rooms.some(r => inRing(probe, r.net)) ? -1 : 1, th = Math.min(.42 * k, 10) / k, base = w.t / 2 + 4 / k, tip = S(add(mid, mul(n, out * base)));
+      const b1 = S(add(add(mid, mul(n, out * (base + th))), mul(u, th * .62))), b2 = S(add(add(mid, mul(n, out * (base + th))), mul(u, -th * .62)));
+      ctx.save(); ctx.fillStyle = picked ? T.select : T.accent; ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y); ctx.closePath(); ctx.fill();
+      const fsE = Math.max(10.5, Math.min(14, k * .26)), rIn = isWin ? 0 : (o.kind === 'door2' ? o.w / 2 : o.kind === 'door' ? o.w : 0);
+      const t = S(add(mid, mul(n, -out * (w.t / 2 + rIn + .12 + fsE * .75 / k)))), text = entrySeen ? 'مدخل' : 'المدخل الرئيسي ±0.00', tx = t.x, ty = t.y;
+      ctx.font = `700 ${fsE}px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+      if (!sheet) { const tw = ctx.measureText(text).width + 12; ctx.fillStyle = 'rgba(253,251,246,.86)'; ctx.beginPath(); ctx.roundRect(tx - tw / 2, ty - fsE * .8, tw, fsE * 1.6, 5); ctx.fill(); }
+      ctx.fillStyle = picked ? T.select : T.accent; ctx.fillText(text, tx, ty); ctx.restore();
+      entryMarks.push({ x: tx, y: ty, text }); entrySeen = true; // منسوب أرضية الدور عند المدخل الرئيسي
     }
   }
 
@@ -220,9 +244,11 @@ export function renderPlan(ctx, st) {
       const it = lay.items.get(p.id), r = roomById.get(p.id); if (!it || !r) continue;
       const c = S({ x: p.x, y: p.y }); let y = c.y - (p.h * k) / 2 + it.lines[0].size * p.scale * k * .55;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      // لوحة تسمية نصف شفافة خلف النص: تُبقي الاسم والمساحة مقروءين فوق الأثاث وبلاط الأرضية دون هالة سميكة
+      if (!sheet) { const pw = p.w * k + 10, ph = p.h * k + 6; ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); ctx.fill(); }
       it.lines.forEach((t, i) => {
         const px = t.size * p.scale * k, font = `${i === 0 ? 700 : i === it.lines.length - 1 ? 400 : 500} ${px}px ${FONT}`;
-        ctx.font = font; ctx.lineWidth = 4; ctx.strokeStyle = sheet ? '#fff' : 'rgba(251,249,244,.92)'; ctx.strokeText(t.text, c.x, y);
+        ctx.font = font; if (sheet) { ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.strokeText(t.text, c.x, y); }
         ctx.fillStyle = i === 0 ? (r.unlabelled ? T.inkSoft : T.ink) : (sheet ? '#000' : i === it.lines.length - 1 ? T.inkSoft : T.ink); ctx.fillText(t.text, c.x, y);
         y += px * 1.25;
       });
@@ -286,8 +312,8 @@ export function renderPlan(ctx, st) {
     ctx.fillRect(a.x, a.y, b.x - a.x, b.y - a.y); ctx.strokeRect(a.x, a.y, b.x - a.x, b.y - a.y); ctx.restore();
   }
   // north arrow + scale bar (+ legend in sheet mode)
-  drawCompass(ctx, 48, 54, doc.north || 0, T);
-  drawScaleBar(ctx, 24, H - 34, k, T);
+  if (flags.compass !== false) drawCompass(ctx, W < 520 ? 34 : 48, W < 520 ? 44 : 56, doc.north || 0, T, sheet, W < 520 ? .78 : 1);
+  if (flags.scaleBar !== false) drawScaleBar(ctx, flags.scaleBarRight ? W - (W < 520 ? 14 : 24) - ((([.5, 1, 2, 5, 10, 20].find(c => c * k >= 70) || 20) * k)) - 22 : (W < 520 ? 14 : 24), H - (W < 520 ? 20 : 30), k, T, sheet);
   if (sheet) drawLegend(ctx, W - 16, H - 16, classes.legend, !!st.columns, pen);
   ctx.restore();
 }
@@ -395,7 +421,11 @@ function drawDimension(ctx, a, b, offset, text, S, k, color, T = THEME) {
   ctx.beginPath(); ctx.moveTo(sa.x, sa.y); ctx.lineTo(sb.x, sb.y); ctx.stroke();
   for (const p of [sa, sb]) { ctx.beginPath(); ctx.moveTo(p.x - 4, p.y + 4); ctx.lineTo(p.x + 4, p.y - 4); ctx.lineWidth = 1.8; ctx.stroke(); }
   const m = { x: (sa.x + sb.x) / 2, y: (sa.y + sb.y) / 2 }; let ang = Math.atan2(sb.y - sa.y, sb.x - sa.x); if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI;
-  ctx.translate(m.x, m.y); ctx.rotate(ang); ctx.font = `600 ${Math.max(10, Math.min(13, k * .26))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  // النص لا يتجاوز طول البُعد: تُحذف الوحدة أولًا ثم يصغر الخط (حتى 8.5) فلا تتراكب أبعاد المقاطع القصيرة على الجوال
+  const segPx = Math.hypot(sb.x - sa.x, sb.y - sa.y); let fsD = Math.max(10, Math.min(13, k * .26)); ctx.font = `600 ${fsD}px ${FONT}`;
+  if (ctx.measureText(text).width > segPx - 8 && / م$/.test(text)) text = text.replace(/ م$/, '');
+  while (fsD > 8.5 && ctx.measureText(text).width > segPx - 6) { fsD -= .5; ctx.font = `600 ${fsD}px ${FONT}`; }
+  ctx.translate(m.x, m.y); ctx.rotate(ang); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
   ctx.lineWidth = 3; ctx.strokeStyle = T.paper; ctx.strokeText(text, 0, -2); ctx.fillText(text, 0, -2); ctx.restore();
 }
 
@@ -405,12 +435,14 @@ function drawFixture(ctx, f, S, k, picked, hover, T = THEME, pen = pens(k)) {
   ctx.save();
   const trace = q => { ctx.beginPath(); q.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); };
   ctx.strokeStyle = picked ? T.select : hover ? T.accent : T.fixtureLine; ctx.lineWidth = picked ? 2.4 : pen.thin;
+  const sanitary = f.kind === 'wc' || f.kind === 'basin' || f.kind === 'bathtub';
   if (sym.outline) { trace(sym.outline); ctx.fillStyle = f.kind === 'rug' ? 'rgba(160,110,90,.18)' : f.kind === 'pool' || f.kind === 'waterfall' || f.kind === 'fountain' ? 'rgba(56,182,207,.30)' : f.kind === 'lawn' ? 'rgba(95,159,69,.22)' : T.fixtureFill; ctx.fill(); ctx.stroke(); }
   if (k > 14) {
     ctx.lineWidth = pen.thin;
+    if (sym.tints?.length && T !== SHEET_THEME) { ctx.fillStyle = sanitary || f.kind === 'kitchen-run' ? 'rgba(120,150,165,.16)' : 'rgba(169,113,66,.13)'; for (const q of sym.tints) { trace(q); ctx.fill(); } }
     for (const r of sym.rects) { trace(r); ctx.stroke(); }
     for (const [a, b] of sym.lines) { const A = S(a), B = S(b); ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }
-    for (const e of sym.ellipses) { const c = S(e.c); if (f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fillStyle = 'rgba(90,150,90,.35)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, e.rx * k, e.ry * k, -e.rot, 0, 7); if (f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fill(); ctx.stroke(); }
+    for (const e of sym.ellipses) { const c = S(e.c); if (f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fillStyle = 'rgba(90,150,90,.35)'; else if (sanitary) ctx.fillStyle = T.fixtureFill; ctx.beginPath(); ctx.ellipse(c.x, c.y, e.rx * k, e.ry * k, -e.rot, 0, 7); if (sanitary || f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fill(); ctx.stroke(); }
   }
   ctx.restore();
 }
@@ -450,16 +482,49 @@ function drawSnapMarker(ctx, s, kind) {
   else { ctx.beginPath(); ctx.moveTo(s.x - 8, s.y); ctx.lineTo(s.x + 8, s.y); ctx.moveTo(s.x, s.y - 8); ctx.lineTo(s.x, s.y + 8); ctx.stroke(); }
   ctx.restore();
 }
-function drawCompass(ctx, x, y, north, T = THEME) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(north * Math.PI / 180); ctx.strokeStyle = T.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 18, 0, 7); ctx.stroke();
-  ctx.fillStyle = T.ink; ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(6, 6); ctx.lineTo(0, 2); ctx.lineTo(-6, 6); ctx.closePath(); ctx.fill();
-  ctx.rotate(-north * Math.PI / 180); ctx.font = `700 12px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText('ش', 0, -24); ctx.restore();
+/** سهم الشمال: وردة بنجمة ثمانية (من هوية الميزان) داخل حلقتين، ونصف السهم مصمت ونصفه فارغ. */
+function drawCompass(ctx, x, y, north, T = THEME, sheet = false, sc = 1) {
+  const gold = sheet ? T.ink : T.gold, R = 19 * sc;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(north * Math.PI / 180); ctx.lineJoin = 'miter';
+  if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.9)'; ctx.beginPath(); ctx.arc(0, 0, R + 3, 0, 7); ctx.fill(); }
+  ctx.strokeStyle = gold; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.stroke();
+  ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, 0, R - 3 * sc, 0, 7); ctx.stroke();
+  ctx.beginPath(); for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8 + Math.PI / 8, r = i % 2 ? R * .3 : R * .62; i ? ctx.lineTo(Math.sin(a) * r, -Math.cos(a) * r) : ctx.moveTo(Math.sin(a) * r, -Math.cos(a) * r); } ctx.closePath(); ctx.stroke(); // النجمة الثمانية الخافتة
+  ctx.fillStyle = T.ink; ctx.strokeStyle = T.ink; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, -R + 2); ctx.lineTo(5.5 * sc, 5 * sc); ctx.lineTo(0, 1.5 * sc); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = sheet ? '#fff' : T.paper; ctx.beginPath(); ctx.moveTo(0, -R + 2); ctx.lineTo(-5.5 * sc, 5 * sc); ctx.lineTo(0, 1.5 * sc); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.rotate(-north * Math.PI / 180); const a = north * Math.PI / 180;
+  ctx.fillStyle = sheet ? T.ink : T.goldDeep; ctx.font = `700 ${Math.round(12 * sc)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ش', Math.sin(a) * (R + 9 * sc), -Math.cos(a) * (R + 9 * sc)); ctx.restore();
 }
-function drawScaleBar(ctx, x, y, k, T = THEME) {
-  const cand = [.5, 1, 2, 5, 10, 20], m = cand.find(c => c * k >= 70) || 20, w = m * k, n = m >= 2 ? 4 : 2;
-  ctx.save(); ctx.strokeStyle = T.ink; ctx.fillStyle = T.ink; ctx.lineWidth = 1;
-  for (let i = 0; i < n; i++) { ctx.fillStyle = i % 2 ? T.paper : T.ink; ctx.fillRect(x + i * w / n, y - 5, w / n, 5); ctx.strokeRect(x + i * w / n, y - 5, w / n, 5); }
-  ctx.fillStyle = T.ink; ctx.font = `600 11px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText('0', x, y - 8); ctx.fillText(m + ' م', x + w, y - 8); ctx.restore();
+/** مقياس الرسم الخطي: صفّان متناوبان بتقسيم أول مفصّل، وأرقام عند كل تقسيم رئيسي. */
+function drawScaleBar(ctx, x, y, k, T = THEME, sheet = false) {
+  const cand = [.5, 1, 2, 5, 10, 20], m = cand.find(c => c * k >= 70) || 20, w = m * k, n = m >= 2 ? 4 : 2, h = 3.5;
+  ctx.save(); ctx.strokeStyle = T.ink; ctx.lineWidth = .8;
+  if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.88)'; ctx.beginPath(); ctx.roundRect(x - 9, y - 2 * h - 18, w + 34, 2 * h + 24, 5); ctx.fill(); }
+  for (let i = 0; i < n; i++) for (const row of [0, 1]) { ctx.fillStyle = (i + row) % 2 ? (sheet ? '#fff' : T.paper) : T.ink; ctx.fillRect(x + i * w / n, y - h * (2 - row), w / n, h); }
+  ctx.strokeRect(x, y - 2 * h, w, 2 * h); ctx.beginPath(); ctx.moveTo(x, y - h); ctx.lineTo(x + w, y - h); ctx.stroke();
+  ctx.fillStyle = T.ink; ctx.font = `600 10.5px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('0', x, y - 2 * h - 4); ctx.fillText(String(m / 2), x + w / 2, y - 2 * h - 4); ctx.fillText(m + ' م', x + w, y - 2 * h - 4); ctx.restore();
+}
+
+/** هل النقطة داخل الحلقة (عدّ التقاطعات)؟ */
+function inRing(p, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) { const a = ring[i], b = ring[j]; if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) inside = !inside; }
+  return inside;
+}
+
+/** نقش الأرضية الخافت داخل الفراغ: بلاط 60 سم للمطابخ ودورات المياه، ألواح خشب لغرف النوم، ورخام بفواصل واسعة للمجالس والصالات. */
+export const FLOOR_PATTERNS = Object.freeze({ wet: { step: .6, grid: true, alpha: .1 }, tile: { step: .6, grid: true, alpha: .06 }, wood: { step: .3, grid: false, alpha: .055 }, marble: { step: 1.2, grid: true, alpha: .05 } });
+function floorPattern(ctx, r, floor, S, k) {
+  const fp = FLOOR_PATTERNS[floor]; if (!fp || fp.step * k < 7) return;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const p of r.net) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+  ctx.save(); ctx.beginPath(); for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); } ctx.clip('evenodd');
+  ctx.strokeStyle = `rgba(43,33,27,${fp.alpha})`; ctx.lineWidth = 1; ctx.beginPath();
+  const alongX = fp.grid || (x1 - x0) >= (y1 - y0); // ألواح الخشب بطول الضلع الأطول
+  if (fp.grid || !alongX) for (let x = x0 + fp.step; x < x1 - .01; x += fp.step) { const a = S({ x, y: y0 }), b = S({ x, y: y1 }); ctx.moveTo(Math.round(a.x) + .5, a.y); ctx.lineTo(Math.round(b.x) + .5, b.y); }
+  if (fp.grid || alongX) for (let y = y0 + fp.step; y < y1 - .01; y += fp.step) { const a = S({ x: x0, y }), b = S({ x: x1, y }); ctx.moveTo(a.x, Math.round(a.y) + .5); ctx.lineTo(b.x, Math.round(b.y) + .5); }
+  ctx.stroke(); ctx.restore();
 }
 
 export default { THEME, SHEET_THEME, makeView, toScreen, toWorld, fitView, docBounds, renderPlan, pens, duplicatesChain };
