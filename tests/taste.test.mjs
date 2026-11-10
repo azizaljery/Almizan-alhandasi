@@ -45,7 +45,7 @@ test('الدرجات: بديل لم يحقق عرفًا افتراضيًا لا 
   const land = { length: 30, width: 20, streets: ['s'], entries: ['s'] };
   const s = new SharaSession({ land }); s.start(); s.answer('mode', 'free'); s.answer('free', 'ابي فيلا دور واحد 4 غرف نوم ومجلس وصالة ومطبخ، احب الاضاءة الطبيعية والخصوصية');
   const out = generateVillaDesigns({ land, counts: s.counts, requirements: s.requirements, keep: 5 });
-  assert.ok(out.designs.length >= 4, 'أربعة بدائل على الأقل: ' + out.designs.map(d => d.mode).join(','));
+  assert.ok(out.designs.length >= 3, 'ثلاثة بدائل على الأقل (كل بديل فكرة تنظيم مختلفة): ' + out.designs.map(d => d.idea).join(','));
   assert.ok(out.designs.every(d => d.fails === 0), 'لا بديل يخالف شرطًا قاله العميل');
   assert.equal(out.designs[0].softFails, 0, 'الأول يحقق الأعراف كلها');
   assert.equal(out.designs[0].mode, 'court', 'ذوق الإضاءة والخصوصية يقدّم الفناء');

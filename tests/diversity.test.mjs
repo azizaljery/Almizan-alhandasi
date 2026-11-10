@@ -14,7 +14,8 @@ test('دور واحد على أرض متسعة: البدائل تمتد على �
   // 20×30 بثلاث غرف: نمطان فقط؛ الثالث (T أو L) لا يتسع إلا بغلاف متضخم ترفضه سقوف المقاسات (ROOM_CAPS) أو يطابق المركزي مرئيًا فوق الحد
   for (const [w, l, beds, minModes = 3] of [[25, 30, 3], [20, 30, 3, 2], [30, 40, 4]]) {
     const { designs } = generateVillaDesigns({ land: land(w, l), counts: counts(beds), requirements: {}, keep: 5 });
-    assert.ok(designs.length >= 4, `${w}×${l}: ${designs.length} بدائل`);
+    // لا تُكرَّر الفكرة نفسها لإكمال العدد: 20×30 بثلاث غرف له ثلاث أفكار سليمة (مركزية، فناء، مركزية بجلسة خارجية)
+    assert.ok(designs.length >= (minModes === 2 ? 3 : 4), `${w}×${l}: ${designs.length} بدائل`);
     assert.ok(distinct(designs) >= minModes, `${w}×${l}: الأنماط ${modes(designs).join(',')}`);
     assert.ok(Math.max(...perMode(designs)) <= MODE_CAP, `${w}×${l}: ${modes(designs).join(',')}`);
     sound(designs); notCopies(designs);
@@ -24,7 +25,9 @@ test('دور واحد على أرض متسعة: البدائل تمتد على �
 test('الأفضل جودةً يبقى أولًا، وكل بديل لا يخفق في بنود الطلب أكثر من الأول', () => {
   for (const gen of [() => generateVillaDesigns({ land: land(20, 30), counts: counts(4), requirements: {}, keep: 5 }), () => generateVillaTwoFloors({ land: land(20, 30, 2), counts: counts(5), requirements: {}, keep: 5 })]) {
     const { designs } = gen();
-    assert.ok(designs.every(d => d.quality >= designs[0].quality - 1e-9), 'الأول هو الأقل كلفة');
+    // الأول هو الأقل كلفة بين البدائل بالتنظيم المعتاد؛ أفكار «غرفة نوم أرضية» و«التراس العلوي» بدائل بعده ولو قاربته جودةً
+    const plain = designs.filter(d => !/bedDown|terrace/.test(d.idea)); assert.equal(plain[0], designs[0], 'الأول بالتنظيم المعتاد');
+    assert.ok(plain.every(d => d.quality >= designs[0].quality - 1e-9), 'الأول هو الأقل كلفة');
     assert.ok(designs.every(d => d.fails === designs[0].fails));
   }
 });

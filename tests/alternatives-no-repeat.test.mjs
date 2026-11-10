@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
 import { createSession, redesign, mergeDesigns, currentDoc, wantsAlternative } from '../dist/design-session.mjs';
 import { buildBrief } from '../dist/shara/brief-engine.mjs';
-import { checkDoc, visualSim, visualSig, VISUAL_LIMIT, BLEND_COPY } from '../dist/villa-layout.mjs';
+import { checkDoc, visualSim, visualSig, VISUAL_LIMIT, BLEND_COPY, patIdea, IDEA_CAP } from '../dist/villa-layout.mjs';
 
 async function session(l, text) {
   const land = { ...l, streets: ['s'], entries: ['s'] }, b = buildBrief(text, { land });
@@ -36,16 +36,23 @@ for (const [name, l, text] of [
   ['دوران 20×30', { width: 20, length: 30, floors: 2 }, '5 غرف نوم ومجلسين ومقلط ومطبخ وصالة'],
   ['شكل L', { width: 20, length: 30, floors: 1 }, 'ابي مبنى على شكل L، 4 غرف نوم ومجلس ومطبخ وصالة'],
   ['فناء U', { width: 25, length: 30, floors: 1 }, 'ابي مبنى على شكل U والمنتصف حديقة، 4 غرف نوم ومجلس ومطبخ وصالة'],
-]) test(`${name}: خمسة «تصميم آخر» متتالية بلا تكرار مرئي`, async () => {
-  const { n } = await fiveNoRepeat(l, text);
-  assert.ok(n >= 5, `أقل من خمسة بدائل مختلفة: ${n}`);
+]) test(`${name}: «تصميم آخر» المتتالي بلا تكرار مرئي ولا تكرار للفكرة نفسها بأسماء مختلفة`, async () => {
+  // شكوى المالك: «بعد المقترح الثالث يعيد المخططات نفسها ويغيّر الأسماء». الفكرة المعمارية الواحدة لا تُعرض أكثر من IDEA_CAP
+  // مرات في كل ما يراه العميل (البداية + «تصميم آخر»)، ثم يُعلن النفاد بدل التكرار؛ فالمطلوب سبعة تصاميم مختلفة على الأقل لا خمسة «أخرى».
+  const { s } = await fiveNoRepeat(l, text);
+  const per = {}; for (const d of s.designs) per[patIdea(d.pat)] = (per[patIdea(d.pat)] || 0) + 1;
+  // الشكل الذي طلبه العميل صراحةً (L أو U) تنويعاته مطلوبة فلا يُحدّ؛ ما عداه لا تتكرر فكرته فوق الحد
+  const asked = /شكل L/.test(text) ? 'L' : /شكل U/.test(text) ? 'court' : null;
+  assert.ok(s.designs.length >= (asked ? 6 : 7), `أقل من ${asked ? 'ستة' : 'سبعة'} تصاميم مختلفة: ${s.designs.length}`);
+  assert.ok(Math.max(...Object.entries(per).filter(([k]) => k !== asked).map(([, v]) => v), 0) <= IDEA_CAP, 'فكرة تكررت فوق الحد: ' + JSON.stringify(per));
+  if (!asked) assert.ok(Object.keys(per).length >= 4, 'أربع أفكار تنظيم مختلفة على الأقل: ' + Object.keys(per).join('، '));
 });
 
 test('كتابة «ابي تصميم بديل مختلف» تعطي بديلًا مختلفًا لا رسالة «لم أفهم»', async () => {
   // بعد سقوف المقاسات صار المعروض من البداية أربعة تصاميم (كان اثنين)، والتوزيعات المتضخمة لم تعد تُحسب بدائل؛
   // فالمطلوب: الطلب النصي يُفهم ويعطي بدائل مختلفة، ومجموع ما يراه العميل لا يقل عن سبعة، ثم يُعلن النفاد بدل التكرار.
   const { n, s } = await fiveNoRepeat({ width: 18, length: 30, floors: 1 }, 'غرفتا نوم، الرئيسية بحمام خاص، ومجلس ومطبخ وصالة', { text: 'ابي تصميم بديل مختلف' });
-  assert.ok(n >= 3, 'ثلاثة بدائل بالنص على الأقل: ' + n);
+  assert.ok(n >= 2, 'بديلان بالنص على الأقل: ' + n);
   assert.ok(s.designs.length >= 7, 'مجموع التصاميم المختلفة المعروضة: ' + s.designs.length);
 });
 

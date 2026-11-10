@@ -61,7 +61,7 @@ export const SPACES = Object.freeze([
   { id: 'basement', label: 'قبو', re: 'قبو|بدروم', dual: null, unsupported: 'القبو: غير مدعوم في هذا الإصدار.', area: 0, floor: 'any', zone: 'service' },
   { id: 'roof', label: 'غرفة السطح', re: 'سطح|روف|غرفه (?:ال)?سطح|ملحق (?:ال)?سطح', dual: null, unsupported: 'السطح وغرفة السطح: لا تُرسم في هذا الإصدار.', area: 0, floor: 'any', zone: 'outside' },
   { id: 'mashab', label: 'مشب', re: 'مشب|مشبين|غرفه (?:ال)?مشب', dual: null, unsupported: 'المشب (مجلس الشتاء بموقده): لا يُرسم فراغًا مستقلًا في هذا الإصدار؛ يمكن إدراجه في المجلس أو إضافته في المرسم.', area: 0, floor: 'ground', zone: 'guest' },
-  { id: 'balcony', label: 'شرفة / تراس', re: 'بلكون|بلكونه|بلكونات|برنده|برندات|شرفه|شرفات|تراس|تراسات', dual: null, unsupported: 'الشرفات والتراس: لا تُرسم في هذا الإصدار.', area: 0, floor: 'any', zone: 'outside' },
+  { id: 'balcony', label: 'شرفة / تراس', re: 'بلكون|بلكونه|بلكونات|برنده|برندات|شرفه|شرفات|تراس|تراسات', dual: null, unsupported: null, area: 0, floor: 'upper', zone: 'outside' },
   { id: 'courtyard', label: 'حديقة داخلية (مبنى U)', re: 'فناء(?! خارجي)|حوش داخلي|كورت ?يارد|حديقه داخليه', dual: null, unsupported: null, prefs: { courtyard: true }, area: 0, floor: 'ground', zone: 'outside' },
 ]);
 export const SPACE = Object.fromEntries(SPACES.map(s => [s.id, s]));

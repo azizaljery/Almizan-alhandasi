@@ -169,6 +169,8 @@ export function extractRules(t) {
     }
     for (const f of FLOORS) for (const m of find(f.rx, c)) {
       if (overlapsUsed(m)) continue;
+      // «تراس فوق» / «بلكونة في الدور العلوي»: وصف لموضع التراس نفسه لا لدور الفراغ الذي سبقه في الجملة
+      if (/(?:تراس|تراسات|بلكون[هات]*|شرف[هات]+|برند[هات]+)\s*(?:في |ب)?(?:ال)?(?:دور )?(?:ال)?$/.test(c.slice(0, m.start))) continue;
       // «غرفة نوم أرضية لأبوي»: الصفة داخل اسم الفراغ
       const host = subs.find(x => m.start >= x.start && m.end <= x.end + 1);
       let A = host ? [host.id] : subjectsBefore(subs, m.start, c);
@@ -442,6 +444,11 @@ function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
     if (od.bbq) { const n = fx('bbq').length; out.push({ id: 'G-bbq', kind: 'pref', text: 'ركن شواء', ok: n > 0, why: n ? '' : 'لا يتسع حوش حرّ لركن الشواء.' }); }
     if (od.fountain) { const n = fx('fountain').length; out.push({ id: 'G-fountain', kind: 'pref', text: 'نافورة', ok: n > 0, why: n ? '' : 'لا يتسع حوش حرّ للنافورة.' }); }
     if (od.planters) { const n = fx('planter').length; out.push({ id: 'G-planters', kind: 'pref', text: 'أحواض زراعة', ok: n > 0, why: n ? '' : 'لا يوجد طول حرّ على السور لأحواض الزراعة.' }); }
+  }
+  // التراس العلوي (طلب صريح): فراغ خارجي مكشوف في دور علوي
+  if (pr.terrace === true) {
+    const lv0 = doc.levels?.[0]?.id, n = (doc.labels || []).filter(l => l.type === 'balcony' && l.level !== lv0).length;
+    out.push({ id: 'T-terrace', kind: 'pref', text: 'تراس علوي', ok: n > 0, why: n ? '' : doc.levels.length < 2 ? 'التراس العلوي يلزمه دوران؛ التصميم دور واحد.' : 'الدور العلوي لا يفيض عن برنامجه بما يكفي لتراس في هذا البديل.' });
   }
   if (pr.elevator) {
     const el = (doc.labels || []).filter(l => l.type === 'elevator'), lv = new Set(el.map(l => l.level)), cars = (doc.fixtures || []).filter(f => f.kind === 'elevator-car');
