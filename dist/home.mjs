@@ -62,7 +62,9 @@ function showLandErrors(errors) {
   $('landWidth').setAttribute('aria-invalid', String(Boolean(errors.width)));
 }
 function clearLandErrors() { showLandErrors({}); }
-function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1 }; }
+function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1, ...(floorsTouched ? { floorsExplicit: true } : {}) }; }
+// عدد الأدوار يُعدّ «محددًا من العميل» فقط إن غيّر الاختيار بنفسه (أو قاله لشرعاء)؛ وإلا يجوز للموقع اقتراح دورين إن لم تتسع الأرض
+let floorsTouched = false; $('landFloors')?.addEventListener('change', () => { floorsTouched = true; });
 function refreshLand() {
   clearLandErrors();
   for (const key of ['n', 's', 'e', 'w']) {

@@ -7,6 +7,7 @@ import { withAi } from './requirements.mjs';
 export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
 import { visualSig, visualSim, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY } from './villa-layout.mjs';
+import { fitStatement } from './fit-ladder.mjs';
 
 export const SESSION_KEY = 'mizan.design.session.v1';
 const MAX_DESIGNS = 15;
@@ -50,10 +51,10 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
 /** بدائل المولّد المهني الأولى (حتى خمسة تصاميم مع الأول): تُعرض تصاميمَ يتنقل بينها العميل من البداية. */
 function initialAlternatives(result) {
   return (result.alternatives || []).filter(a => a.index !== (result.selectedIndex ?? 0) && /^villa/.test(String(a.strategy || '')) && a.doc).slice(0, 4)
-    .map(a => entry({ doc: a.doc, pat: a.pat, summary: a.summary, notes: a.notes, floors: result.floors, engine: a.strategy, ledger: null, mirror: null }, null));
+    .map(a => entry({ doc: a.doc, pat: a.pat, summary: a.summary, notes: a.notes, floors: result.floors, engine: a.strategy, ledger: null, mirror: null, fit: a.fit || result.fit || null }, null));
 }
 function entry(result, feedback) {
-  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null };
+  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null, fit: result.fit || null };
 }
 export const currentDoc = s => parseDoc(s.designs[s.current].doc);
 
@@ -96,7 +97,9 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   const exclude = different ? s.seenPats : [];
   const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null };
   const shown = different ? s.seen : [];
-  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown });
+  // الطلب لم يتغيّر (توزيع آخر فقط) والتصميم المعروض مرّ بسلّم الاتساع: تُعاد درجاته نفسها مباشرة بلا مشي السلّم من أوله
+  const fitHint = !more && !picks.length ? hintOf(cur) : null;
+  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, ...(fitHint ? { fitHint } : {}) });
   const outSig = visualSig(parseDoc(serialize(out.doc)));
   // ضمان أخير مستقل عن المولّد: «تصميم آخر» لا يُقبل إن شابه أي تصميم عُرض فوق الحد
   if (different) {
@@ -148,6 +151,13 @@ export async function mergeDesigns(session, a, b, { generate = generateInitialDe
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
   return { session: s, changes, reply };
+}
+
+/** درجات سلّم الاتساع التي نجح بها تصميم معروض (تلميح لإعادة التوليد بالطلب نفسه). */
+export function hintOf(d) { return d?.fit && (d.fit.applied?.length || d.fit.floors) ? { ids: (d.fit.applied || []).map(x => x.id), floors: d.fit.floors || null } : null; }
+/** بيان ما تغيّر عن طلب العميل في التصميم المعروض، مقيسًا من المستند نفسه (انظر fit-ladder.mjs). */
+export function fitFor(session, doc = currentDoc(session)) {
+  try { return fitStatement(doc, session.input.requirements || {}, { land: session.input.land, fit: session.designs[session.current]?.fit || null }); } catch { return { facts: null, need: null, items: [], decisions: [] }; }
 }
 
 export function approve(session) { const s = clone(session); s.approved = s.current; return s; }
