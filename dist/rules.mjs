@@ -270,7 +270,7 @@ export function rulePenalty(placed, circ, W, D, rules = [], entry = 's') {
 }
 
 // ------------------------------------------------------------------------------------------ التحقق من المستند
-const ROOM_OF = {
+export const ROOM_OF = {
   majlis: r => /^(المجلس|مجلس الرجال|مجلس \d+)$/.test(r.name), majlis_w: r => r.name === 'مجلس النساء', kitchen: r => r.name === 'المطبخ', dining: r => /طعام/.test(r.name),
   master: r => r.name === 'غرفة النوم الرئيسية', kids: r => r.type === 'bedroom' && r.name !== 'غرفة كبار السن' && r.name !== 'غرفة الضيوف', bedrooms: r => (r.type === 'bedroom' || r.type === 'master') && r.name !== 'غرفة الضيوف',
   elderly: r => r.name === 'غرفة كبار السن', maid: r => r.name === 'غرفة الخادمة', driver: r => r.name === 'غرفة السائق', office: r => r.name === 'المكتب', prayer: r => r.name === 'المصلى',
@@ -424,6 +424,12 @@ function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
   const c = req.counts || {};
   if (c.majlis === 0) { const n = sel('majlis').length + sel('majlis_w').length; out.push({ id: 'C-majlis', kind: 'count', text: 'بدون مجلس', ok: n === 0, why: n ? 'يوجد مجلس؛ عدد المجالس في الأعداد ليس صفرًا.' : '' }); }
   if (c.dining === 0) { const n = sel('dining').length; out.push({ id: 'C-dining', kind: 'count', text: 'بدون غرفة طعام', ok: n === 0, why: n ? 'توجد غرفة طعام؛ عددها في الأعداد ليس صفرًا.' : '' }); }
+  // فراغات معدودة طلبها العميل وغابت عن المخطط (أرض لم تتسع فخُفّف البرنامج): تُعلن غير محققة. لا تُدرج حين تتحقق (المعتاد)، فلا يتغير سجل التصاميم الكاملة.
+  { const nm = rooms.filter(r => r.type === 'majlis').length, ty = t => rooms.filter(r => r.type === t).length;
+    if (c.majlis >= 1 && nm === 0) out.push({ id: 'C-majlis1', kind: 'count', text: c.majlis >= 2 ? 'مجلسان' : 'مجلس', ok: false, why: 'لا مجلس في هذا التصميم.' });
+    if (c.dining >= 1 && sel('dining').length + ty('dining') === 0) out.push({ id: 'C-dining1', kind: 'count', text: 'غرفة طعام', ok: false, why: 'لا غرفة طعام مستقلة في هذا التصميم.' });
+    if (c.kitchens >= 2 && ty('kitchen') < 2) out.push({ id: 'C-kitchen2', kind: 'count', text: 'مطبخ تحضيري', ok: false, why: 'لا مطبخ تحضيري في هذا التصميم.' });
+    if (c.halls >= 2 && !rooms.some(r => /^(الصالة العائلية|صالة عائلية \d+)$/.test(r.name)) && !(doc.levels.length === 1 && ty('living') >= 2)) out.push({ id: 'C-hall2', kind: 'count', text: 'صالة عائلية ثانية', ok: false, why: 'لا صالة عائلية ثانية في هذا التصميم.' }); }
   if (Number.isInteger(c.bedrooms) && c.bedrooms > 0) { const n = sel('bedrooms').length; out.push({ id: 'C-bed', kind: 'count', text: `${c.bedrooms} غرف نوم`, ok: n === c.bedrooms, why: n === c.bedrooms ? '' : `في التصميم ${n}.` }); }
   if (c.majlis >= 2) { const w = sel('majlis_w').length, m = sel('majlis').length; out.push({ id: 'C-maj2', kind: 'count', text: 'مجلس للرجال ومجلس للنساء', ok: w >= 1 && m >= 1, why: '' }); }
   const pr = req.prefs || {};
