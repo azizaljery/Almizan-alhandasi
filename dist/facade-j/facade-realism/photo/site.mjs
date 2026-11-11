@@ -25,7 +25,7 @@ function groundTextures(THREE, tier) {
 
 /** خامة الجدار الأساسية للواجهة (أكبر مساحة أمامية) لتلبيس السور بها. */
 function facadeWallMaterial(THREE, S) {
-  let best = null, area = 0; for (const m of S.meshes) { const r = m.userData?.role; if (m.userData?.side !== 's' || !(r === 'wall' || r === 'cladding') || !m.visible) continue; const b = new THREE.Box3().setFromObject(m), a = (b.max.x - b.min.x) * (b.max.y - b.min.y); if (a > area) { area = a; best = m; } }
+  let best = null, area = 0; for (const m of S.meshes) { const r = m.userData?.role; if (m.userData?.side !== 's' || !(r === 'wall' || r === 'cladding') || !m.visible) continue; const b = new THREE.Box3().setFromObject(m), a = (b.max.x - b.min.x) * (b.max.y - b.min.y) * (m.userData.part === 'blocks' ? 4 : m.userData.part === 'wallcore' || m.userData.part === 'plate' ? .2 : 1); if (a > area) { area = a; best = m; } } // كسوة الحجر الظاهرة تتقدم على لوحها الخلفي
   if (!best) return new THREE.MeshStandardMaterial({ color: '#e6dccb', roughness: .9 });
   const c = best.material.clone(); c.vertexColors = false; c.name = (best.material.name || 'wall') + '-site'; return c;
 }
@@ -51,7 +51,7 @@ export function buildSite(THREE, { scene, S, plan, state, tier, night = false })
   M('coping', { color: '#d8cdb9', roughness: .8 }, 'stone'); texd('stone', 'stone', { roughness: .78 }); mats.stone.name = 'site-paving-stone'; texd('walk', 'walk'); mats.walk.userData.pd = false; texd('asphalt', 'asphalt', { roughness: .96, bumpScale: .6 }); mats.asphalt.userData.pd = false;
   texd('gravel', 'gravel', { roughness: 1 }); mats.gravel.userData.pd = false; texd('lawn', 'lawn', { roughness: 1 }); mats.lawn.userData.pd = false; texd('soil', 'soil', { roughness: 1 }); mats.soil.userData.pd = false;
   M('curb', { color: '#b9b2a5', roughness: .9 }, 'concrete'); M('wood', { color: '#6a4a33', roughness: .62 }, 'timber'); M('metal', { color: '#262422', metalness: .7, roughness: .42, envMapIntensity: 1 });
-  M('lamp', { color: '#fff3d6', emissive: '#ffd08a', emissiveIntensity: night ? 6 : 2.2 }); M('nb1', { color: '#e4d9c6' }, 'plaster'); M('nb2', { color: '#d3c2a6' }, 'plaster'); M('nb3', { color: '#efe8dc' }, 'plaster'); M('nbwin', { color: '#56646b', roughness: .2, metalness: .3, envMapIntensity: 1.2 });
+  M('lamp', { color: '#fff3d6', emissive: '#ffd08a', emissiveIntensity: night ? 6 : 2.2 }); M('nb1', { color: '#e9dfce' }, 'plaster'); M('nb2', { color: '#ddcfb8' }, 'plaster'); M('nb3', { color: '#f0e9dd' }, 'plaster'); M('nbwin', { color: '#56646b', roughness: .2, metalness: .3, envMapIntensity: 1.2 });
   mats.water = new THREE.MeshPhysicalMaterial({ map: tex.pool.map, color: '#bfeef2', roughness: .06, metalness: 0, ior: 1.33, envMapIntensity: 1.4, clearcoat: 1, clearcoatRoughness: .03 }); mats.water.name = 'site-water'; mats.water.userData.pd = false; disposables.push(mats.water);
   const add = (key, g) => { (bins[key] ||= []).push(g); };
   // صندوق بإحداثيات المسقط (x, y شمالًا) ← المشهد (X, Z = −y)
@@ -112,8 +112,8 @@ export function buildSite(THREE, { scene, S, plan, state, tier, night = false })
     const fl = Math.max(1, Math.round(h / 3.6)); for (let f = 0; f < fl; f++) for (const [sx, sy] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) { const n = 2 + (R() * 2 | 0), L = sx ? d : w; for (let i = 0; i < n; i++) { if (R() < .25) continue; const t = (i + .5) / n * L - L / 2, ww = 1 + R() * .8, y0 = f * 3.6 + 1.1, y1 = f * 3.6 + 2.6;
       if (sx) nbWins.push([x + sx * (w / 2 + .01), y + t, .04, ww, y0, y1]); else nbWins.push([x + t, y + sy * (d / 2 + .01), ww, .04, y0, y1]); } } };
   const bw = B.x1 - B.x0, bd = B.y1 - B.y0;
-  if (!has('w')) for (let i = 0; i < 2; i++) neighbor(P.x0 - 1.8 - (i + .5) * (W + 1) + .5, B.y0 + bd / 2 + (R() - .5) * 2, W - 5, bd + R() * 2, R() < .6 ? 8.4 : 4.9);
-  if (!has('e')) for (let i = 0; i < 2; i++) neighbor(P.x1 + 1.8 + (i + .5) * (W + 1) - .5, B.y0 + bd / 2 + (R() - .5) * 2, W - 5, bd + R() * 2, R() < .6 ? 8.4 : 4.9);
+  if (!has('w')) for (let i = 0; i < 2; i++) neighbor(P.x0 - 3.2 - (i + .5) * (W + 1) + .5, B.y0 + bd / 2 + 1 + R() * 2, W - 6, bd + R() * 2, i === 0 ? 4.9 : R() < .6 ? 8.4 : 4.9);
+  if (!has('e')) for (let i = 0; i < 2; i++) neighbor(P.x1 + 3.2 + (i + .5) * (W + 1) - .5, B.y0 + bd / 2 + 1 + R() * 2, W - 6, bd + R() * 2, i === 0 ? 4.9 : R() < .6 ? 8.4 : 4.9);
   if (!has('n')) for (let i = -1; i <= 1; i++) neighbor(cxp + i * (W + 1), P.y1 + 3 + bd / 2, W - 5, bd, R() < .6 ? 8.4 : 4.9);
   for (let i = -2; i <= 2; i++) neighbor(cxp + i * (W + 1) + (R() - .5) * 2, P.y0 - 14 - 3.5 - bd / 2, W - 5, bd, R() < .65 ? 8.4 : 4.9);
   for (const [x, y, w, d, y0, y1] of nbWins) box('nbwin', x - w / 2, x + w / 2, y - d / 2, y + d / 2, y0, y1);

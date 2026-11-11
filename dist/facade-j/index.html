@@ -131,6 +131,8 @@ async function variantMode() {
   const S = buildBuildingScene(THREE, built, lib, { grey: greyMats, geo, skin: q.get('skin') !== '0' });
   scene.add(S.group);
   let photo = null;
+  // فقدان سياق WebGL (ذاكرة رسوم غير كافية على الجهاز): يُعاد التحميل مرة بمستوى جودة أدنى بدل لوحة فارغة
+  if (PHOTO) canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); const next = { high: 'medium', medium: 'low' }[tier.name]; if (!next) return; const u = new URL(location.href); u.searchParams.set('q', next); u.searchParams.delete('samples'); location.replace(u.href); });
   if (PHOTO) photo = photoBegin(THREE, { scene, renderer, sun, S, q, Sky, tier, doc: docSite });
   else if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky });
   globalThis.__FLOORS = FI.n > 1 ? { levels: bandLevels(FI) } : undefined; // خطاف style-j.mjs للأشرطة عند كل بلاطة
@@ -190,11 +192,12 @@ async function variantMode() {
     renderer.shadowMap.autoUpdate = false;
     document.body.style.overflow = 'hidden'; Object.assign(stage.style, { padding: '0', position: 'fixed', inset: '0' }); canvas.style.maxWidth = 'none';
     const { enableNavigation } = await import('./facade-realism/nav.mjs');
-    nav = enableNavigation(THREE, { renderer, scene, camera, S, host: document.body, refiner, maxPixelRatio: photo ? tier.pr : 1.5 });
+    nav = enableNavigation(THREE, { renderer, scene, camera, S, host: document.body, refiner, maxPixelRatio: photo ? tier.pr : 1.5, heroSign: photo?.side === 'w' ? -1 : 1 });
   }
   if (photo) {
     await new Promise(r => setTimeout(r, 0)); // يُعرض الإطار الأول قبل بناء المحيط
     const fin = photoFinish(THREE, { scene, renderer, S, q, doc, FI, state: photo, styleId }); photoInfo = fin.info;
+    if (nav && photoInfo.cornerSide) nav.cornerSign = photoInfo.cornerSide === 'w' ? -1 : 1;
     refiner.render(); photoInfo.fullMs = Math.round(performance.now() - T0);
     if (nav) refiner.start(); else await refiner.settle();
     // لقطة عالية الجودة: دقة مضاعفة (حتى 3840 عرضًا) وعيّنات تراكم أكثر، ثم تعود اللوحة إلى حجمها
@@ -206,6 +209,7 @@ async function variantMode() {
       renderer.setPixelRatio(pr); renderer.setSize(sz.x, sz.y, false); refiner.render(); refiner.start(); return out; };
   }
   const gl = renderer.getContext();
+  if (q.get('dbg') === '1') window.__DBG = () => { const out = []; scene.traverse(o => { if (!o.isMesh) return; const n = o.material?.name || ''; if (n === 'glass' || n === 'interior' || o.userData?.role === 'glazing') { const b = new THREE.Box3().setFromObject(o); out.push([o.name, n, o.visible, o.renderOrder, +b.min.z.toFixed(3), +b.max.z.toFixed(3), +b.min.y.toFixed(2), o.userData?.side || ''].join(' ')); } }); return out.filter(s => / s$/.test(s) || !/ [new]$/.test(s)).slice(0, 40).join('\n'); };
   done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,
     // قياس لا ادعاء: أعلى منسوب لجدران المبنى المبني فعلًا، ومنه عدد الأدوار الظاهرة (يُقارن بأدوار المخطط في الاختبارات)
     wallTop: (() => { let y = 0; for (const m of S.meshes) { const r = m.userData?.role; if (r !== 'wall' && r !== 'cladding') continue; const b = new THREE.Box3().setFromObject(m); if (b.max.y > y) y = b.max.y; } return Math.round(y * 100) / 100; })() });

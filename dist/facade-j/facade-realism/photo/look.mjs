@@ -11,17 +11,17 @@ function skyMaterial(THREE, sunDir, sc, night, clouds) {
   const k = night ? .035 : 1;
   return new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, toneMapped: false,
     uniforms: { uSun: { value: sunDir.clone() }, uSunC: { value: new THREE.Vector3(sc[0], sc[1], sc[2]) }, uK: { value: k }, uClouds: { value: night ? 0 : clouds },
-      uZen: { value: new THREE.Color('#6ea2e0').convertSRGBToLinear() }, uHor: { value: new THREE.Color('#f3e7d3').convertSRGBToLinear() }, uGnd: { value: new THREE.Color('#9a8468').convertSRGBToLinear() } },
+      uZen: { value: new THREE.Color('#7fb2e6').convertSRGBToLinear() }, uHor: { value: new THREE.Color('#f3e7d3').convertSRGBToLinear() }, uGnd: { value: new THREE.Color('#9a8468').convertSRGBToLinear() } },
     vertexShader: 'varying vec3 vD; void main(){ vD = position; gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); }',
     fragmentShader: `varying vec3 vD; uniform vec3 uSun, uSunC, uZen, uHor, uGnd; uniform float uK, uClouds;
 float h21( vec2 p ){ return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
 float vn( vec2 p ){ vec2 i = floor( p ), f = fract( p ); f = f * f * ( 3.0 - 2.0 * f ); return mix( mix( h21( i ), h21( i + vec2( 1, 0 ) ), f.x ), mix( h21( i + vec2( 0, 1 ) ), h21( i + vec2( 1, 1 ) ), f.x ), f.y ); }
 float fbm( vec2 p ){ float s = 0.0, a = .5; for ( int i = 0; i < 5; i ++ ) { s += a * vn( p ); p = p * 2.03 + 7.1; a *= .5; } return s; }
 void main(){ vec3 d = normalize( vD ); float h = d.y, sd = max( dot( d, normalize( uSun ) ), 0.0 );
-  float tz = pow( smoothstep( -.02, .8, h ), .42 ); vec3 c = mix( uHor * 1.15, uZen * 1.05, tz );
+  float tz = pow( smoothstep( -.02, .8, h ), .42 ); vec3 c = mix( uHor * vec3( .98, 1.0, 1.06 ) * 1.1, uZen * 1.08, tz );
   float az = pow( max( dot( normalize( d.xz + 1e-5 ), normalize( uSun.xz ) ), 0.0 ), 2.0 );
-  c = mix( c, vec3( 1.0, .84, .62 ) * 1.5, exp( - max( h, 0.0 ) * 6.0 ) * ( .25 + .6 * az ) );
-  c += uSunC * ( pow( sd, 8.0 ) * .5 + pow( sd, 64.0 ) * 1.6 + pow( sd, 700.0 ) * 9.0 );
+  c = mix( c, vec3( 1.0, .84, .62 ) * 1.5, exp( - max( h, 0.0 ) * 9.0 ) * ( .2 + .6 * az ) );
+  c += uSunC * ( pow( sd, 20.0 ) * .22 + pow( sd, 90.0 ) * 1.4 + pow( sd, 700.0 ) * 9.0 );
   if ( uClouds > 0.0 && h > .01 ) { vec2 p = d.xz / ( h + .18 ) * vec2( 1.0, 3.2 ); float f = fbm( p * 2.1 + fbm( p * .9 ) * 1.2 ); float m = smoothstep( .56, .8, f ) * smoothstep( .03, .3, h ) * uClouds; c = mix( c, ( vec3( 1.0, .95, .88 ) * 1.2 + uSunC * pow( sd, 3.0 ) * .8 ), m ); }
   c = mix( uGnd * .55, c, smoothstep( -.06, .0, h ) ); gl_FragColor = vec4( c * uK, 1.0 ); }` });
 }
@@ -49,7 +49,7 @@ export function photoLook(THREE, { scene, renderer, sun, S, q, Sky, tier }) {
   scene.fog = new THREE.FogExp2(night ? '#0c0e14' : '#ecd9bd', night ? .004 : Number(q.get('fog') ?? .0052));
   // الشمس + ضوء سماء/ارتداد أرض (نصف كرة). ضوء البيئة (IBL) يُخفَّض على الخامات الخشنة ليأتي أغلب المحيط من مصدر يمكن تظليله عند التحسين التراكمي.
   let hemi = null; scene.traverse(o => { if (o.isHemisphereLight) hemi = o; }); if (!hemi) { hemi = new THREE.HemisphereLight(); scene.add(hemi); }
-  hemi.color.set(night ? '#27314a' : '#dfe3ea'); hemi.groundColor.set(night ? '#1a1612' : '#cfa57a'); hemi.intensity = Number(q.get('hemi') ?? (night ? .5 : .7));
+  hemi.color.set(night ? '#27314a' : '#dfe3ea'); hemi.groundColor.set(night ? '#1a1612' : '#d9b48c'); hemi.intensity = Number(q.get('hemi') ?? (night ? .5 : .9));
   sun.color.setRGB(sc[0], sc[1], sc[2]); sun.intensity = Number(q.get('sun') ?? (night ? .06 : 5.4));
   const state = { az, el, dir, night, hemi, sun, env, envRough: Number(q.get('envi') ?? .3), tier, bounds: null, disposables: [crt, env] };
   fitSun(THREE, state, buildingBox(THREE, S), 4);
@@ -57,6 +57,8 @@ export function photoLook(THREE, { scene, renderer, sun, S, q, Sky, tier }) {
   const glass = glassMaterial(THREE, { night }); state.glass = glass;
   const room = roomTexture(THREE, tier, night);
   const interior = new THREE.MeshStandardMaterial({ map: room, roughness: 1, color: '#ffffff', emissive: '#ffe0b4', emissiveMap: room, emissiveIntensity: Number(q.get('glow') ?? (night ? 2.6 : 1.5)), envMapIntensity: 0 }); interior.name = 'interior'; state.interior = interior;
+  // إحداثيات خامة الداخل من موضع العالم (لا من UV القطعة): نوافذ الطرز المضافة كصناديق تأخذ جزءًا صحيحًا ومختلفًا من مشهد الغرف
+  interior.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <uv_vertex>', '#include <uv_vertex>\n{ vec3 rW = ( modelMatrix * vec4( position, 1.0 ) ).xyz; vec2 rU = vec2( ( rW.x + rW.z ) / 4.8, rW.y / 3.2 );\n#ifdef USE_MAP\n vMapUv = rU;\n#endif\n#ifdef USE_EMISSIVEMAP\n vEmissiveMapUv = rU;\n#endif\n}'); }; interior.customProgramCacheKey = () => 'photo-room';
   const door = doorMaterial(THREE, renderer), jointMat = new THREE.MeshStandardMaterial({ color: '#8d8474', roughness: .98 }); jointMat.name = 'joint';
   const stoneFace = new Map();
   for (const m of S.meshes) { const n = m.material?.name || '';
@@ -105,7 +107,7 @@ function roomTexture(THREE, tier, night) {
     if (lit && r() > .4) { x.fillStyle = 'rgba(255,232,190,.95)'; x.fillRect(fx + fw * .4, H * .52, fw * .14, H * .1); } // أباجورة
     const cw = w * (.14 + r() * .12); for (let i = 0; i < cw; i++) { const f = .5 + .5 * Math.sin(i / cw * 22 + k), v = .26 + .22 * f; x.fillStyle = `rgba(${225 * v | 0},${208 * v | 0},${180 * v | 0},.94)`; x.fillRect(x0 + i, 0, 1, H); } // ستارة بطيات
   }
-  const t = canvasTex(THREE, c, { tile: 1, aniso: 2 }); t.repeat.set(1 / 4.8, 1 / 3.2); return t;
+  const t = canvasTex(THREE, c, { tile: 1, aniso: 2 }); return t;
 }
 
 // ---------------------------------------------------------------- تفصيل الخامات بمقياس العالم (إسقاط ثلاثي)

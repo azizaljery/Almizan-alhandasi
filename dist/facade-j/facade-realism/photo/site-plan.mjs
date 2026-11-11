@@ -99,6 +99,6 @@ export function planSite(doc, opt = {}) {
   for (const [x, y] of [[P.x0 + 2.6 + R() * 2, B.y1 + 3 + R() * 2], [P.x1 - 2.6 - R() * 2, B.y1 + 4 + R() * 3]]) if (free(x, y, 1.2)) put('olive', x, y, { h: 3.4 + R(), r: 1.5 + R() * .4 });
   // نخيل وأشجار الشارع والجوار (خارج الأرض): تملأ الأفق وتنعكس في الزجاج
   for (let i = -2; i <= 2; i++) { const x = cx + i * (W * .62 + 3) + (R() - .5) * 3; put(R() < .7 ? 'palm' : 'olive', x, P.y0 - 14.6 - R() * 1.5, { h: 6 + R() * 3, r: 1.8, outside: true }); }
-  for (const sd of [-1, 1]) { put('palm', cx + sd * (W / 2 + 5 + R() * 4), P.y0 + 6 + R() * 6, { h: 6.5 + R() * 2.5, outside: true }); put('olive', cx + sd * (W / 2 + 3.5 + R() * 2), P.y0 + 1.2, { h: 3.2 + R(), r: 1.4, outside: true }); }
+  for (const sd of [-1, 1]) { put('palm', cx + sd * (W / 2 + 6 + R() * 5), P.y0 + 13 + R() * 8, { h: 6.5 + R() * 2.5, outside: true }); put('olive', cx + sd * (W / 2 + 3.5 + R() * 2), P.y0 + 1.2, { h: 3.2 + R(), r: 1.4, outside: true }); }
   return { plot: P, B, streets, wall, gates, frontSegs, pillars, landings, beds, fixtures, paving, plants, seed, style, camSide: main && (main.x0 + main.x1) / 2 < (B.x0 + B.x1) / 2 ? 'w' : 'e', frontDepth: dF };
 }

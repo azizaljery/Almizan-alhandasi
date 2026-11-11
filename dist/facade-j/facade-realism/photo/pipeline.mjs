@@ -44,13 +44,13 @@ export function addRoof(THREE, scene, doc, FI) {
   if (!rects.length) return null; let U; try { U = clip.union(...rects); } catch { return null; } if (!U.length) return null;
   const area = r => Math.abs(r.reduce((s, p, i) => { const n = r[(i + 1) % r.length]; return s + p[0] * n[1] - n[0] * p[1]; }, 0) / 2), ring = U.slice().sort((a, b) => area(b[0]) - area(a[0]))[0][0];
   const g = new THREE.ExtrudeGeometry(new THREE.Shape(ring.slice(0, -1).map(([x, y]) => new THREE.Vector2(x, y))), { depth: .25, bevelEnabled: false }); g.rotateX(-Math.PI / 2); g.translate(0, FI.parapetBase - .32, 0);
-  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#cfc6b6', roughness: .95 })); m.material.name = 'roof-screed-concrete'; m.name = 'roof-slab'; m.castShadow = m.receiveShadow = true; scene.add(m); return m;
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#d9cbb2', roughness: .95 })); m.material.name = 'roof-screed-concrete'; m.name = 'roof-slab'; m.castShadow = m.receiveShadow = true; scene.add(m); return m;
 }
 
 /** بيئة انعكاس الزجاج من المحيط نفسه (شارع، نخيل، سماء): كاميرا مكعبة أمام الواجهة ثم PMREM. */
 function captureGlassEnv(THREE, { renderer, scene, state, bb, tier }) {
   if (!tier.envCube || !state.glass) return null;
-  const crt = new THREE.WebGLCubeRenderTarget(tier.envCube, { type: THREE.HalfFloatType, generateMipmaps: false }), cc = new THREE.CubeCamera(.3, 400, crt);
+  const crt = new THREE.WebGLCubeRenderTarget(tier.envCube, { type: THREE.UnsignedByteType, generateMipmaps: false }) /* 8 بت خطي: يقصّ اللمعات اللانهائية للمعادن المصقولة التي كانت تُفسد البيئة كلها (NaN) بعد التمويه */, cc = new THREE.CubeCamera(.3, 400, crt);
   cc.position.set((bb.min.x + bb.max.x) / 2, Math.min(3.2, bb.max.y * .45), bb.max.z + 1.6); const fog = scene.fog; scene.fog = null; const vis = state.glass.visible; state.glass.visible = false;
   cc.update(renderer, scene); scene.fog = fog; state.glass.visible = vis;
   const pm = new THREE.PMREMGenerator(renderer), env = pm.fromCubemap(crt.texture).texture; pm.dispose(); crt.dispose();
@@ -66,7 +66,7 @@ export function photoFinish(THREE, { scene, renderer, S, q, doc, FI, state, styl
   if (q.get('roof') !== '0') addRoof(THREE, scene, doc, FI);
   let site = null;
   if (q.get('site') !== '0') { const plan = planSite(doc, { doors: fi.doors, windows: fi.windows, B: fi.B, style: styleId || 'M', seed: designHash(doc), density: tier.plants });
-    if (plan) { const g = S.meshes.find(m => m.name === 'ground'); if (g) g.visible = false; site = buildSite(THREE, { scene, S, plan, state, tier, night: state.night }); info.plants = site.plants; info.site = { gates: Object.keys(plan.gates), fixtures: plan.fixtures.map(f => f.kind), streets: plan.streets }; } }
+    if (plan) { const g = S.meshes.find(m => m.name === 'ground'); if (g) g.visible = false; site = buildSite(THREE, { scene, S, plan, state, tier, night: state.night }); info.plants = site.plants; info.cornerSide = plan.gates.car ? plan.gates.car.side : plan.camSide; info.site = { gates: Object.keys(plan.gates), fixtures: plan.fixtures.map(f => f.kind), streets: plan.streets }; } }
   info.detailMaterials = upgradeMaterials(THREE, scene, state);
   const bb = buildingBox(THREE, S); fitSun(THREE, state, site ? site.bounds.clone().union(bb) : bb, 1.5); renderer.shadowMap.needsUpdate = true;
   if (site) captureGlassEnv(THREE, { renderer, scene, state, bb, tier });

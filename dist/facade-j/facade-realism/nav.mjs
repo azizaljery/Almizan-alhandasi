@@ -17,7 +17,7 @@ export function buildingBounds(THREE, S) {
   return bb;
 }
 
-export function enableNavigation(THREE, { renderer, scene, camera, S, host, initial = null, refiner = null, maxPixelRatio = 1.5 }) {
+export function enableNavigation(THREE, { renderer, scene, camera, S, host, initial = null, refiner = null, maxPixelRatio = 1.5, heroSign = 1 }) {
   const canvas = renderer.domElement, bb = buildingBounds(THREE, S), EL_MIN = refiner ? -40 * DEG : 2 * DEG; // مع إزاحة العدسة يجوز أن تكون نقطة النظر أعلى من العين (كاميرا الشارع)
   const center = bb.getCenter(new THREE.Vector3()), size = bb.getSize(new THREE.Vector3());
   const span = Math.max(size.x, size.z, size.y * 1.6, 8);
@@ -41,6 +41,8 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
   function orbitPose(o) {
     const p = new THREE.Vector3(o.target.x + o.dist * Math.cos(o.el) * Math.sin(o.az), o.target.y + o.dist * Math.sin(o.el), o.target.z + o.dist * Math.cos(o.el) * Math.cos(o.az));
     if (p.y < .4) p.y = .4;
+    // لا تدخل الكاميرا جوف المبنى عند التكبير: تُدفع للخارج على خط النظر نفسه
+    if (refiner) { const d = p.clone().sub(o.target); for (let k = 0; k < 60 && p.x > bb.min.x - .6 && p.x < bb.max.x + .6 && p.z > bb.min.z - .6 && p.z < bb.max.z + .6 && p.y < bb.max.y + .6; k++) p.addScaledVector(d, .06); }
     return { pos: p, look: o.target.clone() };
   }
   function walkPose() {
@@ -166,7 +168,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     const t = new THREE.Vector3(center.x, size.y * .45, center.z), d = span * 1.35;
     const V = {
       front: { az: 0, el: 6 * DEG, dist: d, target: t },
-      corner: { az: -38 * DEG, el: 18 * DEG, dist: d * 1.05, target: t },
+      corner: refiner ? { az: api.cornerSign * 42 * DEG, el: 15 * DEG, dist: d * 1.3, target: t } : { az: -38 * DEG, el: 18 * DEG, dist: d * 1.05, target: t }, // مع المحيط: من جهة بوابة السيارات (لا نخلة أمامية تحجب)
       side: { az: -90 * DEG, el: 8 * DEG, dist: d, target: t },
       back: { az: 180 * DEG, el: 10 * DEG, dist: d, target: t },
       top: refiner ? { az: -18 * DEG, el: 58 * DEG, dist: d * 2.1, target: new THREE.Vector3(center.x, 0, center.z + size.z * .15) } : { az: 0, el: 80 * DEG, dist: d * 1.2, target: new THREE.Vector3(center.x, 0, center.z) },
@@ -210,7 +212,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
   }
   addEventListener('resize', resize); resize();
   apply(orbitPose(orbit)); render();
-  const api = { setMode, view, get mode() { return mode; }, get orbit() { return { ...orbit, target: orbit.target.clone() }; }, get camera() { return camera; }, ui };
+  const api = { cornerSign: -heroSign, setMode, view, get mode() { return mode; }, get orbit() { return { ...orbit, target: orbit.target.clone() }; }, get camera() { return camera; }, ui };
   globalThis.__facadeNav = api;
   return api;
 }
