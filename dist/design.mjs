@@ -159,7 +159,7 @@ function decisionReply(r) {
     el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), `نفّذت قرارك «${r.decision}» وأعدت التصميم حوله.${r.left ? ' البيان المحدَّث أسفل المواصفات.' : ' التصميم الآن يطابق طلبك؛ لم يبقَ في البيان شيء.'}`)),
     r.back?.length ? el('div', {}, el('p', { class: 'sub' }, 'عاد إلى التصميم:'), el('ul', { class: 'tick' }, r.back.map(t => li('good', t)))) : null,
     r.undone?.length ? el('p', { class: 'sub' }, `قرارك هذا يتعارض مع تثبيتك السابق لـ${r.undone.map(t => '«' + t + '»').join(' و')} على هذه الأرض؛ قدّمتُ قرارك الأحدث وتراجعت عن ذاك التثبيت.`) : null,
-    r.cost?.length ? el('div', {}, el('p', { class: 'sub' }, 'وتغيّر في المقابل:'), el('ul', { class: 'tick' }, r.cost.map(t => li('no', t)))) : null,
+    r.cost?.length ? el('div', {}, el('p', { class: 'sub' }, 'وتغيّر معه في البيان:'), el('ul', { class: 'tick' }, r.cost.map(t => li('no', t)))) : null,
     r.failed?.length ? el('ul', { class: 'tick' }, r.failed.map(x => li('bad', x.text, x.why))) : null);
 }
 

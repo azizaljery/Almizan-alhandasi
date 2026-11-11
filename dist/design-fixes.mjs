@@ -139,7 +139,7 @@ export async function applyFitDecision(session, id, { generate = generateInitial
   s.current = s.designs.length - 1;
   const after = statementOf(s, out.doc), had = new Set(before.items.map(i => i.id)), has = new Set(after.items.map(i => i.id));
   // ما عاد (خرج من البيان)، وما دخل البيان مقابله، وما تغيّر رقمه — كله مقيس من المخططين
-  const back = before.items.filter(i => !has.has(i.id)).map(i => i.what);
+  const back = before.items.filter(i => !has.has(i.id)).map(i => (i.kind === 'shrink' ? `مقاس «${i.what}»` : i.what));
   const cost = after.items.filter(i => !had.has(i.id) || before.items.find(b => b.id === i.id)?.to !== i.to).map(i => i.text);
   const reply = { decision: label, back, cost, undone: undone.map(k => KEY_LABEL[k] || k), left: after.items.length, done: [label], failed: [], picks: [], unclear: [], unsupported: [], unchanged: false, different: true, otherFails: [] };
   s.designs[s.current].feedback = { picks: [], text: '', changes: ['قرارك: ' + label], reply };

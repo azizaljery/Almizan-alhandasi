@@ -24,7 +24,7 @@ export const KEY_LABEL = Object.freeze({
   shrink: 'مقاسات الغرف', 'size:hall': 'مقاس الصالة', 'size:kitchen': 'مقاس المطبخ', 'size:dining': 'مقاس غرفة الطعام', 'size:bedroom': 'مقاس غرف النوم', 'size:master': 'مقاس الغرفة الرئيسية', 'size:majlis': 'مقاس المجلس',
   floors: 'عدد الأدوار', baths: 'دورات المياه', elevator: 'المصعد',
 });
-const SOURCE_OF = { kitchen_prep: ['kitchen_prep'], hall2: ['hall'], dining: ['dining'], majlis_w: ['majlis_women'], majlis: ['majlis_men', 'majlis'], office: ['office'], prayer: ['prayer'], storage: ['storage'], laundry: ['laundry'], driver: ['driver'], guestRoom: ['guest_room'], maid: ['maid'], ensuite: ['bath_suite'] };
+const SOURCE_OF = { kitchen_prep: ['kitchen_prep'], hall2: ['hall'], dining: ['dining'], majlis_w: ['majlis_women'], majlis: ['majlis_men', 'majlis'], office: ['office'], prayer: ['prayer'], storage: ['storage'], laundry: ['laundry'], driver: ['driver'], guestRoom: ['guest_room'], maid: ['maid'], ensuite: ['bath_suite'], bedrooms: ['bedroom', 'bedroom_boys', 'bedroom_girls', 'master', 'elderly_room'] };
 /** هل طلب العميل هذا البند صراحة؟ requirements.sources (من جدول شرعاء: said/edit = صريح، custom/family = افتراض). بلا مصادر: يُعدّ صريحًا. */
 export function isAsked(req, key) {
   if (/^size:/.test(key)) return true; // المقاس لا يدخل الطلب إلا إن قاله العميل
