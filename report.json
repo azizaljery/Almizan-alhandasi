@@ -1,0 +1,102 @@
+{
+  "site": "https://almizan-handasi.aljeryabod.workers.dev",
+  "at": "2026-11-11T15:17:22.163Z",
+  "sample": {
+    "file": "photo-sample.jpg",
+    "width": 1280,
+    "height": 1011
+  },
+  "description": {
+    "style": "C",
+    "floors": 1,
+    "lighting": "golden",
+    "view": "facade"
+  },
+  "status": {
+    "http": 200,
+    "configured": true,
+    "verified": false,
+    "tiers": [
+      "standard",
+      "premium"
+    ],
+    "models": {
+      "standard": "@cf/black-forest-labs/flux-2-klein-9b",
+      "premium": "@cf/black-forest-labs/flux-2-dev"
+    },
+    "dailyCap": 40,
+    "remainingToday": 37,
+    "counter": "d1",
+    "limits": {
+      "perMinute": 3,
+      "perDayPerClient": 20,
+      "maxImageBytes": 1200000,
+      "maxSide": 1536,
+      "outSide": {
+        "standard": 1536,
+        "premium": 2048
+      }
+    },
+    "steps": {
+      "standard": null,
+      "premium": 28
+    },
+    "message": "الخدمة مهيأة؛ هذه الحالة لا تختبر النموذج نفسه. يلزم توليد ناجح للتحقق."
+  },
+  "results": [
+    {
+      "name": "photo-01-premium-golden",
+      "tier": "premium",
+      "lighting": "golden",
+      "ok": true,
+      "ms": 22306,
+      "serverMs": 21776,
+      "model": "@cf/black-forest-labs/flux-2-dev",
+      "steps": 28,
+      "attempts": 1,
+      "seed": 2028271292,
+      "width": 2048,
+      "height": 1616,
+      "file": "photo-01-premium-golden.jpg",
+      "fidelity": null,
+      "remainingToday": 36,
+      "counter": "d1"
+    },
+    {
+      "name": "photo-02-premium-day",
+      "tier": "premium",
+      "lighting": "day",
+      "ok": true,
+      "ms": 21835,
+      "serverMs": 21426,
+      "model": "@cf/black-forest-labs/flux-2-dev",
+      "steps": 28,
+      "attempts": 1,
+      "seed": 4211949193,
+      "width": 2048,
+      "height": 1616,
+      "file": "photo-02-premium-day.jpg",
+      "fidelity": null,
+      "remainingToday": 35,
+      "counter": "d1"
+    },
+    {
+      "name": "photo-03-standard-golden",
+      "tier": "standard",
+      "lighting": "golden",
+      "ok": true,
+      "ms": 3488,
+      "serverMs": 3076,
+      "model": "@cf/black-forest-labs/flux-2-klein-9b",
+      "steps": null,
+      "attempts": 1,
+      "seed": 3267555520,
+      "width": 1536,
+      "height": 1216,
+      "file": "photo-03-standard-golden.jpg",
+      "fidelity": null,
+      "remainingToday": 34,
+      "counter": "d1"
+    }
+  ]
+}
