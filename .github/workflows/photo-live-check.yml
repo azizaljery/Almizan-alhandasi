@@ -3,6 +3,9 @@ name: Photo Live Check (manual)
 # فحص يدوي حي لميزة «صورة معمارية احترافية» على الموقع المنشور. يستدعي النموذج الحقيقي فعلًا،
 # فكل تشغيل يستهلك رصيد Workers AI (صورة واحدة لكل مستوى). لا يعمل تلقائيًا أبدًا.
 on:
+  # الدفع إلى الفرع photo-live-check يشغّل الفحص أيضًا (بديل عن الزر اليدوي حين لا يكون الملف على الفرع الافتراضي)
+  push:
+    branches: [photo-live-check]
   workflow_dispatch:
     inputs:
       site_url:
@@ -38,9 +41,9 @@ jobs:
       - name: Generate one professional photo on the live site
         run: node scripts/photo-live-check.mjs
         env:
-          SITE_URL: ${{ inputs.site_url }}
-          TIER: ${{ inputs.tier }}
-          LIGHTING: ${{ inputs.lighting }}
+          SITE_URL: ${{ inputs.site_url || 'https://almizan-handasi.aljeryabod.workers.dev' }}
+          TIER: ${{ inputs.tier || 'both' }}
+          LIGHTING: ${{ inputs.lighting || 'golden' }}
           OUT: photo-live-out
       - name: Upload the generated photo and report
         if: always()
