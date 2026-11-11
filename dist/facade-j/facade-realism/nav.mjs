@@ -17,8 +17,8 @@ export function buildingBounds(THREE, S) {
   return bb;
 }
 
-export function enableNavigation(THREE, { renderer, scene, camera, S, host, initial = null }) {
-  const canvas = renderer.domElement, bb = buildingBounds(THREE, S);
+export function enableNavigation(THREE, { renderer, scene, camera, S, host, initial = null, refiner = null, maxPixelRatio = 1.5 }) {
+  const canvas = renderer.domElement, bb = buildingBounds(THREE, S), EL_MIN = refiner ? -40 * DEG : 2 * DEG; // مع إزاحة العدسة يجوز أن تكون نقطة النظر أعلى من العين (كاميرا الشارع)
   const center = bb.getCenter(new THREE.Vector3()), size = bb.getSize(new THREE.Vector3());
   const span = Math.max(size.x, size.z, size.y * 1.6, 8);
   const orbit = { az: 0, el: 20 * DEG, dist: span * 1.5, target: new THREE.Vector3(center.x, size.y * .45, center.z), minDist: 3, maxDist: span * 5 };
@@ -33,7 +33,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     if (dir.y < -.05) hit.copy(cam.position).addScaledVector(dir, t); else hit.copy(cam.position).addScaledVector(dir, cam.position.distanceTo(center));
     hit.y = clamp(hit.y, 0, size.y); orbit.target.copy(hit);
     const off = cam.position.clone().sub(orbit.target); orbit.dist = clamp(off.length(), orbit.minDist, orbit.maxDist);
-    orbit.az = Math.atan2(off.x, off.z); orbit.el = clamp(Math.asin(off.y / orbit.dist), 2 * DEG, 89 * DEG);
+    orbit.az = Math.atan2(off.x, off.z); orbit.el = clamp(Math.asin(off.y / orbit.dist), EL_MIN, 89 * DEG);
   }
   fromCamera(camera);
   const home = { az: orbit.az, el: orbit.el, dist: orbit.dist, target: orbit.target.clone() };
@@ -47,20 +47,31 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     const d = new THREE.Vector3(Math.sin(walk.yaw) * Math.cos(walk.pitch), Math.sin(walk.pitch), -Math.cos(walk.yaw) * Math.cos(walk.pitch));
     return { pos: walk.pos.clone(), look: walk.pos.clone().add(d) };
   }
-  function apply(p) { camera.position.copy(p.pos); camera.lookAt(p.look); }
-  const render = () => renderer.render(scene, camera);
+  // «إزاحة العدسة»: قرب مستوى العين يبقى النظر أفقيًا ويُزاح الإسقاط رأسيًا بدل إمالة الكاميرا، فتبقى الخطوط الرأسية مستقيمة (تصوير معماري)؛
+  // مع زيادة الميل (فوق ~18°) تعود الإمالة العادية تدريجيًا حتى اللقطة العلوية.
+  let lastPose = null;
+  function apply(p) {
+    camera.position.copy(p.pos); lastPose = { pos: p.pos.clone(), look: p.look.clone() };
+    if (!refiner || mode === 'walk') { if (refiner) refiner.lens.shift = 0; camera.lookAt(p.look); return; }
+    const dx = p.look.x - p.pos.x, dy = p.look.y - p.pos.y, dz = p.look.z - p.pos.z, hl = Math.hypot(dx, dz) || 1e-6, pitch = Math.atan2(dy, hl), a = Math.abs(pitch);
+    const t = clamp((a - 18 * DEG) / (16 * DEG), 0, 1), w = 1 - t * t * (3 - 2 * t), keep = pitch * (1 - w);
+    camera.lookAt(p.pos.x + dx, p.pos.y + Math.tan(keep) * hl, p.pos.z + dz); refiner.lens.shift = Math.tan(pitch * w) / Math.tan(camera.fov * DEG / 2) / Math.max(.2, Math.cos(keep));
+  }
+  let slow = 0, pr = 0;
+  const render = () => { if (refiner) refiner.render(); else renderer.render(scene, camera); };
+  // قياس زمن الإطار أثناء الحركة: إن ظل فوق ~55 مللي ثانية تُخفَّض دقة العرض تدريجيًا (حتى 0.75) ليبقى التنقل سلسًا على الأجهزة الضعيفة
+  function noteFrame(ms) { if (!refiner || !pr) return; slow = ms > 55 ? slow + 1 : Math.max(0, slow - 1); if (slow >= 10 && pr > .75) { pr = Math.max(.75, pr * .8); slow = 0; api.degraded = pr; resize(); } }
   const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
 
   function tick(now) {
     // التجوّل بزمن حقيقي (حتى ¼ ثانية للإطار) فتبقى المسافة متوقعة على الأجهزة البطيئة؛ الدوران والتكبير بتنعيم أقصر
-    raf = 0; const raw = lastT ? (now - lastT) / 1000 : .016, dt = clamp(raw, 0, .08), dtw = clamp(raw, 0, .25); lastT = now; let active = false;
+    raf = 0; if (lastT) noteFrame(now - lastT); const raw = lastT ? (now - lastT) / 1000 : .016, dt = clamp(raw, 0, .08), dtw = clamp(raw, 0, .25); lastT = now; let active = false;
     if (tween) {
       const k = clamp((performance.now() - tween.t0) / tween.ms, 0, 1), e = ease(k);
-      camera.position.lerpVectors(tween.from.pos, tween.to.pos, e);
-      const look = tween.from.look.clone().lerp(tween.to.look, e); camera.lookAt(look);
+      apply({ pos: new THREE.Vector3().lerpVectors(tween.from.pos, tween.to.pos, e), look: tween.from.look.clone().lerp(tween.to.look, e) });
       if (k >= 1) { tween = null; if (mode === 'orbit') apply(orbitPose(orbit)); } else active = true;
     } else if (mode === 'orbit') {
-      if (inertia) { const g = goalOrbit(); g.az += inertia.vAz * dt; g.el = clamp(g.el + inertia.vEl * dt, 2 * DEG, 89 * DEG); const f = Math.exp(-dt * 4); inertia.vAz *= f; inertia.vEl *= f; if (Math.hypot(inertia.vAz, inertia.vEl) < .02) inertia = null; else active = true; }
+      if (inertia) { const g = goalOrbit(); g.az += inertia.vAz * dt; g.el = clamp(g.el + inertia.vEl * dt, EL_MIN, 89 * DEG); const f = Math.exp(-dt * 4); inertia.vAz *= f; inertia.vEl *= f; if (Math.hypot(inertia.vAz, inertia.vEl) < .02) inertia = null; else active = true; }
       if (goal) {
         const a = 1 - Math.exp(-dt * 14);
         orbit.az += (goal.az - orbit.az) * a; orbit.el += (goal.el - orbit.el) * a; orbit.dist += (goal.dist - orbit.dist) * a; orbit.target.lerp(goal.target, a);
@@ -74,7 +85,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
       apply(walkPose());
     }
     render();
-    if (active) kick(); else lastT = 0;
+    if (active) kick(); else { lastT = 0; refiner?.start(); }
   }
   function goalOrbit() { if (!goal) goal = { az: orbit.az, el: orbit.el, dist: orbit.dist, target: orbit.target.clone() }; return goal; }
   function step(fwd, side) {
@@ -83,7 +94,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     walk.pos.z = clamp(walk.pos.z + fz * fwd + rz * side, bb.min.z - 40, bb.max.z + 40);
     walk.pos.y = walk.eye;
   }
-  function moveTo(to, ms = 650) { tween = { from: { pos: camera.position.clone(), look: camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3())) }, to, t0: performance.now(), ms }; kick(); }
+  function moveTo(to, ms = 650) { const cur = lastPose; tween = { from: cur || { pos: camera.position.clone(), look: camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3())) }, to, t0: performance.now(), ms }; kick(); }
 
   // ---------------------------------------------------------------- أحداث الإدخال
   canvas.style.touchAction = 'none'; canvas.tabIndex = 0;
@@ -106,7 +117,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     if (p.button === 2 || p.button === 1 || p.shift) { pan(dx, dy); return; }
     const w = Math.max(600, canvas.clientWidth || 800), h = Math.max(400, canvas.clientHeight || 600), k = p.type === 'touch' ? .85 : 1;
     const dAz = -dx * 4.36 / w * k, dEl = dy * 2.1 / h * k, g = goalOrbit();
-    g.az += dAz; g.el = clamp(g.el + dEl, 2 * DEG, 89 * DEG);
+    g.az += dAz; g.el = clamp(g.el + dEl, EL_MIN, 89 * DEG);
     const t = performance.now(); samples.push({ t, dAz, dEl }); while (samples.length && t - samples[0].t > 90) samples.shift();
     kick();
   });
@@ -158,7 +169,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
       corner: { az: -38 * DEG, el: 18 * DEG, dist: d * 1.05, target: t },
       side: { az: -90 * DEG, el: 8 * DEG, dist: d, target: t },
       back: { az: 180 * DEG, el: 10 * DEG, dist: d, target: t },
-      top: { az: 0, el: 80 * DEG, dist: d * 1.2, target: new THREE.Vector3(center.x, 0, center.z) },
+      top: refiner ? { az: -18 * DEG, el: 58 * DEG, dist: d * 2.1, target: new THREE.Vector3(center.x, 0, center.z + size.z * .15) } : { az: 0, el: 80 * DEG, dist: d * 1.2, target: new THREE.Vector3(center.x, 0, center.z) },
       home,
     }[name];
     Object.assign(orbit, { az: V.az, el: V.el, dist: V.dist }); orbit.target.copy(V.target);
@@ -193,7 +204,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
   // ---------------------------------------------------------------- الحجم: يملأ الإطار ويتبعه
   function resize() {
     const w = Math.max(1, innerWidth), h = Math.max(1, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); renderer.setSize(w, h, false);
+    if (!pr) pr = Math.min(devicePixelRatio || 1, maxPixelRatio); renderer.setPixelRatio(pr); renderer.setSize(w, h, false);
     canvas.style.width = '100%'; canvas.style.height = '100%';
     camera.aspect = w / h; camera.updateProjectionMatrix(); kick();
   }

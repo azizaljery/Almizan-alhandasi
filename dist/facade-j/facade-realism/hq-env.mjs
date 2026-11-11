@@ -83,14 +83,14 @@ function curtainTexture(THREE, renderer) { const W = 1024, H = 64, [c, x] = cnvW
   x.putImageData(img, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / 2.4, 1); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; }
 function skyTexture(THREE) { const [c, x] = cnv(512); const g = x.createLinearGradient(0, 0, 0, 512); g.addColorStop(0, '#5f95c4'); g.addColorStop(.55, '#a9c9e2'); g.addColorStop(.8, '#dfe6e6'); g.addColorStop(1, '#ece6da'); x.fillStyle = g; x.fillRect(0, 0, 512, 512); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
 /** تفاوت لوني طفيف لكل بلاطة (±4%) كحجر طبيعي من محجر واحد — لون رأسي لكل مثلثات البلاطة نفسها. */
-function tintBlocks(THREE, m) { const g = m.geometry, pos = g.attributes.position, n = pos.count, col = new Float32Array(n * 3), r = rnd(3); let k = 0;
+export function tintBlocks(THREE, m) { const g = m.geometry, pos = g.attributes.position, n = pos.count, col = new Float32Array(n * 3), r = rnd(3); let k = 0;
   // ExtrudeGeometry لكل بلاطة دُمجت متتالية: نقسم بالتقارب المكاني (مفتاح شبكي 0.6×0.3)
   const v = new THREE.Vector3(), key = new Map();
   for (let i = 0; i < n; i += 3) { v.fromBufferAttribute(pos, i); const kk = Math.round(v.x / .6 * 2) + ':' + Math.round(v.y / .3 * 2) + ':' + Math.round(v.z / .6 * 2); let t = key.get(kk); if (t === undefined) { t = .96 + r() * .08; key.set(kk, t); } const w = t, ww = t * (0.99 + r() * .0);
     for (let j = 0; j < 3; j++) { col[(i + j) * 3] = w; col[(i + j) * 3 + 1] = ww * .995; col[(i + j) * 3 + 2] = ww * .985; } }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3)); }
 /** باب مصمت بإطار وألواح غائرة ومقبض (خامة مرسومة بمقياس الباب نفسه + خريطة نتوء) — لا يغيّر فتحة الباب. */
-function doorMaterial(THREE, renderer) { const W = 512, H = 1024, [c, x] = cnvWH(W, H), [b, y] = cnvWH(W, H);
+export function doorMaterial(THREE, renderer) { const W = 512, H = 1024, [c, x] = cnvWH(W, H), [b, y] = cnvWH(W, H);
   x.fillStyle = '#3a2f26'; x.fillRect(0, 0, W, H); for (let i = 0; i < 260; i++) { x.strokeStyle = `rgba(${20 + Math.random() * 30},${14 + Math.random() * 20},10,.25)`; x.beginPath(); const X = Math.random() * W; x.moveTo(X, 0); x.bezierCurveTo(X + 8, H / 3, X - 8, 2 * H / 3, X + 4, H); x.stroke(); }
   y.fillStyle = '#808080'; y.fillRect(0, 0, W, H);
   const panel = (X, Y, w, h) => { x.strokeStyle = 'rgba(0,0,0,.55)'; x.lineWidth = 6; x.strokeRect(X, Y, w, h); x.strokeStyle = 'rgba(255,220,180,.12)'; x.lineWidth = 2; x.strokeRect(X + 5, Y + 5, w - 10, h - 10); y.fillStyle = '#5a5a5a'; y.fillRect(X, Y, w, h); y.fillStyle = '#707070'; y.fillRect(X + 10, Y + 10, w - 20, h - 20); };
@@ -98,7 +98,7 @@ function doorMaterial(THREE, renderer) { const W = 512, H = 1024, [c, x] = cnvWH
   const T = (cv, srgb) => { const t = new THREE.CanvasTexture(cv); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; };
   const mat = new THREE.MeshStandardMaterial({ map: T(c, true), bumpMap: T(b, false), bumpScale: 2, roughness: .62, metalness: .0 }); mat.name = 'door-hq'; return { mat }; }
 /** خرائط UV للباب: من صندوقه في مستوى الواجهة إلى [0,1] حتى تطابق الألواح أبعاد الباب الفعلية. */
-function fitDoorUV(THREE, m) { const g = m.geometry; g.computeBoundingBox(); const bb = g.boundingBox, pos = g.attributes.position, uv = g.attributes.uv, dx = bb.max.x - bb.min.x, dz = bb.max.z - bb.min.z, dy = bb.max.y - bb.min.y, alongX = dx >= dz;
+export function fitDoorUV(THREE, m) { const g = m.geometry; g.computeBoundingBox(); const bb = g.boundingBox, pos = g.attributes.position, uv = g.attributes.uv, dx = bb.max.x - bb.min.x, dz = bb.max.z - bb.min.z, dy = bb.max.y - bb.min.y, alongX = dx >= dz;
   for (let i = 0; i < pos.count; i++) { const a = alongX ? (pos.getX(i) - bb.min.x) / dx : (pos.getZ(i) - bb.min.z) / dz; uv.setXY(i, a, (pos.getY(i) - bb.min.y) / dy); } uv.needsUpdate = true; }
 function cnvWH(W, H) { const c = document.createElement('canvas'); c.width = W; c.height = H; return [c, c.getContext('2d')]; }
 
