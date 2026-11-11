@@ -102,6 +102,30 @@ $('shotHQ').addEventListener('click', async () => {
   } catch (e) { show('تعذّرت اللقطة: ' + (e?.message || e)); }
   finally { btn.disabled = false; }
 });
+// صورة معمارية احترافية: اللقطة العالية من الزاوية الحالية (الواجهة الواقعية داخل إطارها، أو المجسّم في وضع «مدار») ← /api/photo.
+// الزر يبقى مخفيًا إن لم تكن الخدمة مهيأة في الخادم. الوصف المرسل معرّفات من قوائم مغلقة فقط (الطراز والذوق وعدد الأدوار وقطع الحوش).
+import('./photo-pro.mjs').then(async ({ initPhotoPro, describeForPhoto, PHOTO_PRO }) => {
+  const fr = $('facadeFrame'), facadeOn = () => !!fr && !fr.hidden, srcParam = k => { try { return new URLSearchParams((fr.dataset.src || '').split('?')[1] || '').get(k); } catch { return null; } };
+  let key = ''; try { const { designHash } = await import('./facade-j/facade-realism/variation.mjs'); key = String(designHash(loadDoc() || {})); } catch { /* بلا بصمة: لا تُربط الصورة بكتاب المشروع */ }
+  globalThis.__mizanPhotoPro = await initPhotoPro({
+    button: $('photoPro'), designKey: () => key,
+    capture: async ({ onProgress } = {}) => {
+      if (facadeOn()) {
+        const hq = fr.contentWindow?.__facadeHQ, c = fr.contentDocument?.querySelector('canvas'); if (!c) throw new Error('الواجهة الواقعية لم تكتمل بعد. انتظر لحظات ثم أعد المحاولة.');
+        const night = srcParam('night') === '1';
+        if (typeof hq === 'function') { const r = await hq({ ...PHOTO_PRO.shot, onProgress }); if (!r?.blob) throw new Error('تعذّر التقاط الواجهة.'); return { blob: r.blob, view: 'facade', night }; }
+        const blob = await new Promise(res => c.toBlob(res, 'image/png')); if (!blob) throw new Error('تعذّر التقاط الواجهة.'); return { blob, view: 'facade', night };
+      }
+      if (!viewer?.built) throw new Error('المجسّم غير جاهز بعد.');
+      if (viewer.mode !== 'orbit') throw new Error('الصورة المعمارية تؤخذ من «واجهة واقعية» أو من وضع «مدار» للمجسم. انتقل إلى أحدهما ثم أعد المحاولة.');
+      const r = await viewer.captureHQ({ scale: 1, ss: 2 }); return { blob: r.blob, view: 'model', night: false };
+    },
+    describe: ({ lighting, view }) => {
+      const X = globalThis.__mizanExterior, d = loadDoc();
+      return describeForPhoto({ style: (facadeOn() && srcParam('style')) || X?.style || X?.pick?.style, floors: (facadeOn() && +srcParam('floors')) || (d?.levels || []).length || undefined, lighting, view, exterior: X?.exterior, fixtures: d?.fixtures });
+    },
+  });
+}).catch(() => { /* الميزة اختيارية: فشل تحميلها لا يمس العرض */ });
 $('toFinal').addEventListener('click', async () => {
   // يُعلَم العميل فورًا (اللقطة تأخذ وقتًا على الأجهزة البطيئة) ويُمنع الضغط المكرر
   const btn = $('toFinal'), label = btn.textContent; if (btn.disabled) return;

@@ -57,7 +57,8 @@
         <p class="muted">عرض واقعي للواجهة من تصميمك المعتمد نفسه، بإطارات بارزة 20–25 سم. المبنى وحدود الأرض والمداخل وقطع الحوش من مخططك؛ السور والنباتات والرصيف والجوار تنسيق موقع إيضاحي للعرض وليست من المخطط. تتحسن الصورة تلقائيًا (نعومة وظلال) بعد ثوانٍ من توقف الحركة. «بديل آخر» يغيّر التوزيع والتفاصيل دون تحريك أي جدار أو فتحة. الواجهة تُبنى على الدور الأرضي وتتبع قالب الطراز المختار، والأدوار العليا تكرر فتحات الأرضي فلا تطابق فتحات المسقط العلوي حرفيًا؛ ليس مخططًا تنفيذيًا.</p>
       </div></div>
     <div class="shots"><button class="btn" id="shot">التقاط صورة</button><button class="btn gold" id="shotHQ" title="تصيير مضاعف العيّنات (فائق التنعيم) بظلال أدق، ثم تنزيل PNG">لقطة عالية الجودة</button>
-      <p class="muted" id="shotMsg" role="status" aria-live="polite" hidden></p></div>
+      <p class="muted" id="shotMsg" role="status" aria-live="polite" hidden></p>
+      <button class="btn" id="photoPro" type="button" hidden title="يحوّل لقطة مجسم تصميمك إلى صورة واقعية بمستوى التصوير المعماري بالذكاء الاصطناعي، مع الحفاظ على هندسة البيت">صورة معمارية احترافية ✦</button></div>
   </aside>
   <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div><iframe id="facadeFrame" title="الواجهة الخارجية" hidden style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f4f1ea"></iframe></div>
 </div>
@@ -112,7 +113,7 @@ function extCard() { // ملخص الشكل الخارجي + تغييره بال
   $('extLine').textContent = (d.length ? 'طلبك: ' + d.join('، ') + '. ' : 'لم تحدد شكلًا خارجيًا؛ هذا اقتراح الميزان لمخططك. ') + (extPick ? (mine ? 'المعروض: ' : 'اقتراح الميزان (غيّرتَه يدويًا): ') + extPick.styleAr + ' — ' + extPick.why + '.' : '');
 }
 async function refreshExterior() { for (const k of Object.keys(region)) delete region[k]; if (await chooseFromBrief()) { on = true; note0 = ''; await apply(); } extCard(); }
-globalThis.__mizanExterior = { refresh: refreshExterior, get pick() { return extPick; }, get on() { return on; } };
+globalThis.__mizanExterior = { refresh: refreshExterior, get pick() { return extPick; }, get on() { return on; }, get exterior() { return ext; }, get style() { return style; } };
 addEventListener(EXTERIOR_EVENT, () => { refreshExterior(); });
 addEventListener('storage', e => { if (e.key === EXTERIOR_KEY) refreshExterior(); });
 const cur = () => region[style] || (region[style] = safe(() => baseRegion(doc, floorsVal()), null));

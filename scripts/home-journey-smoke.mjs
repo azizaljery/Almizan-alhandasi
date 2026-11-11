@@ -24,6 +24,15 @@ await step('حالة شرعاء الذكي', async () => {
   console.log(`INFO  شرعاء الذكي: المفتاح ${s.configured ? 'مهيأ' : 'غير مهيأ'}، رمز الدخول ${s.accessConfigured ? 'مهيأ' : 'غير مهيأ'} (الاتصال الفعلي لا يُختبر هنا)`);
 });
 
+// 1ج) الصورة المعمارية الاحترافية: حالة الخدمة فقط. لا يُستدعى التوليد هنا أبدًا (حتى لا يُستهلك رصيد Workers AI في كل نشر)؛
+// التحقق الفعلي من النموذج يدوي: scripts/photo-live-check.mjs.
+await step('حالة الصورة الاحترافية', async () => {
+  const r = await fetch(`${BASE}/api/photo/status?smoke=${Date.now()}`);
+  const s = await r.json().catch(() => ({}));
+  check('الصورة الاحترافية: نقطة الحالة تستجيب', r.status === 200 && typeof s.configured === 'boolean', `HTTP ${r.status}`);
+  console.log(`INFO  الصورة الاحترافية: ${s.configured ? `مهيأة — المستويات ${(s.tiers || []).join('، ')}، المتبقي اليوم ${s.remainingToday} من ${s.dailyCap}، العدّاد ${s.counter}` : 'غير مهيأة (الزر مخفي عن العملاء)'} — النموذج نفسه لا يُختبر هنا`);
+});
+
 const launchArgs = process.env.SMOKE_CHROMIUM ? { executablePath: process.env.SMOKE_CHROMIUM } : {};
 const browser = await chromium.launch({ ...launchArgs, args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'] });
 const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
