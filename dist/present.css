@@ -152,6 +152,23 @@ table.rooms td .z{display:inline-block;width:10px;height:10px;border-radius:3px;
 .fixes .fixlist li .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;background:#f3e6c9;color:#5a3a2c;margin-bottom:3px}
 .fixes .fixlist li .btn{flex:0 0 auto;padding:7px 16px}
 .fixes #fixAll{width:100%}
+/* بيان ما تغيّر عن الطلب (سلّم الاتساع) */
+.card.fit{border:1px solid #d9b56a;border-inline-start:6px solid #b3412e;background:#fffaf0;margin:0 0 16px}
+.card.fit h2{margin-bottom:4px}
+.card.fit .fit-facts{font-size:13.5px;line-height:1.9;background:#f6ecd6;border-radius:10px;padding:8px 12px;margin:8px 0 12px;color:#4a3a2a}
+.card.fit h3{font-size:14px;margin:12px 0 6px;color:#5a3a2c}
+.card.fit .fitlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px}
+.card.fit .fitlist li{display:flex;flex-direction:column;gap:8px;justify-content:space-between;padding:10px 12px;border:1px solid #e6d9bd;border-inline-start:4px solid #b3412e;border-radius:10px;background:#fffdf8}
+.card.fit .fitlist li.fit-shrink{border-inline-start-color:#c8922a}
+.card.fit .fitlist li.fit-merge{border-inline-start-color:#7a6a9a}
+.card.fit .fitlist li.fit-floors{border-inline-start-color:#3f6f8f}
+.card.fit .fitlist li b{display:block;font-weight:600;font-size:14px;line-height:1.6}
+.card.fit .fitlist li .num{display:block;font-size:12.5px;color:#8a3a22;font-variant-numeric:tabular-nums}
+.card.fit .fitlist li .why{display:block;font-size:12.5px;color:#6b6a5f;line-height:1.7}
+.card.fit .fitlist li .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;background:#f3e6c9;color:#5a3a2c;margin-bottom:3px}
+.card.fit .fit-acts{display:flex;flex-wrap:wrap;gap:8px}
+.card.fit .fit-acts .btn{padding:7px 14px;font-size:13px}
+.card.fit .fit-decide{margin-top:6px;padding-top:6px;border-top:1px dashed #e0cfa6}
 /* مرحلة الشكل الخارجي: حوار شرعاء بعد اعتماد المخطط */
 .shara.ext{inset:0;align-items:flex-end;background:#0006;pointer-events:auto}
 .shara.ext .panel{max-height:92vh;display:flex;flex-direction:column;gap:10px}

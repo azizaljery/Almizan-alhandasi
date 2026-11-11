@@ -15,6 +15,7 @@ import { extractRequirements } from './requirements.mjs';
 import { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE } from './shara/brief-engine.mjs';
 import { SPACE } from './shara/lexicon.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
+import { climb, fitFacts, programNeed } from './fit-ladder.mjs';
 
 // الحوش الخارجي والمصعد يفهمهما المحلي ويرسمهما؛ لا نعرض قول الذكاء إنه «غير ممثل/غير مدعوم» فيناقض ما رُسم
 const OUTDOOR_AI_NOISE = x => /مسبح|شلال|حديقة|عشب|احواض|أحواض|مصعد|اسانسير|أسانسير|ليفت/.test(x) && /غير (?:مدعوم|ممثل|منفذ|متاح|مطبق)|لا (?:يمكن|يدعم|يمثل|يُمثل)|خارج (?:برنامج|نطاق)/.test(x);
@@ -46,7 +47,7 @@ export function normalizeLand(raw = {}) {
   if (!Number.isInteger(floors) || floors < 1) throw Error('عدد الأدوار يجب أن يكون 1 أو 2.');
   if (floors > 2) throw Error('ثلاثة أدوار أو أكثر غير مدعومة بعد؛ المتاح دور أو دوران.');
   const plot = validatePlot({ width, length, floors: 1, streets: Object.fromEntries(streets.map(s => [s, true])), entry: entries[0] });
-  return { plot, land: { length, width, streets, entries, floors } };
+  return { plot, land: { length, width, streets, entries, floors, ...(raw.floorsExplicit ? { floorsExplicit: true } : {}) } };
 }
 
 // ------------------------------------------------------------------------------------------------ شرعاء
@@ -88,7 +89,9 @@ export class SharaSession {
     const b = buildBrief(this.idea, { ai: this.ai, disabledCustoms: this.disabledCustoms, edits: this.edits, land: this.land, skipped: this.skipped });
     // الأعداد النهائية التي يكتبها العميل بنفسه (المسار القديم) تحكم
     const counts = { ...b.counts, ...this.countOverrides };
-    this.brief = b; this.counts = counts; this.requirements = { ...b.requirements, counts: { ...counts } };
+    // مصدر كل صف (قلتَه / افتراض عرفي / استنتاج): يحدد سلّم الاتساع به ما يُخفَّف أولًا إن لم تتسع الأرض
+    const sources = Object.fromEntries(b.program.map(r => [r.id, r.source]));
+    this.brief = b; this.counts = counts; this.requirements = { ...b.requirements, counts: { ...counts }, sources };
     return b;
   }
   #programMsg() {
@@ -246,8 +249,44 @@ export function modelToStudioDoc(model, land, { title = 'تصميم أولي م�
   return { doc: out, report };
 }
 
-/** يشغّل محرك التوليد الحالي ويعيد التصميم المختار مستندًا للمرسم. أي فشل يُرمى كما هو (لا بديل صامت). */
-export async function generateInitialDesign({ land, rooms, discovery, idea = '', seed = 1, counts = null, requirements = null, engine = 'auto', exclude = [], prefer = null, shown = [], blend = null }) {
+const PASS_CODES = ['VILLA_EXHAUSTED', 'VILLA_NO_BLEND'];
+/**
+ * التوليد كما يراه الموقع: **يصمّم دائمًا**. يجرّب الطلب كما هو؛ فإن لم يجد المولّد توزيعًا سليمًا مشى «سلّم الاتساع»
+ * (fit-ladder.mjs): دوران إن لم يحدَّد عدد الأدوار، ثم تصغير، ثم استبعاد الأقل أولوية، حتى يخرج تصميم سليم، ويعيد معه
+ * `fit` (ما خُفّف، والحقائق بالأرقام) لتُعرض على العميل بيانًا صريحًا. الطلب الأصلي لا يُعدَّل: سجل التنفيذ يبقى يقيس عليه.
+ * strict: السلوك الدقيق بلا سلّم (للتشخيص والاختبار)؛ engine='legacy' كذلك. fitHint: درجات سلّم سبق نجاحها لهذا الطلب.
+ */
+export async function generateInitialDesign(args) {
+  const { strict = false, fitHint = null, ...a } = args;
+  if (strict || a.engine === 'legacy') return generateExact(a);
+  normalizeLand(a.land); // أخطاء الإدخال تُرمى كما هي
+  let first = null;
+  if (!fitHint) try { return await generateExact(a); } catch (err) { if (PASS_CODES.includes(err.code) || /غرفة نوم واحدة على الأقل/.test(err.message || '')) throw err; first = err; }
+  const disc = normalizeDiscovery(a.discovery);
+  const c0 = a.counts && Object.values(a.counts).some(v => Number.isInteger(v) && v > 0) ? a.counts : countsFromRooms(a.rooms || []);
+  const req0 = { ...(a.requirements || extractRequirements(a.idea || '', { counts: c0, discovery: disc })) }; req0.counts = { ...(req0.counts || {}), ...c0 };
+  let last = first;
+  const attempt = async (req, { probe }) => {
+    try { return await generateExact({ ...a, rooms: safeRooms(req.counts), counts: req.counts, requirements: req, engine: 'villa', keep: probe ? 1 : undefined }); }
+    catch (err) { if (PASS_CODES.includes(err.code)) throw err; last = err; return null; }
+  };
+  const got = await climb(req0, a.land, attempt, { hint: fitHint });
+  if (!got) {
+    if (fitHint) return generateInitialDesign({ ...a, strict: false });
+    let f = null; try { f = fitFacts(a.land); } catch { /* بلا حقائق */ }
+    const err = Error(`لم أستطع توليد تصميم سليم لهذه الأرض حتى بأصغر برنامج (غرفة نوم ومطبخ وصالة)${f ? `: المسطح القابل للبناء بعد الارتدادات ${f.W} × ${f.D} م، وأصغر ما يدعمه المولّد حاليًا عرض 4.6 م وعمق 5.9 م` : ''}. هذا حدّ في المولّد لا حكم على أرضك؛ يمكنك الرسم يدويًا في المرسم.`);
+    err.code = 'FIT_IMPOSSIBLE'; err.cause = last; throw err;
+  }
+  const out = got.out, f = (() => { try { return fitFacts(a.land); } catch { return null; } })();
+  out.fit = { applied: got.applied, floors: got.floors, floorsAsked: got.asked, facts: f, need: programNeed(req0), firstError: String(first?.message || '').slice(0, 300) };
+  if (got.applied.length || got.floors !== got.asked.floors) out.notes = ['لم أجد توزيعًا سليمًا للبرنامج كاملًا على هذه الأرض؛ صمّمت أقرب ما يتسع، والتفاصيل في «بيان ما تغيّر عن طلبك» مع خيارات تقررها أنت.', ...(out.notes || [])];
+  for (const alt of out.alternatives || []) alt.fit = out.fit;
+  return out;
+}
+function safeRooms(counts) { try { return defaultRooms(counts); } catch { return []; } }
+
+/** التوليد الدقيق للطلب كما هو: أي فشل يُرمى كما هو (لا بديل صامت). */
+async function generateExact({ land, rooms, discovery, idea = '', seed = 1, counts = null, requirements = null, engine = 'auto', exclude = [], prefer = null, shown = [], blend = null, keep = undefined }) {
   const { plot, land: normLand0 } = normalizeLand(land);
   // عدد الأدوار المذكور في كلام العميل («دورين») يتقدم على الافتراضي في بيانات الأرض
   const reqFloors = requirements?.prefs?.floors ?? null;
@@ -257,15 +296,15 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
   if (normLand.floors >= 2) {
     const c2 = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
     const req2 = requirements || extractRequirements(idea || '', { counts: c2, discovery: disc });
-    try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, shown, blend }); }
-    catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || shown.length || blend) throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms, discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
+    try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, shown, blend, keep }); }
+    catch (err) { if (engine === 'villa') throw err; if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || shown.length || blend) throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms, discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
   }
   // المولّد المهني أولًا (أجنحة نوم بحماماتها، صالة محورية، مجلس بممر ضيوف ودورة مياه)؛ المحرك السابق احتياط فقط
   const villaCounts = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
   let villaFail = null;
   const req = requirements || extractRequirements(idea || '', { counts: villaCounts, discovery: disc });
-  if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, shown, blend }); }
-  catch (err) { if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || shown.length || blend) throw err; villaFail = err.message; }
+  if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, shown, blend, keep }); }
+  catch (err) { if (engine === 'villa') throw err; if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || shown.length || blend) throw err; villaFail = err.message; }
   const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
   const notes = [];
@@ -288,9 +327,9 @@ export async function generateInitialDesign({ land, rooms, discovery, idea = '',
 }
 
 /** المولّد المهني لدور واحد: البدائل مستندات مرسم مباشرة؛ بصمة التصميم تُحسب من نماذجها المصدّرة. */
-function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements, exclude = [], prefer = null, shown = [], blend = null }) {
+function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements, exclude = [], prefer = null, shown = [], blend = null, keep = undefined }) {
   // حتى خمسة بدائل مختلفة مرئيًا من المرة الأولى
-  const out = generateVillaDesigns({ land, counts, requirements, keep: blend ? 1 : 5, exclude, prefer, shown, blend });
+  const out = generateVillaDesigns({ land, counts, requirements, keep: blend ? 1 : keep || 5, exclude, prefer, shown, blend });
   const best = out.designs[0], notes = [...new Set(best.notes)];
   let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes }));
   try {
@@ -303,8 +342,8 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
 }
 
 /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
-function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, shown = [], blend = null }) {
-  const out = generateVillaTwoFloors({ land, counts, requirements, keep: blend ? 1 : 5, exclude, prefer, shown, blend });
+function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, shown = [], blend = null, keep = undefined }) {
+  const out = generateVillaTwoFloors({ land, counts, requirements, keep: blend ? 1 : keep || 5, exclude, prefer, shown, blend });
   const best = out.designs[0];
   return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
 }
@@ -350,7 +389,7 @@ export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow 
     ];
     facts.stairArea = stair;
   }
-  const works = async (l, c) => { try { await generateInitialDesign({ land: l, rooms: defaultRooms(c), discovery, idea, counts: c, engine }); return true; } catch { return false; } };
+  const works = async (l, c) => { try { await generateInitialDesign({ land: l, rooms: defaultRooms(c), discovery, idea, counts: c, engine, strict: true }); return true; } catch { return false; } };
   const floor = { bedrooms: 1, majlis: 0, baths: 1, kitchens: 1, halls: 0, dining: 0 };
   const options = [];
   for (const f of COUNT_FIELDS) {

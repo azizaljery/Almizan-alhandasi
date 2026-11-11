@@ -1,6 +1,6 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
-import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor } from './design-session.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor } from './design-session.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
@@ -11,7 +11,7 @@ import { normalizeLand } from './home-flow.mjs';
 import { displayOr } from './field-guards.mjs';
 import { compareDesigns } from './compare-designs.mjs';
 import { parseDoc } from './draw/doc.mjs';
-import { fixProposals, applyFix } from './design-fixes.mjs';
+import { fixProposals, applyFix, applyFitDecision } from './design-fixes.mjs';
 import { exteriorQuestions, answerLabel, describeExterior, setExterior, normalizeExterior, parseExteriorText, storeExterior } from './exterior-brief.mjs';
 
 const $ = id => document.getElementById(id);
@@ -71,6 +71,9 @@ function show(index) {
       el('button', { type: 'button', class: 'btn', 'data-fix': p.id, onclick: () => runFix(p.id) }, 'نفّذ')))),
     props.length > 1 ? el('button', { type: 'button', class: 'btn primary', id: 'fixAll', onclick: () => runFix('all') }, 'نفّذ كل المقترحات') : null,
     el('p', { class: 'sub', id: 'fixStatus', 'aria-live': 'polite' })) : null;
+  // بيان ما تغيّر عن الطلب (أرض لم تتسع للبرنامج كاملًا): ما استُبعد وما دُمج وما صُغّر وسببه بالأرقام، وقرارات يضغطها العميل.
+  // كله مقيس من المخطط المعروض وطلب العميل الأصلي؛ لا يُعرض إن طابق التصميم الطلب.
+  const fitCard = renderFit(fitFor(session, doc));
   const notes = el('div', { class: 'card' }, el('h2', {}, 'ملاحظات التصميم'), el('ul', { class: 'notes' }, [d.summary, ...(d.notes || [])].filter(Boolean).map(t => el('li', {}, t))),
     d.feedback?.changes?.length ? el('p', { class: 'sub' }, (d.feedback.merge ? '' : 'عدّلتُ هذا التصميم بناءً على: ') + d.feedback.changes.join('، ')) : null);
   const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
@@ -83,9 +86,42 @@ function show(index) {
     ...(replyCard ? [replyCard] : []),
     el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.')), history),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
+    ...(fitCard ? [fitCard] : []),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(fixCard ? [fixCard] : []), reqCard)),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
   legend(); bindPlan(); paint();
+}
+
+/** بطاقة «بيان ما تغيّر عن طلبك»: تظهر فقط إن اختلف المخطط عن الطلب. */
+function renderFit(st) {
+  if (!st || !st.items.length) return null;
+  const f = st.facts, GROUPS = [['floors', 'عدد الأدوار'], ['drop', 'استُبعد'], ['merge', 'دُمج'], ['shrink', 'صُغّر']];
+  const factLine = f ? `أرضك ${fmt(f.plotW)} × ${fmt(f.plotD)} م. بعد الارتدادات (${fmt(f.sideSetbacks[0])} + ${fmt(f.sideSetbacks[1])} م على الجانبين، و${fmt(f.depthSetbacks[0])} + ${fmt(f.depthSetbacks[1])} م أمامًا وخلفًا) يبقى للبناء ${fmt(f.W)} × ${fmt(f.D)} م = ${fmt(f.area)} م² للدور${st.need ? `، وبرنامجك بالمقاسات المعتادة يحتاج نحو ${fmt(st.need)} م²` : ''}.` : null;
+  const item = i => el('li', { class: 'fit-' + i.kind, 'data-fit': i.id },
+    el('div', {}, el('span', { class: 'tag' }, i.asked ? 'من طلبك' : 'افتراض لم تطلبه'), el('b', {}, i.text),
+      i.kind === 'shrink' ? el('span', { class: 'num' }, `من ${fmt(i.from)} إلى ${fmt(i.to)} م²`) : i.kind !== 'floors' && i.from !== i.to && i.unit ? el('span', { class: 'num' }, `طلبك ${fmt(i.from)} ← في التصميم ${fmt(i.to)}`) : null,
+      i.why ? el('span', { class: 'why' }, i.why) : null),
+    i.actions?.length ? el('div', { class: 'fit-acts' }, i.actions.map(a => el('button', { type: 'button', class: 'btn', 'data-decision': a.id, onclick: () => runDecision(a.id) }, a.label))) : null);
+  return el('section', { class: 'card fit', id: 'fitCard', 'aria-label': 'بيان ما تغيّر عن طلبك' },
+    el('h2', {}, 'بيان ما تغيّر عن طلبك'),
+    el('p', { class: 'sub' }, 'صمّمت لك بيتًا سليمًا على أرضك، لكن لم أجد توزيعًا يضم كل ما طلبته كما هو. هذا ما تغيّر وسببه، والقرار لك: اضغط أي خيار وأعيد التصميم حوله.'),
+    factLine ? el('p', { class: 'fit-facts' }, factLine) : null,
+    GROUPS.map(([k, title]) => { const list = st.items.filter(i => i.kind === k); return list.length ? el('div', { class: 'fit-group' }, el('h3', {}, `${title} (${list.length})`), el('ul', { class: 'fitlist' }, list.map(item))) : null; }),
+    st.decisions.length ? el('div', { class: 'fit-decide' }, el('h3', {}, 'أو قرّر أنت ما يُخفَّف'), el('div', { class: 'fit-acts' }, st.decisions.map(a => el('button', { type: 'button', class: 'btn primary', 'data-decision': a.id, onclick: () => runDecision(a.id) }, a.label)))) : null,
+    el('p', { class: 'sub', id: 'fitStatus', 'aria-live': 'polite' }),
+    el('p', { class: 'sub hint' }, 'كل بند هنا مقيس من المخطط المعروض نفسه. «لم أجد توزيعًا» تعني أن مولّد الميزان لم يجد، لا أن أرضك لا تصلح؛ ويمكنك دائمًا التعديل بيدك في المرسم.'));
+}
+/** قرار العميل: يعيد الموقع التوليد حوله ويحدّث البيان؛ إن تعذّر لا يتغير التصميم ويُذكر السبب. */
+async function runDecision(id) {
+  const st = $('fitStatus'), btns = [...document.querySelectorAll('#fitCard button')];
+  btns.forEach(b => { b.disabled = true; }); if (st) st.textContent = 'أعيد التصميم حول قرارك…';
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    const out = await applyFitDecision(session, id);
+    if (!out.changed) { if (st) st.textContent = 'لم أغيّر تصميمك: ' + out.reply.failed.map(f => `${f.text} — ${f.why}`).join(' '); btns.forEach(b => { b.disabled = false; }); return; }
+    session = out.session; saveSession(localStorage, session); show(session.current);
+    toast('نفّذت قرارك — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) { if (st) st.textContent = 'تعذّر تنفيذ القرار: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; btns.forEach(b => { b.disabled = false; }); }
 }
 
 /** تنفيذ مقترح إصلاح (أو كلها): النتيجة تصميم جديد يُعرض مع رد شرعاء بما عولج وما تعذّر وسببه. */
@@ -105,6 +141,7 @@ async function runFix(id) {
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
   if (r.merge) return mergeReply(r);
+  if (r.decision) return decisionReply(r);
   const head = r.fixRun ? (r.relayout ? 'غيّرت توزيع الغرف لأعالج الملاحظات، وأبقيت كل ما طلبته محققًا.' : 'عالجت الملاحظات على توزيعك نفسه دون تغييره.') : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : r.altAsk || fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت، وليس تكرارًا لأي تصميم عرضته عليك.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
   const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
   return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
@@ -113,6 +150,17 @@ function sharaReply(fb) {
     r.failed.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أستطع تنفيذه في هذه الأرض مع بقية طلباتك:'), el('ul', { class: 'tick' }, r.failed.map(x => li('bad', x.text, x.why)))) : null,
     r.unclear.length ? el('div', {}, el('p', { class: 'sub' }, 'لم أفهم هذه العبارات فلم أطبّقها؛ اكتبها بصيغة مباشرة (مثل: «المطبخ في الخلف»):'), el('ul', { class: 'tick' }, r.unclear.map(t => li('no', '«' + t + '»')))) : null,
     r.unsupported.length ? el('ul', { class: 'tick' }, r.unsupported.map(t => li('no', t))) : null);
+}
+
+/** رد شرعاء على قرار العميل في بيان الاتساع: ما عاد، وما خُفّف في المقابل، مقيسًا من المخططين. */
+function decisionReply(r) {
+  const li = (cls, t, why) => el('li', { class: cls }, t, why ? el('span', { class: 'why' }, why) : null);
+  return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
+    el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), `نفّذت قرارك «${r.decision}» وأعدت التصميم حوله.${r.left ? ' البيان المحدَّث أسفل المواصفات.' : ' التصميم الآن يطابق طلبك؛ لم يبقَ في البيان شيء.'}`)),
+    r.back?.length ? el('div', {}, el('p', { class: 'sub' }, 'عاد إلى التصميم:'), el('ul', { class: 'tick' }, r.back.map(t => li('good', t)))) : null,
+    r.undone?.length ? el('p', { class: 'sub' }, `قرارك هذا يتعارض مع تثبيتك السابق لـ${r.undone.map(t => '«' + t + '»').join(' و')} على هذه الأرض؛ قدّمتُ قرارك الأحدث وتراجعت عن ذاك التثبيت.`) : null,
+    r.cost?.length ? el('div', {}, el('p', { class: 'sub' }, 'وتغيّر معه في البيان:'), el('ul', { class: 'tick' }, r.cost.map(t => li('no', t)))) : null,
+    r.failed?.length ? el('ul', { class: 'tick' }, r.failed.map(x => li('bad', x.text, x.why))) : null);
 }
 
 /** رد شرعاء على الدمج: ما بقي في موضعه من كل تصميم، مقيسًا من المخطط الناتج. */
