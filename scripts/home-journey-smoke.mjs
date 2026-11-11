@@ -65,7 +65,8 @@ await step('الرحلة', async () => {
     await page.click('#cmpClose');
   } else check('مقارنة تصميمين (يحتاج تصميمين)', true, 'تصميم واحد فقط في هذه الرحلة');
   await page.click('#btnAnother'); await page.fill('#fbText', 'ابي تصميم بديل مختلف'); await page.click('#fbGo');
-  await page.waitForFunction(n => document.querySelectorAll('.history button').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25, Math.max(1, nDesigns), { timeout: 90000 });
+  // التوليد يجري في عامل خارج الخيط الرئيسي ويعرض نص تقدّم أثناءه؛ الانتهاء = زوال علامة الانشغال
+  await page.waitForFunction(n => !document.body.dataset.busy && (document.querySelectorAll('.history button').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25), Math.max(1, nDesigns), { timeout: 120000 });
   check('«ابي تصميم بديل»: تصميم جديد', (await page.$$('.history button')).length > Math.max(1, nDesigns), await page.evaluate(() => document.querySelector('#fbStatus')?.textContent || ''));
   // 5) ثلاثي الأبعاد
   await page.click('#btnApprove'); await page.waitForSelector('#extShara:not([hidden])', { timeout: 15000 });
