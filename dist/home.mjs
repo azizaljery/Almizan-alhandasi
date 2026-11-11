@@ -1,8 +1,11 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
-import { createSession, saveSession } from './design-session.mjs';
-import { normalizeLand, SharaSession, interpretFree, generateInitialDesign, diagnoseFit, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { saveSession, loadSession, carryOver, sameLand } from './design-session.mjs';
+import { normalizeLand, SharaSession, interpretFree, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { generateInWorker, diagnoseInWorker, warm as warmGenerator, ticking } from './design-client.mjs';
+import { HOME_KEY } from './journey-nav.mjs';
+import { mountSteps } from './journey-steps.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
 import { displayOr, landFieldErrors, hasLandErrors } from './field-guards.mjs';
 import { requestBrief } from './assistant.mjs';
@@ -13,8 +16,28 @@ const stages = ['Welcome', 'Land', 'Shara', 'Build'];
 function show(name) {
   for (const s of stages) $('stage' + s).hidden = s !== name;
   home.dataset.stage = name.toLowerCase();
+  if (name !== 'Welcome') stopScene();
   window.scrollTo({ top: 0 });
+  paintSteps();
 }
+// ------------------------------------------------------------------------------------------------ الحالة المحفوظة والتنقل
+// كل ما أدخله العميل هنا (الأرض، الحوار، البرنامج) يُحفظ، فالرجوع إلى «الأرض» أو «شرعاء» من أي صفحة — بشريط الخطوات أو بزر رجوع المتصفح —
+// يعيده إلى ما كان عليه، وتصميمه المولَّد باقٍ في جلسته (design-session) لا يُمسّ إلا إذا ولّد هو تصميمًا جديدًا.
+const store = { get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } } };
+let tlog = [], regen = false, chatFor = null;
+const designSession = () => { try { return loadSession(localStorage); } catch { return null; } };
+function saveHome() { store.set(HOME_KEY, { v: 1, raw: readLand(), confirmedLand, shara: session ? session.toJSON() : null, tlog: tlog.slice(-80), at: Date.now() }); }
+const HASH = { Land: '#land', Shara: '#shara' };
+/** انتقال داخل الصفحة يُسجَّل في سجل المتصفح، فيعمل زر الرجوع والتقدم بين الاستقبال والأرض وشرعاء. */
+function go(name) { const h = HASH[name] || ''; if (location.hash !== h) history.pushState(null, '', h || location.pathname + location.search); route(); }
+function route() {
+  const want = location.hash === '#shara' ? 'Shara' : location.hash === '#land' ? 'Land' : 'Welcome';
+  if (want === 'Shara' && !confirmedLand) { history.replaceState(null, '', '#land'); show('Land'); setError($('landError'), 'أدخل بيانات الأرض أولًا ثم تابع إلى شرعاء.'); return; }
+  if (want === 'Shara') { show('Shara'); resumeChat(); warmGenerator(); return; }
+  if (want === 'Land') { show('Land'); return; }
+  show('Welcome'); paintWelcome(); if (!scene) startScene();
+}
+let paintSteps = () => {};
 const setError = (el, text) => { el.textContent = text || ''; el.hidden = !text; };
 
 // ------------------------------------------------------------------------------------------------ الاستقبال
@@ -23,12 +46,20 @@ async function startScene() {
   const host = $('scene');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; // الخلفية المتدرجة تكفي
   try {
+    // المشهد زينة: يُحمَّل بعد أن تُرسم الصفحة وتصير أزرارها جاهزة، لا قبلها
+    await new Promise(r => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 1200 }) : setTimeout(r, 300)));
+    if (home.dataset.stage !== 'welcome' || sceneOff) return;
     const T = await loadThreeRuntime();
+    if (home.dataset.stage !== 'welcome' || sceneOff) return;
     scene = createArchitecturalScene(T, host);
-    const t0 = performance.now();
+    const t0 = performance.now(); let slow = 0;
     const tick = now => {
-      const elapsed = now - t0;
+      if (!scene) return;
+      const elapsed = now - t0, w0 = performance.now();
       scene.update(elapsed);
+      // جهاز لا يقدر على المشهد (إطار واحد > 250 مللي ثانية، أو > 120 ثلاث مرات متتالية): يُثبَّت على آخر صورة حتى لا يثقل الأزرار
+      const cost = performance.now() - w0; slow = cost > 120 ? slow + 1 : 0;
+      if (slow >= 3 || cost > 250) { home.dataset.scene = 'still'; return; }
       // يدور المشهد ببطء ما دامت الصفحة الأولى ظاهرة (ويتوقف حين تُخفى الصفحة لتوفير الطاقة)
       if (home.dataset.stage === 'welcome' && scene) frame = requestAnimationFrame(tick);
     };
@@ -36,13 +67,24 @@ async function startScene() {
     addEventListener('resize', () => { if (scene && home.dataset.stage === 'welcome') scene.update(6000); });
   } catch { /* بلا WebGL تبقى الخلفية المتدرجة والشعار */ }
 }
-function stopScene() { cancelAnimationFrame(frame); scene?.dispose(); scene = null; }
-startScene();
+let sceneOff = false;
+function stopScene() { sceneOff = true; cancelAnimationFrame(frame); try { scene?.dispose(); } catch { /* انتهى */ } scene = null; }
 // الافتتاحية (رسم الميزان ثم الاسم ثم النقاط) مرة في الجلسة، ويمكن تخطيها
 (() => { const w = $('stageWelcome'), done = () => { w.classList.add('lx-done'); try { sessionStorage.setItem('mz-intro-seen', '1'); } catch {} };
   try { if (sessionStorage.getItem('mz-intro-seen')) w.classList.add('lx-done'); } catch {}
   $('lxSkip')?.addEventListener('click', done); setTimeout(() => { try { sessionStorage.setItem('mz-intro-seen', '1'); } catch {} }, 7000); })();
-$('start').addEventListener('click', () => { stopScene(); show('Land'); $('landLength').focus(); });
+$('start').addEventListener('click', () => {
+  stopScene();
+  // «ابدأ تصميمًا جديدًا» مع تصميم محفوظ: حوار جديد؛ التصميم المحفوظ يبقى حتى يُولَّد غيره
+  if (designSession() || session || store.get(HOME_KEY)?.shara) { session = null; tlog = []; chatFor = null; regen = false; saveHome(); }
+  go('Land'); $('landLength').focus();
+});
+/** الاستقبال لمن له تصميم محفوظ: زر واضح للعودة إليه، والبدء من جديد يبقى خيارًا. */
+function paintWelcome() {
+  const ds = designSession(), box = $('resumeHome'); if (!box) return;
+  box.hidden = !ds; $('start').textContent = ds ? 'ابدأ تصميمًا جديدًا' : 'ابدأ رحلة منزلك';
+  if (ds) $('resumeHomeText').textContent = `لديك ${ds.designs.length === 1 ? 'تصميم محفوظ' : ds.designs.length + ' تصاميم محفوظة'} على أرض ${ds.input.land.width} × ${ds.input.land.length} م.`;
+}
 
 // ------------------------------------------------------------------------------------------------ الأرض
 const land = { streets: new Set(), entries: new Set() };
@@ -92,35 +134,44 @@ $('landForm').addEventListener('submit', e => {
   if (hasLandErrors(fieldErrors)) { (fieldErrors.length ? $('landLength') : fieldErrors.width ? $('landWidth') : $('sideGrid').querySelector('input')).focus(); return; }
   try { const { land: ok } = normalizeLand(raw); confirmedLand = ok; setError($('landError'), ''); }
   catch (err) { setError($('landError'), err.message); return; }
-  show('Shara'); beginChat();
+  if (session) session.setLand(confirmedLand); // حوار قائم: يبقى، ويُعاد حساب البرنامج على الأرض الجديدة
+  chatFor = null; saveHome(); go('Shara');
 });
 
 // ------------------------------------------------------------------------------------------------ شرعاء
 let session = null;
 const chat = $('chat');
-function bubble(text, who = 'shara') {
+let recording = true;
+/** فقاعة في المحادثة؛ تُسجَّل في نص الحوار المحفوظ (extra: kind/items/reason) ليُعاد عرضها عند الرجوع إلى شرعاء. */
+function bubble(text, who = 'shara', extra = null) {
   const row = document.createElement('div'); row.className = 'row' + (who === 'me' ? ' me' : '');
   const av = document.createElement('div'); av.className = 'avatar'; av.textContent = 'ش'; av.setAttribute('aria-hidden', 'true');
   const b = document.createElement('div'); b.className = 'bubble'; b.textContent = text;
   if (who === 'me') row.append(b); else row.append(av, b);
-  chat.append(row); return row;
+  if (extra?.kind === 'list') { const ul = document.createElement('ul'); ul.className = 'understood'; for (const it of extra.items || []) { const li = document.createElement('li'); li.textContent = it; ul.append(li); } b.append(ul); }
+  if (extra?.kind === 'note') row.classList.add('note');
+  if (extra?.reason) { const why = document.createElement('p'); why.className = 'why'; why.textContent = extra.reason; b.append(why); }
+  chat.append(row);
+  if (recording && extra !== false) { tlog.push({ who, text, ...(extra || {}) }); if (who === 'me') queueMicrotask(saveHome); }
+  return row;
 }
+/** «شرعاء تكتب…»: يظهر فورًا عند كل انتظار ولا يُحفظ في نص الحوار. */
+function typing(text = 'شرعاء تكتب…') { const row = bubble(text, 'shara', false); row.classList.add('typing'); row.dataset.control = ''; row.setAttribute('role', 'status'); row.scrollIntoView?.({ block: 'nearest' }); return row; }
 const clearControls = () => chat.querySelectorAll('[data-control]').forEach(n => n.remove());
 function control(node) { node.dataset.control = ''; chat.append(node); node.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); return node; }
 function fail(err) { setError($('chatError'), err.message || String(err)); }
 
-function render(messages) {
+function render(messages, { record = true } = {}) {
   setError($('chatError'), '');
+  const was = recording; recording = was && record;
+  try { renderAll(messages); } finally { recording = was; }
+  if (record) saveHome();
+}
+function renderAll(messages) {
   for (const m of messages) {
     if (m.kind === 'program') { renderProgram(m); continue; }
-    const row = bubble(m.text);
-    if (m.kind === 'list') {
-      const ul = document.createElement('ul'); ul.className = 'understood';
-      for (const it of m.items || []) { const li = document.createElement('li'); li.textContent = it; ul.append(li); }
-      row.querySelector('.bubble').append(ul);
-      continue;
-    }
-    if (m.kind === 'note') { row.classList.add('note'); continue; }
+    const row = bubble(m.text, 'shara', m.kind === 'list' ? { kind: 'list', items: m.items || [] } : m.kind === 'note' ? { kind: 'note' } : m.kind === 'ask' ? { reason: m.reason } : null);
+    if (m.kind === 'list' || m.kind === 'note') continue;
     if (m.kind === 'ask') { renderAsk(m, row); continue; }
     if (m.kind === 'choice') {
       const wrap = document.createElement('div'); wrap.className = 'pick';
@@ -165,7 +216,7 @@ function render(messages) {
     } else if (m.kind === 'generate') {
       const go = document.createElement('button'); go.type = 'button'; go.className = 'cta'; go.textContent = 'توليد التصميم';
       const wrap = document.createElement('div'); wrap.className = 'pick'; wrap.append(go);
-      go.addEventListener('click', () => { clearControls(); build(); });
+      go.addEventListener('click', () => { go.disabled = true; go.textContent = 'جارٍ التوليد…'; clearControls(); build(); });
       const more = document.createElement('button'); more.type = 'button'; more.className = 'chip'; more.textContent = 'أضيف تفصيلًا بالكلام';
       more.addEventListener('click', () => { more.remove(); const form = renderFree({ id: 'more' }); form.scrollIntoView?.({ block: 'nearest' }); });
       wrap.append(more);
@@ -184,24 +235,31 @@ function renderFree(m) {
     e.preventDefault();
     const text = form.querySelector('textarea').value.trim(), code = form.querySelector('input').value.trim();
     if (text.length < 3) return fail(Error('اكتب وصفًا قصيرًا على الأقل.'));
-    go.disabled = true;
+    go.disabled = true; go.textContent = 'جارٍ الإرسال…'; form.querySelector('textarea').readOnly = true;
+    // ما كتبه العميل يظهر فورًا، ثم «شرعاء تكتب…» حتى يصل الفهم (المحلي جزء من الثانية؛ المتصل بمهلة ثم المحلي)
+    const mine = bubble(text, 'me', false), wait = typing(code ? 'شرعاء تفهم كلامك عبر الذكاء المتصل…' : 'شرعاء تكتب…');
+    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
     try {
       let understood = null, note = '';
       if (code) {
-        try { understood = await understandWithAI(text, code); }
-        catch (err) { note = `تعذّر الذكاء المتصل (${err.message}) فاستخدمت الفهم المحلي.`; }
+        // مهلة الذكاء المتصل: إن تأخر أو فشل يُكمَل بالفهم المحلي فورًا ويُقال ذلك صراحةً؛ والعميل يستطيع ألا ينتظر
+        const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), AI_TIMEOUT_MS), stop = ticking(wait.querySelector('.bubble'), 'شرعاء تفهم كلامك عبر الذكاء المتصل…');
+        const skip = document.createElement('button'); skip.type = 'button'; skip.className = 'chip'; skip.textContent = 'لا أنتظر — افهمي كلامي محليًا الآن'; skip.addEventListener('click', () => ctl.abort()); wait.append(skip);
+        try { understood = await understandWithAI(text, code, ctl.signal); }
+        catch (err) { note = ctl.signal.aborted ? 'لم يصل رد الذكاء المتصل في الوقت المحدد، ففهمتُ كلامك بالفهم المحلي (قد يفوته بعض ما يلتقطه المتصل).' : `تعذّر الذكاء المتصل (${err.message}) فاستخدمت الفهم المحلي.`; }
+        finally { clearTimeout(timer); stop(); }
       }
       understood ||= await interpretFree(text);
       if (note) understood.assumptions = [note, ...understood.assumptions];
-      clearControls(); bubble(text, 'me'); render(session.answer(m.id, understood));
-    } catch (err) { go.disabled = false; fail(err); }
+      const next = session.answer(m.id, understood);
+      mine.remove(); clearControls(); bubble(text, 'me'); render(next);
+    } catch (err) { mine.remove(); wait.remove(); go.disabled = false; go.textContent = 'إرسال'; form.querySelector('textarea').readOnly = false; fail(err); }
   });
   return control(form);
 }
 
 /** سؤال بسببه الهندسي: خيارات (مفردة أو متعددة) + كتابة حرة + تخطٍّ. */
 function renderAsk(m, row) {
-  const why = document.createElement('p'); why.className = 'why'; why.textContent = m.reason; row.querySelector('.bubble').append(why);
   const wrap = document.createElement('div'); wrap.className = 'pick ask'; wrap.dataset.ask = m.id; const chosen = new Set();
   const send = (picks, text) => {
     const labels = m.options.filter(o => picks.includes(o.id)).map(o => o.label); if (text) labels.push(text);
@@ -266,13 +324,65 @@ function renderProgram(m) {
 function edit(op) { try { render(session.answer('program', op)); } catch (err) { fail(err); } }
 function step(id, value) { try { render(session.answer(id, value)); } catch (err) { fail(err); } }
 function beginChat() {
-  chat.replaceChildren(); session = new SharaSession({ land: confirmedLand }); render(session.start());
+  chat.replaceChildren(); tlog = []; session = new SharaSession({ land: confirmedLand }); render(session.start());
 }
+/** جلسة حوار من جلسة تصميم سابقة لهذا الحفظ (لا نص حوار محفوظ لها): تُبنى من نص الطلب وأعداده المحفوظة فيها. */
+function sharaFromDesign(ds) {
+  const req = ds.input.requirements || {}, counts = {};
+  for (const k of ['bedrooms', 'majlis', 'baths', 'kitchens', 'halls', 'dining']) if (Number.isInteger(req.counts?.[k])) counts[k] = req.counts[k];
+  const texts = String(ds.input.idea || '').split('\n').map(t => t.trim()).filter(t => t.length >= 3);
+  return SharaSession.restore({ v: 1, mode: 'free', phase: 'ready', texts: texts.length ? texts : ['بيت لأسرة'], countOverrides: counts }, { land: confirmedLand });
+}
+/**
+ * يعيد صفحة شرعاء إلى حالها عند الرجوع إليها: نص الحوار السابق كما كان، ثم — إن وُجد تصميم — بطاقة فيها
+ * «العودة إلى تصميمي» و«عدّل طلبي وأعد التوليد»؛ وبلا تصميم يكمل العميل من حيث توقف.
+ */
+function resumeChat() {
+  const ds = designSession(), key = JSON.stringify([confirmedLand, ds?.createdAt || 0, ds?.designs.length || 0]);
+  if (chatFor === key && chat.childElementCount) return; // المحادثة المعروضة هي الحالية
+  chatFor = key; regen = false; chat.replaceChildren(); setError($('chatError'), '');
+  const saved = store.get(HOME_KEY);
+  if (!session && saved?.shara) { session = SharaSession.restore(saved.shara, { land: confirmedLand }); tlog = Array.isArray(saved.tlog) ? saved.tlog.filter(x => x && typeof x.text === 'string') : []; }
+  if (!session && ds) {
+    session = sharaFromDesign(ds);
+    tlog = [{ who: 'shara', text: 'هذا طلبك كما حفظته مع تصميمك:' }, ...(ds.input.idea ? [{ who: 'me', text: ds.input.idea }] : []),
+      ...((ds.input.requirements?.understood || []).length ? [{ who: 'shara', text: 'فهمت من كلامك وطبّقته في التصميم:', kind: 'list', items: ds.input.requirements.understood }] : [])];
+  }
+  if (!session || session.phase === 'mode') { beginChat(); if (ds) { resumeCard(ds, false); chat.append(...chat.querySelectorAll('[data-control]')); } saveHome(); return; }
+  const started = session.texts.length > 0, live = !ds || !started, next = live ? session.resume() : [];
+  // ما سيُعاد عرضه الآن (السؤال القائم أو زر التوليد) لا يُكرَّر من النص المحفوظ
+  const again = new Set(next.map(m => m.text)); let end = tlog.length; while (end > 0 && tlog[end - 1].who !== 'me' && again.has(tlog[end - 1].text)) end--;
+  const was = recording; recording = false;
+  try { for (const m of tlog.slice(0, end)) bubble(m.text, m.who === 'me' ? 'me' : 'shara', { kind: m.kind, items: m.items, reason: m.reason }); } finally { recording = was; }
+  if (ds) resumeCard(ds, started);
+  if (live) render(next, { record: false });
+  saveHome();
+  (chat.querySelector('#resumeCard') || chat.lastElementChild)?.scrollIntoView?.({ block: 'nearest' });
+}
+function resumeCard(ds, started) {
+  const n = ds.designs.length, same = sameLand(confirmedLand, ds.input.land);
+  const card = el('section', 'resume'); card.id = 'resumeCard'; card.setAttribute('aria-label', 'تصميمك المحفوظ');
+  card.append(el('p', '', `${n === 1 ? 'تصميمك محفوظ' : 'تصاميمك الـ' + n + ' محفوظة'} على أرض ${ds.input.land.width} × ${ds.input.land.length} م — رجوعك إلى شرعاء لم يمحُ شيئًا.`));
+  if (!same) card.append(el('p', 'hint', `غيّرتَ الأرض إلى ${confirmedLand.width} × ${confirmedLand.length} م؛ تصميمك المحفوظ مرسوم على الأرض السابقة.`));
+  const row = el('div', 'pick');
+  const back = el('a', 'cta', 'العودة إلى تصميمي ←'); back.id = 'backToDesign'; back.href = './design.html'; row.append(back);
+  if (started) {
+    const editBtn = el('button', 'chip', 'عدّل طلبي وأعد التوليد'); editBtn.type = 'button'; editBtn.id = 'editRequest';
+    editBtn.addEventListener('click', () => {
+      regen = true; editBtn.remove();
+      card.append(el('p', 'hint', same ? 'عدّل البرنامج أدناه أو أضف تفصيلًا بالكلام، ثم اضغط «توليد التصميم». تصاميمك السابقة تبقى بعد الجديدة ولا تُمحى.' : 'عدّل البرنامج أدناه ثم اضغط «توليد التصميم». لأن الأرض تغيّرت، التصاميم الجديدة تحلّ محل السابقة.'));
+      render(session.resume(), { record: false }); chat.querySelector('#program')?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+    });
+    row.append(editBtn);
+  } else card.append(el('p', 'hint', 'بدأتَ طلبًا جديدًا: تصميمك المحفوظ يبقى حتى تولّد تصميمًا جديدًا فيحلّ محله.'));
+  card.append(row); chat.append(card);
+}
+const AI_TIMEOUT_MS = 30000;
 
 // الذكاء المتصل اختياري، ويحتاج رمز دخول الموقع. استدعاؤه الحي غير متحقق منه في هذا التسليم.
-async function understandWithAI(text, accessCode) {
+async function understandWithAI(text, accessCode, signal) {
   const { plot } = normalizeLand(confirmedLand);
-  const { brief } = await requestBrief({ prompt: text, plot, previous: { summary: 'ابدأ من برنامج فارغ، واستخرج ما ذكره العميل فقط.', rooms: [] } }, { accessCode });
+  const { brief } = await requestBrief({ prompt: text, plot, previous: { summary: 'ابدأ من برنامج فارغ، واستخرج ما ذكره العميل فقط.', rooms: [] } }, { accessCode, signal });
   const tally = {}; for (const r of brief.rooms || []) tally[r.type] = (tally[r.type] || 0) + 1;
   const map = { bedrooms: 'bedroom', majlis: 'majlis', baths: 'bath', kitchens: 'kitchen', halls: 'living', dining: 'dining' };
   const counts = {}; for (const [k, t] of Object.entries(map)) if (tally[t] !== undefined) counts[k] = tally[t];
@@ -324,21 +434,52 @@ function renderReport({ facts: f, options }, err) {
   console.warn('تفاصيل فشل التوليد:', err);
 }
 
+let building = false;
 async function build() {
-  show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildText').textContent = 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…';
+  if (building) return; building = true;
+  show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildBusy').hidden = false;
+  // التوليد يجري في عامل خارج الخيط الرئيسي: الصفحة تبقى حيّة والمؤشر يعدّ الثواني الفعلية
+  let stop = ticking($('buildText'), 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…');
   const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements };
+  const prev = regen ? designSession() : null;
   try {
-    const out = await generateInitialDesign(input);
-    // التصميم الأولي يُعرض على العميل أولًا (اعتماد / تصميم آخر / تعديل في المرسم)
-    const ds = createSession({ land: confirmedLand, counts: session.counts, requirements: session.requirements, discovery: input.discovery, idea: input.idea, result: out });
-    if (!saveSession(localStorage, ds)) { writeHandoff(sessionStorage, out.doc, { source: 'home-shara', note: out.notes.join(' '), dna: out.dna, alternatives: out.alternatives }); location.href = './studio.html'; return; }
-    $('buildText').textContent = 'جاهز. أعرض عليك التصميم…';
+    const out = await generateInWorker(input, { land: confirmedLand, counts: session.counts, requirements: session.requirements, discovery: input.discovery, idea: input.idea });
+    // التصميم الأولي يُعرض على العميل أولًا (اعتماد / تصميم آخر / تعديل في المرسم)؛ عند «عدّل طلبي» تبقى تصاميمه السابقة بعد الجديدة
+    const ds = carryOver(out.session, prev).session;
+    saveHome();
+    // غادر العميل شاشة الانتظار (رجوع المتصفح) قبل اكتمال التوليد: يُحفظ التصميم ويصير متاحًا من شريط الخطوات، ولا يُنقل قسرًا
+    if (home.dataset.stage !== 'build') { if (saveSession(localStorage, ds) || saveSession(localStorage, out.session)) { chatFor = null; paintSteps(); if (home.dataset.stage === 'shara') resumeChat(); } stop(); return; }
+    if (!saveSession(localStorage, ds) && !saveSession(localStorage, out.session)) { writeHandoff(sessionStorage, out.handoff.doc, { source: 'home-shara', note: out.handoff.notes.join(' '), dna: out.handoff.dna, alternatives: out.handoff.alternatives }); location.href = './studio.html'; return; }
+    stop(); $('buildText').textContent = 'جاهز. أعرض عليك التصميم…';
     location.href = './design.html';
   } catch (err) {
-    setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
-    $('buildText').textContent = 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…';
-    try { renderReport(await diagnoseFit({ land: confirmedLand, counts: session.counts, discovery: input.discovery, idea: input.idea }), err); $('buildText').textContent = ''; }
-    catch (e2) { $('buildText').textContent = 'تعذّر التحليل التفصيلي.'; console.warn(e2); }
-  }
+    stop(); setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
+    stop = ticking($('buildText'), 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…');
+    try { renderReport(await diagnoseInWorker({ land: confirmedLand, counts: session.counts, discovery: input.discovery, idea: input.idea }), err); stop(); $('buildText').textContent = ''; }
+    catch (e2) { stop(); $('buildText').textContent = 'تعذّر التحليل التفصيلي.'; console.warn(e2); }
+    $('buildBusy').hidden = true;
+  } finally { building = false; }
 }
-$('buildRetry').addEventListener('click', () => show('Shara'));
+$('buildRetry').addEventListener('click', () => { chatFor = null; show('Shara'); resumeChat(); });
+
+// ------------------------------------------------------------------------------------------------ البدء: استعادة ما حُفظ ثم التوجيه بحسب الرابط
+{
+  const saved = store.get(HOME_KEY), ds = designSession(), raw = saved?.raw || (ds ? ds.input.land : null);
+  if (raw) {
+    if (Number.isFinite(raw.length)) $('landLength').value = raw.length; if (Number.isFinite(raw.width)) $('landWidth').value = raw.width;
+    if (raw.floors) $('landFloors').value = String(raw.floors);
+    land.streets = new Set(raw.streets || []); land.entries = new Set(raw.entries || []);
+    grid.querySelectorAll('input[data-kind=street]').forEach(i => { i.checked = land.streets.has(i.value); });
+    refreshLand(); grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
+  }
+  const c = saved?.confirmedLand || (ds ? ds.input.land : null);
+  if (c) { try { confirmedLand = normalizeLand(c).land; } catch { confirmedLand = null; } }
+}
+const stageNow = () => ({ land: 'land', shara: 'shara', build: 'shara' })[home.dataset.stage] || 'land';
+const stepBars = [...document.querySelectorAll('ol.steps')].map(ol => mountSteps(ol, { current: stageNow }));
+paintSteps = () => stepBars.forEach(f => f());
+addEventListener('hashchange', route); addEventListener('popstate', route);
+// العودة بزر رجوع المتصفح من صفحة التصميم (الصفحة محفوظة في ذاكرة الرجوع على شاشة «أجهّز تصميمك»): تُعاد إلى شرعاء وفيها بطاقة التصميم
+addEventListener('pageshow', e => { if (e.persisted) { building = false; chatFor = null; route(); } });
+route();
+globalThis.__mizanHome = { get stage() { return home.dataset.stage; }, get session() { return session; }, get tlog() { return tlog; } }; // للاختبارات الحية

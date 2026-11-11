@@ -4,21 +4,14 @@
 import { normalizeAr, extractRequirements } from './requirements.mjs';
 import { redesign as redesignSession, currentDoc, ledgerFor, summarizeDoc, wantsAlternative } from './design-session.mjs';
 import { fixProposals, applyFix } from './design-fixes.mjs';
+import { STAGES } from './journey-nav.mjs';
 
 const r1 = v => Math.round(v * 10) / 10;
 const AR_LETTER = '\\u0620-\\u064A\\u066E-\\u06D5';
 const has = (t, re) => re.test(t);
 
-/** صفحات المسار كما يراها العميل: الأرض ← شرعاء ← التصميم ← الشكل الخارجي ← ثلاثي الأبعاد ← المخططات ← جدول الكميات. */
-export const STAGES = Object.freeze([
-  { id: 'land', label: 'الأرض', href: './home.html' },
-  { id: 'shara', label: 'شرعاء', href: './home.html' },
-  { id: 'design', label: 'التصميم', href: './design.html' },
-  { id: 'exterior', label: 'الشكل الخارجي', href: './design.html#exterior' },
-  { id: 'view3d', label: 'ثلاثي الأبعاد', href: './view3d.html' },
-  { id: 'sheets', label: 'المخططات', href: './final.html#plan0' },
-  { id: 'boq', label: 'جدول الكميات', href: './final.html#qty' },
-]);
+/** صفحات المسار كما يراها العميل (المصدر: journey-nav.mjs): الأرض ← شرعاء ← التصميم ← الشكل الخارجي ← ثلاثي الأبعاد ← المخططات ← جدول الكميات. */
+export { STAGES };
 const stage = id => STAGES.find(s => s.id === id);
 const go = id => ({ label: stage(id).label, href: stage(id).href });
 

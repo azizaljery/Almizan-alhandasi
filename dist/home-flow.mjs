@@ -218,6 +218,35 @@ export class SharaSession {
     }
     throw Error('خطوة غير معروفة.');
   }
+  /** تغيّرت الأرض والحوار قائم: يبقى الكلام، ويُعاد حساب البرنامج (أدواره ومساحاته تتبع الأرض). */
+  setLand(land) { this.land = land; if (this.brief) this.#rebuild(); }
+  /** حالة الحوار كما تُحفظ في التخزين (بيانات فقط): منها يُستعاد الحوار عند الرجوع إلى شرعاء من أي صفحة. */
+  toJSON() {
+    return { v: 1, mode: this.mode, phase: this.phase, land: this.land, texts: [...this.texts], ai: this.ai, edits: [...this.edits], disabledCustoms: [...this.disabledCustoms],
+      skipped: [...this.skipped], countOverrides: { ...this.countOverrides }, asked: this.asked, guidedStep: this.guidedStep, rounds: this.rounds, aiNotes: [...(this.aiNotes || [])] };
+  }
+  /** يستعيد جلسة محفوظة بـ toJSON؛ البرنامج يُعاد بناؤه من الكلام نفسه (المصدر واحد فلا يختلف عمّا عُرض). يعيد null إن فسدت البيانات. */
+  static restore(data, { land = null } = {}) {
+    if (!data || data.v !== 1 || !Array.isArray(data.texts)) return null;
+    const s = new SharaSession({ land: land || data.land || null });
+    s.mode = ['free', 'guided'].includes(data.mode) ? data.mode : null;
+    s.phase = ['mode', 'free', 'guided', 'program', 'ready'].includes(data.phase) ? data.phase : 'mode';
+    s.texts = data.texts.filter(t => typeof t === 'string').map(t => t.slice(0, 2000)); s.ai = data.ai && typeof data.ai === 'object' ? data.ai : null;
+    s.edits = Array.isArray(data.edits) ? data.edits : []; s.disabledCustoms = Array.isArray(data.disabledCustoms) ? data.disabledCustoms : []; s.skipped = Array.isArray(data.skipped) ? data.skipped : [];
+    s.countOverrides = data.countOverrides && typeof data.countOverrides === 'object' ? { ...data.countOverrides } : {};
+    s.asked = Number.isInteger(data.asked) ? data.asked : 0; s.rounds = Number.isInteger(data.rounds) ? data.rounds : 0;
+    s.guidedStep = Number.isInteger(data.guidedStep) ? Math.max(0, Math.min(GUIDED_STEPS.length - 1, data.guidedStep)) : 0; s.aiNotes = Array.isArray(data.aiNotes) ? data.aiNotes : [];
+    try { if (s.texts.length || Object.keys(s.countOverrides).length) { if (!s.texts.length) s.texts.push('بيت'); s.#rebuild(); } else if (['program', 'ready'].includes(s.phase)) s.phase = s.mode ? s.mode : 'mode'; }
+    catch { return null; }
+    return s;
+  }
+  /** الرسائل التي يكمل منها العميل بعد الاستعادة: أين توقف (اختيار الطريقة، الكتابة الحرة، السؤال الموجّه) أو البرنامج وزر التوليد. */
+  resume() {
+    if (this.brief) return this.#push([this.#programMsg(), this.#generateMsg()]);
+    if (this.phase === 'free') return this.#push([msg('أكمل من حيث توقفت: حدّثني بحرية عن بيتك وأسرتك.', { kind: 'text', id: 'free' })]);
+    if (this.phase === 'guided') return this.#push([this.#askMsg(GUIDED_STEPS[this.guidedStep])]);
+    return this.start();
+  }
   /** ما يستهلكه المولّد من الاكتشاف (client-brief). */
   discovery() { return this.brief ? this.brief.discovery : normalizeDiscovery(undefined); }
   rooms() { return defaultRooms(this.counts); }

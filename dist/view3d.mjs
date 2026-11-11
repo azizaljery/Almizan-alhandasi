@@ -96,6 +96,11 @@ $('shotHQ').addEventListener('click', async () => {
   finally { btn.disabled = false; }
 });
 $('toFinal').addEventListener('click', async () => {
+  // يُعلَم العميل فورًا (اللقطة تأخذ وقتًا على الأجهزة البطيئة) ويُمنع الضغط المكرر
+  const btn = $('toFinal'), label = btn.textContent; if (btn.disabled) return;
+  btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = 'جارٍ تجهيز المخرجات…';
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+  addEventListener('pageshow', e => { if (e.persisted) { btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = label; } }, { once: true });
   // لقطة المجسّم لصفحة المخرجات وكتاب المشروع
   try {
     localStorage.removeItem(SNAP_KEY);

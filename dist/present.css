@@ -183,3 +183,6 @@ table.rooms td .z{display:inline-block;width:10px;height:10px;border-radius:3px;
 .shara.ext .chip.sug::after{content:" · يناسبك";font-size:12px;opacity:.8}
 .shara.ext .extfree{display:flex;gap:8px;align-items:flex-end}
 .shara.ext .extfree textarea{flex:1;margin:0}
+
+/* حوار الشكل الخارجي مفتوح: الترويسة وشريط الخطوات فوق الغطاء */
+body.ext-open .ph{z-index:45}

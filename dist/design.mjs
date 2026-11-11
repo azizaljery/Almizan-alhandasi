@@ -1,6 +1,7 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor } from './design-session.mjs';
+import { redesignInWorker, fixInWorker, mergeInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
@@ -12,7 +13,7 @@ import { displayOr } from './field-guards.mjs';
 import { compareDesigns } from './compare-designs.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { fixProposals, applyFix, applyFitDecision } from './design-fixes.mjs';
-import { exteriorQuestions, answerLabel, describeExterior, setExterior, normalizeExterior, parseExteriorText, storeExterior } from './exterior-brief.mjs';
+import { exteriorQuestions, answerLabel, describeExterior, setExterior, normalizeExterior, parseExteriorText, storeExterior, readExterior } from './exterior-brief.mjs';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c !== null && c !== undefined) n.append(c instanceof Node ? c : document.createTextNode(String(c))); return n; };
@@ -29,10 +30,14 @@ function init() {
   show(session.current);
   if (location.hash === '#exterior') onApprove(); // رابط مرحلة «الشكل الخارجي»: يعتمد التصميم المعروض ويفتح حوار شرعاء
 }
-addEventListener('hashchange', () => { if (location.hash === '#exterior' && session && $('extShara').hidden) onApprove(); });
+// الرابط يحكم حوار الشكل الخارجي: ‎#exterior‎ يفتحه، وغيابه يغلقه — فيعمل زر رجوع/تقدم المتصفح وشريط الخطوات بلا إعادة تحميل
+function syncHash() { if (!session) return; const want = location.hash === '#exterior', ext = $('extShara'); if (want && ext.hidden) onApprove(); else if (!want && !ext.hidden) { ext.hidden = true; extPushed = false; } }
+addEventListener('hashchange', syncHash); addEventListener('popstate', syncHash);
+addEventListener('pageshow', e => { if (e.persisted) { const s2 = loadSession(localStorage); if (s2) { session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } } syncHash(); } });
 
 function show(index) {
-  session.current = index; saveSession(localStorage, session);
+  // الجلسة (عدة ميغابايت نصًّا) تُكتب فقط إن تغيّر التصميم المعروض؛ من ولّد أو عدّل يحفظها قبل العرض
+  if (session.current !== index) { session.current = index; saveSession(localStorage, session); }
   doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null; focus = null;
   const d = session.designs[index], S = summarizeDoc(doc), req = session.input.requirements || {};
   const specs = [
@@ -126,15 +131,28 @@ async function runDecision(id) {
 
 /** تنفيذ مقترح إصلاح (أو كلها): النتيجة تصميم جديد يُعرض مع رد شرعاء بما عولج وما تعذّر وسببه. */
 async function runFix(id) {
-  const st = $('fixStatus'), btns = [...document.querySelectorAll('#fixes button')];
-  btns.forEach(b => { b.disabled = true; }); if (st) st.textContent = 'أعالج الملاحظات… قد أجرّب عدة توزيعات.';
-  await new Promise(r => setTimeout(r, 30));
+  if (pending()) { toast('ما زلت أنفّذ طلبك السابق؛ انتظر حتى ينتهي.'); return; }
+  const st = $('fixStatus'), btns = [...document.querySelectorAll('#fixes button')], mine = btns.find(b => (id === 'all' ? b.id === 'fixAll' : b.dataset.fix === id)), label = mine?.textContent;
+  // التنفيذ في عامل خارج الخيط الرئيسي: الصفحة تبقى تستجيب (تمرير، تكبير المسقط) والمؤشر يعدّ الثواني الفعلية
+  const done = busy(true, st, 'أعالج الملاحظات… قد أجرّب عدة توزيعات.'); if (mine) mine.textContent = 'جارٍ التنفيذ…';
+  const restore = () => { done(); if (mine) mine.textContent = label; };
   try {
-    const out = await applyFix(session, id);
-    if (!out.changed) { if (st) st.textContent = out.reply.failed.length ? 'لم أجد علاجًا: ' + out.reply.failed.map(f => `«${f.text}» — ${f.why}`).join(' ') : 'لا شيء يحتاج علاجًا.'; btns.forEach(b => { b.disabled = false; }); return; }
+    const out = await fixInWorker(session, id);
+    if (!out.changed) { restore(); if (st) st.textContent = out.reply.failed.length ? 'لم أجد علاجًا: ' + out.reply.failed.map(f => `«${f.text}» — ${f.why}`).join(' ') : 'لا شيء يحتاج علاجًا.'; return; }
+    done();
     session = out.session; saveSession(localStorage, session); show(session.current);
     toast(out.reply.failed.length ? `عالجت ${out.reply.fixed.length} وتعذّر ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'عالجت الملاحظات — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (e) { if (st) st.textContent = 'تعذّر تنفيذ المقترح: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; btns.forEach(b => { b.disabled = false; }); }
+  } catch (e) { restore(); if (st) st.textContent = 'تعذّر تنفيذ المقترح: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; }
+}
+/**
+ * حالة «جارٍ التنفيذ» للصفحة: تُعطَّل أزرار الأفعال (حتى لا يبدأ طلبان على الجلسة نفسها) ويظهر نص الحالة مع الثواني المنقضية.
+ * تعيد دالة الإنهاء (تعيد الأزرار كما كانت).
+ */
+function busy(on, statusNode, text) {
+  const btns = [...document.querySelectorAll('.actions button, #fixes button, .history button, #fbGo, #mgGo')].filter(b => !b.disabled);
+  btns.forEach(b => { b.disabled = true; }); document.body.dataset.busy = '1';
+  const stop = ticking(statusNode, text);
+  return () => { stop(); btns.forEach(b => { b.disabled = false; }); delete document.body.dataset.busy; };
 }
 
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
@@ -183,13 +201,14 @@ function openMerge() {
 $('mgClose').addEventListener('click', () => { $('merge').hidden = true; });
 $('mgGo').addEventListener('click', async () => {
   const [a, b] = [...document.querySelectorAll('#mgList input:checked')].map(c => Number(c.value));
-  $('mgGo').disabled = true; $('mgStatus').textContent = 'أدمج التصميمين…';
-  await new Promise(r => setTimeout(r, 30));
+  if (pending()) { $('mgStatus').textContent = 'ما زلت أنفّذ طلبك السابق؛ انتظر حتى ينتهي.'; return; }
+  const done = busy(true, $('mgStatus'), 'أدمج التصميمين… أبحث عن توزيع سليم يأخذ من كليهما.'); $('mgGo').textContent = 'جارٍ الدمج…';
+  const end = () => { done(); $('mgGo').textContent = 'ادمج التصميمين'; };
   try {
-    const out = await mergeDesigns(session, a, b);
+    const out = await mergeInWorker(session, a, b); end();
     session = out.session; saveSession(localStorage, session);
     $('merge').hidden = true; show(session.current); toast('تم الدمج — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (err) { $('mgStatus').textContent = err.message || 'تعذّر الدمج.'; $('mgGo').disabled = false; }
+  } catch (err) { end(); $('mgStatus').textContent = err.message || 'تعذّر الدمج.'; $('mgGo').disabled = false; }
 });
 
 /** مقارنة تصميمين جنبًا إلى جنب: المسقطان مع تظليل ما تغيّر موضعه، وأهم الفروق، وجدول المواصفات. */
@@ -351,13 +370,16 @@ function storeFacadeWish() { try { const w = session.input.requirements?.prefs?.
 // مرحلة «الشكل الخارجي»: بعد اعتماد المخطط تحاور شرعاء العميل بأسئلة موجّهة (كل سؤال يتبع ما سبقه)، ثم تولّد الواجهة وتعرضها ثلاثية الأبعاد.
 // الجواب يُحفظ في الجلسة (prefs.exterior) وتقرؤه صفحة العرض فتفتح على واجهة هذا المخطط وهذا الذوق. الرابط المباشر: design.html#exterior
 function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); openExterior(); }
-let extAns = {}, extDone = new Set(), extLog = [];
+let extAns = {}, extDone = new Set(), extLog = [], extPushed = false;
 const extPending = () => exteriorQuestions(extAns).filter(q => !extDone.has(q.id));
 function openExterior() {
   extAns = {}; extDone = new Set(); extLog = [];
+  // عودة إلى هذه المرحلة: أجوبتك السابقة باقية (لا يبدأ الحوار من الصفر)؛ تولّد بها مباشرة أو تعيد الأسئلة
+  const saved = readExterior(session);
   const known = { salmani: 'S', modern: 'modern', hijazi: 'H', najdi: 'N', classic: 'C' }[session.input.requirements?.prefs?.style];
-  if (known) { extAns.style = known; extDone.add('style'); extLog.push({ q: { text: 'ذكرتَ لي من قبل أنك تحب الطراز ال' + answerLabel('style', known) + '؛ سأبني عليه (تستطيع تغييره بالكتابة).', reason: '' } }); }
-  $('extShara').hidden = false; if (location.hash !== '#exterior') history.replaceState(null, '', '#exterior'); extPaint();
+  if (saved) { extAns = { ...saved }; for (const q of exteriorQuestions(extAns)) extDone.add(q.id); extLog.push({ q: { text: 'هذه أجوبتك السابقة عن الشكل الخارجي، وهي محفوظة. ولّد بها مباشرة، أو اكتب ما تريد تغييره، أو اضغط «أعد الأسئلة من البداية».', reason: '' } }); }
+  else if (known) { extAns.style = known; extDone.add('style'); extLog.push({ q: { text: 'ذكرتَ لي من قبل أنك تحب الطراز ال' + answerLabel('style', known) + '؛ سأبني عليه (تستطيع تغييره بالكتابة).', reason: '' } }); }
+  $('extShara').hidden = false; if (location.hash !== '#exterior') { history.pushState(null, '', '#exterior'); extPushed = true; } extPaint();
 }
 function extPaint() {
   const pend = extPending(), q = pend[0], total = exteriorQuestions(extAns).length;
@@ -369,7 +391,7 @@ function extPaint() {
   $('extStep').textContent = q ? `السؤال ${total - pend.length + 1} من ${total}` : 'اكتملت الأسئلة';
   $('extOpts').replaceChildren(...(q ? q.options.map(o => el('button', { type: 'button', class: 'chip' + (o.suggested ? ' sug' : ''), 'data-id': o.id, title: o.hint || null, onclick: () => extAnswer(q, o.id) }, o.label)) : []));
   $('extOpts').dataset.q = q ? q.id : '';
-  $('extGo').hidden = !!q; $('extAll').hidden = !q; $('extBack').hidden = !extLog.some(x => x.id); $('extFree').hidden = false; $('extStatus').textContent = '';
+  $('extGo').hidden = !!q; $('extAll').hidden = !q; $('extBack').hidden = !extLog.some(x => x.id); $('extRestart').hidden = !!q || extLog.some(x => x.id) || !readExterior(session); $('extFree').hidden = false; $('extStatus').textContent = '';
   $('extText').placeholder = q ? 'أو اكتب بكلماتك، مثل: أحب الهيبة، نجدي بحجر فاتح ومدخل غائر' : 'تريد تغيير شيء قبل التوليد؟ اكتبه هنا';
 }
 function extAnswer(q, id) { extAns[q.id] = id; extDone.add(q.id); extLog.push({ id: q.id, q, a: answerLabel(q.id, id) }); extPaint(); }
@@ -391,12 +413,16 @@ function extGenerate() {
   session = setExterior(session, ext); saveSession(localStorage, session); storeExterior(localStorage, ext); storeFacadeWish();
   $('extStatus').textContent = 'أولّد الشكل الخارجي…'; location.href = './view3d.html';
 }
+// الحوار يغطي الصفحة؛ الترويسة وشريط الخطوات يبقيان فوقه قابلين للضغط (الرجوع إلى أي مرحلة من داخل الحوار)
+new MutationObserver(() => document.body.classList.toggle('ext-open', !$('extShara').hidden)).observe($('extShara'), { attributes: true, attributeFilter: ['hidden'] });
 $('extSend').addEventListener('click', extSay);
 $('extText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); extSay(); } });
 $('extBack').addEventListener('click', extBack);
 $('extAll').addEventListener('click', () => { for (const q of extPending()) extDone.add(q.id); extPaint(); });
 $('extGo').addEventListener('click', extGenerate);
-$('extClose').addEventListener('click', () => { $('extShara').hidden = true; history.replaceState(null, '', location.pathname + location.search); });
+$('extRestart').addEventListener('click', () => { extAns = {}; extDone = new Set(); extLog = []; extPaint(); });
+// «رجوع للمخطط»: إن فُتح الحوار من هذه الصفحة فالرجوع خطوة في سجل المتصفح (فيبقى «تقدم» يعيد فتحه)، وإلا يُزال ‎#exterior‎ من الرابط
+$('extClose').addEventListener('click', () => { if (extPushed) { extPushed = false; history.back(); return; } $('extShara').hidden = true; history.replaceState(null, '', location.pathname + location.search); });
 function onStudio() {
   const alternatives = (session.alternatives || []).map(a => { try { return { index: a.index, strategy: a.strategy, doc: JSON.parse(a.doc) }; } catch { return null; } }).filter(Boolean);
   try { writeHandoff(sessionStorage, doc, { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }
@@ -409,25 +435,34 @@ function openShara() {
 $('fbClose').addEventListener('click', () => { $('shara').hidden = true; });
 $('fbGo').addEventListener('click', async () => {
   const picks = [...document.querySelectorAll('#fbChips .chip[aria-pressed=true]')].map(b => b.dataset.id), text = $('fbText').value.trim();
-  $('fbGo').disabled = true; $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
-  await new Promise(r => setTimeout(r, 30));
+  if (pending()) { $('fbStatus').textContent = 'ما زلت أنفّذ طلبك السابق؛ انتظر حتى ينتهي.'; return; }
+  let done = busy(true, $('fbStatus'), 'أطبّق ملاحظاتك… أبحث عن توزيع يحققها.'); $('fbGo').textContent = 'جارٍ التصميم…';
+  const end = () => { done(); $('fbGo').textContent = 'صمّم لي بديلًا'; };
   try {
     // رمز الدخول (إن أُدخل في المحادثة): Claude يفهم الملاحظة أيضًا، ويُدمج فهمه مع الفهم المحلي
     let ai = null, code = ''; try { code = sessionStorage.getItem('mizan.ai.code') || ''; } catch { /* لا تخزين */ }
     if (code && text.length >= 8) {
-      $('fbStatus').textContent = 'أفهم ملاحظتك عبر Claude…';
-      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: { summary: 'ملاحظة تعديل على تصميم معروض؛ استخرج ما تطلبه الملاحظة فقط.', rooms: [] } }, { accessCode: code, signal: AbortSignal.timeout?.(45000) })).brief.requirements || null; }
-      catch { ai = null; }
-      $('fbStatus').textContent = 'أطبّق ملاحظاتك…';
+      // الذكاء المتصل بمهلة 30 ثانية؛ إن تأخر أو فشل تُفهم الملاحظة محليًا ويُكمَل التصميم (ويُقال ذلك)
+      done(); done = busy(true, $('fbStatus'), 'أفهم ملاحظتك عبر الذكاء المتصل… (إن تأخر أكملتُ بالفهم المحلي)');
+      let aiNote = '';
+      try { const { plot } = normalizeLand(session.input.land); ai = (await requestBrief({ prompt: text, plot, previous: { summary: 'ملاحظة تعديل على تصميم معروض؛ استخرج ما تطلبه الملاحظة فقط.', rooms: [] } }, { accessCode: code, signal: AbortSignal.timeout?.(30000) })).brief.requirements || null; }
+      catch { ai = null; aiNote = 'تعذّر الذكاء المتصل أو تأخر؛ فهمتُ ملاحظتك محليًا.'; }
+      done(); done = busy(true, $('fbStatus'), (aiNote ? aiNote + ' ' : '') + 'أطبّق ملاحظاتك…');
     }
-    const out = await redesign(session, { picks, text, ai });
+    const out = await redesignInWorker(session, { picks, text, ai }); end();
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (err) { $('fbStatus').textContent = err.message || 'تعذّر تصميم بديل.'; $('fbGo').disabled = false; }
+  } catch (err) { end(); $('fbStatus').textContent = err.message || 'تعذّر تصميم بديل.'; $('fbGo').disabled = false; }
 });
 
 // نافذة شرعاء الجانبية عدّلت الجلسة (طلب نُفّذ): تُعرض النتيجة هنا فورًا
 globalThis.addEventListener?.('mizan:session', e => { const s2 = e.detail?.session; if (!s2) return; session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } });
+// وحدات المولّد تُحمَّل في العامل والمتصفح خامل، فلا ينتظرها أول «تصميم آخر» أو «نفّذ»
+(globalThis.requestIdleCallback || (f => setTimeout(f, 600)))(() => {
+  if (!session) return; warmGenerator();
+  // الصفحة التالية (العرض ثلاثي الأبعاد) ثقيلة التحميل: مكتبتها ووحداتها تُجلب مسبقًا والعميل يتأمل مخططه
+  for (const href of ['./vendor/three.module.js', './view3d.mjs', './draw/viewer-draw.mjs', './three-runtime.mjs']) { const l = document.createElement('link'); l.rel = 'modulepreload'; l.href = href; document.head.append(l); }
+});
 try { init(); } catch (e) { $('main').replaceChildren(el('div', { class: 'empty card' }, el('h2', {}, 'تعذّر عرض التصميم'), el('p', {}, e.message), el('a', { class: 'btn', href: './home.html' }, 'العودة'))); }
 globalThis.__mizanDesign = { get session() { return session; }, get doc() { return doc; }, get view() { return view; } }; // للاختبارات الحية
