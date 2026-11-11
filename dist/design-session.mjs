@@ -57,6 +57,22 @@ function entry(result, feedback) {
 }
 export const currentDoc = s => parseDoc(s.designs[s.current].doc);
 
+const landKey = l => JSON.stringify([l?.length, l?.width, [...(l?.streets || [])].sort(), [...(l?.entries || [])].sort()]);
+/** هل الأرض نفسها (الأبعاد والشوارع والمداخل)؟ عدد الأدوار من الطلب لا من الأرض. */
+export const sameLand = (a, b) => !!a && !!b && landKey(a) === landKey(b);
+/**
+ * «عدّل طلبي وأعد التوليد» من صفحة شرعاء: التصاميم الجديدة تتقدّم، وتصاميم العميل السابقة تبقى بعدها (لا تُمحى)
+ * ما دامت الأرض نفسها؛ إن تغيّرت الأرض فالسابقة لا تصلح لها فتُستبدل. يعيد { session, kept }.
+ */
+export function carryOver(next, prev) {
+  if (!prev || !Array.isArray(prev.designs) || !prev.designs.length || !sameLand(next?.input?.land, prev.input?.land)) return { session: next, kept: 0 };
+  const s = clone(next), have = new Set(s.designs.map(d => d.doc));
+  const old = prev.designs.filter(d => d && typeof d.doc === 'string' && !have.has(d.doc)).slice(-(MAX_DESIGNS - s.designs.length));
+  s.designs.push(...clone(old));
+  s.seen = [...(s.seen || []), ...clone(prev.seen || [])]; s.seenPats = [...new Set([...(s.seenPats || []), ...(prev.seenPats || []), ...old.map(d => d.pat).filter(Boolean)])];
+  return { session: s, kept: old.length };
+}
+
 /**
  * يطبّق ملاحظات العميل (خيارات + نص حر) على الطلب.
  * - طلب محدد (نص مفهوم أو خيار تعديل): يُطبَّق على التصميم المعروض نفسه متى أمكن (نفس التوزيع) ولا يُفرض توزيع جديد.
@@ -164,7 +180,7 @@ export function ledgerFor(session, doc = currentDoc(session)) {
   try { return verifyRequest(doc, req, { entry }); } catch { return session.designs[session.current]?.ledger || []; }
 }
 
-export default { SESSION_KEY, FEEDBACK, createSession, redesign, mergeDesigns, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules };
+export default { SESSION_KEY, FEEDBACK, createSession, redesign, mergeDesigns, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules, carryOver, sameLand };
 
 // ------------------------------------------------------------------------------------------ العرض
 import { analyzeDoc } from './draw/digest.mjs';

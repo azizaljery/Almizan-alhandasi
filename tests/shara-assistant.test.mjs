@@ -44,7 +44,7 @@ test('الطلبات: تُنفَّذ على التصميم وتُحفظ في ج�
 test('الصدق: ما لم يُفهم لا يغيّر شيئًا ويُقال، وبلا تصميم مفتوح تدل على البداية', async () => {
   const a = await sharaTurn(S, 'الجو حلو اليوم'); assert.equal(a.kind, 'unclear'); assert.equal(a.session, undefined);
   const b = await sharaTurn(S, 'كم عمر المهندس؟'); assert.equal(b.kind, 'unclear'); assert.match(b.text, /لم أجد جواب سؤالك/);
-  const c = await sharaTurn(null, 'كم مساحة المجلس؟'); assert.equal(c.kind, 'unclear'); assert.equal(c.actions[0].href, './home.html');
+  const c = await sharaTurn(null, 'كم مساحة المجلس؟'); assert.equal(c.kind, 'unclear'); assert.equal(c.actions[0].href, './home.html#land');
   assert.equal(answerQuestion(S, 'قصيدة عن البيت'), null);
 });
 test('الشكل الخارجي بالكلام: يُستدعى مطبّق الواجهة ولا يُعاد توليد المخطط', async () => {
