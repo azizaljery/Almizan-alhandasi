@@ -15,6 +15,12 @@ binding = "DB"
 database_name = "almizan-archive"
 database_id = "993f60e1-c187-42ca-bf4c-f0a5a4b9c44f"
 
+# الصورة المعمارية الاحترافية (/api/photo): ربط Workers AI لنماذج FLUX.2.
+# يتطلب أن يملك رمز النشر صلاحية Workers AI، وتجاوزُ الحصة المجانية (10,000 Neuron يوميًا) يتطلب خطة Workers Paid.
+# لإيقاف الخدمة دون نشر كود: اضبط PHOTO_DAILY_CAP = "0".
+[ai]
+binding = "AI"
+
 [observability]
 enabled = true
 
@@ -24,3 +30,9 @@ enabled = true
 #   ANTHROPIC_MODEL  (الافتراضي claude-sonnet-5-5)
 #   ALLOWED_ORIGIN   (قائمة أصول مفصولة بفواصل)
 #   ACCESS_TEAM_DOMAIN, ACCESS_AUD  (لتسجيل الدخول للأرشيف عبر Cloudflare Access)
+#   PHOTO_DAILY_CAP       (سقف يومي إجمالي لعدد الصور الاحترافية لحماية الفاتورة؛ الافتراضي 40، والصفر يوقف الخدمة)
+#   PHOTO_MODEL_STANDARD  (الافتراضي @cf/black-forest-labs/flux-2-klein-9b)
+#   PHOTO_MODEL_PREMIUM   (الافتراضي @cf/black-forest-labs/flux-2-dev)
+# عدّاد السقف اليومي يصير مضمونًا عبر D1 بعد إنشاء الجدول مرة واحدة:
+#   npx wrangler d1 execute almizan-archive --remote --file db/photo-usage.sql
+# وبدونه يعمل العدّاد في ذاكرة النسخة (تقريبي؛ انظر worker/photo.mjs).
