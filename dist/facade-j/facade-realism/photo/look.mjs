@@ -8,7 +8,7 @@ export function sunVector(THREE, az, el) { const a = az * Math.PI / 180, e = el 
 
 /** خامة قبة السماء: إشعاع خطي (HDR) دالة في الاتجاه فقط. */
 function skyMaterial(THREE, sunDir, sc, night, clouds) {
-  const k = night ? .035 : 1;
+  const k = night ? .1 : 1;
   return new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, toneMapped: false,
     uniforms: { uSun: { value: sunDir.clone() }, uSunC: { value: new THREE.Vector3(sc[0], sc[1], sc[2]) }, uK: { value: k }, uClouds: { value: night ? 0 : clouds },
       uZen: { value: new THREE.Color('#7fb2e6').convertSRGBToLinear() }, uHor: { value: new THREE.Color('#f3e7d3').convertSRGBToLinear() }, uGnd: { value: new THREE.Color('#9a8468').convertSRGBToLinear() } },
@@ -49,7 +49,7 @@ export function photoLook(THREE, { scene, renderer, sun, S, q, Sky, tier }) {
   scene.fog = new THREE.FogExp2(night ? '#0c0e14' : '#ecd9bd', night ? .004 : Number(q.get('fog') ?? .0052));
   // الشمس + ضوء سماء/ارتداد أرض (نصف كرة). ضوء البيئة (IBL) يُخفَّض على الخامات الخشنة ليأتي أغلب المحيط من مصدر يمكن تظليله عند التحسين التراكمي.
   let hemi = null; scene.traverse(o => { if (o.isHemisphereLight) hemi = o; }); if (!hemi) { hemi = new THREE.HemisphereLight(); scene.add(hemi); }
-  hemi.color.set(night ? '#27314a' : '#dfe3ea'); hemi.groundColor.set(night ? '#1a1612' : '#d9b48c'); hemi.intensity = Number(q.get('hemi') ?? (night ? .5 : .9));
+  hemi.color.set(night ? '#46587f' : '#dfe3ea'); hemi.groundColor.set(night ? '#4a3a2c' : '#d9b48c'); hemi.intensity = Number(q.get('hemi') ?? (night ? 1.6 : .9));
   sun.color.setRGB(sc[0], sc[1], sc[2]); sun.intensity = Number(q.get('sun') ?? (night ? .06 : 5.4));
   const state = { az, el, dir, night, hemi, sun, env, envRough: Number(q.get('envi') ?? .3), tier, bounds: null, disposables: [crt, env] };
   fitSun(THREE, state, buildingBox(THREE, S), 4);

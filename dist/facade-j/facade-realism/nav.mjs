@@ -168,7 +168,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     const t = new THREE.Vector3(center.x, size.y * .45, center.z), d = span * 1.35;
     const V = {
       front: { az: 0, el: 6 * DEG, dist: d, target: t },
-      corner: refiner ? { az: api.cornerSign * 42 * DEG, el: 15 * DEG, dist: d * 1.3, target: t } : { az: -38 * DEG, el: 18 * DEG, dist: d * 1.05, target: t }, // مع المحيط: من جهة بوابة السيارات (لا نخلة أمامية تحجب)
+      corner: refiner ? { az: api.cornerSign * 42 * DEG, el: 14 * DEG, dist: d * 1.5, target: t } : { az: -38 * DEG, el: 18 * DEG, dist: d * 1.05, target: t }, // مع المحيط: من جهة بوابة السيارات (لا نخلة أمامية تحجب)
       side: { az: -90 * DEG, el: 8 * DEG, dist: d, target: t },
       back: { az: 180 * DEG, el: 10 * DEG, dist: d, target: t },
       top: refiner ? { az: -18 * DEG, el: 58 * DEG, dist: d * 2.1, target: new THREE.Vector3(center.x, 0, center.z + size.z * .15) } : { az: 0, el: 80 * DEG, dist: d * 1.2, target: new THREE.Vector3(center.x, 0, center.z) },
