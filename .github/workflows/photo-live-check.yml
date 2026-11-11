@@ -1,0 +1,51 @@
+name: Photo Live Check (manual)
+
+# فحص يدوي حي لميزة «صورة معمارية احترافية» على الموقع المنشور. يستدعي النموذج الحقيقي فعلًا،
+# فكل تشغيل يستهلك رصيد Workers AI (صورة واحدة لكل مستوى). لا يعمل تلقائيًا أبدًا.
+on:
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: رابط الموقع المنشور
+        default: https://almizan-handasi.aljeryabod.workers.dev
+      tier:
+        description: المستوى
+        type: choice
+        options: [standard, premium, both]
+        default: standard
+      lighting:
+        description: الإضاءة
+        type: choice
+        options: [golden, day, sunset, night]
+        default: golden
+
+permissions:
+  contents: read
+
+jobs:
+  photo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright (not saved to package.json; used only to compute the fidelity score)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Generate one professional photo on the live site
+        run: node scripts/photo-live-check.mjs
+        env:
+          SITE_URL: ${{ inputs.site_url }}
+          TIER: ${{ inputs.tier }}
+          LIGHTING: ${{ inputs.lighting }}
+          OUT: photo-live-out
+      - name: Upload the generated photo and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: photo-live-check
+          path: photo-live-out
+          if-no-files-found: warn

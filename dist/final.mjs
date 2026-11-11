@@ -19,7 +19,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const fmt = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }));
 const get = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const set = (k, v) => { try { localStorage.setItem(k, v); } catch { /* التخزين غير متاح */ } };
-let state = { rates: {}, reservePct: '', vatPct: '' }, doc = null, dna = null, data = null, mep = null;
+let state = { rates: {}, reservePct: '', vatPct: '' }, doc = null, dna = null, data = null, mep = null, proPhoto = null;
 try { Object.assign(state, JSON.parse(get(RATES_KEY) || '{}')); } catch { /* ... */ }
 
 function load() {
@@ -34,6 +34,21 @@ function compute() {
   let snap = null; try { snap = get(SNAP_KEY); } catch { /* ... */ }
   data = buildFinalData(doc, { dna, rates: state.rates, reservePct: state.reservePct, vatPct: state.vatPct, snapshot3d: snap });
   data.mep = mep; // نتيجة الأنظمة تبقى عبر إعادة الحساب (التكلفة، وكتاب المشروع)
+  data.proPhoto = proPhoto;
+}
+// الصورة المعمارية الاحترافية: إن وُلّدت في العرض ثلاثي الأبعاد لهذا التصميم نفسه (بصمة الهندسة) تظهر في قسم المنظور وفي كتاب المشروع، بوسمها دائمًا.
+async function attachProPhoto() {
+  try {
+    const [{ loadLastPhoto, DISCLAIMER }, { designHash }] = await Promise.all([import('./photo-pro.mjs'), import('./facade-j/facade-realism/variation.mjs')]);
+    const rec = await loadLastPhoto();
+    if (!rec?.key || rec.key !== String(designHash(doc)) || !/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(rec.image || '')) return;
+    proPhoto = { image: rec.image, ok: rec.ok }; if (data) data.proPhoto = proPhoto;
+    const s = $('view3d'); if (!s || s.querySelector('.pro-photo')) return;
+    const fig = document.createElement('figure'), img = document.createElement('img'), cap = document.createElement('figcaption');
+    fig.className = 'shot pro-photo'; fig.style.margin = '0 0 14px'; img.alt = 'صورة معمارية محسّنة بالذكاء الاصطناعي من مجسم تصميمك'; img.src = rec.image;
+    cap.className = 'muted'; cap.textContent = DISCLAIMER + '.' + (rec.ok === false ? ' قد تختلف عن تصميمك في بعض التفاصيل.' : '') + ' المرجع هو المخططات.';
+    fig.append(img, cap); s.querySelector('h2').after(fig);
+  } catch { /* الصورة اختيارية */ }
 }
 function renderCost() {
   const c = data.cost;
@@ -123,6 +138,7 @@ function render() {
   // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم، بالعربية
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
   $('fmain').innerHTML = parts.join('');
+  attachProPhoto();
   $('fnav').innerHTML = [['summary', 'الملخص'], ...(d.rooms?.length ? [['areas', 'المساحات']] : []), ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));

@@ -9,6 +9,7 @@ import {
 import { fidelityScore, edgeMaps, FIDELITY } from '../dist/photo-fidelity.mjs';
 import { describeForPhoto, fitSize, DISCLAIMER, PHOTO_PRO } from '../dist/photo-pro.mjs';
 import { sharaTurn } from '../dist/shara-assistant.mjs';
+import { projectBookHtml } from '../dist/final-outputs.mjs';
 import { villaScene } from './fixtures/photo-synth.mjs';
 
 // كل استدعاءات النموذج هنا بمزوّد وهمي: لا يُتصل بـ Workers AI ولا يُختبر النموذج الحقيقي.
@@ -272,4 +273,12 @@ test('شرعاء المرافقة: طلب صورة واقعية/احترافية
   }
   const away = await sharaTurn(session, 'ابي صورة واقعية للبيت', { page: 'design' });
   assert.ok(away.actions.some(a => /view3d/.test(a.href || '')), 'من صفحة أخرى: رابط العرض ثلاثي الأبعاد');
+});
+
+test('كتاب المشروع: الصورة الاحترافية تُدرج بوسمها فقط إن كانت data URL صالحة', () => {
+  const fin = readFileSync(new URL('../dist/final.mjs', import.meta.url), 'utf8'), out = readFileSync(new URL('../dist/final-outputs.mjs', import.meta.url), 'utf8');
+  assert.ok(fin.includes('attachProPhoto()') && fin.includes('rec.key !== String(designHash(doc))'), 'تُعرض لتصميمها نفسه فقط');
+  const line = out.split('\n').find(l => l.includes('data.proPhoto?.image'));
+  assert.ok(line.includes('للتصوّر لا للتنفيذ') && line.includes('data:image'));
+  assert.equal(typeof projectBookHtml, 'function');
 });

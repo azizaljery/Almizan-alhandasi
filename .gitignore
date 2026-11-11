@@ -6,3 +6,4 @@ dist/client/
 dist/.openai/
 .sites-runtime/
 node_modules/
+photo-live-out/
