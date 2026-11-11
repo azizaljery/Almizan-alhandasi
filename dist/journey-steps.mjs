@@ -13,7 +13,7 @@ ol.steps.jst li.on>span{font-weight:600}
 ol.steps.jst li.off>button{opacity:.48;cursor:not-allowed}
 ol.steps.jst .jst-why{position:absolute;inset-block-start:calc(100% + 6px);inset-inline-start:0;z-index:80;max-width:min(340px,86vw);white-space:normal;background:#2c2018;color:#f6ecd8;border:1px solid #b08a4a;border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;box-shadow:0 8px 24px #0006}
 .fh ol.steps.jst li.on{background:#d9b877;color:#3d241b}.fh ol.steps.jst li.done,.fh ol.steps.jst li.off{opacity:.9}
-@media (max-width:820px){ol.steps.jst{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1 1 100%;order:5}ol.steps.jst::-webkit-scrollbar{display:none}ol.steps.jst .jst-why{position:fixed;inset-block-start:auto;inset-block-end:16px;inset-inline:12px;max-width:none}}
+@media (max-width:820px){ol.steps.jst{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1 1 100%;order:5;min-width:0}ol.steps.jst::-webkit-scrollbar{display:none}ol.steps.jst .jst-why{position:fixed;inset-block-start:auto;inset-block-end:16px;inset-inline:12px;max-width:none}}
 @media print{ol.steps.jst{display:none!important}}
 `;
 let styled = false;
@@ -47,7 +47,8 @@ export function mountSteps(ol, { current, onLocal = null, store = globalThis.loc
       return li;
     });
     ol.replaceChildren(...items);
-    const on = ol.querySelector('li.on'); if (on && ol.scrollWidth > ol.clientWidth) on.scrollIntoView?.({ block: 'nearest', inline: 'center' });
+    // الشريط الممرَّر (الجوال): المرحلة الحالية في وسطه — بتمرير الشريط نفسه لا الصفحة
+    const on = ol.querySelector('li.on'); if (on && ol.scrollWidth > ol.clientWidth) { const a = on.getBoundingClientRect(), b = ol.getBoundingClientRect(); ol.scrollLeft += (a.left + a.width / 2) - (b.left + b.width / 2); }
   }
   paint();
   // تغيّرت الجلسة في لسان آخر أو عادت الصفحة من ذاكرة الرجوع: يُعاد الرسم
