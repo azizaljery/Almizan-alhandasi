@@ -36,6 +36,7 @@ import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model
 import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
 import { buildBuildingScene, closeupCamera } from './facade-realism/scene-hq.mjs';
 import { extrudeFloors, decorateFloors, floorsInfo, bandLevels, facadeDoc } from './facade-realism/floors.mjs';
+import { pickTier, gpuName, heroCamera, photoBegin, photoFinish, createRefiner, frontSouthDoc } from './facade-realism/photo/pipeline.mjs';
 
 const q = new URLSearchParams(location.search);
 const mode = q.get('mode') || 'view', id = (q.get('v') || 'A').toUpperCase();
@@ -83,6 +84,10 @@ async function variantMode() {
   let docRaw = null; if (q.get('src') === 'studio') { try { docRaw = localStorage.getItem('mizan.studio.doc.v1'); } catch {} if (!docRaw) throw new Error('لا يوجد تصميم معتمد محفوظ في هذا المتصفح'); }
   if (!docRaw) { const res = await fetch('./facade-realism/C1.json'); if (!res.ok) throw new Error('المسقط غير متاح (' + res.status + ')'); docRaw = await res.text(); }
   let doc = parseDoc(docRaw);
+  const T0 = performance.now(), HQ = q.get('hq') === '1', PHOTO = HQ && q.get('photo') !== '0' && !grey;
+  // «الصورة المعمارية»: المدخل دائمًا في الواجهة الأمامية (المحرك يعامل الجنوب أمامًا): مخطط مدخله شمالي/شرقي/غربي يُدار دورانًا صِرفًا قبل البناء
+  if (PHOTO) doc = frontSouthDoc(doc);
+  const docSite = doc; // المستند الكامل (حدود الأرض، الشوارع، قطع الحوش) للمحيط
   // عدد الأدوار في الواجهة يتبع المخطط/طلب العميل لا القالب: نموذج الواجهة يُبنى من الدور الأرضي ثم يُمدّ رأسيًا إلى العدد المطلوب (extrudeFloors).
   // كان مخطط الدورين يُبنى بدوريه ثم يُمدّ فوقهما دور ثالث، وكانت قوالب بعض الطرز تفرض عدد أدوارها على مخطط العميل.
   doc = await facadeDoc(doc, q, transformDoc); // القوالب تغيّر الفتحات والمداخل والجدران؛ عدد الأدوار يتبع المخطط أو طلب العميل الصريح
@@ -103,6 +108,7 @@ async function variantMode() {
   stage.innerHTML = ''; stage.appendChild(canvas);
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+  const tier = pickTier(q, { gpu: gpuName(renderer) });
   renderer.shadowMap.enabled = q.get('shadows') !== '0'; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -124,8 +130,11 @@ async function variantMode() {
   scene.add(sun, sun.target);
   const S = buildBuildingScene(THREE, built, lib, { grey: greyMats, geo, skin: q.get('skin') !== '0' });
   scene.add(S.group);
-  const HQ = q.get('hq') === '1';
-  if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky });
+  let photo = null;
+  // فقدان سياق WebGL (ذاكرة رسوم غير كافية على الجهاز): يُعاد التحميل مرة بمستوى جودة أدنى بدل لوحة فارغة
+  if (PHOTO) canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); const next = { high: 'medium', medium: 'low' }[tier.name]; if (!next) return; const u = new URL(location.href); u.searchParams.set('q', next); u.searchParams.delete('samples'); location.replace(u.href); });
+  if (PHOTO) photo = photoBegin(THREE, { scene, renderer, sun, S, q, Sky, tier, doc: docSite });
+  else if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky });
   globalThis.__FLOORS = FI.n > 1 ? { levels: bandLevels(FI) } : undefined; // خطاف style-j.mjs للأشرطة عند كل بلاطة
   const styleId = q.get('style') || '';
   // بوابات الواجهة المستقلة (لا تثق بما يبلّغه النمط): هندسة الفتحات والجدران قبل/بعد، وأقصى بروز مقيس من الشبكات المضافة فعلًا
@@ -167,22 +176,40 @@ async function variantMode() {
       const c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3()), fov = 46;
       const need = Math.max(sz.y * 1.25 / (2 * Math.tan(fov * Math.PI / 360)), sz.x * 1.1 / (2 * Math.tan(fov * Math.PI / 360) * (W / H)));
       C = { pos: [c.x - sz.x * .45, 1.65, bb.max.z + need * .95], look: [c.x + sz.x * .05, sz.y * .5, bb.max.z - sz.z * .3], fov };
+      if (photo) { const py = (docSite.plot?.polygon || []).map(p => p.y); C = heroCamera(THREE, { bb, side: photo.side, aspect: q.get('nav') === '1' ? Math.max(.4, innerWidth / Math.max(1, innerHeight)) : W / H, zMax: py.length ? -Math.min(...py) + 12.9 : Infinity }); }
     }
     camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
     camera.position.set(...C.pos); camera.lookAt(...C.look);
   }
   renderer.render(scene, camera);
+  const firstFrameMs = Math.round(performance.now() - T0); // الإطار الأول: المبنى وحده بإضاءته النهائية؛ المحيط يُضاف بعده
+  window.__FR = { ready: false, first: true, firstFrameMs };
   // nav=1: واجهة يتنقل فيها العميل كالمجسم (دوران، تكبير، تحريك، تجوّل بمستوى العين)، لا صورة ثابتة.
   // الظلال تُحسب مرة واحدة (الشمس والمبنى ثابتان) فيبقى التنقل سلسًا.
-  let nav = null;
+  let nav = null, refiner = null, photoInfo = null;
+  if (photo) { renderer.shadowMap.autoUpdate = false; refiner = createRefiner(THREE, { renderer, scene, camera, state: photo, tier }); }
   if (q.get('nav') === '1' && !shot) {
     renderer.shadowMap.autoUpdate = false;
     document.body.style.overflow = 'hidden'; Object.assign(stage.style, { padding: '0', position: 'fixed', inset: '0' }); canvas.style.maxWidth = 'none';
     const { enableNavigation } = await import('./facade-realism/nav.mjs');
-    nav = enableNavigation(THREE, { renderer, scene, camera, S, host: document.body });
+    nav = enableNavigation(THREE, { renderer, scene, camera, S, host: document.body, refiner, maxPixelRatio: photo ? tier.pr : 1.5, heroSign: photo?.side === 'w' ? -1 : 1 });
+  }
+  if (photo) {
+    await new Promise(r => setTimeout(r, 0)); // يُعرض الإطار الأول قبل بناء المحيط
+    const fin = photoFinish(THREE, { scene, renderer, S, q, doc, FI, state: photo, styleId }); photoInfo = fin.info;
+    if (nav && photoInfo.cornerSide) nav.cornerSign = photoInfo.cornerSide === 'w' ? -1 : 1;
+    refiner.render(); photoInfo.fullMs = Math.round(performance.now() - T0);
+    if (nav) refiner.start(); else await refiner.settle();
+    // لقطة عالية الجودة: دقة مضاعفة (حتى 3840 عرضًا) وعيّنات تراكم أكثر، ثم تعود اللوحة إلى حجمها
+    window.__facadeHQ = async ({ scale = 2, samples = 64, onProgress = null } = {}) => {
+      const pr = renderer.getPixelRatio(), sz = renderer.getSize(new THREE.Vector2()), k = Math.max(1, Math.min(scale, 3840 / Math.max(1, sz.x * pr), 2400 / Math.max(1, sz.y * pr)));
+      refiner.cancel(); renderer.setPixelRatio(pr * k); renderer.setSize(sz.x, sz.y, false);
+      const t = performance.now(), n = await refiner.settle(Math.max(samples, 8), async (i, m) => { onProgress?.(i / m); await new Promise(r => setTimeout(r, 0)); });
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png')), out = { blob, width: canvas.width, height: canvas.height, samples: n, renderMs: Math.round(performance.now() - t) };
+      renderer.setPixelRatio(pr); renderer.setSize(sz.x, sz.y, false); refiner.render(); refiner.start(); return out; };
   }
   const gl = renderer.getContext();
-  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav,
+  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,
     // قياس لا ادعاء: أعلى منسوب لجدران المبنى المبني فعلًا، ومنه عدد الأدوار الظاهرة (يُقارن بأدوار المخطط في الاختبارات)
     wallTop: (() => { let y = 0; for (const m of S.meshes) { const r = m.userData?.role; if (r !== 'wall' && r !== 'cladding') continue; const b = new THREE.Box3().setFromObject(m); if (b.max.y > y) y = b.max.y; } return Math.round(y * 100) / 100; })() });
 }

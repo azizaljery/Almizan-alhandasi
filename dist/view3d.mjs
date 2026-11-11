@@ -77,16 +77,23 @@ $('shot').addEventListener('click', async () => {
   const b = await viewer.capturePNG(2), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'mizan-3d.png'; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 });
 const download = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
-// لقطة عالية الجودة: المجسّم يُصيَّر بضعف الدقة مرتين ثم يُصغَّر (تنعيم فائق) مع خريطة ظل 4096؛ الواجهة الواقعية تُلتقط من لوحتها كما هي
+// لقطة عالية الجودة: المجسّم يُصيَّر بضعف الدقة مرتين ثم يُصغَّر (تنعيم فائق) مع خريطة ظل 4096؛ الواجهة الواقعية تُصيَّر بدقة مضاعفة وعيّنات تراكم أكثر
 $('shotHQ').addEventListener('click', async () => {
   const msg = $('shotMsg'), btn = $('shotHQ'), show = t => { msg.hidden = !t; msg.textContent = t || ''; };
   const fr = $('facadeFrame');
   btn.disabled = true; show('جارٍ تصيير اللقطة عالية الجودة… قد يستغرق ذلك ثوانيَ على الأجهزة البطيئة.');
   try {
     if (fr && !fr.hidden) {
-      const c = fr.contentDocument?.querySelector('canvas'); if (!c) throw new Error('الواجهة لم تكتمل بعد');
-      const b = await new Promise(res => c.toBlob(res, 'image/png')); if (!b) throw new Error('تعذّر الالتقاط');
-      download(b, 'mizan-facade.png'); show(`حُفظت صورة الواجهة ${c.width}×${c.height}.`);
+      // الواجهة الواقعية: تصيير ثابت بدقة مضاعفة وعيّنات تراكم أكثر (تنعيم فائق، ظلال ناعمة، تعتيم محيطي) داخل الإطار نفسه؛ وإن لم يتوفر تُلتقط اللوحة كما هي
+      const hq = fr.contentWindow?.__facadeHQ, c = fr.contentDocument?.querySelector('canvas'); if (!c) throw new Error('الواجهة لم تكتمل بعد');
+      if (typeof hq === 'function') {
+        const r = await hq({ scale: 2, samples: 64, onProgress: k => show(`جارٍ تصيير اللقطة عالية الجودة… ${Math.round(k * 100)}٪`) });
+        if (!r?.blob) throw new Error('تعذّر الالتقاط');
+        download(r.blob, 'mizan-facade-hq.png'); show(`حُفظت صورة الواجهة ${r.width}×${r.height} بـ${r.samples} عيّنة (تصيير ${(r.renderMs / 1000).toFixed(1)} ث).`);
+      } else {
+        const b = await new Promise(res => c.toBlob(res, 'image/png')); if (!b) throw new Error('تعذّر الالتقاط');
+        download(b, 'mizan-facade.png'); show(`حُفظت صورة الواجهة ${c.width}×${c.height}.`);
+      }
     } else {
       if (!viewer?.built) throw new Error('المجسّم غير جاهز');
       const r = await viewer.captureHQ({ scale: 2, ss: 2 });
