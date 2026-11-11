@@ -21,9 +21,12 @@ on:
         type: choice
         options: [golden, day, sunset, night]
         default: golden
+      variants:
+        description: "اختياري: عدة صور للمقارنة tier:lighting[:seed] مفصولة بفواصل (يغلب المستوى والإضاءة)، حتى 8"
+        default: ""
 
 permissions:
-  contents: read
+  contents: write # لنشر النواتج إلى الفرع الجانبي photo-live-out عند التشغيل بالدفع
 
 jobs:
   photo:
@@ -44,6 +47,7 @@ jobs:
           SITE_URL: ${{ inputs.site_url || 'https://almizan-handasi.aljeryabod.workers.dev' }}
           TIER: ${{ inputs.tier || 'both' }}
           LIGHTING: ${{ inputs.lighting || 'golden' }}
+          VARIANTS: ${{ inputs.variants }} # فارغ عند الدفع: يؤخذ من .github/photo-live-check.conf إن وُجد (سطر VARIANTS=…)
           OUT: photo-live-out
       - name: Upload the generated photo and report
         if: always()
@@ -52,3 +56,13 @@ jobs:
           name: photo-live-check
           path: photo-live-out
           if-no-files-found: warn
+      # عند التشغيل بالدفع تُنشر النواتج إلى فرع جانبي للصور فقط
+      - name: Publish outputs to the photo-live-out branch (side branch, images only)
+        if: always() && github.event_name == 'push'
+        run: |
+          cd photo-live-out
+          git init -q -b photo-live-out
+          git config user.name "photo-live-check"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A && git commit -q -m "photo live check outputs ${{ github.sha }}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" photo-live-out

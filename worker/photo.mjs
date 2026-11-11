@@ -15,14 +15,16 @@ export const PHOTO_TIERS = Object.freeze({
 });
 /** مهايئ كل عائلة نماذج: الحقول التي تُرسل في multipart. steps = null يعني «لا ترسل الحقل» (النموذج المقطَّر يحدد خطواته). */
 export const ADAPTERS = Object.freeze({
-  'flux-2-dev': { steps: 25, imageField: 'input_image_0', sendSeed: true, sendSize: true },
+  'flux-2-dev': { steps: 28, stepsEnv: 'PHOTO_STEPS_PREMIUM', imageField: 'input_image_0', sendSeed: true, sendSize: true },
   'flux-2-klein': { steps: null, imageField: 'input_image_0', sendSeed: true, sendSize: true },
   generic: { steps: null, imageField: 'input_image_0', sendSeed: true, sendSize: true },
 });
 export const PHOTO_LIMITS = Object.freeze({
   maxImageBytes: 1_200_000, // اللقطة بعد تصغيرها في المتصفح إلى 1536 على الضلع الأطول
   maxBodyBytes: 1_700_000, // base64 يزيد الحجم بالثلث + الوصف
-  maxSide: 1536, minSide: 256, sizeStep: 16,
+  maxSide: 1536, minSide: 256, sizeStep: 16, // maxSide = الضلع الأطول للّقطة الداخلة
+  outSide: Object.freeze({ standard: 1536, premium: 2048 }), maxOutPixels: 4_000_000, // الضلع الأطول للخرج المطلوب من النموذج (يُكبَّر إليه حتى لو كانت اللقطة أصغر)
+  providerRetries: 1, retryDelayMs: 400, // إعادة واحدة عند خطأ مزوّد عابر
   perMinute: 3, perDayPerIp: 20, dailyCapDefault: 40, dailyCapMax: 2000,
   timeoutMs: 110_000, maxBuckets: 5000,
 });
@@ -31,12 +33,12 @@ const DEFAULT_ALLOWED_ORIGINS = ['https://almizan-handasi.aljeryabod.workers.dev
 // ------------------------------------------------------------------------------------------------ البرومبت (قوائم مغلقة فقط)
 // لا يدخل البرومبت أي نص يكتبه العميل: كل حقل معرّف من قائمة مغلقة يقابله نص ثابت هنا.
 export const PHOTO_STYLES = Object.freeze({
-  N: { name: 'Najdi', text: 'traditional Najdi architecture of central Arabia: thick earthen walls finished in hand-troweled mud plaster, stepped triangular crenellated parapets (shurfat), small deep-set windows with wooden shutters, rows of small triangular ventilation openings, a carved and painted Najdi wooden door, thin white gypsum trim bands' },
-  H: { name: 'Hijazi', text: 'historic Hijazi architecture of Jeddah (Al-Balad): light lime-plastered coral-stone walls, projecting carved teak rawasheen (roshan bay windows) with fine mashrabiya latticework, tall timber doors with carved panels, restrained plaster cornices' },
-  S: { name: 'Salmani', text: 'Salmani architecture of Riyadh: a contemporary reading of Najdi tradition with solid cubic volumes clad in sand-colored Riyadh limestone, crisp triangular crenellations and recessed horizontal bands, deep narrow vertical openings, shaded recesses, dark bronze metalwork' },
-  C: { name: 'Classical', text: 'refined neoclassical villa architecture: strict symmetry, cream limestone ashlar, stone columns and pilasters, moulded cornices and window surrounds, stone balustrades, a formal entrance portico' },
-  M: { name: 'Light contemporary', text: 'light contemporary architecture: smooth fine-textured render, clean planar volumes, slim dark aluminium window frames, generous glazing, thin projecting canopy slabs, restrained warm wood-slat accents' },
-  J: { name: 'Stone contemporary', text: 'stone contemporary architecture: large-format honed natural travertine and limestone cladding with fine joints, bronze-anodized metal fins and trims, floor-to-ceiling glazing, warm timber soffits, sharp shadow gaps' },
+  N: { name: 'Najdi', text: 'traditional Najdi architecture of central Arabia: thick earthen walls finished in hand-troweled mud plaster with fine straw texture, stepped triangular crenellated parapets (shurfat), small deep-set windows with wooden shutters, rows of small triangular ventilation openings, a carved and painted Najdi wooden door, thin white gypsum trim bands' },
+  H: { name: 'Hijazi', text: 'historic Hijazi architecture of Jeddah (Al-Balad): light matte lime-plastered coral-stone walls, projecting carved teak rawasheen (roshan bay windows) with fine mashrabiya latticework, tall timber doors with carved panels, restrained plaster cornices' },
+  S: { name: 'Salmani', text: 'Salmani architecture of Riyadh: a contemporary reading of Najdi tradition with solid cubic volumes clad in sand-colored Riyadh limestone with visible coursing, crisp triangular crenellations and recessed horizontal bands, deep narrow vertical openings, shaded recesses, dark bronze metalwork' },
+  C: { name: 'Classical', text: 'refined neoclassical villa architecture: strict symmetry, cream limestone ashlar with fine visible joints and subtle natural variation, stone columns and pilasters, moulded cornices and window surrounds, stone balustrades, a formal entrance portico' },
+  M: { name: 'Light contemporary', text: 'light contemporary architecture: smooth fine-textured mineral plaster in soft off-white, clean planar volumes, slim dark aluminium window frames, generous glazing, thin projecting canopy slabs, restrained warm wood-slat accents' },
+  J: { name: 'Stone contemporary', text: 'stone contemporary architecture: large-format honed natural travertine and limestone cladding with legible veining and fine joints, bronze-anodized metal fins and trims, floor-to-ceiling glazing, warm timber soffits, sharp shadow gaps' },
 });
 export const PHOTO_TONES = Object.freeze({
   auto: '',
@@ -57,12 +59,14 @@ export const PHOTO_ENTRANCE = Object.freeze({
   recessed: 'The existing main entrance sits in a deep shaded recess.',
 });
 export const PHOTO_NIGHT = Object.freeze({ auto: '', lit: 'Architectural lighting washes the walls and highlights the details.', calm: 'Exterior lighting is soft, low and warm.' });
+// الميزان بعد التجربة الحية الأولى (خرج مشبع برتقالي بظلال مسحوقة): ضوء ناعم طبيعي وألوان هادئة؛ «الساعة الذهبية» دفء خفيف لا برتقالي.
 export const PHOTO_LIGHTING = Object.freeze({
-  golden: 'Golden hour: low warm sunlight raking across the facade, long soft shadows, clear sky with a gentle warm gradient.',
-  day: 'Bright clear midday in Saudi Arabia: crisp sunlight, defined shadows, deep blue sky, neutral color balance.',
-  sunset: 'Just after sunset: glowing orange-to-violet sky, soft ambient light, warm interior light beginning to show through the windows.',
-  night: 'Blue hour at night: deep blue sky, warm light glowing from the windows, subtle wall-washing exterior lights, readable facade details.',
+  golden: 'Lighting: late-afternoon sun, soft and natural with only a slight warmth, under a pale blue sky; long gentle shadows that stay open and detailed; no orange cast.',
+  day: 'Lighting: soft clear daylight under a pale blue sky with thin high haze; neutral white balance; gentle open shadows.',
+  sunset: 'Lighting: shortly after sunset, soft even ambient light, a pastel sky with a faint warm band at the horizon, a few interior lights just visible; the facade stays evenly readable; no saturated orange or purple.',
+  night: 'Lighting: early blue hour, a deep blue sky that is not black, soft warm light from the windows and discreet low exterior lights; facade materials remain clearly readable; no blown highlights, no neon colors.',
 });
+export const PHOTO_LOOK = 'Look: calm editorial architectural photography with natural soft light, neutral white balance, balanced exposure, realistic muted colors, visible shadow detail and true-to-life material tones; no oversaturation, no HDR look, no heavy contrast, no crushed blacks, no heavy vignette, no lens flare, no dramatic color grading.';
 export const PHOTO_YARD = Object.freeze({
   pool: 'the swimming pool already shown, with clear turquoise water and a stone coping',
   waterfall: 'the water feature already shown, with gently flowing water',
@@ -77,7 +81,7 @@ export const PHOTO_VIEWS = Object.freeze({
   facade: 'The reference image is a 3D render of the exterior of a private villa in Saudi Arabia, seen from the street side with its boundary wall and gates.',
   model: 'The reference image is a simple 3D massing model of a private villa in Saudi Arabia.',
 });
-export const GEOMETRY_RULES = 'Strict constraints: keep the exact building massing, number of floors, window and door positions, proportions, boundary wall and gates, and camera angle of the reference image; only upgrade materials, lighting, vegetation and realism; do not add or remove floors, openings, or structures; do not move, resize or reshape any window, door, balcony, parapet or gate; do not change the framing or crop. No people, no cars, no text, no logos, no watermark.';
+export const GEOMETRY_RULES = 'Strict constraints: keep the exact building massing, number of floors, window and door positions, proportions, boundary wall and gates, and camera angle of the reference image; only upgrade materials, lighting, vegetation and realism; do not add or remove floors, openings, or structures; do not move, resize or reshape any window, door, balcony, parapet or gate; do not add tall trees in front of the facade; keep existing trees and palms where they are; do not change the framing or crop. No people, no cars, no text, no logos, no watermark.';
 const FLOORS_EN = { 1: 'a single-storey', 2: 'a two-storey', 3: 'a three-storey' };
 
 const record = v => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -104,14 +108,15 @@ export function buildPhotoPrompt(description) {
   const d = normalizeDescription(description), st = PHOTO_STYLES[d.style];
   const dark = d.lighting === 'night' || d.lighting === 'sunset';
   const parts = [
-    'Turn the reference image into a photorealistic professional architectural photograph of the same house.',
+    'Turn the reference image into a realistic, calm editorial architectural photograph of the same house.',
     PHOTO_VIEWS[d.view],
     `It is ${d.floors ? FLOORS_EN[d.floors] : 'a'} villa in ${st.name} style: ${st.text}.`,
     PHOTO_TONES[d.tone], PHOTO_OPENINGS[d.openings], PHOTO_SCREEN[d.screen], PHOTO_ENTRANCE[d.entrance],
     PHOTO_LIGHTING[d.lighting], dark ? PHOTO_NIGHT[d.night] : '',
-    'Setting: a quiet Saudi residential street with a clean asphalt road, stone kerb and paved sidewalk; mature date palms, olive trees and drought-tolerant desert planting (bougainvillea, agave, ornamental grasses) in the places where plants already appear.',
+    PHOTO_LOOK,
+    'Setting: a quiet Saudi residential street with light grey asphalt, a pale stone kerb and a paved sidewalk; render the existing planting as real date palms, olive trees and drought-tolerant desert plants, in the same places and at the same sizes.',
     d.yard.length ? `In the yard, keep and render realistically: ${d.yard.map(k => PHOTO_YARD[k]).join('; ')}.` : '',
-    'Photography: shot on a full-frame camera with a 35mm tilt-shift lens, perfectly vertical lines, natural perspective, high dynamic range, physically accurate materials with fine real-world texture (stone grain, plaster, wood, glass reflections), subtle weathering, true-to-life colors, editorial architectural magazine quality.',
+    'Photography: full-frame camera with a 35mm tilt-shift lens, perfectly vertical lines, natural perspective, sharp fine detail, legible real-world material texture (stone grain and joints, fine plaster, wood grain, soft glass reflections), subtle natural weathering.',
     GEOMETRY_RULES,
   ];
   return parts.filter(Boolean).join(' ');
@@ -126,7 +131,12 @@ export function sniffImage(b) {
   if (b.length > 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return 'image/webp';
   return null;
 }
-const snap = (v, L) => Math.max(L.minSide, Math.min(L.maxSide, Math.round(v / L.sizeStep) * L.sizeStep));
+/** مقاس الخرج المطلوب من النموذج: نسبة اللقطة نفسها، الضلع الأطول = حد المستوى (يُكبَّر إليه إن كانت اللقطة أصغر)، مضاعفات 16، وتحت حد البكسلات. */
+export function outputSize(w, h, tier, L = PHOTO_LIMITS) {
+  const side = L.outSide?.[tier] || L.maxSide, k = Math.min(side / Math.max(w, h), Math.sqrt((L.maxOutPixels || Infinity) / (w * h)));
+  const sn = v => Math.max(L.minSide, Math.min(side, Math.round(v * k / L.sizeStep) * L.sizeStep));
+  return { width: sn(w), height: sn(h) };
+}
 
 /** يتحقق من جسم الطلب ويعيد { bytes, mime, width, height, tier, seed, description }. يرمي invalid_input أو image_too_large. */
 export function validatePhotoInput(body, L = PHOTO_LIMITS) {
@@ -141,9 +151,7 @@ export function validatePhotoInput(body, L = PHOTO_LIMITS) {
   const tier = body.tier === undefined ? 'standard' : body.tier;
   if (typeof tier !== 'string' || !Object.hasOwn(PHOTO_TIERS, tier)) throw new Error('invalid_input');
   if (body.seed !== undefined && !(Number.isInteger(body.seed) && body.seed >= 0 && body.seed <= 0xFFFFFFFF)) throw new Error('invalid_input');
-  // المقاس المطلوب من النموذج بنسبة اللقطة نفسها، بحد 1536 للضلع الأطول ومضاعفات 16
-  const k = Math.min(1, L.maxSide / Math.max(body.width, body.height));
-  return { bytes, mime, width: snap(body.width * k, L), height: snap(body.height * k, L), tier, seed: body.seed ?? null, description: normalizeDescription(body.description) };
+  return { bytes, mime, ...outputSize(body.width, body.height, tier, L), tier, seed: body.seed ?? null, description: normalizeDescription(body.description) };
 }
 
 // ------------------------------------------------------------------------------------------------ المزوّد
@@ -154,12 +162,18 @@ export function modelFor(tier, env = {}) {
 export const adapterFor = model => ADAPTERS[/flux-2-dev/.test(model) ? 'flux-2-dev' : /flux-2-klein/.test(model) ? 'flux-2-klein' : 'generic'];
 
 /** يبني طلب multipart بالنمط الموثّق: Response(form) يعطي الجسم ونوع المحتوى بالـboundary الصحيح. */
-export function buildProviderRequest(model, { prompt, bytes, mime, width, height, seed }) {
+/** خطوات النموذج: ثابت المهايئ، أو متغير البيئة (مثل PHOTO_STEPS_PREMIUM) إن كان عددًا صحيحًا بين 4 و50. null = لا يُرسل الحقل. */
+export function stepsFor(model, env = {}) {
+  const a = adapterFor(model); if (!a.steps) return null;
+  const n = a.stepsEnv ? Number(env[a.stepsEnv]) : NaN;
+  return Number.isInteger(n) && n >= 4 && n <= 50 ? n : a.steps;
+}
+export function buildProviderRequest(model, { prompt, bytes, mime, width, height, seed, steps = adapterFor(model).steps }) {
   const a = adapterFor(model), form = new FormData();
   form.append('prompt', prompt);
   form.append(a.imageField, new Blob([bytes], { type: mime }), mime === 'image/png' ? 'design.png' : 'design.jpg');
   if (a.sendSize) { form.append('width', String(width)); form.append('height', String(height)); }
-  if (a.steps) form.append('steps', String(a.steps));
+  if (steps) form.append('steps', String(steps));
   if (a.sendSeed && seed !== null) form.append('seed', String(seed));
   const res = new Response(form);
   return { multipart: { body: res.body, contentType: res.headers.get('content-type') } };
@@ -261,6 +275,9 @@ const MSG = {
   shape: 'أعاد مولّد الصور ردًا غير مفهوم، فتجاهلته. أعد المحاولة لاحقًا.',
 };
 
+/** أخطاء المزوّد التي تستحق إعادة واحدة (عابرة): 3043، 5xx، Internal server error، ازدحام/سعة. */
+export const TRANSIENT = /\b3043\b|\b5\d\d\b|internal server error|temporar|overload|capacity|unavailable|try again/i;
+
 export function createPhotoHandler({ now = Date.now, limits = PHOTO_LIMITS, log = console } = {}) {
   const L = limits, usage = createUsage(now), minute = new Map();
   // حد الدقيقة في ذاكرة النسخة (نافذة قصيرة، مثل بقية /api)؛ حدّا اليوم عبر usage.
@@ -281,7 +298,8 @@ export function createPhotoHandler({ now = Date.now, limits = PHOTO_LIMITS, log 
       configured, verified: false, tiers: configured ? Object.keys(PHOTO_TIERS) : [],
       models: configured ? Object.fromEntries(Object.keys(PHOTO_TIERS).map(t => [t, modelFor(t, env)])) : {},
       dailyCap: cap, remainingToday: configured ? Math.max(0, cap - used.count) : 0, counter: used.store,
-      limits: { perMinute: L.perMinute, perDayPerClient: L.perDayPerIp, maxImageBytes: L.maxImageBytes, maxSide: L.maxSide },
+      limits: { perMinute: L.perMinute, perDayPerClient: L.perDayPerIp, maxImageBytes: L.maxImageBytes, maxSide: L.maxSide, outSide: L.outSide },
+      steps: configured ? Object.fromEntries(Object.keys(PHOTO_TIERS).map(t => [t, stepsFor(modelFor(t, env), env)])) : {},
       message: configured ? 'الخدمة مهيأة؛ هذه الحالة لا تختبر النموذج نفسه. يلزم توليد ناجح للتحقق.' : !ready ? MSG.off : 'خدمة الصورة الاحترافية موقوفة (السقف اليومي صفر).',
     }, 200, origin ? corsHeaders(origin) : {});
   }
@@ -312,26 +330,35 @@ export function createPhotoHandler({ now = Date.now, limits = PHOTO_LIMITS, log 
 
     const model = modelFor(input.tier, env), seed = input.seed ?? (crypto.getRandomValues(new Uint32Array(1))[0] >>> 0);
     const prompt = buildPhotoPrompt(input.description), t0 = now();
-    let out, timer;
+    // خطأ مزوّد عابر (مثل 3043 Internal server error أو 5xx): إعادة واحدة تلقائية قبل 502؛ الحجز واحد للطلب كله ويُعاد إن فشل نهائيًا
+    const steps = stepsFor(model, env), call = () => env.AI.run(model, buildProviderRequest(model, { prompt, bytes: input.bytes, mime: input.mime, width: input.width, height: input.height, seed, steps }));
+    let out, timer, attempts = 0;
+    const deadline = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('photo_timeout')), L.timeoutMs); });
     try {
-      out = await Promise.race([
-        env.AI.run(model, buildProviderRequest(model, { prompt, bytes: input.bytes, mime: input.mime, width: input.width, height: input.height, seed })),
-        new Promise((_, rej) => { timer = setTimeout(() => rej(new Error('photo_timeout')), L.timeoutMs); }),
-      ]);
+      for (;;) {
+        attempts++;
+        try { out = await Promise.race([call(), deadline]); break; }
+        catch (e) {
+          const detail = String(e?.message || e).slice(0, 300);
+          if (detail === 'photo_timeout' || attempts > (L.providerRetries || 0) || !TRANSIENT.test(detail)) throw e;
+          log.warn?.('[photo] خطأ مزوّد عابر؛ أعيد المحاولة', model, detail);
+          await new Promise(r => setTimeout(r, L.retryDelayMs || 0));
+        }
+      }
     } catch (e) {
       clearTimeout(timer);
       const detail = String(e?.message || e).slice(0, 300);
       if (detail === 'photo_timeout') { log.warn?.('[photo] مهلة النموذج', model); return json({ error: MSG.timeout, code: 'PHOTO_TIMEOUT' }, 504, cors); } // لا يُعاد الحجز: قد يكون التوليد حُسب
       log.warn?.('[photo] خطأ النموذج', model, detail);
       await refund();
-      return json({ error: MSG.provider, code: 'PROVIDER_ERROR', detail }, 502, cors);
+      return json({ error: MSG.provider, code: 'PROVIDER_ERROR', detail, attempts }, 502, cors);
     }
     clearTimeout(timer);
     const img = await readProviderImage(out, log);
     if (!img) return json({ error: MSG.shape, code: 'PROVIDER_SHAPE' }, 502, cors);
     return json({
       image: `data:${img.mime};base64,${img.b64}`, tier: input.tier, model, seed, lighting: input.description.lighting,
-      width: input.width, height: input.height, ms: now() - t0, remainingToday: Math.max(0, cap - total.count), counter: total.store,
+      width: input.width, height: input.height, steps, attempts, ms: now() - t0, remainingToday: Math.max(0, cap - total.count), counter: total.store,
       disclaimer: 'صورة محسّنة بالذكاء الاصطناعي من مجسم تصميمك — للتصوّر لا للتنفيذ',
     }, 200, cors);
   }

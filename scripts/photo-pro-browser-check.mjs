@@ -45,7 +45,7 @@ try {
   check('النتيجة: الوسم الدائم ظاهر على الصورة', r1.stampVisible && r1.stamp === 'صورة محسّنة بالذكاء الاصطناعي من مجسم تصميمك — للتصوّر لا للتنفيذ' && r1.tags === 'المجسم|الصورة');
   check('فحص الأمانة: صورة بهندسة اللقطة نفسها تجتاز بلا إعادة', r1.ok === true && r1.score >= 0.9 && r1.attempts === 1 && !r1.warn, `score ${r1.score}، محاولات ${r1.attempts}`);
   check('اللقطة المرسلة مصغّرة إلى 1536 على الأطول وتحت حد الحجم', Math.max(...r1.shot) <= 1536 && M.calls[0].bytes <= PHOTO_LIMITS.maxImageBytes, `${r1.shot.join('×')}، ${M.calls[0].bytes} بايت`);
-  check('الخادم بنى البرومبت بقيود الهندسة وبطراز الواجهة المعروضة', /keep the exact building massing/.test(M.calls[0].prompt) && /Golden hour/.test(M.calls[0].prompt) && M.calls[0].model.includes('flux-2-klein-9b'), M.calls[0].prompt.slice(165, 260));
+  check('الخادم بنى البرومبت بقيود الهندسة وبطراز الواجهة المعروضة', /keep the exact building massing/.test(M.calls[0].prompt) && /late-afternoon sun/.test(M.calls[0].prompt) && M.calls[0].model.includes('flux-2-klein-9b'), M.calls[0].prompt.slice(165, 260));
   // شريط المقارنة بلوحة المفاتيح
   await page.focus('#ppDialog .pp-range'); for (let i = 0; i < 12; i++) await page.keyboard.press('ArrowRight');
   check('شريط المقارنة يتحرك بلوحة المفاتيح', await page.evaluate(() => document.querySelector('#ppDialog .pp-cmp').style.getPropertyValue('--pp-p')) === '62%');
@@ -57,7 +57,7 @@ try {
   check('التحميل: ملف JPEG باسم واضح', dl.suggestedFilename() === 'mizan-architectural-photo.jpg' && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes.length > 20000, `${dl.suggestedFilename()} ${bytes.length} بايت`);
   // إضاءة أخرى: الزاوية نفسها بلا التقاط جديد
   const n0 = M.calls.length; await page.click('#ppDialog .pp-seg button[data-l=night]'); await page.waitForFunction(() => !document.querySelector('#ppDialog .pp-wait').hidden); await resultShown(page);
-  check('«جرّب إضاءة أخرى»: طلب جديد بإضاءة الليل للّقطة نفسها', M.calls.length === n0 + 1 && /Blue hour at night/.test(M.calls.at(-1).prompt) && M.calls.at(-1).bytes === M.calls[0].bytes && await page.getAttribute('#ppDialog .pp-seg button[data-l=night]', 'aria-pressed') === 'true');
+  check('«جرّب إضاءة أخرى»: طلب جديد بإضاءة الليل للّقطة نفسها', M.calls.length === n0 + 1 && /early blue hour/.test(M.calls.at(-1).prompt) && M.calls.at(-1).bytes === M.calls[0].bytes && await page.getAttribute('#ppDialog .pp-seg button[data-l=night]', 'aria-pressed') === 'true');
   const n1 = M.calls.length; await page.click('#ppRedo'); await resultShown(page);
   check('«أعد التوليد»: طلب جديد ببذرة أخرى', M.calls.length === n1 + 1 && M.calls.at(-1).seed !== M.calls.at(-2).seed);
   await page.click('#ppPremium'); await resultShown(page);

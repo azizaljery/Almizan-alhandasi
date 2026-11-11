@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import index from '../worker/index.mjs';
 import {
   createPhotoHandler, buildPhotoPrompt, normalizeDescription, validatePhotoInput, buildProviderRequest, readProviderImage, modelFor, adapterFor, dailyCap,
-  PHOTO_STYLES, PHOTO_LIGHTING, PHOTO_LIMITS, PHOTO_TIERS, GEOMETRY_RULES, bytesToB64,
+  PHOTO_STYLES, PHOTO_LIGHTING, PHOTO_LOOK, PHOTO_LIMITS, PHOTO_TIERS, GEOMETRY_RULES, bytesToB64, outputSize, stepsFor, TRANSIENT,
 } from '../worker/photo.mjs';
 import { fidelityScore, edgeMaps, FIDELITY } from '../dist/photo-fidelity.mjs';
 import { describeForPhoto, fitSize, DISCLAIMER, PHOTO_PRO } from '../dist/photo-pro.mjs';
@@ -38,8 +38,8 @@ test('البرومبت: لكل طراز مفرداته وقيود الهندسة
   for (const style of Object.keys(PHOTO_STYLES)) for (const lighting of Object.keys(PHOTO_LIGHTING)) {
     const p = buildPhotoPrompt({ style, floors: 2, lighting });
     assert.ok(p.includes(GEOMETRY_RULES), style);
-    for (const must of ['keep the exact building massing', 'number of floors', 'window and door positions', 'boundary wall and gates', 'camera angle', 'do not add or remove floors, openings, or structures', 'No people', 'no text', 'no watermark', '35mm tilt-shift', 'architectural photograph', 'a two-storey villa']) assert.ok(p.includes(must), `${style}: ${must}`);
-    assert.ok(p.includes(PHOTO_STYLES[style].text) && p.includes(PHOTO_LIGHTING[lighting]));
+    for (const must of ['keep the exact building massing', 'number of floors', 'window and door positions', 'boundary wall and gates', 'camera angle', 'do not add or remove floors, openings, or structures', 'No people', 'no text', 'no watermark', '35mm tilt-shift', 'architectural photograph', 'a two-storey villa', 'do not add tall trees in front of the facade', 'keep existing trees and palms where they are', 'natural soft light', 'neutral white balance', 'balanced exposure', 'realistic muted colors', 'visible shadow detail', 'no oversaturation', 'no HDR look', 'no heavy vignette', 'light grey asphalt']) assert.ok(p.includes(must), `${style}: ${must}`);
+    assert.ok(p.includes(PHOTO_STYLES[style].text) && p.includes(PHOTO_LIGHTING[lighting]) && p.includes(PHOTO_LOOK));
     assert.ok(/^[\x20-\x7E]+$/.test(p), 'البرومبت إنجليزي ASCII فقط');
     seen.add(buildPhotoPrompt({ style, lighting: 'golden' }));
   }
@@ -48,7 +48,10 @@ test('البرومبت: لكل طراز مفرداته وقيود الهندسة
   assert.match(buildPhotoPrompt({ style: 'H' }), /Hijazi.*rawasheen.*mashrabiya/);
   assert.match(buildPhotoPrompt({ style: 'S' }), /Salmani.*Riyadh limestone/);
   assert.match(buildPhotoPrompt({ style: 'C' }), /neoclassical.*columns/);
-  assert.match(buildPhotoPrompt({ style: 'M' }), /Light contemporary.*render/);
+  assert.match(buildPhotoPrompt({ style: 'M' }), /Light contemporary.*mineral plaster/);
+  // الميزان بعد التجربة الحية: الساعة الذهبية دفء خفيف لا برتقالي، ولا مفردات تدفع إلى التشبّع
+  assert.match(PHOTO_LIGHTING.golden, /slight warmth.*no orange cast/);
+  for (const l of Object.values(PHOTO_LIGHTING)) assert.ok(!/glowing|dramatic|vivid|high dynamic range|raking/i.test(l), l);
   assert.match(buildPhotoPrompt({ style: 'J' }), /Stone contemporary.*travertine/);
   assert.match(buildPhotoPrompt({ style: 'J', yard: ['pool', 'pergola'] }), /swimming pool already shown.*pergola/);
   assert.match(buildPhotoPrompt({ style: 'J', view: 'model' }), /massing model/);
@@ -65,9 +68,14 @@ test('البرومبت: لا يدخله أي نص حر من العميل، وا�
 
 test('الدخل: صورة حقيقية JPEG/PNG بحد الحجم، ومقاس مضبوط على مضاعفات 16 بحد 1536', () => {
   const ok = validatePhotoInput(body({ width: 3840, height: 2160 }));
-  assert.equal(ok.mime, 'image/jpeg'); assert.equal(ok.width, 1536); assert.equal(ok.height, 864); assert.equal(ok.tier, 'standard'); assert.equal(ok.seed, null);
+  assert.equal(ok.mime, 'image/jpeg'); assert.equal(ok.width, 1536); assert.equal(ok.height, 864);
+  // الخرج لا يقل ضلعه الأطول عن 1536 (قياسي) و2048 (فائق) حتى لو كانت اللقطة أصغر، بالنسبة نفسها ومضاعفات 16 وتحت 4 ميغابكسل
+  assert.deepEqual(outputSize(768, 607, 'standard'), { width: 1536, height: 1216 }); assert.deepEqual(outputSize(768, 607, 'premium'), { width: 2048, height: 1616 });
+  assert.deepEqual(outputSize(3840, 2160, 'premium'), { width: 2048, height: 1152 });
+  for (const [w, h] of [[1000, 1000], [600, 1500], [1536, 1024]]) { const o = outputSize(w, h, 'premium'); assert.ok(o.width * o.height <= 4_000_000 && o.width % 16 === 0 && o.height % 16 === 0 && Math.max(o.width, o.height) >= 1536, JSON.stringify(o)); }
+  assert.equal(validatePhotoInput(body({ width: 768, height: 607, tier: 'premium' })).width, 2048); assert.equal(ok.tier, 'standard'); assert.equal(ok.seed, null);
   assert.equal(validatePhotoInput(body({ image: dataUrl(PNG, 'png'), width: 1000, height: 700, seed: 42, tier: 'premium' })).seed, 42);
-  const v = validatePhotoInput(body({ width: 1000, height: 700 })); assert.equal(v.width % 16, 0); assert.equal(v.height % 16, 0);
+  const v = validatePhotoInput(body({ width: 1000, height: 700 })); assert.equal(v.width, 1536); assert.equal(v.height % 16, 0);
   const bad = [
     { image: 'data:image/jpeg;base64,' + bytesToB64(new TextEncoder().encode('not an image at all')) }, // ليس صورة
     { image: dataUrl(PNG, 'jpeg') }, // النوع المعلن يخالف المحتوى
@@ -83,11 +91,14 @@ test('طلب المزوّد: multipart بالحقول الموثقة والـbou
   assert.equal(modelFor('standard'), '@cf/black-forest-labs/flux-2-klein-9b'); assert.equal(modelFor('premium'), '@cf/black-forest-labs/flux-2-dev');
   assert.equal(modelFor('standard', { PHOTO_MODEL_STANDARD: '@cf/black-forest-labs/flux-2-klein-4b' }), '@cf/black-forest-labs/flux-2-klein-4b');
   assert.equal(modelFor('premium', { PHOTO_MODEL_PREMIUM: 'https://evil.example/model' }), PHOTO_TIERS.premium.model, 'اسم نموذج غير صالح يُهمل');
-  assert.equal(adapterFor('@cf/black-forest-labs/flux-2-dev').steps, 25); assert.equal(adapterFor('@cf/black-forest-labs/flux-2-klein-9b').steps, null);
+  assert.equal(adapterFor('@cf/black-forest-labs/flux-2-dev').steps, 28);
+  assert.equal(stepsFor('@cf/black-forest-labs/flux-2-dev'), 28); assert.equal(stepsFor('@cf/black-forest-labs/flux-2-dev', { PHOTO_STEPS_PREMIUM: '20' }), 20);
+  for (const bad of ['abc', '0', '99', '12.5', '']) assert.equal(stepsFor('@cf/black-forest-labs/flux-2-dev', { PHOTO_STEPS_PREMIUM: bad }), 28, bad);
+  assert.equal(stepsFor('@cf/black-forest-labs/flux-2-klein-9b', { PHOTO_STEPS_PREMIUM: '20' }), null); assert.equal(adapterFor('@cf/black-forest-labs/flux-2-klein-9b').steps, null);
   const r = buildProviderRequest('@cf/black-forest-labs/flux-2-dev', { prompt: 'p', bytes: JPEG, mime: 'image/jpeg', width: 1536, height: 1024, seed: 7 });
   assert.match(r.multipart.contentType, /^multipart\/form-data; boundary=/);
   const f = await new Response(r.multipart.body, { headers: { 'content-type': r.multipart.contentType } }).formData();
-  assert.equal(f.get('prompt'), 'p'); assert.equal(f.get('width'), '1536'); assert.equal(f.get('height'), '1024'); assert.equal(f.get('steps'), '25'); assert.equal(f.get('seed'), '7');
+  assert.equal(f.get('prompt'), 'p'); assert.equal(f.get('width'), '1536'); assert.equal(f.get('height'), '1024'); assert.equal(f.get('steps'), '28'); assert.equal(f.get('seed'), '7');
   assert.deepEqual(new Uint8Array(await f.get('input_image_0').arrayBuffer()), JPEG);
   const k = buildProviderRequest('@cf/black-forest-labs/flux-2-klein-9b', { prompt: 'p', bytes: JPEG, mime: 'image/jpeg', width: 512, height: 512, seed: null });
   const fk = await new Response(k.multipart.body, { headers: { 'content-type': k.multipart.contentType } }).formData();
@@ -116,7 +127,8 @@ test('المسار: نجاح مع AI وهمي يعيد الصورة والبذر
   assert.ok(!form.get('prompt').includes('IGNORE')); assert.equal(form.get('seed'), '99'); assert.equal(form.get('width'), '1536');
   const prem = createPhotoHandler({ log: quiet }), e2 = env();
   assert.equal((await prem.fetch(req(body({ tier: 'premium' })), e2)).status, 200);
-  assert.equal(e2.AI.calls[0].model, '@cf/black-forest-labs/flux-2-dev'); assert.equal(e2.AI.calls[0].form.get('steps'), '25');
+  assert.equal(e2.AI.calls[0].model, '@cf/black-forest-labs/flux-2-dev'); assert.equal(e2.AI.calls[0].form.get('steps'), '28'); assert.equal(e2.AI.calls[0].form.get('width'), '2048');
+  const e3 = env({ PHOTO_STEPS_PREMIUM: '16' }); assert.equal((await (await createPhotoHandler({ log: quiet }).fetch(req(body({ tier: 'premium' })), e3)).json()).steps, 16); assert.equal(e3.AI.calls[0].form.get('steps'), '16');
   assert.match(e2.AI.calls[0].form.get('seed'), /^\d+$/, 'بذرة عشوائية إن لم يرسلها العميل');
 });
 
@@ -210,9 +222,9 @@ test('رفض الدخل الزائد الحجم (413) وغير الصالح (400
 });
 
 test('أخطاء المزوّد: خطأ صريح 502 ويُعاد الحجز، شكل غير مفهوم 502، ومهلة 504 — برسائل عربية', async () => {
-  const lim = { ...PHOTO_LIMITS, perMinute: 50, timeoutMs: 40 }, status = async (h, e) => (await (await h.fetch(req(null, { method: 'GET', path: '/api/photo/status' }), e)).json()).remainingToday;
+  const lim = { ...PHOTO_LIMITS, perMinute: 50, timeoutMs: 40, retryDelayMs: 1 }, status = async (h, e) => (await (await h.fetch(req(null, { method: 'GET', path: '/api/photo/status' }), e)).json()).remainingToday;
   let h = createPhotoHandler({ log: quiet, limits: lim }), e = env({ AI: mockAI(() => { throw new Error('5007: No such model'); }) });
-  let r = await h.fetch(req(), e), d = await r.json(); assert.equal(r.status, 502); assert.equal(d.code, 'PROVIDER_ERROR'); assert.match(d.error, /تعذّر توليد الصورة/); assert.match(d.detail, /No such model/);
+  let r = await h.fetch(req(), e), d = await r.json(); assert.equal(r.status, 502); assert.equal(d.code, 'PROVIDER_ERROR'); assert.match(d.error, /تعذّر توليد الصورة/); assert.match(d.detail, /No such model/); assert.equal(e.AI.calls.length, 1, 'الخطأ غير العابر لا يُعاد');
   assert.equal(await status(h, e), 40);
   h = createPhotoHandler({ log: quiet, limits: lim }); e = env({ AI: mockAI(() => ({ unexpected: true })) });
   r = await h.fetch(req(), e); assert.equal(r.status, 502); assert.equal((await r.json()).code, 'PROVIDER_SHAPE');
@@ -236,7 +248,10 @@ test('فحص الأمانة: الإزاحة والدور الزائد والمب
   const sx = fidelityScore(ref, villaScene({ real: true, dx: 48 })); assert.ok(!sx.ok && sx.score < thr, JSON.stringify(sx)); assert.ok(sx.vertical < sx.horizontal, 'الإزاحة الأفقية تُسقط الحواف الرأسية');
   const sy = fidelityScore(ref, villaScene({ real: true, dy: -30 })); assert.ok(!sy.ok && sy.score < thr, JSON.stringify(sy));
   const ex = fidelityScore(ref, villaScene({ real: true, extraFloor: true })); assert.ok(!ex.ok && ex.score < thr, JSON.stringify(ex));
-  assert.ok(ex.skyline < 0.6 && ex.edges > 0.8, 'الدور الزائد يظهر في خط السماء لا في استرجاع الحواف');
+  assert.ok(ex.massing < 0.3 && ex.added > 0.2 && ex.edges > 0.8, 'الدور الزائد يظهر خطًّا أفقيًا جديدًا في السماء لا في استرجاع الحواف');
+  const an = fidelityScore(ref, villaScene({ real: true, annex: true })); assert.ok(!an.ok && an.score < thr && an.edges > 0.8, 'كتلة مضافة فوق السطح: ' + JSON.stringify(an));
+  // نخيل وأشجار تعلو خط المبنى (كما يضيف النموذج الحقيقي) لا تُسقط الصورة
+  const pl = fidelityScore(ref, villaScene({ real: true, palms: true })); assert.ok(pl.ok && pl.roof >= 0.95 && pl.skyline < 0.5, JSON.stringify(pl));
   const ot = fidelityScore(ref, villaScene({ real: true, other: true })); assert.ok(!ot.ok && ot.score < 0.4, JSON.stringify(ot));
   const flat = { data: new Uint8ClampedArray(64 * 64 * 4).fill(128), width: 64, height: 64 };
   assert.equal(fidelityScore(ref, flat).ok, false, 'صورة فارغة لا تجتاز');
@@ -281,4 +296,31 @@ test('كتاب المشروع: الصورة الاحترافية تُدرج بو
   const line = out.split('\n').find(l => l.includes('data.proPhoto?.image'));
   assert.ok(line.includes('للتصوّر لا للتنفيذ') && line.includes('data:image'));
   assert.equal(typeof projectBookHtml, 'function');
+});
+
+test('خطأ مزوّد عابر (3043/5xx): إعادة واحدة تلقائية في الخادم، والحصة تُحتسب مرة واحدة أو لا تُحتسب إن فشل نهائيًا', async () => {
+  for (const m of ['3043: Internal server error', 'InferenceUpstreamError: 502 Bad Gateway', 'Capacity temporarily exceeded']) assert.ok(TRANSIENT.test(m), m);
+  for (const m of ['5007: No such model', 'Invalid input: prompt', '3003: bad request']) assert.ok(!TRANSIENT.test(m), m);
+  const lim = { ...PHOTO_LIMITS, retryDelayMs: 1 }, remaining = async (h, e) => (await (await h.fetch(req(null, { method: 'GET', path: '/api/photo/status' }), e)).json()).remainingToday;
+  // يفشل مرة ثم ينجح: 200 بمحاولتين، والبرومبت والصورة يُرسلان كاملين في الإعادة
+  let h = createPhotoHandler({ log: quiet, limits: lim }), e = env({ AI: mockAI((model, form, n) => { if (n === 1) throw new Error('3043: Internal server error'); return { image: bytesToB64(PNG) }; }) });
+  let r = await h.fetch(req(body({ seed: 5 })), e), d = await r.json();
+  assert.equal(r.status, 200); assert.equal(d.attempts, 2); assert.equal(e.AI.calls.length, 2); assert.equal(await remaining(h, e), 39, 'تُحتسب صورة واحدة');
+  assert.equal(e.AI.calls[1].form.get('prompt'), e.AI.calls[0].form.get('prompt')); assert.equal(e.AI.calls[1].form.get('seed'), '5');
+  assert.deepEqual(new Uint8Array(await e.AI.calls[1].form.get('input_image_0').arrayBuffer()), JPEG);
+  // يفشل مرتين: 502 بعد محاولتين فقط، ولا يُحتسب شيء
+  h = createPhotoHandler({ log: quiet, limits: lim }); e = env({ AI: mockAI(() => { throw new Error('3043: Internal server error'); }) });
+  r = await h.fetch(req(), e); d = await r.json();
+  assert.equal(r.status, 502); assert.equal(d.code, 'PROVIDER_ERROR'); assert.equal(d.attempts, 2); assert.equal(e.AI.calls.length, 2); assert.equal(await remaining(h, e), 40);
+});
+
+test('فحص الأمانة على ناتج النموذج الحقيقي (تجربة حية 2026-11-11): ينجح بهامش واضح رغم نخلة وأشجار تعلو المبنى', () => {
+  const gray = f => ({ data: new Uint8Array(readFileSync(new URL('./fixtures/' + f, import.meta.url))), width: 192, height: 128 });
+  const f = fidelityScore(gray('photo-live-input.gray'), gray('photo-live-premium-golden.gray'));
+  assert.ok(f.ok && f.score >= 0.8, JSON.stringify(f)); assert.ok(f.roof >= 0.95 && f.added <= 0.1 && f.vertical >= 0.9 && f.score - f.threshold >= 0.08, JSON.stringify(f));
+  assert.ok(f.skyline < 0.6, 'خط السماء القديم كان يُسقطها (للمعلومة فقط الآن)');
+  // والعكس: واجهة تصميم آخر من الموقع (نجدي، بالزاوية والإطار نفسيهما تقريبًا) تسقط في الاتجاهين، ومع الناتج الحي أيضًا
+  const other = gray('photo-other-design.gray');
+  for (const [a, b] of [[gray('photo-live-input.gray'), other], [other, gray('photo-live-input.gray')], [other, gray('photo-live-premium-golden.gray')]]) { const x = fidelityScore(a, b); assert.ok(!x.ok && x.score <= f.score - 0.12, JSON.stringify(x)); }
+  assert.equal(fidelityScore(gray('photo-live-input.gray'), villaScene({ real: true })).ok, false);
 });

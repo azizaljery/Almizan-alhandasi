@@ -33,6 +33,7 @@ enabled = true
 #   PHOTO_DAILY_CAP       (سقف يومي إجمالي لعدد الصور الاحترافية لحماية الفاتورة؛ الافتراضي 40، والصفر يوقف الخدمة)
 #   PHOTO_MODEL_STANDARD  (الافتراضي @cf/black-forest-labs/flux-2-klein-9b)
 #   PHOTO_MODEL_PREMIUM   (الافتراضي @cf/black-forest-labs/flux-2-dev)
+#   PHOTO_STEPS_PREMIUM   (خطوات النموذج الفائق، عدد صحيح 4–50؛ الافتراضي 28 — التكلفة والزمن يتناسبان معها)
 # عدّاد السقف اليومي يصير مضمونًا عبر D1 بعد إنشاء الجدول مرة واحدة:
 #   npx wrangler d1 execute almizan-archive --remote --file db/photo-usage.sql
 # وبدونه يعمل العدّاد في ذاكرة النسخة (تقريبي؛ انظر worker/photo.mjs).

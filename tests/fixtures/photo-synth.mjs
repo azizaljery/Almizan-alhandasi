@@ -1,7 +1,7 @@
 // مشاهد اصطناعية لاختبار فحص الأمانة: فيلا بسيطة (سماء، أرض، كتلة بدورين، فتحات، سور وبوابة) تُرسم إلى RGBA.
 // الخيارات: dx/dy إزاحة المبنى، extraFloor دور زائد، real «تصيير واقعي» (ألوان أخرى + ملمس + نبات + سحب) للهندسة نفسها.
 function rnd(seed) { let a = seed | 0 || 1; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-export function villaScene({ W = 600, H = 400, dx = 0, dy = 0, extraFloor = false, real = false, seed = 7, other = false } = {}) {
+export function villaScene({ W = 600, H = 400, dx = 0, dy = 0, extraFloor = false, real = false, seed = 7, other = false, palms = false, annex = false } = {}) {
   const data = new Uint8ClampedArray(W * H * 4), R = rnd(seed);
   const px = (x, y, c) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const i = (y * W + x) * 4; data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255; };
   const rect = (x0, y0, x1, y1, c) => { for (let y = Math.round(y0); y < Math.round(y1); y++) for (let x = Math.round(x0); x < Math.round(x1); x++) px(x, y, c); };
@@ -19,6 +19,7 @@ export function villaScene({ W = 600, H = 400, dx = 0, dy = 0, extraFloor = fals
     if (f === floors - 1 && k === 1 && !other) rect(wx, wy + fh * .1, wx + (bx1 - bx0) * .1, by1, P.door); else rect(wx, wy, wx + (bx1 - bx0) * .13, wy + fh * .5, P.win);
   }
   rect(bx0 - 4, by0 - 6, bx1 + 4, by0, P.wall.map(v => v - 40)); // دروة
+  if (annex) { rect(bx0 + (bx1 - bx0) * .15, by0 - fh * .8, bx0 + (bx1 - bx0) * .6, by0, P.wall); rect(bx0 + (bx1 - bx0) * .15 - 3, by0 - fh * .8 - 5, bx0 + (bx1 - bx0) * .6 + 3, by0 - fh * .8, P.wall.map(v => v - 40)); } // ملحق مضاف فوق السطح
   // السور والبوابة
   const fy0 = gy - H * .09 + dy; rect(W * .04 + dx, fy0, W * .96 + dx, gy + dy, P.fence); rect(W * .46 + dx, fy0 - 8, W * .54 + dx, gy + dy, P.door);
   if (real) {
@@ -26,6 +27,10 @@ export function villaScene({ W = 600, H = 400, dx = 0, dy = 0, extraFloor = fals
     for (let i = 0; i < data.length; i += 4) { const n = (R() - .5) * 14; data[i] += n; data[i + 1] += n; data[i + 2] += n; }
     for (let y = Math.round(by0); y < by1; y += 9) for (let x = Math.round(bx0); x < bx1; x++) { const i = (y * W + x) * 4; if (data[i] > 150) { data[i] -= 9; data[i + 1] -= 9; data[i + 2] -= 9; } }
     for (let k = 0; k < 7; k++) { const cx = W * (.08 + .13 * k) + dx, cy = gy - 6 + dy, r = 9 + R() * 6; for (let y = -r; y < r; y++) for (let x = -r; x < r; x++) if (x * x + y * y < r * r) px(cx + x | 0, cy + y | 0, [50 + R() * 30, 95 + R() * 30, 45]); }
+  }
+  if (palms) for (const [cx, top] of [[W * .16, H * .1], [W * .84, H * .2], [W * .52, H * .16]]) { // نخيل عالٍ يعلو خط المبنى (كما يضيف النموذج الحقيقي)
+    rect(cx - 4, top, cx + 4, gy, [70, 50, 35]);
+    for (let k = 0; k < 14; k++) { const a = Math.PI * (k / 13) * 1.2 - .3, len = 55 + R() * 20; for (let t = 0; t < len; t++) { const x = cx + Math.cos(a) * t * (k % 2 ? 1 : -1), y = top - Math.sin(a) * t * .5 + (t / len) ** 2 * 40; for (let d = -1; d <= 1; d++) px(x | 0, (y + d) | 0, [40 + R() * 20, 80 + R() * 30, 35]); if (t % 4 === 0) for (let d = 0; d < 9; d++) { px(x | 0, (y + d) | 0, [35, 75 + R() * 30, 30]); px((x + 1) | 0, (y + d) | 0, [35, 75, 30]); } } } // سعف بخوص متدلٍّ
   }
   return { data, width: W, height: H };
 }
