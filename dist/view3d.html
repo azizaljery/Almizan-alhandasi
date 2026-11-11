@@ -185,7 +185,9 @@ function info() { // بصمة التصميم والاتجاه الشمسي
 $('tplMut').addEventListener('click', () => { if (!TPLS.length) return; if (!tpl) tpl = TPLS[0].id; mut = +$('mutK').value; mseed = 1 + Math.floor(Math.random() * 9999); apply(); });
 paint();
 // الافتتاح: واجهة واقعية لهذا المخطط (إن وُجد تصميم معتمد وأمكن تحميل قوالب الطراز)، وإلا يبقى المجسم
-if (doc && new URLSearchParams(location.search).get('model') !== '1') chooseFromBrief().then(ok => { if (ok) { on = true; apply(); } extCard(); });
+// __mizanFacadeDecided: يعرف منها view3d.mjs هل فُتحت الواجهة (فيؤجّل بناء المجسم إلى ما بعد أول إطار لها) أم بقي المجسم
+if (doc && new URLSearchParams(location.search).get('model') !== '1') chooseFromBrief().then(ok => { globalThis.__mizanFacadeDecided = !!ok; if (ok) { on = true; apply(); } extCard(); }, () => { globalThis.__mizanFacadeDecided = false; });
+else globalThis.__mizanFacadeDecided = false;
 </script>
 <script type="module" src="./shara-panel.mjs"></script>
 </body>

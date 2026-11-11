@@ -36,6 +36,7 @@
         <li><span class="n">7</span><span><b>نحلل رسوماتك</b></span></li>
         <li><span class="n">8</span><span><b>جداول الكميات</b></span></li>
       </ol>
+      <div id="resumeHome" class="resume-home" hidden><p id="resumeHomeText"></p><a class="cta" id="resumeDesign" href="./design.html">العودة إلى تصميمي ←</a><a class="quiet-inline" href="#shara">أو ارجع إلى حديثك مع شرعاء</a></div>
       <button id="start" class="cta" type="button">ابدأ رحلة منزلك</button>
     </div>
     <a class="quiet" href="./studio.html">افتح المرسم مباشرة</a>
@@ -43,7 +44,7 @@
   </section>
 
   <section id="stageLand" class="stage panel-stage" hidden aria-labelledby="landTitle">
-    <header class="bar"><span class="mini"><img src="./assets/mizan-logo.svg" alt="" width="28" height="28">الميزان الهندسي</span><span class="steps" aria-label="الخطوة 1 من 3">١ / ٣</span></header>
+    <header class="bar"><span class="mini"><img src="./assets/mizan-logo.svg" alt="" width="28" height="28">الميزان الهندسي</span><ol class="steps" aria-label="مراحل التصميم"></ol></header>
     <div class="card">
       <h2 id="landTitle">أرضك</h2>
       <p class="hint">أدخل الطول والعرض بالمتر، ثم حدّد الشوارع والمداخل. الشمال دائمًا أعلى الرسم.</p>
@@ -66,7 +67,7 @@
   </section>
 
   <section id="stageShara" class="stage panel-stage" hidden aria-labelledby="sharaTitle">
-    <header class="bar"><span class="mini"><svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M60 5 76 19H44z"/><path d="M60 19v59"/><path d="M14 33h92"/><path d="M14 33 5 62M14 33l9 29M106 33l-9 29M106 33l9 29"/><path d="M3 62q11 13 22 0M95 62q11 13 22 0"/><path d="M40 80h40"/></svg>الميزان الهندسي</span><span class="steps" aria-label="الخطوة 2 من 3">٢ / ٣</span></header>
+    <header class="bar"><span class="mini"><svg viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M60 5 76 19H44z"/><path d="M60 19v59"/><path d="M14 33h92"/><path d="M14 33 5 62M14 33l9 29M106 33l-9 29M106 33l9 29"/><path d="M3 62q11 13 22 0M95 62q11 13 22 0"/><path d="M40 80h40"/></svg>الميزان الهندسي</span><ol class="steps" aria-label="مراحل التصميم"></ol></header>
     <div class="card chat-card">
       <h2 id="sharaTitle" class="sr">محادثة مع شرعاء</h2>
       <div id="chat" class="chat" role="log" aria-live="polite" aria-relevant="additions"></div>
@@ -77,7 +78,8 @@
   <section id="stageBuild" class="stage panel-stage" hidden aria-labelledby="buildTitle">
     <div class="card center">
       <h2 id="buildTitle">أجهّز تصميمك الأولي</h2>
-      <p id="buildText" class="hint" role="status">يبحث المحرك بين البدائل ويختار الأنسب لقيودك…</p>
+      <div id="buildBusy" class="busy" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p id="buildText" class="hint" role="status" aria-live="polite">يبحث المحرك بين البدائل ويختار الأنسب لقيودك…</p>
       <p class="error" id="buildError" role="alert" hidden></p>
       <div id="buildReport" class="report" hidden></div>
       <div class="actions"><button id="buildRetry" class="cta ghost" type="button" hidden>رجوع إلى شرعاء</button></div>

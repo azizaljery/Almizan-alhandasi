@@ -1,8 +1,11 @@
 // نافذة شرعاء الجانبية: زر ثابت في كل صفحات المسار يفتح نافذة صغيرة على الجنب؛ العميل يسأل أو يطلب في أي وقت
 // فتجيبه من تصميمه أو تنفّذ طلبه عليه (shara-assistant.mjs)، وتنطق الرد بصوتها إن أراد، وتسمعه بالميكروفون إن دعمه المتصفح.
 // مستقلة عن الصفحة: تقرأ الجلسة من التخزين وتكتبها، وتبث الحدث «mizan:session» لتحدّث الصفحة عرضها.
-import { sharaTurn, STAGES } from './shara-assistant.mjs';
+import { sharaTurn } from './shara-assistant.mjs';
+import { markReached } from './journey-nav.mjs';
+import { mountSteps } from './journey-steps.mjs';
 import { loadSession, saveSession } from './design-session.mjs';
+import { redesignInWorker, fixInWorker, ticking, pending } from './design-client.mjs';
 
 const CHAT_KEY = 'mizan.shara.chat.v1', VOICE_KEY = 'mizan.shara.voice', OPEN_KEY = 'mizan.shara.open';
 const page = document.body.dataset.stage || 'design';
@@ -44,9 +47,7 @@ const CSS = `
 .shp-f .shp-b{color:#3d241b;border-color:#c9ae7a;background:#fff}.shp-f .shp-b.go{background:#3d241b;color:#f6ecd8}.shp-f .shp-b.rec{background:#b3402e;color:#fff}
 .shp-note{font-size:12px;color:#7a6652;padding:0 12px 8px}
 @media (max-width:560px){.shp{inset-inline:8px;inset-block-end:8px;width:auto;height:min(72dvh,560px)}.shp-fab span.t{display:none}.shp-fab{padding:11px}}
-ol.steps li a{color:inherit;text-decoration:none}ol.steps li a:hover{text-decoration:underline}
-.fh ol.steps{display:flex;gap:4px;list-style:none;margin:0;padding:0;flex-wrap:wrap;font-size:13px}.fh ol.steps li{padding:3px 10px;border-radius:99px;opacity:.8}.fh ol.steps li.on{background:#d9b877;color:#3d241b;font-weight:600;opacity:1}
-@media print{.shp,.shp-fab,.fh ol.steps{display:none!important}}
+@media print{.shp,.shp-fab{display:none!important}}
 `;
 
 // ------------------------------------------------------------------------------------------ الصوت
@@ -125,33 +126,44 @@ function listen() {
 let busy = false;
 async function send(preset) {
   const text = (preset ?? input.value).trim(); if (!text || busy) return;
-  busy = true; input.value = ''; note.hidden = true; btnSend.disabled = true;
+  if (pending()) { note.textContent = 'ما زلت أنفّذ طلبك السابق في الصفحة؛ انتظر حتى ينتهي ثم أرسل.'; note.hidden = false; return; }
+  busy = true; input.value = ''; note.hidden = true; btnSend.disabled = true; btnSend.setAttribute('aria-busy', 'true');
   const me = { who: 'me', text }; chat.push(me); keep(); bubble(me);
-  const wait = el('div', { class: 'shp-m she wait' }, 'أفكّر…'); log.append(wait); log.scrollTop = log.scrollHeight;
+  // «شرعاء تكتب…» يظهر فورًا؛ التعديلات تُنفَّذ في عامل خارج الخيط الرئيسي فتبقى الصفحة والنافذة حيّتين، والمؤشر يعدّ الثواني الفعلية
+  const wait = el('div', { class: 'shp-m she wait', role: 'status' }, 'شرعاء تكتب…'); log.append(wait); log.scrollTop = log.scrollHeight;
+  const stopTick = ticking(wait, 'شرعاء تكتب…');
   await new Promise(r => setTimeout(r, 30));
   let out;
   try {
     const session = loadSession(localStorage);
     let exterior = null; try { exterior = (await import('./exterior-brief.mjs')).applyExteriorText || null; } catch { exterior = null; }
-    out = await sharaTurn(session, text, { page, exterior });
+    out = await sharaTurn(session, text, { page, exterior, redesign: redesignInWorker, fix: fixInWorker });
     if (out.session && out.exteriorOnly) { try { const x = await import('./exterior-brief.mjs'); saveSession(localStorage, out.session); x.storeExterior(localStorage, x.readExterior(out.session)); globalThis.dispatchEvent(new CustomEvent(x.EXTERIOR_EVENT || 'mizan:exterior')); } catch { /* يُلتقط من التخزين عند فتح العرض */ } }
     if (out.session) { saveSession(localStorage, out.session); globalThis.dispatchEvent(new CustomEvent('mizan:session', { detail: { session: out.session, changed: !!out.changed, exteriorOnly: !!out.exteriorOnly } })); }
   } catch (e) { out = { text: 'تعذّر الرد: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر شيئًا.' }; }
-  wait.remove(); busy = false; btnSend.disabled = false;
+  stopTick(); wait.remove(); busy = false; btnSend.disabled = false; btnSend.removeAttribute('aria-busy');
   say(out.text, out.actions || []);
 }
 input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) open(false); });
 if (get(OPEN_KEY) === '1' && page !== 'design') open(true);
 
-// شريط المراحل الموحّد: يعلّم موضع الصفحة ويجعل ما سبقها روابط رجوع؛ وحوار الشكل الخارجي (داخل صفحة التصميم) مرحلة قائمة بذاتها
+// شريط المراحل الموحّد (journey-steps.mjs): يعلّم موضع الصفحة، وكل مرحلة بُلغت رابط رجوع أو تقدم، وما لم يُبلغ معطّل بسببه.
+// حوار الشكل الخارجي (داخل صفحة التصميم) مرحلة قائمة بذاتها، وجدول الكميات قسم من صفحة المخططات.
 const ORDER = { design: 'design', view3d: 'view3d', final: 'sheets' };
-const steps = document.querySelector('ol.steps');
-function paintSteps() {
-  if (!steps || !ORDER[page]) return;
-  const ext = document.getElementById('extShara'), id = page === 'design' && ext && !ext.hidden ? 'exterior' : ORDER[page], at = STAGES.findIndex(s => s.id === id);
-  steps.replaceChildren(...STAGES.map((s, i) => { const li = el('li', { class: i < at ? 'done' : i === at ? 'on' : '', 'aria-current': i === at ? 'step' : null }); li.append(i < at ? el('a', { href: s.href }, s.label) : s.label); return li; }));
+const currentStage = () => {
+  if (page === 'design') { const ext = document.getElementById('extShara'); return ext && !ext.hidden ? 'exterior' : 'design'; }
+  if (page === 'final') { const q = document.getElementById('qty'); return q && q.getBoundingClientRect().top < innerHeight * .5 ? 'boq' : 'sheets'; }
+  return ORDER[page] || 'design';
+};
+if (ORDER[page]) {
+  markReached(localStorage, page === 'final' ? 'boq' : ORDER[page]);
+  // روابط الصفحة نفسها بلا إعادة تحميل: الصفحة تسمع hashchange/popstate وتفتح أو تغلق ما يلزم
+  const onLocal = (s, url) => { if (url.hash === location.hash) return true; if (url.hash) return false; history.pushState(null, '', location.pathname + url.search); dispatchEvent(new PopStateEvent('popstate')); return true; }; // المسار الحالي كما هو (في الإنتاج بلا ‎.html‎)
+  const paintSteps = mountSteps(document.querySelector('ol.steps'), { current: currentStage, onLocal });
+  const ext = document.getElementById('extShara');
+  if (ext && globalThis.MutationObserver) new MutationObserver(() => { if (!ext.hidden) markReached(localStorage, 'exterior'); paintSteps(); }).observe(ext, { attributes: true, attributeFilter: ['hidden'] });
+  addEventListener('mizan:session', paintSteps);
+  if (page === 'final') { let last = '', t = 0; const check = () => { t = 0; const c = currentStage(); if (c !== last) { last = c; paintSteps(); } }; addEventListener('scroll', () => { if (!t) t = setTimeout(check, 160); }, { passive: true }); addEventListener('hashchange', () => setTimeout(check, 60)); new MutationObserver(check).observe(document.getElementById('fmain') || document.body, { childList: true }); }
 }
-paintSteps();
-{ const ext = document.getElementById('extShara'); if (ext && globalThis.MutationObserver) new MutationObserver(paintSteps).observe(ext, { attributes: true, attributeFilter: ['hidden'] }); }
 globalThis.__sharaPanel = { open, send, get chat() { return chat; } }; // للاختبارات الحية

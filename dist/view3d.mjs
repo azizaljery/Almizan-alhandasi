@@ -50,10 +50,35 @@ function applySun() {
   viewer?.setSun({ azimuthDeg: s.azimuthDeg, altitudeDeg: s.altitudeDeg, north: doc?.north || 0 });
 }
 
+// الصفحة تفتح على الواجهة الواقعية (إن وُجد تصميم معتمد)، والمجسّم خيار ثانٍ تحتها: لا يُبنى الاثنان معًا على الخيط نفسه.
+// المجسّم يُبنى بعد أول إطار للواجهة (أو فورًا إن طلبه العميل أو لم تُفتح الواجهة)، فيصل العميل إلى واجهته أسرع.
+let modelBuild = null;
+const buildModel = () => (modelBuild ||= buildModelNow());
+function facadeFirst() {
+  if (new URLSearchParams(location.search).get('model') === '1') return Promise.resolve();
+  const fr = $('facadeFrame'), t0 = performance.now();
+  return new Promise(done => {
+    const tick = () => {
+      const decided = globalThis.__mizanFacadeDecided; // يضبطها سكربت الواجهة: true فُتحت، false بقي المجسم
+      let ready = false; try { ready = !!fr?.contentWindow?.__FR?.ready; } catch { ready = false; }
+      if (decided === false || (decided === true && (ready || fr.hidden)) || performance.now() - t0 > 25000) return done();
+      setTimeout(tick, 120);
+    };
+    tick();
+  });
+}
 async function init() {
   doc = loadDoc();
   for (const [id, c] of Object.entries(CITIES)) $('city').append(new Option(`${c.ar} (${c.lat}°)`, id));
   if (!doc || !doc.walls.length) { say('لا يوجد تصميم معتمد بعد. ارجع إلى صفحة التصميم واعتمد تصميمًا.'); return; }
+  say('جارٍ تجهيز العرض ثلاثي الأبعاد…');
+  // العميل انتقل إلى «المجسم» قبل أن يُبنى: يُبنى فورًا
+  const fr = $('facadeFrame'); new MutationObserver(() => { if (fr.hidden && globalThis.__mizanFacadeDecided !== undefined) buildModel(); }).observe(fr, { attributes: true, attributeFilter: ['hidden'] });
+  await facadeFirst();
+  await new Promise(r => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 1500 }) : setTimeout(r, 200)));
+  await buildModel();
+}
+async function buildModelNow() {
   say('جارٍ بناء المجسّم…');
   let v;
   try { v = await ensureViewer(); } catch { fallbackWithoutWebGL('تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط والمخرجات تعمل كاملة.'); return; }
@@ -96,8 +121,14 @@ $('shotHQ').addEventListener('click', async () => {
   finally { btn.disabled = false; }
 });
 $('toFinal').addEventListener('click', async () => {
+  // يُعلَم العميل فورًا (اللقطة تأخذ وقتًا على الأجهزة البطيئة) ويُمنع الضغط المكرر
+  const btn = $('toFinal'), label = btn.textContent; if (btn.disabled) return;
+  btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = 'جارٍ تجهيز المخرجات…';
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+  addEventListener('pageshow', e => { if (e.persisted) { btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = label; } }, { once: true });
   // لقطة المجسّم لصفحة المخرجات وكتاب المشروع
   try {
+    if (doc && doc.walls.length && !viewer?.built) await Promise.race([buildModel(), new Promise(r => setTimeout(r, 12000))]);
     localStorage.removeItem(SNAP_KEY);
     if (viewer?.built) { const b = await viewer.capturePNG(1); const url = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); }); if (url && url.length < 3e6) localStorage.setItem(SNAP_KEY, url); }
   } catch { /* اللقطة اختيارية */ }
