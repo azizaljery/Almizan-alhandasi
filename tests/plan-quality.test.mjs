@@ -141,7 +141,7 @@ test('الهوية الموحّدة: نقش النجمة، تدرج العناو
   assert.match(reduced, /\.plan-drawin\{display:none\}/); assert.match(reduced, /animation:none!important/);
   assert.ok(!/background-attachment:fixed/.test(css.slice(css.indexOf('/* ===== 5)'))), 'النقش لا يُثبَّت (أداء التمرير)');
   assert.ok(Buffer.byteLength(css) < 40000, 'ملف الهوية خفيف');
-  for (const page of ['home.html', 'design.html', 'view3d.html', 'final.html']) {
+  for (const page of ['home.html', 'design.html', 'final.html']) {
     const html = readFileSync(new URL('../dist/' + page, import.meta.url), 'utf8');
     assert.match(html, /Aref\+Ruqaa/, page + ': خط العناوين الاحتفالية'); assert.match(html, /IBM\+Plex\+Sans\+Arabic/); assert.match(html, /lux-theme\.css/); assert.match(html, /dir="rtl"/);
   }

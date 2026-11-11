@@ -135,8 +135,8 @@ body:not(.app-body){background-image:var(--lx-star);background-size:132px 132px;
 
 /* العناوين: تدرج ذهبي باعتدال (عنوان الصفحة وعناوين الأقسام فقط)، وخط احتفالي لعنوان الصفحة */
 .titlebar h1,#stageWelcome .brand h1,.fmain>.sec:first-child h2{font-family:"Aref Ruqaa","IBM Plex Sans Arabic",serif;letter-spacing:0}
-.titlebar h1,.sec>h2,.card>h2,.v3 aside h2,#stageWelcome .brand h1{background:var(--lx-title);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;text-shadow:none!important}
-@media (forced-colors:active){.titlebar h1,.sec>h2,.card>h2,.v3 aside h2,#stageWelcome .brand h1{-webkit-text-fill-color:currentColor;color:CanvasText!important;background:none}}
+.titlebar h1,.sec>h2,.card>h2,#stageWelcome .brand h1{background:var(--lx-title);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;text-shadow:none!important}
+@media (forced-colors:active){.titlebar h1,.sec>h2,.card>h2,#stageWelcome .brand h1{-webkit-text-fill-color:currentColor;color:CanvasText!important;background:none}}
 .titlebar h1{font-size:clamp(26px,3vw,34px);line-height:1.5;padding-block-end:2px}
 .titlebar h1::after,.sec>h2::after{content:"";display:block;height:2px;width:64px;margin-top:6px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--lx-acc));}
 [dir=rtl] .titlebar h1::after,[dir=rtl] .sec>h2::after{background:linear-gradient(270deg,var(--lx-acc),transparent)}
@@ -202,18 +202,11 @@ input.rate:focus,input.pct:focus{border-color:var(--lx-acc);box-shadow:0 0 0 3px
 .dsheet figcaption b{background:var(--lx-bar);border:1px solid var(--lx-acc);color:var(--lx-accL)}
 .shot img{border-color:var(--lx-acc);box-shadow:var(--lx-depth)}
 
-/* العرض ثلاثي الأبعاد: اللوحة الجانبية والأزرار بالهوية نفسها */
-.v3 aside{background:linear-gradient(180deg,#fffdf8,var(--lx-ivory))!important;border-inline-start:1px solid var(--lx-acc)!important;box-shadow:inset 1px 0 0 #fff,-10px 0 30px -24px color-mix(in srgb,var(--lx-deep) 60%,transparent)}
-.v3 aside>div{border-bottom-color:var(--lx-gold-hair)}
-.v3 .seg button,.v3 select,.v3 aside textarea{border-color:var(--lx-gold-hair);border-radius:10px;transition:background .15s,border-color .15s,box-shadow .15s}
-.v3 .seg button:not(.on):hover{border-color:var(--lx-acc);background:var(--lx-tint)}
-.v3 aside textarea{background:#fffdf8;border:1px solid var(--lx-gold-hair)}
-.v3 aside textarea:focus,.v3 select:focus{border-color:var(--lx-acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--lx-acc) 22%,transparent);outline:0}
-.v3 .muted,.v3 .kv{color:var(--lx-soft)}
-.v3 input[type=range]{accent-color:var(--lx-acc)}
-.v3 input[type=checkbox],.planbar input[type=checkbox]{accent-color:var(--lx-acc)}
-.v3 .stage{background:#e9e2d7}
-
+/* تباين نص الأزرار المعدنية ≥ 4.5:1: المراحل ذات النص الأبيض بمعدن أعمق، ومرحلتا الأرض وشرعاء (معدن فاتح) بنص داكن */
+:root,body,#home{--lx-metal:linear-gradient(180deg,var(--lx-acc) 0%,color-mix(in srgb,var(--lx-acc) 80%,#000) 46%,color-mix(in srgb,var(--lx-acc) 64%,#000) 100%)}
+body[data-stage=view3d],body[data-stage=final]{--lx-metal:linear-gradient(180deg,var(--lx-accL) 0%,var(--lx-acc) 52%,color-mix(in srgb,var(--lx-acc) 78%,#000) 100%)}
+body[data-stage=land],#home[data-stage=land],body[data-stage=shara],#home[data-stage=shara],#home[data-stage=build]{--lx-on:#2b1a14;--lx-metal:linear-gradient(180deg,var(--lx-accL) 0%,var(--lx-acc) 52%,color-mix(in srgb,var(--lx-acc) 78%,#000) 100%)}
+#home[data-stage=land] .cta:not(.ghost),#home[data-stage=shara] .cta:not(.ghost),#home[data-stage=build] .cta:not(.ghost){text-shadow:none}
 /* نصوص اللون المميّز في حوار شرعاء على الأبيض: درجة أغمق تحفظ تباين ≥ 4.5:1 (الأزرار المعدنية تبقى بلونها) */
 #home{--gold:color-mix(in srgb,var(--lx-acc) 58%,#2b211b)}
 
@@ -225,6 +218,20 @@ input.rate:focus,input.pct:focus{border-color:var(--lx-acc);box-shadow:0 0 0 3px
 @media (prefers-reduced-motion: reduce){
   .wrap>*,.fmain>.sec,.plan-drawin line{animation:none!important}
   .planwrap canvas,.btn,.planbar .tools button{transition:none!important}.planwrap canvas.drawing{opacity:1}.plan-drawin{display:none}
+}
+/* صفحة المخرجات على الجوال: شريط علوي مضغوط — المرحلة الحالية فقط، وروابط الأقسام صف واحد يُمرَّر أفقيًا، والأزرار صف متساوٍ */
+@media(max-width:700px){
+  .fh{gap:6px 8px!important;padding:8px 12px!important}
+  .fh ol.steps li:not(.on){display:none}
+  .fh .fnav{order:3;flex:1 0 100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0;-webkit-overflow-scrolling:touch}
+  .fh .fnav::-webkit-scrollbar{display:none}
+  .fh .fnav a{flex:none;white-space:nowrap;padding:5px 11px;border:1px solid #ffffff2e;font-size:13px}
+  .fh .fact{order:4;flex:1 0 100%;flex-wrap:nowrap;gap:6px}
+  .fh .fact .btn{flex:1 1 0;text-align:center;padding:7px 6px;font-size:12.5px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .fmain{padding:14px 10px 70px!important}
+  .sec{padding:14px 12px!important;overflow-x:auto}
+  .sec table{font-size:12.5px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 @media(max-width:600px){
   .plancard{outline-offset:3px;margin:4px}.plancard::after{inset:-10px;background-size:18px}

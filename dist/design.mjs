@@ -300,7 +300,7 @@ function paint() {
   const lv = model.levelById.get(levelId);
   const r = c.getBoundingClientRect(), dpr = Math.min(2.5, devicePixelRatio || 1); let W = Math.max(10, r.width), H = Math.max(10, r.height);
   if (!view) {
-    const b = docBounds(doc, levelId), narrow = W < 560, pad = narrow ? 1.5 : 2.4, box = { x0: b.x0 - pad, y0: b.y0 - pad, x1: b.x1 + pad, y1: b.y1 + (narrow ? .9 : 1) };
+    const b = docBounds(doc, levelId), narrow = W < 560, pad = narrow ? 1.7 : 2.4, box = { x0: b.x0 - pad, y0: b.y0 - (narrow ? 3.9 : pad), x1: b.x1 + pad, y1: b.y1 + (narrow ? 2.7 : 1) }; // الجوال: هامش علوي لسهم الشمال وسفلي للأبعاد ومقياس الرسم
     // على الجوال: ارتفاع اللوحة يتبع نسبة المسقط فلا يبقى فراغ أبيض فوقه وتحته، والمسقط يملأ العرض
     if (narrow) { const want = Math.round(Math.max(300, Math.min(innerHeight * .72, (W - 12) * (box.y1 - box.y0) / (box.x1 - box.x0) + 44))); if (Math.abs(want - H) > 3) { $('planWrap').style.height = want + 'px'; $('planWrap').style.minHeight = '0'; H = want; } }
     else if ($('planWrap').style.height) { $('planWrap').style.height = ''; $('planWrap').style.minHeight = ''; H = Math.max(10, c.getBoundingClientRect().height); }

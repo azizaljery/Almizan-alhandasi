@@ -171,7 +171,7 @@ export function renderPlan(ctx, st) {
       const b1 = S(add(add(mid, mul(n, out * (base + th))), mul(u, th * .62))), b2 = S(add(add(mid, mul(n, out * (base + th))), mul(u, -th * .62)));
       ctx.save(); ctx.fillStyle = picked ? T.select : T.accent; ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y); ctx.closePath(); ctx.fill();
       const fsE = Math.max(10.5, Math.min(14, k * .26)), rIn = isWin ? 0 : (o.kind === 'door2' ? o.w / 2 : o.kind === 'door' ? o.w : 0);
-      const t = S(add(mid, mul(n, -out * (w.t / 2 + rIn + .12 + fsE * .75 / k)))), text = entrySeen ? 'مدخل' : 'المدخل الرئيسي ±0.00', tx = t.x, ty = t.y;
+      const t = S(add(mid, mul(n, -out * (w.t / 2 + rIn + .12 + fsE * .75 / k)))), text = entrySeen ? 'مدخل' : k < 30 ? 'المدخل ±0.00' : 'المدخل الرئيسي ±0.00', tx = t.x, ty = t.y;
       ctx.font = `700 ${fsE}px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
       if (!sheet) { const tw = ctx.measureText(text).width + 12; ctx.fillStyle = 'rgba(253,251,246,.86)'; ctx.beginPath(); ctx.roundRect(tx - tw / 2, ty - fsE * .8, tw, fsE * 1.6, 5); ctx.fill(); }
       ctx.fillStyle = picked ? T.select : T.accent; ctx.fillText(text, tx, ty); ctx.restore();
