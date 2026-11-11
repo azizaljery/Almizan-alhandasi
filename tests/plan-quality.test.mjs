@@ -82,15 +82,15 @@ test('المسقط (Canvas): أقواس الأبواب، زجاج النوافذ
   assert.ok(calls.filter(c => c.op === 'roundRect').length >= 3, 'لوحة خلف كل تسمية');
   assert.ok(!calls.some(c => c.op === 'strokeText' && c.a[0] === 'مجلس'), 'بلا هالة سميكة حول التسميات على الشاشة');
   assert.ok(calls.some(c => c.op === 'ellipse'), 'رمز المرحاض بيضوي');
-  assert.ok(calls.some(c => c.op === 'clip'), 'نقش الأرضية مقصوص داخل الفراغ');
-  assert.ok(calls.some(c => c.op === 'fill' && c.fill === 'rgba(43,33,27,.055)'), 'ظل الكتلة');
+  assert.ok(calls.some(c => c.op === 'stroke' && /^rgba\(43,33,27,0?\.(1|055|05|06)\)$/.test(String(c.stroke))), 'نقش الأرضية يُخطّ داخل الفراغات');
+  assert.ok(calls.some(c => c.op === 'fill' && c.fill === 'rgba(43,33,27,.085)'), 'ظل الكتلة');
   assert.ok(FLOOR_PATTERNS.wet.grid && !FLOOR_PATTERNS.wood.grid);
 });
 
 test('المسقط (Canvas): وضع اللوحة يبقى أسود على أبيض بلا ظل ولا نقش ولا لوحات ملوّنة', () => {
   const { calls } = paint(house(), { sheet: true });
-  assert.ok(!calls.some(c => c.op === 'clip' && c.a[0] === 'evenodd'), 'لا نقش أرضية');
-  assert.ok(!calls.some(c => c.fill === 'rgba(43,33,27,.055)'), 'لا ظل');
+  assert.ok(!calls.some(c => c.op === 'stroke' && /^rgba\(43,33,27,0?\.(1|055|05|06)\)$/.test(String(c.stroke))), 'لا نقش أرضية');
+  assert.ok(!calls.some(c => c.fill === 'rgba(43,33,27,.085)'), 'لا ظل');
   assert.ok(calls.some(c => c.op === 'strokeText' && c.a[0] === 'مجلس'), 'الهالة البيضاء باقية للطباعة');
 });
 

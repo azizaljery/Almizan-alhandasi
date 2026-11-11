@@ -92,26 +92,26 @@ export function renderPlan(ctx, st) {
 
   // ------------------------------------------------------------------ rooms
   const rooms = st.analysis?.rooms || [];
-  const levelWalls0 = doc.walls.filter(w => w.level === levelId);
-  // ظل خفيف للكتلة تحت المسقط (طبقتان بلا تمويه: أرخص من shadowBlur) — يرفع المبنى عن الورقة
+  // ظل خفيف للكتلة تحت المسقط (تعبئة واحدة مزاحة بلا تمويه: أرخص كثيرًا من shadowBlur) — يرفع المبنى عن الورقة
   if (!sheet && flags.shadow !== false && rooms.length && k >= 8) {
-    ctx.save(); ctx.fillStyle = 'rgba(43,33,27,.055)';
-    for (const off of [3, 7]) {
-      ctx.beginPath();
-      for (const r of rooms) { r.net.forEach((p, i) => { const q = S(p); i ? ctx.lineTo(q.x + off, q.y + off * 1.2) : ctx.moveTo(q.x + off, q.y + off * 1.2); }); ctx.closePath(); }
-      for (const w of levelWalls0) { if (w.kind === 'fence') continue; wallRect(w).map(S).forEach((q, i) => i ? ctx.lineTo(q.x + off, q.y + off * 1.2) : ctx.moveTo(q.x + off, q.y + off * 1.2)); ctx.closePath(); }
-      ctx.fill('nonzero');
-    }
+    ctx.save(); ctx.fillStyle = 'rgba(43,33,27,.085)';
+    // حلقات الفراغات وحدها (بلا مستطيلات الجدران): مسارات أقل بكثير، والإزاحة تتجاوز سماكة الجدار الخارجي فيظهر الظل خارج الكتلة
+    const off = 4 + .25 * k * .5; ctx.beginPath();
+    for (const r of rooms) { r.net.forEach((p, i) => { const q = S(p); i ? ctx.lineTo(q.x + off, q.y + off * 1.15) : ctx.moveTo(q.x + off, q.y + off * 1.15); }); ctx.closePath(); }
+    ctx.fill();
     ctx.restore();
   }
+  const floorOn = !sheet && flags.floors !== false && k >= 18, floorBatch = new Map(); // نقش الأرضيات يُجمع لكل شفافية ويُخطّ مرة واحدة
   for (const r of rooms) {
     const type = ROOM_TYPES[r.type] || ROOM_TYPES.other, hover = st.hover?.roomId === r.id, picked = sel.has(r.id);
     ctx.beginPath();
     for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); }
     if (!sheet) { ctx.fillStyle = r.unlabelled ? 'rgba(160,160,160,.12)' : (typeof st.roomFill === 'function' && st.roomFill(r)) || type.color; ctx.fill('evenodd'); }
-    if (!sheet && flags.floors !== false && k >= 18 && !r.unlabelled) floorPattern(ctx, r, type.floor, S, k);
+    if (floorOn && !r.unlabelled) floorPattern(ctx, r, type.floor, S, k, floorBatch);
     if (hover || picked) { ctx.beginPath(); for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); } ctx.fillStyle = picked ? 'rgba(14,127,214,.18)' : 'rgba(14,127,214,.09)'; ctx.fill('evenodd'); }
   }
+
+  if (floorBatch.size) { ctx.save(); ctx.lineWidth = 1; for (const [alpha, segs] of floorBatch) { ctx.strokeStyle = `rgba(43,33,27,${alpha})`; ctx.beginPath(); for (let i = 0; i < segs.length; i += 4) { ctx.moveTo(segs[i], segs[i + 1]); ctx.lineTo(segs[i + 2], segs[i + 3]); } ctx.stroke(); } ctx.restore(); }
 
   // ------------------------------------------------------------------ walls: exterior solid, interior hatched in sheet mode; heavy cut line
   const ends = new Map(), key = p => Math.round(p.x * 200) + ',' + Math.round(p.y * 200);
@@ -133,7 +133,7 @@ export function renderPlan(ctx, st) {
   }
   // openings: cut the wall, then draw the symbol
   const wallById = new Map(levelWalls.map(w => [w.id, w]));
-  let entrySeen = false; const entryMarks = []; st.entryMarks = entryMarks; // للاختبارات: مواضع علامات المداخل
+  let entrySeen = false; const entryItems = [], entryMarks = []; st.entryMarks = entryMarks; // للاختبارات: مواضع علامات المداخل
   for (const o of doc.openings) {
     if (o.level !== levelId) continue;
     const w = wallById.get(o.wall); if (!w) continue;
@@ -147,7 +147,7 @@ export function renderPlan(ctx, st) {
     if (isWin) { // نافذة: خط مزدوج (الزجاج) بين الكتفين
       // الرمز المعماري للنافذة: إطاران عند وجهي الجدار، ولوح زجاج مزدوج في المنتصف بلون هادئ
       if (!sheet) { const g = [add(p0, mul(n, hw * .35)), add(p1, mul(n, hw * .35)), sub(p1, mul(n, hw * .35)), sub(p0, mul(n, hw * .35))].map(S); tracePoly(g); ctx.fillStyle = 'rgba(96,160,196,.5)'; ctx.fill(); }
-      for (const f of [-1, 1]) seg(add(p0, mul(n, hw * f)), add(p1, mul(n, hw * f)), pen.thin, picked ? T.select : T.ink);
+      { ctx.strokeStyle = picked ? T.select : T.ink; ctx.lineWidth = pen.thin; ctx.beginPath(); for (const f of [-1, 1]) { const A = S(add(p0, mul(n, hw * f))), B = S(add(p1, mul(n, hw * f))); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); } ctx.stroke(); }
       for (const f of [-.35, .35]) seg(add(p0, mul(n, hw * f)), add(p1, mul(n, hw * f)), sheet ? pen.thin : pen.medium, picked ? T.select : T.ink);
     } else {
       const secs = swingSectors({ o, wall: w });
@@ -156,7 +156,6 @@ export function renderPlan(ctx, st) {
         ctx.strokeStyle = col; ctx.lineWidth = pen.medium; ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.lineTo(leaf.x, leaf.y); ctx.stroke();
         const a0 = Math.atan2(c0.y - h.y, c0.x - h.x), a1 = Math.atan2(leaf.y - h.y, leaf.x - h.x), R = sec.r * k;
         let d = a1 - a0; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
-        if (!sheet) { ctx.save(); ctx.fillStyle = 'rgba(169,113,66,.07)'; ctx.beginPath(); ctx.moveTo(h.x, h.y); ctx.arc(h.x, h.y, R, a0, a0 + d, d < 0); ctx.closePath(); ctx.fill(); ctx.restore(); }
         ctx.save(); ctx.strokeStyle = picked ? T.select : T.inkSoft; ctx.lineWidth = pen.thin; ctx.beginPath(); ctx.arc(h.x, h.y, R, a0, a0 + d, d < 0); ctx.stroke(); ctx.restore();
       }
       if (!secs.length) {
@@ -165,17 +164,9 @@ export function renderPlan(ctx, st) {
       }
     }
     if (o.entry) {
-      // علامة المدخل: مثلث مصمت صغير خارج المبنى يشير إلى الباب (بين الجدار وأول سلسلة أبعاد)، والتسمية في الداخل بعد قوس الفتح فلا تتراكب معه
+      // علامة المدخل تُرسم بعد تسميات الفراغات (أسفل) حتى لا تغطيها لوحاتها
       const mid = add(w.a, mul(u, o.at)), probe = add(mid, mul(n, w.t / 2 + .45));
-      const out = rooms.some(r => inRing(probe, r.net)) ? -1 : 1, th = Math.min(.42 * k, 10) / k, base = w.t / 2 + 4 / k, tip = S(add(mid, mul(n, out * base)));
-      const b1 = S(add(add(mid, mul(n, out * (base + th))), mul(u, th * .62))), b2 = S(add(add(mid, mul(n, out * (base + th))), mul(u, -th * .62)));
-      ctx.save(); ctx.fillStyle = picked ? T.select : T.accent; ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y); ctx.closePath(); ctx.fill();
-      const fsE = Math.max(10.5, Math.min(14, k * .26)), rIn = isWin ? 0 : (o.kind === 'door2' ? o.w / 2 : o.kind === 'door' ? o.w : 0);
-      const t = S(add(mid, mul(n, -out * (w.t / 2 + rIn + .12 + fsE * .75 / k)))), text = entrySeen ? 'مدخل' : k < 30 ? 'المدخل ±0.00' : 'المدخل الرئيسي ±0.00', tx = t.x, ty = t.y;
-      ctx.font = `700 ${fsE}px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
-      if (!sheet) { const tw = ctx.measureText(text).width + 12; ctx.fillStyle = 'rgba(253,251,246,.86)'; ctx.beginPath(); ctx.roundRect(tx - tw / 2, ty - fsE * .8, tw, fsE * 1.6, 5); ctx.fill(); }
-      ctx.fillStyle = picked ? T.select : T.accent; ctx.fillText(text, tx, ty); ctx.restore();
-      entryMarks.push({ x: tx, y: ty, text }); entrySeen = true; // منسوب أرضية الدور عند المدخل الرئيسي
+      entryItems.push({ mid, n, w, out: rooms.some(r => inRing(probe, r.net)) ? -1 : 1, rIn: isWin ? 0 : (o.kind === 'door2' ? o.w / 2 : o.kind === 'door' ? o.w : 0), picked, main: !entrySeen }); entrySeen = true;
     }
   }
 
@@ -240,12 +231,12 @@ export function renderPlan(ctx, st) {
     }
     st.labelLayout = lay; // للاختبارات الحية: عدد التراكبات
     const roomById = new Map(rooms.map(r => [r.id, r]));
+    // لوحات التسميات نصف الشفافة كلها في مسار واحد وتعبئة واحدة: تُبقي الاسم والمساحة مقروءين فوق الأثاث وبلاط الأرضية دون هالة سميكة حول كل حرف
+    if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); for (const p of lay.placed) { const c = S({ x: p.x, y: p.y }), pw = p.w * k + 10, ph = p.h * k + 6; ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); } ctx.fill(); }
     for (const p of lay.placed) {
       const it = lay.items.get(p.id), r = roomById.get(p.id); if (!it || !r) continue;
       const c = S({ x: p.x, y: p.y }); let y = c.y - (p.h * k) / 2 + it.lines[0].size * p.scale * k * .55;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      // لوحة تسمية نصف شفافة خلف النص: تُبقي الاسم والمساحة مقروءين فوق الأثاث وبلاط الأرضية دون هالة سميكة
-      if (!sheet) { const pw = p.w * k + 10, ph = p.h * k + 6; ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); ctx.fill(); }
       it.lines.forEach((t, i) => {
         const px = t.size * p.scale * k, font = `${i === 0 ? 700 : i === it.lines.length - 1 ? 400 : 500} ${px}px ${FONT}`;
         ctx.font = font; if (sheet) { ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.strokeText(t.text, c.x, y); }
@@ -254,6 +245,18 @@ export function renderPlan(ctx, st) {
       });
       if (r.label && sel.has(r.label.id)) { ctx.strokeStyle = T.select; ctx.lineWidth = 1.5; ctx.strokeRect(c.x - p.w * k / 2, c.y - p.h * k / 2, p.w * k, p.h * k); }
     }
+  }
+  // ------------------------------------------------------------------ علامات المداخل: مثلث مصمت داخل العتبة يشير إلى الداخل، والتسمية بعد قوس الفتح إن لم تزاحم تسمية فراغ
+  for (const it of entryItems) {
+    const { mid, n, w, out, rIn, picked } = it, inn = -out, th = Math.max(7, Math.min(.34 * k, 11)) / k, base = w.t / 2 + 3 / k;
+    const tip = S(add(mid, mul(n, inn * (base + th)))), u = norm(sub(w.b, w.a)), b1 = S(add(add(mid, mul(n, inn * base)), mul(u, th * .62))), b2 = S(add(add(mid, mul(n, inn * base)), mul(u, -th * .62)));
+    ctx.save(); ctx.fillStyle = picked ? T.select : T.accent; ctx.beginPath(); ctx.moveTo(tip.x, tip.y); ctx.lineTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y); ctx.closePath(); ctx.fill();
+    const fsE = Math.max(10.5, Math.min(14, k * .26)), text = !it.main ? 'مدخل' : k < 30 ? 'المدخل ±0.00' : 'المدخل الرئيسي ±0.00'; // منسوب أرضية الدور عند المدخل الرئيسي
+    const t = S(add(mid, mul(n, inn * (w.t / 2 + Math.max(rIn, th + .1) + .12 + fsE * .75 / k)))); ctx.font = `700 ${fsE}px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    const tw = ctx.measureText(text).width + 12, hh = fsE * .8;
+    const clash = (st.labelLayout?.placed || []).some(p => { const c = S({ x: p.x, y: p.y }); return Math.abs(c.x - t.x) < (p.w * k + 10 + tw) / 2 && Math.abs(c.y - t.y) < (p.h * k + 6) / 2 + hh; });
+    if (!clash) { if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.86)'; ctx.beginPath(); ctx.roundRect(t.x - tw / 2, t.y - hh, tw, hh * 2, 5); ctx.fill(); } ctx.fillStyle = picked ? T.select : T.accent; ctx.fillText(text, t.x, t.y); }
+    ctx.restore(); entryMarks.push({ x: t.x, y: t.y, text, shown: !clash, tip });
   }
   for (const t of doc.texts) {
     if (t.level !== levelId) continue;
@@ -312,7 +315,7 @@ export function renderPlan(ctx, st) {
     ctx.fillRect(a.x, a.y, b.x - a.x, b.y - a.y); ctx.strokeRect(a.x, a.y, b.x - a.x, b.y - a.y); ctx.restore();
   }
   // north arrow + scale bar (+ legend in sheet mode)
-  if (flags.compass !== false) drawCompass(ctx, W < 520 ? 34 : 48, W < 520 ? 44 : 56, doc.north || 0, T, sheet, W < 520 ? .78 : 1);
+  if (flags.compass !== false) compassCached(ctx, W < 520 ? 34 : 48, W < 520 ? 44 : 56, doc.north || 0, T, sheet, W < 520 ? .78 : 1, st.dpr || (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1));
   if (flags.scaleBar !== false) drawScaleBar(ctx, flags.scaleBarRight ? W - (W < 520 ? 14 : 24) - ((([.5, 1, 2, 5, 10, 20].find(c => c * k >= 70) || 20) * k)) - 22 : (W < 520 ? 14 : 24), H - (W < 520 ? 20 : 30), k, T, sheet);
   if (sheet) drawLegend(ctx, W - 16, H - 16, classes.legend, !!st.columns, pen);
   ctx.restore();
@@ -439,9 +442,13 @@ function drawFixture(ctx, f, S, k, picked, hover, T = THEME, pen = pens(k)) {
   if (sym.outline) { trace(sym.outline); ctx.fillStyle = f.kind === 'rug' ? 'rgba(160,110,90,.18)' : f.kind === 'pool' || f.kind === 'waterfall' || f.kind === 'fountain' ? 'rgba(56,182,207,.30)' : f.kind === 'lawn' ? 'rgba(95,159,69,.22)' : T.fixtureFill; ctx.fill(); ctx.stroke(); }
   if (k > 14) {
     ctx.lineWidth = pen.thin;
-    if (sym.tints?.length && T !== SHEET_THEME) { ctx.fillStyle = sanitary || f.kind === 'kitchen-run' ? 'rgba(120,150,165,.16)' : 'rgba(169,113,66,.13)'; for (const q of sym.tints) { trace(q); ctx.fill(); } }
-    for (const r of sym.rects) { trace(r); ctx.stroke(); }
-    for (const [a, b] of sym.lines) { const A = S(a), B = S(b); ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }
+    if (sym.tints?.length && T !== SHEET_THEME) { ctx.fillStyle = sanitary || f.kind === 'kitchen-run' ? 'rgba(120,150,165,.16)' : 'rgba(169,113,66,.13)'; ctx.beginPath(); for (const q of sym.tints) { q.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); } ctx.fill(); }
+    if (sym.rects.length || sym.lines.length) { // كل خطوط القطعة في مسار واحد وخطّة واحدة
+      ctx.beginPath();
+      for (const q of sym.rects) { q.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); }
+      for (const [a, b] of sym.lines) { const A = S(a), B = S(b); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); }
+      ctx.stroke();
+    }
     for (const e of sym.ellipses) { const c = S(e.c); if (f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fillStyle = 'rgba(90,150,90,.35)'; else if (sanitary) ctx.fillStyle = T.fixtureFill; ctx.beginPath(); ctx.ellipse(c.x, c.y, e.rx * k, e.ry * k, -e.rot, 0, 7); if (sanitary || f.kind === 'tree' || f.kind === 'plant' || f.kind === 'planter') ctx.fill(); ctx.stroke(); }
   }
   ctx.restore();
@@ -482,6 +489,16 @@ function drawSnapMarker(ctx, s, kind) {
   else { ctx.beginPath(); ctx.moveTo(s.x - 8, s.y); ctx.lineTo(s.x + 8, s.y); ctx.moveTo(s.x, s.y - 8); ctx.lineTo(s.x, s.y + 8); ctx.stroke(); }
   ctx.restore();
 }
+/** سهم الشمال لا يتغير بين الإطارات: يُرسم مرة في لوحة جانبية ثم يُنسخ (drawImage) — يوفّر نحو عشر خطّات في كل إعادة رسم. بلا DOM (اختبارات) يُرسم مباشرة. */
+let compassBmp = null;
+function compassCached(ctx, x, y, north, T, sheet, sc, dpr) {
+  if (typeof document === 'undefined' || typeof ctx.drawImage !== 'function') return drawCompass(ctx, x, y, north, T, sheet, sc);
+  const key = `${north}|${sheet ? 1 : 0}|${sc}|${dpr}`, half = Math.ceil(40 * sc);
+  if (!compassBmp || compassBmp.key !== key) {
+    const c = document.createElement('canvas'); c.width = c.height = Math.ceil(half * 2 * dpr); const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); drawCompass(g, half, half, north, T, sheet, sc); compassBmp = { key, c };
+  }
+  ctx.drawImage(compassBmp.c, x - half, y - half, half * 2, half * 2);
+}
 /** سهم الشمال: وردة بنجمة ثمانية (من هوية الميزان) داخل حلقتين، ونصف السهم مصمت ونصفه فارغ. */
 function drawCompass(ctx, x, y, north, T = THEME, sheet = false, sc = 1) {
   const gold = sheet ? T.ink : T.gold, R = 19 * sc;
@@ -514,17 +531,20 @@ function inRing(p, ring) {
   return inside;
 }
 
-/** نقش الأرضية الخافت داخل الفراغ: بلاط 60 سم للمطابخ ودورات المياه، ألواح خشب لغرف النوم، ورخام بفواصل واسعة للمجالس والصالات. */
-export const FLOOR_PATTERNS = Object.freeze({ wet: { step: .6, grid: true, alpha: .1 }, tile: { step: .6, grid: true, alpha: .06 }, wood: { step: .3, grid: false, alpha: .055 }, marble: { step: 1.2, grid: true, alpha: .05 } });
-function floorPattern(ctx, r, floor, S, k) {
+/** نقش الأرضية الخافت داخل الفراغ: بلاط 60 سم للمطابخ ودورات المياه، ألواح خشب لغرف النوم؛ المجالس والصالات (رخام) بلا نقش ليبقى الرسم هادئًا وخفيفًا. */
+export const FLOOR_PATTERNS = Object.freeze({ wet: { step: .6, grid: true, alpha: .1 }, tile: { step: .6, grid: true, alpha: .06 }, wood: { step: .4, grid: false, alpha: .06 } });
+function floorPattern(ctx, r, floor, S, k, batch) {
   const fp = FLOOR_PATTERNS[floor]; if (!fp || fp.step * k < 7) return;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const p of r.net) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
-  ctx.save(); ctx.beginPath(); for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); } ctx.clip('evenodd');
-  ctx.strokeStyle = `rgba(43,33,27,${fp.alpha})`; ctx.lineWidth = 1; ctx.beginPath();
   const alongX = fp.grid || (x1 - x0) >= (y1 - y0); // ألواح الخشب بطول الضلع الأطول
-  if (fp.grid || !alongX) for (let x = x0 + fp.step; x < x1 - .01; x += fp.step) { const a = S({ x, y: y0 }), b = S({ x, y: y1 }); ctx.moveTo(Math.round(a.x) + .5, a.y); ctx.lineTo(Math.round(b.x) + .5, b.y); }
-  if (fp.grid || alongX) for (let y = y0 + fp.step; y < y1 - .01; y += fp.step) { const a = S({ x: x0, y }), b = S({ x: x1, y }); ctx.moveTo(a.x, Math.round(a.y) + .5); ctx.lineTo(b.x, Math.round(b.y) + .5); }
-  ctx.stroke(); ctx.restore();
+  const rect = r.net.length === 4 && !(r.space.holes || []).length && r.net.every(p => (Math.abs(p.x - x0) < 1e-6 || Math.abs(p.x - x1) < 1e-6) && (Math.abs(p.y - y0) < 1e-6 || Math.abs(p.y - y1) < 1e-6));
+  const lines = (push) => {
+    if (fp.grid || !alongX) for (let x = x0 + fp.step; x < x1 - .01; x += fp.step) { const a = S({ x, y: y0 }), b = S({ x, y: y1 }); push(Math.round(a.x) + .5, a.y, Math.round(b.x) + .5, b.y); }
+    if (fp.grid || alongX) for (let y = y0 + fp.step; y < y1 - .01; y += fp.step) { const a = S({ x: x0, y }), b = S({ x: x1, y }); push(a.x, Math.round(a.y) + .5, b.x, Math.round(b.y) + .5); }
+  };
+  if (rect && batch) { let segs = batch.get(fp.alpha); if (!segs) batch.set(fp.alpha, segs = []); lines((a, b, c, d) => segs.push(a, b, c, d)); return; } // الفراغ المستطيل بلا قص: خطوطه داخل حدوده أصلًا
+  ctx.save(); ctx.beginPath(); for (const ring of [r.net, ...(r.space.holes || [])]) { ring.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); } ctx.clip('evenodd');
+  ctx.strokeStyle = `rgba(43,33,27,${fp.alpha})`; ctx.lineWidth = 1; ctx.beginPath(); lines((a, b, c, d) => { ctx.moveTo(a, b); ctx.lineTo(c, d); }); ctx.stroke(); ctx.restore();
 }
 
 export default { THEME, SHEET_THEME, makeView, toScreen, toWorld, fitView, docBounds, renderPlan, pens, duplicatesChain };
