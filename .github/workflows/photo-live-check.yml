@@ -37,10 +37,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Playwright (not saved to package.json; used only to compute the fidelity score)
-        run: |
-          npm install --no-save --no-package-lock playwright@1.49.1
-          npx playwright install --with-deps chromium
       - name: Generate one professional photo on the live site
         run: node scripts/photo-live-check.mjs
         env:
