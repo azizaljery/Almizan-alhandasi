@@ -57,9 +57,9 @@ async function startScene() {
       if (!scene) return;
       const elapsed = now - t0, w0 = performance.now();
       scene.update(elapsed);
-      // جهاز لا يقدر على المشهد (إطار > 120 مللي ثانية ثلاث مرات متتالية): يُثبَّت على آخر صورة حتى لا يثقل الأزرار
-      slow = performance.now() - w0 > 120 ? slow + 1 : 0;
-      if (slow >= 3) { home.dataset.scene = 'still'; return; }
+      // جهاز لا يقدر على المشهد (إطار واحد > 250 مللي ثانية، أو > 120 ثلاث مرات متتالية): يُثبَّت على آخر صورة حتى لا يثقل الأزرار
+      const cost = performance.now() - w0; slow = cost > 120 ? slow + 1 : 0;
+      if (slow >= 3 || cost > 250) { home.dataset.scene = 'still'; return; }
       // يدور المشهد ببطء ما دامت الصفحة الأولى ظاهرة (ويتوقف حين تُخفى الصفحة لتوفير الطاقة)
       if (home.dataset.stage === 'welcome' && scene) frame = requestAnimationFrame(tick);
     };
