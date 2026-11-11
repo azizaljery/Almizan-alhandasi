@@ -206,29 +206,59 @@ export function fixtureSymbol(f) {
   const rot = f.rot || 0, w = f.w, d = f.d, cs = Math.cos(rot), sn = Math.sin(rot);
   const loc = (x, y) => ({ x: f.x + x * cs - y * sn, y: f.y + x * sn + y * cs });
   const rectL = (x0, y0, x1, y1) => [loc(x0, y0), loc(x1, y0), loc(x1, y1), loc(x0, y1)];
-  const sym = { outline: rectL(-w / 2, -d / 2, w / 2, d / 2), lines: [], ellipses: [], rects: [], soft: f.kind === 'rug' || f.kind === 'tree' || f.kind === 'plant' || f.kind === 'lawn' };
+  // tints: مضلعات تُملأ بدرجة هادئة (وسائد، مساند، أحواض) فوق جسم القطعة؛ الرسّامان (Canvas وSVG) يقرآنها إن وُجدت.
+  const sym = { outline: rectL(-w / 2, -d / 2, w / 2, d / 2), lines: [], ellipses: [], rects: [], tints: [], soft: f.kind === 'rug' || f.kind === 'tree' || f.kind === 'plant' || f.kind === 'lawn' };
   const L = (ax, ay, bx, by) => sym.lines.push([loc(ax, ay), loc(bx, by)]);
+  const R = (x0, y0, x1, y1, tint = false) => { const q = rectL(x0, y0, x1, y1); sym.rects.push(q); if (tint) sym.tints.push(q); };
+  const E = (x, y, rx, ry = rx) => sym.ellipses.push({ c: loc(x, y), rx, ry, rot: rx === ry ? 0 : rot });
   switch (f.kind) {
     case 'bed-double': case 'bed-single': {
-      const single = f.kind === 'bed-single', pw = single ? w * .7 : w * .4;
-      for (const sx of single ? [0] : [-1, 1]) { const cx = sx * w * .24, hw = pw / 2 * (single ? 1 : .9); sym.rects.push(rectL(cx - hw, -d / 2 + .11, cx + hw, -d / 2 + .39)); }
-      L(-w / 2, d * .12, w / 2, d * .12); break; }
-    case 'sofa-3': case 'sofa-2': case 'majlis-sofa': case 'armchair':
-      L(-w / 2, -d / 2 + d * .28, w / 2, -d / 2 + d * .28);
-      if (f.kind !== 'armchair') { L(-w / 2 + .12, -d / 2 + d * .28, -w / 2 + .12, d / 2); L(w / 2 - .12, -d / 2 + d * .28, w / 2 - .12, d / 2); }
-      break;
-    case 'wc': sym.ellipses.push({ c: loc(0, d * .15), rx: w * .45, ry: d * .3, rot }); L(-w / 2, -d / 2 + d * .22, w / 2, -d / 2 + d * .22); break;
-    case 'basin': sym.ellipses.push({ c: loc(0, 0), rx: w * .32, ry: d * .3, rot }); break;
-    case 'shower': L(-w / 2, -d / 2, w / 2, d / 2); L(-w / 2, d / 2, w / 2, -d / 2); break;
-    case 'bathtub': sym.rects.push(rectL(-w * .38, -d * .44, w * .38, d * .44)); break;
-    case 'stove': for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) sym.ellipses.push({ c: loc(a * w * .22, b * d * .22), rx: w * .13, ry: w * .13, rot: 0 }); break;
-    case 'kitchen-run': L(-w / 2, d / 2 - .08, w / 2, d / 2 - .08); sym.rects.push(rectL(-w * .2 - .25, -.17, -w * .2 + .25, .17)); break;
-    case 'fridge': L(-w / 2, 0, w / 2, 0); break;
-    case 'washing-machine': sym.ellipses.push({ c: loc(0, 0), rx: w * .32, ry: w * .32, rot: 0 }); break;
+      // سرير: لوح رأس، وسائد، وغطاء مطوي بزاوية مقلوبة
+      const single = f.kind === 'bed-single', pw = single ? w * .7 : w * .4, hb = Math.min(.09, d * .05);
+      sym.tints.push(rectL(-w / 2, -d / 2, w / 2, -d / 2 + hb)); L(-w / 2, -d / 2 + hb, w / 2, -d / 2 + hb);
+      for (const sx of single ? [0] : [-1, 1]) { const cx = sx * w * .24, hw = pw / 2 * (single ? 1 : .9); R(cx - hw, -d / 2 + .14, cx + hw, -d / 2 + .42, true); }
+      const fold = -d / 2 + Math.min(.62, d * .32), band = Math.min(.16, d * .08), tc = Math.min(.42, w * .28);
+      L(-w / 2, fold, w / 2, fold); L(-w / 2, fold + band, w / 2 - tc, fold + band); L(w / 2 - tc, fold + band, w / 2, fold + band + tc);
+      break; }
+    case 'sofa-3': case 'sofa-2': case 'majlis-sofa': case 'armchair': {
+      // كنبة/جلسة عربية: مسند ظهر، ذراعان، وتقسيم وسائد الجلوس؛ الجلسة العربية بمساند ظهر متتابعة
+      const back = -d / 2 + d * .28, arm = Math.min(.14, w * .12);
+      L(-w / 2, back, w / 2, back); L(-w / 2 + arm, back, -w / 2 + arm, d / 2); L(w / 2 - arm, back, w / 2 - arm, d / 2);
+      const n = f.kind === 'sofa-3' ? 3 : f.kind === 'sofa-2' ? 2 : f.kind === 'armchair' ? 1 : Math.max(2, Math.round((w - 2 * arm) / .75)), seat = (w - 2 * arm) / n;
+      for (let i = 1; i < n; i++) L(-w / 2 + arm + i * seat, back, -w / 2 + arm + i * seat, d / 2);
+      if (f.kind === 'majlis-sofa') for (let i = 0; i < n; i++) sym.tints.push(rectL(-w / 2 + arm + i * seat + .04, -d / 2 + .03, -w / 2 + arm + (i + 1) * seat - .04, back - .03));
+      else sym.tints.push(rectL(-w / 2, -d / 2, w / 2, back));
+      break; }
+    case 'coffee-table': R(-w / 2 + .06, -d / 2 + .06, w / 2 - .06, d / 2 - .06); break;
+    case 'wardrobe': { const n = Math.max(2, Math.round(w / .5)); for (let i = 1; i < n; i++) L(-w / 2 + i * w / n, -d / 2, -w / 2 + i * w / n, d / 2); L(-w / 2, 0, w / 2, 0); break; }
+    case 'nightstand': E(0, 0, Math.min(w, d) * .22); break;
+    case 'desk': L(-w / 2, d / 2 - .1, w / 2, d / 2 - .1); break;
+    case 'chair': L(-w / 2, -d / 2 + d * .2, w / 2, -d / 2 + d * .2); break;
+    case 'rug': R(-w / 2 + .12, -d / 2 + .12, w / 2 - .12, d / 2 - .12); break;
+    case 'wc': // مرحاض: خزان خلفي، وعاء بيضوي ومقعد داخلي
+      sym.outline = null; R(-w / 2, -d / 2, w / 2, -d / 2 + d * .24, true);
+      E(0, d * .13, w * .46, d * .36); E(0, d * .15, w * .3, d * .24); break;
+    case 'basin': E(0, d * .06, w * .32, d * .3); E(0, -d * .34, .03); break;
+    case 'shower': R(-w / 2 + .05, -d / 2 + .05, w / 2 - .05, d / 2 - .05); L(-w / 2, -d / 2, w / 2, d / 2); L(-w / 2, d / 2, w / 2, -d / 2); E(0, 0, .05); break;
+    case 'bathtub': E(0, 0, w * .38, d * .44); E(0, -d * .34, .035); break;
+    case 'stove': for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { E(a * w * .22, b * d * .22, w * .13); E(a * w * .22, b * d * .22, w * .05); } break;
+    case 'kitchen-run': { // سطح عمل بحافة أمامية، وحوض مزدوج بخلاط
+      L(-w / 2, d / 2 - .08, w / 2, d / 2 - .08); const cx = -w * .2;
+      R(cx - .36, -.17, cx - .02, .17, true); R(cx + .02, -.17, cx + .36, .17, true); E(cx, -.23, .03);
+      for (let i = 1; i <= 3; i++) if (cx + .42 + i * .07 < w / 2 - .06) L(cx + .42 + i * .07, -.15, cx + .42 + i * .07, .15);
+      break; }
+    case 'fridge': L(-w / 2, d / 2 - .07, w / 2, d / 2 - .07); L(0, d / 2 - .07, 0, d / 2); break;
+    case 'washing-machine': E(0, .03, w * .32); E(0, .03, w * .2); L(-w / 2, -d / 2 + .1, w / 2, -d / 2 + .1); break;
     case 'tv-unit': L(-w * .35, 0, w * .35, 0); break;
-    case 'dining-table': for (const sx of [-.3, .3]) for (const sy of [-1, 1]) sym.rects.push(rectL(sx * w - .2, sy * (d / 2 + .22) - .2, sx * w + .2, sy * (d / 2 + .22) + .2)); break;
+    case 'dining-table': { // كراسٍ على الجانبين الطويلين بعدد يتبع الطول، وكرسيان عند الرأسين إن اتسع العرض
+      const chair = (cx, cy, bx, by) => { R(cx - .2, cy - .2, cx + .2, cy + .2); L(cx - .2 * Math.abs(by) + bx * .17, cy - .2 * Math.abs(bx) + by * .17, cx + .2 * Math.abs(by) + bx * .17, cy + .2 * Math.abs(bx) + by * .17); };
+      const n = Math.max(1, Math.floor(w / .62));
+      for (let i = 0; i < n; i++) for (const sy of [-1, 1]) chair(-w / 2 + (i + .5) * w / n, sy * (d / 2 + .22), 0, sy);
+      if (d >= .8 && w >= 1.5) for (const sx of [-1, 1]) chair(sx * (w / 2 + .22), 0, sx, 0);
+      R(-w / 2 + .07, -d / 2 + .07, w / 2 - .07, d / 2 - .07);
+      break; }
     case 'car': L(-w / 2 + .1, d * .28, w / 2 - .1, d * .28); L(-w / 2 + .1, -d * .18, w / 2 - .1, -d * .18); L(-w / 2 + .1, d * .28, -w / 2 + .1, -d * .18); L(w / 2 - .1, d * .28, w / 2 - .1, -d * .18); break;
-    case 'tree': case 'plant': sym.ellipses.push({ c: loc(0, 0), rx: Math.min(w, d) * .5, ry: Math.min(w, d) * .5, rot: 0 }); sym.outline = null; break;
+    case 'tree': case 'plant': sym.ellipses.push({ c: loc(0, 0), rx: Math.min(w, d) * .5, ry: Math.min(w, d) * .5, rot: 0 }, { c: loc(0, 0), rx: Math.min(w, d) * .3, ry: Math.min(w, d) * .3, rot: 0 }); sym.outline = null; break;
     case 'elevator-car': sym.rects.push(rectL(-w / 2 + .06, -d / 2 + .06, w / 2 - .06, d / 2 - .06)); L(-w / 2 + .06, -d / 2 + .06, w / 2 - .06, d / 2 - .06); L(-w / 2 + .06, d / 2 - .06, w / 2 - .06, -d / 2 + .06); L(-w * .31, d / 2, w * .31, d / 2); break;
     case 'pool': {
       const cp = Math.min(.35, Math.min(w, d) * .08); sym.rects.push(rectL(-w / 2 + cp, -d / 2 + cp, w / 2 - cp, d / 2 - cp));

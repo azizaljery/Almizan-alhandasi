@@ -9,6 +9,7 @@ import { exteriorWallIds } from './topology.mjs';
 import { docBounds } from './editor/render2d.mjs';
 import { sub, add, mul, norm, perp, dist } from './geom.mjs';
 import { isOutdoorKind } from './catalog.mjs';
+import { ROOM_TYPES } from './catalog.mjs';
 import { INK, PAPER, BRONZE, SOFT, roomTint, inkify, sheetDefs, frameSvg, brandStrip } from './sheet-style.mjs';
 import { LINE_MM, SHEETS, pickScale, wallClasses, gridAxes, dimensionChains, layoutLabels, stairInfo, fixtureSymbol, fmtDim, fmtAreaM2, approxTextWidth, countOverlaps } from './plan-annot.mjs';
 
@@ -56,12 +57,14 @@ export function planSheet(doc, opts = {}) {
     `<text x="${n1(x)}" y="${n1(y)}" font-size="${n1(size)}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}"${halo ? ' stroke="#fff" stroke-width="3" paint-order="stroke"' : ''}${rotate ? ` transform="rotate(${rotate} ${n1(x)} ${n1(y)})"` : ''}>${esc(s)}</text>`;
   const out = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${S.w}mm" height="${S.h}mm" direction="rtl" font-family='${FONT}' class="plan-sheet" data-sheet="${sheet}" data-scale="${scale}">`,
     `<title>${esc(doc.title)} — ${esc(lvl.name)} — مسقط معماري 1:${scale}</title>`,
-    `<defs><pattern id="${id}-hatch" patternUnits="userSpaceOnUse" width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" patternTransform="rotate(45)"><rect width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" fill="#cbbba6"/><line x1="0" y1="0" x2="0" y2="${n1(mm(1.2))}" stroke="#000" stroke-width="${LW.thin}"/></pattern>${sheetDefs(id, mm)}</defs>`,
+    `<defs><pattern id="${id}-hatch" patternUnits="userSpaceOnUse" width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" patternTransform="rotate(45)"><rect width="${n1(mm(1.2))}" height="${n1(mm(1.2))}" fill="#cbbba6"/><line x1="0" y1="0" x2="0" y2="${n1(mm(1.2))}" stroke="#000" stroke-width="${LW.thin}"/></pattern>${sheetDefs(id, mm)}${floorDefs(id, k)}</defs>`,
     ...frameSvg({ W, H, F, R, mm, LW })];
   // ------------------------------------------------------------------ ظل الكتلة وأرضيات الفراغات (تظليل هادئ حسب النوع؛ إخراج فقط)
   const floorG = [];
   for (const o of analysis?.outlines || []) if (o.polygon?.length >= 3) floorG.push(poly(o.polygon, `fill="${PAPER}" stroke="none" filter="url(#${id}-shadow)"`));
   for (const r of rooms) if (r.net?.length >= 3) floorG.push(poly(r.net, `fill="${roomTint(r.type)}" stroke="none" data-room-type="${esc(r.type || '')}"`));
+  // نقش أرضية خافت فوق اللون: بلاط للمطابخ ودورات المياه، ألواح خشب لغرف النوم، رخام بفواصل واسعة للمجالس والصالات
+  for (const r of rooms) { const fl = (ROOM_TYPES[r.type] || {}).floor, pat = FLOOR_PAT[fl]; if (pat && r.net?.length >= 3 && !r.unlabelled) floorG.push(poly(r.net, `fill="url(#${id}-fl-${pat})" stroke="none" class="floor-pattern"`)); }
   if (floorG.length) out.push(`<g class="floors">${floorG.join('')}</g>`);
 
   // ------------------------------------------------------------------ الجدران: الخارجي مصمت والداخلي مهشّر، بخط قطع ثقيل
@@ -87,7 +90,9 @@ export function planSheet(doc, opts = {}) {
     for (const p of [p0, p1]) openG.push(line({ x: X(add(p, mul(n, hw)).x), y: Y(add(p, mul(n, hw)).y) }, { x: X(sub(p, mul(n, hw)).x), y: Y(sub(p, mul(n, hw)).y) }, jamb));
     const isWin = o.kind === 'window' || o.kind === 'window2';
     if (isWin) {
-      for (const f of [-.35, .35]) { const a = add(p0, mul(n, hw * f)), c = add(p1, mul(n, hw * f)); openG.push(line({ x: X(a.x), y: Y(a.y) }, { x: X(c.x), y: Y(c.y) }, `stroke="#000" stroke-width="${LW.thin}"`)); }
+      // رمز النافذة: إطاران عند وجهي الجدار ولوح زجاج مزدوج في المنتصف بلون هادئ
+      openG.push(poly([add(p0, mul(n, hw * .35)), add(p1, mul(n, hw * .35)), sub(p1, mul(n, hw * .35)), sub(p0, mul(n, hw * .35))], 'fill="#cfe0e8" stroke="none" class="glass"'));
+      for (const f of [-1, -.35, .35, 1]) { const a = add(p0, mul(n, hw * f)), c = add(p1, mul(n, hw * f)); openG.push(line({ x: X(a.x), y: Y(a.y) }, { x: X(c.x), y: Y(c.y) }, `stroke="#000" stroke-width="${LW.thin}"`)); }
       continue;
     }
     const secs = swingSectors({ o, wall: w });
@@ -147,13 +152,14 @@ export function planSheet(doc, opts = {}) {
   if (opts.withFixtures !== false) for (const f of doc.fixtures) {
     if (f.level !== levelId || isOutdoorKind(f.kind)) continue;
     const sym = fixtureSymbol(f), thin = `fill="none" stroke="#000" stroke-width="${LW.thin}"`;
-    if (sym.outline) fixG.push(poly(sym.outline, `fill="#ffffff" fill-opacity=".55" stroke="#000" stroke-width="${LW.thin}"`));
+    if (sym.outline) fixG.push(poly(sym.outline, `fill="#ffffff" fill-opacity=".7" stroke="#000" stroke-width="${LW.thin}"`));
+    for (const q of sym.tints || []) fixG.push(poly(q, `fill="${BRONZE}" fill-opacity=".14" stroke="none" class="fx-tint"`));
     for (const r of sym.rects) fixG.push(poly(r, thin));
     for (const [a, c] of sym.lines) fixG.push(line({ x: X(a.x), y: Y(a.y) }, { x: X(c.x), y: Y(c.y) }, thin));
     for (const e of sym.ellipses) fixG.push(`<ellipse cx="${n1(X(e.c.x))}" cy="${n1(Y(e.c.y))}" rx="${n1(e.rx * k)}" ry="${n1(e.ry * k)}" transform="rotate(${n1(-e.rot * 180 / Math.PI)} ${n1(X(e.c.x))} ${n1(Y(e.c.y))})" ${thin}/>`);
     if (!sym.soft) fixBoxes.push({ x: f.x, y: f.y, w: Math.max(f.w, f.d), h: Math.max(f.w, f.d), soft: true });
   }
-  if (fixG.length) out.push(`<g class="fixtures">${fixG.join('')}</g>`);
+  if (fixG.length) out.push(`<g class="fixtures">${fixG.join('').replace(/#000/g, '#5d5348')}</g>`); // هرمية الخط: الأثاث أخف من الجدران
   // ------------------------------------------------------------------ تسميات الفراغات: الاسم ثم المساحة (وأبعاد المستطيل إن اتسع)
   const nameSize = mm(3.2) / k, subSize = mm(2.3) / k; // بالمتر
   const measure = (t, size) => approxTextWidth(t, size);
@@ -230,6 +236,14 @@ export function planSheet(doc, opts = {}) {
 
 /** SVG فقط. */
 export const planSheetSvg = (doc, opts) => planSheet(doc, opts).svg;
+
+/** نقوش الأرضيات (SVG pattern) بمقياس اللوحة: k بكسل/متر. */
+const FLOOR_PAT = Object.freeze({ wet: 'tile', tile: 'tile', wood: 'wood', marble: 'marble' });
+function floorDefs(id, k) {
+  const pat = (name, w, h, d, op) => `<pattern id="${id}-fl-${name}" patternUnits="userSpaceOnUse" width="${n1(w)}" height="${n1(h)}"><path d="${d}" fill="none" stroke="${INK}" stroke-opacity="${op}" stroke-width="1"/></pattern>`;
+  const t = .6 * k, wd = .3 * k, m = 1.2 * k;
+  return pat('tile', t, t, `M0 0H${n1(t)}M0 0V${n1(t)}`, .13) + pat('wood', m * 2, wd, `M0 0H${n1(m * 2)}`, .09) + pat('marble', m, m, `M0 0H${n1(m)}M0 0V${n1(m)}`, .08);
+}
 
 function wrap(text, n) {
   const words = String(text).split(/\s+/), lines = []; let cur = '';

@@ -1,7 +1,7 @@
 // صفحة مخرجات التصميم: تقرأ المشروع المحفوظ من المرسم وتعرض المخرجات وتولّد كتاب المشروع.
 import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY, loadSavedDNA } from './draw/handoff.mjs';
-import { buildFinalData, projectBookHtml, designReasons, sheetNote, NEXT_STAGES } from './final-outputs.mjs';
+import { buildFinalData, projectBookHtml, designReasons, sheetNote, NEXT_STAGES, areaSchedule } from './final-outputs.mjs';
 import { GRADES } from './draw/quantities-doc.mjs';
 import { structureCsv } from './draw/structure-sheet.mjs';
 import { drawingSetFiles } from './draw/drawing-set.mjs';
@@ -96,6 +96,7 @@ function render() {
   parts.push(sec('summary', 'ملخص التصميم', `<p class="lead">${esc(d.title)}</p><div class="stats"><div class="stat"><b>${S.levels}</b>أدوار</div><div class="stat"><b>${S.rooms}</b>فراغات</div><div class="stat"><b>${fmt(S.builtArea)} م²</b>مساحة المسقط</div><div class="stat"><b>${fmt(S.roomsArea)} م²</b>مساحة الغرف</div><div class="stat"><b>${fmt(S.doors)}</b>أبواب</div><div class="stat"><b>${fmt(S.windows)}</b>نوافذ</div></div>`
     + (S.byType.length ? table(['الفراغ', 'العدد'], S.byType.map(t => `<tr><td>${esc(t.name)}</td><td class="num">${t.count}</td></tr>`)) : '')
     + `<p class="muted">${S.plot ? `الأرض ${S.plot.width} × ${S.plot.length} م · ` : ''}بصمة الهندسة <code>${esc(d.fingerprint)}</code> · ${esc(d.date)}</p>`));
+  { const a = areaSchedule(d, { cls: 'area-table' }); if (a) parts.push(sec('areas', 'جدول المساحات', a)); }
   d.levels.forEach((l, i) => parts.push(sec('plan' + i, 'المخطط — ' + l.name, `<div class="svgbox sheet">${l.plan}</div>` + sheetNote(l))));
   // اللوحات المعمارية: الموقع العام والواجهات والقطاع وجدول الفتحات — من المخطط نفسه
   const DS = d.drawings;
@@ -122,7 +123,7 @@ function render() {
   // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم، بالعربية
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
   $('fmain').innerHTML = parts.join('');
-  $('fnav').innerHTML = [['summary', 'الملخص'], ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
+  $('fnav').innerHTML = [['summary', 'الملخص'], ...(d.rooms?.length ? [['areas', 'المساحات']] : []), ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));
   $('resPct').addEventListener('input', e => { state.reservePct = e.target.value; update(); });

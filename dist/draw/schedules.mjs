@@ -68,7 +68,7 @@ export function scheduleSheet(doc, opts = {}) {
   const c = sheetCanvas({ sheet: opts.sheet, title: `${doc.title || ''} — جدول الأبواب والنوافذ`, cls: 'schedule-sheet' });
   const { out, txt, P } = c;
   // الأعمدة من اليمين: الرمز، الشكل، النوع، العدد، المقاس، الجلسة، الأدوار، الموقع
-  const COLS = [['الرمز', 12], ['الشكل 1:50', 20], ['النوع', 30], ['العدد', 11], ['العرض × الارتفاع', 25], ['الجلسة', 13], ['الأدوار', 34], ['الموقع', 17]];
+  const COLS = [['الرمز', 12], ['الشكل 1:50', 20], ['النوع', 29], ['العدد', 11], ['العرض × الارتفاع', 25], ['الجلسة', 13], ['الأدوار', 31], ['الموقع', 17]];
   const tableW = mm(COLS.reduce((s, c2) => s + c2[1], 0));
   const blocks = [['door', 'passage'], ['window']];
   const colX = [P.x1 - mm(2), P.x1 - mm(2) - tableW - mm(8)];
