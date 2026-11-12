@@ -5,6 +5,9 @@ import { normalizeAr, extractRequirements } from './requirements.mjs';
 import { redesign as redesignSession, currentDoc, ledgerFor, summarizeDoc, wantsAlternative } from './design-session.mjs';
 import { fixProposals, applyFix } from './design-fixes.mjs';
 import { STAGES } from './journey-nav.mjs';
+import { checkMunicipal, summaryText, DISCLAIMER, SIDE_AR as PLOT_SIDE_AR } from './municipal-rules.mjs';
+import { analyzeSun } from './sun-analysis.mjs';
+import { solarSite } from './geo-land.mjs';
 
 const r1 = v => Math.round(v * 10) / 10;
 const AR_LETTER = '\\u0620-\\u064A\\u066E-\\u06D5';
@@ -90,10 +93,41 @@ function outdoorAnswer(t, doc) {
   return null;
 }
 
+/**
+ * أسئلة الاشتراطات البلدية: الجواب من checkMunicipal على المخطط المعروض وأرض الجلسة (بالمطلوب والموجود)، مع تنبيه الصدق دائمًا.
+ * «يُراجع» يبقى «يُراجع»: لا يُحوَّل حكمًا في الكلام.
+ */
+const MUNI_Q = /بلدي|اشتراط|انظمه (?:ال)?بناء|نظام (?:ال)?بناء|كود (?:ال)?بناء|مخالف|ارتداد|نسبه (?:ال)?بناء|(?:كم|وش|ايش) (?:ال)?مسموح|رخصه/;
+const KIND_AR = { front: 'الواجهة', street: 'شارع جانبي/خلفي', neighbor: 'جار' };
+const m2 = v => String(Math.round(v * 100) / 100);
+export function municipalAnswer(session, text) {
+  const t = normalizeAr(text), doc = currentDoc(session), res = checkMunicipal(doc, session.input?.land || {});
+  const act = [{ label: 'بطاقة مطابقة الاشتراطات', href: './design.html#regsCard' }];
+  if (/ارتداد/.test(t)) {
+    if (!res.setbacks.length) return { kind: 'answer', text: 'لم أستطع قياس الارتدادات: حدود الأرض أو شوارعها غير معروفة في هذا المخطط. ' + DISCLAIMER, actions: act };
+    const rows = res.setbacks.map(r => `الضلع ${PLOT_SIDE_AR[r.side]} (${KIND_AR[r.kind]}${r.width ? ' عرضه ' + m2(r.width) + ' م' : ''}): المطلوب ${m2(r.required)} م${r.exact ? '' : ' على الأقل'} والموجود ${m2(r.upper !== null ? Math.min(r.ground, r.upper) : r.ground)} م${r.verdict === 'fail' ? ' — مخالف' : r.verdict === 'review' ? ' — يُراجع' : ''}`);
+    return { kind: 'answer', text: `الارتدادات على أرضك بحسب الاشتراطات العامة للوزارة: ${rows.join('؛ ')}.${res.needsStreetWidth ? ' لم تُدخل عرض الشارع، فحسبتُ الارتداد جهة الشارع بحده الأدنى؛ أدخله في خطوة الأرض للدقة.' : ''} ${DISCLAIMER}`, actions: res.needsStreetWidth ? [...act, { label: 'أدخل عرض الشارع', href: './home.html#land' }] : act };
+  }
+  if (/نسبه (?:ال)?بناء/.test(t)) { const g = res.items.find(i => i.id === 'coverage_ground'), f = res.items.find(i => i.id === 'coverage_first'); return { kind: 'answer', text: `${g.text}${f && f.verdict !== 'na' ? ' ' + f.text : ''} ${DISCLAIMER}`, actions: act }; }
+  const bad = res.items.filter(i => i.verdict === 'fail'), rev = res.items.filter(i => i.verdict === 'review');
+  return { kind: 'answer', text: `مطابقة أولية لهذا التصميم على الاشتراطات العامة للوزارة: ${summaryText(res.summary)}.`
+    + (bad.length ? ' المخالف: ' + bad.map(i => `${i.title} — ${i.text}`).join(' ') : ' لا بند مخالف في ما قِسته.')
+    + (rev.length ? ` يُراجع مع المكتب الهندسي: ${rev.map(i => i.title).join('، ')}.` : '') + ' ' + DISCLAIMER, actions: act };
+}
+/** أسئلة الشمس والتوجيه: من sun-analysis على المخطط المعروض وموقع الأرض (الخريطة، وإلا المدينة، وإلا الرياض افتراضيًا ويُقال). */
+const SUN_Q = /شمس|توجيه|مشمس|ظل |الظل|حراره|حار |كاسرات/;
+export function sunAnswer(session) {
+  const site = solarSite(session.input?.land?.geo || null), a = analyzeSun(currentDoc(session), site);
+  return { kind: 'answer', text: `درجة توجيه هذا التصميم ${a.score} من 100 (محسوبة لـ${site.label}). ${a.lines.join(' ')}`
+    + (a.ups.length ? ' ما رفعها: ' + a.ups.slice(0, 2).join('؛ ') + '.' : '') + (a.downs.length ? ' ما خفضها: ' + a.downs.slice(0, 2).join('؛ ') + '.' : '') + ' التفصيل وحركة الظل في بطاقة «الشمس والتوجيه». ' + a.limits, actions: [{ label: 'بطاقة الشمس والتوجيه', href: './design.html#sunCard' }] };
+}
+
 /** جواب سؤال من المخطط نفسه. يعيد null إن لم يُعرف السؤال. */
 export function answerQuestion(session, text, { page = 'design' } = {}) {
   const t = normalizeAr(text), doc = currentDoc(session), sum = summarizeDoc(doc), { specs, rooms } = sum;
   const asked = roomsAsked(t, rooms), entry = session.input?.land?.entries?.[0] || 's';
+  if (MUNI_Q.test(t)) { try { return municipalAnswer(session, text); } catch { /* يُكمل إلى بقية الأجوبة */ } }
+  if (SUN_Q.test(t) && !asked?.length) { try { return sunAnswer(session); } catch { /* يُكمل */ } }
   const od = /وين|اين|فيه|موجود|هل |كم /.test(t) ? outdoorAnswer(t, doc) : null; if (od) return od;
   // هل نُفّذ طلبي؟
   if (/نفذت|نفذتي|تنفذ|طلبي|طلباتي|حققت|حققتي|التزمت/.test(t)) {

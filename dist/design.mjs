@@ -13,6 +13,7 @@ import { displayOr } from './field-guards.mjs';
 import { compareDesigns } from './compare-designs.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { fixProposals, applyFix, applyFitDecision } from './design-fixes.mjs';
+import { municipalCard, sunCard, orientationBadges, siteOf } from './regs-sun-ui.mjs';
 import { exteriorQuestions, answerLabel, describeExterior, setExterior, normalizeExterior, parseExteriorText, storeExterior, readExterior } from './exterior-brief.mjs';
 
 const $ = id => document.getElementById(id);
@@ -20,7 +21,8 @@ const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag)
 const fmt = v => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }));
 const toast = t => { const n = el('div', { class: 'toast', role: 'status' }, t); document.body.append(n); setTimeout(() => n.remove(), 3200); };
 
-let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null, focus = null;
+let session = loadSession(localStorage), doc = null, levelId = 'L1', zonesOn = true, view = null, model = null, focus = null, trueNorth = null;
+const northDoc = () => (trueNorth === null ? doc : { ...doc, north: ((trueNorth % 360) + 360) % 360 });
 
 function init() {
   if (!session) {
@@ -38,7 +40,9 @@ addEventListener('pageshow', e => { if (e.persisted) { const s2 = loadSession(lo
 function show(index) {
   // الجلسة (عدة ميغابايت نصًّا) تُكتب فقط إن تغيّر التصميم المعروض؛ من ولّد أو عدّل يحفظها قبل العرض
   if (session.current !== index) { session.current = index; saveSession(localStorage, session); }
-  doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id; view = null; goal = null; inertia = null; focus = null;
+  doc = currentDoc(session); model = analyzeDoc(doc); levelId = doc.levels[0].id;
+  // الشمال الحقيقي (إن حُدّدت الأرض على الخريطة): لبوصلة المسقط ولما يُسلَّم للمجسم والمرسم؛ مستند الجلسة نفسه لا يُمسّ
+  { const st = siteOf(session); trueNorth = st.source === 'map' ? st.north : null; } view = null; goal = null; inertia = null; focus = null;
   const d = session.designs[index], S = summarizeDoc(doc), req = session.input.requirements || {};
   const specs = [
     ['غرف النوم', displayOr(S.specs.bedrooms)], ['دورات المياه', displayOr(S.specs.baths)], ['المجالس', displayOr(S.specs.majlis)], ['الأدوار', displayOr(S.specs.floors)],
@@ -84,15 +88,25 @@ function show(index) {
   const table = el('table', { class: 'rooms' }, el('thead', {}, el('tr', {}, el('th', {}, 'الفراغ'), doc.levels.length > 1 ? el('th', {}, 'الدور') : null, el('th', {}, 'الأبعاد (م)'), el('th', {}, 'المساحة (م²)'), el('th', {}, 'المنطقة'))),
     el('tbody', {}, S.rooms.filter(r => r.area >= 2).map(r => el('tr', {}, el('td', {}, el('span', { class: 'z', style: `background:${ZONES[r.zone].color}` }), r.name), doc.levels.length > 1 ? el('td', {}, r.level) : null, el('td', { class: 'num' }, `${fmt(r.l)} × ${fmt(r.w)}`), el('td', { class: 'num' }, fmt(r.area)), el('td', {}, ZONES[r.zone].label)))),
     el('tfoot', {}, el('tr', {}, el('th', {}, 'إجمالي المساحات الصافية'), doc.levels.length > 1 ? el('th', {}) : null, el('th', {}), el('th', { class: 'num' }, fmt(S.specs.net)), el('th', {}))));
-  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', title: x.summary || '', onclick: () => show(i) }, 'التصميم ' + (i + 1) + (x.feedback?.merge ? ' (دمج)' : '')))) : null;
+  // الشمس والتوجيه: درجة كل تصميم في الجلسة (شارة على أزراره، والأعلى «الأفضل توجيهًا»)، وبطاقتا الاشتراطات والشمس للتصميم المعروض
+  let badges = []; try { badges = orientationBadges(session); } catch { badges = []; }
+  const bd = badges[index] || null, orient = b => (b && b.score !== null ? el('span', { class: 'ori' + (b.best ? ' best' : ''), title: (b.best ? 'الأفضل توجيهًا بين تصاميمك. ' : '') + b.lines.join(' ') }, (b.best ? '★ ' : '') + 'توجيه ' + b.score) : null);
+  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', title: x.summary || '', 'data-design': String(i), onclick: () => show(i) }, 'التصميم ' + (i + 1) + (x.feedback?.merge ? ' (دمج)' : ''), orient(badges[i])))) : null;
+  const best = badges.find(b => b.best && b.index !== index) || null;
+  const orientLine = bd && bd.score !== null ? el('div', { class: 'orient', id: 'orientBadge' }, el('a', { class: 'ori-badge ' + (bd.score >= 75 ? 'good' : bd.score >= 55 ? 'mid' : 'low'), href: '#sunCard' }, `التوجيه: ${bd.score}/100`), el('span', {}, bd.lines.join(' ')),
+    bd.best ? el('span', { class: 'tag' }, 'الأفضل توجيهًا بين تصاميمك') : best ? el('button', { type: 'button', class: 'btn', id: 'bestOrient', onclick: () => { show(best.index); scrollTo({ top: 0, behavior: 'smooth' }); } }, `اعرض الأفضل توجيهًا: التصميم ${best.index + 1} (${best.score})`) : null) : null;
+  let regsCard = null, sunBox = null;
+  try { regsCard = municipalCard(session, doc); } catch { regsCard = null; }
+  try { sunBox = sunCard(session, doc, { onShow: i => { show(i); scrollTo({ top: 0, behavior: 'smooth' }); }, onAsk: t => { openShara(); $('fbText').value = t; $('fbText').focus(); } }); } catch { sunBox = null; }
   const replyCard = sharaReply(d.feedback);
   // replaceChildren يحوّل null إلى النص «null»؛ بطاقة الرد تُمرَّر فقط إن وُجدت
   $('main').replaceChildren(
     ...(replyCard ? [replyCard] : []),
-    el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.')), history),
+    el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), orientLine), history),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     ...(fitCard ? [fitCard] : []),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(fixCard ? [fixCard] : []), reqCard)),
+    ...(sunBox ? [sunBox] : []), ...(regsCard ? [regsCard] : []),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
   legend(); bindPlan(); paint();
 }
@@ -257,7 +271,7 @@ addEventListener('resize', () => { if (!$('compare').hidden) renderCompare(); })
 
 function legend() {
   const box = $('legend'); if (!box) return;
-  box.replaceChildren(...(zonesOn ? Object.values(ZONES).map(z => el('span', {}, el('i', { style: `background:${z.color}` }), z.label)) : [el('span', {}, 'ألوان حسب نوع الفراغ')]), el('span', { style: 'margin-inline-start:auto' }, 'الشمال أعلى المسقط'));
+  box.replaceChildren(...(zonesOn ? Object.values(ZONES).map(z => el('span', {}, el('i', { style: `background:${z.color}` }), z.label)) : [el('span', {}, 'ألوان حسب نوع الفراغ')]), el('span', { style: 'margin-inline-start:auto' }, trueNorth === null ? 'الشمال أعلى المسقط' : Math.abs(trueNorth) < 1 ? 'الشمال الحقيقي أعلى المسقط (من الخريطة)' : `الشمال الحقيقي منحرف ${Math.round(Math.abs(trueNorth))}° نحو ${trueNorth > 0 ? 'الشرق' : 'الغرب'} (سهم البوصلة)`));
 }
 
 // ------------------------------------------------------------------------------------------ المسقط
@@ -377,14 +391,14 @@ function paint() {
   const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (!drewIn) { drewIn = true; drawIn(W, H); }
   renderPlan(ctx, {
-    doc, levelId, view, W, H, analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
+    doc: northDoc(), levelId, view, W, H, analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
     flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true, scaleBarRight: W < 560 },
     roomFill: focus ? rm => (focus.names.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') : zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
   });
 }
 
 // ------------------------------------------------------------------------------------------ الأفعال
-function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(doc)); } catch { /* التخزين غير متاح */ } }
+function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(northDoc())); } catch { /* التخزين غير متاح */ } }
 // طراز العميل («مودرن»، «نجدي»...) يصل إلى اختيار الواجهة في العرض ثلاثي الأبعاد؛ بلا طراز يُمسح الاختيار السابق حتى لا يرث تصميمًا آخر
 function storeFacadeWish() { try { const w = session.input.requirements?.prefs?.styleWish; if (w) localStorage.setItem('mizan.facade.wish', w); else localStorage.removeItem('mizan.facade.wish'); } catch { /* التخزين غير متاح: يبقى اقتراح الميزان */ } }
 // مرحلة «الشكل الخارجي»: بعد اعتماد المخطط تحاور شرعاء العميل بأسئلة موجّهة (كل سؤال يتبع ما سبقه)، ثم تولّد الواجهة وتعرضها ثلاثية الأبعاد.
@@ -445,7 +459,7 @@ $('extRestart').addEventListener('click', () => { extAns = {}; extDone = new Set
 $('extClose').addEventListener('click', () => { if (extPushed) { extPushed = false; history.back(); return; } $('extShara').hidden = true; history.replaceState(null, '', location.pathname + location.search); });
 function onStudio() {
   const alternatives = (session.alternatives || []).map(a => { try { return { index: a.index, strategy: a.strategy, doc: JSON.parse(a.doc) }; } catch { return null; } }).filter(Boolean);
-  try { writeHandoff(sessionStorage, doc, { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }
+  try { writeHandoff(sessionStorage, northDoc(), { source: 'design-page', note: 'التصميم ' + (session.current + 1) + ' من صفحة العرض؛ عدّل عليه ثم اعتمده.', dna: session.dna, alternatives }); } catch { storeForStudio(); }
   location.href = './studio.html';
 }
 function openShara() {

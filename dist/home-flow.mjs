@@ -16,6 +16,8 @@ import { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE } 
 import { SPACE } from './shara/lexicon.mjs';
 import { docToLegacy } from './draw/export-legacy.mjs';
 import { climb, fitFacts, programNeed } from './fit-ladder.mjs';
+import { normalizeGeo } from './geo-land.mjs';
+import { normalizeStreetWidths } from './municipal-rules.mjs';
 
 // الحوش الخارجي والمصعد يفهمهما المحلي ويرسمهما؛ لا نعرض قول الذكاء إنه «غير ممثل/غير مدعوم» فيناقض ما رُسم
 const OUTDOOR_AI_NOISE = x => /مسبح|شلال|حديقة|عشب|احواض|أحواض|مصعد|اسانسير|أسانسير|ليفت/.test(x) && /غير (?:مدعوم|ممثل|منفذ|متاح|مطبق)|لا (?:يمكن|يدعم|يمثل|يُمثل)|خارج (?:برنامج|نطاق)/.test(x);
@@ -29,7 +31,8 @@ const SIDES = Object.keys(SIDE_LABELS);
 /**
  * الأرض كما يدخلها العميل: الطول (شمال/جنوب) والعرض (شرق/غرب) بالمتر، والشوارع، والمداخل.
  * «الاتجاه» هو المدخل: قد يكون للأرض مدخلان على جهتين، وتطل على شارعين أو ثلاثة.
- * الشمال أعلى الرسم كما في الصفحة القديمة؛ لا زاوية شمال هنا.
+ * الشمال أعلى الرسم؛ وإن حدّد العميل أرضه على الخريطة حُفظ انحرافه عن الشمال الحقيقي في land.geo.north (‎-45..45°‎) مع الإحداثيات.
+ * streetWidths (اختياري): عرض الشارع بالمتر لكل ضلع على شارع — يُستعمل في مطابقة الاشتراطات فقط.
  * المحرك الحالي يستعمل المدخل الأول فقط للتوزيع، والمداخل الأخرى تُسجَّل في الوثيقة ولا تؤثر في التوليد.
  */
 export function normalizeLand(raw = {}) {
@@ -47,7 +50,9 @@ export function normalizeLand(raw = {}) {
   if (!Number.isInteger(floors) || floors < 1) throw Error('عدد الأدوار يجب أن يكون 1 أو 2.');
   if (floors > 2) throw Error('ثلاثة أدوار أو أكثر غير مدعومة بعد؛ المتاح دور أو دوران.');
   const plot = validatePlot({ width, length, floors: 1, streets: Object.fromEntries(streets.map(s => [s, true])), entry: entries[0] });
-  return { plot, land: { length, width, streets, entries, floors, ...(raw.floorsExplicit ? { floorsExplicit: true } : {}) } };
+  // اختياريان لا يدخلان التوليد: عروض الشوارع (للارتداد النظامي في بطاقة المطابقة) وموقع الأرض (للشمس والشمال الحقيقي)
+  const streetWidths = normalizeStreetWidths(raw.streetWidths, streets), geo = normalizeGeo(raw.geo);
+  return { plot, land: { length, width, streets, entries, floors, ...(raw.floorsExplicit ? { floorsExplicit: true } : {}), ...(Object.keys(streetWidths).length ? { streetWidths } : {}), ...(geo ? { geo } : {}) } };
 }
 
 // ------------------------------------------------------------------------------------------------ شرعاء
