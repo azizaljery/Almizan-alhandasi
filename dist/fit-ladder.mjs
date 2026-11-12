@@ -3,8 +3,8 @@
 // ثم المقاسات التي حددها (إلى المقاس المعتاد)، ثم فراغات الخدمة والكماليات، ثم الأساسيات (مجلس ثانٍ، غرف نوم، المجلس)،
 // حتى يخرج تصميم سليم. ثم «بيان» مقيس من المخطط نفسه بما استُبعد وما صُغّر وما دُمج وسببه، وقرارات يضغطها العميل.
 // وحدة نقية بلا DOM. لا يُدّعى شيء: البيان يُحسب من المستند وطلب العميل الأصلي، لا من نية السلّم.
-import { DESIGN_TARGETS, buildProgram, NARROW, ENV_MIN } from './villa-layout.mjs';
-import { footprint, validatePlot } from './planner.mjs';
+import { DESIGN_TARGETS, buildProgram, NARROW, ENV_MIN, generatorFootprint } from './villa-layout.mjs';
+import { validatePlot } from './planner.mjs';
 import { docRooms, ROOM_OF, verifyRequest } from './rules.mjs';
 
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -36,7 +36,7 @@ export function isAsked(req, key) {
 /** حقائق الأرض بالأرقام: الارتدادات والمسطح القابل للبناء (العرض على الواجهة × العمق) كما يحسبه المولّد. */
 export function fitFacts(land) {
   const plot = validatePlot({ width: Number(land.width), length: Number(land.length), floors: 1, streets: Object.fromEntries((land.streets || []).map(s => [s, true])), entry: land.entries?.[0] || land.entry });
-  const fp = footprint(plot), sn = ['s', 'n'].includes(plot.entry);
+  const fp = generatorFootprint(land, plot), sn = ['s', 'n'].includes(plot.entry);
   const W = r1(sn ? fp.w : fp.h), D = r1(sn ? fp.h : fp.w);
   const side = sn ? [fp.sb.w, fp.sb.e] : [fp.sb.s, fp.sb.n], deep = sn ? [fp.sb.s, fp.sb.n] : [fp.sb.w, fp.sb.e];
   return { plotW: sn ? plot.width : plot.length, plotD: sn ? plot.length : plot.width, W, D, area: Math.round(W * D), sideSetbacks: side, depthSetbacks: deep, entry: plot.entry };

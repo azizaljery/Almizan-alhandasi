@@ -212,34 +212,49 @@ test('checkMunicipal على تصميم دورين من المولّد: كل بن
   const p = byId(res, 'parking'); assert.equal(p.required, 2, '600 م² ← موقفان'); assert.equal(p.verdict, 'review', 'لم يُرسم موقف: يُراجع لا مخالف');
   assert.equal(res.disclaimer, DISCLAIMER); assert.equal(res.needsStreetWidth, false);
 });
-test('الارتدادات تُقاس إلى وجه الجدار الخارجي: ما يضعه المولّد على خط 3 م يظهر 2.88 م بصدق', () => {
+/** مستند بهيئة ما قبل مطابقة المولّد (محفوظ قديم): محور الجدار الخارجي على خط الارتداد الأمامي، وسترة 0.90 م. يُحاكى بإزاحة جدران المستند الجديد 15 سم نحو الشارع (من 3.15 إلى 3.00 م). */
+const legacyDoc = doc => { const d = clone(doc); for (const w of d.walls) { w.a.y = Math.round((w.a.y - 0.15) * 1000) / 1000; w.b.y = Math.round((w.b.y - 0.15) * 1000) / 1000; } d.roof = { ...(d.roof || {}), parapet: 0.9 }; return d; };
+test('المولّد يطابق من الأصل: وجه الجدار الخارجي على خط الارتداد (3 م) ومحوره داخله بنصف السماكة، والبنود «مطابق»', () => {
   const res = checkMunicipal(out2.doc, { ...LAND2, streetWidths: { s: 15 } }), row = res.setbacks.find(r => r.side === 's');
   assert.deepEqual([row.kind, row.required, row.exact], ['front', 3, true]);
-  assert.equal(row.axis, 3, 'محور الجدار على خط الارتداد'); assert.equal(row.ground, 2.88); assert.equal(row.upper, 2.88);
-  const f = byId(res, 'setback_front'); assert.equal(f.verdict, 'fail'); assert.match(f.text, /المطلوب 3 م والموجود 2\.88 م/); assert.match(f.text, /نصف سماكة الجدار \(12 سم\)/);
-  const n = byId(res, 'setback_neighbor'); assert.equal(n.rows.length, 3); assert.ok(n.rows.every(r => r.required === 1.5));
-  // فروق ارتدادات المولّد عن المطلوب (للتقرير): شارع 15 م لا فرق، شارع 20 م المولّد أقل بمتر
+  assert.equal(row.axis, 3.15, 'محور الجدار على شبكة المولّد داخل الخط'); assert.equal(row.ground, 3.03, 'وجه الجدار داخل خط الارتداد (المحور − نصف السماكة 12.5 سم)'); assert.equal(row.upper, 3.03);
+  const f = byId(res, 'setback_front'); assert.equal(f.verdict, 'ok'); assert.match(f.text, /المطلوب 3 م والموجود 3\.03 م/);
+  const n = byId(res, 'setback_neighbor'); assert.equal(n.rows.length, 3); assert.ok(n.rows.every(r => r.required === 1.5 && r.ground >= 1.5 && r.upper >= 1.5)); assert.equal(n.verdict, 'ok');
+  assert.equal(byId(res, 'roof_parapet').verdict, 'ok'); assert.equal(res.summary.fail, 0, 'لا بند «مخالف» في تصميم المولّد');
+  // فروق ارتدادات المولّد عن المطلوب: التصميم وُلّد بلا عرض شارع (3 م)؛ على شارع 15 م لا فرق، ولو كان الشارع 20 م لكان أقل بمتر (يظهر بصدق)
   assert.ok(generatorSetbackGaps(out2.doc, { ...LAND2, streetWidths: { s: 15 } }).every(g => g.diff === 0));
   const gap = generatorSetbackGaps(out2.doc, { ...LAND2, streetWidths: { s: 20 } }).find(g => g.side === 's'); assert.deepEqual([gap.generator, gap.required, gap.diff], [3, 4, -1]);
-  const wide = checkMunicipal(out2.doc, { ...LAND2, streetWidths: { s: 20 } }); assert.match(byId(wide, 'setback_front').text, /شارع 20 م\): المطلوب 4 م والموجود 2\.88 م/); assert.equal(byId(wide, 'setback_front').verdict, 'fail');
+  const wide = checkMunicipal(out2.doc, { ...LAND2, streetWidths: { s: 20 } }); assert.match(byId(wide, 'setback_front').text, /شارع 20 م\): المطلوب 4 م والموجود 3\.03 م/); assert.equal(byId(wide, 'setback_front').verdict, 'fail');
+});
+test('الارتدادات تُقاس إلى وجه الجدار الخارجي: مستند قديم محور جداره على خط 3 م يظهر 2.88 م بصدق', () => {
+  const res = checkMunicipal(legacyDoc(out2.doc), { ...LAND2, streetWidths: { s: 15 } }), row = res.setbacks.find(r => r.side === 's');
+  assert.equal(row.axis, 3, 'محور الجدار على خط الارتداد'); assert.equal(row.ground, 2.88); assert.equal(row.upper, 2.88);
+  const f = byId(res, 'setback_front'); assert.equal(f.verdict, 'fail'); assert.match(f.text, /المطلوب 3 م والموجود 2\.88 م/); assert.match(f.text, /نصف سماكة الجدار \(12 سم\)/);
 });
 test('بلا عرض شارع: «يُراجع — أدخل عرض الشارع للدقة» لا حكم، والدور الواحد داخل الارتداد يُراجع', () => {
   const res = checkMunicipal(out1.doc, LAND1);
   assert.equal(res.needsStreetWidth, true);
   const side = byId(res, 'setback_street'); assert.equal(side.rows[0].side, 'e'); assert.equal(side.rows[0].required, 2); assert.equal(side.verdict, 'review'); assert.match(side.text, /أدخل عرض الشارع للدقة/); assert.equal(side.hint, 'أدخل عرض الشارع للدقة');
-  const front = byId(res, 'setback_front'); assert.ok(['fail', 'review'].includes(front.verdict)); assert.match(front.text, /المطلوب 3 م على الأقل/);
-  if (out1.doc.levels.length === 1) { assert.equal(front.verdict, 'review', 'الأرضي وحده داخل الارتداد مسموح بشروط'); assert.match(front.text, /مسموح بشروط/); assert.equal(byId(res, 'coverage_first').verdict, 'na'); }
+  // المولّد يحقق الحد الأدنى (3 م للواجهة و2 م للشارع الجانبي)؛ بلا عرض شارع قد يزيد المطلوب فيبقى «يُراجع» لا «مخالف»
+  const front = byId(res, 'setback_front'); assert.equal(front.verdict, 'review'); assert.match(front.text, /المطلوب 3 م على الأقل والموجود 3\.03 م/); assert.match(front.text, /أدخل عرض الشارع للدقة/);
+  assert.ok(side.rows[0].ground >= 2, 'وجه الجدار على خط الشارع الجانبي أو داخله'); assert.equal(byId(res, 'setback_neighbor').verdict, 'ok');
+  if (out1.doc.levels.length === 1) assert.equal(byId(res, 'coverage_first').verdict, 'na');
+  // مستند قديم (محور الجدار على الخط): الأرضي وحده داخل الارتداد «يُراجع» لأنه مسموح بشروط
+  const old = byId(checkMunicipal(legacyDoc(out1.doc), { ...LAND1, streetWidths: { s: 15, e: 10 } }), 'setback_front');
+  if (out1.doc.levels.length === 1) { assert.equal(old.verdict, 'review', 'الأرضي وحده داخل الارتداد مسموح بشروط'); assert.match(old.text, /مسموح بشروط/); }
   // مع عرض الشارعين يصير الحكم قاطعًا
   const exact = checkMunicipal(out1.doc, { ...LAND1, streetWidths: { s: 15, e: 10 } }); assert.equal(exact.needsStreetWidth, false); assert.equal(byId(exact, 'setback_street').verdict, 'ok');
 });
 test('الأحكام تتبع المستند: سترة السطح، السور، المظلة، غرفة دون الحد، وأدوار زائدة', () => {
   const land = { ...LAND2, streetWidths: { s: 15 } }, base = checkMunicipal(out2.doc, land);
-  const rp = byId(base, 'roof_parapet'); assert.equal(rp.verdict, 'fail'); assert.equal(rp.actual, 0.9); assert.match(rp.text, /0\.9 م.*بين 1\.7 و2 م.*أقل بـ80 سم/);
+  assert.equal(out2.doc.roof.parapet, 1.8, 'سترة التصاميم الجديدة 1.80 م'); assert.equal(byId(base, 'roof_parapet').verdict, 'ok');
+  // مستند محفوظ قديم بسترة 0.90 م: يبقى كما هو وتظهر مخالفته
+  const rp = byId(checkMunicipal(legacyDoc(out2.doc), land), 'roof_parapet'); assert.equal(rp.verdict, 'fail'); assert.equal(rp.actual, 0.9); assert.match(rp.text, /0\.9 م.*بين 1\.7 و2 م.*أقل بـ80 سم/);
   const d = clone(out2.doc);
-  d.roof = { ...(d.roof || {}), parapet: 1.8 }; assert.equal(byId(checkMunicipal(d, land), 'roof_parapet').verdict, 'ok');
+  d.roof = { ...(d.roof || {}), parapet: 2.4 }; assert.equal(byId(checkMunicipal(d, land), 'roof_parapet').verdict, 'fail', 'فوق 2 م مخالف'); d.roof.parapet = 1.8;
   d.walls.push({ id: 'wf1', level: d.levels[0].id, a: { x: 0, y: 0 }, b: { x: 20, y: 0 }, t: 0.2, h: 3, kind: 'fence' });
   let r = checkMunicipal(d, land); assert.equal(byId(r, 'fence').verdict, 'ok'); assert.equal(byId(r, 'fence').actual, 3);
-  assert.equal(r.setbacks.find(x => x.side === 's').ground, 2.88, 'السور لا يدخل في قياس الارتداد');
+  assert.equal(r.setbacks.find(x => x.side === 's').ground, 3.03, 'السور لا يدخل في قياس الارتداد');
   d.walls.at(-1).h = 5; assert.equal(byId(checkMunicipal(d, land), 'fence').verdict, 'fail');
   d.fixtures.push({ id: 'fx-car', level: d.levels[0].id, kind: 'carport', x: 4, y: 1.5, rot: 0, w: 5.4, d: 5.5, h: 2.6 });
   r = checkMunicipal(d, land); assert.equal(byId(r, 'parking').verdict, 'ok'); assert.equal(byId(r, 'parking').actual, 2);
@@ -307,7 +322,7 @@ test('ظل الكتلة وشمس الحوش: الظل عكس الشمس، وما
   const north = groundSunHours({ x: 5, y: 12 }, masses, 24.7, DAYS.decemberSolstice, 0), south = groundSunHours({ x: 5, y: -3 }, masses, 24.7, DAYS.decemberSolstice, 0);
   assert.ok(south > north + 3, `حوش الجنوب أشمس شتاءً (${south} مقابل ${north})`);
   // من مستند حقيقي: كتلتان بارتفاع السطح، والمسبح المضاف يظهر في التحليل
-  const m = massing(out2.doc); assert.equal(m.length, 2); assert.equal(m[0].height, 3.2); near(m[1].height, 6.4 + 0.9, 1e-9);
+  const m = massing(out2.doc); assert.equal(m.length, 2); assert.equal(m[0].height, 3.2); near(m[1].height, 6.4 + 1.8, 1e-9); // السطح + سترة السطح (1.80 م في التصاميم الجديدة)
   const d = clone(out2.doc); d.fixtures.push({ id: 'fx-pool', level: d.levels[0].id, kind: 'pool', x: 10, y: 24, rot: 0, w: 3.5, d: 7, h: 0 });
   const a = analyzeSun(d, { lat: 24.7, north: 0 }); assert.equal(a.outdoor.length, 1); assert.equal(a.outdoor[0].kind, 'pool'); assert.ok(a.outdoor[0].summer > a.outdoor[0].winter, 'مسبح شمال المبنى: ظل شتوي أطول'); assert.ok(a.recs.some(t => /المسبح/.test(t)));
 });
@@ -318,9 +333,9 @@ test('شرعاء تجيب عن البلدية والارتداد والشمس م
   const session = createSession({ land, counts: COUNTS, requirements: extractRequirements('4 غرف نوم ومجلس', { counts: COUNTS }), idea: '4 غرف نوم ومجلس', result: out2 });
   assert.equal(classify('هل تصميمي مطابق للبلدية؟'), 'ask'); assert.equal(classify('كم الارتداد؟'), 'ask');
   const a = answerQuestion(session, 'هل تصميمي مطابق للبلدية؟'); assert.equal(a.kind, 'answer');
-  assert.match(a.text, /\d+ مطابق · \d+ يُراجع · \d+ مخالف/); assert.match(a.text, /مطابقة أولية للاشتراطات العامة للوزارة/); assert.match(a.text, /سترة السطح/); assert.match(a.text, /يُراجع مع المكتب الهندسي: /);
+  assert.match(a.text, /\d+ مطابق · \d+ يُراجع · \d+ مخالف/); assert.match(a.text, /مطابقة أولية للاشتراطات العامة للوزارة/); assert.match(a.text, / 0 مخالف/); assert.match(a.text, /لا بند مخالف/); assert.match(a.text, /يُراجع مع المكتب الهندسي: /);
   assert.ok(a.actions.some(x => /regsCard/.test(x.href)));
-  const b = answerQuestion(session, 'كم الارتداد؟'); assert.match(b.text, /الضلع الجنوبي \(الواجهة عرضه 15 م\): المطلوب 3 م والموجود 2\.88 م — مخالف/); assert.match(b.text, /الضلع الشمالي \(جار\): المطلوب 1\.5 م/); assert.match(b.text, /مطابقة أولية/);
+  const b = answerQuestion(session, 'كم الارتداد؟'); assert.match(b.text, /الضلع الجنوبي \(الواجهة عرضه 15 م\): المطلوب 3 م والموجود 3\.03 م/); assert.doesNotMatch(b.text, /مخالف/); assert.match(b.text, /الضلع الشمالي \(جار\): المطلوب 1\.5 م/); assert.match(b.text, /مطابقة أولية/);
   const noW = { ...session, input: { ...session.input, land: LAND2 } }; assert.match(municipalAnswer(noW, 'كم الارتداد الامامي').text, /لم تُدخل عرض الشارع/);
   assert.match(answerQuestion(session, 'كم نسبة البناء؟').text, /÷ مساحة الأرض 600 م²/);
   const s = answerQuestion(session, 'كيف التوجيه والشمس في تصميمي؟'); assert.match(s.text, /درجة توجيه هذا التصميم \d+ من 100/); assert.match(s.text, /موقع أرضك على الخريطة/); assert.match(s.text, /لا يحسب ظل الجيران/);

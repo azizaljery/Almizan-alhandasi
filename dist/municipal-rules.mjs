@@ -114,6 +114,21 @@ export function requiredSetbacks(land = {}) {
 }
 
 /**
+ * حدود البناء النظامية لهذه الأرض — **المصدر الوحيد** الذي يأخذ منه المولّد وسلّم الاتساع والبطاقة (لا تُكرَّر الأرقام في مكان آخر).
+ * الارتداد يُقاس إلى **وجه المبنى الخارجي**: face مستطيل الوجه الخارجي المسموح (بعد الارتدادات ثم سقف نسبة البناء)،
+ * و axis مستطيل محاور الجدران الخارجية = face مُزاحًا للداخل نصف سماكة الجدار (wallT/2) من كل جهة.
+ * يعيد { front, sides, sb: { n, s, e, w } (الارتداد النظامي لكل ضلع)، face, axis, half, coverage, area }.
+ */
+export function buildEnvelope(land = {}, { wallT = 0 } = {}) {
+  const W = Number(land.width), L = Number(land.length), { front, sides } = requiredSetbacks(land);
+  const sb = Object.fromEntries(SIDES.map(s => [s, sides[s].required])), cov = ruleById('coverage_ground').value.max;
+  const w = Math.max(0, W - sb.w - sb.e), h = Math.max(0, L - sb.n - sb.s), area = Math.min(w * h, W * L * cov), k = w * h > 0 ? Math.sqrt(area / (w * h)) : 0;
+  const face = { x: sb.w + (w - w * k) / 2, y: sb.s + (h - h * k) / 2, w: w * k, h: h * k }, half = Math.max(0, wallT) / 2;
+  const axis = { x: face.x + half, y: face.y + half, w: Math.max(0, face.w - 2 * half), h: Math.max(0, face.h - 2 * half) };
+  return { front, sides, sb, face, axis, half, coverage: cov, area };
+}
+
+/**
  * «حسب وضع أرضك»: ما تعنيه الاشتراطات العامة لهذه الأرض بالأرقام.
  * يعيد { ok, width, length, area, front, sides, buildable: { x, y, w, d, area }, coverage: { max, area }, footprintMax, parking, floors, lines[], flags[] }.
  * lines: جمل بلغة بسيطة بالترتيب (تُعرض كما هي). لا يحكم على تصميم؛ يصف حدود الأرض فقط.
@@ -326,4 +341,4 @@ export function generatorSetbackGaps(doc, land = {}) {
   return SIDES.filter(s => Number.isFinite(sb[s])).map(s => ({ side: s, kind: need.sides[s].kind, generator: sb[s], required: need.sides[s].required, exact: need.sides[s].exact, diff: r2(sb[s] - need.sides[s].required) }));
 }
 
-export default { SOURCE, RULES, DISCLAIMER, requiredSetbacks, landBrief, landBriefSvg, checkMunicipal, summaryText, generatorSetbackGaps, VERDICT_AR };
+export default { SOURCE, RULES, DISCLAIMER, requiredSetbacks, buildEnvelope, landBrief, landBriefSvg, checkMunicipal, summaryText, generatorSetbackGaps, VERDICT_AR };

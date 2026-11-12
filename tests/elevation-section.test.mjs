@@ -72,7 +72,7 @@ test('الواجهات: البيت اليدوي — العرض والمناسي�
   assert.deepEqual(right.openings.map(o => o.kind), ['window2']);
   assert.ok(near(right.openings[0].z0, .8) && near(right.openings[0].z1, 2.3));
   const marks = levelMarks(model).map(m => m.z);
-  assert.deepEqual(marks.map(z => +z.toFixed(2)), [-.45, 0, 3.2, 4.1]);
+  assert.deepEqual(marks.map(z => +z.toFixed(2)), [-.45, 0, 3.2, 5]); // أعلى الدروة = السطح 3.2 + سترة السطح الافتراضية 1.80 م (كانت 0.90)
 });
 
 for (const name of ['one', 'two', 'court']) {

@@ -21,12 +21,16 @@ const COLLECTIONS = ['walls', 'openings', 'labels', 'zones', 'fixtures', 'stairs
 const PREFIX = { walls: 'w', openings: 'o', labels: 'r', zones: 'z', fixtures: 'f', stairs: 's', columns: 'c', dimensions: 'd', texts: 't', levels: 'L' };
 export const MAX = Object.freeze({ walls: 4000, openings: 4000, fixtures: 3000, labels: 600, coordinate: 2000, wallLength: 400, minWall: .05 });
 
+/** سترة السطح الافتراضية للمستندات الجديدة (م): ضمن الحد النظامي 1.70–2.00 م (اشتراطات المباني السكنية 5-1-5؛ انظر municipal-rules: roof_parapet).
+ * المستندات المحفوظة قبل ذلك تبقى بقيمتها (0.90) بلا ترحيل صامت، وبطاقة المطابقة تُظهر مخالفتها. */
+export const ROOF_PARAPET_DEFAULT = 1.8;
+
 export function createDoc(options = {}) {
   const doc = {
     schema: SCHEMA, title: options.title || 'مشروع جديد',
     levels: [{ id: 'L1', name: 'الدور الأرضي', elevation: 0, height: LEVEL_DEFAULT_HEIGHT }],
     plot: options.plot || null, north: options.north ?? 0, entry: options.entry || null,
-    roof: { parapet: .9, overhang: .0 }, settings: { grid: .1, defaultThickness: WALL_DEFAULTS.thickness },
+    roof: { parapet: ROOF_PARAPET_DEFAULT, overhang: .0 }, settings: { grid: .1, defaultThickness: WALL_DEFAULTS.thickness },
     counters: { levels: 1 },
   };
   for (const c of COLLECTIONS) doc[c] = [];
