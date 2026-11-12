@@ -136,8 +136,8 @@ export function mepSummaryHtml(M) {
 
 /** الوحدات بالعربية في جداول الكميات (الرمز الدولي بين قوسين حيث يُعرف به في السوق). */
 export const UNIT_AR = Object.freeze({ kW: 'كيلوواط', kVA: 'كيلو فولت أمبير', TR: 'طن تبريد', L: 'لتر', W: 'واط', kWp: 'كيلوواط ذروة', BTU: 'وحدة حرارية بريطانية/ساعة' });
-const STRUCT_IDS = new Set(['concreteColumns', 'concreteBeams', 'concreteSlabs', 'rebar']);
-const SKIP_IDS = new Set(['mep', 'cost']); // لها جداولها الخاصة في القسم نفسه
+export const STRUCT_IDS = new Set(['concreteColumns', 'concreteBeams', 'concreteSlabs', 'rebar']);
+export const SKIP_IDS = new Set(['mep', 'cost']); // لها جداولها الخاصة في القسم نفسه
 /**
  * جداول الكميات كلها في قسم واحد آخر المخرجات (منفصلة عن التصاميم)، بالعربية:
  * 1) المعمارية 2) الإنشائية 3) الأنظمة الهندسية 4) مساحات الفراغات 5) التكلفة (تُمرَّر جاهزة لأنها تفاعلية في الصفحة).
@@ -160,12 +160,12 @@ export function quantityTables(data, { costHtml = '', mepId = '' } = {}) {
   parts.push(`<h3>${pr.length ? 5 : 4}. التكلفة بأسعارك</h3>` + costHtml);
   return parts.join('');
 }
-/** كميات الأنظمة كجدول بنود (لا بطاقات): البند، الكمية، الوحدة، الأساس — ثم جدول التكييف لكل فراغ. */
-export function mepQuantitiesHtml(M) {
-  if (!M || M.notComputed) return `<p class="muted"><b>${esc(NOT_COMPUTED_AR)}</b>${M?.reasonAr ? ' — ' + esc(M.reasonAr) : ''}.</p>`;
+/** بنود كميات الأنظمة كما تُعرض في الصفحة: [البند، الكمية، الوحدة، الأساس]؛ [] إن لم تُحسب. تُستعمل للعرض ولحزمة المهندس (المصدر نفسه). */
+export function mepQuantityItems(M) {
+  if (!M || M.notComputed) return [];
   const n = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 1 }));
   const fx = M.fixtures || {};
-  const items = [
+  return [
     ['وحدات الإنارة', M.lights, 'وحدة', 'بطريقة اللومن لكل فراغ'],
     ['المقابس', M.sockets, 'مقبس', 'بحسب نوع الفراغ ومساحته'],
     ['الدوائر الكهربائية', M.circuits, 'دائرة', 'إنارة ومقابس وأجهزة'],
@@ -180,6 +180,12 @@ export function mepQuantitiesHtml(M) {
     ['عناصر الحريق', M.fire, 'عنصر', 'كواشف وطفايات'], ['عناصر التيار الخفيف', M.lowCurrent, 'عنصر', 'شبكة وهاتف وكاميرات'],
     ...(M.pv ? [['الألواح الشمسية', M.pv.panels, 'لوح', n(M.pv.kWp) + ' ' + UNIT_AR.kWp]] : []),
   ].filter(r => r[1] !== undefined);
+}
+/** كميات الأنظمة كجدول بنود (لا بطاقات): البند، الكمية، الوحدة، الأساس — ثم جدول التكييف لكل فراغ. */
+export function mepQuantitiesHtml(M) {
+  if (!M || M.notComputed) return `<p class="muted"><b>${esc(NOT_COMPUTED_AR)}</b>${M?.reasonAr ? ' — ' + esc(M.reasonAr) : ''}.</p>`;
+  const n = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 1 }));
+  const items = mepQuantityItems(M);
   const src = M.source ? `<p><b>الأرقام من: ${esc(M.source.label)}</b></p>` : '';
   const t1 = `<table class="pb-table qty-table"><thead><tr><th>البند</th><th>الكمية</th><th>الوحدة</th><th>الأساس</th></tr></thead><tbody>${items.map(r => `<tr><td>${esc(r[0])}</td><td class="num">${n(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('')}</tbody></table>`;
   const ac = (M.ac || []).slice().sort((a, b) => (b.btu || 0) - (a.btu || 0));
