@@ -455,20 +455,25 @@ export function clipMeshOutsideBox(THREE, mesh, bx) {
     for (let i = 0; i < mesh.count; i++) { mesh.getMatrixAt(i, m4); c.copy(gc).applyMatrix4(m4).applyMatrix4(mesh.matrixWorld); if (c.x > bx.min.x && c.x < bx.max.x && c.y > bx.min.y && c.y < bx.max.y && c.z > bx.min.z && c.z < bx.max.z) { mesh.setMatrixAt(i, zero); n++; } }
     if (n) { mesh.instanceMatrix.needsUpdate = true; mesh.userData.massClipped = 'instances'; } return n ? 1 : 0; }
   const names = Object.keys(g.attributes), attrs = names.map(k => g.attributes[k]), sizes = attrs.map(a => a.itemSize), stride = 3 + sizes.reduce((a, b) => a + b, 0);
-  const idx = g.index, triCount = (idx ? idx.count : g.attributes.position.count) / 3, v = new THREE.Vector3();
-  const read = i => { const o = new Float64Array(stride); v.fromBufferAttribute(g.attributes.position, i).applyMatrix4(mesh.matrixWorld); o[0] = v.x; o[1] = v.y; o[2] = v.z; let k = 3; for (let a = 0; a < attrs.length; a++) for (let c = 0; c < sizes[a]; c++) o[k++] = attrs[a].array[i * sizes[a] + c]; return o; };
+  const idx = g.index, P = g.attributes.position, triCount = (idx ? idx.count : P.count) / 3;
+  // مواضع الرؤوس العالمية مرة واحدة (بلا تخصيص لكل رأس): أغلب المثلثات خارج الفراغ وتُنسخ كما هي
+  const me = mesh.matrixWorld.elements, wp = new Float32Array(P.count * 3);
+  for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i), z = P.getZ(i); wp[i * 3] = me[0] * x + me[4] * y + me[8] * z + me[12]; wp[i * 3 + 1] = me[1] * x + me[5] * y + me[9] * z + me[13]; wp[i * 3 + 2] = me[2] * x + me[6] * y + me[10] * z + me[14]; }
+  const comp = (a, i, c) => a.isInterleavedBufferAttribute ? a.getComponent(i, c) : a.array[i * a.itemSize + c];
+  const read = i => { const o = new Float64Array(stride); o[0] = wp[i * 3]; o[1] = wp[i * 3 + 1]; o[2] = wp[i * 3 + 2]; let k = 3; for (let a = 0; a < attrs.length; a++) for (let c = 0; c < sizes[a]; c++) o[k++] = comp(attrs[a], i, c); return o; };
   const lerp = (a, b, t) => { const o = new Float64Array(stride); for (let k = 0; k < stride; k++) o[k] = a[k] + (b[k] - a[k]) * t; return o; };
   /** يقسم مضلعًا بمستوى axis=val: [الجزء الأدنى، الجزء الأعلى]. */
   const split = (poly, ax, val) => { const lo = [], hi = []; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length], da = a[ax] - val, db = b[ax] - val;
       if (da <= 0) lo.push(a); if (da >= 0) hi.push(a); if ((da < 0 && db > 0) || (da > 0 && db < 0)) { const p = lerp(a, b, da / (da - db)); lo.push(p); hi.push(p); } } return [lo.length >= 3 ? lo : null, hi.length >= 3 ? hi : null]; };
+  // out: فهرس رأس أصلي (رقم) لما يُنسخ كما هو، أو سجل رأس جديد ناتج عن القصّ
   const groups = g.groups?.length ? g.groups : [{ start: 0, count: triCount * 3, materialIndex: 0 }], out = [], outGroups = []; let changed = false;
+  const x0 = bx.min.x, x1 = bx.max.x, y0 = bx.min.y, y1 = bx.max.y, z0 = bx.min.z, z1 = bx.max.z;
   for (const G of groups) { const startV = out.length;
-    for (let t = G.start / 3; t < (G.start + G.count) / 3; t++) {
-      const ia = idx ? idx.getX(t * 3) : t * 3, ib = idx ? idx.getX(t * 3 + 1) : t * 3 + 1, ic = idx ? idx.getX(t * 3 + 2) : t * 3 + 2; let rest = [read(ia), read(ib), read(ic)];
-      const mn = k => Math.min(rest[0][k], rest[1][k], rest[2][k]), mx = k => Math.max(rest[0][k], rest[1][k], rest[2][k]);
-      if (mx(0) <= bx.min.x || mn(0) >= bx.max.x || mx(1) <= bx.min.y || mn(1) >= bx.max.y || mx(2) <= bx.min.z || mn(2) >= bx.max.z) { out.push(rest[0], rest[1], rest[2]); continue; }
-      changed = true; const keep = [];
-      for (const [ax, val, lowKept] of [[1, bx.min.y, true], [0, bx.min.x, true], [0, bx.max.x, false], [2, bx.min.z, true], [2, bx.max.z, false]]) { if (!rest) break; const [lo, hi] = split(rest, ax, val); if (lowKept) { if (lo) keep.push(lo); rest = hi; } else { if (hi) keep.push(hi); rest = lo; } }
+    for (let t = G.start / 3, tE = (G.start + G.count) / 3; t < tE; t++) {
+      const ia = idx ? idx.getX(t * 3) : t * 3, ib = idx ? idx.getX(t * 3 + 1) : t * 3 + 1, ic = idx ? idx.getX(t * 3 + 2) : t * 3 + 2, a3 = ia * 3, b3 = ib * 3, c3 = ic * 3;
+      if (Math.max(wp[a3], wp[b3], wp[c3]) <= x0 || Math.min(wp[a3], wp[b3], wp[c3]) >= x1 || Math.max(wp[a3 + 1], wp[b3 + 1], wp[c3 + 1]) <= y0 || Math.min(wp[a3 + 1], wp[b3 + 1], wp[c3 + 1]) >= y1 || Math.max(wp[a3 + 2], wp[b3 + 2], wp[c3 + 2]) <= z0 || Math.min(wp[a3 + 2], wp[b3 + 2], wp[c3 + 2]) >= z1) { out.push(ia, ib, ic); continue; }
+      changed = true; const keep = []; let rest = [read(ia), read(ib), read(ic)];
+      for (const [ax, val, lowKept] of [[1, y0, true], [0, x0, true], [0, x1, false], [2, z0, true], [2, z1, false]]) { if (!rest) break; const [lo, hi] = split(rest, ax, val); if (lowKept) { if (lo) keep.push(lo); rest = hi; } else { if (hi) keep.push(hi); rest = lo; } }
       // (bx.max.y غير محدود عمليًا: ما بقي داخل الصندوق يُحذف)
       for (const poly of keep) for (let i = 1; i < poly.length - 1; i++) out.push(poly[0], poly[i], poly[i + 1]);
     }
@@ -476,7 +481,9 @@ export function clipMeshOutsideBox(THREE, mesh, bx) {
   if (!changed) return 0;
   if (!out.length) { mesh.visible = false; mesh.userData.massClipped = 'hidden'; return 2; }
   const ng = new THREE.BufferGeometry(); let k = 3;
-  for (let a = 0; a < attrs.length; a++) { const s = sizes[a], src = attrs[a], arr = new src.array.constructor(out.length * s); for (let i = 0; i < out.length; i++) for (let c = 0; c < s; c++) arr[i * s + c] = out[i][k + c]; ng.setAttribute(names[a], new THREE.BufferAttribute(arr, s, src.normalized)); k += s; }
+  for (let a = 0; a < attrs.length; a++) { const s = sizes[a], src = attrs[a], arr = new src.array.constructor(out.length * s), plain = !src.isInterleavedBufferAttribute, sa = src.array;
+    for (let i = 0, o = 0; i < out.length; i++) { const v = out[i]; if (typeof v === 'number') { if (plain) { const b = v * s; for (let c = 0; c < s; c++) arr[o++] = sa[b + c]; } else for (let c = 0; c < s; c++) arr[o++] = src.getComponent(v, c); } else for (let c = 0; c < s; c++) arr[o++] = v[k + c]; }
+    ng.setAttribute(names[a], new THREE.BufferAttribute(arr, s, src.normalized)); k += s; }
   if (g.groups?.length) for (const G of outGroups) ng.addGroup(G.start, G.count, G.materialIndex);
   ng.computeBoundingBox(); ng.computeBoundingSphere(); mesh.geometry = ng; mesh.userData.massClipped = 'clipped'; mesh.userData.massOwnGeo = true; return 1;
 }
