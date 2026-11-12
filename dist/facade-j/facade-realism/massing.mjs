@@ -100,7 +100,7 @@ export function elementBox(el) { return { min: el.min, max: el.max }; }
 export function massingPlan({ doc, built, style, exterior = {}, floors = null }) {
   const taste = tasteOf(exterior), seed = massingSeed(doc, style, exterior), R = rng(seed);
   const pick = (arr) => arr[Math.floor(R() * arr.length) % arr.length];
-  const faces = facesFromBuilt(built), F = faces.s, plan = { seed, style, taste, vocab: [], elements: [], terraces: [], dropped: [], entry: null, plot: null, encroachFrontM: 0, encroachUpperM: 0, floors: floors || 1 };
+  const faces = facesFromBuilt(built), F = faces.s, plan = { seed, style, taste, vocab: [], elements: [], terraces: [], dropped: [], entry: null, plot: null, encroachFrontM: 0, encroachUpperM: 0, maxProjectionM: 0, upperProjectionM: 0, floors: floors || 1 };
   plan.wallTop = Math.max(0, ...Object.values(faces).flatMap(f => f.pieces.map(p => p.top)));
   const P = (doc?.plot?.polygon || []), sb = doc?.plot?.setbacks || {};
   if (P.length) { const xs = P.map(p => p.x), ys = P.map(p => p.y); plan.plot = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys), sb: { s: sb.s || 0, n: sb.n || 0, e: sb.e || 0, w: sb.w || 0 } }; }
@@ -140,7 +140,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
     return null;
   };
   let cur = '';
-  const push = (el, opt) => { const why = reject(el, opt); if (why) { plan.dropped.push({ id: cur, part: el.part || el.kind, why }); return false; } plan.elements.push({ ...el, id: cur, deco: true, ...(opt?.screen ? { screen: true } : {}) }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur); return true; };
+  const push = (el, opt) => { const why = reject(el, opt); if (why) { plan.dropped.push({ id: cur, part: el.part || el.kind, why }); return false; } plan.elements.push({ ...el, id: cur, deco: true, proj: +(el.max[2] - W(cp.u0, 0, 0)[2]).toFixed(3), ...(opt?.screen ? { screen: true } : {}) }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur); return true; };
   const box = (mat, u0, u1, y0, y1, d0, d1, opt = {}) => { if (u1 - u0 < .02 || y1 - y0 < .01 || d1 - d0 < .005) return false; return push({ kind: 'box', mat, part: opt.part, inst: opt.inst, ...wbox(u0, u1, y0, y1, d0, d1) }, opt); };
   /** منشور: مضلع محدب في مستوى الواجهة (u,y) يُبثق بين d0 و d1 (الواجهة الجنوبية: المحور Z). */
   const prism = (mat, pts, d0, d1, opt = {}) => { const us = pts.map(p => p[0]), ys = pts.map(p => p[1]), b = wbox(Math.min(...us), Math.max(...us), Math.min(...ys), Math.max(...ys), d0, d1);
@@ -259,24 +259,30 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
   if (style === 'N') {
     // 1) كتلة مدخل بارزة تعلو الدروة بشُرَف ولهوج وحزام جصي وعتبة
     if (e) { cur = 'entry-block';
-      const dB = cap(grand ? .95 : .8), pw = .65, yT = two ? H + .3 : H + .4, upWin = main.ops.filter(o => o.floor >= 1 && o.u1 > e.u0 - 1 && o.u0 < e.u1 + 1), yBeam = two ? Math.max(FL1 + 2.6, ...upWin.map(o => o.y1)) + .35 : e.y1 + .4;
+      const dB = cap(grand ? .95 : .8), yT = two ? H + .3 : H + .4, upWin = main.ops.filter(o => o.floor >= 1 && o.u1 > e.u0 - 1 && o.u0 < e.u1 + 1), yBeam = two ? Math.max(FL1 + 2.6, ...upWin.map(o => o.y1)) + .35 : e.y1 + .4;
       let blk = null;
-      for (const m of [.35, .2, .1]) { const L = [e.u0 - m - pw, e.u0 - m], Rr = [e.u1 + m, e.u1 + m + pw]; if (reject(wbox(L[0], L[1], 0, yT, -.02, dB)) || reject(wbox(Rr[0], Rr[1], 0, yT, -.02, dB)) || reject(wbox(L[0], Rr[1], yBeam, yT, -.02, dB))) continue;
+      for (const [m, pw] of [[.35, .65], [.2, .65], [.1, .65], [.1, .45], [.06, .3]]) { const L = [e.u0 - m - pw, e.u0 - m], Rr = [e.u1 + m, e.u1 + m + pw]; if (L[0] < U0 - EPS || Rr[1] > U1 + EPS || reject(wbox(L[0], L[1], 0, yT, -.02, dB)) || reject(wbox(Rr[0], Rr[1], 0, yT, -.02, dB)) || reject(wbox(L[0], Rr[1], yBeam, yT, -.02, dB))) continue;
         prismX('mud', [[-.02, 0], [dB + .08, 0], [dB, yT], [-.02, yT]], L[0], L[1], { part: 'pier' }); prismX('mud', [[-.02, 0], [dB + .08, 0], [dB, yT], [-.02, yT]], Rr[0], Rr[1], { part: 'pier' });
         box('mud', L[1], Rr[0], yBeam, yT, -.02, dB, { part: 'beam' }); if (two) box('mud', L[1], Rr[0], e.y1 + .4, FL1 + .55, -.02, dB - .25, { part: 'spandrel' });
         box('mud', L[0] - .25, Rr[1] + .25, 0, .2, -.02, dB + .45, { part: 'threshold' }); blk = { a: L[0], b: Rr[1], yBeam, yT, dB }; break; }
+      if (!blk) { // لا متسع لكتفين بجانب الباب: كتلة عتب بارزة فوق المدخل
+        const a = Math.max(U0, e.u0 - .3), b = Math.min(U1, e.u1 + .3), y0 = e.y1 + .35, y1 = two ? FL1 + .6 : H + .4, dH = cap(.55);
+        if (box('mud', a, b, y0, y1, -.02, dH, { part: 'beam' })) blk = { a, b, yBeam: y0, yT: y1, dB: dH, low: two }; }
       if (blk) {
         cur = 'gypsum-band'; box('gypsum', blk.a - .02, blk.b + .02, blk.yT - .2, blk.yT - .08, blk.dB - .01, blk.dB + .03, { part: 'band' }); box('gypsum', blk.a - .02, blk.b + .02, blk.yBeam + .02, blk.yBeam + .1, blk.dB - .01, blk.dB + .03, { part: 'band' });
-        cur = 'shurfat'; { const n = Math.max(3, Math.round((blk.b - blk.a) / .52)), st = (blk.b - blk.a) / n; for (let i = 0; i < n; i++) { const u = blk.a + i * st; prism('mud', [[u + .04, blk.yT], [u + st - .04, blk.yT], [u + st * .5, blk.yT + .42]], blk.dB - .38, blk.dB, { part: 'shurfa' }); } }
+        cur = 'shurfat'; if (!blk.low) { const n = Math.max(3, Math.round((blk.b - blk.a) / .52)), st = (blk.b - blk.a) / n; for (let i = 0; i < n; i++) { const u = blk.a + i * st; prism('mud', [[u + .04, blk.yT], [u + st - .04, blk.yT], [u + st * .5, blk.yT + .42]], blk.dB - .38, blk.dB, { part: 'shurfa' }); } }
         cur = 'luhuj'; { const cy = (blk.yBeam + .1 + blk.yT - .2) / 2, c = (blk.a + blk.b) / 2, room = blk.yT - blk.yBeam; if (room > .75) for (const [du, dy] of [[-.36, -.12], [0, -.12], [.36, -.12], [-.18, .17], [.18, .17]]) prism('dark', [[c + du - .11, cy + dy - .1], [c + du + .11, cy + dy - .1], [c + du, cy + dy + .12]], blk.dB - .05, blk.dB + .004, { part: 'lahj' }); }
       }
     }
-    // 2) أكتاف مائلة عند الزوايا (ميل الجدران النجدي)
+    // 2) أكتاف مائلة عند زاويتي الواجهة (ميل الجدران النجدي)
     cur = 'corner-batter';
-    { const yb = roofY - .1; for (const [u, s] of [[U0, 1], [U1, -1]]) { if (!topSegs.some(g => (s > 0 ? Math.abs(g[0] - U0) < EPS : Math.abs(g[1] - U1) < EPS))) continue; prism('mud', s > 0 ? [[u, 0], [u + .85, 0], [u + .5, yb], [u, yb]] : [[u - .85, 0], [u, 0], [u, yb], [u - .5, yb]], -.02, .24, { part: 'batter' }); } }
-    // 3) مزاريب خشبية تحت الدروة
+    for (const [pc, s] of [[F.pieces.find(p => Math.abs(p.u0 - gU0) < EPS), 1], [F.pieces.find(p => Math.abs(p.u1 - gU1) < EPS), -1]]) { if (!pc) continue; use(pc); const u = s > 0 ? pc.u0 : pc.u1, yb = pc.top - 1.0;
+      if (!segsOf(pc).some(g => (s > 0 ? Math.abs(g[0] - pc.u0) < EPS : Math.abs(g[1] - pc.u1) < EPS))) continue;
+      for (const w of [.85, .55, .35]) if (prism('mud', s > 0 ? [[u, 0], [u + w, 0], [u + w * .55, yb], [u, yb]] : [[u - w, 0], [u, 0], [u, yb], [u - w * .55, yb]], -.02, .24, { part: 'batter' })) break; }
+    // 3) مزاريب خشبية تحت الدروة على كل قطع الواجهة
     cur = 'mazarib';
-    { const y = roofY - .12, n = Math.max(2, Math.round((U1 - U0) / 3.4)); for (let i = 0; i < n; i++) { const u = U0 + (i + .5) * (U1 - U0) / n + (R() - .5) * .5; box('timber', u - .06, u + .06, y - .1, y, -.02, cap(.55), { part: 'mizrab' }); } }
+    for (const pc of F.pieces) { use(pc); const y = pc.top - 1.02, w = pc.u1 - pc.u0, n = Math.max(1, Math.round(w / 3.4)); for (let i = 0; i < n; i++) { const u = pc.u0 + (i + .5) * w / n + (R() - .5) * .5; box('timber', u - .06, u + .06, y - .1, y, -.02, cap(.55), { part: 'mizrab' }); } }
+    use(main);
   }
 
   if (style === 'H') {
@@ -333,6 +339,8 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
   // أقصى دخول في الارتداد الأمامي (يُعلن بصدق)
   // encroachFrontM: أي عنصر (درج ورواق ومظلة)؛ encroachUpperM: العناصر المعلّقة فوق 2.4 م (بلاطة السقف والإطار والرواشين)
   if (plan.plot) { const line = -(plan.plot.minY + plan.plot.sb.s); for (const el of plan.elements) { const d = +(el.max[2] - line).toFixed(3); plan.encroachFrontM = Math.max(plan.encroachFrontM, d); if (el.min[1] >= 2.4) plan.encroachUpperM = Math.max(plan.encroachUpperM, d); } }
+  // البروز عن وجه الجدار الحامل نفسه (القالب قد يقدّم جدار الواجهة أو يؤخره عن خط المخطط)
+  for (const el of plan.elements) { plan.maxProjectionM = Math.max(plan.maxProjectionM, el.proj); if (el.min[1] >= 2.4) plan.upperProjectionM = Math.max(plan.upperProjectionM, el.proj); }
   return plan;
 }
 /** r \ h (مستطيلات u,y). */
@@ -511,7 +519,7 @@ export function buildMassing(THREE, { scene, S, plan, night = false }) {
     im.instanceMatrix.needsUpdate = true; im.computeBoundingBox?.(); im.computeBoundingSphere?.(); tris += list.length * 12; addMesh(im, key).name = 'mass-inst-' + k.replace('|', '-'); }
   if (!instUsed) unit.dispose();
   scene.add(group);
-  const info = { body: body.name || '', style: plan.style, seed: plan.seed, vocab: plan.vocab, elements: plan.elements.length, terraces: plan.terraces.length, railing: plan.terraces[0]?.railing || null, meshes: group.children.length, triangles: Math.round(tris), carved, dropped: plan.dropped.length, encroachFrontM: plan.encroachFrontM, encroachUpperM: plan.encroachUpperM, note: MASSING_NOTE, ms: Math.round((globalThis.performance || Date).now() - t0) };
+  const info = { body: body.name || '', style: plan.style, seed: plan.seed, vocab: plan.vocab, elements: plan.elements.length, terraces: plan.terraces.length, railing: plan.terraces[0]?.railing || null, meshes: group.children.length, triangles: Math.round(tris), carved, dropped: plan.dropped.length, encroachFrontM: plan.encroachFrontM, encroachUpperM: plan.encroachUpperM, maxProjectionM: plan.maxProjectionM, upperProjectionM: plan.upperProjectionM, note: MASSING_NOTE, ms: Math.round((globalThis.performance || Date).now() - t0) };
   return { group, info, carve, dispose() { scene.remove(group); group.traverse(o => { if (o.geometry && o.geometry !== unit) o.geometry.dispose(); }); unit.dispose(); for (const g of ownGeos) g.dispose(); for (const m of own) m.dispose(); group.clear(); } };
 }
 
