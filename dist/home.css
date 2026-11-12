@@ -158,7 +158,13 @@ legend{padding:0;font-weight:600;margin-bottom:4px}
 .locate[open]>summary{border-bottom:1px solid var(--line)}
 #locateHost{padding:14px}
 .lm{display:flex;flex-direction:column;gap:10px}
-.lm-tools{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center}
+.lm-tools{display:flex;flex-direction:column;gap:8px}
+.lm-btns{flex-wrap:wrap;align-items:center}
+.lm-world input{appearance:auto;-webkit-appearance:checkbox;background:#fff;width:18px;height:18px;min-width:0;margin:0;flex:none;accent-color:var(--gold)}
+.lm-world{font-size:.84rem;color:var(--ink-soft);display:inline-flex;flex-direction:row;align-items:center;gap:6px;font-weight:400}
+.lm-understood{margin:0;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);color:var(--ink);font-size:.9rem;line-height:1.7}
+.lm-coords{margin:0;font-size:.82rem;color:var(--muted);text-align:left;font-variant-numeric:tabular-nums}
+.lm-pin .lm-pin-hit{fill:#0000;cursor:grab}
 .lm-line{display:flex;gap:6px;min-width:0}
 .lm-in{flex:1;min-width:0;padding:9px 12px;font-size:.92rem;background:#fff!important;color:#2b2118!important;border:1px solid var(--line);border-radius:10px}
 .lm-in::placeholder{color:#7a6a58}
@@ -185,7 +191,7 @@ legend{padding:0;font-weight:600;margin-bottom:4px}
 .lm-side.street{fill:#143a6b}
 .lm-stem{stroke:#7a4a1c;stroke-width:1.5;stroke-dasharray:3 3;pointer-events:none}
 .lm-rotgrip{fill:#b87333;stroke:#fff;stroke-width:2.5;cursor:grab}
-.lm-pin path{fill:#a3271c;stroke:#fff;stroke-width:1.5}.lm-pin circle{fill:#fff}.lm-pin{pointer-events:none}
+.lm-pin path{fill:#a3271c;stroke:#fff;stroke-width:1.5}.lm-pin circle{fill:#fff}.lm-pin{pointer-events:auto;cursor:grab}
 .lm-cross{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:1.5px solid #3a2a1f99;pointer-events:none}
 .lm-zoom{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px}
 .lm-zoom button{width:40px;height:40px;border-radius:10px;border:1px solid #7a4a1c66;background:#fffffff2;color:#3a2a1f;font-size:1.3rem;line-height:1;cursor:pointer}
@@ -220,4 +226,4 @@ legend{padding:0;font-weight:600;margin-bottom:4px}
 .mb-sub{font:400 9.5px 'IBM Plex Sans Arabic',sans-serif;fill:#5a3410}
 .mb-lab{font:500 10px 'IBM Plex Sans Arabic',sans-serif;fill:#5b4636}
 .mb-north path{fill:#3a2a1f}.mb-north text{font:600 10px 'IBM Plex Sans Arabic',sans-serif;fill:#3a2a1f}
-@media(max-width:560px){.lm-tools{grid-template-columns:1fr}.lm-map{height:300px}.brief-body{grid-template-columns:1fr}.brief-fig{max-width:260px;margin:0 auto}}
+@media(max-width:560px){.lm-map{height:300px}.brief-body{grid-template-columns:1fr}.brief-fig{max-width:260px;margin:0 auto}}

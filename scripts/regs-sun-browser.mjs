@@ -2,9 +2,15 @@
 // لا يتصل بأي خدمة خارجية: بلاطات OpenStreetMap و Nominatim تُعترض وتُجاب محليًا — فالبلاطات الحقيقية والبحث الحقيقي «غير متحقق» هنا.
 // التشغيل: node scripts/regs-sun-browser.mjs [مجلد اللقطات] ؛ PLAYWRIGHT=/path/to/playwright/index.mjs ؛ ROOT=dist أو dist/client
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path'; import zlib from 'node:zlib';
+import { createGeo } from '../worker/geo.mjs';
 const ROOT = path.resolve(process.env.ROOT || 'dist'), SHOTS = process.argv[2] || '', PW = process.env.PLAYWRIGHT || '/opt/npm-tools/node_modules/playwright/index.mjs';
 const T = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' };
-const server = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (p === '/') p = '/home.html'; const f = path.join(ROOT, p); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); r.end('nf'); return; } r.writeHead(200, { 'content-type': T[path.extname(f)] || 'application/octet-stream', 'cache-control': 'no-store' }); fs.createReadStream(f).pipe(r); });
+// وكيل الموقع الحقيقي (worker/geo.mjs) يعمل هنا بمصدر Nominatim وهمي؛ geoReq = الطلبات التي وصلت «المصدر».
+const geoReq = [];
+const mkGeo = () => createGeo({ sleep: async () => {}, fetchImpl: async u => { if (/goo\.gl/.test(u)) return new Response(null, { status: 302, headers: { Location: 'https://www.google.com/maps/place/X' } }); geoReq.push(String(u)); return Response.json([{ lat: '24.7743', lon: '46.7386', display_name: 'حي النرجس، الرياض، منطقة الرياض، السعودية', address: { city: 'الرياض', state: 'منطقة الرياض' } }]); } });
+let geoWorker = mkGeo();
+const server = http.createServer(async (q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (p === '/') p = '/home.html';
+  if (p.startsWith('/api/geo/')) { const res = await geoWorker.fetch(new Request('http://localhost' + q.url, { headers: { 'CF-Connecting-IP': '2.2.2.2' } }), {}); r.writeHead(res.status, Object.fromEntries(res.headers)); r.end(Buffer.from(await res.arrayBuffer())); return; } const f = path.join(ROOT, p); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); r.end('nf'); return; } r.writeHead(200, { 'content-type': T[path.extname(f)] || 'application/octet-stream', 'cache-control': 'no-store' }); fs.createReadStream(f).pipe(r); });
 await new Promise(ok => server.listen(0, ok)); const B = 'http://localhost:' + server.address().port;
 
 /** بلاطة PNG وهمية 256×256: شبكة شوارع رمادية على أرضية فاتحة، ولونها يتبع رقم البلاطة (لتمييز البلاطات في اللقطة). */
@@ -24,10 +30,9 @@ const shot = async (p, name, sel) => { if (!SHOTS) return; fs.mkdirSync(SHOTS, {
 
 async function journey(label, viewport, { tiles = true } = {}) {
   const ctx = await br.newContext({ viewport, hasTouch: viewport.width < 500, isMobile: viewport.width < 500, geolocation: { latitude: 24.774265, longitude: 46.738586, accuracy: 12 }, permissions: ['geolocation'] });
-  const p = await ctx.newPage(), errs = [], tileReq = [], geoReq = [], other = [];
+  const p = await ctx.newPage(), errs = [], tileReq = [], other = []; geoReq.length = 0; geoWorker = mkGeo();
   p.on('pageerror', e => errs.push(e.message));
   await ctx.route(/tile\.openstreetmap\.org/, r => { const u = r.request().url(); tileReq.push({ u, referer: r.request().headers().referer || '' }); const m = u.match(/\/(\d+)\/(\d+)\/(\d+)\.png$/); return tiles && m ? r.fulfill({ status: 200, contentType: 'image/png', headers: { 'cache-control': 'max-age=604800' }, body: fakeTile(+m[1], +m[2], +m[3]) }) : r.abort(); });
-  await ctx.route(/nominatim\.openstreetmap\.org/, r => { geoReq.push(r.request().url()); return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify([{ lat: '24.7743', lon: '46.7386', display_name: 'حي النرجس، الرياض، منطقة الرياض، السعودية', address: { city: 'الرياض', state: 'منطقة الرياض' } }]) }); });
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
   p.on('request', q => { const u = q.url(); if (!u.startsWith(B) && !/openstreetmap\.org|fonts\.g/.test(u) && !u.startsWith('data:') && !u.startsWith('blob:')) other.push(u); });
   const T0 = `[${label}] `;
@@ -47,9 +52,11 @@ async function journey(label, viewport, { tiles = true } = {}) {
   await p.waitForTimeout(500);
   if (tiles) check(T0 + 'بلاطات المشهد تُطلب بعد الفتح فقط، بالرابط القياسي ومع Referer', tileReq.length > 0 && tileReq.length <= 30 && tileReq.every(t => /^https:\/\/tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png$/.test(t.u)) && tileReq.every(t => t.referer.startsWith(B)), `${tileReq.length} طلبًا`);
   check(T0 + 'الإسناد «© مساهمو OpenStreetMap» ظاهر فوق الخريطة', await p.locator('#lmMap .lm-attr:visible').innerText() === '© مساهمو OpenStreetMap');
-  await p.fill('#lmPaste', 'https://maps.app.goo.gl/AbCdEf'); await p.click('#lmPasteGo');
-  check(T0 + 'الرابط المختصر: رسالة صريحة', /رابط مختصر/.test(await p.locator('.lm-msg').innerText()));
-  await p.fill('#lmPaste', 'https://www.google.com/maps/place/X/@24.7135,46.6752,17z/data=!3d24.774265!4d46.738586'); await p.click('#lmPasteGo'); await p.waitForTimeout(500);
+  await p.fill('#lmSmart', 'https://maps.app.goo.gl/AbCdEf'); await p.click('#lmSmartGo');
+  await p.waitForFunction(() => /إحداثيات/.test(document.querySelector('.lm-msg').textContent), null, { timeout: 4000 }).catch(() => {});
+  check(T0 + 'الرابط المختصر: يُحلّ عبر الوركر ورسالة صريحة إن لم يحمل إحداثيات', /إحداثيات/.test(await p.locator('.lm-msg').innerText()));
+  await p.waitForTimeout(1100);
+  await p.fill('#lmSmart', 'https://www.google.com/maps/place/X/@24.7135,46.6752,17z/data=!3d24.774265!4d46.738586'); await p.click('#lmSmartGo'); await p.waitForTimeout(500);
   check(T0 + 'رابط Google ← دبوس', await p.locator('#lmMap .lm-pin').count() === 1 && /وُضع الدبوس/.test(await p.locator('.lm-msg').innerText()));
   check(T0 + 'اقتُرحت أقرب مدينة (الرياض)', await p.inputValue('#landCity') === 'riyadh');
   await p.click('#lmDraw'); await p.waitForTimeout(400);
@@ -77,11 +84,11 @@ async function journey(label, viewport, { tiles = true } = {}) {
   check(T0 + 'حالة الموقع: إحداثيات وانحراف 10° وخصوصية', /24\.7742\d.*46\.7385\d/.test(await p.locator('#geoState').innerText()) && /منحرف 10° نحو الشرق/.test(await p.locator('#geoState').innerText()) && /متصفحك فقط/.test(await p.locator('#geoState').innerText()));
   check(T0 + 'سطر الخصوصية ظاهر', /تبقى في متصفحك ولا تُرسل إلى خادم الميزان/.test(await p.locator('.lm-privacy').innerText()));
   // البحث بالاسم: زر صريح، طلب واحد، بلغة ar وحصر sa
-  await p.fill('#lmSearch', 'النرجس'); await p.waitForTimeout(400);
+  await p.fill('#lmSmart', 'النرجس'); await p.waitForTimeout(400);
   check(T0 + 'لا إكمال تلقائي: الكتابة وحدها لا ترسل طلبًا', geoReq.length === 0);
-  await p.click('#lmSearchGo'); await p.waitForSelector('#lmResults .lm-hit');
+  await p.click('#lmSmartGo'); await p.waitForSelector('#lmResults .lm-hit');
   check(T0 + 'البحث بزر صريح: طلب واحد (countrycodes=sa، accept-language=ar)', geoReq.length === 1 && /countrycodes=sa/.test(geoReq[0]) && /accept-language=ar/.test(geoReq[0]) && /Nominatim/.test(await p.locator('#lmResults').innerText()));
-  await p.click('#lmSearchGo'); await p.waitForTimeout(200); check(T0 + 'النتيجة نفسها من الذاكرة بلا طلب ثانٍ', geoReq.length === 1);
+  await p.click('#lmSmartGo'); await p.waitForTimeout(200); check(T0 + 'النتيجة نفسها من الذاكرة بلا طلب ثانٍ', geoReq.length === 1);
   await p.locator('#lmMap').focus(); await p.keyboard.press('Escape');
   // أعد الموقع المعتمد (البحث ينقل العرض فقط؛ الدبوس المعتمد محفوظ في النموذج)
   await shot(p, `${label}-2-land-brief`, '#landBrief');
@@ -145,7 +152,7 @@ async function offline() {
   await p.fill('#landLength', '30'); await p.fill('#landWidth', '12.5'); await p.check('input[data-kind=street][value=s]'); await p.check('input[data-kind=entry][value=s]');
   await p.click('#locateBox > summary'); await p.waitForSelector('#lmMap'); await p.waitForTimeout(1200);
   check('[بلا بلاطات] رسالة واضحة والخريطة لا تعطّل النموذج', await p.locator('#lmWarn:visible').count() === 1 && /تعذّر تحميل صور الخريطة/.test(await p.locator('#lmWarn').innerText()));
-  await p.fill('#lmPaste', '21.4858, 39.1925'); await p.click('#lmPasteGo'); await p.click('#lmDraw'); await p.click('#lmApply'); await p.waitForTimeout(200);
+  await p.fill('#lmSmart', '21.4858, 39.1925'); await p.click('#lmSmartGo'); await p.click('#lmDraw'); await p.click('#lmApply'); await p.waitForTimeout(200);
   check('[بلا بلاطات] الإحداثيات والمستطيل والاعتماد تعمل بلا صور', /21\.4858/.test(await p.locator('#geoState').innerText()) && await p.inputValue('#landCity') === 'jeddah');
   const t = await p.locator('#landBrief').innerText(); check('[بلا بلاطات] بطاقة وضع الأرض 12.5×30: 375 م² وموقف واحد', /375 م²/.test(t) && /موقف واحد/.test(t));
   await p.click('#landForm button[type=submit]'); await p.waitForTimeout(600); check('[بلا بلاطات] المتابعة إلى شرعاء تعمل', /#shara$/.test(p.url()) && errs.length === 0, errs.join('|'));

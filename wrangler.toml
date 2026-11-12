@@ -30,6 +30,8 @@ enabled = true
 #   ANTHROPIC_MODEL  (الافتراضي claude-sonnet-5-5)
 #   ALLOWED_ORIGIN   (قائمة أصول مفصولة بفواصل)
 #   ACCESS_TEAM_DOMAIN, ACCESS_AUD  (لتسجيل الدخول للأرشيف عبر Cloudflare Access)
+#   GEO_NOMINATIM_OFF     (1 يوقف بحث الأسماء /api/geo/search فورًا بلا نشر)
+#   GEO_CONTACT           (بريد/رابط تواصل يُضاف إلى User-Agent المرسل إلى Nominatim)
 #   PHOTO_DAILY_CAP       (سقف يومي إجمالي لعدد الصور الاحترافية لحماية الفاتورة؛ الافتراضي 40، والصفر يوقف الخدمة)
 #   PHOTO_MODEL_STANDARD  (الافتراضي @cf/black-forest-labs/flux-2-klein-9b)
 #   PHOTO_MODEL_PREMIUM   (الافتراضي @cf/black-forest-labs/flux-2-dev)
