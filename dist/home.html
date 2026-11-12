@@ -47,7 +47,7 @@
     <header class="bar"><span class="mini"><img src="./assets/mizan-logo.svg" alt="" width="28" height="28">الميزان الهندسي</span><ol class="steps" aria-label="مراحل التصميم"></ol></header>
     <div class="card">
       <h2 id="landTitle">أرضك</h2>
-      <p class="hint">أدخل الطول والعرض بالمتر، ثم حدّد الشوارع والمداخل. الشمال دائمًا أعلى الرسم.</p>
+      <p class="hint">أدخل الطول والعرض بالمتر، ثم حدّد الشوارع والمداخل. الشمال أعلى الرسم؛ وإن حدّدت أرضك على الخريطة عرفنا انحرافها عن الشمال الحقيقي.</p>
       <form id="landForm" novalidate>
         <div class="two">
           <label>الطول <small>شمال ↔ جنوب</small><input id="landLength" type="number" inputmode="decimal" min="8" max="100" step="0.5" required><span class="field-error" id="errLength" role="alert" hidden></span></label>
@@ -55,11 +55,18 @@
         </div>
         <label>عدد الأدوار <small>دور واحد أو أرضي وعلوي بسلم في الموضع نفسه</small><select id="landFloors"><option value="1">دور واحد (أرضي)</option><option value="2">دوران (أرضي وعلوي)</option></select></label>
         <fieldset class="sides"><legend>الشوارع والمداخل</legend>
-          <p class="hint">اختر الجهات المطلّة على شارع، ثم جهة المدخل. يمكن أن يكون للأرض مدخلان على جهتين.</p>
+          <p class="hint">اختر الجهات المطلّة على شارع، ثم جهة المدخل. يمكن أن يكون للأرض مدخلان على جهتين. عرض الشارع اختياري ويحدّد الارتداد النظامي بدقة.</p>
           <div class="side-grid" id="sideGrid"></div>
           <span class="field-error" id="errStreets" role="alert" hidden></span><span class="field-error" id="errEntries" role="alert" hidden></span>
         </fieldset>
+        <details class="locate" id="locateBox">
+          <summary><b>حدّد موقع أرضك على الخريطة</b> <small>اختياري — لمعرفة الشمال الحقيقي وحساب الشمس لموقعك</small></summary>
+          <div id="locateHost"><p class="hint">تُحمَّل الخريطة عند فتح هذا الخيار فقط.</p></div>
+        </details>
+        <p class="geo-state" id="geoState" role="status" hidden></p>
+        <label class="city-line">مدينة الأرض <small>اختياري — تُحسب بها الشمس إن لم تحدد الموقع على الخريطة</small><select id="landCity"></select></label>
         <div class="preview" id="landPreview" aria-live="polite"></div>
+        <section class="brief" id="landBrief" aria-labelledby="briefTitle" hidden></section>
         <p class="error" id="landError" role="alert" hidden></p>
         <div class="actions"><button type="submit" class="cta">متابعة إلى شرعاء</button></div>
       </form>

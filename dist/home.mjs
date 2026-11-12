@@ -9,6 +9,8 @@ import { mountSteps } from './journey-steps.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
 import { displayOr, landFieldErrors, hasLandErrors } from './field-guards.mjs';
 import { requestBrief } from './assistant.mjs';
+import { REGIONS, cityById, normalizeGeo, GEO_KEY, northText } from './geo-land.mjs';
+import { landBrief, landBriefSvg, normalizeStreetWidths, DISCLAIMER, SOURCE as MUNICIPAL_SOURCE } from './municipal-rules.mjs';
 
 const $ = id => document.getElementById(id);
 const home = $('home');
@@ -93,7 +95,8 @@ for (const key of ['n', 's', 'e', 'w']) {
   const box = document.createElement('div'); box.className = 'side';
   box.innerHTML = `<b>${SIDE_LABELS[key]}</b>`
     + `<label class="tog"><input type="checkbox" data-kind="street" value="${key}"> شارع</label>`
-    + `<label class="tog dis" data-entry-label="${key}"><input type="checkbox" data-kind="entry" value="${key}" disabled> مدخل</label>`;
+    + `<label class="tog dis" data-entry-label="${key}"><input type="checkbox" data-kind="entry" value="${key}" disabled> مدخل</label>`
+    + `<label class="sw" data-width-label="${key}" hidden>عرض الشارع (م) <input type="number" inputmode="decimal" min="4" max="120" step="1" data-kind="width" data-side="${key}" placeholder="مثل 15" aria-label="عرض الشارع ${SIDE_LABELS[key]} بالمتر"></label>`;
   grid.append(box);
 }
 // أخطاء الحقول تظهر قرب كل حقل، وتُمسح عند تعديل أي حقل من الأرض
@@ -104,7 +107,14 @@ function showLandErrors(errors) {
   $('landWidth').setAttribute('aria-invalid', String(Boolean(errors.width)));
 }
 function clearLandErrors() { showLandErrors({}); }
-function readLand() { return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1, ...(floorsTouched ? { floorsExplicit: true } : {}) }; }
+function readWidths() { const raw = {}; grid.querySelectorAll('input[data-kind=width]').forEach(i => { if (i.value !== '') raw[i.dataset.side] = i.valueAsNumber; }); return normalizeStreetWidths(raw, [...land.streets]); }
+/** موقع الأرض: من الخريطة إن اعتُمد، وإلا من المدينة المختارة، وإلا لا شيء (فتُحسب الشمس للرياض افتراضيًا ويُعلن ذلك). */
+function readGeo() { const city = $('landCity').value; return normalizeGeo(geo?.source === 'map' ? { ...geo, city: city || geo.city } : city ? { city } : null); }
+function readLand() {
+  const sw = readWidths(), g = readGeo();
+  return { length: $('landLength').valueAsNumber, width: $('landWidth').valueAsNumber, streets: [...land.streets], entries: [...land.entries], floors: Number($('landFloors').value) || 1, ...(floorsTouched ? { floorsExplicit: true } : {}), ...(Object.keys(sw).length ? { streetWidths: sw } : {}), ...(g ? { geo: g } : {}) };
+}
+let geo = null; // { lat, lng, north, city, cityName, source: 'map' } بعد «اعتمد موقع الأرض»
 // عدد الأدوار يُعدّ «محددًا من العميل» فقط إن غيّر الاختيار بنفسه (أو قاله لشرعاء)؛ وإلا يجوز للموقع اقتراح دورين إن لم تتسع الأرض
 let floorsTouched = false; $('landFloors')?.addEventListener('change', () => { floorsTouched = true; });
 function refreshLand() {
@@ -113,11 +123,63 @@ function refreshLand() {
     const entry = grid.querySelector(`input[data-kind=entry][value=${key}]`), onStreet = land.streets.has(key);
     entry.disabled = !onStreet; entry.closest('.tog').classList.toggle('dis', !onStreet);
     if (!onStreet) { entry.checked = false; land.entries.delete(key); }
+    const wl = grid.querySelector(`[data-width-label=${key}]`); wl.hidden = !onStreet; if (!onStreet) wl.querySelector('input').value = '';
   }
-  $('landPreview').innerHTML = landPreviewSvg(readLand());
+  const raw = readLand();
+  $('landPreview').innerHTML = landPreviewSvg(raw);
+  paintBrief(raw); paintGeo(); locator?.refresh();
 }
+/** «ما تعنيه الاشتراطات لأرضك»: يظهر حين تكتمل الأبعاد والشوارع؛ أرقامه من municipal-rules.mjs (الاشتراطات العامة للوزارة). */
+function paintBrief(raw) {
+  const box = $('landBrief'), b = landBrief(raw); box.hidden = !b.ok; if (!b.ok) { box.replaceChildren(); return; }
+  const fig = el('div', 'brief-fig'); fig.innerHTML = landBriefSvg(b, { north: raw.geo?.source === 'map' ? raw.geo.north : 0 }); // أرقام وتسميات ثابتة فقط
+  const list = el('ol', 'brief-lines'); for (const t of b.lines) list.append(el('li', '', t));
+  const src = el('a', '', 'المصدر: اشتراطات إنشاء المباني السكنية (وزارة البلديات والإسكان، 2024)'); src.href = MUNICIPAL_SOURCE.url; src.target = '_blank'; src.rel = 'noopener';
+  const h3 = el('h3', '', 'ما تعنيه الاشتراطات البلدية لأرضك'); h3.id = 'briefTitle';
+  box.replaceChildren(h3, el('div', 'brief-body', undefined));
+  box.lastChild.append(fig, list);
+  for (const f of b.flags) box.append(el('p', 'brief-flag', f));
+  const note = el('p', 'brief-note', DISCLAIMER + ' '); note.append(src); box.append(note);
+}
+function paintGeo() {
+  const st = $('geoState'), g = geo?.source === 'map' ? geo : null; st.hidden = !g;
+  if (g) st.textContent = `موقع أرضك محدد على الخريطة (${g.lat.toFixed(5)}، ${g.lng.toFixed(5)}). ${northText(g.north)} يبقى في متصفحك فقط.`;
+}
+// ---- الخريطة: تُحمَّل وحدتها وبلاطاتها عند فتح الخيار فقط
+let locator = null, locatorLoading = false;
+function setStreets(list) { land.streets = new Set(list); grid.querySelectorAll('input[data-kind=street]').forEach(i => { i.checked = land.streets.has(i.value); }); }
+$('locateBox').addEventListener('toggle', async () => {
+  if (!$('locateBox').open || locator || locatorLoading) return; locatorLoading = true;
+  try {
+    const { mountLandLocator } = await import('./land-locator.mjs');
+    locator = mountLandLocator($('locateHost'), {
+      getLand: readLand,
+      onDims: ({ width, length }) => { $('landWidth').value = width; $('landLength').value = length; refreshLand(); },
+      onStreets: list => { setStreets(list); refreshLand(); },
+      onCity: id => { if (!$('landCity').value && cityById(id)) $('landCity').value = id; },
+      onApply: a => {
+        $('landWidth').value = a.width; $('landLength').value = a.length;
+        const widths = a.streetWidths || {}; setStreets(a.streets); land.entries = new Set(a.entries);
+        geo = a.geo; if (a.geo?.city && !$('landCity').value) $('landCity').value = a.geo.city;
+        refreshLand();
+        grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
+        grid.querySelectorAll('input[data-kind=width]').forEach(i => { i.value = widths[i.dataset.side] ?? ''; });
+        refreshLand(); saveHome();
+      },
+      onClear: () => { geo = null; refreshLand(); saveHome(); },
+    });
+  } catch (err) { $('locateHost').replaceChildren(el('p', 'hint', 'تعذّر تحميل الخريطة. أكمل الإدخال يدويًا: الطول والعرض والشوارع، واختر المدينة.')); console.warn(err); }
+  finally { locatorLoading = false; }
+});
+{ const sel = $('landCity'), none = document.createElement('option'); none.value = ''; none.textContent = 'غير محددة'; sel.append(none);
+  for (const r of REGIONS) { const g = document.createElement('optgroup'); g.label = r.ar; for (const c of r.cities) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.ar; g.append(o); } sel.append(g); }
+  sel.addEventListener('change', () => { refreshLand(); }); }
+/** الموقع المحفوظ للشمس (مفتاح صغير تقرؤه صفحات لاحقة، ومنها منزلق الشمس في المجسم): يُكتب مع الأرض المعتمدة ويُمسح إن لم يُحدَّد. */
+function storeGeo(g) { try { if (g) localStorage.setItem(GEO_KEY, JSON.stringify(g)); else localStorage.removeItem(GEO_KEY); } catch { /* التخزين غير متاح */ } }
+grid.addEventListener('input', e => { if (e.target.dataset?.kind === 'width') refreshLand(); });
 grid.addEventListener('change', e => {
   const input = e.target; if (!(input instanceof HTMLInputElement)) return;
+  if (input.dataset.kind === 'width') { refreshLand(); return; }
   const set = input.dataset.kind === 'street' ? land.streets : land.entries;
   if (input.checked) set.add(input.value); else set.delete(input.value);
   refreshLand();
@@ -132,8 +194,10 @@ $('landForm').addEventListener('submit', e => {
   setError($('landError'), '');
   showLandErrors(fieldErrors);
   if (hasLandErrors(fieldErrors)) { (fieldErrors.length ? $('landLength') : fieldErrors.width ? $('landWidth') : $('sideGrid').querySelector('input')).focus(); return; }
-  try { const { land: ok } = normalizeLand(raw); confirmedLand = ok; setError($('landError'), ''); }
+  try { const { land: ok } = normalizeLand(raw); confirmedLand = ok; storeGeo(ok.geo || null); setError($('landError'), ''); }
   catch (err) { setError($('landError'), err.message); return; }
+  // تصميم محفوظ على الأرض نفسها: موقعها وعروض شوارعها (لا يدخلان التوليد) يُحدَّثان فيه، فتتبعهما بطاقتا الاشتراطات والشمس بلا إعادة توليد
+  { const ds = designSession(); if (ds && sameLand(ds.input.land, confirmedLand) && JSON.stringify([ds.input.land.geo, ds.input.land.streetWidths]) !== JSON.stringify([confirmedLand.geo, confirmedLand.streetWidths])) { ds.input.land = { ...ds.input.land, geo: confirmedLand.geo, streetWidths: confirmedLand.streetWidths }; saveSession(localStorage, ds); } }
   if (session) session.setLand(confirmedLand); // حوار قائم: يبقى، ويُعاد حساب البرنامج على الأرض الجديدة
   chatFor = null; saveHome(); go('Shara');
 });
@@ -471,6 +535,9 @@ $('buildRetry').addEventListener('click', () => { chatFor = null; show('Shara');
     land.streets = new Set(raw.streets || []); land.entries = new Set(raw.entries || []);
     grid.querySelectorAll('input[data-kind=street]').forEach(i => { i.checked = land.streets.has(i.value); });
     refreshLand(); grid.querySelectorAll('input[data-kind=entry]').forEach(i => { i.checked = land.entries.has(i.value); });
+    grid.querySelectorAll('input[data-kind=width]').forEach(i => { const v = raw.streetWidths?.[i.dataset.side]; if (Number.isFinite(v)) i.value = v; });
+    const g = normalizeGeo(raw.geo); if (g?.source === 'map') geo = g; if (g?.city) $('landCity').value = g.city;
+    refreshLand();
   }
   const c = saved?.confirmedLand || (ds ? ds.input.land : null);
   if (c) { try { confirmedLand = normalizeLand(c).land; } catch { confirmedLand = null; } }
