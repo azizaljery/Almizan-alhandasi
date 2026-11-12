@@ -12,6 +12,7 @@ import { optimizeVariants } from './intel/variant-optimizer.mjs';
 import { mepSummaryHtml, mepQuantityRow, applyMepRow, mepQuantitiesHtml, quantityTables, NOT_COMPUTED_AR } from './final-outputs.mjs';
 import { serialize } from './draw/doc.mjs';
 import { isCostUnpriced, UNPRICED_TOTAL_AR } from './field-guards.mjs';
+import { packCardHtml, mountEngineerPack } from './pack/engineer-pack-ui.mjs';
 
 const RATES_KEY = 'mizan.final.rates.v1', SNAP_KEY = 'mizan.studio.snap3d.v1', SESSION_KEY = 'mizan.design.session.v1';
 const $ = id => document.getElementById(id);
@@ -107,7 +108,7 @@ function renderVariants() {
 }
 function render() {
   const R = designReasons(data), S = data.summary, d = data;
-  const parts = [];
+  const parts = [packCardHtml()]; // «حزمة المهندس» أعلى الصفحة
   parts.push(sec('summary', 'ملخص التصميم', `<p class="lead">${esc(d.title)}</p><div class="stats"><div class="stat"><b>${S.levels}</b>أدوار</div><div class="stat"><b>${S.rooms}</b>فراغات</div><div class="stat"><b>${fmt(S.builtArea)} م²</b>مساحة المسقط</div><div class="stat"><b>${fmt(S.roomsArea)} م²</b>مساحة الغرف</div><div class="stat"><b>${fmt(S.doors)}</b>أبواب</div><div class="stat"><b>${fmt(S.windows)}</b>نوافذ</div></div>`
     + (S.byType.length ? table(['الفراغ', 'العدد'], S.byType.map(t => `<tr><td>${esc(t.name)}</td><td class="num">${t.count}</td></tr>`)) : '')
     + `<p class="muted">${S.plot ? `الأرض ${S.plot.width} × ${S.plot.length} م · ` : ''}بصمة الهندسة <code>${esc(d.fingerprint)}</code> · ${esc(d.date)}</p>`));
@@ -139,7 +140,8 @@ function render() {
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
   $('fmain').innerHTML = parts.join('');
   attachProPhoto();
-  $('fnav').innerHTML = [['summary', 'الملخص'], ...(d.rooms?.length ? [['areas', 'المساحات']] : []), ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
+  mountEngineerPack($('engpack'), () => ({ doc, data, session: readSession(), mep, proPhoto }));
+  $('fnav').innerHTML = [['engpack', 'حزمة المهندس'], ['summary', 'الملخص'], ...(d.rooms?.length ? [['areas', 'المساحات']] : []), ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));
   $('resPct').addEventListener('input', e => { state.reservePct = e.target.value; update(); });
