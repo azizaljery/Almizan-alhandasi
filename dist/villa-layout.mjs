@@ -2056,7 +2056,8 @@ function hallNotes(m, W, D) {
   }
   return out;
 }
-const COST = { MIN_WIDTH: 40, MIN_AREA: 14, NO_WINDOW: 18, SWING_BLOCKED: 10, FIXTURE_OVERLAP: 8, FIXTURE_OUTSIDE: 8, UNREACHABLE_ROOM: 200, BATH_PRIVACY: 12, BEDROOM_FROM_ENTRY: 20, CORRIDOR_NARROW: 15, WINDOW_RATIO: 1, OPENING_NEAR_END: 2 };
+// MIN_AREA: رُفعت من 14 إلى 40 مع تضييق المسطح للارتداد النظامي — غرفة مطلوبة دون مقاسها الإرشادي لا تتصدّر متى وُجد بديل يسعها
+const COST = { MIN_WIDTH: 40, MIN_AREA: 40, NO_WINDOW: 18, SWING_BLOCKED: 10, FIXTURE_OVERLAP: 8, FIXTURE_OUTSIDE: 8, UNREACHABLE_ROOM: 200, BATH_PRIVACY: 12, BEDROOM_FROM_ENTRY: 20, CORRIDOR_NARROW: 15, WINDOW_RATIO: 1, OPENING_NEAR_END: 2 };
 /** كلفة الجودة من مراجعة المرسم نفسها؛ رفض صريح لغرفة معيشية أضيق من حدها أو فراغ لا يُوصل إليه. */
 export function quality(doc, { bedrooms = null } = {}) {
   const model = analyzeDoc(doc), rv = reviewDoc(doc, { model }); let cost = 0, reject = false; const issues = {};
