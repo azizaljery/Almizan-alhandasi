@@ -87,6 +87,7 @@ async function variantMode() {
   let doc = parseDoc(docRaw);
   const T0 = performance.now(), HQ = q.get('hq') === '1', PHOTO = HQ && q.get('photo') !== '0' && !grey;
   // «الصورة المعمارية»: المدخل دائمًا في الواجهة الأمامية (المحرك يعامل الجنوب أمامًا): مخطط مدخله شمالي/شرقي/غربي يُدار دورانًا صِرفًا قبل البناء
+  const docRaw0 = doc; // قبل الإدارة: جهاته هي جهات الأرض كما أدخلها العميل
   if (PHOTO) doc = frontSouthDoc(doc);
   const docSite = doc; // المستند الكامل (حدود الأرض، الشوارع، قطع الحوش) للمحيط
   // عدد الأدوار في الواجهة يتبع المخطط/طلب العميل لا القالب: نموذج الواجهة يُبنى من الدور الأرضي ثم يُمدّ رأسيًا إلى العدد المطلوب (extrudeFloors).
@@ -173,7 +174,9 @@ async function variantMode() {
   if (HQ && styleId && !grey && q.get('mass') !== '0') {
     try {
       let ext = {}; try { ext = JSON.parse(q.get('ext') || localStorage.getItem('mizan.exterior.v1') || '{}') || {}; } catch { ext = {}; }
-      const tM = performance.now(), plan = massingPlan({ doc: docSite, built, style: styleId, exterior: ext, floors: FI.n });
+      // حد البناء: الارتداد النظامي لهذه الأرض (requiredSetbacks) حيث عُرف عرض الشارع أو كانت الجهة مجاورًا؛ وإلا ارتدادات المستند. يُدار مع المستند إن أُديرت الواجهة.
+      let sbk = null; try { const land = JSON.parse(localStorage.getItem('mizan.design.session.v1') || 'null')?.input?.land; if (land?.streets?.length && docRaw0?.plot?.setbacks) { const { requiredSetbacks } = await import('../municipal-rules.mjs'), rq = requiredSetbacks(land).sides, own = docRaw0.plot.setbacks, raw = {}; for (const k of ['s', 'n', 'e', 'w']) raw[k] = rq[k]?.exact ? rq[k].required : Math.max(own[k] || 0, rq[k]?.required || 0); sbk = PHOTO ? frontSouthDoc({ ...docRaw0, plot: { ...docRaw0.plot, setbacks: raw } }).plot.setbacks : raw; } } catch { sbk = null; }
+      const tM = performance.now(), plan = massingPlan({ doc: docSite, built, style: styleId, exterior: ext, floors: FI.n, setbacks: sbk });
       massing = buildMassing(THREE, { scene, S, plan, night: q.get('night') === '1' }); massing.info.ms = Math.round(performance.now() - tM);
       addEventListener('pagehide', () => { try { massing?.dispose(); } catch {} }, { once: true });
     } catch (e) { console.error('MASSING_FAIL', e?.message || e); massing = null; }

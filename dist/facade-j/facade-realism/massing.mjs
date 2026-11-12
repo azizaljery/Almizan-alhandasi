@@ -15,18 +15,20 @@ import { sideTransform } from './model.mjs';
 import { floorLevel } from './floors.mjs';
 import { designHash } from './variation.mjs';
 
-export const MASSING_NOTE = 'التراس وارتداد الدور العلوي من مخططك؛ عناصر الواجهة الزخرفية (مظلات، إطارات بارزة، كاسرات شمس، أروقة، دعامات) مقترحة للعرض وليست من المخطط';
+export const MASSING_NOTE = 'التراس وارتداد الدور العلوي من مخططك؛ عناصر الواجهة الزخرفية (مظلات، إطارات، كاسرات شمس، أروقة، دعامات، وتغوير المدخل والفتحات للداخل) مقترحة للعرض وليست من المخطط، وتبقى داخل حد البناء';
 /** مفردات كل طراز (المعرّفات التي يمكن أن تظهر في plan.vocab). */
 export const VOCAB = Object.freeze({
-  M: ['roof-cantilever', 'facade-frame', 'entry-canopy', 'entry-portal', 'louvers', 'two-material'],
-  J: ['roof-cantilever', 'facade-frame', 'entry-canopy', 'entry-portal', 'louvers', 'two-material'],
-  C: ['portico', 'portico-balustrade', 'portico-pediment', 'central-pilasters', 'keystones'],
-  N: ['entry-block', 'shurfat', 'luhuj', 'gypsum-band', 'corner-batter', 'mazarib'],
-  H: ['rawshan', 'entry-arch', 'parapet-coping'],
-  S: ['stone-entry-frame', 'deep-piers', 'triangle-band'],
+  M: ['recessed-entry', 'deep-reveals', 'roof-cantilever', 'facade-frame', 'entry-canopy', 'entry-portal', 'louvers', 'two-material'],
+  J: ['recessed-entry', 'deep-reveals', 'roof-cantilever', 'facade-frame', 'entry-canopy', 'entry-portal', 'louvers', 'two-material'],
+  C: ['recessed-entry', 'deep-reveals', 'central-attic', 'central-loggia', 'portico', 'portico-balustrade', 'portico-pediment', 'central-pilasters', 'keystones'],
+  N: ['recessed-entry', 'deep-reveals', 'entry-block', 'shurfat', 'luhuj', 'gypsum-band', 'corner-batter', 'mazarib'],
+  H: ['recessed-entry', 'deep-reveals', 'rawshan', 'entry-arch', 'parapet-coping'],
+  S: ['recessed-entry', 'deep-reveals', 'stone-entry-frame', 'deep-piers', 'triangle-band'],
 });
 const RAILING = { M: 'glass', J: 'glass', C: 'balustrade', N: 'solid', H: 'timber', S: 'solid' };
-const EPS = 1e-4, PLINTH = .45;
+const EPS = 1e-4, PLINTH = .45, GROUND_MAX = 1.0;
+/** أقل فائض أمامي (م) يلزم لمفردات الطراز البارزة؛ دونه تُستبدل بعمق للداخل (مدخل غائر، فتحات غائرة، كاسرات ومشربيات داخل الفتحة). */
+const NEED = { M: .6, J: .6, C: 1.2, N: .6, H: .55, S: .5 }, RECESS = { M: [.8, .22], J: [.8, .22], C: [.7, .2], N: [.6, .3], H: [.6, .22], S: [.9, .38] };
 
 // ------------------------------------------------------------------ بذرة حتمية
 function fnv(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return h >>> 0; }
@@ -97,16 +99,17 @@ export function elementBox(el) { return { min: el.min, max: el.max }; }
  * @param style    معرّف الطراز (M,J,C,N,H,S)
  * @param exterior ذوق العميل (prefs.exterior)
  */
-export function massingPlan({ doc, built, style, exterior = {}, floors = null }) {
+export function massingPlan({ doc, built, style, exterior = {}, floors = null, setbacks = null }) {
   const taste = tasteOf(exterior), seed = massingSeed(doc, style, exterior), R = rng(seed);
   const pick = (arr) => arr[Math.floor(R() * arr.length) % arr.length];
-  const faces = facesFromBuilt(built), F = faces.s, plan = { seed, style, taste, vocab: [], elements: [], terraces: [], dropped: [], entry: null, plot: null, encroachFrontM: 0, encroachUpperM: 0, maxProjectionM: 0, upperProjectionM: 0, floors: floors || 1 };
+  const faces = facesFromBuilt(built), F = faces.s, plan = { seed, style, taste, vocab: [], elements: [], recesses: [], loggias: [], terraces: [], dropped: [], entry: null, plot: null, encroachFrontM: 0, encroachUpperM: 0, maxProjectionM: 0, upperProjectionM: 0, floors: floors || 1 };
   plan.wallTop = Math.max(0, ...Object.values(faces).flatMap(f => f.pieces.map(p => p.top)));
-  const P = (doc?.plot?.polygon || []), sb = doc?.plot?.setbacks || {};
+  const P = (doc?.plot?.polygon || []), sb = setbacks || doc?.plot?.setbacks || {}; // setbacks: الارتداد النظامي لهذه الأرض إن عُرف (requiredSetbacks)، وإلا ارتدادات المستند
   if (P.length) { const xs = P.map(p => p.x), ys = P.map(p => p.y); plan.plot = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys), sb: { s: sb.s || 0, n: sb.n || 0, e: sb.e || 0, w: sb.w || 0 } }; }
-  // حد العناصر: داخل الأرض بهامش 0.3 م أمامًا وخلفًا، وعند خط الارتداد الجانبي جانبًا
-  const lim = plan.plot ? { min: [plan.plot.minX + Math.max(.3, plan.plot.sb.w), -1, -(plan.plot.maxY - .3)], max: [plan.plot.maxX - Math.max(.3, plan.plot.sb.e), 99, -(plan.plot.minY + .3)] } : null;
-  plan.limit = lim;
+  // حد البناء: خط الارتداد من الجهات الأربع، مقيسًا إلى الوجه الخارجي لكل عنصر مضاف. حيث يتجاوز جدار قائم الخطَّ (قالب يقدّم الواجهة، أو
+  // سماكة الجدار وكسوته) فالحد هناك وجه ذلك الجدار: لا شيء يبرز عنه. العتبات والدرج الأرضي المكشوف (ground) وحدها تدخل الارتداد حتى GROUND_MAX.
+  const lim = plan.plot ? { min: [plan.plot.minX + plan.plot.sb.w, -1, -(plan.plot.maxY - plan.plot.sb.n)], max: [plan.plot.maxX - plan.plot.sb.e, 99, -(plan.plot.minY + plan.plot.sb.s)] } : null;
+  plan.limit = lim; plan.buildLine = lim;
 
   // --- التراسات (من المخطط)
   const nFloors = plan.floors;
@@ -131,17 +134,22 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
   if (e) plan.entry = wbox(e.u0, e.u1, e.y0, e.y1, -.3, 4);
   const allOps = F.pieces.flatMap(p => p.ops.map(o => ({ o, box: null, p })));
   for (const x of allOps) { const f = x.p.face + .04, a = toWorld(M, x.o.u0, x.o.y0, f - .5), b = toWorld(M, x.o.u1, x.o.y1, f + 4); x.box = { min: [Math.min(a[0], b[0]), x.o.y0, Math.min(a[2], b[2])], max: [Math.max(a[0], b[0]), x.o.y1, Math.max(a[2], b[2])] }; }
+  // ممرات كل أبواب المدخل على الواجهة (قد يكون للمجلس مدخل ثانٍ على قطعة أخرى)
+  const entryBoxes = allOps.filter(x => x.o.entry).map(x => ({ min: [x.box.min[0], x.box.min[1], x.box.min[2] + .2], max: x.box.max })), inEntry = b => (plan.entry && boxOverlap(b, plan.entry, .005)) || entryBoxes.some(c => boxOverlap(b, c, .005));
   /** هل الصندوق العالمي مقبول؟ (سبب الرفض أو null) */
-  const reject = (b, { screen = false } = {}) => {
-    if (lim && (b.min[0] < lim.min[0] - EPS || b.max[0] > lim.max[0] + EPS || b.min[2] < lim.min[2] - EPS || b.max[2] > lim.max[2] + EPS)) return 'خارج حد الأرض/الارتداد الجانبي';
+  const skinZ = () => toWorld(M, cp.u0, 0, cface)[2], xL = () => toWorld(M, gU0, 0, 0)[0], xR = () => toWorld(M, gU1, 0, 0)[0];
+  const reject = (b, { screen = false, ground = false, liner = false } = {}) => {
+    if (lim) { const zMax = ground ? Math.min(Math.max(lim.max[2], skinZ()) + GROUND_MAX, -(plan.plot.minY + .3)) : Math.max(lim.max[2], skinZ());
+      if (b.min[0] < Math.min(lim.min[0], xL()) - EPS || b.max[0] > Math.max(lim.max[0], xR()) + EPS || b.min[2] < lim.min[2] - EPS || b.max[2] > zMax + EPS) return 'خارج حد البناء'; }
+    if (liner) return inEntry(b) ? 'في ممر المدخل' : null;
     if (inVoid(b)) return 'فوق التراس';
-    if (plan.entry && boxOverlap(b, plan.entry, .005)) return 'في ممر المدخل';
+    if (inEntry(b)) return 'في ممر المدخل';
     if (!screen) for (const x of allOps) if (boxOverlap(b, x.box, .005)) return 'أمام الفتحة ' + x.o.id;
     return null;
   };
   let cur = '';
-  const push = (el, opt) => { const why = reject(el, opt); if (why) { plan.dropped.push({ id: cur, part: el.part || el.kind, why }); return false; } plan.elements.push({ ...el, id: cur, deco: true, proj: +(el.max[2] - W(cp.u0, 0, 0)[2]).toFixed(3), ...(opt?.screen ? { screen: true } : {}) }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur); return true; };
-  const box = (mat, u0, u1, y0, y1, d0, d1, opt = {}) => { if (u1 - u0 < .02 || y1 - y0 < .01 || d1 - d0 < .005) return false; return push({ kind: 'box', mat, part: opt.part, inst: opt.inst, ...wbox(u0, u1, y0, y1, d0, d1) }, opt); };
+  const push = (el, opt) => { const why = reject(el, opt); if (why) { plan.dropped.push({ id: cur, part: el.part || el.kind, why }); return false; } plan.elements.push({ ...el, id: cur, deco: true, ...(opt?.ground ? { ground: true } : {}), proj: +(el.max[2] - W(cp.u0, 0, 0)[2]).toFixed(3), face: +skinZ().toFixed(4), ...(opt?.screen ? { screen: true } : {}) }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur); return true; };
+  const box = (mat, u0, u1, y0, y1, d0, d1, opt = {}) => { if (u1 - u0 < .02 || y1 - y0 < .01 || d1 - d0 < .005 || (d1 > .001 && d1 < .05)) return false; return push({ kind: 'box', mat, part: opt.part, inst: opt.inst, ...wbox(u0, u1, y0, y1, d0, d1) }, opt); };
   /** منشور: مضلع محدب في مستوى الواجهة (u,y) يُبثق بين d0 و d1 (الواجهة الجنوبية: المحور Z). */
   const prism = (mat, pts, d0, d1, opt = {}) => { const us = pts.map(p => p[0]), ys = pts.map(p => p[1]), b = wbox(Math.min(...us), Math.max(...us), Math.min(...ys), Math.max(...ys), d0, d1);
     return push({ kind: 'prism', axis: 'z', mat, part: opt.part, pts: pts.map(([u, y]) => { const w = W(u, y, 0); return [w[0], y]; }), a: b.min[2], b: b.max[2], ...b }, opt); };
@@ -164,22 +172,102 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
   // جهة «كتلة المجلس» (الأعرض بعيدًا عن المدخل)
   const featLeft = (ec - U0) > (U1 - ec) + .3 ? true : (U1 - ec) > (ec - U0) + .3 ? false : R() < .5;
 
-  if (style === 'M' || style === 'J') {
-    const OV = .32, accent = 'accent', Pj = cap(simple ? .6 : grand ? 1.2 : pick([.7, .9, 1.1]));
+  // ---------------------------------------------------------------- لا فائض أمامي: العمق للداخل بدل البروز
+  const roomOf = pc => { use(pc); return lim ? Math.max(0, lim.max[2] - skinZ()) : 2.5; };
+  const roomMain = roomOf(main), flat = roomMain < (NEED[style] ?? .6) - 1e-6, RC = RECESS[style] || RECESS.M;
+  plan.frontRoomM = +roomMain.toFixed(3); plan.mode = flat ? 'inward' : 'projecting';
+  /** تغوير فتحة: إطارها وتعبئتها يُؤخَّران D للداخل (الموضع في الواجهة كما هو)، وتُبطَّن جوانب التجويف. كله داخل سماكة المبنى. */
+  const recess = (pc, o, D, mat, liners = true) => { use(pc); const b = wbox(o.u0, o.u1, o.y0, o.y1, -D - .45, .13);
+    if (inVoid(b) || plan.recesses.some(r => r.opening === o.id)) return false; plan.recesses.push({ id: cur, opening: o.id, depth: D, min: b.min, max: b.max, face: skinZ() }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur);
+    if (!liners) return true; const t = .1, d0 = -D - .25, d1 = -.285;
+    box(mat, o.u0 - t, o.u0, o.y0 - t, o.y1 + t, d0, d1, { part: 'reveal', liner: true }); box(mat, o.u1, o.u1 + t, o.y0 - t, o.y1 + t, d0, d1, { part: 'reveal', liner: true });
+    box(mat, o.u0, o.u1, o.y1, o.y1 + t, d0, d1, { part: 'reveal', liner: true }); box(mat, o.u0, o.u1, o.y0 - t, o.y0, d0, d1, { part: 'reveal', liner: true }); return true; };
+  /**
+   * لوجيا: جزء من الواجهة يُغوَّر D للداخل بفتحاته (جدار خلفي بثقوبها، جانبان وسقف وأرضية)، فيبقى الجدار القائم حوله إطارًا. العمق كله داخل حد البناء.
+   * يُرفض إن قطع فتحة جزئيًا أو وقع فوق تراس. يعيد { a, b, y0, y1, D, inside } أو null.
+   */
+  const loggia = (pc, a, b, y0, y1, D, m) => { use(pc); if (b - a < .9 || y1 - y0 < 1.2) return null;
+    const inside = pc.ops.filter(o => o.u0 >= a + .04 && o.u1 <= b - .04 && o.y0 >= y0 - .01 && o.y1 <= y1 - .04);
+    if (pc.ops.some(o => !inside.includes(o) && o.u1 > a - .14 && o.u0 < b + .14 && o.y1 > y0 - .14 && o.y0 < y1 + .14)) return null;
+    const bx = wbox(a, b, y0, y1, -.335, 2.5); if (inVoid(bx) || plan.loggias.some(l => boxOverlap(l, bx, .01))) return null;
+    if ((m.need && !inside.length) || (!m.door && inside.some(o => o.door))) return null;
+    plan.loggias.push({ id: cur, min: bx.min, max: bx.max, depth: D }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur);
+    for (const o of inside) recess(pc, o, D, null, false);
+    let rects = [{ u0: a, u1: b, y0, y1 }]; for (const o of inside) rects = rects.flatMap(r => cutRect(r, o));
+    for (const r of rects) box(m.back, r.u0, r.u1, r.y0, r.y1, -D - .25, -D, { part: 'loggia-back', liner: true });
+    box(m.side, a - .12, a, y0 - .12, y1 + .12, -D - .25, -.01, { part: 'loggia-side', liner: true }); box(m.side, b, b + .12, y0 - .12, y1 + .12, -D - .25, -.01, { part: 'loggia-side', liner: true });
+    box(m.soffit || m.side, a, b, y1, y1 + .12, -D - .25, -.01, { part: 'loggia-soffit', liner: true }); box(m.floor || m.side, a, b, y0 - .12, y0, -D - .25, -.01, { part: 'loggia-floor', liner: true });
+    return { a, b, y0, y1, D, inside }; };
+  /** مدخل غائر: لوجيا حول الباب إن اتسع الجدار حوله، وإلا تغوير الباب وحده. */
+  const recessEntry = (m) => { if (!e) return null; cur = 'recessed-entry'; const D = RC[0] * (grand ? 1.25 : simple ? .6 : 1), yT = Math.min(e.y1 + .45, (two ? FL1 : H - .9) - .4); let L = null;
+    for (const mg of simple ? [.25] : [.75, .5, .25]) { L = loggia(main, Math.max(U0 + .2, e.u0 - mg), Math.min(U1 - .2, e.u1 + mg), e.y0, yT, D, { ...m, door: true }); if (L) { L.mg = mg; break; } }
+    if (!L && !recess(main, e, D, m.side)) return null;
+    use(main); box(m.floor || m.side, e.u0 - .25, e.u1 + .25, 0, .15, -.02, .55, { part: 'threshold', ground: true }); return L; };
+  const deepReveals = (mat) => { cur = 'deep-reveals'; for (const pc of F.pieces) for (const o of pc.ops) if (!o.door) recess(pc, o, RC[1], mat); use(main); };
+  /** شرائح رأسية داخل تجويف النافذة (ساتر مثقّب ضمن سماكة الجدار). */
+  const revealSlats = (pc, o, a, b, opt = {}) => { use(pc); const pitch = opt.pitch || .15, w = opt.w || .04, n = Math.max(2, Math.floor((b - a) / pitch)), st = (b - a) / n; for (let i = 0; i < n; i++) box('timber', a + (i + .5) * st - w / 2, a + (i + .5) * st + w / 2, o.y0, o.y1, -.16, -.03, { part: opt.part || 'slat', inst: opt.inst || 'slat', screen: true }); };
+  if (flat) {
+    const bodyKey = { M: 'accent', J: 'accent', C: 'stone', N: 'mud', H: 'stone', S: 'stone' }[style] || 'accent', modern = style === 'M' || style === 'J';
+    const EL = recessEntry(modern ? { back: 'body', side: 'accent', soffit: 'timber', floor: 'accent' } : { back: 'body', side: bodyKey, soffit: style === 'H' || style === 'N' ? 'timber' : bodyKey, floor: bodyKey });
+    if (style === 'C' && EL && EL.mg >= .5) { use(main); // عمودان داخل فم المدخل الغائر (in antis)
+      for (const u of [(EL.a + e.u0) / 2, (EL.b + e.u1) / 2]) { box('stone', u - .2, u + .2, EL.y0, EL.y0 + .16, -.45, -.05, { part: 'base', liner: true }); cyl('stone', u, -.25, EL.y0 + .16, EL.y1 - .16, .15, { part: 'shaft', liner: true }); box('stone', u - .2, u + .2, EL.y1 - .16, EL.y1, -.45, -.05, { part: 'capital', liner: true }); } }
+    if (style === 'C' && EL && two) { cur = 'central-loggia'; // لوجيا عليا فوق المدخل بدرابزين حجري وعمودين: محور غائر بارتفاع الدورين
+      const y0 = FL1 + .05, UL = loggia(main, EL.a, EL.b, y0, H - 1.25, .6, { back: 'body', side: 'stone', need: true });
+      if (UL) { const o = { liner: true, screen: true }; box('stone', UL.a, UL.b, y0, y0 + .08, -.22, -.04, { part: 'rail', ...o }); box('stone', UL.a, UL.b, y0 + .72, y0 + .82, -.24, -.02, { part: 'rail', ...o });
+        const n = Math.max(3, Math.round((UL.b - UL.a) / .2)); for (let i = 0; i < n; i++) { const u = UL.a + (i + .5) * (UL.b - UL.a) / n; box('stone', u - .045, u + .045, y0 + .08, y0 + .72, -.18, -.08, { part: 'baluster', inst: 'bal', ...o }); }
+        if (EL.mg >= .5) for (const u of [(UL.a + e.u0) / 2, (UL.b + e.u1) / 2]) { cyl('stone', u, -.25, y0 + .82, UL.y1 - .14, .13, { part: 'shaft', ...o }); box('stone', u - .18, u + .18, UL.y1 - .14, UL.y1, -.43, -.07, { part: 'capital', ...o }); } } }
+    let FLg = null;
+    if (modern) { // إطار الواجهة للداخل: كتلة المجلس العليا تُغوَّر لوجيا يحيط بها الجدار القائم، وكاسرات خشب في مستوى الإطار
+      cur = 'facade-frame';
+      const other = F.pieces.filter(p => p !== main && p.u1 - p.u0 >= 3).sort((p, q) => (q.u1 - q.u0) - (p.u1 - p.u0))[0] || null, fp = other || main; use(fp);
+      const fLeft = other ? true : featLeft, seg = segsOf(fp).slice().sort((p, q) => (fLeft ? p[0] - q[0] : q[1] - p[1]))[0] || [fp.u0, fp.u1];
+      const lo = other ? seg[0] : e && fLeft ? seg[0] : e ? Math.max(seg[0], e.u1 + .6) : seg[0], hi = other ? seg[1] : e && fLeft ? Math.min(seg[1], e.u0 - .6) : seg[1];
+      const y0 = two ? FL1 + .05 : PLINTH, y1 = fp.top - 1.2, D = grand ? .9 : simple ? .5 : .7;
+      for (const inset of [.35, .6, 1.0, 1.6]) { FLg = loggia(fp, lo + inset, hi - inset, y0, y1, D, { back: 'body', side: 'accent', soffit: 'timber', floor: 'accent', need: true }); if (FLg) { FLg.pc = fp; FLg.left = fLeft; break; } }
+      if (FLg) { cur = 'louvers'; const all = taste.screen === 'yes' || taste.openings === 'private', w = (FLg.b - FLg.a) * (all ? 1 : .3), a = FLg.left ? FLg.a : FLg.b - w, n = Math.max(3, Math.floor(w / .15)), st = w / n;
+        for (let i = 0; i < n; i++) box('timber', a + (i + .5) * st - .022, a + (i + .5) * st + .022, FLg.y0, FLg.y1, -.15, -.03, { part: 'slat', inst: 'slat', screen: true }); }
+    }
+    deepReveals(bodyKey);
+    const wins = F.pieces.flatMap(pc => pc.ops.filter(o => !o.door && plan.recesses.some(r => r.opening === o.id && r.depth < .45)).map(o => ({ pc, o }))).sort((p, q) => (q.o.u1 - q.o.u0) - (p.o.u1 - p.o.u0));
+    if (modern) {
+      // بلاطة السقف تبرز بقدر الفائض المتاح فقط (أمامًا قد يكون صفرًا؛ جانبًا حتى خط الارتداد الجانبي)، وزعنفة عند الزاوية ضمن الفائض الجانبي
+      const OV = Math.min(grand ? 1.2 : .9, Math.max(0, slackW)), OE = Math.min(grand ? 1.2 : .9, Math.max(0, slackE));
+      cur = 'roof-cantilever';
+      for (const pc of F.pieces) { const Pp = Math.min(.9, roomOf(pc)), Hp = pc.top; for (const [a, b] of segsOf(pc)) { if (b - a < 2) continue; const oL = Math.abs(a - gU0) < EPS ? OV : 0, oR = Math.abs(b - gU1) < EPS ? OE : 0;
+        box('accent', a - oL, b + oR, Hp, Hp + .16, -.45, Pp < .05 ? 0 : Pp, { part: 'slab' }); if (oL > .2) box('timber', a - oL + .04, a - .02, Hp - .03, Hp, -.4, -.02, { part: 'soffit' }); if (oR > .2) box('timber', b + .02, b + oR - .04, Hp - .03, Hp, -.4, -.02, { part: 'soffit' }); } }
+      if (!FLg) { cur = 'louvers'; const all = taste.screen === 'yes' || taste.openings === 'private', list = wins.filter(x => !two || x.o.floor >= 1).slice(0, all ? 6 : 3);
+        for (const { pc, o } of list) { const w = o.u1 - o.u0, part = all || w < 1.3 ? 1 : .38; if (featLeft) revealSlats(pc, o, o.u0, o.u0 + w * part); else revealSlats(pc, o, o.u1 - w * part, o.u1); } }
+    }
+    if (style === 'C' && e) { cur = 'central-attic'; // تاج فوق الدروة على محور المدخل (داخل وجه الجدار)
+      const a = Math.max(U0, e.u0 - 1.6), b = Math.min(U1, e.u1 + 1.6); if (topSegs.some(s => s[0] <= a + EPS && s[1] >= b - EPS)) { use(main); box('stone', a, b, H, H + .45, -.34, 0, { part: 'attic' }); box('stone', a + .12, b - .12, H + .45, H + .6, -.3, -.04, { part: 'attic-cornice' }); } }
+    if (style === 'N') { use(main);
+      if (e) { cur = 'entry-block'; const a = Math.max(U0, e.u0 - .9), b = Math.min(U1, e.u1 + .9); // برج المدخل يعلو الدروة داخل وجه الجدار
+        if (topSegs.some(s => s[0] <= a + EPS && s[1] >= b - EPS) && box('mud', a, b, H, H + .55, -.5, 0, { part: 'tower' })) { cur = 'gypsum-band'; box('gypsum', a + .02, b - .02, H + .4, H + .5, -.52, -.5, { part: 'band' });
+          cur = 'shurfat'; const n = Math.max(3, Math.round((b - a) / .52)), st = (b - a) / n; for (let i = 0; i < n; i++) { const u = a + i * st; prism('mud', [[u + .04, H + .55], [u + st - .04, H + .55], [u + st * .5, H + .97]], -.4, 0, { part: 'shurfa' }); } } }
+      cur = 'mazarib'; for (const pc of F.pieces) { const rm = Math.min(.55, roomOf(pc)); if (rm < .2) continue; const y = pc.top - 1.02, w = pc.u1 - pc.u0, n = Math.max(1, Math.round(w / 3.4)); for (let i = 0; i < n; i++) { const u = pc.u0 + (i + .5) * w / n; box('timber', u - .06, u + .06, y - .1, y, -.02, rm, { part: 'mizrab' }); } } }
+    if (style === 'H') { cur = 'rawshan'; // الروشان يصير مشربية مسطحة داخل تجويف النافذة
+      const list = wins.filter(x => (two ? x.o.floor >= 1 : true) && x.o.u1 - x.o.u0 >= .8).slice(0, grand ? 4 : simple ? 1 : 3);
+      for (const { pc, o } of list) { revealSlats(pc, o, o.u0, o.u1, { pitch: .12, w: .03, part: 'lattice', inst: 'lat' }); use(pc); const nh = Math.max(3, Math.round((o.y1 - o.y0) / .12)); for (let i = 1; i < nh; i++) { const y = o.y0 + i * (o.y1 - o.y0) / nh; box('timber', o.u0, o.u1, y - .015, y + .015, -.15, -.04, { part: 'lattice', inst: 'lat', screen: true }); } }
+      cur = 'parapet-coping'; use(main); for (const [a, b] of topSegs) box('stone', a, b, H, H + .09, -.3, 0, { part: 'coping' }); }
+    use(main);
+  }
+
+  if (!flat && (style === 'M' || style === 'J')) {
+    const OV = .32, accent = 'accent', Pj0 = cap(simple ? .6 : grand ? 1.2 : pick([.7, .9, 1.1]));
     // 1) بلاطة سقف بارزة ببطانة خشب (على كل قطعة من الواجهة عند وجهها)
     cur = 'roof-cantilever';
-    for (const pc of F.pieces) { use(pc); const Hp = pc.top;
+    for (const pc of F.pieces) { use(pc); const Hp = pc.top, Pj = Math.min(Pj0, cap(9)); if (Pj < .15) continue;
       for (const [a, b] of segsOf(pc)) { if (b - a < 2) continue; const oL = Math.abs(a - gU0) < EPS ? Math.min(OV, slackW) : 0, oR = Math.abs(b - gU1) < EPS ? Math.min(OV, slackE) : 0;
         box(accent, a - oL, b + oR, Hp - .42, Hp + .04, -.3, Pj, { part: 'slab' }); box('timber', a - oL + .05, b + oR - .05, Hp - .45, Hp - .42, .03, Pj - .05, { part: 'soffit' }); } }
     // 2) إطار واجهة بارز يحيط بكتلة المجلس: القطعة الأعرض غير قطعة المدخل إن كانت الواجهة متدرجة، وإلا جناح الواجهة البعيد عن المدخل
     cur = 'facade-frame';
     const other = F.pieces.filter(p => p !== main && p.u1 - p.u0 >= 3).sort((p, q) => (q.u1 - q.u0) - (p.u1 - p.u0))[0] || null, fp = other || main; use(fp);
-    const fLeft = other ? Math.abs(fp.u0 - gU0) < EPS || !(Math.abs(fp.u1 - gU1) < EPS) : featLeft, Hf = fp.top;
+    const Pj = Math.min(Pj0, cap(9)); const fLeft = other ? Math.abs(fp.u0 - gU0) < EPS || !(Math.abs(fp.u1 - gU1) < EPS) : featLeft, Hf = fp.top;
     const seg = segsOf(fp).slice().sort((p, q) => (fLeft ? p[0] - q[0] : q[1] - p[1]))[0] || [fp.u0, fp.u1];
     const tf = .32, full = !two || R() < .35, yB = full ? 0 : FL1 - .35, endU = fLeft ? seg[0] : seg[1], stop = other ? (fLeft ? seg[1] : seg[0]) : e ? (fLeft ? Math.min(seg[1], e.u0 - .7) : Math.max(seg[0], e.u1 + .7)) : (fLeft ? seg[1] : seg[0]);
     const gs = gaps(yB, Hf - .45, Math.min(endU, stop), Math.max(endU, stop)).filter(g => g[1] - g[0] >= tf + .06);
     let frame = null;
-    if (gs.length) {
+    if (gs.length && Pj >= .3) {
       const gIn = fLeft ? gs[gs.length - 1] : gs[0], inner = fLeft ? [gIn[1] - tf, gIn[1]] : [gIn[0], gIn[0] + tf];
       const atEnd = Math.abs(endU - (fLeft ? gU0 : gU1)) < EPS && (fLeft ? slackW : slackE) >= tf - .02;
       const outer = atEnd ? (fLeft ? [endU - tf, endU] : [endU, endU + tf]) : (fLeft ? [gs[0][0], gs[0][0] + tf] : [gs[gs.length - 1][1] - tf, gs[gs.length - 1][1]]);
@@ -202,7 +290,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
     use(main);
     // 4) المدخل: كتلة مزدوجة الارتفاع أو مظلة معلّقة
     if (e) {
-      const portal = !simple && (grand || R() < .5), dP = cap(.75);
+      const portal = !simple && (grand || R() < .5), dP = cap(.75), Pj = Pj0;
       let done = false;
       if (portal) { cur = 'entry-portal';
         const upWin = main.ops.filter(o => o.floor >= 1 && o.u1 > e.u0 - .2 && o.u0 < e.u1 + .2), yT = two ? Math.min(H - .5, Math.max(FL1 + 2.6, ...upWin.map(o => o.y1)) + .6) : Math.min(H - .5, e.y1 + .95);
@@ -224,7 +312,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
       for (const r of rects) if (r.u1 - r.u0 > .12 && r.y1 - r.y0 > .12) box(style === 'J' ? 'timber' : 'stone2', r.u0, r.u1, r.y0, r.y1, -.02, .06, { part: 'clad' }); }
   }
 
-  if (style === 'C' && e) {
+  if (!flat && style === 'C' && e) {
     // 1) رواق مدخل بأعمدة وتاج وجبهة
     cur = 'portico';
     const dc = cap(grand ? 1.7 : simple ? 1.15 : 1.4) - .35, four = grand || R() < .5, cL = e.u0 - .6, cR = e.u1 + .6, yE = Math.max(e.y1 + .35, 3.3), yT = Math.max(yE + .5, 3.85);
@@ -232,7 +320,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
     const okTop = box('stone', a, b, yE, yT, -.02, dc + .3, { part: 'entablature' });
     if (okTop) {
       box('stone', a - .08, b + .08, yT, yT + .1, -.02, dc + .38, { part: 'cornice' });
-      box('stone', a - .2, b + .2, 0, PLINTH - .15, -.02, dc + .55, { part: 'platform' }); box('stone', a - .1, b + .1, PLINTH - .15, PLINTH, -.02, dc + .4, { part: 'platform' }); box('stone', a - .35, b + .35, 0, .15, -.02, dc + .7, { part: 'step' });
+      box('stone', a - .2, b + .2, 0, PLINTH - .15, -.02, dc + .55, { part: 'platform', ground: true }); box('stone', a - .1, b + .1, PLINTH - .15, PLINTH, -.02, dc + .4, { part: 'platform', ground: true }); box('stone', a - .35, b + .35, 0, .15, -.02, dc + .7, { part: 'step', ground: true });
       for (const u of colsU) { box('stone', u - .25, u + .25, PLINTH, PLINTH + .2, dc - .25, dc + .25, { part: 'base' }); cyl('stone', u, dc, PLINTH + .2, yE - .2, .17, { part: 'shaft' }); box('stone', u - .24, u + .24, yE - .2, yE, dc - .24, dc + .24, { part: 'capital' }); }
       // أكتاف جدارية خلف الأعمدة
       for (const u of [colsU[0], colsU[colsU.length - 1]]) box('stone', u - .2, u + .2, PLINTH, yE, -.02, .12, { part: 'respond' });
@@ -256,7 +344,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
     for (const o of main.ops) { if (o.door) continue; const c = (o.u0 + o.u1) / 2, y = o.y1 + .03; prism('stone', [[c - .08, y], [c + .08, y], [c + .13, y + .3], [c - .13, y + .3]], .0, .24, { part: 'keystone' }); }
   }
 
-  if (style === 'N') {
+  if (!flat && style === 'N') {
     // 1) كتلة مدخل بارزة تعلو الدروة بشُرَف ولهوج وحزام جصي وعتبة
     if (e) { cur = 'entry-block';
       const dB = cap(grand ? .95 : .8), yT = two ? H + .3 : H + .4, upWin = main.ops.filter(o => o.floor >= 1 && o.u1 > e.u0 - 1 && o.u0 < e.u1 + 1), yBeam = two ? Math.max(FL1 + 2.6, ...upWin.map(o => o.y1)) + .35 : e.y1 + .4;
@@ -264,7 +352,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
       for (const [m, pw] of [[.35, .65], [.2, .65], [.1, .65], [.1, .45], [.06, .3]]) { const L = [e.u0 - m - pw, e.u0 - m], Rr = [e.u1 + m, e.u1 + m + pw]; if (L[0] < U0 - EPS || Rr[1] > U1 + EPS || reject(wbox(L[0], L[1], 0, yT, -.02, dB)) || reject(wbox(Rr[0], Rr[1], 0, yT, -.02, dB)) || reject(wbox(L[0], Rr[1], yBeam, yT, -.02, dB))) continue;
         prismX('mud', [[-.02, 0], [dB + .08, 0], [dB, yT], [-.02, yT]], L[0], L[1], { part: 'pier' }); prismX('mud', [[-.02, 0], [dB + .08, 0], [dB, yT], [-.02, yT]], Rr[0], Rr[1], { part: 'pier' });
         box('mud', L[1], Rr[0], yBeam, yT, -.02, dB, { part: 'beam' }); if (two) box('mud', L[1], Rr[0], e.y1 + .4, FL1 + .55, -.02, dB - .25, { part: 'spandrel' });
-        box('mud', L[0] - .25, Rr[1] + .25, 0, .2, -.02, dB + .45, { part: 'threshold' }); blk = { a: L[0], b: Rr[1], yBeam, yT, dB }; break; }
+        box('mud', L[0] - .25, Rr[1] + .25, 0, .2, -.02, dB + .45, { part: 'threshold', ground: true }); blk = { a: L[0], b: Rr[1], yBeam, yT, dB }; break; }
       if (!blk) { // لا متسع لكتفين بجانب الباب: كتلة عتب بارزة فوق المدخل
         const a = Math.max(U0, e.u0 - .3), b = Math.min(U1, e.u1 + .3), y0 = e.y1 + .35, y1 = two ? FL1 + .6 : H + .4, dH = cap(.55);
         if (box('mud', a, b, y0, y1, -.02, dH, { part: 'beam' })) blk = { a, b, yBeam: y0, yT: y1, dB: dH, low: two }; }
@@ -285,7 +373,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
     use(main);
   }
 
-  if (style === 'H') {
+  if (!flat && style === 'H') {
     // 1) روشان خشبي بارز بمشربية على نوافذ العلوي (أو النافذة الرئيسية في الدور الواحد)
     cur = 'rawshan';
     { const cand = main.ops.filter(o => !o.door && (two ? o.floor >= 1 : true) && o.u1 - o.u0 >= .9 && !plan.terraces.some(t => t.edges.s === 'open' && o.floor >= t.level && o.u1 + M[0][3] > t.x0 && o.u0 + M[0][3] < t.x1)).sort((p, q) => (q.u1 - q.u0) - (p.u1 - p.u0));
@@ -305,25 +393,25 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
       if (okL && okR && okA) { box('stone', c - ro, c - ri, 0, ys, -.02, dA, { part: 'pier' }); box('stone', c + ri, c + ro, 0, ys, -.02, dA, { part: 'pier' });
         box('stone', c - ro - .05, c - ri + .05, ys - .14, ys, -.02, dA + .05, { part: 'impost' }); box('stone', c + ri - .05, c + ro + .05, ys - .14, ys, -.02, dA + .05, { part: 'impost' });
         const N = 12; for (let i = 0; i < N; i++) { const t0 = Math.PI * i / N, t1 = Math.PI * (i + 1) / N; prism('stone', [[c + ri * Math.cos(t0), ys + ri * Math.sin(t0)], [c + ro * Math.cos(t0), ys + ro * Math.sin(t0)], [c + ro * Math.cos(t1), ys + ro * Math.sin(t1)], [c + ri * Math.cos(t1), ys + ri * Math.sin(t1)]], -.02, dA, { part: 'voussoir' }); }
-        box('stone', c - ro - .1, c + ro + .1, 0, .2, -.02, dA + .5, { part: 'threshold' }); } }
+        box('stone', c - ro - .1, c + ro + .1, 0, .2, -.02, dA + .5, { part: 'threshold', ground: true }); } }
     // 3) دروة بسيطة بغطاء
     cur = 'parapet-coping';
     for (const [a, b] of topSegs) box('stone', a - Math.min(.06, slackW), b + Math.min(.06, slackE), H, H + .09, -.3, .1, { part: 'coping' });
   }
 
-  if (style === 'S') {
+  if (!flat && style === 'S') {
     const dP = cap(.4);
     // 1) إطار مدخل حجري عميق
     if (e) { cur = 'stone-entry-frame'; const dE = cap(grand ? .9 : .72), pw = .55;
       for (const m of [.25, .12]) { const L = [e.u0 - m - pw, e.u0 - m], Rr = [e.u1 + m, e.u1 + m + pw], yT = e.y1 + .85; if (reject(wbox(L[0], L[1], 0, yT, -.02, dE)) || reject(wbox(Rr[0], Rr[1], 0, yT, -.02, dE)) || reject(wbox(L[0], Rr[1], e.y1 + .25, yT, -.02, dE))) continue;
         box('stone', L[0], L[1], 0, yT, -.02, dE, { part: 'pier' }); box('stone', Rr[0], Rr[1], 0, yT, -.02, dE, { part: 'pier' }); box('stone', L[1], Rr[0], e.y1 + .25, yT, -.02, dE, { part: 'lintel' });
-        box('stone', L[0] - .2, Rr[1] + .2, 0, .2, -.02, dE + .5, { part: 'threshold' });
+        box('stone', L[0] - .2, Rr[1] + .2, 0, .2, -.02, dE + .5, { part: 'threshold', ground: true });
         cur = 'triangle-band'; const n = Math.max(3, Math.round((Rr[0] - L[1]) / .3)), st = (Rr[0] - L[1]) / n; for (let i = 0; i < n; i++) { const u = L[1] + i * st; prism('dark', i % 2 ? [[u + .03, yT - .12], [u + st - .03, yT - .12], [u + st / 2, yT - .4]] : [[u + .03, yT - .4], [u + st - .03, yT - .4], [u + st / 2, yT - .12]], dE - .04, dE + .004, { part: 'tri' }); }
         break; } }
     // 2) دعامات رأسية عميقة بين الفتحات وعتب علوي: الفتحات تقرأ غائرة ≥ 0.35 م
     cur = 'deep-piers';
     const spans = []; let yTop = H - .95;
-    for (const pc of F.pieces) { use(pc); yTop = pc.top - .95; for (const [a, b] of segsOf(pc)) { let any = false;
+    for (const pc of F.pieces) { use(pc); if (cap(9) < dP - 1e-6) continue; yTop = pc.top - .95; for (const [a, b] of segsOf(pc)) { let any = false;
       for (const g of gaps(PLINTH, yTop, a, b, .22)) { const w = g[1] - g[0]; if (w < .5) continue; const n = w > 2.6 ? 2 : 1, pw = Math.min(.7, w / n - (n > 1 ? .5 : 0));
         const us = n === 1 ? [[(g[0] + g[1]) / 2 - pw / 2, (g[0] + g[1]) / 2 + pw / 2]] : [[g[0], g[0] + pw], [g[1] - pw, g[1]]];
         for (const [p0, p1] of us) if (box('stone', p0, p1, 0, yTop, -.02, dP, { part: 'pier' })) any = true; }
@@ -340,6 +428,10 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null })
   // encroachFrontM: أي عنصر (درج ورواق ومظلة)؛ encroachUpperM: العناصر المعلّقة فوق 2.4 م (بلاطة السقف والإطار والرواشين)
   if (plan.plot) { const line = -(plan.plot.minY + plan.plot.sb.s); for (const el of plan.elements) { const d = +(el.max[2] - line).toFixed(3); plan.encroachFrontM = Math.max(plan.encroachFrontM, d); if (el.min[1] >= 2.4) plan.encroachUpperM = Math.max(plan.encroachUpperM, d); } }
   // البروز عن وجه الجدار الحامل نفسه (القالب قد يقدّم جدار الواجهة أو يؤخره عن خط المخطط)
+  // أقصى تجاوز لحد البناء من العناصر المسقوفة/المصمتة (يجب ≤ 0): مقيس إلى الوجه الخارجي، والحد = خط الارتداد أو وجه الجدار القائم الحامل أيهما أبعد
+  if (lim) { let m = -Infinity, g = 0; const xl = Math.min(lim.min[0], xL()), xr = Math.max(lim.max[0], xR());
+    for (const el of plan.elements) { if (el.ground) { g = Math.max(g, el.max[2] - lim.max[2]); continue; } m = Math.max(m, el.max[2] - Math.max(lim.max[2], el.face), lim.min[2] - el.min[2], xl - el.min[0], el.max[0] - xr); }
+    plan.beyondLineM = isFinite(m) ? +m.toFixed(3) : 0; plan.groundBeyondM = +g.toFixed(3); }
   for (const el of plan.elements) { plan.maxProjectionM = Math.max(plan.maxProjectionM, el.proj); if (el.min[1] >= 2.4) plan.upperProjectionM = Math.max(plan.upperProjectionM, el.proj); }
   return plan;
 }
@@ -473,8 +565,7 @@ export function clipMeshOutsideBox(THREE, mesh, bx) {
       const ia = idx ? idx.getX(t * 3) : t * 3, ib = idx ? idx.getX(t * 3 + 1) : t * 3 + 1, ic = idx ? idx.getX(t * 3 + 2) : t * 3 + 2, a3 = ia * 3, b3 = ib * 3, c3 = ic * 3;
       if (Math.max(wp[a3], wp[b3], wp[c3]) <= x0 || Math.min(wp[a3], wp[b3], wp[c3]) >= x1 || Math.max(wp[a3 + 1], wp[b3 + 1], wp[c3 + 1]) <= y0 || Math.min(wp[a3 + 1], wp[b3 + 1], wp[c3 + 1]) >= y1 || Math.max(wp[a3 + 2], wp[b3 + 2], wp[c3 + 2]) <= z0 || Math.min(wp[a3 + 2], wp[b3 + 2], wp[c3 + 2]) >= z1) { out.push(ia, ib, ic); continue; }
       changed = true; const keep = []; let rest = [read(ia), read(ib), read(ic)];
-      for (const [ax, val, lowKept] of [[1, y0, true], [0, x0, true], [0, x1, false], [2, z0, true], [2, z1, false]]) { if (!rest) break; const [lo, hi] = split(rest, ax, val); if (lowKept) { if (lo) keep.push(lo); rest = hi; } else { if (hi) keep.push(hi); rest = lo; } }
-      // (bx.max.y غير محدود عمليًا: ما بقي داخل الصندوق يُحذف)
+      for (const [ax, val, lowKept] of [[1, y0, true], [1, y1, false], [0, x0, true], [0, x1, false], [2, z0, true], [2, z1, false]]) { if (!rest) break; const [lo, hi] = split(rest, ax, val); if (lowKept) { if (lo) keep.push(lo); rest = hi; } else { if (hi) keep.push(hi); rest = lo; } }
       for (const poly of keep) for (let i = 1; i < poly.length - 1; i++) out.push(poly[0], poly[i], poly[i + 1]);
     }
     outGroups.push({ start: startV, count: out.length - startV, materialIndex: G.materialIndex }); }
@@ -514,6 +605,31 @@ export function buildMassing(THREE, { scene, S, plan, night = false }) {
   const carve = o => { if (!o || (!o.isMesh && !o.isInstancedMesh) || !o.visible || o.userData?.mass) return; for (const bx of voids) { const r = clipMeshOutsideBox(THREE, o, bx); if (r === 1) { carved.clipped++; if (o.userData.massOwnGeo) ownGeos.push(o.geometry); } else if (r === 2) { carved.hidden++; break; } } };
   if (voids.length) { const list = []; scene.traverse(o => { if ((o.isMesh || o.isInstancedMesh) && o.name !== 'ground') list.push(o); }); list.forEach(carve); }
 
+  // 1ب) تغوير الفتحات: ما يقع كله داخل مستطيل الفتحة قرب وجه الجدار (إطار، زجاج/باب، خلفية داخلية، زخرفة باب) يُؤخَّر للداخل بعمق التجويف؛
+  //     والشبكات المدموجة للطراز تُؤخَّر رؤوسها الواقعة داخل المستطيل فقط. لا يتغير موضع الفتحة في الواجهة ولا مقاسها.
+  const moved = { meshes: 0, verts: 0 };
+  if (plan.recesses.length) {
+    const sset = new Set(S.meshes), list = [], bb = new THREE.Box3(), v = new THREE.Vector3(), m4 = new THREE.Matrix4(), tr = new THREE.Matrix4();
+    scene.traverse(o => { if ((o.isMesh || o.isInstancedMesh) && o.visible && o.name !== 'ground' && !o.userData?.mass) list.push({ o, b: new THREE.Box3().setFromObject(o) }); });
+    for (const r of plan.recesses) { const x0 = r.min[0], x1 = r.max[0], y0 = r.min[1], y1 = r.max[1], z0 = r.face - .6, z1 = r.face + .13, D = r.depth, T = .03, I = .012;
+      for (const it of list) { const { o, b } = it; if (b.isEmpty() || b.max.x <= x0 || b.min.x >= x1 || b.max.y <= y0 || b.min.y >= y1 || b.max.z <= z0 || b.min.z >= z1) continue;
+        if (b.min.x >= x0 - T && b.max.x <= x1 + T && b.min.y >= y0 - T && b.max.y <= y1 + T && b.min.z >= z0 && b.max.z <= z1) { o.position.z -= D; o.updateMatrixWorld(true); b.min.z -= D; b.max.z -= D; moved.meshes++; continue; }
+        if (sset.has(o)) continue; // جدران المبنى وكسوته لا تُشوَّه
+        const e = o.matrixWorld.elements; if (Math.abs(e[0] - 1) > 1e-4 || Math.abs(e[5] - 1) > 1e-4 || Math.abs(e[10] - 1) > 1e-4) continue; // شبكات مدارة: تُترك
+        if (o.isInstancedMesh) { o.geometry.computeBoundingBox(); const gc = o.geometry.boundingBox.getCenter(new THREE.Vector3()); tr.makeTranslation(0, 0, -D); let n = 0;
+          for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m4); v.copy(gc).applyMatrix4(m4).applyMatrix4(o.matrixWorld); if (v.x > x0 + I && v.x < x1 - I && v.y > y0 + I && v.y < y1 - I && v.z > z0 && v.z < z1) { m4.premultiply(tr); o.setMatrixAt(i, m4); n++; } }
+          if (n) { o.instanceMatrix.needsUpdate = true; moved.verts += n; } continue; }
+        const P0 = o.geometry.attributes.position; if (!P0 || P0.isInterleavedBufferAttribute) continue; let P = null;
+        for (let i = 0; i < P0.count; i++) { const x = P0.getX(i) + e[12], y = P0.getY(i) + e[13], z = P0.getZ(i) + e[14]; if (!(x > x0 + I && x < x1 - I && y > y0 + I && y < y1 - I && z > z0 && z < z1)) continue;
+          if (!P) { if (!o.userData.massOwnGeo) { o.geometry = o.geometry.clone(); o.userData.massOwnGeo = true; ownGeos.push(o.geometry); } P = o.geometry.attributes.position; }
+          P.setZ(i, P.getZ(i) - D); moved.verts++; }
+        if (P) { P.needsUpdate = true; o.geometry.computeBoundingBox(); o.geometry.computeBoundingSphere(); } } }
+  }
+
+  // 1ج) اللوجيات: يُزال الجدار وزخرفة الطراز في منطقة التغوير (فتحاتها أُخّرت للداخل قبل ذلك)
+  if (plan.loggias.length) { const boxes = plan.loggias.map(l => new THREE.Box3(new THREE.Vector3(...l.min), new THREE.Vector3(...l.max))), list = []; scene.traverse(o => { if ((o.isMesh || o.isInstancedMesh) && o.visible && o.name !== 'ground' && !o.userData?.mass) list.push(o); });
+    for (const o of list) for (const bx of boxes) { const r = clipMeshOutsideBox(THREE, o, bx); if (r === 1) { carved.clipped++; if (o.userData.massOwnGeo) ownGeos.push(o.geometry); } else if (r === 2) { carved.hidden++; break; } } }
+
   // 2) العناصر: دمج لكل خامة، و instancing للصناديق المكررة
   const top = plan.wallTop, els = [...plan.elements, ...plan.terraces.flatMap(t => terraceElements(t, { top }))];
   const byMat = new Map(), byInst = new Map(); let tris = 0;
@@ -526,7 +642,7 @@ export function buildMassing(THREE, { scene, S, plan, night = false }) {
     im.instanceMatrix.needsUpdate = true; im.computeBoundingBox?.(); im.computeBoundingSphere?.(); tris += list.length * 12; addMesh(im, key).name = 'mass-inst-' + k.replace('|', '-'); }
   if (!instUsed) unit.dispose();
   scene.add(group);
-  const info = { body: body.name || '', style: plan.style, seed: plan.seed, vocab: plan.vocab, elements: plan.elements.length, terraces: plan.terraces.length, railing: plan.terraces[0]?.railing || null, meshes: group.children.length, triangles: Math.round(tris), carved, dropped: plan.dropped.length, encroachFrontM: plan.encroachFrontM, encroachUpperM: plan.encroachUpperM, maxProjectionM: plan.maxProjectionM, upperProjectionM: plan.upperProjectionM, note: MASSING_NOTE, ms: Math.round((globalThis.performance || Date).now() - t0) };
+  const info = { body: body.name || '', style: plan.style, seed: plan.seed, vocab: plan.vocab, elements: plan.elements.length, terraces: plan.terraces.length, railing: plan.terraces[0]?.railing || null, meshes: group.children.length, triangles: Math.round(tris), carved, dropped: plan.dropped.length, mode: plan.mode, frontRoomM: plan.frontRoomM, recesses: plan.recesses.length, loggias: plan.loggias.length, moved, beyondLineM: plan.beyondLineM, groundBeyondM: plan.groundBeyondM, encroachFrontM: plan.encroachFrontM, encroachUpperM: plan.encroachUpperM, maxProjectionM: plan.maxProjectionM, upperProjectionM: plan.upperProjectionM, note: MASSING_NOTE, ms: Math.round((globalThis.performance || Date).now() - t0) };
   return { group, info, carve, dispose() { scene.remove(group); group.traverse(o => { if (o.geometry && o.geometry !== unit) o.geometry.dispose(); }); unit.dispose(); for (const g of ownGeos) g.dispose(); for (const m of own) m.dispose(); group.clear(); } };
 }
 

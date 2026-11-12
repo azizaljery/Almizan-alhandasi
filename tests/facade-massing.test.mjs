@@ -38,6 +38,43 @@ function frontOpenings(built) {
   return out;
 }
 
+/**
+ * فحص مستقل لحد البناء: الصندوق المحيط بكل عنصر مسقوف/مصمت داخل خط الارتداد من الجهات الأربع (مقيسًا إلى وجهه الخارجي).
+ * حيث يتجاوز جدار قائم من النموذج الخطَّ (سماكته وكسوته، أو قالب يقدّم الواجهة) فالحد هناك وجه ذلك الجدار: لا شيء يبرز عنه.
+ * العتبات والدرج الأرضي المكشوف (ground، بارتفاع ≤ 0.5 م) وحدها تدخل الارتداد حتى 1 م وتبقى داخل الأرض. يعيد قائمة المخالفات.
+ */
+function insideBuildLine(plan, built, doc, sb) {
+  const P = doc.plot.polygon, x0 = Math.min(...P.map(p => p.x)), x1 = Math.max(...P.map(p => p.x)), y0 = Math.min(...P.map(p => p.y)), y1 = Math.max(...P.map(p => p.y)), bad = [], E = 1e-6;
+  const B = built.s, M = sideTransform('s', B.off), pcs = B.F.pieces.map(pc => ({ a: M[0][0] * pc.u0 + M[0][3], b: M[0][0] * pc.u1 + M[0][3], skin: pc.C + pc.t / 2 + .04 }));
+  const wx0 = Math.min(...pcs.map(p => Math.min(p.a, p.b))), wx1 = Math.max(...pcs.map(p => Math.max(p.a, p.b))), lineZ = -(y0 + sb.s), skinMax = Math.max(...pcs.map(p => p.skin));
+  for (const el of plan.elements) { const name = `${el.id}/${el.part}`;
+    if (el.ground) { if (el.max[1] > .5 + E || el.max[2] > Math.max(lineZ, skinMax) + 1 + E || -el.max[2] < y0 + .3 - E) bad.push(name + ' (أرضي)'); }
+    else { const over = pcs.filter(p => Math.min(p.a, p.b) < el.max[0] + .4 && Math.max(p.a, p.b) > el.min[0] - .4), zLim = Math.max(lineZ, ...(over.length ? over : pcs).map(p => p.skin));
+      if (el.max[2] > zLim + E) bad.push(`${name} أمامًا ${(el.max[2] - zLim).toFixed(3)}`); }
+    if (el.min[0] < Math.min(x0 + sb.w, wx0) - E) bad.push(name + ' غربًا'); if (el.max[0] > Math.max(x1 - sb.e, wx1) + E) bad.push(name + ' شرقًا'); if (-el.min[2] > y1 - sb.n + E) bad.push(name + ' خلفًا');
+  }
+  return bad;
+}
+
+test('حد البناء (قرار المالك): كل عنصر مضاف داخل خط الارتداد من الجهات الأربع — جدار على الخط ← عمق للداخل؛ فائض أمامي 1.5 م ← بروز ضمن الفائض', async () => {
+  const ys = TWO.walls.filter(w => w.kind !== 'fence').flatMap(w => [w.a.y, w.b.y]), gap = Math.min(...ys) - TWO.plot.setbacks.s;
+  assert.ok(Math.abs(gap) < .2, 'مخطط الاختبار جداره الأمامي على خط الارتداد (الفرق ' + gap.toFixed(2) + ' م)');
+  for (const style of Object.keys(STYLES)) for (const [name, doc] of [['دوران', TWO], ['دور', ONE], ['تراس', TER]]) for (const slack of [0, 1.5]) {
+    const { built, FI, tpl } = await build(doc, style), sb = { ...doc.plot.setbacks, s: doc.plot.setbacks.s - slack }, tag = `${style}/${tpl}/${name}/فائض ${slack}`;
+    const plan = massingPlan({ doc, built, style, exterior: {}, floors: FI.n, setbacks: sb });
+    assert.deepEqual(insideBuildLine(plan, built, doc, sb), [], tag); assert.ok(plan.beyondLineM <= 1e-6, tag + ': beyondLineM ' + plan.beyondLineM);
+    assert.ok(plan.vocab.some(v => VOCAB[style].includes(v)), tag + ': لا مفردة'); assert.ok((plan.groundBeyondM || 0) <= 1.2, tag + ': عتبة ' + plan.groundBeyondM);
+    if (plan.mode === 'inward') { // لا فائض: العمق للداخل (مدخل غائر/فتحات غائرة/لوجيا) لا بروز
+      assert.ok(plan.frontRoomM < 1.2); assert.ok(plan.recesses.length >= 1 && plan.vocab.some(v => v === 'recessed-entry' || v === 'deep-reveals'), tag + ': لا عمق للداخل — ' + plan.vocab.join('،'));
+      for (const r of plan.recesses) assert.ok(r.depth >= .2 && r.max[2] <= r.face + .14, tag + ': تغوير ' + r.opening);
+      for (const l of plan.loggias) assert.ok(l.depth >= .45 && plan.elements.some(el => el.part === 'loggia-back' && el.id === l.id), tag + ': لوجيا بلا جدار خلفي');
+    } else { assert.equal(plan.recesses.length, 0); assert.ok(plan.frontRoomM >= .5 && plan.maxProjectionM > .3, tag + ': الفائض غير مستعمل'); assert.ok(Math.max(...plan.elements.filter(el => !el.ground).map(el => el.proj)) <= plan.frontRoomM + 1e-6, tag + ': بروز يتجاوز الفائض'); }
+  }
+  // جدار على الخط: الوضع «للداخل» لكل الطرازات على مخطط المولّد؛ وبفائض 1.5 م: بروز
+  for (const style of Object.keys(STYLES)) { const { built, FI } = await build(TWO, style); const p0 = massingPlan({ doc: TWO, built, style, floors: FI.n }), p1 = massingPlan({ doc: TWO, built, style, floors: FI.n, setbacks: { ...TWO.plot.setbacks, s: TWO.plot.setbacks.s - 1.5 } });
+    if (p0.frontRoomM < .3) assert.equal(p0.mode, 'inward', style); if (p1.frontRoomM >= 1.2) assert.equal(p1.mode, 'projecting', style); assert.notDeepEqual(p0.elements, p1.elements, style); }
+});
+
 test('مخطط علويه أصغر: تراس من المخطط بدرابزين وباب منزلق، وعدد الأدوار صحيح، والكتلة العليا مرتدة', async () => {
   const T = findTerraces(TER); assert.equal(T.length, 1, 'تراس واحد في العلوي');
   const t = T[0]; assert.equal(t.level, 1); assert.ok(t.x1 - t.x0 >= 2.5 && t.y1 - t.y0 >= 2.5, 'أبعاد التراس من المخطط');
@@ -102,9 +139,7 @@ for (const style of Object.keys(STYLES)) test(`الطراز ${style}: مفردة
       assert.ok(-el.max[2] >= y0 + .25 && -el.min[2] <= y1 - .25, `${tag}: ${el.id}/${el.part} يتجاوز حد الأرض أمامًا/خلفًا`);
       assert.ok(el.min[1] >= -1e-6, `${tag}: ${el.id}/${el.part} تحت الأرض`);
     }
-    // البروز عن وجه الجدار الحامل: المعلّق (فوق 2.4 م) ≤ 1.5 م، وأي عنصر ≤ 2.2 م؛ والدخول في الارتداد الأمامي يبقى داخل الأرض ويُقاس
-    assert.ok(plan.upperProjectionM <= 1.5 + 1e-6 && plan.maxProjectionM <= 2.2 + 1e-6, `${tag}: بروز ${plan.maxProjectionM}/${plan.upperProjectionM}`);
-    assert.ok(Math.abs(plan.maxProjectionM - Math.max(...plan.elements.map(el => el.proj))) < 1e-9 && plan.encroachFrontM >= 0 && plan.encroachFrontM <= sb.s - .25, `${tag}: دخول الارتداد الأمامي ${plan.encroachFrontM}`);
+    assert.ok(plan.beyondLineM <= 1e-6, `${tag}: تجاوز حد البناء ${plan.beyondLineM}`); assert.deepEqual(insideBuildLine(plan, built, doc, sb), [], tag + ': عناصر خارج حد البناء');
     // الفتحات: لا عنصر مصمت أمام فتحة، ولا أي عنصر (ولا ساتر) في ممر المدخل
     const ops = frontOpenings(built), entry = ops.filter(o => o.entry);
     for (const el of plan.elements) {
@@ -132,7 +167,7 @@ test('الثبات: نفس المخطط والذوق ← نفس الكتلة؛ �
 test('صفحة العرض: نص الصدق يذكر التراس من المخطط وعناصر الواجهة الزخرفية، والذوق يُمرَّر إلى صفحة الواجهة', async () => {
   const { readFile } = await import('node:fs/promises'), root = new URL('../dist/', import.meta.url);
   const v = await readFile(new URL('view3d.html', root), 'utf8'), f = await readFile(new URL('facade-j/index.html', root), 'utf8');
-  assert.match(v, /تراس الدور العلوي وارتداد كتلته من مخططك/); assert.match(v, /عناصر الواجهة الزخرفية/); assert.match(v, /تنسيق موقع إيضاحي/); assert.match(v, /مراجعة اشتراطات البلدية/);
+  assert.match(v, /تراس الدور العلوي وارتداد كتلته من مخططك/); assert.match(v, /عناصر الواجهة الزخرفية/); assert.match(v, /تنسيق موقع إيضاحي/); assert.match(v, /تبقى داخل حد البناء/); assert.doesNotMatch(v, /يدخل الارتداد الأمامي|مراجعة اشتراطات البلدية/); assert.match(MASSING_NOTE, /داخل حد البناء/); assert.match(f, /requiredSetbacks/);
   assert.match(v, /&ext=/); assert.match(f, /massingPlan\(/); assert.match(f, /q\.get\('mass'\) !== '0'/); assert.match(f, /massing\?\.dispose\(\)/);
   assert.match(MASSING_NOTE, /من مخططك/); assert.match(MASSING_NOTE, /الزخرفية/);
 });
