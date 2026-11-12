@@ -10,7 +10,7 @@ import { requestLocalBrief } from './local-nlp.mjs';
 import { legacyToDoc } from './draw/import-legacy.mjs';
 import { applyCommand } from './draw/doc.mjs';
 import { generateTwoFloors, MultiFloorError, splitProgram, STAIR_W, STAIR_H } from './multi-floor.mjs';
-import { generateVillaDesigns, generateVillaTwoFloors, countsFromRooms } from './villa-layout.mjs';
+import { generateVillaDesigns, generateVillaTwoFloors, countsFromRooms, NARROW, generatorFootprint } from './villa-layout.mjs';
 import { extractRequirements } from './requirements.mjs';
 import { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE } from './shara/brief-engine.mjs';
 import { SPACE } from './shara/lexicon.mjs';
@@ -308,7 +308,7 @@ export async function generateInitialDesign(args) {
   if (!got) {
     if (fitHint) return generateInitialDesign({ ...a, strict: false });
     let f = null; try { f = fitFacts(a.land); } catch { /* بلا حقائق */ }
-    const err = Error(`لم أستطع توليد تصميم سليم لهذه الأرض حتى بأصغر برنامج (غرفة نوم ومطبخ وصالة)${f ? `: المسطح القابل للبناء بعد الارتدادات ${f.W} × ${f.D} م، وأصغر ما يدعمه المولّد حاليًا عرض 4.6 م وعمق 5.9 م` : ''}. هذا حدّ في المولّد لا حكم على أرضك؛ يمكنك الرسم يدويًا في المرسم.`);
+    const err = Error(`لم أستطع توليد تصميم سليم لهذه الأرض حتى بأصغر برنامج (غرفة نوم ومطبخ وصالة)${f ? `: المسطح القابل للبناء بعد الارتدادات ${f.W} × ${f.D} م، وأصغر ما يدعمه المولّد حاليًا عرض ${NARROW.trainMinW} م وعمق ${NARROW.slimMinD} م` : ''}. هذا حدّ في المولّد لا حكم على أرضك؛ يمكنك الرسم يدويًا في المرسم.`);
     err.code = 'FIT_IMPOSSIBLE'; err.cause = last; throw err;
   }
   const out = got.out, f = (() => { try { return fitFacts(a.land); } catch { return null; } })();
@@ -402,7 +402,12 @@ export async function diagnoseFit({ land, counts, discovery, idea = '', maxGrow 
   const { plot, land: normLand } = normalizeLand(land);
   land = normLand;
   const floors = land.floors;
+  // حقائق الأرض من مسطح المولّد نفسه (الارتدادات النظامية لهذه الأرض ووجه الجدار الخارجي)، لا من افتراض المحرك السابق (3 م لكل شارع)؛ engine='legacy' يبقى على حقائق محركه
   const d = footprintDiagnostics(plot);
+  if (engine !== 'legacy') try {
+    const fp = generatorFootprint(land, plot), sn = ['s', 'n'].includes(plot.entry), gw = Math.max(0, plot.width - fp.sb.w - fp.sb.e), gd = Math.max(0, plot.length - fp.sb.n - fp.sb.s);
+    Object.assign(d, { setbacks: { ...fp.sb }, afterSetbacks: { width: gw, depth: gd, area: gw * gd }, net: { width: fp.w, depth: fp.h, area: fp.area }, frontage: sn ? fp.w : fp.h, depth: sn ? fp.h : fp.w });
+  } catch { /* تبقى حقائق المحرك السابق */ }
   const programArea = c => defaultRooms(c).reduce((a, r) => a + (r.area || 0), 0);
   const required = programArea(counts);
   const perType = COUNT_FIELDS.filter(f => counts[f.id] > 0).map(f => {

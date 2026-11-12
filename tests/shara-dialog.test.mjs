@@ -6,6 +6,7 @@ import { extractRules, docRooms, doorInfo } from '../dist/rules.mjs';
 import { extractRequirements, normalizeAr } from '../dist/requirements.mjs';
 import { generateInitialDesign } from '../dist/home-flow.mjs';
 import { createSession, redesign, ledgerFor } from '../dist/design-session.mjs';
+import { patIdea } from '../dist/villa-layout.mjs';
 
 const R = t => extractRules(normalizeAr(t)).rules.map(r => [r.kind, r.a, r.b || r.side || r.floor, r.mode || ''].join(':'));
 const LAND = (o = {}) => ({ width: 20, length: 30, streets: ['s'], entries: ['s'], floors: 1, ...o });
@@ -56,9 +57,11 @@ test('التعديل يُطبَّق على التصميم المعروض نفس�
   const s0 = createSession({ land: LAND(), counts: req.counts, requirements: req, result: first });
   const n0 = s0.designs.length; // حتى خمسة تصاميم من البداية؛ المعروض هو الأول
   const { session, reply } = await redesign(s0, { text: 'المطبخ بجانب الطعام' });
-  assert.equal(session.designs[n0].pat, session.designs[0].pat, 'نفس التوزيع');
+  // التعديل يبقى على فكرة التصميم المعروض (النمط نفسه)؛ وإن كان المعروض يحقق الطلب أصلًا بقي التوزيع نفسه (kept).
+  // بعد مطابقة المولّد للارتداد النظامي صار التصميم الأول لهذه الأرض مطبخه بعيدًا عن الطعام، فالتعديل يعيد ترتيب النمط نفسه ليتجاورا.
+  assert.equal(patIdea(session.designs[n0].pat), patIdea(session.designs[0].pat), 'نفس فكرة التنظيم');
   assert.deepEqual(reply.done, ['«المطبخ» بجوار «الطعام»']);
-  assert.ok(reply.kept);
+  assert.equal(reply.kept, session.designs[n0].pat === session.designs[0].pat, 'kept صادق: يُقال «نفس التوزيع» فقط إن لم يتغير');
   // «توزيع مختلف» صراحة: نمط آخر
   const { session: s2 } = await redesign(session, { picks: ['layout'] });
   assert.notEqual(s2.designs[n0 + 1].pat, session.designs[n0].pat);

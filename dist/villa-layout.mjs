@@ -9,13 +9,14 @@
 // نقي: لا DOM ولا تخزين ولا شبكة.
 import { createDoc, applyCommand, validateDoc } from './draw/doc.mjs';
 import { analyzeWalls } from './draw/topology.mjs';
-import { footprint, validatePlot } from './planner.mjs';
+import { validatePlot } from './planner.mjs';
 import { planGarden } from './garden-plan.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
 import { planElevator } from './elevator-plan.mjs';
 import { reviewDoc, swingSectors, sectorPoints, fixtureRect, penetration } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { rulePenalty, verifyRequest, blocksFor } from './rules.mjs';
+import { buildEnvelope } from './municipal-rules.mjs';
 
 export const VILLA_ENGINE_VERSION = 'villa-zones-2';
 const LV = 'L1', SNAP = .05, EXT = .25, INT = .12, EPS = 1e-6;
@@ -556,11 +557,14 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   // (7) شريطي عرضي للأراضي القليلة العمق (دور واحد): الردهة والصالة عمود بكامل العمق، على جانبه جناح عام مكدّس (مجلس، مطبخ…)
   // وعلى الجانب الآخر صفّان من الغرف بينهما ممر يبدأ من الصالة، وقد تُختم نهايته بالغرفة الرئيسية بكامل العمق.
   // المجلس والصالة العائلية لا يوضعان في الصفّين (عمق الصف دون عرضهما الأدنى).
-  if (allow('bar') && !stair && D < NARROW.barD && D >= NARROW.rowMinD - .01 && W >= (D < NARROW.barMinD ? 10 : NARROW.barW) && blocks.length <= 14) {
+  if (allow('bar') && !stair && D < NARROW.barD && D >= NARROW.slimMinD - .01 && W >= (D < NARROW.barMinD ? 10 : NARROW.barW) && blocks.length <= 14) {
     // العمق دون NARROW.barMinD: صف واحد على الواجهة وممره خلفه (لا يتسع صفّان)
     const gw = T.galleryW, one = D < NARROW.barMinD - .01, rd = one ? snap(D - gw) : snap((D - gw) / 2), rowKind = b => ['suite', 'kitchen', 'dining', 'maid', 'driver', 'office', 'prayer'].includes(b.kind);
     const runMin = (l, cross) => l.reduce((a, b) => a + Math.max(MIN_RUN[b.kind] || 2.4, b.kind === 'suite' && b.bath && cross < 3.2 + (b.master ? 2.2 : 1.7) ? 5.3 : 0), 0);
     const frontRank = b => (b.kind === 'kitchen' ? 0 : b.kind === 'dining' ? 1 : b.kind === 'maid' ? 2 : b.kind === 'suite' ? 4 : 3);
+    // العمق دون NARROW.rowMinD (ارتداد أمامي كبير على أرض قليلة العمق): لا يتسع مدخل أمام الصالة، فالردهة شريط بكامل العمق
+    // بجانب الصالة (بينها وبين جناح الضيافة: باب المجلس عليها لا على الصالة)، والصالة بكامل العمق على الواجهة.
+    const slim = D < NARROW.rowMinD - .01, fw = slim ? NARROW.slimFoyerW : 0;
     for (const wh of [4.4, 5.0]) for (const [S, C] of subsets(blocks)) {
       if (!C.length || C.some(b => !rowKind(b)) || S.some(b => b.kind === 'suite' && !b.guest && C.some(c => c.kind === 'suite') && !b.master)) continue;
       if (!S.length && blocks.some(b => b.kind === 'majlis')) continue;
@@ -570,8 +574,9 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
       const master = C.find(b => b.master) || null;
       for (const capOn of master ? [true, false] : [false]) {
         const R = C.filter(b => !(capOn && b === master)); if (!R.length) continue;
-        const capW = capOn ? snap(Math.max(3.6, Math.min(5.2, master.area / D))) : 0;
-        const cx0 = wl + wh, cx1 = W - capW, len = cx1 - cx0; if (len < 3.2) continue;
+        // الشريطي الضحل: الرئيسية بحمامها في الطرف تحتاج عمقًا من بابها يتسع للحمام والخزانة خلف الغرفة (الشريط الجانبي يضيّقها دون الحد)
+        const capW = capOn ? (slim && master.bath && D - T.masterStripD < 3.35 ? Math.max(NARROW.slimCapW, snap(Math.min(7.6, master.area / D))) : snap(Math.max(3.6, Math.min(5.2, master.area / D)))) : 0;
+        const cx0 = wl + fw + wh, cx1 = W - capW, len = cx1 - cx0; if (len < 3.2) continue;
         for (const [F, B] of subsets(R)) {
           if (one ? B.length > 0 || !F.length : !F.length || !B.length) continue;
           if (runMin(F, rd) > len + .01 || runMin(B, rd) > len + .01) continue;
@@ -580,8 +585,10 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
           const fo = [...F].sort((a, b) => frontRank(a) - frontRank(b) || byRank(a, b)), bo = [...B].sort((a, b) => frontRank(a) - frontRank(b) || byRank(a, b));
           const pl = [...stack(S, 0, wl, 0, D, 'x1'), ...row(fo, cx0, cx1, 0, rd, 'y1'), ...(one ? [] : row(bo, cx0, cx1, rd + gw, D, 'y0')), ...(capOn ? [{ block: master, r: { x0: cx1, y0: 0, x1: W, y1: D }, door: 'x0' }] : [])];
           const f = Math.min(one ? Math.max(2.4, rd - 3.4) : rd, foyerDepth(pl.filter(p => p.r.x1 <= wl + .01), wh));
-          const circ = [{ id: 'foyer', r: { x0: wl, y0: 0, x1: wl + wh, y1: f } }, { id: 'hall', r: { x0: wl, y0: f, x1: wl + wh, y1: D } }, { id: 'gallery', r: { x0: cx0, y0: rd, x1: cx1, y1: rd + gw } }];
-          push('bar', pl, circ, { wh, wl, wr: W - wl - wh });
+          const circ = slim
+            ? [{ id: 'foyer', r: { x0: wl, y0: 0, x1: wl + fw, y1: D } }, { id: 'hall', r: { x0: wl + fw, y0: 0, x1: cx0, y1: D } }, { id: 'gallery', r: { x0: cx0, y0: rd, x1: cx1, y1: rd + gw } }]
+            : [{ id: 'foyer', r: { x0: wl, y0: 0, x1: wl + wh, y1: f } }, { id: 'hall', r: { x0: wl, y0: f, x1: wl + wh, y1: D } }, { id: 'gallery', r: { x0: cx0, y0: rd, x1: cx1, y1: rd + gw } }];
+          push('bar', pl, circ, { wh, wl, wr: W - wl - fw - wh, ...(slim ? { slim: true } : {}) });
         }
       }
     }
@@ -1127,6 +1134,23 @@ export function fixWindowJunctions(doc) {
   for (const c of cmds) { try { doc = applyCommand(doc, c).doc; } catch { /* يبقى كما هو */ } }
   return doc;
 }
+/** سماكة الجدار الخارجي في المولّد (م): الارتداد النظامي يُقاس إلى وجهه الخارجي لا إلى محوره. */
+export const EXT_WALL = EXT;
+/**
+ * مسطح المولّد لهذه الأرض: مستطيل **محاور** الجدران الخارجية، من الاشتراطات نفسها التي تحكم بها بطاقة المطابقة
+ * (municipal-rules.buildEnvelope ← requiredSetbacks: الأمامي خُمس عرض الشارع وبحد أدنى 3 م و6 م للشوارع 30 م فأكثر،
+ * الجانبي/الخلفي على شارع خُمس عرضه وبحد أدنى 2 م، وجهة الجار 1.5 م)، مُزاحًا نصف سماكة الجدار الخارجي للداخل
+ * فيقع **وجه** الجدار على خط الارتداد أو داخله. حواف المستطيل تُقرَّب **للداخل** على شبكة المولّد (5 سم) فتبقى إحداثيات
+ * المستند كلها على الشبكة (المصعد والحديقة والمراجعة تقرّب إلى السنتيمتر)، ولا يتجاوز التقريبُ الخط: الوجه داخل الخط بأقل من 5 سم.
+ * sb: الارتداد النظامي لكل ضلع (يُخزَّن في doc.plot.setbacks: خط الارتداد المرسوم والمقارَن به).
+ */
+export function generatorFootprint(land, plot) {
+  const streets = Object.keys(plot.streets || {}).filter(s => plot.streets[s]), entry = plot.entry;
+  const env = buildEnvelope({ width: plot.width, length: plot.length, streets, entries: [entry, ...(land?.entries || []).filter(s => s !== entry)], streetWidths: land?.streetWidths }, { wallT: EXT });
+  const N = Math.round(1 / SNAP), up = v => Math.ceil(v * N - 1e-6) / N, down = v => Math.floor(v * N + 1e-6) / N, a = env.axis;
+  const x = up(a.x), y = up(a.y), w = Math.max(0, snap(down(a.x + a.w) - x)), h = Math.max(0, snap(down(a.y + a.h) - y));
+  return { x, y, w, h, sb: env.sb, area: w * h, face: env.face, half: env.half };
+}
 export function layoutToDoc(layout, { land, plot, fp, entry, mirror = false, title = 'تصميم شرعاء', ox = 0, Wfull }) {
   const T = frame(fp, entry, mirror, layout.W, ox, Wfull ?? layout.W);
   let doc = createDoc({ title });
@@ -1361,7 +1385,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   const shownIdeas = ideaCounts(exclude);
   const program = buildProgram(counts, requirements);
   const plot = validatePlot({ width: Number(land.width), length: Number(land.length), floors: 1, streets: Object.fromEntries((land.streets || []).map(s => [s, true])), entry: land.entries?.[0] || land.entry });
-  const fp = footprint(plot), entry = plot.entry; program.entry = entry;
+  const fp = generatorFootprint(land, plot), entry = plot.entry; program.entry = entry;
   const W = ['s', 'n'].includes(entry) ? fp.w : fp.h, D = ['s', 'n'].includes(entry) ? fp.h : fp.w;
   const need = program.blocks.reduce((a, b) => a + b.area, 0) + DESIGN_TARGETS.foyer + DESIGN_TARGETS.hall * .6;
   // الغلاف: يُقاس على البرنامج لا على الأرض؛ ما يزيد يبقى ساحات (أمامية/خلفية)
@@ -1552,7 +1576,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const fam = uBlocks.find(b => b.kind === 'family'); if (fam) { uBlocks = uBlocks.filter(b => b !== fam); upperHallName = fam.name; }
   const gExtra = Math.min(1, program.extraBaths);
   const plot = validatePlot({ width: Number(land.width), length: Number(land.length), floors: 1, streets: Object.fromEntries((land.streets || []).map(x => [x, true])), entry: land.entries?.[0] || land.entry });
-  const fp = footprint(plot), entry = plot.entry;
+  const fp = generatorFootprint(land, plot), entry = plot.entry;
   const W = ['s', 'n'].includes(entry) ? fp.w : fp.h, D = ['s', 'n'].includes(entry) ? fp.h : fp.w;
   const STAIR = { len: 4.0 }, sum = l => l.reduce((a, b) => a + b.area, 0);
   const needG = l => sum(l) + DESIGN_TARGETS.foyer + program.hallArea + 15, needU = l => sum(l) + 24 + 15;
@@ -1749,7 +1773,7 @@ const IDEA_AR = Object.freeze({
   L: ['شكل L بساحة خارجية', 'جناح أمامي وذراع خلفي، والزاوية الباقية ساحة خارجية خاصة'],
   rows: ['صفّان: ضيافة أمامية وعائلة خلفية', 'صف أمامي للضيافة وصف خلفي للعائلة وبينهما ممر، للأراضي العريضة'],
   side: ['صالة جانبية بطول البيت', 'الصالة على جدار خارجي بطول المبنى والغرف جناح واحد، للأراضي الضيقة'],
-  bar: ['بيت شريطي بعرض الأرض', 'للأرض العريضة القليلة العمق: الصالة في الوسط، الضيافة على جانب، والغرف صفّان بينهما ممر على الجانب الآخر'],
+  bar: ['بيت شريطي بعرض الأرض', 'للأرض العريضة القليلة العمق: الصالة في الوسط، الضيافة على جانب، والغرف على الجانب الآخر صفّان بينهما ممر، أو صف واحد على الواجهة وممره خلفه إن قلّ العمق'],
 });
 const IDEA_PLUS = Object.freeze({
   bedDown: ['غرفة نوم أرضية', 'غرفة نوم في الدور الأرضي (تصلح لكبار السن أو الضيوف) فيتوازن الدوران ويصغر المسطح'],
@@ -1850,7 +1874,7 @@ const UPPER_TRIES = 2;
 /** أدنى غلاف مبنى في الأراضي المعتادة (افتراض تصميمي): w عرض، d عمق الدور الواحد، d2 عمق الدورين. الأرض الأضيق يتبع حدُّها مسطحَها. */
 export const ENV_MIN = Object.freeze({ w: 8.5, d: 9, d2: 10 });
 /** الأرض الضيقة (مسطحها دون NARROW.w عرضًا): صالة جانبية أضيق من المعتاد؛ والقليلة العمق (دون NARROW.d): صفّان أقل عمقًا. تُعلن في ملاحظات الصالة. */
-export const NARROW = Object.freeze({ w: 8.2, sideHalls: [3.4, 3.6], wing: 2.95, barD: 9, barMinD: 7.5, barW: 14, trainW: 6.35, trainMinW: 4.55, rowMinD: 5.9 });
+export const NARROW = Object.freeze({ w: 8.2, sideHalls: [3.4, 3.6], wing: 2.95, barD: 9, barMinD: 7.5, barW: 14, trainW: 6.35, trainMinW: 4.55, rowMinD: 5.9, slimMinD: 4.7, slimFoyerW: 2.4, slimCapW: 7.0 });
 /** عروض أغلفة ثابتة تتسع للفناء الداخلي (محور ≥ 7.6 م وجناحان ≥ 3.6 م). */
 const COURT_WIDTHS = Object.freeze([15.5, 17, 18.5]);
 /** ما يُخصم من كلفة ترتيب مرشح نمطه من أنماط ذوق العميل (tweaks.preferModes): تقديم لا فرض. */
@@ -2032,7 +2056,8 @@ function hallNotes(m, W, D) {
   }
   return out;
 }
-const COST = { MIN_WIDTH: 40, MIN_AREA: 14, NO_WINDOW: 18, SWING_BLOCKED: 10, FIXTURE_OVERLAP: 8, FIXTURE_OUTSIDE: 8, UNREACHABLE_ROOM: 200, BATH_PRIVACY: 12, BEDROOM_FROM_ENTRY: 20, CORRIDOR_NARROW: 15, WINDOW_RATIO: 1, OPENING_NEAR_END: 2 };
+// MIN_AREA: رُفعت من 14 إلى 40 مع تضييق المسطح للارتداد النظامي — غرفة مطلوبة دون مقاسها الإرشادي لا تتصدّر متى وُجد بديل يسعها
+const COST = { MIN_WIDTH: 40, MIN_AREA: 40, NO_WINDOW: 18, SWING_BLOCKED: 10, FIXTURE_OVERLAP: 8, FIXTURE_OUTSIDE: 8, UNREACHABLE_ROOM: 200, BATH_PRIVACY: 12, BEDROOM_FROM_ENTRY: 20, CORRIDOR_NARROW: 15, WINDOW_RATIO: 1, OPENING_NEAR_END: 2 };
 /** كلفة الجودة من مراجعة المرسم نفسها؛ رفض صريح لغرفة معيشية أضيق من حدها أو فراغ لا يُوصل إليه. */
 export function quality(doc, { bedrooms = null } = {}) {
   const model = analyzeDoc(doc), rv = reviewDoc(doc, { model }); let cost = 0, reject = false; const issues = {};
