@@ -36,6 +36,7 @@ import { buildAllSides, MATERIALS, TAG, SIDE_NAME } from './facade-realism/model
 import { createRealismMaterials, limestone, render, timberLook } from './facade-realism/materials.mjs';
 import { buildBuildingScene, closeupCamera } from './facade-realism/scene-hq.mjs';
 import { extrudeFloors, decorateFloors, floorsInfo, bandLevels, facadeDoc } from './facade-realism/floors.mjs';
+import { massingPlan, buildMassing } from './facade-realism/massing.mjs';
 import { pickTier, gpuName, heroCamera, photoBegin, photoFinish, createRefiner, frontSouthDoc } from './facade-realism/photo/pipeline.mjs';
 
 const q = new URLSearchParams(location.search);
@@ -166,6 +167,17 @@ async function variantMode() {
       if (reachMin > maxProj) { maxProj = reachMin; worst = (o.name || o.type) + '@' + side + ' y' + bb.min.y.toFixed(2) + '-' + bb.max.y.toFixed(2) + ' ' + (o.material?.name || ''); } });
     gates = { style: styleId, openingsWallsUnchanged: moved.length === 0, moved: moved.slice(0, 5), maxProjectionMm: Math.round(maxProj * 1000), groundLevelMm: Math.round(groundProj * 1000), projectionOk: maxProj <= .7501, worst, addedMeshes: added, offenders: offenders.filter(r => r[0] > 750).sort((a, b) => b[0] - a[0]).slice(0, 6) };
   }
+  // كتلة البيت: الدور العلوي الحقيقي (تراس المخطط وارتداده) ومفردات كتلة الطراز. تُبنى بعد بوابات الطراز فتُقاس وحدها (massing.info)،
+  // مبذورة من بصمة المخطط والطراز وذوق العميل (ext= في الرابط، وإلا المحفوظ في المتصفح). mass=0 يعطّلها.
+  let massing = null;
+  if (HQ && styleId && !grey && q.get('mass') !== '0') {
+    try {
+      let ext = {}; try { ext = JSON.parse(q.get('ext') || localStorage.getItem('mizan.exterior.v1') || '{}') || {}; } catch { ext = {}; }
+      const tM = performance.now(), plan = massingPlan({ doc: docSite, built, style: styleId, exterior: ext, floors: FI.n });
+      massing = buildMassing(THREE, { scene, S, plan, night: q.get('night') === '1' }); massing.info.ms = Math.round(performance.now() - tM);
+      addEventListener('pagehide', () => { try { massing?.dispose(); } catch {} }, { once: true });
+    } catch (e) { console.error('MASSING_FAIL', e?.message || e); massing = null; }
+  }
   let camera, roi = null;
   if (shot) { // لقطة مقرّبة بمنطق المشهد نفسه (closeupCamera)
     const cu = closeupCamera(THREE, S, shot, { W, H, index: +(q.get('gi') || 0) }); camera = cu.camera; roi = cu.roi;
@@ -177,6 +189,11 @@ async function variantMode() {
       const need = Math.max(sz.y * 1.25 / (2 * Math.tan(fov * Math.PI / 360)), sz.x * 1.1 / (2 * Math.tan(fov * Math.PI / 360) * (W / H)));
       C = { pos: [c.x - sz.x * .45, 1.65, bb.max.z + need * .95], look: [c.x + sz.x * .05, sz.y * .5, bb.max.z - sz.z * .3], fov };
       if (photo) { const py = (docSite.plot?.polygon || []).map(p => p.y); C = heroCamera(THREE, { bb, side: photo.side, aspect: q.get('nav') === '1' ? Math.max(.4, innerWidth / Math.max(1, innerHeight)) : W / H, zMax: py.length ? -Math.min(...py) + 12.9 : Infinity }); }
+    }
+    if (cam === 'top') { // لقطة علوية مائلة من زاوية الواجهة (تُظهر التراس والسطح)
+      const bb = new THREE.Box3(); S.meshes.forEach(m => { if (m.name !== 'ground' && m.visible) bb.expandByObject(m); });
+      const c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3()), sg = (q.get('hero') || photo?.side) === 'w' ? -1 : 1;
+      C = { pos: [c.x + sg * sz.x * .8, bb.max.y + 11, bb.max.z + 12], look: [c.x, bb.max.y * .55, c.z + sz.z * .15], fov: 46 };
     }
     camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
     camera.position.set(...C.pos); camera.lookAt(...C.look);
@@ -197,6 +214,7 @@ async function variantMode() {
   if (photo) {
     await new Promise(r => setTimeout(r, 0)); // يُعرض الإطار الأول قبل بناء المحيط
     const fin = photoFinish(THREE, { scene, renderer, S, q, doc, FI, state: photo, styleId }); photoInfo = fin.info;
+    if (massing) { massing.carve(scene.getObjectByName('roof-slab')); renderer.shadowMap.needsUpdate = true; } // بلاطة السطح لا تغطي التراس
     if (nav && photoInfo.cornerSide) nav.cornerSign = photoInfo.cornerSide === 'w' ? -1 : 1;
     refiner.render(); photoInfo.fullMs = Math.round(performance.now() - T0);
     if (nav) refiner.start(); else await refiner.settle();
@@ -209,7 +227,7 @@ async function variantMode() {
       renderer.setPixelRatio(pr); renderer.setSize(sz.x, sz.y, false); refiner.render(); refiner.start(); return out; };
   }
   const gl = renderer.getContext();
-  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,
+  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, massing: massing?.info || null, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,
     // قياس لا ادعاء: أعلى منسوب لجدران المبنى المبني فعلًا، ومنه عدد الأدوار الظاهرة (يُقارن بأدوار المخطط في الاختبارات)
     wallTop: (() => { let y = 0; for (const m of S.meshes) { const r = m.userData?.role; if (r !== 'wall' && r !== 'cladding') continue; const b = new THREE.Box3().setFromObject(m); if (b.max.y > y) y = b.max.y; } return Math.round(y * 100) / 100; })() });
 }

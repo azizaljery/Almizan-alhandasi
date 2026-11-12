@@ -54,7 +54,7 @@
         <label class="kv">عدد الأدوار<select id="facadeFloors"><option value="">حسب التصميم</option><option value="1">دور واحد</option><option value="2">دوران</option><option value="3">ثلاثة أدوار (مع ملحق)</option></select></label>
         <div class="seg" id="facadeTime"><button data-t="day" class="on">نهار</button><button data-t="night">ليل</button></div>
         <p class="muted" id="styleNote" hidden></p>
-        <p class="muted">عرض واقعي للواجهة من تصميمك المعتمد نفسه، بإطارات بارزة 20–25 سم. المبنى وحدود الأرض والمداخل وقطع الحوش من مخططك؛ السور والنباتات والرصيف والجوار تنسيق موقع إيضاحي للعرض وليست من المخطط. تتحسن الصورة تلقائيًا (نعومة وظلال) بعد ثوانٍ من توقف الحركة. «بديل آخر» يغيّر التوزيع والتفاصيل دون تحريك أي جدار أو فتحة. الواجهة تُبنى على الدور الأرضي وتتبع قالب الطراز المختار، والأدوار العليا تكرر فتحات الأرضي فلا تطابق فتحات المسقط العلوي حرفيًا؛ ليس مخططًا تنفيذيًا.</p>
+        <p class="muted">عرض واقعي للواجهة من تصميمك المعتمد نفسه، بإطارات بارزة 20–25 سم. المبنى وحدود الأرض والمداخل وقطع الحوش من مخططك؛ تراس الدور العلوي وارتداد كتلته من مخططك أيضًا (حيث العلوي أصغر من الأرضي). السور والنباتات والرصيف والجوار تنسيق موقع إيضاحي للعرض وليست من المخطط، وكذلك عناصر الواجهة الزخرفية (المظلات والإطارات البارزة وكاسرات الشمس والأروقة والرواشين والدعامات): مقترحة لإيضاح طابع الطراز، وبروزها أمام الواجهة يدخل الارتداد الأمامي ويحتاج مراجعة اشتراطات البلدية. تتحسن الصورة تلقائيًا (نعومة وظلال) بعد ثوانٍ من توقف الحركة. «بديل آخر» يغيّر التوزيع والتفاصيل دون تحريك أي جدار أو فتحة. الواجهة تُبنى على الدور الأرضي وتتبع قالب الطراز المختار، والأدوار العليا تكرر فتحات الأرضي فلا تطابق فتحات المسقط العلوي حرفيًا؛ ليس مخططًا تنفيذيًا.</p>
       </div></div>
     <div class="shots"><button class="btn" id="shot">التقاط صورة</button><button class="btn gold" id="shotHQ" title="تصيير مضاعف العيّنات (فائق التنعيم) بظلال أدق، ثم تنزيل PNG">لقطة عالية الجودة</button>
       <p class="muted" id="shotMsg" role="status" aria-live="polite" hidden></p>
@@ -83,6 +83,8 @@ const wish = safe(() => new URLSearchParams(location.search).get('wish') || loca
 const hist = createHistory(), recent = [], tried = new Set(), region = {}; // region[style] = المنطقة الحالية
 const ranking = () => safe(() => rankStyles(doc, wish, { recent }), Object.keys(STYLE_AR).filter(id => id !== 'J').map(id => ({ id, reason: '' })));
 const floorsVal = () => +$('facadeFloors').value || undefined;
+// ذوق العميل (prefs.exterior) يُمرَّر إلى صفحة الواجهة: يبذر مفردات الكتلة (مدخل مهيب/بسيط، ساتر أمام الزجاج…) مع بصمة المخطط
+const extQ = () => { const o = {}; for (const k of ['feel', 'tone', 'openings', 'screen', 'entrance']) { const v = ext?.[k]; if (v && v !== 'auto') o[k] = v; } return Object.keys(o).length ? '&ext=' + encodeURIComponent(JSON.stringify(o)) : ''; };
 style = ranking()[0].id;
 // الشكل الخارجي الذي سألت عنه شرعاء بعد اعتماد المخطط: الصفحة تفتح على الواجهة الواقعية لهذا المخطط وهذا الذوق، و«المجسم» يبقى خيارًا.
 let ext = null, extPick = null;
@@ -142,7 +144,7 @@ async function apply() {
   const c = cur(); if (c) markShown(hist, style, c);
   paint(); chips(); await probe(style); await loadTpls(); info();
   // «حسب التصميم» = عدد أدوار المخطط المعتمد نفسه: القالب لا يغيّر عدد أدوار بيت العميل إلا إذا اختار هو عددًا آخر
-  const fl = $('facadeFloors').value || String(Math.min(3, Math.max(1, (doc?.levels || []).length || 1))), src = './facade-j/?v=A&hq=1&nav=1&style=' + encodeURIComponent(style) + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
+  const fl = $('facadeFloors').value || String(Math.min(3, Math.max(1, (doc?.levels || []).length || 1))), src = './facade-j/?v=A&hq=1&nav=1&style=' + encodeURIComponent(style) + extQ() + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
   if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
 }
 const seg = $('facadeSeg'); const jb = document.createElement('button'); jb.dataset.f = 'J'; jb.textContent = 'واجهة واقعية'; seg.appendChild(jb);
