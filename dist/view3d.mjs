@@ -1,4 +1,5 @@
 // العرض ثلاثي الأبعاد المستقل بعد اعتماد التصميم: المجسّم من المخطط المعتمد نفسه، والشمس من الوقت والتاريخ.
+import './visit-touch.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY } from './draw/handoff.mjs';
 import { sunPosition, CITIES } from './sun.mjs';

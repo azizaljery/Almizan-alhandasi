@@ -1,4 +1,6 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
+import { visit } from './fresh-visit.mjs'; // أولًا: الدخول الجديد يبدأ مشروعًا نظيفًا قبل أن تقرأ أي وحدة حالة المشروع
+import { startNewProject, hasProject, listPast, restorePast, deletePast, takeNotice } from './project-lifecycle.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { saveSession, loadSession, carryOver, sameLand } from './design-session.mjs';
@@ -77,14 +79,31 @@ function stopScene() { sceneOff = true; cancelAnimationFrame(frame); try { scene
   $('lxSkip')?.addEventListener('click', done); setTimeout(() => { try { sessionStorage.setItem('mz-intro-seen', '1'); } catch {} }, 7000); })();
 $('start').addEventListener('click', () => {
   stopScene();
-  // «ابدأ تصميمًا جديدًا» مع تصميم محفوظ: حوار جديد؛ التصميم المحفوظ يبقى حتى يُولَّد غيره
-  if (designSession() || session || store.get(HOME_KEY)?.shara) { session = null; tlog = []; chatFor = null; regen = false; saveHome(); }
+  // «مشروع جديد» مع مشروع قائم في هذا التبويب: يُحفظ في «مشاريعي السابقة» ثم نبدأ نظيفًا (إعادة تحميل كي تبدأ كل الحالة من الصفر)
+  if (designSession() || session || store.get(HOME_KEY)?.shara || hasProject(localStorage)) { startNewProject(localStorage, sessionStorage); history.replaceState(null, '', '#land'); location.reload(); return; }
   go('Land'); $('landLength').focus();
 });
 /** الاستقبال لمن له تصميم محفوظ: زر واضح للعودة إليه، والبدء من جديد يبقى خيارًا. */
+/** تلميح البدء من جديد + «مشاريعي السابقة» (محلية في هذا المتصفح، آخر 20، باستعادة اختيارية). */
+function paintPast() {
+  const note = $('freshNote'), notice = paintPast.notice ??= takeNotice(sessionStorage);
+  if (note) { note.hidden = !notice; note.textContent = notice === 'archived' ? 'بدأنا مشروعًا جديدًا — مشروعك السابق في «مشاريعي السابقة».' : notice === 'lost' ? 'بدأنا مشروعًا جديدًا. تعذّر حفظ مشروعك السابق لامتلاء مساحة المتصفح.' : ''; }
+  const box = $('pastBox'), list = $('pastList'); if (!box || !list) return;
+  const items = listPast(localStorage); box.hidden = !items.length; $('pastCount').textContent = String(items.length); list.replaceChildren();
+  for (const it of items) {
+    const li = document.createElement('li'), when = new Date(it.savedAt).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' });
+    const land = it.summary?.land ? `أرض ${it.summary.land.width} × ${it.summary.land.length} م` : 'بلا أرض محددة', n = it.summary?.designs ? ` — ${it.summary.designs} ${it.summary.designs === 1 ? 'تصميم' : 'تصاميم'}` : '';
+    const txt = document.createElement('span'); txt.textContent = `${when} — ${land}${n}`;
+    const restore = document.createElement('button'); restore.type = 'button'; restore.className = 'quiet-inline'; restore.textContent = 'استعادة';
+    restore.addEventListener('click', () => { if (restorePast(localStorage, sessionStorage, it.id)) { history.replaceState(null, '', location.pathname); location.reload(); } });
+    const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'quiet-inline'; rm.textContent = 'حذف'; rm.addEventListener('click', () => { deletePast(localStorage, it.id); paintPast(); });
+    li.append(txt, ' ', restore, ' ', rm); list.append(li);
+  }
+}
 function paintWelcome() {
+  paintPast();
   const ds = designSession(), box = $('resumeHome'); if (!box) return;
-  box.hidden = !ds; $('start').textContent = ds ? 'ابدأ تصميمًا جديدًا' : 'ابدأ رحلة منزلك';
+  box.hidden = !ds; $('start').textContent = ds ? 'مشروع جديد' : 'ابدأ رحلة منزلك';
   if (ds) $('resumeHomeText').textContent = `لديك ${ds.designs.length === 1 ? 'تصميم محفوظ' : ds.designs.length + ' تصاميم محفوظة'} على أرض ${ds.input.land.width} × ${ds.input.land.length} م.`;
 }
 

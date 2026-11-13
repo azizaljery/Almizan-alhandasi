@@ -1,4 +1,5 @@
 // صفحة مخرجات التصميم: تقرأ المشروع المحفوظ من المرسم وتعرض المخرجات وتولّد كتاب المشروع.
+import './visit-touch.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY, loadSavedDNA } from './draw/handoff.mjs';
 import { buildFinalData, projectBookHtml, designReasons, sheetNote, NEXT_STAGES, areaSchedule } from './final-outputs.mjs';
@@ -13,6 +14,7 @@ import { mepSummaryHtml, mepQuantityRow, applyMepRow, mepQuantitiesHtml, quantit
 import { serialize } from './draw/doc.mjs';
 import { isCostUnpriced, UNPRICED_TOTAL_AR } from './field-guards.mjs';
 import { packCardHtml, mountEngineerPack } from './pack/engineer-pack-ui.mjs';
+import { mountConsent } from './archive-consent.mjs';
 
 const RATES_KEY = 'mizan.final.rates.v1', SNAP_KEY = 'mizan.studio.snap3d.v1', SESSION_KEY = 'mizan.design.session.v1';
 const $ = id => document.getElementById(id);
@@ -138,7 +140,9 @@ function render() {
   parts.push(sec('next', 'ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => `<tr><td>${esc(s.title)}</td><td><span class="pill ${s.status === 'available' ? '' : 'plan'}">${s.status === 'available' ? 'متاح' : 'قادم'}</span></td><td>${esc(s.note)}</td></tr>`))));
   // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم، بالعربية
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
+  parts.push(sec('consent', 'حفظ نسخة في أرشيف الميزان (اختياري)', '<div id="archiveConsent"></div>'));
   $('fmain').innerHTML = parts.join('');
+  mountConsent($('archiveConsent'));
   attachProPhoto();
   mountEngineerPack($('engpack'), () => ({ doc, data, session: readSession(), mep, proPhoto }));
   $('fnav').innerHTML = [['engpack', 'حزمة المهندس'], ['summary', 'الملخص'], ...(d.rooms?.length ? [['areas', 'المساحات']] : []), ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
