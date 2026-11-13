@@ -21,6 +21,7 @@ const mount = (...nodes) => { app.replaceChildren(...nodes); };
 const fmtDate = v => { if (!v) return '—'; const d = typeof v === 'number' ? new Date(v) : new Date(v); return Number.isNaN(+d) ? '—' : d.toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' }); };
 const fmtBytes = n => (n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(1) + ' MB');
 const STYLE_AR = { S: 'سلماني', modern: 'معاصر', H: 'حجازي', N: 'نجدي', C: 'كلاسيكي', M: 'معاصر خفيف', J: 'معاصر حجري', auto: 'تلقائي', '': '—' };
+const SIDE_AR = { n: 'شمال', s: 'جنوب', e: 'شرق', w: 'غرب' }, sides = a => (a || []).map(x => SIDE_AR[x] || x).join('، ') || '—';
 const styleName = s => STYLE_AR[s] || s || '—';
 
 async function api(path, { method = 'GET', body } = {}) {
@@ -182,7 +183,7 @@ async function preview(id) {
   } catch (e) { plans.append(h('p', { class: 'warn' }, 'تعذّر رسم المسقط (' + e.message + ')؛ البيانات المنظمة أدناه.')); }
   const L = d.land || {};
   dlg.append(h('h2', {}, `${r.number} — ${styleName(d.exterior?.style)}`),
-    h('dl', { class: 'kv' }, h('dt', {}, 'التاريخ'), h('dd', {}, fmtDate(r.created_at)), h('dt', {}, 'الأرض'), h('dd', {}, `${L.width} × ${L.length} م — شوارع: ${(L.streets || []).join('، ') || '—'} — مداخل: ${(L.entries || []).join('، ') || '—'}`),
+    h('dl', { class: 'kv' }, h('dt', {}, 'التاريخ'), h('dd', {}, fmtDate(r.created_at)), h('dt', {}, 'الأرض'), h('dd', {}, `${L.width} × ${L.length} م — شوارع: ${sides(L.streets)} — مداخل: ${sides(L.entries)}`),
       h('dt', {}, 'الأدوار'), h('dd', {}, String(r.floors)), h('dt', {}, 'الموقع (مقرّب ~1 كم)'), h('dd', {}, L.geo ? `${L.geo.lat}, ${L.geo.lng}` : 'غير محدد')),
     plans, h('h3', {}, 'برنامج المتطلبات والطراز (بيانات منظمة)'), h('pre', {}, JSON.stringify({ program: d.program, exterior: d.exterior }, null, 2)),
     h('div', { class: 'toolbar' }, h('button', { class: 'btn', type: 'button', on: { click: () => saveText(r.number + '.json', JSON.stringify(envelope(r), null, 2)) } }, 'تحميل JSON'),
