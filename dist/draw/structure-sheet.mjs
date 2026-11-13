@@ -9,7 +9,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const n1 = v => (Math.round(v * 10) / 10).toString();
 const n2 = v => (Math.round(v * 100) / 100).toFixed(2);
 const cm = m => Math.round(m * 100);
-const FONT = `Tahoma, 'Noto Naskh Arabic', 'Noto Sans Arabic', Arial, sans-serif`;
+const FONT = `Tahoma, Noto Naskh Arabic, Noto Sans Arabic, Arial, sans-serif`;
 const C = { paper: '#fbf8f2', ink: '#2b211b', green: '#2b211b', green2: '#4a3a30', gold: '#d4a77c', brass: '#a97142', ivory: '#f6f2ea', wall: '#d8d2c4', wallLine: '#b3ab9a', grid: '#a89684', room: '#8b867a', warn: '#8a3b2a' };
 
 /** أنواع الأعمدة والجسور: كل مقطع مختلف نوع واحد (C1، C2… / B1، B2…) كما في اللوحات الإنشائية. */

@@ -227,3 +227,6 @@ legend{padding:0;font-weight:600;margin-bottom:4px}
 .mb-lab{font:500 10px 'IBM Plex Sans Arabic',sans-serif;fill:#5b4636}
 .mb-north path{fill:#3a2a1f}.mb-north text{font:600 10px 'IBM Plex Sans Arabic',sans-serif;fill:#3a2a1f}
 @media(max-width:560px){.lm-map{height:300px}.brief-body{grid-template-columns:1fr}.brief-fig{max-width:260px;margin:0 auto}}
+
+.fresh-note{margin:0 0 10px;padding:8px 14px;border-radius:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25)}
+.past-box{margin:12px 0 0;text-align:right}.past-box summary{cursor:pointer}.past-box ol{padding:0 18px;margin:8px 0}.past-box li{margin:4px 0}

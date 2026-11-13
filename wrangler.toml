@@ -8,7 +8,7 @@ workers_dev = true
 directory = "./dist/client"
 binding = "ASSETS"
 # المسارات التالية يعالجها الوركر أولًا؛ البقية ملفات ثابتة مباشرة.
-run_worker_first = ["/", "/api/*"]
+run_worker_first = ["/", "/api/*", "/admin", "/admin/*", "/admin.html"]
 
 [[d1_databases]]
 binding = "DB"
@@ -36,6 +36,9 @@ enabled = true
 #   PHOTO_MODEL_STANDARD  (الافتراضي @cf/black-forest-labs/flux-2-klein-9b)
 #   PHOTO_MODEL_PREMIUM   (الافتراضي @cf/black-forest-labs/flux-2-dev)
 #   PHOTO_STEPS_PREMIUM   (خطوات النموذج الفائق، عدد صحيح 4–50؛ الافتراضي 28 — التكلفة والزمن يتناسبان معها)
+# الإدارة (/admin): تُنشأ جداولها مرة واحدة بالأمر:
+#   npx wrangler d1 execute almizan-archive --remote --file db/admin.sql
+#   ADMIN_REOPEN  (1 يسمح بإنشاء كلمة سر جديدة فقط بعد أن حذف المالك كلمة السر؛ انظر worker/README.md)
 # عدّاد السقف اليومي يصير مضمونًا عبر D1 بعد إنشاء الجدول مرة واحدة:
 #   npx wrangler d1 execute almizan-archive --remote --file db/photo-usage.sql
 # وبدونه يعمل العدّاد في ذاكرة النسخة (تقريبي؛ انظر worker/photo.mjs).

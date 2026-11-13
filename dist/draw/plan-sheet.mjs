@@ -14,7 +14,7 @@ import { INK, PAPER, BRONZE, SOFT, roomTint, inkify, sheetDefs, frameSvg, brandS
 import { LINE_MM, SHEETS, pickScale, wallClasses, gridAxes, dimensionChains, layoutLabels, stairInfo, fixtureSymbol, fmtDim, fmtAreaM2, approxTextWidth, countOverlaps } from './plan-annot.mjs';
 
 export const PX_PER_MM = 4;
-const FONT = `"IBM Plex Sans Arabic", Tahoma, 'Noto Sans Arabic', Arial, sans-serif`;
+const FONT = `IBM Plex Sans Arabic, Tahoma, Noto Sans Arabic, Arial, sans-serif`; // بلا علامات اقتباس: القيمة تدخل خاصية XML بين علامتين فكانت تُنتج SVG غير صالح
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const n1 = v => (Math.round(v * 10) / 10).toString();
 const mm = v => v * PX_PER_MM;

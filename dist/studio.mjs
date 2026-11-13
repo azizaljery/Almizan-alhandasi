@@ -1,4 +1,5 @@
 // مرسم الميزان: واجهة الاستوديو (أدوات، خصائص، أدوار، عرض ثلاثي الأبعاد حيّ، مراجعة، مساعد).
+import './visit-touch.mjs';
 import { createDoc, parseDoc, serialize, getById, SCHEMA } from './draw/doc.mjs';
 import { ROOM_TYPES, OPENING_KINDS, FIXTURES, STAIR_KINDS, WALL_KINDS, PLOT_ENTRIES, roomTypeName } from './draw/catalog.mjs';
 import { sampleVilla } from './draw/samples.mjs';

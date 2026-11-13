@@ -6,7 +6,7 @@ import { frameSvg, brandStrip, sheetDefs, inkify } from './sheet-style.mjs';
 export { inkify };
 
 export const PX_PER_MM = 4;
-export const FONT = `"IBM Plex Sans Arabic", Tahoma, 'Noto Sans Arabic', Arial, sans-serif`;
+export const FONT = `IBM Plex Sans Arabic, Tahoma, Noto Sans Arabic, Arial, sans-serif`; // بلا اقتباس: يدخل خاصية XML فلا يجوز أن يحوي علامات اقتباس
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const n1 = v => (Math.round(v * 10) / 10).toString();
 export const mm = v => v * PX_PER_MM;
