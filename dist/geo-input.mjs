@@ -116,7 +116,7 @@ function fromCoordinates(c) {
 // ---------------------------------------------------------------------------------------------- Plus Code
 const PLUS_RE = new RegExp(`(?:^|[\\s,،(])([${ALPHABET}0]{2,8}\\+[${ALPHABET}]{0,7})(?=$|[\\s,،)])`, 'i');
 const arNorm = s => s.toLowerCase().replace(/[ً-ٰٟ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/^مدينه\s+/, '').replace(/^ال/, '').trim();
-const EN_ALIASES = { makkah: ['mecca', 'makkah', 'mekka'], madinah: ['medina', 'madinah', 'madina'], khobar: ['khobar', 'al khobar', 'alkhobar'], jeddah: ['jeddah', 'jedda', 'jiddah'], riyadh: ['riyadh', 'riyad'], dammam: ['dammam'], taif: ['taif'], abha: ['abha'], tabuk: ['tabuk'], hail: ['hail'], jazan: ['jazan', 'jizan'], najran: ['najran'], buraydah: ['buraydah', 'buraidah'] };
+const EN_ALIASES = { makkah: ['mecca', 'makkah', 'mekka'], madinah: ['medina', 'madinah', 'madina'], khobar: ['khobar', 'al khobar', 'alkhobar'], jeddah: ['jeddah', 'jedda', 'jiddah'], riyadh: ['riyadh', 'riyad'], dammam: ['dammam'], taif: ['taif'], abha: ['abha'], tabuk: ['tabuk'], hail: ['hail'], jazan: ['jazan', 'jizan'], najran: ['najran'], buraydah: ['buraydah', 'buraidah'], tathlith: ['tathlith', 'tathleeth', 'tathliith'] };
 /** مدينة رئيسية من القائمة المدمجة بالاسم (عربي أو إنجليزي)، أو null. هي مرجع Plus Code القصير بلا شبكة. */
 export function cityFromText(text) {
   const t = arNorm(prep(text).replace(/[,،.]/g, ' ').replace(/\s+/g, ' ')); if (!t) return null;
