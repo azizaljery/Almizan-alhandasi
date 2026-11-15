@@ -186,7 +186,7 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
   } catch (e) {
     if (e.code === 'VILLA_EXHAUSTED') {
       const s = clone(session);
-      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now() }; delete s.softEnd; return { session: s, added: false, exhausted: true }; }
+      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now() }; const two = s.designs.length < TARGET_DESIGNS ? await probeTwoFloors(s, generate) : null; if (two) s.exhausted.twoFloors = two; delete s.softEnd; return { session: s, added: false, exhausted: true }; }
       s.softEnd = { count: s.designs.length, at: Date.now() };
       return { session: s, added: false, exhausted: false, softEnd: true };
     }
@@ -197,7 +197,23 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
 export const cappedMessage = n => `عرضتُ عليك ${n} تصميمًا مختلفًا، وهذا أقصى ما تحفظه الجلسة؛ اعتمد أقربها إلى ذوقك أو اطلب تعديلًا (شكلًا أو عددًا أو مقاسًا) لأبدأ بحثًا جديدًا.`;
 /** بعد التصاميم المختلفة بوضوح: الأقرب منها ما زال ممكنًا بطلب العميل. */
 export const softEndMessage = (n, clear = n) => (n > clear ? `أول ${clear} تصميمًا مختلفة بوضوح عن بعضها (32٪ على الأقل)، وما بعدها أقرب لما عُرض (25٪ على الأقل) ويُبيَّن ذلك في ملاحظات كل منها. اضغط «تصميم آخر» لأبحث لك عن غيرها.` : `هذه ${n} تصميمًا مختلفة بوضوح عن بعضها (32٪ على الأقل). اضغط «تصميم آخر» إن أردت توزيعات أقرب لما عُرض (تختلف 25٪ على الأقل) وسأبيّن لك ذلك في ملاحظات كل تصميم.`);
-export const exhaustedMessage = n => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.`;
+export const exhaustedMessage = (n, twoFloors = null) => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.${twoFloors ? ` جرّب دورين: أرضك تتسع لتنويع أكبر بدورين (قِسْتُ ${twoFloors} تصاميم مختلفة بدورين، وقد يوجد أكثر).` : ''}`;
+/** أرض بدور واحد مصرَّح انتهت قبل العشرين: يُقاس ما يعطيه الدوران (أول دفعة) ليقترحهما الإعلان بعدد حقيقي لا بتخمين. null إن لم يزد العدد أو تعذّر القياس. */
+const PROBE_MAX = 8;
+async function probeTwoFloors(s, generate) {
+  const req = s.input.requirements;
+  if ((req.prefs?.floors ?? s.input.land?.floors) !== 1 || s.designs.some(d => (d.floors || 1) !== 1)) return null;
+  try {
+    const r2 = clone(req); r2.prefs ||= {}; r2.prefs.floors = 2;
+    const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: r2.counts, requirements: r2, light: false });
+    if ((out.floors || 1) !== 2) return null;
+    // أول دفعة ثم إكمال قصير (حتى PROBE_MAX) بالخطوة نفسها: العدد المعلن مقيس لا مخمَّن
+    let probe = createSession({ land: { ...s.input.land, floors: 2 }, counts: r2.counts, requirements: r2, discovery: s.input.discovery, idea: s.input.idea, result: out });
+    for (let g = 0; g < PROBE_MAX && probe.designs.length < PROBE_MAX; g++) { const o = await extendSession(probe, { target: PROBE_MAX }, { generate }); probe = o.session; if (!o.added) break; }
+    const k = probe.designs.length;
+    return k > s.designs.length ? k : null;
+  } catch { return null; }
+}
 
 /**
  * دمج تصميمين: توزيع سليم جديد يأخذ من كليهما بتوازن ولا يكون نسخة من أحدهما (تشابهه مع كلٍّ < 90٪).

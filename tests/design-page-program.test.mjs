@@ -39,6 +39,11 @@ for (const [w, l, beds, min, ends] of CASES) test(`برنامج الصفحة ${w
     assert.ok(s.exhausted, tag + ': أقل من العشرين بلا إعلان نفاد');
     assert.equal(s.exhausted.count, n, 'العدد المعلن هو عدد ما عُرض فعلًا');
     assert.match(exhaustedMessage(n), new RegExp(`وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك \\(${n} تصميمًا\\)`));
+    // الأرض الضيقة بدور واحد مصرَّح: الإعلان يقترح الدورين بعدد مقيس (قيس 7 لـ12.5×30)، ولا يقترحهما حيث لا يزيدان العدد
+    if (w === 12.5) {
+      assert.ok(s.exhausted.twoFloors >= 4 && s.exhausted.twoFloors > n, `12.5×30: قياس الدورين ${s.exhausted.twoFloors}`);
+      assert.match(exhaustedMessage(n, s.exhausted.twoFloors), new RegExp(`جرّب دورين.*قِسْتُ ${s.exhausted.twoFloors} تصاميم`));
+    } else if (!s.exhausted.twoFloors) assert.doesNotMatch(exhaustedMessage(n, null), /جرّب دورين/);
   }
   const sigs = s.designs.map(d => visualSig(JSON.parse(d.doc)));
   for (let j = 1; j < n; j++) {
