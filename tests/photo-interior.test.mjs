@@ -153,7 +153,7 @@ test('الكاميرا: إسقاط ثقب الإبرة صحيح، والمجال
 test('الكاميرا الداخلية: داخل الغرفة بمستوى العين وزاوية واسعة، تُظهر الأثاث والفتحات، وحتمية', () => {
   for (const type of STAGE_ROOMS) {
     const s = stageRoom(DOC, type, 'S'), c = planInteriorCamera(s), c2 = planInteriorCamera(s); assert.deepEqual(c, c2);
-    assert.ok(pointInPolygon({ x: c.x, y: c.y }, s.room.polygon, 1e-9) && c.eye === 1.45 && [78, 88].includes(c.hfov) && c.vfov > 50 && c.vfov < 68, type);
+    assert.ok(pointInPolygon({ x: c.x, y: c.y }, s.room.polygon, 1e-9) && [1.45, 1.2].includes(c.eye) && [78, 88].includes(c.hfov) && c.vfov > 50 && c.vfov < 68, type);
     for (const f of s.items.filter(f => f.kind !== 'rug')) assert.ok(!pointInPolygon({ x: c.x, y: c.y }, fixtureCorners(f), 1e-9), 'الكاميرا ليست داخل قطعة');
     const lm = projectLandmarks(pinhole(c), s, { levelE: s.level.E }), d = describeLandmarks(lm);
     assert.ok(Object.values(d.pieces).reduce((a, b) => a + b, 0) >= 2, `${type}: قطع مرئية ${JSON.stringify(d)}`);

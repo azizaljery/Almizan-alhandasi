@@ -3,7 +3,7 @@
 import { pointInPolygon } from '../draw/geom.mjs';
 import { fixtureCorners } from './staging.mjs';
 
-export const INTERIOR_CAMERA = Object.freeze({ eye: 1.45, hfov: 78, hfovs: Object.freeze([78, 88]), aspect: 1.5, wallClear: .5, itemClear: .4, minDepth: 2.2, step: .4, headingStep: 10 });
+export const INTERIOR_CAMERA = Object.freeze({ eye: 1.45, hfov: 78, hfovs: Object.freeze([78, 88]), eyes: Object.freeze([1.45, 1.2]), aspect: 1.5, wallClear: .5, itemClear: .4, minDepth: 2.2, step: .4, headingStep: 10 });
 const RAD = Math.PI / 180;
 export const vfovOf = (hfov, aspect) => 2 * Math.atan(Math.tan(hfov * RAD / 2) / aspect) / RAD;
 
@@ -23,7 +23,7 @@ function rayDist(poly, p, a) {
   return best;
 }
 const distEdge = (poly, p) => { let m = Infinity; for (let i = 0; i < poly.length; i++) { const A = poly[i], B = poly[(i + 1) % poly.length], dx = B.x - A.x, dy = B.y - A.y, k = Math.max(0, Math.min(1, ((p.x - A.x) * dx + (p.y - A.y) * dy) / (dx * dx + dy * dy || 1))); m = Math.min(m, Math.hypot(p.x - A.x - k * dx, p.y - A.y - k * dy)); } return m; };
-const ROLE_W = { seat: 1, sofa: 2.2, bed: 3, tv: 1.2, table: .8, chair: .7, nightstand: .4, wardrobe: 1, decor: .1 };
+const ROLE_W = { seat: 1, sofa: 2.2, bed: 6, tv: 1.2, table: .8, chair: .7, nightstand: .4, wardrobe: 1, decor: .1 };
 
 /** يختار نقطة وقوف واتجاهًا لغرفة مؤثثة (staged من stageRoom). يعيد { x, y, headingDeg, eye, hfov, vfov, aspect, score, visible } أو null. */
 export function planInteriorCamera(staged, opt = {}) {
@@ -32,30 +32,32 @@ export function planInteriorCamera(staged, opt = {}) {
   const nearItem = p => boxes.some(bx => { let m = Infinity; for (let k = 0; k < 4; k++) { const A = bx[k], B = bx[(k + 1) % 4], dx = B.x - A.x, dy = B.y - A.y, t = Math.max(0, Math.min(1, ((p.x - A.x) * dx + (p.y - A.y) * dy) / (dx * dx + dy * dy || 1))); m = Math.min(m, Math.hypot(p.x - A.x - t * dx, p.y - A.y - t * dy)); } return m < C.itemClear || pointInPolygon(p, bx, 1e-9); });
   const angDiff = (ang, hd) => ((ang - hd + 540) % 360) - 180;
   let best = null;
-  for (const hfov of fovs) {
+  const eyes = opt.eye ? [opt.eye] : C.eyes || [C.eye];
+  for (const eye of eyes) for (const hfov of fovs) {
     const half = hfov / 2 - 4;
     for (let x = b.x0 + C.wallClear; x <= b.x1 - C.wallClear + 1e-9; x += C.step) for (let y = b.y0 + C.wallClear; y <= b.y1 - C.wallClear + 1e-9; y += C.step) {
       const p = { x, y }; if (!pointInPolygon(p, poly, 1e-9) || distEdge(poly, p) < C.wallClear || nearItem(p)) continue;
       // الزوايا المنظورة لكل قطعة (ثابتة للنقطة، تُقاس لكل اتجاه)
-      const view = items.map((it, i) => ({ it, angs: boxes[i].map(c => Math.atan2(c.x - x, c.y - y) / RAD), dist: Math.min(...boxes[i].map(c => Math.hypot(c.x - x, c.y - y))), cen: Math.hypot(it.x - x, it.y - y) }));
+      const view = items.map((it, i) => ({ it, cs: boxes[i], angs: boxes[i].map(c => Math.atan2(c.x - x, c.y - y) / RAD), dist: Math.min(...boxes[i].map(c => Math.hypot(c.x - x, c.y - y))), cen: Math.hypot(it.x - x, it.y - y) }));
       for (let hd = 0; hd < 360; hd += C.headingStep) {
         const a = hd * RAD, d0 = rayDist(poly, p, a); if (!(d0 >= C.minDepth)) continue;
         let edgeMin = Infinity; for (const o of [-half, -half / 2, half / 2, half]) edgeMin = Math.min(edgeMin, rayDist(poly, p, a + o * RAD));
         if (edgeMin < 1.1) continue; // لا جدار ملتصق بحافة الإطار
         let seen = 0, vis = 0, clipped = 0;
         for (const v of view) {
-          const w = ROLE_W[v.it.role] ?? .5, ds = v.angs.map(g => angDiff(g, hd)), inAll = ds.every(d => Math.abs(d) <= half), inAny = ds.some(d => Math.abs(d) <= half);
+          const w = ROLE_W[v.it.role] ?? .5, ds = v.angs.map(g => angDiff(g, hd)), vhalf = vfovOf(hfov, C.aspect) / 2 - 3, need = Math.max(.2, (eye - v.it.h * .6) / Math.tan(vhalf * RAD));
+          const fwd = Math.min(...v.cs.map(c => (c.x - x) * Math.sin(a) + (c.y - y) * Math.cos(a))), inAll = ds.every(d => Math.abs(d) <= half) && fwd >= need, inAny = ds.some(d => Math.abs(d) <= half);
           if (v.dist < .7 || v.cen > 9) { if (inAny && w >= 1) clipped += w * (v.it.role === 'seat' ? .3 : 1); continue; }
           if (inAll) { seen += w * 1.4; vis++; } else if (Math.abs(angDiff(Math.atan2(v.it.x - x, v.it.y - y) / RAD, hd)) <= half) { seen += w * .35; clipped += w * (v.it.role === 'seat' ? .3 : 1); vis++; } // ظاهرة جزئيًا: تُعاقب القطع الكبيرة المقطوعة
         }
         let ops = 0; for (const o of staged.openings) { const ang = Math.atan2(o.center.x - x, o.center.y - y) / RAD, dd = angDiff(ang, hd), facing = o.normal ? (o.normal.x * (x - o.center.x) + o.normal.y * (y - o.center.y)) : 1; if (Math.abs(dd) <= half && facing > .3) ops += o.door ? .6 : 1; }
-        const score = Math.min(d0, 7.5) * .55 + Math.min(edgeMin, 4) * .25 + seen * 1.1 - clipped * 1.2 + Math.min(ops, 3) * .5 - (hfov > C.hfov ? .8 : 0);
-        if (!best || score > best.score + 1e-9) best = { x: +x.toFixed(3), y: +y.toFixed(3), headingDeg: hd, hfov, score, visible: vis };
+        const score = Math.min(d0, 7.5) * .55 + Math.min(edgeMin, 4) * .25 + seen * 1.1 - clipped * 1.2 + Math.min(ops, 3) * .5 - (hfov > C.hfov ? .8 : 0) - (eye < C.eye ? .5 : 0);
+        if (!best || score > best.score + 1e-9) best = { x: +x.toFixed(3), y: +y.toFixed(3), headingDeg: hd, hfov, eye, score, visible: vis };
       }
     }
   }
   if (!best) return null;
-  return { ...best, eye: C.eye, aspect: C.aspect, vfov: +vfovOf(best.hfov, C.aspect).toFixed(2) };
+  return { ...best, aspect: C.aspect, vfov: +vfovOf(best.hfov, C.aspect).toFixed(2) };
 }
 
 /**
