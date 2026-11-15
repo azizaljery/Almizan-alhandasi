@@ -1548,8 +1548,8 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   // الشكل الذي طلبه العميل: كل مرشحاته أصلية (لا تُؤجَّل إلى مرحلة التكميل)
   if (wantMode) for (const c of cands) if (c.mode === wantMode) delete c.extra;
   cands.sort((a, b) => a.pen - b.pen);
-  if (poolKey) poolPut(poolKey, { cands: cands.map(c => ({ ...c })), built: new Map(), ext: null });
-  } else cands = pool.cands.map(c => ({ ...c }));
+  if (poolKey) poolPut(poolKey, { cands: cands.map(c => structuredClone(c)), built: new Map(), ext: null });
+  } else cands = pool.cands.map(c => structuredClone(c));
   const poolObj = pool || (poolKey ? poolGet(poolKey) : null), builtCache = poolObj ? poolObj.built : null;
   const seenSig = new Set(), ex = new Set(exclude.map(patCore)), avoid = new Set([...(tw.avoidModes || []), ...(program.prefs?.noCorridors && !program.prefs?.courtyard ? ['tee', 'rows', 'court'] : []), ...(program.prefs?.courtyard === false ? ['court'] : [])]);
   // الشكل الذي طلبه العميل: تنويعاته مطلوبة فلا يُحدّ عددها بحدّ الفكرة
@@ -1595,25 +1595,32 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
       try {
         // المرآة: تحددها جهات العميل الجانبية (شرق/غرب) إن وُجدت، وإلا تنويع الاتجاه بين البدائل
         // المرآة: تحددها جهات العميل الجانبية (شرق/غرب) إن وُجدت، وإلا تنويع الاتجاه بين البدائل (وفي «تصميم آخر» تنويع ثابت بالتوقيع ليُعاد استعمال ما بُني)
-        const mirror = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : prefPat && cand.pat === prefPat && prefMirror !== null ? prefMirror : hashBit(cand.pat);
-        const ck = cand.pat + '@' + cand.env.w + 'x' + cand.env.d + 'o' + (cand.env.ox || 0) + (cand.extra ? 'x' : '') + '|' + (mirror ? 1 : 0);
-        let base = builtCache ? builtCache.get(ck) : undefined;
-        if (base === undefined) {
-          base = (() => {
-            const layout = realizeLayout(cand, program, cand.env.w, cand.env.d, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
-            const doc = layoutToDoc(layout, { land, plot, fp, entry, mirror, title, ox: cand.env.ox, Wfull: W });
-            const built = cand.env.w * cand.env.d;
-            layout.notes.push(`مسطح الدور ${Math.round(built - (cand.court ? A_(cand.court) : 0))} م²${cand.court ? ` مع حديقة داخلية ${Math.round(A_(cand.court))} م²` : ''} (${r2(cand.env.w)} × ${r2(cand.env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`);
-            const check = checkDoc(doc);
-            if (!check.ok) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: check.problems }); return null; }
-            const relaxed = relaxFixtures(doc);
-            const q = quality(relaxed, { bedrooms: program.counts.bedrooms });
-            if (q.reject) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: q.issues, doc: relaxed }); return null; }
-            const ledger = verifyRequest(relaxed, requirements, { entry });
-            return { layout, relaxed, q, vsig: visualSig(relaxed), ledger };
-          })();
-          if (builtCache) builtCache.set(ck, base);
-        }
+        const mirror0 = cand.rp && cand.rp.p[0] !== cand.rp.p[1] ? cand.rp.p[1] < cand.rp.p[0] : prefPat && cand.pat === prefPat && prefMirror !== null ? prefMirror : hashBit(cand.pat);
+        const forcedM = !!(cand.rp && cand.rp.p[0] !== cand.rp.p[1]) || !!(prefPat && cand.pat === prefPat && prefMirror !== null);
+        const getBase = mirror => {
+          const ck = cand.pat + '@' + cand.env.w + 'x' + cand.env.d + 'o' + (cand.env.ox || 0) + (cand.extra ? 'x' : '') + '|' + (mirror ? 1 : 0);
+          let base = builtCache ? builtCache.get(ck) : undefined;
+          if (base === undefined) {
+            base = (() => {
+              const layout = realizeLayout(cand, program, cand.env.w, cand.env.d, { secondEntry: canonicalSide(entry, land?.entries?.[1], mirror) });
+              const doc = layoutToDoc(layout, { land, plot, fp, entry, mirror, title, ox: cand.env.ox, Wfull: W });
+              const built = cand.env.w * cand.env.d;
+              layout.notes.push(`مسطح الدور ${Math.round(built - (cand.court ? A_(cand.court) : 0))} م²${cand.court ? ` مع حديقة داخلية ${Math.round(A_(cand.court))} م²` : ''} (${r2(cand.env.w)} × ${r2(cand.env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`);
+              const check = checkDoc(doc);
+              if (!check.ok) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: check.problems }); return null; }
+              const relaxed = relaxFixtures(doc);
+              const q = quality(relaxed, { bedrooms: program.counts.bedrooms });
+              if (q.reject) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: q.issues, doc: relaxed }); return null; }
+              const ledger = verifyRequest(relaxed, requirements, { entry });
+              return { layout, relaxed, q, vsig: visualSig(relaxed), ledger };
+            })();
+            if (builtCache) builtCache.set(ck, base);
+          }
+          return base;
+        };
+        let mirror = mirror0, base = getBase(mirror);
+        // البند الفاشل قد يكون من اتجاه المرآة وحده (حديقة الفناء): تُجرَّب المرآة الأخرى وتُؤخذ الأسلم
+        if (base && !forcedM && splitFails(base.ledger, requirements).hard > 0) { const b2 = getBase(!mirror); if (b2 && splitFails(b2.ledger, requirements).hard < splitFails(base.ledger, requirements).hard) { base = b2; mirror = !mirror; } }
         if (!base) continue;
         const { layout, relaxed, q, vsig, ledger } = base;
         const vis = shown.length ? Math.max(...shown.map(x => visualSim(vsig, x))) : 0;
@@ -1622,7 +1629,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
         const again = !prefPat && !blend && cand.mode !== askedMode && (shownIdeas.get(cand.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { visSkips++; continue; }
         const bl = blendScore(vsig, blend); if (bl === null) continue;
         // «تصميم آخر» لا يُملأ بتصميم يخفق في بنود من طلب العميل أكثر مما أخفق الأول (معيب لا مختلف)
-        if (maxFails !== null && splitFails(ledger, requirements).hard > maxFails) { visSkips++; continue; }
+        if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { visSkips++; continue; } // بنود الحديقة تُستكمل بعد الاختيار (applyGardens)
         // مجلس الرجال بلا دورة مياه خاصة: عيب ضيافة يُؤخّر البديل خلف كل بديل سليم
         const wcMissing = layout.notes.some(n => /دورة مياه (?:الضيوف|الرجال) لم تتسع/.test(n)) ? 1 : 0;
         designs.push({ maxBed: maxBedOf(q.metrics), area: cand.env.w * cand.env.d - (cand.court ? A_(cand.court) : 0), doc: relaxed, vsig, visual: r2(vis), blend: bl, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, idea: cand.idea, env: cand.env, pat: withIdea(cand.pat, cand.idea), notes: [ideaNote(cand.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)].filter(Boolean), summary: describe(cand) + ideaSuffix(cand.idea), rooms: layout.rooms, ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) });
@@ -1850,7 +1857,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
       // فكرة سبق عرضها: لا تعود إلا مختلفة مرئيًا بوضوح، وتُعلن تنويعًا
       const again = !prefPat && !blend && pr.g.mode !== pr.wantG2 && (shownIdeas.get(pr.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { if (dbg) dbg.againSkip = (dbg.againSkip || 0) + 1; continue; }
       const bl = blendScore(vsig, blend); if (bl === null) continue;
-      if (maxFails !== null && splitFails(ledger, requirements).hard > maxFails) { if (dbg) dbg.failSkip = (dbg.failSkip || 0) + 1; continue; }
+      if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { if (dbg) dbg.failSkip = (dbg.failSkip || 0) + 1; continue; }
       const notes = [...new Set([ideaNote(pr.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...(pr.split.moved ? [`«${pr.split.moved.name}» في الدور الأرضي (لم تطلب ذلك): برنامج الدور العلوي أكبر من الأرضي، فنقلُ غرفة إلى الأرضي يوازن الدورين ويغني عن فراغات لم تُطلب؛ إن أردت كل غرف النوم فوق فاختر بديلًا آخر.`] : []), ...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0))} م²${pr.g.court ? ` مع حديقة داخلية ${Math.round(A_(pr.g.court))} م²` : ''} (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
       notes.push(...hallNotes(q.metrics, W, D));
       const pen = pr.pen + (ui ? uCand.pen - pr.u.pen : 0);
@@ -1878,7 +1885,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const lean = blend || prefPat ? designs : designs.filter(d => !(dbl(d) && leanModes.has(d.mode)));
   const picked2 = blend ? designs.slice(0, keep) : diversify(lean, pick || keep, { prefer: preferModes });
   if (!blend && lean.length < designs.length && picked2.length < Math.min(3, keep)) for (const d of diversify(designs, keep, { prefer: preferModes })) { if (picked2.length >= Math.min(3, keep)) break; if (!picked2.includes(d)) picked2.push(d); }
-  if (visRelaxed) picked2[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا.');
+  if (visRelaxed) picked2[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا (يختلف بـ ' + Math.round((1 - (picked2[0]?.visual || 0)) * 100) + '٪ على الأقل).');
   if (diff2.relaxed) picked2[0]?.notes.push('لم يبقَ نمط توزيع مختلف جذريًا لهذا البرنامج والأرض؛ هذا أقرب توزيع غير مطابق لما عُرض.');
   for (const d of picked2) d.doc = settleDoors(d.doc);
   applyElevators(picked2, requirements);
