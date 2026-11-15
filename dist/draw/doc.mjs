@@ -380,6 +380,18 @@ export function applyCommand(doc, command) {
   return { doc: next, ids: result.ids || [], ...result };
 }
 
+/**
+ * نسخة تعدّل المستند الممرَّر نفسه بلا استنساخ كامل لكل أمر (المولّد يبني مئات الأوامر لكل مخطط: الاستنساخ هو الزمن كله تقريبًا).
+ * للمستند الذي يملكه المتصل وحده. عند فشل الأمر تُقتطع المصفوفات إلى أطوالها السابقة فلا يبقى عنصر نصف مضاف.
+ */
+export function applyCommandInPlace(doc, command) {
+  const handler = HANDLERS[command?.type];
+  if (!handler) fail('BAD_COMMAND', 'أمر غير معروف: ' + command?.type);
+  const lens = COLLECTIONS.map(c => (Array.isArray(doc[c]) ? doc[c].length : -1));
+  try { const result = handler(doc, command) || {}; return { doc, ids: result.ids || [], ...result }; }
+  catch (e) { COLLECTIONS.forEach((c, i) => { if (lens[i] >= 0 && doc[c].length > lens[i]) doc[c].length = lens[i]; }); throw e; }
+}
+
 /** Structural validation; returns issues, never throws. */
 export function validateDoc(doc) {
   const issues = [], seen = new Set();

@@ -74,7 +74,17 @@ const inSpace = (space, p) => !!space.net && pointInPolygon(p, space.net, 1e-9) 
  * Internal model of the whole drawing. Pure; recomputed on demand (the drawings are small).
  * level = { level, analysis, walls, rooms[], roomsById, orphanLabels[], duplicates[], openings[], graph, ... }
  */
+// ذاكرة قصيرة للنموذج المحلَّل: المولّد يحلّل المستند نفسه مرات متتالية (الجودة ثم سجل الطلب ثم قواعد المكان...) والنتيجة نفسها.
+// المفتاح هوية المستند ومصفوفاته وأطوالها وشماله؛ كل أمر في applyCommand ينتج مصفوفات جديدة فلا يُقرأ نموذج قديم.
+const ANALYSIS_MEMO = new WeakMap();
 export function analyzeDoc(doc) {
+  const hit = ANALYSIS_MEMO.get(doc), g = doc && [doc.walls, doc.openings, doc.labels, doc.levels, doc.stairs, doc.fixtures, doc.walls?.length, doc.openings?.length, doc.labels?.length, doc.north];
+  if (hit && hit.g.every((v, i) => v === g[i])) return hit.m;
+  const m = analyzeDocUncached(doc);
+  if (doc && typeof doc === 'object') ANALYSIS_MEMO.set(doc, { g, m });
+  return m;
+}
+function analyzeDocUncached(doc) {
   const north = Number(doc.north) || 0;
   const levels = doc.levels.map((level, levelIndex) => {
     const walls = doc.walls.filter(w => w.level === level.id);
