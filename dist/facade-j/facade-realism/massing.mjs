@@ -617,7 +617,7 @@ export function buildMassing(THREE, { scene, S, plan, night = false }) {
 
   // 1ب) تغوير الفتحات: ما يقع كله داخل مستطيل الفتحة قرب وجه الجدار (إطار، زجاج/باب، خلفية داخلية، زخرفة باب) يُؤخَّر للداخل بعمق التجويف؛
   //     والشبكات المدموجة للطراز تُؤخَّر رؤوسها الواقعة داخل المستطيل فقط. لا يتغير موضع الفتحة في الواجهة ولا مقاسها.
-  const moved = { meshes: 0, verts: 0 };
+  const moved = { meshes: 0, verts: 0 }, defer = new Map(), I = .012;
   if (plan.recesses.length) {
     const sset = new Set(S.meshes), list = [], bb = new THREE.Box3(), v = new THREE.Vector3(), m4 = new THREE.Matrix4(), tr = new THREE.Matrix4();
     scene.traverse(o => { if ((o.isMesh || o.isInstancedMesh) && o.visible && o.name !== 'ground' && !o.userData?.mass) list.push({ o, b: new THREE.Box3().setFromObject(o) }); });
@@ -629,11 +629,15 @@ export function buildMassing(THREE, { scene, S, plan, night = false }) {
         if (o.isInstancedMesh) { o.geometry.computeBoundingBox(); const gc = o.geometry.boundingBox.getCenter(new THREE.Vector3()); tr.makeTranslation(0, 0, -D); let n = 0;
           for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m4); v.copy(gc).applyMatrix4(m4).applyMatrix4(o.matrixWorld); if (v.x > x0 + I && v.x < x1 - I && v.y > y0 + I && v.y < y1 - I && v.z > z0 && v.z < z1) { m4.premultiply(tr); o.setMatrixAt(i, m4); n++; } }
           if (n) { o.instanceMatrix.needsUpdate = true; moved.verts += n; } continue; }
-        const P0 = o.geometry.attributes.position; if (!P0 || P0.isInterleavedBufferAttribute) continue; let P = null;
-        for (let i = 0; i < P0.count; i++) { const x = P0.getX(i) + e[12], y = P0.getY(i) + e[13], z = P0.getZ(i) + e[14]; if (!(x > x0 + I && x < x1 - I && y > y0 + I && y < y1 - I && z > z0 && z < z1)) continue;
+        if (!o.geometry.attributes.position || o.geometry.attributes.position.isInterleavedBufferAttribute) continue;
+        (defer.get(o) || defer.set(o, []).get(o)).push({ x0, x1, y0, y1, z0, z1, D, e }); } }
+    // مرور واحد على رؤوس كل شبكة مدموجة لكل تجاويفها المتقاطعة معها (كان مرورًا كاملًا لكل تجويف: الكلفة R × V)
+    for (const [o, rs] of defer) { const P0 = o.geometry.attributes.position, e = rs[0].e; let P = null;
+      for (let i = 0; i < P0.count; i++) { const x = P0.getX(i) + e[12], y = P0.getY(i) + e[13], z = P0.getZ(i) + e[14];
+        for (const r of rs) { if (!(x > r.x0 + I && x < r.x1 - I && y > r.y0 + I && y < r.y1 - I && z > r.z0 && z < r.z1)) continue;
           if (!P) { if (!o.userData.massOwnGeo) { o.geometry = o.geometry.clone(); o.userData.massOwnGeo = true; ownGeos.push(o.geometry); } P = o.geometry.attributes.position; }
-          P.setZ(i, P.getZ(i) - D); moved.verts++; }
-        if (P) { P.needsUpdate = true; o.geometry.computeBoundingBox(); o.geometry.computeBoundingSphere(); } } }
+          P.setZ(i, P.getZ(i) - r.D); moved.verts++; break; } }
+      if (P) { P.needsUpdate = true; o.geometry.computeBoundingBox(); o.geometry.computeBoundingSphere(); } }
   }
 
   // 1ج) اللوجيات: يُزال الجدار وزخرفة الطراز في منطقة التغوير (فتحاتها أُخّرت للداخل قبل ذلك)
