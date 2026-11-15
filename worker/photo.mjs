@@ -8,6 +8,9 @@
 //
 // الخصوصية: الصورة تمرّ إلى النموذج وتعود للعميل فقط؛ لا تُخزَّن في D1 ولا في أي مكان في الخادم.
 
+import { normalizeInteriorDescription, buildInteriorPrompt, interiorCap } from './photo-interior.mjs';
+export { buildInteriorPrompt, normalizeInteriorDescription, interiorCap };
+
 // ------------------------------------------------------------------------------------------------ ثوابت الضبط
 export const PHOTO_TIERS = Object.freeze({
   standard: { model: '@cf/black-forest-labs/flux-2-klein-9b', envKey: 'PHOTO_MODEL_STANDARD' },
@@ -33,11 +36,11 @@ const DEFAULT_ALLOWED_ORIGINS = ['https://almizan-handasi.aljeryabod.workers.dev
 // ------------------------------------------------------------------------------------------------ البرومبت (قوائم مغلقة فقط)
 // لا يدخل البرومبت أي نص يكتبه العميل: كل حقل معرّف من قائمة مغلقة يقابله نص ثابت هنا.
 export const PHOTO_STYLES = Object.freeze({
-  N: { name: 'Najdi', text: 'traditional Najdi architecture of central Arabia: thick earthen walls finished in hand-troweled mud plaster with fine straw texture, stepped triangular crenellated parapets (shurfat), small deep-set windows with wooden shutters, rows of small triangular ventilation openings, a carved and painted Najdi wooden door, thin white gypsum trim bands' },
-  H: { name: 'Hijazi', text: 'historic Hijazi architecture of Jeddah (Al-Balad): light matte lime-plastered coral-stone walls, projecting carved teak rawasheen (roshan bay windows) with fine mashrabiya latticework, tall timber doors with carved panels, restrained plaster cornices' },
-  S: { name: 'Salmani', text: 'Salmani architecture of Riyadh: a contemporary reading of Najdi tradition with solid cubic volumes clad in sand-colored Riyadh limestone with visible coursing, crisp triangular crenellations and recessed horizontal bands, deep narrow vertical openings, shaded recesses, dark bronze metalwork' },
-  C: { name: 'Classical', text: 'refined neoclassical villa architecture: strict symmetry, cream limestone ashlar with fine visible joints and subtle natural variation, stone columns and pilasters, moulded cornices and window surrounds, stone balustrades, a formal entrance portico' },
-  M: { name: 'Light contemporary', text: 'light contemporary architecture: smooth fine-textured mineral plaster in soft off-white, clean planar volumes, slim dark aluminium window frames, generous glazing, thin projecting canopy slabs, restrained warm wood-slat accents' },
+  N: { name: 'Najdi', text: 'traditional Najdi architecture of central Arabia: thick earthen walls finished in hand-troweled mud plaster with fine straw texture in a warm sandy-ochre tone, stepped triangular crenellated parapets (shurfat) in pale gypsum, small deep-set windows with wooden shutters, rows of small triangular ventilation openings, a carved and painted Najdi wooden door with studded panels, thin white gypsum trim bands, ends of palm-trunk beams just below the parapet' },
+  H: { name: 'Hijazi', text: 'historic Hijazi architecture of Jeddah (Al-Balad): light matte lime-plastered coral-stone walls in off-white to pale cream, projecting carved teak rawasheen (roshan bay windows) with fine mashrabiya latticework, tall timber doors with carved panels, restrained plaster cornices, slender vertical proportions, timber shutters in muted deep brown or soft green' },
+  S: { name: 'Salmani', text: 'Salmani architecture of Riyadh: a contemporary reading of Najdi tradition with solid cubic volumes clad in honed sand-colored Riyadh limestone with visible coursing and slightly darker mortar joints, crisp triangular crenellations and recessed horizontal bands, deep narrow vertical openings, shaded recesses, dark bronze metalwork' },
+  C: { name: 'Classical', text: 'refined neoclassical villa architecture: strict symmetry, cream Saudi limestone ashlar with fine visible joints and subtle natural variation, stone columns and pilasters, moulded cornices and window surrounds, stone balustrades, a formal entrance portico' },
+  M: { name: 'Light contemporary', text: 'light contemporary architecture: smooth fine-textured mineral plaster in soft off-white with a light limestone plinth band, clean planar volumes, slim dark aluminium window frames, generous glazing, thin projecting canopy slabs, restrained warm wood-slat accents' },
   J: { name: 'Stone contemporary', text: 'stone contemporary architecture: large-format honed natural travertine and limestone cladding with legible veining and fine joints, bronze-anodized metal fins and trims, floor-to-ceiling glazing, warm timber soffits, sharp shadow gaps' },
 });
 export const PHOTO_TONES = Object.freeze({
@@ -61,10 +64,10 @@ export const PHOTO_ENTRANCE = Object.freeze({
 export const PHOTO_NIGHT = Object.freeze({ auto: '', lit: 'Architectural lighting washes the walls and highlights the details.', calm: 'Exterior lighting is soft, low and warm.' });
 // الميزان بعد التجربة الحية الأولى (خرج مشبع برتقالي بظلال مسحوقة): ضوء ناعم طبيعي وألوان هادئة؛ «الساعة الذهبية» دفء خفيف لا برتقالي.
 export const PHOTO_LIGHTING = Object.freeze({
-  golden: 'Lighting: late-afternoon sun, soft and natural with only a slight warmth, under a pale blue sky; long gentle shadows that stay open and detailed; no orange cast.',
-  day: 'Lighting: soft clear daylight under a pale blue sky with thin high haze; neutral white balance; gentle open shadows.',
+  golden: 'Lighting: late-afternoon sun, soft and natural with only a slight warmth, under a pale blue sky with dry desert air; long gentle shadows that stay open and detailed; sand-colored walls keep their true tone; no orange cast.',
+  day: 'Lighting: soft clear daylight under a pale blue sky with thin high haze; neutral white balance; gentle open shadows, with the shaded sides of the building still showing full material detail.',
   sunset: 'Lighting: shortly after sunset, soft even ambient light, a pastel sky with a faint warm band at the horizon, a few interior lights just visible; the facade stays evenly readable; no saturated orange or purple.',
-  night: 'Lighting: early blue hour, a deep blue sky that is not black, soft warm light from the windows and discreet low exterior lights; facade materials remain clearly readable; no blown highlights, no neon colors.',
+  night: 'Lighting: early blue hour, a deep blue sky that is not black, soft warm light (about 2700K) from the existing windows and discreet low exterior lights; facade materials remain clearly readable and keep their true colors; no blown highlights, no neon colors; the window glass shows warm interior light only where the reference shows windows.',
 });
 export const PHOTO_LOOK = 'Look: calm editorial architectural photography with natural soft light, neutral white balance, balanced exposure, realistic muted colors, visible shadow detail and true-to-life material tones; no oversaturation, no HDR look, no heavy contrast, no crushed blacks, no heavy vignette, no lens flare, no dramatic color grading.';
 export const PHOTO_YARD = Object.freeze({
@@ -82,6 +85,23 @@ export const PHOTO_VIEWS = Object.freeze({
   model: 'The reference image is a simple 3D massing model of a private villa in Saudi Arabia.',
 });
 export const GEOMETRY_RULES = 'Strict constraints: keep the exact building massing, number of floors, window and door positions, proportions, boundary wall and gates, and camera angle of the reference image; only upgrade materials, lighting, vegetation and realism; do not add or remove floors, openings, or structures; do not move, resize or reshape any window, door, balcony, parapet or gate; do not add tall trees in front of the facade; keep existing trees and palms where they are; do not change the framing or crop. No people, no cars, no text, no logos, no watermark.';
+/** حارس عدد الأدوار: صيغة صريحة لكل عدد (أكثر ما يهلوسه النموذج دور زائد أو غرفة سطح). */
+export const FLOORS_RULE = Object.freeze({
+  1: 'The building has exactly one floor (ground floor only) under a flat roof with a parapet: no upper floor, no attic, no rooftop room.',
+  2: 'The building has exactly two floors (a ground floor and one upper floor) under a flat roof with a parapet: no third floor, no attic, no rooftop room.',
+  3: 'The building has exactly three floors under a flat roof with a parapet: no fourth floor, no attic, no rooftop room.',
+});
+/** حفظ العناصر المعدودة (النموذج يضيف نوافذ وشرفات إن لم يُقيَّد). */
+export const PRESERVE_RULES = 'Count and preserve the elements of the reference: the same number of windows on every floor, the same balconies or terraces and no new ones, one main entrance door and the same gate, the same parapet outline and the same roof level.';
+export const AVOID_COMMON = 'Avoid: an extra floor, a rooftop room or water tank structure that is not shown, extra or missing windows, extra doors or balconies, street lamps or utility poles in front of the facade, pitched tiled roofs, glass curtain walls that are not shown, a cartoon or CGI look, warped or bent lines, duplicated or melted details, garbled signage.';
+export const PHOTO_AVOID = Object.freeze({
+  N: 'Also avoid: shiny glass facades, red clay roof tiles, decorative arches that are not in the reference.',
+  H: 'Also avoid: aluminium storefront frames, glossy tiles, rounded stucco swirls.',
+  S: 'Also avoid: ornate classical mouldings, pitched roofs, thin decorative columns.',
+  C: 'Also avoid: red Mediterranean roof tiles, extra columns or arches beyond those shown, gold paint.',
+  M: 'Also avoid: ornate classical mouldings, heavy stone cladding that is not in the reference, traditional crenellations.',
+  J: 'Also avoid: ornate classical mouldings, painted plaster surfaces replacing the stone, extra fins.',
+});
 const FLOORS_EN = { 1: 'a single-storey', 2: 'a two-storey', 3: 'a three-storey' };
 
 const record = v => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -107,17 +127,20 @@ export function normalizeDescription(d) {
 export function buildPhotoPrompt(description) {
   const d = normalizeDescription(description), st = PHOTO_STYLES[d.style];
   const dark = d.lighting === 'night' || d.lighting === 'sunset';
+  // الترتيب بحسب الأهمية: أي اقتطاع محتمل لنهاية البرومبت (حد رموز نموذج النص — غير متحقق) يصيب الزخرفة لا قيود الهندسة.
   const parts = [
     'Turn the reference image into a realistic, calm editorial architectural photograph of the same house.',
     PHOTO_VIEWS[d.view],
     `It is ${d.floors ? FLOORS_EN[d.floors] : 'a'} villa in ${st.name} style: ${st.text}.`,
+    d.floors ? FLOORS_RULE[d.floors] : '',
+    GEOMETRY_RULES, PRESERVE_RULES,
     PHOTO_TONES[d.tone], PHOTO_OPENINGS[d.openings], PHOTO_SCREEN[d.screen], PHOTO_ENTRANCE[d.entrance],
     PHOTO_LIGHTING[d.lighting], dark ? PHOTO_NIGHT[d.night] : '',
     PHOTO_LOOK,
     'Setting: a quiet Saudi residential street with light grey asphalt, a pale stone kerb and a paved sidewalk; render the existing planting as real date palms, olive trees and drought-tolerant desert plants, in the same places and at the same sizes.',
     d.yard.length ? `In the yard, keep and render realistically: ${d.yard.map(k => PHOTO_YARD[k]).join('; ')}.` : '',
     'Photography: full-frame camera with a 35mm tilt-shift lens, perfectly vertical lines, natural perspective, sharp fine detail, legible real-world material texture (stone grain and joints, fine plaster, wood grain, soft glass reflections), subtle natural weathering.',
-    GEOMETRY_RULES,
+    AVOID_COMMON, PHOTO_AVOID[d.style],
   ];
   return parts.filter(Boolean).join(' ');
 }
@@ -148,10 +171,12 @@ export function validatePhotoInput(body, L = PHOTO_LIMITS) {
   const mime = sniffImage(bytes);
   if (mime !== 'image/' + m[1]) throw new Error('invalid_input'); // المحتوى يجب أن يكون صورة فعلًا من النوع المعلن
   if (!Number.isFinite(body.width) || !Number.isFinite(body.height) || body.width < 64 || body.height < 64 || body.width > 8192 || body.height > 8192) throw new Error('invalid_input');
+  if (body.kind !== undefined && body.kind !== 'exterior' && body.kind !== 'interior') throw new Error('invalid_input');
+  const kind = body.kind === 'interior' ? 'interior' : 'exterior';
   const tier = body.tier === undefined ? 'standard' : body.tier;
   if (typeof tier !== 'string' || !Object.hasOwn(PHOTO_TIERS, tier)) throw new Error('invalid_input');
   if (body.seed !== undefined && !(Number.isInteger(body.seed) && body.seed >= 0 && body.seed <= 0xFFFFFFFF)) throw new Error('invalid_input');
-  return { bytes, mime, ...outputSize(body.width, body.height, tier, L), tier, seed: body.seed ?? null, description: normalizeDescription(body.description) };
+  return { bytes, mime, ...outputSize(body.width, body.height, tier, L), tier, seed: body.seed ?? null, kind, description: kind === 'interior' ? normalizeInteriorDescription(body.description) : normalizeDescription(body.description) };
 }
 
 // ------------------------------------------------------------------------------------------------ المزوّد
@@ -272,6 +297,8 @@ const MSG = {
   input: 'بيانات الطلب غير صالحة: يلزم لقطة JPEG أو PNG ووصف تصميم من القيم المعتمدة.',
   timeout: 'تأخر توليد الصورة أكثر من المسموح. لم يتغير تصميمك؛ أعد المحاولة.',
   provider: 'تعذّر توليد الصورة الآن. لم يتغير تصميمك؛ أعد المحاولة لاحقًا.',
+  interiorOff: 'خدمة الصورة الداخلية غير مفعّلة الآن.',
+  interiorCap: 'بلغت الصور الداخلية حدها اليومي. حاول غدًا.',
   shape: 'أعاد مولّد الصور ردًا غير مفهوم، فتجاهلته. أعد المحاولة لاحقًا.',
 };
 
@@ -297,6 +324,7 @@ export function createPhotoHandler({ now = Date.now, limits = PHOTO_LIMITS, log 
     return json({
       configured, verified: false, tiers: configured ? Object.keys(PHOTO_TIERS) : [],
       models: configured ? Object.fromEntries(Object.keys(PHOTO_TIERS).map(t => [t, modelFor(t, env)])) : {},
+      interior: configured ? { configured: interiorCap(env) > 0, dailyCap: interiorCap(env), remainingToday: interiorCap(env) > 0 ? Math.max(0, interiorCap(env) - (await usage.peek(env, 'interior')).count) : 0 } : { configured: false, dailyCap: 0, remainingToday: 0 },
       dailyCap: cap, remainingToday: configured ? Math.max(0, cap - used.count) : 0, counter: used.store,
       limits: { perMinute: L.perMinute, perDayPerClient: L.perDayPerIp, maxImageBytes: L.maxImageBytes, maxSide: L.maxSide, outSide: L.outSide },
       steps: configured ? Object.fromEntries(Object.keys(PHOTO_TIERS).map(t => [t, stepsFor(modelFor(t, env), env)])) : {},
@@ -320,16 +348,23 @@ export function createPhotoHandler({ now = Date.now, limits = PHOTO_LIMITS, log 
       if (e.message === 'too_large' || e.message === 'image_too_large') return json({ error: MSG.large, code: 'IMAGE_TOO_LARGE' }, 413, cors);
       return json({ error: MSG.input, code: 'INVALID_INPUT' }, 400, cors);
     }
+    const icap = input.kind === 'interior' ? interiorCap(env) : null;
+    if (input.kind === 'interior' && icap <= 0) return json({ error: MSG.interiorOff, code: 'INTERIOR_OFF' }, 503, cors);
     // حجز من حد العميل اليومي ثم من السقف الإجمالي قبل استدعاء النموذج (يُعاد الحجز إن رفض النموذج الطلب صراحةً)
     const ipKey = 'ip:' + await ipHash(ip, dayKey(now()));
     const mine = await usage.bump(env, ipKey, 1);
     if (mine.count > L.perDayPerIp) { await usage.bump(env, ipKey, -1); return json({ error: MSG.dayIp, code: 'RATE_DAY' }, 429, { ...cors, 'Retry-After': String(nextDaySeconds()) }); }
     const total = await usage.bump(env, 'total', 1);
-    const refund = async () => { await usage.bump(env, 'total', -1); await usage.bump(env, ipKey, -1); };
+    let interiorBumped = false;
+    const refund = async () => { await usage.bump(env, 'total', -1); await usage.bump(env, ipKey, -1); if (interiorBumped) await usage.bump(env, 'interior', -1); };
     if (total.count > cap) { await refund(); return json({ error: MSG.dayCap, code: 'DAILY_CAP' }, 429, { ...cors, 'Retry-After': String(nextDaySeconds()) }); }
+    if (input.kind === 'interior') { // سقف أيام منفصل للداخلية فوق السقف الإجمالي، حتى لا ترفع تكلفة المالك دون علمه
+      const inter = await usage.bump(env, 'interior', 1); interiorBumped = true;
+      if (inter.count > icap) { await refund(); return json({ error: MSG.interiorCap, code: 'INTERIOR_CAP' }, 429, { ...cors, 'Retry-After': String(nextDaySeconds()) }); }
+    }
 
     const model = modelFor(input.tier, env), seed = input.seed ?? (crypto.getRandomValues(new Uint32Array(1))[0] >>> 0);
-    const prompt = buildPhotoPrompt(input.description), t0 = now();
+    const prompt = input.kind === 'interior' ? buildInteriorPrompt(input.description) : buildPhotoPrompt(input.description), t0 = now();
     // خطأ مزوّد عابر (مثل 3043 Internal server error أو 5xx): إعادة واحدة تلقائية قبل 502؛ الحجز واحد للطلب كله ويُعاد إن فشل نهائيًا
     const steps = stepsFor(model, env), call = () => env.AI.run(model, buildProviderRequest(model, { prompt, bytes: input.bytes, mime: input.mime, width: input.width, height: input.height, seed, steps }));
     let out, timer, attempts = 0;
@@ -357,9 +392,9 @@ export function createPhotoHandler({ now = Date.now, limits = PHOTO_LIMITS, log 
     const img = await readProviderImage(out, log);
     if (!img) return json({ error: MSG.shape, code: 'PROVIDER_SHAPE' }, 502, cors);
     return json({
-      image: `data:${img.mime};base64,${img.b64}`, tier: input.tier, model, seed, lighting: input.description.lighting,
+      image: `data:${img.mime};base64,${img.b64}`, kind: input.kind, tier: input.tier, model, seed, lighting: input.description.lighting,
       width: input.width, height: input.height, steps, attempts, ms: now() - t0, remainingToday: Math.max(0, cap - total.count), counter: total.store,
-      disclaimer: 'صورة محسّنة بالذكاء الاصطناعي من مجسم تصميمك — للتصوّر لا للتنفيذ',
+      disclaimer: input.kind === 'interior' ? 'صورة داخلية محسّنة بالذكاء الاصطناعي من مجسم تصميمك — للتصوّر لا للتنفيذ' : 'صورة محسّنة بالذكاء الاصطناعي من مجسم تصميمك — للتصوّر لا للتنفيذ',
     }, 200, cors);
   }
 

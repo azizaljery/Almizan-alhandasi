@@ -8,7 +8,7 @@
 export const PROJECT_KEYS = Object.freeze([
   'mizan.design.session.v1', 'mizan.home.state.v1', 'mizan.journey.reached.v1',
   'mizan.studio.doc.v1', 'mizan.studio.doc.v1.before-home', 'mizan.studio.doc.v1.before-dna', 'mizan.studio.dna.v1', 'mizan.studio.structure.v1',
-  'mizan.facade.wish', 'mizan.exterior.v1', 'mizan.geometry.v1', 'mizan.land.geo.v1', 'mizan.mep.systems.v1', 'mizan_portal_project_v1',
+  'mizan.facade.wish', 'mizan.exterior.v1', 'mizan.photo.keep.v1', 'mizan.geometry.v1', 'mizan.land.geo.v1', 'mizan.mep.systems.v1', 'mizan_portal_project_v1',
 ]);
 /** مفاتيح تُمسح ولا تُحفظ (لقطة 3D كبيرة تُعاد من التصميم نفسه). */
 export const PROJECT_TRANSIENT_KEYS = Object.freeze(['mizan.studio.snap3d.v1']);
