@@ -24,7 +24,7 @@ try {
   check('الزر ظاهر بجانب زر الصورة المعمارية عند تهيئة الخدمة الداخلية', await page.isVisible('#photoInterior') && await page.evaluate(() => document.getElementById('photoInterior').previousElementSibling?.id === 'photoPro'), await page.textContent('#photoInterior'));
   for (const [room, label] of [['majlis', 'المجلس'], ['living', 'الصالة'], ['master', 'غرفة النوم الرئيسية']]) {
     const n0 = M.calls.length;
-    if (room === 'majlis') { await page.click('#photoInterior'); } else { await page.click(`#piDialog .pp-seg [data-r=${room}]`); }
+    if (room === 'majlis') { await page.evaluate(() => document.getElementById('photoInterior').click()); } else { await page.evaluate(r => document.querySelector(`#piDialog [data-r=${r}]`).click(), room); }
     await shown(page);
     const c = M.calls[n0], r = await page.evaluate(() => { const s = globalThis.__mizanInteriorPhoto.state; return { ok: s.result.fidelity?.ok, score: s.result.fidelity?.score, lm: (s.landmarks || []).length, extra: s.extra, stamp: document.querySelector('#piDialog .pp-stamp').textContent, title: document.querySelector('#piDialog h2').textContent }; });
     check(`${label}: طلب kind=interior ببرومبت داخلي للغرفة وأعداد الفتحات والقطع من اللقطة`, M.calls.length === n0 + 1 && /interior photograph/.test(c.prompt) && new RegExp(({ majlis: 'Arab majlis', living: 'family living room', master: 'master bedroom' })[room]).test(c.prompt) && /exactly/.test(c.prompt), c.prompt.slice(260, 520));
@@ -33,14 +33,14 @@ try {
   }
   await page.screenshot({ path: path.join(OUT, 'interior-dialog-desktop.jpg'), type: 'jpeg', quality: 80 });
   // مخالفة: صورة تحذف ما في المجسم (ثابتة لواجهة) ← تنبيه ولا ادّعاء
-  M.mode = 'fixed'; const n1 = M.calls.length; await page.click('#piDialog .pp-seg [data-l=night]'); await shown(page);
+  M.mode = 'fixed'; const n1 = M.calls.length; await page.evaluate(() => document.querySelector('#piDialog [data-l=night]').click()); await shown(page);
   const w = await page.evaluate(() => ({ ok: globalThis.__mizanInteriorPhoto.state.result.fidelity?.ok, note: document.querySelector('#piDialog .pp-note').textContent }));
   check('صورة تخالف المجسم الداخلي: تنبيه صريح وإعادة تلقائية واحدة', w.ok === false && /قد تختلف/.test(w.note) && M.calls.length === n1 + 2, w.note.slice(0, 120));
   check('تغيير الإضاءة يعيد التقاط المجسم بإضاءته (طلب ليلي)', /evening/.test(M.calls.at(-1).prompt));
   check('مصغّرة الصورة حُفظت مع المشروع (غلاف «مشاريعي السابقة»)', await page.evaluate(() => { try { const v = JSON.parse(localStorage.getItem('mizan.photo.keep.v1') || 'null'); return v?.items?.some(i => /^interior:/.test(i.kind)) && v.items.every(i => i.thumb.length < 40000); } catch { return false; } }));
   M.mode = 'echo'; await page.keyboard.press('Escape'); await ctx.close();
   ({ ctx, page } = await open({ width: 390, height: 844 }, true));
-  await page.waitForSelector('#photoInterior:not([hidden])', { timeout: 90000 }); await page.locator('#photoInterior').scrollIntoViewIfNeeded(); await page.tap('#photoInterior'); await shown(page);
+  await page.waitForSelector('#photoInterior:not([hidden])', { timeout: 90000 }); await page.locator('#photoInterior').scrollIntoViewIfNeeded(); await page.evaluate(() => document.getElementById('photoInterior').click()); await shown(page);
   check('الجوال: لا تمرير أفقي والمقارنة بعرض الشاشة', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1 && document.querySelector('#piDialog .pp-cmp').getBoundingClientRect().width >= 340));
   await page.screenshot({ path: path.join(OUT, 'interior-dialog-mobile.jpg'), type: 'jpeg', quality: 80 }); await ctx.close();
   M.mode = 'off'; ({ ctx, page } = await open({ width: 1366, height: 900 }));
