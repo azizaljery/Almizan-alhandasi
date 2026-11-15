@@ -37,6 +37,7 @@ import { createRealismMaterials, limestone, render, timberLook } from './facade-
 import { buildBuildingScene, closeupCamera } from './facade-realism/scene-hq.mjs';
 import { extrudeFloors, decorateFloors, floorsInfo, bandLevels, facadeDoc } from './facade-realism/floors.mjs';
 import { massingPlan, buildMassing } from './facade-realism/massing.mjs';
+import { upperOpenings } from './facade-realism/upper.mjs';
 import { pickTier, gpuName, heroCamera, photoBegin, photoFinish, createRefiner, frontSouthDoc } from './facade-realism/photo/pipeline.mjs';
 
 const q = new URLSearchParams(location.search);
@@ -96,7 +97,10 @@ async function variantMode() {
   // مظلة السطح المرتد في J تبرز أكثر من 250 مم (بوابة البروز)؛ فالارتداد في J اختياري صراحة (setback=1) ولا يُفعَّل افتراضيًا
   if (q.get('style') === 'J' && !q.has('setback')) q.set('setback', '0');
   const FI = floorsInfo(q);
-  const built = extrudeFloors(buildAllSides(doc, id), FI);
+  // فتحات الأدوار العليا من غرف المخطط الفعلية (upper.mjs)؛ upper=0 يعيد تكرار الأرضي القديم. مع الارتداد (ملحق J) يبقى الحساب القديم.
+  const built0 = buildAllSides(doc, id); FI.style = q.get('style') || '';
+  if (FI.n > 1 && !FI.setback && q.get('upper') !== '0') { try { FI.upper = upperOpenings(docSite, built0); } catch (e) { console.error('UPPER_FAIL', e?.message || e); } }
+  const built = extrudeFloors(built0, FI);
   const lib = createRealismMaterials(THREE);
   const greyMats = grey ? {
     body: new THREE.MeshStandardMaterial({ color: '#b4b4b4', roughness: .85 }),
@@ -176,8 +180,8 @@ async function variantMode() {
       let ext = {}; try { ext = JSON.parse(q.get('ext') || localStorage.getItem('mizan.exterior.v1') || '{}') || {}; } catch { ext = {}; }
       // حد البناء: الارتداد النظامي لهذه الأرض (requiredSetbacks) حيث عُرف عرض الشارع أو كانت الجهة مجاورًا؛ وإلا ارتدادات المستند. يُدار مع المستند إن أُديرت الواجهة.
       let sbk = null; try { const land = JSON.parse(localStorage.getItem('mizan.design.session.v1') || 'null')?.input?.land; if (land?.streets?.length && docRaw0?.plot?.setbacks) { const { requiredSetbacks } = await import('../municipal-rules.mjs'), rq = requiredSetbacks(land).sides, own = docRaw0.plot.setbacks, raw = {}; for (const k of ['s', 'n', 'e', 'w']) raw[k] = rq[k]?.exact ? rq[k].required : Math.max(own[k] || 0, rq[k]?.required || 0); sbk = PHOTO ? frontSouthDoc({ ...docRaw0, plot: { ...docRaw0.plot, setbacks: raw } }).plot.setbacks : raw; } } catch { sbk = null; }
-      const tM = performance.now(), plan = massingPlan({ doc: docSite, built, style: styleId, exterior: ext, floors: FI.n, setbacks: sbk });
-      massing = buildMassing(THREE, { scene, S, plan, night: q.get('night') === '1' }); massing.info.ms = Math.round(performance.now() - tM);
+      const tM = performance.now(), lod = q.get('lod') === 'low' || (!q.get('lod') && tier.why === 'mobile' && tier.name !== 'high') ? 'low' : 'high', plan = massingPlan({ doc: docSite, built, style: styleId, exterior: ext, floors: FI.n, setbacks: sbk, lod }), tP = performance.now();
+      massing = buildMassing(THREE, { scene, S, plan, night: q.get('night') === '1' }); massing.info.ms = Math.round(performance.now() - tM); massing.info.planMs = Math.round(tP - tM); massing.info.lod = lod;
       addEventListener('pagehide', () => { try { massing?.dispose(); } catch {} }, { once: true });
     } catch (e) { console.error('MASSING_FAIL', e?.message || e); massing = null; }
   }

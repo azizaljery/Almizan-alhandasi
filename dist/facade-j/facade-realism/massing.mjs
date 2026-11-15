@@ -23,7 +23,7 @@ export const VOCAB = Object.freeze({
   C: ['recessed-entry', 'deep-reveals', 'central-attic', 'central-loggia', 'portico', 'portico-balustrade', 'portico-pediment', 'central-pilasters', 'keystones'],
   N: ['recessed-entry', 'deep-reveals', 'entry-block', 'shurfat', 'luhuj', 'gypsum-band', 'corner-batter', 'mazarib'],
   H: ['recessed-entry', 'deep-reveals', 'rawshan', 'entry-arch', 'parapet-coping'],
-  S: ['recessed-entry', 'deep-reveals', 'stone-entry-frame', 'deep-piers', 'triangle-band'],
+  S: ['recessed-entry', 'deep-reveals', 'stone-entry-frame', 'deep-piers', 'triangle-band', 'mashrabiya', 'stepped-crowns'],
 });
 const RAILING = { M: 'glass', J: 'glass', C: 'balustrade', N: 'solid', H: 'timber', S: 'solid' };
 const EPS = 1e-4, PLINTH = .45, GROUND_MAX = 1.0;
@@ -99,10 +99,11 @@ export function elementBox(el) { return { min: el.min, max: el.max }; }
  * @param style    معرّف الطراز (M,J,C,N,H,S)
  * @param exterior ذوق العميل (prefs.exterior)
  */
-export function massingPlan({ doc, built, style, exterior = {}, floors = null, setbacks = null }) {
+export function massingPlan({ doc, built, style, exterior = {}, floors = null, setbacks = null, lod = 'high' }) {
+  const LOD = lod === 'low' ? 1.7 : 1; // جوال/جهاز ضعيف: كاسرات وشرائح ومشربيات وأعمدة درابزين أقل عددًا بالنسبة نفسها فيبقى الشكل ويقل عدد الأجزاء المكررة
   const taste = tasteOf(exterior), seed = massingSeed(doc, style, exterior), R = rng(seed);
   const pick = (arr) => arr[Math.floor(R() * arr.length) % arr.length];
-  const faces = facesFromBuilt(built), F = faces.s, plan = { seed, style, taste, vocab: [], elements: [], recesses: [], loggias: [], terraces: [], dropped: [], entry: null, plot: null, encroachFrontM: 0, encroachUpperM: 0, maxProjectionM: 0, upperProjectionM: 0, floors: floors || 1 };
+  const faces = facesFromBuilt(built), F = faces.s, plan = { seed, style, lod, taste, vocab: [], elements: [], recesses: [], loggias: [], terraces: [], dropped: [], entry: null, plot: null, encroachFrontM: 0, encroachUpperM: 0, maxProjectionM: 0, upperProjectionM: 0, floors: floors || 1 };
   plan.wallTop = Math.max(0, ...Object.values(faces).flatMap(f => f.pieces.map(p => p.top)));
   const P = (doc?.plot?.polygon || []), sb = setbacks || doc?.plot?.setbacks || {}; // setbacks: الارتداد النظامي لهذه الأرض إن عُرف (requiredSetbacks)، وإلا ارتدادات المستند
   if (P.length) { const xs = P.map(p => p.x), ys = P.map(p => p.y); plan.plot = { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys), sb: { s: sb.s || 0, n: sb.n || 0, e: sb.e || 0, w: sb.w || 0 } }; }
@@ -205,7 +206,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null, s
     use(main); box(m.floor || m.side, e.u0 - .25, e.u1 + .25, 0, .15, -.02, .55, { part: 'threshold', ground: true }); return L; };
   const deepReveals = (mat) => { cur = 'deep-reveals'; for (const pc of F.pieces) for (const o of pc.ops) if (!o.door) recess(pc, o, RC[1], mat); use(main); };
   /** شرائح رأسية داخل تجويف النافذة (ساتر مثقّب ضمن سماكة الجدار). */
-  const revealSlats = (pc, o, a, b, opt = {}) => { use(pc); const pitch = opt.pitch || .15, w = opt.w || .04, n = Math.max(2, Math.floor((b - a) / pitch)), st = (b - a) / n; for (let i = 0; i < n; i++) box('timber', a + (i + .5) * st - w / 2, a + (i + .5) * st + w / 2, o.y0, o.y1, -.16, -.03, { part: opt.part || 'slat', inst: opt.inst || 'slat', screen: true }); };
+  const revealSlats = (pc, o, a, b, opt = {}) => { use(pc); const pitch = (opt.pitch || .15) * LOD, w = opt.w || .04, n = Math.max(2, Math.floor((b - a) / pitch)), st = (b - a) / n; for (let i = 0; i < n; i++) box('timber', a + (i + .5) * st - w / 2, a + (i + .5) * st + w / 2, o.y0, o.y1, -.16, -.03, { part: opt.part || 'slat', inst: opt.inst || 'slat', screen: true }); };
   if (flat) {
     const bodyKey = { M: 'accent', J: 'accent', C: 'stone', N: 'mud', H: 'stone', S: 'stone' }[style] || 'accent', modern = style === 'M' || style === 'J';
     const EL = recessEntry(modern ? { back: 'body', side: 'accent', soffit: 'timber', floor: 'accent' } : { back: 'body', side: bodyKey, soffit: style === 'H' || style === 'N' ? 'timber' : bodyKey, floor: bodyKey });
@@ -224,11 +225,20 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null, s
       const lo = other ? seg[0] : e && fLeft ? seg[0] : e ? Math.max(seg[0], e.u1 + .6) : seg[0], hi = other ? seg[1] : e && fLeft ? Math.min(seg[1], e.u0 - .6) : seg[1];
       const y0 = two ? FL1 + .05 : PLINTH, y1 = fp.top - 1.2, D = grand ? .9 : simple ? .5 : .7;
       for (const inset of [.35, .6, 1.0, 1.6]) { FLg = loggia(fp, lo + inset, hi - inset, y0, y1, D, { back: 'body', side: 'accent', soffit: 'timber', floor: 'accent', need: true }); if (FLg) { FLg.pc = fp; FLg.left = fLeft; break; } }
-      if (FLg) { cur = 'louvers'; const all = taste.screen === 'yes' || taste.openings === 'private', w = (FLg.b - FLg.a) * (all ? 1 : .3), a = FLg.left ? FLg.a : FLg.b - w, n = Math.max(3, Math.floor(w / .15)), st = w / n;
+      if (FLg) { cur = 'louvers'; const all = taste.screen === 'yes' || taste.openings === 'private', w = (FLg.b - FLg.a) * (all ? 1 : .3), a = FLg.left ? FLg.a : FLg.b - w, n = Math.max(3, Math.floor(w / (.15 * LOD))), st = w / n;
         for (let i = 0; i < n; i++) box('timber', a + (i + .5) * st - .022, a + (i + .5) * st + .022, FLg.y0, FLg.y1, -.15, -.03, { part: 'slat', inst: 'slat', screen: true }); }
     }
     deepReveals(bodyKey);
     const wins = F.pieces.flatMap(pc => pc.ops.filter(o => !o.door && plan.recesses.some(r => r.opening === o.id && r.depth < .45)).map(o => ({ pc, o }))).sort((p, q) => (q.o.u1 - q.o.u0) - (p.o.u1 - p.o.u0));
+    if (style === 'S') { // سلماني داخل الحد: لا بروز، فالعمق من الغور (حزام مثلثات على جدار المدخل الغائر، مشربية هندسية في تجاويف النوافذ) والصلابة من تيجان متدرجة فوق الدروة
+      if (e && EL) { cur = 'triangle-band'; use(main); const a = EL.a + .14, b = EL.b - .14, yb = e.y1 + .1, yt = Math.min(EL.y1 - .06, yb + .34);
+        if (b - a > .5 && yt - yb > .16) { const n = Math.max(3, Math.round((b - a) / .27)), st = (b - a) / n; for (let i = 0; i < n; i++) { const u = a + i * st; prism('dark', i % 2 ? [[u + .02, yt], [u + st - .02, yt], [u + st / 2, yb]] : [[u + .02, yb], [u + st - .02, yb], [u + st / 2, yt]], -EL.D, -EL.D + .02, { part: 'triangle', liner: true }); } } }
+      cur = 'mashrabiya'; { const list = taste.screen === 'no' ? [] : wins.filter(x => x.o.u1 - x.o.u0 >= .7 && x.o.u1 - x.o.u0 <= 2.4).slice(0, grand ? 4 : 2);
+        for (const { pc, o } of list) { revealSlats(pc, o, o.u0, o.u1, { pitch: .13, w: .03, part: 'lattice', inst: 'lat' }); use(pc); const nh = Math.max(3, Math.round((o.y1 - o.y0) / (.22 * LOD))); for (let i = 1; i < nh; i++) { const y = o.y0 + i * (o.y1 - o.y0) / nh; box('timber', o.u0, o.u1, y - .015, y + .015, -.15, -.04, { part: 'lattice', inst: 'lat', screen: true }); } } }
+      cur = 'stepped-crowns'; { use(main); const w = .66, ups = []; for (const [a, b] of topSegs) { if (Math.abs(a - gU0) < EPS) ups.push(a); if (Math.abs(b - gU1) < EPS) ups.push(b - w); }
+        if (e && !simple) { const c0 = Math.max(U0, Math.min(U1 - w, ec - w / 2)); if (topSegs.some(g => g[0] <= c0 + EPS && g[1] >= c0 + w - EPS)) ups.push(c0); }
+        for (const u of ups) for (let h = 0; h < 3; h++) box('stone', u + h * .1, u + w - h * .1, H + h * .2, H + (h + 1) * .2, -.3, 0, { part: 'crown' }); }
+    }
     if (modern) {
       // بلاطة السقف تبرز بقدر الفائض المتاح فقط (أمامًا قد يكون صفرًا؛ جانبًا حتى خط الارتداد الجانبي)، وزعنفة عند الزاوية ضمن الفائض الجانبي
       const OV = Math.min(grand ? 1.2 : .9, Math.max(0, slackW)), OE = Math.min(grand ? 1.2 : .9, Math.max(0, slackE));
@@ -282,7 +292,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null, s
     cur = 'louvers';
     { const za = frame ? frame.a : fp.u0 + .2, zb = frame ? frame.b : fp.u1 - .2, y0 = two ? FL1 + .15 : PLINTH + .1, y1 = Hf - .5;
       const g = gaps(y0, y1, za, zb, .1).filter(x => x[1] - x[0] >= .6).sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]))[0];
-      const slats = (a, b, d, opt) => { const n = Math.max(2, Math.floor((b - a) / .15)), step = (b - a) / n; for (let i = 0; i < n; i++) box('timber', a + i * step + step / 2 - .022, a + i * step + step / 2 + .022, y0, y1, d, d + .12, { part: 'slat', inst: 'slat', ...opt }); };
+      const slats = (a, b, d, opt) => { const n = Math.max(2, Math.floor((b - a) / (.15 * LOD))), step = (b - a) / n; for (let i = 0; i < n; i++) box('timber', a + i * step + step / 2 - .022, a + i * step + step / 2 + .022, y0, y1, d, d + .12, { part: 'slat', inst: 'slat', ...opt }); };
       if (g) { const w = Math.min(g[1] - g[0], 2.1), nearL = fp.ops.some(o => Math.abs(o.u0 - .1 - g[1]) < .2 && o.y1 > y0); slats(nearL ? g[1] - w : g[0], nearL ? g[1] : g[0] + w, .02); }
       const wide = fp.ops.filter(o => !o.door && o.y1 > y0 && o.y0 < y1 && o.u0 >= za - .1 && o.u1 <= zb + .1).sort((p, q) => (q.u1 - q.u0) - (p.u1 - p.u0))[0];
       if (wide && (taste.screen === 'yes' || taste.openings === 'private')) slats(wide.u0 - .05, wide.u1 + .05, .28, { screen: true });
@@ -328,7 +338,7 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null, s
         const y0 = yT + .1, pr = .2; box('stone', a, b, y0, y0 + .08, dc + .12, dc + .3, { part: 'rail' }); box('stone', a, b, y0 + .62, y0 + .72, dc + .1, dc + .32, { part: 'rail' });
         for (const [s0, s1] of [[a, a + .18], [b - .18, b]]) { box('stone', s0, s1, y0, y0 + .08, .02, dc + .12, { part: 'rail' }); box('stone', s0 - .01, s1 + .01, y0 + .62, y0 + .72, .02, dc + .12, { part: 'rail' }); }
         for (const u of [a, b - pr]) box('stone', u, u + pr, y0, y0 + .82, dc + .1, dc + .3, { part: 'pier' });
-        const n = Math.max(3, Math.round((b - a - 2 * pr) / .2)); for (let i = 0; i < n; i++) { const u = a + pr + (i + .5) * (b - a - 2 * pr) / n; box('stone', u - .045, u + .045, y0 + .08, y0 + .62, dc + .16, dc + .26, { part: 'baluster', inst: 'bal' }); }
+        const n = Math.max(3, Math.round((b - a - 2 * pr) / (.2 * LOD))); for (let i = 0; i < n; i++) { const u = a + pr + (i + .5) * (b - a - 2 * pr) / n; box('stone', u - .045, u + .045, y0 + .08, y0 + .62, dc + .16, dc + .26, { part: 'baluster', inst: 'bal' }); }
         const ns = Math.max(2, Math.round(dc / .2)); for (const u of [a + .09, b - .09]) for (let i = 0; i < ns; i++) { const d = .1 + (i + .5) * (dc) / ns; box('stone', u - .045, u + .045, y0 + .08, y0 + .62, d - .05, d + .05, { part: 'baluster', inst: 'bal' }); }
       } else { cur = 'portico-pediment'; const m = (a + b) / 2; prism('stone', [[a - .1, yT + .1], [b + .1, yT + .1], [m, yT + .1 + Math.min(.85, (b - a) * .22)]], -.02, dc + .38, { part: 'pediment' }); }
     }

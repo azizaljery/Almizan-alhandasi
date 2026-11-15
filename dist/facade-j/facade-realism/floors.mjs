@@ -16,6 +16,8 @@ export function floorsInfo(q) {
   const dz = (n - 1) * FLOOR.upper;
   return { n, setback, dz, top: FLOOR.top1 + dz, parapetBase: FLOOR.parapetBase + dz, levels: Array.from({ length: n }, (_, k) => floorLevel(k)) };
 }
+import { openingPoly } from './model.mjs';
+import { placeUpper, deriveUpper } from './upper.mjs';
 const rect = (u0, u1, z0, z1) => [[u0, z0], [u1, z0], [u1, z1], [u0, z1]];
 const bb = pts => { const us = pts.map(p => p[0]), zs = pts.map(p => p[1]); return { u0: Math.min(...us), u1: Math.max(...us), z0: Math.min(...zs), z1: Math.max(...zs) }; };
 const isDoorRect = r => r.z0 < .6;
@@ -44,7 +46,11 @@ export function extrudeFloors(built, info) {
       if (side === 'e' && /^e1\//.test(L.id)) return { u0: -1e3, u1: SB };
       return null;
     };
-    const holesFor = (L, k, FL, c) => frames.filter(f => f.id.split('/')[0] === L.id.split('/')[0]).map(f => upperRect(bb(f.outer), FL))
+    // فتحات الأدوار العليا من غرف المخطط الفعلية (upper.mjs) حيث توفرت؛ وإلا تكرار الأرضي (الافتراض القديم)
+    const real = info.upper && !setback ? info.upper : null, placedBy = {};
+    if (real) for (let k = 1; k < n; k++) if (real.levels.has(k)) placedBy[k] = placeUpper(info.style || 'M', real.fallback?.[side] ? deriveUpper(B.F.pieces, [...real.levels]) : (real.sides[side] || []), B.F.pieces, k);
+    const polyOf = o => o.kind === 'arch' ? openingPoly({ kind: 'arch', u0: o.u0, u1: o.u1, z0: o.z0, z1: o.z1 }) : rect(o.u0, o.u1, o.z0, o.z1);
+    const holesFor = (L, k, FL, c) => placedBy[k] ? placedBy[k].filter(o => o.piece === L.id.split('/')[0]).map(polyOf) : frames.filter(f => f.id.split('/')[0] === L.id.split('/')[0]).map(f => upperRect(bb(f.outer), FL))
       .filter(r => !(k === n - 1 && c && r.u1 > c.u0 && r.u0 < c.u1)).map(r => rect(r.u0, r.u1, r.z0, r.z1));
     for (const L of base) {
       const c = cut(L);
@@ -58,8 +64,8 @@ export function extrudeFloors(built, info) {
           else outer = [[b0.u0, 0], [b0.u1, 0], [b0.u1, zc], [u0, zc], [u0, top], [b0.u0, top]];
         }
         const holes = [...L.holes];
-        for (let k = 1; k < n; k++) holes.push(...holesFor(L, k, floorLevel(k), c));
         const nb = bb(outer);
+        for (let k = 1; k < n; k++) { const hs = holesFor(L, k, floorLevel(k), c); holes.push(...(placedBy[k] ? hs.filter(h => { const hb = bb(h); return hb.u0 >= nb.u0 - 1e-6 && hb.u1 <= nb.u1 + 1e-6 && hb.z0 >= nb.z0 - 1e-6 && hb.z1 <= nb.z1 + 1e-6; }) : hs)); }
         layers.push({ ...L, outer, holes, z1: nb.z1 });
         // الدور الأخير المرتد للواجهة الأمامية: جدار مستقل خلف الواجهة بـSB
         if (c && side === 's') {
@@ -81,6 +87,7 @@ export function extrudeFloors(built, info) {
       if (L.role === 'frame') {
         const r0 = bb(L.outer);
         for (let k = 1; k < n; k++) {
+          if (placedBy[k]) continue;
           const FL = floorLevel(k), r = upperRect(r0, FL);
           const inT = k === n - 1 && c;
           if (inT && side !== 's') { if (r.u1 > c.u0 && r.u0 < c.u1) continue; }
@@ -90,6 +97,14 @@ export function extrudeFloors(built, info) {
           extra.push({ ...L, id: id.replace('.frame', '.glazing'), role: 'glazing', mat: 'glass', cls: 'glass', C, o0: .01, o1: .02, outer: rect(r.u0 + i, r.u1 - i, r.z0 + i, r.z1 - i), holes: [], u0: r.u0 + i, u1: r.u1 - i, z0: r.z0 + i, z1: r.z1 - i, opening: op, floor: k });
         }
       }
+    }
+    // إطارات وزجاج فتحات الدور الحقيقية (موضعها من المخطط؛ نسبها من الطراز)
+    for (let k = 1; k < n; k++) for (const o of placedBy[k] || []) {
+      const pcOps = B.F.pieces.find(p => p.id === o.piece)?.openings || [], isWinF = f => /^window/.test(pcOps.find(x => x.id === f.opening)?.kind || ''), mine = frames.filter(f => f.id.startsWith(o.piece + '/'));
+      const Lf = mine.find(isWinF) || mine[0] || frames.find(isWinF) || frames[0], wallL = base.find(x => x.id === o.piece + '/wall'); if (!Lf) continue;
+      const C = wallL ? wallL.C : Lf.C, i = .06, id = `${o.piece}/${o.id}@F${k}.frame`, op = `${o.id}@F${k}`, pol = polyOf(o), ins = polyOf({ ...o, u0: o.u0 + i, u1: o.u1 - i, z0: o.z0 + i, z1: o.z1 - i });
+      extra.push({ ...Lf, id, C, piece: wallL ? wallL.piece : Lf.piece, o0: .005, o1: .105, outer: pol, holes: [ins], u0: o.u0, u1: o.u1, z0: o.z0, z1: o.z1, opening: op, floor: k, room: o.room });
+      extra.push({ ...Lf, id: id.replace('.frame', '.glazing'), role: 'glazing', mat: 'glass', cls: 'glass', C, piece: wallL ? wallL.piece : Lf.piece, o0: .01, o1: .02, outer: ins, holes: [], u0: o.u0 + i, u1: o.u1 - i, z0: o.z0 + i, z1: o.z1 - i, opening: op, floor: k, room: o.room });
     }
     out[side] = { ...B, layers: [...layers, ...extra] };
   }

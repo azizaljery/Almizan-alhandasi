@@ -88,7 +88,10 @@ export function planSite(doc, opt = {}) {
       put(k, x, y, { base: b.h, r: k === 'grass' ? .55 + R() * .35 : .3 + R() * .25 }); if (b.where === 'street' && R() < .16) put('rock', x + .3, y + (R() - .5) * .3, { base: b.h, r: .22 + R() * .25 }); } }
   // نخلتان تؤطّران الواجهة في ركني الحوش الأمامي (داخل السور)، وأخريان في الحوش الخلفي تعلوان السطح
   const fy = P.y0 + Math.min(dF * .5, 1.5);
+  // الكاميرا الافتتاحية تقف من جهة المدخل (camSide): نخلة ركنها الأمامي القريب منها كانت تحجب ربع الواجهة في أفضل لقطة، فتُنقل إلى الركن البعيد وحده (يؤطّر اللقطة بلا حجب)
+  const camS = (main.x0 + main.x1) / 2 < (B.x0 + B.x1) / 2 ? 'w' : 'e';
   for (const x of [P.x0 + 1.25, P.x1 - 1.25]) { if (gates.car && Math.abs(x - gates.car.x) < carW / 2 + .6) continue; // لا نخلة في مدخل السيارات
+    if (opt.openHero !== false && ((camS === 'w' && x < cx) || (camS === 'e' && x > cx))) continue;
     if (dF >= 2 && !landings.some(l => x > l.x0 - .5 && x < l.x1 + .5) && Math.abs(x - pedX) > pedW / 2 + .6) put('palm', x, fy, { h: 5.6 + R() * 2 }); }
   for (const [x, y] of [[P.x0 + 2 + R(), P.y1 - 2 - R()], [P.x1 - 2 - R(), P.y1 - 2.2 - R()], [cx + (R() - .5) * 4, P.y1 - 1.6]]) if (free(x, y, 1)) put('palm', x, y, { h: 6.5 + R() * 2.5 });
   // زيتونة أمام أوسع مساحة مصمتة في الواجهة (لا تحجب بابًا ولا نافذة)، وأخرى في شريط الرصيف

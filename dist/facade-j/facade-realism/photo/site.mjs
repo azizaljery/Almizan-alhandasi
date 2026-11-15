@@ -40,6 +40,36 @@ export function frontInfo(THREE, S) {
   return { doors, windows, B: { x0, x1, y0: -zf, y1: -y0z }, top: bb.max.y, bb };
 }
 
+/**
+ * إنارة الحديقة الليلية (إيضاحية): أعمدة قصيرة (بولارد) على ممر البوابة إلى المدخل، وإضاءة سفلية دافئة لجذوع النخيل والأشجار داخل السور،
+ * وبقع ضوء دافئة مضافة على الرصف والأرض (بلا أضواء حقيقية لكل منها)، وضوءان نقطيان فقط يغسلان واجهة المدخل. ليست من المخطط.
+ */
+function nightGarden(THREE, { group, plan, mats, disposables, tier }) {
+  const { plot: P, B } = plan, spots = [], bol = [], cv = document.createElement('canvas'); cv.width = cv.height = 128; const cx = cv.getContext('2d'), g = cx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,214,150,1)'); g.addColorStop(.35, 'rgba(255,190,110,.55)'); g.addColorStop(1, 'rgba(255,170,80,0)'); cx.fillStyle = g; cx.fillRect(0, 0, 128, 128);
+  const map = new THREE.CanvasTexture(cv); map.colorSpace = THREE.SRGBColorSpace; disposables.push(map);
+  const poolM = new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .85, toneMapped: false, fog: false }); poolM.name = 'night-pool'; disposables.push(poolM);
+  const pool = (x, y, r, h = .035) => spots.push([x, y, r, h]);
+  // ممر البوابة ← المدخل: بولاردات على جانبي الممر كل ~1.7 م
+  const ped = plan.gates?.ped, land = plan.landings.find(l => l.entry) || plan.landings[0];
+  if (ped && land) { const y1 = land.y0 - .25, y0 = P.y0 + .7, n = Math.max(1, Math.floor((y1 - y0) / 1.7)), dc = (land.x0 + land.x1) / 2;
+    for (let i = 0; i <= n; i++) { const t = i / n, y = y0 + t * (y1 - y0), xc = ped.x + t * (dc - ped.x); for (const sg of [-1, 1]) { const x = xc + sg * .85; bol.push([x, y]); pool(x, y, 1.15); } } }
+  // إضاءة سفلية لجذوع النخيل والأشجار داخل السور
+  for (const p of plan.plants) if (!p.outside && (p.kind === 'palm' || p.kind === 'olive' || p.kind === 'cypress')) { bol.push([p.x + .18, p.y]); pool(p.x, p.y, p.kind === 'palm' ? 1.6 : 1.9); }
+  // بقع ضوء على رصيف الشارع أمام البوابتين (يراها من يقف في الشارع فوق السور القصير)
+  if (ped) pool(ped.x, P.y0 - .9, 2.1, .2); 
+  // تأطير بوابة السيارات
+  if (plan.gates?.car) { pool(plan.gates.car.x, P.y0 + 1.2, 1.7); pool(plan.gates.car.x, P.y0 - .9, 2.3, .2); }
+  const lamp = new THREE.BoxGeometry(.1, .42, .1), lm = new THREE.InstancedMesh(lamp, mats.lamp, Math.max(1, bol.length)); const m4 = new THREE.Matrix4();
+  bol.forEach(([x, y], i) => { m4.makeTranslation(x, .21, -y); lm.setMatrixAt(i, m4); }); lm.count = bol.length; lm.instanceMatrix.needsUpdate = true; lm.name = 'night-bollards'; lm.castShadow = false; group.add(lm); disposables.push(lamp);
+  const pos = [], uv = [];
+  for (const [x, y, r, h] of spots) { const X0 = x - r, X1 = x + r, Z0 = -y - r, Z1 = -y + r; pos.push(X0, h, Z1, X1, h, Z1, X1, h, Z0, X0, h, Z1, X1, h, Z0, X0, h, Z0); uv.push(0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1); }
+  if (pos.length) { const gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); gg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); const m = new THREE.Mesh(gg, poolM); m.name = 'night-pools'; m.renderOrder = 2; m.castShadow = m.receiveShadow = false; group.add(m); disposables.push(gg); }
+  // ضوءان نقطيان دافئان يغسلان واجهة المدخل (ضمن حد القطعة)
+  // أضواء سفلية حقيقية لأقرب النخلتين/الشجرتين إلى الواجهة (للأجهزة غير الضعيفة فقط: ضوء حقيقي لكل منها مكلف على الجوال)
+  if (tier?.name !== 'low') for (const p of plan.plants.filter(q => !q.outside && (q.kind === 'palm' || q.kind === 'olive')).sort((a, b) => a.y - b.y).slice(0, 2)) { const L = new THREE.PointLight('#ffc27a', 6, 6.5, 2); L.position.set(p.x, .35, -p.y + .5); L.name = 'night-uplight'; group.add(L); }
+  { const cxm = land ? (land.x0 + land.x1) / 2 : (B.x0 + B.x1) / 2; for (const [dx, h] of [[-1, 2.6], [1, 2.6]]) { const L = new THREE.PointLight('#ffcf94', 9, 8.5, 2); L.position.set(cxm + dx * 2.2, h, -(B.y0 - 1.6)); L.name = 'night-wash'; group.add(L); } }
+}
 export function buildSite(THREE, { scene, S, plan, state, tier, night = false }) {
   const { plot: P, B, wall, gates } = plan, T = wall.t, tex = groundTextures(THREE, tier), disposables = [];
   for (const t of Object.values(tex)) disposables.push(t.map, t.bump);
@@ -128,6 +158,7 @@ export function buildSite(THREE, { scene, S, plan, state, tier, night = false })
     if (p.kind === 'palm') pl.palm({ ...o, h: p.h }); else if (p.kind === 'olive') pl.olive({ ...o, h: p.h, r: p.r }); else if (p.kind === 'cypress') pl.cypress({ ...o, h: p.h }); else if (p.kind === 'grass') pl.grass({ ...o, s: p.r }); else if (p.kind === 'rock') pl.rock({ ...o, s: p.r }); else pl.shrub({ ...o, r: p.r, kind: p.kind === 'sage' ? 'olive' : 'shrub' }); }
   for (const f of plan.fixtures) { if (f.kind === 'planter') { const n = Math.max(2, Math.round(Math.max(f.w, f.d) / .55)); for (let i = 0; i < n; i++) { const t = (i + .5) / n - .5; pl.shrub({ x: f.x + (f.w > f.d ? t * f.w : 0), z: -(f.y + (f.w > f.d ? 0 : t * f.d)), y: f.h || .5, r: .32 + R() * .15, kind: R() < .5 ? 'olive' : 'shrub' }); } } else if (f.kind === 'tree') pl.olive({ x: f.x, z: -f.y, h: f.h || 3.5, r: Math.max(1, f.w * .7) }); }
   const plants = pl.build(); group.add(plants.group);
+  if (night) nightGarden(THREE, { group, plan, mats, disposables, tier });
   scene.add(group);
   const bounds = new THREE.Box3(new THREE.Vector3(P.x0 - 6, -.5, -P.y1 - 4), new THREE.Vector3(P.x1 + 6, Math.max(9, state?.bounds?.max.y || 9) + 1.5, -P.y0 + 8)); // ما يُظلَّل بدقة: القطعة والرصيف ونصف الشارع
   return { group, plants: plants.counts, bounds, dispose() { scene.remove(group); plants.dispose(); for (const d of disposables) d.dispose?.(); } };

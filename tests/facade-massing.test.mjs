@@ -168,6 +168,30 @@ test('صفحة العرض: نص الصدق يذكر التراس من المخط
   const { readFile } = await import('node:fs/promises'), root = new URL('../dist/', import.meta.url);
   const v = await readFile(new URL('view3d.html', root), 'utf8'), f = await readFile(new URL('facade-j/index.html', root), 'utf8');
   assert.match(v, /تراس الدور العلوي وارتداد كتلته من مخططك/); assert.match(v, /عناصر الواجهة الزخرفية/); assert.match(v, /تنسيق موقع إيضاحي/); assert.match(v, /تبقى داخل حد البناء/); assert.doesNotMatch(v, /يدخل الارتداد الأمامي|مراجعة اشتراطات البلدية/); assert.match(MASSING_NOTE, /داخل حد البناء/); assert.match(f, /requiredSetbacks/);
+  assert.match(v, /موضعها الأفقي ونوع غرفتها من مخططك العلوي/); assert.match(v, /أبعادها ومنسوبها فبنسب الطراز افتراضًا/); assert.doesNotMatch(v, /الأدوار العليا تكرر فتحات الأرضي/); assert.match(f, /upperOpenings\(/); assert.match(f, /q\.get\('upper'\) !== '0'/);
+  assert.match(v, /الإضاءة الذهبية والسماء والنخيل والإنارة الليلية/);
   assert.match(v, /&ext=/); assert.match(f, /massingPlan\(/); assert.match(f, /q\.get\('mass'\) !== '0'/); assert.match(f, /massing\?\.dispose\(\)/);
   assert.match(MASSING_NOTE, /من مخططك/); assert.match(MASSING_NOTE, /الزخرفية/);
+});
+
+test('سلماني داخل الحد (لا فائض أمامي): مشربية هندسية في تجاويف النوافذ وتيجان متدرجة فوق الدروة وحزام مثلثات داخل المدخل الغائر — وكلها داخل حد البناء', async () => {
+  let crowns = 0, lattice = 0, tri = 0;
+  for (const doc of [ONE, TWO, TER]) for (const skip of [0, 2, 5]) { let b; try { b = await build(doc, 'S', skip); } catch { continue; }
+    const plan = massingPlan({ doc, built: b.built, style: 'S', exterior: {}, floors: b.FI.n }), sb = doc.plot.setbacks;
+    if (plan.mode !== 'inward') continue;
+    assert.deepEqual(insideBuildLine(plan, b.built, doc, sb), [], 'S/' + b.tpl); assert.ok(plan.beyondLineM <= 1e-6);
+    crowns += plan.elements.filter(el => el.part === 'crown').length; lattice += plan.elements.filter(el => el.part === 'lattice').length; tri += plan.elements.filter(el => el.part === 'triangle').length;
+    for (const el of plan.elements.filter(x => x.part === 'crown')) assert.ok(el.proj <= 1e-6 && el.min[1] >= plan.wallTop - 1e-6, 'التاج فوق الدروة وداخل وجه الجدار');
+  }
+  assert.ok(crowns > 0, 'تيجان متدرجة'); assert.ok(lattice > 0, 'مشربية داخل التجاويف'); assert.ok(tri > 0, 'حزام مثلثات المدخل');
+});
+
+test('جودة تدرّجية (lod=low للجوال): عدد عناصر الكتلة المكررة أقل، والمفردات والحدود كما هي', async () => {
+  for (const style of ['M', 'C', 'N', 'H', 'S']) { const { built, FI, tpl } = await build(TWO, style), sb = { ...TWO.plot.setbacks, s: TWO.plot.setbacks.s - 1.5 };
+    for (const setbacks of [undefined, sb]) { const hi = massingPlan({ doc: TWO, built, style, exterior: { screen: 'yes' }, floors: FI.n, setbacks }), lo = massingPlan({ doc: TWO, built, style, exterior: { screen: 'yes' }, floors: FI.n, setbacks, lod: 'low' });
+      assert.equal(lo.lod, 'low'); assert.equal(hi.lod, 'high'); assert.equal(lo.seed, hi.seed, 'نفس البذرة'); assert.deepEqual(lo.vocab, hi.vocab, style + '/' + tpl + ': نفس المفردات');
+      assert.ok(lo.elements.length <= hi.elements.length, style + ': lod low لا يزيد العناصر'); assert.ok(lo.beyondLineM <= 1e-6); assert.deepEqual(insideBuildLine(lo, built, TWO, setbacks || TWO.plot.setbacks), []); }
+  }
+  const { built, FI } = await build(TWO, 'H'), a = massingPlan({ doc: TWO, built, style: 'H', exterior: { screen: 'yes', entrance: 'grand' }, floors: FI.n }), b = massingPlan({ doc: TWO, built, style: 'H', exterior: { screen: 'yes', entrance: 'grand' }, floors: FI.n, lod: 'low' });
+  assert.ok(b.elements.length < a.elements.length, 'الروشان/المشربية: أجزاء أقل على الجوال (' + b.elements.length + ' < ' + a.elements.length + ')');
 });
