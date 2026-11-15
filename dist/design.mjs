@@ -1,7 +1,7 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
-import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor } from './design-session.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes } from './design-session.mjs';
 import { redesignInWorker, fixInWorker, mergeInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
@@ -92,7 +92,13 @@ function show(index) {
   // الشمس والتوجيه: درجة كل تصميم في الجلسة (شارة على أزراره، والأعلى «الأفضل توجيهًا»)، وبطاقتا الاشتراطات والشمس للتصميم المعروض
   let badges = []; try { badges = orientationBadges(session); } catch { badges = []; }
   const bd = badges[index] || null, orient = b => (b && b.score !== null ? el('span', { class: 'ori' + (b.best ? ' best' : ''), title: (b.best ? 'الأفضل توجيهًا بين تصاميمك. ' : '') + b.lines.join(' ') }, (b.best ? '★ ' : '') + 'توجيه ' + b.score) : null);
-  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم' }, session.designs.map((x, i) => el('button', { class: i === index ? 'on' : '', title: x.summary || '', 'data-design': String(i), onclick: () => show(i) }, 'التصميم ' + (i + 1) + (x.feedback?.merge ? ' (دمج)' : ''), orient(badges[i])))) : null;
+  // درجة المطابقة المفسَّرة: تُقرأ من سجل التصميم (حُسبت في عامل التوليد)، وما فاتته الدرجة تُحسب لاحقًا وقت الفراغ فلا يتأخر العرض
+  const scoreOf = i => session.designs[i]?.score || null, top = rankedIndexes(session)[0];
+  const sc = scoreOf(index) || (() => { const v = scoreDesign(session, d); if (v) d.score = v; return v; })();
+  const scBadge = i => { const v = scoreOf(i); return v ? el('span', { class: 'ori sc-b' + (i === top && session.designs.length > 1 ? ' best' : ''), title: 'درجة المطابقة: ' + v.total + '/100 — ' + v.grade }, (i === top && session.designs.length > 1 ? '★ ' : '') + v.total) : null; };
+  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم (مرتبة بدرجة المطابقة)' }, rankedIndexes(session).map(i => { const x = session.designs[i]; return el('button', { class: i === index ? 'on' : '', title: x.summary || '', 'data-design': String(i), onclick: () => show(i) }, 'التصميم ' + (i + 1) + (x.feedback?.merge ? ' (دمج)' : ''), scBadge(i), orient(badges[i])); })) : null;
+  const scoreBox = scoreCard(sc, index === top && session.designs.length > 1);
+  if (session.designs.some(x => !x.score)) { const idle = globalThis.requestIdleCallback || (f => setTimeout(f, 300)); idle(() => { let changed = false; for (const x of session.designs) if (!x.score) { x.score = scoreDesign(session, x); changed = changed || !!x.score; } if (changed && session.current === index) { const h = document.querySelector('.history'); if (h) { [...h.querySelectorAll('button[data-design]')].forEach(b => { const i = +b.dataset.design, v = session.designs[i].score; if (v && !b.querySelector('.sc-b')) b.insertBefore(Object.assign(document.createElement('span'), { className: 'ori sc-b', textContent: String(v.total) }), b.querySelector('.ori')); }); } } }); }
   const best = badges.find(b => b.best && b.index !== index) || null;
   const orientLine = bd && bd.score !== null ? el('div', { class: 'orient', id: 'orientBadge' }, el('a', { class: 'ori-badge ' + (bd.score >= 75 ? 'good' : bd.score >= 55 ? 'mid' : 'low'), href: '#sunCard' }, `التوجيه: ${bd.score}/100`), el('span', {}, bd.lines.join(' ')),
     bd.best ? el('span', { class: 'tag' }, 'الأفضل توجيهًا بين تصاميمك') : best ? el('button', { type: 'button', class: 'btn', id: 'bestOrient', onclick: () => { show(best.index); scrollTo({ top: 0, behavior: 'smooth' }); } }, `اعرض الأفضل توجيهًا: التصميم ${best.index + 1} (${best.score})`) : null) : null;
@@ -106,10 +112,22 @@ function show(index) {
     el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), orientLine), history),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     ...(fitCard ? [fitCard] : []),
-    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(fixCard ? [fixCard] : []), reqCard)),
+    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard)),
     ...(sunBox ? [sunBox] : []), ...(regsCard ? [regsCard] : []),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
   legend(); bindPlan(); paint();
+}
+
+/** بطاقة «درجة المطابقة»: الدرجة، «لماذا؟» بجملتين من القياسات نفسها، وأشرطة المؤشرات السبعة (كل مؤشر يشرح نفسه عند المرور عليه). */
+function scoreCard(sc, isTop) {
+  if (!sc) return null;
+  const band = v => (v >= 75 ? 'good' : v >= 55 ? 'mid' : 'low');
+  return el('div', { class: 'card scorecard', id: 'scoreCard' },
+    el('h2', {}, 'درجة مطابقة هذا التصميم'),
+    el('div', { class: 'sc-total ' + band(sc.total) }, el('b', {}, sc.total + '/100'), el('span', {}, sc.grade), isTop ? el('span', { class: 'tag' }, 'الأعلى بين بدائلك') : null),
+    el('div', { class: 'sc-why', id: 'scoreWhy' }, el('b', {}, 'لماذا؟'), el('p', {}, sc.why[0]), el('p', {}, sc.why[1])),
+    el('ul', { class: 'sc-parts' }, sc.parts.map(p => el('li', { title: p.score >= 70 ? p.good : p.bad, 'data-part': p.id }, el('span', { class: 'sc-l' }, p.label), el('span', { class: 'sc-bar' }, el('i', { class: band(p.score), style: `width:${p.score}%` })), el('span', { class: 'sc-n' }, String(p.score))))),
+    el('p', { class: 'sub' }, 'مركّبة من مؤشرات تُقاس من المخطط المرسوم نفسه؛ الأوزان افتراض تصميمي من الميزان، والدرجة للمقارنة بين بدائلك لا حكم مطلق على العمارة.'));
 }
 
 /** بطاقة «بيان ما تغيّر عن طلبك»: تظهر فقط إن اختلف المخطط عن الطلب. */

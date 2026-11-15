@@ -8,6 +8,9 @@ export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
 import { visualSig, visualSim, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY } from './villa-layout.mjs';
 import { fitStatement } from './fit-ladder.mjs';
+import { scorePlan, rankByScore } from './plan-score.mjs';
+import { solarSite } from './geo-land.mjs';
+export { scorePlan, rankByScore };
 
 export const SESSION_KEY = 'mizan.design.session.v1';
 const MAX_DESIGNS = 15;
@@ -30,6 +33,23 @@ export const FEEDBACK = Object.freeze([
 
 const clone = v => JSON.parse(JSON.stringify(v));
 
+/**
+ * درجة المطابقة المفسَّرة لتصميم في الجلسة (انظر plan-score.mjs): تُحسب مرة واحدة عند إنشاء التصميم (في عامل التوليد خارج الخيط الرئيسي)
+ * وتُخزَّن في سجله، فلا تُعاد عند كل عرض. ما فاتته الدرجة (جلسة قديمة، أو مستند عُدّل) تُحسب عند الطلب بـ ensureScore.
+ */
+export function scoreDesign(session, d) {
+  try {
+    const doc = parseDoc(d.doc), req = session.input.requirements || {}, entry = session.input.land?.entries?.[0] || doc.plot?.entry || 's';
+    let ledger = []; try { ledger = verifyRequest(doc, req, { entry }); } catch { ledger = d.ledger || []; }
+    const site = solarSite(session.input.land?.geo || null);
+    return scorePlan(doc, { ledger, site: { lat: site.lat, north: site.north } });
+  } catch { return null; }
+}
+/** يملأ درجة كل تصميم ناقص الدرجة (يعدّل نسخة الجلسة الممرَّرة ويعيدها). */
+export function ensureScores(session) { for (const d of session.designs) if (!d.score) d.score = scoreDesign(session, d); return session; }
+/** ترتيب عرض البدائل: بالدرجة الأعلى أولًا؛ يعيد فهارس تصاميم الجلسة. لا يغيّر مصفوفة الجلسة (فهارسها ثابتة). */
+export const rankedIndexes = session => rankByScore(session.designs.map(d => d.score || null));
+
 /** يبدأ جلسة من نتيجة التوليد الأولى. */
 /** هل يطلب النص تصميمًا بديلًا (لا تعديلًا على المعروض)؟ */
 export function wantsAlternative(text = '') {
@@ -39,14 +59,14 @@ export function wantsAlternative(text = '') {
 export function createSession({ land, counts, requirements, discovery, idea = '', result }) {
   const req = clone(requirements || extractRequirements(idea || '', { counts: counts || {}, discovery }));
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
-  return {
+  return ensureScores({
     v: 1, input: { land, discovery, idea, requirements: req },
     designs: [entry(result, null), ...initialAlternatives(result)], current: 0, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
     // بصمات كل ما عُرض (لا تُقصّ مع سجل التصاميم): لا يُعاد تصميم يشبهها مرئيًا
     seen: [result.doc, ...initialAlternatives(result).map(e => parseDoc(e.doc))].map(d => visualSig(parseDoc(serialize(d)))),
     alternatives: (result.alternatives || []).slice(0, 5).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc) })),
-  };
+  });
 }
 /** بدائل المولّد المهني الأولى (حتى خمسة تصاميم مع الأول): تُعرض تصاميمَ يتنقل بينها العميل من البداية. */
 function initialAlternatives(result) {
@@ -138,6 +158,7 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   s.seen.push(outSig); if (out.pat) s.seenPats = [...new Set([...s.seenPats, out.pat])];
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
+  ensureScores(s);
   return { session: s, changes, reply };
 }
 
@@ -166,6 +187,7 @@ export async function mergeDesigns(session, a, b, { generate = generateInitialDe
   s.seen ||= []; s.seen.push(outSig);
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
+  ensureScores(s);
   return { session: s, changes, reply };
 }
 
