@@ -45,7 +45,9 @@ const mode = q.get('mode') || 'view', id = (q.get('v') || 'A').toUpperCase();
 const cam = q.get('cam') || 'oblique', grey = q.get('grey') === '1', shot = q.get('shot') || '', geo = q.get('geo') || 'block';
 const stage = document.getElementById('stage');
 const done = (info) => { window.__FR = { ready: true, ...info }; };
-const fail = (e) => { stage.innerHTML = ''; const m = document.createElement('div'); m.id = 'msg'; m.textContent = 'تعذّر العرض: ' + (e?.message || e); stage.appendChild(m); window.__FR = { ready: true, error: String(e?.message || e) }; };
+// رسالة خطأ واضحة بالعربية: WebGL غير متاح/نفدت ذاكرة الرسوم (شائع على الجوال) لا يظهر للمستخدم بنص إنجليزي من المكتبة ولا لوحة بيضاء.
+const GL_FAIL = /webgl|context|gpu|out of memory/i, shown = e => GL_FAIL.test(String(e?.message || e)) && !/[\u0600-\u06FF]/.test(String(e?.message || e)) ? 'متصفحك أو جهازك لا يوفّر WebGL كافيًا لهذه الواجهة (غير مفعّل أو ذاكرة الرسوم لا تكفي). المجسّم والمسقط يعملان؛ جرّب إغلاق التبويبات الأخرى ثم أعد التحميل.' : (e?.message || e);
+const fail = (e) => { stage.innerHTML = ''; const m = document.createElement('div'); m.id = 'msg'; m.setAttribute('role', 'alert'); m.textContent = 'تعذّر العرض: ' + shown(e); stage.appendChild(m); window.__FR = { ready: true, error: String(e?.message || e), webgl: GL_FAIL.test(String(e?.message || e)) && !/[\u0600-\u06FF]/.test(String(e?.message || e)) }; };
 
 async function boardMode() {
   const rows = [];
@@ -112,7 +114,7 @@ async function variantMode() {
   const W = clampDim(q.get('w'), 1280), H = clampDim(q.get('h'), 800);
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H; canvas.id = 'fr';
   stage.innerHTML = ''; stage.appendChild(canvas);
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  let renderer; try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true }); } catch (e) { throw new Error('WebGL: ' + (e?.message || e)); }
   renderer.setPixelRatio(1); renderer.setSize(W, H, false);
   const tier = pickTier(q, { gpu: gpuName(renderer) });
   renderer.shadowMap.enabled = q.get('shadows') !== '0'; renderer.shadowMap.type = THREE.PCFSoftShadowMap;

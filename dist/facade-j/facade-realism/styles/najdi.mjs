@@ -24,6 +24,8 @@
 import { resolveTemplate } from '../templates.mjs';
 import { facadeGeometry } from '../../facade-styles.mjs';
 import { templates } from './templates-najdi/list.mjs';
+// roundRect غير متوفر في Safari/iOS قبل 16: يُرسم المستطيل المدوّر بأقواس يدويًا بدل أن ينهار النمط كله («x.roundRect is not a function» ← «تعذّر العرض»).
+const roundRectPath = (c, x, y, w, h, r) => { if (typeof c.roundRect === 'function') return c.roundRect(x, y, w, h, r); const k = Math.max(0, Math.min(r, w / 2, h / 2)); c.moveTo(x + k, y); c.arcTo(x + w, y, x + w, y + h, k); c.arcTo(x + w, y + h, x, y + h, k); c.arcTo(x, y + h, x, y, k); c.arcTo(x, y, x + w, y, k); c.closePath(); };
 export { templates };
 export { docTransform, validateDoc } from './templates-najdi/doc.mjs';
 export const meta = {
@@ -336,7 +338,7 @@ function plasterMat(THREE, renderer, base, seed, S = 1024, rough = 1, bumpK = .5
 /** حجر جيري خشن / لياسة قاعدة داكنة: صفوف حجارة غير منتظمة (دورة 2×1 م). */
 function stoneMat(THREE, renderer, stone, seed) { const W = 1024, H = 512, [c, x] = cnv(W, H), r = rnd(seed * 3 + 7), N = pnoise(seed + 90); x.fillStyle = stone ? '#6f6253' : '#8a755b'; x.fillRect(0, 0, W, H);
   if (stone) { const rows = 5, rh = H / rows; for (let ry = 0; ry < rows; ry++) { let cx = 0, tot = 0, ws = []; while (tot < W - 80) { const w = 120 + r() * 120; ws.push(w); tot += w; } ws.push(W - tot); const sc = W / ws.reduce((a, b) => a + b, 0); ws = ws.map(w => w * sc);
-      for (const w of ws) { const v = 112 + r() * 32, tint = r() * .5; x.fillStyle = `rgb(${v + 12 + tint * 12},${v + 4},${v - 14 + tint * 8})`; x.beginPath(); x.roundRect(cx + 4, ry * rh + 4, w - 8, rh - 8, 10); x.fill(); for (let k = 0; k < 90; k++) { x.fillStyle = `rgba(0,0,0,${r() * .12})`; x.fillRect(cx + 4 + r() * (w - 8), ry * rh + 4 + r() * (rh - 8), 1 + r() * 3, 1 + r() * 3); } cx += w; } } }
+      for (const w of ws) { const v = 112 + r() * 32, tint = r() * .5; x.fillStyle = `rgb(${v + 12 + tint * 12},${v + 4},${v - 14 + tint * 8})`; x.beginPath(); roundRectPath(x, cx + 4, ry * rh + 4, w - 8, rh - 8, 10); x.fill(); for (let k = 0; k < 90; k++) { x.fillStyle = `rgba(0,0,0,${r() * .12})`; x.fillRect(cx + 4 + r() * (w - 8), ry * rh + 4 + r() * (rh - 8), 1 + r() * 3, 1 + r() * 3); } cx += w; } } }
   else { const im = x.getImageData(0, 0, W, H), d = im.data; for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) { const k = .93 + (N(px / W * 16, py / H * 8) - .5) * .1 + (N(px / W * 48, py / H * 24) - .5) * .12 + (N(px / W * 128, py / H * 64) - .5) * .08 + (r() - .5) * .04, i = (py * W + px) * 4; d[i] *= k; d[i + 1] *= k; d[i + 2] *= k; } x.putImageData(im, 0, 0); }
   const t = mkTex(THREE, renderer, c, true, [1 / 2, 1 / 1]), m = new THREE.MeshStandardMaterial({ map: t, bumpMap: t, bumpScale: stone ? 1 : .25, roughness: .95 }); m.name = 'najdi-plinth'; return m; }
 /** ألواح خشب رأسية (8 في عرض الباب) أو مدهونة بلون. */
