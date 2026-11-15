@@ -127,6 +127,20 @@ import('./photo-pro.mjs').then(async ({ initPhotoPro, describeForPhoto, PHOTO_PR
     },
   });
 }).catch(() => { /* الميزة اختيارية: فشل تحميلها لا يمس العرض */ });
+// صورة داخلية احترافية: بطاقة بجانب بطاقة الصورة المعمارية. يؤثَّث المجلس/الصالة/غرفة النوم الرئيسية من مستند التصميم نفسه (جدران وفتحات وأبعاد حقيقية)
+// ويُلتقط بمستوى العين بمثيل عارض خاص، ثم يُرسل طلب kind:'interior' بوصف مغلق (الغرفة، الطراز، الإضاءة، عدد الفتحات والقطع). يبقى الزر مخفيًا إن لم تكن الخدمة الداخلية مفعّلة.
+Promise.all([import('./photo-pro.mjs'), import('./interior/staging.mjs'), import('./interior/interior-view.mjs'), import('./interior/interior-fidelity.mjs')]).then(async ([{ initPhotoPro, describeForInterior }, { stageableRooms }, { captureInterior }, { checkInteriorFidelity }]) => {
+  const d0 = loadDoc(); if (!d0) return;
+  const ROOM_AR = { majlis: 'المجلس', living: 'الصالة', master: 'غرفة النوم الرئيسية' };
+  let rooms = []; try { rooms = stageableRooms(d0).map(r => ({ id: r.type, label: ROOM_AR[r.type] })); } catch { /* مستند بلا غرف قابلة للتأثيث */ }
+  const styleNow = () => { const X = globalThis.__mizanExterior, fr = $('facadeFrame'); try { return (fr && !fr.hidden && new URLSearchParams((fr.dataset.src || '').split('?')[1] || '').get('style')) || X?.style || X?.pick?.style || 'M'; } catch { return 'M'; } };
+  let key = ''; try { const { designHash } = await import('./facade-j/facade-realism/variation.mjs'); key = String(designHash(d0)); } catch { /* بلا بصمة */ }
+  globalThis.__mizanInteriorPhoto = await initPhotoPro({
+    button: $('photoInterior'), kind: 'interior', rooms, designKey: () => key, store: localStorage, fidelity: checkInteriorFidelity,
+    capture: async ({ room, lighting, onProgress } = {}) => { const r = await captureInterior({ doc: loadDoc(), type: room, style: styleNow(), lighting: lighting === 'day' || lighting === 'night' ? lighting : 'golden', onProgress }); return { blob: r.blob, view: 'model', landmarks: r.landmarks, extra: r.description }; },
+    describe: ({ lighting, room, extra }) => describeForInterior({ room, style: styleNow(), lighting, counts: extra?.counts, pieces: extra?.pieces }),
+  });
+}).catch(() => { /* الميزة اختيارية */ });
 $('toFinal').addEventListener('click', async () => {
   // يُعلَم العميل فورًا (اللقطة تأخذ وقتًا على الأجهزة البطيئة) ويُمنع الضغط المكرر
   const btn = $('toFinal'), label = btn.textContent; if (btn.disabled) return;

@@ -1,6 +1,7 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
 import { visit } from './fresh-visit.mjs'; // أولًا: الدخول الجديد يبدأ مشروعًا نظيفًا قبل أن تقرأ أي وحدة حالة المشروع
 import { startNewProject, hasProject, listPast, restorePast, deletePast, takeNotice } from './project-lifecycle.mjs';
+import { coverOfSnapshot } from './photo-keep.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { saveSession, loadSession, carryOver, sameLand } from './design-session.mjs';
@@ -97,6 +98,8 @@ function paintPast() {
     const restore = document.createElement('button'); restore.type = 'button'; restore.className = 'quiet-inline'; restore.textContent = 'استعادة';
     restore.addEventListener('click', () => { if (restorePast(localStorage, sessionStorage, it.id)) { history.replaceState(null, '', location.pathname); location.reload(); } });
     const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'quiet-inline'; rm.textContent = 'حذف'; rm.addEventListener('click', () => { deletePast(localStorage, it.id); paintPast(); });
+    const cover = coverOfSnapshot(it.data); // غلاف المشروع: مصغّرة آخر صورة احترافية لهذا المشروع إن وُجدت
+    if (cover) { const im = document.createElement('img'); im.className = 'past-cover'; im.src = cover.thumb; im.alt = cover.kind === 'exterior' ? 'غلاف المشروع: صورة معمارية احترافية' : 'غلاف المشروع: صورة داخلية احترافية'; im.width = 72; im.height = 48; li.append(im, ' '); }
     li.append(txt, ' ', restore, ' ', rm); list.append(li);
   }
 }

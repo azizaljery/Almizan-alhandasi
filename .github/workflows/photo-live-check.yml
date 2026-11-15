@@ -22,7 +22,7 @@ on:
         options: [golden, day, sunset, night]
         default: golden
       variants:
-        description: "اختياري: عدة صور للمقارنة tier:lighting[:seed] مفصولة بفواصل (يغلب المستوى والإضاءة)، حتى 8"
+        description: "اختياري: matrix (المصفوفة المعتمدة، 16 صورة) أو style:lighting:floors[:tier] مفصولة بفواصل، أو النمط القديم tier:lighting[:seed] (حتى 8)"
         default: ""
 
 permissions:
@@ -31,17 +31,18 @@ permissions:
 jobs:
   photo:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Playwright (not saved to package.json; used only to compute the fidelity score)
+      - name: Install Playwright (optional; the fidelity score is also computed when report.html is opened)
+        continue-on-error: true
         run: |
           npm install --no-save --no-package-lock playwright@1.49.1
           npx playwright install --with-deps chromium
-      - name: Generate one professional photo on the live site
+      - name: Generate the professional photos on the live site
         run: node scripts/photo-live-check.mjs
         env:
           SITE_URL: ${{ inputs.site_url || 'https://almizan-handasi.aljeryabod.workers.dev' }}

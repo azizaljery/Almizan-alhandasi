@@ -73,7 +73,7 @@ export function edgeMaps(img, F = FIDELITY) {
   return { v, h: hz, sky, gw, gh };
 }
 
-function recall(ref, out, gw, gh, F) {
+export function recall(ref, out, gw, gh, F) {
   let sum = 0, hit = 0;
   for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
     const a = ref[y * gw + x]; if (a < F.strongRef) continue;
