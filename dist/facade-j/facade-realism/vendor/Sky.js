@@ -6,7 +6,7 @@ import {
 	ShaderMaterial,
 	UniformsUtils,
 	Vector3
-} from 'three';
+} from '../../vendor/three.module.js'; // مسار نسبي بدل «three» العاري: import maps غير مدعومة في Safari/iOS قبل 16.4 فكان فشلها يوقف الصفحة كلها عند «جارٍ التحميل…»
 
 /**
  * Represents a skydome for scene backgrounds. Based on [A Practical Analytic Model for Daylight](https://www.researchgate.net/publication/220720443_A_Practical_Analytic_Model_for_Daylight)

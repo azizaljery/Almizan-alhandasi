@@ -117,6 +117,8 @@ async function variantMode() {
   let renderer; try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true }); } catch (e) { throw new Error('WebGL: ' + (e?.message || e)); }
   renderer.setPixelRatio(1); renderer.setSize(W, H, false);
   const tier = pickTier(q, { gpu: gpuName(renderer) });
+  // تبديل الطراز يعيد تحميل الإطار: نحرّر سياق WebGL صراحةً عند المغادرة (iOS يحدّ عدد السياقات الحية ويؤخر تحريرها فتظهر الواجهة التالية سوداء بعد عدة تبديلات)
+  addEventListener('pagehide', e => { if (e.persisted) return; globalThis.__leaving = true; try { renderer.dispose(); renderer.forceContextLoss(); } catch { /* تحرير اختياري */ } }, { once: true });
   renderer.shadowMap.enabled = q.get('shadows') !== '0'; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.02;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -140,7 +142,7 @@ async function variantMode() {
   scene.add(S.group);
   let photo = null;
   // فقدان سياق WebGL (ذاكرة رسوم غير كافية على الجهاز): يُعاد التحميل مرة بمستوى جودة أدنى بدل لوحة فارغة
-  if (PHOTO) canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); const next = { high: 'medium', medium: 'low' }[tier.name]; if (!next) return; const u = new URL(location.href); u.searchParams.set('q', next); u.searchParams.delete('samples'); location.replace(u.href); });
+  if (PHOTO) canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); if (globalThis.__leaving) return; const next = { high: 'medium', medium: 'low' }[tier.name]; if (!next) return; const u = new URL(location.href); u.searchParams.set('q', next); u.searchParams.delete('samples'); location.replace(u.href); });
   if (PHOTO) photo = photoBegin(THREE, { scene, renderer, sun, S, q, Sky, tier, doc: docSite });
   else if (HQ) await enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky });
   globalThis.__FLOORS = FI.n > 1 ? { levels: bandLevels(FI) } : undefined; // خطاف style-j.mjs للأشرطة عند كل بلاطة
@@ -207,6 +209,13 @@ async function variantMode() {
     camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
     camera.position.set(...C.pos); camera.lookAt(...C.look);
   }
+  // ميزانية الإضاءة (الليل): كل SpotLight/PointLight يستهلك نحو 8 متجهات uniform في مظلل الشظايا؛ على أجهزة بحدّ 224 (أدنى حد في WebGL2، شائع على الجوال)
+  // يفشل ربط المظلل فتظهر الواجهة سوداء. نُبقي الأقرب إلى الكاميرا ونُخفي الباقي. لا أثر على أجهزة الحد الكبير (lightcap=N للاختبار).
+  const glc = renderer.getContext(), maxFU = glc.getParameter(glc.MAX_FRAGMENT_UNIFORM_VECTORS) || 224;
+  const lightBudget = Number(q.get('lightcap')) || Math.max(4, Math.floor((maxFU - 110) / 8));
+  const capLights = () => { const L = []; scene.traverse(o => { if ((o.isSpotLight || o.isPointLight) && o.visible) L.push(o); });
+    if (L.length <= lightBudget) return 0; const cp = camera.position; L.sort((x, y) => x.position.distanceToSquared(cp) - y.position.distanceToSquared(cp)); L.slice(lightBudget).forEach(l => { l.visible = false; }); return L.length - lightBudget; };
+  let lightsHidden = capLights();
   renderer.render(scene, camera);
   const firstFrameMs = Math.round(performance.now() - T0); // الإطار الأول: المبنى وحده بإضاءته النهائية؛ المحيط يُضاف بعده
   window.__FR = { ready: false, first: true, firstFrameMs };
@@ -223,6 +232,7 @@ async function variantMode() {
   if (photo) {
     await new Promise(r => setTimeout(r, 0)); // يُعرض الإطار الأول قبل بناء المحيط
     const fin = photoFinish(THREE, { scene, renderer, S, q, doc, FI, state: photo, styleId }); photoInfo = fin.info;
+    lightsHidden += capLights();
     if (massing) { massing.carve(scene.getObjectByName('roof-slab')); renderer.shadowMap.needsUpdate = true; } // بلاطة السطح لا تغطي التراس
     if (nav && photoInfo.cornerSide) nav.cornerSign = photoInfo.cornerSide === 'w' ? -1 : 1;
     refiner.render(); photoInfo.fullMs = Math.round(performance.now() - T0);
@@ -235,8 +245,8 @@ async function variantMode() {
       const blob = await new Promise(res => canvas.toBlob(res, 'image/png')), out = { blob, width: canvas.width, height: canvas.height, samples: n, renderMs: Math.round(performance.now() - t) };
       renderer.setPixelRatio(pr); renderer.setSize(sz.x, sz.y, false); refiner.render(); refiner.start(); return out; };
   }
-  const gl = renderer.getContext();
-  done({ gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, massing: massing?.info || null, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,
+  const gl = renderer.getContext(); let nSpot = 0, nPoint = 0; scene.traverse(o => { if (o.visible && o.isSpotLight) nSpot++; else if (o.visible && o.isPointLight) nPoint++; });
+  done({ lights: { spot: nSpot, point: nPoint, hidden: lightsHidden, budget: lightBudget, maxFragUniform: maxFU, maxTexSize: gl.getParameter(gl.MAX_TEXTURE_SIZE), maxTexUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) }, gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, massing: massing?.info || null, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,
     // قياس لا ادعاء: أعلى منسوب لجدران المبنى المبني فعلًا، ومنه عدد الأدوار الظاهرة (يُقارن بأدوار المخطط في الاختبارات)
     wallTop: (() => { let y = 0; for (const m of S.meshes) { const r = m.userData?.role; if (r !== 'wall' && r !== 'cladding') continue; const b = new THREE.Box3().setFromObject(m); if (b.max.y > y) y = b.max.y; } return Math.round(y * 100) / 100; })() });
 }

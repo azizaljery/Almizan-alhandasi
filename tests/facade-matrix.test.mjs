@@ -162,3 +162,13 @@ test('رسالة واضحة بالعربية عند غياب WebGL (لا شاش�
   assert.match(f, /متصفحك أو جهازك لا يوفّر WebGL كافيًا/); assert.match(f, /role', 'alert'/); assert.match(f, /throw new Error\('WebGL: '/);
   assert.match(v, /onFrameError/); assert.match(v, /fr\.contentWindow && fr\.contentWindow\.__FR/); assert.match(v, /الواجهة الواقعية تحتاج WebGL/);
 });
+
+test('بلا مواصفات «عارية» في وحدات الواجهة (import maps غير مدعومة في Safari/iOS قبل 16.4: فشلها يوقف الصفحة عند «جارٍ التحميل…» بلا رسالة)', async () => {
+  const { readdir } = await import('node:fs/promises'), root = new URL('../dist/facade-j/', import.meta.url), bad = [];
+  const walk = async dir => { for (const e of await readdir(new URL(dir, root), { withFileTypes: true })) { const r = dir + e.name;
+    if (e.isDirectory()) { await walk(r + '/'); continue; } if (!/\.(mjs|js|html)$/.test(e.name) || /three\.module(\.min)?\.js$/.test(e.name)) continue;
+    const src = (await readFile(new URL(r, root), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    for (const m of src.matchAll(/(?:^|[\s;}])(?:import|export)\s[^;'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]/g)) { const spec = m[1] || m[2] || m[3]; if (!/^(\.|\/|https?:)/.test(spec)) bad.push(`${r}: ${spec}`); } } };
+  await walk('');
+  assert.deepEqual(bad, []);
+});
