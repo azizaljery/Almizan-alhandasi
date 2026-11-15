@@ -148,6 +148,22 @@ async function apply() {
   const fl = $('facadeFloors').value || String(Math.min(3, Math.max(1, (doc?.levels || []).length || 1))), src = './facade-j/?v=A&hq=1&nav=1&style=' + encodeURIComponent(style) + extQ() + (c ? '&region=' + regionId(c) : '') + '&src=studio&cam=auto' + (fl ? '&floors=' + fl : '') + (tpl ? '&tpl=' + encodeURIComponent(tpl) + '&tseed=' + tplSeed + (mut ? '&mut=' + mut + '&mseed=' + mseed : '') : '') + (time === 'night' ? NIGHT : '');
   if (fr.dataset.src !== src) { fr.dataset.src = src; fr.src = src; }
 }
+// إن فشل بناء الواجهة داخل الإطار (طراز/قالب لا يُبنى على هذا المخطط، أو WebGL غير متاح) يظهر السبب بالعربية هنا ويُعاد إلى المجسم عند غياب WebGL،
+// بدل أن يبقى المستخدم أمام «تعذّر العرض» وحدها. الإطار من الأصل نفسه فنقرأ __FR مباشرة.
+let frTok = 0;
+fr.addEventListener('load', () => {
+  const tok = ++frTok; let n = 0;
+  const tick = () => {
+    if (tok !== frTok || !on) return; let r = null; try { r = fr.contentWindow && fr.contentWindow.__FR; } catch { return; }
+    if (r && r.ready) { if (r.error) onFrameError(r); return; }
+    if (++n < 360) setTimeout(tick, 500);
+  };
+  setTimeout(tick, 600);
+});
+function onFrameError(r) {
+  if (r.webgl) { on = false; apply(); const m = $('threeMsg'); if (m) { m.hidden = false; m.textContent = 'الواجهة الواقعية تحتاج WebGL ولم يتوفر على هذا الجهاز. يُعرض المجسم بدلًا منها.'; } return; }
+  note('تعذّر بناء هذا الطراز/القالب على مخططك: ' + String(r.error).slice(0, 140) + ' — جرّب «قالب آخر» أو طرازًا آخر.');
+}
 const seg = $('facadeSeg'); const jb = document.createElement('button'); jb.dataset.f = 'J'; jb.textContent = 'واجهة واقعية'; seg.appendChild(jb);
 seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; on = b.dataset.f === 'J'; note0 = ''; apply(); });
 // أدوات المجسم (طريقة المشاهدة، الجولة، الشمس، الأجواء، الأدوار) تعمل على المجسم: استعمالها ينقل إليه تلقائيًا

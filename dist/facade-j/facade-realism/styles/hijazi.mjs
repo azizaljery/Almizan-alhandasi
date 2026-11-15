@@ -1,5 +1,7 @@
 import { resolveTemplate } from '../templates.mjs';
 import { genDoc, validateDoc as validatePlan } from './templates-hijazi/plan.mjs';
+// roundRect غير متوفر في Safari/iOS قبل 16: يُرسم المستطيل المدوّر بأقواس يدويًا بدل أن ينهار النمط كله («x.roundRect is not a function» ← «تعذّر العرض»).
+const roundRectPath = (c, x, y, w, h, r) => { if (typeof c.roundRect === 'function') return c.roundRect(x, y, w, h, r); const k = Math.max(0, Math.min(r, w / 2, h / 2)); c.moveTo(x + k, y); c.arcTo(x + w, y, x + w, y + h, k); c.arcTo(x + w, y + h, x, y + h, k); c.arcTo(x, y + h, x, y, k); c.arcTo(x, y, x + w, y, k); c.closePath(); };
 // نمط H (حجازي جدة): واجهة مستلهمة من عمارة جدة التاريخية (الحجاز الساحلي) لا من اللون وحده. العنصر المهيمن: الفتحة + الشاشة الخشبية + الإيقاع الرأسي (عكس نجد: الكتلة).
 // الروشان مركّب من مكونات: فتحة ← غلاف خشبي خفيف (خدود + قاعدة + تاج مائل + كوابيل) ← تقسيمات شبك (درف متحركة + حزام علوي زخرفي) ← إطار وحشوات ← تظليل/خصوصية (الشبك نفسه + خلفية معتمة).
 // MAX_PROJECTION = 750 مم (رفع المالك الحد من 250). الروشان الحقيقي (عمق 36/50/62 سم + تاج 6 سم) ينفَّذ في قوالب H01..H16؛ الوضع القديم (بلا tpl) يبقى بقشرة 15–25 سم كما كان.
@@ -65,7 +67,7 @@ function wallTexture(THREE, renderer, pal, Hb, seed) {
     let y = 0; while (y < Hb + .4) { const ch = .2 + r() * .14; let u = -r() * .5;
       while (u < 6) { const bw = .35 + r() * .6, t = .9 + r() * .2, wv = (r() - .5) * 22, px = u * PPM + 3, py = Y(y + ch) + 3, w2 = bw * PPM - 6, h2 = ch * PPM - 6;
         x.fillStyle = `rgb(${clamp(br * t + wv, 0, 255) | 0},${clamp(bg * t + wv * .9, 0, 255) | 0},${clamp(bb * t + wv * .7, 0, 255) | 0})`;
-        const rr = 5 + r() * 6; x.beginPath(); x.roundRect(px, py, w2, h2, rr); x.fill(); bx.fillStyle = `rgb(${190 + r() * 50 | 0},${190 + r() * 50 | 0},${190 + r() * 50 | 0})`; bx.beginPath(); bx.roundRect(px, py, w2, h2, rr); bx.fill();
+        const rr = 5 + r() * 6; x.beginPath(); roundRectPath(x, px, py, w2, h2, rr); x.fill(); bx.fillStyle = `rgb(${190 + r() * 50 | 0},${190 + r() * 50 | 0},${190 + r() * 50 | 0})`; bx.beginPath(); roundRectPath(bx, px, py, w2, h2, rr); bx.fill();
         // حفر مرجانية وبقع
         for (let k = 0; k < 6 + bw * 9; k++) { const qx = px + r() * w2, qy = py + r() * h2, qr = .8 + r() * r() * 5; x.fillStyle = `rgba(95,78,52,${.08 + r() * .16})`; x.beginPath(); x.ellipse(qx, qy, qr, qr * (.6 + r() * .6), r() * 3, 0, 7); x.fill();
           bx.fillStyle = 'rgba(40,40,40,.7)'; bx.beginPath(); bx.ellipse(qx, qy, qr, qr * .8, 0, 0, 7); bx.fill(); }

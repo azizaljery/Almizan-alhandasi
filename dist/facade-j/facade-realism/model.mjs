@@ -134,6 +134,9 @@ function block(pc, { id, name, mat, u0, u1, z0, z1, o0, o1, role = 'projection',
 }
 /** حلقة بارزة حول فتحة (تأطير حجري): المستطيل الموسّع ناقص الفتحة نفسها. لا تتقاطع مع فتحة أخرى. */
 function ring(pc, o, { grow, id, name, mat, o0, o1 }) {
+  // التأطير يضيق إلى الفراغ المتاح بينه وبين أقرب فتحة (نافذة ملاصقة لباب أو لنافذة)؛ إن ضاق عن 2 سم يُترك بلا تأطير بدل أن يُسقط بناء الواجهة
+  for (const x of pc.openings) { if (x.id === o.id) continue; const sep = Math.max(x.u0 - o.u1, o.u0 - x.u1, x.z0 - o.z1, o.z0 - x.z1); if (sep > 0) grow = Math.min(grow, sep - .005); }
+  if (grow < .02) return null;
   const r = { u0: o.u0 - grow, u1: o.u1 + grow, z0: o.z0 - grow, z1: o.z1 + grow };
   for (const x of pc.openings) if (x.id !== o.id && overlaps(r, x)) throw new Error(`تأطير ${id} يتقاطع مع الفتحة ${x.id}`);
   return { id: `${pc.id}/${id}`, name, role: 'surround', piece: pc.i, C: pc.C, mat, cls: MATERIALS[mat].cls, plan: false, tag: TAG, o0, o1, u0: r.u0, u1: r.u1, z0: r.z0, z1: r.z1, outer: rectPts(r), holes: [o.poly] };
@@ -151,6 +154,22 @@ function infill(pc, o, { mat, fw, o0, o1, role }) {
 const wallBase = (pc, mat) => ({ id: `${pc.id}/wall`, name: 'الجدار الأساسي (المسقط)', role: 'wall', piece: pc.i, C: pc.C, mat, cls: MATERIALS[mat].cls, plan: true, tag: null, o0: -pc.t / 2, o1: pc.t / 2, u0: pc.u0, u1: pc.u1, z0: pc.z0, z1: pc.zTop, outer: rectPts({ u0: pc.u0, u1: pc.u1, z0: pc.z0, z1: pc.zTop }), holes: pc.openings.map(o => o.poly) });
 const fullZone = pc => ({ u0: pc.u0, u1: pc.u1, z0: pc.z0, z1: pc.zTop });
 const plinthZone = (pc, plinth) => ({ u0: pc.u0, u1: pc.u1, z0: pc.z0, z1: plinth });
+/**
+ * أقصى امتداد أفقي لعنصر بارز حول فتحة (ساق/عتبة/مظلة) بحيث لا يلمس فتحة مجاورة ولا يخرج عن قطعة الجدار.
+ * يعيد {l, r} (≤ المطلوب)؛ إن ضاق الفراغ عن 2 سم يصير الامتداد صفرًا فيُسقط المنشئ العنصر بدل أن يرمي الخطأ.
+ * (كان باب مدخل بجوار نافذة بفاصل أقل من 14 سم يُسقط بناء الواجهة كله: «صندوق … يتقاطع مع الفتحة»، فتظهر «تعذّر العرض» عند تبديل الطراز بلا قالب.)
+ */
+function room(pc, o, wantL, wantR, z0, z1) {
+  let l = wantL, r = wantR; const GAP = .01;
+  for (const x of pc.openings) {
+    if (x.id === o.id || Math.min(x.z1, z1) - Math.max(x.z0, z0) <= EPS) continue;
+    if (x.u1 <= o.u0 + EPS) l = Math.min(l, o.u0 - x.u1 - GAP);
+    else if (x.u0 >= o.u1 - EPS) r = Math.min(r, x.u0 - o.u1 - GAP);
+  }
+  l = Math.min(l, o.u0 - pc.u0); r = Math.min(r, pc.u1 - o.u1);
+  return { l: l < .02 ? 0 : l, r: r < .02 ? 0 : r };
+}
+const maybe = (w, mk) => w > 0 ? mk() : [];
 const isEntry = o => o.entry && !/^window/.test(o.kind);
 const isWin = o => /^window/.test(o.kind);
 
@@ -167,7 +186,7 @@ function openingLayers(pc, id, { sills }) {
   for (const o of pc.openings) {
     if (isWin(o)) {
       const w = S.win;
-      if (sills) L.push(...block(pc, { id: o.id + '.sill', name: 'عتبة وسادة للنافذة ' + o.id, mat: S.sill.mat, u0: o.u0 - .05, u1: o.u1 + .05, z0: o.z0 - .05, z1: o.z0, o0: t2 - .02, o1: t2 + S.sill.proud, role: 'sill' }));
+      if (sills) { const R = room(pc, o, .05, .05, o.z0 - .05, o.z0); L.push(...block(pc, { id: o.id + '.sill', name: 'عتبة وسادة للنافذة ' + o.id, mat: S.sill.mat, u0: o.u0 - R.l, u1: o.u1 + R.r, z0: o.z0 - .05, z1: o.z0, o0: t2 - .02, o1: t2 + S.sill.proud, role: 'sill' })); }
       L.push(frame(pc, o, { mat: w.frame, fw: w.fw, o0: t2 + w.o0, o1: t2 + w.o1 }));
       L.push(infill(pc, o, { mat: w.glass, fw: w.fw, o0: t2 + w.gO0, o1: t2 + w.gO1, role: 'glazing' }));
     } else {
@@ -207,13 +226,14 @@ function buildFrontA(pc, geo) {
   L.push(...block(pc, { id: 'string', name: 'شريط حجري أفقي عند 3.20 م', mat: 'limestoneWhite', u0: pc.u0, u1: pc.u1, z0: 3.2, z1: 3.28, o0: t2 + .035, o1: t2 + .075 }));
   for (const o of pc.openings) {
     if (isEntry(o)) {
-      L.push(...block(pc, { id: o.id + '.jambL', name: 'حجر المدخل يسار', mat: 'limestoneWhite', u0: o.u0 - .14, u1: o.u0, z0: pc.z0, z1: o.z1 + .14, o0: t2, o1: t2 + .14 }));
-      L.push(...block(pc, { id: o.id + '.jambR', name: 'حجر المدخل يمين', mat: 'limestoneWhite', u0: o.u1, u1: o.u1 + .14, z0: pc.z0, z1: o.z1 + .14, o0: t2, o1: t2 + .14 }));
-      L.push(...block(pc, { id: o.id + '.lintel', name: 'عتبة علوية للمدخل', mat: 'limestoneWhite', u0: o.u0 - .14, u1: o.u1 + .14, z0: o.z1, z1: o.z1 + .14, o0: t2, o1: t2 + .14 }));
-      const cx = (o.u0 + o.u1) / 2, b0 = o.u0 - .14, b1 = o.u1 + .14, zb = o.z1 + .14;
+      const J = room(pc, o, .14, .14, pc.z0, o.z1 + .14);
+      L.push(...maybe(J.l, () => block(pc, { id: o.id + '.jambL', name: 'حجر المدخل يسار', mat: 'limestoneWhite', u0: o.u0 - J.l, u1: o.u0, z0: pc.z0, z1: o.z1 + .14, o0: t2, o1: t2 + .14 })));
+      L.push(...maybe(J.r, () => block(pc, { id: o.id + '.jambR', name: 'حجر المدخل يمين', mat: 'limestoneWhite', u0: o.u1, u1: o.u1 + J.r, z0: pc.z0, z1: o.z1 + .14, o0: t2, o1: t2 + .14 })));
+      const b0 = o.u0 - J.l, b1 = o.u1 + J.r, cx = (o.u0 + o.u1) / 2, zb = o.z1 + .14;
+      L.push(...block(pc, { id: o.id + '.lintel', name: 'عتبة علوية للمدخل', mat: 'limestoneWhite', u0: b0, u1: b1, z0: o.z1, z1: o.z1 + .14, o0: t2, o1: t2 + .14 }));
       L.push(...block(pc, { id: o.id + '.gable', name: 'جملون حجري فوق المدخل', mat: 'limestoneWhite', u0: b0, u1: b1, z0: zb, z1: zb + .22, o0: t2, o1: t2 + .14, role: 'pediment', poly: [[b0, zb], [b1, zb], [cx, zb + .22]] }));
     }
-    if (isWin(o)) L.push(ring(pc, o, { grow: .07, id: o.id + '.surround', name: 'تأطير حجري للنافذة ' + o.id, mat: 'limestoneWhite', o0: t2 + .035, o1: t2 + .065 }));
+    if (isWin(o)) { const rg = ring(pc, o, { grow: .07, id: o.id + '.surround', name: 'تأطير حجري للنافذة ' + o.id, mat: 'limestoneWhite', o0: t2 + .035, o1: t2 + .065 }); if (rg) L.push(rg); }
   }
   if (pc.top && pc.hasParapet) L.push(...block(pc, { id: 'coping', name: 'غطاء حجر أبيض للدروة', mat: 'limestoneWhite', u0: pc.u0 - .03, u1: pc.u1 + .03, z0: pc.zTop, z1: pc.zTop + .06, o0: t2, o1: t2 + .06, role: 'cornice' }));
   if (pc.top) L.push(...block(pc, { id: 'cornice', name: 'كرنيش حجري بارز عند حافة السطح', mat: 'limestoneWhite', u0: pc.u0 - .08, u1: pc.u1 + .08, z0: pc.z1 - .06, z1: pc.z1 + .1, o0: t2, o1: t2 + .14, role: 'cornice' }));
@@ -226,8 +246,8 @@ function buildFrontB(pc, geo) {
   L.push(...cladding(pc, { id: 'quoinL', name: 'حافة حجرية رأسية يسار (35 سم)', mat: 'limestoneBeige', zone: { u0: pc.u0, u1: pc.u0 + .35, z0: geo.plinth, z1: pc.zTop }, o0: t2, o1: t2 + .03 }));
   L.push(...cladding(pc, { id: 'quoinR', name: 'حافة حجرية رأسية يمين (35 سم)', mat: 'limestoneBeige', zone: { u0: pc.u1 - .35, u1: pc.u1, z0: geo.plinth, z1: pc.zTop }, o0: t2, o1: t2 + .03 }));
   for (const o of pc.openings) {
-    if (isEntry(o)) L.push(...block(pc, { id: o.id + '.canopy', name: 'مظلة معدنية فوق المدخل ' + o.id, mat: 'aluminium', u0: o.u0 - .5, u1: o.u1 + .5, z0: o.z1 + .08, z1: o.z1 + .16, o0: t2, o1: t2 + .9 }));
-    if (isWin(o)) L.push(...block(pc, { id: o.id + '.louver', name: 'كاسر أفقي فوق النافذة ' + o.id, mat: 'aluminium', u0: o.u0 - .05, u1: o.u1 + .05, z0: o.z1 + .12, z1: o.z1 + .16, o0: t2, o1: t2 + .45 }));
+    if (isEntry(o)) { const R = room(pc, o, .5, .5, o.z1 + .08, o.z1 + .16); L.push(...block(pc, { id: o.id + '.canopy', name: 'مظلة معدنية فوق المدخل ' + o.id, mat: 'aluminium', u0: o.u0 - R.l, u1: o.u1 + R.r, z0: o.z1 + .08, z1: o.z1 + .16, o0: t2, o1: t2 + .9 })); }
+    if (isWin(o)) { const R = room(pc, o, .05, .05, o.z1 + .12, o.z1 + .16); L.push(...block(pc, { id: o.id + '.louver', name: 'كاسر أفقي فوق النافذة ' + o.id, mat: 'aluminium', u0: o.u0 - R.l, u1: o.u1 + R.r, z0: o.z1 + .12, z1: o.z1 + .16, o0: t2, o1: t2 + .45 })); }
   }
   if (pc.top && pc.hasParapet) L.push(...block(pc, { id: 'coping', name: 'غطاء معدني رفيع للدروة', mat: 'aluminium', u0: pc.u0, u1: pc.u1, z0: pc.zTop, z1: pc.zTop + .05, o0: t2, o1: t2 + .03, role: 'cornice' }));
   L.push(...openingLayers(pc, 'B', { sills: true }));
@@ -242,9 +262,10 @@ function buildFrontC(pc, geo) {
   }
   for (const o of pc.openings) {
     if (isEntry(o)) {
-      L.push(...block(pc, { id: o.id + '.hood', name: 'هود حجري بارز فوق المدخل ' + o.id, mat: 'limestoneBeige', u0: o.u0 - .25, u1: o.u1 + .25, z0: o.z1 + .12, z1: o.z1 + .2, o0: t2, o1: t2 + .25 }));
-      L.push(...block(pc, { id: o.id + '.jambL', name: 'عتبة حجرية للمدخل يسار', mat: 'limestoneBeige', u0: o.u0 - .1, u1: o.u0, z0: pc.z0 + geo.plinth, z1: o.z1, o0: t2, o1: t2 + .05 }));
-      L.push(...block(pc, { id: o.id + '.jambR', name: 'عتبة حجرية للمدخل يمين', mat: 'limestoneBeige', u0: o.u1, u1: o.u1 + .1, z0: pc.z0 + geo.plinth, z1: o.z1, o0: t2, o1: t2 + .05 }));
+      const H = room(pc, o, .25, .25, o.z1 + .12, o.z1 + .2), J = room(pc, o, .1, .1, pc.z0 + geo.plinth, o.z1);
+      L.push(...block(pc, { id: o.id + '.hood', name: 'هود حجري بارز فوق المدخل ' + o.id, mat: 'limestoneBeige', u0: o.u0 - H.l, u1: o.u1 + H.r, z0: o.z1 + .12, z1: o.z1 + .2, o0: t2, o1: t2 + .25 }));
+      L.push(...maybe(J.l, () => block(pc, { id: o.id + '.jambL', name: 'عتبة حجرية للمدخل يسار', mat: 'limestoneBeige', u0: o.u0 - J.l, u1: o.u0, z0: pc.z0 + geo.plinth, z1: o.z1, o0: t2, o1: t2 + .05 })));
+      L.push(...maybe(J.r, () => block(pc, { id: o.id + '.jambR', name: 'عتبة حجرية للمدخل يمين', mat: 'limestoneBeige', u0: o.u1, u1: o.u1 + J.r, z0: pc.z0 + geo.plinth, z1: o.z1, o0: t2, o1: t2 + .05 })));
     }
   }
   if (pc.top && pc.hasParapet) L.push(...block(pc, { id: 'coping', name: 'غطاء حجر بيج للدروة', mat: 'limestoneBeige', u0: pc.u0 - .03, u1: pc.u1 + .03, z0: pc.zTop, z1: pc.zTop + .06, o0: t2, o1: t2 + .04, role: 'cornice' }));
