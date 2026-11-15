@@ -1,7 +1,7 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
-import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, TARGET_DESIGNS, exhaustedMessage } from './design-session.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, TARGET_DESIGNS, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
 import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
@@ -58,10 +58,12 @@ function thumbHTML(d) {
   thumbCache.set(key, html); if (thumbCache.size > 64) thumbCache.delete(thumbCache.keys().next().value);
   return html;
 }
-const generating = () => bg.running && !session.exhausted && session.designs.length < TARGET_DESIGNS;
+const generating = () => bg.running && !session.exhausted && !session.softEnd && session.designs.length < TARGET_DESIGNS;
 function navStatusText() {
   const n = session.designs.length;
   if (session.exhausted) return exhaustedMessage(n);
+  if (n >= MAX_DESIGNS) return cappedMessage(n);
+  if (session.softEnd && !generating()) return softEndMessage(n, session.softEnd.count);
   if (generating()) return `جاهز ${n} تصاميم مختلفة، وأُعدّ لك المزيد في الخلفية (حتى ${TARGET_DESIGNS})…`;
   return '';
 }
@@ -80,7 +82,7 @@ function navBlock(index, badges = []) {
         el('button', { type: 'button', class: 'btn', id: 'btnPrev', disabled: index === 0 ? '' : null, onclick: () => { show(index - 1); scrollTo({ top: 0, behavior: 'smooth' }); } }, '→ السابق'),
         el('button', { type: 'button', class: 'btn primary', id: 'btnNext', onclick: onNext }, 'تصميم آخر ←'))),
     n > 1 ? el('div', { class: 'dstrip', role: 'group', 'aria-label': 'مصغّرات التصاميم مرقّمة' }, thumbs) : null,
-    el('p', { class: 'dstatus' + (session.exhausted ? ' end' : ''), id: 'dStatus', 'aria-live': 'polite', role: 'status' }, navStatusText()));
+    el('p', { class: 'dstatus' + (session.exhausted || n >= MAX_DESIGNS || session.softEnd ? ' end' : ''), id: 'dStatus', 'aria-live': 'polite', role: 'status' }, navStatusText()));
 }
 /** يحدّث شريط التنقل وحده (دون إعادة رسم الصفحة) حين يصل تصميم جديد من الخلفية. */
 function refreshNav() {
@@ -91,13 +93,13 @@ function refreshNav() {
 function startBg() {
   // فحوص المتصفح التي تعدّ التصاميم بدقة تعطّل الإكمال بهذا المفتاح (لا يُستعمل في الاستعمال العادي)
   try { if (localStorage.getItem('mizan.design.bg') === 'off') return; } catch { /* بلا تخزين */ }
-  if (bg.running || !session || session.exhausted || session.designs.length >= TARGET_DESIGNS) return;
+  if (bg.running || !session || session.exhausted || session.softEnd || session.designs.length >= TARGET_DESIGNS) return;
   bg.running = true; bg.stop = false; bg.p = bgLoop(); refreshNav();
 }
 async function bgLoop() {
   let again = false;
   try {
-    while (!bg.stop && session && !session.exhausted && session.designs.length < TARGET_DESIGNS) {
+    while (!bg.stop && session && !session.exhausted && !session.softEnd && session.designs.length < TARGET_DESIGNS) {
       const snap = session;
       let out; try { out = await extendInWorker(snap, TARGET_DESIGNS); } catch { break; }
       if (session !== snap || !out?.session) { again = session !== snap; break; } // الجلسة تغيّرت أثناء العمل (طلب العميل أو نافذة شرعاء): تُترك النتيجة وتبدأ الخلفية من جديد
@@ -117,12 +119,13 @@ async function withBg(fn) { await settleBg(); try { return await fn(); } finally
 async function onNext() {
   const i = session.current;
   if (i + 1 < session.designs.length) { show(i + 1); scrollTo({ top: 0, behavior: 'smooth' }); return; }
-  if (session.exhausted) { const n = $('dStatus'); if (n) { n.textContent = exhaustedMessage(session.designs.length); n.classList.add('end'); n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } return; }
+  if (session.exhausted || session.designs.length >= MAX_DESIGNS) { const n = $('dStatus'); if (n) { n.textContent = session.exhausted ? exhaustedMessage(session.designs.length) : cappedMessage(session.designs.length); n.classList.add('end'); n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } return; }
   const st = $('dStatus'), done = busy(true, st, 'أبحث لك عن توزيع مختلف عمّا عُرض…');
   try {
     await settleBg();
     if (i + 1 < session.designs.length) { done(); show(i + 1); return; } // وصل تصميم من الخلفية أثناء الانتظار
-    const out = await extendInWorker(session, session.designs.length + 1);
+    let out = await extendInWorker(session, session.designs.length + 1, !!session.softEnd);
+    if (out.softEnd && !out.added) { session = out.session; out = await extendInWorker(session, session.designs.length + 1, true); } // لا يختلف بوضوح غيرها: الأقرب بإعلانه
     done();
     if (out.error) { toast(out.error.message || 'تعذّر تصميم بديل.'); return; }
     const cur = session.current; session = out.session; session.current = cur; saveSession(localStorage, session);

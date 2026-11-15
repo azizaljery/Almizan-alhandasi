@@ -12,7 +12,7 @@ export const OPS = {
   },
   redesign: ({ session, ask }) => redesign(session, ask),
   /** خطوة إكمال واحدة في الخلفية (تصميم مختلف يُضاف في نهاية القائمة)؛ تُسلسل من الصفحة حتى يتقدّم طلب العميل عليها. */
-  extend: ({ session, target }) => extendSession(session, { target }),
+  extend: ({ session, target, relaxed }) => extendSession(session, { target, relaxed: !!relaxed }),
   fix: ({ session, id }) => applyFix(session, id),
   merge: ({ session, a, b }) => mergeDesigns(session, a, b),
   diagnose: ({ input }) => diagnoseFit(input),

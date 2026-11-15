@@ -6,14 +6,14 @@ import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
-import { visualSig, visualSim, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY } from './villa-layout.mjs';
+import { visualSig, visualSim, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails } from './villa-layout.mjs';
 import { fitStatement } from './fit-ladder.mjs';
 import { scorePlan, rankByScore } from './plan-score.mjs';
 import { solarSite } from './geo-land.mjs';
 export { scorePlan, rankByScore };
 
 export const SESSION_KEY = 'mizan.design.session.v1';
-const MAX_DESIGNS = 30;
+export const MAX_DESIGNS = 30;
 /** العدد المستهدف من التصاميم المختلفة في الجلسة (يُولَّد الباقي في الخلفية بعد عرض الأول)؛ ما لم يتوفر يُعلن النفاد بعدده الحقيقي. */
 export const TARGET_DESIGNS = 20;
 
@@ -103,7 +103,7 @@ export function carryOver(next, prev) {
  * - نص لم يُفهم منه شيء ولا خيار معه: لا يُولَّد تصميم؛ يُرمى SHARA_UNCLEAR ليعيد العميل الصياغة.
  * يعيد { session, changes, reply } — reply: ما نُفّذ وما لم يُنفَّذ (بسببه) وما لم يُفهم، مقيسًا من المخطط الجديد.
  */
-export async function redesign(session, { picks = [], text = '', ai = null, auto = false } = {}, { generate = generateInitialDesign } = {}) {
+export async function redesign(session, { picks = [], text = '', ai = null, auto = false, maxSim = undefined } = {}, { generate = generateInitialDesign } = {}) {
   const s = clone(session), req = s.input.requirements, changes = [];
   req.prefs ||= {}; req.tweaks ||= {}; req.counts ||= {}; req.extras ||= {}; req.areas ||= {};
   let more = null;
@@ -137,7 +137,9 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
   const shown = different ? s.seen : [];
   // الطلب لم يتغيّر (توزيع آخر فقط) والتصميم المعروض مرّ بسلّم الاتساع: تُعاد درجاته نفسها مباشرة بلا مشي السلّم من أوله
   const fitHint = !more && !picks.length ? hintOf(cur) : null;
-  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, light: true, ...(fitHint ? { fitHint } : {}) });
+  // «تصميم آخر» لا يخفق في بنود من طلب العميل أكثر مما أخفق أفضل تصميم عُرض (يخفق بنودًا أقل: يُقبل): مختلف لا معيب
+  const maxFails = different && !more && !picks.length ? Math.min(...s.designs.map(d => Array.isArray(d.ledger) ? splitFails(d.ledger, req).hard : 99)) : null;
+  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, light: true, ...(maxSim !== undefined && different ? { maxSim } : {}), ...(maxFails !== null && maxFails < 99 ? { maxFails } : {}), ...(fitHint ? { fitHint } : {}) });
   const outSig = visualSig(parseDoc(serialize(out.doc)));
   // ضمان أخير مستقل عن المولّد: «تصميم آخر» لا يُقبل إن شابه أي تصميم عُرض فوق الحد
   if (different) {
@@ -158,7 +160,7 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
   };
   s.designs.push(entry(out, { picks, text, changes, reply, ...(auto ? { auto: true } : {}) }));
   // الطلب تغيّر (ملاحظة أو خيار): نفاد التوزيعات السابق لا يسري على الطلب الجديد
-  if (!different || picks.some(id => id !== 'layout') || (more && (more.understood.length || more.unsupported.length))) delete s.exhausted;
+  if (!different || picks.some(id => id !== 'layout') || (more && (more.understood.length || more.unsupported.length))) { delete s.exhausted; delete s.softEnd; }
   s.seen.push(outSig); if (out.pat) s.seenPats = [...new Set([...s.seenPats, out.pat])];
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
@@ -171,23 +173,31 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
  * تنتهي بالنفاد الصادق: حين لا يبقى توزيع يختلف عمّا عُرض تُسجَّل الجلسة exhausted بعدد ما عُرض فعلًا (لا يُختلق عدد).
  * يعيد { session, added, exhausted, error? }؛ added = false عند النفاد أو الفشل.
  */
-export async function extendSession(session, { target = TARGET_DESIGNS } = {}, { generate = generateInitialDesign } = {}) {
+export async function extendSession(session, { target = TARGET_DESIGNS, relaxed = false } = {}, { generate = generateInitialDesign } = {}) {
+  if (session.designs.length >= MAX_DESIGNS) return { session, added: false, exhausted: false, capped: true };
   if (session.exhausted || session.designs.length >= target) return { session, added: false, exhausted: !!session.exhausted };
+  // الإكمال التلقائي لا يقبل إلا ما يختلف بوضوح (≥ 32٪)؛ الأقرب (حتى 25٪) يُعرض بطلب العميل وحده، وبإعلانه في ملاحظات التصميم
+  if (session.softEnd && !relaxed) return { session, added: false, exhausted: false, softEnd: true };
   const keepCurrent = session.current;
   try {
-    const out = await redesign(session, { auto: true }, { generate });
+    const out = await redesign(session, { auto: true, maxSim: relaxed ? VISUAL_LIMIT.relaxed : VISUAL_LIMIT.mid }, { generate });
     out.session.current = keepCurrent;
     return { session: out.session, added: true, exhausted: false };
   } catch (e) {
     if (e.code === 'VILLA_EXHAUSTED') {
-      const s = clone(session); s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now() };
-      return { session: s, added: false, exhausted: true };
+      const s = clone(session);
+      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now() }; delete s.softEnd; return { session: s, added: false, exhausted: true }; }
+      s.softEnd = { count: s.designs.length, at: Date.now() };
+      return { session: s, added: false, exhausted: false, softEnd: true };
     }
     return { session, added: false, exhausted: false, error: { message: e.message, code: e.code || null } };
   }
 }
 /** رسالة النفاد الصادقة بعدد التصاميم الفعلي. */
-export const exhaustedMessage = n => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} ${n > 10 ? 'تصميمًا' : n > 2 ? 'تصاميم' : 'تصميمًا'}). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.`;
+export const cappedMessage = n => `عرضتُ عليك ${n} تصميمًا مختلفًا، وهذا أقصى ما تحفظه الجلسة؛ اعتمد أقربها إلى ذوقك أو اطلب تعديلًا (شكلًا أو عددًا أو مقاسًا) لأبدأ بحثًا جديدًا.`;
+/** بعد التصاميم المختلفة بوضوح: الأقرب منها ما زال ممكنًا بطلب العميل. */
+export const softEndMessage = (n, clear = n) => (n > clear ? `أول ${clear} تصميمًا مختلفة بوضوح عن بعضها (32٪ على الأقل)، وما بعدها أقرب لما عُرض (25٪ على الأقل) ويُبيَّن ذلك في ملاحظات كل منها. اضغط «تصميم آخر» لأبحث لك عن غيرها.` : `هذه ${n} تصميمًا مختلفة بوضوح عن بعضها (32٪ على الأقل). اضغط «تصميم آخر» إن أردت توزيعات أقرب لما عُرض (تختلف 25٪ على الأقل) وسأبيّن لك ذلك في ملاحظات كل تصميم.`);
+export const exhaustedMessage = n => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.`;
 
 /**
  * دمج تصميمين: توزيع سليم جديد يأخذ من كليهما بتوازن ولا يكون نسخة من أحدهما (تشابهه مع كلٍّ < 90٪).
