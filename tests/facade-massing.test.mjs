@@ -105,8 +105,8 @@ test('مخطط علويه أصغر: تراس من المخطط بدرابزين 
 test('قصّ ما فوق التراس: الجدار الممتد يُقصّ عند الفراغ ولا يبقى شيء داخله، وبناء المشهد يضيف التراس ويحرر موارده', async () => {
   const { built, FI } = await build(TER, 'M'), plan = massingPlan({ doc: TER, built, style: 'M', exterior: {}, floors: FI.n }), v = plan.terraces[0].void;
   const scene = new THREE.Scene(), top = plan.wallTop;
-  // جدار أمامي ممتد بارتفاع المبنى كله عند وجه الواجهة، وزخرفة داخل الفراغ كليًّا
-  const wall = new THREE.Mesh(new THREE.BoxGeometry(13.5, top, .25), new THREE.MeshStandardMaterial()); wall.position.set(10, top / 2, -3); wall.userData = { role: 'wall', side: 's' }; scene.add(wall);
+  // جدار أمامي ممتد (يتجاوز الفراغ يمينًا ويسارًا أيًّا كان موضع التراس في المخطط) بارتفاع المبنى كله عند وجه الواجهة، وزخرفة داخل الفراغ كليًّا
+  const wall = new THREE.Mesh(new THREE.BoxGeometry(40, top, .25), new THREE.MeshStandardMaterial()); wall.position.set((v.min[0] + v.max[0]) / 2, top / 2, -3); wall.userData = { role: 'wall', side: 's' }; scene.add(wall);
   const deco = new THREE.Mesh(new THREE.BoxGeometry(.5, .5, .5), new THREE.MeshStandardMaterial()); deco.position.set((v.min[0] + v.max[0]) / 2, v.min[1] + 2, -3); scene.add(deco);
   const m = buildMassing(THREE, { scene, S: { meshes: [wall] }, plan });
   assert.equal(deco.visible, false, 'ما كان كله داخل الفراغ أُخفي');

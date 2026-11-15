@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { STAGES, stageStates, readJourney, reachedIndex, markReached, pageKey, samePage, SESSION_KEY, HOME_KEY, REACHED_KEY, STUDIO_DOC_KEY } from '../dist/journey-nav.mjs';
 import { STAGES as ASSISTANT_STAGES } from '../dist/shara-assistant.mjs';
 import { SharaSession, normalizeLand, interpretFree } from '../dist/home-flow.mjs';
-import { carryOver, sameLand } from '../dist/design-session.mjs';
+import { carryOver, sameLand, MAX_DESIGNS } from '../dist/design-session.mjs';
 import { OPS, plain } from '../dist/design-worker.mjs';
 
 const mem = (init = {}) => { const m = new Map(Object.entries(init)); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => { m.set(k, String(v)); }, removeItem: k => { m.delete(k); } }; };
@@ -94,8 +94,8 @@ test('«عدّل طلبي وأعد التوليد»: التصاميم الساب
   assert.ok(sameLand(land, { ...land, floors: 2 })); assert.ok(!sameLand(land, { ...land, width: 21 }));
   assert.equal(carryOver({ ...next, input: { land: { ...land, width: 25 } } }, prev).kept, 0, 'أرض مختلفة: لا تُحمَل السابقة');
   assert.equal(carryOver(next, null).kept, 0);
-  const many = { ...prev, designs: Array.from({ length: 20 }, (_, i) => ({ doc: 'D' + i })) };
-  assert.equal(carryOver(next, many).session.designs.length, 15, 'لا يتجاوز حد الجلسة');
+  const many = { ...prev, designs: Array.from({ length: 40 }, (_, i) => ({ doc: 'D' + i })) };
+  assert.equal(carryOver(next, many).session.designs.length, MAX_DESIGNS, 'لا يتجاوز حد الجلسة');
 });
 
 test('عامل التوليد: الدوال نفسها (نفس المدخلات ← نفس الجلسة)، والنتيجة بيانات صِرفة', async () => {
