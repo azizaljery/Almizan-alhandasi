@@ -23,16 +23,17 @@ function boot() {
 
 let local = null, localRunning = 0;
 async function runLocal(op, args) {
-  localRunning++;
+  const counted = op !== 'extend'; // الإكمال في الخلفية لا يُعدّ انشغالًا يمنع طلب العميل
+  if (counted) localRunning++;
   try {
     local ||= import('./design-worker.mjs');
     const { OPS, plain } = await local;
     await new Promise(r => setTimeout(r, 30)); // يُرسم مؤشر الانتظار قبل أن ينشغل الخيط
     return plain(await OPS[op](args || {}));
-  } finally { localRunning--; }
+  } finally { if (counted) localRunning--; }
 }
 /** هل يوجد توليد جارٍ الآن؟ (لا يُبدأ طلب ثانٍ يعدّل الجلسة نفسها قبل انتهاء الأول) */
-export const pending = () => [...waiting.values()].filter(w => w.op !== 'ping').length + localRunning > 0;
+export const pending = () => [...waiting.values()].filter(w => w.op !== 'ping' && w.op !== 'extend').length + localRunning > 0;
 
 /** هل يعمل التوليد خارج الخيط الرئيسي الآن؟ (للاختبارات والقياس) */
 export const offMainThread = () => !!worker && !dead;
@@ -50,6 +51,7 @@ export function run(op, args) {
 export const generateInWorker = (input, sessionArgs) => run('generate', { input, sessionArgs });
 export const redesignInWorker = (session, ask) => run('redesign', { session, ask });
 export const fixInWorker = (session, id) => run('fix', { session, id });
+export const extendInWorker = (session, target) => run('extend', { session, target });
 export const mergeInWorker = (session, a, b) => run('merge', { session, a, b });
 export const diagnoseInWorker = input => run('diagnose', { input });
 

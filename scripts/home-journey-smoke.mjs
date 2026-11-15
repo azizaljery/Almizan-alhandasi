@@ -67,7 +67,7 @@ await step('الرحلة', async () => {
   check('«هل نُفّذ طلبك؟»: بنود قابلة للتحديد في المسقط', led[0] >= 5 && led[1] === led[0], led.join('/'));
   await page.click('#ledger li.locatable');
   check('«ورّني وين»: إضاءة البند في المسقط', await page.evaluate(() => !document.querySelector('#focusBar').hidden && document.querySelector('#focusText').textContent.length > 5));
-  const nDesigns = (await page.$$('.history button')).length;
+  const nDesigns = (await page.$$('.dnav button[data-design]')).length;
   if (nDesigns >= 2) {
     await page.click('#btnCompare'); await page.waitForTimeout(800);
     check('مقارنة تصميمين: جدول وعناوين', await page.evaluate(() => document.querySelectorAll('#cmpRows tr').length >= 8 && document.querySelectorAll('#cmpHead li').length >= 1));
@@ -75,8 +75,8 @@ await step('الرحلة', async () => {
   } else check('مقارنة تصميمين (يحتاج تصميمين)', true, 'تصميم واحد فقط في هذه الرحلة');
   await page.click('#btnAnother'); await page.fill('#fbText', 'ابي تصميم بديل مختلف'); await page.click('#fbGo');
   // التوليد يجري في عامل خارج الخيط الرئيسي ويعرض نص تقدّم أثناءه؛ الانتهاء = زوال علامة الانشغال
-  await page.waitForFunction(n => !document.body.dataset.busy && (document.querySelectorAll('.history button').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25), Math.max(1, nDesigns), { timeout: 120000 });
-  check('«ابي تصميم بديل»: تصميم جديد', (await page.$$('.history button')).length > Math.max(1, nDesigns), await page.evaluate(() => document.querySelector('#fbStatus')?.textContent || ''));
+  await page.waitForFunction(n => !document.body.dataset.busy && (document.querySelectorAll('.dnav button[data-design]').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25), Math.max(1, nDesigns), { timeout: 120000 });
+  check('«ابي تصميم بديل»: تصميم جديد', (await page.$$('.dnav button[data-design]')).length > Math.max(1, nDesigns), await page.evaluate(() => document.querySelector('#fbStatus')?.textContent || ''));
   // 5) ثلاثي الأبعاد
   await page.click('#btnApprove'); await page.waitForSelector('#extShara:not([hidden])', { timeout: 15000 });
   check('الشكل الخارجي: شرعاء تبدأ بسؤال عمّا يستهوي العميل', await page.evaluate(() => document.getElementById('extOpts').dataset.q === 'feel' && document.querySelectorAll('#extOpts .chip').length >= 5));

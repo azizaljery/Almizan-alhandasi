@@ -293,3 +293,24 @@ body.ext-open .ph{z-index:45}
 .history button .sc-b{background:#e4efe7;color:#24543a}
 .history button.on .sc-b{background:#ffffff2e;color:#fff}
 .history button .sc-b.best{background:#b87333;color:#fff}
+
+/* التنقل بين التصاميم: عدّاد «تصميم 7 من 20» وشريط مصغّرات مرقّمة يلتف في صفوف (لا تمرير أفقي على الجوال) */
+.dnav{margin:0 0 16px;padding:14px 16px;display:grid;gap:12px}
+.dnav .dbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.dnav .dcount{font-size:20px;font-weight:700;color:var(--mz-green-deep);font-variant-numeric:tabular-nums}
+.dnav .dbtns{display:flex;flex-wrap:wrap;gap:8px}
+.dnav .dstrip{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.dnav .dn{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:6px 4px 5px;border:1px solid var(--mz-line);background:#fff;border-radius:12px;cursor:pointer;color:#6b6a5f;font:inherit}
+.dnav .dn .th{display:block;width:100%;height:44px;color:var(--mz-green-deep)}
+.dnav .dn .th svg{display:block;width:100%;height:100%}
+.dnav .dn b{font-size:13px;color:#2c2b24;font-variant-numeric:tabular-nums}
+.dnav .dn .ori{margin:0;font-size:11px;padding:0 6px;border-radius:99px;background:#e4efe7;color:#24543a;font-variant-numeric:tabular-nums}
+.dnav .dn .ori.best{background:#b87333;color:#fff}
+.dnav .dn.best{border-color:#b87333}
+.dnav .dn.on{background:var(--mz-green-deep);border-color:var(--mz-green-deep);color:#fff}
+.dnav .dn.on .th,.dnav .dn.on b{color:#fff}
+.dnav .dn.on .ori{background:#ffffff2e;color:#fff}
+.dnav .dn:focus-visible,.dnav .btn:focus-visible{outline:2px solid var(--mz-gold,#b87333);outline-offset:2px}
+.dnav .dstatus{margin:0;font-size:13.5px;color:#6b6a5f;min-height:1.4em}
+.dnav .dstatus.end{color:#5a3a2c;background:#f8efdc;border:1px solid #e6d3a6;border-radius:10px;padding:8px 12px}
+@media (max-width:560px){.dnav{padding:12px}.dnav .dbtns{width:100%}.dnav .dbtns .btn{flex:1}.dnav .dstrip{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}}

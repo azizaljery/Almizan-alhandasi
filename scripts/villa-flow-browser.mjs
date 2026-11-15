@@ -12,7 +12,8 @@ await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = `http://1
 const { chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs');
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox'] });
 const results = []; const check = (n, ok, d = '') => { results.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
-const p = await (await b.newContext({ viewport: { width: 1360, height: 900 } })).newPage(); const errs = [];
+const ctx0 = await b.newContext({ viewport: { width: 1360, height: 900 } }); await ctx0.addInitScript(() => { try { localStorage.setItem('mizan.design.bg', 'off'); } catch { /* بلا تخزين */ } }); // يعدّ الفحص التصاميم بدقة: الإكمال في الخلفية معطّل
+const p = await ctx0.newPage(); const errs = [];
 p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::/.test(m.text())) errs.push(m.text()); }); p.on('pageerror', e => errs.push(e.message)); p.on('dialog', d => d.accept());
 const TEXT = process.env.VILLA_TEXT || 'أبغى فيلا فيها 4 غرف نوم وحدة منها ماستر بغرفة ملابس، كل غرفة بحمامها، مجلس رجال كبير مع دورة مياه للضيوف، ومجلس نساء بمدخل مستقل، صالة عائلية، مطبخ مفتوح على الطعام، وغرفة خادمة بحمام قريبة من المطبخ، والمطبخ في الخلف، وخل التصميم عصري ومريح';
 await p.goto(base + '/home.html'); await p.click('#start');
@@ -50,13 +51,13 @@ await p.fill('#fbText', 'لا تحط غرف النوم على الشارع، و�
 await p.waitForFunction(() => globalThis.__mizanDesign.session.designs.length === 2, null, { timeout: 60000 }); await p.waitForTimeout(400);
 const rep1 = await p.locator('#sharaReply').innerText();
 check('رد شرعاء يذكر ما نفّذته من التعديل', /شرعاء/.test(rep1) && /غرف النوم/.test(rep1) && /يمين الداخل/.test(rep1), rep1.split('\n').slice(0, 4).join(' | '));
-await p.click('.history button >> nth=0'); await p.waitForTimeout(300);
+await p.click('.dnav button[data-design] >> nth=0'); await p.waitForTimeout(300);
 // طلب تصميم آخر
 await p.click('#btnAnother'); await p.waitForSelector('#shara:not([hidden])');
 await p.click('#fbChips .chip[data-id=rooms_small]'); await p.fill('#fbText', 'المجلس في الجهة الشرقية والماستر بعيدة عن المجلس');
 await p.click('#fbGo'); await p.waitForFunction(() => globalThis.__mizanDesign.session.designs.length === 3, null, { timeout: 60000 }); await p.waitForTimeout(500);
 check('«اطلب تصميمًا آخر» يولّد تصميمًا آخر بالملاحظات', await p.locator('h1').innerText() === 'التصميم 3');
-check('سجل التصاميم يسمح بالرجوع', await p.locator('.history button').count() === 3);
+check('سجل التصاميم يسمح بالرجوع', await p.locator('.dnav button[data-design]').count() === 3);
 const led2 = await p.locator('#ledger').innerText();
 check('ملاحظة شرعاء المكانية نُفّذت في التصميم الثاني', /جهة الشرق/.test(led2) && /بعيدًا عن/.test(led2) && await p.locator('#ledger li.bad').count() === 0, led2.split('\n').slice(0, 5).join(' | '));
 await p.screenshot({ path: out + '/design-2.png', fullPage: false });

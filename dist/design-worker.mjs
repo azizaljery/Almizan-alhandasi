@@ -1,7 +1,7 @@
 // عامل التوليد: البحث عن التوزيعات (توليد أولي، تصميم آخر، علاج الملاحظات، الدمج، تشخيص التعذّر) يجري هنا
 // خارج الخيط الرئيسي حتى لا تتجمّد الواجهة. الدوال نفسها بلا تغيير: نفس المدخلات ← نفس التصاميم.
 import { generateInitialDesign, diagnoseFit } from './home-flow.mjs';
-import { createSession, redesign, mergeDesigns } from './design-session.mjs';
+import { createSession, redesign, mergeDesigns, extendSession } from './design-session.mjs';
 import { applyFix } from './design-fixes.mjs';
 
 export const OPS = {
@@ -11,6 +11,8 @@ export const OPS = {
     return { session: createSession({ ...sessionArgs, result: out }), handoff: { doc: out.doc, notes: out.notes || [], dna: out.dna || null, alternatives: out.alternatives || [] } };
   },
   redesign: ({ session, ask }) => redesign(session, ask),
+  /** خطوة إكمال واحدة في الخلفية (تصميم مختلف يُضاف في نهاية القائمة)؛ تُسلسل من الصفحة حتى يتقدّم طلب العميل عليها. */
+  extend: ({ session, target }) => extendSession(session, { target }),
   fix: ({ session, id }) => applyFix(session, id),
   merge: ({ session, a, b }) => mergeDesigns(session, a, b),
   diagnose: ({ input }) => diagnoseFit(input),

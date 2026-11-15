@@ -1,8 +1,8 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
-import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes } from './design-session.mjs';
-import { redesignInWorker, fixInWorker, mergeInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, TARGET_DESIGNS, exhaustedMessage } from './design-session.mjs';
+import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
@@ -38,6 +38,101 @@ function syncHash() { if (!session) return; const want = location.hash === '#ext
 addEventListener('hashchange', syncHash); addEventListener('popstate', syncHash);
 addEventListener('pageshow', e => { if (e.persisted) { const s2 = loadSession(localStorage); if (s2) { session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } } syncHash(); } });
 
+// ------------------------------------------------------------------------------------------ التنقل بين التصاميم والإكمال في الخلفية
+// بعد عرض التصميم الأول يُولِّد العامل بقية التصاميم المختلفة (حتى TARGET_DESIGNS) خطوةً خطوة دون تجميد الواجهة؛ طلب العميل يتقدّم على الخلفية.
+// وإن لم يبقَ توزيع يختلف عمّا عُرض تُعلَن الجلسة منتهية بعددها الحقيقي (session.exhausted) ولا يُختلق عدد.
+const bg = { running: false, stop: false, p: null };
+const thumbCache = new Map();
+/** مسقط مصغّر: جدران الدور الأول وحدها (SVG)، يُحفظ بنص المستند. */
+function thumbHTML(d) {
+  const key = d.doc; if (thumbCache.has(key)) return thumbCache.get(key);
+  let html = '';
+  try {
+    const dc = JSON.parse(d.doc), lv = dc.levels?.[0]?.id, ws = (dc.walls || []).filter(w => w.level === lv && w.kind !== 'fence');
+    if (ws.length) {
+      const xs = ws.flatMap(w => [w.a.x, w.b.x]), ys = ws.flatMap(w => [w.a.y, w.b.y]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+      const pad = Math.max(x1 - x0, y1 - y0) * .05, r = v => Math.round(v * 10) / 10;
+      html = `<svg viewBox="${r(x0 - pad)} ${r(y0 - pad)} ${r(x1 - x0 + 2 * pad)} ${r(y1 - y0 + 2 * pad)}" aria-hidden="true" focusable="false"><path d="${ws.map(w => `M${r(w.a.x)} ${r(w.a.y)}L${r(w.b.x)} ${r(w.b.y)}`).join('')}" fill="none" stroke="currentColor" stroke-width="${r(Math.max(x1 - x0, y1 - y0) * .022)}" stroke-linecap="square"/></svg>`;
+    }
+  } catch { html = ''; }
+  thumbCache.set(key, html); if (thumbCache.size > 64) thumbCache.delete(thumbCache.keys().next().value);
+  return html;
+}
+const generating = () => bg.running && !session.exhausted && session.designs.length < TARGET_DESIGNS;
+function navStatusText() {
+  const n = session.designs.length;
+  if (session.exhausted) return exhaustedMessage(n);
+  if (generating()) return `جاهز ${n} تصاميم مختلفة، وأُعدّ لك المزيد في الخلفية (حتى ${TARGET_DESIGNS})…`;
+  return '';
+}
+/** شريط التنقل: «تصميم 7 من 20»، السابق/التالي، وشريط مصغّرات مرقّمة (الأعلى درجة ★) يلتف في الصفوف فلا تمرير أفقي. */
+function navBlock(index, badges = []) {
+  const n = session.designs.length, top = n > 1 ? rankedIndexes(session)[0] : -1;
+  const thumbs = session.designs.map((x, i) => {
+    const v = x.score, th = el('span', { class: 'th' }); th.innerHTML = thumbHTML(x);
+    return el('button', { type: 'button', class: 'dn' + (i === index ? ' on' : '') + (i === top ? ' best' : ''), 'data-design': String(i), title: (x.summary || '') + (v ? ` — درجة المطابقة ${v.total}/100` : ''), 'aria-label': `التصميم ${i + 1}${v ? ` درجة ${v.total}` : ''}${i === top ? ' (الأعلى درجة)' : ''}`, 'aria-current': i === index ? 'true' : null, onclick: () => { show(i); scrollTo({ top: 0, behavior: 'smooth' }); } },
+      th, el('b', {}, String(i + 1)), v ? el('span', { class: 'ori sc-b' + (i === top ? ' best' : ''), title: 'درجة المطابقة' }, (i === top ? '★ ' : '') + v.total) : null);
+  });
+  return el('section', { class: 'dnav card', id: 'dnav', 'aria-label': 'التنقل بين التصاميم' },
+    el('div', { class: 'dbar' },
+      el('div', { class: 'dcount', id: 'dCount', 'aria-live': 'polite' }, `تصميم ${index + 1} من ${n}`),
+      el('div', { class: 'dbtns' },
+        el('button', { type: 'button', class: 'btn', id: 'btnPrev', disabled: index === 0 ? '' : null, onclick: () => { show(index - 1); scrollTo({ top: 0, behavior: 'smooth' }); } }, '→ السابق'),
+        el('button', { type: 'button', class: 'btn primary', id: 'btnNext', onclick: onNext }, 'تصميم آخر ←'))),
+    n > 1 ? el('div', { class: 'dstrip', role: 'group', 'aria-label': 'مصغّرات التصاميم مرقّمة' }, thumbs) : null,
+    el('p', { class: 'dstatus' + (session.exhausted ? ' end' : ''), id: 'dStatus', 'aria-live': 'polite', role: 'status' }, navStatusText()));
+}
+/** يحدّث شريط التنقل وحده (دون إعادة رسم الصفحة) حين يصل تصميم جديد من الخلفية. */
+function refreshNav() {
+  const old = $('dnav'); if (!old || !session) return;
+  const cur = session.current, next = navBlock(cur); old.replaceWith(next);
+  if (document.body.dataset.busy) next.querySelectorAll('button').forEach(b => { b.disabled = true; });
+}
+function startBg() {
+  // فحوص المتصفح التي تعدّ التصاميم بدقة تعطّل الإكمال بهذا المفتاح (لا يُستعمل في الاستعمال العادي)
+  try { if (localStorage.getItem('mizan.design.bg') === 'off') return; } catch { /* بلا تخزين */ }
+  if (bg.running || !session || session.exhausted || session.designs.length >= TARGET_DESIGNS) return;
+  bg.running = true; bg.stop = false; bg.p = bgLoop(); refreshNav();
+}
+async function bgLoop() {
+  let again = false;
+  try {
+    while (!bg.stop && session && !session.exhausted && session.designs.length < TARGET_DESIGNS) {
+      const snap = session;
+      let out; try { out = await extendInWorker(snap, TARGET_DESIGNS); } catch { break; }
+      if (session !== snap || !out?.session) { again = session !== snap; break; } // الجلسة تغيّرت أثناء العمل (طلب العميل أو نافذة شرعاء): تُترك النتيجة وتبدأ الخلفية من جديد
+      if (out.error) break;
+      const cur = session.current; session = out.session; session.current = cur; saveSession(localStorage, session);
+      refreshNav();
+      if (!out.added) break;
+      await new Promise(r => setTimeout(r, 40)); // مجال للواجهة بين خطوتين
+    }
+  } finally { bg.running = false; if (session) refreshNav(); if (again && !bg.stop) setTimeout(startBg, 300); }
+}
+/** يوقف الإكمال في الخلفية وينتظر خطوته الجارية (أقصاها تصميم واحد) حتى يبدأ طلب العميل من أحدث جلسة. */
+async function settleBg() { bg.stop = true; if (bg.p) { try { await bg.p; } catch { /* انتهت */ } } }
+/** يشغّل طلبًا للعميل: الخلفية تتوقف قبله وتعود بعده. fn تقرأ session بعد التوقف. */
+async function withBg(fn) { await settleBg(); try { return await fn(); } finally { setTimeout(startBg, 250); } }
+/** «تصميم آخر»: التالي الجاهز فورًا، وإلا يُولَّد الآن، وبعد النفاد تظهر الرسالة الصادقة بالعدد الحقيقي. */
+async function onNext() {
+  const i = session.current;
+  if (i + 1 < session.designs.length) { show(i + 1); scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (session.exhausted) { const n = $('dStatus'); if (n) { n.textContent = exhaustedMessage(session.designs.length); n.classList.add('end'); n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } return; }
+  const st = $('dStatus'), done = busy(true, st, 'أبحث لك عن توزيع مختلف عمّا عُرض…');
+  try {
+    await settleBg();
+    if (i + 1 < session.designs.length) { done(); show(i + 1); return; } // وصل تصميم من الخلفية أثناء الانتظار
+    const out = await extendInWorker(session, session.designs.length + 1);
+    done();
+    if (out.error) { toast(out.error.message || 'تعذّر تصميم بديل.'); return; }
+    const cur = session.current; session = out.session; session.current = cur; saveSession(localStorage, session);
+    if (out.added) { show(session.designs.length - 1); scrollTo({ top: 0, behavior: 'smooth' }); }
+    else { refreshNav(); const n = $('dStatus'); if (n) n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); }
+  } catch (err) { done(); toast(err.message || 'تعذّر تصميم بديل.'); }
+  finally { refreshNav(); setTimeout(startBg, 250); }
+}
+
+
 function show(index) {
   // الجلسة (عدة ميغابايت نصًّا) تُكتب فقط إن تغيّر التصميم المعروض؛ من ولّد أو عدّل يحفظها قبل العرض
   if (session.current !== index) { session.current = index; saveSession(localStorage, session); }
@@ -60,7 +155,7 @@ function show(index) {
   const side = el('div', { class: 'actions card' },
     el('h2', {}, 'ما رأيك في هذا التصميم؟'),
     el('button', { class: 'btn gold', id: 'btnApprove', onclick: onApprove }, 'أعجبني — اعتمده واختر شكله الخارجي ←'),
-    el('button', { class: 'btn primary', id: 'btnAnother', onclick: openShara }, 'اطلب تصميمًا آخر'),
+    el('button', { class: 'btn', id: 'btnAnother', onclick: openShara }, 'لم يعجبني — أخبر شرعاء بما تريد تغييره'),
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnCompare', onclick: openCompare }, 'قارن بين تصميمين جنبًا إلى جنب') : null,
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnMerge', onclick: openMerge }, 'ادمج تصميمين في تصميم واحد') : null,
     el('button', { class: 'btn', id: 'btnStudio', onclick: onStudio }, 'عدّل عليه بيدك في المرسم'),
@@ -96,9 +191,9 @@ function show(index) {
   const scoreOf = i => session.designs[i]?.score || null, top = rankedIndexes(session)[0];
   const sc = scoreOf(index) || (() => { const v = scoreDesign(session, d); if (v) d.score = v; return v; })();
   const scBadge = i => { const v = scoreOf(i); return v ? el('span', { class: 'ori sc-b' + (i === top && session.designs.length > 1 ? ' best' : ''), title: 'درجة المطابقة: ' + v.total + '/100 — ' + v.grade }, (i === top && session.designs.length > 1 ? '★ ' : '') + v.total) : null; };
-  const history = session.designs.length > 1 ? el('div', { class: 'history', 'aria-label': 'التصاميم (مرتبة بدرجة المطابقة)' }, rankedIndexes(session).map(i => { const x = session.designs[i]; return el('button', { class: i === index ? 'on' : '', title: x.summary || '', 'data-design': String(i), onclick: () => show(i) }, 'التصميم ' + (i + 1) + (x.feedback?.merge ? ' (دمج)' : ''), scBadge(i), orient(badges[i])); })) : null;
+  const nav = navBlock(index, badges);
   const scoreBox = scoreCard(sc, index === top && session.designs.length > 1);
-  if (session.designs.some(x => !x.score)) { const idle = globalThis.requestIdleCallback || (f => setTimeout(f, 300)); idle(() => { let changed = false; for (const x of session.designs) if (!x.score) { x.score = scoreDesign(session, x); changed = changed || !!x.score; } if (changed && session.current === index) { const h = document.querySelector('.history'); if (h) { [...h.querySelectorAll('button[data-design]')].forEach(b => { const i = +b.dataset.design, v = session.designs[i].score; if (v && !b.querySelector('.sc-b')) b.insertBefore(Object.assign(document.createElement('span'), { className: 'ori sc-b', textContent: String(v.total) }), b.querySelector('.ori')); }); } } }); }
+  if (session.designs.some(x => !x.score)) { const idle = globalThis.requestIdleCallback || (f => setTimeout(f, 300)); idle(() => { let changed = false; for (const x of session.designs) if (!x.score) { x.score = scoreDesign(session, x); changed = changed || !!x.score; } if (changed && session.current === index) { const h = document.querySelector('.dnav'); if (h) { [...h.querySelectorAll('button[data-design]')].forEach(b => { const i = +b.dataset.design, v = session.designs[i].score; if (v && !b.querySelector('.sc-b')) b.insertBefore(Object.assign(document.createElement('span'), { className: 'ori sc-b', textContent: String(v.total) }), b.querySelector('.ori')); }); } } }); }
   const best = badges.find(b => b.best && b.index !== index) || null;
   const orientLine = bd && bd.score !== null ? el('div', { class: 'orient', id: 'orientBadge' }, el('a', { class: 'ori-badge ' + (bd.score >= 75 ? 'good' : bd.score >= 55 ? 'mid' : 'low'), href: '#sunCard' }, `التوجيه: ${bd.score}/100`), el('span', {}, bd.lines.join(' ')),
     bd.best ? el('span', { class: 'tag' }, 'الأفضل توجيهًا بين تصاميمك') : best ? el('button', { type: 'button', class: 'btn', id: 'bestOrient', onclick: () => { show(best.index); scrollTo({ top: 0, behavior: 'smooth' }); } }, `اعرض الأفضل توجيهًا: التصميم ${best.index + 1} (${best.score})`) : null) : null;
@@ -109,7 +204,8 @@ function show(index) {
   // replaceChildren يحوّل null إلى النص «null»؛ بطاقة الرد تُمرَّر فقط إن وُجدت
   $('main').replaceChildren(
     ...(replyCard ? [replyCard] : []),
-    el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), orientLine), history),
+    el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), orientLine)),
+    nav,
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     ...(fitCard ? [fitCard] : []),
     el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard)),
@@ -170,7 +266,7 @@ async function runFix(id) {
   const done = busy(true, st, 'أعالج الملاحظات… قد أجرّب عدة توزيعات.'); if (mine) mine.textContent = 'جارٍ التنفيذ…';
   const restore = () => { done(); if (mine) mine.textContent = label; };
   try {
-    const out = await fixInWorker(session, id);
+    const out = await withBg(() => fixInWorker(session, id));
     if (!out.changed) { restore(); if (st) st.textContent = out.reply.failed.length ? 'لم أجد علاجًا: ' + out.reply.failed.map(f => `«${f.text}» — ${f.why}`).join(' ') : 'لا شيء يحتاج علاجًا.'; return; }
     done();
     session = out.session; saveSession(localStorage, session); show(session.current);
@@ -182,7 +278,7 @@ async function runFix(id) {
  * تعيد دالة الإنهاء (تعيد الأزرار كما كانت).
  */
 function busy(on, statusNode, text) {
-  const btns = [...document.querySelectorAll('.actions button, #fixes button, .history button, #fbGo, #mgGo')].filter(b => !b.disabled);
+  const btns = [...document.querySelectorAll('.actions button, #fixes button, .history button, .dnav button, #fbGo, #mgGo')].filter(b => !b.disabled);
   btns.forEach(b => { b.disabled = true; }); document.body.dataset.busy = '1';
   const stop = ticking(statusNode, text);
   return () => { stop(); btns.forEach(b => { b.disabled = false; }); delete document.body.dataset.busy; };
@@ -238,7 +334,7 @@ $('mgGo').addEventListener('click', async () => {
   const done = busy(true, $('mgStatus'), 'أدمج التصميمين… أبحث عن توزيع سليم يأخذ من كليهما.'); $('mgGo').textContent = 'جارٍ الدمج…';
   const end = () => { done(); $('mgGo').textContent = 'ادمج التصميمين'; };
   try {
-    const out = await mergeInWorker(session, a, b); end();
+    const out = await withBg(() => mergeInWorker(session, a, b)); end();
     session = out.session; saveSession(localStorage, session);
     $('merge').hidden = true; show(session.current); toast('تم الدمج — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) { end(); $('mgStatus').textContent = err.message || 'تعذّر الدمج.'; $('mgGo').disabled = false; }
@@ -502,7 +598,7 @@ $('fbGo').addEventListener('click', async () => {
       catch { ai = null; aiNote = 'تعذّر الذكاء المتصل أو تأخر؛ فهمتُ ملاحظتك محليًا.'; }
       done(); done = busy(true, $('fbStatus'), (aiNote ? aiNote + ' ' : '') + 'أطبّق ملاحظاتك…');
     }
-    const out = await redesignInWorker(session, { picks, text, ai }); end();
+    const out = await withBg(() => redesignInWorker(session, { picks, text, ai })); end();
     session = out.session; saveSession(localStorage, session);
     $('shara').hidden = true; show(session.current); toast(out.reply?.failed?.length ? `نفّذت ${out.reply.done.length} ولم أستطع ${out.reply.failed.length} — التفاصيل أعلى الصفحة` : 'تم — التفاصيل أعلى الصفحة');
     scrollTo({ top: 0, behavior: 'smooth' });
@@ -510,10 +606,10 @@ $('fbGo').addEventListener('click', async () => {
 });
 
 // نافذة شرعاء الجانبية عدّلت الجلسة (طلب نُفّذ): تُعرض النتيجة هنا فورًا
-globalThis.addEventListener?.('mizan:session', e => { const s2 = e.detail?.session; if (!s2) return; session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } });
+globalThis.addEventListener?.('mizan:session', e => { const s2 = e.detail?.session; if (!s2) return; session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } setTimeout(startBg, 400); });
 // وحدات المولّد تُحمَّل في العامل والمتصفح خامل، فلا ينتظرها أول «تصميم آخر» أو «نفّذ»
 (globalThis.requestIdleCallback || (f => setTimeout(f, 600)))(() => {
-  if (!session) return; warmGenerator();
+  if (!session) return; warmGenerator(); setTimeout(startBg, 1500);
   // الصفحة التالية (العرض ثلاثي الأبعاد) ثقيلة التحميل: مكتبتها ووحداتها تُجلب مسبقًا والعميل يتأمل مخططه
   for (const href of ['./vendor/three.module.js', './view3d.mjs', './draw/viewer-draw.mjs', './three-runtime.mjs']) { const l = document.createElement('link'); l.rel = 'modulepreload'; l.href = href; document.head.append(l); }
 });

@@ -13,7 +13,9 @@ import { solarSite } from './geo-land.mjs';
 export { scorePlan, rankByScore };
 
 export const SESSION_KEY = 'mizan.design.session.v1';
-const MAX_DESIGNS = 15;
+const MAX_DESIGNS = 30;
+/** العدد المستهدف من التصاميم المختلفة في الجلسة (يُولَّد الباقي في الخلفية بعد عرض الأول)؛ ما لم يتوفر يُعلن النفاد بعدده الحقيقي. */
+export const TARGET_DESIGNS = 20;
 
 /** ما الذي لم يعجبك؟ كل خيار يغيّر الطلب تغييرًا محددًا معلنًا (لا تخمين). */
 export const FEEDBACK = Object.freeze([
@@ -101,7 +103,7 @@ export function carryOver(next, prev) {
  * - نص لم يُفهم منه شيء ولا خيار معه: لا يُولَّد تصميم؛ يُرمى SHARA_UNCLEAR ليعيد العميل الصياغة.
  * يعيد { session, changes, reply } — reply: ما نُفّذ وما لم يُنفَّذ (بسببه) وما لم يُفهم، مقيسًا من المخطط الجديد.
  */
-export async function redesign(session, { picks = [], text = '', ai = null } = {}, { generate = generateInitialDesign } = {}) {
+export async function redesign(session, { picks = [], text = '', ai = null, auto = false } = {}, { generate = generateInitialDesign } = {}) {
   const s = clone(session), req = s.input.requirements, changes = [];
   req.prefs ||= {}; req.tweaks ||= {}; req.counts ||= {}; req.extras ||= {}; req.areas ||= {};
   let more = null;
@@ -135,7 +137,7 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
   const shown = different ? s.seen : [];
   // الطلب لم يتغيّر (توزيع آخر فقط) والتصميم المعروض مرّ بسلّم الاتساع: تُعاد درجاته نفسها مباشرة بلا مشي السلّم من أوله
   const fitHint = !more && !picks.length ? hintOf(cur) : null;
-  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, ...(fitHint ? { fitHint } : {}) });
+  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, light: true, ...(fitHint ? { fitHint } : {}) });
   const outSig = visualSig(parseDoc(serialize(out.doc)));
   // ضمان أخير مستقل عن المولّد: «تصميم آخر» لا يُقبل إن شابه أي تصميم عُرض فوق الحد
   if (different) {
@@ -154,13 +156,38 @@ export async function redesign(session, { picks = [], text = '', ai = null } = {
     unclear: more?.unclear || [], unsupported: more?.unsupported || [], kept: !different && !!out.same, unchanged, different, altAsk,
     otherFails: ledger.filter(x => !x.ok && !mine.includes(x)).map(x => ({ text: x.text, why: x.why })),
   };
-  s.designs.push(entry(out, { picks, text, changes, reply }));
+  s.designs.push(entry(out, { picks, text, changes, reply, ...(auto ? { auto: true } : {}) }));
+  // الطلب تغيّر (ملاحظة أو خيار): نفاد التوزيعات السابق لا يسري على الطلب الجديد
+  if (!different || picks.some(id => id !== 'layout') || (more && (more.understood.length || more.unsupported.length))) delete s.exhausted;
   s.seen.push(outSig); if (out.pat) s.seenPats = [...new Set([...s.seenPats, out.pat])];
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
   ensureScores(s);
   return { session: s, changes, reply };
 }
+
+/**
+ * إكمال التصاميم في الخلفية: خطوة واحدة («توزيع مختلف» عن كل ما عُرض) تُضاف إلى نهاية قائمة التصاميم دون أن يتحرك التصميم المعروض.
+ * تنتهي بالنفاد الصادق: حين لا يبقى توزيع يختلف عمّا عُرض تُسجَّل الجلسة exhausted بعدد ما عُرض فعلًا (لا يُختلق عدد).
+ * يعيد { session, added, exhausted, error? }؛ added = false عند النفاد أو الفشل.
+ */
+export async function extendSession(session, { target = TARGET_DESIGNS } = {}, { generate = generateInitialDesign } = {}) {
+  if (session.exhausted || session.designs.length >= target) return { session, added: false, exhausted: !!session.exhausted };
+  const keepCurrent = session.current;
+  try {
+    const out = await redesign(session, { auto: true }, { generate });
+    out.session.current = keepCurrent;
+    return { session: out.session, added: true, exhausted: false };
+  } catch (e) {
+    if (e.code === 'VILLA_EXHAUSTED') {
+      const s = clone(session); s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now() };
+      return { session: s, added: false, exhausted: true };
+    }
+    return { session, added: false, exhausted: false, error: { message: e.message, code: e.code || null } };
+  }
+}
+/** رسالة النفاد الصادقة بعدد التصاميم الفعلي. */
+export const exhaustedMessage = n => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} ${n > 10 ? 'تصميمًا' : n > 2 ? 'تصاميم' : 'تصميمًا'}). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.`;
 
 /**
  * دمج تصميمين: توزيع سليم جديد يأخذ من كليهما بتوازن ولا يكون نسخة من أحدهما (تشابهه مع كلٍّ < 90٪).
@@ -212,7 +239,7 @@ export function ledgerFor(session, doc = currentDoc(session)) {
   try { return verifyRequest(doc, req, { entry }); } catch { return session.designs[session.current]?.ledger || []; }
 }
 
-export default { SESSION_KEY, FEEDBACK, createSession, redesign, mergeDesigns, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules, carryOver, sameLand };
+export default { SESSION_KEY, FEEDBACK, createSession, redesign, extendSession, mergeDesigns, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules, carryOver, sameLand };
 
 // ------------------------------------------------------------------------------------------ العرض
 import { analyzeDoc } from './draw/digest.mjs';
