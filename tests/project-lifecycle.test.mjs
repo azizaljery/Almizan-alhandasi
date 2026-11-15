@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { beginVisit, touchVisit, startNewProject, archiveCurrent, listPast, restorePast, deletePast, hasProject, takeNotice, clearProject, PROJECT_KEYS, KEPT_KEYS, PAST_KEY, PAST_MAX, ACTIVE_KEY } from '../dist/project-lifecycle.mjs';
+import { beginVisit, touchVisit, startNewProject, archiveCurrent, listPast, restorePast, deletePast, hasProject, takeNotice, clearProject, PROJECT_KEYS, KEPT_KEYS, PAST_KEY, PAST_MAX, ACTIVE_KEY, SEEN_KEY, IDLE_MS } from '../dist/project-lifecycle.mjs';
 
 const store = (init = {}, { failSet = false } = {}) => { const m = new Map(Object.entries(init)); return { m, getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => { if (failSet) throw new Error('quota'); m.set(k, String(v)); }, removeItem: k => m.delete(k), get length() { return m.size; } }; };
 const session = (land = { width: 20, length: 30 }) => JSON.stringify({ v: 1, input: { land }, designs: [{ doc: '{}' }, { doc: '{}' }], current: 0, approved: 1, createdAt: 7 });
@@ -59,4 +59,19 @@ test('مفاتيح الإعدادات لا تتقاطع مع مفاتيح الم
   for (const k of KEPT_KEYS) assert.ok(!PROJECT_KEYS.includes(k), k);
   assert.ok(!PROJECT_KEYS.includes(PAST_KEY));
   const local = store({ [PAST_KEY]: 'مشوّه{' }); assert.deepEqual(listPast(local), []);
+});
+
+test('تبويب بقي مفتوحًا بعد خمول طويل (جوال): يُعدّ دخولًا جديدًا ويُحفظ مشروعه السابق', () => {
+  const local = store(project()), ses = store({ [ACTIVE_KEY]: '1', [SEEN_KEY]: '1000' });
+  const r = beginVisit(local, ses, 1000 + IDLE_MS + 1);
+  assert.equal(r.fresh, true); assert.ok(r.archived); assert.equal(listPast(local).length, 1); assert.equal(local.getItem('mizan.design.session.v1'), null);
+});
+test('تبويب نشط حديثًا: لا يُعدّ دخولًا جديدًا ويتجدّد آخر نشاط', () => {
+  const local = store(project()), ses = store({ [ACTIVE_KEY]: '1', [SEEN_KEY]: '1000' });
+  const r = beginVisit(local, ses, 1000 + IDLE_MS - 5); assert.equal(r.fresh, false); assert.equal(listPast(local).length, 0);
+  assert.equal(ses.getItem(SEEN_KEY), String(1000 + IDLE_MS - 5));
+});
+test('الصفحات الداخلية تجدّد آخر نشاط فلا يضيع عمل طويل في المرسم', () => {
+  const local = store(project()), ses = store({ [ACTIVE_KEY]: '1', [SEEN_KEY]: '1000' });
+  touchVisit(ses, 1000 + IDLE_MS - 10); const r = beginVisit(local, ses, 1000 + IDLE_MS + 500); assert.equal(r.fresh, false);
 });

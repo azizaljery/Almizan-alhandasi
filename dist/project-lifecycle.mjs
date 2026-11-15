@@ -20,6 +20,9 @@ export const KEPT_KEYS = Object.freeze(['mizan.shara.voice', 'mizan.shara.open',
 export const PAST_KEY = 'mizan.projects.past.v1';
 export const ACTIVE_KEY = 'mizan.tab.active.v1';
 export const NOTICE_KEY = 'mizan.fresh.notice.v1';
+/** آخر نشاط في هذا التبويب (sessionStorage). تبويب الجوال قد يبقى مفتوحًا أيامًا، فالخمول الطويل يُعدّ دخولًا جديدًا. */
+export const SEEN_KEY = 'mizan.tab.seen.v1';
+export const IDLE_MS = 4 * 3600 * 1000;
 export const PAST_MAX = 20;
 export const PAST_MAX_BYTES = 2_500_000;
 
@@ -70,13 +73,15 @@ export function startNewProject(local, session, now = Date.now()) {
 }
 /** عند فتح الصفحة الرئيسية: دخول جديد (لا علامة نشطة في هذا التبويب) → مشروع نظيف؛ وإلا يستعيد. */
 export function beginVisit(local, session, now = Date.now()) {
-  if (get(session, ACTIVE_KEY)) return { fresh: false };
+  const seen = Number(get(session, SEEN_KEY)) || 0;
+  if (get(session, ACTIVE_KEY) && !(seen && now - seen > IDLE_MS)) { set(session, SEEN_KEY, String(now)); return { fresh: false }; }
   if (!set(session, ACTIVE_KEY, '1')) return { fresh: false, reason: 'no-session-storage' }; // لا نمسح أبدًا ما لا نستطيع تمييزه
+  set(session, SEEN_KEY, String(now));
   const r = startNewProject(local, session, now);
   return { fresh: true, ...r };
 }
 /** الصفحات الأخرى (التصميم، المرسم…) تضع العلامة فقط ولا تمسح: دخول مباشر إلى صفحة داخلية لا يهدم مشروعًا. */
-export function touchVisit(session) { if (!get(session, ACTIVE_KEY)) set(session, ACTIVE_KEY, '1'); }
+export function touchVisit(session, now = Date.now()) { if (!get(session, ACTIVE_KEY)) set(session, ACTIVE_KEY, '1'); set(session, SEEN_KEY, String(now)); }
 /** تلميح البدء مرة واحدة: 'archived' | 'lost' | null. */
 export function takeNotice(session) { const v = get(session, NOTICE_KEY); if (v) del(session, NOTICE_KEY); return v === 'archived' || v === 'lost' ? v : null; }
 /** يستعيد مشروعًا سابقًا: يحفظ الحالي أولًا (إن وُجد) ثم يكتب لقطة السابق. */
