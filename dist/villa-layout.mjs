@@ -391,7 +391,7 @@ function* subsets(list) {
 }
 
 /** يولّد الترتيبات المرشحة لكل الأنماط ويرتبها. */
-export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = null, relaxL = false, only = null, perMode = 0, noFiller = false } = {}) {
+export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = null, relaxL = false, only = null, perMode = 0, noFiller = false, bands = false } = {}) {
   if (upper) return searchUpper(program, W, D, upper, keep);
   const T = DESIGN_TARGETS, out = [];
   // أرضي الدورين: الفائض عن احتياجه (حين يكون العلوي أكبر برنامجًا) يأخذ «جلسة عائلية»؛ الفناء يستوعب فائضه بحديقته فيبقى بلا إضافة
@@ -557,7 +557,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   // (9) أحزمة عرضية (الأراضي الضيقة والمتوسطة): حزام أمامي (مجلس الرجال والردهة)، وحزام صالة في الوسط بعرض المبنى يحمل السلم،
   // وحزام خلفي (المطبخ والطعام والعائلة، أو النوم في الدور الواحد). بلا محور طولي طويل: يقصر المبنى وتكبر الغرف ولا يضيع ثلث المسطح ممرًا.
   // عرض الحزام الأوسط = عرض المبنى؛ فنسبة صالته أعرض من 1:1.6 مقبولة هنا (جلستها بجانب السلم)، وتُعلن في ملاحظات الصالة إن لزم.
-  if (allow('bands') && W >= 7.4 && W < 16 && blocks.length <= 14) {
+  if (bands && allow('bands') && W >= 7.4 && W <= BANDS_MAX_W && blocks.length <= 14) {
     const foyerB = { id: 'foyer', kind: 'foyer', area: T.foyer * 1.15, rank: -1, name: 'الردهة' };
     const menM = blocks.find(b => b.kind === 'majlis' && b.men) || blocks.find(b => b.kind === 'majlis');
     const front0 = blocks.filter(b => b === menM || ['office', 'prayer', 'driver'].includes(b.kind) || b.guest);
@@ -597,7 +597,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
     }
     // أفضل المرشحين فقط يدخلون الترتيب العام (يحدّ الزمن)
     bandsOut.sort((a, b) => a.raw - b.raw);
-    for (const c of bandsOut.slice(0, 24)) { const rp = rulePenalty(c.placed, c.circ, W, D, program.rules, program.entry); out.push({ ...c, rp, pen: c.raw + rp.base + Math.min(...rp.p) }); }
+    for (const c of bandsOut.slice(0, 14)) { const rp = rulePenalty(c.placed, c.circ, W, D, program.rules, program.entry); out.push({ ...c, rp, pen: c.raw + rp.base + Math.min(...rp.p) }); }
   }
   // (7) شريطي عرضي للأراضي القليلة العمق (دور واحد): الردهة والصالة عمود بكامل العمق، على جانبه جناح عام مكدّس (مجلس، مطبخ…)
   // وعلى الجانب الآخر صفّان من الغرف بينهما ممر يبدأ من الصالة، وقد تُختم نهايته بالغرفة الرئيسية بكامل العمق.
@@ -680,7 +680,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
     else if (!perMode) break;
   }
   // مع كتلة الفائض قد لا تتسع الأجنحة: يُجرَّب البرنامج بلا إضافة أيضًا، والأقل كلفة يتقدم (التضخم مرفوض في الحالتين)
-  if (blocks !== blocks0) { const seenP = new Set(res.map(c => c.sig)); for (const c of searchLayouts(program, W, D, { keep, stair, relaxL, only, noFiller: true })) if (!seenP.has(c.sig)) res.push(c); res.sort((a, b) => a.pen - b.pen); return res.slice(0, keep); }
+  if (blocks !== blocks0) { const seenP = new Set(res.map(c => c.sig)); for (const c of searchLayouts(program, W, D, { keep, stair, relaxL, only, noFiller: true, bands })) if (!seenP.has(c.sig)) res.push(c); res.sort((a, b) => a.pen - b.pen); return res.slice(0, keep); }
   return res;
 }
 /** الدور العلوي على هندسة الأرضي نفسها: المحور صالة علوية ينتهي بالسلم في الموضع ذاته، والأجنحة للنوم. */
@@ -1479,7 +1479,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   const wrapCand = (env, c) => ({ ...c, env, ...(env.only ? { extra: true } : {}), pen: c.pen + 6 * Math.max(0, (env.w * env.d - (c.court ? A_(c.court) : 0)) / target - 1.25) * 10 - (prefPat && c.pat === prefPat ? 60 : 0) - (preferModes.includes(c.mode) ? PREFER_MODE_BONUS : 0) });
   // prefer: نمط التصميم المعروض؛ تعديل العميل يُطبَّق عليه نفسه متى أمكن بدل توزيع جديد كليًا
   const __t0 = Date.now();
-  for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3, perMode: 2, only: env.only || null })) cands.push(wrapCand(env, c));
+  for (const env of envelopes) for (const c of searchLayouts(program, env.w, env.d, { keep: keep * 3, perMode: 2, only: env.only || null, bands: W <= BANDS_MAX_W })) cands.push(wrapCand(env, c));
   // فكرة «الجلسة الخارجية المحفورة في الكتلة» (دور واحد): ركن خارجي في طرف أحد الجناحين تفتح عليه الصالة بباب زجاجي منزلق
   // وتطل عليه الغرف المجاورة، فتنكسر الكتلة الصندوقية. فراغ خارجي لم يطلبه العميل ولا يُحسب من المسطح المبني؛ يُعلن في الملاحظات.
   if (!blend && !program.prefs?.shape && program.prefs?.courtyard !== true) {
@@ -1663,7 +1663,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   // أغلفة بعرض ثابت لا يتبع عرض الأرض (للفناء ولصف الخدمة الخلفي): انظر generateVillaDesigns
   for (const wc of COURT_WIDTHS) if (wc <= W - .6) for (const k of split.id === 'std' ? [1.35, 1.6, 1.8] : [1.35]) addEnv(wc, target * k / wc, ['court', 'tee']);
   const wantG2 = wantedShape(gProg);
-  for (const env of envs) for (const g of searchLayouts(gProg, env.w, env.d, { keep: shown.length ? 14 : 6, stair: STAIR, perMode: 2, only: env.only || null })) {
+  for (const env of envs) for (const g of searchLayouts(gProg, env.w, env.d, { keep: shown.length ? 14 : 6, stair: STAIR, perMode: 2, only: env.only || null, bands: W <= BANDS_MAX_W })) {
     if ((tw.avoidModes || []).includes(g.mode) || (g.mode === 'court' && program.prefs?.courtyard === false)) continue;
     const hall = g.circ.find(c => c.id === 'hall').r;
     const upPat = x => x.placed.map(p => p.block.kind[0] + ((p.r.x0 + p.r.x1) / 2 < env.w / 2 ? 'L' : 'R') + Math.round(p.r.y0 / 3)).sort().join('');
@@ -1934,6 +1934,8 @@ function differentFrom(cands, shown, { get = c => c.pat, maxOverlap = .6 } = {})
 /** عدد ترتيبات الدور العلوي التي تُجرَّب لكل أرضي (الأول هو الأفضل؛ الباقي احتياط إن لم يُبنَ سليمًا). */
 const UPPER_TRIES = 2;
 /** أدنى غلاف مبنى في الأراضي المعتادة (افتراض تصميمي): w عرض، d عمق الدور الواحد، d2 عمق الدورين. الأرض الأضيق يتبع حدُّها مسطحَها. */
+/** أقصى عرض مسطح قابل للبناء (أرض ضيقة/متوسطة) يُجرَّب عليه نمط الأحزمة العرضية؛ أعرض منه تصير صالته الوسطى شريطًا (نسبة > 1:2.7) وتكفي أنماط الصالة المركزية. */
+export const BANDS_MAX_W = 12.4;
 export const ENV_MIN = Object.freeze({ w: 8.5, d: 9, d2: 10 });
 /** الأرض الضيقة (مسطحها دون NARROW.w عرضًا): صالة جانبية أضيق من المعتاد؛ والقليلة العمق (دون NARROW.d): صفّان أقل عمقًا. تُعلن في ملاحظات الصالة. */
 export const NARROW = Object.freeze({ w: 8.2, sideHalls: [3.4, 3.6], wing: 2.95, barD: 9, barMinD: 7.5, barW: 14, trainW: 6.35, trainMinW: 4.55, rowMinD: 5.9, slimMinD: 4.7, slimFoyerW: 2.4, slimCapW: 7.0 });

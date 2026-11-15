@@ -15,7 +15,7 @@
 //   (door2: two leaves of radius w/2 hinged at both ends). Sliders, arches and garage doors do not swing.
 // FIXTURE FOOTPRINT: a rectangle w x d centred on (x, y), rotated counter-clockwise by `rot` (radians).
 import { ROOM_TYPES, FIXTURES, WALL_DEFAULTS, OPENING_KINDS, roomTypeName, fixtureName } from './catalog.mjs';
-import { applyCommand, DrawError } from './doc.mjs';
+import { applyCommand, applyCommandInPlace, DrawError } from './doc.mjs';
 import { analyzeDoc, digestDoc, compassOf, SIDE_AR, isWindowKind } from './digest.mjs';
 import { exteriorWallIds } from './topology.mjs';
 import { sub, add, mul, norm, perp, dot, cross, dist, rotate, pointInPolygon, closestOnSegment, segmentIntersection } from './geom.mjs';
@@ -174,7 +174,7 @@ export function suggestRoomType(room, context = {}) {
 // ---------------------------------------------------------------- review
 function verified(doc, fix) {
   if (!fix) return null;
-  try { let d = doc; for (const c of fix.commands) d = applyCommand(d, c).doc; return fix; } catch (e) { if (e instanceof DrawError) return null; throw e; }
+  try { const d = structuredClone(doc); for (const c of fix.commands) applyCommandInPlace(d, c); return fix; } catch (e) { if (e instanceof DrawError) return null; throw e; }
 }
 const longest = list => list.reduce((m, e) => (!m || e.length > m.length ? e : m), null);
 const posOnWall = (wall, p) => dot(sub(p, wall.a), norm(sub(wall.b, wall.a)));
@@ -185,7 +185,8 @@ const posOnWall = (wall, p) => dot(sub(p, wall.a), norm(sub(wall.b, wall.a)));
  */
 export function reviewDoc(doc, options = {}) {
   const model = options.model || analyzeDoc(doc);
-  const digest = options.digest || digestDoc(doc, { model });
+  let digest0 = options.digest || null; // الملخص يُحسب عند أول حاجة فقط (فحص الفتح وحده لا يحتاجه)
+  const digestLazy = () => (digest0 ||= digestDoc(doc, { model }));
   const G = { ...GUIDELINES, ...(options.thresholds || {}) };
   const on = code => (options.only ? options.only.includes(code) : options.rules?.[code] !== false);
   const issues = [];
@@ -195,7 +196,7 @@ export function reviewDoc(doc, options = {}) {
     let id = base, i = 2; while (issues.some(x => x.id === id)) id = base + '#' + i++;
     issues.push({ id, severity, code, message: message + (RULES[code].integrity ? '' : GUIDE_NOTE), targetIds, fix: verified(doc, fix) });
   };
-  const digestRoom = id => digest.levels.flatMap(l => l.rooms).find(r => r.id === id);
+  const digestRoom = id => digestLazy().levels.flatMap(l => l.rooms).find(r => r.id === id);
   const typeName = r => roomTypeName(r.type);
 
   for (const lv of model.levels) {
@@ -210,7 +211,7 @@ export function reviewDoc(doc, options = {}) {
       push('STUB', `جدار معلّق لا يُغلق غرفة في ${lv.level.name} (${ids.join('، ')}).`, ids, removable.length === ids.length ? { label: 'حذف الجدار المعلّق', commands: [{ type: 'delete', ids: removable }] } : null);
     }
     for (const r of lv.rooms) if (r.unlabelled) {
-      const dr = digestRoom(r.id), cand = suggestRoomType(dr, { digest })[0];
+      const dr = digestRoom(r.id), cand = suggestRoomType(dr, { digest: digestLazy() })[0];
       const fix = cand.type !== 'other' ? { label: `تسمية الغرفة «${roomTypeName(cand.type)}» (اقتراح تقريبي)`, commands: [{ type: 'add-label', level: L, name: roomTypeName(cand.type), roomType: cand.type, seed: r.inside }] } : null;
       push('UNLABELLED_ROOM', `غرفة مساحتها ${n1(r.area)} م² بلا تسمية في ${lv.level.name}. ${cand.type !== 'other' ? `الأقرب: ${roomTypeName(cand.type)} (${cand.reason}).` : cand.reason + '.'}`, [r.id], fix);
     }
