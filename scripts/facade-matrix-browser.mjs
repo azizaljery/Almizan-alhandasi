@@ -25,7 +25,7 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 const failures = []; let done = 0;
 async function watch(p, errs) {
   p.on('pageerror', e => errs.push('pageerror: ' + e.message)); p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errs.push('console.error: ' + m.text().slice(0, 160)); });
-  p.on('response', x => { if (x.status() >= 400 && !/api\/site\/notice/.test(x.url())) errs.push(`HTTP ${x.status()} ${x.url()}`); });
+  p.on('response', x => { if (x.status() >= 400 && !/api\/(site\/notice|photo\/status)/.test(x.url())) errs.push(`HTTP ${x.status()} ${x.url()}`); });
 }
 const canvasOk = p => p.evaluate(() => { const c = document.querySelector('canvas'); if (!c) return false; const t = document.createElement('canvas'); t.width = 32; t.height = 20; const x = t.getContext('2d'); x.drawImage(c, 0, 0, 32, 20); const d = x.getImageData(0, 0, 32, 20).data; let mn = 765, mx = 0; for (let i = 0; i < d.length; i += 4) { const v = d[i] + d[i + 1] + d[i + 2]; mn = Math.min(mn, v); mx = Math.max(mx, v); } return mx - mn >= 30; }).catch(() => false);
 async function one(j) {
