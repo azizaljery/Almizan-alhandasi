@@ -6,7 +6,7 @@ import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
-import { visualSig, visualSim, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails } from './villa-layout.mjs';
+import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails } from './villa-layout.mjs';
 import { fitStatement } from './fit-ladder.mjs';
 import { scorePlan, rankByScore } from './plan-score.mjs';
 import { solarSite } from './geo-land.mjs';
@@ -63,17 +63,13 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
   return ensureScores({
     v: 1, input: { land, discovery, idea, requirements: req },
-    designs: [entry(result, null), ...initialAlternatives(result)], current: 0, approved: null, createdAt: Date.now(),
+    designs: [entry(result, null)], current: 0, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
     // بصمات كل ما عُرض (لا تُقصّ مع سجل التصاميم): لا يُعاد تصميم يشبهها مرئيًا
-    seen: [result.doc, ...initialAlternatives(result).map(e => parseDoc(e.doc))].map(d => visualSig(parseDoc(serialize(d)))),
+    seen: [visualSig(parseDoc(serialize(result.doc)))],
+    seenMacro: [macroSig(parseDoc(serialize(result.doc)))].filter(Boolean),
     alternatives: (result.alternatives || []).slice(0, 5).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc) })),
   });
-}
-/** بدائل المولّد المهني الأولى (حتى خمسة تصاميم مع الأول): تُعرض تصاميمَ يتنقل بينها العميل من البداية. */
-function initialAlternatives(result) {
-  return (result.alternatives || []).filter(a => a.index !== (result.selectedIndex ?? 0) && /^villa/.test(String(a.strategy || '')) && a.doc).slice(0, 4)
-    .map(a => entry({ doc: a.doc, pat: a.pat, summary: a.summary, notes: a.notes, floors: result.floors, engine: a.strategy, ledger: null, mirror: null, fit: a.fit || result.fit || null }, null));
 }
 function entry(result, feedback) {
   return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null, fit: result.fit || null };
@@ -92,7 +88,7 @@ export function carryOver(next, prev) {
   const s = clone(next), have = new Set(s.designs.map(d => d.doc));
   const old = prev.designs.filter(d => d && typeof d.doc === 'string' && !have.has(d.doc)).slice(-(MAX_DESIGNS - s.designs.length));
   s.designs.push(...clone(old));
-  s.seen = [...(s.seen || []), ...clone(prev.seen || [])]; s.seenPats = [...new Set([...(s.seenPats || []), ...(prev.seenPats || []), ...old.map(d => d.pat).filter(Boolean)])];
+  s.seen = [...(s.seen || []), ...clone(prev.seen || [])]; s.seenMacro = [...(s.seenMacro || []), ...clone(prev.seenMacro || [])]; s.seenPats = [...new Set([...(s.seenPats || []), ...(prev.seenPats || []), ...old.map(d => d.pat).filter(Boolean)])];
   return { session: s, kept: old.length };
 }
 
@@ -131,20 +127,22 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
   if (different) changes.push('توزيع مختلف للغرف');
   const cur = s.designs[s.current];
   s.seen ||= s.designs.map(d => { try { return visualSig(parseDoc(d.doc)); } catch { return null; } }).filter(Boolean);
+  s.seenMacro ||= s.designs.map(d => { try { return macroSig(parseDoc(d.doc)); } catch { return null; } }).filter(Boolean);
   s.seenPats = [...new Set([...(s.seenPats || []), ...s.designs.map(d => d.pat).filter(Boolean)])];
   const exclude = different ? s.seenPats : [];
   const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null };
-  const shown = different ? s.seen : [];
+  const shown = different ? s.seen : [], shownMacro = different ? s.seenMacro : [];
   // الطلب لم يتغيّر (توزيع آخر فقط) والتصميم المعروض مرّ بسلّم الاتساع: تُعاد درجاته نفسها مباشرة بلا مشي السلّم من أوله
   const fitHint = !more && !picks.length ? hintOf(cur) : null;
   // «تصميم آخر» لا يخفق في بنود من طلب العميل أكثر مما أخفق أفضل تصميم عُرض (يخفق بنودًا أقل: يُقبل): مختلف لا معيب
   const maxFails = different && !more && !picks.length ? Math.min(...s.designs.map(d => Array.isArray(d.ledger) ? splitFails(d.ledger, req).hard : 99)) : null;
-  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, light: true, ...(maxSim !== undefined && different ? { maxSim } : {}), ...(maxFails !== null && maxFails < 99 ? { maxFails } : {}), ...(fitHint ? { fitHint } : {}) });
-  const outSig = visualSig(parseDoc(serialize(out.doc)));
+  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, shownMacro, light: true, ...(maxSim !== undefined && different ? { maxSim } : {}), ...(maxFails !== null && maxFails < 99 ? { maxFails } : {}), ...(fitHint ? { fitHint } : {}) });
+  const outSig = visualSig(parseDoc(serialize(out.doc))), outMac = macroSig(parseDoc(serialize(out.doc)));
   // ضمان أخير مستقل عن المولّد: «تصميم آخر» لا يُقبل إن شابه أي تصميم عُرض فوق الحد
   if (different) {
     const worst = Math.max(0, ...s.seen.map(x => visualSim(outSig, x)));
-    if (worst > VISUAL_LIMIT.relaxed) { const e = Error('لم يبقَ توزيع يختلف بوضوح عمّا عُرض عليك؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين.'); e.code = 'VILLA_EXHAUSTED'; throw e; }
+    const worstMac = Math.max(0, ...s.seenMacro.map(x => macroSim(outMac, x)));
+    if (worst > VISUAL_LIMIT.relaxed || worstMac > MACRO_LIMIT.relaxed + 1e-9) { const e = Error('لم يبقَ توزيع يختلف بوضوح عمّا عُرض عليك؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين.'); e.code = 'VILLA_EXHAUSTED'; throw e; }
   }
   // رد شرعاء: البنود التي طلبها الآن، مقيسة من المخطط الجديد
   const entryDir = s.input.land?.entries?.[0] || 's';
@@ -161,7 +159,7 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
   s.designs.push(entry(out, { picks, text, changes, reply, ...(auto ? { auto: true } : {}) }));
   // الطلب تغيّر (ملاحظة أو خيار): نفاد التوزيعات السابق لا يسري على الطلب الجديد
   if (!different || picks.some(id => id !== 'layout') || (more && (more.understood.length || more.unsupported.length))) { delete s.exhausted; delete s.softEnd; }
-  s.seen.push(outSig); if (out.pat) s.seenPats = [...new Set([...s.seenPats, out.pat])];
+  s.seen.push(outSig); if (outMac) s.seenMacro.push(outMac); if (out.pat) s.seenPats = [...new Set([...s.seenPats, out.pat])];
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
   ensureScores(s);

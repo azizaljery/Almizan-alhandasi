@@ -320,7 +320,7 @@ export async function generateInitialDesign(args) {
 function safeRooms(counts) { try { return defaultRooms(counts); } catch { return []; } }
 
 /** التوليد الدقيق للطلب كما هو: أي فشل يُرمى كما هو (لا بديل صامت). */
-async function generateExact({ land, rooms, discovery, idea = '', seed = 1, counts = null, requirements = null, engine = 'auto', exclude = [], prefer = null, shown = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
+async function generateExact({ land, rooms, discovery, idea = '', seed = 1, counts = null, requirements = null, engine = 'auto', exclude = [], prefer = null, shown = [], shownMacro = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
   const { plot, land: normLand0 } = normalizeLand(land);
   // عدد الأدوار المذكور في كلام العميل («دورين») يتقدم على الافتراضي في بيانات الأرض
   const reqFloors = requirements?.prefs?.floors ?? null;
@@ -330,14 +330,14 @@ async function generateExact({ land, rooms, discovery, idea = '', seed = 1, coun
   if (normLand.floors >= 2) {
     const c2 = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
     const req2 = requirements || extractRequirements(idea || '', { counts: c2, discovery: disc });
-    try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, shown, blend, keep, light, maxFails, maxSim }); }
+    try { return villaTwoFloors({ land: normLand, counts: c2, requirements: req2, exclude, prefer, shown, shownMacro, blend, keep, light, maxFails, maxSim }); }
     catch (err) { if (engine === 'villa') throw err; if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED', 'VILLA_NO_UPPER', 'VILLA_NO_GROUND'].includes(err.code)) throw err; if (exclude.length || shown.length || blend) throw err; const out = await generateMultiFloorDesign({ plot, land: normLand, rooms, discovery: disc, idea, seed }); out.notes.unshift('المولّد المهني لم يجد توزيعًا لدورين (' + err.message + ')؛ استُخدم المحرك السابق.'); return out; }
   }
   // المولّد المهني أولًا (أجنحة نوم بحماماتها، صالة محورية، مجلس بممر ضيوف ودورة مياه)؛ المحرك السابق احتياط فقط
   const villaCounts = counts && Object.values(counts).some(v => Number.isInteger(v) && v > 0) ? counts : countsFromRooms(rooms);
   let villaFail = null;
   const req = requirements || extractRequirements(idea || '', { counts: villaCounts, discovery: disc });
-  if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, shown, blend, keep, light, maxFails, maxSim }); }
+  if (engine !== 'legacy') try { return villaDesign({ plot, land: normLand, rooms, discovery: disc, idea, counts: villaCounts, requirements: req, exclude, prefer, shown, shownMacro, blend, keep, light, maxFails, maxSim }); }
   catch (err) { if (engine === 'villa') throw err; if (!['VILLA_NO_FIT', 'VILLA_BUILD_FAILED'].includes(err.code) || exclude.length || shown.length || blend) throw err; villaFail = err.message; }
   const result = await runMultiEngineDesign({ plot, rooms, idea, discovery: disc, seed });
   const { doc, report } = modelToStudioDoc(result.selectedModel, land);
@@ -361,9 +361,9 @@ async function generateExact({ land, rooms, discovery, idea = '', seed = 1, coun
 }
 
 /** المولّد المهني لدور واحد: البدائل مستندات مرسم مباشرة؛ بصمة التصميم تُحسب من نماذجها المصدّرة. */
-function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements, exclude = [], prefer = null, shown = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
+function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements, exclude = [], prefer = null, shown = [], shownMacro = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
   // حتى خمسة بدائل مختلفة مرئيًا من المرة الأولى
-  const out = generateVillaDesigns({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, blend });
+  const out = generateVillaDesigns({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, shownMacro, blend });
   const best = out.designs[0], notes = [...new Set(best.notes)];
   let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes }));
   // «تصميم آخر» (light) لا يحتاج بصمة المقارنة: تُحسب للتصميم الأول وحده، فلا تُهدر ثانية على كل بديل
@@ -377,8 +377,8 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
 }
 
 /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
-function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, shown = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
-  const out = generateVillaTwoFloors({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, blend });
+function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, shown = [], shownMacro = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
+  const out = generateVillaTwoFloors({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, shownMacro, blend });
   const best = out.designs[0];
   return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
 }

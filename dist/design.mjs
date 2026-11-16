@@ -1,7 +1,7 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
-import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, TARGET_DESIGNS, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
 import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, refineInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
@@ -39,10 +39,9 @@ function syncHash() { if (!session) return; const want = location.hash === '#ext
 addEventListener('hashchange', syncHash); addEventListener('popstate', syncHash);
 addEventListener('pageshow', e => { if (e.persisted) { const s2 = loadSession(localStorage); if (s2) { session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } } syncHash(); } });
 
-// ------------------------------------------------------------------------------------------ التنقل بين التصاميم والإكمال في الخلفية
-// بعد عرض التصميم الأول يُولِّد العامل بقية التصاميم المختلفة (حتى TARGET_DESIGNS) خطوةً خطوة دون تجميد الواجهة؛ طلب العميل يتقدّم على الخلفية.
+// ------------------------------------------------------------------------------------------ التنقل بين التصاميم (بطلب العميل وحده)
+// يُعرض أول تصميم عند البدء، وكل ضغطة «تصميم آخر» تولّد تصميمًا واحدًا مختلفًا جذريًا (هيكلًا لا تبديل غرفتين)؛ والسابقة تبقى للتنقل. لا توليد في الخلفية.
 // وإن لم يبقَ توزيع يختلف عمّا عُرض تُعلَن الجلسة منتهية بعددها الحقيقي (session.exhausted) ولا يُختلق عدد.
-const bg = { running: false, stop: false, p: null };
 const thumbCache = new Map();
 /** مسقط مصغّر: جدران الدور الأول وحدها (SVG)، يُحفظ بنص المستند. */
 function thumbHTML(d) {
@@ -59,13 +58,11 @@ function thumbHTML(d) {
   thumbCache.set(key, html); if (thumbCache.size > 64) thumbCache.delete(thumbCache.keys().next().value);
   return html;
 }
-const generating = () => bg.running && !session.exhausted && !session.softEnd && session.designs.length < TARGET_DESIGNS;
 function navStatusText() {
   const n = session.designs.length;
   if (session.exhausted) return exhaustedMessage(n, session.exhausted.twoFloors);
   if (n >= MAX_DESIGNS) return cappedMessage(n);
-  if (session.softEnd && !generating()) return softEndMessage(n, session.softEnd.count);
-  if (generating()) return `جاهز ${n} تصاميم مختلفة، وأُعدّ لك المزيد في الخلفية (حتى ${TARGET_DESIGNS})…`;
+  if (session.softEnd) return softEndMessage(n, session.softEnd.count);
   return '';
 }
 /** شريط التنقل: «تصميم 7 من 20»، السابق/التالي، وشريط مصغّرات مرقّمة (الأعلى درجة ★) يلتف في الصفوف فلا تمرير أفقي. */
@@ -85,37 +82,14 @@ function navBlock(index, badges = []) {
     n > 1 ? el('div', { class: 'dstrip', role: 'group', 'aria-label': 'مصغّرات التصاميم مرقّمة' }, thumbs) : null,
     el('p', { class: 'dstatus' + (session.exhausted || n >= MAX_DESIGNS || session.softEnd ? ' end' : ''), id: 'dStatus', 'aria-live': 'polite', role: 'status' }, navStatusText()));
 }
-/** يحدّث شريط التنقل وحده (دون إعادة رسم الصفحة) حين يصل تصميم جديد من الخلفية. */
+/** يحدّث شريط التنقل وحده (دون إعادة رسم الصفحة). */
 function refreshNav() {
   const old = $('dnav'); if (!old || !session) return;
   const cur = session.current, next = navBlock(cur); old.replaceWith(next);
   if (document.body.dataset.busy) next.querySelectorAll('button').forEach(b => { b.disabled = true; });
 }
-function startBg() {
-  // فحوص المتصفح التي تعدّ التصاميم بدقة تعطّل الإكمال بهذا المفتاح (لا يُستعمل في الاستعمال العادي)
-  try { if (localStorage.getItem('mizan.design.bg') === 'off') return; } catch { /* بلا تخزين */ }
-  if (bg.running || !session || session.exhausted || session.softEnd || session.designs.length >= TARGET_DESIGNS) return;
-  bg.running = true; bg.stop = false; bg.p = bgLoop(); refreshNav();
-}
-async function bgLoop() {
-  let again = false;
-  try {
-    while (!bg.stop && session && !session.exhausted && !session.softEnd && session.designs.length < TARGET_DESIGNS) {
-      const snap = session;
-      let out; try { out = await extendInWorker(snap, TARGET_DESIGNS); } catch { break; }
-      if (session !== snap || !out?.session) { again = session !== snap; break; } // الجلسة تغيّرت أثناء العمل (طلب العميل أو نافذة شرعاء): تُترك النتيجة وتبدأ الخلفية من جديد
-      if (out.error) break;
-      const cur = session.current; session = out.session; session.current = cur; saveSession(localStorage, session);
-      refreshNav();
-      if (!out.added) break;
-      await new Promise(r => setTimeout(r, 40)); // مجال للواجهة بين خطوتين
-    }
-  } finally { bg.running = false; if (session) refreshNav(); if (again && !bg.stop) setTimeout(startBg, 300); }
-}
-/** يوقف الإكمال في الخلفية وينتظر خطوته الجارية (أقصاها تصميم واحد) حتى يبدأ طلب العميل من أحدث جلسة. */
-async function settleBg() { bg.stop = true; if (bg.p) { try { await bg.p; } catch { /* انتهت */ } } }
-/** يشغّل طلبًا للعميل: الخلفية تتوقف قبله وتعود بعده. fn تقرأ session بعد التوقف. */
-async function withBg(fn) { await settleBg(); try { return await fn(); } finally { setTimeout(startBg, 250); } }
+/** يشغّل طلبًا للعميل. لا توليد تلقائي في الخلفية: لا يُولَّد إلا ما يطلبه العميل (الأول عند البدء، وتصميم واحد لكل ضغطة «تصميم آخر»). */
+async function withBg(fn) { return fn(); }
 /** «تصميم آخر»: التالي الجاهز فورًا، وإلا يُولَّد الآن، وبعد النفاد تظهر الرسالة الصادقة بالعدد الحقيقي. */
 async function onNext() {
   const i = session.current;
@@ -123,8 +97,6 @@ async function onNext() {
   if (session.exhausted || session.designs.length >= MAX_DESIGNS) { const n = $('dStatus'); if (n) { n.textContent = session.exhausted ? exhaustedMessage(session.designs.length, session.exhausted.twoFloors) : cappedMessage(session.designs.length); n.classList.add('end'); n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } return; }
   const st = $('dStatus'), done = busy(true, st, 'أبحث لك عن توزيع مختلف عمّا عُرض…');
   try {
-    await settleBg();
-    if (i + 1 < session.designs.length) { done(); show(i + 1); return; } // وصل تصميم من الخلفية أثناء الانتظار
     let out = await extendInWorker(session, session.designs.length + 1, !!session.softEnd);
     if (out.softEnd && !out.added) { session = out.session; out = await extendInWorker(session, session.designs.length + 1, true); } // لا يختلف بوضوح غيرها: الأقرب بإعلانه
     done();
@@ -133,7 +105,7 @@ async function onNext() {
     if (out.added) { show(session.designs.length - 1); scrollTo({ top: 0, behavior: 'smooth' }); }
     else { refreshNav(); const n = $('dStatus'); if (n) n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); }
   } catch (err) { done(); toast(err.message || 'تعذّر تصميم بديل.'); }
-  finally { refreshNav(); setTimeout(startBg, 250); }
+  finally { refreshNav(); }
 }
 
 
@@ -654,10 +626,10 @@ $('fbGo').addEventListener('click', async () => {
 });
 
 // نافذة شرعاء الجانبية عدّلت الجلسة (طلب نُفّذ): تُعرض النتيجة هنا فورًا
-globalThis.addEventListener?.('mizan:session', e => { const s2 = e.detail?.session; if (!s2) return; session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } setTimeout(startBg, 400); });
+globalThis.addEventListener?.('mizan:session', e => { const s2 = e.detail?.session; if (!s2) return; session = s2; try { show(session.current); } catch { /* تبقى الصفحة كما هي */ } });
 // وحدات المولّد تُحمَّل في العامل والمتصفح خامل، فلا ينتظرها أول «تصميم آخر» أو «نفّذ»
 (globalThis.requestIdleCallback || (f => setTimeout(f, 600)))(() => {
-  if (!session) return; warmGenerator(); setTimeout(startBg, 1500);
+  if (!session) return; warmGenerator();
   // الصفحة التالية (العرض ثلاثي الأبعاد) ثقيلة التحميل: مكتبتها ووحداتها تُجلب مسبقًا والعميل يتأمل مخططه
   for (const href of ['./vendor/three.module.js', './view3d.mjs', './draw/viewer-draw.mjs', './three-runtime.mjs']) { const l = document.createElement('link'); l.rel = 'modulepreload'; l.href = href; document.head.append(l); }
 });

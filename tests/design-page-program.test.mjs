@@ -7,7 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SharaSession, generateInitialDesign } from '../dist/home-flow.mjs';
 import { createSession, extendSession, exhaustedMessage } from '../dist/design-session.mjs';
-import { checkDoc, visualSig, visualSim, VISUAL_LIMIT, splitFails } from '../dist/villa-layout.mjs';
+import { checkDoc, visualSig, visualSim, VISUAL_LIMIT, macroSig, macroSim, MACRO_LIMIT, splitFails } from '../dist/villa-layout.mjs';
 import { checkMunicipal } from '../dist/municipal-rules.mjs';
 import { parseDoc } from '../dist/draw/doc.mjs';
 
@@ -17,7 +17,8 @@ const TEXT = {
 };
 const GUARDED = ['setback_front', 'setback_street', 'setback_neighbor', 'roof_parapet', 'coverage_ground', 'coverage_first'];
 // [العرض، الطول، غرف النوم، الحد الأدنى المقيس بهامش، هل يُنتظر النفاد قبل العشرين]
-const CASES = [[12.5, 30, 3, 1, true], [15, 25, 3, 12, true], [15, 25, 4, 3, true], [20, 30, 3, 20, false], [20, 30, 4, 20, false]];
+// (بمعيار التمايز الهيكلي: لا أرض هنا تبلغ العشرين؛ كل منها ينتهي بنفاد صادق)
+const CASES = [[12.5, 30, 3, 1, true], [15, 25, 3, 3, true], [15, 25, 4, 2, true], [20, 30, 3, 8, true], [20, 30, 4, 8, true]];
 
 /** كما تفعل الصفحة: SharaSession ثم التوليد الأولي ثم إنشاء الجلسة. */
 async function pageSession(w, l, beds) {
@@ -39,9 +40,9 @@ for (const [w, l, beds, min, ends] of CASES) test(`برنامج الصفحة ${w
     assert.ok(s.exhausted, tag + ': أقل من العشرين بلا إعلان نفاد');
     assert.equal(s.exhausted.count, n, 'العدد المعلن هو عدد ما عُرض فعلًا');
     assert.match(exhaustedMessage(n), new RegExp(`وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك \\(${n} تصميمًا\\)`));
-    // الأرض الضيقة بدور واحد مصرَّح: الإعلان يقترح الدورين بعدد مقيس (قيس 7 لـ12.5×30)، ولا يقترحهما حيث لا يزيدان العدد
+    // الأرض الضيقة بدور واحد مصرَّح: الإعلان يقترح الدورين بعدد مقيس (قيس بمعيار التمايز الهيكلي: 2 لـ12.5×30 بعد ما كان 7 بمعيار التشابه البصري وحده)، ولا يقترحهما حيث لا يزيدان العدد
     if (w === 12.5) {
-      assert.ok(s.exhausted.twoFloors >= 4 && s.exhausted.twoFloors > n, `12.5×30: قياس الدورين ${s.exhausted.twoFloors}`);
+      assert.ok(s.exhausted.twoFloors >= 2 && s.exhausted.twoFloors > n, `12.5×30: قياس الدورين ${s.exhausted.twoFloors}`);
       assert.match(exhaustedMessage(n, s.exhausted.twoFloors), new RegExp(`جرّب دورين.*قِسْتُ ${s.exhausted.twoFloors} تصاميم`));
     } else if (!s.exhausted.twoFloors) assert.doesNotMatch(exhaustedMessage(n, null), /جرّب دورين/);
   }
@@ -49,8 +50,10 @@ for (const [w, l, beds, min, ends] of CASES) test(`برنامج الصفحة ${w
   for (let j = 1; j < n; j++) {
     let worst = 0; for (let i = 0; i < j; i++) worst = Math.max(worst, visualSim(sigs[j], sigs[i]));
     assert.ok(worst <= VISUAL_LIMIT.relaxed + 1e-9, `${tag}: التصميم ${j + 1} يشبه سابقًا بنسبة ${Math.round(worst * 100)}٪`);
-    if (worst > VISUAL_LIMIT.strict + 1e-9 && j >= first) assert.ok((s.designs[j].notes || []).some(t => /يختلف (?:بـ|عنه) \d+٪ على الأقل/.test(t)), `${tag}: التصميم ${j + 1} يشبه سابقًا بنسبة ${Math.round(worst * 100)}٪ بلا إعلان`);
+    if (worst > VISUAL_LIMIT.strict + 1e-9 && j >= 1) assert.ok((s.designs[j].notes || []).some(t => /يختلف (?:بـ|عنه) \d+٪ على الأقل/.test(t)), `${tag}: التصميم ${j + 1} يشبه سابقًا بنسبة ${Math.round(worst * 100)}٪ بلا إعلان`);
   }
+  const mac = s.designs.map(d => macroSig(JSON.parse(d.doc)));
+  for (let j = 1; j < n; j++) { let w2 = 0; for (let i = 0; i < j; i++) w2 = Math.max(w2, macroSim(mac[j], mac[i])); assert.ok(w2 <= MACRO_LIMIT.relaxed + 1e-9, `${tag}: التصميم ${j + 1} يشبه سابقًا هيكليًا بنسبة ${Math.round(w2 * 100)}٪`); }
   assert.equal(new Set(s.designs.map(d => d.doc)).size, n, 'مستندان متطابقان');
   const hard0 = splitFails(s.designs[0].ledger || [], s.input.requirements).hard;
   for (const [i, d] of s.designs.entries()) {

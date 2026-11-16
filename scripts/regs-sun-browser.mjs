@@ -30,7 +30,6 @@ const shot = async (p, name, sel) => { if (!SHOTS) return; fs.mkdirSync(SHOTS, {
 
 async function journey(label, viewport, { tiles = true } = {}) {
   const ctx = await br.newContext({ viewport, hasTouch: viewport.width < 500, isMobile: viewport.width < 500, geolocation: { latitude: 24.774265, longitude: 46.738586, accuracy: 12 }, permissions: ['geolocation'] });
-  await ctx.addInitScript(() => { try { localStorage.setItem('mizan.design.bg', 'off'); } catch { /* بلا تخزين */ } }); // يعدّ الفحص التصاميم بدقة: الإكمال في الخلفية معطّل
   const p = await ctx.newPage(), errs = [], tileReq = [], other = []; geoReq.length = 0; geoWorker = mkGeo();
   p.on('pageerror', e => errs.push(e.message));
   await ctx.route(/tile\.openstreetmap\.org/, r => { const u = r.request().url(); tileReq.push({ u, referer: r.request().headers().referer || '' }); const m = u.match(/\/(\d+)\/(\d+)\/(\d+)\.png$/); return tiles && m ? r.fulfill({ status: 200, contentType: 'image/png', headers: { 'cache-control': 'max-age=604800' }, body: fakeTile(+m[1], +m[2], +m[3]) }) : r.abort(); });
@@ -119,6 +118,8 @@ async function journey(label, viewport, { tiles = true } = {}) {
   const now2 = await p.locator('#sunNow').innerText();
   check(T0 + 'المنزلقان يحرّكان الشمس والظل (ديسمبر 08:00 ← الجنوب الشرقي)', now1 !== now2 && /ديسمبر/.test(now2) && /الجنوب الشرقي/.test(now2) && /بتوقيت المملكة/.test(now2), now2);
   await p.locator('#sunHour').evaluate(n => { n.value = '20'; n.dispatchEvent(new Event('input', { bubbles: true })); });
+  // لا توليد تلقائي: يبدأ العميل بتصميم واحد، و«تصميم آخر» يضيف تصميمًا بطلبه
+  await p.click('#btnNext'); await p.waitForFunction(() => !document.body.dataset.busy && document.querySelectorAll('.dnav button[data-design]').length >= 2, null, { timeout: 120000 });
   const badges = await p.locator('.dnav button[data-design] .ori').count(), nDesigns = await p.locator('.dnav button[data-design]').count();
   check(T0 + 'كل بديل يحمل شارة التوجيه، وواحد على الأقل «الأفضل توجيهًا»', nDesigns >= 2 && badges === nDesigns && await p.locator('.dnav button[data-design] .ori.best').count() >= 1, `${badges}/${nDesigns}`);
   check(T0 + 'شارة التوجيه وسطراها أعلى الصفحة', /التوجيه: \d+\/100/.test(await p.locator('#orientBadge').innerText()));

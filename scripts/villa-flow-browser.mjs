@@ -12,7 +12,7 @@ await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = `http://1
 const { chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs');
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox'] });
 const results = []; const check = (n, ok, d = '') => { results.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
-const ctx0 = await b.newContext({ viewport: { width: 1360, height: 900 } }); await ctx0.addInitScript(() => { try { localStorage.setItem('mizan.design.bg', 'off'); } catch { /* بلا تخزين */ } }); // يعدّ الفحص التصاميم بدقة: الإكمال في الخلفية معطّل
+const ctx0 = await b.newContext({ viewport: { width: 1360, height: 900 } });
 const p = await ctx0.newPage(); const errs = [];
 p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::/.test(m.text())) errs.push(m.text()); }); p.on('pageerror', e => errs.push(e.message)); p.on('dialog', d => d.accept());
 const TEXT = process.env.VILLA_TEXT || 'أبغى فيلا فيها 4 غرف نوم وحدة منها ماستر بغرفة ملابس، كل غرفة بحمامها، مجلس رجال كبير مع دورة مياه للضيوف، ومجلس نساء بمدخل مستقل، صالة عائلية، مطبخ مفتوح على الطعام، وغرفة خادمة بحمام قريبة من المطبخ، والمطبخ في الخلف، وخل التصميم عصري ومريح';

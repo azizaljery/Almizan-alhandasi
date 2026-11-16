@@ -43,9 +43,10 @@ for (const [name, l, text] of [
   const per = {}; for (const d of s.designs) per[patIdea(d.pat)] = (per[patIdea(d.pat)] || 0) + 1;
   // الشكل الذي طلبه العميل صراحةً (L أو U) تنويعاته مطلوبة فلا يُحدّ؛ ما عداه لا تتكرر فكرته فوق الحد
   const asked = /شكل L/.test(text) ? 'L' : /شكل U/.test(text) ? 'court' : null;
-  assert.ok(s.designs.length >= (asked ? 6 : 7), `أقل من ${asked ? 'ستة' : 'سبعة'} تصاميم مختلفة: ${s.designs.length}`);
+  // يبدأ العميل بتصميم واحد (لا بدائل تلقائية) وكل ضغطة تضيف واحدًا: الأول + خمس ضغطات = ستة
+  assert.ok(s.designs.length >= 6, `أقل من ستة تصاميم مختلفة: ${s.designs.length}`);
   assert.ok(Math.max(...Object.entries(per).filter(([k]) => k !== asked).map(([, v]) => v), 0) <= IDEA_CAP, 'فكرة تكررت فوق الحد: ' + JSON.stringify(per));
-  if (!asked) assert.ok(Object.keys(per).length >= 4, 'أربع أفكار تنظيم مختلفة على الأقل: ' + Object.keys(per).join('، '));
+  if (!asked) assert.ok(Object.keys(per).length >= 3, 'ثلاث أفكار تنظيم مختلفة على الأقل (ستة تصاميم بمعيار التمايز الهيكلي): ' + Object.keys(per).join('، '));
 });
 
 test('كتابة «ابي تصميم بديل مختلف» تعطي بديلًا مختلفًا لا رسالة «لم أفهم»', async () => {
@@ -55,12 +56,16 @@ test('كتابة «ابي تصميم بديل مختلف» تعطي بديلًا
   // بعد مطابقة المولّد للارتداد النظامي (وجه الجدار الخارجي على الخط: المسطح أضيق 30 سم) تتسع هذه الأرض (18 × 30، عرض البناء 14.7 م
   // بدل 15 م) لخمسة تصاميم مختلفة لا سبعة: أربعة من البداية وواحد بالطلب النصي، ثم يُعلن النفاد بدل التكرار (قيس قبل/بعد: 7 ← 5).
   assert.ok(n >= 1, 'بديل بالنص على الأقل: ' + n);
-  assert.ok(s.designs.length >= 5, 'مجموع التصاميم المختلفة المعروضة: ' + s.designs.length);
+  assert.ok(s.designs.length >= 4, 'مجموع التصاميم المختلفة المعروضة: ' + s.designs.length);
 });
 
-test('البداية: حتى خمسة تصاميم مختلفة مرئيًا يتنقل بينها العميل', async () => {
-  const s = await session({ width: 20, length: 30, floors: 1 }, '4 غرف نوم ومجلس رجال ومقلط ومطبخ وصالة');
-  assert.ok(s.designs.length >= 3 && s.designs.length <= 5, 'عدد التصاميم: ' + s.designs.length);
+test('البداية: تصميم واحد فقط، وكل «تصميم آخر» يضيف تصميمًا واحدًا لا يشبه ما عُرض', async () => {
+  let s = await session({ width: 20, length: 30, floors: 1 }, '4 غرف نوم ومجلس رجال ومقلط ومطبخ وصالة');
+  assert.equal(s.designs.length, 1, 'لا بدائل تُعرض بلا طلب');
+  for (let k = 1; k <= 3; k++) {
+    const o = await redesign(s, {}); s = o.session;
+    assert.equal(s.designs.length, k + 1, 'ضغطة واحدة = تصميم واحد');
+  }
   const sigs = s.designs.map(d => visualSig(JSON.parse(d.doc)));
   for (let i = 0; i < sigs.length; i++) for (let j = 0; j < i; j++) assert.ok(visualSim(sigs[i], sigs[j]) <= VISUAL_LIMIT.relaxed, `التصميمان ${j + 1} و${i + 1} متشابهان`);
 });
@@ -69,7 +74,7 @@ for (const [name, l, text] of [
   ['دور واحد', { width: 20, length: 30, floors: 1 }, '4 غرف نوم ومجلس رجال ومقلط ومطبخ وصالة'],
   ['دوران', { width: 20, length: 30, floors: 2 }, '5 غرف نوم ومجلسين ومقلط ومطبخ وصالة'],
 ]) test(`دمج تصميمين (${name}): توزيع سليم جديد ليس نسخة من أحدهما، والرد يشرح ما أُخذ من كلٍّ`, async () => {
-  const s = await session(l, text);
+  const s = (await redesign(await session(l, text), {})).session; // الدمج يحتاج تصميمين: الأول والثاني بطلب «تصميم آخر»
   const o = await mergeDesigns(s, 0, 1);
   const doc = currentDoc(o.session);
   assert.ok(checkDoc(doc).ok);
