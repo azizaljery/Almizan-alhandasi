@@ -19,6 +19,7 @@ import { mountConsent } from './archive-consent.mjs';
 const RATES_KEY = 'mizan.final.rates.v1', SNAP_KEY = 'mizan.studio.snap3d.v1', SESSION_KEY = 'mizan.design.session.v1';
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const AR_LINK = '<p class="muted"><a href="./view3d.html#ar">اعرضه في أرضي بالواقع المعزز</a> — العرض تقريبي لتصور الحجم، وليس مخططًا تنفيذيًا.</p>';
 const fmt = v => (v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }));
 const get = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const set = (k, v) => { try { localStorage.setItem(k, v); } catch { /* التخزين غير متاح */ } };
@@ -125,7 +126,7 @@ function render() {
       + (DS.errors?.length ? `<p class="muted">تعذّر إنشاء بعض اللوحات: ${esc(DS.errors.join('، '))}</p>` : '')
       + `<p class="muted">لوحات أولية للتصميم والتسعير بمناسيب افتراضية معلنة (الأرض الطبيعية −0.45، البلاطة 0.20 م)، وليست مخططات معتمدة للترخيص أو التنفيذ.</p>`));
   }
-  parts.push(sec('view3d', 'العرض ثلاثي الأبعاد', d.snapshot3d ? `<div class="shot"><img alt="لقطة ثلاثية الأبعاد من المرسم" src="${esc(d.snapshot3d)}"></div><p class="muted">اللقطة من المجسم المبني من المخطط نفسه. للتجوّل والشمس والجولة افتح <a href="./studio.html">المرسم</a>.</p>` : `<p>لا توجد لقطة محفوظة بعد. افتح <a href="./studio.html">المرسم</a> ثم اضغط «اعتمد وأخرج المخرجات» من العرض ثلاثي الأبعاد لتُحفظ اللقطة.</p>`));
+  parts.push(sec('view3d', 'العرض ثلاثي الأبعاد', d.snapshot3d ? `<div class="shot"><img alt="لقطة ثلاثية الأبعاد من المرسم" src="${esc(d.snapshot3d)}"></div><p class="muted">اللقطة من المجسم المبني من المخطط نفسه. للتجوّل والشمس والجولة افتح <a href="./studio.html">المرسم</a>.</p>${AR_LINK}` : `<p>لا توجد لقطة محفوظة بعد. افتح <a href="./studio.html">المرسم</a> ثم اضغط «اعتمد وأخرج المخرجات» من العرض ثلاثي الأبعاد لتُحفظ اللقطة.</p>${AR_LINK}`));
   d.levels.forEach((l, i) => l.structure && parts.push(sec('str' + i, 'المخطط الإنشائي المبدئي — ' + l.name, `<div class="svgbox">${l.structure}</div><p class="muted">تحجيم أولي بجداول ACI 318؛ مطابقة الكود السعودي SBC 304 غير متحققة. ليس تصميمًا إنشائيًا معتمدًا ويراجعه مهندس إنشائي.</p>`)));
   // الأنظمة الهندسية ضمن التصاميم: وصف ورابط المخططات فقط؛ أرقامها في «جداول الكميات» آخر الصفحة
   parts.push(sec('mep', 'الأنظمة الهندسية: الكهرباء والتكييف والسباكة والحريق', `<p>تُبنى من التصميم المعتمد نفسه بافتراضات معلنة تعدّلها في صفحة الأنظمة: مواقع الإنارة والمقابس واللوحات والدوائر، والتكييف والتهوية، والمياه والصرف، والحريق والتيار الخفيف والطاقة الشمسية، مع تصدير SVG وDXF وجداول CSV.</p><p>كمياتها بالأرقام في <a href="#qty">جداول الكميات</a> آخر الصفحة.</p><p><a class="btn primary" href="./mep/systems.html">فتح المخططات الكهربائية والميكانيكية ←</a></p><p class="muted">تصميم أولي يحتاج مراجعة مهندس مختص، وليس مخططًا تنفيذيًا معتمدًا.</p>`));

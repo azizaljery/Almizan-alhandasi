@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="./brand.css">
 <link rel="stylesheet" href="./present.css">
 <link rel="stylesheet" href="./lux-theme.css">
+<link rel="stylesheet" href="./ar.css">
 </head>
 <body data-stage="view3d">
 <header class="ph">
@@ -60,10 +61,19 @@
       <p class="muted" id="shotMsg" role="status" aria-live="polite" hidden></p>
       <button class="btn" id="photoPro" type="button" hidden title="يحوّل لقطة مجسم تصميمك إلى صورة واقعية بمستوى التصوير المعماري بالذكاء الاصطناعي، مع الحفاظ على هندسة البيت">صورة معمارية احترافية ✦</button>
       <button class="btn" id="photoInterior" type="button" hidden title="يؤثث المجلس أو الصالة أو غرفة النوم الرئيسية من تصميمك ويحوّل لقطة بمستوى العين إلى صورة داخلية واقعية بالذكاء الاصطناعي، مع الحفاظ على الأبواب والنوافذ والقطع الرئيسية">صورة داخلية احترافية ✦</button></div>
+    <div id="arBox"><h2 id="ar">اعرضه في أرضك بالواقع المعزز</h2>
+      <button class="btn gold" id="arBtn" type="button">اعرضه في أرضي بالواقع المعزز</button>
+      <button class="btn" id="glbBtn" type="button">تنزيل النموذج (GLB)</button>
+      <p class="muted" id="arStatus" role="status" aria-live="polite"></p>
+      <p class="muted">العرض تقريبي لتصور الحجم، وليس مخططًا تنفيذيًا. كتلة المبنى بجدرانه وفتحاته وسقفه بمقياس 1:1 بلا أثاث. يُبنى النموذج داخل متصفحك ولا يُرسل إلى أي خادم.</p></div>
   </aside>
   <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div><iframe id="facadeFrame" title="الواجهة الخارجية" hidden style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f4f1ea"></iframe></div>
 </div>
+<div id="arOverlay" hidden><div data-ar="touch"></div>
+  <div class="ar-top"><div class="ar-bar"><span data-ar="status"></span><small data-ar="size"></small><small>العرض تقريبي لتصور الحجم، وليس مخططًا تنفيذيًا.</small></div></div>
+  <div class="ar-bottom"><button type="button" data-ar="confirm" hidden>ثبّت هنا</button><button type="button" data-ar="reset" hidden>إعادة الوضع</button><button type="button" class="ar-x" data-ar="close">إغلاق</button></div></div>
 <script type="module" src="./view3d.mjs"></script>
+<script type="module" src="./ar-ui.mjs"></script>
 <script type="module">
 // الواجهة الخارجية ضمن العرض ثلاثي الأبعاد. «بديل آخر» = فكرة معمارية جديدة ضمن الطراز نفسه (منطقة مختلفة، لا إعادة تلوين)؛
 // «جرّب طرازًا آخر» ينقل إلى طراز آخر. السجل في ذاكرة الجلسة فقط.

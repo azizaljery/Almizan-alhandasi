@@ -1,0 +1,15 @@
+/* واجهة الواقع المعزز في العرض ثلاثي الأبعاد */
+#arBox .btn{width:100%;justify-content:center}
+#arBox .btn.is-off{opacity:.6}
+#arStatus[data-kind=warn]{color:#8a4b00}
+#arOverlay{position:fixed;inset:0;z-index:10;direction:rtl;font-family:inherit;color:#fff;pointer-events:none}
+#arOverlay[hidden]{display:none}
+#arOverlay [data-ar=touch]{position:absolute;inset:0;touch-action:none;pointer-events:auto}
+#arOverlay .ar-top,#arOverlay .ar-bottom{position:absolute;inset-inline:12px;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+#arOverlay .ar-top{top:max(12px,env(safe-area-inset-top))}
+#arOverlay .ar-bottom{bottom:max(14px,env(safe-area-inset-bottom));flex-direction:row;justify-content:center;gap:10px}
+#arOverlay .ar-bar{background:rgba(20,30,25,.72);border-radius:12px;padding:8px 12px;font-size:14px;line-height:1.5}
+#arOverlay .ar-bar small{display:block;opacity:.85;font-size:12px}
+#arOverlay button{pointer-events:auto;border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;background:#d4a73c;color:#173025}
+#arOverlay button[hidden]{display:none}
+#arOverlay button.ar-x{background:rgba(255,255,255,.9)}
