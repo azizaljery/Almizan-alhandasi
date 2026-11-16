@@ -3,6 +3,7 @@
 import { generateInitialDesign, diagnoseFit } from './home-flow.mjs';
 import { createSession, redesign, mergeDesigns, extendSession } from './design-session.mjs';
 import { applyFix } from './design-fixes.mjs';
+import { refineDesign } from './design-refine.mjs';
 
 export const OPS = {
   /** توليد أولي + جلسة التصميم؛ ومعها ما يلزم لتسليم المرسم إن تعذّر الحفظ. */
@@ -14,6 +15,8 @@ export const OPS = {
   /** خطوة إكمال واحدة في الخلفية (تصميم مختلف يُضاف في نهاية القائمة)؛ تُسلسل من الصفحة حتى يتقدّم طلب العميل عليها. */
   extend: ({ session, target, relaxed }) => extendSession(session, { target, relaxed: !!relaxed }),
   fix: ({ session, id }) => applyFix(session, id),
+  /** «حسّن هذا التصميم»: تعديلات صغيرة آمنة حتمية؛ النتيجة قبل/بعد أو «لا تحسين متاح» بسببه. لا يمسّ الجلسة. */
+  refine: ({ session, index }) => refineDesign(session, index ?? session.current),
   merge: ({ session, a, b }) => mergeDesigns(session, a, b),
   diagnose: ({ input }) => diagnoseFit(input),
   ping: async () => 'ready',

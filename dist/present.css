@@ -314,3 +314,5 @@ body.ext-open .ph{z-index:45}
 .dnav .dstatus{margin:0;font-size:13.5px;color:#6b6a5f;min-height:1.4em}
 .dnav .dstatus.end{color:#5a3a2c;background:#f8efdc;border:1px solid #e6d3a6;border-radius:10px;padding:8px 12px}
 @media (max-width:560px){.dnav{padding:12px}.dnav .dbtns{width:100%}.dnav .dbtns .btn{flex:1}.dnav .dstrip{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))}}
+
+.rf-table th.num{direction:ltr;text-align:right}.rf-table td.rf-up,.rf-table th.rf-up{color:#2f6b3a;font-weight:700}.rf-table td.rf-same{color:#6b6a5f}.refine-none{line-height:1.9;margin:8px 0}
