@@ -3,6 +3,8 @@
 export const SETTING_DEFS = Object.freeze({
   photo_enabled: { type: 'bool', def: '1', label: 'خدمة الصورة الاحترافية' },
   geo_search_enabled: { type: 'bool', def: '1', label: 'بحث الخريطة بالاسم' },
+  shara_ai_enabled: { type: 'bool', def: '1', label: 'شرعاء الذكية (Claude)' },
+  shara_daily_cap: { type: 'int', min: 0, max: 2000, def: '', label: 'سقف أسئلة شرعاء اليومي' },
   archive_intake_closed: { type: 'bool', def: '0', label: 'إغلاق استقبال الأرشيف' },
   photo_daily_cap: { type: 'int', min: 0, max: 500, def: '', label: 'سقف الصور اليومي' },
   maintenance_message: { type: 'text', max: 200, def: '', label: 'رسالة الصيانة' },
@@ -44,5 +46,7 @@ export function effectiveEnv(env, values) {
   if (values.photo_enabled === '0') out.PHOTO_DAILY_CAP = '0';
   else if (values.photo_daily_cap !== '') out.PHOTO_DAILY_CAP = values.photo_daily_cap;
   if (values.geo_search_enabled === '0') out.GEO_NOMINATIM_OFF = '1';
+  if (values.shara_ai_enabled === '0') out.SHARA_AI_ENABLED = '0';
+  if (typeof values.shara_daily_cap === 'string' && values.shara_daily_cap !== '') out.SHARA_DAILY_CAP = values.shara_daily_cap;
   return out;
 }
