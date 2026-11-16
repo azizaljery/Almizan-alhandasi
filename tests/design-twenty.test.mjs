@@ -84,7 +84,7 @@ test('النفاد صادق: أرض ضيقة تنتهي بعددها الحقي�
   s = await fill(s, TARGET_DESIGNS + 5, false, false);
   // الإكمال التلقائي يقف عند المختلف بوضوح ولا يعلن النفاد؛ الأقرب بطلب العميل وحده
   assert.ok(s.softEnd && !s.exhausted, 'يجب أن يقف الإكمال التلقائي عند المختلف بوضوح');
-  assert.match(softEndMessage(s.designs.length), /32٪ على الأقل/);
+  assert.match(softEndMessage(s.designs.length), /مختلفة جذريًا في الهيكل.*70٪ تشابهًا/); assert.doesNotMatch(softEndMessage(s.designs.length), /32٪/);
   const clear = s.designs.length;
   s = await fill(s, TARGET_DESIGNS + 5, true);
   assert.ok(s.exhausted, 'يجب أن يُعلن النفاد قبل العشرين على هذه الأرض');

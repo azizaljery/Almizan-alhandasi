@@ -174,7 +174,7 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
 export async function extendSession(session, { target = TARGET_DESIGNS, relaxed = false } = {}, { generate = generateInitialDesign } = {}) {
   if (session.designs.length >= MAX_DESIGNS) return { session, added: false, exhausted: false, capped: true };
   if (session.exhausted || session.designs.length >= target) return { session, added: false, exhausted: !!session.exhausted };
-  // الإكمال التلقائي لا يقبل إلا ما يختلف بوضوح (≥ 32٪)؛ الأقرب (حتى 25٪) يُعرض بطلب العميل وحده، وبإعلانه في ملاحظات التصميم
+  // الإكمال التلقائي لا يقبل إلا ما يختلف هيكليًا بوضوح (حتى 60٪ تشابهًا)؛ الأقرب (حتى 70٪) يُعرض بطلب العميل وحده، وبإعلانه في ملاحظات التصميم
   if (session.softEnd && !relaxed) return { session, added: false, exhausted: false, softEnd: true };
   const keepCurrent = session.current;
   try {
@@ -193,8 +193,8 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
 }
 /** رسالة النفاد الصادقة بعدد التصاميم الفعلي. */
 export const cappedMessage = n => `عرضتُ عليك ${n} تصميمًا مختلفًا، وهذا أقصى ما تحفظه الجلسة؛ اعتمد أقربها إلى ذوقك أو اطلب تعديلًا (شكلًا أو عددًا أو مقاسًا) لأبدأ بحثًا جديدًا.`;
-/** بعد التصاميم المختلفة بوضوح: الأقرب منها ما زال ممكنًا بطلب العميل. */
-export const softEndMessage = (n, clear = n) => (n > clear ? `أول ${clear} تصميمًا مختلفة بوضوح عن بعضها (32٪ على الأقل)، وما بعدها أقرب لما عُرض (25٪ على الأقل) ويُبيَّن ذلك في ملاحظات كل منها. اضغط «تصميم آخر» لأبحث لك عن غيرها.` : `هذه ${n} تصميمًا مختلفة بوضوح عن بعضها (32٪ على الأقل). اضغط «تصميم آخر» إن أردت توزيعات أقرب لما عُرض (تختلف 25٪ على الأقل) وسأبيّن لك ذلك في ملاحظات كل تصميم.`);
+/** بعد التصاميم المختلفة هيكليًا (≤ 50٪ تشابهًا): الأقرب منها (حتى 70٪) ما زال ممكنًا بطلب العميل ومعلنًا. */
+export const softEndMessage = (n, clear = n) => (n > clear ? `أول ${clear} تصميمًا مختلفة جذريًا في الهيكل (موضع الصالة والسلّم والمجالس والمطبخ) عن بعضها، وما بعدها أقرب هيكلًا لما عُرض (حتى ${Math.round(MACRO_LIMIT.relaxed * 100)}٪ تشابهًا) ويُبيَّن ذلك في ملاحظات كل منها. اضغط «تصميم آخر» لأبحث لك عن غيرها.` : `هذه ${n} تصميمًا مختلفة جذريًا في الهيكل (موضع الصالة والسلّم والمجالس والمطبخ). اضغط «تصميم آخر» إن أردت توزيعات أقرب هيكلًا لما عُرض (حتى ${Math.round(MACRO_LIMIT.relaxed * 100)}٪ تشابهًا) وسأبيّن لك ذلك في ملاحظات كل تصميم.`);
 export const exhaustedMessage = (n, twoFloors = null) => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.${twoFloors ? ` جرّب دورين: أرضك تتسع لتنويع أكبر بدورين (قِسْتُ ${twoFloors} تصاميم مختلفة بدورين، وقد يوجد أكثر).` : ''}`;
 /** أرض بدور واحد مصرَّح انتهت قبل العشرين: يُقاس ما يعطيه الدوران (أول دفعة) ليقترحهما الإعلان بعدد حقيقي لا بتخمين. null إن لم يزد العدد أو تعذّر القياس. */
 const PROBE_MAX = 8;

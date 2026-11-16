@@ -66,6 +66,11 @@ test('أرض الصورة 15×25 دورين: الأول وحده عند البد
     assert.ok(worst <= MACRO_LIMIT.relaxed + 1e-9, `التصميم ${j + 1} يشبه سابقًا هيكليًا بنسبة ${Math.round(worst * 100)}٪`);
     if (worst > MACRO_LIMIT.strict + 1e-9) assert.ok((s.designs[j].notes || []).some(t => /تشابهه الهيكلي/.test(t)), `التصميم ${j + 1} فوق ${MACRO_LIMIT.strict * 100}٪ بلا إعلان`);
   }
+  // أنماط الهيكل: الأحزمة والجانبي و«صفان وممر» (النمط الجديد للأراضي الضيقة بدورين)؛ ثلاثة هياكل متمايزة (≤ 50٪) على الأقل
+  const keep = []; M.forEach((m, i) => { if (keep.every(k => macroSim(m, M[k]) <= MACRO_LIMIT.strict + 1e-9)) keep.push(i); });
+  assert.ok(keep.length >= 3, 'هياكل متمايزة: ' + keep.length);
+  assert.ok(s.designs.length >= 3, 'ثلاثة تصاميم على الأقل لـ15×25 دورين: ' + s.designs.length);
+  assert.ok(new Set(s.designs.map(d => String(d.pat).split('|')[0])).size >= 3, 'ثلاثة أنماط على الأقل: ' + s.designs.map(d => String(d.pat).split('|')[0]).join(','));
   // ما عُرض سليم، والأول والثاني لا يتشابهان هيكليًا (قبل: أغلب التصاميم من هيكل واحد بتشابه حتى 90٪)
   for (const d of s.designs) assert.ok(checkDoc(parseDoc(d.doc)).ok);
   if (M.length >= 2) assert.ok(macroSim(M[0], M[1]) <= MACRO_LIMIT.strict + 1e-9, 'أول «تصميم آخر» مختلف هيكليًا جذريًا');

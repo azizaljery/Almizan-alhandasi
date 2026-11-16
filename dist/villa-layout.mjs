@@ -415,7 +415,7 @@ function orderPairs(L, R) {
   return out;
 }
 /** يولّد الترتيبات المرشحة لكل الأنماط ويرتبها. */
-export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = null, relaxL = false, only = null, perMode = 0, noFiller = false, bands = false, ext = false } = {}) {
+export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = null, relaxL = false, only = null, perMode = 0, noFiller = false, bands = false, ext = false, rowsStair = false } = {}) {
   if (upper) return searchUpper(program, W, D, upper, keep);
   const T = DESIGN_TARGETS, out = [];
   // أرضي الدورين: الفائض عن احتياجه (حين يكون العلوي أكبر برنامجًا) يأخذ «جلسة عائلية»؛ الفناء يستوعب فائضه بحديقته فيبقى بلا إضافة
@@ -561,7 +561,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   };
   if (allow('L') && blocks.length <= 12 && !stair) lShape(relaxL);
   // (3) صفّان وممر بينهما (للأراضي العريضة قليلة العمق): أمامي عام، خلفي خاص، والصالة في الخلف مقابل الردهة
-  if (allow('rows') && W >= 16 && !stair) {
+  if (allow('rows') && ((W >= 16 && !stair) || (stair && rowsStair && W >= ROWS_STAIR_MIN_W))) { // دورين: للأراضي الضيقة فقط (تضيف هيكلًا ثالثًا)
     const front0 = blocks.filter(b => ['majlis', 'office', 'prayer', 'driver'].includes(b.kind) || b.guest), back0 = blocks.filter(b => ['suite', 'family'].includes(b.kind) && !b.guest);
     const flex = blocks.filter(b => ['dining', 'kitchen', 'maid'].includes(b.kind));
     for (const flexFront of [true, false]) {
@@ -574,13 +574,18 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
         const fl = [...FL].sort(byRank).reverse(), fr = [...FR].sort(byRank); // المجلس ملاصق للردهة
         const bl = [...BL].sort(byRank).reverse(), br = [...BR].sort(byRank);
         const fA = [...F, foyer].reduce((a, b) => a + b.area, 0), bA = [...B, hallB].reduce((a, b) => a + b.area, 0);
-        const gw = T.galleryW, dd = D - gw, fd = Math.max(3.8, Math.min(dd - 3.8, dd * fA / (fA + bA)));
+        const gw = T.galleryW, dd = D - gw, fd0 = Math.max(3.8, Math.min(dd - 3.8, dd * fA / (fA + bA)));
+        for (const fd of [...new Set([snap(fd0), snap(Math.min(dd - 3.8, fd0 + .9)), snap(Math.max(3.8, fd0 - .6))])]) {
         const fy = row([...fl, foyer, ...fr], 0, W, 0, fd, 'y1'), by = row([...bl, hallB, ...br], 0, W, fd + gw, D, 'y0');
         const fo = fy.find(p => p.block === foyer), ha = by.find(p => p.block === hallB);
         if (touch(fo.r, { x0: ha.r.x0, y0: fd, x1: ha.r.x1, y1: fd + .01 }) < 0 || Math.min(fo.r.x1, ha.r.x1) - Math.max(fo.r.x0, ha.r.x0) < 1.2) continue;
         const pl = [...fy, ...by].filter(p => p.block !== foyer && p.block !== hallB);
         const circ = [{ id: 'foyer', r: fo.r }, { id: 'gallery', r: { x0: 0, y0: fd, x1: W, y1: fd + gw } }, { id: 'hall', r: ha.r }];
-        push('rows', pl, circ, {});
+        if (!stair) { push('rows', pl, circ, {}); continue; }
+        // الدورين: السلم داخل صالة الصف الخلفي (عمقها ≥ طول السلم + .6)، على أحد طرفيها
+        if (H_(ha.r) < stair.len + .6 - .01 || W_(ha.r) < 3.6) continue;
+        for (const sx of [0, 1]) push('rows', pl, circ, { stairRect: { x0: sx ? ha.r.x1 - .1 - 2.6 : ha.r.x0 + .1, y0: ha.r.y0 + .2, x1: sx ? ha.r.x1 - .1 : ha.r.x0 + .1 + 2.6, y1: ha.r.y0 + .2 + stair.len }, stairAt: sx });
+        }
       }
     }
   }
@@ -710,7 +715,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
     else if (!perMode) break;
   }
   // مع كتلة الفائض قد لا تتسع الأجنحة: يُجرَّب البرنامج بلا إضافة أيضًا، والأقل كلفة يتقدم (التضخم مرفوض في الحالتين)
-  if (blocks !== blocks0) { const seenP = new Set(res.map(c => c.sig)); for (const c of searchLayouts(program, W, D, { keep, stair, relaxL, only, noFiller: true, bands })) if (!seenP.has(c.sig)) res.push(c); res.sort((a, b) => a.pen - b.pen); return res.slice(0, keep); }
+  if (blocks !== blocks0) { const seenP = new Set(res.map(c => c.sig)); for (const c of searchLayouts(program, W, D, { keep, stair, relaxL, only, noFiller: true, bands, rowsStair })) if (!seenP.has(c.sig)) res.push(c); res.sort((a, b) => a.pen - b.pen); return res.slice(0, keep); }
   return res;
 }
 /** الدور العلوي على هندسة الأرضي نفسها: المحور صالة علوية ينتهي بالسلم في الموضع ذاته، والأجنحة للنوم. */
@@ -758,6 +763,23 @@ function searchUpper0(program, W, D, up, keep, blocks) {
         const sc = score(pl, [lg], W, D, program); if (sc === null) continue;
         const rp = rulePenalty(pl, [lg], W, D, program.rules, program.entry);
         out.push({ mode: 'bands', placed: pl, circ: [lg], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true });
+      }
+    }
+  } else if (up.mode === 'rows' && up.rows) {
+    // الدور العلوي على «صفين وممر»: صف أمامي للنوم، وممر علوي بعرض المبنى، وصف خلفي حول صالة السلم بموضعها نفسه
+    const gal = up.rows.gal, hx0 = hb.x0, hx1 = hb.x1, lg = { id: 'hall', r: { x0: hx0, y0: gal.y1, x1: hx1, y1: D } }, gg = { id: 'gallery', r: gal };
+    for (const [F, Bk] of subsets(blocks)) {
+      if (!F.length) continue;
+      F.sort(byRank);
+      const splits = Bk.length ? (hx0 >= 3.2 && W - hx1 >= 3.2 ? [...subsets(Bk)].filter(([l, r]) => l.length && r.length) : [[Bk, []], [[], Bk]]) : [[[], []]];
+      for (const [BL0, BR0] of splits) {
+        const BL = [...BL0].sort(byRank), BR = [...BR0].sort(byRank);
+        if ((BL.length && hx0 < 3.2) || (BR.length && W - hx1 < 3.2)) continue;
+        const pl = [...row(F, 0, W, 0, gal.y0, 'y1'), ...row(BL, 0, hx0, gal.y1, D, 'x1'), ...row(BR, hx1, W, gal.y1, D, 'x0')];
+        if (pl.some(p => p.r.x1 - p.r.x0 < 2.4 || p.r.y1 - p.r.y0 < 2.4)) continue;
+        const sc = score(pl, [lg, gg], W, D, program); if (sc === null) continue;
+        const rp = rulePenalty(pl, [lg, gg], W, D, program.rules, program.entry);
+        out.push({ mode: 'rows', placed: pl, circ: [lg, gg], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true });
       }
     }
   } else if (up.mode === 'side') {
@@ -1770,11 +1792,11 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   const pairSeen = new Set(), pairs = [];
   const genPairs = (ctx, env, keepN, extF) => {
     const { split, gProg, uProg, wantG2 } = ctx;
-    for (const g of searchLayouts(gProg, env.w, env.d, { keep: keepN, stair: STAIR, perMode: 2, only: env.only || null, bands: W <= BANDS_MAX_W, ext: extF })) {
+    for (const g of searchLayouts(gProg, env.w, env.d, { keep: keepN, stair: STAIR, perMode: 2, only: env.only || null, bands: W <= BANDS_MAX_W, ext: extF, rowsStair: W < 16 })) {
     if ((tw.avoidModes || []).includes(g.mode) || (g.mode === 'court' && program.prefs?.courtyard === false)) continue;
     const hall = g.circ.find(c => c.id === 'hall').r;
     const upPat = x => x.placed.map(p => p.block.kind[0] + ((p.r.x0 + p.r.x1) / 2 < env.w / 2 ? 'L' : 'R') + Math.round(p.r.y0 / 3)).sort().join('');
-    const upOpt = { mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 }, hallY: { y0: hall.y0, y1: hall.y1 }, court: g.court || null, free: !!wantG2 && g.mode === wantG2 };
+    const upOpt = { mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 }, hallY: { y0: hall.y0, y1: hall.y1 }, rows: g.mode === 'rows' ? { gal: g.circ.find(c => c.id === 'gallery').r } : null, court: g.court || null, free: !!wantG2 && g.mode === wantG2 };
     const mk = (us, idea, bias = 0) => {
       const u = us[0]; if (!u) return;
       const pat = g.pat + '/' + upPat(u); if (pairSeen.has(pat)) return; pairSeen.add(pat);
@@ -2153,6 +2175,8 @@ const UPPER_TRIES = 2;
 /** أدنى غلاف مبنى في الأراضي المعتادة (افتراض تصميمي): w عرض، d عمق الدور الواحد، d2 عمق الدورين. الأرض الأضيق يتبع حدُّها مسطحَها. */
 /** أقصى عرض مسطح قابل للبناء (أرض ضيقة/متوسطة) يُجرَّب عليه نمط الأحزمة العرضية؛ أعرض منه تصير صالته الوسطى شريطًا (نسبة > 1:2.7) وتكفي أنماط الصالة المركزية. */
 export const BANDS_MAX_W = 12.4;
+/** أضيق عرض بناء تُجرَّب عليه «صفان وممر» (دور أو دوران؛ السلم في صالة الصف الخلفي). */
+const ROWS_STAIR_MIN_W = 11.5;
 export const ENV_MIN = Object.freeze({ w: 8.5, d: 9, d2: 10 });
 /** الأرض الضيقة (مسطحها دون NARROW.w عرضًا): صالة جانبية أضيق من المعتاد؛ والقليلة العمق (دون NARROW.d): صفّان أقل عمقًا. تُعلن في ملاحظات الصالة. */
 export const NARROW = Object.freeze({ w: 8.2, sideHalls: [3.4, 3.6], wing: 2.95, barD: 9, barMinD: 7.5, barW: 14, trainW: 6.35, trainMinW: 4.55, rowMinD: 5.9, slimMinD: 4.7, slimFoyerW: 2.4, slimCapW: 7.0 });
