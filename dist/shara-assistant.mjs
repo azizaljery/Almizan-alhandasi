@@ -2,7 +2,7 @@
 // كل جواب مقيس من المستند المعروض (لا تخمين): ما لا يُعرف يُقال «لا أعرف» مع ما يمكن فعله.
 // منطق خالص بلا واجهة: يُختبر في node، ولوحة shara-panel.mjs تعرضه وتنطقه.
 import { normalizeAr, extractRequirements } from './requirements.mjs';
-import { redesign as redesignSession, currentDoc, ledgerFor, summarizeDoc, wantsAlternative } from './design-session.mjs';
+import { redesign as redesignSession, currentDoc, ledgerFor, summarizeDoc, wantsAlternative, scoreDesign } from './design-session.mjs';
 import { fixProposals, applyFix } from './design-fixes.mjs';
 import { STAGES } from './journey-nav.mjs';
 import { checkMunicipal, summaryText, DISCLAIMER, SIDE_AR as PLOT_SIDE_AR } from './municipal-rules.mjs';
@@ -97,7 +97,7 @@ function outdoorAnswer(t, doc) {
  * أسئلة الاشتراطات البلدية: الجواب من checkMunicipal على المخطط المعروض وأرض الجلسة (بالمطلوب والموجود)، مع تنبيه الصدق دائمًا.
  * «يُراجع» يبقى «يُراجع»: لا يُحوَّل حكمًا في الكلام.
  */
-const MUNI_Q = /بلدي|اشتراط|انظمه (?:ال)?بناء|نظام (?:ال)?بناء|كود (?:ال)?بناء|مخالف|ارتداد|نسبه (?:ال)?بناء|(?:كم|وش|ايش) (?:ال)?مسموح|رخصه/;
+const MUNI_Q = /بلدي|اشتراط|مطابق|يطابق|طابق|يخالف|نظامي|انظمه (?:ال)?بناء|نظام (?:ال)?بناء|كود (?:ال)?بناء|مخالف|ارتداد|نسبه (?:ال)?بناء|(?:كم|وش|ايش) (?:ال)?مسموح|رخصه/;
 const KIND_AR = { front: 'الواجهة', street: 'شارع جانبي/خلفي', neighbor: 'جار' };
 const m2 = v => String(Math.round(v * 100) / 100);
 export function municipalAnswer(session, text) {
@@ -114,6 +114,22 @@ export function municipalAnswer(session, text) {
     + (bad.length ? ' المخالف: ' + bad.map(i => `${i.title} — ${i.text}`).join(' ') : ' لا بند مخالف في ما قِسته.')
     + (rev.length ? ` يُراجع مع المكتب الهندسي: ${rev.map(i => i.title).join('، ')}.` : '') + ' ' + DISCLAIMER, actions: act };
 }
+/** شرح درجة التصميم ومؤشراتها من plan-score (الدرجة المخزنة في الجلسة أو تُحسب عند الطلب). تقدير آلي بأوزان الموقع لا حكم هندسي. */
+const SCORE_Q = /(?:كم|وش|ايش|ليش|ليه|لماذا|كيف|شرح|اشرح|وضح) .*(?:درجه|تقييم|نقاط|مؤشر)|(?:درجه|تقييم|نقاط|مؤشرات) (?:ال)?(?:تصميم|بيت|مخطط)|^(?:ال)?درجه/;
+export function scoreAnswer(session) {
+  const d = session.designs[session.current], sc = d.score || scoreDesign(session, d);
+  if (!sc) return { kind: 'answer', text: 'تعذّر حساب درجة هذا التصميم الآن؛ لم أقدّر لك رقمًا.' };
+  const parts = sc.parts.map(p => `${p.label}: ${p.score} من 100 (وزنه ${p.weight}٪)`).join('؛ ');
+  return { kind: 'answer', text: `درجة هذا التصميم ${sc.total} من 100 (${sc.grade}). تتكوّن من مؤشرات يقيسها الموقع من المخطط نفسه: ${parts}. ${sc.why.join(' ')}`
+    + (sc.missing?.length ? ' مؤشرات لم تُقَس لهذا التصميم: ' + sc.missing.map(id => SCORE_LABELS_AR[id] || id).join('، ') + '.' : '') + ' هي تقدير آلي بأوزان وضعها الموقع، وليست حكمًا هندسيًا أو اعتمادًا.', actions: [{ label: 'اطلب تصميمًا آخر', say: 'ابي تصميم مختلف' }] };
+}
+const SCORE_LABELS_AR = { req: 'مطابقة ما طلبته', eff: 'كفاءة المساحة', sun: 'التوجيه والشمس', privacy: 'خصوصية المجلس', light: 'الإنارة والتهوية', kitchen: 'قرب المطبخ من الطعام والخدمة', pipes: 'اقتصاد التمديدات' };
+/** مساحة الأرض من الأبعاد التي أدخلها العميل (لا قياس من الخريطة). */
+function landAnswer(session) {
+  const L = session.input?.land || {}, w = Number(L.width), l = Number(L.length);
+  if (!(w > 0 && l > 0)) return { kind: 'answer', text: 'لا أبعاد للأرض في الجلسة؛ أدخلها في خطوة الأرض لأحسب لك.', actions: [go('land')] };
+  return { kind: 'answer', text: `أرضك ${r1(w)} × ${r1(l)} م = ${r1(w * l)} م²، من الأبعاد التي أدخلتها (الموقع لا يقيسها من الخريطة). ${L.streets?.length ? 'الشوارع المسجلة: ' + L.streets.map(x => PLOT_SIDE_AR[x] || x).join('، ') + '.' : ''}`.trim(), actions: [go('land')] };
+}
 /** أسئلة الشمس والتوجيه: من sun-analysis على المخطط المعروض وموقع الأرض (الخريطة، وإلا المدينة، وإلا الرياض افتراضيًا ويُقال). */
 const SUN_Q = /شمس|توجيه|مشمس|ظل |الظل|حراره|حار |كاسرات/;
 export function sunAnswer(session) {
@@ -128,7 +144,9 @@ export function answerQuestion(session, text, { page = 'design' } = {}) {
   const asked = roomsAsked(t, rooms), entry = session.input?.land?.entries?.[0] || 's';
   if (MUNI_Q.test(t)) { try { return municipalAnswer(session, text); } catch { /* يُكمل إلى بقية الأجوبة */ } }
   if (SUN_Q.test(t) && !asked?.length) { try { return sunAnswer(session); } catch { /* يُكمل */ } }
+  if (SCORE_Q.test(t) && !asked?.length) { try { return scoreAnswer(session); } catch { /* يُكمل */ } }
   const od = /وين|اين|فيه|موجود|هل |كم /.test(t) ? outdoorAnswer(t, doc) : null; if (od) return od;
+  if (/مساح(?:ه|ت) (?:ال)?ارض|ارضي كم|كم (?:مساحه )?(?:ال)?ارض|ابعاد (?:ال)?ارض/.test(t)) return landAnswer(session);
   // هل نُفّذ طلبي؟
   if (/نفذت|نفذتي|تنفذ|طلبي|طلباتي|حققت|حققتي|التزمت/.test(t)) {
     const L = ledgerFor(session, doc), bad = L.filter(x => !x.ok);
@@ -165,13 +183,25 @@ export function answerQuestion(session, text, { page = 'design' } = {}) {
     return { kind: 'answer', text: `هذا التصميم: ${d.summary || 'توزيع مقترح'}.` + (notes.length ? ' ما سجّله المولّد عنه: ' + notes.join(' ') : '') + ' هو مخطط مبدئي للنقاش وليس مخططًا تنفيذيًا.' };
   }
   // التكلفة والكميات
-  if (/تكلف|سعر|اسعار|بكم|كميات|حديد|خرسان|بلوك/.test(t)) return { kind: 'answer', text: 'الكميات محسوبة من التصميم المعتمد، والتكلفة تُحسب بأسعارك أنت (لا أفترض أسعارًا). تجدها في جدول الكميات.', actions: [go('boq')] };
+  if (/تكلف|سعر|اسعار|بكم|كميات|حديد|خرسان|بلوك|مواد|ماده|تشطيب|تسليح|اسمنت/.test(t)) return { kind: 'answer', text: /مواد|ماده|تشطيب|تسليح|اسمنت|حديد|خرسان|بلوك/.test(t) && !/تكلف|سعر|اسعار|بكم/.test(t)
+      ? 'الكميات تُحسب من تصميمك نفسه: أرضيات الغرف، تشطيب الجدران الداخلية، بلوك الجدران، الأبواب والنوافذ، وخرسانة الأعمدة والجسور والبلاطات (والتسليح في جدول الكميات إن حُسب الإنشائي). أنواع المواد ودرجاتها تُحدَّد مع مكتبك الهندسي؛ لا أفترض لك نوعًا أو سعرًا. التفصيل في جدول الكميات.'
+      : 'لا أقدّر لك سعرًا: التكلفة = الكمية × سعر الوحدة بأسعارك أنت، تدخلها في جدول الكميات (لا أفترض أسعارًا). الكميات نفسها محسوبة من تصميمك، وتجدها هناك.', actions: [go('boq')] };
   // الخطوة التالية
   if (/الخطوه|بعدين|التالي|وش اسوي|كيف اكمل|كيف اعتمد|وش بعد/.test(t)) {
     const next = { design: 'إن أعجبك التصميم اضغط «أعجبني» لأسألك عن الشكل الخارجي ثم يُفتح العرض ثلاثي الأبعاد؛ وإن لم يعجبك قل لي ما تريد تغييره.', view3d: 'بعد مشاهدة البيت من الخارج والداخل انتقل إلى المخططات ثم جدول الكميات.', final: 'هذه آخر المراحل: المخططات ثم جدول الكميات وكتاب المشروع. يمكنك الرجوع وتعديل التصميم في أي وقت.' }[page] || '';
     return { kind: 'answer', text: 'المسار: الأرض ← شرعاء ← التصميم ← الشكل الخارجي ← ثلاثي الأبعاد ← المخططات ← جدول الكميات. ' + next, actions: page === 'design' ? [] : [go(page === 'view3d' ? 'sheets' : 'design')] };
   }
   return null;
+}
+
+/**
+ * عند عدم الفهم: سؤال توضيحي واحد بدل قائمة عامة. إن ذُكر فراغ من التصميم سألتُ ماذا يريد فيه (مساحته، موضعه، أم أين هو)؛ وإلا سألتُ عن نوع الطلب.
+ * الأزرار تُرسل صيغة مفهومة للمحرك، ولا يتغير شيء قبل نقر العميل.
+ */
+export function clarify(session, text, lead = '') {
+  const t = normalizeAr(text || ''), rooms = session ? summarizeDoc(currentDoc(session)).rooms : [], asked = session ? roomsAsked(t, rooms) : null;
+  if (asked?.length) { const n = asked[0].name; return { kind: 'unclear', text: `${lead} تقصد ${n} تحديدًا: تريد أن أغيّر مساحته أو موضعه، أم تسأل عن مقاسه ومكانه؟`.trim(), actions: [{ label: `${n} أكبر`, say: `${n} أكبر` }, { label: `كم مساحة ${n}؟`, say: `كم مساحة ${n}؟` }, { label: `وين ${n}؟`, say: `وين ${n}؟` }] }; }
+  return { kind: 'unclear', text: `${lead} هل تسأل عن تصميمك، أم عن الاشتراطات البلدية، أم تريد تعديلًا عليه؟`.trim(), actions: [{ label: 'مطابقة الاشتراطات', say: 'هل التصميم يطابق الاشتراطات؟' }, { label: 'كم مساحة البيت؟', say: 'كم مساحة البيت؟' }, { label: 'ابي تصميم مختلف', say: 'ابي تصميم مختلف' }] };
 }
 
 /** موضع الفراغ في المبنى بالنسبة لواجهة المدخل: أمامي/خلفي ويمين/يسار الداخل. يعيد '' إن تعذّر القياس. */
@@ -217,11 +247,11 @@ export async function sharaTurn(session, text, { page = 'design', redesign = red
   if (kind === 'ask') {
     const a = answerQuestion(session, text, { page });
     if (a) return a;
-    return { kind: 'unclear', text: 'لم أجد جواب سؤالك في التصميم. أستطيع أن أجيبك عن المساحات والمقاسات ومواضع الغرف وما نُفّذ من طلبك وسبب التوزيع والخطوة التالية؛ أو اطلب تعديلًا بصيغة مباشرة مثل «كبّري المجلس».' };
+    return clarify(session, text, 'لم أجد جواب سؤالك في التصميم.');
   }
   if (kind === 'unclear') {
     const a = answerQuestion(session, text, { page }); if (a) return a;
-    return { kind, text: 'لم أفهم طلبك بدقة فلم أغيّر شيئًا. اكتبه بصيغة مباشرة مثل: «المطبخ في الخلف»، «كبّري المجلس»، «ابي تصميم مختلف»، أو اسألني: «كم مساحة الصالة؟».' };
+    return { ...clarify(session, text, 'لم أفهم طلبك بدقة فلم أغيّر شيئًا.'), kind };
   }
   // طلب تغيير الشكل الخارجي بالكلام (لا يعيد توليد المخطط)
   if (exterior && /واجه|شكل الخارجي|طراز|ستايل|حجر|لون (?:ال)?(?:بيت|واجه)|نجدي|حجازي|سلماني|مودرن|كلاسيك|معاصر/.test(t)) {
@@ -245,4 +275,22 @@ export async function sharaTurn(session, text, { page = 'design', redesign = red
   }
 }
 
-export default { sharaTurn, classify, answerQuestion, STAGES };
+/**
+ * أين يُجاب هذا الكلام: 'local' (أمر أو سؤال محدد يفهمه المحرك المحلي: سريع ومجاني) أو 'remote' (سؤال مفتوح أو عن الخارج ← /api/shara).
+ * الأمر المحلي الذي لم يُفهم (unclear) يُحوَّل إلى remote من اللوحة بعد تجربته محليًا.
+ */
+const OPEN_Q = /(?:^|\s)(?:حي|شارع|مدين(?:ه|ات)|منطق(?:ه|ات)|شرك(?:ه|ات)|مطور(?:ين)?|مشاريع|مشروع|مقاول(?:ين|ات)?|مورد(?:ين)?|اقرب|قريب(?:ه)?|الان|اليوم|جديد(?:ه)?|احدث|مستجد(?:ات)?|تحديث(?:ات)?|اخر (?:تحديث|اصدار|نسخه)|تعميم|رابط|سوق|افضل|يناسب|مناسب(?:ه)?|الفرق بين|رايك|انصح(?:ني)?|اوصي|ينفع|يجوز)(?:\s|$)/;
+const wordCount = t => t.split(/\s+/).filter(Boolean).length;
+export function routeOf(session, text, { page = 'design' } = {}) {
+  const t = normalizeAr(text || ''), kind = classify(text);
+  if (kind === 'help' || kind === 'nav') return 'local';
+  if (/ملاحظات|مقترحات|اخطاء|اخطا|عيوب|مشاكل|مشكله/.test(t) || /(?:صوره|صور|رندر|تصيير)\s(?:.*\s)?(?:واقعي|حقيقي|احترافي|فوتوغرافي)/.test(t)) return 'local';
+  if (!session) return 'local';
+  if (MUNI_Q.test(t) && wordCount(t) > 6) return 'remote'; // سؤال نظامي محدّد: الأداة تعيد البنود بنصها وصفحاتها وتقارنها بتصميمه؛ وإلا يبقى جواب المحرك المحلي العام
+  if (kind === 'change') return OPEN_Q.test(t) && wordCount(t) > 8 ? 'remote' : 'local';
+  let known = null; try { known = answerQuestion(session, text, { page }); } catch { known = null; }
+  if (known && !OPEN_Q.test(t) && wordCount(t) <= 12) return 'local';
+  return 'remote';
+}
+
+export default { sharaTurn, classify, answerQuestion, routeOf, clarify, STAGES };

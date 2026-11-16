@@ -1,12 +1,13 @@
 // مدخل واحد على Cloudflare: الموقع الثابت + وكيل Claude + أرشيف الحسابات (D1) + الإدارة من أصل واحد.
 // /api/archive/* → site-archive، /api/archive-consent/* → أرشيف تصاميم العملاء بموافقتهم، /admin و/api/admin/* → الإدارة،
-// /api/geo/* → تحديد موقع الأرض، /api/photo* → الصورة المعمارية الاحترافية (Workers AI)، /api/site/notice → رسالة الصيانة،
+// /api/geo/* → تحديد موقع الأرض، /api/shara* → عقل شرعاء (Claude بأدوات وبحث ويب؛ يرجع source:'local' عند غياب المفتاح أو الحد)، /api/photo* → الصورة المعمارية الاحترافية (Workers AI)، /api/site/notice → رسالة الصيانة،
 // وبقية /api/* → وكيل التحليل، وما سواها → ملفات الموقع (ASSETS).
 // مفاتيح التحكم من الإدارة (site_settings) تُطبَّق على photo/geo عبر env فعّال: الإعداد أو المتغير أيهما يوقف يوقف.
 import assistant from './server.mjs';
 import archive from './site-archive.mjs';
 import photo from './photo.mjs';
 import geo from './geo.mjs';
+import shara from './shara.mjs';
 import admin from './admin.mjs';
 import clientArchive from './client-archive.mjs';
 import { readSettings, effectiveEnv } from './site-settings.mjs';
@@ -23,6 +24,7 @@ export default {
     if (pathname === '/api/archive' || pathname.startsWith('/api/archive/')) return archive.fetch(request, env, ctx);
     if (pathname === '/api/photo' || pathname.startsWith('/api/photo/')) return photo.fetch(request, effectiveEnv(env, (await readSettings(env)).values));
     if (pathname === '/api/geo' || pathname.startsWith('/api/geo/')) return geo.fetch(request, effectiveEnv(env, (await readSettings(env)).values));
+    if (pathname === '/api/shara' || pathname.startsWith('/api/shara/')) return shara.fetch(request, effectiveEnv(env, (await readSettings(env)).values));
     if (pathname.startsWith('/api/')) return assistant.fetch(request, env);
     if (pathname === '/' && !new URL(request.url).searchParams.has('legacy') && env?.ASSETS?.fetch && ['GET', 'HEAD'].includes(request.method)) {
       const u = new URL(request.url); u.pathname = '/home.html';

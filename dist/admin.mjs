@@ -203,9 +203,13 @@ async function viewControls() {
     return h('div', { class: 'row' }, h('div', {}, h('b', {}, label), h('div', { class: 'mute' }, hint)), h('label', { class: 'sw' }, box, key === 'archive_intake_closed' ? 'مغلق' : 'مفعّل', msg));
   };
   const cap = h('input', { type: 'number', min: 0, max: 500, step: 1, value: v.photo_daily_cap, placeholder: 'الافتراضي', 'aria-label': 'سقف الصور اليومي' }), capMsg = h('span', { 'aria-live': 'polite' });
+  const scap = h('input', { type: 'number', min: 0, max: 2000, step: 1, value: v.shara_daily_cap, placeholder: 'الافتراضي', 'aria-label': 'سقف أسئلة شرعاء اليومي' }), scapMsg = h('span', { 'aria-live': 'polite' });
   const note = h('input', { type: 'text', maxLength: 200, value: v.maintenance_message, 'aria-label': 'رسالة الصيانة' }), noteMsg = h('span', { 'aria-live': 'polite' });
   out.push(h('div', { class: 'card' },
     toggle('photo_enabled', 'خدمة الصورة الاحترافية', 'إيقافها يخفي الزر ويرفض الطلبات فورًا (يعمل أيضًا إن كان PHOTO_DAILY_CAP=0).'),
+    toggle('shara_ai_enabled', 'شرعاء الذكية (Claude)', 'إيقافها يعيد شرعاء إلى محركها المحلي فورًا برسالة صادقة (يعمل أيضًا إن كان SHARA_AI_ENABLED=0).'),
+    h('div', { class: 'row' }, h('div', {}, h('b', {}, 'سقف أسئلة شرعاء اليومي'), h('div', { class: 'mute' }, 'من 0 إلى 2000؛ فارغ = قيمة SHARA_DAILY_CAP أو الافتراضي (300). يتجاوز الإعداد المتغير.')),
+      h('span', { class: 'sw' }, scap, h('button', { class: 'btn', type: 'button', on: { click: () => save('shara_daily_cap', scap.value.trim(), scapMsg) } }, 'حفظ'), scapMsg)),
     toggle('geo_search_enabled', 'بحث الخريطة بالاسم', 'يُوقَف إن أوقفه الإعداد أو المتغير GEO_NOMINATIM_OFF أيهما.'),
     toggle('archive_intake_closed', 'إغلاق استقبال الأرشيف', 'يرفض حفظ تصاميم جديدة؛ لا يحذف الموجود.'),
     h('div', { class: 'row' }, h('div', {}, h('b', {}, 'سقف الصور اليومي'), h('div', { class: 'mute' }, 'من 0 إلى 500؛ فارغ = قيمة PHOTO_DAILY_CAP أو الافتراضي (40). يتجاوز الإعداد المتغير.')),

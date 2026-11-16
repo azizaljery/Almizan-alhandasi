@@ -159,6 +159,7 @@ export function createAdmin({ now = Date.now } = {}) {
       photo: { usedToday: photoUsed, cap, store: photoStore },
       services: {
         photo: { label: 'الصورة الاحترافية', configured: aiBound, on: aiBound && cap > 0, note: aiBound ? (cap > 0 ? 'مفعّلة' : 'موقوفة (سقف صفر أو إيقاف من الإدارة)') : 'ربط Workers AI غير موجود' },
+        shara: (() => { const key = typeof eff.ANTHROPIC_API_KEY === 'string' && !!eff.ANTHROPIC_API_KEY.trim(), en = String(eff.SHARA_AI_ENABLED ?? '1').trim() !== '0'; return { label: 'شرعاء الذكية (Claude)', configured: key, on: key && en, note: !key ? 'مفتاح ANTHROPIC_API_KEY غير موجود: تعمل شرعاء بمحركها المحلي' : en ? 'مفعّلة (لا يُختبر الاتصال من هنا)' : 'موقوفة من الإدارة أو SHARA_AI_ENABLED=0' }; })(),
         geo: { label: 'البحث الجغرافي (Nominatim)', configured: true, on: activeProviders(eff).length > 0, note: activeProviders(eff).length ? 'مفعّل' : 'موقوف (من الإدارة أو GEO_NOMINATIM_OFF)' },
         ai: { label: 'Workers AI', configured: aiBound, on: aiBound, note: aiBound ? 'الربط موجود (لا يُختبر النموذج من هنا)' : 'غير مربوط' },
         d1: { label: 'قاعدة D1', configured: true, on: true, note: settings.available ? 'جداول الإدارة موجودة' : 'جدول مفاتيح التحكم غير موجود' },
