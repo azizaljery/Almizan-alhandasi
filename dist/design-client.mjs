@@ -52,6 +52,7 @@ export const generateInWorker = (input, sessionArgs) => run('generate', { input,
 export const redesignInWorker = (session, ask) => run('redesign', { session, ask });
 export const fixInWorker = (session, id) => run('fix', { session, id });
 export const extendInWorker = (session, target, relaxed = false) => run('extend', { session, target, relaxed });
+export const refineInWorker = (session, index) => run('refine', { session, index });
 export const mergeInWorker = (session, a, b) => run('merge', { session, a, b });
 export const diagnoseInWorker = input => run('diagnose', { input });
 

@@ -2,7 +2,7 @@
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
 import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, TARGET_DESIGNS, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
-import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
+import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, refineInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
@@ -14,6 +14,7 @@ import { displayOr } from './field-guards.mjs';
 import { compareDesigns } from './compare-designs.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { fixProposals, applyFix, applyFitDecision } from './design-fixes.mjs';
+import { applyRefinement, REFINE_LIMITS } from './design-refine.mjs';
 import { municipalCard, sunCard, orientationBadges, siteOf } from './regs-sun-ui.mjs';
 import { exteriorQuestions, answerLabel, describeExterior, setExterior, normalizeExterior, parseExteriorText, storeExterior, readExterior } from './exterior-brief.mjs';
 
@@ -161,6 +162,7 @@ function show(index) {
     el('button', { class: 'btn', id: 'btnAnother', onclick: openShara }, 'لم يعجبني — أخبر شرعاء بما تريد تغييره'),
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnCompare', onclick: openCompare }, 'قارن بين تصميمين جنبًا إلى جنب') : null,
     session.designs.length >= 2 ? el('button', { class: 'btn', id: 'btnMerge', onclick: openMerge }, 'ادمج تصميمين في تصميم واحد') : null,
+    el('button', { class: 'btn', id: 'btnRefine', onclick: onRefine }, 'حسّن هذا التصميم'),
     el('button', { class: 'btn', id: 'btnStudio', onclick: onStudio }, 'عدّل عليه بيدك في المرسم'),
     el('small', {}, 'بعد الاعتماد تسألك شرعاء عن الشكل الخارجي الذي تحبه، ثم يفتح العرض ثلاثي الأبعاد على واجهة بيتك، ومنه المخرجات (الإنشائي والكميات والتكلفة وكتاب المشروع).'));
   // سجل التنفيذ: كل بند من طلبك مقيس من المخطط نفسه، لا من نية المولّد
@@ -261,6 +263,48 @@ async function runDecision(id) {
   } catch (e) { if (st) st.textContent = 'تعذّر تنفيذ القرار: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; btns.forEach(b => { b.disabled = false; }); }
 }
 
+// ------------------------------------------------------------------------------------------ «حسّن هذا التصميم»
+// المحسِّن (design-refine.mjs) يجرّب تعديلات صغيرة آمنة في العامل، ويعرض النتيجة قبل/بعد بالأرقام؛ العميل يقرر: «اعتمد التحسين» يضيفه تصميمًا جديدًا، و«أبقِ الأصل» يتركه كما هو. لا استبدال صامت.
+const signed = v => (v > 0 ? '+' + v : v < 0 ? '−' + Math.abs(v) : '0');
+/** جدول قبل/بعد لكل مؤشر مع المجموع (RTL). */
+function refineTable(table, total) {
+  return el('table', { class: 'rooms rf-table' }, el('thead', {}, el('tr', {}, el('th', {}, 'المؤشر'), el('th', {}, 'قبل'), el('th', {}, 'بعد'), el('th', {}, 'الفرق'))),
+    el('tbody', {}, table.map(r => el('tr', { 'data-part': r.id }, el('td', {}, r.label), el('td', { class: 'num' }, String(r.before)), el('td', { class: 'num' }, String(r.after)), el('td', { class: 'num ' + (r.diff > 0 ? 'rf-up' : 'rf-same') }, signed(r.diff))))),
+    el('tfoot', {}, el('tr', {}, el('th', {}, 'المجموع من 100'), el('th', { class: 'num' }, String(total.before)), el('th', { class: 'num' }, String(total.after)), el('th', { class: 'num rf-up' }, signed(total.after - total.before)))));
+}
+function refineBody(res) {
+  return [refineTable(res.table, res.total),
+    el('p', { class: 'sub' }, 'ما تغيّر:'), el('ul', { class: 'tick' }, res.changes.map(c => el('li', { class: 'good' }, c.text))),
+    res.rooms?.length ? el('p', { class: 'sub' }, 'المساحات المتغيرة: ' + res.rooms.map(r => `«${r.name}» ${fmt(r.before)} ← ${fmt(r.after)} م²`).join('؛ ')) : null];
+}
+function refineReply(r) {
+  const f = r.refine;
+  return el('section', { class: 'card shara-reply', id: 'sharaReply', 'aria-live': 'polite' },
+    el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), `هذا التصميم محسَّن عن التصميم ${f.from} بتعديلات صغيرة آمنة (تشابه بصري ${Math.round(f.sim * 100)}٪، والتصميم ${f.from} باقٍ كما هو). لم تُكسر مطابقة بلدية ولا بند من طلبك ولم ينخفض أي مؤشر.`)),
+    ...refineBody(f));
+}
+async function onRefine() {
+  if (pending()) { toast('ما زلت أنفّذ طلبك السابق؛ انتظر حتى ينتهي.'); return; }
+  const idx = session.current, snap = session;
+  $('refineCard')?.remove();
+  const st = el('p', { class: 'sub', id: 'refineStatus', role: 'status', 'aria-live': 'polite' }), card = el('section', { class: 'card shara-reply', id: 'refineCard', 'aria-live': 'polite', 'aria-label': 'تحسين التصميم' },
+    el('div', { class: 'who' }, el('div', { class: 'av' }, 'ش'), el('div', {}, el('b', {}, 'شرعاء: '), `أجرّب على التصميم ${idx + 1} تعديلات صغيرة (حتى ${REFINE_LIMITS.maxCandidates} تعديلًا) وأقبل ما يرفع درجته ${REFINE_LIMITS.minGain} نقطة على الأقل دون أن ينخفض أي مؤشر أو تتأثر البلدية أو طلبك.`)), st);
+  $('main').prepend(card); card.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  const done = busy(true, st, 'أبحث عن تعديلات صغيرة آمنة…');
+  try {
+    const res = await withBg(() => refineInWorker(session, idx)); done();
+    if (session.designs[idx]?.doc !== snap.designs[idx]?.doc || session.current !== idx) { card.remove(); return; }
+    if (res.status !== 'improved') {
+      st.replaceWith(el('p', { id: 'refineNone', class: 'refine-none' }, res.reason), el('div', { class: 'row' }, el('button', { type: 'button', class: 'btn', id: 'refineKeep', onclick: () => card.remove() }, 'حسنًا')));
+      return;
+    }
+    st.replaceWith(...refineBody(res), el('p', { class: 'sub hint' }, `الاعتماد يضيف التحسين تصميمًا جديدًا (رقم ${session.designs.length + 1}) إلى قائمتك؛ الأصل (رقم ${idx + 1}) لا يُستبدل ولا يُمسّ.`),
+      el('div', { class: 'row' },
+        el('button', { type: 'button', class: 'btn gold', id: 'refineApply', onclick: () => { session = applyRefinement(session, idx, res, { maxDesigns: MAX_DESIGNS }); saveSession(localStorage, session); show(session.current); toast('أُضيف التصميم المحسَّن — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' }); } }, 'اعتمد التحسين'),
+        el('button', { type: 'button', class: 'btn ghost', id: 'refineKeep', onclick: () => card.remove() }, 'أبقِ الأصل')));
+  } catch (e) { done(); st.textContent = 'تعذّر التحسين: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; }
+}
+
 /** تنفيذ مقترح إصلاح (أو كلها): النتيجة تصميم جديد يُعرض مع رد شرعاء بما عولج وما تعذّر وسببه. */
 async function runFix(id) {
   if (pending()) { toast('ما زلت أنفّذ طلبك السابق؛ انتظر حتى ينتهي.'); return; }
@@ -290,6 +334,7 @@ function busy(on, statusNode, text) {
 /** رد شرعاء على آخر طلب: ما نفّذته، وما لم أستطع وسببه، وما لم أفهمه — بلا ادّعاء. */
 function sharaReply(fb) {
   const r = fb?.reply; if (!r) return null;
+  if (r.refine) return refineReply(r);
   if (r.merge) return mergeReply(r);
   if (r.decision) return decisionReply(r);
   const head = r.fixRun ? (r.relayout ? 'غيّرت توزيع الغرف لأعالج الملاحظات، وأبقيت كل ما طلبته محققًا.' : 'عالجت الملاحظات على توزيعك نفسه دون تغييره.') : r.unchanged ? 'التصميم الحالي يحقق طلبك أصلًا، فلم أغيّر فيه شيئًا.' : r.kept ? 'أبقيت توزيعك نفسه وطبّقت التعديل عليه.' : r.altAsk || fb.picks?.includes('layout') || (!fb.text && !fb.picks?.length) ? 'هذا توزيع مختلف كما طلبت، وليس تكرارًا لأي تصميم عرضته عليك.' : 'لم يكن ممكنًا تنفيذ طلبك على التوزيع نفسه، فغيّرت التوزيع لأحققه.';
