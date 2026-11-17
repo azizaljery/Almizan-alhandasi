@@ -2350,6 +2350,10 @@ export function planMetrics(doc, { bedrooms = null, model = null } = {}) {
   }
   return { levels };
 }
+const PLAN_CIRC = r => r.type === 'corridor' || r.type === 'entrance' || r.type === 'stairs' || (r.type === 'living' && /^(الصالة|الردهة|صالة الحركة|الصالة العلوية)$/.test(r.name));
+/** حدود قياس الصالة الزائدة وحصة الحركة (افتراضات تصميمية: ليست اشتراطًا نظاميًا). */
+export const HALL_CAP = Object.freeze({ abs: 34, share: .2, circ: .3, cost: .6 });
+const WET_STACK_COST = 5;
 const fmtR = v => String(r2(v));
 /** ملاحظة صريحة بالأرقام إن لم تحقق الصالة الرئيسية الحدّ (لا صمت). */
 function hallNotes(m, W, D) {
@@ -2362,6 +2366,7 @@ function hallNotes(m, W, D) {
     out.push(`${upper ? 'الصالة العلوية' : 'الصالة الرئيسية'} صافيها ${fmtR(h.w)} × ${fmtR(h.l)} م (نسبة 1:${fmtR(h.ratio)})، دون المستهدف (عرض صافٍ ≥ ${HALL_LIMITS.minNetW} م ونسبة ≤ 1:${HALL_LIMITS.ratio})؛`
       + (!okW ? ` عرض المسطح القابل للبناء ${fmtR(W)} م لا يتسع لمحور أعرض مع جناحي الغرف.` : upper ? ' طولها يضم فتحة السلم (نحو 4.2 م) والوصول إليها؛ جزء الجلسة أمام السلم أقصر.' : ' لم يتسع في هذا البديل تقسيم المحور إلى صالة متناسبة وممر.'));
   }
+  out.push(...(m.defects || []));
   return out;
 }
 // MIN_AREA: رُفعت من 14 إلى 40 مع تضييق المسطح للارتداد النظامي — غرفة مطلوبة دون مقاسها الإرشادي لا تتصدّر متى وُجد بديل يسعها
@@ -2388,7 +2393,27 @@ export function quality(doc, { bedrooms = null } = {}) {
     if (lv.hall) { const h = lv.hall, over = Math.max(0, h.ratio - HALL_LIMITS.ratio), thin = Math.max(0, HALL_LIMITS.minNetW - h.w); if (over > .02 || thin > .02) { flag('HALL_PROPORTION'); cost += 40 * over + 30 * thin; } }
     if (lv.corridorShare > PLAN_LIMITS.corridorShare) { flag('CORRIDOR_SHARE'); cost += 200 * (lv.corridorShare - PLAN_LIMITS.corridorShare); }
     if (lv.corridorRun > PLAN_LIMITS.corridorRun) { flag('CORRIDOR_RUN'); cost += 4 * (lv.corridorRun - PLAN_LIMITS.corridorRun); }
+    for (const r of lv.rooms) if ((r.type === 'bedroom' || r.type === 'master') && r.area < (r.type === 'master' ? 15 : 11.5)) { flag('BED_AREA_SMALL'); cost += 10 * ((r.type === 'master' ? 15 : 11.5) - r.area); (m.defects ||= []).push(`${lv.name}: «${r.name}» ${r2(r.area)} م² صافيًا، دون المريح (${r.type === 'master' ? 15 : 11.5} م²).`); }
     for (const f of lv.fails) { flag('FURNITURE_' + f.what.toUpperCase()); cost += f.what === 'bed' ? 25 : f.what === 'majlis' ? 10 + 20 * (f.short || 0) : 12; }
+  }
+  // عيوب معمارية تقيسها المراجعة من المخطط المرسوم (حدود تصميمية من الميزان لا نظامية): الصالة الزائدة، حصة الحركة الكلية، المطبخ عن الطعام، تراصّ المبللة
+  const defects = m.defects ||= [];
+  for (const lv of m.levels) {
+    const net = lv.rooms.reduce((s, r) => s + r.area, 0) || 1, circ = lv.rooms.filter(r => PLAN_CIRC(r)).reduce((s, r) => s + r.area, 0), share = circ / net;
+    if (lv.hall) { const cap = Math.max(HALL_CAP.abs, HALL_CAP.share * net), over = lv.hall.area - cap; if (over > 2) { flag('HALL_OVERSIZED'); cost += HALL_CAP.cost * over; defects.push(`${lv.name}: الصالة ${r2(lv.hall.area)} م² (${Math.round(100 * lv.hall.area / net)}٪ من صافي الدور) فوق الحد المستهدف ${Math.round(cap)} م²؛ مساحة حركة زائدة تُنقص غرف الإقامة.`); } }
+    if (share > HALL_CAP.circ) { flag('CIRC_SHARE_TOTAL'); cost += 40 * (share - HALL_CAP.circ); defects.push(`${lv.name}: الصالات والممرات والمداخل ${Math.round(100 * share)}٪ من صافي الدور (المستهدف دون ${Math.round(100 * HALL_CAP.circ)}٪).`); }
+  }
+  // المطبخ يلاصق الطعام (إن وُجد) وإلا يُحسب عيبًا؛ التجاور بجدار مشترك على الدور نفسه
+  for (const lv of model.levels) {
+    const kit = lv.rooms.find(r => r.type === 'kitchen'), dins = lv.rooms.filter(r => r.type === 'dining');
+    if (kit && dins.length && !dins.some(d => kit.edges.some(e => e.space === d.spaceId))) { flag('KITCHEN_NOT_DINING'); cost += 10; defects.push(`${lv.level.name}: المطبخ لا يلاصق صالة الطعام.`); }
+  }
+  // الغرف المبللة العلوية فوق مبللة في الأرضي (تمديدات رأسية مشتركة)
+  if (model.levels.length > 1) {
+    const wet = lv => lv.rooms.filter(r => ['bath', 'kitchen', 'laundry'].includes(r.type)), gr = wet(model.levels[0]);
+    let un = 0, tot = 0;
+    for (const lv of model.levels.slice(1)) for (const u of wet(lv)) { tot++; if (!gr.some(g => Math.hypot(u.centroid.x - g.centroid.x, u.centroid.y - g.centroid.y) <= 2.5)) un++; }
+    if (un) { flag('WET_UNSTACKED'); cost += WET_STACK_COST * un; defects.push(`${un} من ${tot} غرف مبللة علوية لا تعلو غرفة مبللة في الأرضي؛ تمديدات الصرف أطول.`); }
   }
   return { cost, reject, issues, metrics: m };
 }
