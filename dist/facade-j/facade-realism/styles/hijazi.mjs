@@ -33,12 +33,13 @@ function aoTexture(THREE) { const [c, x] = cnv(4, 128), g = x.createLinearGradie
 
 // لوحات الألوان: جدار لياسة، حلية، خشب. hist=false يعني أن لون الخشب (أخضر/أزرق/عنابي) متأخر تاريخيًا بحسب [1]
 const PAL = [
-  { n: 'تيك طبيعي على لؤلؤي', wall: '#efe7d4', trim: '#e3d9c0', wood: '#7a5230', dark: '#4b2f1b', coral: '#d4c7a6', hist: true },
-  { n: 'أخضر زيتوني على كريمي', wall: '#f0e9d6', trim: '#e6dcc4', wood: '#44705a', dark: '#2c4a3c', coral: '#d8caa9', hist: false },
-  { n: 'تيل على رملي', wall: '#e8dbbf', trim: '#f0e6cf', wood: '#2f6a6e', dark: '#1f4649', coral: '#cdbd98', hist: false },
-  { n: 'بني غامق على أبيض', wall: '#f4f0e6', trim: '#e9e2d0', wood: '#503221', dark: '#321e12', coral: '#d6cab0', hist: true },
-  { n: 'عنابي على لؤلؤي', wall: '#f1eadb', trim: '#e5dbc3', wood: '#6b302d', dark: '#431d1b', coral: '#d2c5a5', hist: false },
-  { n: 'أزرق رمادي على رملي فاتح', wall: '#eadfc8', trim: '#f2ead7', wood: '#46647c', dark: '#2e4356', coral: '#cfc09c', hist: false },
+  // (2026-11-17) جدران أوسع طيفًا (لؤلؤي/رملي/وردي ترابي/أصفر جيري) بخشب روشان أغنى لونًا؛ اللؤلؤي والرملي مذكوران في إرشادات جدة المنشورة [غولف نيوز]، وبقية الدرجات قرار تصميمي (hist يحدد ما يُحسب تاريخيًا).
+  { n: 'تيك طبيعي على لؤلؤي', wall: '#f1eadb', trim: '#e3d9c0', wood: '#7a5230', dark: '#4b2f1b', coral: '#cdbf99', hist: true },
+  { n: 'أخضر زيتوني على رملي', wall: '#e4d3ac', trim: '#efe3c6', wood: '#3a7355', dark: '#27493a', coral: '#c4b184', hist: false },
+  { n: 'تيل على وردي ترابي', wall: '#e3c6aa', trim: '#f0dfc9', wood: '#21707a', dark: '#17484d', coral: '#c3a98a', hist: false },
+  { n: 'بني غامق على أبيض', wall: '#f6f2ea', trim: '#e9e2d0', wood: '#4a2c1c', dark: '#2e1a10', coral: '#d4c8ae', hist: true },
+  { n: 'عنابي على جير مصفرّ', wall: '#ecdfae', trim: '#f4ead0', wood: '#6e2630', dark: '#451a20', coral: '#cdbd88', hist: false },
+  { n: 'أزرق على بيج', wall: '#d9c6a2', trim: '#eee3c9', wood: '#365f88', dark: '#223d58', coral: '#bba983', hist: false },
 ];
 
 function woodGrain(THREE, renderer, seed) { // ألياف رأسية بتدرج رمادي (يُلوَّن بـcolor الخامة)

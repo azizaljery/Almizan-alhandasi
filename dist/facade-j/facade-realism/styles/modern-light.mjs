@@ -82,12 +82,13 @@ function bandLevels() { const L = globalThis.__FLOORS?.levels; if (!Array.isArra
   return L.map(l => typeof l === 'number' ? l : l.top ?? ((l.elevation ?? 0) + (l.height ?? 3.2) + .35)).filter(Number.isFinite).sort((a, b) => a - b); }
 
 const PALETTES = [
+  // (2026-11-17، طلب المالك: تمايز الطرز) توسيع الطيف إلى أنثراسيت ورملي وأخضر رمادي بجانب الأبيض؛ قرار تصميمي.
   { n: 'أبيض ثلجي', render: '#f4f3ef', slab: '#faf9f6', trim: '#2a2d30', trimW: 0, warm: 0 },
-  { n: 'جريج دافئ', render: '#e0d9cc', slab: '#eeeae1', trim: '#2f3235', trimW: 0, warm: 1 },
-  { n: 'رمادي فاتح', render: '#d6d8d7', slab: '#ebecea', trim: '#f2f2f0', trimW: 1, warm: 0 },
+  { n: 'جريج عميق', render: '#bdb5a6', slab: '#d6d0c4', trim: '#25282b', trimW: 0, warm: 1 },
+  { n: 'أنثراسيت', render: '#5b5f63', slab: '#787c7f', trim: '#ecece9', trimW: 1, warm: 0 },
   { n: 'عاجي', render: '#eee8da', slab: '#f6f3ec', trim: '#403a34', trimW: 0, warm: 1 },
-  { n: 'رملي دافئ', render: '#dccfb6', slab: '#ece3d0', trim: '#3a342c', trimW: 0, warm: 1 }, // 4: للقوالب فقط
-  { n: 'رمادي حجري', render: '#c2c5c0', slab: '#dcded9', trim: '#202427', trimW: 0, warm: 0 }, // 5: للقوالب فقط
+  { n: 'رملي دافئ', render: '#d2bc94', slab: '#e6d9bd', trim: '#3a342c', trimW: 0, warm: 1 }, // 4: للقوالب فقط
+  { n: 'أخضر رمادي', render: '#a3b09f', slab: '#c6cfc2', trim: '#1f2427', trimW: 0, warm: 0 }, // 5: للقوالب فقط
 ];
 
 export async function apply(THREE, { scene, renderer, S, q, FI, params }) {

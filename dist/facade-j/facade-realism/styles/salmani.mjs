@@ -31,26 +31,28 @@ function noise2(seed) { const P = new Float32Array(512 * 512), r = mulb(seed); f
 
 // لوحات ترابية (أساس الحجر، حجر العناصر المميزة، البرونز). مصدر الألوان: وصف «بيج ترابي، رمل فاتح، بني حمامي» (ثانوي)؛ القيم الدقيقة قرار تصميمي.
 const PALETTES = [
-  { name: 'رمل', base: [236, 216, 182], accent: [212, 186, 148], joint: '#a89270', bronze: '#4a3b2c', wood: '#5a3d28' },
-  { name: 'بيج فاتح', base: [240, 228, 204], accent: [218, 200, 168], joint: '#b0a085', bronze: '#3f372f', wood: '#6a4a33' },
-  { name: 'أوكر حجري', base: [226, 198, 152], accent: [198, 164, 118], joint: '#9a8059', bronze: '#3b2e22', wood: '#4f3322' },
-  { name: 'بني حمامي', base: [214, 198, 178], accent: [184, 164, 142], joint: '#8e7e69', bronze: '#392f29', wood: '#4a3425' },
+  // (2026-11-17، طلب المالك: تمايز الطرز) أربع عائلات حجرية متباعدة اللون، لكل منها تطبيق مداميك (rowK: معامل سطوع لكل مدماك من أربعة) وكتل بلونين (alt).
+  // المرجع: حجر عسير/السراة متعدد الألوان بمداميك وأحزمة بيضاء (المرو) [amlak.net.sa، ajel.sa]، ومنه اللوحة الترابية للسلماني [heyazah]. الألوان الدقيقة قرار تصميمي، وكون السلماني الرياضي نفسه مطبّقًا «غير متحقق».
+  { name: 'رمل ذهبي مطبّق', base: [226, 196, 146], alt: [206, 170, 122], altP: .32, rowK: [.86, .93, .84, 1.2], v: .13, accent: [238, 224, 190], joint: '#8f7a58', bronze: '#4a3b2c', wood: '#5a3d28' },
+  { name: 'رمادي مزرق وحزام أبيض', base: [168, 166, 160], alt: [140, 140, 138], altP: .35, rowK: [.88, .93, .84, 1.28], v: .13, accent: [236, 234, 226], joint: '#66625c', bronze: '#2f2c2a', wood: '#3c2f26' },
+  { name: 'أحمر ترابي مطبّق', base: [170, 122, 96], alt: [142, 102, 80], altP: .38, rowK: [.92, .86, .95, 1.18], v: .13, accent: [228, 202, 170], joint: '#6e4c38', bronze: '#2e2420', wood: '#3a281c' },
+  { name: 'بازلتي داكن وحزام مرو', base: [108, 100, 94], alt: [84, 78, 74], altP: .4, rowK: [.86, .92, .82, 1.5], v: .14, accent: [216, 208, 194], joint: '#3a3632', bronze: '#2b2420', wood: '#4a3425' },
 ];
 
 /** حجر جيري رملي: القماش 2.4×1.2 م (4×4 بلاطات 60×30 مع إزاحة نصف بلاطة للمدماك الفردي، كما في blockGrid). joints=true يرسم فواصل 1 سم للعناصر المضافة. */
 function stoneMat(THREE, renderer, pal, { joints = false, tone = 1, seed = 3, name = 'sandstone-S' } = {}) {
   const PX = 512, W = PX * 2.4 | 0, H = PX * 1.2 | 0, [c, x] = cnv(W, H), [bc, bx] = cnv(W, H), N = noise2(seed), N2 = noise2(seed + 41), r = mulb(seed * 7 + 1);
   const img = x.createImageData(W, H), bim = bx.createImageData(W, H), d = img.data, bd = bim.data, tones = [];
-  for (let i = 0; i < 64; i++) tones.push({ k: 1 + (r() - .5) * .09, w: (r() - .5) * 9, g: (r() - .5) * .03 });
+  const VV = pal.v ?? .09; for (let i = 0; i < 64; i++) tones.push({ k: 1 + (r() - .5) * VV, w: (r() - .5) * (pal.alt ? 12 : 9), g: (r() - .5) * .03, alt: !!pal.alt && r() < (pal.altP ?? .3) });
   for (let py = 0; py < H; py++) { const yv = (H - 1 - py) / PX, row = Math.floor(yv / .3), off = (row & 1) * .3, ry = yv - row * .3;
     for (let px = 0; px < W; px++) { const xu = px / PX, xo = ((xu - off) % 2.4 + 2.4) % 2.4, col = Math.floor(xo / .6), rx = xo - col * .6, b = tones[(row & 3) * 4 + (col & 3)];
       const X = xu * 1.0, Y = yv * 1.0;
       const cloud = N(X * 1.3, Y * 1.3, 4), grain = N2(X * 38, Y * 38, 2), mid = N(X * 9 + 3, Y * 9, 3), bed = N2(X * 1.2, Y * 26, 3);
-      let k = b.k * tone * (.95 + (cloud - .5) * .11 + (mid - .5) * .07 + (grain - .5) * .075 + (bed - .5) * .06);
+      let k = b.k * tone * (pal.rowK ? pal.rowK[row & 3] : 1) * (.95 + (cloud - .5) * .11 + (mid - .5) * .07 + (grain - .5) * .075 + (bed - .5) * .06);
       // فاصل (مدماك) مرسوم فقط للعناصر المضافة
       let jn = 0; if (joints) { const e = Math.min(rx, .6 - rx, ry, .3 - ry); if (e < .005) jn = 1 - e / .005; }
       k *= 1 - jn * .22;
-      const i = (py * W + px) * 4, B = pal.base;
+      const i = (py * W + px) * 4, B = b.alt ? pal.alt : pal.base;
       d[i] = Math.min(255, B[0] * k + b.w); d[i + 1] = Math.min(255, B[1] * k + b.w * .8); d[i + 2] = Math.min(255, B[2] * k * (1 - jn * .02) + b.w * .5); d[i + 3] = 255;
       const bump = 150 + (grain - .5) * 110 + (mid - .5) * 70 - jn * 90; bd[i] = bd[i + 1] = bd[i + 2] = Math.max(0, Math.min(255, bump)); bd[i + 3] = 255; } }
   x.putImageData(img, 0, 0); bx.putImageData(bim, 0, 0);
@@ -81,7 +83,7 @@ export const ENUM = Object.freeze({
   floors: [1, 2, 3], entryPos: ['وسط', 'ثلث أيسر', 'ثلث أيمن', 'طرف أيسر', 'طرف أيمن'], entryKind: ['باب مزدوج 1.4', 'باب مفرد 1.1 عريض', 'باب كبير 1.8', 'باب ضيق طويل 1.2'],
   winSize: ['شقّ ضيق عميق', 'قياسي', 'عريض', 'طويل', 'خليج زجاجي كبير', 'شق طولي رشيق'], acscreen: ['بلا', 'دروة متدرجة بارتفاعين 1.8/1.2 م لحجب التكييف'], scrWood: ['مشربية برونزية', 'مشربية خشب طبيعي'], winRhythm: ['منتظم مفرد', 'أزواج', 'ثلاثيات', 'شريط متصل', 'متباعد قليل'],
   massing: ['مستوٍ', 'كتلة مدخل بارزة', 'رواق غائر', 'جناح بارز', 'كتلة وسطى بارزة', 'خليج جانبي بارز', 'تدرّج ثلاثي', 'جناحان متقدمان وفناء غائر'], thick: ['كما المسقط', 'سميك', 'سميك جدًا'],
-  pal: ['رمل', 'بيج فاتح', 'أوكر حجري', 'بني حمامي'], layer: ['حجر + بياض متدرج', 'بياض كامل + حلي حجرية', 'حلي داكنة', 'حلي جيرية فاتحة'],
+  pal: ['رمل ذهبي مطبّق', 'رمادي مزرق وحزام أبيض', 'أحمر ترابي مطبّق', 'بازلتي داكن وحزام مرو'], layer: ['حجر + بياض متدرج', 'بياض كامل + حلي حجرية', 'حلي داكنة', 'حلي جيرية فاتحة'],
   tower: ['بلا أبراج', 'أبراج نحيلة', 'أبراج متوسطة', 'أبراج عريضة'], rise: ['منخفض', 'متوسط', 'مرتفع'], tsym: ['متماثل', 'ثقل يسار', 'ثقل يمين', 'عريضان'],
   crown: ['مستقيم', 'درجتان', 'هرم ثلاث درجات', 'عمودان توأم'], tri: ['بلا مثلثات', '30 سم', '40 سم', '50 سم'], triPat: ['منتظم', 'متبادل', 'تركيز وسطي'], center: ['بلا', 'فوق المدخل', 'وسط الواجهة'],
   parapet: ['دروة عادية', 'دروة مرتفعة', 'دروة بحشوات غائرة'], cap: ['غطاء رفيع', 'غطاء سميك', 'غطاء مدرّج'], frame: ['إطار قياسي', 'إطار ثقيل عميق', 'عتبة وجلسة فقط', 'لوحة حجرية خلف الإطار', 'تجويف مظلل'],
@@ -270,7 +272,7 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   const LIM = E.LIM, PRJ = E.PRJ, RW = E.RW, palI = E.seedP, motif = E.motif;
   for (const m of S.meshes) if (CLASSIC.has(m.userData?.role)) m.visible = false;
   const stone = stoneMat(THREE, renderer, pal0, { seed: 3 + palI }), stoneJ = stoneMat(THREE, renderer, pal0, { joints: true, seed: 3 + palI, name: 'sandstone-joint-S' });
-  const accent = stoneMat(THREE, renderer, { ...pal, base: pal.accent }, { joints: true, tone: .96, seed: 9 + palI, name: 'sandstone-accent-S' });
+  const accent = stoneMat(THREE, renderer, { ...pal, base: pal.accent, alt: null, rowK: null, v: .09 }, { joints: true, tone: .96, seed: 9 + palI, name: 'sandstone-accent-S' });
   const bronze = new THREE.MeshStandardMaterial({ color: pal.bronze, metalness: .55, roughness: .45 }); bronze.name = 'bronzeS';
   const darkWood = new THREE.MeshStandardMaterial({ color: pal.wood, roughness: .7 });
   const backing = new THREE.MeshStandardMaterial({ color: '#15100c', roughness: 1, envMapIntensity: .1 });

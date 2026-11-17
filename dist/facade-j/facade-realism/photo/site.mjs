@@ -2,6 +2,7 @@
 // كل القطع الثابتة تُدمج في شبكة واحدة لكل خامة (نداءات رسم قليلة)، وإحداثيات UV بالأمتار (لا تمطيط).
 import { rnd, canvas, canvasTex, boxGeo, mergeGeos, metricUV } from './util.mjs';
 import { createPlants } from './plants.mjs';
+import { STYLE_CONTEXT } from '../style-identity.mjs';
 
 function groundTextures(THREE, tier) {
   const S = tier.tex >= 1024 ? 512 : 256, out = {}, r = rnd(19);
@@ -83,6 +84,11 @@ export function buildSite(THREE, { scene, S, plan, state, tier, night = false })
   M('curb', { color: '#b9b2a5', roughness: .9 }, 'concrete'); M('wood', { color: '#6a4a33', roughness: .62 }, 'timber'); M('metal', { color: '#262422', metalness: .7, roughness: .42, envMapIntensity: 1 });
   M('lamp', { color: '#fff3d6', emissive: '#ffd08a', emissiveIntensity: night ? 6 : 2.2 }); M('nb1', { color: '#e9dfce' }, 'plaster'); M('nb2', { color: '#ddcfb8' }, 'plaster'); M('nb3', { color: '#f0e9dd' }, 'plaster'); M('nbwin', { color: '#56646b', roughness: .2, metalness: .3, envMapIntensity: 1.2 });
   mats.water = new THREE.MeshPhysicalMaterial({ map: tex.pool.map, color: '#bfeef2', roughness: .06, metalness: 0, ior: 1.33, envMapIntensity: 1.4, clearcoat: 1, clearcoatRoughness: .03 }); mats.water.name = 'site-water'; mats.water.userData.pd = false; disposables.push(mats.water);
+  // هوية السياق بحسب الطراز (style-identity.mjs): أرضية وسور وخشب بوابة وجوار بألوان الطراز لا بلون واحد للجميع
+  { const th = STYLE_CONTEXT[plan.style]; if (th) {
+    mats.stone.color.set(th.paving); mats.coping.color.set(th.wall || th.paving); mats.wood.color.set(th.wood);
+    if (th.wall) { const w = new THREE.MeshStandardMaterial({ color: th.wall, roughness: .95 }); w.name = 'site-wall-' + plan.style; mats.wall.dispose?.(); mats.wall = w; disposables.push(w); }
+    ['nb1', 'nb2', 'nb3'].forEach((k, i) => mats[k].color.set(th.neighbor[i])); mats.gravel.color.set(th.farGround); } }
   const add = (key, g) => { (bins[key] ||= []).push(g); };
   // صندوق بإحداثيات المسقط (x, y شمالًا) ← المشهد (X, Z = −y)
   const box = (key, x0, x1, y0, y1, h0, h1) => add(key, boxGeo(THREE, x0, x1, h0, h1, -y1, -y0));

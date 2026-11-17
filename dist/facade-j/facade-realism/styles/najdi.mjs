@@ -69,7 +69,8 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
 
   // ───── المعاملات: من القالب (tpl=) إن وُجد، وإلا من البذرة كما كان ─────
   const tpl = resolveTemplate(templates, q), T = tpl ? tpl.p : {}, V = (k, d) => (k in T ? T[k] : d), cls = (k, arr, d) => (k in T ? arr[T[k]] : d);
-  const PAL = [['sand', '#dbc59f'], ['ochre', '#d2b07c'], ['clay', '#c39d7e'], ['cream', '#e6d7b8'], ['mud', '#bb9a72'], ['rose', '#cfa58b']];
+  // (2026-11-17، طلب المالك: تمايز الطرز) لوحة طينية أغمق وأوسع: لبن بني/مصفرّ/أحمر ومبيّض بالجير. المرجع: النجدي لبن/طين بجدران سميكة ولياسة طين [ويكيبيديا Najdi architecture]؛ درجات اللون نفسها قرار تصميمي، والتبييض بالجير «غير متحقق» من مصدر.
+  const PAL = [['sand', '#c8a57a'], ['ochre', '#c1923f'], ['clay', '#a8694b'], ['lime', '#ebe3d0'], ['mud', '#8e6b4b'], ['greymud', '#a08e74']];
   const WOODS = ['#4a3220', '#5c3d24', '#6f4a2a'], PAINTS = [null, '#3f5f4a', '#6a2f27', '#2f5360', '#8a6a2c'];
   const palI = V('pal', Math.min(PAL.length - 1, Math.floor(R(1) * PAL.length))), pal = PAL[palI];
   const trimI = V('trim', R(2) < .5 ? 1 : 0), finish = V('finish', 1);

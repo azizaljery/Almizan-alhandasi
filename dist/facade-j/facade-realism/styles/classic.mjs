@@ -81,14 +81,15 @@ export async function apply(THREE, { scene, renderer, S, q, doc, FI, params }) {
   const R = k => RR[k % 40], pick = (k, a) => a[Math.min(a.length - 1, Math.floor(R(k) * a.length))];
   /* --- تركيبة هذا التصميم (تتغيّر مع البذرة) --- */
   const PALS = [
-    { n: 'كريمي', wall: '#eadfc6', trim: '#f6f2e8', base: '#b8ab94', groove: '#a39880' },
-    { n: 'أبيض', wall: '#f2efe8', trim: '#fcfbf7', base: '#c9c3b8', groove: '#b5afa4' },
-    { n: 'بيج', wall: '#d8c6a3', trim: '#efe6d3', base: '#9d8e77', groove: '#8e7f69' },
-    { n: 'أصفر مغرة', wall: '#dcb872', trim: '#f4ecd8', base: '#a38e68', groove: '#8a7650' },
-    { n: 'وردي طيني', wall: '#d5a48c', trim: '#f6ebdf', base: '#9a7d6b', groove: '#876b5a' },
-    { n: 'رمادي حجري', wall: '#cdc9bf', trim: '#f7f6f2', base: '#8f8a80', groove: '#7d786e' },
-    { n: 'أخضر مريمية', wall: '#c4cbb0', trim: '#f5f3e8', base: '#8d8f7c', groove: '#7b7d6b' },
-    { n: 'أزرق رمادي', wall: '#b9c5c9', trim: '#f6f7f5', base: '#868e91', groove: '#747c80' }];
+    // (2026-11-17، طلب المالك: تمايز الطرز) ألوان أكثر تباعدًا من «كريمي» الواحد: مغرة ذهبية، أبيض، حجر داكن، وردي طيني، مريمية، أزرق رمادي. قرار تصميمي؛ مرجع سعودي بعينه لهذه الألوان «غير متحقق».
+    { n: 'أصفر مغرة ذهبي', wall: '#e2b866', trim: '#f8f1dc', base: '#a88a54', groove: '#8c7144' },
+    { n: 'أبيض', wall: '#f4f1ea', trim: '#fffdf8', base: '#bdb6a8', groove: '#a8a194' },
+    { n: 'بيج حجري عميق', wall: '#c9ad84', trim: '#f1e7d2', base: '#8b7655', groove: '#74623f' },
+    { n: 'وردي طيني', wall: '#d9a089', trim: '#f8ede2', base: '#94705f', groove: '#7e5d4d' },
+    { n: 'أخضر مريمية', wall: '#b3c19e', trim: '#f6f4e6', base: '#7f8a6c', groove: '#6c7659' },
+    { n: 'أزرق رمادي', wall: '#a6bbc7', trim: '#f7f9f9', base: '#6f7f88', groove: '#5e6d76' },
+    { n: 'كريمي', wall: '#ecdfbc', trim: '#fbf7ec', base: '#b3a47f', groove: '#9b8d6b' },
+    { n: 'رمادي حجري', wall: '#bab5aa', trim: '#f7f6f2', base: '#77726a', groove: '#656058' }];
   const TP = resolveTemplate(templates, qT(q)), TPP = TP?.p || null;
   const PAL = TPP ? PALS[TPP.pal % PALS.length] : pick(1, PALS.slice(0, 3));
   const CFG = {
