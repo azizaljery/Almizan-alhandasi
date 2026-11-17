@@ -229,7 +229,7 @@ export function answerQuestion(session, text, { page = 'design' } = {}) {
   // كم مساحة/مقاس فراغ
   if (asked && /كم|مساح|مقاس|ابعاد|حجم|طول|عرض|قد ايش|قد ايه/.test(t)) {
     if (!asked.length) return { kind: 'answer', text: 'هذا الفراغ غير موجود في التصميم المعروض.' };
-    if (/كم (?:عدد )?(?:ال)?(?:غرف|غرفه|حمام|حمامات|دوره|دورات|مجلس|مجالس)/.test(t) && !/مساح|مقاس|ابعاد|حجم|طول|عرض/.test(t)) return { kind: 'answer', text: `في التصميم ${asked.length} (${[...new Set(asked.map(r => r.level))].join(' و')}): ${asked.map(r => r.name).join('، ')}.` };
+    if (/كم (?:عدد )?(?:ال)?(?:غرف|غرفه|حمام|حمامات|دوره|دورات|مجلس|مجالس)/.test(t) && !/مساح|مقاس|ابعاد|حجم|طول|عرض/.test(t)) return { kind: 'answer', text: `العدد ${asked.length} (${[...new Set(asked.map(r => r.level))].join(' و')}): ${asked.map(r => r.name).join('، ')}.` };
     return { kind: 'answer', text: asked.map(roomLine).join('؛ ') + '. المقاسات صافية من وجه الجدار إلى وجه الجدار.' };
   }
   // المساحة الكلية
