@@ -194,7 +194,7 @@ test('الخصوصية: لا إحداثيات دقيقة ولا مفاتيح geo
   await post(createSharaHandler({ providerFetch: p }), { message: 'موقعي 24.7743123, 46.7386123 وكذلك ٢٤٫٧٧٤٣١٢٣', history: [{ role: 'user', text: 'lat=24.77431 lng=46.73861' }, { role: 'assistant', text: 'تمام' }], context: ctx });
   const sent = JSON.stringify(p.calls[0].body); for (const bad of ['24.7743', '46.7386', '24.77431', 'S3CR3T', '"lat"', '"lng"', '"geo"', 'north']) assert.ok(!sent.includes(bad), bad);
   assert.equal(scrub('٢٤٫٧٧٤٣١٢٣'), '[محجوب]'); assert.equal(scrub('الأرض 20.5 م'), 'الأرض 20.5 م');
-  assert.ok(Object.keys(sanitizeContext(ctx)).every(k => ['stage', 'land', 'design', 'ledger', 'notes', 'score', 'municipal'].includes(k)));
+  assert.ok(Object.keys(sanitizeContext(ctx)).every(k => ['stage', 'land', 'design', 'ledger', 'notes', 'score', 'municipal', 'designs', 'exterior'].includes(k)));
   assert.equal(readFileSync('dist/shara-remote.mjs', 'utf8').includes('ANTHROPIC_API_KEY'), false);
 });
 test('أخطاء المزوّد: مهلة، حد، مصادقة، رفض، ويب معطّل ← إعادة بلا ويب، رد فارغ', async () => {
