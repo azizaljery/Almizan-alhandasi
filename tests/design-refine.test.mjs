@@ -25,7 +25,8 @@ async function pageSession(w, l, fl, extra = '', more = 3) {
   for (let g = 0; g < more; g++) { const o = await extendSession(s, { target: 8, relaxed: true }); s = o.session; if (!o.added) break; }
   return s;
 }
-const CASES = [[15, 25, 1], [20, 30, 1], [25, 35, 2], [12.5, 30, 2]];
+// 16×28 أُضيفت بعد إصلاح الصالات الشريطية: التصاميم الأفضل تترك تحسينات أقل، وهذه الأرض ما زال فيها تحسين فعلي (77←79)
+const CASES = [[15, 25, 1], [20, 30, 1], [25, 35, 2], [12.5, 30, 2], [16, 28, 1]];
 const cache = new Map(), results = new Map();
 const sessionOf = async (w, l, f) => { const k = `${w}×${l}×${f}`; if (!cache.has(k)) cache.set(k, await pageSession(w, l, f)); return cache.get(k); };
 
@@ -77,7 +78,7 @@ for (const [w, l, f] of CASES) test(`حسّن هذا التصميم ${w}×${l} $
   assert.ok(improved <= n);
 });
 
-test('المجموع عبر الأراضي الأربع: يوجد تحسين فعلي ويوجد «لا تحسين» (لا يُختلق تحسين لكل تصميم)', async () => {
+test('المجموع عبر الأراضي: يوجد تحسين فعلي ويوجد «لا تحسين» (لا يُختلق تحسين لكل تصميم)', async () => {
   for (const [w, l, f] of CASES) await sessionOf(w, l, f);
   const all = [...results.values()]; if (!all.length) return; // تُشغَّل الاختبارات السابقة أولًا
   assert.ok(all.some(x => x.after !== null), 'لا تحسين واحد عبر كل التصاميم');

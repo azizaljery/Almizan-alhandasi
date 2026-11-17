@@ -172,6 +172,11 @@ function menMajlisPlan(w, h) {
 // المحور الطويل (أطول من 1.6 أمثال عرضه) لا يُترك صالة واحدة طويلة: تنتهي الصالة عند h، ويكمل بعدها «ممر الغرف»
 // بعرض الممر، وتتمدد غرف الجهة الخلفية على ما بقي من عرض المحور فلا يضيع.
 export const HALL_LIMITS = Object.freeze({ ratio: 1.6, minNetW: 4.5 });
+/** صالة طولها (عمق المحور) يجعلها شريطًا أو أكبر من سقفها: نسبة الصافي > HALL_STRIP.ratio أو مساحتها > HALL_STRIP.area × مقاسها المستهدف. */
+export const HALL_STRIP = Object.freeze({ ratio: 2.2, area: 1.6, pen: 220, skipBelowW: 13 });
+/** الترتيب ذو الصالة الشريطية (له بديل بصالة محددة): في الأراضي الضيقة (عرض غلاف الدور دون skipBelowW م) يُحذف؛ وفي الأكبر يتأخر بكلفة pen حتى لا يقل عدد التصاميم المختلفة. */
+function demote(out, at, W, D) { if (W < HALL_STRIP.skipBelowW) out.splice(at, 1); else { out[at].pen += HALL_STRIP.pen; out[at].raw += HALL_STRIP.pen; } }
+const hallStrip = (wh, len, program) => (len - INT) / Math.max(.1, wh - INT) > HALL_STRIP.ratio || wh * len > HALL_STRIP.area * (program.hallArea || DESIGN_TARGETS.hall);
 const hallCap = wh => 1.55 * (wh - INT) + INT;
 /** أعداد الكتل الأمامية (من مقدمة القائمة المرتبة) الأقرب لنسبة الطول frac، الأقرب أولًا (اثنان على الأكثر). */
 function frontCounts(list, frac) {
@@ -478,12 +483,16 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
           const circ = [{ id: 'foyer', r: { x0: wl, y0: 0, x1: wl + wh, y1: f } }, { id: 'hall', r: { x0: wl, y0: f, x1: wl + wh, y1: g } }];
           if (backSet.length) circ.push({ id: 'gallery', r: { x0: 0, y0: g, x1: W, y1: g + T.galleryW } });
           // محور أطول من صالة متناسبة: بديل بصالة متناسبة وممر للغرف الخلفية
+          let split = 0;
           if (splitOk && g - f > HALL_LIMITS.ratio * (wh - INT) + INT) for (const v of spineVariants(L, R, wl, wh, W, g, stair, program.hallArea || T.hall)) {
+            split++;
             push(backSet.length ? 'tee' : 'center', [...v.pl, ...back], [...v.circ, ...circ.filter(c => c.id === 'gallery')], { wh, wl, wr, spine: v.h, ...svcBack, ...(v.stairRect ? { stairRect: v.stairRect } : {}) });
           }
           if (g - f < (stair ? stair.len + 3.2 : 3.2)) continue;
+          // صالة تمتد بكل المحور فتصير شريطًا (نسبتها فوق 1:2.2 أو مساحتها فوق سقف الصالة): تُحذف في الأراضي الضيقة وتتأخر بكلفة في الأكبر (demote) متى وُجد بديل بصالة محددة وممر مضغوط لهذا الترتيب نفسه
+          const stripP = split && hallStrip(wh, g - f, program) ? HALL_STRIP.pen : 0;
           const cx = wl + wh / 2;
-          push(backSet.length ? 'tee' : 'center', pl, circ, { wh, wl, wr, ...svcBack, ...(stair ? { stairRect: { x0: cx - 1.3, y0: g - stair.len - .1, x1: cx + 1.3, y1: g - .1 } } : {}) });
+          { const n0 = out.length; push(backSet.length ? 'tee' : 'center', pl, circ, { wh, wl, wr, ...svcBack, ...(stair ? { stairRect: { x0: cx - 1.3, y0: g - stair.len - .1, x1: cx + 1.3, y1: g - .1 } } : {}) }); if (stripP && out.length > n0) { demote(out, n0, W, D); } }
           }
         }
       }
@@ -550,9 +559,10 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
             const backRow = row(B, 0, a, g + gw, D, 'y0');
             const pl = [...front, ...backRow];
             const circ = [{ id: 'foyer', r: { x0: 0, y0: 0, x1: wh, y1: f } }, { id: 'hall', r: { x0: 0, y0: f, x1: wh, y1: g } }, { id: 'gallery', r: { x0: 0, y0: g, x1: W, y1: g + gw } }];
-            push('L', pl, circ, { wh, wl: 0, wr: W - wh, armW: a });
             // صالة متناسبة: تنتهي عند h، وبعدها ممر ملاصق للجدار الخارجي، وتتمدد كتل الجناح الخلفية على باقي عرض المحور
-            if (splitOk && !hb && g - f > HALL_LIMITS.ratio * (wh - INT) + INT) for (const v of sideSpine(F, wh, W, 0, g, 'x0', null, program.hallArea || T.hall)) push('L', [...v.pl, ...backRow], [...v.circ, circ[2]], { wh, wl: 0, wr: W - wh, armW: a, spine: v.h });
+            const vsL = splitOk && !hb && g - f > HALL_LIMITS.ratio * (wh - INT) + INT ? sideSpine(F, wh, W, 0, g, 'x0', null, program.hallArea || T.hall) : [];
+            { const n0 = out.length; push('L', pl, circ, { wh, wl: 0, wr: W - wh, armW: a }); if (vsL.length && hallStrip(wh, g - f, program) && out.length > n0) { demote(out, n0, W, D); } }
+            for (const v of vsL) push('L', [...v.pl, ...backRow], [...v.circ, circ[2]], { wh, wl: 0, wr: W - wh, armW: a, spine: v.h });
             }
           }
         }
@@ -685,8 +695,9 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
       const circ = [{ id: 'foyer', r: { x0: hx0, y0: 0, x1: hx0 + wh, y1: f } }, { id: 'hall', r: { x0: hx0, y0: f, x1: hx0 + wh, y1: D } }];
       // السلم على الجدار الخارجي للصالة الجانبية، والممر على جهة الجناح
       const sx0 = side === 'L' ? W - .1 - 2.5 : .1, sx1 = sx0 + 2.5;
-      push('side', pl, circ, { wh, sideAt: side, ...(stair ? { stairRect: { x0: sx0, y0: D - stair.len - .1, x1: sx1, y1: D - .1 } } : {}) });
-      if (splitOk && D - f > HALL_LIMITS.ratio * (wh - INT) + INT) for (const v of sideSpine(L, wh, W, side === 'L' ? W - wh : 0, D, side === 'L' ? 'x1' : 'x0', stair, program.hallArea || T.hall)) {
+      const vs = splitOk && D - f > HALL_LIMITS.ratio * (wh - INT) + INT ? sideSpine(L, wh, W, side === 'L' ? W - wh : 0, D, side === 'L' ? 'x1' : 'x0', stair, program.hallArea || T.hall) : [];
+      { const n0 = out.length; push('side', pl, circ, { wh, sideAt: side, ...(stair ? { stairRect: { x0: sx0, y0: D - stair.len - .1, x1: sx1, y1: D - .1 } } : {}) }); if (vs.length && hallStrip(wh, D - f, program) && out.length > n0) { demote(out, n0, W, D); } }
+      for (const v of vs) {
         push('side', v.pl, v.circ, { wh, sideAt: side, spine: v.h, ...(stair ? { stairRect: { x0: sx0, y0: v.h - stair.len - .1, x1: sx1, y1: v.h - .1 } } : {}) });
       }
     }
@@ -719,7 +730,21 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   return res;
 }
 /** الدور العلوي على هندسة الأرضي نفسها: المحور صالة علوية ينتهي بالسلم في الموضع ذاته، والأجنحة للنوم. */
+/** الكتلة فيها غرفة مبللة (حمام جناح، مطبخ، خادمة/سائق بحمام، مجلس بدورة مياه). */
+const isWetBlock = b => b.kind === 'suite' || b.kind === 'kitchen' || ((b.kind === 'maid' || b.kind === 'driver') && b.bath) || !!b.guestWc;
+const overlapA = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+export const WET_STACK_PEN = 12;
+/** كلفة العلوي: كل كتلة مبللة علوية لا يغطي نصفها على الأقل كتلة مبللة في الأرضي (التمديدات الرأسية المشتركة). rects: مستطيلات الأرضي المبللة. */
+function wetStackPen(placed, rects) {
+  let pen = 0;
+  for (const p of placed) if (isWetBlock(p.block) && !p.block.guest) { const a = A_(p.r); if (!rects.some(g => overlapA(p.r, g) >= .5 * Math.min(a, A_(g)))) pen += WET_STACK_PEN; }
+  return pen;
+}
 function searchUpper(program, W, D, up, keep) {
+  if (up.groundWet && up.groundWet.length) {
+    const gw = up.groundWet, { groundWet, ...up0 } = up;
+    return searchUpper(program, W, D, up0, keep * 4).map(c => ({ ...c, pen: c.pen + wetStackPen(c.placed, gw) })).sort((a, b) => a.pen - b.pen).slice(0, keep);
+  }
   // فكرة «التراس العلوي»: فائض الدور العلوي يصير تراسًا مكشوفًا في طرف أحد الجناحين (أمامي على الواجهة أو خلفي على الحوش)
   // فوق جزء من الأرضي، فيصغر العلوي وتتدرج الكتلة بدل غرفة لم يطلبها العميل. بلا فائض كافٍ: لا تراس (لا يُقتطع من المطلوب).
   if (up.terrace) {
@@ -785,7 +810,21 @@ function searchUpper0(program, W, D, up, keep, blocks) {
   } else if (up.mode === 'side') {
     const wx0 = up.sideAt === 'L' ? 0 : hb.x1, wx1 = up.sideAt === 'L' ? hb.x0 : W;
     const pl = stack([...blocks].sort(byRank), wx0, wx1, 0, D, up.sideAt === 'L' ? 'x1' : 'x0');
-    const sc = score(pl, [lounge], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); out.push({ mode: 'side', placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
+    const sc = score(pl, [lounge], W, D, program); let plainAt = -1, splitN = 0;
+    if (sc !== null) { const rp = rulePenalty(pl, [lounge], W, D, program.rules, program.entry); plainAt = out.length; out.push({ mode: 'side', placed: pl, circ: [lounge], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true }); }
+    // الصالة العلوية الجانبية تنتهي بعد فتحة السلم ويكمل المحور ممرًا مضغوطًا تتمدد عليه غرف الجناح الخلفية
+    const hu = sr ? snap(sr.y1 + .1) : null, hubW = hb.x1 - hb.x0, list = [...blocks].sort(byRank);
+    if (hu && D - hu >= 3.2 && hu >= 3.4 && hubW - DESIGN_TARGETS.galleryW >= .6) for (const kS of frontCounts(list, hu / D).slice(0, 1)) {
+      const ex = snap(hubW - DESIGN_TARGETS.galleryW), L = up.sideAt === 'L';
+      const F = L ? stack(list.slice(0, kS), 0, hb.x0, 0, hu, 'x1') : stack(list.slice(0, kS), hb.x1, W, 0, hu, 'x0');
+      const B = L ? stack(list.slice(kS), 0, hb.x0 + ex, hu, D, 'x1') : stack(list.slice(kS), hb.x1 - ex, W, hu, D, 'x0');
+      if (!fitsRun(F, hu) || !fitsRun(B, D)) continue;
+      const circ2 = [{ id: 'hall', r: { x0: hb.x0, y0: 0, x1: hb.x1, y1: hu } }, { id: 'spine', r: L ? { x0: hb.x0 + ex, y0: hu, x1: hb.x1, y1: D } : { x0: hb.x0, y0: hu, x1: hb.x1 - ex, y1: D } }];
+      const pl2 = [...F, ...B], sc2 = score(pl2, circ2, W, D, program); if (sc2 === null) continue;
+      const rp2 = rulePenalty(pl2, circ2, W, D, program.rules, program.entry);
+      splitN++; out.push({ mode: 'side', placed: pl2, circ: circ2, raw: sc2, rp: rp2, pen: sc2 + rp2.base + Math.min(...rp2.p), stairRect: sr, upper: true, spine: hu });
+    }
+    if (splitN && plainAt >= 0 && hallStrip(hubW, D, program)) demote(out, plainAt, W, D);
   } else {
     // الصالة العلوية لا تمتد بطول المحور كله: مقدمة المحور (على الواجهة) قد تأخذ غرفة فلا تضيع المساحة في صالة طويلة
     const hubW = hb.x1 - hb.x0, hubCands = [null, ...blocks.filter(b => !b.master && ['suite', 'office', 'prayer'].includes(b.kind)).filter((b, i, arr) => arr.findIndex(x => x.kind === b.kind && x.area === b.area && !!x.bath === !!b.bath) === i)];
@@ -803,7 +842,8 @@ function searchUpper0(program, W, D, up, keep, blocks) {
         const pl = [...stack(L, 0, hb.x0, 0, D, 'x1'), ...stack(R, hb.x1, W, 0, D, 'x0'), ...front];
         // غرفة الجناح الأمامية تلامس الصالة (لا غرفة المقدمة فقط) بطول يكفي بابها بعد شريط الحمام
         const frontBad = q => fd && q.some(p => p.block !== hb0 && p.r.y0 < fd && p.r.y1 - Math.max(fd, p.block.bath ? (p.block.master ? T_.masterStripD : T_.stripD) : 0) < 1.5);
-        const sc = frontBad(pl) ? null : score(pl, [lg], W, D, program); if (sc !== null) { const rp = rulePenalty(pl, [lg], W, D, program.rules, program.entry); out.push({ mode: up.mode, placed: pl, circ: [lg], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true, frontDepth: fd }); }
+        const sc = frontBad(pl) ? null : score(pl, [lg], W, D, program); let plainAt = -1, splitN = 0;
+        if (sc !== null) { const rp = rulePenalty(pl, [lg], W, D, program.rules, program.entry); plainAt = out.length; out.push({ mode: up.mode, placed: pl, circ: [lg], raw: sc, rp, pen: sc + rp.base + Math.min(...rp.p), stairRect: sr, upper: true, frontDepth: fd }); }
         // صالة علوية متناسبة: تنتهي بعد فتحة السلم، ويكمل المحور «ممر الغرف» وتتمدد الغرف الخلفية على باقي عرضه
         const hu = sr ? snap(sr.y1 + .1) : null;
         if (!hu || D - hu < 3.2 || hu - fd < 3.4) continue;
@@ -818,9 +858,12 @@ function searchUpper0(program, W, D, up, keep, blocks) {
             const circ2 = [{ id: 'hall', r: { x0: hb.x0, y0: fd, x1: hb.x1, y1: hu } }, { id: 'spine', r: { x0: hb.x0 + eL, y0: hu, x1: hb.x1 - eR, y1: D } }];
             const sc2 = score(pl2, circ2, W, D, program); if (sc2 === null) continue;
             const rp2 = rulePenalty(pl2, circ2, W, D, program.rules, program.entry);
+            splitN++;
             out.push({ mode: up.mode, placed: pl2, circ: circ2, raw: sc2, rp: rp2, pen: sc2 + rp2.base + Math.min(...rp2.p), stairRect: sr, upper: true, frontDepth: fd, spine: hu });
           }
         }
+        // صالة علوية تمتد بكل المحور فتصير شريطًا: تُستبدل بصالة محددة وممر مضغوط متى وُجد لهذا الترتيب نفسه
+        if (splitN && plainAt >= 0 && hallStrip(hubW, D - fd, program)) demote(out, plainAt, W, D);
       }
     }
   }
@@ -1796,7 +1839,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
     if ((tw.avoidModes || []).includes(g.mode) || (g.mode === 'court' && program.prefs?.courtyard === false)) continue;
     const hall = g.circ.find(c => c.id === 'hall').r;
     const upPat = x => x.placed.map(p => p.block.kind[0] + ((p.r.x0 + p.r.x1) / 2 < env.w / 2 ? 'L' : 'R') + Math.round(p.r.y0 / 3)).sort().join('');
-    const upOpt = { mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 }, hallY: { y0: hall.y0, y1: hall.y1 }, rows: g.mode === 'rows' ? { gal: g.circ.find(c => c.id === 'gallery').r } : null, court: g.court || null, free: !!wantG2 && g.mode === wantG2 };
+    const upOpt = { groundWet: g.placed.filter(p => isWetBlock(p.block)).map(p => p.r), mode: g.mode, stairRect: g.stairRect, sideAt: g.sideAt, hub: { x0: hall.x0, x1: hall.x1 }, hallY: { y0: hall.y0, y1: hall.y1 }, rows: g.mode === 'rows' ? { gal: g.circ.find(c => c.id === 'gallery').r } : null, court: g.court || null, free: !!wantG2 && g.mode === wantG2 };
     const mk = (us, idea, bias = 0) => {
       const u = us[0]; if (!u) return;
       const pat = g.pat + '/' + upPat(u); if (pairSeen.has(pat)) return; pairSeen.add(pat);

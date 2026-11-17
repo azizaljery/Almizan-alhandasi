@@ -179,8 +179,9 @@ export function massingPlan({ doc, built, style, exterior = {}, floors = null, s
   plan.frontRoomM = +roomMain.toFixed(3); plan.mode = flat ? 'inward' : 'projecting';
   /** تغوير فتحة: إطارها وتعبئتها يُؤخَّران D للداخل (الموضع في الواجهة كما هو)، وتُبطَّن جوانب التجويف. كله داخل سماكة المبنى. */
   const recess = (pc, o, D, mat, liners = true) => { use(pc); const b = wbox(o.u0, o.u1, o.y0, o.y1, -D - .45, .13);
-    if (inVoid(b) || plan.recesses.some(r => r.opening === o.id)) return false; plan.recesses.push({ id: cur, opening: o.id, depth: D, min: b.min, max: b.max, face: skinZ() }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur);
-    if (!liners) return true; const t = .1, d0 = -D - .25, d1 = -.285;
+    if (inVoid(b) || plan.recesses.some(r => r.opening === o.id)) return false;  plan.recesses.push({ id: cur, opening: o.id, depth: D, min: b.min, max: b.max, face: skinZ() }); if (!plan.vocab.includes(cur)) plan.vocab.push(cur);
+    // بطانة التجويف تبرز .1 م حول الفتحة: إن لامست فراغ التراس يبقى التغوير بلا بطانة
+    if (!liners || inVoid(wbox(o.u0 - .1, o.u1 + .1, o.y0 - .1, o.y1 + .1, -D - .45, .13))) return true; const t = .1, d0 = -D - .25, d1 = -.285;
     box(mat, o.u0 - t, o.u0, o.y0 - t, o.y1 + t, d0, d1, { part: 'reveal', liner: true }); box(mat, o.u1, o.u1 + t, o.y0 - t, o.y1 + t, d0, d1, { part: 'reveal', liner: true });
     box(mat, o.u0, o.u1, o.y1, o.y1 + t, d0, d1, { part: 'reveal', liner: true }); box(mat, o.u0, o.u1, o.y0 - t, o.y0, d0, d1, { part: 'reveal', liner: true }); return true; };
   /**
