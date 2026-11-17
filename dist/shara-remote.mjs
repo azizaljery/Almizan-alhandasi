@@ -4,6 +4,7 @@
 import { currentDoc, ledgerFor, summarizeDoc, scoreDesign } from './design-session.mjs';
 import { fixProposals } from './design-fixes.mjs';
 import { checkMunicipal, summaryText } from './municipal-rules.mjs';
+import { readExterior, describeExterior, isAutoExterior } from './exterior-brief.mjs';
 import { STAGES } from './journey-nav.mjs';
 
 export const SHARA_API = '/api/shara';
@@ -22,6 +23,11 @@ export function buildSharaContext(session, page = 'design') {
   try { ctx.notes = fixProposals(session).map(p => ({ text: p.text, why: p.why || '' })); } catch { /* بلا ملاحظات */ }
   try { const d = session.designs[session.current], sc = d.score || scoreDesign(session, d); if (sc) ctx.score = { total: sc.total, grade: sc.grade, parts: sc.parts.map(p => ({ id: p.id, label: p.label, weight: p.weight, score: p.score, good: p.good, bad: p.bad })), why: sc.why }; } catch { /* بلا درجة */ }
   try { if (doc) { const m = checkMunicipal(doc, L); ctx.municipal = { summary: summaryText(m.summary), items: m.items.filter(i => i.verdict !== 'na').map(i => ({ id: i.id, title: i.title, verdict: i.verdict, text: i.text })) }; } } catch { /* بلا مطابقة */ }
+  try { // التصاميم المعروضة في الجلسة (للمقارنة): الأول والأحدث ١١ كحد أقصى، بمقاسات ودرجات الموقع نفسه
+    const n = session.designs.length, idx = n <= 12 ? [...Array(n).keys()] : [0, ...Array.from({ length: 11 }, (_, k) => n - 11 + k)];
+    ctx.designs = idx.map(i => { const d = session.designs[i], sc = d.score || scoreDesign({ ...session, current: i }, d), sp = summarizeDoc(currentDoc({ ...session, current: i })).specs; return { n: i + 1, current: i === session.current, approved: session.approved === i, summary: d.summary || '', total: sc?.total ?? null, built: sp.built, bedrooms: sp.bedrooms, baths: sp.baths, parts: (sc?.parts || []).map(p => ({ id: p.id, score: p.score })) }; });
+  } catch { /* بلا مقارنة */ }
+  try { const e = readExterior(session); ctx.exterior = { auto: !e || isAutoExterior(e), items: e ? describeExterior(e) : [] }; } catch { /* بلا شكل خارجي */ }
   return ctx;
 }
 
