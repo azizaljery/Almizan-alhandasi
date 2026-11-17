@@ -11,7 +11,7 @@ test('الذوق: «مودرن فخمة وواسعة، إضاءة طبيعية �
   assert.deepEqual(r.prefs.taste, ['spacious', 'light', 'privacy', 'open']);
   assert.equal(r.tweaks.envScale, TASTE_SPACIOUS_SCALE); assert.deepEqual(r.tweaks.preferModes, ['court', 'L', 'tee']);
   assert.equal(r.prefs.openKitchen, true); assert.equal(r.prefs.style, 'modern');
-  for (const w of ['بيت أرحب', 'إضاءة وتهوية', 'خصوصية', 'مساحات مفتوحة', 'الطراز حديث']) assert.ok(r.understood.some(u => u.includes(w)), w);
+  for (const w of ['بيت أرحب', 'إضاءة وتهوية', 'خصوصية', 'مساحات مفتوحة', 'المعالجة المعمارية حديث']) assert.ok(r.understood.some(u => u.includes(w)), w);
 });
 test('الذوق: طلب صريح يتقدم — المطبخ المغلق يبقى مغلقًا، والاقتصادي لا يُكبَّر، وحجم فراغ بعينه ليس ذوقًا للبيت', () => {
   const a = extractRequirements('3 غرف والمطبخ مغلق واحب الفراغات المفتوحة', {}); assert.equal(a.prefs.openKitchen, false); assert.deepEqual(a.prefs.taste, ['open']);

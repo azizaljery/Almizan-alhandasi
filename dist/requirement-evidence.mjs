@@ -45,6 +45,62 @@ const WADI_HANIFAH_T41_SOURCE = Object.freeze({
 const WADI_HANIFAH_JURISDICTION_ID = 'wadi-hanifah-t4-1';
 const WADI_HANIFAH_VERIFIED_DATE = '2026-10-13';
 
+// مقاطع الكود العمراني لوادي حنيفة (الهيئة الملكية لمدينة الرياض، rcrc.gov.sa/publications/t-3-2/).
+// مصدر الأسماء: عناوين ملفات الأدلة المنشورة (جلسة 2026-11-17). أدلة PDF محجوبة عن الأدوات:
+// عدد المقاطع الدقيق، وأرقام كل مقطع، وكيفية تحديد مقطع القطعة = غير متحقق.
+// T4.1 وحده له أرقام متحقق منها (ارتدادات ونسبة بناء) وسلوكه القائم لا يتغير.
+export const WADI_SECTION_NOTE = 'مقطع القطعة تحدده الهيئة الملكية لمدينة الرياض/الأمانة وليس هذه الأداة؛ اسأل الجهة أو راجع خريطة الكود الرسمية.';
+export const WADI_SECTION_NUMBERS_NOTE = 'الأرقام غير متحقق منها — راجع دليل المقطع الرسمي';
+export const WADI_SECTIONS = Object.freeze({
+  'T4.1': { id: 'T4.1', label: 'T4.1 — القسم الحضري (فلل منفصلة)', name: 'القسم الحضري T4.1 (فلل منفصلة) — أرقامه متحقق منها في هذا المشروع', verified: true },
+  'T3.2': { id: 'T3.2', label: 'T3.2 — المقطع السكني فلل (صغيرة–متوسطة)', name: 'المقطع السكني فلل (صغيرة–متوسطة)', verified: false },
+  'T3.1': { id: 'T3.1', label: 'T3.1 — (الاسم غير متحقق منه)', name: 'اسم المقطع غير متحقق منه (ظهر دليله بين الأدلة المنشورة دون قراءة عنوانه)', verified: false },
+  'T2.2': { id: 'T2.2', label: 'T2.2 — المزارع', name: 'المزارع (المنطقة الحضرية بحسب عنوان الملف)', verified: false },
+  'T5.1': { id: 'T5.1', label: 'T5.1 — المقطع المركزي', name: 'المقطع المركزي (بحسب عنوان الدليل)', verified: false },
+  unknown: { id: 'unknown', label: 'لا أعرف المقطع', name: 'المقطع غير معروف', verified: false },
+});
+export const WADI_SECTION_IDS = Object.freeze(Object.keys(WADI_SECTIONS));
+// ملاحظة ثانوية غير مستعملة كإلزام: east-consultants تذكر تغطية الفلل حتى ٢٥٠٠م² = ٦٠٪ و>٢٥٠٠ = ٤٠٪ — غير متحقق من الوثيقة الرسمية.
+export const WADI_SECONDARY_COVERAGE_NOTE = 'مصدر ثانوي (east-consultants) يذكر تغطية للفلل حتى ٢٥٠٠م² = ٦٠٪ وما فوقها ٤٠٪ — غير متحقق من الوثيقة الرسمية ولا يُستعمل كإلزام.';
+
+// دليل فلل برنامج التوازن العقاري — مصدر إخباري (amlak.net.sa/112603) وليس وثيقة رسمية: مستوى «ثانوي».
+export const FACADE_GUIDE_SOURCE = 'دليل منشور — ثانوي (خبر amlak.net.sa/112603 عن دليل فلل برنامج التوازن العقاري؛ ليس وثيقة رسمية، غير متحقق من نصه الأصلي)';
+const FACADE_GUIDE = Object.freeze({ minWindowPct: 20, maxMaterials: 2, mainColorPct: 80, secondaryColorPct: 20, maxHeightM: 11 });
+const FLOOR_HEIGHT_M = 3.2;
+
+/** مؤشر مطابقة الواجهة للدليل المنشور: ملاحظات بمستوى معلوماتي لما يقيسه النموذج فقط، وليس اعتمادًا رسميًا أبدًا. */
+export function facadeGuideNotes({ model, plot: requestedPlot = null, facadeFinish = null } = {}) {
+  const category = 'مؤشر واجهة (إرشادي)';
+  const notes = [];
+  const push = (id, title, evidence) => notes.push({ ...make('facade-guide-' + id, title, 'MEASURED', evidence + ' هذه ملاحظة إرشادية وليست اعتمادًا رسميًا.', FACADE_GUIDE_SOURCE, category), info: true });
+  const b = model?.building;
+  const floors = number(model?.plot?.floors ?? requestedPlot?.floors);
+  const openings = Array.isArray(model?.openings) ? model.openings : [];
+  if (b && number(b.w) && number(b.h)) {
+    const front = openings.filter(o => o.type === 'window' && o.axis === 'h' && number(o.y) !== null && number(o.y) < b.h / 2);
+    const wallArea = b.w * FLOOR_HEIGHT_M;
+    const winArea = front.reduce((sum, o) => sum + (number(o.w) || 0) * (number(o.h) || 0), 0);
+    const pct = round(winArea / wallArea * 100);
+    push('windows', 'نسبة النوافذ في الواجهة الرئيسية (الدور الأرضي)',
+      'نوافذ الواجهة الأمامية ' + fmt(pct, 1) + '٪ من مساحة جدارها للدور الأرضي (' + fmt(winArea, 1) + ' م² من ' + fmt(wallArea, 1) + ' م²)؛ الدليل المنشور يذكر ≥ ' + fmt(FACADE_GUIDE.minWindowPct, 0) + '٪ لكل دور: ' +
+      (pct >= FACADE_GUIDE.minWindowPct ? 'القيمة المقاسة ضمن ذلك.' : 'القيمة المقاسة أقل من ذلك.') + ' يُقاس الدور الأرضي فقط (النموذج للدور الأرضي).');
+  }
+  if (floors !== null && floors >= 1) {
+    const h = round(floors * FLOOR_HEIGHT_M);
+    push('height', 'الارتفاع الأقصى', 'الارتفاع التقديري ' + fmt(h, 1) + ' م (' + fmt(floors, 0) + ' × ' + fmt(FLOOR_HEIGHT_M, 1) + ' م لكل دور، دون سور سطح أو أي زيادة)؛ الدليل المنشور يذكر ≤ ' + fmt(FACADE_GUIDE.maxHeightM, 0) + ' م: ' + (h <= FACADE_GUIDE.maxHeightM ? 'ضمن ذلك.' : 'أعلى من ذلك.'));
+  }
+  const fin = facadeFinish && typeof facadeFinish === 'object' ? facadeFinish : null;
+  if (fin && (fin.base || fin.accent)) {
+    const mats = new Set([fin.base, fin.accent && fin.accent !== 'none' ? (fin.accent === 'all' ? 'stone' : fin.accent) : null].filter(Boolean));
+    push('materials', 'عدد مواد الواجهة الرئيسية', 'المواد المسجلة في تشطيب الواجهة: ' + fmt(mats.size, 0) + '؛ الدليل المنشور يذكر ألا تزيد عن ' + fmt(FACADE_GUIDE.maxMaterials, 0) + ': ' + (mats.size <= FACADE_GUIDE.maxMaterials ? 'ضمن ذلك.' : 'أكثر من ذلك.'));
+  } else {
+    push('materials', 'عدد مواد الواجهة الرئيسية', 'لم يُسجَّل تشطيب واجهة في هذا النموذج فلا يمكن عدّ المواد؛ الدليل المنشور يذكر ألا تزيد عن ' + fmt(FACADE_GUIDE.maxMaterials, 0) + ' (غير متحقق).');
+  }
+  push('colour', 'عائلة اللون (٨٠/٢٠)', 'الدليل المنشور يذكر لونًا رئيسيًا ≥ ' + fmt(FACADE_GUIDE.mainColorPct, 0) + '٪ من مساحة الجدران وثانويًا ≤ ' + fmt(FACADE_GUIDE.secondaryColorPct, 0) + '٪ من نفس اللوحة، وتحاشي المواد العاكسة واللامعة؛ النموذج الحالي لا يقيس نسب الألوان فلا حكم هنا (غير متحقق).');
+  return notes;
+}
+
+
 export const REQUIREMENT_STATUS = Object.freeze({
   ENFORCED: 'ENFORCED',
   MEASURED: 'MEASURED',
@@ -61,9 +117,10 @@ const round = n => Math.round(n * 10) / 10;
 const make = (id, title, status, evidence, source = 'النموذج الهندسي', category = 'تخطيط') =>
   ({ id, title, status, evidence, source, category });
 
-export function evaluateRequirementEvidence({ model, program, plot: requestedPlot = null, idea = '', discovery = {}, briefContext = null, jurisdiction = null } = {}) {
-  const riyadh = jurisdiction === RIYADH_JURISDICTION_ID;
-  const wadiHanifah = jurisdiction === WADI_HANIFAH_JURISDICTION_ID;
+export function evaluateRequirementEvidence({ model, program, plot: requestedPlot = null, idea = '', discovery = {}, briefContext = null, jurisdiction = null, wadiSection = null, facadeFinish = null } = {}) {
+  const section = Object.hasOwn(WADI_SECTIONS, wadiSection) ? wadiSection : null;
+  const riyadh = jurisdiction === RIYADH_JURISDICTION_ID && section === null;
+  const wadiHanifah = jurisdiction === WADI_HANIFAH_JURISDICTION_ID || section === 'T4.1';
   if (!model || !Array.isArray(model.rooms) || !Array.isArray(model.openings) || !Array.isArray(model.corridors)) {
     throw Error('يلزم نموذج هندسي صالح لعرض أدلة المتطلبات.');
   }
@@ -182,6 +239,17 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
       measuredValue: null,
       verificationNote: 'لا يوجد في بيانات هذا المشروع تحديد لمدينة أو بلدية أو كود بناء معتمد. دون ذلك لا يمكن تحديد الاشتراطات النظامية الفعلية للارتدادات أو نسبة البناء، ولا اعتماد أي فحص في هذا القسم كمطابقة نظامية؛ القيم المقاسة أدناه حقائق هندسية من الرسم فقط.',
     }), { id: 'reg-jurisdiction', category: regulatoryCategory }));
+  }
+
+  if (section && section !== 'T4.1') {
+    const sec = WADI_SECTIONS[section];
+    rows.push(toEvidenceRow(unverifiedCheck({
+      rule: 'مقطع كود وادي حنيفة العمراني للقطعة',
+      measuredLabel: 'المقطع الذي اختاره مُعِد المشروع',
+      measuredValue: null,
+      verificationNote: 'المقطع المختار: ' + sec.name + '. ' + WADI_SECTION_NUMBERS_NOTE + '. ' + WADI_SECTION_NOTE +
+        ' الكود صادر عن الهيئة الملكية لمدينة الرياض (rcrc.gov.sa/publications/t-3-2/)، ويعتمد نظام الفناء الداخلي؛ عدد المقاطع بدقة وكيفية تحديد مقطع القطعة غير متحققين. ' + WADI_SECONDARY_COVERAGE_NOTE,
+    }), { id: 'reg-wadi-section', category: regulatoryCategory }));
   }
 
   const streetSetback = number(model.plot?.streetSetback ?? requestedPlot?.streetSetback);
@@ -560,6 +628,8 @@ export function evaluateRequirementEvidence({ model, program, plot: requestedPlo
     itemize('cond:idea:' + index, clause, classifyClause(clause), 'وصف العميل', 'شروط من طلبك');
   });
   const droppedClauses = Math.max(0, conditionClauses.length - 12);
+
+  rows.push(...facadeGuideNotes({ model, plot: requestedPlot, facadeFinish }));
 
   const counts = Object.fromEntries(Object.keys(REQUIREMENT_STATUS).map(key => [key, rows.filter(row => row.status === key).length]));
   for (const row of rows) { if (row.tier) row.outcome = outcomeOfStatus(row.status); }

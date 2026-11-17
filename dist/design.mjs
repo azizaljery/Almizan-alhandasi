@@ -547,7 +547,7 @@ function openExterior() {
   const saved = readExterior(session);
   const known = { salmani: 'S', modern: 'modern', hijazi: 'H', najdi: 'N', classic: 'C' }[session.input.requirements?.prefs?.style];
   if (saved) { extAns = { ...saved }; for (const q of exteriorQuestions(extAns)) extDone.add(q.id); extLog.push({ q: { text: 'هذه أجوبتك السابقة عن الشكل الخارجي، وهي محفوظة. ولّد بها مباشرة، أو اكتب ما تريد تغييره، أو اضغط «أعد الأسئلة من البداية».', reason: '' } }); }
-  else if (known) { extAns.style = known; extDone.add('style'); extLog.push({ q: { text: 'ذكرتَ لي من قبل أنك تحب الطراز ال' + answerLabel('style', known) + '؛ سأبني عليه (تستطيع تغييره بالكتابة).', reason: '' } }); }
+  else if (known) { extAns.style = known; extDone.add('style'); extLog.push({ q: { text: 'ذكرتَ لي من قبل أنك تحب المعالجة ال' + answerLabel('style', known) + '؛ سأبني عليه (تستطيع تغييره بالكتابة).', reason: '' } }); }
   $('extShara').hidden = false; if (location.hash !== '#exterior') { history.pushState(null, '', '#exterior'); extPushed = true; } extPaint();
 }
 function extPaint() {
@@ -555,7 +555,7 @@ function extPaint() {
   const bubbles = [el('div', { class: 'q' }, 'اعتمدتَ المخطط. قبل أن أريك بيتك ثلاثي الأبعاد أسألك بضعة أسئلة عن شكله من الخارج، وأبني الواجهة على أجوبتك.')];
   for (const x of extLog) { if (x.q) bubbles.push(el('div', { class: 'q' }, x.q.text)); if (x.a) bubbles.push(el('div', { class: 'a' }, x.a)); }
   if (q) bubbles.push(el('div', { class: 'q', id: 'extQ' }, q.text, el('small', {}, q.reason)));
-  else { const d = describeExterior(extAns); bubbles.push(el('div', { class: 'q', id: 'extQ' }, d.length ? 'فهمتُ ما تحب: ' + d.join('، ') + '. أولّد لك الآن واجهة تخص مخططك وهذا الذوق، وتستطيع تغيير أي شيء بعدها.' : 'تركتَ الاختيار لي: سأقترح الطراز والقالب الأنسب لمخططك، وتستطيع تغيير أي شيء بعدها.')); }
+  else { const d = describeExterior(extAns); bubbles.push(el('div', { class: 'q', id: 'extQ' }, d.length ? 'فهمتُ ما تحب: ' + d.join('، ') + '. أولّد لك الآن واجهة تخص مخططك وهذا الذوق، وتستطيع تغيير أي شيء بعدها.' : 'تركتَ الاختيار لي: سأقترح المعالجة والقالب الأنسب لمخططك، وتستطيع تغيير أي شيء بعدها.')); }
   $('extThread').replaceChildren(...bubbles); $('extThread').scrollTop = $('extThread').scrollHeight;
   $('extStep').textContent = q ? `السؤال ${total - pend.length + 1} من ${total}` : 'اكتملت الأسئلة';
   $('extOpts').replaceChildren(...(q ? q.options.map(o => el('button', { type: 'button', class: 'chip' + (o.suggested ? ' sug' : ''), 'data-id': o.id, title: o.hint || null, onclick: () => extAnswer(q, o.id) }, o.label)) : []));
@@ -566,7 +566,7 @@ function extPaint() {
 function extAnswer(q, id) { extAns[q.id] = id; extDone.add(q.id); extLog.push({ id: q.id, q, a: answerLabel(q.id, id) }); extPaint(); }
 function extSay() {
   const text = $('extText').value.trim(); if (!text) return; const r = parseExteriorText(text);
-  if (!r.understood.length) { $('extStatus').textContent = 'لم أفهم من كلامك ما يخص الشكل الخارجي. اختر من الخيارات، أو اذكر ما يستهويك أو الطراز أو المواد أو الفتحات أو المدخل.'; return; }
+  if (!r.understood.length) { $('extStatus').textContent = 'لم أفهم من كلامك ما يخص الشكل الخارجي. اختر من الخيارات، أو اذكر ما يستهويك أو المعالجة المعمارية أو المواد أو الفتحات أو المدخل.'; return; }
   Object.assign(extAns, r.found); for (const f of Object.keys(r.found)) extDone.add(f);
   extAns.notes = [extAns.notes, text].filter(Boolean).join(' · ');
   extLog.push({ id: Object.keys(r.found)[0], multi: Object.keys(r.found), a: text });

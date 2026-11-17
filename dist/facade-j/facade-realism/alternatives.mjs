@@ -1,7 +1,7 @@
 // «بديل آخر» = فكرة معمارية جديدة داخل الطراز نفسه (منطقة مختلفة من فضاء التصميم)، لا إعادة تلوين.
 // السجل في ذاكرة الجلسة فقط (ذاكرة التصميم عبر الجلسات مؤجّلة).
 import { viableRegions, regionDistance, regionId, familyOf, parseRegion, baseRegion } from './variation.mjs';
-export const EXHAUSTED_MSG = 'لا يوجد حاليًا بديل مختلف بما يكفي ضمن هذا الطراز وقيود المبنى. يمكنك تجربة طراز آخر أو تعديل تفضيلات التصميم.';
+export const EXHAUSTED_MSG = 'لا يوجد حاليًا بديل مختلف بما يكفي ضمن هذه المعالجة وقيود المبنى. يمكنك تجربة معالجة أخرى أو تعديل تفضيلات التصميم.';
 export const MIN_DISTANCE = 2; // أقل عدد مقابض مختلفة ليُعدّ التصميم جديدًا (اللوحة/البذرة وحدها لا تُحسب)
 const h32 = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
 const order = (arr, salt) => arr.map(r => [h32(regionId(r) + '|' + salt), r]).sort((a, b) => a[0] - b[0]).map(x => x[1]); // ترتيب عشوائي حتمي

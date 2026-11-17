@@ -36,9 +36,9 @@ const FEEL_AR = { grand: 'الهيبة والفخامة', warm: 'الدفء وا
 
 /** كل الأسئلة بكل خياراتها (للتطبيع وفهم الكلام). الحوار الفعلي يأخذها من exteriorQuestions(answers) التي تتبع الأجوبة السابقة. */
 export const EXTERIOR_QUESTIONS = Object.freeze([
-  { id: 'feel', text: 'قبل الطراز والمواد: ما الذي يستهويك أنت في بيتٍ تراه من الشارع؟', reason: 'أسأل عنك أولًا لأن الواجهة تعبّر عن صاحبها؛ جوابك يوجّه الطراز والتفاصيل التي أقترحها بعده.', options: [
+  { id: 'feel', text: 'قبل المعالجة المعمارية والمواد: ما الذي يستهويك أنت في بيتٍ تراه من الشارع؟', reason: 'أسأل عنك أولًا لأن الواجهة تعبّر عن صاحبها؛ جوابك يوجّه المعالجة والتفاصيل التي أقترحها بعده.', options: [
     { id: 'grand', label: 'هيبة وفخامة' }, { id: 'warm', label: 'دفء وألفة' }, { id: 'simple', label: 'بساطة وهدوء' }, { id: 'heritage', label: 'أصالة وتراث' }, { id: 'modern', label: 'حداثة وانفتاح' }, AUTO] },
-  { id: 'style', text: 'أي طراز تحب أن يظهر به بيتك من الخارج؟', reason: 'الطراز يحدد تكوين الواجهة كله: الكتل والمدخل وشكل الفتحات، لا اللون وحده.', options: [...EXTERIOR_STYLES, AUTO] },
+  { id: 'style', text: 'أي معالجة معمارية تحب أن يظهر به بيتك من الخارج؟', reason: 'المعالجة المعمارية تحدد تكوين الواجهة كله: الكتل والمدخل وشكل الفتحات، لا اللون وحده.', options: [...EXTERIOR_STYLES, AUTO] },
   { id: 'tone', text: 'ما الألوان والمواد الأقرب لذوقك؟', reason: 'أرجّح بها قوالب الواجهة التي تحمل هذه المواد فعلًا.', options: [...ALL_TONES, AUTO] },
   { id: 'openings', text: 'كيف تحب الفتحات على الواجهة؟', reason: 'الزجاج الواسع يفتح البيت على الخارج، والفتحات الأقل تحفظ الخصوصية وتخفف الحرارة.', options: [
     { id: 'wide', label: 'زجاج واسع وإطلالة' }, { id: 'balanced', label: 'متوازنة' }, { id: 'private', label: 'فتحات أقل وخصوصية' }, AUTO] },
@@ -61,11 +61,11 @@ const QBY = Object.fromEntries(EXTERIOR_QUESTIONS.map(q => [q.id, q]));
 export function exteriorQuestions(answers = {}) {
   const a = normalizeExterior(answers), out = [QBY.feel];
   const sug = FEEL_STYLES[a.feel] || [];
-  out.push(sug.length ? { ...QBY.style, reason: 'قلتَ إن ما يستهويك ' + FEEL_AR[a.feel] + '؛ قدّمتُ لك الطرز التي تحمل ذلك. ' + QBY.style.reason,
+  out.push(sug.length ? { ...QBY.style, reason: 'قلتَ إن ما يستهويك ' + FEEL_AR[a.feel] + '؛ قدّمتُ لك المعالجات التي تحمل ذلك. ' + QBY.style.reason,
     options: [...sug.map(id => ({ ...EXTERIOR_STYLES.find(o => o.id === id), suggested: true })), ...EXTERIOR_STYLES.filter(o => !sug.includes(o.id)), AUTO] } : QBY.style);
   const tones = STYLE_TONES[a.style];
-  out.push(tones ? { ...QBY.tone, text: 'ما الألوان والمواد الأقرب لذوقك في الطراز ال' + EXTERIOR_STYLES.find(o => o.id === a.style).label + '؟', options: [...tones.map(id => ALL_TONES.find(t => t.id === id)), AUTO] } : QBY.tone);
-  out.push(a.style === 'N' ? { ...QBY.openings, reason: 'الطراز النجدي فتحاته صغيرة عميقة بطبعه؛ جوابك يحدد أين يقع بيتك بين الأصالة والانفتاح. ' + QBY.openings.reason } : QBY.openings);
+  out.push(tones ? { ...QBY.tone, text: 'ما الألوان والمواد الأقرب لذوقك في المعالجة ال' + EXTERIOR_STYLES.find(o => o.id === a.style).label + '؟', options: [...tones.map(id => ALL_TONES.find(t => t.id === id)), AUTO] } : QBY.tone);
+  out.push(a.style === 'N' ? { ...QBY.openings, reason: 'المعالجة النجدية فتحاتها صغيرة عميقة بطبعها؛ جوابك يحدد أين يقع بيتك بين الأصالة والانفتاح. ' + QBY.openings.reason } : QBY.openings);
   if (a.openings === 'wide') out.push(QBY.screen);
   out.push(QBY.entrance, QBY.night);
   return out;

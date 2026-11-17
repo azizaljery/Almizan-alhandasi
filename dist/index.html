@@ -336,6 +336,18 @@
         <div class="cb">
           <label class="check jurisdiction-select"><input id="jurisdictionRiyadh" type="checkbox"> المشروع في مدينة الرياض (عام) — طبّق اشتراطات وزارة الشؤون البلدية والقروية والإسكان (الصادرة ١٤٤٦هـ/٢٠٢٤م، المطبّقة عبر أمانة منطقة الرياض) على الارتدادات ونسبة البناء أدناه</label>
           <label class="check jurisdiction-select"><input id="jurisdictionWadiHanifah" type="checkbox"> المشروع داخل كود وادي حنيفة العمراني — القسم الحضري T4.1 (فلل منفصلة ضمن ممر وادي حنيفة وروافده، الصادر عن الهيئة الملكية لمدينة الرياض) — يُستخدم بدل الاشتراط العام أعلاه إن فُعِّل</label>
+          <label class="jurisdiction-select" for="wadiSection">مقطع كود وادي حنيفة العمراني (الهيئة الملكية لمدينة الرياض)
+            <select id="wadiSection">
+              <option value="">لا ينطبق / غير محدد</option>
+              <option value="T4.1">T4.1 — القسم الحضري (فلل منفصلة)</option>
+              <option value="T3.2">T3.2 — المقطع السكني فلل (صغيرة–متوسطة)</option>
+              <option value="T3.1">T3.1 — (الاسم غير متحقق منه)</option>
+              <option value="T2.2">T2.2 — المزارع</option>
+              <option value="T5.1">T5.1 — المقطع المركزي</option>
+              <option value="unknown">لا أعرف المقطع</option>
+            </select>
+          </label>
+          <small class="muted" id="wadiSectionNote">مقطع القطعة تحدده الهيئة الملكية لمدينة الرياض/الأمانة وليس هذه الأداة. أرقام T4.1 وحدها متحقق منها؛ بقية المقاطع تُعرض بأسمائها فقط والأرقام غير متحقق منها.</small>
           <div id="requirementSummary" class="requirement-summary" role="status" aria-live="polite"></div>
           <p id="requirementStale" class="message warning" hidden>هذه الأدلة تخص آخر بديل ناجح وبرنامج الغرف المحفوظ وقت توليده؛ تغيّرت المدخلات الحالية ولم تُفحص بعد. أعد التوليد لعرض سجل جديد.</p>
           <div id="requirementRows" class="requirement-rows"></div>

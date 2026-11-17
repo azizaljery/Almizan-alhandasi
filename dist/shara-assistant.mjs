@@ -295,7 +295,7 @@ export function compareAnswer(session, t) {
 /** الشكل الخارجي المحفوظ في الجلسة؛ إن لم يُسأل العميل بعد قيل ذلك ولم يُخمَّن طراز. */
 export function exteriorAnswer(session) {
   const ext = readExterior(session);
-  if (!ext || isAutoExterior(ext)) return { kind: 'answer', text: 'لم تحدّد شكلًا خارجيًا بعد، فالطراز تلقائي حتى تختاره؛ أي طراز سيظهر غير متحقق قبل ذلك. قل مثلًا «الواجهة نجدية» أو «مودرن» وأعدّله لك.', actions: [go('exterior')] };
+  if (!ext || isAutoExterior(ext)) return { kind: 'answer', text: 'لم تحدّد شكلًا خارجيًا بعد، فالمعالجة المعمارية تلقائية حتى تختارها؛ أي معالجة ستظهر غير متحقق قبل ذلك. قل مثلًا «الواجهة نجدية» أو «مودرن» وأعدّله لك.', actions: [go('exterior')] };
   return { kind: 'answer', text: `الشكل الخارجي المختار في جلستك: ${describeExterior(ext).join('، ')}. يظهر في العرض ثلاثي الأبعاد.`, actions: [go('view3d')] };
 }
 

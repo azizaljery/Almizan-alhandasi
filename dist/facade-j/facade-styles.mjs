@@ -368,7 +368,7 @@ export function elevationSvg(doc, side, spec, { geom = facadeGeometry(doc), titl
   const W = Math.max(6, E.width + 4), Ht = Math.max(4, E.top + 1.6), x0 = -2, zTop = E.top + 1.2;
   const Y = z => r3(zTop - z), X = x => r3(x);
   const out = [];
-  out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} -0.2 ${r3(W)} ${r3(Ht + .5)}" width="${Math.round(W * px)}" height="${Math.round((Ht + .5) * px)}" data-facade-side="${side}" data-facade-style="${spec.style}" data-seed="${spec.seed}" direction="rtl" role="img" aria-label="الواجهة ${SIDE_AR[side]} — طراز ${esc(spec.styleAr)}">`);
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} -0.2 ${r3(W)} ${r3(Ht + .5)}" width="${Math.round(W * px)}" height="${Math.round((Ht + .5) * px)}" data-facade-side="${side}" data-facade-style="${spec.style}" data-seed="${spec.seed}" direction="rtl" role="img" aria-label="الواجهة ${SIDE_AR[side]} — معالجة ${esc(spec.styleAr)}">`);
   out.push(`<rect x="${x0}" y="-0.2" width="${r3(W)}" height="${r3(Ht + .5)}" fill="#fbf8f2"/>`);
   if (E.empty) { out.push(`<text x="${r3(x0 + W / 2)}" y="${r3(Ht / 2)}" font-size=".4" text-anchor="middle" fill="#6b675e">لا جدار خارجي يواجه هذه الجهة</text></svg>`); return out.join(''); }
   for (const p of E.prims) {

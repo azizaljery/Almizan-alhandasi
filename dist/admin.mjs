@@ -128,7 +128,7 @@ async function viewDesigns() {
   const data = await api('/designs?' + qs());
   const pages = Math.max(1, Math.ceil(data.total / data.per)), host = h('div');
   const reload = () => go('designs');
-  const search = h('input', { type: 'search', placeholder: 'بحث: رقم D-000123 أو طراز', value: q.q, on: { keydown: e => { if (e.key === 'Enter') { q.q = e.target.value.trim(); q.page = 1; reload(); } } } });
+  const search = h('input', { type: 'search', placeholder: 'بحث: رقم D-000123 أو معالجة', value: q.q, on: { keydown: e => { if (e.key === 'Enter') { q.q = e.target.value.trim(); q.page = 1; reload(); } } } });
   const sel = (key, opts, label) => h('select', { 'aria-label': label, on: { change: e => { q[key] = e.target.value; q.page = 1; reload(); } } }, ...opts.map(([v, t]) => h('option', { value: v, selected: String(q[key]) === v }, t)));
   const checkAll = h('input', { type: 'checkbox', 'aria-label': 'تحديد كل ما في الصفحة', on: { change: e => { for (const r of data.rows) e.target.checked ? selected.add(r.id) : selected.delete(r.id); reload(); } } });
   checkAll.checked = data.rows.length > 0 && data.rows.every(r => selected.has(r.id));
@@ -147,12 +147,12 @@ async function viewDesigns() {
   const status = h('span', { class: 'mute', 'aria-live': 'polite' });
   host.append(h('h2', {}, 'التصاميم السابقة'), h('p', { class: 'mute' }, 'تصاميم العملاء الذين وافقوا صراحةً على حفظ نسخة (بلا أسماء ولا بيانات شخصية، والإحداثيات مقرّبة إلى نحو كيلومتر). الترقيم تصاعدي ولا يُعاد استعمال رقم محذوف.'),
     h('div', { class: 'toolbar' }, search, h('button', { class: 'btn', type: 'button', on: { click: () => { q.q = search.value.trim(); q.page = 1; reload(); } } }, 'بحث'),
-      sel('style', [['', 'كل الطرز'], ['S', 'سلماني'], ['modern', 'معاصر'], ['H', 'حجازي'], ['N', 'نجدي'], ['C', 'كلاسيكي']], 'الطراز'),
+      sel('style', [['', 'كل المعالجات'], ['S', 'سلماني'], ['modern', 'معاصر'], ['H', 'حجازي'], ['N', 'نجدي'], ['C', 'كلاسيكي']], 'المعالجة المعمارية'),
       sel('floors', [['', 'كل الأدوار'], ['1', 'دور'], ['2', 'دوران'], ['3', '3 أدوار']], 'الأدوار'),
       sel('order', [['desc', 'الأحدث أولًا'], ['asc', 'الأقدم أولًا']], 'الترتيب'), sel('per', [['25', '25'], ['50', '50'], ['100', '100']], 'عدد الصفوف')),
     h('div', { class: 'toolbar' }, ...bulk.nodes, h('button', { class: 'btn', type: 'button', on: { click: () => zipDesigns(null, status) } }, 'تحميل الكل (zip)'),
       h('button', { class: 'btn', type: 'button', on: { click: async () => { const r = await api('/designs.csv?' + qs({ page: '', per: '' })); saveBlob('mizan-designs-index.csv', await r.blob()); } } }, 'فهرس CSV'), status),
-    h('div', { class: 'tablewrap' }, h('table', {}, h('caption', { class: 'mute' }, `${data.total} تصميم`), h('thead', {}, h('tr', {}, h('th', {}, checkAll), ...['الرقم', 'التاريخ', 'الطراز', 'الأدوار', 'الأرض', 'المساحة', 'غرف النوم', 'الحجم', 'إجراءات'].map(t => h('th', {}, t)))), h('tbody', {}, rows.length ? rows : h('tr', {}, h('td', { colSpan: 10 }, 'لا تصاميم مطابقة.'))))),
+    h('div', { class: 'tablewrap' }, h('table', {}, h('caption', { class: 'mute' }, `${data.total} تصميم`), h('thead', {}, h('tr', {}, h('th', {}, checkAll), ...['الرقم', 'التاريخ', 'المعالجة', 'الأدوار', 'الأرض', 'المساحة', 'غرف النوم', 'الحجم', 'إجراءات'].map(t => h('th', {}, t)))), h('tbody', {}, rows.length ? rows : h('tr', {}, h('td', { colSpan: 10 }, 'لا تصاميم مطابقة.'))))),
     h('div', { class: 'pager' }, h('button', { class: 'btn', type: 'button', disabled: q.page <= 1, on: { click: () => { q.page--; reload(); } } }, 'السابقة'), h('span', {}, `صفحة ${data.page} من ${pages}`),
       h('button', { class: 'btn', type: 'button', disabled: q.page >= pages, on: { click: () => { q.page++; reload(); } } }, 'التالية')));
   return [host];
@@ -185,7 +185,7 @@ async function preview(id) {
   dlg.append(h('h2', {}, `${r.number} — ${styleName(d.exterior?.style)}`),
     h('dl', { class: 'kv' }, h('dt', {}, 'التاريخ'), h('dd', {}, fmtDate(r.created_at)), h('dt', {}, 'الأرض'), h('dd', {}, `${L.width} × ${L.length} م — شوارع: ${sides(L.streets)} — مداخل: ${sides(L.entries)}`),
       h('dt', {}, 'الأدوار'), h('dd', {}, String(r.floors)), h('dt', {}, 'الموقع (مقرّب ~1 كم)'), h('dd', {}, L.geo ? `${L.geo.lat}, ${L.geo.lng}` : 'غير محدد')),
-    plans, h('h3', {}, 'برنامج المتطلبات والطراز (بيانات منظمة)'), h('pre', {}, JSON.stringify({ program: d.program, exterior: d.exterior }, null, 2)),
+    plans, h('h3', {}, 'برنامج المتطلبات والمعالجة المعمارية (بيانات منظمة)'), h('pre', {}, JSON.stringify({ program: d.program, exterior: d.exterior }, null, 2)),
     h('div', { class: 'toolbar' }, h('button', { class: 'btn', type: 'button', on: { click: () => saveText(r.number + '.json', JSON.stringify(envelope(r), null, 2)) } }, 'تحميل JSON'),
       h('button', { class: 'btn', type: 'button', on: { click: () => saveText(r.number + '-studio-doc.json', JSON.stringify(d.doc)) } }, 'ملف المرسم'), h('button', { class: 'btn primary', type: 'button', on: { click: () => dlg.close() } }, 'إغلاق')));
   dlg.addEventListener('close', () => { urls.forEach(u => URL.revokeObjectURL(u)); dlg.remove(); });

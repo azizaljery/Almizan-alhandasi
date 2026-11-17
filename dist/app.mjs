@@ -736,8 +736,10 @@ function renderRequirementEvidence() {
       // Riyadh) than the general ministerial decision, so it takes priority if both
       // are somehow checked at once; the change listeners below also keep the two
       // mutually exclusive in the UI itself.
-      jurisdiction: $('jurisdictionWadiHanifah')?.checked ? 'wadi-hanifah-t4-1'
+      jurisdiction: $('jurisdictionWadiHanifah')?.checked || $('wadiSection')?.value === 'T4.1' ? 'wadi-hanifah-t4-1'
         : $('jurisdictionRiyadh')?.checked ? 'riyadh-momah-1446h' : null,
+      wadiSection: $('wadiSection')?.value || null,
+      facadeFinish: state.model?.finish?.facade || null,
     });
     const labels = [
       ['ENFORCED', 'مطابق في الرسم'], ['MEASURED', 'مقاس دون حكم'], ['NOT_MET', 'غير مستوفى'],
@@ -1373,10 +1375,19 @@ function boot() {
   $('showRoute').addEventListener('change', drawRoute); $('showShadow').addEventListener('change', renderSolarPreview); $('showGemini').addEventListener('change', renderGeminiMarkers);
   $('jurisdictionRiyadh')?.addEventListener('change', () => {
     if ($('jurisdictionRiyadh')?.checked && $('jurisdictionWadiHanifah')) $('jurisdictionWadiHanifah').checked = false;
+    if ($('jurisdictionRiyadh')?.checked && $('wadiSection')) $('wadiSection').value = '';
+    renderRequirementEvidence();
+  });
+  $('wadiSection')?.addEventListener('change', () => {
+    const v = $('wadiSection')?.value;
+    if (v && $('jurisdictionRiyadh')) $('jurisdictionRiyadh').checked = false;
+    if ($('jurisdictionWadiHanifah')) $('jurisdictionWadiHanifah').checked = v === 'T4.1';
     renderRequirementEvidence();
   });
   $('jurisdictionWadiHanifah')?.addEventListener('change', () => {
     if ($('jurisdictionWadiHanifah')?.checked && $('jurisdictionRiyadh')) $('jurisdictionRiyadh').checked = false;
+    if ($('jurisdictionWadiHanifah')?.checked && $('wadiSection')) $('wadiSection').value = 'T4.1';
+    else if ($('wadiSection')?.value === 'T4.1') $('wadiSection').value = '';
     renderRequirementEvidence();
   });
   $('saveProject').addEventListener('click', saveProject);

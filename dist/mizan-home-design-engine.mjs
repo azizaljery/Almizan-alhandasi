@@ -1033,7 +1033,7 @@ export function getJourneySteps() {
     { id: 'spaces', title: 'الفراغات', action: 'اختيار ما يريده العميل' },
     { id: 'dislikes', title: 'المرفوضات', action: 'تسجيل ما لا يريده العميل' },
     { id: 'relationships', title: 'العلاقات', action: 'ربط الفراغات وظيفيًا' },
-    { id: 'style', title: 'الطراز', action: 'اختيار الهوية البصرية' },
+    { id: 'style', title: 'المعالجة المعمارية', action: 'اختيار الهوية البصرية' },
     { id: 'design_dna', title: 'Design DNA', action: 'تلخيص شخصية البيت' },
     { id: 'concepts', title: 'البدائل', action: 'إنتاج اتجاهات تصميم مختلفة' },
     { id: 'evaluation', title: 'التقييم', action: 'تحليل ومقارنة البدائل' },

@@ -206,7 +206,7 @@ function applyTaste(t, { prefs, tweaks, understood }) {
   else if (tags.includes('open')) understood.push('مساحات مفتوحة: الحركة عبر الصالة بأقل حواجز');
   if (tags.includes('calm') && !prefer.size) { for (const m of ['center', 'side']) prefer.add(m); understood.push('بسيط وهادئ: أقدّم التوزيعات المدمجة الواضحة بأقل ممرات'); }
   if (prefer.size) tweaks.preferModes = [...prefer];
-  if (style) { prefs.style = style.id; prefs.styleWish = style.wish; understood.push(`الطراز ${style.ar}: يُطبَّق على الواجهة الخارجية في العرض ثلاثي الأبعاد (قوالب هذا الطراز تُقدَّم أولًا)`); }
+  if (style) { prefs.style = style.id; prefs.styleWish = style.wish; understood.push(`المعالجة المعمارية ${style.ar}: يُطبَّق على الواجهة الخارجية في العرض ثلاثي الأبعاد (قوالب هذه المعالجة تُقدَّم أولًا)`); }
   if (tags.length) prefs.taste = tags;
 }
 

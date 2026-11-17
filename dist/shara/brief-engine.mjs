@@ -295,8 +295,8 @@ export const TASTE_OPTIONS = Object.freeze([
   { id: 'calm', label: 'بسيط وعملي', text: 'بيت بسيط وعملي' },
 ]);
 export const STYLE_OPTIONS = Object.freeze([
-  { id: 'modern', label: 'حديث (مودرن)', text: 'طراز مودرن' }, { id: 'classic', label: 'كلاسيكي', text: 'طراز كلاسيكي' },
-  { id: 'najdi', label: 'نجدي', text: 'طراز نجدي' }, { id: 'hijazi', label: 'حجازي', text: 'طراز حجازي' }, { id: 'salmani', label: 'سلماني', text: 'طراز سلماني' },
+  { id: 'modern', label: 'حديث (مودرن)', text: 'معالجة مودرن' }, { id: 'classic', label: 'كلاسيكي', text: 'معالجة كلاسيكية' },
+  { id: 'najdi', label: 'نجدي', text: 'معالجة نجدية' }, { id: 'hijazi', label: 'حجازي', text: 'معالجة حجازية' }, { id: 'salmani', label: 'سلماني', text: 'معالجة سلمانية' },
 ]);
 export const TASTE_QUESTION = Object.freeze({ id: 'taste', text: 'ما الذي يهمك أكثر في بيتك؟ اختر ما يعبّر عن ذوقك (يمكن أكثر من خيار)، أو اكتبه بكلامك.', reason: 'أسأل لأن ذوقك يغيّر التصميم نفسه: الرحابة تكبّر المقاسات، والإضاءة والخصوصية تقدّمان توزيعات الفناء والأجنحة، والمساحات المفتوحة تفتح المطبخ على قلب البيت. بلا جواب أعرض توزيعات متنوعة بلا ترجيح.', options: TASTE_OPTIONS, multi: true, free: true });
 
@@ -308,7 +308,7 @@ export const GUIDED_STEPS = Object.freeze([
   { id: 'g_kitchen', text: 'المطبخ والخدمة: ما الذي تحتاجه؟', reason: 'أسأل لأن المطبخ يحدد موقع المقلط وباب الخدمة، وغرفة الخادمة والسائق تحتاج أبوابًا خارجية.', options: [{ id: 'closed', label: 'مطبخ مغلق', text: 'المطبخ مغلق' }, { id: 'open', label: 'مطبخ مفتوح على الصالة', text: 'المطبخ مفتوح على الصالة' }, { id: 'prep', label: 'مطبخ تحضيري', text: 'ومطبخ تحضيري' }, { id: 'maid', label: 'غرفة خادمة', text: 'وغرفة خادمة' }, { id: 'driver', label: 'غرفة سائق', text: 'وغرفة سائق' }, { id: 'laundry', label: 'غرفة غسيل', text: 'وغرفة غسيل' }, { id: 'storage', label: 'مستودع', text: 'ومستودع' }], multi: true, free: true },
   { id: 'g_extras', text: 'إضافات: اختر ما تريده، وسأخبرك بصدق بما لا يُرسم في هذا الإصدار.', reason: 'أسأل أخيرًا لأن الإضافات لا تغيّر هيكل البيت لكنها تحجز مكانًا (المكتب والمصلى قرب المجلس، وغرفة الضيوف بعيدًا عن العائلة).', options: [{ id: 'office', label: 'مكتب', text: 'ومكتب' }, { id: 'prayer', label: 'مصلى', text: 'ومصلى' }, { id: 'guest', label: 'غرفة نوم للضيوف', text: 'وغرفة نوم للضيوف' }, { id: 'two', label: 'دورين', text: 'البيت دورين' }, { id: 'pool', label: 'مسبح', text: 'ومسبح' }, { id: 'waterfall', label: 'شلال', text: 'وشلال' }, { id: 'garden', label: 'حديقة وعشب', text: 'وحديقة' }, { id: 'annex', label: 'ملحق خارجي', text: 'وملحق خارجي' }, { id: 'elevator', label: 'مصعد', text: 'ومصعد' }, { id: 'none', label: 'لا شيء', text: '' }], multi: true, free: true },
   { id: 'g_taste', text: TASTE_QUESTION.text, reason: TASTE_QUESTION.reason, options: TASTE_OPTIONS, multi: true, free: true },
-  { id: 'g_style', text: 'أي طراز للواجهة يعجبك؟', reason: 'أسأل لأن الطراز يحدد قوالب الواجهة التي أقدّمها أولًا في العرض ثلاثي الأبعاد. بلا جواب يقترح الميزان الأنسب لتصميمك.', options: STYLE_OPTIONS, free: true },
+  { id: 'g_style', text: 'أي معالجة معمارية للواجهة تعجبك؟', reason: 'أسأل لأن المعالجة تحدد قوالب الواجهة التي أقدّمها أولًا في العرض ثلاثي الأبعاد. بلا جواب يقترح الميزان الأنسب لتصميمك.', options: STYLE_OPTIONS, free: true },
 ]);
 
 export default { buildBrief, answerToText, GUIDED_STEPS, SOURCE_AR, FLOOR_AR, ADDABLE };

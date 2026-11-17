@@ -168,7 +168,7 @@ test('صفحة العرض: نص الصدق يذكر التراس من المخط
   const { readFile } = await import('node:fs/promises'), root = new URL('../dist/', import.meta.url);
   const v = await readFile(new URL('view3d.html', root), 'utf8'), f = await readFile(new URL('facade-j/index.html', root), 'utf8');
   assert.match(v, /تراس الدور العلوي وارتداد كتلته من مخططك/); assert.match(v, /عناصر الواجهة الزخرفية/); assert.match(v, /تنسيق موقع إيضاحي/); assert.match(v, /تبقى داخل حد البناء/); assert.doesNotMatch(v, /يدخل الارتداد الأمامي|مراجعة اشتراطات البلدية/); assert.match(MASSING_NOTE, /داخل حد البناء/); assert.match(f, /requiredSetbacks/);
-  assert.match(v, /موضعها الأفقي ونوع غرفتها من مخططك العلوي/); assert.match(v, /أبعادها ومنسوبها فبنسب الطراز افتراضًا/); assert.doesNotMatch(v, /الأدوار العليا تكرر فتحات الأرضي/); assert.match(f, /upperOpenings\(/); assert.match(f, /q\.get\('upper'\) !== '0'/);
+  assert.match(v, /موضعها الأفقي ونوع غرفتها من مخططك العلوي/); assert.match(v, /أبعادها ومنسوبها فبنسب المعالجة افتراضًا/); assert.doesNotMatch(v, /الأدوار العليا تكرر فتحات الأرضي/); assert.match(f, /upperOpenings\(/); assert.match(f, /q\.get\('upper'\) !== '0'/);
   assert.match(v, /الإضاءة الذهبية والسماء والنخيل والإنارة الليلية/);
   assert.match(v, /&ext=/); assert.match(f, /massingPlan\(/); assert.match(f, /q\.get\('mass'\) !== '0'/); assert.match(f, /massing\?\.dispose\(\)/);
   assert.match(MASSING_NOTE, /من مخططك/); assert.match(MASSING_NOTE, /الزخرفية/);
