@@ -1,0 +1,53 @@
+name: Validate design delivery quality
+on:
+  pull_request:
+    branches: [deploy]
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node --test --test-concurrency=4 tests/*.test.mjs
+  local-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install isolated browser test dependency
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Start isolated preview with an empty local database
+        run: |
+          node scripts/quality-preview.mjs > "$RUNNER_TEMP/quality-preview.log" 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4317/api/delivery/status; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify real 3D, exclusive delivery, file match and private recovery
+        run: node scripts/client-quality-browser.mjs
+        env:
+          SITE_URL: http://127.0.0.1:4317
+          AFTER_ONLY: '1'
+          QUALITY_EVIDENCE_DIR: ${{ runner.temp }}/quality-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: design-quality-browser
+          path: ${{ runner.temp }}/quality-evidence

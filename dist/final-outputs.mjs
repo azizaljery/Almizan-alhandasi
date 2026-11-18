@@ -152,6 +152,7 @@ export function quantityTables(data, { costHtml = '', mepId = '' } = {}) {
   const str = rows.filter(r => STRUCT_IDS.has(r.id)).map(row);
   const H = ['البند', 'الكمية', 'درجة الدقة', 'أساس الحساب'];
   const parts = [];
+
   parts.push(`<h3>1. الكميات المعمارية</h3>` + t(H, arch));
   parts.push(`<h3>2. الكميات الإنشائية (تحجيم أولي)</h3>` + (str.length ? t(H, str) : '<p class="muted">لا يوجد تحجيم إنشائي لهذا المخطط.</p>'));
   parts.push(`<h3>3. كميات الأنظمة الهندسية (الكهرباء والتكييف والسباكة والحريق)</h3><div${mepId ? ` id="${mepId}"` : ''}>${mepQuantitiesHtml(data.mep)}</div>`);
@@ -229,6 +230,10 @@ export function projectBookHtml(data, { css = '' } = {}) {
   const sec = (t, body) => `<section class="pb-sec"><h2>${esc(t)}</h2>${body}</section>`;
   const table = (head, rows) => `<table class="pb-table"><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const parts = [];
+  if (data.deliveryReceipt?.id) {
+    const r = data.deliveryReceipt, link = /^https?:\/\//.test(r.verificationUrl || '') ? `<p><a href="${esc(r.verificationUrl)}">تحقق من إيصال التسليم على الموقع</a></p>` : '';
+    parts.push(sec('إيصال حجز بصمة التصميم', `<p>رقم التسليم: <code>${esc(r.id)}</code></p><p>تاريخ التسليم: ${esc(r.deliveredAt || '')}</p><p>بصمة الملف: <code style="overflow-wrap:anywhere">${esc(r.documentHash || '')}</code></p>${link}`));
+  }
   parts.push(sec('نظرة عامة', `<p class="lead">${esc(data.title)} — ${S.rooms} فراغًا في ${S.levels} دور. مساحة المسقط ${fmt(S.builtArea)} م² ومساحة الغرف ${fmt(S.roomsArea)} م².${S.plot ? ` الأرض ${S.plot.width} × ${S.plot.length} م.` : ''}</p>` + table(['الفراغ', 'العدد'], S.byType.map(t => [t.name, t.count])) + `<p class="muted">بصمة الهندسة: <code>${esc(data.fingerprint)}</code>${data.dnaFingerprint ? ` · بصمة ميزانك: <code>${esc(data.dnaFingerprint)}</code>` : ''} · ${esc(data.date)}</p>`));
   { const a = areaSchedule(data); if (a) parts.push(sec('جدول المساحات', a)); }
   if (data.dnaAxes) parts.push(sec('بصمتك التصميمية', table(['المحور', 'القيمة', 'مصدره'], data.dnaAxes.map(a => [a.label, Math.round(a.value * 100) + '%', (a.sources || []).join('، ')]))));

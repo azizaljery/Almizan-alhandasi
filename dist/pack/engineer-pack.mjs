@@ -13,6 +13,7 @@ import { roomTypeName } from '../draw/catalog.mjs';
 import { STRUCT_IDS, SKIP_IDS, mepQuantityItems, projectBookHtml, NOT_COMPUTED_AR } from '../final-outputs.mjs';
 import { xlsxBuild } from './xlsx-lite.mjs';
 import { zipBuild, toBytes } from './zip-lite.mjs';
+import { sessionForDocument } from '../project-context.mjs';
 
 export const PACK_SCHEMA = 'mizan-engineer-pack/1';
 export const PACK_DISCLAIMER_AR = 'هذه الحزمة تصميم أولي غير معتمد. الاعتماد والمخططات التنفيذية والإنشائية وحسابات الأنظمة من اختصاص مكتب هندسي مرخّص، ولا يجوز التنفيذ أو التقديم للترخيص بناءً عليها كما هي.';
@@ -125,6 +126,9 @@ const landOf = (doc, session) => session?.input?.land || (doc.plot ? { polygon: 
  * الجلسة المختصرة تحمل التصميم المُسلَّم وحده (لا بدائل ولا سجل ما عُرض) حتى يبقى الملف صغيرًا.
  */
 export function designJson({ doc, session = null, data = null, ledger = null, version = null, now = new Date() }) {
+  const originalSession = session;
+  session = sessionForDocument(doc, session);
+  if (originalSession && !session) ledger = null;
   const text = serialize(doc), cur = session?.designs?.[session.current ?? 0] || null;
   const slim = session && session.v === 1 && session.input ? {
     v: 1, input: session.input, current: 0, approved: 0, createdAt: session.createdAt ?? null, dna: session.dna ?? null, seen: [], alternatives: [],
@@ -224,7 +228,7 @@ export const PACK_GROUPS = Object.freeze([
  *           onProgress?: (p:{step:string, done:number, total:number})=>void }} o
  * @returns {Promise<{ name, root, files: {path, group, bytes, size, mime}[], groups, dxf, notes: string[] }>}
  */
-export async function buildEngineerPack({ doc, data, session = null, mep = data?.mep ?? null, ledger = null, version = null, now = new Date(), bookCss = '', photo = null, onProgress = null } = {}) {
+export async function buildEngineerPack({ doc, data, session = null, mep = data?.mep ?? null, ledger = null, version = null, now = new Date(), bookCss = '', photo = null, onProgress = null, deliveryReceipt = null } = {}) {
   if (!doc || !data) throw new Error('حزمة المهندس: لا يوجد تصميم.');
   const date = dayOf(now), root = packName(data.title || doc.title, now), files = [], notes = [], STEPS = 6; let step = 0;
   const tick = async label => { if (onProgress) onProgress({ step: label, done: ++step, total: STEPS }); await new Promise(r => setTimeout(r, 0)); };
@@ -240,7 +244,7 @@ export async function buildEngineerPack({ doc, data, session = null, mep = data?
   if (sheets.length) add('svg', 'اطبع-PDF.html', printHtml(sheets, { title: data.title, date }), 'text/html;charset=utf-8');
   for (const e of data.drawings?.errors || []) notes.push('لوحة غير متاحة: ' + e);
   await tick('اللوحات المتجهية');
-  try { add('svg', 'كتاب-المشروع.html', projectBookHtml({ ...data, mep }, { css: bookCss }), 'text/html;charset=utf-8'); } catch (e) { notes.push('تعذّر كتاب المشروع: ' + (e?.message || e)); }
+  try { add('svg', 'كتاب-المشروع.html', projectBookHtml({ ...data, mep, deliveryReceipt }, { css: bookCss }), 'text/html;charset=utf-8'); } catch (e) { notes.push('تعذّر كتاب المشروع: ' + (e?.message || e)); }
   await tick('كتاب المشروع');
   // 3) الكميات
   add('boq', 'BOQ.xlsx', await xlsxBuild(boqSheets(data, { mep, version, now }), { title: 'جدول الكميات — ' + data.title, created: now }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -252,6 +256,7 @@ export async function buildEngineerPack({ doc, data, session = null, mep = data?
   // 5) الصور
   if (photo?.bytes?.length) add('img', 'صورة-معمارية-محسّنة-بالذكاء-الاصطناعي.' + (photo.ext || 'jpg'), photo.bytes, 'image/' + (photo.ext === 'jpg' ? 'jpeg' : photo.ext || 'jpeg'));
   const snap = dataUrlBytes(data.snapshot3d); if (snap) add('img', 'لقطة-المجسم.' + snap.ext, snap.bytes, 'image/' + (snap.ext === 'jpg' ? 'jpeg' : snap.ext));
+  if (deliveryReceipt?.id && deliveryReceipt?.documentHash) add('data', 'delivery-receipt.json', JSON.stringify(deliveryReceipt, null, 2), 'application/json');
   await tick('البيانات والصور');
   const readme = readmeText({ title: data.title, date, version, fingerprint: data.fingerprint, dxfFiles: dxf.map(f => f.name), hasPhoto: files.some(f => f.group === 'img'), files: [...files.map(f => f.path), '04-بيانات/README-اقرأني.txt'] });
   add('data', 'README-اقرأني.txt', readme, 'text/plain;charset=utf-8');

@@ -28,6 +28,8 @@
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { RGBELoader } from './facade-kit/vendor/RGBELoader.mjs';
 import { enhanceScene } from './facade-realism/hq-env.mjs';
+import { hqCapture, fitPresentationCamera } from './facade-realism/presentation-quality.mjs';
+import { buildingBox } from './facade-realism/photo/look.mjs';
 import { Sky } from './facade-realism/vendor/Sky.js';
 import { applyStyle, transformDoc } from './facade-realism/styles/index.mjs';
 import { deriveParams } from './facade-realism/variation.mjs';
@@ -209,6 +211,7 @@ async function variantMode() {
     camera = new THREE.PerspectiveCamera(C.fov, W / H, .1, 400);
     camera.position.set(...C.pos); camera.lookAt(...C.look);
   }
+  if (PHOTO && !shot) fitPresentationCamera(THREE, camera, buildingBox(THREE, S));
   // ميزانية الإضاءة (الليل): كل SpotLight/PointLight يستهلك نحو 8 متجهات uniform في مظلل الشظايا؛ على أجهزة بحدّ 224 (أدنى حد في WebGL2، شائع على الجوال)
   // يفشل ربط المظلل فتظهر الواجهة سوداء. نُبقي الأقرب إلى الكاميرا ونُخفي الباقي. لا أثر على أجهزة الحد الكبير (lightcap=N للاختبار).
   const glc = renderer.getContext(), maxFU = glc.getParameter(glc.MAX_FRAGMENT_UNIFORM_VECTORS) || 224;
@@ -231,19 +234,14 @@ async function variantMode() {
   }
   if (photo) {
     await new Promise(r => setTimeout(r, 0)); // يُعرض الإطار الأول قبل بناء المحيط
-    const fin = photoFinish(THREE, { scene, renderer, S, q, doc, FI, state: photo, styleId }); photoInfo = fin.info;
+    const fin = photoFinish(THREE, { scene, renderer, S, q, doc, FI, state: photo, styleId, camera }); photoInfo = fin.info;
     lightsHidden += capLights();
     if (massing) { massing.carve(scene.getObjectByName('roof-slab')); renderer.shadowMap.needsUpdate = true; } // بلاطة السطح لا تغطي التراس
     if (nav && photoInfo.cornerSide) nav.cornerSign = photoInfo.cornerSide === 'w' ? -1 : 1;
     refiner.render(); photoInfo.fullMs = Math.round(performance.now() - T0);
     if (nav) refiner.start(); else await refiner.settle();
     // لقطة عالية الجودة: دقة مضاعفة (حتى 3840 عرضًا) وعيّنات تراكم أكثر، ثم تعود اللوحة إلى حجمها
-    window.__facadeHQ = async ({ scale = 2, samples = 64, onProgress = null } = {}) => {
-      const pr = renderer.getPixelRatio(), sz = renderer.getSize(new THREE.Vector2()), k = Math.max(1, Math.min(scale, 3840 / Math.max(1, sz.x * pr), 2400 / Math.max(1, sz.y * pr)));
-      refiner.cancel(); renderer.setPixelRatio(pr * k); renderer.setSize(sz.x, sz.y, false);
-      const t = performance.now(), n = await refiner.settle(Math.max(samples, 8), async (i, m) => { onProgress?.(i / m); await new Promise(r => setTimeout(r, 0)); });
-      const blob = await new Promise(res => canvas.toBlob(res, 'image/png')), out = { blob, width: canvas.width, height: canvas.height, samples: n, renderMs: Math.round(performance.now() - t) };
-      renderer.setPixelRatio(pr); renderer.setSize(sz.x, sz.y, false); refiner.render(); refiner.start(); return out; };
+    window.__facadeHQ = hqCapture({ renderer, refiner, canvas });
   }
   const gl = renderer.getContext(); let nSpot = 0, nPoint = 0; scene.traverse(o => { if (o.visible && o.isSpotLight) nSpot++; else if (o.visible && o.isPointLight) nPoint++; });
   done({ lights: { spot: nSpot, point: nPoint, hidden: lightsHidden, budget: lightBudget, maxFragUniform: maxFU, maxTexSize: gl.getParameter(gl.MAX_TEXTURE_SIZE), maxTexUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS) }, gates, variant: id, cam, grey, side: SIDE_NAME.s, meshes: S.meshes.length, triangles: Math.round(S.tris), layers: Object.values(built).reduce((n, b) => n + b.layers.length, 0), glError: gl.getError(), renderer: renderer.capabilities.isWebGL2 ? 'webgl2' : 'webgl1', shot: shot || null, geo, roi, floors: FI.n, setback: FI.setback, massing: massing?.info || null, nav: !!nav, firstFrameMs, photo: photoInfo, tier: tier.name, tierWhy: tier.why, fullMs: photoInfo?.fullMs, settle: refiner ? (n => refiner.settle(n)) : null, refiner,

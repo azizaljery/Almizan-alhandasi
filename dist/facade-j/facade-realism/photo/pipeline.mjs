@@ -6,6 +6,7 @@ import { photoLook, upgradeMaterials, fitSun, buildingBox } from './look.mjs';
 import { planSite, heroSide } from './site-plan.mjs';
 import { buildSite, frontInfo } from './site.mjs';
 import { createRefiner } from './refine.mjs';
+import { keepContextPlant, shadowFrame } from '../presentation-quality.mjs';
 export { frontSouthDoc } from './site-plan.mjs';
 
 export const TIERS = Object.freeze({
@@ -61,15 +62,21 @@ function captureGlassEnv(THREE, { renderer, scene, state, bb, tier }) {
 export function photoBegin(THREE, ctx) { const side = ctx.q.get('hero') || heroSide(ctx.doc); if (!ctx.q.has('az')) ctx.q.set('az', side === 'e' ? '236' : '124'); const state = photoLook(THREE, ctx); state.side = side; return state; }
 
 /** المرحلة الثانية: بعد الإطار الأول — السقف والمحيط والنباتات وتفصيل الخامات وانعكاس الزجاج، ثم إعادة ضبط الظل على المشهد كله. */
-export function photoFinish(THREE, { scene, renderer, S, q, doc, FI, state, styleId }) {
+export function photoFinish(THREE, { scene, renderer, S, q, doc, FI, state, styleId, camera }) {
   const tier = state.tier, t0 = performance.now(), fi = frontInfo(THREE, S), info = { tier: tier.name };
   if (q.get('roof') !== '0') addRoof(THREE, scene, doc, FI);
   let site = null;
   if (q.get('site') !== '0') { const plan = planSite(doc, { doors: fi.doors, windows: fi.windows, B: fi.B, style: styleId || 'M', seed: designHash(doc), density: tier.plants });
-    if (plan) { const g = S.meshes.find(m => m.name === 'ground'); if (g) g.visible = false; site = buildSite(THREE, { scene, S, plan, state, tier, night: state.night }); info.plants = site.plants; info.cornerSide = plan.gates.car ? plan.gates.car.side : plan.camSide; info.site = { gates: Object.keys(plan.gates), fixtures: plan.fixtures.map(f => f.kind), streets: plan.streets }; } }
+    if (plan) { if (camera) { const box = buildingBox(THREE, S), n = plan.plants.length; plan.plants = plan.plants.filter(p => keepContextPlant(p, camera.position, box)); info.contextPlantsOmitted = n - plan.plants.length; } const g = S.meshes.find(m => m.name === 'ground'); if (g) g.visible = false; site = buildSite(THREE, { scene, S, plan, state, tier, night: state.night }); info.plants = site.plants; info.cornerSide = plan.gates.car ? plan.gates.car.side : plan.camSide; info.site = { gates: Object.keys(plan.gates), fixtures: plan.fixtures.map(f => f.kind), streets: plan.streets }; } }
   info.detailMaterials = upgradeMaterials(THREE, scene, state);
-  const bb = buildingBox(THREE, S); fitSun(THREE, state, site ? site.bounds.clone().union(bb) : bb, 1.5); renderer.shadowMap.needsUpdate = true;
+  const bb = buildingBox(THREE, S), fit = shadowFrame(bb, state.dir);
+  const shadowBounds = new THREE.Box3(new THREE.Vector3(fit.min.x, fit.min.y, fit.min.z), new THREE.Vector3(fit.max.x, fit.max.y, fit.max.z));
+  // Faraway road/neighbour meshes used to consume most shadow-map texels.
+  // Concentrate them on the actual building and its projected ground shadow.
+  fitSun(THREE, state, state.dir.y > .1 ? shadowBounds : bb, 1.5); renderer.shadowMap.needsUpdate = true;
+  info.shadowExtent = Math.max(...sunSpan(state.sun.shadow.camera));
   if (site) captureGlassEnv(THREE, { renderer, scene, state, bb, tier });
   info.stage2Ms = Math.round(performance.now() - t0); return { site, info };
 }
 export { createRefiner };
+const sunSpan = c => [c.right - c.left, c.top - c.bottom];

@@ -2,6 +2,7 @@
 // الأصل: quarry_01_1k.hdr من Poly Haven (ترخيص CC0) عبر مستودع three.js (examples/textures/equirectangular، الإيداع 7e26babb).
 // لا يغيّر أي طبقة من طبقات المبنى: يضيف فقط الإضاءة والمحيط ويستبدل خامات الزجاج/الداخل/الأرض في هذه العينة.
 import clip from '../facade-kit/vendor/polygon-clipping.mjs';
+import { shadowFrame } from './presentation-quality.mjs';
 export async function enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGBELoader, doc, Sky }) {
   const envMode = q.get('env') || 'sky';
   // اتجاه الشمس (يُستعمل للسماء والضوء معًا حتى تتسق الخلفية والانعكاس والظل)
@@ -25,8 +26,12 @@ export async function enhanceScene(THREE, { scene, renderer, sun, S, lib, q, RGB
   // ظل: إطار ضيق حول المبنى (22×22 م)، خريطة 4096، وانحياز عادي أكبر — الاختبار أثبت أن الخطوط المائلة تخطيط ظل (تختفي بإطفاء الظل)
   sun.intensity = Number(q.get('sun') ?? 5); sun.color.set('#fff1dc');
   const az = az0, el = el0; // سمت الشمس من الشمال باتجاه عقارب الساعة، والارتفاع بالدرجات (افتراضي: عصرًا من الغرب-الجنوب الغربي، شمس مائلة تُظهر العمق)
-  const ar = az * Math.PI / 180, er = el * Math.PI / 180, T = new THREE.Vector3(9, 2, -12); sun.target.position.copy(T); sun.position.set(T.x + 40 * Math.cos(er) * Math.sin(ar), T.y + 40 * Math.sin(er), T.z - 40 * Math.cos(er) * Math.cos(ar)); sun.target.updateMatrixWorld();
-  if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } sun.shadow.mapSize.set(4096, 4096); const F = 15; Object.assign(sun.shadow.camera, { left: -F, right: F, top: F, bottom: -F, near: 1, far: 90 }); sun.shadow.camera.updateProjectionMatrix();
+  const buildingBounds = new THREE.Box3(); for (const mesh of S.meshes) if (mesh.visible && mesh.name !== 'ground') buildingBounds.expandByObject(mesh);
+  const fit = shadowFrame(buildingBounds, sunDir), T = new THREE.Vector3(fit.center.x, fit.center.y, fit.center.z);
+  sun.target.position.copy(T); sun.position.copy(T).addScaledVector(sunDir, fit.distance); sun.target.updateMatrixWorld();
+  if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+  const shadowSize = Math.min(4096, renderer.capabilities.maxTextureSize || 2048);
+  sun.shadow.mapSize.set(shadowSize, shadowSize); const F = fit.extent; Object.assign(sun.shadow.camera, { left: -F, right: F, top: F, bottom: -F, near: 1, far: fit.far }); sun.shadow.camera.updateProjectionMatrix();
   sun.shadow.bias = -0.0002; sun.shadow.normalBias = 0.04; sun.shadow.radius = 2;
   // زجاج: انعكاس حاد من HDR، لون مائل للأخضر الرمادي كزجاج منخفض الانبعاث، ومجال داخلي غير أسود تمامًا
   // (2026-11-05) زجاج فيزيائي بنفاذية حقيقية (transmission): انعكاس البيئة بفرينل + لون رمادي مزرق خفيف، ويُرى الداخل خلفه

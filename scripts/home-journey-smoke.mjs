@@ -7,6 +7,7 @@ const BASE = (process.env.SITE_URL || 'https://almizan-handasi.aljeryabod.worker
 const EXPECTED = process.env.EXPECTED_COMMIT || '';
 const results = [], errors = [];
 const check = (name, ok, detail = '') => { results.push({ name, ok: !!ok, detail }); console.log((ok ? 'PASS' : 'FAIL') + '  ' + name + (detail ? '  — ' + String(detail).slice(0, 160) : '')); };
+const skip = (name, detail) => { results.push({ name, skipped: true, detail }); console.log('SKIP  ' + name + '  — ' + detail); };
 const step = async (name, fn) => { try { await fn(); } catch (e) { check(name, false, e.message); } };
 
 // 1) الإصدار المنشور
@@ -17,6 +18,11 @@ await step('version.json', async () => {
 });
 
 // 1ب) شرعاء الذكي: حالة الربط فقط (لا يستهلك الخدمة ولا يحتاج رمز الدخول). اختبار تحليل حقيقي يحتاج رمز المالك.
+await step('سجل حجز التسليم', async () => {
+  const r = await fetch(`${BASE}/api/delivery/status`), s = await r.json();
+  check('سجل حجز التسليم جاهز', r.ok && s.ready === true && s.policy === 'mizan-delivery/1', `HTTP ${r.status}`);
+});
+
 await step('حالة شرعاء الذكي', async () => {
   const r = await fetch(`${BASE}/api/assistant/status?smoke=${Date.now()}`);
   const s = await r.json().catch(() => ({}));
@@ -72,7 +78,7 @@ await step('الرحلة', async () => {
     await page.click('#btnCompare'); await page.waitForTimeout(800);
     check('مقارنة تصميمين: جدول وعناوين', await page.evaluate(() => document.querySelectorAll('#cmpRows tr').length >= 8 && document.querySelectorAll('#cmpHead li').length >= 1));
     await page.click('#cmpClose');
-  } else check('مقارنة تصميمين (يحتاج تصميمين)', true, 'تصميم واحد فقط في هذه الرحلة');
+  } else skip('مقارنة تصميمين (يحتاج تصميمين)', 'تصميم واحد فقط في هذه الرحلة؛ لم تُختبر المقارنة');
   await page.click('#btnAnother'); await page.fill('#fbText', 'ابي تصميم بديل مختلف'); await page.click('#fbGo');
   // التوليد يجري في عامل خارج الخيط الرئيسي ويعرض نص تقدّم أثناءه؛ الانتهاء = زوال علامة الانشغال
   await page.waitForFunction(n => !document.body.dataset.busy && (document.querySelectorAll('.dnav button[data-design]').length > n || (document.querySelector('#fbStatus')?.textContent || '').length > 25), Math.max(1, nDesigns), { timeout: 120000 });
@@ -112,6 +118,8 @@ await step('الجوال', async () => {
 
 check('لا أخطاء صفحات ولا ملفات مفقودة', errors.length === 0, errors.slice(0, 4).join(' | '));
 await browser.close();
-const failed = results.filter(r => !r.ok);
-console.log(`\n${results.length - failed.length}/${results.length} PASS`);
+const skipped = results.filter(r => r.skipped);
+const executed = results.filter(r => !r.skipped);
+const failed = executed.filter(r => !r.ok);
+console.log(`\n${executed.length - failed.length}/${executed.length} PASS · ${skipped.length} SKIP`);
 process.exit(failed.length ? 1 : 0);

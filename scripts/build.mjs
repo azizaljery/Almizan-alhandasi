@@ -57,4 +57,6 @@ assert.ok(server.includes('oai-authenticated-user-id'), 'Archive Worker must use
 assert.ok(!server.includes('identity_contract_unverified'), 'Archive Worker must not retain a local-only identity gate after official Sites auth wiring');
 console.log('Arabic app, browser imports, D1 migration and separately bundled archive Worker verified.');
 
-console.log(`Browser import graph verified: ${checkBrowserImports()} modules.`);
+for (const entry of ['dist/app.mjs', 'dist/home.mjs', 'dist/design.mjs', 'dist/view3d.mjs', 'dist/final.mjs', 'dist/delivery-verify.mjs', 'dist/facade-j/facade-realism/photo/pipeline.mjs']) {
+  console.log(`Browser import graph verified: ${entry} — ${checkBrowserImports(entry)} modules.`);
+}
