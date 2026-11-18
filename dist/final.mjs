@@ -15,6 +15,9 @@ import { serialize } from './draw/doc.mjs';
 import { isCostUnpriced, UNPRICED_TOTAL_AR } from './field-guards.mjs';
 import { packCardHtml, mountEngineerPack } from './pack/engineer-pack-ui.mjs';
 import { mountConsent } from './archive-consent.mjs';
+import { mountDelivery } from './delivery-ui.mjs';
+import { loadBoundSnapshot } from './bound-snapshot.mjs';
+import { sessionForDocument } from './project-context.mjs';
 
 const RATES_KEY = 'mizan.final.rates.v1', SNAP_KEY = 'mizan.studio.snap3d.v1', SESSION_KEY = 'mizan.design.session.v1';
 const $ = id => document.getElementById(id);
@@ -24,6 +27,7 @@ const fmt = v => (v === null || v === undefined ? '—' : Number(v).toLocaleStri
 const get = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const set = (k, v) => { try { localStorage.setItem(k, v); } catch { /* التخزين غير متاح */ } };
 let state = { rates: {}, reservePct: '', vatPct: '' }, doc = null, dna = null, data = null, mep = null, proPhoto = null;
+let boundSnapshot = null, delivery = null;
 try { Object.assign(state, JSON.parse(get(RATES_KEY) || '{}')); } catch { /* ... */ }
 
 function load() {
@@ -35,7 +39,7 @@ const sec = (id, title, body) => `<section class="sec" id="${id}"><h2>${esc(titl
 const table = (head, rows) => `<table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
 
 function compute() {
-  let snap = null; try { snap = get(SNAP_KEY); } catch { /* ... */ }
+  const snap = boundSnapshot?.image || null;
   data = buildFinalData(doc, { dna, rates: state.rates, reservePct: state.reservePct, vatPct: state.vatPct, snapshot3d: snap });
   data.mep = mep; // نتيجة الأنظمة تبقى عبر إعادة الحساب (التكلفة، وكتاب المشروع)
   data.proPhoto = proPhoto;
@@ -88,7 +92,7 @@ function renderIntel() {
   return head + privacy + climate + variants;
 }
 /** الأنظمة الأولية بالأرقام: تُحسب من مخطط المرسم المعروض في هذه الصفحة نفسه (المصدر ذاته لصفحة الأنظمة). */
-function readSession() { try { const x = JSON.parse(get(SESSION_KEY) || 'null'); return x && Array.isArray(x.designs) ? x : null; } catch { return null; } }
+function readSession() { try { return sessionForDocument(doc, JSON.parse(get(SESSION_KEY) || 'null')); } catch { return null; } }
 const qtyRow = r => `<tr${r.id === 'mep' ? ' data-qty="mep"' : ''}><td>${esc(r.label)}</td><td class="num">${r.value === null ? '—' : fmt(r.value) + ' ' + esc(r.unit)}</td><td>${esc(GRADES[r.grade])}</td><td>${esc(r.basis)}</td></tr>`;
 async function renderMep() {
   try {
@@ -144,8 +148,11 @@ function render() {
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));
   $('fmain').innerHTML = parts.join('');
   mountConsent($('archiveConsent'));
+  let deliveryRoot = $('delivery');
+  if (!deliveryRoot) { deliveryRoot = document.createElement('section'); deliveryRoot.id = 'delivery'; deliveryRoot.className = 'sec'; $('fmain').prepend(deliveryRoot); }
+  delivery = mountDelivery(deliveryRoot, { doc, project: readSession()?.createdAt || 'manual-' + data.fingerprint });
   attachProPhoto();
-  mountEngineerPack($('engpack'), () => ({ doc, data, session: readSession(), mep, proPhoto }));
+  mountEngineerPack($('engpack'), () => ({ doc, data, session: readSession(), mep, proPhoto, deliveryReceipt: delivery?.receipt() }));
   $('fnav').innerHTML = [['engpack', 'حزمة المهندس'], ['summary', 'الملخص'], ...(d.rooms?.length ? [['areas', 'المساحات']] : []), ['plan0', 'المخطط'], ...(d.drawings?.sheets?.length ? [['sheets', 'الواجهات والقطاع']] : []), ['view3d', 'ثلاثي الأبعاد'], ['str0', 'الإنشائي'], ['mep', 'الأنظمة'], ['why', 'الأسباب'], ['intel', 'الخصوصية والمناخ'], ['next', 'التالي'], ['qty', 'جداول الكميات']].map(([id, t]) => `<a href="#${id}">${t}</a>`).join('');
   renderTotals();
   $('fmain').querySelectorAll('input[data-rate]').forEach(i => i.addEventListener('input', () => { state.rates[i.dataset.rate] = i.value; update(); }));
@@ -164,15 +171,23 @@ function update() {
 function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
 async function bookCss() { try { return await (await fetch('./final.css')).text(); } catch { return ''; } }
 
-function init() {
+async function init() {
   doc = load();
   if (!doc || !doc.walls.length) {
     $('fmain').innerHTML = `<div class="sec empty"><h2>لا يوجد تصميم لعرض مخرجاته</h2><p>ارسم مخططًا أو ولّده من الصفحة الرئيسية، ثم عُد إلى هنا.</p><a class="btn primary" href="./studio.html">فتح المرسم</a> <a class="btn" href="./home.html">ابدأ رحلة التصميم</a></div>`;
     $('btnBook').disabled = $('btnPrint').disabled = true; return;
   }
-  dna = loadSavedDNA(localStorage);
+  dna = readSession() ? loadSavedDNA(localStorage) : null;
+  boundSnapshot = await loadBoundSnapshot(localStorage, doc);
   compute(); render();
+  // Preview stays available; a delivery package is issued only after an explicit
+  // server-confirmed reservation for this exact, immutable page document.
+  document.addEventListener('click', e => {
+    if (e.target.closest('#btnBook, #btnPrint, #epkGo, #epkDxf, #epkXlsx, #epkDone a, button[data-sheet]') && !delivery?.canExport()) {
+      e.preventDefault(); e.stopImmediatePropagation(); delivery?.explain();
+    }
+  }, true);
   $('btnPrint').addEventListener('click', () => window.print());
-  $('btnBook').addEventListener('click', async () => { compute(); download('mizan-project-book-' + data.fingerprint.slice(0, 8).replace(/[^a-z0-9]/gi, '') + '.html', projectBookHtml(data, { css: await bookCss() }), 'text/html;charset=utf-8'); });
+  $('btnBook').addEventListener('click', async () => { compute(); data.deliveryReceipt = delivery?.receipt(); download('mizan-project-book-' + data.fingerprint.slice(0, 8).replace(/[^a-z0-9]/gi, '') + '.html', projectBookHtml(data, { css: await bookCss() }), 'text/html;charset=utf-8'); });
 }
-try { init(); } catch (e) { $('fmain').innerHTML = `<div class="sec empty"><h2>تعذّر تجهيز المخرجات</h2><p>${esc(e.message)}</p><a class="btn" href="./studio.html">العودة إلى المرسم</a></div>`; }
+init().catch(e => { $('fmain').innerHTML = `<div class="sec empty"><h2>تعذّر تجهيز المخرجات</h2><p>${esc(e.message)}</p><a class="btn" href="./studio.html">العودة إلى المرسم</a></div>`; });

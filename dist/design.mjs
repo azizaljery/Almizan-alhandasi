@@ -1,6 +1,7 @@
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
+import { deliveryClientKey, deliveryRequest } from './delivery-ui.mjs';
 import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
 import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, refineInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
@@ -538,7 +539,17 @@ function storeForStudio() { try { localStorage.setItem(STUDIO_KEY, serialize(nor
 function storeFacadeWish() { try { const w = session.input.requirements?.prefs?.styleWish; if (w) localStorage.setItem('mizan.facade.wish', w); else localStorage.removeItem('mizan.facade.wish'); } catch { /* التخزين غير متاح: يبقى اقتراح الميزان */ } }
 // مرحلة «الشكل الخارجي»: بعد اعتماد المخطط تحاور شرعاء العميل بأسئلة موجّهة (كل سؤال يتبع ما سبقه)، ثم تولّد الواجهة وتعرضها ثلاثية الأبعاد.
 // الجواب يُحفظ في الجلسة (prefs.exterior) وتقرؤه صفحة العرض فتفتح على واجهة هذا المخطط وهذا الذوق. الرابط المباشر: design.html#exterior
-function onApprove() { session = approve(session); saveSession(localStorage, session); storeForStudio(); openExterior(); }
+async function onApprove() {
+  const expected = serialize(northDoc()), done = busy(true, $('dStatus'), 'أتحقق أن التوزيع غير محجوز لعميل آخر…');
+  try {
+    await deliveryRequest(northDoc(), deliveryClientKey(localStorage, session.createdAt));
+    if (serialize(northDoc()) !== expected) throw Error('تغيّر المخطط أثناء الفحص؛ راجعه وأعد الاختيار.');
+    session = approve(session); saveSession(localStorage, session); storeForStudio(); openExterior();
+  } catch (e) {
+    if (e.code === 'design_reserved') { toast(e.message + ' اضغط «تصميم آخر» أو عدّل توزيع الغرف.'); }
+    else { toast('تعذر فحص سجل التسليم الآن. يمكنك معاينة 3D؛ لن يُؤكَّد حجز التسليم حتى يعود السجل.'); storeForStudio(); openExterior(); }
+  } finally { done(); }
+}
 let extAns = {}, extDone = new Set(), extLog = [], extPushed = false;
 const extPending = () => exteriorQuestions(extAns).filter(q => !extDone.has(q.id));
 function openExterior() {

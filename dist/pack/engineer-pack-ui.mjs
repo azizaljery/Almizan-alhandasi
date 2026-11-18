@@ -38,7 +38,7 @@ export function mountEngineerPack(root, ctx) {
   let cache = null, busy = false, lastUrl = null;
   if (isIOS()) $('epkIos').hidden = false;
   const setProg = (pct, label) => { prog.hidden = false; fill.style.width = Math.round(pct) + '%'; fill.parentElement.setAttribute('aria-valuenow', String(Math.round(pct))); step.textContent = label; };
-  const keyOf = c => [c.data?.fingerprint, c.mep && !c.mep.notComputed ? 'mep' : '-', c.proPhoto?.image ? c.proPhoto.image.length : 0, c.data?.snapshot3d ? c.data.snapshot3d.length : 0].join('|');
+  const keyOf = c => [c.data?.fingerprint, c.deliveryReceipt?.id || '-', c.mep && !c.mep.notComputed ? 'mep' : '-', c.proPhoto?.image ? c.proPhoto.image.length : 0, c.data?.snapshot3d ? c.data.snapshot3d.length : 0].join('|');
   async function extras(c) {
     const out = { version: null, ledger: null, bookCss: '', photo: null };
     await Promise.all([
@@ -55,7 +55,7 @@ export function mountEngineerPack(root, ctx) {
     if (cache && cache.key === key) return cache.pack;
     setProg(4, 'قراءة التصميم…');
     const x = await extras(c);
-    const pack = await buildEngineerPack({ doc: c.doc, data: c.data, session: c.session, mep: c.mep, ...x, now: new Date(), onProgress: p => setProg(8 + 62 * p.done / p.total, `${p.step} (${p.done} من ${p.total})`) });
+    const pack = await buildEngineerPack({ doc: c.doc, data: c.data, session: c.session, mep: c.mep, deliveryReceipt: c.deliveryReceipt, ...x, now: new Date(), onProgress: p => setProg(8 + 62 * p.done / p.total, `${p.step} (${p.done} من ${p.total})`) });
     cache = { key, pack };
     for (const li of list.children) { const g = pack.groups.find(q => q.id === li.dataset.group); li.querySelector('em').textContent = g ? `${g.count} ${g.count === 1 ? 'ملف' : 'ملفات'} · ${fmtSize(g.size)}` : 'غير متاح لهذا التصميم'; li.classList.toggle('off', !g); if (li.dataset.group === 'img') li.hidden = !g; }
     return pack;

@@ -15,6 +15,8 @@ import { pointInPolygon } from './draw/geom.mjs';
 import { planElevator } from './elevator-plan.mjs';
 import { reviewDoc, swingSectors, sectorPoints, fixtureRect, penetration } from './draw/review.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
+import { designSignature, signatureSimilarity } from './design-signature.mjs';
+import { architecturalQuality } from './architectural-quality.mjs';
 import { rulePenalty, verifyRequest, blocksFor } from './rules.mjs';
 import { buildEnvelope } from './municipal-rules.mjs';
 
@@ -404,7 +406,10 @@ function wingOrders(list) {
   if (list.length < 3) return [list];
   const head = list.slice(0, 1), tail = list.slice(1), rev = [...head, ...[...tail].reverse()];
   const sig = l => l.map(b => b.id).join(',');
-  const out = [list]; for (const v of [rev]) if (!out.some(o => sig(o) === sig(v))) out.push(v);
+  const out = [list];
+  // Keep the front anchor, but explore real depth relationships in the wing.
+  // Cyclic orders are distinct from a mirror of the whole building.
+  for (const v of [rev, [...head, ...tail.slice(1), tail[0]], [...head, ...tail.slice(2), ...tail.slice(0, 2)]]) if (!out.some(o => sig(o) === sig(v))) out.push(v);
   return out;
 }
 /** ترتيبات الجناح الواحد (الصالة الجانبية والحزام): المعتاد، وعكس ما بعد الأمامية، وتدويره درجة ودرجتين. */
@@ -416,7 +421,11 @@ function sideOrders(list) {
 }
 function orderPairs(L, R) {
   const A = wingOrders(L), B = wingOrders(R), out = [[L, R]];
-  for (let i = 0; i < A.length; i++) for (let j = 0; j < B.length; j++) if (i || j) out.push([A[i], B[j]]);
+  for (let i = 0; i < Math.min(2, A.length); i++) for (let j = 0; j < Math.min(2, B.length); j++) if (i || j) out.push([A[i], B[j]]);
+  // A bounded portfolio avoids multiplying every envelope by 16 combinations.
+  for (let i = 2; i < Math.max(A.length, B.length) && out.length < 8; i++) {
+    if (A[i]) out.push([A[i], R]); if (B[i]) out.push([L, B[i]]);
+  }
   return out;
 }
 /** يولّد الترتيبات المرشحة لكل الأنماط ويرتبها. */
@@ -1699,7 +1708,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
         if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { visSkips++; continue; } // بنود الحديقة تُستكمل بعد الاختيار (applyGardens)
         // مجلس الرجال بلا دورة مياه خاصة: عيب ضيافة يُؤخّر البديل خلف كل بديل سليم
         const wcMissing = layout.notes.some(n => /دورة مياه (?:الضيوف|الرجال) لم تتسع/.test(n)) ? 1 : 0;
-        designs.push({ maxBed: maxBedOf(q.metrics), area: cand.env.w * cand.env.d - (cand.court ? A_(cand.court) : 0), doc: relaxed, vsig, visual: r2(vis), macro: r2(mac), blend: bl, penalty: r2(cand.pen), quality: r2(cand.pen + q.cost + MACRO_COST * mac + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, idea: cand.idea, env: cand.env, pat: withIdea(cand.pat, cand.idea), notes: [ideaNote(cand.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)].filter(Boolean), summary: describe(cand) + ideaSuffix(cand.idea), rooms: layout.rooms, ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) });
+        designs.push({ maxBed: maxBedOf(q.metrics), area: cand.env.w * cand.env.d - (cand.court ? A_(cand.court) : 0), doc: relaxed, vsig, visual: r2(vis), macro: r2(mac), blend: bl, penalty: r2(cand.pen), architecturalCost: q.architecturalCost, quality: r2(cand.pen + q.cost + MACRO_COST * mac + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, idea: cand.idea, env: cand.env, pat: withIdea(cand.pat, cand.idea), notes: [ideaNote(cand.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)].filter(Boolean), summary: describe(cand) + ideaSuffix(cand.idea), rooms: layout.rooms, ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) });
       } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: e.message }); }
     }
   return designs;
@@ -1725,7 +1734,7 @@ export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4
   designs.sort((a, b) => a.fails - b.fails || (a.newestFail || 0) - (b.newestFail || 0) || (blend ? b.blend - a.blend : 0) || a.quality - b.quality);
   if (globalThis.__villaDebug) globalThis.__villaDebug.all = designs;
   if (globalThis.__villaDebug) globalThis.__villaDebug.built = designs.map(d => ({ mode: d.mode, quality: d.quality, penalty: d.penalty, env: d.env, bad: (d.ledger || []).filter(x => !x.ok).map(x => x.id + ":" + (x.text || x.label || "").slice(0, 40)), fails: d.fails, pat: d.pat, issues: d.issues }));
-  const picked = blend ? designs.slice(0, keep) : diversify(designs, pick || keep, { prefer: preferModes });
+  const picked = blend ? designs.slice(0, keep) : diversify(designs, pick || keep, { prefer: preferModes, seed: !prefPat && !shown.length ? tw.designSeed : null });
   if (picked[0]?.macro > MACRO_LIMIT.strict) picked[0].notes.push(macroNote(picked[0].macro));
   if (visRelaxed) picked[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا (يختلف بـ ' + Math.round((1 - (picked[0]?.visual || 0)) * 100) + '٪ على الأقل).');
   if (shapeFallback && shapeExhausted) picked[0]?.notes.push(`عُرضت عليك كل توزيعات «${MODE_AR[wantMode] || wantMode}» المختلفة لهذه الأرض؛ هذا بديل بنمط آخر.`);
@@ -1931,7 +1940,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
       const notes = [...new Set([ideaNote(pr.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...(pr.split.moved ? [`«${pr.split.moved.name}» في الدور الأرضي (لم تطلب ذلك): برنامج الدور العلوي أكبر من الأرضي، فنقلُ غرفة إلى الأرضي يوازن الدورين ويغني عن فراغات لم تُطلب؛ إن أردت كل غرف النوم فوق فاختر بديلًا آخر.`] : []), ...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0))} م²${pr.g.court ? ` مع حديقة داخلية ${Math.round(A_(pr.g.court))} م²` : ''} (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
       notes.push(...hallNotes(q.metrics, W, D));
       const pen = pr.pen + (ui ? uCand.pen - pr.u.pen : 0);
-      designs.push({ fill: [pr.g, uCand].map(c => c.placed.filter(x => x.block.filler).length), maxBed: maxBedOf(q.metrics), area: env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0), doc: relaxed, vsig, visual: r2(vis), macro: r2(mac), blend: bl, penalty: r2(pen), quality: r2(pen + q.cost + MACRO_COST * mac + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && uPat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, idea: pr.idea, env, notes: notes.filter(Boolean), pat: withIdea(uPat, pr.idea), summary: describe(pr.g) + ideaSuffix(pr.idea) + ' (دوران)', ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) });
+      designs.push({ fill: [pr.g, uCand].map(c => c.placed.filter(x => x.block.filler).length), maxBed: maxBedOf(q.metrics), area: env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0), doc: relaxed, vsig, visual: r2(vis), macro: r2(mac), blend: bl, penalty: r2(pen), architecturalCost: q.architecturalCost, quality: r2(pen + q.cost + MACRO_COST * mac + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && uPat === prefPat, mirror, issues: q.issues, mode: pr.g.mode, idea: pr.idea, env, notes: notes.filter(Boolean), pat: withIdea(uPat, pr.idea), summary: describe(pr.g) + ideaSuffix(pr.idea) + ' (دوران)', ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) });
       break;
     } catch (e) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: pr.pat, why: e.message }); }
   }
@@ -1953,7 +1962,7 @@ export function generateVillaTwoFloors({ land, counts, requirements = {}, keep =
   // ولا يعود إلا لإكمال ثلاثة بدائل (ويُعلن في ملاحظاته)
   const dbl = d => d.fill && d.fill[0] > 0 && d.fill[1] > 0, leanModes = new Set(designs.filter(d => !dbl(d)).map(d => d.mode));
   const lean = blend || prefPat ? designs : designs.filter(d => !(dbl(d) && leanModes.has(d.mode)));
-  const picked2 = blend ? designs.slice(0, keep) : diversify(lean, pick || keep, { prefer: preferModes });
+  const picked2 = blend ? designs.slice(0, keep) : diversify(lean, pick || keep, { prefer: preferModes, seed: !prefPat && !shown.length ? requirements.tweaks?.designSeed : null });
   if (!blend && lean.length < designs.length && picked2.length < Math.min(3, keep)) for (const d of diversify(designs, keep, { prefer: preferModes })) { if (picked2.length >= Math.min(3, keep)) break; if (!picked2.includes(d)) picked2.push(d); }
   if (picked2[0]?.macro > MACRO_LIMIT.strict) picked2[0].notes.push(macroNote(picked2[0].macro));
   if (visRelaxed) picked2[0]?.notes.push('لم يبقَ توزيع يختلف عمّا عُرض بأكثر من 40٪؛ هذا أكثر التوزيعات الباقية اختلافًا (يختلف بـ ' + Math.round((1 - (picked2[0]?.visual || 0)) * 100) + '٪ على الأقل).');
@@ -2233,7 +2242,9 @@ const maxBedOf = m => Math.max(0, ...(m?.levels || []).flatMap(l => l.rooms).fil
 export const OTHER_MODE_LIMITS = Object.freeze({ areaRatio: 1.7, bed: 32, bedRatio: 1.1 });
 /** كلفة عيوب المخطط المبني نفسه (ملاحظات المراجعة والتناسب والأثاث) بلا كلفة مطابقة المساحات للغلاف. */
 // عيوب المخطط المبني وحدها: بلا كلفة المطابقة وبلا كلفة العرف غير المتحقق (تلك تؤخّر الترتيب ولا تُعدّ عيبًا في الرسم)
-const defectOf = d => (d.quality || 0) - (d.penalty || 0) - SOFT_FAIL_COST * (d.softFails || 0);
+// Soft daylight/composition preferences rank plans, but must not consume the
+// calibrated physical-defect budget and accidentally erase whole plan families.
+const defectOf = d => (d.quality || 0) - (d.penalty || 0) - SOFT_FAIL_COST * (d.softFails || 0) - (d.architecturalCost || 0);
 /** أقصى عدد من البدائل بالنمط التنظيمي نفسه متى وُجد نمط آخر صالح. */
 export const MODE_CAP = 2;
 /**
@@ -2296,7 +2307,7 @@ export function splitFails(ledger = [], requirements = {}) {
   return { hard, soft };
 }
 const MODE_OVER_FILL = 4;
-function diversify(designs, keep, { prefer = [] } = {}) {
+function diversify(designs, keep, { prefer = [], seed = null } = {}) {
   const best = designs[0];
   if (!best) return [];
   const window = best.quality + Math.max(85, Math.abs(best.quality) * .6 + 40), dBest = defectOf(best), dMax = Math.max(dBest + 45, dBest * 1.5); // سقوف المقاسات جوّدت البديل الأول فضاقت النسبة؛ الهامش المطلق يُبقي نمطًا آخر سليمًا ضمن المقارنة
@@ -2315,14 +2326,25 @@ function diversify(designs, keep, { prefer = [] } = {}) {
   const keyOf = d => d.idea || d.mode, out = [], count = k => out.filter(o => keyOf(o) === k).length;
   // ذوق العميل: أفضل بديل صالح من نمط مفضَّل يتقدم إلى الصدارة
   if (prefer.length) { const k = rest.findIndex(d => prefer.includes(d.mode)); if (k > 0) rest.unshift(rest.splice(k, 1)[0]); }
+  // A new client's seed chooses among comparable valid plans, never a poorer
+  // constraint tier. Deterministic inputs + seed still reproduce the same plan.
+  if (seed && rest.length > 1) {
+    const first = rest[0], maxCost = first.quality + Math.max(8, Math.abs(first.quality) * .08);
+    const pool = rest.filter(d => d.fails === first.fails && (d.newestFail || 0) === (first.newestFail || 0) && d.quality <= maxCost && defectOf(d) <= defectOf(first) + 8 && !(/bedDown|terrace/.test(d.idea || '') && !/bedDown|terrace/.test(first.idea || '')) && (!prefer.length || prefer.includes(d.mode)));
+    const hash = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+    pool.sort((a, b) => hash(String(seed) + a.pat) - hash(String(seed) + b.pat));
+    if (pool.length) rest.unshift(rest.splice(rest.indexOf(pool[0]), 1)[0]);
+  }
   const sigOf = d => (d.vsig ||= visualSig(d.doc));
+  const architectureCache = new WeakMap();
+  const architecture = d => { if (!architectureCache.has(d)) architectureCache.set(d, designSignature(d.doc)); return architectureCache.get(d); };
   // الأرضي نفسه بعلوي آخر ليس تصميمًا جديدًا عند العميل
   const sameGround = (d, o) => patCore(d.pat).includes('/') && groundPat(d.pat) === groundPat(o.pat);
   while (out.length < keep && rest.length) {
     if (!out.length) { out.push(rest.shift()); continue; }
-    const scored = rest.map(d => { const ov = Math.max(...out.map(o => patOverlap(d.pat, o.pat))); const vis = Math.max(...out.map(o => visualSim(sigOf(d), sigOf(o)))); const n = count(keyOf(d)); return { d, vis, n, k: d.fails * 1000 + defectOf(d) + d.penalty * .35 + ov * 160 + vis * 200 - (prefer.includes(d.mode) ? 60 : 0) }; })
+    const scored = rest.map(d => { const ov = Math.max(...out.map(o => patOverlap(d.pat, o.pat))); const vis = Math.max(...out.map(o => visualSim(sigOf(d), sigOf(o)))); const spatial = Math.max(...out.map(o => signatureSimilarity(architecture(d), architecture(o)).whole)); const n = count(keyOf(d)); return { d, vis, spatial, n, k: d.fails * 1000 + defectOf(d) + d.penalty * .35 + ov * 160 + vis * 200 + spatial * 120 - (prefer.includes(d.mode) ? 60 : 0) }; })
       // فكرة جديدة: تكفيها عتبة التشابه المرئي؛ فكرة معروضة: مرة ثانية فقط وبشرط اختلاف مرئي واضح؛ الثالثة «المخطط نفسه بأسماء مختلفة»
-      .filter(x => x.vis <= VISUAL_LIMIT.relaxed && x.n < BATCH_IDEA_CAP && (x.n === 0 || x.vis <= BATCH_VARIANT_VIS) && !out.some(o => sameGround(x.d, o)));
+      .filter(x => x.vis <= VISUAL_LIMIT.relaxed && x.spatial < .90 && x.n < BATCH_IDEA_CAP && (x.n === 0 || x.vis <= BATCH_VARIANT_VIS) && !out.some(o => sameGround(x.d, o)));
     if (!scored.length) break;
     // فكرة لم تُعرض أولًا، ثم التنويع على فكرة معروضة
     scored.sort((a, b) => Math.min(a.n, 1) - Math.min(b.n, 1) || a.k - b.k);
@@ -2334,7 +2356,7 @@ function diversify(designs, keep, { prefer = [] } = {}) {
   // أقل من ثلاثة بدائل: يُكمَّل من فكرة الأفضل نفسها بما خرج عن نافذة الجودة وهو سليم المخطط غير متضخم ومختلف مرئيًا بوضوح — لا حشو بمعيب ولا بمكرر
   for (const d of spare) {
     if (out.length >= Math.min(keep, 3)) break;
-    if (count(keyOf(d)) < BATCH_IDEA_CAP && out.every(o => visualSim(sigOf(d), sigOf(o)) <= BATCH_VARIANT_VIS && !sameGround(d, o))) out.push(d);
+    if (count(keyOf(d)) < BATCH_IDEA_CAP && out.every(o => visualSim(sigOf(d), sigOf(o)) <= BATCH_VARIANT_VIS && signatureSimilarity(architecture(d), architecture(o)).whole < .90 && !sameGround(d, o))) out.push(d);
   }
   // النقص يُعلن: لا تُكرَّر الفكرة نفسها بأسماء مختلفة لإكمال العدد
   if (out.length < Math.min(keep, 3) && out[0]?.notes && !out[0].notes.some(n => n.startsWith('لهذه الأرض'))) out[0].notes.push(`لهذه الأرض وهذا البرنامج ${out.length === 1 ? 'فكرة تنظيم سليمة واحدة' : out.length + ' أفكار تنظيم سليمة'} حاليًا؛ لا أكرر الفكرة نفسها بأسماء مختلفة لإكمال العدد.`);
@@ -2458,7 +2480,11 @@ export function quality(doc, { bedrooms = null } = {}) {
     for (const lv of model.levels.slice(1)) for (const u of wet(lv)) { tot++; if (!gr.some(g => Math.hypot(u.centroid.x - g.centroid.x, u.centroid.y - g.centroid.y) <= 2.5)) un++; }
     if (un) { flag('WET_UNSTACKED'); cost += WET_STACK_COST * un; defects.push(`${un} من ${tot} غرف مبللة علوية لا تعلو غرفة مبللة في الأرضي؛ تمديدات الصرف أطول.`); }
   }
-  return { cost, reject, issues, metrics: m };
+  const architectural = architecturalQuality(model);
+  cost += architectural.cost;
+  m.defects.push(...architectural.defects);
+  m.architectural = architectural.axes;
+  return { cost, reject, issues, metrics: m, architecturalCost: architectural.cost };
 }
 /** يزيح قطع الأثاث التي تعترض فتح الأبواب أو تتداخل، على محورها، ثم يحذف ما لم يُحل (عدا الأدوات الأساسية).
  * يبدأ بقلب مفصلة الباب حين تقترح المراجعة ذلك؛ والفحص أثناء الإزاحة محلي سريع بنفس هندسة المراجعة. */

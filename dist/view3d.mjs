@@ -1,5 +1,6 @@
 // العرض ثلاثي الأبعاد المستقل بعد اعتماد التصميم: المجسّم من المخطط المعتمد نفسه، والشمس من الوقت والتاريخ.
 import './visit-touch.mjs';
+import { saveBoundSnapshot, SNAPSHOT_KEY } from './bound-snapshot.mjs';
 import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY } from './draw/handoff.mjs';
 import { sunPosition, CITIES } from './sun.mjs';
@@ -7,6 +8,11 @@ import { planSheetSvg } from './draw/plan-sheet.mjs';
 
 const $ = id => document.getElementById(id);
 const SNAP_KEY = 'mizan.studio.snap3d.v1';
+async function rememberCapture(blob, view) {
+  const capturedDoc = doc; if (!capturedDoc || !blob) return;
+  const image = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = () => reject(Error('تعذر حفظ اللقطة')); r.readAsDataURL(blob); });
+  try { await saveBoundSnapshot(localStorage, capturedDoc, image, { view }); } catch { /* The downloaded image remains valid if browser storage is full. */ }
+}
 let viewer = null, doc = null;
 
 function loadDoc() { try { const raw = localStorage.getItem(STUDIO_KEY); return raw ? parseDoc(raw) : null; } catch { return null; } }
@@ -91,6 +97,7 @@ $('shotHQ').addEventListener('click', async () => {
         const r = await hq({ scale: 2, samples: 64, onProgress: k => show(`جارٍ تصيير اللقطة عالية الجودة… ${Math.round(k * 100)}٪`) });
         if (!r?.blob) throw new Error('تعذّر الالتقاط');
         download(r.blob, 'mizan-facade-hq.png'); show(`حُفظت صورة الواجهة ${r.width}×${r.height} بـ${r.samples} عيّنة (تصيير ${(r.renderMs / 1000).toFixed(1)} ث).`);
+        await rememberCapture(r.blob, 'facade');
       } else {
         const b = await new Promise(res => c.toBlob(res, 'image/png')); if (!b) throw new Error('تعذّر الالتقاط');
         download(b, 'mizan-facade.png'); show(`حُفظت صورة الواجهة ${c.width}×${c.height}.`);
@@ -99,6 +106,7 @@ $('shotHQ').addEventListener('click', async () => {
       if (!viewer?.built) throw new Error('المجسّم غير جاهز');
       const r = await viewer.captureHQ({ scale: 2, ss: 2 });
       download(r.blob, 'mizan-3d-hq.png'); show(`حُفظت اللقطة ${r.width}×${r.height} (تصيير ${(r.renderMs / 1000).toFixed(1)} ث).`);
+      await rememberCapture(r.blob, 'model');
     }
   } catch (e) { show('تعذّرت اللقطة: ' + (e?.message || e)); }
   finally { btn.disabled = false; }
@@ -150,7 +158,12 @@ $('toFinal').addEventListener('click', async () => {
   // لقطة المجسّم لصفحة المخرجات وكتاب المشروع
   try {
     localStorage.removeItem(SNAP_KEY);
-    if (viewer?.built) { const b = await viewer.capturePNG(1); const url = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => res(null); r.readAsDataURL(b); }); if (url && url.length < 3e6) localStorage.setItem(SNAP_KEY, url); }
+    localStorage.removeItem(SNAPSHOT_KEY);
+    const fr = document.getElementById('facadeFrame'), exterior = globalThis.__mizanExterior?.on;
+    if (exterior && fr?.contentWindow?.__facadeHQ) {
+      const shot = await fr.contentWindow.__facadeHQ({ scale: 1.5, samples: 32 });
+      await rememberCapture(shot.blob, 'facade');
+    } else if (viewer?.built) await rememberCapture(await viewer.capturePNG(1.5), 'model');
   } catch { /* اللقطة اختيارية */ }
   location.href = './final.html';
 });

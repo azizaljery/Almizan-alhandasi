@@ -7,6 +7,7 @@ import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { saveSession, loadSession, carryOver, sameLand } from './design-session.mjs';
 import { normalizeLand, SharaSession, interpretFree, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { generateInWorker, diagnoseInWorker, warm as warmGenerator, ticking } from './design-client.mjs';
+import { createDesignSeed } from './delivery-ui.mjs';
 import { HOME_KEY } from './journey-nav.mjs';
 import { mountSteps } from './journey-steps.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
@@ -526,6 +527,8 @@ async function build() {
   show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildBusy').hidden = false;
   // التوليد يجري في عامل خارج الخيط الرئيسي: الصفحة تبقى حيّة والمؤشر يعدّ الثواني الفعلية
   let stop = ticking($('buildText'), 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…');
+  session.requirements.tweaks ||= {};
+  session.requirements.tweaks.designSeed ||= createDesignSeed();
   const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements };
   const prev = regen ? designSession() : null;
   try {
